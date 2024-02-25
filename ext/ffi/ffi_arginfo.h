@@ -121,7 +121,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_FFI_CType_getFuncParameterT
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(FFI, cdef);
 ZEND_METHOD(FFI, load);
 ZEND_METHOD(FFI, scope);
@@ -156,7 +155,6 @@ ZEND_METHOD(FFI_CType, getFuncReturnType);
 ZEND_METHOD(FFI_CType, getFuncParameterCount);
 ZEND_METHOD(FFI_CType, getFuncParameterType);
 
-
 static const zend_function_entry class_FFI_methods[] = {
 	ZEND_ME(FFI, cdef, arginfo_class_FFI_cdef, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(FFI, load, arginfo_class_FFI_load, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -178,11 +176,9 @@ static const zend_function_entry class_FFI_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_FFI_CData_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FFI_CType_methods[] = {
 	ZEND_ME(FFI_CType, getName, arginfo_class_FFI_CType_getName, ZEND_ACC_PUBLIC)
@@ -204,11 +200,9 @@ static const zend_function_entry class_FFI_CType_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_FFI_Exception_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FFI_ParserException_methods[] = {
 	ZEND_FE_END

@@ -55,6 +55,14 @@ class IntlChar
     public const int PROPERTY_IDS_BINARY_OPERATOR = UNKNOWN;
     /** @cvalue UCHAR_IDS_TRINARY_OPERATOR */
     public const int PROPERTY_IDS_TRINARY_OPERATOR = UNKNOWN;
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    /** @cvalue UCHAR_IDS_UNARY_OPERATOR */
+    public const int PROPERTY_IDS_UNARY_OPERATOR = UNKNOWN;
+    /** @cvalue UCHAR_ID_COMPAT_MATH_START */
+    public const int PROPERTY_ID_COMPAT_MATH_START = UNKNOWN;
+    /** @cvalue UCHAR_ID_COMPAT_MATH_CONTINUE */
+    public const int PROPERTY_ID_COMPAT_MATH_CONTINUE = UNKNOWN;
+#endif
     /** @cvalue UCHAR_JOIN_CONTROL */
     public const int PROPERTY_JOIN_CONTROL = UNKNOWN;
     /** @cvalue UCHAR_LOGICAL_ORDER_EXCEPTION */

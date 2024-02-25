@@ -1,8 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: aab38646ace967e985c348b78251474693da95a7 */
 
-
-
 static void register_password_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", "2y", CONST_PERSISTENT);

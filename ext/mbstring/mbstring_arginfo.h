@@ -320,7 +320,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_regex_set_options, 0, 0, IS_S
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(mb_language);
 ZEND_FUNCTION(mb_internal_encoding);
 ZEND_FUNCTION(mb_http_input);
@@ -416,7 +415,6 @@ ZEND_FUNCTION(mb_ereg_search_setpos);
 #if defined(HAVE_MBREGEX)
 ZEND_FUNCTION(mb_regex_set_options);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_language, arginfo_mb_language)

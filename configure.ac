@@ -362,12 +362,9 @@ PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(dlopen, dl)
-PHP_CHECK_FUNC(dlsym, dl)
-if test "$ac_cv_func_dlopen" = "yes"; then
-  AC_DEFINE(HAVE_LIBDL, 1, [ ])
-fi
-AC_CHECK_LIB(m, sin)
+AC_SEARCH_LIBS([dlopen], [dl],
+  [AC_DEFINE([HAVE_LIBDL], [1], [Define to 1 if the dl library is available.])])
+AC_SEARCH_LIBS([sin], [m])
 
 case $host_alias in
   riscv64*)
@@ -375,15 +372,11 @@ case $host_alias in
     ;;
 esac
 
-dnl Check for inet_aton in -lc and -lresolv.
-PHP_CHECK_FUNC(inet_aton, resolv)
-
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
 AC_CHECK_HEADERS([ \
-stdint.h \
 dirent.h \
 sys/param.h \
 sys/types.h \
@@ -398,7 +391,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 linux/sock_diag.h \
-malloc.h \
 os/signpost.h \
 poll.h \
 pty.h \
@@ -412,7 +404,6 @@ sys/file.h \
 sys/mman.h \
 sys/mount.h \
 sys/poll.h \
-sys/procctl.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
@@ -517,10 +508,6 @@ dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 dnl Check __builtin_frame_address
 PHP_CHECK_BUILTIN_FRAME_ADDRESS
-dnl Check prctl
-PHP_CHECK_PRCTL
-dnl Check procctl
-PHP_CHECK_PROCCTL
 dnl Check AVX512
 PHP_CHECK_AVX512_SUPPORTS
 dnl Check AVX512 VBMI
@@ -603,7 +590,6 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_pton \
 localtime_r \
 lchown \
 memcntl \
@@ -640,13 +626,15 @@ memrchr \
 mempcpy \
 )
 
-AC_CHECK_FUNC(inet_ntop,[],[
-    AC_MSG_ERROR([Cannot find inet_ntop which is required])
-]
-)
+AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
+AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
+
+dnl Check for functions inside their belonging headers.
+AC_CHECK_HEADER([sys/prctl.h], [AC_CHECK_FUNCS([prctl])])
+AC_CHECK_HEADER([sys/procctl.h], [AC_CHECK_FUNCS([procctl])])
 
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 
@@ -1344,7 +1332,6 @@ fi
 
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
-  AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
   PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S, "$fiber_asm_cflag")
   AC_MSG_RESULT([$fiber_asm_file])
 else

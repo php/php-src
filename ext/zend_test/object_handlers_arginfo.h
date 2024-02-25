@@ -15,36 +15,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumericCastableNoOperations___construct, 0,
 	ZEND_ARG_TYPE_MASK(0, val, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
-
 static ZEND_METHOD(DoOperationNoCast, __construct);
 static ZEND_METHOD(LongCastableNoOperations, __construct);
 static ZEND_METHOD(FloatCastableNoOperations, __construct);
 static ZEND_METHOD(NumericCastableNoOperations, __construct);
-
 
 static const zend_function_entry class_DoOperationNoCast_methods[] = {
 	ZEND_ME(DoOperationNoCast, __construct, arginfo_class_DoOperationNoCast___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_LongCastableNoOperations_methods[] = {
 	ZEND_ME(LongCastableNoOperations, __construct, arginfo_class_LongCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FloatCastableNoOperations_methods[] = {
 	ZEND_ME(FloatCastableNoOperations, __construct, arginfo_class_FloatCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_NumericCastableNoOperations_methods[] = {
 	ZEND_ME(NumericCastableNoOperations, __construct, arginfo_class_NumericCastableNoOperations___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DimensionHandlersNoArrayAccess_methods[] = {
 	ZEND_FE_END

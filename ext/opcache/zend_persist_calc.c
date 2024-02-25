@@ -487,8 +487,8 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			ADD_STRING(ce->info.user.filename);
 		}
 
-		if (ZCG(accel_directives).save_comments && ce->info.user.doc_comment) {
-			ADD_STRING(ce->info.user.doc_comment);
+		if (ZCG(accel_directives).save_comments && ce->doc_comment) {
+			ADD_STRING(ce->doc_comment);
 		}
 
 		if (ce->attributes) {

@@ -14,13 +14,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlIterator_valid, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlIterator, current);
 ZEND_METHOD(IntlIterator, key);
 ZEND_METHOD(IntlIterator, next);
 ZEND_METHOD(IntlIterator, rewind);
 ZEND_METHOD(IntlIterator, valid);
-
 
 static const zend_function_entry class_IntlIterator_methods[] = {
 	ZEND_ME(IntlIterator, current, arginfo_class_IntlIterator_current, ZEND_ACC_PUBLIC)

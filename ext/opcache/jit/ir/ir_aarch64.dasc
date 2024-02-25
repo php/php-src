@@ -700,7 +700,7 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.i64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					}
 				}
 binop_int:
@@ -721,7 +721,7 @@ binop_fp:
 					} else if (op2_insn->val.u64 == 0) {
 						// 0
 					} else if (op2_insn->val.u64 == 1) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (IR_IS_POWER_OF_TWO(op2_insn->val.u64)) {
 						return IR_MUL_PWR2;
 					}
@@ -747,7 +747,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 1) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (IR_IS_POWER_OF_TWO(op2_insn->val.u64)) {
 						if (IR_IS_TYPE_UNSIGNED(insn->type)) {
 							return IR_DIV_PWR2;
@@ -798,7 +798,7 @@ binop_fp:
 				} else if (IR_IS_CONST_REF(insn->op1)) {
 					// const
 				} else if (op2_insn->val.i64 == 0) {
-					return IR_COPY_INT;
+					// return IR_COPY_INT;
 				} else if (op2_insn->val.i64 == -1) {
 					// -1
 				}
@@ -814,7 +814,7 @@ binop_fp:
 				} else if (op2_insn->val.i64 == 0) {
 					// 0
 				} else if (op2_insn->val.i64 == -1) {
-					return IR_COPY_INT;
+					// return IR_COPY_INT;
 				}
 			}
 			goto binop_int;
@@ -837,7 +837,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (ir_type_size[insn->type] >= 4) {
 						if (op2_insn->val.u64 == 1) {
 							// lea [op1*2]
@@ -863,7 +863,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					}
 				}
 				return IR_SHIFT_CONST;
@@ -880,11 +880,20 @@ binop_fp:
 //		case IR_COND:
 		case IR_COPY:
 			if (IR_IS_TYPE_INT(insn->type)) {
-				return IR_COPY_INT;
+				return IR_COPY_INT | IR_MAY_REUSE;
 			} else {
-				return IR_COPY_FP;
+				return IR_COPY_FP | IR_MAY_REUSE;
 			}
 			break;
+//		case IR_TRUNC:
+		case IR_PROTO:
+			return insn->op | IR_MAY_REUSE;
+		case IR_BITCAST:
+			if (IR_IS_TYPE_INT(insn->type) && IR_IS_TYPE_INT(ctx->ir_base[insn->op1].type)) {
+				return insn->op | IR_MAY_REUSE;
+			} else {
+				return insn->op;
+			}
 		case IR_CALL:
 			ctx->flags2 |= IR_HAS_CALLS;
 			return IR_CALL;
@@ -5690,7 +5699,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 
 		while (i <= bb->end) {
 			if (!((*rule) & (IR_FUSED|IR_SKIPPED)))
-			switch (*rule) {
+			switch ((*rule) & IR_RULE_MASK) {
 				case IR_VAR:
 				case IR_PARAM:
 				case IR_PI:

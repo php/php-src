@@ -1454,12 +1454,12 @@ static bool ir_match_try_revert_lea_to_add(ir_ctx *ctx, ir_ref ref)
 	if (insn->op1 == insn->op2) {
 		/* pass */
 	} else if (ir_match_try_fuse_load(ctx, insn->op2, ref)) {
-		ctx->rules[ref] = IR_BINOP_INT;
+		ctx->rules[ref] = IR_BINOP_INT | IR_MAY_SWAP;
 		return 1;
 	} else if (ir_match_try_fuse_load(ctx, insn->op1, ref)) {
 		/* swap for better load fusion */
 		ir_swap_ops(insn);
-		ctx->rules[ref] = IR_BINOP_INT;
+		ctx->rules[ref] = IR_BINOP_INT | IR_MAY_SWAP;
 		return 1;
 	}
 	return 0;
@@ -1708,10 +1708,11 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 						/* v = BINOP(_, _); CMP(v, 0) => BINOP; SETCC */
 						if (ir_op_flags[op1_insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 							ir_match_fuse_load_commutative_int(ctx, op1_insn, ref);
+							ctx->rules[insn->op1] = IR_BINOP_INT | IR_MAY_SWAP;
 						} else {
 							ir_match_fuse_load(ctx, op1_insn->op2, ref);
+							ctx->rules[insn->op1] = IR_BINOP_INT;
 						}
-						ctx->rules[insn->op1] = IR_BINOP_INT;
 						return IR_SETCC_INT;
 					}
 				}
@@ -1736,7 +1737,7 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 						}
 						/* pass */
 					} else if (op2_insn->val.i64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if ((ir_type_size[insn->type] >= 4 && insn->op == IR_ADD && IR_IS_SIGNED_32BIT(op2_insn->val.i64)) ||
 							(ir_type_size[insn->type] >= 4 && insn->op == IR_SUB && IR_IS_SIGNED_NEG_32BIT(op2_insn->val.i64))) {
 lea:
@@ -1842,21 +1843,27 @@ lea:
 binop_int:
 				if (ir_op_flags[insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 					ir_match_fuse_load_commutative_int(ctx, insn, ref);
+					return IR_BINOP_INT | IR_MAY_SWAP;
 				} else {
 					ir_match_fuse_load(ctx, insn->op2, ref);
+					return IR_BINOP_INT;
 				}
-				return IR_BINOP_INT;
 			} else {
 binop_fp:
 				if (ir_op_flags[insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 					ir_match_fuse_load_commutative_fp(ctx, insn, ref);
+					if (ctx->mflags & IR_X86_AVX) {
+						return IR_BINOP_AVX;
+					} else {
+						return IR_BINOP_SSE2 | IR_MAY_SWAP;
+					}
 				} else {
 					ir_match_fuse_load(ctx, insn->op2, ref);
-				}
-				if (ctx->mflags & IR_X86_AVX) {
-					return IR_BINOP_AVX;
-				} else {
-					return IR_BINOP_SSE2;
+					if (ctx->mflags & IR_X86_AVX) {
+						return IR_BINOP_AVX;
+					} else {
+						return IR_BINOP_SSE2;
+					}
 				}
 			}
 			break;
@@ -1871,7 +1878,7 @@ binop_fp:
 					} else if (op2_insn->val.u64 == 0) {
 						// 0
 					} else if (op2_insn->val.u64 == 1) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (ir_type_size[insn->type] >= 4 &&
 							(op2_insn->val.u64 == 2 || op2_insn->val.u64 == 4 || op2_insn->val.u64 == 8)) {
 						/* MUL(X, 2|4|8) => LEA [X*2|4|8] */
@@ -1933,7 +1940,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 1) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (IR_IS_POWER_OF_TWO(op2_insn->val.u64)) {
 						/* DIV(X, PWR2) => SHR */
 						if (IR_IS_TYPE_UNSIGNED(insn->type)) {
@@ -1997,7 +2004,7 @@ binop_fp:
 				} else if (IR_IS_CONST_REF(insn->op1)) {
 					// const
 				} else if (op2_insn->val.i64 == 0) {
-					return IR_COPY_INT;
+					// return IR_COPY_INT;
 				} else if (op2_insn->val.i64 == -1) {
 					// -1
 				}
@@ -2013,7 +2020,7 @@ binop_fp:
 				} else if (op2_insn->val.i64 == 0) {
 					// 0
 				} else if (op2_insn->val.i64 == -1) {
-					return IR_COPY_INT;
+					// return IR_COPY_INT;
 				}
 			}
 			goto binop_int;
@@ -2036,7 +2043,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					} else if (ir_type_size[insn->type] >= 4) {
 						if (op2_insn->val.u64 == 1) {
 							// lea [op1*2]
@@ -2062,7 +2069,7 @@ binop_fp:
 					} else if (IR_IS_CONST_REF(insn->op1)) {
 						// const
 					} else if (op2_insn->val.u64 == 0) {
-						return IR_COPY_INT;
+						// return IR_COPY_INT;
 					}
 				}
 				return IR_SHIFT_CONST;
@@ -2071,7 +2078,7 @@ binop_fp:
 		case IR_MIN:
 		case IR_MAX:
 			if (IR_IS_TYPE_INT(insn->type)) {
-				return IR_MIN_MAX_INT;
+				return IR_MIN_MAX_INT | IR_MAY_SWAP;
 			} else {
 				goto binop_fp;
 			}
@@ -2079,9 +2086,9 @@ binop_fp:
 //		case IR_COND:
 		case IR_COPY:
 			if (IR_IS_TYPE_INT(insn->type)) {
-				return IR_COPY_INT;
+				return IR_COPY_INT | IR_MAY_REUSE;
 			} else {
-				return IR_COPY_FP;
+				return IR_COPY_FP | IR_MAY_REUSE;
 			}
 			break;
 		case IR_CALL:
@@ -2124,7 +2131,7 @@ store_int:
 					if (!rule) {
 						ctx->rules[insn->op3] = rule = ir_match_insn(ctx, insn->op3);
 					}
-					if ((rule == IR_BINOP_INT && op_insn->op != IR_MUL) || rule == IR_LEA_OB || rule == IR_LEA_IB) {
+					if (((rule & IR_RULE_MASK) == IR_BINOP_INT && op_insn->op != IR_MUL) || rule == IR_LEA_OB || rule == IR_LEA_IB) {
 						if (insn->op1 == op_insn->op1
 						 && ctx->ir_base[op_insn->op1].op == load_op
 						 && ctx->ir_base[op_insn->op1].op2 == insn->op2
@@ -2338,10 +2345,11 @@ store_int:
 								/* v = BINOP(_, _); c = CMP(v, 0) ... IF(c) => BINOP; SKIP_CMP ... JCC */
 								if (ir_op_flags[op1_insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 									ir_match_fuse_load_commutative_int(ctx, op1_insn, ref);
+									ctx->rules[op2_insn->op1] = IR_BINOP_INT | IR_MAY_SWAP;
 								} else {
 									ir_match_fuse_load(ctx, op1_insn->op2, ref);
+									ctx->rules[op2_insn->op1] = IR_BINOP_INT;
 								}
-								ctx->rules[op2_insn->op1] = IR_BINOP_INT;
 								ctx->rules[insn->op2] = IR_FUSED | IR_CMP_INT;
 								return IR_JCC_INT;
 							}
@@ -2381,10 +2389,11 @@ store_int:
 							/* v = BINOP(_, _); IF(v) => BINOP; JCC */
 						if (ir_op_flags[op2_insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 							ir_match_fuse_load_commutative_int(ctx, op2_insn, ref);
+							ctx->rules[insn->op2] = IR_BINOP_INT | IR_MAY_SWAP;
 						} else {
 							ir_match_fuse_load(ctx, op2_insn->op2, ref);
+							ctx->rules[insn->op2] = IR_BINOP_INT;
 						}
-						ctx->rules[insn->op2] = IR_BINOP_INT;
 						return IR_JCC_INT;
 					}
 				} else if ((ctx->flags & IR_OPT_CODEGEN)
@@ -2462,11 +2471,12 @@ store_int:
 											(op2_insn->op == IR_EQ || op2_insn->op == IR_NE))) {
 									if (ir_op_flags[op1_insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 										ir_match_fuse_load_commutative_int(ctx, op1_insn, ref);
+										ctx->rules[op2_insn->op1] = IR_BINOP_INT | IR_MAY_SWAP;
 									} else {
 										ir_match_fuse_load(ctx, op1_insn->op2, ref);
+										ctx->rules[op2_insn->op1] = IR_BINOP_INT;
 									}
 									/* v = BINOP(_, _); c = CMP(v, 0) ... IF(c) => BINOP; SKIP_CMP ... GUARD_JCC */
-									ctx->rules[op2_insn->op1] = IR_BINOP_INT;
 									ctx->rules[insn->op2] = IR_FUSED | IR_CMP_INT;
 									return IR_GUARD_JCC_INT;
 								}
@@ -2546,13 +2556,21 @@ store_int:
 			return insn->op;
 		case IR_SEXT:
 		case IR_ZEXT:
-		case IR_TRUNC:
-		case IR_BITCAST:
 		case IR_FP2INT:
 		case IR_FP2FP:
-		case IR_PROTO:
 			ir_match_fuse_load(ctx, insn->op1, ref);
 			return insn->op;
+		case IR_TRUNC:
+		case IR_PROTO:
+			ir_match_fuse_load(ctx, insn->op1, ref);
+			return insn->op | IR_MAY_REUSE;
+		case IR_BITCAST:
+			ir_match_fuse_load(ctx, insn->op1, ref);
+			if (IR_IS_TYPE_INT(insn->type) && IR_IS_TYPE_INT(ctx->ir_base[insn->op1].type)) {
+				return insn->op | IR_MAY_REUSE;
+			} else {
+				return insn->op;
+			}
 		case IR_CTLZ:
 		case IR_CTTZ:
 			ir_match_fuse_load(ctx, insn->op1, ref);
@@ -6396,16 +6414,16 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		if (!dst64) {
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtsd2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	vcvttsd2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				} else {
-					|	cvtsd2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	cvttsd2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				}
 			} else {
 				IR_ASSERT(src_type == IR_FLOAT);
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtss2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	vcvttss2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				} else {
-					|	cvtss2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	cvttss2si Rd(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				}
 			}
 		} else {
@@ -6413,16 +6431,16 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.if X64
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtsd2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	vcvttsd2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				} else {
-					|	cvtsd2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	cvttsd2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				}
 			} else {
 				IR_ASSERT(src_type == IR_FLOAT);
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtss2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	vcvttss2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				} else {
-					|	cvtss2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
+					|	cvttss2si Rq(def_reg), xmm(op1_reg-IR_REG_FP_FIRST)
 				}
 			}
 |.endif
@@ -6433,16 +6451,16 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		if (!dst64) {
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtsd2si Rd(def_reg), qword [=>label]
+					|	vcvttsd2si Rd(def_reg), qword [=>label]
 				} else {
-					|	cvtsd2si Rd(def_reg), qword [=>label]
+					|	cvttsd2si Rd(def_reg), qword [=>label]
 				}
 			} else {
 				IR_ASSERT(src_type == IR_FLOAT);
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtss2si Rd(def_reg), dword [=>label]
+					|	vcvttss2si Rd(def_reg), dword [=>label]
 				} else {
-					|	cvtss2si Rd(def_reg), dword [=>label]
+					|	cvttss2si Rd(def_reg), dword [=>label]
 				}
 			}
 		} else {
@@ -6450,16 +6468,16 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.if X64
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtsd2si Rq(def_reg), qword [=>label]
+					|	vcvttsd2si Rq(def_reg), qword [=>label]
 				} else {
-					|	cvtsd2si Rq(def_reg), qword [=>label]
+					|	cvttsd2si Rq(def_reg), qword [=>label]
 				}
 			} else {
 				IR_ASSERT(src_type == IR_FLOAT);
 				if (ctx->mflags & IR_X86_AVX) {
-					|	vcvtss2si Rq(def_reg), dword [=>label]
+					|	vcvttss2si Rq(def_reg), dword [=>label]
 				} else {
-					|	cvtss2si Rq(def_reg), dword [=>label]
+					|	cvttss2si Rq(def_reg), dword [=>label]
 				}
 			}
 |.endif
@@ -6476,16 +6494,16 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		if (!dst64) {
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
-					|	ASM_TXT_TMEM_OP vcvtsd2si, Rd(def_reg), qword, mem
+					|	ASM_TXT_TMEM_OP vcvttsd2si, Rd(def_reg), qword, mem
 				} else {
-					|	ASM_TXT_TMEM_OP cvtsd2si, Rd(def_reg), qword, mem
+					|	ASM_TXT_TMEM_OP cvttsd2si, Rd(def_reg), qword, mem
 				}
 			} else {
 				IR_ASSERT(src_type == IR_FLOAT);
 				if (ctx->mflags & IR_X86_AVX) {
-					|	ASM_TXT_TMEM_OP vcvtss2si, Rd(def_reg), dword, mem
+					|	ASM_TXT_TMEM_OP vcvttss2si, Rd(def_reg), dword, mem
 				} else {
-					|	ASM_TXT_TMEM_OP cvtss2si, Rd(def_reg), dword, mem
+					|	ASM_TXT_TMEM_OP cvttss2si, Rd(def_reg), dword, mem
 				}
 			}
 		} else {
@@ -6493,16 +6511,16 @@ static void ir_emit_fp2int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 |.if X64
 			if (src_type == IR_DOUBLE) {
 				if (ctx->mflags & IR_X86_AVX) {
-					|	ASM_TXT_TMEM_OP vcvtsd2si, Rq(def_reg), qword, mem
+					|	ASM_TXT_TMEM_OP vcvttsd2si, Rq(def_reg), qword, mem
 				} else {
-					|	ASM_TXT_TMEM_OP cvtsd2si, Rq(def_reg), qword, mem
+					|	ASM_TXT_TMEM_OP cvttsd2si, Rq(def_reg), qword, mem
 				}
 			} else {
 				IR_ASSERT(src_type == IR_FLOAT);
 				if (ctx->mflags & IR_X86_AVX) {
-					|	ASM_TXT_TMEM_OP vcvtss2si, Rq(def_reg), dword, mem
+					|	ASM_TXT_TMEM_OP vcvttss2si, Rq(def_reg), dword, mem
 				} else {
-					|	ASM_TXT_TMEM_OP cvtss2si, Rq(def_reg), dword, mem
+					|	ASM_TXT_TMEM_OP cvttss2si, Rq(def_reg), dword, mem
 				}
 			}
 |.endif
@@ -9334,7 +9352,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 
 		while (i <= bb->end) {
 			if (!((*rule) & (IR_FUSED|IR_SKIPPED)))
-			switch (*rule) {
+			switch ((*rule) & IR_RULE_MASK) {
 				case IR_VAR:
 				case IR_PARAM:
 				case IR_PI:

@@ -607,7 +607,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 			}
 			if (ctx->rules) {
 				uint32_t rule = ctx->rules[i];
-				uint32_t id = rule & ~(IR_FUSED_REG|IR_FUSED|IR_SKIPPED|IR_SIMPLE);
+				uint32_t id = rule & IR_RULE_MASK;
 
 				if (id < IR_LAST_OP) {
 					fprintf(f, " # RULE(%s", ir_op_name[id]);

@@ -1,8 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 1dd42ee5b5b818c5bd131b5c4bbb13c153d99499 */
 
-
-
 static void register_tokenizer_data_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("T_LNUMBER", T_LNUMBER, CONST_PERSISTENT);

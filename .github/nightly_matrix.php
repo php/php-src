@@ -100,8 +100,9 @@ function get_macos_matrix_include(array $branches) {
                     'branch' => $branch,
                     'debug' => $debug,
                     'zts' => $zts,
-                    'os' => $branch === 'master' ? '13' : '12',
+                    'os' => $branch['name'] === 'master' ? '13' : '12',
                     'arch' => 'X64',
+                    'test_jit' => true,
                 ];
                 if ($branch['version']['minor'] >= 4 || $branch['version']['major'] >= 9) {
                     $jobs[] = [
@@ -110,6 +111,7 @@ function get_macos_matrix_include(array $branches) {
                         'zts' => $zts,
                         'os' => '14',
                         'arch' => 'ARM64',
+                        'test_jit' => !$zts,
                     ];
                 }
             }

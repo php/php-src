@@ -365,6 +365,7 @@ static zend_result zend_create_closure_from_callable(zval *return_value, zval *c
 		call.handler = zend_closure_call_magic;
 		call.function_name = mptr->common.function_name;
 		call.scope = mptr->common.scope;
+		call.doc_comment = NULL;
 
 		zend_free_trampoline(mptr);
 		mptr = (zend_function *) &call;
@@ -479,6 +480,7 @@ ZEND_API zend_function *zend_get_closure_invoke_method(zend_object *object) /* {
 			ZEND_ACC_USER_ARG_INFO;
 	}
 	invoke->internal_function.handler = ZEND_MN(Closure___invoke);
+	invoke->internal_function.doc_comment = NULL;
 	invoke->internal_function.module = 0;
 	invoke->internal_function.scope = zend_ce_closure;
 	invoke->internal_function.function_name = ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE);
@@ -864,6 +866,7 @@ void zend_closure_from_frame(zval *return_value, zend_execute_data *call) { /* {
 		trampoline.handler = zend_closure_call_magic;
 		trampoline.function_name = mptr->common.function_name;
 		trampoline.scope = mptr->common.scope;
+		trampoline.doc_comment = NULL;
 		if (trampoline.fn_flags & ZEND_ACC_VARIADIC) {
 			trampoline.arg_info = trampoline_arg_info;
 		}

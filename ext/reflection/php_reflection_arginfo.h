@@ -613,7 +613,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFiber_getTrace, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "DEBUG_BACKTRACE_PROVIDE_OBJECT")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(Reflection, getModifierNames);
 ZEND_METHOD(ReflectionClass, __clone);
 ZEND_METHOD(ReflectionFunctionAbstract, inNamespace);
@@ -847,25 +846,21 @@ ZEND_METHOD(ReflectionFiber, getExecutingLine);
 ZEND_METHOD(ReflectionFiber, getCallable);
 ZEND_METHOD(ReflectionFiber, getTrace);
 
-
 static const zend_function_entry class_ReflectionException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Reflection_methods[] = {
 	ZEND_ME(Reflection, getModifierNames, arginfo_class_Reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_Reflector_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionFunctionAbstract_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionFunctionAbstract___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionFunctionAbstract___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionFunctionAbstract, inNamespace, arginfo_class_ReflectionFunctionAbstract_inNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, isClosure, arginfo_class_ReflectionFunctionAbstract_isClosure, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunctionAbstract, isDeprecated, arginfo_class_ReflectionFunctionAbstract_isDeprecated, ZEND_ACC_PUBLIC)
@@ -900,7 +895,6 @@ static const zend_function_entry class_ReflectionFunctionAbstract_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionFunction_methods[] = {
 	ZEND_ME(ReflectionFunction, __construct, arginfo_class_ReflectionFunction___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionFunction, __toString, arginfo_class_ReflectionFunction___toString, ZEND_ACC_PUBLIC)
@@ -912,7 +906,6 @@ static const zend_function_entry class_ReflectionFunction_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionGenerator_methods[] = {
 	ZEND_ME(ReflectionGenerator, __construct, arginfo_class_ReflectionGenerator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionGenerator, getExecutingLine, arginfo_class_ReflectionGenerator_getExecutingLine, ZEND_ACC_PUBLIC)
@@ -923,7 +916,6 @@ static const zend_function_entry class_ReflectionGenerator_methods[] = {
 	ZEND_ME(ReflectionGenerator, getExecutingGenerator, arginfo_class_ReflectionGenerator_getExecutingGenerator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionMethod_methods[] = {
 	ZEND_ME(ReflectionMethod, __construct, arginfo_class_ReflectionMethod___construct, ZEND_ACC_PUBLIC)
@@ -946,7 +938,6 @@ static const zend_function_entry class_ReflectionMethod_methods[] = {
 	ZEND_ME(ReflectionMethod, setAccessible, arginfo_class_ReflectionMethod_setAccessible, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, __clone, arginfo_class_ReflectionClass___clone, ZEND_ACC_PRIVATE)
@@ -997,7 +988,7 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, setStaticPropertyValue, arginfo_class_ReflectionClass_setStaticPropertyValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getDefaultProperties, arginfo_class_ReflectionClass_getDefaultProperties, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isIterable, arginfo_class_ReflectionClass_isIterable, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ReflectionClass, isIterateable, isIterable, arginfo_class_ReflectionClass_isIterateable, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("isIterateable", zim_ReflectionClass_isIterable, arginfo_class_ReflectionClass_isIterateable, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(ReflectionClass, implementsInterface, arginfo_class_ReflectionClass_implementsInterface, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getExtension, arginfo_class_ReflectionClass_getExtension, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getExtensionName, arginfo_class_ReflectionClass_getExtensionName, ZEND_ACC_PUBLIC)
@@ -1008,15 +999,13 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionObject_methods[] = {
 	ZEND_ME(ReflectionObject, __construct, arginfo_class_ReflectionObject___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionProperty_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionProperty___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionProperty___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionProperty, __construct, arginfo_class_ReflectionProperty___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, __toString, arginfo_class_ReflectionProperty___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getName, arginfo_class_ReflectionProperty_getName, ZEND_ACC_PUBLIC)
@@ -1042,9 +1031,8 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionClassConstant_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionClassConstant___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionClassConstant___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionClassConstant, __construct, arginfo_class_ReflectionClassConstant___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, __toString, arginfo_class_ReflectionClassConstant___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getName, arginfo_class_ReflectionClassConstant_getName, ZEND_ACC_PUBLIC)
@@ -1063,9 +1051,8 @@ static const zend_function_entry class_ReflectionClassConstant_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionParameter_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionParameter___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionParameter___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionParameter, __construct, arginfo_class_ReflectionParameter___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, __toString, arginfo_class_ReflectionParameter___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionParameter, getName, arginfo_class_ReflectionParameter_getName, ZEND_ACC_PUBLIC)
@@ -1091,14 +1078,12 @@ static const zend_function_entry class_ReflectionParameter_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionType_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionType___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionType___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionType, allowsNull, arginfo_class_ReflectionType_allowsNull, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionType, __toString, arginfo_class_ReflectionType___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionNamedType_methods[] = {
 	ZEND_ME(ReflectionNamedType, getName, arginfo_class_ReflectionNamedType_getName, ZEND_ACC_PUBLIC)
@@ -1106,21 +1091,18 @@ static const zend_function_entry class_ReflectionNamedType_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionUnionType_methods[] = {
 	ZEND_ME(ReflectionUnionType, getTypes, arginfo_class_ReflectionUnionType_getTypes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionIntersectionType_methods[] = {
 	ZEND_ME(ReflectionIntersectionType, getTypes, arginfo_class_ReflectionIntersectionType_getTypes, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionExtension_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionExtension___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionExtension___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionExtension, __construct, arginfo_class_ReflectionExtension___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionExtension, __toString, arginfo_class_ReflectionExtension___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionExtension, getName, arginfo_class_ReflectionExtension_getName, ZEND_ACC_PUBLIC)
@@ -1137,9 +1119,8 @@ static const zend_function_entry class_ReflectionExtension_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionZendExtension_methods[] = {
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionZendExtension___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionZendExtension___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionZendExtension, __construct, arginfo_class_ReflectionZendExtension___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionZendExtension, __toString, arginfo_class_ReflectionZendExtension___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionZendExtension, getName, arginfo_class_ReflectionZendExtension_getName, ZEND_ACC_PUBLIC)
@@ -1150,15 +1131,13 @@ static const zend_function_entry class_ReflectionZendExtension_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionReference_methods[] = {
 	ZEND_ME(ReflectionReference, fromArrayElement, arginfo_class_ReflectionReference_fromArrayElement, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(ReflectionReference, getId, arginfo_class_ReflectionReference_getId, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ReflectionClass, __clone, __clone, arginfo_class_ReflectionReference___clone, ZEND_ACC_PRIVATE)
+	ZEND_RAW_FENTRY("__clone", zim_ReflectionClass___clone, arginfo_class_ReflectionReference___clone, ZEND_ACC_PRIVATE, NULL, NULL)
 	ZEND_ME(ReflectionReference, __construct, arginfo_class_ReflectionReference___construct, ZEND_ACC_PRIVATE)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionAttribute_methods[] = {
 	ZEND_ME(ReflectionAttribute, getName, arginfo_class_ReflectionAttribute_getName, ZEND_ACC_PUBLIC)
@@ -1172,7 +1151,6 @@ static const zend_function_entry class_ReflectionAttribute_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionEnum_methods[] = {
 	ZEND_ME(ReflectionEnum, __construct, arginfo_class_ReflectionEnum___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionEnum, hasCase, arginfo_class_ReflectionEnum_hasCase, ZEND_ACC_PUBLIC)
@@ -1183,21 +1161,18 @@ static const zend_function_entry class_ReflectionEnum_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_ReflectionEnumUnitCase_methods[] = {
 	ZEND_ME(ReflectionEnumUnitCase, __construct, arginfo_class_ReflectionEnumUnitCase___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionEnumUnitCase, getEnum, arginfo_class_ReflectionEnumUnitCase_getEnum, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(ReflectionClassConstant, getValue, getValue, arginfo_class_ReflectionEnumUnitCase_getValue, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("getValue", zim_ReflectionClassConstant_getValue, arginfo_class_ReflectionEnumUnitCase_getValue, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionEnumBackedCase_methods[] = {
 	ZEND_ME(ReflectionEnumBackedCase, __construct, arginfo_class_ReflectionEnumBackedCase___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionEnumBackedCase, getBackingValue, arginfo_class_ReflectionEnumBackedCase_getBackingValue, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReflectionFiber_methods[] = {
 	ZEND_ME(ReflectionFiber, __construct, arginfo_class_ReflectionFiber___construct, ZEND_ACC_PUBLIC)

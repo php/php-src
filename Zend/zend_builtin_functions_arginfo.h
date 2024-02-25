@@ -217,6 +217,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_status arginfo_func_get_args
 
+
 ZEND_FRAMELESS_FUNCTION(property_exists, 2);
 static const zend_frameless_function_info frameless_function_infos_property_exists[] = {
 	{ ZEND_FRAMELESS_FUNCTION_NAME(property_exists, 2), 2 },
@@ -230,7 +231,6 @@ static const zend_frameless_function_info frameless_function_infos_class_exists[
 	{ ZEND_FRAMELESS_FUNCTION_NAME(class_exists, 2), 2 },
 	{ 0 },
 };
-
 
 ZEND_FUNCTION(zend_version);
 ZEND_FUNCTION(func_num_args);
@@ -291,17 +291,16 @@ ZEND_FUNCTION(gc_enable);
 ZEND_FUNCTION(gc_disable);
 ZEND_FUNCTION(gc_status);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_version, arginfo_zend_version)
 	ZEND_FE(func_num_args, arginfo_func_num_args)
 	ZEND_FE(func_get_arg, arginfo_func_get_arg)
 	ZEND_FE(func_get_args, arginfo_func_get_args)
 	ZEND_FE(strlen, arginfo_strlen)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcmp, arginfo_strcmp)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncmp, arginfo_strncmp)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strcasecmp, arginfo_strcasecmp)
-	ZEND_SUPPORTS_COMPILE_TIME_EVAL_FE(strncasecmp, arginfo_strncasecmp)
+	ZEND_RAW_FENTRY("strcmp", zif_strcmp, arginfo_strcmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("strncmp", zif_strncmp, arginfo_strncmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("strcasecmp", zif_strcasecmp, arginfo_strcasecmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("strncasecmp", zif_strncasecmp, arginfo_strncasecmp, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(error_reporting, arginfo_error_reporting)
 	ZEND_FE(define, arginfo_define)
 	ZEND_FE(defined, arginfo_defined)
@@ -315,17 +314,17 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(get_mangled_object_vars, arginfo_get_mangled_object_vars)
 	ZEND_FE(get_class_methods, arginfo_get_class_methods)
 	ZEND_FE(method_exists, arginfo_method_exists)
-	ZEND_FRAMELESS_FE(property_exists, arginfo_property_exists, 0, frameless_function_infos_property_exists)
-	ZEND_FRAMELESS_FE(class_exists, arginfo_class_exists, 0, frameless_function_infos_class_exists)
+	ZEND_RAW_FENTRY("property_exists", zif_property_exists, arginfo_property_exists, 0, frameless_function_infos_property_exists, NULL)
+	ZEND_RAW_FENTRY("class_exists", zif_class_exists, arginfo_class_exists, 0, frameless_function_infos_class_exists, NULL)
 	ZEND_FE(interface_exists, arginfo_interface_exists)
 	ZEND_FE(trait_exists, arginfo_trait_exists)
 	ZEND_FE(enum_exists, arginfo_enum_exists)
 	ZEND_FE(function_exists, arginfo_function_exists)
 	ZEND_FE(class_alias, arginfo_class_alias)
 	ZEND_FE(get_included_files, arginfo_get_included_files)
-	ZEND_FALIAS(get_required_files, get_included_files, arginfo_get_required_files)
+	ZEND_RAW_FENTRY("get_required_files", zif_get_included_files, arginfo_get_required_files, 0, NULL, NULL)
 	ZEND_FE(trigger_error, arginfo_trigger_error)
-	ZEND_FALIAS(user_error, trigger_error, arginfo_user_error)
+	ZEND_RAW_FENTRY("user_error", zif_trigger_error, arginfo_user_error, 0, NULL, NULL)
 	ZEND_FE(set_error_handler, arginfo_set_error_handler)
 	ZEND_FE(restore_error_handler, arginfo_restore_error_handler)
 	ZEND_FE(set_exception_handler, arginfo_set_exception_handler)
@@ -355,7 +354,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gc_status, arginfo_gc_status)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_stdClass_methods[] = {
 	ZEND_FE_END

@@ -1237,6 +1237,92 @@ void ir_build_def_use_lists(ir_ctx *ctx)
 }
 #endif
 
+void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref ref)
+{
+	ir_ref j, n, *p, *q, use;
+	ir_use_list *use_list = &ctx->use_lists[from];
+	ir_ref skip = 0;
+
+	n = use_list->count;
+	for (j = 0, p = q = &ctx->use_edges[use_list->refs]; j < n; j++, p++) {
+		use = *p;
+		if (use == ref) {
+			skip++;
+		} else {
+			if (p != q) {
+				*q = use;
+			}
+			q++;
+		}
+	}
+	if (skip) {
+		use_list->count -= skip;
+		do {
+			*q = IR_UNUSED;
+			q++;
+		} while (--skip);
+	}
+}
+
+void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref ref)
+{
+	ir_ref j, n, *p;
+	ir_use_list *use_list = &ctx->use_lists[from];
+
+	n = use_list->count;
+	j = 0;
+	p = &ctx->use_edges[use_list->refs];
+	while (j < n) {
+		if (*p == ref) {
+			use_list->count--;
+			j++;
+			while (j < n) {
+				*p = *(p+1);
+				p++;
+				j++;
+			}
+			*p = IR_UNUSED;
+			break;
+		}
+		j++;
+	}
+}
+
+void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
+{
+	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_ref i, n, *p;
+
+	n = use_list->count;
+	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+		if (*p == use) {
+			*p = new_use;
+			break;
+		}
+	}
+}
+
+bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref ref)
+{
+	ir_use_list *use_list = &ctx->use_lists[to];
+	ir_ref n = use_list->refs + use_list->count;
+
+	if (n < ctx->use_edges_count && ctx->use_edges[n] == IR_UNUSED) {
+		ctx->use_edges[n] = ref;
+		use_list->count++;
+		return 0;
+	} else {
+		/* Reallocate the whole edges buffer (this is inefficient) */
+		ctx->use_edges = ir_mem_realloc(ctx->use_edges, (ctx->use_edges_count + use_list->count + 1) * sizeof(ir_ref));
+		memcpy(ctx->use_edges + ctx->use_edges_count, ctx->use_edges + use_list->refs, use_list->count * sizeof(ir_ref));
+		use_list->refs = ctx->use_edges_count;
+		ctx->use_edges[use_list->refs + use_list->count] = ref;
+		use_list->count++;
+		ctx->use_edges_count += use_list->count;
+		return 1;
+	}
+}
+
 /* Helper Data Types */
 void ir_array_grow(ir_array *a, uint32_t size)
 {

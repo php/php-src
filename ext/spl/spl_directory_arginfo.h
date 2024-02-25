@@ -272,7 +272,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplTempFileObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, maxMemory, IS_LONG, 0, "2 * 1024 * 1024")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(SplFileInfo, __construct);
 ZEND_METHOD(SplFileInfo, getPath);
 ZEND_METHOD(SplFileInfo, getFilename);
@@ -364,7 +363,6 @@ ZEND_METHOD(SplFileObject, seek);
 ZEND_METHOD(SplFileObject, __toString);
 ZEND_METHOD(SplTempFileObject, __construct);
 
-
 static const zend_function_entry class_SplFileInfo_methods[] = {
 	ZEND_ME(SplFileInfo, __construct, arginfo_class_SplFileInfo___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileInfo, getPath, arginfo_class_SplFileInfo_getPath, ZEND_ACC_PUBLIC)
@@ -394,12 +392,11 @@ static const zend_function_entry class_SplFileInfo_methods[] = {
 	ZEND_ME(SplFileInfo, openFile, arginfo_class_SplFileInfo_openFile, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileInfo, setFileClass, arginfo_class_SplFileInfo_setFileClass, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileInfo, setInfoClass, arginfo_class_SplFileInfo_setInfoClass, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplFileInfo, __toString, getPathname, arginfo_class_SplFileInfo___toString, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__toString", zim_SplFileInfo_getPathname, arginfo_class_SplFileInfo___toString, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SplFileInfo, __debugInfo, arginfo_class_SplFileInfo___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileInfo, _bad_state_ex, arginfo_class_SplFileInfo__bad_state_ex, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL|ZEND_ACC_DEPRECATED)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DirectoryIterator_methods[] = {
 	ZEND_ME(DirectoryIterator, __construct, arginfo_class_DirectoryIterator___construct, ZEND_ACC_PUBLIC)
@@ -413,10 +410,9 @@ static const zend_function_entry class_DirectoryIterator_methods[] = {
 	ZEND_ME(DirectoryIterator, current, arginfo_class_DirectoryIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(DirectoryIterator, next, arginfo_class_DirectoryIterator_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(DirectoryIterator, seek, arginfo_class_DirectoryIterator_seek, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(DirectoryIterator, __toString, getFilename, arginfo_class_DirectoryIterator___toString, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__toString", zim_DirectoryIterator_getFilename, arginfo_class_DirectoryIterator___toString, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FilesystemIterator_methods[] = {
 	ZEND_ME(FilesystemIterator, __construct, arginfo_class_FilesystemIterator___construct, ZEND_ACC_PUBLIC)
@@ -428,7 +424,6 @@ static const zend_function_entry class_FilesystemIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_RecursiveDirectoryIterator_methods[] = {
 	ZEND_ME(RecursiveDirectoryIterator, __construct, arginfo_class_RecursiveDirectoryIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(RecursiveDirectoryIterator, hasChildren, arginfo_class_RecursiveDirectoryIterator_hasChildren, ZEND_ACC_PUBLIC)
@@ -438,7 +433,6 @@ static const zend_function_entry class_RecursiveDirectoryIterator_methods[] = {
 	ZEND_FE_END
 };
 
-
 #if defined(HAVE_GLOB)
 static const zend_function_entry class_GlobIterator_methods[] = {
 	ZEND_ME(GlobIterator, __construct, arginfo_class_GlobIterator___construct, ZEND_ACC_PUBLIC)
@@ -446,7 +440,6 @@ static const zend_function_entry class_GlobIterator_methods[] = {
 	ZEND_FE_END
 };
 #endif
-
 
 static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, __construct, arginfo_class_SplFileObject___construct, ZEND_ACC_PUBLIC)
@@ -479,11 +472,10 @@ static const zend_function_entry class_SplFileObject_methods[] = {
 	ZEND_ME(SplFileObject, hasChildren, arginfo_class_SplFileObject_hasChildren, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, getChildren, arginfo_class_SplFileObject_getChildren, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFileObject, seek, arginfo_class_SplFileObject_seek, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplFileObject, getCurrentLine, fgets, arginfo_class_SplFileObject_getCurrentLine, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("getCurrentLine", zim_SplFileObject_fgets, arginfo_class_SplFileObject_getCurrentLine, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SplFileObject, __toString, arginfo_class_SplFileObject___toString, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplTempFileObject_methods[] = {
 	ZEND_ME(SplTempFileObject, __construct, arginfo_class_SplTempFileObject___construct, ZEND_ACC_PUBLIC)

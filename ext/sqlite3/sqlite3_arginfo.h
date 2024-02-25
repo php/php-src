@@ -164,7 +164,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Result_finalize arginfo_class_SQLite3_close
 
-
 ZEND_METHOD(SQLite3, open);
 ZEND_METHOD(SQLite3, close);
 ZEND_METHOD(SQLite3, version);
@@ -210,14 +209,12 @@ ZEND_METHOD(SQLite3Result, fetchArray);
 ZEND_METHOD(SQLite3Result, reset);
 ZEND_METHOD(SQLite3Result, finalize);
 
-
 static const zend_function_entry class_SQLite3Exception_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SQLite3_methods[] = {
-	ZEND_MALIAS(SQLite3, __construct, open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("__construct", zim_SQLite3_open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SQLite3, open, arginfo_class_SQLite3_open, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, close, arginfo_class_SQLite3_close, ZEND_ACC_PUBLIC)
 	ZEND_ME(SQLite3, version, arginfo_class_SQLite3_version, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -248,7 +245,6 @@ static const zend_function_entry class_SQLite3_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SQLite3Stmt_methods[] = {
 	ZEND_ME(SQLite3Stmt, __construct, arginfo_class_SQLite3Stmt___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(SQLite3Stmt, bindParam, arginfo_class_SQLite3Stmt_bindParam, ZEND_ACC_PUBLIC)
@@ -262,7 +258,6 @@ static const zend_function_entry class_SQLite3Stmt_methods[] = {
 	ZEND_ME(SQLite3Stmt, reset, arginfo_class_SQLite3Stmt_reset, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SQLite3Result_methods[] = {
 	ZEND_ME(SQLite3Result, __construct, arginfo_class_SQLite3Result___construct, ZEND_ACC_PRIVATE)

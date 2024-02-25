@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 893419f59d38566a8f6a766829250c18663e339c */
+ * Stub hash: 50cc9edef7f40e6885be38be25a71f66d7405a50 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -753,6 +753,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_use_daylight_time, 0, 1, 
 	ZEND_ARG_OBJ_INFO(0, timezone, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_iana_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, timezoneId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_transliterator_create, 0, 1, Transliterator, 1)
 	ZEND_ARG_TYPE_INFO(0, id, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, direction, IS_LONG, 0, "Transliterator::FORWARD")
@@ -784,7 +790,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_get_error_message, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, transliterator, Transliterator, 0)
 ZEND_END_ARG_INFO()
-
 
 ZEND_FUNCTION(intlcal_create_instance);
 ZEND_FUNCTION(intlcal_get_keyword_values_for_locale);
@@ -966,6 +971,9 @@ ZEND_FUNCTION(intltz_get_id_for_windows_id);
 ZEND_FUNCTION(intltz_has_same_rules);
 ZEND_FUNCTION(intltz_to_date_time_zone);
 ZEND_FUNCTION(intltz_use_daylight_time);
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+ZEND_FUNCTION(intltz_get_iana_id);
+#endif
 ZEND_FUNCTION(transliterator_create);
 ZEND_FUNCTION(transliterator_create_from_rules);
 ZEND_FUNCTION(transliterator_list_ids);
@@ -973,7 +981,6 @@ ZEND_FUNCTION(transliterator_create_inverse);
 ZEND_FUNCTION(transliterator_transliterate);
 ZEND_FUNCTION(transliterator_get_error_code);
 ZEND_FUNCTION(transliterator_get_error_message);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_create_instance, arginfo_intlcal_create_instance)
@@ -987,7 +994,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_set_time_zone, arginfo_intlcal_set_time_zone)
 	ZEND_FE(intlcal_after, arginfo_intlcal_after)
 	ZEND_FE(intlcal_before, arginfo_intlcal_before)
-	ZEND_DEP_FE(intlcal_set, arginfo_intlcal_set)
+	ZEND_RAW_FENTRY("intlcal_set", zif_intlcal_set, arginfo_intlcal_set, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(intlcal_roll, arginfo_intlcal_roll)
 	ZEND_FE(intlcal_clear, arginfo_intlcal_clear)
 	ZEND_FE(intlcal_field_difference, arginfo_intlcal_field_difference)
@@ -1021,7 +1028,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intlcal_to_date_time, arginfo_intlcal_to_date_time)
 	ZEND_FE(intlcal_get_error_code, arginfo_intlcal_get_error_code)
 	ZEND_FE(intlcal_get_error_message, arginfo_intlcal_get_error_message)
-	ZEND_DEP_FE(intlgregcal_create_instance, arginfo_intlgregcal_create_instance)
+	ZEND_RAW_FENTRY("intlgregcal_create_instance", zif_intlgregcal_create_instance, arginfo_intlgregcal_create_instance, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(intlgregcal_set_gregorian_change, arginfo_intlgregcal_set_gregorian_change)
 	ZEND_FE(intlgregcal_get_gregorian_change, arginfo_intlgregcal_get_gregorian_change)
 	ZEND_FE(intlgregcal_is_leap_year, arginfo_intlgregcal_is_leap_year)
@@ -1156,6 +1163,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
 	ZEND_FE(intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone)
 	ZEND_FE(intltz_use_daylight_time, arginfo_intltz_use_daylight_time)
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+	ZEND_FE(intltz_get_iana_id, arginfo_intltz_get_iana_id)
+#endif
 	ZEND_FE(transliterator_create, arginfo_transliterator_create)
 	ZEND_FE(transliterator_create_from_rules, arginfo_transliterator_create_from_rules)
 	ZEND_FE(transliterator_list_ids, arginfo_transliterator_list_ids)
@@ -1165,7 +1175,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_IntlException_methods[] = {
 	ZEND_FE_END

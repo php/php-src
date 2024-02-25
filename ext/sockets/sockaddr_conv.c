@@ -11,7 +11,7 @@
 
 extern zend_result php_string_to_if_index(const char *val, unsigned *out);
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
 int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
 {
@@ -89,11 +89,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	struct in_addr tmp;
 	struct hostent *host_entry;
 
-#ifdef HAVE_INET_PTON
 	if (inet_pton(AF_INET, string, &tmp)) {
-#else
-	if (inet_aton(string, &tmp)) {
-#endif
 		sin->sin_addr.s_addr = tmp.s_addr;
 	} else {
 		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {
@@ -129,7 +125,7 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *strin
 			return 1;
 		}
 	}
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 	else if (php_sock->type == AF_INET6) {
 		struct sockaddr_in6 t = {0};
 		if (php_set_inet6_addr(&t, string, php_sock)) {

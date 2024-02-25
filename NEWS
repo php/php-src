@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
   . Bumped required libcurl version to 7.61.0. (Ayesh)
+  . Added feature_list key to the curl_version() return value (Ayesh)
 
 - Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
@@ -32,6 +33,7 @@ PHP                                                                        NEWS
   . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
   . Handle OOM more consistently. (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
+  . Added DOMXPath::quote() static method. (divinity76)
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)
@@ -58,6 +60,11 @@ PHP                                                                        NEWS
   . Added NumberFormatter::ROUND_TOWARD_ZERO and ::ROUND_AWAY_FROM_ZERO as
     aliases for ::ROUND_DOWN and ::ROUND_UP. (Jorg Sowa)
   . Added NumberFormatter::ROUND_HALFODD. (Ayesh Karunaratne)
+  . Added PROPERTY_IDS_UNARY_OPERATOR, PROPERTY_ID_COMPAT_MATH_START and
+    PROPERTY_ID_COMPAT_MATH_CONTINUE constants. (David Carlier)
+  . Added IntlDateFormatter::getIanaID/intltz_get_iana_id method/function.
+    (David Carlier)
+  . Set to C++17 standard for icu 74 and onwards. (David Carlier)
 
 - LDAP:
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
@@ -84,6 +91,9 @@ PHP                                                                        NEWS
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
 
+- PCRE:
+  . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
+
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
@@ -101,6 +111,9 @@ PHP                                                                        NEWS
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Added class PdoMysql. (danack, kocsismate)
+  . Fixed binding of Stringable objects. (SakiTakamachi)
+  . Added an error message when a non-scalar value is bound with PARAM_INT.
+    (SakiTakamachi)
 
 - PDO_ODBC:
   . Added class PdoOdbc. (danack, kocsismate)
@@ -176,6 +189,8 @@ PHP                                                                        NEWS
   . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
   . Fix GH-12143 (Optimize round). (SakiTakamachi)
   . Changed return type of long2ip to string from string|false. (Jorg Sowa)
+  . Fix GH-12143 (Extend the maximum precision round can handle by one digit).
+    (SakiTakamachi)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

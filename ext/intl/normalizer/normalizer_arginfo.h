@@ -18,19 +18,17 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Normalizer_getRa
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(normalizer_normalize);
 ZEND_FUNCTION(normalizer_is_normalized);
 #if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_FUNCTION(normalizer_get_raw_decomposition);
 #endif
 
-
 static const zend_function_entry class_Normalizer_methods[] = {
-	ZEND_ME_MAPPING(normalize, normalizer_normalize, arginfo_class_Normalizer_normalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME_MAPPING(isNormalized, normalizer_is_normalized, arginfo_class_Normalizer_isNormalized, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("normalize", zif_normalizer_normalize, arginfo_class_Normalizer_normalize, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isNormalized", zif_normalizer_is_normalized, arginfo_class_Normalizer_isNormalized, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #if U_ICU_VERSION_MAJOR_NUM >= 56
-	ZEND_ME_MAPPING(getRawDecomposition, normalizer_get_raw_decomposition, arginfo_class_Normalizer_getRawDecomposition, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_RAW_FENTRY("getRawDecomposition", zif_normalizer_get_raw_decomposition, arginfo_class_Normalizer_getRawDecomposition, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 #endif
 	ZEND_FE_END
 };

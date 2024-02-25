@@ -84,7 +84,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplMaxHeap_compare arginfo_class_SplHeap_compare
 
-
 ZEND_METHOD(SplPriorityQueue, compare);
 ZEND_METHOD(SplPriorityQueue, insert);
 ZEND_METHOD(SplPriorityQueue, setExtractFlags);
@@ -109,27 +108,25 @@ ZEND_METHOD(SplHeap, __debugInfo);
 ZEND_METHOD(SplMinHeap, compare);
 ZEND_METHOD(SplMaxHeap, compare);
 
-
 static const zend_function_entry class_SplPriorityQueue_methods[] = {
 	ZEND_ME(SplPriorityQueue, compare, arginfo_class_SplPriorityQueue_compare, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplPriorityQueue, insert, arginfo_class_SplPriorityQueue_insert, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplPriorityQueue, setExtractFlags, arginfo_class_SplPriorityQueue_setExtractFlags, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplPriorityQueue, top, arginfo_class_SplPriorityQueue_top, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplPriorityQueue, extract, arginfo_class_SplPriorityQueue_extract, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, count, count, arginfo_class_SplPriorityQueue_count, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, isEmpty, isEmpty, arginfo_class_SplPriorityQueue_isEmpty, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, rewind, rewind, arginfo_class_SplPriorityQueue_rewind, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("count", zim_SplHeap_count, arginfo_class_SplPriorityQueue_count, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isEmpty", zim_SplHeap_isEmpty, arginfo_class_SplPriorityQueue_isEmpty, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("rewind", zim_SplHeap_rewind, arginfo_class_SplPriorityQueue_rewind, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SplPriorityQueue, current, arginfo_class_SplPriorityQueue_current, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, key, key, arginfo_class_SplPriorityQueue_key, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, next, next, arginfo_class_SplPriorityQueue_next, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, valid, valid, arginfo_class_SplPriorityQueue_valid, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, recoverFromCorruption, recoverFromCorruption, arginfo_class_SplPriorityQueue_recoverFromCorruption, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplHeap, isCorrupted, isCorrupted, arginfo_class_SplPriorityQueue_isCorrupted, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("key", zim_SplHeap_key, arginfo_class_SplPriorityQueue_key, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("next", zim_SplHeap_next, arginfo_class_SplPriorityQueue_next, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("valid", zim_SplHeap_valid, arginfo_class_SplPriorityQueue_valid, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("recoverFromCorruption", zim_SplHeap_recoverFromCorruption, arginfo_class_SplPriorityQueue_recoverFromCorruption, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("isCorrupted", zim_SplHeap_isCorrupted, arginfo_class_SplPriorityQueue_isCorrupted, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SplPriorityQueue, getExtractFlags, arginfo_class_SplPriorityQueue_getExtractFlags, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplPriorityQueue, __debugInfo, arginfo_class_SplPriorityQueue___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplHeap_methods[] = {
 	ZEND_ME(SplHeap, extract, arginfo_class_SplHeap_extract, ZEND_ACC_PUBLIC)
@@ -143,18 +140,16 @@ static const zend_function_entry class_SplHeap_methods[] = {
 	ZEND_ME(SplHeap, next, arginfo_class_SplHeap_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplHeap, valid, arginfo_class_SplHeap_valid, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplHeap, recoverFromCorruption, arginfo_class_SplHeap_recoverFromCorruption, ZEND_ACC_PUBLIC)
-	ZEND_ABSTRACT_ME_WITH_FLAGS(SplHeap, compare, arginfo_class_SplHeap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
+	ZEND_RAW_FENTRY("compare", NULL, arginfo_class_SplHeap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_ME(SplHeap, isCorrupted, arginfo_class_SplHeap_isCorrupted, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplHeap, __debugInfo, arginfo_class_SplHeap___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SplMinHeap_methods[] = {
 	ZEND_ME(SplMinHeap, compare, arginfo_class_SplMinHeap_compare, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplMaxHeap_methods[] = {
 	ZEND_ME(SplMaxHeap, compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED)

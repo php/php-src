@@ -360,7 +360,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_exop, 0, 2, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
-
 #if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
 #endif
@@ -465,7 +464,6 @@ ZEND_FUNCTION(ldap_exop_refresh);
 ZEND_FUNCTION(ldap_parse_exop);
 #endif
 
-
 static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
@@ -477,7 +475,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
 #endif
 	ZEND_FE(ldap_unbind, arginfo_ldap_unbind)
-	ZEND_FALIAS(ldap_close, ldap_unbind, arginfo_ldap_close)
+	ZEND_RAW_FENTRY("ldap_close", zif_ldap_unbind, arginfo_ldap_close, 0, NULL, NULL)
 	ZEND_FE(ldap_bind, arginfo_ldap_bind)
 	ZEND_FE(ldap_bind_ext, arginfo_ldap_bind_ext)
 #if defined(HAVE_LDAP_SASL)
@@ -495,7 +493,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_next_attribute, arginfo_ldap_next_attribute)
 	ZEND_FE(ldap_get_attributes, arginfo_ldap_get_attributes)
 	ZEND_FE(ldap_get_values_len, arginfo_ldap_get_values_len)
-	ZEND_FALIAS(ldap_get_values, ldap_get_values_len, arginfo_ldap_get_values)
+	ZEND_RAW_FENTRY("ldap_get_values", zif_ldap_get_values_len, arginfo_ldap_get_values, 0, NULL, NULL)
 	ZEND_FE(ldap_get_dn, arginfo_ldap_get_dn)
 	ZEND_FE(ldap_explode_dn, arginfo_ldap_explode_dn)
 	ZEND_FE(ldap_dn2ufn, arginfo_ldap_dn2ufn)
@@ -507,7 +505,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_mod_add, arginfo_ldap_mod_add)
 	ZEND_FE(ldap_mod_add_ext, arginfo_ldap_mod_add_ext)
 	ZEND_FE(ldap_mod_replace, arginfo_ldap_mod_replace)
-	ZEND_FALIAS(ldap_modify, ldap_mod_replace, arginfo_ldap_modify)
+	ZEND_RAW_FENTRY("ldap_modify", zif_ldap_mod_replace, arginfo_ldap_modify, 0, NULL, NULL)
 	ZEND_FE(ldap_mod_replace_ext, arginfo_ldap_mod_replace_ext)
 	ZEND_FE(ldap_mod_del, arginfo_ldap_mod_del)
 	ZEND_FE(ldap_mod_del_ext, arginfo_ldap_mod_del_ext)
@@ -576,16 +574,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_LDAP_Connection_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_LDAP_Result_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_LDAP_ResultEntry_methods[] = {
 	ZEND_FE_END

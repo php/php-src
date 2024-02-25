@@ -176,10 +176,13 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	clone_docu = zend_is_true(cloneDocu);
 	zend_string_release_ex(member, 0);
 	if (clone_docu == 0) {
-		/* check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation */
+		/* Check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation.
+		 * xsl:key elements may only occur at the top level. Furthermore, all elements at the top level must be in a
+		 * namespace (if not, then the stylesheet is not well-formed and this function will have returned false earlier). */
 		nodep = xmlDocGetRootElement(sheetp->doc);
 		if (nodep && (nodep = nodep->children)) {
 			while (nodep) {
+				ZEND_ASSERT(nodep->ns != NULL);
 				if (nodep->type == XML_ELEMENT_NODE && xmlStrEqual(nodep->name, (const xmlChar *) "key") && xmlStrEqual(nodep->ns->href, XSLT_NAMESPACE)) {
 					intern->hasKeys = true;
 					break;

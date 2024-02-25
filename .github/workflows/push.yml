@@ -2,7 +2,7 @@ name: Push
 on:
   push:
     paths-ignore:
-      - docs/*
+      - docs/**
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
@@ -11,8 +11,8 @@ on:
       - CODING_STANDARDS.md
       - .cirrus.yml
       - .travis.yml
-      - travis/*
-      - .circleci/*
+      - travis/**
+      - .circleci/**
     branches:
       - PHP-8.1
       - PHP-8.2
@@ -20,7 +20,7 @@ on:
       - master
   pull_request:
     paths-ignore:
-      - docs/*
+      - docs/**
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
@@ -29,8 +29,8 @@ on:
       - CODING_STANDARDS.md
       - .cirrus.yml
       - .travis.yml
-      - travis/*
-      - .circleci/*
+      - travis/**
+      - .circleci/**
     branches:
       - '**'
 permissions:

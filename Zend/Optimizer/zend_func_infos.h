@@ -517,9 +517,7 @@ static const func_info_t func_infos[] = {
 	F1("sha1", MAY_BE_STRING),
 	F1("sha1_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("inet_ntop", MAY_BE_STRING|MAY_BE_FALSE),
-#if defined(HAVE_INET_PTON)
 	F1("inet_pton", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
 	F1("metaphone", MAY_BE_STRING),
 	F1("headers_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("htmlspecialchars", MAY_BE_STRING),

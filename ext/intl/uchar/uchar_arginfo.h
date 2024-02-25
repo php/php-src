@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1a3b0e0186557b59b99437c23951c4bf96e50c67 */
+ * Stub hash: f0c67026b921d853e745fcc5d980bdb86f475c80 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlChar_hasBinaryProperty, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_TYPE_MASK(0, codepoint, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -182,7 +182,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlChar_toupper arginfo_class_IntlChar_charMirror
 
-
 ZEND_METHOD(IntlChar, hasBinaryProperty);
 ZEND_METHOD(IntlChar, charAge);
 ZEND_METHOD(IntlChar, charDigitValue);
@@ -244,7 +243,6 @@ ZEND_METHOD(IntlChar, ord);
 ZEND_METHOD(IntlChar, tolower);
 ZEND_METHOD(IntlChar, totitle);
 ZEND_METHOD(IntlChar, toupper);
-
 
 static const zend_function_entry class_IntlChar_methods[] = {
 	ZEND_ME(IntlChar, hasBinaryProperty, arginfo_class_IntlChar_hasBinaryProperty, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -468,6 +466,30 @@ static zend_class_entry *register_class_IntlChar(void)
 	zend_string *const_PROPERTY_IDS_TRINARY_OPERATOR_name = zend_string_init_interned("PROPERTY_IDS_TRINARY_OPERATOR", sizeof("PROPERTY_IDS_TRINARY_OPERATOR") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_PROPERTY_IDS_TRINARY_OPERATOR_name, &const_PROPERTY_IDS_TRINARY_OPERATOR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_PROPERTY_IDS_TRINARY_OPERATOR_name);
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_PROPERTY_IDS_UNARY_OPERATOR_value;
+	ZVAL_LONG(&const_PROPERTY_IDS_UNARY_OPERATOR_value, UCHAR_IDS_UNARY_OPERATOR);
+	zend_string *const_PROPERTY_IDS_UNARY_OPERATOR_name = zend_string_init_interned("PROPERTY_IDS_UNARY_OPERATOR", sizeof("PROPERTY_IDS_UNARY_OPERATOR") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_PROPERTY_IDS_UNARY_OPERATOR_name, &const_PROPERTY_IDS_UNARY_OPERATOR_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_PROPERTY_IDS_UNARY_OPERATOR_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_PROPERTY_ID_COMPAT_MATH_START_value;
+	ZVAL_LONG(&const_PROPERTY_ID_COMPAT_MATH_START_value, UCHAR_ID_COMPAT_MATH_START);
+	zend_string *const_PROPERTY_ID_COMPAT_MATH_START_name = zend_string_init_interned("PROPERTY_ID_COMPAT_MATH_START", sizeof("PROPERTY_ID_COMPAT_MATH_START") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_PROPERTY_ID_COMPAT_MATH_START_name, &const_PROPERTY_ID_COMPAT_MATH_START_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_PROPERTY_ID_COMPAT_MATH_START_name);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+
+	zval const_PROPERTY_ID_COMPAT_MATH_CONTINUE_value;
+	ZVAL_LONG(&const_PROPERTY_ID_COMPAT_MATH_CONTINUE_value, UCHAR_ID_COMPAT_MATH_CONTINUE);
+	zend_string *const_PROPERTY_ID_COMPAT_MATH_CONTINUE_name = zend_string_init_interned("PROPERTY_ID_COMPAT_MATH_CONTINUE", sizeof("PROPERTY_ID_COMPAT_MATH_CONTINUE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_PROPERTY_ID_COMPAT_MATH_CONTINUE_name, &const_PROPERTY_ID_COMPAT_MATH_CONTINUE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_PROPERTY_ID_COMPAT_MATH_CONTINUE_name);
+#endif
 
 	zval const_PROPERTY_JOIN_CONTROL_value;
 	ZVAL_LONG(&const_PROPERTY_JOIN_CONTROL_value, UCHAR_JOIN_CONTROL);

@@ -4,9 +4,7 @@
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoMysql_getWarningCount, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(PdoMysql, getWarningCount);
-
 
 static const zend_function_entry class_PdoMysql_methods[] = {
 	ZEND_ME(PdoMysql, getWarningCount, arginfo_class_PdoMysql_getWarningCount, ZEND_ACC_PUBLIC)

@@ -163,6 +163,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 			}
 		}
 
+		if (function->common.doc_comment) {
+			zend_string_release_ex(function->common.doc_comment, 1);
+			function->common.doc_comment = NULL;
+		}
+
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}
@@ -337,8 +342,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_string_release_ex(ce->name, 0);
 				zend_string_release_ex(ce->info.user.filename, 0);
 
-				if (ce->info.user.doc_comment) {
-					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				if (ce->doc_comment) {
+					zend_string_release_ex(ce->doc_comment, 0);
 				}
 
 				if (ce->attributes) {
@@ -419,6 +424,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
+			if (ce->doc_comment) {
+				zend_string_release_ex(ce->doc_comment, 1);
+			}
+
 			if (ce->backed_enum_table) {
 				zend_hash_release(ce->backed_enum_table);
 			}

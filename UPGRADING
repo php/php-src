@@ -41,6 +41,9 @@ PHP 8.4 UPGRADE NOTES
     DOMException now. This situation is extremely unlikely though and probably
     will not affect you. As a result DOMImplementation::createDocument() now has
     a tentative return type of DOMDocument instead of DOMDocument|false.
+  . Previously, DOMXPath objects could be cloned, but resulted in an unusable
+    object. This is no longer possible, and cloning a DOMXPath object now throws
+    an error.
 
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
@@ -63,6 +66,13 @@ PHP 8.4 UPGRADE NOTES
     may affect users who previously enabled JIT through opcache.jit_buffer_size
     exclusively, without also specifying a JIT mode using opcache.jit. To enable
     JIT, set the opcache.jit config value accordingly.
+
+- PCRE:
+  . The bundled pcre2lib has been updated to version 10.43.
+    As a consequence, this means {,3} is now recognized as a quantifier instead
+    of as text. Furthermore, the meaning of some character classes in UCP mode
+    has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
+    for a full changelog.
 
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
@@ -179,6 +189,12 @@ PHP 8.4 UPGRADE NOTES
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
 
+- PCRE:
+  . The bundled pcre2lib has been updated to version 10.43.
+    As a consequence, LoongArch JIT support has been added, spaces
+    are now allowed between braces in Perl-compatible items, and
+    variable-length lookbehind assertions are now supported.
+
 - PDO:
   . Added support for driver-specific subclasses.
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_subclasses
@@ -239,6 +255,9 @@ PHP 8.4 UPGRADE NOTES
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.
+  . curl_version() returns an additional feature_list value, which is an
+    associative array of all known Curl features, and whether they are
+    supported (true) or not (false).
 
 - Date:
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
@@ -365,6 +384,8 @@ PHP 8.4 UPGRADE NOTES
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
     are compared, so that the values ​​are correctly rounded as decimal numbers.
   . long2ip() now returns string instead of string|false.
+  . The maximum precision that can be handled by round() has been extended by
+    one digit.
 
 ========================================
 6. New Functions
@@ -374,6 +395,12 @@ PHP 8.4 UPGRADE NOTES
   . Added DOMNode::compareDocumentPosition().
   . Added DOMXPath::registerPhpFunctionNS().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
+  . Added DOMXPath::quote() to quote a string for use in an XPath expression.
+    Example usage: "//span[contains(text()," . $xpath->quote($string) . ")]"
+
+- Intl:
+  . Added IntlDateFormatter::getIanaID()/intltz_get_iana_id() to
+    the IANA identifier from a given timezone.
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
@@ -446,6 +473,10 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
     reflecting udat api's UDAT_PATTERN.
+  . The IntlChar class exposes now the new PROPERTY_IDS_UNARY_OPERATOR (new
+    IDS binary operator), PROPERTY_ID_COMPAT_MATH_START,
+    PROPERTY_ID_COMPAT_MATH_CONTINUE (both for mathematical
+    identifier profiling purpose) constants.
 
 - LDAP:
   . LDAP_OPT_X_TLS_PROTOCOL_MAX.

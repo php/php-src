@@ -136,7 +136,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapClient___set
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, location, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(use_soap_error_handler);
 ZEND_FUNCTION(is_soap_fault);
 ZEND_METHOD(SoapParam, __construct);
@@ -168,25 +167,21 @@ ZEND_METHOD(SoapClient, __getCookies);
 ZEND_METHOD(SoapClient, __setSoapHeaders);
 ZEND_METHOD(SoapClient, __setLocation);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(use_soap_error_handler, arginfo_use_soap_error_handler)
 	ZEND_FE(is_soap_fault, arginfo_is_soap_fault)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SoapParam_methods[] = {
 	ZEND_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SoapHeader_methods[] = {
 	ZEND_ME(SoapHeader, __construct, arginfo_class_SoapHeader___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SoapFault_methods[] = {
 	ZEND_ME(SoapFault, __construct, arginfo_class_SoapFault___construct, ZEND_ACC_PUBLIC)
@@ -194,12 +189,10 @@ static const zend_function_entry class_SoapFault_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SoapVar_methods[] = {
 	ZEND_ME(SoapVar, __construct, arginfo_class_SoapVar___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SoapServer_methods[] = {
 	ZEND_ME(SoapServer, __construct, arginfo_class_SoapServer___construct, ZEND_ACC_PUBLIC)
@@ -213,7 +206,6 @@ static const zend_function_entry class_SoapServer_methods[] = {
 	ZEND_ME(SoapServer, handle, arginfo_class_SoapServer_handle, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SoapClient_methods[] = {
 	ZEND_ME(SoapClient, __construct, arginfo_class_SoapClient___construct, ZEND_ACC_PUBLIC)

@@ -256,6 +256,7 @@ jobs:
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
+        if: matrix.test_jit
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
@@ -271,6 +272,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
       - name: Test Function JIT
+        if: matrix.test_jit
         uses: ./.github/actions/test-macos
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT

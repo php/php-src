@@ -151,7 +151,7 @@ AC_CHECK_FUNCS(getpid kill pthread_getattr_np pthread_attr_get_np pthread_get_st
 dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
 AC_CHECK_FUNCS([sigsetjmp],,
   [AC_CHECK_DECL([sigsetjmp],
-    [AC_DEFINE([HAVE_SIGSETJMP],[1],[Define to 1 if you have the 'sigsetjmp' function.])],,
+    [AC_DEFINE([HAVE_SIGSETJMP], [1])],,
     [#include <setjmp.h>])])
 
 dnl Test whether the stack grows downwards
@@ -224,8 +224,6 @@ if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
 fi
-
-AC_C_INLINE
 
 dnl Test and set the alignment define for ZEND_MM. This also does the
 dnl logarithmic test for ZEND_MM.

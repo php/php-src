@@ -37,6 +37,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * The zend_*printf family of functions now supports the "%S" modifier to print
   out zend_string*. This won't cut off the string if it embeds a NUL byte.
 
+* The inet_aton() and win32/inet.h on Windows have been removed. Use Windows
+  native inet_pton() from ws2tcpip.h.
+
 ========================
 2. Build system changes
 ========================
@@ -66,6 +69,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol DARWIN has been removed (use __APPLE__ to target Darwin systems).
    - Symbol MISSING_FCLOSE_DECL and M4 macro PHP_MISSING_FCLOSE_DECL removed.
    - Symbol HAVE_BSD_ICONV has been removed.
+   - Symbol ZEND_FIBER_ASM has been removed.
+   - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
+   - Symbol HAVE_LIBM has been removed.
+   - Symbol HAVE_INET_ATON has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -81,6 +88,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      in ext/mbstring/libmbfl removed.
    - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
      PHP_ASSEMBLER and FIBER_ASM_ABI.
+   - HAVE_PHP_SOAP symbol renamed to HAVE_SOAP.
 
 ========================
 3. Module changes
