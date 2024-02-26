@@ -1351,12 +1351,14 @@ LIBZEND_BASIC_CHECKS
 LIBZEND_DLSYM_CHECK
 LIBZEND_OTHER_CHECKS
 
+CORE_INCLUDES="$CORE_INCLUDES -I\$(top_builddir)/main -I\$(top_builddir)"
 INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
 INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
 
 if test "$abs_srcdir" != "$abs_builddir"; then
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend"
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM -I\$(top_builddir)/"
+  CORE_INCLUDES="$CORE_INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)"
+  INCLUDES="$INCLUDES -I\$(top_srcdir)/Zend"
+  INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM"
 fi
 
 ZEND_EXTRA_LIBS="$LIBS"
@@ -1542,6 +1544,7 @@ PHP_SUBST_OLD(EXTRA_LDFLAGS)
 PHP_SUBST_OLD(EXTRA_LDFLAGS_PROGRAM)
 PHP_SUBST_OLD(EXTRA_LIBS)
 PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
+PHP_SUBST_OLD(CORE_INCLUDES)
 PHP_SUBST_OLD(INCLUDES)
 PHP_SUBST_OLD(EXTRA_INCLUDES)
 PHP_SUBST_OLD(INSTALL_IT)
