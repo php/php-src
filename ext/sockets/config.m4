@@ -11,45 +11,6 @@ if test "$PHP_SOCKETS" != "no"; then
   dnl Check for field ss_family in sockaddr_storage (missing in AIX until 5.3)
   AC_CHECK_MEMBERS([struct sockaddr_storage.ss_family],,,[#include <sys/socket.h>])
 
-  dnl Check for AI_V4MAPPED flag
-  AC_CACHE_CHECK([if getaddrinfo supports AI_V4MAPPED],[ac_cv_gai_ai_v4mapped],
-  [
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <netdb.h>
-  ]], [[int flag = AI_V4MAPPED;]])],
-    [ac_cv_gai_ai_v4mapped=yes], [ac_cv_gai_ai_v4mapped=no])
-  ])
-
-  if test "$ac_cv_gai_ai_v4mapped" = yes; then
-    AC_DEFINE(HAVE_AI_V4MAPPED,1,[Whether you have AI_V4MAPPED])
-  fi
-
-  dnl Check for AI_ALL flag
-  AC_CACHE_CHECK([if getaddrinfo supports AI_ALL],[ac_cv_gai_ai_all],
-  [
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <netdb.h>
-  ]], [[int flag = AI_ALL;]])],
-    [ac_cv_gai_ai_all=yes], [ac_cv_gai_ai_all=no])
-  ])
-
-  if test "$ac_cv_gai_ai_all" = yes; then
-    AC_DEFINE(HAVE_AI_ALL,1,[Whether you have AI_ALL])
-  fi
-
-  dnl Check for AI_IDN flag
-  AC_CACHE_CHECK([if getaddrinfo supports AI_IDN],[ac_cv_gai_ai_idn],
-  [
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <netdb.h>
-  ]], [[int flag = AI_IDN;]])],
-      [ac_cv_gai_ai_idn=yes], [ac_cv_gai_ai_idn=no])
-  ])
-
-  if test "$ac_cv_gai_ai_idn" = yes; then
-    AC_DEFINE(HAVE_AI_IDN,1,[Whether you have AI_IDN])
-  fi
-
   dnl Check for struct ucred. Checking the header is not enough (DragonFlyBSD).
   AC_CHECK_TYPES([struct ucred],,,
     [#ifndef _GNU_SOURCE
