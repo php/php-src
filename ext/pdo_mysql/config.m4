@@ -46,9 +46,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
       AC_MSG_RESULT($PDO_MYSQL_CONFIG)
-      if test "x$SED" = "x"; then
-        AC_PATH_PROG(SED, sed)
-      fi
       PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
       PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     elif test -n "$PDO_MYSQL_DIR"; then
