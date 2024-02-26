@@ -28,7 +28,7 @@ $_main:
      ; (lines=11, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %ssccp_032.php:1-15
-0000 INIT_FCALL 0 %d string("test")
+0000 INIT_FCALL 0 %d %s
 0001 V2 = DO_UCALL
 0002 V1 = FE_RESET_R V2 0009
 0003 FE_FETCH_R V1 CV0($x) 0009

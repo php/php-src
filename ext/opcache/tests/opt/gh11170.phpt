@@ -46,9 +46,9 @@ $_main:
 BB0:
      ; start exit lines=[0-4]
      ; level=0
-0000 INIT_FCALL 0 %d string("test_or")
+0000 INIT_FCALL 0 %d %s
 0001 DO_UCALL
-0002 INIT_FCALL 0 %d string("test_and")
+0002 INIT_FCALL 0 %d %s
 0003 DO_UCALL
 0004 RETURN int(1)
 

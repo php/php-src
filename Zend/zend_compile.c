@@ -4837,8 +4837,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 
 		zval_ptr_dtor(&name_node.u.constant);
-		if ((CG(compiler_options) & ZEND_COMPILE_WITH_INIT_FCALL_PTR)
-		 && fbc->type == ZEND_INTERNAL_FUNCTION) {
+		if ((CG(compiler_options) & ZEND_COMPILE_WITH_INIT_FCALL_PTR)) {
 			zend_string_release_ex(lcname, 0);
 			ZVAL_PTR(&name_node.u.constant, fbc);
 		} else {

@@ -33,9 +33,9 @@ $_main:
      ; (lines=5, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 INIT_FCALL 0 %d string("test")
+0000 INIT_FCALL 0 %d %s
 0001 DO_UCALL
-0002 INIT_FCALL 0 %d string("test2")
+0002 INIT_FCALL 0 %d %s
 0003 DO_UCALL
 0004 RETURN int(1)
 

@@ -563,6 +563,22 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					(char*)opline;
 			}
 #endif
+			if (opline->opcode == ZEND_INIT_FCALL && opline->op2_type == IS_CONST) {
+				zval *op2 =  RT_CONSTANT(opline, opline->op2);
+				if (Z_TYPE_P(op2) == IS_PTR) {
+					zend_function *old_ptr = Z_PTR_P(op2);
+					/* FIXME: Can we make this generic? */
+					if (old_ptr->type != ZEND_INTERNAL_FUNCTION) {
+						void *new_ptr = zend_shared_alloc_get_xlat_entry(old_ptr);
+						if (new_ptr) {
+							Z_PTR_P(op2) = new_ptr;
+						} else {
+							/* Re-check once the script is fully compiled. */
+							zend_stack_push(&ZCG(xlat_ptrs), &op2);
+						}
+					}
+				}
+			}
 #if ZEND_USE_ABS_JMP_ADDR
 			if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 				/* fix jumps to point to new array */
@@ -1317,6 +1333,17 @@ static zend_early_binding *zend_persist_early_bindings(
 	return early_bindings;
 }
 
+static void fix_xlat_ptrs(void)
+{
+	while (!zend_stack_is_empty(&ZCG(xlat_ptrs))) {
+		zval *op = *(void**)zend_stack_top(&ZCG(xlat_ptrs));
+		void *new_ptr = zend_shared_alloc_get_xlat_entry(Z_PTR_P(op));
+		ZEND_ASSERT(new_ptr != NULL);
+		ZVAL_PTR(op, new_ptr);
+		zend_stack_del_top(&ZCG(xlat_ptrs));
+	}
+}
+
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
 {
 	Bucket *p;
@@ -1359,6 +1386,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		zend_persist_op_array(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+	fix_xlat_ptrs();
 	if (!script->corrupted) {
 		ZEND_MAP_PTR_INIT(script->script.main_op_array.run_time_cache, NULL);
 		if (script->script.main_op_array.static_variables) {
