@@ -96,6 +96,16 @@ try {
 }
 
 ?>
+--CLEAN--
+<?php
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+
+const TABLE_NAME = 'test_pdo_35_pdo_row';
+$db->exec("DROP TABLE " . TABLE_NAME);
+?>
 --EXPECTF--
 object(PDORow)#3 (3) {
   ["queryString"]=>
