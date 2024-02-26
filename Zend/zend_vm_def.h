@@ -7503,18 +7503,20 @@ ZEND_VM_HANDLER(194, ZEND_ARRAY_KEY_EXISTS, CV|TMPVAR|CONST, CV|TMPVAR|CONST)
 ZEND_VM_C_LABEL(array_key_exists_array):
 		ht = Z_ARRVAL_P(subject);
 		result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
-	} else if (UNEXPECTED(Z_TYPE_P(subject) != IS_OBJECT)) {
+	} else if (UNEXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
+		if (EXPECTED(zend_class_implements_interface(Z_OBJCE_P(subject), zend_ce_arrayaccess))) {
+			result = zend_array_key_exists_for_array_access(Z_OBJ_P(subject), key);
+		} else {
+			zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+			result = 0;
+		}
+	} else {
 		if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(subject))) {
 			subject = Z_REFVAL_P(subject);
 			if (EXPECTED(Z_TYPE_P(subject) == IS_ARRAY)) {
 				ZEND_VM_C_GOTO(array_key_exists_array);
 			}
 		}
-		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
-		result = 0;
-	} else if (UNEXPECTED(zend_class_implements_interface(Z_OBJCE_P(subject), zend_ce_arrayaccess))) {
-		result = zend_array_key_exists_for_array_access(Z_OBJ_P(subject), key);
-	} else {
 		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
 		result = 0;
 	}

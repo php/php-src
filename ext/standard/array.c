@@ -6780,20 +6780,27 @@ PHP_FUNCTION(array_key_exists)
 	HashTable *ht = Z_ARRVAL_P(zv);
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
-			RETURN_BOOL(zend_symtable_exists(ht, Z_STR_P(key)));
+			RETVAL_BOOL(zend_symtable_exists(ht, Z_STR_P(key)));
+			break;
 		case IS_LONG:
-			RETURN_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
+			RETVAL_BOOL(zend_hash_index_exists(ht, Z_LVAL_P(key)));
+			break;
 		case IS_NULL:
-			RETURN_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
+			RETVAL_BOOL(zend_hash_exists(ht, ZSTR_EMPTY_ALLOC()));
+			break;
 		case IS_DOUBLE:
-			RETURN_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval_safe(Z_DVAL_P(key))));
+			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval_safe(Z_DVAL_P(key))));
+			break;
 		case IS_FALSE:
-			RETURN_BOOL(zend_hash_index_exists(ht, 0));
+			RETVAL_BOOL(zend_hash_index_exists(ht, 0));
+			break;
 		case IS_TRUE:
-			RETURN_BOOL(zend_hash_index_exists(ht, 1));
+			RETVAL_BOOL(zend_hash_index_exists(ht, 1));
+			break;
 		case IS_RESOURCE:
 			zend_use_resource_as_offset(key);
-			RETURN_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
+			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
+			break;
 		default:
 			zend_argument_type_error(1, "must be a valid array offset type");
 			RETURN_THROWS();
