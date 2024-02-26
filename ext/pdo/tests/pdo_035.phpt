@@ -30,6 +30,7 @@ foreach ([0, "0", "id"] as $offset) {
     echo 'Offset: ', var_export($offset), PHP_EOL;
     $offsetRef = &$offset;
 
+    echo 'Dimension:', PHP_EOL;
     echo 'Isset:', PHP_EOL;
     var_dump(isset($result[$offset]));
     var_dump(isset($result[$offsetRef]));
@@ -42,6 +43,19 @@ foreach ([0, "0", "id"] as $offset) {
     echo 'Read:', PHP_EOL;
     var_dump($result[$offset]);
     var_dump($result[$offsetRef]);
+    echo 'Property:', PHP_EOL;
+    echo 'Isset:', PHP_EOL;
+    var_dump(isset($result->{$offset}));
+    var_dump(isset($result->{$offsetRef}));
+    echo 'Empty:', PHP_EOL;
+    var_dump(empty($result->{$offset}));
+    var_dump(empty($result->{$offsetRef}));
+    echo 'Null coalesce:', PHP_EOL;
+    var_dump($result->{$offset} ?? "default");
+    var_dump($result->{$offsetRef} ?? "default");
+    echo 'Read:', PHP_EOL;
+    var_dump($result->{$offset});
+    var_dump($result->{$offsetRef});
 }
 
 echo 'Errors:', PHP_EOL;
@@ -91,9 +105,23 @@ object(PDORow)#3 (2) {
 }
 bool(false)
 Offset: 0
+Dimension:
 Isset:
 bool(false)
 bool(false)
+Empty:
+bool(false)
+bool(false)
+Null coalesce:
+string(2) "23"
+string(2) "23"
+Read:
+string(2) "23"
+string(2) "23"
+Property:
+Isset:
+bool(true)
+bool(true)
 Empty:
 bool(false)
 bool(false)
@@ -104,6 +132,7 @@ Read:
 string(2) "23"
 string(2) "23"
 Offset: '0'
+Dimension:
 Isset:
 bool(false)
 bool(false)
@@ -116,7 +145,34 @@ string(2) "23"
 Read:
 string(2) "23"
 string(2) "23"
+Property:
+Isset:
+bool(true)
+bool(true)
+Empty:
+bool(false)
+bool(false)
+Null coalesce:
+string(2) "23"
+string(2) "23"
+Read:
+string(2) "23"
+string(2) "23"
 Offset: 'id'
+Dimension:
+Isset:
+bool(true)
+bool(true)
+Empty:
+bool(false)
+bool(false)
+Null coalesce:
+string(2) "23"
+string(2) "23"
+Read:
+string(2) "23"
+string(2) "23"
+Property:
 Isset:
 bool(true)
 bool(true)
