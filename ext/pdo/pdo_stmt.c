@@ -2295,6 +2295,10 @@ static zval *row_dim_read(zend_object *object, zval *member, int type, zval *rv)
 	zend_long lval;
 	ZEND_ASSERT(stmt);
 
+	if (UNEXPECTED(!member)) {
+		zend_throw_error(NULL, "Cannot append to PDORow offset");
+		return NULL;
+	}
 	ZVAL_NULL(rv);
 	if (Z_TYPE_P(member) == IS_LONG) {
 		if (Z_LVAL_P(member) >= 0 && Z_LVAL_P(member) < stmt->column_count) {
@@ -2335,7 +2339,11 @@ static zval *row_prop_write(zend_object *object, zend_string *name, zval *value,
 
 static void row_dim_write(zend_object *object, zval *member, zval *value)
 {
-	zend_throw_error(NULL, "Cannot write to PDORow offset");
+	if (!member) {
+		zend_throw_error(NULL, "Cannot append to PDORow offset");
+	} else {
+		zend_throw_error(NULL, "Cannot write to PDORow offset");
+	}
 }
 
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
