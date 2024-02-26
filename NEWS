@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fix unlikely memory leak in case of namespace removal with extremely deep
     trees. (nielsdos)
+  . Fix reference access in dimensions for DOMNodeList and DOMNodeMap.
+    (nielsdos)
 
 - Fileinfo:
   . Fixed bug GH-13344 (finfo::buffer(): Failed identify data 0:(null),

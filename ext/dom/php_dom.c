@@ -1713,6 +1713,8 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 		return NULL;
 	}
 
+	ZVAL_DEREF(offset);
+
 	zend_long lval;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
 		/* does not support named lookup */
@@ -1726,6 +1728,8 @@ static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int 
 
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
 {
+	ZVAL_DEREF(member);
+
 	zend_long offset;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(member, &offset)) {
 		/* does not support named lookup */
@@ -1785,6 +1789,8 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 		return NULL;
 	}
 
+	ZVAL_DEREF(offset);
+
 	zend_long lval;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(offset, &lval)) {
 		/* exceptional case, switch to named lookup */
@@ -1804,6 +1810,8 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 
 static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty)
 {
+	ZVAL_DEREF(member);
+
 	zend_long offset;
 	if (dom_nodemap_or_nodelist_process_offset_as_named(member, &offset)) {
 		/* exceptional case, switch to named lookup */
