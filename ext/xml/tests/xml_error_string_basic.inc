@@ -1,8 +1,3 @@
---TEST--
-xml_error_string() - Basic test on 5 error codes
---EXTENSIONS--
-xml
---FILE--
 <?php
 $xmls = array(
     '<?xml version="1.0"?><element>',
@@ -20,15 +15,3 @@ foreach ($xmls as $xml) {
     }
     xml_parser_free($xml_parser);
 }
-?>
---EXPECTF--
-int(%r5|77%r)
-string(%d) %r"Invalid document end"|"Tag not finished"%r
-int(47)
-string(35) "Processing Instruction not finished"
-int(57)
-string(28) "XML declaration not finished"
-int(64)
-string(17) "Reserved XML Name"
-int(76)
-string(14) "Mismatched tag"

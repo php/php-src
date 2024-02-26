@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - PDO:
   . Fix various PDORow bugs. (Girgias)
 
+- XML:
+  . Fixed bug GH-13517 (Multiple test failures when building with
+    --with-expat). (nielsdos)
 
 14 Mar 2024, PHP 8.2.17
 
