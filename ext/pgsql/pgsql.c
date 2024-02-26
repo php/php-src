@@ -591,6 +591,12 @@ newpconn:
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
+			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
+				if (zend_hash_del(&EG(persistent_list), str.s) != SUCCESS) {
+					goto err;
+				}
+				goto newpconn;
+			}
 			if (le->type != le_plink) {
 				goto err;
 			}
@@ -620,12 +626,6 @@ newpconn:
 			if (PQprotocolVersion(pgsql) >= 3 && zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 7.2) {
 				pg_result = PQexec(pgsql, "RESET ALL;");
 				PQclear(pg_result);
-			}
-			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
-				if (zend_hash_del(&EG(persistent_list), str.s) != SUCCESS) {
-					goto err;
-				}
-				goto newpconn;
 			}
 		}
 
