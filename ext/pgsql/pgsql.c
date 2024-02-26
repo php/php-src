@@ -562,6 +562,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* try to find if we already have this link in our persistent list */
 		if ((le = zend_hash_find_ptr(&EG(persistent_list), str.s)) == NULL) {  /* we don't */
+newpconn:
 			if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 				php_error_docref(NULL, E_WARNING,
 								 "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
@@ -590,6 +591,12 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
+			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
+				if (zend_hash_del(&EG(persistent_list), str.s) != SUCCESS) {
+					goto err;
+				}
+				goto newpconn;
+			}
 			if (le->type != le_plink) {
 				goto err;
 			}
