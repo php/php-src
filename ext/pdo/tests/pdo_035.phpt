@@ -16,17 +16,17 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 const TABLE_NAME = 'test_pdo_35_pdo_row';
-$db->exec('CREATE TABLE ' . TABLE_NAME .' (id int)');
-$db->exec('INSERT INTO ' . TABLE_NAME .' VALUES (23)');
+$db->exec('CREATE TABLE ' . TABLE_NAME .' (id int, name varchar(10))');
+$db->exec('INSERT INTO ' . TABLE_NAME .' VALUES (23, \'\')');
 
-$stmt = $db->prepare('SELECT id FROM ' . TABLE_NAME);
+$stmt = $db->prepare('SELECT id, name FROM ' . TABLE_NAME);
 $stmt->execute();
 $result = $stmt->fetch(PDO::FETCH_LAZY);
 
 var_dump($result);
 var_dump(get_parent_class($result));
 
-foreach ([0, "0", "id"] as $offset) {
+foreach ([0, "0", "id", "name", 1] as $offset) {
     echo 'Offset: ', var_export($offset), PHP_EOL;
     $offsetRef = &$offset;
 
@@ -97,11 +97,13 @@ try {
 
 ?>
 --EXPECTF--
-object(PDORow)#3 (2) {
+object(PDORow)#3 (3) {
   ["queryString"]=>
-  string(34) "SELECT id FROM test_pdo_35_pdo_row"
+  string(40) "SELECT id, name FROM test_pdo_35_pdo_row"
   ["id"]=>
   string(2) "23"
+  ["name"]=>
+  string(0) ""
 }
 bool(false)
 Offset: 0
@@ -185,6 +187,60 @@ string(2) "23"
 Read:
 string(2) "23"
 string(2) "23"
+Offset: 'name'
+Dimension:
+Isset:
+bool(true)
+bool(true)
+Empty:
+bool(true)
+bool(true)
+Null coalesce:
+string(0) ""
+string(0) ""
+Read:
+string(0) ""
+string(0) ""
+Property:
+Isset:
+bool(true)
+bool(true)
+Empty:
+bool(true)
+bool(true)
+Null coalesce:
+string(0) ""
+string(0) ""
+Read:
+string(0) ""
+string(0) ""
+Offset: 1
+Dimension:
+Isset:
+bool(true)
+bool(true)
+Empty:
+bool(true)
+bool(true)
+Null coalesce:
+string(0) ""
+string(0) ""
+Read:
+string(0) ""
+string(0) ""
+Property:
+Isset:
+bool(true)
+bool(true)
+Empty:
+bool(true)
+bool(true)
+Null coalesce:
+string(0) ""
+string(0) ""
+Read:
+string(0) ""
+string(0) ""
 Errors:
 Cannot write to PDORow offset
 Cannot append to PDORow offset
