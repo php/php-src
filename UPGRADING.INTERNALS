@@ -37,8 +37,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * The zend_*printf family of functions now supports the "%S" modifier to print
   out zend_string*. This won't cut off the string if it embeds a NUL byte.
 
-* The inet_aton() and win32/inet.h on Windows have been removed. Use Windows
-  native inet_pton() from ws2tcpip.h.
+* The inet_aton() and win32/inet.h have been removed. Use platform-agnostic
+  inet_pton() from arpa/inet.h or ws2tcpip.h on Windows.
 
 * zend_mm_set_custom_debug_handlers() has been removed from ZendMM, use
   zend_mm_set_custom_handlers() instead which now supports DEBUG builds
@@ -89,6 +89,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-pspell has been removed.
    - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
    - Symbol DBA_CDB_MAKE removed in ext/dba.
+   - Symbol HAVE_LIBM has been removed.
+   - Symbol HAVE_INET_ATON has been removed.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
@@ -109,8 +111,6 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_BSD_ICONV has been removed.
    - Symbol ZEND_FIBER_ASM has been removed.
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
-   - Symbol HAVE_LIBM has been removed.
-   - Symbol HAVE_INET_ATON has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
