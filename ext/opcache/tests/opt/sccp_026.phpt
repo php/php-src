@@ -34,7 +34,7 @@ test:
 0002 JMPZ T2 0004
 0003 JMP 0005
 0004 RETURN null
-0005 INIT_FCALL 1 %d string("var_dump")
+0005 INIT_FCALL %d %d %s
 0006 SEND_VAR CV1($username) 1
 0007 DO_ICALL
 0008 RETURN null

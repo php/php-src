@@ -146,6 +146,9 @@ static void zend_persist_zval_calc(zval *z)
 				}
 			}
 			break;
+		case IS_PTR:
+			/* No data. */
+			break;
 		default:
 			ZEND_ASSERT(Z_TYPE_P(z) < IS_STRING);
 			break;

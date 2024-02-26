@@ -4837,7 +4837,13 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		}
 
 		zval_ptr_dtor(&name_node.u.constant);
-		ZVAL_NEW_STR(&name_node.u.constant, lcname);
+		if ((CG(compiler_options) & ZEND_COMPILE_WITH_INIT_FCALL_PTR)
+		 && fbc->type == ZEND_INTERNAL_FUNCTION) {
+			zend_string_release_ex(lcname, 0);
+			ZVAL_PTR(&name_node.u.constant, fbc);
+		} else {
+			ZVAL_NEW_STR(&name_node.u.constant, lcname);
+		}
 
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();

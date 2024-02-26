@@ -333,19 +333,26 @@ ZEND_API void zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, 
 				flags |= ZEND_FUNC_HAS_CALLS;
 				break;
 			case ZEND_INIT_FCALL:
-			case ZEND_INIT_NS_FCALL_BY_NAME:
+			case ZEND_INIT_NS_FCALL_BY_NAME: {
 				zv = CRT_CONSTANT(opline->op2);
 				if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
 					/* The third literal is the lowercased unqualified name */
 					zv += 2;
 				}
-				if ((fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv))) != NULL) {
+				if (Z_TYPE_P(zv) == IS_STRING) {
+					fn = zend_hash_find_ptr(EG(function_table), Z_STR_P(zv));
+				} else {
+					ZEND_ASSERT(Z_TYPE_P(zv) == IS_PTR);
+					fn = Z_PTR_P(zv);
+				}
+				if (fn != NULL) {
 					if (fn->type == ZEND_INTERNAL_FUNCTION) {
 						flags |= zend_optimizer_classify_function(
-							Z_STR_P(zv), opline->extended_value);
+							fn->common.function_name, opline->extended_value);
 					}
 				}
 				break;
+			}
 			case ZEND_FAST_CALL:
 				BB_START(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes);
 				BB_START(i + 1);

@@ -485,6 +485,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			}
 			break;
 		case ZEND_INIT_FCALL:
+			ZEND_ASSERT(opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING);
 			REQUIRES_STRING(val);
 			if (Z_REFCOUNT_P(val) == 1) {
 				zend_str_tolower(Z_STRVAL_P(val), Z_STRLEN_P(val));
@@ -838,7 +839,12 @@ zend_function *zend_optimizer_get_called_func(
 	switch (opline->opcode) {
 		case ZEND_INIT_FCALL:
 		{
-			zend_string *function_name = Z_STR_P(CRT_CONSTANT(opline->op2));
+			zval *func_zv = CRT_CONSTANT(opline->op2);
+			if (Z_TYPE_P(func_zv) == IS_PTR) {
+				return Z_PTR_P(func_zv);
+			}
+			ZEND_ASSERT(Z_TYPE_P(func_zv) == IS_STRING);
+			zend_string *function_name = Z_STR_P(func_zv);
 			zend_function *func;
 			if (script && (func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
 				return func;
@@ -1216,7 +1222,13 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 				}
 				break;
 		}
-		ZEND_VM_SET_OPCODE_HANDLER(opline);
+		/* INIT_FCALL with IS_PTR *must* use the PTR specialization, because the default spec doesn't
+		 * handle IS_PTR. */
+		if (opline->opcode == ZEND_INIT_FCALL && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_PTR) {
+			zend_vm_set_opcode_handler_ex(opline, IS_UNUSED, IS_CONST, IS_UNUSED);
+		} else {
+			ZEND_VM_SET_OPCODE_HANDLER(opline);
+		}
 		opline++;
 	}
 
@@ -1391,9 +1403,13 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->opcode == ZEND_INIT_FCALL) {
-			func = zend_hash_find_ptr(
-				&ctx->script->function_table,
-				Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+			zval *func_zv = RT_CONSTANT(opline, opline->op2);
+			if (Z_TYPE_P(func_zv) == IS_STRING) {
+				func = zend_hash_find_ptr(&ctx->script->function_table, Z_STR_P(func_zv));
+			} else {
+				ZEND_ASSERT(Z_TYPE_P(func_zv) == IS_PTR);
+				func = Z_PTR_P(func_zv);
+			}
 			if (func) {
 				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, func);
 			}

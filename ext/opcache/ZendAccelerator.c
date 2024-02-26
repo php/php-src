@@ -1558,6 +1558,10 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	orig_compiler_options = CG(compiler_options);
 	if (ZCG(accel_directives).file_cache) {
 		CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
+#ifndef ZEND_WIN32
+	} else {
+		CG(compiler_options) |= ZEND_COMPILE_WITH_INIT_FCALL_PTR;
+#endif
 	}
 	zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level);
 	zend_accel_finalize_delayed_early_binding_list(new_persistent_script);
@@ -1813,6 +1817,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OBSERVER;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
+#ifndef ZEND_WIN32
+		} else {
+			CG(compiler_options) |= ZEND_COMPILE_WITH_INIT_FCALL_PTR;
+#endif
 		}
 		op_array = *op_array_p = accelerator_orig_compile_file(file_handle, type);
 		CG(compiler_options) = orig_compiler_options;

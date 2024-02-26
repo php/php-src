@@ -1647,7 +1647,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_DO_ICALL:
 		{
 			zend_call_info *call;
-			zval *name, *args[3] = {NULL};
+			zval *func_zv, *args[3] = {NULL};
+			zend_string *name;
 			int i;
 
 			if (!ctx->call_map) {
@@ -1656,7 +1657,14 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			call = ctx->call_map[opline - ctx->scdf.op_array->opcodes];
-			name = CT_CONSTANT_EX(ctx->scdf.op_array, call->caller_init_opline->op2.constant);
+			func_zv = CT_CONSTANT_EX(ctx->scdf.op_array, call->caller_init_opline->op2.constant);
+			if (Z_TYPE_P(func_zv) == IS_STRING) {
+				name = Z_STR_P(func_zv);
+			} else {
+				ZEND_ASSERT(Z_TYPE_P(func_zv) == IS_PTR);
+				zend_function *func = Z_PTR_P(func_zv);
+				name = func->common.function_name;
+			}
 
 			/* We already know it can't be evaluated, don't bother checking again */
 			if (ssa_op->result_def < 0 || IS_BOT(&ctx->values[ssa_op->result_def])) {
@@ -1694,7 +1702,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				break;
 			}
 
-			if (ct_eval_func_call(scdf->op_array, &zv, Z_STR_P(name), call->num_args, args) == SUCCESS) {
+			if (ct_eval_func_call(scdf->op_array, &zv, name, call->num_args, args) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;
@@ -1702,11 +1710,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 
 #if 0
 			/* sort out | uniq -c | sort -n */
-			fprintf(stderr, "%s\n", Z_STRVAL_P(name));
+			fprintf(stderr, "%s\n", name);
 			/*if (args[1]) {
-				php_printf("%s %Z %Z\n", Z_STRVAL_P(name), args[0], args[1]);
+				php_printf("%s %Z %Z\n", name, args[0], args[1]);
 			} else {
-				php_printf("%s %Z\n", Z_STRVAL_P(name), args[0]);
+				php_printf("%s %Z\n", name, args[0]);
 			}*/
 #endif
 

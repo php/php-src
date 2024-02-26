@@ -326,7 +326,12 @@ PHPDBG_INFO(literal) /* {{{ */
 		while (literal < ops->last_literal) {
 			if (Z_TYPE(ops->literals[literal]) != IS_NULL) {
 				phpdbg_write("|-------- C%u -------> [", literal);
-				zend_print_zval(&ops->literals[literal], 0);
+				if (Z_TYPE(ops->literals[literal]) != IS_PTR) {
+					zend_print_zval(&ops->literals[literal], 0);
+				} else {
+					zend_function *func = Z_PTR(ops->literals[literal]);
+					phpdbg_write("%s", ZSTR_VAL(func->common.function_name));
+				}
 				phpdbg_out("]\n");
 			}
 			literal++;

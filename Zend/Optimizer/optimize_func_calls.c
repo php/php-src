@@ -197,6 +197,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						fcall->opcode = ZEND_INIT_FCALL;
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						literal_dtor(&ZEND_OP2_LITERAL(fcall));
+						// FIXME: Use IS_PTR if possible
 						fcall->op2.constant = fcall->op2.constant + 1;
 						if (opline->opcode != ZEND_CALLABLE_CONVERT) {
 							opline->opcode = zend_get_call_op(fcall, call_stack[call].func);
@@ -206,6 +207,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						fcall->op1.num = zend_vm_calc_used_stack(fcall->extended_value, call_stack[call].func);
 						literal_dtor(&op_array->literals[fcall->op2.constant]);
 						literal_dtor(&op_array->literals[fcall->op2.constant + 2]);
+						// FIXME: Use IS_PTR if possible
 						fcall->op2.constant = fcall->op2.constant + 1;
 						if (opline->opcode != ZEND_CALLABLE_CONVERT) {
 							opline->opcode = zend_get_call_op(fcall, call_stack[call].func);

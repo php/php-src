@@ -31,13 +31,13 @@ $_main:
      ; (lines=15, args=0, vars=1, tmps=2)
      ; (after optimizer)
      ; %s
-0000 INIT_FCALL 2 %d string("range")
+0000 INIT_FCALL %d %d %s
 0001 SEND_VAL int(0) 1
 0002 SEND_VAL int(10) 2
 0003 V2 = DO_ICALL
 0004 V1 = FE_RESET_R V2 0013
 0005 FE_FETCH_R V1 CV0($char) 0013
-0006 INIT_FCALL 1 %d string("var_dump")
+0006 INIT_FCALL %d %d %s
 0007 INIT_FCALL 1 %d string("test")
 0008 SEND_VAR CV0($char) 1
 0009 V2 = DO_UCALL
