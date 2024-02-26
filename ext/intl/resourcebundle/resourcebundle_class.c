@@ -183,7 +183,14 @@ static zval *resource_bundle_array_fetch(
 	intl_error_reset(INTL_DATA_ERROR_P(rb));
 
 	if (offset_str) {
-		// TODO Check is not empty?
+		if (UNEXPECTED(ZSTR_LEN(offset_str) == 0)) {
+			if (offset_arg_num) {
+				zend_argument_value_error(offset_arg_num, "cannot be empty");
+			} else {
+				zend_value_error("Offset cannot be empty");
+			}
+			return NULL;
+		}
 		key = ZSTR_VAL(offset_str);
 		rb->child = ures_getByKey(rb->me, key, rb->child, &INTL_DATA_ERROR_CODE(rb) );
 	} else {
