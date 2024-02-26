@@ -47,9 +47,6 @@ PHP                                                                        NEWS
 - FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
-- GD:
-  . Fixed detection of image formats in system gd library. (Michael Orlitzky)
-
 - IMAP:
   . Moved to PECL. (Derick Rethans)
 
