@@ -130,6 +130,37 @@ foreach (['A', 'B'] as $class) {
         }
         ++$testCasesTotal;
     }
+    /* Using offsets as references */
+    foreach ($offsets as $offset) {
+        $dimension = &$offset;
+        $container = new $class();
+        $error = "(new $class())[&" . zend_test_var_export($dimension) . '] has different outputs' . "\n";
+        ob_start();
+        var_dump($dimension);
+        $var_dump_output = ob_get_clean();
+
+        include $var_dim_filename;
+        $varOutput = ob_get_contents();
+        ob_clean();
+        $varOutput = str_replace(
+            [$var_dim_filename],
+            ['%s'],
+            $varOutput
+        );
+
+        $expected_output = str_replace(
+            ["VAR_DUMP_OF_OFFSET\n", "CLASS_NAME"],
+            [$var_dump_output, $class],
+            EXPECTED_OUTPUT
+        );
+
+        if ($varOutput !== $expected_output) {
+            file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_ArrayAccess_container_{$failuresNb}.txt", $varOutput);
+            ++$failuresNb;
+            $failures[] = $error;
+        }
+        ++$testCasesTotal;
+    }
 }
 ob_end_clean();
 

@@ -62,6 +62,28 @@ foreach ($offsets as $dimension) {
     }
     ++$testCasesTotal;
 }
+/* Using offsets as references */
+foreach ($offsets as $offset) {
+    $dimension = &$offset;
+    $container = new stdClass();
+    $error = '(new stdClass())[&' . zend_test_var_export($offset) . '] has different outputs' . "\n";
+
+    include $var_dim_filename;
+    $varOutput = ob_get_contents();
+    ob_clean();
+    $varOutput = str_replace(
+        [$var_dim_filename],
+        ['%s'],
+        $varOutput
+    );
+
+    if ($varOutput !== EXPECTED_OUTPUT) {
+        file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_object_container_{$failuresNb}.txt", $varOutput);
+        ++$failuresNb;
+        $failures[] = $error;
+    }
+    ++$testCasesTotal;
+}
 ob_end_clean();
 
 echo "Executed tests\n";
