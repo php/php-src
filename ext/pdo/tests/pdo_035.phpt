@@ -107,8 +107,8 @@ bool(false)
 Offset: 0
 Dimension:
 Isset:
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 Empty:
 bool(false)
 bool(false)
@@ -134,8 +134,8 @@ string(2) "23"
 Offset: '0'
 Dimension:
 Isset:
-bool(false)
-bool(false)
+bool(true)
+bool(true)
 Empty:
 bool(false)
 bool(false)
