@@ -5956,7 +5956,7 @@ PHP_FUNCTION(str_rot13)
 PHPAPI bool php_binary_string_shuffle(php_random_algo_with_state engine, char *str, zend_long len) /* {{{ */
 {
 	const php_random_algo *algo = engine.algo;
-	void *state = engine.status;
+	void *state = engine.state;
 
 	int64_t n_elems, rnd_idx, n_left;
 	char temp;

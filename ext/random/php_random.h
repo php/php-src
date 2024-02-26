@@ -105,7 +105,7 @@ typedef struct _php_random_algo {
 
 typedef struct _php_random_algo_with_state {
 	const php_random_algo *algo;
-	void *status;
+	void *state;
 } php_random_algo_with_state;
 
 extern PHPAPI const php_random_algo php_random_algo_combinedlcg;
@@ -170,7 +170,7 @@ static inline php_random_algo_with_state php_random_default_engine(void)
 {
 	return (php_random_algo_with_state){
 		.algo = php_random_default_algo(),
-		.status = php_random_default_status(),
+		.state = php_random_default_status(),
 	};
 }
 

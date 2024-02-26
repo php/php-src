@@ -77,7 +77,7 @@ static zend_object_handlers random_randomizer_object_handlers;
 PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax)
 {
 	const php_random_algo *algo = engine.algo;
-	void *state = engine.status;
+	void *state = engine.state;
 
 	uint32_t result, limit;
 	size_t total_size = 0;
@@ -136,7 +136,7 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t umax)
 {
 	const php_random_algo *algo = engine.algo;
-	void *state = engine.status;
+	void *state = engine.state;
 
 	uint64_t result, limit;
 	size_t total_size = 0;
@@ -226,7 +226,7 @@ static void randomizer_free_obj(zend_object *object) {
 	php_random_randomizer *randomizer = php_random_randomizer_from_obj(object);
 
 	if (randomizer->is_userland_algo) {
-		php_random_status_free(randomizer->engine.status, false);
+		php_random_status_free(randomizer->engine.state, false);
 	}
 
 	zend_object_std_dtor(&randomizer->std);
@@ -256,7 +256,7 @@ PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, ze
 
 	engine->engine = (php_random_algo_with_state){
 		.algo = algo,
-		.status = php_random_status_alloc(algo, false)
+		.state = php_random_status_alloc(algo, false)
 	};
 	engine->std.handlers = handlers;
 
@@ -267,7 +267,7 @@ PHPAPI void php_random_engine_common_free_object(zend_object *object)
 {
 	php_random_engine *engine = php_random_engine_from_obj(object);
 
-	php_random_status_free(engine->engine.status, false);
+	php_random_status_free(engine->engine.state, false);
 	zend_object_std_dtor(object);
 }
 
@@ -277,8 +277,8 @@ PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object)
 	php_random_engine *new_engine = php_random_engine_from_obj(old_engine->std.ce->create_object(old_engine->std.ce));
 
 	new_engine->engine.algo = old_engine->engine.algo;
-	if (old_engine->engine.status) {
-		new_engine->engine.status = php_random_status_copy(old_engine->engine.algo, old_engine->engine.status, new_engine->engine.status);
+	if (old_engine->engine.state) {
+		new_engine->engine.state = php_random_status_copy(old_engine->engine.algo, old_engine->engine.state, new_engine->engine.state);
 	}
 
 	zend_objects_clone_members(&new_engine->std, &old_engine->std);

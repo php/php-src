@@ -119,7 +119,7 @@ static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_xoshiro256starstar,
-		.status = state,
+		.state = state,
 	}, min, max);
 }
 
@@ -184,7 +184,7 @@ PHPAPI void php_random_xoshiro256starstar_jump_long(php_random_status_state_xosh
 PHP_METHOD(Random_Engine_Xoshiro256StarStar, jump)
 {
 	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
-	php_random_status_state_xoshiro256starstar *state = engine.status;
+	php_random_status_state_xoshiro256starstar *state = engine.state;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -196,7 +196,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, jump)
 PHP_METHOD(Random_Engine_Xoshiro256StarStar, jumpLong)
 {
 	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
-	php_random_status_state_xoshiro256starstar *state = engine.status;
+	php_random_status_state_xoshiro256starstar *state = engine.state;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -208,7 +208,7 @@ PHP_METHOD(Random_Engine_Xoshiro256StarStar, jumpLong)
 PHP_METHOD(Random_Engine_Xoshiro256StarStar, __construct)
 {
 	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
-	php_random_status_state_xoshiro256starstar *state = engine.status;
+	php_random_status_state_xoshiro256starstar *state = engine.state;
 	zend_string *str_seed = NULL;
 	zend_long int_seed = 0;
 	bool seed_is_null = true;

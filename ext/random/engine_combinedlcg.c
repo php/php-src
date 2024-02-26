@@ -63,7 +63,7 @@ static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_combinedlcg,
-		.status = state,
+		.state = state,
 	}, min, max);
 }
 

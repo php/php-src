@@ -3214,7 +3214,7 @@ boundary_error:
 PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *array) /* {{{ */
 {
 	const php_random_algo *algo = engine.algo;
-	void *state = engine.status;
+	void *state = engine.state;
 
 	int64_t idx, j, n_elems, rnd_idx, n_left;
 	zval *zv, temp;
@@ -6197,7 +6197,7 @@ clean_up:
 PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, zend_long num_req, zval *retval, bool silent)
 {
 	const php_random_algo *algo = engine.algo;
-	void *state = engine.status;
+	void *state = engine.state;
 
 	HashTable *ht = Z_ARRVAL_P(input);
 	uint32_t num_avail = zend_hash_num_elements(ht);

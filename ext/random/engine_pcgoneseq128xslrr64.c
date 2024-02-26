@@ -64,7 +64,7 @@ static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_pcgoneseq128xslrr64,
-		.status = state,
+		.state = state,
 	}, min, max);
 }
 
@@ -146,7 +146,7 @@ PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgon
 PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 {
 	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
-	php_random_status_state_pcgoneseq128xslrr64 *state = engine.status;
+	php_random_status_state_pcgoneseq128xslrr64 *state = engine.state;
 	zend_string *str_seed = NULL;
 	zend_long int_seed = 0;
 	bool seed_is_null = true;
@@ -195,7 +195,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, jump)
 {
 	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
-	php_random_status_state_pcgoneseq128xslrr64 *state = engine.status;
+	php_random_status_state_pcgoneseq128xslrr64 *state = engine.state;
 	zend_long advance = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
