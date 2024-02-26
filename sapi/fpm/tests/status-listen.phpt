@@ -9,6 +9,7 @@ require_once "tester.inc";
 
 $cfg = <<<EOT
 [global]
+log_level = debug
 error_log = {{FILE:LOG}}
 [unconfined]
 listen = {{ADDR}}
