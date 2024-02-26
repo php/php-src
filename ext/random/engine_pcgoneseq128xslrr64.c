@@ -43,14 +43,14 @@ static inline void seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_r
 	step(s);
 }
 
-static void seed(void *status, uint64_t seed)
+static void seed(void *state, uint64_t seed)
 {
-	seed128(status, php_random_uint128_constant(0ULL, seed));
+	seed128(state, php_random_uint128_constant(0ULL, seed));
 }
 
-static php_random_result generate(void *status)
+static php_random_result generate(void *state)
 {
-	php_random_status_state_pcgoneseq128xslrr64 *s = status;
+	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 
 	step(s);
 
@@ -60,17 +60,17 @@ static php_random_result generate(void *status)
 	};
 }
 
-static zend_long range(void *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_pcgoneseq128xslrr64,
-		.status = status,
+		.status = state,
 	}, min, max);
 }
 
-static bool serialize(void *status, HashTable *data)
+static bool serialize(void *state, HashTable *data)
 {
-	php_random_status_state_pcgoneseq128xslrr64 *s = status;
+	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 	uint64_t u;
 	zval z;
 
@@ -85,9 +85,9 @@ static bool serialize(void *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *status, HashTable *data)
+static bool unserialize(void *state, HashTable *data)
 {
-	php_random_status_state_pcgoneseq128xslrr64 *s = status;
+	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 	uint64_t u[2];
 	zval *t;
 

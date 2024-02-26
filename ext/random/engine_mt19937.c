@@ -139,14 +139,14 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	mt19937_reload(state);
 }
 
-static void seed(void *status, uint64_t seed)
+static void seed(void *state, uint64_t seed)
 {
-	mt19937_seed_state(status, seed);
+	mt19937_seed_state(state, seed);
 }
 
-static php_random_result generate(void *status)
+static php_random_result generate(void *state)
 {
-	php_random_status_state_mt19937 *s = status;
+	php_random_status_state_mt19937 *s = state;
 	uint32_t s1;
 
 	if (s->count >= MT_N) {
@@ -164,17 +164,17 @@ static php_random_result generate(void *status)
 	};
 }
 
-static zend_long range(void *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_mt19937,
-		.status = status,
+		.status = state,
 	}, min, max);
 }
 
-static bool serialize(void *status, HashTable *data)
+static bool serialize(void *state, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = status;
+	php_random_status_state_mt19937 *s = state;
 	zval t;
 
 	for (uint32_t i = 0; i < MT_N; i++) {
@@ -189,9 +189,9 @@ static bool serialize(void *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *status, HashTable *data)
+static bool unserialize(void *state, HashTable *data)
 {
-	php_random_status_state_mt19937 *s = status;
+	php_random_status_state_mt19937 *s = state;
 	zval *t;
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */

@@ -77,7 +77,7 @@ static zend_object_handlers random_randomizer_object_handlers;
 PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax)
 {
 	const php_random_algo *algo = engine.algo;
-	void *status = engine.status;
+	void *state = engine.status;
 
 	uint32_t result, limit;
 	size_t total_size = 0;
@@ -86,7 +86,7 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 	result = 0;
 	total_size = 0;
 	do {
-		php_random_result r = algo->generate(status);
+		php_random_result r = algo->generate(state);
 		result = result | (((uint32_t) r.result) << (total_size * 8));
 		total_size += r.size;
 		if (EG(exception)) {
@@ -121,7 +121,7 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 		result = 0;
 		total_size = 0;
 		do {
-			php_random_result r = algo->generate(status);
+			php_random_result r = algo->generate(state);
 			result = result | (((uint32_t) r.result) << (total_size * 8));
 			total_size += r.size;
 			if (EG(exception)) {
@@ -136,7 +136,7 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t umax)
 {
 	const php_random_algo *algo = engine.algo;
-	void *status = engine.status;
+	void *state = engine.status;
 
 	uint64_t result, limit;
 	size_t total_size = 0;
@@ -145,7 +145,7 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 	result = 0;
 	total_size = 0;
 	do {
-		php_random_result r = algo->generate(status);
+		php_random_result r = algo->generate(state);
 		result = result | (r.result << (total_size * 8));
 		total_size += r.size;
 		if (EG(exception)) {
@@ -180,7 +180,7 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 		result = 0;
 		total_size = 0;
 		do {
-			php_random_result r = algo->generate(status);
+			php_random_result r = algo->generate(state);
 			result = result | (r.result << (total_size * 8));
 			total_size += r.size;
 			if (EG(exception)) {
@@ -309,14 +309,14 @@ PHPAPI const php_random_algo *php_random_default_algo(void)
 /* {{{ php_random_default_status */
 PHPAPI void *php_random_default_status(void)
 {
-	php_random_status_state_mt19937 *status = RANDOM_G(mt19937);
+	php_random_status_state_mt19937 *state = RANDOM_G(mt19937);
 
 	if (!RANDOM_G(mt19937_seeded)) {
-		php_random_mt19937_seed_default(status);
+		php_random_mt19937_seed_default(state);
 		RANDOM_G(mt19937_seeded) = true;
 	}
 
-	return status;
+	return state;
 }
 /* }}} */
 
@@ -390,14 +390,14 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 /* {{{ php_combined_lcg */
 PHPAPI double php_combined_lcg(void)
 {
-	php_random_status_state_combinedlcg *status = RANDOM_G(combined_lcg);
+	php_random_status_state_combinedlcg *state = RANDOM_G(combined_lcg);
 
 	if (!RANDOM_G(combined_lcg_seeded)) {
-		php_random_combinedlcg_seed_default(status);
+		php_random_combinedlcg_seed_default(state);
 		RANDOM_G(combined_lcg_seeded) = true;
 	}
 
-	return php_random_algo_combinedlcg.generate(status).result * 4.656613e-10;
+	return php_random_algo_combinedlcg.generate(state).result * 4.656613e-10;
 }
 /* }}} */
 

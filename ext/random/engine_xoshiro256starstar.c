@@ -102,30 +102,30 @@ static inline void seed64(php_random_status_state_xoshiro256starstar *state, uin
 	seed256(state, s[0], s[1], s[2], s[3]);
 }
 
-static void seed(void *status, uint64_t seed)
+static void seed(void *state, uint64_t seed)
 {
-	seed64(status, seed);
+	seed64(state, seed);
 }
 
-static php_random_result generate(void *status)
+static php_random_result generate(void *state)
 {
 	return (php_random_result){
 		.size = sizeof(uint64_t),
-		.result = generate_state(status),
+		.result = generate_state(state),
 	};
 }
 
-static zend_long range(void *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_xoshiro256starstar,
-		.status = status,
+		.status = state,
 	}, min, max);
 }
 
-static bool serialize(void *status, HashTable *data)
+static bool serialize(void *state, HashTable *data)
 {
-	php_random_status_state_xoshiro256starstar *s = status;
+	php_random_status_state_xoshiro256starstar *s = state;
 	zval t;
 
 	for (uint32_t i = 0; i < 4; i++) {
@@ -136,9 +136,9 @@ static bool serialize(void *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *status, HashTable *data)
+static bool unserialize(void *state, HashTable *data)
 {
-	php_random_status_state_xoshiro256starstar *s = status;
+	php_random_status_state_xoshiro256starstar *s = state;
 	zval *t;
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */

@@ -32,17 +32,17 @@
  */
 #define MODMULT(a, b, c, m, s) q = s / a; s = b * (s - a * q) - c * q; if (s < 0) s += m
 
-static void seed(void *status, uint64_t seed)
+static void seed(void *state, uint64_t seed)
 {
-	php_random_status_state_combinedlcg *s = status;
+	php_random_status_state_combinedlcg *s = state;
 
 	s->state[0] = seed & 0xffffffffU;
 	s->state[1] = seed >> 32;
 }
 
-static php_random_result generate(void *status)
+static php_random_result generate(void *state)
 {
-	php_random_status_state_combinedlcg *s = status;
+	php_random_status_state_combinedlcg *s = state;
 	int32_t q, z;
 
 	MODMULT(53668, 40014, 12211, 2147483563L, s->state[0]);
@@ -59,17 +59,17 @@ static php_random_result generate(void *status)
 	};
 }
 
-static zend_long range(void *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	return php_random_range((php_random_algo_with_state){
 		.algo = &php_random_algo_combinedlcg,
-		.status = status,
+		.status = state,
 	}, min, max);
 }
 
-static bool serialize(void *status, HashTable *data)
+static bool serialize(void *state, HashTable *data)
 {
-	php_random_status_state_combinedlcg *s = status;
+	php_random_status_state_combinedlcg *s = state;
 	zval t;
 
 	for (uint32_t i = 0; i < 2; i++) {
@@ -80,9 +80,9 @@ static bool serialize(void *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(void *status, HashTable *data)
+static bool unserialize(void *state, HashTable *data)
 {
-	php_random_status_state_combinedlcg *s = status;
+	php_random_status_state_combinedlcg *s = state;
 	zval *t;
 
 	for (uint32_t i = 0; i < 2; i++) {
