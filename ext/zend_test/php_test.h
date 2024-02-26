@@ -18,6 +18,7 @@
 #define PHP_TEST_H
 
 #include "fiber.h"
+#include "Zend/zend_alloc.h"
 
 extern zend_module_entry zend_test_module_entry;
 #define phpext_zend_test_ptr &zend_test_module_entry
@@ -62,6 +63,8 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	zend_long quantity_value;
 	zend_string *str_test;
 	zend_string *not_empty_str_test;
+	int zend_mm_observer_enabled;
+	zend_mm_observer *observer;
 ZEND_END_MODULE_GLOBALS(zend_test)
 
 extern ZEND_DECLARE_MODULE_GLOBALS(zend_test)

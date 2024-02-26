@@ -202,6 +202,37 @@ typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
 static bool zend_mm_use_huge_pages = false;
 
+struct _zend_mm_observer {
+	void (*malloc)(size_t len, void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void (*free)(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void (*realloc)(void *old_ptr, size_t len, void *new_ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void (*gc)(size_t len);
+	void (*shutdown)(bool full, bool silent);
+	zend_mm_observer *next;
+};
+
+#define HANDLE_NO_DEBUG_OBSERVERS(observer_function, ...) \
+    if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) { \
+        zend_mm_observer *current = heap->observers; \
+        while (current != NULL) { \
+            if (current->observer_function != NULL) { \
+                current->observer_function(__VA_ARGS__); \
+            } \
+            current = current->next; \
+        } \
+    }
+
+#define HANDLE_OBSERVERS(observer_function, ...) \
+    if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) { \
+        zend_mm_observer *current = heap->observers; \
+        while (current != NULL) { \
+            if (current->observer_function != NULL) { \
+                current->observer_function(__VA_ARGS__ ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
+            } \
+            current = current->next; \
+        } \
+    }
+
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
  * Inside chunk it's managed by pages of fixed size 4096B.
@@ -233,10 +264,9 @@ static bool zend_mm_use_huge_pages = false;
  *              (5 bits) bin number (e.g. 0 for sizes 0-2, 1 for 3-4,
  *               2 for 5-8, 3 for 9-16 etc) see zend_alloc_sizes.h
  */
-
 struct _zend_mm_heap {
 #if ZEND_MM_CUSTOM
-	int                use_custom_heap;
+	int                use_custom_heap;         /* bitflag */
 #endif
 #if ZEND_MM_STORAGE
 	zend_mm_storage   *storage;
@@ -281,6 +311,7 @@ struct _zend_mm_heap {
 		} debug;
 	} custom_heap;
 	HashTable *tracked_allocs;
+	zend_mm_observer *observers;
 #endif
 };
 
@@ -1947,6 +1978,7 @@ static zend_mm_heap *zend_mm_init(void)
 #endif
 #if ZEND_MM_CUSTOM
 	heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
+	heap->observers = NULL;
 #endif
 #if ZEND_MM_STORAGE
 	heap->storage = NULL;
@@ -1967,7 +1999,9 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 	size_t collected = 0;
 
 #if ZEND_MM_CUSTOM
-	if (heap->use_custom_heap) {
+	int use_custom_heap = heap->use_custom_heap;
+	if (use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) {
+		HANDLE_NO_DEBUG_OBSERVERS(gc ,0);
 		return 0;
 	}
 #endif
@@ -2065,6 +2099,10 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			chunk = chunk->next;
 		}
 	} while (chunk != heap->main_chunk);
+
+#if ZEND_MM_CUSTOM
+	HANDLE_NO_DEBUG_OBSERVERS(gc, collected * ZEND_MM_PAGE_SIZE);
+#endif
 
 	return collected * ZEND_MM_PAGE_SIZE;
 }
@@ -2271,7 +2309,12 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	zend_mm_huge_list *list;
 
 #if ZEND_MM_CUSTOM
-	if (heap->use_custom_heap) {
+	int use_custom_heap = heap->use_custom_heap;
+
+	HANDLE_NO_DEBUG_OBSERVERS(shutdown, full, silent)
+	zend_mm_observers_shutdown(heap);
+
+	if (use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) {
 		if (heap->custom_heap.std._malloc == tracked_malloc) {
 			if (silent) {
 				tracked_free_all();
@@ -2287,7 +2330,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 		}
 
 		if (full) {
-			if (ZEND_DEBUG && heap->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
+			if (ZEND_DEBUG && use_custom_heap & ZEND_MM_CUSTOM_HEAP_DEBUG) {
 				heap->custom_heap.debug._free(heap ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 			} else {
 				heap->custom_heap.std._free(heap);
@@ -2411,7 +2454,7 @@ void* ZEND_FASTCALL _zend_mm_realloc2(zend_mm_heap *heap, void *ptr, size_t size
 ZEND_API size_t ZEND_FASTCALL _zend_mm_block_size(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 #if ZEND_MM_CUSTOM
-	if (UNEXPECTED(heap->use_custom_heap)) {
+	if (UNEXPECTED(heap->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED)) {
 		if (heap->custom_heap.std._malloc == tracked_malloc) {
 			zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 			zval *size_zv = zend_hash_index_find(heap->tracked_allocs, h);
@@ -2445,16 +2488,16 @@ static zend_alloc_globals alloc_globals;
 ZEND_API bool is_zend_mm(void)
 {
 #if ZEND_MM_CUSTOM
-	return !AG(mm_heap)->use_custom_heap;
+	return !(AG(mm_heap)->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED);
 #else
-	return 1;
+	return true;
 #endif
 }
 
 ZEND_API bool is_zend_ptr(const void *ptr)
 {
 #if ZEND_MM_CUSTOM
-	if (AG(mm_heap)->use_custom_heap) {
+	if (AG(mm_heap)->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) {
 		if (AG(mm_heap)->custom_heap.std._malloc == tracked_malloc) {
 			zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 			zval *size_zv = zend_hash_index_find(AG(mm_heap)->tracked_allocs, h);
@@ -2496,29 +2539,53 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 
 static ZEND_COLD void* ZEND_FASTCALL _malloc_custom(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-		return AG(mm_heap)->custom_heap.debug._malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	void *ptr;
+	zend_mm_heap *heap = AG(mm_heap);
+	int use_custom_heap = heap->use_custom_heap;
+	if (ZEND_DEBUG && use_custom_heap & ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		ptr = heap->custom_heap.debug._malloc(size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_STD) {
+		ptr = heap->custom_heap.std._malloc(size);
 	} else {
-		return AG(mm_heap)->custom_heap.std._malloc(size);
+		// no custom memory manager, only observer present
+		ptr = zend_mm_alloc_heap(AG(mm_heap), size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
+	HANDLE_OBSERVERS(malloc, size, ptr)
+	return ptr;
 }
 
 static ZEND_COLD void ZEND_FASTCALL _efree_custom(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-		AG(mm_heap)->custom_heap.debug._free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	zend_mm_heap *heap = AG(mm_heap);
+	int use_custom_heap = heap->use_custom_heap;
+
+	HANDLE_OBSERVERS(free, ptr)
+
+	if (ZEND_DEBUG && use_custom_heap & ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		heap->custom_heap.debug._free(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_STD) {
+		heap->custom_heap.std._free(ptr);
 	} else {
-		AG(mm_heap)->custom_heap.std._free(ptr);
+		// no custom memory manager, only observer present
+		zend_mm_free_heap(AG(mm_heap), ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 }
 
 static ZEND_COLD void* ZEND_FASTCALL _realloc_custom(void *ptr, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
-	if (ZEND_DEBUG && AG(mm_heap)->use_custom_heap == ZEND_MM_CUSTOM_HEAP_DEBUG) {
-		return AG(mm_heap)->custom_heap.debug._realloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	void *new_ptr;
+	zend_mm_heap *heap = AG(mm_heap);
+	int use_custom_heap = heap->use_custom_heap;
+	if (ZEND_DEBUG && use_custom_heap & ZEND_MM_CUSTOM_HEAP_DEBUG) {
+		new_ptr = heap->custom_heap.debug._realloc(ptr, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
+	} else if (use_custom_heap & ZEND_MM_CUSTOM_HEAP_STD) {
+		new_ptr = heap->custom_heap.std._realloc(ptr, size);
 	} else {
-		return AG(mm_heap)->custom_heap.std._realloc(ptr, size);
+		// no custom memory manager, only observer present
+		new_ptr = zend_mm_realloc_heap(AG(mm_heap), ptr, size, 0, size ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
+	HANDLE_OBSERVERS(realloc, ptr, size, new_ptr)
+	return new_ptr;
 }
 #endif
 
@@ -2983,9 +3050,21 @@ ZEND_API zend_mm_heap *zend_mm_get_heap(void)
 ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap)
 {
 #if ZEND_MM_CUSTOM
-	return AG(mm_heap)->use_custom_heap;
+	return (AG(mm_heap)->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) != 0;
 #else
-	return 0;
+	return false;
+#endif
+}
+
+ZEND_API bool zend_mm_is_observed(zend_mm_heap *heap)
+{
+#if ZEND_MM_CUSTOM
+	if (!heap && !(heap = AG(mm_heap))) {
+		return false;
+	}
+	return (heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED) != 0;
+#else
+	return false;
 #endif
 }
 
@@ -2996,6 +3075,7 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 {
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
+	int observed = _heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED;
 
 	if (!_malloc && !_free && !_realloc) {
 		_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_NONE;
@@ -3005,6 +3085,8 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 		_heap->custom_heap.std._free = _free;
 		_heap->custom_heap.std._realloc = _realloc;
 	}
+
+	_heap->use_custom_heap |= observed;
 #endif
 }
 
@@ -3016,7 +3098,7 @@ ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
 
-	if (heap->use_custom_heap) {
+	if (heap->use_custom_heap & ~ZEND_MM_CUSTOM_HEAP_OBSERVED) {
 		*_malloc = _heap->custom_heap.std._malloc;
 		*_free = _heap->custom_heap.std._free;
 		*_realloc = _heap->custom_heap.std._realloc;
@@ -3032,6 +3114,121 @@ ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
 #endif
 }
 
+/*
+ * Use this function to register observers to the ZendMM.
+ * This function operates on the thread local heap and is meant to be called
+ * during the request lifetime.
+ */
+ZEND_API zend_mm_observer* zend_mm_observer_register(
+	zend_mm_heap* heap,
+	void (*malloc)(size_t len, void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+	void (*free)(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+	void (*realloc)(void *old_ptr, size_t len, void *new_ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+	void (*gc)(size_t len),
+	void (*shutdown)(bool full, bool silent)
+) {
+#if ZEND_MM_CUSTOM
+	if (!heap) {
+		heap = AG(mm_heap);
+	}
+	ZEND_ASSERT(heap);
+
+	zend_mm_observer *node = pemalloc(sizeof(zend_mm_observer), 1);
+	node->malloc = malloc;
+	node->free = free;
+	node->realloc = realloc;
+	node->gc = gc;
+	node->shutdown = shutdown;
+	node->next = NULL;
+
+	// set bitflag for observers being around
+	heap->use_custom_heap |= ZEND_MM_CUSTOM_HEAP_OBSERVED;
+
+	if (heap->observers == NULL) {
+		heap->observers = node;
+		return node;
+	}
+	zend_mm_observer *current = heap->observers;
+	while (current->next != NULL) {
+		current = current->next;
+	}
+	current->next = node;
+
+	return node;
+#else
+	return NULL;
+#endif
+}
+
+/*
+ * Use this function to unregister your observer at any given time. In case your
+ * observer was the last one to be unregistered, this will also reset the
+ * `heap->use_custom_heap` bitflag.
+ */
+ZEND_API bool zend_mm_observer_unregister(zend_mm_heap *heap, zend_mm_observer *observer)
+{
+#if ZEND_MM_CUSTOM
+	if (!heap) {
+		heap = AG(mm_heap);
+	}
+	ZEND_ASSERT(heap);
+
+	zend_mm_observer *current = heap->observers, *prev = NULL;
+
+	// find the given observer in the list of observers
+	while (current != NULL && current != observer) {
+		prev = current;
+		current = current->next;
+	}
+
+	// did not find observer or NULL was given
+	if (current == NULL) {
+		return false;
+	}
+
+	if (prev == NULL) {
+		// current observer is the first in the list
+		heap->observers = current->next;
+		if (!heap->observers) {
+			// and current was also the last in the list, so no more observers
+			// left
+			heap->use_custom_heap &= ~ZEND_MM_CUSTOM_HEAP_OBSERVED;
+		}
+	} else {
+		prev->next = current->next;
+	}
+
+	pefree(observer, 1);
+	return true;
+#else
+	return false;
+#endif
+}
+
+/*
+ * This function will shutdown the observers for the current heap and free
+ * memory, it is called in `zend_mm_shutdown()`
+ */
+void zend_mm_observers_shutdown(zend_mm_heap *heap)
+{
+#if ZEND_MM_CUSTOM
+	if (!heap) {
+		heap = AG(mm_heap);
+	}
+	ZEND_ASSERT(heap);
+	zend_mm_observer *current = heap->observers;
+	zend_mm_observer *next = NULL;
+	while (current != NULL) {
+		next = current->next;
+		pefree(current, 1);
+		current = next;
+	}
+	heap->observers = NULL;
+	heap->use_custom_heap &= ~ZEND_MM_CUSTOM_HEAP_OBSERVED;
+	return;
+#endif
+}
+
 #if ZEND_DEBUG
 ZEND_API void zend_mm_set_custom_debug_handlers(zend_mm_heap *heap,
                                                 void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
@@ -3041,7 +3238,7 @@ ZEND_API void zend_mm_set_custom_debug_handlers(zend_mm_heap *heap,
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
 
-	_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_DEBUG;
+	_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_DEBUG | (_heap->use_custom_heap & ZEND_MM_CUSTOM_HEAP_OBSERVED);
 	_heap->custom_heap.debug._malloc = _malloc;
 	_heap->custom_heap.debug._free = _free;
 	_heap->custom_heap.debug._realloc = _realloc;
