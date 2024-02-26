@@ -2256,33 +2256,58 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 
 /* }}} */
 
+/* {{{ overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
+static zval *row_read_column_name(pdo_stmt_t *stmt, zend_string *name, zval *rv)
+{
+	/* TODO: replace this with a hash of available column names to column numbers */
+	for (int colno = 0; colno < stmt->column_count; colno++) {
+		if (zend_string_equals(stmt->columns[colno].name, name)) {
+			fetch_value(stmt, rv, colno, NULL);
+			return rv;
+		}
+	}
+	return NULL;
+}
+
+static zval *row_read_column_number(pdo_stmt_t *stmt, zend_long column, zval *rv)
+{
+	if (column >= 0 && column < stmt->column_count) {
+		fetch_value(stmt, rv, column, NULL);
+		return rv;
+	}
+	return NULL;
+}
+
 static zval *row_prop_read(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	pdo_row_t *row = (pdo_row_t *)object;
 	pdo_stmt_t *stmt = row->stmt;
 	zend_long lval;
+	zval *retval;
 	ZEND_ASSERT(stmt);
 
 	ZVAL_NULL(rv);
 	if (zend_string_equals_literal(name, "queryString")) {
 		return zend_std_read_property(&stmt->std, name, type, cache_slot, rv);
 	} else if (is_numeric_str_function(name, &lval, /* dval */ NULL) == IS_LONG) {
-		if (lval >= 0 && lval < stmt->column_count) {
-			fetch_value(stmt, rv, lval, NULL);
-		}
-		return rv;
+		retval = row_read_column_number(stmt, lval, rv);
 	} else {
-		/* TODO: replace this with a hash of available column names to column
-		 * numbers */
-		for (int colno = 0; colno < stmt->column_count; colno++) {
-			if (zend_string_equals(stmt->columns[colno].name, name)) {
-				fetch_value(stmt, rv, colno, NULL);
-				return rv;
-			}
-		}
+		retval = row_read_column_name(stmt, name, rv);
 	}
-
-	return rv;
+	if (UNEXPECTED(!retval)) {
+		// TODO throw an error on master
+		//if (type != BP_VAR_IS) {
+		//	if (is_numeric) {
+		//		zend_value_error("Invalid column index");
+		//	} else {
+		//		zend_throw_error(NULL, "No column named \"%s\" exists", ZSTR_VAL(name));
+		//	}
+		//}
+		//return &EG(uninitialized_zval);
+		ZVAL_NULL(rv);
+		return rv;
+	}
+	return retval;
 }
 
 static zval *row_dim_read(zend_object *object, zval *offset, int type, zval *rv)
@@ -2332,28 +2357,23 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 	pdo_row_t *row = (pdo_row_t *)object;
 	pdo_stmt_t *stmt = row->stmt;
 	zend_long lval;
+	zval tmp_val;
+	zval *retval = NULL;
 	ZEND_ASSERT(stmt);
 
 	if (is_numeric_str_function(name, &lval, /* dval */ NULL) == IS_LONG) {
-		return lval >=0 && lval < stmt->column_count;
+		retval = row_read_column_number(stmt, lval, &tmp_val);
+	} else {
+		retval = row_read_column_name(stmt, name, &tmp_val);
 	}
 
-	/* TODO: replace this with a hash of available column names to column
-	 * numbers */
-	for (int colno = 0; colno < stmt->column_count; colno++) {
-		if (zend_string_equals(stmt->columns[colno].name, name)) {
-			int res;
-			zval val;
-
-			fetch_value(stmt, &val, colno, NULL);
-			res = check_empty ? i_zend_is_true(&val) : Z_TYPE(val) != IS_NULL;
-			zval_ptr_dtor_nogc(&val);
-
-			return res;
-		}
+	if (!retval) {
+		return false;
 	}
-
-	return 0;
+	ZEND_ASSERT(retval == &tmp_val);
+	int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+	zval_ptr_dtor_nogc(retval);
+	return res;
 }
 
 static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
@@ -2362,8 +2382,21 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 		pdo_row_t *row = (pdo_row_t *)object;
 		pdo_stmt_t *stmt = row->stmt;
 		ZEND_ASSERT(stmt);
+		zend_long column = Z_LVAL_P(offset);
 
-		return Z_LVAL_P(offset) >= 0 && Z_LVAL_P(offset) < stmt->column_count;
+		if (!check_empty) {
+			return column >= 0 && column < stmt->column_count;
+		}
+
+		zval tmp_val;
+		zval *retval = row_read_column_number(stmt, column, &tmp_val);
+		if (!retval) {
+			return false;
+		}
+		ZEND_ASSERT(retval == &tmp_val);
+		int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+		zval_ptr_dtor_nogc(retval);
+		return res;
 	} else {
 		zend_string *member = zval_try_get_string(offset);
 		if (!member) {
