@@ -17,7 +17,7 @@ $db = PDOTest::factory();
 
 const TABLE_NAME = 'test_pdo_35_pdo_row';
 $db->exec('CREATE TABLE ' . TABLE_NAME .' (id int, name varchar(10))');
-$db->exec('INSERT INTO ' . TABLE_NAME .' VALUES (23, \'\')');
+$db->exec('INSERT INTO ' . TABLE_NAME .' VALUES (23, \'0\')');
 
 $stmt = $db->prepare('SELECT id, name FROM ' . TABLE_NAME);
 $stmt->execute();
@@ -103,7 +103,7 @@ object(PDORow)#3 (3) {
   ["id"]=>
   string(2) "23"
   ["name"]=>
-  string(0) ""
+  string(1) "0"
 }
 bool(false)
 Offset: 0
@@ -196,11 +196,11 @@ Empty:
 bool(true)
 bool(true)
 Null coalesce:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Read:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Property:
 Isset:
 bool(true)
@@ -209,11 +209,11 @@ Empty:
 bool(true)
 bool(true)
 Null coalesce:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Read:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Offset: 1
 Dimension:
 Isset:
@@ -223,11 +223,11 @@ Empty:
 bool(true)
 bool(true)
 Null coalesce:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Read:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Property:
 Isset:
 bool(true)
@@ -236,11 +236,11 @@ Empty:
 bool(true)
 bool(true)
 Null coalesce:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Read:
-string(0) ""
-string(0) ""
+string(1) "0"
+string(1) "0"
 Errors:
 Cannot write to PDORow offset
 Cannot append to PDORow offset
