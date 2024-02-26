@@ -96,16 +96,16 @@ typedef struct _php_random_result {
 
 typedef struct _php_random_algo {
 	const size_t state_size;
-	void (*seed)(void *status, uint64_t seed);
-	php_random_result (*generate)(void *status);
-	zend_long (*range)(void *status, zend_long min, zend_long max);
-	bool (*serialize)(void *status, HashTable *data);
-	bool (*unserialize)(void *status, HashTable *data);
+	void (*seed)(void *state, uint64_t seed);
+	php_random_result (*generate)(void *state);
+	zend_long (*range)(void *state, zend_long min, zend_long max);
+	bool (*serialize)(void *state, HashTable *data);
+	bool (*unserialize)(void *state, HashTable *data);
 } php_random_algo;
 
 typedef struct _php_random_algo_with_state {
 	const php_random_algo *algo;
-	void *status;
+	void *state;
 } php_random_algo_with_state;
 
 extern PHPAPI const php_random_algo php_random_algo_combinedlcg;
@@ -170,7 +170,7 @@ static inline php_random_algo_with_state php_random_default_engine(void)
 {
 	return (php_random_algo_with_state){
 		.algo = php_random_default_algo(),
-		.status = php_random_default_status(),
+		.state = php_random_default_status(),
 	};
 }
 

@@ -39,7 +39,7 @@ static inline void randomizer_common_init(php_random_randomizer *randomizer, zen
 		php_random_status_state_user *state = php_random_status_alloc(&php_random_algo_user, false);
 		randomizer->engine = (php_random_algo_with_state){
 			.algo = &php_random_algo_user,
-			.status = state,
+			.state = state,
 		};
 
 		zend_string *mname;
@@ -103,7 +103,7 @@ PHP_METHOD(Random_Randomizer, nextFloat)
 	result = 0;
 	total_size = 0;
 	do {
-		php_random_result r = engine.algo->generate(engine.status);
+		php_random_result r = engine.algo->generate(engine.state);
 		result = result | (r.result << (total_size * 8));
 		total_size += r.size;
 		if (EG(exception)) {
@@ -214,7 +214,7 @@ PHP_METHOD(Random_Randomizer, nextInt)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	php_random_result result = engine.algo->generate(engine.status);
+	php_random_result result = engine.algo->generate(engine.state);
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
@@ -248,9 +248,9 @@ PHP_METHOD(Random_Randomizer, getInt)
 
 	if (UNEXPECTED(
 		engine.algo->range == php_random_algo_mt19937.range
-		&& ((php_random_status_state_mt19937 *) engine.status)->mode != MT_RAND_MT19937
+		&& ((php_random_status_state_mt19937 *) engine.state)->mode != MT_RAND_MT19937
 	)) {
-		uint64_t r = php_random_algo_mt19937.generate(engine.status).result >> 1;
+		uint64_t r = php_random_algo_mt19937.generate(engine.state).result >> 1;
 
 		/* This is an inlined version of the RAND_RANGE_BADSCALING macro that does not invoke UB when encountering
 		 * (max - min) > ZEND_LONG_MAX.
@@ -259,7 +259,7 @@ PHP_METHOD(Random_Randomizer, getInt)
 
 		result = (zend_long) (offset + min);
 	} else {
-		result = engine.algo->range(engine.status, min, max);
+		result = engine.algo->range(engine.state, min, max);
 	}
 
 	if (EG(exception)) {
@@ -292,7 +292,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	retval = zend_string_alloc(length, 0);
 
 	while (total_size < length) {
-		php_random_result result = engine.algo->generate(engine.status);
+		php_random_result result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
@@ -411,7 +411,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 	if (max_offset > 0xff) {
 		while (total_size < length) {
-			uint64_t offset = engine.algo->range(engine.status, 0, max_offset);
+			uint64_t offset = engine.algo->range(engine.state, 0, max_offset);
 
 			if (EG(exception)) {
 				zend_string_free(retval);
@@ -432,7 +432,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 		int failures = 0;
 		while (total_size < length) {
-			php_random_result result = engine.algo->generate(engine.status);
+			php_random_result result = engine.algo->generate(engine.state);
 			if (EG(exception)) {
 				zend_string_free(retval);
 				RETURN_THROWS();

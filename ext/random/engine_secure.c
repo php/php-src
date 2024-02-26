@@ -25,7 +25,7 @@
 
 #include "Zend/zend_exceptions.h"
 
-static php_random_result generate(void *status)
+static php_random_result generate(void *state)
 {
 	zend_ulong r = 0;
 
@@ -37,7 +37,7 @@ static php_random_result generate(void *status)
 	};
 }
 
-static zend_long range(void *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	zend_long result = 0;
 

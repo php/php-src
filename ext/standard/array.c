@@ -3214,7 +3214,7 @@ boundary_error:
 PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *array) /* {{{ */
 {
 	const php_random_algo *algo = engine.algo;
-	void *status = engine.status;
+	void *state = engine.state;
 
 	int64_t idx, j, n_elems, rnd_idx, n_left;
 	zval *zv, temp;
@@ -3256,7 +3256,7 @@ PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *arra
 			}
 		}
 		while (--n_left) {
-			rnd_idx = algo->range(status, 0, n_left);
+			rnd_idx = algo->range(state, 0, n_left);
 			if (EG(exception)) {
 				return false;
 			}
@@ -3284,7 +3284,7 @@ PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *arra
 			}
 		}
 		while (--n_left) {
-			rnd_idx = algo->range(status, 0, n_left);
+			rnd_idx = algo->range(state, 0, n_left);
 			if (EG(exception)) {
 				return false;
 			}
@@ -6197,7 +6197,7 @@ clean_up:
 PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, zend_long num_req, zval *retval, bool silent)
 {
 	const php_random_algo *algo = engine.algo;
-	void *status = engine.status;
+	void *state = engine.state;
 
 	HashTable *ht = Z_ARRVAL_P(input);
 	uint32_t num_avail = zend_hash_num_elements(ht);
@@ -6223,7 +6223,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 			/* If less than 1/2 of elements are used, don't sample. Instead search for a
 			 * specific offset using linear scan. */
 			i = 0;
-			randval = algo->range(status, 0, num_avail - 1);
+			randval = algo->range(state, 0, num_avail - 1);
 			if (EG(exception)) {
 				return false;
 			}
@@ -6246,7 +6246,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 		 * For N=10 this becomes smaller than 0.1%. */
 		if (HT_IS_PACKED(ht)) {
 			do {
-				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				randval = algo->range(state, 0, ht->nNumUsed - 1);
 				if (EG(exception)) {
 					return false;
 				}
@@ -6258,7 +6258,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 			} while (true);
 		} else {
 			do {
-				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				randval = algo->range(state, 0, ht->nNumUsed - 1);
 				if (EG(exception)) {
 					return false;
 				}
@@ -6296,7 +6296,7 @@ PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, 
 	i = num_req;
 	int failures = 0;
 	while (i) {
-		randval = algo->range(status, 0, num_avail - 1);
+		randval = algo->range(state, 0, num_avail - 1);
 		if (EG(exception)) {
 			goto fail;
 		}
