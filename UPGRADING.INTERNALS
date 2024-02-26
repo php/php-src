@@ -40,6 +40,44 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * The inet_aton() and win32/inet.h on Windows have been removed. Use Windows
   native inet_pton() from ws2tcpip.h.
 
+* zend_mm_set_custom_debug_handlers() has been removed from ZendMM, use
+  zend_mm_set_custom_handlers() instead which now supports DEBUG builds
+
+* zend_mm_set_custom_handlers() has changed its signature from
+  void()(zend_mm_heap *heap,
+         void* (*_malloc)(size_t),
+         void  (*_free)(void*),
+         void* (*_realloc)(void*, size_t))
+  to
+  void()(zend_mm_heap *heap,
+         void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+
+* zend_mm_get_custom_handlers() has changed its signature from
+  void()(zend_mm_heap *heap,
+         void* (**_malloc)(size_t),
+         void  (**_free)(void*),
+         void* (**_realloc)(void*, size_t))
+  to
+  void()(zend_mm_heap *heap,
+         void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+
+* __zend_malloc() has changed their signature from
+  void(*)(size_t) to
+  void(*)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+
+* __zend_calloc() has changed their signature from
+  void(*)(size_t, size_t) to
+  void(*)(size_t, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+
+* __zend_realloc() has changed their signature from
+  void(*)(void *, size_t) to
+  void(*)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+
+
 ========================
 2. Build system changes
 ========================
