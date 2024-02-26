@@ -62,6 +62,13 @@ PHP                                                                        NEWS
   . Added IntlDateFormatter::getIanaID/intltz_get_iana_id method/function.
     (David Carlier)
   . Set to C++17 standard for icu 74 and onwards. (David Carlier)
+  . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
+    ResourceBundle object now throw:
+    - TypeError for invalid offset types
+    - ValueError for an empty string
+    - ValueError if the integer index does not fit in a signed 32 bit integer
+  . ResourceBundle::get() now has a tentative return type of:
+    ResourceBundle|array|string|int|null
 
 - LDAP:
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3

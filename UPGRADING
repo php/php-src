@@ -45,6 +45,13 @@ PHP 8.4 UPGRADE NOTES
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
 
+- Intl:
+  . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
+    ResourceBundle object now throw:
+    - TypeError for invalid offset types
+    - ValueError for an empty string
+    - ValueError if the integer index does not fit in a signed 32 bit integer
+
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
@@ -321,6 +328,8 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
   . NumberFormatter::ROUND_HALFODD added to complement existing
     NumberFormatter::ROUND_HALFEVEN functionality.
+  . ResourceBundle::get() now has a tentative return type of:
+    ResourceBundle|array|string|int|null
 
 - MBString:
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
