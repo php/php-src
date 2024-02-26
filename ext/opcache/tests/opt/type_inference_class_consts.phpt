@@ -133,14 +133,10 @@ LIVE RANGES:
      0: 0001 - 0002 (tmp/var)
 
 Test2::getParentFoo:
-     ; (lines=3, args=0, vars=0, tmps=1)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 T0 = FETCH_CLASS_CONSTANT (parent) (exception) string("FOO")
-0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
-LIVE RANGES:
-     0: 0001 - 0002 (tmp/var)
+0000 RETURN int(42)
 
 Test2::getParentBar:
      ; (lines=1, args=0, vars=0, tmps=0)
@@ -149,11 +145,10 @@ Test2::getParentBar:
 0000 RETURN int(42)
 
 Test2::getParentBaz:
-     ; (lines=2, args=0, vars=0, tmps=1)
+     ; (lines=1, args=0, vars=0, tmps=0)
      ; (after optimizer)
      ; %s
-0000 T0 = FETCH_CLASS_CONSTANT (parent) (exception) string("BAZ")
-0001 RETURN T0
+0000 RETURN int(42)
 
 Test3::getTestFoo:
      ; (lines=1, args=0, vars=0, tmps=0)

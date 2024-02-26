@@ -834,7 +834,7 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 const zend_class_constant *zend_fetch_class_const_info(
 	const zend_script *script, const zend_op_array *op_array, const zend_op *opline, bool *is_prototype) {
 	const zend_class_entry *ce = NULL;
-	bool is_static_or_parent_reference = false;
+	bool is_static_reference = false;
 
 	if (opline->op2_type != IS_CONST || Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 		return NULL;
@@ -850,12 +850,11 @@ const zend_class_constant *zend_fetch_class_const_info(
 			ce = op_array->scope;
 		} else if (fetch_type == ZEND_FETCH_CLASS_STATIC) {
 			ce = op_array->scope;
-			is_static_or_parent_reference = true;
+			is_static_reference = true;
 		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT) {
 			if (op_array->scope->ce_flags & ZEND_ACC_LINKED) {
 				ce = op_array->scope->parent;
 			}
-			is_static_or_parent_reference = true;
 		}
 	}
 	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
@@ -869,8 +868,8 @@ const zend_class_constant *zend_fetch_class_const_info(
 		|| ((ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC && const_info->ce != op_array->scope)) {
 		return NULL;
 	}
-	*is_prototype = !is_static_or_parent_reference
-		|| (const_info->ce->ce_flags & ZEND_ACC_FINAL) || (ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_FINAL);
+	*is_prototype = is_static_reference
+		&& !(const_info->ce->ce_flags & ZEND_ACC_FINAL) && !(ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_FINAL);
 
 	return const_info;
 }
