@@ -295,10 +295,6 @@ if test "$PHP_RPATH" = "no"; then
 fi
 ])
 
-AC_DEFUN([PHP_CHECK_GCC_ARG],[
-  AC_MSG_ERROR([[Use AX_CHECK_COMPILE_FLAG instead]])
-])
-
 dnl
 dnl PHP_LIBGCC_LIBPATH(gcc)
 dnl
