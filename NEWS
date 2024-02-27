@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed array key as hash to string (case insensitive) comparison typo
     for the second operand buffer size (albeit unused for now). (A. Slepykh)
 
+- XML:
+  . Fixed bug GH-13517 (Multiple test failures when building with
+    --with-expat). (nielsdos)
+
 15 Feb 2024, PHP 8.3.3
 
 - Core:

@@ -22,5 +22,5 @@ $error = xml_error_string($code);
 echo "xml_parse returned $success, xml_get_error_code = $code, xml_error_string = $error\r\n";
 ?>
 --EXPECTF--
-xml_parse returned 1, xml_get_error_code = 0, xml_error_string = No error
-%rxml_parse returned 0, xml_get_error_code = 5, xml_error_string = Invalid document end|xml_parse returned 0, xml_get_error_code = 77, xml_error_string = Tag not finished%r
+xml_parse returned 1, xml_get_error_code = 0, xml_error_string = %S
+%rxml_parse returned 0, xml_get_error_code = 5, xml_error_string = Invalid document end|xml_parse returned 0, xml_get_error_code = 3, xml_error_string = no element found|xml_parse returned 0, xml_get_error_code = 77, xml_error_string = Tag not finished%r
