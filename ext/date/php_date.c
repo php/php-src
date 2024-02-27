@@ -2525,16 +2525,14 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	zend_long sec;
 	int usec;
 
-	if (UNEXPECTED(isnan(sec_dval)
-		|| sec_dval >= (double)TIMELIB_LONG_MAX
-		|| sec_dval < (double)TIMELIB_LONG_MIN
-	)) {
-		zend_throw_error(
+	if (UNEXPECTED(isnan(sec_dval) || !PHP_DATE_DOUBLE_FITS_LONG(sec_dval))) {
+		zend_argument_error(
 			date_ce_date_range_error,
-			"Seconds must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ", %g given",
+			1,
+			"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
 			TIMELIB_LONG_MIN,
 			TIMELIB_LONG_MAX,
-			sec_dval
+			ts
 		);
 		return false;
 	}
@@ -2543,6 +2541,18 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	usec = (int)(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(usec < 0)) {
+		if (UNEXPECTED(sec == TIMELIB_LONG_MIN)) {
+			zend_argument_error(
+				date_ce_date_range_error,
+				1,
+				"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
+				TIMELIB_LONG_MIN,
+				TIMELIB_LONG_MAX,
+				ts
+			);
+			return false;
+		}
+
 		sec = sec - 1;
 		usec = 1000000 + usec;
 	}

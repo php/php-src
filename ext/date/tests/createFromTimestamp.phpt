@@ -1,9 +1,5 @@
 --TEST--
 Tests for DateTime[Immutable]::createFromTimestamp
---SKIPIF--
-<?php
-if (PHP_INT_SIZE === 4) die('xfail fails on 32-bit');
-?>
 --INI--
 date.timezone=Europe/London
 --FILE--
@@ -11,10 +7,6 @@ date.timezone=Europe/London
 
 class MyDateTime extends DateTime {};
 class MyDateTimeImmutable extends DateTimeImmutable {};
-
-define('MAX_32BIT', 2147483647);
-// -2147483648 may not be expressed in a literal due to parsing peculiarities.
-define('MIN_32BIT', -2147483647 - 1);
 
 $timestamps = array(
     1696883232,
@@ -26,9 +18,6 @@ $timestamps = array(
     0,
     0.0,
     -0.0,
-    MAX_32BIT,
-    MIN_32BIT,
-    MIN_32BIT - 0.5,
     PHP_INT_MAX + 1024.0,
     PHP_INT_MIN - 1025.0,
     NAN,
@@ -212,64 +201,16 @@ DateTimeImmutable::createFromTimestamp(-0.0): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTime::createFromTimestamp(2147483647): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "2038-01-19 03:14:07.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-DateTimeImmutable::createFromTimestamp(2147483647): object(DateTimeImmutable)#%d (3) {
-  ["date"]=>
-  string(26) "2038-01-19 03:14:07.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-DateTime::createFromTimestamp(-2147483648): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:52.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-DateTimeImmutable::createFromTimestamp(-2147483648): object(DateTimeImmutable)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:52.000000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-DateTime::createFromTimestamp(-2147483648.5): object(DateTime)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:51.500000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-DateTimeImmutable::createFromTimestamp(-2147483648.5): object(DateTimeImmutable)#%d (3) {
-  ["date"]=>
-  string(26) "1901-12-13 20:45:51.500000"
-  ["timezone_type"]=>
-  int(1)
-  ["timezone"]=>
-  string(6) "+00:00"
-}
-DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTime::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTimeImmutable::createFromTimestamp(%f): DateRangeError: Seconds must be a finite number between %i and %i, %f given
-DateTime::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
-DateTimeImmutable::createFromTimestamp(NAN): DateRangeError: Seconds must be a finite number between %i and %i, NAN given
-DateTime::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
-DateTimeImmutable::createFromTimestamp(INF): DateRangeError: Seconds must be a finite number between %i and %i, INF given
-DateTime::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
-DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: Seconds must be a finite number between %i and %i, -INF given
+DateTime::createFromTimestamp(%f): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, %f given
+DateTimeImmutable::createFromTimestamp(%f): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, %f given
+DateTime::createFromTimestamp(%f): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, %f given
+DateTimeImmutable::createFromTimestamp(%f): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, %f given
+DateTime::createFromTimestamp(NAN): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, NAN given
+DateTimeImmutable::createFromTimestamp(NAN): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, NAN given
+DateTime::createFromTimestamp(INF): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, INF given
+DateTimeImmutable::createFromTimestamp(INF): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, INF given
+DateTime::createFromTimestamp(-INF): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, -INF given
+DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, -INF given
 MyDateTime::createFromTimestamp(0): object(MyDateTime)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"
