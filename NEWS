@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed bug GH-13354 (pg_execute/pg_send_query_params/pg_send_execute
     with null value passed by reference). (George Barbarosie)
+  . Fixed bug GH-13519 (PGSQL_CONNECT_FORCE_RENEW not working with persistent
+    connections. (David Carlier)
 
 - Standard:
   . Fixed bug GH-13279 (Instable array during in-place modification in uksort).
