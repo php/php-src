@@ -32,12 +32,15 @@
  */
 #define MODMULT(a, b, c, m, s) q = s / a; s = b * (s - a * q) - c * q; if (s < 0) s += m
 
+PHPAPI inline void php_random_combinedlcg_seed64(php_random_status_state_combinedlcg *state, uint64_t seed)
+{
+	state->state[0] = seed & 0xffffffffU;
+	state->state[1] = seed >> 32;
+}
+
 static void seed(void *state, uint64_t seed)
 {
-	php_random_status_state_combinedlcg *s = state;
-
-	s->state[0] = seed & 0xffffffffU;
-	s->state[1] = seed >> 32;
+	php_random_combinedlcg_seed64(state, seed);
 }
 
 static php_random_result generate(void *state)
