@@ -315,8 +315,14 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 		PQclear(res);
 	}
 	PQfinish(link);
-	PGG(num_persistent)--;
-	PGG(num_links)--;
+	/* See https://github.com/php/php-src/issues/12974 why we need to check the if */
+#ifdef ZTS
+	if (pgsql_module_entry.module_started)
+#endif
+	{
+		PGG(num_persistent)--;
+		PGG(num_links)--;
+	}
 	rsrc->ptr = NULL;
 }
 
@@ -589,12 +595,6 @@ newpconn:
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
-			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
-				if (zend_hash_del(&EG(persistent_list), str.s) != SUCCESS) {
-					goto err;
-				}
-				goto newpconn;
-			}
 			if (le->type != le_plink) {
 				goto err;
 			}
@@ -624,6 +624,12 @@ newpconn:
 			if (zend_strtod(PQparameterStatus(pgsql, "server_version"), NULL) >= 7.2) {
 				pg_result = PQexec(pgsql, "RESET ALL;");
 				PQclear(pg_result);
+			}
+			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
+				if (zend_hash_del(&EG(persistent_list), str.s) != SUCCESS) {
+					goto err;
+				}
+				goto newpconn;
 			}
 		}
 

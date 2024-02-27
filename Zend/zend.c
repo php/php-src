@@ -826,19 +826,13 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
-static void executor_globals_persistent_list_dtor(void *storage)
-{
-	zend_executor_globals *executor_globals = storage;
-
-	if (&executor_globals->persistent_list != global_persistent_list) {
-		zend_destroy_rsrc_list(&executor_globals->persistent_list);
-	}
-}
-
 static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
 {
 	zend_ini_dtor(executor_globals->ini_directives);
 
+	if (&executor_globals->persistent_list != global_persistent_list) {
+		zend_destroy_rsrc_list(&executor_globals->persistent_list);
+	}
 	if (executor_globals->zend_constants != GLOBAL_CONSTANTS_TABLE) {
 		zend_hash_destroy(executor_globals->zend_constants);
 		free(executor_globals->zend_constants);
@@ -1128,9 +1122,6 @@ void zend_shutdown(void) /* {{{ */
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
-#ifdef ZTS
-	ts_apply_for_id(executor_globals_id, executor_globals_persistent_list_dtor);
-#endif
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();
