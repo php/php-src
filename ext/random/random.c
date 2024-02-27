@@ -688,7 +688,13 @@ PHP_FUNCTION(mt_srand)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	state->mode = mode;
+	switch (mode) {
+	case MT_RAND_PHP:
+		state->mode = MT_RAND_PHP;
+		break;
+	default:
+		state->mode = MT_RAND_MT19937;
+	}
 
 	if (ZEND_NUM_ARGS() == 0) {
 		php_random_mt19937_seed_default(status->state);
