@@ -836,7 +836,7 @@ const zend_class_constant *zend_fetch_class_const_info(
 	const zend_class_entry *ce = NULL;
 	bool is_static_reference = false;
 
-	if (opline->op2_type != IS_CONST || Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
+	if (!opline || !op_array || !script || opline->op2_type != IS_CONST || Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 		return NULL;
 	}
 	if (opline->op1_type == IS_CONST) {
