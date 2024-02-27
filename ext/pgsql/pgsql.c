@@ -589,14 +589,16 @@ newpconn:
 			PGG(num_links)++;
 			PGG(num_persistent)++;
 		} else {  /* we do */
-			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
-				if (zend_hash_del(&EG(persistent_list), str.s) != SUCCESS) {
-					goto err;
-				}
-				goto newpconn;
-			}
 			if (le->type != le_plink) {
 				goto err;
+			}
+			if ((connect_type & PGSQL_CONNECT_FORCE_NEW)) {
+				pgsql = (PGconn *) le->ptr;
+				PQfinish(pgsql);
+				PGG(num_links)--;
+				PGG(num_persistent)--;
+				le->ptr = NULL;
+				goto newpconn;
 			}
 			/* ensure that the link did not die */
 			if (PGG(auto_reset_persistent) & 1) {
