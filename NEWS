@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 - Curl:
   . Fix failing tests due to string changes in libcurl 8.6.0. (Ayesh)
 
+
 - DOM:
   . Fix unlikely memory leak in case of namespace removal with extremely deep
     trees. (nielsdos)
