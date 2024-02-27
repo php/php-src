@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-11950 ([mysqlnd] Fixed not to set CR_MALFORMED_PACKET to error
     if CR_SERVER_GONE_ERROR is already set). (Saki Takamachi)
 
+- PDO:
+  . Fix various PDORow bugs. (Girgias)
+
 - PGSQL:
   . Fixed bug GH-13354 (pg_execute/pg_send_query_params/pg_send_execute
     with null value passed by reference). (George Barbarosie)
