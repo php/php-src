@@ -15,5 +15,5 @@ print "ok\n";
 
 ?>
 --EXPECT--
-[] operator not supported for SplFixedArray
+Cannot fetch append object of type SplFixedArray
 ok

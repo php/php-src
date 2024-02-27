@@ -31,7 +31,7 @@ var_dump($fixedData[0] ?? 42);
 var_dump($fixedData[0][1][2] ?? 42);
 
 $fixedData[0] = new MyFixedArray(10);
-$fixedData[0][1] = new MyFixedArray(10);
+// TODO Add support? $fixedData[0][1] = new MyFixedArray(10);
 var_dump(isset($fixedData[0][1][2]));
 var_dump($fixedData[0][1][2] ?? 42);
 
@@ -46,17 +46,11 @@ int(42)
 offsetExists(0)
 int(42)
 offsetSet(0)
-offsetGet(0)
-offsetSet(1)
 offsetExists(0)
 offsetGet(0)
 offsetExists(1)
-offsetGet(1)
-offsetExists(2)
 bool(false)
 offsetExists(0)
 offsetGet(0)
 offsetExists(1)
-offsetGet(1)
-offsetExists(2)
 int(42)

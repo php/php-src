@@ -10,7 +10,11 @@ $a[0] = 1;
 $a[1] = 2;
 $a[2] = $a;
 
-$a[2][0] = 3;
+try {
+    $a[2][0] = 3;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 
 foreach ($a as $x) {
     if (is_object($x)) {

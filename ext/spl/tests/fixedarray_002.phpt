@@ -84,6 +84,7 @@ A::offsetExists
 A::offsetExists
 A::offsetExists
 A::offsetExists
+A::offsetGet
 bool(false)
 bool(true)
 bool(true)
