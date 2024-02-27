@@ -156,7 +156,6 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_xoshiro256starstar = {
 	sizeof(php_random_status_state_xoshiro256starstar),
-	NULL,
 	generate,
 	range,
 	serialize,

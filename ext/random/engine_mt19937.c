@@ -226,7 +226,6 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_mt19937 = {
 	sizeof(php_random_status_state_mt19937),
-	NULL,
 	generate,
 	range,
 	serialize,

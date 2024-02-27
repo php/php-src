@@ -48,7 +48,6 @@ static zend_long range(void *state, zend_long min, zend_long max)
 
 const php_random_algo php_random_algo_secure = {
 	0,
-	NULL,
 	generate,
 	range,
 	NULL,

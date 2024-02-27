@@ -107,7 +107,6 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_pcgoneseq128xslrr64 = {
 	sizeof(php_random_status_state_pcgoneseq128xslrr64),
-	NULL,
 	generate,
 	range,
 	serialize,

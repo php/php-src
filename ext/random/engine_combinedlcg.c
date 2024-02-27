@@ -98,7 +98,6 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_combinedlcg = {
 	sizeof(php_random_status_state_combinedlcg),
-	NULL,
 	generate,
 	range,
 	serialize,

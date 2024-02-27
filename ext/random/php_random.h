@@ -96,7 +96,6 @@ typedef struct _php_random_result {
 
 typedef struct _php_random_algo {
 	const size_t state_size;
-	void (*seed)(void *state, uint64_t seed);
 	php_random_result (*generate)(void *state);
 	zend_long (*range)(void *state, zend_long min, zend_long max);
 	bool (*serialize)(void *state, HashTable *data);
