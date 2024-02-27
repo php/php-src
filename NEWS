@@ -39,6 +39,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13519 (PGSQL_CONNECT_FORCE_RENEW not working with persistent
     connections. (David Carlier)
 
+- SPL:
+  . Fixed bug GH-13531 (Unable to resize SplfixedArray after being unserialized
+    in PHP 8.2.15). (nielsdos)
+
 - Standard:
   . Fixed bug GH-13279 (Instable array during in-place modification in uksort).
     (ilutov)
