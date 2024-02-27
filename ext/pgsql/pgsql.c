@@ -314,15 +314,6 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 		PQclear(res);
 	}
 	PQfinish(link);
-	/*
-#ifdef ZTS
-	if (pgsql_module_entry.module_started)
-#endif
-	{
-		PGG(num_persistent)--;
-		PGG(num_links)--;
-	}
-	*/
 	rsrc->ptr = NULL;
 }
 
