@@ -116,6 +116,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
    - M4 macro PHP_SOCKADDR_CHECKS has been removed (use AC_CHECK_TYPES and
      AC_CHECK_MEMBERS).
+   - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
+     AX_CHECK_COMPILE_FLAG).
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
