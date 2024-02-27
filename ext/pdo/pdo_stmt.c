@@ -31,6 +31,7 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "php_memory_streams.h"
 #include "pdo_stmt_arginfo.h"
 
@@ -2302,19 +2303,19 @@ static zval *row_prop_read(zend_object *object, zend_string *name, int type, voi
 	return retval;
 }
 
-static zval *row_dim_read(zend_object *object, zval *offset, int type, zval *rv)
+static bool row_has_column_number(const pdo_stmt_t *stmt, zend_long column) {
+	return column >= 0 && column < stmt->column_count;
+}
+
+static zval *row_dim_read(zend_object *object, zval *offset, zval *rv)
 {
-	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot append to PDORow offset");
-		return NULL;
-	}
 	if (Z_TYPE_P(offset) == IS_LONG) {
 		pdo_row_t *row = (pdo_row_t *)object;
 		pdo_stmt_t *stmt = row->stmt;
 		ZEND_ASSERT(stmt);
 
 		ZVAL_NULL(rv);
-		if (Z_LVAL_P(offset) >= 0 && Z_LVAL_P(offset) < stmt->column_count) {
+		if (row_has_column_number(stmt, Z_LVAL_P(offset))) {
 			fetch_value(stmt, rv, Z_LVAL_P(offset), NULL);
 		}
 		return rv;
@@ -2323,7 +2324,7 @@ static zval *row_dim_read(zend_object *object, zval *offset, int type, zval *rv)
 		if (!member) {
 			return NULL;
 		}
-		zval *result = row_prop_read(object, member, type, NULL, rv);
+		zval *result = row_prop_read(object, member, BP_VAR_R, NULL, rv);
 		zend_string_release_ex(member, false);
 		return result;
 	}
@@ -2333,15 +2334,6 @@ static zval *row_prop_write(zend_object *object, zend_string *name, zval *value,
 {
 	zend_throw_error(NULL, "Cannot write to PDORow property");
 	return value;
-}
-
-static void row_dim_write(zend_object *object, zval *member, zval *value)
-{
-	if (!member) {
-		zend_throw_error(NULL, "Cannot append to PDORow offset");
-	} else {
-		zend_throw_error(NULL, "Cannot write to PDORow offset");
-	}
 }
 
 // todo: make row_prop_exists return bool as well
@@ -2370,35 +2362,20 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 	return res;
 }
 
-
-// todo: make row_dim_exists return bool as well
-static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
+static bool row_dim_exists(zend_object *object, zval *offset)
 {
 	if (Z_TYPE_P(offset) == IS_LONG) {
 		pdo_row_t *row = (pdo_row_t *)object;
 		pdo_stmt_t *stmt = row->stmt;
 		ZEND_ASSERT(stmt);
-		zend_long column = Z_LVAL_P(offset);
 
-		if (!check_empty) {
-			return column >= 0 && column < stmt->column_count;
-		}
-
-		zval tmp_val;
-		zval *retval = row_read_column_number(stmt, column, &tmp_val);
-		if (!retval) {
-			return false;
-		}
-		ZEND_ASSERT(retval == &tmp_val);
-		bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
-		zval_ptr_dtor_nogc(retval);
-		return res;
+		return row_has_column_number(stmt, Z_LVAL_P(offset));
 	} else {
 		zend_string *member = zval_try_get_string(offset);
 		if (!member) {
 			return 0;
 		}
-		int result = row_prop_exists(object, member, check_empty, NULL);
+		bool result = row_prop_exists(object, member, /* check_empty */ false, NULL);
 		zend_string_release_ex(member, false);
 		return result;
 	}
@@ -2407,11 +2384,6 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 static void row_prop_delete(zend_object *object, zend_string *offset, void **cache_slot)
 {
 	zend_throw_error(NULL, "Cannot unset PDORow property");
-}
-
-static void row_dim_delete(zend_object *object, zval *offset)
-{
-	zend_throw_error(NULL, "Cannot unset PDORow offset");
 }
 
 static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose purpose)
@@ -2476,6 +2448,65 @@ zend_object *pdo_row_new(zend_class_entry *ce)
 	return &row->std;
 }
 
+PHP_METHOD(PDORow, offsetGet)
+{
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_str) {
+		if (zend_string_equals_literal(offset_str, "queryString")) {
+			zend_argument_value_error(1, "cannot be \"queryString\"");
+			RETURN_THROWS();
+		}
+		RETVAL_NULL();
+		row_prop_read(Z_OBJ_P(ZEND_THIS), offset_str, /* type */ BP_VAR_R, /* cache_slot */NULL, return_value);
+		return;
+	} else {
+		pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(ZEND_THIS);
+		pdo_stmt_t *stmt = row->stmt;
+		ZEND_ASSERT(stmt);
+
+		RETVAL_NULL();
+		if (row_has_column_number(stmt, offset_long)) {
+			fetch_value(stmt, return_value, offset_long, NULL);
+		}
+		return;
+	}
+}
+
+PHP_METHOD(PDORow, offsetExists)
+{
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (offset_str) {
+		if (zend_string_equals_literal(offset_str, "queryString")) {
+			zend_argument_value_error(1, "cannot be \"queryString\"");
+			RETURN_THROWS();
+		}
+		RETURN_BOOL(row_prop_exists(Z_OBJ_P(ZEND_THIS), offset_str, /* check_empty */ false, NULL));
+	} else {
+		pdo_row_t *row = (pdo_row_t *)Z_OBJ_P(ZEND_THIS);
+		pdo_stmt_t *stmt = row->stmt;
+		ZEND_ASSERT(stmt);
+
+		RETURN_BOOL(row_has_column_number(stmt, offset_long));
+	}
+}
+
+static /* const */ zend_class_dimensions_functions pdo_row_dimensions_functions = {
+	.read_dimension = row_dim_read,
+	.has_dimension  = row_dim_exists,
+};
+
 void pdo_stmt_init(void)
 {
 	pdo_dbstmt_ce = register_class_PDOStatement(zend_ce_aggregate);
@@ -2492,9 +2523,10 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.compare = zend_objects_not_comparable;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
-	pdo_row_ce = register_class_PDORow();
+	pdo_row_ce = register_class_PDORow(zend_ce_dimension_read);
 	pdo_row_ce->create_object = pdo_row_new;
 	pdo_row_ce->default_object_handlers = &pdo_row_object_handlers;
+	pdo_row_ce->dimension_handlers = &pdo_row_dimensions_functions;
 
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
@@ -2504,10 +2536,6 @@ void pdo_stmt_init(void)
 	pdo_row_object_handlers.write_property = row_prop_write;
 	pdo_row_object_handlers.has_property = row_prop_exists;
 	pdo_row_object_handlers.unset_property = row_prop_delete;
-	pdo_row_object_handlers.read_dimension = row_dim_read;
-	pdo_row_object_handlers.write_dimension = row_dim_write;
-	pdo_row_object_handlers.has_dimension = row_dim_exists;
-	pdo_row_object_handlers.unset_dimension = row_dim_delete;
 	pdo_row_object_handlers.get_properties_for = row_get_properties_for;
 	pdo_row_object_handlers.get_constructor = row_get_ctor;
 	pdo_row_object_handlers.compare = zend_objects_not_comparable;

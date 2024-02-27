@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6a5b332ba4bfeceaca6aad734d38dabb66d82c97 */
+ * Stub hash: 5ce85d34205ca72d6a0ea43e8f730a3c1adad987 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDOStatement_bindColumn, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, column, MAY_BE_STRING|MAY_BE_LONG, NULL)
@@ -87,6 +87,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PDOStatement_getIterator, 0, 0, Iterator, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDORow_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDORow_offsetExists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(PDOStatement, bindColumn);
 ZEND_METHOD(PDOStatement, bindParam);
 ZEND_METHOD(PDOStatement, bindValue);
@@ -107,6 +115,8 @@ ZEND_METHOD(PDOStatement, rowCount);
 ZEND_METHOD(PDOStatement, setAttribute);
 ZEND_METHOD(PDOStatement, setFetchMode);
 ZEND_METHOD(PDOStatement, getIterator);
+ZEND_METHOD(PDORow, offsetGet);
+ZEND_METHOD(PDORow, offsetExists);
 
 static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_ME(PDOStatement, bindColumn, arginfo_class_PDOStatement_bindColumn, ZEND_ACC_PUBLIC)
@@ -133,6 +143,8 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 };
 
 static const zend_function_entry class_PDORow_methods[] = {
+	ZEND_ME(PDORow, offsetGet, arginfo_class_PDORow_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDORow, offsetExists, arginfo_class_PDORow_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -154,13 +166,14 @@ static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_ent
 	return class_entry;
 }
 
-static zend_class_entry *register_class_PDORow(void)
+static zend_class_entry *register_class_PDORow(zend_class_entry *class_entry_DimensionReadable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	zend_class_implements(class_entry, 1, class_entry_DimensionReadable);
 
 	zval property_queryString_default_value;
 	ZVAL_UNDEF(&property_queryString_default_value);
