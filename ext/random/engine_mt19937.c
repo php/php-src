@@ -139,11 +139,6 @@ PHPAPI inline void php_random_mt19937_seed32(php_random_status_state_mt19937 *st
 	mt19937_reload(state);
 }
 
-static void seed(void *state, uint64_t seed)
-{
-	php_random_mt19937_seed32(state, seed & 0xffffffffU);
-}
-
 static php_random_result generate(void *state)
 {
 	php_random_status_state_mt19937 *s = state;
@@ -231,7 +226,7 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_mt19937 = {
 	sizeof(php_random_status_state_mt19937),
-	seed,
+	NULL,
 	generate,
 	range,
 	serialize,

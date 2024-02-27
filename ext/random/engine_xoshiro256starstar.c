@@ -102,11 +102,6 @@ PHPAPI inline void php_random_xoshiro256starstar_seed64(php_random_status_state_
 	php_random_xoshiro256starstar_seed256(state, s[0], s[1], s[2], s[3]);
 }
 
-static void seed(void *state, uint64_t seed)
-{
-	php_random_xoshiro256starstar_seed64(state, seed);
-}
-
 static php_random_result generate(void *state)
 {
 	return (php_random_result){
@@ -161,7 +156,7 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_xoshiro256starstar = {
 	sizeof(php_random_status_state_xoshiro256starstar),
-	seed,
+	NULL,
 	generate,
 	range,
 	serialize,

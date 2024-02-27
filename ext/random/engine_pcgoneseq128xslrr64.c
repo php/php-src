@@ -43,11 +43,6 @@ PHPAPI inline void php_random_pcgoneseq128xslrr64_seed128(php_random_status_stat
 	step(s);
 }
 
-static void seed(void *state, uint64_t seed)
-{
-	php_random_pcgoneseq128xslrr64_seed128(state, php_random_uint128_constant(0ULL, seed));
-}
-
 static php_random_result generate(void *state)
 {
 	php_random_status_state_pcgoneseq128xslrr64 *s = state;
@@ -112,7 +107,7 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_pcgoneseq128xslrr64 = {
 	sizeof(php_random_status_state_pcgoneseq128xslrr64),
-	seed,
+	NULL,
 	generate,
 	range,
 	serialize,
