@@ -3,7 +3,7 @@
 /** @generate-class-entries */
 
 /** @not-serializable */
-class ResourceBundle implements IteratorAggregate, Countable
+class ResourceBundle implements IteratorAggregate, Countable, DimensionReadable
 {
     public function __construct(?string $locale, ?string $bundle, bool $fallback = true) {}
 
@@ -15,6 +15,12 @@ class ResourceBundle implements IteratorAggregate, Countable
 
     /** @tentative-return-type */
     public function get(string|int $index, bool $fallback = true): ResourceBundle|array|string|int|null {}
+
+    /** @param string|int $offset */
+    public function offsetGet(mixed $offset): ResourceBundle|array|string|int|null {}
+
+    /** @param string|int $offset */
+    public function offsetExists(mixed $offset): bool {}
 
     /**
      * @tentative-return-type

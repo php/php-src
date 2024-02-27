@@ -19,6 +19,7 @@
 #include <zend.h>
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
+#include <Zend/zend_interfaces_dimension.h>
 #include <php.h>
 
 #include "php_intl.h"
@@ -168,6 +169,43 @@ PHP_FUNCTION( resourcebundle_create )
 }
 /* }}} */
 
+/* TODO Assume fallback is false or true? */
+static bool resource_bundle_offset_exists(zend_object *object, zend_string *offset_str, zend_long offset_int)
+{
+	UErrorCode private_code = 0;
+	ResourceBundle_object *rb = php_intl_resourcebundle_fetch_object(object);
+	if (offset_str) {
+		if (UNEXPECTED(ZSTR_LEN(offset_str) == 0)) {
+			return false;
+		}
+		const char *key = ZSTR_VAL(offset_str);
+        ures_getByKey(rb->me, key, rb->child, &private_code);
+	} else {
+		if (UNEXPECTED(offset_int < (zend_long)INT32_MIN || offset_int > (zend_long)INT32_MAX)) {
+			return false;
+		}
+		ures_getByIndex(rb->me, (int32_t)offset_int, rb->child, &private_code);
+	}
+
+	if (U_FAILURE(private_code)) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
+static bool resource_bundle_array_has(zend_object *object, zval *offset)
+{
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		return resource_bundle_offset_exists(object, /* offset_str */ NULL, Z_LVAL_P(offset));
+	} else if (Z_TYPE_P(offset) == IS_STRING) {
+		return resource_bundle_offset_exists(object, Z_STR_P(offset), /* offset_int */ 0);
+	} else {
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
+		return false;
+	}
+}
+
 /* {{{ resourcebundle_array_fetch */
 static zval *resource_bundle_array_fetch(
 	zend_object *object, zend_string *offset_str, zend_long offset_int,
@@ -240,20 +278,14 @@ static zval *resource_bundle_array_fetch(
 /* }}} */
 
 /* {{{ resourcebundle_array_get */
-zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval *rv)
+static zval *resourcebundle_array_get(zend_object *object, zval *offset, zval *rv)
 {
-	if (offset == NULL) {
-		zend_throw_error(NULL, "Cannot apply [] to ResourceBundle object");
-		return NULL;
-	}
-
-	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) == IS_LONG) {
 		return resource_bundle_array_fetch(object, /* offset_str */ NULL, Z_LVAL_P(offset), rv, /* fallback */ true, /* arg_num */ 0);
 	} else if (Z_TYPE_P(offset) == IS_STRING) {
 		return resource_bundle_array_fetch(object, Z_STR_P(offset), /* offset_int */ 0, rv, /* fallback */ true, /* arg_num */ 0);
 	} else {
-		zend_illegal_container_offset(object->ce->name, offset, type);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
 		return NULL;
 	}
 }
@@ -298,7 +330,33 @@ PHP_METHOD(ResourceBundle , get)
 		RETURN_THROWS();
 	}
 }
-/* }}} */
+
+PHP_METHOD(ResourceBundle, offsetGet)
+{
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *retval = resource_bundle_array_fetch(Z_OBJ_P(ZEND_THIS), offset_str, offset_long, return_value, /* fallback */ true, /* arg_num */ 1);
+	if (!retval) {
+		RETURN_THROWS();
+	}
+}
+
+PHP_METHOD(ResourceBundle, offsetExists)
+{
+	zend_string *offset_str = NULL;
+	zend_long offset_long = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(offset_str, offset_long)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(resource_bundle_offset_exists(Z_OBJ_P(ZEND_THIS), offset_str, offset_long));
+}
 
 /* {{{ resourcebundle_array_count */
 static zend_result resourcebundle_array_count(zend_object *object, zend_long *count)
@@ -414,21 +472,26 @@ PHP_METHOD(ResourceBundle, getIterator) {
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
+static /* const */ zend_class_dimensions_functions resourcebundle_dimensions_functions = {
+	.read_dimension  = resourcebundle_array_get,
+	.has_dimension   = resource_bundle_array_has,
+};
+
 /* {{{ resourcebundle_register_class
  * Initialize 'ResourceBundle' class
  */
 void resourcebundle_register_class( void )
 {
-	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable);
+	ResourceBundle_ce_ptr = register_class_ResourceBundle(zend_ce_aggregate, zend_ce_countable, zend_ce_dimension_read);
 	ResourceBundle_ce_ptr->create_object = ResourceBundle_object_create;
 	ResourceBundle_ce_ptr->default_object_handlers = &ResourceBundle_object_handlers;
 	ResourceBundle_ce_ptr->get_iterator = resourcebundle_get_iterator;
+	ResourceBundle_ce_ptr->dimension_handlers = &resourcebundle_dimensions_functions;
 
 	ResourceBundle_object_handlers = std_object_handlers;
 	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
 	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */
 	ResourceBundle_object_handlers.free_obj = ResourceBundle_object_free;
-	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 }
 /* }}} */
