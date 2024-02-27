@@ -33,7 +33,7 @@
 #include "spl_iterators.h"
 #include "ext/json/php_json.h"
 
-zend_object_handlers spl_handler_SplFixedArray;
+static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 
 #ifdef COMPILE_DL_SPL_FIXEDARRAY
