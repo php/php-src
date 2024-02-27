@@ -183,6 +183,8 @@ PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *sta
 
 PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgoneseq128xslrr64 *state, uint64_t advance);
 
+PHPAPI void php_random_xoshiro256starstar_seed64(php_random_status_state_xoshiro256starstar *state, uint64_t seed);
+PHPAPI void php_random_xoshiro256starstar_seed256(php_random_status_state_xoshiro256starstar *state, uint64_t s0, uint64_t s1, uint64_t s2, uint64_t s3);
 PHPAPI void php_random_xoshiro256starstar_jump(php_random_status_state_xoshiro256starstar *state);
 PHPAPI void php_random_xoshiro256starstar_jump_long(php_random_status_state_xoshiro256starstar *state);
 
