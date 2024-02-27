@@ -91,6 +91,7 @@ static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
 	array->elements = NULL;
+	array->cached_resize = -1;
 }
 
 /* Initializes the range [from, to) to null. Does not dtor existing elements. */
@@ -110,6 +111,7 @@ static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_lon
 	array->elements = size ? safe_emalloc(size, sizeof(zval), 0) : NULL;
 	array->size = size;
 	array->should_rebuild_properties = true;
+	array->cached_resize = -1;
 }
 
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
@@ -120,7 +122,6 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 	} else {
 		spl_fixedarray_default_ctor(array);
 	}
-	array->cached_resize = -1;
 }
 
 /* Copies the range [begin, end) into the fixedarray, beginning at `offset`.
