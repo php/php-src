@@ -35,7 +35,7 @@ static inline void step(php_random_status_state_pcgoneseq128xslrr64 *s)
 	);
 }
 
-static inline void seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed)
+PHPAPI inline void php_random_pcgoneseq128xslrr64_seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed)
 {
 	s->state = php_random_uint128_constant(0ULL, 0ULL);
 	step(s);
@@ -45,7 +45,7 @@ static inline void seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_r
 
 static void seed(void *state, uint64_t seed)
 {
-	seed128(state, php_random_uint128_constant(0ULL, seed));
+	php_random_pcgoneseq128xslrr64_seed128(state, php_random_uint128_constant(0ULL, seed));
 }
 
 static php_random_result generate(void *state)
@@ -164,7 +164,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 			RETURN_THROWS();
 		}
 
-		seed128(state, s);
+		php_random_pcgoneseq128xslrr64_seed128(state, s);
 	} else {
 		if (str_seed) {
 			/* char (byte: 8 bit) * 16 = 128 bits */
@@ -179,13 +179,13 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 					}
 				}
 
-				seed128(state, php_random_uint128_constant(t[0], t[1]));
+				php_random_pcgoneseq128xslrr64_seed128(state, php_random_uint128_constant(t[0], t[1]));
 			} else {
 				zend_argument_value_error(1, "must be a 16 byte (128 bit) string");
 				RETURN_THROWS();
 			}
 		} else {
-			seed128(state, php_random_uint128_constant(0ULL, (uint64_t) int_seed));
+			php_random_pcgoneseq128xslrr64_seed128(state, php_random_uint128_constant(0ULL, (uint64_t) int_seed));
 		}
 	}
 }

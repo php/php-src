@@ -181,6 +181,7 @@ PHPAPI void php_random_combinedlcg_seed_default(php_random_status_state_combined
 
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state);
 
+PHPAPI void php_random_pcgoneseq128xslrr64_seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed);
 PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgoneseq128xslrr64 *state, uint64_t advance);
 
 PHPAPI void php_random_xoshiro256starstar_seed64(php_random_status_state_xoshiro256starstar *state, uint64_t seed);
