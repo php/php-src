@@ -3,10 +3,10 @@ GH-13519 - PGSQL_CONNECT_FORCE_NEW with persistent connections.
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
-include 'config.inc';
+include 'inc/config.inc';
 
 $db1 = pg_pconnect($conn_str);
 $pid1 = pg_get_pid($db1);
