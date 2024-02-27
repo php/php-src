@@ -215,37 +215,45 @@ AC_DEFUN([PHP_ADD_SOURCES_X],[
 dnl Relative to source- or build-directory?
 dnl ac_srcdir/ac_bdir include trailing slash
   case $1 in
-  ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+    "") ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
+    /*) ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+    *) ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
 
 dnl how to build .. shared or static?
   ifelse($5,yes,_PHP_ASSIGN_BUILD_VARS(shared),_PHP_ASSIGN_BUILD_VARS(php))
 
 dnl Iterate over the sources.
-  old_IFS=[$]IFS
-  for ac_src in $2; do
 
 dnl Remove the suffix.
-      IFS=.
-      set $ac_src
-      ac_obj=[$]1
-      IFS=$old_IFS
+  old_IFS=[$]IFS
+  for ac_src in $2; do
+    IFS=.
+    set $ac_src
+    ac_obj=[$]1
+    IFS=$old_IFS
 
 dnl Append to the array which has been dynamically chosen at m4 time.
-      $4="[$]$4 [$]ac_bdir[$]ac_obj.lo"
+    $4="[$]$4 [$]ac_bdir[$]ac_obj.lo"
 
-dnl Choose the right compiler/flags/etc. for the source-file.
-      case $ac_src in
-        *.c[)] ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
-        *.s[)] ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
-        *.S[)] ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post" ;;
-        *.cpp|*.cc|*.cxx[)] ac_comp="$b_cxx_pre $ac_inc $b_cxx_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_cxx_post" ;;
-      esac
+    # Choose compiler/flags based on file extension
+    case $ac_src in
+      *.rs)
+        # Rust source file
+        ac_comp="rustc $ac_srcdir$ac_src --crate-type=staticlib --out-dir $ac_bdir --crate-name=$(basename $ac_src .rs) && mv ${ac_bdir}lib$(basename $ac_src .rs).a ${ac_bdir}$(basename $ac_src .rs).o"
+        ;;
 
-dnl Generate Makefiles with dependencies
-      ac_comp="$ac_comp -MMD -MF $ac_bdir$ac_obj.dep -MT $ac_bdir[$]ac_obj.lo"
+      *.c|*.s|*.S)
+        # C and assembly source files
+        ac_comp="$b_c_pre $ac_inc $b_c_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_c_post -MMD -MF $ac_bdir$ac_obj.dep -MT $ac_bdir$ac_obj.lo"
+        ;;
+      *.cpp|*.cc|*.cxx)
+        # C++ source files
+        ac_comp="$b_cxx_pre $ac_inc $b_cxx_meta $3 -c $ac_srcdir$ac_src -o $ac_bdir$ac_obj.$b_lo $b_cxx_post -MMD -MF $ac_bdir$ac_obj.dep -MT $ac_bdir$ac_obj.lo"
+        ;;
+    esac
+
+
 
 dnl Create a rule for the object/source combo.
     cat >>Makefile.objects<<EOF
@@ -253,8 +261,12 @@ dnl Create a rule for the object/source combo.
 $ac_bdir[$]ac_obj.lo: $ac_srcdir[$]ac_src
 	$ac_comp
 EOF
+
+
   done
 ])
+
+
 
 dnl ----------------------------------------------------------------------------
 dnl Compiler characteristics checks.
@@ -781,6 +793,10 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   php_cxx_post=
   php_lo=lo
 
+  php_rustc_pre='rustc'
+  php_rustc_meta='$(RUSTFLAGS)'
+  php_rustc_post=
+
   case $with_pic in
     yes) pic_setting='-prefer-pic';;
     no)  pic_setting='-prefer-non-pic';;
@@ -794,6 +810,7 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
   shared_cxx_post=
   shared_lo=lo
 ])
+
 
 dnl
 dnl PHP_SHARED_MODULE(module-name, object-var, build-dir, cxx, zend_ext)

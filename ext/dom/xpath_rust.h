@@ -1,0 +1,1 @@
+extern char* domxpath_quote_literal(const char *const input, uintptr_t *const len);
