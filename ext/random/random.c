@@ -405,7 +405,7 @@ PHPAPI double php_combined_lcg(void)
 PHPAPI void php_mt_srand(uint32_t seed)
 {
 	/* Seed the generator with a simple uint32 */
-	php_random_algo_mt19937.seed(php_random_default_status(), (zend_long) seed);
+	php_random_mt19937_seed32(php_random_default_status(), (zend_long) seed);
 }
 /* }}} */
 
@@ -491,7 +491,7 @@ PHP_FUNCTION(mt_srand)
 	if (seed_is_null) {
 		php_random_mt19937_seed_default(state);
 	} else {
-		php_random_algo_mt19937.seed(state, (uint64_t) seed);
+		php_random_mt19937_seed32(state, (uint64_t) seed);
 	}
 	RANDOM_G(mt19937_seeded) = true;
 }
