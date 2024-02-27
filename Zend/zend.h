@@ -280,7 +280,6 @@ void zend_shutdown(void);
 void zend_register_standard_ini_entries(void);
 zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
-void zend_unload_modules(void);
 
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
 ZEND_API size_t zend_get_page_size(void);
