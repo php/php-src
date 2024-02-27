@@ -1,8 +1,3 @@
---TEST--
-Test xml_set_start_namespace_decl_handler function: basic
---EXTENSIONS--
-xml
---FILE--
 <?php
 $xml = <<<HERE
 <aw1:book xmlns:aw1="http://www.somewhere.com/namespace1"
@@ -37,14 +32,3 @@ function Namespace_End_Handler($parser, $prefix) {
 function DefaultHandler( $parser, $data ) {
    print( 'DefaultHandler Called<br/>' );
 }
-?>
---EXPECT--
-bool(true)
-bool(true)
-Namespace_Start_Handler called
-...Prefix: aw1
-...Uri: http://www.somewhere.com/namespace1
-Namespace_Start_Handler called
-...Prefix: aw2
-...Uri: file:/DTD/somewhere.dtd
-Done
