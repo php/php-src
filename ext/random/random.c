@@ -404,8 +404,7 @@ PHPAPI double php_combined_lcg(void)
 /* {{{ php_mt_srand */
 PHPAPI void php_mt_srand(uint32_t seed)
 {
-	/* Seed the generator with a simple uint32 */
-	php_random_mt19937_seed32(php_random_default_status(), (zend_long) seed);
+	php_random_mt19937_seed32(php_random_default_status(), seed);
 }
 /* }}} */
 
