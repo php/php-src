@@ -179,6 +179,7 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest);
 
 PHPAPI void php_random_combinedlcg_seed_default(php_random_status_state_combinedlcg *state);
 
+PHPAPI void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed);
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state);
 
 PHPAPI void php_random_pcgoneseq128xslrr64_seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed);
