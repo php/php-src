@@ -65,6 +65,11 @@ static int startup(sapi_module_struct *sapi_module)
 	return php_module_startup(sapi_module, NULL);
 }
 
+static int child_startup(sapi_module_struct *sapi_module)
+{
+	return php_module_child_startup(sapi_module);
+}
+
 static size_t ub_write(const char *str, size_t str_length)
 {
 	/* quiet */
@@ -102,6 +107,8 @@ static sapi_module_struct fuzzer_module = {
 
 	startup,             /* startup */
 	php_module_shutdown_wrapper,   /* shutdown */
+
+	child_startup,                 /* child_startup */
 
 	NULL,                          /* activate */
 	NULL,                          /* deactivate */
@@ -159,7 +166,8 @@ int fuzzer_init_php(const char *extra_ini)
 	 */
 	putenv("USE_ZEND_ALLOC=0");
 
-	if (fuzzer_module.startup(&fuzzer_module)==FAILURE) {
+	if (fuzzer_module.startup(&fuzzer_module)==FAILURE
+			|| fuzzer_module.child_startup(&fuzzer_module)) {
 		return FAILURE;
 	}
 

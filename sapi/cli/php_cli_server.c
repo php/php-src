@@ -515,6 +515,11 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 	return php_module_startup(sapi_module, &cli_server_module_entry);
 } /* }}} */
 
+static int sapi_cli_server_child_startup(sapi_module_struct *sapi_module) /* {{{ */
+{
+	return php_module_child_startup(sapi_module);
+} /* }}} */
+
 static size_t sapi_cli_server_ub_write(const char *str, size_t str_length) /* {{{ */
 {
 	php_cli_server_client *client = SG(server_context);
@@ -804,8 +809,10 @@ sapi_module_struct cli_server_sapi_module = {
 	"cli-server",							/* name */
 	"Built-in HTTP server",		/* pretty name */
 
-	sapi_cli_server_startup,				/* startup */
+	sapi_cli_server_startup,		/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
+
+	sapi_cli_server_child_startup,	/* child_startup */
 
 	NULL,							/* activate */
 	NULL,							/* deactivate */

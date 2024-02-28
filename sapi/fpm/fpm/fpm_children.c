@@ -9,6 +9,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "SAPI.h"
 #include "fpm.h"
 #include "fpm_children.h"
 #include "fpm_signals.h"
@@ -202,6 +203,8 @@ static void fpm_child_init(struct fpm_worker_pool_s *wp) /* {{{ */
 		zlog(ZLOG_ERROR, "[pool %s] child failed to initialize", wp->config->name);
 		exit(FPM_EXIT_SOFTWARE);
 	}
+
+	sapi_module.child_startup(&sapi_module);
 }
 /* }}} */
 

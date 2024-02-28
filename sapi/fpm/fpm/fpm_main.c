@@ -793,6 +793,12 @@ static int php_cgi_startup(sapi_module_struct *sapi_module) /* {{{ */
 }
 /* }}} */
 
+static int php_cgi_child_startup(sapi_module_struct *sapi_module) /* {{{ */
+{
+	return php_module_child_startup(sapi_module);
+}
+/* }}} */
+
 /* {{{ sapi_module_struct cgi_sapi_module */
 static sapi_module_struct cgi_sapi_module = {
 	"fpm-fcgi",						/* name */
@@ -800,6 +806,8 @@ static sapi_module_struct cgi_sapi_module = {
 
 	php_cgi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
+
+	php_cgi_child_startup,				/* child_startup */
 
 	sapi_cgi_activate,				/* activate */
 	sapi_cgi_deactivate,			/* deactivate */
@@ -1651,6 +1659,7 @@ int main(int argc, char *argv[])
 
 			case 'm': /* list compiled in modules */
 				cgi_sapi_module.startup(&cgi_sapi_module);
+				cgi_sapi_module.child_startup(&cgi_sapi_module);
 				php_output_activate();
 				SG(headers_sent) = 1;
 				php_printf("[PHP Modules]\n");
@@ -1689,6 +1698,7 @@ int main(int argc, char *argv[])
 			case '?':
 			case PHP_GETOPT_INVALID_ARG:
 				cgi_sapi_module.startup(&cgi_sapi_module);
+				cgi_sapi_module.child_startup(&cgi_sapi_module);
 				php_output_activate();
 				SG(headers_sent) = 1;
 				php_cgi_usage(argv[0]);
@@ -1700,6 +1710,7 @@ int main(int argc, char *argv[])
 
 			case 'v': /* show php version & quit */
 				cgi_sapi_module.startup(&cgi_sapi_module);
+				cgi_sapi_module.child_startup(&cgi_sapi_module);
 				if (php_request_startup() == FAILURE) {
 					SG(server_context) = NULL;
 					php_module_shutdown();
@@ -1725,6 +1736,7 @@ int main(int argc, char *argv[])
 	if (php_information) {
 		cgi_sapi_module.phpinfo_as_text = 1;
 		cgi_sapi_module.startup(&cgi_sapi_module);
+		cgi_sapi_module.child_startup(&cgi_sapi_module);
 		if (php_request_startup() == FAILURE) {
 			SG(server_context) = NULL;
 			php_module_shutdown();
@@ -1742,6 +1754,7 @@ int main(int argc, char *argv[])
 	/* No other args are permitted here as there is no interactive mode */
 	if (argc != php_optind) {
 		cgi_sapi_module.startup(&cgi_sapi_module);
+		cgi_sapi_module.child_startup(&cgi_sapi_module);
 		php_output_activate();
 		SG(headers_sent) = 1;
 		php_cgi_usage(argv[0]);

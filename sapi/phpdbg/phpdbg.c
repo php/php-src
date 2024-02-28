@@ -28,6 +28,7 @@
 #include "phpdbg_print.h"
 #include "phpdbg_help.h"
 #include "phpdbg_arginfo.h"
+#include "zend_types.h"
 #include "zend_vm.h"
 #include "php_ini_builder.h"
 
@@ -711,6 +712,11 @@ static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* 
 	return SUCCESS;
 } /* }}} */
 
+static inline int php_sapi_phpdbg_module_child_startup(sapi_module_struct *module) /* {{{ */
+{
+	return php_module_child_startup(module);
+} /* }}} */
+
 static char* php_sapi_phpdbg_read_cookies(void) /* {{{ */
 {
 	return NULL;
@@ -937,6 +943,8 @@ static sapi_module_struct phpdbg_sapi_module = {
 
 	php_sapi_phpdbg_module_startup, /* startup */
 	php_module_shutdown_wrapper,    /* shutdown */
+
+	php_sapi_phpdbg_module_child_startup, /* child_startup */
 
 	php_sapi_phpdbg_activate,       /* activate */
 	php_sapi_phpdbg_deactivate,     /* deactivate */
@@ -1355,7 +1363,8 @@ phpdbg_main:
 	/* set flags from command line */
 	PHPDBG_G(flags) = flags;
 
-	if (phpdbg->startup(phpdbg) == SUCCESS) {
+	if (phpdbg->startup(phpdbg) == SUCCESS
+			&& phpdbg->child_startup(phpdbg) == SUCCESS) {
 		zend_mm_heap *mm_heap;
 #ifdef _WIN32
 	EXCEPTION_POINTERS *xp;

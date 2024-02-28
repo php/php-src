@@ -365,10 +365,22 @@ PHP_MINFO_FUNCTION(curl)
 }
 /* }}} */
 
+/* {{{ PHP_CHINIT_FUNCTION */
+PHP_CHINIT_FUNCTION(curl)
+{
+	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(curl)
 {
 	REGISTER_INI_ENTRIES();
+	PHP_MODULE_SET_CHINIT_FUNC(PHP_CHINIT(curl));
 
 	register_curl_symbols(module_number);
 
@@ -389,10 +401,6 @@ PHP_MINIT_FUNCTION(curl)
 		CRYPTO_set_locking_callback(php_curl_ssl_lock);
 	}
 #endif
-
-	if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
-		return FAILURE;
-	}
 
 	curl_ce = register_class_CurlHandle();
 	curl_ce->create_object = curl_create_object;

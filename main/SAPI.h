@@ -238,9 +238,16 @@ struct _sapi_module_struct {
 	char *name;
 	char *pretty_name;
 
+	/* Must be called by the SAPI once per process, excluding forked processes
+	 */
 	int (*startup)(struct _sapi_module_struct *sapi_module);
 	int (*shutdown)(struct _sapi_module_struct *sapi_module);
 
+	/* Must be called by the SAPI once per request-handling process. The process
+	 * must not fork (without exec) after that. */
+	int (*child_startup)(struct _sapi_module_struct *sapi_module);
+
+	/* Must be called by the SAPI once per request */
 	int (*activate)(void);
 	int (*deactivate)(void);
 

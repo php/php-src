@@ -78,6 +78,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   void(*)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
 
+* It is recommended that extensions initializing external libraries or starting
+  threads during module startup (MINIT) do so in the child startup hook (CHINIT)
+  instead. A child startup hook can be declared by using the
+  PHP_MODULE_SET_CHINIT_FUNC() macro during module startup. See
+  ext/curl/interface.c for an example.
+
 ========================
 2. Build system changes
 ========================
@@ -194,3 +200,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 ========================
 5. SAPI changes
 ========================
+
+* SAPIs must call php_module_child_startup() once per request-handling process,
+  any time before handling the first request of the process, and must not fork
+  (without exec()) after that.

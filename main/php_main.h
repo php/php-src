@@ -21,6 +21,7 @@
 #include "zend_globals.h"
 #include "php_globals.h"
 #include "SAPI.h"
+#include "zend_modules.h"
 
 BEGIN_EXTERN_C()
 
@@ -40,6 +41,7 @@ PHPAPI zend_result php_request_startup(void);
 PHPAPI void php_request_shutdown(void *dummy);
 PHPAPI zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_module);
 PHPAPI void php_module_shutdown(void);
+PHPAPI zend_result php_module_child_startup(sapi_module_struct *sf);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
 
 PHPAPI zend_result php_register_extensions(zend_module_entry * const * ptr, int count);
