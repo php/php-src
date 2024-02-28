@@ -7665,7 +7665,14 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
 
-	unqualified_name = decl->name;
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		zend_string *filename = op_array->filename;
+		uint32_t start_lineno = decl->start_lineno;
+		unqualified_name = zend_strpprintf(0, "{closure:%s:%" PRIu32 "}", ZSTR_VAL(filename), start_lineno);
+	} else {
+		unqualified_name = zend_string_copy(decl->name);
+	}
+
 	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
 	lcname = zend_string_tolower(name);
 
@@ -7703,6 +7710,9 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			opline->op2.num = func_ref;
 		}
 	}
+
+	zend_string_release(unqualified_name);
+
 	return lcname;
 }
 /* }}} */
