@@ -62,8 +62,10 @@ function getFiles(array $dirsOrFiles): \Iterator {
 }
 
 function normalizeOutput(string $out): string {
-    $out = preg_replace('/in (\/|[A-Z]:\\\\).+ on line \d+$/m', 'in %s on line %d', $out);
+    $out = preg_replace('/in (\/|[A-Z]:\\\\).+ on line \d+/m', 'in %s on line %d', $out);
     $out = preg_replace('/in (\/|[A-Z]:\\\\).+:\d+$/m', 'in %s:%d', $out);
+    $out = preg_replace('/\{closure:(\/|[A-Z]:\\\\).+:\d+\}/', '{closure:%s:%d}', $out);
+    $out = preg_replace('/object\(([A-Za-z0-9]*)\)#\d+/', 'object($1)#%d', $out);
     $out = preg_replace('/^#(\d+) (\/|[A-Z]:\\\\).+\(\d+\):/m', '#$1 %s(%d):', $out);
     $out = preg_replace('/Resource id #\d+/', 'Resource id #%d', $out);
     $out = preg_replace('/resource\(\d+\) of type/', 'resource(%d) of type', $out);
