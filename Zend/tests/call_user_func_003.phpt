@@ -21,11 +21,15 @@ var_dump(call_user_func(function() use (&$foo) { return $foo; }, '__invoke'));
 ?>
 --EXPECTF--
 string(3) "OK!"
-object(Closure)#%d (1) {
+object(Closure)#%d (2) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
   ["static"]=>
   array(1) {
     ["instance"]=>
-    object(Closure)#%d (0) {
+    object(Closure)#%d (1) {
+      ["name"]=>
+      string(%d) "{closure:%s:%d}"
     }
   }
 }

@@ -37,11 +37,11 @@ while($test++ < 5)
 ?>
 ===DONE===
 --EXPECTF--
-{closure}(Test1,1)
+{closure:%s:%d}(Test1,1)
 Caught: Test1::__construct
-{closure}(Test2,2)
-Caught: {closure}
-{closure}(Test3,3)
+{closure:%s:%d}(Test2,2)
+Caught: {closure:%s:%d}
+{closure:%s:%d}(Test3,3)
 
 Fatal error: Uncaught Error: Class "Test3" not found in %s:%d
 Stack trace:

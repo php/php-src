@@ -10,4 +10,6 @@ var_dump(foo());
 ?>
 --EXPECTF--
 object(Closure)#%d (%d) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
 }

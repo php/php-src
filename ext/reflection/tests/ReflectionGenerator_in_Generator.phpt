@@ -37,7 +37,7 @@ array(1) {
   [0]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }
@@ -49,7 +49,7 @@ object(Generator)#2 (0) {
 }
 object(ReflectionFunction)#4 (1) {
   ["name"]=>
-  string(9) "{closure}"
+  string(%d) "{closure:%s:%d}"
 }
 NULL
 array(2) {
@@ -60,7 +60,7 @@ array(2) {
     ["line"]=>
     int(%d)
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }
@@ -68,7 +68,7 @@ array(2) {
   [1]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }
@@ -80,6 +80,6 @@ object(Generator)#5 (0) {
 }
 object(ReflectionFunction)#6 (1) {
   ["name"]=>
-  string(9) "{closure}"
+  string(%d) "{closure:%s:%d}"
 }
 NULL

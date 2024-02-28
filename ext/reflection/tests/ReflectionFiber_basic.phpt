@@ -65,7 +65,7 @@ array(2) {
   [1]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }
@@ -96,7 +96,7 @@ array(2) {
   [1]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }

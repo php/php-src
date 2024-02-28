@@ -36,7 +36,7 @@ get(...loop());
 Fatal error: Uncaught Exception in %s:%d
 Stack trace:
 #0 %s(%d): throwException()
-#1 %s(%d): {closure}()
+#1 %s(%d): {closure:%s:%d}()
 #2 %s(%d): loop()
 #3 {main}
   thrown in %s on line %d

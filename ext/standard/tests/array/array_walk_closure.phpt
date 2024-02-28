@@ -108,19 +108,19 @@ bool(true)
 
 closure with array
 
-Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 array(1) {
   ["sum"]=>
   int(42)
 }
 
-Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 array(1) {
   ["sum"]=>
   int(42)
 }
 
-Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 array(1) {
   ["sum"]=>
   int(42)
@@ -146,19 +146,19 @@ End result:int(48)
 
 closure with object
 
-Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 object(stdClass)#1 (1) {
   ["sum"]=>
   int(42)
 }
 
-Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 object(stdClass)#1 (1) {
   ["sum"]=>
   int(43)
 }
 
-Warning: {closure}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
+Warning: {closure:%s:%d}(): Argument #3 ($udata) must be passed by reference, value given in %s on line %d
 object(stdClass)#1 (1) {
   ["sum"]=>
   int(45)
@@ -203,7 +203,7 @@ array(2) {
   [0]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(2) {
       [0]=>
@@ -232,7 +232,9 @@ array(2) {
         int(3)
       }
       [1]=>
-      object(Closure)#2 (1) {
+      object(Closure)#%d (2) {
+        ["name"]=>
+        string(%d) "{closure:%s:%d}"
         ["parameter"]=>
         array(2) {
           ["$v"]=>

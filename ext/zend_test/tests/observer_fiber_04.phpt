@@ -31,7 +31,7 @@ $fiber->resume();
 <!-- init Fiber::start() -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-<!-- init {closure}() -->
+<!-- init {closure:%s:%d}() -->
 <!-- init Fiber::suspend() -->
 <!-- switching from fiber %s to %s -->
 <suspend '%s'>
@@ -40,7 +40,7 @@ $fiber->resume();
 <resume '%s'>
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-<!-- init {closure}() -->
+<!-- init {closure:%s:%d}() -->
 <!-- switching from fiber %s to %s -->
 <suspend '%s'>
 <!-- switching from fiber %s to %s -->

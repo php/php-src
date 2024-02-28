@@ -31,6 +31,6 @@ int(123)
 
 Fatal error: Uncaught Error: Cannot access private property Foo::$bar in %s:%d
 Stack trace:
-#0 %s(%d): A->{closure}()
+#0 %s(%d): A->{closure:%s:%d}()
 #1 {main}
   thrown in %s on line %d

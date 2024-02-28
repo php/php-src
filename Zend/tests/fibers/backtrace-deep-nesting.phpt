@@ -48,7 +48,7 @@ Stack trace:
 #10 %sbacktrace-deep-nesting.php(%d): suspend_fiber(2)
 #11 %sbacktrace-deep-nesting.php(%d): suspend_fiber(1)
 #12 %sbacktrace-deep-nesting.php(%d): suspend_fiber(0)
-#13 [internal function]: {closure}()
+#13 [internal function]: {closure:%s:%d}()
 #14 %sbacktrace-deep-nesting.php(%d): Fiber->resume('test')
 #15 {main}
   thrown in %sbacktrace-deep-nesting.php on line %d

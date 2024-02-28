@@ -22,7 +22,9 @@ Deprecated: Optional parameter $a declared before required parameter $b is impli
 string(1) "x"
 array(1) {
   [0]=>
-  object(Closure)#%d (1) {
+  object(Closure)#%d (2) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
     ["parameter"]=>
     array(2) {
       ["$a"]=>

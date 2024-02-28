@@ -35,43 +35,57 @@ array(0) {
 }
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (1) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
   }
 }
 int(2)
 array(1) {
   [0]=>
-  object(Closure)#%d (1) {
+  object(Closure)#%d (2) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
     ["static"]=>
     array(1) {
       ["h"]=>
       &array(1) {
         [0]=>
-        object(Closure)#%d (0) {
+        object(Closure)#%d (1) {
+          ["name"]=>
+          string(%d) "{closure:%s:%d}"
         }
       }
     }
   }
 }
-object(Closure)#%d (1) {
+object(Closure)#%d (2) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
   ["static"]=>
   array(1) {
     ["h"]=>
     &array(1) {
       [0]=>
-      object(Closure)#%d (0) {
+      object(Closure)#%d (1) {
+        ["name"]=>
+        string(%d) "{closure:%s:%d}"
       }
     }
   }
 }
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (1) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
   }
 }
 array(2) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (1) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
   }
   [1]=>
   int(5)

@@ -25,6 +25,6 @@ Before calling f()
 
 Fatal error: Uncaught Error: Call to undefined function f() in %s:%d
 Stack trace:
-#0 [internal function]: {closure}()
+#0 [internal function]: {closure:%s:%d}()
 #1 {main}
   thrown in %s on line %d

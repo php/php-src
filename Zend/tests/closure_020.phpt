@@ -28,7 +28,9 @@ object(foo)#%d (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure)#%d (2) {
+  object(Closure)#%d (3) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
     ["static"]=>
     array(1) {
       ["a"]=>

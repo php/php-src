@@ -27,13 +27,13 @@ $c = Foo::bar();
 
 $c();
 ?>
---EXPECT--
+--EXPECTF--
 string(7) "Baz\foo"
 string(7) "Baz\foo"
 string(0) ""
 string(3) "bar"
 string(12) "Baz\Foo::bar"
 string(7) "Baz\Foo"
-string(13) "Baz\{closure}"
-string(13) "Baz\{closure}"
+string(%d) "Baz\{closure:%s:%d}"
+string(%d) "Baz\{closure:%s:%d}"
 string(7) "Baz\Foo"

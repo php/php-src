@@ -39,11 +39,15 @@ var_dump($foo->bar->onBaz);
 --EXPECTF--
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (1) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
   }
 }
 array(1) {
   [0]=>
-  object(Closure)#%d (0) {
+  object(Closure)#%d (1) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
   }
 }

@@ -23,7 +23,7 @@ $o->func();
 ?>
 ===DONE===
 --EXPECTF--
-{closure}()
+{closure:%s:%d}()
 
 Fatal error: Uncaught Error: Call to private method Test::func() from global scope in %s:%d
 Stack trace:

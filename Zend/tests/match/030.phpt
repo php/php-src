@@ -18,6 +18,6 @@ echo "unreachable\n";
 --EXPECTF--
 Fatal error: Uncaught Exception: Custom error handler: Undefined variable $undefVar in %s030.php:4
 Stack trace:
-#0 %s030.php(7): {closure}(%d, 'Undefined varia...', '%s', %d)
+#0 %s(%d): {closure:%s:%d}(2, 'Undefined varia...', '%s', 7)
 #1 {main}
   thrown in %s030.php on line 4

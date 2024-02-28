@@ -14,14 +14,16 @@ class foo {
 $baz = new foo();
 var_dump($baz->bar());
 ?>
---EXPECT--
-object(Closure)#2 (2) {
+--EXPECTF--
+object(Closure)#%d (3) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
   ["static"]=>
   array(1) {
     ["test"]=>
     string(3) "one"
   }
   ["this"]=>
-  object(foo)#1 (0) {
+  object(foo)#%d (0) {
   }
 }

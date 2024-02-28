@@ -36,7 +36,7 @@ try {
 
 echo "Done";
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing array_map() : anonymous callback function ***
 -- anonymous function with all parameters and body --
 array(3) {
@@ -63,7 +63,7 @@ array(3) {
   }
 }
 -- anonymous function with two parameters and passing one array --
-Exception: Too few arguments to function {closure}(), 1 passed and exactly 2 expected
+Exception: Too few arguments to function {closure:%s:%d}(), 1 passed and exactly 2 expected
 -- anonymous function with NULL parameter --
 array(3) {
   [0]=>

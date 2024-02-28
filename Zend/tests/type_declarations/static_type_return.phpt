@@ -67,25 +67,25 @@ $test = $test->bindTo($a);
 var_dump($test($a));
 
 ?>
---EXPECT--
-object(A)#3 (0) {
+--EXPECTF--
+object(A)#%d (0) {
 }
-object(B)#3 (0) {
+object(B)#%d (0) {
 }
 
-object(A)#3 (0) {
+object(A)#%d (0) {
 }
 A::test2(): Return value must be of type B, A returned
 
-object(A)#3 (0) {
+object(A)#%d (0) {
 }
-object(C)#3 (0) {
+object(C)#%d (0) {
 }
 
-object(A)#3 (0) {
+object(A)#%d (0) {
 }
 A::test4(): Return value must be of type B|array, A returned
 
-{closure}(): Return value must be of type static, stdClass returned
-object(A)#1 (0) {
+{closure:%s:%d}(): Return value must be of type static, stdClass returned
+object(A)#%d (0) {
 }

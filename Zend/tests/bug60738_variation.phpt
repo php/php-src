@@ -13,7 +13,9 @@ throw new Exception('Exception!');
 ?>
 --EXPECTF--
 NULL
-object(Closure)#1 (0) {
+object(Closure)#%d (1) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
 }
 
 Fatal error: Uncaught Exception: Exception! in %s:%d

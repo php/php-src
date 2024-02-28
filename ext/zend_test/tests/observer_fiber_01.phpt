@@ -25,7 +25,7 @@ $fiber->resume();
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-<!-- init {closure}() -->
+<!-- init {closure:%s:%d}() -->
 <!-- init Fiber::suspend() -->
 <!-- switching from fiber %s to %s -->
 <suspend '%s'>

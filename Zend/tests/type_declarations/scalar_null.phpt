@@ -27,13 +27,13 @@ echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
 Testing int:
-*** Caught {closure}(): Argument #1 ($i) must be of type int, null given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($i) must be of type int, null given, called in %s on line %d
 Testing float:
-*** Caught {closure}(): Argument #1 ($f) must be of type float, null given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($f) must be of type float, null given, called in %s on line %d
 Testing string:
-*** Caught {closure}(): Argument #1 ($s) must be of type string, null given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($s) must be of type string, null given, called in %s on line %d
 Testing bool:
-*** Caught {closure}(): Argument #1 ($b) must be of type bool, null given, called in %s on line %d
+*** Caught {closure:%s:%d}(): Argument #1 ($b) must be of type bool, null given, called in %s on line %d
 Testing int nullable:
 NULL
 Testing float nullable:

@@ -16,5 +16,5 @@ class B extends A {
 --EXPECTF--
 Fatal error: During inheritance of B, while autoloading Y: Uncaught Exception in %s:%d
 Stack trace:
-#0 %s(%d): {closure}('Y')
+#0 %s(%d): {closure:%s:%d}('Y')
 #1 {main} in %s on line %d

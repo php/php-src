@@ -15,6 +15,6 @@ class A implements I {
 Fatal error: Uncaught ReflectionException: Class "A" does not exist in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->__construct('A')
-#1 %s(%d): {closure}('I')
+#1 %s(%d): {closure:%s:%d}('I')
 #2 {main}
   thrown in %s on line %d

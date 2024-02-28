@@ -8,8 +8,8 @@ var_dump((new ReflectionFunction('sin'))->getClosure());
 var_dump(function ($someThing) {});
 
 ?>
---EXPECT--
-object(Closure)#2 (2) {
+--EXPECTF--
+object(Closure)#%d (2) {
   ["function"]=>
   string(3) "sin"
   ["parameter"]=>
@@ -18,7 +18,9 @@ object(Closure)#2 (2) {
     string(10) "<required>"
   }
 }
-object(Closure)#2 (1) {
+object(Closure)#%d (2) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
   ["parameter"]=>
   array(1) {
     ["$someThing"]=>

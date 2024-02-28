@@ -29,7 +29,9 @@ var_dump(spl_autoload_functions());
 --EXPECTF--
 array(3) {
   [0]=>
-  object(Closure)#%d (1) {
+  object(Closure)#%d (2) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
     ["parameter"]=>
     array(1) {
       ["$class"]=>

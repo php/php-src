@@ -33,7 +33,9 @@ object(foo)#%d (1) {
   ["a"]=>
   array(1) {
     [0]=>
-    object(Closure)#%d (1) {
+    object(Closure)#%d (2) {
+      ["name"]=>
+      string(%d) "{closure:%s:%d}"
       ["this"]=>
       *RECURSION*
     }
@@ -44,7 +46,9 @@ int(1)
 string(1) "a"
 array(1) {
   [0]=>
-  object(Closure)#%d (1) {
+  object(Closure)#%d (2) {
+    ["name"]=>
+    string(%d) "{closure:%s:%d}"
     ["this"]=>
     object(foo)#%d (1) {
       ["a"]=>
