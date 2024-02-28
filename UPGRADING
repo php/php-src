@@ -45,6 +45,10 @@ PHP 8.4 UPGRADE NOTES
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
 
+- FFI:
+  . Using FFI::load() during preloading ("opcache.preload") is not supported
+    anymore. Use "ffi.preload" instead.
+
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
