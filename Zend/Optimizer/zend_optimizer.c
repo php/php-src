@@ -836,7 +836,7 @@ const zend_class_constant *zend_fetch_class_const_info(
 	const zend_class_entry *ce = NULL;
 	bool is_static_reference = false;
 
-	if (!opline || !op_array || !script || opline->op2_type != IS_CONST || Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
+	if (!opline || !op_array || !script || opline->op2_type != IS_CONST || Z_TYPE_P(CRT_CONSTANT(opline->op2)) != IS_STRING) {
 		return NULL;
 	}
 	if (opline->op1_type == IS_CONST) {
@@ -845,7 +845,7 @@ const zend_class_constant *zend_fetch_class_const_info(
 			ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
-		int fetch_type = (int) opline->op1.num & ZEND_FETCH_CLASS_MASK;
+		int fetch_type = opline->op1.num & ZEND_FETCH_CLASS_MASK;
 		if (fetch_type == ZEND_FETCH_CLASS_SELF) {
 			ce = op_array->scope;
 		} else if (fetch_type == ZEND_FETCH_CLASS_STATIC) {
