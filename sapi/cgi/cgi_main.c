@@ -970,6 +970,11 @@ static int php_cgi_startup(sapi_module_struct *sapi_module)
 	return php_module_startup(sapi_module, &cgi_module_entry);
 }
 
+static int php_cgi_child_startup(sapi_module_struct *sapi_module)
+{
+	return php_module_child_startup(sapi_module);
+}
+
 /* {{{ sapi_module_struct cgi_sapi_module */
 static sapi_module_struct cgi_sapi_module = {
 	"cgi-fcgi",						/* name */
@@ -977,6 +982,8 @@ static sapi_module_struct cgi_sapi_module = {
 
 	php_cgi_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
+
+	php_cgi_child_startup,			/* child_startup */
 
 	sapi_cgi_activate,				/* activate */
 	sapi_cgi_deactivate,			/* deactivate */
@@ -1864,7 +1871,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* startup after we get the above ini override se we get things right */
-	if (cgi_sapi_module.startup(&cgi_sapi_module) == FAILURE) {
+	if (cgi_sapi_module.startup(&cgi_sapi_module) == FAILURE
+			|| cgi_sapi_module.child_startup(&cgi_sapi_module) == FAILURE) {
 #ifdef ZTS
 		tsrm_shutdown();
 #endif

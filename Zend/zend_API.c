@@ -34,6 +34,16 @@
 #include "zend_observer.h"
 
 #include <stdarg.h>
+#if ZEND_DEBUG
+# if __linux__
+#  include <sys/types.h>
+#  include <dirent.h>
+# elif __APPLE__
+#  include <mach/mach_init.h>
+#  include <mach/task.h>
+#  include <mach/vm_map.h>
+# endif /* __APPLE__ */
+#endif
 
 /* these variables are true statics/globals, and have to be mutex'ed on every access */
 ZEND_API HashTable module_registry;
@@ -2292,6 +2302,64 @@ ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, z
 }
 /* }}} */
 
+#if ZEND_DEBUG
+# if __linux__
+static int zend_thread_count(void)
+{
+	pid_t pid = getpid();
+	char path[64];
+	int len = snprintf(path, sizeof(path), "/proc/%d/task", (int)pid);
+	if (len == -1 || len >= sizeof(path)) {
+		return -1;
+	}
+
+	DIR *d = opendir(path);
+	if (d == NULL) {
+		return -1;
+	}
+
+	struct dirent *entry;
+	int nthreads = 0;
+	while ((entry = readdir(d))){
+		nthreads++;
+	}
+
+	closedir(d);
+
+	return nthreads;
+}
+# elif __APPLE__
+static int zend_thread_count(void)
+{
+	pid_t pid = getpid();
+	mach_port_t me = mach_task_self();
+	mach_port_t task;
+	kern_return_t res;
+	thread_array_t threads;
+	mach_msg_type_number_t nthreads;
+
+	res = task_for_pid(me, pid, &task);
+	if (res != KERN_SUCCESS) {
+		return -1;
+	}
+
+	res = task_threads(task, &threads, &nthreads);
+	if (res != KERN_SUCCESS) {
+		return -1;
+	}
+
+	vm_deallocate(me, (vm_address_t)threads, nthreads * sizeof(*threads));
+
+	return (int) nthreads;
+}
+# else
+static int zend_thread_count(void)
+{
+	return 0;
+}
+# endif /* __APPLE__ */
+#endif
+
 ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 {
 	size_t name_len;
@@ -2338,6 +2406,9 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 #endif
 	}
 	if (module->module_startup_func) {
+#if ZEND_DEBUG
+		int thread_count = zend_thread_count();
+#endif
 		EG(current_module) = module;
 		if (module->module_startup_func(module->type, module->module_number)==FAILURE) {
 			zend_error_noreturn(E_CORE_ERROR,"Unable to start %s module", module->name);
@@ -2345,7 +2416,19 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 			return FAILURE;
 		}
 		EG(current_module) = NULL;
+#if ZEND_DEBUG
+		if (zend_thread_count() > thread_count) {
+			zend_error_noreturn(E_CORE_ERROR,
+					"Thread count increased during the initialization of %s"
+					" module. This is unsafe as the process may be forked after"
+					" initialization. Modules whishing to start threads should"
+					" do so in child_startup_func.",
+					module->name);
+			abort();
+		}
+#endif
 	}
+
 	return SUCCESS;
 }
 /* }}} */
@@ -2488,6 +2571,40 @@ ZEND_API void zend_destroy_modules(void) /* {{{ */
 	free(module_request_startup_handlers);
 	module_request_startup_handlers = NULL;
 	zend_hash_graceful_reverse_destroy(&module_registry);
+}
+/* }}} */
+
+ZEND_API void zend_child_startup_modules(void) /* {{{ */
+{
+	zend_module_entry *module;
+
+	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
+		if (module->child_startup_func) {
+			if (module->child_startup_func(module->type, module->module_number)==FAILURE) {
+				zend_error(E_CORE_ERROR, "child_startup() for %s module failed", module->name);
+				exit(1);
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+ZEND_API void zend_module_set_child_startup_func(INIT_FUNC_ARGS, zend_result (*child_startup_func)(INIT_FUNC_ARGS)) /* {{{ */
+{
+	if (!EG(current_module)) {
+		zend_error(E_CORE_ERROR, "Can not set child startup func after startup");
+		abort();
+	}
+
+	if (EG(current_module)->module_number != module_number) {
+		zend_error(E_CORE_ERROR,
+				"Invalid module_number passed to zend_set_child_startup_func"
+				" during statup of %s module",
+				EG(current_module)->name);
+		abort();
+	}
+
+	EG(current_module)->child_startup_func = child_startup_func;
 }
 /* }}} */
 

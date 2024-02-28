@@ -122,12 +122,20 @@ static int php_embed_startup(sapi_module_struct *sapi_module)
 	return php_module_startup(sapi_module, NULL);
 }
 
+/* Request-handling process initialization (CHINIT) */
+static int php_embed_child_startup(sapi_module_struct *sapi_module)
+{
+	return php_module_child_startup(sapi_module);
+}
+
 EMBED_SAPI_API sapi_module_struct php_embed_module = {
 	"embed",                       /* name */
 	"PHP Embedded Library",        /* pretty name */
 
 	php_embed_startup,             /* startup */
 	php_module_shutdown_wrapper,   /* shutdown */
+
+	php_embed_child_startup,       /* child_startup */
 
 	NULL,                          /* activate */
 	php_embed_deactivate,          /* deactivate */
@@ -224,7 +232,8 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 	}
 
 	/* Module initialization (MINIT) */
-	if (php_embed_module.startup(&php_embed_module) == FAILURE) {
+	if (php_embed_module.startup(&php_embed_module) == FAILURE
+			|| php_embed_module.child_startup(&php_embed_module) == FAILURE) {
 		return FAILURE;
 	}
 

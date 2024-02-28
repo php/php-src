@@ -411,6 +411,12 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 }
 /* }}} */
 
+static int php_cli_child_startup(sapi_module_struct *sapi_module) /* {{{ */
+{
+	return php_module_child_startup(sapi_module);
+}
+/* }}} */
+
 /* {{{ sapi_cli_ini_defaults */
 
 /* overwritable ini defaults must be set in sapi_cli_ini_defaults() */
@@ -432,6 +438,8 @@ static sapi_module_struct cli_sapi_module = {
 
 	php_cli_startup,				/* startup */
 	php_module_shutdown_wrapper,	/* shutdown */
+
+	php_cli_child_startup,			/* child_startup */
 
 	NULL,							/* activate */
 	sapi_cli_deactivate,			/* deactivate */
@@ -1304,7 +1312,8 @@ exit_loop:
 	sapi_module->ini_entries = php_ini_builder_finish(&ini_builder);
 
 	/* startup after we get the above ini override se we get things right */
-	if (sapi_module->startup(sapi_module) == FAILURE) {
+	if (sapi_module->startup(sapi_module) == FAILURE
+			|| sapi_module->child_startup(sapi_module) == FAILURE) {
 		/* there is no way to see if we must call zend_ini_deactivate()
 		 * since we cannot check if EG(ini_directives) has been initialized
 		 * because the executor's constructor does not set initialize it.

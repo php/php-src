@@ -96,6 +96,10 @@ PHPAPI size_t core_globals_offset;
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
+#if ZEND_DEBUG
+static pid_t php_child_started = 0;
+#endif
+
 PHPAPI const char *php_version(void)
 {
 	return PHP_VERSION;
@@ -1736,6 +1740,11 @@ static void sigchld_handler(int apar)
 /* {{{ php_request_startup */
 zend_result php_request_startup(void)
 {
+#if ZEND_DEBUG
+	ZEND_ASSERT(php_child_started == getpid()
+			&& "SAPI must call php_module_child_startup() once per request-handling process");
+#endif
+
 	zend_result retval = SUCCESS;
 
 	zend_interned_strings_activate();
@@ -2428,6 +2437,21 @@ void php_module_shutdown(void)
 #endif
 
 	zend_observer_shutdown();
+}
+/* }}} */
+
+/* {{{ php_module_child_startup */
+zend_result php_module_child_startup(sapi_module_struct *sf)
+{
+#if ZEND_DEBUG
+	ZEND_ASSERT(php_child_started == 0
+			&& "php_module_child_startup() already called for this process or a parent process");
+	php_child_started = getpid();
+#endif
+
+	zend_child_startup_modules();
+
+	return SUCCESS;
 }
 /* }}} */
 

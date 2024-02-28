@@ -386,12 +386,19 @@ static int php_apache2_startup(sapi_module_struct *sapi_module)
 	return php_module_startup(sapi_module, &php_apache_module);
 }
 
+static int php_apache2_child_startup(sapi_module_struct *sapi_module)
+{
+	return php_module_child_startup(sapi_module);
+}
+
 static sapi_module_struct apache2_sapi_module = {
 	"apache2handler",
 	"Apache 2.0 Handler",
 
 	php_apache2_startup,				/* startup */
 	php_module_shutdown_wrapper,			/* shutdown */
+
+	php_apache2_child_startup,			/* child_startup */
 
 	NULL,						/* activate */
 	NULL,						/* deactivate */
@@ -755,6 +762,7 @@ zend_first_try {
 static void php_apache_child_init(apr_pool_t *pchild, server_rec *s)
 {
 	apr_pool_cleanup_register(pchild, NULL, php_apache_child_shutdown, apr_pool_cleanup_null);
+	apache2_sapi_module.child_startup(&apache2_sapi_module);
 }
 
 #ifdef ZEND_SIGNALS

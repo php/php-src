@@ -221,6 +221,7 @@ typedef struct _zend_fcall_info_cache {
 /* Name macros */
 #define ZEND_MODULE_STARTUP_N(module)       zm_startup_##module
 #define ZEND_MODULE_SHUTDOWN_N(module)		zm_shutdown_##module
+#define ZEND_MODULE_CHILD_STARTUP_N(module) zm_child_startup_##module
 #define ZEND_MODULE_ACTIVATE_N(module)		zm_activate_##module
 #define ZEND_MODULE_DEACTIVATE_N(module)	zm_deactivate_##module
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)	zm_post_zend_deactivate_##module
@@ -231,6 +232,7 @@ typedef struct _zend_fcall_info_cache {
 /* Declaration macros */
 #define ZEND_MODULE_STARTUP_D(module)		zend_result ZEND_MODULE_STARTUP_N(module)(INIT_FUNC_ARGS)
 #define ZEND_MODULE_SHUTDOWN_D(module)		zend_result ZEND_MODULE_SHUTDOWN_N(module)(SHUTDOWN_FUNC_ARGS)
+#define ZEND_MODULE_CHILD_STARTUP_D(module)	zend_result ZEND_MODULE_CHILD_STARTUP_N(module)(INIT_FUNC_ARGS)
 #define ZEND_MODULE_ACTIVATE_D(module)		zend_result ZEND_MODULE_ACTIVATE_N(module)(INIT_FUNC_ARGS)
 #define ZEND_MODULE_DEACTIVATE_D(module)	zend_result ZEND_MODULE_DEACTIVATE_N(module)(SHUTDOWN_FUNC_ARGS)
 #define ZEND_MODULE_POST_ZEND_DEACTIVATE_D(module)	zend_result ZEND_MODULE_POST_ZEND_DEACTIVATE_N(module)(void)
@@ -242,6 +244,9 @@ typedef struct _zend_fcall_info_cache {
     BEGIN_EXTERN_C()\
 	ZEND_DLEXPORT zend_module_entry *get_module(void) { return &name##_module_entry; }\
     END_EXTERN_C()
+
+#define ZEND_MODULE_SET_CHILD_STARTUP_FUNC(func) \
+	zend_module_set_child_startup_func(INIT_FUNC_ARGS_PASSTHRU, func)
 
 #define ZEND_BEGIN_MODULE_GLOBALS(module_name)		\
 	typedef struct _zend_##module_name##_globals {
@@ -384,6 +389,8 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module);
 ZEND_API void zend_startup_modules(void);
 ZEND_API void zend_collect_module_handlers(void);
 ZEND_API void zend_destroy_modules(void);
+ZEND_API void zend_child_startup_modules(void);
+ZEND_API void zend_module_set_child_startup_func(INIT_FUNC_ARGS, zend_result (*child_startup_func)(INIT_FUNC_ARGS));
 ZEND_API void zend_check_magic_method_implementation(
 		const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type);
 ZEND_API void zend_add_magic_method(zend_class_entry *ce, zend_function *fptr, zend_string *lcname);

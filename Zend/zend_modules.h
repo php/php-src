@@ -46,7 +46,7 @@
 
 #define ZEND_MODULE_BUILD_ID "API" ZEND_TOSTR(ZEND_MODULE_API_NO) ZEND_BUILD_TS ZEND_BUILD_DEBUG ZEND_BUILD_SYSTEM ZEND_BUILD_EXTRA
 
-#define STANDARD_MODULE_PROPERTIES_EX 0, 0, NULL, 0, ZEND_MODULE_BUILD_ID
+#define STANDARD_MODULE_PROPERTIES_EX NULL, 0, 0, NULL, 0, ZEND_MODULE_BUILD_ID
 
 #define NO_MODULE_GLOBALS 0, NULL, NULL, NULL
 
@@ -77,8 +77,12 @@ struct _zend_module_entry {
 	const struct _zend_module_dep *deps;
 	const char *name;
 	const struct _zend_function_entry *functions;
+	/* Called once per process, excluding forked processes. This function
+	 * must not start threads. Calling external libraries from this function is
+	 * not recommended. */
 	zend_result (*module_startup_func)(INIT_FUNC_ARGS);
 	zend_result (*module_shutdown_func)(SHUTDOWN_FUNC_ARGS);
+	/* Called once per request */
 	zend_result (*request_startup_func)(INIT_FUNC_ARGS);
 	zend_result (*request_shutdown_func)(SHUTDOWN_FUNC_ARGS);
 	void (*info_func)(ZEND_MODULE_INFO_FUNC_ARGS);
@@ -92,6 +96,8 @@ struct _zend_module_entry {
 	void (*globals_ctor)(void *global);
 	void (*globals_dtor)(void *global);
 	zend_result (*post_deactivate_func)(void);
+	/* Called once per request-handling process */
+	zend_result (*child_startup_func)(INIT_FUNC_ARGS);
 	int module_started;
 	unsigned char type;
 	void *handle;
