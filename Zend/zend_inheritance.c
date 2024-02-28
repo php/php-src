@@ -1955,10 +1955,10 @@ static inline bool zend_was_type_resolved(zend_type original_type, zend_type res
 static zend_type zend_resolve_name_type(zend_type type, const zend_class_entry *const ce)
 {
 	ZEND_ASSERT(ZEND_TYPE_HAS_NAME(type));
-	if (ZEND_TYPE_IS_RELATIVE_SELF(type)) {
+	if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(type), "self")) {
 		zend_type resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(zend_string_copy(ce->name), /* allows_null */ false, /* extra_flags */ ZEND_TYPE_FULL_MASK(type));
 		return resolved_type;
-	} else if (ZEND_TYPE_IS_RELATIVE_PARENT(type)) {
+	} else if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(type), "parent")) {
 		if (!ce->parent) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use trait which has \"parent\" as a type when current class scope has no parent");

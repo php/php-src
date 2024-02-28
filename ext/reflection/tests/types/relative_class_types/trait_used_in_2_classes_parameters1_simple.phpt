@@ -58,9 +58,6 @@ foreach ($instances as $instance) {
             $type = $param->getType();
             echo "\t\tType: ", $type, PHP_EOL;
             echo "\t\tInstance of: ", $type::class, PHP_EOL;
-            $resolvedType = $type->resolveToNamedType();
-            echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
-            echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
 
             foreach ($instances as $arg) {
                 try {
@@ -79,20 +76,16 @@ Class: A
 Class: B
 Class: C
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 				C::bar(): Argument #1 ($o) must be of type B, A given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, A2 given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, B2 given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, C2 given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, D2 given, called in %s on line %d
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 				C::ping(): Argument #1 ($o) must be of type C, A given, called in %s on line %d
 				C::ping(): Argument #1 ($o) must be of type C, B given, called in %s on line %d
 				C::ping(): Argument #1 ($o) must be of type C, A2 given, called in %s on line %d
@@ -101,20 +94,16 @@ Class: C
 				C::ping(): Argument #1 ($o) must be of type C, D2 given, called in %s on line %d
 Class: D
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 				C::bar(): Argument #1 ($o) must be of type B, A given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, A2 given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, B2 given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, C2 given, called in %s on line %d
 				C::bar(): Argument #1 ($o) must be of type B, D2 given, called in %s on line %d
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 				C::ping(): Argument #1 ($o) must be of type C, A given, called in %s on line %d
 				C::ping(): Argument #1 ($o) must be of type C, B given, called in %s on line %d
 				C::ping(): Argument #1 ($o) must be of type C, A2 given, called in %s on line %d
@@ -125,20 +114,16 @@ Class: A2
 Class: B2
 Class: C2
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B2
-			Instance of: ReflectionNamedType
+		Type: B2
+		Instance of: ReflectionNamedType
 				C2::bar(): Argument #1 ($o) must be of type B2, A given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, B given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, C given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, D given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, A2 given, called in %s on line %d
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C2
-			Instance of: ReflectionNamedType
+		Type: C2
+		Instance of: ReflectionNamedType
 				C2::ping(): Argument #1 ($o) must be of type C2, A given, called in %s on line %d
 				C2::ping(): Argument #1 ($o) must be of type C2, B given, called in %s on line %d
 				C2::ping(): Argument #1 ($o) must be of type C2, C given, called in %s on line %d
@@ -147,20 +132,16 @@ Class: C2
 				C2::ping(): Argument #1 ($o) must be of type C2, B2 given, called in %s on line %d
 Class: D2
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B2
-			Instance of: ReflectionNamedType
+		Type: B2
+		Instance of: ReflectionNamedType
 				C2::bar(): Argument #1 ($o) must be of type B2, A given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, B given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, C given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, D given, called in %s on line %d
 				C2::bar(): Argument #1 ($o) must be of type B2, A2 given, called in %s on line %d
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C2
-			Instance of: ReflectionNamedType
+		Type: C2
+		Instance of: ReflectionNamedType
 				C2::ping(): Argument #1 ($o) must be of type C2, A given, called in %s on line %d
 				C2::ping(): Argument #1 ($o) must be of type C2, B given, called in %s on line %d
 				C2::ping(): Argument #1 ($o) must be of type C2, C given, called in %s on line %d

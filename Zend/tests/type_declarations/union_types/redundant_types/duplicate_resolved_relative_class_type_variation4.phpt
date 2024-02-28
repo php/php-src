@@ -12,4 +12,4 @@ class Bar extends Foo {
 
 ?>
 --EXPECTF--
-Fatal error: parent resolves to Foo which is redundant in %s on line %d
+Fatal error: Duplicate type Foo is redundant in %s on line %d

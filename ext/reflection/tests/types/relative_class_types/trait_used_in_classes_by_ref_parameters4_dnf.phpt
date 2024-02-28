@@ -39,15 +39,12 @@ foreach ($instances as $instance) {
             $unionType = $param->getType();
             $types = $unionType->getTypes();
             foreach ($types as $type) {
-                if (!($type instanceof ReflectionRelativeClassType)) {
+                if ($type instanceof ReflectionIntersectionType) {
                     // Do not care about "(X&Y)" type here;
                     continue;
                 }
                 echo "\t\tType: ", $type, PHP_EOL;
                 echo "\t\tInstance of: ", $type::class, PHP_EOL;
-                $resolvedType = $type->resolveToNamedType();
-                echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
-                echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
 
                 foreach ($instances as $arg) {
                     try {
@@ -67,29 +64,21 @@ Class: A
 Class: B
 Class: C
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 				C::bar(): Argument #1 ($o) must be of type (X&Y)|B, A given, called in %s on line %d
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 				C::ping(): Argument #1 ($o) must be of type (X&Y)|C, A given, called in %s on line %d
 				C::ping(): Argument #1 ($o) must be of type (X&Y)|C, B given, called in %s on line %d
 Class: D
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 				C::bar(): Argument #1 ($o) must be of type (X&Y)|B, A given, called in %s on line %d
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 				C::ping(): Argument #1 ($o) must be of type (X&Y)|C, A given, called in %s on line %d
 				C::ping(): Argument #1 ($o) must be of type (X&Y)|C, B given, called in %s on line %d

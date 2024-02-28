@@ -1,5 +1,5 @@
 --TEST--
-ReflectionTypes of relative class types (self, parent) in classes, parameter union types
+ReflectionTypes of relative class type static in classes, return union types
 --FILE--
 <?php
 
@@ -8,12 +8,11 @@ class A {
 }
 
 class B extends A {
-    public function foo(int|self $o) { return $o; }
+    public function foo($o): int|static { return $o; }
 }
 
 class C extends B {
-    public function bar(int|parent $o) { return $o; }
-    public function ping(int|self $o) { return $o; }
+    public function bar($o): int|static { return $o; }
 }
 
 class D extends C {}
@@ -31,27 +30,24 @@ foreach ($instances as $instance) {
     $methods = $rc->getMethods();
     foreach ($methods as $method) {
         echo "\tMethod: ", $method->name, PHP_EOL;
-        $parameters = $method->getParameters();
-        foreach ($parameters as $param) {
-            $unionType = $param->getType();
-            $types = $unionType->getTypes();
-            foreach ($types as $type) {
-                if (!($type instanceof ReflectionRelativeClassType)) {
-                    // Do not care about "int" type here;
-                    continue;
-                }
-                echo "\t\tType: ", $type, PHP_EOL;
-                echo "\t\tInstance of: ", $type::class, PHP_EOL;
-                $resolvedType = $type->resolveToNamedType();
-                echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
-                echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
+        $unionType = $method->getReturnType();
+        $types = $unionType->getTypes();
+        foreach ($types as $type) {
+            if (!($type instanceof ReflectionRelativeClassType)) {
+                // Do not care about "int" type here;
+                continue;
+            }
+            echo "\t\tType: ", $type, PHP_EOL;
+            echo "\t\tInstance of: ", $type::class, PHP_EOL;
+            $resolvedType = $type->resolveToNamedType();
+            echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
+            echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
 
-                foreach ($instances as $arg) {
-                    try {
-                        $instance->{$method->name}($arg);
-                    } catch (\TypeError $e) {
-                        echo "\t\t\t\t", $e->getMessage(), PHP_EOL;
-                    }
+            foreach ($instances as $arg) {
+                try {
+                    $instance->{$method->name}($arg);
+                } catch (\TypeError $e) {
+                    echo "\t\t\t\t", $e->getMessage(), PHP_EOL;
                 }
             }
         }
@@ -63,48 +59,40 @@ foreach ($instances as $instance) {
 Class: A
 Class: B
 	Method: foo
-		Type: self
+		Type: static
 		Instance of: ReflectionRelativeClassType
 			Resolved Type: B
 			Instance of: ReflectionNamedType
-				B::foo(): Argument #1 ($o) must be of type B|int, A given, called in %s on line %d
+				B::foo(): Return value must be of type B|int, A returned
 Class: C
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
-				C::bar(): Argument #1 ($o) must be of type B|int, A given, called in %s on line %d
-	Method: ping
-		Type: self
+		Type: static
 		Instance of: ReflectionRelativeClassType
 			Resolved Type: C
 			Instance of: ReflectionNamedType
-				C::ping(): Argument #1 ($o) must be of type C|int, A given, called in %s on line %d
-				C::ping(): Argument #1 ($o) must be of type C|int, B given, called in %s on line %d
+				C::bar(): Return value must be of type C|int, A returned
+				C::bar(): Return value must be of type C|int, B returned
 	Method: foo
-		Type: self
+		Type: static
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: C
 			Instance of: ReflectionNamedType
-				B::foo(): Argument #1 ($o) must be of type B|int, A given, called in %s on line %d
+				B::foo(): Return value must be of type C|int, A returned
+				B::foo(): Return value must be of type C|int, B returned
 Class: D
 	Method: bar
-		Type: parent
+		Type: static
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: D
 			Instance of: ReflectionNamedType
-				C::bar(): Argument #1 ($o) must be of type B|int, A given, called in %s on line %d
-	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
-				C::ping(): Argument #1 ($o) must be of type C|int, A given, called in %s on line %d
-				C::ping(): Argument #1 ($o) must be of type C|int, B given, called in %s on line %d
+				C::bar(): Return value must be of type D|int, A returned
+				C::bar(): Return value must be of type D|int, B returned
+				C::bar(): Return value must be of type D|int, C returned
 	Method: foo
-		Type: self
+		Type: static
 		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
+			Resolved Type: D
 			Instance of: ReflectionNamedType
-				B::foo(): Argument #1 ($o) must be of type B|int, A given, called in %s on line %d
+				B::foo(): Return value must be of type D|int, A returned
+				B::foo(): Return value must be of type D|int, B returned
+				B::foo(): Return value must be of type D|int, C returned
