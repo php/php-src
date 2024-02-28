@@ -218,6 +218,10 @@ PHP 8.2 UPGRADE NOTES
     dba_fetch(string|array $key, $skip, $dba): string|false
     is still accepted, but it is recommended to use the new standard variant.
 
+- Gettext:
+  . dcgettext/dcngettext throw now an exception if the category's argument if set to
+    `LC_ALL`.
+
 - MBString
   . mb_check_encoding() now checks input encoding more strictly for
     certain text encodings, including ISO-2022-JP and UTF-7.

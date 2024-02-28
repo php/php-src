@@ -23,6 +23,7 @@
 #ifdef HAVE_LIBINTL
 
 #include <stdio.h>
+#include <locale.h>
 #include "ext/standard/info.h"
 #include "php_gettext.h"
 #include "gettext_arginfo.h"
@@ -58,6 +59,12 @@ ZEND_GET_MODULE(php_gettext)
 #define PHP_GETTEXT_LENGTH_CHECK(_arg_num, check_len) \
 	if (UNEXPECTED(check_len > PHP_GETTEXT_MAX_MSGID_LENGTH)) { \
 		zend_argument_value_error(_arg_num, "is too long"); \
+		RETURN_THROWS(); \
+	}
+
+#define PHP_DCGETTEXT_CATEGORY_CHECK(_arg_num, category) \
+	if (category == LC_ALL) { \
+		zend_argument_value_error(_arg_num, "cannot be LC_ALL"); \
 		RETURN_THROWS(); \
 	}
 
@@ -146,6 +153,7 @@ PHP_FUNCTION(dcgettext)
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
 	PHP_GETTEXT_LENGTH_CHECK(2, ZSTR_LEN(msgid))
+	PHP_DCGETTEXT_CATEGORY_CHECK(3, category)
 
 	msgstr = dcgettext(ZSTR_VAL(domain), ZSTR_VAL(msgid), category);
 
@@ -260,6 +268,7 @@ PHP_FUNCTION(dcngettext)
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, domain_len)
 	PHP_GETTEXT_LENGTH_CHECK(2, msgid1_len)
 	PHP_GETTEXT_LENGTH_CHECK(3, msgid2_len)
+	PHP_DCGETTEXT_CATEGORY_CHECK(5, category)
 
 	msgstr = dcngettext(domain, msgid1, msgid2, count, category);
 
