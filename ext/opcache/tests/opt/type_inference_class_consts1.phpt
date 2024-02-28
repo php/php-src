@@ -1,5 +1,5 @@
 --TEST--
-Test type inference of class consts
+Test type inference of class consts - reference by static and self
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -38,38 +38,6 @@ class Test1 {
 
     public function getStaticBaz(): int {
         return static::BAZ;
-    }
-}
-
-final class Test2 extends Test1 {
-    public function getStaticFoo(): int {
-        return static::FOO;
-    }
-
-    public function getParentFoo(): int {
-        return parent::FOO;
-    }
-
-    public function getParentBar(): int {
-        return parent::BAR;
-    }
-
-    public function getParentBaz(): int {
-        return parent::BAZ;
-    }
-}
-
-class Test3 {
-    public function getTestFoo(): int {
-        return Test1::FOO;
-    }
-
-    public function getTestBar(): int {
-        return Test1::BAR;
-    }
-
-    public function getTestBaz(): int {
-        return Test1::BAZ;
     }
 }
 
@@ -121,49 +89,3 @@ Test1::getStaticBaz:
      ; %s
 0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("BAZ")
 0001 RETURN T0
-
-Test2::getStaticFoo:
-     ; (lines=3, args=0, vars=0, tmps=1)
-     ; (after optimizer)
-     ; %s
-0000 T0 = FETCH_CLASS_CONSTANT (static) (exception) string("FOO")
-0001 VERIFY_RETURN_TYPE T0
-0002 RETURN T0
-LIVE RANGES:
-     0: 0001 - 0002 (tmp/var)
-
-Test2::getParentFoo:
-     ; (lines=1, args=0, vars=0, tmps=0)
-     ; (after optimizer)
-     ; %s
-0000 RETURN int(42)
-
-Test2::getParentBar:
-     ; (lines=1, args=0, vars=0, tmps=0)
-     ; (after optimizer)
-     ; %s
-0000 RETURN int(42)
-
-Test2::getParentBaz:
-     ; (lines=1, args=0, vars=0, tmps=0)
-     ; (after optimizer)
-     ; %s
-0000 RETURN int(42)
-
-Test3::getTestFoo:
-     ; (lines=1, args=0, vars=0, tmps=0)
-     ; (after optimizer)
-     ; %s
-0000 RETURN int(42)
-
-Test3::getTestBar:
-     ; (lines=1, args=0, vars=0, tmps=0)
-     ; (after optimizer)
-     ; %s
-0000 RETURN int(42)
-
-Test3::getTestBaz:
-     ; (lines=1, args=0, vars=0, tmps=0)
-     ; (after optimizer)
-     ; %s
-0000 RETURN int(42)
