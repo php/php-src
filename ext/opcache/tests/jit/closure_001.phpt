@@ -30,16 +30,22 @@ var_dump($f->call($foo));
 var_dump($f->call($foo));
 var_dump($f());
 ?>
---EXPECT--
-object(Closure)#3 (1) {
+--EXPECTF--
+object(Closure)#3 (2) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["this"]=>
+  object(Foo)#1 (0) {
+  }
+}
+object(Closure)#3 (2) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
   ["this"]=>
   object(Foo)#1 (0) {
   }
 }
 object(Closure)#3 (1) {
-  ["this"]=>
-  object(Foo)#1 (0) {
-  }
-}
-object(Closure)#3 (0) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
 }
