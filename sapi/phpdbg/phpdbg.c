@@ -1364,7 +1364,7 @@ phpdbg_main:
 	PHPDBG_G(flags) = flags;
 
 	if (phpdbg->startup(phpdbg) == SUCCESS
-			|| phpdbg->child_startup(phpdbg) == FAILURE) {
+			&& phpdbg->child_startup(phpdbg) == SUCCESS) {
 		zend_mm_heap *mm_heap;
 #ifdef _WIN32
 	EXCEPTION_POINTERS *xp;

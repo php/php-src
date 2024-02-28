@@ -2367,6 +2367,7 @@ void php_module_shutdown(void)
 	int module_number=0;
 
 	module_shutdown = true;
+	php_child_started = 0;
 
 	if (!module_initialized) {
 		return;

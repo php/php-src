@@ -4667,43 +4667,33 @@ static zend_result accel_finish_startup_preload(bool in_child)
 
 static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 {
+	struct passwd *pw = NULL;
 	uid_t euid = geteuid();
 	if (euid != 0) {
 		if (ZCG(accel_directives).preload_user
 		 && *ZCG(accel_directives).preload_user) {
 			zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored because the current user is not \"root\"");
 		}
+	} else {
+		if (!ZCG(accel_directives).preload_user
+		 || !*ZCG(accel_directives).preload_user) {
 
-		*pid = -1;
-		return SUCCESS;
-	}
+			bool sapi_requires_preload_user = !(strcmp(sapi_module.name, "cli") == 0
+			  || strcmp(sapi_module.name, "phpdbg") == 0);
 
-	if (!ZCG(accel_directives).preload_user
-	 || !*ZCG(accel_directives).preload_user) {
-
-		bool sapi_requires_preload_user = !(strcmp(sapi_module.name, "cli") == 0
-		  || strcmp(sapi_module.name, "phpdbg") == 0);
-
-		if (!sapi_requires_preload_user) {
-			*pid = -1;
-			return SUCCESS;
+			if (sapi_requires_preload_user) {
+				zend_shared_alloc_unlock();
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload\" requires \"opcache.preload_user\" when running under uid 0");
+				return FAILURE;
+			}
+		} else {
+			pw = getpwnam(ZCG(accel_directives).preload_user);
+			if (pw == NULL) {
+				zend_shared_alloc_unlock();
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
+				return FAILURE;
+			}
 		}
-
-		zend_shared_alloc_unlock();
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "\"opcache.preload\" requires \"opcache.preload_user\" when running under uid 0");
-		return FAILURE;
-	}
-
-	struct passwd *pw = getpwnam(ZCG(accel_directives).preload_user);
-	if (pw == NULL) {
-		zend_shared_alloc_unlock();
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Preloading failed to getpwnam(\"%s\")", ZCG(accel_directives).preload_user);
-		return FAILURE;
-	}
-
-	if (pw->pw_uid == euid) {
-		*pid = -1;
-		return SUCCESS;
 	}
 
 	*pid = fork();
@@ -4714,17 +4704,19 @@ static zend_result accel_finish_startup_preload_subprocess(pid_t *pid)
 	}
 
 	if (*pid == 0) { /* children */
-		if (setgid(pw->pw_gid) < 0) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
-			exit(1);
-		}
-		if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
-			exit(1);
-		}
-		if (setuid(pw->pw_uid) < 0) {
-			zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
-			exit(1);
+		if (pw != NULL && pw->pw_uid != euid) {
+			if (setgid(pw->pw_gid) < 0) {
+				zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setgid(%d)", pw->pw_gid);
+				exit(1);
+			}
+			if (initgroups(pw->pw_name, pw->pw_gid) < 0) {
+				zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to initgroups(\"%s\", %d)", pw->pw_name, pw->pw_uid);
+				exit(1);
+			}
+			if (setuid(pw->pw_uid) < 0) {
+				zend_accel_error(ACCEL_LOG_WARNING, "Preloading failed to setuid(%d)", pw->pw_uid);
+				exit(1);
+			}
 		}
 	}
 
@@ -4769,10 +4761,9 @@ static zend_result accel_finish_startup(void)
 		return FAILURE;
 	}
 
-	if (pid == -1) { /* no subprocess was needed */
-		/* The called function unlocks the shared alloc lock */
-		return accel_finish_startup_preload(false);
-	} else if (pid == 0) { /* subprocess */
+	if (pid == 0) { /* subprocess */
+		ZEND_ASSERT(sapi_module.child_startup);
+		sapi_module.child_startup(&sapi_module);
 		const zend_result ret = accel_finish_startup_preload(true);
 
 		exit(ret == SUCCESS ? 0 : 1);
