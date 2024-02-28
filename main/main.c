@@ -2367,7 +2367,9 @@ void php_module_shutdown(void)
 	int module_number=0;
 
 	module_shutdown = true;
+#if ZEND_DEBUG
 	php_child_started = 0;
+#endif
 
 	if (!module_initialized) {
 		return;
