@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.4
+29 Feb 2024, PHP 8.3.4RC1
 
 - Core:
   . Fix ZTS persistent resource crashes on shutdown. (nielsdos)
