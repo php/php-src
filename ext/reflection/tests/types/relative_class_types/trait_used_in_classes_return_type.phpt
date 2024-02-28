@@ -38,9 +38,11 @@ foreach ($instances as $instance) {
         $type = $method->getReturnType();
         echo "\t\tType: ", $type, PHP_EOL;
         echo "\t\tInstance of: ", $type::class, PHP_EOL;
-        $resolvedType = $type->resolveToNamedType();
-        echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
-        echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
+        if ($type instanceof ReflectionRelativeClassType) {
+            $resolvedType = $type->resolveToNamedType();
+            echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
+            echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
+        }
 
         foreach ($instances as $arg) {
             try {
@@ -58,16 +60,12 @@ Class: A
 Class: B
 Class: C
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 				C::bar(): Return value must be of type B, A returned
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 				C::ping(): Return value must be of type C, A returned
 				C::ping(): Return value must be of type C, B returned
 	Method: pong
@@ -79,16 +77,12 @@ Class: C
 				C::pong(): Return value must be of type C, B returned
 Class: D
 	Method: bar
-		Type: parent
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 				C::bar(): Return value must be of type B, A returned
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 				C::ping(): Return value must be of type C, A returned
 				C::ping(): Return value must be of type C, B returned
 	Method: pong

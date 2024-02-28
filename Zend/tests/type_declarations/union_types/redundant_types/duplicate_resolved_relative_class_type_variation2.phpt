@@ -9,4 +9,4 @@ class Foo {
 
 ?>
 --EXPECTF--
-Fatal error: self resolves to Foo which is redundant in %s on line %d
+Fatal error: Duplicate type Foo is redundant in %s on line %d

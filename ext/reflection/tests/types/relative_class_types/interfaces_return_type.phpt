@@ -12,7 +12,7 @@ interface B extends A {
 }
 
 interface C extends B {
-    //public function bar(object $o): parent; // This compile errors
+    //public function bar(object $o): parent; // This compiles errors
     public function ping(object $o): self;
     public function pong(object $o): static;
 }
@@ -35,12 +35,14 @@ foreach ($interfaces as $interface) {
         $type = $method->getReturnType();
         echo "\t\tType: ", $type, PHP_EOL;
         echo "\t\tInstance of: ", $type::class, PHP_EOL;
-        try {
-            $resolvedType = $type->resolveToNamedType();
-            echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
-            echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
-        } catch (ReflectionException $e) {
-            echo $e->getMessage(), PHP_EOL;
+        if ($type instanceof ReflectionRelativeClassType) {
+            try {
+                $resolvedType = $type->resolveToNamedType();
+                echo "\t\t\tResolved Type: ", $resolvedType, PHP_EOL;
+                echo "\t\t\tInstance of: ", $resolvedType::class, PHP_EOL;
+            } catch (ReflectionException $e) {
+                echo $e->getMessage(), PHP_EOL;
+            }
         }
     }
 }
@@ -50,37 +52,27 @@ foreach ($interfaces as $interface) {
 Interface: A
 Interface: B
 	Method: foo
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 Interface: C
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 	Method: pong
 		Type: static
 		Instance of: ReflectionRelativeClassType
 Cannot resolve "static" type of an interface
 	Method: foo
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
 Interface: D
 	Method: ping
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: C
-			Instance of: ReflectionNamedType
+		Type: C
+		Instance of: ReflectionNamedType
 	Method: pong
 		Type: static
 		Instance of: ReflectionRelativeClassType
 Cannot resolve "static" type of an interface
 	Method: foo
-		Type: self
-		Instance of: ReflectionRelativeClassType
-			Resolved Type: B
-			Instance of: ReflectionNamedType
+		Type: B
+		Instance of: ReflectionNamedType
