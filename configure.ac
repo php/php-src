@@ -375,6 +375,9 @@ esac
 dnl Solaris/Illumos for process mapping.
 AC_SEARCH_LIBS([Pgrab], [proc])
 
+dnl Haiku does not have network api in libc.
+AC_SEARCH_LIBS([setsockopt], [network])
+
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
@@ -643,9 +646,6 @@ AX_FUNC_WHICH_GETHOSTBYNAME_R
 dnl Some systems (Solaris 10) do not have nanosleep in libc.
 AC_CHECK_FUNCS([nanosleep],,
   [AC_SEARCH_LIBS([nanosleep], [rt], [AC_DEFINE([HAVE_NANOSLEEP], [1])])])
-
-dnl Haiku does not have network api in libc.
-PHP_CHECK_FUNC_LIB(setsockopt, network)
 
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
