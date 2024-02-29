@@ -480,11 +480,13 @@ PHP_FUNCTION(mt_srand)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
-	state->mode = mode;
-
-	/* Anything that is not MT_RAND_MT19937 was interpreted as MT_RAND_PHP. */
-	if (state->mode != MT_RAND_MT19937) {
+	switch (mode) {
+	case MT_RAND_PHP:
+		state->mode = MT_RAND_PHP;
 		zend_error(E_DEPRECATED, "The MT_RAND_PHP variant of Mt19937 is deprecated");
+		break;
+	default:
+		state->mode = MT_RAND_MT19937;
 	}
 
 	if (seed_is_null) {
