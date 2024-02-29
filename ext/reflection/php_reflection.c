@@ -1645,8 +1645,13 @@ ZEND_METHOD(ReflectionFunction, __construct)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(closure_obj, zend_ce_closure, fname)
 	ZEND_PARSE_PARAMETERS_END();
 
+	/* Set CE to NULL */
+	intern->ce = NULL;
 	if (closure_obj) {
 		fptr = (zend_function*)zend_get_closure_method_def(closure_obj);
+		//zend_object *tmp = NULL;
+		///* We use the get_closure object handler that always succeds to fetch the function and CE pointers */
+		//closure_obj->handlers->get_closure(closure_obj, &intern->ce, &fptr, /* obj_ptr */ &tmp, /* check_only */ false);
 	} else {
 		if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
 			/* Ignore leading "\" */
@@ -1681,7 +1686,6 @@ ZEND_METHOD(ReflectionFunction, __construct)
 	} else {
 		ZVAL_UNDEF(&intern->obj);
 	}
-	intern->ce = NULL;
 }
 /* }}} */
 
