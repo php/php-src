@@ -992,13 +992,13 @@ PHP_METHOD(DOM_Document, createElementNS)
 	errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 	if (errorcode == 0) {
-		nodep = xmlNewDocRawNode(docp, NULL, localname, NULL);
+		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
+		nodep = xmlNewDocNode(docp, ns, localname, NULL);
 		if (UNEXPECTED(nodep == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 			RETURN_THROWS();
 		}
-		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
-		nodep->ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 		DOM_RET_OBJ(nodep, &ret, intern);
 	} else {
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
