@@ -45,6 +45,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13354 (pg_execute/pg_send_query_params/pg_send_execute
     with null value passed by reference). (George Barbarosie)
 
+- Random:
+  . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
+    unknown modes). (timwolla)
+
 - Standard:
   . Fixed array key as hash to string (case insensitive) comparison typo
     for the second operand buffer size (albeit unused for now). (A. Slepykh)
