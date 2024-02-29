@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d5b84bd062c130448e2da2ca27205e91bf63aed0 */
+ * Stub hash: 4158aa1e1ff26136831a38085ae14b1ba1400afd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -574,6 +574,22 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOM_ChildNode_after arginfo_class_DOM_ParentNode_append
 
 #define arginfo_class_DOM_ChildNode_replaceWith arginfo_class_DOM_ParentNode_append
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Implementation_createDocumentType, 0, 3, DOM\\DocumentType, 0)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, publicId, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, systemId, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Implementation_createDocument, 0, 2, DOM\\XMLDocument, 0)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, doctype, DOM\\DocumentType, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Implementation_createHTMLDocument, 0, 0, DOM\\HTMLDocument, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, title, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Node___construct arginfo_class_DOMDocumentFragment___construct
 
@@ -1225,6 +1241,9 @@ ZEND_METHOD(DOMXPath, registerPhpFunctionNS);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, quote);
 #endif
+ZEND_METHOD(DOM_Implementation, createDocumentType);
+ZEND_METHOD(DOM_Implementation, createDocument);
+ZEND_METHOD(DOM_Implementation, createHTMLDocument);
 ZEND_METHOD(DOM_Node, __construct);
 ZEND_METHOD(DOM_Node, isEqualNode);
 ZEND_METHOD(DOM_Node, isSameNode);
@@ -1538,6 +1557,13 @@ static const zend_function_entry class_DOM_ChildNode_methods[] = {
 	ZEND_RAW_FENTRY("before", NULL, arginfo_class_DOM_ChildNode_before, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("after", NULL, arginfo_class_DOM_ChildNode_after, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceWith", NULL, arginfo_class_DOM_ChildNode_replaceWith, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_DOM_Implementation_methods[] = {
+	ZEND_ME(DOM_Implementation, createDocumentType, arginfo_class_DOM_Implementation_createDocumentType, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_Implementation, createDocument, arginfo_class_DOM_Implementation_createDocument, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_Implementation, createHTMLDocument, arginfo_class_DOM_Implementation_createHTMLDocument, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -2709,6 +2735,17 @@ static zend_class_entry *register_class_DOM_ChildNode(void)
 	return class_entry;
 }
 
+static zend_class_entry *register_class_DOM_Implementation(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "DOM", "Implementation", class_DOM_Implementation_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_DOM_Node(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -3294,6 +3331,13 @@ static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_ent
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_DOM_Node);
 	class_entry->ce_flags |= ZEND_ACC_ABSTRACT;
 	zend_class_implements(class_entry, 1, class_entry_DOM_ParentNode);
+
+	zval property_implementation_default_value;
+	ZVAL_UNDEF(&property_implementation_default_value);
+	zend_string *property_implementation_name = zend_string_init("implementation", sizeof("implementation") - 1, 1);
+	zend_string *property_implementation_class_DOM_Implementation = zend_string_init("DOM\\Implementation", sizeof("DOM\\Implementation")-1, 1);
+	zend_declare_typed_property(class_entry, property_implementation_name, &property_implementation_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_implementation_class_DOM_Implementation, 0, 0));
+	zend_string_release(property_implementation_name);
 
 	zval property_URL_default_value;
 	ZVAL_UNDEF(&property_URL_default_value);

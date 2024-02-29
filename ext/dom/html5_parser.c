@@ -20,10 +20,10 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "php_dom.h"
 #include "html5_parser.h"
 #include <lexbor/html/parser.h>
 #include <lexbor/html/interfaces/element.h>
-#include <libxml/tree.h>
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLtree.h>
 #include <Zend/zend.h>
@@ -307,21 +307,10 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     php_dom_libxml_ns_mapper *ns_mapper
 )
 {
-#ifdef LIBXML_HTML_ENABLED
-    xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+    xmlDocPtr lxml_doc = php_dom_create_html_doc();
     if (UNEXPECTED(!lxml_doc)) {
         return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
     }
-#else
-    /* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
-     * This code mimics the behaviour. */
-    xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-    if (UNEXPECTED(!lxml_doc)) {
-        return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-    }
-    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-#endif
-    lxml_doc->dict = xmlDictCreate();
     lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
         lxb_dom_interface_node(document)->last_child,
         lxml_doc,

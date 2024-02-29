@@ -59,6 +59,7 @@ DOM_DEF_GET_CE_FUNC(notation)
 DOM_DEF_GET_CE_FUNC(documentfragment)
 DOM_DEF_GET_CE_FUNC(namednodemap)
 DOM_DEF_GET_CE_FUNC(nodelist)
+DOM_DEF_GET_CE_FUNC(domimplementation)
 
 #endif
 

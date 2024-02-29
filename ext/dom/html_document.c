@@ -78,6 +78,28 @@ typedef struct _dom_decoding_encoding_ctx {
 	lxb_codepoint_t codepoints[4096];
 } dom_decoding_encoding_ctx;
 
+/* https://dom.spec.whatwg.org/#dom-document-implementation */
+zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
+{
+	const uint32_t PROP_INDEX = 14;
+
+#if ZEND_DEBUG
+	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
+	const zend_property_info *prop_info = zend_get_property_info(dom_abstract_base_document_class_entry, implementation_str, 0);
+	zend_string_release_ex(implementation_str, false);
+	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
+#endif
+
+	zval *cached_implementation = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	if (Z_ISUNDEF_P(cached_implementation)) {
+		php_dom_create_implementation(cached_implementation, true);
+	}
+
+	ZVAL_OBJ_COPY(retval, Z_OBJ_P(cached_implementation));
+
+	return SUCCESS;
+}
+
 static void dom_decoding_encoding_ctx_init(dom_decoding_encoding_ctx *ctx)
 {
 	ctx->encode_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
@@ -703,19 +725,11 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		zend_argument_value_error(1, "must be a valid document encoding");
 		RETURN_THROWS();
 	}
-	
-#ifdef LIBXML_HTML_ENABLED
-	xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+
+	xmlDocPtr lxml_doc = php_dom_create_html_doc();
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		goto oom;
 	}
-#else
-	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-	if (UNEXPECTED(lxml_doc == NULL)) {
-		goto oom;
-	}
-	lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-#endif
 
 	lxml_doc->encoding = xmlStrdup((const xmlChar *) encoding);
 

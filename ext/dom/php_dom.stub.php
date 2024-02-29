@@ -1124,6 +1124,19 @@ namespace DOM
         public function replaceWith(Node|string ...$nodes): void;
     }
 
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    class Implementation
+    {
+        public function createDocumentType(string $qualifiedName, string $publicId, string $systemId): DocumentType {}
+
+        public function createDocument(?string $namespace, string $qualifiedName, ?DocumentType $doctype = null): XMLDocument {}
+
+        public function createHTMLDocument(?string $title = null): HTMLDocument {}
+    }
+
     /** @strict-properties */
     class Node
     {
@@ -1512,6 +1525,8 @@ namespace DOM
 
     abstract class Document extends Node implements ParentNode
     {
+        /** @readonly */
+        public Implementation $implementation;
         /** @readonly */
         public string $URL;
         /** @readonly */

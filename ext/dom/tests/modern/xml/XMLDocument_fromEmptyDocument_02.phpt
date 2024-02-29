@@ -10,7 +10,7 @@ var_dump($dom);
 
 ?>
 --EXPECT--
-object(DOM\XMLDocument)#1 (28) {
+object(DOM\XMLDocument)#1 (29) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -19,6 +19,8 @@ object(DOM\XMLDocument)#1 (28) {
   string(3) "1.1"
   ["formatOutput"]=>
   bool(false)
+  ["implementation"]=>
+  string(22) "(object value omitted)"
   ["URL"]=>
   string(11) "about:blank"
   ["documentURI"]=>

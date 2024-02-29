@@ -26,6 +26,7 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_modern_parentnode_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_childnode_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_childnode_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_domimplementation_class_entry;
+extern PHP_DOM_EXPORT zend_class_entry *dom_modern_domimplementation_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_documentfragment_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_documentfragment_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_document_class_entry;

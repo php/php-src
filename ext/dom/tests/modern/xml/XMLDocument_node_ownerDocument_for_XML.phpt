@@ -13,7 +13,7 @@ var_dump($element->ownerDocument);
 
 ?>
 --EXPECTF--
-object(DOM\XMLDocument)#1 (28) {
+object(DOM\XMLDocument)#1 (29) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -22,6 +22,8 @@ object(DOM\XMLDocument)#1 (28) {
   string(3) "1.0"
   ["formatOutput"]=>
   bool(false)
+  ["implementation"]=>
+  string(22) "(object value omitted)"
   ["URL"]=>
   string(%d) "%s"
   ["documentURI"]=>

@@ -23,7 +23,9 @@ var_dump(get_class($dom->getElementsByTagName("p")->item(0)));
 
 ?>
 --EXPECT--
-object(DOM\HTMLDocument)#1 (24) {
+object(DOM\HTMLDocument)#1 (25) {
+  ["implementation"]=>
+  string(22) "(object value omitted)"
   ["URL"]=>
   string(11) "about:blank"
   ["documentURI"]=>

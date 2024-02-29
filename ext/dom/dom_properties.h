@@ -34,6 +34,7 @@ zend_result dom_characterdata_length_read(dom_object *obj, zval *retval);
 /* document properties */
 zend_result dom_document_doctype_read(dom_object *obj, zval *retval);
 zend_result dom_document_implementation_read(dom_object *obj, zval *retval);
+zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_document_document_element_read(dom_object *obj, zval *retval);
 zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_document_actual_encoding_write(dom_object *obj, zval *newval);
