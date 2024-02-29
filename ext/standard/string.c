@@ -6144,7 +6144,6 @@ PHP_FUNCTION(str_split)
 PHP_FUNCTION(strpbrk)
 {
 	zend_string *haystack, *char_list;
-	const char *haystack_ptr, *cl_ptr;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(haystack)
@@ -6156,12 +6155,14 @@ PHP_FUNCTION(strpbrk)
 		RETURN_THROWS();
 	}
 
-	for (haystack_ptr = ZSTR_VAL(haystack); haystack_ptr < (ZSTR_VAL(haystack) + ZSTR_LEN(haystack)); ++haystack_ptr) {
-		for (cl_ptr = ZSTR_VAL(char_list); cl_ptr < (ZSTR_VAL(char_list) + ZSTR_LEN(char_list)); ++cl_ptr) {
-			if (*cl_ptr == *haystack_ptr) {
-				RETURN_STRINGL(haystack_ptr, (ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - haystack_ptr));
-			}
-		}
+	size_t shift = php_strcspn(
+		ZSTR_VAL(haystack),
+		ZSTR_VAL(char_list),
+		ZSTR_VAL(haystack) + ZSTR_LEN(haystack),
+		ZSTR_VAL(char_list) + ZSTR_LEN(char_list)
+	);
+	if (shift < ZSTR_LEN(haystack)) {
+		RETURN_STRINGL(ZSTR_VAL(haystack) + shift, ZSTR_LEN(haystack) - shift);
 	}
 
 	RETURN_FALSE;
