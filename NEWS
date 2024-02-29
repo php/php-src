@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.5
 
+- Random:
+  . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
+    unknown modes). (timwolla)
 
 14 Mar 2024, PHP 8.3.4
 
