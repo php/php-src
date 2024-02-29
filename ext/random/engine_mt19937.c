@@ -121,7 +121,7 @@ static inline void mt19937_reload(php_random_status_state_mt19937 *state)
 	state->count = 0;
 }
 
-static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, uint64_t seed)
+PHPAPI inline void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed)
 {
 	uint32_t i, prev_state;
 
@@ -129,7 +129,7 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	   See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
-	state->state[0] = seed & 0xffffffffU;
+	state->state[0] = seed;
 	for (i = 1; i < MT_N; i++) {
 		prev_state = state->state[i - 1];
 		state->state[i] = (1812433253U * (prev_state  ^ (prev_state  >> 30)) + i) & 0xffffffffU;
@@ -137,11 +137,6 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	state->count = i;
 
 	mt19937_reload(state);
-}
-
-static void seed(void *state, uint64_t seed)
-{
-	mt19937_seed_state(state, seed);
 }
 
 static php_random_result generate(void *state)
@@ -231,7 +226,6 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_mt19937 = {
 	sizeof(php_random_status_state_mt19937),
-	seed,
 	generate,
 	range,
 	serialize,
@@ -241,13 +235,13 @@ const php_random_algo php_random_algo_mt19937 = {
 /* {{{ php_random_mt19937_seed_default */
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state)
 {
-	zend_long seed = 0;
+	uint32_t seed = 0;
 
 	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
 		seed = GENERATE_SEED();
 	}
 
-	mt19937_seed_state(state, (uint64_t) seed);
+	php_random_mt19937_seed32(state, seed);
 }
 /* }}} */
 
@@ -286,7 +280,7 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 		}
 	}
 
-	mt19937_seed_state(state, seed);
+	php_random_mt19937_seed32(state, seed);
 }
 /* }}} */
 

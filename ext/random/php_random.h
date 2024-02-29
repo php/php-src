@@ -96,7 +96,6 @@ typedef struct _php_random_result {
 
 typedef struct _php_random_algo {
 	const size_t state_size;
-	void (*seed)(void *state, uint64_t seed);
 	php_random_result (*generate)(void *state);
 	zend_long (*range)(void *state, zend_long min, zend_long max);
 	bool (*serialize)(void *state, HashTable *data);
@@ -177,12 +176,17 @@ static inline php_random_algo_with_state php_random_default_engine(void)
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);
 PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest);
 
+PHPAPI void php_random_combinedlcg_seed64(php_random_status_state_combinedlcg *state, uint64_t seed);
 PHPAPI void php_random_combinedlcg_seed_default(php_random_status_state_combinedlcg *state);
 
+PHPAPI void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed);
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state);
 
+PHPAPI void php_random_pcgoneseq128xslrr64_seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed);
 PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgoneseq128xslrr64 *state, uint64_t advance);
 
+PHPAPI void php_random_xoshiro256starstar_seed64(php_random_status_state_xoshiro256starstar *state, uint64_t seed);
+PHPAPI void php_random_xoshiro256starstar_seed256(php_random_status_state_xoshiro256starstar *state, uint64_t s0, uint64_t s1, uint64_t s2, uint64_t s3);
 PHPAPI void php_random_xoshiro256starstar_jump(php_random_status_state_xoshiro256starstar *state);
 PHPAPI void php_random_xoshiro256starstar_jump_long(php_random_status_state_xoshiro256starstar *state);
 

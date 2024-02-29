@@ -156,6 +156,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      single php_random_algo_with_state struct by value, making it easier to
      pass around the state with its associated algorithm and thus reducing
      the chance for mistakes.
+   - The seed member of a php_random_algo has been removed. As a replacement
+     engine-specific seeding functions are now exposed. This change allows
+     users to better take engine-specific behavior into account. As an example
+     Mt19937 ignored the upper half of the seed parameter of the generic
+     seeding function.
    - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
      and much smaller php_random_csprng.h header. The new header is included
      in php_random.h for compatibility with existing users.
