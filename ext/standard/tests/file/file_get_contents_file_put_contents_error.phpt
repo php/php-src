@@ -31,7 +31,7 @@ unlink($file_path."/file_put_contents_error1.tmp");
 
 -- Testing with  Non-existing file --
 
-Warning: file_get_contents(/no/such/file/or/dir): Failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents('%s'): Failed to open stream: No such file or directory in %s on line %d
 
 -- Testing for invalid negative maxlen values --
 file_get_contents(): Argument #5 ($length) must be greater than or equal to 0

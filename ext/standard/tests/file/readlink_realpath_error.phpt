@@ -25,17 +25,17 @@ echo "Done\n";
 --EXPECTF--
 *** Testing readlink() on a non-existent link ***
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 
 *** Testing readlink() on existing file ***
 
-Warning: readlink(): Invalid argument in %s on line %d
+Warning: readlink('%s'): Invalid argument in %s on line %d
 bool(false)
 
 *** Testing readlink() on existing directory ***
 
-Warning: readlink(): Invalid argument in %s on line %d
+Warning: readlink('%s'): Invalid argument in %s on line %d
 bool(false)
 
 *** Testing realpath() on a non-existent file ***

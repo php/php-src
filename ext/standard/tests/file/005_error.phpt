@@ -18,16 +18,16 @@ echo "\nDone";
 *** Testing error conditions ***
 
 -- Testing with  Non-existing files --
-Warning: fileatime(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: fileatime('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: filemtime(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: filemtime('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: filectime(): stat failed for /no/such/file/or/dir in %s on line %d
+Warning: filectime('%s'): stat failed for /no/such/file/or/dir in %s on line %d
 bool(false)
 
-Warning: touch(): Unable to create file /no/such/file/or/dir because No such file or directory in %s on line %d
+Warning: touch('%s', 10): Unable to create file /no/such/file/or/dir because No such file or directory in %s on line %d
 bool(false)
 
 Done

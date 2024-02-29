@@ -75,11 +75,11 @@ ValueError: file_put_contents(): Argument #1 ($filename) must not contain any nu
 TypeError: file_put_contents(): Argument #1 ($filename) must be of type string, array given
 -- Iteration 7 --
 
-Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents('%s', 'Some data'): Failed to open stream: No such file or directory in %s on line %d
 Failed to write data to: '%sir'
 -- Iteration 8 --
 
-Warning: file_put_contents(%sphp): Failed to open stream: %s in %s on line %d
+Warning: file_put_contents('php/php', 'Some data'): Failed to open stream: No such file or directory in %s on line %d
 Failed to write data to: '%sphp'
 
 *** Done ***

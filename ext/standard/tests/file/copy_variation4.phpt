@@ -84,7 +84,7 @@ Size of the source file before copy operation => int(1500)
 -- Iteration 1 --
 Existence of destination file before copy => bool(true)
 Copy operation => 
-Warning: copy(): The second argument to copy() function cannot be a directory in %s on line %d
+Warning: copy('%s'): The second argument to copy() function cannot be a directory in %s on line %d
 bool(false)
 Existence of destination file => bool(true)
 Destination file name => %s/
@@ -96,7 +96,7 @@ Warning: unlink(%s): %s
 -- Iteration 2 --
 Existence of destination file before copy => bool(true)
 Copy operation => 
-Warning: copy(): The second argument to copy() function cannot be a directory in %s on line %d
+Warning: copy('%s'): The second argument to copy() function cannot be a directory in %s on line %d
 bool(false)
 Existence of destination file => bool(true)
 Destination file name => %s/
@@ -108,7 +108,7 @@ Warning: unlink(%s): %s
 -- Iteration 3 --
 Existence of destination file before copy => bool(true)
 Copy operation => 
-Warning: copy(): The second argument to copy() function cannot be a directory in %s on line %d
+Warning: copy('%s'): The second argument to copy() function cannot be a directory in %s on line %d
 bool(false)
 Existence of destination file => bool(true)
 Destination file name => %s/
@@ -120,7 +120,7 @@ Warning: unlink(%s): %s
 -- Iteration 4 --
 Existence of destination file before copy => bool(true)
 Copy operation => 
-Warning: copy(): The second argument to copy() function cannot be a directory in %s on line %d
+Warning: copy('%s'): The second argument to copy() function cannot be a directory in %s on line %d
 bool(false)
 Existence of destination file => bool(true)
 Destination file name => %s/

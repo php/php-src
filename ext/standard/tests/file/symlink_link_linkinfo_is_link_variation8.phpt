@@ -59,13 +59,13 @@ echo "Done\n";
 --EXPECTF--
 *** Create hard link in different directory with same filename ***
 
-Warning: link(): File exists in %s on line %d
+Warning: link('%s'): File exists in %s on line %d
 bool(false)
 bool(true)
 
 *** Create soft link in different directory with same filename ***
 
-Warning: symlink(): %rFile exists|Permission denied%r in %s on line %d
+Warning: symlink('%s'): File exists in %s on line %d
 bool(false)
 bool(true)
 Done

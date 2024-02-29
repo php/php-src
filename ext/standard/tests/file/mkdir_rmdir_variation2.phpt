@@ -56,7 +56,7 @@ bool(true)
 *** Testing rmdir() on a non-empty directory ***
 bool(true)
 
-Warning: rmdir(%s/mkdir_variation2/): %s on line %d
+Warning: rmdir('%s'): Directory not empty in %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
@@ -66,7 +66,7 @@ rmdir(): Argument #1 ($directory) must not contain any null bytes
 *** Testing mkdir() with miscellaneous input ***
 bool(true)
 
-Warning: mkdir(): Permission denied in %s on line %d
+Warning: mkdir('%s', 511, true): Permission denied in %s on line %d
 bool(false)
 bool(true)
 Done

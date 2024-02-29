@@ -60,7 +60,7 @@ rmdir($dir_name);
 int(%d)
 - Iteration 2 -
 
-Warning: filegroup(): stat failed for %s//filegroup_variation3/filegroup_variation3.tmp/ in %s on line %d
+Warning: filegroup('%s'): stat failed for %s//filegroup_variation3/filegroup_variation3.tmp/ in %s on line %d
 bool(false)
 - Iteration 3 -
 int(%d)
@@ -68,19 +68,19 @@ int(%d)
 int(%d)
 - Iteration 5 -
 
-Warning: filegroup(): stat failed for %s//filegroup_variation3/*.tmp in %s on line %d
+Warning: filegroup('%s'): stat failed for %s//filegroup_variation3/*.tmp in %s on line %d
 bool(false)
 - Iteration 6 -
 
-Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
+Warning: filegroup('%s'): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
 
-Warning: filegroup(): Filename contains null byte in %s on line %d
+Warning: filegroup('%s'): Filename contains null byte in %s on line %d
 bool(false)
 - Iteration 8 -
 
-Warning: filegroup(): Filename contains null byte in %s on line %d
+Warning: filegroup('%s'): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***

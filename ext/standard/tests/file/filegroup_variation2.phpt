@@ -33,19 +33,19 @@ foreach( $filenames as $filename ) {
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: filegroup(): stat failed for -2.34555 in %s on line %d
+Warning: filegroup('-2.34555'): stat failed for -2.34555 in %s on line %d
 bool(false)
 
-Warning: filegroup(): stat failed for   in %s on line %d
-bool(false)
-bool(false)
-
-Warning: filegroup(): stat failed for 1 in %s on line %d
+Warning: filegroup(' '): stat failed for   in %s on line %d
 bool(false)
 bool(false)
 
-Warning: filegroup(): stat failed for 1234 in %s on line %d
+Warning: filegroup('1'): stat failed for 1 in %s on line %d
+bool(false)
 bool(false)
 
-Warning: filegroup(): stat failed for 0 in %s on line %d
+Warning: filegroup('1234'): stat failed for 1234 in %s on line %d
+bool(false)
+
+Warning: filegroup('0'): stat failed for 0 in %s on line %d
 bool(false)

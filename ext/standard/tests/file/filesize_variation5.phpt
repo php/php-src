@@ -18,9 +18,9 @@ echo "*** Done ***\n";
 bool(false)
 bool(false)
 
-Warning: filesize(): stat failed for   in %s on line %d
+Warning: filesize(' '): stat failed for   in %s on line %d
 bool(false)
 
-Warning: filesize(): stat failed for | in %s on line %d
+Warning: filesize('|'): stat failed for | in %s on line %d
 bool(false)
 *** Done ***

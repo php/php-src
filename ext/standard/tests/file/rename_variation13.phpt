@@ -56,43 +56,43 @@ rmdir($file_path);
 -- testing '-1' --
 bool(true)
 
-Warning: rename(-1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename('-1', '%s'): No such file or directory in %s on line %d
 bool(false)
 -- testing '1' --
 bool(true)
 
-Warning: rename(1,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename('1', '%s'): No such file or directory in %s on line %d
 bool(false)
 -- testing '' --
 
-Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
+Warning: rename('%s', ''): Invalid argument in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
+Warning: rename('', '%s'): Invalid argument in %s on line %d
 bool(false)
 -- testing '' --
 
-Warning: rename(%s/renameVar13/afile.tmp,): %s in %s on line %d
+Warning: rename('%s', ''): Invalid argument in %s on line %d
 bool(false)
 
-Warning: rename(,%s/renameVar13/afile.tmp): %s in %s on line %d
+Warning: rename('', '%s'): Invalid argument in %s on line %d
 bool(false)
 -- testing ' ' --
 bool(true)
 
-Warning: rename( ,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename(' ', '%s'): No such file or directory in %s on line %d
 bool(false)
 -- testing '/no/such/file/dir' --
 
-Warning: rename(%s/renameVar13/afile.tmp,/no/such/file/dir): No such file or directory in %s on line %d
+Warning: rename('%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: rename(/no/such/file/dir,%s/renameVar13/afile.tmp): No such file or directory in %s on line %d
+Warning: rename('%s'): No such file or directory in %s on line %d
 bool(false)
 -- testing 'php/php' --
 
-Warning: rename(%s/renameVar13/afile.tmp,php/php): %s directory in %s on line %d
+Warning: rename('%s', 'php/php'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: rename(php/php,%s/renameVar13/afile.tmp): %s directory in %s on line %d
+Warning: rename('php/php', '%s'): No such file or directory in %s on line %d
 bool(false)

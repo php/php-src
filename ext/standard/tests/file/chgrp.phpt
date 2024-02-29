@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECTF--
-Warning: chgrp(): No such file or directory in %s on line %d
+Warning: chgrp('sjhgfskhagkfdgs...', 0): No such file or directory in %s on line %d

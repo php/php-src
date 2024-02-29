@@ -70,7 +70,7 @@ bool(true)
 chmod() on a path containing .. with invalid directories
 bool(true)
 
-Warning: chmod(): No such file or directory in %s on line %d
+Warning: chmod('./chmod_variati...', 493): No such file or directory in %s on line %d
 bool(false)
 777
 

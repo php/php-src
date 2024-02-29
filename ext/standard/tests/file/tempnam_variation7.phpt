@@ -71,13 +71,13 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 *** Testing tempnam() with invalid/non-existing directory names ***
 -- Iteration 0 --
 
-Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
+Notice: tempnam('-1', 'tempnam_variati...'): file created in the system's temporary directory in %s on line %d
 File name is => %s%etempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 1 --
 
-Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
+Notice: tempnam('1', 'tempnam_variati...'): file created in the system's temporary directory in %s on line %d
 File name is => %s%etempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
@@ -91,7 +91,7 @@ File permissions are => 100600
 File created in => temp dir
 -- Iteration 4 --
 
-Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
+Notice: tempnam(' ', 'tempnam_variati...'): file created in the system's temporary directory in %s on line %d
 File name is => %s%etempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
@@ -101,13 +101,13 @@ tempnam(): Argument #1 ($directory) must not contain any null bytes
 tempnam(): Argument #1 ($directory) must be of type string, array given
 -- Iteration 7 --
 
-Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
+Notice: tempnam('%s'): file created in the system's temporary directory in %s on line %d
 File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir
 -- Iteration 8 --
 
-Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7.php on line %d
+Notice: tempnam('php', 'tempnam_variati...'): file created in the system's temporary directory in %s on line %d
 File name is => %s/tempnam_variation3.tmp%s
 File permissions are => 100600
 File created in => temp dir

@@ -81,12 +81,12 @@ string(%d) "%s/readlink_realpath_variation1/home/tests/link/readlink_realpath_va
 -- Testing readlink() and realpath() with hardlink, linkname stored inside an object --
 bool(true)
 
-Warning: readlink(): Invalid argument in %s on line %d
+Warning: readlink('%s'): Invalid argument in %s on line %d
 bool(false)
 string(%d) "%s/readlink_realpath_variation1/home/readlink_realpath_variation1_link.tmp"
 bool(true)
 
-Warning: readlink(): Invalid argument in %s on line %d
+Warning: readlink('%s'): Invalid argument in %s on line %d
 bool(false)
 string(%d) "%s/readlink_realpath_variation1_link.tmp"
 Done

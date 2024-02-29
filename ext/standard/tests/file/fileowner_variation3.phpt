@@ -60,7 +60,7 @@ rmdir($dir_name);
 int(%d)
 - Iteration 2 -
 
-Warning: fileowner(): stat failed for %s//fileowner_variation3/fileowner_variation3.tmp/ in %s on line %d
+Warning: fileowner('%s'): stat failed for %s//fileowner_variation3/fileowner_variation3.tmp/ in %s on line %d
 bool(false)
 - Iteration 3 -
 int(%d)
@@ -68,19 +68,19 @@ int(%d)
 int(%d)
 - Iteration 5 -
 
-Warning: fileowner(): stat failed for %s//fileowner_variation3/*.tmp in %s on line %d
+Warning: fileowner('%s'): stat failed for %s//fileowner_variation3/*.tmp in %s on line %d
 bool(false)
 - Iteration 6 -
 
-Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
+Warning: fileowner('%s'): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
 
-Warning: fileowner(): Filename contains null byte in %s on line %d
+Warning: fileowner('%s'): Filename contains null byte in %s on line %d
 bool(false)
 - Iteration 8 -
 
-Warning: fileowner(): Filename contains null byte in %s on line %d
+Warning: fileowner('%s'): Filename contains null byte in %s on line %d
 bool(false)
 
 *** Done ***

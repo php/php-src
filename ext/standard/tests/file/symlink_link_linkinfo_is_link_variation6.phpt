@@ -57,19 +57,19 @@ bool(true)
 
 -- Working with soft links --
 
-Warning: symlink(): Permission denied in %s on line %d
+Warning: symlink('%s'): Permission denied in %s on line %d
 bool(false)
 
-Warning: linkinfo(): Permission denied in %s on line %d
+Warning: linkinfo('%s'): Permission denied in %s on line %d
 int(-1)
 bool(false)
 
 -- Working with hard links --
 
-Warning: link(): Permission denied in %s on line %d
+Warning: link('%s'): Permission denied in %s on line %d
 bool(false)
 
-Warning: linkinfo(): Permission denied in %s on line %d
+Warning: linkinfo('%s'): Permission denied in %s on line %d
 int(-1)
 bool(false)
 Done

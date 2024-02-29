@@ -95,7 +95,7 @@ bool(true)
 
 ------ stream_set_blocking - 4: -------
 
-Warning: stream_set_blocking(): test_wrapper_base::stream_set_option is not implemented! in %s
+Warning: stream_set_blocking(Resource id #%d, 1): test_wrapper_base::stream_set_option is not implemented! in %s on line %d
 bool(false)
 
 ------ stream_set_write_buffer - 1: -------

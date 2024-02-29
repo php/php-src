@@ -1018,7 +1018,12 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	/* if we still have memory then format the origin */
 	if (is_function) {
-		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, params);
+		zend_string *dynamic_params = NULL;
+		dynamic_params = zend_trace_current_function_args_string();
+		origin_len = (int)spprintf(&origin, 0, "%s%s%s(%s)", class_name, space, function, dynamic_params ? ZSTR_VAL(dynamic_params) : params);
+		if (dynamic_params) {
+			zend_string_release(dynamic_params);
+		}
 	} else {
 		origin_len = (int)spprintf(&origin, 0, "%s", function);
 	}

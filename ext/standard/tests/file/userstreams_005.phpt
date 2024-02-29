@@ -52,7 +52,7 @@ bool(true)
 bool(true)
 ------ stream_truncate not implemented: -------
 
-Warning: ftruncate(): Can't truncate this stream! in %s on line %d
+Warning: ftruncate(Resource id #%d, 0): Can't truncate this stream! in %s on line %d
 bool(false)
 ------ stream_truncate size 0: -------
 truncation with new_size=0
@@ -65,5 +65,5 @@ ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 ------ stream_truncate bad return: -------
 truncation with new_size=0
 
-Warning: ftruncate(): test_wrapper_bad::stream_truncate did not return a boolean! in %s on line %d
+Warning: ftruncate(Resource id #%d, 0): test_wrapper_bad::stream_truncate did not return a boolean! in %s on line %d
 bool(false)

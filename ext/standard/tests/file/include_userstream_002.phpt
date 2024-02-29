@@ -99,9 +99,9 @@ include "test2://hello";
 <?php echo "Hello World\n";?>
 <?php echo "Hello World\n";?>
 
-Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_include=0 in %sinclude_userstream_002.php on line 11
+Warning: fopen('test1://hello', 'rb'): test1:// wrapper is disabled in the server configuration by allow_url_include=0 in %s on line %d
 
-Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_002.php on line 11
+Warning: fopen('test1://hello', 'rb'): Failed to open stream: no suitable wrapper could be found in %s on line %d
 
 Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_002.php on line 90
 

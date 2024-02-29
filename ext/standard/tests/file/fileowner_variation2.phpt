@@ -34,19 +34,19 @@ foreach( $filenames as $filename ) {
 --EXPECTF--
 *** Testing Invalid file types ***
 
-Warning: fileowner(): stat failed for -2.34555 in %s on line %d
+Warning: fileowner('-2.34555'): stat failed for -2.34555 in %s on line %d
 bool(false)
 
-Warning: fileowner(): stat failed for   in %s on line %d
-bool(false)
-bool(false)
-
-Warning: fileowner(): stat failed for 1 in %s on line %d
+Warning: fileowner(' '): stat failed for   in %s on line %d
 bool(false)
 bool(false)
 
-Warning: fileowner(): stat failed for 1234 in %s on line %d
+Warning: fileowner('1'): stat failed for 1 in %s on line %d
+bool(false)
 bool(false)
 
-Warning: fileowner(): stat failed for 0 in %s on line %d
+Warning: fileowner('1234'): stat failed for 1234 in %s on line %d
+bool(false)
+
+Warning: fileowner('0'): stat failed for 0 in %s on line %d
 bool(false)

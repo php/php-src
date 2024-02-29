@@ -81,25 +81,25 @@ string(%d) "%s%ereadlink_realpath_basic1%ehome%etest%ereadlink_realpath_basic1.t
 
 -- Iteration 4 --
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
 -- Iteration 5 --
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 bool(false)
 
 -- Iteration 6 --
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 %s
 
 -- Iteration 7 --
 
-Warning: readlink(): %s in %s on line %d
+Warning: readlink('%s'): Invalid argument in %s on line %d
 bool(false)
 %s
 Done

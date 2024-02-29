@@ -44,22 +44,22 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 *** Testing readfile() : variation ***
 -- testing '-1' --
 
-Warning: readfile(-1): Failed to open stream: %s in %s on line %d
+Warning: readfile('-1'): Failed to open stream: No such file or directory in %s on line %d
 -- testing '1' --
 
-Warning: readfile(1): Failed to open stream: %s in %s on line %d
+Warning: readfile('1'): Failed to open stream: No such file or directory in %s on line %d
 -- testing '' --
 ValueError: Path cannot be empty
 -- testing '' --
 ValueError: Path cannot be empty
 -- testing ' ' --
 
-Warning: readfile( ): Failed to open stream: %s in %s on line %d
+Warning: readfile(' '): Failed to open stream: No such file or directory in %s on line %d
 -- testing '%0' --
 ValueError: readfile(): Argument #1 ($filename) must not contain any null bytes
 -- testing '%sdir' --
 
-Warning: readfile(%sdir): Failed to open stream: %s in %s on line %d
+Warning: readfile('%s'): Failed to open stream: No such file or directory in %s on line %d
 -- testing '%sphp' --
 
-Warning: readfile(%sphp): Failed to open stream: %s in %s on line %d
+Warning: readfile('php/php'): Failed to open stream: No such file or directory in %s on line %d

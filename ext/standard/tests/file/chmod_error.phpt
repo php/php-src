@@ -12,5 +12,5 @@ var_dump(chmod($filename, 0777));
 --EXPECTF--
 *** Testing chmod() : error conditions ***
 
-Warning: chmod(): No such file or directory in %s on line %d
+Warning: chmod('___nonExisiting...', 511): No such file or directory in %s on line %d
 bool(false)

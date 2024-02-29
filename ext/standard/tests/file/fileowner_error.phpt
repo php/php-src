@@ -16,13 +16,13 @@ echo "\n*** Done ***\n";
 --EXPECTF--
 *** Testing fileowner(): error conditions ***
 
-Warning: fileowner(): stat failed for /no/such/file/dir in %s on line %d
+Warning: fileowner('%s'): stat failed for /no/such/file/dir in %s on line %d
 bool(false)
 
-Warning: fileowner(): stat failed for string in %s on line %d
+Warning: fileowner('string'): stat failed for string in %s on line %d
 bool(false)
 
-Warning: fileowner(): stat failed for 100 in %s on line %d
+Warning: fileowner('100'): stat failed for 100 in %s on line %d
 bool(false)
 
 *** Done ***

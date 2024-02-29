@@ -57,7 +57,7 @@ rmdir($dirname);
 bool(true)
 bool(true)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo('%s'): No such file or directory in %s on line %d
 int(-1)
 bool(false)
 Done

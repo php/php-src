@@ -30,10 +30,10 @@ unlink($file_path."/disk_free_space.tmp");
 --EXPECTF--
 *** Testing error conditions ***
 
-Warning: disk_free_space(): No such file or directory in %s on line %d
+Warning: disk_free_space('%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: diskfreespace(): No such file or directory in %s on line %d
+Warning: diskfreespace('%s'): No such file or directory in %s on line %d
 bool(false)
 float(%f)
 float(%f)

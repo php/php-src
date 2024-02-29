@@ -49,30 +49,30 @@ bool(true)
 string(%d) "%ssymlink.dat"
 int(%d)
 
-Warning: readlink(): No such file or directory in %s on line %d
+Warning: readlink('%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: linkinfo(): No such file or directory in %s on line %d
+Warning: linkinfo('%s'): No such file or directory in %s on line %d
 int(-1)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink('%s'): File exists in %s on line %d
 bool(false)
 bool(true)
 
-Warning: symlink(): File exists in %s on line %d
+Warning: symlink('%s'): File exists in %s on line %d
 bool(false)
 bool(true)
 
-Warning: link(): No such file or directory in %s on line %d
+Warning: link('%s'): No such file or directory in %s on line %d
 bool(false)
 
-Warning: symlink(): %s in %s on line %d
+Warning: symlink('.', '.'): File exists in %s on line %d
 bool(false)
 
-Warning: link(): %s in %s on line %d
+Warning: link('.', '.'): Operation not permitted in %s on line %d
 bool(false)
 
-Warning: readlink(): Invalid argument in %s on line %d
+Warning: readlink('.'): Invalid argument in %s on line %d
 bool(false)
 int(%d)
 Done
