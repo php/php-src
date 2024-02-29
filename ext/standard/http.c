@@ -20,6 +20,7 @@
 #include "SAPI.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
+#include "basic_functions.h"
 
 static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
 	int encoding_type, zend_ulong index_int,
@@ -359,4 +360,27 @@ PHP_FUNCTION(request_parse_body)
 exit:
 	SG(request_parse_body_context).throw_exceptions = false;
 	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
+}
+
+PHP_FUNCTION(http_get_last_response_headers)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!Z_ISUNDEF(BG(last_http_headers))) {
+		RETURN_COPY(&BG(last_http_headers));
+	} else {
+		RETURN_NULL();
+	}
+}
+
+PHP_FUNCTION(http_clear_last_response_headers)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zval_ptr_dtor(&BG(last_http_headers));
+	ZVAL_UNDEF(&BG(last_http_headers));
 }

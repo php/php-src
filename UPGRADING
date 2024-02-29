@@ -428,6 +428,11 @@ PHP 8.4 UPGRADE NOTES
   . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
     with the ARM cryptographic extensions.
 
+- Standard:
+  . Added the http_get_last_response_headers() and
+    http_clear_last_response_headers() that allows retrieving the same content
+    as the magic $http_response_header variable.
+
 - XSL:
   . Added XSLTProcessor::registerPhpFunctionNS().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
