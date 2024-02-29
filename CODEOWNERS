@@ -16,6 +16,7 @@
 /ext/dba @Girgias
 /ext/dom @nielsdos
 /ext/ffi @dstogov
+/ext/gettext @devnexen
 /ext/gmp @Girgias
 /ext/intl @devnexen
 /ext/json @bukka
