@@ -1001,7 +1001,6 @@ PHP_METHOD(DOM_Document, createElementNS)
 		nodep->ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
 		DOM_RET_OBJ(nodep, &ret, intern);
 	} else {
-		xmlFreeNode(nodep);
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
 	}
 
