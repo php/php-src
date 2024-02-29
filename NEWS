@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - PDO:
   . Fix various PDORow bugs. (Girgias)
 
+- Random:
+  . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
+    unknown modes). (timwolla)
+
 - SPL:
   . Fixed bug GH-13531 (Unable to resize SplfixedArray after being unserialized
     in PHP 8.2.15). (nielsdos)
@@ -44,10 +48,6 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed bug GH-13354 (pg_execute/pg_send_query_params/pg_send_execute
     with null value passed by reference). (George Barbarosie)
-
-- Random:
-  . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
-    unknown modes). (timwolla)
 
 - Standard:
   . Fixed array key as hash to string (case insensitive) comparison typo
