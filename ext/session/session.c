@@ -387,17 +387,16 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 
 static zend_long php_session_gc(bool immediate) /* {{{ */
 {
-	int nrand;
 	zend_long num = -1;
+	bool collect = immediate;
 
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
-		if (immediate) {
-			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
-			return num;
+		if (!collect && PS(gc_probability) > 0) {
+			collect = php_random_range(PS(random), 0, PS(gc_divisor) - 1) < PS(gc_probability);
 		}
-		nrand = (zend_long) ((float) PS(gc_divisor) * php_combined_lcg());
-		if (PS(gc_probability) > 0 && nrand < PS(gc_probability)) {
+
+		if (collect) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 		}
 	}
@@ -2872,6 +2871,16 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_validate_sid);
 	ZVAL_UNDEF(&ps_globals->mod_user_names.ps_update_timestamp);
 	ZVAL_UNDEF(&ps_globals->http_session_vars);
+
+	ps_globals->random = (php_random_algo_with_state){
+		.algo = &php_random_algo_pcgoneseq128xslrr64,
+		.state = &ps_globals->random_state,
+	};
+	php_random_uint128_t seed;
+	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+		seed = php_random_uint128_constant(GENERATE_SEED(), GENERATE_SEED());
+	}
+	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
 }
 /* }}} */
 
