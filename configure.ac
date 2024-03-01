@@ -1125,7 +1125,7 @@ case $host_alias in
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
     AC_RUN_IFELSE(
-        [AC_LANG_SOURCE([[int main() {return 0;}]])],
+        [AC_LANG_PROGRAM()],
         [ac_cv_common_page_size=yes],
         [ac_cv_common_page_size=no],
         [ac_cv_common_page_size=no])
@@ -1139,7 +1139,7 @@ case $host_alias in
         save_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
         AC_RUN_IFELSE(
-            [AC_LANG_SOURCE([[int main() {return 0;}]])],
+            [AC_LANG_PROGRAM()],
             [ac_cv_max_page_size=yes],
             [ac_cv_max_page_size=no],
             [ac_cv_max_page_size=no])
