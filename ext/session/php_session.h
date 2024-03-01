@@ -132,10 +132,10 @@ typedef struct _php_session_rfc1867_progress {
 	size_t    content_length;
 
 	zval      data;                 /* the array exported to session data */
-	zval	 *post_bytes_processed; /* data["bytes_processed"] */
 	zval      files;                /* data["files"] array */
-	zval      current_file;         /* array of currently uploading file */
+	zval	 *post_bytes_processed; /* data["bytes_processed"] */
 	zval	 *current_file_bytes_processed;
+	zval      current_file;         /* array of currently uploading file */
 } php_session_rfc1867_progress;
 
 typedef struct _php_ps_globals {
@@ -147,19 +147,19 @@ typedef struct _php_ps_globals {
 	zend_long cookie_lifetime;
 	char *cookie_path;
 	char *cookie_domain;
+	char *cookie_samesite;
 	bool  cookie_secure;
 	bool  cookie_httponly;
-	char *cookie_samesite;
 	const ps_module *mod;
 	const ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
 	zend_string *session_started_filename;
 	uint32_t session_started_lineno;
+	int module_number;
 	zend_long gc_probability;
 	zend_long gc_divisor;
 	zend_long gc_maxlifetime;
-	int module_number;
 	zend_long cache_expire;
 	struct {
 		zval ps_open;
@@ -172,28 +172,29 @@ typedef struct _php_ps_globals {
 		zval ps_validate_sid;
 		zval ps_update_timestamp;
 	} mod_user_names;
+	zend_string *mod_user_class_name;
 	bool mod_user_implemented;
 	bool mod_user_is_open;
-	zend_string *mod_user_class_name;
-	const struct ps_serializer_struct *serializer;
-	zval http_session_vars;
 	bool auto_start;
 	bool use_cookies;
 	bool use_only_cookies;
 	bool use_trans_sid; /* contains the INI value of whether to use trans-sid */
-
-	zend_long sid_length;
-	zend_long sid_bits_per_character;
 	bool send_cookie;
 	bool define_sid;
 
+	const struct ps_serializer_struct *serializer;
+	zval http_session_vars;
+
+	zend_long sid_length;
+	zend_long sid_bits_per_character;
+
 	php_session_rfc1867_progress *rfc1867_progress;
-	bool rfc1867_enabled; /* session.upload_progress.enabled */
-	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 	char *rfc1867_prefix;  /* session.upload_progress.prefix */
 	char *rfc1867_name;    /* session.upload_progress.name */
 	zend_long rfc1867_freq;         /* session.upload_progress.freq */
 	double rfc1867_min_freq;   /* session.upload_progress.min_freq */
+	bool rfc1867_enabled; /* session.upload_progress.enabled */
+	bool rfc1867_cleanup; /* session.upload_progress.cleanup */
 
 	bool use_strict_mode; /* whether or not PHP accepts unknown session ids */
 	bool lazy_write; /* omit session write when it is possible */
