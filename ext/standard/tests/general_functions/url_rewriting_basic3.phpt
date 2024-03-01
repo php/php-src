@@ -80,7 +80,10 @@ output_add_rewrite_var('<name2>', '<value2>');
 echo "\nURL-Rewriting with transparent session id support without output_add_rewrite_var()\n";
 echo $testTags;
 
---EXPECT--
+--EXPECTF--
+Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 47
+
+Deprecated: ini_set(): Enabling session.use_trans_sid INI setting is deprecated in %s on line 50
 URL-Rewriting with transparent session id support without output_add_rewrite_var()
 
 <a href="?PHPSESSID=testid"></a>
