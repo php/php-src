@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13531 (Unable to resize SplfixedArray after being unserialized
     in PHP 8.2.15). (nielsdos)
 
+- Standard:
+  . Fixed bug GH-11808 (Live filesystem modified by tests). (nielsdos)
+
 - XML:
   . Fixed bug GH-13517 (Multiple test failures when building with
     --with-expat). (nielsdos)
