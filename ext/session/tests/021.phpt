@@ -60,6 +60,9 @@ ini_set("url_rewriter.tags", "a=href,fieldset=,area=href,frame=src,input=src");
 session_destroy();
 ?>
 --EXPECT--
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
+
+Deprecated: PHP Startup: Enabling session.use_trans_sid INI setting is deprecated in Unknown on line 0
 <form action="//bad.net/do.php">
 <fieldset>
 <form action="//php.net/do.php"><input type="hidden" name="PHPSESSID" value="test021" />
