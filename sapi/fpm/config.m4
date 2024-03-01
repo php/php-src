@@ -577,13 +577,13 @@ if test "$PHP_FPM" != "no"; then
   PHP_SUBST_OLD(php_fpm_systemd)
   AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
-  if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
+  if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
   else
     php_fpm_user="$PHP_FPM_USER"
   fi
 
-  if test -z "$PHP_FPM_GROUP" -o "$PHP_FPM_GROUP" = "yes" -o "$PHP_FPM_GROUP" = "no"; then
+  if test -z "$PHP_FPM_GROUP" || test "$PHP_FPM_GROUP" = "yes" || test "$PHP_FPM_GROUP" = "no"; then
     php_fpm_group="nobody"
   else
     php_fpm_group="$PHP_FPM_GROUP"

@@ -2148,7 +2148,7 @@ crypt_r("passwd", "hash", &buffer);
   if test "$php_cv_crypt_r_style" = "cryptd"; then
     AC_DEFINE(CRYPT_R_CRYPTD, 1, [Define if crypt_r has uses CRYPTD])
   fi
-  if test "$php_cv_crypt_r_style" = "struct_crypt_data" -o "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
+  if test "$php_cv_crypt_r_style" = "struct_crypt_data" || test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
     AC_DEFINE(CRYPT_R_STRUCT_CRYPT_DATA, 1, [Define if crypt_r uses struct crypt_data])
   fi
   if test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then

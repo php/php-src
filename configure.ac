@@ -344,7 +344,7 @@ PHP_TEST_WRITE_STDOUT
 
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary and
 dnl source packages. This should be harmless on other OSs.
-if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
+if test -d /usr/pkg/include && test -d /usr/pkg/lib; then
    CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
    LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
