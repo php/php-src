@@ -66682,37 +66682,43 @@ static uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec, cons
 	return (spec & SPEC_START_MASK) + offset;
 }
 
+static zend_always_inline uint32_t zend_vm_get_opcode_handler_spec_ex(uint8_t opcode, zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info, bool swap_operands);
+
+static zend_always_inline uint32_t zend_vm_get_opcode_handler_spec(uint8_t opcode, zend_op* op, bool swap_operands)
+{
+	uint32_t all_types = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_UNDEF;
+	return zend_vm_get_opcode_handler_spec_ex(opcode, op, all_types, all_types, all_types, swap_operands);
+}
+
 #if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC
 static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)
 {
-	return zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];
+	/* Casting away const is safe, as we're not swapping operands. */
+	return zend_opcode_handlers[zend_vm_get_opcode_handler_spec(opcode, (zend_op*)op, false)];
 }
 #endif
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
 static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op)
 {
-	uint32_t spec = zend_spec_handlers[opcode];
-	return zend_opcode_handler_funcs[zend_vm_get_opcode_handler_idx(spec, op)];
+	/* Casting away const is safe, as we're not swapping operands. */
+	return zend_opcode_handler_funcs[zend_vm_get_opcode_handler_spec(opcode, (zend_op*)op, false)];
 }
 
 #endif
 
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)
 {
-	uint8_t opcode = zend_user_opcodes[op->opcode];
-
-	if (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {
-		if (op->op1_type < op->op2_type) {
-			zend_swap_operands(op);
-		}
-	}
-	op->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];
+	op->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_spec(zend_user_opcodes[op->opcode], op, true)];
 }
 
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info)
 {
-	uint8_t opcode = zend_user_opcodes[op->opcode];
+	op->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_spec_ex(zend_user_opcodes[op->opcode], op, op1_info, op2_info, res_info, true)];
+}
+
+static zend_always_inline uint32_t zend_vm_get_opcode_handler_spec_ex(uint8_t opcode, zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info, bool swap_operands)
+{
 	uint32_t spec = zend_spec_handlers[opcode];
 	switch (opcode) {
 		case ZEND_ADD:
@@ -66721,7 +66727,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 					break;
 				}
 				spec = 2582 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
-				if (op->op1_type < op->op2_type) {
+				if (swap_operands && op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
@@ -66729,7 +66735,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 					break;
 				}
 				spec = 2607 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
-				if (op->op1_type < op->op2_type) {
+				if (swap_operands && op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
@@ -66737,7 +66743,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 					break;
 				}
 				spec = 2632 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
-				if (op->op1_type < op->op2_type) {
+				if (swap_operands && op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
 			}
@@ -66761,7 +66767,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_MUL:
-			if (op->op1_type < op->op2_type) {
+			if (swap_operands && op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
@@ -66782,7 +66788,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
-			if (op->op1_type < op->op2_type) {
+			if (swap_operands && op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
 			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
@@ -66800,7 +66806,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
-			if (op->op1_type < op->op2_type) {
+			if (swap_operands && op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
 			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
@@ -66818,7 +66824,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_IS_EQUAL:
-			if (op->op1_type < op->op2_type) {
+			if (swap_operands && op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
 			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
@@ -66834,7 +66840,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
-			if (op->op1_type < op->op2_type) {
+			if (swap_operands && op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
 			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
@@ -66971,13 +66977,13 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 		case ZEND_BOOL_XOR:
-			if (op->op1_type < op->op2_type) {
+			if (swap_operands && op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
 			break;
 		case ZEND_USER_OPCODE:
 			if (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {
-				if (op->op1_type < op->op2_type) {
+				if (swap_operands && op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
 			}
@@ -66985,7 +66991,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 		default:
 			break;
 	}
-	op->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(spec, op)];
+	return zend_vm_get_opcode_handler_idx(spec, op);
 }
 
 ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)

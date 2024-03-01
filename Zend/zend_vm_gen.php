@@ -2832,14 +2832,21 @@ function gen_vm($def, $skel) {
         out($f, "\treturn (spec & SPEC_START_MASK) + offset;\n");
     }
     out($f, "}\n\n");
+
+    out($f, "static zend_always_inline uint32_t zend_vm_get_opcode_handler_spec_ex(uint8_t opcode, zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info, bool swap_operands);\n\n");
+
+    // Generate zend_vm_get_opcode_handler_spec() function
+    out($f, "static zend_always_inline uint32_t zend_vm_get_opcode_handler_spec(uint8_t opcode, zend_op* op, bool swap_operands)\n");
+    out($f, "{\n");
+    out($f, "\tuint32_t all_types = MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_UNDEF;\n");
+    out($f, "\treturn zend_vm_get_opcode_handler_spec_ex(opcode, op, all_types, all_types, all_types, swap_operands);\n");
+    out($f, "}\n\n");
+
     out($f, "#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
     out($f, "static const void *zend_vm_get_opcode_handler(uint8_t opcode, const zend_op* op)\n");
     out($f, "{\n");
-    if (!ZEND_VM_SPEC) {
-        out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
-    } else {
-        out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];\n");
-    }
+    out($f, "\t/* Casting away const is safe, as we're not swapping operands. */\n");
+    out($f, "\treturn zend_opcode_handlers[zend_vm_get_opcode_handler_spec(opcode, (zend_op*)op, false)];\n");
     out($f, "}\n");
     out($f, "#endif\n\n");
 
@@ -2848,11 +2855,11 @@ function gen_vm($def, $skel) {
         out($f, "#if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID\n");
         out($f,"static const void *zend_vm_get_opcode_handler_func(uint8_t opcode, const zend_op* op)\n");
         out($f, "{\n");
-        out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n");
         if (!ZEND_VM_SPEC) {
-            out($f, "\treturn zend_opcode_handler_funcs[spec];\n");
+            out($f, "\treturn zend_opcode_handler_funcs[zend_spec_handlers[opcode]];\n");
         } else {
-            out($f, "\treturn zend_opcode_handler_funcs[zend_vm_get_opcode_handler_idx(spec, op)];\n");
+            out($f, "\t/* Casting away const is safe, as we're not swapping operands. */\n");
+            out($f, "\treturn zend_opcode_handler_funcs[zend_vm_get_opcode_handler_spec(opcode, (zend_op*)op, false)];\n");
         }
         out($f, "}\n\n");
         out($f, "#endif\n\n");
@@ -2861,26 +2868,20 @@ function gen_vm($def, $skel) {
     // Generate zend_vm_get_opcode_handler() function
     out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)\n");
     out($f, "{\n");
-    out($f, "\tuint8_t opcode = zend_user_opcodes[op->opcode];\n");
-    if (!ZEND_VM_SPEC) {
-        out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
-    } else {
-        out($f, "\n");
-        out($f, "\tif (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {\n");
-        out($f, "\t\tif (op->op1_type < op->op2_type) {\n");
-        out($f, "\t\t\tzend_swap_operands(op);\n");
-        out($f, "\t\t}\n");
-        out($f, "\t}\n");
-        out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(zend_spec_handlers[opcode], op)];\n");
-    }
+    out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_spec(zend_user_opcodes[op->opcode], op, true)];\n");
     out($f, "}\n\n");
 
     // Generate zend_vm_set_opcode_handler_ex() function
     out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info)\n");
     out($f, "{\n");
-    out($f, "\tuint8_t opcode = zend_user_opcodes[op->opcode];\n");
+    out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_spec_ex(zend_user_opcodes[op->opcode], op, op1_info, op2_info, res_info, true)];\n");
+    out($f, "}\n\n");
+
+    // Generate zend_vm_get_opcode_handler_spec_ex() function
+    out($f, "static zend_always_inline uint32_t zend_vm_get_opcode_handler_spec_ex(uint8_t opcode, zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info, bool swap_operands)\n");
+    out($f, "{\n");
     if (!ZEND_VM_SPEC) {
-        out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(opcode, op)];\n");
+        out($f, "\treturn zend_vm_get_opcode_handler_idx(opcode, op);\n");
     } else {
         out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n");
         if (isset($used_extra_spec["TYPE"])) {
@@ -2890,7 +2891,7 @@ function gen_vm($def, $skel) {
                     $orig_op = $dsc['op'];
                     out($f, "\t\tcase $orig_op:\n");
                     if (isset($dsc["spec"]["COMMUTATIVE"])) {
-                        out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
+                        out($f, "\t\t\tif (swap_operands && op->op1_type < op->op2_type) {\n");
                         out($f, "\t\t\t\tzend_swap_operands(op);\n");
                         out($f, "\t\t\t}\n");
                     }
@@ -2911,7 +2912,7 @@ function gen_vm($def, $skel) {
                         }
                         out($f, "\t\t\t\tspec = {$spec_dsc['spec_code']};\n");
                         if (isset($spec_dsc["spec"]["COMMUTATIVE"]) && !isset($dsc["spec"]["COMMUTATIVE"])) {
-                            out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
+                            out($f, "\t\t\t\tif (swap_operands && op->op1_type < op->op2_type) {\n");
                             out($f, "\t\t\t\t\tzend_swap_operands(op);\n");
                             out($f, "\t\t\t\t}\n");
                         }
@@ -2933,13 +2934,13 @@ function gen_vm($def, $skel) {
                 }
             }
             if ($has_commutative) {
-                out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
+                out($f, "\t\t\tif (swap_operands && op->op1_type < op->op2_type) {\n");
                 out($f, "\t\t\t\tzend_swap_operands(op);\n");
                 out($f, "\t\t\t}\n");
                 out($f, "\t\t\tbreak;\n");
                 out($f, "\t\tcase ZEND_USER_OPCODE:\n");
                 out($f, "\t\t\tif (zend_spec_handlers[op->opcode] & SPEC_RULE_COMMUTATIVE) {\n");
-                out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
+                out($f, "\t\t\t\tif (swap_operands && op->op1_type < op->op2_type) {\n");
                 out($f, "\t\t\t\t\tzend_swap_operands(op);\n");
                 out($f, "\t\t\t\t}\n");
                 out($f, "\t\t\t}\n");
@@ -2949,7 +2950,7 @@ function gen_vm($def, $skel) {
             out($f, "\t\t\tbreak;\n");
             out($f, "\t}\n");
         }
-        out($f, "\top->handler = zend_opcode_handlers[zend_vm_get_opcode_handler_idx(spec, op)];\n");
+        out($f, "\treturn zend_vm_get_opcode_handler_idx(spec, op);\n");
     }
     out($f, "}\n\n");
 

@@ -1222,13 +1222,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 				}
 				break;
 		}
-		/* INIT_FCALL with IS_PTR *must* use the PTR specialization, because the default spec doesn't
-		 * handle IS_PTR. */
-		if (opline->opcode == ZEND_INIT_FCALL && Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_PTR) {
-			zend_vm_set_opcode_handler_ex(opline, IS_UNUSED, IS_CONST, IS_UNUSED);
-		} else {
-			ZEND_VM_SET_OPCODE_HANDLER(opline);
-		}
+		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
 
