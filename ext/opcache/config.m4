@@ -103,7 +103,7 @@ if test "$PHP_OPCACHE" != "no"; then
     fi
   fi
 
-  AC_CHECK_FUNCS([mprotect memfd_create shm_create_largepage])
+  AC_CHECK_FUNCS([mprotect shm_create_largepage])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
