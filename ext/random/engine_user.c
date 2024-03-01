@@ -21,9 +21,9 @@
 #include "php.h"
 #include "php_random.h"
 
-static uint64_t generate(php_random_status *status)
+static php_random_result generate(void *state)
 {
-	php_random_status_state_user *s = status->state;
+	php_random_status_state_user *s = state;
 	uint64_t result = 0;
 	size_t size;
 	zval retval;
@@ -31,17 +31,18 @@ static uint64_t generate(php_random_status *status)
 	zend_call_known_instance_method_with_0_params(s->generate_method, s->object, &retval);
 
 	if (EG(exception)) {
-		return 0;
+		return (php_random_result){
+			.size = sizeof(uint64_t),
+			.result = 0,
+		};
 	}
 
-	/* Store generated size in a state */
 	size = Z_STRLEN(retval);
 
 	/* Guard for over 64-bit results */
 	if (size > sizeof(uint64_t)) {
 		size = sizeof(uint64_t);
 	}
-	status->last_generated_size = size;
 
 	if (size > 0) {
 		/* Endianness safe copy */
@@ -50,23 +51,30 @@ static uint64_t generate(php_random_status *status)
 		}
 	} else {
 		zend_throw_error(random_ce_Random_BrokenRandomEngineError, "A random engine must return a non-empty string");
-		return 0;
+		return (php_random_result){
+			.size = sizeof(uint64_t),
+			.result = 0,
+		};
 	}
 
 	zval_ptr_dtor(&retval);
 
-	return result;
+	return (php_random_result){
+		.size = size,
+		.result = result,
+	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_user, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_user,
+		.state = state,
+	}, min, max);
 }
 
 const php_random_algo php_random_algo_user = {
-	0,
 	sizeof(php_random_status_state_user),
-	NULL,
 	generate,
 	range,
 	NULL,

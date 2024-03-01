@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cd199a8733c51c8bb5970f86b7797ca91e6e59c6 */
+ * Stub hash: 69734dd8094fd69c878383d488900886d1162998 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_xml_parser_create, 0, 0, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -17,13 +17,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_element_handler, 0, 3, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
-	ZEND_ARG_INFO(0, start_handler)
-	ZEND_ARG_INFO(0, end_handler)
+	ZEND_ARG_TYPE_MASK(0, start_handler, MAY_BE_CALLABLE|MAY_BE_STRING|MAY_BE_NULL, NULL)
+	ZEND_ARG_TYPE_MASK(0, end_handler, MAY_BE_CALLABLE|MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_set_character_data_handler, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
-	ZEND_ARG_INFO(0, handler)
+	ZEND_ARG_TYPE_MASK(0, handler, MAY_BE_CALLABLE|MAY_BE_STRING|MAY_BE_NULL, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xml_set_processing_instruction_handler arginfo_xml_set_character_data_handler
@@ -46,7 +46,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parse, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, is_final, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xml_parse_into_struct, 0, 3, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_xml_parse_into_struct, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, parser, XMLParser, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, values)
@@ -82,7 +82,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_xml_parser_get_option, 0, 2, MAY
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(xml_parser_create);
 ZEND_FUNCTION(xml_parser_create_ns);
 ZEND_FUNCTION(xml_set_object);
@@ -105,7 +104,6 @@ ZEND_FUNCTION(xml_get_current_byte_index);
 ZEND_FUNCTION(xml_parser_free);
 ZEND_FUNCTION(xml_parser_set_option);
 ZEND_FUNCTION(xml_parser_get_option);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xml_parser_create, arginfo_xml_parser_create)
@@ -132,7 +130,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xml_parser_get_option, arginfo_xml_parser_get_option)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_XMLParser_methods[] = {
 	ZEND_FE_END
@@ -166,6 +163,7 @@ static void register_xml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("XML_OPTION_TARGET_ENCODING", PHP_XML_OPTION_TARGET_ENCODING, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_TAGSTART", PHP_XML_OPTION_SKIP_TAGSTART, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("XML_OPTION_SKIP_WHITE", PHP_XML_OPTION_SKIP_WHITE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("XML_OPTION_PARSE_HUGE", PHP_XML_OPTION_PARSE_HUGE, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("XML_SAX_IMPL", PHP_XML_SAX_IMPL, CONST_PERSISTENT);
 }
 

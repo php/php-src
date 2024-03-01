@@ -25,6 +25,13 @@ print("Bad ASCII (strict): " . mb_detect_encoding("\xDD\x92", ['ASCII', 'UTF-8']
 print("Bad ASCII/UTF-8, with more errors for ASCII (non-strict): " . mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], false) . "\n");
 print("Bad ASCII/UTF-8, with more errors for ASCII (strict): " . var_export(mb_detect_encoding("\xD6\x8A\x8A", ['ASCII', 'UTF-8'], true), true) . "\n");
 
+print("UTF-8 BOM (non-strict): " . mb_detect_encoding("\xEF\xBB\xBF", ["UTF-8", "ASCII"], false) . "\n");
+print("UTF-8 BOM (strict): " . mb_detect_encoding("\xEF\xBB\xBF", ["UTF-8", "ASCII"], true) . "\n");
+print("UTF-16BE BOM (non-strict): " . mb_detect_encoding("\xFE\xFF", ["UTF-8", "UTF-16BE", "UTF-16LE"], false) . "\n");
+print("UTF-16BE BOM (strict): " . mb_detect_encoding("\xFE\xFF", ["UTF-8", "UTF-16BE", "UTF-16LE"], true) . "\n");
+print("UTF-16LE BOM (non-strict): " . mb_detect_encoding("\xFF\xFE", ["UTF-8", "UTF-16BE", "UTF-16LE"], false) . "\n");
+print("UTF-16LE BOM (strict): " . mb_detect_encoding("\xFF\xFE", ["UTF-8", "UTF-16BE", "UTF-16LE"], true) . "\n");
+
 print("SJIS: " . mb_detect_encoding($sjis, 'SJIS', true) . "\n");
 print("JIS: " . mb_detect_encoding($jis, 'JIS', true) . "\n");
 print("EUC-JP (strict): " . mb_detect_encoding($euc_jp, 'UTF-8,EUC-JP,JIS', true) . "\n");
@@ -84,6 +91,18 @@ $css = 'input[type="radio"]:checked + img {
     border: 5px solid #0083ca;
 }';
 echo mb_detect_encoding($css, mb_list_encodings(), true), "\n";
+
+// Test cases courtesy of Kirill Roskolii and Chris Burgess
+echo "-- Māori text --\n";
+
+echo mb_detect_encoding("Total Māori,31.5,33.3,31.8,33,36.4,33.2,33.2", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+// Names of native birds from Aotearoa:
+echo mb_detect_encoding("Kākā", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Whēkau", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Tīwaiwaka", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Kōtuku", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Kererū", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
+echo mb_detect_encoding("Tūī", ['UTF-8', 'ISO-8859-1', 'Windows-1251']), "\n";
 
 echo "== DETECT ORDER ==\n";
 
@@ -387,6 +406,12 @@ Bad ASCII (non-strict): UTF-8
 Bad ASCII (strict): UTF-8
 Bad ASCII/UTF-8, with more errors for ASCII (non-strict): UTF-8
 Bad ASCII/UTF-8, with more errors for ASCII (strict): false
+UTF-8 BOM (non-strict): UTF-8
+UTF-8 BOM (strict): UTF-8
+UTF-16BE BOM (non-strict): UTF-16BE
+UTF-16BE BOM (strict): UTF-16BE
+UTF-16LE BOM (non-strict): UTF-16LE
+UTF-16LE BOM (strict): UTF-16LE
 SJIS: SJIS
 JIS: JIS
 EUC-JP (strict): EUC-JP
@@ -407,6 +432,14 @@ UTF-8
 UTF-8
 UTF-8
 SJIS
+UTF-8
+-- Māori text --
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
+UTF-8
 UTF-8
 == DETECT ORDER ==
 JIS: JIS

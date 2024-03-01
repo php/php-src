@@ -11,7 +11,7 @@ if test "$PHP_LIBXML" != "no"; then
 
   PHP_SETUP_LIBXML(LIBXML_SHARED_LIBADD, [
     AC_DEFINE(HAVE_LIBXML,1,[ ])
-    PHP_NEW_EXTENSION(libxml, [libxml.c], $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-    PHP_INSTALL_HEADERS([ext/libxml/php_libxml.h])
+    PHP_NEW_EXTENSION(libxml, [libxml.c mime_sniff.c], $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+    PHP_INSTALL_HEADERS([ext/libxml], [php_libxml.h])
   ])
 fi

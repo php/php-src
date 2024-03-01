@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 549946c91248fddc4d43502d32335b68cfbe71f2 */
+ * Stub hash: 295c11739a3588a8254db2fe904be6f9911f85b3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -90,6 +90,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_sign, 0, 4, Open
 	ZEND_ARG_TYPE_INFO(0, days, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, serial, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, serial_hex, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_openssl_csr_new, 0, 2, OpenSSLCertificateSigningRequest, MAY_BE_FALSE)
@@ -387,7 +388,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_cert_locations, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -452,7 +452,6 @@ ZEND_FUNCTION(openssl_spki_export);
 ZEND_FUNCTION(openssl_spki_export_challenge);
 ZEND_FUNCTION(openssl_get_cert_locations);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
 	ZEND_FE(openssl_x509_export, arginfo_openssl_x509_export)
@@ -462,7 +461,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_parse, arginfo_openssl_x509_parse)
 	ZEND_FE(openssl_x509_checkpurpose, arginfo_openssl_x509_checkpurpose)
 	ZEND_FE(openssl_x509_read, arginfo_openssl_x509_read)
-	ZEND_DEP_FE(openssl_x509_free, arginfo_openssl_x509_free)
+	ZEND_RAW_FENTRY("openssl_x509_free", zif_openssl_x509_free, arginfo_openssl_x509_free, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(openssl_pkcs12_export_to_file, arginfo_openssl_pkcs12_export_to_file)
 	ZEND_FE(openssl_pkcs12_export, arginfo_openssl_pkcs12_export)
 	ZEND_FE(openssl_pkcs12_read, arginfo_openssl_pkcs12_read)
@@ -476,11 +475,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_pkey_export_to_file, arginfo_openssl_pkey_export_to_file)
 	ZEND_FE(openssl_pkey_export, arginfo_openssl_pkey_export)
 	ZEND_FE(openssl_pkey_get_public, arginfo_openssl_pkey_get_public)
-	ZEND_FALIAS(openssl_get_publickey, openssl_pkey_get_public, arginfo_openssl_get_publickey)
-	ZEND_DEP_FE(openssl_pkey_free, arginfo_openssl_pkey_free)
-	ZEND_DEP_FALIAS(openssl_free_key, openssl_pkey_free, arginfo_openssl_free_key)
+	ZEND_RAW_FENTRY("openssl_get_publickey", zif_openssl_pkey_get_public, arginfo_openssl_get_publickey, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("openssl_pkey_free", zif_openssl_pkey_free, arginfo_openssl_pkey_free, ZEND_ACC_DEPRECATED, NULL, NULL)
+	ZEND_RAW_FENTRY("openssl_free_key", zif_openssl_pkey_free, arginfo_openssl_free_key, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(openssl_pkey_get_private, arginfo_openssl_pkey_get_private)
-	ZEND_FALIAS(openssl_get_privatekey, openssl_pkey_get_private, arginfo_openssl_get_privatekey)
+	ZEND_RAW_FENTRY("openssl_get_privatekey", zif_openssl_pkey_get_private, arginfo_openssl_get_privatekey, 0, NULL, NULL)
 	ZEND_FE(openssl_pkey_get_details, arginfo_openssl_pkey_get_details)
 	ZEND_FE(openssl_pbkdf2, arginfo_openssl_pbkdf2)
 	ZEND_FE(openssl_pkcs7_verify, arginfo_openssl_pkcs7_verify)
@@ -523,16 +522,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_OpenSSLCertificate_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_OpenSSLCertificateSigningRequest_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_OpenSSLAsymmetricKey_methods[] = {
 	ZEND_FE_END
@@ -548,9 +544,9 @@ static void register_openssl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SMIME_SIGN", X509_PURPOSE_SMIME_SIGN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_SMIME_ENCRYPT", X509_PURPOSE_SMIME_ENCRYPT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_CRL_SIGN", X509_PURPOSE_CRL_SIGN, CONST_PERSISTENT);
-#if defined(X509_PURPOSE_ANY)
 	REGISTER_LONG_CONSTANT("X509_PURPOSE_ANY", X509_PURPOSE_ANY, CONST_PERSISTENT);
-#endif
+	REGISTER_LONG_CONSTANT("X509_PURPOSE_OCSP_HELPER", X509_PURPOSE_OCSP_HELPER, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("X509_PURPOSE_TIMESTAMP_SIGN", X509_PURPOSE_TIMESTAMP_SIGN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA1", OPENSSL_ALGO_SHA1, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD5", OPENSSL_ALGO_MD5, CONST_PERSISTENT);
 #if !defined(OPENSSL_NO_MD4)

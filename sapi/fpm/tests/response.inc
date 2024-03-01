@@ -2,14 +2,68 @@
 
 namespace FPM;
 
-class Response
+abstract class BaseResponse
+{
+    /**
+     * Tester instance
+     * @var Tester
+     */
+    private Tester $tester;
+
+    /**
+     * @var bool
+     */
+    protected bool $debugOutputted = false;
+
+    /**
+     * @param Tester $tester
+     */
+    public function __construct(Tester $tester)
+    {
+        $this->tester = $tester;
+    }
+
+    /**
+     * Debug response output.
+     *
+     * @return void
+     */
+    abstract function debugOutput(): void;
+
+    /**
+     * Emit error message
+     *
+     * @param string $message
+     * @param bool   $throw
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    protected function error(string $message, bool $throw = false): bool
+    {
+        $errorMessage = "ERROR: $message\n";
+        if ($throw) {
+            throw new \Exception($errorMessage);
+        }
+        if ( ! $this->debugOutputted) {
+            $this->debugOutput();
+        }
+        echo $errorMessage;
+
+        $this->tester->printLogs();
+
+        return false;
+    }
+}
+
+class Response extends BaseResponse
 {
     const HEADER_SEPARATOR = "\r\n\r\n";
 
     /**
      * @var array
      */
-    private $data;
+    private array $data;
 
     /**
      * @var string
@@ -39,19 +93,17 @@ class Response
     /**
      * @var bool
      */
-    private $expectInvalid;
+    private bool $expectInvalid;
 
     /**
-     * @var bool
-     */
-    private bool $debugOutputted = false;
-
-    /**
+     * @param Tester            $tester
      * @param string|array|null $data
      * @param bool              $expectInvalid
      */
-    public function __construct($data = null, $expectInvalid = false)
+    public function __construct(Tester $tester, $data = null, bool $expectInvalid = false)
     {
+        parent::__construct($tester);
+
         if ( ! is_array($data)) {
             $data = [
                 'response'     => $data,
@@ -105,7 +157,7 @@ class Response
      *
      * @return Response
      */
-    public function expectJsonBodyPatternForStatusProcessField(string $fieldName, string $pattern)
+    public function expectJsonBodyPatternForStatusProcessField(string $fieldName, string $pattern): Response
     {
         $rawData = $this->getBody('application/json');
         $data = json_decode($rawData, true);
@@ -184,7 +236,7 @@ class Response
     /**
      * Expect error pattern in the response.
      *
-     * @param string $errorMessagePattern Expected error message RegExp patter.
+     * @param string $errorMessagePattern Expected error message RegExp pattern.
      *
      * @return Response
      */
@@ -281,7 +333,7 @@ class Response
     /**
      * Debug response output
      */
-    public function debugOutput()
+    public function debugOutput(): void
     {
         echo ">>> Response\n";
         echo "----------------- OUT -----------------\n";
@@ -442,21 +494,71 @@ class Response
             );
         }
     }
+}
+
+class ValuesResponse extends BaseResponse
+{
+    /**
+     * @var array
+     */
+    private array $values;
 
     /**
-     * Emit error message
-     *
-     * @param string $message
-     *
-     * @return bool
+     * @param Tester            $tester
+     * @param string|array|null $values
+     * @throws \Exception
      */
-    private function error(string $message): bool
+    public function __construct(Tester $tester, $values = null)
     {
-        if ( ! $this->debugOutputted) {
-            $this->debugOutput();
-        }
-        echo "ERROR: $message\n";
+        parent::__construct($tester);
 
-        return false;
+        if ( ! is_array($values)) {
+            if ( ! is_null($values) ) {
+                $this->error('Invalid values supplied', true);
+            }
+            $this->values = [];
+        } else {
+            $this->values = $values;
+        }
+    }
+
+    /**
+     * Expect value.
+     *
+     * @param string $name
+     * @param mixed  $value
+     * @return ValuesResponse
+     * @throws \Exception
+     */
+    public function expectValue(string $name, $value = null)
+    {
+        if ( ! isset($this->values[$name])) {
+            $this->error("Value $name not found in values");
+        }
+        if ( ! is_null($value) && $value !== $this->values[$name]) {
+            $this->error("Value $name is {$this->values[$name]} but expected $value");
+        }
+        return $this;
+    }
+
+    /**
+     * Get values.
+     *
+     * @return array
+     */
+    public function getValues()
+    {
+        return $this->values;
+    }
+
+    /**
+     * Debug output data.
+     */
+    public function debugOutput(): void
+    {
+        echo ">>> ValuesResponse\n";
+        echo "----------------- Values -----------------\n";
+        var_dump($this->values);
+        echo "---------------------------------------\n\n";
     }
 }

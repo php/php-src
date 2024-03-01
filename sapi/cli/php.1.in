@@ -1,4 +1,4 @@
-.TH @program_prefix@php 1 "2023" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php 1 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@php \- PHP Command Line Interface 'CLI'
 .P

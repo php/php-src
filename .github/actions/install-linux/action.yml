@@ -1,8 +1,4 @@
 name: Install
-inputs:
-  withOci:
-    default: true
-    required: false
 runs:
   using: composite
   steps:
@@ -10,9 +6,7 @@ runs:
       run: |
         set -x
         sudo make install
-        sudo mkdir     /etc/php.d
+        sudo mkdir -p /etc/php.d
         sudo chmod 777 /etc/php.d
         echo mysqli.default_socket=/var/run/mysqld/mysqld.sock    > /etc/php.d/mysqli.ini
         echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini
-        ${{ inputs.withOci == 'true' && 'echo extension=oci8.so > /etc/php.d/oci8.ini' || '' }}
-        ${{ inputs.withOci == 'true' && 'echo extension=pdo_oci.so > /etc/php.d/pdo_oci.ini' || '' }}

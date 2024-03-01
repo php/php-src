@@ -16,7 +16,7 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
 putenv("PDOTEST_ATTR=" . serialize(array(PDO::ATTR_PERSISTENT => true)));
 
-function test() {
+function callback() {
     $db = PDOTest::factory('PDO', false);
     $stmt = @$db->query("SELECT 1 FROM TABLE_DOES_NOT_EXIST");
     if ($stmt === false) {
@@ -24,8 +24,8 @@ function test() {
     }
 }
 
-test();
-test();
+callback();
+callback();
 echo "Done";
 ?>
 --EXPECT--

@@ -60,7 +60,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 	UnicodeString id = UnicodeString();
 	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
 		intl_error_set(NULL, status,
-			"intltz_create_time_zone: could not convert time zone id to UTF-16", 0);
+			"could not convert time zone id to UTF-16", 0);
 		RETURN_NULL();
 	}
 
@@ -84,7 +84,7 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 	tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 	if (!tzobj->initialized) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_from_date_time_zone: DateTimeZone object is unconstructed",
+			"DateTimeZone object is unconstructed",
 			0);
 		RETURN_NULL();
 	}
@@ -151,7 +151,7 @@ int_offset:
 		if (UNEXPECTED(Z_LVAL_P(arg) < (zend_long)INT32_MIN ||
 				Z_LVAL_P(arg) > (zend_long)INT32_MAX)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"intltz_create_enumeration: value is out of range", 0);
+				"value is out of range", 0);
 			RETURN_FALSE;
 		} else {
 			se = TimeZone::createEnumeration((int32_t) Z_LVAL_P(arg));
@@ -180,7 +180,7 @@ double_offset:
 		se = TimeZone::createEnumeration(Z_STRVAL_P(arg));
 	} else {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_enumeration: invalid argument type", 0);
+			"invalid argument type", 0);
 		RETURN_FALSE;
 	}
 
@@ -188,7 +188,7 @@ double_offset:
 		IntlIterator_from_StringEnumeration(se, return_value);
 	} else {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_enumeration: error obtaining enumeration", 0);
+			"error obtaining enumeration", 0);
 		RETVAL_FALSE;
 	}
 }
@@ -208,7 +208,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	UnicodeString id = UnicodeString();
 	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
 		intl_error_set(NULL, status,
-			"intltz_count_equivalent_ids: could not convert time zone id to UTF-16", 0);
+			"could not convert time zone id to UTF-16", 0);
 		RETURN_FALSE;
 	}
 
@@ -236,14 +236,14 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	if (zoneType != UCAL_ZONE_TYPE_ANY && zoneType != UCAL_ZONE_TYPE_CANONICAL
 			&& zoneType != UCAL_ZONE_TYPE_CANONICAL_LOCATION) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_create_time_zone_id_enumeration: bad zone type", 0);
+			"bad zone type", 0);
 		RETURN_FALSE;
 	}
 
 	if (!arg3isnull) {
 		if (UNEXPECTED(offset_arg < (zend_long)INT32_MIN || offset_arg > (zend_long)INT32_MAX)) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"intltz_create_time_zone_id_enumeration: offset out of bounds", 0);
+				"offset out of bounds", 0);
 			RETURN_FALSE;
 		}
 		offset = (int32_t)offset_arg;
@@ -254,8 +254,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	UErrorCode uec = UErrorCode();
 	se = TimeZone::createTimeZoneIDEnumeration((USystemTimeZoneType)zoneType,
 		region, offsetp, uec);
-	INTL_CHECK_STATUS(uec, "intltz_create_time_zone_id_enumeration: "
-		"Error obtaining time zone id enumeration")
+	INTL_CHECK_STATUS(uec, "error obtaining time zone id enumeration")
 
 	IntlIterator_from_StringEnumeration(se, return_value);
 }
@@ -276,18 +275,18 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	UnicodeString id;
 	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
 		intl_error_set(NULL, status,
-			"intltz_get_canonical_id: could not convert time zone id to UTF-16", 0);
+			"could not convert time zone id to UTF-16", 0);
 		RETURN_FALSE;
 	}
 
 	UnicodeString result;
 	UBool isSystemID;
 	TimeZone::getCanonicalID(id, result, isSystemID, status);
-	INTL_CHECK_STATUS(status, "intltz_get_canonical_id: error obtaining canonical ID");
+	INTL_CHECK_STATUS(status, "error obtaining canonical ID");
 
 	zend_string *u8str =intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), &status);
 	INTL_CHECK_STATUS(status,
-		"intltz_get_canonical_id: could not convert time zone id to UTF-16");
+		"could not convert time zone id to UTF-16");
 	RETVAL_NEW_STR(u8str);
 
 	if (is_systemid) { /* by-ref argument passed */
@@ -313,12 +312,12 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 	UnicodeString id;
 	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
 		intl_error_set(NULL, status,
-			"intltz_get_region: could not convert time zone id to UTF-16", 0);
+			"could not convert time zone id to UTF-16", 0);
 		RETURN_FALSE;
 	}
 
 	int32_t region_len = TimeZone::getRegion(id, outbuf, sizeof(outbuf), status);
-	INTL_CHECK_STATUS(status, "intltz_get_region: Error obtaining region");
+	INTL_CHECK_STATUS(status, "error obtaining region");
 
 	RETURN_STRINGL(outbuf, region_len);
 }
@@ -333,8 +332,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 
 	UErrorCode status = UErrorCode();
 	const char *res = TimeZone::getTZDataVersion(status);
-	INTL_CHECK_STATUS(status, "intltz_get_tz_data_version: "
-		"Error obtaining time zone data version");
+	INTL_CHECK_STATUS(status, "error obtaining time zone data version");
 
 	RETURN_STRING(res);
 }
@@ -358,7 +356,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	UnicodeString id;
 	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
 		intl_error_set(NULL, status,
-			"intltz_get_equivalent_id: could not convert time zone id to UTF-16", 0);
+			"could not convert time zone id to UTF-16", 0);
 		RETURN_FALSE;
 	}
 
@@ -366,10 +364,40 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	zend_string *u8str;
 
 	u8str = intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), &status);
-	INTL_CHECK_STATUS(status, "intltz_get_equivalent_id: "
-		"could not convert resulting time zone id to UTF-16");
+	INTL_CHECK_STATUS(status, "could not convert resulting time zone id to UTF-16");
 	RETVAL_NEW_STR(u8str);
 }
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+U_CFUNC PHP_FUNCTION(intltz_get_iana_id)
+{
+	char	*str_id;
+	size_t	 str_id_len;
+	intl_error_reset(NULL);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+			&str_id, &str_id_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	UErrorCode status = UErrorCode();
+	UnicodeString id;
+	if (intl_stringFromChar(id, str_id, str_id_len, &status) == FAILURE) {
+		intl_error_set(NULL, status,
+			"could not convert time zone id to UTF-16", 0);
+		RETURN_FALSE;
+	}
+
+	UnicodeString result;
+	TimeZone::getIanaID(id, result, status);
+	INTL_CHECK_STATUS(status, "error obtaining IANA ID");
+
+	zend_string *u8str = intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), &status);
+	INTL_CHECK_STATUS(status,
+		"could not convert time zone id to UTF-16");
+	RETVAL_NEW_STR(u8str);
+}
+#endif
 
 U_CFUNC PHP_FUNCTION(intltz_get_id)
 {
@@ -389,7 +417,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 
 	u8str = intl_convert_utf16_to_utf8(
 		id_us.getBuffer(), id_us.length(), TIMEZONE_ERROR_CODE_P(to));
-	INTL_METHOD_CHECK_STATUS(to, "intltz_get_id: Could not convert id to UTF-8");
+	INTL_METHOD_CHECK_STATUS(to, "could not convert id to UTF-8");
 
 	RETVAL_NEW_STR(u8str);
 }
@@ -429,7 +457,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	to->utimezone->getOffset((UDate) date, (UBool) local, rawOffset, dstOffset,
 		TIMEZONE_ERROR_CODE(to));
 
-	INTL_METHOD_CHECK_STATUS(to, "intltz_get_offset: error obtaining offset");
+	INTL_METHOD_CHECK_STATUS(to, "error obtaining offset");
 
 	zval_ptr_dtor(rawOffsetArg);
 	ZVAL_LONG(rawOffsetArg, rawOffset);
@@ -468,7 +496,7 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 	other_to = Z_INTL_TIMEZONE_P(other_object);
 	if (other_to->utimezone == NULL) {
 		intl_errors_set(&to->err, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_has_same_rules: The second IntlTimeZone is unconstructed", 0);
+			"The second IntlTimeZone is unconstructed", 0);
 		RETURN_FALSE;
 	}
 
@@ -503,7 +531,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	}
 	if (!found) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intltz_get_display_name: wrong display type", 0);
+			"wrong display type", 0);
 		RETURN_FALSE;
 	}
 
@@ -518,8 +546,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 		Locale::createFromName(locale_str), result);
 
 	zend_string *u8str = intl_convert_utf16_to_utf8(result.getBuffer(), result.length(), TIMEZONE_ERROR_CODE_P(to));
-	INTL_METHOD_CHECK_STATUS(to, "intltz_get_display_name: "
-		"could not convert resulting time zone id to UTF-16");
+	INTL_METHOD_CHECK_STATUS(to, "could not convert resulting time zone id to UTF-16");
 
 	RETVAL_NEW_STR(u8str);
 }
@@ -615,7 +642,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 	error = U_ZERO_ERROR;
 	if (intl_stringFromChar(uID, id->val, id->len, &error) == FAILURE) {
 		intl_error_set(NULL, error,
-		               "intltz_get_windows_id: could not convert time zone id to UTF-16", 0);
+		               "could not convert time zone id to UTF-16", 0);
 		RETURN_FALSE;
 	}
 
@@ -624,13 +651,13 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 	INTL_CHECK_STATUS(error, "intltz_get_windows_id: Unable to get timezone from windows ID");
 	if (uWinID.length() == 0) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		               "intltz_get_windows_id: Unknown system timezone", 0);
+		               "unknown system timezone", 0);
 		RETURN_FALSE;
 	}
 
 	error = U_ZERO_ERROR;
 	winID = intl_convert_utf16_to_utf8(uWinID.getBuffer(), uWinID.length(), &error);
-	INTL_CHECK_STATUS(error, "intltz_get_windows_id: could not convert time zone id to UTF-8");
+	INTL_CHECK_STATUS(error, "could not convert time zone id to UTF-8");
 	RETURN_STR(winID);
 }
 /* }}} */
@@ -651,22 +678,22 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	error = U_ZERO_ERROR;
 	if (intl_stringFromChar(uWinID, winID->val, winID->len, &error) == FAILURE) {
 		intl_error_set(NULL, error,
-		               "intltz_get_id_for_windows_id: could not convert time zone id to UTF-16", 0);
+		               "could not convert time zone id to UTF-16", 0);
 		RETURN_FALSE;
 	}
 
 	error = U_ZERO_ERROR;
 	TimeZone::getIDForWindowsID(uWinID, region ? region->val : NULL, uID, error);
-	INTL_CHECK_STATUS(error, "intltz_get_id_for_windows_id: Unable to get windows ID for timezone");
+	INTL_CHECK_STATUS(error, "unable to get windows ID for timezone");
 	if (uID.length() == 0) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-		               "intltz_get_windows_id: Unknown windows timezone", 0);
+		               "unknown windows timezone", 0);
 		RETURN_FALSE;
 	}
 
 	error = U_ZERO_ERROR;
 	id = intl_convert_utf16_to_utf8(uID.getBuffer(), uID.length(), &error);
-	INTL_CHECK_STATUS(error, "intltz_get_id_for_windows_id: could not convert time zone id to UTF-8");
+	INTL_CHECK_STATUS(error, "could not convert time zone id to UTF-8");
 	RETURN_STR(id);
 }
 /* }}} */

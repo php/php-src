@@ -147,7 +147,7 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, si
 		str->c = pemalloc(str->a + 1, 1);
 	} else {
 		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
-			zend_error(E_ERROR, "String size overflow");
+			zend_error_noreturn(E_ERROR, "String size overflow");
 		}
 		len += str->len;
 		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
@@ -173,7 +173,7 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 		}
 	} else {
 		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
-			zend_error(E_ERROR, "String size overflow");
+			zend_error_noreturn(E_ERROR, "String size overflow");
 		}
 		len += str->len;
 		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;

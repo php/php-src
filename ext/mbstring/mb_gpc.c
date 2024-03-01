@@ -221,8 +221,9 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 		var = php_strtok_r(NULL, info->separator, &strtok_buf);
 	}
 
-	if (ZEND_SIZE_T_GT_ZEND_LONG(n, (PG(max_input_vars) * 2))) {
-		php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", PG(max_input_vars));
+	zend_long max_input_vars = REQUEST_PARSE_BODY_OPTION_GET(max_input_vars, PG(max_input_vars));
+	if (ZEND_SIZE_T_GT_ZEND_LONG(n, max_input_vars * 2)) {
+		php_error_docref(NULL, E_WARNING, "Input variables exceeded " ZEND_LONG_FMT ". To increase the limit change max_input_vars in php.ini.", max_input_vars);
 		goto out;
 	}
 

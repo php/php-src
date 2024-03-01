@@ -1,5 +1,7 @@
 --TEST--
 GH-11290 (DOMElement::replaceWith causes crash)
+--EXTENSIONS--
+dom
 --FILE--
 <?php
 $html = <<<HTML

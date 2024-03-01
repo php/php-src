@@ -8,13 +8,29 @@ if (PHP_DOM == "yes") {
 		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c \
+			xml_document.c html_document.c html5_serializer.c html5_parser.c namespace_compat.c \
 			domexception.c parentnode.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
 			node.c characterdata.c documenttype.c \
 			entity.c nodelist.c text.c comment.c \
 			entityreference.c \
 			notation.c xpath.c dom_iterators.c \
-			namednodemap.c");
+			namednodemap.c xpath_callbacks.c", null, "-Iext/dom/lexbor");
+
+		ADD_SOURCES("ext/dom/lexbor/lexbor/ports/windows_nt/lexbor/core", "memory.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/core", "array_obj.c array.c avl.c bst.c diyfp.c conv.c dobject.c dtoa.c hash.c mem.c mraw.c print.c serialize.c shs.c str.c strtod.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/dom", "interface.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/dom/interfaces", "attr.c cdata_section.c character_data.c comment.c document.c document_fragment.c document_type.c element.c node.c processing_instruction.c shadow_root.c text.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/html/tokenizer", "error.c state_comment.c state_doctype.c state_rawtext.c state_rcdata.c state_script.c state.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/html/tree", "active_formatting.c open_elements.c error.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/html/tree/insertion_mode", "after_after_body.c after_after_frameset.c after_body.c after_frameset.c after_head.c before_head.c before_html.c foreign_content.c in_body.c in_caption.c in_cell.c in_column_group.c in_frameset.c in_head.c in_head_noscript.c initial.c in_row.c in_select.c in_select_in_table.c in_table_body.c in_table.c in_table_text.c in_template.c text.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/html", "encoding.c interface.c parser.c token.c token_attr.c tokenizer.c tree.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/encoding", "big5.c decode.c encode.c encoding.c euc_kr.c gb18030.c iso_2022_jp_katakana.c jis0208.c jis0212.c range.c res.c single.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/html/interfaces", "anchor_element.c area_element.c audio_element.c base_element.c body_element.c br_element.c button_element.c canvas_element.c data_element.c data_list_element.c details_element.c dialog_element.c directory_element.c div_element.c d_list_element.c document.c element.c embed_element.c field_set_element.c font_element.c form_element.c frame_element.c frame_set_element.c head_element.c heading_element.c hr_element.c html_element.c iframe_element.c image_element.c input_element.c label_element.c legend_element.c li_element.c link_element.c map_element.c marquee_element.c media_element.c menu_element.c meta_element.c meter_element.c mod_element.c object_element.c o_list_element.c opt_group_element.c option_element.c output_element.c paragraph_element.c param_element.c picture_element.c pre_element.c progress_element.c quote_element.c script_element.c select_element.c slot_element.c source_element.c span_element.c style_element.c table_caption_element.c table_cell_element.c table_col_element.c table_element.c table_row_element.c table_section_element.c template_element.c text_area_element.c time_element.c title_element.c track_element.c u_list_element.c unknown_element.c video_element.c window.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/selectors", "selectors.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/ns", "ns.c", "dom");
+		ADD_SOURCES("ext/dom/lexbor/lexbor/tag", "tag.c", "dom");
+		ADD_FLAG("CFLAGS_DOM", "/D LEXBOR_STATIC ");
 
 		AC_DEFINE("HAVE_DOM", 1, "DOM support");
 
@@ -25,7 +41,7 @@ if (PHP_DOM == "yes") {
 				WARNING("dom support can't be enabled, libxml is not found")
 			}
 		}
-		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h");
+		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h xpath_callbacks.h");
 	} else {
 		WARNING("dom support can't be enabled, libxml is not enabled")
 		PHP_DOM = "no"

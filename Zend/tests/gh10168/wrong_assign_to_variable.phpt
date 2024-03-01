@@ -1,5 +1,9 @@
 --TEST--
 GH-10168: Wrong assign to variable
+--SKIPIF--
+<?php
+if (defined('ZEND_VERIFY_TYPE_INFERENCE')) die('skip Destructor side-effects violate type inference');
+?>
 --FILE--
 <?php
 

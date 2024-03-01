@@ -576,6 +576,27 @@ void ts_free_id(ts_rsrc_id id)
 	TSRM_ERROR((TSRM_ERROR_LEVEL_CORE, "Successfully freed resource id %d", id));
 }/*}}}*/
 
+TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *))
+{
+	int rsrc_id = TSRM_UNSHUFFLE_RSRC_ID(id);
+
+	tsrm_mutex_lock(tsmm_mutex);
+
+	if (tsrm_tls_table && resource_types_table) {
+		for (int i = 0; i < tsrm_tls_table_size; i++) {
+			tsrm_tls_entry *p = tsrm_tls_table[i];
+
+			while (p) {
+				if (p->count > rsrc_id && p->storage[rsrc_id]) {
+					cb(p->storage[rsrc_id]);
+				}
+				p = p->next;
+			}
+		}
+	}
+
+	tsrm_mutex_unlock(tsmm_mutex);
+}
 
 /*
  * Utility Functions

@@ -59,12 +59,6 @@ if test "$PHP_PDO_ODBC" != "no"; then
         pdo_odbc_def_lib=odbc
         ;;
 
-    ODBCRouter|odbcrouter)
-        pdo_odbc_def_libdir=/usr/$PHP_LIBDIR
-        pdo_odbc_def_incdir=/usr/include
-        pdo_odbc_def_lib=odbcsdk
-        ;;
-
     generic)
         pdo_odbc_def_lib="`echo $PHP_PDO_ODBC | cut -d, -f3`"
         pdo_odbc_def_ldflags="`echo $PHP_PDO_ODBC | cut -d, -f4`"
@@ -94,7 +88,6 @@ if test "$PHP_PDO_ODBC" != "no"; then
   fi
 
   PDO_ODBC_CHECK_HEADER(odbc.h)
-  PDO_ODBC_CHECK_HEADER(odbcsdk.h)
   PDO_ODBC_CHECK_HEADER(iodbc.h)
   PDO_ODBC_CHECK_HEADER(sqlunix.h)
   PDO_ODBC_CHECK_HEADER(sqltypes.h)

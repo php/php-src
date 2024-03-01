@@ -71,11 +71,7 @@ void resourcebundle_extract_value( zval *return_value, ResourceBundle_object *so
 			source->child = NULL;
 			intl_errors_reset(INTL_DATA_ERROR_P(source));
 			break;
-
-		default:
-			intl_errors_set(INTL_DATA_ERROR_P(source), U_ILLEGAL_ARGUMENT_ERROR, "Unknown resource type", 0);
-			RETURN_FALSE;
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 }
 /* }}} */

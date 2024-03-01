@@ -20,6 +20,7 @@ $engines[] = new PcgOneseq128XslRr64();
 $engines[] = new Xoshiro256StarStar();
 $engines[] = new Secure();
 $engines[] = new TestShaEngine();
+$iterations = getenv("SKIP_SLOW_TESTS") ? 10 : 250;
 
 foreach ($engines as $engine) {
     echo $engine::class, PHP_EOL;
@@ -28,7 +29,7 @@ foreach ($engines as $engine) {
     var_dump($randomizer->getBytesFromString('a', 10));
     var_dump($randomizer->getBytesFromString(str_repeat('a', 256), 5));
 
-    for ($i = 1; $i < 250; $i++) {
+    for ($i = 1; $i < $iterations; $i++) {
         $output = $randomizer->getBytesFromString(str_repeat('ab', $i), 500);
 
         // This check can theoretically fail with a chance of 0.5**500.

@@ -1,68 +1,53 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 07475caecc81ab3b38a04905f874615af1126289 */
 
-
-
-
 static const zend_function_entry class_LogicException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_BadFunctionCallException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_BadMethodCallException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DomainException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_InvalidArgumentException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_LengthException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_OutOfRangeException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_RuntimeException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_OutOfBoundsException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_OverflowException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_RangeException_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_UnderflowException_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_UnexpectedValueException_methods[] = {
 	ZEND_FE_END

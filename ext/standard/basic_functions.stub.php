@@ -375,6 +375,26 @@ const PHP_ROUND_HALF_EVEN = UNKNOWN;
  * @cvalue PHP_ROUND_HALF_ODD
  */
 const PHP_ROUND_HALF_ODD = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_CEILING
+ */
+const PHP_ROUND_CEILING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_FLOOR
+ */
+const PHP_ROUND_FLOOR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_TOWARD_ZERO
+ */
+const PHP_ROUND_TOWARD_ZERO = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_ROUND_AWAY_FROM_ZERO
+ */
+const PHP_ROUND_AWAY_FROM_ZERO = UNKNOWN;
 
 /* crypt.c */
 
@@ -1513,7 +1533,7 @@ function header_register_callback(callable $callback): bool {}
 
 /* main/output.c */
 
-/** @param callable $callback */
+/** @param callable|null $callback */
 function ob_start($callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
 
 function ob_flush(): bool {}
@@ -1612,10 +1632,16 @@ function pos(array|object $array): mixed {}
 
 function key(array|object $array): int|string|null {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function min(mixed $value, mixed ...$values): mixed {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function max(mixed $value, mixed ...$values): mixed {}
 
 function array_walk(array|object &$array, callable $callback, mixed $arg = UNKNOWN): true {}
@@ -1624,6 +1650,8 @@ function array_walk_recursive(array|object &$array, callable $callback, mixed $a
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
  */
 function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
@@ -1917,7 +1945,7 @@ function constant(string $name): mixed {}
 function ip2long(string $ip): int|false {}
 
 /** @refcount 1 */
-function long2ip(int $ip): string|false {}
+function long2ip(int $ip): string {}
 
 /**
  * @return string|array<string, string>|false
@@ -2207,15 +2235,11 @@ function closelog(): true {}
 function syslog(int $priority, string $message): true {} // TODO make return type void
 #endif
 
-#ifdef HAVE_INET_NTOP
 /** @refcount 1 */
 function inet_ntop(string $ip): string|false {}
-#endif
 
-#ifdef HAVE_INET_PTON
 /** @refcount 1 */
 function inet_pton(string $ip): string|false {}
-#endif
 
 /* metaphone.c */
 
@@ -2303,7 +2327,11 @@ function nl_langinfo(int $item): string|false {}
 
 function strcoll(string $string1, string $string2): int {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function trim(string $string, string $characters = " \n\r\t\v\0"): string {}
 
 /** @compile-time-eval */
@@ -2330,6 +2358,8 @@ function explode(string $separator, string $string, int $limit = PHP_INT_MAX): a
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
  */
 function implode(string|array $separator, ?array $array = null): string {}
 
@@ -2337,7 +2367,6 @@ function implode(string|array $separator, ?array $array = null): string {}
 function join(string|array $separator, ?array $array = null): string {}
 
 /**
- * @compile-time-eval
  * @refcount 1
  */
 function strtok(string $string, ?string $token = null): string|false {}
@@ -2355,7 +2384,11 @@ function str_decrement(string $string): string {}
 /** @refcount 1 */
 function basename(string $path, string $suffix = ""): string {}
 
-/** @refcount 1 */
+/**
+ * @refcount 1
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function dirname(string $path, int $levels = 1): string {}
 
 /**
@@ -2373,13 +2406,19 @@ function stristr(string $haystack, string $needle, bool $before_needle = false):
 /**
  * @compile-time-eval
  * @refcount 1
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
  */
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 /** @alias strstr */
 function strchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
+ */
 function strpos(string $haystack, string $needle, int $offset = 0): int|false {}
 
 /** @compile-time-eval */
@@ -2395,12 +2434,18 @@ function strripos(string $haystack, string $needle, int $offset = 0): int|false 
  * @compile-time-eval
  * @refcount 1
  */
-function strrchr(string $haystack, string $needle): string|false {}
+function strrchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_contains(string $haystack, string $needle): bool {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ */
 function str_starts_with(string $haystack, string $needle): bool {}
 
 /** @compile-time-eval */
@@ -2412,7 +2457,11 @@ function str_ends_with(string $haystack, string $needle): bool {}
  */
 function chunk_split(string $string, int $length = 76, string $separator = "\r\n"): string {}
 
-/** @compile-time-eval */
+/**
+ * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
+ */
 function substr(string $string, int $offset, ?int $length = null): string {}
 
 /**
@@ -2450,6 +2499,8 @@ function ucwords(string $string, string $separators = " \t\r\n\f\v"): string {}
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 2}
+ * @frameless-function {"arity": 3}
  */
 function strtr(string $string, string|array $from, ?string $to = null): string {}
 
@@ -2488,6 +2539,7 @@ function stripslashes(string $string): string {}
  * @param int $count
  * @return string|array<int|string, string>
  * @compile-time-eval
+ * @frameless-function {"arity": 3}
  */
 function str_replace(array|string $search, array|string $replace, string|array $subject, &$count = null): string|array {}
 
@@ -2973,6 +3025,17 @@ function pfsockopen(string $hostname, int $port = -1, &$error_code = null, &$err
 /** @refcount 1 */
 function http_build_query(array|object $data, string $numeric_prefix = "", ?string $arg_separator = null, int $encoding_type = PHP_QUERY_RFC1738): string {}
 
+function http_get_last_response_headers(): ?array {}
+
+function http_clear_last_response_headers(): void {}
+
+/**
+ * @param array|null $options
+ * @return array<int, array>
+ * @refcount 1
+ */
+function request_parse_body(?array $options = null): array {}
+
 /* image.c */
 
 /**
@@ -3185,6 +3248,7 @@ function decoct(int $num): string {}
 /**
  * @compile-time-eval
  * @refcount 1
+ * @frameless-function {"arity": 1}
  */
 function dechex(int $num): string {}
 
@@ -3322,7 +3386,7 @@ function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $sec
 function stream_context_create(?array $options = null, ?array $params = null) {}
 
 /** @param resource $context */
-function stream_context_set_params($context, array $params): bool {}
+function stream_context_set_params($context, array $params): true {}
 
 /**
  * @param resource $context
@@ -3332,10 +3396,10 @@ function stream_context_set_params($context, array $params): bool {}
 function stream_context_get_params($context): array {}
 
 /** @param resource $context */
-function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): bool {}
+function stream_context_set_option($context, array|string $wrapper_or_options, ?string $option_name = null, mixed $value = UNKNOWN): true {}
 
 /** @param resource $context */
-function stream_context_set_options($context, array $options): bool {}
+function stream_context_set_options($context, array $options): true {}
 
 /**
  * @param resource $stream_or_context
@@ -3590,6 +3654,7 @@ function is_double(mixed $value): bool {}
 
 /**
  * @compile-time-eval
+ * @frameless-function {"arity": 1}
  */
 function is_numeric(mixed $value): bool {}
 

@@ -12,7 +12,7 @@ const AF_UNIX = UNKNOWN;
  * @cvalue AF_INET
  */
 const AF_INET = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue AF_INET6
@@ -649,7 +649,7 @@ const IP_MULTICAST_LOOP = UNKNOWN;
  */
 const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
 #endif
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_MULTICAST_IF
@@ -1542,7 +1542,7 @@ const SOCKET_NO_ADDRESS = UNKNOWN;
  * @cvalue IPPROTO_IP
  */
 const IPPROTO_IP = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPPROTO_IPV6
@@ -1568,7 +1568,7 @@ const SOL_UDP = UNKNOWN;
 const SOL_UDPLITE = UNKNOWN;
 #endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_UNICAST_HOPS
@@ -1591,14 +1591,14 @@ const AI_CANONNAME = UNKNOWN;
  * @cvalue AI_NUMERICHOST
  */
 const AI_NUMERICHOST = UNKNOWN;
-#if HAVE_AI_V4MAPPED
+#ifdef AI_V4MAPPED
 /**
  * @var int
  * @cvalue AI_V4MAPPED
  */
 const AI_V4MAPPED = UNKNOWN;
 #endif
-#if HAVE_AI_ALL
+#ifdef AI_ALL
 /**
  * @var int
  * @cvalue AI_ALL
@@ -1610,7 +1610,7 @@ const AI_ALL = UNKNOWN;
  * @cvalue AI_ADDRCONFIG
  */
 const AI_ADDRCONFIG = UNKNOWN;
-#if HAVE_AI_IDN
+#ifdef AI_IDN
 /**
  * @var int
  * @cvalue AI_IDN
@@ -1747,6 +1747,13 @@ const SO_DETACH_FILTER = UNKNOWN;
  * @cvalue SO_DETACH_BPF
  */
 const SO_DETACH_BPF = UNKNOWN;
+#endif
+#if defined(SO_EXCLUSIVEADDRUSE)
+/**
+ * @var int
+ * @cvalue SO_EXCLUSIVEADDRUSE
+ */
+const SO_EXCLUSIVEADDRUSE = UNKNOWN;
 #endif
 #if defined(TCP_QUICKACK)
 /**

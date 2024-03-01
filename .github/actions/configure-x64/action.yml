@@ -33,7 +33,6 @@ runs:
           --enable-exif \
           --with-zip \
           --with-zlib \
-          --with-zlib-dir=/usr \
           --enable-soap \
           --enable-xmlreader \
           --with-xsl \
@@ -53,7 +52,6 @@ runs:
           --enable-bcmath \
           --enable-calendar \
           --enable-ftp \
-          --with-pspell=/usr \
           ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \
           --with-kerberos \
           --enable-sysvmsg \
@@ -74,11 +72,7 @@ runs:
           --with-qdbm \
           ${{ inputs.skipSlow == 'false' && '--with-snmp' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-unixODBC' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-imap' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-imap-ssl' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-oci8=shared,instantclient,/opt/oracle/instantclient' || '' }} \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-firebird' || '' }} \

@@ -2,7 +2,10 @@
 
 namespace FPM;
 
-use Adoy\FastCGI\Client;
+use FPM\FastCGI\Client;
+use FPM\FastCGI\SocketTransport;
+use FPM\FastCGI\StreamTransport;
+use FPM\FastCGI\Transport;
 
 require_once 'fcgi.inc';
 require_once 'logreader.inc';
@@ -64,6 +67,11 @@ class Tester
      * @var array
      */
     private array $clients = [];
+
+    /**
+     * @var string
+     */
+    private string $clientTransport;
 
     /**
      * @var LogReader
@@ -331,13 +339,48 @@ class Tester
     }
 
     /**
+     * Skip if shared extension is not available in extension directory.
+     */
+    static public function skipIfSharedExtensionNotFound($extensionName)
+    {
+        $soPath = ini_get('extension_dir') . '/' . $extensionName . '.so';
+        if ( ! file_exists($soPath)) {
+            die("skip $extensionName extension not present in extension_dir");
+        }
+    }
+
+    /**
+     * Skip test if supplied shell command fails.
+     *
+     * @param string $command
+     * @param string|null $expectedPartOfOutput
+     */
+    static public function skipIfShellCommandFails(string $command, string $expectedPartOfOutput = null)
+    {
+        $result = exec("$command 2>&1", $output, $code);
+        if ($result === false || $code) {
+            die("skip command '$command' faieled with code $code");
+        }
+        if (!is_null($expectedPartOfOutput)) {
+            if (is_array($output)) {
+                foreach ($output as $line) {
+                    if (str_contains($line, $expectedPartOfOutput)) {
+                        // string found so no need to skip
+                        return;
+                    }
+                }
+            }
+            die("skip command '$command' did not contain output '$expectedPartOfOutput'");
+        }
+    }
+
+    /**
      * Skip if posix extension not loaded.
      */
-    static public function skipIfUserDoesNotExist($userName)
-    {
+    static public function skipIfUserDoesNotExist($userName) {
         self::skipIfPosixNotLoaded();
-        if (posix_getpwnam($userName) === false) {
-            die("skip user $userName does not exist");
+        if ( posix_getpwnam( $userName ) === false ) {
+            die( "skip user $userName does not exist" );
         }
     }
 
@@ -355,15 +398,30 @@ class Tester
         string $code = '',
         array $options = [],
         string $fileName = null,
-        bool $debug = null
+        bool $debug = null,
+        string $clientTransport = 'stream'
     ) {
-        $this->configTemplate = $configTemplate;
-        $this->code           = $code;
-        $this->options        = $options;
-        $this->fileName       = $fileName ?: self::getCallerFileName();
-        $this->debug          = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
-        $this->logReader      = new LogReader($this->debug);
-        $this->logTool        = new LogTool($this->logReader, $this->debug);
+        $this->configTemplate  = $configTemplate;
+        $this->code            = $code;
+        $this->options         = $options;
+        $this->fileName        = $fileName ?: self::getCallerFileName();
+        $this->debug           = $debug !== null ? $debug : (bool)getenv('TEST_FPM_DEBUG');
+        $this->logReader       = new LogReader($this->debug);
+        $this->logTool         = new LogTool($this->logReader, $this->debug);
+        $this->clientTransport = $clientTransport;
+    }
+
+    /**
+     * Creates new client transport.
+     *
+     * @return Transport
+     */
+    private function createTransport()
+    {
+        return match ($this->clientTransport) {
+            'stream' => new StreamTransport(),
+            'socket' => new SocketTransport(),
+        };
     }
 
     /**
@@ -614,7 +672,7 @@ class Tester
         }
 
         require_once "status.inc";
-        $status = new Status();
+        $status = new Status($this);
         foreach ($formats as $format) {
             $query    = $format === 'plain' ? '' : $format;
             $response = $this->request($query, [], $statusPath, $address);
@@ -639,7 +697,8 @@ class Tester
         string $uri = null,
         string $scriptFilename = null,
         string $scriptName = null,
-        ?string $stdin = null
+        ?string $stdin = null,
+        ?string $method = null,
     ): array {
         if (is_null($scriptFilename)) {
             $scriptFilename = $this->makeSourceFile();
@@ -654,7 +713,7 @@ class Tester
         $params = array_merge(
             [
                 'GATEWAY_INTERFACE' => 'FastCGI/1.0',
-                'REQUEST_METHOD'    => is_null($stdin) ? 'GET' : 'POST',
+                'REQUEST_METHOD'    => $method ?? (is_null($stdin) ? 'GET' : 'POST'),
                 'SCRIPT_FILENAME'   => $scriptFilename === '' ? null : $scriptFilename,
                 'SCRIPT_NAME'       => $scriptName,
                 'QUERY_STRING'      => $query,
@@ -752,11 +811,13 @@ class Tester
      * @param string|null       $successMessage
      * @param string|null       $errorMessage
      * @param bool              $connKeepAlive
+     * @param bool              $socketKeepAlive
      * @param string|null       $scriptFilename = null
      * @param string|null       $scriptName = null
      * @param string|array|null $stdin          = null
      * @param bool              $expectError
      * @param int               $readLimit
+     * @param int               $writeDelay
      *
      * @return Response
      * @throws \Exception
@@ -769,26 +830,30 @@ class Tester
         string $successMessage = null,
         string $errorMessage = null,
         bool $connKeepAlive = false,
+        bool $socketKeepAlive = false,
         string $scriptFilename = null,
         string $scriptName = null,
         string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
+        int $writeDelay = 0,
+        ?string $method = null,
     ): Response {
         if ($this->hasError()) {
-            return new Response(null, true);
+            return $this->createResponse(expectInvalid: true);
         }
 
         if (is_array($stdin)) {
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
+        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $method);
         $this->trace('Request params', $params);
 
         try {
-            $this->response = new Response(
-                $this->getClient($address, $connKeepAlive)->request_data($params, $stdin, $readLimit)
+            $this->response = $this->createResponse(
+                $this->getClient($address, $connKeepAlive, $socketKeepAlive)
+                    ->request_data($params, $stdin, $readLimit, $writeDelay)
             );
             if ($expectError) {
                 $this->error('Expected request error but the request was successful');
@@ -803,7 +868,7 @@ class Tester
             } else {
                 $this->message($errorMessage);
             }
-            $this->response = new Response();
+            $this->response = $this->createResponse();
         }
         if ($this->debug) {
             $this->response->debugOutput();
@@ -819,8 +884,10 @@ class Tester
      * @param string|null $address
      * @param string|null $successMessage
      * @param string|null $errorMessage
+     * @param bool        $socketKeepAlive
      * @param bool        $connKeepAlive
      * @param int         $readTimeout
+     * @param int         $writeDelay
      *
      * @return Response[]
      * @throws \Exception
@@ -831,37 +898,44 @@ class Tester
         string $successMessage = null,
         string $errorMessage = null,
         bool $connKeepAlive = false,
-        int $readTimeout = 0
+        bool $socketKeepAlive = false,
+        int $readTimeout = 0,
+        int $writeDelay = 0,
     ) {
         if (is_numeric($requests)) {
             $requests = array_fill(0, $requests, []);
         }
 
         if ($this->hasError()) {
-            return array_map(fn($request) => new Response(null, true), $requests);
+            return array_map(fn($request) => $this->createResponse(expectInvalid: true), $requests);
         }
 
         try {
-            $connections = array_map(function ($requestData) use ($address, $connKeepAlive) {
-                $client = $this->getClient($address, $connKeepAlive);
-                $params = $this->getRequestParams(
-                    $requestData['query'] ?? '',
-                    $requestData['headers'] ?? [],
-                    $requestData['uri'] ?? null
-                );
+            $connections = array_map(
+                function ($requestData) use ($address, $connKeepAlive, $socketKeepAlive, $writeDelay) {
+                    $client = $this->getClient($address, $connKeepAlive, $socketKeepAlive);
+                    $params = $this->getRequestParams(
+                        $requestData['query'] ?? '',
+                        $requestData['headers'] ?? [],
+                        $requestData['uri'] ?? null
+                    );
 
-                if (isset($requestData['delay'])) {
-                    usleep($requestData['delay']);
-                }
+                    if (isset($requestData['delay'])) {
+                        usleep($requestData['delay']);
+                    }
 
-                return [
-                    'client'    => $client,
-                    'requestId' => $client->async_request($params, false),
-                ];
-            }, $requests);
+                    return [
+                        'client'    => $client,
+                        'requestId' => $client->async_request($params, false, $writeDelay),
+                    ];
+                },
+                $requests
+            );
 
             $responses = array_map(function ($conn) use ($readTimeout) {
-                $response = new Response($conn['client']->wait_for_response_data($conn['requestId'], $readTimeout));
+                $response = $this->createResponse(
+                    $conn['client']->wait_for_response_data($conn['requestId'], $readTimeout)
+                );
                 if ($this->debug) {
                     $response->debugOutput();
                 }
@@ -878,20 +952,58 @@ class Tester
                 $this->message($errorMessage);
             }
 
-            return array_map(fn($request) => new Response(null, true), $requests);
+            return array_map(fn($request) => $this->createResponse(expectInvalid: true), $requests);
         }
+    }
+
+    /**
+     * Execute request for getting FastCGI values.
+     *
+     * @param string|null $address
+     * @param bool        $connKeepAlive
+     * @param bool        $socketKeepAlive
+     *
+     * @return ValuesResponse
+     * @throws \Exception
+     */
+    public function requestValues(
+        string $address = null,
+        bool $connKeepAlive = false,
+        bool $socketKeepAlive = false
+    ): ValuesResponse {
+        if ($this->hasError()) {
+            return $this->createValueResponse();
+        }
+
+        try {
+            $valueResponse = $this->createValueResponse(
+                $this->getClient($address, $connKeepAlive)->getValues(['FCGI_MPXS_CONNS'])
+            );
+            if ($this->debug) {
+                $this->response->debugOutput();
+            }
+        } catch (\Exception $exception) {
+            $this->error("Request for getting values failed", $exception);
+            $valueResponse = $this->createValueResponse();
+        }
+
+        return $valueResponse;
     }
 
     /**
      * Get client.
      *
-     * @param string $address
-     * @param bool   $keepAlive
+     * @param string|null $address
+     * @param bool        $connKeepAlive
+     * @param bool        $socketKeepAlive
      *
      * @return Client
      */
-    private function getClient(string $address = null, $keepAlive = false): Client
-    {
+    private function getClient(
+        string $address = null,
+        bool $connKeepAlive = false,
+        bool $socketKeepAlive = false
+    ): Client {
         $address = $address ? $this->processTemplate($address) : $this->getAddr();
         if ($address[0] === '/') { // uds
             $host = 'unix://' . $address;
@@ -911,13 +1023,16 @@ class Tester
             $port         = $addressParts[1] ?? $this->getPort();
         }
 
-        if ( ! $keepAlive) {
-            return new Client($host, $port);
+        if ($socketKeepAlive) {
+            $connKeepAlive = true;
+        }
+        if ( ! $connKeepAlive) {
+            return new Client($host, $port, $this->createTransport());
         }
 
         if ( ! isset($this->clients[$host][$port])) {
-            $client = new Client($host, $port);
-            $client->setKeepAlive(true);
+            $client = new Client($host, $port, $this->createTransport());
+            $client->setKeepAlive($connKeepAlive, $socketKeepAlive);
             $this->clients[$host][$port] = $client;
         }
 
@@ -1382,6 +1497,30 @@ class Tester
     }
 
     /**
+     * Create a new response.
+     *
+     * @param mixed $data
+     * @param bool  $expectInvalid
+     * @return Response
+     */
+    private function createResponse($data = null, bool $expectInvalid = false): Response
+    {
+        return new Response($this, $data, $expectInvalid);
+    }
+
+    /**
+     * Create a new values response.
+     *
+     * @param mixed $values
+     * @return ValuesResponse
+     * @throws \Exception
+     */
+    private function createValueResponse($values = null): ValuesResponse
+    {
+        return new ValuesResponse($this, $values);
+    }
+
+    /**
      * @param string|null $msg
      */
     private function message($msg)
@@ -1389,6 +1528,16 @@ class Tester
         if ($msg !== null) {
             echo "$msg\n";
         }
+    }
+
+    /**
+     * Print log reader logs.
+     *
+     * @return void
+     */
+    public function printLogs(): void
+    {
+        $this->logReader->printLogs();
     }
 
     /**
@@ -1409,6 +1558,7 @@ class Tester
         $this->error .= "\n";
 
         echo $this->error;
+        $this->printLogs();
 
         return false;
     }

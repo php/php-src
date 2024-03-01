@@ -203,13 +203,11 @@ static php_process_env _php_array_to_envp(zval *environment)
 #endif
 
 		if (key) {
-			memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
-			p += ZSTR_LEN(key);
+			p = zend_mempcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
 			*p++ = '=';
 		}
 
-		memcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
-		p += ZSTR_LEN(str);
+		p = zend_mempcpy(p, ZSTR_VAL(str), ZSTR_LEN(str));
 		*p++ = '\0';
 		zend_string_release_ex(str, 0);
 	} ZEND_HASH_FOREACH_END();
@@ -1173,6 +1171,7 @@ PHP_FUNCTION(proc_open)
 
 		descriptors[ndesc].index = (int)nindex;
 
+		ZVAL_DEREF(descitem);
 		if (Z_TYPE_P(descitem) == IS_RESOURCE) {
 			if (set_proc_descriptor_from_resource(descitem, &descriptors[ndesc], ndesc) == FAILURE) {
 				goto exit_fail;

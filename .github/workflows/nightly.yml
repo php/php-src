@@ -14,8 +14,9 @@ jobs:
       branches: ${{ steps.set-matrix.outputs.branches }}
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
       windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
+      macos-matrix-include: ${{ steps.set-matrix.outputs.macos-matrix-include }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # Set fetch-depth to 0 to clone the full repository
           # including all branches. This is required to find
@@ -32,7 +33,7 @@ jobs:
             nightly-
       - name: Generate Matrix
         id: set-matrix
-        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}"
+        run: php .github/nightly_matrix.php "${{ github.event_name }}" "${{ github.run_attempt }}" "${{ github.head_ref || github.ref_name }}"
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -48,6 +49,15 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
       matrix:
@@ -60,18 +70,24 @@ jobs:
         zts: [true, false]
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.matrix-include) }}
     name: "${{ matrix.branch.name }}_LINUX_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: ubuntu-${{ (matrix.branch.ref == 'master' && !matrix.asan) && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ (matrix.branch.version.minor >= 3 && !matrix.asan) && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
@@ -91,15 +107,16 @@ jobs:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
+          idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -115,12 +132,11 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -140,11 +156,7 @@ jobs:
     name: "${{ matrix.branch.name }}_LINUX_X32_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
-    env:
-      MYSQL_TEST_HOST: mysql
-      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
-      PDO_MYSQL_TEST_HOST: mysql
+      image: ubuntu:${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     services:
       mysql:
         image: mysql:8
@@ -155,11 +167,19 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
         uses: ./.github/actions/apt-x32
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          dpkg -l
+          echo "::endgroup::"
       - name: ./configure
         uses: ./.github/actions/configure-x32
         with:
@@ -178,11 +198,11 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
+          jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
@@ -193,12 +213,11 @@ jobs:
       - name: Test Function JIT
         uses: ./.github/actions/test-linux
         with:
+          jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit=1205
       - name: Notify Slack
         if: failure()
         uses: ./.github/actions/notify-slack
@@ -210,14 +229,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        debug: [true, false]
-        zts: [true, false]
-    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: macos-11
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.macos-matrix-include) }}
+    name: "${{ matrix.branch.name }}_MACOS_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: macos-${{ matrix.os }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: brew
@@ -230,41 +247,39 @@ jobs:
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
       - name: make
         run: |-
-          export PATH="/usr/local/opt/bison/bin:$PATH"
+          export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
           make -j$(sysctl -n hw.logicalcpu) >/dev/null
       - name: make install
         run: sudo make install
       - name: Test
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
+        if: matrix.test_jit
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
       - name: Test Function JIT
+        if: matrix.test_jit
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
+          jitType: function
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            -d opcache.protect_memory=1
-            -d opcache.jit_buffer_size=16M
-            -d opcache.jit=1205
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
       - name: Notify Slack
@@ -281,14 +296,21 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: Install gcovr
@@ -307,6 +329,7 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
+          jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
@@ -325,15 +348,22 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-    name: "${{ matrix.branch.name }}_COMMUNITY"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+        type: ['asan', 'verify_type_inference']
+        # These branches don't include type verification
+        exclude:
+          - { branch: { name: 'PHP-8.1', ref: 'PHP-8.1', major: 8, minor: 1 }, type: 'verify_type_inference' }
+          - { branch: { name: 'PHP-8.2', ref: 'PHP-8.2', major: 8, minor: 2 }, type: 'verify_type_inference' }
+          - { branch: { name: 'PHP-8.3', ref: 'PHP-8.3', major: 8, minor: 3 }, type: 'verify_type_inference' }
+    name: "${{ matrix.branch.name }}_COMMUNITY_${{ matrix.type }}"
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     env:
+      ASAN_OPTIONS: exitcode=139
       UBSAN_OPTIONS: print_stacktrace=1
       USE_ZEND_ALLOC: 0
       USE_TRACKED_ALLOC: 1
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -341,11 +371,11 @@ jobs:
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
+          # CFLAGS removes O2, so we have to add it again...
           configurationParameters: >-
-            --enable-debug
             --enable-zts
-            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
-            LDFLAGS='-fsanitize=undefined,address'
+            ${{ matrix.type == 'asan' && '--enable-debug CFLAGS="-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address"' || '' }}
+            ${{ matrix.type == 'verify_type_inference' && 'CFLAGS="-DZEND_VERIFY_TYPE_INFERENCE -O2"' || '' }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -355,14 +385,31 @@ jobs:
           sudo service mysql start
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-      - name: Enable Opcache and JIT
+      - name: Enable Opcache
         run: |
+          echo memory_limit=-1 >> /etc/php.d/opcache.ini
           echo zend_extension=opcache.so > /etc/php.d/opcache.ini
           echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
+          echo opcache.enable=1 >> /etc/php.d/opcache.ini
           echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
+          echo opcache.memory_consumption=256M >> /etc/php.d/opcache.ini
+          echo opcache.file_update_protection=0 >> /etc/php.d/opcache.ini
+          echo opcache.interned_strings_buffer=64 >> /etc/php.d/opcache.ini
+          echo opcache.max_accelerated_files=100000 >> /etc/php.d/opcache.ini
+      - name: Enable JIT
+        if: matrix.type != 'verify_type_inference'
+        run: |
+          echo opcache.jit=tracing >> /etc/php.d/opcache.ini
           echo opcache.jit_buffer_size=1G >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_root_traces=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_side_traces=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_max_exit_counters=100000 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_loop=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_func=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_return=1 >> /etc/php.d/opcache.ini
+          echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
+          php -v
       - name: Test AMPHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
@@ -372,7 +419,6 @@ jobs:
             cd "amphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ ${EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -381,21 +427,18 @@ jobs:
           done
           exit $X
       - name: Test Laravel
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/laravel/framework.git --branch=master --depth=1
           cd framework
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           # Hack to disable a test that hangs
-          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("*/\n    public function testSharedGet()", "* @group skip\n     */\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
-          export ASAN_OPTIONS=exitcode=139
+          php -r '$c = file_get_contents("tests/Filesystem/FilesystemTest.php"); $c = str_replace("public function testSharedGet()", "#[\\PHPUnit\\Framework\\Attributes\\Group('"'"'skip'"'"')]\n    public function testSharedGet()", $c); file_put_contents("tests/Filesystem/FilesystemTest.php", $c);'
           php vendor/bin/phpunit --exclude-group skip || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
       - name: Test ReactPHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
@@ -405,7 +448,6 @@ jobs:
             cd "reactphp-$repository"
             git rev-parse HEAD
             php /usr/bin/composer install --no-progress --ignore-platform-reqs
-            export ASAN_OPTIONS=exitcode=139
             vendor/bin/phpunit || EXIT_CODE=$?
             if [ $[EXIT_CODE:-0} -gt 128 ]; then
               X=1;
@@ -414,19 +456,16 @@ jobs:
           done
           exit $X
       - name: Test Revolt PHP
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/revoltphp/event-loop.git --depth=1
           cd event-loop
           git rev-parse HEAD
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
-          export ASAN_OPTIONS=exitcode=139
           vendor/bin/phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
       - name: Test Symfony
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
@@ -437,7 +476,6 @@ jobs:
           php -r '$c = file_get_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php"); $c = str_replace("public function testSanitizeDeepNestedString()", "/** @group skip */\n    public function testSanitizeDeepNestedString()", $c); file_put_contents("src/Symfony/Component/HtmlSanitizer/Tests/HtmlSanitizerCustomTest.php", $c);'
           # Buggy FFI test in Symfony, see https://github.com/symfony/symfony/issues/47668
           php -r '$c = file_get_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php"); $c = str_replace("*/\n    public function testCastNonTrailingCharPointer()", "* @group skip\n     */\n    public function testCastNonTrailingCharPointer()", $c); file_put_contents("src/Symfony/Component/VarDumper/Tests/Caster/FFICasterTest.php", $c);'
-          export ASAN_OPTIONS=exitcode=139
           export SYMFONY_DEPRECATIONS_HELPER=max[total]=999
           X=0
           for component in $(find src/Symfony -mindepth 2 -type f -name phpunit.xml.dist -printf '%h\n'); do
@@ -453,14 +491,12 @@ jobs:
           git clone https://github.com/sebastianbergmann/phpunit.git --branch=main --depth=1
           cd phpunit
           git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           php ./phpunit || EXIT_CODE=$?
           if [ ${EXIT_CODE:-0} -gt 128 ]; then
             exit 1
           fi
       - name: 'Symfony Preloading'
-        if: matrix.branch.ref != 'PHP-8.0'
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
@@ -473,7 +509,6 @@ jobs:
           git clone https://github.com/WordPress/wordpress-develop.git wordpress --depth=1
           cd wordpress
           git rev-parse HEAD
-          export ASAN_OPTIONS=exitcode=139
           php /usr/bin/composer install --no-progress --ignore-platform-reqs
           cp wp-tests-config-sample.php wp-tests-config.php
           sed -i 's/youremptytestdbnamehere/test/g' wp-tests-config.php
@@ -498,21 +533,28 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: test
+      firebird:
+        image: jacobalberty/firebird
+        ports:
+          - 3050:3050
+        env:
+          ISC_PASSWORD: test
+          FIREBIRD_DATABASE: test.fdb
+          FIREBIRD_USER: test
+          FIREBIRD_PASSWORD: test
     strategy:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_OPCACHE_VARIATION"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Create MSSQL container
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        uses: ./.github/actions/setup-oracle
       - name: apt
         uses: ./.github/actions/apt-x64
       - name: ./configure
@@ -579,10 +621,10 @@ jobs:
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
     name: "${{ matrix.branch.name }}_MSAN"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -632,13 +674,13 @@ jobs:
             --enable-memory-sanitizer \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d \
-            ${{ matrix.branch.ref != 'PHP-8.0' && '--enable-dl-test=shared' || '' }}
+            --enable-dl-test=shared
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         run: |
           sudo make install
-          sudo mkdir     /etc/php.d
+          sudo mkdir -p /etc/php.d
           sudo chmod 777 /etc/php.d
           echo mysqli.default_socket=/var/run/mysqld/mysqld.sock    > /etc/php.d/mysqli.ini
           echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock > /etc/php.d/pdo_mysql.ini
@@ -676,13 +718,11 @@ jobs:
       fail-fast: false
       matrix:
         branch: ${{ fromJson(needs.GENERATE_MATRIX.outputs.branches) }}
-        exclude:
-          - branch: { name: 'PHP-80', ref: 'PHP-8.0' }
     name: "${{ matrix.branch.name }}_LIBMYSQLCLIENT"
-    runs-on: ubuntu-${{ matrix.branch.ref == 'master' && '22.04' || '20.04' }}
+    runs-on: ubuntu-${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: apt
@@ -695,30 +735,23 @@ jobs:
           mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
           # Ensure local_infile tests can run.
           mysql -uroot -proot -e "SET GLOBAL local_infile = true"
-      # Does not support caching_sha2_auth :(
-      # - name: Build mysql-5.6
-      #  uses: ./.github/actions/build-libmysqlclient
-      #  with:
-      #    libmysql: mysql-5.6.49-linux-glibc2.12-x86_64.tar.gz
-      # - name: Test mysql-5.6
-      #   uses: ./.github/actions/test-libmysqlclient
-      - name: Build mysql-5.7
-        uses: ./.github/actions/build-libmysqlclient
-        with:
-          libmysql: mysql-5.7.41-linux-glibc2.12-x86_64.tar.gz
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
-      - name: Test mysql-5.7
-        uses: ./.github/actions/test-libmysqlclient
-        with:
-          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Build mysql-8.0
         uses: ./.github/actions/build-libmysqlclient
         with:
-          # FIXME: There are new warnings
-          # configurationParameters: --enable-werror
-          libmysql: mysql-8.0.33-linux-glibc2.12-x86_64.tar.xz
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.0.35-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
+        uses: ./.github/actions/test-libmysqlclient
+        with:
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Build mysql-8.2
+        uses: ./.github/actions/build-libmysqlclient
+        with:
+          configurationParameters: --enable-werror
+          libmysql: mysql-8.2.0-linux-glibc2.28-x86_64.tar.xz
+          withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
+      - name: Test mysql-8.2
         uses: ./.github/actions/test-libmysqlclient
         with:
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
@@ -737,36 +770,38 @@ jobs:
       CXX: ccache g++
     steps:
       - name: git checkout PHP
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: php
       - name: git checkout apcu
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: krakjoe/apcu
           path: apcu
       - name: git checkout imagick
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: Imagick/imagick
           path: imagick
       - name: git checkout memcached
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php-memcached-dev/php-memcached
           path: memcached
       - name: git checkout redis
-        uses: actions/checkout@v3
+        # Currently fails to build
+        if: false
+        uses: actions/checkout@v4
         with:
           repository: phpredis/phpredis
           path: redis
       - name: git checkout xdebug
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: xdebug/xdebug
           path: xdebug
       - name: git checkout yaml
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: php/pecl-file_formats-yaml
           path: yaml
@@ -815,6 +850,8 @@ jobs:
           ./configure --prefix=/opt/php --with-php-config=/opt/php/bin/php-config
           make -j$(/usr/bin/nproc)
       - name: build redis
+        # Currently fails to build
+        if: false
         run: |
           cd redis
           /opt/php/bin/phpize
@@ -850,7 +887,7 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php-sdk-2.2.0
+      PHP_BUILD_SDK_BRANCH: php_downloads_server_migration_v1
       PHP_BUILD_CRT: vs16
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
@@ -861,7 +898,7 @@ jobs:
       - name: git config
         run: git config --global core.autocrlf false && git config --global core.eol lf
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ matrix.branch.ref }}
       - name: Setup

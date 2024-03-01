@@ -29,7 +29,7 @@ class PDO_PGSql_Ext {
     public function pgsqlLOBUnlink(string $oid): bool {}
 
     /** @tentative-return-type */
-    public function pgsqlGetNotify(int $fetchMode = PDO::FETCH_USE_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
+    public function pgsqlGetNotify(int $fetchMode = PDO::FETCH_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
 
     /** @tentative-return-type */
     public function pgsqlGetPid(): int {}

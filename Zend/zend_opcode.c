@@ -163,6 +163,11 @@ ZEND_API void zend_function_dtor(zval *zv)
 			}
 		}
 
+		if (function->common.doc_comment) {
+			zend_string_release_ex(function->common.doc_comment, 1);
+			function->common.doc_comment = NULL;
+		}
+
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}
@@ -337,8 +342,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_string_release_ex(ce->name, 0);
 				zend_string_release_ex(ce->info.user.filename, 0);
 
-				if (ce->info.user.doc_comment) {
-					zend_string_release_ex(ce->info.user.doc_comment, 0);
+				if (ce->doc_comment) {
+					zend_string_release_ex(ce->doc_comment, 0);
 				}
 
 				if (ce->attributes) {
@@ -419,6 +424,10 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			break;
 		case ZEND_INTERNAL_CLASS:
+			if (ce->doc_comment) {
+				zend_string_release_ex(ce->doc_comment, 1);
+			}
+
 			if (ce->backed_enum_table) {
 				zend_hash_release(ce->backed_enum_table);
 			}
@@ -447,6 +456,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 				if (prop_info->ce == ce) {
 					zend_string_release(prop_info->name);
 					zend_type_release(prop_info->type, /* persistent */ 1);
+					if (prop_info->attributes) {
+						zend_hash_release(prop_info->attributes);
+					}
 					free(prop_info);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -875,12 +887,12 @@ static bool keeps_op1_alive(zend_op *opline) {
 	 || opline->opcode == ZEND_SWITCH_STRING
 	 || opline->opcode == ZEND_MATCH
 	 || opline->opcode == ZEND_FETCH_LIST_R
+	 || opline->opcode == ZEND_FETCH_LIST_W
 	 || opline->opcode == ZEND_COPY_TMP) {
 		return 1;
 	}
 	ZEND_ASSERT(opline->opcode != ZEND_FE_FETCH_R
 		&& opline->opcode != ZEND_FE_FETCH_RW
-		&& opline->opcode != ZEND_FETCH_LIST_W
 		&& opline->opcode != ZEND_VERIFY_RETURN_TYPE
 		&& opline->opcode != ZEND_BIND_LEXICAL
 		&& opline->opcode != ZEND_ROPE_ADD);
@@ -1115,6 +1127,7 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_FE_RESET_RW:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
 			case ZEND_ASSERT_CHECK:

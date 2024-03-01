@@ -72,7 +72,6 @@ int main(void) {
         ;;
 
       bsd [)]
-        AC_DEFINE([HAVE_BSD_ICONV],1,[Konstantin Chuguev's iconv implementation])
         AC_DEFINE([PHP_ICONV_IMPL],["BSD iconv"],[Which iconv implementation to use])
         ;;
 
@@ -149,7 +148,7 @@ int main(void) {
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_SUBST(ICONV_SHARED_LIBADD)
-    PHP_INSTALL_HEADERS([ext/iconv/])
+    PHP_INSTALL_HEADERS([ext/iconv], [php_iconv.h])
   else
     AC_MSG_ERROR(Please reinstall the iconv library.)
   fi

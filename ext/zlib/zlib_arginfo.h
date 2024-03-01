@@ -132,7 +132,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_inflate_get_read_len arginfo_inflate_get_status
 
-
 ZEND_FUNCTION(ob_gzhandler);
 ZEND_FUNCTION(zlib_get_coding_type);
 ZEND_FUNCTION(gzfile);
@@ -163,7 +162,6 @@ ZEND_FUNCTION(inflate_add);
 ZEND_FUNCTION(inflate_get_status);
 ZEND_FUNCTION(inflate_get_read_len);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ob_gzhandler, arginfo_ob_gzhandler)
 	ZEND_FE(zlib_get_coding_type, arginfo_zlib_get_coding_type)
@@ -178,17 +176,17 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gzinflate, arginfo_gzinflate)
 	ZEND_FE(gzdecode, arginfo_gzdecode)
 	ZEND_FE(gzuncompress, arginfo_gzuncompress)
-	ZEND_FALIAS(gzwrite, fwrite, arginfo_gzwrite)
-	ZEND_FALIAS(gzputs, fwrite, arginfo_gzputs)
-	ZEND_FALIAS(gzrewind, rewind, arginfo_gzrewind)
-	ZEND_FALIAS(gzclose, fclose, arginfo_gzclose)
-	ZEND_FALIAS(gzeof, feof, arginfo_gzeof)
-	ZEND_FALIAS(gzgetc, fgetc, arginfo_gzgetc)
-	ZEND_FALIAS(gzpassthru, fpassthru, arginfo_gzpassthru)
-	ZEND_FALIAS(gzseek, fseek, arginfo_gzseek)
-	ZEND_FALIAS(gztell, ftell, arginfo_gztell)
-	ZEND_FALIAS(gzread, fread, arginfo_gzread)
-	ZEND_FALIAS(gzgets, fgets, arginfo_gzgets)
+	ZEND_RAW_FENTRY("gzwrite", zif_fwrite, arginfo_gzwrite, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzputs", zif_fwrite, arginfo_gzputs, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzrewind", zif_rewind, arginfo_gzrewind, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzclose", zif_fclose, arginfo_gzclose, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzeof", zif_feof, arginfo_gzeof, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzgetc", zif_fgetc, arginfo_gzgetc, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzpassthru", zif_fpassthru, arginfo_gzpassthru, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzseek", zif_fseek, arginfo_gzseek, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gztell", zif_ftell, arginfo_gztell, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzread", zif_fread, arginfo_gzread, 0, NULL, NULL)
+	ZEND_RAW_FENTRY("gzgets", zif_fgets, arginfo_gzgets, 0, NULL, NULL)
 	ZEND_FE(deflate_init, arginfo_deflate_init)
 	ZEND_FE(deflate_add, arginfo_deflate_add)
 	ZEND_FE(inflate_init, arginfo_inflate_init)
@@ -198,11 +196,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_InflateContext_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_DeflateContext_methods[] = {
 	ZEND_FE_END

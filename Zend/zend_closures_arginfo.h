@@ -24,13 +24,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Closure_fromCallable, 0, 1,
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(Closure, __construct);
 ZEND_METHOD(Closure, bind);
 ZEND_METHOD(Closure, bindTo);
 ZEND_METHOD(Closure, call);
 ZEND_METHOD(Closure, fromCallable);
-
 
 static const zend_function_entry class_Closure_methods[] = {
 	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)

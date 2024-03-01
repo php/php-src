@@ -14,11 +14,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_onClose, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(php_user_filter, filter);
 ZEND_METHOD(php_user_filter, onCreate);
 ZEND_METHOD(php_user_filter, onClose);
-
 
 static const zend_function_entry class_php_user_filter_methods[] = {
 	ZEND_ME(php_user_filter, filter, arginfo_class_php_user_filter_filter, ZEND_ACC_PUBLIC)
@@ -59,7 +57,7 @@ static zend_class_entry *register_class_php_user_filter(void)
 	zval property_stream_default_value;
 	ZVAL_NULL(&property_stream_default_value);
 	zend_string *property_stream_name = zend_string_init("stream", sizeof("stream") - 1, 1);
-	zend_declare_property_ex(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL);
+	zend_declare_typed_property(class_entry, property_stream_name, &property_stream_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	zend_string_release(property_stream_name);
 
 	return class_entry;

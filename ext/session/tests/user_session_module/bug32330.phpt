@@ -13,43 +13,45 @@ session.gc_divisor=1
 <?php
 error_reporting(E_ALL);
 
-function sOpen($path, $name)
-{
-    echo "open: path = {$path}, name = {$name}\n";
-    return TRUE;
+class MySessionHandler implements SessionHandlerInterface {
+    function open($path, $name): bool
+    {
+        echo "open: path = {$path}, name = {$name}\n";
+        return TRUE;
+    }
+
+    function close(): bool
+    {
+        echo "close\n";
+        return TRUE;
+    }
+
+    function read($id): string|false
+    {
+        echo "read: id = {$id}\n";
+        return '';
+    }
+
+    function write($id, $data): bool
+    {
+        echo "write: id = {$id}, data = {$data}\n";
+        return TRUE;
+    }
+
+    function destroy($id): bool
+    {
+        echo "destroy: id = {$id}\n";
+        return TRUE;
+    }
+
+    function gc($maxlifetime): int
+    {
+        echo "gc: maxlifetime = {$maxlifetime}\n";
+        return 1;
+    }
 }
 
-function sClose()
-{
-    echo "close\n";
-    return TRUE;
-}
-
-function sRead($id)
-{
-    echo "read: id = {$id}\n";
-    return '';
-}
-
-function sWrite($id, $data)
-{
-    echo "write: id = {$id}, data = {$data}\n";
-    return TRUE;
-}
-
-function sDestroy($id)
-{
-    echo "destroy: id = {$id}\n";
-    return TRUE;
-}
-
-function sGC($maxlifetime)
-{
-    echo "gc: maxlifetime = {$maxlifetime}\n";
-    return TRUE;
-}
-
-session_set_save_handler( 'sOpen', 'sClose', 'sRead', 'sWrite', 'sDestroy', 'sGC' );
+session_set_save_handler(new MySessionHandler());
 
 // without output buffering, the debug messages will cause all manner of warnings
 ob_start();

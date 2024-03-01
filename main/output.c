@@ -478,7 +478,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 		default:
 			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
 			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error)) {
-				handler = php_output_handler_init(handler_name, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_USER);
+				handler = php_output_handler_init(handler_name, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_USER);
 				ZVAL_COPY(&user->zoh, output_handler);
 				handler->func.user = user;
 			} else {
@@ -504,7 +504,7 @@ PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, 
 	php_output_handler *handler;
 	zend_string *str = zend_string_init(name, name_len, 0);
 
-	handler = php_output_handler_init(str, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_INTERNAL);
+	handler = php_output_handler_init(str, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_INTERNAL);
 	handler->func.internal = output_handler;
 	zend_string_release_ex(str, 0);
 
@@ -597,7 +597,7 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 	zend_string *str;
 
 	if (!EG(current_module)) {
-		zend_error(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
+		zend_error_noreturn(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
 		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
@@ -614,7 +614,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 	HashTable rev, *rev_ptr = NULL;
 
 	if (!EG(current_module)) {
-		zend_error(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
+		zend_error_noreturn(E_ERROR, "Cannot register a reverse output handler conflict outside of MINIT");
 		return FAILURE;
 	}
 
@@ -651,7 +651,7 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 	zend_string *str;
 
 	if (!EG(current_module)) {
-		zend_error(E_ERROR, "Cannot register an output handler alias outside of MINIT");
+		zend_error_noreturn(E_ERROR, "Cannot register an output handler alias outside of MINIT");
 		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);

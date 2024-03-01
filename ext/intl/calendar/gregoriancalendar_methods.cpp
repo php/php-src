@@ -91,6 +91,14 @@ static void _php_intlgregcal_constructor_body(
 	int			variant;
 	intl_error_reset(NULL);
 
+	if (is_constructor && ZEND_NUM_ARGS() > 2) {
+		zend_error(E_DEPRECATED, "Calling IntlGregorianCalendar::__construct() with more than 2 arguments is deprecated, "
+			"use either IntlGregorianCalendar::createFromDate() or IntlGregorianCalendar::createFromDateTime() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	// parameter number validation / variant determination
 	if (ZEND_NUM_ARGS() > 6 ||
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {

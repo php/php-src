@@ -13,7 +13,7 @@ if (PHP_XML == "yes") {
 		if (!PHP_XML_SHARED) {
 			ADD_FLAG("CFLAGS_XML", "/D LIBXML_STATIC ");
 		}
-		PHP_INSTALL_HEADERS("", "ext/xml");
+		PHP_INSTALL_HEADERS("ext/xml", "expat_compat.h php_xml.h");
 	} else {
 		WARNING("xml support can't be enabled, libraries or headers are missing")
 		PHP_XML = "no"

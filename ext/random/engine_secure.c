@@ -21,19 +21,23 @@
 
 #include "php.h"
 #include "php_random.h"
+#include "php_random_csprng.h"
 
 #include "Zend/zend_exceptions.h"
 
-static uint64_t generate(php_random_status *status)
+static php_random_result generate(void *state)
 {
 	zend_ulong r = 0;
 
-	php_random_bytes_throw(&r, sizeof(zend_ulong));
+	php_random_bytes_throw(&r, sizeof(r));
 
-	return r;
+	return (php_random_result){
+		.size = sizeof(zend_ulong),
+		.result = r,
+	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
 	zend_long result = 0;
 
@@ -43,9 +47,7 @@ static zend_long range(php_random_status *status, zend_long min, zend_long max)
 }
 
 const php_random_algo php_random_algo_secure = {
-	sizeof(zend_ulong),
 	0,
-	NULL,
 	generate,
 	range,
 	NULL,

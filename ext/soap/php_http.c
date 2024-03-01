@@ -19,7 +19,7 @@
 #include "php_soap.h"
 #include "ext/standard/base64.h"
 #include "ext/standard/md5.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 #include "ext/hash/php_hash.h"
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
@@ -532,6 +532,8 @@ try_again:
 	}
 	PG(allow_url_fopen) = old_allow_url_fopen;
 
+	bool client_trace = Z_TYPE_P(Z_CLIENT_TRACE_P(this_ptr)) == IS_TRUE;
+
 	if (stream) {
 		zval *cookies, *login, *password;
 		zend_resource *ret = zend_register_resource(phpurl, le_url);
@@ -863,7 +865,7 @@ try_again:
 
 		smart_str_append_const(&soap_headers, "\r\n");
 		smart_str_0(&soap_headers);
-		if (Z_TYPE_P(Z_CLIENT_TRACE_P(this_ptr)) == IS_TRUE) {
+		if (client_trace) {
 			zval_ptr_dtor(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr));
 			/* Need to copy the string here, as we continue appending to soap_headers below. */
 			ZVAL_STRINGL(Z_CLIENT_LAST_REQUEST_HEADERS_P(this_ptr),
@@ -892,65 +894,78 @@ try_again:
 		return FALSE;
 	}
 
-	if (!return_value) {
-		php_stream_close(stream);
-		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
-		smart_str_free(&soap_headers_z);
-		return TRUE;
+	http_headers = NULL;
+	if (return_value || client_trace) {
+		do {
+			http_headers = get_http_headers(stream);
+			if (!http_headers) {
+				if (request != buf) {
+					zend_string_release_ex(request, 0);
+				}
+				php_stream_close(stream);
+				convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
+				convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+				add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
+				smart_str_free(&soap_headers_z);
+				return FALSE;
+			}
+
+			if (client_trace) {
+				zval_ptr_dtor(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr));
+				ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr), http_headers);
+			}
+
+			/* Check to see what HTTP status was sent */
+			http_1_1 = 0;
+			http_status = 0;
+			http_version = get_http_header_value(ZSTR_VAL(http_headers), "HTTP/");
+			if (http_version) {
+				char *tmp;
+
+				if (!strncmp(http_version,"1.1", 3)) {
+					http_1_1 = 1;
+				}
+
+				tmp = strstr(http_version," ");
+				if (tmp != NULL) {
+					tmp++;
+					http_status = atoi(tmp);
+				}
+				tmp = strstr(tmp," ");
+				if (tmp != NULL) {
+					tmp++;
+					if (http_msg) {
+						efree(http_msg);
+					}
+					http_msg = estrdup(tmp);
+				}
+				efree(http_version);
+
+				/* Try and get headers again */
+				if (http_status == 100) {
+					zend_string_release_ex(http_headers, 0);
+				}
+			}
+		} while (http_status == 100);
 	}
 
-	do {
-		http_headers = get_http_headers(stream);
-		if (!http_headers) {
-			if (request != buf) {
-				zend_string_release_ex(request, 0);
-			}
-			php_stream_close(stream);
-			convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
-			convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
-			add_soap_fault(this_ptr, "HTTP", "Error Fetching http headers", NULL, NULL);
-			smart_str_free(&soap_headers_z);
-			return FALSE;
+	if (!return_value) {
+		/* In this case, the headers were only fetched because client_trace was true. */
+		if (request != buf) {
+			zend_string_release_ex(request, 0);
 		}
-
-		if (Z_TYPE_P(Z_CLIENT_TRACE_P(this_ptr)) == IS_TRUE) {
-			zval_ptr_dtor(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr));
-			ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_HEADERS_P(this_ptr), http_headers);
+		php_stream_close(stream);
+		if (http_headers) {
+			zend_string_release_ex(http_headers, 0);
 		}
-
-		/* Check to see what HTTP status was sent */
-		http_1_1 = 0;
-		http_status = 0;
-		http_version = get_http_header_value(ZSTR_VAL(http_headers), "HTTP/");
-		if (http_version) {
-			char *tmp;
-
-			if (!strncmp(http_version,"1.1", 3)) {
-				http_1_1 = 1;
-			}
-
-			tmp = strstr(http_version," ");
-			if (tmp != NULL) {
-				tmp++;
-				http_status = atoi(tmp);
-			}
-			tmp = strstr(tmp," ");
-			if (tmp != NULL) {
-				tmp++;
-				if (http_msg) {
-					efree(http_msg);
-				}
-				http_msg = estrdup(tmp);
-			}
-			efree(http_version);
-
-			/* Try and get headers again */
-			if (http_status == 100) {
-				zend_string_release_ex(http_headers, 0);
-			}
+		convert_to_null(Z_CLIENT_HTTPSOCKET_P(this_ptr));
+		convert_to_null(Z_CLIENT_USE_PROXY_P(this_ptr));
+		if (http_msg) {
+			efree(http_msg);
 		}
-	} while (http_status == 100);
+		smart_str_free(&soap_headers_z);
+		return true;
+	}
 
 	/* Grab and send back every cookie */
 

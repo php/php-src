@@ -27,7 +27,7 @@
 #include "php_reflection.h"
 #include "ext/standard/info.h"
 #include "ext/standard/sha1.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "zend.h"
 #include "zend_API.h"
@@ -309,8 +309,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	zend_string *sub_indent = strpprintf(0, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
-	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->info.user.doc_comment));
+	if (ce->doc_comment) {
+		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->doc_comment));
 		smart_str_appendc(str, '\n');
 	}
 
@@ -566,6 +566,10 @@ static void _class_const_string(smart_str *str, zend_string *name, zend_class_co
 	const char *final = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_FINAL ? "final " : "";
 	zend_string *type_str = ZEND_TYPE_IS_SET(c->type) ? zend_type_to_string(c->type) : NULL;
 	const char *type = type_str ? ZSTR_VAL(type_str) : zend_zval_type_name(&c->value);
+
+	if (c->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+	}
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
 		indent, final, visibility, type, ZSTR_VAL(name));
 	if (Z_TYPE(c->value) == IS_ARRAY) {
@@ -780,6 +784,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	 */
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->op_array.doc_comment));
+	} else if (fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
 	smart_str_appendl(str, indent, strlen(indent));
@@ -889,6 +895,9 @@ static zval *property_get_default(zend_property_info *prop_info) {
 /* {{{ _property_string */
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent)
 {
+	if (prop && prop->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(prop->doc_comment));
+	}
 	smart_str_append_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
 		smart_str_append_printf(str, "<dynamic> public $%s", prop_name);
@@ -1122,6 +1131,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
+	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
 }
 /* }}} */
 
@@ -1914,10 +1924,17 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		RETURN_STR_COPY(fptr->op_array.doc_comment);
 	}
+
+	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function *) fptr)->doc_comment) {
+		RETURN_STR_COPY(((zend_internal_function *) fptr)->doc_comment);
+	}
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -3204,6 +3221,14 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	zend_function *mptr;
 
 	if (is_constructor) {
+		if (ZEND_NUM_ARGS() == 1) {
+			zend_error(E_DEPRECATED, "Calling ReflectionMethod::__construct() with 1 argument is deprecated, "
+				"use ReflectionMethod::createFromMethodName() instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
 			Z_PARAM_OPTIONAL
@@ -3272,9 +3297,7 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 		&& (mptr = zend_get_closure_invoke_method(orig_obj)) != NULL)
 	{
 		/* do nothing, mptr already set */
-	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL
-		|| ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce))
-	{
+	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, method_name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), method_name);
@@ -4389,8 +4412,8 @@ ZEND_METHOD(ReflectionClass, getDocComment)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		RETURN_STR_COPY(ce->info.user.doc_comment);
+	if (ce->doc_comment) {
+		RETURN_STR_COPY(ce->doc_comment);
 	}
 	RETURN_FALSE;
 }

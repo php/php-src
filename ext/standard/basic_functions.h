@@ -27,9 +27,6 @@
 
 #include "url_scanner_ex.h"
 
-/* for MT_N */
-#include "ext/random/php_random.h"
-
 #if defined(_WIN32) && !defined(__clang__)
 #include <intrin.h>
 #endif
@@ -72,6 +69,9 @@ typedef struct _php_basic_globals {
 	zend_llist *user_tick_functions;
 
 	zval active_ini_file_section;
+
+	/* http_fopen_wrapper.c */
+	zval last_http_headers;
 
 	/* pageinfo.c */
 	zend_long page_uid;

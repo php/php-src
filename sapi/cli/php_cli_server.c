@@ -356,10 +356,25 @@ static void append_http_status_line(smart_str *buffer, int protocol_version, int
 	smart_str_appendl_ex(buffer, "\r\n", 2, persistent);
 } /* }}} */
 
-static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, bool persistent) /* {{{ */
+static void append_essential_headers(smart_str* buffer, php_cli_server_client *client, bool persistent, sapi_headers_struct *sapi_headers) /* {{{ */
 {
 	zval *val;
 	struct timeval tv = {0};
+	bool append_date_header = true;
+
+	if (sapi_headers != NULL) {
+		zend_llist_position pos;
+		sapi_header_struct *h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
+		while (h) {
+			if (h->header_len > strlen("Date:")) {
+				if (strncasecmp(h->header, "Date:", strlen("Date:")) == 0) {
+					append_date_header = false;
+					break;
+				}
+			}
+			h = (sapi_header_struct*)zend_llist_get_next_ex(&sapi_headers->headers, &pos);
+		}
+	}
 
 	if (NULL != (val = zend_hash_find(&client->request.headers, ZSTR_KNOWN(ZEND_STR_HOST)))) {
 		smart_str_appends_ex(buffer, "Host: ", persistent);
@@ -367,7 +382,7 @@ static void append_essential_headers(smart_str* buffer, php_cli_server_client *c
 		smart_str_appends_ex(buffer, "\r\n", persistent);
 	}
 
-	if (!gettimeofday(&tv, NULL)) {
+	if (append_date_header && !gettimeofday(&tv, NULL)) {
 		zend_string *dt = php_format_date("D, d M Y H:i:s", sizeof("D, d M Y H:i:s") - 1, tv.tv_sec, 0);
 		smart_str_appends_ex(buffer, "Date: ", persistent);
 		smart_str_append_ex(buffer, dt, persistent);
@@ -551,7 +566,7 @@ static int sapi_cli_server_send_headers(sapi_headers_struct *sapi_headers) /* {{
 		append_http_status_line(&buffer, client->request.protocol_version, SG(sapi_headers).http_response_code, 0);
 	}
 
-	append_essential_headers(&buffer, client, 0);
+	append_essential_headers(&buffer, client, 0, sapi_headers);
 
 	h = (sapi_header_struct*)zend_llist_get_first_ex(&sapi_headers->headers, &pos);
 	while (h) {
@@ -1422,14 +1437,13 @@ static void php_cli_server_request_dtor(php_cli_server_request *req) /* {{{ */
 	}
 } /* }}} */
 
-static void php_cli_server_request_translate_vpath(php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
+static void php_cli_server_request_translate_vpath(const php_cli_server *server, php_cli_server_request *request, const char *document_root, size_t document_root_len) /* {{{ */
 {
 	zend_stat_t sb = {0};
 	static const char *index_files[] = { "index.php", "index.html", NULL };
 	char *buf = safe_pemalloc(1, request->vpath_len, 1 + document_root_len + 1 + sizeof("index.html"), 1);
 	char *p = buf, *prev_path = NULL, *q, *vpath;
 	size_t prev_path_len = 0;
-	int  is_static_file = 0;
 
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
@@ -1437,13 +1451,6 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	if (request->vpath_len != 0) {
 		if (request->vpath[0] != '/') {
 			*p++ = DEFAULT_SLASH;
-		}
-		q = request->vpath + request->vpath_len;
-		while (q > request->vpath) {
-			if (*q-- == '.') {
-				is_static_file = 1;
-				break;
-			}
 		}
 		memmove(p, request->vpath, request->vpath_len);
 #ifdef PHP_WIN32
@@ -1474,7 +1481,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 					}
 					file++;
 				}
-				if (!*file || is_static_file) {
+				if (!*file) {
 					if (prev_path) {
 						pefree(prev_path, 1);
 					}
@@ -1786,7 +1793,7 @@ static int php_cli_server_client_read_request_on_message_complete(php_http_parse
 {
 	php_cli_server_client *client = parser->data;
 	client->request.protocol_version = parser->http_major * 100 + parser->http_minor;
-	php_cli_server_request_translate_vpath(&client->request, client->server->document_root, client->server->document_root_len);
+	php_cli_server_request_translate_vpath(client->server, &client->request, client->server->document_root, client->server->document_root_len);
 	if (client->request.vpath) {
 		const char *vpath = client->request.vpath;
 		const char *end = vpath + client->request.vpath_len;
@@ -2049,7 +2056,8 @@ static zend_result php_cli_server_send_error_page(php_cli_server *server, php_cl
 			/* out of memory */
 			goto fail;
 		}
-		append_essential_headers(&buffer, client, 1);
+		append_essential_headers(&buffer, client, 1, NULL);
+		smart_str_appends_ex(&buffer, SAPI_PHP_VERSION_HEADER "\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Type: text/html; charset=UTF-8\r\n", 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, php_cli_server_buffer_size(&client->content_sender.buffer), 1);
@@ -2165,7 +2173,7 @@ static zend_result php_cli_server_begin_send_static(php_cli_server *server, php_
 			php_cli_server_log_response(client, 500, NULL);
 			return FAILURE;
 		}
-		append_essential_headers(&buffer, client, 1);
+		append_essential_headers(&buffer, client, 1, NULL);
 		if (mime_type) {
 			smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
 			smart_str_appends_ex(&buffer, mime_type, 1);
@@ -2214,6 +2222,8 @@ static void php_cli_server_request_shutdown(php_cli_server *server, php_cli_serv
 	destroy_request_info(&SG(request_info));
 	SG(server_context) = NULL;
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 }
 /* }}} */
 
@@ -2233,9 +2243,13 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 
 	zend_try {
 		zval retval;
-
 		ZVAL_UNDEF(&retval);
-		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
+		int sg_options_back = SG(options);
+		/* Don't chdir to the router script because the file path may be relative. */
+		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		bool result = php_execute_script_ex(&zfd, &retval);
+		SG(options) = sg_options_back;
+		if (result) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;
 				zval_ptr_dtor(&retval);
@@ -2303,6 +2317,8 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 			sapi_module.send_headers = send_header_func;
 			SG(sapi_headers).send_default_content_type = 1;
 			SG(rfc1867_uploaded_files) = NULL;
+			SG(request_parse_body_context).throw_exceptions = false;
+			memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 		}
 		if (FAILURE == php_cli_server_begin_send_static(server, client)) {
 			php_cli_server_close_connection(server, client);

@@ -4,8 +4,13 @@ Bug #80783 (PDO ODBC truncates BLOB records at every 256th byte)
 pdo_odbc
 --SKIPIF--
 <?php
+
 require 'ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
+
+if (PDO_ODBC_TYPE === "unixODBC") {
+    die("skip Fails with unixODBC");
+}
 ?>
 --FILE--
 <?php
@@ -28,7 +33,7 @@ var_dump($data === $string);
 <?php
 require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
-$db->exec("DROP TABLE bug80783a");
+$db->exec("DROP TABLE IF EXISTS bug80783a");
 ?>
 --EXPECT--
 bool(true)

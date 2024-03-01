@@ -18,5 +18,6 @@ class C extends B {
     }
 }
 echo "okey";
+?>
 --EXPECT--
 okey

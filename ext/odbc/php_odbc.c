@@ -675,12 +675,14 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 /* }}} */
 
 /* {{{ _close_pconn_with_res */
-static int _close_pconn_with_res(zend_resource *le, zend_resource *res)
+static int _close_pconn_with_res(zval *zv, void *p)
 {
-	if (le->type == le_pconn && (((odbc_connection *)(le->ptr))->res == res)){
-		return 1;
-	}else{
-		return 0;
+	zend_resource *le = Z_RES_P(zv);
+	zend_resource *res = (zend_resource*)p;
+	if (le->type == le_pconn && (((odbc_connection *)(le->ptr))->res == res)) {
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
 	}
 }
 /* }}} */
@@ -759,7 +761,7 @@ PHP_FUNCTION(odbc_close_all)
 				zend_list_close(p);
 				/* Delete the persistent connection */
 				zend_hash_apply_with_argument(&EG(persistent_list),
-					(apply_func_arg_t) _close_pconn_with_res, (void *)p);
+					_close_pconn_with_res, (void *)p);
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -845,6 +847,7 @@ PHP_FUNCTION(odbc_prepare)
 			break;
 		default:
 			odbc_sql_error(conn, result->stmt, "SQLPrepare");
+			efree(result);
 			RETURN_FALSE;
 	}
 
@@ -2092,32 +2095,56 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 		/* a connection string may have = but not ; - i.e. "DSN=PHP" */
 		if (strstr((char*)db, "=")) {
 			direct = 1;
+
+			/* This should be identical to the code in the PDO driver and vice versa. */
+			size_t db_len = strlen(db);
+			char *db_end = db + db_len;
+			bool use_uid_arg = uid != NULL && !php_memnistr(db, "uid=", strlen("uid="), db_end);
+			bool use_pwd_arg = pwd != NULL && !php_memnistr(db, "pwd=", strlen("pwd="), db_end);
+
 			/* Force UID and PWD to be set in the DSN */
-			bool is_uid_set = uid && *uid
-				&& !strstr(db, "uid=")
-				&& !strstr(db, "UID=");
-			bool is_pwd_set = pwd && *pwd
-				&& !strstr(db, "pwd=")
-				&& !strstr(db, "PWD=");
-			if (is_uid_set && is_pwd_set) {
+			if (use_uid_arg || use_pwd_arg) {
+				db_end--;
+				if ((unsigned char)*(db_end) == ';') {
+					*db_end = '\0';
+				}
+
 				char *uid_quoted = NULL, *pwd_quoted = NULL;
-				bool should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
-				bool should_quote_pwd = !php_odbc_connstr_is_quoted(pwd) && php_odbc_connstr_should_quote(pwd);
-				if (should_quote_uid) {
-					size_t estimated_length = php_odbc_connstr_estimate_quote_length(uid);
-					uid_quoted = emalloc(estimated_length);
-					php_odbc_connstr_quote(uid_quoted, uid, estimated_length);
-				} else {
-					uid_quoted = uid;
+				bool should_quote_uid, should_quote_pwd;
+				if (use_uid_arg) {
+					should_quote_uid = !php_odbc_connstr_is_quoted(uid) && php_odbc_connstr_should_quote(uid);
+					if (should_quote_uid) {
+						size_t estimated_length = php_odbc_connstr_estimate_quote_length(uid);
+						uid_quoted = emalloc(estimated_length);
+						php_odbc_connstr_quote(uid_quoted, uid, estimated_length);
+					} else {
+						uid_quoted = uid;
+					}
+
+					if (!use_pwd_arg) {
+						spprintf(&ldb, 0, "%s;UID=%s;", db, uid_quoted);
+					}
 				}
-				if (should_quote_pwd) {
-					size_t estimated_length = php_odbc_connstr_estimate_quote_length(pwd);
-					pwd_quoted = emalloc(estimated_length);
-					php_odbc_connstr_quote(pwd_quoted, pwd, estimated_length);
-				} else {
-					pwd_quoted = pwd;
+
+				if (use_pwd_arg) {
+					should_quote_pwd = !php_odbc_connstr_is_quoted(pwd) && php_odbc_connstr_should_quote(pwd);
+					if (should_quote_pwd) {
+						size_t estimated_length = php_odbc_connstr_estimate_quote_length(pwd);
+						pwd_quoted = emalloc(estimated_length);
+						php_odbc_connstr_quote(pwd_quoted, pwd, estimated_length);
+					} else {
+						pwd_quoted = pwd;
+					}
+
+					if (!use_uid_arg) {
+						spprintf(&ldb, 0, "%s;PWD=%s;", db, pwd_quoted);
+					}
 				}
-				spprintf(&ldb, 0, "%s;UID=%s;PWD=%s", db, uid_quoted, pwd_quoted);
+
+				if (use_uid_arg && use_pwd_arg) {
+					spprintf(&ldb, 0, "%s;UID=%s;PWD=%s;", db, uid_quoted, pwd_quoted);
+				}
+
 				if (uid_quoted && should_quote_uid) {
 					efree(uid_quoted);
 				}
@@ -2164,18 +2191,19 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 /* {{{ odbc_do_connect */
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 {
-	char *db, *uid, *pwd;
+	char *db, *uid=NULL, *pwd=NULL;
 	size_t db_len, uid_len, pwd_len;
 	zend_long pv_opt = SQL_CUR_DEFAULT;
 	odbc_connection *db_conn;
 	int cur_opt;
 
-	/*  Now an optional 4th parameter specifying the cursor type
-	 *  defaulting to the cursors default
-	 */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|l", &db, &db_len, &uid, &uid_len, &pwd, &pwd_len, &pv_opt) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STRING(db, db_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(uid, uid_len)
+		Z_PARAM_STRING_OR_NULL(pwd, pwd_len)
+		Z_PARAM_LONG(pv_opt)
+	ZEND_PARSE_PARAMETERS_END();
 
 	cur_opt = pv_opt;
 
@@ -2191,7 +2219,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		}
 	}
 
-	if (ODBCG(allow_persistent) <= 0) {
+	if (!ODBCG(allow_persistent)) {
 		persistent = 0;
 	}
 
@@ -2207,12 +2235,12 @@ try_and_get_another_connection:
 		/* the link is not in the persistent list */
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_len)) == NULL) {
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-				php_error_docref(NULL, E_WARNING, "Too many open links (%ld)", ODBCG(num_links));
+				php_error_docref(NULL, E_WARNING, "Too many open links (" ZEND_LONG_FMT ")", ODBCG(num_links));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
 			if (ODBCG(max_persistent) != -1 && ODBCG(num_persistent) >= ODBCG(max_persistent)) {
-				php_error_docref(NULL, E_WARNING,"Too many open persistent links (%ld)", ODBCG(num_persistent));
+				php_error_docref(NULL, E_WARNING,"Too many open persistent links (" ZEND_LONG_FMT ")", ODBCG(num_persistent));
 				efree(hashed_details);
 				RETURN_FALSE;
 			}
@@ -2282,7 +2310,7 @@ try_and_get_another_connection:
 		RETVAL_RES(db_conn->res);
 	} else { /* non persistent */
 		if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
-			php_error_docref(NULL, E_WARNING,"Too many open connections (%ld)",ODBCG(num_links));
+			php_error_docref(NULL, E_WARNING,"Too many open connections (" ZEND_LONG_FMT ")",ODBCG(num_links));
 			RETURN_FALSE;
 		}
 
@@ -2329,7 +2357,7 @@ PHP_FUNCTION(odbc_close)
 	zend_list_close(Z_RES_P(pv_conn));
 
 	if(is_pconn){
-		zend_hash_apply_with_argument(&EG(persistent_list),	(apply_func_arg_t) _close_pconn_with_res, (void *) Z_RES_P(pv_conn));
+		zend_hash_apply_with_argument(&EG(persistent_list), _close_pconn_with_res, (void *) Z_RES_P(pv_conn));
 	}
 }
 /* }}} */

@@ -1,0 +1,188 @@
+From 9d60c0fda0b51e9374a234c48df36130d2c988ee Mon Sep 17 00:00:00 2001
+From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
+Date: Sat, 26 Aug 2023 15:08:59 +0200
+Subject: [PATCH] Expose line and column information for use in PHP
+
+---
+ source/lexbor/dom/interfaces/node.h  |  2 ++
+ source/lexbor/html/token.h           |  2 ++
+ source/lexbor/html/tokenizer.c       | 24 +++++++++++++++++++++++-
+ source/lexbor/html/tokenizer.h       |  2 ++
+ source/lexbor/html/tokenizer/state.h |  2 ++
+ source/lexbor/html/tree.c            | 11 +++++++++++
+ source/lexbor/html/tree/error.c      |  5 +++--
+ source/lexbor/html/tree/error.h      |  5 +++--
+ 8 files changed, 48 insertions(+), 5 deletions(-)
+
+diff --git a/source/lexbor/dom/interfaces/node.h b/source/lexbor/dom/interfaces/node.h
+index 4a10197..ff9c924 100755
+--- a/source/lexbor/dom/interfaces/node.h
++++ b/source/lexbor/dom/interfaces/node.h
+@@ -58,6 +58,8 @@ struct lxb_dom_node {
+ 
+     lxb_dom_node_type_t    type;
+ 
++    size_t                 line;
++
+ #ifdef LXB_DOM_NODE_USER_VARIABLES
+     LXB_DOM_NODE_USER_VARIABLES
+ #endif /* LXB_DOM_NODE_USER_VARIABLES */
+diff --git a/source/lexbor/html/token.h b/source/lexbor/html/token.h
+index 79accd0..0b7f4fd 100755
+--- a/source/lexbor/html/token.h
++++ b/source/lexbor/html/token.h
+@@ -33,6 +33,8 @@ enum lxb_html_token_type {
+ typedef struct {
+     const lxb_char_t      *begin;
+     const lxb_char_t      *end;
++    size_t                line;
++    size_t                column;
+ 
+     const lxb_char_t      *text_start;
+     const lxb_char_t      *text_end;
+diff --git a/source/lexbor/html/tokenizer.c b/source/lexbor/html/tokenizer.c
+index 741bced..0bd9aec 100755
+--- a/source/lexbor/html/tokenizer.c
++++ b/source/lexbor/html/tokenizer.c
+@@ -91,6 +91,7 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
+ 
+     tkz->pos = tkz->start;
+     tkz->end = tkz->start + LXB_HTML_TKZ_TEMP_SIZE;
++    /* current_line & current_column already initialized by calloc (zero-based) */
+ 
+     tkz->tree = NULL;
+     tkz->tags = NULL;
+@@ -152,6 +153,8 @@ lxb_html_tokenizer_inherit(lxb_html_tokenizer_t *tkz_to,
+     tkz_to->start = tkz_from->start;
+     tkz_to->end = tkz_from->end;
+     tkz_to->pos = tkz_to->start;
++    tkz_to->current_line = tkz_from->current_line;
++    tkz_to->current_column = tkz_from->current_column;
+ 
+     return LXB_STATUS_OK;
+ }
+@@ -312,7 +315,26 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
+     tkz->last = end;
+ 
+     while (data < end) {
+-        data = tkz->state(tkz, data, end);
++        size_t current_column = tkz->current_column;
++        const lxb_char_t *new_data = tkz->state(tkz, data, end);
++        while (data < new_data) {
++            /* Codepoints < 0x80 are encoded the same as their ASCII counterpart, so '\n' will uniquely identify a newline. */
++            if (*data == '\n') {
++                tkz->current_line++;
++                current_column = 0;
++            } else {
++                /* Other characters can be mapped back to the unicode codepoint offset because UTF-8 is a prefix code.
++                 * Continuation bytes start with 0b10XXXXXX so we can skip those to only get the start of an encoded code point. */
++                if ((*data & 0b11000000) == 0b10000000) {
++                    /* Continuation byte, do nothing */
++                } else {
++                    /* First byte for a codepoint */
++                    current_column++;
++                }
++            }
++            data++;
++        }
++        tkz->current_column = current_column;
+     }
+ 
+     return tkz->status;
+diff --git a/source/lexbor/html/tokenizer.h b/source/lexbor/html/tokenizer.h
+index ba9602f..74bb55e 100755
+--- a/source/lexbor/html/tokenizer.h
++++ b/source/lexbor/html/tokenizer.h
+@@ -73,6 +73,8 @@ struct lxb_html_tokenizer {
+     const lxb_char_t                 *end;
+     const lxb_char_t                 *begin;
+     const lxb_char_t                 *last;
++    size_t                           current_line;
++    size_t                           current_column;
+ 
+     /* Entities */
+     const lexbor_sbst_entry_static_t *entity;
+diff --git a/source/lexbor/html/tokenizer/state.h b/source/lexbor/html/tokenizer/state.h
+index 0892846..77b86ac 100755
+--- a/source/lexbor/html/tokenizer/state.h
++++ b/source/lexbor/html/tokenizer/state.h
+@@ -90,6 +90,8 @@ extern "C" {
+     do {                                                                       \
+         tkz->pos = tkz->start;                                                 \
+         tkz->token->begin = v_begin;                                           \
++        tkz->token->line = tkz->current_line;                                  \
++        tkz->token->column = tkz->current_column;                              \
+     }                                                                          \
+     while (0)
+ 
+diff --git a/source/lexbor/html/tree.c b/source/lexbor/html/tree.c
+index 0f067e4..bdec6a5 100755
+--- a/source/lexbor/html/tree.c
++++ b/source/lexbor/html/tree.c
+@@ -434,6 +434,9 @@ lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
+         return NULL;
+     }
+ 
++    node->line = token->line;
++    /* We only expose line number in PHP DOM */
++
+     lxb_status_t status;
+     lxb_dom_element_t *element = lxb_dom_interface_element(node);
+ 
+@@ -770,6 +773,11 @@ lxb_html_tree_insert_character_for_data(lxb_html_tree_t *tree,
+ 
+     lxb_dom_interface_text(text)->char_data.data = *str;
+ 
++    if (tree->tkz_ref) {
++        text->line = tree->tkz_ref->token->line;
++        /* We only expose line number in PHP DOM */
++    }
++
+     if (ret_node != NULL) {
+         *ret_node = text;
+     }
+@@ -809,6 +817,9 @@ lxb_html_tree_insert_comment(lxb_html_tree_t *tree,
+         return NULL;
+     }
+ 
++    node->line = token->line;
++    /* We only expose line number in PHP DOM */
++
+     tree->status = lxb_html_token_make_text(token, &comment->char_data.data,
+                                             tree->document->dom_document.text);
+     if (tree->status != LXB_STATUS_OK) {
+diff --git a/source/lexbor/html/tree/error.c b/source/lexbor/html/tree/error.c
+index e6e43f4..88ad8c4 100755
+--- a/source/lexbor/html/tree/error.c
++++ b/source/lexbor/html/tree/error.c
+@@ -21,8 +21,9 @@ lxb_html_tree_error_add(lexbor_array_obj_t *parse_errors,
+     }
+ 
+     entry->id = id;
+-    entry->begin = token->begin;
+-    entry->end = token->end;
++    entry->line = token->line;
++    entry->column = token->column;
++    entry->length = token->end - token->begin;
+ 
+     return entry;
+ }
+diff --git a/source/lexbor/html/tree/error.h b/source/lexbor/html/tree/error.h
+index 2fd06cb..ed1859f 100755
+--- a/source/lexbor/html/tree/error.h
++++ b/source/lexbor/html/tree/error.h
+@@ -97,8 +97,9 @@ lxb_html_tree_error_id_t;
+ 
+ typedef struct {
+     lxb_html_tree_error_id_t id;
+-    const lxb_char_t         *begin;
+-    const lxb_char_t         *end;
++    size_t                   line;
++    size_t                   column;
++    size_t                   length;
+ }
+ lxb_html_tree_error_t;
+ 
+-- 
+2.43.0
+

@@ -5,61 +5,16 @@ PHP_ARG_ENABLE([fpm],,
   [no])
 
 dnl Configure checks.
-AC_DEFUN([AC_FPM_STDLIBS],
-[
-  AC_CHECK_FUNCS(clearenv setproctitle setproctitle_fast)
-
-  AC_SEARCH_LIBS(socket, socket)
-  AC_SEARCH_LIBS(inet_addr, nsl)
-])
-
-AC_DEFUN([AC_FPM_SETPFLAGS],
-[
-  AC_MSG_CHECKING([for setpflags])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <priv.h>]], [[setpflags(0, 0);]])], [
-    AC_DEFINE([HAVE_SETPFLAGS], 1, [do we have setpflags?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
 AC_DEFUN([AC_FPM_CLOCK],
 [
-  have_clock_gettime=no
-
-  AC_MSG_CHECKING([for clock_gettime])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);]])], [
-    have_clock_gettime=yes
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_clock_gettime" = "no"; then
-    AC_MSG_CHECKING([for clock_gettime in -lrt])
-
-    SAVED_LIBS="$LIBS"
-    LIBS="$LIBS -lrt"
-
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);]])], [
-      have_clock_gettime=yes
-      AC_MSG_RESULT([yes])
-    ], [
-      LIBS="$SAVED_LIBS"
-      AC_MSG_RESULT([no])
-    ])
-  fi
-
-  if test "$have_clock_gettime" = "yes"; then
-    AC_DEFINE([HAVE_CLOCK_GETTIME], 1, [do we have clock_gettime?])
-  fi
+  AC_CHECK_FUNCS([clock_gettime],,
+    [AC_SEARCH_LIBS([clock_gettime], [rt],
+      [ac_cv_func_clock_gettime=yes
+      AC_DEFINE([HAVE_CLOCK_GETTIME], [1])])])
 
   have_clock_get_time=no
 
-  if test "$have_clock_gettime" = "no"; then
+  if test "$ac_cv_func_clock_gettime" = "no"; then
     AC_MSG_CHECKING([for clock_get_time])
 
     AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <mach/mach.h>
@@ -231,7 +186,9 @@ AC_DEFUN([AC_FPM_TRACE],
     AC_MSG_CHECKING([for proc mem file])
 
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
+      #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
+      #endif
       #define _FILE_OFFSET_BITS 64
       #include <stdint.h>
       #include <unistd.h>
@@ -342,34 +299,10 @@ AC_DEFUN([AC_FPM_LQ],
       AC_MSG_RESULT([no])
     ])
 
-    if test "$have_lq" = "tcp_info"; then
-      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQxxx?])
+    if test "$have_lq" = "so_listenq"; then
+      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQ?])
     fi
   fi
-])
-
-AC_DEFUN([AC_FPM_SYSCONF],
-[
-	AC_MSG_CHECKING([for sysconf])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <unistd.h>]], [[sysconf(_SC_CLK_TCK);]])],[
-		AC_DEFINE([HAVE_SYSCONF], 1, [do we have sysconf?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
-AC_DEFUN([AC_FPM_TIMES],
-[
-	AC_MSG_CHECKING([for times])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/times.h>]], [[struct tms t; times(&t);]])],[
-		AC_DEFINE([HAVE_TIMES], 1, [do we have times?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
 ])
 
 AC_DEFUN([AC_FPM_KQUEUE],
@@ -505,19 +438,20 @@ AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
-  AC_FPM_STDLIBS
-  AC_FPM_SETPFLAGS
   AC_FPM_CLOCK
   AC_FPM_TRACE
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
-  AC_FPM_SYSCONF
-  AC_FPM_TIMES
   AC_FPM_KQUEUE
   AC_FPM_PORT
   AC_FPM_DEVPOLL
   AC_FPM_EPOLL
   AC_FPM_SELECT
+
+  AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
+
+  AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
+  AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
@@ -574,7 +508,6 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "$PHP_FPM_ACL" != "no" ; then
-    AC_MSG_CHECKING([for acl user/group permissions support])
     AC_CHECK_HEADERS([sys/acl.h])
 
     AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
@@ -591,10 +524,9 @@ if test "$PHP_FPM" != "no"; then
         return 0;
       }
     ]])], [
-      AC_CHECK_LIB(acl, acl_free, 
+      AC_CHECK_LIB(acl, acl_free,
         [PHP_ADD_LIBRARY(acl)
           have_fpm_acl=yes
-          AC_MSG_RESULT([yes])
         ],[
           AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
             int main(void)
@@ -609,21 +541,18 @@ if test "$PHP_FPM" != "no"; then
               acl_free(acl);
               return 0;
             }
-          ]])], [
-            have_fpm_acl=yes
-            AC_MSG_RESULT([yes])
-          ], [
-            have_fpm_acl=no
-            AC_MSG_RESULT([no])
-          ], [AC_MSG_RESULT([skipped])])
+          ]])],[have_fpm_acl=yes],[have_fpm_acl=no],[have_fpm_acl=no])
         ])
     ], [
       have_fpm_acl=no
-      AC_MSG_RESULT([no])
-    ], [AC_MSG_RESULT([skipped (cross-compiling)])])
+    ])
 
+    AC_MSG_CHECKING([for acl user/group permissions support])
     if test "$have_fpm_acl" = "yes"; then
+      AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
+    else
+      AC_MSG_RESULT([no])
     fi
   fi
 
@@ -719,13 +648,13 @@ if test "$PHP_FPM" != "no"; then
 
   case $host_alias in
       *aix*)
-        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
         ;;
       *darwin*)
         BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
       ;;
       *)
-        BUILD_FPM="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+        BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
       ;;
   esac
 

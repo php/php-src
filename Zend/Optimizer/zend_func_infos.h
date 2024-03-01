@@ -235,7 +235,7 @@ static const func_info_t func_infos[] = {
 	F1("mb_convert_variables", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mb_encode_numericentity", MAY_BE_STRING),
 	F1("mb_decode_numericentity", MAY_BE_STRING),
-	F1("mb_get_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE),
+	F1("mb_get_info", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_NULL),
 #if defined(HAVE_MBREGEX)
 	F1("mb_regex_encoding", MAY_BE_STRING|MAY_BE_BOOL),
 #endif
@@ -308,14 +308,6 @@ static const func_info_t func_infos[] = {
 	F1("mysqli_stat", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("mysqli_store_result", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("mysqli_use_result", MAY_BE_OBJECT|MAY_BE_FALSE),
-	FN("oci_new_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_pconnect", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	F1("oci_error", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
-	FN("oci_parse", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_get_implicit_resultset", MAY_BE_RESOURCE|MAY_BE_FALSE),
-	FN("oci_password_change", MAY_BE_RESOURCE|MAY_BE_BOOL),
-	FN("oci_new_cursor", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("odbc_prepare", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("odbc_exec", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("odbc_connect", MAY_BE_RESOURCE|MAY_BE_FALSE),
@@ -414,7 +406,6 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_GETRLIMIT)
 	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
-	F1("pspell_suggest", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("random_bytes", MAY_BE_STRING),
 #if defined(HAVE_HISTORY_LIST)
 	F1("readline_list_history", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
@@ -477,7 +468,7 @@ static const func_info_t func_infos[] = {
 	FN("array_rand", MAY_BE_LONG|MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("base64_encode", MAY_BE_STRING),
 	F1("base64_decode", MAY_BE_STRING|MAY_BE_FALSE),
-	F1("long2ip", MAY_BE_STRING|MAY_BE_FALSE),
+	F1("long2ip", MAY_BE_STRING),
 	F1("getenv", MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 	F1("getopt", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_FALSE|MAY_BE_FALSE),
 #if defined(HAVE_NANOSLEEP)
@@ -525,12 +516,8 @@ static const func_info_t func_infos[] = {
 	F1("md5_file", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("sha1", MAY_BE_STRING),
 	F1("sha1_file", MAY_BE_STRING|MAY_BE_FALSE),
-#if defined(HAVE_INET_NTOP)
 	F1("inet_ntop", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
-#if defined(HAVE_INET_PTON)
 	F1("inet_pton", MAY_BE_STRING|MAY_BE_FALSE),
-#endif
 	F1("metaphone", MAY_BE_STRING),
 	F1("headers_list", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 	F1("htmlspecialchars", MAY_BE_STRING),
@@ -610,6 +597,7 @@ static const func_info_t func_infos[] = {
 	F1("fsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	FN("pfsockopen", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("http_build_query", MAY_BE_STRING),
+	F1("request_parse_body", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_ARRAY),
 	F1("image_type_to_mime_type", MAY_BE_STRING),
 	F1("image_type_to_extension", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("getimagesize", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),

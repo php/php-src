@@ -8,6 +8,7 @@ soap
 <?php
 require __DIR__.'/../../standard/tests/http/server.inc';
 http_server_skipif();
+?>
 --FILE--
 <?php
 require __DIR__.'/../../standard/tests/http/server.inc';

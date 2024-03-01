@@ -8,7 +8,6 @@
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-*.stub.php @kocsismate
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
 /ext/bcmath @Girgias
@@ -17,19 +16,23 @@
 /ext/dba @Girgias
 /ext/dom @nielsdos
 /ext/ffi @dstogov
+/ext/gettext @devnexen
 /ext/gmp @Girgias
-/ext/imap @Girgias
+/ext/intl @devnexen
 /ext/json @bukka
 /ext/libxml @nielsdos
 /ext/mbstring @alexdowad
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
+/ext/odbc @NattyNarwhal
+/ext/pdo_pgsql @devnexen
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka
 /Zend @iluuu1994
@@ -37,12 +40,14 @@
 /Zend/zend.* @dstogov
 /Zend/zend_alloc.* @dstogov
 /Zend/zend_API.* @dstogov
+/Zend/zend_call_stack.* @arnaud-lb
 /Zend/zend_closures.* @dstogov
 /Zend/zend_execute.* @dstogov
 /Zend/zend_execute_API.c @dstogov
-/Zend/zend_gc.* @dstogov
+/Zend/zend_gc.* @dstogov @arnaud-lb
 /Zend/zend_hash.* @dstogov
 /Zend/zend_inheritance.* @dstogov
+/Zend/zend_max_execution_timer.* @arnaud-lb
 /Zend/zend_object_handlers.* @dstogov
 /Zend/zend_objects.* @dstogov
 /Zend/zend_objects_API.* @dstogov
@@ -51,3 +56,4 @@
 /Zend/zend_type*.h @dstogov
 /Zend/zend_variables.* @dstogov
 /Zend/zend_vm* @dstogov
+*.stub.php @kocsismate

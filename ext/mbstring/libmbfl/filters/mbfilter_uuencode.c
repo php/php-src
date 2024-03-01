@@ -44,7 +44,8 @@ const mbfl_encoding mbfl_encoding_uuencode = {
 	NULL,
 	mb_uuencode_to_wchar,
 	mb_wchar_to_uuencode,
-	NULL
+	NULL,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_uuencode_8bit = {

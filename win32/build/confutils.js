@@ -95,10 +95,10 @@ if (typeof(CWD) == "undefined") {
 if (!MODE_PHPIZE) {
 	/* defaults; we pick up the precise versions from configure.ac */
 	var PHP_VERSION = 8;
-	var PHP_MINOR_VERSION = 3;
+	var PHP_MINOR_VERSION = 4;
 	var PHP_RELEASE_VERSION = 0;
 	var PHP_EXTRA_VERSION = "";
-	var PHP_VERSION_STRING = "8.3.0";
+	var PHP_VERSION_STRING = "8.4.0";
 }
 
 /* Get version numbers and DEFINE as a string */
@@ -2978,6 +2978,7 @@ function toolset_setup_project_tools()
 	PATH_PROG('lib', null, 'MAKE_LIB');
 
 	var BISON = PATH_PROG('bison');
+	DEFINE('BISON_FLAGS', '-Wall');
 	if (BISON) {
 		var BISONVERS = probe_binary(BISON, "longversion");
 		STDOUT.WriteLine('  Detected bison version ' + BISONVERS);
@@ -3348,7 +3349,7 @@ function toolset_setup_intrinsic_cflags()
 		if (TARGET_ARCH == 'arm64') {
 			/* arm64 supports neon */
 			configure_subst.Add("PHP_SIMD_SCALE", 'NEON');
-			/* all offically supported arm64 cpu supports crc32 (TODO: to be confirmed) */
+			/* all officially supported arm64 cpu supports crc32 (TODO: to be confirmed) */
 			AC_DEFINE('HAVE_ARCH64_CRC32', 1);
 			return;
 		}

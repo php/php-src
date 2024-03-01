@@ -20,5 +20,5 @@ $result = $doc->relaxNGValidate($rng);
 var_dump($result);
 ?>
 --EXPECTF--
-Warning: DOMDocument::relaxNGValidate(): Did not expect element pear there in %s on line %d
+Warning: DOM\Document::relaxNGValidate(): Did not expect element pear there in %s on line %d
 bool(false)

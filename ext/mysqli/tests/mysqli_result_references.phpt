@@ -84,7 +84,7 @@ opcache.enable=0
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
-array(7) refcount(2){
+array(7) packed refcount(2){
   [0]=>
   array(2) refcount(1){
     ["id"]=>

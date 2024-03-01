@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 06c88dc2fb5582a6d21c11aee6ac0a0538e70cbc */
+ * Stub hash: 36eac2dee86bcc386c24e2cc14caa7bd3d709e82 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -18,7 +18,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_string, 0, 1,
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_simplexml_import_dom, 0, 1, SimpleXMLElement, 1)
-	ZEND_ARG_OBJ_TYPE_MASK(0, node, SimpleXMLElement|DOMNode, 0, NULL)
+	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, class_name, IS_STRING, 1, "SimpleXMLElement::class")
 ZEND_END_ARG_INFO()
 
@@ -100,7 +100,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_getChildren, 0, 0, SimpleXMLElement, 1)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(simplexml_load_file);
 ZEND_FUNCTION(simplexml_load_string);
 ZEND_FUNCTION(simplexml_import_dom);
@@ -125,7 +124,6 @@ ZEND_METHOD(SimpleXMLElement, next);
 ZEND_METHOD(SimpleXMLElement, hasChildren);
 ZEND_METHOD(SimpleXMLElement, getChildren);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(simplexml_load_file, arginfo_simplexml_load_file)
 	ZEND_FE(simplexml_load_string, arginfo_simplexml_load_string)
@@ -133,12 +131,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, xpath, arginfo_class_SimpleXMLElement_xpath, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, registerXPathNamespace, arginfo_class_SimpleXMLElement_registerXPathNamespace, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, asXML, arginfo_class_SimpleXMLElement_asXML, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SimpleXMLElement, saveXML, asXML, arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("saveXML", zim_SimpleXMLElement_asXML, arginfo_class_SimpleXMLElement_saveXML, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SimpleXMLElement, getNamespaces, arginfo_class_SimpleXMLElement_getNamespaces, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, getDocNamespaces, arginfo_class_SimpleXMLElement_getDocNamespaces, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, children, arginfo_class_SimpleXMLElement_children, ZEND_ACC_PUBLIC)
@@ -158,7 +155,6 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, getChildren, arginfo_class_SimpleXMLElement_getChildren, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SimpleXMLIterator_methods[] = {
 	ZEND_FE_END

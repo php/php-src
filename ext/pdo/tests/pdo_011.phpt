@@ -15,11 +15,11 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group1\')');
-$db->exec('INSERT INTO test VALUES(3, \'C\', \'Group2\')');
-$db->exec('INSERT INTO test VALUES(4, \'D\', \'Group2\')');
+$db->exec('CREATE TABLE test011(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
+$db->exec("INSERT INTO test011 VALUES(1, 'A', 'Group1')");
+$db->exec("INSERT INTO test011 VALUES(2, 'B', 'Group1')");
+$db->exec("INSERT INTO test011 VALUES(3, 'C', 'Group2')");
+$db->exec("INSERT INTO test011 VALUES(4, 'D', 'Group2')");
 
 class DerivedStatement extends PDOStatement
 {
@@ -34,9 +34,9 @@ class DerivedStatement extends PDOStatement
     }
 }
 
-$select1 = $db->prepare('SELECT grp, id FROM test');
-$select2 = $db->prepare('SELECT id, val FROM test');
-$derived = $db->prepare('SELECT id, val FROM test', array(PDO::ATTR_STATEMENT_CLASS=>array('DerivedStatement', array('Overloaded', $db))));
+$select1 = $db->prepare('SELECT grp, id FROM test011');
+$select2 = $db->prepare('SELECT id, val FROM test011');
+$derived = $db->prepare('SELECT id, val FROM test011', array(PDO::ATTR_STATEMENT_CLASS=>array('DerivedStatement', array('Overloaded', $db))));
 
 class Test1
 {
@@ -52,7 +52,7 @@ class Test1
     }
 }
 
-function test($id,$val='N/A')
+function callback($id,$val='N/A')
 {
     echo __METHOD__ . "($id,$val)\n";
     return array($id=>$val);
@@ -61,10 +61,10 @@ function test($id,$val='N/A')
 $f = new Test1(0,0);
 
 $select1->execute();
-var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'test'));
+var_dump($select1->fetchAll(PDO::FETCH_FUNC|PDO::FETCH_GROUP, 'callback'));
 
 $select2->execute();
-var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'test'));
+var_dump($select2->fetchAll(PDO::FETCH_FUNC, 'callback'));
 
 $select2->execute();
 var_dump($select2->fetchAll(PDO::FETCH_FUNC, array('Test1','factory')));
@@ -81,13 +81,19 @@ $derived->execute();
 var_dump($derived->fetchAll(PDO::FETCH_FUNC, array($derived, 'RETRIEVE')));
 
 ?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test011");
+?>
 --EXPECTF--
 DerivedStatement::__construct(Overloaded)
 Test1::__construct(0,0)
-test(1,N/A)
-test(2,N/A)
-test(3,N/A)
-test(4,N/A)
+callback(1,N/A)
+callback(2,N/A)
+callback(3,N/A)
+callback(4,N/A)
 array(2) {
   ["Group1"]=>
   array(2) {
@@ -116,10 +122,10 @@ array(2) {
     }
   }
 }
-test(1,A)
-test(2,B)
-test(3,C)
-test(4,D)
+callback(1,A)
+callback(2,B)
+callback(3,C)
+callback(4,D)
 array(4) {
   [0]=>
   array(1) {

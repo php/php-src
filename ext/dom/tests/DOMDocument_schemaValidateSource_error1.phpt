@@ -17,13 +17,13 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOMDocument::schemaValidateSource(): Entity: line 1: parser error : Start tag expected, '<' not found in %s.php on line %d
+Warning: DOM\Document::schemaValidateSource(): Entity: line 1: parser error : Start tag expected, '<' not found in %s on line %d
 
-Warning: DOMDocument::schemaValidateSource(): string that is not a schema in %s.php on line %d
+Warning: DOM\Document::schemaValidateSource(): string that is not a schema in %s on line %d
 
-Warning: DOMDocument::schemaValidateSource(): ^ in %s.php on line %d
+Warning: DOM\Document::schemaValidateSource(): ^ in %s on line %d
 
-Warning: DOMDocument::schemaValidateSource(): Failed to parse the XML resource 'in_memory_buffer'. in %s.php on line %d
+Warning: DOM\Document::schemaValidateSource(): Failed to parse the XML resource 'in_memory_buffer'. in %s on line %d
 
-Warning: DOMDocument::schemaValidateSource(): Invalid Schema in %s.php on line %d
+Warning: DOM\Document::schemaValidateSource(): Invalid Schema in %s on line %d
 bool(false)

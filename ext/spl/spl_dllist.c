@@ -33,7 +33,7 @@
 #include "spl_dllist_arginfo.h"
 #include "spl_exceptions.h"
 
-zend_object_handlers spl_handler_SplDoublyLinkedList;
+static zend_object_handlers spl_handler_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplQueue;
 PHPAPI zend_class_entry  *spl_ce_SplStack;
@@ -875,7 +875,7 @@ static void spl_dllist_it_rewind(zend_object_iterator *iter) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_it_valid(zend_object_iterator *iter) /* {{{ */
+static zend_result spl_dllist_it_valid(zend_object_iterator *iter) /* {{{ */
 {
 	spl_dllist_it         *iterator = (spl_dllist_it *)iter;
 	spl_ptr_llist_element *element  = iterator->traverse_pointer;

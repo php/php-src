@@ -26,6 +26,7 @@
 #include "soap_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "ext/standard/php_incomplete_class.h"
 
 
 static int le_sdl = 0;
@@ -214,10 +215,14 @@ PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
 PHP_MINFO_FUNCTION(soap);
 
+static const zend_module_dep soap_deps[] = {
+	ZEND_MOD_REQUIRED("date")
+	ZEND_MOD_END
+};
+
 zend_module_entry soap_module_entry = {
-#ifdef STANDARD_MODULE_HEADER
-  STANDARD_MODULE_HEADER,
-#endif
+  STANDARD_MODULE_HEADER_EX, NULL,
+  soap_deps,
   "soap",
   ext_functions,
   PHP_MINIT(soap),
@@ -293,7 +298,7 @@ static HashTable defEnc, defEncIndex, defEncNs;
 static void php_soap_prepare_globals(void)
 {
 	int i;
-	const encode* enc;
+	encode* enc;
 
 	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
@@ -306,9 +311,12 @@ static void php_soap_prepare_globals(void)
 		/* If has a ns and a str_type then index it */
 		if (defaultEncoding[i].details.type_str) {
 			if (defaultEncoding[i].details.ns != NULL) {
-				char *ns_type;
-				spprintf(&ns_type, 0, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
-				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), (void*)enc);
+				char *ns_type, *clark_notation;
+				size_t clark_notation_len = spprintf(&clark_notation, 0, "{%s}%s", enc->details.ns, enc->details.type_str);
+				enc->details.clark_notation = zend_string_init(clark_notation, clark_notation_len, true);
+				size_t ns_type_len = spprintf(&ns_type, 0, "%s:%s", enc->details.ns, enc->details.type_str);
+				zend_hash_str_add_ptr(&defEnc, ns_type, ns_type_len, (void*)enc);
+				efree(clark_notation);
 				efree(ns_type);
 			} else {
 				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), (void*)enc);
@@ -348,6 +356,13 @@ static void php_soap_init_globals(zend_soap_globals *soap_globals)
 
 PHP_MSHUTDOWN_FUNCTION(soap)
 {
+	int i = 0;
+	do {
+		if (defaultEncoding[i].details.clark_notation) {
+			zend_string_release_ex(defaultEncoding[i].details.clark_notation, 1);
+		}
+		i++;
+	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
 	zend_error_cb = old_error_handler;
 	zend_hash_destroy(&SOAP_GLOBAL(defEnc));
 	zend_hash_destroy(&SOAP_GLOBAL(defEncIndex));
@@ -1320,9 +1335,13 @@ PHP_METHOD(SoapServer, handle)
 			ZVAL_DEREF(session_vars);
 			if (Z_TYPE_P(session_vars) == IS_ARRAY &&
 			    (tmp_soap_p = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
-			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT &&
-			    Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce) {
-				soap_obj = tmp_soap_p;
+			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT) {
+				if (EXPECTED(Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce)) {
+					soap_obj = tmp_soap_p;
+				} else if (Z_OBJCE_P(tmp_soap_p) == php_ce_incomplete_class) {
+					/* See #51561, communicate limitation to user */
+					soap_server_fault("Server", "SoapServer class was deserialized from the session prior to loading the class passed to SoapServer::setClass(). Start the session after loading all classes to resolve this issue.", NULL, NULL, NULL);
+				}
 			}
 		}
 #endif

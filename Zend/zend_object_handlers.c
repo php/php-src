@@ -36,10 +36,10 @@
 #define ZEND_WRONG_PROPERTY_OFFSET   0
 
 /* guard flags */
-#define IN_GET		(1<<0)
-#define IN_SET		(1<<1)
-#define IN_UNSET	(1<<2)
-#define IN_ISSET	(1<<3)
+#define IN_GET		ZEND_GUARD_PROPERTY_GET
+#define IN_SET		ZEND_GUARD_PROPERTY_SET
+#define IN_UNSET	ZEND_GUARD_PROPERTY_UNSET
+#define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
 
 /*
   __X accessors explanation:
@@ -542,30 +542,36 @@ static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 }
 /* }}} */
 
+static zend_always_inline zval *zend_get_guard_value(zend_object *zobj)
+{
+	return zobj->properties_table + zobj->ce->default_properties_count;
+}
+
 ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member) /* {{{ */
 {
 	HashTable *guards;
 	zval *zv;
 	uint32_t *ptr;
 
+
 	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS);
-	zv = zobj->properties_table + zobj->ce->default_properties_count;
+	zv = zend_get_guard_value(zobj);
 	if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
 		zend_string *str = Z_STR_P(zv);
 		if (EXPECTED(str == member) ||
 		    /* str and member don't necessarily have a pre-calculated hash value here */
 		    EXPECTED(zend_string_equal_content(str, member))) {
-			return &Z_PROPERTY_GUARD_P(zv);
-		} else if (EXPECTED(Z_PROPERTY_GUARD_P(zv) == 0)) {
+			return &Z_GUARD_P(zv);
+		} else if (EXPECTED(Z_GUARD_P(zv) == 0)) {
 			zval_ptr_dtor_str(zv);
 			ZVAL_STR_COPY(zv, member);
-			return &Z_PROPERTY_GUARD_P(zv);
+			return &Z_GUARD_P(zv);
 		} else {
 			ALLOC_HASHTABLE(guards);
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
-				(void*)(((uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
+				(void*)(((uintptr_t)&Z_GUARD_P(zv)) | 1));
 			zval_ptr_dtor_str(zv);
 			ZVAL_ARR(zv, guards);
 		}
@@ -579,8 +585,8 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
 		ZVAL_STR_COPY(zv, member);
-		Z_PROPERTY_GUARD_P(zv) = 0;
-		return &Z_PROPERTY_GUARD_P(zv);
+		Z_GUARD_P(zv) &= ~ZEND_GUARD_PROPERTY_MASK;
+		return &Z_GUARD_P(zv);
 	}
 	/* we have to allocate uint32_t separately because ht->arData may be reallocated */
 	ptr = (uint32_t*)emalloc(sizeof(uint32_t));
@@ -588,6 +594,15 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	return (uint32_t*)zend_hash_add_new_ptr(guards, member, ptr);
 }
 /* }}} */
+
+ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj)
+{
+	if (!(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
+		return NULL;
+	}
+	zval *zv = zend_get_guard_value(zobj);
+	return &Z_GUARD_P(zv);
+}
 
 ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
 {
@@ -726,7 +741,7 @@ call_getter:
 				retval = &EG(uninitialized_zval);
 			}
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				zend_verify_prop_assignable_by_ref_ex(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0, ZEND_VERIFY_PROP_ASSIGNABLE_BY_REF_CONTEXT_MAGIC_GET);
 			}
 
@@ -743,7 +758,7 @@ call_getter:
 
 uninit_error:
 	if (type != BP_VAR_IS) {
-		if (UNEXPECTED(prop_info)) {
+		if (prop_info) {
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(prop_info->ce->name),
 				ZSTR_VAL(name));
@@ -811,7 +826,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
 			Z_TRY_ADDREF_P(value);
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
 					Z_TRY_DELREF_P(value);
 					zend_readonly_property_modification_error(prop_info);
@@ -914,7 +929,7 @@ write_std_property:
 			variable_ptr = OBJ_PROP(zobj, property_offset);
 
 			Z_TRY_ADDREF_P(value);
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY)
 						&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize"))) {
 					Z_TRY_DELREF_P(value);
@@ -1095,15 +1110,18 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET) ||
 			    UNEXPECTED(prop_info && (Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT))) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-					if (UNEXPECTED(prop_info)) {
+					if (prop_info) {
 						zend_throw_error(NULL,
 							"Typed property %s::$%s must not be accessed before initialization",
 							ZSTR_VAL(prop_info->ce->name),
 							ZSTR_VAL(name));
 						retval = &EG(error_zval);
 					} else {
-						ZVAL_NULL(retval);
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+						/* An error handler may set the property */
+						 if (EXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+							ZVAL_NULL(retval);
+						 }
 					}
 				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
 					/* Readonly property, delegate to read_property + write_property. */
@@ -1145,12 +1163,10 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties(zobj);
 			}
-			retval = zend_hash_update(zobj->properties, name, &EG(uninitialized_zval));
-			/* Notice is thrown after creation of the property, to avoid EG(std_property_info)
-			 * being overwritten in an error handler. */
 			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
+			retval = zend_hash_add(zobj->properties, name, &EG(uninitialized_zval));
 		}
 	} else if (zobj->ce->__get == NULL) {
 		retval = &EG(error_zval);

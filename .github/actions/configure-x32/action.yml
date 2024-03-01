@@ -35,7 +35,6 @@ runs:
             --enable-exif \
             --with-zip \
             --with-zlib \
-            --with-zlib-dir=/usr \
             --enable-soap \
             --enable-xmlreader \
             --with-xsl \
@@ -55,7 +54,6 @@ runs:
             --enable-bcmath \
             --enable-calendar \
             --enable-ftp \
-            --with-pspell=/usr \
             --with-kerberos \
             --enable-sysvmsg \
             --with-ffi \

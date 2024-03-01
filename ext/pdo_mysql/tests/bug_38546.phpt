@@ -1,28 +1,23 @@
 --TEST--
 PDO MySQL Bug #38546 (bindParam incorrect processing of bool types)
 --EXTENSIONS--
-pdo
 pdo_mysql
 --SKIPIF--
 <?php
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
 
 $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
 // To test error cases.
 $db->exec("SET sql_mode='STRICT_TRANS_TABLES'");
 
-$db->exec("DROP TABLE IF EXISTS test");
-
-$query = "CREATE TABLE test(
+$query = "CREATE TABLE test_38546(
             uid MEDIUMINT UNSIGNED NOT NULL,
             some_bool_1 BOOL NOT NULL,
             some_bool_2 BOOL NOT NULL,
@@ -30,7 +25,7 @@ $query = "CREATE TABLE test(
         )";
 $db->exec($query);
 
-$st = $db->prepare("INSERT INTO test (uid, some_bool_1, some_bool_2, some_int) VALUES (?, ?, ?, ?)");
+$st = $db->prepare("INSERT INTO test_38546 (uid, some_bool_1, some_bool_2, some_int) VALUES (?, ?, ?, ?)");
 
 $values = [
     'uid' => 6,
@@ -51,11 +46,11 @@ if ($result === false) {
     print("ok insert\n");
 }
 
-foreach ($db->query('SELECT * from test') as $row) {
+foreach ($db->query('SELECT * FROM test_38546') as $row) {
     print_r($row);
 }
 
-$st = $db->prepare("UPDATE test SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
+$st = $db->prepare("UPDATE test_38546 SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
 
 $values = [
     'uid' => 6,
@@ -77,11 +72,11 @@ if ($result === false) {
     print("ok prepare 1\n");
 }
 
-foreach ($db->query('SELECT * from test') as $row) {
+foreach ($db->query('SELECT * FROM test_38546') as $row) {
     print_r($row);
 }
 
-$st = $db->prepare("UPDATE test SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
+$st = $db->prepare("UPDATE test_38546 SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
 
 $values = [
     'uid' => 6,
@@ -103,12 +98,12 @@ if ($result === false) {
     print("ok prepare 2\n");
 }
 
-foreach ($db->query('SELECT * from test') as $row) {
+foreach ($db->query('SELECT * FROM test_38546') as $row) {
     print_r($row);
 }
 
 // String true and false should fail
-$st = $db->prepare("UPDATE test SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
+$st = $db->prepare("UPDATE test_38546 SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
 
 $values = [
     'uid' => 6,
@@ -130,12 +125,12 @@ if ($result === false) {
     print("ok prepare 3\n");
 }
 
-foreach ($db->query('SELECT * from test') as $row) {
+foreach ($db->query('SELECT * FROM test_38546') as $row) {
     print_r($row);
 }
 
 // Null should not be treated as false
-$st = $db->prepare("UPDATE test SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
+$st = $db->prepare("UPDATE test_38546 SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
 
 $values = [
     'uid' => 6,
@@ -157,12 +152,12 @@ if ($result === false) {
     print("ok prepare 4\n");
 }
 
-foreach ($db->query('SELECT * from test') as $row) {
+foreach ($db->query('SELECT * FROM test_38546') as $row) {
     print_r($row);
 }
 
 // Integers converted correctly
-$st = $db->prepare("UPDATE test SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
+$st = $db->prepare("UPDATE test_38546 SET some_bool_1=?, some_bool_2=?, some_int=? WHERE uid=?");
 
 $values = [
     'uid' => 6,
@@ -184,15 +179,15 @@ if ($result === false) {
     print("ok prepare 5\n");
 }
 
-foreach ($db->query('SELECT * from test') as $row) {
+foreach ($db->query('SELECT * FROM test_38546') as $row) {
     print_r($row);
 }
-
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS test_38546');
 ?>
 --EXPECTF--
 ok insert

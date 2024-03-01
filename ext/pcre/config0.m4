@@ -60,7 +60,7 @@ else
   AC_MSG_CHECKING([for PCRE library to use])
   AC_MSG_RESULT([bundled])
   pcrelib_sources="pcre2lib/pcre2_auto_possess.c pcre2lib/pcre2_chartables.c pcre2lib/pcre2_compile.c \
-      pcre2lib/pcre2_config.c pcre2lib/pcre2_context.c pcre2lib/pcre2_dfa_match.c pcre2lib/pcre2_error.c \
+      pcre2lib/pcre2_config.c pcre2lib/pcre2_context.c pcre2lib/pcre2_chkdint.c pcre2lib/pcre2_dfa_match.c pcre2lib/pcre2_error.c \
   pcre2lib/pcre2_jit_compile.c pcre2lib/pcre2_maketables.c pcre2lib/pcre2_match.c pcre2lib/pcre2_match_data.c \
   pcre2lib/pcre2_newline.c pcre2lib/pcre2_ord2utf.c pcre2lib/pcre2_pattern_info.c pcre2lib/pcre2_serialize.c \
   pcre2lib/pcre2_string_utils.c pcre2lib/pcre2_study.c pcre2lib/pcre2_substitute.c  pcre2lib/pcre2_substring.c \
@@ -77,7 +77,7 @@ else
 
     AC_CACHE_CHECK([whether Intel CET is enabled], ac_cv_have_pcre2_intel_cet, [
       AC_COMPILE_IFELSE([
-        AC_LANG_SOURCE([[
+        AC_LANG_PROGRAM([[
           #ifndef __CET__
           # error CET is not enabled
           #endif
@@ -86,10 +86,10 @@ else
         ], [
           ac_cv_have_pcre2_intel_cet=no
         ])
-      if test "$ac_cv_have_pcre2_intel_cet" = yes; then
-        PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"
-      fi
     ])
+    if test "$ac_cv_have_pcre2_intel_cet" = yes; then
+      PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"
+    fi
 
   else
     AC_MSG_RESULT([no])

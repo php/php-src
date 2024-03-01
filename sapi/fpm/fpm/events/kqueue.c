@@ -79,13 +79,11 @@ static int fpm_event_kqueue_init(int max) /* {{{ */
 		return -1;
 	}
 
-	kevents = malloc(sizeof(struct kevent) * max);
+	kevents = calloc(max, sizeof(struct kevent));
 	if (!kevents) {
 		zlog(ZLOG_ERROR, "epoll: unable to allocate %d events", max);
 		return -1;
 	}
-
-	memset(kevents, 0, sizeof(struct kevent) * max);
 
 	nkevents = max;
 
@@ -96,7 +94,7 @@ static int fpm_event_kqueue_init(int max) /* {{{ */
 /*
  * release kqueue stuff
  */
-static int fpm_event_kqueue_clean() /* {{{ */
+static int fpm_event_kqueue_clean(void) /* {{{ */
 {
 	if (kevents) {
 		free(kevents);

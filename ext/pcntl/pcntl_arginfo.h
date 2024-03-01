@@ -132,7 +132,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
 ZEND_FUNCTION(pcntl_wait);
@@ -178,7 +177,6 @@ ZEND_FUNCTION(pcntl_rfork);
 ZEND_FUNCTION(pcntl_forkx);
 #endif
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
 	ZEND_FE(pcntl_waitpid, arginfo_pcntl_waitpid)
@@ -207,7 +205,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_exec, arginfo_pcntl_exec)
 	ZEND_FE(pcntl_alarm, arginfo_pcntl_alarm)
 	ZEND_FE(pcntl_get_last_error, arginfo_pcntl_get_last_error)
-	ZEND_FALIAS(pcntl_errno, pcntl_get_last_error, arginfo_pcntl_errno)
+	ZEND_RAW_FENTRY("pcntl_errno", zif_pcntl_get_last_error, arginfo_pcntl_errno, 0, NULL, NULL)
 #if defined(HAVE_GETPRIORITY)
 	ZEND_FE(pcntl_getpriority, arginfo_pcntl_getpriority)
 #endif

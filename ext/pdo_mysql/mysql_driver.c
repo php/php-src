@@ -532,7 +532,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(return_value, dbh->auto_commit);
+			ZVAL_BOOL(return_value, dbh->auto_commit);
 			break;
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
@@ -545,7 +545,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 
 		case PDO_ATTR_EMULATE_PREPARES:
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
-			ZVAL_LONG(return_value, H->emulate_prepare);
+			ZVAL_BOOL(return_value, H->emulate_prepare);
 			break;
 
 #ifndef PDO_USE_MYSQLND
@@ -575,6 +575,10 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 		}
 #endif
+
+		case PDO_ATTR_FETCH_TABLE_NAMES:
+			ZVAL_BOOL(return_value, H->fetch_table_names);
+			break;
 
 		default:
 			PDO_DBG_RETURN(0);

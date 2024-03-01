@@ -46,6 +46,7 @@ $so = @socket_set_option($s, IPPROTO_IPV6, MCAST_JOIN_SOURCE_GROUP, array(
 if ($so === false) {
     die('skip protocol independent multicast API is unavailable.');
 }
+?>
 --FILE--
 <?php
 include __DIR__."/mcast_helpers.php.inc";

@@ -100,10 +100,19 @@ void zend_shared_alloc_create_lock(char *lockfile_path)
 		return;
 #endif
 
+#ifdef O_TMPFILE
+	lock_file = open(lockfile_path, O_RDWR | O_TMPFILE | O_EXCL | O_CLOEXEC, 0666);
+	/* lack of O_TMPFILE support results in many possible errors
+	 * use it only when open returns a non-negative integer */
+	if (lock_file >= 0) {
+		return;
+	}
+#endif
+
 	snprintf(lockfile_name, sizeof(lockfile_name), "%s/%sXXXXXX", lockfile_path, SEM_FILENAME_PREFIX);
 	lock_file = mkstemp(lockfile_name);
 	if (lock_file == -1) {
-		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create lock file: %s (%d)", strerror(errno), errno);
+		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Unable to create opcache lock file in %s: %s (%d)", lockfile_path, strerror(errno), errno);
 	}
 
 	fchmod(lock_file, 0666);
@@ -272,7 +281,7 @@ int zend_shared_alloc_startup(size_t requested_size, size_t reserved_size)
 	free(ZSMMG(shared_segments));
 	ZSMMG(shared_segments) = tmp_shared_segments;
 
-	ZSMMG(shared_memory_state).positions = (int *)zend_shared_alloc(sizeof(int) * ZSMMG(shared_segments_count));
+	ZSMMG(shared_memory_state).positions = (size_t *)zend_shared_alloc(sizeof(size_t) * ZSMMG(shared_segments_count));
 	if (!ZSMMG(shared_memory_state).positions) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		return ALLOC_FAILURE;

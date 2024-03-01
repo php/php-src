@@ -92,7 +92,7 @@
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
-#elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
+#elif PHP_HAVE_BUILTIN_UNREACHABLE && PHP_HAVE_BUILTIN_EXPECT
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
 	} while (0)
@@ -106,10 +106,16 @@
 # define ZEND_ASSERT(c) ZEND_ASSUME(c)
 #endif
 
-#if ZEND_DEBUG
-# define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); ZEND_ASSUME(0);} while (0)
+#ifdef PHP_HAVE_BUILTIN_UNREACHABLE
+# define _ZEND_UNREACHABLE() __builtin_unreachable()
 #else
-# define ZEND_UNREACHABLE() ZEND_ASSUME(0)
+# define _ZEND_UNREACHABLE() ZEND_ASSUME(0)
+#endif
+
+#if ZEND_DEBUG
+# define ZEND_UNREACHABLE() do {ZEND_ASSERT(0); _ZEND_UNREACHABLE();} while (0)
+#else
+# define ZEND_UNREACHABLE() _ZEND_UNREACHABLE()
 #endif
 
 /* pseudo fallthrough keyword; */
@@ -196,7 +202,7 @@ char *alloca();
 # endif
 #endif
 
-#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(__APPLE__)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	bool name;
@@ -296,7 +302,7 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
 #elif defined(ZEND_WIN32)
@@ -312,13 +318,21 @@ char *alloca();
 # define ZEND_STACK_ALIGNED
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
 #endif
 
 #if ZEND_GCC_VERSION >= 3001 || __has_builtin(__builtin_constant_p)
 # define HAVE_BUILTIN_CONSTANT_P
+#endif
+
+#if __has_attribute(element_count)
+#define ZEND_ELEMENT_COUNT(m) __attribute__((element_count(m)))
+#elif __has_attribute(counted_by)
+#define ZEND_ELEMENT_COUNT(m) __attribute__((counted_by(m)))
+#else
+#define ZEND_ELEMENT_COUNT(m)
 #endif
 
 #ifdef HAVE_BUILTIN_CONSTANT_P
@@ -737,18 +751,29 @@ extern "C++" {
 # define ZEND_INDIRECT_RETURN
 #endif
 
-#if __GNUC__ && !defined(__clang__)
-# define __DO_PRAGMA(x) _Pragma(#x)
-# define _DO_PRAGMA(x) __DO_PRAGMA(x)
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_START(warning) \
+#define __ZEND_DO_PRAGMA(x) _Pragma(#x)
+#define _ZEND_DO_PRAGMA(x) __ZEND_DO_PRAGMA(x)
+#if defined(__clang__)
+# define ZEND_DIAGNOSTIC_IGNORED_START(warning) \
+	_Pragma("clang diagnostic push") \
+	_ZEND_DO_PRAGMA(clang diagnostic ignored warning)
+# define ZEND_DIAGNOSTIC_IGNORED_END \
+	_Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+# define ZEND_DIAGNOSTIC_IGNORED_START(warning) \
 	_Pragma("GCC diagnostic push") \
-	_DO_PRAGMA(GCC diagnostic ignored warning)
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_END \
+	_ZEND_DO_PRAGMA(GCC diagnostic ignored warning)
+# define ZEND_DIAGNOSTIC_IGNORED_END \
 	_Pragma("GCC diagnostic pop")
 #else
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_START(warning)
-# define ZEND_CGG_DIAGNOSTIC_IGNORED_END
+# define ZEND_DIAGNOSTIC_IGNORED_START(warning)
+# define ZEND_DIAGNOSTIC_IGNORED_END
 #endif
+
+/** @deprecated */
+#define ZEND_CGG_DIAGNOSTIC_IGNORED_START ZEND_DIAGNOSTIC_IGNORED_START
+/** @deprecated */
+#define ZEND_CGG_DIAGNOSTIC_IGNORED_END ZEND_DIAGNOSTIC_IGNORED_END
 
 #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L) /* C11 */
 # define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)

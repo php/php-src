@@ -311,6 +311,7 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 		f.fn_flags = ZEND_ACC_CALL_VIA_HANDLER;
 		f.function_name = zend_string_copy(name);
 		f.handler = PHP_FN(com_method_handler);
+		f.doc_comment = NULL;
 
 		fptr = &f;
 

@@ -230,7 +230,12 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 static ZEND_INI_MH(OnUpdateFiberStackSize) /* {{{ */
 {
 	if (new_value) {
-		EG(fiber_stack_size) = zend_ini_parse_uquantity_warn(new_value, entry->name);
+		zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+		if (tmp < 0) {
+			zend_error(E_WARNING, "fiber.stack_size must be a positive number");
+			return FAILURE;
+		}
+		EG(fiber_stack_size) = tmp;
 	} else {
 		EG(fiber_stack_size) = ZEND_FIBER_DEFAULT_C_STACK_SIZE;
 	}
@@ -546,6 +551,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				HashTable *properties;
 
 				zend_object *zobj = Z_OBJ_P(expr);
+				uint32_t *guard = zend_get_recursion_guard(zobj);
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(zobj);
 				smart_str_appends(buf, ZSTR_VAL(class_name));
 				zend_string_release_ex(class_name, 0);
@@ -561,7 +567,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					smart_str_appendc(buf, '\n');
 				}
 
-				if (GC_IS_RECURSIVE(Z_OBJ_P(expr))) {
+				if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, DEBUG, zobj)) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
@@ -571,9 +577,9 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					break;
 				}
 
-				GC_PROTECT_RECURSION(Z_OBJ_P(expr));
+				ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 				print_hash(buf, properties, indent, 1);
-				GC_UNPROTECT_RECURSION(Z_OBJ_P(expr));
+				ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, DEBUG, zobj);
 
 				zend_release_properties(properties);
 				break;
@@ -820,13 +826,19 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 }
 /* }}} */
 
-static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
+static void executor_globals_persistent_list_dtor(void *storage)
 {
-	zend_ini_dtor(executor_globals->ini_directives);
+	zend_executor_globals *executor_globals = storage;
 
 	if (&executor_globals->persistent_list != global_persistent_list) {
 		zend_destroy_rsrc_list(&executor_globals->persistent_list);
 	}
+}
+
+static void executor_globals_dtor(zend_executor_globals *executor_globals) /* {{{ */
+{
+	zend_ini_dtor(executor_globals->ini_directives);
+
 	if (executor_globals->zend_constants != GLOBAL_CONSTANTS_TABLE) {
 		zend_hash_destroy(executor_globals->zend_constants);
 		free(executor_globals->zend_constants);
@@ -1116,6 +1128,9 @@ void zend_shutdown(void) /* {{{ */
 	zend_vm_dtor();
 
 	zend_destroy_rsrc_list(&EG(persistent_list));
+#ifdef ZTS
+	ts_apply_for_id(executor_globals_id, executor_globals_persistent_list_dtor);
+#endif
 	zend_destroy_modules();
 
 	virtual_cwd_deactivate();
@@ -1124,6 +1139,13 @@ void zend_shutdown(void) /* {{{ */
 	zend_hash_destroy(GLOBAL_FUNCTION_TABLE);
 	/* Child classes may reuse structures from parent classes, so destroy in reverse order. */
 	zend_hash_graceful_reverse_destroy(GLOBAL_CLASS_TABLE);
+
+	zend_flf_capacity = 0;
+	zend_flf_count = 0;
+	free(zend_flf_functions);
+	free(zend_flf_handlers);
+	zend_flf_functions = NULL;
+	zend_flf_handlers = NULL;
 
 	zend_hash_destroy(GLOBAL_AUTO_GLOBALS_TABLE);
 	free(GLOBAL_AUTO_GLOBALS_TABLE);
@@ -1160,6 +1182,8 @@ void zend_shutdown(void) /* {{{ */
 	}
 #endif
 	zend_destroy_rsrc_list_dtors();
+
+	zend_unload_modules();
 
 	zend_optimizer_shutdown();
 	startup_done = false;
@@ -1591,26 +1615,22 @@ ZEND_API ZEND_COLD void zend_error_at(
 	va_end(args);
 }
 
-ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+#define zend_error_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+	} while (0)
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) {
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...) {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
-
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
+	zend_error_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
@@ -1630,18 +1650,26 @@ ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_at_noreturn(
 	abort();
 }
 
+#define zend_error_noreturn_impl(type, format) do { \
+		zend_string *filename; \
+		uint32_t lineno; \
+		va_list args; \
+		get_filename_lineno(type, &filename, &lineno); \
+		va_start(args, format); \
+		zend_error_va_list(type, filename, lineno, format, args); \
+		va_end(args); \
+		/* Should never reach this. */ \
+		abort(); \
+	} while (0)
+
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...)
 {
-	zend_string *filename;
-	uint32_t lineno;
-	va_list args;
+	zend_error_noreturn_impl(type, format);
+}
 
-	get_filename_lineno(type, &filename, &lineno);
-	va_start(args, format);
-	zend_error_va_list(type, filename, lineno, format, args);
-	va_end(args);
-	/* Should never reach this. */
-	abort();
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...)
+{
+	zend_error_noreturn_impl(type, format);
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_strerror_noreturn(int type, int errn, const char *message)
@@ -1724,7 +1752,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	if (EG(current_execute_data) && !CG(in_compilation)) {
 		zend_throw_exception(exception_ce, message, 0);
 	} else {
-		zend_error(E_ERROR, "%s", message);
+		zend_error_noreturn(E_ERROR, "%s", message);
 	}
 
 	efree(message);
@@ -1848,12 +1876,40 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	zval_ptr_dtor(&orig_user_exception_handler);
 } /* }}} */
 
+ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle)
+{
+	zend_op_array *op_array = zend_compile_file(file_handle, type);
+	if (file_handle->opened_path) {
+		zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
+	}
+
+	zend_result ret = SUCCESS;
+	if (op_array) {
+		zend_execute(op_array, retval);
+		zend_exception_restore();
+		if (UNEXPECTED(EG(exception))) {
+			if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
+				zend_user_exception_handler();
+			}
+			if (EG(exception)) {
+				ret = zend_exception_error(EG(exception), E_ERROR);
+			}
+		}
+		zend_destroy_static_vars(op_array);
+		destroy_op_array(op_array);
+		efree_size(op_array, sizeof(zend_op_array));
+	} else if (type == ZEND_REQUIRE) {
+		ret = FAILURE;
+	}
+
+	return ret;
+}
+
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...) /* {{{ */
 {
 	va_list files;
 	int i;
 	zend_file_handle *file_handle;
-	zend_op_array *op_array;
 	zend_result ret = SUCCESS;
 
 	va_start(files, file_count);
@@ -1862,32 +1918,10 @@ ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count
 		if (!file_handle) {
 			continue;
 		}
-
 		if (ret == FAILURE) {
 			continue;
 		}
-
-		op_array = zend_compile_file(file_handle, type);
-		if (file_handle->opened_path) {
-			zend_hash_add_empty_element(&EG(included_files), file_handle->opened_path);
-		}
-		if (op_array) {
-			zend_execute(op_array, retval);
-			zend_exception_restore();
-			if (UNEXPECTED(EG(exception))) {
-				if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
-					zend_user_exception_handler();
-				}
-				if (EG(exception)) {
-					ret = zend_exception_error(EG(exception), E_ERROR);
-				}
-			}
-			zend_destroy_static_vars(op_array);
-			destroy_op_array(op_array);
-			efree_size(op_array, sizeof(zend_op_array));
-		} else if (type==ZEND_REQUIRE) {
-			ret = FAILURE;
-		}
+		ret = zend_execute_script(type, retval, file_handle);
 	}
 	va_end(files);
 

@@ -70,15 +70,6 @@ AC_DEFUN([PHP_EXPAND_PATH],[
 ])
 
 dnl
-dnl PHP_DEFINE(WHAT [, value[, directory]])
-dnl
-dnl Creates builddir/include/what.h and in there #define WHAT value.
-dnl
-AC_DEFUN([PHP_DEFINE],[
-  [echo "#define ]$1[]ifelse([$2],,[ 1],[ $2])[" > ]ifelse([$3],,[include],[$3])[/php_]translit($1,A-Z,a-z)[.h]
-])
-
-dnl
 dnl PHP_SUBST(varname)
 dnl
 dnl Adds variable with its value into Makefile, e.g.:
@@ -124,7 +115,7 @@ AC_DEFUN([PHP_CANONICAL_HOST_TARGET],[
     host_alias=$host
   fi
   if test -z "$host_alias"; then
-    AC_MSG_ERROR([host_alias is not set!])
+    AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])
   fi
 ])
 
@@ -135,12 +126,8 @@ dnl Creates build directories and Makefile placeholders.
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
-test -d include || $php_shtool mkdir include
 > Makefile.objects
 > Makefile.fragments
-dnl We need to play tricks here to avoid matching the grep line itself.
-pattern=define
-$EGREP $pattern'.*include/php' $srcdir/configure|$SED 's/.*>//'|xargs touch 2>/dev/null
 ])
 
 dnl
@@ -306,10 +293,6 @@ fi
 if test "$PHP_RPATH" = "no"; then
   ld_runpath_switch=
 fi
-])
-
-AC_DEFUN([PHP_CHECK_GCC_ARG],[
-  AC_MSG_ERROR([[Use AX_CHECK_COMPILE_FLAG instead]])
 ])
 
 dnl
@@ -786,10 +769,10 @@ dnl
 dnl PHP_BUILD_PROGRAM
 dnl
 AC_DEFUN([PHP_BUILD_PROGRAM],[
-  php_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  php_c_pre='$(LIBTOOL) --tag=CC --mode=compile $(CC)'
   php_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS)'
   php_c_post=
-  php_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  php_cxx_pre='$(LIBTOOL) --tag=CXX --mode=compile $(CXX)'
   php_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS)'
   php_cxx_post=
   php_lo=lo
@@ -799,10 +782,10 @@ AC_DEFUN([PHP_BUILD_PROGRAM],[
     no)  pic_setting='-prefer-non-pic';;
   esac
 
-  shared_c_pre='$(LIBTOOL) --mode=compile $(CC)'
+  shared_c_pre='$(LIBTOOL) --tag=CC --mode=compile $(CC)'
   shared_c_meta='$(COMMON_FLAGS) $(CFLAGS_CLEAN) $(EXTRA_CFLAGS) '$pic_setting
   shared_c_post=
-  shared_cxx_pre='$(LIBTOOL) --mode=compile $(CXX)'
+  shared_cxx_pre='$(LIBTOOL) --tag=CXX --mode=compile $(CXX)'
   shared_cxx_meta='$(COMMON_FLAGS) $(CXXFLAGS_CLEAN) $(EXTRA_CXXFLAGS) '$pic_setting
   shared_cxx_post=
   shared_lo=lo
@@ -832,10 +815,10 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   PHP_SUBST($2)
   cat >>Makefile.objects<<EOF
 \$(phplibdir)/$1.$suffix: $3/$1.$suffix
-	\$(LIBTOOL) --mode=install cp $3/$1.$suffix \$(phplibdir)
+	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=install cp $3/$1.$suffix \$(phplibdir)
 
 $3/$1.$suffix: \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_DEPENDENCIES)
-	\$(LIBTOOL) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
+	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=link ifelse($4,,[\$(CC)],[\$(CXX)]) -shared \$(COMMON_FLAGS) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(LDFLAGS) $additional_flags -o [\$]@ -export-dynamic -avoid-version -prefer-pic -module -rpath \$(phplibdir) \$(EXTRA_LDFLAGS) \$($2) \$(translit($1,a-z_-,A-Z__)_SHARED_LIBADD)
 
 EOF
 ])
@@ -966,18 +949,6 @@ dnl ---------------------------
 ])
 
 dnl
-dnl PHP_WITH_SHARED
-dnl
-dnl Checks whether $withval is "shared" or starts with "shared,XXX" and sets
-dnl $shared to "yes" or "no", and removes "shared,?" stuff from $withval.
-dnl
-AC_DEFUN([PHP_WITH_SHARED],[
-  PHP_ARG_ANALYZE_EX(withval)
-  shared=$ext_shared
-  unset ext_shared ext_output
-])
-
-dnl
 dnl PHP_ADD_EXTENSION_DEP(extname, depends [, depconf])
 dnl
 dnl This macro is scanned by genif.sh when it builds the internal functions
@@ -1067,28 +1038,6 @@ AC_DEFUN([PHP_CHECK_SIZEOF], [
     AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), 1, [Whether $1 is available])
   ])
   AC_MSG_RESULT([[$][php_cv_sizeof_]translit($1, ,_)])
-])
-
-dnl
-dnl PHP_CHECK_IN_ADDR_T
-dnl
-AC_DEFUN([PHP_CHECK_IN_ADDR_T], [
-dnl AIX keeps in_addr_t in /usr/include/netinet/in.h
-AC_MSG_CHECKING([for in_addr_t])
-AC_CACHE_VAL(ac_cv_type_in_addr_t,
-[AC_EGREP_CPP(dnl
-changequote(<<,>>)dnl
-<<in_addr_t[^a-zA-Z_0-9]>>dnl
-changequote([,]), [#include <sys/types.h>
-#include <stdlib.h>
-#include <stddef.h>
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif], ac_cv_type_in_addr_t=yes, ac_cv_type_in_addr_t=no)])dnl
-AC_MSG_RESULT([$ac_cv_type_in_addr_t])
-if test $ac_cv_type_in_addr_t = no; then
-  AC_DEFINE(in_addr_t, u_int, [ ])
-fi
 ])
 
 dnl
@@ -1290,66 +1239,6 @@ AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
 ])
 
 dnl
-dnl PHP_STRUCT_FLOCK
-dnl
-AC_DEFUN([PHP_STRUCT_FLOCK],[
-AC_CACHE_CHECK(for struct flock,ac_cv_struct_flock,
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <unistd.h>
-#include <fcntl.h>
-        ]], [[struct flock x;]])],[
-          ac_cv_struct_flock=yes
-        ],[
-          ac_cv_struct_flock=no
-        ])
-)
-if test "$ac_cv_struct_flock" = "yes" ; then
-    AC_DEFINE(HAVE_STRUCT_FLOCK, 1,[whether you have struct flock])
-fi
-])
-
-dnl
-dnl PHP_MISSING_FCLOSE_DECL
-dnl
-dnl See if we have broken header files like SunOS has.
-dnl
-AC_DEFUN([PHP_MISSING_FCLOSE_DECL],[
-  AC_MSG_CHECKING([for fclose declaration])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int (*func)() = fclose]])],[
-    AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
-    AC_MSG_RESULT([ok])
-  ],[
-    AC_DEFINE(MISSING_FCLOSE_DECL,1,[ ])
-    AC_MSG_RESULT([missing])
-  ])
-])
-
-dnl
-dnl PHP_SOCKADDR_CHECKS
-dnl
-AC_DEFUN([PHP_SOCKADDR_CHECKS], [
-  dnl Check for struct sockaddr_storage exists.
-  AC_CACHE_CHECK([for struct sockaddr_storage], ac_cv_sockaddr_storage,
-    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/socket.h>]],
-    [[struct sockaddr_storage s; s]])],
-    [ac_cv_sockaddr_storage=yes], [ac_cv_sockaddr_storage=no])
-  ])
-  if test "$ac_cv_sockaddr_storage" = "yes"; then
-    AC_DEFINE(HAVE_SOCKADDR_STORAGE, 1, [Whether you have struct sockaddr_storage])
-  fi
-  dnl Check if field sa_len exists in struct sockaddr.
-  AC_CACHE_CHECK([for field sa_len in struct sockaddr],ac_cv_sockaddr_sa_len,[
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/socket.h>]], [[static struct sockaddr sa; int n = (int) sa.sa_len; return n;]])],
-    [ac_cv_sockaddr_sa_len=yes], [ac_cv_sockaddr_sa_len=no])
-  ])
-  if test "$ac_cv_sockaddr_sa_len" = "yes"; then
-    AC_DEFINE(HAVE_SOCKADDR_SA_LEN, 1, [Whether struct sockaddr has field sa_len])
-  fi
-])
-
-dnl
 dnl PHP_EBCDIC
 dnl
 AC_DEFUN([PHP_EBCDIC], [
@@ -1431,20 +1320,20 @@ AC_DEFUN([PHP_FOPENCOOKIE], [
   AC_CHECK_FUNC(fopencookie, [have_glibc_fopencookie=yes])
 
   if test "$have_glibc_fopencookie" = "yes"; then
-dnl This comes in two flavors: newer glibcs (since 2.1.2?) have a type called
-dnl cookie_io_functions_t.
+dnl glibcs (since 2.1.2?) have a type called cookie_io_functions_t.
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 ]], [[cookie_io_functions_t cookie;]])],[have_cookie_io_functions_t=yes],[])
 
     if test "$have_cookie_io_functions_t" = "yes"; then
-      cookie_io_functions_t=cookie_io_functions_t
-      have_fopen_cookie=yes
-
-dnl Even newer glibcs have a different seeker definition.
+dnl Newer glibcs have a different seeker definition.
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1488,22 +1377,8 @@ int main(void) {
   esac
 ])
 
-    else
-
-dnl Older glibc versions (up to 2.1.2?) call it _IO_cookie_io_functions_t.
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#define _GNU_SOURCE
-#include <stdio.h>
-]], [[_IO_cookie_io_functions_t cookie;]])], [have_IO_cookie_io_functions_t=yes], [])
-      if test "$have_cookie_io_functions_t" = "yes" ; then
-        cookie_io_functions_t=_IO_cookie_io_functions_t
-        have_fopen_cookie=yes
-      fi
-    fi
-
-    if test "$have_fopen_cookie" = "yes" ; then
       AC_DEFINE(HAVE_FOPENCOOKIE, 1, [ ])
-      AC_DEFINE_UNQUOTED(COOKIE_IO_FUNCTIONS_T, $cookie_io_functions_t, [ ])
+
       if test "$cookie_io_functions_use_off64_t" = "yes" ; then
         AC_DEFINE(COOKIE_SEEKER_USES_OFF64_T, 1, [ ])
       fi
@@ -1819,7 +1694,7 @@ AC_DEFUN([PHP_PROG_BISON], [
   case $php_bison_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_parser.h" || test ! -f "$abs_srcdir/Zend/zend_language_parser.c"; then
-        AC_MSG_ERROR([bison $php_bison_required_version is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
+        AC_MSG_ERROR([bison $php_bison_required_version or newer is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
       fi
 
       YACC="exit 0;"
@@ -1877,7 +1752,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   case $php_re2c_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_ERROR([re2c $php_re2c_required_version is required to generate PHP lexers.])
+        AC_MSG_ERROR([re2c $php_re2c_required_version or newer is required to generate PHP lexers.])
       fi
 
       RE2C="exit 0;"
@@ -2167,9 +2042,7 @@ dnl PHP_CHECK_PDO_INCLUDES([found [, not-found]])
 dnl
 AC_DEFUN([PHP_CHECK_PDO_INCLUDES],[
   AC_CACHE_CHECK([for PDO includes], pdo_cv_inc_path, [
-    if test -f $abs_srcdir/include/php/ext/pdo/php_pdo_driver.h; then
-      pdo_cv_inc_path=$abs_srcdir/ext
-    elif test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
+    if test -f $abs_srcdir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$abs_srcdir/ext
     elif test -f $phpincludedir/ext/pdo/php_pdo_driver.h; then
       pdo_cv_inc_path=$phpincludedir/ext
@@ -2251,7 +2124,9 @@ crypt_r("passwd", "hash", &buffer);
     if test "$php_cv_crypt_r_style" = "none"; then
       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #define _REENTRANT 1
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <crypt.h>
 ]],[[
 struct crypt_data buffer;
@@ -2389,7 +2264,7 @@ dnl overwritten (Bug 61268).
 $abs_srcdir/$ac_provsrc:;
 
 $ac_bdir[$]ac_hdrobj: $abs_srcdir/$ac_provsrc
-	CPP="\$(CPP)" CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
+	CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -h -C -s $ac_srcdir[$]ac_provsrc -o \$[]@.bak && \$(SED) -e 's,PHP_,DTRACE_,g' \$[]@.bak > \$[]@
 
 \$(PHP_DTRACE_OBJS): $ac_bdir[$]ac_hdrobj
 
@@ -2409,12 +2284,12 @@ EOF
 $ac_bdir[$]ac_provsrc.lo: \$(PHP_DTRACE_OBJS)
 	echo "[#] Generated by Makefile for libtool" > \$[]@
 	@test -d "$dtrace_lib_dir" || mkdir $dtrace_lib_dir
-	if CPP="\$(CPP)" CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o $dtrace_d_obj -s $abs_srcdir/$ac_provsrc $dtrace_lib_objs 2> /dev/null && test -f "$dtrace_d_obj"; then [\\]
+	if CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o $dtrace_d_obj -s $abs_srcdir/$ac_provsrc $dtrace_lib_objs 2> /dev/null && test -f "$dtrace_d_obj"; then [\\]
 	  echo "pic_object=['].libs/$dtrace_prov_name[']" >> \$[]@ [;\\]
 	else [\\]
 	  echo "pic_object='none'" >> \$[]@ [;\\]
 	fi
-	if CPP="\$(CPP)" CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o $ac_bdir[$]ac_provsrc.o -s $abs_srcdir/$ac_provsrc $dtrace_nolib_objs 2> /dev/null && test -f "$ac_bdir[$]ac_provsrc.o"; then [\\]
+	if CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o $ac_bdir[$]ac_provsrc.o -s $abs_srcdir/$ac_provsrc $dtrace_nolib_objs 2> /dev/null && test -f "$ac_bdir[$]ac_provsrc.o"; then [\\]
 	  echo "non_pic_object=[']$dtrace_prov_name[']" >> \$[]@ [;\\]
 	else [\\]
 	  echo "non_pic_object='none'" >> \$[]@ [;\\]
@@ -2426,7 +2301,7 @@ EOF
   *)
 cat>>Makefile.objects<<EOF
 $ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
-	CPP="\$(CPP)" CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
+	CC="\$(CC)" CFLAGS="\$(CFLAGS_CLEAN)" dtrace -G -o \$[]@ -s $abs_srcdir/$ac_provsrc $dtrace_objs
 
 EOF
     ;;
@@ -2437,7 +2312,6 @@ dnl
 dnl PHP_CHECK_STDINT_TYPES
 dnl
 AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
-  AC_CHECK_SIZEOF([short])
   AC_CHECK_SIZEOF([int])
   AC_CHECK_SIZEOF([long])
   AC_CHECK_SIZEOF([long long])
@@ -2462,6 +2336,25 @@ AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
   ])
 
   AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
+])
+
+dnl
+dnl PHP_CHECK_BUILTIN_UNREACHABLE
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN_UNREACHABLE], [
+  AC_MSG_CHECKING([for __builtin_unreachable])
+
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+    __builtin_unreachable();
+  ]])], [
+    have_builtin_unreachable=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_unreachable=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_UNREACHABLE], [$have_builtin_unreachable], [Whether the compiler supports __builtin_unreachable])
 ])
 
 dnl
@@ -2713,7 +2606,7 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_INIT], [
   AC_MSG_CHECKING([for __builtin_cpu_init])
 
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_cpu_init()? 1 : 0;
+    __builtin_cpu_init();
   ]])], [
     have_builtin_cpu_init=1
     AC_MSG_RESULT([yes])
@@ -2780,32 +2673,6 @@ AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
 
   $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
     > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
-])
-
-dnl Check if we have prctl
-AC_DEFUN([PHP_CHECK_PRCTL],
-[
-  AC_MSG_CHECKING([for prctl])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/prctl.h>]], [[prctl(0, 0, 0, 0, 0);]])], [
-    AC_DEFINE([HAVE_PRCTL], 1, [do we have prctl?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-])
-
-dnl Check if we have procctl
-AC_DEFUN([PHP_CHECK_PROCCTL],
-[
-  AC_MSG_CHECKING([for procctl])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/procctl.h>]], [[procctl(0, 0, 0, 0);]])], [
-    AC_DEFINE([HAVE_PROCCTL], 1, [do we have procctl?])
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
 ])
 
 dnl

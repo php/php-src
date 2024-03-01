@@ -677,7 +677,7 @@ static inline int process_numeric_entity(const char **buf, unsigned *code_point)
 	int hexadecimal = (**buf == 'x' || **buf == 'X'); /* TODO: XML apparently disallows "X" */
 	char *endptr;
 
-	if (hexadecimal && (**buf != '\0'))
+	if (hexadecimal)
 		(*buf)++;
 
 	/* strtol allows whitespace and other stuff in the beginning
@@ -1332,12 +1332,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 		(unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), all, (int) flags,
 		hint_charset ? ZSTR_VAL(hint_charset) : NULL, double_encode, /* quiet */ 0);
 	RETVAL_STR(replaced);
-}
-/* }}} */
-
-/* {{{ register_html_constants */
-void register_html_constants(INIT_FUNC_ARGS)
-{
 }
 /* }}} */
 

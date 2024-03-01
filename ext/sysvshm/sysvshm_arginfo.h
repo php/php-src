@@ -31,7 +31,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_shm_remove_var arginfo_shm_has_var
 
-
 ZEND_FUNCTION(shm_attach);
 ZEND_FUNCTION(shm_detach);
 ZEND_FUNCTION(shm_has_var);
@@ -39,7 +38,6 @@ ZEND_FUNCTION(shm_remove);
 ZEND_FUNCTION(shm_put_var);
 ZEND_FUNCTION(shm_get_var);
 ZEND_FUNCTION(shm_remove_var);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(shm_attach, arginfo_shm_attach)
@@ -51,7 +49,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(shm_remove_var, arginfo_shm_remove_var)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SysvSharedMemory_methods[] = {
 	ZEND_FE_END

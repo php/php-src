@@ -121,9 +121,18 @@ const ZEND_DEBUG_BUILD = UNKNOWN;
 
 /* Special constants true/false/null.  */
 
-/** @var bool */
+/**
+ * @var bool
+ * @undocumentable
+ */
 const TRUE = true;
-/** @var bool */
+/**
+ * @var bool
+ * @undocumentable
+ */
 const FALSE = false;
-/** @var null */
+/**
+ * @var null
+ * @undocumentable
+ */
 const NULL = null;

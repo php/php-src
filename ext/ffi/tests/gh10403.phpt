@@ -21,6 +21,7 @@ foreach ($test_values as $test_value) {
     var_dump($test_struct->y === $test_value);
 }
 var_dump($test_struct->x);
+?>
 --EXPECT--
 bool(true)
 bool(true)

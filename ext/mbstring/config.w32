@@ -22,7 +22,7 @@ if (PHP_MBSTRING != "no") {
 			mbfilter_qprint.c mbfilter_ucs2.c \
 			mbfilter_ucs4.c mbfilter_utf16.c mbfilter_utf32.c \
 			mbfilter_utf7.c mbfilter_utf7imap.c mbfilter_utf8.c \
-			mbfilter_utf8_mobile.c mbfilter_uuencode.c \
+			mbfilter_uuencode.c \
 			mbfilter_singlebyte.c", "mbstring");
 
 		ADD_SOURCES("ext/mbstring/libmbfl/mbfl", "mbfilter.c mbfilter_8bit.c \

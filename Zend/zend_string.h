@@ -19,7 +19,9 @@
 #ifndef ZEND_STRING_H
 #define ZEND_STRING_H
 
-#include "zend.h"
+#include "zend_types.h"
+#include "zend_gc.h"
+#include "zend_alloc.h"
 
 BEGIN_EXTERN_C()
 

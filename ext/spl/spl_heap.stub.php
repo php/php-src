@@ -4,27 +4,18 @@
 
 class SplPriorityQueue implements Iterator, Countable
 {
-    /**
-     * @var int
-     * @cvalue SPL_PQUEUE_EXTR_BOTH
-     */
-    public const EXTR_BOTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_PQUEUE_EXTR_PRIORITY
-     */
-    public const EXTR_PRIORITY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue SPL_PQUEUE_EXTR_DATA
-     */
-    public const EXTR_DATA = UNKNOWN;
+    /** @cvalue SPL_PQUEUE_EXTR_BOTH */
+    public const int EXTR_BOTH = UNKNOWN;
+    /** @cvalue SPL_PQUEUE_EXTR_PRIORITY */
+    public const int EXTR_PRIORITY = UNKNOWN;
+    /** @cvalue SPL_PQUEUE_EXTR_DATA */
+    public const int EXTR_DATA = UNKNOWN;
 
     /** @tentative-return-type */
     public function compare(mixed $priority1, mixed $priority2): int {}
 
-    /** @return true */
-    public function insert(mixed $value, mixed $priority) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function insert(mixed $value, mixed $priority): true {}
 
     /** @tentative-return-type */
     public function setExtractFlags(int $flags): int {}
@@ -75,10 +66,10 @@ class SplPriorityQueue implements Iterator, Countable
     public function valid(): bool {}
 
     /**
-     * @return bool
+     * @tentative-return-type
      * @implementation-alias SplHeap::recoverFromCorruption
      */
-    public function recoverFromCorruption() {} // TODO make return type void
+    public function recoverFromCorruption(): true {}
 
     /**
      * @tentative-return-type
@@ -99,7 +90,7 @@ abstract class SplHeap implements Iterator, Countable
     public function extract(): mixed {}
 
     /** @tentative-return-type */
-    public function insert(mixed $value): bool {}
+    public function insert(mixed $value): true {}
 
     /** @tentative-return-type */
     public function top(): mixed {}
@@ -126,7 +117,7 @@ abstract class SplHeap implements Iterator, Countable
     public function valid(): bool {}
 
     /** @tentative-return-type */
-    public function recoverFromCorruption(): bool {}
+    public function recoverFromCorruption(): true {}
 
     /** @tentative-return-type */
     abstract protected function compare(mixed $value1, mixed $value2): int;

@@ -42,7 +42,7 @@ PHPAPI zend_class_entry     *spl_ce_SplSubject;
 PHPAPI zend_class_entry     *spl_ce_SplObjectStorage;
 PHPAPI zend_class_entry     *spl_ce_MultipleIterator;
 
-PHPAPI zend_object_handlers spl_handler_SplObjectStorage;
+static zend_object_handlers spl_handler_SplObjectStorage;
 
 /* Bit flags for marking internal functionality overridden by SplObjectStorage subclasses. */
 #define SOS_OVERRIDDEN_READ_DIMENSION  1

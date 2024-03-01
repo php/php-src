@@ -24,7 +24,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Override___construct arginfo_class_ReturnTypeWillChange___construct
 
-
 ZEND_METHOD(Attribute, __construct);
 ZEND_METHOD(ReturnTypeWillChange, __construct);
 ZEND_METHOD(AllowDynamicProperties, __construct);
@@ -34,30 +33,25 @@ ZEND_METHOD(SensitiveParameterValue, getValue);
 ZEND_METHOD(SensitiveParameterValue, __debugInfo);
 ZEND_METHOD(Override, __construct);
 
-
 static const zend_function_entry class_Attribute_methods[] = {
 	ZEND_ME(Attribute, __construct, arginfo_class_Attribute___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_ReturnTypeWillChange_methods[] = {
 	ZEND_ME(ReturnTypeWillChange, __construct, arginfo_class_ReturnTypeWillChange___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_AllowDynamicProperties_methods[] = {
 	ZEND_ME(AllowDynamicProperties, __construct, arginfo_class_AllowDynamicProperties___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SensitiveParameter_methods[] = {
 	ZEND_ME(SensitiveParameter, __construct, arginfo_class_SensitiveParameter___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SensitiveParameterValue_methods[] = {
 	ZEND_ME(SensitiveParameterValue, __construct, arginfo_class_SensitiveParameterValue___construct, ZEND_ACC_PUBLIC)
@@ -65,7 +59,6 @@ static const zend_function_entry class_SensitiveParameterValue_methods[] = {
 	ZEND_ME(SensitiveParameterValue, __debugInfo, arginfo_class_SensitiveParameterValue___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_Override_methods[] = {
 	ZEND_ME(Override, __construct, arginfo_class_Override___construct, ZEND_ACC_PUBLIC)
@@ -134,12 +127,12 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_declare_typed_property(class_entry, property_flags_name, &property_flags_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_flags_name);
 
-	zend_string *attribute_name_Attribute_class_Attribute = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
-	zend_attribute *attribute_Attribute_class_Attribute = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Attribute, 1);
-	zend_string_release(attribute_name_Attribute_class_Attribute);
-	zval attribute_Attribute_class_Attribute_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Attribute_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_Attribute->args[0].value, &attribute_Attribute_class_Attribute_arg0);
+	zend_string *attribute_name_Attribute_class_Attribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_Attribute_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Attribute_0, 1);
+	zend_string_release(attribute_name_Attribute_class_Attribute_0);
+	zval attribute_Attribute_class_Attribute_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_Attribute_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_Attribute_0->args[0].value, &attribute_Attribute_class_Attribute_0_arg0);
 
 	return class_entry;
 }
@@ -152,12 +145,12 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
-	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
-	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange, 1);
-	zend_string_release(attribute_name_Attribute_class_ReturnTypeWillChange);
-	zval attribute_Attribute_class_ReturnTypeWillChange_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_ReturnTypeWillChange->args[0].value, &attribute_Attribute_class_ReturnTypeWillChange_arg0);
+	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange_0, 1);
+	zend_string_release(attribute_name_Attribute_class_ReturnTypeWillChange_0);
+	zval attribute_Attribute_class_ReturnTypeWillChange_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ReturnTypeWillChange_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ReturnTypeWillChange_0->args[0].value, &attribute_Attribute_class_ReturnTypeWillChange_0_arg0);
 
 	return class_entry;
 }
@@ -170,12 +163,12 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
-	zend_string *attribute_name_Attribute_class_AllowDynamicProperties = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
-	zend_attribute *attribute_Attribute_class_AllowDynamicProperties = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties, 1);
-	zend_string_release(attribute_name_Attribute_class_AllowDynamicProperties);
-	zval attribute_Attribute_class_AllowDynamicProperties_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_AllowDynamicProperties->args[0].value, &attribute_Attribute_class_AllowDynamicProperties_arg0);
+	zend_string *attribute_name_Attribute_class_AllowDynamicProperties_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_AllowDynamicProperties_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties_0, 1);
+	zend_string_release(attribute_name_Attribute_class_AllowDynamicProperties_0);
+	zval attribute_Attribute_class_AllowDynamicProperties_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_AllowDynamicProperties_0_arg0, ZEND_ATTRIBUTE_TARGET_CLASS);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_AllowDynamicProperties_0->args[0].value, &attribute_Attribute_class_AllowDynamicProperties_0_arg0);
 
 	return class_entry;
 }
@@ -188,12 +181,12 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_Attribute_class_SensitiveParameter = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
-	zend_attribute *attribute_Attribute_class_SensitiveParameter = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter, 1);
-	zend_string_release(attribute_name_Attribute_class_SensitiveParameter);
-	zval attribute_Attribute_class_SensitiveParameter_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_SensitiveParameter->args[0].value, &attribute_Attribute_class_SensitiveParameter_arg0);
+	zend_string *attribute_name_Attribute_class_SensitiveParameter_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_SensitiveParameter_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter_0, 1);
+	zend_string_release(attribute_name_Attribute_class_SensitiveParameter_0);
+	zval attribute_Attribute_class_SensitiveParameter_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_SensitiveParameter_0_arg0, ZEND_ATTRIBUTE_TARGET_PARAMETER);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_SensitiveParameter_0->args[0].value, &attribute_Attribute_class_SensitiveParameter_0_arg0);
 
 	return class_entry;
 }
@@ -223,12 +216,12 @@ static zend_class_entry *register_class_Override(void)
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
 
-	zend_string *attribute_name_Attribute_class_Override = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
-	zend_attribute *attribute_Attribute_class_Override = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override, 1);
-	zend_string_release(attribute_name_Attribute_class_Override);
-	zval attribute_Attribute_class_Override_arg0;
-	ZVAL_LONG(&attribute_Attribute_class_Override_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
-	ZVAL_COPY_VALUE(&attribute_Attribute_class_Override->args[0].value, &attribute_Attribute_class_Override_arg0);
+	zend_string *attribute_name_Attribute_class_Override_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_Override_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override_0, 1);
+	zend_string_release(attribute_name_Attribute_class_Override_0);
+	zval attribute_Attribute_class_Override_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_Override_0_arg0, ZEND_ATTRIBUTE_TARGET_METHOD);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_Override_0->args[0].value, &attribute_Attribute_class_Override_0_arg0);
 
 	return class_entry;
 }

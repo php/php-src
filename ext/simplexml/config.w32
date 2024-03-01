@@ -21,7 +21,7 @@ if (PHP_SIMPLEXML == "yes") {
 			MESSAGE("\tSPL support in simplexml disabled");
 		}
 		ADD_FLAG("CFLAGS_SIMPLEXML", "/D PHP_SIMPLEXML_EXPORTS ");
-		PHP_INSTALL_HEADERS("ext/simplexml/", "php_simplexml.h php_simplexml_exports.h");
+		PHP_INSTALL_HEADERS("ext/simplexml", "php_simplexml.h php_simplexml_exports.h");
 	} else {
 		PHP_SIMPLEXML = "no";
 		WARNING("simplexml not enabled; libraries and headers not found");

@@ -942,17 +942,13 @@ default_socket_timeout = 60
 ;extension=gettext
 ;extension=gmp
 ;extension=intl
-;extension=imap
 ;extension=mbstring
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
-;extension=oci8_12c  ; Use with Oracle Database 12c Instant Client
-;extension=oci8_19  ; Use with Oracle Database 19 Instant Client
 ;extension=odbc
 ;extension=openssl
 ;extension=pdo_firebird
 ;extension=pdo_mysql
-;extension=pdo_oci
 ;extension=pdo_odbc
 ;extension=pdo_pgsql
 ;extension=pdo_sqlite
@@ -1022,13 +1018,6 @@ cli_server.color = On
 ; To use an output encoding conversion, iconv's output handler must be set
 ; otherwise output encoding conversion cannot be performed.
 ;iconv.output_encoding =
-
-[imap]
-; rsh/ssh logins are disabled by default. Use this INI entry if you want to
-; enable them. Note that the IMAP library does not filter mailbox names before
-; passing them to rsh/ssh command, thus passing untrusted data to this function
-; with rsh/ssh enabled is insecure.
-;imap.enable_insecure_rsh=0
 
 [intl]
 ;intl.default_locale =
@@ -1249,66 +1238,6 @@ mysqlnd.collect_memory_statistics = On
 ; SHA-256 Authentication Plugin related. File with the MySQL server public RSA
 ; key.
 ;mysqlnd.sha256_server_public_key =
-
-[OCI8]
-
-; Connection: Enables privileged connections using external
-; credentials (OCI_SYSOPER, OCI_SYSDBA)
-; https://php.net/oci8.privileged-connect
-;oci8.privileged_connect = Off
-
-; Connection: The maximum number of persistent OCI8 connections per
-; process. Using -1 means no limit.
-; https://php.net/oci8.max-persistent
-;oci8.max_persistent = -1
-
-; Connection: The maximum number of seconds a process is allowed to
-; maintain an idle persistent connection. Using -1 means idle
-; persistent connections will be maintained forever.
-; https://php.net/oci8.persistent-timeout
-;oci8.persistent_timeout = -1
-
-; Connection: The number of seconds that must pass before issuing a
-; ping during oci_pconnect() to check the connection validity. When
-; set to 0, each oci_pconnect() will cause a ping. Using -1 disables
-; pings completely.
-; https://php.net/oci8.ping-interval
-;oci8.ping_interval = 60
-
-; Connection: Set this to a user chosen connection class to be used
-; for all pooled server requests with Oracle Database Resident
-; Connection Pooling (DRCP).  To use DRCP, this value should be set to
-; the same string for all web servers running the same application,
-; the database pool must be configured, and the connection string must
-; specify to use a pooled server.
-;oci8.connection_class =
-
-; High Availability: Using On lets PHP receive Fast Application
-; Notification (FAN) events generated when a database node fails. The
-; database must also be configured to post FAN events.
-;oci8.events = Off
-
-; Tuning: This option enables statement caching, and specifies how
-; many statements to cache. Using 0 disables statement caching.
-; https://php.net/oci8.statement-cache-size
-;oci8.statement_cache_size = 20
-
-; Tuning: Enables row prefetching and sets the default number of
-; rows that will be fetched automatically after statement execution.
-; https://php.net/oci8.default-prefetch
-;oci8.default_prefetch = 100
-
-; Tuning: Sets the amount of LOB data that is internally returned from
-; Oracle Database when an Oracle LOB locator is initially retrieved as
-; part of a query. Setting this can improve performance by reducing
-; round-trips.
-; https://php.net/oci8.prefetch-lob-size
-; oci8.prefetch_lob_size = 0
-
-; Compatibility. Using On means oci_close() will not close
-; oci_connect() and oci_new_connect() connections.
-; https://php.net/oci8.old-oci-close-semantics
-;oci8.old_oci_close_semantics = Off
 
 [PostgreSQL]
 ; Allow or prevent persistent links.

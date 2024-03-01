@@ -97,7 +97,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
-struct sigaction act, old_term, old_quit, old_int;
+static struct sigaction act, old_term, old_quit, old_int;
 #endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
@@ -116,7 +116,7 @@ static int parent = 1;
 
 #ifndef PHP_WIN32
 /* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
-static int exit_signal = 0;
+static volatile sig_atomic_t exit_signal = 0;
 
 /* Is Parent waiting for children to exit */
 static int parent_waiting = 0;
@@ -355,11 +355,11 @@ static void sapi_fcgi_flush(void *server_context)
 {
 	fcgi_request *request = (fcgi_request*) server_context;
 
-	if (
-		!parent &&
-		request && !fcgi_flush(request, 0)) {
-
-		php_handle_aborted_connection();
+	if (!parent && request) {
+		sapi_send_headers();
+		if (!fcgi_flush(request, 0)) {
+			php_handle_aborted_connection();
+		}
 	}
 }
 
@@ -1454,7 +1454,7 @@ static void init_request_info(fcgi_request *request)
 /**
  * Clean up child processes upon exit
  */
-void fastcgi_cleanup(int signal)
+static void fastcgi_cleanup(int signal)
 {
 #ifdef DEBUG_FASTCGI
 	fprintf(stderr, "FastCGI shutdown, pid %d\n", getpid());
@@ -1468,7 +1468,7 @@ void fastcgi_cleanup(int signal)
 	if (parent && parent_waiting) {
 		exit_signal = 1;
 	} else {
-		exit(0);
+		_exit(0);
 	}
 }
 #else

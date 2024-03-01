@@ -20,13 +20,16 @@
 #ifndef ZEND_COMPILE_H
 #define ZEND_COMPILE_H
 
-#include "zend.h"
 #include "zend_ast.h"
+#include "zend_types.h"
+#include "zend_map_ptr.h"
+#include "zend_alloc.h"
 
 #include <stdarg.h>
 #include <stdint.h>
 
 #include "zend_llist.h"
+#include "zend_frameless_function.h"
 
 #define SET_UNUSED(op) do { \
 	op ## _type = IS_UNUSED; \
@@ -85,7 +88,6 @@ typedef struct _znode { /* used only during compilation */
 	} u;
 } znode;
 
-/* Temporarily defined here, to avoid header ordering issues */
 typedef struct _zend_ast_znode {
 	zend_ast_kind kind;
 	zend_ast_attr attr;
@@ -142,6 +144,14 @@ struct _zend_op {
 	uint8_t op1_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 	uint8_t op2_type;     /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
 	uint8_t result_type;  /* IS_UNUSED, IS_CONST, IS_TMP_VAR, IS_VAR, IS_CV */
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+	uint32_t op1_use_type;
+	uint32_t op2_use_type;
+	uint32_t result_use_type;
+	uint32_t op1_def_type;
+	uint32_t op2_def_type;
+	uint32_t result_def_type;
+#endif
 };
 
 
@@ -189,6 +199,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
+	bool       in_jmp_frameless_branch;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -453,6 +464,7 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
@@ -475,7 +487,6 @@ struct _zend_op_array {
 	zend_string *filename;
 	uint32_t line_start;
 	uint32_t line_end;
-	zend_string *doc_comment;
 
 	int last_literal;
 	uint32_t num_dynamic_func_defs;
@@ -491,6 +502,9 @@ struct _zend_op_array {
 
 #define ZEND_RETURN_VALUE				0
 #define ZEND_RETURN_REFERENCE			1
+
+#define INTERNAL_FUNCTION_PARAMETERS zend_execute_data *execute_data, zval *return_value
+#define INTERNAL_FUNCTION_PARAM_PASSTHRU execute_data, return_value
 
 /* zend_internal_function_handler */
 typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
@@ -508,11 +522,13 @@ typedef struct _zend_internal_function {
 	zend_internal_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
 	zif_handler handler;
 	struct _zend_module_entry *module;
+	const zend_frameless_function_info *frameless_function_infos;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
@@ -534,6 +550,7 @@ union _zend_function {
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 		HashTable   *attributes;
 		ZEND_MAP_PTR_DEF(void **, run_time_cache);
+		zend_string *doc_comment;
 		uint32_t T;         /* number of temporary variables */
 	} common;
 
@@ -642,6 +659,11 @@ ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 	(EG(current_execute_data)->prev_execute_data && \
 	 EG(current_execute_data)->prev_execute_data->func && \
 	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data))
+
+#define ZEND_FLF_ARG_USES_STRICT_TYPES() \
+	(EG(current_execute_data) && \
+	 EG(current_execute_data)->func && \
+	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))
 
 #define ZEND_RET_USES_STRICT_TYPES() \
 	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
@@ -855,6 +877,7 @@ ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
+ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle);
 ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);

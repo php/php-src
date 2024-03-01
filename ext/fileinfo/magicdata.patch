@@ -1,36 +1,3 @@
-diff -ur Magdir.orig/fonts Magdir/fonts
---- Magdir.orig/fonts	2021-02-23 01:49:24.000000000 +0100
-+++ Magdir/fonts	2022-09-18 14:07:14.233023271 +0200
-@@ -384,11 +384,13 @@
- 
- # https://www.w3.org/TR/WOFF/
- 0	string		wOFF	Web Open Font Format
-+!:mime font/woff
- >0	use		woff
- >20	beshort		x	\b, version %d
- >22	beshort		x	\b.%d
- # https://www.w3.org/TR/WOFF2/
- 0	string		wOF2	Web Open Font Format (Version 2)
-+!:mime font/woff2
- >0	use		woff
- #>20	belong		x	\b, totalCompressedSize %d
- >24	beshort		x	\b, version %d
-diff -ur Magdir.orig/mail.news Magdir/mail.news
---- Magdir.orig/mail.news	2021-03-31 01:47:28.000000000 +0200
-+++ Magdir/mail.news	2021-04-05 19:41:55.168556972 +0200
-@@ -1,5 +1,5 @@
- #------------------------------------------------------------------------------
--# $File: mail.news,v 1.26 2021/03/21 14:37:03 christos Exp $
-+# $File: mail.news,v 1.27 2021/04/05 16:36:14 christos Exp $
- # mail.news:  file(1) magic for mail and news
- #
- # Unfortunately, saved netnews also has From line added in some news software.
-@@ -81,4 +81,4 @@
- # File format spec: https://wiki.dovecot.org/Design/Dcrypt/#File_format
- # From: Stephen Gildea
- 0	string	CRYPTED\003\007		Dovecot encrypted message
-->9	byte	xu			\b, dcrypt version %d
-+>9	byte	x			\b, dcrypt version %d
 diff -ur Magdir.orig/rpm Magdir/rpm
 --- Magdir.orig/rpm	2021-02-23 01:49:24.000000000 +0100
 +++ Magdir/rpm	2021-04-05 19:40:55.080911893 +0200
@@ -51,3 +18,26 @@ diff -ur Magdir.orig/securitycerts Magdir/securitycerts
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
+diff --git a/magic/Magdir/sgml b/magic/Magdir/sgml
+--- Magdir.orig/sgml
++++ Magdir/sgml
+@@ -1,16 +1,17 @@
+ 
+ #------------------------------------------------------------------------------
+-# $File: sgml,v 1.48 2023/01/18 16:10:21 christos Exp $
++# $File: sgml,v 1.49 2023/08/05 14:34:47 christos Exp $
+ # Type:	SVG Vectorial Graphics
+ # From:	Noel Torres <tecnico@ejerciciosresueltos.com>
+-0	string		\<?xml\ version=
++0	string/bt	\<?xml\ version=
+ >14	regex		['"\ \t]*[0-9.]+['"\ \t]*
+ >>19	search/4096	\<svg			SVG Scalable Vector Graphics image
++!:strength +50
+ !:mime	image/svg+xml
+ !:ext   svg
+ >>19	search/4096	\<gnc-v2		GnuCash file
+ !:mime	application/x-gnucash
+-0	string		\<svg			SVG Scalable Vector Graphics image
++0	string/bt	\<svg			SVG Scalable Vector Graphics image
+ !:mime	image/svg+xml
+ !:ext   svg

@@ -8,7 +8,7 @@ spl_autoload_register(function ($name) {
 });
 
 try {
-  new ReflectionMethod("UndefC::test");
+  new ReflectionMethod("UndefC", "test");
 }
 catch (ReflectionException $e) {
   echo $e->getMessage();

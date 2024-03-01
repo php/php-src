@@ -16,136 +16,64 @@ const ULOC_VALID_LOCALE = UNKNOWN;
 /** @not-serializable */
 class Collator
 {
-    /**
-     * @var int
-     * @cvalue UCOL_DEFAULT
-     */
-    const DEFAULT_VALUE = UNKNOWN;
+    /** @cvalue UCOL_DEFAULT */
+    public const int DEFAULT_VALUE = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCOL_PRIMARY
-     */
-    const PRIMARY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_SECONDARY
-     */
-    const SECONDARY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_TERTIARY
-     */
-    const TERTIARY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_DEFAULT_STRENGTH
-     */
-    const DEFAULT_STRENGTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_QUATERNARY
-     */
-    const QUATERNARY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_IDENTICAL
-     */
-    const IDENTICAL = UNKNOWN;
+    /** @cvalue UCOL_PRIMARY */
+    public const int PRIMARY = UNKNOWN;
+    /** @cvalue UCOL_SECONDARY */
+    public const int SECONDARY = UNKNOWN;
+    /** @cvalue UCOL_TERTIARY */
+    public const int TERTIARY = UNKNOWN;
+    /** @cvalue UCOL_DEFAULT_STRENGTH */
+    public const int DEFAULT_STRENGTH = UNKNOWN;
+    /** @cvalue UCOL_QUATERNARY */
+    public const int QUATERNARY = UNKNOWN;
+    /** @cvalue UCOL_IDENTICAL */
+    public const int IDENTICAL = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCOL_OFF
-     */
-    const OFF = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_ON
-     */
-    const ON = UNKNOWN;
+    /** @cvalue UCOL_OFF */
+    public const int OFF = UNKNOWN;
+    /** @cvalue UCOL_ON */
+    public const int ON = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCOL_SHIFTED
-     */
-    const SHIFTED = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_NON_IGNORABLE
-     */
-    const NON_IGNORABLE = UNKNOWN;
+    /** @cvalue UCOL_SHIFTED */
+    public const int SHIFTED = UNKNOWN;
+    /** @cvalue UCOL_NON_IGNORABLE */
+    public const int NON_IGNORABLE = UNKNOWN;
 
-    /**
-     * @var int
-     * @cvalue UCOL_LOWER_FIRST
-     */
-    const LOWER_FIRST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_UPPER_FIRST
-     */
-    const UPPER_FIRST = UNKNOWN;
+    /** @cvalue UCOL_LOWER_FIRST */
+    public const int LOWER_FIRST = UNKNOWN;
+    /** @cvalue UCOL_UPPER_FIRST */
+    public const int UPPER_FIRST = UNKNOWN;
 
     /* UColAttribute constants */
 
-    /**
-     * @var int
-     * @cvalue UCOL_FRENCH_COLLATION
-     */
-    const FRENCH_COLLATION = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_ALTERNATE_HANDLING
-     */
-    const ALTERNATE_HANDLING = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_CASE_FIRST
-     */
-    const CASE_FIRST = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_CASE_LEVEL
-     */
-    const CASE_LEVEL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_NORMALIZATION_MODE
-     */
-    const NORMALIZATION_MODE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_STRENGTH
-     */
-    const STRENGTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_HIRAGANA_QUATERNARY_MODE
-     */
-    const HIRAGANA_QUATERNARY_MODE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue UCOL_NUMERIC_COLLATION
-     */
-    const NUMERIC_COLLATION = UNKNOWN;
+    /** @cvalue UCOL_FRENCH_COLLATION */
+    public const int FRENCH_COLLATION = UNKNOWN;
+    /** @cvalue UCOL_ALTERNATE_HANDLING */
+    public const int ALTERNATE_HANDLING = UNKNOWN;
+    /** @cvalue UCOL_CASE_FIRST */
+    public const int CASE_FIRST = UNKNOWN;
+    /** @cvalue UCOL_CASE_LEVEL */
+    public const int CASE_LEVEL = UNKNOWN;
+    /** @cvalue UCOL_NORMALIZATION_MODE */
+    public const int NORMALIZATION_MODE = UNKNOWN;
+    /** @cvalue UCOL_STRENGTH */
+    public const int STRENGTH = UNKNOWN;
+    /** @cvalue UCOL_HIRAGANA_QUATERNARY_MODE */
+    public const int HIRAGANA_QUATERNARY_MODE = UNKNOWN;
+    /** @cvalue UCOL_NUMERIC_COLLATION */
+    public const int NUMERIC_COLLATION = UNKNOWN;
 
     /* sort flags */
 
-    /**
-     * @var int
-     * @cvalue COLLATOR_SORT_REGULAR
-     */
-    const SORT_REGULAR = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue COLLATOR_SORT_STRING
-     */
-    const SORT_STRING = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue COLLATOR_SORT_NUMERIC
-     */
-    const SORT_NUMERIC = UNKNOWN;
+    /** @cvalue COLLATOR_SORT_REGULAR */
+    public const int SORT_REGULAR = UNKNOWN;
+    /** @cvalue COLLATOR_SORT_STRING */
+    public const int SORT_STRING = UNKNOWN;
+    /** @cvalue COLLATOR_SORT_NUMERIC */
+    public const int SORT_NUMERIC = UNKNOWN;
 
     public function __construct(string $locale) {}
 

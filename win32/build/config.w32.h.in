@@ -86,9 +86,7 @@
 #undef HAVE_ALLOCA_H
 #undef HAVE_KILL
 #define HAVE_GETPID 1
-#define HAVE_LIBM 1
 #undef HAVE_RINT
-#define SIZEOF_SHORT 2
 /* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
@@ -116,10 +114,6 @@
 
 /* Win32 support proc_open */
 #define PHP_CAN_SUPPORT_PROC_OPEN 1
-
-/* inet_ntop() / inet_pton() */
-#define HAVE_INET_PTON 1
-#define HAVE_INET_NTOP 1
 
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch

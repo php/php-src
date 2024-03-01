@@ -149,9 +149,11 @@ ZEND_API const zend_internal_function zend_pass_function = {
 	(zend_internal_arg_info *) zend_pass_function_arg_info + 1, /* arg_info */
 	NULL,                   /* attributes        */
 	NULL,                   /* run_time_cache    */
+	NULL,                   /* doc_comment       */
 	0,                      /* T                 */
 	ZEND_FN(pass),          /* handler           */
 	NULL,                   /* module            */
+	NULL,                   /* frameless_function_infos */
 	{NULL,NULL,NULL,NULL}   /* reserved          */
 };
 
@@ -272,7 +274,7 @@ static zend_never_inline ZEND_COLD zval* zval_undefined_cv(uint32_t var EXECUTE_
 {
 	if (EXPECTED(EG(exception) == NULL)) {
 		zend_string *cv = CV_DEF_OF(EX_VAR_TO_NUM(var));
-		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	}
 	return &EG(uninitialized_zval);
 }
@@ -1297,7 +1299,7 @@ ZEND_API bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_d
 
 ZEND_API ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
 {
-	zend_error(E_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
+	zend_error_noreturn(E_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
 		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
 		fbc->common.scope ? "::" : "",
 		ZSTR_VAL(fbc->common.function_name));
@@ -1411,8 +1413,8 @@ ZEND_API ZEND_COLD void zend_verify_never_error(const zend_function *zf)
 {
 	zend_string *func_name = get_function_or_method_name(zf);
 
-	zend_type_error("%s(): never-returning function must not implicitly return",
-		ZSTR_VAL(func_name));
+	zend_type_error("%s(): never-returning %s must not implicitly return",
+		ZSTR_VAL(func_name), zf->common.scope ? "method" : "function");
 
 	zend_string_release(func_name);
 }
@@ -1504,9 +1506,9 @@ ZEND_API bool zend_never_inline zend_verify_class_constant_type(zend_class_const
 	return 1;
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(const zend_object *object)
 {
-	zend_throw_error(NULL, "Cannot use object as array");
+	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(object->ce->name));
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_array_offset_access(const zval *offset)
@@ -1584,7 +1586,7 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zv
 		}
 		zval_ptr_dtor(&res);
 	} else {
-		zend_use_object_as_array();
+		zend_use_object_as_array(obj);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
@@ -1999,7 +2001,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
 			ZVAL_LONG(prop, val);
@@ -2015,7 +2017,7 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 				}
 			}
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				zend_incdec_typed_prop(prop_info, prop, NULL OPLINE_CC EXECUTE_DATA_CC);
 			} else if (ZEND_IS_INCREMENT(opline->opcode)) {
 				increment_function(prop);
@@ -2038,7 +2040,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 		} else {
 			fast_long_decrement_function(prop);
 		}
-		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 				&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 			zend_long val = zend_throw_incdec_prop_error(prop_info OPLINE_CC);
 			ZVAL_LONG(prop, val);
@@ -2053,7 +2055,7 @@ static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_
 			}
 		}
 
-		if (UNEXPECTED(prop_info)) {
+		if (prop_info) {
 			zend_incdec_typed_prop(prop_info, prop, EX_VAR(opline->result.var) OPLINE_CC EXECUTE_DATA_CC);
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), prop);
@@ -2311,7 +2313,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 #ifdef ZEND_CHECK_STACK_LIMIT
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_call_stack_size_error(void)
 {
-	zend_throw_error(NULL, "Maximum call stack size of %zu bytes reached. Infinite recursion?",
+	zend_throw_error(NULL, "Maximum call stack size of %zu bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?",
 		(size_t) ((uintptr_t) EG(stack_base) - (uintptr_t) EG(stack_limit)));
 }
 #endif /* ZEND_CHECK_STACK_LIMIT */
@@ -3309,7 +3311,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 				prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
 			}
 
-			if (UNEXPECTED(prop_info)) {
+			if (prop_info) {
 				variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr, &garbage EXECUTE_DATA_CC);
 			} else {
 				zend_assign_to_variable_reference(variable_ptr, value_ptr, &garbage);
@@ -3441,7 +3443,7 @@ static zend_always_inline zend_result zend_fetch_static_property_address(zval **
 
 		if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW)
 				&& UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF)
-				&& UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
+				&& ZEND_TYPE_IS_SET(property_info->type)) {
 			zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",
 				ZSTR_VAL(property_info->ce->name),
 				zend_get_unmangled_property_name(property_info->name));
@@ -3788,7 +3790,7 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 				Z_ADDREF_P(result);
 			} else {
 				ZVAL_NULL(result);
-				zend_error(E_WARNING, "Undefined variable $this");
+				zend_error_unchecked(E_WARNING, "Undefined variable $this");
 			}
 			break;
 		case BP_VAR_IS:
@@ -4639,6 +4641,16 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 	op->op1_type = op->op2_type;
 	op->op2      = tmp;
 	op->op2_type = tmp_type;
+
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+	uint32_t tmp_info;
+	tmp_info = op->op1_use_type;
+	op->op1_use_type = op->op2_use_type;
+	op->op2_use_type = tmp_info;
+	tmp_info = op->op1_def_type;
+	op->op1_def_type = op->op2_def_type;
+	op->op2_def_type = tmp_info;
+#endif
 }
 /* }}} */
 #endif
@@ -5301,6 +5313,8 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 # include "zend_vm_trace_lines.h"
 #elif defined(ZEND_VM_TRACE_MAP)
 # include "zend_vm_trace_map.h"
+#elif defined(ZEND_VERIFY_TYPE_INFERENCE)
+# include "zend_verify_type_inference.h"
 #endif
 
 #define ZEND_VM_NEXT_OPCODE_EX(check_exception, skip) \

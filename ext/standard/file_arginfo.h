@@ -1,8 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: e9a566d5ef96f781074027b1b3ff1824d0208b47 */
 
-
-
 static void register_file_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("SEEK_SET", SEEK_SET, CONST_PERSISTENT);

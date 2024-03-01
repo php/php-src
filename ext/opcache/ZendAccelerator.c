@@ -187,19 +187,6 @@ static time_t zend_accel_get_time(void)
 # define zend_accel_get_time() time(NULL)
 #endif
 
-static inline bool is_stream_path(const char *filename)
-{
-	const char *p;
-
-	for (p = filename;
-	     (*p >= 'a' && *p <= 'z') ||
-	     (*p >= 'A' && *p <= 'Z') ||
-	     (*p >= '0' && *p <= '9') ||
-	     *p == '+' || *p == '-' || *p == '.';
-	     p++);
-	return ((p != filename) && (p[0] == ':') && (p[1] == '/') && (p[2] == '/'));
-}
-
 static inline bool is_cacheable_stream_path(const char *filename)
 {
 	return memcmp(filename, "file://", sizeof("file://") - 1) == 0 ||
@@ -1060,7 +1047,7 @@ accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_
 			if (file_handle->opened_path) {
 				char *file_path = ZSTR_VAL(file_handle->opened_path);
 
-				if (is_stream_path(file_path)) {
+				if (php_is_stream_path(file_path)) {
 					if (zend_get_stream_timestamp(file_path, &statbuf) == SUCCESS) {
 						break;
 					}
@@ -1208,7 +1195,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 	/* CWD and include_path don't matter for absolute file names and streams */
 	if (IS_ABSOLUTE_PATH(path, path_length)) {
 		/* pass */
-	} else if (UNEXPECTED(is_stream_path(path))) {
+	} else if (UNEXPECTED(php_is_stream_path(path))) {
 		if (!is_cacheable_stream_path(path)) {
 			return NULL;
 		}
@@ -1404,6 +1391,7 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 {
 	zend_string *realpath;
 	zend_persistent_script *persistent_script;
+	zend_bool file_found = true;
 
 	if (!ZCG(accelerator_enabled) || accelerator_shm_read_lock() != SUCCESS) {
 		return FAILURE;
@@ -1412,7 +1400,10 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 	realpath = accelerator_orig_zend_resolve_path(filename);
 
 	if (!realpath) {
-		return FAILURE;
+		//file could have been deleted, but we still need to invalidate it.
+		//so instead of failing, just use the provided filename for the lookup
+		realpath = zend_string_copy(filename);
+		file_found = false;
 	}
 
 	if (ZCG(accel_directives).file_cache) {
@@ -1437,12 +1428,13 @@ zend_result zend_accel_invalidate(zend_string *filename, bool force)
 
 		file_handle.opened_path = NULL;
 		zend_destroy_file_handle(&file_handle);
+		file_found = true;
 	}
 
 	accelerator_shm_read_unlock();
 	zend_string_release_ex(realpath, 0);
 
-	return SUCCESS;
+	return file_found ? SUCCESS : FAILURE;
 }
 
 static zend_string* accel_new_interned_key(zend_string *key)
@@ -1891,7 +1883,7 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 	zend_op_array *op_array = NULL;
 	bool from_memory; /* if the script we've got is stored in SHM */
 
-	if (is_stream_path(ZSTR_VAL(file_handle->filename)) &&
+	if (php_is_stream_path(ZSTR_VAL(file_handle->filename)) &&
 	    !is_cacheable_stream_path(ZSTR_VAL(file_handle->filename))) {
 		return accelerator_orig_compile_file(file_handle, type);
 	}
@@ -2036,7 +2028,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 				return accelerator_orig_compile_file(file_handle, type);
 			}
 			persistent_script = zend_accel_hash_find(&ZCSG(hash), key);
-		} else if (UNEXPECTED(is_stream_path(ZSTR_VAL(file_handle->filename)) && !is_cacheable_stream_path(ZSTR_VAL(file_handle->filename)))) {
+		} else if (UNEXPECTED(php_is_stream_path(ZSTR_VAL(file_handle->filename)) && !is_cacheable_stream_path(ZSTR_VAL(file_handle->filename)))) {
 			ZCG(cache_opline) = NULL;
 			ZCG(cache_persistent_script) = NULL;
 			return accelerator_orig_compile_file(file_handle, type);
@@ -3027,11 +3019,16 @@ static void accel_move_code_to_huge_pages(void)
 		long unsigned int  start, end, offset, inode;
 		char perm[5], dev[10], name[MAXPATHLEN];
 		int ret;
+		extern char *__progname;
+		char buffer[MAXPATHLEN];
 
-		while (1) {
-			ret = fscanf(f, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
-			if (ret == 7) {
-				if (perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/') {
+		while (fgets(buffer, MAXPATHLEN, f)) {
+			ret = sscanf(buffer, "%lx-%lx %4s %lx %9s %lu %s\n", &start, &end, perm, &offset, dev, &inode, name);
+			if (ret >= 6) {
+				/* try to find the php text segment and map it into huge pages
+				   Lines without 'name' are going to be skipped */
+				if (ret > 6 && perm[0] == 'r' && perm[1] == '-' && perm[2] == 'x' && name[0] == '/' \
+					&& strstr(name, __progname)) {
 					long unsigned int  seg_start = ZEND_MM_ALIGNED_SIZE_EX(start, huge_page_size);
 					long unsigned int  seg_end = (end & ~(huge_page_size-1L));
 					long unsigned int  real_end;
@@ -3050,8 +3047,6 @@ static void accel_move_code_to_huge_pages(void)
 					}
 					break;
 				}
-			} else {
-				break;
 			}
 		}
 		fclose(f);
@@ -3256,11 +3251,13 @@ static zend_result accel_post_startup(void)
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
 		if (JIT_G(enabled)) {
-			if (JIT_G(buffer_size) == 0
-		     || !ZSMMG(reserved)
-			 || zend_jit_startup(ZSMMG(reserved), jit_size, reattached) != SUCCESS) {
+			if (JIT_G(buffer_size) == 0) {
 				JIT_G(enabled) = false;
 				JIT_G(on) = false;
+			} else if (!ZSMMG(reserved)) {
+				zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: could not use reserved buffer!");
+			} else {
+				zend_jit_startup(ZSMMG(reserved), jit_size, reattached);
 			}
 		}
 #endif
@@ -4050,7 +4047,7 @@ static void preload_link(void)
 
 static zend_string *preload_resolve_path(zend_string *filename)
 {
-	if (is_stream_path(ZSTR_VAL(filename))) {
+	if (php_is_stream_path(ZSTR_VAL(filename))) {
 		return NULL;
 	}
 	return zend_resolve_path(filename);
@@ -4642,6 +4639,8 @@ static zend_result accel_finish_startup_preload(bool in_child)
 		SIGG(check) = false;
 #endif
 		php_request_shutdown(NULL); /* calls zend_shared_alloc_unlock(); */
+		EG(class_table) = NULL;
+		EG(function_table) = NULL;
 		PG(report_memleaks) = orig_report_memleaks;
 	} else {
 		zend_shared_alloc_unlock();

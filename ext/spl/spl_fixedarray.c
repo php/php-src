@@ -33,7 +33,7 @@
 #include "spl_iterators.h"
 #include "ext/json/php_json.h"
 
-zend_object_handlers spl_handler_SplFixedArray;
+static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 
 #ifdef COMPILE_DL_SPL_FIXEDARRAY
@@ -89,6 +89,7 @@ static void spl_fixedarray_default_ctor(spl_fixedarray *array)
 {
 	array->size = 0;
 	array->elements = NULL;
+	array->cached_resize = -1;
 }
 
 /* Initializes the range [from, to) to null. Does not dtor existing elements. */
@@ -107,6 +108,7 @@ static void spl_fixedarray_init_non_empty_struct(spl_fixedarray *array, zend_lon
 	array->size = 0; /* reset size in case ecalloc() fails */
 	array->elements = size ? safe_emalloc(size, sizeof(zval), 0) : NULL;
 	array->size = size;
+	array->cached_resize = -1;
 }
 
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
@@ -117,7 +119,6 @@ static void spl_fixedarray_init(spl_fixedarray *array, zend_long size)
 	} else {
 		spl_fixedarray_default_ctor(array);
 	}
-	array->cached_resize = -1;
 }
 
 /* Copies the range [begin, end) into the fixedarray, beginning at `offset`.
@@ -376,8 +377,7 @@ static zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		// TODO Change error message and use OutOfBound SPL Exception?
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return NULL;
 	} else {
 		return &intern->array.elements[index];
@@ -425,8 +425,7 @@ static void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		// TODO Change error message and use OutOfBound SPL Exception?
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return;
 	} else {
 		/* Fix #81429 */
@@ -465,8 +464,7 @@ static void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		// TODO Change error message and use OutOfBound SPL Exception?
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
@@ -743,7 +741,7 @@ PHP_METHOD(SplFixedArray, fromArray)
 		}
 		spl_fixedarray_init(&array, tmp);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(data), num_index, str_index, element) {
+		ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(data), num_index, element) {
 			ZVAL_COPY_DEREF(&array.elements[num_index], element);
 		} ZEND_HASH_FOREACH_END();
 
@@ -898,7 +896,7 @@ static void spl_fixedarray_it_rewind(zend_object_iterator *iter)
 	((spl_fixedarray_it*)iter)->current = 0;
 }
 
-static int spl_fixedarray_it_valid(zend_object_iterator *iter)
+static zend_result spl_fixedarray_it_valid(zend_object_iterator *iter)
 {
 	spl_fixedarray_it     *iterator = (spl_fixedarray_it*)iter;
 	spl_fixedarray_object *object   = Z_SPLFIXEDARRAY_P(&iter->data);

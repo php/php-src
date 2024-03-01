@@ -15,14 +15,20 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec("CREATE TABLE test (id int NOT NULL, PRIMARY KEY (id))");
-$db->exec("INSERT INTO test (id) VALUES (1)");
+$db->exec("CREATE TABLE test5809 (id int NOT NULL, PRIMARY KEY (id))");
+$db->exec("INSERT INTO test5809 (id) VALUES (1)");
 
 $values = array(1);
 var_dump($values);
-$stmt = $db->prepare('SELECT * FROM test WHERE id = ?');
+$stmt = $db->prepare('SELECT * FROM test5809 WHERE id = ?');
 $stmt->execute($values);
 var_dump($values);
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test5809");
 ?>
 --EXPECT--
 array(1) {

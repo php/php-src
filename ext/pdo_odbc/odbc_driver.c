@@ -344,6 +344,30 @@ static bool odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			H->assume_utf8 = bval;
 			return true;
+		case PDO_ATTR_AUTOCOMMIT:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			if (dbh->in_txn) {
+				pdo_raise_impl_error(dbh, NULL, "HY000", "Cannot change autocommit mode while a transaction is already open");
+				return false;
+			}
+			if (dbh->auto_commit ^ bval) {
+				dbh->auto_commit = bval;
+				RETCODE rc = SQLSetConnectAttr(
+					H->dbc,
+					SQL_ATTR_AUTOCOMMIT,
+					dbh->auto_commit ? (SQLPOINTER) SQL_AUTOCOMMIT_ON : (SQLPOINTER) SQL_AUTOCOMMIT_OFF,
+					SQL_IS_INTEGER
+				);
+				if (rc != SQL_SUCCESS) {
+					pdo_odbc_drv_error(
+						dbh->auto_commit ? "SQLSetConnectAttr AUTOCOMMIT = ON" : "SQLSetConnectAttr AUTOCOMMIT = OFF"
+					);
+					return false;
+				}
+			}
+			return true;
 		default:
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
@@ -384,9 +408,11 @@ static int odbc_handle_get_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_ATTR_CONNECTION_STATUS:
 			break;
 		case PDO_ODBC_ATTR_ASSUME_UTF8:
-			ZVAL_BOOL(val, H->assume_utf8 ? 1 : 0);
+			ZVAL_BOOL(val, H->assume_utf8);
 			return 1;
-
+		case PDO_ATTR_AUTOCOMMIT:
+			ZVAL_BOOL(val, dbh->auto_commit);
+			return 1;
 	}
 	return 0;
 }
@@ -500,36 +526,65 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 
 		use_direct = 1;
 
-		/* Force UID and PWD to be set in the DSN */
-		bool is_uid_set = dbh->username && *dbh->username
-			&& !strstr(dbh->data_source, "uid=")
-			&& !strstr(dbh->data_source, "UID=");
-		bool is_pwd_set = dbh->password && *dbh->password
-			&& !strstr(dbh->data_source, "pwd=")
-			&& !strstr(dbh->data_source, "PWD=");
-		if (is_uid_set && is_pwd_set) {
-			char *uid = NULL, *pwd = NULL;
-			bool should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
-			bool should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
-			if (should_quote_uid) {
-				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
-				uid = emalloc(estimated_length);
-				php_odbc_connstr_quote(uid, dbh->username, estimated_length);
-			} else {
-				uid = dbh->username;
+		size_t db_len = strlen(dbh->data_source);
+		bool use_uid_arg = dbh->username != NULL && !php_memnistr(dbh->data_source, "uid=", strlen("uid="), dbh->data_source + db_len);
+		bool use_pwd_arg = dbh->password != NULL && !php_memnistr(dbh->data_source, "pwd=", strlen("pwd="), dbh->data_source + db_len);
+
+		if (use_uid_arg || use_pwd_arg) {
+			char *db = (char*) emalloc(db_len + 1);
+			strcpy(db, dbh->data_source);
+			char *db_end = db + db_len;
+			db_end--;
+			if ((unsigned char)*(db_end) == ';') {
+				*db_end = '\0';
 			}
-			if (should_quote_pwd) {
-				size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
-				pwd = emalloc(estimated_length);
-				php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
-			} else {
-				pwd = dbh->password;
+
+			char *uid = NULL, *pwd = NULL, *dsn = NULL;
+			bool should_quote_uid, should_quote_pwd;
+			size_t new_dsn_size;
+
+			if (use_uid_arg) {
+				should_quote_uid = !php_odbc_connstr_is_quoted(dbh->username) && php_odbc_connstr_should_quote(dbh->username);
+				if (should_quote_uid) {
+					size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->username);
+					uid = emalloc(estimated_length);
+					php_odbc_connstr_quote(uid, dbh->username, estimated_length);
+				} else {
+					uid = dbh->username;
+				}
+
+				if (!use_pwd_arg) {
+					new_dsn_size = strlen(db) + strlen(uid) + strlen(";UID=;") + 1;
+					dsn = pemalloc(new_dsn_size, dbh->is_persistent);
+					snprintf(dsn, new_dsn_size, "%s;UID=%s;", db, uid);
+				}
 			}
-			size_t new_dsn_size = strlen(dbh->data_source)
-				+ strlen(uid) + strlen(pwd)
-				+ strlen(";UID=;PWD=") + 1;
-			char *dsn = pemalloc(new_dsn_size, dbh->is_persistent);
-			snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s", dbh->data_source, uid, pwd);
+
+			if (use_pwd_arg) {
+				should_quote_pwd = !php_odbc_connstr_is_quoted(dbh->password) && php_odbc_connstr_should_quote(dbh->password);
+				if (should_quote_pwd) {
+					size_t estimated_length = php_odbc_connstr_estimate_quote_length(dbh->password);
+					pwd = emalloc(estimated_length);
+					php_odbc_connstr_quote(pwd, dbh->password, estimated_length);
+				} else {
+					pwd = dbh->password;
+				}
+
+				if (!use_uid_arg) {
+					new_dsn_size = strlen(db) + strlen(pwd) + strlen(";PWD=;") + 1;
+					dsn = pemalloc(new_dsn_size, dbh->is_persistent);
+					snprintf(dsn, new_dsn_size, "%s;PWD=%s;", db, pwd);
+				}
+			}
+
+			if (use_uid_arg && use_pwd_arg) {
+				new_dsn_size = strlen(db)
+					+ strlen(uid) + strlen(pwd)
+					+ strlen(";UID=;PWD=;") + 1;
+				dsn = pemalloc(new_dsn_size, dbh->is_persistent);
+				snprintf(dsn, new_dsn_size, "%s;UID=%s;PWD=%s;", db, uid, pwd);
+			}
+
 			pefree((char*)dbh->data_source, dbh->is_persistent);
 			dbh->data_source = dsn;
 			if (uid && should_quote_uid) {
@@ -538,6 +593,7 @@ static int pdo_odbc_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ 
 			if (pwd && should_quote_pwd) {
 				efree(pwd);
 			}
+			efree(db);
 		}
 
 		rc = SQLDriverConnect(H->dbc, NULL, (SQLCHAR *) dbh->data_source, strlen(dbh->data_source),

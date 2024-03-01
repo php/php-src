@@ -25,5 +25,8 @@
 /Zend/zend_vm_handlers.h linguist-generated -diff
 /Zend/zend_vm_opcodes.[ch] linguist-generated -diff
 
-# The OSS fuzz files are bunary
+# The OSS fuzz files are binary
 /ext/date/tests/ossfuzz*.txt binary
+
+# Vendored libraries
+/ext/dom/lexbor/lexbor linguist-vendored

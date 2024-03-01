@@ -333,7 +333,7 @@ int fpm_event_init_main(void)
 	}
 
 	if (!module->wait) {
-		zlog(ZLOG_ERROR, "Incomplete event implementation. Please open a bug report on https://bugs.php.net.");
+		zlog(ZLOG_ERROR, "Incomplete event implementation. Please open a bug report on https://github.com/php/php-src/issues.");
 		return -1;
 	}
 

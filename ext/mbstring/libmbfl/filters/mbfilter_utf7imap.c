@@ -98,7 +98,8 @@ const mbfl_encoding mbfl_encoding_utf7imap = {
 	&vtbl_wchar_utf7imap,
 	mb_utf7imap_to_wchar,
 	mb_wchar_to_utf7imap,
-	mb_check_utf7imap
+	mb_check_utf7imap,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_utf7imap_wchar = {
@@ -616,6 +617,7 @@ static size_t mb_utf7imap_to_wchar(unsigned char **in, size_t *in_len, uint32_t 
 	if (p == e && base64) {
 		/* UTF7-IMAP doesn't allow strings to end in Base64 mode
 		 * One space in output buffer was reserved just for this */
+		ZEND_ASSERT(out < limit);
 		*out++ = MBFL_BAD_INPUT;
 	}
 

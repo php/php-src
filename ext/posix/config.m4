@@ -10,7 +10,12 @@ if test "$PHP_POSIX" = "yes"; then
 
   AC_CHECK_HEADERS([sys/mkdev.h sys/sysmacros.h])
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups makedev initgroups getgrgid_r posix_pathconf eaccess)
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups makedev initgroups getgrgid_r eaccess)
+
+dnl Skip pathconf and fpathconf check on musl libc due to limited implementation
+dnl (first argument is not validated and has different error).
+  AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep -q "^musl"],[],
+    [AC_CHECK_FUNCS(pathconf fpathconf)])
 
   AC_MSG_CHECKING([for working ttyname_r() implementation])
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -31,19 +36,10 @@ int main(int argc, char *argv[])
     AC_MSG_RESULT([no, cannot detect working ttyname_r() when cross compiling. posix_ttyname() will be thread-unsafe])
   ])
 
-  AC_CACHE_CHECK([for utsname.domainname], ac_cv_have_utsname_domainname, [
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-      #define _GNU_SOURCE
-      #include <sys/utsname.h>
-    ]],[[
-      return sizeof(((struct utsname *)0)->domainname);
-    ]])],[
-      ac_cv_have_utsname_domainname=yes
-    ],[
-      ac_cv_have_utsname_domainname=no
-    ])
+  AC_CHECK_MEMBERS([struct utsname.domainname],,,[
+    #ifndef _GNU_SOURCE
+    #define _GNU_SOURCE
+    #endif
+    #include <sys/utsname.h>
   ])
-  if test "$ac_cv_have_utsname_domainname" = yes; then
-    AC_DEFINE(HAVE_UTSNAME_DOMAINNAME, 1, [Whether struct utsname has domainname])
-  fi
 fi

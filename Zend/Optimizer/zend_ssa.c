@@ -607,7 +607,7 @@ add_op1_def:
 			}
 			break;
 		case ZEND_ASSIGN_OBJ_REF:
-			if (opline->op1_type == IS_CV) {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
 				ssa_ops[k].op1_def = ssa_vars_count;
 				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
 				ssa_vars_count++;
@@ -766,6 +766,35 @@ add_op1_def:
 				//NEW_SSA_VAR(opline->op1.var)
 			}
 			break;
+		case ZEND_FRAMELESS_ICALL_1:
+		case ZEND_FRAMELESS_ICALL_2:
+		case ZEND_FRAMELESS_ICALL_3: {
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				ssa_ops[k].op1_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op1.var)
+			}
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				ssa_ops[k].op2_def = ssa_vars_count;
+				var[EX_VAR_TO_NUM(opline->op2.var)] = ssa_vars_count;
+				ssa_vars_count++;
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->opcode == ZEND_FRAMELESS_ICALL_3) {
+				next = opline + 1;
+				if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+					ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
+					//USE_SSA_VAR(op_array->last_var + next->op1.var);
+					if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
+						ssa_ops[k + 1].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(next->op1.var)
+					}
+				}
+			}
+		}
 		default:
 			break;
 	}

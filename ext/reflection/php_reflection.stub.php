@@ -116,11 +116,8 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
 class ReflectionFunction extends ReflectionFunctionAbstract
 {
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_DEPRECATED
-     */
-    public const IS_DEPRECATED = UNKNOWN;
+    /** @cvalue ZEND_ACC_DEPRECATED */
+    public const int IS_DEPRECATED = UNKNOWN;
 
     public function __construct(Closure|string $function) {}
 
@@ -170,36 +167,18 @@ final class ReflectionGenerator
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 {
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_STATIC
-     */
-    public const IS_STATIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PUBLIC
-     */
-    public const IS_PUBLIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PROTECTED
-     */
-    public const IS_PROTECTED = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PRIVATE
-     */
-    public const IS_PRIVATE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_ABSTRACT
-     */
-    public const IS_ABSTRACT = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_FINAL
-     */
-    public const IS_FINAL = UNKNOWN;
+    /** @cvalue ZEND_ACC_STATIC */
+    public const int IS_STATIC = UNKNOWN;
+    /** @cvalue ZEND_ACC_PUBLIC */
+    public const int IS_PUBLIC = UNKNOWN;
+    /** @cvalue ZEND_ACC_PROTECTED */
+    public const int IS_PROTECTED = UNKNOWN;
+    /** @cvalue ZEND_ACC_PRIVATE */
+    public const int IS_PRIVATE = UNKNOWN;
+    /** @cvalue ZEND_ACC_ABSTRACT */
+    public const int IS_ABSTRACT = UNKNOWN;
+    /** @cvalue ZEND_ACC_FINAL */
+    public const int IS_FINAL = UNKNOWN;
 
     public string $class;
 
@@ -258,26 +237,16 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 class ReflectionClass implements Reflector
 {
     /**
-     * @var int
      * @cvalue ZEND_ACC_IMPLICIT_ABSTRACT_CLASS
      * @todo deprecate
      */
-    public const IS_IMPLICIT_ABSTRACT = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
-     */
-    public const IS_EXPLICIT_ABSTRACT = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_FINAL
-     */
-    public const IS_FINAL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_READONLY_CLASS
-     */
-    public const IS_READONLY = UNKNOWN;
+    public const int IS_IMPLICIT_ABSTRACT = UNKNOWN;
+    /** @cvalue ZEND_ACC_EXPLICIT_ABSTRACT_CLASS */
+    public const int IS_EXPLICIT_ABSTRACT = UNKNOWN;
+    /** @cvalue ZEND_ACC_FINAL */
+    public const int IS_FINAL = UNKNOWN;
+    /** @cvalue ZEND_ACC_READONLY_CLASS */
+    public const int IS_READONLY = UNKNOWN;
 
     public string $name;
 
@@ -455,31 +424,16 @@ class ReflectionObject extends ReflectionClass
 /** @not-serializable */
 class ReflectionProperty implements Reflector
 {
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_STATIC
-     */
-    public const IS_STATIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_READONLY
-     */
-    public const IS_READONLY = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PUBLIC
-     */
-    public const IS_PUBLIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PROTECTED
-     */
-    public const IS_PROTECTED = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PRIVATE
-     */
-    public const IS_PRIVATE = UNKNOWN;
+    /** @cvalue ZEND_ACC_STATIC */
+    public const int IS_STATIC = UNKNOWN;
+    /** @cvalue ZEND_ACC_READONLY */
+    public const int IS_READONLY = UNKNOWN;
+    /** @cvalue ZEND_ACC_PUBLIC */
+    public const int IS_PUBLIC = UNKNOWN;
+    /** @cvalue ZEND_ACC_PROTECTED */
+    public const int IS_PROTECTED = UNKNOWN;
+    /** @cvalue ZEND_ACC_PRIVATE */
+    public const int IS_PRIVATE = UNKNOWN;
 
     public string $name;
     public string $class;
@@ -551,26 +505,14 @@ class ReflectionProperty implements Reflector
 /** @not-serializable */
 class ReflectionClassConstant implements Reflector
 {
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PUBLIC
-     */
-    public const IS_PUBLIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PROTECTED
-     */
-    public const IS_PROTECTED = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_PRIVATE
-     */
-    public const IS_PRIVATE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue ZEND_ACC_FINAL
-     */
-    public const IS_FINAL = UNKNOWN;
+    /** @cvalue ZEND_ACC_PUBLIC */
+    public const int IS_PUBLIC = UNKNOWN;
+    /** @cvalue ZEND_ACC_PROTECTED */
+    public const int IS_PROTECTED = UNKNOWN;
+    /** @cvalue ZEND_ACC_PRIVATE */
+    public const int IS_PRIVATE = UNKNOWN;
+    /** @cvalue ZEND_ACC_FINAL */
+    public const int IS_FINAL = UNKNOWN;
 
     public string $name;
     public string $class;
@@ -819,11 +761,10 @@ final class ReflectionReference
 /** @not-serializable */
 class ReflectionAttribute implements Reflector
 {
-    /**
-     * @var int
-     * @cvalue REFLECTION_ATTRIBUTE_IS_INSTANCEOF
-     */
-    public const IS_INSTANCEOF = UNKNOWN;
+    /** @cvalue REFLECTION_ATTRIBUTE_IS_INSTANCEOF */
+    public const int IS_INSTANCEOF = UNKNOWN;
+
+    public string $name;
 
     public function getName(): string {}
     public function getTarget(): int {}

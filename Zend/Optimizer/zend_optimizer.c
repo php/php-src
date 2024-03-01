@@ -721,6 +721,7 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
 			break;
 		case ZEND_FE_FETCH_R:
@@ -765,6 +766,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		case ZEND_ASSERT_CHECK:
 		case ZEND_JMP_NULL:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
 			break;
 		case ZEND_CATCH:
@@ -799,7 +801,9 @@ zend_class_entry *zend_optimizer_get_class_entry(
 	}
 
 	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
+	if (ce
+	 && (ce->type == ZEND_INTERNAL_CLASS
+	  || (op_array && ce->info.user.filename == op_array->filename))) {
 		return ce;
 	}
 
@@ -819,7 +823,9 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 		}
 	} else if (opline->op1_type == IS_UNUSED && op_array->scope
 			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
-			&& (opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) {
+			&& ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF
+				|| ((opline->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_STATIC
+					&& (op_array->scope->ce_flags & ZEND_ACC_FINAL)))) {
 		return op_array->scope;
 	}
 	return NULL;
@@ -1160,6 +1166,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 				break;
 			case ZEND_CATCH:
@@ -1281,6 +1288,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 				break;
 			case ZEND_CATCH:
@@ -1330,6 +1338,26 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 				}
 				break;
 		}
+#ifdef ZEND_VERIFY_TYPE_INFERENCE
+		if (ssa_op->op1_use >= 0) {
+			opline->op1_use_type = ssa->var_info[ssa_op->op1_use].type;
+		}
+		if (ssa_op->op2_use >= 0) {
+			opline->op2_use_type = ssa->var_info[ssa_op->op2_use].type;
+		}
+		if (ssa_op->result_use >= 0) {
+			opline->result_use_type = ssa->var_info[ssa_op->result_use].type;
+		}
+		if (ssa_op->op1_def >= 0) {
+			opline->op1_def_type = ssa->var_info[ssa_op->op1_def].type;
+		}
+		if (ssa_op->op2_def >= 0) {
+			opline->op2_def_type = ssa->var_info[ssa_op->op2_def].type;
+		}
+		if (ssa_op->result_def >= 0) {
+			opline->result_def_type = ssa->var_info[ssa_op->result_def].type;
+		}
+#endif
 		zend_vm_set_opcode_handler_ex(opline, op1_info, op2_info, res_info);
 		opline++;
 	}

@@ -99,7 +99,11 @@ static zend_result datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handlin
 	}
 	if (!INTL_UDATE_FMT_OK(time_type)) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: invalid time format style", 0);
-return FAILURE;
+		return FAILURE;
+	}
+	if (date_type == UDAT_PATTERN && time_type != UDAT_PATTERN) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_create: time format must be UDAT_PATTERN if date format is UDAT_PATTERN", 0);
+		return FAILURE;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
@@ -107,6 +111,11 @@ return FAILURE;
 		locale_str = (char *) intl_locale_get_default();
 	}
 	locale = Locale::createFromName(locale_str);
+	/* get*Name accessors being set does not preclude being bogus */
+	if (locale.isBogus() || ((locale_len == 1 && locale_str[0] != 'C') || (locale_len > 1 && strlen(locale.getISO3Language()) == 0))) {
+        zend_argument_value_error(1, "\"%s\" is invalid", locale_str);
+		return FAILURE;
+	}
 
 	/* process calendar */
 	if (datefmt_process_calendar_arg(calendar_obj, calendar_long, calendar_is_null, locale, "datefmt_create",

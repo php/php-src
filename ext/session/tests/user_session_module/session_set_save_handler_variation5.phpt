@@ -58,6 +58,8 @@ rmdir($path);
 *** Testing session_set_save_handler() : variation ***
 string(0) ""
 *** Without lazy_write ***
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 bool(true)
 Open [%s,PHPSESSID]
 CreateID [PHPT-%d]
@@ -72,6 +74,8 @@ bool(true)
 string(%d) "PHPT-%d"
 *** With lazy_write ***
 string(%d) "PHPT-%d"
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 bool(true)
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]

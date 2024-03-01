@@ -1,4 +1,4 @@
-.TH @program_prefix@php\-config 1 "2023" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php\-config 1 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 @program_prefix@php\-config \- get information about PHP configuration and compile options
 .SH SYNOPSIS
@@ -49,6 +49,14 @@ Show all SAPI modules available
 .PD 0
 .B \-\-configure-options
 Configure options to recreate configuration of current PHP installation
+.TP
+.PD 0
+.B \-\-ini-path
+Directory from which PHP reads its INI configuration file (php.ini)
+.TP
+.PD 0
+.B \-\-ini-dir
+Directory from which PHP scans for additional INI configuration files
 .TP
 .PD 0
 .B \-\-version

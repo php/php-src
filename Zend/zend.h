@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "4.3.0-dev"
+#define ZEND_VERSION "4.4.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -219,12 +219,13 @@ struct _zend_class_entry {
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
 
+	zend_string *doc_comment;
+
 	union {
 		struct {
 			zend_string *filename;
 			uint32_t line_start;
 			uint32_t line_end;
-			zend_string *doc_comment;
 		} user;
 		struct {
 			const struct _zend_function_entry *builtin_functions;
@@ -279,6 +280,7 @@ void zend_shutdown(void);
 void zend_register_standard_ini_entries(void);
 zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
+void zend_unload_modules(void);
 
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
 ZEND_API size_t zend_get_page_size(void);
@@ -345,6 +347,7 @@ extern ZEND_API void (*zend_post_shutdown_cb)(void);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+ZEND_API ZEND_COLD ZEND_NORETURN void zend_error_noreturn_unchecked(int type, const char *format, ...);
 /* For custom format specifiers like H */
 ZEND_API ZEND_COLD void zend_error_unchecked(int type, const char *format, ...);
 /* If filename is NULL the default filename is used. */
