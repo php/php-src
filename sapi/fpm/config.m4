@@ -327,27 +327,6 @@ AC_DEFUN([AC_FPM_KQUEUE],
 	])
 ])
 
-AC_DEFUN([AC_FPM_PORT],
-[
-	AC_MSG_CHECKING([for port framework])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <port.h>
-	]], [[
-		int port;
-
-		port = port_create();
-		if (port < 0) {
-			return 1;
-		}
-	]])], [
-		AC_DEFINE([HAVE_PORT], 1, [do we have port framework?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
 AC_DEFUN([AC_FPM_DEVPOLL],
 [
 	AC_MSG_CHECKING([for /dev/poll])
@@ -443,7 +422,6 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
   AC_FPM_KQUEUE
-  AC_FPM_PORT
   AC_FPM_DEVPOLL
   AC_FPM_EPOLL
   AC_FPM_SELECT
@@ -452,6 +430,7 @@ if test "$PHP_FPM" != "no"; then
 
   AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
   AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
+  AC_CHECK_HEADER([port.h], [AC_CHECK_FUNCS([port_create])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
