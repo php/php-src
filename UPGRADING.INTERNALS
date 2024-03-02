@@ -185,6 +185,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      When flags should be ignored, pass 0 to the flags argument.
    - php_pcre_match_impl() and pcre_get_compiled_regex_cache_ex() now use
      proper boolean argument types instead of integer types.
+   - pcre_get_compiled_regex_cache_ex() now provides an option to collect extra
+     options (from modifiers used in the expression, for example), and calls
+     pcre2_set_compile_extra_options() with those options.
 
 ========================
 4. OpCode changes
