@@ -45,13 +45,7 @@ if test "$PHP_PHPDBG" != "no"; then
     AC_MSG_RESULT([disabled])
   fi
 
-  AC_CACHE_CHECK([for userfaultfd faulting on write-protected memory support], ac_cv_phpdbg_userfaultfd_writefault, AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-    #include <linux/userfaultfd.h>
-    #ifndef UFFDIO_WRITEPROTECT_MODE_WP
-    # error userfaults on write-protected memory not supported
-    #endif
-  ]])], [ac_cv_phpdbg_userfaultfd_writefault=yes], [ac_cv_phpdbg_userfaultfd_writefault=no]))
-  if test "$ac_cv_phpdbg_userfaultfd_writefault" = "yes"; then
+  AC_CHECK_DECL([UFFDIO_WRITEPROTECT_MODE_WP], [
     if test "$enable_zts" != "yes"; then
       CFLAGS_SAVE="$CFLAGS"
       LIBS_SAVE="$LIBS"
@@ -73,7 +67,7 @@ if test "$PHP_PHPDBG" != "no"; then
     else
       AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
     fi
-  fi
+  ],,[#include <linux/userfaultfd.h>])
 
   PHP_SUBST(PHPDBG_EXTRA_LIBS)
 
