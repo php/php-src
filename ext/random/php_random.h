@@ -50,8 +50,6 @@ enum php_random_mt19937_mode {
 	MT_RAND_PHP = 1,
 };
 
-# define MT_N (624)
-
 #define PHP_RANDOM_RANGE_ATTEMPTS (50)
 
 PHPAPI void php_mt_srand(uint32_t seed);
@@ -75,7 +73,7 @@ typedef struct _php_random_status_state_combinedlcg {
 typedef struct _php_random_status_state_mt19937 {
 	uint32_t count;
 	enum php_random_mt19937_mode mode;
-	uint32_t state[MT_N];
+	uint32_t state[624];
 } php_random_status_state_mt19937;
 
 typedef struct _php_random_status_state_pcgoneseq128xslrr64 {
