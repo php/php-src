@@ -37,11 +37,18 @@
 
 PHPAPI double php_combined_lcg(void);
 
+static inline zend_long GENERATE_SEED()
+{
+	zend_ulong pid;
+
 # ifdef PHP_WIN32
-#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) GetCurrentProcessId())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+	pid = (zend_ulong) GetCurrentProcessId();
 # else
-#  define GENERATE_SEED() (((zend_long) ((zend_ulong) time(NULL) * (zend_ulong) getpid())) ^ ((zend_long) (1000000.0 * php_combined_lcg())))
+	pid = (zend_ulong) getpid();
 # endif
+
+	return (((zend_long) ((zend_ulong) time(NULL) * pid)) ^ ((zend_long) (1000000.0 * php_combined_lcg())));
+}
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
