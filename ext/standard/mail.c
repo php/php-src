@@ -78,6 +78,13 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 
 			return CONTAINS_CRLF;
 		}
+		/**
+		 * The RFC does not allow using LF alone for folding. However, LF is
+		 * often treated similarly to CRLF, and there are likely many user
+		 * environments that use LF for folding.
+		 * Therefore, considering such an environment, folding with LF alone
+		 * is allowed.
+		 */
 		if (*(value->val+len) == '\n') {
 			if (value->len - len >= 2
 				&& (*(value->val+len+1) == ' '  || *(value->val+len+1) == '\t')) {
