@@ -171,7 +171,7 @@ PHP_FUNCTION(bindtextdomain)
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, domain_len)
 
-	if (domain[0] == '\0') {
+	if (!domain_len) {
 		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
@@ -282,6 +282,11 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, domain_len)
+
+	if (!domain_len) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
 
 	retval = bind_textdomain_codeset(domain, codeset);
 
