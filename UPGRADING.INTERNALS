@@ -97,6 +97,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-imap-ssl has been removed.
    - The configure option --with-oci8 has been removed.
    - The configure option --with-zlib-dir has been removed.
+   - The configure option --with-kerberos has been removed.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.

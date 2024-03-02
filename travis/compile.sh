@@ -61,7 +61,6 @@ $S390X_CONFIG \
 --enable-calendar \
 --enable-ftp \
 --with-enchant=/usr \
---with-kerberos \
 --enable-sysvmsg \
 --with-ffi \
 --with-sodium \
