@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c1adcd8a928af82766ee8c0cd6b20c2f2e9afcc1 */
+ * Stub hash: 07c454c493c48f3abd5d5d724a3ce2dc56cdae4d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -484,6 +484,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_grapheme_stristr arginfo_grapheme_strstr
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_grapheme_str_split, 0, 1, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -901,6 +906,7 @@ ZEND_FUNCTION(grapheme_strripos);
 ZEND_FUNCTION(grapheme_substr);
 ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
+ZEND_FUNCTION(grapheme_str_split);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -1093,6 +1099,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_substr, arginfo_grapheme_substr)
 	ZEND_FE(grapheme_strstr, arginfo_grapheme_strstr)
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
+	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
