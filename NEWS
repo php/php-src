@@ -83,6 +83,7 @@ PHP                                                                        NEWS
     - ValueError if the integer index does not fit in a signed 32 bit integer
   . ResourceBundle::get() now has a tentative return type of:
     ResourceBundle|array|string|int|null
+  . Added the new Grapheme function grapheme_str_split. (youkidearitai)
 
 - LDAP:
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3

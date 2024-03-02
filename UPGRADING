@@ -435,6 +435,8 @@ PHP 8.4 UPGRADE NOTES
 - Intl:
   . Added IntlDateFormatter::getIanaID()/intltz_get_iana_id() to
     the IANA identifier from a given timezone.
+  . Added grapheme_str_split which allow to support emoji and Variation
+    Selectors.
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.

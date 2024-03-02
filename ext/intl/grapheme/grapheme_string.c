@@ -816,4 +816,82 @@ PHP_FUNCTION(grapheme_extract)
 	RETURN_STRINGL(((char *)pstr), ret_pos);
 }
 
+PHP_FUNCTION(grapheme_str_split)
+{
+	char *pstr, *end;
+	zend_string *str;
+	zend_long split_len = 1;
+
+	unsigned char u_break_iterator_buffer[U_BRK_SAFECLONE_BUFFERSIZE];
+	UErrorCode ustatus = U_ZERO_ERROR;
+	int32_t pos, current, i, end_len = 0;
+	UBreakIterator* bi;
+	UText *ut = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(split_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (split_len <= 0 || split_len > UINT_MAX / 4) {
+		zend_argument_value_error(2, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(str) == 0) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	pstr = ZSTR_VAL(str);
+	ut = utext_openUTF8(ut, pstr, ZSTR_LEN(str), &ustatus);
+
+	if ( U_FAILURE( ustatus ) ) {
+		/* Set global error code. */
+		intl_error_set_code( NULL, ustatus );
+
+		/* Set error messages. */
+		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text", 0 );
+
+		RETURN_FALSE;
+	}
+
+	bi = NULL;
+	ustatus = U_ZERO_ERROR;
+	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &ustatus );
+
+	if( U_FAILURE(ustatus) ) {
+		RETURN_FALSE;
+	}
+
+	ubrk_setUText(bi, ut, &ustatus);
+
+	pos = 0;
+	array_init(return_value);
+
+	for (end = pstr, i = 0, current = 0; pos != UBRK_DONE;) {
+		end_len = pos - current;
+		pos = ubrk_next(bi);
+
+		if (i == split_len - 1) {
+			if ( pos != UBRK_DONE ) {
+				add_next_index_stringl(return_value, pstr, pos - current);
+				end = pstr + pos - current;
+				i = 0;
+			}
+			pstr += pos - current;
+			current = pos;
+		} else {
+			i += 1;
+		}
+	}
+
+	if (i != 0 && end_len != 0) {
+		add_next_index_stringl(return_value, end, end_len);
+	}
+
+	utext_close(ut);
+	ubrk_close(bi);
+}
+
 /* }}} */
