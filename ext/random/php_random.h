@@ -37,7 +37,7 @@
 
 PHPAPI double php_combined_lcg(void);
 
-static inline zend_long GENERATE_SEED()
+static inline zend_long GENERATE_SEED(void)
 {
 	zend_ulong pid;
 
