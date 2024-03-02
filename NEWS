@@ -47,6 +47,10 @@ PHP                                                                        NEWS
 - FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
+- Gettext:
+  . bind_textdomain_codeset now throws an exception on empty domain.
+    (David Carlier)
+
 - IMAP:
   . Moved to PECL. (Derick Rethans)
 

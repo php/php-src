@@ -324,6 +324,9 @@ PHP 8.4 UPGRADE NOTES
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
 
+- Gettext:
+  . bind_textdomain_codeset now throws an exception if the domain's argument is empty.
+
 - Intl:
   . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
   . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
