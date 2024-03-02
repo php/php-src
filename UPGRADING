@@ -165,6 +165,11 @@ PHP 8.4 UPGRADE NOTES
     requests in non-POST HTTP requests.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
 
+- Curl:
+  . curl_version() returns an additional feature_list value, which is an
+    associative array of all known Curl features, and whether they are
+    supported (true) or not (false).
+
 - Date:
   . Added static methods
     DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
@@ -193,6 +198,10 @@ PHP 8.4 UPGRADE NOTES
 - FPM:
   . Flushing headers without a body will now succeed. See GH-12785.
 
+- Intl:
+  . NumberFormatter::ROUND_HALFODD added to complement existing
+    NumberFormatter::ROUND_HALFEVEN functionality.
+
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
 
@@ -211,8 +220,7 @@ PHP 8.4 UPGRADE NOTES
     or by invoking their constructor directly.
 
 - PDO_DBLIB:
-  . Fixed setAttribute and getAttribute (SakiTakamachi)
-  . Added PdoDbLib class (danack, kocsismate)
+  . Added class PdoDbLib.
 
 - PDO_FIREBIRD:
   . Added class PdoFirebird.
@@ -264,9 +272,6 @@ PHP 8.4 UPGRADE NOTES
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.
-  . curl_version() returns an additional feature_list value, which is an
-    associative array of all known Curl features, and whether they are
-    supported (true) or not (false).
 
 - Date:
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
@@ -326,8 +331,6 @@ PHP 8.4 UPGRADE NOTES
     have been added as aliases for NumberFormatter::ROUND_DOWN and
     NumberFormatter::ROUND_UP to be consistent with the new PHP_ROUND_* modes.
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
-  . NumberFormatter::ROUND_HALFODD added to complement existing
-    NumberFormatter::ROUND_HALFEVEN functionality.
   . ResourceBundle::get() now has a tentative return type of:
     ResourceBundle|array|string|int|null
 
