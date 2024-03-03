@@ -44,26 +44,26 @@ foreach ($attrs as $attr) {
 <container foo:bar="&amp;hello2" bar="&amp;hello3" xmlns="&amp;hello5"></container>
 <container foo:bar="&amp;hello2" bar="&amp;hello6" xmlns="&amp;hello5"></container>
 Attr: foo:bar
-string(0) ""
+NULL
 string(7) "foo:bar"
 NULL
 Attr: foo:bar
-string(0) ""
+NULL
 string(7) "foo:bar"
 NULL
 Attr: bar
-string(0) ""
+NULL
 string(3) "bar"
 NULL
 Attr: xmlns
-string(0) ""
+NULL
 string(5) "xmlns"
 NULL
 Attr: xmlns
-string(0) ""
+NULL
 string(5) "xmlns"
 NULL
 Attr: bar
-string(0) ""
+NULL
 string(3) "bar"
 NULL

@@ -25,19 +25,19 @@ dumpAttr($attr);
 --EXPECT--
 --- HTML document ---
 Attr: foo
-string(0) ""
+NULL
 string(3) "foo"
 NULL
 Attr: fooo
-string(0) ""
+NULL
 string(4) "fooo"
 NULL
 --- XML document ---
 Attr: foo
-string(0) ""
+NULL
 string(3) "foo"
 NULL
 Attr: FoOo
-string(0) ""
+NULL
 string(4) "FoOo"
 NULL

@@ -42,17 +42,17 @@ object(DOM\NamedNodeMap)#5 (1) {
   int(2)
 }
 name: string(5) "xmlns"
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: string(29) "http://www.w3.org/2000/xmlns/"
 name: string(1) "a"
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: NULL
 object(DOM\NamedNodeMap)#3 (1) {
   ["length"]=>
   int(3)
 }
 name: string(5) "xmlns"
-prefix: string(0) ""
+prefix: NULL
 namespaceURI: string(29) "http://www.w3.org/2000/xmlns/"
 name: string(7) "xmlns:c"
 prefix: string(5) "xmlns"

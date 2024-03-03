@@ -13,6 +13,6 @@ echo $root->ownerDocument->saveXML($root), "\n";
 
 ?>
 --EXPECT--
-string(0) ""
+NULL
 string(2) "u1"
 <el1 xmlns:p="u1" xmlns:q="u1"><el2 xmlns:q="u2" p:name="v"/></el1>

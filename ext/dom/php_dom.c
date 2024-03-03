@@ -980,7 +980,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&dom_modern_attr_prop_handlers, 0, NULL, NULL, true);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "namespaceURI", dom_node_namespace_uri_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "prefix", dom_node_prefix_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "prefix", dom_modern_node_prefix_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "localName", dom_node_local_name_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "name", dom_attr_name_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_attr_prop_handlers, "value", dom_attr_value_read, dom_attr_value_write);

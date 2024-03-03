@@ -87,7 +87,7 @@ string(5) "xmlns"
 string(9) "xmlns:bar"
 string(29) "http://www.w3.org/2000/xmlns/"
 Attr: xmlns
-string(0) ""
+NULL
 string(5) "xmlns"
 string(29) "http://www.w3.org/2000/xmlns/"
 Attr: xml:foo
@@ -106,19 +106,19 @@ string(5) "urn:a"
 
 --- NULL prefix cases ---
 Attr: baz1
-string(0) ""
+NULL
 string(4) "baz1"
 NULL
 Attr: baz2
-string(0) ""
+NULL
 string(4) "baz2"
 NULL
 Attr: baz1
-string(0) ""
+NULL
 string(4) "baz1"
 NULL
 Attr: baz2
-string(0) ""
+NULL
 string(4) "baz2"
 NULL
 <foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar="" baz1="" baz2=""></foo>
