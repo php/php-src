@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6fb121a5992ae96d12dea6055d1b0f0d6534cf21 */
+ * Stub hash: 690e40e295b09ca44dbb6dfadd3cd350695b4c85 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -148,7 +148,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_date_timestamp_set, 0, 2, DateTime, 0)
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
-	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_date_timestamp_get arginfo_date_offset_get
@@ -329,7 +329,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setISODa
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 1, DateTime, 0)
-	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DateTime_setMicroseconds, 0, 1, IS_STATIC, 0)
@@ -408,7 +408,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 1, DateTimeImmutable, 0)
-	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
+	ZEND_ARG_TYPE_MASK(0, timestamp, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_setMicroseconds arginfo_class_DateTime_setMicroseconds
