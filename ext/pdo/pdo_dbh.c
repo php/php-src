@@ -197,9 +197,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		zval_ptr_dtor(&info);
 	}
 
-	if (message) {
-		zend_string_release_ex(message, 0);
-	}
+	zend_string_release_ex(message, false);
 
 	if (supp) {
 		efree(supp);
