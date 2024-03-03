@@ -86,6 +86,8 @@ zend_result dom_element_schema_type_info_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_read(dom_object *obj, zval *retval);
 zend_result dom_element_inner_html_write(dom_object *obj, zval *newval);
 zend_result dom_element_class_list_read(dom_object *obj, zval *retval);
+zend_result dom_modern_element_substituted_node_value_read(dom_object *obj, zval *retval);
+zend_result dom_modern_element_substituted_node_value_write(dom_object *obj, zval *newval);
 
 /* entity properties */
 zend_result dom_entity_public_id_read(dom_object *obj, zval *retval);
