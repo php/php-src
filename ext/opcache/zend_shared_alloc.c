@@ -548,21 +548,17 @@ void zend_shared_alloc_init_xlat_table(void)
 {
 	/* Prepare translation table */
 	zend_hash_init(&ZCG(xlat_table), 128, NULL, NULL, 0);
-	zend_stack_init(&ZCG(xlat_ptrs), sizeof(void*));
 }
 
 void zend_shared_alloc_destroy_xlat_table(void)
 {
 	/* Destroy translation table */
 	zend_hash_destroy(&ZCG(xlat_table));
-	zend_stack_destroy(&ZCG(xlat_ptrs));
 }
 
 void zend_shared_alloc_clear_xlat_table(void)
 {
 	zend_hash_clean(&ZCG(xlat_table));
-	zend_stack_destroy(&ZCG(xlat_ptrs));
-	zend_stack_init(&ZCG(xlat_ptrs), sizeof(void*));
 }
 
 uint32_t zend_shared_alloc_checkpoint_xlat_table(void)

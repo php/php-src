@@ -213,7 +213,11 @@ typedef struct _zend_accel_globals {
 	time_t                  request_time;
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
 	HashTable               xlat_table;
-	zend_stack              xlat_ptrs;
+
+	zval                  **xlat_ptrs;
+	size_t                  xlat_ptrs_size;
+	size_t                  xlat_ptrs_capacity;
+
 #ifndef ZEND_WIN32
 	zend_ulong              root_hash;
 #endif

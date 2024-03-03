@@ -89,6 +89,35 @@ static void zend_persist_op_array(zval *zv);
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
+static void init_xlat_ptrs(void)
+{
+	ZCG(xlat_ptrs_size) = 0;
+	ZCG(xlat_ptrs_capacity) = 8;
+	ZCG(xlat_ptrs) = emalloc(sizeof(zval*) * ZCG(xlat_ptrs_capacity));
+}
+
+static void free_xlat_ptrs(void)
+{
+	ZCG(xlat_ptrs_size) = 0;
+	ZCG(xlat_ptrs_capacity) = 0;
+	efree(ZCG(xlat_ptrs));
+}
+
+static void push_xlat_ptr(void *p)
+{
+	if (!ZCG(xlat_ptrs)) {
+		return;
+	}
+
+	ZEND_ASSERT(ZCG(xlat_ptrs_capacity) >= ZCG(xlat_ptrs_size));
+	if (ZCG(xlat_ptrs_capacity) == ZCG(xlat_ptrs_size)) {
+		ZCG(xlat_ptrs_capacity) *= 2;
+		ZCG(xlat_ptrs) = erealloc(ZCG(xlat_ptrs), sizeof(zval*) * ZCG(xlat_ptrs_capacity));
+	}
+
+	ZCG(xlat_ptrs)[ZCG(xlat_ptrs_size)++] = p;
+}
+
 static void zend_hash_persist(HashTable *ht)
 {
 	uint32_t idx, nIndex;
@@ -574,7 +603,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 							Z_PTR_P(op2) = new_ptr;
 						} else {
 							/* Re-check once the script is fully compiled. */
-							zend_stack_push(&ZCG(xlat_ptrs), &op2);
+							push_xlat_ptr(op2);
 						}
 					}
 				}
@@ -1335,13 +1364,13 @@ static zend_early_binding *zend_persist_early_bindings(
 
 static void fix_xlat_ptrs(void)
 {
-	while (!zend_stack_is_empty(&ZCG(xlat_ptrs))) {
-		zval *op = *(void**)zend_stack_top(&ZCG(xlat_ptrs));
+	for (uint32_t i = 0; i < ZCG(xlat_ptrs_size); i++) {
+		zval *op = ZCG(xlat_ptrs)[i];
 		void *new_ptr = zend_shared_alloc_get_xlat_entry(Z_PTR_P(op));
 		ZEND_ASSERT(new_ptr != NULL);
 		ZVAL_PTR(op, new_ptr);
-		zend_stack_del_top(&ZCG(xlat_ptrs));
 	}
+	free_xlat_ptrs();
 }
 
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, int for_shm)
@@ -1377,6 +1406,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 #endif
 
 	zend_map_ptr_extend(ZCSG(map_ptr_last));
+	init_xlat_ptrs();
 
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table);
