@@ -714,7 +714,7 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 /* }}} */
 
 /* perform a fetch.
- * If return_value is not null, store values into it according to HOW. */
+ * Stores values into return_value according to HOW. */
 static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
 {
 	int flags, idx, old_arg_count = 0;
@@ -742,11 +742,6 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		colno = 1;
 	} else {
 		colno = stmt->fetch.column;
-	}
-
-	/* If no return value we are done */
-	if (!return_value) {
-		return true;
 	}
 
 	if (how == PDO_FETCH_LAZY) {
