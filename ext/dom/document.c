@@ -975,9 +975,7 @@ PHP_METHOD(DOMDocument, createElementNS)
 PHP_METHOD(DOM_Document, createElementNS)
 {
 	xmlDocPtr docp;
-	xmlNodePtr nodep = NULL;
 	int ret;
-	int errorcode;
 	dom_object *intern;
 	zend_string *name = NULL, *uri;
 
@@ -988,17 +986,17 @@ PHP_METHOD(DOM_Document, createElementNS)
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
 	xmlChar *localname = NULL, *prefix = NULL;
-	errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
+	int errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
 
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
-		nodep = xmlNewDocNode(docp, ns, localname, NULL);
+		xmlNodePtr nodep = xmlNewDocNode(docp, ns, localname, NULL);
 		if (UNEXPECTED(nodep == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
-			RETURN_THROWS();
+		} else {
+			DOM_RET_OBJ(nodep, &ret, intern);
 		}
-		DOM_RET_OBJ(nodep, &ret, intern);
 	} else {
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
 	}
