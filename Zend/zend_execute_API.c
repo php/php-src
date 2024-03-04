@@ -1544,7 +1544,7 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 			t_r.it_value.tv_sec = seconds;
 			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;
 
-# if defined(__CYGWIN__) || defined(__PASE__)
+# if defined(__CYGWIN__) || defined(__PASE__) || defined(__APPLE__)
 			setitimer(ITIMER_REAL, &t_r, NULL);
 		}
 		signo = SIGALRM;
