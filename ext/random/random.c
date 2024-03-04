@@ -309,7 +309,7 @@ PHPAPI const php_random_algo *php_random_default_algo(void)
 /* {{{ php_random_default_status */
 PHPAPI void *php_random_default_status(void)
 {
-	php_random_status_state_mt19937 *state = RANDOM_G(mt19937);
+	php_random_status_state_mt19937 *state = &RANDOM_G(mt19937);
 
 	if (!RANDOM_G(mt19937_seeded)) {
 		php_random_mt19937_seed_default(state);
@@ -390,7 +390,7 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 /* {{{ php_combined_lcg */
 PHPAPI double php_combined_lcg(void)
 {
-	php_random_status_state_combinedlcg *state = RANDOM_G(combined_lcg);
+	php_random_status_state_combinedlcg *state = &RANDOM_G(combined_lcg);
 
 	if (!RANDOM_G(combined_lcg_seeded)) {
 		php_random_combinedlcg_seed_default(state);
@@ -472,7 +472,7 @@ PHP_FUNCTION(mt_srand)
 	zend_long seed = 0;
 	bool seed_is_null = true;
 	zend_long mode = MT_RAND_MT19937;
-	php_random_status_state_mt19937 *state = RANDOM_G(mt19937);
+	php_random_status_state_mt19937 *state = &RANDOM_G(mt19937);
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -615,12 +615,6 @@ PHP_FUNCTION(random_int)
 static PHP_GINIT_FUNCTION(random)
 {
 	random_globals->random_fd = -1;
-
-	random_globals->combined_lcg = php_random_status_alloc(&php_random_algo_combinedlcg, true);
-	random_globals->combined_lcg_seeded = false;
-
-	random_globals->mt19937 = php_random_status_alloc(&php_random_algo_mt19937, true);
-	random_globals->mt19937_seeded = false;
 }
 /* }}} */
 
@@ -631,12 +625,6 @@ static PHP_GSHUTDOWN_FUNCTION(random)
 		close(random_globals->random_fd);
 		random_globals->random_fd = -1;
 	}
-
-	php_random_status_free(random_globals->combined_lcg, true);
-	random_globals->combined_lcg = NULL;
-
-	php_random_status_free(random_globals->mt19937, true);
-	random_globals->mt19937 = NULL;
 }
 /* }}} */
 

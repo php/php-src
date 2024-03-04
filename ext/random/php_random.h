@@ -203,11 +203,11 @@ PHP_MSHUTDOWN_FUNCTION(random);
 PHP_RINIT_FUNCTION(random);
 
 ZEND_BEGIN_MODULE_GLOBALS(random)
-	php_random_status_state_combinedlcg *combined_lcg;
-	bool combined_lcg_seeded;
-	php_random_status_state_mt19937 *mt19937;
-	bool mt19937_seeded;
 	int random_fd;
+	bool combined_lcg_seeded;
+	bool mt19937_seeded;
+	php_random_status_state_combinedlcg combined_lcg;
+	php_random_status_state_mt19937 mt19937;
 ZEND_END_MODULE_GLOBALS(random)
 
 PHPAPI ZEND_EXTERN_MODULE_GLOBALS(random)
