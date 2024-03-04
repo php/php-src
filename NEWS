@@ -2,12 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.5
 
+- MySQLnd:
+  . Fix GH-13452 (Fixed handshake response [mysqlnd]). (Saki Takamachi)
+
 - Random:
   . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
     unknown modes). (timwolla)
 
 - Standard:
   . Fixed bug GH-11808 (Live filesystem modified by tests). (nielsdos)
+  . Fixed GH-13402 (Added validation of `\n` in $additional_headers of mail()).
+    (SakiTakamachi)
 
 14 Mar 2024, PHP 8.3.4
 
