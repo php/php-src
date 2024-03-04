@@ -417,6 +417,9 @@ void ir_free(ir_ctx *ctx)
 	if (ctx->cfg_map) {
 		ir_mem_free(ctx->cfg_map);
 	}
+	if (ctx->cfg_schedule) {
+		ir_mem_free(ctx->cfg_schedule);
+	}
 	if (ctx->rules) {
 		ir_mem_free(ctx->rules);
 	}

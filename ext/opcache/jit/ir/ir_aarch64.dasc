@@ -1967,17 +1967,17 @@ static void ir_emit_overflow(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
-static void ir_emit_overflow_and_branch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
+static void ir_emit_overflow_and_branch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint32_t next_block)
 {
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 	ir_insn *overflow_insn = &ctx->ir_base[insn->op2];
 	ir_insn *math_insn = &ctx->ir_base[overflow_insn->op1];
 	ir_type type = math_insn->type;
-	uint32_t true_block, false_block, next_block;
+	uint32_t true_block, false_block;
 	bool reverse = 0;
 
-	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
+	ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 	if (true_block == next_block) {
 		reverse = 1;
 		true_block = false_block;
@@ -2845,37 +2845,37 @@ static void ir_emit_cmp_fp(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
-static void ir_emit_jmp_true(ir_ctx *ctx, uint32_t b, ir_ref def)
+static void ir_emit_jmp_true(ir_ctx *ctx, uint32_t b, ir_ref def, uint32_t next_block)
 {
-	uint32_t true_block, false_block, next_block;
+	uint32_t true_block, false_block;
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 
-	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
+	ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 	if (true_block != next_block) {
 		|	b =>true_block
 	}
 }
 
-static void ir_emit_jmp_false(ir_ctx *ctx, uint32_t b, ir_ref def)
+static void ir_emit_jmp_false(ir_ctx *ctx, uint32_t b, ir_ref def, uint32_t next_block)
 {
-	uint32_t true_block, false_block, next_block;
+	uint32_t true_block, false_block;
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 
-	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
+	ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 	if (false_block != next_block) {
 		|	b =>false_block
 	}
 }
 
-static void ir_emit_jz(ir_ctx *ctx, uint8_t op, uint32_t b, ir_type type, ir_reg reg)
+static void ir_emit_jz(ir_ctx *ctx, uint32_t b, uint32_t next_block, uint8_t op, ir_type type, ir_reg reg)
 {
-	uint32_t true_block, false_block, next_block;
+	uint32_t true_block, false_block;
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 
-	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
+	ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 	if (true_block == next_block) {
 		IR_ASSERT(op < IR_LT);
 		op ^= 1; // reverse
@@ -2904,13 +2904,13 @@ static void ir_emit_jz(ir_ctx *ctx, uint8_t op, uint32_t b, ir_type type, ir_reg
 	}
 }
 
-static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn *insn, bool int_cmp)
+static void ir_emit_jcc(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint32_t next_block, uint8_t op, bool int_cmp)
 {
-	uint32_t true_block, false_block, next_block;
+	uint32_t true_block, false_block;
 	ir_backend_data *data = ctx->data;
 	dasm_State **Dst = &data->dasm_state;
 
-	ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
+	ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 	if (true_block == next_block) {
 		/* swap to avoid unconditional JMP */
 		if (int_cmp || op == IR_EQ || op == IR_NE) {
@@ -3004,7 +3004,7 @@ static void ir_emit_jcc(ir_ctx *ctx, uint8_t op, uint32_t b, ir_ref def, ir_insn
 	}
 }
 
-static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
+static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint32_t next_block)
 {
 	ir_insn *cmp_insn = &ctx->ir_base[insn->op2];
 	ir_op op = cmp_insn->op;
@@ -3037,11 +3037,11 @@ static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_i
 	 && ctx->ir_base[op2].val.u64 == 0) {
 		if (op == IR_ULT) {
 			/* always false */
-			ir_emit_jmp_false(ctx, b, def);
+			ir_emit_jmp_false(ctx, b, def, next_block);
 			return;
 		} else if (op == IR_UGE) {
 			/* always true */
-			ir_emit_jmp_true(ctx, b, def);
+			ir_emit_jmp_true(ctx, b, def, next_block);
 			return;
 		} else if (op == IR_ULE) {
 			op = IR_EQ;
@@ -3049,21 +3049,21 @@ static void ir_emit_cmp_and_branch_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_i
 			op = IR_NE;
 		}
 		if (op1_reg != IR_REG_NONE && (op == IR_EQ || op == IR_NE)) {
-			ir_emit_jz(ctx, op, b, type, op1_reg);
+			ir_emit_jz(ctx, b, next_block, op, type, op1_reg);
 			return;
 		}
 	}
 	ir_emit_cmp_int_common(ctx, type, op1_reg, op1, op2_reg, op2);
-	ir_emit_jcc(ctx, op, b, def, insn, 1);
+	ir_emit_jcc(ctx, b, def, insn, next_block, op, 1);
 }
 
-static void ir_emit_cmp_and_branch_fp(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
+static void ir_emit_cmp_and_branch_fp(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint32_t next_block)
 {
 	ir_op op = ir_emit_cmp_fp_common(ctx, insn->op2, &ctx->ir_base[insn->op2]);
-	ir_emit_jcc(ctx, op, b, def, insn, 0);
+	ir_emit_jcc(ctx, b, def, insn, next_block, op, 0);
 }
 
-static void ir_emit_if_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
+static void ir_emit_if_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn, uint32_t next_block)
 {
 	ir_type type = ctx->ir_base[insn->op2].type;
 	ir_reg op2_reg = ctx->regs[def][2];
@@ -3071,9 +3071,9 @@ static void ir_emit_if_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 	dasm_State **Dst = &data->dasm_state;
 
 	if (IR_IS_CONST_REF(insn->op2)) {
-		uint32_t true_block, false_block, next_block;
+		uint32_t true_block, false_block;
 
-		ir_get_true_false_blocks(ctx, b, &true_block, &false_block, &next_block);
+		ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 		if (ir_const_is_true(&ctx->ir_base[insn->op2])) {
 			if (true_block != next_block) {
 				|	b =>true_block
@@ -3091,7 +3091,7 @@ static void ir_emit_if_int(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 		ir_emit_load(ctx, type, op2_reg, insn->op2);
 	}
 	|	ASM_REG_IMM_OP cmp, type, op2_reg, 0
-	ir_emit_jcc(ctx, IR_NE, b, def, insn, 1);
+	ir_emit_jcc(ctx, b, def, insn, next_block, IR_NE, 1);
 }
 
 static void ir_emit_cond(ir_ctx *ctx, ir_ref def, ir_insn *insn)
@@ -5610,9 +5610,20 @@ static void* dasm_labels[ir_lb_MAX];
 /* Veneers support (TODO: avid global variable usage) */
 static ir_ctx *ir_current_ctx;
 
+static uint32_t _ir_next_block(ir_ctx *ctx, uint32_t _b)
+{
+	uint32_t b = ctx->cfg_schedule[++_b];
+
+	/* Check for empty ENTRY block */
+	while (b && ((ctx->cfg_blocks[b].flags & (IR_BB_START|IR_BB_EMPTY)) == IR_BB_EMPTY)) {
+		b = ctx->cfg_schedule[++_b];
+	}
+	return b;
+}
+
 void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 {
-	uint32_t b, n, target;
+	uint32_t _b, b, n, target;
 	ir_block *bb;
 	ir_ref i;
 	ir_insn *insn;
@@ -5674,7 +5685,17 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 		ir_emit_load_params(ctx);
 	}
 
-	for (b = 1, bb = ctx->cfg_blocks + b; b <= ctx->cfg_blocks_count; b++, bb++) {
+	if (UNEXPECTED(!ctx->cfg_schedule)) {
+		uint32_t *list = ctx->cfg_schedule = ir_mem_malloc(sizeof(uint32_t) * (ctx->cfg_blocks_count + 2));
+		for (b = 0; b <= ctx->cfg_blocks_count; b++) {
+			list[b] = b;
+		}
+		list[ctx->cfg_blocks_count + 1] = 0;
+	}
+
+	for (_b = 1; _b <= ctx->cfg_blocks_count; _b++) {
+		b = ctx->cfg_schedule[_b];
+		bb = &ctx->cfg_blocks[b];
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
 			continue;
@@ -5774,10 +5795,10 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					ir_emit_copy_fp(ctx, i, insn);
 					break;
 				case IR_CMP_AND_BRANCH_INT:
-					ir_emit_cmp_and_branch_int(ctx, b, i, insn);
+					ir_emit_cmp_and_branch_int(ctx, b, i, insn, _ir_next_block(ctx, _b));
 					break;
 				case IR_CMP_AND_BRANCH_FP:
-					ir_emit_cmp_and_branch_fp(ctx, b, i, insn);
+					ir_emit_cmp_and_branch_fp(ctx, b, i, insn, _ir_next_block(ctx, _b));
 					break;
 				case IR_GUARD_CMP_INT:
 					ir_emit_guard_cmp_int(ctx, b, i, insn);
@@ -5786,7 +5807,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					ir_emit_guard_cmp_fp(ctx, b, i, insn);
 					break;
 				case IR_IF_INT:
-					ir_emit_if_int(ctx, b, i, insn);
+					ir_emit_if_int(ctx, b, i, insn, _ir_next_block(ctx, _b));
 					break;
 				case IR_COND:
 					ir_emit_cond(ctx, i, insn);
@@ -5801,7 +5822,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					ir_emit_overflow(ctx, i, insn);
 					break;
 				case IR_OVERFLOW_AND_BRANCH:
-					ir_emit_overflow_and_branch(ctx, b, i, insn);
+					ir_emit_overflow_and_branch(ctx, b, i, insn, _ir_next_block(ctx, _b));
 					break;
 				case IR_END:
 				case IR_LOOP_END:
@@ -5824,7 +5845,7 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 							IR_ASSERT(bb->successors_count == 1);
 						}
 						target = ir_skip_empty_target_blocks(ctx, succ);
-						if (b == ctx->cfg_blocks_count || target != ir_skip_empty_next_blocks(ctx, b + 1)) {
+						if (target != _ir_next_block(ctx, _b)) {
 							|	b =>target
 						}
 					} while (0);

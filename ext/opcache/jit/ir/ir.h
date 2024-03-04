@@ -563,6 +563,7 @@ struct _ir_ctx {
 	ir_block          *cfg_blocks;              /* list of basic blocks (starts from 1) */
 	uint32_t          *cfg_edges;               /* the actual basic blocks predecessors and successors edges */
 	uint32_t          *cfg_map;                 /* map of instructions to basic block number */
+	uint32_t          *cfg_schedule;            /* BB order for code generation */
 	uint32_t          *rules;                   /* array of target specific code-generation rules (for each instruction) */
 	uint32_t          *vregs;
 	ir_ref             vregs_count;

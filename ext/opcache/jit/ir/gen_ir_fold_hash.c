@@ -28,12 +28,12 @@ void print_hash(uint32_t *mask, uint32_t count)
 	printf("};\n\n");
 }
 
+#if 0
 static uint32_t hash_shl2(uint32_t mask, uint32_t r1, uint32_t r2)
 {
 	return ((mask << r1) - mask) << r2;
 }
-
-#if 0
+#else
 #define ir_rol(x, n)	(((x)<<(n)) | ((x)>>(-(int)(n)&(8*sizeof(x)-1))))
 #define ir_ror(x, n)	(((x)<<(-(int)(n)&(8*sizeof(x)-1))) | ((x)>>(n)))
 
@@ -52,6 +52,7 @@ int find_hash(uint32_t *mask, uint32_t count)
 	for (n = (count | 1); n < MAX_SLOTS; n += 2) {
 		for (r1 = 0; r1 < 31; r1++) {
 			for (r2 = 0; r2 < 32; r2++) {
+#if 0
 				memset(hash, 0, n * sizeof(uint32_t));
 				for (i = 0; i < count; i++) {
 					h = hash_shl2(mask[i] & 0x1fffff, r1, r2) % n;
@@ -63,7 +64,7 @@ int find_hash(uint32_t *mask, uint32_t count)
 					printf("static uint32_t _ir_fold_hashkey(uint32_t h)\n{\n\treturn (((h << %d) - h) << %d) %% %d;\n}\n", r1, r2, n);
 					return 1;
 				}
-#if 0
+#else
 				memset(hash, 0, n * sizeof(uint32_t));
 				for (i = 0; i < count; i++) {
 					h = hash_rol2(mask[i] & 0x1fffff, r1, r2) % n;
@@ -72,7 +73,7 @@ int find_hash(uint32_t *mask, uint32_t count)
 				}
 				if (i == count) {
 					print_hash(hash, n);
-					printf("static uint32_t _ir_fold_hashkey(uint32_t h)\n{\nreturn 0; /*rol2(%u,%u,%u)*/\n}\n", r1, r2, n);
+					printf("static uint32_t _ir_fold_hashkey(uint32_t h)\n{\nreturn ir_rol32((ir_rol32(h, %d) - h), %d) %% %d;\n}\n", r1, r2, n);
 					return 1;
 				}
 #endif
