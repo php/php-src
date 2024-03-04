@@ -45,10 +45,10 @@ PHPAPI double php_combined_lcg(void);
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
 
-# define MT_RAND_MT19937 0
-# define MT_RAND_PHP 1
-
-# define MT_N (624)
+enum php_random_mt19937_mode {
+	MT_RAND_MT19937 = 0,
+	MT_RAND_PHP = 1,
+};
 
 #define PHP_RANDOM_RANGE_ATTEMPTS (50)
 
@@ -71,9 +71,9 @@ typedef struct _php_random_status_state_combinedlcg {
 } php_random_status_state_combinedlcg;
 
 typedef struct _php_random_status_state_mt19937 {
-	uint32_t state[MT_N];
 	uint32_t count;
-	uint8_t mode;
+	enum php_random_mt19937_mode mode;
+	uint32_t state[624];
 } php_random_status_state_mt19937;
 
 typedef struct _php_random_status_state_pcgoneseq128xslrr64 {
