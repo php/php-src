@@ -22,6 +22,7 @@
 #include "mysqlnd_auth.h"
 #include "mysqlnd_wireprotocol.h"
 #include "mysqlnd_debug.h"
+#include "mysqlnd_charset.h"
 
 
 /* {{{ mysqlnd_command::set_option */
@@ -642,13 +643,12 @@ MYSQLND_METHOD(mysqlnd_command, handshake)(MYSQLND_CONN_DATA * const conn, const
 	conn->protocol_version	= greet_packet.protocol_version;
 	conn->server_version	= mnd_pestrdup(greet_packet.server_version, conn->persistent);
 
-	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
-	if (!conn->greet_charset) {
-		char * msg;
-		mnd_sprintf(&msg, 0, "Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet.charset_no);
-		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, msg);
-		mnd_sprintf_free(msg);
-		goto err;
+	const MYSQLND_CHARSET *read_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
+	if (!read_charset) {
+		greet_packet.charset_no = conn->m->get_server_version(conn) >= 50500 ? MYSQLND_UTF8_MB4_DEFAULT_ID : MYSQLND_UTF8_MB3_DEFAULT_ID;
+		conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
+	} else {
+		conn->greet_charset = read_charset;
 	}
 
 	conn->server_capabilities 	= greet_packet.server_capabilities;

@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.18
 
+- MySQLnd:
+  . Fix GH-13452 (Fixed handshake response [mysqlnd]). (Saki Takamachi)
+
 - PDO:
   . Fix various PDORow bugs. (Girgias)
 
