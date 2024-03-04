@@ -49,5 +49,12 @@ do { \
 	} \
 } while(0)
 
+typedef enum {
+	NO_HEADER_ERROR,
+	CONTAINS_LF_ONLY,
+	CONTAINS_CR_ONLY,
+	CONTAINS_CRLF,
+	CONTAINS_NULL
+} php_mail_header_value_error_type;
 
 #endif /* PHP_MAIL_H */

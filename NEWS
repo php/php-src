@@ -15,6 +15,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-11808 (Live filesystem modified by tests). (nielsdos)
+  . Fixed GH-13402: Added validation of `\n` in `$additional_headers` of `mail()`
+    (SakiTakamachi)
 
 - XML:
   . Fixed bug GH-13517 (Multiple test failures when building with

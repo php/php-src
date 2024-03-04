@@ -243,6 +243,8 @@ PHP 8.2 UPGRADE NOTES
     objects.
   . mail() function reverts back to the mixed LF and CRLF new lines (behavior
     before PHP 8.0) if mail.mixed_lf_and_crlf INI is on.
+  . When $additional_headers of mail() is an array, the same validation as
+    `\r\n` is now applied to `\n` alone too.
 
 - XML
   . xml_parser_set_option() now actually returns false when attempting to set a
