@@ -860,7 +860,7 @@ const zend_class_constant *zend_fetch_class_const_info(
 	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
 		return NULL;
 	}
-	zend_class_constant *const_info = zend_hash_find_ptr(&ce->constants_table, Z_STR(ZEND_OP2_LITERAL(opline)));
+	zend_class_constant *const_info = zend_hash_find_ptr(&ce->constants_table, Z_STR_P(CRT_CONSTANT(opline->op2)));
 	if (!const_info) {
 		return NULL;
 	}
