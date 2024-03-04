@@ -595,6 +595,10 @@ PHP_METHOD(SQLite3, query)
 	result->column_count = -1;
 	ZVAL_OBJ(&result->stmt_obj_zval, Z_OBJ(stmt));
 
+	if (sqlite3_column_count(result->stmt_obj->stmt) == 0) {
+		return;
+	}
+
 	return_code = sqlite3_step(result->stmt_obj->stmt);
 
 	switch (return_code) {
