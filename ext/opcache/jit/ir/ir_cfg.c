@@ -1826,7 +1826,10 @@ int ir_schedule_blocks(ir_ctx *ctx)
 	ir_block *bb, *best_successor_bb;
 	ir_insn *insn;
 	uint32_t *list, *empty;
-	uint32_t count = 0, empty_count = 0;
+	uint32_t count = 0;
+#ifdef IR_DEBUG
+	uint32_t empty_count = 0;
+#endif
 
 	ir_bitqueue_init(&blocks, ctx->cfg_blocks_count + 1);
 	blocks.pos = 0;
@@ -1852,7 +1855,9 @@ int ir_schedule_blocks(ir_ctx *ctx)
 			}
 			if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
 				/* move empty blocks to the end */
+#ifdef IR_DEBUG
 				empty_count++;
+#endif
 				*empty = b;
 				empty--;
 			} else {
