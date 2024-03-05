@@ -4498,21 +4498,22 @@ function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
     return empty($conds) ? null : implode(' && ', $conds);
 }
 
-function getFileDocComment(array $stmts): ?DocComment {
+/** @return DocComment[] */
+function getFileDocComments(array $stmts): array {
     if (empty($stmts)) {
-        return null;
+        return [];
     }
 
     $comments = $stmts[0]->getComments();
-    if (empty($comments)) {
-        return null;
+
+    $result = [];
+    foreach ($comments as $comment) {
+        if ($comment instanceof DocComment) {
+            $result[] = $comment;
+        }
     }
 
-    if ($comments[0] instanceof DocComment) {
-        return $comments[0];
-    }
-
-    return null;
+    return $result;
 }
 
 function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstract $prettyPrinter) {
@@ -4665,9 +4666,9 @@ function parseStubFile(string $code): FileInfo {
     $nodeTraverser->traverse($stmts);
 
     $fileInfo = new FileInfo;
-    $fileDocComment = getFileDocComment($stmts);
-    if ($fileDocComment) {
-        $fileTags = parseDocComment($fileDocComment);
+    $fileDocComments = getFileDocComments($stmts);
+    if ($fileDocComments !== []) {
+        $fileTags = parseDocComments($fileDocComments);
         foreach ($fileTags as $tag) {
             if ($tag->name === 'generate-function-entries') {
                 $fileInfo->generateFunctionEntries = true;
