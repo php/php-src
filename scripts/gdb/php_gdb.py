@@ -1,9 +1,14 @@
 
 """GDB support for PHP types
 
-Add this to your gdb by amending your ~/.gdbinit as follows:
+This is auto-loaded by GDB if Python Auto-loading is enabled (the default), and
+the PHP binary is in the auto load safe path:
 
-    source .gdb.py
+    # ~/.config/gdb/gdbinit (not ~/.gdbinit)
+    add-auto-load-safe-path /path/to/php-src
+
+See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Auto_002dloading.html
+See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Auto_002dloading-safe-path.html#Auto_002dloading-safe-path
 
 If needed, pretty printers can be by-passed by using the /r flag:
   (gdb) p /r any_variable
