@@ -32,6 +32,7 @@
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/xmlreader @nielsdos
 /ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka
