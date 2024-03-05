@@ -210,6 +210,10 @@ PHP 8.4 UPGRADE NOTES
     As a consequence, LoongArch JIT support has been added, spaces
     are now allowed between braces in Perl-compatible items, and
     variable-length lookbehind assertions are now supported.
+  . Added support for the "r" (PCRE2_EXTRA_CASELESS_RESTRICT) modifier, as well
+    as the (?r) mode modifier. When enabled along with the case-insensitive
+    modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
+    characters.
 
 - PDO:
   . Added support for driver-specific subclasses.

@@ -592,6 +592,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 #else
 	uint32_t			 coptions = 0;
 #endif
+	uint32_t			 eoptions = PHP_PCRE_DEFAULT_EXTRA_COPTIONS;
 	PCRE2_UCHAR	         error[128];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -722,6 +723,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 			/* PCRE specific options */
 			case 'A':	coptions |= PCRE2_ANCHORED;		break;
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
+			case 'r':	eoptions |= PCRE2_EXTRA_CASELESS_RESTRICT; break;
 			case 'S':	/* Pass. */					break;
 			case 'X':	/* Pass. */					break;
 			case 'U':	coptions |= PCRE2_UNGREEDY;		break;
@@ -775,6 +777,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 		}
 	}
 	pcre2_set_character_tables(cctx, tables);
+
+	pcre2_set_compile_extra_options(cctx, eoptions);
 
 	/* Compile pattern and display a warning if compilation failed. */
 	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
