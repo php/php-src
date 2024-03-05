@@ -62,6 +62,12 @@ ZEND_GET_MODULE(php_gettext)
 		RETURN_THROWS(); \
 	}
 
+#define PHP_DCGETTEXT_CATEGORY_CHECK(_arg_num, category) \
+	if (category == LC_ALL) { \
+		zend_argument_value_error(_arg_num, "cannot be LC_ALL"); \
+		RETURN_THROWS(); \
+	}
+
 PHP_MINFO_FUNCTION(php_gettext)
 {
 	php_info_print_table_start();
@@ -147,9 +153,7 @@ PHP_FUNCTION(dcgettext)
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
 	PHP_GETTEXT_LENGTH_CHECK(2, ZSTR_LEN(msgid))
-	if (category == LC_ALL) {
-		RETURN_STR_COPY(msgid);
-	}
+	PHP_DCGETTEXT_CATEGORY_CHECK(3, category)
 
 	msgstr = dcgettext(ZSTR_VAL(domain), ZSTR_VAL(msgid), category);
 
@@ -264,9 +268,7 @@ PHP_FUNCTION(dcngettext)
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, domain_len)
 	PHP_GETTEXT_LENGTH_CHECK(2, msgid1_len)
 	PHP_GETTEXT_LENGTH_CHECK(3, msgid2_len)
-	if (category == LC_ALL) {
-		RETURN_STRING(msgid1);
-	}
+	PHP_DCGETTEXT_CATEGORY_CHECK(5, category)
 
 	msgstr = dcngettext(domain, msgid1, msgid2, count, category);
 
