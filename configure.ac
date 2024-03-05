@@ -1709,6 +1709,10 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
+if printf "#if __ELF__\nelf\n#endif\n" | $CC -E - | grep elf > /dev/null; then
+  PHP_ADD_SOURCES(main, gdb_inlined_script.c)
+fi
+
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \

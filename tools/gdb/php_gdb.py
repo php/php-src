@@ -1,13 +1,16 @@
 
 """GDB support for PHP types
 
-Add this to your gdb by amending your ~/.gdbinit as follows:
-
-    source .gdb.py
+This is auto-loaded by GDB if Python Auto-loading is enabled (the default).
+See https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-Auto_002dloading.html
 
 Use
   (gdb) p /r any_variable
 to print |any_variable| without using any printers.
+
+Use
+  (gdb) source tools/gdb/php_gdb.py
+to reload the script
 
 To interactively type Python for development of the printers, use
   (gdb) python foo = gdb.parse_and_eval('bar')
