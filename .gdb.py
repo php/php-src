@@ -32,10 +32,7 @@ class ZendStringPrettyPrinter(gdb.printing.PrettyPrinter):
 
     def children(self):
         for field in self.val.type.fields():
-            if field.name == 'val':
-                yield ('val', self.format_string())
-            else:
-                yield (field.name, self.val[field.name])
+            yield (field.name, self.val[field.name])
 
     def format_string(self):
         len = int(self.val['len'])
