@@ -213,13 +213,11 @@ dnl from the sources. Should not be used directly.
 dnl
 AC_DEFUN([PHP_ADD_SOURCES_X],[
 dnl Relative to source- or build-directory?
-dnl source-path is "" when called from PHP_NEW_EXTENSION() for extensions built
-dnl with phpize, or a relative path when built in php-src.
 dnl ac_srcdir/ac_bdir include trailing slash
   case $1 in
-  ""[)] ac_srcdir="$abs_srcdir/"; ac_bdir="$abs_builddir/"; ac_inc="-I$ac_bdir -I. -I$abs_srcdir" ;;
+  ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
   /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
-  *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$abs_builddir/$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
+  *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
 
 dnl how to build .. shared or static?
