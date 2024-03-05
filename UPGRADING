@@ -481,6 +481,9 @@ PHP 8.4 UPGRADE NOTES
 - Sqlite:
   . The class constants are typed now.
 
+- XMLReader:
+  . The class constants are typed now.
+
 - XSL:
   . The typed properties XSLTProcessor::$cloneDocument and
     XSLTProcessor::$doXInclude are now declared.
