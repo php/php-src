@@ -479,7 +479,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 {
 	ir_ref i, j, n, ref, *p;
 	ir_insn *insn;
-	uint32_t flags, b;
+	uint32_t flags, _b, b;
 	ir_block *bb;
 	bool first;
 
@@ -501,7 +501,16 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 		fprintf(f, ";\n");
 	}
 
-	for (b = 1, bb = ctx->cfg_blocks + b; b <= ctx->cfg_blocks_count; b++, bb++) {
+	for (_b = 1; _b <= ctx->cfg_blocks_count; _b++) {
+		if (ctx->cfg_schedule) {
+			b = ctx->cfg_schedule[_b];
+		} else {
+			b = _b;
+		}
+		bb = &ctx->cfg_blocks[b];
+		if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
+			continue;
+		}
 		fprintf(f, "#BB%d:\n", b);
 
 		for (i = bb->start, insn = ctx->ir_base + i; i <= bb->end;) {
@@ -672,23 +681,14 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 #endif
 				}
 			}
+			succ = ir_skip_empty_target_blocks(ctx, succ);
 			if (succ != b + 1) {
 				fprintf(f, "\t# GOTO BB%d\n", succ);
 			}
 		} else if (insn->op == IR_IF) {
-			uint32_t true_block, false_block, *p;
+			uint32_t true_block, false_block;
 
-			p = &ctx->cfg_edges[bb->successors];
-			true_block = *p;
-			if (ctx->ir_base[ctx->cfg_blocks[true_block].start].op == IR_IF_TRUE) {
-				false_block = *(p+1);
-				IR_ASSERT(ctx->ir_base[ctx->cfg_blocks[false_block].start].op == IR_IF_FALSE);
-			} else {
-				false_block = true_block;
-				IR_ASSERT(ctx->ir_base[ctx->cfg_blocks[false_block].start].op == IR_IF_FALSE);
-				true_block = *(p+1);
-				IR_ASSERT(ctx->ir_base[ctx->cfg_blocks[true_block].start].op == IR_IF_TRUE);
-			}
+			ir_get_true_false_blocks(ctx, b, &true_block, &false_block);
 			fprintf(f, "\t# IF_TRUE BB%d, IF_FALSE BB%d\n", true_block, false_block);
 		} else if (insn->op == IR_SWITCH) {
 			fprintf(f, "\t# SWITCH ...\n");
