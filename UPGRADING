@@ -196,10 +196,6 @@ PHP 8.3 UPGRADE NOTES
   . Calling ldap_connect() with separate hostname and port is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_3#deprecate_calling_ldap_connect_with_2_parameters
 
-- Gettext:
-  . dcgettext/dcngettext throw now an exception if the category's argument if set to
-    `LC_ALL`.
-
 - MBString
   . Passing a negative $width to mb_strimwidth() is now deprecated.
 
