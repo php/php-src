@@ -29,7 +29,7 @@
 # include "win32/php_registry.h"
 # include <sys/timeb.h>
 #else
-# include "php_config.h"
+# include <php_config.h>
 #endif
 
 #ifdef __riscos__

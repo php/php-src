@@ -56,7 +56,7 @@
 #	define strcasecmp _stricmp
 #	define strncasecmp _strnicmp
 #else
-#	include "php_config.h"
+#	include <php_config.h>
 #endif
 #ifndef O_BINARY
 #	define O_BINARY 0

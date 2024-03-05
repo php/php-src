@@ -22,7 +22,7 @@
 /* Note that there is no code from the gd package in this file */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"

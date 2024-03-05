@@ -18,7 +18,7 @@
 #define PHP_POSIX_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #ifdef HAVE_POSIX
