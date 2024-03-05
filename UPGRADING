@@ -555,6 +555,8 @@ PHP 8.4 UPGRADE NOTES
 * The performance of strspn() and strcspn() is greatly improved.
   They now run in linear time instead of being bounded by quadratic time.
 
+* Improved the performance of strpbrk().
+
 * mb_strcut() is much faster now for UTF-8 and UTF-16 strings.
 
 * Looking up mbstring encoding names is much faster now.

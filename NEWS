@@ -13,7 +13,8 @@ PHP                                                                        NEWS
     array to hashed). (ilutov)
   . Fixed zend fiber build for solaris default mode (32 bits). (David Carlier)
   . Fixed zend call stack size for macOs/arm64. (David Carlier)
-  . Added support for Zend Max Execution Timers on FreeBSD (Kévin Dunglas)
+  . Added support for Zend Max Execution Timers on FreeBSD. (Kévin Dunglas)
+  . Ensure fiber stack is not backed by THP. (crrodriguez)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -104,6 +105,7 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
+  . Add "/r" modifier. (Ayesh)
 
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
@@ -208,6 +210,9 @@ PHP                                                                        NEWS
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
+
+- XMLReader:
+  . Declares class constant types. (Ayesh)
 
 - XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
