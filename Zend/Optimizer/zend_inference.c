@@ -3922,7 +3922,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			UPDATE_SSA_TYPE(zend_convert_type(script, cc->type, &ce), ssa_op->result_def);
 			if (ce) {
-				UPDATE_SSA_OBJ_TYPE(ce, is_prototype, ssa_op->result_def);
+				UPDATE_SSA_OBJ_TYPE(ce, /* is_instanceof */ true, ssa_op->result_def);
 			}
 			break;
 		}
