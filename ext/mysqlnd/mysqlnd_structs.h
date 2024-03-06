@@ -185,6 +185,7 @@ typedef struct st_mysqlnd_charset
 	const char		*comment;
 	short			mb_charlen;
 	short			mb_valid;
+	unsigned int    lowest_mb_byte;
 } MYSQLND_CHARSET;
 
 

@@ -87,6 +87,11 @@ PHPAPI void mysqlnd_library_init(void)
 		mysqlnd_register_builtin_authentication_plugins();
 
 		mysqlnd_reverse_api_init();
+
+#if MYSQLND_CHARSETS_SANITY_CHECK == 1
+		void mysqlnd_charsets_sanity_check(void);
+		mysqlnd_charsets_sanity_check();
+#endif
 	}
 }
 /* }}} */
