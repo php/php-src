@@ -47,6 +47,10 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 {
 	zval *p, *end;
 
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(object);
+	}
+
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
 			if (EXPECTED(GC_DELREF(object->properties) == 0)
@@ -84,10 +88,6 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			zend_hash_destroy(guards);
 			FREE_HASHTABLE(guards);
 		}
-	}
-
-	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
-		zend_weakrefs_notify(object);
 	}
 }
 
