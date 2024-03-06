@@ -160,10 +160,5 @@ prof-use:
 		fi; \
 	fi;
 
-$(srcdir)/main/gdb_inlined_script.c: $(srcdir)/tools/gdb/gen_gdb_inlined_script.php
-	@if test ! -z "$(PHP)"; then \
-		$(PHP) $(srcdir)/tools/gdb/gen_gdb_inlined_script.php; \
-	fi;
-
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
 .NOEXPORT:
