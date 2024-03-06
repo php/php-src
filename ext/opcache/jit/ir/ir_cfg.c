@@ -2299,10 +2299,10 @@ restart:
 	/* 4. Merge empty entry blocks */
 	if ((ctx->flags & IR_MERGE_EMPTY_ENTRIES) && ctx->entries_count) {
 		for (i = 0; i < ctx->entries_count; i++) {
-			b = ctx->cfg_map[ctx->entries[i]];
+			b = ctx->entries[i];
+			IR_ASSERT(ctx->cfg_blocks[b].flags & IR_BB_ENTRY);
 			if (b && chains[b].head == b && chains[b].tail == b) {
 				bb = &ctx->cfg_blocks[b];
-				IR_ASSERT(bb->flags & IR_BB_ENTRY);
 				if (bb->flags & IR_BB_EMPTY) {
 					uint32_t successor;
 
