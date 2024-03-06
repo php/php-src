@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
     unknown modes). (timwolla)
 
+- Sockets:
+  . Fixed bug GH-13604 (socket_getsockname returns random characters in the
+    end of the socket name). (David Carlier) 
+
 - SPL:
   . Fixed bug GH-13531 (Unable to resize SplfixedArray after being unserialized
     in PHP 8.2.15). (nielsdos)
