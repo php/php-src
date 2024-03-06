@@ -472,16 +472,18 @@ if test "$PHP_FPM" != "no"; then
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
-    AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
-    if test $HAVE_SD_DAEMON_H = "no"; then
-      AC_MSG_ERROR([Your system does not support systemd.])
-    else
-      AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
-      PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-      PHP_EVAL_LIBLINE($SYSTEMD_LIBS)
-      PHP_EVAL_INCLINE($SYSTEMD_CFLAGS)
-      php_fpm_systemd=notify
-    fi
+    AC_DEFINE([HAVE_SYSTEMD], [1], [Whether FPM has systemd integration])
+    PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
+    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS])
+    PHP_EVAL_INCLINE([$SYSTEMD_CFLAGS])
+    php_fpm_systemd=notify
+
+    dnl Sanity check.
+    CFLAGS_save="$CFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([systemd/sd-daemon.h],,
+      [AC_MSG_ERROR([Required systemd/sd-daemon.h not found.])])
+    CFLAGS="$CFLAGS_save"
   else
     php_fpm_systemd=simple
   fi
