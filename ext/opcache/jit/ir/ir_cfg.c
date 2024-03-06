@@ -2271,13 +2271,32 @@ restart:
 				IR_ASSERT(src == ir_chain_head(chains, e->from) && chains[src].tail == e->from);
 				if (src != dst) {
 					ir_join_chains(chains, src, dst);
-				} else if (ctx->ir_base[ctx->cfg_blocks[src].start].op == IR_LOOP_BEGIN
-				 && ctx->ir_base[ctx->cfg_blocks[src].end].op == IR_IF
-				 && ctx->ir_base[ctx->cfg_blocks[e->from].end].op == IR_LOOP_END) {
-					/* rotate loop moving the loop condition to the end */
-					uint32_t new_head = e->from;
-					chains[src].head = new_head;
-					chains[new_head].head = new_head;
+				} else if (ctx->cfg_blocks[e->from].successors_count < 2) {
+					/* Try to rotate loop chian to finish it with a conditional branch */
+					uint32_t tail = e->from;
+					uint32_t prev = src;
+					uint32_t next = chains[prev].next;
+					uint32_t best = 0;
+
+					while (prev != tail) {
+						if (ctx->ir_base[ctx->cfg_blocks[prev].end].op == IR_IF) {
+							if (ctx->ir_base[ctx->cfg_blocks[prev].start].op == IR_LOOP_BEGIN
+							 && ctx->cfg_blocks[prev].loop_depth > 1) {
+								best = next;
+								break;
+							} else if (!best || bb_freq[next] < bb_freq[best]) {
+								/* Find the successor of IF with the least frequency */
+								best = next;
+							}
+						}
+						prev = next;
+						next = chains[next].next;
+					}
+					if (best) {
+						/* change the head of the chain */
+						chains[src].head = best;
+						chains[best].head = best;
+					}
 				}
 #if !IR_DEBUG_BB_SCHEDULE_GRAPH
 				e->from = 0; /* reset "from" to avoid check on step #5 */
