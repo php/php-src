@@ -915,7 +915,7 @@ PHP_FUNCTION(socket_read)
 PHP_FUNCTION(socket_getsockname)
 {
 	zval					*arg1, *addr, *port = NULL;
-	php_sockaddr_storage	sa_storage;
+	php_sockaddr_storage	sa_storage = {0};
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
@@ -983,7 +983,7 @@ PHP_FUNCTION(socket_getsockname)
 PHP_FUNCTION(socket_getpeername)
 {
 	zval					*arg1, *arg2, *arg3 = NULL;
-	php_sockaddr_storage	sa_storage;
+	php_sockaddr_storage	sa_storage = {0};
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
