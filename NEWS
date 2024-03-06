@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.18
 
+- Core:
+  . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
+    (nielsdos)
+
 - Gettext:
   - Fixed sigabrt raised with dcgettext/dcngettext calls with gettext 0.22.5
     with category set to LC_ALL. (David Carlier)
