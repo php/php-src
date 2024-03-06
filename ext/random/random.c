@@ -312,6 +312,7 @@ PHPAPI void *php_random_default_status(void)
 	php_random_status_state_mt19937 *state = &RANDOM_G(mt19937);
 
 	if (!RANDOM_G(mt19937_seeded)) {
+		state->mode = MT_RAND_MT19937;
 		php_random_mt19937_seed_default(state);
 		RANDOM_G(mt19937_seeded) = true;
 	}
