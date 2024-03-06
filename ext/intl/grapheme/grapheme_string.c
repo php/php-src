@@ -847,7 +847,7 @@ PHP_FUNCTION(grapheme_str_split)
 	}
 
 	pstr = ZSTR_VAL(str);
-	utext_openUTF8(&ut, pstr, -1, &ustatus);
+	utext_openUTF8(&ut, pstr, ZSTR_LEN(str), &ustatus);
 
 	if ( U_FAILURE( ustatus ) ) {
 		/* Set global error code. */
