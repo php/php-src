@@ -325,6 +325,8 @@ interface DateTimeInterface
     /** @tentative-return-type */
     public function getTimestamp(): int;
 
+    public function getMicrosecond(): int;
+
     /** @tentative-return-type */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval;
 
