@@ -856,7 +856,7 @@ PHP_FUNCTION(grapheme_str_split)
 		/* Set error messages. */
 		intl_error_set_custom_msg( NULL, "Error opening UTF-8 text", 0 );
 
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	bi = NULL;
@@ -864,7 +864,7 @@ PHP_FUNCTION(grapheme_str_split)
 	bi = grapheme_get_break_iterator((void*)u_break_iterator_buffer, &ustatus );
 
 	if( U_FAILURE(ustatus) ) {
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	ubrk_setUText(bi, &ut, &ustatus);

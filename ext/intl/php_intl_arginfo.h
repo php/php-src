@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 07c454c493c48f3abd5d5d724a3ce2dc56cdae4d */
+ * Stub hash: 92bcd606c27114d821a20b217ba27dd7265ec0bd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -484,7 +484,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_grapheme_stristr arginfo_grapheme_strstr
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_grapheme_str_split, 0, 1, IS_ARRAY, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_split, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1")
 ZEND_END_ARG_INFO()
