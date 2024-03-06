@@ -53,7 +53,7 @@ array(3) {
   [2]=>
   array(2) {
     ["function"]=>
-    string(%d) "test\{closure:%s:%d}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }
