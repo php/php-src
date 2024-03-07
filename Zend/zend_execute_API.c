@@ -507,7 +507,7 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 		return "";
 	}
 
-	func = EG(current_execute_data)->func;
+	func = zend_active_function();
 
 	switch (func->type) {
 		case ZEND_USER_FUNCTION:
