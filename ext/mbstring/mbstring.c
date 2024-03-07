@@ -2953,55 +2953,41 @@ PHP_FUNCTION(mb_strtolower)
 	RETURN_STR(mbstring_convert_case(PHP_UNICODE_CASE_LOWER, ZSTR_VAL(str), ZSTR_LEN(str), enc));
 }
 
-static zend_string* php_mb_ulcfirst(zend_string *str, php_case_mode mode, const mbfl_encoding *enc)
+static void php_mb_ulcfirst(INTERNAL_FUNCTION_PARAMETERS, php_case_mode mode)
 {
-	zend_string *first, *second, *head;
-	first = mb_get_substr(str, 0, 1, enc);
-	second = mb_get_substr(str, 1, MBFL_SUBSTR_UNTIL_END, enc);
-	head = mbstring_convert_case(mode, ZSTR_VAL(first), ZSTR_LEN(first), enc);
+	zend_string *str, *from_encoding = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(from_encoding)
+	ZEND_PARSE_PARAMETERS_END();
+
+	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
+	if (!enc) {
+		RETURN_THROWS();
+	}
+
+	zend_string *first = mb_get_substr(str, 0, 1, enc);
+	zend_string *second = mb_get_substr(str, 1, MBFL_SUBSTR_UNTIL_END, enc);
+	zend_string *head = mbstring_convert_case(mode, ZSTR_VAL(first), ZSTR_LEN(first), enc);
 	zend_string_release_ex(first, false);
 
 	zend_string *retval = zend_string_concat2(ZSTR_VAL(head), ZSTR_LEN(head), ZSTR_VAL(second), ZSTR_LEN(second));
 	zend_string_release_ex(head, false);
 	zend_string_release_ex(second, false);
 
-	return retval;
+	RETVAL_STR(retval);
 }
 
 PHP_FUNCTION(mb_ucfirst)
 {
-	zend_string *str, *from_encoding = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(from_encoding)
-	ZEND_PARSE_PARAMETERS_END();
-
-	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
-	if (!enc) {
-		RETURN_THROWS();
-	}
-
-	RETVAL_STR(php_mb_ulcfirst(str, PHP_UNICODE_CASE_TITLE, enc));
+	php_mb_ulcfirst(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_UNICODE_CASE_TITLE);
 }
 
 PHP_FUNCTION(mb_lcfirst)
 {
-	zend_string *str, *from_encoding = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(str)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_NULL(from_encoding)
-	ZEND_PARSE_PARAMETERS_END();
-
-	const mbfl_encoding *enc = php_mb_get_encoding(from_encoding, 2);
-	if (!enc) {
-		RETURN_THROWS();
-	}
-
-	RETVAL_STR(php_mb_ulcfirst(str, PHP_UNICODE_CASE_LOWER, enc));
+	php_mb_ulcfirst(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_UNICODE_CASE_LOWER);
 }
 
 typedef enum {
