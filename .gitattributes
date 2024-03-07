@@ -30,3 +30,5 @@
 
 # Vendored libraries
 /ext/dom/lexbor/lexbor linguist-vendored
+
+*.phpt linguist-generated
