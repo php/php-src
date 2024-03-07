@@ -85,6 +85,9 @@ PHP                                                                        NEWS
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
 
+- MySQLnd:
+  . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
+
 - Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
@@ -110,7 +113,6 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
-  . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
