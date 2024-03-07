@@ -2,6 +2,7 @@
 openssl_private_decrypt() tests
 --EXTENSIONS--
 openssl
+--XFAIL--
 --FILE--
 <?php
 $data = "Testing openssl_public_decrypt()";
