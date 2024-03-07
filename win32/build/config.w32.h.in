@@ -10,7 +10,6 @@
 
 /* Default PHP / PEAR directories */
 #define PHP_CONFIG_FILE_PATH ""
-#define CONFIGURATION_FILE_PATH "php.ini"
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
 #define PHP_DATADIR "@PREFIX@"
@@ -22,8 +21,6 @@
 #define PHP_SYSCONFDIR "@PREFIX@"
 
 /* PHP Runtime Configuration */
-#define PHP_URL_FOPEN 1
-#define USE_CONFIG_FILE 1
 #define DEFAULT_SHORT_OPEN_TAG "1"
 
 /* Platform-Specific Configuration. Should not be changed. */
@@ -40,7 +37,6 @@
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
-#define HAVE_ERRMSG_H 0
 #undef HAVE_ADABAS
 #undef HAVE_SOLID
 #undef HAVE_SYMLINK
@@ -50,8 +46,6 @@
 #define HAVE_NANOSLEEP 1
 
 #define HAVE_GETCWD 1
-#define NEED_ISBLANK 1
-#define DISCARD_PATH 0
 #undef HAVE_SETITIMER
 #undef HAVE_SIGSETJMP
 #undef HAVE_IODBC
@@ -65,11 +59,8 @@
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
 #undef HAVE_STRUCT_STAT_ST_BLOCKS
 #define HAVE_STRUCT_STAT_ST_RDEV 1
-#define REGEX 1
-#define HSREGEX 1
 #define HAVE_GETLOGIN 1
 #define HAVE_MEMMOVE 1
-#define HAVE_REGCOMP 1
 #define HAVE_SHUTDOWN 1
 #define HAVE_STRCASECMP 1
 #define HAVE_UTIME 1
@@ -86,7 +77,6 @@
 #undef HAVE_ALLOCA_H
 #undef HAVE_KILL
 #define HAVE_GETPID 1
-#undef HAVE_RINT
 /* int and long are still 32bit in 64bit compiles */
 #define SIZEOF_INT 4
 #define SIZEOF_LONG 4
