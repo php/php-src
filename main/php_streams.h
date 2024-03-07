@@ -20,6 +20,11 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
+#ifdef __APPLE__
+#include <sys/dirent.h>
+#endif
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "zend.h"
@@ -107,10 +112,14 @@ typedef struct _php_stream_statbuf {
 } php_stream_statbuf;
 
 typedef struct _php_stream_dirent {
-#ifdef NAME_MAX
-	char d_name[NAME_MAX + 1];
+#if defined(__DARWIN_MAXPATHLEN)
+	char d_name[__DARWIN_MAXPATHLEN + 1];
 #else
+# ifdef NAME_MAX
+	char d_name[NAME_MAX + 1];
+# else
 	char d_name[MAXPATHLEN];
+# endif
 #endif
 	unsigned char d_type;
 } php_stream_dirent;
