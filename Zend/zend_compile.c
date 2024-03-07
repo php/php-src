@@ -4807,7 +4807,8 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		zend_op *opline;
 
 		lcname = zend_string_tolower(Z_STR_P(name));
-		fbc = zend_hash_find_ptr(CG(function_table), lcname);
+		zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
+		fbc = fbc_zv ? Z_PTR_P(fbc_zv) : NULL;
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
@@ -4841,6 +4842,12 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();
+
+		/* Store offset to function from symbol table in op2.extra. */
+		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+			Bucket *fbc_bucket = (Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+			Z_EXTRA_P(CT_CONSTANT(opline->op2)) = fbc_bucket - CG(function_table)->arData;
+		}
 
 		zend_compile_call_common(result, args_ast, fbc, ast->lineno);
 	}
