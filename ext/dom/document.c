@@ -538,7 +538,7 @@ PHP_METHOD(DOM_Document, createElement)
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
 	if (xmlValidateName(BAD_CAST ZSTR_VAL(name), 0) != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document));
+		php_dom_throw_error(INVALID_CHARACTER_ERR, /* strict */ true);
 		RETURN_THROWS();
 	}
 

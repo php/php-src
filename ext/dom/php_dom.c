@@ -1933,7 +1933,7 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last)
 }
 
 /* https://dom.spec.whatwg.org/#validate-and-extract */
-int dom_validate_and_extract(zend_string *namespace, zend_string *qname, xmlChar **localName, xmlChar **prefix)
+int dom_validate_and_extract(const zend_string *namespace, const zend_string *qname, xmlChar **localName, xmlChar **prefix)
 {
 	/* 1. If namespace is the empty string, then set it to null.
 	 *    However, we're going to cheat and do the opposite to make

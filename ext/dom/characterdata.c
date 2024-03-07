@@ -119,14 +119,14 @@ Since:
 */
 PHP_METHOD(DOMCharacterData, substringData)
 {
-	zval       *id;
-	xmlChar    *cur;
-	xmlChar    *substring;
-	xmlNodePtr  node;
-	zend_long        offset_input, count_input;
+	zval *id;
+	xmlChar *cur;
+	xmlChar *substring;
+	xmlNodePtr node;
+	zend_long offset_input, count_input;
 	unsigned int count, offset;
-	int         length;
-	dom_object	*intern;
+	int length;
+	dom_object *intern;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset_input, &count_input) == FAILURE) {

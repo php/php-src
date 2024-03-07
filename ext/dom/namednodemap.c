@@ -79,9 +79,9 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (const xmlChar *) ZSTR_VAL(named));
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, BAD_CAST ZSTR_VAL(named));
 				} else {
-					xmlNotationPtr notep = xmlHashLookup(objmap->ht, (const xmlChar *) ZSTR_VAL(named));
+					xmlNotationPtr notep = xmlHashLookup(objmap->ht, BAD_CAST ZSTR_VAL(named));
 					if (notep) {
 						if (may_transform) {
 							itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
@@ -95,9 +95,9 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
 				if (php_dom_follow_spec_intern(objmap->baseobj)) {
-					itemnode = (xmlNodePtr) php_dom_get_attribute_node(nodep, (const xmlChar *) ZSTR_VAL(named), ZSTR_LEN(named));
+					itemnode = (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST ZSTR_VAL(named), ZSTR_LEN(named));
 				} else {
-					itemnode = (xmlNodePtr) xmlHasProp(nodep, (const xmlChar *) ZSTR_VAL(named));
+					itemnode = (xmlNodePtr) xmlHasProp(nodep, BAD_CAST ZSTR_VAL(named));
 				}
 			}
 		}
@@ -224,9 +224,9 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
 				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, (xmlChar *) named);
+					itemnode = (xmlNodePtr)xmlHashLookup(objmap->ht, BAD_CAST named);
 				} else {
-					notep = (xmlNotation *)xmlHashLookup(objmap->ht, (xmlChar *) named);
+					notep = (xmlNotation *)xmlHashLookup(objmap->ht, BAD_CAST named);
 					if (notep) {
 						itemnode = create_notation(notep->name, notep->PublicID, notep->SystemID);
 					}
@@ -235,7 +235,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 		} else {
 			nodep = dom_object_get_node(objmap->baseobj);
 			if (nodep) {
-				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, (xmlChar *) named, (xmlChar *) uri);
+				itemnode = (xmlNodePtr)xmlHasNsProp(nodep, BAD_CAST named, BAD_CAST uri);
 			}
 		}
 	}

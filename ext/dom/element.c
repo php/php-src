@@ -277,7 +277,7 @@ PHP_METHOD(DOMElement, getAttribute)
 	dom_object *intern;
 	xmlNodePtr attr;
 	size_t name_len;
-	bool should_free;
+	bool should_free = false;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
@@ -424,8 +424,7 @@ PHP_METHOD(DOMElement, setAttribute)
 					break;
 				case XML_NAMESPACE_DECL:
 					RETURN_FALSE;
-				default:
-					break;
+				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 		}
 
@@ -712,7 +711,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	if (existattrp != NULL) {
 		DOM_RET_OBJ((xmlNodePtr) existattrp, &ret, intern);
 	} else {
-		RETVAL_NULL();
+		RETURN_NULL();
 	}
 }
 
@@ -722,7 +721,7 @@ Since:
 */
 PHP_METHOD(DOMElement, setAttributeNode)
 {
-	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false, false);
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* use_ns */ false, /* modern */ false);
 }
 /* }}} end dom_element_set_attribute_node */
 
@@ -866,7 +865,7 @@ PHP_METHOD(DOMElement, getAttributeNS)
 }
 /* }}} end dom_element_get_attribute_ns */
 
-static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, char *uri, char *name, const char *value, size_t uri_len, size_t name_len)
+static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, char *uri, size_t uri_len, char *name, size_t name_len, const char *value)
 {
 	if (name_len == 0) {
 		zend_argument_value_error(2, "cannot be empty");
@@ -963,7 +962,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 }
 
 /* https://dom.spec.whatwg.org/#dom-element-setattributens */
-static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, zend_string *uri, zend_string *name, const char *value)
+static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, zend_string *uri, const zend_string *name, const char *value)
 {
 	xmlChar *localname = NULL, *prefix = NULL;
 	int errorcode = dom_validate_and_extract(uri, name, &localname, &prefix);
@@ -1006,7 +1005,7 @@ PHP_METHOD(DOMElement, setAttributeNS)
 	if (php_dom_follow_spec_intern(intern)) {
 		dom_set_attribute_ns_modern(intern, elemp, uri, name, value);
 	} else {
-		dom_set_attribute_ns_legacy(intern, elemp, uri ? ZSTR_VAL(uri) : NULL, ZSTR_VAL(name), value, uri ? ZSTR_LEN(uri) : 0, ZSTR_LEN(name));
+		dom_set_attribute_ns_legacy(intern, elemp, uri ? ZSTR_VAL(uri) : NULL, uri ? ZSTR_LEN(uri) : 0, ZSTR_VAL(name), ZSTR_LEN(name), value);
 	}
 }
 /* }}} end dom_element_set_attribute_ns */
@@ -1103,12 +1102,12 @@ PHP_METHOD(DOMElement, removeAttributeNS)
 		uri = NULL;
 	}
 
-	attrp = xmlHasNsProp(nodep, (xmlChar *)name, (xmlChar *)uri);
+	attrp = xmlHasNsProp(nodep, BAD_CAST name, BAD_CAST uri);
 
 	if (!follow_spec) {
-		nsptr = dom_get_nsdecl(nodep, (xmlChar *)name);
+		nsptr = dom_get_nsdecl(nodep, BAD_CAST name);
 		if (nsptr != NULL) {
-			if (xmlStrEqual((xmlChar *)uri, nsptr->href)) {
+			if (xmlStrEqual(BAD_CAST uri, nsptr->href)) {
 				dom_eliminate_ns(nodep, nsptr);
 			} else {
 				return;
@@ -1154,12 +1153,12 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 		uri = NULL;
 	}
 
-	attrp = xmlHasNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
+	attrp = xmlHasNsProp(elemp, BAD_CAST name, BAD_CAST uri);
 
 	if (attrp == NULL) {
-		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+		if (!follow_spec && xmlStrEqual(BAD_CAST uri, DOM_XMLNS_NAMESPACE)) {
 			xmlNsPtr nsptr;
-			nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
+			nsptr = dom_get_nsdecl(elemp, BAD_CAST name);
 			if (nsptr != NULL) {
 				/* Keep parent alive, because we're a fake child. */
 				GC_ADDREF(&intern->std);
@@ -1183,12 +1182,12 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMElement, setAttributeNodeNS)
 {
-	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, false);
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* use_ns */ true, /* modern */ false);
 }
 
 PHP_METHOD(DOM_Element, setAttributeNodeNS)
 {
-	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true, true);
+	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* use_ns */ true, /* modern */ true);
 }
 /* }}} end dom_element_set_attribute_node_ns */
 
@@ -1695,7 +1694,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 				* It follows the same rules when you'd manually add an attribute using the other APIs. */
 				int len;
 				const xmlChar *split = xmlSplitQName3((const xmlChar *) qname, &len);
-				if (split == NULL || strncmp(qname, "xmlns:", len + 1) != 0) {
+				if (split == NULL || strncmp(qname, "xmlns:", len + 1 /* +1 for matching ':' too */) != 0) {
 					/* unqualified name, or qualified name with no xml namespace declaration */
 					dom_create_attribute(thisp, qname, "");
 				} else {
