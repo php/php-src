@@ -45,6 +45,7 @@ Intl:
 
 MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
+  . Added mb_ucfirst and mb_lcfirst. (Yuya Hamada)
 
 Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)

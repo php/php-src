@@ -331,6 +331,8 @@ PDO_SQLITE:
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
     RFC: https://wiki.php.net/rfc/mb_trim
+  . Added mb_ucfirst and mb_lcfirst functions.
+    RFC: https://wiki.php.net/rfc/mb_ucfirst
 
 - Opcache:
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
