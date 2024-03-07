@@ -491,22 +491,25 @@ if test "$PHP_FPM" != "no"; then
 
     dnl *BSD has acl_* built into libc, macOS doesn't have user/group support.
     LIBS_save="$LIBS"
-    AC_SEARCH_LIBS([acl_free], [acl],
-      [AC_MSG_CHECKING([for acl user/group permissions support])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>],
-        [acl_t acl;
+    AC_SEARCH_LIBS([acl_free], [acl], [
+      AC_MSG_CHECKING([for acl user/group permissions support])
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
+        acl_t acl;
         acl_entry_t user, group;
         acl = acl_init(1);
         acl_create_entry(&acl, &user);
         acl_set_tag_type(user, ACL_USER);
         acl_create_entry(&acl, &group);
         acl_set_tag_type(user, ACL_GROUP);
-        acl_free(acl);])],
-        [AC_MSG_RESULT([yes])
-        AC_DEFINE([HAVE_FPM_ACL], [1], [Whether FPM has acl support])],
-        [AC_MSG_RESULT([no])
-        LIBS="$LIBS_save"])],
-      [LIBS="$LIBS_save"])
+        acl_free(acl);
+      ])], [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_FPM_ACL], [1], [Whether FPM has acl support])
+      ], [
+        AC_MSG_RESULT([no])
+        LIBS="$LIBS_save"
+      ])
+    ])
   fi
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then
