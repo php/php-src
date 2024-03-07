@@ -844,7 +844,9 @@ const zend_class_constant *zend_fetch_class_const_info(
 		if (Z_TYPE_P(op1) == IS_STRING) {
 			ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
 		}
-	} else if (opline->op1_type == IS_UNUSED && op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
+	} else if (opline->op1_type == IS_UNUSED
+		&& op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
+		&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 		int fetch_type = opline->op1.num & ZEND_FETCH_CLASS_MASK;
 		if (fetch_type == ZEND_FETCH_CLASS_SELF) {
 			ce = op_array->scope;
