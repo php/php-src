@@ -1,6 +1,6 @@
-#################
+##########
  --TEST--
-#################
+##########
 
 The mandatory ``--TEST--`` section that must be at the beginning of a PHPT.
 
