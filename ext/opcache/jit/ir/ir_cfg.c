@@ -1856,9 +1856,15 @@ static int ir_edge_info_cmp(const void *b1, const void *b2)
 	if (e1->freq != e2->freq) {
 		return e1->freq < e2->freq ? 1 : -1;
 	}
-	/* In case of equal frequences prefer to keep the existing order */
+	/* In case of equal frequencies, try to avoid penalization of one of the "equal" paths by
+	 * preferring the first RPO successor (in conditional branches) and the last RPO predecessor
+	 * (in merge points).
+	 *
+	 * See "Static Basic Block Reordering Heuristics for Implicit Control Flow in Baseline JITs"
+	 * Polito Guillermo, Ducasse Stephane, and Tesone Pablo (2021)
+	 */
 	if (e1->from != e2->from) {
-		return e1->from - e2->from;
+		return e2->from - e1->from;
 	} else {
 		return e1->to - e2->to;
 	}
@@ -2037,7 +2043,7 @@ static int ir_schedule_blocks_bottom_up(ir_ctx *ctx)
 		chains[b].prev = b;
 	}
 
-	/* 2. Collect information about BBs and EDGEs freqeuncies */
+	/* 2. Collect information about BBs and EDGEs frequencies */
 	edges = ir_mem_malloc(sizeof(ir_edge_info) * max_edges_count);
 	bb_freq = ir_mem_calloc(ctx->cfg_blocks_count + 1, sizeof(float));
 	bb_freq[1] = 1.0f;
@@ -2052,8 +2058,8 @@ restart:
 			uint32_t *p = ctx->cfg_edges + bb->predecessors;
 			for (; n > 0; p++, n--) {
 				uint32_t predecessor = *p;
-				/* Basic Blocks are ordered in a way that usual predecessors ids are less then successors.
-				 * So we may comapre blocks ids (predecessor < b) instead of a more expensive check for back edge
+				/* Basic Blocks are ordered in a way that usual predecessors ids are less than successors.
+				 * So we may compare blocks ids (predecessor < b) instead of a more expensive check for back edge
 				 * (b != predecessor && ctx->cfg_blocks[predecessor].loop_header != b)
 				 */
 				if (predecessor < b) {
@@ -2255,14 +2261,14 @@ restart:
 	ir_bitqueue_free(&worklist);
 	ir_mem_free(visited);
 
-	/* 2. Sort EDGEs according to their frequentcies */
+	/* 2. Sort EDGEs according to their frequencies */
 	qsort(edges, edges_count, sizeof(ir_edge_info), ir_edge_info_cmp);
 
 #if IR_DEBUG_BB_SCHEDULE_EDGES
 	ir_dump_edges(ctx, edges_count, edges);
 #endif
 
-	/* 3. Process EDGEs in the decrising frequentcy order and join the connected chains */
+	/* 3. Process EDGEs in the decreasing frequency order and join the connected chains */
 	for (e = edges, i = edges_count; i > 0; e++, i--) {
 		uint32_t dst = chains[e->to].head;
 		if (dst == e->to) {
@@ -2341,8 +2347,8 @@ restart:
 #endif
 	}
 
-	/* 5. Group chains accoring to the most frequnt edge between them */
-	// TODO: Try to find a better heuristc
+	/* 5. Group chains according to the most frequent edge between them */
+	// TODO: Try to find a better heuristic
 	for (e = edges, i = edges_count; i > 0; e++, i--) {
 #if !IR_DEBUG_BB_SCHEDULE_GRAPH
 		if (!e->from) continue;
@@ -2525,8 +2531,14 @@ int ir_schedule_blocks(ir_ctx *ctx)
 {
 	if (ctx->cfg_blocks_count <= 2) {
 		return 1;
-	// TODO: make the choise between top-down and bottom-up algorithm configurable
-	} else if (UNEXPECTED(ctx->flags2 & IR_IRREDUCIBLE_CFG) || ctx->cfg_blocks_count > 256) {
+	}
+
+	/* The bottom-up Pettis-Hansen algorithm is expensive - O(n^3),
+	 * use it only for relatively small functions.
+	 *
+	 * TODO: make the choice between top-down and bottom-up algorithm configurable
+	 */
+	if (UNEXPECTED(ctx->flags2 & IR_IRREDUCIBLE_CFG) || ctx->cfg_blocks_count > 256) {
 		return ir_schedule_blocks_top_down(ctx);
 	} else {
 		return ir_schedule_blocks_bottom_up(ctx);
