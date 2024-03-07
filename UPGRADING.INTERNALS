@@ -129,6 +129,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
      PHP_ASSEMBLER and FIBER_ASM_ABI.
    - HAVE_PHP_SOAP symbol renamed to HAVE_SOAP.
+   - Unused symbols CONFIGURATION_FILE_PATH, DISCARD_PATH, HAVE_ERRMSG_H,
+     HAVE_REGCOMP, HAVE_RINT, NEED_ISBLANK, PHP_URL_FOPEN, REGEX, HSREGEX,
+     USE_CONFIG_FILE have been removed.
 
 ========================
 3. Module changes
