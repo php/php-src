@@ -110,6 +110,7 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
+  . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
