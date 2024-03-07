@@ -2973,7 +2973,10 @@ static void php_mb_ulcfirst(INTERNAL_FUNCTION_PARAMETERS, php_case_mode mode)
 	zend_string *head = mbstring_convert_case(mode, ZSTR_VAL(first), ZSTR_LEN(first), enc);
 
 	if (zend_string_equals(first, head)) {
-		RETVAL_STR(zend_string_copy(str));
+		zend_string_release_ex(first, false);
+		zend_string_release_ex(head, false);
+		zend_string_release_ex(second, false);
+		RETURN_STR(zend_string_copy(str));
 	}
 
 	zend_string_release_ex(first, false);
