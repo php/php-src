@@ -9,12 +9,7 @@ multiple sections, however each test must have at least 3 sections:
 -  A script to test
 -  The expected output of the test
 
-A complete description of the available section is available TODO.
-
-.. toctree::
-
-   phpt-sections/test
-   phpt-sections/file
+A complete description of the available section is available at the end.
 
 *******************
  Naming convention
@@ -80,3 +75,15 @@ TODO
    ?>
    --EXPECT--
    TODO
+
+***************
+ PHPT Sections
+***************
+
+.. toctree::
+
+   phpt-sections/test
+   phpt-sections/description
+   phpt-sections/credit
+   phpt-sections/skipif
+   phpt-sections/file

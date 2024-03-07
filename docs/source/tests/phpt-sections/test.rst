@@ -10,7 +10,7 @@ It should contain the title of the test as plain text on a single line.
  Example
 *********
 
-.. code:: plaintext
+.. code:: text
 
    --TEST--
    Test filter_input() with GET and POST data.
