@@ -32,10 +32,8 @@
 
 zend_string *dom_node_concatenated_name_helper(size_t name_len, const char *name, size_t prefix_len, const char *prefix)
 {
-	if (UNEXPECTED(prefix_len > ZSTR_MAX_LEN / 2 - 1 || name_len > ZSTR_MAX_LEN / 2 - 1)) {
-		return zend_empty_string;
-	}
-	zend_string *str = zend_string_alloc(prefix_len + 1 + name_len, false);
+	/* prefix_len can't overflow because it would need to occupy the entire address space */
+	zend_string *str = zend_string_safe_alloc(1, name_len, prefix_len + 1, false);
 	memcpy(ZSTR_VAL(str), prefix, prefix_len);
 	ZSTR_VAL(str)[prefix_len] = ':';
 	memcpy(ZSTR_VAL(str) + prefix_len + 1, name, name_len + 1 /* include \0 */);
