@@ -11,7 +11,7 @@ PHP_ARG_WITH([system-ciphers],
   [no])
 
 if test "$PHP_OPENSSL" != "no"; then
-  PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
+  PHP_NEW_EXTENSION(openssl, openssl.c openssl_pwhash.c xp_ssl.c, $ext_shared)
   PHP_SUBST(OPENSSL_SHARED_LIBADD)
   PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
   [
