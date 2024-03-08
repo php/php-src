@@ -164,6 +164,8 @@ PHP 8.4 UPGRADE NOTES
   . Added request_parse_body() function that allows parsing RFC1867 (multipart)
     requests in non-POST HTTP requests.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
+  . Getting the debug info for WeakReference will now also output the object
+    it references, or null if the reference is no longer valid.
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
