@@ -279,7 +279,7 @@ ZEND_METHOD(Closure, bindTo)
 		Z_PARAM_OBJ_OR_STR_OR_NULL(scope_obj, scope_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	do_closure_bind(return_value, getThis(), newthis, scope_obj, scope_str);
+	do_closure_bind(return_value, ZEND_THIS, newthis, scope_obj, scope_str);
 }
 
 static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {

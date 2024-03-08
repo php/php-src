@@ -28,7 +28,7 @@
 /* {{{ com_create_instance - ctor for COM class */
 PHP_METHOD(com, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	zend_string *server_name = NULL;
 	HashTable *server_params = NULL;
 	php_com_dotnet_object *obj;
