@@ -180,9 +180,6 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef PROT_MAX
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif
-#ifdef MAP_JIT
-	flags |= MAP_JIT;
-#endif
 #if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 	void *hint = find_prefered_mmap_base(requested_size);
 	if (hint != MAP_FAILED) {
