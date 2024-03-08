@@ -2339,13 +2339,20 @@ static zval *dom_modern_nodemap_read_dimension(zend_object *object, zval *offset
 		return NULL;
 	}
 
+	dom_nnodemap_object *map = php_dom_obj_from_obj(object)->ptr;
+
 	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) == IS_STRING) {
-		php_dom_named_node_map_get_named_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_STR_P(offset), rv);
+		zend_ulong lval;
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
+			php_dom_named_node_map_get_item_into_zval(map, (zend_long) lval, rv);
+		} else {
+			php_dom_named_node_map_get_named_item_into_zval(map, Z_STR_P(offset), rv);
+		}
 	} else if (Z_TYPE_P(offset) == IS_LONG) {
-		php_dom_named_node_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, Z_LVAL_P(offset), rv);
+		php_dom_named_node_map_get_item_into_zval(map, Z_LVAL_P(offset), rv);
 	} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-		php_dom_named_node_map_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, zend_dval_to_lval_safe(Z_DVAL_P(offset)), rv);
+		php_dom_named_node_map_get_item_into_zval(map, zend_dval_to_lval_safe(Z_DVAL_P(offset)), rv);
 	} else {
 		zend_illegal_container_offset(object->ce->name, offset, type);
 		return NULL;
@@ -2359,15 +2366,23 @@ static int dom_modern_nodemap_has_dimension(zend_object *object, zval *member, i
 	/* If it exists, it cannot be empty because nodes aren't empty. */
 	ZEND_IGNORE_VALUE(check_empty);
 
+	dom_object *obj = php_dom_obj_from_obj(object);
+	dom_nnodemap_object *map = obj->ptr;
+
 	ZVAL_DEREF(member);
 	if (Z_TYPE_P(member) == IS_STRING) {
-		return php_dom_named_node_map_get_named_item(php_dom_obj_from_obj(object)->ptr, Z_STR_P(member), false) != NULL;
+		zend_ulong lval;
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(member), lval)) {
+			return (zend_long) lval >= 0 && (zend_long) lval < php_dom_get_namednodemap_length(obj);
+		} else {
+			return php_dom_named_node_map_get_named_item(map, Z_STR_P(member), false) != NULL;
+		}
 	} else if (Z_TYPE_P(member) == IS_LONG) {
 		zend_long offset = Z_LVAL_P(member);
-		return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
+		return offset >= 0 && offset < php_dom_get_namednodemap_length(obj);
 	} else if (Z_TYPE_P(member) == IS_DOUBLE) {
 		zend_long offset = zend_dval_to_lval_safe(Z_DVAL_P(member));
-		return offset >= 0 && offset < php_dom_get_namednodemap_length(php_dom_obj_from_obj(object));
+		return offset >= 0 && offset < php_dom_get_namednodemap_length(obj);
 	} else {
 		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
 		return 0;

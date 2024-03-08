@@ -8,7 +8,7 @@ dom
 $dom = DOM\XMLDocument::createFromString('<root a="1" b="2" c="3"></root>');
 $attributes = $dom->documentElement->attributes;
 
-$test_values = [-1, 0, 1, 2, 3, 1.0, 1.1, true, null, "0", "", "1", "a", "b", "c", "d"];
+$test_values = [-1, 0, 1, 2, 3, 1.0, 1.1, true, null, "0", "", "1", "8", "a", "b", "c", "d"];
 
 foreach ($test_values as $value) {
     echo "--- ", json_encode($value), " ---\n";
@@ -62,14 +62,18 @@ Cannot access offset of type bool on DOM\NamedNodeMap
 --- null ---
 Cannot access offset of type null on DOM\NamedNodeMap
 --- "0" ---
-string(3) "N/A"
-bool(false)
+string(1) "a"
 bool(true)
+bool(false)
 --- "" ---
 string(3) "N/A"
 bool(false)
 bool(true)
 --- "1" ---
+string(1) "b"
+bool(true)
+bool(false)
+--- "8" ---
 string(3) "N/A"
 bool(false)
 bool(true)
