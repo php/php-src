@@ -21,9 +21,13 @@
 
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
+#include "Optimizer/zend_ssa.h"
 #include "zend_API.h"
+#include "zend_compile.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
+#include "zend_type_info.h"
+#include "zend_types.h"
 #include "zend_vm.h"
 #include "zend_cfg.h"
 #include "zend_func_info.h"
@@ -831,8 +835,34 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 	return NULL;
 }
 
-zend_function *zend_optimizer_get_called_func(
-		zend_script *script, zend_op_array *op_array, zend_op *opline, bool *is_prototype)
+zend_class_entry *zend_optimizer_get_dynamic_class_entry_from_op1(
+		const zend_script *script, const zend_op_array *op_array,
+		const zend_op *opline, const zend_ssa *ssa) {
+	if (opline->op1_type == IS_UNUSED
+			&& op_array->scope
+			&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
+			&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
+		return op_array->scope;
+	}
+	if (!ssa || !ssa->var_info) {
+		return NULL;
+	}
+	if (opline->op1_type == IS_CONST) {
+		return NULL;
+	}
+	int use = ssa->ops[opline - op_array->opcodes].op1_use;
+	if (use < 0) {
+		return NULL;
+	}
+	if ((ssa->var_info[use].type & (MAY_BE_ANY|MAY_BE_UNDEF)) != MAY_BE_OBJECT) {
+		return NULL;
+	}
+	return ssa->var_info[use].ce;
+}
+
+zend_function *zend_optimizer_get_called_func_ssa(
+		const zend_script *script, const zend_op_array *op_array,
+		const zend_op *opline, bool *is_prototype, const zend_ssa *ssa)
 {
 	*is_prototype = 0;
 	switch (opline->opcode) {
@@ -889,33 +919,38 @@ zend_function *zend_optimizer_get_called_func(
 			}
 			break;
 		case ZEND_INIT_METHOD_CALL:
-			if (opline->op1_type == IS_UNUSED
-					&& opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING
-					&& op_array->scope
-					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)
-					&& !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
-				zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
-				zend_function *fbc = zend_hash_find_ptr(
-					&op_array->scope->function_table, method_name);
-				if (fbc) {
-					bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
-					if (is_private) {
-						/* Only use private method if in the same scope. We can't even use it
-						 * as a prototype, as it may be overridden with changed signature. */
-						bool same_scope = fbc->common.scope == op_array->scope;
-						return same_scope ? fbc : NULL;
-					}
-					/* Prototype methods are potentially overridden. fbc still contains useful type information.
-					 * Some optimizations may not be applied, like inlining or inferring the send-mode of superfluous args.
-					 * A method cannot be overridden if the class or method is final. */
-					if ((fbc->common.fn_flags & ZEND_ACC_FINAL) == 0 &&
-						(fbc->common.scope->ce_flags & ZEND_ACC_FINAL) == 0) {
-						*is_prototype = true;
-					}
-					return fbc;
+		{
+			if (opline->op2_type != IS_CONST
+					|| Z_TYPE_P(CRT_CONSTANT(opline->op2)) != IS_STRING) {
+				break;
+			}
+			zend_class_entry *ce = zend_optimizer_get_dynamic_class_entry_from_op1(
+					script, op_array, opline, ssa);
+			if (!ce) {
+				break;
+			}
+			zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
+			zend_function *fbc = zend_hash_find_ptr(
+				&ce->function_table, method_name);
+			if (fbc) {
+				bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
+				if (is_private) {
+					/* Only use private method if in the same scope. We can't even use it
+					 * as a prototype, as it may be overridden with changed signature. */
+					bool same_scope = fbc->common.scope == op_array->scope;
+					return same_scope ? fbc : NULL;
 				}
+				/* Prototype methods are potentially overridden. fbc still contains useful type information.
+				 * Some optimizations may not be applied, like inlining or inferring the send-mode of superfluous args.
+				 * A method cannot be overridden if the class or method is final. */
+				if ((fbc->common.fn_flags & ZEND_ACC_FINAL) == 0 &&
+					(fbc->common.scope->ce_flags & ZEND_ACC_FINAL) == 0) {
+					*is_prototype = true;
+				}
+				return fbc;
 			}
 			break;
+		}
 		case ZEND_NEW:
 		{
 			zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
@@ -927,6 +962,14 @@ zend_function *zend_optimizer_get_called_func(
 		}
 	}
 	return NULL;
+}
+
+zend_function *zend_optimizer_get_called_func(
+		const zend_script *script, const zend_op_array *op_array,
+		const zend_op *opline, bool *is_prototype)
+{
+	return zend_optimizer_get_called_func_ssa(script, op_array, opline,
+			is_prototype, /* ssa */ NULL);
 }
 
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) {
@@ -1525,7 +1568,8 @@ ZEND_API void zend_optimize_script(zend_script *script, zend_long optimization_l
 			zend_optimize(call_graph.op_arrays[i], &ctx);
 		}
 
-	    zend_analyze_call_graph(&ctx.arena, script, &call_graph);
+	    zend_analyze_call_graph(&ctx.arena, script, &call_graph,
+				(optimization_level & ZEND_OPTIMIZER_PASS_17) ? ZEND_INFERRED_CALLS : 0);
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);

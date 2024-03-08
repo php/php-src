@@ -23,6 +23,8 @@
 #include "zend_dump.h"
 #include "zend_inference.h"
 #include "Optimizer/zend_optimizer_internal.h"
+#include "Optimizer/zend_call_graph.h"
+#include "zend_vm_opcodes.h"
 
 static bool dominates(const zend_basic_block *blocks, int a, int b) {
 	while (blocks[b].level > blocks[a].level) {

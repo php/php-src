@@ -41,6 +41,7 @@
 #define ZEND_OPTIMIZER_PASS_14		(1<<13)  /* DCE (dead code elimination) */
 #define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* (unsafe) Collect constants */
 #define ZEND_OPTIMIZER_PASS_16		(1<<15)  /* Inline functions */
+#define ZEND_OPTIMIZER_PASS_17		(1<<18)  /* DFA based function call optimizations */
 
 #define ZEND_OPTIMIZER_IGNORE_OVERLOADING	(1<<16)  /* (unsafe) Ignore possibility of operator overloading */
 

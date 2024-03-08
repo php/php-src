@@ -109,6 +109,8 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx);
+void zend_optimize_func_calls_ssa(zend_arena **arena, zend_op_array *op_array,
+		const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa);
@@ -118,7 +120,11 @@ void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx
 void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx *ctx);
 void zend_optimizer_compact_vars(zend_op_array *op_array);
 zend_function *zend_optimizer_get_called_func(
-		zend_script *script, zend_op_array *op_array, zend_op *opline, bool *is_prototype);
+		const zend_script *script, const zend_op_array *op_array,
+		const zend_op *opline, bool *is_prototype);
+zend_function *zend_optimizer_get_called_func_ssa(
+		const zend_script *script, const zend_op_array *op_array,
+		const zend_op *opline, bool *is_prototype, const zend_ssa *ssa);
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args);
 void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, zend_op *opline);
 void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_t *shiftlist);

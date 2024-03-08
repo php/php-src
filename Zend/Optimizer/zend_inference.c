@@ -22,6 +22,7 @@
 #include "zend_func_info.h"
 #include "zend_call_graph.h"
 #include "zend_closures.h"
+#include "zend_vm_opcodes.h"
 #include "zend_worklist.h"
 #include "zend_optimizer_internal.h"
 
@@ -1566,7 +1567,8 @@ ZEND_API bool zend_inference_propagate_range(const zend_op_array *op_array, cons
 				}
 
 				call_info = func_info->call_map[opline - op_array->opcodes];
-				if (!call_info || call_info->is_prototype) {
+				if (!call_info || !call_info->callee_func
+						|| call_info->is_prototype) {
 					break;
 				}
 				if (call_info->callee_func->type == ZEND_USER_FUNCTION) {
@@ -1986,7 +1988,7 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 				ZEND_ASSERT(ssa_opcodes != NULL ||						\
 					__ssa_var->var >= op_array->last_var ||				\
 					(ssa_var_info[__var].type & MAY_BE_REF)				\
-						== (__type & MAY_BE_REF));						\
+						<= (__type & MAY_BE_REF));						\
 				if (ssa_var_info[__var].type & ~__type) {				\
 					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
@@ -2076,6 +2078,26 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 				}
 				if (op->op2_def >= 0) {
 					zend_bitset_incl(worklist, op->op2_def);
+				}
+			} else if (op_array->opcodes[use].opcode == ZEND_INIT_METHOD_CALL
+			 && ssa->ops[use].op1_use == var) {
+				/* DO_FCALL and SEND ops also implicitly use var */
+				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+				if (func_info && func_info->call_map) {
+					zend_call_info *call_info = func_info->call_map[use];
+					if (call_info && call_info->infer) {
+						const zend_op *call_opline = call_info->caller_call_opline;
+						const zend_ssa_op *op = &ssa->ops[call_opline - op_array->opcodes];
+						if (op->result_def > 0) {
+							zend_bitset_incl(worklist, op->result_def);
+						}
+						for (int i = 0; i < call_info->num_args; i++) {
+							op = &ssa->ops[call_info->arg_info[i].opline - op_array->opcodes];
+							if (op->op1_def > 0) {
+								zend_bitset_incl(worklist, op->op1_def);
+							}
+						}
+					}
 				}
 			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
@@ -3273,6 +3295,41 @@ static zend_always_inline zend_result _zend_update_type_info(
 		case ZEND_SEND_VAR_EX:
 		case ZEND_SEND_FUNC_ARG:
 			if (ssa_op->op1_def >= 0) {
+				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+
+				if (opline->op2_type != IS_CONST && func_info && func_info->call_map) {
+					zend_call_info *call_info = func_info->call_map[opline - op_array->opcodes];
+					if (call_info) {
+						if (call_info->infer) {
+							const zend_op *init_opline = call_info->caller_init_opline;
+							ZEND_ASSERT(init_opline->opcode == ZEND_INIT_METHOD_CALL);
+
+							uint32_t tmp = get_ssa_var_info(ssa, ssa->var_info ? ssa->ops[init_opline - op_array->opcodes].op1_use : -1);
+							if (!(tmp & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))) {
+								tmp = 0;
+								UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
+								return SUCCESS;
+							}
+
+							call_info->callee_func = zend_optimizer_get_called_func_ssa(
+									script, op_array, init_opline,
+									&call_info->is_prototype, ssa);
+						}
+						if (call_info->callee_func) {
+							uint32_t arg_num = opline->op2.num;
+							/* See has_known_send_mode() */
+							if (!call_info->is_prototype
+									|| arg_num <= call_info->callee_func->common.num_args
+									|| (call_info->callee_func->common.fn_flags & ZEND_ACC_VARIADIC)) {
+								if (!ARG_SHOULD_BE_SENT_BY_REF(call_info->callee_func, arg_num)) {
+									UPDATE_SSA_TYPE(t1, ssa_op->op1_def);
+									break;
+								}
+							}
+						}
+					}
+				}
+
 				tmp = (t1 & MAY_BE_UNDEF)|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
@@ -3897,11 +3954,31 @@ static zend_always_inline zend_result _zend_update_type_info(
 					goto unknown_opcode;
 				}
 
+				if (call_info->infer) {
+					const zend_op *init_opline = call_info->caller_init_opline;
+					ZEND_ASSERT(init_opline->opcode == ZEND_INIT_METHOD_CALL);
+
+					int tmp = get_ssa_var_info(ssa, ssa->var_info ? ssa->ops[init_opline - op_array->opcodes].op1_use : -1);
+					if (!(tmp & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS))) {
+						tmp = 0;
+						UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+						return SUCCESS;
+					}
+
+					call_info->callee_func = zend_optimizer_get_called_func_ssa(
+							script, op_array, init_opline,
+							&call_info->is_prototype, ssa);
+
+					if (!call_info->callee_func) {
+						goto unknown_opcode;
+					}
+				}
+
 				zend_class_entry *ce;
-				bool ce_is_instanceof;
+				bool ce_is_instanceof; /* TODO? */
 				tmp = zend_get_func_info(call_info, ssa, &ce, &ce_is_instanceof);
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
-				if (ce) {
+				if (ce) { /* TODO: always set ce? */
 					UPDATE_SSA_OBJ_TYPE(ce, ce_is_instanceof, ssa_op->result_def);
 				}
 			}
@@ -4491,7 +4568,8 @@ static bool is_recursive_tail_call(const zend_op_array *op_array,
 
 		if (op->opcode == ZEND_DO_UCALL) {
 			zend_call_info *call_info = info->call_map[op - op_array->opcodes];
-			if (call_info && op_array == &call_info->callee_func->op_array) {
+			if (call_info && call_info->callee_func
+					&& op_array == &call_info->callee_func->op_array) {
 				return 1;
 			}
 		}
@@ -4697,6 +4775,30 @@ static void zend_func_return_info(const zend_op_array   *op_array,
 	ret->has_range = tmp_has_range;
 }
 
+static zend_result zend_infer_types_minimal(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level)
+{
+	int ssa_vars_count = ssa->vars_count;
+	int j;
+	zend_bitset worklist;
+	ALLOCA_FLAG(use_heap);
+
+	worklist = do_alloca(sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count), use_heap);
+	memset(worklist, 0, sizeof(zend_ulong) * zend_bitset_len(ssa_vars_count));
+
+	/* Type Inference */
+	for (j = op_array->last_var; j < ssa_vars_count; j++) {
+		zend_bitset_incl(worklist, j);
+	}
+
+	if (zend_infer_types_ex(op_array, script, ssa, worklist, optimization_level) == FAILURE) {
+		free_alloca(worklist,  use_heap);
+		return FAILURE;
+	}
+
+	free_alloca(worklist,  use_heap);
+	return SUCCESS;
+}
+
 static zend_result zend_infer_types(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level)
 {
 	int ssa_vars_count = ssa->vars_count;
@@ -4868,34 +4970,49 @@ static void zend_mark_cv_references(const zend_op_array *op_array, const zend_sc
 	free_alloca(worklist,  use_heap);
 }
 
-ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
+static void zend_inference_init_ssa_var_info(const zend_op_array *op_array,
+		zend_ssa *ssa, zend_ssa_var_info *ssa_var_info)
 {
-	zend_ssa_var_info *ssa_var_info;
 	int i;
-
-	if (!ssa->var_info) {
-		ssa->var_info = zend_arena_calloc(arena, ssa->vars_count, sizeof(zend_ssa_var_info));
-	}
-	ssa_var_info = ssa->var_info;
 
 	if (!op_array->function_name) {
 		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-			ssa_var_info[i].has_range = 0;
 		}
 	} else {
 		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF;
-			ssa_var_info[i].has_range = 0;
 			if (ssa->vars[i].alias) {
 				ssa_var_info[i].type |= get_ssa_alias_types(ssa->vars[i].alias);
 			}
 		}
 	}
-	for (i = op_array->last_var; i < ssa->vars_count; i++) {
-		ssa_var_info[i].type = 0;
-		ssa_var_info[i].has_range = 0;
-	}
+}
+
+ZEND_API zend_result zend_ssa_callee_inference(zend_arena **arena,
+		zend_op_array *op_array, const zend_script *script, zend_ssa *ssa,
+		zend_long optimization_level)
+{
+	zend_ssa_var_info *ssa_var_info;
+	ZEND_ASSERT(!ssa->var_info);
+
+	ssa_var_info = zend_arena_calloc(arena, ssa->vars_count, sizeof(zend_ssa_var_info));
+	zend_inference_init_ssa_var_info(op_array, ssa, ssa_var_info);
+
+	ssa->var_info = ssa_var_info;
+
+	return zend_infer_types_minimal(op_array, script, ssa, optimization_level);
+}
+
+ZEND_API zend_result zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level) /* {{{ */
+{
+	zend_ssa_var_info *ssa_var_info;
+	ZEND_ASSERT(!ssa->var_info);
+
+	ssa_var_info = zend_arena_calloc(arena, ssa->vars_count, sizeof(zend_ssa_var_info));
+	zend_inference_init_ssa_var_info(op_array, ssa, ssa_var_info);
+
+	ssa->var_info = ssa_var_info;
 
 	zend_mark_cv_references(op_array, script, ssa);
 

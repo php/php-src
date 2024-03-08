@@ -24,6 +24,7 @@
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
+#include "zend_types.h"
 #include "zend_vm.h"
 #include "zend_bitset.h"
 #include "zend_cfg.h"
@@ -36,6 +37,7 @@ bool zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int
 	if (c) {
 		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
 		 && !(ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)
+		 && (Z_TYPE(c->value) < IS_STRING || Z_TYPE(c->value) == IS_ARRAY || Z_TYPE(c->value) == IS_CONSTANT_AST)
 		 && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE)
 		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);

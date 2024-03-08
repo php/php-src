@@ -173,8 +173,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							 || Z_TYPE(result) == IS_CONSTANT_AST) {
 								break;
 							}
-						} else {
+						} else if (Z_TYPE_P(c) < IS_STRING || Z_TYPE_P(c) == IS_ARRAY) {
 							ZVAL_COPY_OR_DUP(&result, c);
+						} else {
+							break;
 						}
 
 						replace_by_const_or_qm_assign(op_array, opline, &result);

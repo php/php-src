@@ -64,7 +64,8 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
 					script, op_array, opline, &is_prototype);
-				if (func) {
+				if (func || ((build_flags & ZEND_INFERRED_CALLS)
+							&& opline->opcode == ZEND_INIT_METHOD_CALL)) {
 					call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info) + (sizeof(zend_send_arg_info) * ((int)opline->extended_value - 1)));
 					call_info->caller_op_array = op_array;
 					call_info->caller_init_opline = opline;
@@ -74,21 +75,8 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 					call_info->next_callee = func_info->callee_info;
 					call_info->is_prototype = is_prototype;
 					call_info->is_frameless = false;
+					call_info->infer = !func;
 					func_info->callee_info = call_info;
-
-					if (build_flags & ZEND_CALL_TREE) {
-						call_info->next_caller = NULL;
-					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
-						call_info->next_caller = NULL;
-					} else {
-						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
-						if (callee_func_info) {
-							call_info->next_caller = callee_func_info->caller_info;
-							callee_func_info->caller_info = call_info;
-						} else {
-							call_info->next_caller = NULL;
-						}
-					}
 				} else {
 					call_info = NULL;
 				}
@@ -252,13 +240,35 @@ ZEND_API void zend_build_call_graph(zend_arena **arena, zend_script *script, zen
 }
 /* }}} */
 
-ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
+ZEND_API void zend_analyze_call_graph(zend_arena **arena, zend_script *script,
+		zend_call_graph *call_graph, uint32_t build_flags) /* {{{ */
 {
 	int i;
 
 	for (i = 0; i < call_graph->op_arrays_count; i++) {
-		zend_analyze_calls(arena, script, 0, call_graph->op_arrays[i], call_graph->func_infos + i);
+		zend_analyze_calls(arena, script,
+				build_flags & (ZEND_INFERRED_CALLS|ZEND_CALL_TREE),
+				call_graph->op_arrays[i], call_graph->func_infos + i);
 	}
+
+	for (i = 0; i < call_graph->op_arrays_count; i++) {
+		zend_func_info *func_info = ZEND_FUNC_INFO(call_graph->op_arrays[i]);
+		for (
+			zend_call_info *call_info = func_info->callee_info;
+			call_info;
+			call_info = call_info->next_callee
+		) {
+			zend_function *func = call_info->callee_func;
+			if (func && func->type != ZEND_INTERNAL_FUNCTION) {
+				zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
+				if (callee_func_info) {
+					call_info->next_caller = callee_func_info->caller_info;
+					callee_func_info->caller_info = call_info;
+				}
+			}
+		}
+	}
+
 	zend_analyze_recursion(call_graph);
 	zend_sort_op_arrays(call_graph);
 }

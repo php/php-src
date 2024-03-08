@@ -3091,7 +3091,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 	call_graph.op_arrays_count = 0;
 	zend_build_call_graph(&CG(arena), script, &call_graph);
 
-	zend_analyze_call_graph(&CG(arena), script, &call_graph);
+	zend_analyze_call_graph(&CG(arena), script, &call_graph, ZEND_CALL_TREE);
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_FIRST_EXEC ||
 	    JIT_G(trigger) == ZEND_JIT_ON_PROF_REQUEST ||

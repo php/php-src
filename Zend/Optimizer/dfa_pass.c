@@ -19,6 +19,7 @@
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_API.h"
+#include "zend_compile.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
@@ -29,6 +30,7 @@
 #include "zend_call_graph.h"
 #include "zend_inference.h"
 #include "zend_dump.h"
+#include "zend_vm_opcodes.h"
 
 #ifndef ZEND_DEBUG_DFA
 # define ZEND_DEBUG_DFA ZEND_DEBUG
@@ -37,6 +39,10 @@
 #if ZEND_DEBUG_DFA
 # include "ssa_integrity.c"
 #endif
+
+zend_result zend_dfa_optimize_func_calls(zend_arena **arena,
+		zend_op_array *op_array, const zend_script *script, zend_ssa *ssa,
+		zend_long optimization_level);
 
 zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
@@ -88,12 +94,18 @@ zend_result zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ct
 		zend_dump_op_array(op_array, ZEND_DUMP_SSA, "dfa ssa", ssa);
 	}
 
-
 	zend_ssa_compute_use_def_chains(&ctx->arena, op_array, ssa);
 
 	zend_ssa_find_false_dependencies(op_array, ssa);
 
 	zend_ssa_find_sccs(op_array, ssa);
+
+	if (ZEND_OPTIMIZER_PASS_17 & ctx->optimization_level) {
+		if (zend_dfa_optimize_func_calls(&ctx->arena, op_array, ctx->script,
+					ssa, ctx->optimization_level) == FAILURE) {
+			return FAILURE;
+		}
+	}
 
 	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa, ctx->optimization_level) == FAILURE) {
 		return FAILURE;
@@ -383,6 +395,53 @@ static bool variable_defined_or_used_in_range(zend_ssa *ssa, int var, int start,
 		start++;
 	}
 	return 0;
+}
+
+zend_result zend_dfa_optimize_func_calls(zend_arena **arena,
+		zend_op_array *op_array, const zend_script *script, zend_ssa *ssa,
+		zend_long optimization_level)
+{
+	void *checkpoint = zend_arena_checkpoint(*arena);
+
+	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
+	ZEND_ASSERT(func_info);
+
+	/* Infer call_info->callee_func */
+	if (zend_ssa_callee_inference(arena, op_array, script, ssa,
+			optimization_level) == FAILURE) {
+		return FAILURE;
+	}
+
+	/* Remove call_infos without callee */
+	zend_call_info **call_info = &func_info->callee_info;
+	zend_call_info **map = func_info->call_map;
+	while ((*call_info)) {
+		(*call_info)->infer = false;
+		if (!(*call_info)->callee_func) {
+			map[(*call_info)->caller_init_opline - op_array->opcodes] = NULL;
+			if ((*call_info)->caller_call_opline) {
+				map[(*call_info)->caller_call_opline - op_array->opcodes] = NULL;
+			}
+			if (!(*call_info)->is_frameless) {
+				for (int i = 0; i < (*call_info)->num_args; i++) {
+					if ((*call_info)->arg_info[i].opline) {
+						map[(*call_info)->arg_info[i].opline - op_array->opcodes] = NULL;
+					}
+				}
+			}
+			*call_info = (*call_info)->next_callee;
+		} else {
+			call_info = &(*call_info)->next_callee;
+		}
+	}
+
+	zend_optimize_func_calls_ssa(arena, op_array, script, ssa,
+			optimization_level);
+
+	ssa->var_info = NULL;
+	zend_arena_release(arena, checkpoint);
+
+	return SUCCESS;
 }
 
 int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)

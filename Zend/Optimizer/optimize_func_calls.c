@@ -23,10 +23,12 @@
 
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
+#include "Optimizer/zend_ssa.h"
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
+#include "zend_vm_opcodes.h"
 
 typedef struct _optimizer_call_info {
 	zend_function *func;
@@ -147,7 +149,8 @@ static bool has_known_send_mode(const optimizer_call_info *info, uint32_t arg_nu
 		|| (info->func->common.fn_flags & ZEND_ACC_VARIADIC);
 }
 
-void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+void zend_optimize_func_calls_ssa(zend_arena **arena, zend_op_array *op_array,
+		const zend_script *script, zend_ssa *ssa, zend_long optimization_level)
 {
 	zend_op *opline = op_array->opcodes;
 	zend_op *end = opline + op_array->last;
@@ -159,8 +162,8 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		return;
 	}
 
-	checkpoint = zend_arena_checkpoint(ctx->arena);
-	call_stack = zend_arena_calloc(&ctx->arena, op_array->last / 2, sizeof(optimizer_call_info));
+	checkpoint = zend_arena_checkpoint(*arena);
+	call_stack = zend_arena_calloc(arena, op_array->last / 2, sizeof(optimizer_call_info));
 	while (opline < end) {
 		switch (opline->opcode) {
 			case ZEND_INIT_FCALL_BY_NAME:
@@ -171,8 +174,9 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_NEW:
 				/* The argument passing optimizations are valid for prototypes as well,
 				 * as inheritance cannot change between ref <-> non-ref arguments. */
-				call_stack[call].func = zend_optimizer_get_called_func(
-					ctx->script, op_array, opline, &call_stack[call].is_prototype);
+				call_stack[call].func = zend_optimizer_get_called_func_ssa(
+					script, op_array, opline,
+					&call_stack[call].is_prototype, ssa);
 				call_stack[call].try_inline =
 					!call_stack[call].is_prototype && opline->opcode != ZEND_NEW;
 				ZEND_FALLTHROUGH;
@@ -218,7 +222,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						ZEND_UNREACHABLE();
 					}
 
-					if ((ZEND_OPTIMIZER_PASS_16 & ctx->optimization_level)
+					if ((ZEND_OPTIMIZER_PASS_16 & optimization_level)
 							&& call_stack[call].try_inline
 							&& opline->opcode != ZEND_CALLABLE_CONVERT) {
 						zend_try_inline_call(op_array, fcall, opline, call_stack[call].func);
@@ -263,7 +267,23 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						} else {
 							opline->opcode = ZEND_FETCH_STATIC_PROP_R;
 						}
+						if (ssa) {
+							/* op1 is not defined anymore */
+							zend_ssa_op *op = &ssa->ops[opline - op_array->opcodes];
+							if (op->op1_def >= 0) {
+								ZEND_ASSERT(op->op1_use >= 0);
+								zend_ssa_rename_var_uses(ssa, op->op1_def,
+										op->op1_use, 0);
+								zend_ssa_remove_op1_def(ssa, op);
+							}
+						}
 					}
+				} else if (opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+						&& opline->op2_type == IS_UNUSED) {
+					/* FETCH_DIM_FUNC_ARG supports UNUSED op2, while FETCH_DIM_R does not.
+					 * Performing the replacement would create an invalid opcode. */
+					call_stack[call - 1].try_inline = 0;
+					break;
 				}
 				break;
 			case ZEND_SEND_VAL_EX:
@@ -275,6 +295,16 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				if (has_known_send_mode(&call_stack[call - 1], opline->op2.num)) {
 					if (!ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
 						opline->opcode = ZEND_SEND_VAL;
+						if (ssa) {
+							/* op1 is not defined anymore */
+							zend_ssa_op *op = &ssa->ops[opline - op_array->opcodes];
+							if (op->op1_def >= 0) {
+								ZEND_ASSERT(op->op1_use >= 0);
+								zend_ssa_rename_var_uses(ssa, op->op1_def,
+										op->op1_use, 0);
+								zend_ssa_remove_op1_def(ssa, op);
+							}
+						}
 					}
 				}
 				break;
@@ -313,6 +343,16 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						opline->opcode = ZEND_SEND_REF;
 					} else {
 						opline->opcode = ZEND_SEND_VAR;
+						if (ssa) {
+							/* op1 is not defined anymore */
+							zend_ssa_op *op = &ssa->ops[opline - op_array->opcodes];
+							if (op->op1_def >= 0) {
+								ZEND_ASSERT(op->op1_use >= 0);
+								zend_ssa_rename_var_uses(ssa, op->op1_def,
+										op->op1_use, 0);
+								zend_ssa_remove_op1_def(ssa, op);
+							}
+						}
 					}
 				}
 				break;
@@ -329,6 +369,16 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						opline->opcode = ZEND_SEND_VAL;
 					} else {
 						opline->opcode = ZEND_SEND_VAR;
+						if (ssa) {
+							/* op1 is not defined anymore */
+							zend_ssa_op *op = &ssa->ops[opline - op_array->opcodes];
+							if (op->op1_def >= 0) {
+								ZEND_ASSERT(op->op1_use >= 0);
+								zend_ssa_rename_var_uses(ssa, op->op1_def,
+										op->op1_use, 0);
+								zend_ssa_remove_op1_def(ssa, op);
+							}
+						}
 					}
 				}
 				break;
@@ -351,5 +401,11 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		opline++;
 	}
 
-	zend_arena_release(&ctx->arena, checkpoint);
+	zend_arena_release(arena, checkpoint);
+}
+
+void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
+{
+	return zend_optimize_func_calls_ssa(&ctx->arena, op_array, ctx->script,
+			/* ssa */ NULL, ctx->optimization_level);
 }

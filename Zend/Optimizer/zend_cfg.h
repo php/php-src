@@ -99,6 +99,7 @@ typedef struct _zend_cfg {
 #define ZEND_CFG_RECV_ENTRY            (1<<24)
 #define ZEND_CALL_TREE                 (1<<23)
 #define ZEND_SSA_USE_CV_RESULTS        (1<<22)
+#define ZEND_INFERRED_CALLS            (1<<24)
 
 #define CRT_CONSTANT_EX(op_array, opline, node) \
 	(((op_array)->fn_flags & ZEND_ACC_DONE_PASS_TWO) ? \

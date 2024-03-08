@@ -98,7 +98,7 @@ typedef struct _sccp_ctx {
 #define MAKE_TOP(zv) (Z_TYPE_INFO_P(zv) = TOP)
 #define MAKE_BOT(zv) (Z_TYPE_INFO_P(zv) = BOT)
 
-static void scp_dump_value(zval *zv) {
+static void scp_dump_value(const zval *zv) {
 	if (IS_TOP(zv)) {
 		fprintf(stderr, " top");
 	} else if (IS_BOT(zv)) {
