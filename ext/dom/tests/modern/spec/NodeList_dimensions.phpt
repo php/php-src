@@ -8,7 +8,7 @@ dom
 $dom = DOM\XMLDocument::createFromString('<root><a/><b/><c/></root>');
 $children = $dom->documentElement->childNodes;
 
-$test_values = [-1, 0, 1, 2, 3, 1.0, 1.1, true, null, "0", ""];
+$test_values = [-1, 0, 1, 2, 3, 1.0, 1.1, true, null, "0", "1", "", "foo"];
 
 foreach ($test_values as $value) {
     echo "--- ", json_encode($value), " ---\n";
@@ -62,6 +62,14 @@ Cannot access offset of type bool on DOM\NodeList
 --- null ---
 Cannot access offset of type null on DOM\NodeList
 --- "0" ---
-Cannot access offset of type string on DOM\NodeList
+string(1) "a"
+bool(true)
+bool(false)
+--- "1" ---
+string(1) "b"
+bool(true)
+bool(false)
 --- "" ---
+Cannot access offset of type string on DOM\NodeList
+--- "foo" ---
 Cannot access offset of type string on DOM\NodeList

@@ -2201,6 +2201,7 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 
 static zend_long dom_modern_nodelist_get_index(zval *offset, bool *failed)
 {
+	zend_ulong lval;
 	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) == IS_LONG) {
 		*failed = false;
@@ -2208,6 +2209,9 @@ static zend_long dom_modern_nodelist_get_index(zval *offset, bool *failed)
 	} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 		*failed = false;
 		return zend_dval_to_lval_safe(Z_DVAL_P(offset));
+	} else if (Z_TYPE_P(offset) == IS_STRING && ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
+		*failed = false;
+		return (zend_long) lval;
 	} else {
 		*failed = true;
 		return 0;
