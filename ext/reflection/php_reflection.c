@@ -6524,7 +6524,7 @@ ZEND_METHOD(ReflectionReference, getId)
 		RETURN_THROWS();
 	}
 
-	intern = Z_REFLECTION_P(getThis());
+	intern = Z_REFLECTION_P(ZEND_THIS);
 	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
 		_DO_THROW("Corrupted ReflectionReference object");
 		RETURN_THROWS();

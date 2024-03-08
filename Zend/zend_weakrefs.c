@@ -314,7 +314,7 @@ ZEND_METHOD(WeakReference, get)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_weakref_get(getThis(), return_value);
+	zend_weakref_get(ZEND_THIS, return_value);
 }
 
 static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
