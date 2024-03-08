@@ -1039,7 +1039,7 @@ PHP_ARG_ENABLE([dtrace],
   [no])
 
 if test "$PHP_DTRACE" = "yes"; then
-  AC_CHECK_HEADERS([sys/sdt.h], [
+  AC_CHECK_HEADER([sys/sdt.h], [
     PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
       Zend/zend_execute.c Zend/zend_exceptions.c \
       Zend/zend_dtrace.c Zend/zend.c])
