@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-if (!defined('MYSQLI_STORE_RESULT_COPY_DATA')) {
-    die("skip Requires MYSQLI_STORE_RESULT_COPY_DATA");
-}
 ?>
 --FILE--
 <?php
