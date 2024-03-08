@@ -359,7 +359,6 @@ dnl uClibc will bark at linking with glibc's libnsl.
 
 PHP_CHECK_FUNC(socket, socket, network)
 PHP_CHECK_FUNC(socketpair, socket, network)
-PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
 AC_SEARCH_LIBS([dlopen], [dl],
