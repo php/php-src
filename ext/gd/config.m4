@@ -213,9 +213,6 @@ if test "$PHP_GD" != "no"; then
                   libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c \
                   libgd/gd_bmp.c libgd/gd_tga.c"
 
-dnl check for fabsf and floorf which are available since C99
-    AC_CHECK_FUNCS(fabsf floorf)
-
 dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
     AC_DEFINE(HAVE_GD_PNG,              1, [ ])
