@@ -163,7 +163,8 @@ static inline double php_round_helper(double integral, double value, double expo
  * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
-	double exponent, tmp_value, adjusted_value;
+	double exponent;
+	double tmp_value;
 	int cpu_round_mode;
 
 	if (!zend_finite(value) || value == 0.0) {
@@ -186,23 +187,14 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	 * e.g.
 	 * 0.285 * 10000000000 => 2850000000.0
 	 * floor(0.285 * 10000000000) => 2850000000
-	 *
-	 * Using `if` twice to prevent accidental optimization with llvm 15.0.0.
 	 */
-	bool val_is_positive_or_zero = value >= 0.0;
 	cpu_round_mode = fegetround();
-	if (val_is_positive_or_zero) {
+	if (value >= 0.0) {
 		fesetround(FE_UPWARD);
+		tmp_value = floor(places > 0  ? value * exponent : value / exponent);
 	} else {
 		fesetround(FE_DOWNWARD);
-	}
-
-	adjusted_value = places > 0  ? value * exponent : value / exponent;
-
-	if (val_is_positive_or_zero) {
-		tmp_value = floor(adjusted_value);
-	} else {
-		tmp_value = ceil(adjusted_value);
+		tmp_value = ceil(places > 0  ? value * exponent : value / exponent);
 	}
 	fesetround(cpu_round_mode);
 
