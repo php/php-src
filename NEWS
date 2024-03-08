@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed GH-13569 (GC buffer unnecessarily grows up to GC_MAX_BUF_SIZE when
     scanning WeakMaps). (Arnaud)
+  . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
+    (nielsdos)
 
 - Gettext:
   . Fixed sigabrt raised with dcgettext/dcngettext calls with gettext 0.22.5
