@@ -357,7 +357,7 @@ dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try to avoid -lnsl
 dnl checks, if we already have the functions which are usually in libnsl. Also,
 dnl uClibc will bark at linking with glibc's libnsl.
 
-PHP_CHECK_FUNC(socket, socket, network)
+AC_SEARCH_LIBS([socket], [socket network])
 PHP_CHECK_FUNC(socketpair, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
