@@ -83,86 +83,82 @@ die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.
             }
         }
 
-        if (function_exists('mysqli_stmt_get_result')) {
-            /* mysqlnd only */
-            if (!mysqli_stmt_execute($stmt)) {
-                printf("[%04d - %s] [%d] %s\n",
-                    $offset + 6, $sql,
-                    mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-                return false;
-            }
+        if (!mysqli_stmt_execute($stmt)) {
+            printf("[%04d - %s] [%d] %s\n",
+                $offset + 6, $sql,
+                mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+            return false;
+        }
 
-            $res = mysqli_stmt_get_result($stmt);
-            if (false === $res && !empty($expected_mysqlnd)) {
-                printf("[%04d - %s] Expecting resultset [%d] %s\n",
-                    $offset + 7, $sql,
-                    mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-                return false;
-            } else if (empty($expected_mysqlnd) && false !== $res) {
-                printf("[%04d - %s] Unexpected resultset [%d] %s\n",
-                    $offset + 8, $sql,
-                    mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-                return false;
-            }
+        $res = mysqli_stmt_get_result($stmt);
+        if (false === $res && !empty($expected_mysqlnd)) {
+            printf("[%04d - %s] Expecting resultset [%d] %s\n",
+                $offset + 7, $sql,
+                mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+            return false;
+        } else if (empty($expected_mysqlnd) && false !== $res) {
+            printf("[%04d - %s] Unexpected resultset [%d] %s\n",
+                $offset + 8, $sql,
+                mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+            return false;
+        }
 
-            if (!is_object($res)) {
-                printf("[%04d - %s] [%d] %s\n",
-                    $offset + 9, $sql,
-                    mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
-                return false;
-            }
-            if ('mysqli_result' != get_class($res)) {
-                printf("[%04d - %s] Expecting object/mysqli_result got object/%s\n",
-                    $offset + 10, $sql,
-                    get_class($res));
-                return false;
-            }
+        if (!is_object($res)) {
+            printf("[%04d - %s] [%d] %s\n",
+                $offset + 9, $sql,
+                mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
+            return false;
+        }
+        if ('mysqli_result' != get_class($res)) {
+            printf("[%04d - %s] Expecting object/mysqli_result got object/%s\n",
+                $offset + 10, $sql,
+                get_class($res));
+            return false;
+        }
 
-            $meta_res = array(
-                'num_fields'		=> mysqli_num_fields($res),
-                'fetch_field'		=> mysqli_fetch_field($res),
-                'fetch_field_direct0'	=> mysqli_fetch_field_direct($res, 0),
-                'fetch_field_direct1'	=> @mysqli_fetch_field_direct($res, 1),
-                'fetch_fields'		=> count(mysqli_fetch_fields($res)),
-                'field_count'		=> mysqli_field_count($link),
-                'field_seek-1'		=> @mysqli_field_seek($res, -1),
-                'field_seek0'		=> mysqli_field_seek($res, 0),
-                'field_tell'		=> mysqli_field_tell($res),
-            );
-            if (is_object($meta_res['fetch_field'])) {
-                $meta_res['fetch_field']->charsetnr	= 'ignore';
-                $meta_res['fetch_field']->flags	= 'ignore';
-            }
-            if (is_object($meta_res['fetch_field_direct0'])) {
-                $meta_res['fetch_field_direct0']->charsetnr	= 'ignore';
-                $meta_res['fetch_field_direct0']->flags	= 'ignore';
-            }
-            if (is_object($meta_res['fetch_field_direct1'])) {
-                $meta_res['fetch_field_direct1']->charsetnr	= 'ignore';
-                $meta_res['fetch_field_direct1']->flags	= 'ignore';
-            }
-            mysqli_free_result($res);
-            if ($check_mysqlnd && $meta_res != $expected_mysqlnd) {
-                printf("[%04d - %s] Metadata differs from expected\n",
-                    $offset + 11, $sql);
+        $meta_res = array(
+            'num_fields'		=> mysqli_num_fields($res),
+            'fetch_field'		=> mysqli_fetch_field($res),
+            'fetch_field_direct0'	=> mysqli_fetch_field_direct($res, 0),
+            'fetch_field_direct1'	=> @mysqli_fetch_field_direct($res, 1),
+            'fetch_fields'		=> count(mysqli_fetch_fields($res)),
+            'field_count'		=> mysqli_field_count($link),
+            'field_seek-1'		=> @mysqli_field_seek($res, -1),
+            'field_seek0'		=> mysqli_field_seek($res, 0),
+            'field_tell'		=> mysqli_field_tell($res),
+        );
+        if (is_object($meta_res['fetch_field'])) {
+            $meta_res['fetch_field']->charsetnr	= 'ignore';
+            $meta_res['fetch_field']->flags	= 'ignore';
+        }
+        if (is_object($meta_res['fetch_field_direct0'])) {
+            $meta_res['fetch_field_direct0']->charsetnr	= 'ignore';
+            $meta_res['fetch_field_direct0']->flags	= 'ignore';
+        }
+        if (is_object($meta_res['fetch_field_direct1'])) {
+            $meta_res['fetch_field_direct1']->charsetnr	= 'ignore';
+            $meta_res['fetch_field_direct1']->flags	= 'ignore';
+        }
+        mysqli_free_result($res);
+        if ($check_mysqlnd && $meta_res != $expected_mysqlnd) {
+            printf("[%04d - %s] Metadata differs from expected\n",
+                $offset + 11, $sql);
+            var_dump($meta_res);
+            var_dump($expected_mysqlnd);
+        } else {
+            if ($meta_res['field_count'] < 1) {
+                printf("[%04d - %s] Metadata seems wrong, no fields?\n",
+                $offset + 12, $sql);
                 var_dump($meta_res);
-                var_dump($expected_mysqlnd);
-            } else {
-                if ($meta_res['field_count'] < 1) {
-                    printf("[%04d - %s] Metadata seems wrong, no fields?\n",
-                    $offset + 12, $sql);
-                    var_dump($meta_res);
-                    var_dump(mysqli_fetch_assoc($res));
-                }
+                var_dump(mysqli_fetch_assoc($res));
             }
+        }
 
-            if ($compare && $meta_res != $meta) {
-                printf("[%04d - %s] Metadata returned by mysqli_stmt_result_metadata() and mysqli_stmt_get_result() differ\n",
-                    $offset + 13, $sql);
-                var_dump($meta_res);
-                var_dump($meta);
-            }
-
+        if ($compare && $meta_res != $meta) {
+            printf("[%04d - %s] Metadata returned by mysqli_stmt_result_metadata() and mysqli_stmt_get_result() differ\n",
+                $offset + 13, $sql);
+            var_dump($meta_res);
+            var_dump($meta);
         }
 
         mysqli_stmt_close($stmt);

@@ -95,8 +95,7 @@ require_once 'skipifconnectfailure.inc';
             var_dump($fields);
         }
 
-        if (function_exists('mysqli_stmt_get_result') &&
-            $stmt->prepare('EXPLAIN SELECT t1.*, t2.* FROM test AS t1, test AS t2') &&
+        if ($stmt->prepare('EXPLAIN SELECT t1.*, t2.* FROM test AS t1, test AS t2') &&
             $stmt->execute()) {
             if (!$res_stmt = mysqli_stmt_get_result($stmt)) {
                 printf("[017] Cannot fetch result from PS [%d] %s\n",

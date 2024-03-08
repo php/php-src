@@ -5,9 +5,6 @@ mysqli
 --SKIPIF--
 <?PHP
 require_once 'skipifconnectfailure.inc';
-if (!function_exists('mysqli_get_client_stats')) {
-    die("skip only available with mysqlnd");
-}
 ?>
 --INI--
 mysqlnd.collect_statistics=0
