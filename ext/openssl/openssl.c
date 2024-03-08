@@ -270,9 +270,20 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 	zend_object_std_dtor(&key_object->std);
 }
 
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+static const zend_module_dep openssl_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+#endif
 /* {{{ openssl_module_entry */
 zend_module_entry openssl_module_entry = {
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+	STANDARD_MODULE_HEADER_EX, NULL,
+	openssl_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"openssl",
 	ext_functions,
 	PHP_MINIT(openssl),
@@ -1330,6 +1341,12 @@ PHP_MINIT_FUNCTION(openssl)
 
 	REGISTER_INI_ENTRIES();
 
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+	if (FAILURE == PHP_MINIT(openssl_pwhash)(INIT_FUNC_ARGS_PASSTHRU)) {
+		return FAILURE;
+	}
+#endif
+
 	return SUCCESS;
 }
 /* }}} */
@@ -1402,6 +1419,11 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_stream_xport_unregister("tlsv1.2");
 	php_stream_xport_unregister("tlsv1.3");
 
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+	if (FAILURE == PHP_MSHUTDOWN(openssl_pwhash)(SHUTDOWN_FUNC_ARGS_PASSTHRU)) {
+		return FAILURE;
+	}
+#endif
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
 
