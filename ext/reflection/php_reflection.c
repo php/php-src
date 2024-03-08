@@ -1467,19 +1467,40 @@ static void reflection_type_factory(
 	}
 }
 
-/* {{{ reflection_function_factory */
-static void reflection_function_factory(zend_function *function, zval *closure_object, zval *object)
+/* copy of hidden zend_closure */
+typedef struct _zend_closure {
+	zend_object       std;
+	zend_function     func;
+	zval              this_ptr;
+	zend_class_entry *called_scope;
+	zif_handler       orig_internal_handler;
+} zend_closure;
+
+static void reflection_function_create_common(zend_function *function, zend_object *closure_object, zval *object)
 {
-	reflection_object *intern;
-	reflection_instantiate(reflection_function_ptr, object);
-	intern = Z_REFLECTION_P(object);
+	reflection_object *intern = Z_REFLECTION_P(object);
+
 	intern->ptr = function;
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = NULL;
 	if (closure_object) {
-		ZVAL_OBJ_COPY(&intern->obj, Z_OBJ_P(closure_object));
+		ZVAL_OBJ_COPY(&intern->obj, closure_object);
+		zend_closure *closure = (zend_closure*) closure_object;
+		/* if it is bound to a class, resolve to it */
+		if (closure->called_scope) {
+			intern->ce = closure->called_scope;
+		}
+	} else {
+		ZVAL_UNDEF(&intern->obj);
 	}
 	ZVAL_STR_COPY(reflection_prop_name(object), function->common.function_name);
+}
+
+/* {{{ reflection_function_factory */
+static void reflection_function_factory(zend_function *function, zend_object *closure_object, zval *object)
+{
+	reflection_instantiate(reflection_function_ptr, object);
+	reflection_function_create_common(function, closure_object, object);
 }
 /* }}} */
 
@@ -1632,27 +1653,18 @@ ZEND_METHOD(Reflection, getModifierNames)
 /* {{{ Constructor. Throws an Exception in case the given function does not exist */
 ZEND_METHOD(ReflectionFunction, __construct)
 {
-	zval *object;
 	zend_object *closure_obj = NULL;
-	reflection_object *intern;
+	zend_string *fname = NULL;
 	zend_function *fptr;
-	zend_string *fname, *lcname;
-
-	object = ZEND_THIS;
-	intern = Z_REFLECTION_P(object);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJ_OF_CLASS_OR_STR(closure_obj, zend_ce_closure, fname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Set CE to NULL */
-	intern->ce = NULL;
 	if (closure_obj) {
 		fptr = (zend_function*)zend_get_closure_method_def(closure_obj);
-		//zend_object *tmp = NULL;
-		///* We use the get_closure object handler that always succeds to fetch the function and CE pointers */
-		//closure_obj->handlers->get_closure(closure_obj, &intern->ce, &fptr, /* obj_ptr */ &tmp, /* check_only */ false);
 	} else {
+		zend_string *lcname;
 		if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
 			/* Ignore leading "\" */
 			ALLOCA_FLAG(use_heap)
@@ -1673,19 +1685,15 @@ ZEND_METHOD(ReflectionFunction, __construct)
 		}
 	}
 
-	if (intern->ptr) {
-		zval_ptr_dtor(&intern->obj);
-		zval_ptr_dtor(reflection_prop_name(object));
-	}
+	// TODO How can this ever be hit?
+	//zval *object = ZEND_THIS;
+	//reflection_object *intern = Z_REFLECTION_P(object);
+	//if (intern->ptr) {
+	//	zval_ptr_dtor(&intern->obj);
+	//	zval_ptr_dtor(reflection_prop_name(object));
+	//}
 
-	ZVAL_STR_COPY(reflection_prop_name(object), fptr->common.function_name);
-	intern->ptr = fptr;
-	intern->ref_type = REF_TYPE_FUNCTION;
-	if (closure_obj) {
-		ZVAL_OBJ_COPY(&intern->obj, closure_obj);
-	} else {
-		ZVAL_UNDEF(&intern->obj);
-	}
+	reflection_function_create_common(fptr, closure_obj, ZEND_THIS);
 }
 /* }}} */
 
@@ -2389,9 +2397,7 @@ ZEND_METHOD(ReflectionGenerator, getFunction)
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
 	if (ex->func->common.fn_flags & ZEND_ACC_CLOSURE) {
-		zval closure;
-		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(ex->func));
-		reflection_function_factory(ex->func, &closure, return_value);
+		reflection_function_factory(ex->func, ZEND_CLOSURE_OBJECT(ex->func), return_value);
 	} else if (ex->func->op_array.scope) {
 		reflection_method_factory(ex->func->op_array.scope, ex->func, NULL, return_value);
 	} else {
@@ -2674,7 +2680,7 @@ ZEND_METHOD(ReflectionParameter, getDeclaringFunction)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (!param->fptr->common.scope) {
-		reflection_function_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value);
+		reflection_function_factory(_copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : Z_OBJ(intern->obj), return_value);
 	} else {
 		reflection_method_factory(param->fptr->common.scope, _copy_function(param->fptr), Z_ISUNDEF(intern->obj)? NULL : &intern->obj, return_value);
 	}
@@ -3159,7 +3165,7 @@ ZEND_METHOD(ReflectionNamedType, isBuiltin)
 }
 /* }}} */
 
-/* {{{ Returns whether type is a builtin type */
+/* {{{ Resolve a relative class type to a proper named type */
 ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 {
 	reflection_object *intern;
@@ -3195,9 +3201,19 @@ ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 		}
 		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->name, allows_null, /* extra flags */ 0);
 	} else {
-		ZEND_ASSERT(zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "self") || zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "parent"));
 		ZEND_ASSERT(ZEND_TYPE_HAS_NAME(param->type));
-		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_NAME(param->type), allows_null, /* extra flags */ 0);
+		ZEND_ASSERT(zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "self") || zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "parent"));
+
+		if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "self")) {
+			resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->name, allows_null, /* extra flags */ 0);
+		} else {
+			if (!intern->ce->parent) {
+				zend_throw_exception_ex(reflection_exception_ptr, 0,
+					"Cannot resolve \"parent\" type when class has no parent");
+				RETURN_THROWS();
+			}
+			resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->parent->name, allows_null, /* extra flags */ 0);
+		}
 	}
 
 	reflection_type_factory(resolved_type, return_value, /* legacy_behavior */ true, intern->ce);

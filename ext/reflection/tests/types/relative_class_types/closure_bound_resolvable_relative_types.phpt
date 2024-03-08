@@ -1,7 +1,5 @@
 --TEST--
-ReflectionTypes of relative class types (self, parent) from traits in classes, variadic parameter DNF types
---XFAIL--
-I'm confused why it not possible to chope the bound scope via Reflection
+ReflectionTypes of relative class types (self, parent) in Closure bound to class with parent
 --FILE--
 <?php
 
@@ -20,20 +18,17 @@ $instances = [
 
 $b = new B();
 
-// TODO Method getClosureScopeClass() seems useful
-// TODO Need to pass scope to: ZEND_METHOD(ReflectionFunctionAbstract, getParameters) ?
-// TODO Need to pass scope to: ZEND_METHOD(ReflectionFunctionAbstract, getReturnType) ?
 foreach ($instances as $instance) {
-    $instance->bindTo($b);
-    $rc = new ReflectionFunction($instance);
-    echo "\tBound to: ", $rc->getClosureScopeClass()->name, PHP_EOL;
+    $fn = $instance->bindTo($b);
+    $rc = new ReflectionFunction($fn);
+    echo "Bound to: ", $rc->getClosureCalledClass()->name, PHP_EOL;
     $type = $rc->getReturnType();
-    echo "\tType: ", $type, PHP_EOL;
-    echo "\tInstance of: ", $type::class, PHP_EOL;
+    echo "Type: ", $type, PHP_EOL;
+    echo "Instance of: ", $type::class, PHP_EOL;
     try {
         $resolvedType = $type->resolveToNamedType();
-        echo "\t\tResolved Type: ", $resolvedType, PHP_EOL;
-        echo "\t\tInstance of: ", $resolvedType::class, PHP_EOL;
+        echo "\tResolved Type: ", $resolvedType, PHP_EOL;
+        echo "\tInstance of: ", $resolvedType::class, PHP_EOL;
     } catch (\Throwable $e) {
         echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
@@ -41,3 +36,18 @@ foreach ($instances as $instance) {
 
 ?>
 --EXPECT--
+Bound to: B
+Type: self
+Instance of: ReflectionRelativeClassType
+	Resolved Type: B
+	Instance of: ReflectionNamedType
+Bound to: B
+Type: parent
+Instance of: ReflectionRelativeClassType
+	Resolved Type: A
+	Instance of: ReflectionNamedType
+Bound to: B
+Type: static
+Instance of: ReflectionRelativeClassType
+	Resolved Type: B
+	Instance of: ReflectionNamedType
