@@ -803,6 +803,7 @@ PHP_METHOD(DOM_Element, getElementsByTagName)
 }
 /* }}} end dom_element_get_elements_by_tag_name */
 
+/* should_free_result must be initialized to false */
 static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp, const char *uri, size_t uri_len, const char *name, bool *should_free_result)
 {
 	bool follow_spec = php_dom_follow_spec_intern(intern);
@@ -819,7 +820,6 @@ static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp,
 		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
 			xmlNsPtr nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
 			if (nsptr != NULL) {
-				*should_free_result = false;
 				return nsptr->href;
 			} else {
 				return NULL;
@@ -849,7 +849,7 @@ PHP_METHOD(DOMElement, getAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	bool should_free_result;
+	bool should_free_result = false;
 	const xmlChar *result = dom_get_attribute_ns(intern, elemp, uri, uri_len, name, &should_free_result);
 	if (result == NULL) {
 		if (php_dom_follow_spec_intern(intern)) {
@@ -1275,7 +1275,7 @@ PHP_METHOD(DOMElement, hasAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	bool should_free_result;
+	bool should_free_result = false;
 	const xmlChar *result = dom_get_attribute_ns(intern, elemp, uri, uri_len, name, &should_free_result);
 	if (result == NULL) {
 		RETURN_FALSE;
