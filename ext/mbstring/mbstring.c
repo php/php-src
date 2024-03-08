@@ -2978,8 +2978,9 @@ static void php_mb_ulcfirst(INTERNAL_FUNCTION_PARAMETERS, php_case_mode mode)
 	}
 
 	zend_string *second = mb_get_substr(str, 1, MBFL_SUBSTR_UNTIL_END, enc);
-	zend_string_release_ex(first, false);
 	zend_string *retval = zend_string_concat2(ZSTR_VAL(head), ZSTR_LEN(head), ZSTR_VAL(second), ZSTR_LEN(second));
+
+	zend_string_release_ex(first, false);
 	zend_string_release_ex(head, false);
 	zend_string_release_ex(second, false);
 
