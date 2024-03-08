@@ -164,7 +164,7 @@ mysqlnd.fetch_data_copy=0
     if (mysqli_get_server_version($link) > 50000) {
         // let's try to play with stored procedures
         mysqli_real_query($link, 'DROP PROCEDURE IF EXISTS p');
-        if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) READS SQL DATA BEGIN SELECT id FROM test WHERE id >= 100 ORDER BY id; SELECT id + 1, label FROM test WHERE id > 0 AND id < 3 ORDER BY id; SELECT VERSION() INTO ver_param;
+        if (mysqli_real_query($link, 'CREATE PROCEDURE p(OUT ver_param VARCHAR(50)) READS SQL DATA BEGIN SELECT id FROM test WHERE id >= 100 ORDER BY id; SELECT id + 1, label FROM test WHERE id > 0 AND id < 3 ORDER BY id; SELECT VERSION() INTO ver_param;
 END;')) {
             mysqli_multi_query($link, "CALL p(@version)");
             do {
