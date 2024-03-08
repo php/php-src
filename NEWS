@@ -7,7 +7,7 @@ PHP                                                                        NEWS
     (nielsdos)
 
 - Gettext:
-  - Fixed sigabrt raised with dcgettext/dcngettext calls with gettext 0.22.5
+  . Fixed sigabrt raised with dcgettext/dcngettext calls with gettext 0.22.5
     with category set to LC_ALL. (David Carlier)
 
 - MySQLnd:
