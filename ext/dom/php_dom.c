@@ -1514,20 +1514,15 @@ void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type
 /* {{{ php_dom_create_object */
 PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
 {
-	zend_class_entry *ce;
-	dom_object *intern;
-
-	if (!obj) {
-		ZVAL_NULL(return_value);
-		return 0;
-	}
-
-	if ((intern = (dom_object *) php_dom_object_get_data((void *) obj))) {
+	dom_object *intern = php_dom_object_get_data(obj);
+	if (intern) {
 		ZVAL_OBJ_COPY(return_value, &intern->std);
-		return 1;
+		return true;
 	}
 
 	bool modern = domobj && php_dom_follow_spec_intern(domobj);
+
+	zend_class_entry *ce;
 	switch (obj->type) {
 		case XML_DOCUMENT_NODE:
 		{
@@ -1606,14 +1601,14 @@ PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, do
 			/* TODO you can actually hit this with fixed attributes in the DTD for example... */
 			zend_throw_error(NULL, "Unsupported node type: %d", obj->type);
 			ZVAL_NULL(return_value);
-			return 0;
+			return false;
 	}
 
 	if (domobj && domobj->document) {
 		ce = dom_get_doc_classmap(domobj->document, ce);
 	}
 	php_dom_instantiate_object_helper(return_value, ce, obj, domobj);
-	return 0;
+	return false;
 }
 /* }}} end php_domobject_new */
 

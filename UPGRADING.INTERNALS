@@ -144,6 +144,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - New public APIs are available to handle callbacks from XPath, see
      xpath_callbacks.h.
    - Added public APIs to manipulate namespace data, see namespace_compat.h.
+   - php_dom_create_object() now no longer accepts a NULL obj argument.
 
  b. ext/random
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
