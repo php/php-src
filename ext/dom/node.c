@@ -670,7 +670,7 @@ zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval)
 	xmlNode *nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -959,7 +959,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 	}
 
 	xmlNodePtr new_child = NULL;
-	int stricterror = dom_get_strict_error(intern->document);
+	bool stricterror = dom_get_strict_error(intern->document);
 	int ret;
 
 	if (dom_node_is_read_only(parentp) == SUCCESS ||
@@ -1271,7 +1271,7 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 	DOM_GET_OBJ(newchild, newnode, xmlNodePtr, newchildobj);
 	DOM_GET_OBJ(oldchild, oldnode, xmlNodePtr, oldchildobj);
 
-	int stricterror = dom_get_strict_error(intern->document);
+	bool stricterror = dom_get_strict_error(intern->document);
 
 	if (newchild->doc != nodep->doc && newchild->doc != NULL) {
 		php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
@@ -2484,30 +2484,23 @@ PHP_METHOD(DOMNode, getLineNo)
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-node-contains
 Since:
 */
-static void dom_node_contains(INTERNAL_FUNCTION_PARAMETERS, zval *other)
+static bool dom_node_contains(xmlNodePtr thisp, xmlNodePtr otherp)
 {
-	zval *id;
-	xmlNodePtr otherp, thisp;
-	dom_object *unused_intern;
-
-	ZEND_ASSERT(other != NULL);
-
-	DOM_GET_OBJ(otherp, other, xmlNodePtr, unused_intern);
-	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, unused_intern);
-
 	do {
 		if (otherp == thisp) {
-			RETURN_TRUE;
+			return true;
 		}
 		otherp = otherp->parent;
 	} while (otherp);
 
-	RETURN_FALSE;
+	return false;
 }
 
 PHP_METHOD(DOMNode, contains)
 {
-	zval *other;
+	zval *other, *id;
+	xmlNodePtr otherp, thisp;
+	dom_object *unused_intern;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OR_NULL(other)
@@ -2522,12 +2515,17 @@ PHP_METHOD(DOMNode, contains)
 		RETURN_THROWS();
 	}
 
-	dom_node_contains(INTERNAL_FUNCTION_PARAM_PASSTHRU, other);
+	DOM_GET_OBJ(otherp, other, xmlNodePtr, unused_intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, unused_intern);
+
+	RETURN_BOOL(dom_node_contains(thisp, otherp));
 }
 
 PHP_METHOD(DOM_Node, contains)
 {
-	zval *other;
+	zval *other, *id;
+	xmlNodePtr otherp, thisp;
+	dom_object *unused_intern;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(other, dom_modern_node_class_entry)
@@ -2537,7 +2535,10 @@ PHP_METHOD(DOM_Node, contains)
 		RETURN_FALSE;
 	}
 
-	dom_node_contains(INTERNAL_FUNCTION_PARAM_PASSTHRU, other);
+	DOM_GET_OBJ(otherp, other, xmlNodePtr, unused_intern);
+	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, unused_intern);
+
+	RETURN_BOOL(dom_node_contains(thisp, otherp));
 }
 /* }}} */
 
@@ -2552,7 +2553,7 @@ PHP_METHOD(DOMNode, getRootNode)
 	/* Unused now because we don't support the shadow DOM nodes. Options only influence shadow DOM nodes. */
 	zval *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &options) != SUCCESS) {
 		RETURN_THROWS();
 	}
 

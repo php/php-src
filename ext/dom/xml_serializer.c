@@ -898,7 +898,7 @@ static int dom_xml_serialize_element_node(
 			TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
 
 			/* 12.5.5. Append the following to markup, in the order listed: ... */
-			TRY_OR_CLEANUP(xmlOutputBufferWrite(out, strlen(" xmlns:"), " xmlns:"));
+			TRY_OR_CLEANUP(xmlOutputBufferWrite(out, strlen(" xmlns:"), " xmlns:")); /* 12.5.5.1 - 12.5.5.2 */
 			TRY_OR_CLEANUP(xmlOutputBufferWriteString(out, (const char *) prefix));
 			TRY_OR_CLEANUP(xmlOutputBufferWrite(out, strlen("=\""), "=\""));
 			TRY_OR_CLEANUP(dom_xml_common_text_serialization(out, (const char *) ns, true));
@@ -929,7 +929,7 @@ static int dom_xml_serialize_element_node(
 			TRY_OR_CLEANUP(dom_xml_output_qname(out, &qualified_name));
 
 			/* 12.6.5. Append the following to markup, in the order listed: ... */
-			TRY_OR_CLEANUP(xmlOutputBufferWrite(out, strlen(" xmlns=\""), " xmlns=\""));
+			TRY_OR_CLEANUP(xmlOutputBufferWrite(out, strlen(" xmlns=\""), " xmlns=\"")); /* 12.6.5.1 - 12.6.5.2 */
 			TRY_OR_CLEANUP(dom_xml_common_text_serialization(out, (const char *) ns, true));
 			TRY_OR_CLEANUP(xmlOutputBufferWrite(out, strlen("\""), "\""));
 		}

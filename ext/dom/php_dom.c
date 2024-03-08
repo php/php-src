@@ -531,8 +531,7 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 
 		DOM_RET_OBJ((xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
 	} else {
-		/* TODO: should this be a type error instead? */
-		zend_argument_value_error(1, "is not a valid node type");
+		zend_argument_type_error(1, "is not a valid node type");
 		RETURN_THROWS();
 	}
 }

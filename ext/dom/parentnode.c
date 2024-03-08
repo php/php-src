@@ -774,7 +774,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		viable_next_sibling = viable_next_sibling->next;
 	}
 
-	int stricterror = dom_get_strict_error(context->document);
+	bool stricterror = dom_get_strict_error(context->document);
 	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
 		return;
 	}
