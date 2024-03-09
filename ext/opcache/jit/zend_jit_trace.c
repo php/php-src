@@ -6315,21 +6315,21 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_FRAMELESS_ICALL_0:
-						jit_frameless_icall0(jit, opline);
+						jit_frameless_icall0(jit, peek_checked_stack - checked_stack, opline);
 						goto done;
 					case ZEND_FRAMELESS_ICALL_1:
 						op1_info = OP1_INFO();
-						jit_frameless_icall1(jit, opline, op1_info);
+						jit_frameless_icall1(jit, peek_checked_stack - checked_stack, opline, op1_info);
 						goto done;
 					case ZEND_FRAMELESS_ICALL_2:
 						op1_info = OP1_INFO();
 						op2_info = OP2_INFO();
-						jit_frameless_icall2(jit, opline, op1_info, op2_info);
+						jit_frameless_icall2(jit, peek_checked_stack - checked_stack, opline, op1_info, op2_info);
 						goto done;
 					case ZEND_FRAMELESS_ICALL_3:
 						op1_info = OP1_INFO();
 						op2_info = OP2_INFO();
-						jit_frameless_icall3(jit, opline, op1_info, op2_info, OP1_DATA_INFO());
+						jit_frameless_icall3(jit, peek_checked_stack - checked_stack, opline, op1_info, op2_info, OP1_DATA_INFO());
 						goto done;
 					default:
 						break;

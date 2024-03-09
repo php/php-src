@@ -2139,6 +2139,10 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				}
 				return 0;
 			}
+			if (opline->opcode == ZEND_OP_DATA) {
+				/* Consider the primary opline for matching */
+				--opline;
+			}
 			if (ssa_op->op1_def >= 0 || ssa_op->op2_def >= 0) {
 				if (var->use_chain < 0 && var->phi_use_chain == NULL) {
 					switch (opline->opcode) {
@@ -2209,6 +2213,8 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						zend_ssa_remove_instr(ssa, opline, ssa_op);
 						removed_ops++;
 						if (has_op_data) {
+							old_type = opline[1].result_type;
+							old_var = opline[1].result.var;
 							zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
 							removed_ops++;
 						}

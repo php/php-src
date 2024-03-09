@@ -2644,21 +2644,21 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					}
 					break;
 				case ZEND_FRAMELESS_ICALL_0:
-					jit_frameless_icall0(jit, opline);
+					jit_frameless_icall0(jit, 0, opline);
 					goto done;
 				case ZEND_FRAMELESS_ICALL_1:
 					op1_info = OP1_INFO();
-					jit_frameless_icall1(jit, opline, op1_info);
+					jit_frameless_icall1(jit, 0, opline, op1_info);
 					goto done;
 				case ZEND_FRAMELESS_ICALL_2:
 					op1_info = OP1_INFO();
 					op2_info = OP2_INFO();
-					jit_frameless_icall2(jit, opline, op1_info, op2_info);
+					jit_frameless_icall2(jit, 0, opline, op1_info, op2_info);
 					goto done;
 				case ZEND_FRAMELESS_ICALL_3:
 					op1_info = OP1_INFO();
 					op2_info = OP2_INFO();
-					jit_frameless_icall3(jit, opline, op1_info, op2_info, OP1_DATA_INFO());
+					jit_frameless_icall3(jit, 0, opline, op1_info, op2_info, OP1_DATA_INFO());
 					goto done;
 				default:
 					if (!zend_jit_handler(&ctx, opline,
