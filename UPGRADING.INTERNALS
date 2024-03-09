@@ -147,6 +147,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - php_dom_create_object() now no longer accepts a NULL obj argument.
    - Removed the `ret` argument from the DOM_RET_OBJ macro, use the return
      value instead.
+   - Removed DOM_XMLNS_NAMESPACE from xml_common.h. Use DOM_XMLNS_NS_URI
+     from namespace_compat.h instead.
 
  b. ext/random
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation

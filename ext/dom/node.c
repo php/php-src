@@ -723,7 +723,7 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 				if (strURI == NULL ||
 					(zend_string_equals_literal(prefix_str, "xml") && strcmp(strURI, (char *) XML_XML_NAMESPACE)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && zend_string_equals_literal(prefix_str, "xmlns") &&
-					 strcmp(strURI, (char *) DOM_XMLNS_NAMESPACE)) ||
+					 strcmp(strURI, DOM_XMLNS_NS_URI)) ||
 					(nodep->type == XML_ATTRIBUTE_NODE && !strcmp((char *) nodep->name, "xmlns"))) {
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;

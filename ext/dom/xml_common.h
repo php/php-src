@@ -56,9 +56,6 @@ PHP_DOM_EXPORT dom_object *php_dom_object_get_data(xmlNodePtr obj);
 PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval* return_value, dom_object *domobj);
 PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 
-#define DOM_XMLNS_NAMESPACE \
-    (const xmlChar *) "http://www.w3.org/2000/xmlns/"
-
 #define NODE_GET_OBJ(__ptr, __id, __prtype, __intern) { \
 	__intern = Z_LIBXML_NODE_P(__id); \
 	if (UNEXPECTED(__intern->node == NULL)) { \
