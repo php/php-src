@@ -1341,7 +1341,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	if (local) {
 		int len = local_len > INT_MAX ? -1 : (int) local_len;
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)local, len)) != NULL) {
-			mapptr->local = (xmlChar*) tmp;
+			mapptr->local = BAD_CAST tmp;
 		} else {
 			mapptr->local = xmlCharStrndup(local, len);
 			mapptr->free_local = true;
@@ -1357,7 +1357,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 	if (ns) {
 		int len = ns_len > INT_MAX ? -1 : (int) ns_len;
 		if (doc != NULL && (tmp = xmlDictExists(doc->dict, (const xmlChar *)ns, len)) != NULL) {
-			mapptr->ns = (xmlChar*) tmp;
+			mapptr->ns = BAD_CAST tmp;
 		} else {
 			mapptr->ns = xmlCharStrndup(ns, len);
 			mapptr->free_ns = true;
@@ -1986,16 +1986,16 @@ int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, i
 		return NAMESPACE_ERR;
 	}
 
-	*localname = (char *)xmlSplitQName2((xmlChar *)qname, (xmlChar **) prefix);
+	*localname = (char *)xmlSplitQName2(BAD_CAST qname, (xmlChar **) prefix);
 	if (*localname == NULL) {
-		*localname = (char *)xmlStrdup((xmlChar *)qname);
+		*localname = (char *)xmlStrdup(BAD_CAST qname);
 		if (*prefix == NULL && uri_len == 0) {
 			return 0;
 		}
 	}
 
 	/* 1 */
-	if (xmlValidateQName((xmlChar *) qname, 0) != 0) {
+	if (xmlValidateQName(BAD_CAST qname, 0) != 0) {
 		return NAMESPACE_ERR;
 	}
 
@@ -2049,7 +2049,7 @@ NAMESPACE_ERR: Raised if
 
 xmlNsPtr dom_get_ns_unchecked(xmlNodePtr nodep, char *uri, char *prefix)
 {
-	xmlNsPtr nsptr = xmlNewNs(nodep, (xmlChar *)uri, (xmlChar *)prefix);
+	xmlNsPtr nsptr = xmlNewNs(nodep, BAD_CAST uri, BAD_CAST prefix);
 	if (UNEXPECTED(nsptr == NULL)) {
 		/* Either memory allocation failure, or it's because of a prefix conflict.
 		 * We'll assume a conflict and try again. If it was a memory allocation failure we'll just fail again, whatever.
@@ -2120,9 +2120,9 @@ static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, 
 	xmlNsPtr curns = xmlNewNs(NULL, original->href, NULL);
 	if (original->prefix) {
 		curns->prefix = xmlStrdup(original->prefix);
-		attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *) original->prefix, original->href);
+		attrp = xmlNewDocNode(nodep->doc, NULL, BAD_CAST original->prefix, original->href);
 	} else {
-		attrp = xmlNewDocNode(nodep->doc, NULL, (xmlChar *)"xmlns", original->href);
+		attrp = xmlNewDocNode(nodep->doc, NULL, BAD_CAST "xmlns", original->href);
 	}
 	attrp->type = XML_NAMESPACE_DECL;
 	attrp->parent = nodep;

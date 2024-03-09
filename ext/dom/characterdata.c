@@ -80,7 +80,7 @@ zend_result dom_characterdata_data_write(dom_object *obj, zval *newval)
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	zend_string *str = Z_STR_P(newval);
 
-	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+	xmlNodeSetContentLen(nodep, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 
 	return SUCCESS;
 }
@@ -189,7 +189,7 @@ static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
+	xmlTextConcat(nodep, BAD_CAST arg, arg_len);
 	if (return_true) {
 		RETURN_TRUE;
 	}
@@ -255,7 +255,7 @@ static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 	second = xmlUTF8Strsub(cur, (int)offset, length - (int)offset);
 
 	xmlNodeSetContent(node, first);
-	xmlNodeAddContent(node, (xmlChar *) arg);
+	xmlNodeAddContent(node, BAD_CAST arg);
 	xmlNodeAddContent(node, second);
 
 	xmlFree(first);
@@ -403,7 +403,7 @@ static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool r
 		second = xmlUTF8Strsub(cur, (int)offset + count, length - (int)offset);
 	}
 
-	substring = xmlStrcat(substring, (xmlChar *) arg);
+	substring = xmlStrcat(substring, BAD_CAST arg);
 	substring = xmlStrcat(substring, second);
 
 	xmlNodeSetContent(node, substring);

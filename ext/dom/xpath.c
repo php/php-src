@@ -295,7 +295,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 		ctxp->nsNr = in_scope_ns.count;
 	}
 
-	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
+	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression(BAD_CAST expr, ctxp);
 	ctxp->node = NULL;
 
 	if (register_node_ns && nodep != NULL) {

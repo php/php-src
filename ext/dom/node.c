@@ -204,7 +204,7 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_ATTRIBUTE_NODE:
 			if (php_dom_follow_spec_intern(obj)) {
 				dom_remove_all_children(nodep);
-				xmlAddChild(nodep, xmlNewTextLen((xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str)));
+				xmlAddChild(nodep, xmlNewTextLen(BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str)));
 				break;
 			}
 			ZEND_FALLTHROUGH;
@@ -215,7 +215,7 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 		case XML_COMMENT_NODE:
 		case XML_CDATA_SECTION_NODE:
 		case XML_PI_NODE:
-			xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+			xmlNodeSetContentLen(nodep, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 			break;
 		default:
 			break;
@@ -717,7 +717,7 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 				 * We should fall back to the default namespace in this case. */
 				prefix = NULL;
 			}
-			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, (xmlChar *)prefix)) {
+			if (nsnode && nodep->ns != NULL && !xmlStrEqual(nodep->ns->prefix, BAD_CAST prefix)) {
 				strURI = (char *) nodep->ns->href;
 				/* Validate namespace naming constraints */
 				if (strURI == NULL ||
@@ -730,14 +730,14 @@ zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 				} else {
 					curns = nsnode->nsDef;
 					while (curns != NULL) {
-						if (xmlStrEqual((xmlChar *)prefix, curns->prefix) && xmlStrEqual(nodep->ns->href, curns->href)) {
+						if (xmlStrEqual(BAD_CAST prefix, curns->prefix) && xmlStrEqual(nodep->ns->href, curns->href)) {
 							ns = curns;
 							break;
 						}
 						curns = curns->next;
 					}
 					if (ns == NULL) {
-						ns = xmlNewNs(nsnode, nodep->ns->href, (xmlChar *)prefix);
+						ns = xmlNewNs(nsnode, nodep->ns->href, BAD_CAST prefix);
 						/* Sadly, we cannot distinguish between OOM and namespace conflict.
 						 * But OOM will almost never happen. */
 						if (UNEXPECTED(ns == NULL)) {
@@ -2019,7 +2019,7 @@ static void dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 					RETURN_STRING(result);
 				}
 			} else {
-				nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, (xmlChar *) uri);
+				nsptr = xmlSearchNsByHref(lookupp->doc, lookupp, BAD_CAST uri);
 				if (nsptr && nsptr->prefix != NULL) {
 					RETURN_STRING((const char *) nsptr->prefix);
 				}
@@ -2139,7 +2139,7 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 		}
 
 		nsptr = xmlSearchNs(nodep->doc, nodep, NULL);
-		if (nsptr && xmlStrEqual(nsptr->href, (xmlChar *) uri)) {
+		if (nsptr && xmlStrEqual(nsptr->href, BAD_CAST uri)) {
 			RETURN_TRUE;
 		}
 	}
@@ -2313,13 +2313,13 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
-						xmlXPathRegisterNs(ctxp, (xmlChar *) ZSTR_VAL(prefix), (xmlChar *) Z_STRVAL_P(tmpns));
+						xmlXPathRegisterNs(ctxp, BAD_CAST ZSTR_VAL(prefix), BAD_CAST Z_STRVAL_P(tmpns));
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
 
-		xpathobjp = xmlXPathEvalExpression((xmlChar *) xquery, ctxp);
+		xpathobjp = xmlXPathEvalExpression(BAD_CAST xquery, ctxp);
 		ctxp->node = NULL;
 		if (xpathobjp && xpathobjp->type == XPATH_NODESET) {
 			nodeset = xpathobjp->nodesetval;
@@ -2342,7 +2342,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 				sizeof(xmlChar *), 0);
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(ns_prefixes), tmpns) {
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
-					inclusive_ns_prefixes[nscount++] = (xmlChar *) Z_STRVAL_P(tmpns);
+					inclusive_ns_prefixes[nscount++] = BAD_CAST Z_STRVAL_P(tmpns);
 				}
 			} ZEND_HASH_FOREACH_END();
 			inclusive_ns_prefixes[nscount] = NULL;

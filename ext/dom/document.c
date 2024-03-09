@@ -153,7 +153,7 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 	if (handler != NULL) {
 		xmlCharEncCloseFunc(handler);
 		if (docp->encoding != NULL) {
-			xmlFree((xmlChar *)docp->encoding);
+			xmlFree(BAD_CAST docp->encoding);
 		}
 		docp->encoding = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
 	} else {
@@ -257,7 +257,7 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 	}
 
 	if (docp->version != NULL) {
-		xmlFree((xmlChar *) docp->version );
+		xmlFree(BAD_CAST docp->version);
 	}
 
 	docp->version = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
@@ -463,7 +463,7 @@ zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 	}
 
 	if (docp->URL != NULL) {
-		xmlFree((xmlChar *) docp->URL);
+		xmlFree(BAD_CAST docp->URL);
 	}
 
 	docp->URL = xmlStrdup((const xmlChar *) ZSTR_VAL(str));
@@ -604,7 +604,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	node = xmlNewDocText(docp, (xmlChar *) value);
+	node = xmlNewDocText(docp, BAD_CAST value);
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
@@ -633,7 +633,7 @@ PHP_METHOD(DOMDocument, createComment)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	node = xmlNewDocComment(docp, (xmlChar *) value);
+	node = xmlNewDocComment(docp, BAD_CAST value);
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
@@ -675,7 +675,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 		}
 	}
 
-	node = xmlNewCDataBlock(docp, (xmlChar *) value, value_len);
+	node = xmlNewCDataBlock(docp, BAD_CAST value, value_len);
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
@@ -703,7 +703,7 @@ static void dom_document_create_processing_instruction(INTERNAL_FUNCTION_PARAMET
 
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
-	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+	if (xmlValidateName(BAD_CAST name, 0) != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -715,7 +715,7 @@ static void dom_document_create_processing_instruction(INTERNAL_FUNCTION_PARAMET
 		}
 	}
 
-	node = xmlNewDocPI(docp, (xmlChar *) name, (xmlChar *) value);
+	node = xmlNewDocPI(docp, BAD_CAST name, BAD_CAST value);
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
@@ -796,12 +796,12 @@ PHP_METHOD(DOMDocument, createEntityReference)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	if (xmlValidateName((xmlChar *) name, 0) != 0) {
+	if (xmlValidateName(BAD_CAST name, 0) != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
 
-	node = xmlNewReference(docp, (xmlChar *) name);
+	node = xmlNewReference(docp, BAD_CAST name);
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		RETURN_THROWS();
@@ -1093,7 +1093,7 @@ PHP_METHOD(DOMDocument, getElementById)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	attrp = xmlGetID(docp, (xmlChar *) idname);
+	attrp = xmlGetID(docp, BAD_CAST idname);
 
 	/* From the moment an ID is created, libxml2's behaviour is to cache that element, even
 	 * if that element is not yet attached to the document. Similarly, only upon destruction of
@@ -1294,7 +1294,7 @@ PHP_METHOD(DOMDocument, __construct)
 		RETURN_THROWS();
 	}
 
-	docp = xmlNewDoc((xmlChar *) version);
+	docp = xmlNewDoc(BAD_CAST version);
 
 	if (!docp) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);
@@ -1302,7 +1302,7 @@ PHP_METHOD(DOMDocument, __construct)
 	}
 
 	if (encoding_len > 0) {
-		docp->encoding = (const xmlChar *) xmlStrdup((xmlChar *) encoding);
+		docp->encoding = (const xmlChar *) xmlStrdup(BAD_CAST encoding);
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -1334,7 +1334,7 @@ const char *_dom_get_valid_file_path(const char *source, char *resolved_path, in
 	if (uri == NULL) {
 		return NULL;
 	}
-	escsource = xmlURIEscapeStr((xmlChar *) source, (xmlChar *) ":");
+	escsource = xmlURIEscapeStr(BAD_CAST source, BAD_CAST ":");
 	xmlParseURIReference(uri, (char *) escsource);
 	xmlFree(escsource);
 
@@ -1486,7 +1486,7 @@ xmlDocPtr dom_document_parser(zval *id, dom_load_mode mode, const char *source, 
 		}
 		/* If loading from memory, set the base reference uri for the document */
 		if (ret && ret->URL == NULL && ctxt->directory != NULL) {
-			ret->URL = xmlStrdup((xmlChar *) ctxt->directory);
+			ret->URL = xmlStrdup(BAD_CAST ctxt->directory);
 		}
 	} else {
 		ret = DOM_DOCUMENT_MALFORMED;
