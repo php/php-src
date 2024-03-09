@@ -2210,7 +2210,6 @@ PHP_METHOD(DOMDocument, saveHTML)
 	xmlOutputBufferPtr outBuf;
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
-	xmlChar *mem = NULL;
 	int format;
 
 	id = ZEND_THIS;
@@ -2257,7 +2256,7 @@ PHP_METHOD(DOMDocument, saveHTML)
 		}
 		if (!outBuf->error) {
 			xmlOutputBufferFlush(outBuf);
-			mem = (xmlChar*) xmlBufferContent(buf);
+			const xmlChar *mem = xmlBufferContent(buf);
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
@@ -2271,6 +2270,7 @@ PHP_METHOD(DOMDocument, saveHTML)
 		xmlOutputBufferClose(outBuf);
 		xmlBufferFree(buf);
 	} else {
+		xmlChar *mem = NULL;
 		int size = 0;
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
 		if (!size || !mem) {
@@ -2278,8 +2278,7 @@ PHP_METHOD(DOMDocument, saveHTML)
 		} else {
 			RETVAL_STRINGL((const char*) mem, size);
 		}
-		if (mem)
-			xmlFree(mem);
+		xmlFree(mem);
 	}
 
 }
