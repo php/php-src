@@ -738,9 +738,7 @@ static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int s
 void dom_child_node_remove(dom_object *context)
 {
 	xmlNode *child = dom_object_get_node(context);
-	int stricterror;
-
-	stricterror = dom_get_strict_error(context->document);
+	bool stricterror = dom_get_strict_error(context->document);
 
 	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
 		return;

@@ -874,7 +874,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 	xmlAttr *attr;
 	char *localname = NULL, *prefix = NULL;
 	int is_xmlns = 0, name_valid;
-	int stricterror = dom_get_strict_error(intern->document);
+	bool stricterror = dom_get_strict_error(intern->document);
 
 	int errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
