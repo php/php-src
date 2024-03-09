@@ -525,11 +525,21 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "x$PHP_FPM_SELINUX" != "xno" ; then
-    AC_CHECK_HEADERS([selinux/selinux.h])
-    AC_CHECK_LIB(selinux, security_setenforce, [
-      PHP_ADD_LIBRARY(selinux)
-      AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
-    ],[])
+    PKG_CHECK_MODULES([SELINUX], [selinux], [
+      PHP_EVAL_LIBLINE([$SELINUX_LIBS])
+      PHP_EVAL_INCLINE([$SELINUX_CFLAGS])
+    ],
+      [AC_CHECK_LIB([selinux], [security_setenforce],
+        [PHP_ADD_LIBRARY([selinux])],
+        [AC_MSG_ERROR([Required SELinux library not found.])])])
+
+    dnl Sanity check.
+    CFLAGS_save="$CFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([selinux/selinux.h],
+      [AC_DEFINE([HAVE_SELINUX], [1], [Whether SELinux is available.])],
+      [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
+    CFLAGS="$CFLAGS_save"
   fi
 
   PHP_SUBST_OLD(php_fpm_systemd)
