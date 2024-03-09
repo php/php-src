@@ -1797,12 +1797,20 @@ PHP_METHOD(DOMNode, getLineNo)
 
 PHP_METHOD(DOMNode, __sleep)
 {
+	if (zend_parse_parameters_none() != SUCCESS) {
+		RETURN_THROWS();
+	}
+
 	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed, unless serialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 	RETURN_THROWS();
 }
 
 PHP_METHOD(DOMNode, __wakeup)
 {
+	if (zend_parse_parameters_none() != SUCCESS) {
+		RETURN_THROWS();
+	}
+
 	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless unserialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 	RETURN_THROWS();
 }
