@@ -53,7 +53,6 @@ Since: DOM Level 2
 PHP_METHOD(DOMImplementation, createDocumentType)
 {
 	xmlDtd *doctype;
-	int ret;
 	size_t name_len = 0, publicid_len = 0, systemid_len = 0;
 	char *name = NULL, *publicid = NULL, *systemid = NULL;
 	xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
@@ -105,7 +104,7 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 		RETURN_FALSE;
 	}
 
-	DOM_RET_OBJ((xmlNodePtr) doctype, &ret, NULL);
+	DOM_RET_OBJ((xmlNodePtr) doctype, NULL);
 }
 
 PHP_METHOD(DOM_Implementation, createDocumentType)
@@ -154,7 +153,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 	xmlNode *nodep;
 	xmlDtdPtr doctype = NULL;
 	xmlNsPtr nsptr = NULL;
-	int ret, errorcode = 0;
+	int errorcode = 0;
 	size_t uri_len = 0, name_len = 0;
 	char *uri = NULL, *name = NULL;
 	char *prefix = NULL, *localname = NULL;
@@ -242,7 +241,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 		xmlFree(localname);
 	}
 
-	DOM_RET_OBJ((xmlNodePtr) docp, &ret, NULL);
+	DOM_RET_OBJ((xmlNodePtr) docp, NULL);
 
 	if (doctobj != NULL) {
 		doctobj->document = ((dom_object *)((php_libxml_node_ptr *)docp->_private)->_private)->document;

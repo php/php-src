@@ -107,10 +107,9 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 
 void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = php_dom_named_node_map_get_named_item(objmap, named, true);
 	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
 		RETURN_NULL();
 	}
@@ -164,10 +163,9 @@ xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_lon
 
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = php_dom_named_node_map_get_item(objmap, index);
 	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
 		RETURN_NULL();
 	}
@@ -200,7 +198,6 @@ Since: DOM Level 2
 PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 {
 	zval *id;
-	int ret;
 	size_t namedlen=0, urilen=0;
 	dom_object *intern;
 	xmlNodePtr itemnode = NULL;
@@ -241,8 +238,7 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 	}
 
 	if (itemnode) {
-		DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
-		return;
+		DOM_RET_OBJ(itemnode, objmap->baseobj);
 	} else {
 		RETVAL_NULL();
 	}

@@ -495,7 +495,6 @@ PHP_METHOD(DOMDocument, createElement)
 {
 	xmlDocPtr docp;
 	dom_object *intern;
-	int ret;
 	size_t value_len;
 	char *value = NULL;
 	zend_string *name;
@@ -520,7 +519,7 @@ PHP_METHOD(DOMDocument, createElement)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 
 PHP_METHOD(DOM_Document, createElement)
@@ -528,7 +527,6 @@ PHP_METHOD(DOM_Document, createElement)
 	xmlNode *node;
 	xmlDocPtr docp;
 	dom_object *intern;
-	int ret;
 	zend_string *name;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -556,7 +554,7 @@ PHP_METHOD(DOM_Document, createElement)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 /* }}} end dom_document_create_element */
 
@@ -569,7 +567,6 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 	xmlNode *node;
 	xmlDocPtr docp;
 	dom_object *intern;
-	int ret;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -584,7 +581,7 @@ PHP_METHOD(DOMDocument, createDocumentFragment)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 /* }}} end dom_document_create_document_fragment */
 
@@ -596,7 +593,6 @@ PHP_METHOD(DOMDocument, createTextNode)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret;
 	size_t value_len;
 	dom_object *intern;
 	char *value;
@@ -614,7 +610,7 @@ PHP_METHOD(DOMDocument, createTextNode)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 /* }}} end dom_document_create_text_node */
 
@@ -626,7 +622,6 @@ PHP_METHOD(DOMDocument, createComment)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret;
 	size_t value_len;
 	dom_object *intern;
 	char *value;
@@ -644,7 +639,7 @@ PHP_METHOD(DOMDocument, createComment)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 /* }}} end dom_document_create_comment */
 
@@ -657,7 +652,6 @@ PHP_METHOD(DOMDocument, createCDATASection)
 	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret;
 	size_t value_len;
 	dom_object *intern;
 	char *value;
@@ -687,7 +681,7 @@ PHP_METHOD(DOMDocument, createCDATASection)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 /* }}} end dom_document_create_cdatasection */
 
@@ -699,7 +693,6 @@ static void dom_document_create_processing_instruction(INTERNAL_FUNCTION_PARAMET
 {
 	xmlNode *node;
 	xmlDocPtr docp;
-	int ret;
 	size_t value_len, name_len = 0;
 	dom_object *intern;
 	char *name, *value = NULL;
@@ -728,7 +721,7 @@ static void dom_document_create_processing_instruction(INTERNAL_FUNCTION_PARAMET
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ(node, &ret, intern);
+	DOM_RET_OBJ(node, intern);
 }
 
 PHP_METHOD(DOMDocument, createProcessingInstruction)
@@ -751,7 +744,6 @@ PHP_METHOD(DOMDocument, createAttribute)
 	zval *id;
 	xmlAttrPtr node;
 	xmlDocPtr docp;
-	int ret;
 	dom_object *intern;
 	zend_string *name;
 
@@ -780,7 +772,7 @@ PHP_METHOD(DOMDocument, createAttribute)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ((xmlNodePtr) node, &ret, intern);
+	DOM_RET_OBJ((xmlNodePtr) node, intern);
 
 }
 /* }}} end dom_document_create_attribute */
@@ -794,7 +786,6 @@ PHP_METHOD(DOMDocument, createEntityReference)
 	xmlNode *node;
 	xmlDocPtr docp = NULL;
 	dom_object *intern;
-	int ret;
 	size_t name_len;
 	char *name;
 
@@ -816,7 +807,7 @@ PHP_METHOD(DOMDocument, createEntityReference)
 		RETURN_THROWS();
 	}
 
-	DOM_RET_OBJ((xmlNodePtr) node, &ret, intern);
+	DOM_RET_OBJ((xmlNodePtr) node, intern);
 }
 /* }}} end dom_document_create_entity_reference */
 
@@ -830,7 +821,6 @@ PHP_METHOD(DOMDocument, importNode)
 	xmlDocPtr docp;
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
-	int ret;
 	bool recursive = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
@@ -867,7 +857,7 @@ PHP_METHOD(DOMDocument, importNode)
 		}
 	}
 
-	DOM_RET_OBJ(retnodep, &ret, intern);
+	DOM_RET_OBJ(retnodep, intern);
 }
 
 static void dom_modern_document_import_node(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *node_ce)
@@ -876,7 +866,6 @@ static void dom_modern_document_import_node(INTERNAL_FUNCTION_PARAMETERS, zend_c
 	xmlDocPtr docp;
 	xmlNodePtr nodep, retnodep;
 	dom_object *intern, *nodeobj;
-	int ret;
 	bool recursive = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, node_ce, &recursive) != SUCCESS) {
@@ -902,7 +891,7 @@ static void dom_modern_document_import_node(INTERNAL_FUNCTION_PARAMETERS, zend_c
 		}
 	}
 
-	DOM_RET_OBJ(retnodep, &ret, intern);
+	DOM_RET_OBJ(retnodep, intern);
 }
 
 PHP_METHOD(DOM_Document, importNode)
@@ -924,7 +913,6 @@ PHP_METHOD(DOMDocument, createElementNS)
 {
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL;
-	int ret;
 	size_t value_len = 0;
 	char *value = NULL;
 	int errorcode;
@@ -969,13 +957,12 @@ PHP_METHOD(DOMDocument, createElementNS)
 		RETURN_FALSE;
 	}
 
-	DOM_RET_OBJ(nodep, &ret, intern);
+	DOM_RET_OBJ(nodep, intern);
 }
 
 PHP_METHOD(DOM_Document, createElementNS)
 {
 	xmlDocPtr docp;
-	int ret;
 	dom_object *intern;
 	zend_string *name = NULL, *uri;
 
@@ -995,7 +982,7 @@ PHP_METHOD(DOM_Document, createElementNS)
 		if (UNEXPECTED(nodep == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		} else {
-			DOM_RET_OBJ(nodep, &ret, intern);
+			DOM_RET_OBJ(nodep, intern);
 		}
 	} else {
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
@@ -1016,7 +1003,6 @@ PHP_METHOD(DOMDocument, createAttributeNS)
 	xmlDocPtr docp;
 	xmlNodePtr nodep = NULL, root;
 	xmlNsPtr nsptr;
-	int ret;
 	zend_string *name, *uri;
 	xmlChar *localname = NULL, *prefix = NULL;
 	dom_object *intern;
@@ -1084,7 +1070,7 @@ error:
 		RETURN_FALSE;
 	}
 
-	DOM_RET_OBJ(nodep, &ret, intern);
+	DOM_RET_OBJ(nodep, intern);
 }
 /* }}} end dom_document_create_attribute_ns */
 
@@ -1096,7 +1082,6 @@ PHP_METHOD(DOMDocument, getElementById)
 	zval *id;
 	xmlDocPtr docp;
 	xmlAttrPtr  attrp;
-	int ret;
 	size_t idname_len;
 	dom_object *intern;
 	char *idname;
@@ -1117,7 +1102,7 @@ PHP_METHOD(DOMDocument, getElementById)
 	 * idea and lost cause to fight it. Instead, we'll simply walk the tree upwards to check
 	 * if the node is attached to the document. */
 	if (attrp && attrp->parent && php_dom_is_node_connected(attrp->parent)) {
-		DOM_RET_OBJ((xmlNodePtr) attrp->parent, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) attrp->parent, intern);
 	} else {
 		RETVAL_NULL();
 	}
