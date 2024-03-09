@@ -1223,10 +1223,7 @@ namespace DOM
         /** @readonly */
         public int $length;
 
-        /**
-         * @tentative-return-type
-         * @implementation-alias DOMNodeList::count
-         */
+        /** @implementation-alias DOMNodeList::count */
         public function count(): int {}
 
         /** @implementation-alias DOMNodeList::getIterator */
@@ -1248,10 +1245,7 @@ namespace DOM
         /** @implementation-alias DOMNamedNodeMap::getNamedItemNS */
         public function getNamedItemNS(?string $namespace, string $localName): ?Attr {}
 
-        /**
-         * @tentative-return-type
-         * @implementation-alias DOMNamedNodeMap::count
-         */
+        /** @implementation-alias DOMNamedNodeMap::count */
         public function count(): int {}
 
         /** @implementation-alias DOMNamedNodeMap::getIterator */
@@ -1270,10 +1264,7 @@ namespace DOM
         /** @implementation-alias DOMNamedNodeMap::getNamedItemNS */
         public function getNamedItemNS(?string $namespace, string $localName): Entity|Notation|null {}
 
-        /**
-         * @tentative-return-type
-         * @implementation-alias DOMNamedNodeMap::count
-         */
+        /** @implementation-alias DOMNamedNodeMap::count */
         public function count(): int {}
 
         /** @implementation-alias DOMNamedNodeMap::getIterator */
@@ -1290,10 +1281,7 @@ namespace DOM
 
         /* TODO: implement namedItem */
 
-        /**
-         * @tentative-return-type
-         * @implementation-alias DOMNodeList::count
-         */
+        /** @implementation-alias DOMNodeList::count */
         public function count(): int {}
 
         /** @implementation-alias DOMNodeList::getIterator */

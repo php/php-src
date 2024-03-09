@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4158aa1e1ff26136831a38085ae14b1ba1400afd */
+ * Stub hash: bca273cb7255e24536575922505d3cce7488b32d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -675,7 +675,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Node___wakeup arginfo_class_DOMChildNode_remove
 
-#define arginfo_class_DOM_NodeList_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOM_NodeList_count arginfo_class_DOM_Node_getLineNo
 
 #define arginfo_class_DOM_NodeList_getIterator arginfo_class_DOMNodeList_getIterator
 
@@ -696,7 +696,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_NamedNodeMap_getNamedIt
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOM_NamedNodeMap_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOM_NamedNodeMap_count arginfo_class_DOM_Node_getLineNo
 
 #define arginfo_class_DOM_NamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 
@@ -713,7 +713,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_DOM_DTDNamedNodeMap_ge
 	ZEND_ARG_TYPE_INFO(0, localName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOM_DTDNamedNodeMap_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOM_DTDNamedNodeMap_count arginfo_class_DOM_Node_getLineNo
 
 #define arginfo_class_DOM_DTDNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 
@@ -721,7 +721,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLCollection_item, 0,
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DOM_HTMLCollection_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOM_HTMLCollection_count arginfo_class_DOM_Node_getLineNo
 
 #define arginfo_class_DOM_HTMLCollection_getIterator arginfo_class_DOMNodeList_getIterator
 
