@@ -8,7 +8,6 @@
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
-*.stub.php @kocsismate
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
 /ext/bcmath @Girgias
@@ -17,19 +16,26 @@
 /ext/dba @Girgias
 /ext/dom @nielsdos
 /ext/ffi @dstogov
+/ext/gettext @devnexen
 /ext/gmp @Girgias
 /ext/imap @Girgias
+/ext/intl @devnexen
 /ext/json @bukka
 /ext/libxml @nielsdos
 /ext/mbstring @alexdowad
+/ext/odbc @NattyNarwhal
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
+/ext/pdo_odbc @NattyNarwhal
+/ext/pdo_pgsql @devnexen
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/xmlreader @nielsdos
+/ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka
 /Zend @iluuu1994
@@ -53,3 +59,4 @@
 /Zend/zend_type*.h @dstogov
 /Zend/zend_variables.* @dstogov
 /Zend/zend_vm* @dstogov
+*.stub.php @kocsismate
