@@ -29,7 +29,7 @@ function hash_hmac_file(string $algo, string $filename, #[\SensitiveParameter] s
  */
 function hash_init(string $algo, int $flags = 0, #[\SensitiveParameter] string $key = "", array $options = []): HashContext {}
 
-function hash_update(HashContext $context, string $data): bool {}
+function hash_update(HashContext $context, string $data): true {}
 
 /** @param resource $stream */
 function hash_update_stream(HashContext $context, $stream, int $length = -1): int {}

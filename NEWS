@@ -53,6 +53,9 @@ PHP                                                                        NEWS
   . bind_textdomain_codeset now throws an exception on empty domain.
     (David Carlier)
 
+- Hash:
+  . Changed return type of hash_update() to true. (nielsdos)
+
 - IMAP:
   . Moved to PECL. (Derick Rethans)
 
