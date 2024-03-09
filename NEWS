@@ -128,9 +128,6 @@ PHP                                                                        NEWS
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Added class PdoMysql. (danack, kocsismate)
-  . Fixed binding of Stringable objects. (SakiTakamachi)
-  . Added an error message when a non-scalar value is bound with PARAM_INT.
-    (SakiTakamachi)
 
 - PDO_ODBC:
   . Added class PdoOdbc. (danack, kocsismate)
