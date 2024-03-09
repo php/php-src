@@ -325,6 +325,10 @@ PHP 8.4 UPGRADE NOTES
 - Gettext:
   . bind_textdomain_codeset now throws an exception if the domain's argument is empty.
 
+- Hash:
+  . Changed the return type of hash_update() to true. It was already the case that only
+    true could be returned, but the stub was not updated yet.
+
 - Intl:
   . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
   . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
