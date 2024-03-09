@@ -515,13 +515,21 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then
-    AC_CHECK_HEADERS([sys/apparmor.h])
-    AC_CHECK_LIB(apparmor, aa_change_profile, [
-      PHP_ADD_LIBRARY(apparmor)
-      AC_DEFINE(HAVE_APPARMOR, 1, [ AppArmor confinement available ])
-    ],[
-      AC_MSG_ERROR(libapparmor required but not found)
-    ])
+    PKG_CHECK_MODULES([APPARMOR], [libapparmor], [
+      PHP_EVAL_LIBLINE([$APPARMOR_LIBS])
+      PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])
+    ],
+      [AC_CHECK_LIB([apparmor], [aa_change_profile],
+        [PHP_ADD_LIBRARY([apparmor])],
+        [AC_MSG_ERROR([libapparmor required but not found.])])])
+
+    dnl Sanity check.
+    CFLAGS_save="$CFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([sys/apparmor.h],
+      [AC_DEFINE([HAVE_APPARMOR], [1], [AppArmor confinement available])],
+      [AC_MSG_ERROR([Required sys/apparmor.h not found.])])
+    CFLAGS="$CFLAGS_save"
   fi
 
   if test "x$PHP_FPM_SELINUX" != "xno" ; then
