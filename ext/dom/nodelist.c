@@ -137,7 +137,6 @@ PHP_METHOD(DOMNodeList, count)
 
 void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = NULL;
 	bool cache_itemnode = false;
 	if (index >= 0) {
@@ -209,7 +208,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 		}
 
 		if (itemnode) {
-			DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+			DOM_RET_OBJ(itemnode, objmap->baseobj);
 			if (cache_itemnode) {
 				/* Hold additional reference for the cache, must happen before releasing the cache
 				 * because we might be the last reference holder.

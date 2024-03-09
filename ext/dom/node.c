@@ -958,7 +958,6 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 
 	xmlNodePtr new_child = NULL;
 	bool stricterror = dom_get_strict_error(intern->document);
-	int ret;
 
 	if (dom_node_is_read_only(parentp) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
@@ -1033,7 +1032,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr);
 				} else {
-					DOM_RET_OBJ(child, &ret, intern);
+					DOM_RET_OBJ(child, intern);
 					return;
 				}
 			}
@@ -1083,7 +1082,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 					xmlUnlinkNode((xmlNodePtr) lastattr);
 					php_libxml_node_free_resource((xmlNodePtr) lastattr);
 				} else {
-					DOM_RET_OBJ(child, &ret, intern);
+					DOM_RET_OBJ(child, intern);
 					return;
 				}
 			}
@@ -1104,7 +1103,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 		}
 	}
 
-	DOM_RET_OBJ(new_child, &ret, intern);
+	DOM_RET_OBJ(new_child, intern);
 	return;
 cannot_add:
 	zend_throw_error(NULL, "Cannot add newnode as the previous sibling of refnode");
@@ -1115,7 +1114,6 @@ cannot_add:
 /* https://dom.spec.whatwg.org/#dom-node-insertbefore */
 static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
 {
-	int ret;
 	xmlNodePtr refp = NULL;
 	dom_object *refobjp;
 	if (php_dom_pre_insert_is_parent_invalid(parentp)) {
@@ -1127,7 +1125,7 @@ static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_obj
 	}
 	php_libxml_invalidate_node_list_cache(intern->document);
 	php_dom_pre_insert(intern->document, child, parentp, refp);
-	DOM_RET_OBJ(child, &ret, intern);
+	DOM_RET_OBJ(child, intern);
 }
 
 static void dom_node_insert_before(INTERNAL_FUNCTION_PARAMETERS, bool modern)
@@ -1257,8 +1255,6 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 	xmlNodePtr newchild, oldchild, nodep;
 	dom_object *intern, *newchildobj, *oldchildobj;
 
-	int ret;
-
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OO", &newnode, dom_get_node_ce(modern), &oldnode, dom_get_node_ce(modern)) == FAILURE) {
 		RETURN_THROWS();
@@ -1337,7 +1333,7 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		}
 	}
 	php_libxml_invalidate_node_list_cache(intern->document);
-	DOM_RET_OBJ(oldchild, &ret, intern);
+	DOM_RET_OBJ(oldchild, intern);
 }
 
 PHP_METHOD(DOMNode, replaceChild)
@@ -1359,7 +1355,7 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	zval *id, *node;
 	xmlNodePtr child, nodep;
 	dom_object *intern, *childobj;
-	int ret, stricterror;
+	int stricterror;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
@@ -1389,7 +1385,7 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 
 	xmlUnlinkNode(child);
 	php_libxml_invalidate_node_list_cache(intern->document);
-	DOM_RET_OBJ(child, &ret, intern);
+	DOM_RET_OBJ(child, intern);
 }
 
 PHP_METHOD(DOMNode, removeChild)
@@ -1410,7 +1406,7 @@ Since:
 static void dom_node_append_child_legacy(zval *return_value, dom_object *intern, dom_object *childobj, xmlNodePtr nodep, xmlNodePtr child)
 {
 	xmlNodePtr new_child = NULL;
-	int ret, stricterror;
+	int stricterror;
 
 	if (!dom_node_children_valid(nodep)) {
 		RETURN_FALSE;
@@ -1506,7 +1502,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 
 	php_libxml_invalidate_node_list_cache(intern->document);
 
-	DOM_RET_OBJ(new_child, &ret, intern);
+	DOM_RET_OBJ(new_child, intern);
 	return;
 cannot_add:
 	php_dom_throw_error(INVALID_STATE_ERR, stricterror);
@@ -1552,8 +1548,7 @@ PHP_METHOD(DOM_Node, appendChild)
 	/* Append, this doesn't do the parent check so we do it here. */
 	php_libxml_invalidate_node_list_cache(intern->document);
 	php_dom_node_append(intern->document, child, nodep);
-	int ret;
-	DOM_RET_OBJ(child, &ret, intern);
+	DOM_RET_OBJ(child, intern);
 }
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
@@ -1591,7 +1586,6 @@ PHP_METHOD(DOMNode, cloneNode)
 {
 	zval *id;
 	xmlNode *n, *node;
-	int ret;
 	dom_object *intern;
 	bool recursive = 0;
 
@@ -1631,7 +1625,7 @@ PHP_METHOD(DOMNode, cloneNode)
 			zend_class_entry *ce = n->type == XML_DOCUMENT_NODE ? dom_xml_document_class_entry : dom_html_document_class_entry;
 			new_intern = php_dom_instantiate_object_helper(return_value, ce, node, NULL);
 		} else {
-			DOM_RET_OBJ(node, &ret, NULL);
+			DOM_RET_OBJ(node, NULL);
 			new_intern = Z_DOMOBJ_P(return_value);
 		}
 		php_dom_update_document_after_clone(intern, n, new_intern, node);
@@ -1645,7 +1639,7 @@ PHP_METHOD(DOMNode, cloneNode)
 			node->ns = n->ns;
 		}
 
-		DOM_RET_OBJ(node, &ret, intern);
+		DOM_RET_OBJ(node, intern);
 	}
 }
 /* }}} end dom_node_clone_node */
@@ -2561,8 +2555,7 @@ PHP_METHOD(DOMNode, getRootNode)
 		thisp = thisp->parent;
 	}
 
-	int ret;
-	DOM_RET_OBJ(thisp, &ret, intern);
+	DOM_RET_OBJ(thisp, intern);
 }
 /* }}} */
 

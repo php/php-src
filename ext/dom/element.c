@@ -370,7 +370,7 @@ PHP_METHOD(DOMElement, setAttribute)
 	zval *id;
 	xmlNode *nodep;
 	xmlNodePtr attr = NULL;
-	int ret, name_valid;
+	int name_valid;
 	size_t name_len, value_len;
 	dom_object *intern;
 	char *name, *value;
@@ -437,7 +437,7 @@ PHP_METHOD(DOMElement, setAttribute)
 			RETURN_TRUE;
 		}
 
-		DOM_RET_OBJ(attr, &ret, intern);
+		DOM_RET_OBJ(attr, intern);
 	}
 }
 /* }}} end dom_element_set_attribute */
@@ -610,7 +610,6 @@ PHP_METHOD(DOMElement, getAttributeNode)
 	zval *id;
 	xmlNodePtr nodep, attrp;
 	size_t name_len;
-	int ret;
 	dom_object *intern;
 	char *name;
 
@@ -635,7 +634,7 @@ PHP_METHOD(DOMElement, getAttributeNode)
 		GC_ADDREF(&intern->std);
 		(void) php_dom_create_fake_namespace_decl(nodep, original, return_value, intern);
 	} else {
-		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) attrp, intern);
 	}
 }
 /* }}} end dom_element_get_attribute_node */
@@ -647,7 +646,6 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 	xmlNs *nsp;
 	xmlAttr *attrp, *existattrp = NULL;
 	dom_object *intern, *attrobj, *oldobj;
-	int ret;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_get_node_ce(modern)) == FAILURE) {
@@ -709,7 +707,7 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 
 	/* Returns old property if removed otherwise NULL */
 	if (existattrp != NULL) {
-		DOM_RET_OBJ((xmlNodePtr) existattrp, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) existattrp, intern);
 	} else {
 		RETURN_NULL();
 	}
@@ -734,7 +732,6 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	xmlNode *nodep;
 	xmlAttr *attrp;
 	dom_object *intern, *attrobj;
-	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -753,7 +750,7 @@ static void dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 
 	xmlUnlinkNode((xmlNodePtr) attrp);
 
-	DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+	DOM_RET_OBJ((xmlNodePtr) attrp, intern);
 }
 
 PHP_METHOD(DOMElement, removeAttributeNode)
@@ -1138,7 +1135,6 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 	xmlAttrPtr attrp;
 	dom_object *intern;
 	size_t uri_len, name_len;
-	int ret;
 	char *uri, *name;
 
 	id = ZEND_THIS;
@@ -1170,7 +1166,7 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 			RETURN_NULL();
 		}
 	} else {
-		DOM_RET_OBJ((xmlNodePtr) attrp, &ret, intern);
+		DOM_RET_OBJ((xmlNodePtr) attrp, intern);
 	}
 
 }
@@ -1585,7 +1581,6 @@ static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, ze
 	zval *element_zval, *id;
 	xmlNodePtr thisp, otherp;
 	dom_object *this_intern, *other_intern;
-	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SO", &where, &element_zval, element_ce) != SUCCESS) {
 		RETURN_THROWS();
@@ -1598,7 +1593,7 @@ static void dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAMETERS, ze
 	if (result == NULL) {
 		RETURN_NULL();
 	} else if (result != INSERT_ADJACENT_RES_ADOPT_FAILED && result != INSERT_ADJACENT_RES_PRE_INSERT_FAILED) {
-		DOM_RET_OBJ(otherp, &ret, other_intern);
+		DOM_RET_OBJ(otherp, other_intern);
 	} else {
 		RETURN_THROWS();
 	}

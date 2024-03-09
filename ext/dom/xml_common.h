@@ -76,8 +76,8 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	} \
 }
 
-#define DOM_RET_OBJ(obj, ret, domobject) \
-	*ret = php_dom_create_object(obj, return_value, domobject)
+#define DOM_RET_OBJ(obj, domobject) \
+	php_dom_create_object(obj, return_value, domobject)
 
 #define DOM_GET_THIS_OBJ(__ptr, __id, __prtype, __intern) \
 	__id = ZEND_THIS; \

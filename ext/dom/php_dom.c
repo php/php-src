@@ -502,7 +502,6 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 	zval *node;
 	xmlNodePtr nodep = NULL;
 	php_libxml_node_object *nodeobj;
-	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &node) == FAILURE) {
 		RETURN_THROWS();
@@ -529,7 +528,7 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 			dom_document_convert_to_modern(nodeobj->document, nodep->doc);
 		}
 
-		DOM_RET_OBJ((xmlNodePtr) nodep, &ret, (dom_object *)nodeobj);
+		DOM_RET_OBJ((xmlNodePtr) nodep, (dom_object *)nodeobj);
 	} else {
 		zend_argument_type_error(1, "is not a valid node type");
 		RETURN_THROWS();
