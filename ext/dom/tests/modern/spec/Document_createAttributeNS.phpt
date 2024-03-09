@@ -14,7 +14,6 @@ function testErrorCase($dom, $ns, $qname) {
         $ns_readable = is_null($ns) ? 'null' : "\"$ns\"";
         echo "($ns_readable, \"$qname\"): {$e->getMessage()}\n";
     }
-
 }
 
 $dom = DOM\HTMLDocument::createEmpty();
