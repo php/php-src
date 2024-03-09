@@ -6,6 +6,8 @@ dom
 <?php
 
 $dom = DOM\HTMLDocument::createEmpty();
+$container = $dom->createElement("container");
+$dom->append($container);
 
 $tags = [
     "area",
@@ -29,13 +31,13 @@ $tags = [
 ];
 
 foreach ($tags as $tag) {
-    $element = $dom->appendChild($dom->createElement($tag));
+    $element = $container->appendChild($dom->createElement($tag));
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
     echo "$tag: ";
-    var_dump(strlen($dom->saveHTML($element)) === 0);
+    var_dump($dom->saveHTML($element));
 
-    $element = $dom->appendChild($dom->createElementNS("http://php.net/foo", "x:$tag"));
+    $element = $container->appendChild($dom->createElementNS("http://php.net/foo", "x:$tag"));
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
 }
@@ -44,25 +46,25 @@ echo $dom->saveHTML();
 
 ?>
 --EXPECT--
-area: bool(true)
-base: bool(true)
-br: bool(true)
-col: bool(true)
-embed: bool(true)
-hr: bool(true)
-img: bool(true)
-input: bool(true)
-link: bool(true)
-meta: bool(true)
-source: bool(true)
-track: bool(true)
-wbr: bool(true)
-basefont: bool(true)
-bgsound: bool(true)
-frame: bool(true)
-keygen: bool(true)
-param: bool(true)
-<area>
+area: string(6) "<area>"
+base: string(6) "<base>"
+br: string(4) "<br>"
+col: string(5) "<col>"
+embed: string(7) "<embed>"
+hr: string(4) "<hr>"
+img: string(5) "<img>"
+input: string(7) "<input>"
+link: string(6) "<link>"
+meta: string(6) "<meta>"
+source: string(8) "<source>"
+track: string(7) "<track>"
+wbr: string(5) "<wbr>"
+basefont: string(10) "<basefont>"
+bgsound: string(9) "<bgsound>"
+frame: string(7) "<frame>"
+keygen: string(8) "<keygen>"
+param: string(7) "<param>"
+<container><area>
 <x:area><inner></inner></x:area>
 <base>
 <x:base><inner></inner></x:base>
@@ -98,3 +100,4 @@ param: bool(true)
 <x:keygen><inner></inner></x:keygen>
 <param>
 <x:param><inner></inner></x:param>
+</container>

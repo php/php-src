@@ -20,11 +20,10 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "php_dom.h"
 #include "html5_parser.h"
-#include "namespace_compat.h"
 #include <lexbor/html/parser.h>
 #include <lexbor/html/interfaces/element.h>
-#include <libxml/tree.h>
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLtree.h>
 #include <Zend/zend.h>
@@ -63,14 +62,14 @@ static unsigned short sanitize_line_nr(size_t line)
     return (unsigned short) line;
 }
 
-static const xmlChar *get_libxml_namespace_href(uintptr_t lexbor_namespace)
+static const php_dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_namespace)
 {
     if (lexbor_namespace == LXB_NS_SVG) {
-        return (const xmlChar *) DOM_SVG_NS_URI;
+        return php_dom_ns_is_svg_magic_token;
     } else if (lexbor_namespace == LXB_NS_MATH) {
-        return (const xmlChar *) DOM_MATHML_NS_URI;
+        return php_dom_ns_is_mathml_magic_token;
     } else {
-        return (const xmlChar *) DOM_XHTML_NS_URI;
+        return php_dom_ns_is_html_magic_token;
     }
 }
 
@@ -98,10 +97,15 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     lxb_dom_node_t *start_node,
     xmlDocPtr lxml_doc,
     bool compact_text_nodes,
-    bool create_default_ns
+    bool create_default_ns,
+    php_dom_libxml_ns_mapper *ns_mapper
 )
 {
     lexbor_libxml2_bridge_status retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
+
+    xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
+    xmlNsPtr xlink_ns = NULL;
+    xmlNsPtr prefixed_xmlns_ns = NULL;
 
     lexbor_array_obj_t work_list;
     lexbor_array_obj_init(&work_list, WORK_LIST_INIT_SIZE, sizeof(work_list_item));
@@ -135,7 +139,17 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             uintptr_t entering_namespace = element->node.ns;
             xmlNsPtr current_lxml_ns = current_stack_item->lxml_ns;
             if (create_default_ns && UNEXPECTED(entering_namespace != current_stack_item->current_active_namespace)) {
-                current_lxml_ns = xmlNewNs(lxml_element, get_libxml_namespace_href(entering_namespace), NULL);
+                if (entering_namespace == LXB_NS_HTML) {
+                    current_lxml_ns = html_ns;
+                } else {
+                    const php_dom_ns_magic_token *magic_token = get_libxml_namespace_href(entering_namespace);
+                    zend_string *uri = zend_string_init((char *) magic_token, strlen((char *) magic_token), false);
+                    current_lxml_ns = php_dom_libxml_ns_mapper_get_ns(ns_mapper, NULL, uri);
+                    zend_string_release_ex(uri, false);
+                    if (EXPECTED(current_lxml_ns != NULL)) {
+                        current_lxml_ns->_private = (void *) magic_token;
+                    }
+                }
             }
             /* Instead of xmlSetNs() because we know the arguments are valid. Prevents overhead. */
             lxml_element->ns = current_lxml_ns;
@@ -181,6 +195,25 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 }
 
                 lxml_attr->children = lxml_attr->last = lxml_text;
+                lxml_text->parent = (xmlNodePtr) lxml_attr;
+
+                if (attr->node.ns == LXB_NS_XMLNS) {
+                    if (strcmp((const char *) local_name, "xmlns") != 0) {
+                        if (prefixed_xmlns_ns == NULL) {
+                            prefixed_xmlns_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xmlns", DOM_XMLNS_NS_URI);
+                        }
+                        lxml_attr->ns = prefixed_xmlns_ns;
+                    } else {
+                        lxml_attr->ns = php_dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(ns_mapper);
+                    }
+                    lxml_attr->ns->_private = (void *) php_dom_ns_is_xmlns_magic_token;
+                } else if (attr->node.ns == LXB_NS_XLINK) {
+                    if (xlink_ns == NULL) {
+                        xlink_ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, "xlink", DOM_XLINK_NS_URI);
+                        xlink_ns->_private = (void *) php_dom_ns_is_xlink_magic_token;
+                    }
+                    lxml_attr->ns = xlink_ns;
+                }
 
                 if (last_added_attr == NULL) {
                     lxml_element->properties = lxml_attr;
@@ -270,29 +303,20 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     lxb_html_document_t *document,
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
-    bool create_default_ns
+    bool create_default_ns,
+    php_dom_libxml_ns_mapper *ns_mapper
 )
 {
-#ifdef LIBXML_HTML_ENABLED
-    xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+    xmlDocPtr lxml_doc = php_dom_create_html_doc();
     if (UNEXPECTED(!lxml_doc)) {
         return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
     }
-#else
-    /* If HTML support is not enabled, then htmlNewDocNoDtD() is not available.
-     * This code mimics the behaviour. */
-    xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-    if (UNEXPECTED(!lxml_doc)) {
-        return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-    }
-    lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-#endif
-    lxml_doc->dict = xmlDictCreate();
     lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
         lxb_dom_interface_node(document)->last_child,
         lxml_doc,
         compact_text_nodes,
-        create_default_ns
+        create_default_ns,
+        ns_mapper
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
         xmlFreeDoc(lxml_doc);

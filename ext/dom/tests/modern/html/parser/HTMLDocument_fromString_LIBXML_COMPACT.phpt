@@ -23,7 +23,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 </html>
 HTML, LIBXML_COMPACT);
 
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 foreach ($xpath->query("//*[name()='p']") as $p) {
     echo $p->textContent, "\n";
 }

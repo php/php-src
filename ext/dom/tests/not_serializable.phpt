@@ -34,9 +34,24 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+$dom = DOM\XMLDocument::createEmpty();
+try {
+    serialize($dom);
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    serialize(new DOM\XPath($dom));
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 Serialization of 'DOMDocument' is not allowed, unless serialization methods are implemented in a subclass
 Serialization of 'DOMElement' is not allowed, unless serialization methods are implemented in a subclass
 Serialization of 'DOMXPath' is not allowed
 Serialization of 'DOMNameSpaceNode' is not allowed, unless serialization methods are implemented in a subclass
+Serialization of 'DOM\XMLDocument' is not allowed, unless serialization methods are implemented in a subclass
+Serialization of 'DOM\XPath' is not allowed

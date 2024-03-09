@@ -18,7 +18,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 echo "--- Namespaces ---\n";
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 foreach ($xpath->query("//*[name()='body']//*") as $node) {
     echo $node->nodeName, " ", $node->namespaceURI ?? "(NONE)", "\n";
     echo "prefix: \"", $node->prefix, "\"\n";
@@ -35,7 +35,7 @@ echo $dom->saveXML();
 ?>
 --EXPECT--
 --- Namespaces ---
-foo:bar http://www.w3.org/1999/xhtml
+FOO:BAR http://www.w3.org/1999/xhtml
 prefix: ""
 --- HTML serialization ---
 <!DOCTYPE html><html><head>
@@ -52,6 +52,6 @@ prefix: ""
     <title>Test</title>
 </head>
 <body xmlns:foo="urn:hi">
-    <foo:bar/>
+    <foo:bar></foo:bar>
 
 </body></html>

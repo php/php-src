@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "namespace_compat.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -113,14 +114,14 @@ static void dom_xpath_ext_function_trampoline(xmlXPathParserContextPtr ctxt, int
 }
 
 /* {{{ */
-PHP_METHOD(DOMXPath, __construct)
+static void dom_xpath_construct(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *document_ce)
 {
 	zval *doc;
 	bool register_node_ns = true;
 	xmlDocPtr docp = NULL;
 	dom_object *docobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_abstract_base_document_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, document_ce, &register_node_ns) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -153,6 +154,16 @@ PHP_METHOD(DOMXPath, __construct)
 	intern->dom.document = docobj->document;
 	intern->register_node_ns = register_node_ns;
 	php_libxml_increment_doc_ref((php_libxml_node_object *) &intern->dom, docp);
+}
+
+PHP_METHOD(DOMXPath, __construct)
+{
+	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_document_class_entry);
+}
+
+PHP_METHOD(DOM_XPath, __construct)
+{
+	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_abstract_base_document_class_entry);
 }
 /* }}} end DOMXPath::__construct */
 
@@ -225,19 +236,18 @@ static void dom_xpath_iter(zval *baseobj, dom_object *intern) /* {{{ */
 }
 /* }}} */
 
-static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
+static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) /* {{{ */
 {
 	zval *context = NULL;
 	xmlNodePtr nodep = NULL;
-	size_t expr_len, nsnbr = 0, xpath_type;
+	size_t expr_len, xpath_type;
 	dom_object *nodeobj;
 	char *expr;
-	xmlNsPtr *ns = NULL;
 
 	dom_xpath_object *intern = Z_XPATHOBJ_P(ZEND_THIS);
 	bool register_node_ns = intern->register_node_ns;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, modern ? dom_modern_node_class_entry : dom_node_class_entry, &register_node_ns) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -249,8 +259,13 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	xmlDocPtr docp = ctxp->doc;
 	if (docp == NULL) {
-		php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
-		RETURN_FALSE;
+		if (modern) {
+			zend_throw_error(NULL, "Invalid XPath Document Pointer");
+			RETURN_THROWS();
+		} else {
+			php_error_docref(NULL, E_WARNING, "Invalid XPath Document Pointer");
+			RETURN_FALSE;
+		}
 	}
 
 	if (context != NULL) {
@@ -268,32 +283,37 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	ctxp->node = nodep;
 
-	if (register_node_ns) {
-		/* Register namespaces in the node */
-		ns = xmlGetNsList(docp, nodep);
-
-		if (ns != NULL) {
-			while (ns[nsnbr] != NULL) {
-				nsnbr++;
-			}
+	php_dom_in_scope_ns in_scope_ns;
+	if (register_node_ns && nodep != NULL) {
+		if (modern) {
+			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
+			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep);
+		} else {
+			in_scope_ns = php_dom_get_in_scope_ns_legacy(nodep);
 		}
+		ctxp->namespaces = in_scope_ns.list;
+		ctxp->nsNr = in_scope_ns.count;
 	}
-
-	ctxp->namespaces = ns;
-	ctxp->nsNr = nsnbr;
 
 	xmlXPathObjectPtr xpathobjp = xmlXPathEvalExpression((xmlChar *) expr, ctxp);
 	ctxp->node = NULL;
 
-	if (ns != NULL) {
-		xmlFree(ns);
+	if (register_node_ns && nodep != NULL) {
+		php_dom_in_scope_ns_destroy(&in_scope_ns);
 		ctxp->namespaces = NULL;
 		ctxp->nsNr = 0;
 	}
 
 	if (! xpathobjp) {
-		/* TODO Add Warning? */
-		RETURN_FALSE;
+		if (modern) {
+			if (!EG(exception)) {
+				zend_throw_error(NULL, "Could not evaluate XPath expression");
+			}
+			RETURN_THROWS();
+		} else {
+			/* Should have already emit a warning by libxml */
+			RETURN_FALSE;
+		}
 	}
 
 	if (type == PHP_DOM_XPATH_QUERY) {
@@ -317,6 +337,10 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 					zval child;
 
 					if (node->type == XML_NAMESPACE_DECL) {
+						if (modern) {
+							continue;
+						}
+
 						xmlNodePtr nsparent = node->_private;
 						xmlNsPtr original = (xmlNsPtr) node;
 
@@ -334,7 +358,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_iterator(return_value, DOM_NODELIST);
+			php_dom_create_iterator(return_value, DOM_NODELIST, modern);
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
@@ -364,14 +388,24 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 /* {{{ */
 PHP_METHOD(DOMXPath, query)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, false);
+}
+
+PHP_METHOD(DOM_XPath, query)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, true);
 }
 /* }}} end dom_xpath_query */
 
 /* {{{ */
 PHP_METHOD(DOMXPath, evaluate)
 {
-	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, false);
+}
+
+PHP_METHOD(DOM_XPath, evaluate)
+{
+	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, true);
 }
 /* }}} end dom_xpath_evaluate */
 

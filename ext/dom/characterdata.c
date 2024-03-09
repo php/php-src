@@ -30,6 +30,24 @@
 * Since:
 */
 
+/* For some peculiar reason, many of these methods operate on unsigned numbers.
+ * Unfortunately, "old DOM" doesn't, so we have to conditionally convert...
+ * And the reason we're using "unsigned int" instead of "unsigned zend_long" is because libxml2 internally works with ints. */
+static bool dom_convert_number_unsigned(dom_object *intern, zend_long input, unsigned int *output)
+{
+	if (input < 0) {
+		if (php_dom_follow_spec_intern(intern)) {
+			*output = (unsigned int) input;
+		} else {
+			php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+			return false;
+		}
+	} else {
+		*output = input;
+	}
+	return true;
+}
+
 /* {{{ data	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
@@ -96,20 +114,22 @@ zend_result dom_characterdata_length_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-substringdata
 Since:
 */
 PHP_METHOD(DOMCharacterData, substringData)
 {
-	zval       *id;
-	xmlChar    *cur;
-	xmlChar    *substring;
-	xmlNodePtr  node;
-	zend_long        offset, count;
-	int         length;
-	dom_object	*intern;
+	zval *id;
+	xmlChar *cur;
+	xmlChar *substring;
+	xmlNodePtr node;
+	zend_long offset_input, count_input;
+	unsigned int count, offset;
+	int length;
+	dom_object *intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset_input, &count_input) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -117,12 +137,21 @@ PHP_METHOD(DOMCharacterData, substringData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
+	if (ZEND_LONG_INT_OVFL(offset_input) || ZEND_LONG_INT_OVFL(count_input)) {
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
 
-	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
+	if (!dom_convert_number_unsigned(intern, offset_input, &offset) || !dom_convert_number_unsigned(intern, count_input, &count)) {
+		RETURN_FALSE;
+	}
+
+	if (offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -143,9 +172,10 @@ PHP_METHOD(DOMCharacterData, substringData)
 /* }}} end dom_characterdata_substring_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-appenddata
 Since:
 */
-PHP_METHOD(DOMCharacterData, appendData)
+static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -160,26 +190,40 @@ PHP_METHOD(DOMCharacterData, appendData)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 	xmlTextConcat(nodep, (xmlChar *) arg, arg_len);
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, appendData)
+{
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, appendData)
+{
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_append_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-insertdata
 Since:
 */
-PHP_METHOD(DOMCharacterData, insertData)
+static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlChar		*cur, *first, *second;
 	xmlNodePtr  node;
 	char		*arg;
-	zend_long        offset;
+	zend_long        offset_input;
+	unsigned int offset;
 	int         length;
 	size_t arg_len;
 	dom_object	*intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset_input, &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -187,12 +231,22 @@ PHP_METHOD(DOMCharacterData, insertData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || offset > length) {
+	if (ZEND_LONG_INT_OVFL(offset_input)) {
+		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (!dom_convert_number_unsigned(intern, offset_input, &offset)) {
+		RETURN_FALSE;
+	}
+
+	if (offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -207,24 +261,38 @@ PHP_METHOD(DOMCharacterData, insertData)
 	xmlFree(first);
 	xmlFree(second);
 
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, insertData)
+{
+	dom_character_data_insert_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, insertData)
+{
+	dom_character_data_insert_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_insert_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-deletedata
 Since:
 */
-PHP_METHOD(DOMCharacterData, deleteData)
+static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlChar    *cur, *substring, *second;
 	xmlNodePtr  node;
-	zend_long        offset, count;
+	zend_long        offset, count_input;
+	unsigned int count;
 	int         length;
 	dom_object	*intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count_input) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -232,13 +300,18 @@ PHP_METHOD(DOMCharacterData, deleteData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
+	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count_input) || offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (!dom_convert_number_unsigned(intern, count_input, &count)) {
 		RETURN_FALSE;
 	}
 
@@ -260,26 +333,40 @@ PHP_METHOD(DOMCharacterData, deleteData)
 	xmlFree(second);
 	xmlFree(substring);
 
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, deleteData)
+{
+	dom_character_data_delete_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, deleteData)
+{
+	dom_character_data_delete_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_delete_data */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
+Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-replacedata
 Since:
 */
-PHP_METHOD(DOMCharacterData, replaceData)
+static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
 	xmlChar		*cur, *substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
-	zend_long        offset, count;
+	zend_long        offset, count_input;
+	unsigned int count;
 	int         length;
 	size_t arg_len;
 	dom_object	*intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count_input, &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -287,13 +374,18 @@ PHP_METHOD(DOMCharacterData, replaceData)
 
 	cur = node->content;
 	if (cur == NULL) {
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 
 	length = xmlUTF8Strlen(cur);
 
-	if (offset < 0 || count < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count) || offset > length) {
+	if (offset < 0 || ZEND_LONG_INT_OVFL(offset) || ZEND_LONG_INT_OVFL(count_input) || offset > length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
+		RETURN_FALSE;
+	}
+
+	if (!dom_convert_number_unsigned(intern, count_input, &count)) {
 		RETURN_FALSE;
 	}
 
@@ -321,7 +413,19 @@ PHP_METHOD(DOMCharacterData, replaceData)
 	}
 	xmlFree(substring);
 
-	RETURN_TRUE;
+	if (return_true) {
+		RETURN_TRUE;
+	}
+}
+
+PHP_METHOD(DOMCharacterData, replaceData)
+{
+	dom_character_data_replace_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+
+PHP_METHOD(DOM_CharacterData, replaceData)
+{
+	dom_character_data_replace_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 /* }}} end dom_characterdata_replace_data */
 

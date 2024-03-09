@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML [interop]: simplexml_import_dom
+SimpleXML [interop]: simplexml_import_dom (old DOM)
 --EXTENSIONS--
 simplexml
 dom

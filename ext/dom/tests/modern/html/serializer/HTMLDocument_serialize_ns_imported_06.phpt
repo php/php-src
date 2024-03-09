@@ -6,17 +6,17 @@ dom
 <?php
 
 $xml = DOM\XMLDocument::createFromFile(__DIR__.'/sample.xml');
-$xml->documentElement->firstChild->appendChild($xml->createElementNS('some:ns2', 'child'));
-echo $xml->saveXML();
+$xml->documentElement->firstElementChild->appendChild($xml->createElementNS('some:ns2', 'child'));
+echo $xml->saveXML(), "\n";
 
 echo "--- After clone + import into HTML ---\n";
 
 $html = DOM\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 
-$p = $html->documentElement->firstChild->nextSibling->firstChild;
+$p = $html->documentElement->firstElementChild->nextElementSibling->firstElementChild;
 $p->appendChild($html->adoptNode($xml->documentElement->firstElementChild->cloneNode(true)));
 
-echo $html->saveXML();
+echo $html->saveXML(), "\n";
 echo $html->saveHTML(), "\n";
 
 ?>
@@ -31,11 +31,11 @@ echo $html->saveHTML(), "\n";
         <subcontainer2>
             <foo xmlns="some:ns"/>
         </subcontainer2>
-    </x>
+    <child xmlns="some:ns2"/></x>
 </container>
 --- After clone + import into HTML ---
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head/><body><p>foo<x xmlns="some:ns">
+<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body><p>foo<x xmlns="some:ns">
         <subcontainer>
             <test xmlns="x:y"/>
             <child2/>
@@ -43,7 +43,7 @@ echo $html->saveHTML(), "\n";
         <subcontainer2>
             <foo xmlns="some:ns"/>
         </subcontainer2>
-    </x></p></body></html>
+    <child xmlns="some:ns2"/></x></p></body></html>
 <html><head></head><body><p>foo<x>
         <subcontainer>
             <test xmlns="x:y"></test>
@@ -52,4 +52,4 @@ echo $html->saveHTML(), "\n";
         <subcontainer2>
             <foo xmlns="some:ns"></foo>
         </subcontainer2>
-    </x></p></body></html>
+    <child></child></x></p></body></html>

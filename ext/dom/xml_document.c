@@ -67,14 +67,14 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 /* Living spec never creates explicit namespace declaration nodes.
  * They are only written upon serialization but never appear in the tree.
  * So in principle we could just ignore them outright.
- * However, step 10 in https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token
+ * However, step 10 in https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token (Date 2023-12-15)
  * requires us to have the declaration as an attribute available */
-static void dom_mark_namespaces_as_attributes_too(xmlDocPtr doc)
+static void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc)
 {
 	xmlNodePtr node = doc->children;
 	while (node != NULL) {
 		if (node->type == XML_ELEMENT_NODE) {
-			dom_ns_compat_mark_attribute_list(node->nsDef);
+			php_dom_ns_compat_mark_attribute_list(ns_mapper, node);
 
 			if (node->children) {
 				node = node->children;
@@ -82,53 +82,7 @@ static void dom_mark_namespaces_as_attributes_too(xmlDocPtr doc)
 			}
 		}
 
-		if (node->next) {
-			node = node->next;
-		} else {
-			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-			do {
-				node = node->parent;
-				if (node == NULL) {
-					return;
-				}
-			} while (node->next == NULL);
-			node = node->next;
-		}
-	}
-}
-
-void dom_mark_namespaces_for_copy_based_on_copy(xmlNodePtr copy, const xmlNode *original)
-{
-	xmlNodePtr copy_current = copy;
-	const xmlNode *original_current = original;
-	while (copy_current != NULL) {
-		ZEND_ASSERT(original_current != NULL);
-
-		if (copy_current->type == XML_ELEMENT_NODE) {
-			dom_ns_compat_copy_attribute_list_mark(copy_current->nsDef, original_current->nsDef);
-
-			if (copy_current->children) {
-				copy_current = copy_current->children;
-				original_current = original_current->children;
-				continue;
-			}
-		}
-
-		if (copy_current->next) {
-			copy_current = copy_current->next;
-			original_current = original_current->next;
-		} else {
-			/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-			do {
-				copy_current = copy_current->parent;
-				if (copy_current == NULL) {
-					return;
-				}
-				original_current = original_current->parent;
-			} while (copy_current->next == NULL);
-			copy_current = copy_current->next;
-			original_current = original_current->next;
-		}
+		node = php_dom_next_in_tree_order(node, NULL);
 	}
 }
 
@@ -164,7 +118,8 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
 	return;
 
 oom:
@@ -220,12 +175,16 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	xmlDocPtr lxml_doc = dom_document_parser(NULL, mode, source, source_len, options, encoding);
-	if (UNEXPECTED(lxml_doc == NULL)) {
+	if (UNEXPECTED(lxml_doc == NULL || lxml_doc == DOM_DOCUMENT_MALFORMED)) {
 		if (!EG(exception)) {
-			if (mode == DOM_LOAD_FILE) {
-				zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
+			if (lxml_doc == DOM_DOCUMENT_MALFORMED) {
+				zend_throw_exception_ex(NULL, 0, "XML document is malformed");
 			} else {
-				php_dom_throw_error(INVALID_STATE_ERR, 1);
+				if (mode == DOM_LOAD_FILE) {
+					zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
+				} else {
+					php_dom_throw_error(INVALID_STATE_ERR, 1);
+				}
 			}
 		}
 		RETURN_THROWS();
@@ -237,14 +196,46 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 			lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
 		}
 	}
+	if (mode == DOM_LOAD_FILE && lxml_doc->URL != NULL) {
+		if (!php_is_stream_path((char *) lxml_doc->URL)) {
+			/* Check for "file:/" instead of "file://" because of libxml2 quirk */
+			if (strncmp((const char *) lxml_doc->URL, "file:/", sizeof("file:/") - 1) != 0) {
+#if PHP_WIN32
+				xmlChar *buffer = xmlStrdup((const xmlChar *) "file:///");
+#else
+				xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
+#endif
+				if (buffer != NULL) {
+					xmlChar *new_buffer = xmlStrcat(buffer, lxml_doc->URL);
+					if (new_buffer != NULL) {
+						xmlFree(BAD_CAST lxml_doc->URL);
+						lxml_doc->URL = new_buffer;
+					} else {
+						xmlFree(buffer);
+					}
+				}
+			} else {
+#if PHP_WIN32
+				lxml_doc->URL = php_dom_libxml_fix_file_path(BAD_CAST lxml_doc->URL);
+#endif
+			}
+		}
+	}
 	dom_object *intern = php_dom_instantiate_object_helper(
 		return_value,
 		dom_xml_document_class_entry,
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
-	dom_mark_namespaces_as_attributes_too(lxml_doc);
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_document_convert_to_modern(intern->document, lxml_doc);
+}
+
+void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc)
+{
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	dom_mark_namespaces_as_attributes_too(ns_mapper, lxml_doc);
 }
 
 PHP_METHOD(DOM_XMLDocument, createFromString)

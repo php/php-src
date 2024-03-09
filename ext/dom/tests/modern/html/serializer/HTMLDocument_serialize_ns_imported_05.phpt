@@ -7,7 +7,7 @@ dom
 
 $xml = DOM\XMLDocument::createFromFile(__DIR__.'/sample.xml');
 $xml->documentElement->appendChild($xml->createElementNS('some:ns2', 'child'));
-echo $xml->saveXML();
+echo $xml->saveXML(), "\n";
 
 echo "--- After adoption into HTML ---\n";
 
@@ -16,7 +16,7 @@ $html = DOM\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 $p = $html->documentElement->firstChild->nextSibling->firstChild;
 $p->appendChild($html->adoptNode($xml->documentElement));
 
-echo $html->saveXML();
+echo $html->saveXML(), "\n";
 echo $html->saveHTML(), "\n";
 
 ?>
@@ -35,7 +35,7 @@ echo $html->saveHTML(), "\n";
 <child xmlns="some:ns2"/></container>
 --- After adoption into HTML ---
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<html xmlns="http://www.w3.org/1999/xhtml"><head/><body><p>foo<container xmlns="some:ns" xmlns:bar="another:ns">
+<html xmlns="http://www.w3.org/1999/xhtml"><head></head><body><p>foo<container xmlns="some:ns" xmlns:bar="another:ns">
     <x>
         <subcontainer>
             <test xmlns="x:y"/>

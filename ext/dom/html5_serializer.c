@@ -23,24 +23,14 @@
 #include "php_dom.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
+#include "serialize_common.h"
 #include <lexbor/encoding/encoding.h>
 
+/* This file implements the HTML 5 serialization algorithm.
+ * https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-12-14)
+ */
+
 #define TRY(x) do { if (UNEXPECTED((x) != SUCCESS)) { return FAILURE; } } while (0)
-
-static bool dom_is_ns(const xmlNode *node, const char *uri)
-{
-	return node->ns != NULL && strcmp((const char *) node->ns->href, uri) == 0;
-}
-
-static bool dom_is_html_ns(const xmlNode *node)
-{
-	return node->ns == NULL || dom_is_ns(node, DOM_XHTML_NS_URI);
-}
-
-static bool dom_local_name_compare_ex(const xmlNode *node, const char *tag, size_t tag_length, size_t name_length)
-{
-	return name_length == tag_length && zend_binary_strcmp((const char *) node->name, name_length, tag, tag_length) == 0;
-}
 
 static zend_result dom_html5_serialize_doctype(dom_html5_serialize_context *ctx, const xmlDtd *dtd)
 {
@@ -61,8 +51,17 @@ static zend_result dom_html5_serialize_processing_instruction(dom_html5_serializ
 	TRY(ctx->write_string_len(ctx->application_data, "<?", strlen("<?")));
 	TRY(ctx->write_string(ctx->application_data, (const char *) node->name));
 	TRY(ctx->write_string_len(ctx->application_data, " ", strlen(" ")));
-	TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	if (node->content) {
+		TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	}
 	return ctx->write_string_len(ctx->application_data, ">", strlen(">"));
+}
+
+static zend_result dom_html5_serialize_entity_ref(dom_html5_serialize_context *ctx, const xmlNode *node)
+{
+	TRY(ctx->write_string_len(ctx->application_data, "&", strlen("&")));
+	TRY(ctx->write_string(ctx->application_data, (const char *) node->name));
+	return ctx->write_string_len(ctx->application_data, ";", strlen(";"));
 }
 
 /* https://html.spec.whatwg.org/multipage/parsing.html#escapingString */
@@ -132,7 +131,7 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 
 static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
-	if (node->parent->type == XML_ELEMENT_NODE && dom_is_html_ns(node->parent)) {
+	if (node->parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(node->parent, php_dom_ns_is_html_magic_token)) {
 		const xmlNode *parent = node->parent;
 		size_t name_length = strlen((const char *) parent->name);
 		/* Spec tells us to only emit noscript content as-is if scripting is enabled.
@@ -156,7 +155,7 @@ static zend_result dom_html5_serialize_element_tag_name(dom_html5_serialize_cont
 {
 	/* Note: it is not the serializer's responsibility to care about uppercase/lowercase (see createElement() note) */
 	if (node->ns != NULL && node->ns->prefix != NULL
-		&& !(dom_is_html_ns(node) || dom_is_ns(node, DOM_MATHML_NS_URI) || dom_is_ns(node, DOM_SVG_NS_URI))) {
+		&& !(php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token) || php_dom_ns_is_fast(node, php_dom_ns_is_mathml_magic_token) || php_dom_ns_is_fast(node, php_dom_ns_is_svg_magic_token))) {
 		TRY(ctx->write_string(ctx->application_data, (const char *) node->ns->prefix));
 		TRY(ctx->write_string_len(ctx->application_data, ":", strlen(":")));
 	}
@@ -170,32 +169,15 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 
 	/* We don't support the "is" value during element creation, so no handling here. */
 
-	/* Some namespace declarations are also attributes (see https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token) */
-	for (const xmlNs *ns = node->nsDef; ns != NULL; ns = ns->next) {
-		if (!dom_ns_is_also_an_attribute(ns)) {
-			continue;
-		}
-
-		if (ns->prefix != NULL) {
-			TRY(ctx->write_string_len(ctx->application_data, " xmlns:", strlen(" xmlns:")));
-			TRY(ctx->write_string(ctx->application_data, (const char *) ns->prefix));
-			TRY(ctx->write_string_len(ctx->application_data, "=\"", strlen("=\"")));
-		} else {
-			TRY(ctx->write_string_len(ctx->application_data, " xmlns=\"", strlen(" xmlns=\"")));
-		}
-		TRY(ctx->write_string(ctx->application_data, (const char *) ns->href));
-		TRY(ctx->write_string_len(ctx->application_data, "\"", strlen("\"")));
-	}
-
 	for (const xmlAttr *attr = node->properties; attr; attr = attr->next) {
 		TRY(ctx->write_string_len(ctx->application_data, " ", strlen(" ")));
 		if (attr->ns == NULL) {
 			TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 		} else {
-			if (dom_is_ns((const xmlNode *) attr, DOM_XML_NS_URI)) {
+			if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xml_magic_token)) {
 				TRY(ctx->write_string_len(ctx->application_data, "xml:", strlen("xml:")));
 				TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
-			} else if (dom_is_ns((const xmlNode *) attr, DOM_XMLNS_NS_URI)) {
+			} else if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xmlns_magic_token)) {
 				/* Compatibility for real attributes */
 				if (strcmp((const char *) attr->name, "xmlns") == 0) {
 					TRY(ctx->write_string_len(ctx->application_data, "xmlns", strlen("xmlns")));
@@ -203,7 +185,7 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 					TRY(ctx->write_string_len(ctx->application_data, "xmlns:", strlen("xmlns:")));
 					TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 				}
-			} else if (dom_is_ns((const xmlNode *) attr, DOM_XLINK_NS_URI)) {
+			} else if (php_dom_ns_is_fast((const xmlNode *) attr, php_dom_ns_is_xlink_magic_token)) {
 				TRY(ctx->write_string_len(ctx->application_data, "xlink:", strlen("xlink:")));
 				TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 			} else if (attr->ns->prefix == NULL) {
@@ -233,7 +215,7 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
  * https://html.spec.whatwg.org/multipage/parsing.html#serializes-as-void */
 static bool dom_html5_serializes_as_void(const xmlNode *node)
 {
-	if (dom_is_html_ns(node)) {
+	if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)) {
 		size_t name_length = strlen((const char *) node->name);
 		if (/* These are the void elements from https://html.spec.whatwg.org/multipage/syntax.html#void-elements */
 			dom_local_name_compare_ex(node, "area", strlen("area"), name_length)
@@ -311,6 +293,12 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 				break;
 			}
 
+			/* Only exists for compatibility with XML and old DOM. */
+			case XML_ENTITY_REF_NODE: {
+				TRY(dom_html5_serialize_entity_ref(ctx, node));
+				break;
+			}
+
 			default:
 				break;
 		}
@@ -335,8 +323,7 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 	return SUCCESS;
 }
 
-/* https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments (Date 2023-10-18)
- * Note: this serializes the _children_, excluding the node itself! */
+/* Note: this serializes the _children_, excluding the node itself! */
 zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
 	/* Step 1. Note that this algorithm serializes children. Only elements, documents, and fragments can have children. */
@@ -355,6 +342,24 @@ zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode 
 
 	/* Step 4 */
 	return dom_html5_serialize_node(ctx, node->children, node);
+}
+
+/* Variant on the above that is equivalent to the "outer HTML". */
+zend_result dom_html5_serialize_outer(dom_html5_serialize_context *ctx, const xmlNode *node)
+{
+	if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE || node->type == XML_DOCUMENT_FRAG_NODE) {
+		node = node->children;
+		if (!node) {
+			return SUCCESS;
+		}
+		return dom_html5_serialize_node(ctx, node, node->parent);
+	} else {
+		xmlNodePtr old_next = node->next;
+		((xmlNodePtr) node)->next = NULL;
+		zend_result result = dom_html5_serialize_node(ctx, node, node->parent);
+		((xmlNodePtr) node)->next = old_next;
+		return result;
+	}
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

@@ -20,11 +20,13 @@ object(DOMDocument)#1 (41) {
   ["dynamicProperty"]=>
   object(stdClass)#2 (0) {
   }
+  ["doctype"]=>
+  NULL
   ["implementation"]=>
   string(22) "(object value omitted)"
+  ["documentElement"]=>
+  string(22) "(object value omitted)"
   ["actualEncoding"]=>
-  NULL
-  ["config"]=>
   NULL
   ["encoding"]=>
   NULL
@@ -38,6 +40,12 @@ object(DOMDocument)#1 (41) {
   string(3) "1.0"
   ["xmlVersion"]=>
   string(3) "1.0"
+  ["strictErrorChecking"]=>
+  bool(true)
+  ["documentURI"]=>
+  string(%d) "%s"
+  ["config"]=>
+  NULL
   ["formatOutput"]=>
   bool(false)
   ["validateOnParse"]=>
@@ -50,14 +58,6 @@ object(DOMDocument)#1 (41) {
   bool(false)
   ["substituteEntities"]=>
   bool(false)
-  ["doctype"]=>
-  NULL
-  ["documentElement"]=>
-  string(22) "(object value omitted)"
-  ["strictErrorChecking"]=>
-  bool(true)
-  ["documentURI"]=>
-  string(%d) "%s"
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>

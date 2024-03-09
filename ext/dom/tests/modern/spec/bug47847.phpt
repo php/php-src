@@ -2,12 +2,9 @@
 Bug #47847 (importNode loses the namespace of an XML element)
 --EXTENSIONS--
 dom
---XFAIL--
-See https://github.com/php/php-src/pull/12308
 --FILE--
 <?php
-$fromdom = new DOMDocument();
-$fromdom->loadXML(<<<XML
+$fromdom = DOM\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <ns:container xmlns:ns="http://php.net">
 <ns:inner xmlns="http://php.net">
@@ -16,14 +13,17 @@ $fromdom->loadXML(<<<XML
 </ns:container>
 XML);
 
-$aDOM = new DOMDocument();
+$aDOM = DOM\XMLDocument::createEmpty();
 $imported = $aDOM->importNode($fromdom->documentElement->firstElementChild, true);
 $aDOM->appendChild($imported);
 
-echo $aDOM->saveXML();
+echo $aDOM->saveXML(), "\n";
+
+var_dump($aDOM->documentElement->firstElementChild->prefix);
 ?>
 --EXPECT--
-<?xml version="1.0"?>
-<ns:inner xmlns="http://php.net" xmlns:ns="http://php.net">
-<ns:WATCH-MY-NAMESPACE xmlns=""/>
+<?xml version="1.0" encoding="UTF-8"?>
+<ns:inner xmlns:ns="http://php.net" xmlns="http://php.net">
+<WATCH-MY-NAMESPACE/>
 </ns:inner>
+string(2) "ns"

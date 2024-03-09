@@ -72,20 +72,24 @@ PHP_METHOD(DOMAttr, __construct)
 /* {{{ name	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
+Modern spec URL: https://dom.spec.whatwg.org/#dom-attr-name
 Since:
 */
 zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 {
-	xmlAttrPtr attrp;
-
-	attrp = (xmlAttrPtr) dom_object_get_node(obj);
+	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
 
 	if (attrp == NULL) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
 		return FAILURE;
 	}
 
-	ZVAL_STRING(retval, (char *) attrp->name);
+	if (php_dom_follow_spec_intern(obj)) {
+		zend_string *str = dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false);
+		ZVAL_NEW_STR(retval, str);
+	} else {
+		ZVAL_STRING(retval, (char *) attrp->name);
+	}
 
 	return SUCCESS;
 }
@@ -99,7 +103,7 @@ Since:
 */
 zend_result dom_attr_specified_read(dom_object *obj, zval *retval)
 {
-	/* TODO */
+	/* From spec: "useless; always returns true" */
 	ZVAL_TRUE(retval);
 	return SUCCESS;
 }
@@ -147,7 +151,13 @@ zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 	zend_string *str = Z_STR_P(newval);
 
 	dom_remove_all_children((xmlNodePtr) attrp);
-	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+
+	if (php_dom_follow_spec_intern(obj)) {
+		xmlNodePtr node = xmlNewDocTextLen(attrp->doc, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
+		xmlAddChild((xmlNodePtr) attrp, node);
+	} else {
+		xmlNodeSetContentLen((xmlNodePtr) attrp, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
+	}
 
 	return SUCCESS;
 }

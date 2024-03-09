@@ -35,5 +35,5 @@ var_dump($result);
 
 ?>
 --EXPECTF--
-Warning: DOM\Document::relaxNGValidateSource(): Did not expect element pear there in %s on line %d
+Warning: DOMDocument::relaxNGValidateSource(): Did not expect element pear there in %s on line %d
 bool(false)

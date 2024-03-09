@@ -143,6 +143,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
    - New public APIs are available to handle callbacks from XPath, see
      xpath_callbacks.h.
+   - Added public APIs to manipulate namespace data, see namespace_compat.h.
 
  b. ext/random
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
@@ -176,6 +177,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
      from libxml.
    - Removed the "properties" HashTable field from php_libxml_node_object.
+   - Added a way to attached private data to a php_libxml_ref_obj.
+   - Added a way to fix a class type onto php_libxml_ref_obj.
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.

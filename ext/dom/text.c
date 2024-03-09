@@ -100,6 +100,7 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
+Modern spec URL: https://dom.spec.whatwg.org/#dom-text-splittext
 Since:
 */
 PHP_METHOD(DOMText, splitText)
@@ -125,20 +126,17 @@ PHP_METHOD(DOMText, splitText)
 		RETURN_THROWS();
 	}
 
-	if (node->type != XML_TEXT_NODE && node->type != XML_CDATA_SECTION_NODE) {
-		/* TODO Add warning? */
-		RETURN_FALSE;
-	}
-
 	cur = node->content;
 	if (cur == NULL) {
-		/* TODO Add warning? */
-		RETURN_FALSE;
+		/* TODO: is this even possible? */
+		cur = BAD_CAST "";
 	}
 	length = xmlUTF8Strlen(cur);
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {
-		/* TODO Add warning? */
+		if (php_dom_follow_spec_intern(intern)) {
+			php_dom_throw_error(INDEX_SIZE_ERR, /* strict */ true);
+		}
 		RETURN_FALSE;
 	}
 
