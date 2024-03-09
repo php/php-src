@@ -8,6 +8,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
     (nielsdos)
 
+- DOM:
+  . Add some missing ZPP checks. (nielsdos)
+
 - FPM:
   . Fixed GH-11086 (FPM: config test runs twice in daemonised mode).
     (Jakub Zelenka)
