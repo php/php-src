@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
    | Authors: Levi Morrison <levim@php.net>                               |
    |          Sammy Kaye Powers <sammyk@php.net>                          |
+   |          Bob Weinand <bobwei9@hotmail.com>                           |
    +----------------------------------------------------------------------+
 */
 
@@ -31,6 +32,19 @@ extern ZEND_API bool zend_observer_errors_observed;
 extern ZEND_API bool zend_observer_function_declared_observed;
 extern ZEND_API bool zend_observer_class_linked_observed;
 
+typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
+typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
+
+typedef struct _zend_observer_fcall_handlers {
+	zend_observer_fcall_begin_handler begin;
+	zend_observer_fcall_end_handler end;
+} zend_observer_fcall_handlers;
+
+#define ZEND_OBSERVER_DATA(function) \
+	((zend_observer_fcall_begin_handler *)&ZEND_OP_ARRAY_EXTENSION((&(function)->common), zend_observer_fcall_op_array_extension))
+
+#define ZEND_OBSERVER_NONE_OBSERVED ((void *) 3)
+
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
 #define ZEND_OBSERVER_FCALL_BEGIN(execute_data) do { \
@@ -44,14 +58,6 @@ extern ZEND_API bool zend_observer_class_linked_observed;
 			zend_observer_fcall_end(execute_data, return_value); \
 		} \
 	} while (0)
-
-typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
-typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
-
-typedef struct _zend_observer_fcall_handlers {
-	zend_observer_fcall_begin_handler begin;
-	zend_observer_fcall_end_handler end;
-} zend_observer_fcall_handlers;
 
 /* If the fn should not be observed then return {NULL, NULL} */
 typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_execute_data *execute_data);
@@ -71,15 +77,44 @@ ZEND_API void zend_observer_post_startup(void); // Called by engine after MINITs
 ZEND_API void zend_observer_activate(void);
 ZEND_API void zend_observer_shutdown(void);
 
-ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(
-	zend_execute_data *execute_data);
+ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute_data);
+void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *observer_data);
 
-ZEND_API void ZEND_FASTCALL zend_observer_generator_resume(
-	zend_execute_data *execute_data);
+static zend_always_inline bool zend_observer_handler_is_unobserved(zend_observer_fcall_begin_handler *handler) {
+	return *handler == ZEND_OBSERVER_NONE_OBSERVED;
+}
 
-ZEND_API void ZEND_FASTCALL zend_observer_fcall_end(
-	zend_execute_data *execute_data,
-	zval *return_value);
+static zend_always_inline bool zend_observer_fcall_has_no_observers(zend_execute_data *execute_data, bool allow_generator, zend_observer_fcall_begin_handler **handler) {
+	zend_function *function = EX(func);
+	void *ZEND_MAP_PTR(runtime_cache) = ZEND_MAP_PTR(function->common.run_time_cache);
+
+	if (function->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | (allow_generator ? 0 : ZEND_ACC_GENERATOR))) {
+		return true;
+	}
+
+	if (!ZEND_MAP_PTR(runtime_cache)) {
+		return true;
+	}
+
+	*handler = (zend_observer_fcall_begin_handler *)ZEND_MAP_PTR_GET(runtime_cache) + zend_observer_fcall_op_array_extension;
+	return zend_observer_handler_is_unobserved(*handler);
+}
+
+static zend_always_inline void zend_observer_fcall_begin_specialized(zend_execute_data *execute_data, bool allow_generator) {
+	zend_observer_fcall_begin_handler *handler;
+	if (!zend_observer_fcall_has_no_observers(execute_data, allow_generator, &handler)) {
+		zend_observer_fcall_begin_prechecked(execute_data, handler);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_observer_generator_resume(zend_execute_data *execute_data);
+
+ZEND_API void ZEND_FASTCALL zend_observer_fcall_end_prechecked(zend_execute_data *execute_data, zval *return_value);
+static zend_always_inline void zend_observer_fcall_end(zend_execute_data *execute_data, zval *return_value) {
+	if (execute_data == EG(current_observed_frame)) {
+		zend_observer_fcall_end_prechecked(execute_data, return_value);
+	}
+}
 
 ZEND_API void zend_observer_fcall_end_all(void);
 

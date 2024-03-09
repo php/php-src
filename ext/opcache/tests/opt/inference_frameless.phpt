@@ -25,6 +25,6 @@ _strpos:
      ; (after optimizer)
      ; %sinference_frameless.php:2-4
 0000 CV0($str) = RECV 1
-0001 T1 = FRAMELESS_ICALL_3(strpos) CV0($str) string("o")
-0002 OP_DATA int(1)
+0001 FRAMELESS_ICALL_3(strpos) CV0($str) string("o")
+0002 T1 = OP_DATA int(1)
 0003 RETURN T1

@@ -193,6 +193,8 @@ struct _zend_executor_globals {
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
 
+	zend_execute_data *current_observed_frame;
+
 	int ticks_count;
 
 	zend_long precision;
