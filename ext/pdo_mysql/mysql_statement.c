@@ -540,11 +540,11 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 					case IS_OBJECT:
 						if(zend_class_implements_interface(Z_OBJCE_P(parameter), zend_ce_stringable)) {
-							convert_to_string(parameter);
+							zend_string *str = zval_get_string(parameter);
 							b->buffer_type = MYSQL_TYPE_STRING;
-							b->buffer = Z_STRVAL_P(parameter);
-							b->buffer_length = Z_STRLEN_P(parameter);
-							*b->length = Z_STRLEN_P(parameter);
+							b->buffer = ZSTR_VAL(str);
+							b->buffer_length = ZSTR_LEN(str);
+							*b->length = ZSTR_LEN(str);
 							PDO_DBG_RETURN(1);
 						}
 						ZEND_FALLTHROUGH;
