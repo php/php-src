@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-require __DIR__ . "/dump_attr.inc";
+require __DIR__ . '/dump_attr.inc';
 
 function testErrorCase($dom, $ns, $qname) {
     try {
@@ -24,6 +24,7 @@ $attrs[] = $dom->createAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns');
 $attrs[] = $dom->createAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:foo');
 $attrs[] = $dom->createAttributeNS('urn:a', 'foo:bar');
 $attrs[] = $dom->createAttributeNS('urn:a', 'bar:bar');
+$attrs[] = $dom->createAttributeNS('http://www.w3.org/2000/xmlns', 'foo:bar');
 
 echo "--- Error cases ---\n";
 
@@ -33,7 +34,6 @@ testErrorCase($dom, 'urn:a', '@');
 testErrorCase($dom, 'urn:a', 'foo:bar:baz');
 testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'xmlns');
 testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'xmlns:bar');
-testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'foo:bar');
 testErrorCase($dom, 'http://www.w3.org/2000/xmlns', 'xml:foo');
 
 echo "\n--- Normal cases ---\n";
@@ -101,7 +101,11 @@ Attr: bar:bar
 string(3) "bar"
 string(7) "bar:bar"
 string(5) "urn:a"
-<foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar=""></foo>
+Attr: foo:bar
+string(3) "foo"
+string(7) "foo:bar"
+string(28) "http://www.w3.org/2000/xmlns"
+<foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar="" foo:bar=""></foo>
 
 --- NULL prefix cases ---
 Attr: baz1
@@ -120,4 +124,4 @@ Attr: baz2
 NULL
 string(4) "baz2"
 NULL
-<foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar="" baz1="" baz2=""></foo>
+<foo xmlns:foo="" xmlns:bar="" xmlns="" xml:foo="" bar:bar="" foo:bar="" baz1="" baz2=""></foo>
