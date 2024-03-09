@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMCharacterData extends DOMNode
@@ -55,26 +56,14 @@ Since:
 */
 zend_result dom_characterdata_data_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 	php_dom_get_content_into_zval(nodep, retval, false);
-
 	return SUCCESS;
 }
 
 zend_result dom_characterdata_data_write(dom_object *obj, zval *newval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
@@ -94,14 +83,9 @@ Since:
 */
 zend_result dom_characterdata_length_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
 	long length = 0;
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
 	if (nodep->content) {
 		length = xmlUTF8Strlen(nodep->content);
 	}

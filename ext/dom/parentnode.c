@@ -25,6 +25,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "internal_helpers.h"
+#include "dom_properties.h"
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes
@@ -32,15 +33,9 @@ URL: https://www.w3.org/TR/dom/#dom-parentnode-firstelementchild
 */
 zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *first = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	xmlNodePtr first = NULL;
 	if (dom_node_children_valid(nodep)) {
 		first = nodep->children;
 
@@ -65,15 +60,9 @@ URL: https://www.w3.org/TR/dom/#dom-parentnode-lastelementchild
 */
 zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *last = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	xmlNodePtr last = NULL;
 	if (dom_node_children_valid(nodep)) {
 		last = nodep->last;
 
@@ -98,18 +87,11 @@ https://www.w3.org/TR/dom/#dom-parentnode-childelementcount
 */
 zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *first = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
 	zend_long count = 0;
-
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
 	if (dom_node_children_valid(nodep)) {
-		first = nodep->children;
+		xmlNodePtr first = nodep->children;
 
 		while (first != NULL) {
 			if (first->type == XML_ELEMENT_NODE) {

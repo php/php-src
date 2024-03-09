@@ -24,6 +24,7 @@
 #include "php_dom.h"
 #include "namespace_compat.h"
 #include "internal_helpers.h"
+#include "dom_properties.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -113,12 +114,7 @@ Since:
 */
 zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	bool uppercase = php_dom_follow_spec_intern(obj) && php_dom_ns_is_html_and_document_is_html(nodep);
 
@@ -132,12 +128,7 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 
 static zend_result dom_element_reflected_attribute_read(dom_object *obj, zval *retval, const char *name)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlChar *content = xmlGetNoNsProp(nodep, (const xmlChar *) name);
 	if (content == NULL) {
