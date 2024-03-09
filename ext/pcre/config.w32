@@ -10,7 +10,7 @@ AC_DEFINE('PCRE2_CODE_UNIT_WIDTH', 8, 'Have PCRE library');
 AC_DEFINE("PCRE2_STATIC", 1, "");
 PHP_PCRE="yes";
 PHP_INSTALL_HEADERS("ext/pcre", "php_pcre.h pcre2lib/");
-ADD_FLAG("CFLAGS_PCRE", " /D HAVE_CONFIG_H");
+ADD_FLAG("CFLAGS_PCRE", " /D HAVE_CONFIG_H /D HAVE_MEMMOVE");
 
 ARG_WITH("pcre-jit", "Enable PCRE JIT support", "yes");
 if (PHP_PCRE_JIT != "no") {
