@@ -37,7 +37,7 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -70,7 +70,7 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -104,7 +104,7 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 	nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 

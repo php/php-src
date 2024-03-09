@@ -83,7 +83,7 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	if (uri != NULL && uri->opaque != NULL) {
 		localname = xmlStrdup((xmlChar *) uri->opaque);
 		if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
-			php_dom_throw_error(NAMESPACE_ERR, 1);
+			php_dom_throw_error(NAMESPACE_ERR, true);
 			xmlFreeURI(uri);
 			xmlFree(localname);
 			RETURN_FALSE;
@@ -172,7 +172,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 		if (doctype->doc != NULL) {
 			/* As the new document is the context node, and the default for strict error checking
 			 * is true, this will always throw. */
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, 1);
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, true);
 			RETURN_THROWS();
 		}
 	} else {
@@ -196,7 +196,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 		if (localname != NULL) {
 			xmlFree(localname);
 		}
-		php_dom_throw_error(errorcode, 1);
+		php_dom_throw_error(errorcode, true);
 		RETURN_THROWS();
 	}
 

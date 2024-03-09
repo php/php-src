@@ -123,7 +123,7 @@ PHP_METHOD(DOM_XMLDocument, createEmpty)
 	return;
 
 oom:
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
 	RETURN_THROWS();
 }
 
@@ -183,7 +183,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 				if (mode == DOM_LOAD_FILE) {
 					zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
 				} else {
-					php_dom_throw_error(INVALID_STATE_ERR, 1);
+					php_dom_throw_error(INVALID_STATE_ERR, true);
 				}
 			}
 		}
