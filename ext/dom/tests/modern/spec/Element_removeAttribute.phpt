@@ -36,11 +36,12 @@ echo "--- Remove after creating with namespace case sensitive ---\n";
 $element = $dom->createElementNS("urn:a", "a:element");
 $attr = $dom->createAttributeNS("urn:a", "Prefix:local2");
 $element->setAttributeNode($attr);
+echo $dom->saveHTML($element), "\n";
 $attr->value = "C";
 var_dump($element->removeAttribute("Prefix:local2"));
 var_dump($element->removeAttribute("Prefix:LOCAL2"));
 var_dump($element->removeAttribute("prefix:local2"));
-echo $dom->saveHTML($body), "\n";
+echo $dom->saveHTML($element), "\n";
 
 ?>
 --EXPECT--
@@ -57,7 +58,8 @@ NULL
 NULL
 <body></body>
 --- Remove after creating with namespace case sensitive ---
+<a:element Prefix:local2=""></a:element>
 NULL
 NULL
 NULL
-<body></body>
+<a:element></a:element>
