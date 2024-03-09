@@ -58,7 +58,7 @@ zend_result dom_characterdata_data_read(dom_object *obj, zval *retval)
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -72,7 +72,7 @@ zend_result dom_characterdata_data_write(dom_object *obj, zval *newval)
 	xmlNode *nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -98,7 +98,7 @@ zend_result dom_characterdata_length_read(dom_object *obj, zval *retval)
 	long length = 0;
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 

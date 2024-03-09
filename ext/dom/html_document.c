@@ -744,7 +744,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 	return;
 
 oom:
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
 	RETURN_THROWS();
 }
 
@@ -895,7 +895,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 
 fail_oom:
 	lxb_html_document_destroy(document);
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
 	RETURN_THROWS();
 }
 
@@ -1114,7 +1114,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	return;
 
 fail_oom:
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
 fail_general:
 	if (ns_mapper != NULL) {
 		php_dom_libxml_ns_mapper_destroy(ns_mapper);
@@ -1315,7 +1315,7 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 {
 	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
 	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 

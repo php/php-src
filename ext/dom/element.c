@@ -50,7 +50,7 @@ PHP_METHOD(DOMElement, __construct)
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -72,7 +72,7 @@ PHP_METHOD(DOMElement, __construct)
 			if (nodep != NULL) {
 				xmlFreeNode(nodep);
 			}
-			php_dom_throw_error(errorcode, 1);
+			php_dom_throw_error(errorcode, true);
 			RETURN_THROWS();
 		}
 	} else {
@@ -81,14 +81,14 @@ PHP_METHOD(DOMElement, __construct)
 	    if (prefix != NULL) {
 			xmlFree(localname);
 			xmlFree(prefix);
-	        php_dom_throw_error(NAMESPACE_ERR, 1);
+	        php_dom_throw_error(NAMESPACE_ERR, true);
 	        RETURN_THROWS();
 	    }
 		nodep = xmlNewNode(NULL, (xmlChar *) name);
 	}
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -116,7 +116,7 @@ zend_result dom_element_tag_name_read(dom_object *obj, zval *retval)
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -135,7 +135,7 @@ static zend_result dom_element_reflected_attribute_read(dom_object *obj, zval *r
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return FAILURE;
 	}
 
@@ -156,7 +156,7 @@ static xmlAttrPtr dom_element_reflected_attribute_write(dom_object *obj, zval *n
 	xmlNode *nodep = dom_object_get_node(obj);
 
 	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		return NULL;
 	}
 
@@ -387,7 +387,7 @@ PHP_METHOD(DOMElement, setAttribute)
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -1660,7 +1660,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 
 	/* Step 1 */
 	if (xmlValidateName((xmlChar *) qname, 0) != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
