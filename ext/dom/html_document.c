@@ -1330,7 +1330,7 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) ZSTR_VAL(str), ZSTR_LEN(str));
 
 	if (encoding_data != NULL) {
-		xmlFree((xmlChar *) docp->encoding);
+		xmlFree(BAD_CAST docp->encoding);
 		docp->encoding = xmlStrdup((const xmlChar *) encoding_data->name);
 	} else {
 		goto invalid_encoding;

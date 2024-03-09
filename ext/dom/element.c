@@ -48,7 +48,7 @@ PHP_METHOD(DOMElement, __construct)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
@@ -58,7 +58,7 @@ PHP_METHOD(DOMElement, __construct)
 	if (uri_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 		if (errorcode == 0) {
-			nodep = xmlNewNode (NULL, (xmlChar *)localname);
+			nodep = xmlNewNode (NULL, BAD_CAST localname);
 			if (nodep != NULL && uri != NULL) {
 				nsptr = dom_get_ns(nodep, uri, &errorcode, prefix);
 				xmlSetNs(nodep, nsptr);
@@ -77,14 +77,14 @@ PHP_METHOD(DOMElement, __construct)
 		}
 	} else {
 	    /* If you don't pass a namespace uri, then you can't set a prefix */
-	    localname = (char *) xmlSplitQName2((xmlChar *) name, (xmlChar **) &prefix);
+	    localname = (char *) xmlSplitQName2(BAD_CAST name, (xmlChar **) &prefix);
 	    if (prefix != NULL) {
 			xmlFree(localname);
 			xmlFree(prefix);
 	        php_dom_throw_error(NAMESPACE_ERR, true);
 	        RETURN_THROWS();
 	    }
-		nodep = xmlNewNode(NULL, (xmlChar *) name);
+		nodep = xmlNewNode(NULL, BAD_CAST name);
 	}
 
 	if (!nodep) {
@@ -93,7 +93,7 @@ PHP_METHOD(DOMElement, __construct)
 	}
 
 	if (value_len > 0) {
-		xmlNodeSetContentLen(nodep, (xmlChar *) value, value_len);
+		xmlNodeSetContentLen(nodep, BAD_CAST value, value_len);
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -246,7 +246,7 @@ static xmlNodePtr dom_get_attribute_or_nsdecl(dom_object *intern, xmlNodePtr ele
 				return (xmlNodePtr)xmlHasNsProp(elem, nqname, ns->href);
 			}
 		} else {
-			if (xmlStrEqual(name, (xmlChar *)"xmlns")) {
+			if (xmlStrEqual(name, BAD_CAST "xmlns")) {
 				xmlNsPtr nsPtr = elem->nsDef;
 				while (nsPtr) {
 					if (nsPtr->prefix == NULL) {
@@ -294,11 +294,11 @@ PHP_METHOD(DOMElement, getAttribute)
 				should_free = true;
 				break;
 			case XML_NAMESPACE_DECL:
-				value = (xmlChar *) ((xmlNsPtr)attr)->href;
+				value = BAD_CAST ((xmlNsPtr)attr)->href;
 				should_free = false;
 				break;
 			default:
-				value = (xmlChar *) ((xmlAttributePtr)attr)->defaultValue;
+				value = BAD_CAST ((xmlAttributePtr)attr)->defaultValue;
 				should_free = false;
 		}
 	}
@@ -354,10 +354,10 @@ PHP_METHOD(DOMElement, getAttributeNames)
 
 static xmlNodePtr dom_create_attribute(xmlNodePtr nodep, const char *name, const char* value)
 {
-	if (xmlStrEqual((xmlChar *)name, (xmlChar *)"xmlns")) {
-		return (xmlNodePtr) xmlNewNs(nodep, (xmlChar *)value, NULL);
+	if (xmlStrEqual(BAD_CAST name, BAD_CAST "xmlns")) {
+		return (xmlNodePtr) xmlNewNs(nodep, BAD_CAST value, NULL);
 	} else {
-		return (xmlNodePtr) xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
+		return (xmlNodePtr) xmlSetProp(nodep, BAD_CAST name, BAD_CAST value);
 	}
 }
 
@@ -385,7 +385,7 @@ PHP_METHOD(DOMElement, setAttribute)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
@@ -808,14 +808,14 @@ static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp,
 		uri = NULL;
 	}
 
-	xmlChar *strattr = xmlGetNsProp(elemp, (xmlChar *) name, (xmlChar *) uri);
+	xmlChar *strattr = xmlGetNsProp(elemp, BAD_CAST name, BAD_CAST uri);
 
 	if (strattr != NULL) {
 		*should_free_result = true;
 		return strattr;
 	} else {
-		if (!follow_spec && xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
-			xmlNsPtr nsptr = dom_get_nsdecl(elemp, (xmlChar *)name);
+		if (!follow_spec && xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NAMESPACE)) {
+			xmlNsPtr nsptr = dom_get_nsdecl(elemp, BAD_CAST name);
 			if (nsptr != NULL) {
 				return nsptr->href;
 			} else {
@@ -880,29 +880,29 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 
 	if (errorcode == 0) {
 		if (uri_len > 0) {
-			nodep = (xmlNodePtr) xmlHasNsProp(elemp, (xmlChar *) localname, (xmlChar *) uri);
+			nodep = (xmlNodePtr) xmlHasNsProp(elemp, BAD_CAST localname, BAD_CAST uri);
 			if (nodep != NULL && nodep->type != XML_ATTRIBUTE_DECL) {
 				node_list_unlink(nodep->children);
 			}
 
-			if ((xmlStrEqual((xmlChar *) prefix, (xmlChar *)"xmlns") ||
-				(prefix == NULL && xmlStrEqual((xmlChar *) localname, (xmlChar *)"xmlns"))) &&
-				xmlStrEqual((xmlChar *) uri, (xmlChar *)DOM_XMLNS_NAMESPACE)) {
+			if ((xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns") ||
+				(prefix == NULL && xmlStrEqual(BAD_CAST localname, BAD_CAST "xmlns"))) &&
+				xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NAMESPACE)) {
 				is_xmlns = 1;
 				if (prefix == NULL) {
 					nsptr = dom_get_nsdecl(elemp, NULL);
 				} else {
-					nsptr = dom_get_nsdecl(elemp, (xmlChar *)localname);
+					nsptr = dom_get_nsdecl(elemp, BAD_CAST localname);
 				}
 			} else {
-				nsptr = xmlSearchNsByHref(elemp->doc, elemp, (xmlChar *)uri);
+				nsptr = xmlSearchNsByHref(elemp->doc, elemp, BAD_CAST uri);
 				if (nsptr && nsptr->prefix == NULL) {
 					xmlNsPtr tmpnsptr;
 
 					tmpnsptr = nsptr->next;
 					while (tmpnsptr) {
 						if ((tmpnsptr->prefix != NULL) && (tmpnsptr->href != NULL) &&
-							(xmlStrEqual(tmpnsptr->href, (xmlChar *) uri))) {
+							(xmlStrEqual(tmpnsptr->href, BAD_CAST uri))) {
 							nsptr = tmpnsptr;
 							break;
 						}
@@ -916,7 +916,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 
 			if (nsptr == NULL) {
 				if (is_xmlns == 1) {
-					xmlNewNs(elemp, (xmlChar *)value, prefix == NULL ? NULL : (xmlChar *)localname);
+					xmlNewNs(elemp, BAD_CAST value, prefix == NULL ? NULL : BAD_CAST localname);
 				} else {
 					nsptr = dom_get_ns(elemp, uri, &errorcode, prefix);
 				}
@@ -924,26 +924,26 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 			} else {
 				if (is_xmlns == 1) {
 					if (nsptr->href) {
-						xmlFree((xmlChar *) nsptr->href);
+						xmlFree(BAD_CAST nsptr->href);
 					}
-					nsptr->href = xmlStrdup((xmlChar *)value);
+					nsptr->href = xmlStrdup(BAD_CAST value);
 				}
 			}
 
 			if (errorcode == 0 && is_xmlns == 0) {
-				xmlSetNsProp(elemp, nsptr, (xmlChar *)localname, (xmlChar *)value);
+				xmlSetNsProp(elemp, nsptr, BAD_CAST localname, BAD_CAST value);
 			}
 		} else {
-			name_valid = xmlValidateName((xmlChar *) localname, 0);
+			name_valid = xmlValidateName(BAD_CAST localname, 0);
 			if (name_valid != 0) {
 				errorcode = INVALID_CHARACTER_ERR;
 				stricterror = 1;
 			} else {
-				attr = xmlHasProp(elemp, (xmlChar *)localname);
+				attr = xmlHasProp(elemp, BAD_CAST localname);
 				if (attr != NULL && attr->type != XML_ATTRIBUTE_DECL) {
 					node_list_unlink(attr->children);
 				}
-				xmlSetProp(elemp, (xmlChar *)localname, (xmlChar *)value);
+				xmlSetProp(elemp, BAD_CAST localname, BAD_CAST value);
 			}
 		}
 	}
@@ -1321,7 +1321,7 @@ PHP_METHOD(DOMElement, setIdAttribute)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
-	attrp = xmlHasNsProp(nodep, (xmlChar *)name, NULL);
+	attrp = xmlHasNsProp(nodep, BAD_CAST name, NULL);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 	} else {
@@ -1352,7 +1352,7 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	attrp = xmlHasNsProp(elemp, (xmlChar *)name, (xmlChar *)uri);
+	attrp = xmlHasNsProp(elemp, BAD_CAST name, BAD_CAST uri);
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 	} else {
@@ -1659,7 +1659,7 @@ PHP_METHOD(DOMElement, toggleAttribute)
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
 	/* Step 1 */
-	if (xmlValidateName((xmlChar *) qname, 0) != 0) {
+	if (xmlValidateName(BAD_CAST qname, 0) != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}

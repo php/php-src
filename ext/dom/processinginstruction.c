@@ -43,13 +43,13 @@ PHP_METHOD(DOMProcessingInstruction, __construct)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewPI((xmlChar *) name, (xmlChar *) value);
+	nodep = xmlNewPI(BAD_CAST name, BAD_CAST value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);
@@ -118,7 +118,7 @@ zend_result dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	zend_string *str = Z_STR_P(newval);
 
-	xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+	xmlNodeSetContentLen(nodep, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
 
 	return SUCCESS;
 }

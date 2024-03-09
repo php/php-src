@@ -43,7 +43,7 @@ PHP_METHOD(DOMText, __construct)
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewText((xmlChar *) value);
+	nodep = xmlNewText(BAD_CAST value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);

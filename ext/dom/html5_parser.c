@@ -85,7 +85,7 @@ static xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xmlDocPtr lxml_doc, c
         lxml_text->name = xmlStringText;
         lxml_text->type = XML_TEXT_NODE;
         lxml_text->doc = lxml_doc;
-        lxml_text->content = (xmlChar *) &lxml_text->properties;
+        lxml_text->content = BAD_CAST &lxml_text->properties;
         memcpy(lxml_text->content, data, data_length);
         return lxml_text;
     } else {

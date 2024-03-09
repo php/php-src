@@ -43,13 +43,13 @@ PHP_METHOD(DOMEntityReference, __construct)
 		RETURN_THROWS();
 	}
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
-	node = xmlNewReference(NULL, (xmlChar *) name);
+	node = xmlNewReference(NULL, BAD_CAST name);
 
 	if (!node) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);

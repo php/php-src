@@ -141,7 +141,7 @@ static bool php_dom_xpath_is_callback_name_valid(const zend_string *name, php_do
 	}
 
 	if (name_validation == PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME) {
-		if (xmlValidateNCName((xmlChar *) ZSTR_VAL(name), /* pass 0 to disallow spaces */ 0) != 0) {
+		if (xmlValidateNCName(BAD_CAST ZSTR_VAL(name), /* pass 0 to disallow spaces */ 0) != 0) {
 			return false;
 		}
 	}
@@ -440,7 +440,7 @@ static zend_result php_dom_xpath_callback_dispatch(php_dom_xpath_callbacks *xpat
 			return FAILURE;
 		} else {
 			zend_string *str = zval_get_string(&callback_retval);
-			valuePush(ctxt, xmlXPathNewString((xmlChar *) ZSTR_VAL(str)));
+			valuePush(ctxt, xmlXPathNewString(BAD_CAST ZSTR_VAL(str)));
 			zend_string_release_ex(str, 0);
 		}
 		zval_ptr_dtor(&callback_retval);

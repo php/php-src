@@ -68,10 +68,10 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	}
 
 	if (publicid_len > 0) {
-		pch1 = (xmlChar *) publicid;
+		pch1 = BAD_CAST publicid;
 	}
 	if (systemid_len > 0) {
-		pch2 = (xmlChar *) systemid;
+		pch2 = BAD_CAST systemid;
 	}
 
 	if (strstr(name, "%00")) {
@@ -81,7 +81,7 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 
 	uri = xmlParseURI(name);
 	if (uri != NULL && uri->opaque != NULL) {
-		localname = xmlStrdup((xmlChar *) uri->opaque);
+		localname = xmlStrdup(BAD_CAST uri->opaque);
 		if (xmlStrchr(localname, (xmlChar) ':') != NULL) {
 			php_dom_throw_error(NAMESPACE_ERR, true);
 			xmlFreeURI(uri);
@@ -89,7 +89,7 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 			RETURN_FALSE;
 		}
 	} else {
-		localname = xmlStrdup((xmlChar *) name);
+		localname = xmlStrdup(BAD_CAST name);
 	}
 
 	if (uri) {
@@ -182,7 +182,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 	if (name_len > 0) {
 		errorcode = dom_check_qname(name, &localname, &prefix, 1, name_len);
 		if (errorcode == 0 && uri_len > 0
-			&& ((nsptr = xmlNewNs(NULL, (xmlChar *) uri, (xmlChar *) prefix)) == NULL)
+			&& ((nsptr = xmlNewNs(NULL, BAD_CAST uri, BAD_CAST prefix)) == NULL)
 		) {
 			errorcode = NAMESPACE_ERR;
 		}
@@ -220,7 +220,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 	}
 
 	if (localname != NULL) {
-		nodep = xmlNewDocNode(docp, nsptr, (xmlChar *) localname, NULL);
+		nodep = xmlNewDocNode(docp, nsptr, BAD_CAST localname, NULL);
 		if (!nodep) {
 			if (doctype != NULL) {
 				docp->intSubset = NULL;

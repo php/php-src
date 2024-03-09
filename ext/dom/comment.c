@@ -42,7 +42,7 @@ PHP_METHOD(DOMComment, __construct)
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewComment((xmlChar *) value);
+	nodep = xmlNewComment(BAD_CAST value);
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);
