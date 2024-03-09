@@ -25,6 +25,7 @@
 #include "namespace_compat.h"
 #include "xml_serializer.h"
 #include "internal_helpers.h"
+#include "dom_properties.h"
 #include <libxml/SAX.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
@@ -45,15 +46,9 @@ Since:
 */
 zend_result dom_document_doctype_read(dom_object *obj, zval *retval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	xmlDtdPtr dtdptr;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	dtdptr = xmlGetIntSubset(docp);
+	xmlDtdPtr dtdptr = xmlGetIntSubset(docp);
 	if (!dtdptr) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -84,15 +79,9 @@ Since:
 */
 zend_result dom_document_document_element_read(dom_object *obj, zval *retval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	xmlNode *root;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	root = xmlDocGetRootElement(docp);
+	xmlNodePtr root = xmlDocGetRootElement(docp);
 	if (!root) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -110,15 +99,9 @@ Since: DOM Level 3
 */
 zend_result dom_document_encoding_read(dom_object *obj, zval *retval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	char *encoding;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	encoding = (char *) docp->encoding;
+	const char *encoding = (const char *) docp->encoding;
 
 	if (encoding != NULL) {
 		ZVAL_STRING(retval, encoding);
@@ -131,13 +114,7 @@ zend_result dom_document_encoding_read(dom_object *obj, zval *retval)
 
 zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	xmlCharEncodingHandlerPtr handler;
-
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
 	/* Typed property, can only be IS_STRING or IS_NULL. */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING || Z_TYPE_P(newval) == IS_NULL);
@@ -146,9 +123,9 @@ zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 		goto invalid_encoding;
 	}
 
-	zend_string *str = Z_STR_P(newval);
+	const zend_string *str = Z_STR_P(newval);
 
-	handler = xmlFindCharEncodingHandler(ZSTR_VAL(str));
+	xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(ZSTR_VAL(str));
 
 	if (handler != NULL) {
 		xmlCharEncCloseFunc(handler);
@@ -176,30 +153,16 @@ Since: DOM Level 3
 */
 zend_result dom_document_standalone_read(dom_object *obj, zval *retval)
 {
-	xmlDoc *docp;
-
-	docp = (xmlDocPtr) dom_object_get_node(obj);
-
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 	ZVAL_BOOL(retval, docp->standalone > 0);
 	return SUCCESS;
 }
 
 zend_result dom_document_standalone_write(dom_object *obj, zval *newval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	zend_long standalone;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	standalone = zval_get_long(newval);
+	zend_long standalone = zval_get_long(newval);
 	docp->standalone = ZEND_NORMALIZE_BOOL(standalone);
 
 	return SUCCESS;
@@ -214,15 +177,9 @@ Since: DOM Level 3
 */
 zend_result dom_document_version_read(dom_object *obj, zval *retval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	char *version;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	version = (char *) docp->version;
+	const char *version = (const char *) docp->version;
 
 	if (version != NULL) {
 		ZVAL_STRING(retval, version);
@@ -235,15 +192,9 @@ zend_result dom_document_version_read(dom_object *obj, zval *retval)
 
 zend_result dom_document_version_write(dom_object *obj, zval *newval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	zend_string *str;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	str = zval_try_get_string(newval);
+	zend_string *str = zval_try_get_string(newval);
 	if (UNEXPECTED(!str)) {
 		return FAILURE;
 	}
@@ -425,15 +376,9 @@ Since: DOM Level 3
 */
 zend_result dom_document_document_uri_read(dom_object *obj, zval *retval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	char *url;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	url = (char *) docp->URL;
+	const char *url = (const char *) docp->URL;
 	if (url != NULL) {
 		ZVAL_STRING(retval, url);
 	} else {
@@ -449,15 +394,9 @@ zend_result dom_document_document_uri_read(dom_object *obj, zval *retval)
 
 zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	zend_string *str;
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	str = zval_try_get_string(newval);
+	zend_string *str = zval_try_get_string(newval);
 	if (UNEXPECTED(!str)) {
 		return FAILURE;
 	}

@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMProcessingInstruction extends DOMNode
@@ -72,15 +73,8 @@ Since:
 */
 zend_result dom_processinginstruction_target_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	ZVAL_STRING(retval, (char *) (nodep->name));
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+	ZVAL_STRING(retval, (const char *) nodep->name);
 	return SUCCESS;
 }
 
@@ -93,26 +87,14 @@ Since:
 */
 zend_result dom_processinginstruction_data_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 	php_dom_get_content_into_zval(nodep, retval, false);
-
 	return SUCCESS;
 }
 
 zend_result dom_processinginstruction_data_write(dom_object *obj, zval *newval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);

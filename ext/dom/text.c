@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "dom_ce.h"
+#include "dom_properties.h"
 
 /*
 * class DOMText extends DOMCharacterData
@@ -66,15 +67,9 @@ Since: DOM Level 3
 */
 zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr node;
+	DOM_PROP_NODE(xmlNodePtr, node, obj);
+
 	xmlChar *wholetext = NULL;
-
-	node = dom_object_get_node(obj);
-
-	if (node == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
 
 	/* Find starting text node */
 	while (node->prev && ((node->prev->type == XML_TEXT_NODE) || (node->prev->type == XML_CDATA_SECTION_NODE))) {

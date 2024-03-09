@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMAttr extends DOMNode
@@ -77,12 +78,7 @@ Since:
 */
 zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 {
-	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
-
-	if (attrp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
 
 	if (php_dom_follow_spec_intern(obj)) {
 		zend_string *str = dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false);
@@ -117,13 +113,8 @@ Since:
 */
 zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 {
-	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
+	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
 	xmlChar *content;
-
-	if (attrp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
 
 	/* Can't avoid a content copy because it's an attribute node */
 	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
@@ -139,12 +130,7 @@ zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 
 zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 {
-	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
-
-	if (attrp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
@@ -171,16 +157,9 @@ Since: DOM Level 2
 */
 zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep, nodeparent;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	nodeparent = nodep->parent;
+	xmlNodePtr nodeparent = nodep->parent;
 	if (!nodeparent) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -188,7 +167,6 @@ zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 
 	php_dom_create_object(nodeparent, retval, obj);
 	return SUCCESS;
-
 }
 
 /* }}} */

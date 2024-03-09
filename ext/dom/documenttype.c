@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /* {{{ name	string
 readonly=yes
@@ -30,15 +31,8 @@ Since:
 */
 zend_result dom_documenttype_name_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 	ZVAL_STRING(retval, dtdptr->name ? (char *) (dtdptr->name) : "");
-
 	return SUCCESS;
 }
 
@@ -51,20 +45,13 @@ Since:
 */
 zend_result dom_documenttype_entities_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr doctypep = (xmlDtdPtr) dom_object_get_node(obj);
-	xmlHashTable *entityht;
-	dom_object *intern;
-
-	if (doctypep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
 	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
 
-	entityht = (xmlHashTable *) doctypep->entities;
+	xmlHashTable *entityht = (xmlHashTable *) dtdptr->entities;
 
-	intern = Z_DOMOBJ_P(retval);
+	dom_object *intern = Z_DOMOBJ_P(retval);
 	dom_namednode_iter(obj, XML_ENTITY_NODE, intern, entityht, NULL, 0, NULL, 0);
 
 	return SUCCESS;
@@ -79,20 +66,13 @@ Since:
 */
 zend_result dom_documenttype_notations_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr doctypep = (xmlDtdPtr) dom_object_get_node(obj);
-	xmlHashTable *notationht;
-	dom_object *intern;
-
-	if (doctypep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
 	php_dom_create_iterator(retval, DOM_DTD_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
 
-	notationht = (xmlHashTable *) doctypep->notations;
+	xmlHashTable *notationht = (xmlHashTable *) dtdptr->notations;
 
-	intern = Z_DOMOBJ_P(retval);
+	dom_object *intern = Z_DOMOBJ_P(retval);
 	dom_namednode_iter(obj, XML_NOTATION_NODE, intern, notationht, NULL, 0, NULL, 0);
 
 	return SUCCESS;
@@ -107,20 +87,15 @@ Since: DOM Level 2
 */
 zend_result dom_documenttype_public_id_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
 	if (dtdptr->ExternalID) {
 		ZVAL_STRING(retval, (char *) (dtdptr->ExternalID));
 	} else {
 		ZVAL_EMPTY_STRING(retval);
 	}
-	return SUCCESS;
 
+	return SUCCESS;
 }
 
 /* }}} */
@@ -132,18 +107,14 @@ Since: DOM Level 2
 */
 zend_result dom_documenttype_system_id_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
 
 	if (dtdptr->SystemID) {
 		ZVAL_STRING(retval, (char *) (dtdptr->SystemID));
 	} else {
 		ZVAL_EMPTY_STRING(retval);
 	}
+
 	return SUCCESS;
 }
 
@@ -156,14 +127,9 @@ Since: DOM Level 2
 */
 zend_result dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 {
-	xmlDtdPtr dtdptr = (xmlDtdPtr) dom_object_get_node(obj);
+	DOM_PROP_NODE(xmlDtdPtr, dtdptr, obj);
+
 	xmlDtdPtr intsubset;
-
-	if (dtdptr == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
 	if (dtdptr->doc != NULL && ((intsubset = xmlGetIntSubset(dtdptr->doc)) != NULL)) {
 		smart_str ret_buf = {0};
 		xmlNodePtr cur = intsubset->children;
@@ -192,7 +158,6 @@ zend_result dom_documenttype_internal_subset_read(dom_object *obj, zval *retval)
 	ZVAL_NULL(retval);
 
 	return SUCCESS;
-
 }
 
 /* }}} */

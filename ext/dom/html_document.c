@@ -24,6 +24,7 @@
 #include "html5_parser.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
+#include "dom_properties.h"
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
 #include <lexbor/encoding/encoding.h>
@@ -1313,11 +1314,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 
 zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
 	/* Typed property, can only be IS_STRING or IS_NULL. */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING || Z_TYPE_P(newval) == IS_NULL);

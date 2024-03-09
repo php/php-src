@@ -24,6 +24,7 @@
 #include "php_dom.h"
 #include "namespace_compat.h"
 #include "internal_helpers.h"
+#include "dom_properties.h"
 
 /*
 * class DOMNode
@@ -77,12 +78,7 @@ Since:
 */
 zend_result dom_node_node_name_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	bool uppercase = false;
 
@@ -143,12 +139,7 @@ Since:
 */
 zend_result dom_node_node_value_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
@@ -186,15 +177,9 @@ zend_result dom_node_node_value_read(dom_object *obj, zval *retval)
 
 zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	zend_string *str;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	str = zval_try_get_string(newval);
+	zend_string *str = zval_try_get_string(newval);
 	if (UNEXPECTED(!str)) {
 		return FAILURE;
 	}
@@ -236,14 +221,7 @@ Since:
 */
 zend_result dom_node_node_type_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep;
-
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	/* Specs dictate that they are both type XML_DOCUMENT_TYPE_NODE */
 	if (nodep->type == XML_DTD_NODE) {
@@ -259,12 +237,7 @@ zend_result dom_node_node_type_read(dom_object *obj, zval *retval)
 
 static zend_result dom_node_parent_get(dom_object *obj, zval *retval, bool only_element)
 {
-	xmlNodePtr nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nodeparent = nodep->parent;
 	if (!nodeparent || (only_element && nodeparent->type != XML_ELEMENT_NODE)) {
@@ -307,16 +280,10 @@ Since:
 */
 zend_result dom_node_child_nodes_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	dom_object *intern;
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	php_dom_create_iterator(retval, DOM_NODELIST, php_dom_follow_spec_intern(obj));
-	intern = Z_DOMOBJ_P(retval);
+	dom_object *intern = Z_DOMOBJ_P(retval);
 	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, 0, NULL, 0);
 
 	return SUCCESS;
@@ -330,15 +297,9 @@ Since:
 */
 zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *first = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	xmlNodePtr first = NULL;
 	if (dom_node_children_valid(nodep)) {
 		first = nodep->children;
 	}
@@ -361,15 +322,9 @@ Since:
 */
 zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *last = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	xmlNodePtr last = NULL;
 	if (dom_node_children_valid(nodep)) {
 		last = nodep->last;
 	}
@@ -392,16 +347,9 @@ Since:
 */
 zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *prevsib;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	prevsib = nodep->prev;
+	xmlNodePtr prevsib = nodep->prev;
 	if (!prevsib) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -420,16 +368,9 @@ Since:
 */
 zend_result dom_node_next_sibling_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *nextsib;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	nextsib = nodep->next;
+	xmlNodePtr nextsib = nodep->next;
 	if (!nextsib) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -448,16 +389,9 @@ Since:
 */
 zend_result dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *prevsib;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	prevsib = nodep->prev;
+	xmlNodePtr prevsib = nodep->prev;
 
 	while (prevsib && prevsib->type != XML_ELEMENT_NODE) {
 		prevsib = prevsib->prev;
@@ -481,16 +415,9 @@ Since:
 */
 zend_result dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep, *nextsib;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	nextsib = nodep->next;
+	xmlNodePtr nextsib = nodep->next;
 
 	while (nextsib != NULL && nextsib->type != XML_ELEMENT_NODE) {
 		nextsib = nextsib->next;
@@ -514,17 +441,11 @@ Since:
 */
 zend_result dom_node_attributes_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	dom_object *intern;
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE) {
 		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP, php_dom_follow_spec_intern(obj));
-		intern = Z_DOMOBJ_P(retval);
+		dom_object *intern = Z_DOMOBJ_P(retval);
 		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, 0, NULL, 0);
 	} else {
 		ZVAL_NULL(retval);
@@ -542,13 +463,7 @@ Since:
 */
 zend_result dom_node_is_connected_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 	ZVAL_BOOL(retval, php_dom_is_node_connected(nodep));
 	return SUCCESS;
 }
@@ -561,20 +476,14 @@ Since:
 */
 zend_result dom_node_owner_document_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	xmlDocPtr docp;
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
 	}
 
-	docp = nodep->doc;
+	xmlDocPtr docp = nodep->doc;
 	if (!docp) {
 		return FAILURE;
 	}
@@ -592,20 +501,15 @@ Since: DOM Level 2
 */
 zend_result dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	char *str = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	const char *str = NULL;
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
 		case XML_NAMESPACE_DECL:
 			if (nodep->ns != NULL) {
-				str = (char *) nodep->ns->href;
+				str = (const char *) nodep->ns->href;
 			}
 			break;
 		default:
@@ -632,24 +536,19 @@ Since: DOM Level 2
 */
 zend_result dom_node_prefix_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	xmlNsPtr ns;
-	char *str = NULL;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
+	const char *str = NULL;
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
 		case XML_ATTRIBUTE_NODE:
-		case XML_NAMESPACE_DECL:
-			ns = nodep->ns;
+		case XML_NAMESPACE_DECL: {
+			xmlNsPtr ns = nodep->ns;
 			if (ns != NULL && ns->prefix) {
 				str = (char *) ns->prefix;
 			}
 			break;
+		}
 		default:
 			str = NULL;
 			break;
@@ -665,12 +564,7 @@ zend_result dom_node_prefix_read(dom_object *obj, zval *retval)
 
 zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNsPtr ns = nodep->ns;
 	if (ns != NULL && ns->prefix != NULL) {
@@ -684,17 +578,12 @@ zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval)
 zend_result dom_node_prefix_write(dom_object *obj, zval *newval)
 {
 	zend_string *prefix_str;
-	xmlNode *nodep, *nsnode = NULL;
+	xmlNode *nsnode = NULL;
 	xmlNsPtr ns = NULL, curns;
 	char *strURI;
 	char *prefix;
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	switch (nodep->type) {
 		case XML_ELEMENT_NODE:
@@ -766,12 +655,7 @@ Since: DOM Level 2
 */
 zend_result dom_node_local_name_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (nodep->type == XML_ELEMENT_NODE || nodep->type == XML_ATTRIBUTE_NODE || nodep->type == XML_NAMESPACE_DECL) {
 		ZVAL_STRING(retval, (char *) (nodep->name));
@@ -791,15 +675,9 @@ Since: DOM Level 3
 */
 zend_result dom_node_base_uri_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-	xmlChar *baseuri;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
-
-	baseuri = xmlNodeGetBase(nodep->doc, nodep);
+	xmlChar *baseuri = xmlNodeGetBase(nodep->doc, nodep);
 	if (baseuri) {
 		ZVAL_STRING(retval, (const char *) baseuri);
 		xmlFree(baseuri);
@@ -842,12 +720,7 @@ static bool dom_skip_text_content(dom_object *obj, xmlNodePtr nodep)
 
 zend_result dom_node_text_content_read(dom_object *obj, zval *retval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	if (dom_skip_text_content(obj, nodep)) {
 		ZVAL_NULL(retval);
@@ -860,12 +733,7 @@ zend_result dom_node_text_content_read(dom_object *obj, zval *retval)
 
 zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 {
-	xmlNode *nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	php_libxml_invalidate_node_list_cache(obj->document);
 

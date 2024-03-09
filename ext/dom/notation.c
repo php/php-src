@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMNotation extends DOMNode
@@ -39,12 +40,7 @@ Since:
 */
 zend_result dom_notation_public_id_read(dom_object *obj, zval *retval)
 {
-	xmlEntityPtr nodep = (xmlEntityPtr) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->ExternalID) {
 		ZVAL_STRING(retval, (char *) (nodep->ExternalID));
@@ -64,12 +60,7 @@ Since:
 */
 zend_result dom_notation_system_id_read(dom_object *obj, zval *retval)
 {
-	xmlEntityPtr nodep = (xmlEntityPtr) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, true);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->SystemID) {
 		ZVAL_STRING(retval, (char *) (nodep->SystemID));
