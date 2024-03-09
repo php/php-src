@@ -2066,8 +2066,8 @@ xmlNsPtr dom_get_ns(xmlNodePtr nodep, char *uri, int *errorcode, char *prefix) {
 	xmlNsPtr nsptr;
 
 	if (! ((prefix && !strcmp (prefix, "xml") && strcmp(uri, (char *)XML_XML_NAMESPACE)) ||
-		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, (char *)DOM_XMLNS_NAMESPACE)) ||
-		   (prefix && !strcmp(uri, (char *)DOM_XMLNS_NAMESPACE) && strcmp (prefix, "xmlns")))) {
+		   (prefix && !strcmp (prefix, "xmlns") && strcmp(uri, DOM_XMLNS_NS_URI)) ||
+		   (prefix && !strcmp(uri, DOM_XMLNS_NS_URI) && strcmp (prefix, "xmlns")))) {
 		nsptr = dom_get_ns_unchecked(nodep, uri, prefix);
 		if (UNEXPECTED(nsptr == NULL)) {
 			goto err;

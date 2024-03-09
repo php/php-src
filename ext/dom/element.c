@@ -814,7 +814,7 @@ static const xmlChar *dom_get_attribute_ns(dom_object *intern, xmlNodePtr elemp,
 		*should_free_result = true;
 		return strattr;
 	} else {
-		if (!follow_spec && xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NAMESPACE)) {
+		if (!follow_spec && xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NS_URI)) {
 			xmlNsPtr nsptr = dom_get_nsdecl(elemp, BAD_CAST name);
 			if (nsptr != NULL) {
 				return nsptr->href;
@@ -887,7 +887,7 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 
 			if ((xmlStrEqual(BAD_CAST prefix, BAD_CAST "xmlns") ||
 				(prefix == NULL && xmlStrEqual(BAD_CAST localname, BAD_CAST "xmlns"))) &&
-				xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NAMESPACE)) {
+				xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NS_URI)) {
 				is_xmlns = 1;
 				if (prefix == NULL) {
 					nsptr = dom_get_nsdecl(elemp, NULL);
@@ -1152,7 +1152,7 @@ PHP_METHOD(DOMElement, getAttributeNodeNS)
 	attrp = xmlHasNsProp(elemp, BAD_CAST name, BAD_CAST uri);
 
 	if (attrp == NULL) {
-		if (!follow_spec && xmlStrEqual(BAD_CAST uri, DOM_XMLNS_NAMESPACE)) {
+		if (!follow_spec && xmlStrEqual(BAD_CAST uri, BAD_CAST DOM_XMLNS_NS_URI)) {
 			xmlNsPtr nsptr;
 			nsptr = dom_get_nsdecl(elemp, BAD_CAST name);
 			if (nsptr != NULL) {
