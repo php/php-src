@@ -525,7 +525,7 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   if test "x$PHP_FPM_SELINUX" != "xno" ; then
-    PKG_CHECK_MODULES([SELINUX], [selinux], [
+    PKG_CHECK_MODULES([SELINUX], [libselinux], [
       PHP_EVAL_LIBLINE([$SELINUX_LIBS])
       PHP_EVAL_INCLINE([$SELINUX_CFLAGS])
     ],
