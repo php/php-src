@@ -90,6 +90,8 @@ typedef uintptr_t zend_jit_addr;
 	OP_ADDR(opline, result_type, result)
 #define OP1_DATA_ADDR() \
 	OP_ADDR(opline + 1, op1_type, op1)
+#define RES_DATA_ADDR() \
+	OP_ADDR(opline + 1, result_type, result)
 
 #define OP1_REG_ADDR() \
 	OP_REG_ADDR(opline, op1_type, op1, op1_use)

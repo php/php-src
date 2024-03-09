@@ -4542,7 +4542,7 @@ static uint32_t find_frameless_function_offset(uint32_t arity, void *handler)
 
 static const zend_frameless_function_info *find_frameless_function_info(zend_ast_list *args, zend_function *fbc, uint32_t type)
 {
-	if (ZEND_OBSERVER_ENABLED || zend_execute_internal) {
+	if (zend_execute_internal) {
 		return NULL;
 	}
 
@@ -4608,7 +4608,12 @@ static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *ar
 		SET_NODE(opline->op2, &arg_zvs[1]);
 	}
 	if (num_args >= 3) {
-		zend_emit_op_data(&arg_zvs[2]);
+		// Put result znode on OP_DATA to ensure dispatch in observer fallback can be aligned with the last opcode of the call
+		zend_op *op_data = zend_emit_op_data(&arg_zvs[2]);
+		op_data->result = opline->result;
+		op_data->result_type = opline->result_type;
+		opline->result_type = IS_UNUSED;
+		++opnum;
 	}
 	return opnum;
 }

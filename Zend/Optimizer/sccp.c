@@ -2211,6 +2211,8 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						if (has_op_data) {
 							zend_ssa_remove_instr(ssa, opline + 1, ssa_op + 1);
 							removed_ops++;
+							old_type = opline[1].result_type;
+							old_var = opline[1].result.var;
 						}
 					}
 					ssa_op->result_def = var_num;

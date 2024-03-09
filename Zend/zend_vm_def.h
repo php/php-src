@@ -9579,46 +9579,89 @@ ZEND_VM_C_LABEL(try_again):
 	}
 }
 
-ZEND_VM_HANDLER(204, ZEND_FRAMELESS_ICALL_0, UNUSED, UNUSED)
+ZEND_VM_HANDLER(204, ZEND_FRAMELESS_ICALL_0, UNUSED, UNUSED, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	SAVE_OPLINE();
+
+#if !ZEND_VM_SPEC || ZEND_OBSERVER_ENABLED
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_function *fbc = ZEND_FLF_FUNC(opline);
+		if (UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(fbc)) == false)) {
+			zend_execute_data *call = _zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(0, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, 0, NULL);
+			call->prev_execute_data = EX(call);
+			EX(call) = call;
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_DO_ICALL);
+		}
+	}
+#endif
 	zend_frameless_function_0 function = (zend_frameless_function_0)ZEND_FLF_HANDLER(opline);
-	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *result = EX_VAR(opline->result.var);
+	ZVAL_NULL(result);
 	function(EX_VAR(opline->result.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(205, ZEND_FRAMELESS_ICALL_1, ANY, UNUSED)
+ZEND_VM_HANDLER(205, ZEND_FRAMELESS_ICALL_1, ANY, UNUSED, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	SAVE_OPLINE();
 	zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
-	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *result = EX_VAR(opline->result.var);
+	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception) != NULL)) {
 		FREE_OP1();
 		HANDLE_EXCEPTION();
 	}
-	function(EX_VAR(opline->result.var), arg1);
+#if !ZEND_VM_SPEC || ZEND_OBSERVER_ENABLED
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_function *fbc = ZEND_FLF_FUNC(opline);
+		if (UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(fbc)) == false)) {
+			zend_execute_data *call = _zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(1, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, 1, NULL);
+			call->prev_execute_data = EX(call);
+			ZVAL_COPY(ZEND_CALL_VAR_NUM(call, 0), arg1);
+			FREE_OP1();
+			EX(call) = call;
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_DO_ICALL);
+		}
+	}
+#endif
+	function(result, arg1);
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY)
+ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	SAVE_OPLINE();
 	zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
-	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *result = EX_VAR(opline->result.var);
+	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception) != NULL)) {
 		FREE_OP1();
 		FREE_OP2();
 		HANDLE_EXCEPTION();
 	}
-	function(EX_VAR(opline->result.var), arg1, arg2);
+#if !ZEND_VM_SPEC || ZEND_OBSERVER_ENABLED
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_function *fbc = ZEND_FLF_FUNC(opline);
+		if (UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(fbc)) == false)) {
+			zend_execute_data *call = _zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(2, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, 2, NULL);
+			call->prev_execute_data = EX(call);
+			ZVAL_COPY(ZEND_CALL_VAR_NUM(call, 0), arg1);
+			ZVAL_COPY(ZEND_CALL_VAR_NUM(call, 1), arg2);
+			FREE_OP1();
+			FREE_OP2();
+			EX(call) = call;
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_DO_ICALL);
+		}
+	}
+#endif
+	function(result, arg1, arg2);
 	FREE_OP1();
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
 	if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {
@@ -9628,22 +9671,41 @@ ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY)
+ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY, SPEC(OBSERVER))
 {
 	USE_OPLINE
 	SAVE_OPLINE();
 	zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-	ZVAL_NULL(EX_VAR(opline->result.var));
+	zval *result = EX_VAR(opline[1].result.var);
+	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg3 = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (EG(exception)) {
+	if (UNEXPECTED(EG(exception) != NULL)) {
 		FREE_OP1();
 		FREE_OP2();
 		FREE_OP_DATA();
 		HANDLE_EXCEPTION();
 	}
-	function(EX_VAR(opline->result.var), arg1, arg2, arg3);
+#if !ZEND_VM_SPEC || ZEND_OBSERVER_ENABLED
+	if (ZEND_OBSERVER_ENABLED) {
+		zend_function *fbc = ZEND_FLF_FUNC(opline);
+		if (UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(fbc)) == false)) {
+			zend_execute_data *call = _zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(3, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, 3, NULL);
+			call->prev_execute_data = EX(call);
+			ZVAL_COPY(ZEND_CALL_VAR_NUM(call, 0), arg1);
+			ZVAL_COPY(ZEND_CALL_VAR_NUM(call, 1), arg2);
+			ZVAL_COPY(ZEND_CALL_VAR_NUM(call, 2), arg3);
+			FREE_OP1();
+			FREE_OP2();
+			FREE_OP_DATA();
+			EX(call) = call;
+			ZEND_VM_INC_OPCODE(); // Jump over OP_DATA
+			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_DO_ICALL);
+		}
+	}
+#endif
+	function(result, arg1, arg2, arg3);
 	FREE_OP1();
 	/* Set to UNDEF in case FREE_OP2() throws. */
 	if (OP1_TYPE & (IS_VAR|IS_TMP_VAR)) {

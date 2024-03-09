@@ -940,16 +940,8 @@ static void zend_calc_live_ranges(
 			if (EXPECTED(last_use[var_num] != (uint32_t) -1)) {
 				/* Skip trivial live-range */
 				if (opnum + 1 != last_use[var_num]) {
-					uint32_t num;
-
-#if 1
-					/* OP_DATA uses only op1 operand */
-					ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
-					num = opnum;
-#else
-					/* OP_DATA is really part of the previous opcode. */
-					num = opnum - (opline->opcode == ZEND_OP_DATA);
-#endif
+					/* OP_DATA is really part of the previous opcode. E.g. result for ZEND_FRAMELESS_ICALL_3. */
+					uint32_t num = opnum - (opline->opcode == ZEND_OP_DATA);
 					emit_live_range(op_array, var_num, num, last_use[var_num], needs_live_range);
 				}
 				last_use[var_num] = (uint32_t) -1;

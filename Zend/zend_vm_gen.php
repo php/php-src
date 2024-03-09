@@ -730,8 +730,8 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/FREE_OP2\(\)/" => $op2_free_op[$op2],
         "/FREE_OP1_IF_VAR\(\)/" => $op1_free_op_if_var[$op1],
         "/FREE_OP2_IF_VAR\(\)/" => $op2_free_op_if_var[$op2],
-        "/\!ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY")?"0":"1",
-        "/ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY")?"1":"0",
+        "/\!ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY"||$extra_spec)?"0":"1",
+        "/ZEND_VM_SPEC/m" => ($op1!="ANY"||$op2!="ANY"||$extra_spec)?"1":"0",
         "/ZEND_VM_C_LABEL\(\s*([A-Za-z_]*)\s*\)/m" => "\\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec)):""),
         "/ZEND_VM_C_GOTO\(\s*([A-Za-z_]*)\s*\)/m" => "goto \\1".(($spec && $kind != ZEND_VM_KIND_CALL)?("_SPEC".$prefix[$op1].$prefix[$op2].extra_spec_name($extra_spec)):""),
         "/^#(\s*)if\s+1\s*\\|\\|.*[^\\\\]$/m" => "#\\1if 1",
@@ -776,7 +776,7 @@ function gen_code($f, $spec, $kind, $code, $op1, $op2, $name, $extra_spec=null) 
         "/ZEND_OBSERVER_FREE_RETVAL\(\)/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "if (return_value == &observer_retval) { zval_ptr_dtor_nogc(&observer_retval); }" : "",
         "/ZEND_OBSERVER_SAVE_OPLINE\(\)/" => isset($extra_spec['OBSERVER']) && $extra_spec['OBSERVER'] == 1 ? "SAVE_OPLINE()" : "",
         "/ZEND_OBSERVER_FCALL_BEGIN\(\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
-            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_begin(\\1)")
+            ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_begin_specialized(\\1, false)")
             : "",
         "/ZEND_OBSERVER_FCALL_END\(\s*([^,]*)\s*,\s*(.*)\s*\)/" => isset($extra_spec['OBSERVER']) ?
             ($extra_spec['OBSERVER'] == 0 ? "" : "zend_observer_fcall_end(\\1, \\2)")
