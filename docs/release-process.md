@@ -924,7 +924,7 @@ feature development that cannot go into the new version.
    ```sh
    grep -Fxf 82/NEWS 83/NEWS
    ```
-    
+
 
 5. On the announcement day for the initial stable version (or shortly before),
    update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
@@ -943,7 +943,7 @@ feature development that cannot go into the new version.
    yearly cadence, coinciding with our X.Y.0 releases.
 
    Please see the instructions for
-   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
+   [making changes to security.txt][security-txt].
 
 
 ## Prime the selection of release managers for the next version
@@ -1084,3 +1084,4 @@ volunteers to begin the selection process for the next release managers.
 [Generating a new GPG key]: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 [sign your GPG key]: https://carouth.com/articles/signing-pgp-keys/
 [Send emails from a different address or alias]: https://support.google.com/mail/answer/22370?hl=en
+[security-txt]: https://github.com/php/policies/blob/main/security-policies.rst#making-changes-to-securitytxt
