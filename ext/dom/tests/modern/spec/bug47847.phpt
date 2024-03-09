@@ -17,10 +17,13 @@ $aDOM = DOM\XMLDocument::createEmpty();
 $imported = $aDOM->importNode($fromdom->documentElement->firstElementChild, true);
 $aDOM->appendChild($imported);
 
-echo $aDOM->saveXML();
+echo $aDOM->saveXML(), "\n";
+
+var_dump($aDOM->documentElement->firstElementChild->prefix);
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <ns:inner xmlns:ns="http://php.net" xmlns="http://php.net">
 <WATCH-MY-NAMESPACE/>
 </ns:inner>
+string(2) "ns"
