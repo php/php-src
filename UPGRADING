@@ -179,14 +179,6 @@ PHP 8.4 UPGRADE NOTES
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINS.
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
   . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
-  . Implemented DOM HTML5 parsing and serialization.
-    RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
-    This RFC adds the new DOM namespace along with class and constant aliases.
-    There are two new classes to handle HTML and XML documents:
-    DOM\HTMLDocument and DOM\XMLDocument.
-    These classes provide a cleaner API to handle HTML and XML documents.
-    Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
-    parsing and serialization.
   . It is now possible to pass any callable to registerPhpFunctions().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
@@ -435,6 +427,22 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- DOM:
+  . Implemented DOM HTML5 parsing and serialization.
+    RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
+    This RFC adds the new DOM namespace along with new classes and
+    constant aliases.
+    There are two new classes to handle HTML and XML documents:
+    DOM\HTMLDocument and DOM\XMLDocument.
+    These classes provide a cleaner API to handle HTML and XML documents.
+    Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
+    parsing and serialization.
+  . Implemented opt-in ext/dom spec compliance RFC.
+    This adds new classes in the DOM namespace that correspond to modern
+    equivalents to the old DOM classes in the global namespaces.
+    The new classes follow the DOM living spec.
+    RFC: https://wiki.php.net/rfc/opt_in_dom_spec_compliance
 
 ========================================
 8. Removed Extensions and SAPIs
