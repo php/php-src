@@ -599,7 +599,6 @@ localtime_r \
 lchown \
 memcntl \
 memfd_create \
-memmove \
 mkstemp \
 mmap \
 nice \
