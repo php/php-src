@@ -282,7 +282,7 @@ zend_class_entry *dom_get_doc_classmap(php_libxml_ref_obj *document, zend_class_
 /* }}} */
 
 /* {{{ dom_get_strict_error() */
-int dom_get_strict_error(php_libxml_ref_obj *document) {
+bool dom_get_strict_error(php_libxml_ref_obj *document) {
 	return dom_get_doc_props_read_only(document)->stricterror;
 }
 /* }}} */

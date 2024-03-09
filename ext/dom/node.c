@@ -1355,7 +1355,6 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	zval *id, *node;
 	xmlNodePtr child, nodep;
 	dom_object *intern, *childobj;
-	int stricterror;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
@@ -1370,7 +1369,7 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
-	stricterror = dom_get_strict_error(intern->document);
+	bool stricterror = dom_get_strict_error(intern->document);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
@@ -1406,13 +1405,12 @@ Since:
 static void dom_node_append_child_legacy(zval *return_value, dom_object *intern, dom_object *childobj, xmlNodePtr nodep, xmlNodePtr child)
 {
 	xmlNodePtr new_child = NULL;
-	int stricterror;
 
 	if (!dom_node_children_valid(nodep)) {
 		RETURN_FALSE;
 	}
 
-	stricterror = dom_get_strict_error(intern->document);
+	bool stricterror = dom_get_strict_error(intern->document);
 
 	if (dom_node_is_read_only(nodep) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
