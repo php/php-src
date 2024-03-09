@@ -27,6 +27,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-11808 (Live filesystem modified by tests). (nielsdos)
   . Fixed GH-13402 (Added validation of `\n` in $additional_headers of mail()).
     (SakiTakamachi)
+  . Fixed bug GH-13203 (file_put_contents fail on strings over 4GB on Windows).
+    (divinity76)
 
 14 Mar 2024, PHP 8.3.4
 
