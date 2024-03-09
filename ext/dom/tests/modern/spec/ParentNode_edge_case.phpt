@@ -7,12 +7,12 @@ dom
 
 $dom = DOM\HTMLDocument::createEmpty();
 $container = $dom->createElement('container');
-$container->append($dom);
+try {
+    $container->append($dom);
+} catch (DOMException $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught DOMException: Hierarchy Request Error in %s:%d
-Stack trace:
-#0 %s(%d): DOM\Element->append(Object(DOM\HTMLDocument))
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+Hierarchy Request Error
