@@ -641,12 +641,6 @@ void _php_load_environment_variables(zval *array_ptr)
 	php_import_environment_variables(array_ptr);
 }
 
-bool php_std_auto_global_callback(char *name, uint32_t name_len)
-{
-	zend_printf("%s\n", name);
-	return 0; /* don't rearm */
-}
-
 /* {{{ php_build_argv */
 PHPAPI void php_build_argv(const char *s, zval *track_vars_array)
 {
