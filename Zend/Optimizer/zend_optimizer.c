@@ -1154,6 +1154,9 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 		}
 		/* reset smart branch flags IS_SMART_BRANCH_JMP[N]Z */
 		opline->result_type &= (IS_TMP_VAR|IS_VAR|IS_CV|IS_CONST);
+		if (opline->opcode == ZEND_FRAMELESS_ICALL_3) {
+			(opline+1)->result_type = IS_UNUSED;
+		}
 		opline++;
 	}
 #if !ZEND_USE_ABS_CONST_ADDR
@@ -1272,6 +1275,10 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 						}
 					}
 				}
+				break;
+			case ZEND_FRAMELESS_ICALL_3:
+				(opline+1)->result.var = opline->result.var;
+				(opline+1)->result_type = opline->result_type;
 				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
@@ -1394,6 +1401,10 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 						}
 					}
 				}
+				break;
+			case ZEND_FRAMELESS_ICALL_3:
+				(opline+1)->result.var = opline->result.var;
+				(opline+1)->result_type = opline->result_type;
 				break;
 		}
 #ifdef ZEND_VERIFY_TYPE_INFERENCE

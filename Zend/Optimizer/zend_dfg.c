@@ -130,9 +130,6 @@ add_op1_def:
 					zend_bitset_incl(use, var_num);
 				}
 			}
-			if (opline->opcode == ZEND_FRAMELESS_ICALL_3) {
-				++opline; // OP_DATA has result
-			}
 			break;
 		case ZEND_ASSIGN_DIM_OP:
 		case ZEND_ASSIGN_OBJ_OP:

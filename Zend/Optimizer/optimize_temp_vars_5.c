@@ -49,7 +49,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	int *map_T;				/* Map's the T to its new index */
 	zend_op *opline, *end;
 	int currT;
-	int exclNextT = -1;
 	int i;
 	int max = -1;
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
@@ -145,11 +144,6 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 			opline->op2.var = NUM_VAR(map_T[currT] + offset);
 		}
 
-		if (exclNextT != -1) {
-			zend_bitset_excl(taken_T, exclNextT);
-			exclNextT = -1;
-		}
-
 		if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
 			currT = VAR_NUM(opline->result.var) - offset;
 			if (map_T[currT] == INVALID_VAR) {
@@ -163,12 +157,7 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 				 * since the fast_var could also be set by ZEND_HANDLE_EXCEPTION
 				 * which could be ahead of it */
 				if (opline->opcode != ZEND_FAST_CALL) {
-					if (opline->opcode == ZEND_OP_DATA) {
-						/* ZEND_OP_DATA may contain a result, which must not be equal to any of its prior opcode vars */
-						exclNextT = map_T[currT];
-					} else {
-						zend_bitset_excl(taken_T, map_T[currT]);
-					}
+					zend_bitset_excl(taken_T, map_T[currT]);
 				}
 				if (opline->opcode == ZEND_ROPE_INIT) {
 					uint32_t num = ((opline->extended_value * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
