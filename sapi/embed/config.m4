@@ -1,6 +1,6 @@
 PHP_ARG_ENABLE([embed],,
   [AS_HELP_STRING([[--enable-embed[=TYPE]]],
-    [EXPERIMENTAL: Enable building of embedded SAPI library TYPE is either
+    [Enable building of embedded SAPI library TYPE is either
     'shared' or 'static'. [TYPE=shared]])],
   [no],
   [no])
