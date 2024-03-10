@@ -18,7 +18,7 @@
 #define TOKEN_LIST_H
 
 typedef struct _dom_token_list_object {
-	php_libxml_node_ptr *element_ptr;
+	HashTable token_set;
 	/* Used to check if the token set is up to date. */
 	char *cached_string;
 	php_libxml_cache_tag cache_tag;

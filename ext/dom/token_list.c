@@ -25,7 +25,7 @@
 #include "zend_interfaces.h"
 
 #define TOKEN_LIST_GET_INTERNAL() php_dom_token_list_from_obj(Z_OBJ_P(ZEND_THIS))
-#define TOKEN_LIST_GET_SET(intern) intern->dom.ptr
+#define TOKEN_LIST_GET_SET(intern) (&(intern)->token_set)
 #define Z_TOKEN_LIST_P(zv) php_dom_token_list_from_obj(Z_OBJ_P(zv))
 
 typedef struct _dom_token_list_it {
@@ -119,7 +119,8 @@ static char *dom_ordered_set_serializer(HashTable *token_set)
 
 static zend_always_inline xmlNode *dom_token_list_get_element(dom_token_list_object *intern)
 {
-	return intern->element_ptr->node;
+	php_libxml_node_ptr *element_ptr = intern->dom.ptr;
+	return element_ptr->node;
 }
 
 static zend_always_inline const xmlAttr *dom_token_list_get_attr(dom_token_list_object *intern)
@@ -192,13 +193,12 @@ void dom_token_list_ctor(dom_token_list_object *intern, dom_object *element_obj)
 {
 	php_libxml_node_ptr *ptr = element_obj->ptr;
 	ptr->refcount++;
-	intern->element_ptr = ptr;
+	intern->dom.ptr = ptr;
 	element_obj->document->refcount++;
 	intern->dom.document = element_obj->document;
 
 	intern->cache_tag.modification_nr = 0;
 
-	ALLOC_HASHTABLE(TOKEN_LIST_GET_SET(intern));
 	HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 	zend_hash_init(token_set, 0, NULL, NULL, false);
 
@@ -211,15 +211,14 @@ void dom_token_list_free_obj(zend_object *object)
 
 	zend_object_std_dtor(object);
 
-	if (EXPECTED(intern->element_ptr != NULL)) { /* Object initialized? */
+	if (EXPECTED(intern->dom.ptr != NULL)) { /* Object initialized? */
 		xmlNodePtr node = dom_token_list_get_element(intern);
-		if (php_libxml_decrement_node_ptr_ref(intern->element_ptr) == 0) {
+		if (php_libxml_decrement_node_ptr_ref(intern->dom.ptr) == 0) {
 			php_libxml_node_free_resource(node);
 		}
 		php_libxml_decrement_doc_ref((php_libxml_node_object *) &intern->dom);
 		HashTable *token_set = TOKEN_LIST_GET_SET(intern);
 		zend_hash_destroy(token_set);
-		FREE_HASHTABLE(token_set);
 		efree(intern->cached_string);
 	}
 }
@@ -326,7 +325,7 @@ zend_result dom_token_list_length_read(dom_object *obj, zval *retval)
 {
 	dom_token_list_object *token_list = php_dom_token_list_from_dom_obj(obj);
 	dom_token_list_ensure_set_up_to_date(token_list);
-	ZVAL_LONG(retval, zend_hash_num_elements(obj->ptr));
+	ZVAL_LONG(retval, zend_hash_num_elements(TOKEN_LIST_GET_SET(token_list)));
 	return SUCCESS;
 }
 
