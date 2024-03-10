@@ -128,23 +128,6 @@ AC_REQUIRE([AC_PROG_CC])
 
 AC_CHECK_HEADERS([cpuid.h])
 
-dnl
-dnl LIBZEND_DLSYM_CHECK
-dnl
-dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
-dnl
-AC_DEFUN([LIBZEND_DLSYM_CHECK],[
-AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
-_LT_AC_TRY_DLOPEN_SELF([
-  AC_MSG_RESULT(no)
-], [
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(DLSYM_NEEDS_UNDERSCORE, 1, [Define if dlsym() requires a leading underscore in symbol names. ])
-], [
-  AC_MSG_RESULT(no)
-], [])
-])
-
 dnl Checks for library functions.
 AC_CHECK_FUNCS(getpid kill pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack pthread_stackseg_np gettid)
 
