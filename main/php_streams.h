@@ -112,7 +112,9 @@ typedef struct _php_stream_statbuf {
 } php_stream_statbuf;
 
 typedef struct _php_stream_dirent {
-#if !defined(__APPLE__) && defined(NAME_MAX)
+#if defined(__DARWIN_MAXPATHLEN)
+	char d_name[__DARWIN_MAXPATHLEN];
+#elif defined(NAME_MAX)
 	char d_name[NAME_MAX + 1];
 #else
 	char d_name[MAXPATHLEN];
