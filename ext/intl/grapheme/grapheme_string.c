@@ -826,7 +826,7 @@ PHP_FUNCTION(grapheme_str_split)
 	UErrorCode ustatus = U_ZERO_ERROR;
 	int32_t pos, current, i, end_len = 0;
 	UBreakIterator* bi;
-	UText ut = UTEXT_INITIALIZER;
+	UText *ut = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(str)
@@ -847,7 +847,7 @@ PHP_FUNCTION(grapheme_str_split)
 	}
 
 	pstr = ZSTR_VAL(str);
-	utext_openUTF8(&ut, pstr, ZSTR_LEN(str), &ustatus);
+	ut = utext_openUTF8(ut, pstr, ZSTR_LEN(str), &ustatus);
 
 	if ( U_FAILURE( ustatus ) ) {
 		/* Set global error code. */
@@ -867,7 +867,7 @@ PHP_FUNCTION(grapheme_str_split)
 		RETURN_FALSE;
 	}
 
-	ubrk_setUText(bi, &ut, &ustatus);
+	ubrk_setUText(bi, ut, &ustatus);
 
 	pos = 0;
 	array_init(return_value);
@@ -893,6 +893,7 @@ PHP_FUNCTION(grapheme_str_split)
 		add_next_index_stringl(return_value, end, end_len);
 	}
 
+	utext_close(ut);
 	ubrk_close(bi);
 }
 
