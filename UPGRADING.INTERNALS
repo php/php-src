@@ -77,6 +77,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   void(*)(void *, size_t) to
   void(*)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
+* The function zend_shutdown_constants() has been removed.
 
 ========================
 2. Build system changes
