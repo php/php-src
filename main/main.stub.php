@@ -84,6 +84,11 @@ const PHP_PREFIX = UNKNOWN;
  * @cvalue PHP_BINDIR
  */
 const PHP_BINDIR = UNKNOWN;
+/**
+ * @var string
+ * @cvalue PHP_SBINDIR
+ */
+const PHP_SBINDIR = UNKNOWN;
 #ifndef PHP_WIN32
 /**
  * @var string
