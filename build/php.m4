@@ -1465,7 +1465,7 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main(void) { return (0); }]])],[found=yes],[found=no],[
+    AC_RUN_IFELSE([AC_LANG_PROGRAM()],[found=yes],[found=no],[
       dnl Cross compilation.
       found=yes
     ])
