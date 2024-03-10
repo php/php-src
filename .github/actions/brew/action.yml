@@ -5,6 +5,12 @@ runs:
     - shell: bash
       run: |
         set -x
+
+        # Patch brew to overwrite always
+        formula_installer="$(brew --repo)"/Library/Homebrew/formula_installer.rb
+        code=" keg.link\(verbose: verbose\?"
+        sudo sed -Ei '' "s/$code.*/$code, overwrite: true\)/" "$formula_installer"
+
         brew install \
           pkg-config \
           autoconf \
