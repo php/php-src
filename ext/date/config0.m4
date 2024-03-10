@@ -1,10 +1,8 @@
 dnl Check for headers needed by timelib
 AC_CHECK_HEADERS([io.h])
 
-dnl Check for strtoll, atoll
-AC_CHECK_FUNCS([strtoll atoll])
+PHP_DATE_CFLAGS="-Wno-implicit-fallthrough -I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1 -DHAVE_STRTOLL"
 
-PHP_DATE_CFLAGS="-Wno-implicit-fallthrough -I@ext_builddir@/lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 -DHAVE_TIMELIB_CONFIG_H=1"
 timelib_sources="lib/astro.c lib/dow.c lib/parse_date.c lib/parse_tz.c lib/parse_posix.c
                  lib/timelib.c lib/tm2unixtime.c lib/unixtime2tm.c lib/parse_iso_intervals.c lib/interval.c"
 
