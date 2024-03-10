@@ -534,11 +534,7 @@ fi
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
-AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
-dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist.
-if test "`uname -s 2>/dev/null`" != "QNX"; then
-  AC_STRUCT_ST_BLOCKS
-fi
+AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_blocks, struct stat.st_rdev])
 
 dnl Checks for types.
 AC_TYPE_UID_T
