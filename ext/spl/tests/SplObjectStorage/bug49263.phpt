@@ -5,7 +5,7 @@ SPL: SplObjectStorage serialization references
 $o1 = new stdClass;
 $o2 = new stdClass;
 
-$s = new splObjectStorage();
+$s = new SplObjectStorage();
 
 $s->attach($o1, array('prev' => 2, 'next' => $o2));
 $s->attach($o2, array('prev' => $o1));

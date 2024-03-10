@@ -1,5 +1,5 @@
 --TEST--
-Bug #53071 (Usage of SPLObjectStorage defeats gc_collect_cycles)
+Bug #53071 (Usage of SplObjectStorage defeats gc_collect_cycles)
 --FILE--
 <?php
 gc_enable();
