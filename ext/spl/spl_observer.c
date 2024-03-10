@@ -87,20 +87,21 @@ static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObject
 		zval param;
 		zval rv;
 		ZVAL_OBJ(&param, obj);
-		zend_call_method_with_1_params(
-			&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, &param);
-		if (!Z_ISUNDEF(rv)) {
-			if (Z_TYPE(rv) == IS_STRING) {
-				key->key = Z_STR(rv);
-				return SUCCESS;
-			} else {
-				zend_throw_exception(spl_ce_RuntimeException, "Hash needs to be a string", 0);
-
+		zend_call_method_with_1_params(&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, &param);
+		if (UNEXPECTED(Z_ISUNDEF(rv))) {
+			/* An exception has occurred */
+			return FAILURE;
+		} else {
+			/* TODO PHP 9: Remove this as this will be enforced from the return type */
+			if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
+				zend_type_error("%s::getHash(): Return value must be of type string, %s returned",
+					ZSTR_VAL(intern->std.ce->name), zend_zval_value_name(&rv));
 				zval_ptr_dtor(&rv);
 				return FAILURE;
+			} else {
+				key->key = Z_STR(rv);
+				return SUCCESS;
 			}
-		} else {
-			return FAILURE;
 		}
 	} else {
 		key->key = NULL;

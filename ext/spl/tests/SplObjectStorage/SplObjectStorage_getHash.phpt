@@ -1,25 +1,13 @@
 --TEST--
-SplObjectStorage::getHash implementation
+SplObjectStorage::getHash() implementation
 --FILE--
 <?php
-$s = new SplObjectStorage();
-$o1 = new Stdclass;
-$o2 = new Stdclass;
-$s[$o1] = "some_value\n";
-echo $s->offsetGet($o1);
 
-class MySplObjectStorage extends SplObjectStorage {
+class MySplObjectStorage1 extends SplObjectStorage {
     #[ReturnTypeWillChange]
     public function getHash($obj) {
         return 2;
     }
-}
-
-try {
-    $s1 = new MySplObjectStorage;
-    $s1[$o1] = "foo";
-} catch(Exception $e) {
-    echo "caught 1\n";
 }
 
 class MySplObjectStorage2 extends SplObjectStorage {
@@ -29,31 +17,47 @@ class MySplObjectStorage2 extends SplObjectStorage {
     }
 }
 
-try {
-    $s2 = new MySplObjectStorage2;
-    $s2[$o2] = "foo";
-} catch(Exception $e) {
-    echo "caught 2\n";
-}
-
 class MySplObjectStorage3 extends SplObjectStorage {
     public function getHash($obj): string {
         return "asd";
     }
 }
 
-$s3 = new MySplObjectStorage3;
-$s3[$o1] = $o1;
-var_dump($s3[$o1]);
-$s3[$o2] = $o2;
+$s = new SplObjectStorage();
+$o1 = new stdClass();
+$o2 = new stdClass();
 
-var_dump($s3[$o1] === $s3[$o2]);
+$instances = [
+    new SplObjectStorage(),
+    new MySplObjectStorage1(),
+    new MySplObjectStorage2(),
+    new MySplObjectStorage3(),
+];
+
+foreach ($instances as $instance) {
+    echo 'Instance as ', $instance::class, PHP_EOL;
+    try {
+        $instance[$o1] = 'foo';
+        var_dump($instance->offsetGet($o1));
+        var_dump($instance[$o1]);
+        $instance[$o2] = $o2;
+        var_dump($instance[$o1] === $instance[$o2]);
+    } catch(Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+    }
+}
 
 ?>
 --EXPECT--
-some_value
-caught 1
-caught 2
-object(stdClass)#2 (0) {
-}
+Instance as SplObjectStorage
+string(3) "foo"
+string(3) "foo"
+bool(false)
+Instance as MySplObjectStorage1
+TypeError: MySplObjectStorage1::getHash(): Return value must be of type string, int returned
+Instance as MySplObjectStorage2
+Exception: foo
+Instance as MySplObjectStorage3
+string(3) "foo"
+string(3) "foo"
 bool(true)
