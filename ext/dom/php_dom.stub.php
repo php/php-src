@@ -1658,7 +1658,6 @@ namespace DOM
         public function supports(string $token): bool {}
         public string $value;
 
-        /** @tentative-return-type */
         public function count(): int {}
 
         public function getIterator(): \Iterator {}

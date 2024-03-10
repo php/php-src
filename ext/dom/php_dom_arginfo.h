@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3d63c0bcffe88af8d36ab01aeda9a04d65aed730 */
+ * Stub hash: 0fd0d8b1b6bc3082e5488dc8ab24cb305ac31db4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1074,7 +1074,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_TokenList_supports arginfo_class_DOM_TokenList_contains
 
-#define arginfo_class_DOM_TokenList_count arginfo_class_DOMNode_getLineNo
+#define arginfo_class_DOM_TokenList_count arginfo_class_DOM_Node_getLineNo
 
 #define arginfo_class_DOM_TokenList_getIterator arginfo_class_DOMNodeList_getIterator
 
