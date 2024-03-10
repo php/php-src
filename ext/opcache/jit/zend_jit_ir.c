@@ -5405,7 +5405,7 @@ static int zend_jit_add_arrays(zend_jit_ctx *jit, const zend_op *opline, uint32_
 static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
                                      const zend_op  *opline,
                                      uint8_t         opcode,
-                                     uint8_t         op1_type, 
+                                     uint8_t         op1_type,
                                      znode_op        op1,
                                      zend_jit_addr   op1_addr,
                                      uint32_t        op1_info,
@@ -7915,7 +7915,7 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 
 	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 		mask = opline->extended_value;
-		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {			
+		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {
 			jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 			if (exit_addr) {
 				if (smart_branch_opcode == ZEND_JMPNZ) {
@@ -11784,7 +11784,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				if (opline->op2_type != IS_CONST) {
 					ir_ref if_num, end1, ref2;
 
-					if_num = ir_IF( 
+					if_num = ir_IF(
 						ir_ULE(
 							ir_LOAD_C(ir_ADD_OFFSET(key, offsetof(zend_string, val))),
 							ir_CONST_CHAR('9')));
@@ -16161,8 +16161,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 			} else {
 				ir_GUARD(ir_GE(ref, ir_CONST_I32(0)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 			}
-		} else if (opline->opcode == ZEND_EXIT ||
-		           opline->opcode == ZEND_GENERATOR_RETURN ||
+		} else if (opline->opcode == ZEND_GENERATOR_RETURN ||
 		           opline->opcode == ZEND_YIELD ||
 		           opline->opcode == ZEND_YIELD_FROM) {
 			ir_IJMP(jit_STUB_ADDR(jit, jit_stub_trace_halt));

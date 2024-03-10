@@ -7683,10 +7683,14 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			"__autoload() is no longer supported, use spl_autoload_register() instead");
 	}
 
-	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
+	if (
+		zend_string_equals_literal_ci(unqualified_name, "assert")
+		|| zend_string_equals_literal_ci(unqualified_name, "exit")
+		|| zend_string_equals_literal_ci(unqualified_name, "die")
+	) {
 		zend_error(E_COMPILE_ERROR,
-			"Defining a custom assert() function is not allowed, "
-			"as the function has special semantics");
+			"Defining a custom %s() function is not allowed, "
+			"as the function has special semantics", ZSTR_VAL(unqualified_name));
 	}
 
 	zend_register_seen_symbol(lcname, ZEND_SYMBOL_FUNCTION);
@@ -9623,27 +9627,6 @@ static void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *expr_ast = ast->child[0];
-	znode expr_node;
-
-	if (expr_ast) {
-		zend_compile_expr(&expr_node, expr_ast);
-	} else {
-		expr_node.op_type = IS_UNUSED;
-	}
-
-	zend_op *opline = zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
-	if (result) {
-		/* Mark this as an "expression throw" for opcache. */
-		opline->extended_value = ZEND_THROW_IS_EXPR;
-		result->op_type = IS_CONST;
-		ZVAL_TRUE(&result->u.constant);
-	}
-}
-/* }}} */
-
 static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *value_ast = ast->child[0];
@@ -9948,6 +9931,14 @@ static void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 	bool is_fully_qualified;
 	zend_string *orig_name = zend_ast_get_str(name_ast);
 	zend_string *resolved_name = zend_resolve_const_name(orig_name, name_ast->attr, &is_fully_qualified);
+
+	if (UNEXPECTED(
+		zend_string_equals_literal_ci(orig_name, "exit")
+		|| zend_string_equals_literal_ci(orig_name, "die")
+	)) {
+		zend_throw_error(NULL, "Cannot define constant with name %s", ZSTR_VAL(orig_name));
+		return;
+	}
 
 	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (name_ast->attr != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {
 		zend_ast *last = CG(ast);
@@ -10605,7 +10596,6 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_halt_compiler(ast);
 			break;
 		case ZEND_AST_THROW:
-		case ZEND_AST_EXIT:
 			zend_compile_expr(NULL, ast);
 			break;
 		default:
@@ -10706,9 +10696,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_PRINT:
 			zend_compile_print(result, ast);
-			return;
-		case ZEND_AST_EXIT:
-			zend_compile_exit(result, ast);
 			return;
 		case ZEND_AST_YIELD:
 			zend_compile_yield(result, ast);
