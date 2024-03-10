@@ -49,7 +49,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	*    end, the 0's are omitted and the number of digits in num is reduced.
 	*    In that case, may end up in the same situation as 2.
 	*/
-	if (precision < 0 && num->n_len <= labs(precision)) {
+	if (precision < 0 && num->n_len <= (size_t) (-(precision + Z_L(1))) + 1) {
 		*result = bc_copy_num(BCG(_zero_));
 		return;
 	}
@@ -68,7 +68,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	size_t rounded_len = num->n_len + precision;
 	memcpy((*result)->n_value, num->n_value, rounded_len);
 
-	char *nptr = num->n_value + rounded_len;
+	const char *nptr = num->n_value + rounded_len;
 
 	/* Check cases that can be determined without looping. */
 	switch (mode) {
@@ -88,7 +88,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			} else if (*nptr < 5) {
 				return;
 			}
-			/* if *nptr == 5, a loop is required for judgment. */
+			/* if *nptr == 5, we need to look-up further digits before making a decision. */
 			break;
 
 		case PHP_ROUND_CEILING:
@@ -118,12 +118,16 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			}
 			/* if *nptr == 0, a loop is required for judgment. */
 			break;
+
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	/* Loop through the remaining digits. */
 	size_t count = num->n_len + num->n_scale - rounded_len - 1;
 	nptr++;
-	while ((count > 0) && (*nptr++ == 0)) count--;
+	while ((count > 0) && (*nptr++ == 0)) {
+		count--;
+	}
 
 	if (count > 0) {
 		goto up;
@@ -147,6 +151,8 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 				return;
 			}
 			break;
+
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 up:
