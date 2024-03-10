@@ -1,5 +1,11 @@
 --TEST--
 testing /r modifier in preg_* functions
+--SKIPIF--
+<?php
+if (PCRE_VERSION_MAJOR == 10 && PCRE_VERSION_MINOR < 43) {
+    die("skip old pcre version");
+}
+?>
 --FILE--
 <?php
 echo "SK substitute matching" . PHP_EOL;
