@@ -1122,6 +1122,11 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_JMP_FRAMELESS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
 				break;
+			case ZEND_FRAMELESS_ICALL_3:
+				// Copy result to OP_DATA to ensure dispatch in observer fallback can be aligned with the last opcode of the call
+				opline[1].result.var = opline->result.var;
+				opline[1].result_type = opline->result_type;
+				break;
 			case ZEND_ASSERT_CHECK:
 			{
 				/* If result of assert is unused, result of check is unused as well */

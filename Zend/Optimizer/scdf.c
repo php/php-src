@@ -124,10 +124,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 				zend_ssa_op *ssa_op = &ssa->ops[i];
 				if (opline->opcode == ZEND_OP_DATA) {
 					opline--;
-					if (opline->opcode != ZEND_FRAMELESS_ICALL_3) {
-						// result op not on OP_DATA
-						ssa_op--;
-					}
+					ssa_op--;
 				}
 				scdf->handlers.visit_instr(scdf, opline, ssa_op);
 				if (i == block->start + block->len - 1) {
@@ -165,7 +162,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 				for (j = block->start; j < end; j++) {
 					opline = &scdf->op_array->opcodes[j];
 					zend_bitset_excl(scdf->instr_worklist, j);
-					if (opline->opcode != ZEND_OP_DATA || opline[-1].opcode == ZEND_FRAMELESS_ICALL_3) {
+					if (opline->opcode != ZEND_OP_DATA) {
 						scdf->handlers.visit_instr(scdf, opline, &ssa->ops[j]);
 					}
 				}
@@ -175,10 +172,7 @@ void scdf_solve(scdf_ctx *scdf, const char *name) {
 					ZEND_ASSERT(opline && "Should have opline in non-empty block");
 					if (opline->opcode == ZEND_OP_DATA) {
 						opline--;
-						if (opline->opcode != ZEND_FRAMELESS_ICALL_3) {
-							// result op not on OP_DATA
-							j--;
-						}
+						j--;
 					}
 					scdf->handlers.mark_feasible_successors(scdf, i, block, opline, &ssa->ops[j-1]);
 				}

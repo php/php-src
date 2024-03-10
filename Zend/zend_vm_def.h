@@ -9696,7 +9696,7 @@ ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY, SPEC(OBSERVER))
 	USE_OPLINE
 	SAVE_OPLINE();
 	zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-	zval *result = EX_VAR(opline[1].result.var);
+	zval *result = EX_VAR(opline->result.var);
 	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);

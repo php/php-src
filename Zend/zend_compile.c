@@ -4641,12 +4641,7 @@ static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *ar
 		SET_NODE(opline->op2, &arg_zvs[1]);
 	}
 	if (num_args >= 3) {
-		// Put result znode on OP_DATA to ensure dispatch in observer fallback can be aligned with the last opcode of the call
-		zend_op *op_data = zend_emit_op_data(&arg_zvs[2]);
-		op_data->result = opline->result;
-		op_data->result_type = opline->result_type;
-		opline->result_type = IS_UNUSED;
-		++opnum;
+		zend_emit_op_data(&arg_zvs[2]);
 	}
 	return opnum;
 }

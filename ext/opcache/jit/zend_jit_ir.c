@@ -17152,7 +17152,7 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, int checked_stack, const zen
 
 	void *function = ZEND_FLF_HANDLER(opline);
 	uint8_t op_data_type = (opline + 1)->op1_type;
-	zend_jit_addr res_addr = RES_DATA_ADDR();
+	zend_jit_addr res_addr = RES_ADDR();
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
 	zend_jit_addr op3_addr = OP1_DATA_ADDR();
