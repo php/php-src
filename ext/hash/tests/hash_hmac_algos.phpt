@@ -37,6 +37,7 @@ Array
     [%d] => snefru256
     [%d] => gost
     [%d] => gost-crypto
+    [29] => blake3
     [%d] => haval128,3
     [%d] => haval160,3
     [%d] => haval192,3

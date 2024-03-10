@@ -12,4 +12,5 @@ runs:
         ext/tokenizer/tokenizer_data_gen.php
         build/gen_stub.php -f
         build/gen_stub.php --generate-optimizer-info
+        ext/hash/blake3/fetch_upstream_blake3.sh
         git add . -N && git diff --exit-code
