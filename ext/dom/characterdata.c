@@ -140,7 +140,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 		RETURN_FALSE;
 	}
 
-	if ((offset + count) > length) {
+	if (count > length - offset) {
 		count = length - offset;
 	}
 
@@ -305,7 +305,7 @@ static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 		substring = NULL;
 	}
 
-	if ((offset + count) > length) {
+	if (count > length - offset) {
 		count = length - offset;
 	}
 
@@ -379,7 +379,7 @@ static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool r
 		substring = NULL;
 	}
 
-	if ((offset + count) > length) {
+	if (count > length - offset) {
 		count = length - offset;
 	}
 
