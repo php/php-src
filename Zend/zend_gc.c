@@ -1838,10 +1838,6 @@ static zend_always_inline zend_result gc_call_destructors(uint32_t idx, uint32_t
 				if (UNEXPECTED(fiber != NULL && GC_G(dtor_fiber) != fiber)) {
 					/* We resumed after suspension */
 					gc_check_possible_root((zend_refcounted*)&obj->gc);
-
-					GC_DELREF(&fiber->std);
-					gc_check_possible_root((zend_refcounted*)&fiber->std.gc);
-
 					return FAILURE;
 				}
 			}
@@ -1901,6 +1897,9 @@ static zend_never_inline void gc_call_destructors_in_fiber(uint32_t end)
 			GC_TRACE("destructor fiber suspended by destructor");
 			GC_G(dtor_fiber) = NULL;
 			GC_G(dtor_idx)++;
+			/* We do not own the fiber anymore. It may be collected if the
+			 * application does not reference it. */
+			zend_object_release(&fiber->std);
 			fiber = gc_create_destructor_fiber();
 			continue;
 		} else {
