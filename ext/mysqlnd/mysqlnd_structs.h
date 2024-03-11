@@ -465,7 +465,7 @@ typedef MYSQLND_RES *		(*func_mysqlnd_conn_data__list_method)(MYSQLND_CONN_DATA 
 
 typedef uint64_t			(*func_mysqlnd_conn_data__get_last_insert_id)(const MYSQLND_CONN_DATA * const conn);
 typedef uint64_t			(*func_mysqlnd_conn_data__get_affected_rows)(const MYSQLND_CONN_DATA * const conn);
-typedef unsigned int		(*func_mysqlnd_conn_data__get_warning_count)(const MYSQLND_CONN_DATA * const conn);
+typedef unsigned int		(*func_mysqlnd_conn_data__get_warnings_count)(const MYSQLND_CONN_DATA * const conn);
 
 typedef unsigned int		(*func_mysqlnd_conn_data__get_field_count)(const MYSQLND_CONN_DATA * const conn);
 
@@ -556,7 +556,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data)
 
 	func_mysqlnd_conn_data__get_last_insert_id get_last_insert_id;
 	func_mysqlnd_conn_data__get_affected_rows get_affected_rows;
-	func_mysqlnd_conn_data__get_warning_count get_warning_count;
+	func_mysqlnd_conn_data__get_warnings_count get_warnings_count;
 
 	func_mysqlnd_conn_data__get_field_count get_field_count;
 
@@ -761,7 +761,7 @@ typedef uint64_t			(*func_mysqlnd_stmt__get_affected_rows)(const MYSQLND_STMT * 
 typedef uint64_t			(*func_mysqlnd_stmt__get_num_rows)(const MYSQLND_STMT * const stmt);
 typedef unsigned int		(*func_mysqlnd_stmt__get_param_count)(const MYSQLND_STMT * const stmt);
 typedef unsigned int		(*func_mysqlnd_stmt__get_field_count)(const MYSQLND_STMT * const stmt);
-typedef unsigned int		(*func_mysqlnd_stmt__get_warning_count)(const MYSQLND_STMT * const stmt);
+typedef unsigned int		(*func_mysqlnd_stmt__get_warnings_count)(const MYSQLND_STMT * const stmt);
 typedef unsigned int		(*func_mysqlnd_stmt__get_error_no)(const MYSQLND_STMT * const stmt);
 typedef const char *		(*func_mysqlnd_stmt__get_error_str)(const MYSQLND_STMT * const stmt);
 typedef const char *		(*func_mysqlnd_stmt__get_sqlstate)(const MYSQLND_STMT * const stmt);
@@ -809,7 +809,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt)
 
 	func_mysqlnd_stmt__get_param_count get_param_count;
 	func_mysqlnd_stmt__get_field_count get_field_count;
-	func_mysqlnd_stmt__get_warning_count get_warning_count;
+	func_mysqlnd_stmt__get_warnings_count get_warnings_count;
 
 	func_mysqlnd_stmt__get_error_no get_error_no;
 	func_mysqlnd_stmt__get_error_str get_error_str;
