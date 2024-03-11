@@ -191,6 +191,8 @@ PHP                                                                        NEWS
 - Sodium:
   . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
   . Enable AES-GCM on aarch64 with the ARM crypto extensions (jedisct1)
+  . Add sodium_crypto_onetimeauth_* functions for one-time Poly1305
+    MAC generation and verification (Ayesh Karunaratne)
 
 - Standard:
   . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)

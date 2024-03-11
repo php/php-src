@@ -2942,6 +2942,68 @@ PHP_FUNCTION(sodium_crypto_auth_verify)
 	RETURN_TRUE;
 }
 
+PHP_FUNCTION(sodium_crypto_onetimeauth)
+{
+	zend_string *mac;
+	char        *key;
+	char        *msg;
+	size_t       msg_len;
+	size_t       key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+									&msg, &msg_len,
+									&key, &key_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (key_len != crypto_onetimeauth_KEYBYTES) {
+		zend_argument_error(sodium_exception_ce, 2, "must be SODIUM_CRYPTO_ONETIMEAUTH_KEYBYTES bytes long");
+		RETURN_THROWS();
+	}
+	mac = zend_string_alloc(crypto_onetimeauth_BYTES, 0);
+	if (crypto_onetimeauth((unsigned char *) ZSTR_VAL(mac),
+					       (const unsigned char *) msg, msg_len,
+					       (const unsigned char *) key) != 0) {
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		RETURN_THROWS();
+	}
+	ZSTR_VAL(mac)[crypto_onetimeauth_BYTES] = 0;
+
+	RETURN_STR(mac);
+}
+
+PHP_FUNCTION(sodium_crypto_onetimeauth_verify)
+{
+	char      *mac;
+	char      *key;
+	char      *msg;
+	size_t     mac_len;
+	size_t     msg_len;
+	size_t     key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss",
+									&mac, &mac_len,
+									&msg, &msg_len,
+									&key, &key_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
+		RETURN_THROWS();
+	}
+	if (key_len != crypto_onetimeauth_KEYBYTES) {
+		zend_argument_error(sodium_exception_ce, 3, "must be SODIUM_CRYPTO_ONETIMEAUTH_KEYBYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (mac_len != crypto_onetimeauth_BYTES) {
+		zend_argument_error(sodium_exception_ce, 1, "must be SODIUM_CRYPTO_ONETIMEAUTH_BYTES bytes long");
+		RETURN_THROWS();
+	}
+	if (crypto_onetimeauth_verify((const unsigned char *) mac,
+						          (const unsigned char *) msg, msg_len,
+						          (const unsigned char *) key) != 0) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+
 PHP_FUNCTION(sodium_crypto_sign_ed25519_sk_to_curve25519)
 {
 	zend_string *ecdhkey;
@@ -3095,6 +3157,17 @@ PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_keygen)
 PHP_FUNCTION(sodium_crypto_auth_keygen)
 {
 	unsigned char key[crypto_auth_KEYBYTES];
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	randombytes_buf(key, sizeof key);
+	RETURN_STRINGL((const char *) key, sizeof key);
+}
+
+PHP_FUNCTION(sodium_crypto_onetimeauth_keygen)
+{
+	unsigned char key[crypto_onetimeauth_KEYBYTES];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();

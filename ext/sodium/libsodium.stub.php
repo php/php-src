@@ -160,6 +160,16 @@ const SODIUM_CRYPTO_AUTH_BYTES = UNKNOWN;
 const SODIUM_CRYPTO_AUTH_KEYBYTES = UNKNOWN;
 /**
  * @var int
+ * @cvalue crypto_onetimeauth_BYTES
+ */
+const SODIUM_CRYPTO_ONETIMEAUTH_BYTES = UNKNOWN;
+/**
+ * @var int
+ * @cvalue crypto_onetimeauth_KEYBYTES
+ */
+const SODIUM_CRYPTO_ONETIMEAUTH_KEYBYTES = UNKNOWN;
+/**
+ * @var int
  * @cvalue crypto_box_SEALBYTES
  */
 const SODIUM_CRYPTO_BOX_SEALBYTES = UNKNOWN;
@@ -594,6 +604,12 @@ function sodium_crypto_auth(string $message, #[\SensitiveParameter] string $key)
 function sodium_crypto_auth_keygen(): string {}
 
 function sodium_crypto_auth_verify(string $mac, string $message, #[\SensitiveParameter] string $key): bool {}
+
+function sodium_crypto_onetimeauth(string $message, #[\SensitiveParameter] string $key): string {}
+
+function sodium_crypto_onetimeauth_keygen(): string {}
+
+function sodium_crypto_onetimeauth_verify(string $mac, string $message, #[\SensitiveParameter] string $key): bool {}
 
 function sodium_crypto_box(#[\SensitiveParameter] string $message, string $nonce, #[\SensitiveParameter] string $key_pair): string {}
 

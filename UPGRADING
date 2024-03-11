@@ -435,6 +435,12 @@ PHP 8.4 UPGRADE NOTES
     that was introduced in libsodium 1.0.19.
   . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
     with the ARM cryptographic extensions.
+  . Added sodium_crypto_onetimeauth(), sodium_crypto_onetimeauth_keygen(), and
+    sodium_crypto_onetimeauth_verify() functions for one-time authentication
+    based on Poly1305 Message Authentication Code. These MACs are 16 bytes
+    long, and are generated using a 32 byte key. Due to its output size,
+    Poly1305 is recommended for online protocols, exchanging many small
+    messages, rather than for authenticating very large files.
 
 - Standard:
   . Added the http_get_last_response_headers() and
@@ -550,6 +556,8 @@ PHP 8.4 UPGRADE NOTES
   . SODIUM_CRYPTO_AEAD_AEGIS256_NSECBYTES
   . SODIUM_CRYPTO_AEAD_AEGIS256_NPUBBYTES
   . SODIUM_CRYPTO_AEAD_AEGIS256_ABYTES
+  . SODIUM_CRYPTO_ONETIMEAUTH_BYTES
+  . SODIUM_CRYPTO_ONETIMEAUTH_KEYBYTES
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and

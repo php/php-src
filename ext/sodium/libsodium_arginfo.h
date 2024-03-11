@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 89cbb449ee6146dc8d50ba4bb1e76f83444a2db2 */
+ * Stub hash: c4950089e6284f7b834b3dc544c8f4dc4cee64fb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_aead_aes256gcm_is_available, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -131,6 +131,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_auth_verify, 0, 3,
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_sodium_crypto_onetimeauth arginfo_sodium_crypto_auth
+
+#define arginfo_sodium_crypto_onetimeauth_keygen arginfo_sodium_crypto_aead_chacha20poly1305_keygen
+
+#define arginfo_sodium_crypto_onetimeauth_verify arginfo_sodium_crypto_auth_verify
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_crypto_box, 0, 3, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
@@ -597,6 +603,9 @@ ZEND_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt);
 ZEND_FUNCTION(sodium_crypto_auth);
 ZEND_FUNCTION(sodium_crypto_auth_keygen);
 ZEND_FUNCTION(sodium_crypto_auth_verify);
+ZEND_FUNCTION(sodium_crypto_onetimeauth);
+ZEND_FUNCTION(sodium_crypto_onetimeauth_keygen);
+ZEND_FUNCTION(sodium_crypto_onetimeauth_verify);
 ZEND_FUNCTION(sodium_crypto_box);
 ZEND_FUNCTION(sodium_crypto_box_keypair);
 ZEND_FUNCTION(sodium_crypto_box_seed_keypair);
@@ -800,6 +809,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sodium_crypto_auth, arginfo_sodium_crypto_auth)
 	ZEND_FE(sodium_crypto_auth_keygen, arginfo_sodium_crypto_auth_keygen)
 	ZEND_FE(sodium_crypto_auth_verify, arginfo_sodium_crypto_auth_verify)
+	ZEND_FE(sodium_crypto_onetimeauth, arginfo_sodium_crypto_onetimeauth)
+	ZEND_FE(sodium_crypto_onetimeauth_keygen, arginfo_sodium_crypto_onetimeauth_keygen)
+	ZEND_FE(sodium_crypto_onetimeauth_verify, arginfo_sodium_crypto_onetimeauth_verify)
 	ZEND_FE(sodium_crypto_box, arginfo_sodium_crypto_box)
 	ZEND_FE(sodium_crypto_box_keypair, arginfo_sodium_crypto_box_keypair)
 	ZEND_FE(sodium_crypto_box_seed_keypair, arginfo_sodium_crypto_box_seed_keypair)
@@ -1026,6 +1038,8 @@ static void register_libsodium_symbols(int module_number)
 #endif
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AUTH_BYTES", crypto_auth_BYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AUTH_KEYBYTES", crypto_auth_KEYBYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_ONETIMEAUTH_BYTES", crypto_onetimeauth_BYTES, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_ONETIMEAUTH_KEYBYTES", crypto_onetimeauth_KEYBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_BOX_SEALBYTES", crypto_box_SEALBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_BOX_SECRETKEYBYTES", crypto_box_SECRETKEYBYTES, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_BOX_PUBLICKEYBYTES", crypto_box_PUBLICKEYBYTES, CONST_PERSISTENT);
@@ -1230,6 +1244,10 @@ static void register_libsodium_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_auth", sizeof("sodium_crypto_auth") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_auth_verify", sizeof("sodium_crypto_auth_verify") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_onetimeauth", sizeof("sodium_crypto_onetimeauth") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_onetimeauth_verify", sizeof("sodium_crypto_onetimeauth_verify") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "sodium_crypto_box", sizeof("sodium_crypto_box") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
