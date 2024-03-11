@@ -16,16 +16,20 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fix GH-13452 (Fixed handshake response [mysqlnd]). (Saki Takamachi)
 
+- Opcache:
+  . Fixed GH-13508 (JITed QM_ASSIGN may be optimized out when op1 is null).
+    (Arnaud, Dmitry)
+
 - PDO:
   . Fix various PDORow bugs. (Girgias)
 
 - Random:
-  . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with
-    unknown modes). (timwolla)
+  . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with unknown
+    modes). (timwolla)
 
 - Sockets:
-  . Fixed bug GH-13604 (socket_getsockname returns random characters in the
-    end of the socket name). (David Carlier) 
+  . Fixed bug GH-13604 (socket_getsockname returns random characters in the end
+    of the socket name). (David Carlier)
 
 - SPL:
   . Fixed bug GH-13531 (Unable to resize SplfixedArray after being unserialized
