@@ -5,6 +5,7 @@ freebsd_task:
   name: FREEBSD_DEBUG_NTS
   freebsd_instance:
     image_family: freebsd-13-3
+  skip: "changesIncludeOnly('docs/**', 'NEWS', 'UPGRADING', 'UPGRADING.INTERNALS', '**/README.*', 'CONTRIBUTING.md', 'CODING_STANDARDS.md', '.circleci/**')"
   env:
     ARCH: amd64
   install_script:
