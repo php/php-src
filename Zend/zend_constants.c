@@ -275,7 +275,7 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 	return NULL;
 }
 
-static zend_constant *zend_get_constant_impl(zend_string *name)
+ZEND_API zend_constant *zend_get_constant_ptr(zend_string *name)
 {
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
@@ -292,7 +292,7 @@ static zend_constant *zend_get_constant_impl(zend_string *name)
 
 ZEND_API zval *zend_get_constant(zend_string *name)
 {
-	zend_constant *c = zend_get_constant_impl(name);
+	zend_constant *c = zend_get_constant_ptr(name);
 	if (c) {
 		return &c->value;
 	}
@@ -521,7 +521,7 @@ failure:
 		}
 	} else {
 		if (cname) {
-			c = zend_get_constant_impl(cname);
+			c = zend_get_constant_ptr(cname);
 		} else {
 			c = zend_get_constant_str_impl(name, name_len);
 		}
