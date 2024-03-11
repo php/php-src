@@ -236,6 +236,11 @@ typedef struct _zend_string_table {
 	zend_string *saved_top;
 } zend_string_table;
 
+typedef uint32_t zend_string_table_pos_t;
+
+#define ZEND_STRING_TABLE_POS_MAX UINT32_MAX
+#define ZEND_STRING_TABLE_POS_ALIGNMENT 8
+
 typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
 	zend_ulong   hits;

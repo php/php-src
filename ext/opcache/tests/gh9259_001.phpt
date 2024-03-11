@@ -13,6 +13,6 @@ echo 'OK';
 
 ?>
 --EXPECTF--
-%sWarning opcache.interned_strings_buffer must be less than or equal to 4095, 131072 given%s
+%sWarning opcache.interned_strings_buffer must be less than or equal to 32767, 131072 given%s
 
 OK

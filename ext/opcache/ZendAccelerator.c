@@ -404,22 +404,22 @@ static inline void accel_unlock_all(void)
 #define STRTAB_INVALID_POS 0
 
 #define STRTAB_HASH_TO_SLOT(tab, h) \
-	((uint32_t*)((char*)(tab) + sizeof(*(tab)) + ((h) & (tab)->nTableMask)))
+	((zend_string_table_pos_t*)((char*)(tab) + sizeof(*(tab)) + ((h) & (tab)->nTableMask)))
 #define STRTAB_STR_TO_POS(tab, s) \
-	((uint32_t)((char*)s - (char*)(tab)))
+	((zend_string_table_pos_t)(((char*)s - (char*)(tab)) / ZEND_STRING_TABLE_POS_ALIGNMENT))
 #define STRTAB_POS_TO_STR(tab, pos) \
-	((zend_string*)((char*)(tab) + (pos)))
+	((zend_string*)((char*)(tab) + ((uintptr_t)(pos) * ZEND_STRING_TABLE_POS_ALIGNMENT)))
 #define STRTAB_COLLISION(s) \
-	(*((uint32_t*)((char*)s - sizeof(uint32_t))))
+	(*((zend_string_table_pos_t*)((char*)s - sizeof(zend_string_table_pos_t))))
 #define STRTAB_STR_SIZE(s) \
-	ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_HEADER_SIZE + ZSTR_LEN(s) + 5, 8)
+	ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(ZSTR_LEN(s)) + sizeof(zend_string_table_pos_t), ZEND_STRING_TABLE_POS_ALIGNMENT)
 #define STRTAB_NEXT(s) \
 	((zend_string*)((char*)(s) + STRTAB_STR_SIZE(s)))
 
 static void accel_interned_strings_restore_state(void)
 {
 	zend_string *s, *top;
-	uint32_t *hash_slot, n;
+	zend_string_table_pos_t *hash_slot, n;
 
 	/* clear removed content */
 	memset(ZCSG(interned_strings).saved_top,
@@ -465,7 +465,7 @@ static void accel_interned_strings_save_state(void)
 static zend_always_inline zend_string *accel_find_interned_string(zend_string *str)
 {
 	zend_ulong   h;
-	uint32_t     pos;
+	zend_string_table_pos_t pos;
 	zend_string *s;
 
 	if (IS_ACCEL_INTERNED(str)) {
@@ -500,7 +500,7 @@ static zend_always_inline zend_string *accel_find_interned_string(zend_string *s
 zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 {
 	zend_ulong   h;
-	uint32_t     pos, *hash_slot;
+	zend_string_table_pos_t pos, *hash_slot;
 	zend_string *s;
 
 	if (UNEXPECTED(file_cache_only)) {
@@ -575,7 +575,7 @@ static zend_string* ZEND_FASTCALL accel_new_interned_string_for_php(zend_string 
 
 static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong h, const char *str, size_t size)
 {
-	uint32_t     pos;
+	zend_string_table_pos_t pos;
 	zend_string *s;
 
 	/* check for existing interned string */
@@ -2842,7 +2842,7 @@ static zend_result zend_accel_init_shm(void)
 	} else {
 		/* Make sure there is always at least one interned string hash slot,
 		 * so the table can be queried unconditionally. */
-		accel_shared_globals_size = sizeof(zend_accel_shared_globals) + sizeof(uint32_t);
+		accel_shared_globals_size = sizeof(zend_accel_shared_globals) + sizeof(zend_string_table_pos_t);
 	}
 
 	accel_shared_globals = zend_shared_alloc(accel_shared_globals_size);
@@ -2869,18 +2869,22 @@ static zend_result zend_accel_init_shm(void)
 		hash_size |= (hash_size >> 8);
 		hash_size |= (hash_size >> 16);
 
-		ZCSG(interned_strings).nTableMask = hash_size << 2;
+		ZCSG(interned_strings).nTableMask =
+			hash_size * sizeof(zend_string_table_pos_t);
 		ZCSG(interned_strings).nNumOfElements = 0;
 		ZCSG(interned_strings).start =
 			(zend_string*)((char*)&ZCSG(interned_strings) +
 				sizeof(zend_string_table) +
-				((hash_size + 1) * sizeof(uint32_t))) +
+				((hash_size + 1) * sizeof(zend_string_table_pos_t))) +
 				8;
+		ZEND_ASSERT(((uintptr_t)ZCSG(interned_strings).start & 0x7) == 0); /* should be 8 byte aligned */
+
 		ZCSG(interned_strings).top =
 			ZCSG(interned_strings).start;
 		ZCSG(interned_strings).end =
 			(zend_string*)((char*)(accel_shared_globals + 1) + /* table data is stored after accel_shared_globals */
 				ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
+		ZEND_ASSERT(((uintptr_t)ZCSG(interned_strings).end - (uintptr_t)&ZCSG(interned_strings)) / ZEND_STRING_TABLE_POS_ALIGNMENT < ZEND_STRING_TABLE_POS_MAX);
 		ZCSG(interned_strings).saved_top = NULL;
 
 		memset((char*)&ZCSG(interned_strings) + sizeof(zend_string_table),
