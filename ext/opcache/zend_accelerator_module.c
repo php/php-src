@@ -49,7 +49,7 @@
 		/* nTableMask must not overflow (uint32_t) */ \
 		UINT32_MAX / (32 * 1024 * sizeof(zend_string_table_pos_t)) \
 	), \
-	/* SHM allocation must not overlow (size_t) */ \
+	/* SHM allocation must not overflow (size_t) */ \
 	(SIZE_MAX - sizeof(zend_accel_shared_globals)) / (1024 * 1024) \
 ))
 #define TOKENTOSTR(X) #X
