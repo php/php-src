@@ -1866,6 +1866,11 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 }
 /* }}} */
 
+static ZEND_COLD void spl_filesystem_file_cannot_read(spl_filesystem_object *intern)
+{
+	zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot read from file %s", ZSTR_VAL(intern->file_name));
+}
+
 static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bool silent, zend_long line_add, bool csv)
 {
 	char *buf;
@@ -1875,7 +1880,7 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 
 	if (php_stream_eof(intern->u.file.stream)) {
 		if (!silent) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot read from file %s", ZSTR_VAL(intern->file_name));
+			spl_filesystem_file_cannot_read(intern);
 		}
 		return FAILURE;
 	}
@@ -1930,10 +1935,10 @@ static bool is_line_empty(spl_filesystem_object *intern)
 				|| (current_line_len == 2 && current_line[0] == '\r' && current_line[1] == '\n'))));
 }
 
-static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value) /* {{{ */
+static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value, bool silent) /* {{{ */
 {
 	do {
-		zend_result ret = spl_filesystem_file_read(intern, /* silent */ true, /* csv */ true);
+		zend_result ret = spl_filesystem_file_read(intern, silent, /* csv */ true);
 		if (ret != SUCCESS) {
 			return ret;
 		}
@@ -1959,19 +1964,21 @@ static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, c
 }
 /* }}} */
 
-/* Call to this function reads a line in a "silent" fashion and does not throw an exception */
-static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
+static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesystem_object *intern, bool silent) /* {{{ */
 {
 	zval retval;
 
 	/* 1) use fgetcsv? 2) overloaded call the function, 3) do it directly */
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)) {
-		return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL);
+		return spl_filesystem_file_read_csv(intern, intern->u.file.delimiter, intern->u.file.enclosure, intern->u.file.escape, NULL, silent);
 	}
 	if (intern->u.file.func_getCurr->common.scope != spl_ce_SplFileObject) {
 		spl_filesystem_file_free_line(intern);
 
 		if (php_stream_eof(intern->u.file.stream)) {
+			if (!silent) {
+				spl_filesystem_file_cannot_read(intern);
+			}
 			return FAILURE;
 		}
 		zend_call_method_with_0_params(Z_OBJ_P(this_ptr), Z_OBJCE_P(this_ptr), &intern->u.file.func_getCurr, "getCurrentLine", &retval);
@@ -1995,18 +2002,17 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 		zval_ptr_dtor(&retval);
 		return SUCCESS;
 	} else {
-		return spl_filesystem_file_read(intern, /* silent */ true, /* csv */ false);
+		return spl_filesystem_file_read(intern, silent, /* csv */ false);
 	}
 } /* }}} */
 
-/* Call to this function reads a line in a "silent" fashion and does not throw an exception */
-static zend_result spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
+static zend_result spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object *intern, bool silent) /* {{{ */
 {
-	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern);
+	zend_result ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent);
 
 	while (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY) && ret == SUCCESS && is_line_empty(intern)) {
 		spl_filesystem_file_free_line(intern);
-		ret = spl_filesystem_file_read_line_ex(this_ptr, intern);
+		ret = spl_filesystem_file_read_line_ex(this_ptr, intern, silent);
 	}
 
 	return ret;
@@ -2028,7 +2034,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 	intern->u.file.current_line_num = 0;
 
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
-		spl_filesystem_file_read_line(this_ptr, intern);
+		spl_filesystem_file_read_line(this_ptr, intern, true);
 	}
 } /* }}} */
 
@@ -2182,7 +2188,7 @@ PHP_METHOD(SplFileObject, current)
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
 	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern);
+		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
 	}
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
 		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
@@ -2221,7 +2227,7 @@ PHP_METHOD(SplFileObject, next)
 
 	spl_filesystem_file_free_line(intern);
 	if (SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_AHEAD)) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern);
+		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
 	}
 	intern->u.file.current_line_num++;
 } /* }}} */
@@ -2339,7 +2345,7 @@ PHP_METHOD(SplFileObject, fgetcsv)
 		}
 	}
 
-	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value) == FAILURE) {
+	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value, true) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -2720,7 +2726,7 @@ PHP_METHOD(SplFileObject, seek)
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
 
 	for (i = 0; i < line_pos; i++) {
-		if (spl_filesystem_file_read_line(ZEND_THIS, intern) == FAILURE) {
+		if (spl_filesystem_file_read_line(ZEND_THIS, intern, true) == FAILURE) {
 			return;
 		}
 	}
@@ -2740,8 +2746,12 @@ PHP_METHOD(SplFileObject, __toString)
 
 	CHECK_SPL_FILE_OBJECT_IS_INITIALIZED(intern);
 
-	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
-		spl_filesystem_file_read_line(ZEND_THIS, intern);
+	if (!intern->u.file.current_line) {
+		ZEND_ASSERT(Z_ISUNDEF(intern->u.file.current_zval));
+		zend_result result = spl_filesystem_file_read_line(ZEND_THIS, intern, false);
+		if (UNEXPECTED(result != SUCCESS)) {
+			RETURN_THROWS();
+		}
 	}
 
 	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
