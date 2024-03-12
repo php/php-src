@@ -13,8 +13,18 @@ var_dump(dcngettext(1,1,1,1,1));
 var_dump(dcngettext("test","test","test",1,1));
 var_dump(dcngettext("test","test","test",0,1));
 var_dump(dcngettext("test","test","test",-1,-1));
-var_dump(dcngettext("","","",1,1));
-var_dump(dcngettext("","","",0,1));
+
+try {
+    dcngettext("","","",1,1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+    dcngettext("","","",0,1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
+}
 
 echo "Done\n";
 ?>
@@ -23,6 +33,6 @@ string(1) "1"
 string(4) "test"
 string(4) "test"
 string(4) "test"
-string(0) ""
-string(0) ""
+dcngettext(): Argument #1 ($domain) cannot be empty
+dcngettext(): Argument #1 ($domain) cannot be empty
 Done

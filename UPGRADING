@@ -323,7 +323,8 @@ PHP 8.4 UPGRADE NOTES
     Previously, the return type was bool but only true could be returned in practice.
 
 - Gettext:
-  . bind_textdomain_codeset now throws an exception if the domain's argument is empty.
+  . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
+    if the domain's argument is empty.
 
 - Hash:
   . Changed the return type of hash_update() to true. It was already the case that only
