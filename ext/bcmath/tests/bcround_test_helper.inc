@@ -3,7 +3,7 @@
 function printResult (array $cases, int $mode)
 {
     foreach ($cases as [$num, $precision]) {
-        echo str_pad("[{$num}, {$precision}]", 17), " => ", bcround($num, $precision, $mode), "\n";
+        echo str_pad("[{$num}, {$precision}]", 17, ' ', STR_PAD_LEFT), " => ", bcround($num, $precision, $mode), "\n";
     }
     echo "\n";
 }
