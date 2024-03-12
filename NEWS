@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     scanning WeakMaps). (Arnaud)
   . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
     (nielsdos)
+  . Fixed bug GH-13446 (Restore exception handler after it finishes). (ilutov)
 
 - DOM:
   . Add some missing ZPP checks. (nielsdos)
