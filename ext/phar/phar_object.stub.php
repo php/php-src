@@ -245,10 +245,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 
 class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAccess
 {
-    /**
-     * @implementation-alias Phar::__construct
-     * @no-verify PharData constructor accepts extra $format argument
-     */
+    /** @implementation-alias Phar::__construct */
     public function __construct(string $filename, int $flags = FilesystemIterator::SKIP_DOTS|FilesystemIterator::UNIX_PATHS, ?string $alias = null, int $format = 0) {}
 
     /** @implementation-alias Phar::__destruct */
@@ -299,14 +296,12 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /**
      * @tentative-return-type
      * @implementation-alias Phar::compress
-     * @no-verify
      */
     public function compress(int $compression, ?string $extension = null): ?PharData {}
 
     /**
      * @tentative-return-type
      * @implementation-alias Phar::decompress
-     * @no-verify
      */
     public function decompress(?string $extension = null): ?PharData {}
 

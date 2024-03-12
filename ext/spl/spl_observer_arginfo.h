@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3e17e99dffb3150685ae7c4724d6b8aad2f5db6e */
+ * Stub hash: 2d075036abecd043dbf5f3a2ab0c57f2d49e42f0 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -166,6 +166,7 @@ ZEND_METHOD(MultipleIterator, valid);
 ZEND_METHOD(MultipleIterator, key);
 ZEND_METHOD(MultipleIterator, current);
 ZEND_METHOD(MultipleIterator, next);
+ZEND_METHOD(MultipleIterator, __debugInfo);
 
 static const zend_function_entry class_SplObserver_methods[] = {
 	ZEND_RAW_FENTRY("update", NULL, arginfo_class_SplObserver_update, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
@@ -220,7 +221,7 @@ static const zend_function_entry class_MultipleIterator_methods[] = {
 	ZEND_ME(MultipleIterator, key, arginfo_class_MultipleIterator_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, current, arginfo_class_MultipleIterator_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(MultipleIterator, next, arginfo_class_MultipleIterator_next, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("__debugInfo", zim_SplObjectStorage___debugInfo, arginfo_class_MultipleIterator___debugInfo, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(MultipleIterator, __debugInfo, arginfo_class_MultipleIterator___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

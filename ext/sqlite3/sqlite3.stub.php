@@ -272,13 +272,13 @@ class SQLite3
     public const int RECURSIVE = UNKNOWN;
 #endif
 
-    /**
-     * @implementation-alias SQLite3::open
-     * @no-verify SQLite3::open should really be static
-     */
+    /** @implementation-alias SQLite3::open */
     public function __construct(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = "") {}
 
-    /** @tentative-return-type */
+    /**
+     * @tentative-return-type
+     * @todo SQLite3::open should really be static
+     */
     public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = ""): void {}
 
     /** @return bool */
