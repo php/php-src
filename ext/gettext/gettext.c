@@ -88,8 +88,11 @@ PHP_FUNCTION(textdomain)
 		RETURN_THROWS();
 	}
 
-	if (domain != NULL && ZSTR_LEN(domain) != 0 && !zend_string_equals_literal(domain, "0")) {
+	if (domain != NULL) {
 		PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
+	}
+
+	if (domain != NULL && !zend_string_equals_literal(domain, "0")) {
 		domain_name = ZSTR_VAL(domain);
 	}
 
