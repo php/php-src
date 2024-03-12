@@ -836,13 +836,26 @@ const zend_class_constant *zend_fetch_class_const_info(
 	const zend_class_entry *ce = NULL;
 	bool is_static_reference = false;
 
-	if (!opline || !op_array || !script || opline->op2_type != IS_CONST || Z_TYPE_P(CRT_CONSTANT(opline->op2)) != IS_STRING) {
+	if (!opline || !op_array || opline->op2_type != IS_CONST || Z_TYPE_P(CRT_CONSTANT(opline->op2)) != IS_STRING) {
 		return NULL;
 	}
 	if (opline->op1_type == IS_CONST) {
 		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
-			ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
+			if (script) {
+				ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
+			} else {
+				zend_class_entry *tmp = zend_hash_find_ptr(EG(class_table), Z_STR_P(op1 + 1));
+				if (tmp != NULL) {
+					if (tmp->type == ZEND_INTERNAL_CLASS) {
+						ce = tmp;
+					} else if (tmp->type == ZEND_USER_CLASS
+						&& tmp->info.user.filename
+						&& tmp->info.user.filename == op_array->filename) {
+						ce = tmp;
+					}
+				}
+			}
 		}
 	} else if (opline->op1_type == IS_UNUSED
 		&& op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
