@@ -54,6 +54,9 @@ ZEND_GET_MODULE(php_gettext)
 	if (UNEXPECTED(domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH)) { \
 		zend_argument_value_error(_arg_num, "is too long"); \
 		RETURN_THROWS(); \
+	} else if (domain_len == 0) { \
+		zend_argument_value_error(_arg_num, "cannot be empty"); \
+		RETURN_THROWS(); \
 	}
 
 #define PHP_GETTEXT_LENGTH_CHECK(_arg_num, check_len) \
@@ -85,8 +88,11 @@ PHP_FUNCTION(textdomain)
 		RETURN_THROWS();
 	}
 
-	if (domain != NULL && ZSTR_LEN(domain) != 0 && !zend_string_equals_literal(domain, "0")) {
+	if (domain != NULL) {
 		PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
+	}
+
+	if (domain != NULL && !zend_string_equals_literal(domain, "0")) {
 		domain_name = ZSTR_VAL(domain);
 	}
 
@@ -178,11 +184,6 @@ PHP_FUNCTION(bindtextdomain)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, domain_len)
-
-	if (!domain_len) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	if (dir == NULL) {
 		RETURN_STRING(bindtextdomain(domain, NULL));
@@ -291,11 +292,6 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, domain_len)
-
-	if (!domain_len) {
-		zend_argument_value_error(1, "cannot be empty");
-		RETURN_THROWS();
-	}
 
 	retval = bind_textdomain_codeset(domain, codeset);
 
