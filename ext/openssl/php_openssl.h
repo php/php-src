@@ -191,7 +191,6 @@ PHP_GINIT_FUNCTION(openssl);
 PHP_GSHUTDOWN_FUNCTION(openssl);
 #if PHP_OPENSSL_API_VERSION >= 0x30200
 PHP_MINIT_FUNCTION(openssl_pwhash);
-PHP_MSHUTDOWN_FUNCTION(openssl_pwhash);
 #endif
 
 #ifdef PHP_WIN32
