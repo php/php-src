@@ -6,7 +6,7 @@ TestFest 2009 - AFUP - Perrick Penet <perrick@noparking.net>
 curl
 --SKIPIF--
 <?php
-    $addr = "www.".uniqid().".".uniqid();
+    $addr = "www.".uniqid().".php.net";
     if (gethostbyname($addr) != $addr) {
         print "skip catch all dns";
     }
@@ -14,7 +14,7 @@ curl
 --FILE--
 <?php
 
-$url = "http://www.".uniqid().".".uniqid();
+$url = "http://www.".uniqid().".php.net";
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 
