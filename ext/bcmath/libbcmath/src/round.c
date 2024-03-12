@@ -39,15 +39,14 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	bc_free_num(result);
 
 	/*
-	* The following three cases result in an early return:
+	* The following cases result in an early return:
 	*
-	* 1. When rounding to an integer part, when trying to round to a digit
-	*    larger than the num.
-	* 2. If try to round to the finest digit of num or finer than that,
-	*    num is returned unchanged.
-	* 3. If the fraction part is all 0 from the beginning or middle to the
-	*    end, the 0's are omitted and the number of digits in num is reduced.
-	*    In that case, may end up in the same situation as 2.
+	* - When rounding to an integer part which is larger than the number
+	*   e.g. Rounding 21.123 to 3 digits before the decimal point.
+	* - When rounding to a greater decimal precision then the number has, the number is unchanged
+	*   e.g. Rounding 21.123 to 4 digits after the decimal point.
+	* - If the fractional part ends with zeros, the zeros are omitted and the number of digits in num is reduced.
+	*   Meaning we might end up in the previous case.
 	*/
 	if (precision < 0 && num->n_len <= (size_t) (-(precision + Z_L(1))) + 1) {
 		*result = bc_copy_num(BCG(_zero_));
