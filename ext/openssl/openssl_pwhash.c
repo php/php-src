@@ -383,8 +383,6 @@ PHP_MINIT_FUNCTION(openssl_pwhash)
 {
 	zend_string *argon2i = ZSTR_INIT_LITERAL("argon2i", 1);
 
-	zend_register_functions(NULL, ext_functions, NULL, type);
-
 	if (php_password_algo_find(argon2i)) {
 		/* Nothing to do. Core or sodium has registered these algorithms for us. */
 		zend_string_release(argon2i);
@@ -400,13 +398,6 @@ PHP_MINIT_FUNCTION(openssl_pwhash)
 	if (FAILURE == php_password_algo_register("argon2id", &openssl_algo_argon2id)) {
 		return FAILURE;
 	}
-
-	return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(openssl_pwhash)
-{
-	zend_unregister_functions(ext_functions, -1, NULL);
 
 	return SUCCESS;
 }
