@@ -1,11 +1,9 @@
 --TEST--
-parent type cannot take part in an intersection type
+parent type cannot take part in an intersection type when unresolved
 --FILE--
 <?php
 
-class A {}
-
-class B extends A {
+trait T {
     public function foo(): parent&Iterator {}
 }
 

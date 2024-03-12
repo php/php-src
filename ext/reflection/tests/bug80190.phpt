@@ -31,13 +31,13 @@ foreach ((new ReflectionClass(C::class))->getMethods() as $method) {
         print '    $method->getReturnType()->getTypes() returns an array with ' . count($method->getReturnType()->getTypes()) . ' element(s)' . PHP_EOL;
 
         print '    type(s) in union: ';
-        
+
         $types = [];
 
         foreach ($method->getReturnType()->getTypes() as $type) {
             $types[] = get_class($type) . "($type)";
         }
-        
+
         print join(', ', $types) . PHP_EOL;
     }
 
@@ -48,20 +48,20 @@ foreach ((new ReflectionClass(C::class))->getMethods() as $method) {
 --EXPECT--
 C::a()
     $method->getReturnType() returns ReflectionNamedType
-    $method->getReturnType()->__toString() returns self
+    $method->getReturnType()->__toString() returns C
 
 C::b()
     $method->getReturnType() returns ReflectionUnionType
-    $method->getReturnType()->__toString() returns stdClass|self
+    $method->getReturnType()->__toString() returns stdClass|C
     $method->getReturnType()->getTypes() returns an array with 2 element(s)
-    type(s) in union: ReflectionNamedType(stdClass), ReflectionNamedType(self)
+    type(s) in union: ReflectionNamedType(stdClass), ReflectionNamedType(C)
 
 C::c()
-    $method->getReturnType() returns ReflectionNamedType
+    $method->getReturnType() returns ReflectionRelativeClassType
     $method->getReturnType()->__toString() returns static
 
 C::d()
     $method->getReturnType() returns ReflectionUnionType
     $method->getReturnType()->__toString() returns stdClass|static
     $method->getReturnType()->getTypes() returns an array with 2 element(s)
-    type(s) in union: ReflectionNamedType(stdClass), ReflectionNamedType(static)
+    type(s) in union: ReflectionNamedType(stdClass), ReflectionRelativeClassType(static)

@@ -1,9 +1,9 @@
 --TEST--
-self type cannot take part in an intersection type
+self type cannot take part in an intersection type when unresolved
 --FILE--
 <?php
 
-class A {
+trait T {
     public function foo(): self&Iterator {}
 }
 
