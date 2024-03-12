@@ -30,8 +30,5 @@ const PASSWORD_ARGON2_DEFAULT_THREADS = UNKNOWN;
  * @var string
  */
 const PASSWORD_ARGON2_PROVIDER = "openssl";
-
-function openssl_password_hash(string $algo, #[\SensitiveParameter] string $password, array $options = []): string {}
-function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
 #endif
 

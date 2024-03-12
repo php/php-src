@@ -1419,11 +1419,6 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_stream_xport_unregister("tlsv1.2");
 	php_stream_xport_unregister("tlsv1.3");
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
-	if (FAILURE == PHP_MSHUTDOWN(openssl_pwhash)(SHUTDOWN_FUNC_ARGS_PASSTHRU)) {
-		return FAILURE;
-	}
-#endif
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
 
