@@ -259,16 +259,17 @@ static zend_result php_session_decode(zend_string *data) /* {{{ */
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return FAILURE;
 	}
+	zend_result result = SUCCESS;
 	zend_try {
 		if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
 			php_session_cancel_decode();
-			return FAILURE;
+			result = FAILURE;
 		}
 	} zend_catch {
 		php_session_cancel_decode();
 		zend_bailout();
 	} zend_end_try();
-	return SUCCESS;
+	return result;
 }
 /* }}} */
 

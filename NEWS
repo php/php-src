@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with unknown
     modes). (timwolla)
 
+- Session:
+  . Fixed bug GH-13680 (Segfault with session_decode and compilation error).
+    (nielsdos)
+
 - Sockets:
   . Fixed bug GH-13604 (socket_getsockname returns random characters in the end
     of the socket name). (David Carlier)
