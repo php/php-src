@@ -36,6 +36,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_property_hooks.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -326,6 +327,8 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
 	CG(context).in_jmp_frameless_branch = false;
+	CG(context).active_property_info = NULL;
+	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
 }
 /* }}} */
 
@@ -852,23 +855,35 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 {
 	switch (token) {
 		case T_PUBLIC:
-			return ZEND_ACC_PUBLIC;
+			if (target != ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
+				return ZEND_ACC_PUBLIC;
+			}
+			break;
 		case T_PROTECTED:
-			return ZEND_ACC_PROTECTED;
+			if (target != ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
+				return ZEND_ACC_PROTECTED;
+			}
+			break;
 		case T_PRIVATE:
-			return ZEND_ACC_PRIVATE;
+			if (target != ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
+				return ZEND_ACC_PRIVATE;
+			}
+			break;
 		case T_READONLY:
 			if (target == ZEND_MODIFIER_TARGET_PROPERTY || target == ZEND_MODIFIER_TARGET_CPP) {
 				return ZEND_ACC_READONLY;
 			}
 			break;
 		case T_ABSTRACT:
-			if (target == ZEND_MODIFIER_TARGET_METHOD) {
+			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_PROPERTY) {
 				return ZEND_ACC_ABSTRACT;
 			}
 			break;
 		case T_FINAL:
-			if (target == ZEND_MODIFIER_TARGET_METHOD || target == ZEND_MODIFIER_TARGET_CONSTANT) {
+			if (target == ZEND_MODIFIER_TARGET_METHOD
+				|| target == ZEND_MODIFIER_TARGET_CONSTANT
+				|| target == ZEND_MODIFIER_TARGET_PROPERTY
+				|| target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
 				return ZEND_ACC_FINAL;
 			}
 			break;
@@ -888,6 +903,8 @@ uint32_t zend_modifier_token_to_flag(zend_modifier_target target, uint32_t token
 		member = "class constant";
 	} else if (target == ZEND_MODIFIER_TARGET_CPP) {
 		member = "parameter";
+	} else if (target == ZEND_MODIFIER_TARGET_PROPERTY_HOOK) {
+		member = "property hook";
 	} else {
 		ZEND_UNREACHABLE();
 	}
@@ -2038,6 +2055,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 		ce->num_interfaces = 0;
 		ce->interfaces = NULL;
 		ce->num_traits = 0;
+		ce->num_hooked_props = 0;
+		ce->num_hooked_prop_variance_checks = 0;
 		ce->trait_names = NULL;
 		ce->trait_aliases = NULL;
 		ce->trait_precedences = NULL;
@@ -4773,6 +4792,64 @@ static zend_result zend_try_compile_special_func(znode *result, zend_string *lcn
 	return zend_compile_frameless_icall(result, args, fbc, type) != (uint32_t)-1 ? SUCCESS : FAILURE;
 }
 
+static const char *zend_get_cstring_from_property_hook_kind(zend_property_hook_kind kind) {
+	switch (kind) {
+		case ZEND_PROPERTY_HOOK_GET:
+			return "get";
+		case ZEND_PROPERTY_HOOK_SET:
+			return "set";
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+static void zend_compile_parent_property_hook_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+{
+	if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use temporary expression in write context");
+	}
+
+	zend_class_entry *ce = CG(active_class_entry);
+	if (!ce) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use \"parent\" when no class scope is active");
+	}
+
+	zend_ast *name_ast = ast->child[0];
+	zend_ast *args_ast = ast->child[1];
+
+	zend_string *name = zend_ast_get_str(name_ast);
+	char *property_name_start = ZSTR_VAL(name) + strlen("parent::$");
+	char *hook_name_start = strchr(property_name_start, ':') + 2;
+	zend_string *property_name = zend_string_init(property_name_start, hook_name_start - property_name_start - 2, /* persistent */ false);
+	zend_string *hook_name = zend_string_init(hook_name_start, (ZSTR_VAL(name) + ZSTR_LEN(name)) - hook_name_start, /* persistent */ false);
+	zend_property_hook_kind hook_kind = zend_get_property_hook_kind_from_name(hook_name);
+	ZEND_ASSERT(hook_kind != (uint32_t)-1);
+
+	const zend_property_info *prop_info = CG(context).active_property_info;
+	if (!prop_info) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() outside a property hook",
+			ZSTR_VAL(property_name), ZSTR_VAL(hook_name));
+	}
+	if (!zend_string_equals(property_name, prop_info->name)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() in a different property ($%s)",
+			ZSTR_VAL(property_name), ZSTR_VAL(hook_name), ZSTR_VAL(prop_info->name));
+	}
+	if (hook_kind != CG(context).active_property_hook_kind) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Must not use parent::$%s::%s() in a different property hook (%s)",
+			ZSTR_VAL(property_name), ZSTR_VAL(hook_name), zend_get_cstring_from_property_hook_kind(CG(context).active_property_hook_kind));
+	}
+	zend_string_release_ex(hook_name, /* persistent */ false);
+
+	zend_op *opline = get_next_op();
+	opline->opcode = ZEND_INIT_PARENT_PROPERTY_HOOK_CALL;
+	opline->op1_type = IS_CONST;
+	opline->op1.constant = zend_add_literal_string(&property_name);
+	opline->op2.num = hook_kind;
+
+	zend_function *fbc = NULL;
+	zend_compile_call_common(result, args_ast, fbc, zend_ast_get_lineno(name_ast));
+}
+
 static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
@@ -7096,6 +7173,88 @@ static void zend_compile_attributes(
 }
 /* }}} */
 
+static void zend_compile_property_hooks(
+		zend_property_info *prop_info, zend_string *prop_name,
+		zend_ast *prop_type_ast, zend_ast_list *hooks);
+
+typedef struct {
+	zend_string *property_name;
+	bool uses_property;
+} find_property_usage_context;
+
+static void zend_property_hook_find_property_usage(zend_ast **ast_ptr, void *_context) /* {{{ */
+{
+	zend_ast *ast = *ast_ptr;
+	find_property_usage_context *context = (find_property_usage_context *) _context;
+
+	if (ast == NULL) {
+		return;
+	} else if (ast->kind == ZEND_AST_VAR
+	 && ast->child[0]->kind == ZEND_AST_ZVAL) {
+		zval *var_name = zend_ast_get_zval(ast->child[0]);
+		if (Z_TYPE_P(var_name) == IS_STRING
+		 && zend_string_equals_literal(Z_STR_P(var_name), "field")) {
+			context->uses_property = true;
+			zend_ast_destroy(ast);
+			*ast_ptr = zend_ast_create(ZEND_AST_PROP, 
+				zend_ast_create(ZEND_AST_VAR, zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_THIS))),
+				zend_ast_create_zval_from_str(zend_string_copy(context->property_name)));
+			/* We just replaced the AST, no need to look for references in this branch. */
+			return;
+		}
+	} else if (ast->kind == ZEND_AST_PROP || ast->kind == ZEND_AST_NULLSAFE_PROP) {
+		zend_ast *object_ast = ast->child[0];
+		zend_ast *property_ast = ast->child[1];
+
+		if (object_ast->kind == ZEND_AST_VAR
+		 && object_ast->child[0]->kind == ZEND_AST_ZVAL
+		 && property_ast->kind == ZEND_AST_ZVAL) {
+			zval *object = zend_ast_get_zval(object_ast->child[0]);
+			zval *property = zend_ast_get_zval(property_ast);
+			if (Z_TYPE_P(object) == IS_STRING
+				&& Z_TYPE_P(property) == IS_STRING
+				&& zend_string_equals_literal(Z_STR_P(object), "this")
+				&& zend_string_equals(Z_STR_P(property), context->property_name)) {
+				context->uses_property = true;
+				/* No need to look for references in this branch. */
+				return;
+			}
+		}
+	}
+
+	/* Don't search across function/class boundaries. */
+	if (!zend_ast_is_special(ast)) {
+		zend_ast_apply(ast, zend_property_hook_find_property_usage, context);
+	}
+}
+
+static bool zend_property_hook_uses_property(zend_string *property_name, zend_ast *hook_ast)
+{
+	find_property_usage_context context = { property_name, false };
+	zend_property_hook_find_property_usage(&hook_ast, &context);
+	return context.uses_property;
+}
+
+static bool zend_property_is_virtual(zend_string *property_name, zend_ast *hooks_ast) {
+	if (!hooks_ast) {
+		return false;
+	}
+
+	bool is_virtual = true;
+
+	zend_ast_list *hooks = zend_ast_get_list(hooks_ast);
+	for (uint32_t i = 0; i < hooks->children; i++) {
+		zend_ast_decl *hook = (zend_ast_decl *) hooks->child[i];
+		zend_ast *body = hook->child[2];
+		/* Abstract properties aren't virtual. */
+		if (!body || zend_property_hook_uses_property(property_name, body)) {
+			is_virtual = false;
+		}
+	}
+
+	return is_virtual;
+}
+
 static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fallback_return_type) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
@@ -7146,6 +7305,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_ast **default_ast_ptr = &param_ast->child[2];
 		zend_ast *attributes_ast = param_ast->child[3];
 		zend_ast *doc_comment_ast = param_ast->child[4];
+		zend_ast *hooks_ast = param_ast->child[5];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
@@ -7315,9 +7475,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			}
 
 			/* Don't give the property an explicit default value. For typed properties this means
-			 * uninitialized, for untyped properties it means an implicit null default value. */
+			 * uninitialized, for untyped properties it means an implicit null default value.
+			 * Properties with hooks get an implicit default value of undefined until inheritance,
+			 * where it is changed to null only once we know it is not virtual. If we were to set it
+			 * here, we couldn't verify that a true virtual property must not have an explicit
+			 * default value. */
 			zval default_value;
-			if (ZEND_TYPE_IS_SET(type)) {
+			if (ZEND_TYPE_IS_SET(type) || hooks_ast) {
 				ZVAL_UNDEF(&default_value);
 			} else {
 				if (property_flags & ZEND_ACC_READONLY) {
@@ -7331,7 +7495,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			zend_string *doc_comment =
 				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 			zend_property_info *prop = zend_declare_typed_property(
-				scope, name, &default_value, property_flags | ZEND_ACC_PROMOTED, doc_comment, type);
+				scope, name, &default_value,
+				property_flags | (zend_property_is_virtual(name, hooks_ast) ? ZEND_ACC_VIRTUAL : 0) | ZEND_ACC_PROMOTED,
+				doc_comment, type);
+			if (hooks_ast) {
+				zend_ast_list *hooks = zend_ast_get_list(hooks_ast);
+				zend_compile_property_hooks(prop, name, type_ast, hooks);
+			}
 			if (attributes_ast) {
 				zend_compile_attributes(
 					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, ZEND_ATTRIBUTE_TARGET_PARAMETER);
@@ -7707,15 +7877,19 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 }
 /* }}} */
 
-static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) /* {{{ */
-{
+static zend_op_array *zend_compile_func_decl_ex(
+	znode *result, zend_ast *ast, bool toplevel,
+	const zend_property_info *property_info,
+	zend_property_hook_kind hook_kind
+) {
 	zend_ast_decl *decl = (zend_ast_decl *) ast;
 	zend_ast *params_ast = decl->child[0];
 	zend_ast *uses_ast = decl->child[1];
 	zend_ast *stmt_ast = decl->child[2];
 	zend_ast *return_type_ast = decl->child[3];
 	bool is_method = decl->kind == ZEND_AST_METHOD;
-	zend_string *lcname;
+	zend_string *lcname = NULL;
+	bool is_hook = decl->kind == ZEND_AST_PROPERTY_HOOK;
 
 	zend_class_entry *orig_class_entry = CG(active_class_entry);
 	zend_op_array *orig_op_array = CG(active_op_array);
@@ -7742,7 +7916,11 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		op_array->fn_flags |= ZEND_ACC_CLOSURE;
 	}
 
-	if (is_method) {
+	if (is_hook) {
+		zend_class_entry *ce = CG(active_class_entry);
+		op_array->scope = ce;
+		op_array->function_name = zend_string_copy(decl->name);
+	} else if (is_method) {
 		bool has_body = stmt_ast != NULL;
 		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
@@ -7789,6 +7967,8 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	}
 
 	zend_oparray_context_begin(&orig_oparray_context);
+	CG(context).active_property_info = property_info;
+	CG(context).active_property_hook_kind = hook_kind;
 
 	{
 		/* Push a separator to the loop variable stack */
@@ -7852,12 +8032,187 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		zend_observer_function_declared_notify(op_array, lcname);
 	}
 
-	zend_string_release_ex(lcname, 0);
+	if (lcname != NULL) {
+		zend_string_release_ex(lcname, 0);
+	}
 
 	CG(active_op_array) = orig_op_array;
 	CG(active_class_entry) = orig_class_entry;
+
+	return op_array;
 }
-/* }}} */
+
+static zend_op_array *zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel)
+{
+	return zend_compile_func_decl_ex(result, ast, toplevel, /* property_info */ NULL, (zend_property_hook_kind)-1);
+}
+
+zend_property_hook_kind zend_get_property_hook_kind_from_name(zend_string *name) {
+	if (zend_string_equals_literal_ci(name, "get")) {
+		return ZEND_PROPERTY_HOOK_GET;
+	} else if (zend_string_equals_literal_ci(name, "set")) {
+		return ZEND_PROPERTY_HOOK_SET;
+	} else {
+		return (zend_property_hook_kind)-1;
+	}
+}
+
+static void zend_compile_property_hooks(
+		zend_property_info *prop_info, zend_string *prop_name,
+		zend_ast *prop_type_ast, zend_ast_list *hooks)
+{
+	zend_class_entry *ce = CG(active_class_entry);
+
+	if (hooks->children == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list cannot be empty");
+	}
+
+	for (uint32_t i = 0; i < hooks->children; i++) {
+		zend_ast_decl *hook = (zend_ast_decl *) hooks->child[i];
+		zend_string *name = hook->name;
+		zend_ast *stmt_ast = hook->child[2];
+		zend_ast **return_type_ast_ptr = NULL;
+		zend_ast **value_type_ast_ptr = NULL;
+		CG(zend_lineno) = hook->start_lineno;
+
+		/* Non-private hooks are always public. This avoids having to copy the hook when inheriting
+		 * hooks from protected properties to public ones. */
+		uint32_t hook_visibility = (prop_info->flags & ZEND_ACC_PPP_MASK) != ZEND_ACC_PRIVATE ? ZEND_ACC_PUBLIC : ZEND_ACC_PRIVATE;
+		hook->flags |= hook_visibility;
+
+		if (prop_info->flags & ZEND_ACC_STATIC) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare hooks for static property");
+		}
+		if ((hook->flags & ZEND_ACC_FINAL) && (hook->flags & ZEND_ACC_PRIVATE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Property hook cannot be both final and private");
+		}
+		if ((ce->ce_flags & ZEND_ACC_INTERFACE)
+		 || ((prop_info->flags & ZEND_ACC_ABSTRACT) && !stmt_ast)) {
+			hook->flags |= ZEND_ACC_ABSTRACT;
+
+			if (stmt_ast) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Abstract property hook cannot have body");
+			}
+			if (hook->flags & ZEND_ACC_PRIVATE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Property hook cannot be both abstract and private");
+			}
+			if (hook->flags & ZEND_ACC_FINAL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Property hook cannot be both abstract and final");
+			}
+		} else if (!stmt_ast) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Non-abstract property hook must have a body");
+		}
+
+		zend_property_hook_kind hook_kind = zend_get_property_hook_kind_from_name(name);
+		if (hook_kind == (zend_property_hook_kind)-1) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Unknown hook \"%s\" for property %s::$%s, expected \"get\" or \"set\"",
+				ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+		}
+
+		if (stmt_ast && stmt_ast->kind == ZEND_AST_PROPERTY_HOOK_IMPLICIT_RETURN) {
+			stmt_ast = stmt_ast->child[0];
+			if (hook_kind == ZEND_PROPERTY_HOOK_GET) {
+				stmt_ast = zend_ast_create(ZEND_AST_RETURN, stmt_ast);
+			}
+			stmt_ast = zend_ast_create_list(1, ZEND_AST_STMT_LIST, stmt_ast);
+			hook->child[2] = stmt_ast;
+		}
+
+		if (hook_kind == ZEND_PROPERTY_HOOK_GET) {
+			if (hook->child[0]) {
+				zend_error_noreturn(E_COMPILE_ERROR, "get hook of property %s::$%s must not have a parameter list",
+					ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+			}
+
+			hook->child[0] = zend_ast_create_list(0, ZEND_AST_PARAM_LIST);
+
+			return_type_ast_ptr = &hook->child[3];
+			*return_type_ast_ptr = prop_type_ast;
+		} else if (hook_kind == ZEND_PROPERTY_HOOK_SET) {
+			if (hook->child[0]) {
+				zend_ast_list *param_list = zend_ast_get_list(hook->child[0]);
+				if (param_list->children != 1) {
+					zend_error_noreturn(E_COMPILE_ERROR, "%s hook of property %s::$%s must accept exactly one parameters",
+						ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+				}
+				zend_ast *value_param_ast = param_list->child[0];
+				if (value_param_ast->attr & ZEND_PARAM_REF) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Parameter $%s of %s hook %s::$%s must not be pass-by-reference",
+						ZSTR_VAL(zend_ast_get_str(value_param_ast->child[1])), ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+				}
+				if (value_param_ast->attr & ZEND_PARAM_VARIADIC) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Parameter $%s of %s hook %s::$%s must not be variadic",
+						ZSTR_VAL(zend_ast_get_str(value_param_ast->child[1])), ZSTR_VAL(name), ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+				}
+				if (!value_param_ast->child[0]) {
+					value_type_ast_ptr = &value_param_ast->child[0];
+					value_param_ast->child[0] = prop_type_ast;
+				}
+			} else {
+				zend_ast *param_name_ast = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VALUE));
+				zend_ast *param = zend_ast_create(
+					ZEND_AST_PARAM, prop_type_ast, param_name_ast,
+					/* expr */ NULL, /* doc_comment */ NULL, /* attributes */ NULL,
+					/* hooks */ NULL);
+				value_type_ast_ptr = &param->child[0];
+				hook->child[0] = zend_ast_create_list(1, ZEND_AST_PARAM_LIST, param);
+			}
+			zend_ast *return_type = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_VOID));
+			return_type->attr = ZEND_NAME_NOT_FQ;
+			hook->child[3] = return_type;
+		} else {
+			ZEND_UNREACHABLE();
+		}
+
+		hook->name = zend_strpprintf(0, "$%s::%s", ZSTR_VAL(prop_name), ZSTR_VAL(name));
+
+		zend_function *func = (zend_function *) zend_compile_func_decl_ex(
+			NULL, (zend_ast *) hook, /* toplevel */ false, prop_info, hook_kind);
+
+		if (!prop_info->hooks) {
+			prop_info->hooks = zend_arena_alloc(&CG(arena), ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+			memset(prop_info->hooks, 0, ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		}
+
+		if (prop_info->hooks[hook_kind]) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot redeclare property hook \"%s\"", ZSTR_VAL(name));
+		}
+		prop_info->hooks[hook_kind] = func;
+
+		if (hook_kind == ZEND_PROPERTY_HOOK_SET) {
+			switch (zend_verify_property_hook_variance(prop_info, func)) {
+				case INHERITANCE_SUCCESS:
+					break;
+				case INHERITANCE_UNRESOLVED:
+					ce->num_hooked_prop_variance_checks++;
+					break;
+				case INHERITANCE_ERROR:
+					zend_hooked_property_variance_error(prop_info);
+				case INHERITANCE_WARNING:
+					ZEND_UNREACHABLE();
+			}
+		}
+
+		zend_string_release(name);
+		/* Un-share type ASTs to avoid double-frees of zval nodes. */
+		if (return_type_ast_ptr) {
+			*return_type_ast_ptr = NULL;
+		}
+		if (value_type_ast_ptr) {
+			*value_type_ast_ptr = NULL;
+		}
+	}
+
+	ce->ce_flags |= ZEND_ACC_USE_GUARDS;
+	ce->num_hooked_props++;
+
+	if (!ce->get_iterator) {
+		ce->get_iterator = zend_hooked_object_get_iterator;
+	}
+}
 
 static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
 {
@@ -7865,12 +8220,27 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 	zend_class_entry *ce = CG(active_class_entry);
 	uint32_t i, children = list->children;
 
-	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Interfaces may not include properties");
-	}
-
 	if (ce->ce_flags & ZEND_ACC_ENUM) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Enum %s cannot include properties", ZSTR_VAL(ce->name));
+	}
+
+	if ((flags & ZEND_ACC_FINAL) && (flags & ZEND_ACC_PRIVATE)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Property cannot be both final and private");
+	}
+
+	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+		if (flags & ZEND_ACC_FINAL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Property in interface cannot be final");
+		}
+		if (flags & (ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Property in interface cannot be protected or private");
+		}
+		if (flags & ZEND_ACC_ABSTRACT) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Property in interface cannot be explicitly abstract. "
+				"All interface members are implicitly abstract");
+		}
+		flags |= ZEND_ACC_ABSTRACT;
 	}
 
 	for (i = 0; i < children; ++i) {
@@ -7879,10 +8249,31 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		zend_ast *name_ast = prop_ast->child[0];
 		zend_ast **value_ast_ptr = &prop_ast->child[1];
 		zend_ast *doc_comment_ast = prop_ast->child[2];
+		zend_ast *hooks_ast = prop_ast->child[3];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(name_ast));
 		zend_string *doc_comment = NULL;
 		zval value_zv;
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
+		flags |= zend_property_is_virtual(name, hooks_ast) ? ZEND_ACC_VIRTUAL : 0;
+
+		if (!hooks_ast) {
+			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Interfaces may only include hooked properties");
+			}
+			if (flags & ZEND_ACC_ABSTRACT) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Only hooked properties may be declared abstract");
+			}
+		}
+		if ((flags & ZEND_ACC_ABSTRACT)) {
+			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
+		}
+
+		if (hooks_ast && (flags & ZEND_ACC_READONLY)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Hooked properties cannot be readonly");
+		}
 
 		if (type_ast) {
 			type = zend_compile_typename(type_ast);
@@ -7926,7 +8317,7 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 						ZSTR_VAL(ce->name), ZSTR_VAL(name), ZSTR_VAL(str));
 				}
 			}
-		} else if (!ZEND_TYPE_IS_SET(type)) {
+		} else if (!ZEND_TYPE_IS_SET(type) && !hooks_ast) {
 			ZVAL_NULL(&value_zv);
 		} else {
 			ZVAL_UNDEF(&value_zv);
@@ -7954,6 +8345,14 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		}
 
 		info = zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+
+		if (hooks_ast) {
+			zend_compile_property_hooks(info, name, type_ast, zend_ast_get_list(hooks_ast));
+
+			if (!ce->parent_name) {
+				zend_verify_hooked_property(ce, info, name);
+			}
+		}
 
 		if (attr_ast) {
 			zend_compile_attributes(&info->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY, 0);
@@ -8324,7 +8723,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	}
 
 	/* We currently don't early-bind classes that implement interfaces or use traits */
-	if (!ce->num_interfaces && !ce->num_traits
+	if (!ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
 	 && !(CG(compiler_options) & ZEND_COMPILE_WITHOUT_EXECUTION)) {
 		if (toplevel) {
 			if (extends_ast) {
@@ -8395,7 +8794,7 @@ link_unbound:
 		if (toplevel
 			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
 				/* We currently don't early-bind classes that implement interfaces or use traits */
-			 && !ce->num_interfaces && !ce->num_traits
+			 && !ce->num_interfaces && !ce->num_traits && !ce->num_hooked_prop_variance_checks
 		) {
 			if (!extends_ast) {
 				/* Use empty string for classes without parents to avoid new handler, and special
@@ -8784,6 +9183,15 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 				ZVAL_EMPTY_STRING(zv);
 			}
 			break;
+		case T_PROPERTY_C: {
+			const zend_property_info *prop_info = CG(context).active_property_info;
+			if (prop_info) {
+				ZVAL_STR_COPY(zv, prop_info->name);
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
+			break;
+		}
 		case T_METHOD_C:
 			/* Detect whether we are directly inside a class (e.g. a class constant) and treat
 			 * this as not being inside a function. */
@@ -10649,6 +11057,7 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
 		case ZEND_AST_STATIC_CALL:
+		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
 			zend_compile_var(result, ast, BP_VAR_R, 0);
 			return;
 		case ZEND_AST_ASSIGN:
@@ -10803,6 +11212,9 @@ static zend_op *zend_compile_var_inner(znode *result, zend_ast *ast, uint32_t ty
 			return zend_compile_static_prop(result, ast, type, by_ref, 0);
 		case ZEND_AST_CALL:
 			zend_compile_call(result, ast, type);
+			return NULL;
+		case ZEND_AST_PARENT_PROPERTY_HOOK_CALL:
+			zend_compile_parent_property_hook_call(result, ast, type);
 			return NULL;
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:

@@ -857,6 +857,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					prop_info = zend_get_property_info(Z_OBJCE_P(obj), prop_name, 1);
 					if (prop_info
 					 && prop_info != ZEND_WRONG_PROPERTY_INFO
+					 && !(prop_info->flags & ZEND_ACC_VIRTUAL)
 					 && !(prop_info->flags & ZEND_ACC_STATIC)) {
 						val = OBJ_PROP(Z_OBJ_P(obj), prop_info->offset);
 						TRACE_RECORD_VM(ZEND_JIT_TRACE_VAL_INFO, NULL, Z_TYPE_P(val), 0, 0);

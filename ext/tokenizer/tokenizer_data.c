@@ -39,6 +39,7 @@ char *get_token_type_name(int token_type)
 		case T_CONSTANT_ENCAPSED_STRING: return "T_CONSTANT_ENCAPSED_STRING";
 		case T_STRING_VARNAME: return "T_STRING_VARNAME";
 		case T_NUM_STRING: return "T_NUM_STRING";
+		case T_PARENT_PROPERTY_HOOK_NAME: return "T_PARENT_PROPERTY_HOOK_NAME";
 		case T_INCLUDE: return "T_INCLUDE";
 		case T_INCLUDE_ONCE: return "T_INCLUDE_ONCE";
 		case T_EVAL: return "T_EVAL";
@@ -117,6 +118,7 @@ char *get_token_type_name(int token_type)
 		case T_TRAIT_C: return "T_TRAIT_C";
 		case T_METHOD_C: return "T_METHOD_C";
 		case T_FUNC_C: return "T_FUNC_C";
+		case T_PROPERTY_C: return "T_PROPERTY_C";
 		case T_NS_C: return "T_NS_C";
 		case T_ATTRIBUTE: return "T_ATTRIBUTE";
 		case T_PLUS_EQUAL: return "T_PLUS_EQUAL";

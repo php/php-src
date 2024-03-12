@@ -30,16 +30,19 @@
 #include "zend_closures.h"
 #include "zend_compile.h"
 #include "zend_hash.h"
+#include "zend_property_hooks.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
 #define ZEND_WRONG_PROPERTY_OFFSET   0
+#define ZEND_HOOKED_PROPERTY_OFFSET 1
 
 /* guard flags */
 #define IN_GET		ZEND_GUARD_PROPERTY_GET
 #define IN_SET		ZEND_GUARD_PROPERTY_SET
 #define IN_UNSET	ZEND_GUARD_PROPERTY_UNSET
 #define IN_ISSET	ZEND_GUARD_PROPERTY_ISSET
+#define IN_HOOK		ZEND_GUARD_PROPERTY_HOOK
 
 /*
   __X accessors explanation:
@@ -395,6 +398,15 @@ found:
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	}
 
+	if (property_info->hooks) {
+		*info_ptr = property_info;
+		if (cache_slot) {
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)ZEND_HOOKED_PROPERTY_OFFSET);
+			CACHE_PTR_EX(cache_slot + 2, property_info);
+		}
+		return ZEND_HOOKED_PROPERTY_OFFSET;
+	}
+
 	offset = property_info->offset;
 	if (EXPECTED(!ZEND_TYPE_IS_SET(property_info->type))) {
 		property_info = NULL;
@@ -604,6 +616,13 @@ ZEND_API uint32_t *zend_get_recursion_guard(zend_object *zobj)
 	return &Z_GUARD_P(zv);
 }
 
+ZEND_COLD static void zend_typed_property_uninitialized_access(const zend_property_info *prop_info, zend_string *name)
+{
+	zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
+		ZSTR_VAL(prop_info->ce->name),
+		ZSTR_VAL(name));
+}
+
 ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	zval *retval;
@@ -619,6 +638,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
 	property_offset = zend_get_property_offset(zobj->ce, name, (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot, &prop_info);
 
+try_again:
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		retval = OBJ_PROP(zobj, property_offset);
 		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
@@ -681,6 +701,72 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 				goto exit;
 			}
 		}
+	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
+		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
+		if (!get) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL, "Property %s::$%s is write-only",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				return &EG(uninitialized_zval);
+			}
+			/* Cache the fact that this hook has trivial read. This only applies to
+			 * BP_VAR_R and BP_VAR_IS fetches. */
+			ZEND_SET_PROPERTY_HOOK_SIMPLE_READ(cache_slot);
+
+			retval = OBJ_PROP(zobj, prop_info->offset);
+			if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
+				/* As hooked properties can't be unset, the only way to end up with an undef
+				 * value is via an uninitialized property. */
+				ZEND_ASSERT(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT);
+				goto uninit_error;
+			}
+
+			if (UNEXPECTED(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
+				if (UNEXPECTED(Z_TYPE_P(retval) != IS_OBJECT)) {
+					zend_throw_error(NULL, "Cannot acquire reference to hooked property %s::$%s",
+						ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					goto exit;
+				}
+				ZVAL_COPY(rv, retval);
+				retval = rv;
+			}
+			goto exit;
+		}
+
+		guard = zend_get_property_guard(zobj, name);
+		if (UNEXPECTED((*guard) & IN_HOOK)) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL, "Must not read from virtual property %s::$%s",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				return &EG(uninitialized_zval);
+			}
+			property_offset = prop_info->offset;
+			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
+			goto try_again;
+		}
+
+		GC_ADDREF(zobj);
+		*guard |= IN_HOOK;
+		zend_call_known_instance_method_with_0_params(get, zobj, rv);
+		*guard &= ~IN_HOOK;
+
+		if (Z_TYPE_P(rv) != IS_UNDEF) {
+			retval = rv;
+			if (!Z_ISREF_P(rv)
+			 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
+			 && UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
+				zend_throw_error(NULL, "Cannot acquire reference to hooked property %s::$%s",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+			}
+		} else {
+			retval = &EG(uninitialized_zval);
+		}
+
+		/* The return type is already enforced through the method return type. */
+		OBJ_RELEASE(zobj);
+		goto exit;
 	} else if (UNEXPECTED(EG(exception))) {
 		retval = &EG(uninitialized_zval);
 		goto exit;
@@ -749,7 +835,7 @@ call_getter:
 			goto exit;
 		} else if (UNEXPECTED(IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			/* Trigger the correct error */
-			zend_get_property_offset(zobj->ce, name, 0, NULL, &prop_info);
+			zend_wrong_offset(zobj->ce, name);
 			ZEND_ASSERT(EG(exception));
 			retval = &EG(uninitialized_zval);
 			goto exit;
@@ -759,9 +845,7 @@ call_getter:
 uninit_error:
 	if (type != BP_VAR_IS) {
 		if (prop_info) {
-			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
-				ZSTR_VAL(prop_info->ce->name),
-				ZSTR_VAL(name));
+			zend_typed_property_uninitialized_access(prop_info, name);
 		} else {
 			zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 		}
@@ -821,6 +905,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
 
+try_again:
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
@@ -897,6 +982,45 @@ found:;
 				goto found;
 			}
 		}
+	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
+		zend_function *set = prop_info->hooks[ZEND_PROPERTY_HOOK_SET];
+
+		if (!set) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL, "Property %s::$%s is read-only", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				variable_ptr = &EG(error_zval);
+				goto exit;
+			}
+			ZEND_SET_PROPERTY_HOOK_SIMPLE_WRITE(cache_slot);
+			property_offset = prop_info->offset;
+			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
+			goto try_again;
+		}
+
+		uint32_t *guard = zend_get_property_guard(zobj, name);
+		if (UNEXPECTED((*guard) & IN_HOOK)) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL, "Must not write to virtual property %s::$%s",
+					 ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				variable_ptr = &EG(error_zval);
+				goto exit;
+			}
+			property_offset = prop_info->offset;
+			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
+			goto try_again;
+		}
+		GC_ADDREF(zobj);
+		(*guard) |= IN_HOOK;
+		zend_call_known_instance_method_with_1_params(set, zobj, NULL, value);
+		(*guard) &= ~IN_HOOK;
+		OBJ_RELEASE(zobj);
+
+		variable_ptr = value;
+		goto exit;
 	} else if (UNEXPECTED(EG(exception))) {
 		variable_ptr = &EG(error_zval);
 		goto exit;
@@ -1111,10 +1235,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			    UNEXPECTED(prop_info && (Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT))) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 					if (prop_info) {
-						zend_throw_error(NULL,
-							"Typed property %s::$%s must not be accessed before initialization",
-							ZSTR_VAL(prop_info->ce->name),
-							ZSTR_VAL(name));
+						zend_typed_property_uninitialized_access(prop_info, name);
 						retval = &EG(error_zval);
 					} else {
 						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
@@ -1168,7 +1289,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			}
 			retval = zend_hash_add(zobj->properties, name, &EG(uninitialized_zval));
 		}
-	} else if (zobj->ce->__get == NULL) {
+	} else if (!IS_HOOKED_PROPERTY_OFFSET(property_offset) && zobj->ce->__get == NULL) {
 		retval = &EG(error_zval);
 	}
 
@@ -1231,6 +1352,10 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		if (EXPECTED(zend_hash_del(zobj->properties, name) != FAILURE)) {
 			return;
 		}
+	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
+		zend_throw_error(NULL, "Cannot unset hooked property %s::$%s",
+			ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+		return;
 	} else if (UNEXPECTED(EG(exception))) {
 		return;
 	}
@@ -1379,6 +1504,105 @@ ZEND_API zend_function *zend_get_call_trampoline_func(const zend_class_entry *ce
 	return (zend_function*)func;
 }
 /* }}} */
+
+static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
+{
+	zend_parent_hook_call_info *parent_hook_call_info = Z_PTR_P(ZEND_THIS);
+	zend_object *obj = parent_hook_call_info->object;
+	zend_string *prop_name = parent_hook_call_info->property;
+
+	if (UNEXPECTED(ZEND_NUM_ARGS() != 0)) {
+		zend_wrong_parameters_none_error();
+		goto clean;
+	}
+
+	uint32_t *guard = zend_get_property_guard(obj, prop_name);
+	uint32_t guard_backup = *guard;
+	*guard |= IN_HOOK;
+
+	zval rv;
+	zval *retval = obj->handlers->read_property(obj, prop_name, BP_VAR_R, NULL, &rv);
+	if (retval == &rv) {
+		RETVAL_COPY_VALUE(retval);
+	} else {
+		RETVAL_COPY(retval);
+	}
+
+	*guard = guard_backup;
+
+clean:
+	zend_free_trampoline(EX(func));
+	EX(func) = NULL;
+	efree(parent_hook_call_info);
+}
+
+static ZEND_FUNCTION(zend_parent_hook_set_trampoline)
+{
+	zend_parent_hook_call_info *parent_hook_call_info = Z_PTR_P(ZEND_THIS);
+	zend_object *obj = parent_hook_call_info->object;
+	zend_string *prop_name = parent_hook_call_info->property;
+
+	zval *value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END_EX(goto clean);
+
+	uint32_t *guard = zend_get_property_guard(obj, prop_name);
+	uint32_t guard_backup = *guard;
+	*guard |= IN_HOOK;
+
+	zval *retval = obj->handlers->write_property(obj, prop_name, value, NULL);
+	RETVAL_COPY(retval);
+
+	*guard = guard_backup;
+
+clean:
+	zend_free_trampoline(EX(func));
+	EX(func) = NULL;
+	efree(parent_hook_call_info);
+}
+
+static zend_result zend_property_hook_trampoline(zend_function **fptr_ptr, zend_string *name, uint32_t args, zif_handler handler)
+{
+	zend_function *func;
+	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
+		func = &EG(trampoline);
+	} else {
+		func = ecalloc(sizeof(zend_internal_function), 1);
+	}
+	func->type = ZEND_INTERNAL_FUNCTION;
+	func->common.arg_flags[0] = 0;
+	func->common.arg_flags[1] = 0;
+	func->common.arg_flags[2] = 0;
+	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
+	func->common.function_name = name;
+	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
+	func->common.num_args = args;
+	func->common.required_num_args = args;
+	func->common.scope = NULL;
+	func->common.prototype = NULL;
+	func->common.arg_info = NULL;
+	func->internal_function.handler = handler;
+	func->internal_function.module = NULL;
+
+	func->internal_function.reserved[0] = NULL;
+	func->internal_function.reserved[1] = NULL;
+
+	*fptr_ptr = func;
+
+	return SUCCESS;
+}
+
+ZEND_API zend_result zend_property_hook_get_trampoline(zend_function **fptr_ptr)
+{
+	return zend_property_hook_trampoline(fptr_ptr, ZSTR_KNOWN(ZEND_STR_GET), 0, ZEND_FN(zend_parent_hook_get_trampoline));
+}
+
+ZEND_API zend_result zend_property_hook_set_trampoline(zend_function **fptr_ptr)
+{
+	return zend_property_hook_trampoline(fptr_ptr, ZSTR_KNOWN(ZEND_STR_SET), 1, ZEND_FN(zend_parent_hook_set_trampoline));
+}
 
 static zend_always_inline zend_function *zend_get_user_call_function(zend_class_entry *ce, zend_string *method_name) /* {{{ */
 {
@@ -1826,6 +2050,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 
 	property_offset = zend_get_property_offset(zobj->ce, name, 1, cache_slot, &prop_info);
 
+try_again:
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		value = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(value) != IS_UNDEF) {
@@ -1874,6 +2099,53 @@ found:
 				goto exit;
 			}
 		}
+	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
+		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
+		if (!get) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL, "Property %s::$%s is write-only",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				return 0;
+			} else {
+				property_offset = prop_info->offset;
+				goto try_again;
+			}
+		}
+
+		if (has_set_exists == ZEND_PROPERTY_EXISTS) {
+			return 1;
+		}
+
+		uint32_t *guard = zend_get_property_guard(zobj, name);
+		if (UNEXPECTED(*guard & IN_HOOK)) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				zend_throw_error(NULL, "Must not read from virtual property %s::$%s",
+					ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				return 0;
+			}
+			property_offset = prop_info->offset;
+			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
+				prop_info = NULL;
+			}
+			goto try_again;
+		}
+
+		zval rv;
+		GC_ADDREF(zobj);
+		*guard |= IN_HOOK;
+		zend_call_known_instance_method_with_0_params(get, zobj, &rv);
+		*guard &= ~IN_HOOK;
+		OBJ_RELEASE(zobj);
+
+		if (has_set_exists == ZEND_PROPERTY_NOT_EMPTY) {
+			result = zend_is_true(&rv);
+		} else {
+			ZEND_ASSERT(has_set_exists == ZEND_PROPERTY_ISSET);
+			result = Z_TYPE(rv) != IS_NULL
+				&& (Z_TYPE(rv) != IS_REFERENCE || Z_TYPE_P(Z_REFVAL(rv)) != IS_NULL);
+		}
+		zval_ptr_dtor(&rv);
+		return result;
 	} else if (UNEXPECTED(EG(exception))) {
 		result = 0;
 		goto exit;
@@ -1990,10 +2262,15 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 				return ht;
 			}
 			ZEND_FALLTHROUGH;
+		case ZEND_PROP_PURPOSE_JSON:
+		case ZEND_PROP_PURPOSE_GET_OJBECT_VARS:
+			if (obj->ce->num_hooked_props) {
+				return zend_hooked_object_build_properties(obj);
+			}
+			ZEND_FALLTHROUGH;
 		case ZEND_PROP_PURPOSE_ARRAY_CAST:
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
-		case ZEND_PROP_PURPOSE_JSON:
 			ht = obj->handlers->get_properties(obj);
 			if (ht) {
 				GC_TRY_ADDREF(ht);
