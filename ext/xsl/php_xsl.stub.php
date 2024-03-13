@@ -76,25 +76,25 @@ class XSLTProcessor
     public bool $cloneDocument = false;
 
     /**
-     * @param DOM\Document|SimpleXMLElement $stylesheet
+     * @param DOMDocument|DOM\Document|SimpleXMLElement $stylesheet
      * @tentative-return-type
      */
     public function importStylesheet(object $stylesheet): bool {}
 
     /**
-     * @param DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|DOM\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToDoc(object $document, ?string $returnClass = null): object|false {}
 
     /**
-     * @param DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|DOM\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToUri(object $document, string $uri): int {}
 
     /**
-     * @param DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|DOM\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToXml(object $document): string|null|false {}
