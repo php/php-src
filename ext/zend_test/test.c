@@ -1128,9 +1128,9 @@ PHP_ZEND_TEST_API void bug_gh9090_void_int_char_var(int i, char *fmt, ...) {
 /**
  * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.
  */
-PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
+PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off_t *off_in, int fd_out, off_t *off_out, size_t len, unsigned int flags)
 {
-	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");
+	ssize_t (*original_copy_file_range)(int, off_t *, int, off_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");
 	if (ZT_G(limit_copy_file_range) >= Z_L(0)) {
 		len = ZT_G(limit_copy_file_range);
 	}
