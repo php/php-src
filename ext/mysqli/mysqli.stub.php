@@ -776,7 +776,6 @@ class mysqli
     /**
      * @return true
      * @alias mysqli_close
-     * @no-verify
      */
     public function close() {} // TODO make return type void
 
@@ -989,7 +988,6 @@ class mysqli
     /**
      * @return true
      * @alias mysqli_ssl_set
-     * @no-verify
      */
     public function ssl_set(
         ?string $key,
@@ -1242,7 +1240,6 @@ class mysqli_stmt
     /**
      * @return true
      * @alias mysqli_stmt_close
-     * @no-verify
      */
     public function close() {} // TODO make return type void
 
