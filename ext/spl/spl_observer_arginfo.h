@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3e17e99dffb3150685ae7c4724d6b8aad2f5db6e */
+ * Stub hash: d32b09f927ca51422b341d090cabee44ca67db87 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -58,6 +58,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_next arginfo_class_SplSubject_notify
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_seek, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObjectStorage_unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -147,6 +151,7 @@ ZEND_METHOD(SplObjectStorage, valid);
 ZEND_METHOD(SplObjectStorage, key);
 ZEND_METHOD(SplObjectStorage, current);
 ZEND_METHOD(SplObjectStorage, next);
+ZEND_METHOD(SplObjectStorage, seek);
 ZEND_METHOD(SplObjectStorage, unserialize);
 ZEND_METHOD(SplObjectStorage, serialize);
 ZEND_METHOD(SplObjectStorage, offsetGet);
@@ -194,6 +199,7 @@ static const zend_function_entry class_SplObjectStorage_methods[] = {
 	ZEND_ME(SplObjectStorage, key, arginfo_class_SplObjectStorage_key, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, current, arginfo_class_SplObjectStorage_current, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, next, arginfo_class_SplObjectStorage_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplObjectStorage, seek, arginfo_class_SplObjectStorage_seek, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, unserialize, arginfo_class_SplObjectStorage_unserialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplObjectStorage, serialize, arginfo_class_SplObjectStorage_serialize, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("offsetExists", zim_SplObjectStorage_contains, arginfo_class_SplObjectStorage_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -244,13 +250,13 @@ static zend_class_entry *register_class_SplSubject(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_ArrayAccess)
+static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_SeekableIterator, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_ArrayAccess)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplObjectStorage", class_SplObjectStorage_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_Iterator, class_entry_Serializable, class_entry_ArrayAccess);
+	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
 
 	return class_entry;
 }

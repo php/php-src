@@ -757,6 +757,49 @@ PHP_METHOD(SplObjectStorage, next)
 	intern->index++;
 } /* }}} */
 
+/* {{{ Seek to position. */
+PHP_METHOD(SplObjectStorage, seek)
+{
+	zend_long position;
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &position) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (position < 0 || position >= zend_hash_num_elements(&intern->storage)) {
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", position);
+		RETURN_THROWS();
+	}
+
+	if (position == 0) {
+		/* fast path */
+		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+		intern->index = 0;
+	} else if (position > intern->index) {
+		/* unlike the optimization below, it's not cheap to go to the end */
+		do {
+			zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+			intern->index++;
+		} while (position > intern->index);
+	} else if (position < intern->index) {
+		/* optimization: check if it's more profitable to reset and do a forwards seek instead, it's cheap to reset */
+		if (intern->index - position > position) {
+			zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+			intern->index = 0;
+			do {
+				zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+				intern->index++;
+			} while (position > intern->index);
+		} else {
+			do {
+				zend_hash_move_backwards_ex(&intern->storage, &intern->pos);
+				intern->index--;
+			} while (position < intern->index);
+		}
+	}
+} /* }}} */
+
 /* {{{ Serializes storage */
 PHP_METHOD(SplObjectStorage, serialize)
 {
@@ -1325,7 +1368,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_ce_SplObserver = register_class_SplObserver();
 	spl_ce_SplSubject = register_class_SplSubject();
 
-	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_arrayaccess);
+	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, spl_ce_SeekableIterator, zend_ce_serializable, zend_ce_arrayaccess);
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
 	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
 
