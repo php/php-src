@@ -1930,7 +1930,7 @@ function array_is_list(array $array): bool {}
  * @compile-time-eval
  * @refcount 1
  */
-function base64_encode(string $string): string {}
+function base64_encode(string $string, bool $padding = true): string {}
 
 /**
  * @compile-time-eval

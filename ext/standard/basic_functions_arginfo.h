@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 954bf48ac1f24a14fd7508c8bf4b781883398499 */
+ * Stub hash: 8ae13d072715cee48915fdfd1c47fc3a9027d21a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -366,6 +366,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_base64_encode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, padding, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_base64_decode, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
@@ -798,7 +799,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_assert_options, 0, 1, IS_MIXED, 
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_bin2hex arginfo_base64_encode
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bin2hex, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_hex2bin, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -860,13 +863,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtok, 0, 1, MAY_BE_STRING|MAY_
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, token, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_strtoupper arginfo_base64_encode
+#define arginfo_strtoupper arginfo_bin2hex
 
-#define arginfo_strtolower arginfo_base64_encode
+#define arginfo_strtolower arginfo_bin2hex
 
-#define arginfo_str_increment arginfo_base64_encode
+#define arginfo_str_increment arginfo_bin2hex
 
-#define arginfo_str_decrement arginfo_base64_encode
+#define arginfo_str_decrement arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_basename, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
@@ -935,7 +938,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_substr_replace, 0, 3, MAY_BE_STR
 	ZEND_ARG_TYPE_MASK(0, length, MAY_BE_ARRAY|MAY_BE_LONG|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_quotemeta arginfo_base64_encode
+#define arginfo_quotemeta arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ord, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, character, IS_STRING, 0)
@@ -945,9 +948,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chr, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, codepoint, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_ucfirst arginfo_base64_encode
+#define arginfo_ucfirst arginfo_bin2hex
 
-#define arginfo_lcfirst arginfo_base64_encode
+#define arginfo_lcfirst arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ucwords, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -960,7 +963,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strtr, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, to, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-#define arginfo_strrev arginfo_base64_encode
+#define arginfo_strrev arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_similar_text, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, string1, IS_STRING, 0)
@@ -973,11 +976,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_addcslashes, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, characters, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_addslashes arginfo_base64_encode
+#define arginfo_addslashes arginfo_bin2hex
 
-#define arginfo_stripcslashes arginfo_base64_encode
+#define arginfo_stripcslashes arginfo_bin2hex
 
-#define arginfo_stripslashes arginfo_base64_encode
+#define arginfo_stripslashes arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_str_replace, 0, 3, MAY_BE_STRING|MAY_BE_ARRAY)
 	ZEND_ARG_TYPE_MASK(0, search, MAY_BE_ARRAY|MAY_BE_STRING, NULL)
@@ -1057,9 +1060,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_sscanf, 0, 2, MAY_BE_ARRAY|MAY_B
 	ZEND_ARG_VARIADIC_TYPE_INFO(1, vars, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_str_rot13 arginfo_base64_encode
+#define arginfo_str_rot13 arginfo_bin2hex
 
-#define arginfo_str_shuffle arginfo_base64_encode
+#define arginfo_str_shuffle arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_str_word_count, 0, 1, MAY_BE_ARRAY|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -1085,9 +1088,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_substr_compare, 0, 3, IS_LONG, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, case_insensitive, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-#define arginfo_utf8_encode arginfo_base64_encode
+#define arginfo_utf8_encode arginfo_bin2hex
 
-#define arginfo_utf8_decode arginfo_base64_encode
+#define arginfo_utf8_decode arginfo_bin2hex
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
@@ -1811,11 +1814,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_get_status, 0, 1, IS_ARRAY,
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_quoted_printable_decode arginfo_base64_encode
+#define arginfo_quoted_printable_decode arginfo_bin2hex
 
-#define arginfo_quoted_printable_encode arginfo_base64_encode
+#define arginfo_quoted_printable_encode arginfo_bin2hex
 
-#define arginfo_soundex arginfo_base64_encode
+#define arginfo_soundex arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -2090,13 +2093,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_parse_url, 0, 1, MAY_BE_LONG|MAY
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, component, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
-#define arginfo_urlencode arginfo_base64_encode
+#define arginfo_urlencode arginfo_bin2hex
 
-#define arginfo_urldecode arginfo_base64_encode
+#define arginfo_urldecode arginfo_bin2hex
 
-#define arginfo_rawurlencode arginfo_base64_encode
+#define arginfo_rawurlencode arginfo_bin2hex
 
-#define arginfo_rawurldecode arginfo_base64_encode
+#define arginfo_rawurldecode arginfo_bin2hex
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
@@ -2127,7 +2130,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_filter_register, 0, 2, _I
 	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_convert_uuencode arginfo_base64_encode
+#define arginfo_convert_uuencode arginfo_bin2hex
 
 #define arginfo_convert_uudecode arginfo_hex2bin
 
