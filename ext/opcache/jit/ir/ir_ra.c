@@ -1554,6 +1554,10 @@ static bool ir_vregs_inside(ir_ctx *ctx, uint32_t parent, uint32_t child)
 	ir_live_interval *child_ival = ctx->live_intervals[child];
 	ir_live_interval *parent_ival = ctx->live_intervals[parent];
 
+	if ((child_ival->flags | parent_ival->flags) & IR_LIVE_INTERVAL_COALESCED) {
+		// TODO: Support valid cases with already coalesced "parent_ival
+		return 0;
+	}
 #if 0
 	if (child_ival->end >= parent_ival->end) {
 		return 0;
@@ -1629,6 +1633,13 @@ static void ir_vregs_coalesce(ir_ctx *ctx, uint32_t v1, uint32_t v2, ir_ref from
 	uint16_t f1 = ctx->live_intervals[v1]->flags;
 	uint16_t f2 = ctx->live_intervals[v2]->flags;
 
+#if 0
+	if (ctx->binding) {
+		ir_ref b1 = ir_binding_find(ctx, from);
+		ir_ref b2 = ir_binding_find(ctx, to);
+		IR_ASSERT(b1 == b2);
+	}
+#endif
 	if ((f1 & IR_LIVE_INTERVAL_COALESCED) && !(f2 & IR_LIVE_INTERVAL_COALESCED)) {
 		ir_vregs_join(ctx, v1, v2);
 		ctx->vregs[to] = v1;
@@ -1971,6 +1982,13 @@ int ir_coalesce(ir_ctx *ctx)
 					 && ctx->vregs[insn->op1]
 					 && ctx->vregs[i] != ctx->vregs[insn->op1]) {
 						if (ir_vregs_inside(ctx, ctx->vregs[insn->op1], ctx->vregs[i])) {
+							if (ctx->binding) {
+								ir_ref b1 = ir_binding_find(ctx, i);
+								ir_ref b2 = ir_binding_find(ctx, insn->op1);
+								if (b1 != b2) {
+									continue;
+								}
+							}
 							ir_vregs_coalesce(ctx, ctx->vregs[i], ctx->vregs[insn->op1], i, insn->op1);
 							compact = 1;
 						}

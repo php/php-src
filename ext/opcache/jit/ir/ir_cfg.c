@@ -2027,13 +2027,10 @@ static int ir_schedule_blocks_bottom_up(ir_ctx *ctx)
 	ir_chain *chains;
 	ir_bitqueue worklist;
 	ir_bitset visited;
-	uint32_t *empty, count;
-#ifdef IR_DEBUG
-	uint32_t empty_count = 0;
-#endif
+	uint32_t *schedule_end, count;
 
 	ctx->cfg_schedule = ir_mem_malloc(sizeof(uint32_t) * (ctx->cfg_blocks_count + 2));
-	empty = ctx->cfg_schedule + ctx->cfg_blocks_count;
+	schedule_end = ctx->cfg_schedule + ctx->cfg_blocks_count;
 
 	/* 1. Create initial chains for each BB */
 	chains = ir_mem_malloc(sizeof(ir_chain) * (ctx->cfg_blocks_count + 1));
@@ -2083,11 +2080,8 @@ restart:
 			/* move empty blocks to the end */
 			IR_ASSERT(chains[b].head == b);
 			chains[b].head = 0;
-#ifdef IR_DEBUG
-			empty_count++;
-#endif
-			*empty = b;
-			empty--;
+			*schedule_end = b;
+			schedule_end--;
 
 			if (successor > b) {
 				bb_freq[successor] += bb_freq[b];
@@ -2168,14 +2162,22 @@ restart:
 				} else {
 					prob1 = prob2 = 50;
 				}
-				IR_ASSERT(edges_count < max_edges_count);
-				freq = bb_freq[b] * (float)prob1 / (float)probN;
-				if (successor1 > b) {
-					IR_ASSERT(!ir_bitset_in(visited, successor1));
-					bb_freq[successor1] += freq;
-					ir_bitqueue_add(&worklist, successor1);
-				}
 				do {
+					freq = bb_freq[b] * (float)prob1 / (float)probN;
+					if (successor1 > b) {
+						IR_ASSERT(!ir_bitset_in(visited, successor1));
+						bb_freq[successor1] += freq;
+						if (successor1_bb->successors_count == 0 && insn1->op2 == 1) {
+							/* move cold block without successors to the end */
+							IR_ASSERT(chains[successor1].head == successor1);
+							chains[successor1].head = 0;
+							*schedule_end = successor1;
+							schedule_end--;
+							break;
+						} else {
+							ir_bitqueue_add(&worklist, successor1);
+						}
+					}
 					/* try to join edges early to reduce number of edges and the cost of their sorting */
 					if (prob1 > prob2
 					 && (successor1_bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) != IR_BB_EMPTY) {
@@ -2187,19 +2189,28 @@ restart:
 						if (!IR_DEBUG_BB_SCHEDULE_GRAPH) break;
 					}
 					successor1 = _ir_skip_empty_blocks(ctx, successor1);
+					IR_ASSERT(edges_count < max_edges_count);
 					edges[edges_count].from = b;
 					edges[edges_count].to = successor1;
 					edges[edges_count].freq = freq;
 					edges_count++;
 				} while (0);
-				IR_ASSERT(edges_count < max_edges_count);
-				freq = bb_freq[b] * (float)prob2 / (float)probN;
-				if (successor2 > b) {
-					IR_ASSERT(!ir_bitset_in(visited, successor2));
-					bb_freq[successor2] += freq;
-					ir_bitqueue_add(&worklist, successor2);
-				}
 				do {
+					freq = bb_freq[b] * (float)prob2 / (float)probN;
+					if (successor2 > b) {
+						IR_ASSERT(!ir_bitset_in(visited, successor2));
+						bb_freq[successor2] += freq;
+						if (successor2_bb->successors_count == 0 && insn2->op2 == 1) {
+							/* move cold block without successors to the end */
+							IR_ASSERT(chains[successor2].head == successor2);
+							chains[successor2].head = 0;
+							*schedule_end = successor2;
+							schedule_end--;
+							break;
+						} else {
+							ir_bitqueue_add(&worklist, successor2);
+						}
+					}
 					if (prob2 > prob1
 					 && (successor2_bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) != IR_BB_EMPTY) {
 						uint32_t src = chains[b].next;
@@ -2210,6 +2221,7 @@ restart:
 						if (!IR_DEBUG_BB_SCHEDULE_GRAPH) break;
 					}
 					successor2 = _ir_skip_empty_blocks(ctx, successor2);
+					IR_ASSERT(edges_count < max_edges_count);
 					edges[edges_count].from = b;
 					edges[edges_count].to = successor2;
 					edges[edges_count].freq = freq;
@@ -2242,7 +2254,6 @@ restart:
 					} else {
 						prob = 100 / bb->successors_count;
 					}
-					IR_ASSERT(edges_count < max_edges_count);
 					freq = bb_freq[b] * (float)prob / 100.0f;
 					if (successor > b) {
 						IR_ASSERT(!ir_bitset_in(visited, successor));
@@ -2250,6 +2261,7 @@ restart:
 						ir_bitqueue_add(&worklist, successor);
 					}
 					successor = _ir_skip_empty_blocks(ctx, successor);
+					IR_ASSERT(edges_count < max_edges_count);
 					edges[edges_count].from = b;
 					edges[edges_count].to = successor;
 					edges[edges_count].freq = freq;
@@ -2383,7 +2395,7 @@ restart:
 		}
 	}
 
-	IR_ASSERT(count + empty_count == ctx->cfg_blocks_count);
+	IR_ASSERT(ctx->cfg_schedule + count == schedule_end);
 	ctx->cfg_schedule[ctx->cfg_blocks_count + 1] = 0;
 
 	ir_mem_free(edges);
@@ -2401,17 +2413,14 @@ static int ir_schedule_blocks_top_down(ir_ctx *ctx)
 	uint32_t b, best_successor, last_non_empty;
 	ir_block *bb, *best_successor_bb;
 	ir_insn *insn;
-	uint32_t *list, *empty;
+	uint32_t *list, *schedule_end;
 	uint32_t count = 0;
-#ifdef IR_DEBUG
-	uint32_t empty_count = 0;
-#endif
 
 	ir_bitqueue_init(&blocks, ctx->cfg_blocks_count + 1);
 	blocks.pos = 0;
 	list = ir_mem_malloc(sizeof(uint32_t) * (ctx->cfg_blocks_count + 2));
 	list[ctx->cfg_blocks_count + 1] = 0;
-	empty = list + ctx->cfg_blocks_count;
+	schedule_end = list + ctx->cfg_blocks_count;
 	for (b = 1; b <= ctx->cfg_blocks_count; b++) {
 		ir_bitset_incl(blocks.set, b);
 	}
@@ -2431,11 +2440,8 @@ static int ir_schedule_blocks_top_down(ir_ctx *ctx)
 			}
 			if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
 				/* move empty blocks to the end */
-#ifdef IR_DEBUG
-				empty_count++;
-#endif
-				*empty = b;
-				empty--;
+				*schedule_end = b;
+				schedule_end--;
 			} else {
 				count++;
 				list[count] = b;
@@ -2520,7 +2526,7 @@ static int ir_schedule_blocks_top_down(ir_ctx *ctx)
 		} while (1);
 	}
 
-	IR_ASSERT(count + empty_count == ctx->cfg_blocks_count);
+	IR_ASSERT(list + count == schedule_end);
 	ctx->cfg_schedule = list;
 	ir_bitqueue_free(&blocks);
 

@@ -7746,7 +7746,7 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 	}
 
 	/* Generate a table jmp or a seqence of calls */
-	if ((max.i64-min.i64) < count * 8) {
+	if (count > 2 && (max.i64-min.i64) < count * 8) {
 		int *labels = ir_mem_malloc(sizeof(int) * (size_t)(max.i64 - min.i64 + 1));
 
 		for (i = 0; i <= (max.i64 - min.i64); i++) {

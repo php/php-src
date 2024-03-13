@@ -2508,6 +2508,7 @@ IR_FOLD(MUL(MUL, C_I8))
 IR_FOLD(MUL(MUL, C_I16))
 IR_FOLD(MUL(MUL, C_I32))
 IR_FOLD(MUL(MUL, C_I64))
+IR_FOLD(MUL(MUL, C_ADDR))
 {
 	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x * c1) * c2  => x * (c1 * c2) */
@@ -2527,6 +2528,7 @@ IR_FOLD(AND(AND, C_I8))
 IR_FOLD(AND(AND, C_I16))
 IR_FOLD(AND(AND, C_I32))
 IR_FOLD(AND(AND, C_I64))
+IR_FOLD(AND(AND, C_ADDR))
 {
 	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x & c1) & c2  => x & (c1 & c2) */
@@ -2546,6 +2548,7 @@ IR_FOLD(OR(OR, C_I8))
 IR_FOLD(OR(OR, C_I16))
 IR_FOLD(OR(OR, C_I32))
 IR_FOLD(OR(OR, C_I64))
+IR_FOLD(OR(OR, C_ADDR))
 {
 	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x | c1) | c2  => x | (c1 | c2) */
@@ -2565,6 +2568,7 @@ IR_FOLD(XOR(XOR, C_I8))
 IR_FOLD(XOR(XOR, C_I16))
 IR_FOLD(XOR(XOR, C_I32))
 IR_FOLD(XOR(XOR, C_I64))
+IR_FOLD(XOR(XOR, C_ADDR))
 {
 	if (IR_IS_CONST_REF(op1_insn->op2) && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)) {
 		/* (x ^ c1) ^ c2  => x ^ (c1 ^ c2) */
