@@ -157,6 +157,9 @@ class MultipleIterator implements Iterator
     /** @tentative-return-type */
     public function next(): void {}
 
-    /** @tentative-return-type */
+    /**
+     * @tentative-return-type
+     * @implementation-alias SplObjectStorage::__debugInfo
+     */
     public function __debugInfo(): array {}
 }
