@@ -1294,8 +1294,8 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	if (nodep != NULL) {
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
-			RETURN_FALSE;
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, true);
+			RETURN_THROWS();
 		}
 	} else {
 		node = (const xmlNode *) docp;
