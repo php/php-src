@@ -765,6 +765,16 @@ oom:
 	RETURN_THROWS();
 }
 
+/* Only bother to register error handling when the error reports can become observable. */
+static bool dom_should_register_error_handlers(zend_long options)
+{
+	if (options & XML_PARSE_NOERROR) {
+		return false;
+	}
+
+	return php_libxml_uses_internal_errors() || (EG(error_reporting) & E_WARNING);
+}
+
 PHP_METHOD(DOM_HTMLDocument, createFromString)
 {
 	const char *source, *override_encoding = NULL;
@@ -793,7 +803,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
-	if (!(options & XML_PARSE_NOERROR)) {
+	if (dom_should_register_error_handlers(options)) {
 		lexbor_libxml2_bridge_parse_set_error_callbacks(
 			&ctx,
 			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
@@ -952,7 +962,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
-	if (!(options & XML_PARSE_NOERROR)) {
+	if (dom_should_register_error_handlers(options)) {
 		lexbor_libxml2_bridge_parse_set_error_callbacks(
 			&ctx,
 			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
