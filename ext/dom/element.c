@@ -25,6 +25,7 @@
 #include "namespace_compat.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
+#include "token_list.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -171,6 +172,33 @@ zend_result dom_element_class_name_write(dom_object *obj, zval *newval)
 		return SUCCESS;
 	}
 	return FAILURE;
+}
+/* }}} */
+
+/* {{{ classList	TokenList
+URL: https://dom.spec.whatwg.org/#dom-element-classlist
+*/
+zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
+{
+	const uint32_t PROP_INDEX = 20;
+
+#if ZEND_DEBUG
+	zend_string *class_list_str = ZSTR_INIT_LITERAL("classList", false);
+	const zend_property_info *prop_info = zend_get_property_info(dom_modern_element_class_entry, class_list_str, 0);
+	zend_string_release_ex(class_list_str, false);
+	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
+#endif
+
+	zval *cached_token_list = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	if (Z_ISUNDEF_P(cached_token_list)) {
+		object_init_ex(cached_token_list, dom_token_list_class_entry);
+		dom_token_list_object *intern = php_dom_token_list_from_obj(Z_OBJ_P(cached_token_list));
+		dom_token_list_ctor(intern, obj);
+	}
+
+	ZVAL_OBJ_COPY(retval, Z_OBJ_P(cached_token_list));
+
+	return SUCCESS;
 }
 /* }}} */
 

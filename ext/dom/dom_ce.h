@@ -61,6 +61,7 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_modern_entityreference_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_processinginstruction_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_abstract_base_document_class_entry;
+extern PHP_DOM_EXPORT zend_class_entry *dom_token_list_class_entry;
 #ifdef LIBXML_XPATH_ENABLED
 extern PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_modern_xpath_class_entry;

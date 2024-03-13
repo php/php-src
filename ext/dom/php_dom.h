@@ -125,6 +125,7 @@ static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zen
 
 #define DOM_HTML_NO_DEFAULT_NS (1U << 31)
 
+void dom_objects_free_storage(zend_object *object);
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 libxml_doc_props const* dom_get_doc_props_read_only(const php_libxml_ref_obj *document);
@@ -251,14 +252,8 @@ xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, 
 
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php_libxml_cache_tag *cache_tag, const php_libxml_ref_obj *doc_ptr)
 {
-	ZEND_ASSERT(cache_tag != NULL);
 	ZEND_ASSERT(doc_ptr != NULL);
-	/* See overflow comment in php_libxml_invalidate_node_list_cache(). */
-#if SIZEOF_SIZE_T == 8
-	return cache_tag->modification_nr != doc_ptr->cache_tag.modification_nr;
-#else
-	return cache_tag->modification_nr != doc_ptr->cache_tag.modification_nr || UNEXPECTED(doc_ptr->cache_tag.modification_nr == SIZE_MAX);
-#endif
+	return php_libxml_is_cache_tag_stale(cache_tag, &doc_ptr->cache_tag);
 }
 
 static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
