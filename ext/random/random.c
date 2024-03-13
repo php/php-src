@@ -334,6 +334,7 @@ PHPAPI php_random_status *php_random_default_status(void)
 	php_random_status *status = RANDOM_G(mt19937);
 
 	if (!RANDOM_G(mt19937_seeded)) {
+		((php_random_status_state_mt19937 *)status->state)->mode = MT_RAND_MT19937;
 		php_random_mt19937_seed_default(status->state);
 		RANDOM_G(mt19937_seeded) = true;
 	}

@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Random:
   . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with unknown
     modes). (timwolla)
+  . Fixed bug GH-13690 (Global Mt19937 is not properly reset in-between
+    requests when MT_RAND_PHP is used). (timwolla)
 
 - Session:
   . Fixed bug GH-13680 (Segfault with session_decode and compilation error).
