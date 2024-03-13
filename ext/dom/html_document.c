@@ -245,35 +245,43 @@ static void dom_find_line_and_column_using_cache(
 		offset = application_data->current_input_length;
 	}
 
+	size_t last_column = cache->last_column;
+	size_t last_line = cache->last_line;
+	size_t last_offset = cache->last_offset;
+
 	/* Either unicode or UTF-8 data */
 	if (application_data->current_input_codepoints != NULL) {
-		while (cache->last_offset < offset) {
-			if (application_data->current_input_codepoints[cache->last_offset] == 0x000A /* Unicode codepoint for line feed */) {
-				cache->last_line++;
-				cache->last_column = 1;
+		while (last_offset < offset) {
+			if (application_data->current_input_codepoints[last_offset] == 0x000A /* Unicode codepoint for line feed */) {
+				last_line++;
+				last_column = 1;
 			} else {
-				cache->last_column++;
+				last_column++;
 			}
-			cache->last_offset++;
+			last_offset++;
 		}
 	} else {
-		while (cache->last_offset < offset) {
-			const lxb_char_t current = application_data->current_input_characters[cache->last_offset];
+		while (last_offset < offset) {
+			const lxb_char_t current = application_data->current_input_characters[last_offset];
 			if (current == '\n') {
-				cache->last_line++;
-				cache->last_column = 1;
-				cache->last_offset++;
+				last_line++;
+				last_column = 1;
+				last_offset++;
 			} else {
 				/* See Lexbor tokenizer patch
 				 * Note for future self: branchlessly computing the length and jumping by the length would be nice,
 				 * however it takes so many instructions to do so that it is slower than this naive method. */
 				if ((current & 0b11000000) != 0b10000000) {
-					cache->last_column++;
+					last_column++;
 				}
-				cache->last_offset++;
+				last_offset++;
 			}
 		}
 	}
+
+	cache->last_column = last_column;
+	cache->last_line = last_line;
+	cache->last_offset = last_offset;
 }
 
 static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(
