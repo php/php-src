@@ -517,8 +517,16 @@ static bool dom_decode_encode_fast_path(
 	const lxb_char_t *buf_ref = *buf_ref_ref;
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
-		const lxb_char_t *buf_ref_backup = buf_ref;
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
+		if (decoding_encoding_ctx->decode.u.utf_8.need == 0 && *buf_ref < 0x80) {
+			/* Fast path within the fast path: try to skip non-mb bytes in bulk if we are not in a state where we
+			 * need more UTF-8 bytes to complete a sequence.
+			 * It might be tempting to use SIMD here, but it turns out that this is less efficient because
+			 * we need to process the same byte multiple times sometimes when mixing ASCII with multibyte. */
+			buf_ref++;
+			continue;
+		}
+		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
 			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
