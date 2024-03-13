@@ -1599,7 +1599,7 @@ namespace DOM
         /** @implementation-alias DOMDocument::save */
         public function saveXMLFile(string $filename, int $options = 0): int|false {}
 
-        public function saveHTML(?Node $node = null): string|false {}
+        public function saveHTML(?Node $node = null): string {}
 
         public function saveHTMLFile(string $filename): int|false {}
     }
