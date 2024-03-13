@@ -1055,23 +1055,22 @@ PHP_FUNCTION(libxml_set_streams_context)
 }
 /* }}} */
 
+PHP_LIBXML_API bool php_libxml_uses_internal_errors(void)
+{
+	return xmlStructuredError == php_libxml_structured_error_handler;
+}
+
 /* {{{ Disable libxml errors and allow user to fetch error information as needed */
 PHP_FUNCTION(libxml_use_internal_errors)
 {
-	xmlStructuredErrorFunc current_handler;
-	bool use_errors, use_errors_is_null = 1, retval;
+	bool use_errors, use_errors_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL_OR_NULL(use_errors, use_errors_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	current_handler = xmlStructuredError;
-	if (current_handler && current_handler == php_libxml_structured_error_handler) {
-		retval = 1;
-	} else {
-		retval = 0;
-	}
+	bool retval = php_libxml_uses_internal_errors();
 
 	if (use_errors_is_null) {
 		RETURN_BOOL(retval);
