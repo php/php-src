@@ -120,7 +120,7 @@ static zend_always_inline unsigned char *neon_base64_encode(const unsigned char 
 }
 #endif /* defined(__aarch64__) || defined(_M_ARM64) */
 
-static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out) /* {{{ */
+static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned char *in, size_t inl, unsigned char *out, zend_long flags) /* {{{ */
 {
 #if defined(__aarch64__) || defined(_M_ARM64)
 	if (inl >= 16 * 3) {
@@ -147,11 +147,15 @@ static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned c
 		if (inl > 1) {
 			*out++ = base64_table[((in[0] & 0x03) << 4) + (in[1] >> 4)];
 			*out++ = base64_table[(in[1] & 0x0f) << 2];
-			*out++ = base64_pad;
+			if ((flags & PHP_BASE64_NO_PADDING) == 0) {
+				*out++ = base64_pad;
+			}
 		} else {
 			*out++ = base64_table[(in[0] & 0x03) << 4];
-			*out++ = base64_pad;
-			*out++ = base64_pad;
+			if ((flags & PHP_BASE64_NO_PADDING) == 0) {
+				*out++ = base64_pad;
+				*out++ = base64_pad;
+			}
 		}
 	}
 
@@ -381,32 +385,32 @@ fail:
 # include "Zend/zend_cpuinfo.h"
 
 # if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
-ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length));
+ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length, zend_long flags));
 ZEND_INTRIN_AVX512_FUNC_DECL(zend_string *php_base64_decode_ex_avx512(const unsigned char *str, size_t length, bool strict));
 # endif
 # if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
-ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length));
+ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length, zend_long flags));
 ZEND_INTRIN_AVX512_VBMI_FUNC_DECL(zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t length, bool strict));
 # endif
 
 # if ZEND_INTRIN_AVX2_RESOLVER
-ZEND_INTRIN_AVX2_FUNC_DECL(zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length));
+ZEND_INTRIN_AVX2_FUNC_DECL(zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length, zend_long flags));
 ZEND_INTRIN_AVX2_FUNC_DECL(zend_string *php_base64_decode_ex_avx2(const unsigned char *str, size_t length, bool strict));
 # endif
 
 # if ZEND_INTRIN_SSSE3_RESOLVER
-ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length));
+ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length, zend_long flags));
 ZEND_INTRIN_SSSE3_FUNC_DECL(zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length, bool strict));
 # endif
 
-zend_string *php_base64_encode_default(const unsigned char *str, size_t length);
+zend_string *php_base64_encode_default(const unsigned char *str, size_t length, zend_long flags);
 zend_string *php_base64_decode_ex_default(const unsigned char *str, size_t length, bool strict);
 
 # if (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO)
-PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) __attribute__((ifunc("resolve_base64_encode")));
+PHPAPI zend_string *php_base64_encode_ex(const unsigned char *str, size_t length, zend_long flags) __attribute__((ifunc("resolve_base64_encode")));
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, bool strict) __attribute__((ifunc("resolve_base64_decode")));
 
-typedef zend_string *(*base64_encode_func_t)(const unsigned char *, size_t);
+typedef zend_string *(*base64_encode_func_t)(const unsigned char *, size_t, zend_long flags);
 typedef zend_string *(*base64_decode_func_t)(const unsigned char *, size_t, bool);
 
 ZEND_NO_SANITIZE_ADDRESS
@@ -462,11 +466,11 @@ static base64_decode_func_t resolve_base64_decode(void) {
 }
 # else /* (ZEND_INTRIN_AVX2_FUNC_PROTO || ZEND_INTRIN_SSSE3_FUNC_PROTO) */
 
-PHPAPI zend_string *(*php_base64_encode_ptr)(const unsigned char *str, size_t length) = NULL;
+PHPAPI zend_string *(*php_base64_encode_ptr)(const unsigned char *str, size_t length, zend_long flags) = NULL;
 PHPAPI zend_string *(*php_base64_decode_ex_ptr)(const unsigned char *str, size_t length, bool strict) = NULL;
 
-PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length) {
-	return php_base64_encode_ptr(str, length);
+PHPAPI zend_string *php_base64_encode_ex(const unsigned char *str, size_t length, zend_long flags) {
+	return php_base64_encode_ptr(str, length, flags);
 }
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, bool strict) {
 	return php_base64_decode_ex_ptr(str, length, strict);
@@ -508,7 +512,7 @@ PHP_MINIT_FUNCTION(base64_intrin)
 #endif /* ZEND_INTRIN_AVX2_NATIVE */
 
 #if BASE64_INTRIN_AVX512_VBMI_FUNC_PROTO || BASE64_INTRIN_AVX512_VBMI_FUNC_PTR
-zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length)
+zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t length, zend_long flags)
 {
 	const unsigned char *c = str;
 	unsigned char *o;
@@ -545,7 +549,7 @@ zend_string *php_base64_encode_avx512_vbmi(const unsigned char *str, size_t leng
 		length -= 48;
 	}
 
-	o = php_base64_encode_impl(c, length, o);
+	o = php_base64_encode_impl(c, length, o, flags);
 
 	ZSTR_LEN(result) = (o - (unsigned char *)ZSTR_VAL(result));
 
@@ -618,7 +622,7 @@ zend_string *php_base64_decode_ex_avx512_vbmi(const unsigned char *str, size_t l
 #endif
 
 #if BASE64_INTRIN_AVX512_FUNC_PROTO || BASE64_INTRIN_AVX512_FUNC_PTR
-zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length)
+zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length, zend_long flags)
 {
 	const unsigned char *c = str;
 	unsigned char *o;
@@ -665,7 +669,7 @@ zend_string *php_base64_encode_avx512(const unsigned char *str, size_t length)
 		length -= 48;
 	}
 
-	o = php_base64_encode_impl(c, length, o);
+	o = php_base64_encode_impl(c, length, o, flags);
 
 	ZSTR_LEN(result) = (o - (unsigned char *)ZSTR_VAL(result));
 
@@ -900,11 +904,11 @@ static __m128i php_base64_encode_ssse3_translate(__m128i in)
 
 #if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER
 # if ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_SSSE3_NATIVE
-PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
+PHPAPI zend_string *php_base64_encode_ex(const unsigned char *str, size_t length, zend_long flags)
 # elif ZEND_INTRIN_AVX2_RESOLVER
-zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length)
+zend_string *php_base64_encode_avx2(const unsigned char *str, size_t length, zend_long flags)
 # else /* ZEND_INTRIN_SSSE3_RESOLVER */
-zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
+zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length, zend_long flags)
 # endif
 {
 	const unsigned char *c = str;
@@ -938,7 +942,7 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 	PHP_BASE64_ENCODE_SSSE3_LOOP;
 # endif
 
-	o = php_base64_encode_impl(c, length, o);
+	o = php_base64_encode_impl(c, length, o, flags);
 
 	ZSTR_LEN(result) = (o - (unsigned char *)ZSTR_VAL(result));
 
@@ -946,7 +950,7 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 }
 
 # if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_AVX2_RESOLVER
-zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
+zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length, zend_long flags)
 {
 	const unsigned char *c = str;
 	unsigned char *o;
@@ -957,7 +961,7 @@ zend_string *php_base64_encode_ssse3(const unsigned char *str, size_t length)
 
 	PHP_BASE64_ENCODE_SSSE3_LOOP;
 
-	o = php_base64_encode_impl(c, length, o);
+	o = php_base64_encode_impl(c, length, o, flags);
 
 	ZSTR_LEN(result) = (o - (unsigned char *)ZSTR_VAL(result));
 
@@ -1180,9 +1184,9 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 
 #if !ZEND_INTRIN_AVX2_NATIVE && !ZEND_INTRIN_SSSE3_NATIVE
 #if ZEND_INTRIN_AVX2_RESOLVER || ZEND_INTRIN_SSSE3_RESOLVER
-zend_string *php_base64_encode_default(const unsigned char *str, size_t length)
+zend_string *php_base64_encode_default(const unsigned char *str, size_t length, zend_long flags)
 #else
-PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
+PHPAPI zend_string *php_base64_encode_ex(const unsigned char *str, size_t length, zend_long flags)
 #endif
 {
 	unsigned char *p;
@@ -1191,7 +1195,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
 	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
 	p = (unsigned char *)ZSTR_VAL(result);
 
-	p = php_base64_encode_impl(str, length, p);
+	p = php_base64_encode_impl(str, length, p, flags);
 
 	ZSTR_LEN(result) = (p - (unsigned char *)ZSTR_VAL(result));
 
@@ -1229,12 +1233,15 @@ PHP_FUNCTION(base64_encode)
 	char *str;
 	size_t str_len;
 	zend_string *result;
+	bool padding = true;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(padding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_base64_encode((unsigned char*)str, str_len);
+	result = php_base64_encode_ex((unsigned char*)str, str_len, (padding ? 0 : PHP_BASE64_NO_PADDING));
 	RETURN_STR(result);
 }
 /* }}} */
