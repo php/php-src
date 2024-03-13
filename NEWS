@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13544 (Pre-PHP 8.2 compatibility for mt_srand with unknown
     modes). (timwolla)
 
+- Session:
+  . Fixed bug GH-13680 (Segfault with session_decode and compilation error).
+    (nielsdos)
+
 - Standard:
   . Fixed bug GH-11808 (Live filesystem modified by tests). (nielsdos)
   . Fixed GH-13402 (Added validation of `\n` in $additional_headers of mail()).
