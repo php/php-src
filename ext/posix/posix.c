@@ -39,10 +39,9 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#ifdef HAVE_SYS_MKDEV_H
+#ifdef MAJOR_IN_MKDEV
 # include <sys/mkdev.h>
-#endif
-#ifdef HAVE_SYS_SYSMACROS_H
+#elif defined(MAJOR_IN_SYSMACROS)
 # include <sys/sysmacros.h>
 #endif
 
@@ -620,7 +619,7 @@ PHP_FUNCTION(posix_mknod)
 			zend_argument_value_error(3, "cannot be 0 for the POSIX_S_IFCHR and POSIX_S_IFBLK modes");
 			RETURN_THROWS();
 		} else {
-#if defined(HAVE_MAKEDEV) || defined(makedev)
+#ifdef HAVE_MAKEDEV
 			php_dev = makedev(major, minor);
 #else
 			php_error_docref(NULL, E_WARNING, "Cannot create a block or character device, creating a normal file instead");

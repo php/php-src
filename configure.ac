@@ -454,6 +454,11 @@ if test "$GCC" = "yes"; then
   PHP_BROKEN_GCC_STRLEN_OPT
 fi
 
+dnl Detect the headers required to use makedev, major, and minor.
+dnl Autoconf <= 2.69 didn't check glibc 2.25 deprecated macros in sys/types.h.
+m4_version_prereq([2.70],,[ac_cv_header_sys_types_h_makedev=no])
+AC_HEADER_MAJOR
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl ----------------------------------------------------------------------------
 
