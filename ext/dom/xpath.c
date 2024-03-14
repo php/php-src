@@ -125,8 +125,11 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 					}
 				}
 				break;
-			default:
-			ZVAL_STRING(&fci.params[i], (char *)xmlXPathCastToString(obj));
+			default: {
+				str = (char *)xmlXPathCastToString(obj);
+				ZVAL_STRING(&fci.params[i], str);
+				xmlFree(str);
+			}
 		}
 		xmlXPathFreeObject(obj);
 	}

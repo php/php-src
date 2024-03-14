@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Add some missing ZPP checks. (nielsdos)
+  . Fix potential memory leak in XPath evaluation results. (nielsdos)
 
 - FPM:
   . Fixed GH-11086 (FPM: config test runs twice in daemonised mode).
