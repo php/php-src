@@ -1,9 +1,9 @@
-#################
+#######
  Stubs
-#################
+#######
 
-Stub files are pieces of plain PHP code which only contain declarations without actually runnable code. A very basic stub
-looks like this:
+Stub files are pieces of plain PHP code which only contain declarations without actually runnable
+code. A very basic stub looks like this:
 
 .. code:: php
 
@@ -18,9 +18,10 @@ looks like this:
 
    function foo(string $param): string {}
 
-Any kind of symbols can be declared via stubs, and with the exception of disjunctive normal form (DNF) types, basically
-any kind of type declaration is supported. Additional meta information can be added either via PHPDoc or attributes.
-Namespaces can also be used by either adding a top-level ``namespace`` declaration or by using namespace blocks:
+Any kind of symbols can be declared via stubs, and with the exception of disjunctive normal form
+(DNF) types, basically any kind of type declaration is supported. Additional meta information can be
+added either via PHPDoc or attributes. Namespaces can also be used by either adding a top-level
+``namespace`` declaration or by using namespace blocks:
 
 .. code:: php
 
@@ -39,27 +40,28 @@ Namespaces can also be used by either adding a top-level ``namespace`` declarati
        function foo(string $param): string {}
    }
 
-The above example declares the global constants and class ``Foo`` in the top-level namespace, while ``foo()`` will be
-available in the ``Foo`` namespace.
+The above example declares the global constants and class ``Foo`` in the top-level namespace, while
+``foo()`` will be available in the ``Foo`` namespace.
 
-**********
-Using gen_stub.php
-**********
+********************
+ Using gen_stub.php
+********************
 
-By convention, stub files have a ``.stub.php`` extension. They are processed by ``build/gen_stub.php``: it uses
-`PHP-Parser`_ for parsing, then depending on the configuration and the supplied arguments, it can generate various artifacts.
-The following sections will introduce these capabilities.
+By convention, stub files have a ``.stub.php`` extension. They are processed by
+``build/gen_stub.php``: it uses PHP-Parser_ for parsing, then depending on the configuration and the
+supplied arguments, it can generate various artifacts. The following sections will introduce these
+capabilities.
 
-.. _PHP-Parser: https://github.com/nikic/PHP-Parser
+.. _php-parser: https://github.com/nikic/PHP-Parser
 
-**********
-Generating arginfo structures
-**********
+*******************************
+ Generating arginfo structures
+*******************************
 
-The original purpose of stubs was to make it easier to declare arginfo structures. Previously, one had to manually use
-the different ``ZEND_BEGIN_ARG_* ... ZEND_END_ARG_INFO()`` macros. This was a tedious and error-prone process, so being
-able to use pure PHP code based on which the C code can be generated is a huge relief. The first example above results
-in the following arginfo file:
+The original purpose of stubs was to make it easier to declare arginfo structures. Previously, one
+had to manually use the different ``ZEND_BEGIN_ARG_* ... ZEND_END_ARG_INFO()`` macros. This was a
+tedious and error-prone process, so being able to use pure PHP code based on which the C code can be
+generated is a huge relief. The first example above results in the following arginfo file:
 
 .. code:: c
 
@@ -73,20 +75,23 @@ in the following arginfo file:
    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Foo_bar, 0, 0, IS_STRING, 0)
    ZEND_END_ARG_INFO()
 
-Please note the hash above. It makes sure that stub files are not reprocessed unless there was any actual change, or
-something requires it to be processed (e.g. regeneration was forced by using the `-f` flag).
+Please note the hash above. It makes sure that stub files are not reprocessed unless there was any
+actual change, or something requires it to be processed (e.g. regeneration was forced by using the
+`-f` flag).
 
-Another very important thing to keep in mind is that stub-based type declarations have to be in sync with the parameter
-parsing code (``ZPP``). Even though only ZPP is run in case of release builds when an internal function or method is invoked,
-(meaning that arginfo structures are only used for reflection purposes), however, the result of ``ZPP`` as well as the
-actual type of the return value is compared with the available reflection information in debug builds, and errors are
-raised in case of any incompatibility. That's why only absolutely correct types should ever be declared in stubs. For
-documentation purposes, PHPDoc can be used.
+Another very important thing to keep in mind is that stub-based type declarations have to be in sync
+with the parameter parsing code (``ZPP``). Even though only ZPP is run in case of release builds
+when an internal function or method is invoked, (meaning that arginfo structures are only used for
+reflection purposes), however, the result of ``ZPP`` as well as the actual type of the return value
+is compared with the available reflection information in debug builds, and errors are raised in case
+of any incompatibility. That's why only absolutely correct types should ever be declared in stubs.
+For documentation purposes, PHPDoc can be used.
 
 Since PHP 8.0, arginfo structures can also store default values in order to be used by
-``ReflectionParameter::getDefaultValue()`` among some other use-cases. Default values may not only be literals, but
-compile-time evaluable expressions, possibly containing references to constants. Let's modify function ``foo()``
-slightly in our original example by making ``$param`` an optional parameter:
+``ReflectionParameter::getDefaultValue()`` among some other use-cases. Default values may not only
+be literals, but compile-time evaluable expressions, possibly containing references to constants.
+Let's modify function ``foo()`` slightly in our original example by making ``$param`` an optional
+parameter:
 
 .. code:: php
 
@@ -100,8 +105,9 @@ This will result in the following arginfo:
       ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, param, IS_LONG, 0, "FOO . \"bar\"")
    ZEND_END_ARG_INFO()
 
-By default, referencing constants works as long as the constant is available in the same stub file. If this is
-not possible by any reason, then the stub declaring the necessary constant should be included:
+By default, referencing constants works as long as the constant is available in the same stub file.
+If this is not possible by any reason, then the stub declaring the necessary constant should be
+included:
 
 .. code:: php
 
@@ -120,8 +126,9 @@ not possible by any reason, then the stub declaring the necessary constant shoul
 
    function foo(string $param = FOO): string {}
 
-Sometimes, arguments have to be passed by reference, or by using the `ZEND_SEND_PREFER_REF` flag. Passing by reference
-is trivial to declare by the usual syntax, while the latter can be achieved by using the ``@prefer-ref`` PHPDoc tag:
+Sometimes, arguments have to be passed by reference, or by using the `ZEND_SEND_PREFER_REF` flag.
+Passing by reference is trivial to declare by the usual syntax, while the latter can be achieved by
+using the ``@prefer-ref`` PHPDoc tag:
 
 .. code:: php
 
@@ -140,12 +147,13 @@ This is going to yield the following arginfo structure:
        ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, param2, IS_STRING, 0)
    ZEND_END_ARG_INFO()
 
-**********
-Generating function entries
-**********
+*****************************
+ Generating function entries
+*****************************
 
-Besides arginfo structures, function entries themselves can also be generated via stubs. In order to make this work,
-the file-level ``@generate-function-entries`` PHPDoc tag has to be added to our stub:
+Besides arginfo structures, function entries themselves can also be generated via stubs. In order to
+make this work, the file-level ``@generate-function-entries`` PHPDoc tag has to be added to our
+stub:
 
 .. code:: php
 
@@ -176,8 +184,8 @@ Now, the following C code is added to our original arginfo file:
        ZEND_FE_END
    };
 
-The ``ext_functions`` variable is to be passed for the ``functions`` member of `zend_module_entry`, while
-``class_Foo_methods`` can be used when registering the ``Foo`` class:
+The ``ext_functions`` variable is to be passed for the ``functions`` member of `zend_module_entry`,
+while ``class_Foo_methods`` can be used when registering the ``Foo`` class:
 
 .. code:: c
 
@@ -187,32 +195,34 @@ Function entries may make use of extra meta information passed via the following
 
 -  ``@deprecated``: Triggers the usual deprecation notice when the function/method is called.
 
--  ``@alias``: If a function/method is an alias of another function/method, then the aliased function/method name
-   has to be provided as value. E.g. function ``sizeof()` has the ``@alias count`` annotation.
+-  ``@alias``: If a function/method is an alias of another function/method, then the aliased
+   function/method name has to be provided as value. E.g. function ``sizeof()` has the ``@alias
+   count`` annotation.
 
--  ``@implementation-alias``: This is very similar to ``@alias`` with some semantic difference: these aliases
-   exists purely to avoid duplicating some code, but there is no other connection between the alias and the aliased
-   function or method. A notable example is ``Error::getCode()`` which has the ``@implementation-alias Exception::getCode``
-   annotation. The difference between ``@alias`` and ``@implementation-alias`` is very nuanced and is only observable
-   in the manual.
+-  ``@implementation-alias``: This is very similar to ``@alias`` with some semantic difference:
+   these aliases exists purely to avoid duplicating some code, but there is no other connection
+   between the alias and the aliased function or method. A notable example is ``Error::getCode()``
+   which has the ``@implementation-alias Exception::getCode`` annotation. The difference between
+   ``@alias`` and ``@implementation-alias`` is very nuanced and is only observable in the manual.
 
--  ``@tentative-return-type``: By using this annotation, the return type declaration is reclassified as a
-   `tentative return type`_.
+-  ``@tentative-return-type``: By using this annotation, the return type declaration is reclassified
+   as a `tentative return type`_.
 
--  ``@genstubs-expose-comment-block``: By adding this annotation at the beginning of a docblock, the content of the
-   docblock will be exposed for `ReflectionFunctionAbstract::getDocComment()`. This feature is only available as of
-   PHP 8.4.0.
+-  ``@genstubs-expose-comment-block``: By adding this annotation at the beginning of a docblock, the
+   content of the docblock will be exposed for `ReflectionFunctionAbstract::getDocComment()`. This
+   feature is only available as of PHP 8.4.0.
 
 .. _tentative return type: https://wiki.php.net/rfc/internal_method_return_types
 
-**********
-Generating class entries
-**********
+**************************
+ Generating class entries
+**************************
 
-Until now, we only covered how to deal with functions. But as mentioned in the beginning, stubs can declare any kind of
-symbols. In order to generate the code which is necessary for registering constants, classes, properties, enums, and
-traits, the ``@generate-class-entries`` file-level PHPDoc tag has to be added to the stub. Using
-``@generate-class-entries`` automatically implies ``@generate-function-entries```, so there is no use of adding the latter.
+Until now, we only covered how to deal with functions. But as mentioned in the beginning, stubs can
+declare any kind of symbols. In order to generate the code which is necessary for registering
+constants, classes, properties, enums, and traits, the ``@generate-class-entries`` file-level PHPDoc
+tag has to be added to the stub. Using ``@generate-class-entries`` automatically implies
+``@generate-function-entries```, so there is no use of adding the latter.
 
 Given the following stub:
 
@@ -287,39 +297,41 @@ The following arginfo file is generated:
        return class_entry;
    }
 
-We can disregard the implementation details of the ``register_class_*()`` functions, and directly use them to register
-enum ``Number`` and class ``Foo``:
+We can disregard the implementation details of the ``register_class_*()`` functions, and directly
+use them to register enum ``Number`` and class ``Foo``:
 
 .. code:: c
 
    zend_class_entry *number_ce = register_class_Number();
    zend_class_entry *foo_ce = register_class_Foo(zend_standard_class_def);
 
-It's worth to note that the class entry of any dependency (e.g. the parent class or implemented interfaces) has to be
-manually passed to the register function: in this specific case, the class entry for ``stdClass`` (``zend_standard_class_def``)
-was passed.
+It's worth to note that the class entry of any dependency (e.g. the parent class or implemented
+interfaces) has to be manually passed to the register function: in this specific case, the class
+entry for ``stdClass`` (``zend_standard_class_def``) was passed.
 
 Just like functions and methods, classes also support some meta information passed via PHPDoc tags:
 
 -  ``@deprecated``: triggers a deprecation notice when the class is used
 
--  ``@strict-properties``: adds the ``ZEND_ACC_NO_DYNAMIC_PROPERTIES`` flag for the class (as of PHP 8.0), which disallow
-   dynamic properties.
+-  ``@strict-properties``: adds the ``ZEND_ACC_NO_DYNAMIC_PROPERTIES`` flag for the class (as of PHP
+   8.0), which disallow dynamic properties.
 
--  ``@not-serializable``: adds the ``ZEND_ACC_NOT_SERIALIZABLE`` flag for the class (as of PHP 8.1), which prevents
-   the serialization of the class.
+-  ``@not-serializable``: adds the ``ZEND_ACC_NOT_SERIALIZABLE`` flag for the class (as of PHP 8.1),
+   which prevents the serialization of the class.
 
--  ``@genstubs-expose-comment-block``: By adding this tag at the beginning of a docblock, the content of the
-   docblock will be exposed for `ReflectionClass::getDocComment()`. This feature is only available as of PHP 8.4.0.
+-  ``@genstubs-expose-comment-block``: By adding this tag at the beginning of a docblock, the
+   content of the docblock will be exposed for `ReflectionClass::getDocComment()`. This feature is
+   only available as of PHP 8.4.0.
 
-**********
-Generating global constants and attributes
-**********
+********************************************
+ Generating global constants and attributes
+********************************************
 
-We have not covered so far how to register global constants and attributes for functions. Slightly surprisingly,
-the ``/** @generate-class-entries */``` file-level PHPDoc tag is necessary for it to work, even though, neither
-of them relate to classes. That's also why the C code which registers these symbols takes place in a function
-called ``register_{{ STUB FILE NAME }}_symbols()```. Given the following ``example.stub.php``` file:
+We have not covered so far how to register global constants and attributes for functions. Slightly
+surprisingly, the ``/** @generate-class-entries */``` file-level PHPDoc tag is necessary for it to
+work, even though, neither of them relate to classes. That's also why the C code which registers
+these symbols takes place in a function called ``register_{{ STUB FILE NAME }}_symbols()```. Given
+the following ``example.stub.php``` file:
 
 .. code:: php
 
@@ -338,7 +350,8 @@ called ``register_{{ STUB FILE NAME }}_symbols()```. Given the following ``examp
 
    function foo(#[\SensitiveParameter] string $param): string {}
 
-The following C function will be generated in order to register the two global constants and the attribute:
+The following C function will be generated in order to register the two global constants and the
+attribute:
 
 .. code:: c
 
@@ -350,8 +363,9 @@ The following C function will be generated in order to register the two global c
        zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "foo", sizeof("foo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
    }
 
-Similarly to class registration functions, ``register_example_symbols()`` also has to be called during the module
-initialization process (``MINIT``), and the ``module_number`` variable has to be passed to it:
+Similarly to class registration functions, ``register_example_symbols()`` also has to be called
+during the module initialization process (``MINIT``), and the ``module_number`` variable has to be
+passed to it:
 
 .. code:: c
 
@@ -362,46 +376,52 @@ initialization process (``MINIT``), and the ``module_number`` variable has to be
        return SUCCESS;
    }
 
-Constant registration needs more elaboration: no matter if the constant type can be inferred from the value, it always
-has to be provided via the ``@var`` PHPDoc tag. For typed class constants, ``@var`` can be omitted, and the type
-declaration will serve for this purpose.
+Constant registration needs more elaboration: no matter if the constant type can be inferred from
+the value, it always has to be provided via the ``@var`` PHPDoc tag. For typed class constants,
+``@var`` can be omitted, and the type declaration will serve for this purpose.
 
-In lots of cases, constants have a value which comes from a 3rd party library, or it may also be possible that the value
-is a C expression (e.g. think about a combination of bit flags). Sometimes the exact value is not even known, because it
-depends on the system. In these cases, it's better not to duplicate the exact value in the stub, but the C value should
-be referenced instead. That's when the ``UNKNOWN`` constant value along with the ``@cvalue`` PHPDoc tag is useful: this
-combination can be used to refer to a C value (see constant ``BAR`` in the last example).
+In lots of cases, constants have a value which comes from a 3rd party library, or it may also be
+possible that the value is a C expression (e.g. think about a combination of bit flags). Sometimes
+the exact value is not even known, because it depends on the system. In these cases, it's better not
+to duplicate the exact value in the stub, but the C value should be referenced instead. That's when
+the ``UNKNOWN`` constant value along with the ``@cvalue`` PHPDoc tag is useful: this combination can
+be used to refer to a C value (see constant ``BAR`` in the last example).
 
 Constants can take the following extra meta information passed via PHPDoc tags:
 
 -  ``@deprecated``: Triggers a deprecation notice when the constant is used.
 
--  ``@genstubs-expose-comment-block``: By adding this tag at the beginning of a docblock, the content of the
-   docblock will be exposed for `ReflectionClass::getDocComment()`. This feature is only available as of PHP 8.4.0.
+-  ``@genstubs-expose-comment-block``: By adding this tag at the beginning of a docblock, the
+   content of the docblock will be exposed for `ReflectionClass::getDocComment()`. This feature is
+   only available as of PHP 8.4.0.
 
-**********
-Maintaining backward compatibility
-**********
+************************************
+ Maintaining backward compatibility
+************************************
 
-While php-src itself processes the built-in stubs with only the latest version of ``gen_stub.php`` which is available in
-a specific PHP version, the same is not true for 3rd party extensions: their stubs need to keep backward compatibility
-with older PHP versions even when using the latest version of ``gen_stub.php``. Achieving this is not straightforward,
-since stubs may get new features which are unavailable in earlier PHP versions, or ABI compatibility breaks may happen
-between minor releases. Not to mention the fact that PHP 7.x versions are substantially different from nowadays' PHP
-versions.
+While php-src itself processes the built-in stubs with only the latest version of ``gen_stub.php``
+which is available in a specific PHP version, the same is not true for 3rd party extensions: their
+stubs need to keep backward compatibility with older PHP versions even when using the latest version
+of ``gen_stub.php``. Achieving this is not straightforward, since stubs may get new features which
+are unavailable in earlier PHP versions, or ABI compatibility breaks may happen between minor
+releases. Not to mention the fact that PHP 7.x versions are substantially different from nowadays'
+PHP versions.
 
-That's why it is useful to be able to declare the backward compatibility expectations of a stub. This is possible via
-using the ``@generate-legacy-arginfo`` file-level PHPDoc tag. If no value is passed to the annotation, the
-generated arginfo code will be compatible with PHP 7.0. In order to achieve this, an additional arginfo file is generated
-with a ``_legacy_arginfo.h`` suffix besides the regular one. Symbols declared by a legacy arginfo file will miss any
-type information and any PHP 8.x features. An extension author can then include the proper arginfo file depending on which
+That's why it is useful to be able to declare the backward compatibility expectations of a stub.
+This is possible via using the ``@generate-legacy-arginfo`` file-level PHPDoc tag. If no value is
+passed to the annotation, the generated arginfo code will be compatible with PHP 7.0. In order to
+achieve this, an additional arginfo file is generated with a ``_legacy_arginfo.h`` suffix besides
+the regular one. Symbols declared by a legacy arginfo file will miss any type information and any
+PHP 8.x features. An extension author can then include the proper arginfo file depending on which
 PHP version the extension is built for.
 
-When ``@generate-legacy-arginfo`` is passed a PHP version ID (``80000`` for PHP 8.0, ``80100`` for PHP PHP 8.1,
-``80200`` for PHP 8.2, ``80300`` for PHP 8.3, and ``80400`` for PHP 8.4), then only one arginfo file is going to be generated,
-and ``#if`` prepocessor directives will ensure compatibility with all the required PHP versions.
+When ``@generate-legacy-arginfo`` is passed a PHP version ID (``80000`` for PHP 8.0, ``80100`` for
+PHP PHP 8.1, ``80200`` for PHP 8.2, ``80300`` for PHP 8.3, and ``80400`` for PHP 8.4), then only one
+arginfo file is going to be generated, and ``#if`` prepocessor directives will ensure compatibility
+with all the required PHP versions.
 
-Let's add the PHP 8.0 compatibility requirement to the slightly modified version of our previous example:
+Let's add the PHP 8.0 compatibility requirement to the slightly modified version of our previous
+example:
 
 .. code:: php
 
@@ -464,23 +484,25 @@ Then notice the ``#if (PHP_VERSION_ID >= ...)`` conditions in the generated argi
        return class_entry;
    }
 
-The prepocessor conditions are necessary because ``enum``s and ``readonly`` properties are PHP 8.1 features and consequently,
-they don't exist in PHP 8.0. Therefore, the registration of ``Number`` is completely omitted, while the ``readonly`` flag is
-not added for ``Foo::$prop`` below PHP 8.1 versions.
+The prepocessor conditions are necessary because ``enum``s and ``readonly`` properties are PHP 8.1
+features and consequently, they don't exist in PHP 8.0. Therefore, the registration of ``Number`` is
+completely omitted, while the ``readonly`` flag is not added for ``Foo::$prop`` below PHP 8.1
+versions.
 
-**********
-Generating information for the optimizer
-**********
+******************************************
+ Generating information for the optimizer
+******************************************
 
-A list of functions is maintained for the optimizer in ``Zend/Optimizer/zend_func_infos.h`` containing extra information
-about the return type and the cardinality of the return value. These pieces of information can enable more accurate
-optimizations (i.e. better type inference). Previously, the file was maintained manually, however since PHP 8.1,
-``gen_stub.php`` takes care of this task by passing the ``--generate-optimizer-info`` option.
+A list of functions is maintained for the optimizer in ``Zend/Optimizer/zend_func_infos.h``
+containing extra information about the return type and the cardinality of the return value. These
+pieces of information can enable more accurate optimizations (i.e. better type inference).
+Previously, the file was maintained manually, however since PHP 8.1, ``gen_stub.php`` takes care of
+this task by passing the ``--generate-optimizer-info`` option.
 
-A function is added to ``zend_func_infos.h`` if either the ``@return`` or the ``@refcount`` PHPDoc tag supplies
-more information than what is available based on the return type declaration. By default, scalar return types have a
-``refcount`` of ``0``, while non-scalar values are ``N``. If a function can only return newly created non-scalar values,
-its ``refcount`` can be set to ``1``.
+A function is added to ``zend_func_infos.h`` if either the ``@return`` or the ``@refcount`` PHPDoc
+tag supplies more information than what is available based on the return type declaration. By
+default, scalar return types have a ``refcount`` of ``0``, while non-scalar values are ``N``. If a
+function can only return newly created non-scalar values, its ``refcount`` can be set to ``1``.
 
 An example from the built-in functions:
 
@@ -498,23 +520,27 @@ Based on which the following func info entry is provided for the optimizer:
 
    F1("get_declared_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 
-Please note that the feature is only available for built-in stubs inside php-src, since currently there
-is no way to provide the function list for the optimizer other than overwriting ``zend_func_infos.h`` directly.
+Please note that the feature is only available for built-in stubs inside php-src, since currently
+there is no way to provide the function list for the optimizer other than overwriting
+``zend_func_infos.h`` directly.
 
-Additionally, functions can be evaluated in compile-time if their arguments are known in compile-time and their
-behavior if free from side-effects as well as it is not affected by the global state. Until PHP 8.2, a list of such
-functions was maintained manually in the optimizer. However, since PHP 8.2, the ``@compile-time-eval`` PHPDoc tag
-can be applied to any functions which conform to the above restrictions in order for them to qualify as evaluable in
-compile-time. The feature internally works by adding the ``ZEND_ACC_COMPILE_TIME_EVAL`` function flag.
+Additionally, functions can be evaluated in compile-time if their arguments are known in
+compile-time and their behavior if free from side-effects as well as it is not affected by the
+global state. Until PHP 8.2, a list of such functions was maintained manually in the optimizer.
+However, since PHP 8.2, the ``@compile-time-eval`` PHPDoc tag can be applied to any functions which
+conform to the above restrictions in order for them to qualify as evaluable in compile-time. The
+feature internally works by adding the ``ZEND_ACC_COMPILE_TIME_EVAL`` function flag.
 
-As of PHP 8.4, the concept of arity-based frameless functions was introduced. This is another optimization technique,
-which results in faster internal function calls by eliminating unnecessary checks for the number of passed parameters
-(if the number of passed arguments is known in compile-time).
+As of PHP 8.4, the concept of arity-based frameless functions was introduced. This is another
+optimization technique, which results in faster internal function calls by eliminating unnecessary
+checks for the number of passed parameters (if the number of passed arguments is known in
+compile-time).
 
-In order to take advantage of frameless functions, the ``@frameless-function`` PHPDoc tag has to be provided along
-with some configuration. Since currently only arity-based optimizations are supported, the following should be provided:
-``@frameless-function {"arity": NUM}``, where ``NUM`` is the number of parameters for which a frameless function
-is available. Let's see the stub of ``in_array()`` as an example:
+In order to take advantage of frameless functions, the ``@frameless-function`` PHPDoc tag has to be
+provided along with some configuration. Since currently only arity-based optimizations are
+supported, the following should be provided: ``@frameless-function {"arity": NUM}``, where ``NUM``
+is the number of parameters for which a frameless function is available. Let's see the stub of
+``in_array()`` as an example:
 
 .. code:: php
 
@@ -525,8 +551,8 @@ is available. Let's see the stub of ``in_array()`` as an example:
     */
    function in_array(mixed $needle, array $haystack, bool $strict = false): bool {}
 
-Apart from being compile-time evaluable, it has a frameless function counterpart for both the 2 and the 3-parameter
-signatures:
+Apart from being compile-time evaluable, it has a frameless function counterpart for both the 2 and
+the 3-parameter signatures:
 
 .. code:: c
 
@@ -564,43 +590,46 @@ signatures:
    flf_clean:;
    }
 
-**********
-Generating signatures for the manual
-**********
+**************************************
+ Generating signatures for the manual
+**************************************
 
-Theoretically, the manual should reflect the exact same signatures which are represented by the stubs. This is not
-exactly the case yet for built-in symbols, but ``gen_stub.php`` have multiple features to automate the process of
-syncronization.
+Theoretically, the manual should reflect the exact same signatures which are represented by the
+stubs. This is not exactly the case yet for built-in symbols, but ``gen_stub.php`` have multiple
+features to automate the process of syncronization.
 
-First of all, newly added functions or methods can be documented by providing the ``--generate-methodsynopses`` option.
-E.g. running ``./build/gen_stub.php --generate-methodsynopses ./ext/mbstring ../doc-en/reference/mbstring`` will create a
-dedicated page for each ``ext/mbstring`` function which is not yet documented, saving them into the
-``../doc-en/reference/mbstring/functions`` directory. Since the generated pages are stubs, the relevant
-descriptions have to be added, while the irrelevant ones have to be removed.
+First of all, newly added functions or methods can be documented by providing the
+``--generate-methodsynopses`` option. E.g. running ``./build/gen_stub.php --generate-methodsynopses
+./ext/mbstring ../doc-en/reference/mbstring`` will create a dedicated page for each ``ext/mbstring``
+function which is not yet documented, saving them into the
+``../doc-en/reference/mbstring/functions`` directory. Since the generated pages are stubs, the
+relevant descriptions have to be added, while the irrelevant ones have to be removed.
 
-For functions or methods which are already available in the manual, the documented signatures can be updated by providing
-the ``--replace-methodsynopses`` option. E.g. running ``./build/gen_stub.php --replace-methodsynopses ./ ../doc-en/`` will
-update all the function or method signatures in the English documentation whose stub counterpart is found.
+For functions or methods which are already available in the manual, the documented signatures can be
+updated by providing the ``--replace-methodsynopses`` option. E.g. running ``./build/gen_stub.php
+--replace-methodsynopses ./ ../doc-en/`` will update all the function or method signatures in the
+English documentation whose stub counterpart is found.
 
 Class signatures can be updated by providing the ``--replace-classsynopses`` option. E.g. running
-``./build/gen_stub.php --replace-classsynopses ./ ../doc-en/`` will
-update all the class signatures in the English documentation whose stub counterpart is found.
+``./build/gen_stub.php --replace-classsynopses ./ ../doc-en/`` will update all the class signatures
+in the English documentation whose stub counterpart is found.
 
-If a symbol is not intended to be documented, the ``@undocumentable`` PHPDoc tag should be added to it. Doing so will prevent
-any documentation to be created for the given symbol. In order not to add a whole stub file not to the manual, the PHPDoc
-tag should be applied to the file itself. These possibilities are useful for symbols which exist only for testing
-purposes (e.g. the ones declared for ``ext/zend_test``), or by some other reason documentation is not possible.
+If a symbol is not intended to be documented, the ``@undocumentable`` PHPDoc tag should be added to
+it. Doing so will prevent any documentation to be created for the given symbol. In order not to add
+a whole stub file not to the manual, the PHPDoc tag should be applied to the file itself. These
+possibilities are useful for symbols which exist only for testing purposes (e.g. the ones declared
+for ``ext/zend_test``), or by some other reason documentation is not possible.
 
-**********
-Validation
-**********
+************
+ Validation
+************
 
-It's possible to validate whether the alias function/method signatures are correct by providing the ``--verify`` flag to
-``gen_stub.php``. Normally, an alias function/method should have the exact same signature as its aliased
-function/method counterpart has apart from the name. In some cases this is not achievable by some reason (i.e.
-``bzwrite()`` is an alias of ``fwrite()``, but the name of the first parameter is different because the resource
-types differ). In order to suppress the error when the check is false positive, the ``@no-verify`` PHPDoc tag should be
-applied to the alias:
+It's possible to validate whether the alias function/method signatures are correct by providing the
+``--verify`` flag to ``gen_stub.php``. Normally, an alias function/method should have the exact same
+signature as its aliased function/method counterpart has apart from the name. In some cases this is
+not achievable by some reason (i.e. ``bzwrite()`` is an alias of ``fwrite()``, but the name of the
+first parameter is different because the resource types differ). In order to suppress the error when
+the check is false positive, the ``@no-verify`` PHPDoc tag should be applied to the alias:
 
 .. code:: php
 
@@ -611,25 +640,22 @@ applied to the alias:
     */
    function bzwrite($bz, string $data, ?int $length = null): int|false {}
 
-Besides aliases, the contents of the documentation can also be validated by providing the  ``--verify-manual`` option
-to ``gen_stub.php`` along with the path of the manual as the last argument: e.g.
-``./build/gen_stub.php --verify-manual ./ ../doc-en/`` when validation is based on all stubs in ``php-src`` and
-the English documentation is available in the parent directory.
+Besides aliases, the contents of the documentation can also be validated by providing the
+``--verify-manual`` option to ``gen_stub.php`` along with the path of the manual as the last
+argument: e.g. ``./build/gen_stub.php --verify-manual ./ ../doc-en/`` when validation is based on
+all stubs in ``php-src`` and the English documentation is available in the parent directory.
 
 When this feature is used, the following validations are performed:
 
 -  Detecting missing global constants
-
 -  Detecting missing classes
-
 -  Detecting missing methods
-
 -  Detecting incorrectly documented alias functions or methods
 
-**********
-Parameter statistics
-**********
+**********************
+ Parameter statistics
+**********************
 
-A less commonly used feature of ``gen_stub.php`` is to count how many times a parameter name occurs in the codebase:
-``./build/gen_stub.php --parameter-stats``. The result is a JSON object containing the parameter names and the
-number of their occurrences in descending order.
+A less commonly used feature of ``gen_stub.php`` is to count how many times a parameter name occurs
+in the codebase: ``./build/gen_stub.php --parameter-stats``. The result is a JSON object containing
+the parameter names and the number of their occurrences in descending order.
