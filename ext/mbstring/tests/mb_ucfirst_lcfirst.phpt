@@ -59,6 +59,9 @@ var_dump(bin2hex(mb_ucfirst(mb_convert_encoding("ｅｂｉ", "SJIS", "UTF-8"), "
 var_dump(bin2hex(mb_lcfirst(mb_convert_encoding("ＥＢＩ", "SJIS", "UTF-8"), "SJIS")));
 var_dump(bin2hex(mb_ucfirst(hex2bin("8471"), "SJIS"))); /* б */
 var_dump(bin2hex(mb_lcfirst(hex2bin("8441"), "SJIS"))); /* Б */
+echo "== Longer strings ==\n";
+var_dump(mb_ucfirst("э" . str_repeat("A", 65536)) === "Э" . str_repeat("A", 65536));
+var_dump(mb_lcfirst("Э" . str_repeat("A", 65536)) === "э" . str_repeat("A", 65536));
 ?>
 --EXPECT--
 == Empty String ==
@@ -82,3 +85,6 @@ string(12) "826482828289"
 string(12) "828582618268"
 string(4) "8441"
 string(4) "8471"
+== Longer strings ==
+bool(true)
+bool(true)
