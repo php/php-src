@@ -11,6 +11,8 @@
 |.globals ir_lb
 |.section code, cold_code, rodata, jmp_table
 
+|.define IR_LOOP_ALIGNMENT, 8
+
 #ifdef IR_DEBUG
 typedef struct _ir_mem {uint64_t v;} ir_mem;
 
@@ -5699,6 +5701,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 		IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
 		if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
 			continue;
+		}
+		if (bb->flags & IR_BB_ALIGN_LOOP) {
+			|	.align IR_LOOP_ALIGNMENT
 		}
 		|=>b:
 

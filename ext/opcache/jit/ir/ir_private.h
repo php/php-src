@@ -953,6 +953,8 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
 #define IR_BB_HAS_PARAM        (1<<12)
 #define IR_BB_HAS_VAR          (1<<13)
 
+/* The following flags are set by BB scheduler */
+#define IR_BB_ALIGN_LOOP       (1<<14)
 
 struct _ir_block {
 	uint32_t flags;

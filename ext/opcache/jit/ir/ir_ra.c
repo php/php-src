@@ -3926,7 +3926,6 @@ static void assign_regs(ir_ctx *ctx)
 										}
 									}
 									if (use_pos->hint_ref < 0
-									 && ctx->use_lists[-use_pos->hint_ref].count > 1
 									 && (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE) {
 										if (top_ival->flags & IR_LIVE_INTERVAL_SPILL_SPECIAL) {
 											reg |= IR_REG_SPILL_SPECIAL;
@@ -3950,7 +3949,6 @@ static void assign_regs(ir_ctx *ctx)
 										reg = IR_REG_NONE;
 									}
 								} else if (use_pos->hint_ref < 0
-										&& ctx->use_lists[-use_pos->hint_ref].count > 1
 										&& (old_reg = ir_get_alocated_reg(ctx, -use_pos->hint_ref, use_pos->op_num)) != IR_REG_NONE) {
 									if (reg != old_reg) {
 										IR_ASSERT(ctx->rules[-use_pos->hint_ref] & IR_FUSED);

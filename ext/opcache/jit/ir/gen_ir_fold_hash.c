@@ -25,10 +25,11 @@ void print_hash(uint32_t *mask, uint32_t count)
 {
 	uint32_t i;
 
-	printf("static const uint32_t _ir_fold_hash[%d] = {\n", count);
+	printf("static const uint32_t _ir_fold_hash[%d] = {\n", count + 1);
 	for (i = 0; i < count; i++) {
 		printf("\t0x%08x,\n", mask[i]);
 	}
+	printf("\t0x%08x\n", 0);
 	printf("};\n\n");
 }
 

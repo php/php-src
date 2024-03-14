@@ -2359,7 +2359,19 @@ restart:
 #endif
 	}
 
-	/* 5. Group chains according to the most frequent edge between them */
+	/* 5. Align loop headers */
+	for (b = 1; b <= ctx->cfg_blocks_count; b++) {
+		if (chains[b].head == b) {
+			bb = &ctx->cfg_blocks[b];
+			if (bb->loop_depth) {
+				if ((bb->flags & IR_BB_LOOP_HEADER) || ir_chain_head(chains, bb->loop_header) == b) {
+					bb->flags |= IR_BB_ALIGN_LOOP;
+				}
+			}
+		}
+	}
+
+	/* 6. Group chains according to the most frequent edge between them */
 	// TODO: Try to find a better heuristic
 	for (e = edges, i = edges_count; i > 0; e++, i--) {
 #if !IR_DEBUG_BB_SCHEDULE_GRAPH
@@ -2380,7 +2392,7 @@ restart:
 	ir_dump_chains(ctx, chains);
 #endif
 
-	/* 6. Form a final BB order  */
+	/* 7. Form a final BB order */
 	count = 0;
 	for (b = 1; b <= ctx->cfg_blocks_count; b++) {
 		if (chains[b].head == b) {
