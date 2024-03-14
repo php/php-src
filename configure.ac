@@ -1404,6 +1404,7 @@ datadir=`eval eval echo $datadir`
 dnl Build extension directory path.
 ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //'`
 
+AC_ARG_VAR([EXTENSION_DIR],[Overrides the PHP 'extension_dir' INI directive absolute path])dnl
 if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO
   if test "$oldstyleextdir" = "yes"; then
@@ -1480,18 +1481,23 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
 UNAME=`uname -a | xargs`
-PHP_UNAME=${PHP_UNAME:-$UNAME}
+AC_ARG_VAR([PHP_UNAME],[Overrides system information (uname -a output)])dnl
+AS_IF([test -z "$PHP_UNAME"],[PHP_UNAME=[$]UNAME])
 AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
 PHP_OS=`uname | xargs`
 AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
-PHP_BUILD_SYSTEM=${PHP_BUILD_SYSTEM:-$PHP_UNAME}
+AC_ARG_VAR([PHP_BUILD_SYSTEM],[PHP builder name output])dnl
+AS_IF([test -z "$PHP_BUILD_SYSTEM"],[PHP_BUILD_SYSTEM=[$]PHP_UNAME])
 AC_DEFINE_UNQUOTED(PHP_BUILD_SYSTEM,"$PHP_BUILD_SYSTEM",[builder uname output])
+AC_ARG_VAR([PHP_BUILD_PROVIDER],[PHP build provider])dnl
 if test -n "${PHP_BUILD_PROVIDER}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_PROVIDER,"$PHP_BUILD_PROVIDER",[build provider])
 fi
+AC_ARG_VAR([PHP_BUILD_COMPILER],[Compiler used for building PHP])dnl
 if test -n "${PHP_BUILD_COMPILER}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
 fi
+AC_ARG_VAR([PHP_BUILD_ARCH],[Target build architecture])dnl
 if test -n "${PHP_BUILD_ARCH}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
 fi
@@ -1538,11 +1544,15 @@ PHP_SUBST(CXXFLAGS)
 PHP_SUBST(CXXFLAGS_CLEAN)
 PHP_SUBST_OLD(DEBUG_CFLAGS)
 PHP_SUBST_OLD(EXTENSION_DIR)
+AC_ARG_VAR([EXTRA_LDFLAGS],[Additional LDFLAGS to apppend to the build])dnl
 PHP_SUBST_OLD(EXTRA_LDFLAGS)
 PHP_SUBST_OLD(EXTRA_LDFLAGS_PROGRAM)
 PHP_SUBST_OLD(EXTRA_LIBS)
 PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
 PHP_SUBST_OLD(INCLUDES)
+AC_ARG_VAR([EXTRA_CFLAGS],[Additional CFLAGS to apppend to the build])dnl
+PHP_SUBST(EXTRA_CFLAGS)
+AC_ARG_VAR([EXTRA_INCLUDES],[Extra includes, eg. '-I/path/to/include/'])dnl
 PHP_SUBST_OLD(EXTRA_INCLUDES)
 PHP_SUBST_OLD(INSTALL_IT)
 PHP_SUBST(LIBTOOL)
