@@ -2232,7 +2232,7 @@ function openlog(string $prefix, int $flags, int $facility): true {}
 
 function closelog(): true {}
 
-function syslog(int $priority, string $message): true {} // TODO make return type void
+function syslog(int $priority, string $message): true {}
 #endif
 
 /** @refcount 1 */

@@ -127,8 +127,8 @@ class XMLReader
 
     public string $xmlLang;
 
-    /** @return true */
-    public function close() {} // TODO make return type void
+    /** @tentative-return-type */
+    public function close(): true {}
 
     /** @tentative-return-type */
     public function getAttribute(string $name): ?string {}

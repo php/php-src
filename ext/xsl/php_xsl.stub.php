@@ -116,8 +116,8 @@ class XSLTProcessor
 
     public function registerPHPFunctionNS(string $namespaceURI, string $name, callable $callable): void {}
 
-    /** @return true */
-    public function setProfiling(?string $filename) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function setProfiling(?string $filename): true {}
 
     /** @tentative-return-type */
     public function setSecurityPrefs(int $preferences): int {}

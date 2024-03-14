@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a8822bd2d34cadfd7c7e166cb7be38271ea3ae6a */
+ * Stub hash: 5cdfeec10f0f92e3e2f9d2df572b2681b208449d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -440,7 +440,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_character_set_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_close, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_commit arginfo_class_mysqli_begin_transaction
@@ -457,7 +457,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_dump_debug_info, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_debug, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -479,7 +479,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_mysqli_get_warnings, 0, 0, mysqli_warning, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_mysqli_init arginfo_class_mysqli_close
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_init, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_kill, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -556,7 +557,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_set_opt arginfo_class_mysqli_options
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 5, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 1)
@@ -699,7 +700,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_stmt_get_result arginfo_class_mysqli_use_result
 
-#define arginfo_class_mysqli_warning___construct arginfo_class_mysqli_close
+#define arginfo_class_mysqli_warning___construct arginfo_class_mysqli_init
 
 #define arginfo_class_mysqli_warning_next arginfo_mysqli_thread_safe
 

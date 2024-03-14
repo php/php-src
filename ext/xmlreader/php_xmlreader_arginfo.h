@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6284a7b9f4477a9c0b2dd268d6229653bf66297c */
+ * Stub hash: fc01b7eacbd96dbeaf0b6a3a045692a77ef033f1 */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_close, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_getAttribute, 0, 1, IS_STRING, 1)

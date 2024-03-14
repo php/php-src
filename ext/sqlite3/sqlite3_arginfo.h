@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ec304d7a3db5b3a50c0d95755691bc055dffe047 */
+ * Stub hash: 28a003d4e83b956ab1e24b65c65e9ac28cfad0f4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -13,7 +13,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_open, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encryptionKey, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_close, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_version, 0, 0, IS_ARRAY, 0)
@@ -144,7 +144,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Stmt_reset arginfo_class_SQLite3Stmt_clear
 
-#define arginfo_class_SQLite3Result___construct arginfo_class_SQLite3_close
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Result___construct, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Result_numColumns arginfo_class_SQLite3_lastInsertRowID
 
