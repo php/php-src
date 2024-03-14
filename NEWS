@@ -8,6 +8,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Add some missing ZPP checks. (nielsdos)
+  . Fix potential memory leak in XPath evaluation results. (nielsdos)
 
 - Gettext:
   . Fixed sigabrt raised with dcgettext/dcngettext calls with gettext 0.22.5
