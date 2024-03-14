@@ -772,7 +772,7 @@ static bool dom_should_register_error_handlers(zend_long options)
 		return false;
 	}
 
-	return php_libxml_uses_internal_errors() || (EG(error_reporting) & E_WARNING);
+	return php_libxml_uses_internal_errors() || ((EG(error_reporting) | EG(user_error_handler_error_reporting)) & E_WARNING);
 }
 
 PHP_METHOD(DOM_HTMLDocument, createFromString)
