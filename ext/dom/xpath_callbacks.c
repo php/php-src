@@ -365,7 +365,9 @@ static zval *php_dom_xpath_callback_fetch_args(xmlXPathParserContextPtr ctxt, ui
 				}
 				break;
 			default:
-				ZVAL_STRING(param, (char *)xmlXPathCastToString(obj));
+				char *str = (char *)xmlXPathCastToString(obj);
+				ZVAL_STRING(param, str);
+				xmlFree(str);
 				break;
 		}
 		xmlXPathFreeObject(obj);
