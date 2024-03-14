@@ -11,11 +11,7 @@ if (!defined('TCP_CONGESTION')) {
 --FILE--
 <?php
 
-if (str_contains(PHP_OS, 'Linux')) {
-	$algo = 'cubic';
-} else {
-	$algo = 'newreno';
-}
+$algo = 'cubic';
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 if (!$socket) die ("socket failed");
 $r = socket_get_option($socket, SOL_TCP, TCP_CONGESTION);
