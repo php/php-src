@@ -138,15 +138,6 @@ using the ``@prefer-ref`` PHPDoc tag:
     */
    function foo(&$param1, string $param2): string {}
 
-This is going to yield the following arginfo structure:
-
-.. code:: c
-
-   ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_foo, 0, 2, IS_STRING, 0)
-       ZEND_ARG_INFO(1, param1)
-       ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, param2, IS_STRING, 0)
-   ZEND_END_ARG_INFO()
-
 *****************************
  Generating function entries
 *****************************
@@ -260,17 +251,7 @@ The following arginfo file is generated:
    {
        zend_class_entry *class_entry = zend_register_internal_enum("Number", IS_STRING, class_Number_methods);
 
-       zval const_ONE_value;
-       zend_string *const_ONE_value_str = zend_string_init("one", strlen("one"), 1);
-       ZVAL_STR(&const_ONE_value, const_ONE_value_str);
-       zend_string *const_ONE_name = zend_string_init_interned("ONE", sizeof("ONE") - 1, 1);
-       zend_declare_class_constant_ex(class_entry, const_ONE_name, &const_ONE_value, ZEND_ACC_PUBLIC, NULL);
-       zend_string_release(const_ONE_name);
-
-       zval enum_case_One_value;
-       zend_string *enum_case_One_value_str = zend_string_init("one", strlen("one"), 1);
-       ZVAL_STR(&enum_case_One_value, enum_case_One_value_str);
-       zend_enum_add_case_cstr(class_entry, "One", &enum_case_One_value);
+       /*  ... */
 
        return class_entry;
    }
@@ -279,20 +260,7 @@ The following arginfo file is generated:
    {
        zend_class_entry ce, *class_entry;
 
-       INIT_CLASS_ENTRY(ce, "Foo", class_Foo_methods);
-       class_entry = zend_register_internal_class_ex(&ce, NULL);
-
-       zval const_PI_value;
-       ZVAL_DOUBLE(&const_PI_value, M_PI);
-       zend_string *const_PI_name = zend_string_init_interned("PI", sizeof("PI") - 1, 1);
-       zend_declare_typed_class_constant(class_entry, const_PI_name, &const_PI_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_DOUBLE));
-       zend_string_release(const_PI_name);
-
-       zval property_prop_default_value;
-       ZVAL_UNDEF(&property_prop_default_value);
-       zend_string *property_prop_name = zend_string_init("prop", sizeof("prop") - 1, 1);
-       zend_declare_typed_property(class_entry, property_prop_name, &property_prop_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
-       zend_string_release(property_prop_name);
+       /*  ... */
 
        return class_entry;
    }
@@ -357,10 +325,7 @@ attribute:
 
    static void register_example_symbols(int module_number)
    {
-       REGISTER_STRING_CONSTANT("FOO", "foo", CONST_PERSISTENT);
-       REGISTER_DOUBLE_CONSTANT("BAR", M_PI, CONST_PERSISTENT);
-
-       zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "foo", sizeof("foo") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+       /*  ... */
    }
 
 Similarly to class registration functions, ``register_example_symbols()`` also has to be called
@@ -444,23 +409,12 @@ Then notice the ``#if (PHP_VERSION_ID >= ...)`` conditions in the generated argi
 
 .. code:: c
 
-   static const zend_function_entry class_Number_methods[] = {
-       ZEND_FE_END
-   };
-
-   static const zend_function_entry class_Foo_methods[] = {
-       ZEND_ME(Foo, foo, arginfo_class_Foo_foo, ZEND_ACC_PUBLIC)
-       ZEND_FE_END
-   };
+   /*  ... */
 
    #if (PHP_VERSION_ID >= 80100)
    static zend_class_entry *register_class_Number(void)
    {
-       zend_class_entry *class_entry = zend_register_internal_enum("Number", IS_UNDEF, class_Number_methods);
-
-       zend_enum_add_case_cstr(class_entry, "One", NULL);
-
-       return class_entry;
+       /*  ... */
    }
    #endif
 
@@ -484,7 +438,7 @@ Then notice the ``#if (PHP_VERSION_ID >= ...)`` conditions in the generated argi
        return class_entry;
    }
 
-The prepocessor conditions are necessary because ``enum``s and ``readonly`` properties are PHP 8.1
+The preprocessor conditions are necessary because ``enum``s and ``readonly`` properties are PHP 8.1
 features and consequently, they don't exist in PHP 8.0. Therefore, the registration of ``Number`` is
 completely omitted, while the ``readonly`` flag is not added for ``Foo::$prop`` below PHP 8.1
 versions.
@@ -496,8 +450,8 @@ versions.
 A list of functions is maintained for the optimizer in ``Zend/Optimizer/zend_func_infos.h``
 containing extra information about the return type and the cardinality of the return value. These
 pieces of information can enable more accurate optimizations (i.e. better type inference).
-Previously, the file was maintained manually, however since PHP 8.1, ``gen_stub.php`` takes care of
-this task by passing the ``--generate-optimizer-info`` option.
+Previously, the file was maintained manually, however since PHP 8.1, ``gen_stub.php`` can take care
+of this task when the ``--generate-optimizer-info`` option is passed to it.
 
 A function is added to ``zend_func_infos.h`` if either the ``@return`` or the ``@refcount`` PHPDoc
 tag supplies more information than what is available based on the return type declaration. By
@@ -513,12 +467,6 @@ An example from the built-in functions:
     * @refcount 1
     */
    function get_declared_classes(): array {}
-
-Based on which the following func info entry is provided for the optimizer:
-
-.. code:: c
-
-   F1("get_declared_classes", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 
 Please note that the feature is only available for built-in stubs inside php-src, since currently
 there is no way to provide the function list for the optimizer other than overwriting
@@ -596,27 +544,28 @@ the 3-parameter signatures:
 
 Theoretically, the manual should reflect the exact same signatures which are represented by the
 stubs. This is not exactly the case yet for built-in symbols, but ``gen_stub.php`` have multiple
-features to automate the process of syncronization.
+features to automate the process of synchronization.
 
 First of all, newly added functions or methods can be documented by providing the
 ``--generate-methodsynopses`` option. E.g. running ``./build/gen_stub.php --generate-methodsynopses
 ./ext/mbstring ../doc-en/reference/mbstring`` will create a dedicated page for each ``ext/mbstring``
 function which is not yet documented, saving them into the
-``../doc-en/reference/mbstring/functions`` directory. Since the generated pages are stubs, the
-relevant descriptions have to be added, while the irrelevant ones have to be removed.
+``../doc-en/reference/mbstring/functions`` directory. Since these are stub pages, many of the
+sections are empty by default, so the relevant descriptions have to be added, while the irrelevant
+ones have to be removed.
 
 For functions or methods which are already available in the manual, the documented signatures can be
 updated by providing the ``--replace-methodsynopses`` option. E.g. running ``./build/gen_stub.php
 --replace-methodsynopses ./ ../doc-en/`` will update all the function or method signatures in the
 English documentation whose stub counterpart is found.
 
-Class signatures can be updated by providing the ``--replace-classsynopses`` option. E.g. running
-``./build/gen_stub.php --replace-classsynopses ./ ../doc-en/`` will update all the class signatures
-in the English documentation whose stub counterpart is found.
+Class signatures can be updated in the manual by providing the ``--replace-classsynopses`` option.
+E.g. running ``./build/gen_stub.php --replace-classsynopses ./ ../doc-en/`` will update all the
+class signatures in the English documentation whose stub counterpart is found.
 
 If a symbol is not intended to be documented, the ``@undocumentable`` PHPDoc tag should be added to
 it. Doing so will prevent any documentation to be created for the given symbol. In order not to add
-a whole stub file not to the manual, the PHPDoc tag should be applied to the file itself. These
+a whole stub file to the manual, the PHPDoc tag should be applied to the file itself. These
 possibilities are useful for symbols which exist only for testing purposes (e.g. the ones declared
 for ``ext/zend_test``), or by some other reason documentation is not possible.
 
