@@ -10,7 +10,7 @@ freebsd_task:
   install_script:
     #- sed -i -e 's/quarterly/latest/g' /etc/pkg/FreeBSD.conf
     #- pkg upgrade -y
-    #- kldload accf_http
+    - kldload accf_http
     - pkg install -y autoconf bison gmake re2c icu libiconv png freetype2 enchant2 bzip2 krb5 t1lib gmp tidyp libsodium libzip libxml2 libxslt openssl oniguruma pkgconf webp libavif
   script:
     - ./buildconf -f
@@ -25,4 +25,4 @@ freebsd_task:
   tests_script:
     - export SKIP_IO_CAPTURE_TESTS=1
     - export CI_NO_IPV6=1
-    - sapi/cli/php run-tests.php -P -q -j2 -g FAIL,BORK,LEAK,XLEAK --no-progress --offline --show-diff --show-slow 1000 --set-timeout 120 -d zend_extension=opcache.so
+    - sapi/cli/php run-tests.php -P -q -j2 -g FAIL,BORK,LEAK,XLEAK --offline --show-diff --show-slow 1000 --set-timeout 120 -d zend_extension=opcache.so
