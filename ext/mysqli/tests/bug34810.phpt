@@ -84,7 +84,7 @@ object(mysqli)#%d (%d) {
   ["host_info"]=>
   string(%d) "%s"
   ["info"]=>
-  NULL
+  %s
   ["insert_id"]=>
   int(0)
   ["server_info"]=>
