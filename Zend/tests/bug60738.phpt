@@ -16,9 +16,13 @@ trigger_error('Error!');
 --EXPECTF--
 NULL
 Intercepted error!
-object(Closure)#%d (1) {
+object(Closure)#%d (3) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
 }
 
 Notice: Error! in %s on line %d

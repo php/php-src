@@ -5,9 +5,13 @@ Dumping closures includes the name.
 var_dump(function($foo) { });
 ?>
 --EXPECTF--
-object(Closure)#1 (2) {
+object(Closure)#1 (4) {
   ["name"]=>
   string(%d) "{closure:%s:2}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["parameter"]=>
   array(1) {
     ["$foo"]=>

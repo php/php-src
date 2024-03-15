@@ -28,9 +28,13 @@ object(foo)#%d (2) {
   ["test":"foo":private]=>
   int(3)
   ["a"]=>
-  object(Closure)#%d (3) {
+  object(Closure)#%d (5) {
     ["name"]=>
     string(%d) "{closure:%s:%d}"
+    ["file"]=>
+    string(%d) "%s"
+    ["line"]=>
+    int(%d)
     ["static"]=>
     array(1) {
       ["a"]=>

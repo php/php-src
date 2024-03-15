@@ -18,9 +18,13 @@ object(Closure)#%d (2) {
     string(10) "<required>"
   }
 }
-object(Closure)#%d (2) {
+object(Closure)#%d (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["parameter"]=>
   array(1) {
     ["$someThing"]=>

@@ -54,6 +54,8 @@ Array
                     [0] => Closure Object
                         (
                             [name] => {closure:%s:%d}
+                            [file] => %s
+                            [line] => 8
                             [parameter] => Array
                                 (
                                     [$param] => <required>

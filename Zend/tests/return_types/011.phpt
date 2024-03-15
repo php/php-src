@@ -12,4 +12,8 @@ var_dump(foo());
 object(Closure)#%d (%d) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
 }

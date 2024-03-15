@@ -15,9 +15,13 @@ $baz = new foo();
 var_dump($baz->bar());
 ?>
 --EXPECTF--
-object(Closure)#%d (3) {
+object(Closure)#%d (5) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["static"]=>
   array(1) {
     ["test"]=>

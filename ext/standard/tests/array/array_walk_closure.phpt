@@ -232,9 +232,13 @@ array(2) {
         int(3)
       }
       [1]=>
-      object(Closure)#%d (2) {
+      object(Closure)#%d (4) {
         ["name"]=>
         string(%d) "{closure:%s:%d}"
+        ["file"]=>
+        string(%d) "%s"
+        ["line"]=>
+        int(%d)
         ["parameter"]=>
         array(2) {
           ["$v"]=>
