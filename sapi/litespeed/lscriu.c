@@ -498,7 +498,6 @@ static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 
 static void LSCRIU_try_checkpoint(int *forked_pid)
 {
-    int iRet;
     pid_t iPid;
     pid_t iPidDump = getpid();
 
@@ -525,7 +524,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
         pid_t   iPidParent = getppid();
 
         setsid();
-        iRet = LSCRIU_Native_Dump(iPidDump,
+        (void)LSCRIU_Native_Dump(iPidDump,
                                   s_criu_image_path,
                                   s_fd_native);
         close(s_fd_native);
