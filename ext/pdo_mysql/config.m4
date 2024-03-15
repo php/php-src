@@ -41,8 +41,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
   else
-    AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
       AC_MSG_RESULT($PDO_MYSQL_CONFIG)
