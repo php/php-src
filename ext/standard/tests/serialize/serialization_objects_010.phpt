@@ -3,11 +3,11 @@ Serialize() must return a string or NULL
 --FILE--
 <?php
 Class C implements Serializable {
-    public function serialize() {
+    public function serialize(): ?string {
         return $this;
     }
 
-    public function unserialize($blah) {
+    public function unserialize($blah): void {
     }
 }
 

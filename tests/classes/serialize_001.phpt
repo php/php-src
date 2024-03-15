@@ -13,13 +13,13 @@ class Test implements Serializable
         $this->data = $data;
     }
 
-    function serialize()
+    function serialize(): ?string
     {
         echo __METHOD__ . "({$this->data})\n";
         return $this->data;
     }
 
-    function unserialize($serialized)
+    function unserialize($serialized): void
     {
         echo __METHOD__ . "($serialized)\n";
         $this->data = $serialized;

@@ -4,11 +4,11 @@ References to objects for which Serializable::serialize() returned NULL should u
 <?php
 
 class NotSerializable implements Serializable {
-    public function serialize() {
+    public function serialize(): ?string {
         return null;
     }
 
-    public function unserialize($serialized) {
+    public function unserialize($serialized): void {
     }
 }
 

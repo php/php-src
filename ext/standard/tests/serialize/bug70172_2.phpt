@@ -4,10 +4,10 @@ Bug #70172 - Use After Free Vulnerability in unserialize()
 <?php
 class obj implements Serializable {
     var $data;
-    function serialize() {
+    function serialize(): ?string {
         return serialize($this->data);
     }
-    function unserialize($data) {
+    function unserialize($data): void {
         $this->data = unserialize($data);
     }
 }

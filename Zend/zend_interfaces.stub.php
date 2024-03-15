@@ -48,11 +48,11 @@ interface ArrayAccess
 
 interface Serializable
 {
-    /** @return string|null */
-    public function serialize();
+    /** @tentative-return-type */
+    public function serialize(): ?string;
 
-    /** @return void */
-    public function unserialize(string $data);
+    /** @tentative-return-type */
+    public function unserialize(string $data): void;
 }
 
 interface Countable

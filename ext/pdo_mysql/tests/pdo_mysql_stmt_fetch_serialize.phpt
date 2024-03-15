@@ -64,12 +64,12 @@ MySQLPDOTest::skip();
             }
 
             // Serializable
-            public function serialize() {
+            public function serialize(): ?string {
                 printf("%s()\n", __METHOD__);
                 return 'Data from serialize';
             }
 
-            public function unserialize($data) {
+            public function unserialize($data): void {
                 printf("%s(%s)\n", __METHOD__, var_export($data, true));
             }
 

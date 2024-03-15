@@ -4,10 +4,10 @@ Testing to implement Serializable interface by traits
 <?php
 
 trait foo {
-    public function serialize() {
+    public function serialize(): ?string {
         return 'foobar';
     }
-    public function unserialize($x) {
+    public function unserialize($x): void {
         var_dump($x);
     }
 }

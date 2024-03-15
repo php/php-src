@@ -23,12 +23,12 @@ class B implements Serializable
         $this->b = new C($c);
     }
 
-    public function serialize()
+    public function serialize(): ?string
     {
         return serialize(clone $this->b);
     }
 
-    public function unserialize($data)
+    public function unserialize($data): void
     {
         $this->b = unserialize($data);
     }

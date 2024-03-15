@@ -21,7 +21,7 @@ class TestBase implements Serializable
     protected $BasePro = 'Protected';
     private   $BasePri = 'Private';
 
-    function serialize()
+    function serialize(): ?string
     {
         $serialized = array();
         foreach($this as $prop => $val) {
@@ -32,7 +32,7 @@ class TestBase implements Serializable
         return $serialized;
     }
 
-    function unserialize($serialized)
+    function unserialize($serialized): void
     {
         echo __METHOD__ . "($serialized)\n";
         foreach(unserialize($serialized) as $prop => $val) {
@@ -50,13 +50,13 @@ class TestDerived extends TestBase
     protected $DerivedPro = 'Protected';
     private   $DerivedPri = 'Private';
 
-    function serialize()
+    function serialize(): ?string
     {
         echo __METHOD__ . "()\n";
         return TestBase::serialize();
     }
 
-    function unserialize($serialized)
+    function unserialize($serialized): void
     {
         echo __METHOD__ . "()\n";
         return TestBase::unserialize($serialized);

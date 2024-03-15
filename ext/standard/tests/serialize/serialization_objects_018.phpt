@@ -3,8 +3,8 @@ Object serialization / unserialization: Strict format (2)
 --FILE--
 <?php
 class A implements Serializable {
-	public function serialize() {}
-	public function unserialize($data) {}
+	public function serialize(): ?string {}
+	public function unserialize($data): void {}
 	public function __serialize() {}
 	public function __unserialize($data) {}
 }

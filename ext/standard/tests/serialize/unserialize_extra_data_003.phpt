@@ -6,7 +6,7 @@ Test unserialize() with extra data at the end of a valid value with Serializable
 final class Foo implements Serializable {
     public $foo;
 
-    public function unserialize(string $foo)
+    public function unserialize(string $foo): void
     {
         $this->foo = unserialize($foo);
     }

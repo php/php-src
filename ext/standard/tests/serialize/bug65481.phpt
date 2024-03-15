@@ -8,7 +8,7 @@ class A {
 }
 
 class Token implements \Serializable {
-    public function serialize()
+    public function serialize(): ?string
     {
         $c = new A;
 
@@ -22,7 +22,7 @@ class Token implements \Serializable {
         return serialize(array(serialize($c)));
     }
 
-    public function unserialize($str)
+    public function unserialize($str): void
     {
         $r = unserialize($str);
         $r = unserialize($r[0]);

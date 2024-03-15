@@ -5,8 +5,8 @@ Bug #80411: References to null-serialized object break serialize()
 
 class UnSerializable implements Serializable
 {
-  public function serialize() {}
-  public function unserialize($serialized) {}
+  public function serialize(): ?string {}
+  public function unserialize($serialized): void {}
 }
 
 $unser = new UnSerializable();

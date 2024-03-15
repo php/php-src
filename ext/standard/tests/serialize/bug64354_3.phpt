@@ -9,11 +9,11 @@ class A {
 }
 
 class B implements Serializable {
-    public function serialize() {
+    public function serialize(): ?string {
         return NULL;
     }
 
-    public function unserialize($data) {
+    public function unserialize($data): void {
     }
 }
 

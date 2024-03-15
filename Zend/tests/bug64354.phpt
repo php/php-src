@@ -3,12 +3,12 @@ Bug #64354 (Unserialize array of objects whose class can't be autoloaded fail)
 --FILE--
 <?php
 class B implements Serializable {
-    public function serialize() {
+    public function serialize(): ?string {
         throw new Exception("serialize");
         return NULL;
     }
 
-    public function unserialize($data) {
+    public function unserialize($data): void {
     }
 }
 

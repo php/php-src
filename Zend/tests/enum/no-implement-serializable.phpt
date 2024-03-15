@@ -6,12 +6,12 @@ Enum must not implement Serializable
 enum Foo implements Serializable {
     case Bar;
 
-    public function serialize() {
+    public function serialize(): ?string {
         return serialize('Hello');
     }
 
-    public function unserialize($data) {
-        return unserialize($data);
+    public function unserialize($data): void {
+        unserialize($data);
     }
 }
 

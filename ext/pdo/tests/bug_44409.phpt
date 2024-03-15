@@ -25,12 +25,12 @@ class bug44409 implements Serializable
         printf("Method called: %s()\n", __METHOD__);
     }
 
-    public function serialize()
+    public function serialize(): ?string
     {
         return "any data from serizalize()";
     }
 
-    public function unserialize($dat)
+    public function unserialize($dat): void
     {
         printf("Method called: %s(%s)\n", __METHOD__, var_export($dat, true));
     }

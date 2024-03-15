@@ -14,7 +14,7 @@ function do_autoload($class_name)
     echo __FUNCTION__ . "($class_name)\n";
 }
 
-function unserializer($class_name)
+function unserializer($class_name): void
 {
     echo __METHOD__ . "($class_name)\n";
     switch($class_name)
@@ -42,12 +42,12 @@ ini_set('unserialize_callback_func', 'unserializer');
 
 class TestOld
 {
-    function serialize()
+    function serialize(): ?string
     {
         echo __METHOD__ . "()\n";
     }
 
-    function unserialize($serialized)
+    function unserialize($serialized): void
     {
         echo __METHOD__ . "()\n";
     }
@@ -68,7 +68,7 @@ class TestNew implements Serializable
 {
     protected static $check = 0;
 
-    function serialize()
+    function serialize(): ?string
     {
         echo __METHOD__ . "()\n";
         switch(++self::$check)
@@ -80,7 +80,7 @@ class TestNew implements Serializable
         }
     }
 
-    function unserialize($serialized)
+    function unserialize($serialized): void
     {
         echo __METHOD__ . "()\n";
     }

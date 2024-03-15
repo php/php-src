@@ -17,11 +17,11 @@ class SerializableClass implements Serializable {
     {
         $this->$key = $value;
     }
-    public function serialize()
+    public function serialize(): ?string
     {
         return serialize(get_object_vars($this));
     }
-    public function unserialize($data)
+    public function unserialize($data): void
     {
         $ar = unserialize($data);
         if ($ar === false) {

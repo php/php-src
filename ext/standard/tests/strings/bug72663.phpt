@@ -4,10 +4,10 @@ Bug #72663: Create an Unexpected Object and Don't Invoke __wakeup() in Deseriali
 <?php
 class obj implements Serializable {
     var $data;
-    function serialize() {
+    function serialize(): ?string {
         return serialize($this->data);
     }
-    function unserialize($data) {
+    function unserialize($data): void {
         $this->data = unserialize($data);
     }
 }

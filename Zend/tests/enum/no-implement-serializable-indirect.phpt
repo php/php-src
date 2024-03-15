@@ -8,12 +8,12 @@ interface MySerializable extends Serializable {}
 enum Foo implements MySerializable {
     case Bar;
 
-    public function serialize() {
+    public function serialize(): ?string {
         return serialize('Hello');
     }
 
-    public function unserialize($data) {
-        return unserialize($data);
+    public function unserialize($data): void {
+        unserialize($data);
     }
 }
 

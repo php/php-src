@@ -22,12 +22,12 @@ class Test implements Serializable {
         var_dump($data);
     }
 
-    public function serialize() {
+    public function serialize(): ?string {
         echo "serialize() called\n";
         return "payload";
     }
 
-    public function unserialize($payload) {
+    public function unserialize($payload): void {
         echo "unserialize() called\n";
         var_dump($payload);
     }

@@ -22,12 +22,12 @@ class Entry implements \Serializable
         $this->identity = $identity;
     }
 
-    public function serialize()
+    public function serialize(): ?string
     {
         return serialize(array($this->identity));
     }
 
-    public function unserialize($serialized)
+    public function unserialize($serialized): void
     {
         list($this->identity) = unserialize($serialized);
     }

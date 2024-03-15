@@ -66,10 +66,10 @@ var_dump(unserialize(
 ini_set("unserialize_max_depth", 4096);
 
 class Test implements Serializable {
-    public function serialize() {
+    public function serialize(): ?string {
         return '';
     }
-    public function unserialize($str) {
+    public function unserialize($str): void {
         // Should fail, due to combined nesting level
         var_dump(unserialize(create_nested_data(129, 'a:1:{i:0;', '}')));
         // Should succeed, below combined nesting level
@@ -83,10 +83,10 @@ var_dump(is_array(unserialize(
 )));
 
 class Test2 implements Serializable {
-    public function serialize() {
+    public function serialize(): ?string {
         return '';
     }
-    public function unserialize($str) {
+    public function unserialize($str): void {
         // If depth limit is overridden, the depth should be counted
         // from zero again.
         var_dump(unserialize(

@@ -5,10 +5,10 @@ Bug #36424 - Serializable interface breaks object references
 
 #[AllowDynamicProperties]
 class a implements Serializable {
-    function serialize() {
+    function serialize(): ?string {
         return serialize(get_object_vars($this));
     }
-    function unserialize($s) {
+    function unserialize($s): void {
         foreach (unserialize($s) as $p=>$v) {
             $this->$p=$v;
         }

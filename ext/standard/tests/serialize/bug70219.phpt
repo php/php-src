@@ -8,10 +8,10 @@ error_reporting=E_ALL&~E_DEPRECATED
 <?php
 class obj implements Serializable {
     var $data;
-    function serialize() {
+    function serialize(): ?string {
         return serialize($this->data);
     }
-    function unserialize($data) {
+    function unserialize($data): void {
         session_start();
         session_decode($data);
     }
