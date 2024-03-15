@@ -1358,7 +1358,7 @@ session.cookie_domain =
 ; Whether or not to add the httpOnly flag to the cookie, which makes it
 ; inaccessible to browser scripting languages such as JavaScript.
 ; https://php.net/session.cookie-httponly
-session.cookie_httponly =
+session.cookie_httponly = 1
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
 ; Current valid values are "Strict", "Lax" or "None". When using "None",
