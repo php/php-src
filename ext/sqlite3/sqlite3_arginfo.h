@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 28a003d4e83b956ab1e24b65c65e9ac28cfad0f4 */
+ * Stub hash: 4474d0a8fb45923895d172af430663932675a4ac */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -13,7 +13,7 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_open, 0,
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encryptionKey, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_close, 0, 0, IS_TRUE, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_close, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3_version, 0, 0, IS_ARRAY, 0)
@@ -126,10 +126,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_bind
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "SQLITE3_TEXT")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_clear, 0, 0, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_SQLite3Stmt_clear arginfo_class_SQLite3_close
 
-#define arginfo_class_SQLite3Stmt_close arginfo_class_SQLite3Stmt_clear
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SQLite3Stmt_close, 0, 0, IS_TRUE, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_SQLite3Stmt_execute, 0, 0, SQLite3Result, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
@@ -140,9 +140,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Stmt_paramCount arginfo_class_SQLite3_lastInsertRowID
 
-#define arginfo_class_SQLite3Stmt_readOnly arginfo_class_SQLite3Stmt_clear
+#define arginfo_class_SQLite3Stmt_readOnly arginfo_class_SQLite3_close
 
-#define arginfo_class_SQLite3Stmt_reset arginfo_class_SQLite3Stmt_clear
+#define arginfo_class_SQLite3Stmt_reset arginfo_class_SQLite3_close
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Result___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -161,9 +161,9 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_SQLite3Result_fe
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "SQLITE3_BOTH")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SQLite3Result_reset arginfo_class_SQLite3Stmt_clear
+#define arginfo_class_SQLite3Result_reset arginfo_class_SQLite3_close
 
-#define arginfo_class_SQLite3Result_finalize arginfo_class_SQLite3_close
+#define arginfo_class_SQLite3Result_finalize arginfo_class_SQLite3Stmt_close
 
 ZEND_METHOD(SQLite3, open);
 ZEND_METHOD(SQLite3, close);

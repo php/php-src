@@ -282,7 +282,7 @@ class SQLite3
     public function open(string $filename, int $flags = SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, string $encryptionKey = ""): void {}
 
     /** @tentative-return-type */
-    public function close(): true {}
+    public function close(): bool {}
 
     /** @tentative-return-type */
     public static function version(): array {}
@@ -367,7 +367,7 @@ class SQLite3Stmt
     public function clear(): bool {}
 
     /** @tentative-return-type */
-    public function close(): bool {}
+    public function close(): true {}
 
     /** @tentative-return-type */
     public function execute(): SQLite3Result|false {}
