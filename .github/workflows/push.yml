@@ -81,6 +81,13 @@ jobs:
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-22.04
+      mariadblatest:
+        image: quay.io/mariadb-foundation/mariadb-devel:latest
+        ports:
+          - 3307:3306
+        env:
+          MARIADB_DATABASE: test
+          MARIADB_ROOT_PASSWORD: root
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -133,6 +140,11 @@ jobs:
         uses: ./.github/actions/test-linux
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+      - name: Test Extra MariaDB (latest)
+        uses: ./.github/actions/test-mysql-extra
+        with:
+          runHost: mariadblatest
+          runPort: ${{ job.services.mariadblatest.ports[3306] }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
