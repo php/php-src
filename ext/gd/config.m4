@@ -239,7 +239,7 @@ dnl Various checks for GD features
 
     PHP_TEST_BUILD(foobar, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ $GD_SHARED_LIBADD ], [char foobar () {}])
+    ], [ $GD_SHARED_LIBADD ], [char foobar (void) {}])
 
   else
     extra_sources="gd_compat.c"

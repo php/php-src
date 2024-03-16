@@ -220,7 +220,7 @@ typedef union _mm_align_test {
 #define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
 #endif
 
-int main()
+int main(void)
 {
   size_t i = ZEND_MM_ALIGNMENT;
   int zeros = 0;
