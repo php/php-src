@@ -53,6 +53,19 @@ const SOCK_SEQPACKET = UNKNOWN;
  */
 const SOCK_RDM = UNKNOWN;
 #endif
+#ifdef SOCK_CONN_DGRAM
+/**
+ * @var int
+ * @cvalue SOCK_CONN_DGRAM
+ */
+const SOCK_CONN_DGRAM = UNKNOWN;
+/**
+ * is an alias of SOCK_CONN_DGRAM
+ * @var int
+ * @cvalue SOCK_DCCP
+ */
+const SOCK_DCCP = UNKNOWN;
+#endif
 
 /**
  * @var int
