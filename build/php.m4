@@ -1034,7 +1034,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
 #endif
 $3
 
-int main()
+int main(void)
 {
 	FILE *fp = fopen("conftestval", "w");
 	if (!fp) return(1);
@@ -1102,7 +1102,7 @@ AC_CACHE_CHECK(for type of reentrant time-related functions, ac_cv_time_r_type,[
 AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
 
-int main() {
+int main(void) {
 char buf[27];
 struct tm t;
 time_t old = 0;
@@ -1118,7 +1118,7 @@ return (1);
 ],[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <time.h>
-int main() {
+int main(void) {
   struct tm t, *s;
   time_t old = 0;
   char buf[27], *p;
@@ -1159,7 +1159,7 @@ AC_DEFUN([PHP_DOES_PWRITE_WORK],[
 #include <errno.h>
 #include <stdlib.h>
 $1
-    int main() {
+    int main(void) {
     int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
 
     if (fd < 0) return 1;
@@ -1193,7 +1193,7 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 #include <errno.h>
 #include <stdlib.h>
 $1
-    int main() {
+    int main(void) {
     char buf[3];
     int fd = open("conftest_in", O_RDONLY);
     if (fd < 0) return 1;
@@ -1261,27 +1261,27 @@ dnl PHP_MISSING_TIME_R_DECL
 dnl
 AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
   AC_MSG_CHECKING([for missing declarations of reentrant functions])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)() = localtime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = localtime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_LOCALTIME_R_DECL,1,[Whether localtime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)() = gmtime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = gmtime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_GMTIME_R_DECL,1,[Whether gmtime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)() = asctime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = asctime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_ASCTIME_R_DECL,1,[Whether asctime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)() = ctime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = ctime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_CTIME_R_DECL,1,[Whether ctime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)() = strtok_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)(void) = strtok_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
@@ -1315,7 +1315,7 @@ dnl See if we have broken header files like SunOS has.
 dnl
 AC_DEFUN([PHP_MISSING_FCLOSE_DECL],[
   AC_MSG_CHECKING([for fclose declaration])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int (*func)() = fclose]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int (*func)(void) = fclose]])],[
     AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
     AC_MSG_RESULT([ok])
   ],[
@@ -1405,7 +1405,7 @@ struct s
   int i;
   char c[1];
 };
-int main()
+int main(void)
 {
   struct s *s = malloc(sizeof(struct s) + 3);
   s->i = 3;
@@ -1463,7 +1463,7 @@ int seeker(void *cookie, off64_t *position, int whence)
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
 
-int main() {
+int main(void) {
   struct cookiedata g = { 0 };
   FILE *fp = fopencookie(&g, "r", funcs);
 
@@ -1590,7 +1590,7 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main() { return (0); }]])],[found=yes],[found=no],[
+    AC_RUN_IFELSE([AC_LANG_PROGRAM()],[found=yes],[found=no],[
       dnl Cross compilation.
       found=yes
     ])
@@ -1643,8 +1643,8 @@ AC_DEFUN([PHP_TEST_BUILD], [
   LIBS="$4 $LIBS"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[
     $5
-    char $1();
-    int main() {
+    char $1(void);
+    int main(void) {
       $1();
       return 0;
     }
@@ -2296,7 +2296,7 @@ AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
 
 #define TEXT "This is the test message -- "
 
-int main()
+int main(void)
 {
   int n;
 

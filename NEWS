@@ -151,6 +151,8 @@ PHP                                                                        NEWS
     loading composer classmaps with more than 11k elements). (nielsdos)
   . Fixed bug GH-12966 (missing cross-compiling 3rd argument so Autoconf doesn't
     emit warnings). (Peter Kokot)
+  . Fixed bug GH-13727 (missing void keyword for C generate code for feature test).
+    (Peter Kokot/David Carlier)
 
 - Cli:
   . Fix incorrect timeout in built-in web server when using router script and

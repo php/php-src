@@ -3598,7 +3598,7 @@ EOF
 	  # whether they linked in statically or dynamically with ldd.
 	  $rm conftest.c
 	  cat > conftest.c <<EOF
-	  int main() { return 0; }
+	  int main(void) { return 0; }
 EOF
 	  $rm conftest
 	  if $LTCC $LTCFLAGS -o conftest conftest.c $deplibs; then
