@@ -127,10 +127,10 @@ class IntlCalendar
     public function before(IntlCalendar $other): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias intlcal_clear
      */
-    public function clear(?int $field = null) {} // TODO make return type void
+    public function clear(?int $field = null): true {}
 
     /**
      * @tentative-return-type
@@ -224,10 +224,10 @@ class IntlCalendar
     public function getMinimalDaysInFirstWeek(): int|false {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias intlcal_set_minimal_days_in_first_week
      */
-    public function setMinimalDaysInFirstWeek(int $days) {} // TODO make return void
+    public function setMinimalDaysInFirstWeek(int $days): true {}
 
     /**
      * @tentative-return-type
@@ -315,38 +315,38 @@ class IntlCalendar
     public function isSet(int $field): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @implementation-alias intlcal_set
      */
-    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN) {} // TODO make return type void
+    public function set(int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
     public function setDate(int $year, int $month, int $dayOfMonth): void {}
 
     public function setDateTime(int $year, int $month, int $dayOfMonth, int $hour, int $minute, ?int $second = null): void {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias intlcal_set_first_day_of_week
      */
-    public function setFirstDayOfWeek(int $dayOfWeek) {} // TODO make return type void
+    public function setFirstDayOfWeek(int $dayOfWeek): true {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias intlcal_set_lenient
      */
-    public function setLenient(bool $lenient) {} // TODO make return type void
+    public function setLenient(bool $lenient): true {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias intlcal_set_repeated_wall_time_option
      */
-    public function setRepeatedWallTimeOption(int $option) {} // TODO make return type void
+    public function setRepeatedWallTimeOption(int $option): true {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias intlcal_set_skipped_wall_time_option
      */
-    public function setSkippedWallTimeOption(int $option) {} // TODO make return type void
+    public function setSkippedWallTimeOption(int $option): true {}
 
     /**
      * @tentative-return-type
