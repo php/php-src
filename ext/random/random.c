@@ -12,6 +12,7 @@
    +----------------------------------------------------------------------+
    | Authors: Sammy Kaye Powers <me@sammyk.me>                            |
    |          Go Kudo <zeriyoshi@php.net>                                 |
+   |          Tim Düsterhus <timwolla@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -31,6 +32,7 @@
 
 #include "php_random.h"
 #include "php_random_csprng.h"
+#include "ext/standard/sha1.h"
 
 #if HAVE_UNISTD_H
 # include <unistd.h>
@@ -612,10 +614,97 @@ PHP_FUNCTION(random_int)
 }
 /* }}} */
 
+static void write_32(PHP_SHA1_CTX *c, uint32_t u)
+{
+	unsigned char buf[4];
+	unsigned char *p = buf;
+	*(p++) = (u >> 0) & 0xff;
+	*(p++) = (u >> 8) & 0xff;
+	*(p++) = (u >> 16) & 0xff;
+	*(p++) = (u >> 24) & 0xff;
+	PHP_SHA1Update(c, buf, sizeof(buf));
+}
+
+static void write_64(PHP_SHA1_CTX *c, uint64_t u)
+{
+	write_32(c, u);
+	write_32(c, u >> 32);
+}
+
+static void write_p(PHP_SHA1_CTX *c, uintptr_t p)
+{
+	if (sizeof(p) == 4) {
+		write_32(c, p);
+	} else {
+		write_64(c, p);
+	}
+}
+
+uint64_t php_random_generate_fallback_seed(void)
+{
+	/* Mix various values using SHA-1 as a PRF to obtain as
+	 * much entropy as possible, hopefully generating an
+	 * unpredictable and independent uint64_t. Nevertheless
+	 * the output of this function MUST NOT be treated as
+	 * being cryptographically safe.
+	 */
+	PHP_SHA1_CTX c;
+	struct timeval tv;
+	char buf[64 + 1];
+
+	PHP_SHA1Init(&c);
+	if (!RANDOM_G(fallback_seed_initialized)) {
+		/* Current time. */
+		gettimeofday(&tv, NULL);
+		write_32(&c, tv.tv_sec);
+		write_32(&c, tv.tv_usec);
+		/* Various PIDs. */
+		write_32(&c, getpid());
+		write_32(&c, getppid());
+		write_32(&c, tsrm_thread_id());
+		/* Pointer values to benefit from ASLR. */
+		write_p(&c, (uintptr_t)&RANDOM_G(fallback_seed_initialized));
+		write_p(&c, (uintptr_t)&c);
+		/* Updated time. */
+		gettimeofday(&tv, NULL);
+		write_32(&c, tv.tv_usec);
+		/* Hostname. */
+		memset(buf, 0, sizeof(buf));
+		if (gethostname(buf, sizeof(buf) - 1) == 0) {
+			PHP_SHA1Update(&c, (unsigned char*)buf, strlen(buf));
+		}
+		/* CSPRNG. */
+		if (php_random_bytes_silent(buf, 16) == SUCCESS) {
+			PHP_SHA1Update(&c, (unsigned char*)buf, 16);
+		}
+		/* Updated time. */
+		gettimeofday(&tv, NULL);
+		write_32(&c, tv.tv_usec);
+	} else {
+		/* Current time. */
+		gettimeofday(&tv, NULL);
+		write_32(&c, tv.tv_sec);
+		write_32(&c, tv.tv_usec);
+		/* Previous state. */
+		PHP_SHA1Update(&c, RANDOM_G(fallback_seed), 20);
+	}
+	PHP_SHA1Final(RANDOM_G(fallback_seed), &c);
+	RANDOM_G(fallback_seed_initialized) = true;
+
+	uint64_t result = 0;
+
+	for (int i = 0; i < sizeof(result); i++) {
+		result = result | (((uint64_t)RANDOM_G(fallback_seed)[i]) << (i * 8));
+	}
+
+	return result;
+}
+
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {
 	random_globals->random_fd = -1;
+	random_globals->fallback_seed_initialized = false;
 }
 /* }}} */
 

@@ -37,17 +37,11 @@
 
 PHPAPI double php_combined_lcg(void);
 
+PHPAPI uint64_t php_random_generate_fallback_seed(void);
+
 static inline zend_long GENERATE_SEED(void)
 {
-	zend_ulong pid;
-
-# ifdef PHP_WIN32
-	pid = (zend_ulong) GetCurrentProcessId();
-# else
-	pid = (zend_ulong) getpid();
-# endif
-
-	return (((zend_long) ((zend_ulong) time(NULL) * pid)) ^ ((zend_long) (1000000.0 * php_combined_lcg())));
+	return (zend_long)php_random_generate_fallback_seed();
 }
 
 # define PHP_MT_RAND_MAX ((zend_long) (0x7FFFFFFF)) /* (1<<31) - 1 */
@@ -213,6 +207,8 @@ ZEND_BEGIN_MODULE_GLOBALS(random)
 	int random_fd;
 	bool combined_lcg_seeded;
 	bool mt19937_seeded;
+	bool fallback_seed_initialized;
+	unsigned char fallback_seed[20];
 	php_random_status_state_combinedlcg combined_lcg;
 	php_random_status_state_mt19937 mt19937;
 ZEND_END_MODULE_GLOBALS(random)
