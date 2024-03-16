@@ -259,6 +259,8 @@ PHP 8.4 UPGRADE NOTES
     quotes.
   . It is now possible to pass any callable to registerPhpFunctions().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
+  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars
+    to control the recursion depth of XSL template evaluation.
 
 ========================================
 3. Changes in SAPI modules

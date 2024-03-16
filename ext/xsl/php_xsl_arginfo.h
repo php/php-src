@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ae093276a1caf53c34d429076458bc8b802d69e9 */
+ * Stub hash: f7f9951cbb437f1985016dc06490d55f711bc725 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XSLTProcessor_importStylesheet, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, stylesheet, IS_OBJECT, 0)
@@ -130,6 +130,18 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 	zend_string *property_cloneDocument_name = zend_string_init("cloneDocument", sizeof("cloneDocument") - 1, 1);
 	zend_declare_typed_property(class_entry, property_cloneDocument_name, &property_cloneDocument_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_BOOL));
 	zend_string_release(property_cloneDocument_name);
+
+	zval property_maxTemplateDepth_default_value;
+	ZVAL_UNDEF(&property_maxTemplateDepth_default_value);
+	zend_string *property_maxTemplateDepth_name = zend_string_init("maxTemplateDepth", sizeof("maxTemplateDepth") - 1, 1);
+	zend_declare_typed_property(class_entry, property_maxTemplateDepth_name, &property_maxTemplateDepth_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_maxTemplateDepth_name);
+
+	zval property_maxTemplateVars_default_value;
+	ZVAL_UNDEF(&property_maxTemplateVars_default_value);
+	zend_string *property_maxTemplateVars_name = zend_string_init("maxTemplateVars", sizeof("maxTemplateVars") - 1, 1);
+	zend_declare_typed_property(class_entry, property_maxTemplateVars_name, &property_maxTemplateVars_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_maxTemplateVars_name);
 
 	return class_entry;
 }

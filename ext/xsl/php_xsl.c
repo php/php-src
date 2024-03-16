@@ -118,9 +118,68 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 	intern->parameter = zend_new_array(0);
 	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
 
+	/* Default initialize properties that could not be default initialized at the stub because they depend on library
+	 * configuration parameters. */
+	ZVAL_LONG(xsl_prop_max_template_depth(&intern->std), xsltMaxDepth);
+	ZVAL_LONG(xsl_prop_max_template_vars(&intern->std), xsltMaxVars);
+
 	return &intern->std;
 }
 /* }}} */
+
+#if ZEND_DEBUG
+# define XSL_DEFINE_PROP_ACCESSOR(c_name, php_name, prop_index) \
+	zval *xsl_prop_##c_name(zend_object *object) \
+	{ \
+		zend_string *prop_name = ZSTR_INIT_LITERAL(php_name, false); \
+		const zend_property_info *prop_info = zend_get_property_info(xsl_xsltprocessor_class_entry, prop_name, 0); \
+		zend_string_release_ex(prop_name, false); \
+		ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == prop_index); \
+		return OBJ_PROP_NUM(object, prop_index); \
+	}
+#else
+# define XSL_DEFINE_PROP_ACCESSOR(c_name, php_name, prop_index) \
+	zval *xsl_prop_##c_name(zend_object *object) \
+	{ \
+		return OBJ_PROP_NUM(object, prop_index); \
+	}
+#endif
+
+XSL_DEFINE_PROP_ACCESSOR(max_template_depth, "maxTemplateDepth", 2)
+XSL_DEFINE_PROP_ACCESSOR(max_template_vars, "maxTemplateVars", 3)
+
+static zval *xsl_objects_write_property_with_validation(zend_object *object, zend_string *member, zval *value, void **cache_slot, zval *property)
+{
+	/* Read old value so we can restore it if necessary. The value is not refcounted as its type is IS_LONG. */
+	ZEND_ASSERT(Z_TYPE_P(property) == IS_LONG);
+	zend_long old_property_value = Z_LVAL_P(property);
+
+	/* Write new property, which will also potentially perform coercions. */
+	zend_std_write_property(object, member, value, cache_slot);
+
+	/* Validate value *after* coercions have been performed, and restore the old value if necessary. */
+	if (UNEXPECTED(Z_LVAL_P(property) < 0)) {
+		Z_LVAL_P(property) = old_property_value;
+		zend_value_error("%s::$%s must be greater than or equal to 0", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		return &EG(error_zval);
+	}
+
+	return property;
+}
+
+static zval *xsl_objects_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot)
+{
+	/* Extra validation for maxTemplateDepth and maxTemplateVars */
+	if (zend_string_equals_literal(member, "maxTemplateDepth")) {
+		zval *property = xsl_prop_max_template_depth(object);
+		return xsl_objects_write_property_with_validation(object, member, value, cache_slot, property);
+	} else if (zend_string_equals_literal(member, "maxTemplateVars")) {
+		zval *property = xsl_prop_max_template_vars(object);
+		return xsl_objects_write_property_with_validation(object, member, value, cache_slot, property);
+	} else {
+		return zend_std_write_property(object, member, value, cache_slot);
+	}
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xsl)
@@ -130,6 +189,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 	xsl_object_handlers.get_gc = xsl_objects_get_gc;
+	xsl_object_handlers.write_property = xsl_objects_write_property;
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;

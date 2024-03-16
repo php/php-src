@@ -224,5 +224,7 @@ PHP                                                                        NEWS
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
+  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars.
+    (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
