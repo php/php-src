@@ -661,7 +661,9 @@ uint64_t php_random_generate_fallback_seed(void)
 		/* Various PIDs. */
 		write_32(&c, getpid());
 		write_32(&c, getppid());
+#ifdef ZTS
 		write_32(&c, tsrm_thread_id());
+#endif
 		/* Pointer values to benefit from ASLR. */
 		write_p(&c, (uintptr_t)&RANDOM_G(fallback_seed_initialized));
 		write_p(&c, (uintptr_t)&c);
