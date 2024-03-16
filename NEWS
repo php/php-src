@@ -188,6 +188,7 @@ PHP                                                                        NEWS
 - Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Added the SO_EXECLUSIVEADDRUSE windows constant. (David Carlier)
+  . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
 
 - Sodium:
   . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
