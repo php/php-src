@@ -2879,7 +2879,10 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	};
 	php_random_uint128_t seed;
 	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = php_random_uint128_constant(GENERATE_SEED(), GENERATE_SEED());
+		seed = php_random_uint128_constant(
+			php_random_generate_fallback_seed(),
+			php_random_generate_fallback_seed()
+		);
 	}
 	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
 }

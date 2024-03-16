@@ -242,7 +242,7 @@ PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *sta
 	uint32_t seed = 0;
 
 	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = GENERATE_SEED();
+		seed = (uint32_t)php_random_generate_fallback_seed();
 	}
 
 	php_random_mt19937_seed32(state, seed);
