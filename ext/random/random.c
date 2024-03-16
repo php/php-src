@@ -660,7 +660,9 @@ uint64_t php_random_generate_fallback_seed(void)
 		write_32(&c, tv.tv_usec);
 		/* Various PIDs. */
 		write_32(&c, getpid());
+#ifndef WIN32
 		write_32(&c, getppid());
+#endif
 #ifdef ZTS
 		write_32(&c, tsrm_thread_id());
 #endif
