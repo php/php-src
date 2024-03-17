@@ -817,20 +817,26 @@ static zend_object *bc_num_clone_obj(zend_object *object)
 }
 /* }}} */
 
-static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num)
+static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num, bool *should_free)
 {
+	*should_free = false;
+
 	switch (Z_TYPE_P(zv)) {
 		case IS_LONG:
 		case IS_STRING:
-			convert_to_string(zv);
-			bc_init_num(&num1);
-			if (!bc_str2num(num, Z_STRVAL_P(zv), 0)) {
-				return FAILURE;
+			{
+				zend_string *str = zval_get_string(zv);
+				bc_init_num(num);
+				*should_free = true;
+				if (!bc_str2num(num, ZSTR_VAL(str), 0)) {
+					zend_string_release(str);
+					return FAILURE;
+				}
+				zend_string_release(str);
 			}
 			break;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(zv), bc_num_ce)) {
-				bc_free_num(num);
 				*num = bc_num_obj_from_zval(zv)->bc_num;
 			} else {
 				zend_argument_type_error(0, "must be of type int, string, or BcNum, %s given", zend_zval_value_name(zv));
@@ -845,12 +851,14 @@ static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num)
 static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num_calculation_type type, bool is_operator)
 {
 	bc_num num1, num2;
+	bc_num_obj *result_obj;
+	bool should_free1, should_free2;
 
-	if (convert_zval_to_bc_num(op1, &num1) == FAILURE || convert_zval_to_bc_num(op2, &num2) == FAILURE) {
-		return FAILURE;
+	if (convert_zval_to_bc_num(op1, &num1, &should_free1) == FAILURE || convert_zval_to_bc_num(op2, &num2, &should_free2) == FAILURE) {
+		goto cleanup;
 	}
 
-	bc_num_obj *result_obj = bc_num_obj_from_obj(bc_num_create_obj(bc_num_ce));
+	result_obj = bc_num_obj_from_obj(bc_num_create_obj(bc_num_ce));
 	bc_init_num(&result_obj->bc_num);
 
 	size_t scale = MAX(num1->n_scale, num2->n_scale);
@@ -876,7 +884,7 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 				long exponent = bc_num2long(num2);
 				if (exponent == 0 && (num2->n_len > 1 || num2->n_value[0] != 0)) {
 					zend_argument_value_error(is_operator ? 0 : 1, "exponent is too large");
-					return FAILURE;
+					goto cleanup;
 				}
 				bc_raise(num1, bc_num2long(num2), &result_obj->bc_num, scale);
 			}
@@ -884,9 +892,26 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
+	if (should_free1) {
+		bc_free_num(&num1);
+	}
+	if (should_free2) {
+		bc_free_num(&num2);
+	}
+
 	result_obj->bc_num->n_scale = scale;
 	ZVAL_OBJ(result, &result_obj->std);
 	return SUCCESS;
+
+cleanup:
+	if (should_free1) {
+		bc_free_num(&num1);
+	}
+	if (should_free2) {
+		bc_free_num(&num2);
+	}
+	bc_free_num(&result_obj->bc_num);
+	return FAILURE;
 }
 
 /* {{{ bc_num_obj_handlers.do_operation */
