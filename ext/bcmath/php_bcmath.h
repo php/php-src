@@ -42,4 +42,18 @@ ZEND_TSRMLS_CACHE_EXTERN()
 ZEND_EXTERN_MODULE_GLOBALS(bcmath)
 #define BCG(v) ZEND_MODULE_GLOBALS_ACCESSOR(bcmath, v)
 
+typedef struct _bc_num_obj {
+	zend_object std;
+	bc_num bc_num;
+} bc_num_obj;
+
+typedef enum {
+	BC_NUM_ADD,
+	BC_NUM_SUB,
+	BC_NUM_MUL,
+	BC_NUM_DIV,
+	BC_NUM_MOD,
+	BC_NUM_POW
+} bc_num_calculation_type;
+
 #endif /* PHP_BCMATH_H */

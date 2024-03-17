@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cd3d182e13cb0ca22b27c13a8d0a86c20fde5b76 */
+ * Stub hash: fdad767ce14d624bb64a90ab5a7bca71c6061a9d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -55,6 +55,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcround, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_BcNum___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(bcadd);
 ZEND_FUNCTION(bcsub);
 ZEND_FUNCTION(bcmul);
@@ -68,6 +73,7 @@ ZEND_FUNCTION(bcscale);
 ZEND_FUNCTION(bcfloor);
 ZEND_FUNCTION(bcceil);
 ZEND_FUNCTION(bcround);
+ZEND_METHOD(BcNum, __construct);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcadd, arginfo_bcadd)
@@ -85,3 +91,18 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcround, arginfo_bcround)
 	ZEND_FE_END
 };
+
+static const zend_function_entry class_BcNum_methods[] = {
+	ZEND_ME(BcNum, __construct, arginfo_class_BcNum___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_BcNum(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "BcNum", class_BcNum_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
