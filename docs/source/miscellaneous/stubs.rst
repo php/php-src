@@ -472,16 +472,16 @@ Please note that the feature is only available for built-in stubs inside php-src
 there is no way to provide the function list for the optimizer other than overwriting
 ``zend_func_infos.h`` directly.
 
-Additionally, functions can be evaluated in compile-time if their arguments are known in
+Additionally, functions can be evaluated at compile-time if their arguments are known in
 compile-time and their behavior if free from side-effects as well as it is not affected by the
 global state. Until PHP 8.2, a list of such functions was maintained manually in the optimizer.
 However, since PHP 8.2, the ``@compile-time-eval`` PHPDoc tag can be applied to any functions which
-conform to the above restrictions in order for them to qualify as evaluable in compile-time. The
+conform to the above restrictions in order for them to qualify as evaluable at compile-time. The
 feature internally works by adding the ``ZEND_ACC_COMPILE_TIME_EVAL`` function flag.
 
 As of PHP 8.4, the concept of arity-based frameless functions was introduced. This is another
 optimization technique, which results in faster internal function calls by eliminating unnecessary
-checks for the number of passed parameters (if the number of passed arguments is known in
+checks for the number of passed parameters (if the number of passed arguments is known at
 compile-time).
 
 In order to take advantage of frameless functions, the ``@frameless-function`` PHPDoc tag has to be
