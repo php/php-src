@@ -23,6 +23,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed GH-13508 (JITed QM_ASSIGN may be optimized out when op1 is null).
     (Arnaud, Dmitry)
+  . Fixed GH-13712 (Segmentation fault for enabled observers when calling trait
+    method of internal trait when opcache is loaded). (Bob)
 
 - PDO:
   . Fix various PDORow bugs. (Girgias)
