@@ -852,7 +852,7 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 {
 	bc_num num1, num2;
 	bc_num_obj *result_obj;
-	bool should_free1, should_free2;
+	bool should_free1, should_free2, should_free_result = false;
 
 	if (convert_zval_to_bc_num(op1, &num1, &should_free1) == FAILURE || convert_zval_to_bc_num(op2, &num2, &should_free2) == FAILURE) {
 		goto cleanup;
@@ -860,6 +860,7 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 
 	result_obj = bc_num_obj_from_obj(bc_num_create_obj(bc_num_ce));
 	bc_init_num(&result_obj->bc_num);
+	should_free_result = true;
 
 	size_t scale = MAX(num1->n_scale, num2->n_scale);
 
@@ -910,7 +911,9 @@ cleanup:
 	if (should_free2) {
 		bc_free_num(&num2);
 	}
-	bc_free_num(&result_obj->bc_num);
+	if (should_free_result) {
+		bc_free_num(&result_obj->bc_num);
+	}
 	return FAILURE;
 }
 
