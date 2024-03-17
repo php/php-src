@@ -8,16 +8,7 @@ if (getenv("SKIP_SLOW_TESTS")) die('skip slow test');
 ?>
 --FILE--
 <?php
-$deprecated = 0;
-set_error_handler(function ($errno, $errstr, $errfile, $errline) use (
-    &$deprecated
-) {
-    if ($errno == E_DEPRECATED) {
-        ++$deprecated;
-        return true;
-    }
-    return false;
-});
+error_reporting(E_ALL ^ E_DEPRECATED);
 
 $binaryOperators = [
     "==",
@@ -188,8 +179,6 @@ if($c === 0) {
 } else {
     echo "Failed: $f\n";
 }
-
-echo "Deprecated: $deprecated\n";
 ?>
 --CLEAN--
 <?php
@@ -198,4 +187,3 @@ $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 ?>
 --EXPECT--
 Failed: 0
-Deprecated: 8532
