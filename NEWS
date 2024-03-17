@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13680 (Segfault with session_decode and compilation error).
     (nielsdos)
 
+- SPL:
+  . Fixed bug GH-13685 (Unexpected null pointer in zend_string.h). (nielsdos)
+
 - Standard:
   . Fixed bug GH-11808 (Live filesystem modified by tests). (nielsdos)
   . Fixed GH-13402 (Added validation of `\n` in $additional_headers of mail()).
