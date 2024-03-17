@@ -59,6 +59,15 @@ var_dump(bin2hex(mb_ucfirst(mb_convert_encoding("ｅｂｉ", "SJIS", "UTF-8"), "
 var_dump(bin2hex(mb_lcfirst(mb_convert_encoding("ＥＢＩ", "SJIS", "UTF-8"), "SJIS")));
 var_dump(bin2hex(mb_ucfirst(hex2bin("8471"), "SJIS"))); /* б */
 var_dump(bin2hex(mb_lcfirst(hex2bin("8441"), "SJIS"))); /* Б */
+var_dump(bin2hex(mb_ucfirst(hex2bin("83bf"), "SJIS"))); /* α */
+var_dump(bin2hex(mb_lcfirst(hex2bin("839f"), "SJIS"))); /* Α */
+var_dump(bin2hex(mb_lcfirst(hex2bin("82a0"), "SJIS"))); /* あ */
+var_dump(bin2hex(mb_ucfirst(hex2bin("83bf8471"), "SJIS")));
+var_dump(bin2hex(mb_lcfirst(hex2bin("839f8441"), "SJIS")));
+echo "== EUC-JP ==\n";
+var_dump(bin2hex(mb_ucfirst(hex2bin("a6d8"), "EUC-JP"))); /* Ω */
+var_dump(bin2hex(mb_lcfirst(hex2bin("a6b8"), "EUC-JP"))); /* ω */
+var_dump(bin2hex(mb_ucfirst(hex2bin("a4a2a4a2"), "EUC-JP"))); /* あ */
 echo "== Longer strings ==\n";
 var_dump(mb_ucfirst("э" . str_repeat("A", 65536)) === "Э" . str_repeat("A", 65536));
 var_dump(mb_lcfirst("Э" . str_repeat("A", 65536)) === "э" . str_repeat("A", 65536));
@@ -85,6 +94,15 @@ string(12) "826482828289"
 string(12) "828582618268"
 string(4) "8441"
 string(4) "8471"
+string(4) "839f"
+string(4) "83bf"
+string(4) "82a0"
+string(8) "839f8471"
+string(8) "83bf8441"
+== EUC-JP ==
+string(4) "a6b8"
+string(4) "a6d8"
+string(8) "a4a2a4a2"
 == Longer strings ==
 bool(true)
 bool(true)
