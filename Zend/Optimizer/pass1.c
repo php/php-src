@@ -155,33 +155,26 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 			break;
 
-		case ZEND_FETCH_CLASS_CONSTANT:
-			if (opline->op2_type == IS_CONST &&
-				Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
-
-				zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
-					ctx->script, op_array, opline);
-				if (ce) {
-					zend_class_constant *cc = zend_hash_find_ptr(
-						&ce->constants_table, Z_STR(ZEND_OP2_LITERAL(opline)));
-					if (cc && !(ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_DEPRECATED) && (ZEND_CLASS_CONST_FLAGS(cc) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
-						zval *c = &cc->value;
-						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
-							zend_ast *ast = Z_ASTVAL_P(c);
-							if (ast->kind != ZEND_AST_CONSTANT
-							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, 1)
-							 || Z_TYPE(result) == IS_CONSTANT_AST) {
-								break;
-							}
-						} else {
-							ZVAL_COPY_OR_DUP(&result, c);
-						}
-
-						replace_by_const_or_qm_assign(op_array, opline, &result);
-					}
-				}
+		case ZEND_FETCH_CLASS_CONSTANT: {
+			bool is_prototype;
+			const zend_class_constant *cc = zend_fetch_class_const_info(ctx->script, op_array, opline, &is_prototype);
+			if (!cc || is_prototype) {
+				break;
 			}
+			const zval *c = &cc->value;
+			if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
+				zend_ast *ast = Z_ASTVAL_P(c);
+				if (ast->kind != ZEND_AST_CONSTANT
+				 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &result, 1)
+				 || Z_TYPE(result) == IS_CONSTANT_AST) {
+					break;
+				}
+			} else {
+				ZVAL_COPY_OR_DUP(&result, c);
+			}
+			replace_by_const_or_qm_assign(op_array, opline, &result);
 			break;
+		}
 
 		case ZEND_DO_ICALL: {
 			zend_op *send1_opline = opline - 1;
