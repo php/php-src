@@ -611,6 +611,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
 	zend_string *tmp_name = NULL;
+	bool repeated_after_isset = false;
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
@@ -619,6 +620,7 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	/* make zend_get_property_info silent if we have getter - we may want to use it */
 	property_offset = zend_get_property_offset(zobj->ce, name, (type == BP_VAR_IS) || (zobj->ce->__get != NULL), cache_slot, &prop_info);
 
+repeat:
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		retval = OBJ_PROP(zobj, property_offset);
 		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
@@ -636,6 +638,13 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 					zend_readonly_property_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);
 				}
+			}
+			if (repeated_after_isset) {
+				/* __isset might've released the object, so we need a copy to make sure the value
+				 * survives. */
+				ZVAL_COPY(rv, retval);
+				retval = rv;
+				goto exit;
 			}
 			goto exit;
 		} else {
@@ -674,7 +683,12 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 			}
 			retval = zend_hash_find(zobj->properties, name);
 			if (EXPECTED(retval)) {
-				if (cache_slot) {
+				if (repeated_after_isset) {
+					/* __isset might've released the object, so we need a copy to make sure the value
+					 * survives. */
+					ZVAL_COPY(rv, retval);
+					retval = rv;
+				} else if (cache_slot) {
 					uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 					CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 				}
@@ -695,25 +709,31 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 			if (!tmp_name && !ZSTR_IS_INTERNED(name)) {
 				tmp_name = zend_string_copy(name);
 			}
-			GC_ADDREF(zobj);
-			ZVAL_UNDEF(&tmp_result);
+			if (!repeated_after_isset) {
+				GC_ADDREF(zobj);
+				ZVAL_UNDEF(&tmp_result);
 
-			*guard |= IN_ISSET;
-			zend_std_call_issetter(zobj, name, &tmp_result);
-			*guard &= ~IN_ISSET;
+				*guard |= IN_ISSET;
+				zend_std_call_issetter(zobj, name, &tmp_result);
+				*guard &= ~IN_ISSET;
 
-			if (!zend_is_true(&tmp_result)) {
-				retval = &EG(uninitialized_zval);
-				OBJ_RELEASE(zobj);
+				if (!zend_is_true(&tmp_result)) {
+					retval = &EG(uninitialized_zval);
+					OBJ_RELEASE(zobj);
+					zval_ptr_dtor(&tmp_result);
+					goto exit;
+				}
+
 				zval_ptr_dtor(&tmp_result);
-				goto exit;
+				repeated_after_isset = true;
+				goto repeat;
 			}
-
-			zval_ptr_dtor(&tmp_result);
 			if (zobj->ce->__get && !((*guard) & IN_GET)) {
+				repeated_after_isset = false;
 				goto call_getter;
 			}
 			OBJ_RELEASE(zobj);
+			repeated_after_isset = false;
 		} else if (zobj->ce->__get && !((*guard) & IN_GET)) {
 			goto call_getter_addref;
 		}
@@ -770,6 +790,9 @@ uninit_error:
 
 exit:
 	zend_tmp_string_release(tmp_name);
+	if (repeated_after_isset) {
+		OBJ_RELEASE(zobj);
+	}
 
 	return retval;
 }
