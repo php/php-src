@@ -44,7 +44,7 @@ ZEND_EXTERN_MODULE_GLOBALS(bcmath)
 
 typedef struct _bc_num_obj {
 	zend_object std;
-	bc_num bc_num;
+	bc_num num;
 } bc_num_obj;
 
 typedef enum {

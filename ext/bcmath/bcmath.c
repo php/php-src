@@ -768,7 +768,6 @@ PHP_FUNCTION(bcscale)
 
 static zend_class_entry *bc_num_ce;
 static zend_object_handlers bc_num_obj_handlers;
-#define IS_BC_NUM(zval) (Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), bc_num_ce))
 
 static inline bc_num_obj *bc_num_obj_from_obj(zend_object *obj) {
 	return (bc_num_obj*)((char*)(obj) - XtOffsetOf(bc_num_obj, std));
@@ -787,6 +786,7 @@ static zend_object *bc_num_create_obj(zend_class_entry *ce)
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);
 	rebuild_object_properties(&intern->std);
+	intern->num = NULL;
 
 	return &intern->std;
 }
@@ -796,10 +796,10 @@ static zend_object *bc_num_create_obj(zend_class_entry *ce)
 static void bc_num_free_obj(zend_object *object)
 {
 	bc_num_obj *intern = bc_num_obj_from_obj(object);
-	if (intern->bc_num) {
-		bc_free_num(&intern->bc_num);
+	if (intern->num) {
+		bc_free_num(&intern->num);
 	}
-	efree(intern->bc_num);
+	intern->num = NULL;
 	zend_object_std_dtor(&intern->std);
 }
 /* }}} */
@@ -807,28 +807,28 @@ static void bc_num_free_obj(zend_object *object)
 /* {{{ bc_num_obj_handlers.clone_obj */
 static zend_object *bc_num_clone_obj(zend_object *object)
 {
-	bc_num_obj *old_obj = bc_num_obj_from_obj(object);
-	bc_num_obj *new_obj = bc_num_obj_from_obj(bc_num_create_obj(old_obj->std.ce));
+	bc_num_obj *original = bc_num_obj_from_obj(object);
+	bc_num_obj *clone = bc_num_obj_from_obj(bc_num_create_obj(original->std.ce));
 
-	zend_objects_clone_members(&new_obj->std, &old_obj->std);
-	new_obj->bc_num = bc_copy_num(old_obj->bc_num);
+	zend_objects_clone_members(&clone->std, &original->std);
+	clone->num = bc_copy_num(original->num);
 
-	return &new_obj->std;
+	return &clone->std;
 }
 /* }}} */
 
-static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num, bool *should_free)
+static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num)
 {
-	*should_free = false;
+	bc_num tmp;
 
 	switch (Z_TYPE_P(zv)) {
 		case IS_LONG:
 		case IS_STRING:
 			{
 				zend_string *str = zval_get_string(zv);
-				bc_init_num(num);
-				*should_free = true;
-				if (!bc_str2num(num, ZSTR_VAL(str), 0)) {
+				bc_init_num(&tmp);
+				if (!bc_str2num(&tmp, ZSTR_VAL(str), 0)) {
+					bc_free_num(&tmp);
 					zend_string_release(str);
 					return FAILURE;
 				}
@@ -837,7 +837,7 @@ static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num, bool *should_fr
 			break;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(zv), bc_num_ce)) {
-				*num = bc_num_obj_from_zval(zv)->bc_num;
+				tmp = bc_num_obj_from_zval(zv)->num;
 			} else {
 				zend_argument_type_error(0, "must be of type int, string, or BcNum, %s given", zend_zval_value_name(zv));
 				return FAILURE;
@@ -845,40 +845,38 @@ static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num, bool *should_fr
 			break;
 	}
 
+	*num = tmp;
 	return SUCCESS;
 }
 
 static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num_calculation_type type, bool is_operator)
 {
-	bc_num num1, num2;
+	bc_num num1 = NULL, num2 = NULL, result_num = NULL;
 	bc_num_obj *result_obj;
-	bool should_free1, should_free2, should_free_result = false;
 
-	if (convert_zval_to_bc_num(op1, &num1, &should_free1) == FAILURE || convert_zval_to_bc_num(op2, &num2, &should_free2) == FAILURE) {
+	if (convert_zval_to_bc_num(op1, &num1) == FAILURE || convert_zval_to_bc_num(op2, &num2) == FAILURE) {
 		goto cleanup;
 	}
 
-	result_obj = bc_num_obj_from_obj(bc_num_create_obj(bc_num_ce));
-	bc_init_num(&result_obj->bc_num);
-	should_free_result = true;
+	bc_init_num(&result_num);
 
 	size_t scale = MAX(num1->n_scale, num2->n_scale);
 
 	switch (type) {
 		case BC_NUM_ADD:
-			bc_add(num1, num2, &result_obj->bc_num, scale);
+			bc_add(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_SUB:
-			bc_sub(num1, num2, &result_obj->bc_num, scale);
+			bc_sub(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_MUL:
-			bc_multiply(num1, num2, &result_obj->bc_num, scale);
+			bc_multiply(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_DIV:
-			bc_divide(num1, num2, &result_obj->bc_num, scale);
+			bc_divide(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_MOD:
-			bc_modulo(num1, num2, &result_obj->bc_num, scale);
+			bc_modulo(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_POW:
 			{
@@ -887,32 +885,34 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 					zend_argument_value_error(is_operator ? 0 : 1, "exponent is too large");
 					goto cleanup;
 				}
-				bc_raise(num1, bc_num2long(num2), &result_obj->bc_num, scale);
+				bc_raise(num1, bc_num2long(num2), &result_num, scale);
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
-	if (should_free1) {
+	if (num1 && Z_TYPE_P(op1) != IS_OBJECT) {
 		bc_free_num(&num1);
 	}
-	if (should_free2) {
+	if (num2 && Z_TYPE_P(op2) != IS_OBJECT) {
 		bc_free_num(&num2);
 	}
 
-	result_obj->bc_num->n_scale = scale;
+	result_num->n_scale = scale;
+	result_obj = bc_num_obj_from_obj(bc_num_create_obj(bc_num_ce));
+	result_obj->num = result_num;
 	ZVAL_OBJ(result, &result_obj->std);
 	return SUCCESS;
 
 cleanup:
-	if (should_free1) {
+	if (num1 && Z_TYPE_P(op1) != IS_OBJECT) {
 		bc_free_num(&num1);
 	}
-	if (should_free2) {
+	if (num2 && Z_TYPE_P(op2) != IS_OBJECT) {
 		bc_free_num(&num2);
 	}
-	if (should_free_result) {
-		bc_free_num(&result_obj->bc_num);
+	if (result_num) {
+		bc_free_num(&result_num);
 	}
 	return FAILURE;
 }
@@ -952,15 +952,12 @@ static int bc_num_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op
 /* {{{ bc_num_obj_handlers.compare */
 static int bc_num_compare(zval *z1, zval *z2)
 {
-	bc_num_obj *obj1;
-	bc_num_obj *obj2;
-
 	ZEND_COMPARE_OBJECTS_FALLBACK(z1, z2);
 
-	obj1 = bc_num_obj_from_zval(z1);
-	obj2 = bc_num_obj_from_zval(z2);
+	bc_num_obj *intern1 = bc_num_obj_from_zval(z1);
+	bc_num_obj *intern2 = bc_num_obj_from_zval(z2);
 
-	return bc_compare(obj1->bc_num, obj2->bc_num);
+	return bc_compare(intern1->num, intern2->num);
 }
 /* }}} */
 
@@ -968,7 +965,7 @@ static int bc_num_compare(zval *z1, zval *z2)
 static HashTable *bc_num_get_properties_for(zend_object *object, zend_prop_purpose purpose)
 {
 	HashTable *props;
-	bc_num_obj *bc_num_obj;
+	bc_num_obj *intern;
 
 	switch (purpose) {
 		case ZEND_PROP_PURPOSE_DEBUG:
@@ -982,12 +979,12 @@ static HashTable *bc_num_get_properties_for(zend_object *object, zend_prop_purpo
 	}
 
 	zval zv;
-	bc_num_obj = bc_num_obj_from_obj(object);
+	intern = bc_num_obj_from_obj(object);
 	props = zend_array_dup(zend_std_get_properties(object));
 
-	ZVAL_STR(&zv, bc_num2str(bc_num_obj->bc_num));
+	ZVAL_STR(&zv, bc_num2str(intern->num));
 	zend_hash_str_update(props, "num", sizeof("num")-1, &zv);
-	ZVAL_LONG(&zv, bc_num_obj->bc_num->n_scale);
+	ZVAL_LONG(&zv, intern->num->n_scale);
 	zend_hash_str_update(props, "scale", sizeof("scale")-1, &zv);
 
 	return props;
@@ -1022,16 +1019,21 @@ static void bc_num_register_class(void)
 /* {{{ Creates new BcNum */
 PHP_METHOD(BcNum, __construct)
 {
-	zend_string *num_str;
+	zend_string *num_str, *num_str_tmp;
+	zend_long num_l;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_STR(num_str)
+		Z_PARAM_STR_OR_LONG(num_str, num_l)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(scale_param, scale_param_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (!num_str) {
+		num_str_tmp = zend_long_to_str(num_l);
+	}
 
 	if (scale_param_is_null) {
 		scale = BCG(bc_precision);
@@ -1042,22 +1044,32 @@ PHP_METHOD(BcNum, __construct)
 		scale = (int) scale_param;
 	}
 
-	bc_num_obj *obj = bc_num_obj_from_zval(ZEND_THIS);
-	bc_init_num(&obj->bc_num);
+	bc_num_obj *intern = bc_num_obj_from_zval(ZEND_THIS);
 
-	if (php_str2num(&obj->bc_num, ZSTR_VAL(num_str)) == FAILURE) {
+	bc_num num;
+	bc_init_num(&num);
+
+	if (php_str2num(&num, ZSTR_VAL(num_str ?: num_str_tmp)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
-		bc_free_num(&obj->bc_num);
+		bc_free_num(&num);
+		if (num_str_tmp) {
+			zend_string_release(num_str_tmp);
+		}
 		RETURN_THROWS();
 	}
 
-	if (obj->bc_num->n_scale < scale) {
-		char *nptr = (char *) (obj->bc_num->n_value + obj->bc_num->n_len + obj->bc_num->n_scale);
-		for (int count = scale - obj->bc_num->n_scale; count > 0; count--) {
+	if (num_str_tmp) {
+		zend_string_release(num_str_tmp);
+	}
+
+	if (num->n_scale < scale) {
+		char *nptr = (char *) (num->n_value + num->n_len + num->n_scale);
+		for (int count = scale - num->n_scale; count > 0; count--) {
 			*nptr++ = 0;
 		}
 	}
-	obj->bc_num->n_scale = scale;
+	num->n_scale = scale;
+	intern->num = num;
 }
 /* }}} */
 

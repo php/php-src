@@ -41,7 +41,7 @@ function bcround(string $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP)
 
 class BcNum
 {
-    public function __construct(string $num, ?int $scale = null) {}
+    public function __construct(string|int $num, ?int $scale = null) {}
 
     //public static function getGlobalScale(): int {}
 
