@@ -7668,7 +7668,40 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		zend_string *filename = op_array->filename;
 		uint32_t start_lineno = decl->start_lineno;
-		op_array->function_name = name = unqualified_name = zend_strpprintf(0, "{closure:%s:%" PRIu32 "}", ZSTR_VAL(filename), start_lineno);
+
+		zend_string *class = zend_empty_string;
+		zend_string *separator = zend_empty_string;
+		zend_string *function = filename;
+		char *parens = "";
+		
+		if (CG(active_op_array) && CG(active_op_array)->function_name) {
+			if (CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE) {
+				/* If the parent function is a closure, don't redundantly
+				 * add the classname and parentheses.
+				 */
+				function = CG(active_op_array)->function_name;
+			} else {
+				function = CG(active_op_array)->function_name;
+				parens = "()";
+
+				if (CG(active_class_entry) && CG(active_class_entry)->name) {
+					class = CG(active_class_entry)->name;
+					separator = ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM);
+				}
+			}
+		}
+
+		unqualified_name = zend_strpprintf_unchecked(
+			0,
+			"{closure:%S%S%S%s:%" PRIu32 "}",
+			class,
+			separator,
+			function,
+			parens,
+			start_lineno
+		);
+
+		op_array->function_name = name = unqualified_name;
 	} else {
 		unqualified_name = decl->name;
 		op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
