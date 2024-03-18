@@ -1210,27 +1210,27 @@ dnl PHP_MISSING_TIME_R_DECL
 dnl
 AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
   AC_MSG_CHECKING([for missing declarations of reentrant functions])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)() = localtime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = localtime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_LOCALTIME_R_DECL,1,[Whether localtime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)() = gmtime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = gmtime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_GMTIME_R_DECL,1,[Whether gmtime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)() = asctime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = asctime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_ASCTIME_R_DECL,1,[Whether asctime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)() = ctime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = ctime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_CTIME_R_DECL,1,[Whether ctime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)() = strtok_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)(void) = strtok_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
@@ -1518,7 +1518,7 @@ AC_DEFUN([PHP_TEST_BUILD], [
   LIBS="$4 $LIBS"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[
     $5
-    char $1();
+    char $1(void);
     int main(void) {
       $1();
       return 0;
