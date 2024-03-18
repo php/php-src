@@ -49,7 +49,7 @@
 static void *find_prefered_mmap_base(size_t requested_size)
 {
 	size_t huge_page_size = 2 * 1024 * 1024;
-	uintptr_t last_free_addr = 0;
+	uintptr_t last_free_addr = huge_page_size;
 	uintptr_t last_candidate = (uintptr_t)MAP_FAILED;
 	uintptr_t start, end, text_start = 0;
 #if defined(__linux__)
