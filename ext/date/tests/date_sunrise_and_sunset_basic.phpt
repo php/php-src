@@ -25,8 +25,12 @@ var_dump(gettype(date_sunset(time())));
 --EXPECTF--
 Basic test for date_sunrise() and date_sunset()
 
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
+
 Deprecated: Function date_sunrise() is deprecated in %s on line %d
 %s %s %d %d, sunrise time : %d:%d
+
+Deprecated: Constant SUNFUNCS_RET_STRING is deprecated in %s on line %d
 
 Deprecated: Function date_sunset() is deprecated in %s on line %d
 %s %s %d %d, sunset time : %d:%d
