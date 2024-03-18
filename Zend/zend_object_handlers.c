@@ -610,7 +610,6 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
 	uint32_t *guard = NULL;
-	zend_string *tmp_name = NULL;
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Read object #%d property: %s\n", zobj->handle, ZSTR_VAL(name));
@@ -692,9 +691,6 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 		guard = zend_get_property_guard(zobj, name);
 
 		if (!((*guard) & IN_ISSET)) {
-			if (!tmp_name && !ZSTR_IS_INTERNED(name)) {
-				tmp_name = zend_string_copy(name);
-			}
 			GC_ADDREF(zobj);
 			ZVAL_UNDEF(&tmp_result);
 
@@ -769,8 +765,6 @@ uninit_error:
 	retval = &EG(uninitialized_zval);
 
 exit:
-	zend_tmp_string_release(tmp_name);
-
 	return retval;
 }
 /* }}} */
@@ -1822,7 +1816,6 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 	zval *value = NULL;
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
-	zend_string *tmp_name = NULL;
 
 	property_offset = zend_get_property_offset(zobj->ce, name, 1, cache_slot, &prop_info);
 
@@ -1887,9 +1880,6 @@ found:
 			zval rv;
 
 			/* have issetter - try with it! */
-			if (!tmp_name && !ZSTR_IS_INTERNED(name)) {
-				tmp_name = zend_string_copy(name);
-			}
 			GC_ADDREF(zobj);
 			(*guard) |= IN_ISSET; /* prevent circular getting */
 			zend_std_call_issetter(zobj, name, &rv);
@@ -1912,7 +1902,6 @@ found:
 	}
 
 exit:
-	zend_tmp_string_release(tmp_name);
 	return result;
 }
 /* }}} */
