@@ -87,6 +87,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-mhash emits deprecation warning.
    - The configure option --with-pdo-oci has been removed.
    - The configure option --with-pspell has been removed.
+   - New configure option --disable-configure-command to hide the PHP build
+     configure command and options in the phpinfo() output (enabled by default).
    - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
    - Symbol DBA_CDB_MAKE removed in ext/dba.
    - Symbol HAVE_LIBM has been removed.

@@ -1077,6 +1077,17 @@ PHP_ARG_ENABLE([undefined-sanitizer],,
   [no],
   [no])
 
+PHP_ARG_ENABLE([configure-command],
+  [whether to show the configure command in phpinfo],
+  [AS_HELP_STRING([--disable-configure-command],
+    [Hide PHP build configure command and options in the phpinfo output])],
+  [yes],
+  [no])
+
+if test "x$PHP_CONFIGURE_COMMAND" = xyes; then
+  AC_DEFINE([PHP_SHOW_CONFIGURE_COMMAND], [1], [Show configure command in phpinfo.])
+fi
+
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
 
