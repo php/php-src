@@ -181,6 +181,54 @@ static zval *xsl_objects_write_property(zend_object *object, zend_string *member
 	}
 }
 
+/* Tries to output an error message where a part was replaced by another string.
+ * Returns true if the search string was found and the error message with replacement was outputted.
+ * Return false otherwise. */
+static bool xsl_try_output_replaced_error_message(
+	void *ctx,
+	const char *msg,
+	va_list args,
+	const char *search,
+	size_t search_len,
+	const char *replace
+)
+{
+	const char *msg_replace_location = strstr(msg, search);
+	if (msg_replace_location != NULL) {
+		php_libxml_ctx_error(ctx, "%.*s%s%s", (int) (msg_replace_location - msg), msg, replace, msg_replace_location + search_len);
+		return true;
+	}
+	return false;
+}
+
+/* Helper macro so the string length doesn't need to be passed separately.
+ * Only allows literal strings for `search` and `replace`. */
+#define XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg, args, search, replace) \
+	xsl_try_output_replaced_error_message(ctx, msg, args, "" search, sizeof("" search) - 1, "" replace)
+
+/* We want to output PHP-tailored error messages for some libxslt error messages, such that
+ * the errors refer to PHP properties instead of libxslt-specific fields. */
+static void xsl_libxslt_error_handler(void *ctx, const char *msg, ...)
+{
+	va_list args;
+	va_start(args, msg);
+
+	if (strcmp(msg, "%s") == 0) {
+		/* Adjust error message to be more descriptive */
+		const char *msg_arg = va_arg(args, const char *);
+		bool output = XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg_arg, args, "xsltMaxDepth (--maxdepth)", "$maxTemplateDepth")
+				   || XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg_arg, args, "maxTemplateVars (--maxvars)", "$maxTemplateVars");
+
+		if (!output) {
+			php_libxml_ctx_error(ctx, "%s", msg_arg);
+		}
+	} else {
+		php_libxml_error_handler_va(PHP_LIBXML_ERROR, ctx, msg, args);
+	}
+
+	va_end(args);
+}
+
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(xsl)
 {
@@ -205,7 +253,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
 				   (const xmlChar *) "http://php.net/xsl",
 				   xsl_ext_function_object_php);
-	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
+	xsltSetGenericErrorFunc(NULL, xsl_libxslt_error_handler);
 
 	register_php_xsl_symbols(module_number);
 

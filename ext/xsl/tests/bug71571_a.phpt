@@ -35,7 +35,7 @@ $proc->transformToDoc($doc);
 Warning: XSLTProcessor::transformToDoc(): runtime error: file %s line 8 element call-template in %s on line %d
 
 Warning: XSLTProcessor::transformToDoc(): xsltApplySequenceConstructor: A potential infinite template recursion was detected.
-You can adjust xsltMaxDepth (--maxdepth) in order to raise the maximum number of nested template calls and variables/params (currently set to 2). in %s on line %d
+You can adjust $maxTemplateDepth in order to raise the maximum number of nested template calls and variables/params (currently set to 2). in %s on line %d
 
 Warning: XSLTProcessor::transformToDoc(): Templates: in %s on line %d
 

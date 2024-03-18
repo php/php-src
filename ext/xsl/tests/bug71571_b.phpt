@@ -40,7 +40,7 @@ $proc->transformToDoc($doc);
 Warning: XSLTProcessor::transformToDoc(): runtime error: file %s line 8 element param in %s on line %d
 
 Warning: XSLTProcessor::transformToDoc(): xsltApplyXSLTTemplate: A potential infinite template recursion was detected.
-You can adjust maxTemplateVars (--maxvars) in order to raise the maximum number of variables/params (currently set to 2). in %s on line %d
+You can adjust $maxTemplateVars in order to raise the maximum number of variables/params (currently set to 2). in %s on line %d
 
 Warning: XSLTProcessor::transformToDoc(): Templates: in %s on line %d
 
