@@ -3786,7 +3786,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 	USE_OPLINE
 	SAVE_OPLINE();
 	zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-	zval *result = EX_VAR(opline[1].result.var);
+	zval *result = EX_VAR(opline->result.var);
 	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
@@ -3834,7 +3834,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 	USE_OPLINE
 	SAVE_OPLINE();
 	zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-	zval *result = EX_VAR(opline[1].result.var);
+	zval *result = EX_VAR(opline->result.var);
 	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);

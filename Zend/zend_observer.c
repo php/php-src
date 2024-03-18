@@ -252,7 +252,7 @@ static void ZEND_FASTCALL _zend_observe_fcall_begin(zend_execute_data *execute_d
 	zend_observer_fcall_begin_specialized(execute_data, true);
 }
 
-void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *handler)
+ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *handler)
 {
 	zend_observer_fcall_begin_handler *possible_handlers_end = handler + zend_observers_fcall_list.count;
 

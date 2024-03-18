@@ -45,7 +45,7 @@ typedef struct _zend_observer_fcall_handlers {
 	ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_USER_CODE((function)->type) \
 		? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
 
-#define ZEND_OBSERVER_NONE_OBSERVED ((void *) 3)
+#define ZEND_OBSERVER_NONE_OBSERVED ((void *) 3) // Neither begin nor end handler present
 
 /* Omit zend_observer_fcall_internal_function_extension check, they are set at the same time. */
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
@@ -81,7 +81,7 @@ ZEND_API void zend_observer_activate(void);
 ZEND_API void zend_observer_shutdown(void);
 
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute_data);
-void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *observer_data);
+ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *observer_data);
 
 static zend_always_inline bool zend_observer_handler_is_unobserved(zend_observer_fcall_begin_handler *handler) {
 	return *handler == ZEND_OBSERVER_NONE_OBSERVED;
