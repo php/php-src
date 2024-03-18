@@ -31,7 +31,7 @@ var_dump($f->call($foo));
 var_dump($f());
 ?>
 --EXPECTF--
-object(Closure)#3 (2) {
+object(Closure)#3 (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
   ["file"]=>
@@ -42,7 +42,7 @@ object(Closure)#3 (2) {
   object(Foo)#1 (0) {
   }
 }
-object(Closure)#3 (2) {
+object(Closure)#3 (4) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
   ["file"]=>
@@ -53,7 +53,7 @@ object(Closure)#3 (2) {
   object(Foo)#1 (0) {
   }
 }
-object(Closure)#3 (1) {
+object(Closure)#3 (3) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
   ["file"]=>
