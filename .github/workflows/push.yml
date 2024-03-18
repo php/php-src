@@ -72,7 +72,7 @@ jobs:
             zts: true
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-${{ !matrix.asan && '22' || '20' }}.04
     container:
       image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
     steps:
