@@ -1085,7 +1085,7 @@ void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{
 		 * let's prevent it from segfault for now
 		 */
 	} else {
-		phpdbg_watch_efree(p);
+		phpdbg_watch_efree(p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 		_zend_mm_free(heap, p ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 } /* }}} */
@@ -1146,9 +1146,9 @@ int main(int argc, char **argv) /* {{{ */
 	char *read_from_stdin = NULL;
 	zend_string *backup_phpdbg_compile = NULL;
 	bool show_help = 0, show_version = 0;
-	void* (*_malloc)(size_t);
-	void (*_free)(void*);
-	void* (*_realloc)(void*, size_t);
+	void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+	void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 	php_stream_wrapper wrapper;
 	php_stream_wrapper_ops wops;
 
@@ -1412,11 +1412,7 @@ phpdbg_main:
 		_free = phpdbg_watch_efree;
 
 		if (use_mm_wrappers) {
-#if ZEND_DEBUG
-			zend_mm_set_custom_debug_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
-#else
 			zend_mm_set_custom_handlers(mm_heap, phpdbg_malloc_wrapper, phpdbg_free_wrapper, phpdbg_realloc_wrapper);
-#endif
 		} else {
 			zend_mm_set_custom_handlers(mm_heap, _malloc, _free, _realloc);
 		}

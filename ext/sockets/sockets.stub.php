@@ -53,6 +53,19 @@ const SOCK_SEQPACKET = UNKNOWN;
  */
 const SOCK_RDM = UNKNOWN;
 #endif
+#ifdef SOCK_CONN_DGRAM
+/**
+ * @var int
+ * @cvalue SOCK_CONN_DGRAM
+ */
+const SOCK_CONN_DGRAM = UNKNOWN;
+/**
+ * is an alias of SOCK_CONN_DGRAM
+ * @var int
+ * @cvalue SOCK_DCCP
+ */
+const SOCK_DCCP = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -1591,14 +1604,14 @@ const AI_CANONNAME = UNKNOWN;
  * @cvalue AI_NUMERICHOST
  */
 const AI_NUMERICHOST = UNKNOWN;
-#if HAVE_AI_V4MAPPED
+#ifdef AI_V4MAPPED
 /**
  * @var int
  * @cvalue AI_V4MAPPED
  */
 const AI_V4MAPPED = UNKNOWN;
 #endif
-#if HAVE_AI_ALL
+#ifdef AI_ALL
 /**
  * @var int
  * @cvalue AI_ALL
@@ -1610,7 +1623,7 @@ const AI_ALL = UNKNOWN;
  * @cvalue AI_ADDRCONFIG
  */
 const AI_ADDRCONFIG = UNKNOWN;
-#if HAVE_AI_IDN
+#ifdef AI_IDN
 /**
  * @var int
  * @cvalue AI_IDN

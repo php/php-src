@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 50cc9edef7f40e6885be38be25a71f66d7405a50 */
+ * Stub hash: 08c4caf706645f1afaa8d40c3887f01025ced930 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -226,7 +226,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_get_strength, 0, 1, IS_
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_set_strength, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_set_strength, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_TYPE_INFO(0, strength, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -503,7 +503,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_locale_get_default arginfo_intl_get_error_message
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_set_default, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_set_default, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -630,9 +630,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_resourcebundle_create, 0, 2, Reso
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_resourcebundle_get, 0, 2, IS_MIXED, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_resourcebundle_get, 0, 2, ResourceBundle, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL)
 	ZEND_ARG_OBJ_INFO(0, bundle, ResourceBundle, 0)
-	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_TYPE_MASK(0, index, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 

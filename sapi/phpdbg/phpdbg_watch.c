@@ -106,6 +106,7 @@
 #include "phpdbg_watch.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_prompt.h"
+#include "zend_portability.h"
 #ifndef _WIN32
 # include <unistd.h>
 # include <sys/mman.h>
@@ -1195,7 +1196,7 @@ int phpdbg_print_changed_zvals(void) {
 	return ret;
 }
 
-void phpdbg_watch_efree(void *ptr) {
+void phpdbg_watch_efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) {
 	phpdbg_btree_result *result;
 
 	/* only do expensive checks if there are any watches at all */
@@ -1231,7 +1232,7 @@ void phpdbg_watch_efree(void *ptr) {
 	}
 
 	if (PHPDBG_G(original_free_function)) {
-		PHPDBG_G(original_free_function)(ptr);
+		PHPDBG_G(original_free_function)(ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
 	}
 }
 

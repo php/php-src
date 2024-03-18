@@ -8,7 +8,7 @@ if (PHP_DOM == "yes") {
 		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c \
-			xml_document.c html_document.c html5_serializer.c html5_parser.c namespace_compat.c \
+			xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c \
 			domexception.c parentnode.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
 			node.c characterdata.c documenttype.c \
@@ -41,7 +41,7 @@ if (PHP_DOM == "yes") {
 				WARNING("dom support can't be enabled, libxml is not found")
 			}
 		}
-		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h xpath_callbacks.h");
+		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h xpath_callbacks.h namespace_compat.h");
 	} else {
 		WARNING("dom support can't be enabled, libxml is not enabled")
 		PHP_DOM = "no"

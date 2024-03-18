@@ -2377,15 +2377,15 @@ static void update_errors_warnings(timelib_error_container **last_errors) /* {{{
 	*last_errors = NULL;
 } /* }}} */
 
-static void php_date_set_time_fraction(timelib_time *time, int microseconds)
+static void php_date_set_time_fraction(timelib_time *time, int microsecond)
 {
-	time->us = microseconds;
+	time->us = microsecond;
 }
 
 static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
 {
 #if HAVE_GETTIMEOFDAY
-	struct timeval tp = {0}; /* For setting microseconds */
+	struct timeval tp = {0}; /* For setting microsecond */
 
 	gettimeofday(&tp, NULL);
 	*sec = tp.tv_sec;
@@ -2525,16 +2525,14 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	zend_long sec;
 	int usec;
 
-	if (UNEXPECTED(isnan(sec_dval)
-		|| sec_dval >= (double)TIMELIB_LONG_MAX
-		|| sec_dval < (double)TIMELIB_LONG_MIN
-	)) {
-		zend_throw_error(
+	if (UNEXPECTED(isnan(sec_dval) || !PHP_DATE_DOUBLE_FITS_LONG(sec_dval))) {
+		zend_argument_error(
 			date_ce_date_range_error,
-			"Seconds must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ", %g given",
+			1,
+			"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
 			TIMELIB_LONG_MIN,
 			TIMELIB_LONG_MAX,
-			sec_dval
+			ts
 		);
 		return false;
 	}
@@ -2543,6 +2541,18 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	usec = (int)(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(usec < 0)) {
+		if (UNEXPECTED(sec == TIMELIB_LONG_MIN)) {
+			zend_argument_error(
+				date_ce_date_range_error,
+				1,
+				"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
+				TIMELIB_LONG_MIN,
+				TIMELIB_LONG_MAX,
+				ts
+			);
+			return false;
+		}
+
 		sec = sec - 1;
 		usec = 1000000 + usec;
 	}
@@ -3845,7 +3855,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(DateTimeImmutable, setMicroseconds)
+PHP_METHOD(DateTimeImmutable, setMicrosecond)
 {
 	zval *object, new_object;
 	php_date_obj *dateobj, *new_dateobj;
@@ -3879,7 +3889,7 @@ PHP_METHOD(DateTimeImmutable, setMicroseconds)
 /* }}} */
 
 /* {{{ */
-PHP_METHOD(DateTime, setMicroseconds)
+PHP_METHOD(DateTime, setMicrosecond)
 {
 	zval *object;
 	php_date_obj *dateobj;
@@ -3937,7 +3947,7 @@ PHP_FUNCTION(date_timestamp_get)
 }
 /* }}} */
 
-PHP_METHOD(DateTime, getMicroseconds) /* {{{ */
+PHP_METHOD(DateTime, getMicrosecond) /* {{{ */
 {
 	zval *object;
 	php_date_obj *dateobj;

@@ -60,13 +60,13 @@ BEGIN_EXTERN_C()
 
 #if ZEND_HRTIME_PLATFORM_WINDOWS
 
-extern double zend_hrtime_timer_scale;
+ZEND_API extern double zend_hrtime_timer_scale;
 
 #elif ZEND_HRTIME_PLATFORM_APPLE
 
 # include <mach/mach_time.h>
 # include <string.h>
-extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
+ZEND_API extern mach_timebase_info_data_t zend_hrtime_timerlib_info;
 
 #endif
 

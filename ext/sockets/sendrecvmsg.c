@@ -123,7 +123,7 @@ static void init_ancillary_registry(void)
 #endif
 
 #ifdef SO_PASSCRED
-#ifdef ANC_CREDS_UCRED
+#ifdef HAVE_STRUCT_UCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
 #else

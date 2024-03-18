@@ -13,6 +13,10 @@ Deprecated: Optional parameter $testA declared before required parameter $testC 
 
 Deprecated: Optional parameter $testB declared before required parameter $testC is implicitly treated as a required parameter in %s on line %d
 
+Deprecated: Implicitly marking parameter $test2A as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+
 Deprecated: Optional parameter $test2B declared before required parameter $test2C is implicitly treated as a required parameter in %s on line %d
+
+Deprecated: Implicitly marking parameter $test3A as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 
 Deprecated: Optional parameter $test3B declared before required parameter $test3C is implicitly treated as a required parameter in %s on line %d

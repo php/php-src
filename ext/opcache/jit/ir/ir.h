@@ -36,6 +36,21 @@ extern "C" {
 # endif
 #endif
 
+/* target auto detection */
+#if !defined(IR_TARGET_X86) && !defined(IR_TARGET_X64) && !defined(IR_TARGET_AARCH64)
+# if defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#  define IR_TARGET_X64
+# elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86)
+#  define IR_TARGET_X86
+# elif defined(__aarch64__) || defined(_M_ARM64)
+#  define IR_TARGET_AARCH64
+# elif defined (_WIN64)
+#  define IR_TARGET_X64
+# elif defined (_WIN32)
+#  define IR_TARGET_X86
+# endif
+#endif
+
 #if defined(IR_TARGET_X86)
 # define IR_TARGET "x86"
 #elif defined(IR_TARGET_X64)
@@ -563,6 +578,7 @@ struct _ir_ctx {
 	ir_block          *cfg_blocks;              /* list of basic blocks (starts from 1) */
 	uint32_t          *cfg_edges;               /* the actual basic blocks predecessors and successors edges */
 	uint32_t          *cfg_map;                 /* map of instructions to basic block number */
+	uint32_t          *cfg_schedule;            /* BB order for code generation */
 	uint32_t          *rules;                   /* array of target specific code-generation rules (for each instruction) */
 	uint32_t          *vregs;
 	ir_ref             vregs_count;

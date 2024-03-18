@@ -953,6 +953,8 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
 #define IR_BB_HAS_PARAM        (1<<12)
 #define IR_BB_HAS_VAR          (1<<13)
 
+/* The following flags are set by BB scheduler */
+#define IR_BB_ALIGN_LOOP       (1<<14)
 
 struct _ir_block {
 	uint32_t flags;
@@ -977,8 +979,8 @@ struct _ir_block {
 };
 
 uint32_t ir_skip_empty_target_blocks(const ir_ctx *ctx, uint32_t b);
-uint32_t ir_skip_empty_next_blocks(const ir_ctx *ctx, uint32_t b);
-void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block, uint32_t *next_block);
+uint32_t ir_next_block(const ir_ctx *ctx, uint32_t b);
+void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block);
 
 IR_ALWAYS_INLINE uint32_t ir_phi_input_number(const ir_ctx *ctx, const ir_block *bb, uint32_t from)
 {

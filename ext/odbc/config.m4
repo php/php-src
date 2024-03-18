@@ -46,8 +46,8 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
   fi
 
 dnl Check for the library files, and setup the ODBC_LIBS path.
-if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -a \
-  ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
+if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so && \
+  test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
   dnl we have an error and should bail out, as we can't find the libs!
   echo ""
   echo "*********************************************************************"
@@ -395,7 +395,7 @@ PHP_ARG_WITH([dbmaker],,
       dnl check DBMaker version (from 5.0 to 2.0)
       DBMAKER_VERSION=5.0
 
-      while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a "$DBMAKER_VERSION" != "2.9"; do
+      while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION && test "$DBMAKER_VERSION" != "2.9"; do
         DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | $AWK '{ print $1-1;}'`
         MAJOR_V=`echo $DM_VER | $AWK '{ print $1/10; }'  | $AWK -F. '{ print $1; }'`
         MINOR_V=`echo $DM_VER | $AWK '{ print $1%10; }'`

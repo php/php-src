@@ -33,8 +33,8 @@
 
 #define SPL_HEAP_CORRUPTED       0x00000001
 
-zend_object_handlers spl_handler_SplHeap;
-zend_object_handlers spl_handler_SplPriorityQueue;
+static zend_object_handlers spl_handler_SplHeap;
+static zend_object_handlers spl_handler_SplPriorityQueue;
 
 PHPAPI zend_class_entry  *spl_ce_SplHeap;
 PHPAPI zend_class_entry  *spl_ce_SplMaxHeap;

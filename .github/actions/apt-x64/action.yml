@@ -37,6 +37,7 @@ runs:
           libxpm-dev \
           libzip-dev \
           libsqlite3-dev \
+          libsqlite3-mod-spatialite \
           libwebp-dev \
           libonig-dev \
           libkrb5-dev \

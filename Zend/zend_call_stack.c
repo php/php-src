@@ -313,6 +313,7 @@ static bool zend_call_stack_get_freebsd_sysctl(zend_call_stack *stack)
 	int mib[2] = {CTL_KERN, KERN_USRSTACK};
 	size_t len = sizeof(stack_base);
 	struct rlimit rlim;
+	size_t numguards = 0;
 
 	/* This method is relevant only for the main thread */
 	ZEND_ASSERT(zend_call_stack_is_main_thread());
@@ -329,7 +330,13 @@ static bool zend_call_stack_get_freebsd_sysctl(zend_call_stack *stack)
 		return false;
 	}
 
-	size_t guard_size = getpagesize();
+	len = sizeof(numguards);
+	/* For most of the cases, we do not necessarily need to do so as, by default, it is `1` page, but is user writable */
+	if (sysctlbyname("security.bsd.stack_guard_page", &numguards, &len, NULL, 0) != 0) {
+		return false;
+	}
+
+	size_t guard_size = numguards * getpagesize();
 
 	stack->base = stack_base;
 	stack->max_size = rlim.rlim_cur - guard_size;

@@ -643,7 +643,7 @@ static bool has_opline(zend_execute_data *execute_data)
 	;
 }
 
-void * zend_test_custom_malloc(size_t len)
+void * zend_test_custom_malloc(size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
@@ -651,7 +651,7 @@ void * zend_test_custom_malloc(size_t len)
 	return _zend_mm_alloc(ZT_G(zend_orig_heap), len ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
-void zend_test_custom_free(void *ptr)
+void zend_test_custom_free(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
@@ -659,7 +659,7 @@ void zend_test_custom_free(void *ptr)
 	_zend_mm_free(ZT_G(zend_orig_heap), ptr ZEND_FILE_LINE_EMPTY_CC ZEND_FILE_LINE_EMPTY_CC);
 }
 
-void * zend_test_custom_realloc(void * ptr, size_t len)
+void * zend_test_custom_realloc(void * ptr, size_t len ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	if (has_opline(EG(current_execute_data))) {
 		assert(EG(current_execute_data)->opline->lineno != (uint32_t)-1);
@@ -1368,6 +1368,9 @@ PHP_ZEND_TEST_API int gh11934b_ffi_var_test_cdata;
 /**
  * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.
  */
+#ifdef __MUSL__
+typedef off_t off64_t;
+#endif
 PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
 {
 	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");

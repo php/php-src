@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/utf16be_bom.html");
-var_dump($dom->encoding);
+var_dump($dom->characterSet);
 $dom->documentElement->firstChild->nextElementSibling->textContent = "é";
 $output = $dom->saveHTML();
 echo $output, "\n";
@@ -14,7 +14,7 @@ $dom->saveHTMLFile(__DIR__ . "/utf16be_bom_output.tmp");
 var_dump(file_get_contents(__DIR__ . "/utf16be_bom_output.tmp") === $output);
 
 echo "--- After changing encoding to UTF-8 ---\n";
-$dom->encoding = "UTF-8";
+$dom->characterSet = "UTF-8";
 echo $dom->saveHTML(), "\n";
 
 ?>

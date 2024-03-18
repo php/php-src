@@ -8,9 +8,19 @@ if test "$PHP_POSIX" = "yes"; then
   AC_DEFINE(HAVE_POSIX, 1, [whether to include POSIX-like functions])
   PHP_NEW_EXTENSION(posix, posix.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-  AC_CHECK_HEADERS([sys/mkdev.h sys/sysmacros.h])
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups initgroups getgrgid_r eaccess)
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups makedev initgroups getgrgid_r eaccess)
+  dnl Check for makedev. If it's defined as a macro, AC_CHECK_FUNCS won't work.
+  dnl Required headers are included by the AC_HEADER_MAJOR logic.
+  AC_CHECK_FUNCS([makedev],,
+    [AC_CHECK_DECL([makedev], [AC_DEFINE([HAVE_MAKEDEV], [1])],, [
+      #include <sys/types.h>
+      #ifdef MAJOR_IN_MKDEV
+      # include <sys/mkdev.h>
+      #elif defined(MAJOR_IN_SYSMACROS)
+      # include <sys/sysmacros.h>
+      #endif
+    ])])
 
 dnl Skip pathconf and fpathconf check on musl libc due to limited implementation
 dnl (first argument is not validated and has different error).

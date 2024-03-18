@@ -8,10 +8,10 @@ $functions = [
     'float' => function (float $f) { return $f; },
     'string' => function (string $s) { return $s; },
     'bool' => function (bool $b) { return $b; },
-    'int nullable' => function (int $i = NULL) { return $i; },
-    'float nullable' => function (float $f = NULL) { return $f; },
-    'string nullable' => function (string $s = NULL) { return $s; },
-    'bool nullable' => function (bool $b = NULL) { return $b; }
+    'int nullable' => function (?int $i) { return $i; },
+    'float nullable' => function (?float $f) { return $f; },
+    'string nullable' => function (?string $s) { return $s; },
+    'bool nullable' => function (?bool $b) { return $b; }
 ];
 
 foreach ($functions as $type => $function) {

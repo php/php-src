@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e446ff14fc14d08a6ac225af78cde931e381ee5b */
+ * Stub hash: 59861342e0075231d2a576afb2d5df6973d70684 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_getDefault, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Locale_setDefault, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Locale_setDefault, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

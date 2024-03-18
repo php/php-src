@@ -35,7 +35,7 @@ static inline void step(php_random_status_state_pcgoneseq128xslrr64 *s)
 	);
 }
 
-static inline void seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed)
+PHPAPI inline void php_random_pcgoneseq128xslrr64_seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_random_uint128_t seed)
 {
 	s->state = php_random_uint128_constant(0ULL, 0ULL);
 	step(s);
@@ -43,14 +43,9 @@ static inline void seed128(php_random_status_state_pcgoneseq128xslrr64 *s, php_r
 	step(s);
 }
 
-static void seed(php_random_status *status, uint64_t seed)
+static php_random_result generate(void *state)
 {
-	seed128(status->state, php_random_uint128_constant(0ULL, seed));
-}
-
-static php_random_result generate(php_random_status *status)
-{
-	php_random_status_state_pcgoneseq128xslrr64 *s = status->state;
+	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 
 	step(s);
 
@@ -60,14 +55,17 @@ static php_random_result generate(php_random_status *status)
 	};
 }
 
-static zend_long range(php_random_status *status, zend_long min, zend_long max)
+static zend_long range(void *state, zend_long min, zend_long max)
 {
-	return php_random_range(&php_random_algo_pcgoneseq128xslrr64, status, min, max);
+	return php_random_range((php_random_algo_with_state){
+		.algo = &php_random_algo_pcgoneseq128xslrr64,
+		.state = state,
+	}, min, max);
 }
 
-static bool serialize(php_random_status *status, HashTable *data)
+static bool serialize(void *state, HashTable *data)
 {
-	php_random_status_state_pcgoneseq128xslrr64 *s = status->state;
+	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 	uint64_t u;
 	zval z;
 
@@ -82,9 +80,9 @@ static bool serialize(php_random_status *status, HashTable *data)
 	return true;
 }
 
-static bool unserialize(php_random_status *status, HashTable *data)
+static bool unserialize(void *state, HashTable *data)
 {
-	php_random_status_state_pcgoneseq128xslrr64 *s = status->state;
+	php_random_status_state_pcgoneseq128xslrr64 *s = state;
 	uint64_t u[2];
 	zval *t;
 
@@ -109,7 +107,6 @@ static bool unserialize(php_random_status *status, HashTable *data)
 
 const php_random_algo php_random_algo_pcgoneseq128xslrr64 = {
 	sizeof(php_random_status_state_pcgoneseq128xslrr64),
-	seed,
 	generate,
 	range,
 	serialize,
@@ -142,8 +139,8 @@ PHPAPI void php_random_pcgoneseq128xslrr64_advance(php_random_status_state_pcgon
 /* {{{ Random\Engine\PcgOneseq128XslRr64::__construct */
 PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 {
-	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	php_random_status_state_pcgoneseq128xslrr64 *state = engine->status->state;
+	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
+	php_random_status_state_pcgoneseq128xslrr64 *state = engine.state;
 	zend_string *str_seed = NULL;
 	zend_long int_seed = 0;
 	bool seed_is_null = true;
@@ -161,7 +158,7 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 			RETURN_THROWS();
 		}
 
-		seed128(state, s);
+		php_random_pcgoneseq128xslrr64_seed128(state, s);
 	} else {
 		if (str_seed) {
 			/* char (byte: 8 bit) * 16 = 128 bits */
@@ -176,13 +173,13 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 					}
 				}
 
-				seed128(state, php_random_uint128_constant(t[0], t[1]));
+				php_random_pcgoneseq128xslrr64_seed128(state, php_random_uint128_constant(t[0], t[1]));
 			} else {
 				zend_argument_value_error(1, "must be a 16 byte (128 bit) string");
 				RETURN_THROWS();
 			}
 		} else {
-			seed128(state, php_random_uint128_constant(0ULL, (uint64_t) int_seed));
+			php_random_pcgoneseq128xslrr64_seed128(state, php_random_uint128_constant(0ULL, (uint64_t) int_seed));
 		}
 	}
 }
@@ -191,8 +188,8 @@ PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, __construct)
 /* {{{ Random\Engine\PcgOneseq128XslRr64::jump() */
 PHP_METHOD(Random_Engine_PcgOneseq128XslRr64, jump)
 {
-	php_random_engine *engine = Z_RANDOM_ENGINE_P(ZEND_THIS);
-	php_random_status_state_pcgoneseq128xslrr64 *state = engine->status->state;
+	php_random_algo_with_state engine = Z_RANDOM_ENGINE_P(ZEND_THIS)->engine;
+	php_random_status_state_pcgoneseq128xslrr64 *state = engine.state;
 	zend_long advance = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)

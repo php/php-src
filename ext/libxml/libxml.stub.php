@@ -20,6 +20,11 @@ const LIBXML_LOADED_VERSION = UNKNOWN;
 
 /**
  * @var int
+ * @cvalue XML_PARSE_RECOVER
+ */
+const LIBXML_RECOVER = UNKNOWN;
+/**
+ * @var int
  * @cvalue XML_PARSE_NOENT
  */
 const LIBXML_NOENT = UNKNOWN;

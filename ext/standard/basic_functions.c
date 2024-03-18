@@ -418,6 +418,9 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BASIC_RINIT_SUBMODULE(dir)
 	BASIC_RINIT_SUBMODULE(url_scanner_ex)
 
+	/* Initialize memory for last http headers */
+	ZVAL_UNDEF(&BG(last_http_headers));
+
 	/* Setup default context */
 	FG(default_context) = NULL;
 
@@ -481,6 +484,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
+
+	/* Free last http headers */
+	zval_ptr_dtor(&BG(last_http_headers));
 
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;

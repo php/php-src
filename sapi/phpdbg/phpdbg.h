@@ -256,7 +256,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable *watchlist_mem;                    /* triggered watchpoints */
 	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
 	bool watchpoint_hit;                    /* a watchpoint was hit */
-	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
+	void (*original_free_function)(void * ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);      /* the original AG(mm_heap)->_free function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */

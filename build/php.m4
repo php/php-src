@@ -295,10 +295,6 @@ if test "$PHP_RPATH" = "no"; then
 fi
 ])
 
-AC_DEFUN([PHP_CHECK_GCC_ARG],[
-  AC_MSG_ERROR([[Use AX_CHECK_COMPILE_FLAG instead]])
-])
-
 dnl
 dnl PHP_LIBGCC_LIBPATH(gcc)
 dnl
@@ -1214,27 +1210,27 @@ dnl PHP_MISSING_TIME_R_DECL
 dnl
 AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
   AC_MSG_CHECKING([for missing declarations of reentrant functions])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)() = localtime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = localtime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_LOCALTIME_R_DECL,1,[Whether localtime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)() = gmtime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = gmtime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_GMTIME_R_DECL,1,[Whether gmtime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)() = asctime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = asctime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_ASCTIME_R_DECL,1,[Whether asctime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)() = ctime_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = ctime_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_CTIME_R_DECL,1,[Whether ctime_r is declared])
   ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)() = strtok_r]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)(void) = strtok_r]])],[
     :
   ],[
     AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
@@ -1469,7 +1465,7 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
   if test "$found" = "yes"; then
     ac_libs=$LIBS
     LIBS="$LIBS -l$2"
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[int main(void) { return (0); }]])],[found=yes],[found=no],[
+    AC_RUN_IFELSE([AC_LANG_PROGRAM()],[found=yes],[found=no],[
       dnl Cross compilation.
       found=yes
     ])
@@ -1522,7 +1518,7 @@ AC_DEFUN([PHP_TEST_BUILD], [
   LIBS="$4 $LIBS"
   AC_LINK_IFELSE([AC_LANG_SOURCE([[
     $5
-    char $1();
+    char $1(void);
     int main(void) {
       $1();
       return 0;
@@ -2152,7 +2148,7 @@ crypt_r("passwd", "hash", &buffer);
   if test "$php_cv_crypt_r_style" = "cryptd"; then
     AC_DEFINE(CRYPT_R_CRYPTD, 1, [Define if crypt_r has uses CRYPTD])
   fi
-  if test "$php_cv_crypt_r_style" = "struct_crypt_data" -o "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
+  if test "$php_cv_crypt_r_style" = "struct_crypt_data" || test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
     AC_DEFINE(CRYPT_R_STRUCT_CRYPT_DATA, 1, [Define if crypt_r uses struct crypt_data])
   fi
   if test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then

@@ -31,13 +31,13 @@
 
 # define WIN32_LEAN_AND_MEAN
 
-double zend_hrtime_timer_scale = .0;
+ZEND_API double zend_hrtime_timer_scale = .0;
 
 #elif ZEND_HRTIME_PLATFORM_APPLE
 
 # include <mach/mach_time.h>
 # include <string.h>
-mach_timebase_info_data_t zend_hrtime_timerlib_info = {
+ZEND_API mach_timebase_info_data_t zend_hrtime_timerlib_info = {
 	.numer = 0,
 	.denom = 1,
 };

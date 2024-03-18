@@ -37,8 +37,46 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * The zend_*printf family of functions now supports the "%S" modifier to print
   out zend_string*. This won't cut off the string if it embeds a NUL byte.
 
-* The inet_aton() and win32/inet.h on Windows have been removed. Use Windows
-  native inet_pton() from ws2tcpip.h.
+* The inet_aton() and win32/inet.h have been removed. Use platform-agnostic
+  inet_pton() from arpa/inet.h or ws2tcpip.h on Windows.
+
+* zend_mm_set_custom_debug_handlers() has been removed from ZendMM, use
+  zend_mm_set_custom_handlers() instead which now supports DEBUG builds
+
+* zend_mm_set_custom_handlers() has changed its signature from
+  void()(zend_mm_heap *heap,
+         void* (*_malloc)(size_t),
+         void  (*_free)(void*),
+         void* (*_realloc)(void*, size_t))
+  to
+  void()(zend_mm_heap *heap,
+         void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+
+* zend_mm_get_custom_handlers() has changed its signature from
+  void()(zend_mm_heap *heap,
+         void* (**_malloc)(size_t),
+         void  (**_free)(void*),
+         void* (**_realloc)(void*, size_t))
+  to
+  void()(zend_mm_heap *heap,
+         void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+         void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+
+* __zend_malloc() has changed their signature from
+  void(*)(size_t) to
+  void(*)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+
+* __zend_calloc() has changed their signature from
+  void(*)(size_t, size_t) to
+  void(*)(size_t, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+
+* __zend_realloc() has changed their signature from
+  void(*)(void *, size_t) to
+  void(*)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
+
 
 ========================
 2. Build system changes
@@ -51,6 +89,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-pspell has been removed.
    - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
    - Symbol DBA_CDB_MAKE removed in ext/dba.
+   - Symbol HAVE_LIBM has been removed.
+   - Symbol HAVE_INET_ATON has been removed.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
@@ -71,13 +111,14 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_BSD_ICONV has been removed.
    - Symbol ZEND_FIBER_ASM has been removed.
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
-   - Symbol HAVE_LIBM has been removed.
-   - Symbol HAVE_INET_ATON has been removed.
+   - Symbol HAVE_MYSQL has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
    - M4 macro PHP_SOCKADDR_CHECKS has been removed (use AC_CHECK_TYPES and
      AC_CHECK_MEMBERS).
+   - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
+     AX_CHECK_COMPILE_FLAG).
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
@@ -89,6 +130,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
      PHP_ASSEMBLER and FIBER_ASM_ABI.
    - HAVE_PHP_SOAP symbol renamed to HAVE_SOAP.
+   - Unused symbols CONFIGURATION_FILE_PATH, DISCARD_PATH, HAVE_ERRMSG_H,
+     HAVE_REGCOMP, HAVE_RINT, NEED_ISBLANK, PHP_URL_FOPEN, REGEX, HSREGEX,
+     USE_CONFIG_FILE have been removed.
 
 ========================
 3. Module changes
@@ -100,6 +144,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
    - New public APIs are available to handle callbacks from XPath, see
      xpath_callbacks.h.
+   - Added public APIs to manipulate namespace data, see namespace_compat.h.
+   - php_dom_create_object() now no longer accepts a NULL obj argument.
+   - Removed the `ret` argument from the DOM_RET_OBJ macro, use the return
+     value instead.
+   - Removed DOM_XMLNS_NAMESPACE from xml_common.h. Use DOM_XMLNS_NS_URI
+     from namespace_compat.h instead.
 
  b. ext/random
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
@@ -109,6 +159,18 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
      the php_random_algo struct.
+   - The php_random_status struct has been removed, since the previous change
+     reduced it to a single void* member containing the actual state, resulting
+     in needless indirection. Functions taking a php_random_algo struct pointer
+     and a php_random_status struct pointer as separate parameters now take a
+     single php_random_algo_with_state struct by value, making it easier to
+     pass around the state with its associated algorithm and thus reducing
+     the chance for mistakes.
+   - The seed member of a php_random_algo has been removed. As a replacement
+     engine-specific seeding functions are now exposed. This change allows
+     users to better take engine-specific behavior into account. As an example
+     Mt19937 ignored the upper half of the seed parameter of the generic
+     seeding function.
    - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
      and much smaller php_random_csprng.h header. The new header is included
      in php_random.h for compatibility with existing users.
@@ -121,6 +183,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
      from libxml.
    - Removed the "properties" HashTable field from php_libxml_node_object.
+   - Added a way to attached private data to a php_libxml_ref_obj.
+   - Added a way to fix a class type onto php_libxml_ref_obj.
+   - Added php_libxml_uses_internal_errors().
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.
@@ -133,6 +198,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      When flags should be ignored, pass 0 to the flags argument.
    - php_pcre_match_impl() and pcre_get_compiled_regex_cache_ex() now use
      proper boolean argument types instead of integer types.
+   - pcre_get_compiled_regex_cache_ex() now provides an option to collect extra
+     options (from modifiers used in the expression, for example), and calls
+     pcre2_set_compile_extra_options() with those options.
 
 ========================
 4. OpCode changes

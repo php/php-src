@@ -56,6 +56,7 @@ typedef struct _xsl_object {
 	void *ptr;
 	HashTable *parameter;
 	bool hasKeys;
+	php_libxml_ref_obj *sheet_ref_obj;
 	zend_long securityPrefs;
 	php_dom_xpath_callbacks xpath_callbacks;
 	php_libxml_node_object *doc;
@@ -70,6 +71,7 @@ static inline xsl_object *php_xsl_fetch_object(zend_object *obj) {
 #define Z_XSL_P(zv) php_xsl_fetch_object(Z_OBJ_P((zv)))
 
 void php_xsl_set_object(zval *wrapper, void *obj);
+void xsl_free_sheet(xsl_object *intern);
 void xsl_objects_free_storage(zend_object *object);
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);

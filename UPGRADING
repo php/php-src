@@ -45,6 +45,13 @@ PHP 8.4 UPGRADE NOTES
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
 
+- Intl:
+  . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
+    ResourceBundle object now throw:
+    - TypeError for invalid offset types
+    - ValueError for an empty string
+    - ValueError if the integer index does not fit in a signed 32 bit integer
+
 - MBString:
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
@@ -157,13 +164,20 @@ PHP 8.4 UPGRADE NOTES
   . Added request_parse_body() function that allows parsing RFC1867 (multipart)
     requests in non-POST HTTP requests.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
+  . Getting the debug info for WeakReference will now also output the object
+    it references, or null if the reference is no longer valid.
+
+- Curl:
+  . curl_version() returns an additional feature_list value, which is an
+    associative array of all known Curl features, and whether they are
+    supported (true) or not (false).
 
 - Date:
   . Added static methods
     DateTime[Immutable]::createFromTimestamp(int|float $timestamp): static.
-  . Added method DateTime[Immutable]::getMicroseconds(): int.
+  . Added method DateTime[Immutable]::getMicrosecond(): int.
   . Added method
-    DateTime[Immutable]::setMicroseconds(int $microseconds): static.
+    DateTime[Immutable]::setMicrosecond(int $microsecond): static.
 
 - DOM:
   . Added constant DOMNode::DOCUMENT_POSITION_DISCONNECTED.
@@ -172,19 +186,15 @@ PHP 8.4 UPGRADE NOTES
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINS.
   . Added constant DOMNode::DOCUMENT_POSITION_CONTAINED_BY.
   . Added constant DOMNode::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC.
-  . Implemented DOM HTML5 parsing and serialization.
-    RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
-    This RFC adds the new DOM namespace along with class and constant aliases.
-    There are two new classes to handle HTML and XML documents:
-    DOM\HTMLDocument and DOM\XMLDocument.
-    These classes provide a cleaner API to handle HTML and XML documents.
-    Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
-    parsing and serialization.
   . It is now possible to pass any callable to registerPhpFunctions().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
 
 - FPM:
   . Flushing headers without a body will now succeed. See GH-12785.
+
+- Intl:
+  . NumberFormatter::ROUND_HALFODD added to complement existing
+    NumberFormatter::ROUND_HALFEVEN functionality.
 
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
@@ -194,6 +204,10 @@ PHP 8.4 UPGRADE NOTES
     As a consequence, LoongArch JIT support has been added, spaces
     are now allowed between braces in Perl-compatible items, and
     variable-length lookbehind assertions are now supported.
+  . Added support for the "r" (PCRE2_EXTRA_CASELESS_RESTRICT) modifier, as well
+    as the (?r) mode modifier. When enabled along with the case-insensitive
+    modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
+    characters.
 
 - PDO:
   . Added support for driver-specific subclasses.
@@ -204,8 +218,7 @@ PHP 8.4 UPGRADE NOTES
     or by invoking their constructor directly.
 
 - PDO_DBLIB:
-  . Fixed setAttribute and getAttribute (SakiTakamachi)
-  . Added PdoDbLib class (danack, kocsismate)
+  . Added class PdoDbLib.
 
 - PDO_FIREBIRD:
   . Added class PdoFirebird.
@@ -229,6 +242,8 @@ PHP 8.4 UPGRADE NOTES
 - Reflection:
   . ReflectionAttribute now contains a $name property to improve the debugging
     experience.
+  . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
+    now returns the attached doc comments.
 
 - SOAP:
   . Added support for clark notation for namespaces in class map.
@@ -253,11 +268,12 @@ PHP 8.4 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Core:
+  . Implicitly nullable parameter types are now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecate-implicitly-nullable-types
+
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.
-  . curl_version() returns an additional feature_list value, which is an
-    associative array of all known Curl features, and whether they are
-    supported (true) or not (false).
 
 - Date:
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
@@ -310,6 +326,14 @@ PHP 8.4 UPGRADE NOTES
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
 
+- Gettext:
+  . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
+    if the domain argument is empty.
+
+- Hash:
+  . Changed the return type of hash_update() to true. It was already the case that only
+    true could be returned, but the stub was not updated yet.
+
 - Intl:
   . IntlDateFormatter::__construct() throws a ValueError if the locale is invalid.
   . NumberFormatter::__construct() throws a ValueError if the locale is invalid.
@@ -317,8 +341,8 @@ PHP 8.4 UPGRADE NOTES
     have been added as aliases for NumberFormatter::ROUND_DOWN and
     NumberFormatter::ROUND_UP to be consistent with the new PHP_ROUND_* modes.
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
-  . NumberFormatter::ROUND_HALFODD added to complement existing
-    NumberFormatter::ROUND_HALFEVEN functionality.
+  . ResourceBundle::get() now has a tentative return type of:
+    ResourceBundle|array|string|int|null
 
 - MBString:
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
@@ -417,6 +441,11 @@ PHP 8.4 UPGRADE NOTES
   . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
     with the ARM cryptographic extensions.
 
+- Standard:
+  . Added the http_get_last_response_headers() and
+    http_clear_last_response_headers() that allows retrieving the same content
+    as the magic $http_response_header variable.
+
 - XSL:
   . Added XSLTProcessor::registerPhpFunctionNS().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
@@ -424,6 +453,22 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- DOM:
+  . Implemented DOM HTML5 parsing and serialization.
+    RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
+    This RFC adds the new DOM namespace along with new classes and
+    constant aliases.
+    There are two new classes to handle HTML and XML documents:
+    DOM\HTMLDocument and DOM\XMLDocument.
+    These classes provide a cleaner API to handle HTML and XML documents.
+    Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
+    parsing and serialization.
+  . Implemented opt-in ext/dom spec compliance RFC.
+    This adds new classes in the DOM namespace that correspond to modern
+    equivalents to the old DOM classes in the global namespaces.
+    The new classes follow the DOM living spec.
+    RFC: https://wiki.php.net/rfc/opt_in_dom_spec_compliance
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -459,6 +504,9 @@ PHP 8.4 UPGRADE NOTES
 - Sqlite:
   . The class constants are typed now.
 
+- XMLReader:
+  . The class constants are typed now.
+
 - XSL:
   . The typed properties XSLTProcessor::$cloneDocument and
     XSLTProcessor::$doXInclude are now declared.
@@ -482,6 +530,9 @@ PHP 8.4 UPGRADE NOTES
   . LDAP_OPT_X_TLS_PROTOCOL_MAX.
   . LDAP_OPT_X_TLS_PROTOCOL_TLS1_3.
 
+- LibXML:
+  . LIBXML_RECOVER.
+
 - OpenSSL:
   . X509_PURPOSE_OCSP_HELPER.
   . X509_PURPOSE_TIMESTAMP_SIGN.
@@ -494,6 +545,18 @@ PHP 8.4 UPGRADE NOTES
 
 - Sockets:
   . SO_EXCLUSIVEADDRUSE (Windows only).
+  . SOCK_CONN_DGRAM (NetBSD only).
+  . SOCK_DCCP (NetBSD only).
+
+- Sodium:
+  . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS128L_NSECBYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS128L_NPUBBYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS128L_ABYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS256_KEYBYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS256_NSECBYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS256_NPUBBYTES
+  . SODIUM_CRYPTO_AEAD_AEGIS256_ABYTES
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE to allow large inputs in xml_parse and
@@ -523,6 +586,8 @@ PHP 8.4 UPGRADE NOTES
 * The performance of strspn() and strcspn() is greatly improved.
   They now run in linear time instead of being bounded by quadratic time.
 
+* Improved the performance of strpbrk().
+
 * mb_strcut() is much faster now for UTF-8 and UTF-16 strings.
 
 * Looking up mbstring encoding names is much faster now.
@@ -530,3 +595,5 @@ PHP 8.4 UPGRADE NOTES
 * The performance of converting SJIS-win to unicode is greatly improved.
 
 * get_browser() is much faster now, up to 1.5x - 2.5x for some test cases.
+
+* Improved the performance of MySQLnd quoting.

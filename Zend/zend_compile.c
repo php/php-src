@@ -4807,7 +4807,8 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		zend_op *opline;
 
 		lcname = zend_string_tolower(Z_STR_P(name));
-		fbc = zend_hash_find_ptr(CG(function_table), lcname);
+		zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
+		fbc = fbc_zv ? Z_PTR_P(fbc_zv) : NULL;
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
@@ -4841,6 +4842,12 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();
+
+		/* Store offset to function from symbol table in op2.extra. */
+		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+			Bucket *fbc_bucket = (Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+			Z_EXTRA_P(CT_CONSTANT(opline->op2)) = fbc_bucket - CG(function_table)->arData;
+		}
 
 		zend_compile_call_common(result, args_ast, fbc, ast->lineno);
 	}
@@ -7217,6 +7224,11 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename_ex(type_ast, force_nullable, &forced_allow_nullable);
+			if (forced_allow_nullable) {
+				zend_error(E_DEPRECATED,
+				   "Implicitly marking parameter $%s as nullable is deprecated, the explicit nullable type "
+				   "must be used instead", ZSTR_VAL(name));
+			}
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");

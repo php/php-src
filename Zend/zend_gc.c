@@ -718,7 +718,7 @@ static void ZEND_FASTCALL gc_extra_root(zend_refcounted *ref)
 
 	if (EXPECTED(GC_HAS_UNUSED())) {
 		idx = GC_FETCH_UNUSED();
-	} else if (EXPECTED(GC_HAS_NEXT_UNUSED_UNDER_THRESHOLD())) {
+	} else if (EXPECTED(GC_HAS_NEXT_UNUSED())) {
 		idx = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();

@@ -130,7 +130,7 @@ int phpdbg_print_changed_zvals(void);
 
 void phpdbg_list_watchpoints(void);
 
-void phpdbg_watch_efree(void *ptr);
+void phpdbg_watch_efree(void *ptr ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 
 
 static long phpdbg_pagesize;

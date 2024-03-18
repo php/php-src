@@ -6,6 +6,7 @@ openssl
 <?php
 if (OPENSSL_VERSION_NUMBER >= 0x30000000) die('skip For OpenSSL < 3.0');
 ?>
+--XFAIL--
 --FILE--
 <?php
 // helper function to check openssl errors

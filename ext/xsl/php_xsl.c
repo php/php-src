@@ -59,6 +59,21 @@ static HashTable *xsl_objects_get_gc(zend_object *object, zval **table, int *n)
 	return php_dom_xpath_callbacks_get_gc_for_whole_object(&intern->xpath_callbacks, object, table, n);
 }
 
+void xsl_free_sheet(xsl_object *intern)
+{
+	if (intern->ptr) {
+		xsltStylesheetPtr sheet = intern->ptr;
+
+		/* Free wrapper */
+		if (sheet->_private != NULL) {
+			sheet->_private = NULL;
+		}
+
+		xsltFreeStylesheet(sheet);
+		intern->ptr = NULL;
+	}
+}
+
 /* {{{ xsl_objects_free_storage */
 void xsl_objects_free_storage(zend_object *object)
 {
@@ -73,20 +88,17 @@ void xsl_objects_free_storage(zend_object *object)
 
 	php_dom_xpath_callbacks_dtor(&intern->xpath_callbacks);
 
+	xsl_free_sheet(intern);
+
 	if (intern->doc) {
 		php_libxml_decrement_doc_ref(intern->doc);
 		efree(intern->doc);
 	}
 
-	if (intern->ptr) {
-		/* free wrapper */
-		if (((xsltStylesheetPtr) intern->ptr)->_private != NULL) {
-			((xsltStylesheetPtr) intern->ptr)->_private = NULL;
-		}
-
-		xsltFreeStylesheet((xsltStylesheetPtr) intern->ptr);
-		intern->ptr = NULL;
+	if (intern->sheet_ref_obj) {
+		php_libxml_decrement_doc_ref_directly(intern->sheet_ref_obj);
 	}
+
 	if (intern->profiling) {
 		efree(intern->profiling);
 	}

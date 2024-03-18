@@ -10,7 +10,7 @@ class Custom extends DOM\Document {
     }
 }
 
-$dom = new DOMDocument();
+$dom = DOM\HTMLDocument::createEmpty();
 try {
     $dom->registerNodeClass("DOM\\Document", "Custom");
 } catch (ValueError $e) {
@@ -28,9 +28,9 @@ $element->ownerDocument->foo();
 ?>
 --EXPECTF--
 DOM\Document::registerNodeClass(): Argument #1 ($baseClass) must not be an abstract class
-string(11) "DOMDocument"
+string(16) "DOM\HTMLDocument"
 
-Fatal error: Uncaught Error: Call to undefined method DOMDocument::foo() in %s:%d
+Fatal error: Uncaught Error: Call to undefined method DOM\HTMLDocument::foo() in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

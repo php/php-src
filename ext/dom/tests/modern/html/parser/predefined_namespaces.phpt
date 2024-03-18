@@ -28,7 +28,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 echo "--- Namespaces ---\n";
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 foreach ($xpath->query("//*[name()='body']//*") as $node) {
     echo $node->nodeName, " ", $node->namespaceURI ?? "(NONE)", "\n";
     foreach ($node->attributes as $attribute) {
@@ -54,8 +54,8 @@ rect http://www.w3.org/2000/svg
   Attribute: y (NONE)
   Attribute: width (NONE)
   Attribute: height (NONE)
-div http://www.w3.org/1999/xhtml
-p http://www.w3.org/1999/xhtml
+DIV http://www.w3.org/1999/xhtml
+P http://www.w3.org/1999/xhtml
 math http://www.w3.org/1998/Math/MathML
 mtable http://www.w3.org/1998/Math/MathML
   Attribute: id (NONE)
