@@ -238,7 +238,7 @@ static int parse_rule(const char *buf)
 	return mask;
 }
 
-int main()
+int main(int argc, char **argv)
 {
 	char buf[4096];
 	FILE *f = stdin;

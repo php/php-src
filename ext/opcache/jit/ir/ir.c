@@ -382,7 +382,7 @@ void ir_init(ir_ctx *ctx, uint32_t flags, ir_ref consts_limit, ir_ref insns_limi
 	buf = ir_mem_malloc((consts_limit + insns_limit) * sizeof(ir_insn));
 	ctx->ir_base = buf + consts_limit;
 
-	ctx->ir_base[IR_UNUSED].optx = IR_NOP;
+	MAKE_NOP(&ctx->ir_base[IR_UNUSED]);
 	ctx->ir_base[IR_NULL].optx = IR_OPT(IR_C_ADDR, IR_ADDR);
 	ctx->ir_base[IR_NULL].val.u64 = 0;
 	ctx->ir_base[IR_FALSE].optx = IR_OPT(IR_C_BOOL, IR_BOOL);
@@ -1296,7 +1296,7 @@ void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref ref)
 	}
 }
 
-void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 {
 	ir_use_list *use_list = &ctx->use_lists[ref];
 	ir_ref i, n, *p;
@@ -1306,6 +1306,19 @@ void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 		if (*p == use) {
 			*p = new_use;
 			break;
+		}
+	}
+}
+
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
+{
+	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_ref i, n, *p;
+
+	n = use_list->count;
+	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+		if (*p == use) {
+			*p = new_use;
 		}
 	}
 }
@@ -2679,10 +2692,7 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 							} else {
 								ctx->control = insn->op1;
 							}
-							insn->optx = IR_NOP;
-							insn->op1 = IR_NOP;
-							insn->op2 = IR_NOP;
-							insn->op3 = IR_NOP;
+							MAKE_NOP(insn);
 						}
 						break;
 					}

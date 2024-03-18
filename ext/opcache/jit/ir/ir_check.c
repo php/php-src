@@ -125,9 +125,9 @@ bool ir_check(const ir_ctx *ctx)
 									ok = 0;
 								}
 							}
-							if (use >= i
-							 && !(insn->op == IR_PHI
-							  && (!(ctx->flags2 & IR_LINEAR) || ctx->ir_base[insn->op1].op == IR_LOOP_BEGIN))) {
+							if ((ctx->flags2 & IR_LINEAR)
+							 && use >= i
+							 && !(insn->op == IR_PHI && ctx->ir_base[insn->op1].op == IR_LOOP_BEGIN)) {
 								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
 								ok = 0;
 							}
@@ -216,7 +216,8 @@ bool ir_check(const ir_ctx *ctx)
 							}
 							break;
 						case IR_OPND_CONTROL_DEP:
-							if (use >= i
+							if ((ctx->flags2 & IR_LINEAR)
+							 && use >= i
 							 && !(insn->op == IR_LOOP_BEGIN)) {
 								fprintf(stderr, "ir_base[%d].ops[%d] invalid forward reference (%d)\n", i, j, use);
 								ok = 0;

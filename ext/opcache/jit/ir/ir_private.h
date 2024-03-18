@@ -923,8 +923,33 @@ struct _ir_use_list {
 
 void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref use);
 void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref use);
-void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
 bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
+
+/*** Modification helpers ***/
+#define MAKE_NOP(_insn) do { \
+		ir_insn *__insn = _insn; \
+		__insn->optx = IR_NOP; \
+		__insn->op1 = __insn->op2 = __insn->op3 = IR_UNUSED; \
+	} while (0)
+
+#define CLEAR_USES(_ref) do { \
+		ir_use_list *__use_list = &ctx->use_lists[_ref]; \
+		__use_list->count = 0; \
+	} while (0)
+
+#define SWAP_REFS(_ref1, _ref2) do { \
+		ir_ref _tmp = _ref1; \
+		_ref1 = _ref2; \
+		_ref2 = _tmp; \
+	} while (0)
+
+#define SWAP_INSNS(_insn1, _insn2) do { \
+		ir_insn *_tmp = _insn1; \
+		_insn1 = _insn2; \
+		_insn2 = _tmp; \
+	} while (0)
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \

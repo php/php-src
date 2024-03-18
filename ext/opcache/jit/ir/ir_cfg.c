@@ -8,30 +8,6 @@
 #include "ir.h"
 #include "ir_private.h"
 
-#define MAKE_NOP(_insn) do { \
-		ir_insn *__insn = _insn; \
-		__insn->optx = IR_NOP; \
-		__insn->op1 = __insn->op2 = __insn->op3 = IR_UNUSED; \
-	} while (0)
-
-#define CLEAR_USES(_ref) do { \
-		ir_use_list *__use_list = &ctx->use_lists[_ref]; \
-		__use_list->count = 0; \
-		__use_list->refs = 0; \
-	} while (0)
-
-#define SWAP_REFS(_ref1, _ref2) do { \
-		ir_ref _tmp = _ref1; \
-		_ref1 = _ref2; \
-		_ref2 = _tmp; \
-	} while (0)
-
-#define SWAP_INSNS(_insn1, _insn2) do { \
-		ir_insn *_tmp = _insn1; \
-		_insn1 = _insn2; \
-		_insn2 = _tmp; \
-	} while (0)
-
 static void ir_get_true_false_refs(const ir_ctx *ctx, ir_ref if_ref, ir_ref *if_true_ref, ir_ref *if_false_ref)
 {
 	ir_use_list *use_list = &ctx->use_lists[if_ref];
@@ -54,7 +30,6 @@ static ir_ref _ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin)
 {
 	ir_ref prev, next;
 	ir_use_list *use_list;
-	ir_ref n, *p;
 
 	IR_ASSERT(ctx->ir_base[begin].op == IR_BEGIN);
 	IR_ASSERT(ctx->ir_base[end].op == IR_END);
@@ -68,23 +43,12 @@ static ir_ref _ir_merge_blocks(ir_ctx *ctx, ir_ref end, ir_ref begin)
 	next = ctx->use_edges[use_list->refs];
 
 	/* remove BEGIN and END */
-	ctx->ir_base[begin].op = IR_NOP;
-	ctx->ir_base[begin].op1 = IR_UNUSED;
-	ctx->use_lists[begin].count = 0;
-	ctx->ir_base[end].op = IR_NOP;
-	ctx->ir_base[end].op1 = IR_UNUSED;
-	ctx->use_lists[end].count = 0;
+	MAKE_NOP(&ctx->ir_base[begin]); CLEAR_USES(begin);
+	MAKE_NOP(&ctx->ir_base[end]);   CLEAR_USES(end);
 
 	/* connect their predecessor and successor */
 	ctx->ir_base[next].op1 = prev;
-	use_list = &ctx->use_lists[prev];
-	n = use_list->count;
-	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-		if (*p == end) {
-			*p = next;
-		}
-	}
-
+	ir_use_list_replace_all(ctx, prev, end, next);
 	return next;
 }
 
@@ -141,7 +105,7 @@ static ir_ref ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn
 		IR_ASSERT(ctx->use_lists[start2_ref].count == 1);
 
 		next->op1 = root->op1;
-		ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+		ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 		if (!IR_IS_CONST_REF(root->op2)) {
 			ir_use_list_remove_all(ctx, root->op2, root_ref);
 		}
@@ -189,7 +153,7 @@ static ir_ref ir_try_remove_empty_diamond(ir_ctx *ctx, ir_ref ref, ir_insn *insn
 		ir_insn *root = &ctx->ir_base[root_ref];
 
 		next->op1 = root->op1;
-		ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+		ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 		ir_use_list_remove_all(ctx, root->op2, root_ref);
 
 		MAKE_NOP(root);   CLEAR_USES(root_ref);
@@ -303,8 +267,7 @@ static ir_ref ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 					insn->op3 = IR_UNUSED;
 
 					next->op1 = root->op1;
-					ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
-					ir_use_list_remove_all(ctx, root->op2, root_ref);
+					ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 					if (!IR_IS_CONST_REF(insn->op1)) {
 						ir_use_list_remove_all(ctx, insn->op1, cond_ref);
 					}
@@ -384,8 +347,8 @@ static ir_ref ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 					insn->op3 = IR_UNUSED;
 
 					next->op1 = root->op1;
-					ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
-					ir_use_list_remove_all(ctx, root->op2, root_ref);
+					ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
+					ir_use_list_remove_one(ctx, insn->op1, neg_ref);
 					if (!IR_IS_CONST_REF(insn->op1)) {
 						ir_use_list_remove_all(ctx, insn->op1, cond_ref);
 					}
@@ -440,8 +403,8 @@ static ir_ref ir_optimize_phi(ir_ctx *ctx, ir_ref merge_ref, ir_insn *merge, ir_
 					}
 
 					next->op1 = root->op1;
-					ir_use_list_replace(ctx, cond_ref, root_ref, ref);
-					ir_use_list_replace(ctx, root->op1, root_ref, next_ref);
+					ir_use_list_replace_one(ctx, cond_ref, root_ref, ref);
+					ir_use_list_replace_one(ctx, root->op1, root_ref, next_ref);
 					ir_use_list_remove_all(ctx, root->op2, root_ref);
 
 					MAKE_NOP(root);   CLEAR_USES(root_ref);
@@ -619,9 +582,9 @@ static ir_ref ir_try_split_if(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 				ir_use_list_remove_all(ctx, merge_ref, cond_ref);
 				ir_use_list_remove_all(ctx, ref, if_true_ref);
 				if (!IR_IS_CONST_REF(cond->op3)) {
-					ir_use_list_replace(ctx, cond->op3, cond_ref, end2_ref);
+					ir_use_list_replace_one(ctx, cond->op3, cond_ref, end2_ref);
 				}
-				ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
+				ir_use_list_replace_one(ctx, end1_ref, merge_ref, if_false_ref);
 				ir_use_list_add(ctx, end2_ref, if_true_ref);
 
 				end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
@@ -722,8 +685,8 @@ static ir_ref ir_try_split_if_cmp(ir_ctx *ctx, ir_worklist *worklist, ir_ref ref
 							 *    |                        |
 							 */
 
-							ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
-							ir_use_list_replace(ctx, end2_ref, merge_ref, if_true_ref);
+							ir_use_list_replace_one(ctx, end1_ref, merge_ref, if_false_ref);
+							ir_use_list_replace_one(ctx, end2_ref, merge_ref, if_true_ref);
 
 							MAKE_NOP(merge); CLEAR_USES(merge_ref);
 							MAKE_NOP(phi);   CLEAR_USES(phi_ref);
@@ -762,8 +725,8 @@ static ir_ref ir_try_split_if_cmp(ir_ctx *ctx, ir_worklist *worklist, ir_ref ref
 							 *    |                        |
 							 */
 
-							ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
-							ir_use_list_replace(ctx, end2_ref, merge_ref, if_false_ref);
+							ir_use_list_replace_one(ctx, end1_ref, merge_ref, if_false_ref);
+							ir_use_list_replace_one(ctx, end2_ref, merge_ref, if_false_ref);
 
 							MAKE_NOP(merge); CLEAR_USES(merge_ref);
 							MAKE_NOP(phi);   CLEAR_USES(phi_ref);
@@ -809,10 +772,10 @@ static ir_ref ir_try_split_if_cmp(ir_ctx *ctx, ir_worklist *worklist, ir_ref ref
 						ir_use_list_remove_all(ctx, merge_ref, phi_ref);
 						ir_use_list_remove_all(ctx, ref, if_true_ref);
 						if (!IR_IS_CONST_REF(phi->op3)) {
-							ir_use_list_replace(ctx, phi->op3, phi_ref, insn->op2);
+							ir_use_list_replace_one(ctx, phi->op3, phi_ref, insn->op2);
 						}
-						ir_use_list_replace(ctx, end1_ref, merge_ref, if_false_ref);
-						ir_use_list_replace(ctx, cond_ref, ref, end2_ref);
+						ir_use_list_replace_one(ctx, end1_ref, merge_ref, if_false_ref);
+						ir_use_list_replace_one(ctx, cond_ref, ref, end2_ref);
 						ir_use_list_add(ctx, end2_ref, if_true_ref);
 
 						end2->optx = IR_OPTX(IR_IF, IR_VOID, 2);
