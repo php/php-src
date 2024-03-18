@@ -155,7 +155,7 @@ static zval *xsl_objects_write_property_with_validation(zend_object *object, zen
 	zend_long old_property_value = Z_LVAL_P(property);
 
 	/* Write new property, which will also potentially perform coercions. */
-	zend_std_write_property(object, member, value, cache_slot);
+	zend_std_write_property(object, member, value, NULL);
 
 	/* Validate value *after* coercions have been performed, and restore the old value if necessary. */
 	if (UNEXPECTED(Z_LVAL_P(property) < 0)) {
@@ -179,6 +179,41 @@ static zval *xsl_objects_write_property(zend_object *object, zend_string *member
 	} else {
 		return zend_std_write_property(object, member, value, cache_slot);
 	}
+}
+
+static bool xsl_is_validated_property(const zend_string *member)
+{
+	return zend_string_equals_literal(member, "maxTemplateDepth") || zend_string_equals_literal(member, "maxTemplateVars");
+}
+
+static zval *xsl_objects_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+{
+	if (xsl_is_validated_property(member)) {
+		return NULL;
+	}
+
+	return zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
+}
+
+static zval *xsl_objects_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
+{
+	/* read handler is being called as a fallback after get_property_ptr_ptr returned NULL */
+	if (type != BP_VAR_IS && type != BP_VAR_R && xsl_is_validated_property(member)) {
+		zend_throw_error(NULL, "Indirect modification of %s::$%s is not allowed", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		return &EG(uninitialized_zval);
+	}
+
+	return zend_std_read_property(object, member, type, cache_slot, rv);
+}
+
+static void xsl_objects_unset_property(zend_object *object, zend_string *member, void **cache_slot)
+{
+	if (xsl_is_validated_property(member)) {
+		zend_throw_error(NULL, "Cannot unset %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(member));
+		return;
+	}
+
+	zend_std_unset_property(object, member, cache_slot);
 }
 
 /* Tries to output an error message where a part was replaced by another string.
@@ -238,6 +273,9 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 	xsl_object_handlers.get_gc = xsl_objects_get_gc;
 	xsl_object_handlers.write_property = xsl_objects_write_property;
+	xsl_object_handlers.get_property_ptr_ptr = xsl_objects_get_property_ptr_ptr;
+	xsl_object_handlers.read_property = xsl_objects_read_property;
+	xsl_object_handlers.unset_property = xsl_objects_unset_property;
 
 	xsl_xsltprocessor_class_entry = register_class_XSLTProcessor();
 	xsl_xsltprocessor_class_entry->create_object = xsl_objects_new;
