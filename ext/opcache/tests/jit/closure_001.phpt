@@ -34,6 +34,10 @@ var_dump($f());
 object(Closure)#3 (2) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["this"]=>
   object(Foo)#1 (0) {
   }
@@ -41,6 +45,10 @@ object(Closure)#3 (2) {
 object(Closure)#3 (2) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["this"]=>
   object(Foo)#1 (0) {
   }
@@ -48,4 +56,8 @@ object(Closure)#3 (2) {
 object(Closure)#3 (1) {
   ["name"]=>
   string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
 }
