@@ -1272,9 +1272,14 @@ PHP_FUNCTION(proc_open)
 	}
 
 	if (cwd) {
-		r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
-		if (r != 0) {
-			php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
+		r = access(cwd, X_OK);
+		if (r == 0) {
+			r = posix_spawn_file_actions_addchdir_np(&factions, cwd);
+			if (r != 0) {
+				php_error_docref(NULL, E_WARNING, "posix_spawn_file_actions_addchdir_np() failed: %s", strerror(r));
+			}
+		} else {
+			php_error_docref(NULL, E_DEPRECATED, "Provided cwd does not exist, falling back to current cwd");
 		}
 	}
 
