@@ -46,19 +46,16 @@ namespace {
         public static function alignof(FFI\CData|FFI\CType $ptr): int {}
 
         /**
-         * @param FFI\CData|string $from
          * @prefer-ref $to
          * @prefer-ref $from
          */
-        public static function memcpy(FFI\CData $to, $from, int $size): void {}
+        public static function memcpy(FFI\CData $to, FFI\CData|string $from, int $size): void {}
 
         /**
          * @prefer-ref $ptr1
-         * @param string|FFI\CData $ptr1
          * @prefer-ref $ptr2
-         * @param string|FFI\CData $ptr2
          */
-        public static function memcmp($ptr1, $ptr2, int $size): int {}
+        public static function memcmp(FFI\CData|string $ptr1, FFI\CData|string $ptr2, int $size): int {}
 
         /** @prefer-ref $ptr */
         public static function memset(FFI\CData $ptr, int $value, int $size): void {}
