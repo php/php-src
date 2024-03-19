@@ -8,9 +8,18 @@ intl
 <?php
 ini_set("intl.error_level", E_WARNING);
 
+$r = new ReflectionClass("DateTimeZone");
+try {
+	IntlTimeZone::fromDateTimeZone($r->newInstanceWithoutConstructor());
+} catch (\Error $e) {
+	echo $e->getMessage(). PHP_EOL;
+}
+
 $dt = new DateTime('2012-08-01 00:00:00 WEST');
 var_dump(IntlTimeZone::fromDateTimeZone($dt->getTimeZone()));
 ?>
 --EXPECTF--
+DateTimeZone object is unconstructed
+
 Warning: IntlTimeZone::fromDateTimeZone(): intltz_from_date_time_zone: time zone id 'WEST' extracted from ext/date DateTimeZone not recognized in %s on line %d
 NULL
