@@ -823,7 +823,6 @@ static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num)
 
 	switch (Z_TYPE_P(zv)) {
 		case IS_LONG:
-		case IS_STRING:
 			{
 				zend_string *str = zval_get_string(zv);
 				bc_init_num(&tmp);
@@ -833,11 +832,22 @@ static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num)
 					return FAILURE;
 				}
 				zend_string_release(str);
+				*num = tmp;
+			}
+			break;
+		case IS_STRING:
+			{
+				bc_init_num(&tmp);
+				if (php_str2num(&tmp, Z_STRVAL_P(zv)) == FAILURE) {
+					bc_free_num(&tmp);
+					return FAILURE;
+				}
+				*num = tmp;
 			}
 			break;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(zv), bc_num_ce)) {
-				tmp = bc_num_obj_from_zval(zv)->num;
+				*num = bc_num_obj_from_zval(zv)->num;
 			} else {
 				zend_argument_type_error(0, "must be of type int, string, or BcNum, %s given", zend_zval_value_name(zv));
 				return FAILURE;
@@ -845,7 +855,6 @@ static zend_result convert_zval_to_bc_num(zval *zv, bc_num *num)
 			break;
 	}
 
-	*num = tmp;
 	return SUCCESS;
 }
 
@@ -853,6 +862,7 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 {
 	bc_num num1 = NULL, num2 = NULL, result_num = NULL;
 	bc_num_obj *result_obj;
+	size_t scale;
 
 	if (convert_zval_to_bc_num(op1, &num1) == FAILURE || convert_zval_to_bc_num(op2, &num2) == FAILURE) {
 		goto cleanup;
@@ -860,31 +870,60 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 
 	bc_init_num(&result_num);
 
-	size_t scale = MAX(num1->n_scale, num2->n_scale);
-
 	switch (type) {
 		case BC_NUM_ADD:
+			scale = MAX(num1->n_scale, num2->n_scale);
 			bc_add(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_SUB:
+			scale = MAX(num1->n_scale, num2->n_scale);
 			bc_sub(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_MUL:
+			scale = num1->n_scale + num2->n_scale;
+			if (scale > INT_MAX) {
+				scale = INT_MAX;
+			}
 			bc_multiply(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_DIV:
+			// TODO: How set the scale?
+			scale = num1->n_scale;
+			if (!bc_divide(num1, num2, &result_num, scale)) {
+				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+				goto cleanup;
+			}
 			bc_divide(num1, num2, &result_num, scale);
 			break;
 		case BC_NUM_MOD:
-			bc_modulo(num1, num2, &result_num, scale);
+			scale = num1->n_scale;
+			if (!bc_modulo(num1, num2, &result_num, scale)) {
+				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+				goto cleanup;
+			}
 			break;
 		case BC_NUM_POW:
 			{
+				/* Check the exponent for scale digits and convert to a long. */
+				if (num2->n_scale != 0) {
+					zend_argument_value_error(0, "exponent cannot have a fractional part");
+					goto cleanup;
+				}
 				long exponent = bc_num2long(num2);
 				if (exponent == 0 && (num2->n_len > 1 || num2->n_value[0] != 0)) {
 					zend_argument_value_error(is_operator ? 0 : 1, "exponent is too large");
 					goto cleanup;
 				}
+				if (exponent >= 0) {
+					scale = num1->n_scale * exponent;
+					if (scale > INT_MAX) {
+						scale = INT_MAX;
+					}
+				} else {
+					// // TODO: How set the scale?
+					scale = num1->n_scale * exponent;
+				}
+
 				bc_raise(num1, bc_num2long(num2), &result_num, scale);
 			}
 			break;
@@ -898,7 +937,6 @@ static zend_result bc_num_calculation(zval *result, zval *op1, zval *op2, bc_num
 		bc_free_num(&num2);
 	}
 
-	result_num->n_scale = scale;
 	result_obj = bc_num_obj_from_obj(bc_num_create_obj(bc_num_ce));
 	result_obj->num = result_num;
 	ZVAL_OBJ(result, &result_obj->std);
@@ -920,7 +958,14 @@ cleanup:
 /* {{{ bc_num_obj_handlers.do_operation */
 static int bc_num_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2)
 {
+	zval op1_copy;
 	zend_result ret;
+
+	/* For increment and decrement */
+	if (result == op1) {
+		ZVAL_COPY_VALUE(&op1_copy, op1);
+		op1 = &op1_copy;
+	}
 
 	switch (opcode) {
 		case ZEND_ADD:
@@ -943,6 +988,11 @@ static int bc_num_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op
 			break;
 		default:
 			return FAILURE;
+	}
+
+	/* For increment and decrement */
+	if (ret == SUCCESS && op1 == &op1_copy) {
+		zval_ptr_dtor(op1);
 	}
 
 	return ret;
