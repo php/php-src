@@ -23,4 +23,4 @@ $o = new CBroken;
 $o->foo(1);
 ?>
 --EXPECTF--
-Fatal error: Declaration of CBroken::foo($a) must be compatible with TBroken2::foo($a, $b = 0) in %s on line %d
+Fatal error: Declaration of CBroken::foo($a) (from TBroken1) must be compatible with TBroken2::foo($a, $b = 0) in %s on line %d
