@@ -1,0 +1,37 @@
+# GitHub Action for PHP with extensions
+name: Windows Release
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  windows:
+    name: Windows
+    defaults:
+      run:
+        shell: cmd
+    runs-on: windows-2019
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.0.28', '8.1.18', '8.2.5']
+        thread: [nts, ts]
+        arch: [x86, x64]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Build PHP ${{ matrix.php }}-${{ matrix.thread }} with dependency and extension
+      run: .\cmd\compile_${{ matrix.arch }}.bat --php ${{ matrix.php }} --${{ matrix.thread }}
+    - name: Create PHP ${{ matrix.php }}-${{ matrix.thread }} Zip archive with dependency and extension
+      run: .\cmd\compile_${{ matrix.arch }}.bat --php ${{ matrix.php }} --${{ matrix.thread }} --snap
+    - name: Upload the windows binary artifacts
+      uses: svenstaro/upload-release-action@v2
+      with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: php-sdk\phpdev\vs16\${{ matrix.arch }}\php-${{matrix.php}}\${{ matrix.arch }}\Release*\*.zip
+          asset_name: php-${{matrix.php}}-${{ matrix.thread }}-Win32-vs16-${{ matrix.arch }}_static_ext_%EXTNAME%-${{ github.event.release.tag_name }}.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
+          body: "Static PHP-${{matrix.php}}-${{ matrix.thread }} Windows build, includes %DEPS%, %EXTNAME% with all other extensions and Zip archives"
