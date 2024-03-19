@@ -107,6 +107,9 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	uint8_t *p;
 	uint8_t *out;
 	size_t out_size;
+	uint8_t bpp;
+	size_t (*encode)(const uint8_t*, int, int, int, float, uint8_t**);
+	size_t (*encode_lossless)(const uint8_t*, int, int, int, uint8_t**);
 
 	if (im == NULL) {
 		return;
@@ -121,15 +124,25 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 		quality = 80;
 	}
 
-	if (overflow2(gdImageSX(im), 4)) {
+	if (im->saveAlphaFlag) {
+		bpp = 4;
+		encode = WebPEncodeRGBA;
+		encode_lossless = WebPEncodeLosslessRGBA;
+	} else {
+		bpp = 3;
+		encode = WebPEncodeRGB;
+		encode_lossless = WebPEncodeLosslessRGB;
+	}
+
+	if (overflow2(gdImageSX(im), bpp)) {
 		return;
 	}
 
-	if (overflow2(gdImageSX(im) * 4, gdImageSY(im))) {
+	if (overflow2(gdImageSX(im) * bpp, gdImageSY(im))) {
 		return;
 	}
 
-	argb = (uint8_t *)gdMalloc(gdImageSX(im) * 4 * gdImageSY(im));
+	argb = (uint8_t *)gdMalloc(gdImageSX(im) * bpp * gdImageSY(im));
 	if (!argb) {
 		return;
 	}
@@ -139,23 +152,27 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 			register int c;
 			register char a;
 			c = im->tpixels[y][x];
-			a = gdTrueColorGetAlpha(c);
-			if (a == 127) {
-				a = 0;
-			} else {
-				a = 255 - ((a << 1) + (a >> 6));
+			if (bpp == 4) {
+				a = gdTrueColorGetAlpha(c);
+				if (a == 127) {
+					a = 0;
+				} else {
+					a = 255 - ((a << 1) + (a >> 6));
+				}
 			}
 			*(p++) = gdTrueColorGetRed(c);
 			*(p++) = gdTrueColorGetGreen(c);
 			*(p++) = gdTrueColorGetBlue(c);
-			*(p++) = a;
+			if (bpp == 4) {
+				*(p++) = a;
+			}
 		}
 	}
 	
 	if (quality >= gdWebpLossless) {
-		out_size = WebPEncodeLosslessRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, &out);
+		out_size = encode_lossless(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * bpp, &out);
 	} else {
-		out_size = WebPEncodeRGBA(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * 4, quality, &out);
+		out_size = encode(argb, gdImageSX(im), gdImageSY(im), gdImageSX(im) * bpp, quality, &out);
 	}
 
 	if (out_size == 0) {
