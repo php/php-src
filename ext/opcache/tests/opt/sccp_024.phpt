@@ -29,16 +29,16 @@ $_main:
 0000 RETURN int(1)
 
 A::t:
-     ; (lines=10, args=1, vars=2, tmps=2)
+     ; (lines=10, args=1, vars=2, tmps=4)
      ; (after optimizer)
      ; %ssccp_024.php:3-10
 0000 CV0($obj) = RECV 1
 0001 CV1($c) = QM_ASSIGN int(1)
 0002 T2 = INSTANCEOF CV0($obj) string("A")
 0003 ECHO T2
-0004 T2 = INSTANCEOF CV0($obj) string("self")
-0005 ECHO T2
-0006 V3 = FETCH_CLASS (no-autoload) (silent) (exception) CV1($c)
-0007 T2 = INSTANCEOF CV0($obj) V3
-0008 ECHO T2
+0004 T3 = INSTANCEOF CV0($obj) string("self")
+0005 ECHO T3
+0006 V4 = FETCH_CLASS (no-autoload) (silent) (exception) CV1($c)
+0007 T5 = INSTANCEOF CV0($obj) V4
+0008 ECHO T5
 0009 RETURN null

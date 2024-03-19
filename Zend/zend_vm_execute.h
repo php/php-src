@@ -5478,6 +5478,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CON
 			efree_size(ref, sizeof(zend_reference));
 		}
 	}
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -19881,6 +19882,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_TMP_HANDLER(ZEND
 			efree_size(ref, sizeof(zend_reference));
 		}
 	}
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -22823,6 +22825,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_VAR_HANDLER(ZEND
 			efree_size(ref, sizeof(zend_reference));
 		}
 	}
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	ZEND_VM_NEXT_OPCODE();
 }
 
@@ -40279,6 +40282,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CV_HANDLER(ZEND_
 			efree_size(ref, sizeof(zend_reference));
 		}
 	}
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
 	ZEND_VM_NEXT_OPCODE();
 }
 

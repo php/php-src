@@ -29,19 +29,19 @@ $_main:
      ; (after optimizer)
      ; %ssccp_032.php:1-15
 0000 INIT_FCALL 0 %d string("test")
-0001 V2 = DO_UCALL
-0002 V1 = FE_RESET_R V2 0009
-0003 FE_FETCH_R V1 CV0($x) 0009
+0001 V1 = DO_UCALL
+0002 V2 = FE_RESET_R V1 0009
+0003 FE_FETCH_R V2 CV0($x) 0009
 0004 INIT_FCALL 1 %d string("var_export")
 0005 SEND_VAR CV0($x) 1
 0006 DO_ICALL
 0007 ECHO string("
 ")
 0008 JMP 0003
-0009 FE_FREE V1
+0009 FE_FREE V2
 0010 RETURN int(1)
 LIVE RANGES:
-     1: 0003 - 0009 (loop)
+     2: 0003 - 0009 (loop)
 
 test:
      ; (lines=5, args=0, vars=0, tmps=1)
