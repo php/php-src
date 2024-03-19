@@ -107,23 +107,12 @@ const php_random_algo php_random_algo_combinedlcg = {
 /* {{{ php_random_combinedlcg_seed_default */
 PHPAPI void php_random_combinedlcg_seed_default(php_random_status_state_combinedlcg *state)
 {
-	struct timeval tv;
+	uint64_t seed = 0;
 
-	if (gettimeofday(&tv, NULL) == 0) {
-		state->state[0] = tv.tv_usec ^ (tv.tv_usec << 11);
-	} else {
-		state->state[0] = 1;
+	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+		seed = php_random_generate_fallback_seed();
 	}
 
-#ifdef ZTS
-	state->state[1] = (zend_long) tsrm_thread_id();
-#else
-	state->state[1] = (zend_long) getpid();
-#endif
-
-	/* Add entropy to s2 by calling gettimeofday() again */
-	if (gettimeofday(&tv, NULL) == 0) {
-		state->state[1] ^= (tv.tv_usec << 11);
-	}
+	php_random_combinedlcg_seed64(state, seed);
 }
 /* }}} */
