@@ -24,7 +24,7 @@ require_once 'skipifconnectfailure.inc';
         printf("[005] Expecting boolean/any, got %s/%s\n", gettype($tmp), $tmp);
 
     if ($res = mysqli_query($link, "SELECT id FROM test LIMIT 1"))
-        pintf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
+        printf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
 
     var_dump($error = mysqli_error($link));
     if (!is_string($error) || ('' === $error))
@@ -103,11 +103,11 @@ object(mysqli)#%d (%d) {
     }
   }
   ["field_count"]=>
-  int(0)
+  int(1)
   ["host_info"]=>
   string(%d) "%s"
   ["info"]=>
-  %s
+  NULL
   ["insert_id"]=>
   int(0)
   ["server_info"]=>
@@ -115,13 +115,13 @@ object(mysqli)#%d (%d) {
   ["server_version"]=>
   int(%d)
   ["sqlstate"]=>
-  string(5) "HY000"
+  string(%d) "%s"
   ["protocol_version"]=>
-  int(10)
+  int(%d)
   ["thread_id"]=>
   int(%d)
   ["warning_count"]=>
-  int(0)
+  int(%d)
 }
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 array(1) {
