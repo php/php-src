@@ -98,6 +98,8 @@ PHP                                                                        NEWS
   . Added large shared segments support for FreeBSD. (David Carlier)
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues. (danog)
+  . Increased the maximum value of opcache.interned_strings_buffer to 32767 on
+    64bit archs. (Arnaud)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
