@@ -614,30 +614,12 @@ PHP_FUNCTION(random_int)
 }
 /* }}} */
 
-static void write_32(PHP_SHA1_CTX *c, uint32_t u)
-{
-	unsigned char buf[4];
-	unsigned char *p = buf;
-	*(p++) = (u >> 0) & 0xff;
-	*(p++) = (u >> 8) & 0xff;
-	*(p++) = (u >> 16) & 0xff;
-	*(p++) = (u >> 24) & 0xff;
-	PHP_SHA1Update(c, buf, sizeof(buf));
-}
-
-static void write_64(PHP_SHA1_CTX *c, uint64_t u)
-{
-	write_32(c, u);
-	write_32(c, u >> 32);
-}
-
-static void write_p(PHP_SHA1_CTX *c, uintptr_t p)
-{
-	if (sizeof(p) == 4) {
-		write_32(c, p);
-	} else {
-		write_64(c, p);
-	}
+static inline void fallback_seed_add(PHP_SHA1_CTX *c, void *p, size_t l){
+	/* Wrapper around PHP_SHA1Update allowing to pass
+	 * arbitrary pointers without (unsigned char*) casts
+	 * everywhere.
+	 */
+	PHP_SHA1Update(c, p, l);
 }
 
 uint64_t php_random_generate_fallback_seed(void)
@@ -650,47 +632,55 @@ uint64_t php_random_generate_fallback_seed(void)
 	 */
 	PHP_SHA1_CTX c;
 	struct timeval tv;
+	void *pointer;
+	pid_t pid;
+#ifdef ZTS
+	THREAD_T tid;
+#endif
 	char buf[64 + 1];
 
 	PHP_SHA1Init(&c);
 	if (!RANDOM_G(fallback_seed_initialized)) {
 		/* Current time. */
 		gettimeofday(&tv, NULL);
-		write_32(&c, tv.tv_sec);
-		write_32(&c, tv.tv_usec);
+		fallback_seed_add(&c, &tv, sizeof(tv));
 		/* Various PIDs. */
-		write_32(&c, getpid());
+		pid = getpid();
+		fallback_seed_add(&c, &pid, sizeof(pid));
 #ifndef WIN32
-		write_32(&c, getppid());
+		pid = getppid();
+		fallback_seed_add(&c, &pid, sizeof(pid));
 #endif
 #ifdef ZTS
-		write_32(&c, tsrm_thread_id());
+		tid = tsrm_thread_id();
+		fallback_seed_add(&c, &tid, sizeof(tid));
 #endif
 		/* Pointer values to benefit from ASLR. */
-		write_p(&c, (uintptr_t)&RANDOM_G(fallback_seed_initialized));
-		write_p(&c, (uintptr_t)&c);
+		pointer = &RANDOM_G(fallback_seed_initialized);
+		fallback_seed_add(&c, &pointer, sizeof(pointer));
+		pointer = &c;
+		fallback_seed_add(&c, &pointer, sizeof(pointer));
 		/* Updated time. */
 		gettimeofday(&tv, NULL);
-		write_32(&c, tv.tv_usec);
+		fallback_seed_add(&c, &tv, sizeof(tv));
 		/* Hostname. */
 		memset(buf, 0, sizeof(buf));
 		if (gethostname(buf, sizeof(buf) - 1) == 0) {
-			PHP_SHA1Update(&c, (unsigned char*)buf, strlen(buf));
+			fallback_seed_add(&c, buf, strlen(buf));
 		}
 		/* CSPRNG. */
 		if (php_random_bytes_silent(buf, 16) == SUCCESS) {
-			PHP_SHA1Update(&c, (unsigned char*)buf, 16);
+			fallback_seed_add(&c, buf, 16);
 		}
 		/* Updated time. */
 		gettimeofday(&tv, NULL);
-		write_32(&c, tv.tv_usec);
+		fallback_seed_add(&c, &tv, sizeof(tv));
 	} else {
 		/* Current time. */
 		gettimeofday(&tv, NULL);
-		write_32(&c, tv.tv_sec);
-		write_32(&c, tv.tv_usec);
+		fallback_seed_add(&c, &tv, sizeof(tv));
 		/* Previous state. */
-		PHP_SHA1Update(&c, RANDOM_G(fallback_seed), 20);
+		fallback_seed_add(&c, RANDOM_G(fallback_seed), 20);
 	}
 	PHP_SHA1Final(RANDOM_G(fallback_seed), &c);
 	RANDOM_G(fallback_seed_initialized) = true;
