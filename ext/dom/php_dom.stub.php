@@ -296,11 +296,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMNode|false */
     public function importNode(DOMNode $node, bool $deep = false) {}
 
-    /** @return DOMDocument|bool */
-    public function load(string $filename, int $options = 0) {}
+    /** @tentative-return-type */
+    public function load(string $filename, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadXML(string $source, int $options = 0) {}
+    /** @tentative-return-type */
+    public function loadXML(string $source, int $options = 0): bool {}
 
     /** @return void */
     public function normalizeDocument() {}
@@ -312,11 +312,11 @@ class DOMDocument extends DOMNode implements DOMParentNode
     public function save(string $filename, int $options = 0) {}
 
 #ifdef LIBXML_HTML_ENABLED
-    /** @return DOMDocument|bool */
-    public function loadHTML(string $source, int $options = 0) {}
+    /** @tentative-return-type */
+    public function loadHTML(string $source, int $options = 0): bool {}
 
-    /** @return DOMDocument|bool */
-    public function loadHTMLFile(string $filename, int $options = 0) {}
+    /** @tentative-return-type */
+    public function loadHTMLFile(string $filename, int $options = 0): bool {}
 
     /** @return string|false */
     public function saveHTML(?DOMNode $node = null) {}
