@@ -3377,9 +3377,9 @@ PHP_METHOD(DateTimeImmutable, modify)
 	zend_error_handling zeh;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &modify, &modify_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(modify, modify_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 
@@ -3437,9 +3437,9 @@ PHP_METHOD(DateTimeImmutable, add)
 	zval *object, *interval, new_object;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &interval, date_ce_interval) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(interval, date_ce_interval)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 	php_date_add(&new_object, interval, return_value);
@@ -3512,9 +3512,9 @@ PHP_METHOD(DateTimeImmutable, sub)
 	zend_error_handling zeh;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &interval, date_ce_interval) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(interval, date_ce_interval)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 
@@ -3621,9 +3621,9 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 	zval *timezone_object;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &timezone_object, date_ce_timezone) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(timezone_object, date_ce_timezone)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 	php_date_timezone_set(&new_object, timezone_object, return_value);
@@ -3702,9 +3702,13 @@ PHP_METHOD(DateTimeImmutable, setTime)
 	zend_long  h, i, s = 0, ms = 0;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|ll", &h, &i, &s, &ms) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_LONG(h)
+		Z_PARAM_LONG(i)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(s)
+		Z_PARAM_LONG(ms)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 	php_date_time_set(&new_object, h, i, s, ms, return_value);
@@ -3748,9 +3752,11 @@ PHP_METHOD(DateTimeImmutable, setDate)
 	zend_long  y, m, d;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &y, &m, &d) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_LONG(y)
+		Z_PARAM_LONG(m)
+		Z_PARAM_LONG(d)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 	php_date_date_set(&new_object, y, m, d, return_value);
@@ -3798,9 +3804,12 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 	zend_long  y, w, d = 1;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &y, &w, &d) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_LONG(y)
+		Z_PARAM_LONG(w)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(d)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 	php_date_isodate_set(&new_object, y, w, d, return_value);
@@ -3843,9 +3852,9 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 	zend_long  timestamp;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timestamp) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(timestamp)
+	ZEND_PARSE_PARAMETERS_END();
 
 	date_clone_immutable(object, &new_object);
 	php_date_timestamp_set(&new_object, timestamp, return_value);
