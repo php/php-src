@@ -65,14 +65,12 @@ function get_mangled_object_vars(object $object): array {}
  */
 function get_class_methods(object|string $object_or_class): array {}
 
-/** @param object|string $object_or_class */
-function method_exists($object_or_class, string $method): bool {}
+function method_exists(object|string $object_or_class, string $method): bool {}
 
 /**
- * @param object|string $object_or_class
  * @frameless-function {"arity": 2}
  */
-function property_exists($object_or_class, string $property): bool {}
+function property_exists(object|string $object_or_class, string $property): bool {}
 
 /**
  * @frameless-function {"arity": 1}
@@ -107,13 +105,11 @@ function trigger_error(string $message, int $error_level = E_USER_NOTICE): true 
 /** @alias trigger_error */
 function user_error(string $message, int $error_level = E_USER_NOTICE): true {}
 
-/** @return callable|null */
-function set_error_handler(?callable $callback, int $error_levels = E_ALL) {}
+function set_error_handler(?callable $callback, int $error_levels = E_ALL): ?callable {}
 
 function restore_error_handler(): true {}
 
-/** @return callable|null */
-function set_exception_handler(?callable $callback) {}
+function set_exception_handler(?callable $callback): ?callable {}
 
 function restore_exception_handler(): true {}
 
