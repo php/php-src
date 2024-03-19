@@ -8377,11 +8377,6 @@ static void zend_compile_use(zend_ast *ast) /* {{{ */
 				new_name = zend_string_init(unqualified_name, unqualified_name_len, 0);
 			} else {
 				new_name = zend_string_copy(old_name);
-
-				if (!current_ns) {
-					zend_error(E_WARNING, "The use statement with non-compound name '%s' "
-						"has no effect", ZSTR_VAL(new_name));
-				}
 			}
 		}
 
