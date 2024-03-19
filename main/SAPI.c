@@ -460,6 +460,9 @@ SAPI_API void sapi_activate(void)
 	SG(request_parse_body_context).throw_exceptions = false;
 	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 
+    if (sapi_module.activate) {
+        sapi_module.activate();
+    }
 	/* Handle request method */
 	if (SG(server_context)) {
 		if (PG(enable_post_data_reading)
@@ -475,9 +478,6 @@ SAPI_API void sapi_activate(void)
 
 		/* Cookies */
 		SG(request_info).cookie_data = sapi_module.read_cookies();
-	}
-	if (sapi_module.activate) {
-		sapi_module.activate();
 	}
 	if (sapi_module.input_filter_init) {
 		sapi_module.input_filter_init();
