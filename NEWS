@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - DOM:
   . Add some missing ZPP checks. (nielsdos)
   . Fix potential memory leak in XPath evaluation results. (nielsdos)
+  . Fix phpdoc for DOMDocument load methods. (VincentLanglet)
 
 - GD:
   . Fixed bug GH-12019 (add GDLIB_CFLAGS in feature tests). (Michael Orlitzky)
