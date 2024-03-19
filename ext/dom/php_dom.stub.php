@@ -743,10 +743,10 @@ class DOMDocument extends DOMNode implements DOMParentNode
     /** @return DOMNode|false */
     public function importNode(DOMNode $node, bool $deep = false) {}
 
-    /** @return DOMDocument|bool */
+    /** @return bool */
     public function load(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
 
-    /** @return DOMDocument|bool */
+    /** @return bool */
     public function loadXML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
 
     /** @tentative-return-type */
@@ -759,10 +759,10 @@ class DOMDocument extends DOMNode implements DOMParentNode
     public function save(string $filename, int $options = 0): int|false {}
 
 #ifdef LIBXML_HTML_ENABLED
-    /** @return DOMDocument|bool */
+    /** @return bool */
     public function loadHTML(string $source, int $options = 0) {} // TODO return type shouldn't depend on the call scope
 
-    /** @return DOMDocument|bool */
+    /** @return bool */
     public function loadHTMLFile(string $filename, int $options = 0) {} // TODO return type shouldn't depend on the call scope
 
     /** @tentative-return-type */
