@@ -24,6 +24,8 @@ extern zend_module_entry tokenizer_module_entry;
 #define PHP_TOKENIZER_VERSION PHP_VERSION
 
 #define TOKEN_PARSE (1 << 0)
+#define TOKEN_ENABLE_SHORT_OPEN_TAG (1 << 1)
+#define TOKEN_DISABLE_SHORT_OPEN_TAG (1 << 2)
 
 #ifdef ZTS
 #include "TSRM.h"

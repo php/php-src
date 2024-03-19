@@ -319,7 +319,7 @@ static void add_token(
 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
 }
 
-static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class)
+static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *token_class, bool short_tags)
 {
 	zval source_zval;
 	zend_lex_state original_lex_state;
@@ -335,6 +335,7 @@ static bool tokenize(zval *return_value, zend_string *source, zend_class_entry *
 	zend_prepare_string_for_scanning(&source_zval, ZSTR_EMPTY_ALLOC());
 
 	LANG_SCNG(yy_state) = yycINITIAL;
+	LANG_SCNG(short_tags) = short_tags;
 	zend_hash_init(&interned_strings, 0, NULL, NULL, 0);
 	array_init(return_value);
 
@@ -452,7 +453,7 @@ void on_event(
 }
 
 static bool tokenize_parse(
-		zval *return_value, zend_string *source, zend_class_entry *token_class)
+		zval *return_value, zend_string *source, zend_class_entry *token_class, bool short_tags)
 {
 	zval source_zval;
 	struct event_context ctx;
@@ -478,6 +479,7 @@ static bool tokenize_parse(
 	LANG_SCNG(yy_state) = yycINITIAL;
 	LANG_SCNG(on_event) = on_event;
 	LANG_SCNG(on_event_context) = &ctx;
+	LANG_SCNG(short_tags) = short_tags;
 
 	if((success = (zendparse() == SUCCESS))) {
 		ZVAL_COPY_VALUE(return_value, &token_stream);
@@ -500,14 +502,23 @@ static bool tokenize_parse(
 static bool tokenize_common(
 		zval *return_value, zend_string *source, zend_long flags, zend_class_entry *token_class)
 {
-	if (flags & TOKEN_PARSE) {
-		return tokenize_parse(return_value, source, token_class);
+	bool result;
+	bool short_tags;
+	if (flags & (TOKEN_ENABLE_SHORT_OPEN_TAG|TOKEN_DISABLE_SHORT_OPEN_TAG)) {
+		/* TOKEN_DISABLE_SHORT_OPEN_TAG takes precedence over TOKEN_ENABLE_SHORT_OPEN_TAG */
+		short_tags = (flags & TOKEN_DISABLE_SHORT_OPEN_TAG) == 0;
 	} else {
-		int success = tokenize(return_value, source, token_class);
+		short_tags = CG(short_tags);
+	}
+	if (flags & TOKEN_PARSE) {
+		result = tokenize_parse(return_value, source, token_class, short_tags);
+	} else {
+		int success = tokenize(return_value, source, token_class, short_tags);
 		/* Normal token_get_all() should not throw. */
 		zend_clear_exception();
-		return success;
+		result = success;
 	}
+	return result;
 }
 
 /* }}} */
