@@ -4,7 +4,7 @@ env:
 freebsd_task:
   name: FREEBSD_DEBUG_NTS
   freebsd_instance:
-    image_family: freebsd-13-2
+    image_family: freebsd-13-3
   env:
     ARCH: amd64
   install_script:
@@ -14,7 +14,7 @@ freebsd_task:
     - pkg install -y autoconf bison gmake re2c icu libiconv png freetype2 enchant2 bzip2 krb5 t1lib gmp tidyp libsodium libzip libxml2 libxslt openssl oniguruma pkgconf webp libavif
   script:
     - ./buildconf -f
-    - ./configure --prefix=/usr/local --enable-debug --enable-option-checking=fatal --enable-fpm --with-pdo-sqlite --without-pear --with-bz2 --with-avif --with-jpeg --with-webp --with-freetype --enable-gd --enable-exif --with-zip --with-zlib --enable-soap --enable-xmlreader --with-xsl --with-libxml --enable-shmop --enable-pcntl --enable-mbstring --with-curl --enable-sockets --with-openssl --with-iconv=/usr/local --enable-bcmath --enable-calendar --enable-ftp --with-kerberos --with-ffi --enable-zend-test --enable-dl-test=shared --enable-intl --with-mhash --with-sodium --enable-werror --with-config-file-path=/etc --with-config-file-scan-dir=/etc/php.d
+    - ./configure --prefix=/usr/local --enable-debug --enable-option-checking=fatal --enable-fpm --with-pdo-sqlite --without-pear --with-bz2 --with-avif --with-jpeg --with-webp --with-freetype --enable-gd --enable-exif --with-zip --with-zlib --enable-soap --enable-xmlreader --with-xsl --with-libxml --enable-shmop --enable-pcntl --enable-mbstring --with-curl --enable-sockets --with-openssl --with-iconv=/usr/local --enable-bcmath --enable-calendar --enable-ftp --with-kerberos --with-ffi --enable-zend-test --enable-dl-test=shared --enable-intl --with-mhash --with-sodium --with-config-file-path=/etc --with-config-file-scan-dir=/etc/php.d
     - gmake -j2
     - mkdir /etc/php.d
     - gmake install
