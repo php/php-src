@@ -1675,6 +1675,8 @@ rerun_gc:
 finish:
 	zend_get_gc_buffer_release();
 
+	/* Prevent GC from running during zend_gc_check_root_tmpvars, before
+	 * gc_threshold is adjusted, as this may result in unbounded recursion */
 	GC_G(gc_active) = 1;
 	zend_gc_check_root_tmpvars();
 	GC_G(gc_active) = 0;

@@ -51,7 +51,8 @@ for ($i = 0; $i < $defaultThreshold*2; $i++) {
 
 work();
 
-// Iterate on a tmpvar
+// Result of array_slice() is a tmpvar that will be checked by
+// zend_gc_check_root_tmpvars()
 foreach (array_slice($objs, -10) as $obj) {
     $o = $obj;
 }
