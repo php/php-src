@@ -119,4 +119,6 @@ void pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAMETERS);
 void pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAMETERS);
 void pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAMETERS);
 
+int pdo_pgsql_parser(pdo_parser_t *s);
+
 #endif /* PHP_PDO_PGSQL_INT_H */
