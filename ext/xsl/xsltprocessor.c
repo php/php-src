@@ -23,7 +23,6 @@
 #include "php_xsl.h"
 #include <libxslt/variables.h>
 #include "ext/libxml/php_libxml.h"
-#include "ext/dom/php_dom.h"
 #include "ext/dom/namespace_compat.h"
 
 

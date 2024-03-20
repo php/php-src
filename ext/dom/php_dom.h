@@ -114,9 +114,6 @@ typedef enum _dom_iterator_type {
 	DOM_HTMLCOLLECTION,
 } dom_iterator_type;
 
-struct _php_dom_libxml_ns_mapper;
-typedef struct _php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
-
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
 	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
 }
@@ -177,27 +174,6 @@ xmlChar *php_dom_libxml_fix_file_path(xmlChar *path);
 void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc);
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 xmlDocPtr php_dom_create_html_doc(void);
-
-static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *nodep, const xmlNode *basep)
-{
-	if (nodep->next) {
-		return nodep->next;
-	} else {
-		/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
-		do {
-			nodep = nodep->parent;
-			if (nodep == basep) {
-				return NULL;
-			}
-			/* This shouldn't happen, unless there's an invalidation bug somewhere. */
-			if (UNEXPECTED(nodep == NULL)) {
-				zend_throw_error(NULL, "Current node in traversal is not in the document. Please report this as a bug in php-src.");
-				return NULL;
-			}
-		} while (nodep->next == NULL);
-		return nodep->next;
-	}
-}
 
 typedef enum {
 	DOM_LOAD_STRING = 0,
@@ -287,17 +263,6 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_l
 	}
 }
 
-static zend_always_inline bool php_dom_follow_spec_doc_ref(const php_libxml_ref_obj *document)
-{
-	return document != NULL && document->class_type == PHP_LIBXML_CLASS_MODERN;
-}
-
-static zend_always_inline bool php_dom_follow_spec_intern(const dom_object *intern)
-{
-	ZEND_ASSERT(intern != NULL);
-	return php_dom_follow_spec_doc_ref(intern->document);
-}
-
 static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
@@ -309,12 +274,6 @@ static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 		}
 	}
 	return false;
-}
-
-static zend_always_inline php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *intern)
-{
-	ZEND_ASSERT(intern->document != NULL);
-	return (php_dom_libxml_ns_mapper *) intern->document->private_data;
 }
 
 PHP_MINIT_FUNCTION(dom);
