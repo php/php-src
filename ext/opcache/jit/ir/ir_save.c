@@ -121,7 +121,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 			uint32_t b = ctx->cfg_map[i];
 			ir_block *bb = &ctx->cfg_blocks[b];
 			fprintf(f, "#BB%d: end=l_%d", b, bb->end);
-			if (bb->flags && IR_BB_UNREACHABLE) {
+			if (bb->flags & IR_BB_UNREACHABLE) {
 				fprintf(f, ", U");
 			}
 			if (bb->dom_parent > 0) {

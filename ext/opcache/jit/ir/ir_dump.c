@@ -513,7 +513,7 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 		}
 
 		fprintf(f, "#BB%d: end=l_%d", b, bb->end);
-		if (bb->flags && IR_BB_UNREACHABLE) {
+		if (bb->flags & IR_BB_UNREACHABLE) {
 			fprintf(f, ", U");
 		}
 		if (bb->dom_parent > 0) {
