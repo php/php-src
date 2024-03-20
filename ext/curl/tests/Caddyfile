@@ -3,11 +3,11 @@
 	auto_https disable_redirects
 }
 
-localhost
+{$SERVER_NAME:https://localhost} {
+	respond / "Caddy is up and running"
 
-respond / "Caddy is up and running"
-
-# HTTP/2 Server Push
-respond /serverpush "main response"
-respond /serverpush/pushed "pushed response"
-push /serverpush /serverpush/pushed
+	# HTTP/2 Server Push
+	respond /serverpush "main response"
+	respond /serverpush/pushed "pushed response"
+	push /serverpush /serverpush/pushed
+}
