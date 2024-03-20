@@ -150,6 +150,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      value instead.
    - Removed DOM_XMLNS_NAMESPACE from xml_common.h. Use DOM_XMLNS_NS_URI
      from namespace_compat.h instead.
+   - Added php_dom_get_ns_mapper(), php_dom_next_in_tree_order(),
+     php_dom_follow_spec_doc_ref(), and php_dom_follow_spec_doc_ref().
 
  b. ext/random
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
