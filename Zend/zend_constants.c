@@ -116,13 +116,6 @@ void zend_register_standard_constants(void)
 	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
 }
 
-
-void zend_shutdown_constants(void)
-{
-	zend_hash_destroy(EG(zend_constants));
-	free(EG(zend_constants));
-}
-
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
 	zend_constant c;
