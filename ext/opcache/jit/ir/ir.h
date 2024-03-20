@@ -156,11 +156,15 @@ typedef enum _ir_type {
 # define IR_SSIZE_T    IR_I64
 # define IR_UINTPTR_T  IR_U64
 # define IR_INTPTR_T   IR_I64
+# define IR_C_UINTPTR  IR_U64
+# define IR_C_INTPTR   IR_I64
 #else
 # define IR_SIZE_T     IR_U32
 # define IR_SSIZE_T    IR_I32
 # define IR_UINTPTR_T  IR_U32
 # define IR_INTPTR_T   IR_I32
+# define IR_C_UINTPTR  IR_U32
+# define IR_C_INTPTR   IR_I32
 #endif
 
 /* List of IR opcodes
@@ -839,8 +843,14 @@ int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
 int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 
 /* IR save API (implementation in ir_save.c) */
+#define IR_SAVE_CFG       (1<<0) /* add info about CFG */
+#define IR_SAVE_CFG_MAP   (1<<1) /* add info about CFG block assignment */
+#define IR_SAVE_USE_LISTS (1<<2) /* add info about def->use lists */
+#define IR_SAVE_RULES     (1<<3) /* add info about selected code-generation rules */
+#define IR_SAVE_REGS      (1<<4) /* add info about selected registers */
+
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
-void ir_save(const ir_ctx *ctx, FILE *f);
+void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
 void ir_dump(const ir_ctx *ctx, FILE *f);

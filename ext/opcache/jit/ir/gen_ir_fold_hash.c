@@ -255,6 +255,9 @@ int main(int argc, char **argv)
 
 	IR_OPS(IR_OP_ADD)
 
+	ir_strtab_lookup(&strtab, "C_INTPTR",  sizeof("C_INTPTR") - 1, IR_C_INTPTR + 1);
+	ir_strtab_lookup(&strtab, "C_UINTPTR", sizeof("C_IINTPTR") - 1, IR_C_UINTPTR + 1);
+
 	while (fgets(buf, sizeof(buf) - 1, f)) {
 		size_t len = strlen(buf);
 		if (len > 0 && (buf[len - 1] == '\r' || buf[len - 1] == '\n')) {

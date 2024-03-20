@@ -511,7 +511,46 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 		if ((bb->flags & (IR_BB_START|IR_BB_ENTRY|IR_BB_EMPTY)) == IR_BB_EMPTY) {
 			continue;
 		}
-		fprintf(f, "#BB%d:\n", b);
+
+		fprintf(f, "#BB%d: end=l_%d", b, bb->end);
+		if (bb->flags && IR_BB_UNREACHABLE) {
+			fprintf(f, ", U");
+		}
+		if (bb->dom_parent > 0) {
+			fprintf(f, ", idom=BB%d(%d)", bb->dom_parent, bb->dom_depth);
+		}
+		if (bb->loop_depth != 0) {
+			if (bb->flags & IR_BB_LOOP_HEADER) {
+				if (bb->loop_header > 0) {
+					fprintf(f, ", loop=HDR,BB%d(%d)", bb->loop_header, bb->loop_depth);
+				} else {
+					IR_ASSERT(bb->loop_depth == 1);
+					fprintf(f, ", loop=HDR(%d)", bb->loop_depth);
+				}
+			} else {
+				IR_ASSERT(bb->loop_header > 0);
+				fprintf(f, ", loop=BB%d(%d)", bb->loop_header, bb->loop_depth);
+			}
+		}
+		if (bb->predecessors_count) {
+			uint32_t i;
+
+			fprintf(f, ", pred(%d)=[BB%d", bb->predecessors_count, ctx->cfg_edges[bb->predecessors]);
+			for (i = 1; i < bb->predecessors_count; i++) {
+				fprintf(f, ", BB%d", ctx->cfg_edges[bb->predecessors + i]);
+			}
+			fprintf(f, "]");
+		}
+		if (bb->successors_count) {
+			uint32_t i;
+
+			fprintf(f, ", succ(%d)=[BB%d", bb->successors_count, ctx->cfg_edges[bb->successors]);
+			for (i = 1; i < bb->successors_count; i++) {
+				fprintf(f, ", BB%d", ctx->cfg_edges[bb->successors + i]);
+			}
+			fprintf(f, "]");
+		}
+		fprintf(f, "\n");
 
 		for (i = bb->start, insn = ctx->ir_base + i; i <= bb->end;) {
 			flags = ir_op_flags[insn->op];
@@ -682,8 +721,14 @@ void ir_dump_codegen(const ir_ctx *ctx, FILE *f)
 				}
 			}
 			succ = ir_skip_empty_target_blocks(ctx, succ);
-			if (succ != b + 1) {
-				fprintf(f, "\t# GOTO BB%d\n", succ);
+			if (ctx->cfg_schedule) {
+				if (_b == ctx->cfg_blocks_count || succ != ctx->cfg_schedule[_b + 1]) {
+					fprintf(f, "\t# GOTO BB%d\n", succ);
+				}
+			} else {
+				if (succ != b + 1) {
+					fprintf(f, "\t# GOTO BB%d\n", succ);
+				}
 			}
 		} else if (insn->op == IR_IF) {
 			uint32_t true_block, false_block;

@@ -2370,10 +2370,11 @@ store_int:
 								ctx->rules[op2_insn->op1] = IR_FUSED | IR_TEST_INT;
 								ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_NOP;
 								return IR_TEST_AND_BRANCH_INT;
-							} else if ((op1_insn->op == IR_OR || op1_insn->op == IR_AND || op1_insn->op == IR_XOR) ||
-									/* GT(ADD(_, _), 0) can't be optimized because ADD may overflow */
-									((op1_insn->op == IR_ADD || op1_insn->op == IR_SUB) &&
-										(op2_insn->op == IR_EQ || op2_insn->op == IR_NE))) {
+							} else if (insn->op2 == ref - 1 && /* previous instruction */
+									((op1_insn->op == IR_OR || op1_insn->op == IR_AND || op1_insn->op == IR_XOR) ||
+										/* GT(ADD(_, _), 0) can't be optimized because ADD may overflow */
+										((op1_insn->op == IR_ADD || op1_insn->op == IR_SUB) &&
+											(op2_insn->op == IR_EQ || op2_insn->op == IR_NE)))) {
 								/* v = BINOP(_, _); c = CMP(v, 0) ... IF(c) => BINOP; SKIP_CMP ... JCC */
 								if (ir_op_flags[op1_insn->op] & IR_OP_FLAG_COMMUTATIVE) {
 									ir_match_fuse_load_commutative_int(ctx, op1_insn, ref);
