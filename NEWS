@@ -90,6 +90,7 @@ PHP                                                                        NEWS
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
+  . Added mb_ucfirst and mb_lcfirst. (Yuya Hamada)
 
 - MySQLnd:
   . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
