@@ -27,19 +27,19 @@ object(ReflectionConstant)#1 (1) {
   ["name"]=>
   string(15) "ZEND_CONSTANT_A"
 }
-Const [ ZEND_CONSTANT_A = 'global' ]
+Constant [ <persistent> string ZEND_CONSTANT_A ] { global }
 object(ReflectionConstant)#1 (1) {
   ["name"]=>
   string(20) "ZEND_TEST_DEPRECATED"
 }
-Const [ <deprecated> ZEND_TEST_DEPRECATED = 42 ]
+Constant [ <persistent, deprecated> int ZEND_TEST_DEPRECATED ] { 42 }
 object(ReflectionConstant)#1 (1) {
   ["name"]=>
   string(8) "RT_CONST"
 }
-Const [ RT_CONST = 42 ]
+Constant [ int RT_CONST ] { 42 }
 object(ReflectionConstant)#1 (1) {
   ["name"]=>
   string(8) "CT_CONST"
 }
-Const [ CT_CONST = ['foo' => 'foo', 'bar' => ['bar']] ]
+Constant [ array CT_CONST ] { Array }

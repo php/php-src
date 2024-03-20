@@ -539,20 +539,48 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 {
 	const char *type = zend_zval_type_name(value);
+	uint32_t flags = Z_CONSTANT_FLAGS_P(value);
+
+	smart_str_appends(str, indent);
+	smart_str_appends(str, "Constant [ ");
+
+	if (flags & (CONST_PERSISTENT|CONST_NO_FILE_CACHE|CONST_DEPRECATED)) {
+		bool first = true;
+		smart_str_appends(str, "<");
+
+#define DUMP_CONST_FLAG(flag, output) \
+	do { \
+		if (flags & flag) { \
+			if (!first) smart_str_appends(str, ", "); \
+			smart_str_appends(str, output); \
+			first = false; \
+		} \
+	} while (0)
+		DUMP_CONST_FLAG(CONST_PERSISTENT, "persistent");
+		DUMP_CONST_FLAG(CONST_NO_FILE_CACHE, "no_file_cache");
+		DUMP_CONST_FLAG(CONST_DEPRECATED, "deprecated");
+#undef DUMP_CONST_FLAG
+
+		smart_str_appends(str, "> ");
+	}
+
+	smart_str_appends(str, type);
+	smart_str_appendc(str, ' ');
+	smart_str_appends(str, name);
+	smart_str_appends(str, " ] { ");
 
 	if (Z_TYPE_P(value) == IS_ARRAY) {
-		smart_str_append_printf(str, "%s    Constant [ %s %s ] { Array }\n",
-						indent, type, name);
+		smart_str_appends(str, "Array");
 	} else if (Z_TYPE_P(value) == IS_STRING) {
-		smart_str_append_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-						indent, type, name, Z_STRVAL_P(value));
+		smart_str_appends(str, Z_STRVAL_P(value));
 	} else {
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(value, &tmp_value_str);
-		smart_str_append_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-						indent, type, name, ZSTR_VAL(value_str));
+		smart_str_appends(str, ZSTR_VAL(value_str));
 		zend_tmp_string_release(tmp_value_str);
 	}
+
+	smart_str_appends(str, " }\n");
 }
 /* }}} */
 
@@ -1060,7 +1088,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 
 		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
-				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, indent);
+				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, "    ");
 				num_constants++;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1250,19 +1278,6 @@ static void _zend_extension_string(smart_str *str, zend_extension *extension, ch
 	smart_str_appends(str, "]\n");
 }
 /* }}} */
-
-static void _const_decl_string(smart_str *str, zend_constant *const_)
-{
-	smart_str_append_printf(str, "Const [ ");
-	if (ZEND_CONSTANT_FLAGS(const_) & CONST_DEPRECATED) {
-		smart_str_append_printf(str, "<deprecated> ");
-	}
-	smart_str_append_printf(str, "%s = ", ZSTR_VAL(const_->name));
-	if (format_default_value(str, &const_->value) == FAILURE) {
-		return;
-	}
-	smart_str_appends(str, " ]\n");
-}
 
 /* {{{ _function_check_flag */
 static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
@@ -7351,7 +7366,7 @@ ZEND_METHOD(ReflectionConstant, __toString)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(const_);
-	_const_decl_string(&str, const_);
+	_const_string(&str, ZSTR_VAL(const_->name), &const_->value, "");
 	RETURN_STR(smart_str_extract(&str));
 }
 
