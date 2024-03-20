@@ -1380,8 +1380,6 @@ case `eval echo $datadir` in
     ;;
 esac
 
-phplibdir=`pwd`/modules
-$php_shtool mkdir -p $phplibdir
 phptempdir=`pwd`/libs
 
 old_exec_prefix=$exec_prefix
@@ -1508,7 +1506,6 @@ PHP_SUBST_OLD(program_suffix)
 PHP_SUBST(includedir)
 PHP_SUBST(libdir)
 PHP_SUBST(mandir)
-PHP_SUBST(phplibdir)
 PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
 PHP_SUBST(localstatedir)
@@ -1749,9 +1746,6 @@ PHP_ADD_BUILD_DIR(Zend Zend/asm Zend/Optimizer)
 
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
-
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 

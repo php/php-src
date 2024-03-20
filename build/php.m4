@@ -128,6 +128,16 @@ AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
 AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
 > Makefile.objects
 > Makefile.fragments
+dnl Run at the end of the configuration, before creating the config.status.
+AC_CONFIG_COMMANDS_PRE([dnl
+dnl Directory for storing shared objects of extensions.
+PHP_ADD_BUILD_DIR([modules])dnl
+phplibdir="$(pwd)/modules"
+PHP_SUBST([phplibdir])dnl
+dnl Create build directories and generate global Makefile.
+PHP_GEN_BUILD_DIRS[]dnl
+PHP_GEN_GLOBAL_MAKEFILE[]dnl
+])dnl
 ])
 
 dnl
@@ -136,6 +146,7 @@ dnl
 dnl Generates the global makefile.
 dnl
 AC_DEFUN([PHP_GEN_GLOBAL_MAKEFILE],[
+  AC_MSG_NOTICE([creating Makefile])
   cat >Makefile <<EOF
 srcdir = $abs_srcdir
 builddir = $abs_builddir
@@ -881,6 +892,7 @@ dnl
 dnl PHP_GEN_BUILD_DIRS
 dnl
 AC_DEFUN([PHP_GEN_BUILD_DIRS],[
+  AC_MSG_NOTICE([creating build directories])
   $php_shtool mkdir -p $BUILD_DIR
 ])
 
