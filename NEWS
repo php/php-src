@@ -86,6 +86,7 @@ PHP                                                                        NEWS
   . ResourceBundle::get() now has a tentative return type of:
     ResourceBundle|array|string|int|null
   . Added the new Grapheme function grapheme_str_split. (youkidearitai)
+  . Addewd IntlDateFormatter::parseToCalendar. (David Carlier)
 
 - LDAP:
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3

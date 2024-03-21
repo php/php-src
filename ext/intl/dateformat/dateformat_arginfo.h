@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 91f1dbe4843fd1d4dff7266e814a3c8f9aed882a */
+ * Stub hash: 56b66b1b51220ddbff698ec4c9a6ae60f3e0bfb0 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -75,6 +75,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatte
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_parseToCalendar, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_IntlDateFormatter_localtime, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, offset, "null")
@@ -104,6 +109,7 @@ ZEND_FUNCTION(datefmt_is_lenient);
 ZEND_FUNCTION(datefmt_format);
 ZEND_FUNCTION(datefmt_format_object);
 ZEND_FUNCTION(datefmt_parse);
+ZEND_METHOD(IntlDateFormatter, parseToCalendar);
 ZEND_FUNCTION(datefmt_localtime);
 ZEND_FUNCTION(datefmt_get_error_code);
 ZEND_FUNCTION(datefmt_get_error_message);
@@ -127,6 +133,7 @@ static const zend_function_entry class_IntlDateFormatter_methods[] = {
 	ZEND_RAW_FENTRY("format", zif_datefmt_format, arginfo_class_IntlDateFormatter_format, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("formatObject", zif_datefmt_format_object, arginfo_class_IntlDateFormatter_formatObject, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("parse", zif_datefmt_parse, arginfo_class_IntlDateFormatter_parse, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(IntlDateFormatter, parseToCalendar, arginfo_class_IntlDateFormatter_parseToCalendar, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("localtime", zif_datefmt_localtime, arginfo_class_IntlDateFormatter_localtime, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getErrorCode", zif_datefmt_get_error_code, arginfo_class_IntlDateFormatter_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getErrorMessage", zif_datefmt_get_error_message, arginfo_class_IntlDateFormatter_getErrorMessage, ZEND_ACC_PUBLIC, NULL, NULL)
