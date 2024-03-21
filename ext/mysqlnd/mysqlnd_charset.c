@@ -270,7 +270,7 @@ static unsigned int check_mb_eucjpms(const char * const start, const char * cons
 	}
 	if (valid_eucjpms_ss3(start[0]) && (end - start) > 2 && valid_eucjpms(start[1]) &&
 		valid_eucjpms(start[2])) {
-		return 2;
+		return 3;
 	}
 	return 0;
 }
