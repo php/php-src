@@ -69,6 +69,9 @@ static void observer_show_opcode(zend_execute_data *execute_data)
 
 static void observer_begin(zend_execute_data *execute_data)
 {
+	ZEND_ASSERT(!ZEND_USER_CODE(EX(func)->type) ||
+		(EX(opline) >= EX(func)->op_array.opcodes && EX(opline) < EX(func)->op_array.opcodes + EX(func)->op_array.last));
+
 	if (!ZT_G(observer_show_output)) {
 		return;
 	}

@@ -10221,7 +10221,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {
-			|	SAVE_IP
+			|	SET_EX_OPLINE opline, r0
 			|	mov FCARG1a, FP
 			|	EXT_CALL zend_observer_fcall_begin, r0
 		}
