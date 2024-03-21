@@ -3273,6 +3273,7 @@ class ClassInfo {
     public array $attributes;
     private ?ExposedDocComment $exposedDocComment;
     private bool $isNotSerializable;
+    private bool $isStruct;
     /** @var Name[] */
     public /* readonly */ array $extends;
     /** @var Name[] */
@@ -3309,6 +3310,7 @@ class ClassInfo {
         array $attributes,
         ?ExposedDocComment $exposedDocComment,
         bool $isNotSerializable,
+        bool $isStruct,
         array $extends,
         array $implements,
         array $constInfos,
@@ -3329,6 +3331,7 @@ class ClassInfo {
         $this->attributes = $attributes;
         $this->exposedDocComment = $exposedDocComment;
         $this->isNotSerializable = $isNotSerializable;
+        $this->isStruct = $isStruct;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->constInfos = $constInfos;
@@ -3550,6 +3553,12 @@ class ClassInfo {
             $php70Flags[] = "ZEND_ACC_DEPRECATED";
         }
 
+        /* Only available from 8.5, but must not be used in older versions at
+         * all. Hence, don't add a version guard. */
+        if ($this->isStruct) {
+            $php70Flags[] = "ZEND_ACC_STRUCT";
+        }
+
         $php80Flags = $php70Flags;
 
         if ($this->isStrictProperties) {
@@ -3596,6 +3605,7 @@ class ClassInfo {
         $this->exposedDocComment = null;
         $this->isStrictProperties = false;
         $this->isNotSerializable = false;
+        $this->isStruct = false;
 
         foreach ($this->propertyInfos as $propertyInfo) {
             $propertyInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
@@ -4667,6 +4677,7 @@ function parseClass(
     $isDeprecated = false;
     $isStrictProperties = false;
     $isNotSerializable = false;
+    $isStruct = false;
     $allowsDynamicProperties = false;
 
     if ($comments) {
@@ -4680,6 +4691,8 @@ function parseClass(
                 $isStrictProperties = true;
             } else if ($tag->name === 'not-serializable') {
                 $isNotSerializable = true;
+            } else if ($tag->name === 'struct') {
+                $isStruct = true;
             } else if ($tag->name === 'undocumentable') {
                 $isUndocumentable = true;
             }
@@ -4738,6 +4751,7 @@ function parseClass(
         $attributes,
         ExposedDocComment::extractExposedComment($comments),
         $isNotSerializable,
+        $isStruct,
         $extends,
         $implements,
         $consts,

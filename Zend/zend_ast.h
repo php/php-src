@@ -169,6 +169,7 @@ enum _zend_ast_kind {
 
 	// Pseudo node for initializing enums
 	ZEND_AST_CONST_ENUM_INIT,
+	ZEND_AST_MUTATING_METHOD_CALL,
 
 	/* 4 child nodes */
 	ZEND_AST_FOR = 4 << ZEND_AST_NUM_CHILDREN_SHIFT,

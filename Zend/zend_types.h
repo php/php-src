@@ -1556,6 +1556,19 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+#define SEPARATE_DATA_OBJ(zv) do {						\
+		zval *_zv = (zv);								\
+		ZEND_ASSERT(Z_TYPE_P(_zv) == IS_OBJECT);		\
+		zend_object *obj = Z_OBJ_P(_zv);				\
+		if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_STRUCT)	\
+		 && GC_REFCOUNT(obj) > 1) {						\
+			zend_object_clone_obj_t clone_call = obj->handlers->clone_obj;	\
+			ZEND_ASSERT(clone_call);					\
+			ZVAL_OBJ(_zv, clone_call(obj));				\
+			GC_TRY_DELREF(obj);							\
+		}												\
+	} while (0)
+
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
