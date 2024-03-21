@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.19
 
+- Core:
+  . Fixed bug GH-13772 (Invalid execute_data->opline pointers in observer fcall
+    handlers when JIT is enabled). (Bob)
+
 - FPM:
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
