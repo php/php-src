@@ -1320,6 +1320,7 @@ class FuncInfo {
     /** @var FramelessFunctionInfo[] */
     private array $framelessFunctionInfos;
     private ?ExposedDocComment $exposedDocComment;
+    private bool $isMutating;
 
     /**
      * @param ArgInfo[] $args
@@ -1343,7 +1344,8 @@ class FuncInfo {
         ?int $minimumPhpVersionIdCompatibility,
         array $attributes,
         array $framelessFunctionInfos,
-        ?ExposedDocComment $exposedDocComment
+        ?ExposedDocComment $exposedDocComment,
+        bool $isMutating,
     ) {
         $this->name = $name;
         $this->classFlags = $classFlags;
@@ -1362,6 +1364,7 @@ class FuncInfo {
         $this->attributes = $attributes;
         $this->framelessFunctionInfos = $framelessFunctionInfos;
         $this->exposedDocComment = $exposedDocComment;
+        $this->isMutating = $isMutating;
         if ($return->tentativeReturnType && $this->isFinalMethod()) {
             throw new Exception("Tentative return inapplicable for final method");
         }
@@ -1639,6 +1642,10 @@ class FuncInfo {
 
         if ($this->isDeprecated) {
             $flags[] = "ZEND_ACC_DEPRECATED";
+        }
+
+        if ($this->isMutating) {
+            $flags[] = "ZEND_ACC_MUTATING";
         }
 
         foreach ($this->attributes as $attr) {
@@ -2215,11 +2222,11 @@ OUPUT_EXAMPLE
             $this->numRequiredArgs,
             $minPHPCompatability === null || $minPHPCompatability >= PHP_81_VERSION_ID
         );
-    
+
         foreach ($this->args as $argInfo) {
             $code .= $argInfo->toZendInfo();
         }
-    
+
         $code .= "ZEND_END_ARG_INFO()";
         return $code . "\n";
     }
@@ -3410,6 +3417,7 @@ class ClassInfo {
     private array $attributes;
     private ?ExposedDocComment $exposedDocComment;
     private bool $isNotSerializable;
+    private bool $isStruct;
     /** @var Name[] */
     private /* readonly */ array $extends;
     /** @var Name[] */
@@ -3446,6 +3454,7 @@ class ClassInfo {
         array $attributes,
         ?ExposedDocComment $exposedDocComment,
         bool $isNotSerializable,
+        bool $isStruct,
         array $extends,
         array $implements,
         array $constInfos,
@@ -3466,6 +3475,7 @@ class ClassInfo {
         $this->attributes = $attributes;
         $this->exposedDocComment = $exposedDocComment;
         $this->isNotSerializable = $isNotSerializable;
+        $this->isStruct = $isStruct;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->constInfos = $constInfos;
@@ -3681,6 +3691,12 @@ class ClassInfo {
             $php70Flags[] = "ZEND_ACC_DEPRECATED";
         }
 
+        /* Only available from 8.5, but must not be used in older versions at
+         * all. Hence, don't add a version guard. */
+        if ($this->isStruct) {
+            $php70Flags[] = "ZEND_ACC_STRUCT";
+        }
+
         $flags = new VersionFlags($php70Flags);
 
         if ($this->isStrictProperties) {
@@ -3711,6 +3727,7 @@ class ClassInfo {
         $this->exposedDocComment = null;
         $this->isStrictProperties = false;
         $this->isNotSerializable = false;
+        $this->isStruct = false;
 
         foreach ($this->propertyInfos as $propertyInfo) {
             $propertyInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
@@ -4310,13 +4327,13 @@ class FileInfo {
                 return implode('\\', $node->getParts());
             }
         };
-    
+
         $stmts = $parser->parse($code);
         $nodeTraverser->traverse($stmts);
-    
+
         $fileTags = DocCommentTag::parseDocComments(self::getFileDocComments($stmts));
         $fileInfo = new FileInfo($fileTags);
-    
+
         $fileInfo->handleStatements($stmts, $prettyPrinter);
         return $fileInfo;
     }
@@ -4337,16 +4354,16 @@ class FileInfo {
         $conds = [];
         foreach ($stmts as $stmt) {
             $cond = self::handlePreprocessorConditions($conds, $stmt);
-    
+
             if ($stmt instanceof Stmt\Nop) {
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Namespace_) {
                 $this->handleStatements($stmt->stmts, $prettyPrinter);
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Const_) {
                 foreach ($stmt->consts as $const) {
                     $this->constInfos[] = parseConstLike(
@@ -4364,7 +4381,7 @@ class FileInfo {
                 }
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Function_) {
                 $this->funcInfos[] = parseFunctionLike(
                     $prettyPrinter,
@@ -4378,7 +4395,7 @@ class FileInfo {
                 );
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\ClassLike) {
                 $className = $stmt->namespacedName;
                 $constInfos = [];
@@ -4390,10 +4407,10 @@ class FileInfo {
                     if ($classStmt instanceof Stmt\Nop) {
                         continue;
                     }
-    
+
                     $classFlags = $stmt instanceof Class_ ? $stmt->flags : 0;
                     $abstractFlag = $stmt instanceof Stmt\Interface_ ? Modifiers::ABSTRACT : 0;
-    
+
                     if ($classStmt instanceof Stmt\ClassConst) {
                         foreach ($classStmt->consts as $const) {
                             $constInfos[] = parseConstLike(
@@ -4447,7 +4464,7 @@ class FileInfo {
                         throw new Exception("Not implemented {$classStmt->getType()}");
                     }
                 }
-    
+
                 $this->classInfos[] = parseClass(
                     $className,
                     $stmt,
@@ -4461,7 +4478,7 @@ class FileInfo {
                 );
                 continue;
             }
-    
+
             if ($stmt instanceof Stmt\Expression) {
                 $expr = $stmt->expr;
                 if ($expr instanceof Expr\Include_) {
@@ -4469,7 +4486,7 @@ class FileInfo {
                     continue;
                 }
             }
-    
+
             throw new Exception("Unexpected node {$stmt->getType()}");
         }
         if (!empty($conds)) {
@@ -4501,7 +4518,7 @@ class FileInfo {
                 throw new Exception("Unrecognized preprocessor directive \"$text\"");
             }
         }
-    
+
         return empty($conds) ? null : implode(' && ', $conds);
     }
 
@@ -4684,6 +4701,7 @@ function parseFunctionLike(
         $docParamTypes = [];
         $refcount = null;
         $framelessFunctionInfos = [];
+        $isMutating = false;
 
         if ($comments) {
             $tags = DocCommentTag::parseDocComments($comments);
@@ -4730,6 +4748,10 @@ function parseFunctionLike(
 
                     case 'frameless-function':
                         $framelessFunctionInfos[] = new FramelessFunctionInfo($tag->getValue());
+                        break;
+
+                    case 'mutating':
+                        $isMutating = true;
                         break;
                 }
             }
@@ -4834,7 +4856,8 @@ function parseFunctionLike(
             $minimumPhpVersionIdCompatibility,
             AttributeInfo::createFromGroups($func->attrGroups),
             $framelessFunctionInfos,
-            ExposedDocComment::extractExposedComment($comments)
+            ExposedDocComment::extractExposedComment($comments),
+            $isMutating,
         );
     } catch (Exception $e) {
         throw new Exception($name . "(): " .$e->getMessage());
@@ -5023,6 +5046,7 @@ function parseClass(
     $isStrictProperties = array_key_exists('strict-properties', $tagMap);
     $isNotSerializable = array_key_exists('not-serializable', $tagMap);
     $isUndocumentable = $isUndocumentable || array_key_exists('undocumentable', $tagMap);
+    $isStruct = array_key_exists('struct', $tagMap);
     foreach ($tags as $tag) {
         if ($tag->name === 'alias') {
             $alias = $tag->getValue();
@@ -5081,6 +5105,7 @@ function parseClass(
         $attributes,
         ExposedDocComment::extractExposedComment($comments),
         $isNotSerializable,
+        $isStruct,
         $extends,
         $implements,
         $consts,

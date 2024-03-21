@@ -190,6 +190,14 @@ namespace {
         public static function callStatic(): void {}
     }
 
+    /** @struct */
+    class ZendTestBox {
+        public mixed $value;
+
+        /** @mutating */
+        public function setNull(): void {}
+    }
+
     enum ZendTestUnitEnum {
         case Foo;
         case Bar;

@@ -152,6 +152,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_STATIC        "'static'"
 %token <ident> T_ABSTRACT      "'abstract'"
 %token <ident> T_FINAL         "'final'"
+%token <ident> T_MUTATING      "'mutating'"
 %token <ident> T_PRIVATE       "'private'"
 %token <ident> T_PROTECTED     "'protected'"
 %token <ident> T_PUBLIC        "'public'"
@@ -165,6 +166,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_EMPTY         "'empty'"
 %token <ident> T_HALT_COMPILER "'__halt_compiler'"
 %token <ident> T_CLASS         "'class'"
+%token <ident> T_STRUCT        "'struct'"
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
 %token <ident> T_ENUM          "'enum'"
@@ -292,6 +294,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <num> returns_ref function fn is_reference is_variadic property_modifiers property_hook_modifiers
 %type <num> method_modifiers class_const_modifiers member_modifier optional_cpp_modifiers
 %type <num> class_modifiers class_modifier anonymous_class_modifiers anonymous_class_modifiers_optional use_type backup_fn_flags
+%type <num> class_like
 
 %type <ptr> backup_lex_pos
 %type <str> backup_doc_comment
@@ -310,19 +313,24 @@ reserved_non_modifiers:
 	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
-	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
+	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS | T_STRUCT
 	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH | T_ENUM
 	| T_PROPERTY_C
 ;
 
 semi_reserved:
 	  reserved_non_modifiers
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC | T_READONLY | T_MUTATING
 ;
 
 ampersand:
 		T_AMPERSAND_FOLLOWED_BY_VAR_OR_VARARG
 	|	T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG
+;
+
+class_like:
+		T_CLASS { $$ = 0; }
+	|	T_STRUCT { $$ = ZEND_ACC_STRUCT; }
 ;
 
 identifier:
@@ -602,12 +610,12 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers T_CLASS { $<num>$ = CG(zend_lineno); }
+		class_modifiers class_like { $<num>$ = zend_add_class_modifier($1, $2); if (!$<num>$) { YYERROR; } } { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
-	|	T_CLASS { $<num>$ = CG(zend_lineno); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $<num>3, $<num>4, $8, zend_ast_get_str($5), $6, $7, $10, NULL, NULL); }
+	|	class_like { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
 ;
 
 class_modifiers:
@@ -1112,6 +1120,7 @@ member_modifier:
 	|	T_ABSTRACT				{ $$ = T_ABSTRACT; }
 	|	T_FINAL					{ $$ = T_FINAL; }
 	|	T_READONLY				{ $$ = T_READONLY; }
+	|	T_MUTATING				{ $$ = T_MUTATING; }
 ;
 
 property_list:
@@ -1571,6 +1580,8 @@ callable_variable:
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
 	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_METHOD_CALL, $1, $3, $4); }
+	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name '!' argument_list
+			{ $$ = zend_ast_create(ZEND_AST_MUTATING_METHOD_CALL, $1, $3, $5); }
 	|	function_call { $$ = $1; }
 ;
 

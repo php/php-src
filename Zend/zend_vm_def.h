@@ -1040,6 +1040,9 @@ ZEND_VM_HANDLER(28, ZEND_ASSIGN_OBJ_OP, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, OP)
 
 ZEND_VM_C_LABEL(assign_op_object):
 		/* here we are sure we are dealing with an object */
+		if (OP1_TYPE & (IS_VAR|IS_CV)) {
+			SEPARATE_DATA_OBJ(object);
+		}
 		zobj = Z_OBJ_P(object);
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
@@ -1317,6 +1320,9 @@ ZEND_VM_HANDLER(132, ZEND_PRE_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACH
 
 ZEND_VM_C_LABEL(pre_incdec_object):
 		/* here we are sure we are dealing with an object */
+		if (OP1_TYPE & (IS_VAR|IS_CV)) {
+			SEPARATE_DATA_OBJ(object);
+		}
 		zobj = Z_OBJ_P(object);
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
@@ -1387,6 +1393,9 @@ ZEND_VM_HANDLER(134, ZEND_POST_INC_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CAC
 
 ZEND_VM_C_LABEL(post_incdec_object):
 		/* here we are sure we are dealing with an object */
+		if (OP1_TYPE & (IS_VAR|IS_CV)) {
+			SEPARATE_DATA_OBJ(object);
+		}
 		zobj = Z_OBJ_P(object);
 		if (OP2_TYPE == IS_CONST) {
 			name = Z_STR_P(property);
@@ -2484,6 +2493,9 @@ ZEND_VM_HANDLER(24, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_
 	}
 
 ZEND_VM_C_LABEL(assign_object):
+	if (OP1_TYPE & (IS_CV|IS_VAR)) {
+		SEPARATE_DATA_OBJ(object);
+	}
 	zobj = Z_OBJ_P(object);
 	if (OP2_TYPE == IS_CONST) {
 		if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
@@ -3588,10 +3600,21 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	zend_object *obj;
 	zend_execute_data *call;
 	uint32_t call_info;
+	bool needs_addref = false;
 
 	SAVE_OPLINE();
 
-	object = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if ((OP1_TYPE & IS_VAR)
+	 && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+		object = EX_VAR(opline->op1.var);
+		if (EXPECTED(Z_TYPE_P(object) == IS_INDIRECT)) {
+			object = Z_INDIRECT_P(object);
+			/* Object was fetched through BP_VAR_RW, we need to addref. */
+			needs_addref = true;
+		}
+	} else {
+		object = GET_OP1_OBJ_ZVAL_PTR_UNDEF(BP_VAR_R);
+	}
 
 	if (OP2_TYPE != IS_CONST) {
 		function_name = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
@@ -3608,13 +3631,17 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 			} else if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
 				ZVAL_UNDEFINED_OP2();
 				if (UNEXPECTED(EG(exception) != NULL)) {
-					FREE_OP1();
+					if (!needs_addref) {
+						FREE_OP1();
+					}
 					HANDLE_EXCEPTION();
 				}
 			}
 			zend_throw_error(NULL, "Method name must be a string");
 			FREE_OP2();
-			FREE_OP1();
+			if (!needs_addref) {
+				FREE_OP1();
+			}
 			HANDLE_EXCEPTION();
 		} while (0);
 	}
@@ -3624,6 +3651,9 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	} else {
 		do {
 			if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+				if (OP1_TYPE & (IS_CV|IS_VAR) && UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+					SEPARATE_DATA_OBJ(object);
+				}
 				obj = Z_OBJ_P(object);
 			} else {
 				if ((OP1_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_ISREF_P(object))) {
@@ -3631,8 +3661,11 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 
 					object = &ref->val;
 					if (EXPECTED(Z_TYPE_P(object) == IS_OBJECT)) {
+						if (UNEXPECTED(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)) {
+							SEPARATE_DATA_OBJ(object);
+						}
 						obj = Z_OBJ_P(object);
-						if (OP1_TYPE & IS_VAR) {
+						if ((OP1_TYPE & IS_VAR) && !needs_addref) {
 							if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 								efree_size(ref, sizeof(zend_reference));
 							} else {
@@ -3656,7 +3689,9 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 				}
 				zend_invalid_method_call(object, function_name);
 				FREE_OP2();
-				FREE_OP1();
+				if (!needs_addref) {
+					FREE_OP1();
+				}
 				HANDLE_EXCEPTION();
 			}
 		} while (0);
@@ -3682,6 +3717,21 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 			}
 			FREE_OP2();
 			if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && GC_DELREF(orig_obj) == 0) {
+				zend_objects_store_del(orig_obj);
+			}
+			HANDLE_EXCEPTION();
+		}
+		if (UNEXPECTED(
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
+		)) {
+			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
+				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
+			} else {
+				zend_throw_error(NULL, "Non-mutating method must not be called with $object->func!() syntax");
+			}
+			FREE_OP2();
+			if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && !needs_addref && GC_DELREF(orig_obj) == 0) {
 				zend_objects_store_del(orig_obj);
 			}
 			HANDLE_EXCEPTION();
@@ -3718,7 +3768,7 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		obj = (zend_object*)called_scope;
 		call_info = ZEND_CALL_NESTED_FUNCTION;
 	} else if (OP1_TYPE & (IS_VAR|IS_TMP_VAR|IS_CV)) {
-		if (OP1_TYPE == IS_CV) {
+		if (OP1_TYPE == IS_CV || needs_addref) {
 			GC_ADDREF(obj); /* For $this pointer */
 		}
 		/* CV may be changed indirectly (e.g. when it's a reference) */
@@ -3726,7 +3776,7 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
-		fbc, opline->extended_value, obj);
+		fbc, opline->extended_value & ~ZEND_INIT_METHOD_CALL_MUTATING, obj);
 	call->prev_execute_data = EX(call);
 	EX(call) = call;
 
@@ -6991,6 +7041,9 @@ ZEND_VM_COLD_CONST_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 		ZEND_VM_NEXT_OPCODE();
 	} else if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
+			if (OP1_TYPE & (IS_CV|IS_VAR)) {
+				SEPARATE_DATA_OBJ(array_ptr);
+			}
 			zend_object *zobj = Z_OBJ_P(array_ptr);
 			HashTable *properties;
 			if (UNEXPECTED(zend_object_is_lazy(zobj))) {
@@ -9222,8 +9275,14 @@ ZEND_VM_HOT_HANDLER(184, ZEND_FETCH_THIS, UNUSED, UNUSED)
 	if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		zval *result = EX_VAR(opline->result.var);
 
-		ZVAL_OBJ(result, Z_OBJ(EX(This)));
-		Z_ADDREF_P(result);
+		if (EXPECTED(!(Z_OBJCE(EX(This))->ce_flags & ZEND_ACC_STRUCT))) {
+			ZVAL_OBJ(result, Z_OBJ(EX(This)));
+			Z_ADDREF_P(result);
+		} else {
+			zend_object_clone_obj_t clone_call = Z_OBJ(EX(This))->handlers->clone_obj;
+			ZEND_ASSERT(clone_call);
+			ZVAL_OBJ(result, clone_call(Z_OBJ(EX(This))));
+		}
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);

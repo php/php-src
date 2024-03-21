@@ -2739,9 +2739,13 @@ simple_list:
 		/* 3 child nodes */
 		case ZEND_AST_METHOD_CALL:
 		case ZEND_AST_NULLSAFE_METHOD_CALL:
+		case ZEND_AST_MUTATING_METHOD_CALL:
 			zend_ast_export_ex(str, ast->child[0], 0, indent);
 			smart_str_appends(str, ast->kind == ZEND_AST_NULLSAFE_METHOD_CALL ? "?->" : "->");
 			zend_ast_export_var(str, ast->child[1], 0, indent);
+			if (ast->kind == ZEND_AST_MUTATING_METHOD_CALL) {
+				smart_str_appendc(str, '!');
+			}
 			smart_str_appendc(str, '(');
 			zend_ast_export_ex(str, ast->child[2], 0, indent);
 			smart_str_appendc(str, ')');

@@ -3543,6 +3543,10 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		} while (0);
 	}
 
+	if (container_op_type & (IS_VAR|IS_CV)) {
+		SEPARATE_DATA_OBJ(container);
+	}
+
 	zobj = Z_OBJ_P(container);
 	if (prop_op_type == IS_CONST &&
 	    EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
@@ -3563,7 +3567,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 						 * Similar as with magic __get() allow them, but return the value as a copy
 						 * to make sure no actual modification is possible. */
 						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
-						if (Z_TYPE_P(ptr) == IS_OBJECT) {
+						if (Z_TYPE_P(ptr) == IS_OBJECT
+						 && EXPECTED(!(Z_OBJCE_P(ptr)->ce_flags & ZEND_ACC_STRUCT))) {
 							ZVAL_COPY(result, ptr);
 						} else {
 							if (prop_info->flags & ZEND_ACC_READONLY) {
