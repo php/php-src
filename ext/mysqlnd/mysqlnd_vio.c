@@ -141,6 +141,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 	EG(regular_list).pDestructor = NULL;
 	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
 	EG(regular_list).pDestructor = origin_dtor;
+	efree(net_stream->res);
 	net_stream->res = NULL;
 
 	DBG_RETURN(net_stream);
