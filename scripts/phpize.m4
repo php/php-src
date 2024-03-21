@@ -162,7 +162,6 @@ AC_PROG_LIBTOOL
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
-phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 CFLAGS_CLEAN='$(CFLAGS) -D_GNU_SOURCE'
 CXXFLAGS_CLEAN='$(CXXFLAGS)'
@@ -188,7 +187,6 @@ PHP_SUBST(prefix)
 PHP_SUBST(exec_prefix)
 PHP_SUBST(libdir)
 PHP_SUBST(prefix)
-PHP_SUBST(phplibdir)
 PHP_SUBST(phpincludedir)
 
 PHP_SUBST(CC)
@@ -209,11 +207,6 @@ PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
 PHP_SUBST(INSTALL_HEADERS)
 PHP_SUBST(BUILD_CC)
-
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
-
-test -d modules || $php_shtool mkdir modules
 
 AC_CONFIG_HEADERS([config.h])
 
