@@ -129,14 +129,13 @@ AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
 > Makefile.objects
 > Makefile.fragments
 dnl Run at the end of the configuration, before creating the config.status.
-AC_CONFIG_COMMANDS_PRE([dnl
-dnl Directory for storing shared objects of extensions.
-PHP_ADD_BUILD_DIR([modules])dnl
+AC_CONFIG_COMMANDS_PRE(
+[dnl Directory for storing shared objects of extensions.
+PHP_ADD_BUILD_DIR([modules])
 phplibdir="$(pwd)/modules"
-PHP_SUBST([phplibdir])dnl
-dnl Create build directories and generate global Makefile.
-PHP_GEN_BUILD_DIRS[]dnl
-PHP_GEN_GLOBAL_MAKEFILE[]dnl
+PHP_SUBST([phplibdir])
+PHP_GEN_BUILD_DIRS
+PHP_GEN_GLOBAL_MAKEFILE
 ])dnl
 ])
 
