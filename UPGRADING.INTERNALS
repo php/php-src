@@ -91,6 +91,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol DBA_CDB_MAKE removed in ext/dba.
    - Symbol HAVE_LIBM has been removed.
    - Symbol HAVE_INET_ATON has been removed.
+   - The Zend/zend_istdiostream.h header has been removed.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
