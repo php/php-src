@@ -112,6 +112,20 @@ MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_u
 }
 /* }}} */
 
+static void mysqlnd_fixup_regular_list(php_stream *net_stream)
+{
+	/*
+	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
+	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
+	  unregistered until the script ends. So, we need to take care of that.
+	*/
+	dtor_func_t origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle);
+	EG(regular_list).pDestructor = origin_dtor;
+	efree(net_stream->res);
+	net_stream->res = NULL;
+}
 
 /* {{{ mysqlnd_vio::open_pipe */
 static php_stream *
@@ -119,7 +133,6 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int streams_options = 0;
-	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_vio::open_pipe");
@@ -132,17 +145,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown error while connecting");
 		DBG_RETURN(NULL);
 	}
-	/*
-	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered until the script ends. So, we need to take care of that.
-	*/
-	origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	EG(regular_list).pDestructor = origin_dtor;
-	efree(net_stream->res);
-	net_stream->res = NULL;
+	mysqlnd_fixup_regular_list(net_stream);
 
 	DBG_RETURN(net_stream);
 }
@@ -224,17 +227,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 		mnd_sprintf_free(hashed_details);
 	}
 
-	/*
-	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered until the script ends. So, we need to take care of that.
-	*/
-	origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	efree(net_stream->res);
-	net_stream->res = NULL;
-	EG(regular_list).pDestructor = origin_dtor;
+	mysqlnd_fixup_regular_list(net_stream);
 	DBG_RETURN(net_stream);
 }
 /* }}} */
