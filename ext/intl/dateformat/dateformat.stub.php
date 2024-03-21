@@ -154,10 +154,11 @@ class IntlDateFormatter
 
     /**
      * @param int $offset
+     * @param bool $updateCalendar
      * @tentative-return-type
      * @alias datefmt_parse
      */
-    public function parse(string $string, &$offset = null): int|float|false {}
+    public function parse(string $string, &$offset = null, bool $updateCalendar = false): int|float|false {}
 
     /**
      * @param int $offset

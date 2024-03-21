@@ -31,7 +31,7 @@
  *	if set to 1 - store any error encountered  in the parameter parse_error
  *	if set to 0 - no need to store any error encountered  in the parameter parse_error
 */
-static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* text_to_parse, size_t text_len, int32_t *parse_pos, zval *return_value)
+static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* text_to_parse, size_t text_len, int32_t *parse_pos, bool update_calendar, zval *return_value)
 {
 	double	result =  0;
 	UDate 	timestamp   =0;
@@ -42,13 +42,22 @@ static void internal_parse_to_timestamp(IntlDateFormatter_object *dfo, char* tex
 	intl_convert_utf8_to_utf16(&text_utf16, &text_utf16_len, text_to_parse, text_len, &INTL_DATA_ERROR_CODE(dfo));
 	INTL_METHOD_CHECK_STATUS(dfo, "Error converting timezone to UTF-16" );
 
-	timestamp = udat_parse( DATE_FORMAT_OBJECT(dfo), text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
-	if( text_utf16 ){
-		efree(text_utf16);
+	if (UNEXPECTED(update_calendar)) {
+		UCalendar      *parsed_calendar = (UCalendar *)udat_getCalendar(DATE_FORMAT_OBJECT(dfo));
+		udat_parseCalendar( DATE_FORMAT_OBJECT(dfo), parsed_calendar, text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
+		if( text_utf16 ){
+			efree(text_utf16);
+		}
+		INTL_METHOD_CHECK_STATUS( dfo, "Calendar parsing failed" );
+		timestamp = ucal_getMillis( parsed_calendar, &INTL_DATA_ERROR_CODE(dfo));
+	} else {
+		timestamp = udat_parse( DATE_FORMAT_OBJECT(dfo), text_utf16, text_utf16_len, parse_pos, &INTL_DATA_ERROR_CODE(dfo));
+		if( text_utf16 ){
+			efree(text_utf16);
+		}
 	}
 
 	INTL_METHOD_CHECK_STATUS( dfo, "Date parsing failed" );
-
 	/* Since return is in  sec. */
 	result = (double)timestamp / U_MILLIS_PER_SECOND;
 	if (result > (double)LONG_MAX || result < (double)LONG_MIN) {
@@ -122,13 +131,14 @@ PHP_FUNCTION(datefmt_parse)
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
-	int32_t		parse_pos = -1;
+	int32_t		    parse_pos = -1;
+	bool            update_calendar = false;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
-		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!b",
+		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos, &update_calendar ) == FAILURE ){
 		RETURN_THROWS();
 	}
 
@@ -149,7 +159,7 @@ PHP_FUNCTION(datefmt_parse)
 			RETURN_FALSE;
 		}
 	}
-	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value);
+	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, update_calendar, return_value);
 	if(z_parse_pos) {
 		zval_ptr_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);
