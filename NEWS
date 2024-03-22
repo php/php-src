@@ -18,7 +18,9 @@ PHP                                                                        NEWS
   . Fix phpdoc for DOMDocument load methods. (VincentLanglet)
 
 - FPM
-  . Fix incorrect check in fpm_shm_free(). (nielsdos)
+  . Fixed incorrect check in fpm_shm_free(). (nielsdos)
+  . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
+    (Jakub Zelenka)
 
 - GD:
   . Fixed bug GH-12019 (add GDLIB_CFLAGS in feature tests). (Michael Orlitzky)
