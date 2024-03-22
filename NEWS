@@ -26,6 +26,7 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Fix GH-13452 (Fixed handshake response [mysqlnd]). (Saki Takamachi)
+  . Fix incorrect charset length in check_mb_eucjpms(). (nielsdos)
 
 - Opcache:
   . Fixed GH-13508 (JITed QM_ASSIGN may be optimized out when op1 is null).
