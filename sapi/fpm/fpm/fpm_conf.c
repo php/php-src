@@ -1710,6 +1710,12 @@ static void fpm_conf_dump(void)
 {
 	struct fpm_worker_pool_s *wp;
 
+	// set level to at least NOTICE, so that the following output is visible regardless of configured log_level
+	int old_level = zlog_set_level(ZLOG_NOTICE);
+	if (old_level < ZLOG_NOTICE) {
+		zlog_set_level(old_level);
+	}
+
 	/*
 	 * Please keep the same order as in fpm_conf.h and in php-fpm.conf.in
 	 */
@@ -1815,6 +1821,8 @@ static void fpm_conf_dump(void)
 		}
 		zlog(ZLOG_NOTICE, " ");
 	}
+	// reset level
+	zlog_set_level(old_level);
 }
 
 int fpm_conf_init_main(int test_conf, int force_daemon) /* {{{ */
