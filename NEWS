@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
     (nielsdos)
   . Fixed bug GH-13446 (Restore exception handler after it finishes). (ilutov)
+  . Fixed bug GH-13784 (AX_GCC_FUNC_ATTRIBUTE failure). (Remi)
 
 - DOM:
   . Add some missing ZPP checks. (nielsdos)
