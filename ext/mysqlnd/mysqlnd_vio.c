@@ -249,7 +249,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
-		net_stream->__exposed = 1;
+		php_stream_auto_cleanup(net_stream);
 #endif
 		mnd_sprintf_free(hashed_details);
 	}
