@@ -41,6 +41,7 @@ PHP                                                                        NEWS
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)
+  . Fixed bug #65106 (PHP fails to compile ext/fileinfo). (Guillaume Outters)
 
 - FPM:
   . Implement GH-12385 (flush headers without body when calling flush()).
