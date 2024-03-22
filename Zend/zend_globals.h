@@ -104,6 +104,8 @@ struct _zend_compiler_globals {
 
 	bool ini_parser_unbuffered_errors;
 
+	bool dlopen_deepbind;
+
 	zend_llist open_files;
 
 	struct _zend_ini_parser_param *ini_parser_param;
