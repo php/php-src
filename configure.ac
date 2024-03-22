@@ -1663,7 +1663,7 @@ else
 fi;
 
 all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
-install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install $install_embed"
 
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
@@ -1755,7 +1755,7 @@ $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
 ALL_OUTPUT_FILES="main/build-defs.h \
-scripts/phpize scripts/man1/phpize.1 \
+scripts/php.pc scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"
 

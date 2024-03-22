@@ -1,0 +1,18 @@
+# The .pc file for pkgconf (pkg-config) utility.
+# https://github.com/pkgconf/pkgconf
+# https://people.freedesktop.org/~dbn/pkg-config-guide.html
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@prefix@/include
+libdir=@exec_prefix@/lib
+
+Name: PHP Embed SAPI
+Description: Embed PHP into application with C bindings using a lightweight SAPI
+URL: https://www.php.net
+License: PHP
+Version: @PHP_VERSION@
+Cflags.private: @PHP_CFLAGS_PRIVATE@
+Cflags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
+Libs.private: @PHP_LIBS_PRIVATE@
+Libs: -L${libdir} -lphp

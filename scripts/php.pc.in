@@ -1,0 +1,16 @@
+# The .pc file for pkgconf (pkg-config) utility.
+# https://github.com/pkgconf/pkgconf
+# https://people.freedesktop.org/~dbn/pkg-config-guide.html
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@prefix@/include
+libdir=@exec_prefix@/lib
+
+Name: PHP
+Description: A general-purpose scripting language
+URL: https://www.php.net
+License: PHP
+Version: @PHP_VERSION@
+CFlags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
+Libs: -L${libdir} -lphp

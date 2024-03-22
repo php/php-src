@@ -46,6 +46,9 @@ install-programs: $(builddir)/phpize $(builddir)/php-config
 		echo "  page: $(program_prefix)$${page}$(program_suffix).1"; \
 		$(INSTALL_DATA) $(builddir)/man1/$${page}.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)$${page}$(program_suffix).1; \
 	done
+	@echo "Installing pkgconf .pc file:       $(INSTALL_ROOT)$(libdir)/pkgconfig/php.pc"
+	@$(mkinstalldirs) $(INSTALL_ROOT)$(libdir)/pkgconfig
+	@$(INSTALL_DATA) $(builddir)/php.pc $(INSTALL_ROOT)$(libdir)/pkgconfig/$(program_prefix)php$(program_suffix).pc
 
 $(builddir)/phpize: $(srcdir)/phpize.in $(top_builddir)/config.status
 	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
