@@ -432,6 +432,7 @@ class Tester
         bool $daemonize = false,
         array $extensions = [],
         array $iniEntries = [],
+        array $envVars = [],
     ) {
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
@@ -465,7 +466,7 @@ class Tester
         $cmd = array_merge($cmd, $extraArgs);
         $this->trace('Starting FPM using command:', $cmd, true);
 
-        $this->masterProcess = proc_open($cmd, $desc, $pipes);
+        $this->masterProcess = proc_open($cmd, $desc, $pipes, null, $envVars);
         register_shutdown_function(
             function ($masterProcess) use ($configFile) {
                 @unlink($configFile);
