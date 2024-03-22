@@ -42,6 +42,7 @@
 #    flatten
 #    format
 #    format_arg
+#    gnu_format
 #    gnu_inline
 #    hot
 #    ifunc
@@ -77,7 +78,7 @@
 #   and this notice are preserved.  This file is offered as-is, without any
 #   warranty.
 
-#serial 9
+#serial 13a
 
 AC_DEFUN([AX_GCC_FUNC_ATTRIBUTE], [
     AS_VAR_PUSHDEF([ac_var], [ax_cv_have_func_attribute_$1])
@@ -132,13 +133,16 @@ AC_DEFUN([AX_GCC_FUNC_ATTRIBUTE], [
                     int foo( void ) __attribute__(($1));
                 ],
                 [fallthrough], [
-                    int foo( void ) {switch (0) { case 1: __attribute__(($1)); case 2: break ; }};
+                    void foo( int x ) {switch (x) { case 1: __attribute__(($1)); case 2: break ; }};
                 ],
                 [flatten], [
                     int foo( void ) __attribute__(($1));
                 ],
                 [format], [
                     int foo(const char *p, ...) __attribute__(($1(printf, 1, 2)));
+                ],
+                [gnu_format], [
+                    int foo(const char *p, ...) __attribute__((format(gnu_printf, 1, 2)));
                 ],
                 [format_arg], [
                     char *foo(const char *p) __attribute__(($1(1)));
