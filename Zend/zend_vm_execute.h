@@ -1272,8 +1272,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	zval retval;
 
 	SAVE_OPLINE();
-	EX(call) = call->prev_execute_data;
+#if ZEND_VERIFY_INTERNAL_PARAM_DEFAULTS
+	zend_verify_internal_param_defaults(&call);
+#endif
 
+	EX(call) = call->prev_execute_data;
 	call->prev_execute_data = execute_data;
 	EG(current_execute_data) = call;
 
@@ -1334,8 +1337,11 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	zval retval;
 
 	SAVE_OPLINE();
-	EX(call) = call->prev_execute_data;
+#if ZEND_VERIFY_INTERNAL_PARAM_DEFAULTS
+	zend_verify_internal_param_defaults(&call);
+#endif
 
+	EX(call) = call->prev_execute_data;
 	call->prev_execute_data = execute_data;
 	EG(current_execute_data) = call;
 
