@@ -1582,6 +1582,8 @@ namespace Dom
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
 
         public ?Element $body;
+        /** @readonly */
+        public ?Element $head;
     }
 
     final class HTMLDocument extends Document
