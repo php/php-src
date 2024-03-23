@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
 
+- Streams:
+  . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
+    (Jakub Zelenka)
+
 11 Apr 2024, PHP 8.2.18
 
 - Core:
