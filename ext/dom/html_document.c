@@ -1366,26 +1366,35 @@ invalid_encoding:
 	return FAILURE;
 }
 
-zend_result dom_html_document_element_read_helper(dom_object *obj, zval *retval, bool (*accept)(const xmlChar *))
+static const xmlNode *dom_html_document_element_read_raw(const xmlDoc *docp, bool (*accept)(const xmlChar *))
 {
-	DOM_PROP_NODE(const xmlDoc *, docp, obj);
-
 	const xmlNode *root = xmlDocGetRootElement(docp);
 	if (root == NULL || !(php_dom_ns_is_fast(root, php_dom_ns_is_html_magic_token) && xmlStrEqual(root->name, BAD_CAST "html"))) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
+		return NULL;
 	}
 
-	xmlNodePtr cur = root->children;
+	const xmlNode *cur = root->children;
 	while (cur != NULL) {
 		if (cur->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(cur, php_dom_ns_is_html_magic_token) && accept(cur->name)) {
-			php_dom_create_object(cur, retval, obj);
-			return SUCCESS;
+			return cur;
 		}
 		cur = cur->next;
 	}
 
-	ZVAL_NULL(retval);
+	return NULL;
+}
+
+zend_result dom_html_document_element_read_helper(dom_object *obj, zval *retval, bool (*accept)(const xmlChar *))
+{
+	DOM_PROP_NODE(const xmlDoc *, docp, obj);
+
+	const xmlNode *element = dom_html_document_element_read_raw(docp, accept);
+	if (element == NULL) {
+		ZVAL_NULL(retval);
+	} else {
+		php_dom_create_object((xmlNodePtr) element, retval, obj);
+	}
+
 	return SUCCESS;
 }
 
@@ -1407,6 +1416,51 @@ zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
 zend_result dom_html_document_head_read(dom_object *obj, zval *retval)
 {
 	return dom_html_document_element_read_helper(obj, retval, dom_accept_head_name);
+}
+
+zend_result dom_html_document_body_write(dom_object *obj, zval *newval)
+{
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
+
+	/* 1. If the new value is not a body or frameset element, then throw a "HierarchyRequestError" DOMException. */
+	if (Z_TYPE_P(newval) != IS_NULL) {
+		dom_object *newval_intern = Z_DOMOBJ_P(newval);
+		if (newval_intern->ptr != NULL) {
+			xmlNodePtr newval_node = ((php_libxml_node_ptr *) newval_intern->ptr)->node;
+			if (php_dom_ns_is_fast(newval_node, php_dom_ns_is_html_magic_token) && dom_accept_body_name(newval_node->name)) {
+				/* 2. If the new value is the same as the body element, return. */
+				const xmlNode *current_body_element = dom_html_document_element_read_raw(docp, dom_accept_body_name);
+				if (current_body_element == newval_node) {
+					return SUCCESS;
+				}
+
+				/* 3. If the body element is not null, then replace the body element with the new value within the body element's parent and return. */
+				if (current_body_element != NULL) {
+					php_dom_adopt_node(newval_node, obj, docp);
+					xmlNodePtr old = xmlReplaceNode((xmlNodePtr) current_body_element, newval_node);
+					if (old != NULL && old->_private == NULL) {
+						php_libxml_node_free_resource(old);
+					}
+					return SUCCESS;
+				}
+
+				/* 4. If there is no document element, throw a "HierarchyRequestError" DOMException. */
+				xmlNodePtr root = xmlDocGetRootElement(docp);
+				if (root == NULL) {
+					php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "A body can only be set if there is a document element", true);
+					return FAILURE;
+				}
+
+				/* 5. Append the new value to the document element. */
+				php_dom_adopt_node(newval_node, obj, docp);
+				xmlAddChild(root, newval_node);
+				return SUCCESS;
+			}
+		}
+	}
+
+	php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "The new body must either be a body or a frameset tag", true);
+	return FAILURE;
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

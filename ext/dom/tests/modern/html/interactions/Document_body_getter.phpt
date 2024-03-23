@@ -1,5 +1,5 @@
 --TEST--
-Test DOM\Document::$body
+Test DOM\Document::$body getter
 --EXTENSIONS--
 dom
 --FILE--
