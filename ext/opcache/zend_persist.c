@@ -903,10 +903,11 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			ce->default_static_members_table = zend_shared_memdup_free(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
 
 			/* Persist only static properties in this class.
-			 * Static properties from parent classes will be handled in class_copy_ctor */
-			i = (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) ? ce->parent->default_static_members_count : 0;
-			for (; i < ce->default_static_members_count; i++) {
-				zend_persist_zval(&ce->default_static_members_table[i]);
+			 * Static properties from parent classes will be handled in class_copy_ctor and are marked with IS_INDIRECT */
+			for (i = 0; i < ce->default_static_members_count; i++) {
+				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
+					zend_persist_zval(&ce->default_static_members_table[i]);
+				}
 			}
 			if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				if (ce->ce_flags & ZEND_ACC_LINKED) {
