@@ -1366,7 +1366,7 @@ invalid_encoding:
 	return FAILURE;
 }
 
-zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
+zend_result dom_html_document_element_read_helper(dom_object *obj, zval *retval, bool (*accept)(const xmlChar *))
 {
 	DOM_PROP_NODE(const xmlDoc *, docp, obj);
 
@@ -1378,8 +1378,7 @@ zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
 
 	xmlNodePtr cur = root->children;
 	while (cur != NULL) {
-		if (cur->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(cur, php_dom_ns_is_html_magic_token)
-			&& (xmlStrEqual(cur->name, BAD_CAST "body") || xmlStrEqual(cur->name, BAD_CAST "frameset"))) {
+		if (cur->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(cur, php_dom_ns_is_html_magic_token) && accept(cur->name)) {
 			php_dom_create_object(cur, retval, obj);
 			return SUCCESS;
 		}
@@ -1388,6 +1387,26 @@ zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
 
 	ZVAL_NULL(retval);
 	return SUCCESS;
+}
+
+static bool dom_accept_body_name(const xmlChar *name)
+{
+	return xmlStrEqual(name, BAD_CAST "body") || xmlStrEqual(name, BAD_CAST "frameset");
+}
+
+static bool dom_accept_head_name(const xmlChar *name)
+{
+	return xmlStrEqual(name, BAD_CAST "head");
+}
+
+zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
+{
+	return dom_html_document_element_read_helper(obj, retval, dom_accept_body_name);
+}
+
+zend_result dom_html_document_head_read(dom_object *obj, zval *retval)
+{
+	return dom_html_document_element_read_helper(obj, retval, dom_accept_head_name);
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

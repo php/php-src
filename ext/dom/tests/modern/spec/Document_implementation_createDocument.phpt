@@ -37,7 +37,7 @@ echo $dom->implementation->createDocument(null, "", $dtd)->saveXML(), "\n";
 ?>
 --EXPECT--
 --- (null, "") ---
-object(DOM\XMLDocument)#3 (30) {
+object(DOM\XMLDocument)#3 (31) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -69,6 +69,8 @@ object(DOM\XMLDocument)#3 (30) {
   ["childElementCount"]=>
   int(0)
   ["body"]=>
+  NULL
+  ["head"]=>
   NULL
   ["nodeType"]=>
   int(9)
