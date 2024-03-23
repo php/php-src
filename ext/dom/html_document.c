@@ -1342,12 +1342,8 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Typed property, can only be IS_STRING or IS_NULL. */
-	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING || Z_TYPE_P(newval) == IS_NULL);
-
-	if (Z_TYPE_P(newval) == IS_NULL) {
-		goto invalid_encoding;
-	}
+	/* Typed property, can only be IS_STRING. */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 
 	zend_string *str = Z_STR_P(newval);
 	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) ZSTR_VAL(str), ZSTR_LEN(str));
@@ -1356,14 +1352,11 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 		xmlFree(BAD_CAST docp->encoding);
 		docp->encoding = xmlStrdup((const xmlChar *) encoding_data->name);
 	} else {
-		goto invalid_encoding;
+		zend_value_error("Invalid document encoding");
+		return FAILURE;
 	}
 
 	return SUCCESS;
-
-invalid_encoding:
-	zend_value_error("Invalid document encoding");
-	return FAILURE;
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */
