@@ -247,10 +247,7 @@ static void php_session_track_init(void) /* {{{ */
 static zend_string *php_session_encode(void) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		if (!PS(serializer)) {
-			php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
-			return NULL;
-		}
+        ZEND_ASSERT(PS(serializer));
 		return PS(serializer)->encode();
 	} else {
 		php_error_docref(NULL, E_WARNING, "Cannot encode non-existent session");
@@ -268,10 +265,7 @@ static ZEND_COLD void php_session_cancel_decode(void)
 
 static zend_result php_session_decode(zend_string *data) /* {{{ */
 {
-	if (!PS(serializer)) {
-		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
-		return FAILURE;
-	}
+    ZEND_ASSERT(PS(serializer));
 	zend_result result = SUCCESS;
 	zend_try {
 		if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
