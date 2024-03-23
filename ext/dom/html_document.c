@@ -1366,4 +1366,28 @@ invalid_encoding:
 	return FAILURE;
 }
 
+zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(const xmlDoc *, docp, obj);
+
+	const xmlNode *root = xmlDocGetRootElement(docp);
+	if (root == NULL || !(php_dom_ns_is_fast(root, php_dom_ns_is_html_magic_token) && xmlStrEqual(root->name, BAD_CAST "html"))) {
+		ZVAL_NULL(retval);
+		return SUCCESS;
+	}
+
+	xmlNodePtr cur = root->children;
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(cur, php_dom_ns_is_html_magic_token)
+			&& (xmlStrEqual(cur->name, BAD_CAST "body") || xmlStrEqual(cur->name, BAD_CAST "frameset"))) {
+			php_dom_create_object(cur, retval, obj);
+			return SUCCESS;
+		}
+		cur = cur->next;
+	}
+
+	ZVAL_NULL(retval);
+	return SUCCESS;
+}
+
 #endif  /* HAVE_LIBXML && HAVE_DOM */
