@@ -23,10 +23,8 @@ runs:
           libffi-dev:i386 \
           libfreetype6-dev:i386 \
           libgmp-dev:i386 \
-          libgssapi-krb5-2:i386 \
           libicu-dev:i386 \
           libjpeg-dev:i386 \
-          libkrb5-dev:i386 \
           libonig-dev:i386 \
           libpng-dev:i386 \
           libpq-dev:i386 \

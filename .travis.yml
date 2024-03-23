@@ -19,7 +19,6 @@ addons:
       - libgmp-dev
       - libicu-dev
       - libjpeg-dev
-      - libkrb5-dev
       - libonig-dev
       - libpng-dev
       - libpq-dev
