@@ -1580,6 +1580,8 @@ namespace Dom
         public function replaceChildren(Node|string ...$nodes): void {}
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
+
+        public ?Element $body;
     }
 
     final class HTMLDocument extends Document
