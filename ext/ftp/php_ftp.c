@@ -99,15 +99,6 @@ static void ftp_object_destroy(zend_object *zobj) {
 
 PHP_MINIT_FUNCTION(ftp)
 {
-#if defined(HAVE_FTP_SSL) && !defined(LIBRESSL_VERSION_NUMBER)
-	SSL_library_init();
-	OpenSSL_add_all_ciphers();
-	OpenSSL_add_all_digests();
-	OpenSSL_add_all_algorithms();
-
-	SSL_load_error_strings();
-#endif
-
 	php_ftp_ce = register_class_FTP_Connection();
 	php_ftp_ce->create_object = ftp_object_create;
 
