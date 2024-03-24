@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fix potential memory leak in XPath evaluation results. (nielsdos)
   . Fix phpdoc for DOMDocument load methods. (VincentLanglet)
 
+- FPM
+  . Fix incorrect check in fpm_shm_free(). (nielsdos)
+
 - GD:
   . Fixed bug GH-12019 (add GDLIB_CFLAGS in feature tests). (Michael Orlitzky)
 
