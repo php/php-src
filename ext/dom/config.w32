@@ -9,7 +9,7 @@ if (PHP_DOM == "yes") {
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c \
 			xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c \
-			domexception.c parentnode.c processinginstruction.c \
+			domexception.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c \
 			node.c characterdata.c documenttype.c \
 			entity.c nodelist.c text.c comment.c \
@@ -17,6 +17,7 @@ if (PHP_DOM == "yes") {
 			notation.c xpath.c dom_iterators.c \
 			namednodemap.c xpath_callbacks.c", null, "-Iext/dom/lexbor");
 
+		ADD_SOURCES("ext/dom/parentnode", "tree.c css_selectors.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/ports/windows_nt/lexbor/core", "memory.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/core", "array_obj.c array.c avl.c bst.c diyfp.c conv.c dobject.c dtoa.c hash.c mem.c mraw.c print.c serialize.c shs.c str.c strtod.c", "dom");
 		ADD_SOURCES("ext/dom/lexbor/lexbor/dom", "interface.c", "dom");

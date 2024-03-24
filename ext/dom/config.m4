@@ -28,7 +28,8 @@ if test "$PHP_DOM" != "no"; then
       $LEXBOR_DIR/tag/tag.c"
     PHP_NEW_EXTENSION(dom, [php_dom.c attr.c document.c \
                             xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c \
-                            domexception.c parentnode.c \
+                            domexception.c \
+                            parentnode/tree.c parentnode/css_selectors.c \
                             processinginstruction.c cdatasection.c \
                             documentfragment.c domimplementation.c \
                             element.c node.c characterdata.c \
@@ -39,6 +40,7 @@ if test "$PHP_DOM" != "no"; then
                             namednodemap.c xpath_callbacks.c \
                             $LEXBOR_SOURCES],
                             $ext_shared,,$PHP_LEXBOR_CFLAGS)
+    PHP_ADD_BUILD_DIR($ext_builddir/parentnode)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/core)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/dom/interfaces)

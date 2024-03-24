@@ -72,12 +72,12 @@ try {
 --- Selector: p, img ---
 <p xmlns="http://www.w3.org/1999/xhtml">First p</p>
 <p xmlns="http://www.w3.org/1999/xhtml">Second p</p>
-<p xmlns="http://www.w3.org/1999/xhtml">Third p</p>
-<p xmlns="http://www.w3.org/1999/xhtml">Fourth p</p>
-<p xmlns="http://www.w3.org/1999/xhtml" class="bar">Fifth p</p>
 <img xmlns="http://www.w3.org/1999/xhtml" src="1.png" />
+<p xmlns="http://www.w3.org/1999/xhtml">Third p</p>
 <img xmlns="http://www.w3.org/1999/xhtml" src="2.png" />
 <img xmlns="http://www.w3.org/1999/xhtml" src="3.png" />
+<p xmlns="http://www.w3.org/1999/xhtml">Fourth p</p>
+<p xmlns="http://www.w3.org/1999/xhtml" class="bar">Fifth p</p>
 --- Selector: body p ---
 <p xmlns="http://www.w3.org/1999/xhtml">First p</p>
 <p xmlns="http://www.w3.org/1999/xhtml">Second p</p>
@@ -86,7 +86,6 @@ try {
 <p xmlns="http://www.w3.org/1999/xhtml" class="bar">Fifth p</p>
 --- Selector: body div p ---
 <p xmlns="http://www.w3.org/1999/xhtml">Third p</p>
-<p xmlns="http://www.w3.org/1999/xhtml">Fourth p</p>
 <p xmlns="http://www.w3.org/1999/xhtml">Fourth p</p>
 --- Selector: div > * ---
 <p xmlns="http://www.w3.org/1999/xhtml">Third p</p>

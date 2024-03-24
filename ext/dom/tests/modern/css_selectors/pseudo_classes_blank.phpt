@@ -13,11 +13,11 @@ XML);
 
 try {
     test_helper($dom, ':blank');
-} catch (Error $e) {
+} catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
 --- Selector: :blank ---
-DOM\Document::querySelectorAll(): Argument #1 ($selectors) :blank selector is not implemented because CSSWG has not yet decided its semantics (https://github.com/w3c/csswg-drafts/issues/1967)
+:blank selector is not implemented because CSSWG has not yet decided its semantics (https://github.com/w3c/csswg-drafts/issues/1967)

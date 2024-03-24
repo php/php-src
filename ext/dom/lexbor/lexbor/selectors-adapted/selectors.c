@@ -1,9 +1,9 @@
 /*
- * Copyright (C) 2021 Alexander Borisov
+ * Copyright (C) 2021-2024 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  * Adapted for PHP + libxml2 by: Niels Dossche <nielsdos@php.net>
- * Based on https://github.com/lexbor/lexbor/blob/795126188f8df25ed1f5fc8ed368bdd5110a8045/source/lexbor/selectors/selectors.c Lexbor 2.4.0
+ * Based on Lexbor 2.4.0 (upstream commit d190520f9be4a9076411c70319df7de8318d8241)
  */
 
 #include <libxml/xmlstring.h>
@@ -13,36 +13,14 @@
 #include <Zend/zend_API.h>
 #include <php.h>
 
-#include "ext/dom/namespace_compat.h"
 #include "lexbor/selectors-adapted/selectors.h"
+#include "ext/dom/namespace_compat.h"
+#include "ext/dom/domexception.h"
 
 #include <math.h>
 
-/* TODO: performance improvement idea: use more interned string comparisons when possible */
-
 /* Note: casting and then comparing is a bit faster on my i7-4790 */
 #define CMP_NODE_TYPE(node, ty) ((unsigned char) (node)->type == ty)
-
-/**
- * The following methods are adapters to ease the porting of the
- * lexbor selectors library to libxml2, and changing the underlying implementations without having to replace libxml calls.
- */
-
-/* Note: assumes a != b */
-static zend_always_inline bool lxb_selectors_adapted_cmp_nullable_string_a_neq_b(const char *a, const char *b)
-{
-	ZEND_ASSERT(a != b);
-	if (a == NULL || b == NULL) {
-		return false; /* We know that they can't be both NULL because a != b. */
-	}
-	return strcmp(a, b) == 0;
-}
-
-static zend_always_inline bool lxb_selectors_adapted_cmp_ns(const xmlNode *a, const xmlNode *b)
-{
-	/* Namespace URIs are not interned, hence a->href != b->href. */
-	return a->ns == b->ns || (a->ns != NULL && b->ns != NULL && lxb_selectors_adapted_cmp_nullable_string_a_neq_b((const char *) a->ns->href, (const char *) b->ns->href));
-}
 
 static zend_always_inline bool lxb_selectors_adapted_is_matchable_child(const xmlNode *node)
 {
@@ -54,14 +32,15 @@ static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_literal(cons
 	return strcmp((const char *) node->name, name) == 0;
 }
 
+static zend_always_inline bool lxb_selectors_adapted_cmp_ns(const xmlNode *a, const xmlNode *b)
+{
+	/* Namespace URIs are not interned, hence a->href != b->href. */
+	return a->ns == b->ns || (a->ns != NULL && b->ns != NULL && xmlStrEqual(a->ns->href, b->ns->href));
+}
+
 static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_id(const xmlNode *node, const lxb_selectors_adapted_id *id)
 {
 	return node->name == id->name || strcmp((const char *) node->name, (const char *) id->name) == 0;
-}
-
-static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_node(const xmlNode *node, const xmlNode *other)
-{
-	return node->name == other->name || strcmp((const char *) node->name, (const char *) other->name) == 0;
 }
 
 static zend_always_inline const xmlAttr *lxb_selectors_adapted_attr(const xmlNode *node, const lxb_char_t *name)
@@ -110,55 +89,97 @@ static zend_always_inline lexbor_str_t lxb_selectors_adapted_attr_value_empty(co
 	return ret;
 }
 
-/**
- * The following code is adapted from Lexbor.
- */
+static void lxb_selectors_adapted_set_entry_id_ex(lxb_selectors_entry_t *entry, const lxb_css_selector_t *selector, const xmlNode *node)
+{
+	if (node->doc != NULL && node->doc->dict != NULL) {
+		const xmlChar *interned = xmlDictExists(node->doc->dict, selector->name.data, selector->name.length);
+		if (interned != NULL) {
+			entry->id.name = interned;
+		} else {
+			entry->id.name = selector->name.data;
+		}
+	} else {
+		entry->id.name = selector->name.data;
+	}
+}
 
-static lxb_selectors_entry_t *
-lxb_selectors_find_by_selector(lxb_selectors_t *selectors, const xmlNode *root,
-							   lxb_selectors_entry_t *entry,
-							   lxb_css_selector_t *selector,
-							   lxb_selectors_cb_f cb, void *ctx);
-
-static lxb_selectors_entry_child_t *
-lxb_selectors_next(lxb_selectors_t *selectors, const xmlNode *root,
-				   lxb_selectors_entry_child_t *child,
-				   lxb_css_selector_list_t *list,
-				   lxb_selectors_cb_f cb, void *ctx);
-
-static lxb_selectors_entry_child_t *
-lxb_selectors_current(lxb_selectors_t *selectors, const xmlNode *root,
-					  lxb_selectors_entry_child_t *child,
-					  lxb_css_selector_list_t *list,
-					  lxb_selectors_cb_f cb, void *ctx);
-
-static lxb_selectors_entry_t *
-lxb_selectors_next_by_selector(lxb_selectors_t *selectors, const xmlNode *root,
-							   lxb_selectors_entry_t *entry,
-							   lxb_css_selector_t *selector,
-							   lxb_selectors_cb_f cb, void *ctx);
+static zend_always_inline void lxb_selectors_adapted_set_entry_id(lxb_selectors_entry_t *entry, const lxb_css_selector_t *selector, const xmlNode *node)
+{
+	if (entry->id.name == NULL) {
+		lxb_selectors_adapted_set_entry_id_ex(entry, selector, node);
+	}
+}
 
 static lxb_status_t
-lxb_selectors_find_by(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					  const xmlNode *root, const xmlNode *node,
-					  lxb_css_selector_t *selector, lxb_selectors_cb_f cb, void *ctx);
+lxb_selectors_state_tree(lxb_selectors_t *selectors, const xmlNode *root,
+                         const lxb_css_selector_list_t *list);
+
+static lxb_status_t
+lxb_selectors_state_run(lxb_selectors_t *selectors, const xmlNode *node,
+                        const lxb_css_selector_list_t *list);
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_find(lxb_selectors_t *selectors,
+                         lxb_selectors_entry_t *entry);
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_find_check(lxb_selectors_t *selectors, const xmlNode *node,
+                               const lxb_css_selector_t *selector,
+                               lxb_selectors_entry_t *entry);
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_pseudo_class_function(lxb_selectors_t *selectors,
+                                          lxb_selectors_entry_t *entry);
+
+static const xmlNode *
+lxb_selectors_next_node(lxb_selectors_nested_t *main);
+
+static const xmlNode *
+lxb_selectors_state_has_relative(const xmlNode *node,
+                                 const lxb_css_selector_t *selector);
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_after_find_has(lxb_selectors_t *selectors,
+                                   lxb_selectors_entry_t *entry);
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_after_find(lxb_selectors_t *selectors,
+                               lxb_selectors_entry_t *entry);
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_after_nth_child(lxb_selectors_t *selectors,
+                                    lxb_selectors_entry_t *entry);
 
 static bool
 lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					lxb_css_selector_t *selector, const xmlNode *node);
+                    const lxb_css_selector_t *selector, const xmlNode *node);
+
+static bool
+lxb_selectors_match_element(const lxb_css_selector_t *selector,
+                            const xmlNode *node, lxb_selectors_entry_t *entry);
+
+static bool
+lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node);
 
 static bool
 lxb_selectors_match_class(const lexbor_str_t *target, const lexbor_str_t *src,
-						  bool quirks);
+                          bool quirks);
 
 static bool
-lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node);
+lxb_selectors_match_attribute(const lxb_css_selector_t *selector,
+                              const xmlNode *node, lxb_selectors_entry_t *entry);
 
 static bool
-lxb_selectors_pseudo_class_function(lxb_selectors_t *selectors,
-									lxb_css_selector_t *selector,
-									const xmlNode *node,
-									lxb_selectors_entry_t *entry);
+lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
+                           const xmlNode *node);
+
+static bool
+lxb_selectors_pseudo_class_function(const lxb_css_selector_t *selector,
+                                    const xmlNode *node);
+
+static bool
+lxb_selectors_pseudo_element(const lxb_css_selector_t *selector,
+                             const xmlNode *node);
 
 static bool
 lxb_selectors_pseudo_class_disabled(const xmlNode *node);
@@ -178,639 +199,977 @@ lxb_selectors_pseudo_class_last_of_type(const xmlNode *node);
 static bool
 lxb_selectors_pseudo_class_read_write(const xmlNode *node);
 
+static bool
+lxb_selectors_anb_calc(lxb_css_selector_anb_of_t *anb, size_t index);
+
 static lxb_status_t
-lxb_selectors_first_match(const xmlNode *node,
-						  lxb_css_selector_specificity_t spec, void *ctx);
+lxb_selectors_cb_ok(const xmlNode *node,
+                    lxb_css_selector_specificity_t spec, void *ctx);
+
+static lxb_status_t
+lxb_selectors_cb_not(const xmlNode *node,
+                     lxb_css_selector_specificity_t spec, void *ctx);
 
 
 lxb_status_t
 lxb_selectors_init(lxb_selectors_t *selectors)
 {
-	lxb_status_t status;
+    lxb_status_t status;
 
-	selectors->objs = lexbor_dobject_create();
-	status = lexbor_dobject_init(selectors->objs,
-								 128, sizeof(lxb_selectors_entry_t));
-	if (status != LXB_STATUS_OK) {
-		return status;
-	}
+    selectors->objs = lexbor_dobject_create();
+    status = lexbor_dobject_init(selectors->objs,
+                                 128, sizeof(lxb_selectors_entry_t));
+    if (status != LXB_STATUS_OK) {
+        return status;
+    }
 
-	selectors->chld = lexbor_dobject_create();
-	status = lexbor_dobject_init(selectors->chld,
-								 32, sizeof(lxb_selectors_entry_child_t));
-	if (status != LXB_STATUS_OK) {
-		return status;
-	}
+    selectors->nested = lexbor_dobject_create();
+    status = lexbor_dobject_init(selectors->nested,
+                                 64, sizeof(lxb_selectors_nested_t));
+    if (status != LXB_STATUS_OK) {
+        return status;
+    }
 
-	return LXB_STATUS_OK;
+    selectors->options = LXB_SELECTORS_OPT_DEFAULT;
+
+    return LXB_STATUS_OK;
 }
 
 void
 lxb_selectors_clean(lxb_selectors_t *selectors)
 {
-	lexbor_dobject_clean(selectors->objs);
-	lexbor_dobject_clean(selectors->chld);
+    lexbor_dobject_clean(selectors->objs);
+    lexbor_dobject_clean(selectors->nested);
 }
 
 void
 lxb_selectors_destroy(lxb_selectors_t *selectors)
 {
-	selectors->objs = lexbor_dobject_destroy(selectors->objs, true);
-	selectors->chld = lexbor_dobject_destroy(selectors->chld, true);
-}
-
-
-lxb_inline const xmlNode *
-lxb_selectors_descendant(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-						 lxb_css_selector_t *selector, const xmlNode *root,
-						 const xmlNode *node)
-{
-	do {
-		if (lxb_selectors_adapted_is_matchable_child(node) &&
-			lxb_selectors_match(selectors, entry, selector, node))
-		{
-			return node;
-		}
-
-		if (node->children != NULL) {
-			node = node->children;
-		}
-		else {
-			while (node != root && node->next == NULL) {
-				node = node->parent;
-			}
-
-			if (node == root) {
-				return NULL;
-			}
-
-			node = node->next;
-		}
-	}
-	while (true);
+    selectors->objs = lexbor_dobject_destroy(selectors->objs, true);
+    selectors->nested = lexbor_dobject_destroy(selectors->nested, true);
 }
 
 lxb_inline const xmlNode *
-lxb_selectors_descendant_next(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-							  lxb_css_selector_t *selector, const xmlNode *root,
-							  const xmlNode *node)
+lxb_selectors_descendant(lxb_selectors_t *selectors,
+                         lxb_selectors_entry_t *entry,
+                         const lxb_css_selector_t *selector,
+                         const xmlNode *node)
 {
-	do {
-		if (node->children != NULL) {
-			node = node->children;
-		}
-		else {
-			while (node != root && node->next == NULL) {
-				node = node->parent;
-			}
+    node = node->parent;
 
-			if (node == root) {
-				return NULL;
-			}
+    while (node != NULL) {
+        if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE)
+            && lxb_selectors_match(selectors, entry, selector, node))
+        {
+            return node;
+        }
 
-			node = node->next;
-		}
+        node = node->parent;
+    }
 
-		if (lxb_selectors_adapted_is_matchable_child(node) &&
-			lxb_selectors_match(selectors, entry, selector, node))
-		{
-			return node;
-		}
-
-		/* While this helps, this doesn't seem worth it too much to take the risk of a penalty. */
-#if 0
-		if (node->next != NULL) {
-			__builtin_prefetch(&node->next->parent);
-		}
-#endif
-	}
-	while (true);
+    return NULL;
 }
 
 lxb_inline const xmlNode *
 lxb_selectors_close(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					lxb_css_selector_t *selector, const xmlNode *node)
+                    const lxb_css_selector_t *selector, const xmlNode *node)
 {
-	if (lxb_selectors_adapted_is_matchable_child(node) && lxb_selectors_match(selectors, entry, selector, node)) {
-		return node;
-	}
+    if (lxb_selectors_match(selectors, entry, selector, node)) {
+        return node;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 lxb_inline const xmlNode *
 lxb_selectors_child(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					lxb_css_selector_t *selector, const xmlNode *root,
-					const xmlNode *node)
+                    const lxb_css_selector_t *selector, const xmlNode *root)
 {
-	node = root->children;
+    root = root->parent;
 
-	while (node != NULL) {
-		if (lxb_selectors_adapted_is_matchable_child(node) &&
-			lxb_selectors_match(selectors, entry, selector, node))
-		{
-			return node;
-		}
+    if (root != NULL && CMP_NODE_TYPE(root, XML_ELEMENT_NODE)
+        && lxb_selectors_match(selectors, entry, selector, root))
+    {
+        return root;
+    }
 
-		node = node->next;
-	}
-
-	return NULL;
-}
-
-lxb_inline const xmlNode *
-lxb_selectors_child_next(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-						 lxb_css_selector_t *selector, const xmlNode *root,
-						 const xmlNode *node)
-{
-	node = node->next;
-
-	while (node != NULL) {
-		if (lxb_selectors_adapted_is_matchable_child(node) &&
-			lxb_selectors_match(selectors, entry, selector, node))
-		{
-			return node;
-		}
-
-		node = node->next;
-	}
-
-	return NULL;
+    return NULL;
 }
 
 lxb_inline const xmlNode *
 lxb_selectors_sibling(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					  lxb_css_selector_t *selector, const xmlNode *node)
+                      const lxb_css_selector_t *selector, const xmlNode *node)
 {
-	node = node->next;
+    node = node->prev;
 
-	while (node != NULL) {
-		if (lxb_selectors_adapted_is_matchable_child(node)) {
-			if (lxb_selectors_match(selectors, entry, selector, node)) {
-				return node;
-			}
+    while (node != NULL) {
+        if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+            if (lxb_selectors_match(selectors, entry, selector, node)) {
+                return node;
+            }
 
-			return NULL;
-		}
+            return NULL;
+        }
 
-		node = node->next;
-	}
+        node = node->prev;
+    }
 
-	return NULL;
+    return NULL;
 }
 
 lxb_inline const xmlNode *
 lxb_selectors_following(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-						lxb_css_selector_t *selector, const xmlNode *node)
+                        const lxb_css_selector_t *selector, const xmlNode *node)
 {
-	node = node->next;
+    node = node->prev;
 
-	while (node != NULL) {
-		if (lxb_selectors_adapted_is_matchable_child(node) &&
-			lxb_selectors_match(selectors, entry, selector, node))
-		{
-			return node;
-		}
+    while (node != NULL) {
+        if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE) &&
+            lxb_selectors_match(selectors, entry, selector, node))
+        {
+            return node;
+        }
 
-		node = node->next;
-	}
+        node = node->prev;
+    }
 
-	return NULL;
-}
-
-lxb_inline bool
-lxb_selectors_anb_calc(lxb_css_selector_anb_of_t *anb, size_t index)
-{
-	double num;
-
-	if (anb->anb.a == 0) {
-		if (anb->anb.b >= 0 && (size_t) anb->anb.b == index) {
-			return true;
-		}
-	}
-	else {
-		num = ((double) index - (double) anb->anb.b) / (double) anb->anb.a;
-
-		if (num >= 0.0f && (num - trunc(num)) == 0.0f) {
-			return true;
-		}
-	}
-
-	return false;
+    return NULL;
 }
 
 lxb_status_t
 lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
-				   lxb_css_selector_list_t *list, lxb_selectors_cb_f cb, void *ctx)
+                   const lxb_css_selector_list_t *list,
+                   lxb_selectors_cb_f cb, void *ctx)
 {
-	lxb_selectors_entry_t *child;
+    lxb_selectors_entry_t *entry;
+    lxb_selectors_nested_t nested;
 
-	while (list != NULL) {
-		child = lxb_selectors_next_by_selector(selectors, root, NULL,
-											   list->first, cb, ctx);
-		if (child == NULL) {
-			return LXB_STATUS_ERROR;
-		}
+    entry = lexbor_dobject_calloc(selectors->objs);
 
-		list = list->next;
-	}
+    entry->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+    entry->selector = list->last;
 
-	lxb_selectors_clean(selectors);
+    nested.parent = NULL;
+    nested.entry = entry;
+    nested.cb = cb;
+    nested.ctx = ctx;
 
-	return LXB_STATUS_OK;
+    selectors->current = &nested;
+    selectors->status = LXB_STATUS_OK;
+
+    return lxb_selectors_state_tree(selectors, root, list);
 }
 
-static lxb_selectors_entry_t *
-lxb_selectors_find_by_selector(lxb_selectors_t *selectors, const xmlNode *root,
-							   lxb_selectors_entry_t *entry,
-							   lxb_css_selector_t *selector,
-							   lxb_selectors_cb_f cb, void *ctx)
+lxb_status_t
+lxb_selectors_match_node(lxb_selectors_t *selectors, const xmlNode *node,
+                         const lxb_css_selector_list_t *list,
+                         lxb_selectors_cb_f cb, void *ctx)
 {
-	lxb_status_t status;
-	const xmlNode *node = root, *base = root;
+    lxb_status_t status;
+    lxb_selectors_entry_t *entry;
+    lxb_selectors_nested_t nested;
 
-	if (entry == NULL) {
-		entry = lexbor_dobject_calloc(selectors->objs);
-		entry->selector = selector;
-	}
+    if (!CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+        return LXB_STATUS_OK;
+    }
 
-	switch (selector->combinator) {
-		case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
-			node = lxb_selectors_descendant(selectors, entry, selector,
-											base, node);
-			break;
+    entry = lexbor_dobject_calloc(selectors->objs);
 
-		case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
-			node = lxb_selectors_close(selectors, entry, selector, node);
-			break;
+    entry->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+    entry->selector = list->last;
 
-		case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
-			node = lxb_selectors_child(selectors, entry, selector, base, node);
-			break;
+    nested.parent = NULL;
+    nested.entry = entry;
+    nested.cb = cb;
+    nested.ctx = ctx;
 
-		case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
-			node = lxb_selectors_sibling(selectors, entry, selector, base);
-			break;
+    selectors->current = &nested;
+    selectors->status = LXB_STATUS_OK;
 
-		case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
-			node = lxb_selectors_following(selectors, entry, selector, node);
-			break;
+    status = lxb_selectors_state_run(selectors, node, list);
 
-		case LXB_CSS_SELECTOR_COMBINATOR_CELL:
-		default:
-			return NULL;
-	}
+    lxb_selectors_clean(selectors);
 
-	status = lxb_selectors_find_by(selectors, entry, root, node, selector,
-								   cb, ctx);
-	if (status != LXB_STATUS_OK) {
-		return NULL;
-	}
-
-	return entry;
-}
-
-static lxb_selectors_entry_child_t *
-lxb_selectors_next(lxb_selectors_t *selectors, const xmlNode *root,
-				   lxb_selectors_entry_child_t *child,
-				   lxb_css_selector_list_t *list,
-				   lxb_selectors_cb_f cb, void *ctx)
-{
-	lxb_selectors_entry_child_t *chld_root = child;
-
-	if (list == NULL) {
-		return NULL;
-	}
-
-	if (child == NULL) {
-		child = lexbor_dobject_calloc(selectors->chld);
-		chld_root = child;
-	}
-
-	do {
-		child->entry = lxb_selectors_next_by_selector(selectors, root,
-													  child->entry, list->first,
-													  cb, ctx);
-		if (child->entry == NULL) {
-			return NULL;
-		}
-
-		if (list->next == NULL) {
-			return chld_root;
-		}
-
-		if (child->next == NULL) {
-			child->next = lexbor_dobject_calloc(selectors->chld);
-		}
-
-		child = child->next;
-		list = list->next;
-	}
-	while (true);
-
-	return chld_root;
-}
-
-static lxb_selectors_entry_child_t *
-lxb_selectors_current(lxb_selectors_t *selectors, const xmlNode *root,
-					  lxb_selectors_entry_child_t *child,
-					  lxb_css_selector_list_t *list,
-					  lxb_selectors_cb_f cb, void *ctx)
-{
-	lxb_selectors_entry_child_t *chld_root = child;
-
-	if (list == NULL) {
-		return NULL;
-	}
-
-	if (child == NULL) {
-		child = lexbor_dobject_calloc(selectors->chld);
-		chld_root = child;
-	}
-
-	do {
-		child->entry = lxb_selectors_find_by_selector(selectors, root,
-													  child->entry, list->first,
-													  cb, ctx);
-		if (child->entry == NULL) {
-			return NULL;
-		}
-
-		if (list->next == NULL) {
-			return chld_root;
-		}
-
-		if (child->next == NULL) {
-			child->next = lexbor_dobject_calloc(selectors->chld);
-		}
-
-		child = child->next;
-		list = list->next;
-	}
-	while (true);
-
-	return chld_root;
-}
-
-static lxb_selectors_entry_t *
-lxb_selectors_next_by_selector(lxb_selectors_t *selectors, const xmlNode *root,
-							   lxb_selectors_entry_t *entry,
-							   lxb_css_selector_t *selector,
-							   lxb_selectors_cb_f cb, void *ctx)
-{
-	lxb_status_t status;
-	const xmlNode *node = root, *base = root;
-
-	if (entry == NULL) {
-		entry = lexbor_dobject_calloc(selectors->objs);
-		entry->selector = selector;
-	}
-
-	switch (selector->combinator) {
-		case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
-			node = lxb_selectors_descendant_next(selectors, entry, selector,
-												 base, node);
-			break;
-
-		case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
-			node = lxb_selectors_close(selectors, entry, selector, node);
-			break;
-
-		case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
-			node = lxb_selectors_child(selectors, entry, selector, base, node);
-			break;
-
-		case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
-			node = lxb_selectors_sibling(selectors, entry, selector, base);
-			break;
-
-		case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
-			node = lxb_selectors_following(selectors, entry, selector, node);
-			break;
-
-		case LXB_CSS_SELECTOR_COMBINATOR_CELL:
-		default:
-			selectors->status = LXB_STATUS_ERROR;
-			return NULL;
-	}
-
-	status = lxb_selectors_find_by(selectors, entry, root, node, selector,
-								 cb, ctx);
-	if (status != LXB_STATUS_OK) {
-		return NULL;
-	}
-
-	return entry;
+    return status;
 }
 
 static lxb_status_t
-lxb_selectors_find_by(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					  const xmlNode *root, const xmlNode *node,
-					  lxb_css_selector_t *selector, lxb_selectors_cb_f cb, void *ctx)
+lxb_selectors_state_tree(lxb_selectors_t *selectors, const xmlNode *root,
+                         const lxb_css_selector_list_t *list)
 {
-	lxb_status_t status;
-	lxb_selectors_entry_t *next;
-	const xmlNode *base = root;
+    lxb_status_t status;
+    const xmlNode *node;
 
-	do {
-		if (node == NULL) {
-			if (entry->prev == NULL) {
-				return LXB_STATUS_OK;
-			}
+    if (selectors->options & LXB_SELECTORS_OPT_MATCH_ROOT) {
+        node = root;
 
-			do {
-				entry = entry->prev;
-				selector = entry->selector;
-			}
-			while (entry->prev != NULL
-				   && selector->combinator == LXB_CSS_SELECTOR_COMBINATOR_CLOSE);
+        if (CMP_NODE_TYPE(node, XML_DOCUMENT_NODE) || CMP_NODE_TYPE(node, XML_HTML_DOCUMENT_NODE)) {
+            node = root->children;
+        }
+    }
+    else {
+        node = root->children;
+    }
 
-			if (selector->combinator == LXB_CSS_SELECTOR_COMBINATOR_CLOSE) {
-				return LXB_STATUS_OK;
-			}
+    if (node == NULL) {
+        goto out;
+    }
 
-			node = entry->node;
-			base = (entry->prev != NULL) ? entry->prev->node : root;
+    do {
+        if (!CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+            goto next;
+        }
 
-			goto next;
-		}
+        status = lxb_selectors_state_run(selectors, node, list);
+        if (status != LXB_STATUS_OK) {
+            if (status == LXB_STATUS_STOP) {
+                break;
+            }
 
-		if (selector->next == NULL) {
-			status = cb(node, selector->list->specificity, ctx);
-			if (status != LXB_STATUS_OK) {
-				if (status == LXB_STATUS_STOP) {
-					return LXB_STATUS_OK;
-				}
+            lxb_selectors_clean(selectors);
 
-				return status;
-			}
+            return status;
+        }
 
-			if (selector->combinator == LXB_CSS_SELECTOR_COMBINATOR_CLOSE) {
-				while (entry->prev != NULL
-					   && entry->selector->combinator == LXB_CSS_SELECTOR_COMBINATOR_CLOSE)
-				{
-					entry = entry->prev;
-				}
+        if (node->children != NULL) {
+            node = node->children;
+        }
+        else {
 
-				selector = entry->selector;
-				node = entry->node;
-			}
+        next:
 
-			base = (entry->prev != NULL) ? entry->prev->node : root;
+            while (node != root && node->next == NULL) {
+                node = node->parent;
+            }
 
-			goto next;
-		}
+            if (node == root) {
+                break;
+            }
 
-		base = node;
-		entry->node = node;
+            node = node->next;
+        }
+    }
+    while (true);
 
-		if (entry->next == NULL) {
-			next = lexbor_dobject_calloc(selectors->objs);
-			next->selector = selector->next;
-			next->prev = entry;
-			entry->next = next;
-			entry = next;
-		}
-		else {
-			entry = entry->next;
-		}
+out:
+    lxb_selectors_clean(selectors);
 
-		selector = entry->selector;
-
-		switch (selector->combinator) {
-			case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
-				node = lxb_selectors_descendant_next(selectors, entry, selector,
-													 base, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
-				node = lxb_selectors_close(selectors, entry, selector, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
-				node = lxb_selectors_child(selectors, entry, selector,
-										   base, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
-				node = lxb_selectors_sibling(selectors, entry, selector, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
-				node = lxb_selectors_following(selectors, entry,
-											   selector, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_CELL:
-			default:
-				return LXB_STATUS_ERROR;
-		}
-
-		continue;
-
-	next:
-
-		switch (selector->combinator) {
-			case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
-				node = lxb_selectors_descendant_next(selectors, entry, selector,
-													 base, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
-				node = lxb_selectors_close(selectors, entry, selector, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
-				node = lxb_selectors_child_next(selectors, entry, selector,
-												base, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
-				node = NULL;
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
-				node = lxb_selectors_following(selectors, entry,
-											   selector, node);
-				break;
-
-			case LXB_CSS_SELECTOR_COMBINATOR_CELL:
-			default:
-				return LXB_STATUS_ERROR;
-		}
-	}
-	while (true);
-
-	return LXB_STATUS_OK;
+    return LXB_STATUS_OK;
 }
 
-static void lxb_selectors_adapted_set_entry_id_ex(lxb_selectors_entry_t *entry, lxb_css_selector_t *selector, const xmlNode *node)
+static lxb_status_t
+lxb_selectors_state_run(lxb_selectors_t *selectors, const xmlNode *node,
+                        const lxb_css_selector_list_t *list)
 {
-	if (node->doc != NULL && node->doc->dict != NULL) {
-		const xmlChar *interned = xmlDictExists(node->doc->dict, selector->name.data, selector->name.length);
-		if (interned != NULL) {
-			entry->id.name = interned;
-		} else {
-			entry->id.name = selector->name.data;
-		}
-	} else {
-		entry->id.name = selector->name.data;
-	}
+    lxb_selectors_entry_t *entry;
+
+    entry = selectors->current->entry;
+
+    entry->node = node;
+    selectors->state = lxb_selectors_state_find;
+    selectors->first = entry;
+
+again:
+
+    do {
+        entry = selectors->state(selectors, entry);
+    }
+    while (entry != NULL);
+
+    if (selectors->current->parent != NULL
+        && selectors->status == LXB_STATUS_OK)
+    {
+        entry = selectors->current->entry;
+        selectors->state = selectors->current->return_state;
+
+        goto again;
+    }
+
+    return selectors->status;
 }
 
-static zend_always_inline void lxb_selectors_adapted_set_entry_id(lxb_selectors_entry_t *entry, lxb_css_selector_t *selector, const xmlNode *node)
+static lxb_selectors_entry_t *
+lxb_selectors_state_find(lxb_selectors_t *selectors,
+                         lxb_selectors_entry_t *entry)
 {
-	if (entry->id.name == NULL) {
-		lxb_selectors_adapted_set_entry_id_ex(entry, selector, node);
-	}
+    const xmlNode *node;
+    lxb_selectors_entry_t *next;
+    const lxb_css_selector_t *selector;
+    const lxb_css_selector_anb_of_t *anb;
+    const lxb_css_selector_pseudo_t *pseudo;
+
+    selector = entry->selector;
+
+    if (selector->type == LXB_CSS_SELECTOR_TYPE_PSEUDO_CLASS_FUNCTION) {
+        pseudo = &selector->u.pseudo;
+
+        /* Optimizing. */
+
+        switch (pseudo->type) {
+            case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_CHILD:
+            case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_CHILD:
+                anb = pseudo->data;
+
+                if (anb->of != NULL) {
+                    break;
+                }
+
+                goto godoit;
+
+            case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_OF_TYPE:
+            case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_OF_TYPE:
+                goto godoit;
+
+            default:
+                break;
+        }
+
+        if (entry->nested == NULL) {
+            next = lexbor_dobject_calloc(selectors->objs);
+
+            next->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+
+            entry->nested = lexbor_dobject_calloc(selectors->nested);
+
+            entry->nested->entry = next;
+            entry->nested->parent = selectors->current;
+        }
+
+        selectors->state = lxb_selectors_state_pseudo_class_function;
+        selectors->current->last = entry;
+        selectors->current = entry->nested;
+
+        next = entry->nested->entry;
+        next->node = entry->node;
+
+        return next;
+    }
+
+godoit:
+
+    switch (entry->combinator) {
+        case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
+            node = lxb_selectors_descendant(selectors, entry,
+                                            selector, entry->node);
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
+            node = lxb_selectors_close(selectors, entry,
+                                       selector, entry->node);
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
+            node = lxb_selectors_child(selectors, entry,
+                                       selector, entry->node);
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
+            node = lxb_selectors_sibling(selectors, entry,
+                                         selector, entry->node);
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
+            node = lxb_selectors_following(selectors, entry,
+                                           selector, entry->node);
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CELL:
+        default:
+            selectors->status = LXB_STATUS_ERROR;
+            return NULL;
+    }
+
+    return lxb_selectors_state_find_check(selectors, node, selector, entry);
+}
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_find_check(lxb_selectors_t *selectors, const xmlNode *node,
+                               const lxb_css_selector_t *selector,
+                               lxb_selectors_entry_t *entry)
+{
+    lxb_selectors_entry_t *next;
+    lxb_selectors_nested_t *current;
+
+    if (node == NULL) {
+
+    try_next:
+
+        if (entry->next == NULL) {
+
+        try_next_list:
+
+            if (selector->list->next == NULL) {
+                return NULL;
+            }
+
+            /*
+             * Try the following selectors from the selector list.
+             */
+
+            if (entry->following != NULL) {
+                entry->following->node = entry->node;
+
+                if (selectors->current->parent == NULL) {
+                    selectors->first = entry->following;
+                }
+
+                return entry->following;
+            }
+
+            next = lexbor_dobject_calloc(selectors->objs);
+
+            next->combinator = LXB_CSS_SELECTOR_COMBINATOR_CLOSE;
+            next->selector = selector->list->next->last;
+            next->node = entry->node;
+
+            entry->following = next;
+
+            if (selectors->current->parent == NULL) {
+                selectors->first = next;
+            }
+
+            return next;
+        }
+
+        do {
+            entry = entry->next;
+
+            while (entry->combinator == LXB_CSS_SELECTOR_COMBINATOR_CLOSE) {
+                if (entry->next == NULL) {
+                    selector = entry->selector;
+                    goto try_next;
+                }
+
+                entry = entry->next;
+            }
+
+            switch (entry->combinator) {
+                case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
+                    node = entry->node->parent;
+
+                    if (node == NULL
+                        || !CMP_NODE_TYPE(node, XML_ELEMENT_NODE))
+                    {
+                        node = NULL;
+                    }
+
+                    break;
+
+                case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
+                    node = entry->node->prev;
+                    break;
+
+                case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
+                case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
+                case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
+                    node = NULL;
+                    break;
+
+                case LXB_CSS_SELECTOR_COMBINATOR_CELL:
+                default:
+                    selectors->status = LXB_STATUS_ERROR;
+                    return NULL;
+            }
+        }
+        while (node == NULL);
+
+        entry->node = node;
+
+        return entry;
+    }
+
+    if (selector->prev == NULL) {
+        current = selectors->current;
+
+        selectors->status = current->cb(current->entry->node,
+                                        selector->list->specificity,
+                                        current->ctx);
+
+        if ((selectors->options & LXB_SELECTORS_OPT_MATCH_FIRST) == 0
+            && current->parent == NULL)
+        {
+            if (selectors->status == LXB_STATUS_OK) {
+                entry = selectors->first;
+                goto try_next_list;
+            }
+        }
+
+        return NULL;
+    }
+
+    if (entry->prev == NULL) {
+        next = lexbor_dobject_calloc(selectors->objs);
+
+        next->combinator = selector->combinator;
+        next->selector = selector->prev;
+        next->node = node;
+
+        next->next = entry;
+        entry->prev = next;
+
+        return next;
+    }
+
+    entry->prev->node = node;
+
+    return entry->prev;
+}
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_pseudo_class_function(lxb_selectors_t *selectors,
+                                          lxb_selectors_entry_t *entry)
+{
+    const xmlNode *node, *base;
+    lxb_selectors_nested_t *current;
+    const lxb_css_selector_list_t *list;
+    lxb_css_selector_anb_of_t *anb;
+    const lxb_css_selector_pseudo_t *pseudo;
+
+    current = selectors->current;
+
+    base = lxb_selectors_next_node(current);
+    if (base == NULL) {
+        goto not_found;
+    }
+
+    pseudo = &current->parent->last->selector->u.pseudo;
+
+    switch (pseudo->type) {
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_HAS:
+            list = (lxb_css_selector_list_t *) pseudo->data;
+            node = lxb_selectors_state_has_relative(base, list->first);
+
+            if (node == NULL) {
+                selectors->current = selectors->current->parent;
+                entry = selectors->current->last;
+
+                selectors->state = lxb_selectors_state_find;
+
+                return lxb_selectors_state_find_check(selectors, NULL,
+                                                      entry->selector, entry);
+            }
+
+            current->root = base;
+
+            current->entry->selector = list->last;
+            current->entry->node = node;
+            current->return_state = lxb_selectors_state_after_find_has;
+            current->cb = lxb_selectors_cb_ok;
+            current->ctx = &current->found;
+            current->found = false;
+
+            selectors->state = lxb_selectors_state_find;
+
+            return entry;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_CURRENT:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_IS:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_WHERE:
+            current->entry->selector = ((lxb_css_selector_list_t *) pseudo->data)->last;
+            current->entry->node = base;
+            current->return_state = lxb_selectors_state_after_find;
+            current->cb = lxb_selectors_cb_ok;
+            current->ctx = &current->found;
+            current->found = false;
+
+            selectors->state = lxb_selectors_state_find;
+
+            return entry;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NOT:
+            current->entry->selector = ((lxb_css_selector_list_t *) pseudo->data)->last;
+            current->entry->node = base;
+            current->return_state = lxb_selectors_state_after_find;
+            current->cb = lxb_selectors_cb_not;
+            current->ctx = &current->found;
+            current->found = true;
+
+            selectors->state = lxb_selectors_state_find;
+
+            return entry;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_CHILD:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_CHILD:
+            anb = pseudo->data;
+
+            current->entry->selector = anb->of->last;
+            current->entry->node = base;
+            current->return_state = lxb_selectors_state_after_nth_child;
+            current->cb = lxb_selectors_cb_ok;
+            current->ctx = &current->found;
+            current->root = base;
+            current->index = 0;
+            current->found = false;
+
+            selectors->state = lxb_selectors_state_find;
+
+            return entry;
+
+        /*
+         * This one can only happen if the user has somehow messed up the
+         * selector.
+         */
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_OF_TYPE:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_OF_TYPE:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_DIR:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_LANG:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_COL:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_COL:
+        default:
+            break;
+    }
+
+not_found:
+
+    selectors->current = selectors->current->parent;
+    entry = selectors->current->last;
+
+    selectors->state = lxb_selectors_state_find;
+
+    return lxb_selectors_state_find_check(selectors, NULL,
+                                          entry->selector, entry);
+}
+
+static const xmlNode *
+lxb_selectors_next_node(lxb_selectors_nested_t *main)
+{
+    const xmlNode *node = main->entry->node;
+
+    switch (main->parent->last->combinator) {
+        case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
+        case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
+            if (node->parent == NULL
+                || !CMP_NODE_TYPE(node->parent, XML_ELEMENT_NODE))
+            {
+                return NULL;
+            }
+
+            return node->parent;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
+            return node;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
+        case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
+            node = node->prev;
+            break;
+
+        default:
+            return NULL;
+    }
+
+    while (node != NULL) {
+        if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+            break;
+        }
+
+        node = node->prev;
+    }
+
+    return node;
+}
+
+static const xmlNode *
+lxb_selectors_state_has_relative(const xmlNode *node,
+                                 const lxb_css_selector_t *selector)
+{
+    const xmlNode *root = node;
+
+    switch (selector->combinator) {
+        case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
+        case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
+            node = node->children;
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
+        case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
+            node = node->next;
+            break;
+
+        default:
+            return NULL;
+    }
+
+    while (node != NULL) {
+        if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+            break;
+        }
+
+        while (node !=root && node->next == NULL) {
+            node = node->parent;
+        }
+
+        if (node == root) {
+            return NULL;
+        }
+
+        node = node->next;
+    }
+
+    return node;
+}
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_after_find_has(lxb_selectors_t *selectors,
+                                   lxb_selectors_entry_t *entry)
+{
+    const xmlNode *node;
+    lxb_selectors_entry_t *parent;
+    lxb_selectors_nested_t *current;
+
+    if (selectors->current->found) {
+        node = selectors->current->root;
+
+        selectors->current = selectors->current->parent;
+        parent = selectors->current->last;
+
+        selectors->state = lxb_selectors_state_find;
+
+        return lxb_selectors_state_find_check(selectors, node,
+                                              parent->selector, parent);
+    }
+
+    current = selectors->current;
+    node = entry->node;
+
+    switch (entry->selector->list->first->combinator) {
+        case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
+            if (node->children != NULL) {
+                node = node->children;
+            }
+            else {
+
+            next:
+
+                while (node != current->root && node->next == NULL) {
+                    node = node->parent;
+                }
+
+                if (node == current->root) {
+                    goto failed;
+                }
+
+                node = node->next;
+            }
+
+            if (!CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+                goto next;
+            }
+
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
+        case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
+            node = node->next;
+
+            while (node != NULL && !CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+                node = node->next;
+            }
+
+            if (node == NULL) {
+                goto failed;
+            }
+
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
+            goto failed;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
+        case LXB_CSS_SELECTOR_COMBINATOR_CELL:
+        default:
+            selectors->status = LXB_STATUS_ERROR;
+            return NULL;
+    }
+
+    entry->node = node;
+    selectors->state = lxb_selectors_state_find;
+
+    return entry;
+
+failed:
+
+    selectors->current = selectors->current->parent;
+    parent = selectors->current->last;
+
+    selectors->state = lxb_selectors_state_find;
+
+    return lxb_selectors_state_find_check(selectors, NULL,
+                                          parent->selector, parent);
+}
+
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_after_find(lxb_selectors_t *selectors,
+                               lxb_selectors_entry_t *entry)
+{
+    const xmlNode *node;
+    lxb_selectors_entry_t *parent;
+    lxb_selectors_nested_t *current;
+
+    current = selectors->current;
+
+    if (current->found) {
+        node = entry->node;
+
+        selectors->current = current->parent;
+        parent = selectors->current->last;
+
+        selectors->state = lxb_selectors_state_find;
+
+        return lxb_selectors_state_find_check(selectors, node,
+                                              parent->selector, parent);
+    }
+
+    node = entry->node;
+
+    switch (current->parent->last->combinator) {
+        case LXB_CSS_SELECTOR_COMBINATOR_DESCENDANT:
+            if (node->parent != NULL
+                && CMP_NODE_TYPE(node->parent, XML_ELEMENT_NODE))
+            {
+                node = node->parent;
+            }
+            else {
+                node = NULL;
+            }
+
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_FOLLOWING:
+            node = node->prev;
+
+            while (node != NULL && !CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+                node = node->prev;
+            }
+
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CHILD:
+        case LXB_CSS_SELECTOR_COMBINATOR_SIBLING:
+        case LXB_CSS_SELECTOR_COMBINATOR_CLOSE:
+            node = NULL;
+            break;
+
+        case LXB_CSS_SELECTOR_COMBINATOR_CELL:
+        default:
+            selectors->status = LXB_STATUS_ERROR;
+            return NULL;
+    }
+
+    if (node == NULL) {
+        selectors->current = current->parent;
+        parent = selectors->current->last;
+
+        selectors->state = lxb_selectors_state_find;
+
+        return lxb_selectors_state_find_check(selectors, node,
+                                              parent->selector, parent);
+    }
+
+    entry->node = node;
+    selectors->state = lxb_selectors_state_find;
+
+    return entry;
+}
+
+static lxb_selectors_entry_t *
+lxb_selectors_state_after_nth_child(lxb_selectors_t *selectors,
+                                    lxb_selectors_entry_t *entry)
+{
+    bool found;
+    const xmlNode *node;
+    lxb_selectors_entry_t *parent;
+    lxb_selectors_nested_t *current;
+    const lxb_css_selector_t *selector;
+    const lxb_css_selector_pseudo_t *pseudo;
+
+    current = selectors->current;
+    selector = current->parent->last->selector;
+    pseudo = &selector->u.pseudo;
+
+    node = entry->node;
+
+    if (current->found) {
+        current->index += 1;
+    }
+    else if (current->root == node) {
+        node = NULL;
+        goto done;
+    }
+
+    if (pseudo->type == LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_CHILD) {
+        node = node->prev;
+
+        while (node != NULL) {
+            if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+                break;
+            }
+
+            node = node->prev;
+        }
+    }
+    else {
+        node = node->next;
+
+        while (node != NULL) {
+            if (CMP_NODE_TYPE(node, XML_ELEMENT_NODE)) {
+                break;
+            }
+
+            node = node->next;
+        }
+    }
+
+    if (node == NULL) {
+        goto done;
+    }
+
+    entry->node = node;
+    current->found = false;
+    selectors->state = lxb_selectors_state_find;
+
+    return entry;
+
+done:
+
+    if (current->index > 0) {
+        found = lxb_selectors_anb_calc(pseudo->data, current->index);
+
+        node = (found) ? current->root : NULL;
+    }
+
+    selectors->state = lxb_selectors_state_find;
+    selectors->current = selectors->current->parent;
+
+    parent = selectors->current->last;
+
+    return lxb_selectors_state_find_check(selectors, node,
+                                          parent->selector, parent);
 }
 
 static bool
 lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
-					lxb_css_selector_t *selector, const xmlNode *node)
+                    const lxb_css_selector_t *selector, const xmlNode *node)
 {
-	bool res, ins;
-	const lexbor_str_t *src;
-	lxb_css_selector_attribute_t *attr;
-	const xmlAttr *dom_attr;
-	lexbor_str_t trg;
+    switch (selector->type) {
+        case LXB_CSS_SELECTOR_TYPE_ANY:
+            return true;
 
-	switch (selector->type) {
-		case LXB_CSS_SELECTOR_TYPE_ANY:
-			return true;
+        case LXB_CSS_SELECTOR_TYPE_ELEMENT:
+            return lxb_selectors_match_element(selector, node, entry);
 
-		case LXB_CSS_SELECTOR_TYPE_ELEMENT:
-			lxb_selectors_adapted_set_entry_id(entry, selector, node);
+        case LXB_CSS_SELECTOR_TYPE_ID:
+            return lxb_selectors_match_id(selector, node);
 
-			if (lxb_selectors_adapted_cmp_local_name_id(node, &entry->id)) {
-				return true;
-			}
-
-			break;
-
-		case LXB_CSS_SELECTOR_TYPE_ID:
-			dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "id");
+        case LXB_CSS_SELECTOR_TYPE_CLASS: {
+            const xmlAttr *dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "class");
 			if (dom_attr == NULL) {
 				return false;
 			}
 
-			src = &selector->name;
-			trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
-			if (trg.length == src->length
-				&& lexbor_str_data_ncasecmp(trg.data, src->data, src->length))
-			{
-				return true;
-			}
-
-			return false;
-
-		case LXB_CSS_SELECTOR_TYPE_CLASS:
-			dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "class");
-			if (dom_attr == NULL) {
-				return false;
-			}
-
-			trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
+			lexbor_str_t trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
 
 			if (trg.length == 0) {
 				return false;
@@ -818,201 +1177,250 @@ lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
 
 			return lxb_selectors_match_class(&trg,
 											 &selector->name, true);
+		}
 
-		case LXB_CSS_SELECTOR_TYPE_ATTRIBUTE:
-			attr = &selector->u.attribute;
+        case LXB_CSS_SELECTOR_TYPE_ATTRIBUTE:
+            return lxb_selectors_match_attribute(selector, node, entry);
 
-			lxb_selectors_adapted_set_entry_id(entry, selector, node);
+        case LXB_CSS_SELECTOR_TYPE_PSEUDO_CLASS:
+            return lxb_selectors_pseudo_class(selector, node);
 
-			dom_attr = lxb_selectors_adapted_attr(node, entry->id.name);
-			if (dom_attr == NULL) {
-				return false;
-			}
+        case LXB_CSS_SELECTOR_TYPE_PSEUDO_CLASS_FUNCTION:
+            return lxb_selectors_pseudo_class_function(selector, node);
 
-			src = &attr->value;
+        case LXB_CSS_SELECTOR_TYPE_PSEUDO_ELEMENT:
+            return lxb_selectors_pseudo_element(selector, node);
 
-			if (src->data == NULL) {
-				return true;
-			}
+        case LXB_CSS_SELECTOR_TYPE_PSEUDO_ELEMENT_FUNCTION:
+            return false;
 
-			trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
+        default:
+            break;
+    }
 
-			ins = attr->modifier == LXB_CSS_SELECTOR_MODIFIER_I;
+    return false;
+}
 
-			switch (attr->match) {
-				case LXB_CSS_SELECTOR_MATCH_EQUAL:      /*  = */
-					if (trg.length == src->length) {
-						if (ins) {
-							return lexbor_str_data_ncasecmp(trg.data, src->data,
-															src->length);
-						}
+static bool
+lxb_selectors_match_element(const lxb_css_selector_t *selector,
+                            const xmlNode *node, lxb_selectors_entry_t *entry)
+{
+	lxb_selectors_adapted_set_entry_id(entry, selector, node);
+	return lxb_selectors_adapted_cmp_local_name_id(node, &entry->id);
+}
 
-						return lexbor_str_data_ncmp(trg.data, src->data,
-													src->length);
-					}
+static bool
+lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node)
+{
+    const xmlAttr *dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "id");
+	if (dom_attr == NULL) {
+		return false;
+	}
 
-					return false;
-
-				case LXB_CSS_SELECTOR_MATCH_INCLUDE:    /* ~= */
-					return lxb_selectors_match_class(&trg, src, ins);
-
-				case LXB_CSS_SELECTOR_MATCH_DASH:       /* |= */
-					if (trg.length == src->length) {
-						if (ins) {
-							return lexbor_str_data_ncasecmp(trg.data, src->data,
-															src->length);
-						}
-
-						return lexbor_str_data_ncmp(trg.data, src->data,
-													src->length);
-					}
-
-					if (trg.length > src->length) {
-						if (ins) {
-							res = lexbor_str_data_ncasecmp(trg.data,
-														   src->data, src->length);
-						}
-						else {
-							res = lexbor_str_data_ncmp(trg.data,
-													   src->data, src->length);
-						}
-
-						if (res && trg.data[src->length] == '-') {
-							return true;
-						}
-					}
-
-					return false;
-
-				case LXB_CSS_SELECTOR_MATCH_PREFIX:     /* ^= */
-					if (src->length != 0 && trg.length >= src->length) {
-						if (ins) {
-							return lexbor_str_data_ncasecmp(trg.data, src->data,
-															src->length);
-						}
-
-						return lexbor_str_data_ncmp(trg.data, src->data,
-													src->length);
-					}
-
-					return false;
-
-				case LXB_CSS_SELECTOR_MATCH_SUFFIX:     /* $= */
-					if (src->length != 0 && trg.length >= src->length) {
-						size_t dif = trg.length - src->length;
-
-						if (ins) {
-							return lexbor_str_data_ncasecmp(trg.data + dif,
-															src->data, src->length);
-						}
-
-						return lexbor_str_data_ncmp(trg.data + dif, src->data,
-													src->length);
-					}
-
-					return false;
-
-				case LXB_CSS_SELECTOR_MATCH_SUBSTRING:  /* *= */
-					if (src->length == 0) {
-						return false;
-					}
-
-					if (ins) {
-						return lexbor_str_data_ncasecmp_contain(trg.data, trg.length,
-																src->data, src->length);
-					}
-
-					return lexbor_str_data_ncmp_contain(trg.data, trg.length,
-														src->data, src->length);
-
-				EMPTY_SWITCH_DEFAULT_CASE()
-			}
-
-			break;
-
-		case LXB_CSS_SELECTOR_TYPE_PSEUDO_CLASS:
-			return lxb_selectors_pseudo_class(selector, node);
-
-		case LXB_CSS_SELECTOR_TYPE_PSEUDO_CLASS_FUNCTION:
-			return lxb_selectors_pseudo_class_function(selectors, selector,
-													   node, entry);
-
-		default:
-			break;
+	const lexbor_str_t *src = &selector->name;
+	lexbor_str_t trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
+	if (trg.length == src->length
+		&& lexbor_str_data_ncasecmp(trg.data, src->data, src->length))
+	{
+		return true;
 	}
 
 	return false;
 }
 
 static bool
-lxb_selectors_match_class(const lexbor_str_t *target, const  lexbor_str_t *src,
-						  bool quirks)
+lxb_selectors_match_class(const lexbor_str_t *target, const lexbor_str_t *src,
+                          bool quirks)
 {
-	lxb_char_t chr;
+    lxb_char_t chr;
 
-	if (target->length < src->length) {
+    if (target->length < src->length) {
+        return false;
+    }
+
+    bool is_it = false;
+
+    const lxb_char_t *data = target->data;
+    const lxb_char_t *pos = data;
+    const lxb_char_t *end = data + target->length;
+
+    for (; data < end; data++) {
+        chr = *data;
+
+        if (lexbor_utils_whitespace(chr, ==, ||)) {
+
+            if ((size_t) (data - pos) == src->length) {
+                if (quirks) {
+                    is_it = lexbor_str_data_ncasecmp(pos, src->data, src->length);
+                }
+                else {
+                    is_it = lexbor_str_data_ncmp(pos, src->data, src->length);
+                }
+
+                if (is_it) {
+                    return true;
+                }
+            }
+
+            if ((size_t) (end - data) < src->length) {
+                return false;
+            }
+
+            pos = data + 1;
+        }
+    }
+
+    if ((size_t) (end - pos) == src->length && src->length != 0) {
+        if (quirks) {
+            is_it = lexbor_str_data_ncasecmp(pos, src->data, src->length);
+        }
+        else {
+            is_it = lexbor_str_data_ncmp(pos, src->data, src->length);
+        }
+    }
+
+    return is_it;
+}
+
+static bool
+lxb_selectors_match_attribute(const lxb_css_selector_t *selector,
+                              const xmlNode *node, lxb_selectors_entry_t *entry)
+{
+    bool res, ins;
+    const xmlAttr *dom_attr;
+    lexbor_str_t trg;
+	const lexbor_str_t *src;
+    const lxb_css_selector_attribute_t *attr;
+
+    attr = &selector->u.attribute;
+
+	lxb_selectors_adapted_set_entry_id(entry, selector, node);
+
+	dom_attr = lxb_selectors_adapted_attr(node, entry->id.name);
+	if (dom_attr == NULL) {
 		return false;
 	}
 
-	bool is_it = false;
+	src = &attr->value;
 
-	const lxb_char_t *data = target->data;
-	const lxb_char_t *pos = data;
-	const lxb_char_t *end = data + target->length;
+	if (src->data == NULL) {
+		return true;
+	}
 
-	for (; data < end; data++) {
-		chr = *data;
+	trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
 
-		if (lexbor_utils_whitespace(chr, ==, ||)) {
+	ins = attr->modifier == LXB_CSS_SELECTOR_MODIFIER_I;
 
-			if ((size_t) (data - pos) == src->length) {
-				if (quirks) {
-					is_it = lexbor_str_data_ncasecmp(pos, src->data, src->length);
+	switch (attr->match) {
+		case LXB_CSS_SELECTOR_MATCH_EQUAL:      /*  = */
+			if (trg.length == src->length) {
+				if (ins) {
+					return lexbor_str_data_ncasecmp(trg.data, src->data,
+													src->length);
+				}
+
+				return lexbor_str_data_ncmp(trg.data, src->data,
+											src->length);
+			}
+
+			return false;
+
+		case LXB_CSS_SELECTOR_MATCH_INCLUDE:    /* ~= */
+			return lxb_selectors_match_class(&trg, src, ins);
+
+		case LXB_CSS_SELECTOR_MATCH_DASH:       /* |= */
+			if (trg.length == src->length) {
+				if (ins) {
+					return lexbor_str_data_ncasecmp(trg.data, src->data,
+													src->length);
+				}
+
+				return lexbor_str_data_ncmp(trg.data, src->data,
+											src->length);
+			}
+
+			if (trg.length > src->length) {
+				if (ins) {
+					res = lexbor_str_data_ncasecmp(trg.data,
+													src->data, src->length);
 				}
 				else {
-					is_it = lexbor_str_data_ncmp(pos, src->data, src->length);
+					res = lexbor_str_data_ncmp(trg.data,
+												src->data, src->length);
 				}
 
-				if (is_it) {
+				if (res && trg.data[src->length] == '-') {
 					return true;
 				}
 			}
 
-			if ((size_t) (end - data) < src->length) {
+			return false;
+
+		case LXB_CSS_SELECTOR_MATCH_PREFIX:     /* ^= */
+			if (src->length != 0 && trg.length >= src->length) {
+				if (ins) {
+					return lexbor_str_data_ncasecmp(trg.data, src->data,
+													src->length);
+				}
+
+				return lexbor_str_data_ncmp(trg.data, src->data,
+											src->length);
+			}
+
+			return false;
+
+		case LXB_CSS_SELECTOR_MATCH_SUFFIX:     /* $= */
+			if (src->length != 0 && trg.length >= src->length) {
+				size_t dif = trg.length - src->length;
+
+				if (ins) {
+					return lexbor_str_data_ncasecmp(trg.data + dif,
+													src->data, src->length);
+				}
+
+				return lexbor_str_data_ncmp(trg.data + dif, src->data,
+											src->length);
+			}
+
+			return false;
+
+		case LXB_CSS_SELECTOR_MATCH_SUBSTRING:  /* *= */
+			if (src->length == 0) {
 				return false;
 			}
 
-			pos = data + 1;
-		}
-	}
+			if (ins) {
+				return lexbor_str_data_ncasecmp_contain(trg.data, trg.length,
+														src->data, src->length);
+			}
 
-	if ((size_t) (end - pos) == src->length && src->length != 0) {
-		if (quirks) {
-			is_it = lexbor_str_data_ncasecmp(pos, src->data, src->length);
-		}
-		else {
-			is_it = lexbor_str_data_ncmp(pos, src->data, src->length);
-		}
-	}
+			return lexbor_str_data_ncmp_contain(trg.data, trg.length,
+												src->data, src->length);
+        default:
+            break;
+    }
 
-	return is_it;
+    return false;
 }
 
 static bool
-lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
+lxb_selectors_pseudo_class(const lxb_css_selector_t *selector,
+                           const xmlNode *node)
 {
-	const xmlAttr *dom_attr;
-	lxb_css_selector_pseudo_t *pseudo = &selector->u.pseudo;
+    const lxb_css_selector_pseudo_t *pseudo = &selector->u.pseudo;
 
-	static const lxb_char_t checkbox[] = "checkbox";
-	static const size_t checkbox_length = sizeof(checkbox) / sizeof(lxb_char_t) - 1;
+    static const lxb_char_t checkbox[] = "checkbox";
+    static const size_t checkbox_length = sizeof(checkbox) / sizeof(lxb_char_t) - 1;
 
-	static const lxb_char_t radio[] = "radio";
-	static const size_t radio_length = sizeof(radio) / sizeof(lxb_char_t) - 1;
+    static const lxb_char_t radio[] = "radio";
+    static const size_t radio_length = sizeof(radio) / sizeof(lxb_char_t) - 1;
 
-	switch (pseudo->type) {
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_ANY_LINK:
-			/* https://drafts.csswg.org/selectors/#the-any-link-pseudo */
+    switch (pseudo->type) {
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_ACTIVE:
+            return false;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_ANY_LINK:
+            /* https://drafts.csswg.org/selectors/#the-any-link-pseudo */
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
 				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "a")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "area")))
@@ -1022,19 +1430,19 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_BLANK:
-			if (!EG(exception)) {
-				zend_argument_value_error(1, ":blank selector is not implemented because CSSWG has not yet decided its semantics (https://github.com/w3c/csswg-drafts/issues/1967)");
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_BLANK:
+            if (!EG(exception)) {
+                php_dom_throw_error_with_message(NOT_SUPPORTED_ERR, ":blank selector is not implemented because CSSWG has not yet decided its semantics (https://github.com/w3c/csswg-drafts/issues/1967)", true);
 			}
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_CHECKED:
-			/* https://drafts.csswg.org/selectors/#checked */
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_CHECKED:
+            /* https://drafts.csswg.org/selectors/#checked */
 			if (!php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)) {
 				return false;
 			}
 			if (lxb_selectors_adapted_cmp_local_name_literal(node, "input")) {
-				dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "type");
+				const xmlAttr *dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "type");
 				if (dom_attr == NULL) {
 					return false;
 				}
@@ -1062,11 +1470,15 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_DISABLED:
-			return lxb_selectors_pseudo_class_disabled(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_CURRENT:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_DEFAULT:
+            return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_EMPTY:
-			node = node->children;
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_DISABLED:
+            return lxb_selectors_pseudo_class_disabled(node);
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_EMPTY:
+            node = node->children;
 
 			while (node != NULL) {
 				/* Following https://developer.mozilla.org/en-US/docs/Web/CSS/:empty, i.e. what currently happens in browsers,
@@ -1080,23 +1492,50 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return true;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_ENABLED:
-			return !lxb_selectors_pseudo_class_disabled(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_ENABLED:
+            return !lxb_selectors_pseudo_class_disabled(node);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FIRST_CHILD:
-			return lxb_selectors_pseudo_class_first_child(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FIRST_CHILD:
+            return lxb_selectors_pseudo_class_first_child(node);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FIRST_OF_TYPE:
-			return lxb_selectors_pseudo_class_first_of_type(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FIRST_OF_TYPE:
+            return lxb_selectors_pseudo_class_first_of_type(node);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_LAST_CHILD:
-			return lxb_selectors_pseudo_class_last_child(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FOCUS:
+            break;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_LAST_OF_TYPE:
-			return lxb_selectors_pseudo_class_last_of_type(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FOCUS_VISIBLE:
+            break;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_LINK:
-			/* https://html.spec.whatwg.org/multipage/semantics-other.html#selector-link */
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FOCUS_WITHIN:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FULLSCREEN:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUTURE:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_HOVER:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_IN_RANGE:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_INDETERMINATE:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_INVALID:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_LAST_CHILD:
+            return lxb_selectors_pseudo_class_last_child(node);
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_LAST_OF_TYPE:
+            return lxb_selectors_pseudo_class_last_of_type(node);
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_LINK:
+            /* https://html.spec.whatwg.org/multipage/semantics-other.html#selector-link */
 			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
 				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "a")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "area")))
@@ -1106,16 +1545,19 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_ONLY_CHILD:
-			return lxb_selectors_pseudo_class_first_child(node)
-				   && lxb_selectors_pseudo_class_last_child(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_LOCAL_LINK:
+            break;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_ONLY_OF_TYPE:
-			return lxb_selectors_pseudo_class_first_of_type(node)
-				   && lxb_selectors_pseudo_class_last_of_type(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_ONLY_CHILD:
+            return lxb_selectors_pseudo_class_first_child(node)
+            && lxb_selectors_pseudo_class_last_child(node);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_OPTIONAL:
-			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_ONLY_OF_TYPE:
+            return lxb_selectors_pseudo_class_first_of_type(node)
+            && lxb_selectors_pseudo_class_last_of_type(node);
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_OPTIONAL:
+            if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
 				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "select")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")))
@@ -1125,8 +1567,14 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_PLACEHOLDER_SHOWN:
-			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_OUT_OF_RANGE:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_PAST:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_PLACEHOLDER_SHOWN:
+            if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
 				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")))
 			{
@@ -1135,14 +1583,14 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_READ_ONLY:
-			return !lxb_selectors_pseudo_class_read_write(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_READ_ONLY:
+            return !lxb_selectors_pseudo_class_read_write(node);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_READ_WRITE:
-			return lxb_selectors_pseudo_class_read_write(node);
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_READ_WRITE:
+            return lxb_selectors_pseudo_class_read_write(node);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_REQUIRED:
-			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_REQUIRED:
+            if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)
 				&& (lxb_selectors_adapted_cmp_local_name_literal(node, "input")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "select")
 					|| lxb_selectors_adapted_cmp_local_name_literal(node, "textarea")))
@@ -1152,177 +1600,138 @@ lxb_selectors_pseudo_class(lxb_css_selector_t *selector, const xmlNode *node)
 
 			return false;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_ROOT:
-			return node->parent != NULL
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_ROOT:
+            return node->parent != NULL
 				&& (node->parent->type == XML_DOCUMENT_FRAG_NODE || node->parent->type == XML_DOCUMENT_NODE
 					|| node->parent->type == XML_HTML_DOCUMENT_NODE);
-	}
 
-	return false;
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_SCOPE:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_TARGET:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_TARGET_WITHIN:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_USER_INVALID:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_VALID:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_VISITED:
+            break;
+
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_WARNING:
+            break;
+    }
+
+    return false;
 }
 
 static bool
-lxb_selectors_pseudo_class_function(lxb_selectors_t *selectors,
-									lxb_css_selector_t *selector,
-									const xmlNode *node,
-									lxb_selectors_entry_t *entry)
+lxb_selectors_pseudo_class_function(const lxb_css_selector_t *selector,
+                                    const xmlNode *node)
 {
-	size_t index;
-	bool found = false;
-	const xmlNode *base;
-	lxb_css_selector_anb_of_t *anb;
-	lxb_css_selector_pseudo_t *pseudo = &selector->u.pseudo;
+    size_t index;
+    const xmlNode *base;
+    const lxb_css_selector_pseudo_t *pseudo;
 
-	switch (pseudo->type) {
-		/* These four selectors share the same code path here, but will return the right thing based on their selector entry data. */
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_CURRENT:
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_HAS:
-		/* Only difference between the following two selectors is specificity, which for matching elements doesn't matter. */
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_WHERE:
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_IS:
-			entry->child = lxb_selectors_next(selectors, node, entry->child,
-											  pseudo->data,
-											  lxb_selectors_first_match, &found);
-			if (entry->child == NULL) {
-				return false;
-			}
+    pseudo = &selector->u.pseudo;
 
-			return found;
+    switch (pseudo->type) {
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_CHILD:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_CHILD:
+            index = 0;
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NOT:
-			entry->child = lxb_selectors_next(selectors, node, entry->child,
-											  pseudo->data,
-											  lxb_selectors_first_match, &found);
-			if (entry->child == NULL) {
-				return false;
-			}
+            if (pseudo->type == LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_CHILD) {
+                while (node != NULL) {
+                    if (lxb_selectors_adapted_is_matchable_child(node))
+                    {
+                        index++;
+                    }
 
-			return !found;
+                    node = node->prev;
+                }
+            }
+            else {
+                while (node != NULL) {
+                    if (lxb_selectors_adapted_is_matchable_child(node))
+                    {
+                        index++;
+                    }
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_CHILD:
-			index = 0;
-			found = false;
-			anb = selector->u.pseudo.data;
+                    node = node->next;
+                }
+            }
 
-			if (anb->of != NULL) {
-				while (node != NULL) {
-					if (lxb_selectors_adapted_is_matchable_child(node))
-					{
-						entry->child = lxb_selectors_current(selectors, node, entry->child,
-															 anb->of, lxb_selectors_first_match,
-															 &found);
-						if (entry->child == NULL) {
-							return false;
-						}
+            return lxb_selectors_anb_calc(pseudo->data, index);
 
-						if (found) {
-							index++;
-						} else if (index == 0) {
-							/* If the node we're currently at doesn't match the "of" requirement,
-							 * then there's no point computing the index. */
-							return false;
-						}
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_OF_TYPE:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_OF_TYPE:
+            index = 0;
+            base = node;
 
-						found = false;
-					}
+            if (pseudo->type == LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_OF_TYPE) {
+                while (node != NULL) {
+                    if(xmlStrEqual(node->name, base->name)
+                       && lxb_selectors_adapted_cmp_ns(node, base))
+                    {
+                        index++;
+                    }
 
-					node = node->prev;
-				}
-			}
-			else {
-				while (node != NULL) {
-					if (lxb_selectors_adapted_is_matchable_child(node))
-					{
-						index++;
-					}
+                    node = node->prev;
+                }
+            }
+            else {
+                while (node != NULL) {
+                    if(xmlStrEqual(node->name, base->name)
+                       && lxb_selectors_adapted_cmp_ns(node, base))
+                    {
+                        index++;
+                    }
 
-					node = node->prev;
-				}
-			}
+                    node = node->next;
+                }
+            }
 
-			return lxb_selectors_anb_calc(anb, index);
+            return lxb_selectors_anb_calc(pseudo->data, index);
 
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_CHILD:
-			index = 0;
-			found = false;
-			anb = selector->u.pseudo.data;
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_DIR:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_LANG:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_COL:
+        case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_COL:
+        default:
+            break;
+    }
 
-			if (anb->of != NULL) {
-				while (node != NULL) {
-					if (lxb_selectors_adapted_is_matchable_child(node))
-					{
-						entry->child = lxb_selectors_current(selectors, node, entry->child,
-															 anb->of, lxb_selectors_first_match,
-															 &found);
-						if (entry->child == NULL) {
-							return false;
-						}
+    return false;
+}
 
-						if (found) {
-							index++;
-						} else if (index == 0) {
-							/* If the node we're currently at doesn't match the "of" requirement,
-							 * then there's no point computing the index. */
-							return false;
-						}
+static bool
+lxb_selectors_pseudo_element(const lxb_css_selector_t *selector,
+                             const xmlNode *node)
+{
+    const lxb_css_selector_pseudo_t *pseudo = &selector->u.pseudo;
 
-						found = false;
-					}
+    switch (pseudo->type) {
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_AFTER:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_BACKDROP:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_BEFORE:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_FIRST_LETTER:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_FIRST_LINE:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_GRAMMAR_ERROR:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_INACTIVE_SELECTION:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_MARKER:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_PLACEHOLDER:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_SELECTION:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_SPELLING_ERROR:
+        case LXB_CSS_SELECTOR_PSEUDO_ELEMENT_TARGET_TEXT:
+            break;
+    }
 
-					node = node->next;
-				}
-			}
-			else {
-				while (node != NULL) {
-					if (lxb_selectors_adapted_is_matchable_child(node))
-					{
-						index++;
-					}
-
-					node = node->next;
-				}
-			}
-
-			return lxb_selectors_anb_calc(anb, index);
-
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_LAST_OF_TYPE:
-			index = 0;
-			found = false;
-			anb = selector->u.pseudo.data;
-			base = node;
-
-			while (node != NULL) {
-				if(lxb_selectors_adapted_cmp_local_name_node(node, base)
-				   && lxb_selectors_adapted_cmp_ns(node, base))
-				{
-					index++;
-				}
-
-				node = node->next;
-			}
-
-			return lxb_selectors_anb_calc(anb, index);
-
-		case LXB_CSS_SELECTOR_PSEUDO_CLASS_FUNCTION_NTH_OF_TYPE:
-			index = 0;
-			found = false;
-			anb = selector->u.pseudo.data;
-			base = node;
-
-			while (node != NULL) {
-				if(lxb_selectors_adapted_cmp_local_name_node(node, base)
-				   && lxb_selectors_adapted_cmp_ns(node, base))
-				{
-					index++;
-				}
-
-				node = node->prev;
-			}
-
-			return lxb_selectors_anb_calc(anb, index);
-	}
-
-	return false;
+    return false;
 }
 
 /* https://html.spec.whatwg.org/multipage/semantics-other.html#concept-element-disabled */
@@ -1388,73 +1797,73 @@ lxb_selectors_pseudo_class_disabled(const xmlNode *node)
 static bool
 lxb_selectors_pseudo_class_first_child(const xmlNode *node)
 {
-	node = node->prev;
+    node = node->prev;
 
-	while (node != NULL) {
-		if (lxb_selectors_adapted_is_matchable_child(node))
-		{
-			return false;
-		}
+    while (node != NULL) {
+        if (lxb_selectors_adapted_is_matchable_child(node))
+        {
+            return false;
+        }
 
-		node = node->prev;
-	}
+        node = node->prev;
+    }
 
-	return true;
+    return true;
 }
 
 static bool
 lxb_selectors_pseudo_class_first_of_type(const xmlNode *node)
 {
-	const xmlNode *root = node;
-	node = node->prev;
+    const xmlNode *root = node;
+    node = node->prev;
 
-	while (node) {
-		if (lxb_selectors_adapted_cmp_local_name_node(node, root)
-		   && lxb_selectors_adapted_cmp_ns(node, root))
-		{
-			return false;
-		}
+    while (node) {
+        if (xmlStrEqual(node->name, root->name)
+            && lxb_selectors_adapted_cmp_ns(node, root))
+        {
+            return false;
+        }
 
-		node = node->prev;
-	}
+        node = node->prev;
+    }
 
-	return true;
+    return true;
 }
 
 static bool
 lxb_selectors_pseudo_class_last_child(const xmlNode *node)
 {
-	node = node->next;
+    node = node->next;
 
-	while (node != NULL) {
-		if (lxb_selectors_adapted_is_matchable_child(node))
-		{
-			return false;
-		}
+    while (node != NULL) {
+        if (lxb_selectors_adapted_is_matchable_child(node))
+        {
+            return false;
+        }
 
-		node = node->next;
-	}
+        node = node->next;
+    }
 
-	return true;
+    return true;
 }
 
 static bool
 lxb_selectors_pseudo_class_last_of_type(const xmlNode *node)
 {
-	const xmlNode *root = node;
-	node = node->next;
+    const xmlNode *root = node;
+    node = node->next;
 
-	while (node) {
-		if (lxb_selectors_adapted_cmp_local_name_node(node, root)
-		   && lxb_selectors_adapted_cmp_ns(node, root))
-		{
-			return false;
-		}
+    while (node) {
+        if (xmlStrEqual(node->name, root->name)
+            && lxb_selectors_adapted_cmp_ns(node, root))
+        {
+            return false;
+        }
 
-		node = node->next;
-	}
+        node = node->next;
+    }
 
-	return true;
+    return true;
 }
 
 static bool
@@ -1474,10 +1883,39 @@ lxb_selectors_pseudo_class_read_write(const xmlNode *node)
 	return false;
 }
 
-static lxb_status_t
-lxb_selectors_first_match(const xmlNode *node,
-						  lxb_css_selector_specificity_t spec, void *ctx)
+static bool
+lxb_selectors_anb_calc(lxb_css_selector_anb_of_t *anb, size_t index)
 {
-	*((bool *) ctx) = true;
-	return LXB_STATUS_STOP;
+    double num;
+
+    if (anb->anb.a == 0) {
+        if (anb->anb.b >= 0 && (size_t) anb->anb.b == index) {
+            return true;
+        }
+    }
+    else {
+        num = ((double) index - (double) anb->anb.b) / (double) anb->anb.a;
+
+        if (num >= 0.0f && (num - trunc(num)) == 0.0f) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static lxb_status_t
+lxb_selectors_cb_ok(const xmlNode *node,
+                    lxb_css_selector_specificity_t spec, void *ctx)
+{
+    *((bool *) ctx) = true;
+    return LXB_STATUS_OK;
+}
+
+static lxb_status_t
+lxb_selectors_cb_not(const xmlNode *node,
+                     lxb_css_selector_specificity_t spec, void *ctx)
+{
+    *((bool *) ctx) = false;
+    return LXB_STATUS_OK;
 }
