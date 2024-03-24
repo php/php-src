@@ -280,10 +280,6 @@ namespace
 
         /** @param DOMNode|string $nodes */
         public function replaceChildren(...$nodes): void;
-
-        public function querySelector(string $selectors): ?DOMElement {}
-
-        public function querySelectorAll(string $selectors): DOMNodeList {}
     }
 
     interface DOMChildNode
@@ -511,12 +507,6 @@ namespace
          * @implementation-alias DOMDocument::replaceChildren
          */
         public function replaceChildren(...$nodes): void {}
-
-        /** @implementation-alias DOMElement::querySelector */
-        public function querySelector(string $selectors): ?DOMElement {}
-
-        /** @implementation-alias DOMElement::querySelectorAll */
-        public function querySelectorAll(string $selectors): DOMNodeList {}
     }
 
     class DOMNodeList implements IteratorAggregate, Countable
@@ -711,14 +701,6 @@ namespace
 
         /** @param DOMNode|string $nodes */
         public function replaceChildren(...$nodes): void {}
-
-        /** @implementation-alias DOMElement::querySelector */
-        public function querySelector(string $selectors): ?DOMElement {}
-
-        /** @implementation-alias DOMElement::querySelectorAll */
-        public function querySelectorAll(string $selectors): DOMNodeList {}
-
-        public function matches(string $selectors): bool {}
 
         public function insertAdjacentElement(string $where, DOMElement $element): ?DOMElement {}
 
@@ -1132,6 +1114,9 @@ namespace DOM
         public function append(Node|string ...$nodes): void;
         public function prepend(Node|string ...$nodes): void;
         public function replaceChildren(Node|string ...$nodes): void;
+
+        public function querySelector(string $selectors): ?Element;
+        public function querySelectorAll(string $selectors): NodeList;
     }
 
     interface ChildNode
@@ -1391,6 +1376,10 @@ namespace DOM
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        public function querySelector(string $selectors): ?Element {}
+        public function querySelectorAll(string $selectors): NodeList {}
+        public function matches(string $selectors): bool {}
     }
 
     class Attr extends Node
@@ -1507,6 +1496,11 @@ namespace DOM
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        /** @implementation-alias DOM\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+        /** @implementation-alias DOM\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
     }
 
     class Entity extends Node
@@ -1602,10 +1596,10 @@ namespace DOM
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
 
-        /** @implementation-alias DOMElement::querySelector */
+        /** @implementation-alias DOM\Element::querySelector */
         public function querySelector(string $selectors): ?Element {}
 
-        /** @implementation-alias DOMElement::querySelectorAll */
+        /** @implementation-alias DOM\Element::querySelectorAll */
         public function querySelectorAll(string $selectors): NodeList {}
     }
 

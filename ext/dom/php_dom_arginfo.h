@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5999c0b9a7356a6f5ad7c215104b2187028c6379 */
+ * Stub hash: 4dc1862862acbdfa41148882a5e9a8c79839a3d1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -24,14 +24,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMParentNode_prepend arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMParentNode_replaceChildren arginfo_class_DOMParentNode_append
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMParentNode_querySelector, 0, 1, DOMElement, 1)
-	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMParentNode_querySelectorAll, 0, 1, DOMNodeList, 0)
-	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMChildNode_remove, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -170,10 +162,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMDocumentFragment_prepend arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMDocumentFragment_replaceChildren arginfo_class_DOMParentNode_append
-
-#define arginfo_class_DOMDocumentFragment_querySelector arginfo_class_DOMParentNode_querySelector
-
-#define arginfo_class_DOMDocumentFragment_querySelectorAll arginfo_class_DOMParentNode_querySelectorAll
 
 #define arginfo_class_DOMNodeList_count arginfo_class_DOMNode_getLineNo
 
@@ -328,14 +316,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMElement_prepend arginfo_class_DOMParentNode_append
 
 #define arginfo_class_DOMElement_replaceChildren arginfo_class_DOMParentNode_append
-
-#define arginfo_class_DOMElement_querySelector arginfo_class_DOMParentNode_querySelector
-
-#define arginfo_class_DOMElement_querySelectorAll arginfo_class_DOMParentNode_querySelectorAll
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMElement_matches, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMElement_insertAdjacentElement, 0, 2, DOMElement, 1)
 	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
@@ -586,6 +566,14 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOM_ParentNode_prepend arginfo_class_DOM_ParentNode_append
 
 #define arginfo_class_DOM_ParentNode_replaceChildren arginfo_class_DOM_ParentNode_append
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_ParentNode_querySelector, 0, 1, DOM\\Element, 1)
+	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_ParentNode_querySelectorAll, 0, 1, DOM\\\116odeList, 0)
+	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_ChildNode_remove arginfo_class_DOMChildNode_remove
 
@@ -849,6 +837,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Element_replaceChildren arginfo_class_DOM_ParentNode_append
 
+#define arginfo_class_DOM_Element_querySelector arginfo_class_DOM_ParentNode_querySelector
+
+#define arginfo_class_DOM_Element_querySelectorAll arginfo_class_DOM_ParentNode_querySelectorAll
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Element_matches, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_DOM_Attr_isId arginfo_class_DOM_Node_hasChildNodes
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_CharacterData_substringData, 0, 2, IS_STRING, 0)
@@ -905,6 +901,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOM_DocumentFragment_prepend arginfo_class_DOM_ParentNode_append
 
 #define arginfo_class_DOM_DocumentFragment_replaceChildren arginfo_class_DOM_ParentNode_append
+
+#define arginfo_class_DOM_DocumentFragment_querySelector arginfo_class_DOM_ParentNode_querySelector
+
+#define arginfo_class_DOM_DocumentFragment_querySelectorAll arginfo_class_DOM_ParentNode_querySelectorAll
 
 #define arginfo_class_DOM_Document_getElementsByTagName arginfo_class_DOM_Element_getElementsByTagName
 
@@ -1001,13 +1001,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_importLegacyNo
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, deep, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_querySelector, 0, 1, DOM\\Element, 1)
-	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DOM_Document_querySelector arginfo_class_DOM_ParentNode_querySelector
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_Document_querySelectorAll, 0, 1, DOM\\\116odeList, 0)
-	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DOM_Document_querySelectorAll arginfo_class_DOM_ParentNode_querySelectorAll
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLDocument_createEmpty, 0, 0, DOM\\HTMLDocument, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"UTF-8\"")
@@ -1154,8 +1150,6 @@ ZEND_METHOD(DOMDocumentFragment, appendXML);
 ZEND_METHOD(DOMElement, append);
 ZEND_METHOD(DOMElement, prepend);
 ZEND_METHOD(DOMDocument, replaceChildren);
-ZEND_METHOD(DOMElement, querySelector);
-ZEND_METHOD(DOMElement, querySelectorAll);
 ZEND_METHOD(DOMNodeList, count);
 ZEND_METHOD(DOMNodeList, getIterator);
 ZEND_METHOD(DOMNodeList, item);
@@ -1192,7 +1186,6 @@ ZEND_METHOD(DOMElement, setIdAttributeNS);
 ZEND_METHOD(DOMElement, setIdAttributeNode);
 ZEND_METHOD(DOMElement, toggleAttribute);
 ZEND_METHOD(DOMElement, replaceChildren);
-ZEND_METHOD(DOMElement, matches);
 ZEND_METHOD(DOMElement, insertAdjacentElement);
 ZEND_METHOD(DOMElement, insertAdjacentText);
 ZEND_METHOD(DOMDocument, __construct);
@@ -1294,6 +1287,9 @@ ZEND_METHOD(DOM_Element, getElementsByTagName);
 ZEND_METHOD(DOM_Element, getElementsByTagNameNS);
 ZEND_METHOD(DOM_Element, insertAdjacentElement);
 ZEND_METHOD(DOM_Element, setIdAttributeNode);
+ZEND_METHOD(DOM_Element, querySelector);
+ZEND_METHOD(DOM_Element, querySelectorAll);
+ZEND_METHOD(DOM_Element, matches);
 ZEND_METHOD(DOM_CharacterData, appendData);
 ZEND_METHOD(DOM_CharacterData, insertData);
 ZEND_METHOD(DOM_CharacterData, deleteData);
@@ -1348,8 +1344,6 @@ static const zend_function_entry class_DOMParentNode_methods[] = {
 	ZEND_RAW_FENTRY("append", NULL, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", NULL, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", NULL, arginfo_class_DOMParentNode_replaceChildren, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("querySelector", NULL, arginfo_class_DOMParentNode_querySelector, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("querySelectorAll", NULL, arginfo_class_DOMParentNode_querySelectorAll, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1408,8 +1402,6 @@ static const zend_function_entry class_DOMDocumentFragment_methods[] = {
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_DOMDocumentFragment_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_DOMDocumentFragment_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMDocument_replaceChildren, arginfo_class_DOMDocumentFragment_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("querySelector", zim_DOMElement_querySelector, arginfo_class_DOMDocumentFragment_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("querySelectorAll", zim_DOMElement_querySelectorAll, arginfo_class_DOMDocumentFragment_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1468,9 +1460,6 @@ static const zend_function_entry class_DOMElement_methods[] = {
 	ZEND_ME(DOMElement, append, arginfo_class_DOMElement_append, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, prepend, arginfo_class_DOMElement_prepend, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, replaceChildren, arginfo_class_DOMElement_replaceChildren, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("querySelector", zim_DOMElement_querySelector, arginfo_class_DOMElement_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("querySelectorAll", zim_DOMElement_querySelectorAll, arginfo_class_DOMElement_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_ME(DOMElement, matches, arginfo_class_DOMElement_matches, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, insertAdjacentElement, arginfo_class_DOMElement_insertAdjacentElement, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMElement, insertAdjacentText, arginfo_class_DOMElement_insertAdjacentText, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -1587,6 +1576,8 @@ static const zend_function_entry class_DOM_ParentNode_methods[] = {
 	ZEND_RAW_FENTRY("append", NULL, arginfo_class_DOM_ParentNode_append, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", NULL, arginfo_class_DOM_ParentNode_prepend, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", NULL, arginfo_class_DOM_ParentNode_replaceChildren, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("querySelector", NULL, arginfo_class_DOM_ParentNode_querySelector, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("querySelectorAll", NULL, arginfo_class_DOM_ParentNode_querySelectorAll, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1694,6 +1685,9 @@ static const zend_function_entry class_DOM_Element_methods[] = {
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_DOM_Element_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_DOM_Element_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMElement_replaceChildren, arginfo_class_DOM_Element_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(DOM_Element, querySelector, arginfo_class_DOM_Element_querySelector, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_Element, querySelectorAll, arginfo_class_DOM_Element_querySelectorAll, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_Element, matches, arginfo_class_DOM_Element_matches, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1745,6 +1739,8 @@ static const zend_function_entry class_DOM_DocumentFragment_methods[] = {
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_DOM_DocumentFragment_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_DOM_DocumentFragment_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMElement_replaceChildren, arginfo_class_DOM_DocumentFragment_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("querySelector", zim_DOM_Element_querySelector, arginfo_class_DOM_DocumentFragment_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("querySelectorAll", zim_DOM_Element_querySelectorAll, arginfo_class_DOM_DocumentFragment_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1792,8 +1788,8 @@ static const zend_function_entry class_DOM_Document_methods[] = {
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_DOM_Document_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMDocument_replaceChildren, arginfo_class_DOM_Document_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(DOM_Document, importLegacyNode, arginfo_class_DOM_Document_importLegacyNode, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("querySelector", zim_DOMElement_querySelector, arginfo_class_DOM_Document_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("querySelectorAll", zim_DOMElement_querySelectorAll, arginfo_class_DOM_Document_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("querySelector", zim_DOM_Element_querySelector, arginfo_class_DOM_Document_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("querySelectorAll", zim_DOM_Element_querySelectorAll, arginfo_class_DOM_Document_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

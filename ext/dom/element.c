@@ -1734,17 +1734,17 @@ static void php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAMETERS, bool a
 	}
 }
 
-PHP_METHOD(DOMElement, querySelector)
+PHP_METHOD(DOM_Element, querySelector)
 {
 	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOMElement, querySelectorAll)
+PHP_METHOD(DOM_Element, querySelectorAll)
 {
 	php_dom_dispatch_query_selector(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
-PHP_METHOD(DOMElement, matches)
+PHP_METHOD(DOM_Element, matches)
 {
 	zend_string *selectors_str;
 
