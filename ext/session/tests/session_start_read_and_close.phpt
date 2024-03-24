@@ -9,7 +9,7 @@ session
 
 ob_start();
 
-$valuesEnablingReadAndClose = [true, 1, "1", "777"];
+$valuesEnablingReadAndClose = [true, 1, "1", "777", 777, -1];
 
 $valuesDisablingReadAndClose = ["true", false, "false", 0, "0", "no", "00000"];
 
@@ -33,6 +33,8 @@ try {
 ob_end_flush();
 ?>
 --EXPECTF--
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
