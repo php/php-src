@@ -13,7 +13,7 @@ var_dump($element->ownerDocument);
 
 ?>
 --EXPECTF--
-object(DOM\XMLDocument)#1 (29) {
+object(DOM\XMLDocument)#1 (31) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -44,6 +44,10 @@ object(DOM\XMLDocument)#1 (29) {
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(1)
+  ["body"]=>
+  NULL
+  ["head"]=>
+  NULL
   ["nodeType"]=>
   int(9)
   ["nodeName"]=>

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 59b592b969e62100af3e3d73212cf513ab8d3ab8 */
+ * Stub hash: 417704d2342cadbdae59b288f270c280086b36bd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -3402,6 +3402,20 @@ static zend_class_entry *register_class_DOM_Document(zend_class_entry *class_ent
 	zend_string *property_childElementCount_name = zend_string_init("childElementCount", sizeof("childElementCount") - 1, 1);
 	zend_declare_typed_property(class_entry, property_childElementCount_name, &property_childElementCount_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_childElementCount_name);
+
+	zval property_body_default_value;
+	ZVAL_UNDEF(&property_body_default_value);
+	zend_string *property_body_name = zend_string_init("body", sizeof("body") - 1, 1);
+	zend_string *property_body_class_DOM_Element = zend_string_init("DOM\\Element", sizeof("DOM\\Element")-1, 1);
+	zend_declare_typed_property(class_entry, property_body_name, &property_body_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_body_class_DOM_Element, 0, MAY_BE_NULL));
+	zend_string_release(property_body_name);
+
+	zval property_head_default_value;
+	ZVAL_UNDEF(&property_head_default_value);
+	zend_string *property_head_name = zend_string_init("head", sizeof("head") - 1, 1);
+	zend_string *property_head_class_DOM_Element = zend_string_init("DOM\\Element", sizeof("DOM\\Element")-1, 1);
+	zend_declare_typed_property(class_entry, property_head_name, &property_head_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_head_class_DOM_Element, 0, MAY_BE_NULL));
+	zend_string_release(property_head_name);
 
 	return class_entry;
 }

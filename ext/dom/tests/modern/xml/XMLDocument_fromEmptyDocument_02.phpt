@@ -10,7 +10,7 @@ var_dump($dom);
 
 ?>
 --EXPECT--
-object(DOM\XMLDocument)#1 (29) {
+object(DOM\XMLDocument)#1 (31) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -41,6 +41,10 @@ object(DOM\XMLDocument)#1 (29) {
   NULL
   ["childElementCount"]=>
   int(0)
+  ["body"]=>
+  NULL
+  ["head"]=>
+  NULL
   ["nodeType"]=>
   int(9)
   ["nodeName"]=>

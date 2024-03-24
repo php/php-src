@@ -1583,6 +1583,11 @@ namespace DOM
         public function replaceChildren(Node|string ...$nodes): void {}
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
+
+        /* TODO: HTMLElement, once we decided on whether to implement that ? */
+        public ?Element $body;
+        /** @readonly */
+        public ?Element $head;
     }
 
     final class HTMLDocument extends Document
