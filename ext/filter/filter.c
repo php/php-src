@@ -548,7 +548,6 @@ static void php_filter_array_handler(zval *input, HashTable *op_ht, zend_long op
 		php_filter_call(return_value, -1, NULL, op_long, 0, FILTER_REQUIRE_ARRAY);
 	} else {
 		array_init(return_value);
-
 		ZEND_HASH_FOREACH_STR_KEY_VAL(op_ht, arg_key, arg_elm) {
 			if (arg_key == NULL) {
 				zend_argument_type_error(2, "must contain only string keys");
@@ -674,14 +673,16 @@ PHP_FUNCTION(filter_input_array)
 	zend_long    fetch_from;
 	zval   *array_input = NULL;
 	bool add_empty = 1;
+	bool null_on_failure = 0;
 	HashTable *op_ht = NULL;
 	zend_long op_long = FILTER_DEFAULT;
 
-	ZEND_PARSE_PARAMETERS_START(1, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_LONG(fetch_from)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_HT_OR_LONG(op_ht, op_long)
 		Z_PARAM_BOOL(add_empty)
+		Z_PARAM_BOOL(null_on_failure)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!op_ht && !PHP_FILTER_ID_EXISTS(op_long)) {
@@ -695,20 +696,12 @@ PHP_FUNCTION(filter_input_array)
 	}
 
 	if (!array_input) {
-		zend_long filter_flags = 0;
-		zval *option;
-		if (op_long) {
-			filter_flags = op_long;
-		} else if (op_ht && (option = zend_hash_str_find(op_ht, "flags", sizeof("flags") - 1)) != NULL) {
-			filter_flags = zval_get_long(option);
-		}
-
 		/* The FILTER_NULL_ON_FAILURE flag inverts the usual return values of
 		 * the function: normally when validation fails false is returned, and
 		 * when the input value doesn't exist NULL is returned. With the flag
 		 * set, NULL and false should be returned, respectively. Ergo, although
 		 * the code below looks incorrect, it's actually right. */
-		if (filter_flags & FILTER_NULL_ON_FAILURE) {
+		if (null_on_failure || (op_long & FILTER_NULL_ON_FAILURE)) {
 			RETURN_FALSE;
 		} else {
 			RETURN_NULL();

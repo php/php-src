@@ -2,26 +2,21 @@
 filter_input_array: test FILTER_NULL_ON_FAILURE option
 --EXTENSIONS--
 filter
---GET--
-b="test"
 --FILE--
 <?php
     $args = [
-        "a" => [
+        "c" => [
             "flags" => FILTER_NULL_ON_FAILURE,
-            "filter" => FILTER_VALIDATE_BOOLEAN,
-        ],
-        "b" => [
-            "filter" => FILTER_VALIDATE_BOOLEAN,
         ]
     ];
 
+    var_dump(filter_input_array(INPUT_GET, $args, true, true));
     var_dump(filter_input_array(INPUT_GET, $args, true));
+    var_dump(filter_input_array(INPUT_GET, FILTER_DEFAULT, true, true));
+    var_dump(filter_input_array(INPUT_GET, FILTER_DEFAULT, true));
 ?>
 --EXPECT--
-array(2) {
-  ["a"]=>
-  NULL
-  ["b"]=>
-  bool(false)
-}
+bool(false)
+NULL
+bool(false)
+NULL
