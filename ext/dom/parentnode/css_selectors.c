@@ -61,6 +61,57 @@ lxb_status_t php_dom_query_selector_find_matches_callback(const xmlNode *node, l
 	return LXB_STATUS_OK;
 }
 
+static lxb_css_selector_list_t *php_dom_parse_selector(
+	lxb_css_parser_t *parser,
+	lxb_selectors_t *selectors,
+	const zend_string *selectors_str,
+	lxb_selectors_opt_t options
+)
+{
+	lxb_status_t status;
+
+	memset(parser, 0, sizeof(lxb_css_parser_t));
+	status = lxb_css_parser_init(parser, NULL);
+	ZEND_ASSERT(status == LXB_STATUS_OK);
+
+	memset(selectors, 0, sizeof(lxb_selectors_t));
+	status = lxb_selectors_init(selectors);
+	ZEND_ASSERT(status == LXB_STATUS_OK);
+	lxb_selectors_opt_set(selectors, options);
+
+	lxb_css_selector_list_t *list = lxb_css_selectors_parse(parser, (const lxb_char_t *) ZSTR_VAL(selectors_str), ZSTR_LEN(selectors_str));
+	if (UNEXPECTED(list == NULL)) {
+		size_t nr_of_messages = lexbor_array_obj_length(&parser->log->messages);
+		if (nr_of_messages > 0) {
+			lxb_css_log_message_t *msg = lexbor_array_obj_get(&parser->log->messages, 0);
+			char *error;
+			zend_spprintf(&error, 0, "Invalid selector (%.*s)", (int) msg->text.length, msg->text.data);
+			php_dom_throw_error_with_message(SYNTAX_ERR, error, true);
+			efree(error);
+		} else {
+			php_dom_throw_error_with_message(SYNTAX_ERR, "Invalid selector", true);
+		}
+	}
+	
+	return list;
+}
+
+static lxb_status_t php_dom_check_css_execution_status(lxb_status_t status)
+{
+	if (UNEXPECTED(status != LXB_STATUS_OK && status != LXB_STATUS_STOP)) {
+		zend_argument_value_error(1, "contains an unsupported selector");
+		return status;
+	}
+	return LXB_STATUS_OK;
+}
+
+static void php_dom_selector_cleanup(lxb_css_parser_t *parser, lxb_selectors_t *selectors, lxb_css_selector_list_t *list)
+{
+	lxb_css_selector_list_destroy_memory(list);
+	lxb_selectors_destroy(selectors);
+	(void) lxb_css_parser_destroy(parser, false);
+}
+
 static lxb_status_t php_dom_query_selector_common(
 	zval *return_value,
 	const xmlNode *root,
@@ -73,39 +124,44 @@ static lxb_status_t php_dom_query_selector_common(
 	lxb_status_t status;
 
 	lxb_css_parser_t parser;
-	memset(&parser, 0, sizeof(lxb_css_parser_t));
-	status = lxb_css_parser_init(&parser, NULL);
-	ZEND_ASSERT(status == LXB_STATUS_OK);
-
 	lxb_selectors_t selectors;
-	memset(&selectors, 0, sizeof(lxb_selectors_t));
-	status = lxb_selectors_init(&selectors);
-	ZEND_ASSERT(status == LXB_STATUS_OK);
-	lxb_selectors_opt_set(&selectors, options);
 
-	lxb_css_selector_list_t *list = lxb_css_selectors_parse(&parser, (const lxb_char_t *) ZSTR_VAL(selectors_str), ZSTR_LEN(selectors_str));
+	lxb_css_selector_list_t *list = php_dom_parse_selector(&parser, &selectors, selectors_str, options);
 	if (UNEXPECTED(list == NULL)) {
-		size_t nr_of_messages = lexbor_array_obj_length(&parser.log->messages);
-		if (nr_of_messages > 0) {
-			lxb_css_log_message_t *msg = lexbor_array_obj_get(&parser.log->messages, 0);
-			char *error;
-			zend_spprintf(&error, 0, "Invalid selector (%.*s)", (int) msg->text.length, msg->text.data);
-			php_dom_throw_error_with_message(SYNTAX_ERR, error, true);
-			efree(error);
-		} else {
-			php_dom_throw_error_with_message(SYNTAX_ERR, "Invalid selector", true);
-		}
 		status = LXB_STATUS_ERROR;
 	} else {
 		status = lxb_selectors_find(&selectors, root, list, cb, ctx);
-		if (UNEXPECTED(status != LXB_STATUS_OK && status != LXB_STATUS_STOP)) {
-			zend_argument_value_error(1, "contains an unsupported selector");
-		}
+		status = php_dom_check_css_execution_status(status);
 	}
 
-	lxb_css_selector_list_destroy_memory(list);
-	lxb_selectors_destroy(&selectors);
-	(void) lxb_css_parser_destroy(&parser, false);
+	php_dom_selector_cleanup(&parser, &selectors, list);
+
+	return status;
+}
+
+static lxb_status_t php_dom_query_matches(
+	zval *return_value,
+	const xmlNode *root,
+	zend_string *selectors_str,
+	lxb_selectors_cb_f cb,
+	void *ctx,
+	lxb_selectors_opt_t options
+)
+{
+	lxb_status_t status;
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+
+	lxb_css_selector_list_t *list = php_dom_parse_selector(&parser, &selectors, selectors_str, options);
+	if (UNEXPECTED(list == NULL)) {
+		status = LXB_STATUS_ERROR;
+	} else {
+		status = lxb_selectors_match_node(&selectors, root, list, cb, ctx);
+		status = php_dom_check_css_execution_status(status);
+	}
+
+	php_dom_selector_cleanup(&parser, &selectors, list);
 
 	return status;
 }
@@ -159,18 +215,13 @@ void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_valu
 {
 	dom_query_selector_matches_ctx ctx = { thisp, false };
 
-	const xmlNode *root = thisp;
-	while (root->parent != NULL) {
-		root = root->parent;
-	}
-
-	if (php_dom_query_selector_common(
+	if (php_dom_query_matches(
 		return_value,
-		root,
+		thisp,
 		selectors_str,
 		php_dom_query_selector_find_matches_callback,
 		&ctx,
-		LXB_SELECTORS_OPT_DEFAULT
+		LXB_SELECTORS_OPT_MATCH_FIRST
 	) != LXB_STATUS_OK) {
 		RETURN_THROWS();
 	} else {
