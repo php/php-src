@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 59b592b969e62100af3e3d73212cf513ab8d3ab8 */
+ * Stub hash: f441c789fdce91e8fc71f450b294c11059999af1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -2885,13 +2885,13 @@ static zend_class_entry *register_class_DOM_Node(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_NodeList(zend_class_entry *class_entry_DOM_IteratorAggregate, zend_class_entry *class_entry_DOM_Countable)
+static zend_class_entry *register_class_DOM_NodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "NodeList", class_DOM_NodeList_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_DOM_IteratorAggregate, class_entry_DOM_Countable);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -2902,13 +2902,13 @@ static zend_class_entry *register_class_DOM_NodeList(zend_class_entry *class_ent
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_NamedNodeMap(zend_class_entry *class_entry_DOM_IteratorAggregate, zend_class_entry *class_entry_DOM_Countable)
+static zend_class_entry *register_class_DOM_NamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "NamedNodeMap", class_DOM_NamedNodeMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_DOM_IteratorAggregate, class_entry_DOM_Countable);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -2919,13 +2919,13 @@ static zend_class_entry *register_class_DOM_NamedNodeMap(zend_class_entry *class
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_DTDNamedNodeMap(zend_class_entry *class_entry_DOM_IteratorAggregate, zend_class_entry *class_entry_DOM_Countable)
+static zend_class_entry *register_class_DOM_DTDNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "DTDNamedNodeMap", class_DOM_DTDNamedNodeMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_DOM_IteratorAggregate, class_entry_DOM_Countable);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -2936,13 +2936,13 @@ static zend_class_entry *register_class_DOM_DTDNamedNodeMap(zend_class_entry *cl
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOM_HTMLCollection(zend_class_entry *class_entry_DOM_IteratorAggregate, zend_class_entry *class_entry_DOM_Countable)
+static zend_class_entry *register_class_DOM_HTMLCollection(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "DOM", "HTMLCollection", class_DOM_HTMLCollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_DOM_IteratorAggregate, class_entry_DOM_Countable);
+	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
