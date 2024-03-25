@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayObject
+Bug #70053 (MutlitpleIterator array-keys incompatible change in PHP 7)
 --FILE--
 <?php
 
