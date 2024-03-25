@@ -10,7 +10,7 @@ $oIntlDateFormatter->setPattern('VV');
 
 var_dump($oIntlDateFormatter->parse('America/Los_Angeles', $offset1));
 var_dump($oIntlDateFormatter->getTimeZone()->getID());
-var_dump($oIntlDateFormatter->parse('America/Los_Angeles', $offset2, true));
+var_dump($oIntlDateFormatter->parseToCalendar('America/Los_Angeles', $offset2));
 var_dump($oIntlDateFormatter->getTimeZone()->getID());
 --EXPECTF--
 int(%d)
