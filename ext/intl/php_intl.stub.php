@@ -374,11 +374,8 @@ function datefmt_format(IntlDateFormatter $formatter, $datetime): string|false {
  */
 function datefmt_format_object($datetime, $format = null, ?string $locale = null): string|false {}
 
-/**
- * @param int $offset
- * @param bool $updateCalendar
- */
-function datefmt_parse(IntlDateFormatter $formatter, string $string, &$offset = null, bool $updateCalendar = false): int|float|false {}
+/** @param int $offset */
+function datefmt_parse(IntlDateFormatter $formatter, string $string, &$offset = null): int|float|false {}
 
 /**
  * @param int $offset

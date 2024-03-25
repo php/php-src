@@ -131,14 +131,13 @@ PHP_FUNCTION(datefmt_parse)
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
-	int32_t		    parse_pos = -1;
-	bool            update_calendar = false;
+	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!b",
-		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos, &update_calendar ) == FAILURE ){
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
+		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
 		RETURN_THROWS();
 	}
 
@@ -159,13 +158,52 @@ PHP_FUNCTION(datefmt_parse)
 			RETURN_FALSE;
 		}
 	}
-	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, update_calendar, return_value);
+	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, false, return_value);
 	if(z_parse_pos) {
 		zval_ptr_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }
 /* }}} */
+
+PHP_METHOD(IntlDateFormatter, parseToCalendar)
+{
+	char*           text_to_parse = NULL;
+	size_t          text_len =0;
+	zval*         	z_parse_pos = NULL;
+	int32_t		parse_pos = -1;
+
+	DATE_FORMAT_METHOD_INIT_VARS;
+
+	/* Parse parameters. */
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
+		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
+		RETURN_THROWS();
+	}
+
+	/* Fetch the object. */
+	DATE_FORMAT_METHOD_FETCH_OBJECT;
+
+	if (z_parse_pos) {
+		zend_long long_parse_pos;
+		ZVAL_DEREF(z_parse_pos);
+		long_parse_pos = zval_get_long(z_parse_pos);
+		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
+			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
+			RETURN_FALSE;
+		}
+		parse_pos = (int32_t)long_parse_pos;
+		if((size_t)parse_pos > text_len) {
+			RETURN_FALSE;
+		}
+	}
+	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, true, return_value);
+	if(z_parse_pos) {
+		zval_ptr_dtor(z_parse_pos);
+		ZVAL_LONG(z_parse_pos, parse_pos);
+	}
+}
 
 /* {{{ Parse the string $value to a localtime array */
 PHP_FUNCTION(datefmt_localtime)
