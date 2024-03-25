@@ -838,7 +838,10 @@ PHP_FUNCTION(grapheme_str_split)
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	} else if (split_len > UINT_MAX / 4) {
-		zend_argument_value_error(2, "is too large");
+	if (split_len <= 0 || split_len > UINT_MAX / 4) {
+		zend_argument_value_error(2, "must be greater than 0 and less than or equal to %d", UINT_MAX / 4);
+		RETURN_THROWS();
+	}
 		RETURN_THROWS();
 	}
 
