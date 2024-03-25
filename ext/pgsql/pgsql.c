@@ -23,7 +23,7 @@
 #define PHP_PGSQL_PRIVATE 1
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #define SMART_STR_PREALLOC 512

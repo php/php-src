@@ -34,7 +34,7 @@
 #include <process.h>
 #include "win32/codepage.h"
 #else
-#include "php_config.h"
+#include <php_config.h>
 extern char** environ;
 #endif
 
