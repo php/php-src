@@ -313,6 +313,11 @@ PHP_FUNCTION(mysqli_commit)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
+	if (!MYSQLI_IS_IN_TRANSACTION(mysql)) {
+		php_mysqli_report_error(NULL, 0, "There is no active transaction");
+		RETURN_FALSE;
+	}
+
 	if (FAIL == mysqlnd_commit(mysql->mysql, flags, name)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 		RETURN_FALSE;
@@ -523,12 +528,12 @@ PHP_FUNCTION(mysqli_execute_query)
 
 	if (FAIL == mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-		
+
 		close_stmt_and_copy_errors(stmt, mysql);
 		RETURN_FALSE;
 	}
 
-	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */ 
+	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */
 	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
 	/* Get performance boost if reporting is switched off */
 	if (query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {
@@ -1420,6 +1425,10 @@ PHP_FUNCTION(mysqli_rollback)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
+	if (!MYSQLI_IS_IN_TRANSACTION(mysql)) {
+		php_mysqli_report_error(NULL, 0, "There is no active transaction");
+		RETURN_FALSE;
+	}
 
 	if (FAIL == mysqlnd_rollback(mysql->mysql, flags, name)) {
 		MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
