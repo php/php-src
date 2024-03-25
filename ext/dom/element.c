@@ -1757,7 +1757,7 @@ PHP_METHOD(DOM_Element, matches)
 	zval *id;
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
-	dom_element_matches(thisp, intern, return_value, selectors_str);
+	dom_element_matches(thisp, return_value, selectors_str);
 }
 
 PHP_METHOD(DOM_Element, closest)

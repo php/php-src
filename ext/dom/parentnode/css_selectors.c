@@ -37,14 +37,14 @@ typedef struct {
 	bool result;
 } dom_query_selector_matches_ctx;
 
-lxb_status_t php_dom_query_selector_find_single_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
+lxb_status_t dom_query_selector_find_single_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
 {
 	xmlNodePtr *result = (xmlNodePtr *) ctx;
 	*result = (xmlNodePtr) node;
 	return LXB_STATUS_STOP;
 }
 
-lxb_status_t php_dom_query_selector_find_array_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
+lxb_status_t dom_query_selector_find_array_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
 {
 	dom_query_selector_all_ctx *qsa_ctx = (dom_query_selector_all_ctx *) ctx;
 	zval object;
@@ -53,7 +53,7 @@ lxb_status_t php_dom_query_selector_find_array_callback(const xmlNode *node, lxb
 	return LXB_STATUS_OK;
 }
 
-lxb_status_t php_dom_query_selector_find_matches_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
+lxb_status_t dom_query_selector_find_matches_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
 {
 	dom_query_selector_matches_ctx *matches_ctx = (dom_query_selector_matches_ctx *) ctx;
 	if (node == matches_ctx->reference) {
@@ -63,7 +63,7 @@ lxb_status_t php_dom_query_selector_find_matches_callback(const xmlNode *node, l
 	return LXB_STATUS_OK;
 }
 
-static lxb_css_selector_list_t *php_dom_parse_selector(
+static lxb_css_selector_list_t *dom_parse_selector(
 	lxb_css_parser_t *parser,
 	lxb_selectors_t *selectors,
 	const zend_string *selectors_str,
@@ -98,7 +98,7 @@ static lxb_css_selector_list_t *php_dom_parse_selector(
 	return list;
 }
 
-static lxb_status_t php_dom_check_css_execution_status(lxb_status_t status)
+static lxb_status_t dom_check_css_execution_status(lxb_status_t status)
 {
 	if (UNEXPECTED(status != LXB_STATUS_OK && status != LXB_STATUS_STOP)) {
 		zend_argument_value_error(1, "contains an unsupported selector");
@@ -107,17 +107,17 @@ static lxb_status_t php_dom_check_css_execution_status(lxb_status_t status)
 	return LXB_STATUS_OK;
 }
 
-static void php_dom_selector_cleanup(lxb_css_parser_t *parser, lxb_selectors_t *selectors, lxb_css_selector_list_t *list)
+static void dom_selector_cleanup(lxb_css_parser_t *parser, lxb_selectors_t *selectors, lxb_css_selector_list_t *list)
 {
 	lxb_css_selector_list_destroy_memory(list);
 	lxb_selectors_destroy(selectors);
 	(void) lxb_css_parser_destroy(parser, false);
 }
 
-static lxb_status_t php_dom_query_selector_common(
+static lxb_status_t dom_query_selector_common(
 	zval *return_value,
 	const xmlNode *root,
-	zend_string *selectors_str,
+	const zend_string *selectors_str,
 	lxb_selectors_cb_f cb,
 	void *ctx,
 	lxb_selectors_opt_t options
@@ -128,26 +128,23 @@ static lxb_status_t php_dom_query_selector_common(
 	lxb_css_parser_t parser;
 	lxb_selectors_t selectors;
 
-	lxb_css_selector_list_t *list = php_dom_parse_selector(&parser, &selectors, selectors_str, options);
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, options);
 	if (UNEXPECTED(list == NULL)) {
 		status = LXB_STATUS_ERROR;
 	} else {
 		status = lxb_selectors_find(&selectors, root, list, cb, ctx);
-		status = php_dom_check_css_execution_status(status);
+		status = dom_check_css_execution_status(status);
 	}
 
-	php_dom_selector_cleanup(&parser, &selectors, list);
+	dom_selector_cleanup(&parser, &selectors, list);
 
 	return status;
 }
 
-static lxb_status_t php_dom_query_matches(
-	zval *return_value,
+static lxb_status_t dom_query_matches(
 	const xmlNode *root,
-	zend_string *selectors_str,
-	lxb_selectors_cb_f cb,
-	void *ctx,
-	lxb_selectors_opt_t options
+	const zend_string *selectors_str,
+	void *ctx
 )
 {
 	lxb_status_t status;
@@ -155,29 +152,62 @@ static lxb_status_t php_dom_query_matches(
 	lxb_css_parser_t parser;
 	lxb_selectors_t selectors;
 
-	lxb_css_selector_list_t *list = php_dom_parse_selector(&parser, &selectors, selectors_str, options);
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST);
 	if (UNEXPECTED(list == NULL)) {
 		status = LXB_STATUS_ERROR;
 	} else {
-		status = lxb_selectors_match_node(&selectors, root, list, cb, ctx);
-		status = php_dom_check_css_execution_status(status);
+		status = lxb_selectors_match_node(&selectors, root, list, dom_query_selector_find_matches_callback, ctx);
+		status = dom_check_css_execution_status(status);
 	}
 
-	php_dom_selector_cleanup(&parser, &selectors, list);
+	dom_selector_cleanup(&parser, &selectors, list);
 
 	return status;
 }
 
+static const xmlNode *dom_query_closest(
+	const xmlNode *root,
+	const zend_string *selectors_str
+)
+{
+	const xmlNode *ret = NULL;
+
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST);
+	if (EXPECTED(list != NULL)) {
+		const xmlNode *current = root;
+		while (current != NULL) {
+			dom_query_selector_matches_ctx ctx = { current, false };
+			lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, dom_query_selector_find_matches_callback, &ctx);
+			status = dom_check_css_execution_status(status);
+			if (UNEXPECTED(status != LXB_STATUS_OK)) {
+				break;
+			}
+			if (ctx.result) {
+				ret = current;
+				break;
+			}
+			current = current->parent;
+		}
+	}
+
+	dom_selector_cleanup(&parser, &selectors, list);
+
+	return ret;
+}
+
 /* https://dom.spec.whatwg.org/#dom-parentnode-queryselector */
-void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *return_value, zend_string *selectors_str)
+void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
 {
 	xmlNodePtr result = NULL;
 
-	if (php_dom_query_selector_common(
+	if (dom_query_selector_common(
 		return_value,
 		thisp,
 		selectors_str,
-		php_dom_query_selector_find_single_callback,
+		dom_query_selector_find_single_callback,
 		&result,
 		LXB_SELECTORS_OPT_MATCH_FIRST
 	) != LXB_STATUS_OK || result == NULL) {
@@ -188,16 +218,16 @@ void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *
 }
 
 /* https://dom.spec.whatwg.org/#dom-parentnode-queryselectorall */
-void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zval *return_value, zend_string *selectors_str)
+void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
 {
 	HashTable *list = zend_new_array(0);
 	dom_query_selector_all_ctx ctx = { list, intern };
 
-	if (php_dom_query_selector_common(
+	if (dom_query_selector_common(
 		return_value,
 		thisp,
 		selectors_str,
-		php_dom_query_selector_find_array_callback,
+		dom_query_selector_find_array_callback,
 		&ctx,
 		LXB_SELECTORS_OPT_DEFAULT
 	) != LXB_STATUS_OK) {
@@ -213,17 +243,14 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 }
 
 /* https://dom.spec.whatwg.org/#dom-element-matches */
-void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, zend_string *selectors_str)
+void dom_element_matches(xmlNodePtr thisp, zval *return_value, const zend_string *selectors_str)
 {
 	dom_query_selector_matches_ctx ctx = { thisp, false };
 
-	if (php_dom_query_matches(
-		return_value,
+	if (dom_query_matches(
 		thisp,
 		selectors_str,
-		php_dom_query_selector_find_matches_callback,
-		&ctx,
-		LXB_SELECTORS_OPT_MATCH_FIRST
+		&ctx
 	) != LXB_STATUS_OK) {
 		RETURN_THROWS();
 	} else {
@@ -232,32 +259,12 @@ void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_valu
 }
 
 /* https://dom.spec.whatwg.org/#dom-element-closest */
-void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, zend_string *selectors_str)
+void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
 {
-	lxb_css_parser_t parser;
-	lxb_selectors_t selectors;
-
-	lxb_css_selector_list_t *list = php_dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST);
-	if (UNEXPECTED(list == NULL)) {
-		RETURN_THROWS();
-	} else {
-		xmlNodePtr current = thisp;
-		while (current != NULL) {
-			dom_query_selector_matches_ctx ctx = { current, false };
-			lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, php_dom_query_selector_find_matches_callback, &ctx);
-			status = php_dom_check_css_execution_status(status);
-			if (UNEXPECTED(status != LXB_STATUS_OK)) {
-				break;
-			}
-			if (ctx.result) {
-				DOM_RET_OBJ(current, intern);
-				break;
-			}
-			current = current->parent;
-		}
+	const xmlNode *result = dom_query_closest(thisp, selectors_str);
+	if (EXPECTED(result != NULL)) {
+		DOM_RET_OBJ((xmlNodePtr) result, intern);
 	}
-
-	php_dom_selector_cleanup(&parser, &selectors, list);
 }
 
 #endif
