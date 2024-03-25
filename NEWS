@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
     (nielsdos)
   . Fixed bug GH-13784 (AX_GCC_FUNC_ATTRIBUTE failure). (Remi)
+  . Fixed bug GH-13670 (GC does not scale well with a lot of objects created in
+    destructor). (Arnaud)
 
 - DOM:
   . Add some missing ZPP checks. (nielsdos)
