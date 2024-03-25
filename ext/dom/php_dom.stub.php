@@ -1218,7 +1218,7 @@ namespace DOM
         public function __wakeup(): void {}
     }
 
-    class NodeList implements IteratorAggregate, Countable
+    class NodeList implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1233,7 +1233,7 @@ namespace DOM
         public function item(int $index): ?Node {}
     }
 
-    class NamedNodeMap implements IteratorAggregate, Countable
+    class NamedNodeMap implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1252,7 +1252,7 @@ namespace DOM
         public function getIterator(): \Iterator {}
     }
 
-    class DTDNamedNodeMap implements IteratorAggregate, Countable
+    class DTDNamedNodeMap implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1271,7 +1271,7 @@ namespace DOM
         public function getIterator(): \Iterator {}
     }
 
-    class HTMLCollection implements IteratorAggregate, Countable
+    class HTMLCollection implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
