@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4dc1862862acbdfa41148882a5e9a8c79839a3d1 */
+ * Stub hash: 120b3e764f4d83c93918b81e1a73601bb7fe7cf0 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -841,6 +841,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOM_Element_querySelectorAll arginfo_class_DOM_ParentNode_querySelectorAll
 
+#define arginfo_class_DOM_Element_closest arginfo_class_DOM_ParentNode_querySelector
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOM_Element_matches, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, selectors, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1289,6 +1291,7 @@ ZEND_METHOD(DOM_Element, insertAdjacentElement);
 ZEND_METHOD(DOM_Element, setIdAttributeNode);
 ZEND_METHOD(DOM_Element, querySelector);
 ZEND_METHOD(DOM_Element, querySelectorAll);
+ZEND_METHOD(DOM_Element, closest);
 ZEND_METHOD(DOM_Element, matches);
 ZEND_METHOD(DOM_CharacterData, appendData);
 ZEND_METHOD(DOM_CharacterData, insertData);
@@ -1687,6 +1690,7 @@ static const zend_function_entry class_DOM_Element_methods[] = {
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMElement_replaceChildren, arginfo_class_DOM_Element_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(DOM_Element, querySelector, arginfo_class_DOM_Element_querySelector, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOM_Element, querySelectorAll, arginfo_class_DOM_Element_querySelectorAll, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOM_Element, closest, arginfo_class_DOM_Element_closest, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOM_Element, matches, arginfo_class_DOM_Element_matches, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

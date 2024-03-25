@@ -231,4 +231,33 @@ void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_valu
 	}
 }
 
+/* https://dom.spec.whatwg.org/#dom-element-closest */
+void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, zend_string *selectors_str)
+{
+	lxb_css_parser_t parser;
+	lxb_selectors_t selectors;
+
+	lxb_css_selector_list_t *list = php_dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST);
+	if (UNEXPECTED(list == NULL)) {
+		RETURN_THROWS();
+	} else {
+		xmlNodePtr current = thisp;
+		while (current != NULL) {
+			dom_query_selector_matches_ctx ctx = { current, false };
+			lxb_status_t status = lxb_selectors_match_node(&selectors, current, list, php_dom_query_selector_find_matches_callback, &ctx);
+			status = php_dom_check_css_execution_status(status);
+			if (UNEXPECTED(status != LXB_STATUS_OK)) {
+				break;
+			}
+			if (ctx.result) {
+				DOM_RET_OBJ(current, intern);
+				break;
+			}
+			current = current->parent;
+		}
+	}
+
+	php_dom_selector_cleanup(&parser, &selectors, list);
+}
+
 #endif

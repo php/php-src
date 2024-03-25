@@ -1379,6 +1379,7 @@ namespace DOM
 
         public function querySelector(string $selectors): ?Element {}
         public function querySelectorAll(string $selectors): NodeList {}
+        public function closest(string $selectors): ?Element {}
         public function matches(string $selectors): bool {}
     }
 
