@@ -17083,7 +17083,7 @@ static ir_ref jit_frameless_observer_end(zend_jit_ctx *jit, struct jit_frameless
 	ir_ref rx = jit_IP(jit);
 	jit_observer_fcall_end(jit, rx, res_addr);
 
-	ir_STORE(jit_EG(current_execute_data), jit_CALL(rx, prev_execute_data));
+	ir_STORE(jit_EG(current_execute_data), ir_LOAD_A(jit_CALL(rx, prev_execute_data)));
 
 	ir_ref allocated_path = IR_UNUSED;
 
