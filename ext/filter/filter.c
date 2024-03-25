@@ -701,7 +701,7 @@ PHP_FUNCTION(filter_input_array)
 		 * when the input value doesn't exist NULL is returned. With the flag
 		 * set, NULL and false should be returned, respectively. Ergo, although
 		 * the code below looks incorrect, it's actually right. */
-		if (null_on_failure || (op_long & FILTER_NULL_ON_FAILURE)) {
+		if (null_on_failure) {
 			RETURN_FALSE;
 		} else {
 			RETURN_NULL();
