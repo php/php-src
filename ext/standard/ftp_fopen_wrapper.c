@@ -406,7 +406,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 	php_stream *stream = NULL, *datastream = NULL;
 	php_url *resource = NULL;
 	char tmp_line[512];
-	char ip[sizeof("123.123.123.123")];
+	char ip[INET6_ADDRSTRLEN];
 	unsigned short portno;
 	char *hoststart = NULL;
 	int result = 0, use_ssl, use_ssl_on_data=0;
@@ -686,7 +686,7 @@ php_stream * php_stream_ftp_opendir(php_stream_wrapper *wrapper, const char *pat
 	php_url *resource = NULL;
 	int result = 0, use_ssl, use_ssl_on_data = 0;
 	char *hoststart = NULL, tmp_line[512];
-	char ip[sizeof("123.123.123.123")];
+	char ip[INET6_ADDRSTRLEN];
 	unsigned short portno;
 
 	tmp_line[0] = '\0';
