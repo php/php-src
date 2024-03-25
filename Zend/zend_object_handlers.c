@@ -825,7 +825,10 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 				bool is_clone_with_op = false;
 
 				if (UNEXPECTED(is_readonly)) {
-					is_clone_with_op = EG(current_execute_data) && EG(current_execute_data)->opline &&
+					is_clone_with_op = EG(current_execute_data) &&
+						EG(current_execute_data)->func &&
+						ZEND_USER_CODE(EG(current_execute_data)->func->common.type) &&
+						EG(current_execute_data)->opline &&
 						EG(current_execute_data)->opline->opcode == ZEND_CLONE_INIT_PROP;
 
 					if (UNEXPECTED(
