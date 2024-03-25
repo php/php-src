@@ -25,6 +25,8 @@
 #include "lexbor/css/parser.h"
 #include "lexbor/selectors-adapted/selectors.h"
 
+// TODO: optimization idea: cache the parsed selectors in an LRU fashion?
+
 typedef struct {
 	HashTable *list;
 	dom_object *intern;
