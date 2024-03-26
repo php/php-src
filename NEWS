@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.18
+28 Mar 2024, PHP 8.2.18RC1
 
 - Core:
   . Fixed bug GH-13612 (Corrupted memory in destructor with weak references).
