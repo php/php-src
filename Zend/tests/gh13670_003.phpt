@@ -1,5 +1,10 @@
 --TEST--
 GH-13670 003
+--SKIPIF--
+<?php
+// gc_threshold is global state
+if (getenv('SKIP_REPEAT')) die('skip Not repeatable');
+?>
 --FILE--
 <?php
 
