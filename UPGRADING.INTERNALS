@@ -203,7 +203,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      php_date_initialize_from_ts_double() to initialize a php_date_obj with
      the given unix timestamp using GMT +00:00.
 
- d. ext/pcre
+ f. ext/pcre
    - php_pcre_match_impl() now no longer has a use_flags argument.
      When flags should be ignored, pass 0 to the flags argument.
    - php_pcre_match_impl() and pcre_get_compiled_regex_cache_ex() now use
@@ -211,6 +211,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - pcre_get_compiled_regex_cache_ex() now provides an option to collect extra
      options (from modifiers used in the expression, for example), and calls
      pcre2_set_compile_extra_options() with those options.
+
+ g. ext/standard
+   - Added the base64_encode_ex() API with flag parameters, value can be
+     PHP_BASE64_NO_PADDING to encode without the padding character '='.
 
 ========================
 4. OpCode changes
