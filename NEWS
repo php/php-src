@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.5
+?? ??? ????, PHP 8.3.6
+
+
+28 Mar 2024, PHP 8.3.5RC1
 
 - Core:
   . Fixed GH-13569 (GC buffer unnecessarily grows up to GC_MAX_BUF_SIZE when
