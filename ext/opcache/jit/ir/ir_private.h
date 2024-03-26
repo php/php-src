@@ -479,6 +479,91 @@ IR_ALWAYS_INLINE int ir_bitset_pop_first(ir_bitset set, uint32_t len)
 	} \
 } while (0)
 
+/* Sparse Set */
+typedef struct _ir_sparse_set {
+	uint32_t size;
+	uint32_t len;
+	uint32_t *data;
+} ir_sparse_set;
+
+#define IR_SPARSE_SET_DENSE(set,  n) (set)->data[n]
+#define IR_SPARSE_SET_SPARSE(set, n) (set)->data[-1 - ((int32_t)(n))]
+
+IR_ALWAYS_INLINE void ir_sparse_set_init(ir_sparse_set *set, uint32_t size)
+{
+	set->size = size;
+	set->len = 0;
+	set->data = (uint32_t*)ir_mem_malloc(sizeof(uint32_t) * 2 * size) + size;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_clear(ir_sparse_set *set)
+{
+	set->len = 0;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_free(ir_sparse_set *set)
+{
+	ir_mem_free(set->data - set->size);
+}
+
+IR_ALWAYS_INLINE bool ir_sparse_set_empty(const ir_sparse_set *set)
+{
+	return set->len == 0;
+}
+
+IR_ALWAYS_INLINE bool ir_sparse_set_in(const ir_sparse_set *set, uint32_t n)
+{
+	uint32_t idx = IR_SPARSE_SET_SPARSE(set, n);
+
+	return idx < set->len && IR_SPARSE_SET_DENSE(set, idx) == n;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_add(ir_sparse_set *set, uint32_t n)
+{
+	uint32_t idx;
+
+	IR_ASSERT(!ir_sparse_set_in(set, n));
+	idx = set->len++;
+	IR_SPARSE_SET_DENSE(set,	idx) = n;
+	IR_SPARSE_SET_SPARSE(set, n) = idx;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_del(ir_sparse_set *set, uint32_t n)
+{
+	uint32_t last;
+
+	IR_ASSERT(ir_sparse_set_in(set, n));
+	last = IR_SPARSE_SET_DENSE(set,	set->len - 1);
+	if (last != n) {
+		uint32_t idx = IR_SPARSE_SET_SPARSE(set, n);
+
+		IR_SPARSE_SET_DENSE(set, idx) = last;
+		IR_SPARSE_SET_SPARSE(set, last) = idx;
+
+	}
+	set->len--;
+}
+
+IR_ALWAYS_INLINE uint32_t ir_sparse_set_pop(ir_sparse_set *set)
+{
+	if (set->len > 0) {
+		set->len--;
+		return IR_SPARSE_SET_DENSE(set, set->len);
+	}
+	return -1; /* empty set */
+}
+
+#define IR_SPARSE_SET_FOREACH(set, bit) do { \
+	ir_sparse_set *_set = (set); \
+	uint32_t _i, _len = _set->len; \
+	uint32_t *_p = _set->data; \
+	for (_i = 0; _i < _len; _p++, _i++) { \
+		(bit) = *_p; \
+
+#define IR_SPARSE_SET_FOREACH_END() \
+	} \
+} while (0)
+
 /* Bit Queue */
 typedef struct _ir_bitqueue {
 	uint32_t  len;

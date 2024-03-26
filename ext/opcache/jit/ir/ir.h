@@ -531,8 +531,9 @@ void ir_strtab_free(ir_strtab *strtab);
 
 /* debug related */
 #ifdef IR_DEBUG
-# define IR_DEBUG_SCCP         (1<<27)
-# define IR_DEBUG_GCM          (1<<28)
+# define IR_DEBUG_SCCP         (1<<26)
+# define IR_DEBUG_GCM          (1<<27)
+# define IR_DEBUG_GCM_SPLIT    (1<<28)
 # define IR_DEBUG_SCHEDULE     (1<<29)
 # define IR_DEBUG_RA           (1<<30)
 #endif

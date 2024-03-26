@@ -116,7 +116,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 
 		if ((save_flags & IR_SAVE_CFG)
 		 && ctx->cfg_map
-		 && ctx->cfg_map[i]
+		 && (int32_t)ctx->cfg_map[i] > 0 /* the node may be scheduled incompletely */
 		 && ctx->cfg_blocks[ctx->cfg_map[i]].start == i) {
 			uint32_t b = ctx->cfg_map[i];
 			ir_block *bb = &ctx->cfg_blocks[b];
@@ -288,7 +288,7 @@ void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f)
 
 		if ((save_flags & IR_SAVE_CFG_MAP)
 		 && ctx->cfg_map
-		 && ctx->cfg_map[i]) {
+		 && ctx->cfg_map[i] > 0) { /* the node may be scheduled incompletely */
 			if (first) {
 				fprintf(f, " #");
 				first = 0;

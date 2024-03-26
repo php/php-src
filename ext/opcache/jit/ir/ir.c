@@ -1984,10 +1984,25 @@ void _ir_BEGIN(ir_ctx *ctx, ir_ref src)
 	}
 }
 
+ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+
+	if (insn->op == IR_NE && IR_IS_CONST_REF(insn->op2)) {
+		ir_insn *op2_insn = &ctx->ir_base[insn->op2];
+
+		if (IR_IS_TYPE_INT(op2_insn->type) && op2_insn->val.u64 == 0) {
+			return insn->op1;
+		}
+	}
+	return ref;
+}
+
 ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition)
 {
 	ir_ref if_ref;
 
+	condition = _ir_fold_condition(ctx, condition);
 	IR_ASSERT(ctx->control);
 	if (IR_IS_CONST_REF(condition)) {
 		condition = ir_ref_is_true(ctx, condition) ? IR_TRUE : IR_FALSE;

@@ -14,13 +14,14 @@
 #define IR_GCM_IS_SCHEDULED_EARLY(b) (((int32_t)(b)) < 0)
 #define IR_GCM_EARLY_BLOCK(b)        ((uint32_t)-((int32_t)(b)))
 
-static uint32_t ir_gcm_schedule_early(ir_ctx *ctx, ir_ref ref, ir_list *queue_rest)
+#define IR_GCM_SPLIT 1
+
+static uint32_t ir_gcm_schedule_early(ir_ctx *ctx, ir_ref ref, ir_list *queue_late)
 {
 	ir_ref n, *p, input;
 	ir_insn *insn;
 	uint32_t dom_depth;
 	uint32_t b, result;
-	bool reschedule_late = 1;
 
 	insn = &ctx->ir_base[ref];
 
@@ -38,25 +39,17 @@ static uint32_t ir_gcm_schedule_early(ir_ctx *ctx, ir_ref ref, ir_list *queue_re
 			if (IR_GCM_IS_SCHEDULED_EARLY(b)) {
 				b = IR_GCM_EARLY_BLOCK(b);
 			} else if (!b) {
-				b = ir_gcm_schedule_early(ctx, input, queue_rest);
+				b = ir_gcm_schedule_early(ctx, input, queue_late);
 			}
 			if (dom_depth < ctx->cfg_blocks[b].dom_depth) {
 				dom_depth = ctx->cfg_blocks[b].dom_depth;
 				result = b;
 			}
-			reschedule_late = 0;
 		}
 	}
 
 	ctx->cfg_map[ref] = IR_GCM_EARLY_BLOCK(result);
-	if (UNEXPECTED(reschedule_late)) {
-		/* Floating nodes that don't depend on other nodes
-		 * (e.g. only on constants), have to be scheduled to the
-		 * last common ancestor. Otherwise they always go to the
-		 * first block.
-		 */
-		ir_list_push_unchecked(queue_rest, ref);
-	}
+	ir_list_push_unchecked(queue_late, ref);
 	return result;
 }
 
@@ -80,10 +73,371 @@ static uint32_t ir_gcm_find_lca(ir_ctx *ctx, uint32_t b1, uint32_t b2)
 	return b2;
 }
 
+static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
+{
+	ir_block *bb = &ctx->cfg_blocks[lca];
+	uint32_t loop_depth = bb->loop_depth;
+	uint32_t flags, best, b;
+
+	if (!loop_depth) {
+		return lca;
+	}
+
+	if (ctx->ir_base[ref].op >= IR_EQ && ctx->ir_base[ref].op <= IR_UGT) {
+		ir_use_list *use_list = &ctx->use_lists[ref];
+
+		if (use_list->count == 1) {
+			ir_ref use = ctx->use_edges[use_list->refs];
+			ir_insn *insn = &ctx->ir_base[use];
+			if (insn->op == IR_IF || insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
+				/* Don't hoist invariant comparison */
+				return lca;
+			}
+		}
+	}
+
+	flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
+	if ((flags & IR_BB_LOOP_WITH_ENTRY)
+	 && !(ctx->binding && ir_binding_find(ctx, ref))) {
+		/* Don't move loop invariant code across an OSR ENTRY if we can't restore it */
+		return lca;
+	}
+
+	best = b = lca;
+	do {
+		b = bb->dom_parent;
+		bb = &ctx->cfg_blocks[b];
+		if (bb->loop_depth < loop_depth) {
+			if (!bb->loop_depth) {
+				best = b;
+				break;
+			}
+			flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
+			if ((flags & IR_BB_LOOP_WITH_ENTRY)
+			 && !(ctx->binding && ir_binding_find(ctx, ref))) {
+				break;
+			}
+			loop_depth = bb->loop_depth;
+			best = b;
+		}
+	} while (b != ctx->cfg_map[ref]);
+
+	return best;
+}
+
+#if IR_GCM_SPLIT
+/* Partially Dead Code Elimination through splitting the node and sunking the clones
+ *
+ * This code is based on the Benedikt Meurer's idea first implemented in V8.
+ * See: https://codereview.chromium.org/899433005
+ */
+
+typedef struct _ir_gcm_split_data {
+	ir_sparse_set totally_useful;
+	ir_list       worklist;
+} ir_gcm_split_data;
+
+static void _push_predecessors(ir_ctx *ctx, ir_block *bb, ir_gcm_split_data *data)
+{
+	uint32_t *p, i, n = bb->predecessors_count;
+
+	IR_ASSERT(n > 0);
+	p = ctx->cfg_edges + bb->predecessors;
+	do {
+		i = *p;
+		if (!ir_sparse_set_in(&data->totally_useful, i)) {
+			ir_list_push(&data->worklist, i);
+		}
+		p++;
+		n--;
+	} while (n > 0);
+}
+
+static bool _check_successors(ir_ctx *ctx, ir_block *bb, ir_gcm_split_data *data)
+{
+	uint32_t *p, i, n = bb->successors_count;
+
+	if (n <= 1) {
+		IR_ASSERT(ir_sparse_set_in(&data->totally_useful, ctx->cfg_edges[bb->successors]));
+		return 1;
+	}
+
+	p = ctx->cfg_edges + bb->successors;
+	do {
+		i = *p;
+		if (!ir_sparse_set_in(&data->totally_useful, i)) {
+			return 0;
+		}
+		p++;
+		n--;
+	} while (n > 0);
+
+	return 1;
+}
+
+static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
+{
+	ir_use_list *use_list;
+	ir_insn *insn;
+	ir_ref n, *p, use;
+	uint32_t i;
+	ir_gcm_split_data *data = ctx->data;
+
+	IR_ASSERT(b > 0 && b <= ctx->cfg_blocks_count);
+
+	/* 1. Find a set of blocks where the node is TOTALLY_USEFUL (not PARTIALLY_DEAD)
+	 * 1.1. Collect the blocks where the node is really USED.
+	 */
+	ir_sparse_set_clear(&data->totally_useful);
+
+	use_list = &ctx->use_lists[ref];
+	n = use_list->count;
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		use = *p;
+		insn = &ctx->ir_base[use];
+		if (insn->op == IR_PHI) {
+			ir_ref *p = insn->ops + 2; /* PHI data inputs */
+			ir_ref *q = ctx->ir_base[insn->op1].ops + 1; /* MERGE inputs */
+			ir_ref n = insn->inputs_count - 1;
+
+			for (;n > 0; p++, q++, n--) {
+				if (*p == ref) {
+					i = ctx->cfg_map[*q];
+					IR_ASSERT(i > 0 && i <= ctx->cfg_blocks_count);
+					if (!ir_sparse_set_in(&data->totally_useful, i)) {
+						if (i == b) return 0; /* node is totally-useful in the scheduled block */
+						ir_sparse_set_add(&data->totally_useful, i);
+					}
+				}
+			}
+		} else {
+			i = ctx->cfg_map[use];
+			if (!i) {
+				continue;
+			}
+			IR_ASSERT(i > 0 && i <= ctx->cfg_blocks_count);
+			if (!ir_sparse_set_in(&data->totally_useful, i)) {
+				if (i == b) return 0; /* node is totally-useful in the scheduled block */
+				ir_sparse_set_add(&data->totally_useful, i);
+			}
+		}
+	}
+
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_GCM_SPLIT) {
+		bool first = 1;
+		fprintf(stderr, "*** Split partially dead node d_%d scheduled to BB%d\n", ref, b);
+		IR_SPARSE_SET_FOREACH(&data->totally_useful, i) {
+			if (first) {
+				fprintf(stderr, "\td_%d is USED in [BB%d", ref, i);
+				first = 0;
+			} else {
+				fprintf(stderr, ", BB%d", i);
+			}
+		} IR_SPARSE_SET_FOREACH_END();
+		fprintf(stderr, "]\n");
+	}
+#endif
+
+	/* 1.2. Iteratively check the predecessors of already found TOTALLY_USEFUL blocks and
+	 *      add them into TOTALLY_USEFUL set if all of their sucessors are already there.
+	 */
+	IR_SPARSE_SET_FOREACH(&data->totally_useful, i) {
+		_push_predecessors(ctx, &ctx->cfg_blocks[i], data);
+	} IR_SPARSE_SET_FOREACH_END();
+
+	while (ir_list_len(&data->worklist)) {
+		i = ir_list_pop(&data->worklist);
+		if (!ir_sparse_set_in(&data->totally_useful, i)) {
+			ir_block *bb = &ctx->cfg_blocks[i];
+
+			if (_check_successors(ctx, bb, data)) {
+				if (i == b) {
+					/* node is TOTALLY_USEFUL in the scheduled block */
+					ir_list_clear(&data->worklist);
+					return 0;
+				}
+				ir_sparse_set_add(&data->totally_useful, i);
+				_push_predecessors(ctx, bb, data);
+			}
+		}
+	}
+
+	IR_ASSERT(!ir_sparse_set_in(&data->totally_useful, b));
+
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_GCM_SPLIT) {
+		bool first = 1;
+		IR_SPARSE_SET_FOREACH(&data->totally_useful, i) {
+			if (first) {
+				fprintf(stderr, "\td_%d is TOTALLY_USEFUL in [BB%d", ref, i);
+				first = 0;
+			} else {
+				fprintf(stderr, ", BB%d", i);
+			}
+		} IR_SPARSE_SET_FOREACH_END();
+		fprintf(stderr, "]\n");
+	}
+#endif
+
+	/* 2. Split the USEs into partitions */
+	use_list = &ctx->use_lists[ref];
+	ir_hashtab hash;
+	uint32_t j, clone, clones_count = 0, uses_count = 0;
+	struct {
+		ir_ref   ref;
+		uint32_t block;
+		uint32_t use_count;
+		uint32_t use;
+	} *clones = ir_mem_malloc(sizeof(*clones) * use_list->count);
+	struct {
+		ir_ref   ref;
+		uint32_t block;
+		uint32_t next;
+	} *uses = ir_mem_malloc(sizeof(*uses) * use_list->count);
+
+	ir_hashtab_init(&hash, use_list->count);
+	n = use_list->count;
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		use = *p;
+		insn = &ctx->ir_base[use];
+		if (insn->op == IR_PHI) {
+			ir_ref *p = insn->ops + 2; /* PHI data inputs */
+			ir_ref *q = ctx->ir_base[insn->op1].ops + 1; /* MERGE inputs */
+			ir_ref n = insn->inputs_count - 1;
+
+			/* PHIs must be processed once */
+			if (ir_hashtab_find(&hash, -use) != (ir_ref)IR_INVALID_VAL) {
+				continue;
+			}
+			ir_hashtab_add(&hash, -use, IR_NULL);
+			for (;n > 0; p++, q++, n--) {
+				if (*p == ref) {
+					j = i = ctx->cfg_map[*q];
+					while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+						j = ctx->cfg_blocks[j].idom;
+					}
+					clone = ir_hashtab_find(&hash, j);
+					if (clone == IR_INVALID_VAL) {
+						clone = clones_count++;
+						ir_hashtab_add(&hash, j, clone);
+						clones[clone].block = j;
+						clones[clone].use_count = 0;
+						clones[clone].use = (uint32_t)-1;
+					}
+					uses[uses_count].ref = use;
+					uses[uses_count].block = i;
+					uses[uses_count].next = clones[clone].use;
+					clones[clone].use_count++;
+					clones[clone].use = uses_count++;
+				}
+			}
+		} else {
+			j = i = ctx->cfg_map[use];
+			IR_ASSERT(i > 0);
+			while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+				j = ctx->cfg_blocks[j].idom;
+			}
+			clone = ir_hashtab_find(&hash, j);
+			if (clone == IR_INVALID_VAL) {
+				clone = clones_count++;
+				ir_hashtab_add(&hash, j, clone);
+				clones[clone].block = j;
+				clones[clone].use_count = 0;
+				clones[clone].use = -1;
+			}
+			uses[uses_count].ref = use;
+			uses[uses_count].block = i;
+			uses[uses_count].next = clones[clone].use;
+			clones[clone].use_count++;
+			clones[clone].use = uses_count++;
+		}
+	}
+
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_GCM_SPLIT) {
+		for (i = 0; i < clones_count; i++) {
+			uint32_t u = clones[i].use;
+
+			fprintf(stderr, "\tCLONE #%d in BB%d USES(%d)=[d_%d/BB%d",
+				i, clones[i].block, clones[i].use_count, uses[u].ref, uses[u].block);
+			u = uses[u].next;
+			while (u != (uint32_t)-1) {
+				fprintf(stderr, ", d_%d/BB%d", uses[u].ref, uses[u].block);
+				u = uses[u].next;
+			}
+			fprintf(stderr, "]\n");
+		}
+	}
+#endif
+
+	/* Create Clones */
+	insn = &ctx->ir_base[ref];
+	clones[0].ref = ref;
+	for (i = 1; i < clones_count; i++) {
+		clones[i].ref = clone = ir_emit(ctx, insn->optx, insn->op1, insn->op2, insn->op3);
+		insn = &ctx->ir_base[ref];
+		if (insn->op1 > 0) ir_use_list_add(ctx, insn->op1, clone);
+		if (insn->op2 > 0) ir_use_list_add(ctx, insn->op2, clone);
+		if (insn->op3 > 0) ir_use_list_add(ctx, insn->op3, clone);
+	}
+
+	/* Reconstruct IR: Update DEF->USE lists, CFG mapping and etc */
+	ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_count * sizeof(ir_use_list));
+	ctx->cfg_map = ir_mem_realloc(ctx->cfg_map, ctx->insns_count * sizeof(uint32_t));
+	n = ctx->use_lists[ref].refs;
+	for (i = 0; i < clones_count; i++) {
+		clone = clones[i].ref;
+		ctx->cfg_map[clone] = clones[i].block;
+		ctx->use_lists[clone].count = clones[i].use_count;
+		ctx->use_lists[clone].refs = n;
+
+		uint32_t u = clones[i].use;
+		while (u != (uint32_t)-1) {
+			use = uses[u].ref;
+			ctx->use_edges[n++] = use;
+			u = uses[u].next;
+			if (i > 0) {
+				/* replace inputs */
+				ir_insn *insn = &ctx->ir_base[use];
+				ir_ref k, l = insn->inputs_count;
+
+				for (k = 1; k <= l; k++) {
+					if (ir_insn_op(insn, k) == ref) {
+						if (insn->op == IR_PHI) {
+							j = ctx->cfg_map[ir_insn_op(&ctx->ir_base[insn->op1], k - 1)];
+							while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
+								j = ctx->cfg_blocks[j].idom;
+							}
+							if (j != clones[i].block) {
+								continue;
+							}
+						}
+						ir_insn_set_op(insn, k, clone);
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	ir_mem_free(uses);
+	ir_mem_free(clones);
+	ir_hashtab_free(&hash);
+
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_GCM_SPLIT) {
+		ir_check(ctx);
+	}
+#endif
+
+	return 1;
+}
+#endif
+
 static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 {
-	ir_ref n, *p, use;
-	ir_use_list *use_list;
+	ir_ref n, use;
 	uint32_t lca = 0;
 
 	IR_ASSERT(ctx->ir_base[ref].op != IR_PARAM && ctx->ir_base[ref].op != IR_VAR);
@@ -92,11 +446,9 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	IR_ASSERT(IR_GCM_IS_SCHEDULED_EARLY(b));
 	b = IR_GCM_EARLY_BLOCK(b);
 	ctx->cfg_map[ref] = b;
-	use_list = &ctx->use_lists[ref];
-	n = use_list->count;
 
-	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-		use = *p;
+	for (n = 0; n < ctx->use_lists[ref].count; n++) {
+		use = ctx->use_edges[ctx->use_lists[ref].refs + n];
 		b = ctx->cfg_map[use];
 		if (IR_GCM_IS_SCHEDULED_EARLY(b)) {
 			ir_gcm_schedule_late(ctx, use, b);
@@ -122,49 +474,16 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	}
 
 	IR_ASSERT(lca != 0 && "No Common Ancestor");
-	b = lca;
 
-	if (b != ctx->cfg_map[ref]) {
-		ir_block *bb = &ctx->cfg_blocks[b];
-		uint32_t loop_depth = bb->loop_depth;
+#if IR_GCM_SPLIT
+	if (ctx->use_lists[ref].count > 1
+	 && ir_split_partially_dead_node(ctx, ref, lca)) {
+		return;
+	}
+#endif
 
-		if (loop_depth) {
-			uint32_t flags;
-
-			use_list = &ctx->use_lists[ref];
-			if (use_list->count == 1) {
-				use = ctx->use_edges[use_list->refs];
-				ir_insn *insn = &ctx->ir_base[use];
-				if (insn->op == IR_IF || insn->op == IR_GUARD || insn->op == IR_GUARD_NOT) {
-					ctx->cfg_map[ref] = b;
-					return;
-				}
-			}
-
-			flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
-			if ((flags & IR_BB_LOOP_WITH_ENTRY)
-			 && !(ctx->binding && ir_binding_find(ctx, ref))) {
-				/* Don't move loop invariant code across an OSR ENTRY if we can't restore it */
-			} else {
-				do {
-					lca = bb->dom_parent;
-					bb = &ctx->cfg_blocks[lca];
-					if (bb->loop_depth < loop_depth) {
-						if (!bb->loop_depth) {
-							b = lca;
-							break;
-						}
-						flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
-						if ((flags & IR_BB_LOOP_WITH_ENTRY)
-						 && !(ctx->binding && ir_binding_find(ctx, ref))) {
-							break;
-						}
-						loop_depth = bb->loop_depth;
-						b = lca;
-					}
-				} while (lca != ctx->cfg_map[ref]);
-			}
-		}
+	if (lca != ctx->cfg_map[ref]) {
+		b = ir_gcm_select_best_block(ctx, ref, lca);
 
 		ctx->cfg_map[ref] = b;
 		if (ctx->ir_base[ref + 1].op == IR_OVERFLOW) {
@@ -174,63 +493,12 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	}
 }
 
-static void ir_gcm_schedule_rest(ir_ctx *ctx, ir_ref ref)
-{
-	ir_ref n, *p, use;
-	uint32_t b = ctx->cfg_map[ref];
-	uint32_t lca = 0;
-
-	IR_ASSERT(ctx->ir_base[ref].op != IR_PARAM && ctx->ir_base[ref].op != IR_VAR);
-	IR_ASSERT(ctx->ir_base[ref].op != IR_PHI && ctx->ir_base[ref].op != IR_PI);
-
-	IR_ASSERT(IR_GCM_IS_SCHEDULED_EARLY(b));
-	b = IR_GCM_EARLY_BLOCK(b);
-	ctx->cfg_map[ref] = b;
-	n = ctx->use_lists[ref].count;
-
-	for (p = &ctx->use_edges[ctx->use_lists[ref].refs]; n > 0; p++, n--) {
-		use = *p;
-		b = ctx->cfg_map[use];
-		if (IR_GCM_IS_SCHEDULED_EARLY(b)) {
-			ir_gcm_schedule_late(ctx, use, b);
-			b = ctx->cfg_map[use];
-			IR_ASSERT(b != 0);
-		} else if (!b) {
-			continue;
-		} else if (ctx->ir_base[use].op == IR_PHI) {
-			ir_insn *insn = &ctx->ir_base[use];
-			ir_ref *p = insn->ops + 2; /* PHI data inputs */
-			ir_ref *q = ctx->ir_base[insn->op1].ops + 1; /* MERGE inputs */
-			ir_ref n = insn->inputs_count - 1;
-
-			for (;n > 0; p++, q++, n--) {
-				if (*p == ref) {
-					b = ctx->cfg_map[*q];
-					lca = !lca ? b : ir_gcm_find_lca(ctx, lca, b);
-				}
-			}
-			continue;
-		}
-		lca = !lca ? b : ir_gcm_find_lca(ctx, lca, b);
-	}
-
-	IR_ASSERT(lca != 0 && "No Common Ancestor");
-	b = lca;
-
-	ctx->cfg_map[ref] = b;
-	if (ctx->ir_base[ref + 1].op == IR_OVERFLOW) {
-		/* OVERFLOW is a projection and must be scheduled together with previous ADD/SUB/MUL_OV */
-		ctx->cfg_map[ref + 1] = b;
-	}
-}
-
 int ir_gcm(ir_ctx *ctx)
 {
 	ir_ref k, n, *p, ref;
 	ir_block *bb;
 	ir_list queue_early;
 	ir_list queue_late;
-	ir_list queue_rest;
 	uint32_t *_blocks, b;
 	ir_insn *insn, *use_insn;
 	ir_use_list *use_list;
@@ -309,7 +577,6 @@ int ir_gcm(ir_ctx *ctx)
 			}
 			if (insn->type != IR_VOID) {
 				IR_ASSERT(ir_op_flags[insn->op] & IR_OP_FLAG_MEM);
-				ir_list_push_unchecked(&queue_late, ref);
 			}
 			ref = insn->op1; /* control predecessor */
 		}
@@ -328,27 +595,17 @@ int ir_gcm(ir_ctx *ctx)
 					if (EXPECTED(ctx->use_lists[ref].count != 0)) {
 						_blocks[ref] = b; /* pin to block */
 						ir_list_push_unchecked(&queue_early, ref);
-						ir_list_push_unchecked(&queue_late, ref);
 					}
 				} else if (use_insn->op == IR_PARAM) {
 					bb->flags |= IR_BB_HAS_PARAM;
 					_blocks[ref] = b; /* pin to block */
-					if (EXPECTED(ctx->use_lists[ref].count != 0)) {
-						ir_list_push_unchecked(&queue_late, ref);
-					}
 				} else if (use_insn->op == IR_VAR) {
 					bb->flags |= IR_BB_HAS_VAR;
 					_blocks[ref] = b; /* pin to block */
-					if (EXPECTED(ctx->use_lists[ref].count != 0)) {
-						/* This is necessary only for VADDR */
-						ir_list_push_unchecked(&queue_late, ref);
-					}
 				}
 			}
 		}
 	}
-
-	ir_list_init(&queue_rest, ctx->insns_count);
 
 	n = ir_list_len(&queue_early);
 	while (n > 0) {
@@ -359,7 +616,7 @@ int ir_gcm(ir_ctx *ctx)
 		for (p = insn->ops + 2; k > 0; p++, k--) {
 			ref = *p;
 			if (ref > 0 && _blocks[ref] == 0) {
-				ir_gcm_schedule_early(ctx, ref, &queue_rest);
+				ir_gcm_schedule_early(ctx, ref, &queue_late);
 			}
 		}
 	}
@@ -373,31 +630,32 @@ int ir_gcm(ir_ctx *ctx)
 	}
 #endif
 
+#if IR_GCM_SPLIT
+	ir_gcm_split_data data;
+
+	ir_sparse_set_init(&data.totally_useful, ctx->cfg_blocks_count + 1);
+	ir_list_init(&data.worklist, ctx->cfg_blocks_count + 1);
+	ctx->data = &data;
+#endif
+
 	n = ir_list_len(&queue_late);
 	while (n > 0) {
 		n--;
 		ref = ir_list_at(&queue_late, n);
-		use_list = &ctx->use_lists[ref];
-		k = use_list->count;
-		for (p = &ctx->use_edges[use_list->refs]; k > 0; p++, k--) {
-			ref = *p;
-			b = _blocks[ref];
-			if (IR_GCM_IS_SCHEDULED_EARLY(b)) {
-				ir_gcm_schedule_late(ctx, ref, b);
-			}
+		b = ctx->cfg_map[ref];
+		if (IR_GCM_IS_SCHEDULED_EARLY(b)) {
+			ir_gcm_schedule_late(ctx, ref, b);
 		}
 	}
 
-	n = ir_list_len(&queue_rest);
-	while (n > 0) {
-		n--;
-		ref = ir_list_at(&queue_rest, n);
-		ir_gcm_schedule_rest(ctx, ref);
-	}
+#if IR_GCM_SPLIT
+	ir_list_free(&data.worklist);
+	ir_sparse_set_free(&data.totally_useful);
+	ctx->data = NULL;
+#endif
 
 	ir_list_free(&queue_early);
 	ir_list_free(&queue_late);
-	ir_list_free(&queue_rest);
 
 #ifdef IR_DEBUG
 	if (ctx->flags & IR_DEBUG_GCM) {
@@ -465,6 +723,7 @@ int ir_schedule(ir_ctx *ctx)
 	ir_ref i, j, k, n, *p, *q, ref, new_ref, prev_ref, insns_count, consts_count, use_edges_count;
 	ir_ref *_xlat;
 	ir_ref *edges;
+	ir_ref prev_b_end;
 	uint32_t b, prev_b;
 	uint32_t *_blocks = ctx->cfg_map;
 	ir_ref *_next = ir_mem_malloc(ctx->insns_count * sizeof(ir_ref));
@@ -475,14 +734,15 @@ int ir_schedule(ir_ctx *ctx)
 	ir_use_list *lists, *use_list, *new_list;
 
 	/* Create a double-linked list of nodes ordered by BB, respecting BB->start and BB->end */
-	prev_b = _blocks[1];
-	IR_ASSERT(prev_b);
+	IR_ASSERT(_blocks[1] == 1);
+	prev_b = 1;
+	prev_b_end = ctx->cfg_blocks[1].end;
 	_prev[1] = 0;
-	_prev[ctx->cfg_blocks[1].end] = 0;
+	_prev[prev_b_end] = 0;
 	for (i = 2, j = 1; i < ctx->insns_count; i++) {
 		b = _blocks[i];
 		IR_ASSERT((int32_t)b >= 0);
-		if (b == prev_b) {
+		if (b == prev_b && i <= prev_b_end) {
 			/* add to the end of the list */
 			_next[j] = i;
 			_prev[i] = j;
@@ -492,6 +752,7 @@ int ir_schedule(ir_ctx *ctx)
 			if (i == bb->start) {
 				IR_ASSERT(bb->end > bb->start);
 				prev_b = b;
+				prev_b_end = bb->end;
 				_prev[bb->end] = 0;
 				/* add to the end of the list */
 				_next[j] = i;
@@ -601,6 +862,29 @@ int ir_schedule(ir_ctx *ctx)
 				}
 				i = _next[i];
 				insn = &ctx->ir_base[i];
+			}
+		}
+		if (bb->successors_count > 1) {
+			ir_ref input, j = bb->end;
+			ir_insn *end = &ctx->ir_base[j];
+
+			if (end->op == IR_IF) {
+				/* Move condition closer to IF */
+				input = end->op2;
+				if (input > 0 && _blocks[input] == b && !_xlat[input] && _prev[j] != input) {
+					if (input == i) {
+						i = _next[i];
+						insn = &ctx->ir_base[i];
+					}
+					/* remove "input" */
+					_prev[_next[input]] = _prev[input];
+					_next[_prev[input]] = _next[input];
+					/* insert before "j" */
+					_prev[input] = _prev[j];
+					_next[input] = j;
+					_next[_prev[j]] = input;
+					_prev[j] = input;
+				}
 			}
 		}
 		while (i != bb->end) {
