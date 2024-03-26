@@ -2175,10 +2175,10 @@ function dns_get_mx(string $hostname, &$hosts, &$weights = null): bool {}
 
 /**
  * @param array $hosts
- * @param array $weights
+ * @param array $preferences
  * @alias dns_get_mx
  */
-function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
+function getmxrr(string $hostname, &$hosts, &$preferences = null): bool {}
 #endif
 
 /* net.c */
