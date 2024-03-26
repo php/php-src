@@ -21,45 +21,45 @@ extern "C" {
 
 
 typedef enum {
-    LXB_SELECTORS_OPT_DEFAULT = 0x00,
+	LXB_SELECTORS_OPT_DEFAULT = 0x00,
 
-    /*
-     * Includes the passed (root) node in the search.
-     *
-     * By default, the root node does not participate in selector searches,
-     * only its children.
-     *
-     * This behavior is logical, if you have found a node and then you want to
-     * search for other nodes in it, you don't need to check it again.
-     *
-     * But there are cases when it is necessary for root node to participate
-     * in the search.  That's what this option is for.
-     */
-    LXB_SELECTORS_OPT_MATCH_ROOT = 1 << 1,
+	/*
+	 * Includes the passed (root) node in the search.
+	 *
+	 * By default, the root node does not participate in selector searches,
+	 * only its children.
+	 *
+	 * This behavior is logical, if you have found a node and then you want to
+	 * search for other nodes in it, you don't need to check it again.
+	 *
+	 * But there are cases when it is necessary for root node to participate
+	 * in the search.  That's what this option is for.
+	 */
+	LXB_SELECTORS_OPT_MATCH_ROOT = 1 << 1,
 
-    /*
-     * Stop searching after the first match with any of the selectors
-     * in the list.
-     *
-     * By default, the callback will be triggered for each selector list.
-     * That is, if your node matches different selector lists, it will be
-     * returned multiple times in the callback.
-     *
-     * For example:
-     *    HTML: <div id="ok"><span>test</span></div>
-     *    Selectors: div, div[id="ok"], div:has(:not(a))
-     *
-     * The default behavior will cause three callbacks with the same node (div).
-     * Because it will be found by every selector in the list.
-     *
-     * This option allows you to end the element check after the first match on
-     * any of the selectors.  That is, the callback will be called only once
-     * for example above.  This way we get rid of duplicates in the search.
-     */
-    LXB_SELECTORS_OPT_MATCH_FIRST = 1 << 2,
+	/*
+	 * Stop searching after the first match with any of the selectors
+	 * in the list.
+	 *
+	 * By default, the callback will be triggered for each selector list.
+	 * That is, if your node matches different selector lists, it will be
+	 * returned multiple times in the callback.
+	 *
+	 * For example:
+	 *    HTML: <div id="ok"><span>test</span></div>
+	 *    Selectors: div, div[id="ok"], div:has(:not(a))
+	 *
+	 * The default behavior will cause three callbacks with the same node (div).
+	 * Because it will be found by every selector in the list.
+	 *
+	 * This option allows you to end the element check after the first match on
+	 * any of the selectors.  That is, the callback will be called only once
+	 * for example above.  This way we get rid of duplicates in the search.
+	 */
+	LXB_SELECTORS_OPT_MATCH_FIRST = 1 << 2,
 
-    /* Quirks mode (sigh) */
-    LXB_SELECTORS_OPT_QUIRKS_MODE = 1 << 3,
+	/* Quirks mode (sigh) */
+	LXB_SELECTORS_OPT_QUIRKS_MODE = 1 << 3,
 }
 lxb_selectors_opt_t;
 
@@ -69,52 +69,52 @@ typedef struct lxb_selectors_nested lxb_selectors_nested_t;
 
 typedef lxb_status_t
 (*lxb_selectors_cb_f)(const xmlNode *node,
-                      lxb_css_selector_specificity_t spec, void *ctx);
+					  lxb_css_selector_specificity_t spec, void *ctx);
 
 typedef lxb_selectors_entry_t *
 (*lxb_selectors_state_cb_f)(lxb_selectors_t *selectors,
-                            lxb_selectors_entry_t *entry);
+							lxb_selectors_entry_t *entry);
 
 typedef struct {
-    const xmlChar *name;
+	const xmlChar *name;
 } lxb_selectors_adapted_id;
 
 struct lxb_selectors_entry {
-    lxb_selectors_adapted_id      id;
-    lxb_css_selector_combinator_t combinator;
-    const lxb_css_selector_t      *selector;
-    const xmlNode                 *node;
-    lxb_selectors_entry_t         *next;
-    lxb_selectors_entry_t         *prev;
-    lxb_selectors_entry_t         *following;
-    lxb_selectors_nested_t        *nested;
+	lxb_selectors_adapted_id      id;
+	lxb_css_selector_combinator_t combinator;
+	const lxb_css_selector_t      *selector;
+	const xmlNode                 *node;
+	lxb_selectors_entry_t         *next;
+	lxb_selectors_entry_t         *prev;
+	lxb_selectors_entry_t         *following;
+	lxb_selectors_nested_t        *nested;
 };
 
 struct lxb_selectors_nested {
-    lxb_selectors_entry_t    *entry;
-    lxb_selectors_state_cb_f return_state;
+	lxb_selectors_entry_t    *entry;
+	lxb_selectors_state_cb_f return_state;
 
-    lxb_selectors_cb_f       cb;
-    void                     *ctx;
+	lxb_selectors_cb_f       cb;
+	void                     *ctx;
 
-    const xmlNode            *root;
-    lxb_selectors_entry_t    *last;
-    lxb_selectors_nested_t   *parent;
+	const xmlNode            *root;
+	lxb_selectors_entry_t    *last;
+	lxb_selectors_nested_t   *parent;
 
-    size_t                   index;
-    bool                     found;
+	size_t                   index;
+	bool                     found;
 };
 
 struct lxb_selectors {
-    lxb_selectors_state_cb_f state;
-    lexbor_dobject_t         *objs;
-    lexbor_dobject_t         *nested;
+	lxb_selectors_state_cb_f state;
+	lexbor_dobject_t         *objs;
+	lexbor_dobject_t         *nested;
 
-    lxb_selectors_nested_t   *current;
-    lxb_selectors_entry_t    *first;
+	lxb_selectors_nested_t   *current;
+	lxb_selectors_entry_t    *first;
 
-    lxb_selectors_opt_t      options;
-    lxb_status_t             status;
+	lxb_selectors_opt_t      options;
+	lxb_status_t             status;
 };
 
 
@@ -178,8 +178,8 @@ lxb_selectors_destroy(lxb_selectors_t *selectors);
  */
 LXB_API lxb_status_t
 lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
-                   const lxb_css_selector_list_t *list,
-                   lxb_selectors_cb_f cb, void *ctx);
+				   const lxb_css_selector_list_t *list,
+				   lxb_selectors_cb_f cb, void *ctx);
 
 /*
  * Match a node to a Selectors List.
@@ -209,8 +209,8 @@ lxb_selectors_find(lxb_selectors_t *selectors, const xmlNode *root,
  */
 LXB_API lxb_status_t
 lxb_selectors_match_node(lxb_selectors_t *selectors, const xmlNode *node,
-                         const lxb_css_selector_list_t *list,
-                         lxb_selectors_cb_f cb, void *ctx);
+						 const lxb_css_selector_list_t *list,
+						 lxb_selectors_cb_f cb, void *ctx);
 
 /*
  * Inline functions.
@@ -227,7 +227,7 @@ lxb_selectors_match_node(lxb_selectors_t *selectors, const xmlNode *node,
 lxb_inline void
 lxb_selectors_opt_set(lxb_selectors_t *selectors, lxb_selectors_opt_t opt)
 {
-    selectors->options = opt;
+	selectors->options = opt;
 }
 
 /*
@@ -243,7 +243,7 @@ lxb_selectors_opt_set(lxb_selectors_t *selectors, lxb_selectors_opt_t opt)
 lxb_inline const lxb_css_selector_list_t *
 lxb_selectors_selector(const lxb_selectors_t *selectors)
 {
-    return selectors->current->entry->selector->list;
+	return selectors->current->entry->selector->list;
 }
 
 #ifdef __cplusplus
