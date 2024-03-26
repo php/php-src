@@ -159,7 +159,7 @@ lxb_selectors_match_element(const lxb_css_selector_t *selector,
                             const xmlNode *node, lxb_selectors_entry_t *entry);
 
 static bool
-lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node);
+lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node, bool quirks);
 
 static bool
 lxb_selectors_match_class(const lexbor_str_t *target, const lexbor_str_t *src,
@@ -1161,7 +1161,7 @@ lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
             return lxb_selectors_match_element(selector, node, entry);
 
         case LXB_CSS_SELECTOR_TYPE_ID:
-            return lxb_selectors_match_id(selector, node);
+            return lxb_selectors_match_id(selector, node, selectors->options & LXB_SELECTORS_OPT_QUIRKS_MODE);
 
         case LXB_CSS_SELECTOR_TYPE_CLASS: {
             const xmlAttr *dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "class");
@@ -1176,7 +1176,7 @@ lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
 			}
 
 			return lxb_selectors_match_class(&trg,
-											 &selector->name, true);
+											 &selector->name, selectors->options & LXB_SELECTORS_OPT_QUIRKS_MODE);
 		}
 
         case LXB_CSS_SELECTOR_TYPE_ATTRIBUTE:
@@ -1210,7 +1210,7 @@ lxb_selectors_match_element(const lxb_css_selector_t *selector,
 }
 
 static bool
-lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node)
+lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node, bool quirks)
 {
     const xmlAttr *dom_attr = lxb_selectors_adapted_attr(node, (const lxb_char_t *) "id");
 	if (dom_attr == NULL) {
@@ -1219,10 +1219,12 @@ lxb_selectors_match_id(const lxb_css_selector_t *selector, const xmlNode *node)
 
 	const lexbor_str_t *src = &selector->name;
 	lexbor_str_t trg = lxb_selectors_adapted_attr_value_empty(dom_attr);
-	if (trg.length == src->length
-		&& lexbor_str_data_ncasecmp(trg.data, src->data, src->length))
-	{
-		return true;
+	if (trg.length == src->length) {
+        if (quirks) {
+            return lexbor_str_data_ncasecmp(trg.data, src->data, src->length);
+        } else {
+		    return lexbor_str_data_ncmp(trg.data, src->data, src->length);
+        }
 	}
 
 	return false;

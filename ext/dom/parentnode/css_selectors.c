@@ -37,6 +37,14 @@ typedef struct {
 	bool result;
 } dom_query_selector_matches_ctx;
 
+static lxb_selectors_opt_t dom_quirks_opt(lxb_selectors_opt_t options, const dom_object *intern)
+{
+	if (intern->document != NULL && intern->document->quirks_mode) {
+		options |= LXB_SELECTORS_OPT_QUIRKS_MODE;
+	}
+	return options;
+}
+
 lxb_status_t dom_query_selector_find_single_callback(const xmlNode *node, lxb_css_selector_specificity_t spec, void *ctx)
 {
 	xmlNodePtr *result = (xmlNodePtr *) ctx;
@@ -67,7 +75,8 @@ static lxb_css_selector_list_t *dom_parse_selector(
 	lxb_css_parser_t *parser,
 	lxb_selectors_t *selectors,
 	const zend_string *selectors_str,
-	lxb_selectors_opt_t options
+	lxb_selectors_opt_t options,
+	const dom_object *intern
 )
 {
 	lxb_status_t status;
@@ -79,7 +88,7 @@ static lxb_css_selector_list_t *dom_parse_selector(
 	memset(selectors, 0, sizeof(lxb_selectors_t));
 	status = lxb_selectors_init(selectors);
 	ZEND_ASSERT(status == LXB_STATUS_OK);
-	lxb_selectors_opt_set(selectors, options);
+	lxb_selectors_opt_set(selectors, dom_quirks_opt(options, intern));
 
 	lxb_css_selector_list_t *list = lxb_css_selectors_parse(parser, (const lxb_char_t *) ZSTR_VAL(selectors_str), ZSTR_LEN(selectors_str));
 	if (UNEXPECTED(list == NULL)) {
@@ -115,8 +124,8 @@ static void dom_selector_cleanup(lxb_css_parser_t *parser, lxb_selectors_t *sele
 }
 
 static lxb_status_t dom_query_selector_common(
-	zval *return_value,
 	const xmlNode *root,
+	const dom_object *intern,
 	const zend_string *selectors_str,
 	lxb_selectors_cb_f cb,
 	void *ctx,
@@ -128,7 +137,7 @@ static lxb_status_t dom_query_selector_common(
 	lxb_css_parser_t parser;
 	lxb_selectors_t selectors;
 
-	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, options);
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, options, intern);
 	if (UNEXPECTED(list == NULL)) {
 		status = LXB_STATUS_ERROR;
 	} else {
@@ -143,6 +152,7 @@ static lxb_status_t dom_query_selector_common(
 
 static lxb_status_t dom_query_matches(
 	const xmlNode *root,
+	const dom_object *intern,
 	const zend_string *selectors_str,
 	void *ctx
 )
@@ -152,7 +162,7 @@ static lxb_status_t dom_query_matches(
 	lxb_css_parser_t parser;
 	lxb_selectors_t selectors;
 
-	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST);
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
 	if (UNEXPECTED(list == NULL)) {
 		status = LXB_STATUS_ERROR;
 	} else {
@@ -167,6 +177,7 @@ static lxb_status_t dom_query_matches(
 
 static const xmlNode *dom_query_closest(
 	const xmlNode *root,
+	const dom_object *intern,
 	const zend_string *selectors_str
 )
 {
@@ -175,7 +186,7 @@ static const xmlNode *dom_query_closest(
 	lxb_css_parser_t parser;
 	lxb_selectors_t selectors;
 
-	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST);
+	lxb_css_selector_list_t *list = dom_parse_selector(&parser, &selectors, selectors_str, LXB_SELECTORS_OPT_MATCH_FIRST, intern);
 	if (EXPECTED(list != NULL)) {
 		const xmlNode *current = root;
 		while (current != NULL) {
@@ -204,8 +215,8 @@ void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *
 	xmlNodePtr result = NULL;
 
 	if (dom_query_selector_common(
-		return_value,
 		thisp,
+		intern,
 		selectors_str,
 		dom_query_selector_find_single_callback,
 		&result,
@@ -224,8 +235,8 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 	dom_query_selector_all_ctx ctx = { list, intern };
 
 	if (dom_query_selector_common(
-		return_value,
 		thisp,
+		intern,
 		selectors_str,
 		dom_query_selector_find_array_callback,
 		&ctx,
@@ -243,12 +254,13 @@ void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zv
 }
 
 /* https://dom.spec.whatwg.org/#dom-element-matches */
-void dom_element_matches(xmlNodePtr thisp, zval *return_value, const zend_string *selectors_str)
+void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
 {
 	dom_query_selector_matches_ctx ctx = { thisp, false };
 
 	if (dom_query_matches(
 		thisp,
+		intern,
 		selectors_str,
 		&ctx
 	) != LXB_STATUS_OK) {
@@ -261,7 +273,7 @@ void dom_element_matches(xmlNodePtr thisp, zval *return_value, const zend_string
 /* https://dom.spec.whatwg.org/#dom-element-closest */
 void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str)
 {
-	const xmlNode *result = dom_query_closest(thisp, selectors_str);
+	const xmlNode *result = dom_query_closest(thisp, intern, selectors_str);
 	if (EXPECTED(result != NULL)) {
 		DOM_RET_OBJ((xmlNodePtr) result, intern);
 	}

@@ -56,7 +56,10 @@ typedef enum {
      * any of the selectors.  That is, the callback will be called only once
      * for example above.  This way we get rid of duplicates in the search.
      */
-    LXB_SELECTORS_OPT_MATCH_FIRST = 1 << 2
+    LXB_SELECTORS_OPT_MATCH_FIRST = 1 << 2,
+
+    /* Quirks mode (sigh) */
+    LXB_SELECTORS_OPT_QUIRKS_MODE = 1 << 3,
 }
 lxb_selectors_opt_t;
 
