@@ -3913,6 +3913,7 @@ class FileInfo {
     public bool $generateClassEntries = false;
     public bool $isUndocumentable = false;
     public bool $legacyArginfoGeneration = false;
+    public bool $insertBom = false;
     private ?int $minimumPhpVersionIdCompatibility = null;
 
     /**
@@ -4779,6 +4780,8 @@ function parseStubFile(string $code): FileInfo {
                 $fileInfo->declarationPrefix = $tag->value ? $tag->value . " " : "";
             } else if ($tag->name === 'undocumentable') {
                 $fileInfo->isUndocumentable = true;
+            } else if ($tag->name === 'insert-bom') {
+                $fileInfo->insertBom = true;
             }
         }
     }
@@ -4952,7 +4955,12 @@ function generateArgInfoCode(
     array $allConstInfos,
     string $stubHash
 ): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead.\n"
+    if (isset($fileInfo->insertBom) && $fileInfo->insertBom === true) {
+        $code = "\xEF\xBB\xBF";
+    } else {
+        $code = "";
+    }
+    $code .= "/* This is a generated file, edit the .stub.php file instead.\n"
           . " * Stub hash: $stubHash */\n";
 
     $minimumPhpVersionIdCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility();

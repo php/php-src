@@ -1,6 +1,7 @@
 <?php
 
 /** @generate-class-entries */
+/** @insert-bom */
 
 #ifdef HAVE_MBREGEX
 /**
