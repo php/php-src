@@ -31,4 +31,4 @@ new stdClass(exit);
 Caught
 Caught
 Caught
-int(32767)
+int(30719)
