@@ -162,17 +162,9 @@ static zend_string *php_openssl_argon2_hash(const zend_string *password, zend_ar
 		return NULL;
 	}
 
-	hash64 = php_base64_encode(hash, HASH_SIZE);
-	/* No padding utsing 32 *4 / 3 = 42.6 (43 + 1 padding char)  */
-	ZEND_ASSERT(ZSTR_LEN(hash64)==44 && ZSTR_VAL(hash64)[43]=='=');
-	ZSTR_VAL(hash64)[43] = 0;
-	ZSTR_LEN(hash64) = 43;
+	hash64 = php_base64_encode_ex(hash, HASH_SIZE, PHP_BASE64_NO_PADDING);
 
-	salt64 = php_base64_encode(salt, SALT_SIZE);
-	/* No padding using 16 *4 / 3 = 21.3 (22 + 2 padding char)  */
-	ZEND_ASSERT(ZSTR_LEN(salt64)==24 && ZSTR_VAL(salt64)[22]=='=' && ZSTR_VAL(salt64)[23]=='=');
-	ZSTR_VAL(salt64)[22] = 0;
-	ZSTR_LEN(salt64) = 22;
+	salt64 = php_base64_encode_ex(salt, SALT_SIZE, PHP_BASE64_NO_PADDING);
 
 	digest = zend_string_alloc(DIGEST_SIZE, 0);
 	ZSTR_LEN(digest) = snprintf(ZSTR_VAL(digest), ZSTR_LEN(digest), "$%s$v=%d$m=%u,t=%u,p=%u$%s$%s",
