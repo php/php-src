@@ -34,7 +34,7 @@ if test "$PHP_DOM" != "no"; then
                             documenttype.c entity.c \
                             nodelist.c text.c comment.c \
                             entityreference.c \
-                            notation.c xpath.c dom_iterators.c \
+                            notation.c xpath.c xpath_rust.rs dom_iterators.c \
                             namednodemap.c xpath_callbacks.c \
                             $LEXBOR_SOURCES],
                             $ext_shared,,$PHP_LEXBOR_CFLAGS)
