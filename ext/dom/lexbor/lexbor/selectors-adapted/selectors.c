@@ -40,7 +40,14 @@ static zend_always_inline bool lxb_selectors_adapted_cmp_ns(const xmlNode *a, co
 
 static zend_always_inline bool lxb_selectors_adapted_cmp_local_name_id(const xmlNode *node, const lxb_selectors_adapted_id *id)
 {
-	return node->name == id->name || strcmp((const char *) node->name, (const char *) id->name) == 0;
+	uintptr_t ptr = (uintptr_t) node->name;
+	if ((ptr & (ZEND_MM_ALIGNMENT - 1)) != 0) {
+		/* It cannot be a heap-allocated string because the pointer is not properly aligned for a heap allocation.
+		 * Therefore, it must be interned into the dictionary pool. */
+		return node->name == id->name;
+	}
+
+	return strcmp((const char *) node->name, (const char *) id->name) == 0;
 }
 
 static zend_always_inline const xmlAttr *lxb_selectors_adapted_attr(const xmlNode *node, const lxb_char_t *name)
@@ -1194,8 +1201,7 @@ lxb_selectors_match(lxb_selectors_t *selectors, lxb_selectors_entry_t *entry,
         case LXB_CSS_SELECTOR_TYPE_PSEUDO_ELEMENT_FUNCTION:
             return false;
 
-        default:
-            break;
+        EMPTY_SWITCH_DEFAULT_CASE();
     }
 
     return false;
@@ -1398,8 +1404,7 @@ lxb_selectors_match_attribute(const lxb_css_selector_t *selector,
 
 			return lexbor_str_data_ncmp_contain(trg.data, trg.length,
 												src->data, src->length);
-        default:
-            break;
+        EMPTY_SWITCH_DEFAULT_CASE();
     }
 
     return false;
