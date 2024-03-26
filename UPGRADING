@@ -558,6 +558,7 @@ PHP 8.4 UPGRADE NOTES
   . SO_EXCLUSIVEADDRUSE (Windows only).
   . SOCK_CONN_DGRAM (NetBSD only).
   . SOCK_DCCP (NetBSD only).
+  . TCP_SYNCNT (Linux only).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES
