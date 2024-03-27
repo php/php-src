@@ -410,7 +410,8 @@ lxb_selectors_state_tree(lxb_selectors_t *selectors, const xmlNode *root,
 	if (selectors->options & LXB_SELECTORS_OPT_MATCH_ROOT) {
 		node = root;
 
-		if (CMP_NODE_TYPE(node, XML_DOCUMENT_NODE) || CMP_NODE_TYPE(node, XML_HTML_DOCUMENT_NODE)) {
+		if (CMP_NODE_TYPE(node, XML_DOCUMENT_NODE) || CMP_NODE_TYPE(node, XML_HTML_DOCUMENT_NODE)
+			 || CMP_NODE_TYPE(node, XML_DOCUMENT_FRAG_NODE)) {
 			node = root->children;
 		}
 	}
