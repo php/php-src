@@ -31,8 +31,8 @@ $fiber->start();
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init var_dump() -->
       <var_dump>
 int(1)
@@ -48,7 +48,7 @@ int(1)
     <!-- Exception: GracefulExit -->
   </Fiber::suspend>
   <!-- Exception: GracefulExit -->
-</{closure}>
+</{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
 <destroyed '%s'>
 <!-- destroy: %s -->

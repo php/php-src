@@ -1263,12 +1263,12 @@ inline_function:
 		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
-				  ZSTR_INIT_LITERAL("{closure}", 0),
+				  NULL,
 				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
 	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
 		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
-				  ZSTR_INIT_LITERAL("{closure}", 0), $5, NULL, $11, $7, NULL);
+				  NULL, $5, NULL, $11, $7, NULL);
 				  CG(extra_fn_flags) = $9; }
 ;
 

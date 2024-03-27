@@ -40,8 +40,8 @@ $fiber->resume();
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init var_dump() -->
       <var_dump>
 int(1)
@@ -57,8 +57,8 @@ int(1)
 <!-- alloc: %s -->
 <!-- switching from fiber %s to %s -->
 <init '%s'>
-        <!-- init {closure}() -->
-        <{closure}>
+        <!-- init {closure:%s:%d}() -->
+        <{closure:%s:%d}>
           <var_dump>
 int(2)
           </var_dump>
@@ -76,7 +76,7 @@ int(2)
 
 Fatal error: Allowed memory size of 104857600 bytes exhausted %s on line %d
           </str_repeat>
-        </{closure}>
+        </{closure:%s:%d}>
 <!-- switching from fiber %s to %s -->
 <returned '%s'>
 <!-- destroy: %s -->

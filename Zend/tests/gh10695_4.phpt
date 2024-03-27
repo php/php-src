@@ -14,6 +14,6 @@ Caught: main
 
 Fatal error: Uncaught Exception: exception handler in %s:%d
 Stack trace:
-#0 [internal function]: {closure}(Object(Exception))
+#0 [internal function]: {closure:%s:%d}(Object(Exception))
 #1 {main}
   thrown in %s on line %d

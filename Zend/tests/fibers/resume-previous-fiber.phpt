@@ -20,9 +20,9 @@ $fiber->start();
 Fatal error: Uncaught FiberError: Cannot resume a fiber that is not suspended in %sresume-previous-fiber.php:%d
 Stack trace:
 #0 %sresume-previous-fiber.php(%d): Fiber->resume()
-#1 [internal function]: {closure}()
+#1 [internal function]: {closure:%s:%d}()
 #2 %sresume-previous-fiber.php(%d): Fiber->start()
-#3 [internal function]: {closure}()
+#3 [internal function]: {closure:%s:%d}()
 #4 %sresume-previous-fiber.php(%d): Fiber->start()
 #5 {main}
   thrown in %sresume-previous-fiber.php on line %d

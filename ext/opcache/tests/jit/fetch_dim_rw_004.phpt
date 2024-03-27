@@ -12,9 +12,9 @@ $k=[];
 $y[$k]++;
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: {closure}(): Argument #1 ($y) must be of type y, int given, called in %sfetch_dim_rw_004.php:2
+Fatal error: Uncaught TypeError: {closure:%s:%d}(): Argument #1 ($y) must be of type y, int given, called in %s on line %d and defined in %s:%d
 Stack trace:
-#0 %sfetch_dim_rw_004.php(5): {closure}(2, 'Undefined varia...', '%s', 5)
+#0 %s(%d): {closure:%s:%d}(2, 'Undefined varia...', '%s', 5)
 #1 {main}
 
 Next TypeError: Cannot access offset of type array on array in %sfetch_dim_rw_004.php:5

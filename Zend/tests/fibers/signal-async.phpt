@@ -30,8 +30,8 @@ Fiber start
 Fatal error: Uncaught FiberError: Cannot switch fibers in current execution context in %ssignal-async.php:%d
 Stack trace:
 #0 %ssignal-async.php(%d): Fiber::suspend()
-#1 %ssignal-async.php(%d): {closure}(%d, Array)
-#2 [internal function]: {closure}()
+#1 %ssignal-async.php(%d): {closure:%s:%d}(%d, Array)
+#2 [internal function]: {closure:%s:%d}()
 #3 %ssignal-async.php(%d): Fiber->start()
 #4 {main}
   thrown in %ssignal-async.php on line %d

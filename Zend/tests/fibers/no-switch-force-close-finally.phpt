@@ -26,6 +26,6 @@ finally
 Fatal error: Uncaught FiberError: Cannot switch fibers in current execution context in %sno-switch-force-close-finally.php:%d
 Stack trace:
 #0 %sno-switch-force-close-finally.php(%d): Fiber->start()
-#1 [internal function]: {closure}()
+#1 [internal function]: {closure:%s:%d}()
 #2 {main}
   thrown in %sno-switch-force-close-finally.php on line %d
