@@ -28,6 +28,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
     (Jakub Zelenka)
 
+- Treewide:
+  . Fix gcc-14 Wcalloc-transposed-args warnings. (Cristian Rodríguez)
+
 11 Apr 2024, PHP 8.2.18
 
 - Core:
