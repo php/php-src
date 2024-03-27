@@ -1699,6 +1699,17 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
+if printf "#if __ELF__\nelf\n#endif\n" | $CC -E - | grep elf > /dev/null; then
+  PHP_ADD_SOURCES(main, gdb_inlined_script.c)
+
+  cat >> Makefile.objects <<EOF
+$abs_srcdir/main/gdb_inlined_script.c: $abs_srcdir/scripts/gdb/gen_gdb_inlined_script.php $abs_srcdir/scripts/gdb/php_gdb.py $abs_srcdir/scripts/gdb/php_gdb.gdb
+	@if test ! -z "\$(PHP)"; then \\
+		\$(PHP) $abs_srcdir/scripts/gdb/gen_gdb_inlined_script.php; \\
+	fi;
+EOF
+fi
+
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
