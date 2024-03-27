@@ -161,6 +161,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_EMPTY         "'empty'"
 %token <ident> T_HALT_COMPILER "'__halt_compiler'"
 %token <ident> T_CLASS         "'class'"
+%token <ident> T_DATA_CLASS    "'data class'"
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
 %token <ident> T_ENUM          "'enum'"
@@ -593,6 +594,9 @@ class_declaration_statement:
 	|	T_CLASS { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, 0, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
+	|	T_DATA_CLASS { $<num>$ = CG(zend_lineno); }
+		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_DATA_CLASS, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
 ;
 
 class_modifiers:
@@ -1442,6 +1446,8 @@ callable_variable:
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
 	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_METHOD_CALL, $1, $3, $4); }
+	|	array_object_dereferenceable T_OBJECT_OPERATOR property_name '!' argument_list
+			{ $$ = zend_ast_create(ZEND_AST_MUTATING_METHOD_CALL, $1, $3, $5); }
 	|	function_call { $$ = $1; }
 ;
 

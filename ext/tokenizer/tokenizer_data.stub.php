@@ -374,6 +374,11 @@ const T_HALT_COMPILER = UNKNOWN;
 const T_CLASS = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_DATA_CLASS
+ */
+const T_DATA_CLASS = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_TRAIT
  */
 const T_TRAIT = UNKNOWN;

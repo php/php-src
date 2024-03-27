@@ -315,6 +315,9 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
+/* Data classes are value types                           |     |     |     */
+#define ZEND_ACC_DATA_CLASS              (1 << 30) /*  X  |     |     |     */
+/*                                                        |     |     |     */
 /* Function Flags (unused: 29-30)                         |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
@@ -1047,6 +1050,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_THROW_IS_EXPR 1u
 
 #define ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS 1
+
+#define ZEND_INIT_METHOD_CALL_MUTATING ((uint32_t)1 << 31)
 
 /* The send mode, the is_variadic, the is_promoted, and the is_tentative flags are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT

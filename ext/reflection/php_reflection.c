@@ -5744,6 +5744,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
 				RETURN_THROWS();
 			}
+			ZVAL_DEREF(tmp);
 
 			if (Z_TYPE_P(tmp) != IS_NULL && Z_TYPE_P(tmp) != IS_OBJECT) {
 				zend_string *method_name = get_active_function_or_method_name();
@@ -5754,6 +5755,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 				}
 			}
 		} else {
+			ZVAL_DEREF(value);
 			zend_string *method_name = get_active_function_or_method_name();
 			zend_error(E_DEPRECATED, "Calling %s() with a single argument is deprecated", ZSTR_VAL(method_name));
 			zend_string_release(method_name);
@@ -5764,8 +5766,23 @@ ZEND_METHOD(ReflectionProperty, setValue)
 
 		zend_update_static_property_ex(intern->ce, ref->unmangled_name, value);
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &object, &value) == FAILURE) {
 			RETURN_THROWS();
+		}
+
+		zval *orig_object = object;
+		ZVAL_DEREF(object);
+		if (Z_TYPE_P(object) != IS_OBJECT) {
+			zend_argument_type_error(1, "must be of type object, %s given", zend_zval_value_name(object));
+			RETURN_THROWS();
+		}
+
+		if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS) {
+			if (Z_TYPE_P(orig_object) != IS_REFERENCE) {
+				zend_throw_error(NULL, "Instance of data class %s must be passed by reference", ZSTR_VAL(Z_OBJCE_P(object)->name));
+				RETURN_THROWS();
+			}
+			SEPARATE_DATA_OBJ(object);
 		}
 
 		zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
