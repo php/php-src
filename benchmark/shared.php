@@ -1,17 +1,28 @@
 <?php
 
-class ProcessResult {
-    public $stdout;
-    public $stderr;
+readonly class ProcessResult {
+    public function __construct(
+        public string $stdout,
+        public string $stderr,
+    ) {}
 }
 
-function runCommand(array $args, ?string $cwd = null): ProcessResult {
-    $cmd = implode(' ', array_map('escapeshellarg', $args));
+readonly class UnescapedArg {
+    public function __construct(
+        public string $arg,
+    ) {}
+}
+
+function runCommand(array $args, ?string $cwd = null, ?array $envVars = null): ProcessResult {
+    $cmd = implode(' ', array_map(function (string|UnescapedArg $v): string {
+        return $v instanceof UnescapedArg
+            ? $v->arg
+            : escapeshellarg($v);
+    }, $args));
     $pipes = null;
-    $result = new ProcessResult();
     $descriptorSpec = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
     fwrite(STDOUT, "> $cmd\n");
-    $processHandle = proc_open($cmd, $descriptorSpec, $pipes, $cwd ?? getcwd(), null);
+    $processHandle = proc_open($cmd, $descriptorSpec, $pipes, $cwd ?? getcwd(), $envVars);
 
     $stdin = $pipes[0];
     $stdout = $pipes[1];
@@ -22,6 +33,8 @@ function runCommand(array $args, ?string $cwd = null): ProcessResult {
     stream_set_blocking($stdout, false);
     stream_set_blocking($stderr, false);
 
+    $stdoutStr = '';
+    $stderrStr = '';
     $stdoutEof = false;
     $stderrEof = false;
 
@@ -35,9 +48,9 @@ function runCommand(array $args, ?string $cwd = null): ProcessResult {
         foreach ($read as $stream) {
             $chunk = fgets($stream);
             if ($stream === $stdout) {
-                $result->stdout .= $chunk;
+                $stdoutStr .= $chunk;
             } elseif ($stream === $stderr) {
-                $result->stderr .= $chunk;
+                $stderrStr .= $chunk;
             }
         }
 
@@ -47,6 +60,8 @@ function runCommand(array $args, ?string $cwd = null): ProcessResult {
 
     fclose($stdout);
     fclose($stderr);
+
+    $result = new ProcessResult($stdoutStr, $stderrStr);
 
     $statusCode = proc_close($processHandle);
     if ($statusCode !== 0) {

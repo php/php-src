@@ -63,7 +63,8 @@ function runSymfonyDemo(bool $jit): array {
     cloneRepo($dir, 'https://github.com/php/benchmarking-symfony-demo-2.2.3.git');
     runPhpCommand([$dir . '/bin/console', 'cache:clear']);
     runPhpCommand([$dir . '/bin/console', 'cache:warmup']);
-    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+
+    return runValgrindPhpCgiCommand('symfony-demo', [$dir . '/public/index.php'], cwd: $dir, jit: $jit, repeat: 100);
 }
 
 function runWordpress(bool $jit): array {
@@ -86,7 +87,8 @@ function runWordpress(bool $jit): array {
 
     // Warmup
     runPhpCommand([$dir . '/index.php'], $dir);
-    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, warmup: 50, repeat: 50);
+
+    return runValgrindPhpCgiCommand('wordpress', [$dir . '/index.php'], cwd: $dir, jit: $jit, repeat: 100);
 }
 
 function runPhpCommand(array $args, ?string $cwd = null): ProcessResult {
@@ -98,41 +100,94 @@ function runValgrindPhpCgiCommand(
     array $args,
     ?string $cwd = null,
     bool $jit = false,
-    int $warmup = 0,
     int $repeat = 1,
 ): array {
     global $phpCgi;
 
-    $profileOut = __DIR__ . "/profiles/callgrind.out.$name";
+    $profileOut = __DIR__ . "/profiles/callgrind.$name";
     if ($jit) {
-        $profileOut .= '.jit';
+        $profileOut .= '-jit';
     }
 
     $process = runCommand([
         'valgrind',
         '--tool=callgrind',
         '--dump-instr=yes',
+        '--collect-jumps=yes',
+        '--trace-children=yes',
         "--callgrind-out-file=$profileOut",
+        '--verbose',
         '--',
         $phpCgi,
-        '-T' . ($warmup ? $warmup . ',' : '') . $repeat,
+        '-T' . $repeat,
         '-d max_execution_time=0',
         '-d opcache.enable=1',
         '-d opcache.jit=' . ($jit ? 'tracing' : 'disable'),
         '-d opcache.jit_buffer_size=128M',
         '-d opcache.validate_timestamps=0',
         ...$args,
-    ]);
-    $instructions = extractInstructionsFromValgrindOutput($process->stderr);
-    if ($repeat > 1) {
-        $instructions = gmp_strval(gmp_div_q($instructions, $repeat));
+    ], null, array_merge(getenv(), ['BENCHMARK_DUMP_SEPARATE_PROFILES' => '1']));
+
+    // collect metrics for startup, each benchmark run and shutdown
+    $metricsArr = [];
+    foreach (['startup' => 1, ...range(2, $repeat + 1), 'shutdown' => ''] as $k => $kCallgrindOut) {
+        $profileOutSpecific = $profileOut . '.' . $k;
+        rename($profileOut . ($kCallgrindOut === '' ? '' : '.' . $kCallgrindOut), $profileOutSpecific);
+
+        $metricsArr[$k] = extractMetricsFromCallgrindFile($profileOutSpecific);
     }
+
+    // print all collected metrics
+    print_r(array_map(fn ($metrics) => array_map(fn ($v) => number_format($v, 0, '.', '_'), $metrics), $metricsArr));
+
+    // find median benchmark run
+    $metricsForMedianArr = $metricsArr;
+    unset($metricsForMedianArr['startup']);
+    unset($metricsForMedianArr['shutdown']);
+    uasort($metricsForMedianArr, fn ($a, $b) => $a['Ir'] <=> $b['Ir']);
+    $medianRunIndex = array_keys($metricsForMedianArr)[max(0, floor((count($metricsForMedianArr) - 3 /* -1 for count to index, -1 for first slow run due compliation, -1 for second run which is a little slower too */) / 2.0))];
+
+    // remove non-first-non-median profiles from artifacts
+    foreach (range(0, $repeat - 1) as $k) {
+        $profileOutSpecific = $profileOut . '.' . $k;
+
+        if ($k !== 0 && $k !== $medianRunIndex) {
+            unlink($profileOutSpecific);
+        }
+    }
+
+    // annotate profiles for artifacts
+    foreach (['startup', 0, $medianRunIndex, 'shutdown'] as $k) {
+        $profileOutSpecific = $profileOut . '.' . $k;
+
+        runCommand([
+            'callgrind_annotate',
+            '--threshold=100',
+            '--auto=yes',
+            '--show-percs=no',
+            $profileOutSpecific,
+            new UnescapedArg('>'),
+            "$profileOutSpecific.txt",
+        ]);
+    }
+
+    $instructions = $metricsArr[$medianRunIndex]['Ir'];
+    if ($repeat === 1) { // return the same data as before https://github.com/php/php-src/pull/13162
+        $instructions += $metricsArr['startup']['Ir'];
+    }
+
     return ['instructions' => $instructions];
 }
 
-function extractInstructionsFromValgrindOutput(string $output): string {
-    preg_match("(==[0-9]+== Events    : Ir\n==[0-9]+== Collected : (?<instructions>[0-9]+))", $output, $matches);
-    return $matches['instructions'] ?? throw new \Exception('Unexpected valgrind output');
+/**
+ * @return array<non-empty-string, numeric-string>
+ */
+function extractMetricsFromCallgrindFile(string $path): array {
+    if (!preg_match('/\nevents:((?: +\w+)+)\nsummary:((?: +\d+)+)\n/', file_get_contents($path, length: 10_000), $matches)) {
+        throw new \Exception('Unexpected callgrind data');
+    }
+
+    return array_combine(explode(' ', ltrim($matches[1], ' ')), explode(' ', ltrim($matches[2], ' ')));
 }
 
 main();
