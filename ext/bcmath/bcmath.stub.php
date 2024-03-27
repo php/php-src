@@ -29,3 +29,21 @@ function bcsqrt(string $num, ?int $scale = null): string {}
 function bccomp(string $num1, string $num2, ?int $scale = null): int {}
 
 function bcscale(?int $scale = null): int {}
+
+/** @refcount 1 */
+function bcfloor(string $num): string {}
+
+/** @refcount 1 */
+function bcceil(string $num): string {}
+
+/** @refcount 1 */
+function bcround(string $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): string {}
+
+class BcNum
+{
+    public function __construct(string|int $num, ?int $scale = null) {}
+
+    //public static function getGlobalScale(): int {}
+
+    //public static function setGlobalScale(int $scale): void {}
+}

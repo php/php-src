@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f28dafc2a279f5421cd0d0e668fde0032e996ebc */
+ * Stub hash: 6d009650e820a9b46aaccf6b8ce034edf1f90c42 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -43,6 +43,23 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcscale, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcfloor, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_bcceil arginfo_bcfloor
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcround, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_BcNum___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_STRING|MAY_BE_LONG, NULL)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(bcadd);
 ZEND_FUNCTION(bcsub);
 ZEND_FUNCTION(bcmul);
@@ -53,6 +70,10 @@ ZEND_FUNCTION(bcpow);
 ZEND_FUNCTION(bcsqrt);
 ZEND_FUNCTION(bccomp);
 ZEND_FUNCTION(bcscale);
+ZEND_FUNCTION(bcfloor);
+ZEND_FUNCTION(bcceil);
+ZEND_FUNCTION(bcround);
+ZEND_METHOD(BcNum, __construct);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcadd, arginfo_bcadd)
@@ -65,5 +86,23 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcsqrt, arginfo_bcsqrt)
 	ZEND_FE(bccomp, arginfo_bccomp)
 	ZEND_FE(bcscale, arginfo_bcscale)
+	ZEND_FE(bcfloor, arginfo_bcfloor)
+	ZEND_FE(bcceil, arginfo_bcceil)
+	ZEND_FE(bcround, arginfo_bcround)
 	ZEND_FE_END
 };
+
+static const zend_function_entry class_BcNum_methods[] = {
+	ZEND_ME(BcNum, __construct, arginfo_class_BcNum___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static zend_class_entry *register_class_BcNum(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "BcNum", class_BcNum_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+
+	return class_entry;
+}
