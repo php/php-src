@@ -365,6 +365,11 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char*)&error, &len) != 0) {
 			ret = -1;
 		}
+		if (error == EINPROGRESS) {
+			/* Is leftover from the earlier connect call, since php_socket_errno
+			 * does not clear it. */
+			error = 0;
+		}
 	} else {
 		/* whoops: sockfd has disappeared */
 		ret = -1;
