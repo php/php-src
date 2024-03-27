@@ -263,9 +263,20 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 	zend_object_std_dtor(&key_object->std);
 }
 
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+static const zend_module_dep openssl_deps[] = {
+	ZEND_MOD_REQUIRED("standard")
+	ZEND_MOD_END
+};
+#endif
 /* {{{ openssl_module_entry */
 zend_module_entry openssl_module_entry = {
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+	STANDARD_MODULE_HEADER_EX, NULL,
+	openssl_deps,
+#else
 	STANDARD_MODULE_HEADER,
+#endif
 	"openssl",
 	ext_functions,
 	PHP_MINIT(openssl),
@@ -1318,6 +1329,12 @@ PHP_MINIT_FUNCTION(openssl)
 	php_register_url_stream_wrapper("ftps", &php_stream_ftp_wrapper);
 
 	REGISTER_INI_ENTRIES();
+
+#if PHP_OPENSSL_API_VERSION >= 0x30200
+	if (FAILURE == PHP_MINIT(openssl_pwhash)(INIT_FUNC_ARGS_PASSTHRU)) {
+		return FAILURE;
+	}
+#endif
 
 	return SUCCESS;
 }
