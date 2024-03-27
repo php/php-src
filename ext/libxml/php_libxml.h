@@ -141,6 +141,12 @@ static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xm
 
 typedef void * (*php_libxml_export_node) (zval *object);
 
+typedef enum {
+	PHP_LIBXML_ERROR = 0,
+	PHP_LIBXML_CTX_ERROR = 1,
+	PHP_LIBXML_CTX_WARNING = 2,
+} php_libxml_error_level;
+
 PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
 PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
 PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
@@ -157,6 +163,7 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...);
 PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, int column, const char *msg,...);
 PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...);
+PHP_LIBXML_API void php_libxml_error_handler_va(php_libxml_error_level error_type, void *ctx, const char *msg, va_list args);
 PHP_LIBXML_API int php_libxml_xmlCheckUTF8(const unsigned char *s);
 PHP_LIBXML_API void php_libxml_switch_context(zval *context, zval *oldcontext);
 PHP_LIBXML_API void php_libxml_issue_error(int level, const char *msg);

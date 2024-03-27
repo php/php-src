@@ -45,9 +45,6 @@
 #include "php_libxml.h"
 
 #define PHP_LIBXML_LOADED_VERSION ((char *)xmlParserVersion)
-#define PHP_LIBXML_ERROR 0
-#define PHP_LIBXML_CTX_ERROR 1
-#define PHP_LIBXML_CTX_WARNING 2
 
 #include "libxml_arginfo.h"
 
@@ -647,12 +644,12 @@ void php_libxml_issue_error(int level, const char *msg)
 	}
 }
 
-static void php_libxml_internal_error_handler_ex(int error_type, void *ctx, const char **msg, va_list ap, int line, int column)
+static void php_libxml_internal_error_handler_ex(php_libxml_error_level error_type, void *ctx, const char *msg, va_list ap, int line, int column)
 {
 	char *buf;
 	int len, len_iter, output = 0;
 
-	len = vspprintf(&buf, 0, *msg, ap);
+	len = vspprintf(&buf, 0, msg, ap);
 	len_iter = len;
 
 	/* remove any trailing \n */
@@ -685,7 +682,7 @@ static void php_libxml_internal_error_handler_ex(int error_type, void *ctx, cons
 	}
 }
 
-static void php_libxml_internal_error_handler(int error_type, void *ctx, const char **msg, va_list ap)
+PHP_LIBXML_API void php_libxml_error_handler_va(php_libxml_error_level error_type, void *ctx, const char *msg, va_list ap)
 {
 	int line = 0;
 	int column = 0;
@@ -831,7 +828,7 @@ PHP_LIBXML_API void php_libxml_pretend_ctx_error_ex(const char *file, int line, 
 {
 	va_list args;
 	va_start(args, msg);
-	php_libxml_internal_error_handler_ex(PHP_LIBXML_CTX_ERROR, NULL, &msg, args, line, column);
+	php_libxml_internal_error_handler_ex(PHP_LIBXML_CTX_ERROR, NULL, msg, args, line, column);
 	va_end(args);
 
 	/* Propagate back into libxml */
@@ -853,7 +850,7 @@ PHP_LIBXML_API void php_libxml_ctx_error(void *ctx, const char *msg, ...)
 {
 	va_list args;
 	va_start(args, msg);
-	php_libxml_internal_error_handler(PHP_LIBXML_CTX_ERROR, ctx, &msg, args);
+	php_libxml_error_handler_va(PHP_LIBXML_CTX_ERROR, ctx, msg, args);
 	va_end(args);
 }
 
@@ -861,7 +858,7 @@ PHP_LIBXML_API void php_libxml_ctx_warning(void *ctx, const char *msg, ...)
 {
 	va_list args;
 	va_start(args, msg);
-	php_libxml_internal_error_handler(PHP_LIBXML_CTX_WARNING, ctx, &msg, args);
+	php_libxml_error_handler_va(PHP_LIBXML_CTX_WARNING, ctx, msg, args);
 	va_end(args);
 }
 
@@ -878,7 +875,7 @@ PHP_LIBXML_API void php_libxml_error_handler(void *ctx, const char *msg, ...)
 {
 	va_list args;
 	va_start(args, msg);
-	php_libxml_internal_error_handler(PHP_LIBXML_ERROR, ctx, &msg, args);
+	php_libxml_error_handler_va(PHP_LIBXML_ERROR, ctx, msg, args);
 	va_end(args);
 }
 

@@ -192,6 +192,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  d. ext/libxml
    - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
      from libxml.
+   - Added php_libxml_error_handler_va() to pass libxml errors, and
+     corresponding php_libxml_error_level enum.
    - Removed the "properties" HashTable field from php_libxml_node_object.
    - Added a way to attached private data to a php_libxml_ref_obj.
    - Added a way to fix a class type onto php_libxml_ref_obj.

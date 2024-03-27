@@ -67,8 +67,9 @@ PHP_DOM_EXPORT void php_dom_xpath_callbacks_clean_argument_stack(xmlXPathParserC
 		xmlXPathFreeObject(obj);
 	}
 
-	/* Push sentinel value */
-	valuePush(ctxt, xmlXPathNewString((const xmlChar *) ""));
+	/* Don't push a sentinel value here. If this is called from an error situation, then by *not* pushing a sentinel
+	 * the execution will halt. If this is called from a regular situation, then it is the caller's responsibility
+	 * to ensure the stack remains balanced. */
 }
 
 PHP_DOM_EXPORT void php_dom_xpath_callbacks_dtor(php_dom_xpath_callbacks *registry)
