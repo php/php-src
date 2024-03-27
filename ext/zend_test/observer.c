@@ -297,8 +297,9 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
 			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
-				zend_observer_remove_begin_handler(func, observer_begin);
-				zend_observer_remove_end_handler(func, observer_end);
+				void *old_handler;
+				zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
+				zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
