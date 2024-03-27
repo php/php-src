@@ -4469,6 +4469,78 @@ static int zend_jit_update_regs(zend_jit_ctx *jit, uint32_t var, zend_jit_addr s
 	return 1;
 }
 
+struct jit_observer_fcall_is_unobserved_data {
+	ir_ref if_unobserved;
+	ir_ref if_rt_cache;
+	ir_ref if_trampoline_or_generator;
+};
+
+static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobserved_start(zend_jit_ctx *jit, const zend_function *func, ir_ref *observer_handler, ir_ref rx, ir_ref func_ref) {
+	ir_ref run_time_cache;
+	struct jit_observer_fcall_is_unobserved_data data = {
+		.if_rt_cache = IS_UNUSED,
+		.if_trampoline_or_generator = IS_UNUSED,
+	};
+	if (func) {
+		ZEND_ASSERT((func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0);
+	} else {
+		ZEND_ASSERT(rx != IR_UNUSED);
+		data.if_trampoline_or_generator = ir_IF(ir_AND_U32(
+			ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
+			ir_CONST_U32(ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)));
+		ir_IF_FALSE(data.if_trampoline_or_generator);
+	}
+	if (func && (func->common.fn_flags & ZEND_ACC_CLOSURE) == 0) {
+		if (ZEND_MAP_PTR_IS_OFFSET(func->common.run_time_cache)) {
+			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)), (uintptr_t)ZEND_MAP_PTR(func->common.run_time_cache)));
+		} else {
+			ZEND_ASSERT(rx != IR_UNUSED);
+			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(func_ref ? func_ref : ir_CONST_ADDR(func), offsetof(zend_op_array, run_time_cache__ptr)));
+			data.if_rt_cache = ir_IF(ir_NE(run_time_cache, IR_NULL));
+			ir_IF_TRUE(data.if_rt_cache);
+		}
+	} else {
+		ZEND_ASSERT(rx != IR_UNUSED);
+		// Closures may be duplicated and have a different runtime cache. Use the regular run_time_cache access pattern for these
+		run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CALL(rx, func)), offsetof(zend_op_array, run_time_cache__ptr)));
+		ir_ref if_odd = ir_IF(ir_AND_A(run_time_cache, ir_CONST_ADDR(1)));
+		ir_IF_TRUE(if_odd);
+
+		ir_ref run_time_cache2 = ir_LOAD_A(ir_ADD_A(run_time_cache, ir_LOAD_A(jit_CG(map_ptr_base))));
+
+		ir_MERGE_WITH_EMPTY_FALSE(if_odd);
+		run_time_cache = ir_PHI_2(IR_ADDR, run_time_cache2, run_time_cache);
+	}
+	*observer_handler = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
+	ir_ref is_unobserved = ir_EQ(ir_LOAD_A(*observer_handler), ir_CONST_ADDR(ZEND_OBSERVER_NONE_OBSERVED));
+
+	data.if_unobserved = ir_IF(is_unobserved);
+	ir_IF_FALSE(data.if_unobserved);
+	return data;
+}
+
+static void jit_observer_fcall_is_unobserved_end(zend_jit_ctx *jit, struct jit_observer_fcall_is_unobserved_data *data) {
+	if (data->if_rt_cache != IR_UNUSED) {
+		ir_MERGE_WITH_EMPTY_FALSE(data->if_rt_cache);
+	}
+	if (data->if_trampoline_or_generator != IR_UNUSED) {
+		ir_MERGE_WITH_EMPTY_TRUE(data->if_trampoline_or_generator);
+	}
+	ir_MERGE_WITH_EMPTY_TRUE(data->if_unobserved);
+}
+
+static void jit_observer_fcall_begin(zend_jit_ctx *jit, ir_ref rx, ir_ref observer_handler) {
+	ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_begin_prechecked), rx, observer_handler);
+}
+
+static void jit_observer_fcall_end(zend_jit_ctx *jit, ir_ref rx, zend_jit_addr res_addr) {
+	ir_ref has_end_observer = ir_IF(ir_EQ(rx, ir_LOAD_A(jit_EG(current_observed_frame))));
+	ir_IF_TRUE(has_end_observer);
+	ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_end_prechecked),
+		rx, jit_ZVAL_ADDR(jit, res_addr));
+	ir_MERGE_WITH_EMPTY_FALSE(has_end_observer);
+}
+
 static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op1_def_info, zend_jit_addr op1_def_addr, uint32_t res_use_info, uint32_t res_info, zend_jit_addr res_addr, int may_overflow, int may_throw)
 {
 	ir_ref if_long = IR_UNUSED;
@@ -8142,10 +8214,11 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	ir_ref used_stack_ref = IR_UNUSED;
 	bool stack_check = 1;
 	ir_ref rx, ref, top, if_enough_stack, cold_path = IR_UNUSED;
+	uint32_t num_args = ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode) ? ZEND_FLF_NUM_ARGS(opline->opcode) : opline->extended_value;
 
 	ZEND_ASSERT(func_ref != IR_NULL);
 	if (func) {
-		used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
+		used_stack = zend_vm_calc_used_stack(num_args, func);
 		if ((int)used_stack <= checked_stack) {
 			stack_check = 0;
 		}
@@ -8228,7 +8301,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 #ifdef _WIN32
 			if (0) {
 #else
-			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
+			if ((opline->opcode == ZEND_INIT_FCALL || ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) && func && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 				jit_SET_EX_OPLINE(jit, opline);
 				ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_int_extend_stack_helper), used_stack_ref);
@@ -8381,7 +8454,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	}
 
 	// JIT: ZEND_CALL_NUM_ARGS(call) = num_args;
-	ir_STORE(jit_CALL(rx, This.u2.num_args), ir_CONST_U32(opline->extended_value));
+	ir_STORE(jit_CALL(rx, This.u2.num_args), ir_CONST_U32(num_args));
 
 	return 1;
 }
@@ -9876,12 +9949,16 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			ir_MERGE_WITH_EMPTY_FALSE(if_need);
 		}
 
-		if (ZEND_OBSERVER_ENABLED) {
+		if (ZEND_OBSERVER_ENABLED && (!func || (func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0)) {
+			ir_ref observer_handler;
+			ir_ref rx = jit_FP(jit); // Not sure why we cannot reuse rx here, but have to refetch
+			struct jit_observer_fcall_is_unobserved_data unobserved_data = jit_observer_fcall_is_unobserved_start(jit, func, &observer_handler, rx, func_ref);
 			if (GCC_GLOBAL_REGS) {
 				// EX(opline) = opline
 				ir_STORE(jit_EX(opline), jit_IP(jit));
 			}
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_begin), jit_FP(jit));
+			jit_observer_fcall_begin(jit, rx, observer_handler);
+			jit_observer_fcall_is_unobserved_end(jit, &unobserved_data);
 		}
 
 		if (trace) {
@@ -10008,8 +10085,12 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		// JIT: EG(current_execute_data) = execute_data;
 		ir_STORE(jit_EG(current_execute_data), rx);
 
-		if (ZEND_OBSERVER_ENABLED) {
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_begin), rx);
+		bool may_have_observer = ZEND_OBSERVER_ENABLED && (!func || (func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0);
+		if (may_have_observer) {
+			ir_ref observer_handler;
+			struct jit_observer_fcall_is_unobserved_data unobserved_data = jit_observer_fcall_is_unobserved_start(jit, func, &observer_handler, rx, func_ref ? func_ref : ir_LOAD_A(jit_CALL(rx, func)));
+			jit_observer_fcall_begin(jit, rx, observer_handler);
+			jit_observer_fcall_is_unobserved_end(jit, &unobserved_data);
 		}
 
 		// JIT: ZVAL_NULL(EX_VAR(opline->result.var));
@@ -10049,9 +10130,8 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			ir_CALL_2(IR_VOID, func_ptr, rx, jit_ZVAL_ADDR(jit, res_addr));
 		}
 
-		if (ZEND_OBSERVER_ENABLED) {
-			ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_end),
-				rx, jit_ZVAL_ADDR(jit, res_addr));
+		if (may_have_observer) {
+			jit_observer_fcall_end(jit, rx, res_addr);
 		}
 
 		// JIT: EG(current_execute_data) = execute_data;
@@ -16681,7 +16761,93 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 	return 1;
 }
 
-static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
+struct jit_frameless_observer_data {
+	ir_ref if_unobserved;
+	ir_ref reused_jit_ip;
+};
+
+static struct jit_frameless_observer_data jit_frameless_observer_begin(zend_jit_ctx *jit, int checked_stack, const zend_op *opline, ir_ref op1_ref, uint32_t op1_info, ir_ref op2_ref, uint32_t op2_info, ir_ref op1_data_ref, uint32_t op1_data_info) {
+	struct jit_frameless_observer_data data;
+	// JIT: zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(fbc))
+	ir_ref observer_handler;
+	zend_function *fbc = ZEND_FLF_FUNC(opline);
+	// Not need for runtime cache or generator checks here, we just need if_unobserved
+	data.if_unobserved = jit_observer_fcall_is_unobserved_start(jit, fbc, &observer_handler, IR_UNUSED, IR_UNUSED).if_unobserved;
+
+	// push args to a valid call frame, without copying
+	bool track_last_valid_opline = jit->track_last_valid_opline;
+	const zend_op *last_valid_opline = jit->last_valid_opline;
+	bool reuse_ip = jit->reuse_ip;
+	if (reuse_ip) {
+		data.reused_jit_ip = jit_IP(jit);
+	}
+	zend_jit_push_call_frame(jit, opline, NULL, fbc, 0, 0, checked_stack, ir_CONST_ADDR(fbc), IR_NULL);
+	// yes, we'll temporarily reuse the IP, but we don't want to handle this via the reuse_ip mechanism for simiplicity - we just reset IP to original in end
+	jit->track_last_valid_opline = track_last_valid_opline;
+	jit->last_valid_opline = last_valid_opline;
+	jit->reuse_ip = reuse_ip;
+
+	// push all args
+	uint32_t call_num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+	switch (call_num_args) {
+		case 3: jit_ZVAL_COPY(jit, ZEND_ADDR_MEM_ZVAL(ZREG_RX, EX_NUM_TO_VAR(3)), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op1_data_ref), op1_data_info, 0); ZEND_FALLTHROUGH;
+		case 2: jit_ZVAL_COPY(jit, ZEND_ADDR_MEM_ZVAL(ZREG_RX, EX_NUM_TO_VAR(2)), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op2_ref), op2_info, 0); ZEND_FALLTHROUGH;
+		case 1: jit_ZVAL_COPY(jit, ZEND_ADDR_MEM_ZVAL(ZREG_RX, EX_NUM_TO_VAR(1)), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op1_ref), op1_info, 0);
+	}
+
+	// Make call frame externally visible
+	ir_ref rx = jit_IP(jit);
+	ir_STORE(jit_CALL(rx, prev_execute_data), jit_FP(jit));
+	ir_STORE(jit_EG(current_execute_data), rx);
+
+	jit_observer_fcall_begin(jit, rx, observer_handler);
+
+	return data;
+}
+
+static ir_ref jit_frameless_observer_end(zend_jit_ctx *jit, struct jit_frameless_observer_data *data, const zend_op *opline, zend_jit_addr res_addr) {
+	ir_ref rx = jit_IP(jit);
+	jit_observer_fcall_end(jit, rx, res_addr);
+
+	ir_STORE(jit_EG(current_execute_data), ir_LOAD_A(jit_CALL(rx, prev_execute_data)));
+
+	ir_ref allocated_path = IR_UNUSED;
+
+	// free the call frame
+	if (JIT_G(trigger) != ZEND_JIT_ON_HOT_TRACE ||
+	    !JIT_G(current_frame) ||
+	    !JIT_G(current_frame)->call ||
+	    !TRACE_FRAME_IS_NESTED(JIT_G(current_frame)->call)) {
+		// JIT: zend_vm_stack_free_call_frame(call);
+		// JIT: if (UNEXPECTED(ZEND_CALL_INFO(call) & ZEND_CALL_ALLOCATED))
+		ir_ref if_allocated = ir_IF(ir_AND_U8(
+			ir_LOAD_U8(ir_ADD_OFFSET(rx, offsetof(zend_execute_data, This.u1.type_info) + 2)),
+			ir_CONST_U8(ZEND_CALL_ALLOCATED >> 16)));
+		ir_IF_TRUE_cold(if_allocated);
+
+		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_free_call_frame), rx);
+
+		allocated_path = ir_END();
+		ir_IF_FALSE(if_allocated);
+	}
+	ir_STORE(jit_EG(vm_stack_top), rx);
+
+	if (allocated_path) {
+		ir_MERGE_WITH(allocated_path);
+	}
+
+	if (jit->reuse_ip) {
+		jit_STORE_IP(jit, data->reused_jit_ip);
+	} else {
+		jit_SET_EX_OPLINE(jit, opline);
+	}
+
+	ir_ref skip = ir_END();
+	ir_IF_TRUE(data->if_unobserved);
+	return skip;
+}
+
+static void jit_frameless_icall0(zend_jit_ctx *jit, int checked_stack, const zend_op *opline)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -16689,11 +16855,22 @@ static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 	zend_jit_addr res_addr = RES_ADDR();
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		struct jit_frameless_observer_data observer_data = jit_frameless_observer_begin(jit, checked_stack, opline, IR_UNUSED, 0, IR_UNUSED, 0, IR_UNUSED, 0);
+		ir_CALL_1(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref);
+		skip_observer = jit_frameless_observer_end(jit, &observer_data, opline, res_addr);
+	}
 	ir_CALL_1(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref);
+	if (skip_observer != IR_UNUSED) {
+		ir_MERGE_WITH(skip_observer);
+	}
+
 	zend_jit_check_exception(jit);
 }
 
-static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info)
+static void jit_frameless_icall1(zend_jit_ctx *jit, int checked_stack, const zend_op *opline, uint32_t op1_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -16714,12 +16891,23 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 	if (op1_info & MAY_BE_REF) {
 		op1_ref = jit_ZVAL_DEREF_ref(jit, op1_ref);
 	}
+
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		struct jit_frameless_observer_data observer_data = jit_frameless_observer_begin(jit, checked_stack, opline, op1_ref, op1_info, IR_UNUSED, 0, IR_UNUSED, 0);
+		ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref);
+		skip_observer = jit_frameless_observer_end(jit, &observer_data, opline, res_addr);
+	}
 	ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref);
+	if (skip_observer != IR_UNUSED) {
+		ir_MERGE_WITH(skip_observer);
+	}
+
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	zend_jit_check_exception(jit);
 }
 
-static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info)
+static void jit_frameless_icall2(zend_jit_ctx *jit, int checked_stack, const zend_op *opline, uint32_t op1_info, uint32_t op2_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -16735,6 +16923,7 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	zend_jit_addr res_addr = RES_ADDR();
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
+
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);
@@ -16751,9 +16940,21 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	if (op2_info & MAY_BE_REF) {
 		op2_ref = jit_ZVAL_DEREF_ref(jit, op2_ref);
 	}
+
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		struct jit_frameless_observer_data observer_data = jit_frameless_observer_begin(jit, checked_stack, opline, op1_ref, op1_info, op2_ref, op2_info, IR_UNUSED, 0);
+		ir_CALL_3(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref);
+		skip_observer = jit_frameless_observer_end(jit, &observer_data, opline, res_addr);
+	}
 	ir_CALL_3(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref);
+	if (skip_observer != IR_UNUSED) {
+		ir_MERGE_WITH(skip_observer);
+	}
+
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
+	// TODO: I believe this is only necessary when jit_ir_needs_dtor is true for either op
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) != 0 && (opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0) {
 		jit_set_Z_TYPE_INFO(jit, op1_addr, IS_UNDEF);
 	}
@@ -16761,7 +16962,7 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	zend_jit_check_exception(jit);
 }
 
-static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, uint32_t op1_data_info)
+static void jit_frameless_icall3(zend_jit_ctx *jit, int checked_stack, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, uint32_t op1_data_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -16782,6 +16983,7 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
 	zend_jit_addr op3_addr = OP1_DATA_ADDR();
+
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);
@@ -16805,7 +17007,18 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	if (op1_data_info & MAY_BE_REF) {
 		op3_ref = jit_ZVAL_DEREF_ref(jit, op3_ref);
 	}
+
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		struct jit_frameless_observer_data observer_data = jit_frameless_observer_begin(jit, checked_stack, opline, op1_ref, op1_info, op2_ref, op2_info, op3_ref, op1_data_info);
+		ir_CALL_4(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref, op3_ref);
+		skip_observer = jit_frameless_observer_end(jit, &observer_data, opline, res_addr);
+	}	
 	ir_CALL_4(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref, op3_ref);
+	if (skip_observer != IR_UNUSED) {
+		ir_MERGE_WITH(skip_observer);
+	}
+
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))

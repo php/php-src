@@ -1,5 +1,5 @@
 --TEST--
-Observer: Frameless calls are disabled when there are observers
+Observer: Frameless calls are properly observable
 --EXTENSIONS--
 zend_test
 --INI--
@@ -9,9 +9,13 @@ zend_test.observer.enabled=1
 function _strpos(string $str) {
     return \strpos($str, 'o', 1);
 }
-_strpos('foo');
+var_dump(_strpos('foo'));
+var_dump(_strpos('foo')); // second time, with no observers detected
 ?>
 --EXPECTF--
 <!-- init '%s' -->
 <!-- init _strpos() -->
 <!-- init strpos() -->
+<!-- init var_dump() -->
+int(1)
+int(1)
