@@ -3,7 +3,7 @@ session_set_save_handler test
 --EXTENSIONS--
 session
 --INI--
-session.use_cookies=0
+session.use_cookies=1
 session.use_strict_mode=0
 session.cache_limiter=
 session.name=PHPSESSID
