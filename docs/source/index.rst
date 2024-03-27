@@ -15,6 +15,12 @@
 
    core/data-structures/index
 
+.. toctree::
+   :caption: Miscellaneous
+   :hidden:
+
+   miscellaneous/stubs
+
 Welcome to the php-src documentation!
 
 .. warning::
