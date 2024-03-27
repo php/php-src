@@ -83,18 +83,21 @@ const DATE_W3C = DATE_RFC3339;
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_TIMESTAMP
+ * @deprecated
  */
 const SUNFUNCS_RET_TIMESTAMP = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_STRING
+ * @deprecated
  */
 const SUNFUNCS_RET_STRING = UNKNOWN;
 
 /**
  * @var int
  * @cvalue SUNFUNCS_RET_DOUBLE
+ * @deprecated
  */
 const SUNFUNCS_RET_DOUBLE = UNKNOWN;
 
