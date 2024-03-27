@@ -1233,15 +1233,12 @@ PHP_FUNCTION(base64_encode)
 	char *str;
 	size_t str_len;
 	zend_string *result;
-	bool padding = true;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(str, str_len)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(padding)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_base64_encode_ex((unsigned char*)str, str_len, (padding ? 0 : PHP_BASE64_NO_PADDING));
+	result = php_base64_encode((unsigned char*)str, str_len);
 	RETURN_STR(result);
 }
 /* }}} */

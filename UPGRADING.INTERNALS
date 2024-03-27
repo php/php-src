@@ -213,7 +213,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      pcre2_set_compile_extra_options() with those options.
 
  g. ext/standard
-   - Added the base64_encode_ex() API with flag parameters, value can be
+   - Added the php_base64_encode_ex() API with flag parameters, value can be
      PHP_BASE64_NO_PADDING to encode without the padding character '='.
 
 ========================
