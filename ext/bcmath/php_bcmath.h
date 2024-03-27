@@ -19,6 +19,8 @@
 
 #include "libbcmath/src/bcmath.h"
 #include "zend_API.h"
+#include "php.h"
+#include "ext/standard/php_math.h"
 
 extern zend_module_entry bcmath_module_entry;
 #define phpext_bcmath_ptr &bcmath_module_entry
