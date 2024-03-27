@@ -690,7 +690,7 @@ static zend_string* get_command_from_array(HashTable *array, char ***argv, int n
 static descriptorspec_item* alloc_descriptor_array(HashTable *descriptorspec)
 {
 	uint32_t ndescriptors = zend_hash_num_elements(descriptorspec);
-	return ecalloc(sizeof(descriptorspec_item), ndescriptors);
+	return ecalloc(ndescriptors, sizeof(descriptorspec_item));
 }
 
 static zend_string* get_string_parameter(zval *array, int index, char *param_name)
