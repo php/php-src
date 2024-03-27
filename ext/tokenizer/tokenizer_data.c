@@ -53,6 +53,7 @@ char *get_token_type_name(int token_type)
 		case T_INSTANCEOF: return "T_INSTANCEOF";
 		case T_NEW: return "T_NEW";
 		case T_CLONE: return "T_CLONE";
+		case T_WITH: return "T_WITH";
 		case T_EXIT: return "T_EXIT";
 		case T_IF: return "T_IF";
 		case T_ELSEIF: return "T_ELSEIF";

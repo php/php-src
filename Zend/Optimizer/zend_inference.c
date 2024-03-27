@@ -2562,7 +2562,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 	   || opline->opcode == ZEND_ASSIGN_OBJ_OP
 	   || opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP
 	   || opline->opcode == ZEND_ASSIGN_DIM
-	   || opline->opcode == ZEND_ASSIGN_OBJ)
+	   || opline->opcode == ZEND_ASSIGN_OBJ
+	   || opline->opcode == ZEND_CLONE_INIT_PROP)
 	    && !(OP1_DATA_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS)) /*&& 0*/)) {
 		tmp = 0;
 		if (ssa_op->result_def >= 0 && !(ssa_var_info[ssa_op->result_def].type & MAY_BE_REF)) {
@@ -2578,7 +2579,8 @@ static zend_always_inline zend_result _zend_update_type_info(
 		 || opline->opcode == ZEND_ASSIGN_OBJ_OP
 		 || opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP
 		 || opline->opcode == ZEND_ASSIGN_DIM
-		 || opline->opcode == ZEND_ASSIGN_OBJ) {
+		 || opline->opcode == ZEND_ASSIGN_OBJ
+		 || opline->opcode == ZEND_CLONE_INIT_PROP) {
 			if ((ssa_op+1)->op1_def >= 0 && !(ssa_var_info[(ssa_op+1)->op1_def].type & MAY_BE_REF)) {
 				UPDATE_SSA_TYPE(tmp, (ssa_op+1)->op1_def);
 			}
@@ -3028,6 +3030,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 			}
 			break;
 		case ZEND_ASSIGN_OBJ:
+		case ZEND_CLONE_INIT_PROP:
 			if (opline->op1_type == IS_CV) {
 				zend_class_entry *ce = ssa_var_info[ssa_op->op1_use].ce;
 				bool add_rc = (t1 & (MAY_BE_OBJECT|MAY_BE_REF)) && (!ce
@@ -3695,6 +3698,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 							case ZEND_ASSIGN_OBJ:
 							case ZEND_ASSIGN_OBJ_OP:
 							case ZEND_ASSIGN_OBJ_REF:
+							case ZEND_CLONE_INIT_PROP:
 							case ZEND_PRE_INC_OBJ:
 							case ZEND_PRE_DEC_OBJ:
 							case ZEND_POST_INC_OBJ:
@@ -5212,6 +5216,41 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				 || ce->__get
 				 || ce->__set
 				 || ce->parent) {
+					return 1;
+				}
+
+				if (opline->op2_type != IS_CONST) {
+					return 1;
+				}
+
+				zend_string *prop_name = Z_STR_P(CRT_CONSTANT(opline->op2));
+				if (ZSTR_LEN(prop_name) > 0 && ZSTR_VAL(prop_name)[0] == '\0') {
+					return 1;
+				}
+
+				zend_property_info *prop_info =
+					zend_hash_find_ptr(&ce->properties_info, prop_name);
+				if (prop_info) {
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						return 1;
+					}
+					return !(prop_info->flags & ZEND_ACC_PUBLIC)
+						&& prop_info->ce != op_array->scope;
+				} else {
+					return !(ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
+				}
+			}
+			return 1;
+		case ZEND_CLONE_INIT_PROP:
+			if (t1 & (MAY_BE_ANY-MAY_BE_OBJECT)) {
+				return 1;
+			}
+			if (ssa_op->op1_use) {
+				zend_ssa_var_info *var_info = ssa->var_info + ssa_op->op1_use;
+				zend_class_entry *ce = var_info->ce;
+
+				if (var_info->is_instanceof ||
+				    !ce || ce->create_object || ce->__get || ce->__set || ce->parent) {
 					return 1;
 				}
 

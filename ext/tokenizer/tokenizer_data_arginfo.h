@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1dd42ee5b5b818c5bd131b5c4bbb13c153d99499 */
+ * Stub hash: a363f324157f7f10e5784e95d110910f5ade8dcd */
 
 static void register_tokenizer_data_symbols(int module_number)
 {
@@ -29,6 +29,7 @@ static void register_tokenizer_data_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("T_INSTANCEOF", T_INSTANCEOF, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_NEW", T_NEW, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_CLONE", T_CLONE, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_WITH", T_WITH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_EXIT", T_EXIT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_IF", T_IF, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_ELSEIF", T_ELSEIF, CONST_PERSISTENT);

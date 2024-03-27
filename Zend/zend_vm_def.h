@@ -2418,7 +2418,16 @@ ZEND_VM_C_LABEL(assign_object):
 					zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
 
 					if (prop_info != NULL) {
+						if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE))) {
+							zend_readonly_property_modification_error(prop_info);
+							value = &EG(uninitialized_zval);
+							ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+						}
+
 						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						if (value != &EG(uninitialized_zval)) {
+							Z_PROP_FLAG_P(property_val) &= ~IS_PROP_REINITABLE;
+						}
 						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
 					} else {
 ZEND_VM_C_LABEL(fast_assign_obj):
@@ -2471,7 +2480,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						} else if (OP_DATA_TYPE == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
+					}
 					zend_hash_add_new(zobj->properties, name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
@@ -9672,6 +9681,131 @@ ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY)
 		ZVAL_UNDEF(EX_VAR(opline->op2.var));
 	}
 	FREE_OP_DATA();
+	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
+ZEND_VM_HANDLER(209, ZEND_CLONE_INIT_PROP, VAR, CONST|TMPVAR|CV, CACHE_SLOT, SPEC(OP_DATA=CONST|TMP|VAR|CV))
+{
+	USE_OPLINE
+	zval *object, *zname, *value, tmp;
+	zend_object *zobj;
+	zend_string *name;
+	zend_refcounted *garbage = NULL;
+
+	SAVE_OPLINE();
+	object = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+	value = GET_OP_DATA_ZVAL_PTR(BP_VAR_R);
+
+	assert(Z_TYPE_P(object) == IS_OBJECT);
+
+	zobj = Z_OBJ_P(object);
+	void **cache_slot = CACHE_ADDR(opline->extended_value);
+	if (EXPECTED(zobj->ce == CACHED_PTR(opline->extended_value))) {
+		uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
+		zval *property_val;
+
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+			property_val = OBJ_PROP(zobj, prop_offset);
+
+			if (Z_TYPE_P(property_val) != IS_UNDEF) {
+				zend_property_info *prop_info = (zend_property_info*) CACHED_PTR_EX(cache_slot + 2);
+
+				if (UNEXPECTED(prop_info != NULL)) {
+					if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && (Z_PROP_FLAG_P(property_val) & IS_PROP_REINITED))) {
+						zend_readonly_property_modification_error(prop_info);
+						value = &EG(uninitialized_zval);
+						ZEND_VM_C_GOTO(free_and_exit_init_prop);
+					}
+					value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+					if (value != &EG(uninitialized_zval)) {
+						Z_PROP_FLAG_P(property_val) |= IS_PROP_REINITED;
+					}
+					ZEND_VM_C_GOTO(free_and_exit_init_prop);
+				} else {
+ZEND_VM_C_LABEL(fast_init_prop):
+					zend_assign_to_variable_ex(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES(), &garbage);
+					ZEND_VM_C_GOTO(free_and_exit_init_prop);
+				}
+			}
+		} else {
+			zname = GET_OP2_ZVAL_PTR(BP_VAR_R);
+			if (Z_TYPE_P(zname) != IS_STRING) {
+				zend_throw_error(zend_ce_type_error, "Property name must be of type string, %s given", zend_zval_type_name(zname));
+				ZEND_VM_C_GOTO(free_and_exit_init_prop);
+			}
+			name = Z_STR_P(zname);
+
+			if (EXPECTED(zobj->properties != NULL)) {
+				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
+					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
+						GC_DELREF(zobj->properties);
+					}
+					zobj->properties = zend_array_dup(zobj->properties);
+				}
+				property_val = zend_hash_find_known_hash(zobj->properties, name);
+				if (property_val) {
+					ZEND_VM_C_GOTO(fast_init_prop);
+				}
+			}
+
+			if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
+				if (EXPECTED(zobj->properties == NULL)) {
+					rebuild_object_properties(zobj);
+				}
+				if (OP_DATA_TYPE == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
+						Z_ADDREF_P(value);
+					}
+				} else if (OP_DATA_TYPE != IS_TMP_VAR) {
+					if (Z_ISREF_P(value)) {
+						if (OP_DATA_TYPE == IS_VAR) {
+							zend_reference *ref = Z_REF_P(value);
+							if (GC_DELREF(ref) == 0) {
+								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
+								efree_size(ref, sizeof(zend_reference));
+								value = &tmp;
+							} else {
+								value = Z_REFVAL_P(value);
+								Z_TRY_ADDREF_P(value);
+							}
+						} else {
+							value = Z_REFVAL_P(value);
+							Z_TRY_ADDREF_P(value);
+						}
+					} else if (OP_DATA_TYPE == IS_CV) {
+						Z_TRY_ADDREF_P(value);
+					}
+				}
+				zend_hash_add_new(zobj->properties, name, value);
+				ZEND_VM_C_GOTO(free_and_exit_init_prop);
+			}
+		}
+	}
+
+	zname = GET_OP2_ZVAL_PTR(BP_VAR_R);
+	if (Z_TYPE_P(zname) != IS_STRING) {
+		zend_throw_error(zend_ce_type_error, "Property name must be of type string, %s given", zend_zval_type_name(zname));
+		ZEND_VM_C_GOTO(free_and_exit_init_prop);
+	}
+	name = Z_STR_P(zname);
+
+	if (OP_DATA_TYPE == IS_CV || OP_DATA_TYPE == IS_VAR) {
+		ZVAL_DEREF(value);
+	}
+
+	value = zobj->handlers->write_property(zobj, name, value, cache_slot);
+
+ZEND_VM_C_LABEL(free_and_exit_init_prop):
+	if (RETURN_VALUE_USED(opline) && value) {
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), object);
+	}
+	FREE_OP_DATA();
+	if (garbage) {
+		GC_DTOR_NO_REF(garbage);
+	}
+	FREE_OP2();
+	FREE_OP1();
+	/* ZEND_CLONE_INIT_PROP has two opcodes! */
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
 }
 
