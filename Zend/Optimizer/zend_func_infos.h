@@ -407,6 +407,7 @@ static const func_info_t func_infos[] = {
 	F1("posix_getrlimit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_FALSE),
 #endif
 	F1("random_bytes", MAY_BE_STRING),
+	FN("Random\\Randomizer::pickArrayKeys", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #if defined(HAVE_HISTORY_LIST)
 	F1("readline_list_history", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_STRING),
 #endif
@@ -678,6 +679,8 @@ static const func_info_t func_infos[] = {
 	F1("xml_error_string", MAY_BE_STRING|MAY_BE_NULL),
 	F1("xml_parser_get_option", MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL),
 	FN("zend_test_create_throwing_resource", MAY_BE_RESOURCE),
+	F1("_ZendTestTypeInference::getIntArray", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
+	F1("_ZendTestTypeInference::createIntArray", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_OF_LONG),
 	FN("zip_open", MAY_BE_RESOURCE|MAY_BE_LONG|MAY_BE_FALSE),
 	FN("zip_read", MAY_BE_RESOURCE|MAY_BE_FALSE),
 	F1("ob_gzhandler", MAY_BE_STRING|MAY_BE_FALSE),

@@ -25,6 +25,7 @@
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
 #include "zend_inference.h"
+#include "zend_execute.h"
 #ifdef _WIN32
 #include "win32/ioutil.h"
 #endif
@@ -100,18 +101,20 @@ ZEND_API int zend_func_info_rid = -1;
 
 uint32_t zend_get_internal_func_info(
 		const zend_function *callee_func, const zend_call_info *call_info, const zend_ssa *ssa) {
-	if (callee_func->common.scope) {
-		/* This is a method, not a function. */
+	if (callee_func->common.scope && !call_info->is_prototype) {
+		/* This is a non-prototype method. */
 		return 0;
 	}
 
-	zend_string *name = callee_func->common.function_name;
-	if (!name) {
+	zend_string *name = get_function_or_method_name_or_null(callee_func);
+	if (name == NULL) {
+		zend_string_release(name);
 		/* zend_pass_function has no name. */
 		return 0;
 	}
 
 	zval *zv = zend_hash_find_known_hash(&func_info, name);
+	zend_string_release(name);
 	if (!zv) {
 		return 0;
 	}
