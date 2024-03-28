@@ -339,15 +339,15 @@ lxb_css_rule_ref_dec(lxb_css_rule_t *rule)
 lxb_inline void
 lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
 {
+#if 0
     if (rule->ref_count > 0) {
         rule->ref_count--;
     }
 
     if (rule->ref_count == 0) {
-#if 0
         (void) lxb_css_rule_destroy(rule, true);
-#endif
     }
+#endif
 }
 
 lxb_inline void

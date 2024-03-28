@@ -1320,8 +1320,6 @@ lxb_html_tree_insertion_mode_in_body_textarea(lxb_html_tree_t *tree,
     lxb_html_tokenizer_state_set(tree->tkz_ref,
                                  lxb_html_tokenizer_state_rcdata_before);
 
-    tree->original_mode = tree->mode;
-
     tree->frameset_ok = false;
 
     tree->original_mode = tree->mode;

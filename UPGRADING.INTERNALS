@@ -195,6 +195,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Removed the "properties" HashTable field from php_libxml_node_object.
    - Added a way to attached private data to a php_libxml_ref_obj.
    - Added a way to fix a class type onto php_libxml_ref_obj.
+   - Added a way to record quirks mode in php_libxml_ref_obj.
    - Added php_libxml_uses_internal_errors().
 
  e. ext/date

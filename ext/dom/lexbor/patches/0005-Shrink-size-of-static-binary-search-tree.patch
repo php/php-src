@@ -1,7 +1,7 @@
-From 7fde66f32dcfbdc5df97fbffe411c0d7fd60fa50 Mon Sep 17 00:00:00 2001
+From 16daa8e860e393ff39613b908550b0982a2210f2 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:29:31 +0100
-Subject: [PATCH 2/2] Shrink size of static binary search tree
+Subject: [PATCH 5/6] Shrink size of static binary search tree
 
 This also makes it more efficient on the data cache.
 ---
@@ -13,7 +13,7 @@ This also makes it more efficient on the data cache.
  5 files changed, 12 insertions(+), 12 deletions(-)
 
 diff --git a/source/lexbor/core/sbst.h b/source/lexbor/core/sbst.h
-index b0fbc54..40e0e91 100755
+index b0fbc54..40e0e91 100644
 --- a/source/lexbor/core/sbst.h
 +++ b/source/lexbor/core/sbst.h
 @@ -19,12 +19,12 @@ extern "C" {
@@ -35,7 +35,7 @@ index b0fbc54..40e0e91 100755
  lexbor_sbst_entry_static_t;
  
 diff --git a/source/lexbor/html/tokenizer/state.c b/source/lexbor/html/tokenizer/state.c
-index 70ca391..2f3414f 100755
+index 70ca391..2f3414f 100644
 --- a/source/lexbor/html/tokenizer/state.c
 +++ b/source/lexbor/html/tokenizer/state.c
 @@ -1815,7 +1815,7 @@ lxb_html_tokenizer_state_char_ref_named(lxb_html_tokenizer_t *tkz,
@@ -48,7 +48,7 @@ index 70ca391..2f3414f 100755
              tkz->entity_match = entry;
          }
 diff --git a/utils/lexbor/html/tmp/tokenizer_res.h b/utils/lexbor/html/tmp/tokenizer_res.h
-index b3701d5..73ab66e 100755
+index b3701d5..73ab66e 100644
 --- a/utils/lexbor/html/tmp/tokenizer_res.h
 +++ b/utils/lexbor/html/tmp/tokenizer_res.h
 @@ -6,7 +6,7 @@
@@ -98,7 +98,7 @@ index ee7dcb4..7cd1335 100755
 +                 "../../../source/lexbor/html/tokenizer/res.h",
                   "data/entities.json");
 diff --git a/utils/lexbor/lexbor/LXB.py b/utils/lexbor/lexbor/LXB.py
-index 3e75812..b068ea3 100755
+index 2370c66..c41e645 100755
 --- a/utils/lexbor/lexbor/LXB.py
 +++ b/utils/lexbor/lexbor/LXB.py
 @@ -27,7 +27,7 @@ class Temp:
@@ -111,5 +111,5 @@ index 3e75812..b068ea3 100755
          fh.close()
  
 -- 
-2.43.0
+2.44.0
 

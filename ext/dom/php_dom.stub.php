@@ -1114,6 +1114,9 @@ namespace DOM
         public function append(Node|string ...$nodes): void;
         public function prepend(Node|string ...$nodes): void;
         public function replaceChildren(Node|string ...$nodes): void;
+
+        public function querySelector(string $selectors): ?Element;
+        public function querySelectorAll(string $selectors): NodeList;
     }
 
     interface ChildNode
@@ -1373,6 +1376,11 @@ namespace DOM
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        public function querySelector(string $selectors): ?Element {}
+        public function querySelectorAll(string $selectors): NodeList {}
+        public function closest(string $selectors): ?Element {}
+        public function matches(string $selectors): bool {}
     }
 
     class Attr extends Node
@@ -1489,6 +1497,11 @@ namespace DOM
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        /** @implementation-alias DOM\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+        /** @implementation-alias DOM\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
     }
 
     class Entity extends Node
@@ -1583,6 +1596,12 @@ namespace DOM
         public function replaceChildren(Node|string ...$nodes): void {}
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
+
+        /** @implementation-alias DOM\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+
+        /** @implementation-alias DOM\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
     }
 
     final class HTMLDocument extends Document

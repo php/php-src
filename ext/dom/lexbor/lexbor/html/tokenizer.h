@@ -73,8 +73,8 @@ struct lxb_html_tokenizer {
     const lxb_char_t                 *end;
     const lxb_char_t                 *begin;
     const lxb_char_t                 *last;
-    size_t                            current_line;
-    size_t                            current_column;
+    size_t                           current_line;
+    size_t                           current_column;
 
     /* Entities */
     const lexbor_sbst_entry_static_t *entity;
