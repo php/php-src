@@ -148,6 +148,9 @@ typedef struct pgsql_link_handle {
 	zend_string *hash;
 	HashTable *notices;
 	bool persistent;
+#ifdef LIBPQ_HAS_PIPELINING
+	bool synced;
+#endif
 	zend_object std;
 } pgsql_link_handle;
 
