@@ -3241,7 +3241,8 @@ static void zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && \
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
@@ -3268,7 +3269,7 @@ static void zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__i386__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
