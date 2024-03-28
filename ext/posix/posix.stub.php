@@ -454,3 +454,13 @@ function posix_pathconf(string $path, int $name): int|false {}
 /** @param resource|int $file_descriptor */
 function posix_fpathconf($file_descriptor, int $name): int|false {}
 #endif
+
+#ifdef HAVE_MKFIFOAT
+/** @param resource|int $file_descriptor */
+function posix_mkfifoat($file_descriptor, string $path, int $permissions): bool {}
+#endif
+
+#ifdef HAVE_MKNODAT
+/** @param resource|int $file_descriptor */
+function posix_mknodat($file_descriptor, string $path, int $flags, int $major = 0, int $minor = 0): bool {}
+#endif

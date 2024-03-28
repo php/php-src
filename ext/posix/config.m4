@@ -8,7 +8,7 @@ if test "$PHP_POSIX" = "yes"; then
   AC_DEFINE(HAVE_POSIX, 1, [whether to include POSIX-like functions])
   PHP_NEW_EXTENSION(posix, posix.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups initgroups getgrgid_r eaccess)
+  AC_CHECK_FUNCS(seteuid setegid setsid getsid getpgid ctermid mkfifo mknod setrlimit getrlimit getgroups initgroups getgrgid_r eaccess mkfifoat mknodat)
 
   dnl Check for makedev. If it's defined as a macro, AC_CHECK_FUNCS won't work.
   dnl Required headers are included by the AC_HEADER_MAJOR logic.

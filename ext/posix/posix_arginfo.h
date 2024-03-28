@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 82caf527a8ec686bc450e5d782bb79275d5a13e3 */
+ * Stub hash: 6152cd1c60c3136d137106736789161eb402a991 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_kill, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -185,6 +185,24 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_posix_fpathconf, 0, 2, MAY_BE_LO
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_MKFIFOAT)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_mkfifoat, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, file_descriptor)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, permissions, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_MKNODAT)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_posix_mknodat, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, file_descriptor)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, major, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, minor, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(posix_kill);
 ZEND_FUNCTION(posix_getpid);
 ZEND_FUNCTION(posix_getppid);
@@ -256,6 +274,12 @@ ZEND_FUNCTION(posix_pathconf);
 #endif
 #if defined(HAVE_FPATHCONF)
 ZEND_FUNCTION(posix_fpathconf);
+#endif
+#if defined(HAVE_MKFIFOAT)
+ZEND_FUNCTION(posix_mkfifoat);
+#endif
+#if defined(HAVE_MKNODAT)
+ZEND_FUNCTION(posix_mknodat);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -331,6 +355,12 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_FPATHCONF)
 	ZEND_FE(posix_fpathconf, arginfo_posix_fpathconf)
+#endif
+#if defined(HAVE_MKFIFOAT)
+	ZEND_FE(posix_mkfifoat, arginfo_posix_mkfifoat)
+#endif
+#if defined(HAVE_MKNODAT)
+	ZEND_FE(posix_mknodat, arginfo_posix_mknodat)
 #endif
 	ZEND_FE_END
 };
