@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13433 (Segmentation Fault in zend_class_init_statics when
     using opcache.preload). (nielsdos)
 
+- OpenSSL:
+  . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
+    (Jakub Zelenka)
+
 - Streams:
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
     (Jakub Zelenka)
