@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.19
 
+- FPM:
+  . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
+    (Jakub Zelenka)
 
 11 Apr 2024, PHP 8.2.18
 
@@ -19,8 +22,6 @@ PHP                                                                        NEWS
 
 - FPM
   . Fixed incorrect check in fpm_shm_free(). (nielsdos)
-  . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
-    (Jakub Zelenka)
 
 - GD:
   . Fixed bug GH-12019 (add GDLIB_CFLAGS in feature tests). (Michael Orlitzky)
