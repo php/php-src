@@ -190,22 +190,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
-		php_stream_bucket *bucket;
-
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
-		while ((bucket = buckets_in->head)) {
-			/* Remove unconsumed buckets from the brigade */
-			php_stream_bucket_unlink(bucket);
-			php_stream_bucket_delref(bucket);
-		}
-	}
-	if (ret != PSFS_PASS_ON) {
-		php_stream_bucket *bucket = buckets_out->head;
-		while (bucket != NULL) {
-			php_stream_bucket_unlink(bucket);
-			php_stream_bucket_delref(bucket);
-			bucket = buckets_out->head;
-		}
 	}
 
 	/* filter resources are cleaned up by the stream destructor,

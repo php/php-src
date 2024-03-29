@@ -636,6 +636,17 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
 					stream->eof = 1;
+					/* free all data left in brigades */
+					while ((bucket = brig_inp->head)) {
+						/* Remove unconsumed buckets from the input brigade */
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
+					while ((bucket = brig_outp->head)) {
+						/* Remove unconsumed buckets from the output brigade */
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
 					efree(chunk_buf);
 					retval = FAILURE;
 					goto out_is_eof;

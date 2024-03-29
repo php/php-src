@@ -2,9 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.6
 
+- FPM:
+  . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
+    (Jakub Zelenka)
+
 - Opcache:
   . Fixed bug GH-13433 (Segmentation Fault in zend_class_init_statics when
     using opcache.preload). (nielsdos)
+
+- Streams:
+  . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
+    (Jakub Zelenka)
 
 28 Mar 2024, PHP 8.3.5RC1
 
@@ -26,8 +34,6 @@ PHP                                                                        NEWS
   . Fixed GH-11086 (FPM: config test runs twice in daemonised mode).
     (Jakub Zelenka)
   . Fixed incorrect check in fpm_shm_free(). (nielsdos)
-  . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
-    (Jakub Zelenka)
 
 - GD:
   . Fixed bug GH-12019 (add GDLIB_CFLAGS in feature tests). (Michael Orlitzky)
