@@ -63,25 +63,26 @@ $proxyCode = <<<'CODE'
 
     $read = [$upstream, $conn];
     $applicationData = false;
-    $i = 1;
     while (stream_select($read, $write, $except, 1)) {
         foreach ($read as $fp) {
             $data = stream_get_contents($fp);
             if ($fp === $conn) {
                 fwrite($upstream, $data);
             } else {
-                if ($data !== '' && $data[0] === chr(23)) {
-                    if (!$applicationData) {
-                        $applicationData = true;
-                        fwrite($conn, $data[0]);
-                        phpt_notify();
-                        sleep(1);
-                        fwrite($conn, substr($data, 1));
+                foreach (phpt_extract_tls_records($data) as $record) {
+                    if ($record !== '' && $record[0] === chr(23)) {
+                        if (!$applicationData) {
+                            $applicationData = true;
+                            fwrite($conn, $record[0]);
+                            phpt_notify();
+                            sleep(1);
+                            fwrite($conn, substr($record, 1));
+                        } else {
+                            fwrite($conn, $record);
+                        }
                     } else {
-                        fwrite($conn, $data);
+                        fwrite($conn, $record);
                     }
-                } else {
-                    fwrite($conn, $data);
                 }
             }
         }
