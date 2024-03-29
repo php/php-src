@@ -2480,21 +2480,96 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 					/* the poll() call was skipped if the socket is non-blocking (or MSG_DONTWAIT is available) and if the timeout is zero */
 					/* additionally, we don't use this optimization if SSL is active because in that case, we're not using MSG_DONTWAIT */
 					if (sslsock->ssl_active) {
-						int n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
-						if (n <= 0) {
-							int err = SSL_get_error(sslsock->ssl_handle, n);
-							switch (err) {
-								case SSL_ERROR_SYSCALL:
-									alive = php_socket_errno() == EAGAIN;
-									break;
-								case SSL_ERROR_WANT_READ:
-								case SSL_ERROR_WANT_WRITE:
-									alive = 1;
-									break;
-								default:
-									/* any other problem is a fatal error */
-									alive = 0;
+						int retry = 1;
+						struct timeval start_time;
+						struct timeval *timeout = NULL;
+						int began_blocked = sslsock->s.is_blocked;
+						int has_timeout = 0;
+
+						/* never use a timeout with non-blocking sockets */
+						if (began_blocked) {
+							timeout = &tv;
+						}
+
+						if (timeout && php_set_sock_blocking(sslsock->s.socket, 0) == SUCCESS) {
+							sslsock->s.is_blocked = 0;
+						}
+
+						if (!sslsock->s.is_blocked && timeout && (timeout->tv_sec > 0 || (timeout->tv_sec == 0 && timeout->tv_usec))) {
+							has_timeout = 1;
+							/* gettimeofday is not monotonic; using it here is not strictly correct */
+							gettimeofday(&start_time, NULL);
+						}
+
+						/* Main IO loop. */
+						do {
+							struct timeval cur_time, elapsed_time, left_time;
+
+							/* If we have a timeout to check, figure out how much time has elapsed since we started. */
+							if (has_timeout) {
+								gettimeofday(&cur_time, NULL);
+
+								/* Determine how much time we've taken so far. */
+								elapsed_time = php_openssl_subtract_timeval(cur_time, start_time);
+
+								/* and return an error if we've taken too long. */
+								if (php_openssl_compare_timeval(elapsed_time, *timeout) > 0 ) {
+									/* If the socket was originally blocking, set it back. */
+									if (began_blocked) {
+										php_set_sock_blocking(sslsock->s.socket, 1);
+										sslsock->s.is_blocked = 1;
+									}
+									sslsock->s.timeout_event = 1;
+									return PHP_STREAM_OPTION_RETURN_ERR;
+								}
 							}
+
+							int n = SSL_peek(sslsock->ssl_handle, &buf, sizeof(buf));
+							/* If we didn't do anything on the last loop (or an error) check to see if we should retry or exit. */
+							if (n <= 0) {
+								/* Now, do the IO operation. Don't block if we can't complete... */
+								int err = SSL_get_error(sslsock->ssl_handle, n);
+								switch (err) {
+									case SSL_ERROR_SYSCALL:
+										retry = php_socket_errno() == EAGAIN;
+										break;
+									case SSL_ERROR_WANT_READ:
+									case SSL_ERROR_WANT_WRITE:
+										retry = 1;
+										break;
+									default:
+										/* any other problem is a fatal error */
+										retry = 0;
+								}
+
+								/* Don't loop indefinitely in non-blocking mode if no data is available */
+								if (began_blocked == 0 || !has_timeout) {
+									alive = retry;
+									break;
+								}
+
+								/* Now, if we have to wait some time, and we're supposed to be blocking, wait for the socket to become
+								* available. Now, php_pollfd_for uses select to wait up to our time_left value only...
+								*/
+								if (retry) {
+									/* Now, how much time until we time out? */
+									left_time = php_openssl_subtract_timeval(*timeout, elapsed_time);
+									if (php_pollfd_for(sslsock->s.socket, PHP_POLLREADABLE|POLLPRI|POLLOUT, has_timeout ? &left_time : NULL) <= 0) {
+										retry = 0;
+										alive = 0;
+									};
+								}
+							} else {
+								retry = 0;
+								alive = 1;
+							}
+							/* Finally, we keep going until there are any data or there is no time to wait. */
+						} while (retry);
+
+						if (began_blocked && !sslsock->s.is_blocked) {
+							// Set it back to blocking
+							php_set_sock_blocking(sslsock->s.socket, 1);
+							sslsock->s.is_blocked = 1;
 						}
 					} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT) && php_socket_errno() != EAGAIN) {
 						alive = 0;
