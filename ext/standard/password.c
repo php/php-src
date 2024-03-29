@@ -180,6 +180,11 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
+	if (memchr(ZSTR_VAL(password), '\0', ZSTR_LEN(password))) {
+		zend_value_error("Bcrypt password must not contain null character");
+		return NULL;
+	}
+
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		cost = zval_get_long(zcost);
 	}
