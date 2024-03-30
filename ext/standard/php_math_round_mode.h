@@ -10,35 +10,40 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Andi Gutmans <andi@php.net>                                  |
+   | Authors: Jim Winstead <jimw@php.net>                                 |
+   |          Stig Sæther Bakken <ssb@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_BCMATH_H
-#define PHP_BCMATH_H
-
-#include "libbcmath/src/bcmath.h"
-#include "zend_API.h"
-#include "ext/standard/php_math_round_mode.h"
-
-extern zend_module_entry bcmath_module_entry;
-#define phpext_bcmath_ptr &bcmath_module_entry
-
-#include "php_version.h"
-#define PHP_BCMATH_VERSION PHP_VERSION
-
-ZEND_BEGIN_MODULE_GLOBALS(bcmath)
-	bc_num _zero_;
-	bc_num _one_;
-	bc_num _two_;
-	int bc_precision;
-ZEND_END_MODULE_GLOBALS(bcmath)
-
-#if defined(ZTS) && defined(COMPILE_DL_BCMATH)
-ZEND_TSRMLS_CACHE_EXTERN()
+/* Define rounding modes (all are round-to-nearest) */
+#ifndef PHP_ROUND_HALF_UP
+#define PHP_ROUND_HALF_UP        0x01    /* Arithmetic rounding, up == away from zero */
 #endif
 
-ZEND_EXTERN_MODULE_GLOBALS(bcmath)
-#define BCG(v) ZEND_MODULE_GLOBALS_ACCESSOR(bcmath, v)
+#ifndef PHP_ROUND_HALF_DOWN
+#define PHP_ROUND_HALF_DOWN      0x02    /* Arithmetic rounding, down == towards zero */
+#endif
 
-#endif /* PHP_BCMATH_H */
+#ifndef PHP_ROUND_HALF_EVEN
+#define PHP_ROUND_HALF_EVEN      0x03    /* Banker's rounding */
+#endif
+
+#ifndef PHP_ROUND_HALF_ODD
+#define PHP_ROUND_HALF_ODD       0x04
+#endif
+
+#ifndef PHP_ROUND_CEILING
+#define PHP_ROUND_CEILING        0x05
+#endif
+
+#ifndef PHP_ROUND_FLOOR
+#define PHP_ROUND_FLOOR          0x06
+#endif
+
+#ifndef PHP_ROUND_TOWARD_ZERO
+#define PHP_ROUND_TOWARD_ZERO    0x07
+#endif
+
+#ifndef PHP_ROUND_AWAY_FROM_ZERO
+#define PHP_ROUND_AWAY_FROM_ZERO 0x08
+#endif
