@@ -1,5 +1,5 @@
 --TEST--
-Nested WeakMap for same object key
+WeakMaps disallow data classes
 --FILE--
 <?php
 
