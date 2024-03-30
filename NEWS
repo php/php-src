@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Ensure fiber stack is not backed by THP. (crrodriguez)
   . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
   . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
+  . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -180,6 +181,8 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
+  . Added the TCP_SYNCNT constant for Linux to set number of attempts to send
+    SYN packets from the client. (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

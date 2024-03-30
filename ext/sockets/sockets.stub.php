@@ -544,6 +544,13 @@ const SKF_AD_MAX = UNKNOWN;
  */
 const TCP_CONGESTION = UNKNOWN;
 #endif
+#ifdef TCP_SYNCNT
+/**
+ * @var int
+ * @cvalue TCP_SYNCNT
+ */
+const TCP_SYNCNT = UNKNOWN;
+#endif
 #ifdef SO_ZEROCOPY
 /**
  * @var int
