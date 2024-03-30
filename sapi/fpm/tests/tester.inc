@@ -499,11 +499,12 @@ class Tester
     /**
      * Start PHP-FPM master process
      *
-     * @param array $extraArgs   Command extra arguments.
-     * @param bool  $forceStderr Whether to output to stderr so error log is used.
-     * @param bool  $daemonize   Whether to start FPM daemonized
-     * @param array $extensions  List of extension to add if shared build used.
-     * @param array $iniEntries  List of ini entries to use.
+     * @param array      $extraArgs   Command extra arguments.
+     * @param bool       $forceStderr Whether to output to stderr so error log is used.
+     * @param bool       $daemonize   Whether to start FPM daemonized
+     * @param array      $extensions  List of extension to add if shared build used.
+     * @param array      $iniEntries  List of ini entries to use.
+     * @param array|null $envVars     List of env variable to execute FPM with or null to use the current ones.
      *
      * @return bool
      * @throws \Exception
@@ -514,7 +515,7 @@ class Tester
         bool $daemonize = false,
         array $extensions = [],
         array $iniEntries = [],
-        array $envVars = [],
+        ?array $envVars = null,
     ) {
         $configFile = $this->createConfig();
         $desc       = $this->outDesc ? [] : [1 => array('pipe', 'w'), 2 => array('redirect', 1)];
