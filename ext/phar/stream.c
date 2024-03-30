@@ -858,8 +858,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->link = entry->tmp = NULL;
 		source = entry;
 
-		/* add to the manifest, and then store the pointer to the new guy in entry */
-		entry = zend_hash_str_add_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
+		/* add to the manifest, and then store the pointer to the new guy in entry
+		 * if it already exists, we overwrite the destination like what copy('phar://...', 'phar://...') does. */
+		entry = zend_hash_str_update_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
 
 		entry->filename = estrndup(ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1);
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error)) {

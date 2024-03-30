@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
     (Jakub Zelenka)
 
+- Phar:
+  . Fixed bug GH-13836 (Renaming a file in a Phar to an already existing
+    filename causes a NULL pointer dereference). (nielsdos)
+
 - PHPDBG:
   . Fixed bug GH-13827 (Null pointer access of type 'zval' in phpdbg_frame).
     (nielsdos)
