@@ -3729,13 +3729,29 @@ static void php_date_date_set(zval *object, zend_long y, zend_long m, zend_long 
 PHP_FUNCTION(date_date_set)
 {
 	zval *object;
-	zend_long  y, m, d;
+	php_date_obj* dateobj;
+	zend_long y, m, d;
+	bool y_is_null = 1, m_is_null = 1, d_is_null = 1;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Olll", &object, date_ce_date, &y, &m, &d) == FAILURE) {
+	if (zend_parse_method_parameters(
+        ZEND_NUM_ARGS(), getThis(), "O|l!l!l!",
+        &object, date_ce_date,
+        &y, &y_is_null,
+        &m, &m_is_null,
+        &d, &d_is_null
+    ) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_date_date_set(object, y, m, d, return_value);
+	dateobj = Z_PHPDATE_P(object);
+
+	php_date_date_set(
+		object,
+		y_is_null ? dateobj->time->y : y,
+		m_is_null ? dateobj->time->m : m,
+		d_is_null ? dateobj->time->d : d,
+		return_value
+	);
 
 	RETURN_OBJ_COPY(Z_OBJ_P(object));
 }
@@ -3744,16 +3760,23 @@ PHP_FUNCTION(date_date_set)
 /* {{{ */
 PHP_METHOD(DateTimeImmutable, setDate)
 {
-	zval *object, new_object;
-	zend_long  y, m, d;
+	zval *object = ZEND_THIS, new_object;
+	php_date_obj* dateobj = Z_PHPDATE_P(object);
+	zend_long y, m, d;
+	bool y_is_null = 1, m_is_null = 1, d_is_null = 1;
 
-	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &y, &m, &d) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!l!l!", &y, &y_is_null, &m, &m_is_null, &d, &d_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
-	php_date_date_set(&new_object, y, m, d, return_value);
+	php_date_date_set(
+		&new_object,
+		y_is_null ? dateobj->time->y : y,
+		m_is_null ? dateobj->time->m : m,
+		d_is_null ? dateobj->time->d : d,
+		return_value
+	);
 
 	RETURN_OBJ(Z_OBJ(new_object));
 }

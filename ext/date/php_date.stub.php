@@ -426,7 +426,7 @@ class DateTime implements DateTimeInterface
      * @tentative-return-type
      * @alias date_date_set
      */
-    public function setDate(int $year, int $month, int $day): DateTime {}
+    public function setDate(?int $year = null, ?int $month = null, ?int $day = null): DateTime {}
 
     /**
      * @tentative-return-type
@@ -536,7 +536,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function setTime(int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTimeImmutable {}
 
     /** @tentative-return-type */
-    public function setDate(int $year, int $month, int $day): DateTimeImmutable {}
+    public function setDate(?int $year = null, ?int $month = null, ?int $day = null): DateTimeImmutable {}
 
     /** @tentative-return-type */
     public function setISODate(int $year, int $week, int $dayOfWeek = 1): DateTimeImmutable {}
