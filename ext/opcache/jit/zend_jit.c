@@ -243,6 +243,11 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	return 0;
 }
 
+#define ADVANCE_SSA_OP(ssa_op, offset) \
+	do { \
+		if (ssa_op) ssa_op += offset; \
+	} while (0)
+
 static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
 	int skip;
@@ -250,7 +255,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	if (trace) {
 		zend_jit_trace_rec *p = trace;
 
-		ssa_op++;
+		ADVANCE_SSA_OP(ssa_op, 1);
 		while (1) {
 			if (p->op == ZEND_JIT_TRACE_VM) {
 				switch (p->opline->opcode) {
@@ -305,7 +310,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 							return 1;
 						}
 				}
-				ssa_op += zend_jit_trace_op_len(opline);
+				ADVANCE_SSA_OP(ssa_op, zend_jit_trace_op_len(opline));
 			} else if (p->op == ZEND_JIT_TRACE_ENTER ||
 			           p->op == ZEND_JIT_TRACE_BACK ||
 			           p->op == ZEND_JIT_TRACE_END) {
@@ -319,7 +324,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 		const zend_op *end = op_array->opcodes + op_array->last;
 
 		opline++;
-		ssa_op++;
+		ADVANCE_SSA_OP(ssa_op, 1);
 		skip = (call_level == 1);
 		while (opline != end) {
 			if (!skip) {
@@ -381,7 +386,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					return 0;
 			}
 			opline++;
-			ssa_op++;
+			ADVANCE_SSA_OP(ssa_op, 1);
 		}
 
 		return 1;
@@ -395,7 +400,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 		}
 
 		opline++;
-		ssa_op++;
+		ADVANCE_SSA_OP(ssa_op, 1);
 		skip = (call_level == 1);
 		while (opline != end) {
 			if (skip) {
@@ -421,7 +426,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				}
 			}
 			opline++;
-			ssa_op++;
+			ADVANCE_SSA_OP(ssa_op, 1);
 		}
 
 		return 0;

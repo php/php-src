@@ -172,19 +172,20 @@ static zend_always_inline uint32_t get_ssa_var_info(const zend_ssa *ssa, int ssa
 }
 
 #define DEFINE_SSA_OP_INFO(opN) \
-	static zend_always_inline uint32_t _ssa_##opN##_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline uint32_t _ssa_##opN##_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op, size_t offset) \
 	{																		\
+		opline += offset; \
 		if (opline->opN##_type == IS_CONST) {							\
 			return _const_op_type(CRT_CONSTANT(opline->opN)); \
 		} else { \
-			return get_ssa_var_info(ssa, ssa->var_info ? ssa_op->opN##_use : -1); \
+			return get_ssa_var_info(ssa, ssa->var_info ? (ssa_op + offset)->opN##_use : -1); \
 		} \
 	} \
 
 #define DEFINE_SSA_OP_DEF_INFO(opN) \
-	static zend_always_inline uint32_t _ssa_##opN##_def_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline uint32_t _ssa_##opN##_def_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op, size_t offset) \
 	{ \
-		return get_ssa_var_info(ssa, ssa->var_info ? ssa_op->opN##_def : -1); \
+		return get_ssa_var_info(ssa, ssa->var_info ? (ssa_op + offset)->opN##_def : -1); \
 	} \
 
 
@@ -195,16 +196,16 @@ DEFINE_SSA_OP_DEF_INFO(op1)
 DEFINE_SSA_OP_DEF_INFO(op2)
 DEFINE_SSA_OP_DEF_INFO(result)
 
-#define OP1_INFO()           (_ssa_op1_info(op_array, ssa, opline, ssa_op))
-#define OP2_INFO()           (_ssa_op2_info(op_array, ssa, opline, ssa_op))
-#define OP1_DATA_INFO()      (_ssa_op1_info(op_array, ssa, (opline+1), (ssa_op+1)))
-#define OP2_DATA_INFO()      (_ssa_op2_info(op_array, ssa, (opline+1), (ssa_op+1)))
-#define RES_USE_INFO()       (_ssa_result_info(op_array, ssa, opline, ssa_op))
-#define OP1_DEF_INFO()       (_ssa_op1_def_info(op_array, ssa, opline, ssa_op))
-#define OP2_DEF_INFO()       (_ssa_op2_def_info(op_array, ssa, opline, ssa_op))
-#define OP1_DATA_DEF_INFO()  (_ssa_op1_def_info(op_array, ssa, (opline+1), (ssa_op+1)))
-#define OP2_DATA_DEF_INFO()  (_ssa_op2_def_info(op_array, ssa, (opline+1), (ssa_op+1)))
-#define RES_INFO()           (_ssa_result_def_info(op_array, ssa, opline, ssa_op))
+#define OP1_INFO()           (_ssa_op1_info(op_array, ssa, opline, ssa_op, 0))
+#define OP2_INFO()           (_ssa_op2_info(op_array, ssa, opline, ssa_op, 0))
+#define OP1_DATA_INFO()      (_ssa_op1_info(op_array, ssa, opline, ssa_op, 1))
+#define OP2_DATA_INFO()      (_ssa_op2_info(op_array, ssa, opline, ssa_op, 1))
+#define RES_USE_INFO()       (_ssa_result_info(op_array, ssa, opline, ssa_op, 0))
+#define OP1_DEF_INFO()       (_ssa_op1_def_info(op_array, ssa, opline, ssa_op, 0))
+#define OP2_DEF_INFO()       (_ssa_op2_def_info(op_array, ssa, opline, ssa_op, 0))
+#define OP1_DATA_DEF_INFO()  (_ssa_op1_def_info(op_array, ssa, opline, ssa_op, 1))
+#define OP2_DATA_DEF_INFO()  (_ssa_op2_def_info(op_array, ssa, opline, ssa_op, 1))
+#define RES_INFO()           (_ssa_result_def_info(op_array, ssa, opline, ssa_op, 0))
 
 static zend_always_inline bool zend_add_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a > ZEND_LONG_MAX - b)
