@@ -200,7 +200,7 @@ function date_diff(
 function date_time_set(
     DateTime $object, int $hour, int $minute, int $second = 0, int $microsecond = 0): DateTime {}
 
-function date_date_set(DateTime $object, int $year, int $month, int $day): DateTime {}
+function date_date_set(DateTime $object, ?int $year = null, ?int $month = null, ?int $day = null): DateTime {}
 
 function date_isodate_set(DateTime $object, int $year, int $week, int $dayOfWeek = 1): DateTime {}
 
