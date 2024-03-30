@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.6
 
+- Core:
+  . Fixed zend_call_stack build with Linux/uclibc-ng without thread support.
+    (Fabrice Fontaine)
+
 - FPM:
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
