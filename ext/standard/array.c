@@ -6580,6 +6580,102 @@ PHP_FUNCTION(array_filter)
 }
 /* }}} */
 
+/* {{{ Internal function to find an array element for a user closure. */
+static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval *result_key, zval *result_value, bool *has_result, bool negate_condition)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval retval;
+	zval *key;
+	zval args[2];
+	zval *operand;
+	*has_result = false;
+
+	if (zend_hash_num_elements(array) == 0) {
+		return SUCCESS;
+	}
+
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(fci));
+
+	fci.retval = &retval;
+	fci.param_count = 2;
+	key = &args[1];
+
+	ZEND_HASH_FOREACH_KEY_VAL(array, num_key, str_key, operand) {
+		/* Set up the key */
+		if (!str_key) {
+			ZVAL_LONG(key, num_key);
+		} else {
+			ZVAL_STR_COPY(key, str_key);
+		}
+
+		ZVAL_COPY(&args[0], operand);
+		fci.params = args;
+
+		if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
+			int retval_true;
+
+			retval_true = zend_is_true(&retval);
+			zval_ptr_dtor(&retval);
+
+			if (negate_condition) {
+				retval_true = !retval_true;
+			}
+
+			if (retval_true) {
+				*has_result = true;
+
+				if (result_value != NULL) {
+					ZVAL_COPY(result_value, &args[0]);
+				}
+
+				if (result_key != NULL) {
+					ZVAL_COPY(result_key, &args[1]);
+				}
+
+				zval_ptr_dtor(&args[0]);
+				zval_ptr_dtor(&args[1]);
+
+				return SUCCESS;
+			} else {
+				zval_ptr_dtor(&args[0]);
+				zval_ptr_dtor(&args[1]);
+			}
+		} else {
+			zval_ptr_dtor(&args[0]);
+			zval_ptr_dtor(&args[1]);
+
+			return FAILURE;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ Search within an array and returns the first found element value. */
+PHP_FUNCTION(array_find)
+{
+	zval *array = NULL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	bool has_result = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_array_find(Z_ARR_P(array), fci, fci_cache, NULL, return_value, &has_result, false) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if (!has_result) {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
 /* {{{ Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
 {
