@@ -359,6 +359,14 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ctxt->xinclude = zend_is_true(doXInclude);
 	zend_string_release_ex(member, 0);
 
+	zval *max_template_depth = xsl_prop_max_template_depth(Z_OBJ_P(id));
+	ZEND_ASSERT(Z_TYPE_P(max_template_depth) == IS_LONG);
+	ctxt->maxTemplateDepth = Z_LVAL_P(max_template_depth);
+
+	zval *max_template_vars = xsl_prop_max_template_vars(Z_OBJ_P(id));
+	ZEND_ASSERT(Z_TYPE_P(max_template_vars) == IS_LONG);
+	ctxt->maxTemplateVars = Z_LVAL_P(max_template_vars);
+
 	secPrefsValue = intern->securityPrefs;
 
 	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
