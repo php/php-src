@@ -764,7 +764,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, zval **row_ptr, const unsign
 
 	DBG_ENTER("mysqlnd_fetch_stmt_row_cursor");
 
-	if (!stmt || !stmt->conn || !result || !result->conn || !result->unbuf) {
+	if (!stmt->conn || !result->conn) {
 		DBG_ERR("no statement");
 		DBG_RETURN(FAIL);
 	}
