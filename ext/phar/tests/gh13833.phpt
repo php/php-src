@@ -1,33 +1,45 @@
 --TEST--
-GH-13836 (Renaming a file in a Phar to an already existing filename causes a NULL pointer dereference)
---EXTENSIONS--
-phar
+GH-13833 (Applying zero offset to null pointer in zend_hash.c)
 --INI--
 phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = __DIR__ . '/gh13836.phar';
+$fname = __DIR__ . '/gh13833.phar';
+$pname = 'phar://' . $fname;
+$file = "<?php
+Phar::mapPhar('hio');
+__HALT_COMPILER(); ?>";
+$files = array();
+$files['a'] = 'a';
+include 'files/phar_test.inc';
+include $fname;
 
-$phar = new Phar($fname, 0, 'a.phar');
-$phar['x'] = 'hi1';
-$phar['y'] = 'hi2';
+$file = "<?php __HALT_COMPILER(); ?>";
+$files['a'] = array('cont' => 'a');
+include 'files/phar_test.inc';
 
-var_dump(rename("phar://a.phar/x", "phar://a.phar/y"));
-
-var_dump(isset($phar['x']));
-var_dump($phar['y']);
+$phar = new Phar($fname);
+$phar->setMetadata((object) ['my' => 'friend']);
+// NOTE: Phar will use the cached value of metadata if setMetaData was called on that Phar path before.
+// Save the writes to the phar and use a different file path.
+$fname_new = "$fname.copy.phar";
+copy($fname, $fname_new);
+try {
+  new Phar($fname_new);
+} catch (UnexpectedValueException $e) {
+  echo $e->getMessage(), "\n";
+}
 ?>
+--EXTENSIONS--
+phar
 --CLEAN--
 <?php
-unlink(__DIR__ . '/gh13836.phar');
+unlink(__DIR__ . '/gh13833.phar');
+unlink(__DIR__ . '/gh13833.phar.copy.phar');
 ?>
+--CREDITS--
+Yuancheng Jiang <yuancheng@comp.nus.edu.sg>
+Felix De Vliegher <felix.devliegher@gmail.com>
 --EXPECTF--
-bool(true)
-bool(false)
-object(PharFileInfo)#2 (2) {
-  ["pathName":"SplFileInfo":private]=>
-  string(%d) "phar://%sgh13836.phar/y"
-  ["fileName":"SplFileInfo":private]=>
-  string(1) "y"
-}
+internal corruption of phar "%sgh13833.phar.copy.phar" (trying to read past buffer end)

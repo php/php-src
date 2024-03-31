@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Phar:
   . Fixed bug GH-13836 (Renaming a file in a Phar to an already existing
     filename causes a NULL pointer dereference). (nielsdos)
+  . Fixed bug GH-13833 (Applying zero offset to null pointer in zend_hash.c).
+    (nielsdos)
 
 - PHPDBG:
   . Fixed bug GH-13827 (Null pointer access of type 'zval' in phpdbg_frame).
