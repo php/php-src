@@ -3,6 +3,8 @@ GH-13833 (Applying zero offset to null pointer in zend_hash.c)
 --INI--
 phar.require_hash=0
 phar.readonly=0
+--SKIPIF--
+<?php if (defined("PHP_WINDOWS_VERSION_MAJOR")) die("skip Windows results in a different error"); ?>
 --FILE--
 <?php
 $fname = __DIR__ . '/gh13833.phar';
