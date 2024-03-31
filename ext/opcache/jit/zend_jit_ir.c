@@ -16301,7 +16301,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 	if (parent) {
 		int i;
 		int parent_vars_count = parent->exit_info[exit_num].stack_size;
-		zend_jit_trace_stack *parent_stack =
+		zend_jit_trace_stack *parent_stack = parent_vars_count == 0 ? NULL :
 			parent->stack_map +
 			parent->exit_info[exit_num].stack_offset;
 
