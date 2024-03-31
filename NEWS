@@ -198,6 +198,8 @@ PHP                                                                        NEWS
     SYN packets from the client. (David Carlier)
   . Added the SO_EXCLBIND constant for exclusive socket binding on illumos/solaris.
     (David Carlier)
+  . Updated the socket_create_listen backlog argument default value to SOMAXCONN.
+    (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
