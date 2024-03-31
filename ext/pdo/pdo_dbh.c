@@ -98,7 +98,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
 
-	if (dbh && dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
+	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	} else {
 		zval ex, info;
