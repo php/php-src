@@ -58,16 +58,16 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 	 && ssa
 	 && !(ssa->cfg.flags & ZEND_SSA_TSSA)) {
 		zend_op_array *op_array = call_info->caller_op_array;
-		uint32_t t1 = _ssa_op1_info(op_array, ssa, call_info->arg_info[0].opline,
-			&ssa->ops[call_info->arg_info[0].opline - op_array->opcodes], 0);
-		uint32_t t2 = _ssa_op1_info(op_array, ssa, call_info->arg_info[1].opline,
-			&ssa->ops[call_info->arg_info[1].opline - op_array->opcodes], 0);
+		uint32_t t1 = _ssa_op1_info(op_array, ssa, op_array->opcodes,
+			ssa->ops, call_info->arg_info[0].opline - op_array->opcodes);
+		uint32_t t2 = _ssa_op1_info(op_array, ssa, op_array->opcodes,
+			ssa->ops, call_info->arg_info[1].opline - op_array->opcodes);
 		uint32_t t3 = 0;
 		uint32_t tmp = MAY_BE_RC1 | MAY_BE_ARRAY;
 
 		if (call_info->num_args == 3) {
-			t3 = _ssa_op1_info(op_array, ssa, call_info->arg_info[2].opline,
-				&ssa->ops[call_info->arg_info[2].opline - op_array->opcodes], 0);
+			t3 = _ssa_op1_info(op_array, ssa, op_array->opcodes,
+				ssa->ops, call_info->arg_info[2].opline - op_array->opcodes);
 		}
 		if ((t1 & MAY_BE_STRING) && (t2 & MAY_BE_STRING)) {
 			tmp |= MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_DOUBLE | MAY_BE_ARRAY_OF_STRING;
