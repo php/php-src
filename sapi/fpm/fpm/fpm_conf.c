@@ -721,7 +721,7 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	} while (0)
 #define FPM_WPC_STR_CP(_cfg, _scfg, _field) FPM_WPC_STR_CP_EX(_cfg, _scfg, _field, _field)
 
-void fpm_conf_apply_kv_array_to_kv_array(struct key_value_s *src, void *dest) {
+static void fpm_conf_apply_kv_array_to_kv_array(struct key_value_s *src, void *dest) {
 	struct key_value_s *kv;
 
 	for (kv = src; kv; kv = kv->next) {

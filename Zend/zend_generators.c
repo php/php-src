@@ -1135,7 +1135,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 };
 
 /* by_ref is int due to Iterator API */
-zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+static zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	zend_object_iterator *iterator;
 	zend_generator *generator = (zend_generator*)Z_OBJ_P(object);

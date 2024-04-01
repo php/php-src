@@ -23,7 +23,7 @@
 #include <fcntl.h>
 #endif
 
-const char HARDCODED_INI[] =
+static const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"register_argc_argv=1\n"
 	"implicit_flush=1\n"

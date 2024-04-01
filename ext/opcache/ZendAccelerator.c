@@ -1877,7 +1877,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	return new_persistent_script;
 }
 
-zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
+static zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 {
 	zend_persistent_script *persistent_script;
 	zend_op_array *op_array = NULL;

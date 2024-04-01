@@ -341,7 +341,7 @@ PHP_FUNCTION(mail)
 /* }}} */
 
 
-void php_mail_log_crlf_to_spaces(char *message) {
+static void php_mail_log_crlf_to_spaces(char *message) {
 	/* Find all instances of carriage returns or line feeds and
 	 * replace them with spaces. Thus, a log line is always one line
 	 * long
@@ -352,7 +352,7 @@ void php_mail_log_crlf_to_spaces(char *message) {
 	}
 }
 
-void php_mail_log_to_syslog(char *message) {
+static void php_mail_log_to_syslog(char *message) {
 	/* Write 'message' to syslog. */
 #ifdef HAVE_SYSLOG_H
 	php_syslog(LOG_NOTICE, "%s", message);
@@ -360,7 +360,7 @@ void php_mail_log_to_syslog(char *message) {
 }
 
 
-void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
+static void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
 	uint32_t flags = REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);

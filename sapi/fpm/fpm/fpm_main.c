@@ -606,7 +606,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
  *
  * Ignore level, we want to send all messages through fastcgi
  */
-void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
+static void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 {
 
 	fcgi_request *request = (fcgi_request*) SG(server_context);

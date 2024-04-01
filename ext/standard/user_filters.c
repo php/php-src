@@ -123,7 +123,7 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 	zval_ptr_dtor(obj);
 }
 
-php_stream_filter_status_t userfilter_filter(
+static php_stream_filter_status_t userfilter_filter(
 			php_stream *stream,
 			php_stream_filter *thisfilter,
 			php_stream_bucket_brigade *buckets_in,

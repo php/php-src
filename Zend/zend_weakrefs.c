@@ -54,7 +54,7 @@ typedef struct _zend_weakmap_iterator {
 #define ZEND_WEAKREF_ENCODE(p, t) ((void *) (((uintptr_t) (p)) | (t)))
 
 zend_class_entry *zend_ce_weakref;
-zend_class_entry *zend_ce_weakmap;
+static zend_class_entry *zend_ce_weakmap;
 static zend_object_handlers zend_weakref_handlers;
 static zend_object_handlers zend_weakmap_handlers;
 

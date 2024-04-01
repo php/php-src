@@ -28,8 +28,8 @@
 #include "zend_exceptions.h"
 
 /* for systems that need to override reading of environment variables */
-void _php_import_environment_variables(zval *array_ptr);
-void _php_load_environment_variables(zval *array_ptr);
+static void _php_import_environment_variables(zval *array_ptr);
+static void _php_load_environment_variables(zval *array_ptr);
 PHPAPI void (*php_import_environment_variables)(zval *array_ptr) = _php_import_environment_variables;
 PHPAPI void (*php_load_environment_variables)(zval *array_ptr) = _php_load_environment_variables;
 
@@ -626,7 +626,7 @@ static zend_always_inline void import_environment_variable(HashTable *ht, char *
 	}
 }
 
-void _php_import_environment_variables(zval *array_ptr)
+static void _php_import_environment_variables(zval *array_ptr)
 {
 	tsrm_env_lock();
 
@@ -649,7 +649,7 @@ void _php_import_environment_variables(zval *array_ptr)
 	tsrm_env_unlock();
 }
 
-void _php_load_environment_variables(zval *array_ptr)
+static void _php_load_environment_variables(zval *array_ptr)
 {
 	php_import_environment_variables(array_ptr);
 }

@@ -32,13 +32,13 @@
 #define ZEND_OBSERVABLE_FN(function) \
 	(ZEND_MAP_PTR(function->common.run_time_cache) && !(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 
-zend_llist zend_observers_fcall_list;
-zend_llist zend_observer_function_declared_callbacks;
-zend_llist zend_observer_class_linked_callbacks;
-zend_llist zend_observer_error_callbacks;
-zend_llist zend_observer_fiber_init;
-zend_llist zend_observer_fiber_switch;
-zend_llist zend_observer_fiber_destroy;
+static zend_llist zend_observers_fcall_list;
+static zend_llist zend_observer_function_declared_callbacks;
+static zend_llist zend_observer_class_linked_callbacks;
+static zend_llist zend_observer_error_callbacks;
+static zend_llist zend_observer_fiber_init;
+static zend_llist zend_observer_fiber_switch;
+static zend_llist zend_observer_fiber_destroy;
 
 int zend_observer_fcall_op_array_extension;
 int zend_observer_fcall_internal_function_extension;

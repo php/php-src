@@ -72,9 +72,9 @@ static zend_object_handlers sqlite3_stmt_object_handlers;
 static zend_object_handlers sqlite3_result_object_handlers;
 
 /* Class entries */
-zend_class_entry *php_sqlite3_exception_ce;
-zend_class_entry *php_sqlite3_sc_entry;
-zend_class_entry *php_sqlite3_stmt_entry;
+static zend_class_entry *php_sqlite3_exception_ce;
+static zend_class_entry *php_sqlite3_sc_entry;
+static zend_class_entry *php_sqlite3_stmt_entry;
 zend_class_entry *php_sqlite3_result_entry;
 
 /* {{{ Error Handler */

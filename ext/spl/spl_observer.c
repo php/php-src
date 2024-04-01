@@ -73,7 +73,7 @@ static inline spl_SplObjectStorage *spl_object_storage_from_obj(zend_object *obj
 
 #define Z_SPLOBJSTORAGE_P(zv)  spl_object_storage_from_obj(Z_OBJ_P((zv)))
 
-void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
+static void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 
