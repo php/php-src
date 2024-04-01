@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
   . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
   . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
+  . Added fiber Sys-V loongarch64 support. (qiangxuhui)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
