@@ -1835,6 +1835,7 @@ static int ir_edge_info_cmp(const void *b1, const void *b2)
 
 static IR_NEVER_INLINE uint32_t ir_chain_head_path_compress(ir_chain *chains, uint32_t src, uint32_t head)
 {
+	IR_ASSERT(head != 0);
 	do {
 		head = chains[head].head;
 	} while (chains[head].head != head);
@@ -1997,6 +1998,9 @@ static int ir_schedule_blocks_bottom_up(ir_ctx *ctx)
 
 	/* 1. Create initial chains for each BB */
 	chains = ir_mem_malloc(sizeof(ir_chain) * (ctx->cfg_blocks_count + 1));
+	chains[0].head = 0;
+	chains[0].next = 0;
+	chains[0].prev = 0;
 	for (b = 1; b <= ctx->cfg_blocks_count; b++) {
 		chains[b].head = b;
 		chains[b].next = b;

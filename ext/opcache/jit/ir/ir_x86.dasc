@@ -835,6 +835,32 @@ IR_ALWAYS_INLINE ir_mem IR_MEM(ir_reg base, int32_t offset, ir_reg index, int32_
 ||	}
 |.endmacro
 
+|.macro ASM_SSE2_REG_REG_TXT_OP, op, type, op1, op2, op3
+||	if (type == IR_DOUBLE) {
+|		op..d xmm(op1-IR_REG_FP_FIRST), xmm(op2-IR_REG_FP_FIRST), op3
+||	} else {
+||		IR_ASSERT(type == IR_FLOAT);
+|		op..s xmm(op1-IR_REG_FP_FIRST), xmm(op2-IR_REG_FP_FIRST), op3
+||	}
+|.endmacro
+
+|.macro ASM_SSE2_REG_REG_REG_TXT_OP, op, type, op1, op2, op3, op4
+||	if (type == IR_DOUBLE) {
+|		op..d xmm(op1-IR_REG_FP_FIRST), xmm(op2-IR_REG_FP_FIRST), xmm(op3-IR_REG_FP_FIRST), op4
+||	} else {
+||		IR_ASSERT(type == IR_FLOAT);
+|		op..s xmm(op1-IR_REG_FP_FIRST), xmm(op2-IR_REG_FP_FIRST), xmm(op3-IR_REG_FP_FIRST), op4
+||	}
+|.endmacro
+
+|.macro ASM_FP_REG_REG_TXT_OP, op, type, op1, op2, op3
+||	if (ctx->mflags & IR_X86_AVX) {
+|		ASM_SSE2_REG_REG_REG_TXT_OP v..op, type, op1, op2, op3
+||	} else {
+|		ASM_SSE2_REG_REG_TXT_OP op, type, op1, op2, op3
+||	}
+|.endmacro
+
 typedef struct _ir_backend_data {
     ir_reg_alloc_data  ra_data;
 	uint32_t           dessa_from_block;
@@ -994,6 +1020,7 @@ const char *ir_reg_name(int8_t reg, ir_type type)
 	_(SHIFT_CONST)         \
 	_(COPY_INT)            \
 	_(COPY_FP)             \
+	_(CMP_AND_STORE_INT)   \
 	_(CMP_AND_BRANCH_INT)  \
 	_(CMP_AND_BRANCH_FP)   \
 	_(TEST_AND_BRANCH_INT) \
@@ -1028,6 +1055,12 @@ const char *ir_reg_name(int8_t reg, ir_type type)
 	_(RETURN_INT)          \
 	_(RETURN_FP)           \
 	_(BIT_COUNT)           \
+	_(SSE_SQRT)            \
+	_(SSE_RINT)            \
+	_(SSE_FLOOR)           \
+	_(SSE_CEIL)            \
+	_(SSE_TRUNC)           \
+	_(SSE_NEARBYINT)       \
 
 #define IR_RULE_ENUM(name) IR_ ## name,
 
@@ -1273,6 +1306,7 @@ op2_const:
 		case IR_MEM_BINOP_INT:
 		case IR_MEM_SHIFT:
 		case IR_MEM_SHIFT_CONST:
+		case IR_CMP_AND_STORE_INT:
 			flags = IR_USE_MUST_BE_IN_REG | IR_OP2_MUST_BE_IN_REG;
 			insn = &ctx->ir_base[ref];
 			if (IR_IS_CONST_REF(insn->op2)) {
@@ -1299,10 +1333,9 @@ op2_const:
 				constraints->tmp_regs[0] = IR_TMP_REG(2, insn->type, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 				n = 1;
 			}
-			if (sizeof(void*) == 8) {
-				constraints->tmp_regs[n] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
-				n++;
-			}
+			/* we need a temporary regeset in case MIN CASE value is not zero or some CASE VAL can't fit into 32-bit */
+			constraints->tmp_regs[n] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+			n++;
 			break;
 		case IR_CALL:
 			insn = &ctx->ir_base[ref];
@@ -1460,6 +1493,11 @@ op2_const:
 		case IR_VA_ARG:
 			flags = IR_USE_MUST_BE_IN_REG | IR_OP1_MUST_BE_IN_REG;
 			constraints->tmp_regs[0] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_SAVE_SUB_REF);
+			n = 1;
+			break;
+		case IR_VA_COPY:
+			flags = IR_OP1_MUST_BE_IN_REG | IR_OP2_MUST_BE_IN_REG;
+			constraints->tmp_regs[0] = IR_TMP_REG(1, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
 			n = 1;
 			break;
 	}
@@ -1702,6 +1740,74 @@ static void ir_match_fuse_load_cmp_fp_br(ir_ctx *ctx, ir_insn *insn, ir_ref root
 			insn->op ^= 3;
 		}
 	}
+}
+
+#define STR_EQUAL(name, name_len, str) (name_len == strlen(str) && memcmp(name, str, strlen(str)) == 0)
+
+#define IR_IS_FP_FUNC_1(proto, _type)  (proto->params_count == 1 && \
+                                        proto->param_types[0] == _type && \
+                                        proto->ret_type == _type)
+
+static uint32_t ir_match_builtin_call(ir_ctx *ctx, const ir_insn *func)
+{
+	const ir_proto_t *proto = (const ir_proto_t *)ir_get_str(ctx, func->proto);
+
+	if (proto->flags & IR_BUILTIN_FUNC) {
+		size_t name_len;
+		const char *name = ir_get_strl(ctx, func->val.name, &name_len);
+
+		if (STR_EQUAL(name, name_len, "sqrt")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_DOUBLE)) {
+				return IR_SSE_SQRT;
+			}
+		} else if (STR_EQUAL(name, name_len, "sqrtf")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_FLOAT)) {
+				return IR_SSE_SQRT;
+			}
+		} else if (STR_EQUAL(name, name_len, "rint")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_DOUBLE)) {
+				return IR_SSE_RINT;
+			}
+		} else if (STR_EQUAL(name, name_len, "rintf")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_FLOAT)) {
+				return IR_SSE_RINT;
+			}
+		} else if (STR_EQUAL(name, name_len, "floor")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_DOUBLE)) {
+				return IR_SSE_FLOOR;
+			}
+		} else if (STR_EQUAL(name, name_len, "floorf")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_FLOAT)) {
+				return IR_SSE_FLOOR;
+			}
+		} else if (STR_EQUAL(name, name_len, "ceil")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_DOUBLE)) {
+				return IR_SSE_CEIL;
+			}
+		} else if (STR_EQUAL(name, name_len, "ceilf")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_FLOAT)) {
+				return IR_SSE_CEIL;
+			}
+		} else if (STR_EQUAL(name, name_len, "trunc")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_DOUBLE)) {
+				return IR_SSE_TRUNC;
+			}
+		} else if (STR_EQUAL(name, name_len, "truncf")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_FLOAT)) {
+				return IR_SSE_TRUNC;
+			}
+		} else if (STR_EQUAL(name, name_len, "nearbyint")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_DOUBLE)) {
+				return IR_SSE_NEARBYINT;
+			}
+		} else if (STR_EQUAL(name, name_len, "nearbyintf")) {
+			if (IR_IS_FP_FUNC_1(proto, IR_FLOAT)) {
+				return IR_SSE_NEARBYINT;
+			}
+		}
+	}
+
+	return 0;
 }
 
 static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
@@ -2124,6 +2230,17 @@ binop_fp:
 			}
 			break;
 		case IR_CALL:
+			if (IR_IS_CONST_REF(insn->op2)) {
+				const ir_insn *func = &ctx->ir_base[insn->op2];
+
+				if (func->op == IR_FUNC && func->proto) {
+					uint32_t rule = ir_match_builtin_call(ctx, func);
+
+					if (rule) {
+						return rule;
+					}
+				}
+			}
 			ctx->flags2 |= IR_HAS_CALLS;
 #ifndef IR_REG_FP_RET1
 			if (IR_IS_TYPE_FP(insn->type)) {
@@ -2267,6 +2384,10 @@ store_int:
 							ctx->rules[op_insn->op1] = IR_SKIPPED | load_op;
 							return IR_MEM_OP_INT;
 						}
+					} else if (rule == IR_CMP_INT && load_op == IR_LOAD) {
+						/* c = CMP(_, _) ... STORE(c) => SKIP_CMP ... CMP_AND_STORE_INT */
+						ctx->rules[insn->op3] = IR_FUSED | IR_CMP_INT;
+						return IR_CMP_AND_STORE_INT;
 					}
 				}
 				return store_rule;
@@ -2771,8 +2892,8 @@ static void ir_emit_mov_imm_int(ir_ctx *ctx, ir_type type, ir_reg reg, int64_t v
 			|	mov Rd(reg), (uint32_t)val // zero extended load
 		} else if (IR_IS_SIGNED_32BIT(val)) {
 			|	mov Rq(reg), (int32_t)val // sign extended load
-//		} else if (type == IR_ADDR && IR_MAY_USE_32BIT_ADDR(ctx->code_buffer, (intptr_t)val)) {
-//			|	lea Ra(reg), [&val]
+		} else if (type == IR_ADDR && IR_MAY_USE_32BIT_ADDR(ctx->code_buffer, (intptr_t)val)) {
+			|	lea Ra(reg), [&val]
 		} else {
 			|	mov64 Ra(reg), val
 		}
@@ -5267,6 +5388,48 @@ static void _ir_emit_setcc_int(ir_ctx *ctx, uint8_t op, ir_reg def_reg)
 	}
 }
 
+static void _ir_emit_setcc_int_mem(ir_ctx *ctx, uint8_t op, ir_mem mem)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+
+
+	switch (op) {
+		default:
+			IR_ASSERT(0 && "NIY binary op");
+		case IR_EQ:
+			|	ASM_TMEM_OP sete, byte, mem
+			break;
+		case IR_NE:
+			|	ASM_TMEM_OP setne, byte, mem
+			break;
+		case IR_LT:
+			|	ASM_TMEM_OP setl, byte, mem
+			break;
+		case IR_GE:
+			|	ASM_TMEM_OP setge, byte, mem
+			break;
+		case IR_LE:
+			|	ASM_TMEM_OP setle, byte, mem
+			break;
+		case IR_GT:
+			|	ASM_TMEM_OP setg, byte, mem
+			break;
+		case IR_ULT:
+			|	ASM_TMEM_OP setb, byte, mem
+			break;
+		case IR_UGE:
+			|	ASM_TMEM_OP setae, byte, mem
+			break;
+		case IR_ULE:
+			|	ASM_TMEM_OP setbe, byte, mem
+			break;
+		case IR_UGT:
+			|	ASM_TMEM_OP seta, byte, mem
+			break;
+	}
+}
+
 static void ir_emit_cmp_int(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
 	ir_backend_data *data = ctx->data;
@@ -7319,6 +7482,47 @@ static void ir_emit_store_int(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	}
 }
 
+static void ir_emit_cmp_and_store_int(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
+{
+	ir_reg addr_reg = ctx->regs[ref][2];
+	ir_mem mem;
+	ir_insn *cmp_insn = &ctx->ir_base[insn->op3];
+	ir_op op = cmp_insn->op;
+	ir_type type = ctx->ir_base[cmp_insn->op1].type;
+	ir_ref op1 = cmp_insn->op1;
+	ir_ref op2 = cmp_insn->op2;
+	ir_reg op1_reg = ctx->regs[insn->op3][1];
+	ir_reg op2_reg = ctx->regs[insn->op3][2];
+
+	if (addr_reg != IR_REG_NONE) {
+		if (IR_REG_SPILLED(addr_reg) || IR_IS_CONST_REF(insn->op2)) {
+			addr_reg = IR_REG_NUM(addr_reg);
+			IR_ASSERT(ctx->ir_base[insn->op2].type == IR_ADDR);
+			ir_emit_load(ctx, IR_ADDR, addr_reg, insn->op2);
+		}
+		mem = IR_MEM_B(addr_reg);
+	} else if (IR_IS_CONST_REF(insn->op2)) {
+		mem = ir_fuse_addr_const(ctx, insn->op2);
+	} else {
+		IR_ASSERT(ir_rule(ctx, insn->op2) & IR_FUSED);
+		mem = ir_fuse_addr(ctx, ref, insn->op2);
+	}
+
+	if (op1_reg != IR_REG_NONE && (IR_IS_CONST_REF(op1) || IR_REG_SPILLED(op1_reg))) {
+		op1_reg = IR_REG_NUM(op1_reg);
+		ir_emit_load(ctx, type, op1_reg, op1);
+	}
+	if (op2_reg != IR_REG_NONE && (IR_IS_CONST_REF(op2) || IR_REG_SPILLED(op2_reg))) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		if (op1 != op2) {
+			ir_emit_load(ctx, type, op2_reg, op2);
+		}
+	}
+
+	ir_emit_cmp_int_common(ctx, type, ref, cmp_insn, op1_reg, op1, op2_reg, op2);
+	_ir_emit_setcc_int_mem(ctx, op, mem);
+}
+
 static void ir_emit_store_fp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 {
 	ir_ref type = ctx->ir_base[insn->op3].type;
@@ -7639,7 +7843,53 @@ static void ir_emit_va_start(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 static void ir_emit_va_copy(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
+#if defined(_WIN64) || defined(IR_TARGET_X86)
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg tmp_reg = ctx->regs[def][1];
+	ir_reg op2_reg = ctx->regs[def][2];
+	ir_reg op3_reg = ctx->regs[def][3];
+
+	IR_ASSERT(tmp_reg != IR_REG_NONE && op2_reg != IR_REG_NONE && op3_reg != IR_REG_NONE);
+	if (IR_REG_SPILLED(op2_reg)) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+	}
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+	}
+	|	mov Ra(tmp_reg), aword [Ra(op3_reg)]
+	|	mov aword [Ra(op2_reg)], Ra(tmp_reg)
+#elif defined(IR_TARGET_X64)
+|.if X64
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg tmp_reg = ctx->regs[def][1];
+	ir_reg op2_reg = ctx->regs[def][2];
+	ir_reg op3_reg = ctx->regs[def][3];
+
+	IR_ASSERT(tmp_reg != IR_REG_NONE && op2_reg != IR_REG_NONE && op3_reg != IR_REG_NONE);
+	if (IR_REG_SPILLED(op2_reg)) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+	}
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+	}
+	|	mov Rd(tmp_reg), dword [Ra(op3_reg)+offsetof(ir_va_list, gp_offset)]
+	|	mov dword [Ra(op2_reg)+offsetof(ir_va_list, gp_offset)], Rd(tmp_reg)
+	|	mov Rd(tmp_reg), dword [Ra(op3_reg)+offsetof(ir_va_list, fp_offset)]
+	|	mov aword [Ra(op2_reg)+offsetof(ir_va_list, fp_offset)], Ra(tmp_reg)
+	|	mov Ra(tmp_reg), aword [Ra(op3_reg)+offsetof(ir_va_list, overflow_arg_area)]
+	|	mov aword [Ra(op2_reg)+offsetof(ir_va_list, overflow_arg_area)], Ra(tmp_reg)
+	|	mov Ra(tmp_reg), aword [Ra(op3_reg)+offsetof(ir_va_list, reg_save_area)]
+	|	mov aword [Ra(op2_reg)+offsetof(ir_va_list, reg_save_area)], Ra(tmp_reg)
+|.endif
+#else
 	IR_ASSERT(0 && "NIY va_copy");
+#endif
 }
 
 static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
@@ -7735,13 +7985,11 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 	int label, default_label = 0;
 	int count = 0;
 	ir_val min, max;
-	int64_t offset;
 	ir_reg op2_reg = ctx->regs[def][2];
-|.if X64
-||	ir_reg tmp_reg = ctx->regs[def][3];
-|.endif
+	ir_reg tmp_reg = ctx->regs[def][3];
 
 	type = ctx->ir_base[insn->op2].type;
+	IR_ASSERT(tmp_reg != IR_REG_NONE);
 	if (IR_IS_TYPE_SIGNED(type)) {
 		min.u64 = 0x7fffffffffffffff;
 		max.u64 = 0x8000000000000000;
@@ -7775,9 +8023,6 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 	}
 
 	IR_ASSERT(op2_reg != IR_REG_NONE);
-|.if X64
-||	IR_ASSERT(tmp_reg != IR_REG_NONE || sizeof(void*) != 8);
-|.endif
 	if (IR_REG_SPILLED(op2_reg)) {
 		op2_reg = IR_REG_NUM(op2_reg);
 		ir_emit_load(ctx, type, op2_reg, insn->op2);
@@ -7804,109 +8049,94 @@ static void ir_emit_switch(ir_ctx *ctx, uint32_t b, ir_ref def, ir_insn *insn)
 			}
 		}
 
-		if (default_label) {
-			if (IR_IS_32BIT(type, max)) {
-				|	ASM_REG_IMM_OP cmp, type, op2_reg, max.i32
+		switch (ir_type_size[type]) {
+			default:
+				IR_ASSERT(0 && "Unsupported type size");
+			case 1:
+				if (IR_IS_TYPE_SIGNED(type)) {
+					|	movsx Ra(op2_reg), Rb(op2_reg)
+				} else {
+					|	movzx Ra(op2_reg), Rb(op2_reg)
+				}
+				break;
+			case 2:
+				if (IR_IS_TYPE_SIGNED(type)) {
+					|	movsx Ra(op2_reg), Rw(op2_reg)
+				} else {
+					|	movzx Ra(op2_reg), Rw(op2_reg)
+				}
+				break;
+			case 4:
+|.if X64
+				if (IR_IS_TYPE_SIGNED(type)) {
+					|	movsxd Ra(op2_reg), Rd(op2_reg)
+				} else {
+					|	mov Rd(op2_reg), Rd(op2_reg)
+				}
+				break;
+||			case 8:
+|.endif
+				break;
+		}
+
+		if (min.i64 != 0) {
+			int64_t offset = -min.i64;
+
+			if (IR_IS_SIGNED_32BIT(offset)) {
+				|	lea Ra(tmp_reg), [Ra(op2_reg)+(int32_t)offset]
 			} else {
-				IR_ASSERT(ir_type_size[type] == 8);
 				IR_ASSERT(sizeof(void*) == 8);
 |.if X64
-				|	mov64 Rq(tmp_reg), max.i64
-				|	cmp Rq(op2_reg), Rq(tmp_reg)
+				|	mov64 Rq(tmp_reg), offset
+				|	add Ra(tmp_reg), Ra(op2_reg)
 |.endif
 			}
-			if (IR_IS_TYPE_SIGNED(type)) {
-				|	jg =>default_label
-			} else {
+			if (default_label) {
+				offset = max.i64 - min.i64;
+
+				IR_ASSERT(IR_IS_SIGNED_32BIT(offset));
+				|	cmp Ra(tmp_reg), (int32_t)offset
 				|	ja =>default_label
 			}
-		}
-
-		if (IR_IS_32BIT(type, min)) {
-			offset = -min.i64 * sizeof(void*);
-			if (IR_IS_SIGNED_32BIT(offset)) {
-				if (default_label) {
-					|	ASM_REG_IMM_OP cmp, type, op2_reg, min.i32
-				}
-			} else {
-				|	ASM_REG_REG_OP sub, type, op2_reg, (int32_t)offset // TODO: reg clobbering
-				offset = 0;
-			}
-		} else {
-			IR_ASSERT(sizeof(void*) == 8);
 |.if X64
-			|	mov64 Rq(tmp_reg), min.i64
-			|	ASM_REG_REG_OP sub, type, op2_reg, tmp_reg // TODO: reg clobbering
-			offset = 0;
-|.endif
-		}
-
-		if (default_label) {
-			if (IR_IS_TYPE_SIGNED(type)) {
-				|	jl =>default_label
+			if (ctx->code_buffer
+			 && IR_IS_SIGNED_32BIT((char*)ctx->code_buffer->start)
+			 && IR_IS_SIGNED_32BIT((char*)ctx->code_buffer->end)) {
+				|	jmp aword [Ra(tmp_reg)*8+>1]
 			} else {
-				|	jb =>default_label
+				int64_t offset = -min.i64;
+
+				IR_ASSERT(IR_IS_SIGNED_32BIT(offset));
+				offset *= 8;
+				IR_ASSERT(IR_IS_SIGNED_32BIT(offset));
+				|	lea Ra(tmp_reg), aword [>1]
+				|	jmp aword [Ra(tmp_reg)+Ra(op2_reg)*8+offset]
 			}
-		}
-		if (sizeof(void*) == 8) {
-|.if X64
-			switch (ir_type_size[type]) {
-				default:
-					IR_ASSERT(0);
-				case 1:
-					if (IR_IS_TYPE_SIGNED(type)) {
-						|	movsx Ra(op2_reg), Rb(op2_reg)
-					} else {
-						|	movzx Ra(op2_reg), Rb(op2_reg)
-					}
-					break;
-				case 2:
-					if (IR_IS_TYPE_SIGNED(type)) {
-						|	movsx Ra(op2_reg), Rw(op2_reg)
-					} else {
-						|	movzx Ra(op2_reg), Rw(op2_reg)
-					}
-					break;
-				case 4:
-					if (IR_IS_TYPE_SIGNED(type)) {
-						|	movsxd Ra(op2_reg), Rd(op2_reg)
-					} else {
-						|	mov Rd(op2_reg), Rd(op2_reg)
-					}
-					break;
-				case 8:
-					break;
-			}
-			|	lea Ra(tmp_reg), aword [>1]
-			|	jmp aword [Ra(tmp_reg)+Ra(op2_reg)*8+(int32_t)offset]
+|.else
+			|	jmp aword [Ra(tmp_reg)*4+>1]
 |.endif
 		} else {
-|.if not X64
-			switch (ir_type_size[type]) {
-				default:
-					IR_ASSERT(0 && "Unsupported type size");
-				case 1:
-					if (IR_IS_TYPE_SIGNED(type)) {
-						|	movsx Ra(op2_reg), Rb(op2_reg)
-					} else {
-						|	movzx Ra(op2_reg), Rb(op2_reg)
-					}
-					break;
-				case 2:
-					if (IR_IS_TYPE_SIGNED(type)) {
-						|	movsx Ra(op2_reg), Rw(op2_reg)
-					} else {
-						|	movzx Ra(op2_reg), Rw(op2_reg)
-					}
-					break;
-				case 4:
-					break;
+			if (default_label) {
+				int64_t offset = max.i64;
+
+				IR_ASSERT(IR_IS_SIGNED_32BIT(offset));
+				|	cmp Ra(op2_reg), (int32_t)offset
+				|	ja =>default_label
 			}
-			|//	jmp aword [Ra(op2_reg)*4+(int32_t)offset+>1]
-			|	lea Ra(op2_reg), aword [Ra(op2_reg)*4+(int32_t)offset] // TODO: reg clobbering
-			|	jmp aword [Ra(op2_reg)+>1]
+|.if X64
+			if (ctx->code_buffer
+			 && IR_IS_SIGNED_32BIT((char*)ctx->code_buffer->start)
+			 && IR_IS_SIGNED_32BIT((char*)ctx->code_buffer->end)) {
+				|	jmp aword [Ra(op2_reg)*8+>1]
+			} else {
+				|	lea Ra(tmp_reg), aword [>1]
+				|	jmp aword [Ra(tmp_reg)+Ra(op2_reg)*8]
+			}
+|.else
+			|	jmp aword [Ra(op2_reg)*4+>1]
 |.endif
 		}
+
 		|.jmp_table
 		if (!data->jmp_table_label) {
 			data->jmp_table_label = ctx->cfg_blocks_count + ctx->consts_count + 3;
@@ -9044,6 +9274,54 @@ static void ir_emit_tls(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
+static void ir_emit_sse_sqrt(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg op3_reg = ctx->regs[def][3];
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+
+	IR_ASSERT(IR_IS_TYPE_FP(insn->type));
+	IR_ASSERT(def_reg != IR_REG_NONE && op3_reg != IR_REG_NONE);
+
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+	}
+
+	|	ASM_FP_REG_REG_OP sqrts, insn->type, def_reg, op3_reg
+
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, insn->type, def, def_reg);
+	}
+}
+
+static void ir_emit_sse_round(ir_ctx *ctx, ir_ref def, ir_insn *insn, int round_op)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg op3_reg = ctx->regs[def][3];
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+
+	IR_ASSERT(IR_IS_TYPE_FP(insn->type));
+	IR_ASSERT(def_reg != IR_REG_NONE && op3_reg != IR_REG_NONE);
+
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+	}
+
+	if (ctx->mflags & IR_X86_AVX) {
+		|	ASM_SSE2_REG_REG_REG_TXT_OP vrounds, insn->type, def_reg, def_reg, op3_reg, round_op
+	} else {
+		|	ASM_SSE2_REG_REG_TXT_OP rounds, insn->type, def_reg, op3_reg, round_op
+	}
+
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, insn->type, def, def_reg);
+	}
+}
+
 static void ir_emit_exitcall(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
 	ir_backend_data *data = ctx->data;
@@ -9929,6 +10207,9 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 				case IR_COPY_FP:
 					ir_emit_copy_fp(ctx, i, insn);
 					break;
+				case IR_CMP_AND_STORE_INT:
+					ir_emit_cmp_and_store_int(ctx, i, insn);
+					break;
 				case IR_CMP_AND_BRANCH_INT:
 					ir_emit_cmp_and_branch_int(ctx, b, i, insn, _ir_next_block(ctx, _b));
 					break;
@@ -10126,6 +10407,24 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					if (ir_emit_guard_overflow(ctx, b, i, insn)) {
 						goto next_block;
 					}
+					break;
+				case IR_SSE_SQRT:
+					ir_emit_sse_sqrt(ctx, i, insn);
+					break;
+				case IR_SSE_RINT:
+					ir_emit_sse_round(ctx, i, insn, 4);
+					break;
+				case IR_SSE_FLOOR:
+					ir_emit_sse_round(ctx, i, insn, 9);
+					break;
+				case IR_SSE_CEIL:
+					ir_emit_sse_round(ctx, i, insn, 10);
+					break;
+				case IR_SSE_TRUNC:
+					ir_emit_sse_round(ctx, i, insn, 11);
+					break;
+				case IR_SSE_NEARBYINT:
+					ir_emit_sse_round(ctx, i, insn, 12);
 					break;
 				case IR_TLS:
 					ir_emit_tls(ctx, i, insn);

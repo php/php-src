@@ -2692,6 +2692,16 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 	ir_type type2;
 	bool guarded = 0;
 
+	if (!IR_IS_CONST_REF(val)) {
+		insn = &ctx->ir_base[val];
+		if (insn->op == IR_BITCAST
+		 && !IR_IS_CONST_REF(insn->op1)
+		 && ir_type_size[insn->type] == ir_type_size[ctx->ir_base[insn->op1].type]) {
+			/* skip BITCAST */
+			val = insn->op1;
+		}
+	}
+
 	IR_ASSERT(ctx->control);
 	while (ref > limit) {
 		insn = &ctx->ir_base[ref];

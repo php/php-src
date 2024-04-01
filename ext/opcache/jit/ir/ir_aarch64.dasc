@@ -633,6 +633,11 @@ int ir_get_target_constraints(ir_ctx *ctx, ir_ref ref, ir_target_constraints *co
 			constraints->tmp_regs[0] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_SAVE_SUB_REF);
 			n = 1;
 			break;
+		case IR_VA_COPY:
+			flags = IR_OP1_MUST_BE_IN_REG | IR_OP2_MUST_BE_IN_REG;
+			constraints->tmp_regs[0] = IR_TMP_REG(1, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+			n = 1;
+			break;
 	}
 	constraints->tmps_count = n;
 
@@ -4166,7 +4171,49 @@ static void ir_emit_va_start(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 
 static void ir_emit_va_copy(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 {
-	IR_ASSERT(0 && "NIY va_copy");
+#ifdef __APPLE__
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg tmp_reg = ctx->regs[def][1];
+	ir_reg op2_reg = ctx->regs[def][2];
+	ir_reg op3_reg = ctx->regs[def][3];
+
+	IR_ASSERT(tmp_reg != IR_REG_NONE && op2_reg != IR_REG_NONE && op3_reg != IR_REG_NONE);
+	if (IR_REG_SPILLED(op2_reg)) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+	}
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+	}
+	|	ldr Rx(tmp_reg), [Rx(op3_reg)]
+	|	str Rx(tmp_reg), [Rx(op2_reg)]
+#else
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg tmp_reg = ctx->regs[def][1];
+	ir_reg op2_reg = ctx->regs[def][2];
+	ir_reg op3_reg = ctx->regs[def][3];
+
+	IR_ASSERT(tmp_reg != IR_REG_NONE && op2_reg != IR_REG_NONE && op3_reg != IR_REG_NONE);
+	if (IR_REG_SPILLED(op2_reg)) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+	}
+	if (IR_REG_SPILLED(op3_reg)) {
+		op3_reg = IR_REG_NUM(op3_reg);
+		ir_emit_load(ctx, IR_ADDR, op3_reg, insn->op3);
+	}
+	|	ldr Rx(tmp_reg), [Rx(op3_reg)]
+	|	str Rx(tmp_reg), [Rx(op2_reg)]
+	|	ldr Rx(tmp_reg), [Rx(op3_reg), #8]
+	|	str Rx(tmp_reg), [Rx(op2_reg), #8]
+	|	ldr Rx(tmp_reg), [Rx(op3_reg), #16]
+	|	str Rx(tmp_reg), [Rx(op2_reg), #16]
+	|	ldr Rx(tmp_reg), [Rx(op3_reg), #24]
+	|	str Rx(tmp_reg), [Rx(op2_reg), #24]
+#endif
 }
 
 static void ir_emit_va_arg(ir_ctx *ctx, ir_ref def, ir_insn *insn)
