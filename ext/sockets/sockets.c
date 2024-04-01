@@ -219,7 +219,7 @@ ZEND_GET_MODULE(sockets)
 
 static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
-	struct sockaddr_in  la;
+	struct sockaddr_in  la = {0};
 	struct hostent		*hp;
 
 #ifndef PHP_WIN32

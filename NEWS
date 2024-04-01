@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Ensure fiber stack is not backed by THP. (crrodriguez)
   . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
   . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
+  . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -102,6 +103,8 @@ PHP                                                                        NEWS
     of JIT startup initialization issues. (danog)
   . Increased the maximum value of opcache.interned_strings_buffer to 32767 on
     64bit archs. (Arnaud)
+  . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
+    zend_jit.c). (nielsdos)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
@@ -180,6 +183,8 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
+  . Added the TCP_SYNCNT constant for Linux to set number of attempts to send
+    SYN packets from the client. (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
@@ -233,5 +238,7 @@ PHP                                                                        NEWS
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
+  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars.
+    (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

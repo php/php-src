@@ -3241,7 +3241,8 @@ static void zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && \
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
@@ -3268,7 +3269,7 @@ static void zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__i386__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
@@ -15240,7 +15241,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 			jit->b = -1;
 		}
 	} else {
-		zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+		zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[opline - op_array->opcodes] : NULL;
 		uint32_t op1_info = OP1_INFO();
 		zend_jit_addr op1_addr = OP1_ADDR();
 		const zend_op *default_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
@@ -16301,7 +16302,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 	if (parent) {
 		int i;
 		int parent_vars_count = parent->exit_info[exit_num].stack_size;
-		zend_jit_trace_stack *parent_stack =
+		zend_jit_trace_stack *parent_stack = parent_vars_count == 0 ? NULL :
 			parent->stack_map +
 			parent->exit_info[exit_num].stack_offset;
 

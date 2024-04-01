@@ -35,9 +35,9 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || \
-    defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || \
-    defined(__sun)
+#if (defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)) || \
+    defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || \
+    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun)
 # include <pthread.h>
 #endif
 #if defined(__FreeBSD__) || defined(__DragonFly__)

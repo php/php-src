@@ -2779,7 +2779,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	zend_jit_trace_stack *stack;
 	uint32_t parent_vars_count = parent_trace ?
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_size : 0;
-	zend_jit_trace_stack *parent_stack = parent_trace ?
+	zend_jit_trace_stack *parent_stack = parent_vars_count ?
 		zend_jit_traces[parent_trace].stack_map +
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset : NULL;
 	checkpoint = zend_arena_checkpoint(CG(arena));
@@ -8386,7 +8386,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	/* Deoptimization of VM stack state */
 	uint32_t i;
 	uint32_t stack_size = t->exit_info[exit_num].stack_size;
-	zend_jit_trace_stack *stack = t->stack_map + t->exit_info[exit_num].stack_offset;
+	zend_jit_trace_stack *stack = stack_size ? t->stack_map + t->exit_info[exit_num].stack_offset : NULL;
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 		zend_execute_data *call = (zend_execute_data *)regs->gpr[ZREG_RX];

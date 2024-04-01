@@ -1228,6 +1228,7 @@ if test "$PHP_PEAR" != "no"; then
     esac
   fi
 
+  PHP_ADD_BUILD_DIR([pear])
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
 fi
 
@@ -1747,19 +1748,21 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/zend_dump.c \
     , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(TSRM)
-PHP_ADD_BUILD_DIR(Zend Zend/asm Zend/Optimizer)
-
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
-dnl Make directories when building in a separate build directory.
-$php_shtool mkdir -p pear
-$php_shtool mkdir -p scripts
-$php_shtool mkdir -p scripts/man1
+PHP_ADD_BUILD_DIR([m4_normalize([
+  main
+  main/streams
+  scripts
+  scripts/man1
+  TSRM
+  Zend
+  Zend/asm
+  Zend/Optimizer
+])])
 
 ALL_OUTPUT_FILES="main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
@@ -1794,8 +1797,6 @@ fi
 
 dnl Create configuration headers.
 dnl ----------------------------------------------------------------------------
-test -d Zend || $php_shtool mkdir Zend
-
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
 FEO

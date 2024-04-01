@@ -75,6 +75,10 @@ class XSLTProcessor
 
     public bool $cloneDocument = false;
 
+    public int $maxTemplateDepth;
+
+    public int $maxTemplateVars;
+
     /**
      * @param DOMDocument|DOM\Document|SimpleXMLElement $stylesheet
      * @tentative-return-type

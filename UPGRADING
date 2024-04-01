@@ -261,6 +261,8 @@ PHP 8.4 UPGRADE NOTES
     quotes.
   . It is now possible to pass any callable to registerPhpFunctions().
     RFC: https://wiki.php.net/rfc/improve_callbacks_dom_and_xsl
+  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars
+    to control the recursion depth of XSL template evaluation.
 
 ========================================
 3. Changes in SAPI modules
@@ -556,6 +558,7 @@ PHP 8.4 UPGRADE NOTES
   . SO_EXCLUSIVEADDRUSE (Windows only).
   . SOCK_CONN_DGRAM (NetBSD only).
   . SOCK_DCCP (NetBSD only).
+  . TCP_SYNCNT (Linux only).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES

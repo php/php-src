@@ -77,6 +77,9 @@ void xsl_objects_free_storage(zend_object *object);
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
 
+zval *xsl_prop_max_template_depth(zend_object *object);
+zval *xsl_prop_max_template_vars(zend_object *object);
+
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);
 PHP_RINIT_FUNCTION(xsl);
