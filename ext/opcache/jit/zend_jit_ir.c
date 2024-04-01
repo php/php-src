@@ -15241,7 +15241,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 			jit->b = -1;
 		}
 	} else {
-		zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+		zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[opline - op_array->opcodes] : NULL;
 		uint32_t op1_info = OP1_INFO();
 		zend_jit_addr op1_addr = OP1_ADDR();
 		const zend_op *default_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
@@ -16302,7 +16302,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 	if (parent) {
 		int i;
 		int parent_vars_count = parent->exit_info[exit_num].stack_size;
-		zend_jit_trace_stack *parent_stack =
+		zend_jit_trace_stack *parent_stack = parent_vars_count == 0 ? NULL :
 			parent->stack_map +
 			parent->exit_info[exit_num].stack_offset;
 
