@@ -103,6 +103,8 @@ PHP                                                                        NEWS
     of JIT startup initialization issues. (danog)
   . Increased the maximum value of opcache.interned_strings_buffer to 32767 on
     64bit archs. (Arnaud)
+  . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
+    zend_jit.c). (nielsdos)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
