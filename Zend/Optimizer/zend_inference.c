@@ -637,16 +637,6 @@ static zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 	return b & d;
 }
 
-static zend_ulong minXOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
-{
-	return minAND(a, b, ~d, ~c) | minAND(~b, ~a, c, d);
-}
-
-static zend_ulong maxXOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
-{
-	return maxOR(0, maxAND(a, b, ~d, ~c), 0, maxAND(~b, ~a, c, d));
-}
-
 /* Based on "Hacker's Delight" */
 
 /*
