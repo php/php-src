@@ -31,13 +31,6 @@ struct _nodeIterator {
 	xmlNode *node;
 };
 
-typedef struct _notationIterator notationIterator;
-struct _notationIterator {
-	int cur;
-	int index;
-	xmlNotation *notation;
-};
-
 /* Function pointer typedef changed in 2.9.8, see https://github.com/GNOME/libxml2/commit/e03f0a199a67017b2f8052354cf732b2b4cae787 */
 #if LIBXML_VERSION >= 20908
 static void itemHashScanner (void *payload, void *data, const xmlChar *name) /* {{{ */
@@ -45,13 +38,13 @@ static void itemHashScanner (void *payload, void *data, const xmlChar *name) /* 
 static void itemHashScanner (void *payload, void *data, xmlChar *name)
 #endif
 {
-	nodeIterator *priv = (nodeIterator *)data;
+	nodeIterator *priv = data;
 
-	if(priv->cur < priv->index) {
+	if (priv->cur < priv->index) {
 		priv->cur++;
 	} else {
-		if(priv->node == NULL) {
-			priv->node = (xmlNode *)payload;
+		if (priv->node == NULL) {
+			priv->node = payload;
 		}
 	}
 }
@@ -104,22 +97,11 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index) /* {{{ */
 
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) /* {{{ */
 {
-	notationIterator *iter;
-	xmlNotation *notep = NULL;
-	int htsize;
-
-	if ((htsize = xmlHashSize(ht)) > 0 && index < htsize) {
-		iter = emalloc(sizeof(notationIterator));
-		iter->cur = 0;
-		iter->index = index;
-		iter->notation = NULL;
-		xmlHashScan(ht, itemHashScanner, iter);
-		notep = iter->notation;
-		efree(iter);
-		return create_notation(notep->name, notep->PublicID, notep->SystemID);
-	} else {
-		return NULL;
+	xmlNotation *notation = (xmlNotation *) php_dom_libxml_hash_iter(ht, index);
+	if (notation != NULL) {
+		return create_notation(notation->name, notation->PublicID, notation->SystemID);
 	}
+	return NULL;
 }
 /* }}} */
 
