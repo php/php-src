@@ -1262,7 +1262,7 @@ PHP_FUNCTION(pcntl_unshare)
 		switch (errno) {
 #ifdef EINVAL
 			case EINVAL:
-				zend_argument_value_error(1, "must be a combination of CLONE_* flags");
+				zend_argument_value_error(1, "must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel");
 				RETURN_THROWS();
 				break;
 #endif
