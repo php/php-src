@@ -180,11 +180,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
 						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
 						previndex = 0;
-						if (basenode->type == XML_DOCUMENT_NODE || basenode->type == XML_HTML_DOCUMENT_NODE) {
-							curnode = xmlDocGetRootElement((xmlDoc *) basenode);
-						} else {
-							curnode = basenode->children;
-						}
+						curnode = php_dom_first_child_of_container_node(basenode);
 					} else {
 						previndex = iter->index - 1;
 						curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
@@ -264,12 +260,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 						curnode = (xmlNodePtr) basep->children;
 					}
 				} else {
-					xmlNodePtr nodep = basep;
-					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-						nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-					} else {
-						nodep = nodep->children;
-					}
+					xmlNodePtr nodep = php_dom_first_child_of_container_node(basep);
 					curnode = dom_get_elements_by_tag_name_ns_raw(
 						basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &curindex, 0);
 				}

@@ -93,11 +93,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 		}
 	} else {
 		xmlNodePtr basep = nodep;
-		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-			nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-		} else {
-			nodep = nodep->children;
-		}
+		nodep = php_dom_first_child_of_container_node(basep);
 		dom_get_elements_by_tag_name_ns_raw(
 			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, INT_MAX - 1 /* because of <= */);
 	}
@@ -189,11 +185,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 							itemnode = nodep;
 						} else {
 							if (restart) {
-								if (basep->type == XML_DOCUMENT_NODE || basep->type == XML_HTML_DOCUMENT_NODE) {
-									nodep = xmlDocGetRootElement((xmlDoc*) basep);
-								} else {
-									nodep = basep->children;
-								}
+								nodep = php_dom_first_child_of_container_node(basep);
 							}
 							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, relative_index);
 						}
