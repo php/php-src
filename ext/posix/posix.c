@@ -39,10 +39,9 @@
 #include <errno.h>
 #include <grp.h>
 #include <pwd.h>
-#ifdef HAVE_SYS_MKDEV_H
+#ifdef MAJOR_IN_MKDEV
 # include <sys/mkdev.h>
-#endif
-#ifdef HAVE_SYS_SYSMACROS_H
+#elif defined(MAJOR_IN_SYSMACROS)
 # include <sys/sysmacros.h>
 #endif
 
@@ -358,7 +357,7 @@ PHP_FUNCTION(posix_uname)
 	add_assoc_string(return_value, "version",  u.version);
 	add_assoc_string(return_value, "machine",  u.machine);
 
-#if defined(_GNU_SOURCE) && !defined(DARWIN) && defined(HAVE_UTSNAME_DOMAINNAME)
+#if defined(_GNU_SOURCE) && defined(HAVE_STRUCT_UTSNAME_DOMAINNAME)
 	add_assoc_string(return_value, "domainname", u.domainname);
 #endif
 }
@@ -533,8 +532,8 @@ PHP_FUNCTION(posix_isatty)
 /* }}} */
 
 /*
-	POSIX.1, 4.8.1 sysconf() - TODO
-	POSIX.1, 5.7.1 pathconf(), fpathconf() - TODO
+	POSIX.1, 4.8.1 sysconf()
+	POSIX.1, 5.7.1 pathconf(), fpathconf()
 
 	POSIX.1, 5.1.2 opendir(), readdir(), rewinddir(), closedir()
 	POSIX.1, 5.2.1 chdir()
@@ -620,7 +619,7 @@ PHP_FUNCTION(posix_mknod)
 			zend_argument_value_error(3, "cannot be 0 for the POSIX_S_IFCHR and POSIX_S_IFBLK modes");
 			RETURN_THROWS();
 		} else {
-#if defined(HAVE_MAKEDEV) || defined(makedev)
+#ifdef HAVE_MAKEDEV
 			php_dev = makedev(major, minor);
 #else
 			php_error_docref(NULL, E_WARNING, "Cannot create a block or character device, creating a normal file instead");
@@ -1240,7 +1239,7 @@ PHP_FUNCTION(posix_sysconf)
 	RETURN_LONG(sysconf(conf_id));
 }
 
-#ifdef HAVE_POSIX_PATHCONF
+#ifdef HAVE_PATHCONF
 PHP_FUNCTION(posix_pathconf)
 {
 	zend_long name, ret;
@@ -1269,7 +1268,9 @@ PHP_FUNCTION(posix_pathconf)
 
 	RETURN_LONG(ret);
 }
+#endif
 
+#ifdef HAVE_FPATHCONF
 PHP_FUNCTION(posix_fpathconf)
 {
 	zend_long name, ret, fd = 0;

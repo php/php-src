@@ -23,6 +23,9 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
+# ifdef __FreeBSD__
+# include <pthread_np.h>
+# endif
 
 #include "zend.h"
 #include "zend_globals.h"
@@ -33,23 +36,41 @@
 # define sigev_notify_thread_id _sigev_un._tid
 # endif
 
+// FreeBSD doesn't support CLOCK_BOOTTIME
+# ifdef __FreeBSD__
+# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_MONOTONIC
+# else
+# define ZEND_MAX_EXECUTION_TIMERS_CLOCK CLOCK_BOOTTIME
+# endif
+
 ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 {
+	pid_t pid = getpid();
+
+	if (EG(pid) == pid) {
+		return;
+	}
+
 	struct sigevent sev;
 	sev.sigev_notify = SIGEV_THREAD_ID;
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
 	sev.sigev_signo = SIGRTMIN;
+# ifdef __FreeBSD__
+	sev.sigev_notify_thread_id = pthread_getthreadid_np();
+# else
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
+# endif
 
-	EG(pid) = getpid();
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
-	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {
+	if (timer_create(ZEND_MAX_EXECUTION_TIMERS_CLOCK, &sev, &EG(max_execution_timer_timer)) != 0) {
 		zend_strerror_noreturn(E_ERROR, errno, "Could not create timer");
 	}
 
-#  ifdef MAX_EXECUTION_TIMERS_DEBUG
+	EG(pid) = pid;
+
+# ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Timer %#jx created on thread %d\n", (uintmax_t) EG(max_execution_timer_timer), sev.sigev_notify_thread_id);
-#  endif
+# endif
 
 	sigaction(sev.sigev_signo, NULL, &EG(oldact));
 }

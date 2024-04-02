@@ -406,7 +406,7 @@ PHP_INI_BEGIN()
 STD_PHP_INI_BOOLEAN( "pgsql.allow_persistent",      "1",  PHP_INI_SYSTEM, OnUpdateBool, allow_persistent,      zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_ENTRY_EX("pgsql.max_persistent",       "-1",  PHP_INI_SYSTEM, OnUpdateLong, max_persistent,        zend_pgsql_globals, pgsql_globals, display_link_numbers)
 STD_PHP_INI_ENTRY_EX("pgsql.max_links",            "-1",  PHP_INI_SYSTEM, OnUpdateLong, max_links,             zend_pgsql_globals, pgsql_globals, display_link_numbers)
-STD_PHP_INI_BOOLEAN( "pgsql.auto_reset_persistent", "0",  PHP_INI_SYSTEM, OnUpdateBool, auto_reset_persistent, zend_pgsql_globals, pgsql_globals)
+STD_PHP_INI_BOOLEAN( "pgsql.auto_reset_persistent", "0",  PHP_INI_SYSTEM, OnUpdateLong, auto_reset_persistent, zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.ignore_notice",         "0",  PHP_INI_ALL,    OnUpdateBool, ignore_notices,        zend_pgsql_globals, pgsql_globals)
 STD_PHP_INI_BOOLEAN( "pgsql.log_notice",            "0",  PHP_INI_ALL,    OnUpdateBool, log_notices,           zend_pgsql_globals, pgsql_globals)
 PHP_INI_END()
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(pg_execute)
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
-
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
@@ -1698,6 +1698,14 @@ PHP_FUNCTION(pg_fetch_result)
 	int pgsql_row;
 
 	if (ZEND_NUM_ARGS() == 2) {
+		if (zend_string_equals_literal(EX(func)->common.function_name, "pg_fetch_result")) {
+			zend_error(E_DEPRECATED, "Calling pg_fetch_result() with 2 arguments is deprecated, "
+				"use the 3-parameter signature with a null $row parameter instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
@@ -2009,6 +2017,15 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type, bo
 	int pgsql_row;
 
 	if (ZEND_NUM_ARGS() == 2) {
+		if (nullable_row) {
+			zend_error(E_DEPRECATED, "Calling %s() with 2 arguments is deprecated, "
+				"use the 3-parameter signature with a null $row parameter instead",
+				ZSTR_VAL(EX(func)->common.function_name));
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(2, 2)
 			Z_PARAM_OBJECT_OF_CLASS(result, pgsql_result_ce)
 			Z_PARAM_STR_OR_LONG(field_name, field_offset)
@@ -2199,7 +2216,7 @@ PHP_FUNCTION(pg_untrace)
 	PGconn *pgsql;
 	pgsql_link_handle *link;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r!", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &pgsql_link, pgsql_link_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3338,7 +3355,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 		tmp = PQescapeIdentifier(pgsql, ZSTR_VAL(from), ZSTR_LEN(from));
 	}
 	if (!tmp) {
-		php_error_docref(NULL, E_WARNING,"Failed to escape");
+		php_error_docref(NULL, E_WARNING, "Failed to escape");
 		RETURN_FALSE;
 	}
 
@@ -3694,7 +3711,7 @@ PHP_FUNCTION(pg_send_query_params)
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
-
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
@@ -3861,7 +3878,7 @@ PHP_FUNCTION(pg_send_execute)
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
-
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
@@ -5883,67 +5900,5 @@ PHP_FUNCTION(pg_select)
 	return;
 }
 /* }}} */
-
-#ifdef LIBPQ_HAS_PIPELINING
-PHP_FUNCTION(pg_enter_pipeline_mode)
-{
-	zval *pgsql_link;
-	pgsql_link_handle *pgsql_handle;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
-	CHECK_PGSQL_LINK(pgsql_handle);
-
-	RETURN_BOOL(PQenterPipelineMode(pgsql_handle->conn));
-}
-
-PHP_FUNCTION(pg_exit_pipeline_mode)
-{
-	zval *pgsql_link;
-	pgsql_link_handle *pgsql_handle;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
-	CHECK_PGSQL_LINK(pgsql_handle);
-
-	RETURN_BOOL(PQexitPipelineMode(pgsql_handle->conn));
-}
-
-PHP_FUNCTION(pg_pipeline_sync)
-{
-	zval *pgsql_link;
-	pgsql_link_handle *pgsql_handle;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
-	CHECK_PGSQL_LINK(pgsql_handle);
-
-	RETURN_BOOL(PQpipelineSync(pgsql_handle->conn));
-}
-
-PHP_FUNCTION(pg_pipeline_status)
-{
-	zval *pgsql_link;
-	pgsql_link_handle *pgsql_handle;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
-	CHECK_PGSQL_LINK(pgsql_handle);
-
-	RETURN_LONG(PQpipelineStatus(pgsql_handle->conn));
-}
-#endif
 
 #endif

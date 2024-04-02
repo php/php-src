@@ -579,7 +579,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 				EG(current_execute_data) = original_execute_data;
 
-				if (!((old_root ? old_root : generator)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+				if (!(old_root->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
 					new_root->node.parent = NULL;
 					OBJ_RELEASE(&new_root_parent->std);
 					zend_generator_resume(generator);
@@ -1018,7 +1018,7 @@ static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ 
 }
 /* }}} */
 
-static int zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ */
+static zend_result zend_generator_iterator_valid(zend_object_iterator *iterator) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 

@@ -60,9 +60,7 @@ $S390X_CONFIG \
 --enable-bcmath \
 --enable-calendar \
 --enable-ftp \
---with-pspell=/usr \
 --with-enchant=/usr \
---with-kerberos \
 --enable-sysvmsg \
 --with-ffi \
 --with-sodium \

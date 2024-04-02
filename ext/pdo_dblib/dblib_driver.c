@@ -290,10 +290,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			return SUCCEED == dbsettime(lval);
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->stringify_uniqueidentifier = lval;
+			H->stringify_uniqueidentifier = bval;
 			return true;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			if (!pdo_get_bool_param(&bval, val)) {
@@ -302,10 +302,10 @@ static bool dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			H->skip_empty_rowsets = bval;
 			return true;
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
-			if (!pdo_get_long_param(&lval, val)) {
+			if (!pdo_get_bool_param(&bval, val)) {
 				return false;
 			}
-			H->datetime_convert = lval;
+			H->datetime_convert = bval;
 			return true;
 		default:
 			return false;

@@ -20,6 +20,11 @@ namespace {
     interface _ZendTestInterface
     {
         /** @var int */
+        /** @genstubs-expose-comment-block
+         * "Lorem ipsum"
+         * @see https://www.php.net
+         * @since 8.2
+         */
         public const DUMMY = 0;
     }
 
@@ -55,6 +60,11 @@ namespace {
         static public function variadicTest(string|Iterator ...$elements) : static {}
 
         public function takesUnionType(stdclass|Iterator $arg): void {}
+    }
+
+    class _ZendTestMagicCall
+    {
+        public function __call(string $name, array $args): mixed {}
     }
 
     class _ZendTestChildClass extends _ZendTestClass
@@ -100,8 +110,18 @@ namespace {
         public function __construct(string $parameter) {}
     }
 
+    /** @genstubs-expose-comment-block
+     * "Lorem ipsum"
+     * @see https://www.php.net
+     * @since 8.1
+     */
     #[Attribute(Attribute::TARGET_PROPERTY)]
     final class ZendTestPropertyAttribute {
+        /** @genstubs-expose-comment-block
+         * "Lorem ipsum"
+         * @see https://www.php.net
+         * @since 8.4
+         */
         public string $parameter;
 
         public function __construct(string $parameter) {}
@@ -156,6 +176,15 @@ namespace {
 
     function zend_test_array_return(): array {}
 
+    /** @genstubs-expose-comment-block
+     * "Lorem ipsum"
+     * @see https://www.php.net
+     * @since 8.3
+     */
+     /**
+     * @internal
+     * @compile-time-eval
+     */
     function zend_test_nullable_array_return(): null|array {}
 
     function zend_test_void_return(): void {}
@@ -239,6 +268,8 @@ namespace {
 #if defined(HAVE_LIBXML) && !defined(PHP_WIN32)
 function zend_test_override_libxml_global_state(): void {}
 #endif
+
+    function zend_test_is_pcre_bundled(): bool {}
 }
 
 namespace ZendTestNS {
@@ -254,6 +285,11 @@ namespace ZendTestNS {
         public function method(): ?UnlikelyCompileError {}
     }
 
+    class NotUnlikelyCompileError {
+        /* This method signature would create a compile error due to the string
+         * "ZendTestNS\NotUnlikelyCompileError" in the generated macro call */
+        public function method(): ?NotUnlikelyCompileError {}
+    }
 }
 
 namespace ZendTestNS2 {

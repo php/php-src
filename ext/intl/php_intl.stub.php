@@ -201,6 +201,7 @@ function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
+/** @deprecated */
 function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
 /** @param int|bool $value */
@@ -277,6 +278,7 @@ function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
  * @param int $hour
  * @param int $minute
  * @param int $second
+ * @deprecated
  */
 function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
@@ -298,7 +300,7 @@ function collator_set_attribute(Collator $object, int $attribute, int $value): b
 
 function collator_get_strength(Collator $object): int {}
 
-function collator_set_strength(Collator $object, int $strength): bool {}
+function collator_set_strength(Collator $object, int $strength): true {}
 
 function collator_sort(Collator $object, array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
@@ -459,7 +461,7 @@ function idn_to_utf8(string $domain, int $flags = IDNA_DEFAULT, int $variant = I
 
 function locale_get_default(): string {}
 
-function locale_set_default(string $locale): bool {}
+function locale_set_default(string $locale): true {}
 
 function locale_get_primary_language(string $locale): ?string {}
 
@@ -541,8 +543,7 @@ function normalizer_get_raw_decomposition(string $string, int $form = Normalizer
 
 function resourcebundle_create(?string $locale, ?string $bundle, bool $fallback = true): ?ResourceBundle {}
 
-/** @param string|int $index */
-function resourcebundle_get(ResourceBundle $bundle, $index, bool $fallback = true): mixed {}
+function resourcebundle_get(ResourceBundle $bundle, string|int $index, bool $fallback = true): ResourceBundle|array|string|int|null {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 
@@ -613,6 +614,10 @@ function intltz_has_same_rules(IntlTimeZone $timezone, IntlTimeZone $other): boo
 function intltz_to_date_time_zone(IntlTimeZone $timezone): DateTimeZone|false {}
 
 function intltz_use_daylight_time(IntlTimeZone $timezone): bool {}
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+function intltz_get_iana_id(string $timezoneId): string|false {}
+#endif
 
 /* transliterator */
 

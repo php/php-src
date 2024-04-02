@@ -224,6 +224,7 @@ static const lxb_tag_data_t lxb_tag_res_data_default[LXB_TAG__LAST_ENTRY] =
     {{.u.short_str = "xmp", .length = 3, .next = NULL}, LXB_TAG_XMP, 1, true}
 };
 
+#if 0
 static const lxb_tag_data_t lxb_tag_res_data_upper_default[LXB_TAG__LAST_ENTRY] = 
 {
     {{.u.short_str = "#UNDEF", .length = 6, .next = NULL}, LXB_TAG__UNDEF, 1, true},
@@ -423,6 +424,7 @@ static const lxb_tag_data_t lxb_tag_res_data_upper_default[LXB_TAG__LAST_ENTRY] 
     {{.u.short_str = "WBR", .length = 3, .next = NULL}, LXB_TAG_WBR, 1, true},
     {{.u.short_str = "XMP", .length = 3, .next = NULL}, LXB_TAG_XMP, 1, true}
 };
+#endif
 
 static const lexbor_shs_entry_t lxb_tag_res_shs_data_default[] = 
 {

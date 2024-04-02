@@ -43,7 +43,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcscale, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(bcadd);
 ZEND_FUNCTION(bcsub);
 ZEND_FUNCTION(bcmul);
@@ -54,7 +53,6 @@ ZEND_FUNCTION(bcpow);
 ZEND_FUNCTION(bcsqrt);
 ZEND_FUNCTION(bccomp);
 ZEND_FUNCTION(bcscale);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcadd, arginfo_bcadd)

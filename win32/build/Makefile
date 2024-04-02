@@ -78,15 +78,15 @@ $(BUILD_DIR)\$(PHPDLL).def: $(PHP_DLL_DEF_SOURCES)
 	type $(PHP_DLL_DEF_SOURCES) > $(BUILD_DIR)\$(PHPDLL).def
 
 Zend\zend_ini_parser.c Zend\zend_ini_parser.h: Zend\zend_ini_parser.y
-	$(BISON) --output=Zend/zend_ini_parser.c -v -d Zend/zend_ini_parser.y
+	$(BISON) $(BISON_FLAGS) --output=Zend/zend_ini_parser.c -v -d Zend/zend_ini_parser.y
 
 Zend\zend_language_parser.c Zend\zend_language_parser.h: Zend\zend_language_parser.y
-	$(BISON) --output=Zend/zend_language_parser.c -v -d Zend/zend_language_parser.y
+	$(BISON) $(BISON_FLAGS) --output=Zend/zend_language_parser.c -v -d Zend/zend_language_parser.y
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.c
 	@if "$(SED)" neq "" $(SED) -i "s,^int zendparse\(.*\),ZEND_API int zendparse\1,g" Zend/zend_language_parser.h
 
 sapi\phpdbg\phpdbg_parser.c sapi\phpdbg\phpdbg_parser.h: sapi\phpdbg\phpdbg_parser.y
-	$(BISON) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
+	$(BISON) $(BISON_FLAGS) --output=sapi/phpdbg/phpdbg_parser.c -v -d sapi/phpdbg/phpdbg_parser.y
 
 !if $(RE2C) != ""
 Zend\zend_ini_scanner.c Zend\zend_ini_scanner_defs.h: Zend\zend_ini_scanner.l

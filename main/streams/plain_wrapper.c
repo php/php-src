@@ -40,6 +40,7 @@
 # include "win32/time.h"
 # include "win32/ioutil.h"
 # include "win32/readdir.h"
+# include <limits.h>
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC)
@@ -353,11 +354,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		ssize_t bytes_written;
-		if (ZEND_SIZE_T_UINT_OVFL(count)) {
-			count = UINT_MAX;
-		}
-		bytes_written = _write(data->fd, buf, (unsigned int)count);
+		ssize_t bytes_written = _write(data->fd, buf, (unsigned int)(count > INT_MAX ? INT_MAX : count));
 #else
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif

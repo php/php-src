@@ -4,21 +4,23 @@ MySQL PDOStatement->rowCount() @ SELECT
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
+
+    $table = 'pdo_mysql_stmt_rowcount';
+    MySQLPDOTest::createTestTable($table, $db);
 
     try {
 
-        if (0 !== ($tmp = $db->query('SELECT id FROM test WHERE 1 = 0')->rowCount()))
+        if (0 !== ($tmp = $db->query("SELECT id FROM {$table} WHERE 1 = 0")->rowCount()))
             printf("[002] Expecting 0 got %s", var_export($tmp, true));
 
-        if (1 !== ($tmp = $db->query('SELECT id FROM test WHERE id = 1')->rowCount()))
+        if (1 !== ($tmp = $db->query("SELECT id FROM {$table} WHERE id = 1")->rowCount()))
             printf("[003] Expecting 1 got %s", var_export($tmp, true));
 
     } catch (PDOException $e) {
@@ -30,8 +32,9 @@ MySQLPDOTest::skip();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->exec('DROP TABLE IF EXISTS pdo_mysql_stmt_rowcount');
 ?>
 --EXPECT--
 done!

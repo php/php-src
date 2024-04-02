@@ -5,6 +5,12 @@ runs:
     - shell: bash
       run: |
         set -x
+
+        # Patch brew to overwrite always
+        formula_installer="$(brew --repo)"/Library/Homebrew/formula_installer.rb
+        code=" keg.link\(verbose: verbose\?"
+        sudo sed -Ei '' "s/$code.*/$code, overwrite: true\)/" "$formula_installer"
+
         brew install \
           pkg-config \
           autoconf \
@@ -13,7 +19,6 @@ runs:
         brew install \
           openssl@1.1 \
           curl \
-          krb5 \
           bzip2 \
           enchant \
           libffi \
@@ -31,6 +36,7 @@ runs:
           tidy-html5 \
           libxml2 \
           libjpeg \
+          libsodium \
           libxslt \
           postgresql
         brew link icu4c gettext --force

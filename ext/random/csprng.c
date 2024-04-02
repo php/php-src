@@ -28,6 +28,7 @@
 #include "Zend/zend_exceptions.h"
 
 #include "php_random.h"
+#include "php_random_csprng.h"
 
 #if HAVE_UNISTD_H
 # include <unistd.h>

@@ -1,8 +1,9 @@
 --TEST--
 GH-8626: PDOStatement->execute() failed, then execute successfully, errorInfo() information is incorrect
+--EXTENSIONS--
+pdo
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
@@ -21,10 +22,9 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
-$db->exec('DROP TABLE test');
-$db->exec('CREATE TABLE test (x int NOT NULL)');
+$db->exec('CREATE TABLE test8626 (x int NOT NULL)');
 
-$stmt = $db->prepare('INSERT INTO test VALUES(?)');
+$stmt = $db->prepare('INSERT INTO test8626 VALUES(?)');
 
 // fail
 var_dump($stmt->execute([null]), $stmt->errorCode());
@@ -39,6 +39,12 @@ $errorInfo = $stmt->errorInfo();
 var_dump(array_slice($errorInfo, 0, 3)); // odbc, dblib
 ?>
 ===DONE===
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test8626");
+?>
 --EXPECTF--
 bool(false)
 string(%d) "%s"

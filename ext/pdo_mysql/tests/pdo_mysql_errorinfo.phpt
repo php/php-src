@@ -4,15 +4,16 @@ MySQL PDO->errorInfo()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
-    MySQLPDOTest::createTestTable($db);
+
+    $table = 'pdo_mysql_errorinfo';
+    MySQLPDOTest::createTestTable($table, $db);
 
     function check_error($offset, &$obj, $expected = '00000') {
         $info = $obj->errorInfo();
@@ -29,13 +30,12 @@ $db = MySQLPDOTest::factory();
             if (!isset($info[2]) || $info[2] == '')
                 printf("[%03d] Driver-specific error message.not set\n", $offset);
         }
-
     }
 
     function pdo_mysql_errorinfo($db, $offset) {
+        global $table;
 
         try {
-
             /*
             If you create a PDOStatement object through PDO->prepare()
             or PDO->query() and invoke an error on the statement handle,
@@ -46,12 +46,12 @@ $db = MySQLPDOTest::factory();
             $code = $db->errorCode();
             check_error($offset + 2, $db);
 
-            $stmt = $db->query('SELECT id, label FROM test');
+            $stmt = $db->query("SELECT id, label FROM {$table}");
             $stmt2 = &$stmt;
             check_error($offset + 3, $db);
             check_error($offset + 4, $stmt);
 
-            $db->exec('DROP TABLE IF EXISTS test');
+            $db->exec("DROP TABLE IF EXISTS {$table}");
             @$stmt->execute();
             check_error($offset + 5, $db);
             check_error($offset + 6, $stmt, '42S02');
@@ -60,14 +60,14 @@ $db = MySQLPDOTest::factory();
             @$stmt = $db->query('SELECT id, label FROM unknown');
             check_error($offset + 8, $db, '42S02');
 
-            MySQLPDOTest::createTestTable($db);
-            $stmt = $db->query('SELECT id, label FROM test');
+            MySQLPDOTest::createTestTable($table, $db);
+            $stmt = $db->query("SELECT id, label FROM {$table}");
             check_error($offset + 9, $db);
             check_error($offset + 10, $stmt);
 
             $db2 = &$db;
-            $db->exec('DROP TABLE IF EXISTS unknown');
-            @$db->query('SELECT id, label FROM unknown');
+            $db->exec('DROP TABLE IF EXISTS pdo_mysql_errorinfo_unknown');
+            @$db->query('SELECT id, label FROM pdo_mysql_errorinfo_unknown');
             check_error($offset + 11, $db, '42S02');
             check_error($offset + 12, $db2, '42S02');
             check_error($offset + 13, $stmt);
@@ -99,8 +99,9 @@ $db = MySQLPDOTest::factory();
 ?>
 --CLEAN--
 <?php
-require __DIR__ . '/mysql_pdo_test.inc';
-MySQLPDOTest::dropTestTable();
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
+$db = MySQLPDOTest::factory();
+$db->query('DROP TABLE IF EXISTS pdo_mysql_errorinfo');
 ?>
 --EXPECT--
 Emulated Prepared Statements...

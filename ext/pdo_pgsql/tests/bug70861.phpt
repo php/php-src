@@ -21,7 +21,7 @@ try {
 } catch (Exception $e) {
 }
 
-$db->query('CREATE TABLE test_blob_crash_70861 (id SERIAL NOT NULL, blob1 BYTEA)');
+$db->query('CREATE TABLE test70861 (id SERIAL NOT NULL, blob1 BYTEA)');
 
 class HelloWrapper {
     public function stream_open() { return true; }
@@ -33,14 +33,12 @@ stream_wrapper_register("hello", "HelloWrapper");
 
 $f = fopen("hello://there", "r");
 
-$stmt = $db->prepare("INSERT INTO test_one_blob (blob1) VALUES (:foo)", array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
+$stmt = $db->prepare("INSERT INTO test70861 (blob1) VALUES (:foo)", array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL));
 
 $stmt->bindparam(':foo', $f, PDO::PARAM_LOB);
 $stmt->execute();
 
 fclose($f);
-
-$db->exec('DROP TABLE test_blob_crash');
 
 ?>
 +++DONE+++
@@ -48,7 +46,7 @@ $db->exec('DROP TABLE test_blob_crash');
 <?php
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
-$db->query('DROP TABLE IF EXISTS test_blob_crash_70861 CASCADE');
+$db->query('DROP TABLE IF EXISTS test70861 CASCADE');
 ?>
 --EXPECTF--
 %a

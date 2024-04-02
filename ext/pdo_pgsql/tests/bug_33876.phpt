@@ -17,8 +17,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 $db->exec("SET LC_MESSAGES='C'");
 $db->exec('CREATE TABLE b33876 (foo varchar(5) NOT NULL, bar bool NOT NULL)');
-$db->exec("INSERT INTO b33876 VALUES('false','f')");
-$db->exec("INSERT INTO b33876 VALUES('true', 't')");
+$db->exec("INSERT INTO b33876 VALUES('false','f'), ('true', 't')");
 
 $res = $db->prepare('SELECT foo from b33876 where bar = ?');
 

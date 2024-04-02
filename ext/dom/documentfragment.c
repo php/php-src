@@ -43,7 +43,7 @@ PHP_METHOD(DOMDocumentFragment, __construct)
 	nodep = xmlNewDocFragment(NULL);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -80,7 +80,7 @@ PHP_METHOD(DOMDocumentFragment, appendXML) {
 
 	if (data) {
 		PHP_LIBXML_SANITIZE_GLOBALS(parse);
-		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, (xmlChar *) data, &lst);
+		err = xmlParseBalancedChunkMemory(nodep->doc, NULL, NULL, 0, BAD_CAST data, &lst);
 		PHP_LIBXML_RESTORE_GLOBALS(parse);
 		if (err != 0) {
 			RETURN_FALSE;

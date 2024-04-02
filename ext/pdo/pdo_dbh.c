@@ -71,7 +71,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 	char *message = NULL;
 	const char *msg;
 
-	if (dbh && dbh->error_mode == PDO_ERRMODE_SILENT) {
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
 #if 0
 		/* BUG: if user is running in silent mode and hits an error at the driver level
 		 * when they use the PDO methods to call up the error information, they may
@@ -98,7 +98,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
 
-	if (dbh && dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
+	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	} else {
 		zval ex, info;
@@ -134,7 +134,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	zend_string *message = NULL;
 	zval info;
 
-	if (dbh == NULL || dbh->error_mode == PDO_ERRMODE_SILENT) {
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
 		return;
 	}
 
@@ -197,9 +197,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		zval_ptr_dtor(&info);
 	}
 
-	if (message) {
-		zend_string_release_ex(message, 0);
-	}
+	zend_string_release_ex(message, false);
 
 	if (supp) {
 		efree(supp);
@@ -221,10 +219,64 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ */
-PHP_METHOD(PDO, __construct)
+static bool create_driver_specific_pdo_object(pdo_driver_t *driver, zend_class_entry *called_scope, zval *new_object)
 {
-	zval *object = ZEND_THIS;
+	zend_class_entry *ce;
+	zend_class_entry *ce_based_on_driver_name = NULL, *ce_based_on_called_object = NULL;
+
+	ce_based_on_driver_name = zend_hash_str_find_ptr(&pdo_driver_specific_ce_hash, driver->driver_name, driver->driver_name_len);
+
+	ZEND_HASH_MAP_FOREACH_PTR(&pdo_driver_specific_ce_hash, ce) {
+		if (called_scope != pdo_dbh_ce && instanceof_function(called_scope, ce)) {
+			ce_based_on_called_object = called_scope;
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (ce_based_on_called_object) {
+		if (ce_based_on_driver_name) {
+			if (instanceof_function(ce_based_on_called_object, ce_based_on_driver_name) == false) {
+				zend_throw_exception_ex(pdo_exception_ce, 0,
+					"%s::connect() cannot be called when connecting to the \"%s\" driver, "
+					"either %s::connect() or PDO::connect() must be called instead",
+					ZSTR_VAL(called_scope->name), driver->driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+				return false;
+			}
+
+			/* A driver-specific implementation was instantiated via the connect() method of the appropriate driver class */
+			object_init_ex(new_object, ce_based_on_called_object);
+			return true;
+		} else {
+			zend_throw_exception_ex(pdo_exception_ce, 0,
+				"%s::connect() cannot be called when connecting to an unknown driver, "
+				"PDO::connect() must be called instead",
+				ZSTR_VAL(called_scope->name));
+			return false;
+		}
+	}
+
+	if (ce_based_on_driver_name) {
+		if (called_scope != pdo_dbh_ce) {
+			/* A driver-specific implementation was instantiated via the connect method of a wrong driver class */
+			zend_throw_exception_ex(pdo_exception_ce, 0,
+				"%s::connect() cannot be called when connecting to the \"%s\" driver, "
+				"either %s::connect() or PDO::connect() must be called instead",
+				ZSTR_VAL(called_scope->name), driver->driver_name, ZSTR_VAL(ce_based_on_driver_name->name));
+			return false;
+		}
+
+		/* A driver-specific implementation was instantiated via PDO::__construct() */
+		object_init_ex(new_object, ce_based_on_driver_name);
+	} else {
+		/* No driver-specific implementation found */
+		object_init_ex(new_object, called_scope);
+	}
+
+	return true;
+}
+
+static void internal_construct(INTERNAL_FUNCTION_PARAMETERS, zend_object *object, zend_class_entry *current_scope, zval *new_zval_object)
+{
 	pdo_dbh_t *dbh = NULL;
 	bool is_persistent = 0;
 	char *data_source;
@@ -291,7 +343,16 @@ PHP_METHOD(PDO, __construct)
 		RETURN_THROWS();
 	}
 
-	dbh = Z_PDO_DBH_P(object);
+	if (new_zval_object != NULL) {
+		ZEND_ASSERT((driver->driver_name != NULL) && "PDO driver name is null");
+		if (!create_driver_specific_pdo_object(driver, current_scope, new_zval_object)) {
+			RETURN_THROWS();
+		}
+
+		dbh = Z_PDO_DBH_P(new_zval_object);
+	} else {
+		dbh = php_pdo_dbh_fetch_inner(object);
+	}
 
 	/* is this supposed to be a persistent connection ? */
 	if (options) {
@@ -352,7 +413,7 @@ PHP_METHOD(PDO, __construct)
 		if (pdbh) {
 			efree(dbh);
 			/* switch over to the persistent one */
-			Z_PDO_OBJECT_P(object)->inner = pdbh;
+			php_pdo_dbh_fetch_object(object)->inner = pdbh;
 			pdbh->refcount++;
 			dbh = pdbh;
 		}
@@ -431,6 +492,19 @@ options:
 	if (!EG(exception)) {
 		zend_throw_exception(pdo_exception_ce, "Constructor failed", 0);
 	}
+}
+
+/* {{{ */
+PHP_METHOD(PDO, __construct)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, NULL);
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(PDO, connect)
+{
+	internal_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_OBJ(EX(This)), EX(This).value.ce, return_value);
 }
 /* }}} */
 
@@ -911,8 +985,13 @@ PHP_METHOD(PDO, getAttribute)
 				add_next_index_zval(return_value, &dbh->def_stmt_ctor_args);
 			}
 			return;
+
 		case PDO_ATTR_DEFAULT_FETCH_MODE:
 			RETURN_LONG(dbh->default_fetch_type);
+
+		case PDO_ATTR_STRINGIFY_FETCHES:
+			RETURN_BOOL(dbh->stringify);
+
 		default:
 			break;
 	}
@@ -1255,6 +1334,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		} else {
 			func.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
 		}
+		func.doc_comment = NULL;
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 
@@ -1329,6 +1409,7 @@ static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)
 }
 
 static zend_object_handlers pdo_dbh_object_handlers;
+
 static void pdo_dbh_free_storage(zend_object *std);
 
 void pdo_dbh_init(int module_number)

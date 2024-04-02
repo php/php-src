@@ -662,8 +662,12 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 		do {
 			name = (char *)tidyAttrName(tempattr);
 			val = (char *)tidyAttrValue(tempattr);
-			if (name && val) {
-				add_assoc_string(&attribute, name, val);
+			if (name) {
+				if (val) {
+					add_assoc_string(&attribute, name, val);
+				} else {
+					add_assoc_str(&attribute, name, zend_empty_string);
+				}
 			}
 		} while((tempattr = tidyAttrNext(tempattr)));
 	} else {

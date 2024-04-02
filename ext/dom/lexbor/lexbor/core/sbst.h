@@ -19,12 +19,12 @@ extern "C" {
 typedef struct {
     lxb_char_t key;
 
-    void       *value;
-    size_t     value_len;
+    lxb_char_t         value[6];
+    unsigned char      value_len;
 
-    size_t     left;
-    size_t     right;
-    size_t     next;
+    unsigned short     left;
+    unsigned short     right;
+    unsigned short     next;
 }
 lexbor_sbst_entry_static_t;
 

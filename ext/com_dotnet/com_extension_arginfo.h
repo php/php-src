@@ -131,7 +131,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_dotnet___construct, 0, 0, 2)
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(variant_set);
 ZEND_FUNCTION(variant_add);
 ZEND_FUNCTION(variant_cat);
@@ -170,7 +169,6 @@ ZEND_METHOD(com, __construct);
 ZEND_METHOD(dotnet, __construct);
 #endif
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(variant_set, arginfo_variant_set)
 	ZEND_FE(variant_add, arginfo_variant_add)
@@ -207,18 +205,15 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_variant_methods[] = {
 	ZEND_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_com_methods[] = {
 	ZEND_ME(com, __construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 #if HAVE_MSCOREE_H
 static const zend_function_entry class_dotnet_methods[] = {
@@ -227,11 +222,9 @@ static const zend_function_entry class_dotnet_methods[] = {
 };
 #endif
 
-
 static const zend_function_entry class_com_safearray_proxy_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_com_exception_methods[] = {
 	ZEND_FE_END

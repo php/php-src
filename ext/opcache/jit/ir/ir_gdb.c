@@ -16,7 +16,6 @@
 # include <sys/types.h>
 # include <sys/sysctl.h>
 # include <sys/user.h>
-# include <libutil.h>
 #endif
 
 #include "ir.h"
@@ -393,6 +392,7 @@ static void ir_gdbjit_debugabbrev(ir_gdbjit_ctx *ctx)
 	DUV(DW_FORM_data4);
 	DB(0);
 	DB(0);
+	DB(0);
 
 	ctx->p = p;
 }
@@ -561,6 +561,22 @@ void ir_gdb_unregister_all(void)
 	}
 }
 
+#if defined(__FreeBSD__)
+static bool ir_gdb_info_proc(pid_t pid, struct kinfo_proc *proc)
+{
+	size_t len, plen;
+	len = plen = sizeof(*proc);
+	int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, pid};
+
+	if (sysctl(mib, 4, proc, &len, NULL, 0) < 0 || len != plen ||
+            proc->ki_structsize != (int)plen || proc->ki_pid != pid) {
+		return false;
+	}
+
+	return true;
+}
+#endif
+
 bool ir_gdb_present(void)
 {
 	bool ret = 0;
@@ -584,7 +600,7 @@ bool ir_gdb_present(void)
 				pid = atoi(s);
 				if (pid) {
 					char out[1024];
-					sprintf(buf, "/proc/%d/exe", (int)pid);
+					snprintf(buf, sizeof(buf), "/proc/%d/exe", (int)pid);
 					if (readlink(buf, out, sizeof(out) - 1) > 0) {
 						if (strstr(out, "gdb")) {
 							ret = 1;
@@ -597,13 +613,13 @@ bool ir_gdb_present(void)
 		close(fd);
 	}
 #elif defined(__FreeBSD__)
-    struct kinfo_proc *proc = kinfo_getproc(getpid());
+    struct kinfo_proc proc, dbg;
 
-    if (proc) {
-        if ((proc->ki_flag & P_TRACED) != 0) {
-            struct kinfo_proc *dbg = kinfo_getproc(proc->ki_tracer);
-
-            ret = (dbg && strstr(dbg->ki_comm, "gdb"));
+    if (ir_gdb_info_proc(getpid(), &proc)) {
+        if ((proc.ki_flag & P_TRACED) != 0) {
+            if (ir_gdb_info_proc(proc.ki_tracer, &dbg)) {
+            	ret = strstr(dbg.ki_comm, "gdb");
+	    }
         }
     }
 #endif

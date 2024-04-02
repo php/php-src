@@ -25,8 +25,8 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
     /** @tentative-return-type */
     public function getSize(): int {}
 
-    /** @return bool */
-    public function setSize(int $size) {} // TODO make return type void
+    /** @tentative-return-type */
+    public function setSize(int $size): true {}
 
     /**
      * @param int $index

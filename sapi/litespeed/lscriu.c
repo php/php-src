@@ -99,7 +99,9 @@ static int (*s_lscapi_dump_me)(void) = NULL;
 static int (*s_lscapi_prepare_me)(void) = NULL;
 static int s_native = 0;
 static int s_tried_checkpoint = 0;
+#ifdef LSAPILIB_DEBUG_CRIU
 static int s_criu_debug = 0;
+#endif
 static int s_fd_native = -1;
 static char *s_criu_image_path = NULL;
 static int s_pid = 0;
@@ -309,6 +311,7 @@ static void LSCRIU_Wink_Server_is_Ready(void)
 }
 
 
+#ifdef LSAPILIB_DEBUG_CRIU
 static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 {
     const char *pchDefaultSocketPath = "/tmp/";
@@ -319,7 +322,6 @@ static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 }
 
 
-#ifdef LSAPILIB_DEBUG_CRIU
 static void LSCRIU_Debugging(void) {
     char *pchCRIUDebug;
     pchCRIUDebug = getenv("LSAPI_CRIU_DEBUG");
@@ -496,7 +498,6 @@ static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 
 static void LSCRIU_try_checkpoint(int *forked_pid)
 {
-    int iRet;
     pid_t iPid;
     pid_t iPidDump = getpid();
 
@@ -523,7 +524,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
         pid_t   iPidParent = getppid();
 
         setsid();
-        iRet = LSCRIU_Native_Dump(iPidDump,
+        (void)LSCRIU_Native_Dump(iPidDump,
                                   s_criu_image_path,
                                   s_fd_native);
         close(s_fd_native);

@@ -229,12 +229,6 @@ case $host_alias in
   *solaris*)
     CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
     ;;
-  *dgux*)
-    CPPFLAGS="$CPPFLAGS -D_BSD_TIMEOFDAY_FLAVOR"
-    ;;
-  *mips*)
-    CPPFLAGS="$CPPFLAGS -D_XPG_IV"
-    ;;
   *hpux*)
     if test "$GCC" = "yes"; then
       CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE_EXTENDED"
@@ -293,8 +287,11 @@ dnl SAPI configuration.
 dnl ----------------------------------------------------------------------------
 
 dnl Paths to the targets are relative to the build directory.
-SAPI_SHARED=libs/libphp.[]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp.a
+SAPI_LIBNAME=libphp
+SAPI_LIBNAME_SHARED=$SAPI_LIBNAME.[]$SHLIB_DL_SUFFIX_NAME
+SAPI_LIBNAME_STATIC=$SAPI_LIBNAME.a
+SAPI_SHARED=libs/$SAPI_LIBNAME_SHARED
+SAPI_STATIC=libs/$SAPI_LIBNAME_STATIC
 SAPI_LIBTOOL=libphp.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
@@ -350,7 +347,7 @@ PHP_TEST_WRITE_STDOUT
 
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary and
 dnl source packages. This should be harmless on other OSs.
-if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
+if test -d /usr/pkg/include && test -d /usr/pkg/lib; then
    CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
    LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
@@ -363,17 +360,13 @@ dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try to avoid -lnsl
 dnl checks, if we already have the functions which are usually in libnsl. Also,
 dnl uClibc will bark at linking with glibc's libnsl.
 
-PHP_CHECK_FUNC(socket, socket, network)
+AC_SEARCH_LIBS([socket], [socket network])
 PHP_CHECK_FUNC(socketpair, socket, network)
-PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
-PHP_CHECK_FUNC(dlopen, dl, root)
-PHP_CHECK_FUNC(dlsym, dl, root)
-if test "$ac_cv_func_dlopen" = "yes"; then
-  AC_DEFINE(HAVE_LIBDL, 1, [ ])
-fi
-AC_CHECK_LIB(m, sin)
+AC_SEARCH_LIBS([dlopen], [dl],
+  [AC_DEFINE([HAVE_LIBDL], [1], [Define to 1 if the dl library is available.])])
+AC_SEARCH_LIBS([sin], [m])
 
 case $host_alias in
   riscv64*)
@@ -381,15 +374,17 @@ case $host_alias in
     ;;
 esac
 
-dnl Check for inet_aton in -lc, -lbind and -lresolv.
-PHP_CHECK_FUNC(inet_aton, resolv, bind)
+dnl Solaris/Illumos for process mapping.
+AC_SEARCH_LIBS([Pgrab], [proc])
+
+dnl Haiku does not have network api in libc.
+AC_SEARCH_LIBS([setsockopt], [network])
 
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
 AC_CHECK_HEADERS([ \
-stdint.h \
 dirent.h \
 sys/param.h \
 sys/types.h \
@@ -398,15 +393,12 @@ netinet/in.h \
 alloca.h \
 arpa/inet.h \
 arpa/nameser.h \
-crypt.h \
 dns.h \
 fcntl.h \
 grp.h \
 ieeefp.h \
 langinfo.h \
-linux/filter.h \
 linux/sock_diag.h \
-malloc.h \
 os/signpost.h \
 poll.h \
 pty.h \
@@ -420,7 +412,6 @@ sys/file.h \
 sys/mman.h \
 sys/mount.h \
 sys/poll.h \
-sys/procctl.h \
 sys/resource.h \
 sys/select.h \
 sys/socket.h \
@@ -466,15 +457,19 @@ if test "$GCC" = "yes"; then
   PHP_BROKEN_GCC_STRLEN_OPT
 fi
 
+dnl Detect the headers required to use makedev, major, and minor.
+dnl Autoconf <= 2.69 didn't check glibc 2.25 deprecated macros in sys/types.h.
+m4_version_prereq([2.70],,[ac_cv_header_sys_types_h_makedev=no])
+AC_HEADER_MAJOR
+
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl ----------------------------------------------------------------------------
 
 AC_STRUCT_TIMEZONE
 
 PHP_MISSING_TIME_R_DECL
-PHP_MISSING_FCLOSE_DECL
-PHP_STRUCT_FLOCK
 
+AC_CHECK_TYPES([struct flock],,,[#include <fcntl.h>])
 AC_CHECK_TYPES(socklen_t, [], [], [
   #ifdef HAVE_SYS_TYPES_H
   # include <sys/types.h>
@@ -526,10 +521,6 @@ dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 dnl Check __builtin_frame_address
 PHP_CHECK_BUILTIN_FRAME_ADDRESS
-dnl Check prctl
-PHP_CHECK_PRCTL
-dnl Check procctl
-PHP_CHECK_PROCCTL
 dnl Check AVX512
 PHP_CHECK_AVX512_SUPPORTS
 dnl Check AVX512 VBMI
@@ -558,20 +549,22 @@ if test "`uname -s 2>/dev/null`" != "QNX"; then
 fi
 
 dnl Checks for types.
-AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
 dnl Checks for sockaddr_storage and sockaddr.sa_len.
-PHP_SOCKADDR_CHECKS
+AC_CHECK_TYPES([struct sockaddr_storage],,,[#include <sys/socket.h>])
+AC_CHECK_MEMBERS([struct sockaddr.sa_len],,,[#include <sys/socket.h>])
 
 dnl Checks for GCC function attributes on all systems except ones without glibc
 dnl Fix for these systems is already included in GCC 7, but not on GCC 6.
 dnl
 dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
-dnl bug #77284. Conservatively don't use ifuncs on FreeBSD.
-AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*freebsd*|*openbsd*], [true], [
-  AX_GCC_FUNC_ATTRIBUTE([ifunc])
-  AX_GCC_FUNC_ATTRIBUTE([target])
+dnl bug #77284. Conservatively don't use ifuncs on FreeBSD prior to version 12.
+AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true], [
+  if test "`uname -s 2>/dev/null`" != "FreeBSD" || test "`uname -U 2>/dev/null`" -ge 1200000; then
+    AX_GCC_FUNC_ATTRIBUTE([ifunc])
+    AX_GCC_FUNC_ATTRIBUTE([target])
+  fi
 ])
 
 dnl Check for IPv6 support.
@@ -610,13 +603,10 @@ getgrnam_r \
 getpwuid_r \
 getwd \
 glob \
-inet_ntoa \
-inet_ntop \
-inet_pton \
 localtime_r \
 lchown \
 memcntl \
-memmove \
+memfd_create \
 mkstemp \
 mmap \
 nice \
@@ -643,28 +633,32 @@ usleep \
 utime \
 vasprintf \
 asprintf \
-nanosleep \
 memmem \
 memrchr \
+mempcpy \
 )
+
+AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
+AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
 
+dnl Check for functions inside their belonging headers.
+AC_CHECK_HEADER([sys/prctl.h], [AC_CHECK_FUNCS([prctl])])
+AC_CHECK_HEADER([sys/procctl.h], [AC_CHECK_FUNCS([procctl])])
+
 AX_FUNC_WHICH_GETHOSTBYNAME_R
 
-dnl Some systems (like OpenSolaris) do not have nanosleep in libc.
-PHP_CHECK_FUNC_LIB(nanosleep, rt)
-
-dnl Haiku does not have network api in libc.
-PHP_CHECK_FUNC_LIB(setsockopt, network)
+dnl Some systems (Solaris 10) do not have nanosleep in libc.
+AC_CHECK_FUNCS([nanosleep],,
+  [AC_SEARCH_LIBS([nanosleep], [rt], [AC_DEFINE([HAVE_NANOSLEEP], [1])])])
 
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
   [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <string.h>
 #include <netdb.h>
 #include <sys/types.h>
 #include <string.h>
@@ -750,7 +744,6 @@ fi
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
-PHP_CHECK_IN_ADDR_T
 
 AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
@@ -759,9 +752,8 @@ if test "$ac_cv_func___crc32d" = "yes"; then
 fi
 
 dnl Check for asm goto support.
-AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
-int main(void) {
+AC_CACHE_CHECK([for asm goto], [ac_cv__asm_goto],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
 #if defined(__x86_64__) || defined(__i386__)
     __asm__ goto("jmp %l0\n" :::: end);
 #elif defined(__aarch64__)
@@ -769,23 +761,9 @@ int main(void) {
 #endif
 end:
     return 0;
-}
-  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [
-    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-int main(void) {
-#if defined(__x86_64__) || defined(__i386__)
-    __asm__ goto("jmp %l0\n" :::: end);
-#elif defined(__aarch64__)
-    __asm__ goto("b %l0\n" :::: end);
-#endif
-end:
-    return 0;
-}
-  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])
-])])
-
+]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])])
 if test "$ac_cv__asm_goto" = yes; then
-  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+  AC_DEFINE([HAVE_ASM_GOTO], [1], [Define if asm goto support is available.])
 fi
 
 dnl Check valgrind support.
@@ -810,7 +788,8 @@ if test "$PHP_VALGRIND" != "no"; then
 fi
 
 dnl Check for openpty. It may require linking against libutil or libbsd.
-PHP_CHECK_FUNC(openpty, util, bsd)
+AC_CHECK_FUNCS([openpty],,
+  [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
@@ -1051,7 +1030,7 @@ PHP_ARG_ENABLE([dtrace],
   [no])
 
 if test "$PHP_DTRACE" = "yes"; then
-  AC_CHECK_HEADERS([sys/sdt.h], [
+  AC_CHECK_HEADER([sys/sdt.h], [
     PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
       Zend/zend_execute.c Zend/zend_exceptions.c \
       Zend/zend_dtrace.c Zend/zend.c])
@@ -1137,7 +1116,7 @@ case $host_alias in
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
     AC_RUN_IFELSE(
-        [AC_LANG_SOURCE([[int main() {return 0;}]])],
+        [AC_LANG_PROGRAM()],
         [ac_cv_common_page_size=yes],
         [ac_cv_common_page_size=no],
         [ac_cv_common_page_size=no])
@@ -1151,7 +1130,7 @@ case $host_alias in
         save_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
         AC_RUN_IFELSE(
-            [AC_LANG_SOURCE([[int main() {return 0;}]])],
+            [AC_LANG_PROGRAM()],
             [ac_cv_max_page_size=yes],
             [ac_cv_max_page_size=no],
             [ac_cv_max_page_size=no])
@@ -1249,6 +1228,7 @@ if test "$PHP_PEAR" != "no"; then
     esac
   fi
 
+  PHP_ADD_BUILD_DIR([pear])
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
 fi
 
@@ -1271,6 +1251,7 @@ AS_CASE([$host_cpu],
   [ppc64*|powerpc64*], [fiber_cpu="ppc64"],
   [ppc*|powerpc*], [fiber_cpu="ppc32"],
   [riscv64*], [fiber_cpu="riscv64"],
+  [sparc64], [fiber_cpu="sparc64"],
   [s390x*], [fiber_cpu="s390x"],
   [mips64*], [fiber_cpu="mips64"],
   [mips*], [fiber_cpu="mips32"],
@@ -1292,6 +1273,7 @@ AS_CASE([$fiber_cpu],
   [ppc64], [fiber_asm_file_prefix="ppc64_sysv"],
   [ppc32], [fiber_asm_file_prefix="ppc32_sysv"],
   [riscv64], [fiber_asm_file_prefix="riscv64_sysv"],
+  [sparc64], [fiber_asm_file_prefix="sparc64_sysv"],
   [s390x], [fiber_asm_file_prefix="s390x_sysv"],
   [mips64], [fiber_asm_file_prefix="mips64_n64"],
   [mips32], [fiber_asm_file_prefix="mips32_o32"],
@@ -1346,7 +1328,6 @@ fi
 
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
-  AC_DEFINE([ZEND_FIBER_ASM], 1, [ ])
   PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S, "$fiber_asm_cflag")
   AC_MSG_RESULT([$fiber_asm_file])
 else
@@ -1392,6 +1373,7 @@ test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=
 test "$program_suffix" = "NONE" && program_suffix=
 
+orig_libdir=$libdir
 case $libdir in
   '${exec_prefix}/lib')
     libdir=$libdir/php
@@ -1403,8 +1385,6 @@ case `eval echo $datadir` in
     ;;
 esac
 
-phplibdir=`pwd`/modules
-$php_shtool mkdir -p $phplibdir
 phptempdir=`pwd`/libs
 
 old_exec_prefix=$exec_prefix
@@ -1520,8 +1500,6 @@ PHP_SUBST(PHP_BINARIES)
 PHP_SUBST(PHP_MODULES)
 PHP_SUBST(PHP_ZEND_EX)
 
-PHP_SUBST(EXT_LIBS)
-
 PHP_SUBST_OLD(abs_builddir)
 PHP_SUBST_OLD(abs_srcdir)
 
@@ -1531,9 +1509,9 @@ PHP_SUBST(exec_prefix)
 PHP_SUBST_OLD(program_prefix)
 PHP_SUBST_OLD(program_suffix)
 PHP_SUBST(includedir)
+PHP_SUBST_OLD(orig_libdir)
 PHP_SUBST(libdir)
 PHP_SUBST(mandir)
-PHP_SUBST(phplibdir)
 PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
 PHP_SUBST(localstatedir)
@@ -1559,25 +1537,23 @@ PHP_SUBST_OLD(EXTRA_LIBS)
 PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
 PHP_SUBST_OLD(INCLUDES)
 PHP_SUBST_OLD(EXTRA_INCLUDES)
-PHP_SUBST_OLD(INCLUDE_PATH)
 PHP_SUBST_OLD(INSTALL_IT)
-PHP_SUBST(LFLAGS)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
 PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST_OLD(PHP_LDFLAGS)
-PHP_SUBST_OLD(PHP_LIBS)
 PHP_SUBST(OVERALL_TARGET)
 PHP_SUBST(PHP_RPATHS)
 PHP_SUBST(PHP_SAPI)
 PHP_SUBST_OLD(PHP_VERSION)
 PHP_SUBST_OLD(PHP_VERSION_ID)
 PHP_SUBST(SHELL)
-PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(PHP_FRAMEWORKS)
 PHP_SUBST(PHP_FRAMEWORKPATH)
 PHP_SUBST(INSTALL_HEADERS)
+PHP_SUBST_OLD(SAPI_LIBNAME_SHARED)
+PHP_SUBST_OLD(SAPI_LIBNAME_STATIC)
 
 old_CC=$CC
 
@@ -1622,6 +1598,24 @@ if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
       CFLAGS="$CFLAGS -fno-sanitize=object-size"
       CXXFLAGS="$CFLAGS -fno-sanitize=object-size"
     ])
+
+    dnl Clang 17 adds stricter function pointer compatibility checks where pointer args cannot be
+    dnl cast to void*. In that case, set -fno-sanitize=function.
+    OLD_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -fno-sanitize-recover=undefined"
+    AC_CACHE_CHECK([whether to add -fno-sanitize=function],[php_cv_ubsan_no_function],[
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+void foo(char *string) {}
+int main(void) {
+  void (*f)(void *) = (void (*)(void *))foo;
+  f("foo");
+}
+    ]])],[php_cv_ubsan_no_function=no],[php_cv_ubsan_no_function=yes],[php_cv_ubsan_no_function=no])])
+    CFLAGS="$OLD_CFLAGS"
+    if test "$php_cv_ubsan_no_function" = yes; then
+      CFLAGS="$CFLAGS -fno-sanitize=function"
+      CXXFLAGS="$CFLAGS -fno-sanitize=function"
+    fi
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
 fi
 
@@ -1659,13 +1653,6 @@ PHP_SET_LIBTOOL_VARIABLE([--silent])
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
-dnl This needs to be passed explicitly to allow scan-build compiler overrides.
-PHP_SET_LIBTOOL_VARIABLE([--tag CC])
-
-test -z "$PHP_COMPILE" && PHP_COMPILE='$(LIBTOOL) --mode=compile $(COMPILE) -c $<'
-test -z "$CXX_PHP_COMPILE" && CXX_PHP_COMPILE='$(LIBTOOL) --mode=compile $(CXX_COMPILE) -c $<'
-SHARED_LIBTOOL='$(LIBTOOL)'
-
 CC=$old_CC
 
 PHP_CONFIGURE_PART(Generating files)
@@ -1683,14 +1670,14 @@ else
   pharcmd_install=
 fi;
 
-all_targets="$lcov_target \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
+all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
 install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
 PHP_SUBST(all_targets)
 PHP_SUBST(install_targets)
 PHP_SUBST(install_binary_targets)
 
-PHP_INSTALL_HEADERS([Zend/ TSRM/ include/ main/ main/streams/])
+PHP_INSTALL_HEADERS([Zend/ TSRM/ main/ main/streams/])
 PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_call_graph.h \
     zend_cfg.h \
@@ -1699,7 +1686,8 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
     zend_func_info.h \
     zend_inference.h \
     zend_optimizer.h \
-    zend_ssa.h])
+    zend_ssa.h \
+    zend_worklist.h])
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
@@ -1736,6 +1724,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
     zend_max_execution_timer.c \
     zend_hrtime.c \
+    zend_frameless_function.c \
 	Optimizer/zend_optimizer.c \
 	Optimizer/pass1.c \
 	Optimizer/pass3.c \
@@ -1759,22 +1748,21 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/zend_dump.c \
     , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(TSRM)
-PHP_ADD_BUILD_DIR(Zend Zend/asm Zend/Optimizer)
-
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
 
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
-
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
-dnl Make directories when building in a separate build directory.
-$php_shtool mkdir -p pear
-$php_shtool mkdir -p scripts
-$php_shtool mkdir -p scripts/man1
+PHP_ADD_BUILD_DIR([m4_normalize([
+  main
+  main/streams
+  scripts
+  scripts/man1
+  TSRM
+  Zend
+  Zend/asm
+  Zend/Optimizer
+])])
 
 ALL_OUTPUT_FILES="main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
@@ -1809,8 +1797,6 @@ fi
 
 dnl Create configuration headers.
 dnl ----------------------------------------------------------------------------
-test -d Zend || $php_shtool mkdir Zend
-
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
 FEO
@@ -1837,24 +1823,6 @@ X
         fi
       fi
     fi
-
-  dnl Warn about Apache if oci8 extension is enabled on Linux.
-  if test "$PHP_OCI8" != "no"; then
-    if test "$PHP_SIGCHILD" != "yes"; then
-      if test "$PHP_OCI8_INSTANT_CLIENT" = "no"; then
-cat <<X
-+--------------------------------------------------------------------+
-| Notice:                                                            |
-| If you encounter <defunc> processes when using a local Oracle      |
-| database, set the value BEQUEATH_DETACH=YES in Oracle Net's        |
-| sqlnet.ora file on the PHP host, or set the environment variable   |
-| BEQUEATH_DETACH to YES before starting Apache.  If the problem     |
-| still occurs, then recompile PHP and specify --enable-sigchild     |
-| when configuring.                                                  |
-X
-      fi
-    fi
-  fi
 
 fi
 ])

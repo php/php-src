@@ -38,6 +38,34 @@ class Status
     ];
 
     /**
+     * @var Tester
+     */
+    private Tester $tester;
+
+    /**
+     * @param Tester $tester
+     */
+    public function __construct(Tester $tester)
+    {
+        $this->tester = $tester;
+    }
+
+    /**
+     * @param string $body
+     * @param string $pattern
+     * @return void
+     */
+    private function matchError(string $body, string $pattern): void
+    {
+        echo "ERROR: Expected body does not match pattern\n";
+        echo "BODY:\n";
+        var_dump($body);
+        echo "PATTERN:\n";
+        var_dump($pattern);
+        $this->tester->printLogs();
+    }
+
+    /**
      * Check status page.
      *
      * @param Response $response
@@ -106,11 +134,7 @@ class Status
         $pattern .= $footer . ')';
 
         if (!preg_match($pattern, $body)) {
-            echo "ERROR: Expected body does not match pattern\n";
-            echo "BODY:\n";
-            var_dump($body);
-            echo "PATTERN:\n";
-            var_dump($pattern);
+            $this->matchError($body, $pattern);
         }
     }
 
@@ -245,11 +269,7 @@ class Status
             "# EOF)\n";
 
         if (!preg_match($pattern, $body)) {
-            echo "ERROR: Expected body does not match pattern\n";
-            echo "BODY:\n";
-            var_dump($body);
-            echo "PATTERN:\n";
-            var_dump($pattern);
+            $this->matchError($body, $pattern);
         }
     }
 }

@@ -244,21 +244,34 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 		}
 		if (info & MAY_BE_ARRAY) {
 			if (first) first = 0; else fprintf(stderr, ", ");
-			if (!(info & MAY_BE_ARRAY_KEY_STRING) || (info & MAY_BE_PACKED_GUARD)) {
-				if (MAY_BE_PACKED_ONLY(info)) {
-					if (info & MAY_BE_PACKED_GUARD) {
-						fprintf(stderr, "!");
-					}
-					fprintf(stderr, "packed ");
-				} else if (MAY_BE_HASH_ONLY(info)) {
-					if (info & MAY_BE_PACKED_GUARD) {
-						fprintf(stderr, "!");
-					}
-					fprintf(stderr, "hash ");
+			if (info & MAY_BE_PACKED_GUARD) {
+				fprintf(stderr, "!");
+			}
+			if (MAY_BE_EMPTY_ONLY(info)) {
+				fprintf(stderr, "empty ");
+			} else if (MAY_BE_PACKED_ONLY(info)) {
+				fprintf(stderr, "packed ");
+			} else if (MAY_BE_HASH_ONLY(info)) {
+				fprintf(stderr, "hash ");
+			} else if ((info & MAY_BE_ARRAY_KEY_ANY) != MAY_BE_ARRAY_KEY_ANY && (info & MAY_BE_ARRAY_KEY_ANY) != 0) {
+				bool afirst = 1;
+				fprintf(stderr, "[");
+				if (info & MAY_BE_ARRAY_EMPTY) {
+					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					fprintf(stderr, "empty");
 				}
+				if (MAY_BE_PACKED(info)) {
+					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					fprintf(stderr, "packed");
+				}
+				if (MAY_BE_HASH(info)) {
+					if (afirst) afirst = 0; else fprintf(stderr, ", ");
+					fprintf(stderr, "hash");
+				}
+				fprintf(stderr, "] ");
 			}
 			fprintf(stderr, "array");
-			if ((info & MAY_BE_ARRAY_KEY_ANY) != 0 &&
+			if ((info & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING)) != 0 &&
 			    ((info & MAY_BE_ARRAY_KEY_LONG) == 0 ||
 			     (info & MAY_BE_ARRAY_KEY_STRING) == 0)) {
 				bool afirst = 1;
@@ -448,6 +461,11 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 		fprintf(stderr, "%s", (name + 5));
 	} else {
 		fprintf(stderr, "OP_%d", (int)opline->opcode);
+	}
+
+	if (ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
+		zend_function *func = ZEND_FLF_FUNC(opline);
+		fprintf(stderr, "(%s)", ZSTR_VAL(func->common.function_name));
 	}
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
@@ -1155,20 +1173,6 @@ void zend_dump_dominators(const zend_op_array *op_array, const zend_cfg *cfg)
 		if (b->flags & ZEND_BB_REACHABLE) {
 			zend_dump_block_info(cfg, j, 0);
 		}
-	}
-}
-
-void zend_dump_variables(const zend_op_array *op_array)
-{
-	int j;
-
-	fprintf(stderr, "\nCV Variables for \"");
-	zend_dump_op_array_name(op_array);
-	fprintf(stderr, "\"\n");
-	for (j = 0; j < op_array->last_var; j++) {
-		fprintf(stderr, "    ");
-		zend_dump_var(op_array, IS_CV, j);
-		fprintf(stderr, "\n");
 	}
 }
 

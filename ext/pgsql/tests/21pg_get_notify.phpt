@@ -3,12 +3,12 @@ PostgreSQL pg_get_notify() functions
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // optional functions
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 pg_query($db, 'LISTEN test_msg');

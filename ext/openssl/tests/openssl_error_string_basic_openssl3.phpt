@@ -118,12 +118,12 @@ expect_openssl_errors('openssl_pkey_export', ['1C800064', '04800065']);
 @openssl_private_encrypt("data", $crypted, $private_key_file, 1000);
 expect_openssl_errors('openssl_private_encrypt', ['1C8000A5']);
 // private decrypt with failed padding check
-@openssl_private_decrypt("data", $crypted, $private_key_file);
-expect_openssl_errors('openssl_private_decrypt', ['0200009F', '02000072']);
+@openssl_private_decrypt("data", $crypted, $private_key_file, OPENSSL_PKCS1_OAEP_PADDING);
+expect_openssl_errors('openssl_private_decrypt', ['02000079']);
 // public encrypt and decrypt with failed padding check and padding
 @openssl_public_encrypt("data", $crypted, $public_key_file, 1000);
-@openssl_public_decrypt("data", $crypted, $public_key_file);
-expect_openssl_errors('openssl_private_(en|de)crypt padding', ['02000076', '0200008A', '02000072', '1C880004']);
+@openssl_public_decrypt("data", $crypted, $public_key_file, OPENSSL_PKCS1_OAEP_PADDING);
+expect_openssl_errors('openssl_private_(en|de)crypt padding', ['1C8000A5']);
 
 // X509
 echo "X509 errors\n";

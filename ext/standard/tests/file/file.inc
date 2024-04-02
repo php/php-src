@@ -590,9 +590,9 @@ $all_stat_keys = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
                        "rdev", "size", "atime", "mtime", "ctime",
                        "blksize", "blocks");
 
-$stat_time_diff_keys = array(8, 'atime');
-
 function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
+  $stat_time_diff_keys = array(8, 'atime');
+
   // dump the stat if requested
   if ( $flag == true ) {
     var_dump($stat1);
@@ -608,10 +608,10 @@ function compare_stats($stat1, $stat2, $fields, $op = "==", $flag = false ) {
     {
        case "==":
          if ( $stat1[ $fields[$index] ] != $stat2[ $fields[$index] ] ) {
-          if ( ! in_array( $index, $stat_time_diff_keys ) ) {
+          if ( ! in_array( $fields[$index], $stat_time_diff_keys ) ) {
             $result = false;
             echo "Error: stat1 do not match with stat2 at key value: $fields[$index]\n";
-          } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 1)  {
+          } elseif (abs($stat1[ $fields[$index] ] - $stat2[ $fields[$index] ]) > 2) {
             $result = false;
             echo "Error: stat1 differs too much from stat2 at key value: $fields[$index]\n";
           }

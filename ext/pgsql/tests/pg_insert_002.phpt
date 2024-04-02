@@ -3,11 +3,11 @@ PostgreSQL pg_insert() - test for CVE-2015-1532
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $conn = pg_connect($conn_str);
 

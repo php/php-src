@@ -90,7 +90,7 @@ function identifyInvalidString($badString, $encoding) {
 function testConversion($fromString, $toString, $fromEncoding, $toEncoding) {
     $result = mb_convert_encoding($fromString, $toEncoding, $fromEncoding);
     if ($result !== $toString) {
-        echo "mb_convert_encoding not working on $fromEncoding input: " . dbgPrint($fromString) . "\nExpected $toEncoding: " . dbgPrint($toString) . "\nActually got: " . dbgPrint($result) . PHP_EOL;
+        echo "mb_convert_encoding not working on $fromEncoding input: " . dbgPrint($fromString) . "\nExpected $toEncoding: " . dbgPrint($toString) . "\nActually got: " . str_repeat(' ', strlen($toEncoding) - 3) . dbgPrint($result) . PHP_EOL;
         testFailedIncrement();
     }
 }

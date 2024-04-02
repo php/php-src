@@ -4,10 +4,6 @@ Fetching BIT column values using the PS API
 mysqli
 --SKIPIF--
 <?php
-if (!function_exists('mysqli_stmt_get_result')) {
-    die("skip mysqli_stmt_get_result() not available");
-}
-
 require_once 'connect.inc';
 if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));

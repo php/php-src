@@ -66,18 +66,18 @@ define dump_bt
 		if $func
 			if $ex->This->value.obj
 				if $func->common.scope
-					printf "%s->", $func->common.scope->name->val
+					printf "%s->", (char*)$func->common.scope->name->val
 				else
-					printf "%s->", $ex->This->value.obj->ce.name->val
+					printf "%s->", (char*)$ex->This->value.obj->ce.name->val
 				end
 			else
 				if $func->common.scope
-					printf "%s::", $func->common.scope->name->val
+					printf "%s::", (char*)$func->common.scope->name->val
 				end
 			end
 
 			if $func->common.function_name
-				printf "%s(", $func->common.function_name->val
+				printf "%s(", (char*)$func->common.function_name->val
 			else
 				printf "(main"
 			end
@@ -109,7 +109,7 @@ define dump_bt
 					printf "%f", $zvalue->value.dval
 				end
 				if $type == 6
-					____print_str $zvalue->value.str->val $zvalue->value.str->len
+					____print_str (char*)$zvalue->value.str->val $zvalue->value.str->len
 				end
 				if $type == 7
 					printf "array(%d)[%p]", $zvalue->value.arr->nNumOfElements, $zvalue
@@ -135,7 +135,7 @@ define dump_bt
 		end
 		if $func != 0
 			if $func->type == 2
-				printf "%s:%d ", $func->op_array.filename->val, $ex->opline->lineno
+				printf "%s:%d ", (char*)$func->op_array.filename->val, $ex->opline->lineno
 			else
 				printf "[internal function]"
 			end
@@ -186,7 +186,7 @@ define ____printzv_contents
 		printf "double: %f", $zvalue->value.dval
 	end
 	if $type == 6
-		printf "string: %s", $zvalue->value.str->val
+		printf "string: %s", (char*)$zvalue->value.str->val
 	end
 	if $type == 7
 		printf "array: "
@@ -208,7 +208,7 @@ define ____printzv_contents
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
 		set $zobj = $zvalue->value.obj
-		set $cname = $zobj->ce->name->val
+		set $cname = (char*)$zobj->ce->name->val
 		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
@@ -233,7 +233,7 @@ define ____printzv_contents
 						set $name = $p->key
 						set $prop = (zend_property_info*)$p->val.value.ptr
 						set $val = (zval*)((char*)$zobj + $prop->offset)
-						printf "%s => ", $name->val
+						printf "%s => ", (char*)$name->val
 						printzv $val
 						set $k = $k + 1
 					end
@@ -348,7 +348,7 @@ define ____print_ht
 			end
 			printf "[%d] ", $i
 			if $key
-				____print_str $key->val $key->len
+				____print_str (char*)$key->val $key->len
 				printf " => "
 			else
 				printf "%d => ", $h
@@ -365,7 +365,7 @@ define ____print_ht
 			end
 			if $arg1 == 3
 				set $func = (zend_function*)$val->value.ptr
-				printf "\"%s\"\n", $func->common.function_name->val
+				printf "\"%s\"\n", (char*)$func->common.function_name->val
 			end
 			if $arg1 == 4
 				set $const = (zend_constant *)$val->value.ptr
@@ -423,15 +423,15 @@ define ____print_inh_class
 			printf "final "
 		end
 	end
-	printf "class %s", $ce->name->val
+	printf "class %s", (char*)$ce->name->val
 	if $ce->parent != 0
-		printf " extends %s", $ce->parent->name->val
+		printf " extends %s", (char*)$ce->parent->name->val
 	end
 	if $ce->num_interfaces != 0
 		printf " implements"
 		set $tmp = 0
 		while $tmp < $ce->num_interfaces
-			printf " %s", $ce->interfaces[$tmp]->name->val
+			printf " %s", (char*)$ce->interfaces[$tmp]->name->val
 			set $tmp = $tmp + 1
 			if $tmp < $ce->num_interfaces
 				printf ","
@@ -443,10 +443,10 @@ end
 
 define ____print_inh_iface
 	set $ce = $arg0
-	printf "interface %s", $ce->name->val
+	printf "interface %s", (char*)$ce->name->val
 	if $ce->num_interfaces != 0
 		set $ce = $ce->interfaces[0]
-		printf " extends %s", $ce->name->val
+		printf " extends %s", (char*)$ce->name->val
 	else
 		set $ce = 0
 	end
@@ -486,7 +486,7 @@ define print_pi
 	set $ptr_to_val = (zval*)((char*)$pi->ce->default_properties_table + $pi->offset - $initial_offset)
 	printf "[%p] {\n", $pi
 	printf "    offset = %p\n", $pi->offset
-	printf "    ce = [%p] %s\n", $pi->ce, $pi->ce->name->val
+	printf "    ce = [%p] %s\n", $pi->ce, (char*)$pi->ce->name->val
 	printf "    flags = 0x%x (", $pi->flags
 	if $pi->flags & 0x100
 		printf "ZEND_ACC_PUBLIC"
@@ -608,7 +608,7 @@ define print_zstr
 		set $maxlen = $zstr->len
 	end
 	printf "string(%d) ", $zstr->len
-	____print_str $zstr->val $zstr->len $maxlen
+	____print_str (char*)$zstr->val $zstr->len $maxlen
 	printf "\n"
 end
 

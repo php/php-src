@@ -1,2 +1,3 @@
 ignore:
   - "ext/dom/lexbor/lexbor" # bundled library
+  - "ext/pcre/pcre2lib" # bundled library

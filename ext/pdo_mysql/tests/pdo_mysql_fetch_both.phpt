@@ -4,17 +4,15 @@ MySQL PDOStatement->fetch()
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     function fetch($offset, &$db, $query, $expect = null) {
-
         try {
             $stmt = $db->query('SELECT 1');
             $num = $stmt->fetch(PDO::FETCH_NUM);
@@ -37,21 +35,15 @@ $db = MySQLPDOTest::factory();
                 var_dump($expect);
                 var_dump($both);
             }
-
         } catch (PDOException $e) {
-
             printf("[%03d] %s, [%s] %s\n",
                 $offset,
                 $e->getMessage(), $db->errroCode(), implode(' ', $db->errorInfo()));
-
         }
-
     }
 
     try {
-
         fetch(2, $db, 'SELECT 1', array(0 => '1', '1' => '1'));
-
     } catch (PDOException $e) {
         printf("[001] %s [%s] %s\n",
             $e->getMessage(), $db->errorCode(), implode(' ', $db->errorInfo()));

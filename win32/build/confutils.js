@@ -2978,6 +2978,7 @@ function toolset_setup_project_tools()
 	PATH_PROG('lib', null, 'MAKE_LIB');
 
 	var BISON = PATH_PROG('bison');
+	DEFINE('BISON_FLAGS', '-Wall');
 	if (BISON) {
 		var BISONVERS = probe_binary(BISON, "longversion");
 		STDOUT.WriteLine('  Detected bison version ' + BISONVERS);

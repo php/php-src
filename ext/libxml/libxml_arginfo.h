@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 98cdd082ed214f84fd741097dd58979accc37bff */
+ * Stub hash: 08e4e3f10ba89430292831f50c4760a362593282 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_set_streams_context, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, context)
@@ -29,7 +29,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_libxml_get_external_entity_loader, 0, 0, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(libxml_set_streams_context);
 ZEND_FUNCTION(libxml_use_internal_errors);
 ZEND_FUNCTION(libxml_get_last_error);
@@ -39,19 +38,17 @@ ZEND_FUNCTION(libxml_disable_entity_loader);
 ZEND_FUNCTION(libxml_set_external_entity_loader);
 ZEND_FUNCTION(libxml_get_external_entity_loader);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(libxml_set_streams_context, arginfo_libxml_set_streams_context)
 	ZEND_FE(libxml_use_internal_errors, arginfo_libxml_use_internal_errors)
 	ZEND_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
 	ZEND_FE(libxml_get_errors, arginfo_libxml_get_errors)
 	ZEND_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
-	ZEND_DEP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
+	ZEND_RAW_FENTRY("libxml_disable_entity_loader", zif_libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
 	ZEND_FE(libxml_get_external_entity_loader, arginfo_libxml_get_external_entity_loader)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_LibXMLError_methods[] = {
 	ZEND_FE_END
@@ -62,6 +59,7 @@ static void register_libxml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION", LIBXML_VERSION, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_DOTTED_VERSION", LIBXML_DOTTED_VERSION, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LIBXML_LOADED_VERSION", PHP_LIBXML_LOADED_VERSION, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("LIBXML_RECOVER", XML_PARSE_RECOVER, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_NOENT", XML_PARSE_NOENT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_DTDLOAD", XML_PARSE_DTDLOAD, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("LIBXML_DTDATTR", XML_PARSE_DTDATTR, CONST_PERSISTENT);

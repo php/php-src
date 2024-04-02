@@ -1090,6 +1090,9 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 
 	mydata = pecalloc(1, sizeof(phar_archive_data), PHAR_G(persist));
 	mydata->is_persistent = PHAR_G(persist);
+	HT_INVALIDATE(&mydata->manifest);
+	HT_INVALIDATE(&mydata->mounted_dirs);
+	HT_INVALIDATE(&mydata->virtual_dirs);
 
 	/* check whether we have meta data, zero check works regardless of byte order */
 	SAFE_PHAR_GET_32(buffer, endbuffer, len);

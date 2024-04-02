@@ -26,6 +26,9 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
+#include "pdo_mysql_arginfo.h"
+
+static zend_class_entry *pdo_mysql_ce;
 
 #ifdef COMPILE_DL_PDO_MYSQL
 #ifdef ZTS
@@ -81,6 +84,22 @@ static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 };
 #endif
 
+/* proto string PDO::mysqlGetWarningCount()
+ * Returns the number of SQL warnings during the execution of the last statement
+ */
+PHP_METHOD(PdoMysql, getWarningCount)
+{
+	pdo_dbh_t *dbh;
+	pdo_mysql_db_handle *H;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK;
+
+	H = (pdo_mysql_db_handle *)dbh->driver_data;
+	RETURN_LONG(mysql_warning_count(H->server));
+}
 
 /* {{{ PHP_INI_BEGIN */
 PHP_INI_BEGIN()
@@ -118,7 +137,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CAPATH", (zend_long)PDO_MYSQL_ATTR_SSL_CAPATH);
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_CIPHER", (zend_long)PDO_MYSQL_ATTR_SSL_CIPHER);
 #if MYSQL_VERSION_ID > 50605 || defined(PDO_USE_MYSQLND)
-	 REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
 #endif
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
 #ifdef PDO_USE_MYSQLND
@@ -132,7 +151,14 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
-	return php_pdo_register_driver(&pdo_mysql_driver);
+	pdo_mysql_ce = register_class_PdoMysql(pdo_dbh_ce);
+	pdo_mysql_ce->create_object = pdo_dbh_new;
+
+	if (php_pdo_register_driver(&pdo_mysql_driver) == FAILURE) {
+		return FAILURE;
+	}
+
+	return php_pdo_register_driver_specific_ce(&pdo_mysql_driver, pdo_mysql_ce);
 }
 /* }}} */
 

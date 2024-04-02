@@ -770,6 +770,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_CLASS_DELAYED:
+				case ZEND_JMP_FRAMELESS:
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
 					break;

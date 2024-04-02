@@ -377,6 +377,14 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 
 	int arg_num = ZEND_NUM_ARGS() - (object ? 0 : 1);
 
+	if (object && arg_num > 2) {
+		zend_error(E_DEPRECATED, "Calling IntlCalendar::set() with more than 2 arguments is deprecated, "
+			"use either IntlCalendar::setDate() or IntlCalendar::setDateTime() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	if (zend_parse_method_parameters(
 		ZEND_NUM_ARGS(), object, "Oll|llll",
 		&object, Calendar_ce_ptr, &args[0], &args[1], &args[2], &args[3], &args[4], &args[5]

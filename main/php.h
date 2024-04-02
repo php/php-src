@@ -328,6 +328,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 /* PHPAPI void php_error(int type, const char *format, ...); */
 PHPAPI ZEND_COLD void php_error_docref(const char *docref, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI ZEND_COLD void php_error_docref_unchecked(const char *docref, int type, const char *format, ...);
 PHPAPI ZEND_COLD void php_error_docref1(const char *docref, const char *param1, int type, const char *format, ...)
 	PHP_ATTRIBUTE_FORMAT(printf, 4, 5);
 PHPAPI ZEND_COLD void php_error_docref2(const char *docref, const char *param1, const char *param2, int type, const char *format, ...)

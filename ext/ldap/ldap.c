@@ -926,8 +926,11 @@ PHP_FUNCTION(ldap_connect)
 	ldap_linkdata *ld;
 	LDAP *ldap = NULL;
 
-	if (ZEND_NUM_ARGS() == 2) {
-	    zend_error(E_DEPRECATED, "Usage of ldap_connect with two arguments is deprecated");
+	if (ZEND_NUM_ARGS() > 2) {
+	    zend_error(E_DEPRECATED, "Calling ldap_connect() with Oracle-specific arguments is deprecated, "
+			"use ldap_connect_wallet() instead");
+	} else if (ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Usage of ldap_connect with two arguments is deprecated");
 	}
 
 #ifdef HAVE_ORALDAP
@@ -2988,6 +2991,9 @@ PHP_FUNCTION(ldap_get_option)
 #ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
 	case LDAP_OPT_X_TLS_PROTOCOL_MIN:
 #endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MAX
+	case LDAP_OPT_X_TLS_PROTOCOL_MAX:
+#endif
 #ifdef LDAP_OPT_X_KEEPALIVE_IDLE
 	case LDAP_OPT_X_KEEPALIVE_IDLE:
 	case LDAP_OPT_X_KEEPALIVE_PROBES:
@@ -3155,6 +3161,9 @@ PHP_FUNCTION(ldap_set_option)
 #endif
 #ifdef LDAP_OPT_X_TLS_PROTOCOL_MIN
 	case LDAP_OPT_X_TLS_PROTOCOL_MIN:
+#endif
+#ifdef LDAP_OPT_X_TLS_PROTOCOL_MAX
+	case LDAP_OPT_X_TLS_PROTOCOL_MAX:
 #endif
 #ifdef LDAP_OPT_X_KEEPALIVE_IDLE
 	case LDAP_OPT_X_KEEPALIVE_IDLE:
@@ -3894,6 +3903,13 @@ static void php_ldap_exop(INTERNAL_FUNCTION_PARAMETERS, bool force_sync) {
 	LDAPMessage *ldap_res;
 	LDAPControl **lserverctrls = NULL;
 	int rc, msgid;
+
+	if (force_sync == false && ZEND_NUM_ARGS() > 4) {
+		zend_error(E_DEPRECATED, "Calling ldap_exop() with more than 4 arguments is deprecated, use ldap_exop_sync() instead");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|S!a!zz", &link, ldap_link_ce, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
 		RETURN_THROWS();

@@ -228,7 +228,7 @@ static zend_always_inline void delegate_transfer_result(
 
 static ZEND_METHOD(_ZendTestFiber, __construct)
 {
-	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_FUNC(fiber->fci, fiber->fci_cache)
@@ -240,7 +240,7 @@ static ZEND_METHOD(_ZendTestFiber, __construct)
 
 static ZEND_METHOD(_ZendTestFiber, start)
 {
-	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 	zval *params;
 	uint32_t param_count;
 	zend_array *named_params;
@@ -304,7 +304,7 @@ static ZEND_METHOD(_ZendTestFiber, resume)
 		Z_PARAM_ZVAL(value);
 	ZEND_PARSE_PARAMETERS_END();
 
-	fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 
 	if (UNEXPECTED(fiber->context.status != ZEND_FIBER_STATUS_SUSPENDED || fiber->caller != NULL)) {
 		zend_throw_error(NULL, "Cannot resume a fiber that is not suspended");
@@ -325,7 +325,7 @@ static ZEND_METHOD(_ZendTestFiber, pipeTo)
 		Z_PARAM_FUNC(fci, fci_cache)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(getThis());
+	zend_test_fiber *fiber = (zend_test_fiber *) Z_OBJ_P(ZEND_THIS);
 	zend_test_fiber *target = (zend_test_fiber *) zend_test_fiber_class->create_object(zend_test_fiber_class);
 
 	target->fci = fci;

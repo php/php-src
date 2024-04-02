@@ -24,13 +24,6 @@ PHP_ARG_WITH([capstone],,
   [no],
   [no])
 
-PHP_ARG_ENABLE([opcache-jit-ir],
-  [whether to enable JIT based on IR framework],
-  [AS_HELP_STRING([--disable-opcache-jit-ir],
-    [Disable JIT based on IR framework (use old JIT)])],
-  [yes],
-  [no])
-
 if test "$PHP_OPCACHE" != "no"; then
 
   dnl Always build as shared extension
@@ -42,61 +35,20 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
-      i[[34567]]86*|x86*|aarch64)
+      i[[34567]]86*|x86*|aarch64|amd64)
         ;;
       *)
         AC_MSG_WARN([JIT not supported by host architecture])
         PHP_OPCACHE_JIT=no
         ;;
     esac
+    if test "$host_vendor" = "apple" && test "$host_cpu" = "aarch64" && test "$PHP_THREAD_SAFETY" = "yes"; then
+      AC_MSG_WARN([JIT not supported on Apple Silicon with ZTS])
+      PHP_OPCACHE_JIT=no
+    fi
   fi
 
-  if test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "no" ; then
-    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_gdb.c jit/zend_jit_vm_helpers.c"
-
-    dnl Find out which ABI we are using.
-    case $host_alias in
-      x86_64-*-darwin*)
-        DASM_FLAGS="-D X64APPLE=1 -D X64=1"
-        DASM_ARCH="x86"
-        ;;
-      x86_64*)
-        DASM_FLAGS="-D X64=1"
-        DASM_ARCH="x86"
-        ;;
-      i[[34567]]86*)
-        DASM_ARCH="x86"
-        ;;
-      x86*)
-        DASM_ARCH="x86"
-        ;;
-      aarch64*)
-        DASM_FLAGS="-D ARM64=1"
-        DASM_ARCH="arm64"
-        ;;
-    esac
-
-    if test "$PHP_THREAD_SAFETY" = "yes"; then
-      DASM_FLAGS="$DASM_FLAGS -D ZTS=1"
-    fi
-
-    AS_IF([test x"$with_capstone" = "xyes"],[
-      PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
-        AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
-        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
-        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-      ],[
-        AC_MSG_ERROR([capstone >= 3.0 required but not found])
-      ])
-    ])
-
-    PHP_SUBST(DASM_FLAGS)
-    PHP_SUBST(DASM_ARCH)
-
-    JIT_CFLAGS=
-
-  elif test "$PHP_OPCACHE_JIT" = "yes" -a "$PHP_OPCACHE_JIT_IR" = "yes"; then
+  if test "$PHP_OPCACHE_JIT" = "yes" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
@@ -111,7 +63,7 @@ if test "$PHP_OPCACHE" != "no"; then
         DASM_FLAGS="-D X64APPLE=1 -D X64=1"
         DASM_ARCH="x86"
         ;;
-      x86_64*)
+      *x86_64*|amd64-*-freebsd*)
         IR_TARGET=IR_TARGET_X64
         DASM_FLAGS="-D X64=1"
         DASM_ARCH="x86"
@@ -135,7 +87,7 @@ if test "$PHP_OPCACHE" != "no"; then
         AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
         PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
         PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-        ZEND_JIT_SRC+=" jit/ir/ir_disasm.c"
+        ZEND_JIT_SRC="$ZEND_JIT_SRC jit/ir/ir_disasm.c"
       ],[
         AC_MSG_ERROR([capstone >= 3.0 required but not found])
       ])
@@ -151,7 +103,7 @@ if test "$PHP_OPCACHE" != "no"; then
     fi
   fi
 
-  AC_CHECK_FUNCS([mprotect memfd_create shm_create_largepage])
+  AC_CHECK_FUNCS([mprotect shm_create_largepage])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -286,9 +238,16 @@ int main(void) {
   fi
   AC_MSG_RESULT([$have_shm_mmap_anon])
 
-  PHP_CHECK_FUNC_LIB(shm_open, rt, root)
-  AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  dnl Check POSIX shared memory object operations and link required library as
+  dnl needed: rt (older Linux and Solaris <= 10). Most systems have it in the C
+  dnl standard library (newer Linux, illumos, Solaris 11.4, macOS, BSD-based
+  dnl systems...). Haiku has it in the root library, which is linked by default.
+  LIBS_save="$LIBS"
+  LIBS=
+  AC_SEARCH_LIBS([shm_open], [rt],
+    [AC_CACHE_CHECK([for mmap() using shm_open() shared memory support],
+      [php_cv_shm_mmap_posix],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -350,13 +309,20 @@ int main(void) {
     return 9;
   }
   return 0;
-}
-]])],[have_shm_mmap_posix=yes],[have_shm_mmap_posix=no],[have_shm_mmap_posix=no])
-  if test "$have_shm_mmap_posix" = "yes"; then
-    AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
-  fi
-  AC_MSG_RESULT([$have_shm_mmap_posix])
+}]])],
+      [php_cv_shm_mmap_posix=yes],
+      [php_cv_shm_mmap_posix=no],
+      [php_cv_shm_mmap_posix=no])
+    ])
+
+    if test "$php_cv_shm_mmap_posix" = "yes"; then
+      AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
+        [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
+      AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
+        [Define if you have POSIX mmap() SHM support])
+    fi
+  ])
+  LIBS="$LIBS_save"
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
@@ -377,15 +343,13 @@ int main(void) {
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
-  if test "$have_shm_ipc" != "yes" && test "$have_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
+  if test "$have_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
     AC_MSG_ERROR([No supported shared memory caching support was found when configuring opcache. Check config.log for any errors or missing dependencies.])
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
-    if test "$PHP_OPCACHE_JIT_IR" = "yes"; then
-      PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
-    fi
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
     PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
   fi
   PHP_SUBST(OPCACHE_SHARED_LIBADD)

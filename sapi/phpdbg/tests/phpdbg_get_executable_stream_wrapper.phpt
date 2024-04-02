@@ -30,7 +30,7 @@ final class StreamWrapper
         string $path,
         string $mode,
         int $options = 0,
-        string &$openedPath = null
+        ?string &$openedPath = null
     ) : bool {
         if ($mode[0] !== 'r') {
             return false;

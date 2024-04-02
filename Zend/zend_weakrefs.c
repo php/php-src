@@ -271,6 +271,25 @@ static void zend_weakref_free(zend_object *zo) {
 	zend_object_std_dtor(&wr->std);
 }
 
+static HashTable *zend_weakref_get_debug_info(zend_object *object, int *is_temp)
+{
+	*is_temp = 1;
+
+	HashTable *ht = zend_new_array(1);
+
+	zend_object *referent = zend_weakref_from(object)->referent;
+	zval value;
+	if (referent) {
+		ZVAL_OBJ_COPY(&value, referent);
+	} else {
+		ZVAL_NULL(&value);
+	}
+
+	zend_hash_update(ht, ZSTR_KNOWN(ZEND_STR_OBJECT), &value);
+
+	return ht;
+}
+
 ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
 	zend_throw_error(NULL, "Direct instantiation of WeakReference is not allowed, use WeakReference::create instead");
@@ -295,7 +314,7 @@ ZEND_METHOD(WeakReference, get)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	zend_weakref_get(getThis(), return_value);
+	zend_weakref_get(ZEND_THIS, return_value);
 }
 
 static zend_object *zend_weakmap_create_object(zend_class_entry *ce)
@@ -597,7 +616,7 @@ static void zend_weakmap_iterator_dtor(zend_object_iterator *obj_iter)
 	zval_ptr_dtor(&iter->it.data);
 }
 
-static int zend_weakmap_iterator_valid(zend_object_iterator *obj_iter)
+static zend_result zend_weakmap_iterator_valid(zend_object_iterator *obj_iter)
 {
 	zend_weakmap_iterator *iter = (zend_weakmap_iterator *) obj_iter;
 	zend_weakmap *wm = zend_weakmap_fetch(&iter->it.data);
@@ -749,6 +768,7 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.offset = XtOffsetOf(zend_weakref, std);
 
 	zend_weakref_handlers.free_obj = zend_weakref_free;
+	zend_weakref_handlers.get_debug_info = zend_weakref_get_debug_info;
 	zend_weakref_handlers.clone_obj = NULL;
 
 	zend_ce_weakmap = register_class_WeakMap(zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);

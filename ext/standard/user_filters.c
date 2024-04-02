@@ -24,7 +24,6 @@
 
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"
-#define PHP_STREAM_FILTER_RES_NAME "userfilter.filter"
 
 struct php_user_filter_data {
 	zend_class_entry *ce;
@@ -190,22 +189,7 @@ php_stream_filter_status_t userfilter_filter(
 	}
 
 	if (buckets_in->head) {
-		php_stream_bucket *bucket;
-
 		php_error_docref(NULL, E_WARNING, "Unprocessed filter buckets remaining on input brigade");
-		while ((bucket = buckets_in->head)) {
-			/* Remove unconsumed buckets from the brigade */
-			php_stream_bucket_unlink(bucket);
-			php_stream_bucket_delref(bucket);
-		}
-	}
-	if (ret != PSFS_PASS_ON) {
-		php_stream_bucket *bucket = buckets_out->head;
-		while (bucket != NULL) {
-			php_stream_bucket_unlink(bucket);
-			php_stream_bucket_delref(bucket);
-			bucket = buckets_out->head;
-		}
 	}
 
 	/* filter resources are cleaned up by the stream destructor,

@@ -202,7 +202,7 @@ char *alloca();
 # endif
 #endif
 
-#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(DARWIN)
+#if !ZEND_DEBUG && (defined(HAVE_ALLOCA) || (defined (__GNUC__) && __GNUC__ >= 2)) && !(defined(ZTS) && defined(HPUX)) && !defined(__APPLE__)
 # define ZEND_ALLOCA_MAX_SIZE (32 * 1024)
 # define ALLOCA_FLAG(name) \
 	bool name;
@@ -302,7 +302,7 @@ char *alloca();
 # define ZEND_FASTCALL
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
 #elif defined(ZEND_WIN32)
@@ -318,13 +318,21 @@ char *alloca();
 # define ZEND_STACK_ALIGNED
 #endif
 
-#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
+#if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(__APPLE__) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__))
 # define HAVE_NORETURN_ALIAS
 # define HAVE_ATTRIBUTE_WEAK
 #endif
 
 #if ZEND_GCC_VERSION >= 3001 || __has_builtin(__builtin_constant_p)
 # define HAVE_BUILTIN_CONSTANT_P
+#endif
+
+#if __has_attribute(element_count)
+#define ZEND_ELEMENT_COUNT(m) __attribute__((element_count(m)))
+#elif __has_attribute(counted_by)
+#define ZEND_ELEMENT_COUNT(m) __attribute__((counted_by(m)))
+#else
+#define ZEND_ELEMENT_COUNT(m)
 #endif
 
 #ifdef HAVE_BUILTIN_CONSTANT_P

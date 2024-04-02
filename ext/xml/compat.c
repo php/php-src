@@ -311,7 +311,7 @@ _notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_i
 }
 
 static void
-_build_comment(const xmlChar *data, int data_len, xmlChar **comment, int *comment_len)
+_build_comment(const xmlChar *data, size_t data_len, xmlChar **comment, size_t *comment_len)
 {
 	*comment_len = data_len + 7;
 
@@ -330,16 +330,16 @@ _comment_handler(void *user, const xmlChar *comment)
 
 	if (parser->h_default) {
 		xmlChar *d_comment;
-		int      d_comment_len;
+		size_t   d_comment_len;
 
-		_build_comment(comment, xmlStrlen(comment), &d_comment, &d_comment_len);
+		_build_comment(comment, (size_t) xmlStrlen(comment), &d_comment, &d_comment_len);
 		parser->h_default(parser->user, d_comment, d_comment_len);
 		xmlFree(d_comment);
 	}
 }
 
 static void
-_build_entity(const xmlChar *name, int len, xmlChar **entity, int *entity_len)
+_build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_len)
 {
 	*entity_len = len + 2;
 	*entity = xmlMalloc(*entity_len + 1);
@@ -380,9 +380,9 @@ _get_entity(void *user, const xmlChar *name)
 				/* Predefined entities will expand unless no cdata handler is present */
 				if (parser->h_default && ! (ret && ret->etype == XML_INTERNAL_PREDEFINED_ENTITY && parser->h_cdata)) {
 					xmlChar *entity;
-					int      len;
+					size_t   len;
 
-					_build_entity(name, xmlStrlen(name), &entity, &len);
+					_build_entity(name, (size_t) xmlStrlen(name), &entity, &len);
 					parser->h_default(parser->user, (const xmlChar *) entity, len);
 					xmlFree(entity);
 				} else {

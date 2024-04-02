@@ -2,6 +2,12 @@
 Bug #72913 (imagecopy() loses single-color transparency on palette images)
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 $base64 = 'iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAIAAACRXR/mAAAABnRSTlMAAAAAAABu'

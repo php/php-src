@@ -26,7 +26,7 @@ int fpm_scoreboard_init_main(void)
 	struct fpm_worker_pool_s *wp;
 
 #ifdef HAVE_TIMES
-#if (defined(HAVE_SYSCONF) && defined(_SC_CLK_TCK))
+#ifdef _SC_CLK_TCK
 	fpm_scoreboard_tick = sysconf(_SC_CLK_TCK);
 #else /* _SC_CLK_TCK */
 #ifdef HZ

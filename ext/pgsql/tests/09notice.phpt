@@ -5,15 +5,15 @@ pgsql
 --SKIPIF--
 <?php
 
-include("skipif.inc");
+include("inc/skipif.inc");
 
 _skip_lc_messages($conn);
 
 ?>
 --FILE--
 <?php
-include 'config.inc';
-include 'lcmess.inc';
+include 'inc/config.inc';
+include 'inc/lcmess.inc';
 
 ini_set('pgsql.log_notice', TRUE);
 ini_set('pgsql.ignore_notice', FALSE);

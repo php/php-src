@@ -1,7 +1,7 @@
 --TEST--
 Calling bzerr* functions on non-bz2 streams
---SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+--EXTENSIONS--
+bz2
 --FILE--
 <?php
 $f = fopen(__FILE__, 'r');

@@ -52,9 +52,7 @@ runs:
           --enable-bcmath \
           --enable-calendar \
           --enable-ftp \
-          --with-pspell=/usr \
           ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \
-          --with-kerberos \
           --enable-sysvmsg \
           --with-ffi \
           --enable-zend-test \
@@ -73,11 +71,7 @@ runs:
           --with-qdbm \
           ${{ inputs.skipSlow == 'false' && '--with-snmp' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-unixODBC' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-imap' || '' }} \
-          ${{ inputs.skipSlow == 'false' && '--with-imap-ssl' || '' }} \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-odbc=unixODBC,/usr' || '' }} \
-          $([ -d "/opt/oracle/instantclient" ] && echo '--with-pdo-oci=shared,instantclient,/opt/oracle/instantclient') \
-          $([ -d "/opt/oracle/instantclient" ] && echo '--with-oci8=shared,instantclient,/opt/oracle/instantclient') \
           --with-config-file-path=/etc \
           --with-config-file-scan-dir=/etc/php.d \
           ${{ inputs.skipSlow == 'false' && '--with-pdo-firebird' || '' }} \

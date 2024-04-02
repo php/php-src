@@ -207,17 +207,21 @@ struct _php_stream  {
 	void *wrapperthis;		/* convenience pointer for an instance of a wrapper */
 	zval wrapperdata;		/* fgetwrapperdata retrieves this */
 
-	uint8_t is_persistent:1;
-	uint8_t in_free:2;			/* to prevent recursion during free */
-	uint8_t eof:1;
-	uint8_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
+	uint16_t is_persistent:1;
+	uint16_t in_free:2;			/* to prevent recursion during free */
+	uint16_t eof:1;
+	uint16_t __exposed:1;	/* non-zero if exposed as a zval somewhere */
 
 	/* so we know how to clean it up correctly.  This should be set to
 	 * PHP_STREAM_FCLOSE_XXX as appropriate */
-	uint8_t fclose_stdiocast:2;
+	uint16_t fclose_stdiocast:2;
+
 
 	/* flag to mark whether the stream has buffered data */
-	uint8_t has_buffered_data:1;
+	uint16_t has_buffered_data:1;
+
+	/* whether stdio cast flushing is in progress */
+	uint16_t fclose_stdiocast_flush_in_progress:1;
 
 	char mode[16];			/* "rwb" etc. ala stdio */
 

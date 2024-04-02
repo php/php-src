@@ -4,16 +4,15 @@ MySQL PDO->__construct() - Generic + DSN
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
 if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
 ?>
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
     function tryandcatch($offset, $code) {
-
         try {
             eval($code);
             assert(sprintf("[%03d] Should have failed\n", $offset) != '');
@@ -29,7 +28,6 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
     }
 
     try {
-
         try {
             if (NULL !== ($db = @new PDO()))
                 printf("[001] Too few parameters\n");
@@ -104,7 +102,6 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
             try { $db = @new PDO($dsn, $user, $pass); } catch (PDOException $e) {
                 printf("[017] DSN=%s, %s\n", $dsn, $e->getMessage());
             }
-
         }
 
         // what about long values for a valid option ...
@@ -142,7 +139,6 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
                 // atoi('abc') = 0, 0 -> fallback to default 3306 -> may or may not fail!
             } catch (PDOException $e) {
             }
-
         }
 
         if (PDO_MYSQL_TEST_DB) {
@@ -161,7 +157,6 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
             try { $db = @new PDO($dsn, $user, $pass); } catch (PDOException $e) {
                 printf("[023] DSN=%s, %s\n", $dsn, $e->getMessage());
             }
-
         }
 
         if (PDO_MYSQL_TEST_SOCKET && (stristr(PDO_MYSQL_TEST_DSN, PDO_MYSQL_TEST_SOCKET) !== false)) {
@@ -179,7 +174,6 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
             try { $db = @new PDO($dsn, $user, $pass); } catch (PDOException $e) {
                 printf("[025] DSN=%s, %s\n", $dsn, $e->getMessage());
             }
-
         }
 
         $have_charset_support = false;
@@ -238,9 +232,7 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
                 } else {
                     printf("[030] You're trying to run the tests with charset '%s' which seems not supported by the server!", $charset);
                 }
-
             }
-
         }
 
         if ($have_charset_support) {
@@ -282,10 +274,8 @@ if (getenv('CIRCLECI')) die('xfail Broken on CicleCI');
                 } catch (PDOException $e) {
                     printf("[034] %s\n", $e->getMessage());
                 }
-
             }
         }
-
     } catch (PDOException $e) {
         printf("[001] %s, [%s] %s\n",
             $e->getMessage(),

@@ -309,9 +309,7 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 {
 	pdo_mysql_db_handle *H = (pdo_mysql_db_handle *)dbh->driver_data;
 	bool use_national_character_set = 0;
-	char *quoted;
 	size_t quotedlen;
-	zend_string *quoted_str;
 
 	if (H->assume_national_character_set_strings) {
 		use_national_character_set = 1;
@@ -326,7 +324,9 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	PDO_DBG_ENTER("mysql_handle_quoter");
 	PDO_DBG_INF_FMT("dbh=%p", dbh);
 	PDO_DBG_INF_FMT("unquoted=%.*s", (int)ZSTR_LEN(unquoted), ZSTR_VAL(unquoted));
-	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3 + (use_national_character_set ? 1 : 0));
+
+	zend_string *quoted_str = zend_string_safe_alloc(2, ZSTR_LEN(unquoted), 3 + (use_national_character_set ? 1 : 0), false);
+	char *quoted = ZSTR_VAL(quoted_str);
 
 	if (use_national_character_set) {
 		quotedlen = mysql_real_escape_string_quote(H->server, quoted + 2, ZSTR_VAL(unquoted), ZSTR_LEN(unquoted), '\'');
@@ -343,8 +343,8 @@ static zend_string* mysql_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquo
 	quoted[++quotedlen] = '\0';
 	PDO_DBG_INF_FMT("quoted=%.*s", (int)quotedlen, quoted);
 
-	quoted_str = zend_string_init(quoted, quotedlen, 0);
-	efree(quoted);
+	quoted_str = zend_string_truncate(quoted_str, quotedlen, false);
+
 	PDO_DBG_RETURN(quoted_str);
 }
 /* }}} */
@@ -532,7 +532,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 
 		case PDO_ATTR_AUTOCOMMIT:
-			ZVAL_LONG(return_value, dbh->auto_commit);
+			ZVAL_BOOL(return_value, dbh->auto_commit);
 			break;
 
 		case PDO_ATTR_DEFAULT_STR_PARAM:
@@ -545,7 +545,7 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 
 		case PDO_ATTR_EMULATE_PREPARES:
 		case PDO_MYSQL_ATTR_DIRECT_QUERY:
-			ZVAL_LONG(return_value, H->emulate_prepare);
+			ZVAL_BOOL(return_value, H->emulate_prepare);
 			break;
 
 #ifndef PDO_USE_MYSQLND
@@ -575,6 +575,10 @@ static int pdo_mysql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 			break;
 		}
 #endif
+
+		case PDO_ATTR_FETCH_TABLE_NAMES:
+			ZVAL_BOOL(return_value, H->fetch_table_names);
+			break;
 
 		default:
 			PDO_DBG_RETURN(0);

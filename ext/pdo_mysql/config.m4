@@ -41,14 +41,9 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
   else
-    AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
       AC_MSG_RESULT($PDO_MYSQL_CONFIG)
-      if test "x$SED" = "x"; then
-        AC_PATH_PROG(SED, sed)
-      fi
       PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
       PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     elif test -n "$PDO_MYSQL_DIR"; then
@@ -98,8 +93,5 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
   fi
 
-  PDO_MYSQL_MODULE_TYPE=external
-
   PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
-  PHP_SUBST_OLD(PDO_MYSQL_MODULE_TYPE)
 fi

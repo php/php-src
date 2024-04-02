@@ -75,7 +75,7 @@ if (PHP_GD != "no") {
 			ADD_FLAG("LDFLAGS_GD", "/nodefaultlib:libcmt");
 		}
 
-		PHP_INSTALL_HEADERS("", "ext/gd ext/gd/libgd" );
+		PHP_INSTALL_HEADERS("ext/gd", "php_gd.h libgd/");
 	} else {
 		WARNING("gd not enabled; libraries and headers not found");
 	}

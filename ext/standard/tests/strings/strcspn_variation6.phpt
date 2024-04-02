@@ -145,8 +145,8 @@ int(26)
 int(26)
 
 -- Iteration 6 --
-int(5)
-int(5)
+int(25)
+int(25)
 int(2)
 int(2)
 int(25)
@@ -157,8 +157,8 @@ int(25)
 int(25)
 
 -- Iteration 7 --
-int(5)
-int(5)
+int(27)
+int(27)
 int(2)
 int(2)
 int(27)

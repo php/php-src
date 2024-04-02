@@ -516,8 +516,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 
 	if (packet->send_auth_data || packet->is_change_user_packet) {
 		len = MIN(strlen(packet->user), MYSQLND_MAX_ALLOWED_USER_LEN);
-		memcpy(p, packet->user, len);
-		p+= len;
+		p = zend_mempcpy(p, packet->user, len);
 		*p++ = '\0';
 
 		/* defensive coding */
@@ -540,15 +539,13 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 			DBG_RETURN(0);
 		}
 		if (packet->auth_data_len) {
-			memcpy(p, packet->auth_data, packet->auth_data_len);
-			p+= packet->auth_data_len;
+			p = zend_mempcpy(p, packet->auth_data, packet->auth_data_len);
 		}
 
 		if (packet->db_len > 0) {
 			/* CLIENT_CONNECT_WITH_DB should have been set */
 			size_t real_db_len = MIN(MYSQLND_MAX_ALLOWED_DB_LEN, packet->db_len);
-			memcpy(p, packet->db, real_db_len);
-			p+= real_db_len;
+			p = zend_mempcpy(p, packet->db, real_db_len);
 			*p++= '\0';
 		} else if (packet->is_change_user_packet) {
 			*p++= '\0';
@@ -564,8 +561,7 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 
 		if (packet->auth_plugin_name) {
 			len = MIN(strlen(packet->auth_plugin_name), sizeof(buffer) - (p - buffer) - 1);
-			memcpy(p, packet->auth_plugin_name, len);
-			p+= len;
+			p = zend_mempcpy(p, packet->auth_plugin_name, len);
 			*p++= '\0';
 		}
 
@@ -599,12 +595,10 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 
 							/* copy key */
 							p = php_mysqlnd_net_store_length(p, ZSTR_LEN(key));
-							memcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
-							p+= ZSTR_LEN(key);
+							p = zend_mempcpy(p, ZSTR_VAL(key), ZSTR_LEN(key));
 							/* copy value */
 							p = php_mysqlnd_net_store_length(p, value_len);
-							memcpy(p, Z_STRVAL_P(entry_value), value_len);
-							p+= value_len;
+							p = zend_mempcpy(p, Z_STRVAL_P(entry_value), value_len);
 						}
 					} ZEND_HASH_FOREACH_END();
 				}
@@ -766,8 +760,7 @@ php_mysqlnd_change_auth_response_write(MYSQLND_CONN_DATA * conn, void * _packet)
 	DBG_ENTER("php_mysqlnd_change_auth_response_write");
 
 	if (packet->auth_data_len) {
-		memcpy(p, packet->auth_data, packet->auth_data_len);
-		p+= packet->auth_data_len;
+		p = zend_mempcpy(p, packet->auth_data, packet->auth_data_len);
 	}
 
 	{
@@ -2467,8 +2460,10 @@ MYSQLND_METHOD(mysqlnd_protocol, send_command_handle_OK)(
 	payload_decoder_factory->m.init_ok_packet(&ok_response);
 	DBG_ENTER("mysqlnd_protocol::send_command_handle_OK");
 	if (FAIL == (ret = PACKET_READ(payload_decoder_factory->conn, &ok_response))) {
-		DBG_INF("Error while reading OK packet");
-		SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		if (error_info->error_no != CR_SERVER_GONE_ERROR) {
+			DBG_INF("Error while reading OK packet");
+			SET_CLIENT_ERROR(error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "Malformed packet");
+		}
 		goto end;
 	}
 	DBG_INF_FMT("OK from server");

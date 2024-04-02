@@ -4,7 +4,7 @@ PHP_ARG_WITH([curl],
     [Include cURL support])])
 
 if test "$PHP_CURL" != "no"; then
-  PKG_CHECK_MODULES([CURL], [libcurl >= 7.29.0])
+  PKG_CHECK_MODULES([CURL], [libcurl >= 7.61.0])
   PKG_CHECK_VAR([CURL_FEATURES], [libcurl], [supported_features])
 
   PHP_EVAL_LIBLINE($CURL_LIBS, CURL_SHARED_LIBADD)
@@ -28,6 +28,7 @@ if test "$PHP_CURL" != "no"; then
 
     AC_MSG_CHECKING([for libcurl linked against old openssl])
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdio.h>
 #include <strings.h>
 #include <curl/curl.h>
 
@@ -39,9 +40,18 @@ int main(int argc, char *argv[])
     const char *ptr = data->ssl_version;
 
     while(*ptr == ' ') ++ptr;
-    if (strncasecmp(ptr, "OpenSSL/1.1", sizeof("OpenSSL/1.1")-1) == 0) {
-      /* New OpenSSL version */
-      return 3;
+    int major, minor;
+    if (sscanf(ptr, "OpenSSL/%d", &major) == 1) {
+      if (major >= 3) {
+        /* OpenSSL version 3 or later */
+        return 4;
+      }
+    }
+    if (sscanf(ptr, "OpenSSL/%d.%d", &major, &minor) == 2) {
+      if (major > 1 || (major == 1 && minor >= 1)) {
+        /* OpenSSL version 1.1 or later */
+        return 3;
+      }
     }
     if (strncasecmp(ptr, "OpenSSL", sizeof("OpenSSL")-1) == 0) {
       /* Old OpenSSL version */
@@ -56,11 +66,7 @@ int main(int argc, char *argv[])
     ]])],[
       AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_CURL_OLD_OPENSSL], [1], [Have cURL with old OpenSSL])
-      PKG_CHECK_MODULES([OPENSSL], [openssl], [
-        PHP_EVAL_LIBLINE($OPENSSL_LIBS, CURL_SHARED_LIBADD)
-        PHP_EVAL_INCLINE($OPENSSL_CFLAGS)
-        AC_CHECK_HEADERS([openssl/crypto.h])
-      ], [])
+      PHP_SETUP_OPENSSL(CURL_SHARED_LIBADD,[AC_CHECK_HEADERS([openssl/crypto.h])],[])
     ], [
       AC_MSG_RESULT([no])
     ], [

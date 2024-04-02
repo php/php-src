@@ -9,6 +9,7 @@ pdo_firebird
 # magic auto-configuration
 
 $config = array(
+    // A bug in firebird causes a memory leak when calling `isc_attach_database()`. See https://github.com/FirebirdSQL/firebird/issues/7849
 	'ENV' => ['LSAN_OPTIONS' => 'detect_leaks=0'],
 	'TESTS' => 'ext/pdo/tests'
 );

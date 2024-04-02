@@ -17,7 +17,7 @@ if (PHP_ICONV != "no") {
 		if (!PHP_ICONV_SHARED) {
 			ADD_DEF_FILE("ext\\iconv\\php_iconv.def");
 		}
-		PHP_INSTALL_HEADERS("", "ext/iconv");
+		PHP_INSTALL_HEADERS("ext/iconv", "php_iconv.h");
 	} else {
 		WARNING("iconv support can't be enabled, libraries or headers are missing")
 		PHP_ICONV = "no";

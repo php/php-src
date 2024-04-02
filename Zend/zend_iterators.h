@@ -31,7 +31,7 @@ typedef struct _zend_object_iterator_funcs {
 	void (*dtor)(zend_object_iterator *iter);
 
 	/* check for end of iteration (FAILURE or SUCCESS if data is valid) */
-	int (*valid)(zend_object_iterator *iter);
+	zend_result (*valid)(zend_object_iterator *iter);
 
 	/* fetch the item data for the current element */
 	zval *(*get_current_data)(zend_object_iterator *iter);

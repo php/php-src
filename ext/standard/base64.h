@@ -61,9 +61,15 @@
 PHP_MINIT_FUNCTION(base64_intrin);
 #endif
 
-PHPAPI extern zend_string *php_base64_encode(const unsigned char *, size_t);
+/* php_base64_encode_ex flags */
+#define PHP_BASE64_NO_PADDING 1
+
+PHPAPI extern zend_string *php_base64_encode_ex(const unsigned char *, size_t, zend_long flags);
 PHPAPI extern zend_string *php_base64_decode_ex(const unsigned char *, size_t, bool);
 
+static inline zend_string *php_base64_encode(const unsigned char *str, size_t len) {
+	return php_base64_encode_ex(str, len, 0);
+}
 static inline zend_string *php_base64_encode_str(const zend_string *str) {
 	return php_base64_encode((const unsigned char*)(ZSTR_VAL(str)), ZSTR_LEN(str));
 }

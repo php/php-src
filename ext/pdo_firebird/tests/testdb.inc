@@ -17,5 +17,12 @@ if(!PDO_FIREBIRD_TEST_DSN)
         die('Error: PDO_FIREBIRD_TEST_DSN must be set');
 }
 
-$dbh = new PDO(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS) or die;
+function getDbConnection($class = PDO::class): PDO {
+    return new $class(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS);
+}
+
+function connectToDb(): PdoFirebird {
+    return PdoFirebird::connect(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS);
+}
+
 ?>

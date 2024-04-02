@@ -27,6 +27,8 @@
 #include "php_pdo_odbc_int.h"
 #include "pdo_odbc_arginfo.h"
 
+static zend_class_entry *pdo_odbc_ce;
+
 /* {{{ pdo_odbc_deps[] */
 static const zend_module_dep pdo_odbc_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
@@ -105,7 +107,10 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_DRIVER", SQL_CUR_USE_DRIVER);
 	REGISTER_PDO_CLASS_CONST_LONG("ODBC_SQL_USE_ODBC", SQL_CUR_USE_ODBC);
 
-	return SUCCESS;
+	pdo_odbc_ce = register_class_PdoOdbc(pdo_dbh_ce);
+	pdo_odbc_ce->create_object = pdo_dbh_new;
+
+	return php_pdo_register_driver_specific_ce(&pdo_odbc_driver, pdo_odbc_ce);
 }
 /* }}} */
 

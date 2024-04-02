@@ -135,7 +135,6 @@ typedef struct _spl_dual_it_object {
 			pcre_cache_entry *pce;
 			zend_string      *regex;
 			regex_mode       mode;
-			int              use_flags;
 		} regex;
 		zend_fcall_info_cache callback_filter;
 	} u;
@@ -211,7 +210,7 @@ static void spl_recursive_it_dtor(zend_object_iterator *_iter)
 	zval_ptr_dtor(&iter->intern.data);
 }
 
-static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis)
+static zend_result spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthis)
 {
 	zend_object_iterator      *sub_iter;
 	int                       level = object->level;
@@ -233,7 +232,7 @@ static int spl_recursive_it_valid_ex(spl_recursive_it_object *object, zval *zthi
 	return FAILURE;
 }
 
-static int spl_recursive_it_valid(zend_object_iterator *iter)
+static zend_result spl_recursive_it_valid(zend_object_iterator *iter)
 {
 	return spl_recursive_it_valid_ex(Z_SPLRECURSIVE_IT_P(&iter->data), &iter->data);
 }
@@ -1198,7 +1197,7 @@ PHP_METHOD(RecursiveTreeIterator, current)
 	}
 
 	if (object->flags & RTIT_BYPASS_CURRENT) {
-		zend_object_iterator      *iterator = object->iterators[object->level].iterator;
+		zend_object_iterator      *iterator;
 		zval                      *data;
 
 		SPL_FETCH_SUB_ITERATOR(iterator, object);
@@ -1407,7 +1406,6 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			zend_string *regex;
 			zend_long mode = REGIT_MODE_MATCH;
 
-			intern->u.regex.use_flags = ZEND_NUM_ARGS() >= 5;
 			intern->u.regex.flags = 0;
 			intern->u.regex.preg_flags = 0;
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS|lll", &zobject, ce_inner, &regex, &mode, &intern->u.regex.flags, &intern->u.regex.preg_flags) == FAILURE) {
@@ -1527,7 +1525,7 @@ static inline void spl_dual_it_rewind(spl_dual_it_object *intern)
 	}
 }
 
-static inline int spl_dual_it_valid(spl_dual_it_object *intern)
+static inline zend_result spl_dual_it_valid(spl_dual_it_object *intern)
 {
 	if (!intern->inner.iterator) {
 		return FAILURE;
@@ -1876,7 +1874,7 @@ PHP_METHOD(RegexIterator, accept)
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
 			php_pcre_match_impl(intern->u.regex.pce, subject, &zcount,
-				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.use_flags, intern->u.regex.preg_flags, 0);
+				&intern->current.data, intern->u.regex.mode == REGIT_MODE_ALL_MATCHES, intern->u.regex.preg_flags, 0);
 			RETVAL_BOOL(Z_LVAL(zcount) > 0);
 			break;
 
@@ -1920,7 +1918,7 @@ PHP_METHOD(RegexIterator, accept)
 /* {{{ Returns current regular expression */
 PHP_METHOD(RegexIterator, getRegex)
 {
-	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(ZEND_THIS);
+	spl_dual_it_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2006,11 +2004,7 @@ PHP_METHOD(RegexIterator, getPregFlags)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	if (intern->u.regex.use_flags) {
-		RETURN_LONG(intern->u.regex.preg_flags);
-	} else {
-		RETURN_LONG(0);
-	}
+	RETURN_LONG(intern->u.regex.preg_flags);
 } /* }}} */
 
 /* {{{ Set PREG flags */
@@ -2026,7 +2020,6 @@ PHP_METHOD(RegexIterator, setPregFlags)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	intern->u.regex.preg_flags = preg_flags;
-	intern->u.regex.use_flags = 1;
 } /* }}} */
 
 /* {{{ Create an RecursiveRegexIterator from another recursive iterator and a regular expression */
@@ -2191,7 +2184,7 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-static inline int spl_limit_it_valid(spl_dual_it_object *intern)
+static inline zend_result spl_limit_it_valid(spl_dual_it_object *intern)
 {
 	/* FAILURE / SUCCESS */
 	if (intern->u.limit.count != -1 && intern->current.pos >= intern->u.limit.offset + intern->u.limit.count) {

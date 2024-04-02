@@ -34,6 +34,7 @@ zend_result dom_characterdata_length_read(dom_object *obj, zval *retval);
 /* document properties */
 zend_result dom_document_doctype_read(dom_object *obj, zval *retval);
 zend_result dom_document_implementation_read(dom_object *obj, zval *retval);
+zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_document_document_element_read(dom_object *obj, zval *retval);
 zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_document_actual_encoding_write(dom_object *obj, zval *newval);
@@ -60,6 +61,9 @@ zend_result dom_document_recover_read(dom_object *obj, zval *retval);
 zend_result dom_document_recover_write(dom_object *obj, zval *newval);
 zend_result dom_document_substitue_entities_read(dom_object *obj, zval *retval);
 zend_result dom_document_substitue_entities_write(dom_object *obj, zval *newval);
+
+/* html5 document properties */
+zend_result dom_html_document_encoding_write(dom_object *obj, zval *retval);
 
 /* documenttype properties */
 zend_result dom_documenttype_name_read(dom_object *obj, zval *retval);
@@ -112,6 +116,7 @@ zend_result dom_node_is_connected_read(dom_object *obj, zval *retval);
 zend_result dom_node_owner_document_read(dom_object *obj, zval *retval);
 zend_result dom_node_namespace_uri_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_read(dom_object *obj, zval *retval);
+zend_result dom_modern_node_prefix_read(dom_object *obj, zval *retval);
 zend_result dom_node_prefix_write(dom_object *obj, zval *newval);
 zend_result dom_node_local_name_read(dom_object *obj, zval *retval);
 zend_result dom_node_base_uri_read(dom_object *obj, zval *retval);
@@ -139,5 +144,12 @@ zend_result dom_xpath_document_read(dom_object *obj, zval *retval);
 zend_result dom_xpath_register_node_ns_read(dom_object *obj, zval *retval);
 zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval);
 #endif
+
+#define DOM_PROP_NODE(type, name, obj) \
+	type name = (type) dom_object_get_node(obj); \
+	if (UNEXPECTED(name == NULL)) { \
+		php_dom_throw_error(INVALID_STATE_ERR, true); \
+		return FAILURE; \
+	}
 
 #endif /* DOM_PROPERTIES_H */

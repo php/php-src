@@ -67,7 +67,7 @@ struct fpm_scoreboard_s {
 	int free_proc;
 	unsigned long int slow_rq;
 	struct fpm_scoreboard_s *shared;
-	struct fpm_scoreboard_proc_s procs[];
+	struct fpm_scoreboard_proc_s procs[] ZEND_ELEMENT_COUNT(nprocs);
 };
 
 int fpm_scoreboard_init_main(void);

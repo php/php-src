@@ -382,12 +382,12 @@ function odbc_free_result($statement): bool {}
 /**
  * @return resource|false
  */
-function odbc_connect(string $dsn, string $user, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
+function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER) {}
 
 /**
  * @return resource|false
  */
-function odbc_pconnect(string $dsn, string $user, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER) {}
+function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER) {}
 
 /** @param resource $odbc */
 function odbc_close($odbc): void {}

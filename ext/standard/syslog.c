@@ -35,29 +35,13 @@
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(syslog)
 {
-	BG(syslog_device)=NULL;
-
 	return SUCCESS;
 }
 /* }}} */
 
-PHP_RINIT_FUNCTION(syslog)
-{
-	BG(syslog_device) = NULL;
-	return SUCCESS;
-}
-
-
-#ifdef PHP_WIN32
 PHP_RSHUTDOWN_FUNCTION(syslog)
 {
-	closelog();
-	return SUCCESS;
-}
-#endif
-
-PHP_MSHUTDOWN_FUNCTION(syslog)
-{
+	php_closelog();
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
 		BG(syslog_device) = NULL;

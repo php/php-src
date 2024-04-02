@@ -653,6 +653,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 			case ZEND_ASSERT_CHECK:
 			case ZEND_JMP_NULL:
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
+			case ZEND_JMP_FRAMELESS:
 				if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 				}

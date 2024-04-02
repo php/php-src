@@ -4,7 +4,7 @@ PostgreSQL create large object with given oid
 pgsql
 --SKIPIF--
 <?php
-include("skipif.inc");
+include("inc/skipif.inc");
 $v = pg_version($conn);
 if (version_compare("8.3", $v["client"]) > 0) die("skip - requires pg client >= 8.3\n");
 if (version_compare("8.3", $v["server"]) > 0) die("skip - requires pg server >= 8.3\n");
@@ -12,33 +12,33 @@ if (version_compare("8.3", $v["server"]) > 0) die("skip - requires pg server >= 
 --FILE--
 <?php
 
-include('config.inc');
+include('inc/config.inc');
 
 $db = pg_connect($conn_str);
 
 echo "create LO from int\n";
-pg_exec ($db, "begin");
+pg_exec ($db, "BEGIN");
 $oid = pg_lo_create ($db, 21000);
 if (!$oid) echo ("pg_lo_create() error\n");
 if ($oid != 21000) echo ("pg_lo_create() wrong id\n");
 pg_lo_unlink ($db, $oid);
-pg_exec ($db, "commit");
+pg_exec ($db, "COMMIT");
 
 echo "create LO from string\n";
-pg_exec ($db, "begin");
+pg_exec ($db, "BEGIN");
 $oid = pg_lo_create ($db, "21001");
 if (!$oid) echo ("pg_lo_create() error\n");
 if ($oid != 21001) echo ("pg_lo_create() wrong id\n");
 pg_lo_unlink ($db, $oid);
-pg_exec ($db, "commit");
+pg_exec ($db, "COMMIT");
 
 echo "create LO using default connection\n";
-pg_exec ("begin");
+pg_exec ("BEGIN");
 $oid = pg_lo_create (21002);
 if (!$oid) echo ("pg_lo_create() error\n");
 if ($oid != 21002) echo ("pg_lo_create() wrong id\n");
 pg_lo_unlink ($oid);
-pg_exec ("commit");
+pg_exec ("COMMIT");
 
 echo "OK";
 ?>

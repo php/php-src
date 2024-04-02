@@ -62,6 +62,8 @@ rmdir($path);
 ?>
 --EXPECTF--
 *** Testing session_set_save_handler() : test write short circuit ***
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 CreateID [PHPT-%s]
 Read [%s,%s]
@@ -84,6 +86,8 @@ array(3) {
   int(1234567890)
 }
 Starting session again..!
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 Read [%s,%s]
 array(3) {
@@ -97,6 +101,8 @@ array(3) {
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;Bar|s:3:"Foo";]
 Close [%s,PHPSESSID]
 Starting session again..!
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Open [%s,PHPSESSID]
 Read [%s,%s]
 array(4) {

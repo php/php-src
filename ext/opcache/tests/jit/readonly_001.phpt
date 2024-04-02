@@ -3,7 +3,6 @@ JIT readonly modification post-inc
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.jit_buffer_size=1M
 --FILE--
 <?php
 class Foo {

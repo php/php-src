@@ -60,7 +60,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_list, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(dba_popen);
 ZEND_FUNCTION(dba_open);
 ZEND_FUNCTION(dba_close);
@@ -76,7 +75,6 @@ ZEND_FUNCTION(dba_optimize);
 ZEND_FUNCTION(dba_sync);
 ZEND_FUNCTION(dba_handlers);
 ZEND_FUNCTION(dba_list);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dba_popen, arginfo_dba_popen)

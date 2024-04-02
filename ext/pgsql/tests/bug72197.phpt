@@ -3,7 +3,7 @@ Bug #72197 pg_lo_create arbitrary read
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 /* This shouldn't crash. */
@@ -16,7 +16,7 @@ try {
 }
 
 /* This should work correctly. */
-include('config.inc');
+include('inc/config.inc');
 
 /* Check with explicit link. */
 $conn = pg_connect($conn_str);

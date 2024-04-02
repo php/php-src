@@ -1318,7 +1318,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				child_info->offset = parent_info->offset;
 			}
 
-			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
+			if (ZEND_TYPE_IS_SET(parent_info->type)) {
 				inheritance_status status = property_types_compatible(parent_info, child_info);
 				if (status == INHERITANCE_ERROR) {
 					emit_incompatible_property_error(child_info, parent_info);
@@ -1751,7 +1751,7 @@ static bool do_inherit_constant_check(
 		);
 	}
 
-	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_constant->type))) {
+	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && ZEND_TYPE_IS_SET(parent_constant->type)) {
 		inheritance_status status = class_constant_types_compatible(parent_constant, child_constant);
 		if (status == INHERITANCE_ERROR) {
 			emit_incompatible_class_constant_error(child_constant, parent_constant, name);
@@ -1996,9 +1996,9 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	} else {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_fn, fn, sizeof(zend_op_array));
-		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
+	new_fn->common.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 
 	/* Reassign method name, in case it is an alias. */
 	new_fn->common.function_name = name;
@@ -2032,6 +2032,17 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
+static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
+{
+	/* If the function was originally already private+final, then it will have already been warned about.
+	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
+	if ((original_fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) != (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+		&& (fn_copy->common.fn_flags & (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)) == (ZEND_ACC_PRIVATE | ZEND_ACC_FINAL)
+		&& !zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
+	}
+}
+
 static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, zend_class_entry *ce, HashTable *exclude_table, zend_class_entry **aliases) /* {{{ */
 {
 	zend_trait_alias  *alias, **alias_ptr;
@@ -2051,11 +2062,13 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 			) {
 				fn_copy = *fn;
-
-				/* if it is 0, no modifiers have been changed */
-				if (alias->modifiers) {
+				if (alias->modifiers & ZEND_ACC_PPP_MASK) {
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+				} else {
+					fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
 				}
+
+				zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, alias->alias);
 
 				lcname = zend_string_tolower(alias->alias);
 				zend_add_trait_method(ce, alias->alias, lcname, &fn_copy);
@@ -2082,13 +2095,19 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 					&& fn->common.scope == aliases[i]
 					&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 				) {
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+					if (alias->modifiers & ZEND_ACC_PPP_MASK) {
+						fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
+					} else {
+						fn_copy.common.fn_flags = alias->modifiers | fn->common.fn_flags;
+					}
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
 				i++;
 			}
 		}
+
+		zend_traits_check_private_final_inheritance(fn->common.fn_flags, &fn_copy, fnname);
 
 		zend_add_trait_method(ce, fn->common.function_name, fnname, &fn_copy);
 	}

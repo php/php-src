@@ -26,6 +26,7 @@
 #include "soap_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "ext/standard/php_incomplete_class.h"
 
 
 static int le_sdl = 0;
@@ -214,10 +215,14 @@ PHP_MINIT_FUNCTION(soap);
 PHP_MSHUTDOWN_FUNCTION(soap);
 PHP_MINFO_FUNCTION(soap);
 
+static const zend_module_dep soap_deps[] = {
+	ZEND_MOD_REQUIRED("date")
+	ZEND_MOD_END
+};
+
 zend_module_entry soap_module_entry = {
-#ifdef STANDARD_MODULE_HEADER
-  STANDARD_MODULE_HEADER,
-#endif
+  STANDARD_MODULE_HEADER_EX, NULL,
+  soap_deps,
   "soap",
   ext_functions,
   PHP_MINIT(soap),
@@ -1330,9 +1335,13 @@ PHP_METHOD(SoapServer, handle)
 			ZVAL_DEREF(session_vars);
 			if (Z_TYPE_P(session_vars) == IS_ARRAY &&
 			    (tmp_soap_p = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
-			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT &&
-			    Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce) {
-				soap_obj = tmp_soap_p;
+			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT) {
+				if (EXPECTED(Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce)) {
+					soap_obj = tmp_soap_p;
+				} else if (Z_OBJCE_P(tmp_soap_p) == php_ce_incomplete_class) {
+					/* See #51561, communicate limitation to user */
+					soap_server_fault("Server", "SoapServer class was deserialized from the session prior to loading the class passed to SoapServer::setClass(). Start the session after loading all classes to resolve this issue.", NULL, NULL, NULL);
+				}
 			}
 		}
 #endif

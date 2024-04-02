@@ -152,20 +152,16 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 	size_t i, j=0;
 	char *t;
 	zend_string *res;
-	char *lc_pattern;
-	ALLOCA_FLAG(use_heap);
 
 	res = zend_string_alloc(browscap_compute_regex_len(pattern), persistent);
 	t = ZSTR_VAL(res);
-
-	lc_pattern = do_alloca(ZSTR_LEN(pattern) + 1, use_heap);
-	zend_str_tolower_copy(lc_pattern, ZSTR_VAL(pattern), ZSTR_LEN(pattern));
 
 	t[j++] = '~';
 	t[j++] = '^';
 
 	for (i = 0; i < ZSTR_LEN(pattern); i++, j++) {
-		switch (lc_pattern[i]) {
+		char c = ZSTR_VAL(pattern)[i];
+		switch (c) {
 			case '?':
 				t[j] = '.';
 				break;
@@ -198,7 +194,7 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 				t[j] = '+';
 				break;
 			default:
-				t[j] = lc_pattern[i];
+				t[j] = zend_tolower_ascii(c);
 				break;
 		}
 	}
@@ -208,7 +204,6 @@ static zend_string *browscap_convert_pattern(zend_string *pattern, int persisten
 	t[j]=0;
 
 	ZSTR_LEN(res) = j;
-	free_alloca(lc_pattern, use_heap);
 	return res;
 }
 /* }}} */
@@ -228,7 +223,7 @@ static zend_string *browscap_intern_str(
 	} else {
 		interned = zend_string_copy(str);
 		if (persistent) {
-			interned = zend_new_interned_string(str);
+			interned = zend_new_interned_string(interned);
 		}
 		zend_hash_add_new_ptr(&ctx->str_interned, interned, interned);
 	}
@@ -272,27 +267,39 @@ static void browscap_add_kv(
 	bdata->kv_used++;
 }
 
-static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *entry) {
-	zval tmp;
-	uint32_t i;
-
-	HashTable *ht = zend_new_array(8);
-
-	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
-	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);
-
-	ZVAL_STR_COPY(&tmp, entry->pattern);
-	zend_hash_str_add(ht, "browser_name_pattern", sizeof("browser_name_pattern")-1, &tmp);
-
-	if (entry->parent) {
-		ZVAL_STR_COPY(&tmp, entry->parent);
-		zend_hash_str_add(ht, "parent", sizeof("parent")-1, &tmp);
-	}
-
-	for (i = entry->kv_start; i < entry->kv_end; i++) {
+static void browscap_entry_add_kv_to_existing_array(browser_data *bdata, browscap_entry *entry, HashTable *ht) {
+	for (uint32_t i = entry->kv_start; i < entry->kv_end; i++) {
+		zval tmp;
 		ZVAL_STR_COPY(&tmp, bdata->kv[i].value);
 		zend_hash_add(ht, bdata->kv[i].key, &tmp);
 	}
+}
+
+static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *entry) {
+	zval tmp;
+	HashTable *ht = zend_new_array(2 + (entry->parent ? 1 : 0) + (entry->kv_end - entry->kv_start));
+
+	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
+	zend_string *key = ZSTR_INIT_LITERAL("browser_name_regex", 0);
+	ZSTR_H(key) = zend_inline_hash_func("browser_name_regex", sizeof("browser_name_regex")-1);
+	zend_hash_add_new(ht, key, &tmp);
+	zend_string_release_ex(key, false);
+
+	ZVAL_STR_COPY(&tmp, entry->pattern);
+	key = ZSTR_INIT_LITERAL("browser_name_pattern", 0);
+	ZSTR_H(key) = zend_inline_hash_func("browser_name_pattern", sizeof("browser_name_pattern")-1);
+	zend_hash_add_new(ht, key, &tmp);
+	zend_string_release_ex(key, false);
+
+	if (entry->parent) {
+		ZVAL_STR_COPY(&tmp, entry->parent);
+		key = ZSTR_INIT_LITERAL("parent", 0);
+		ZSTR_H(key) = zend_inline_hash_func("parent", sizeof("parent")-1);
+		zend_hash_add_new(ht, key, &tmp);
+		zend_string_release_ex(key, false);
+	}
+
+	browscap_entry_add_kv_to_existing_array(bdata, entry, ht);
 
 	return ht;
 }
@@ -397,10 +404,6 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 }
 /* }}} */
 
-static void str_interned_dtor(zval *zv) {
-	zend_string_release(Z_STR_P(zv));
-}
-
 static int browscap_read_file(char *filename, browser_data *browdata, int persistent) /* {{{ */
 {
 	zend_file_handle fh;
@@ -430,7 +433,9 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	ctx.bdata = browdata;
 	ctx.current_entry = NULL;
 	ctx.current_section_name = NULL;
-	zend_hash_init(&ctx.str_interned, 8, NULL, str_interned_dtor, persistent);
+	/* No dtor because we don't inc the refcount for the reference stored within the hash table's entry value
+	 * as the hash table is only temporary anyway. */
+	zend_hash_init(&ctx.str_interned, 8, NULL, NULL, persistent);
 
 	zend_parse_ini_file(&fh, persistent, ZEND_INI_SCANNER_RAW,
 			(zend_ini_parser_cb_t) php_browscap_parser_cb, &ctx);
@@ -544,30 +549,88 @@ static inline size_t browscap_get_minimum_length(browscap_entry *entry) {
 	return len;
 }
 
-static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr) /* {{{ */
+static bool browscap_match_string_wildcard(const char *s, const char *s_end, const char *pattern, const char *pattern_end)
+{
+	const char *pattern_current = pattern;
+	const char *s_current = s;
+
+	const char *wildcard_pattern_restore_pos = NULL;
+	const char *wildcard_s_restore_pos = NULL;
+
+	while (s_current < s_end) {
+		char pattern_char = *pattern_current;
+		char s_char = *s_current;
+
+		if (pattern_char == '*') {
+			/* Collapse wildcards */
+			pattern_current++;
+			while (pattern_current < pattern_end && *pattern_current == '*') {
+				pattern_current++;
+			}
+
+			/* If we're at the end of the pattern, it means that the ending was just '*', so this is a trivial match */
+			if (pattern_current == pattern_end) {
+				return true;
+			}
+
+			/* Optimization: if there is a non-wildcard character X after a *, then we can immediately jump to the first
+			 * character X in s starting from s_current because it is the only way to match beyond the *. */
+			if (*pattern_current != '?') {
+				while (s_current < s_end && *s_current != *pattern_current) {
+					s_current++;
+				}
+			}
+
+			/* We will first assume the skipped part by * is a 0-length string (or n-length if the optimization above skipped n characters).
+			 * When a mismatch happens we will backtrack and move s one position to assume * skipped a 1-length string.
+			 * Then 2, 3, 4, ... */
+			wildcard_pattern_restore_pos = pattern_current;
+			wildcard_s_restore_pos = s_current;
+
+			continue;
+		} else if (pattern_char == s_char || pattern_char == '?') {
+			/* Match */
+			pattern_current++;
+			s_current++;
+
+			/* If this was the last character of the pattern, we either fully matched s, or we have a mismatch */
+			if (pattern_current == pattern_end) {
+				if (s_current == s_end) {
+					return true;
+				}
+				/* Fallthrough to mismatch */
+			} else {
+				continue;
+			}
+		}
+
+		/* Mismatch */
+		if (wildcard_pattern_restore_pos) {
+			pattern_current = wildcard_pattern_restore_pos;
+			wildcard_s_restore_pos++;
+			s_current = wildcard_s_restore_pos;
+		} else {
+			/* No wildcard is active, so it is impossible to match */
+			return false;
+		}
+	}
+
+	/* Skip remaining * wildcards, they match nothing here as we are at the end of s */
+	while (pattern_current < pattern_end && *pattern_current == '*') {
+		pattern_current++;
+	}
+
+	ZEND_ASSERT(s_current == s_end);
+	return pattern_current == pattern_end;
+}
+
+static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, browscap_entry **found_entry_ptr, size_t *cached_prev_len) /* {{{ */
 {
 	browscap_entry *found_entry = *found_entry_ptr;
 	ALLOCA_FLAG(use_heap)
-	zend_string *pattern_lc, *regex;
+	zend_string *pattern_lc;
 	const char *cur;
 	int i;
-
-	pcre2_code *re;
-	pcre2_match_data *match_data;
-	uint32_t capture_count;
-	int rc;
-
-	/* Agent name too short */
-	if (ZSTR_LEN(agent_name) < browscap_get_minimum_length(entry)) {
-		return 0;
-	}
-
-	/* Quickly discard patterns where the prefix doesn't match. */
-	if (zend_binary_strcasecmp(
-			ZSTR_VAL(agent_name), entry->prefix_len,
-			ZSTR_VAL(entry->pattern), entry->prefix_len) != 0) {
-		return 0;
-	}
 
 	/* Lowercase the pattern, the agent name is already lowercase */
 	ZSTR_ALLOCA_ALLOC(pattern_lc, ZSTR_LEN(entry->pattern), use_heap);
@@ -592,88 +655,49 @@ static int browser_reg_compare(browscap_entry *entry, zend_string *agent_name, b
 	/* See if we have an exact match, if so, we're done... */
 	if (zend_string_equals(agent_name, pattern_lc)) {
 		*found_entry_ptr = entry;
+		/* cached_prev_len doesn't matter here because we end the search when an exact match is found. */
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		return 1;
 	}
 
-	regex = browscap_convert_pattern(entry->pattern, 0);
-	re = pcre_get_compiled_regex(regex, &capture_count);
-	if (re == NULL) {
-		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-		zend_string_release(regex);
-		return 0;
-	}
-
-	match_data = php_pcre_create_match_data(capture_count, re);
-	if (!match_data) {
-		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-		zend_string_release(regex);
-		return 0;
-	}
-	rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, 0, match_data, php_pcre_mctx());
-	php_pcre_free_match_data(match_data);
-	if (rc >= 0) {
+	if (browscap_match_string_wildcard(
+		ZSTR_VAL(agent_name) + entry->prefix_len,
+		ZSTR_VAL(agent_name) + ZSTR_LEN(agent_name),
+		ZSTR_VAL(pattern_lc) + entry->prefix_len,
+		ZSTR_VAL(pattern_lc) + ZSTR_LEN(pattern_lc)
+	)) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */
+		size_t curr_len = entry->prefix_len; /* Start from the prefix because the prefix is free of wildcards */
+		zend_string *current_match = entry->pattern;
+		for (size_t i = curr_len; i < ZSTR_LEN(current_match); i++) {
+			switch (ZSTR_VAL(current_match)[i]) {
+				case '?':
+				case '*':
+					/* do nothing, ignore these characters in the count */
+				break;
+
+				default:
+					++curr_len;
+			}
+		}
+
 		if (found_entry) {
-			size_t i, prev_len = 0, curr_len = 0;
-			zend_string *previous_match = found_entry->pattern;
-			zend_string *current_match = entry->pattern;
-
-			for (i = 0; i < ZSTR_LEN(previous_match); i++) {
-				switch (ZSTR_VAL(previous_match)[i]) {
-					case '?':
-					case '*':
-						/* do nothing, ignore these characters in the count */
-					break;
-
-					default:
-						++prev_len;
-				}
-			}
-
-			for (i = 0; i < ZSTR_LEN(current_match); i++) {
-				switch (ZSTR_VAL(current_match)[i]) {
-					case '?':
-					case '*':
-						/* do nothing, ignore these characters in the count */
-					break;
-
-					default:
-						++curr_len;
-				}
-			}
-
 			/* Pick which browser pattern replaces the least amount of
 			   characters when compared to the original user agent string... */
-			if (prev_len < curr_len) {
+			if (*cached_prev_len < curr_len) {
 				*found_entry_ptr = entry;
+				*cached_prev_len = curr_len;
 			}
 		} else {
 			*found_entry_ptr = entry;
+			*cached_prev_len = curr_len;
 		}
 	}
 
 	ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
-	zend_string_release(regex);
 	return 0;
-}
-/* }}} */
-
-static void browscap_zval_copy_ctor(zval *p) /* {{{ */
-{
-	if (Z_REFCOUNTED_P(p)) {
-		zend_string *str;
-
-		ZEND_ASSERT(Z_TYPE_P(p) == IS_STRING);
-		str = Z_STR_P(p);
-		if (!(GC_FLAGS(str) & GC_PERSISTENT)) {
-			GC_ADDREF(str);
-		} else {
-			ZVAL_NEW_STR(p, zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0));
-		}
-	}
 }
 /* }}} */
 
@@ -726,9 +750,31 @@ PHP_FUNCTION(get_browser)
 	found_entry = zend_hash_find_ptr(bdata->htab, lookup_browser_name);
 	if (found_entry == NULL) {
 		browscap_entry *entry;
+		size_t cached_prev_len = 0; /* silence compiler warning */
 
-		ZEND_HASH_FOREACH_PTR(bdata->htab, entry) {
-			if (browser_reg_compare(entry, lookup_browser_name, &found_entry)) {
+		ZEND_HASH_MAP_FOREACH_PTR(bdata->htab, entry) {
+			/* The following two early-skip checks are inside this loop instead of inside browser_reg_compare().
+			 * That's because we want to avoid the call frame overhead, especially as browser_reg_compare() is
+			 * a function that uses alloca(). */
+
+			/* Agent name too short */
+			if (ZSTR_LEN(lookup_browser_name) < browscap_get_minimum_length(entry)) {
+				continue;
+			}
+
+			/* Quickly discard patterns where the prefix doesn't match. */
+			bool prefix_matches = true;
+			for (size_t i = 0; i < entry->prefix_len; i++) {
+				if (ZSTR_VAL(lookup_browser_name)[i] != zend_tolower_ascii(ZSTR_VAL(entry->pattern)[i])) {
+					prefix_matches = false;
+					break;
+				}
+			}
+			if (!prefix_matches) {
+				continue;
+			}
+
+			if (browser_reg_compare(entry, lookup_browser_name, &found_entry, &cached_prev_len)) {
 				break;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -737,11 +783,13 @@ PHP_FUNCTION(get_browser)
 			found_entry = zend_hash_str_find_ptr(bdata->htab,
 				DEFAULT_SECTION_NAME, sizeof(DEFAULT_SECTION_NAME)-1);
 			if (found_entry == NULL) {
-				zend_string_release(lookup_browser_name);
+				zend_string_release_ex(lookup_browser_name, false);
 				RETURN_FALSE;
 			}
 		}
 	}
+
+	zend_string_release_ex(lookup_browser_name, false);
 
 	agent_ht = browscap_entry_to_array(bdata, found_entry);
 
@@ -751,23 +799,15 @@ PHP_FUNCTION(get_browser)
 		object_and_properties_init(return_value, zend_standard_class_def, agent_ht);
 	}
 
+	HashTable *target_ht = return_array ? Z_ARRVAL_P(return_value) : Z_OBJPROP_P(return_value);
+
 	while (found_entry->parent) {
 		found_entry = zend_hash_find_ptr(bdata->htab, found_entry->parent);
 		if (found_entry == NULL) {
 			break;
 		}
 
-		agent_ht = browscap_entry_to_array(bdata, found_entry);
-		if (return_array) {
-			zend_hash_merge(Z_ARRVAL_P(return_value), agent_ht, (copy_ctor_func_t) browscap_zval_copy_ctor, 0);
-		} else {
-			zend_hash_merge(Z_OBJPROP_P(return_value), agent_ht, (copy_ctor_func_t) browscap_zval_copy_ctor, 0);
-		}
-
-		zend_hash_destroy(agent_ht);
-		efree(agent_ht);
+		browscap_entry_add_kv_to_existing_array(bdata, found_entry, target_ht);
 	}
-
-	zend_string_release_ex(lookup_browser_name, 0);
 }
 /* }}} */

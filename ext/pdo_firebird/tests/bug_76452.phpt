@@ -4,6 +4,9 @@ Bug ##76452 (Crash while parsing blob data in firebird_fetch_blob)
 pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); ?>
+--XLEAK--
+A bug in firebird causes a memory leak when calling `isc_attach_database()`.
+See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
 require_once "payload_server.inc";
@@ -11,12 +14,12 @@ require_once "payload_server.inc";
 $address = run_server(__DIR__ . "/bug_76452.data");
 
 // no need to change the credentials; we're running against a falke server
-$dsn = "firebird:dbname=inet://$address/test";
+$dsn = "firebird:dbname=inet://$address/test76452";
 $username = 'SYSDBA';
 $password = 'masterkey';
 
 $dbh = new PDO($dsn, $username, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
-$query = $dbh->prepare("select * from test");
+$query = $dbh->prepare("SELECT * FROM test76452");
 $query->execute();
 var_dump($query->fetch());
 ?>

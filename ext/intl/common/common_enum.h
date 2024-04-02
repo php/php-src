@@ -68,7 +68,7 @@ extern zend_class_entry *IntlIterator_ce_ptr;
 extern zend_object_handlers IntlIterator_handlers;
 
 U_CFUNC void zoi_with_current_dtor(zend_object_iterator *iter);
-U_CFUNC int zoi_with_current_valid(zend_object_iterator *iter);
+U_CFUNC zend_result zoi_with_current_valid(zend_object_iterator *iter);
 U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter);
 U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter);
 
