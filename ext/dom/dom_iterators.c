@@ -76,19 +76,15 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index) /* {{{ */
 {
-	xmlNode *nodep = NULL;
-	nodeIterator *iter;
 	int htsize;
 
 	if ((htsize = xmlHashSize(ht)) > 0 && index < htsize) {
-		iter = emalloc(sizeof(nodeIterator));
-		iter->cur = 0;
-		iter->index = index;
-		iter->node = NULL;
-		xmlHashScan(ht, itemHashScanner, iter);
-		nodep = iter->node;
-		efree(iter);
-		return nodep;
+		nodeIterator iter;
+		iter.cur = 0;
+		iter.index = index;
+		iter.node = NULL;
+		xmlHashScan(ht, itemHashScanner, &iter);
+		return iter.node;
 	} else {
 		return NULL;
 	}
