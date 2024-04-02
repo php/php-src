@@ -176,7 +176,6 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	xmlNodePtr curnode = NULL;
-	bool do_curobj_undef = 1;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
@@ -195,9 +194,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 				zend_hash_move_forward_ex(nodeht, &iterator->pos);
 				if ((entry = zend_hash_get_current_data_ex(nodeht, &iterator->pos))) {
 					zval_ptr_dtor(&iterator->curobj);
-					ZVAL_UNDEF(&iterator->curobj);
 					ZVAL_COPY(&iterator->curobj, entry);
-					do_curobj_undef = 0;
+					return;
 				}
 			} else {
 				if (objmap->nodetype == XML_ATTRIBUTE_NODE ||
@@ -237,10 +235,9 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 		}
 	}
 err:
-	if (do_curobj_undef) {
-		zval_ptr_dtor(&iterator->curobj);
-		ZVAL_UNDEF(&iterator->curobj);
-	}
+	zval_ptr_dtor(&iterator->curobj);
+	ZVAL_UNDEF(&iterator->curobj);
+
 	if (curnode) {
 		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
