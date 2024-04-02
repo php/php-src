@@ -433,7 +433,7 @@ err:
 	return NULL;
 }
 
-static zend_result dom_sanity_check_node_list_types(zval *nodes, int nodesc, zend_class_entry *node_ce)
+static zend_result dom_sanity_check_node_list_types(zval *nodes, uint32_t nodesc, zend_class_entry *node_ce)
 {
 	for (uint32_t i = 0; i < nodesc; i++) {
 		zend_uchar type = Z_TYPE(nodes[i]);
