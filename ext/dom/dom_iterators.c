@@ -206,9 +206,10 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					/* The collection is live, we nav the tree from the base object if we cannot
 					 * use the cache to restart from the last point. */
 					xmlNodePtr basenode = dom_object_get_node(objmap->baseobj);
-					if (UNEXPECTED(!basenode)) {
-						goto err;
-					}
+
+					/* We have a strong reference to the base node via baseobj_zv, this cannot become NULL */
+					ZEND_ASSERT(basenode != NULL);
+
 					int previndex;
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
 						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
@@ -234,7 +235,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 			}
 		}
 	}
-err:
+
 	zval_ptr_dtor(&iterator->curobj);
 	ZVAL_UNDEF(&iterator->curobj);
 
