@@ -62,7 +62,7 @@ xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const
 }
 /* }}} */
 
-xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index) /* {{{ */
+static xmlNode *php_dom_libxml_hash_iter_ex(xmlHashTable *ht, int index)
 {
 	int htsize;
 
@@ -77,17 +77,18 @@ xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index) /* {{{ */
 		return NULL;
 	}
 }
-/* }}} */
 
-xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index) /* {{{ */
+xmlNode *php_dom_libxml_hash_iter(dom_nnodemap_object *objmap, int index)
 {
-	xmlNotation *notation = (xmlNotation *) php_dom_libxml_hash_iter(ht, index);
-	if (notation != NULL) {
-		return create_notation(notation->name, notation->PublicID, notation->SystemID);
+	xmlNode *curnode = php_dom_libxml_hash_iter_ex(objmap->ht, index);
+
+	if (curnode != NULL && objmap->nodetype != XML_ENTITY_NODE) {
+		xmlNotation *notation = (xmlNotation *) curnode;
+		curnode = create_notation(notation->name, notation->PublicID, notation->SystemID);
 	}
-	return NULL;
+
+	return curnode;
 }
-/* }}} */
 
 static void php_dom_iterator_dtor(zend_object_iterator *iter) /* {{{ */
 {
@@ -194,11 +195,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 				}
 			}
 		} else {
-			if (objmap->nodetype == XML_ENTITY_NODE) {
-				curnode = php_dom_libxml_hash_iter(objmap->ht, iter->index);
-			} else {
-				curnode = php_dom_libxml_notation_iter(objmap->ht, iter->index);
-			}
+			curnode = php_dom_libxml_hash_iter(objmap, iter->index);
 		}
 	}
 
@@ -279,11 +276,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 				}
 			}
 		} else {
-			if (objmap->nodetype == XML_ENTITY_NODE) {
-				curnode = php_dom_libxml_hash_iter(objmap->ht, 0);
-			} else {
-				curnode = php_dom_libxml_notation_iter(objmap->ht, 0);
-			}
+			curnode = php_dom_libxml_hash_iter(objmap, 0);
 		}
 	}
 err:

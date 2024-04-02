@@ -142,11 +142,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 	if (index >= 0) {
 		if (objmap != NULL) {
 			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-				}
+				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
 					HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
