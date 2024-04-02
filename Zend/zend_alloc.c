@@ -541,7 +541,7 @@ static void *zend_mm_mmap(size_t size)
 /***********/
 
 /* number of trailing set (1) bits */
-static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
+ZEND_ATTRIBUTE_CONST static zend_always_inline int zend_mm_bitset_nts(zend_mm_bitset bitset)
 {
 #if (defined(__GNUC__) || __has_builtin(__builtin_ctzl)) && SIZEOF_ZEND_LONG == SIZEOF_LONG && defined(PHP_HAVE_BUILTIN_CTZL)
 	return __builtin_ctzl(~bitset);
