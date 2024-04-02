@@ -175,29 +175,23 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 
 static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 {
-	zval *object;
-	xmlNodePtr curnode = NULL, basenode;
-	dom_object *intern;
-	dom_object *nnmap;
-	dom_nnodemap_object *objmap;
-	int previndex;
-	HashTable *nodeht;
-	zval *entry;
+	xmlNodePtr curnode = NULL;
 	bool do_curobj_undef = 1;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 
-	object = &iterator->intern.data;
-	nnmap = Z_DOMOBJ_P(object);
-	objmap = (dom_nnodemap_object *)nnmap->ptr;
+	zval *object = &iterator->intern.data;
+	dom_object *nnmap = Z_DOMOBJ_P(object);
+	dom_nnodemap_object *objmap = nnmap->ptr;
 
-	intern = Z_DOMOBJ_P(&iterator->curobj);
+	dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
 	if (intern != NULL && intern->ptr != NULL) {
 		if (objmap->nodetype != XML_ENTITY_NODE &&
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
-				nodeht = HASH_OF(&objmap->baseobj_zv);
+				HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
+				zval *entry;
 				zend_hash_move_forward_ex(nodeht, &iterator->pos);
 				if ((entry = zend_hash_get_current_data_ex(nodeht, &iterator->pos))) {
 					zval_ptr_dtor(&iterator->curobj);
@@ -213,10 +207,11 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 				} else {
 					/* The collection is live, we nav the tree from the base object if we cannot
 					 * use the cache to restart from the last point. */
-					basenode = dom_object_get_node(objmap->baseobj);
+					xmlNodePtr basenode = dom_object_get_node(objmap->baseobj);
 					if (UNEXPECTED(!basenode)) {
 						goto err;
 					}
+					int previndex;
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
 						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
 						previndex = 0;
