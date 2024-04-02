@@ -275,6 +275,16 @@ static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 	return false;
 }
 
+/* Returns the first child of a container node (e.g. elements, fragments, documents, ...). */
+static zend_always_inline xmlNodePtr php_dom_first_child_of_container_node(xmlNodePtr parent)
+{
+	if (parent->type == XML_DOCUMENT_NODE || parent->type == XML_HTML_DOCUMENT_NODE) {
+		return xmlDocGetRootElement((xmlDoc *) parent);
+	} else {
+		return parent->children;
+	}
+}
+
 PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);
 PHP_MINFO_FUNCTION(dom);
