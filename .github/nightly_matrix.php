@@ -72,6 +72,7 @@ function get_matrix_include(array $branches) {
                 'debug' => true,
                 'zts' => true,
                 'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1'",
+                'run_tests_parameters' => '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0',
                 'timeout_minutes' => 360,
                 'test_function_jit' => true,
                 'asan' => false,
