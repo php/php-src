@@ -52,25 +52,13 @@ static void itemHashScanner (void *payload, void *data, xmlChar *name)
 
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID) /* {{{ */
 {
-	xmlEntityPtr ret;
-
-	ret = (xmlEntityPtr) xmlMalloc(sizeof(xmlEntity));
+	xmlEntityPtr ret = xmlMalloc(sizeof(xmlEntity));
 	memset(ret, 0, sizeof(xmlEntity));
 	ret->type = XML_NOTATION_NODE;
 	ret->name = xmlStrdup(name);
 	ret->ExternalID = xmlStrdup(ExternalID);
 	ret->SystemID = xmlStrdup(SystemID);
-	ret->length = 0;
-	ret->content = NULL;
-	ret->URI = NULL;
-	ret->orig = NULL;
-	ret->children = NULL;
-	ret->parent = NULL;
-	ret->doc = NULL;
-	ret->_private = NULL;
-	ret->last = NULL;
-	ret->prev = NULL;
-	return((xmlNodePtr) ret);
+	return (xmlNodePtr) ret;
 }
 /* }}} */
 
