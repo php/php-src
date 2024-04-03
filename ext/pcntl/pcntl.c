@@ -46,6 +46,10 @@
 #include <sched.h>
 #endif
 
+#ifdef HAVE_PIDFD_OPEN
+#include <sys/syscall.h>
+#endif
+
 #ifdef HAVE_FORKX
 #include <sys/fork.h>
 #endif
@@ -1401,6 +1405,70 @@ PHP_FUNCTION(pcntl_forkx)
 }
 #endif
 /* }}} */
+
+#ifdef HAVE_PIDFD_OPEN
+// The `pidfd_open` syscall is available since 5.3
+// and `setns` since 3.0.
+PHP_FUNCTION(pcntl_setns)
+{
+	zend_long pid, nstype = CLONE_NEWNET;
+	bool pid_is_null = 1;
+	int fd, ret;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_LONG(nstype)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pid = pid_is_null ? getpid() : pid;
+	fd = syscall(SYS_pidfd_open, pid, 0);
+	if (errno) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case EINVAL:
+			case ESRCH:
+				zend_argument_value_error(1, "is not a valid process (%d)", pid);
+				RETURN_THROWS();
+
+			case ENFILE:
+				php_error_docref(NULL, E_WARNING, "Error %d: File descriptors per-process limit reached", errno);
+				break;
+
+			case ENODEV:
+				php_error_docref(NULL, E_WARNING, "Error %d: Anonymous inode fs unsupported", errno);
+				break;
+
+			case ENOMEM:
+				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory for pidfd_open", errno);
+				break;
+		}
+		RETURN_FALSE;
+	}
+	ret = setns(fd, (int)nstype);
+	close(fd);
+
+	if (ret == -1) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "process no longer available (%d)", pid);
+				RETURN_THROWS();
+
+			case EINVAL:
+				zend_argument_value_error(2, "is an invalid nstype (%d)", nstype);
+				RETURN_THROWS();
+
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
+				break;
+		}
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+#endif
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)
 {
