@@ -60,11 +60,17 @@
 #  include "win32/pwd.h"
 # else
 #  include <pwd.h>
+#ifndef NSS_BUFLEN_PASSWD
+#define NSS_BUFLEN_PASSWD     1024
+#endif
 # endif
 #endif
 
 #if HAVE_GRP_H
 # include <grp.h>
+#ifndef NSS_BUFLEN_GROUP
+#define NSS_BUFLEN_GROUP     1024
+#endif
 #endif
 
 #ifdef HAVE_UTIME
@@ -277,20 +283,20 @@ PHPAPI zend_result php_get_gid_by_name(const char *name, gid_t *gid)
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 		struct group gr;
 		struct group *retgrptr;
-		long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
-		char *grbuf;
+		long initialsize = sysconf(_SC_GETGR_R_SIZE_MAX);
+		zend_string *str = zend_string_alloc(MAX(initialsize, NSS_BUFLEN_GROUP), 0);
+		int retval;
 
-		if (grbuflen < 1) {
+		while ((retval = getgrnam_r(name, &gr, ZSTR_VAL(str), ZSTR_LEN(str), &retgrptr)) == ERANGE) {
+				str = zend_string_extend(str, (ZSTR_LEN(str) * 2) , 0);
+		}
+		if(retval != 0 || retgrptr == NULL) {
+			zend_string_release(str);
 			return FAILURE;
 		}
-
-		grbuf = emalloc(grbuflen);
-		if (getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
-			efree(grbuf);
-			return FAILURE;
-		}
-		efree(grbuf);
 		*gid = gr.gr_gid;
+		zend_string_release(str);
+
 #else
 		struct group *gr = getgrnam(name);
 
@@ -403,20 +409,19 @@ PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 		struct passwd pw;
 		struct passwd *retpwptr = NULL;
-		long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
-		char *pwbuf;
+		long initialsize = sysconf(_SC_GETPW_R_SIZE_MAX);
+		zend_string *str = zend_string_alloc(MAX(initialsize, NSS_BUFLEN_PASSWD), 0);
+		int retval;
 
-		if (pwbuflen < 1) {
+		while ((retval = getpwnam_r(name, &pw, ZSTR_VAL(str), ZSTR_LEN(str), &retpwptr)) == ERANGE) {
+				str = zend_string_extend(str, (ZSTR_LEN(str) * 2) , 0);
+		}
+		if(retval != 0 || retpwptr == NULL) {
+			zend_string_release(str);
 			return FAILURE;
 		}
-
-		pwbuf = emalloc(pwbuflen);
-		if (getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
-			efree(pwbuf);
-			return FAILURE;
-		}
-		efree(pwbuf);
 		*uid = pw.pw_uid;
+		zend_string_release(str);
 #else
 		struct passwd *pw = getpwnam(name);
 
