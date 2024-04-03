@@ -442,6 +442,10 @@ PHP 8.4 UPGRADE NOTES
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues.
 
+- PCNTL:
+  . Added pcntl_setns allowing a process to be reassociated with a namespace in order
+    to share resources with other processes within this context.
+
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
     functions to support the AEGIS family of authenticated encryption algorithms,

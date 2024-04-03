@@ -122,6 +122,9 @@ PHP                                                                        NEWS
   . Fixed bug with url_rewriter.hosts not used by output_add_rewrite_var().
     (haszi)
 
+- PCNTL:
+  . Added pcntl_setns for Linux. (David Carlier)
+
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
   . Add "/r" modifier. (Ayesh)

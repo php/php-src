@@ -990,3 +990,7 @@ function pcntl_rfork(int $flags, int $signal = 0): int{}
 #ifdef HAVE_FORKX
 function pcntl_forkx(int $flags): int{}
 #endif
+
+#ifdef HAVE_PIDFD_OPEN
+function pcntl_setns(int $process_id = null, int $nstype = CLONE_NEWNET): bool {}
+#endif

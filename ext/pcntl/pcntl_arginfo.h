@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3b03373d1bb68de779baaa62db14d98ca9018339 */
+ * Stub hash: 614bd67bb4cfcdc68d37141ff9dfad0a49c318b5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -132,6 +132,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PIDFD_OPEN)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setns, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 0, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nstype, IS_LONG, 0, "CLONE_NEWNET")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
 ZEND_FUNCTION(pcntl_wait);
@@ -175,6 +182,9 @@ ZEND_FUNCTION(pcntl_rfork);
 #endif
 #if defined(HAVE_FORKX)
 ZEND_FUNCTION(pcntl_forkx);
+#endif
+#if defined(HAVE_PIDFD_OPEN)
+ZEND_FUNCTION(pcntl_setns);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -222,6 +232,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_FORKX)
 	ZEND_FE(pcntl_forkx, arginfo_pcntl_forkx)
+#endif
+#if defined(HAVE_PIDFD_OPEN)
+	ZEND_FE(pcntl_setns, arginfo_pcntl_setns)
 #endif
 	ZEND_FE_END
 };
