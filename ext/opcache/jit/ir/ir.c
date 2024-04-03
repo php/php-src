@@ -267,6 +267,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_x2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x3      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_xN      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | IR_OP_FLAG_VAR_INPUTS)
+#define ir_op_flag_a1      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_a2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 
 #define ir_op_kind____     IR_OPND_UNUSED
@@ -2770,4 +2771,10 @@ ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list)
 {
 	IR_ASSERT(ctx->control);
 	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list);
+}
+
+ir_ref _ir_BLOCK_BEGIN(ir_ctx *ctx)
+{
+	IR_ASSERT(ctx->control);
+	return ctx->control = ir_emit1(ctx, IR_OPT(IR_BLOCK_BEGIN, IR_ADDR), ctx->control);
 }

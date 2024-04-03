@@ -662,14 +662,16 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 	}
 }
 
-IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t *loc, ir_bitset todo, ir_type type, int32_t to, ir_reg tmp_reg, ir_reg tmp_fp_reg)
+IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t *loc, int8_t *types, ir_bitset todo, int32_t to, ir_reg tmp_reg, ir_reg tmp_fp_reg)
 {
 	ir_ref from;
 	ir_mem tmp_spill_slot;
+	ir_type type;
 
 	IR_MEM_VAL(tmp_spill_slot) = 0;
 	IR_ASSERT(!IR_IS_CONST_REF(to));
 	from = pred[to];
+	type = types[from];
 	IR_ASSERT(!IR_IS_CONST_REF(from));
 	IR_ASSERT(from != to);
 	IR_ASSERT(loc[from] == from);
@@ -721,6 +723,7 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 
 		from = pred[to];
 		r = loc[from];
+		type = types[to];
 
 		if (from == r && ir_bitset_in(todo, from)) {
 			/* Memory to memory move inside an isolated or "blocked" cycle requres an additional temporary register */
@@ -743,6 +746,8 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 			break;
 		}
 	}
+
+	type = types[to];
 	if (IR_MEM_VAL(tmp_spill_slot)) {
 		ir_emit_load_mem(ctx, type, IR_IS_TYPE_INT(type) ? tmp_reg : tmp_fp_reg, tmp_spill_slot);
 	}
@@ -830,11 +835,12 @@ static int ir_dessa_parallel_copy(ir_ctx *ctx, ir_dessa_copy *copies, int count,
 		to = pred[to];
 		while (!IR_IS_CONST_REF(to) && ir_bitset_in(ready, to)) {
 			to = pred[to];
-			if (!IR_IS_CONST_REF(to) && ir_bitset_in(visited, to)) {
+			if (IR_IS_CONST_REF(to)) {
+				break;
+			} else if (ir_bitset_in(visited, to)) {
 				/* We found a cycle. Resolve it. */
 				ir_bitset_incl(visited, to);
-				type = types[to];
-				ir_dessa_resolve_cycle(ctx, pred, loc, todo, type, to, tmp_reg, tmp_fp_reg);
+				ir_dessa_resolve_cycle(ctx, pred, loc, types, todo, to, tmp_reg, tmp_fp_reg);
 				break;
 			}
 			ir_bitset_incl(visited, to);

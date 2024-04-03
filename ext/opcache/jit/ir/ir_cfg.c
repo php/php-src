@@ -1511,12 +1511,17 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 }
 #else
 /* A single pass modification of "A Simple, Fast Dominance Algorithm" by
- * Cooper, Harvey and Kennedy, that relays on IR block ordering */
+ * Cooper, Harvey and Kennedy, that relays on IR block ordering.
+ * It may fallback to the general slow fixed-point algorithm.  */
+static int ir_build_dominators_tree_iterative(ir_ctx *ctx);
 int ir_build_dominators_tree(ir_ctx *ctx)
 {
 	uint32_t blocks_count, b;
 	ir_block *blocks, *bb;
 	uint32_t *edges;
+	ir_list worklist;
+
+	ir_list_init(&worklist, ctx->cfg_blocks_count / 2);
 
 	ctx->flags2 |= IR_NO_LOOPS;
 
@@ -1539,6 +1544,9 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		if (UNEXPECTED(idom > b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
+			IR_ASSERT(k > 1);
+			IR_ASSERT(blocks[idom].successors_count == 1);
+			ir_list_push(&worklist, idom);
 			while (1) {
 				k--;
 				p++;
@@ -1547,9 +1555,12 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 					break;
 				}
 				IR_ASSERT(k > 0);
+				IR_ASSERT(blocks[idom].successors_count == 1);
+				ir_list_push(&worklist, idom);
 			}
 		}
 		IR_ASSERT(blocks[idom].idom > 0);
+		IR_ASSERT(k != 0);
 
 		while (--k > 0) {
 			uint32_t pred_b = *(++p);
@@ -1566,6 +1577,9 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 				}
 			} else {
 				ctx->flags2 &= ~IR_NO_LOOPS;
+				IR_ASSERT(bb->predecessors_count > 1);
+				IR_ASSERT(blocks[pred_b].successors_count == 1);
+				ir_list_push(&worklist, pred_b);
 			}
 		}
 		bb->idom = idom;
@@ -1592,6 +1606,131 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 	}
 
 	blocks[1].idom = 0;
+
+	if (ir_list_len(&worklist) != 0) {
+		uint32_t dom_depth;
+		uint32_t succ_b;
+		bool complete = 1;
+
+		/* Check if all the back-edges lead to the loop headers */
+		do {
+			b = ir_list_pop(&worklist);
+			bb = &blocks[b];
+			IR_ASSERT(bb->successors_count == 1);
+			succ_b = ctx->cfg_edges[bb->successors];
+			dom_depth = blocks[succ_b].dom_depth;;
+			while (bb->dom_depth > dom_depth) {
+				b = bb->dom_parent;
+				bb = &blocks[b];
+			}
+			if (UNEXPECTED(b != succ_b)) {
+				complete = 0;
+				break;
+			}
+		} while (ir_list_len(&worklist) != 0);
+
+		if (UNEXPECTED(!complete)) {
+			ir_list_free(&worklist);
+			return ir_build_dominators_tree_iterative(ctx);
+		}
+	}
+
+	ir_list_free(&worklist);
+
+	return 1;
+}
+
+static int ir_build_dominators_tree_iterative(ir_ctx *ctx)
+{
+	bool changed;
+	uint32_t blocks_count, b;
+	ir_block *blocks, *bb;
+	uint32_t *edges;
+
+	/* Find immediate dominators */
+	blocks = ctx->cfg_blocks;
+	edges  = ctx->cfg_edges;
+	blocks_count = ctx->cfg_blocks_count;
+
+	/* Clear the dominators tree, but keep already found dominators */
+	for (b = 0, bb = &blocks[0]; b <= blocks_count; b++, bb++) {
+		bb->dom_depth = 0;
+		bb->dom_child = 0;
+		bb->dom_next_child = 0;
+	}
+
+	/* Find immediate dominators by iterative fixed-point algorithm */
+	blocks[1].idom = 1;
+	do {
+		changed = 0;
+
+		for (b = 2, bb = &blocks[2]; b <= blocks_count; b++, bb++) {
+			IR_ASSERT(!(bb->flags & IR_BB_UNREACHABLE));
+			IR_ASSERT(bb->predecessors_count > 0);
+			uint32_t k = bb->predecessors_count;
+			uint32_t *p = edges + bb->predecessors;
+			uint32_t idom = *p;
+
+			if (blocks[idom].idom == 0) {
+				while (1) {
+					k--;
+					p++;
+					idom = *p;
+					if (blocks[idom].idom > 0) {
+						break;
+					}
+					IR_ASSERT(k > 0);
+				}
+			}
+			IR_ASSERT(k != 0);
+			while (--k > 0) {
+				uint32_t pred_b = *(++p);
+
+				if (blocks[pred_b].idom > 0) {
+					IR_ASSERT(blocks[pred_b].idom > 0);
+					while (idom != pred_b) {
+						while (pred_b > idom) {
+							pred_b = blocks[pred_b].idom;
+						}
+						while (idom > pred_b) {
+							idom = blocks[idom].idom;
+						}
+					}
+				}
+			}
+			if (bb->idom != idom) {
+				bb->idom = idom;
+				changed = 1;
+			}
+		}
+	} while (changed);
+
+	/* Build dominators tree */
+	blocks[1].idom = 0;
+	blocks[1].dom_depth = 0;
+	for (b = 2, bb = &blocks[2]; b <= blocks_count; b++, bb++) {
+		uint32_t idom = bb->idom;
+		ir_block *idom_bb = &blocks[idom];
+
+		bb->dom_depth = idom_bb->dom_depth + 1;
+		/* Sort by block number to traverse children in pre-order */
+		if (idom_bb->dom_child == 0) {
+			idom_bb->dom_child = b;
+		} else if (b < idom_bb->dom_child) {
+			bb->dom_next_child = idom_bb->dom_child;
+			idom_bb->dom_child = b;
+		} else {
+			int child = idom_bb->dom_child;
+			ir_block *child_bb = &blocks[child];
+
+			while (child_bb->dom_next_child > 0 && b > child_bb->dom_next_child) {
+				child = child_bb->dom_next_child;
+				child_bb = &blocks[child];
+			}
+			bb->dom_next_child = child_bb->dom_next_child;
+			child_bb->dom_next_child = b;
+		}
+	}
 
 	return 1;
 }

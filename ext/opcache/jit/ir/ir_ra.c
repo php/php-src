@@ -3311,26 +3311,26 @@ static int ir_fix_dessa_tmps(ir_ctx *ctx, uint8_t type, ir_ref from, ir_ref to)
 		if (IR_IS_TYPE_INT(type)) {
 			tmp_reg.num = 0;
 			tmp_reg.type = type;
-			tmp_reg.start = IR_DEF_SUB_REF;
+			tmp_reg.start = IR_USE_SUB_REF;
 			tmp_reg.end = IR_SAVE_SUB_REF;
 		} else {
 			IR_ASSERT(IR_IS_TYPE_FP(type));
 			tmp_reg.num = 1;
 			tmp_reg.type = type;
-			tmp_reg.start = IR_DEF_SUB_REF;
+			tmp_reg.start = IR_USE_SUB_REF;
 			tmp_reg.end = IR_SAVE_SUB_REF;
 		}
 	} else if (from != 0) {
 		if (IR_IS_TYPE_INT(type)) {
 			tmp_reg.num = 0;
 			tmp_reg.type = type;
-			tmp_reg.start = IR_DEF_SUB_REF;
+			tmp_reg.start = IR_USE_SUB_REF;
 			tmp_reg.end = IR_SAVE_SUB_REF;
 		} else {
 			IR_ASSERT(IR_IS_TYPE_FP(type));
 			tmp_reg.num = 1;
 			tmp_reg.type = type;
-			tmp_reg.start = IR_DEF_SUB_REF;
+			tmp_reg.start = IR_USE_SUB_REF;
 			tmp_reg.end = IR_SAVE_SUB_REF;
 		}
 	} else {
@@ -3916,7 +3916,7 @@ static void assign_regs(ir_ctx *ctx)
 										} else {
 											reg |= IR_REG_SPILL_LOAD;
 										}
-										if (ctx->ir_base[ref].op != IR_SNAPSHOT) {
+										if (ctx->ir_base[ref].op != IR_SNAPSHOT && !(use_pos->flags & IR_PHI_USE)) {
 											uint32_t use_b = ctx->cfg_map[ref];
 
 											if (ir_ival_covers(ival, IR_SAVE_LIVE_POS_FROM_REF(ctx->cfg_blocks[use_b].end))) {

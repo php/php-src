@@ -4063,6 +4063,34 @@ static void ir_emit_afree(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 	}
 }
 
+static void ir_emit_block_begin(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg def_reg = IR_REG_NUM(ctx->regs[def][0]);
+
+	|	mov Rx(def_reg), sp
+
+	if (IR_REG_SPILLED(ctx->regs[def][0])) {
+		ir_emit_store(ctx, IR_ADDR, def, def_reg);
+	}
+}
+
+static void ir_emit_block_end(ir_ctx *ctx, ir_ref def, ir_insn *insn)
+{
+	ir_backend_data *data = ctx->data;
+	dasm_State **Dst = &data->dasm_state;
+	ir_reg op2_reg = ctx->regs[def][2];
+
+	IR_ASSERT(op2_reg != IR_REG_NONE);
+	if (IR_REG_SPILLED(op2_reg)) {
+		op2_reg = IR_REG_NUM(op2_reg);
+		ir_emit_load(ctx, IR_ADDR, op2_reg, insn->op2);
+	}
+
+	|	mov sp, Rx(op2_reg)
+}
+
 static void ir_emit_frame_addr(ir_ctx *ctx, ir_ref def)
 {
 	ir_backend_data *data = ctx->data;
@@ -5964,6 +5992,12 @@ void *ir_emit_code(ir_ctx *ctx, size_t *size_ptr)
 					break;
 				case IR_AFREE:
 					ir_emit_afree(ctx, i, insn);
+					break;
+				case IR_BLOCK_BEGIN:
+					ir_emit_block_begin(ctx, i, insn);
+					break;
+				case IR_BLOCK_END:
+					ir_emit_block_end(ctx, i, insn);
 					break;
 				case IR_FRAME_ADDR:
 					ir_emit_frame_addr(ctx, i);
