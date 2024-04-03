@@ -1442,6 +1442,9 @@ PHP_FUNCTION(pcntl_setns)
 			case ENOMEM:
 				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory for pidfd_open", errno);
 				break;
+
+			default:
+			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 		RETURN_FALSE;
 	}
@@ -1462,6 +1465,9 @@ PHP_FUNCTION(pcntl_setns)
 			case EPERM:
 				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
 				break;
+
+			default:
+			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 		RETURN_FALSE;
 	} else {
