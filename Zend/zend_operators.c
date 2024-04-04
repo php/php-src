@@ -2452,7 +2452,7 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 			if (Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
 				return true;
 			}
-			if ((Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_DATA_CLASS)
+			if (UNEXPECTED(Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_DATA_CLASS)
 			 && Z_OBJCE_P(op1) == Z_OBJCE_P(op2)) {
 				return zend_is_identical_data_class(op1, op2);
 			}

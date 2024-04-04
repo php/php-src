@@ -3434,7 +3434,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			RETURN_THROWS();
 		}
 
-		if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS) {
+		if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"May not invoke mutating method \"%s::%s()\" through reflection",
 				ZSTR_VAL(Z_OBJCE_P(object)->name), ZSTR_VAL(mptr->common.function_name));
@@ -5775,7 +5775,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			RETURN_THROWS();
 		}
 
-		if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS) {
+		if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"May not set property value of data class \"%s\" through reflection",
 				ZSTR_VAL(Z_OBJCE_P(object)->name));
