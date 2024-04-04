@@ -8345,9 +8345,10 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		// JIT: call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
 		//      (closure->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
 		call_info = ir_OR_U32(
-			ir_AND_U64(
-				ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags))),
-				ir_CONST_U64(ZEND_ACC_FAKE_CLOSURE)),
+			ir_AND_U32(
+				// Truncate high bytes, call_info is stored in type_info, which is only 32-bits.
+				ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags)))),
+				ir_CONST_U32(ZEND_ACC_FAKE_CLOSURE)),
 			ir_CONST_U32(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE));
 		// JIT: if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		if_cond = ir_IF(ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, this_ptr.u1.v.type))));
