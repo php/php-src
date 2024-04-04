@@ -1410,7 +1410,7 @@ ZEND_API ZEND_COLD void zend_error_zstr_at(
 	zval retval;
 	zval orig_user_error_handler;
 	bool in_compilation;
-	zend_class_entry *saved_class_entry;
+	zend_class_entry *saved_class_entry = NULL;
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	int type = orig_type & E_ALL;
