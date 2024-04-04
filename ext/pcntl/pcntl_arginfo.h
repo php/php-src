@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 614bd67bb4cfcdc68d37141ff9dfad0a49c318b5 */
+ * Stub hash: e5204cee68c41ff1201992f2572940c8f87980a3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -134,7 +134,7 @@ ZEND_END_ARG_INFO()
 
 #if defined(HAVE_PIDFD_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setns, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 0, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nstype, IS_LONG, 0, "CLONE_NEWNET")
 ZEND_END_ARG_INFO()
 #endif
