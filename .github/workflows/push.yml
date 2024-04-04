@@ -191,6 +191,77 @@ jobs:
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+  ALPINE:
+    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - debug: false
+            zts: false
+            asan: false
+          - debug: true
+            zts: true
+            asan: true
+    name: "ALPINE_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
+    runs-on: ubuntu-22.04
+    container:
+      image: 'alpine:3.19.1'
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+      - name: apk
+        uses: ./.github/actions/apk
+      - name: LLVM 17 (ASAN-only)
+        if: ${{ matrix.asan }}
+        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17
+        run: |
+          apk add clang17 compiler-rt
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          apk list
+          echo "::endgroup::"
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          # This duplicates the "job.name" expression above because
+          # GitHub has no way to query the job name (github.job is the
+          # job id, not the job name)
+          key: "ALPINE_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+      - name: ./configure
+        uses: ./.github/actions/configure-alpine
+        with:
+          # -Wno-error=address: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=114609
+          # -Wno-error=stringop-overread: main/getopt.c: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=114622
+          configurationParameters: >-
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang-17 CXX=clang++-17' || 'CFLAGS="-Wno-error=address -Wno-error=stringop-overread"' }}
+          skipSlow: ${{ matrix.asan }}
+          configureArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-alpine
+      - name: Test
+        if: matrix.asan == false
+        uses: ./.github/actions/test-alpine
+        with:
+          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-alpine
+        with:
+          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_Tracing JIT
+          jitType: tracing
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+            ${{ matrix.asan && '--asan -x' || '' }}
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     strategy:
