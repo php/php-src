@@ -1545,7 +1545,6 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
 			IR_ASSERT(k > 1);
-			IR_ASSERT(blocks[idom].successors_count == 1);
 			ir_list_push(&worklist, idom);
 			while (1) {
 				k--;
@@ -1555,7 +1554,6 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 					break;
 				}
 				IR_ASSERT(k > 0);
-				IR_ASSERT(blocks[idom].successors_count == 1);
 				ir_list_push(&worklist, idom);
 			}
 		}
@@ -1578,7 +1576,6 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 			} else {
 				ctx->flags2 &= ~IR_NO_LOOPS;
 				IR_ASSERT(bb->predecessors_count > 1);
-				IR_ASSERT(blocks[pred_b].successors_count == 1);
 				ir_list_push(&worklist, pred_b);
 			}
 		}
@@ -1616,8 +1613,16 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		do {
 			b = ir_list_pop(&worklist);
 			bb = &blocks[b];
-			IR_ASSERT(bb->successors_count == 1);
 			succ_b = ctx->cfg_edges[bb->successors];
+			if (bb->successors_count != 1) {
+				/* LOOP_END/END may be linked with the following ENTRY by a fake edge */
+				IR_ASSERT(bb->successors_count == 2);
+				if (blocks[succ_b].flags & IR_BB_ENTRY) {
+					succ_b = ctx->cfg_edges[bb->successors + 1];
+				} else {
+					IR_ASSERT(blocks[ctx->cfg_edges[bb->successors + 1]].flags & IR_BB_ENTRY);
+				}
+			}
 			dom_depth = blocks[succ_b].dom_depth;;
 			while (bb->dom_depth > dom_depth) {
 				b = bb->dom_parent;
