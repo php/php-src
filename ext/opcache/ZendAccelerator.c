@@ -3916,7 +3916,7 @@ static void preload_link(void)
 			 * prevent freeing of interface names. */
 			void *checkpoint = zend_arena_checkpoint(CG(arena));
 			zend_class_entry *orig_ce = ce;
-			uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
+			zend_ce_flags temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
 			ce->ce_flags |= temporary_flags;
 			if (ce->parent_name) {
 				zend_string_addref(ce->parent_name);

@@ -1495,7 +1495,7 @@ ZEND_API zend_result zend_update_class_constants(zend_class_entry *class_type) /
 	zval *static_members_table = NULL;
 	zend_class_constant *c;
 	zval *val;
-	uint32_t ce_flags;
+	zend_ce_flags ce_flags;
 
 	ce_flags = class_type->ce_flags;
 

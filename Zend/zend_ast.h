@@ -207,7 +207,7 @@ typedef struct _zend_ast_decl {
 	zend_ast_attr attr; /* Unused - for structure compatibility */
 	uint32_t start_lineno;
 	uint32_t end_lineno;
-	uint32_t flags;
+	uint64_t flags;
 	zend_string *doc_comment;
 	zend_string *name;
 	zend_ast *child[5];

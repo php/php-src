@@ -112,10 +112,12 @@ typedef struct _zend_trait_alias {
 	uint32_t modifiers;
 } zend_trait_alias;
 
+typedef uint64_t zend_ce_flags;
+
 typedef struct _zend_class_mutable_data {
 	zval      *default_properties_table;
 	HashTable *constants_table;
-	uint32_t   ce_flags;
+	zend_ce_flags ce_flags;
 	HashTable *backed_enum_table;
 } zend_class_mutable_data;
 
@@ -152,8 +154,8 @@ struct _zend_class_entry {
 		zend_class_entry *parent;
 		zend_string *parent_name;
 	};
+	zend_ce_flags ce_flags;
 	int refcount;
-	uint32_t ce_flags;
 
 	int default_properties_count;
 	int default_static_members_count;

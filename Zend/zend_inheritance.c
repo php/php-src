@@ -3011,7 +3011,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	zend_class_entry **traits_and_interfaces = NULL;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
-	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	zend_ce_flags is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	uint32_t i, j;
 	zval *zv;
 	ALLOCA_FLAG(use_heap)
@@ -3355,7 +3355,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		return ce;
 	}
 
-	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	zend_ce_flags is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	UPDATE_IS_CACHEABLE(parent_ce);
 	if (is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {
