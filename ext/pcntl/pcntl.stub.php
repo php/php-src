@@ -992,5 +992,5 @@ function pcntl_forkx(int $flags): int{}
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
-function pcntl_setns(int $process_id = null, int $nstype = CLONE_NEWNET): bool {}
+function pcntl_setns(?int $process_id = null, int $nstype = CLONE_NEWNET): bool {}
 #endif

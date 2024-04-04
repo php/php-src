@@ -1428,7 +1428,7 @@ PHP_FUNCTION(pcntl_setns)
 		switch (errno) {
 			case EINVAL:
 			case ESRCH:
-				zend_argument_value_error(1, "is not a valid process (%d)", pid);
+				zend_argument_value_error(1, "is not a valid process (" ZEND_LONG_FMT ")", pid);
 				RETURN_THROWS();
 
 			case ENFILE:
@@ -1455,7 +1455,7 @@ PHP_FUNCTION(pcntl_setns)
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
-				zend_argument_value_error(1, "process no longer available (%d)", pid);
+				zend_argument_value_error(1, "process no longer available (" ZEND_LONG_FMT ")", pid);
 				RETURN_THROWS();
 
 			case EINVAL:
