@@ -2483,7 +2483,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			continue;
 		}
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->properties_info, prop_name, property_info) {
-			uint32_t flags = property_info->flags;
+			zend_prop_flags flags = property_info->flags;
 
 			/* next: check for conflicts with current class */
 			if ((colliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
@@ -2492,7 +2492,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					flags |= ZEND_ACC_CHANGED;
 				} else {
 					bool is_compatible = false;
-					uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
+					zend_prop_flags flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
 
 					if ((colliding_prop->flags & flags_mask) == (flags & flags_mask) &&
 						property_types_compatible(property_info, colliding_prop) == INHERITANCE_SUCCESS

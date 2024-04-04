@@ -316,7 +316,7 @@ static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *c
 {
 	zval *zv;
 	zend_property_info *property_info;
-	uint32_t flags;
+	zend_prop_flags flags;
 	zend_class_entry *scope;
 	uintptr_t offset;
 

@@ -13769,8 +13769,8 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_IF_TRUE_cold(if_has_prop_info);
 
 			ir_ref if_readonly = ir_IF(
-				ir_AND_U32(ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, flags))),
-					ir_CONST_U32(ZEND_ACC_READONLY)));
+				ir_AND_U64(ir_LOAD_U64(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, flags))),
+					ir_CONST_U64(ZEND_ACC_READONLY)));
 			ir_IF_TRUE(if_readonly);
 
 			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);

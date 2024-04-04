@@ -4666,7 +4666,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 /* }}} */
 
 /* {{{ _addproperty */
-static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_entry *ce, HashTable *ht, long filter)
+static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
 	if ((pptr->flags & ZEND_ACC_PRIVATE) && pptr->ce != ce) {
 		return;
@@ -4712,6 +4712,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_long filter;
 	bool filter_is_null = 1;
 
+	// FIXME: sizeof(zend_long) < sizeof(zend_prop_flags) on some platforms...
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}

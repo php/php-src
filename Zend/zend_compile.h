@@ -398,10 +398,12 @@ typedef uint64_t zend_fn_flags;
 
 char *zend_visibility_string(zend_fn_flags fn_flags);
 
+typedef uint64_t zend_prop_flags;
+
 typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or
 	                      property index for static properties */
-	uint32_t flags;
+	zend_prop_flags flags;
 	zend_string *name;
 	zend_string *doc_comment;
 	HashTable *attributes;
