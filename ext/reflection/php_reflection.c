@@ -4533,7 +4533,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	zend_long filter;
 	bool filter_is_null = 1;
 
-	// FIXME: sizeof(zend_long) < sizeof(zend_fn_flags) on some platforms...
+	// FIXME: sizeof(zend_long) < sizeof(zend_fn_flags) on 32-bit platforms
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -4712,7 +4712,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_long filter;
 	bool filter_is_null = 1;
 
-	// FIXME: sizeof(zend_long) < sizeof(zend_prop_flags) on some platforms...
+	// FIXME: sizeof(zend_long) < sizeof(zend_prop_flags) on 32-bit platforms
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
