@@ -7029,7 +7029,7 @@ static void zend_compile_attributes(
 				}
 			}
 
-			uint32_t flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
+			zend_fn_flags flags = (CG(active_op_array)->fn_flags & ZEND_ACC_STRICT_TYPES)
 				? ZEND_ATTRIBUTE_STRICT_TYPES : 0;
 			attr = zend_add_attribute(
 				attributes, name, args ? args->children : 0, flags, offset, el->lineno);
@@ -7597,7 +7597,7 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 {
 	zend_class_entry *ce = CG(active_class_entry);
 	bool in_interface = (ce->ce_flags & ZEND_ACC_INTERFACE) != 0;
-	uint32_t fn_flags = op_array->fn_flags;
+	zend_fn_flags fn_flags = op_array->fn_flags;
 
 	zend_string *lcname;
 

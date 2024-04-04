@@ -394,7 +394,9 @@ typedef struct _zend_oparray_context {
 // Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
 #define ZEND_JMP_NULL_BP_VAR_IS 4
 
-char *zend_visibility_string(uint32_t fn_flags);
+typedef uint64_t zend_fn_flags;
+
+char *zend_visibility_string(zend_fn_flags fn_flags);
 
 typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or
@@ -455,7 +457,7 @@ struct _zend_op_array {
 	/* Common elements */
 	uint8_t type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-	uint32_t fn_flags;
+	zend_fn_flags fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
 	zend_function *prototype;
@@ -513,7 +515,7 @@ typedef struct _zend_internal_function {
 	/* Common elements */
 	uint8_t type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-	uint32_t fn_flags;
+	zend_fn_flags fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
 	zend_function *prototype;
@@ -541,7 +543,7 @@ union _zend_function {
 	struct {
 		uint8_t type;  /* never used */
 		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-		uint32_t fn_flags;
+		zend_fn_flags fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
 		zend_function *prototype;

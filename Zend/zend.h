@@ -98,6 +98,8 @@ typedef struct _zend_trait_precedence {
 	zend_string *exclude_class_names[1];
 } zend_trait_precedence;
 
+typedef uint64_t zend_fn_flags;
+
 typedef struct _zend_trait_alias {
 	zend_trait_method_reference trait_method;
 
@@ -109,7 +111,7 @@ typedef struct _zend_trait_alias {
 	/**
 	* modifiers to be set on trait method
 	*/
-	uint32_t modifiers;
+	zend_fn_flags modifiers;
 } zend_trait_alias;
 
 typedef uint64_t zend_ce_flags;

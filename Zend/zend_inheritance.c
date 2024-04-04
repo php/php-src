@@ -196,7 +196,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
+char *zend_visibility_string(zend_fn_flags fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";
@@ -1089,8 +1089,8 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		zend_class_entry *ce, zval *child_zv,
 		bool check_visibility, bool check_only, bool checked, bool force_mutable) /* {{{ */
 {
-	uint32_t child_flags;
-	uint32_t parent_flags = parent->common.fn_flags;
+	zend_fn_flags child_flags;
+	zend_fn_flags parent_flags = parent->common.fn_flags;
 	zend_function *proto;
 
 	if (UNEXPECTED((parent_flags & ZEND_ACC_PRIVATE) && !(parent_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_CTOR))) {
@@ -2032,7 +2032,7 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
-static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
+static void zend_traits_check_private_final_inheritance(zend_fn_flags original_fn_flags, zend_function *fn_copy, zend_string *name)
 {
 	/* If the function was originally already private+final, then it will have already been warned about.
 	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
