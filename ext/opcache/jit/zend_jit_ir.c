@@ -8345,9 +8345,9 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		// JIT: call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE |
 		//      (closure->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
 		call_info = ir_OR_U32(
-			ir_AND_U32(
+			ir_AND_U64(
 				ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags))),
-				ir_CONST_U32(ZEND_ACC_FAKE_CLOSURE)),
+				ir_CONST_U64(ZEND_ACC_FAKE_CLOSURE)),
 			ir_CONST_U32(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE));
 		// JIT: if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
 		if_cond = ir_IF(ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, this_ptr.u1.v.type))));
@@ -8791,9 +8791,9 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 
 	if (!func) {
 		// JIT: if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		if_static = ir_IF(ir_AND_U32(
+		if_static = ir_IF(ir_AND_U64(
 			ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
-			ir_CONST_U32(ZEND_ACC_STATIC)));
+			ir_CONST_U64(ZEND_ACC_STATIC)));
 		ir_IF_TRUE_cold(if_static);
 	}
 
@@ -9592,9 +9592,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 				func_ref = ir_LOAD_A(jit_CALL(rx, func));
 				ir_GUARD_NOT(
-					ir_AND_U32(
+					ir_AND_U64(
 						ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)),
+						ir_CONST_U64(ZEND_ACC_DEPRECATED)),
 					ir_CONST_ADDR(exit_addr));
 			}
 		}
