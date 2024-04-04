@@ -7994,7 +7994,7 @@ static void zend_check_trait_alias_modifiers(uint32_t attr) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_ast *attr_ast, zend_ast *type_ast)
+static void zend_compile_class_const_decl(zend_ast *ast, zend_class_const_flags flags, zend_ast *attr_ast, zend_ast *type_ast)
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	zend_class_entry *ce = CG(active_class_entry);

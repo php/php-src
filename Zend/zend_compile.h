@@ -420,6 +420,8 @@ typedef struct _zend_property_info {
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
 
+typedef uint32_t zend_class_const_flags;
+
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */
 	zend_string *doc_comment;

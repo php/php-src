@@ -3894,7 +3894,7 @@ ZEND_METHOD(ReflectionClassConstant, hasType)
 	RETVAL_BOOL(ZEND_TYPE_IS_SET(ref->type));
 }
 
-static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
+static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, zend_class_const_flags mask) /* {{{ */
 {
 	reflection_object *intern;
 	zend_class_constant *ref;
@@ -3939,7 +3939,7 @@ ZEND_METHOD(ReflectionClassConstant, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_constant *ref;
-	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_PPP_MASK;
+	zend_class_const_flags keep_flags = ZEND_ACC_FINAL | ZEND_ACC_PPP_MASK;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
