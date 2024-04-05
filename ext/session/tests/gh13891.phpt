@@ -4,6 +4,7 @@ GH-13891 (memleak and segfault when using ini_set with session.trans_sid_hosts)
 session.use_cookies=0
 session.use_only_cookies=0
 session.use_trans_sid=1
+session.trans_sid_hosts=php.net
 --EXTENSIONS--
 session
 --SKIPIF--
