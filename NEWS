@@ -124,6 +124,7 @@ PHP                                                                        NEWS
 
 - PCNTL:
   . Added pcntl_setns for Linux. (David Carlier)
+  . Added pcntl_getaffinity/pcntl_setaffinity. (David Carlier)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)

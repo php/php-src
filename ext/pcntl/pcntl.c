@@ -42,8 +42,13 @@
 #endif
 
 #include <errno.h>
-#ifdef HAVE_UNSHARE
+#if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY)
 #include <sched.h>
+#if defined(__FreeBSD__)
+#include <sys/types.h>
+#include <sys/cpuset.h>
+typedef cpuset_t cpu_set_t;
+#endif
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
@@ -1468,6 +1473,123 @@ PHP_FUNCTION(pcntl_setns)
 
 			default:
 			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+#endif
+
+#ifdef HAVE_SCHED_SETAFFINITY
+PHP_FUNCTION(pcntl_getcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// 0 == getpid in this context, we're just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+
+	CPU_ZERO(&mask);
+
+	if (sched_getaffinity(pid, sizeof(mask), &mask) != 0) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+
+		RETURN_FALSE;
+	}
+
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	array_init(return_value);
+
+	for (zend_ulong i = 0; i < maxcpus; i ++) {
+		if (CPU_ISSET(i, &mask)) {
+			add_next_index_long(return_value, i);
+		}
+	}
+}
+
+PHP_FUNCTION(pcntl_setcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+	zval *hmask = NULL, *ncpu;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_ARRAY(hmask)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
+		zend_argument_value_error(2, "must not be empty");
+		RETURN_THROWS();
+	}
+
+	// 0 == getpid in this context, we're just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	CPU_ZERO(&mask);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
+		ZVAL_DEREF(ncpu);
+		zend_long cpu;
+		if (Z_TYPE_P(ncpu) != IS_LONG) {
+			if (Z_TYPE_P(ncpu) == IS_STRING) {
+				zend_ulong tmp;
+				if (!ZEND_HANDLE_NUMERIC(Z_STR_P(ncpu), tmp)) {
+					zend_argument_value_error(2, "cpu id invalid value (%s)", ZSTR_VAL(Z_STR_P(ncpu)));
+					RETURN_THROWS();
+				}
+
+				cpu = (zend_long)tmp;
+			} else {
+				zend_string *wcpu = zval_get_string_func(ncpu);
+				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
+				zend_string_release(wcpu);
+				RETURN_THROWS();
+			}
+		} else {
+			cpu = Z_LVAL_P(ncpu);
+		}
+
+		if (cpu < 0 || cpu >= maxcpus) {
+			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			RETURN_THROWS();
+		}
+		       
+		if (!CPU_ISSET(cpu, &mask)) {
+			CPU_SET(cpu, &mask);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (sched_setaffinity(pid, sizeof(mask), &mask) != 0) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 		RETURN_FALSE;
 	} else {
