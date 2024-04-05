@@ -32,6 +32,8 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
     (Jakub Zelenka)
+  . Fixed bug GH-13860 (Incorrect PHP_STREAM_OPTION_CHECK_LIVENESS case in
+    ext/openssl/xp_ssl.c - causing use of dead socket). (nielsdos)
 
 - Treewide:
   . Fix gcc-14 Wcalloc-transposed-args warnings. (Cristian Rodríguez)
