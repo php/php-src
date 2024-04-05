@@ -3608,8 +3608,8 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");

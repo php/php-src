@@ -7027,8 +7027,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -9583,8 +9583,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -12006,8 +12006,8 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -16395,8 +16395,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -17876,8 +17876,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -19272,8 +19272,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -34462,8 +34462,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -36574,8 +36574,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -39142,8 +39142,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -44193,8 +44193,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -48031,8 +48031,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
@@ -53575,8 +53575,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 			HANDLE_EXCEPTION();
 		}
 		if (UNEXPECTED(
-			((fbc->common.fn_flags & ZEND_ACC_MUTATING) != 0)
-			!= ((opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING) != 0)
+			(bool)(fbc->common.fn_flags & ZEND_ACC_MUTATING)
+			!= (bool)(opline->extended_value & ZEND_INIT_METHOD_CALL_MUTATING)
 		)) {
 			if (fbc->common.fn_flags & ZEND_ACC_MUTATING) {
 				zend_throw_error(NULL, "Mutating method must be called with $object->func!() syntax");
