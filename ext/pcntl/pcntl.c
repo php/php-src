@@ -42,8 +42,13 @@
 #endif
 
 #include <errno.h>
-#ifdef HAVE_UNSHARE
+#if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY)
 #include <sched.h>
+#if defined(__FreeBSD__)
+#include <sys/types.h>
+#include <sys/cpuset.h>
+typedef cpuset_t cpu_set_t;
+#endif
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
@@ -1468,6 +1473,103 @@ PHP_FUNCTION(pcntl_setns)
 
 			default:
 			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+#endif
+
+#ifdef HAVE_SCHED_SETAFFINITY
+PHP_FUNCTION(pcntl_getcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+	zend_ulong i, maxcpus;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// 0 == getpid in this context, we re just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+
+	CPU_ZERO(&mask);
+
+	if (sched_getaffinity(pid, sizeof(mask), &mask) != 0) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+
+		RETURN_EMPTY_ARRAY();
+	}
+
+	maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_ONLN);
+	array_init(return_value);
+
+	for (i = 0; i < maxcpus; i ++) {
+		if (CPU_ISSET(i, &mask)) {
+			add_next_index_long(return_value, i);
+		}
+	}
+}
+
+PHP_FUNCTION(pcntl_setcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+	zval *hmask = NULL, *cpu;
+	zend_ulong maxcpus;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_ARRAY(hmask)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!hmask || Z_ARRVAL_P(hmask)->nNumOfElements == 0) {
+		zend_argument_value_error(2, "must not be empty");
+		RETURN_THROWS();
+	}
+
+	// 0 == getpid in this context, we re just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+	maxcpus = sysconf(_SC_NPROCESSORS_ONLN);
+	CPU_ZERO(&mask);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), cpu) {
+		if (Z_TYPE_P(cpu) == IS_LONG && Z_LVAL_P(cpu) >= 0 &&
+                    Z_LVAL_P(cpu) < maxcpus && !CPU_ISSET(Z_LVAL_P(cpu), &mask)) {
+			CPU_SET(Z_LVAL_P(cpu), &mask);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!CPU_COUNT(&mask)) {
+		zend_argument_value_error(2, "invalid cpu affinity mapping");
+		RETURN_THROWS();
+	}
+
+	if (sched_setaffinity(pid, sizeof(mask), &mask) != 0) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
 		}
 		RETURN_FALSE;
 	} else {
