@@ -542,6 +542,24 @@ static zend_always_inline int dom_xml_serialize_text_node(xmlOutputBufferPtr out
 	return dom_xml_common_text_serialization(out, (const char *) text->content, false);
 }
 
+static int dom_xml_serialize_attribute_node_value(xmlOutputBufferPtr out, xmlAttrPtr attr)
+{
+	TRY(xmlOutputBufferWriteString(out, (const char *) attr->name));
+	TRY(xmlOutputBufferWrite(out, strlen("=\""), "=\""));
+	for (xmlNodePtr child = attr->children; child != NULL; child = child->next) {
+		if (child->type == XML_TEXT_NODE) {
+			if (child->content != NULL) {
+				TRY(dom_xml_common_text_serialization(out, (const char *) child->content, true));
+			}
+		} else if (child->type == XML_ENTITY_REF_NODE) {
+			TRY(xmlOutputBufferWrite(out, strlen("&"), "&"));
+			TRY(dom_xml_common_text_serialization(out, (const char *) child->name, true));
+			TRY(xmlOutputBufferWrite(out, strlen(";"), ";"));
+		}
+	}
+	return xmlOutputBufferWrite(out, strlen("\""), "\"");
+}
+
 /* Spec says to do nothing, but that's inconsistent/wrong, see https://github.com/w3c/DOM-Parsing/issues/28 */
 static int dom_xml_serialize_attribute_node(xmlOutputBufferPtr out, xmlNodePtr attr)
 {
@@ -549,10 +567,7 @@ static int dom_xml_serialize_attribute_node(xmlOutputBufferPtr out, xmlNodePtr a
 		TRY(xmlOutputBufferWriteString(out, (const char *) attr->ns->prefix));
 		TRY(xmlOutputBufferWrite(out, strlen(":"), ":"));
 	}
-	TRY(xmlOutputBufferWriteString(out, (const char *) attr->name));
-	TRY(xmlOutputBufferWrite(out, strlen("=\""), "=\""));
-	TRY(dom_xml_common_text_serialization(out, (const char *) dom_get_attribute_value((xmlAttrPtr) attr), true));
-	return xmlOutputBufferWrite(out, strlen("\""), "\"");
+	return dom_xml_serialize_attribute_node_value(out, (xmlAttrPtr) attr);
 }
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-xml-serializing-a-comment-node */
@@ -730,10 +745,7 @@ static int dom_xml_serialize_attributes(
 		 *      => N/A */
 
 		/* 3.9. Append the following strings to result, in the order listed: */
-		TRY(xmlOutputBufferWriteString(out, (const char *) attr->name));
-		TRY(xmlOutputBufferWrite(out, strlen("=\""), "=\""));
-		TRY(dom_xml_common_text_serialization(out, (const char *) dom_get_attribute_value(attr), true));
-		TRY(xmlOutputBufferWrite(out, strlen("\""), "\""));
+		dom_xml_serialize_attribute_node_value(out, attr);
 	}
 
 	/* 4. Return the value of result.

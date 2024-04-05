@@ -196,13 +196,21 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 				TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 			}
 		}
+
 		TRY(ctx->write_string_len(ctx->application_data, "=\"", strlen("=\"")));
-		xmlChar *content = xmlNodeGetContent((const xmlNode *) attr);
-		if (content != NULL) {
-			zend_result result = dom_html5_escape_string(ctx, (const char *) content, true);
-			xmlFree(content);
-			TRY(result);
+
+		for (xmlNodePtr child = attr->children; child != NULL; child = child->next) {
+			if (child->type == XML_TEXT_NODE) {
+				if (child->content != NULL) {
+					TRY(dom_html5_escape_string(ctx, (const char *) child->content, true));
+				}
+			} else if (child->type == XML_ENTITY_REF_NODE) {
+				TRY(ctx->write_string_len(ctx->application_data, "&", strlen("&")));
+				TRY(dom_html5_escape_string(ctx, (const char *) child->name, true));
+				TRY(ctx->write_string_len(ctx->application_data, ";", strlen(";")));
+			}
 		}
+
 		TRY(ctx->write_string_len(ctx->application_data, "\"", strlen("\"")));
 	}
 
