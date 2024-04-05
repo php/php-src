@@ -140,7 +140,7 @@ static int php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *new_value
 		if (keylen > 0) {
 			/* Note: the hash table is persistently allocated, so the strings must be too!
 			 * FIXME: the reason this is persistent is because the tables are allocated in GINIT,
-			 *        so it survives the request. This also means that the values set by `init_set` carry
+			 *        so it survives the request. This also means that the values set by `ini_set` carry
 			 *        over from request to request, which is strange... */
 			tmp_key = zend_string_init(key, keylen, true);
 			zend_hash_add_empty_element(hosts, tmp_key);
