@@ -225,7 +225,7 @@ int main(void) {
 }
 ]])],[have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[
   case $host_alias in
-    *linux*)
+    *linux*|*midipix)
       have_shm_mmap_anon=yes
       ;;
     *)

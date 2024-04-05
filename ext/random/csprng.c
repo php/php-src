@@ -47,7 +47,7 @@
 #if HAVE_SYS_PARAM_H
 # include <sys/param.h>
 # if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || \
-     defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
+     defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000) || defined(__midipix__)
 #  include <sys/random.h>
 # endif
 #endif
@@ -99,7 +99,7 @@ PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw)
 #else
 	size_t read_bytes = 0;
 # if (defined(__linux__) && defined(SYS_getrandom)) || (defined(__FreeBSD__) && __FreeBSD_version >= 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || \
-  defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000)
+  defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000) || defined(__midipix__)
 	/* Linux getrandom(2) syscall or FreeBSD/DragonFlyBSD/NetBSD getrandom(2) function
 	 * Being a syscall, implemented in the kernel, getrandom offers higher quality output
 	 * compared to the arc4random api albeit a fallback to /dev/urandom is considered.

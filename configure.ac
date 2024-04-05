@@ -699,7 +699,7 @@ int main(void) {
   ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [
     dnl Cross compilation.
     case $host_alias in
-      *linux*)
+      *linux*|*midipix)
         ac_cv_func_getaddrinfo=yes
         ;;
       *)
@@ -1262,6 +1262,7 @@ AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
   [aix*|os400*], [fiber_os="aix"],
   [freebsd*], [fiber_os="freebsd"],
+  [midipix], [fiber_os="midipix"],
   [fiber_os="other"]
 )
 
@@ -1293,6 +1294,15 @@ elif test "$fiber_os" = 'freebsd'; then
       ;;
     *)
       fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
+      ;;
+  esac
+elif test "$fiber_os" = 'midipix'; then
+  case $fiber_cpu in
+    i386*)
+      fiber_asm="no"
+      ;;
+    x86_64)
+      fiber_asm_file="x86_64_ms_pe_gas"
       ;;
   esac
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
