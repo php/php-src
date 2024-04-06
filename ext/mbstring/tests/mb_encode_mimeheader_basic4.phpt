@@ -2,6 +2,8 @@
 Test mb_encode_mimeheader() function : test cases found by fuzzer
 --EXTENSIONS--
 mbstring
+--INI--
+error_reporting=E_ALL^E_DEPRECATED
 --FILE--
 <?php
 
@@ -137,7 +139,7 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""
 string(21) "=?UTF-8?Q?abc=00abc?="
 string(16) "=?UTF-8?B?Pw==?="
@@ -180,8 +182,5 @@ string(135) "=?UTF-8?B?LDk4Njg5NDksOTg2ODk3OCw5ODY5MDE1LDk2ODkxMDAsOTg2OTEyMSw5O
 string(142) "xx =?UTF-8?B?QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB?=
  =?UTF-8?B?QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIA==?="
 string(690) "=?ISO-2022-JP?B?bmU/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/cxskQiFEGyhCPw==?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/MRskQiFEGyhCPxskQiFEGyhCPw==?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/GyRCIUQbKEI/?=A =?ISO-2022-JP?B?GyRCIUQbKEI/GyRCIUQbKEI/MQ==?="
-
-
-Deprecated: mb_encode_mimeheader(): Handling QPrint via mbstring is deprecated; use quoted_printable_encode/quoted_printable_decode instead in %s on line %d
 mb_encode_mimeheader(): Argument #2 ($charset) "Quoted-Printable" cannot be used for MIME header encoding
 Done
