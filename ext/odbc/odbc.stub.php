@@ -315,10 +315,10 @@ const SQL_QUICK = UNKNOWN;
 function odbc_close_all(): void {}
 
 /** @param resource $statement */
-function odbc_binmode($statement, int $mode): bool {}
+function odbc_binmode($statement, int $mode): true {}
 
 /** @param resource $statement */
-function odbc_longreadlen($statement, int $length): bool {}
+function odbc_longreadlen($statement, int $length): true {}
 
 /**
  * @param resource $odbc
@@ -377,7 +377,7 @@ function odbc_result($statement, string|int $field): string|bool|null {}
 function odbc_result_all($statement, string $format = ""): int|false {}
 
 /** @param resource $statement */
-function odbc_free_result($statement): bool {}
+function odbc_free_result($statement): true {}
 
 /**
  * @return resource|false
