@@ -1564,40 +1564,6 @@ PHP_FUNCTION(odbc_fetch_into)
 }
 /* }}} */
 
-/* {{{ */
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35)
-PHP_FUNCTION(solid_fetch_prev)
-{
-	odbc_result *result;
-	RETCODE rc;
-	zval *pv_res;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
-		RETURN_THROWS();
-	}
-	if (result->numcols == 0) {
-		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
-		RETURN_FALSE;
-	}
-	rc = SQLFetchPrev(result->stmt);
-
-	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
-		RETURN_FALSE;
-	}
-
-	if (result->fetched > 1) {
-		result->fetched--;
-	}
-
-	RETURN_TRUE;
-}
-#endif
-/* }}} */
-
 /* {{{ Fetch a row */
 PHP_FUNCTION(odbc_fetch_row)
 {
