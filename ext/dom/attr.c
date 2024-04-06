@@ -113,19 +113,9 @@ Since:
 */
 zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 {
-	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
-	xmlChar *content;
-
-	/* Can't avoid a content copy because it's an attribute node */
-	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_STRING(retval, (char *) content);
-		xmlFree(content);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, attrp, obj);
+	php_dom_get_content_into_zval(attrp, retval, false);
 	return SUCCESS;
-
 }
 
 zend_result dom_attr_value_write(dom_object *obj, zval *newval)
