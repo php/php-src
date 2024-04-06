@@ -1514,7 +1514,7 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 		RETURN_FALSE;
 	}
 
-	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_ONLN);
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
 	array_init(return_value);
 
 	for (zend_ulong i = 0; i < maxcpus; i ++) {
@@ -1544,7 +1544,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
-	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_ONLN);
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
 	CPU_ZERO(&mask);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
@@ -1552,10 +1552,17 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		zend_long cpu;
 		if (Z_TYPE_P(ncpu) != IS_LONG) {
 			if (Z_TYPE_P(ncpu) == IS_STRING) {
-				cpu = zval_get_long(ncpu);
+				zend_ulong tmp;
+				if (!ZEND_HANDLE_NUMERIC(Z_STR_P(ncpu), tmp)) {
+					zend_argument_value_error(2, "cpu id invalid value (%s)", ZSTR_VAL(Z_STR_P(ncpu)));
+					RETURN_THROWS();
+				}
+
+				cpu = (zend_long)tmp;
 			} else {
 				zend_string *wcpu = zval_get_string_func(ncpu);
-				zend_value_error("cpu id invalid type (%s)", ZSTR_VAL(wcpu));
+				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
+				zend_string_release(wcpu);
 				RETURN_THROWS();
 			}
 		} else {
@@ -1563,7 +1570,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		}
 
 		if (cpu < 0 || cpu >= maxcpus) {
-			zend_value_error("cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
 			RETURN_THROWS();
 		}
 		       

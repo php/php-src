@@ -7,18 +7,7 @@ if test "$PHP_PCNTL" != "no"; then
   AC_CHECK_FUNCS([fork], [], [AC_MSG_ERROR([pcntl: fork() not supported by this platform])])
   AC_CHECK_FUNCS([waitpid], [], [AC_MSG_ERROR([pcntl: waitpid() not supported by this platform])])
   AC_CHECK_FUNCS([sigaction], [], [AC_MSG_ERROR([pcntl: sigaction() not supported by this platform])])
-  AC_CHECK_FUNCS([
-	getpriority
-	setpriority
-	wait3
-	wait4
-	sigwaitinfo
-	sigtimedwait
-	unshare
-	rfork 
-	forkx
-	pidfd_open
-	sched_setaffinity])
+  AC_CHECK_FUNCS([getpriority setpriority wait3 wait4 sigwaitinfo sigtimedwait unshare rfork forkx pidfd_open sched_setaffinity])
 
   AC_CHECK_TYPE([siginfo_t],[PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"],,[#include <signal.h>])
 
