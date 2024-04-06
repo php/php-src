@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug GH-13856 (Member access within null pointer of type 'ps_files' in
     ext/session/mod_files.c). (nielsdos)
+  . Fixed bug GH-13891 (memleak and segfault when using ini_set with
+    session.trans_sid_hosts). (nielsdos, kamil-tekiela).
 
 - Streams:
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
