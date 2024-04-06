@@ -27,8 +27,11 @@
 /*
  * combinedLCG() returns a pseudo random number in the range of (0, 1).
  * The function combines two CGs with periods of
- * 2^31 - 85 and 2^31 - 249. The period of this function
- * is equal to the product of both primes.
+ * 2^31 - 85 - 1 and 2^31 - 249 - 1. The period of this function
+ * is equal to the product of the two underlying periods, divided
+ * by factors shared by the underlying periods, i.e. 2.3 * 10^18.
+ *
+ * see: https://library.sciencemadness.org/lanl1_a/lib-www/numerica/f7-1.pdf
  */
 #define MODMULT(a, b, c, m, s) q = s / a; s = b * (s - a * q) - c * q; if (s < 0) s += m
 
@@ -43,7 +46,9 @@ static php_random_result generate(void *state)
 	php_random_status_state_combinedlcg *s = state;
 	int32_t q, z;
 
+	/* s->state[0] = (s->state[0] * 40014) % 2147483563; */
 	MODMULT(53668, 40014, 12211, 2147483563L, s->state[0]);
+	/* s->state[1] = (s->state[1] * 40692) % 2147483399; */
 	MODMULT(52774, 40692, 3791, 2147483399L, s->state[1]);
 
 	z = s->state[0] - s->state[1];
