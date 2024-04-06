@@ -14,6 +14,7 @@ $act_mask = pcntl_getcpuaffinity();
 var_dump(array_diff($mask, $act_mask));
 $n_act_mask = pcntl_getcpuaffinity();
 var_dump(array_diff($act_mask, $n_act_mask));
+var_dump(pcntl_setcpuaffinity(null, ["0", "1"]));
 
 try {
 	pcntl_setcpuaffinity(null, []);
@@ -42,17 +43,26 @@ try {
 try {
 	pcntl_getcpuaffinity(-1024);
 } catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+	pcntl_setcpuaffinity(null, [1, array(1)]);
+} catch (\ValueError $e) {
 	echo $e->getMessage();
 }
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 array(0) {
 }
 array(0) {
 }
+bool(true)
 pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) must not be empty
-pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) invalid cpu affinity mapping
-pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) invalid cpu affinity mapping
-pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) invalid cpu affinity mapping
+cpu id must be between 0 and %d (%d)
+cpu id must be between 0 and %d (-1024)
 pcntl_getcpuaffinity(): Argument #1 ($process_id) invalid process (-1024)
+
+Warning: Array to string conversion in %s on line %d
+cpu id invalid type (Array)

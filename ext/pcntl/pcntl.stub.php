@@ -996,6 +996,6 @@ function pcntl_setns(?int $process_id = null, int $nstype = CLONE_NEWNET): bool 
 #endif
 
 #ifdef HAVE_SCHED_SETAFFINITY
-function pcntl_getcpuaffinity(?int $process_id = null): array {}
+function pcntl_getcpuaffinity(?int $process_id = null): array|false {}
 function pcntl_setcpuaffinity(?int $process_id = null, array $cpu_ids = []): bool {}
 #endif

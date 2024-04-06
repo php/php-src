@@ -1487,14 +1487,13 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 	zend_long pid;
 	bool pid_is_null = 1;
 	cpu_set_t mask;
-	zend_ulong i, maxcpus;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// 0 == getpid in this context, we re just saving a syscall
+	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
 
 	CPU_ZERO(&mask);
@@ -1512,13 +1511,13 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 				php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 
-		RETURN_EMPTY_ARRAY();
+		RETURN_FALSE;
 	}
 
-	maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_ONLN);
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_ONLN);
 	array_init(return_value);
 
-	for (i = 0; i < maxcpus; i ++) {
+	for (zend_ulong i = 0; i < maxcpus; i ++) {
 		if (CPU_ISSET(i, &mask)) {
 			add_next_index_long(return_value, i);
 		}
@@ -1530,8 +1529,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 	zend_long pid;
 	bool pid_is_null = 1;
 	cpu_set_t mask;
-	zval *hmask = NULL, *cpu;
-	zend_ulong maxcpus;
+	zval *hmask = NULL, *ncpu;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -1539,27 +1537,40 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		Z_PARAM_ARRAY(hmask)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!hmask || Z_ARRVAL_P(hmask)->nNumOfElements == 0) {
+	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
 		zend_argument_value_error(2, "must not be empty");
 		RETURN_THROWS();
 	}
 
-	// 0 == getpid in this context, we re just saving a syscall
+	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
-	maxcpus = sysconf(_SC_NPROCESSORS_ONLN);
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_ONLN);
 	CPU_ZERO(&mask);
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), cpu) {
-		if (Z_TYPE_P(cpu) == IS_LONG && Z_LVAL_P(cpu) >= 0 &&
-                    Z_LVAL_P(cpu) < maxcpus && !CPU_ISSET(Z_LVAL_P(cpu), &mask)) {
-			CPU_SET(Z_LVAL_P(cpu), &mask);
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
+		ZVAL_DEREF(ncpu);
+		zend_long cpu;
+		if (Z_TYPE_P(ncpu) != IS_LONG) {
+			if (Z_TYPE_P(ncpu) == IS_STRING) {
+				cpu = zval_get_long(ncpu);
+			} else {
+				zend_string *wcpu = zval_get_string_func(ncpu);
+				zend_value_error("cpu id invalid type (%s)", ZSTR_VAL(wcpu));
+				RETURN_THROWS();
+			}
+		} else {
+			cpu = Z_LVAL_P(ncpu);
+		}
+
+		if (cpu < 0 || cpu >= maxcpus) {
+			zend_value_error("cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			RETURN_THROWS();
+		}
+		       
+		if (!CPU_ISSET(cpu, &mask)) {
+			CPU_SET(cpu, &mask);
 		}
 	} ZEND_HASH_FOREACH_END();
-
-	if (!CPU_COUNT(&mask)) {
-		zend_argument_value_error(2, "invalid cpu affinity mapping");
-		RETURN_THROWS();
-	}
 
 	if (sched_setaffinity(pid, sizeof(mask), &mask) != 0) {
 		PCNTL_G(last_error) = errno;
@@ -1570,6 +1581,8 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			case EPERM:
 				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
 				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
 		RETURN_FALSE;
 	} else {

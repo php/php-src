@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3b3fd6aaaca61451cad2679aafa3abef1a7056db */
+ * Stub hash: a61b0327f5c36ca91e19c5f370377794b7950dee */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -140,7 +140,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_SCHED_SETAFFINITY)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_getcpuaffinity, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getcpuaffinity, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 #endif
