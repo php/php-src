@@ -28,11 +28,19 @@ var_dump($result2);
 
 ?>
 --EXPECTF--
-resource(%d) of type (odbc link)
-resource(%d) of type (odbc link persistent)
-resource(%d) of type (odbc result)
-resource(%d) of type (odbc result)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
-resource(%d) of type (Unknown)
+object(ODBC\Connection)#%d (%d) {
+}
+object(ODBC\Connection)#%d (%d) {
+}
+object(ODBC\Result)#%d (%d) {
+}
+object(ODBC\Result)#%d (%d) {
+}
+object(ODBC\Connection)#%d (%d) {
+}
+object(ODBC\Connection)#%d (%d) {
+}
+object(ODBC\Result)#%d (%d) {
+}
+object(ODBC\Result)#%d (%d) {
+}

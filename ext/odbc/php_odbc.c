@@ -65,11 +65,17 @@
 
 void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent);
 static void safe_odbc_disconnect(void *handle);
+static void close_results_with_connection(const odbc_connection *conn);
 
 static int le_pconn;
 
 static zend_class_entry *odbc_connection_ce, *odbc_result_ce;
 static zend_object_handlers odbc_connection_object_handlers, odbc_result_object_handlers;
+
+static void odbc_insert_new_result(zval *result) {
+	Z_TRY_ADDREF_P(result);
+	zend_hash_next_index_insert_new(&ODBCG(results), result);
+}
 
 static inline odbc_link *odbc_link_from_obj(zend_object *obj) {
 	return (odbc_link *)((char *)(obj) - XtOffsetOf(odbc_link, std));
@@ -95,19 +101,29 @@ static zend_function *odbc_connection_get_constructor(zend_object *object) {
 
 static void odbc_link_free(odbc_link *link)
 {
-	/* If aborted via timer expiration, don't try to call any unixODBC function */
-	if (!(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
-		safe_odbc_disconnect(link->connection->hdbc);
-		SQLFreeConnect(link->connection->hdbc);
-		SQLFreeEnv(link->connection->henv);
-	}
-	efree(link->connection);
-	link->connection = NULL;
-	ODBCG(num_links)--;
-	if (!link->persistent) {
+	ZEND_ASSERT(link->connection && "link has already been closed");
+
+	if (link->persistent) {
+		zend_hash_del(&EG(persistent_list), link->hash);
+	} else {
+		close_results_with_connection(link->connection);
+
 		zend_hash_del(&ODBCG(connections), link->hash);
+
+		/* If aborted via timer expiration, don't try to call any unixODBC function */
+		if (!(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
+			safe_odbc_disconnect(link->connection->hdbc);
+			SQLFreeConnect(link->connection->hdbc);
+			SQLFreeEnv(link->connection->henv);
+		}
+		efree(link->connection);
+		ODBCG(num_links)--;
 	}
+
+	link->connection = NULL;
+
 	zend_string_release(link->hash);
+	link->hash = NULL;
 }
 
 static void odbc_connection_free_obj(zend_object *obj)
@@ -146,6 +162,8 @@ static zend_function *odbc_result_get_constructor(zend_object *object) {
 
 static void odbc_result_free(odbc_result *res)
 {
+	ZEND_ASSERT(res->conn_ptr && "result has already been closed");
+
 	if (res->values) {
 		for (int i = 0; i < res->numcols; i++) {
 			if (res->values[i].value) {
@@ -154,6 +172,7 @@ static void odbc_result_free(odbc_result *res)
 		}
 		efree(res->values);
 		res->values = NULL;
+		res->numcols = 0;
 	}
 	/* If aborted via timer expiration, don't try to call any unixODBC function */
 	if (res->stmt && !(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
@@ -165,20 +184,32 @@ static void odbc_result_free(odbc_result *res)
 		/* We don't want the connection to be closed after the last statement has been closed
 		 * Connections will be closed on shutdown
 		 */
+		res->stmt = NULL;
 	}
 	if (res->param_info) {
 		efree(res->param_info);
+		res->param_info = NULL;
 	}
-	efree(res);
+	res->conn_ptr = NULL;
 }
 
 static void odbc_result_free_obj(zend_object *obj) {
+	zend_ulong num_index;
+	zval *p;
+
 	odbc_result *result = odbc_result_from_obj(obj);
 
-	if (!result->stmt) {
+	if (!result->conn_ptr) {
 		zend_object_std_dtor(&result->std);
 		return;
 	}
+
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&ODBCG(results), num_index, p) {
+		odbc_result *res = Z_ODBC_RESULT_P(p);
+		if (res->stmt == result->stmt) {
+			zend_hash_index_del(&ODBCG(results), num_index);
+		}
+	} ZEND_HASH_FOREACH_END();
 
 	odbc_result_free(result);
 	zend_object_std_dtor(&result->std);
@@ -223,7 +254,7 @@ static void close_results_with_connection(const odbc_connection *conn) {
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(&ODBCG(results), num_index, p) {
 		odbc_result *result = Z_ODBC_RESULT_P(p);
 		if (result->conn_ptr == conn) {
-			odbc_result_free((odbc_result*) p);
+			odbc_result_free(result);
 			zend_hash_index_del(&ODBCG(results), num_index);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -256,6 +287,7 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 		SQLFreeEnv(conn->henv);
 	}
 	free(conn);
+	conn = NULL;
 
 	ODBCG(num_links)--;
 	ODBCG(num_persistent)--;
@@ -812,30 +844,38 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 /* {{{ Close all ODBC connections */
 PHP_FUNCTION(odbc_close_all)
 {
-	zval *p;
+	odbc_link *p;
+	zval *zv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	/* Loop through list and close all statements */
-	ZEND_HASH_FOREACH_VAL(&ODBCG(results), p) {
-		odbc_result_free((odbc_result*) p);
+	/* Loop through the connection list, now close all non-persistent connections and their results */
+	ZEND_HASH_FOREACH_PTR(&ODBCG(connections), p) {
+		if (p->connection) {
+			odbc_link_free(p);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_clean(&ODBCG(connections));
+
+	/* Loop through the persistent list, now close all persistent connections and their results */
+	ZEND_HASH_FOREACH_VAL(&EG(persistent_list), zv) {
+		if (Z_RES_P(zv)->type == le_pconn) {
+			zend_list_close(Z_RES_P(zv));
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	/* Loop through the results list searching for any dangling results and close all statements */
+	ZEND_HASH_FOREACH_VAL(&ODBCG(results), zv) {
+		odbc_result *result = Z_ODBC_RESULT_P(zv);
+		if (result->conn_ptr) {
+			odbc_result_free(result);
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_clean(&ODBCG(results));
-
-	/* Second loop through list, now close all non-persistent connections */
-	ZEND_HASH_FOREACH_VAL(&ODBCG(connections), p) {
-		odbc_link_free((odbc_link*) p);
-	} ZEND_HASH_FOREACH_END();
-
-	/* Third loop through persistent list, now close all persistent connections */
-	ZEND_HASH_FOREACH_VAL(&EG(persistent_list), p) {
-		if (Z_RES_P(p)->type == le_pconn) {
-			zend_list_close(Z_RES_P(p));
-		}
-	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
 
@@ -947,7 +987,7 @@ PHP_FUNCTION(odbc_prepare)
 		}
 	}
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 
@@ -1323,7 +1363,7 @@ PHP_FUNCTION(odbc_exec)
 	result->conn_ptr = conn;
 	result->fetched = 0;
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 
@@ -1390,7 +1430,6 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	else
 #endif
 		result->fetched++;
-	}
 
 	for(i = 0; i < result->numcols; i++) {
 		sql_c_type = SQL_C_CHAR;
@@ -1500,7 +1539,7 @@ PHP_FUNCTION(odbc_fetch_into)
 	SQLSMALLINT sql_c_type;
 	char *buf = NULL;
 	zval *pv_res, *pv_res_arr, tmp;
-	zend_long pv_row = 0;
+	zend_long pv_row = -1;
 	bool pv_row_is_null = true;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
@@ -1553,7 +1592,6 @@ PHP_FUNCTION(odbc_fetch_into)
 	else
 #endif
 		result->fetched++;
-	}
 
 	for(i = 0; i < result->numcols; i++) {
 		sql_c_type = SQL_C_CHAR;
@@ -1630,7 +1668,7 @@ PHP_FUNCTION(odbc_fetch_row)
 	odbc_result *result;
 	RETCODE rc;
 	zval *pv_res;
-	zend_long pv_row = 0;
+	zend_long pv_row = -1;
 	bool pv_row_is_null = true;
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLULEN crow;
@@ -1674,6 +1712,7 @@ PHP_FUNCTION(odbc_fetch_row)
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		RETURN_FALSE;
 	}
+
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (!pv_row_is_null) {
 		result->fetched = (SQLLEN)pv_row;
@@ -2042,7 +2081,6 @@ PHP_FUNCTION(odbc_free_result)
 {
 	zval *pv_res;
 	odbc_result *result;
-	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_res, odbc_result_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -2051,17 +2089,9 @@ PHP_FUNCTION(odbc_free_result)
 	result = Z_ODBC_RESULT_P(pv_res);
 	CHECK_ODBC_RESULT(result);
 
-	if (result->values) {
-		for (i = 0; i < result->numcols; i++) {
-			if (result->values[i].value) {
-				efree(result->values[i].value);
-			}
-		}
-		efree(result->values);
-		result->values = NULL;
+	if (result->conn_ptr) {
+		odbc_result_free(result);
 	}
-
-	zend_list_close(Z_RES_P(pv_res));
 
 	RETURN_TRUE;
 }
@@ -2085,6 +2115,7 @@ PHP_FUNCTION(odbc_pconnect)
 bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool persistent, zend_string *hash)
 {
 	RETCODE rc;
+	SQLRETURN ret;
 	odbc_link *link;
 
 	object_init_ex(zv, odbc_connection_ce);
@@ -2093,9 +2124,18 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	memset(link->connection, 0, sizeof(odbc_connection));
 
 	link->persistent = persistent;
-	link->hash = hash;
-	SQLAllocEnv(link->connection->henv);
-	SQLAllocConnect(link->connection->henv, link->connection->hdbc);
+	link->hash = zend_string_copy(hash);
+	ret = SQLAllocEnv(&((*link->connection).henv));
+	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+		odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLAllocEnv");
+		return false;
+	}
+
+	ret = SQLAllocConnect((*link->connection).henv, &((*link->connection).hdbc));
+	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
+		odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLAllocConnect");
+		return false;
+	}
 
 #if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
 	SQLSetConnectOption((link->connection->hdbc, SQL_TRANSLATE_OPTION,
@@ -2358,9 +2398,9 @@ try_and_get_another_connection:
 			RETURN_FALSE;
 		}
 		ODBCG(num_links)++;
+		zend_hash_update_ptr(&ODBCG(connections), hashed_details.s, Z_ODBC_LINK_P(return_value));
 	}
 
-	zend_hash_update(&ODBCG(connections), hashed_details.s, return_value);
 	smart_str_free(&hashed_details);
 }
 /* }}} */
@@ -2377,12 +2417,6 @@ PHP_FUNCTION(odbc_close)
 
 	link = Z_ODBC_LINK_P(pv_conn);
 	CHECK_ODBC_CONNECTION(link->connection);
-
-	if (link->persistent) {
-		zend_hash_del(&EG(persistent_list), link->hash);
-	}
-
-	close_results_with_connection(link->connection);
 
 	odbc_link_free(link);
 }
@@ -2815,7 +2849,7 @@ PHP_FUNCTION(odbc_tables)
 	result->conn_ptr = conn;
 	result->fetched = 0;
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 
@@ -2883,7 +2917,7 @@ PHP_FUNCTION(odbc_columns)
 	result->conn_ptr = conn;
 	result->fetched = 0;
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 
@@ -2945,7 +2979,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	result->conn_ptr = conn;
 	result->fetched = 0;
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 #endif /* HAVE_DBMAKER || HAVE_SOLID*/
@@ -3022,7 +3056,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	result->conn_ptr = conn;
 	result->fetched = 0;
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 #endif /* HAVE_SOLID */
@@ -3081,7 +3115,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	result->conn_ptr = conn;
 	result->fetched = 0;
 
-	zend_hash_next_index_insert_new(&ODBCG(results), return_value);
+	odbc_insert_new_result(return_value);
 }
 /* }}} */
 
