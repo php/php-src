@@ -2577,13 +2577,17 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 #else
 						ssize_t ret;
 #endif
-						int err;
 
 						ret = recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT);
-						err = php_socket_errno();
-						if (0 == ret || /* the counterpart did properly shutdown */
-							(0 > ret && err != EWOULDBLOCK && err != EAGAIN && err != EMSGSIZE)) { /* there was an unrecoverable error */
+						if (0 == ret) {
+							/* the counterpart did properly shutdown */
 							alive = 0;
+						} else if (0 > ret) {
+							int err = php_socket_errno();
+							if (err != EWOULDBLOCK && err != EMSGSIZE && err != EAGAIN) {
+								/* there was an unrecoverable error */
+								alive = 0;
+							}
 						}
 					}
 				}
