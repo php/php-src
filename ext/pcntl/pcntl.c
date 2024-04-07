@@ -119,7 +119,6 @@ static PHP_GINIT_FUNCTION(pcntl)
 PHP_RINIT_FUNCTION(pcntl)
 {
 	php_add_tick_function(pcntl_signal_dispatch_tick_function, NULL);
-	zend_hash_init(&PCNTL_G(php_signal_table), 16, NULL, ZVAL_PTR_DTOR, 0);
 	PCNTL_G(head) = PCNTL_G(tail) = PCNTL_G(spares) = NULL;
 	PCNTL_G(async_signals) = 0;
 	PCNTL_G(last_error) = 0;
@@ -131,6 +130,7 @@ PHP_RINIT_FUNCTION(pcntl)
 		PCNTL_G(num_signals) = SIGRTMAX + 1;
 	}
 #endif
+	zend_hash_init(&PCNTL_G(php_signal_table), PCNTL_G(num_signals), NULL, ZVAL_PTR_DTOR, 0);
 	return SUCCESS;
 }
 
