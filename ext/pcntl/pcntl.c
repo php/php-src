@@ -692,8 +692,17 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 		Z_PARAM_LONG(signo)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (signo < 1 || signo > 32) {
-		zend_argument_value_error(1, "must be between 1 and 32");
+	// note: max signal on mac is SIGUSR2 (31), no real time signals.
+	int sigmax = NSIG - 1;
+#if defined(SIGRTMAX)
+	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
+	if (sigmax < SIGRTMAX) {
+		sigmax = SIGRTMAX;
+	}
+#endif
+
+	if (signo < 1 || signo > sigmax) {
+		zend_argument_value_error(1, "must be between 1 and %d", sigmax);
 		RETURN_THROWS();
 	}
 

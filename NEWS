@@ -125,6 +125,8 @@ PHP                                                                        NEWS
 - PCNTL:
   . Added pcntl_setns for Linux. (David Carlier)
   . Added pcntl_getaffinity/pcntl_setaffinity. (David Carlier)
+  . Updated pcntl_get_signal_handler signal id upper limit to be
+    more in line with platforms limits. (David Carlier)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
