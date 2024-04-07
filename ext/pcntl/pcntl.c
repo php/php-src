@@ -1014,7 +1014,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	/* needs to be cleared, since any returned value is valid */
 	errno = 0;
 
-	pid = pid_is_null ? getpid() : pid;
+	pid = pid_is_null ? 0 : pid;
 	pri = getpriority(who, pid);
 
 	if (errno) {
@@ -1068,7 +1068,7 @@ PHP_FUNCTION(pcntl_setpriority)
 		Z_PARAM_LONG(who)
 	ZEND_PARSE_PARAMETERS_END();
 
-	pid = pid_is_null ? getpid() : pid;
+	pid = pid_is_null ? 0 : pid;
 
 	if (setpriority(who, pid, pri)) {
 		PCNTL_G(last_error) = errno;
