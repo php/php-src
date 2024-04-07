@@ -529,7 +529,7 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 /* }}} */
 
 /* {{{ odbc_bindcols */
-int odbc_bindcols(odbc_result *result)
+void odbc_bindcols(odbc_result *result)
 {
 	RETCODE rc;
 	int i;
@@ -645,7 +645,6 @@ int odbc_bindcols(odbc_result *result)
 				break;
 		}
 	}
-	return 1;
 }
 /* }}} */
 
@@ -855,10 +854,7 @@ PHP_FUNCTION(odbc_prepare)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -1057,10 +1053,7 @@ PHP_FUNCTION(odbc_execute)
 		SQLNumResultCols(result->stmt, &(result->numcols));
 
 		if (result->numcols > 0) {
-			if (!odbc_bindcols(result)) {
-				efree(result);
-				RETVAL_FALSE;
-			}
+			odbc_bindcols(result);
 		} else {
 			result->values = NULL;
 		}
@@ -1253,10 +1246,7 @@ PHP_FUNCTION(odbc_exec)
 
 	/* For insert, update etc. cols == 0 */
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -2383,10 +2373,7 @@ PHP_FUNCTION(odbc_next_result)
 		SQLNumResultCols(result->stmt, &(result->numcols));
 
 		if (result->numcols > 0) {
-			if (!odbc_bindcols(result)) {
-				efree(result);
-				RETVAL_FALSE;
-			}
+			odbc_bindcols(result);
 		} else {
 			result->values = NULL;
 		}
@@ -2752,10 +2739,7 @@ PHP_FUNCTION(odbc_tables)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -2822,10 +2806,7 @@ PHP_FUNCTION(odbc_columns)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -2886,10 +2867,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -2965,10 +2943,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3026,10 +3001,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3087,10 +3059,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3151,10 +3120,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3214,10 +3180,7 @@ PHP_FUNCTION(odbc_procedures)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3285,10 +3248,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3354,10 +3314,7 @@ PHP_FUNCTION(odbc_statistics)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
@@ -3416,10 +3373,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	SQLNumResultCols(result->stmt, &(result->numcols));
 
 	if (result->numcols > 0) {
-		if (!odbc_bindcols(result)) {
-			efree(result);
-			RETURN_FALSE;
-		}
+		odbc_bindcols(result);
 	} else {
 		result->values = NULL;
 	}
