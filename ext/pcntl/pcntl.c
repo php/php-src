@@ -1516,6 +1516,9 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 			case EPERM:
 				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
 				break;
+			case EINVAL:
+				zend_value_error("invalid cpu affinity mask size");
+				RETURN_THROWS();
 			default:
 				php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
@@ -1597,6 +1600,9 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			case EPERM:
 				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
 				break;
+			case EINVAL:
+				zend_argument_value_error(2, "invalid cpu affinity mask size or unmapped cpu id(s)");
+				RETURN_THROWS();
 			default:
 				php_error_docref(NULL, E_WARNING, "Error %d", errno);
 		}
