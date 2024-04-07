@@ -693,7 +693,7 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 	ZEND_PARSE_PARAMETERS_END();
 
 	// note: max signal on mac is SIGUSR2 (31), no real time signals.
-	static int sigmax = NSIG - 1;
+	int sigmax = NSIG - 1;
 #if defined(SIGRTMAX)
 	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
 	if (sigmax < SIGRTMAX) {
