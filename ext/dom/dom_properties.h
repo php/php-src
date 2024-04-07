@@ -66,6 +66,7 @@ zend_result dom_html_document_body_read(dom_object *obj, zval *retval);
 zend_result dom_html_document_body_write(dom_object *obj, zval *newval);
 zend_result dom_html_document_head_read(dom_object *obj, zval *retval);
 zend_result dom_html_document_title_read(dom_object *obj, zval *retval);
+zend_result dom_html_document_title_write(dom_object *obj, zval *newval);
 
 /* documenttype properties */
 zend_result dom_documenttype_name_read(dom_object *obj, zval *retval);

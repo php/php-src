@@ -1359,14 +1359,14 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 	return SUCCESS;
 }
 
-static const xmlNode *dom_html_document_element_read_raw(const xmlDoc *docp, bool (*accept)(const xmlChar *))
+static xmlNodePtr dom_html_document_element_read_raw(const xmlDoc *docp, bool (*accept)(const xmlChar *))
 {
 	const xmlNode *root = xmlDocGetRootElement(docp);
 	if (root == NULL || !(php_dom_ns_is_fast(root, php_dom_ns_is_html_magic_token) && xmlStrEqual(root->name, BAD_CAST "html"))) {
 		return NULL;
 	}
 
-	const xmlNode *cur = root->children;
+	xmlNodePtr cur = root->children;
 	while (cur != NULL) {
 		if (cur->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(cur, php_dom_ns_is_html_magic_token) && accept(cur->name)) {
 			return cur;
@@ -1476,9 +1476,9 @@ static zend_string *dom_get_child_text_content(const xmlNode *node)
 }
 
 /* https://html.spec.whatwg.org/#the-title-element-2 */
-static const xmlNode *dom_get_title_element(const xmlDoc *doc)
+static xmlNodePtr dom_get_title_element(const xmlDoc *doc)
 {
-	const xmlNode *node = doc->children;
+	xmlNodePtr node = doc->children;
 
 	while (node != NULL) {
 		if (node->type == XML_ELEMENT_NODE) {
@@ -1493,11 +1493,28 @@ static const xmlNode *dom_get_title_element(const xmlDoc *doc)
 	return node;
 }
 
+/* The subtle difference is that this is about the direct title descendant of the svg element,
+ * whereas the html variant of this function is about the first in-tree title element. */
+static xmlNodePtr dom_get_svg_title_element(xmlNodePtr svg)
+{
+	xmlNodePtr cur = svg->children;
+
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE
+			&& php_dom_ns_is_fast(cur, php_dom_ns_is_svg_magic_token) && xmlStrEqual(cur->name, BAD_CAST "title")) {
+			break;
+		}
+		cur = cur->next;
+	}
+
+	return cur;
+}
+
 /* https://html.spec.whatwg.org/#document.title */
 zend_result dom_html_document_title_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(const xmlDoc *, docp, obj);
-	const xmlNode *root = xmlDocGetRootElement(docp);
+	xmlNodePtr root = xmlDocGetRootElement(docp);
 
 	if (root == NULL) {
 		ZVAL_EMPTY_STRING(retval);
@@ -1509,15 +1526,9 @@ zend_result dom_html_document_title_read(dom_object *obj, zval *retval)
 	/* 1. If the document element is an SVG svg element,
 	 *    then let value be the child text content of the first SVG title element that is a child of the document element. */
 	if (php_dom_ns_is_fast(root, php_dom_ns_is_svg_magic_token) && xmlStrEqual(root->name, BAD_CAST "svg")) {
-		const xmlNode *cur = root->children;
-
-		while (cur != NULL) {
-			if (cur->type == XML_ELEMENT_NODE
-				&& php_dom_ns_is_fast(cur, php_dom_ns_is_svg_magic_token) && xmlStrEqual(cur->name, BAD_CAST "title")) {
-				value = dom_get_child_text_content(cur);
-				break;
-			}
-			cur = cur->next;
+		const xmlNode *title = dom_get_svg_title_element(root);
+		if (title != NULL) {
+			value = dom_get_child_text_content(title);
 		}
 	} else {
 		/* 2. Otherwise, let value be the child text content of the title element,
@@ -1533,6 +1544,97 @@ zend_result dom_html_document_title_read(dom_object *obj, zval *retval)
 
 	/* 4. Return value. */
 	ZVAL_STR(retval, value);
+
+	return SUCCESS;
+}
+
+static void dom_string_replace_all(xmlDocPtr docp, xmlNodePtr element, zval *zv)
+{
+	dom_remove_all_children(element);
+	xmlNode *text = xmlNewDocText(docp, BAD_CAST Z_STRVAL_P(zv));
+	xmlAddChild(element, text);
+}
+
+/* https://html.spec.whatwg.org/#document.title */
+zend_result dom_html_document_title_write(dom_object *obj, zval *newval)
+{
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
+	xmlNodePtr root = xmlDocGetRootElement(docp);
+
+	if (root == NULL) {
+		return SUCCESS;
+	}
+
+	/* If the document element is an SVG svg element */
+	if (php_dom_ns_is_fast(root, php_dom_ns_is_svg_magic_token) && xmlStrEqual(root->name, BAD_CAST "svg")) {
+		/* 1. If there is an SVG title element that is a child of the document element, let element be the first such element. */
+		xmlNodePtr element = dom_get_svg_title_element(root);
+
+		/* 2. Otherwise: */
+		if (element == NULL) {
+			/* 2.1. Let element be the result of creating an element given the document element's node document,
+			 *      title, and the SVG namespace. */
+
+			/* Annoyingly, we must create it in the svg namespace _without_ prefix... */
+			xmlNsPtr ns = root->ns;
+			if (ns->prefix != NULL) {
+				/* Slow path... */
+				php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(obj);
+				zend_string *href = ZSTR_INIT_LITERAL(DOM_SVG_NS_URI, false);
+				ns = php_dom_libxml_ns_mapper_get_ns(ns_mapper, zend_empty_string, href);
+				zend_string_release_ex(href, false);
+			}
+
+			element = xmlNewDocNode(docp, ns, BAD_CAST "title", NULL);
+			if (UNEXPECTED(element == NULL)) {
+				php_dom_throw_error(INVALID_STATE_ERR, true);
+				return FAILURE;
+			}
+
+			/* 2.2. Insert element as the first child of the document element. */
+			if (root->children == NULL) {
+				root->last = element;
+			} else {
+				element->next = root->children;
+				root->children->prev = element;
+			}
+			root->children = element;
+			element->parent = root;
+		}
+
+		/* 3. String replace all with the given value within element. */
+		dom_string_replace_all(docp, element, newval);
+	}
+	/* If the document element is in the HTML namespace */
+	else if (php_dom_ns_is_fast(root, php_dom_ns_is_html_magic_token)) {
+		/* 1. If the title element is null and the head element is null, then return. */
+		xmlNodePtr title = dom_get_title_element(docp);
+		xmlNodePtr head = dom_html_document_element_read_raw(docp, dom_accept_head_name);
+		if (title == NULL && head == NULL) {
+			return SUCCESS;
+		}
+
+		/* 2. If the title element is non-null, let element be the title element. */
+		xmlNodePtr element = title;
+
+		/* 3. Otherwise: */
+		if (element == NULL) {
+			/* 3.1. Let element be the result of creating an element given the document element's node document, title,
+			 *      and the HTML namespace. */
+			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(obj);
+			element = xmlNewDocNode(docp, php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper), BAD_CAST "title", NULL);
+			if (UNEXPECTED(element == NULL)) {
+				php_dom_throw_error(INVALID_STATE_ERR, true);
+				return FAILURE;
+			}
+
+			/* 3.2. Append element to the head element. */
+			xmlAddChild(head, element);
+		}
+
+		/* 4. String replace all with the given value within element. */
+		dom_string_replace_all(docp, element, newval);
+	}
 
 	return SUCCESS;
 }
