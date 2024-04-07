@@ -26,6 +26,7 @@
 /ext/odbc @NattyNarwhal
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
+/ext/pcntl @devnexen
 /ext/pdo @SakiTakamachi
 /ext/pdo_dblib @SakiTakamachi
 /ext/pdo_firebird @SakiTakamachi
