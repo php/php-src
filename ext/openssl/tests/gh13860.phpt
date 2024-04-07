@@ -21,6 +21,7 @@ $serverCode = <<<'CODE'
         fwrite($client, "xx");
         phpt_wait();
         fclose($client);
+        phpt_notify();
     }
 CODE;
 
@@ -38,6 +39,7 @@ $clientCode = <<<'CODE'
     while (!($in = fread($fp, 2))) {
         usleep(1000);
     }
+    phpt_wait();
     var_dump(feof($fp));
     fclose($fp);
 CODE;
