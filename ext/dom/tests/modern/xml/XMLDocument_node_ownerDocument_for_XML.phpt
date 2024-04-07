@@ -13,7 +13,7 @@ var_dump($element->ownerDocument);
 
 ?>
 --EXPECTF--
-object(Dom\XMLDocument)#1 (31) {
+object(Dom\XMLDocument)#1 (32) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -48,6 +48,8 @@ object(Dom\XMLDocument)#1 (31) {
   NULL
   ["head"]=>
   NULL
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(9)
   ["nodeName"]=>

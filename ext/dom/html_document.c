@@ -21,6 +21,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "infra.h"
 #include "html5_parser.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
@@ -1456,6 +1457,84 @@ zend_result dom_html_document_body_write(dom_object *obj, zval *newval)
 
 	php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "The new body must either be a body or a frameset tag", true);
 	return FAILURE;
+}
+
+/* https://dom.spec.whatwg.org/#concept-child-text-content */
+static zend_string *dom_get_child_text_content(const xmlNode *node)
+{
+	smart_str content = {0};
+
+	const xmlNode *text = node->children;
+	while (text != NULL) {
+		if (text->type == XML_TEXT_NODE || text->type == XML_CDATA_SECTION_NODE) {
+			smart_str_appends(&content, (const char *) text->content);
+		}
+		text = text->next;
+	}
+
+	return smart_str_extract(&content);
+}
+
+/* https://html.spec.whatwg.org/#the-title-element-2 */
+static const xmlNode *dom_get_title_element(const xmlDoc *doc)
+{
+	const xmlNode *node = doc->children;
+
+	while (node != NULL) {
+		if (node->type == XML_ELEMENT_NODE) {
+			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token) && xmlStrEqual(node->name, BAD_CAST "title")) {
+				break;
+			}
+		}
+
+		node = php_dom_next_in_tree_order(node, NULL);
+	}
+
+	return node;
+}
+
+/* https://html.spec.whatwg.org/#document.title */
+zend_result dom_html_document_title_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(const xmlDoc *, docp, obj);
+	const xmlNode *root = xmlDocGetRootElement(docp);
+
+	if (root == NULL) {
+		ZVAL_EMPTY_STRING(retval);
+		return SUCCESS;
+	}
+
+	zend_string *value = zend_empty_string;
+
+	/* 1. If the document element is an SVG svg element,
+	 *    then let value be the child text content of the first SVG title element that is a child of the document element. */
+	if (php_dom_ns_is_fast(root, php_dom_ns_is_svg_magic_token) && xmlStrEqual(root->name, BAD_CAST "svg")) {
+		const xmlNode *cur = root->children;
+
+		while (cur != NULL) {
+			if (cur->type == XML_ELEMENT_NODE
+				&& php_dom_ns_is_fast(cur, php_dom_ns_is_svg_magic_token) && xmlStrEqual(cur->name, BAD_CAST "title")) {
+				value = dom_get_child_text_content(cur);
+				break;
+			}
+			cur = cur->next;
+		}
+	} else {
+		/* 2. Otherwise, let value be the child text content of the title element,
+		 *    or the empty string if the title element is null. */
+		const xmlNode *title = dom_get_title_element(docp);
+		if (title != NULL) {
+			value = dom_get_child_text_content(title);
+		}
+	}
+
+	/* 3. Strip and collapse ASCII whitespace in value. */
+	value = dom_strip_and_collapse_ascii_whitespace(value);
+
+	/* 4. Return value. */
+	ZVAL_STR(retval, value);
+
+	return SUCCESS;
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

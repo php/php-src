@@ -1584,6 +1584,7 @@ namespace Dom
         public ?Element $body;
         /** @readonly */
         public ?Element $head;
+        public string $title;
     }
 
     final class HTMLDocument extends Document

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0795d4e52f62ab33df92cfbdd5178223fbfc3eeb */
+ * Stub hash: 7a2c28838f431eff28dea8cc5356dbcd38921592 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -3455,6 +3455,12 @@ static zend_class_entry *register_class_Dom_Document(zend_class_entry *class_ent
 	zend_string *property_head_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
 	zend_declare_typed_property(class_entry, property_head_name, &property_head_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_head_class_Dom_Element, 0, MAY_BE_NULL));
 	zend_string_release(property_head_name);
+
+	zval property_title_default_value;
+	ZVAL_UNDEF(&property_title_default_value);
+	zend_string *property_title_name = zend_string_init("title", sizeof("title") - 1, 1);
+	zend_declare_typed_property(class_entry, property_title_name, &property_title_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_title_name);
 
 	return class_entry;
 }
