@@ -39,7 +39,7 @@ Test::f1(1);
 
 ?>
 --EXPECTF--
-Deprecated: Implicitly marking parameter $ar as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: Test::f2(): Implicitly marking parameter $ar as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 Test::f1()
 array(1) {
   [0]=>

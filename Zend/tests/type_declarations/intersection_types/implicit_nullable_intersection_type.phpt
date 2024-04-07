@@ -11,5 +11,5 @@ foo(null);
 
 ?>
 --EXPECTF--
-Deprecated: Implicitly marking parameter $foo as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: foo(): Implicitly marking parameter $foo as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 NULL

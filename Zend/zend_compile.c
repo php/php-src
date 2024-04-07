@@ -7126,7 +7126,9 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 		if (ZEND_TYPE_CONTAINS_CODE(arg_infos[-1].type, IS_VOID)
 				&& (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			zend_error(E_DEPRECATED, "Returning by reference from a void function is deprecated");
+			zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
+			zend_error(E_DEPRECATED, "%s(): Returning by reference from a void function is deprecated", ZSTR_VAL(func_name));
+			zend_string_release(func_name);
 		}
 	} else {
 		if (list->children == 0) {
@@ -7225,9 +7227,11 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename_ex(type_ast, force_nullable, &forced_allow_nullable);
 			if (forced_allow_nullable) {
+				zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
 				zend_error(E_DEPRECATED,
-				   "Implicitly marking parameter $%s as nullable is deprecated, the explicit nullable type "
-				   "must be used instead", ZSTR_VAL(name));
+				   "%s(): Implicitly marking parameter $%s as nullable is deprecated, the explicit nullable type "
+				   "must be used instead", ZSTR_VAL(func_name), ZSTR_VAL(name));
+				zend_string_release(func_name);
 			}
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
@@ -7253,11 +7257,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			/* Ignore parameters of the form "Type $param = null".
 			 * This is the PHP 5 style way of writing "?Type $param", so allow it for now. */
 			if (!forced_allow_nullable) {
+				zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
 				zend_ast *required_param_ast = list->child[last_required_param];
 				zend_error(E_DEPRECATED,
-					"Optional parameter $%s declared before required parameter $%s "
+					"%s(): Optional parameter $%s declared before required parameter $%s "
 					"is implicitly treated as a required parameter",
-					ZSTR_VAL(name), ZSTR_VAL(zend_ast_get_str(required_param_ast->child[1])));
+					ZSTR_VAL(func_name), ZSTR_VAL(name), ZSTR_VAL(zend_ast_get_str(required_param_ast->child[1])));
+				zend_string_release(func_name);
 			}
 
 			/* Regardless of whether we issue a deprecation, convert this parameter into

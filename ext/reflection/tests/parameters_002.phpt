@@ -73,7 +73,7 @@ check_params(ReflectionMethod::createFromMethodName('test::method'));
 
 ?>
 --EXPECTF--
-Deprecated: Implicitly marking parameter $opt as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: test(): Implicitly marking parameter $opt as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 #####test()#####
 ===0===
 getName: string(3) "nix"

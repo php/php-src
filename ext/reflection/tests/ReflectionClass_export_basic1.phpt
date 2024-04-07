@@ -20,7 +20,7 @@ define('K', "16 chars long --");
 echo new ReflectionClass("C"), "\n";
 ?>
 --EXPECTF--
-Deprecated: Implicitly marking parameter $h as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: A::pubf(): Implicitly marking parameter $h as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 Class [ <user> class C extends A ] {
   @@ %s 14-14
 

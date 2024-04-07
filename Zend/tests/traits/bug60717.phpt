@@ -70,9 +70,9 @@ namespace HTML
 }
 ?>
 --EXPECTF--
-Deprecated: Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: HTML\Helper::attributes(): Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 
-Deprecated: Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: HTML\TextArea::attributes(): Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 
-Deprecated: Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: HTML\HTMLAttributes::attributes(): Implicitly marking parameter $attributes as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 Done
