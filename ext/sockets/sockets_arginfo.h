@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c761db0839535812316a42200f68c7db22639d81 */
+ * Stub hash: 98bd7f47a1aa8d1c2cb40bf768115da2633f56fb */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -477,6 +477,9 @@ static void register_sockets_symbols(int module_number)
 #endif
 #if defined(SO_BPF_EXTENSIONS)
 	REGISTER_LONG_CONSTANT("SO_BPF_EXTENSIONS", SO_BPF_EXTENSIONS, CONST_PERSISTENT);
+#endif
+#if defined(SO_EXCLBIND)
+	REGISTER_LONG_CONSTANT("SO_EXCLBIND", SO_EXCLBIND, CONST_PERSISTENT);
 #endif
 #if defined(SKF_AD_OFF)
 	REGISTER_LONG_CONSTANT("SKF_AD_OFF", SKF_AD_OFF, CONST_PERSISTENT);
