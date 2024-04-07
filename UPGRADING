@@ -447,6 +447,7 @@ PHP 8.4 UPGRADE NOTES
     to share resources with other processes within this context.
   . Added pcntl_getaffinity to get the cpu(s) bound to a process and
     pcntl_setaffinity to bind 1 or more cpus to a process.
+  . Added pcntl_getcpu to get the cpu id from where the current process runs.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()

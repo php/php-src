@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a61b0327f5c36ca91e19c5f370377794b7950dee */
+ * Stub hash: 75eacf08a17e18c30fb2111bb742c36b18aa9ead */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -152,6 +152,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setcpuaffinity, 0, 0, _IS_
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_SCHED_GETCPU)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_getcpu, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
 ZEND_FUNCTION(pcntl_wait);
@@ -204,6 +209,9 @@ ZEND_FUNCTION(pcntl_getcpuaffinity);
 #endif
 #if defined(HAVE_SCHED_SETAFFINITY)
 ZEND_FUNCTION(pcntl_setcpuaffinity);
+#endif
+#if defined(HAVE_SCHED_GETCPU)
+ZEND_FUNCTION(pcntl_getcpu);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -260,6 +268,9 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_SCHED_SETAFFINITY)
 	ZEND_FE(pcntl_setcpuaffinity, arginfo_pcntl_setcpuaffinity)
+#endif
+#if defined(HAVE_SCHED_GETCPU)
+	ZEND_FE(pcntl_getcpu, arginfo_pcntl_getcpu)
 #endif
 	ZEND_FE_END
 };

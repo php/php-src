@@ -42,7 +42,7 @@
 #endif
 
 #include <errno.h>
-#if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY)
+#if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
 #if defined(__FreeBSD__)
 #include <sys/types.h>
@@ -1610,6 +1610,15 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 	} else {
 		RETURN_TRUE;
 	}
+}
+#endif
+
+#if defined(HAVE_SCHED_GETCPU)
+PHP_FUNCTION(pcntl_getcpu)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(sched_getcpu());
 }
 #endif
 
