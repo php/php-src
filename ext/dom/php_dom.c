@@ -2255,36 +2255,60 @@ void dom_remove_all_children(xmlNodePtr nodep)
 	}
 }
 
-void php_dom_get_content_into_zval(const xmlNode *nodep, zval *retval, bool default_is_null)
+void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, bool null_on_failure)
 {
 	ZEND_ASSERT(nodep != NULL);
 
-	if (nodep->type == XML_TEXT_NODE
-		|| nodep->type == XML_CDATA_SECTION_NODE
-		|| nodep->type == XML_PI_NODE
-		|| nodep->type == XML_COMMENT_NODE) {
-		char *str = (char * ) nodep->content;
-		if (str != NULL) {
-			ZVAL_STRING(retval, str);
-		} else {
-			goto failure;
+	switch (nodep->type) {
+		case XML_TEXT_NODE:
+		case XML_CDATA_SECTION_NODE:
+		case XML_PI_NODE:
+		case XML_COMMENT_NODE: {
+			char *str = (char * ) nodep->content;
+			if (str != NULL) {
+				RETURN_STRING(str);
+			}
+
+			break;
 		}
-		return;
+
+		case XML_ATTRIBUTE_NODE: {
+			/* For attributes we can also have an optimized fast-path.
+			 * This fast-path is only possible in the (common) case where the attribute
+			 * has a single text child. Note that if the child or the content is NULL, this
+			 * is equivalent to not having content (i.e. the attribute has the empty string as value). */
+
+			if (nodep->children == NULL) {
+				RETURN_EMPTY_STRING();
+			}
+
+			if (nodep->children->type == XML_TEXT_NODE && nodep->children->next == NULL) {
+				if (nodep->children->content == NULL) {
+					RETURN_EMPTY_STRING();
+				} else {
+					RETURN_STRING((const char *) nodep->children->content);
+				}
+			}
+
+			ZEND_FALLTHROUGH;
+		}
+
+		default: {
+			char *str = (char *) xmlNodeGetContent(nodep);
+			if (str != NULL) {
+				RETVAL_STRING(str);
+				xmlFree(str);
+				return;
+			}
+
+			break;
+		}
 	}
 
-	char *str = (char *) xmlNodeGetContent(nodep);
-
-	if (str != NULL) {
-		ZVAL_STRING(retval, str);
-		xmlFree(str);
-		return;
-	}
-
-failure:
-	if (default_is_null) {
-		ZVAL_NULL(retval);
+	if (null_on_failure) {
+		RETURN_NULL();
 	} else {
-		ZVAL_EMPTY_STRING(retval);
+		RETURN_EMPTY_STRING();
 	}
 }
 
