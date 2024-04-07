@@ -410,6 +410,13 @@ const SO_MEMINFO = UNKNOWN;
  */
 const SO_BPF_EXTENSIONS = UNKNOWN;
 #endif
+#ifdef SO_EXCLBIND
+/**
+ * @var int
+ * @cvalue SO_EXCLBIND
+ */
+const SO_EXCLBIND = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
