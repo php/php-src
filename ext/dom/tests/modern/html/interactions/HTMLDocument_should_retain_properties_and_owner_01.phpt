@@ -23,7 +23,7 @@ var_dump(get_class($dom->getElementsByTagName("p")->item(0)));
 
 ?>
 --EXPECT--
-object(Dom\HTMLDocument)#1 (27) {
+object(Dom\HTMLDocument)#1 (28) {
   ["implementation"]=>
   string(22) "(object value omitted)"
   ["URL"]=>
@@ -50,6 +50,8 @@ object(Dom\HTMLDocument)#1 (27) {
   string(22) "(object value omitted)"
   ["head"]=>
   string(22) "(object value omitted)"
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(13)
   ["nodeName"]=>

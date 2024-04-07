@@ -853,6 +853,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "body", dom_html_document_body_read, dom_html_document_body_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "head", dom_html_document_head_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_abstract_base_document_prop_handlers, "title", dom_html_document_title_read, NULL);
 	zend_hash_merge(&dom_abstract_base_document_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	/* No need to register in &classes because this is an abstract class handler. */
 
