@@ -1776,7 +1776,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 
 ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int options, int limit) /* {{{ */
 {
-	zend_execute_data *call;
+	zend_execute_data *call, *last_call = NULL;
 	zend_object *object;
 	bool fake_frame = 0;
 	int lineno, frameno = 0;
@@ -1821,6 +1821,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 	if (skip_last) {
 		/* skip debug_backtrace() */
+		last_call = call;
 		call = call->prev_execute_data;
 	}
 
@@ -1857,9 +1858,14 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 				zval *arg = zend_get_zval_ptr(op_data, op_data->op1_type, &op_data->op1, call);
 				if (Z_TYPE_P(arg) == IS_UNDEF) goto not_frameless_call;
 			}
+			zend_function *func = ZEND_FLF_FUNC(opline);
+			/* Assume frameless functions are not recursive with themselves.
+			 * This condition may be true when observers are enabled. */
+			if (last_call && last_call->func == func) {
+				goto not_frameless_call;
+			}
 			stack_frame = zend_new_array(8);
 			zend_hash_real_init_mixed(stack_frame);
-			zend_function *func = ZEND_FLF_FUNC(opline);
 			zend_string *name = func->common.function_name;
 			ZVAL_STRINGL(&tmp, ZSTR_VAL(name), ZSTR_LEN(name));
 			_zend_hash_append_ex(stack_frame, ZSTR_KNOWN(ZEND_STR_FUNCTION), &tmp, 1);
@@ -2068,6 +2074,7 @@ skip_frame:
 		} else {
 			fake_frame = 0;
 			include_filename = filename;
+			last_call = call;
 			call = prev;
 		}
 	}
