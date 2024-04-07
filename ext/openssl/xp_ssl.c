@@ -2571,8 +2571,20 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 							php_set_sock_blocking(sslsock->s.socket, 1);
 							sslsock->s.is_blocked = 1;
 						}
-					} else if (0 == recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT) && php_socket_errno() != EAGAIN) {
-						alive = 0;
+					} else {
+#ifdef PHP_WIN32
+						int ret;
+#else
+						ssize_t ret;
+#endif
+						int err;
+
+						ret = recv(sslsock->s.socket, &buf, sizeof(buf), MSG_PEEK|MSG_DONTWAIT);
+						err = php_socket_errno();
+						if (0 == ret || /* the counterpart did properly shutdown */
+							(0 > ret && err != EWOULDBLOCK && err != EAGAIN && err != EMSGSIZE)) { /* there was an unrecoverable error */
+							alive = 0;
+						}
 					}
 				}
 				return alive ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
