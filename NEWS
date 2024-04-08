@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13772 (Invalid execute_data->opline pointers in observer fcall
     handlers when JIT is enabled). (Bob)
 
+- Fibers:
+  . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
+    (nielsdos)
+
 - FPM:
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
