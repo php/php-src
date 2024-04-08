@@ -617,7 +617,12 @@ static int readline_shell_run(void) /* {{{ */
 	}
 
 #ifndef PHP_WIN32
-	history_file = tilde_expand("~/.php_history");
+#define PHP_HISTFILE_ENV "PHP_HISTFILE"
+	if (getenv(PHP_HISTFILE_ENV)) {
+		spprintf(&history_file, MAXPATHLEN, "%s", getenv(PHP_HISTFILE_ENV));
+	} else {
+		spprintf(&history_file, MAXPATHLEN, "%s/.php_history", getenv("HOME"));
+	}
 #else
 	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
 #endif
@@ -717,11 +722,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		php_last_char = '\0';
 	}
-#ifdef PHP_WIN32
 	efree(history_file);
-#else
-	free(history_file);
-#endif
 	efree(code);
 	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
