@@ -1890,10 +1890,15 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			}
 
 			md_ctx = EVP_MD_CTX_create();
-
+			if (md_ctx == NULL){
+				if (error) {
+					spprintf(error, 0, "openssl signature could not be verified");
+				}
+				return FAILURE;
+			}
 			siglen = EVP_PKEY_size(key);
 			sigbuf = emalloc(siglen + 1);
-
+			
 			if (!EVP_SignInit(md_ctx, mdtype)) {
 				EVP_PKEY_free(key);
 				efree(sigbuf);
