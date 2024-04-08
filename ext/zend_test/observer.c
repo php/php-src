@@ -67,8 +67,16 @@ static void observer_show_opcode(zend_execute_data *execute_data)
 	php_printf("%*s<!-- opcode: '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));
 }
 
+static inline void assert_observer_opline(zend_execute_data *execute_data) {
+	ZEND_ASSERT(!ZEND_USER_CODE(EX(func)->type) ||
+		(EX(opline) >= EX(func)->op_array.opcodes && EX(opline) < EX(func)->op_array.opcodes + EX(func)->op_array.last) ||
+		(EX(opline) >= EG(exception_op) && EX(opline) < EG(exception_op) + 3));
+}
+
 static void observer_begin(zend_execute_data *execute_data)
 {
+	assert_observer_opline(execute_data);
+
 	if (!ZT_G(observer_show_output)) {
 		return;
 	}
@@ -112,6 +120,8 @@ static void get_retval_info(zval *retval, smart_str *buf)
 
 static void observer_end(zend_execute_data *execute_data, zval *retval)
 {
+	assert_observer_opline(execute_data);
+
 	if (!ZT_G(observer_show_output)) {
 		return;
 	}
