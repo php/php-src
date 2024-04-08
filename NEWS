@@ -30,6 +30,7 @@ PHP                                                                        NEWS
     filename causes a NULL pointer dereference). (nielsdos)
   . Fixed bug GH-13833 (Applying zero offset to null pointer in zend_hash.c).
     (nielsdos)
+  . Fix potential NULL pointer dereference before calling EVP_SignInit. (icy17)
 
 - PHPDBG:
   . Fixed bug GH-13827 (Null pointer access of type 'zval' in phpdbg_frame).
