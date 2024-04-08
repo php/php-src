@@ -10221,7 +10221,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {
-			|	SAVE_IP
+			if (trace && (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+				ZEND_ASSERT(trace[1].op == ZEND_JIT_TRACE_VM || trace[1].op == ZEND_JIT_TRACE_END);
+				|	SET_EX_OPLINE trace[1].opline, r0
+			} else {
+				|	SAVE_IP
+			}
 			|	mov FCARG1a, FP
 			|	EXT_CALL zend_observer_fcall_begin, r0
 		}
