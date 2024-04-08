@@ -27,13 +27,14 @@ PHP                                                                        NEWS
   . Fixed bug GH-13856 (Member access within null pointer of type 'ps_files' in
     ext/session/mod_files.c). (nielsdos)
   . Fixed bug GH-13891 (memleak and segfault when using ini_set with
-    session.trans_sid_hosts). (nielsdos, kamil-tekiela).
+    session.trans_sid_hosts). (nielsdos, kamil-tekiela)
 
 - Streams:
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
     (Jakub Zelenka)
   . Fixed bug GH-13860 (Incorrect PHP_STREAM_OPTION_CHECK_LIVENESS case in
     ext/openssl/xp_ssl.c - causing use of dead socket). (nielsdos)
+  . Fixed bug GH-11678 (Build fails on musl 1.2.4 - lfs64). (Arnaud)
 
 - Treewide:
   . Fix gcc-14 Wcalloc-transposed-args warnings. (Cristian Rodríguez)
