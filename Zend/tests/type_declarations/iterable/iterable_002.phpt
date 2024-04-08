@@ -17,6 +17,6 @@ function baz(iterable $iterable = 1) {
 
 ?>
 --EXPECTF--
-Deprecated: Implicitly marking parameter $iterable as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
+Deprecated: foo(): Implicitly marking parameter $iterable as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 
 Fatal error: Cannot use int as default value for parameter $iterable of type Traversable|array in %s on line %d
