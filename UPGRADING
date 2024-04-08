@@ -246,6 +246,9 @@ PHP 8.4 UPGRADE NOTES
   . Added constant POSIX_SC_CHILD_MAX
   . Added constant POSIX_SC_CLK_TCK
 
+- Readfile:
+  . Added ability to change .php_history path through PHP_HISTFILE env variable.
+
 - Reflection:
   . ReflectionAttribute now contains a $name property to improve the debugging
     experience.
