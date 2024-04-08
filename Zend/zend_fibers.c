@@ -62,6 +62,7 @@
 #endif
 
 #ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
 # include <sanitizer/common_interface_defs.h>
 #endif
 
@@ -299,6 +300,12 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	const size_t page_size = zend_fiber_get_page_size();
 
 	void *pointer = (void *) ((uintptr_t) stack->pointer - ZEND_FIBER_GUARD_PAGES * page_size);
+
+#ifdef __SANITIZE_ADDRESS__
+	/* If another mmap happens after unmapping, it may trigger the stale stack red zones
+	 * so we have to unpoison it before unmapping. */
+	ASAN_UNPOISON_MEMORY_REGION(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
+#endif
 
 #ifdef ZEND_WIN32
 	VirtualFree(pointer, 0, MEM_RELEASE);
