@@ -383,6 +383,10 @@ PHP 8.4 UPGRADE NOTES
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.
 
+- POSIX:
+  . posix_isatty now sets the error number when the file descriptor/stream argument
+    is invalid.
+
 - SPL:
   . SplPriorityQueue::insert() and SplPriorityQueue::recoverFromCorruption()
     now has a tentative return type of true

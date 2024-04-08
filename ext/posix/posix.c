@@ -521,11 +521,13 @@ PHP_FUNCTION(posix_isatty)
 
 	/* A valid file descriptor must fit in an int and be positive */
 	if (fd < 0 || fd > INT_MAX) {
+		POSIX_G(last_error) = EBADF;
 		RETURN_FALSE;
 	}
 	if (isatty(fd)) {
 		RETURN_TRUE;
 	} else {
+		POSIX_G(last_error) = errno;
 		RETURN_FALSE;
 	}
 }

@@ -173,6 +173,8 @@ PHP                                                                        NEWS
 
 - POSIX:
   . Added POSIX_SC_CHILD_MAX and POSIX_SC_CLK_TCK constants. (Jakub Zelenka)
+  . Updated posix_isatty to set the error number on file descriptors.
+    (David Carlier)
 
 - PSpell:
   . Moved to PECL. (Derick Rethans)
