@@ -1285,6 +1285,14 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_THROWS();
 	}
 
+	/* TODO deprecate $row argument values less than 1 or null after PHP 8.4 */
+
+#ifndef HAVE_SQL_EXTENDED_FETCH
+	if (!pv_row_is_null && pv_row > 0) {
+		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
+	}
+#endif
+
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
@@ -1437,6 +1445,14 @@ PHP_FUNCTION(odbc_fetch_into)
 		RETURN_THROWS();
 	}
 
+	/* TODO deprecate $row argument values less than 1 or null after PHP 8.4 */
+
+#ifndef HAVE_SQL_EXTENDED_FETCH
+	if (!pv_row_is_null && pv_row > 0) {
+		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
+	}
+#endif
+
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
 		RETURN_FALSE;
@@ -1558,6 +1574,14 @@ PHP_FUNCTION(odbc_fetch_row)
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
 		RETURN_THROWS();
 	}
+
+	/* TODO deprecate $row argument values less than 1 or null after PHP 8.4 */
+
+#ifndef HAVE_SQL_EXTENDED_FETCH
+	if (!pv_row_is_null && pv_row > 0) {
+		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
+	}
+#endif
 
 	if (result->numcols == 0) {
 		php_error_docref(NULL, E_WARNING, "No tuples available at this result index");
