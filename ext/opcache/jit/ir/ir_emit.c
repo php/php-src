@@ -623,7 +623,13 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 	IR_ASSERT(from != to);
 	if (to < IR_REG_NUM) {
 		if (IR_IS_CONST_REF(from)) {
-			ir_emit_load(ctx, type, to, from);
+			if (-from < ctx->consts_count) {
+				/* constant reference */
+				ir_emit_load(ctx, type, to, from);
+			} else {
+				/* local variable address */
+				ir_load_local_addr(ctx, to, -from - ctx->consts_count);
+			}
 		} else if (from < IR_REG_NUM) {
 			if (IR_IS_TYPE_INT(type)) {
 				ir_emit_mov(ctx, type, to, from);
@@ -637,18 +643,27 @@ static void ir_emit_dessa_move(ir_ctx *ctx, ir_type type, ir_ref to, ir_ref from
 	} else {
 		mem_to = ir_vreg_spill_slot(ctx, to - IR_REG_NUM);
 		if (IR_IS_CONST_REF(from)) {
+			if (-from < ctx->consts_count) {
+				/* constant reference */
 #if defined(IR_TARGET_X86) || defined(IR_TARGET_X64)
-			if (IR_IS_TYPE_INT(type)
-			 && !IR_IS_SYM_CONST(ctx->ir_base[from].op)
-			 && (ir_type_size[type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[from].val.i64))) {
-				ir_emit_store_mem_imm(ctx, type, mem_to, ctx->ir_base[from].val.i32);
-				return;
-			}
+				if (IR_IS_TYPE_INT(type)
+				 && !IR_IS_SYM_CONST(ctx->ir_base[from].op)
+				 && (ir_type_size[type] != 8 || IR_IS_SIGNED_32BIT(ctx->ir_base[from].val.i64))) {
+					ir_emit_store_mem_imm(ctx, type, mem_to, ctx->ir_base[from].val.i32);
+					return;
+				}
 #endif
-			ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
-			IR_ASSERT(tmp != IR_REG_NONE);
-			ir_emit_load(ctx, type, tmp, from);
-			ir_emit_store_mem(ctx, type, mem_to, tmp);
+				ir_reg tmp = IR_IS_TYPE_INT(type) ?  tmp_reg : tmp_fp_reg;
+				IR_ASSERT(tmp != IR_REG_NONE);
+				ir_emit_load(ctx, type, tmp, from);
+				ir_emit_store_mem(ctx, type, mem_to, tmp);
+			} else {
+				/* local variable address */
+				IR_ASSERT(IR_IS_TYPE_INT(type));
+				IR_ASSERT(tmp_reg != IR_REG_NONE);
+				ir_load_local_addr(ctx, tmp_reg, -from - ctx->consts_count);
+				ir_emit_store_mem(ctx, type, mem_to, tmp_reg);
+			}
 		} else if (from < IR_REG_NUM) {
 			ir_emit_store_mem(ctx, type, mem_to, from);
 		} else {
@@ -909,6 +924,9 @@ static void ir_emit_dessa_moves(ir_ctx *ctx, int b, ir_block *bb)
 			IR_ASSERT(dst == IR_REG_NONE || !IR_REG_SPILLED(dst));
 			if (IR_IS_CONST_REF(input)) {
 				from = input;
+			} else if (ir_rule(ctx, input) == IR_STATIC_ALLOCA) {
+				/* encode local variable address */
+				from = -(ctx->consts_count + input);
 			} else {
 				from = (src != IR_REG_NONE && !IR_REG_SPILLED(src)) ?
 					(ir_ref)src : (ir_ref)(IR_REG_NUM + ctx->vregs[input]);
