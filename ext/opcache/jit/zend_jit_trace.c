@@ -7227,7 +7227,9 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	/* Deoptimization */
 	stack_size = zend_jit_traces[trace_num].exit_info[exit_num].stack_size;
-	stack = zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset;
+	stack =  zend_jit_traces[trace_num].exit_info[exit_num].stack_size ?
+		zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset :
+		NULL;
 
 	if (!zend_jit_trace_deoptimization(&ctx,
 			zend_jit_traces[trace_num].exit_info[exit_num].flags,
@@ -7769,7 +7771,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 	for (i = 0; i < t->exit_count; i++) {
 		const zend_op_array *op_array = t->exit_info[i].op_array;
 		uint32_t stack_size = t->exit_info[i].stack_size;
-		zend_jit_trace_stack *stack = t->stack_map + t->exit_info[i].stack_offset;
+		zend_jit_trace_stack *stack = t->exit_info[i].stack_size ? t->stack_map + t->exit_info[i].stack_offset : NULL;
 
 		fprintf(stderr, "     exit_%d:", i);
 		if (t->exit_info[i].opline) {
