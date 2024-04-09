@@ -521,7 +521,8 @@ ZEND_API const char *zend_get_type_by_const(int type);
 
 #define ZEND_THIS                           (&EX(This))
 
-#define getThis()							((Z_TYPE_P(ZEND_THIS) == IS_OBJECT) ? ZEND_THIS : NULL)
+#define hasThis()							(Z_TYPE_P(ZEND_THIS) == IS_OBJECT)
+#define getThis()							(hasThis() ? ZEND_THIS : NULL)
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
