@@ -399,7 +399,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 linux/sock_diag.h \
-os/signpost.h \
 poll.h \
 pty.h \
 pwd.h \
