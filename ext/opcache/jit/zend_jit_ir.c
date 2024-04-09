@@ -4493,34 +4493,31 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		ir_END_list(data.ir_end_inputs);
 		ir_IF_FALSE(if_trampoline_or_generator);
 	}
-	if (func && (func->common.fn_flags & ZEND_ACC_CLOSURE) == 0) {
-		if (ZEND_MAP_PTR_IS_OFFSET(func->common.run_time_cache)) {
-			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)), (uintptr_t)ZEND_MAP_PTR(func->common.run_time_cache)));
-		} else {
-			ZEND_ASSERT(rx != IR_UNUSED);
-			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(func_ref ? func_ref : ir_CONST_ADDR(func), offsetof(zend_op_array, run_time_cache__ptr)));
-		}
+	if (func && (func->common.fn_flags & ZEND_ACC_CLOSURE) == 0 && ZEND_MAP_PTR_IS_OFFSET(func->common.run_time_cache)) {
+		run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)), (uintptr_t)ZEND_MAP_PTR(func->common.run_time_cache)));
 	} else {
 		ZEND_ASSERT(rx != IR_UNUSED);
 		// Closures may be duplicated and have a different runtime cache. Use the regular run_time_cache access pattern for these
-		run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CALL(rx, func)), offsetof(zend_op_array, run_time_cache__ptr)));
-		ir_ref if_odd = ir_IF(ir_AND_A(run_time_cache, ir_CONST_ADDR(1)));
-		ir_IF_TRUE(if_odd);
+		if (func && ZEND_USER_CODE(func->type)) { // not a closure and definitely not an internal function
+			run_time_cache = ir_LOAD_A(jit_CALL(rx, run_time_cache));
+		} else {
+			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CALL(rx, func)), offsetof(zend_op_array, run_time_cache__ptr)));
+			ir_ref if_odd = ir_IF(ir_AND_A(run_time_cache, ir_CONST_ADDR(1)));
+			ir_IF_TRUE(if_odd);
 
-		ir_ref run_time_cache2 = ir_LOAD_A(ir_ADD_A(run_time_cache, ir_LOAD_A(jit_CG(map_ptr_base))));
+			ir_ref run_time_cache2 = ir_LOAD_A(ir_ADD_A(run_time_cache, ir_LOAD_A(jit_CG(map_ptr_base))));
 
-		ir_ref if_odd_end = ir_END();
-		ir_IF_FALSE(if_odd);
+			ir_ref if_odd_end = ir_END();
+			ir_IF_FALSE(if_odd);
 
-		if (!func) { // not a closure
 			ir_ref if_rt_cache = ir_IF(ir_EQ(run_time_cache, IR_NULL));
 			ir_IF_TRUE(if_rt_cache);
 			ir_END_list(data.ir_end_inputs);
 			ir_IF_FALSE(if_rt_cache);
-		}
 
-		ir_MERGE_WITH(if_odd_end);
-		run_time_cache = ir_PHI_2(IR_ADDR, run_time_cache2, run_time_cache);
+			ir_MERGE_WITH(if_odd_end);
+			run_time_cache = ir_PHI_2(IR_ADDR, run_time_cache, run_time_cache2);
+		}
 	}
 	*observer_handler = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
 
