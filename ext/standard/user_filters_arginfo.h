@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d0658405953ef28aefd50aa52c106913aca18892 */
+ * Stub hash: 33264435fe01a2cc9aa21a4a087dbbf3c4007206 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_php_user_filter_filter, 0, 4, IS_LONG, 0)
 	ZEND_ARG_INFO(0, in)
@@ -92,6 +92,12 @@ static zend_class_entry *register_class_StreamBucket(void)
 	zend_string *property_datalen_name = zend_string_init("datalen", sizeof("datalen") - 1, 1);
 	zend_declare_typed_property(class_entry, property_datalen_name, &property_datalen_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_datalen_name);
+
+	zval property_dataLength_default_value;
+	ZVAL_UNDEF(&property_dataLength_default_value);
+	zend_string *property_dataLength_name = zend_string_init("dataLength", sizeof("dataLength") - 1, 1);
+	zend_declare_typed_property(class_entry, property_dataLength_name, &property_dataLength_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(property_dataLength_name);
 
 	return class_entry;
 }

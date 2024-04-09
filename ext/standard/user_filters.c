@@ -361,6 +361,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 		zval_ptr_dtor(&zbucket);
 		zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
+		zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
 	} else {
 		ZVAL_NULL(return_value);
 	}
@@ -466,6 +467,7 @@ PHP_FUNCTION(stream_bucket_new)
 	zval_ptr_dtor(&zbucket);
 	zend_update_property_stringl(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("data"), bucket->buf, bucket->buflen);
 	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("datalen"), bucket->buflen);
+	zend_update_property_long(Z_OBJCE_P(return_value), Z_OBJ_P(return_value), ZEND_STRL("dataLength"), bucket->buflen);
 }
 /* }}} */
 

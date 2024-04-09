@@ -29,5 +29,7 @@ object(StreamBucket)#%d (%d) {
   string(0) ""
   ["datalen"]=>
   int(0)
+  ["dataLength"]=>
+  int(0)
 }
 Done
