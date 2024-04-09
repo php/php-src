@@ -4476,24 +4476,22 @@ static int zend_jit_update_regs(zend_jit_ctx *jit, uint32_t var, zend_jit_addr s
 
 struct jit_observer_fcall_is_unobserved_data {
 	ir_ref if_unobserved;
-	ir_ref if_rt_cache;
-	ir_ref if_trampoline_or_generator;
+	ir_ref ir_end_inputs;
 };
 
 static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobserved_start(zend_jit_ctx *jit, const zend_function *func, ir_ref *observer_handler, ir_ref rx, ir_ref func_ref) {
 	ir_ref run_time_cache;
-	struct jit_observer_fcall_is_unobserved_data data = {
-		.if_rt_cache = IS_UNUSED,
-		.if_trampoline_or_generator = IS_UNUSED,
-	};
+	struct jit_observer_fcall_is_unobserved_data data = { .ir_end_inputs = IR_UNUSED };
 	if (func) {
 		ZEND_ASSERT((func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0);
 	} else {
 		ZEND_ASSERT(rx != IR_UNUSED);
-		data.if_trampoline_or_generator = ir_IF(ir_AND_U32(
+		ir_ref if_trampoline_or_generator = ir_IF(ir_AND_U32(
 			ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
 			ir_CONST_U32(ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)));
-		ir_IF_FALSE(data.if_trampoline_or_generator);
+		ir_IF_TRUE(if_trampoline_or_generator);
+		ir_END_list(data.ir_end_inputs);
+		ir_IF_FALSE(if_trampoline_or_generator);
 	}
 	if (func && (func->common.fn_flags & ZEND_ACC_CLOSURE) == 0) {
 		if (ZEND_MAP_PTR_IS_OFFSET(func->common.run_time_cache)) {
@@ -4501,8 +4499,6 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		} else {
 			ZEND_ASSERT(rx != IR_UNUSED);
 			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(func_ref ? func_ref : ir_CONST_ADDR(func), offsetof(zend_op_array, run_time_cache__ptr)));
-			data.if_rt_cache = ir_IF(ir_NE(run_time_cache, IR_NULL));
-			ir_IF_TRUE(data.if_rt_cache);
 		}
 	} else {
 		ZEND_ASSERT(rx != IR_UNUSED);
@@ -4513,25 +4509,31 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 
 		ir_ref run_time_cache2 = ir_LOAD_A(ir_ADD_A(run_time_cache, ir_LOAD_A(jit_CG(map_ptr_base))));
 
-		ir_MERGE_WITH_EMPTY_FALSE(if_odd);
+		ir_ref if_odd_end = ir_END();
+		ir_IF_FALSE(if_odd);
+
+		if (!func) { // not a closure
+			ir_ref if_rt_cache = ir_IF(ir_EQ(run_time_cache, IR_NULL));
+			ir_IF_TRUE(if_rt_cache);
+			ir_END_list(data.ir_end_inputs);
+			ir_IF_FALSE(if_rt_cache);
+		}
+
+		ir_MERGE_WITH(if_odd_end);
 		run_time_cache = ir_PHI_2(IR_ADDR, run_time_cache2, run_time_cache);
 	}
 	*observer_handler = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
-	ir_ref is_unobserved = ir_EQ(ir_LOAD_A(*observer_handler), ir_CONST_ADDR(ZEND_OBSERVER_NONE_OBSERVED));
 
-	data.if_unobserved = ir_IF(is_unobserved);
+	data.if_unobserved = ir_IF(ir_EQ(ir_LOAD_A(*observer_handler), ir_CONST_ADDR(ZEND_OBSERVER_NONE_OBSERVED)));
 	ir_IF_FALSE(data.if_unobserved);
 	return data;
 }
 
 static void jit_observer_fcall_is_unobserved_end(zend_jit_ctx *jit, struct jit_observer_fcall_is_unobserved_data *data) {
-	if (data->if_rt_cache != IR_UNUSED) {
-		ir_MERGE_WITH_EMPTY_FALSE(data->if_rt_cache);
-	}
-	if (data->if_trampoline_or_generator != IR_UNUSED) {
-		ir_MERGE_WITH_EMPTY_TRUE(data->if_trampoline_or_generator);
-	}
-	ir_MERGE_WITH_EMPTY_TRUE(data->if_unobserved);
+	ir_END_list(data->ir_end_inputs);
+	ir_IF_TRUE(data->if_unobserved);
+	ir_END_list(data->ir_end_inputs);
+	ir_MERGE_list(data->ir_end_inputs);
 }
 
 static void jit_observer_fcall_begin(zend_jit_ctx *jit, ir_ref rx, ir_ref observer_handler) {
