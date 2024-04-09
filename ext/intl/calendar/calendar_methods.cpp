@@ -44,21 +44,21 @@ using icu::Locale;
 
 #define ZEND_VALUE_ERROR_INVALID_FIELD(argument, zpp_arg_position) \
 	if (argument < 0 || argument >= UCAL_FIELD_COUNT) { \
-		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
+		zend_argument_value_error(hasThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be a valid field"); \
 		RETURN_THROWS(); \
 	}
 
 #define ZEND_VALUE_ERROR_OUT_OF_BOUND_VALUE(argument, zpp_arg_position) \
 	if (UNEXPECTED(argument < INT32_MIN || argument > INT32_MAX)) { \
-		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
+		zend_argument_value_error(hasThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be between %d and %d", INT32_MIN, INT32_MAX); \
 		RETURN_THROWS(); \
 	}
 
 #define ZEND_VALUE_ERROR_INVALID_DAY_OF_WEEK(argument, zpp_arg_position) \
 	if (argument < UCAL_SUNDAY || argument > UCAL_SATURDAY) { \
-		zend_argument_value_error(getThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
+		zend_argument_value_error(hasThis() ? ((zpp_arg_position)-1) : zpp_arg_position, \
 			"must be a valid day of the week"); \
 		RETURN_THROWS(); \
 	}
@@ -641,7 +641,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_locale)
 	}
 
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be either Locale::ACTUAL_LOCALE or Locale::VALID_LOCALE");
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be either Locale::ACTUAL_LOCALE or Locale::VALID_LOCALE");
 		RETURN_THROWS();
 	}
 
@@ -886,7 +886,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_minimal_days_in_first_week)
 
 	// Use ZEND_VALUE_ERROR_INVALID_DAY_OF_WEEK ?
 	if (num_days < 1 || num_days > 7) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be between 1 and 7");
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be between 1 and 7");
 		RETURN_THROWS();
 	}
 
@@ -961,7 +961,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_repeated_wall_time_option)
 	}
 
 	if (option != UCAL_WALLTIME_FIRST && option != UCAL_WALLTIME_LAST) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be either IntlCalendar::WALLTIME_FIRST or "
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be either IntlCalendar::WALLTIME_FIRST or "
 			"IntlCalendar::WALLTIME_LAST");
 		RETURN_THROWS();
 	}
@@ -985,7 +985,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_skipped_wall_time_option)
 
 	if (option != UCAL_WALLTIME_FIRST && option != UCAL_WALLTIME_LAST
 			&& option != UCAL_WALLTIME_NEXT_VALID) {
-		zend_argument_value_error(getThis() ? 1 : 2, "must be one of IntlCalendar::WALLTIME_FIRST, "
+		zend_argument_value_error(hasThis() ? 1 : 2, "must be one of IntlCalendar::WALLTIME_FIRST, "
 			"IntlCalendar::WALLTIME_LAST, or IntlCalendar::WALLTIME_NEXT_VALID");
 		RETURN_THROWS();
 	}
