@@ -18,12 +18,12 @@ odbc_exec($conn, 'INSERT INTO fetch_row VALUES (1), (2)');
 $res = odbc_exec($conn, 'SELECT * FROM fetch_row');
 
 var_dump(odbc_fetch_row($res, 0));
-var_dump(odbc_result($res, 'test'));
 
 var_dump(odbc_fetch_row($res, null));
 var_dump(odbc_result($res, 'test'));
 
 var_dump(odbc_fetch_row($res, null));
+var_dump(odbc_result($res, 'test'));
 
 var_dump(odbc_fetch_row($res, 2));
 var_dump(odbc_result($res, 'test'));
@@ -40,11 +40,12 @@ $conn = odbc_connect($dsn, $user, $pass);
 odbc_exec($conn, 'DROP TABLE fetch_row');
 ?>
 --EXPECTF--
+Warning: odbc_fetch_row(): Argument #3 ($row) must be greater than or equal to 1 in %s on line %d
+bool(false)
 bool(true)
 string(1) "1"
 bool(true)
 string(1) "2"
-bool(false)
 bool(true)
 string(1) "2"
 bool(false)

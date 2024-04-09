@@ -1285,7 +1285,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 		RETURN_THROWS();
 	}
 
-	/* TODO deprecate $row argument values less than 1 or null after PHP 8.4 */
+	/* TODO deprecate $row argument values less than 1 after PHP 8.4 */
 
 #ifndef HAVE_SQL_EXTENDED_FETCH
 	if (!pv_row_is_null && pv_row > 0) {
@@ -1445,7 +1445,7 @@ PHP_FUNCTION(odbc_fetch_into)
 		RETURN_THROWS();
 	}
 
-	/* TODO deprecate $row argument values less than 1 or null after PHP 8.4 */
+	/* TODO deprecate $row argument values less than 1 after PHP 8.4 */
 
 #ifndef HAVE_SQL_EXTENDED_FETCH
 	if (!pv_row_is_null && pv_row > 0) {
@@ -1575,11 +1575,14 @@ PHP_FUNCTION(odbc_fetch_row)
 		RETURN_THROWS();
 	}
 
-	/* TODO deprecate $row argument values less than 1 or null after PHP 8.4 */
-
 #ifndef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null && pv_row > 0) {
+	if (!pv_row_is_null) {
 		php_error_docref(NULL, E_WARNING, "Extended fetch functionality is not available, argument #3 ($row) is ignored");
+	}
+#else
+	if (!pv_row_is_null && pv_row < 1) {
+		php_error_docref(NULL, E_WARNING, "Argument #3 ($row) must be greater than or equal to 1");
+		RETURN_FALSE;
 	}
 #endif
 
@@ -1590,7 +1593,7 @@ PHP_FUNCTION(odbc_fetch_row)
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (result->fetch_abs) {
-		if (!pv_row_is_null && pv_row > 0) {
+		if (!pv_row_is_null) {
 			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_ABSOLUTE,(SQLLEN)pv_row,&crow,RowStatus);
 		} else {
 			rc = SQLExtendedFetch(result->stmt,SQL_FETCH_NEXT,1,&crow,RowStatus);
@@ -1603,7 +1606,7 @@ PHP_FUNCTION(odbc_fetch_row)
 		RETURN_FALSE;
 	}
 #ifdef HAVE_SQL_EXTENDED_FETCH
-	if (!pv_row_is_null && pv_row > 0) {
+	if (!pv_row_is_null) {
 		result->fetched = (SQLLEN)pv_row;
 	} else
 #endif
