@@ -1176,9 +1176,19 @@ ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32
 		exit(-1);
 	}
 	gc_protect(1);
+
+	if (CG(in_compilation)) {
+		CG(in_compilation) = 0;
+		/* We bailout during compilation which may for example leave stale entries in CG(loop_var_stack).
+		 * If code is compiled during shutdown, we need to make sure the compiler is reset to a clean state,
+		 * otherwise this will lead to incorrect compilation during shutdown.
+		 * We don't do a full re-initialization via init_compiler() because that will also reset streams and resources. */
+		shutdown_compiler();
+		zend_init_compiler_data_structures();
+	}
+
 	CG(unclean_shutdown) = 1;
 	CG(active_class_entry) = NULL;
-	CG(in_compilation) = 0;
 	CG(memoize_mode) = 0;
 	EG(current_execute_data) = NULL;
 	LONGJMP(*EG(bailout), FAILURE);
