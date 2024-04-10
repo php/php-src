@@ -205,7 +205,7 @@ PHP                                                                        NEWS
    (David Carlier).
 
 - PDO_Firebird:
-  . Fix GH-13119 (Changed to convert float and double values ​​into strings using
+  . Fix GH-13119 (Changed to convert float and double values into strings using
     `H` format). (SakiTakamachi)
 
 - Phar:
