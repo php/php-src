@@ -139,6 +139,26 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 }
 /* }}} */
 
+static xmlNodePtr dom_fetch_first_iteration_item(dom_nnodemap_object *objmap)
+{
+	xmlNodePtr basep = dom_object_get_node(objmap->baseobj);
+	if (!basep) {
+		return NULL;
+	}
+	if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
+		if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
+			return (xmlNodePtr) basep->properties;
+		} else {
+			return basep->children;
+		}
+	} else {
+		int curindex = 0;
+		xmlNodePtr nodep = php_dom_first_child_of_container_node(basep);
+		return dom_get_elements_by_tag_name_ns_raw(
+			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &curindex, 0);
+	}
+}
+
 static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 {
 	xmlNodePtr curnode = NULL;
@@ -219,7 +239,6 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
 	xmlNodePtr curnode=NULL;
-	int curindex = 0;
 	HashTable *nodeht;
 	zval *entry;
 	php_dom_iterator *iterator;
@@ -249,27 +268,13 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 					ZVAL_COPY(&iterator->curobj, entry);
 				}
 			} else {
-				xmlNodePtr basep = (xmlNode *)dom_object_get_node(objmap->baseobj);
-				if (!basep) {
-					goto err;
-				}
-				if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-					if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
-						curnode = (xmlNodePtr) basep->properties;
-					} else {
-						curnode = (xmlNodePtr) basep->children;
-					}
-				} else {
-					xmlNodePtr nodep = php_dom_first_child_of_container_node(basep);
-					curnode = dom_get_elements_by_tag_name_ns_raw(
-						basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &curindex, 0);
-				}
+				curnode = dom_fetch_first_iteration_item(objmap);
 			}
 		} else {
 			curnode = php_dom_libxml_hash_iter(objmap, 0);
 		}
 	}
-err:
+
 	if (curnode) {
 		php_dom_create_object(curnode, &iterator->curobj, objmap->baseobj);
 	}
