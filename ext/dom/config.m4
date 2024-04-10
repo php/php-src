@@ -32,7 +32,7 @@ if test "$PHP_DOM" != "no"; then
                             documentfragment.c domimplementation.c \
                             element.c node.c characterdata.c \
                             documenttype.c entity.c \
-                            nodelist.c text.c comment.c \
+                            nodelist.c html_collection.c text.c comment.c \
                             entityreference.c \
                             notation.c xpath.c dom_iterators.c \
                             namednodemap.c xpath_callbacks.c \

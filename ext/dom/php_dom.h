@@ -175,6 +175,7 @@ dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_ent
 xmlDocPtr php_dom_create_html_doc(void);
 
 xmlChar *dom_attr_value(const xmlAttr *attr, bool *free);
+bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 
 typedef enum {
 	DOM_LOAD_STRING = 0,
