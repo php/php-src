@@ -16,6 +16,8 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Fix shift out of bounds on 32-bit non-fast-path platforms. (nielsdos)
+  . Fixed bug #81335 (PHP Warning, Packets out of order after connection
+    timeout). (Appla)
 
 - OpenSSL:
   . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
