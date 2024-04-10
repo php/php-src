@@ -1279,7 +1279,7 @@ namespace DOM
         /** @implementation-alias DOMNodeList::item */
         public function item(int $index): ?Element {}
 
-        /* TODO: implement namedItem */
+        public function namedItem(string $key): ?Element {}
 
         /** @implementation-alias DOMNodeList::count */
         public function count(): int {}

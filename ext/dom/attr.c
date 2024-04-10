@@ -229,4 +229,15 @@ xmlChar *dom_attr_value(const xmlAttr *attr, bool *free)
 	return value;
 }
 
+bool dom_compare_value(const xmlAttr *attr, const xmlChar *value)
+{
+	bool free;
+	xmlChar *attr_value = dom_attr_value(attr, &free);
+	bool result = xmlStrEqual(attr_value, value);
+	if (free) {
+		xmlFree(attr_value);
+	}
+	return result;
+}
+
 #endif

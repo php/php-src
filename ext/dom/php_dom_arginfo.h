@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f441c789fdce91e8fc71f450b294c11059999af1 */
+ * Stub hash: 37a1c811bfc8c611d686f0842d06fc327b54511f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -721,6 +721,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLCollection_item, 0,
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOM_HTMLCollection_namedItem, 0, 1, DOM\\Element, 1)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_DOM_HTMLCollection_count arginfo_class_DOM_Node_getLineNo
 
 #define arginfo_class_DOM_HTMLCollection_getIterator arginfo_class_DOMNodeList_getIterator
@@ -1256,6 +1260,7 @@ ZEND_METHOD(DOM_Node, appendChild);
 ZEND_METHOD(DOM_Node, replaceChild);
 ZEND_METHOD(DOM_Node, removeChild);
 ZEND_METHOD(DOM_Node, getNodePath);
+ZEND_METHOD(DOM_HTMLCollection, namedItem);
 ZEND_METHOD(DOM_Element, removeAttribute);
 ZEND_METHOD(DOM_Element, setAttributeNodeNS);
 ZEND_METHOD(DOM_Element, removeAttributeNode);
@@ -1620,6 +1625,7 @@ static const zend_function_entry class_DOM_DTDNamedNodeMap_methods[] = {
 
 static const zend_function_entry class_DOM_HTMLCollection_methods[] = {
 	ZEND_RAW_FENTRY("item", zim_DOMNodeList_item, arginfo_class_DOM_HTMLCollection_item, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(DOM_HTMLCollection, namedItem, arginfo_class_DOM_HTMLCollection_namedItem, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("count", zim_DOMNodeList_count, arginfo_class_DOM_HTMLCollection_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIterator", zim_DOMNodeList_getIterator, arginfo_class_DOM_HTMLCollection_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
