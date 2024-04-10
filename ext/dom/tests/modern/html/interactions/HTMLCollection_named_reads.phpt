@@ -22,20 +22,61 @@ $xml = <<<XML
 XML;
 
 $dom = DOM\XMLDocument::createFromString($xml);
-var_dump($dom->getElementsByTagName('node')->namedItem('foo')?->textContent);
-var_dump($dom->getElementsByTagName('node')->namedItem('')?->textContent);
-var_dump($dom->getElementsByTagName('node')->namedItem('does not exist')?->textContent);
-var_dump($dom->getElementsByTagName('node')->namedItem('wrong')?->textContent);
-var_dump($dom->getElementsByTagName('node')->namedItem('bar')?->textContent);
-var_dump($dom->getElementsByTagName('x')->namedItem('foo')?->textContent);
-var_dump($dom->getElementsByTagName('x')->namedItem('footest')?->textContent);
+
+function test($obj, $name) {
+    echo "--- Query \"$name\" ---\n";
+    var_dump($obj->namedItem($name)?->textContent);
+    var_dump($obj[$name]?->textContent);
+    var_dump(isset($obj[$name]));
+
+    // Search to check for dimension access consistency
+    $node = $obj[$name];
+    if ($node) {
+        $found = false;
+        for ($i = 0; $i < $obj->length && !$found; $i++) {
+            $found = $obj[$i] === $node;
+        }
+        if (!$found) {
+            throw new Error('inconsistency in dimension access');
+        }
+    }
+}
+
+test($dom->getElementsByTagName('node'), 'foo');
+test($dom->getElementsByTagName('node'), '');
+test($dom->getElementsByTagName('node'), 'does not exist');
+test($dom->getElementsByTagName('node'), 'wrong');
+test($dom->getElementsByTagName('node'), 'bar');
+test($dom->getElementsByTagName('x'), 'foo');
+test($dom->getElementsByTagName('x'), 'footest');
 
 ?>
 --EXPECT--
+--- Query "foo" ---
 string(1) "5"
+string(1) "5"
+bool(true)
+--- Query "" ---
 NULL
 NULL
+bool(false)
+--- Query "does not exist" ---
+NULL
+NULL
+bool(false)
+--- Query "wrong" ---
 string(1) "4"
+string(1) "4"
+bool(true)
+--- Query "bar" ---
 string(12) "with html ns"
+string(12) "with html ns"
+bool(true)
+--- Query "foo" ---
 string(1) "2"
+string(1) "2"
+bool(true)
+--- Query "footest" ---
 string(13) "2 with entity"
+string(13) "2 with entity"
+bool(true)

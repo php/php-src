@@ -14,27 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef PHP_NODELIST_H
-#define PHP_NODELIST_H
+#ifndef PHP_HTML_COLLECTION_H
+#define PHP_HTML_COLLECTION_H
 
-enum dom_nodelist_dimension_index_type {
-	DOM_NODELIST_DIM_ILLEGAL,
-	DOM_NODELIST_DIM_STRING,
-	DOM_NODELIST_DIM_LONG,
-};
-
-typedef struct _dom_nodelist_dimension_index {
-	union {
-		zend_long lval;
-		zend_string *str;
-	};
-	enum dom_nodelist_dimension_index_type type;
-} dom_nodelist_dimension_index;
-
-void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
-int php_dom_get_nodelist_length(dom_object *obj);
-dom_nodelist_dimension_index dom_modern_nodelist_get_index(const zval *offset);
-zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
-int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
+zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
+int dom_html_collection_has_dimension(zend_object *object, zval *member, int check_empty);
 
 #endif

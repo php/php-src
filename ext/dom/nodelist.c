@@ -250,7 +250,7 @@ ZEND_METHOD(DOMNodeList, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-dom_nodelist_dimension_index dom_modern_nodelist_get_index(zval *offset)
+dom_nodelist_dimension_index dom_modern_nodelist_get_index(const zval *offset)
 {
 	dom_nodelist_dimension_index ret;
 

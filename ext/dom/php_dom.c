@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "nodelist.h"
+#include "html_collection.h"
 #include "namespace_compat.h"
 #include "internal_helpers.h"
 #include "php_dom_arginfo.h"
@@ -90,6 +91,7 @@ static zend_object_handlers dom_nnodemap_object_handlers;
 static zend_object_handlers dom_nodelist_object_handlers;
 static zend_object_handlers dom_modern_nnodemap_object_handlers;
 static zend_object_handlers dom_modern_nodelist_object_handlers;
+static zend_object_handlers dom_html_collection_object_handlers;
 static zend_object_handlers dom_object_namespace_node_handlers;
 static zend_object_handlers dom_modern_domimplementation_object_handlers;
 #ifdef LIBXML_XPATH_ENABLED
@@ -715,6 +717,10 @@ PHP_MINIT_FUNCTION(dom)
 	dom_modern_nodelist_object_handlers.read_dimension = dom_modern_nodelist_read_dimension;
 	dom_modern_nodelist_object_handlers.has_dimension = dom_modern_nodelist_has_dimension;
 
+	memcpy(&dom_html_collection_object_handlers, &dom_modern_nodelist_object_handlers, sizeof(zend_object_handlers));
+	dom_html_collection_object_handlers.read_dimension = dom_html_collection_read_dimension;
+	dom_html_collection_object_handlers.has_dimension = dom_html_collection_has_dimension;
+
 	memcpy(&dom_object_namespace_node_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
 	dom_object_namespace_node_handlers.free_obj = dom_object_namespace_node_free_storage;
@@ -927,7 +933,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	dom_html_collection_class_entry = register_class_DOM_HTMLCollection(zend_ce_aggregate, zend_ce_countable);
 	dom_html_collection_class_entry->create_object = dom_nnodemap_objects_new;
-	dom_html_collection_class_entry->default_object_handlers = &dom_modern_nodelist_object_handlers;
+	dom_html_collection_class_entry->default_object_handlers = &dom_html_collection_object_handlers;
 	dom_html_collection_class_entry->get_iterator = php_dom_get_iterator;
 
 	zend_hash_add_new_ptr(&classes, dom_html_collection_class_entry->name, &dom_nodelist_prop_handlers);
