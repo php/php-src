@@ -92,7 +92,7 @@ PHP 8.4 UPGRADE NOTES
 
 - PDO_MYSQL:
   . getAttribute, ATTR_AUTOCOMMIT, ATTR_EMULATE_PREPARES, MYSQL_ATTR_DIRECT_QUERY have
-    been changed to get values ​​as bool.
+    been changed to get values as bool.
 
 - PDO_PGSQL:
   . The DSN's credentials, when set, are given priority over their PDO
@@ -368,7 +368,7 @@ PHP 8.4 UPGRADE NOTES
   . getAttribute, enabled to get the value of ATTR_STRINGIFY_FETCHES.
 
 - PDO_FIREBIRD:
-  . getAttribute, enabled to get values ​​of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
+  . getAttribute, enabled to get values of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
     FB_ATTR_TIMESTAMP_FORMAT.
   . Added new attributes to specify transaction isolation level and access mode.
     Along with these, five constants (PDO::FB_TRANSACTION_ISOLATION_LEVEL,
@@ -414,7 +414,7 @@ PHP 8.4 UPGRADE NOTES
     "pre-rounding" to treat a value like 0.285 (actually 0.28499999999999998) as a
     decimal number and round it to 0.29. However, "pre-rounding" incorrectly rounds
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
-    are compared, so that the values ​​are correctly rounded as decimal numbers.
+    are compared, so that the values are correctly rounded as decimal numbers.
   . long2ip() now returns string instead of string|false.
   . The maximum precision that can be handled by round() has been extended by
     one digit.
