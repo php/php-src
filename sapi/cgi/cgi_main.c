@@ -1918,9 +1918,16 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 
 	if (bindpath) {
-		int backlog = 128;
+		int backlog = MIN(SOMAXCONN, 128);
 		if (getenv("PHP_FCGI_BACKLOG")) {
 			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
+		}
+		if (backlog < -1 || backlog > SOMAXCONN) {
+			fprintf(stderr, "Invalid backlog %d, needs to be between -1 and %d\n", backlog, SOMAXCONN);
+#ifdef ZTS
+			tsrm_shutdown();
+#endif
+			return FAILURE;
 		}
 		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {
