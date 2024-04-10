@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-13772 (Invalid execute_data->opline pointers in observer fcall
     handlers when JIT is enabled). (Bob)
+  . Fixed bug GH-13931 (Applying zero offset to null pointer in
+    Zend/zend_opcode.c). (nielsdos)
 
 - Fibers:
   . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
