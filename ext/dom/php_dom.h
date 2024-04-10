@@ -177,6 +177,9 @@ xmlDocPtr php_dom_create_html_doc(void);
 xmlChar *dom_attr_value(const xmlAttr *attr, bool *free);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 
+zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
+int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
+
 typedef enum {
 	DOM_LOAD_STRING = 0,
 	DOM_LOAD_FILE = 1,
