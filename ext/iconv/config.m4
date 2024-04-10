@@ -112,8 +112,8 @@ int main(void) {
       AC_MSG_RESULT(yes, cross-compiling)
     ])
 
-    AC_MSG_CHECKING([if iconv supports //IGNORE])
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <iconv.h>
 #include <stdlib.h>
 
@@ -132,16 +132,13 @@ int main(void) {
   }
   return 0;
 }
-   ]])],[
-      AC_MSG_RESULT(yes)
-      AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
-    ],[
-      AC_MSG_RESULT(no)
-      AC_DEFINE([ICONV_BROKEN_IGNORE],1,[Whether iconv supports IGNORE])
-    ],[
-      AC_MSG_RESULT(no, cross-compiling)
-      AC_DEFINE([ICONV_BROKEN_IGNORE],0,[Whether iconv supports IGNORE])
-    ])
+      ]])],
+      [php_cv_iconv_ignore=yes],
+      [php_cv_iconv_ignore=no],
+      [php_cv_iconv_ignore=no])])
+
+    AS_VAR_IF([php_cv_iconv_ignore], [no],
+      [AC_DEFINE([ICONV_BROKEN_IGNORE], [1], [Whether iconv has broken IGNORE.])])
 
     LDFLAGS="$save_LDFLAGS"
     CFLAGS="$save_CFLAGS"
