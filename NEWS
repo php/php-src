@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
     (nielsdos)
 
+- Fileinfo:
+  . Fixed bug GH-13795 (Test failing in ext/fileinfo/tests/bug78987.phpt on
+    big-endian PPC). (orlitzky)
+
 - FPM:
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
