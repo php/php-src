@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.1.28
+11 Apr 2024, PHP 8.1.28
 
 - Standard:
   . Fixed bug GHSA-pc52-254m-w9w7 (Command injection via array-ish $command
