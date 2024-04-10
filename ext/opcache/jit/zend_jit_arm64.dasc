@@ -688,7 +688,7 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |	.if ZTS
 ||		if (GCC_GLOBAL_REGS) {
 |			LOAD_TSRM_CACHE IP
-|	   		MEM_ACCESS_64_WITH_UOFFSET ldr, IP, IP, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
+|	   		ADD_SUB_64_WITH_CONST_32 add, IP, IP, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
 ||		} else {
 |			LOAD_TSRM_CACHE RX
 |			ADD_SUB_64_WITH_CONST_32 add, RX, RX, (struct.._offset+offsetof(zend_..struct, field)), tmp_reg
@@ -1935,6 +1935,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|5:
 		|	// opline = EG(exception_op);
 		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op, TMP2
+		|	str IP, EX->opline
 		|	// HANDLE_EXCEPTION()
 		|	b ->exception_handler
 	} else {
