@@ -249,23 +249,46 @@ ZEND_METHOD(DOMNodeList, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-static zend_long dom_modern_nodelist_get_index(zval *offset, bool *failed)
+enum dom_nodelist_dimension_index_type {
+	DOM_NODELIST_DIM_ILLEGAL,
+	DOM_NODELIST_DIM_STRING,
+	DOM_NODELIST_DIM_LONG,
+};
+
+typedef struct _dom_nodelist_dimension_index {
+	union {
+		zend_long lval;
+		zend_string *str;
+	};
+	enum dom_nodelist_dimension_index_type type;
+} dom_nodelist_dimension_index;
+
+static dom_nodelist_dimension_index dom_modern_nodelist_get_index(zval *offset)
 {
-	zend_ulong lval;
+	dom_nodelist_dimension_index ret;
+
 	ZVAL_DEREF(offset);
+
 	if (Z_TYPE_P(offset) == IS_LONG) {
-		*failed = false;
-		return Z_LVAL_P(offset);
+		ret.type = DOM_NODELIST_DIM_LONG;
+		ret.lval = Z_LVAL_P(offset);
 	} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-		*failed = false;
-		return zend_dval_to_lval_safe(Z_DVAL_P(offset));
-	} else if (Z_TYPE_P(offset) == IS_STRING && ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
-		*failed = false;
-		return (zend_long) lval;
+		ret.type = DOM_NODELIST_DIM_LONG;
+		ret.lval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+	} else if (Z_TYPE_P(offset) == IS_STRING) {
+		zend_ulong lval;
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
+			ret.type = DOM_NODELIST_DIM_LONG;
+			ret.lval = (zend_long) lval;
+		} else {
+			ret.type = DOM_NODELIST_DIM_STRING;
+			ret.str = Z_STR_P(offset);
+		}
 	} else {
-		*failed = true;
-		return 0;
+		ret.type = DOM_NODELIST_DIM_ILLEGAL;
 	}
+
+	return ret;
 }
 
 zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
@@ -275,14 +298,13 @@ zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int 
 		return NULL;
 	}
 
-	bool failed;
-	zend_long lval = dom_modern_nodelist_get_index(offset, &failed);
-	if (UNEXPECTED(failed)) {
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(offset);
+	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
 		zend_illegal_container_offset(object->ce->name, offset, type);
 		return NULL;
 	}
 
-	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, lval, rv);
+	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
 	return rv;
 }
 
@@ -291,14 +313,13 @@ int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int che
 	/* If it exists, it cannot be empty because nodes aren't empty. */
 	ZEND_IGNORE_VALUE(check_empty);
 
-	bool failed;
-	zend_long lval = dom_modern_nodelist_get_index(member, &failed);
-	if (UNEXPECTED(failed)) {
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(member);
+	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
 		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
 		return 0;
 	}
 
-	return lval >= 0 && lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
+	return index.lval >= 0 && index.lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
 }
 
 #endif
