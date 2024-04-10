@@ -177,9 +177,6 @@ xmlDocPtr php_dom_create_html_doc(void);
 xmlChar *dom_attr_value(const xmlAttr *attr, bool *free);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 
-zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
-int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
-
 typedef enum {
 	DOM_LOAD_STRING = 0,
 	DOM_LOAD_FILE = 1,
@@ -209,9 +206,7 @@ xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, co
 void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap, const zend_string *named, zval *return_value);
 xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
-void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
 int php_dom_get_namednodemap_length(dom_object *obj);
-int php_dom_get_nodelist_length(dom_object *obj);
 
 xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
 

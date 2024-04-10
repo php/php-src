@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "nodelist.h"
 #include "zend_interfaces.h"
 
 /*
@@ -249,21 +250,7 @@ ZEND_METHOD(DOMNodeList, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-enum dom_nodelist_dimension_index_type {
-	DOM_NODELIST_DIM_ILLEGAL,
-	DOM_NODELIST_DIM_STRING,
-	DOM_NODELIST_DIM_LONG,
-};
-
-typedef struct _dom_nodelist_dimension_index {
-	union {
-		zend_long lval;
-		zend_string *str;
-	};
-	enum dom_nodelist_dimension_index_type type;
-} dom_nodelist_dimension_index;
-
-static dom_nodelist_dimension_index dom_modern_nodelist_get_index(zval *offset)
+dom_nodelist_dimension_index dom_modern_nodelist_get_index(zval *offset)
 {
 	dom_nodelist_dimension_index ret;
 
