@@ -406,7 +406,7 @@ static size_t tsrm_tls_offset;
 |	.if ZTS
 ||		if (GCC_GLOBAL_REGS) {
 |			LOAD_TSRM_CACHE IP
-|			mov IP, aword [IP + (struct.._offset + offsetof(zend_..struct, field))]
+|			lea IP, aword [IP + (struct.._offset + offsetof(zend_..struct, field))]
 ||		} else {
 |			LOAD_TSRM_CACHE RX
 |			lea RX, aword [RX + (struct.._offset + offsetof(zend_..struct, field))]
@@ -1884,6 +1884,7 @@ static int zend_jit_leave_throw_stub(dasm_State **Dst)
 		|5:
 		|	// opline = EG(exception_op);
 		|	LOAD_IP_ADDR_ZTS executor_globals, exception_op
+		|	mov aword EX->opline, IP
 		|	// HANDLE_EXCEPTION()
 		|	jmp ->exception_handler
 	} else {
