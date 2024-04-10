@@ -352,17 +352,17 @@ function odbc_do($odbc, string $query) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
 /** @param resource $statement */
-function odbc_fetch_object($statement, int $row = -1): stdClass|false {}
+function odbc_fetch_object($statement, ?int $row = null): stdClass|false {}
 
 /** @param resource $statement */
-function odbc_fetch_array($statement, int $row = -1): array|false {}
+function odbc_fetch_array($statement, ?int $row = null): array|false {}
 #endif
 
 /**
  * @param resource $statement
  * @param array $array
  */
-function odbc_fetch_into($statement, &$array, int $row = 0): int|false {}
+function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
 
 /** @param resource $statement */
 function odbc_fetch_row($statement, ?int $row = null): bool {}

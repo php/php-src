@@ -64,6 +64,10 @@ PHP 8.4 UPGRADE NOTES
     is converted to Unicode. This is significant because around 40 SJIS-Mac characters
     convert to a sequence of multiple Unicode codepoints.
 
+- ODBC:
+  . odbc_fetch_row() returns false when a value less than or equal to 0 is
+    passed for parameter $row. Now, a warning is emitted in this case.
+
 - Opcache:
   . The JIT config defaults changed from opcache.jit=tracing and
     opcache.jit_buffer_size=0 to opcache.jit=disable and
@@ -359,6 +363,12 @@ PHP 8.4 UPGRADE NOTES
     a single entry.
   . New serial_hex parameter added to openssl_csr_sign to allow setting serial
     number in the hexadecimal format.
+
+- ODBC:
+  . Parameter $row of odbc_fetch_object(), odbc_fetch_array(), and
+    odbc_fetch_into() now has a default value of null, consistent with
+    odbc_fetch_row(). Previously, the default values were -1, -1, and 0,
+    respectively.
 
 - Output:
   . Output handler status flags passed to the flags parameter of ob_start
