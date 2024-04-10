@@ -188,8 +188,19 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 			} else {
 				if (objmap->nodetype == XML_ATTRIBUTE_NODE ||
 					objmap->nodetype == XML_ELEMENT_NODE) {
-					curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
-					curnode = curnode->next;
+
+					/* Note: keep legacy behaviour for non-spec mode. */
+					if (php_dom_follow_spec_intern(intern) && php_dom_is_cache_tag_stale_from_doc_ptr(&iterator->cache_tag, intern->document)) {
+						php_dom_mark_cache_tag_up_to_date_from_doc_ref(&iterator->cache_tag, intern->document);
+						curnode = dom_fetch_first_iteration_item(objmap);
+						zend_ulong index = 0;
+						while (curnode != NULL && index++ < iter->index) {
+							curnode = curnode->next;
+						}
+					} else {
+						curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->ptr)->node;
+						curnode = curnode->next;
+					}
 				} else {
 					/* The collection is live, we nav the tree from the base object if we cannot
 					 * use the cache to restart from the last point. */

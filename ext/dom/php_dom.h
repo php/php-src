@@ -262,6 +262,13 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_l
 	}
 }
 
+static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_doc_ref(php_libxml_cache_tag *cache_tag, php_libxml_ref_obj *document)
+{
+	ZEND_ASSERT(cache_tag != NULL);
+	ZEND_ASSERT(document != NULL);
+	cache_tag->modification_nr = document->cache_tag.modification_nr;
+}
+
 static zend_always_inline bool php_dom_follow_spec_node(const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
