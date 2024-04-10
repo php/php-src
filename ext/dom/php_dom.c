@@ -656,8 +656,6 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
 static zval *dom_modern_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_modern_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
-static zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
-static int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
 static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
 
 #ifdef LIBXML_XPATH_ENABLED
@@ -2191,58 +2189,6 @@ static int dom_nodelist_has_dimension(zend_object *object, zval *member, int che
 	}
 
 	return offset >= 0 && offset < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
-}
-
-static zend_long dom_modern_nodelist_get_index(zval *offset, bool *failed)
-{
-	zend_ulong lval;
-	ZVAL_DEREF(offset);
-	if (Z_TYPE_P(offset) == IS_LONG) {
-		*failed = false;
-		return Z_LVAL_P(offset);
-	} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
-		*failed = false;
-		return zend_dval_to_lval_safe(Z_DVAL_P(offset));
-	} else if (Z_TYPE_P(offset) == IS_STRING && ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
-		*failed = false;
-		return (zend_long) lval;
-	} else {
-		*failed = true;
-		return 0;
-	}
-}
-
-static zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
-{
-	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
-		return NULL;
-	}
-
-	bool failed;
-	zend_long lval = dom_modern_nodelist_get_index(offset, &failed);
-	if (UNEXPECTED(failed)) {
-		zend_illegal_container_offset(object->ce->name, offset, type);
-		return NULL;
-	}
-
-	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, lval, rv);
-	return rv;
-}
-
-static int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
-{
-	/* If it exists, it cannot be empty because nodes aren't empty. */
-	ZEND_IGNORE_VALUE(check_empty);
-
-	bool failed;
-	zend_long lval = dom_modern_nodelist_get_index(member, &failed);
-	if (UNEXPECTED(failed)) {
-		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
-		return 0;
-	}
-
-	return lval >= 0 && lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
 }
 
 void dom_remove_all_children(xmlNodePtr nodep)
