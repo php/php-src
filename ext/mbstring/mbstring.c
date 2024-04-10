@@ -6119,6 +6119,9 @@ static zend_string* mb_mime_header_encode(zend_string *input, const mbfl_encodin
 	unsigned char *in = (unsigned char*)ZSTR_VAL(input);
 	size_t in_len = ZSTR_LEN(input);
 
+	ZEND_ASSERT(outcode->mime_name != NULL);
+	ZEND_ASSERT(outcode->mime_name[0] != '\0');
+
 	if (!in_len) {
 		return zend_empty_string;
 	}
@@ -6141,7 +6144,8 @@ static zend_string* mb_mime_header_encode(zend_string *input, const mbfl_encodin
 	unsigned int state = 0;
 	/* wchar_buf should be big enough that when it is full, we definitely have enough
 	 * wchars to fill an entire line of output */
-	uint32_t wchar_buf[80];
+	const size_t wchar_buf_len = 90;
+	uint32_t wchar_buf[wchar_buf_len];
 	uint32_t *p, *e;
 	/* What part of wchar_buf is filled with still-unprocessed data which should not
 	 * be overwritten? */
@@ -6152,7 +6156,7 @@ static zend_string* mb_mime_header_encode(zend_string *input, const mbfl_encodin
 	 * spaces), just pass it through unchanged */
 	bool checking_leading_spaces = true;
 	while (in_len) {
-		size_t out_len = incode->to_wchar(&in, &in_len, wchar_buf, 80, &state);
+		size_t out_len = incode->to_wchar(&in, &in_len, wchar_buf, wchar_buf_len, &state);
 		p = wchar_buf;
 		e = wchar_buf + out_len;
 
@@ -6186,9 +6190,9 @@ no_passthrough: ;
 	 * do so all the way to the end of the string */
 	while (in_len) {
 		/* Decode part of the input string, refill wchar_buf */
-		ZEND_ASSERT(offset < 80);
-		size_t out_len = incode->to_wchar(&in, &in_len, wchar_buf + offset, 80 - offset, &state);
-		ZEND_ASSERT(out_len <= 80 - offset);
+		ZEND_ASSERT(offset + MBSTRING_MIN_WCHAR_BUFSIZE <= wchar_buf_len);
+		size_t out_len = incode->to_wchar(&in, &in_len, wchar_buf + offset, wchar_buf_len - offset, &state);
+		ZEND_ASSERT(out_len <= wchar_buf_len - offset);
 		p = wchar_buf;
 		e = wchar_buf + offset + out_len;
 		/* ASCII output is broken into space-delimited 'words'
@@ -6209,6 +6213,7 @@ no_passthrough: ;
 				 * If we are already too far along on a line to include Base64/QPrint encoded data
 				 * on the same line (without overrunning max line length), then add a line feed
 				 * right now */
+feed_and_mime_encode:
 				if (mb_convert_buf_len(&buf) - line_start + indent + strlen(outcode->mime_name) > 55) {
 					MB_CONVERT_BUF_ENSURE(&buf, buf.out, buf.limit, (e - word_start) + linefeed_len + 1);
 					buf.out = mb_convert_buf_appendn(buf.out, linefeed, linefeed_len);
@@ -6246,7 +6251,13 @@ no_passthrough: ;
 
 		if (in_len) {
 			/* Copy chars which are part of an incomplete 'word' to the beginning
-			 * of wchar_buf and reprocess them on the next iteration */
+			 * of wchar_buf and reprocess them on the next iteration.
+			 * But first make sure that the incomplete 'word' isn't so big that
+			 * there will be no space to add any more decoded wchars in the buffer
+			 * (which could lead to an infinite loop) */
+			if ((word_start - wchar_buf) < MBSTRING_MIN_WCHAR_BUFSIZE) {
+				goto feed_and_mime_encode;
+			}
 			offset = e - word_start;
 			if (offset) {
 				memmove(wchar_buf, word_start, offset * sizeof(uint32_t));
@@ -6288,17 +6299,17 @@ mime_encoding_needed: ;
 
 	/* Do we need to refill wchar_buf to make sure we don't run out of wchars
 	 * in the middle of a line? */
-	if (p == wchar_buf) {
+	offset = e - p;
+	if (wchar_buf_len - offset < MBSTRING_MIN_WCHAR_BUFSIZE) {
 		goto start_new_line;
 	}
-	offset = e - p;
 	memmove(wchar_buf, p, offset * sizeof(uint32_t));
 
 	while(true) {
 refill_wchar_buf: ;
-		ZEND_ASSERT(offset < 80);
-		size_t out_len = incode->to_wchar(&in, &in_len, wchar_buf + offset, 80 - offset, &state);
-		ZEND_ASSERT(out_len <= 80 - offset);
+		ZEND_ASSERT(offset + MBSTRING_MIN_WCHAR_BUFSIZE <= wchar_buf_len);
+		size_t out_len = incode->to_wchar(&in, &in_len, wchar_buf + offset, wchar_buf_len - offset, &state);
+		ZEND_ASSERT(out_len <= wchar_buf_len - offset);
 		p = wchar_buf;
 		e = wchar_buf + offset + out_len;
 
@@ -6373,22 +6384,18 @@ start_new_line: ;
 
 					indent = 0; /* Indent argument must only affect the first line */
 
-					if (in_len) {
-						/* We still have more of input string remaining to decode */
+					if (in_len || p < e) {
+						/* We still have more input to process */
 						buf.out = mb_convert_buf_appendn(buf.out, linefeed, linefeed_len);
 						buf.out = mb_convert_buf_add(buf.out, ' ');
 						line_start = mb_convert_buf_len(&buf);
-						/* Copy remaining wchars to beginning of buffer so they will be
-						 * processed on the next iteration of outer 'do' loop */
 						offset = e - p;
-						memmove(wchar_buf, p, offset * sizeof(uint32_t));
-						goto refill_wchar_buf;
-					} else if (p < e) {
-						/* Input string is finished, but we still have trailing wchars
-						 * remaining to be processed in wchar_buf */
-						buf.out = mb_convert_buf_appendn(buf.out, linefeed, linefeed_len);
-						buf.out = mb_convert_buf_add(buf.out, ' ');
-						line_start = mb_convert_buf_len(&buf);
+						if (in_len && (wchar_buf_len - offset >= MBSTRING_MIN_WCHAR_BUFSIZE)) {
+							/* Copy any remaining wchars to beginning of buffer and refill
+							 * the rest of the buffer */
+							memmove(wchar_buf, p, offset * sizeof(uint32_t));
+							goto refill_wchar_buf;
+						}
 						goto start_new_line;
 					} else {
 						/* We are done! */
@@ -6426,7 +6433,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 		charset = php_mb_get_encoding(charset_name, 2);
 		if (!charset) {
 			RETURN_THROWS();
-		} else if (charset->mime_name == NULL || charset->mime_name[0] == '\0') {
+		} else if (charset->mime_name == NULL || charset->mime_name[0] == '\0' || charset == &mbfl_encoding_qprint) {
 			zend_argument_value_error(2, "\"%s\" cannot be used for MIME header encoding", ZSTR_VAL(charset_name));
 			RETURN_THROWS();
 		}
