@@ -2273,24 +2273,13 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, boo
 		}
 
 		case XML_ATTRIBUTE_NODE: {
-			/* For attributes we can also have an optimized fast-path.
-			 * This fast-path is only possible in the (common) case where the attribute
-			 * has a single text child. Note that if the child or the content is NULL, this
-			 * is equivalent to not having content (i.e. the attribute has the empty string as value). */
-
-			if (nodep->children == NULL) {
-				RETURN_EMPTY_STRING();
+			bool free;
+			xmlChar *value = dom_attr_value((const xmlAttr *) nodep, &free);
+			RETURN_STRING_FAST((const char *) value);
+			if (free) {
+				xmlFree(value);
 			}
-
-			if (nodep->children->type == XML_TEXT_NODE && nodep->children->next == NULL) {
-				if (nodep->children->content == NULL) {
-					RETURN_EMPTY_STRING();
-				} else {
-					RETURN_STRING((const char *) nodep->children->content);
-				}
-			}
-
-			ZEND_FALLTHROUGH;
+			return;
 		}
 
 		default: {

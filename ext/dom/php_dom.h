@@ -174,6 +174,8 @@ void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 xmlDocPtr php_dom_create_html_doc(void);
 
+xmlChar *dom_attr_value(const xmlAttr *attr, bool *free);
+
 typedef enum {
 	DOM_LOAD_STRING = 0,
 	DOM_LOAD_FILE = 1,
