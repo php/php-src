@@ -123,8 +123,10 @@ static void php_dom_iterator_current_key(zend_object_iterator *iter, zval *key) 
 {
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
 	zval *object = &iterator->intern.data;
+	zend_class_entry *ce = Z_OBJCE_P(object);
 
-	if (instanceof_function(Z_OBJCE_P(object), dom_nodelist_class_entry)) {
+	/* Nodelists have the index as a key while named node maps have the name as a key. */
+	if (instanceof_function(ce, dom_nodelist_class_entry) || instanceof_function(ce, dom_modern_nodelist_class_entry)) {
 		ZVAL_LONG(key, iter->index);
 	} else {
 		dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
