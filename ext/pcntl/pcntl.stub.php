@@ -1003,3 +1003,17 @@ function pcntl_setcpuaffinity(?int $process_id = null, array $cpu_ids = []): boo
 #ifdef HAVE_SCHED_GETCPU
 function pcntl_getcpu(): int {}
 #endif
+
+#ifdef HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP
+enum QosClass
+{
+	case UserInteractive;
+	case UserInitiated;
+	case Default;
+	case Utility;
+	case Background;
+}
+
+function pcntl_getqos_class(): QosClass {}
+function pcntl_setqos_class(QosClass $qos_class = QosClass::Default): void {}
+#endif

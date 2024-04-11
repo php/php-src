@@ -475,6 +475,8 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getaffinity to get the cpu(s) bound to a process and
     pcntl_setaffinity to bind 1 or more cpus to a process.
   . Added pcntl_getcpu to get the cpu id from where the current process runs.
+  . Added pcntl_getqos_class to get the QoS level (aka performance and related
+    energy consumption) of the current process and pcntl_setqos_class to set it.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
@@ -581,6 +583,13 @@ PHP 8.4 UPGRADE NOTES
 - OpenSSL:
   . X509_PURPOSE_OCSP_HELPER.
   . X509_PURPOSE_TIMESTAMP_SIGN.
+
+- PCNTL:
+  . QosClass::Background (macOs only).
+  . QosClass::Default (macOs only).
+  . QosClass::UserInteractive (macOs only).
+  . QosClass::UserInitiated (macOs only).
+  . QosClass::Utility (macOs only).
 
 - Standard:
   . PHP_ROUND_CEILING.
