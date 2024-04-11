@@ -3255,7 +3255,7 @@ static void zend_jit_setup(void)
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
 			: "=a" (ti));
 		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 16;
+		tsrm_tls_index = ti[0] * 8;
 #else
 		size_t *ti;
 
