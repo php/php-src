@@ -452,6 +452,7 @@ PHP_FUNCTION(posix_ttyname)
 	zend_long fd = 0;
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	zend_long buflen;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -477,12 +478,23 @@ PHP_FUNCTION(posix_ttyname)
 #if defined(ZTS) && defined(HAVE_TTYNAME_R) && defined(_SC_TTY_NAME_MAX)
 	buflen = sysconf(_SC_TTY_NAME_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 32;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	p = emalloc(buflen);
 
-	if (ttyname_r(fd, p, buflen)) {
-		POSIX_G(last_error) = errno;
+try_again:
+	err = ttyname_r(fd, p, buflen);
+	if (err) {
+		if (err == ERANGE) {
+			buflen *= 2;
+			p = erealloc(p, buflen);
+			goto try_again;
+		}
+		POSIX_G(last_error) = err;
 		efree(p);
 		RETURN_FALSE;
 	}
@@ -775,6 +787,7 @@ PHP_FUNCTION(posix_getgrnam)
 	struct group gbuf;
 	long buflen;
 	char *buf;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -784,19 +797,24 @@ PHP_FUNCTION(posix_getgrnam)
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
 	buflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	buf = emalloc(buflen);
 try_again:
 	g = &gbuf;
 
-	if (getgrnam_r(name, g, buf, buflen, &g) || g == NULL) {
-		if (errno == ERANGE) {
+	err = getgrnam_r(name, g, buf, buflen, &g);
+	if (err || g == NULL) {
+		if (err == ERANGE) {
 			buflen *= 2;
 			buf = erealloc(buf, buflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = errno;
+		POSIX_G(last_error) = err;
 		efree(buf);
 		RETURN_FALSE;
 	}
@@ -824,7 +842,7 @@ PHP_FUNCTION(posix_getgrgid)
 {
 	zend_long gid;
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
-	int ret;
+	int err;
 	struct group _g;
 	struct group *retgrptr = NULL;
 	long grbuflen;
@@ -840,20 +858,24 @@ PHP_FUNCTION(posix_getgrgid)
 
 	grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 	if (grbuflen < 1) {
-		RETURN_FALSE;
+		grbuflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	grbuflen = 1;
+#endif
 
 	grbuf = emalloc(grbuflen);
 
 try_again:
-	ret = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
-	if (ret || retgrptr == NULL) {
-		if (errno == ERANGE) {
+	err = getgrgid_r(gid, &_g, grbuf, grbuflen, &retgrptr);
+	if (err || retgrptr == NULL) {
+		if (err == ERANGE) {
 			grbuflen *= 2;
 			grbuf = erealloc(grbuf, grbuflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = ret;
+		POSIX_G(last_error) = err;
 		efree(grbuf);
 		RETURN_FALSE;
 	}
@@ -905,6 +927,7 @@ PHP_FUNCTION(posix_getpwnam)
 	struct passwd pwbuf;
 	long buflen;
 	char *buf;
+	int err;
 #endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -914,20 +937,25 @@ PHP_FUNCTION(posix_getpwnam)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
 	buflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (buflen < 1) {
-		RETURN_FALSE;
+		buflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	buflen = 1;
+#endif
 	buf = emalloc(buflen);
-	pw = &pwbuf;
 
 try_again:
-	if (getpwnam_r(name, pw, buf, buflen, &pw) || pw == NULL) {
-		if (errno == ERANGE) {
+	pw = &pwbuf;
+	err = getpwnam_r(name, pw, buf, buflen, &pw);
+	if (err || pw == NULL) {
+		if (err == ERANGE) {
 			buflen *= 2;
 			buf = erealloc(buf, buflen);
 			goto try_again;
 		}
 		efree(buf);
-		POSIX_G(last_error) = errno;
+		POSIX_G(last_error) = err;
 		RETURN_FALSE;
 	}
 #else
@@ -958,7 +986,7 @@ PHP_FUNCTION(posix_getpwuid)
 	struct passwd *retpwptr = NULL;
 	long pwbuflen;
 	char *pwbuf;
-	int ret;
+	int err;
 #endif
 	struct passwd *pw;
 
@@ -969,19 +997,23 @@ PHP_FUNCTION(posix_getpwuid)
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
 	pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 	if (pwbuflen < 1) {
-		RETURN_FALSE;
+		pwbuflen = 1024;
 	}
+#if ZEND_DEBUG
+	/* Test retry logic */
+	pwbuflen = 1;
+#endif
 	pwbuf = emalloc(pwbuflen);
 
 try_again:
-	ret = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
-	if (ret || retpwptr == NULL) {
+	err = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+	if (err || retpwptr == NULL) {
 		if (errno == ERANGE) {
 			pwbuflen *= 2;
 			pwbuf = erealloc(pwbuf, pwbuflen);
 			goto try_again;
 		}
-		POSIX_G(last_error) = ret;
+		POSIX_G(last_error) = err;
 		efree(pwbuf);
 		RETURN_FALSE;
 	}
