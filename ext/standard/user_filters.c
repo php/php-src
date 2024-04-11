@@ -398,16 +398,14 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (NULL != (pzdata = zend_read_property(NULL, Z_OBJ_P(zobject), "data", sizeof("data")-1, false, &rv))) {
 		ZVAL_DEREF(pzdata);
-		if (Z_TYPE_P(pzdata) == IS_STRING) {
-			if (!bucket->own_buf) {
-				bucket = php_stream_bucket_make_writeable(bucket);
-			}
-			if (bucket->buflen != Z_STRLEN_P(pzdata)) {
-				bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
-				bucket->buflen = Z_STRLEN_P(pzdata);
-			}
-			memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
+		if (!bucket->own_buf) {
+			bucket = php_stream_bucket_make_writeable(bucket);
 		}
+		if (bucket->buflen != Z_STRLEN_P(pzdata)) {
+			bucket->buf = perealloc(bucket->buf, Z_STRLEN_P(pzdata), bucket->is_persistent);
+			bucket->buflen = Z_STRLEN_P(pzdata);
+		}
+		memcpy(bucket->buf, Z_STRVAL_P(pzdata), bucket->buflen);
 	}
 
 	if (append) {
