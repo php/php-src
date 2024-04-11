@@ -28,20 +28,11 @@ if test "$PHP_ICONV" != "no"; then
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if using GNU libiconv])
-      AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <iconv.h>
-#include <stdio.h>
-int main(void) {
-  printf("%d", _libiconv_version);
-  return 0;
-}
-      ]])],[
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <iconv.h>], [(void) _libiconv_version])],[
         AC_MSG_RESULT(yes)
         iconv_impl_name="gnu_libiconv"
       ],[
         AC_MSG_RESULT(no)
-      ],[
-        AC_MSG_RESULT([no, cross-compiling])
       ])
     fi
 
