@@ -4,6 +4,7 @@ Bug #39551 (Segfault with stream_bucket_new in user filter)
 <?php
 
 $bucket = stream_bucket_new(fopen('php://temp', 'w+'), '');
+var_dump($bucket);
 
 class bucketFilter extends php_user_filter {
     public function filter($in, $out, &$consumed, $closing ): int {
@@ -20,5 +21,15 @@ stream_get_contents($s);
 
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
+object(StreamBucket)#%d (%d) {
+  ["bucket"]=>
+  resource(%d) of type (userfilter.bucket)
+  ["data"]=>
+  string(0) ""
+  ["datalen"]=>
+  int(0)
+  ["dataLength"]=>
+  int(0)
+}
 Done
