@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 75eacf08a17e18c30fb2111bb742c36b18aa9ead */
+ * Stub hash: fdd48ba3c71ec80eb3ae740c5a6b8539efcdaa6c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -157,6 +157,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_getcpu, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_pcntl_getqos_class, 0, 0, QosClass, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setqos_class, 0, 0, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, qos_class, QosClass, 0, "QosClass::Default")
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
 ZEND_FUNCTION(pcntl_wait);
@@ -212,6 +223,12 @@ ZEND_FUNCTION(pcntl_setcpuaffinity);
 #endif
 #if defined(HAVE_SCHED_GETCPU)
 ZEND_FUNCTION(pcntl_getcpu);
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_FUNCTION(pcntl_getqos_class);
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_FUNCTION(pcntl_setqos_class);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -272,8 +289,20 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_SCHED_GETCPU)
 	ZEND_FE(pcntl_getcpu, arginfo_pcntl_getcpu)
 #endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	ZEND_FE(pcntl_getqos_class, arginfo_pcntl_getqos_class)
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	ZEND_FE(pcntl_setqos_class, arginfo_pcntl_setqos_class)
+#endif
 	ZEND_FE_END
 };
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+static const zend_function_entry class_QosClass_methods[] = {
+	ZEND_FE_END
+};
+#endif
 
 static void register_pcntl_symbols(int module_number)
 {
@@ -628,3 +657,36 @@ static void register_pcntl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PCNTL_ECAPMODE", ECAPMODE, CONST_PERSISTENT);
 #endif
 }
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+static zend_class_entry *register_class_QosClass(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("QosClass", IS_LONG, class_QosClass_methods);
+
+	zval enum_case_UserInteractive_value;
+	ZVAL_LONG(&enum_case_UserInteractive_value, 0x21);
+	zend_enum_add_case_cstr(class_entry, "UserInteractive", &enum_case_UserInteractive_value);
+
+	zval enum_case_UserInitiated_value;
+	ZVAL_LONG(&enum_case_UserInitiated_value, 0x19);
+	zend_enum_add_case_cstr(class_entry, "UserInitiated", &enum_case_UserInitiated_value);
+
+	zval enum_case_Default_value;
+	ZVAL_LONG(&enum_case_Default_value, 0x15);
+	zend_enum_add_case_cstr(class_entry, "Default", &enum_case_Default_value);
+
+	zval enum_case_Utility_value;
+	ZVAL_LONG(&enum_case_Utility_value, 0x11);
+	zend_enum_add_case_cstr(class_entry, "Utility", &enum_case_Utility_value);
+
+	zval enum_case_Background_value;
+	ZVAL_LONG(&enum_case_Background_value, 0x9);
+	zend_enum_add_case_cstr(class_entry, "Background", &enum_case_Background_value);
+
+	zval enum_case_Unspecified_value;
+	ZVAL_LONG(&enum_case_Unspecified_value, 0x0);
+	zend_enum_add_case_cstr(class_entry, "Unspecified", &enum_case_Unspecified_value);
+
+	return class_entry;
+}
+#endif

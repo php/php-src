@@ -51,6 +51,11 @@ typedef cpuset_t cpu_set_t;
 #endif
 #endif
 
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+#include <pthread/qos.h>
+static zend_class_entry *QosClass_ce;
+#endif
+
 #ifdef HAVE_PIDFD_OPEN
 #include <sys/syscall.h>
 #endif
@@ -65,9 +70,10 @@ typedef cpuset_t cpu_set_t;
 
 #define LONG_CONST(c) (zend_long) c
 
-#include "pcntl_arginfo.h"
-
+#include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"
+
+#include "pcntl_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -136,6 +142,9 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	QosClass_ce = register_class_QosClass();
+#endif
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
@@ -1619,6 +1628,50 @@ PHP_FUNCTION(pcntl_getcpu)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(sched_getcpu());
+}
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+PHP_FUNCTION(pcntl_getqos_class)
+{
+	qos_class_t qos_class;
+	zend_object *qos_obj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (UNEXPECTED(pthread_get_qos_class_np(pthread_self(), &qos_class, NULL) != 0))
+	{
+		// unlikely unless an external tool set the QOS class with a wrong value
+		PCNTL_G(last_error) = errno;
+		zend_throw_error(NULL, "invalid QOS class %u", qos_class);
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(zend_enum_get_case_by_value(&qos_obj, QosClass_ce, (zend_long)qos_class, NULL, false) == FAILURE))
+	{
+		zend_throw_error(NULL, "invalid QOS value class entry %u", qos_class);
+		RETURN_THROWS();
+	}
+
+	RETVAL_OBJ(qos_obj);
+}
+
+PHP_FUNCTION(pcntl_setqos_class)
+{
+	zval *qos_obj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_long qos_class = Z_LVAL_P(zend_enum_fetch_case_value(Z_OBJ_P(qos_obj)));
+
+	if (pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0)
+	{
+		PCNTL_G(last_error) = errno;
+		zend_argument_value_error(1, "must be one of QosClass enum entries : ::UserInteractive, ::UserInitiated, ::Default, ::Utility or ::Background");
+		RETURN_THROWS();
+	}
 }
 #endif
 
