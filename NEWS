@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13827 (Null pointer access of type 'zval' in phpdbg_frame).
     (nielsdos)
 
+- Posix:
+  . Fix usage of reentrant functions in ext/posix. (Arnaud)
+
 - Session:
   . Fixed bug GH-13856 (Member access within null pointer of type 'ps_files' in
     ext/session/mod_files.c). (nielsdos)
