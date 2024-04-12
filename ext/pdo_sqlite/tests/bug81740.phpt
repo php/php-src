@@ -16,5 +16,6 @@ $pdo = new PDO("sqlite::memory:");
 $string = str_repeat("a", 0x80000000);
 var_dump($pdo->quote($string));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: PDO::quote(): String is too long to be quoted in %s on line %d
 bool(false)
