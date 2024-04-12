@@ -327,27 +327,6 @@ AC_DEFUN([AC_FPM_KQUEUE],
 	])
 ])
 
-AC_DEFUN([AC_FPM_PORT],
-[
-	AC_MSG_CHECKING([for port framework])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <port.h>
-	]], [[
-		int port;
-
-		port = port_create();
-		if (port < 0) {
-			return 1;
-		}
-	]])], [
-		AC_DEFINE([HAVE_PORT], 1, [do we have port framework?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
-])
-
 AC_DEFUN([AC_FPM_DEVPOLL],
 [
 	AC_MSG_CHECKING([for /dev/poll])
@@ -443,7 +422,6 @@ if test "$PHP_FPM" != "no"; then
   AC_FPM_BUILTIN_ATOMIC
   AC_FPM_LQ
   AC_FPM_KQUEUE
-  AC_FPM_PORT
   AC_FPM_DEVPOLL
   AC_FPM_EPOLL
   AC_FPM_SELECT
@@ -452,6 +430,7 @@ if test "$PHP_FPM" != "no"; then
 
   AC_CHECK_HEADER([priv.h], [AC_CHECK_FUNCS([setpflags])])
   AC_CHECK_HEADER([sys/times.h], [AC_CHECK_FUNCS([times])])
+  AC_CHECK_HEADER([port.h], [AC_CHECK_FUNCS([port_create])])
 
   PHP_ARG_WITH([fpm-user],,
     [AS_HELP_STRING([[--with-fpm-user[=USER]]],
@@ -493,16 +472,18 @@ if test "$PHP_FPM" != "no"; then
   if test "$PHP_FPM_SYSTEMD" != "no" ; then
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
-    AC_CHECK_HEADERS(systemd/sd-daemon.h, [HAVE_SD_DAEMON_H="yes"], [HAVE_SD_DAEMON_H="no"])
-    if test $HAVE_SD_DAEMON_H = "no"; then
-      AC_MSG_ERROR([Your system does not support systemd.])
-    else
-      AC_DEFINE(HAVE_SYSTEMD, 1, [FPM use systemd integration])
-      PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-      PHP_EVAL_LIBLINE($SYSTEMD_LIBS)
-      PHP_EVAL_INCLINE($SYSTEMD_CFLAGS)
-      php_fpm_systemd=notify
-    fi
+    AC_DEFINE([HAVE_SYSTEMD], [1], [Whether FPM has systemd integration])
+    PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
+    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS])
+    PHP_EVAL_INCLINE([$SYSTEMD_CFLAGS])
+    php_fpm_systemd=notify
+
+    dnl Sanity check.
+    CFLAGS_save="$CFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([systemd/sd-daemon.h],,
+      [AC_MSG_ERROR([Required systemd/sd-daemon.h not found.])])
+    CFLAGS="$CFLAGS_save"
   else
     php_fpm_systemd=simple
   fi
@@ -510,9 +491,11 @@ if test "$PHP_FPM" != "no"; then
   if test "$PHP_FPM_ACL" != "no" ; then
     AC_CHECK_HEADERS([sys/acl.h])
 
-    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
-      int main(void)
-      {
+    dnl *BSD has acl_* built into libc, macOS doesn't have user/group support.
+    LIBS_save="$LIBS"
+    AC_SEARCH_LIBS([acl_free], [acl], [
+      AC_MSG_CHECKING([for acl user/group permissions support])
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
         acl_t acl;
         acl_entry_t user, group;
         acl = acl_init(1);
@@ -521,69 +504,62 @@ if test "$PHP_FPM" != "no"; then
         acl_create_entry(&acl, &group);
         acl_set_tag_type(user, ACL_GROUP);
         acl_free(acl);
-        return 0;
-      }
-    ]])], [
-      AC_CHECK_LIB(acl, acl_free,
-        [PHP_ADD_LIBRARY(acl)
-          have_fpm_acl=yes
-        ],[
-          AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <sys/acl.h>
-            int main(void)
-            {
-              acl_t acl;
-              acl_entry_t user, group;
-              acl = acl_init(1);
-              acl_create_entry(&acl, &user);
-              acl_set_tag_type(user, ACL_USER);
-              acl_create_entry(&acl, &group);
-              acl_set_tag_type(user, ACL_GROUP);
-              acl_free(acl);
-              return 0;
-            }
-          ]])],[have_fpm_acl=yes],[have_fpm_acl=no],[have_fpm_acl=no])
-        ])
-    ], [
-      have_fpm_acl=no
+      ])], [
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_FPM_ACL], [1], [Whether FPM has acl support])
+      ], [
+        AC_MSG_RESULT([no])
+        LIBS="$LIBS_save"
+      ])
     ])
-
-    AC_MSG_CHECKING([for acl user/group permissions support])
-    if test "$have_fpm_acl" = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([HAVE_FPM_ACL], 1, [do we have acl support?])
-    else
-      AC_MSG_RESULT([no])
-    fi
   fi
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then
-    AC_CHECK_HEADERS([sys/apparmor.h])
-    AC_CHECK_LIB(apparmor, aa_change_profile, [
-      PHP_ADD_LIBRARY(apparmor)
-      AC_DEFINE(HAVE_APPARMOR, 1, [ AppArmor confinement available ])
-    ],[
-      AC_MSG_ERROR(libapparmor required but not found)
-    ])
+    PKG_CHECK_MODULES([APPARMOR], [libapparmor], [
+      PHP_EVAL_LIBLINE([$APPARMOR_LIBS])
+      PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])
+    ],
+      [AC_CHECK_LIB([apparmor], [aa_change_profile],
+        [PHP_ADD_LIBRARY([apparmor])],
+        [AC_MSG_ERROR([libapparmor required but not found.])])])
+
+    dnl Sanity check.
+    CFLAGS_save="$CFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([sys/apparmor.h],
+      [AC_DEFINE([HAVE_APPARMOR], [1], [AppArmor confinement available])],
+      [AC_MSG_ERROR([Required sys/apparmor.h not found.])])
+    CFLAGS="$CFLAGS_save"
   fi
 
   if test "x$PHP_FPM_SELINUX" != "xno" ; then
-    AC_CHECK_HEADERS([selinux/selinux.h])
-    AC_CHECK_LIB(selinux, security_setenforce, [
-      PHP_ADD_LIBRARY(selinux)
-      AC_DEFINE(HAVE_SELINUX, 1, [ SElinux available ])
-    ],[])
+    PKG_CHECK_MODULES([SELINUX], [libselinux], [
+      PHP_EVAL_LIBLINE([$SELINUX_LIBS])
+      PHP_EVAL_INCLINE([$SELINUX_CFLAGS])
+    ],
+      [AC_CHECK_LIB([selinux], [security_setenforce],
+        [PHP_ADD_LIBRARY([selinux])],
+        [AC_MSG_ERROR([Required SELinux library not found.])])])
+
+    dnl Sanity check.
+    CFLAGS_save="$CFLAGS"
+    CFLAGS="$INCLUDES $CFLAGS"
+    AC_CHECK_HEADER([selinux/selinux.h],
+      [AC_DEFINE([HAVE_SELINUX], [1], [Whether SELinux is available.])],
+      [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
+    CFLAGS="$CFLAGS_save"
   fi
 
   PHP_SUBST_OLD(php_fpm_systemd)
   AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
-  if test -z "$PHP_FPM_USER" -o "$PHP_FPM_USER" = "yes" -o "$PHP_FPM_USER" = "no"; then
+  if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
   else
     php_fpm_user="$PHP_FPM_USER"
   fi
 
-  if test -z "$PHP_FPM_GROUP" -o "$PHP_FPM_GROUP" = "yes" -o "$PHP_FPM_GROUP" = "no"; then
+  if test -z "$PHP_FPM_GROUP" || test "$PHP_FPM_GROUP" = "yes" || test "$PHP_FPM_GROUP" = "no"; then
     php_fpm_group="nobody"
   else
     php_fpm_group="$PHP_FPM_GROUP"

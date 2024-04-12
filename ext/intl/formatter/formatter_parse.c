@@ -96,7 +96,7 @@ PHP_FUNCTION( numfmt_parse )
 			}
 			goto cleanup;
 		default:
-			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(hasThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			goto cleanup;
 	}
 

@@ -42,8 +42,17 @@
 #endif
 
 #include <errno.h>
-#ifdef HAVE_UNSHARE
+#if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
+#if defined(__FreeBSD__)
+#include <sys/types.h>
+#include <sys/cpuset.h>
+typedef cpuset_t cpu_set_t;
+#endif
+#endif
+
+#ifdef HAVE_PIDFD_OPEN
+#include <sys/syscall.h>
 #endif
 
 #ifdef HAVE_FORKX
@@ -683,8 +692,17 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 		Z_PARAM_LONG(signo)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (signo < 1 || signo > 32) {
-		zend_argument_value_error(1, "must be between 1 and 32");
+	// note: max signal on mac is SIGUSR2 (31), no real time signals.
+	int sigmax = NSIG - 1;
+#if defined(SIGRTMAX)
+	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
+	if (sigmax < SIGRTMAX) {
+		sigmax = SIGRTMAX;
+	}
+#endif
+
+	if (signo < 1 || signo > sigmax) {
+		zend_argument_value_error(1, "must be between 1 and %d", sigmax);
 		RETURN_THROWS();
 	}
 
@@ -996,7 +1014,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	/* needs to be cleared, since any returned value is valid */
 	errno = 0;
 
-	pid = pid_is_null ? getpid() : pid;
+	pid = pid_is_null ? 0 : pid;
 	pri = getpriority(who, pid);
 
 	if (errno) {
@@ -1050,7 +1068,7 @@ PHP_FUNCTION(pcntl_setpriority)
 		Z_PARAM_LONG(who)
 	ZEND_PARSE_PARAMETERS_END();
 
-	pid = pid_is_null ? getpid() : pid;
+	pid = pid_is_null ? 0 : pid;
 
 	if (setpriority(who, pid, pri)) {
 		PCNTL_G(last_error) = errno;
@@ -1262,7 +1280,7 @@ PHP_FUNCTION(pcntl_unshare)
 		switch (errno) {
 #ifdef EINVAL
 			case EINVAL:
-				zend_argument_value_error(1, "must be a combination of CLONE_* flags");
+				zend_argument_value_error(1, "must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel");
 				RETURN_THROWS();
 				break;
 #endif
@@ -1401,6 +1419,208 @@ PHP_FUNCTION(pcntl_forkx)
 }
 #endif
 /* }}} */
+
+#ifdef HAVE_PIDFD_OPEN
+// The `pidfd_open` syscall is available since 5.3
+// and `setns` since 3.0.
+PHP_FUNCTION(pcntl_setns)
+{
+	zend_long pid, nstype = CLONE_NEWNET;
+	bool pid_is_null = 1;
+	int fd, ret;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_LONG(nstype)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pid = pid_is_null ? getpid() : pid;
+	fd = syscall(SYS_pidfd_open, pid, 0);
+	if (errno) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case EINVAL:
+			case ESRCH:
+				zend_argument_value_error(1, "is not a valid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+
+			case ENFILE:
+				php_error_docref(NULL, E_WARNING, "Error %d: File descriptors per-process limit reached", errno);
+				break;
+
+			case ENODEV:
+				php_error_docref(NULL, E_WARNING, "Error %d: Anonymous inode fs unsupported", errno);
+				break;
+
+			case ENOMEM:
+				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory for pidfd_open", errno);
+				break;
+
+			default:
+			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	}
+	ret = setns(fd, (int)nstype);
+	close(fd);
+
+	if (ret == -1) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "process no longer available (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+
+			case EINVAL:
+				zend_argument_value_error(2, "is an invalid nstype (%d)", nstype);
+				RETURN_THROWS();
+
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
+				break;
+
+			default:
+			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+#endif
+
+#ifdef HAVE_SCHED_SETAFFINITY
+PHP_FUNCTION(pcntl_getcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// 0 == getpid in this context, we're just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+
+	CPU_ZERO(&mask);
+
+	if (sched_getaffinity(pid, sizeof(mask), &mask) != 0) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			case EINVAL:
+				zend_value_error("invalid cpu affinity mask size");
+				RETURN_THROWS();
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+
+		RETURN_FALSE;
+	}
+
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	array_init(return_value);
+
+	for (zend_ulong i = 0; i < maxcpus; i ++) {
+		if (CPU_ISSET(i, &mask)) {
+			add_next_index_long(return_value, i);
+		}
+	}
+}
+
+PHP_FUNCTION(pcntl_setcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+	zval *hmask = NULL, *ncpu;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_ARRAY(hmask)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
+		zend_argument_value_error(2, "must not be empty");
+		RETURN_THROWS();
+	}
+
+	// 0 == getpid in this context, we're just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	CPU_ZERO(&mask);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
+		ZVAL_DEREF(ncpu);
+		zend_long cpu;
+		if (Z_TYPE_P(ncpu) != IS_LONG) {
+			if (Z_TYPE_P(ncpu) == IS_STRING) {
+				zend_ulong tmp;
+				if (!ZEND_HANDLE_NUMERIC(Z_STR_P(ncpu), tmp)) {
+					zend_argument_value_error(2, "cpu id invalid value (%s)", ZSTR_VAL(Z_STR_P(ncpu)));
+					RETURN_THROWS();
+				}
+
+				cpu = (zend_long)tmp;
+			} else {
+				zend_string *wcpu = zval_get_string_func(ncpu);
+				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
+				zend_string_release(wcpu);
+				RETURN_THROWS();
+			}
+		} else {
+			cpu = Z_LVAL_P(ncpu);
+		}
+
+		if (cpu < 0 || cpu >= maxcpus) {
+			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			RETURN_THROWS();
+		}
+		       
+		if (!CPU_ISSET(cpu, &mask)) {
+			CPU_SET(cpu, &mask);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (sched_setaffinity(pid, sizeof(mask), &mask) != 0) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			case EINVAL:
+				zend_argument_value_error(2, "invalid cpu affinity mask size or unmapped cpu id(s)");
+				RETURN_THROWS();
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+#endif
+
+#if defined(HAVE_SCHED_GETCPU)
+PHP_FUNCTION(pcntl_getcpu)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(sched_getcpu());
+}
+#endif
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)
 {

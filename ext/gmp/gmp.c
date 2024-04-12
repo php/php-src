@@ -1585,11 +1585,15 @@ ZEND_FUNCTION(gmp_invert)
 		RETURN_THROWS();
 	}
 
+	if (Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) == 0) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+		RETURN_THROWS();
+	}
+
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
-	// TODO Early check if b_arg IS_LONG?
-	if (0 == mpz_cmp_ui(gmpnum_b, 0)) {
+	if (!mpz_cmp_ui(gmpnum_b, 0)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 		FREE_GMP_TEMP(temp_a);
 		FREE_GMP_TEMP(temp_b);
@@ -1730,9 +1734,9 @@ static void gmp_init_random(void)
 		/* Initialize */
 		gmp_randinit_mt(GMPG(rand_state));
 		/* Seed */
-		zend_long seed = 0;
-		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
-			seed = GENERATE_SEED();
+		unsigned long int seed = 0;
+		if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+			seed = (unsigned long int)php_random_generate_fallback_seed();
 		}
 		gmp_randseed_ui(GMPG(rand_state), seed);
 

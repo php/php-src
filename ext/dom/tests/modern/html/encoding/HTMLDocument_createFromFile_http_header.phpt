@@ -63,7 +63,7 @@ foreach ($tests as $name => $headers) {
     ['pid' => $pid, 'uri' => $uri] = http_server($responses);
     for ($i = 0; $i < count($responses); $i++) {
         $result = DOM\HTMLDocument::createFromFile($uri, LIBXML_NOERROR);
-        echo $result->textContent;
+        echo $result->getElementsByTagName("p")[0]->textContent, "\n";
     }
     http_server_kill($pid);
 }

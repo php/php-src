@@ -14,6 +14,7 @@ $x(new \stdclass);
 
 ?>
 --EXPECTF--
+Deprecated: foo\{closure}(): Implicitly marking parameter $x as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 NULL
 object(stdClass)#%d (0) {
 }

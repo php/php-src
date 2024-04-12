@@ -86,7 +86,11 @@
 	SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#define N             MT_N                 /* length of state vector */
+#define N             624                 /* length of state vector */
+ZEND_STATIC_ASSERT(
+	N == sizeof(((php_random_status_state_mt19937*)0)->state) / sizeof(((php_random_status_state_mt19937*)0)->state[0]),
+	"Assumed length of Mt19937 state vector does not match actual size."
+);
 #define M             (397)                /* a period parameter */
 #define hiBit(u)      ((u) & 0x80000000U)  /* mask all but highest   bit of u */
 #define loBit(u)      ((u) & 0x00000001U)  /* mask all but lowest    bit of u */
@@ -121,7 +125,7 @@ static inline void mt19937_reload(php_random_status_state_mt19937 *state)
 	state->count = 0;
 }
 
-static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, uint64_t seed)
+PHPAPI inline void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed)
 {
 	uint32_t i, prev_state;
 
@@ -129,8 +133,8 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	   See Knuth TAOCP Vol 2, 3rd Ed, p.106 for multiplier.
 	   In previous versions, most significant bits (MSBs) of the seed affect
 	   only MSBs of the state array.  Modified 9 Jan 2002 by Makoto Matsumoto. */
-	state->state[0] = seed & 0xffffffffU;
-	for (i = 1; i < MT_N; i++) {
+	state->state[0] = seed;
+	for (i = 1; i < N; i++) {
 		prev_state = state->state[i - 1];
 		state->state[i] = (1812433253U * (prev_state  ^ (prev_state  >> 30)) + i) & 0xffffffffU;
 	}
@@ -139,17 +143,12 @@ static inline void mt19937_seed_state(php_random_status_state_mt19937 *state, ui
 	mt19937_reload(state);
 }
 
-static void seed(void *state, uint64_t seed)
-{
-	mt19937_seed_state(state, seed);
-}
-
 static php_random_result generate(void *state)
 {
 	php_random_status_state_mt19937 *s = state;
 	uint32_t s1;
 
-	if (s->count >= MT_N) {
+	if (s->count >= N) {
 		mt19937_reload(s);
 	}
 
@@ -177,7 +176,7 @@ static bool serialize(void *state, HashTable *data)
 	php_random_status_state_mt19937 *s = state;
 	zval t;
 
-	for (uint32_t i = 0; i < MT_N; i++) {
+	for (uint32_t i = 0; i < N; i++) {
 		ZVAL_STR(&t, php_random_bin2hex_le(&s->state[i], sizeof(uint32_t)));
 		zend_hash_next_index_insert(data, &t);
 	}
@@ -195,11 +194,11 @@ static bool unserialize(void *state, HashTable *data)
 	zval *t;
 
 	/* Verify the expected number of elements, this implicitly ensures that no additional elements are present. */
-	if (zend_hash_num_elements(data) != (MT_N + 2)) {
+	if (zend_hash_num_elements(data) != (N + 2)) {
 		return false;
 	}
 
-	for (uint32_t i = 0; i < MT_N; i++) {
+	for (uint32_t i = 0; i < N; i++) {
 		t = zend_hash_index_find(data, i);
 		if (!t || Z_TYPE_P(t) != IS_STRING || Z_STRLEN_P(t) != (2 * sizeof(uint32_t))) {
 			return false;
@@ -208,16 +207,16 @@ static bool unserialize(void *state, HashTable *data)
 			return false;
 		}
 	}
-	t = zend_hash_index_find(data, MT_N);
+	t = zend_hash_index_find(data, N);
 	if (!t || Z_TYPE_P(t) != IS_LONG) {
 		return false;
 	}
 	s->count = Z_LVAL_P(t);
-	if (s->count > MT_N) {
+	if (s->count > N) {
 		return false;
 	}
 
-	t = zend_hash_index_find(data, MT_N + 1);
+	t = zend_hash_index_find(data, N + 1);
 	if (!t || Z_TYPE_P(t) != IS_LONG) {
 		return false;
 	}
@@ -231,7 +230,6 @@ static bool unserialize(void *state, HashTable *data)
 
 const php_random_algo php_random_algo_mt19937 = {
 	sizeof(php_random_status_state_mt19937),
-	seed,
 	generate,
 	range,
 	serialize,
@@ -241,13 +239,13 @@ const php_random_algo php_random_algo_mt19937 = {
 /* {{{ php_random_mt19937_seed_default */
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state)
 {
-	zend_long seed = 0;
+	uint32_t seed = 0;
 
 	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = GENERATE_SEED();
+		seed = (uint32_t)php_random_generate_fallback_seed();
 	}
 
-	mt19937_seed_state(state, (uint64_t) seed);
+	php_random_mt19937_seed32(state, seed);
 }
 /* }}} */
 
@@ -286,7 +284,7 @@ PHP_METHOD(Random_Engine_Mt19937, __construct)
 		}
 	}
 
-	mt19937_seed_state(state, seed);
+	php_random_mt19937_seed32(state, seed);
 }
 /* }}} */
 

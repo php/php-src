@@ -315,10 +315,10 @@ const SQL_QUICK = UNKNOWN;
 function odbc_close_all(): void {}
 
 /** @param resource $statement */
-function odbc_binmode($statement, int $mode): bool {}
+function odbc_binmode($statement, int $mode): true {}
 
 /** @param resource $statement */
-function odbc_longreadlen($statement, int $length): bool {}
+function odbc_longreadlen($statement, int $length): true {}
 
 /**
  * @param resource $odbc
@@ -352,17 +352,17 @@ function odbc_do($odbc, string $query) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
 /** @param resource $statement */
-function odbc_fetch_object($statement, int $row = -1): stdClass|false {}
+function odbc_fetch_object($statement, ?int $row = null): stdClass|false {}
 
 /** @param resource $statement */
-function odbc_fetch_array($statement, int $row = -1): array|false {}
+function odbc_fetch_array($statement, ?int $row = null): array|false {}
 #endif
 
 /**
  * @param resource $statement
  * @param array $array
  */
-function odbc_fetch_into($statement, &$array, int $row = 0): int|false {}
+function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
 
 /** @param resource $statement */
 function odbc_fetch_row($statement, ?int $row = null): bool {}
@@ -377,7 +377,7 @@ function odbc_result($statement, string|int $field): string|bool|null {}
 function odbc_result_all($statement, string $format = ""): int|false {}
 
 /** @param resource $statement */
-function odbc_free_result($statement): bool {}
+function odbc_free_result($statement): true {}
 
 /**
  * @return resource|false

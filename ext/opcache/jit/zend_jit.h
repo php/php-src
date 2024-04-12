@@ -76,10 +76,10 @@
 
 #define ZEND_JIT_DEBUG_IR_SRC            (1<<24)
 #define ZEND_JIT_DEBUG_IR_FINAL          (1<<25)
-#define ZEND_JIT_DEBUG_IR_CFG            (1<<26)
-#define ZEND_JIT_DEBUG_IR_REGS           (1<<27)
+#define ZEND_JIT_DEBUG_IR_AFTER_SCCP     (1<<26)
+#define ZEND_JIT_DEBUG_IR_AFTER_CFG      (1<<27)
 
-#define ZEND_JIT_DEBUG_IR_AFTER_SCCP     (1<<28)
+#define ZEND_JIT_DEBUG_IR_AFTER_GCM      (1<<28)
 #define ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE (1<<29)
 #define ZEND_JIT_DEBUG_IR_AFTER_REGS     (1<<30)
 #define ZEND_JIT_DEBUG_IR_CODEGEN        (1U<<31)

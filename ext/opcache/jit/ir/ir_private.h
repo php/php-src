@@ -479,6 +479,95 @@ IR_ALWAYS_INLINE int ir_bitset_pop_first(ir_bitset set, uint32_t len)
 	} \
 } while (0)
 
+/* Sparse Set */
+typedef struct _ir_sparse_set {
+	uint32_t size;
+	uint32_t len;
+	uint32_t *data;
+} ir_sparse_set;
+
+#define IR_SPARSE_SET_DENSE(set,  n) (set)->data[n]
+#define IR_SPARSE_SET_SPARSE(set, n) (set)->data[-1 - ((int32_t)(n))]
+
+IR_ALWAYS_INLINE void ir_sparse_set_init(ir_sparse_set *set, uint32_t size)
+{
+	set->size = size;
+	set->len = 0;
+	set->data = (uint32_t*)ir_mem_malloc(sizeof(uint32_t) * 2 * size) + size;
+#if IR_DEBUG
+	/* initialize sparse part to avoid valgrind warnings */
+	memset(&IR_SPARSE_SET_SPARSE(set, size - 1), 0, size * sizeof(uint32_t));
+#endif
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_clear(ir_sparse_set *set)
+{
+	set->len = 0;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_free(ir_sparse_set *set)
+{
+	ir_mem_free(set->data - set->size);
+}
+
+IR_ALWAYS_INLINE bool ir_sparse_set_empty(const ir_sparse_set *set)
+{
+	return set->len == 0;
+}
+
+IR_ALWAYS_INLINE bool ir_sparse_set_in(const ir_sparse_set *set, uint32_t n)
+{
+	uint32_t idx = IR_SPARSE_SET_SPARSE(set, n);
+
+	return idx < set->len && IR_SPARSE_SET_DENSE(set, idx) == n;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_add(ir_sparse_set *set, uint32_t n)
+{
+	uint32_t idx;
+
+	IR_ASSERT(!ir_sparse_set_in(set, n));
+	idx = set->len++;
+	IR_SPARSE_SET_DENSE(set,	idx) = n;
+	IR_SPARSE_SET_SPARSE(set, n) = idx;
+}
+
+IR_ALWAYS_INLINE void ir_sparse_set_del(ir_sparse_set *set, uint32_t n)
+{
+	uint32_t last;
+
+	IR_ASSERT(ir_sparse_set_in(set, n));
+	last = IR_SPARSE_SET_DENSE(set,	set->len - 1);
+	if (last != n) {
+		uint32_t idx = IR_SPARSE_SET_SPARSE(set, n);
+
+		IR_SPARSE_SET_DENSE(set, idx) = last;
+		IR_SPARSE_SET_SPARSE(set, last) = idx;
+
+	}
+	set->len--;
+}
+
+IR_ALWAYS_INLINE uint32_t ir_sparse_set_pop(ir_sparse_set *set)
+{
+	if (set->len > 0) {
+		set->len--;
+		return IR_SPARSE_SET_DENSE(set, set->len);
+	}
+	return -1; /* empty set */
+}
+
+#define IR_SPARSE_SET_FOREACH(set, bit) do { \
+	ir_sparse_set *_set = (set); \
+	uint32_t _i, _len = _set->len; \
+	uint32_t *_p = _set->data; \
+	for (_i = 0; _i < _len; _p++, _i++) { \
+		(bit) = *_p; \
+
+#define IR_SPARSE_SET_FOREACH_END() \
+	} \
+} while (0)
+
 /* Bit Queue */
 typedef struct _ir_bitqueue {
 	uint32_t  len;
@@ -892,6 +981,7 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 #define IR_HAS_VA_ARG_GP       (1<<8)
 #define IR_HAS_VA_ARG_FP       (1<<9)
 #define IR_HAS_FP_RET_SLOT     (1<<10)
+#define IR_16B_FRAME_ALIGNMENT (1<<11)
 
 /* Temporary: SCCP -> CFG */
 #define IR_SCCP_DONE           (1<<25)
@@ -923,8 +1013,33 @@ struct _ir_use_list {
 
 void ir_use_list_remove_all(ir_ctx *ctx, ir_ref from, ir_ref use);
 void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref use);
-void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use);
 bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
+
+/*** Modification helpers ***/
+#define MAKE_NOP(_insn) do { \
+		ir_insn *__insn = _insn; \
+		__insn->optx = IR_NOP; \
+		__insn->op1 = __insn->op2 = __insn->op3 = IR_UNUSED; \
+	} while (0)
+
+#define CLEAR_USES(_ref) do { \
+		ir_use_list *__use_list = &ctx->use_lists[_ref]; \
+		__use_list->count = 0; \
+	} while (0)
+
+#define SWAP_REFS(_ref1, _ref2) do { \
+		ir_ref _tmp = _ref1; \
+		_ref1 = _ref2; \
+		_ref2 = _tmp; \
+	} while (0)
+
+#define SWAP_INSNS(_insn1, _insn2) do { \
+		ir_insn *_tmp = _insn1; \
+		_insn1 = _insn2; \
+		_insn2 = _tmp; \
+	} while (0)
 
 /*** IR Basic Blocks info ***/
 #define IR_IS_BB_START(op) \
@@ -953,6 +1068,8 @@ bool ir_use_list_add(ir_ctx *ctx, ir_ref to, ir_ref new_use);
 #define IR_BB_HAS_PARAM        (1<<12)
 #define IR_BB_HAS_VAR          (1<<13)
 
+/* The following flags are set by BB scheduler */
+#define IR_BB_ALIGN_LOOP       (1<<14)
 
 struct _ir_block {
 	uint32_t flags;
@@ -977,8 +1094,8 @@ struct _ir_block {
 };
 
 uint32_t ir_skip_empty_target_blocks(const ir_ctx *ctx, uint32_t b);
-uint32_t ir_skip_empty_next_blocks(const ir_ctx *ctx, uint32_t b);
-void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block, uint32_t *next_block);
+uint32_t ir_next_block(const ir_ctx *ctx, uint32_t b);
+void ir_get_true_false_blocks(const ir_ctx *ctx, uint32_t b, uint32_t *true_block, uint32_t *false_block);
 
 IR_ALWAYS_INLINE uint32_t ir_phi_input_number(const ir_ctx *ctx, const ir_block *bb, uint32_t from)
 {

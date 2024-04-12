@@ -260,10 +260,6 @@
  *
  **************************************************************************/
 
-#if defined(PHP_WIN32)
-#pragma setlocale("english")
-#endif
-
 #include "sdncal.h"
 
 #define HALAKIM_PER_HOUR 1080

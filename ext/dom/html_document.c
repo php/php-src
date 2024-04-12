@@ -24,6 +24,7 @@
 #include "html5_parser.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
+#include "dom_properties.h"
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
 #include <lexbor/encoding/encoding.h>
@@ -77,6 +78,28 @@ typedef struct _dom_decoding_encoding_ctx {
 	lxb_char_t encoding_output[4096];
 	lxb_codepoint_t codepoints[4096];
 } dom_decoding_encoding_ctx;
+
+/* https://dom.spec.whatwg.org/#dom-document-implementation */
+zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
+{
+	const uint32_t PROP_INDEX = 14;
+
+#if ZEND_DEBUG
+	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
+	const zend_property_info *prop_info = zend_get_property_info(dom_abstract_base_document_class_entry, implementation_str, 0);
+	zend_string_release_ex(implementation_str, false);
+	ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == PROP_INDEX);
+#endif
+
+	zval *cached_implementation = OBJ_PROP_NUM(&obj->std, PROP_INDEX);
+	if (Z_ISUNDEF_P(cached_implementation)) {
+		php_dom_create_implementation(cached_implementation, true);
+	}
+
+	ZVAL_OBJ_COPY(retval, Z_OBJ_P(cached_implementation));
+
+	return SUCCESS;
+}
 
 static void dom_decoding_encoding_ctx_init(dom_decoding_encoding_ctx *ctx)
 {
@@ -222,35 +245,43 @@ static void dom_find_line_and_column_using_cache(
 		offset = application_data->current_input_length;
 	}
 
+	size_t last_column = cache->last_column;
+	size_t last_line = cache->last_line;
+	size_t last_offset = cache->last_offset;
+
 	/* Either unicode or UTF-8 data */
 	if (application_data->current_input_codepoints != NULL) {
-		while (cache->last_offset < offset) {
-			if (application_data->current_input_codepoints[cache->last_offset] == 0x000A /* Unicode codepoint for line feed */) {
-				cache->last_line++;
-				cache->last_column = 1;
+		while (last_offset < offset) {
+			if (application_data->current_input_codepoints[last_offset] == 0x000A /* Unicode codepoint for line feed */) {
+				last_line++;
+				last_column = 1;
 			} else {
-				cache->last_column++;
+				last_column++;
 			}
-			cache->last_offset++;
+			last_offset++;
 		}
 	} else {
-		while (cache->last_offset < offset) {
-			const lxb_char_t current = application_data->current_input_characters[cache->last_offset];
+		while (last_offset < offset) {
+			const lxb_char_t current = application_data->current_input_characters[last_offset];
 			if (current == '\n') {
-				cache->last_line++;
-				cache->last_column = 1;
-				cache->last_offset++;
+				last_line++;
+				last_column = 1;
+				last_offset++;
 			} else {
 				/* See Lexbor tokenizer patch
 				 * Note for future self: branchlessly computing the length and jumping by the length would be nice,
 				 * however it takes so many instructions to do so that it is slower than this naive method. */
 				if ((current & 0b11000000) != 0b10000000) {
-					cache->last_column++;
+					last_column++;
 				}
-				cache->last_offset++;
+				last_offset++;
 			}
 		}
 	}
+
+	cache->last_column = last_column;
+	cache->last_line = last_line;
+	cache->last_offset = last_offset;
 }
 
 static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(
@@ -279,7 +310,7 @@ static void dom_lexbor_libxml2_bridge_tree_error_reporter(
 		return;
 	}
 
-	if (UNEXPECTED(len <= 1)) {
+	if (len <= 1) {
 		/* Possible with EOF, or single-character tokens, don't use a range in the error display in this case */
 		php_libxml_pretend_ctx_error_ex(
 			application_data->input_name,
@@ -350,23 +381,7 @@ static void dom_post_process_html5_loading(
 			dom_place_remove_element_and_hoist_children(html_node, "body");
 		}
 		if (!observations->has_explicit_html_tag) {
-			/* The HTML node has a single namespace declaration, that we must preserve after removing the node.
-			 * However, it's possible the namespace is NULL if DOM\HTML_NO_DEFAULT_NS was set. */
-			if (!(options & DOM_HTML_NO_DEFAULT_NS)) {
-				php_libxml_set_old_ns(lxml_doc, html_node->nsDef);
-				html_node->nsDef = NULL;
-			}
 			dom_place_remove_element_and_hoist_children((xmlNodePtr) lxml_doc, "html");
-			if (!(options & DOM_HTML_NO_DEFAULT_NS) && EXPECTED(lxml_doc->children != NULL)) {
-				xmlNodePtr node = lxml_doc->children;
-				while (node) {
-					/* Fine to use the DOM wrap reconciliation here because it's the "modern" world of DOM,
-					 * and no user manipulation happened yet. */
-					xmlDOMWrapCtxt dummy_ctxt = {0};
-					xmlDOMWrapReconcileNamespaces(&dummy_ctxt, node, /* options */ 0);
-					node = node->next;
-				}
-			}
 		}
 	}
 }
@@ -510,8 +525,16 @@ static bool dom_decode_encode_fast_path(
 	const lxb_char_t *buf_ref = *buf_ref_ref;
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
-		const lxb_char_t *buf_ref_backup = buf_ref;
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
+		if (decoding_encoding_ctx->decode.u.utf_8.need == 0 && *buf_ref < 0x80) {
+			/* Fast path within the fast path: try to skip non-mb bytes in bulk if we are not in a state where we
+			 * need more UTF-8 bytes to complete a sequence.
+			 * It might be tempting to use SIMD here, but it turns out that this is less efficient because
+			 * we need to process the same byte multiple times sometimes when mixing ASCII with multibyte. */
+			buf_ref++;
+			continue;
+		}
+		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
 			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
@@ -719,19 +742,11 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		zend_argument_value_error(1, "must be a valid document encoding");
 		RETURN_THROWS();
 	}
-	
-#ifdef LIBXML_HTML_ENABLED
-	xmlDocPtr lxml_doc = htmlNewDocNoDtD(NULL, NULL);
+
+	xmlDocPtr lxml_doc = php_dom_create_html_doc();
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		goto oom;
 	}
-#else
-	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) "1.0");
-	if (UNEXPECTED(lxml_doc == NULL)) {
-		goto oom;
-	}
-	lxml_doc->type = XML_HTML_DOCUMENT_NODE;
-#endif
 
 	lxml_doc->encoding = xmlStrdup((const xmlChar *) encoding);
 
@@ -741,12 +756,23 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
 	return;
 
 oom:
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
 	RETURN_THROWS();
+}
+
+/* Only bother to register error handling when the error reports can become observable. */
+static bool dom_should_register_error_handlers(zend_long options)
+{
+	if (options & XML_PARSE_NOERROR) {
+		return false;
+	}
+
+	return php_libxml_uses_internal_errors() || ((EG(error_reporting) | EG(user_error_handler_error_reporting)) & E_WARNING);
 }
 
 PHP_METHOD(DOM_HTMLDocument, createFromString)
@@ -777,7 +803,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
-	if (!(options & XML_PARSE_NOERROR)) {
+	if (dom_should_register_error_handlers(options)) {
 		lexbor_libxml2_bridge_parse_set_error_callbacks(
 			&ctx,
 			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
@@ -852,15 +878,19 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		goto fail_oom;
 	}
 
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
 		document,
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
-		!(options & DOM_HTML_NO_DEFAULT_NS)
+		!(options & DOM_HTML_NO_DEFAULT_NS),
+		ns_mapper
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
+		php_dom_libxml_ns_mapper_destroy(ns_mapper);
 		php_libxml_ctx_error(
 			NULL,
 			"%s in %s",
@@ -886,18 +916,20 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
 fail_oom:
 	lxb_html_document_destroy(document);
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
 	RETURN_THROWS();
 }
 
 PHP_METHOD(DOM_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
+	php_dom_libxml_ns_mapper *ns_mapper = NULL;
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
@@ -930,7 +962,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
-	if (!(options & XML_PARSE_NOERROR)) {
+	if (dom_should_register_error_handlers(options)) {
 		lexbor_libxml2_bridge_parse_set_error_callbacks(
 			&ctx,
 			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
@@ -958,7 +990,8 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		dom_setup_parser_encoding_manually((const lxb_char_t *) buf, encoding_data, &decoding_encoding_ctx, &application_data);
 	}
 
-	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, /* opened_path */ NULL, php_libxml_get_stream_context());
+	zend_string *opened_path = NULL;
+	stream = php_stream_open_wrapper_ex(filename, "rb", REPORT_ERRORS, &opened_path, php_libxml_get_stream_context());
 	if (!stream) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", filename);
@@ -1035,19 +1068,21 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		goto fail_oom;
 	}
 
+	ns_mapper = php_dom_libxml_ns_mapper_create();
+
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
 		document,
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
-		!(options & DOM_HTML_NO_DEFAULT_NS)
+		!(options & DOM_HTML_NO_DEFAULT_NS),
+		ns_mapper
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 		php_libxml_ctx_error(NULL, "%s in %s", dom_lexbor_libxml2_bridge_status_code_to_string(bridge_status), filename);
-		lxb_html_document_destroy(document);
-		php_stream_close(stream);
-		RETURN_FALSE;
+		RETVAL_FALSE;
+		goto fail_general;
 	}
 	lxb_html_document_destroy(document);
 
@@ -1059,8 +1094,8 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		lxml_doc->encoding = xmlStrdup((const xmlChar *) "UTF-8");
 	}
 
-	if (stream->wrapper == &php_plain_files_wrapper) {
-		xmlChar *converted = xmlPathToURI((const xmlChar *) filename);
+	if (stream->wrapper == &php_plain_files_wrapper && opened_path != NULL) {
+		xmlChar *converted = xmlPathToURI((const xmlChar *) ZSTR_VAL(opened_path));
 		if (UNEXPECTED(!converted)) {
 			goto fail_oom;
 		}
@@ -1080,12 +1115,18 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 			xmlFree(converted);
 			lxml_doc->URL = new_buffer;
 		} else {
+#if PHP_WIN32
+			converted = php_dom_libxml_fix_file_path(converted);
+#endif
 			lxml_doc->URL = converted;
 		}
 	} else {
 		lxml_doc->URL = xmlStrdup((const xmlChar *) filename);
 	}
 
+	if (opened_path != NULL) {
+		zend_string_release_ex(opened_path, false);
+	}
 	php_stream_close(stream);
 	stream = NULL;
 
@@ -1095,16 +1136,21 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->is_modern_api_class = true;
+	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
 fail_oom:
-	php_dom_throw_error(INVALID_STATE_ERR, 1);
-	lxb_html_document_destroy(document);
-	if (stream) {
-		php_stream_close(stream);
+	php_dom_throw_error(INVALID_STATE_ERR, true);
+fail_general:
+	if (ns_mapper != NULL) {
+		php_dom_libxml_ns_mapper_destroy(ns_mapper);
 	}
-	RETURN_THROWS();
+	lxb_html_document_destroy(document);
+	php_stream_close(stream);
+	if (opened_path != NULL) {
+		zend_string_release_ex(opened_path, false);
+	}
 }
 
 static zend_result dom_write_output_smart_str(void *ctx, const char *buf, size_t size)
@@ -1189,7 +1235,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	ctx.write_string_len = dom_saveHTML_write_string_len;
 	ctx.write_string = dom_saveHTML_write_string;
 	ctx.application_data = output_ctx;
-	if (UNEXPECTED(dom_html5_serialize(&ctx, node) != SUCCESS)) {
+	if (UNEXPECTED(dom_html5_serialize_outer(&ctx, node) != SUCCESS)) {
 		return FAILURE;
 	}
 
@@ -1265,7 +1311,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	const xmlNode *node;
 	dom_object *intern, *nodeobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &nodep, dom_node_class_entry) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &nodep, dom_modern_node_class_entry) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1274,8 +1320,8 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	if (nodep != NULL) {
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
-			RETURN_FALSE;
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, true);
+			RETURN_THROWS();
 		}
 	} else {
 		node = (const xmlNode *) docp;
@@ -1292,42 +1338,25 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	RETURN_STR(smart_str_extract(&buf));
 }
 
-PHP_METHOD(DOM_HTMLDocument, __construct)
-{
-	/* Private constructor cannot be called. */
-	ZEND_UNREACHABLE();
-}
-
 zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 {
-	xmlDoc *docp = (xmlDocPtr) dom_object_get_node(obj);
-	if (docp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Typed property, can only be IS_STRING or IS_NULL. */
-	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING || Z_TYPE_P(newval) == IS_NULL);
-
-	if (Z_TYPE_P(newval) == IS_NULL) {
-		goto invalid_encoding;
-	}
+	/* Typed property, can only be IS_STRING. */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 
 	zend_string *str = Z_STR_P(newval);
 	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) ZSTR_VAL(str), ZSTR_LEN(str));
 
 	if (encoding_data != NULL) {
-		xmlFree((xmlChar *) docp->encoding);
+		xmlFree(BAD_CAST docp->encoding);
 		docp->encoding = xmlStrdup((const xmlChar *) encoding_data->name);
 	} else {
-		goto invalid_encoding;
+		zend_value_error("Invalid document encoding");
+		return FAILURE;
 	}
 
 	return SUCCESS;
-
-invalid_encoding:
-	zend_value_error("Invalid document encoding");
-	return FAILURE;
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

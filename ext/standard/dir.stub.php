@@ -2,6 +2,17 @@
 
 /** @generate-class-entries */
 
+/**
+ * @var string
+ * @cvalue dirsep_str
+ */
+const DIRECTORY_SEPARATOR = UNKNOWN;
+/**
+ * @var string
+ * @cvalue pathsep_str
+ */
+const PATH_SEPARATOR = UNKNOWN;
+
 #ifdef HAVE_GLOB
 #if (defined(GLOB_BRACE) && GLOB_BRACE != 0)
 /**

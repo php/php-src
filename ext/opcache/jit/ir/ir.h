@@ -36,6 +36,21 @@ extern "C" {
 # endif
 #endif
 
+/* target auto detection */
+#if !defined(IR_TARGET_X86) && !defined(IR_TARGET_X64) && !defined(IR_TARGET_AARCH64)
+# if defined(__x86_64__) || defined(__x86_64) || defined(_M_X64) || defined(_M_AMD64)
+#  define IR_TARGET_X64
+# elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_M_IX86)
+#  define IR_TARGET_X86
+# elif defined(__aarch64__) || defined(_M_ARM64)
+#  define IR_TARGET_AARCH64
+# elif defined (_WIN64)
+#  define IR_TARGET_X64
+# elif defined (_WIN32)
+#  define IR_TARGET_X86
+# endif
+#endif
+
 #if defined(IR_TARGET_X86)
 # define IR_TARGET "x86"
 #elif defined(IR_TARGET_X64)
@@ -141,11 +156,15 @@ typedef enum _ir_type {
 # define IR_SSIZE_T    IR_I64
 # define IR_UINTPTR_T  IR_U64
 # define IR_INTPTR_T   IR_I64
+# define IR_C_UINTPTR  IR_U64
+# define IR_C_INTPTR   IR_I64
 #else
 # define IR_SIZE_T     IR_U32
 # define IR_SSIZE_T    IR_I32
 # define IR_UINTPTR_T  IR_U32
 # define IR_INTPTR_T   IR_I32
+# define IR_C_UINTPTR  IR_U32
+# define IR_C_INTPTR   IR_I32
 #endif
 
 /* List of IR opcodes
@@ -297,6 +316,8 @@ typedef enum _ir_type {
 	/* memory reference and load/store ops                              */ \
 	_(ALLOCA,       a2,   src, def, ___) /* alloca(def)                 */ \
 	_(AFREE,        a2,   src, def, ___) /* revert alloca(def)          */ \
+	_(BLOCK_BEGIN,  a1,   src, ___, ___) /* stacksave                   */ \
+	_(BLOCK_END,    a2,   src, def, ___) /* stackrestore                */ \
 	_(VADDR,        d1,   var, ___, ___) /* load address of local var   */ \
 	_(VLOAD,        l2,   src, var, ___) /* load value of local var     */ \
 	_(VSTORE,       s3,   src, var, def) /* store value to local var    */ \
@@ -512,8 +533,9 @@ void ir_strtab_free(ir_strtab *strtab);
 
 /* debug related */
 #ifdef IR_DEBUG
-# define IR_DEBUG_SCCP         (1<<27)
-# define IR_DEBUG_GCM          (1<<28)
+# define IR_DEBUG_SCCP         (1<<26)
+# define IR_DEBUG_GCM          (1<<27)
+# define IR_DEBUG_GCM_SPLIT    (1<<28)
 # define IR_DEBUG_SCHEDULE     (1<<29)
 # define IR_DEBUG_RA           (1<<30)
 #endif
@@ -563,6 +585,7 @@ struct _ir_ctx {
 	ir_block          *cfg_blocks;              /* list of basic blocks (starts from 1) */
 	uint32_t          *cfg_edges;               /* the actual basic blocks predecessors and successors edges */
 	uint32_t          *cfg_map;                 /* map of instructions to basic block number */
+	uint32_t          *cfg_schedule;            /* BB order for code generation */
 	uint32_t          *rules;                   /* array of target specific code-generation rules (for each instruction) */
 	uint32_t          *vregs;
 	ir_ref             vregs_count;
@@ -823,8 +846,14 @@ int ir_load_llvm_bitcode(ir_loader *loader, const char *filename);
 int ir_load_llvm_asm(ir_loader *loader, const char *filename);
 
 /* IR save API (implementation in ir_save.c) */
+#define IR_SAVE_CFG       (1<<0) /* add info about CFG */
+#define IR_SAVE_CFG_MAP   (1<<1) /* add info about CFG block assignment */
+#define IR_SAVE_USE_LISTS (1<<2) /* add info about def->use lists */
+#define IR_SAVE_RULES     (1<<3) /* add info about selected code-generation rules */
+#define IR_SAVE_REGS      (1<<4) /* add info about selected registers */
+
 void ir_print_proto(const ir_ctx *ctx, ir_ref proto, FILE *f);
-void ir_save(const ir_ctx *ctx, FILE *f);
+void ir_save(const ir_ctx *ctx, uint32_t save_flags, FILE *f);
 
 /* IR debug dump API (implementation in ir_dump.c) */
 void ir_dump(const ir_ctx *ctx, FILE *f);

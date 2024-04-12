@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b8ea4527467c70a6f665129cd5d5f34ea2386a70 */
+ * Stub hash: 1ef54fdebc6a206c4af3438130db0cd12a62c8b6 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1502,6 +1502,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_http_build_query, 0, 1, IS_STRIN
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding_type, IS_LONG, 0, "PHP_QUERY_RFC1738")
 ZEND_END_ARG_INFO()
 
+#define arginfo_http_get_last_response_headers arginfo_error_get_last
+
+#define arginfo_http_clear_last_response_headers arginfo_flush
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_request_parse_body, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
@@ -2100,18 +2104,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, StreamBucket, 1)
 	ZEND_ARG_INFO(0, brigade)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_prepend, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, brigade)
-	ZEND_ARG_TYPE_INFO(0, bucket, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_INFO(0, bucket, StreamBucket, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_stream_bucket_append arginfo_stream_bucket_prepend
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_new, 0, 2, IS_OBJECT, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_bucket_new, 0, 2, StreamBucket, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, buffer, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -2713,6 +2717,8 @@ ZEND_FUNCTION(vfprintf);
 ZEND_FUNCTION(fsockopen);
 ZEND_FUNCTION(pfsockopen);
 ZEND_FUNCTION(http_build_query);
+ZEND_FUNCTION(http_get_last_response_headers);
+ZEND_FUNCTION(http_clear_last_response_headers);
 ZEND_FUNCTION(request_parse_body);
 ZEND_FUNCTION(image_type_to_mime_type);
 ZEND_FUNCTION(image_type_to_extension);
@@ -3350,6 +3356,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(fsockopen, arginfo_fsockopen)
 	ZEND_FE(pfsockopen, arginfo_pfsockopen)
 	ZEND_FE(http_build_query, arginfo_http_build_query)
+	ZEND_FE(http_get_last_response_headers, arginfo_http_get_last_response_headers)
+	ZEND_FE(http_clear_last_response_headers, arginfo_http_clear_last_response_headers)
 	ZEND_FE(request_parse_body, arginfo_request_parse_body)
 	ZEND_RAW_FENTRY("image_type_to_mime_type", zif_image_type_to_mime_type, arginfo_image_type_to_mime_type, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("image_type_to_extension", zif_image_type_to_extension, arginfo_image_type_to_extension, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)

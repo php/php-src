@@ -1088,7 +1088,6 @@ PHP_METHOD(XMLReader, expand)
 {
 #ifdef HAVE_DOM
 	zval *id, *basenode = NULL;
-	int ret;
 	xmlreader_object *intern;
 	xmlNode *node, *nodec;
 	xmlDocPtr docp = NULL;
@@ -1118,7 +1117,7 @@ PHP_METHOD(XMLReader, expand)
 				php_error_docref(NULL, E_NOTICE, "Cannot expand this node type");
 				RETURN_FALSE;
 			} else {
-				DOM_RET_OBJ(nodec, &ret, (dom_object *)domobj);
+				DOM_RET_OBJ(nodec, (dom_object *)domobj);
 			}
 		}
 	} else {

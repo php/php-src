@@ -5,7 +5,7 @@ Testing type-hinted lambda parameter inside namespace
 
 namespace foo;
 
-$x = function (\stdclass $x = NULL) {
+$x = function (?\stdclass $x = NULL) {
     var_dump($x);
 };
 

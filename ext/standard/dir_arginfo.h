@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f2571fbbcff57095abcb846f148644e10b2db2e8 */
+ * Stub hash: 4b0f093770ff9a6cad9db033e0b62b412408b937 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Directory_close, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -22,6 +22,8 @@ static const zend_function_entry class_Directory_methods[] = {
 
 static void register_dir_symbols(int module_number)
 {
+	REGISTER_STRING_CONSTANT("DIRECTORY_SEPARATOR", dirsep_str, CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PATH_SEPARATOR", pathsep_str, CONST_PERSISTENT);
 #if defined(HAVE_GLOB) && (defined(GLOB_BRACE) && GLOB_BRACE != 0)
 	REGISTER_LONG_CONSTANT("GLOB_BRACE", GLOB_BRACE, CONST_PERSISTENT);
 #endif

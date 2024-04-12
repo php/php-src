@@ -124,9 +124,9 @@ if test "$PHP_LDAP" != "no"; then
   fi
 
   dnl Sanity check
-  AC_CHECK_FUNC(ldap_bind_s, [], [
-    AC_MSG_ERROR([LDAP build check failed. Please check config.log for more information.])
-  ])
+  AC_CHECK_FUNC([ldap_sasl_bind_s],,
+    [AC_CHECK_FUNC([ldap_simple_bind_s],,
+      [AC_MSG_ERROR([LDAP build check failed. Please check config.log for details.])])])
 
   dnl Restore original values
   CPPFLAGS=$_SAVE_CPPFLAGS

@@ -29,12 +29,12 @@ if test "$PHP_PHPDBG" != "no"; then
     AC_DEFINE(PHPDBG_DEBUG, 0, [ ])
   fi
 
-  PHP_PHPDBG_CFLAGS="-D_GNU_SOURCE -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_PHPDBG_CFLAGS="-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_io.c phpdbg_out.c"
 
   AC_MSG_CHECKING([for phpdbg and readline integration])
   if test "$PHP_PHPDBG_READLINE" = "yes"; then
-    if test "$PHP_READLINE" != "no" -o  "$PHP_LIBEDIT" != "no"; then
+    if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
   	  AC_DEFINE(HAVE_PHPDBG_READLINE, 1, [ ])
   	  PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
   	  AC_MSG_RESULT([ok])
@@ -45,13 +45,7 @@ if test "$PHP_PHPDBG" != "no"; then
     AC_MSG_RESULT([disabled])
   fi
 
-  AC_CACHE_CHECK([for userfaultfd faulting on write-protected memory support], ac_cv_phpdbg_userfaultfd_writefault, AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-    #include <linux/userfaultfd.h>
-    #ifndef UFFDIO_WRITEPROTECT_MODE_WP
-    # error userfaults on write-protected memory not supported
-    #endif
-  ]])], [ac_cv_phpdbg_userfaultfd_writefault=yes], [ac_cv_phpdbg_userfaultfd_writefault=no]))
-  if test "$ac_cv_phpdbg_userfaultfd_writefault" = "yes"; then
+  AC_CHECK_DECL([UFFDIO_WRITEPROTECT_MODE_WP], [
     if test "$enable_zts" != "yes"; then
       CFLAGS_SAVE="$CFLAGS"
       LIBS_SAVE="$LIBS"
@@ -73,7 +67,7 @@ if test "$PHP_PHPDBG" != "no"; then
     else
       AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
     fi
-  fi
+  ],,[#include <linux/userfaultfd.h>])
 
   PHP_SUBST(PHPDBG_EXTRA_LIBS)
 

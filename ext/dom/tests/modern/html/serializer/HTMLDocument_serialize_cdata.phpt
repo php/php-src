@@ -5,10 +5,15 @@ dom
 --FILE--
 <?php
 
+// Note: can't create CData in an HTML document.
+$dom = DOM\XMLDocument::createEmpty();
+$cdata = $dom->createCDATASection("foobaré\"<>-&");
+
 $dom = DOM\HTMLDocument::createEmpty();
-$dom->appendChild($dom->createCDATASection("foobaré\"<>-&"));
+$container = $dom->appendChild($dom->createElement("container"));
+$container->appendChild($dom->importNode($cdata));
 echo $dom->saveHTML();
 
 ?>
 --EXPECT--
-foobaré"&lt;&gt;-&amp;
+<container>foobaré"&lt;&gt;-&amp;</container>

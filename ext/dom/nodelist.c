@@ -93,13 +93,9 @@ int php_dom_get_nodelist_length(dom_object *obj)
 		}
 	} else {
 		xmlNodePtr basep = nodep;
-		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-			nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-		} else {
-			nodep = nodep->children;
-		}
+		nodep = php_dom_first_child_of_container_node(basep);
 		dom_get_elements_by_tag_name_ns_raw(
-			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, INT_MAX - 1 /* because of <= */);
+			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, INT_MAX - 1 /* because of <= */);
 	}
 
 	objmap->cached_length = count;
@@ -137,17 +133,12 @@ PHP_METHOD(DOMNodeList, count)
 
 void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = NULL;
 	bool cache_itemnode = false;
 	if (index >= 0) {
 		if (objmap != NULL) {
 			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-				}
+				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
 					HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
@@ -194,13 +185,9 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 							itemnode = nodep;
 						} else {
 							if (restart) {
-								if (basep->type == XML_DOCUMENT_NODE || basep->type == XML_HTML_DOCUMENT_NODE) {
-									nodep = xmlDocGetRootElement((xmlDoc*) basep);
-								} else {
-									nodep = basep->children;
-								}
+								nodep = php_dom_first_child_of_container_node(basep);
 							}
-							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, relative_index);
+							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, relative_index);
 						}
 						cache_itemnode = true;
 					}
@@ -209,7 +196,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 		}
 
 		if (itemnode) {
-			DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+			DOM_RET_OBJ(itemnode, objmap->baseobj);
 			if (cache_itemnode) {
 				/* Hold additional reference for the cache, must happen before releasing the cache
 				 * because we might be the last reference holder.

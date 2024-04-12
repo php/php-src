@@ -26,7 +26,7 @@ if test "$PHP_DOM" != "no"; then
       $LEXBOR_DIR/ns/ns.c \
       $LEXBOR_DIR/tag/tag.c"
     PHP_NEW_EXTENSION(dom, [php_dom.c attr.c document.c \
-                            xml_document.c html_document.c html5_serializer.c html5_parser.c namespace_compat.c \
+                            xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c \
                             domexception.c parentnode.c \
                             processinginstruction.c cdatasection.c \
                             documentfragment.c domimplementation.c \
@@ -49,7 +49,7 @@ if test "$PHP_DOM" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ns)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/tag)
     PHP_SUBST(DOM_SHARED_LIBADD)
-    PHP_INSTALL_HEADERS([ext/dom], [xml_common.h xpath_callbacks.h])
+    PHP_INSTALL_HEADERS([ext/dom], [xml_common.h xpath_callbacks.h namespace_compat.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
   ])
 fi

@@ -577,6 +577,9 @@ extern "C" {
 
 #define ir_FRAME_ADDR()                   ir_fold0(_ir_CTX, IR_OPT(IR_FRAME_ADDR, IR_ADDR))
 
+#define ir_BLOCK_BEGIN()                  _ir_BLOCK_BEGIN(_ir_CTX)
+#define ir_BLOCK_END(_val)                do {_ir_CTX->control = ir_emit2(_ir_CTX, IR_BLOCK_END, _ir_CTX->control, (_val));} while (0)
+
 #define ir_VA_START(_list)                _ir_VA_START(_ir_CTX, _list)
 #define ir_VA_END(_list)                  _ir_VA_END(_ir_CTX, _list)
 #define ir_VA_COPY(_dst, _src)            _ir_VA_COPY(_ir_CTX, _dst, _src)
@@ -680,6 +683,7 @@ void   _ir_RETURN(ir_ctx *ctx, ir_ref val);
 void   _ir_IJMP(ir_ctx *ctx, ir_ref addr);
 void   _ir_GUARD(ir_ctx *ctx, ir_ref condition, ir_ref addr);
 void   _ir_GUARD_NOT(ir_ctx *ctx, ir_ref condition, ir_ref addr);
+ir_ref _ir_BLOCK_BEGIN(ir_ctx *ctx);
 ir_ref _ir_SNAPSHOT(ir_ctx *ctx, ir_ref n);
 void   _ir_SNAPSHOT_SET_OP(ir_ctx *ctx, ir_ref snapshot, ir_ref pos, ir_ref val);
 ir_ref _ir_EXITCALL(ir_ctx *ctx, ir_ref func);

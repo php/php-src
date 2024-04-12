@@ -77,6 +77,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   void(*)(void *, size_t) to
   void(*)(void *, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 
+* zend_observer_remove_begin_handler() and zend_observer_remove_end_handler()
+  got each a new parameter returning an observer which must be called, if the
+  removal happened during observer execution.
+
 
 ========================
 2. Build system changes
@@ -91,11 +95,13 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol DBA_CDB_MAKE removed in ext/dba.
    - Symbol HAVE_LIBM has been removed.
    - Symbol HAVE_INET_ATON has been removed.
+   - The Zend/zend_istdiostream.h header has been removed.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
    - The configure option --with-oci8 has been removed.
    - The configure option --with-zlib-dir has been removed.
+   - The configure option --with-kerberos has been removed.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
@@ -111,6 +117,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_BSD_ICONV has been removed.
    - Symbol ZEND_FIBER_ASM has been removed.
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
+   - Symbol HAVE_MYSQL has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -118,6 +125,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      AC_CHECK_MEMBERS).
    - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
      AX_CHECK_COMPILE_FLAG).
+   - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
@@ -129,6 +137,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - FIBER_ASSEMBLER and FIBER_ASM_ARCH Makefile variables removed in favor of
      PHP_ASSEMBLER and FIBER_ASM_ABI.
    - HAVE_PHP_SOAP symbol renamed to HAVE_SOAP.
+   - Unused symbols CONFIGURATION_FILE_PATH, DISCARD_PATH, HAVE_ERRMSG_H,
+     HAVE_REGCOMP, HAVE_RINT, NEED_ISBLANK, PHP_URL_FOPEN, REGEX, HSREGEX,
+     USE_CONFIG_FILE have been removed.
 
 ========================
 3. Module changes
@@ -140,6 +151,14 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The macros DOM_NO_ARGS() and DOM_NOT_IMPLEMENTED() have been removed.
    - New public APIs are available to handle callbacks from XPath, see
      xpath_callbacks.h.
+   - Added public APIs to manipulate namespace data, see namespace_compat.h.
+   - php_dom_create_object() now no longer accepts a NULL obj argument.
+   - Removed the `ret` argument from the DOM_RET_OBJ macro, use the return
+     value instead.
+   - Removed DOM_XMLNS_NAMESPACE from xml_common.h. Use DOM_XMLNS_NS_URI
+     from namespace_compat.h instead.
+   - Added php_dom_get_ns_mapper(), php_dom_next_in_tree_order(),
+     php_dom_follow_spec_doc_ref(), and php_dom_follow_spec_doc_ref().
 
  b. ext/random
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
@@ -156,9 +175,19 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      single php_random_algo_with_state struct by value, making it easier to
      pass around the state with its associated algorithm and thus reducing
      the chance for mistakes.
+   - The seed member of a php_random_algo has been removed. As a replacement
+     engine-specific seeding functions are now exposed. This change allows
+     users to better take engine-specific behavior into account. As an example
+     Mt19937 ignored the upper half of the seed parameter of the generic
+     seeding function.
    - The CSPRNG API (php_random_(bytes|int)_*) is now provided by the new
      and much smaller php_random_csprng.h header. The new header is included
      in php_random.h for compatibility with existing users.
+   - A new php_random_generate_fallback_seed() function has been added as a
+     replacement for the generically named GENERATE_SEED(). The internal
+     implementation has been improved to generate better seeds, however any
+     users should use the opportunity to verify that seeding is first
+     attempted using the CSPRNG for better output size flexibility.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used
@@ -167,7 +196,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  d. ext/libxml
    - Added php_libxml_pretend_ctx_error_ex() to emit errors as if they had come
      from libxml.
+   - Added php_libxml_error_handler_va() to pass libxml errors, and
+     corresponding php_libxml_error_level enum.
    - Removed the "properties" HashTable field from php_libxml_node_object.
+   - Added a way to attached private data to a php_libxml_ref_obj.
+   - Added a way to fix a class type onto php_libxml_ref_obj.
+   - Added php_libxml_uses_internal_errors().
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.
@@ -175,11 +209,18 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      php_date_initialize_from_ts_double() to initialize a php_date_obj with
      the given unix timestamp using GMT +00:00.
 
- d. ext/pcre
+ f. ext/pcre
    - php_pcre_match_impl() now no longer has a use_flags argument.
      When flags should be ignored, pass 0 to the flags argument.
    - php_pcre_match_impl() and pcre_get_compiled_regex_cache_ex() now use
      proper boolean argument types instead of integer types.
+   - pcre_get_compiled_regex_cache_ex() now provides an option to collect extra
+     options (from modifiers used in the expression, for example), and calls
+     pcre2_set_compile_extra_options() with those options.
+
+ g. ext/standard
+   - Added the php_base64_encode_ex() API with flag parameters, value can be
+     PHP_BASE64_NO_PADDING to encode without the padding character '='.
 
 ========================
 4. OpCode changes

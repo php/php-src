@@ -12,6 +12,7 @@ if (PHP_FFI != 'no') {
 		    AC_DEFINE('HAVE_FFI_MS_CDECL', 1 ,'libffi supports ms_cdecl calling convention');
 		    AC_DEFINE('HAVE_FFI_SYSV', 1 ,'libffi supports sysv calling convention');
 		}
+		// Available in https://github.com/winlibs/libffi.
 		if (GREP_HEADER("ffitarget.h", "FFI_VECTORCALL_PARTIAL", PHP_PHP_BUILD + "\\include")) {
 			AC_DEFINE('HAVE_FFI_VECTORCALL_PARTIAL', 1 ,'libffi partially supports vectorcall calling convention');
 		}

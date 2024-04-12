@@ -22,7 +22,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 </html>
 HTML);
 
-$xpath = new DOMXPath($dom);
+$xpath = new DOM\XPath($dom);
 
 foreach ($xpath->query("//*") as $element) {
     echo "Element: '", $element->tagName, "', ", $element->getLineNo(), "\n";
@@ -44,13 +44,13 @@ foreach ($xpath->query("//comment()") as $comment) {
 
 ?>
 --EXPECT--
-Element: 'html', 1
-Element: 'head', 2
-Element: 'title', 3
-Element: 'body', 5
-Element: 'div', 6
-Element: 'p', 7
-Element: 'strong', 8
+Element: 'HTML', 1
+Element: 'HEAD', 2
+Element: 'TITLE', 3
+Element: 'BODY', 5
+Element: 'DIV', 6
+Element: 'P', 7
+Element: 'STRONG', 8
 Text: 'This is my paragraph', 8
 Attribute: 'id', 6
 Attribute: 'x', 6

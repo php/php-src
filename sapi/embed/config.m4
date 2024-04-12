@@ -1,6 +1,6 @@
 PHP_ARG_ENABLE([embed],,
   [AS_HELP_STRING([[--enable-embed[=TYPE]]],
-    [EXPERIMENTAL: Enable building of embedded SAPI library TYPE is either
+    [Enable building of embedded SAPI library TYPE is either
     'shared' or 'static'. [TYPE=shared]])],
   [no],
   [no])
@@ -12,12 +12,12 @@ if test "$PHP_EMBED" != "no"; then
     yes|shared)
       LIBPHP_CFLAGS="-shared"
       PHP_EMBED_TYPE=shared
-      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(prefix)/lib; \$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)\$(prefix)/lib"
+      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(orig_libdir); \$(INSTALL) -m 0755 $SAPI_SHARED \$(INSTALL_ROOT)\$(orig_libdir)"
       ;;
     static)
       LIBPHP_CFLAGS="-static"
       PHP_EMBED_TYPE=static
-      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(prefix)/lib; \$(INSTALL) -m 0644 $SAPI_STATIC \$(INSTALL_ROOT)\$(prefix)/lib"
+      INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(orig_libdir); \$(INSTALL) -m 0644 $SAPI_STATIC \$(INSTALL_ROOT)\$(orig_libdir)"
       ;;
     *)
       PHP_EMBED_TYPE=no
@@ -29,6 +29,7 @@ if test "$PHP_EMBED" != "no"; then
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   fi
   AC_MSG_RESULT([$PHP_EMBED_TYPE])
+  PHP_SUBST_OLD(PHP_EMBED_TYPE)
 else
   AC_MSG_RESULT(no)
 fi

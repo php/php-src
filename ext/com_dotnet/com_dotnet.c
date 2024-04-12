@@ -217,7 +217,7 @@ out:
 /* {{{ com_dotnet_create_instance - ctor for DOTNET class */
 PHP_METHOD(dotnet, __construct)
 {
-	zval *object = getThis();
+	zval *object = ZEND_THIS;
 	php_com_dotnet_object *obj;
 	char *assembly_name, *datatype_name;
 	size_t assembly_name_len, datatype_name_len;

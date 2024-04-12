@@ -213,8 +213,22 @@ static int fpm_conf_expand_pool_name(char **value) {
 static char *fpm_conf_set_boolean(zval *value, void **config, intptr_t offset) /* {{{ */
 {
 	zend_string *val = Z_STR_P(value);
-	bool value_y = zend_string_equals_literal(val, "1");
-	bool value_n = ZSTR_LEN(val) == 0; /* Empty string is the only valid false value */
+	/* we need to check all allowed values to correctly set value from the environment variable */
+	bool value_y = (
+		zend_string_equals_literal(val, "1") ||
+		zend_string_equals_literal(val, "yes") ||
+		zend_string_equals_literal(val, "true") ||
+		zend_string_equals_literal(val, "on")
+	);
+	bool value_n = (
+		value_y || ZSTR_LEN(val) == 0 ||
+		zend_string_equals_literal(val, "0") ||
+		zend_string_equals_literal(val, "no") ||
+		zend_string_equals_literal(val, "none") ||
+		zend_string_equals_literal(val, "false") ||
+		zend_string_equals_literal(val, "off")
+	);
+
 
 	if (!value_y && !value_n) {
 		return "invalid boolean value";

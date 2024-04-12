@@ -45,6 +45,8 @@
 #define MYSQLND_DBG_ENABLED 0
 #endif
 
+#define MYSQLND_CHARSETS_SANITY_CHECK 0
+
 #ifdef ZTS
 #include "TSRM.h"
 #endif

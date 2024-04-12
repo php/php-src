@@ -12,6 +12,13 @@ if(!$s) {
 }
 $dom = dom_import_simplexml($s);
 print $dom->ownerDocument->saveXML();
+
+// This should fail because it has been imported already above in legacy DOM
+try {
+    DOM\import_simplexml($s);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
 --EXPECT--
 <?xml version="1.0"?>
@@ -25,3 +32,4 @@ print $dom->ownerDocument->saveXML();
   <author>John Steinbeck</author>
  </book>
 </books>
+DOM\import_simplexml(): Argument #1 ($node) must not be already imported as a DOMNode

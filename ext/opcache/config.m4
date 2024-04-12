@@ -87,7 +87,7 @@ if test "$PHP_OPCACHE" != "no"; then
         AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
         PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
         PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
-        ZEND_JIT_SRC+=" jit/ir/ir_disasm.c"
+        ZEND_JIT_SRC="$ZEND_JIT_SRC jit/ir/ir_disasm.c"
       ],[
         AC_MSG_ERROR([capstone >= 3.0 required but not found])
       ])
@@ -103,7 +103,7 @@ if test "$PHP_OPCACHE" != "no"; then
     fi
   fi
 
-  AC_CHECK_FUNCS([mprotect memfd_create shm_create_largepage])
+  AC_CHECK_FUNCS([mprotect shm_create_largepage])
 
   AC_MSG_CHECKING(for sysvipc shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -238,9 +238,16 @@ int main(void) {
   fi
   AC_MSG_RESULT([$have_shm_mmap_anon])
 
-  PHP_CHECK_FUNC_LIB(shm_open, rt, root)
-  AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  dnl Check POSIX shared memory object operations and link required library as
+  dnl needed: rt (older Linux and Solaris <= 10). Most systems have it in the C
+  dnl standard library (newer Linux, illumos, Solaris 11.4, macOS, BSD-based
+  dnl systems...). Haiku has it in the root library, which is linked by default.
+  LIBS_save="$LIBS"
+  LIBS=
+  AC_SEARCH_LIBS([shm_open], [rt],
+    [AC_CACHE_CHECK([for mmap() using shm_open() shared memory support],
+      [php_cv_shm_mmap_posix],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -302,13 +309,20 @@ int main(void) {
     return 9;
   }
   return 0;
-}
-]])],[have_shm_mmap_posix=yes],[have_shm_mmap_posix=no],[have_shm_mmap_posix=no])
-  AC_MSG_RESULT([$have_shm_mmap_posix])
-  if test "$have_shm_mmap_posix" = "yes"; then
-    AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
-  fi
+}]])],
+      [php_cv_shm_mmap_posix=yes],
+      [php_cv_shm_mmap_posix=no],
+      [php_cv_shm_mmap_posix=no])
+    ])
+
+    if test "$php_cv_shm_mmap_posix" = "yes"; then
+      AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
+        [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
+      AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
+        [Define if you have POSIX mmap() SHM support])
+    fi
+  ])
+  LIBS="$LIBS_save"
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
@@ -329,7 +343,7 @@ int main(void) {
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
-  if test "$have_shm_ipc" != "yes" && test "$have_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
+  if test "$have_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
     AC_MSG_ERROR([No supported shared memory caching support was found when configuring opcache. Check config.log for any errors or missing dependencies.])
   fi
 

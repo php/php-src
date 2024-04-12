@@ -267,6 +267,7 @@ void ir_print_const(const ir_ctx *ctx, const ir_insn *insn, FILE *f, bool quoted
 #define ir_op_flag_x2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_x3      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | 3 | (3 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_xN      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_CALL | IR_OP_FLAG_VAR_INPUTS)
+#define ir_op_flag_a1      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 1 | (1 << IR_OP_FLAG_OPERANDS_SHIFT))
 #define ir_op_flag_a2      (IR_OP_FLAG_CONTROL|IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_ALLOC | 2 | (2 << IR_OP_FLAG_OPERANDS_SHIFT))
 
 #define ir_op_kind____     IR_OPND_UNUSED
@@ -382,7 +383,7 @@ void ir_init(ir_ctx *ctx, uint32_t flags, ir_ref consts_limit, ir_ref insns_limi
 	buf = ir_mem_malloc((consts_limit + insns_limit) * sizeof(ir_insn));
 	ctx->ir_base = buf + consts_limit;
 
-	ctx->ir_base[IR_UNUSED].optx = IR_NOP;
+	MAKE_NOP(&ctx->ir_base[IR_UNUSED]);
 	ctx->ir_base[IR_NULL].optx = IR_OPT(IR_C_ADDR, IR_ADDR);
 	ctx->ir_base[IR_NULL].val.u64 = 0;
 	ctx->ir_base[IR_FALSE].optx = IR_OPT(IR_C_BOOL, IR_BOOL);
@@ -416,6 +417,9 @@ void ir_free(ir_ctx *ctx)
 	}
 	if (ctx->cfg_map) {
 		ir_mem_free(ctx->cfg_map);
+	}
+	if (ctx->cfg_schedule) {
+		ir_mem_free(ctx->cfg_schedule);
 	}
 	if (ctx->rules) {
 		ir_mem_free(ctx->rules);
@@ -923,7 +927,11 @@ restart:
 		uint32_t k = key & any;
 		uint32_t h = _ir_fold_hashkey(k);
 		uint32_t fh = _ir_fold_hash[h];
-		if (IR_FOLD_KEY(fh) == k /*|| (fh = _ir_fold_hash[h+1], (fh & 0x1fffff) == k)*/) {
+		if (IR_FOLD_KEY(fh) == k
+#ifdef IR_FOLD_SEMI_PERFECT_HASH
+		 || (fh = _ir_fold_hash[h+1], (fh & 0x1fffff) == k)
+#endif
+		) {
 			switch (IR_FOLD_RULE(fh)) {
 #include "ir_fold.h"
 				default:
@@ -1284,11 +1292,12 @@ void ir_use_list_remove_one(ir_ctx *ctx, ir_ref from, ir_ref ref)
 			*p = IR_UNUSED;
 			break;
 		}
+		p++;
 		j++;
 	}
 }
 
-void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
+void ir_use_list_replace_one(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 {
 	ir_use_list *use_list = &ctx->use_lists[ref];
 	ir_ref i, n, *p;
@@ -1298,6 +1307,19 @@ void ir_use_list_replace(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
 		if (*p == use) {
 			*p = new_use;
 			break;
+		}
+	}
+}
+
+void ir_use_list_replace_all(ir_ctx *ctx, ir_ref ref, ir_ref use, ir_ref new_use)
+{
+	ir_use_list *use_list = &ctx->use_lists[ref];
+	ir_ref i, n, *p;
+
+	n = use_list->count;
+	for (i = 0, p = &ctx->use_edges[use_list->refs]; i < n; i++, p++) {
+		if (*p == use) {
+			*p = new_use;
 		}
 	}
 }
@@ -1963,10 +1985,25 @@ void _ir_BEGIN(ir_ctx *ctx, ir_ref src)
 	}
 }
 
+ir_ref _ir_fold_condition(ir_ctx *ctx, ir_ref ref)
+{
+	ir_insn *insn = &ctx->ir_base[ref];
+
+	if (insn->op == IR_NE && IR_IS_CONST_REF(insn->op2)) {
+		ir_insn *op2_insn = &ctx->ir_base[insn->op2];
+
+		if (IR_IS_TYPE_INT(op2_insn->type) && op2_insn->val.u64 == 0) {
+			return insn->op1;
+		}
+	}
+	return ref;
+}
+
 ir_ref _ir_IF(ir_ctx *ctx, ir_ref condition)
 {
 	ir_ref if_ref;
 
+	condition = _ir_fold_condition(ctx, condition);
 	IR_ASSERT(ctx->control);
 	if (IR_IS_CONST_REF(condition)) {
 		condition = ir_ref_is_true(ctx, condition) ? IR_TRUE : IR_FALSE;
@@ -2656,6 +2693,16 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 	ir_type type2;
 	bool guarded = 0;
 
+	if (!IR_IS_CONST_REF(val)) {
+		insn = &ctx->ir_base[val];
+		if (insn->op == IR_BITCAST
+		 && !IR_IS_CONST_REF(insn->op1)
+		 && ir_type_size[insn->type] == ir_type_size[ctx->ir_base[insn->op1].type]) {
+			/* skip BITCAST */
+			val = insn->op1;
+		}
+	}
+
 	IR_ASSERT(ctx->control);
 	while (ref > limit) {
 		insn = &ctx->ir_base[ref];
@@ -2671,10 +2718,7 @@ void _ir_STORE(ir_ctx *ctx, ir_ref addr, ir_ref val)
 							} else {
 								ctx->control = insn->op1;
 							}
-							insn->optx = IR_NOP;
-							insn->op1 = IR_NOP;
-							insn->op2 = IR_NOP;
-							insn->op3 = IR_NOP;
+							MAKE_NOP(insn);
 						}
 						break;
 					}
@@ -2727,4 +2771,10 @@ ir_ref _ir_VA_ARG(ir_ctx *ctx, ir_type type, ir_ref list)
 {
 	IR_ASSERT(ctx->control);
 	return ctx->control = ir_emit2(ctx, IR_OPT(IR_VA_ARG, type), ctx->control, list);
+}
+
+ir_ref _ir_BLOCK_BEGIN(ir_ctx *ctx)
+{
+	IR_ASSERT(ctx->control);
+	return ctx->control = ir_emit1(ctx, IR_OPT(IR_BLOCK_BEGIN, IR_ADDR), ctx->control);
 }
