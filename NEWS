@@ -123,6 +123,8 @@ PHP                                                                        NEWS
   . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
     (Vincent Jardin)
   . Bumped minimum required OpenSSL version to 1.1.1. (Ayesh Karunaratne)
+  . Added compile-time option --with-openssl-legacy-provider to enable legacy
+    provider. (Adam Saponara)
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
