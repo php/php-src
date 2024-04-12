@@ -224,7 +224,26 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 {
 	char *quoted;
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
+		php_error_docref(NULL, E_WARNING, "String is too long to be quoted");
 		return NULL;
+	}
+	// check if it contains a null byte
+	if (memchr(ZSTR_VAL(unquoted), '\0', ZSTR_LEN(unquoted))) {
+		if(((ZSTR_LEN(unquoted) * 2) + 3) > (INT_MAX - 3) / 2) {
+			php_error_docref(NULL, E_WARNING, "Binary string is too long to be quoted");
+			return NULL;
+		}
+		zend_string *quoted_str = zend_string_alloc((ZSTR_LEN(unquoted) * 2) + 4, 0); // 4: x'hex'\x00
+		// x'hex'
+		quoted_str->val[0] = 'x';
+		quoted_str->val[1] = '\'';
+		for (size_t i = 0; i < ZSTR_LEN(unquoted); i++) {
+			sprintf(quoted_str->val + 2 + (i * 2), "%02x", (unsigned char)ZSTR_VAL(unquoted)[i]);
+		}
+		quoted_str->val[2 + (ZSTR_LEN(unquoted) * 2)] = '\'';
+		quoted_str->val[3 + (ZSTR_LEN(unquoted) * 2)] = '\0';
+		quoted_str->len = (ZSTR_LEN(unquoted) * 2) + 3;
+		return quoted_str;
 	}
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
