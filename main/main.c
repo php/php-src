@@ -1407,9 +1407,9 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					zend_objects_store_mark_destructed(&EG(objects_store));
 					if (CG(in_compilation) && (type == E_COMPILE_ERROR || type == E_PARSE)) {
 						/* We bailout during compilation which may for example leave stale entries in CG(loop_var_stack).
-						* If code is compiled during shutdown, we need to make sure the compiler is reset to a clean state,
-						* otherwise this will lead to incorrect compilation during shutdown.
-						* We don't do a full re-initialization via init_compiler() because that will also reset streams and resources. */
+						 * If code is compiled during shutdown, we need to make sure the compiler is reset to a clean state,
+						 * otherwise this will lead to incorrect compilation during shutdown.
+						 * We don't do a full re-initialization via init_compiler() because that will also reset streams and resources. */
 						shutdown_compiler();
 						zend_init_compiler_data_structures();
 					}
