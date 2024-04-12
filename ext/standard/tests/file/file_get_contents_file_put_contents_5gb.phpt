@@ -1,5 +1,5 @@
 --TEST--
-Test file_put_contents() function with 5GB string
+Test file_put_contents() and file_get_contents() functions with 5GB string
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE < 5) {
@@ -30,7 +30,7 @@ function get_system_memory(): int|float|false
 if (get_system_memory() < 10 * 1024 * 1024 * 1024) {
     die('skip Reason: Insufficient RAM (less than 10GB)');
 }
-$tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin";
+$tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "file_get_contents_file_put_contents_5gb.bin";
 $tmpfileh = fopen($tmpfile, "wb");
 if ($tmpfileh === false) {
     die('skip Reason: Unable to create temporary file');
@@ -45,15 +45,27 @@ if (disk_free_space(dirname($tmpfile)) < 10 * 1024 * 1024 * 1024) {
 memory_limit=6G
 --FILE--
 <?php
-$tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin";
-$large_string = str_repeat('a', 5 * 1024 * 1024 * 1024);
+$tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "file_get_contents_file_put_contents_5gb.bin";
+$large_string_len = 5 * 1024 * 1024 * 1024;
+
+$large_string = str_repeat('a', $large_string_len);
 $result = file_put_contents($tmpfile, $large_string);
-if ($result !== strlen($large_string)) {
-    echo "Could only write $result bytes of " . strlen($large_string) . " bytes.";
+if ($result !== $large_string_len) {
+    echo "Could only write $result bytes of $large_string_len bytes.";
     var_dump(error_get_last());
 } else {
-    echo "File written successfully.";
+    echo "File written successfully." . PHP_EOL;
 }
+unset($large_string);
+
+$result_large_string = file_get_contents($tmpfile);
+if (strlen($result_large_string) !== $large_string_len) {
+    echo "Could only read " . strlen($result_large_string) . " bytes of $large_string_len bytes.";
+    var_dump(error_get_last());
+} else {
+    echo "File read successfully." . PHP_EOL;
+}
+
 clearstatcache(true, $tmpfile);
 if (file_exists($tmpfile)) {
     unlink($tmpfile);
@@ -61,7 +73,8 @@ if (file_exists($tmpfile)) {
 ?>
 --CLEAN--
 <?php
-@unlink(sys_get_temp_dir() . DIRECTORY_SEPARATOR . "test_file_put_contents_5gb.bin");
+@unlink(sys_get_temp_dir() . DIRECTORY_SEPARATOR . "file_get_contents_file_put_contents_5gb.bin");
 ?>
 --EXPECT--
 File written successfully.
+File read successfully.
