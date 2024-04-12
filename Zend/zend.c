@@ -823,6 +823,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->pid = 0;
 	executor_globals->oldact = (struct sigaction){0};
 #endif
+	memset(executor_globals->strtod_state.freelist, 0,
+			sizeof(executor_globals->strtod_state.freelist));
+	executor_globals->strtod_state.p5s = NULL;
+	executor_globals->strtod_state.result = NULL;
 }
 /* }}} */
 
@@ -918,7 +922,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
 	zend_startup_hrtime();
-	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */
@@ -1158,7 +1161,6 @@ void zend_shutdown(void) /* {{{ */
 
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
-	zend_shutdown_strtod();
 	zend_attributes_shutdown();
 
 #ifdef ZTS
@@ -1275,6 +1277,7 @@ ZEND_API void zend_activate(void) /* {{{ */
 #ifdef ZTS
 	virtual_cwd_activate();
 #endif
+	zend_strtod_activate();
 	gc_reset();
 	init_compiler();
 	init_executor();
@@ -1344,6 +1347,8 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	if (zend_hash_num_elements(&CG(interned_strings)) > 0) {
 		zend_map_ptr_reset();
 	}
+
+	zend_strtod_deactivate();
 
 #if GC_BENCH
 	gc_bench_print();
