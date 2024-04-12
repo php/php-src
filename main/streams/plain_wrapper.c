@@ -54,7 +54,7 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
 #if defined(PHP_WIN32)
-# define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+# define PLAIN_WRAP_BUF_SIZE(st) ((unsigned int)(st > INT_MAX ? INT_MAX : st))
 #define fsync _commit
 #define fdatasync fsync
 #else
