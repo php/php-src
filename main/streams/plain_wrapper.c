@@ -353,11 +353,8 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 	assert(data != NULL);
 
 	if (data->fd >= 0) {
-#ifdef PHP_WIN32
-		ssize_t bytes_written = _write(data->fd, buf, (unsigned int)(count > INT_MAX ? INT_MAX : count));
-#else
-		ssize_t bytes_written = write(data->fd, buf, count);
-#endif
+		ssize_t bytes_written = write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
+
 		if (bytes_written < 0) {
 			if (PHP_IS_TRANSIENT_ERROR(errno)) {
 				return 0;
