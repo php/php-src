@@ -27,11 +27,11 @@ echo 'DONE' . PHP_EOL;
 --EXPECTF--
 <!-- init '%s' -->
 <file '%s'>
-  <!-- init {closure}() -->
-  <{closure}>
+  <!-- init {closure:%s:%d}() -->
+  <{closure:%s:%d}>
 Answer
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init array_sum() -->
       <array_sum>
       </array_sum>
@@ -39,27 +39,27 @@ Answer
       <var_dump>
 int(42)
       </var_dump>
-    </{closure}>
-  </{closure}>
-  <{closure}>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
+  <{closure:%s:%d}>
 Answer
-    <{closure}>
+    <{closure:%s:%d}>
       <array_sum>
       </array_sum>
       <var_dump>
 int(42)
       </var_dump>
-    </{closure}>
-  </{closure}>
-  <{closure}>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
+  <{closure:%s:%d}>
 Answer
-    <{closure}>
+    <{closure:%s:%d}>
       <array_sum>
       </array_sum>
       <var_dump>
 int(42)
       </var_dump>
-    </{closure}>
-  </{closure}>
+    </{closure:%s:%d}>
+  </{closure:%s:%d}>
 DONE
 </file '%s'>

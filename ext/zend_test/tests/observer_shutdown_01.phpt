@@ -35,8 +35,8 @@ echo 'Done: ' . bar(40) . PHP_EOL;
   </bar:40>
 Done: 40
 </file '%s'>
-<!-- init {closure}() -->
-<{closure}>
+<!-- init {closure:%s:%d}() -->
+<{closure:%s:%d}>
   <!-- init foo() -->
   <foo>
     <bar>
@@ -45,4 +45,4 @@ Done: 40
     </bar:42>
   </foo:42>
 Shutdown: 42
-</{closure}:NULL>
+</{closure:%s:%d}:NULL>

@@ -603,6 +603,15 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			ZVAL_STR_COPY(&val, closure->func.common.function_name);
 		}
 		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_FUNCTION), &val);
+	} else {
+		ZVAL_STR_COPY(&val, closure->func.common.function_name);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_NAME), &val);
+
+		ZVAL_STR_COPY(&val, closure->func.op_array.filename);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_FILE), &val);
+
+		ZVAL_LONG(&val, closure->func.op_array.line_start);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_LINE), &val);
 	}
 
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {

@@ -13,6 +13,6 @@ $function("secrets", "arewrong");
 --EXPECTF--
 Fatal error: Uncaught Exception in %sexception_ignore_args.php:3
 Stack trace:
-#0 %sexception_ignore_args.php(8): {closure}()
+#0 %s(%d): {closure:%s:%d}()
 #1 {main}
   thrown in %sexception_ignore_args.php on line 3

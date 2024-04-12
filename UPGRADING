@@ -172,6 +172,8 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/rfc1867-non-post
   . Getting the debug info for WeakReference will now also output the object
     it references, or null if the reference is no longer valid.
+  . The output of Closure::__debugInfo() now includes the name, file, and line
+    of the Closure.
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
@@ -619,6 +621,10 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 13. Other Changes
 ========================================
+
+* Closure names have been adjusted to include the parent function's name
+  and the line of definition to make them easier to distinguish, for example
+  within stack traces.
 
 ========================================
 14. Performance Improvements

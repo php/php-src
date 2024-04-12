@@ -14,7 +14,7 @@ $test('sensitive');
 
 ?>
 --EXPECTF--
-#0 %ssensitive_parameter_closure.php(10): {closure}(Object(SensitiveParameterValue))
+#0 %s(%d): {closure:%s:%d}(Object(SensitiveParameterValue))
 array(1) {
   [0]=>
   array(4) {
@@ -23,7 +23,7 @@ array(1) {
     ["line"]=>
     int(10)
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(1) {
       [0]=>
@@ -40,7 +40,7 @@ array(1) {
     ["line"]=>
     int(10)
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(1) {
       [0]=>
