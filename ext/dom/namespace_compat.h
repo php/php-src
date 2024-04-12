@@ -70,7 +70,7 @@ typedef struct _php_dom_in_scope_ns {
    bool origin_is_ns_compat;
 } php_dom_in_scope_ns;
 
-PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_mapper *ns_mapper, const xmlNode *node);
+PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_mapper *ns_mapper, const xmlNode *node, bool ignore_elements);
 PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns_legacy(const xmlNode *node);
 PHP_DOM_EXPORT void php_dom_in_scope_ns_destroy(php_dom_in_scope_ns *in_scope_ns);
 

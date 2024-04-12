@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 28365949d78a2d0254cfdb0da6549e282d2eb436 */
+ * Stub hash: 9065d5c713a6fb879f8116821eaabc3a01a4db20 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -3120,6 +3120,12 @@ static zend_class_entry *register_class_Dom_Element(zend_class_entry *class_entr
 	zend_string *property_nextElementSibling_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
 	zend_declare_typed_property(class_entry, property_nextElementSibling_name, &property_nextElementSibling_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_nextElementSibling_class_Dom_Element, 0, MAY_BE_NULL));
 	zend_string_release(property_nextElementSibling_name);
+
+	zval property_innerHTML_default_value;
+	ZVAL_UNDEF(&property_innerHTML_default_value);
+	zend_string *property_innerHTML_name = zend_string_init("innerHTML", sizeof("innerHTML") - 1, 1);
+	zend_declare_typed_property(class_entry, property_innerHTML_name, &property_innerHTML_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
+	zend_string_release(property_innerHTML_name);
 
 	return class_entry;
 }
