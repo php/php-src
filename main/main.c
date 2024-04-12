@@ -1406,7 +1406,6 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store));
 					if (CG(in_compilation)) {
-						CG(in_compilation) = 0;
 						/* We bailout during compilation which may for example leave stale entries in CG(loop_var_stack).
 						* If code is compiled during shutdown, we need to make sure the compiler is reset to a clean state,
 						* otherwise this will lead to incorrect compilation during shutdown.
