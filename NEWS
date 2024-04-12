@@ -54,6 +54,7 @@ PHP                                                                        NEWS
 
 - FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
+  . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions
