@@ -219,18 +219,96 @@ static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string 
 	return zend_i64_to_str(sqlite3_last_insert_rowid(H->db));
 }
 
-/* NB: doesn't handle binary strings... use prepared stmts for that */
+/* This does what "etSQLESCAPE2" does in sqlite3's sqlite3_snprintf, but binary safe, and with NULL escaping. */
 static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	char *quoted;
-	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
-		return NULL;
+	static const char null_state_enter_at_start[] = "x'";
+	static const char null_state_enter[] = "'||x'";
+	static const char null_state_leave[] = "'||'";
+	const size_t largest_addition = sizeof(null_state_enter) - 1 + sizeof(null_state_leave) - 1 + 2;
+
+	bool state_in_nulls = false;
+
+	/* First pass to compute necessary length */
+	size_t quoted_len = 2; /* Two single quotes */
+	const char *source = ZSTR_VAL(unquoted);
+	const char *source_end = source + ZSTR_LEN(unquoted);
+	while (source < source_end) {
+		/* If the largest addition could ever be larger than the maximum size of a string, bail. */
+		if (UNEXPECTED(quoted_len >= ZSTR_MAX_LEN - largest_addition)) {
+			return NULL;
+		}
+
+		if (*source == '\0') {
+			if (!state_in_nulls) {
+				state_in_nulls = true;
+				if (source == ZSTR_VAL(unquoted)) {
+					quoted_len--; /* backup initial ' */
+					quoted_len += sizeof(null_state_enter_at_start) - 1;
+				} else {
+					quoted_len += sizeof(null_state_enter) - 1;
+				}
+				/* Every null state will eventually get back to the normal state. */
+				quoted_len += sizeof(null_state_leave) - 1;
+			}
+			quoted_len += 2; /* '00' */
+		} else {
+			if (*source == '\'') {
+				quoted_len += 2; /* Two single quotes */
+			} else {
+				quoted_len++;
+			}
+			state_in_nulls = false;
+		}
+		source++;
 	}
-	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
-	/* TODO use %Q format? */
-	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
-	zend_string *quoted_str = zend_string_init(quoted, strlen(quoted), 0);
-	efree(quoted);
+
+	if (state_in_nulls) {
+		/* We don't emit the leave state if it ends in NULLs. */
+		quoted_len -= sizeof(null_state_leave) - 1;
+	}
+
+	/* Second pass to perform the transformation */
+	zend_string *quoted_str = zend_string_alloc(quoted_len, false);
+	char *quoted_dest = ZSTR_VAL(quoted_str);
+	state_in_nulls = false;
+
+	*quoted_dest++ = '\'';
+
+	source = ZSTR_VAL(unquoted);
+	while (source < source_end) {
+		if (*source == '\0') {
+			if (!state_in_nulls) {
+				state_in_nulls = true;
+				if (source == ZSTR_VAL(unquoted)) {
+					quoted_dest--; /* backup initial ' */
+					memcpy(quoted_dest, null_state_enter_at_start, sizeof(null_state_enter_at_start) - 1);
+					quoted_dest += sizeof(null_state_enter_at_start) - 1;
+				} else {
+					memcpy(quoted_dest, null_state_enter, sizeof(null_state_enter) - 1);
+					quoted_dest += sizeof(null_state_enter) - 1;
+				}
+			}
+			*quoted_dest++ = '0';
+			*quoted_dest++ = '0';
+		} else {
+			if (state_in_nulls) {
+				state_in_nulls = false;
+				memcpy(quoted_dest, null_state_leave, sizeof(null_state_leave) - 1);
+				quoted_dest += sizeof(null_state_leave) - 1;
+			}
+			if (*source == '\'') {
+				*quoted_dest++ = '\'';
+			}
+			*quoted_dest++ = *source;
+			state_in_nulls = false;
+		}
+		source++;
+	}
+
+	*quoted_dest++ = '\'';
+	*quoted_dest = '\0';
+
 	return quoted_str;
 }
 
