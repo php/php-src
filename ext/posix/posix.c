@@ -416,14 +416,14 @@ PHP_FUNCTION(posix_ctermid)
 /* }}} */
 
 /* Checks if the provides resource is a stream and if it provides a file descriptor */
-static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
+static zend_result php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 {
 	php_stream *stream;
 
 	php_stream_from_zval_no_verify(stream, zfp);
 
 	if (stream == NULL) {
-		return 0;
+		return FAILURE;
 	}
 
 	/* get the fd.
@@ -437,9 +437,9 @@ static int php_posix_stream_get_fd(zval *zfp, zend_long *fd) /* {{{ */
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
-		return 0;
+		return FAILURE;
 	}
-	return 1;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -459,7 +459,7 @@ PHP_FUNCTION(posix_ttyname)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -520,7 +520,7 @@ PHP_FUNCTION(posix_isatty)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
@@ -1044,7 +1044,7 @@ try_again:
 #define UNLIMITED_STRING "unlimited"
 
 /* {{{ posix_addlimit */
-static int posix_addlimit(int limit, const char *name, zval *return_value) {
+static zend_result posix_addlimit(int limit, const char *name, zval *return_value) {
 	int result;
 	struct rlimit rl;
 	char hard[80];
@@ -1316,7 +1316,7 @@ PHP_FUNCTION(posix_fpathconf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
-		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+		if (php_posix_stream_get_fd(z_fd, &fd) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
