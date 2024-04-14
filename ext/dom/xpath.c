@@ -473,7 +473,7 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 PHP_METHOD(DOMXPath, quote) {
 	const char *input;
 	size_t input_len;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &input, &input_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
