@@ -54,7 +54,7 @@ extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
 
 #if defined(PHP_WIN32)
-# define PLAIN_WRAP_BUF_SIZE(st) (((st) > UINT_MAX) ? UINT_MAX : (unsigned int)(st))
+# define PLAIN_WRAP_BUF_SIZE(st) ((unsigned int)(st > INT_MAX ? INT_MAX : st))
 #define fsync _commit
 #define fdatasync fsync
 #else
@@ -354,7 +354,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 
 	if (data->fd >= 0) {
 #ifdef PHP_WIN32
-		ssize_t bytes_written = _write(data->fd, buf, (unsigned int)(count > INT_MAX ? INT_MAX : count));
+		ssize_t bytes_written = _write(data->fd, buf, PLAIN_WRAP_BUF_SIZE(count));
 #else
 		ssize_t bytes_written = write(data->fd, buf, count);
 #endif

@@ -51,6 +51,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13891 (memleak and segfault when using ini_set with
     session.trans_sid_hosts). (nielsdos, kamil-tekiela)
 
+- Standard:
+  . Fixed file_get_contents() on Windows fails with "errno=22 Invalid
+    argument". (Damian Wójcik)
+
 - Streams:
   . Fixed bug GH-13264 (Part 1 - Memory leak on stream filter failure).
     (Jakub Zelenka)
