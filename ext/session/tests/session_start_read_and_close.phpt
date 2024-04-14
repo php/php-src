@@ -25,7 +25,7 @@ foreach ($valuesDisablingReadAndClose as $value) {
 }
 
 try {
-    session_start(["read_and_close" => 1.1]);
+    session_start(["read_and_close" => 1.0]);
 } catch (Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
