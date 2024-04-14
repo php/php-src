@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fdd48ba3c71ec80eb3ae740c5a6b8539efcdaa6c */
+ * Stub hash: 3e15bebb568e6e2031acbd932d6eefbd23984c83 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -661,31 +661,17 @@ static void register_pcntl_symbols(int module_number)
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 static zend_class_entry *register_class_QosClass(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("QosClass", IS_LONG, class_QosClass_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("QosClass", IS_UNDEF, class_QosClass_methods);
 
-	zval enum_case_UserInteractive_value;
-	ZVAL_LONG(&enum_case_UserInteractive_value, 0x21);
-	zend_enum_add_case_cstr(class_entry, "UserInteractive", &enum_case_UserInteractive_value);
+	zend_enum_add_case_cstr(class_entry, "UserInteractive", NULL);
 
-	zval enum_case_UserInitiated_value;
-	ZVAL_LONG(&enum_case_UserInitiated_value, 0x19);
-	zend_enum_add_case_cstr(class_entry, "UserInitiated", &enum_case_UserInitiated_value);
+	zend_enum_add_case_cstr(class_entry, "UserInitiated", NULL);
 
-	zval enum_case_Default_value;
-	ZVAL_LONG(&enum_case_Default_value, 0x15);
-	zend_enum_add_case_cstr(class_entry, "Default", &enum_case_Default_value);
+	zend_enum_add_case_cstr(class_entry, "Default", NULL);
 
-	zval enum_case_Utility_value;
-	ZVAL_LONG(&enum_case_Utility_value, 0x11);
-	zend_enum_add_case_cstr(class_entry, "Utility", &enum_case_Utility_value);
+	zend_enum_add_case_cstr(class_entry, "Utility", NULL);
 
-	zval enum_case_Background_value;
-	ZVAL_LONG(&enum_case_Background_value, 0x9);
-	zend_enum_add_case_cstr(class_entry, "Background", &enum_case_Background_value);
-
-	zval enum_case_Unspecified_value;
-	ZVAL_LONG(&enum_case_Unspecified_value, 0x0);
-	zend_enum_add_case_cstr(class_entry, "Unspecified", &enum_case_Unspecified_value);
+	zend_enum_add_case_cstr(class_entry, "Background", NULL);
 
 	return class_entry;
 }

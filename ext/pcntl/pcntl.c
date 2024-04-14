@@ -1632,10 +1632,53 @@ PHP_FUNCTION(pcntl_getcpu)
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+static qos_class_t qos_zval_to_lval(const zval *qos_obj)
+{
+	qos_class_t qos_class = QOS_CLASS_DEFAULT;
+	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
+
+	if (zend_string_equals_cstr(entry, "UserInteractive", sizeof("UserInteractive") - 1)) {
+		qos_class = QOS_CLASS_USER_INTERACTIVE;
+	} else if (zend_string_equals_cstr(entry, "UserInitiated", sizeof("UserInitiated") - 1)) {
+		qos_class = QOS_CLASS_USER_INITIATED;
+	} else if (zend_string_equals_cstr(entry, "Utility", sizeof("Utility") - 1)) {
+		qos_class = QOS_CLASS_UTILITY;
+	} else if (zend_string_equals_cstr(entry, "Background", sizeof("Background") - 1)) {
+		qos_class = QOS_CLASS_BACKGROUND;
+	}
+
+	return qos_class;
+}
+
+static zend_object *qos_lval_to_zval(qos_class_t qos_class)
+{
+	const char *entryname;
+	switch (qos_class)
+	{
+	case QOS_CLASS_USER_INTERACTIVE:
+		entryname = "UserInteractive";
+		break;
+	case QOS_CLASS_USER_INITIATED:
+		entryname = "UserInitiated";
+		break;
+	case QOS_CLASS_UTILITY:
+		entryname = "Utility";
+		break;
+	case QOS_CLASS_BACKGROUND:
+		entryname = "Background";
+		break;
+	case QOS_CLASS_DEFAULT:
+	default:
+		entryname = "Default";
+		break;
+	}
+
+	return zend_enum_get_case_cstr(QosClass_ce, entryname);
+}
+
 PHP_FUNCTION(pcntl_getqos_class)
 {
 	qos_class_t qos_class;
-	zend_object *qos_obj;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1647,13 +1690,7 @@ PHP_FUNCTION(pcntl_getqos_class)
 		RETURN_THROWS();
 	}
 
-	if (UNEXPECTED(zend_enum_get_case_by_value(&qos_obj, QosClass_ce, (zend_long)qos_class, NULL, false) == FAILURE))
-	{
-		zend_throw_error(NULL, "invalid QOS value class entry %u", qos_class);
-		RETURN_THROWS();
-	}
-
-	RETVAL_OBJ(qos_obj);
+	RETURN_OBJ_COPY(qos_lval_to_zval(qos_class));
 }
 
 PHP_FUNCTION(pcntl_setqos_class)
@@ -1664,12 +1701,13 @@ PHP_FUNCTION(pcntl_setqos_class)
 		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_long qos_class = Z_LVAL_P(zend_enum_fetch_case_value(Z_OBJ_P(qos_obj)));
+	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
 
-	if (pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0)
+	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
 	{
+		// unlikely, unless it is a new os issue, as we draw from the specified enum values
 		PCNTL_G(last_error) = errno;
-		zend_argument_value_error(1, "must be one of QosClass enum entries : ::UserInteractive, ::UserInitiated, ::Default, ::Utility or ::Background");
+		zend_throw_error(NULL, "pcntl_setqos_class failed");
 		RETURN_THROWS();
 	}
 }

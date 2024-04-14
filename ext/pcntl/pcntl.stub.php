@@ -1005,14 +1005,13 @@ function pcntl_getcpu(): int {}
 #endif
 
 #ifdef HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP
-enum QosClass: int
+enum QosClass
 {
-	case UserInteractive = 0x21;
-	case UserInitiated = 0x19;
-	case Default = 0x15;
-	case Utility = 0x11;
-	case Background = 0x09;
-	case Unspecified = 0x00;
+	case UserInteractive;
+	case UserInitiated;
+	case Default;
+	case Utility;
+	case Background;
 }
 
 function pcntl_getqos_class(): QosClass {}
