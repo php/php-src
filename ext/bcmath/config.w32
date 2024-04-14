@@ -7,8 +7,8 @@ if (PHP_BCMATH == "yes") {
 	ADD_SOURCES("ext/bcmath/libbcmath/src", "add.c div.c init.c neg.c \
 		raisemod.c sub.c compare.c divmod.c int2num.c \
 		num2long.c output.c recmul.c sqrt.c zero.c doaddsub.c \
-		floor_or_ceil.c nearzero.c num2str.c raise.c rmzero.c str2num.c" \
-		round.c, "bcmath");
+		floor_or_ceil.c nearzero.c num2str.c raise.c rmzero.c str2num.c \
+		round.c", "bcmath");
 
 	AC_DEFINE('HAVE_BCMATH', 1, 'Have BCMATH library');
 }
