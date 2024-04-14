@@ -39,8 +39,9 @@ void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
 	/* check fractional part. */
 	size_t count = num->n_scale;
 	const char *nptr = num->n_value + num->n_len;
-	while ((count > 0) && (*nptr++ == 0)) {
+	while ((count > 0) && (*nptr == 0)) {
 		count--;
+		nptr++;
 	}
 
 	/* If all digits past the decimal point are 0 */

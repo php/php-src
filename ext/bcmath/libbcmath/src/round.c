@@ -109,8 +109,9 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	/* Loop through the remaining digits. */
 	size_t count = num->n_len + num->n_scale - rounded_len - 1;
 	nptr++;
-	while ((count > 0) && (*nptr++ == 0)) {
+	while ((count > 0) && (*nptr == 0)) {
 		count--;
+		nptr++;
 	}
 
 	if (count > 0) {
