@@ -17087,7 +17087,11 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, int checked_stack, const
 			uint32_t offset = EX_NUM_TO_VAR(i);
 			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset);
 
+			// JIT_G(current_frame) is untouched for frameless calls. We'll have to NULL it so that it's not considered here.
+			zend_jit_trace_stack_frame *jit_current_frame = JIT_G(current_frame);
+			JIT_G(current_frame) = NULL;
 			jit_ZVAL_PTR_DTOR(jit, var_addr, MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, opline);
+			JIT_G(current_frame) = jit_current_frame;
 		}
 	}
 
