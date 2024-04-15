@@ -952,7 +952,7 @@ PHP_FUNCTION(posix_getpwuid)
 try_again:
 	err = getpwuid_r(uid, &_pw, pwbuf, pwbuflen, &retpwptr);
 	if (err || retpwptr == NULL) {
-		if (errno == ERANGE) {
+		if (err == ERANGE) {
 			pwbuflen *= 2;
 			pwbuf = erealloc(pwbuf, pwbuflen);
 			goto try_again;
