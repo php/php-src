@@ -39,7 +39,7 @@ echo "Done\n";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-rmdir($file_path."/12345");
+rmdir($file_path."/12346");
 ?>
 --EXPECT--
 *** Testing rename() by renaming a file and directory to numeric name ***
