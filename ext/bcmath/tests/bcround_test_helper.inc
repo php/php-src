@@ -30,6 +30,8 @@ function run_round_test(int $mode)
     ];
 
     $minus_precision_cases = [
+        ['50', -2],
+        ['-50', -2],
         ['1230', -1],
         ['1235', -1],
         ['-1230', -1],
