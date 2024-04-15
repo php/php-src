@@ -36,9 +36,7 @@ PHP_MINFO_FUNCTION(pcntl);
 struct php_pcntl_pending_signal {
 	struct php_pcntl_pending_signal *next;
 	zend_long signo;
-#ifdef HAVE_STRUCT_SIGINFO_T
 	siginfo_t siginfo;
-#endif
 };
 
 ZEND_BEGIN_MODULE_GLOBALS(pcntl)

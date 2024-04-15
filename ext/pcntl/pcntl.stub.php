@@ -932,14 +932,12 @@ function pcntl_signal_dispatch(): bool {}
 function pcntl_sigprocmask(int $mode, array $signals, &$old_signals = null): bool {}
 #endif
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 /** @param array $info */
 function pcntl_sigwaitinfo(array $signals, &$info = []): int|false {}
 
 /** @param array $info */
 function pcntl_sigtimedwait(array $signals, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
-#endif
 #endif
 
 function pcntl_wifexited(int $status): bool {}
