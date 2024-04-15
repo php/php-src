@@ -599,13 +599,67 @@ static char **cli_code_completion(const char *text, int start, int end) /* {{{ *
 }
 /* }}} */
 
+/* {{{ */
+static char *cli_history_file()
+{
+#ifdef PHP_WIN32
+	char *history_file;
+	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
+	return history_file;
+#else
+	struct stat buffer;
+	char *history_file, *expanded, *xdg_data_home, *xdg_php_home;
+	bool use_xdg = false;
+
+	expanded = tilde_expand("~/.php_history");
+	spprintf(&history_file, 0, "%s", expanded);
+	free(expanded);
+
+	if (stat(history_file, &buffer) == 0) {
+		return history_file;
+	}
+
+	for (int i = 0; environ[i] != NULL; i++) {
+		if (strncmp(environ[i], "XDG_", strlen("XDG_")) == 0) {
+			use_xdg = true;
+			break;
+		}
+	}
+
+	if (!use_xdg) {
+		return history_file;
+	}
+
+	xdg_data_home = getenv("XDG_DATA_HOME");
+	if (!xdg_data_home) {
+		xdg_data_home = "~/.local/share";
+	}
+
+	expanded = tilde_expand(xdg_data_home);
+	spprintf(&xdg_php_home, 0, "%s/php", expanded);
+	free(expanded);
+
+	if (stat(xdg_php_home, &buffer) != 0 && mkdir(xdg_php_home, S_IRWXU) != 0) {
+		efree(xdg_php_home);
+		return history_file;
+	}
+
+	efree(history_file);
+	spprintf(&history_file, 0, "%s/history", xdg_php_home);
+	efree(xdg_php_home);
+
+	return history_file;
+#endif
+}
+/* }}} */
+
 static int readline_shell_run(void) /* {{{ */
 {
 	char *line;
 	size_t size = 4096, pos = 0, len;
 	char *code = emalloc(size);
 	zend_string *prompt = cli_get_prompt("php", '>');
-	char *history_file;
+	char *history_file = cli_history_file();
 	int history_lines_to_write = 0;
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
@@ -616,11 +670,6 @@ static int readline_shell_run(void) /* {{{ */
 		zend_destroy_file_handle(&prepend_file);
 	}
 
-#ifndef PHP_WIN32
-	history_file = tilde_expand("~/.php_history");
-#else
-	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
-#endif
 	/* Install the default completion function for 'php -a'.
 	 *
 	 * But if readline_completion_function() was called by PHP code prior to the shell starting
@@ -717,11 +766,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		php_last_char = '\0';
 	}
-#ifdef PHP_WIN32
 	efree(history_file);
-#else
-	free(history_file);
-#endif
 	efree(code);
 	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
