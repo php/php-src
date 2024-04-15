@@ -1637,13 +1637,13 @@ static qos_class_t qos_zval_to_lval(const zval *qos_obj)
 	qos_class_t qos_class = QOS_CLASS_DEFAULT;
 	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
 
-	if (zend_string_equals_cstr(entry, "UserInteractive", sizeof("UserInteractive") - 1)) {
+	if (zend_string_equals_literal(entry, "UserInteractive")) {
 		qos_class = QOS_CLASS_USER_INTERACTIVE;
-	} else if (zend_string_equals_cstr(entry, "UserInitiated", sizeof("UserInitiated") - 1)) {
+	} else if (zend_string_equals_literal(entry, "UserInitiated")) {
 		qos_class = QOS_CLASS_USER_INITIATED;
-	} else if (zend_string_equals_cstr(entry, "Utility", sizeof("Utility") - 1)) {
+	} else if (zend_string_equals_literal(entry, "Utility")) {
 		qos_class = QOS_CLASS_UTILITY;
-	} else if (zend_string_equals_cstr(entry, "Background", sizeof("Background") - 1)) {
+	} else if (zend_string_equals_literal(entry, "Background")) {
 		qos_class = QOS_CLASS_BACKGROUND;
 	}
 
