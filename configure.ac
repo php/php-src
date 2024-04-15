@@ -1704,7 +1704,7 @@ if printf "#if __ELF__\nelf\n#endif\n" | $CC -E - | grep elf > /dev/null; then
   PHP_ADD_SOURCES(main, debug_gdb_scripts.c)
 
   cat >> Makefile.objects <<EOF
-$abs_srcdir/main/debug_gdb_scripts.c: $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php $abs_srcdir/scripts/gdb/php_gdb.py $abs_srcdir/scripts/gdb/php_gdb.gdb
+$abs_srcdir/main/debug_gdb_scripts.c: $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php $abs_srcdir/scripts/gdb/php_gdb.py $abs_srcdir/.gdbinit
 	@if test ! -z "\$(PHP)"; then \\
 		\$(PHP) $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php; \\
 	fi;
