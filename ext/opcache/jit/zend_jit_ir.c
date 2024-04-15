@@ -17040,22 +17040,23 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, int checked_stack, const
 	// Not need for runtime cache or generator checks here, we just need if_unobserved
 	ir_ref if_unobserved = jit_observer_fcall_is_unobserved_start(jit, fbc, &observer_handler, IR_UNUSED, IR_UNUSED).if_unobserved;
 
+	// Preserve delayed_call_level. We cannot override delayed_call_level without also saving in unobserved path.
+	uint32_t delayed_call_level = jit->delayed_call_level;
+	bool is_delayed_call_chain = delayed_call_chain;
+	if (jit->delayed_call_level) {
+		zend_jit_save_call_chain(jit, jit->delayed_call_level);
+	}
+
 	// push args to a valid call frame
 	bool track_last_valid_opline = jit->track_last_valid_opline;
 	bool use_last_valid_opline = jit->use_last_valid_opline;
 	const zend_op *last_valid_opline = jit->last_valid_opline;
 	bool reuse_ip = jit->reuse_ip;
-	// zend_jit_save_call_chain, but preserve delayed_call_level. We cannot override delayed_call_level without also saving in unobserved path.
-	if (jit->delayed_call_level) {
-		ir_ref call = jit_CALL(jit_FP(jit), call);
-		ir_STORE(jit_CALL(jit_IP(jit), prev_execute_data), jit->delayed_call_level == 1 ? IR_NULL : ir_LOAD_A(call));
-		ir_STORE(call, jit_IP(jit));
-	}
 	zend_jit_push_call_frame(jit, opline, NULL, fbc, 0, 0, checked_stack, ir_CONST_ADDR(fbc), IR_NULL);
 	// yes, we'll temporarily reuse the IP, but we must not handle this via the reuse_ip mechanism - we just reset IP to original in end
 	// the primary issue here is that this code is just executed conditionally while the reuse mechanisms are meant to be global
 	jit->track_last_valid_opline = track_last_valid_opline;
-	jit->use_last_valid_opline = use_last_valid_opline;
+	jit->use_last_valid_opline = use_last_valid_opline; // opline restored later in function
 	jit->last_valid_opline = last_valid_opline;
 	jit->reuse_ip = reuse_ip;
 
@@ -17117,8 +17118,10 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, int checked_stack, const
 
 	if (reuse_ip) {
 		jit_STORE_IP(jit, ir_LOAD_A(jit_CALL(jit_FP(jit), call)));
-		if (jit->delayed_call_level) { // restore if saved
+		if (delayed_call_level) { // restore if saved
 			ir_STORE(jit_CALL(jit_FP(jit), call), ir_LOAD_A(jit_CALL(jit_IP(jit), prev_execute_data)));
+			delayed_call_chain = is_delayed_call_chain;
+			jit->delayed_call_level = delayed_call_level;
 		}
 	} else {
 		// Note: conditional (if_unobserved) opline, zend_jit_set_last_valid_opline() may only be called if the opline is actually unconditionally updated
