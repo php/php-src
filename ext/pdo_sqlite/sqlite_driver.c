@@ -226,6 +226,24 @@ static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unqu
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
 		return NULL;
 	}
+	if(ZSTR_LEN(unquoted) != 0 && memchr(ZSTR_VAL(unquoted), '\0', ZSTR_LEN(unquoted))) {
+		// (''||x'hex')
+		// the odd (''||) thing is to make sure quote produce a sqlite datatype "string" rather than "blob" ...
+		// https://github.com/php/php-src/pull/13962/files#r1565485792
+		zend_string *quoted = zend_string_safe_alloc(9 + (2 * ZSTR_LEN(unquoted)), 1, 0, 0);
+		char *outptr = ZSTR_VAL(quoted);
+		const char *inptr = ZSTR_VAL(unquoted);
+		const char *const inendptr = inptr + ZSTR_LEN(unquoted);
+		memcpy(outptr, "(''||x'", 7);
+		outptr += 7;
+		while(inptr != inendptr) {
+			const unsigned char c = *inptr++;
+			*outptr++ = "0123456789ABCDEF"[c >> 4];
+			*outptr++ = "0123456789ABCDEF"[c & 0x0F];
+		}
+		memcpy(outptr, "')", 3); // todo: does zend_string_safe_alloc write the null terminator? if it does, reduce this to 2
+		return quoted;
+	}
 	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
 	/* TODO use %Q format? */
 	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
