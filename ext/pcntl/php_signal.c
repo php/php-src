@@ -21,24 +21,18 @@
 
 /* php_signal using sigaction is derived from Advanced Programming
  * in the Unix Environment by W. Richard Stevens p 298. */
-Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
+Sigfunc *php_signal4(int signo, Sigfunc *func, bool restart, bool mask_all)
 {
 	struct sigaction act,oact;
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 	act.sa_sigaction = func;
-#else
-	act.sa_handler = func;
-#endif
 	if (mask_all) {
 		sigfillset(&act.sa_mask);
 	} else {
 		sigemptyset(&act.sa_mask);
 	}
 	act.sa_flags = SA_ONSTACK;
-#ifdef HAVE_STRUCT_SIGINFO_T
 	act.sa_flags |= SA_SIGINFO;
-#endif
 	if (!restart) {
 #ifdef SA_INTERRUPT
 		act.sa_flags |= SA_INTERRUPT; /* SunOS */
@@ -50,14 +44,10 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 	}
 	zend_sigaction(signo, &act, &oact);
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 	return oact.sa_sigaction;
-#else
-	return oact.sa_handler;
-#endif
 }
 
-Sigfunc *php_signal(int signo, Sigfunc *func, int restart)
+Sigfunc *php_signal(int signo, Sigfunc *func, bool restart)
 {
-	return php_signal4(signo, func, restart, 0);
+	return php_signal4(signo, func, restart, false);
 }
