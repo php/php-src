@@ -1695,13 +1695,12 @@ ZEND_METHOD(ReflectionFunction, __construct)
 		}
 	}
 
-	// TODO How can this ever be hit?
-	//zval *object = ZEND_THIS;
-	//reflection_object *intern = Z_REFLECTION_P(object);
-	//if (intern->ptr) {
-	//	zval_ptr_dtor(&intern->obj);
-	//	zval_ptr_dtor(reflection_prop_name(object));
-	//}
+	/* If the constructor is manually called again we need to free the storage */
+	reflection_object *intern = Z_REFLECTION_P(ZEND_THIS);
+	if (intern->ptr) {
+		zval_ptr_dtor(&intern->obj);
+		zval_ptr_dtor(reflection_prop_name(ZEND_THIS));
+	}
 
 	reflection_function_create_common(fptr, closure_obj, ZEND_THIS);
 }
