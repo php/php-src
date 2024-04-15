@@ -3755,6 +3755,19 @@ static zend_result preload_resolve_deps(preload_error *error, const zend_class_e
 	return SUCCESS;
 }
 
+static zend_result preload_update_constant(zval *val, zend_class_entry *scope)
+{
+	zval tmp;
+	ZVAL_COPY(&tmp, val);
+	if (zval_update_constant_ex(&tmp, scope) == FAILURE || Z_COLLECTABLE(tmp)) {
+		zval_ptr_dtor(&tmp);
+		return FAILURE;
+	}
+	zval_ptr_dtor_nogc(val);
+	ZVAL_COPY_VALUE(val, &tmp);
+	return SUCCESS;
+}
+
 static bool preload_try_resolve_constants(zend_class_entry *ce)
 {
 	bool ok, changed, was_changed = false;
@@ -3768,7 +3781,7 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 		ZEND_HASH_MAP_FOREACH_PTR(&ce->constants_table, c) {
 			val = &c->value;
 			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-				if (EXPECTED(zval_update_constant_ex(val, c->ce) == SUCCESS)) {
+				if (EXPECTED(preload_update_constant(val, c->ce) == SUCCESS)) {
 					was_changed = changed = true;
 				} else {
 					ok = false;
@@ -3786,7 +3799,7 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 				val = &ce->default_properties_table[i];
 				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 					zend_property_info *prop = ce->properties_info_table[i];
-					if (UNEXPECTED(zval_update_constant_ex(val, prop->ce) != SUCCESS)) {
+					if (UNEXPECTED(preload_update_constant(val, prop->ce) != SUCCESS)) {
 						resolved = ok = false;
 					}
 				}
@@ -3802,7 +3815,7 @@ static bool preload_try_resolve_constants(zend_class_entry *ce)
 			val = ce->default_static_members_table + ce->default_static_members_count - 1;
 			while (count) {
 				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-					if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
+					if (UNEXPECTED(preload_update_constant(val, ce) != SUCCESS)) {
 						resolved = ok = false;
 					}
 				}

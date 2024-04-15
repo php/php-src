@@ -769,12 +769,6 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *as
 			break;
 		case ZEND_AST_CONST_ENUM_INIT:
 		{
-			// Preloading will attempt to resolve constants but objects can't be stored in shm
-			// Aborting here to store the const AST instead
-			if (CG(in_compilation)) {
-				return FAILURE;
-			}
-
 			zend_ast *class_name_ast = ast->child[0];
 			zend_string *class_name = zend_ast_get_str(class_name_ast);
 
@@ -792,6 +786,12 @@ static zend_result ZEND_FASTCALL zend_ast_evaluate_ex(zval *result, zend_ast *as
 			}
 
 			zend_class_entry *ce = zend_lookup_class(class_name);
+			if (!ce) {
+				/* Class may not be available when resolving constants on a dynamically
+				 * declared enum during preloading. */
+				ZEND_ASSERT(CG(compiler_options) & ZEND_COMPILE_PRELOAD);
+				return FAILURE;
+			}
 			zend_enum_new(result, ce, case_name, case_value_ast != NULL ? &case_value_zv : NULL);
 			zval_ptr_dtor_nogc(&case_value_zv);
 			break;
