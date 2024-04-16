@@ -1161,6 +1161,7 @@ void zend_shutdown(void) /* {{{ */
 
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
+	zend_shutdown_strtod();
 	zend_attributes_shutdown();
 
 #ifdef ZTS
@@ -1277,7 +1278,6 @@ ZEND_API void zend_activate(void) /* {{{ */
 #ifdef ZTS
 	virtual_cwd_activate();
 #endif
-	zend_strtod_activate();
 	gc_reset();
 	init_compiler();
 	init_executor();
@@ -1347,8 +1347,6 @@ ZEND_API void zend_deactivate(void) /* {{{ */
 	if (zend_hash_num_elements(&CG(interned_strings)) > 0) {
 		zend_map_ptr_reset();
 	}
-
-	zend_strtod_deactivate();
 
 #if GC_BENCH
 	gc_bench_print();

@@ -234,8 +234,8 @@ extern char *MALLOC();
 extern void *MALLOC(size_t);
 #endif
 #else
-#define MALLOC emalloc
-#define FREE   efree
+#define MALLOC malloc
+#define FREE   free
 #endif
 
 #ifndef Omit_Private_Memory
@@ -557,12 +557,7 @@ static MUTEX_T dtoa_mutex;
 static MUTEX_T pow5mult_mutex;
 #endif /* ZTS */
 
-ZEND_API int zend_strtod_activate(void) /* {{{ */
-{
-	return 1;
-}
-/* }}} */
-ZEND_API int zend_strtod_deactivate(void) /* {{{ */
+ZEND_API int zend_shutdown_strtod(void) /* {{{ */
 {
 	destroy_freelist();
 	free_p5s();

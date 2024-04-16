@@ -37,8 +37,7 @@ ZEND_API double zend_strtod(const char *s00, const char **se);
 ZEND_API double zend_hex_strtod(const char *str, const char **endptr);
 ZEND_API double zend_oct_strtod(const char *str, const char **endptr);
 ZEND_API double zend_bin_strtod(const char *str, const char **endptr);
-ZEND_API int zend_strtod_activate(void);
-ZEND_API int zend_strtod_deactivate(void);
+ZEND_API int zend_shutdown_strtod(void);
 END_EXTERN_C()
 
 /* double limits */
