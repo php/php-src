@@ -1262,13 +1262,8 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 	chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(bin, ZEND_MM_CHUNK_SIZE);
 	page_num = ZEND_MM_ALIGNED_OFFSET(bin, ZEND_MM_CHUNK_SIZE) / ZEND_MM_PAGE_SIZE;
 	chunk->map[page_num] = ZEND_MM_SRUN(bin_num);
-	if (bin_pages[bin_num] > 1) {
-		uint32_t i = 1;
-
-		do {
-			chunk->map[page_num+i] = ZEND_MM_NRUN(bin_num, i);
-			i++;
-		} while (i < bin_pages[bin_num]);
+	for (uint32_t i = 1; i < bin_pages[bin_num]; i++) {
+		chunk->map[page_num+i] = ZEND_MM_NRUN(bin_num, i);
 	}
 
 	/* create a linked list of elements from 1 to last */
