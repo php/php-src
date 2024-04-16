@@ -1932,20 +1932,33 @@ int ir_coalesce(ir_ctx *ctx)
 								IR_ASSERT(ir_op_flags[input_insn->op] & IR_OP_FLAG_COMMUTATIVE);
 								if (input_insn->op2 == use
 								 && input_insn->op1 != use
-								 && (ctx->live_intervals[v1]->use_pos->flags & IR_DEF_REUSES_OP1_REG)
-								 && ctx->live_intervals[v2]->end == IR_USE_LIVE_POS_FROM_REF(input)) {
+								 && (ctx->live_intervals[v1]->use_pos->flags & IR_DEF_REUSES_OP1_REG)) {
 									ir_live_range *r = &ctx->live_intervals[v2]->range;
 
-									while (r->next) {
+									do {
+										if (r->end == IR_USE_LIVE_POS_FROM_REF(input)) {
+											break;
+										}
 										r = r->next;
+									} while (r);
+									if (r) {
+										r->end = IR_LOAD_LIVE_POS_FROM_REF(input);
+										if (!r->next) {
+											ctx->live_intervals[v2]->end = IR_LOAD_LIVE_POS_FROM_REF(input);
+										}
+										if (ir_vregs_overlap(ctx, v1, v2)) {
+											r->end = IR_USE_LIVE_POS_FROM_REF(input);
+											if (!r->next) {
+												ctx->live_intervals[v2]->end = IR_USE_LIVE_POS_FROM_REF(input);
+											}
+										} else {
+											ir_swap_operands(ctx, input, input_insn);
+											IR_ASSERT(!ir_vregs_overlap(ctx, v1, v2));
+											ir_vregs_coalesce(ctx, v1, v2, input, use);
+											compact = 1;
+											continue;
+										}
 									}
-									r->end = IR_LOAD_LIVE_POS_FROM_REF(input);
-									ctx->live_intervals[v2]->end = IR_LOAD_LIVE_POS_FROM_REF(input);
-									ir_swap_operands(ctx, input, input_insn);
-									IR_ASSERT(!ir_vregs_overlap(ctx, v1, v2));
-									ir_vregs_coalesce(ctx, v1, v2, input, use);
-									compact = 1;
-									continue;
 								}
 							}
 #endif
@@ -2609,14 +2622,11 @@ static int32_t ir_allocate_big_spill_slot(ir_ctx *ctx, int32_t size, ir_reg_allo
 		return ir_allocate_small_spill_slot(ctx, size, data);
 	}
 
-	if (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) {
-		/* Stack must be 16 byte aligned */
-		size = IR_ALIGNED_SIZE(size, 16);
-	} else {
-		size = IR_ALIGNED_SIZE(size, 8);
-	}
-	ret = ctx->stack_frame_size;
-	ctx->stack_frame_size += size;
+	/* Align stack allocated data to 16 byte */
+	ctx->flags2 |= IR_16B_FRAME_ALIGNMENT;
+	ret = IR_ALIGNED_SIZE(ctx->stack_frame_size, 16);
+	size = IR_ALIGNED_SIZE(size, 8);
+	ctx->stack_frame_size = ret + size;
 
 	return ret;
 }
