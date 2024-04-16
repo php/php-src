@@ -9,6 +9,8 @@ PHP                                                                        NEWS
     handlers when JIT is enabled). (Bob)
   . Fixed bug GH-13931 (Applying zero offset to null pointer in
     Zend/zend_opcode.c). (nielsdos)
+  . Fixed bug GH-13942 (Align the behavior of zend-max-execution-timers with
+    other timeout implementations). (Kévin Dunglas)
 
 - Fibers:
   . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
