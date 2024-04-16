@@ -1458,10 +1458,9 @@ static void reflection_type_factory(
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 	intern->ce = object_ce;
+	ZVAL_UNDEF(&intern->obj);
 
 	if (closure_object) {
-		ZVAL_OBJ_COPY(&intern->obj, closure_object);
-
 		zend_function *fptr = NULL;
 		zend_class_entry *called_scope = NULL;
 		zend_object *this_obj = NULL;
@@ -1473,8 +1472,6 @@ static void reflection_type_factory(
 		} else {
 			intern->ce = fptr->common.scope;
 		}
-	} else {
-		ZVAL_UNDEF(&intern->obj);
 	}
 
 	/* Property types may be resolved during the lifetime of the ReflectionType.
@@ -3190,7 +3187,6 @@ ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 
 	/* Unbound closures can have relative class types that we cannot resolve */
 	if (!intern->ce) {
-		ZEND_ASSERT(!Z_ISUNDEF(intern->obj));
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot resolve relative class name for a static closure");
 		RETURN_THROWS();
