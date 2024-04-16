@@ -31,10 +31,10 @@ foreach ($instances as $instance) {
 --EXPECT--
 Type: self
 		Instance of: ReflectionRelativeClassType
-ReflectionException: Cannot resolve relative class name for a closure
+ReflectionException: Cannot resolve relative class name for a static closure
 		Type: parent
 		Instance of: ReflectionRelativeClassType
-ReflectionException: Cannot resolve relative class name for a closure
+ReflectionException: Cannot resolve relative class name for a static closure
 		Type: static
 		Instance of: ReflectionRelativeClassType
-ReflectionException: Cannot resolve relative class name for a closure
+ReflectionException: Cannot resolve relative class name for a static closure

@@ -1462,20 +1462,17 @@ static void reflection_type_factory(
 	if (closure_object) {
 		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 
-		/* If bound to a class */
-		//if (object_ce) {
-			zend_function *fptr = NULL;
-			zend_class_entry *called_scope = NULL;
-			zend_object *this_obj = NULL;
-			closure_object->ce->default_object_handlers->get_closure(closure_object, &called_scope, &fptr, &this_obj, /* check_only */ true);
-			/* it was bound to something, assign ce to be zend_ce_closure as static can be completely different than self/parent
-			 * and needs to be resolved depending on the type. */
-			if (type_kind == SELF_PARENT_TYPE) {
-				intern->ce = fptr->common.scope;
-			} else {
-				intern->ce = called_scope;
-			}
-		//}
+		zend_function *fptr = NULL;
+		zend_class_entry *called_scope = NULL;
+		zend_object *this_obj = NULL;
+		closure_object->ce->default_object_handlers->get_closure(closure_object, &called_scope, &fptr, &this_obj, /* check_only */ true);
+		/* it was bound to something, assign ce to be zend_ce_closure as static can be completely different than self/parent
+		 * and needs to be resolved depending on the type. */
+		if (type_kind == STATIC_TYPE) {
+			intern->ce = called_scope;
+		} else {
+			intern->ce = fptr->common.scope;
+		}
 	} else {
 		ZVAL_UNDEF(&intern->obj);
 	}
@@ -3191,55 +3188,12 @@ ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	/* Is closure */
-	if (!Z_ISUNDEF(intern->obj)) {
-		/* Unbound closures can use relative class types */
-		if (!intern->ce) {
-			ZEND_ASSERT(!Z_ISUNDEF(intern->obj));
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Cannot resolve relative class name for a closure");
-			RETURN_THROWS();
-		}
-
-		/* Attempt to resolve bound Closure */
-		zend_function *fptr = NULL;
-		zend_class_entry *called_scope = NULL;
-		zend_object *this_obj = NULL;
-
-		Z_OBJ_HANDLER(intern->obj, get_closure)(Z_OBJ(intern->obj), &called_scope, &fptr, &this_obj, /* check_only */ true);
-
-		/* Support for legacy behaviour of nullable types and ReflectionNamedType */
-		bool allows_null = ZEND_TYPE_PURE_MASK(param->type) & MAY_BE_NULL;
-		zend_type resolved_closure_type;
-
-		if (ZEND_TYPE_PURE_MASK(param->type) & MAY_BE_STATIC) {
-			resolved_closure_type = (zend_type) ZEND_TYPE_INIT_CLASS(called_scope->name, allows_null, /* extra flags */ 0);
-		} else {
-			ZEND_ASSERT(ZEND_TYPE_HAS_NAME(param->type));
-			ZEND_ASSERT(zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "self") || zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "parent"));
-
-			zend_class_entry *self_ce = fptr->common.scope;
-			if (zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "self")) {
-				resolved_closure_type = (zend_type) ZEND_TYPE_INIT_CLASS(self_ce->name, allows_null, /* extra flags */ 0);
-			} else {
-				if (!self_ce->parent) {
-					zend_throw_exception_ex(reflection_exception_ptr, 0,
-						"Cannot resolve \"parent\" type when class has no parent");
-					RETURN_THROWS();
-				}
-				resolved_closure_type = (zend_type) ZEND_TYPE_INIT_CLASS(self_ce->parent->name, allows_null, /* extra flags */ 0);
-			}
-		}
-
-
-		reflection_type_factory(
-			resolved_closure_type,
-			return_value,
-			/* legacy_behavior */ true,
-			intern->ce,
-			/* closure_object */ NULL
-		);
-		return;
+	/* Unbound closures can have relative class types that we cannot resolve */
+	if (!intern->ce) {
+		ZEND_ASSERT(!Z_ISUNDEF(intern->obj));
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Cannot resolve relative class name for a static closure");
+		RETURN_THROWS();
 	}
 
 	if (intern->ce->ce_flags & ZEND_ACC_TRAIT) {
@@ -3248,8 +3202,6 @@ ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 		RETURN_THROWS();
 	}
 
-	/* For all other case self and parent will have been resolved at compile time */
-	ZEND_ASSERT(ZEND_TYPE_PURE_MASK(param->type) & MAY_BE_STATIC);
 	/* Support for legacy behaviour of nullable types and ReflectionNamedType */
 	bool allows_null = ZEND_TYPE_PURE_MASK(param->type) & MAY_BE_NULL;
 	zend_type resolved_type;
@@ -3259,7 +3211,18 @@ ZEND_METHOD(ReflectionRelativeClassType, resolveToNamedType)
 			"Cannot resolve \"static\" type of an interface");
 		RETURN_THROWS();
 	}
-	resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->name, allows_null, /* extra flags */ 0);
+
+	/* The only cases where self/parent are not resolved at compile time is in Closures */
+	if (ZEND_TYPE_IS_COMPLEX(param->type) && zend_string_equals_literal_ci(ZEND_TYPE_NAME(param->type), "parent")) {
+		if (!intern->ce->parent) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Cannot resolve \"parent\" type when class has no parent");
+			RETURN_THROWS();
+		}
+		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->parent->name, allows_null, /* extra flags */ 0);
+	} else {
+		resolved_type = (zend_type) ZEND_TYPE_INIT_CLASS(intern->ce->name, allows_null, /* extra flags */ 0);
+	}
 
 	reflection_type_factory(
 		resolved_type,

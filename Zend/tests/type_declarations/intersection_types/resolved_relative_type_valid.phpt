@@ -1,5 +1,5 @@
 --TEST--
-parent type cannot take part in an intersection type
+parent/self type can take part in an intersection type if it is resolvable at compile time
 --FILE--
 <?php
 

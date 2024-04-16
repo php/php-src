@@ -66,15 +66,15 @@ foreach ($methods as $method) {
 Closure:
 	Type: self
 	Instance of: ReflectionRelativeClassType
-Cannot resolve relative class name for a closure
+Cannot resolve relative class name for a static closure
 Closure:
 	Type: parent
 	Instance of: ReflectionRelativeClassType
-Cannot resolve relative class name for a closure
+Cannot resolve relative class name for a static closure
 Closure:
 	Type: static
 	Instance of: ReflectionRelativeClassType
-Cannot resolve relative class name for a closure
+Cannot resolve relative class name for a static closure
 
 Trait:
 Method: bar
