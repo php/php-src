@@ -61,6 +61,8 @@ foreach ($codes as $key => $code) {
 }
 
 echo "\nDone\n";
+$dir = PHP_OS_FAMILY == 'Windows' ? getenv("USERPROFILE") : getenv("HOME");
+var_dump(file_exists($dir . '/.php_history'));
 ?>
 --EXPECT--
 --------------
@@ -105,3 +107,4 @@ Interactive shell
 Parse error: Unmatched ')' in php shell code on line 1
 
 Done
+bool(true)
