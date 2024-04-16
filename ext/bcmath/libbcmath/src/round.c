@@ -33,7 +33,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 	* - If the fractional part ends with zeros, the zeros are omitted and the number of digits in num is reduced.
 	*   Meaning we might end up in the previous case.
 	*/
-	if (precision < 0 && num->n_len <= (size_t) (-(precision + Z_L(1))) + 1) {
+	if (precision < 0 && num->n_len < (size_t) (-(precision + Z_L(1))) + 1) {
 		*result = bc_copy_num(BCG(_zero_));
 		return;
 	}
@@ -42,15 +42,24 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		return;
 	}
 
-	/* Initialize result */
-	*result = bc_new_num(num->n_len, precision > 0 ? precision : 0);
-	(*result)->n_sign = num->n_sign;
 	/*
 	 * If the calculation result is a negative value, there is an early return,
 	 * so no underflow will occur.
 	 */
 	size_t rounded_len = num->n_len + precision;
-	memcpy((*result)->n_value, num->n_value, rounded_len);
+
+	/*
+	 * Initialize result
+	 * For example, if rounded_len is 0, it means trying to round 50 to 100 or 0.
+	 * If the result of rounding is carried over, it will be added later, so first set it to 0 here.
+	 */
+	if (rounded_len == 0) {
+		*result = bc_copy_num(BCG(_zero_));
+	} else {
+		*result = bc_new_num(num->n_len, precision > 0 ? precision : 0);
+		memcpy((*result)->n_value, num->n_value, rounded_len);
+	}
+	(*result)->n_sign = num->n_sign;
 
 	const char *nptr = num->n_value + rounded_len;
 
@@ -126,13 +135,13 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			return;
 
 		case PHP_ROUND_HALF_EVEN:
-			if (num->n_value[rounded_len - 1] % 2 == 0) {
+			if (rounded_len == 0 || num->n_value[rounded_len - 1] % 2 == 0) {
 				return;
 			}
 			break;
 
 		case PHP_ROUND_HALF_ODD:
-			if (num->n_value[rounded_len - 1] % 2 == 1) {
+			if (rounded_len != 0 && num->n_value[rounded_len - 1] % 2 == 1) {
 				return;
 			}
 			break;
@@ -142,13 +151,21 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 
 up:
 	{
-		bc_num scaled_one = bc_new_num((*result)->n_len, (*result)->n_scale);
-		scaled_one->n_value[rounded_len - 1] = 1;
+		bc_num tmp;
 
-		bc_num tmp = _bc_do_add(*result, scaled_one, (*result)->n_scale);
-		tmp->n_sign = (*result)->n_sign;
+		if (rounded_len == 0) {
+			tmp = bc_new_num(num->n_len + 1, 0);
+			tmp->n_value[0] = 1;
+			tmp->n_sign = num->n_sign;
+		} else {
+			bc_num scaled_one = bc_new_num((*result)->n_len, (*result)->n_scale);
+			scaled_one->n_value[rounded_len - 1] = 1;
 
-		bc_free_num(&scaled_one);
+			tmp = _bc_do_add(*result, scaled_one, (*result)->n_scale);
+			tmp->n_sign = (*result)->n_sign;
+			bc_free_num(&scaled_one);
+		}
+
 		bc_free_num(result);
 		*result = tmp;
 	}
