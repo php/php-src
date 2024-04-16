@@ -1540,6 +1540,11 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		struct itimerval t_r;		/* timeout requested */
 		int signo;
 
+		// Prevent EINVAL error
+		if (seconds < 0 || seconds > 999999999) {
+			seconds = 0;
+		}
+
 		if(seconds) {
 			t_r.it_value.tv_sec = seconds;
 			t_r.it_value.tv_usec = t_r.it_interval.tv_sec = t_r.it_interval.tv_usec = 0;

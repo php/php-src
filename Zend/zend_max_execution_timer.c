@@ -71,6 +71,11 @@ void zend_max_execution_timer_settime(zend_long seconds) /* {{{ }*/
 
 	timer_t timer = EG(max_execution_timer_timer);
 
+	// Prevent EINVAL error
+	if (seconds < 0 || seconds > 999999999) {
+		seconds = 0;
+	}
+
 	struct itimerspec its;
 	its.it_value.tv_sec = seconds;
 	its.it_value.tv_nsec = its.it_interval.tv_sec = its.it_interval.tv_nsec = 0;
