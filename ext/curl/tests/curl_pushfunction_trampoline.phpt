@@ -11,8 +11,6 @@ if ($curl_version['version_number'] < 0x080100) {
     exit("skip: test may crash with curl < 8.1.0");
 }
 ?>
---XFAIL--
-Need CI to test caddy
 --FILE--
 <?php
 
