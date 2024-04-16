@@ -752,6 +752,8 @@ static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_
 	FPM_WPC_STR_CP(config, shared_config, user);
 	FPM_WPC_STR_CP(config, shared_config, group);
 	FPM_WPC_STR_CP(config, shared_config, pm_status_path);
+	FPM_WPC_STR_CP(config, shared_config, ping_path);
+	FPM_WPC_STR_CP(config, shared_config, ping_response);
 
 	config->pm = PM_STYLE_ONDEMAND;
 	config->pm_max_children = 2;

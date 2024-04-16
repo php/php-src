@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-14343 (Memory leak in xml and dom). (nielsdos)
 
+- FPM:
+  . Fixed bug GH-14037 (PHP-FPM ping.path and ping.response config vars are
+    ignored in status pool). (Wilhansen Li, Pierrick Charron)
+
 - GD:
   . Fix parameter numbers for imagecolorset(). (Giovanni Giacobbi)
 
