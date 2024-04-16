@@ -922,7 +922,9 @@ binop_fp:
 				return insn->op;
 			}
 		case IR_CALL:
-			ctx->flags |= IR_USE_FRAME_POINTER;
+			if (ctx->flags & IR_FUNCTION) {
+				ctx->flags |= IR_USE_FRAME_POINTER;
+			}
 			ctx->flags2 |= IR_HAS_CALLS | IR_16B_FRAME_ALIGNMENT;
 			return IR_CALL;
 		case IR_VAR:
