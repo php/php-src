@@ -30,6 +30,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-13433 (Segmentation Fault in zend_class_init_statics when
     using opcache.preload). (nielsdos)
+  . Fixed incorrect assumptions across compilation units for static calls.
+    (ilutov)
 
 - OpenSSL:
   . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
