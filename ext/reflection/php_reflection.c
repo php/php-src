@@ -147,6 +147,7 @@ typedef struct _attribute_reference {
 	zend_attribute *data;
 	zend_class_entry *scope;
 	zend_string *filename;
+	bool is_user_defined;
 	uint32_t target;
 } attribute_reference;
 
@@ -1116,7 +1117,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 
 /* {{{ reflection_attribute_factory */
 static void reflection_attribute_factory(zval *object, HashTable *attributes, zend_attribute *data,
-		zend_class_entry *scope, uint32_t target, zend_string *filename)
+		zend_class_entry *scope, uint32_t target, zend_string *filename, bool is_user_defined)
 {
 	reflection_object *intern;
 	attribute_reference *reference;
@@ -1129,6 +1130,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->scope = scope;
 	reference->filename = filename ? zend_string_copy(filename) : NULL;
 	reference->target = target;
+	reference->is_user_defined = is_user_defined;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
 	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
@@ -1136,7 +1138,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 /* }}} */
 
 static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename, bool is_user_defined) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1149,7 +1151,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename, is_user_defined);
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1181,7 +1183,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename, is_user_defined);
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1190,7 +1192,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
+		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename, bool is_user_defined) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1223,7 +1225,7 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 
 	array_init(return_value);
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
+	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename, is_user_defined)) {
 		RETURN_THROWS();
 	}
 }
@@ -1956,7 +1958,7 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		fptr->common.attributes, 0, fptr->common.scope, target,
-		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
+		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL, ZEND_USER_CODE(fptr->type));
 }
 /* }}} */
 
@@ -2837,7 +2839,7 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
-		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
+		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL, ZEND_USER_CODE(param->fptr->type));
 }
 
 /* {{{ Returns whether this parameter is an optional parameter */
@@ -4021,7 +4023,7 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
-		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
+		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL, ref->ce->type == ZEND_USER_CLASS);
 }
 /* }}} */
 
@@ -4429,7 +4431,7 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
-		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
+		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL, ce->type == ZEND_USER_CLASS);
 }
 /* }}} */
 
@@ -5866,7 +5868,7 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
-		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
+		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL, ref->prop->ce->type == ZEND_USER_CLASS);
 }
 /* }}} */
 
@@ -6678,6 +6680,53 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 			add_next_index_zval(return_value, &tmp);
 		}
 	}
+}
+/* }}} */
+
+/* {{{ Returns true if the attribute is defined by user land code, false otherwise */
+ZEND_METHOD(ReflectionAttribute, isUserDefined)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	RETURN_BOOL(attr->is_user_defined);
+}
+/* }}} */
+
+/* {{{ Returns the filename (if it exists : user land code) at which the attribute was defined */
+ZEND_METHOD(ReflectionAttribute, getFileName)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(attr);
+	if (attr->filename != NULL) {
+		RETURN_STR_COPY(attr->filename);
+	}
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ Returns the line at which the attribute was defined */
+ZEND_METHOD(ReflectionAttribute, getLine)
+{
+	reflection_object *intern;
+	attribute_reference *attr;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(attr);
+
+	RETURN_LONG(attr->data->lineno);
 }
 /* }}} */
 

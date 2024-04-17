@@ -771,6 +771,9 @@ class ReflectionAttribute implements Reflector
     public function isRepeated(): bool {}
     public function getArguments(): array {}
     public function newInstance(): object {}
+    public function isUserDefined(): bool {}
+    public function getFileName(): string|false {}
+    public function getLine(): int {}
 
     public function __toString(): string {}
 
