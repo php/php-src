@@ -1172,6 +1172,7 @@ int ir_sccp(ir_ctx *ctx)
 					/* not changed */
 					continue;
 				} else if (_values[i].optx == IR_BOTTOM) {
+					insn = &ctx->ir_base[i];
 					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
 					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
 						ir_bitqueue_add(&worklist2, i);
