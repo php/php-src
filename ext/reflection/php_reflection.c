@@ -1518,7 +1518,6 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 	intern->ref_type = REF_TYPE_FUNCTION;
 	intern->ce = ce;
 	if (closure_object) {
-		intern->ce = zend_ce_closure;
 		ZVAL_OBJ_COPY(&intern->obj, closure_object);
 	}
 
