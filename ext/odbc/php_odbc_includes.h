@@ -191,6 +191,7 @@ typedef struct odbc_connection {
     ODBC_SQL_CONN_T hdbc;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
+	HashTable *results;
 } odbc_connection;
 
 typedef struct odbc_link {
@@ -227,6 +228,7 @@ typedef struct odbc_result {
 	int fetched;
 	odbc_param_info *param_info;
 	odbc_connection *conn_ptr;
+	uint32_t index;
 	zend_object std;
 } odbc_result;
 
@@ -246,8 +248,7 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
     zend_long default_cursortype;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	HashTable results;
-	HashTable connections;
+	HashTable non_persistent_connections;
 ZEND_END_MODULE_GLOBALS(odbc)
 
 int odbc_add_result(HashTable *list, odbc_result *result);
