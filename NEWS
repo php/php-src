@@ -323,6 +323,10 @@ PHP                                                                        NEWS
 
 - XMLReader:
   . Declares class constant types. (Ayesh)
+  . Add XMLReader::fromStream(). (nielsdos)
+
+- XMLWriter:
+  . Add XMLWriter::toStream(). (nielsdos)
 
 - XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both

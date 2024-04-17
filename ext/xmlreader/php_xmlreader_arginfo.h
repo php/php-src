@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: fc01b7eacbd96dbeaf0b6a3a045692a77ef033f1 */
+ * Stub hash: 08ea43f5bbfa20407a6c1913fe3a51e99ba79fd8 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
@@ -59,6 +59,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_fromStream, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, documentUri, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_readInnerXml, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -107,6 +114,7 @@ ZEND_METHOD(XMLReader, moveToNextAttribute);
 ZEND_METHOD(XMLReader, read);
 ZEND_METHOD(XMLReader, next);
 ZEND_METHOD(XMLReader, open);
+ZEND_METHOD(XMLReader, fromStream);
 ZEND_METHOD(XMLReader, readInnerXml);
 ZEND_METHOD(XMLReader, readOuterXml);
 ZEND_METHOD(XMLReader, readString);
@@ -134,6 +142,7 @@ static const zend_function_entry class_XMLReader_methods[] = {
 	ZEND_ME(XMLReader, read, arginfo_class_XMLReader_read, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, next, arginfo_class_XMLReader_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, open, arginfo_class_XMLReader_open, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(XMLReader, fromStream, arginfo_class_XMLReader_fromStream, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(XMLReader, readInnerXml, arginfo_class_XMLReader_readInnerXml, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, readOuterXml, arginfo_class_XMLReader_readOuterXml, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, readString, arginfo_class_XMLReader_readString, ZEND_ACC_PUBLIC)
