@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
     (Jakub Zelenka)
 
+- PDO SQLite:
+  . Fix GH-13984 (Buffer size is now checked before memcmp). (Saki Takamachi)
+
 - Phar:
   . Fixed bug GH-13836 (Renaming a file in a Phar to an already existing
     filename causes a NULL pointer dereference). (nielsdos)
