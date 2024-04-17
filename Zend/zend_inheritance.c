@@ -1988,6 +1988,7 @@ static zend_type zend_resolve_type(zend_type type, const zend_class_entry *const
 		return type;
 	}
 
+	ZEND_ASSERT(ZEND_TYPE_USES_ARENA(type));
 	zend_type_list *union_type_list = ZEND_TYPE_LIST(type);
 	bool has_resolved_type = false;
 	/* We don't use ZEND_TYPE_LIST_FOREACH() as we need to keep track of the array index */
@@ -2019,6 +2020,7 @@ static zend_type zend_resolve_type(zend_type type, const zend_class_entry *const
 		ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_ARENA_BIT;
 		/* Inform that the type list is a union type */
 		ZEND_TYPE_FULL_MASK(new_type) |= _ZEND_TYPE_UNION_BIT;
+		ZEND_TYPE_FULL_MASK(new_type) = ZEND_TYPE_FULL_MASK(type);
 		return new_type;
 	} else {
 		return type;
@@ -2112,7 +2114,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_fn, fn, sizeof(zend_op_array));
 		zend_resolve_trait_relative_class_types(new_fn, ce);
-		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
+		//new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
 	new_fn->common.fn_flags |= ZEND_ACC_TRAIT_CLONE;
