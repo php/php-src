@@ -38,10 +38,6 @@
 #include "zend_interfaces.h"
 #include "main/snprintf.h"
 
-#ifdef COMPILE_DL_SPL
-ZEND_GET_MODULE(spl)
-#endif
-
 ZEND_TLS zend_string *spl_autoload_extensions;
 ZEND_TLS HashTable *spl_autoload_functions;
 
