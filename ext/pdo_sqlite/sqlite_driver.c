@@ -751,7 +751,7 @@ static char *make_filename_safe(const char *filename)
 		}
 		return estrdup(filename);
 	}
-	if (*filename && (sizeof(filename) != sizeof(":memory:") || memcmp(filename, ":memory:", sizeof(":memory:")) != 0)) {
+	if (*filename && zend_binary_strcmp(filename, strlen(filename)-1, ":memory:", strlen(":memory:")-1)) {
 		char *fullpath = expand_filepath(filename, NULL);
 
 		if (!fullpath) {
