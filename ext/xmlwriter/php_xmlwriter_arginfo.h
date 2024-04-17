@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 820ad2d68166b189b9163c2c3dfcc76806d41b7d */
+ * Stub hash: c65d664c3c84742dfda4cb3e2682036ec4fe893a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
@@ -180,6 +180,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_openUr
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_openMemory, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_toStream, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_setIndent, 0, 1, _IS_BOOL, 0)
@@ -369,6 +373,7 @@ ZEND_FUNCTION(xmlwriter_end_dtd_entity);
 ZEND_FUNCTION(xmlwriter_write_dtd_entity);
 ZEND_FUNCTION(xmlwriter_output_memory);
 ZEND_FUNCTION(xmlwriter_flush);
+ZEND_METHOD(XMLWriter, toStream);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xmlwriter_open_uri, arginfo_xmlwriter_open_uri)
@@ -419,6 +424,7 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_XMLWriter_methods[] = {
 	ZEND_RAW_FENTRY("openUri", zif_xmlwriter_open_uri, arginfo_class_XMLWriter_openUri, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("openMemory", zif_xmlwriter_open_memory, arginfo_class_XMLWriter_openMemory, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(XMLWriter, toStream, arginfo_class_XMLWriter_toStream, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_RAW_FENTRY("setIndent", zif_xmlwriter_set_indent, arginfo_class_XMLWriter_setIndent, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("setIndentString", zif_xmlwriter_set_indent_string, arginfo_class_XMLWriter_setIndentString, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("startComment", zif_xmlwriter_start_comment, arginfo_class_XMLWriter_startComment, ZEND_ACC_PUBLIC, NULL, NULL)

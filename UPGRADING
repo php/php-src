@@ -178,6 +178,15 @@ PHP 8.4 UPGRADE NOTES
     Passing an empty string to disable the handler is still allowed,
     but not recommended.
 
+- XMLReader:
+  . Passing an invalid character encoding to XMLReader::open() or
+    XMLReader::XML() now throws a ValueError. Passing a string containing NULL
+    bytes previously emitted a warning and now throws a ValueError as well.
+
+- XMLWriter:
+  . Passing a string containing NULL bytes previously emitted a warning and
+    now throws a ValueError.
+
 - XSL:
   . XSLTProcessor::setParameter() will now throw a ValueError when its arguments
     contain null bytes. This never actually worked correctly in the first place,
@@ -618,6 +627,14 @@ PHP 8.4 UPGRADE NOTES
   . Added functions array_find(), array_find_key(), array_all(), and
     array_any().
     RFC: https://wiki.php.net/rfc/array_find
+
+- XMLReader:
+  . Added XMLReader::fromStream().
+    RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
+
+- XMLWriter:
+  . Added XMLWriter::toStream().
+    RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
 
 - XSL:
   . Added XSLTProcessor::registerPhpFunctionNS().
