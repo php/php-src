@@ -21,6 +21,10 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fix shift out of bounds on 32-bit non-fast-path platforms. (nielsdos)
 
+- Opcache:
+  . Fixed incorrect assumptions across compilation units for static calls.
+    (ilutov)
+
 - OpenSSL:
   . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).
     (Jakub Zelenka)
