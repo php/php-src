@@ -3331,7 +3331,9 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 				return true;
 			}
 		}
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		zend_class_entry *old_ce = zend_hash_find_ptr(EG(class_table), lcname);
+		ZEND_ASSERT(old_ce);
+		zend_class_redeclaration_error(E_COMPILE_ERROR, old_ce);
 		return false;
 	}
 	if (zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL) {
