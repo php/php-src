@@ -1152,7 +1152,7 @@ ZEND_FUNCTION(class_alias)
 		if (zend_register_class_alias_ex(ZSTR_VAL(alias_name), ZSTR_LEN(alias_name), ce, false) == SUCCESS) {
 			RETURN_TRUE;
 		} else {
-			zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(alias_name));
+			zend_class_redeclaration_error_ex(E_WARNING, alias_name, ce);
 			RETURN_FALSE;
 		}
 	} else {

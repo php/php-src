@@ -227,9 +227,7 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, Ha
 					CG(in_compilation) = 1;
 					zend_set_compiled_filename(ce1->info.user.filename);
 					CG(zend_lineno) = ce1->info.user.line_start;
-					zend_error_noreturn(E_ERROR,
-							"Cannot declare %s %s, because the name is already in use",
-							zend_get_object_type(ce1), ZSTR_VAL(ce1->name));
+					zend_class_redeclaration_error(E_ERROR, ce1);
 					return;
 				}
 				continue;

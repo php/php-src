@@ -13,4 +13,4 @@ namespace Bazzle {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot declare function Bazzle\bar because the name is already in use in %s on line %d
+Fatal error: Cannot redeclare Bazzle\bar() (previously declared as local import) in %s on line %d
