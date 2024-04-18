@@ -441,11 +441,11 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce)
 {
 	if (old_ce->type == ZEND_INTERNAL_CLASS) {
-		zend_error(type, "Cannot declare %s %s, because the name is already in use",
+		zend_error(type, "Cannot redeclare %s %s",
 			zend_get_object_type(old_ce),
 			ZSTR_VAL(new_name));
 	} else {
-		zend_error(type, "Cannot declare %s %s, because the name is already in use (previously declared in %s:%d)",
+		zend_error(type, "Cannot redeclare %s %s (previously declared in %s:%d)",
 			zend_get_object_type(old_ce),
 			ZSTR_VAL(new_name),
 			ZSTR_VAL(old_ce->info.user.filename),

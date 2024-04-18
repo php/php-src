@@ -227,7 +227,7 @@ static zend_always_inline void _zend_accel_class_hash_copy(HashTable *target, Ha
 					CG(in_compilation) = 1;
 					zend_set_compiled_filename(ce1->info.user.filename);
 					CG(zend_lineno) = ce1->info.user.line_start;
-					zend_class_redeclaration_error(E_ERROR, ce1);
+					zend_class_redeclaration_error(E_ERROR, Z_PTR_P(t));
 					return;
 				}
 				continue;
