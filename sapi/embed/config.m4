@@ -29,7 +29,7 @@ if test "$PHP_EMBED" != "no"; then
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   fi
   AC_MSG_RESULT([$PHP_EMBED_TYPE])
-  PHP_SUBST_OLD(PHP_EMBED_TYPE)
+  AC_SUBST([PHP_EMBED_TYPE])
 else
   AC_MSG_RESULT(no)
 fi
