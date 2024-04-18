@@ -974,7 +974,10 @@ volunteers to begin the selection process for the next release managers.
 1. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Email systems@php.net to get setup for access to downloads.php.net, to be
+2. Subscribe to the php-annouce@lists.php.net mailing list by emailing
+   php-announce+subscribe@lists.php.net
+
+3. Email systems@php.net to get setup for access to downloads.php.net, to be
    added to the release-managers@php.net distribution list, and to be added to
    the moderators for php-announce@lists.php.net so you are able to moderate
    your release announcements.
@@ -988,12 +991,10 @@ volunteers to begin the selection process for the next release managers.
    - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
      up access to downloads.php.net through jump hosts, and provide a
      `.google_authenticator` file for 2FA.
-   - Subscribe to the php-annouce@lists.php.net mailing list by emailing
-     php-announce+subscribe@lists.php.net
    - Your @php.net email address to use for the release-managers@php.net
      distribution list and php-announce@lists.php.net moderator address. This
      should preferably not forward to a Gmail address.
-   - Your GitHub accounti name, so that your membership to the release managers
+   - Your GitHub account name, so that your membership to the release managers
      group may be approved.
 
    A system admin will then contact you to go through with steps 5 through 8 of
@@ -1005,7 +1006,7 @@ volunteers to begin the selection process for the next release managers.
    > "[Send emails from a different address or alias][]."
 
 
-3. Create a [GPG key][] for your @php.net address.
+4. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1070,7 +1071,7 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Make sure you have the following repositories cloned locally:
+5. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
    * https://github.com/php/web-php
