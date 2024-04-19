@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13563 (Setting bool values via env in FPM config fails).
     (Jakub Zelenka)
 
+- Intl:
+  . Fixed build for icu 74 and onwards. (dunglas)
+
 - MySQLnd:
   . Fix shift out of bounds on 32-bit non-fast-path platforms. (nielsdos)
 
