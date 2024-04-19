@@ -593,6 +593,8 @@ PHP 8.4 UPGRADE NOTES
   . QosClass::UserInteractive (macOs only).
   . QosClass::UserInitiated (macOs only).
   . QosClass::Utility (macOs only).
+  . SIGCKPT (DragonFlyBSD only).
+  . SIGCKPTEXIT (DragonFlyBSD only).
 
 - Standard:
   . PHP_ROUND_CEILING.

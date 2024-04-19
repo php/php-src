@@ -136,6 +136,7 @@ PHP                                                                        NEWS
     more in line with platforms limits. (David Carlier)
   . Added pcntl_getcpu for Linux/FreeBSD. (David Carlier)
   . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
+  . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
