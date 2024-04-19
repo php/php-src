@@ -61,8 +61,7 @@ static inline void php_output_context_reset(php_output_context *context);
 static inline void php_output_context_swap(php_output_context *context);
 static inline void php_output_context_dtor(php_output_context *context);
 
-static zend_result php_output_stack_pop(int flags);
-
+static int php_output_stack_pop(int flags);
 static int php_output_stack_apply_op(void *h, void *c);
 static int php_output_stack_apply_clean(void *h, void *c);
 static int php_output_stack_apply_list(void *h, void *z);
