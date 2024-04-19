@@ -3609,10 +3609,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, getShortName)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	zend_string *name = fptr->common.function_name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash) {
-		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
+	if (!(fptr->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+		if (backslash) {
+			RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
+		}
 	}
+
 	RETURN_STR_COPY(name);
 }
 /* }}} */
