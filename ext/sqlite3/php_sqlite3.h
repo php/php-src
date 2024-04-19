@@ -21,7 +21,7 @@ extern zend_module_entry sqlite3_module_entry;
 #define phpext_sqlite3_ptr &sqlite3_module_entry
 
 ZEND_BEGIN_MODULE_GLOBALS(sqlite3)
-	char *extension_dir;
+	zend_string *extension_dir;
 	int dbconfig_defensive;
 ZEND_END_MODULE_GLOBALS(sqlite3)
 

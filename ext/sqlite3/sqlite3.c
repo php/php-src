@@ -60,7 +60,7 @@ static zend_always_inline void php_sqlite3_fetch_one(int n_cols, php_sqlite3_res
 
 /* {{{ PHP_INI */
 PHP_INI_BEGIN()
-	STD_PHP_INI_ENTRY("sqlite3.extension_dir",  NULL, PHP_INI_SYSTEM, OnUpdateString, extension_dir, zend_sqlite3_globals, sqlite3_globals)
+	STD_PHP_INI_ENTRY("sqlite3.extension_dir",  NULL, PHP_INI_SYSTEM, OnUpdateStr, extension_dir, zend_sqlite3_globals, sqlite3_globals)
 #if SQLITE_VERSION_NUMBER >= 3026000
 	STD_PHP_INI_BOOLEAN("sqlite3.defensive",  "1", PHP_INI_USER, OnUpdateBool, dbconfig_defensive, zend_sqlite3_globals, sqlite3_globals)
 #endif
@@ -415,8 +415,8 @@ PHP_METHOD(SQLite3, loadExtension)
 		RETURN_THROWS();
 	}
 
-	extension_dir = SQLITE3G(extension_dir);
-	extension_dir_len = strlen(SQLITE3G(extension_dir));
+	extension_dir = ZSTR_VAL(SQLITE3G(extension_dir));
+	extension_dir_len = ZSTR_LEN(SQLITE3G(extension_dir));
 
 	if (IS_SLASH(extension_dir[extension_dir_len-1])) {
 		spprintf(&lib_path, 0, "%s%s", extension_dir, extension);
