@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     Zend/zend_opcode.c). (nielsdos)
   . Fixed bug GH-13942 (Align the behavior of zend-max-execution-timers with
     other timeout implementations). (Kévin Dunglas)
+  . Fixed bug GH-14003 (Broken cleanup of unfinished calls with callable convert
+    parameters). (ilutov)
 
 - Fibers:
   . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
