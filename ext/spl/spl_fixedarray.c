@@ -36,10 +36,6 @@
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;
 
-#ifdef COMPILE_DL_SPL_FIXEDARRAY
-ZEND_GET_MODULE(spl_fixedarray)
-#endif
-
 /* Check if the object is an instance of a subclass of SplFixedArray that overrides method's implementation.
  * Expect subclassing SplFixedArray to be rare and check that first. */
 #define HAS_FIXEDARRAY_ARRAYACCESS_OVERRIDE(object, method) UNEXPECTED((object)->ce != spl_ce_SplFixedArray && (object)->ce->arrayaccess_funcs_ptr->method->common.scope != spl_ce_SplFixedArray)
