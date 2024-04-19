@@ -147,7 +147,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options);
 static PHP_INI_MH(php_tidy_set_clean_output);
 static void php_tidy_clean_output_start(const char *name, size_t name_len);
 static php_output_handler *php_tidy_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
-static int php_tidy_output_handler(void **nothing, php_output_context *output_context);
+static zend_result php_tidy_output_handler(void **nothing, php_output_context *output_context);
 
 static PHP_MINIT_FUNCTION(tidy);
 static PHP_MSHUTDOWN_FUNCTION(tidy);
@@ -953,9 +953,9 @@ static php_output_handler *php_tidy_output_handler_init(const char *handler_name
 	return php_output_handler_create_internal(handler_name, handler_name_len, php_tidy_output_handler, chunk_size, flags);
 }
 
-static int php_tidy_output_handler(void **nothing, php_output_context *output_context)
+static zend_result php_tidy_output_handler(void **nothing, php_output_context *output_context)
 {
-	int status = FAILURE;
+	zend_result status = FAILURE;
 	TidyDoc doc;
 	TidyBuffer inbuf, outbuf, errbuf;
 
