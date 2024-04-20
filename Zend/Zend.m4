@@ -135,7 +135,7 @@ dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
 AC_DEFUN([LIBZEND_DLSYM_CHECK],[
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
-_LT_AC_TRY_DLOPEN_SELF([
+_LT_TRY_DLOPEN_SELF([
   AC_MSG_RESULT(no)
 ], [
   AC_MSG_RESULT(yes)
