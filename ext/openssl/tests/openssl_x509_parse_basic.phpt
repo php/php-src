@@ -4,7 +4,7 @@ openssl_x509_parse() tests
 openssl
 --SKIPIF--
 <?php
-if (OPENSSL_VERSION_NUMBER >= 0x30200000) die('skip For OpenSSL < 3.2');
+if (OPENSSL_VERSION_NUMBER >= 0x30200000) die('skip For OpenSSL >= 3.2');
 ?>
 --FILE--
 <?php
