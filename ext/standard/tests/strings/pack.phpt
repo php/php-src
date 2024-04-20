@@ -16,6 +16,8 @@ print_r(unpack("C", pack("C", -129)));
 
 echo "H\n";
 print_r(unpack("H", pack("H", 0x04)));
+echo bin2hex(pack("H*", "3f3c0001A887")), "\n";
+var_dump(unpack("H*", pack("H8", "4.@Gg1")));
 
 echo "I\n";
 print_r(unpack("I", pack("I", 65534)));
@@ -64,6 +66,7 @@ print_r(unpack("c", pack("c", -127)));
 print_r(unpack("c", pack("c", 127)));
 print_r(unpack("c", pack("c", 255)));
 print_r(unpack("c", pack("c", -129)));
+echo bin2hex(pack("c*", 1, 2, 3)), "\n";
 
 echo "h\n";
 print_r(unpack("h", pack("h", 3000000)));
@@ -106,8 +109,49 @@ print_r(unpack("v", pack("v", 0)));
 print_r(unpack("v", pack("v", -1000)));
 print_r(unpack("v", pack("v", -64434)));
 print_r(unpack("v", pack("v", -65535)));
+
+echo "x\n";
+echo bin2hex(pack("x*")), "\n";
+print_r(unpack("x", "a")); // Doesn't have to be \0.
+
+echo "X\n";
+echo bin2hex(pack("ccXc", 1, 2, 3)), "\n";
+print_r(unpack("na/nb/X2/nc/nd", pack("nnn", 1, 2, 3)));
+print_r(unpack("na/nb/X*/X/nc", pack("nnn", 1, 2, 3)));
+
+echo "@\n";
+echo bin2hex(pack("c@7c", 1, 2)), "\n";
+echo bin2hex(pack("c@0c", 1, 2)), "\n";
+print_r(unpack("@2", "a"));
+
+echo "f\n";
+print_r(unpack("f3", pack("f3", 1.5, INF, NAN)));
+
+echo "d\n";
+print_r(unpack("d3", pack("d3", 1.5, INF, NAN)));
+
+echo "Generic errors\n";
+try {
+    echo bin2hex(pack("a")), "\n";
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    echo bin2hex(pack("a*", (object)[])), "\n";
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    echo bin2hex(pack("?", 1)), "\n";
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+echo bin2hex(pack("c", 1, 2)), "\n";
+echo bin2hex(pack("ccX8c", 1, 2, 3)), "\n";
+$longName = str_repeat("a", 200);
+var_dump(isset(unpack("i" . $longName . "b", pack("i", 1))[$longName]));
 ?>
---EXPECT--
+--EXPECTF--
 A
 Array
 (
@@ -140,6 +184,21 @@ Array
 (
     [1] => 4
 )
+3f3c0001a887
+
+Warning: pack(): Type H: not enough characters in string in %s on line %d
+
+Warning: pack(): Type H: illegal hex digit . in %s on line %d
+
+Warning: pack(): Type H: illegal hex digit @ in %s on line %d
+
+Warning: pack(): Type H: illegal hex digit G in %s on line %d
+
+Warning: pack(): Type H: illegal hex digit g in %s on line %d
+array(1) {
+  [1]=>
+  string(6) "400001"
+}
 I
 Array
 (
@@ -253,6 +312,7 @@ Array
 (
     [1] => 127
 )
+010203
 h
 Array
 (
@@ -379,3 +439,60 @@ Array
 (
     [1] => 1
 )
+x
+
+Warning: pack(): Type x: '*' ignored in %s on line %d
+00
+Array
+(
+)
+X
+0103
+Array
+(
+    [a] => 1
+    [b] => 2
+    [c] => 2
+    [d] => 3
+)
+
+Warning: unpack(): Type X: '*' ignored in %s on line %d
+Array
+(
+    [a] => 1
+    [b] => 2
+    [c] => 2
+)
+@
+0100000000000002
+02
+
+Warning: unpack(): Type @: outside of string in %s on line %d
+Array
+(
+)
+f
+Array
+(
+    [1] => 1.5
+    [2] => INF
+    [3] => NAN
+)
+d
+Array
+(
+    [1] => 1.5
+    [2] => INF
+    [3] => NAN
+)
+Generic errors
+Type a: not enough arguments
+Object of class stdClass could not be converted to string
+Type ?: unknown format code
+
+Warning: pack(): 1 arguments unused in %s on line %d
+01
+
+Warning: pack(): Type X: outside of string in %s on line %d
+03
+bool(true)
