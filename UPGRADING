@@ -31,11 +31,10 @@ PHP 8.4 UPGRADE NOTES
   . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
 
 - DOM:
-  . New methods and constants were added to some DOM classes. If you inherit
-    from these and you happen to have a method or property with the same name,
-    you might encounter errors if the declaration is incompatible.
-    Consult sections 2. New Features and 6. New Functions for a list of
-    newly implemented methods and constants.
+  . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
+    constants.
+    If you have a method or constant with the same name, you might encounter errors
+    if the declaration is incompatible.
   . Some DOM methods previously returned false or a PHP_ERR DOMException if a new
     node could not be allocated. They consistently throw an INVALID_STATE_ERR
     DOMException now. This situation is extremely unlikely though and probably
