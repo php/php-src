@@ -1,11 +1,5 @@
 --TEST--
 Generic pack()/unpack() tests
---SKIPIF--
-<?php
-if (PHP_INT_MAX > 2147483647) {
-    die("skip 32bit test only");
-}
-?>
 --FILE--
 <?php
 echo "A\n";
@@ -26,25 +20,25 @@ print_r(unpack("H", pack("H", 0x04)));
 echo "I\n";
 print_r(unpack("I", pack("I", 65534)));
 print_r(unpack("I", pack("I", 0)));
-print_r(unpack("I", pack("I", -1000)));
-print_r(unpack("I", pack("I", -64434)));
+echo bin2hex(pack("I", -1000)), "\n";
+echo bin2hex(pack("I", -64434)), "\n";
 print_r(unpack("I", pack("I", 4294967296)));
 print_r(unpack("I", pack("I", -4294967296)));
 
 echo "L\n";
 print_r(unpack("L", pack("L", 65534)));
 print_r(unpack("L", pack("L", 0)));
-print_r(unpack("L", pack("L", 2147483650)));
-print_r(unpack("L", pack("L", 4294967295)));
-print_r(unpack("L", pack("L", -2147483648)));
+echo bin2hex(pack("L", 2147483650)), "\n";
+echo bin2hex(pack("L", 4294967295)), "\n";
+echo bin2hex(pack("L", -2147483648)), "\n";
 
 echo "N\n";
 print_r(unpack("N", pack("N", 65534)));
 print_r(unpack("N", pack("N", 0)));
-print_r(unpack("N", pack("N", 2147483650)));
+echo bin2hex(pack("N", 2147483650)), "\n";
 print_r(unpack("N", pack("N", 4294967296)));
-print_r(unpack("N", pack("N", -2147483648)));
-print_r(unpack("N", pack("N", -30000)));
+echo bin2hex(pack("N", -2147483648)), "\n";
+echo bin2hex(pack("N", -30000)), "\n";
 
 echo "S\n";
 print_r(unpack("S", pack("S", 65534)));
@@ -57,9 +51,9 @@ print_r(unpack("S", pack("S", -65535)));
 echo "V\n";
 print_r(unpack("V", pack("V", 65534)));
 print_r(unpack("V", pack("V", 0)));
-print_r(unpack("V", pack("V", 2147483650)));
+echo bin2hex(pack("V", 2147483650)), "\n";
 print_r(unpack("V", pack("V", 4294967296)));
-print_r(unpack("V", pack("V", -2147483648)));
+echo bin2hex(pack("V", -2147483648)), "\n";
 
 echo "a\n";
 print_r(unpack("a", pack("a", "hello world")));
@@ -155,14 +149,8 @@ Array
 (
     [1] => 0
 )
-Array
-(
-    [1] => -1000
-)
-Array
-(
-    [1] => -64434
-)
+18fcffff
+4e04ffff
 Array
 (
     [1] => 0
@@ -180,18 +168,9 @@ Array
 (
     [1] => 0
 )
-Array
-(
-    [1] => -2147483646
-)
-Array
-(
-    [1] => -1
-)
-Array
-(
-    [1] => -2147483648
-)
+02000080
+ffffffff
+00000080
 N
 Array
 (
@@ -201,22 +180,13 @@ Array
 (
     [1] => 0
 )
-Array
-(
-    [1] => -2147483646
-)
+80000002
 Array
 (
     [1] => 0
 )
-Array
-(
-    [1] => -2147483648
-)
-Array
-(
-    [1] => -30000
-)
+80000000
+ffff8ad0
 S
 Array
 (
@@ -251,18 +221,12 @@ Array
 (
     [1] => 0
 )
-Array
-(
-    [1] => -2147483646
-)
+02000080
 Array
 (
     [1] => 0
 )
-Array
-(
-    [1] => -2147483648
-)
+00000080
 a
 Array
 (
