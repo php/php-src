@@ -974,7 +974,7 @@ volunteers to begin the selection process for the next release managers.
 1. Request membership to the
    [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Subscribe to the php-annouce@lists.php.net mailing list by emailing
+2. Subscribe to the php-announce@lists.php.net mailing list by emailing
    php-announce+subscribe@lists.php.net
 
 3. Email systems@php.net to get setup for access to downloads.php.net, to be
