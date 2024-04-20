@@ -142,6 +142,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed incorrect assumptions across compilation units for static calls.
     (ilutov)
+  . Fixed bug GH-13817 (Segmentation fault for enabled observers after pass 4).
+    (Bob)
 
 - OpenSSL:
   . Fixed bug GH-10495 (feof on OpenSSL stream hangs indefinitely).

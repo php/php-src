@@ -255,6 +255,9 @@ static zend_always_inline uint32_t zend_vm_calc_used_stack(uint32_t num_args, ze
 	return used_stack * sizeof(zval);
 }
 
+// Handle a possibly currently not applied pass_two
+ZEND_API uint32_t zend_vm_calc_ct_used_stack(uint32_t num_args, zend_function *func);
+
 static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope)
 {
 	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);

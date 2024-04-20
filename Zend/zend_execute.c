@@ -226,6 +226,11 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	return ptr;
 }
 
+ZEND_API uint32_t zend_vm_calc_ct_used_stack(uint32_t num_args, zend_function *func)
+{
+	return zend_vm_calc_used_stack(num_args, func) + ((func->common.fn_flags & ZEND_ACC_DONE_PASS_TWO) == 0 && ZEND_USER_CODE(func->type) ? ZEND_OBSERVER_ENABLED : 0) * sizeof(zval);
+}
+
 ZEND_API zval* zend_get_compiled_variable_value(const zend_execute_data *execute_data, uint32_t var)
 {
 	return EX_VAR(var);
