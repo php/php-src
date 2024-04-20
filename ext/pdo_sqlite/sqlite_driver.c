@@ -428,7 +428,6 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 		 * the context */
 		if (agg_context) {
 			if (Z_ISUNDEF(retval)) {
-				zval_ptr_dtor(&agg_context->val);
 				return FAILURE;
 			}
 			zval_ptr_dtor(Z_REFVAL(agg_context->val));

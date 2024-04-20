@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 
 - PDO SQLite:
   . Fix GH-13984 (Buffer size is now checked before memcmp). (Saki Takamachi)
+  . Fix GH-13998 (Manage refcount of agg_context->val correctly).
+    (Saki Takamachi)
 
 - Phar:
   . Fixed bug GH-13836 (Renaming a file in a Phar to an already existing
