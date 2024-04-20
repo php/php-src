@@ -58,6 +58,7 @@ PHP                                                                        NEWS
     ext/session/mod_files.c). (nielsdos)
   . Fixed bug GH-13891 (memleak and segfault when using ini_set with
     session.trans_sid_hosts). (nielsdos, kamil-tekiela)
+  . Fixed buffer _read/_write size limit on windows for the file mode. (David Carlier)
 
 - Streams:
   . Fixed file_get_contents() on Windows fails with "errno=22 Invalid
