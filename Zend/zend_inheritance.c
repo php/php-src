@@ -1085,8 +1085,19 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 	uint32_t parent_flags = parent->common.fn_flags;
 	zend_function *proto;
 
+#define SEPARATE_METHOD() do { \
+			if (child_scope != ce && child->type == ZEND_USER_FUNCTION && child_zv) { \
+				/* op_array wasn't duplicated yet */ \
+				zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array)); \
+				memcpy(new_function, child, sizeof(zend_op_array)); \
+				Z_PTR_P(child_zv) = child = new_function; \
+				child_zv = NULL; \
+			} \
+		} while(0)
+
 	if (UNEXPECTED((parent_flags & ZEND_ACC_PRIVATE) && !(parent_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_CTOR))) {
 		if (!check_only) {
+			SEPARATE_METHOD();
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
 		}
 		/* The parent method is private and not an abstract so we don't need to check any inheritance rules */
@@ -1130,7 +1141,12 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
-	if (!check_only && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
+	if (!check_only
+	 && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))
+	 /* In the case of abstract traits, don't mark the method as changed. We don't actually have a
+	  * private parent method. */
+	 && !(parent->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+		SEPARATE_METHOD();
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
@@ -1146,21 +1162,16 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		parent = proto;
 	}
 
-	if (!check_only && child->common.prototype != proto && child_zv) {
-		do {
-			if (child->common.scope != ce && child->type == ZEND_USER_FUNCTION) {
-				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-					/* Few parent interfaces contain the same method */
-					break;
-				} else {
-					/* op_array wasn't duplicated yet */
-					zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
-					memcpy(new_function, child, sizeof(zend_op_array));
-					Z_PTR_P(child_zv) = child = new_function;
-				}
-			}
-			child->common.prototype = proto;
-		} while (0);
+	if (!check_only
+	 && child->common.prototype != proto
+	 /* We are not setting the prototype of overridden interface methods because of abstract
+	  * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
+	 && !(ce->ce_flags & ZEND_ACC_INTERFACE)
+	 /* Parent is a trait when its method is abstract. We only need to verify its signature then,
+	  * don't actually use it as a prototype. See Zend/tests/gh14009_004.phpt. */
+	 && !(parent->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+		SEPARATE_METHOD();
+		child->common.prototype = proto;
 	}
 
 	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
@@ -1180,6 +1191,9 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		}
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
 	}
+
+#undef SEPARATE_METHOD
+
 	return INHERITANCE_SUCCESS;
 }
 /* }}} */
