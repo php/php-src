@@ -592,48 +592,39 @@ static void append_win_escaped_arg(smart_str *str, zend_string *arg, bool is_cmd
 	smart_str_appendc(str, '"');
 }
 
-static inline int stricmp_end(const char* suffix, const char* str) {
-    size_t suffix_len = strlen(suffix);
-    size_t str_len = strlen(str);
-
-    if (suffix_len > str_len) {
-        return -1; /* Suffix is longer than string, cannot match. */
-    }
-
-    /* Compare the end of the string with the suffix, ignoring case. */
-    return _stricmp(str + (str_len - suffix_len), suffix);
-}
-
-static bool is_executed_by_cmd(const char *prog_name)
+static bool is_executed_by_cmd(const char *prog_name, size_t prog_name_length)
 {
-	/* If program name is cmd.exe, then return true. */
-	if (_stricmp("cmd.exe", prog_name) == 0 || _stricmp("cmd", prog_name) == 0
-			|| stricmp_end("\\cmd.exe", prog_name) == 0 || stricmp_end("\\cmd", prog_name) == 0) {
-		return true;
-	}
+    size_t out_len;
+    WCHAR long_name[MAX_PATH];
+    WCHAR full_name[MAX_PATH];
+    LPWSTR file_part = NULL;
 
-    /* Find the last occurrence of the directory separator (backslash or forward slash). */
-    char *last_separator = strrchr(prog_name, '\\');
-    char *last_separator_fwd = strrchr(prog_name, '/');
-    if (last_separator_fwd && (!last_separator || last_separator < last_separator_fwd)) {
-        last_separator = last_separator_fwd;
+    wchar_t *prog_name_wide = php_win32_cp_conv_any_to_w(prog_name, prog_name_length, &out_len);
+
+    if (GetLongPathNameW(prog_name_wide, long_name, MAX_PATH) == 0) {
+        /* This can fail for example with ERROR_FILE_NOT_FOUND (short path resolution only works for existing files)
+         * in which case we'll pass the path verbatim to the FullPath transformation. */
+        lstrcpynW(long_name, prog_name_wide, MAX_PATH);
     }
 
-    /* Find the last dot in the filename after the last directory separator. */
-    char *extension = NULL;
-    if (last_separator != NULL) {
-        extension = strrchr(last_separator, '.');
-    } else {
-        extension = strrchr(prog_name, '.');
-    }
+    free(prog_name_wide);
+    prog_name_wide = NULL;
 
-    if (extension == NULL || extension == prog_name) {
-        /* No file extension found, it is not batch file. */
+    if (GetFullPathNameW(long_name, MAX_PATH, full_name, &file_part) == 0 || file_part == NULL) {
         return false;
     }
 
-    /* Check if the file extension is ".bat" or ".cmd" which is always executed by cmd.exe. */
-    return _stricmp(extension, ".bat") == 0 || _stricmp(extension, ".cmd") == 0;
+    bool uses_cmd = false;
+    if (_wcsicmp(file_part, L"cmd.exe") == 0 || _wcsicmp(file_part, L"cmd") == 0) {
+        uses_cmd = true;
+    } else {
+        const WCHAR *extension_dot = wcsrchr(file_part, L'.');
+        if (extension_dot && (_wcsicmp(extension_dot, L".bat") == 0 || _wcsicmp(extension_dot, L".cmd") == 0)) {
+            uses_cmd = true;
+        }
+    }
+
+    return uses_cmd;
 }
 
 static zend_string *create_win_command_from_args(HashTable *args)
@@ -652,7 +643,7 @@ static zend_string *create_win_command_from_args(HashTable *args)
 		}
 
 		if (is_prog_name) {
-			is_cmd_execution = is_executed_by_cmd(ZSTR_VAL(arg_str));
+			is_cmd_execution = is_executed_by_cmd(ZSTR_VAL(arg_str), ZSTR_LEN(arg_str));
 		} else {
 			smart_str_appendc(&str, ' ');
 		}
