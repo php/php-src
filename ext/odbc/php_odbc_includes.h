@@ -191,7 +191,7 @@ typedef struct odbc_connection {
     ODBC_SQL_CONN_T hdbc;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	HashTable *results;
+	HashTable results;
 } odbc_connection;
 
 typedef struct odbc_link {

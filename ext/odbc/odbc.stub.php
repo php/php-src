@@ -373,9 +373,9 @@ function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
 
     function odbc_free_result(ODBC\Result $statement): true {}
 
-    function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
+    function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
 
-    function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] string $password, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
+    function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
 
     function odbc_close(ODBC\Connection $odbc): void {}
 
