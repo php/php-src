@@ -69,10 +69,14 @@
 #endif
 
 # if defined __CET__
+#  include <sys/syscall.h>
+#  include <unistd.h>
 #  include <cet.h>
 #  define SHSTK_ENABLED (__CET__ & 0x2)
 #  define BOOST_CONTEXT_SHADOW_STACK (SHSTK_ENABLED && SHADOW_STACK_SYSCALL)
-#  define __NR_map_shadow_stack 451
+# ifndef SYS_map_shadow_stack
+#  define SYS_map_shadow_stack 453
+# endif
 # ifndef SHADOW_STACK_SET_TOKEN
 #  define SHADOW_STACK_SET_TOKEN 0x1
 #endif
@@ -272,7 +276,7 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 
 	/* issue syscall to create shadow stack for the new fcontext */
 	/* SHADOW_STACK_SET_TOKEN option will put "restore token" on the new shadow stack */
-	stack->ss_base = (void *)syscall(__NR_map_shadow_stack, 0, stack->ss_size, SHADOW_STACK_SET_TOKEN);
+	stack->ss_base = (void *)syscall(SYS_map_shadow_stack, 0, stack->ss_size, SHADOW_STACK_SET_TOKEN);
 
 	if (stack->ss_base == MAP_FAILED) {
 		zend_throw_exception_ex(NULL, 0, "Fiber shadow stack allocate failed: mmap failed: %s (%d)", strerror(errno), errno);
