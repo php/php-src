@@ -8,7 +8,7 @@ permissions:
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
@@ -288,7 +288,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     services:
       postgres:
         image: postgres
@@ -769,7 +769,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     env:
       CC: ccache gcc
