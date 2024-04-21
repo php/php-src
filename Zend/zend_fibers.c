@@ -268,11 +268,7 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 	stack->size = stack_size;
 
 #if !defined(ZEND_FIBER_UCONTEXT) && BOOST_CONTEXT_SHADOW_STACK
-	/* shadow stack saves ret address only, need less space */
-	stack->ss_size= stack_size >> 5;
-
-	/* align shadow stack to 8 bytes. */
-	stack->ss_size = (stack->ss_size + 7) & ~7;
+	stack->ss_size = stack_size;
 
 	/* issue syscall to create shadow stack for the new fcontext */
 	/* SHADOW_STACK_SET_TOKEN option will put "restore token" on the new shadow stack */
