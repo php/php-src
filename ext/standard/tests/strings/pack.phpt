@@ -22,8 +22,6 @@ var_dump(unpack("H*", pack("H8", "4.@Gg1")));
 echo "I\n";
 print_r(unpack("I", pack("I", 65534)));
 print_r(unpack("I", pack("I", 0)));
-echo bin2hex(asLittleEndian(pack("I", -1000))), "\n";
-echo bin2hex(asLittleEndian(pack("I", -64434))), "\n";
 print_r(unpack("I", pack("I", 4294967296)));
 print_r(unpack("I", pack("I", -4294967296)));
 
@@ -220,8 +218,6 @@ Array
 (
     [1] => 0
 )
-18fcffff
-4e04ffff
 Array
 (
     [1] => 0

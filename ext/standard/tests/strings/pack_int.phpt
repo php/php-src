@@ -9,8 +9,8 @@ if (PHP_INT_SIZE > 4) {
 --FILE--
 <?php
 echo "I\n";
-print_r(unpack("I", asLittleEndian(hex2bin('18fcffff'))));
-print_r(unpack("I", asLittleEndian(hex2bin('4e04ffff'))));
+print_r(unpack("I", pack("I", -1000)));
+print_r(unpack("I", pack("I", -64434)));
 
 echo "L\n";
 print_r(unpack("L", asLittleEndian(hex2bin('02000080'))));
