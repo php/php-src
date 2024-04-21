@@ -22,17 +22,17 @@ var_dump(unpack("H*", pack("H8", "4.@Gg1")));
 echo "I\n";
 print_r(unpack("I", pack("I", 65534)));
 print_r(unpack("I", pack("I", 0)));
-echo bin2hex(pack("I", -1000)), "\n";
-echo bin2hex(pack("I", -64434)), "\n";
+echo bin2hex(asLittleEndian(pack("I", -1000))), "\n";
+echo bin2hex(asLittleEndian(pack("I", -64434))), "\n";
 print_r(unpack("I", pack("I", 4294967296)));
 print_r(unpack("I", pack("I", -4294967296)));
 
 echo "L\n";
 print_r(unpack("L", pack("L", 65534)));
 print_r(unpack("L", pack("L", 0)));
-echo bin2hex(pack("L", 2147483650)), "\n";
-echo bin2hex(pack("L", 4294967295)), "\n";
-echo bin2hex(pack("L", -2147483648)), "\n";
+echo bin2hex(asLittleEndian(pack("L", 2147483650))), "\n";
+echo bin2hex(asLittleEndian(pack("L", 4294967295))), "\n";
+echo bin2hex(asLittleEndian(pack("L", -2147483648))), "\n";
 
 echo "N\n";
 print_r(unpack("N", pack("N", 65534)));
@@ -150,6 +150,18 @@ echo bin2hex(pack("c", 1, 2)), "\n";
 echo bin2hex(pack("ccX8c", 1, 2, 3)), "\n";
 $longName = str_repeat("a", 200);
 var_dump(isset(unpack("i" . $longName . "b", pack("i", 1))[$longName]));
+
+function asLittleEndian(string $bin): string
+{
+    static $isBe;
+    if (!isset($isBe)) {
+        $isBe = unpack('s', "\x00\x01")[1] == 1;
+    }
+    if ($isBe) {
+        $bin = implode('', array_reverse(str_split($bin, 1)));
+    }
+    return $bin;
+}
 ?>
 --EXPECTF--
 A
