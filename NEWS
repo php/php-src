@@ -13,6 +13,7 @@ PHP                                                                        NEWS
     other timeout implementations). (Kévin Dunglas)
   . Fixed bug GH-14003 (Broken cleanup of unfinished calls with callable convert
     parameters). (ilutov)
+  . Fixed bug GH-14013 (Erroneous dnl appended in configure). (Peter Kokot)
 
 - Fibers:
   . Fixed bug GH-13903 (ASAN false positive underflow when executing copy()).
