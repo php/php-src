@@ -100,6 +100,9 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
+  . Fixed bug GH-10599 (Apache crash on Windows when using a self-referencing
+    anonymous function inside a class with an active mysqli connection).
+    (nielsdos)
 
 - Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
