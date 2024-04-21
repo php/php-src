@@ -42,6 +42,7 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -98,6 +99,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     runs-on: macos-12
     steps:
       - name: git checkout
@@ -131,6 +133,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
