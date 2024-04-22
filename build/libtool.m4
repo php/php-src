@@ -4636,7 +4636,7 @@ for ac_symprfx in "" "_"; do
 extern "C" {
 #endif
 char nm_test_var;
-void nm_test_func(){}
+void nm_test_func(void){}
 #ifdef __cplusplus
 }
 #endif
