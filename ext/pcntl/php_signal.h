@@ -18,12 +18,9 @@
 #ifndef PHP_SIGNAL_H
 #define PHP_SIGNAL_H
 
-#ifdef HAVE_STRUCT_SIGINFO_T
 typedef void Sigfunc(int, siginfo_t*, void*);
-#else
-typedef void Sigfunc(int);
-#endif
-Sigfunc *php_signal(int signo, Sigfunc *func, int restart);
-Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all);
+
+Sigfunc *php_signal(int signo, Sigfunc *func, bool restart);
+Sigfunc *php_signal4(int signo, Sigfunc *func, bool restart, bool mask_all);
 
 #endif
