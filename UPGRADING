@@ -644,6 +644,12 @@ PHP 8.4 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- Core:
+  . Improved the performance of floating point number parsing and formatting in
+    ZTS builds under highly concurrent loads. This affects the `printf()` family
+    of functions as well as serialization functions such as `json_encode()`,
+    `serialize()`.
+
 - DOM:
   . The performance of DOMNode::C14N() is greatly improved for the case without
     an xpath query. This can give a time improvement of easily two order of
