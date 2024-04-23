@@ -583,7 +583,13 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	const char *num_str = ZSTR_VAL(val);
 	bool skip_lead = false;
 
-	if (ZSTR_LEN(val) >= 2 && num_str[0] == '0') {
+	size_t num_len = ZSTR_LEN(val);
+	while (isspace(*num_str)) {
+		++num_str;
+		--num_len;
+	}
+
+	if (num_len >= 2 && num_str[0] == '0') {
 		if ((base == 0 || base == 16) && (num_str[1] == 'x' || num_str[1] == 'X')) {
 			base = 16;
 			skip_lead = true;
