@@ -32,7 +32,7 @@ class MyHttpClient
         curl_setopt($this->curl, CURLOPT_HEADER, false);
         curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, false);
         curl_setopt($this->curl, CURLOPT_FAILONERROR, false);
-        curl_setopt($this->curl, CURLOPT_URL, 'https://localhost/serverpush');
+        curl_setopt($this->curl, CURLOPT_URL, (getenv('SERVER_NAME') ?: 'https://localhost') . '/serverpush');
         curl_setopt($this->curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         curl_setopt($this->curl, CURLOPT_HEADERFUNCTION, function ($ch, $data) {
             return \strlen($data);
