@@ -866,7 +866,7 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 static bool gmp_verify_base(zend_long base, uint32_t arg_num)
 {
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		zend_argument_value_error(arg_num, "must be between 2 and %d", GMP_MAX_BASE);
+		zend_argument_value_error(arg_num, "must be 0 or between 2 and %d", GMP_MAX_BASE);
 		return false;
 	}
 
