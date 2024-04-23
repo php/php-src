@@ -11,4 +11,4 @@ namespace {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare bar() (previously declared as local import) in %s on line %d
+Fatal error: Cannot redeclare function bar() (previously declared as local import) in %s on line %d

@@ -13,4 +13,4 @@ namespace Bazzle {
 }
 ?>
 --EXPECTF--
-Fatal error: Cannot redeclare Bazzle\bar() (previously declared as local import) in %s on line %d
+Fatal error: Cannot redeclare function Bazzle\bar() (previously declared as local import) in %s on line %d

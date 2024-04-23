@@ -178,12 +178,12 @@ failure:
 	CG(zend_lineno) = function1->op_array.opcodes[0].lineno;
 	if (function2->type == ZEND_USER_FUNCTION
 		&& function2->op_array.last > 0) {
-		zend_error_noreturn(E_ERROR, "Cannot redeclare %s() (previously declared in %s:%d)",
+		zend_error_noreturn(E_ERROR, "Cannot redeclare function %s() (previously declared in %s:%d)",
 				   ZSTR_VAL(function1->common.function_name),
 				   ZSTR_VAL(function2->op_array.filename),
 				   (int)function2->op_array.opcodes[0].lineno);
 	} else {
-		zend_error_noreturn(E_ERROR, "Cannot redeclare %s()", ZSTR_VAL(function1->common.function_name));
+		zend_error_noreturn(E_ERROR, "Cannot redeclare function %s()", ZSTR_VAL(function1->common.function_name));
 	}
 }
 
