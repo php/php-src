@@ -1057,7 +1057,7 @@ binop_fp:
 			return insn->op;
 		case IR_VA_START:
 			ctx->flags2 |= IR_HAS_VA_START;
-			if (ctx->ir_base[insn->op2].op == IR_ALLOCA) {
+			if ((ctx->ir_base[insn->op2].op == IR_ALLOCA) || (ctx->ir_base[insn->op2].op == IR_VADDR)) {
 				ir_use_list *use_list = &ctx->use_lists[insn->op2];
 				ir_ref *p, n = use_list->count;
 				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
@@ -1092,7 +1092,7 @@ binop_fp:
 
 				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 					if (ctx->ir_base[*p].op != IR_VA_END) {
-						return IR_VADDR;
+						return IR_STATIC_ALLOCA;
 					}
 				}
 			}
@@ -3802,7 +3802,7 @@ static ir_mem ir_fuse_addr(ir_ctx *ctx, ir_ref root, ir_ref ref)
 			return IR_MEM_BO(reg, ctx->ir_base[addr_insn->op2].val.i32);
 		}
 	} else {
-		IR_ASSERT(addr_insn->op == IR_ALLOCA);
+		IR_ASSERT(addr_insn->op == IR_ALLOCA || addr_insn->op == IR_VADDR);
 		reg = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 		offset = IR_SPILL_POS_TO_OFFSET(ctx->ir_base[ref].op3);
 		return IR_MEM_BO(reg, offset);

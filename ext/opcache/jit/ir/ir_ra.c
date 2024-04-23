@@ -722,8 +722,10 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					  || (ctx->rules[ref] & IR_RULE_MASK) == IR_ALLOCA)
 					 && ctx->use_lists[ref].count > 0) {
 						insn = &ctx->ir_base[ref];
-						insn->op3 = ctx->vars;
-						ctx->vars = ref;
+						if (insn->op != IR_VADDR) {
+							insn->op3 = ctx->vars;
+							ctx->vars = ref;
+						}
 					}
 					continue;
 				}
@@ -1338,8 +1340,10 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					  || (ctx->rules[ref] & IR_RULE_MASK) == IR_ALLOCA)
 					 && ctx->use_lists[ref].count > 0) {
 						insn = &ctx->ir_base[ref];
-						insn->op3 = ctx->vars;
-						ctx->vars = ref;
+						if (insn->op != IR_VADDR) {
+							insn->op3 = ctx->vars;
+							ctx->vars = ref;
+						}
 					}
 					continue;
 				}
@@ -3507,13 +3511,27 @@ static int ir_linear_scan(ir_ctx *ctx)
 	data.handled = NULL;
 
 	while (vars) {
-		ir_insn *insn = &ctx->ir_base[vars];
+		ir_ref var = vars;
+		ir_insn *insn = &ctx->ir_base[var];
 
 		IR_ASSERT(insn->op == IR_VAR || insn->op == IR_ALLOCA);
 		vars = insn->op3; /* list next */
 
 		if (insn->op == IR_VAR) {
-			insn->op3 = ir_allocate_spill_slot(ctx, insn->type, &data);
+			ir_ref slot = ir_allocate_spill_slot(ctx, insn->type, &data);;
+			ir_use_list *use_list;
+			ir_ref n, *p;
+
+			insn->op3 = slot;
+			use_list = &ctx->use_lists[var];
+			n = use_list->count;
+			p = &ctx->use_edges[use_list->refs];
+			for (; n > 0; p++, n--) {
+				insn = &ctx->ir_base[*p];
+				if (insn->op == IR_VADDR) {
+					insn->op3 = slot;
+				}
+			}
 		} else {
 			ir_insn *val = &ctx->ir_base[insn->op2];
 
@@ -4060,7 +4078,8 @@ static void assign_regs(ir_ctx *ctx)
 					if (IR_IS_CONST_REF(ops[ival->tmp_op_num])) {
 						/* constant rematerialization */
 						reg |= IR_REG_SPILL_LOAD;
-					} else if (ctx->ir_base[ops[ival->tmp_op_num]].op == IR_ALLOCA) {
+					} else if (ctx->ir_base[ops[ival->tmp_op_num]].op == IR_ALLOCA
+							|| ctx->ir_base[ops[ival->tmp_op_num]].op == IR_VADDR) {
 						/* local address rematerialization */
 						reg |= IR_REG_SPILL_LOAD;
 					}

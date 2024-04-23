@@ -2810,7 +2810,7 @@ store_int:
 
 				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 					if (ctx->ir_base[*p].op != IR_VA_END) {
-						return IR_VADDR;
+						return IR_STATIC_ALLOCA;
 					}
 				}
 			}

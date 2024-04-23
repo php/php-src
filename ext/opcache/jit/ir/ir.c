@@ -75,7 +75,7 @@ const char *ir_op_name[IR_LAST_OP] = {
 #endif
 };
 
-static void ir_print_escaped_str(const char *s, size_t len, FILE *f)
+void ir_print_escaped_str(const char *s, size_t len, FILE *f)
 {
 	char ch;
 
@@ -95,10 +95,14 @@ static void ir_print_escaped_str(const char *s, size_t len, FILE *f)
 			case '\v': fputs("\\v", f); break;
 			case '\?': fputs("\\?", f); break;
 			default:
+#ifdef __aarch64__
 				if (ch < 32) {
+#else
+				if (ch >= 0 && ch < 32) {
+#endif
 					fprintf(f, "\\%c%c%c",
-						'0' + ((ch >> 3) % 8),
 						'0' + ((ch >> 6) % 8),
+						'0' + ((ch >> 3) % 8),
 						'0' + (ch % 8));
 					break;
 				} else {
@@ -1784,48 +1788,64 @@ static ir_alias ir_check_aliasing(ir_ctx *ctx, ir_ref addr1, ir_ref addr2)
 static ir_alias ir_check_partial_aliasing(const ir_ctx *ctx, ir_ref addr1, ir_ref addr2, ir_type type1, ir_type type2)
 {
 	ir_insn *insn1, *insn2;
+	ir_ref base1, base2, off1, off2;
 
 	/* this must be already check */
 	IR_ASSERT(addr1 != addr2);
 
 	insn1 = &ctx->ir_base[addr1];
 	insn2 = &ctx->ir_base[addr2];
-	if (insn1->op == IR_ADD && IR_IS_CONST_REF(insn1->op2)) {
-		if (insn1->op1 == addr2) {
-			uintptr_t offset1 = ctx->ir_base[insn1->op2].val.addr;
-			uintptr_t size2 = ir_type_size[type2];
+	if (insn1->op != IR_ADD) {
+		base1 = addr1;
+		off1 = IR_UNUSED;
+	} else if (ctx->ir_base[insn1->op2].op == IR_SYM) {
+		base1 = insn1->op2;
+		off1 = insn1->op1;
+	} else {
+		base1 = insn1->op1;
+		off1 = insn1->op2;
+	}
+	if (insn2->op != IR_ADD) {
+		base2 = addr2;
+		off2 = IR_UNUSED;
+	} else if (ctx->ir_base[insn2->op2].op == IR_SYM) {
+		base2 = insn2->op2;
+		off2 = insn2->op1;
+	} else {
+		base2 = insn2->op1;
+		off2 = insn2->op2;
+	}
+	if (base1 == base2) {
+		uintptr_t offset1, offset2;
 
-			return (offset1 < size2) ? IR_MUST_ALIAS : IR_NO_ALIAS;
-		} else if (insn2->op == IR_ADD && IR_IS_CONST_REF(insn1->op2) && insn1->op1 == insn2->op1) {
-			if (insn1->op2 == insn2->op2) {
-				return IR_MUST_ALIAS;
-			} else if (IR_IS_CONST_REF(insn1->op2) && IR_IS_CONST_REF(insn2->op2)) {
-				uintptr_t offset1 = ctx->ir_base[insn1->op2].val.addr;
-				uintptr_t offset2 = ctx->ir_base[insn2->op2].val.addr;
-
-				if (offset1 == offset2) {
-					return IR_MUST_ALIAS;
-				} else if (type1 == type2) {
-					return IR_NO_ALIAS;
-				} else {
-					/* check for partail intersection */
-					uintptr_t size1 = ir_type_size[type1];
-					uintptr_t size2 = ir_type_size[type2];
-
-					if (offset1	> offset2) {
-						return offset1 < offset2 + size2 ? IR_MUST_ALIAS : IR_NO_ALIAS;
-					} else {
-						return offset2 < offset1 + size1 ? IR_MUST_ALIAS : IR_NO_ALIAS;
-					}
-				}
-			}
+		if (!off1) {
+			offset1 = 0;
+		} else if (IR_IS_CONST_REF(off1) && !IR_IS_SYM_CONST(ctx->ir_base[off1].op)) {
+			offset1 = ctx->ir_base[off1].val.addr;
+		} else {
+			return IR_MAY_ALIAS;
 		}
-	} else if (insn2->op == IR_ADD && IR_IS_CONST_REF(insn2->op2)) {
-		if (insn2->op1 == addr1) {
-			uintptr_t offset2 = ctx->ir_base[insn2->op2].val.addr;
-			uintptr_t size1 = ir_type_size[type1];
-
-			return (offset2 < size1) ? IR_MUST_ALIAS : IR_NO_ALIAS;
+		if (!off2) {
+			offset2 = 0;
+		} else if (IR_IS_CONST_REF(off2) && !IR_IS_SYM_CONST(ctx->ir_base[off2].op)) {
+			offset2 = ctx->ir_base[off2].val.addr;
+		} else {
+			return IR_MAY_ALIAS;
+		}
+		if (offset1 == offset2) {
+			return IR_MUST_ALIAS;
+		} else if (offset1	< offset2) {
+			return offset1 + ir_type_size[type1] <= offset2 ? IR_NO_ALIAS : IR_MUST_ALIAS;
+		} else {
+			return offset2 + ir_type_size[type2] <= offset1 ? IR_NO_ALIAS : IR_MUST_ALIAS;
+		}
+	} else {
+		insn1 = &ctx->ir_base[base1];
+		insn2 = &ctx->ir_base[base2];
+		if ((insn1->op == IR_ALLOCA && (insn2->op == IR_ALLOCA || insn2->op == IR_SYM || insn2->op == IR_PARAM))
+		 || (insn1->op == IR_SYM && (insn2->op == IR_ALLOCA || insn2->op == IR_SYM))
+		 || (insn1->op == IR_PARAM && insn2->op == IR_ALLOCA)) {
+			return IR_NO_ALIAS;
 		}
 	}
 	return IR_MAY_ALIAS;
