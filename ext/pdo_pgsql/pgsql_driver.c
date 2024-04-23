@@ -1321,7 +1321,8 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
 	NULL,
 	pgsql_handle_in_transaction,
-	NULL /* get_gc */
+	NULL, /* get_gc */
+	pdo_pgsql_scanner
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */
