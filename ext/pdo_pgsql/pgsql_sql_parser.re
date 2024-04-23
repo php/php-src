@@ -30,12 +30,13 @@ int pdo_pgsql_scanner(pdo_scanner_t *s)
 	QUESTION	= [?];
 	ESCQUESTION	= [?][?];
 	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
-	SPECIALS	= [:?"'/-];
+	SPECIALS	= [eE:?"'/-];
 	MULTICHAR	= [:]{2,};
 	ANYNOEOF	= [\001-\377];
 	*/
 
 	/*!re2c
+		[eE](['](([']['])|([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
 		(["]((["]["])|ANYNOEOF\["])*["])		{ RET(PDO_PARSER_TEXT); }
 		(['](([']['])|ANYNOEOF\['])*['])		{ RET(PDO_PARSER_TEXT); }
 		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
