@@ -390,8 +390,7 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	array_init(&headers);
 	for (size_t i = 0; i < num_headers; i++) {
-		char *header;
-		header = curl_pushheader_bynum(push_headers, i);
+		char *header = curl_pushheader_bynum(push_headers, i);
 		add_next_index_string(&headers, header);
 	}
 
