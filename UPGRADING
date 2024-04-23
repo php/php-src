@@ -55,6 +55,8 @@ PHP 8.4 UPGRADE NOTES
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
   . mb_http_input() now always throws a ValueError if the $type is invalid.
+  . mb_http_output() now checks that the $encoding parameter does not
+    contain any null bytes. If it does, a ValueError is now thrown.
   . On invalid strings (those with encoding errors), mb_substr() now interprets
     character indices in the same manner as most other mbstring functions. This
     means that character indices returned by mb_strpos() can be passed to mb_substr().
