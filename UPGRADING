@@ -465,6 +465,7 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
     RFC: https://wiki.php.net/rfc/mb_trim
+    Note: this was amended by GH-13820 to fix GH-13815.
   . Added mb_ucfirst and mb_lcfirst functions.
     RFC: https://wiki.php.net/rfc/mb_ucfirst
 
