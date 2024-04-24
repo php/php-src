@@ -166,12 +166,12 @@ string(10) "SplSubject"
 bool(true)
 bool(false)
 bool(false)
-string(4) "self"
+string(1) "c"
 ** Method 2 - parameter 0
 bool(true)
 bool(false)
 bool(false)
-string(6) "parent"
+string(8) "stdClass"
 ** Method 3 - parameter 0
 bool(true)
 bool(false)
@@ -195,12 +195,12 @@ string(3) "int"
 bool(true)
 bool(false)
 bool(false)
-string(4) "self"
+string(1) "c"
 ** Function/method return type 4
 bool(true)
 bool(false)
 bool(false)
-string(6) "parent"
+string(8) "stdClass"
 ** Function/method return type 5
 bool(true)
 bool(false)

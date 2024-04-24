@@ -110,6 +110,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 ZEND_API void zend_type_release(zend_type type, bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
+		ZEND_ASSERT((!persistent && !ZEND_TYPE_USES_ARENA(type)) && "User defined list types must be arena allocated");
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
 			zend_type_release(*list_type, persistent);
