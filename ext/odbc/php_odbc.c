@@ -81,9 +81,40 @@ static void odbc_insert_new_result(odbc_connection *connection, zval *result) {
 	ZEND_ASSERT(Z_TYPE_P(result) == IS_OBJECT && instanceof_function(Z_OBJCE_P(result), odbc_result_ce));
 
 	odbc_result *res = Z_ODBC_RESULT_P(result);
+
 	res->index = connection->results.nNextFreeElement;
-	zend_hash_next_index_insert_new(&connection->results, result);
+	zend_hash_index_add_new(&connection->results, res->index, result);
 	Z_ADDREF_P(result);
+}
+
+static inline odbc_link *odbc_link_from_obj(zend_object *obj) {
+	return (odbc_link *)((char *)(obj) - XtOffsetOf(odbc_link, std));
+}
+
+static int _close_pconn_with_res(zval *zv, void *p)
+{
+	zend_resource *le = Z_RES_P(zv);
+	if (le->type != le_pconn) {
+		return ZEND_HASH_APPLY_KEEP;
+	}
+
+	odbc_connection *list_conn = ((odbc_connection *)(le->ptr));
+	odbc_connection *obj_conn = odbc_link_from_obj((zend_object*)p)->connection;
+	if (list_conn == obj_conn) {
+		return ZEND_HASH_APPLY_REMOVE;
+	}
+
+	return ZEND_HASH_APPLY_KEEP;
+}
+
+static int _close_pconn(zval *zv)
+{
+	zend_resource *le = Z_RES_P(zv);
+	if (le->type == le_pconn) {
+		return ZEND_HASH_APPLY_REMOVE;
+	} else {
+		return ZEND_HASH_APPLY_KEEP;
+	}
 }
 
 static void odbc_link_free(odbc_link *link)
@@ -101,6 +132,7 @@ static void odbc_link_free(odbc_link *link)
 		}
 		link->connection->hdbc = NULL;
 		link->connection->henv = NULL;
+		zend_hash_destroy(&link->connection->results);
 		efree(link->connection);
 		ODBCG(num_links)--;
 
@@ -115,10 +147,6 @@ static void odbc_link_free(odbc_link *link)
 		zend_string_release_ex(link->hash, link->persistent);
 		link->hash = NULL;
 	}
-}
-
-static inline odbc_link *odbc_link_from_obj(zend_object *obj) {
-	return (odbc_link *)((char *)(obj) - XtOffsetOf(odbc_link, std));
 }
 
 static zend_object *odbc_connection_create_object(zend_class_entry *class_type) {
@@ -253,9 +281,10 @@ static void close_results_with_connection(odbc_connection *conn) {
 		if (result->conn_ptr) {
 			odbc_result_free(result);
 		}
+		GC_DELREF(&result->std);
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_destroy(&conn->results);
+	zend_hash_clean(&conn->results);
 }
 
 /* disconnect, and if it fails, then issue a rollback for any pending transaction (lurcher) */
@@ -277,6 +306,7 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 	odbc_connection *conn = (odbc_connection *)rsrc->ptr;
 
 	close_results_with_connection(conn);
+	zend_hash_destroy(&conn->results);
 
 	/* If aborted via timer expiration, don't try to call any unixODBC function */
 	if (!(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
@@ -284,7 +314,6 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 		SQLFreeConnect(conn->hdbc);
 		SQLFreeEnv(conn->henv);
 	}
-	free(conn);
 
 	ODBCG(num_links)--;
 	ODBCG(num_persistent)--;
@@ -855,12 +884,7 @@ PHP_FUNCTION(odbc_close_all)
 
 	zend_hash_clean(&ODBCG(non_persistent_connections));
 
-	/* Loop through the persistent connection list, now close all persistent connections and their results */
-	ZEND_HASH_FOREACH_VAL(&EG(persistent_list), zv) {
-		if (Z_RES_P(zv)->type == le_pconn) {
-			zend_list_close(Z_RES_P(zv));
-		}
-	} ZEND_HASH_FOREACH_END();
+	zend_hash_apply(&EG(persistent_list), _close_pconn);
 }
 /* }}} */
 
@@ -2388,7 +2412,7 @@ try_and_get_another_connection:
 /* {{{ Close an ODBC connection */
 PHP_FUNCTION(odbc_close)
 {
-	zval *pv_conn, *zv;
+	zval *pv_conn;
 	odbc_link *link;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_conn, odbc_connection_ce) == FAILURE) {
@@ -2398,13 +2422,11 @@ PHP_FUNCTION(odbc_close)
 	link = Z_ODBC_LINK_P(pv_conn);
 	CHECK_ODBC_CONNECTION(link->connection);
 
-	odbc_link_free(link);
+	if (link->persistent) {
+		zend_hash_apply_with_argument(&EG(persistent_list), _close_pconn_with_res, (void *) Z_OBJ_P(pv_conn));
+	}
 
-	ZEND_HASH_FOREACH_VAL(&EG(persistent_list), zv) {
-		if (Z_RES_P(zv)->type == le_pconn && link->connection == Z_RES_P(zv)->ptr) {
-			zend_list_close(Z_RES_P(zv));
-		}
-	} ZEND_HASH_FOREACH_END();
+	odbc_link_free(link);
 }
 /* }}} */
 
