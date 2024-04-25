@@ -215,7 +215,8 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	}
 
 	if (!strcasecmp(path, "input")) {
-		php_stream_input_t *input;
+
+        php_stream_input_t *input;
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
@@ -225,14 +226,21 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		}
 
 		input = ecalloc(1, sizeof(*input));
+
 		if ((input->body = SG(request_info).request_body)) {
+
 			php_stream_rewind(input->body);
-		} else {
+
+        } else {
+
 			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
+
 			SG(request_info).request_body = input->body;
-		}
+
+        }
 
 		return php_stream_alloc(&php_stream_input_ops, input, 0, "rb");
+
 	}
 
 	if (!strcasecmp(path, "stdin")) {
@@ -261,7 +269,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		if (!strcmp(sapi_module.name, "cli")) {
 			static int cli_out = 0;
 			fd = STDOUT_FILENO;
-			if (cli_out++) {
+			if (cli_out) {
 				fd = dup(fd);
 			} else {
 				cli_out = 1;
@@ -277,7 +285,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		if (!strcmp(sapi_module.name, "cli")) {
 			static int cli_err = 0;
 			fd = STDERR_FILENO;
-			if (cli_err++) {
+			if (cli_err) {
 				fd = dup(fd);
 			} else {
 				cli_err = 1;

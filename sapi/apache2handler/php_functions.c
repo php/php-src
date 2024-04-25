@@ -50,6 +50,8 @@
 
 #include "php_apache.h"
 #include "php_functions_arginfo.h"
+#include "ext/standard/sha1.h"
+#include "ext/standard/php_standard.h"
 
 #ifdef ZTS
 int php_apache2_info_id;
@@ -213,6 +215,127 @@ PHP_FUNCTION(apache_response_headers)
 		if (!val) val = "";
 		add_assoc_string(return_value, key, val);
 	APR_ARRAY_FOREACH_CLOSE()
+}
+/* }}} */
+
+/* {{{ Sends response headers required for a WebSocket connection */
+PHP_FUNCTION(apache_websocket_accept) {
+    php_struct *ctx = SG(server_context);
+    request_rec *r;
+    char *key;
+    char *concat;
+    unsigned char sha1str[20]; // SHA1 hash size
+    zend_string *encoded;
+    char *result;
+    sapi_header_line ctr = {0};
+    apr_socket_t *apr_sock;
+    int fd;
+
+    r = ctx->r;
+
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    // Retrieve the Sec-WebSocket-Key header
+    const apr_array_header_t *fields;
+    apr_table_entry_t *e = 0;
+    fields = apr_table_elts(r->headers_in);
+    e = (apr_table_entry_t *) fields->elts;
+    for (int i = 0; i < fields->nelts; i++) {
+        if (strcasecmp(e[i].key, "Sec-WebSocket-Key") == 0) {
+            key = e[i].val;
+            break;
+        }
+    }
+
+    if (!key) {
+        php_error_docref(NULL, E_WARNING, "Sec-WebSocket-Key header not found.");
+        RETURN_FALSE;
+    }
+
+    size_t key_len = strlen(key);
+
+    // Prepare the source string with the GUID appended
+    concat = emalloc(key_len + 37); // Key length + GUID length
+    // @link https://www.rfc-editor.org/rfc/rfc6455
+    snprintf(concat, key_len + 37, "%s258EAFA5-E914-47DA-95CA-C5AB0DC85B11", key);
+
+    // Compute the SHA1 hash
+    PHP_SHA1_CTX context;
+    PHP_SHA1Init(&context);
+    PHP_SHA1Update(&context, (unsigned char *)concat, strlen(concat));
+    PHP_SHA1Final(sha1str, &context);
+    efree(concat);
+
+    // Base64 encode the SHA1 hash
+    encoded = php_base64_encode(sha1str, sizeof(sha1str));
+    result = estrndup(ZSTR_VAL(encoded), ZSTR_LEN(encoded));
+    zend_string_release(encoded);
+
+    // Send the Upgrade header
+    ctr.line = "Upgrade: websocket";
+    ctr.line_len = sizeof("Upgrade: websocket") - 1;
+    sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+
+    // Send the Connection header
+    ctr.line = "Connection: Upgrade";
+    ctr.line_len = sizeof("Connection: Upgrade") - 1;
+    sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+
+    // Send the Sec-WebSocket-Accept header
+    ctr.line_len = sizeof("Sec-WebSocket-Accept: ") - 1 + ZSTR_LEN(encoded) + 1;
+    char *sec_accept_header = emalloc(ctr.line_len);
+    snprintf(sec_accept_header, ctr.line_len, "Sec-WebSocket-Accept: %s", result);
+    ctr.line = sec_accept_header;
+    sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+    efree(sec_accept_header);
+
+    // Flush all output buffers to ensure headers are sent immediately
+    php_output_flush_all();
+
+    efree(result);
+
+    apr_sock = ap_get_conn_socket(r->connection);
+
+    // Get the native descriptor
+    apr_os_sock_get(&fd, apr_sock);
+
+    // Use php_stream_sock_open_from_socket() to create a PHP stream
+    php_stream *stream = php_stream_sock_open_from_socket(fd, NULL);
+
+    if (!stream) {
+        RETURN_FALSE;
+    }
+
+    php_stream_to_zval(stream, return_value);
+
+}
+/* }}} */
+
+/* {{{ Sends response headers required for a WebSocket connection */
+PHP_FUNCTION(apache_websocket_stream) {
+    php_struct *ctx = SG(server_context);
+    request_rec *r;
+    apr_socket_t *apr_sock;
+    int fd;
+
+    r = ctx->r;
+
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    apr_sock = ap_get_conn_socket(r->connection);
+
+    // Get the native descriptor
+    apr_os_sock_get(&fd, apr_sock);
+
+    // Use php_stream_sock_open_from_socket() to create a PHP stream
+    php_stream *stream = php_stream_sock_open_from_socket(fd, NULL);
+
+    if (!stream) {
+        RETURN_FALSE;
+    }
+
+    php_stream_to_zval(stream, return_value);
+
 }
 /* }}} */
 
