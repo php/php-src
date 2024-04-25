@@ -161,7 +161,6 @@ class IntlDateFormatter
 
     /**
      * @param int $offset
-     * @tentative-return-type
      */
     public function parseToCalendar(string $string, &$offset = null): int|float|false {}
 
