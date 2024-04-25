@@ -225,6 +225,10 @@ PHP_FUNCTION(apache_connection_stream) {
     int fd;
     php_stream *stream;
 
+
+    // Check for proper parsing of parameters (none expected)
+    ZEND_PARSE_PARAMETERS_NONE();
+
     // Ensure the server context is available
     if (!ctx) {
         php_error_docref(NULL, E_WARNING, "Server context is not available");
@@ -238,9 +242,6 @@ PHP_FUNCTION(apache_connection_stream) {
         php_error_docref(NULL, E_WARNING, "Request record is not available");
         RETURN_FALSE;
     }
-
-    // Check for proper parsing of parameters (none expected)
-    ZEND_PARSE_PARAMETERS_NONE();
 
     apr_sock = ap_get_conn_socket(r->connection);
 
