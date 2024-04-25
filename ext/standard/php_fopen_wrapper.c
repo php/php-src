@@ -243,32 +243,21 @@ static php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const c
 	}
 
 	if (!strcasecmp(path, "input")) {
-
         php_stream_input_t *input;
-
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			php_stream_wrapper_warn(wrapper, context, options,
 				Disabled,
 				"URL file-access is disabled in the server configuration");
 			return NULL;
 		}
-
 		input = ecalloc(1, sizeof(*input));
-
 		if ((input->body = SG(request_info).request_body)) {
-
 			php_stream_rewind(input->body);
-
         } else {
-
 			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
-
 			SG(request_info).request_body = input->body;
-
         }
-
 		return php_stream_alloc(&php_stream_input_ops, input, 0, "rb");
-
 	}
 
 	if (!strcasecmp(path, "stdin")) {
