@@ -217,7 +217,7 @@ PHP_FUNCTION(apache_response_headers)
 }
 /* }}} */
 
-/* {{{ The allows for direct select calls on apache's connection socket */
+/* {{{ The allows for direct select calls on Apache's connection socket */
 PHP_FUNCTION(apache_connection_stream) {
     php_struct *ctx = SG(server_context);
     request_rec *r;
