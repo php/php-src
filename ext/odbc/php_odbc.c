@@ -228,7 +228,8 @@ static void odbc_result_free(odbc_result *res)
 
 	HashTable *tmp = &res->conn_ptr->results;
 	res->conn_ptr = NULL;
-	zend_hash_index_del(tmp, res->index);
+	zend_result status = zend_hash_index_del(tmp, res->index);
+	ZEND_ASSERT(status == SUCCESS);
 }
 
 static void odbc_result_free_obj(zend_object *obj) {
@@ -281,7 +282,6 @@ static void close_results_with_connection(odbc_connection *conn) {
 		if (result->conn_ptr) {
 			odbc_result_free(result);
 		}
-		GC_DELREF(&result->std);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_clean(&conn->results);
@@ -2126,7 +2126,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	object_init_ex(zv, odbc_connection_ce);
 	link = Z_ODBC_LINK_P(zv);
 	link->connection = pecalloc(1, sizeof(odbc_connection), persistent);
-	zend_hash_init(&link->connection->results, 0, NULL, NULL, 1);
+	zend_hash_init(&link->connection->results, 0, NULL, ZVAL_PTR_DTOR, 1);
 	link->persistent = persistent;
 	link->hash = zend_string_init(hash, hash_len, persistent);
 	ret = SQLAllocEnv(&link->connection->henv);
