@@ -223,25 +223,50 @@ PHP_FUNCTION(apache_connection_stream) {
     request_rec *r;
     apr_socket_t *apr_sock;
     int fd;
+    php_stream *stream;
+
+    // Ensure the server context is available
+    if (!ctx) {
+        php_error_docref(NULL, E_WARNING, "Server context is not available");
+        RETURN_FALSE;
+    }
 
     r = ctx->r;
 
+    // Ensure the request record is available
+    if (!r) {
+        php_error_docref(NULL, E_WARNING, "Request record is not available");
+        RETURN_FALSE;
+    }
+
+    // Check for proper parsing of parameters (none expected)
     ZEND_PARSE_PARAMETERS_NONE();
 
     apr_sock = ap_get_conn_socket(r->connection);
 
-    // Get the native descriptor
-    apr_os_sock_get(&fd, apr_sock);
-
-    // Use php_stream_sock_open_from_socket() to create a PHP stream
-    php_stream *stream = php_stream_sock_open_from_socket(fd, NULL);
-
-    if (!stream) {
+    // Ensure the connection socket is available
+    if (!apr_sock) {
+        php_error_docref(NULL, E_WARNING, "Failed to obtain connection socket");
         RETURN_FALSE;
     }
 
-    php_stream_to_zval(stream, return_value);
+    // Get the native descriptor
+    if (apr_os_sock_get(&fd, apr_sock) != APR_SUCCESS) {
+        php_error_docref(NULL, E_WARNING, "Failed to get native socket descriptor");
+        RETURN_FALSE;
+    }
 
+    // Use php_stream_sock_open_from_socket() to create a PHP stream
+    stream = php_stream_sock_open_from_socket(fd, NULL);
+
+    // Check if the stream was successfully created
+    if (!stream) {
+        php_error_docref(NULL, E_WARNING, "Failed to open stream from socket");
+        RETURN_FALSE;
+    }
+
+    // Convert the php_stream to a zval and return it
+    php_stream_to_zval(stream, return_value);
 }
 /* }}} */
 
