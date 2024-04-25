@@ -78,7 +78,10 @@ static zend_object_handlers odbc_connection_object_handlers, odbc_result_object_
 #define Z_ODBC_RESULT_P(zv) odbc_result_from_obj(Z_OBJ_P(zv))
 
 static void odbc_insert_new_result(odbc_connection *connection, zval *result) {
-	ZEND_ASSERT(Z_TYPE_P(result) == IS_OBJECT && instanceof_function(Z_OBJCE_P(result), odbc_result_ce));
+	ZEND_ASSERT(Z_TYPE_P(result) == IS_OBJECT);
+#if ZEND_DEBUG
+	ZEND_ASSERT(instanceof_function(Z_OBJCE_P(result), odbc_result_ce));
+#endif
 
 	odbc_result *res = Z_ODBC_RESULT_P(result);
 
