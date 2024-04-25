@@ -7714,7 +7714,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 		zend_string *separator = zend_empty_string;
 		zend_string *function = filename;
 		char *parens = "";
-		
+
 		if (CG(active_op_array) && CG(active_op_array)->function_name) {
 			if (CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE) {
 				/* If the parent function is a closure, don't redundantly
@@ -8982,7 +8982,7 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 	}
 	if ((opcode == ZEND_POW) && zval_get_long(op1) == 0 && zval_get_long(op2) < 0) {
 		/* 0 ** (<=0) throws a division by zero error. */
-		zend_error(E_DEPRECATED, "Power of base 0 and negative exponent is deprecated");
+        return 1;
 	}
 	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
 		/* Shift by negative number throws an error. */
