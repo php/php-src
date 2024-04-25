@@ -1899,6 +1899,8 @@ function array_filter(array $array, ?callable $callback = null, int $mode = 0): 
 
 function array_find(array $array, callable $callback): mixed {}
 
+function array_find_key(array $array, callable $callback): mixed {}
+
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
 /**

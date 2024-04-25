@@ -6676,6 +6676,29 @@ PHP_FUNCTION(array_find)
 }
 /* }}} */
 
+/* {{{ Search within an array and returns the first found element key. */
+PHP_FUNCTION(array_find_key)
+{
+	zval *array = NULL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+	bool has_result = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_array_find(Z_ARR_P(array), fci, fci_cache, return_value, NULL, &has_result, false) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	if (!has_result) {
+		RETURN_NULL();
+	}
+}
+/* }}} */
+
 /* {{{ Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
 {
