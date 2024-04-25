@@ -982,9 +982,7 @@ binop_fp:
 						} else if ((ir_op_flags[op_insn->op] & IR_OP_FLAG_COMMUTATIVE)
 						 && ctx->ir_base[op_insn->op2].op == IR_RLOAD
 						 && ctx->ir_base[op_insn->op2].op2 == insn->op3) {
-							ir_ref tmp = op_insn->op1;
-							op_insn->op1 = op_insn->op2;
-							op_insn->op2 = tmp;
+							SWAP_REFS(op_insn->op1, op_insn->op2);
 							ctx->rules[insn->op2] = IR_FUSED | IR_BINOP_INT;
 							ctx->rules[op_insn->op1] = IR_SKIPPED | IR_RLOAD;
 							return IR_REG_BINOP_INT;

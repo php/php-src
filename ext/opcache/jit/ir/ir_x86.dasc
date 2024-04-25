@@ -1529,9 +1529,7 @@ static bool ir_match_try_fuse_load(ir_ctx *ctx, ir_ref ref, ir_ref root);
 
 static void ir_swap_ops(ir_insn *insn)
 {
-	ir_ref tmp = insn->op1;
-	insn->op1 = insn->op2;
-	insn->op2 = tmp;
+	SWAP_REFS(insn->op1, insn->op2);
 }
 
 static bool ir_match_try_revert_lea_to_add(ir_ctx *ctx, ir_ref ref)
@@ -5744,12 +5742,9 @@ static ir_op ir_emit_cmp_fp_common(ir_ctx *ctx, ir_ref root, ir_ref cmp_ref, ir_
 	op2_reg = ctx->regs[cmp_ref][2];
 
 	if (op1_reg == IR_REG_NONE && op2_reg != IR_REG_NONE && (op == IR_EQ || op == IR_NE)) {
-		ir_ref tmp;
 		ir_reg tmp_reg;
 
-		tmp = op1;
-		op1 = op2;
-		op2 = tmp;
+		SWAP_REFS(op1, op2);
 		tmp_reg = op1_reg;
 		op1_reg = op2_reg;
 		op2_reg = tmp_reg;

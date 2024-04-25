@@ -987,6 +987,7 @@ IR_ALWAYS_INLINE uint32_t ir_insn_len(const ir_insn *insn)
 
 /* Temporary: SCCP -> CFG */
 #define IR_SCCP_DONE           (1<<25)
+#define IR_CFG_REACHABLE       (1<<26)
 
 /* Temporary: Dominators -> Loops */
 #define IR_NO_LOOPS            (1<<25)

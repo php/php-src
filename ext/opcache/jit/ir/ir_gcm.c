@@ -15,6 +15,7 @@
 #define IR_GCM_EARLY_BLOCK(b)        ((uint32_t)-((int32_t)(b)))
 
 #define IR_GCM_SPLIT 1
+#define IR_SCHEDULE_SWAP_OPS 1
 
 static uint32_t ir_gcm_schedule_early(ir_ctx *ctx, ir_ref ref, ir_list *queue_late)
 {
@@ -1131,6 +1132,37 @@ restart:
 				new_insn->op1 = _xlat[insn->op1];
 				new_insn->op2 = _xlat[insn->op2];
 				new_insn->op3 = insn->op3;
+#if IR_SCHEDULE_SWAP_OPS
+				/* Swap operands according to folding rules */
+				if (new_insn->op1 < new_insn->op2) {
+					switch (new_insn->op) {
+						case IR_EQ:
+						case IR_NE:
+						case IR_ADD:
+						case IR_MUL:
+						case IR_ADD_OV:
+						case IR_MUL_OV:
+						case IR_OR:
+						case IR_AND:
+						case IR_XOR:
+						case IR_MIN:
+						case IR_MAX:
+							SWAP_REFS(new_insn->op1, new_insn->op2);
+							break;
+						case IR_LT:
+						case IR_GE:
+						case IR_LE:
+						case IR_GT:
+						case IR_ULT:
+						case IR_UGE:
+						case IR_ULE:
+						case IR_UGT:
+							SWAP_REFS(new_insn->op1, new_insn->op2);
+							new_insn->op ^= 3; /* [U]LT <-> [U]GT, [U]LE <-> [U]GE */
+							break;
+					}
+				}
+#endif
 				break;
 			case 3:
 				new_insn->op1 = _xlat[insn->op1];

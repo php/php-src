@@ -2405,9 +2405,22 @@ IR_FOLD(TRUNC(SEXT))
 IR_FOLD(TRUNC(BITCAST))
 IR_FOLD(ZEXT(BITCAST))
 IR_FOLD(SEXT(BITCAST))
+{
+	if (IR_IS_TYPE_INT(ctx->ir_base[op1_insn->op1].type)) {
+		op1 = op1_insn->op1;
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
+}
+
 IR_FOLD(BITCAST(BITCAST))
 {
-	if (IR_IS_TYPE_INT(op1_insn->type)) {
+	ir_type dst_type = IR_OPT_TYPE(opt);
+	ir_type src_type = ctx->ir_base[op1_insn->op1].type;
+
+	if (src_type == dst_type) {
+		IR_FOLD_COPY(op1_insn->op1);
+	} else if (IR_IS_TYPE_INT(src_type) == IR_IS_TYPE_INT(dst_type)) {
 		op1 = op1_insn->op1;
 		IR_FOLD_RESTART;
 	}
@@ -2420,6 +2433,26 @@ IR_FOLD(SEXT(SEXT))
 {
 	op1 = op1_insn->op1;
 	IR_FOLD_RESTART;
+}
+
+IR_FOLD(SEXT(ZEXT))
+{
+	op1 = op1_insn->op1;
+	opt = IR_OPT(IR_ZEXT, IR_OPT_TYPE(opt));
+	IR_FOLD_RESTART;
+}
+
+IR_FOLD(SEXT(AND))
+{
+	if (IR_IS_CONST_REF(op1_insn->op2)
+	 && !IR_IS_SYM_CONST(ctx->ir_base[op1_insn->op2].op)
+	 && !(ctx->ir_base[op1_insn->op2].val.u64
+			& (1ULL << ((ir_type_size[op1_insn->type] * 8) - 1)))) {
+		/* SEXT(AND(_, 0b0*)) -> ZEXT(AND(_, 0b0*)) */
+		opt = IR_OPT(IR_ZEXT, IR_OPT_TYPE(opt));
+		IR_FOLD_RESTART;
+	}
+	IR_FOLD_NEXT;
 }
 
 IR_FOLD(TRUNC(AND))
@@ -2838,9 +2871,7 @@ IR_FOLD(MUL(_, _))
 IR_FOLD_NAMED(swap_ops)
 {
 	if (op1 < op2) {  /* move lower ref to op2 */
-		ir_ref tmp = op1;
-		op1 = op2;
-		op2 = tmp;
+		SWAP_REFS(op1, op2);
 		IR_FOLD_RESTART;
 	}
     IR_FOLD_NEXT;
@@ -2850,9 +2881,7 @@ IR_FOLD(ADD_OV(_, _))
 IR_FOLD(MUL_OV(_, _))
 {
 	if (op1 < op2) {  /* move lower ref to op2 */
-		ir_ref tmp = op1;
-		op1 = op2;
-		op2 = tmp;
+		SWAP_REFS(op1, op2);
 		IR_FOLD_RESTART;
 	}
 	/* skip CSE ??? */
@@ -2921,9 +2950,7 @@ IR_FOLD(GT(_, _))
 			IR_FOLD_BOOL((opt ^ (opt >> 1)) & 1);
 		}
 	} else if (op1 < op2) {  /* move lower ref to op2 */
-		ir_ref tmp = op1;
-		op1 = op2;
-		op2 = tmp;
+		SWAP_REFS(op1, op2);
 		opt ^= 3; /* [U]LT <-> [U]GT, [U]LE <-> [U]GE */
 		IR_FOLD_RESTART;
 	}
@@ -2939,9 +2966,7 @@ IR_FOLD(UGT(_, _))
 		/* a >= a => true (two low bits are differ) */
 		IR_FOLD_BOOL((opt ^ (opt >> 1)) & 1);
 	} else if (op1 < op2) {  /* move lower ref to op2 */
-		ir_ref tmp = op1;
-		op1 = op2;
-		op2 = tmp;
+		SWAP_REFS(op1, op2);
 		opt ^= 3; /* [U]LT <-> [U]GT, [U]LE <-> [U]GE */
 	}
 	IR_FOLD_NEXT;
