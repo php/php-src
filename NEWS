@@ -103,6 +103,9 @@ PHP                                                                        NEWS
 
 - MySQLnd:
   . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
+  . Fixed bug GH-10599 (Apache crash on Windows when using a self-referencing
+    anonymous function inside a class with an active mysqli connection).
+    (nielsdos)
 
 - Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
@@ -136,6 +139,7 @@ PHP                                                                        NEWS
     more in line with platforms limits. (David Carlier)
   . Added pcntl_getcpu for Linux/FreeBSD. (David Carlier)
   . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
+  . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)

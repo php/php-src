@@ -2199,7 +2199,7 @@ int main(void)
       ac_cv_write_stdout=no
     ],[
       case $host_alias in
-        *linux*)
+        *linux*|*midipix)
           ac_cv_write_stdout=yes
           ;;
         *)

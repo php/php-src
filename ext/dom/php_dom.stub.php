@@ -1515,9 +1515,7 @@ namespace DOM
     {
         /** @readonly */
         public Implementation $implementation;
-        /** @readonly */
         public string $URL;
-        /** @readonly */
         public string $documentURI;
         public string $characterSet;
         public string $charset;

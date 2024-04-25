@@ -967,6 +967,145 @@ static ir_ref ir_promote_i2i(ir_ctx *ctx, ir_type type, ir_ref ref, ir_ref use)
 	return ref;
 }
 
+static ir_ref ir_ext_const(ir_ctx *ctx, ir_insn *val_insn, ir_op op, ir_type type)
+{
+	ir_val new_val;
+
+	switch (val_insn->type) {
+		default:
+			IR_ASSERT(0);
+		case IR_I8:
+		case IR_U8:
+		case IR_BOOL:
+			if (op == IR_SEXT) {
+				new_val.i64 = (int64_t)val_insn->val.i8;
+			} else {
+				new_val.u64 = (uint64_t)val_insn->val.u8;
+			}
+			break;
+		case IR_I16:
+		case IR_U16:
+			if (op == IR_SEXT) {
+				new_val.i64 = (int64_t)val_insn->val.i16;
+			} else {
+				new_val.u64 = (uint64_t)val_insn->val.u16;
+			}
+			break;
+		case IR_I32:
+		case IR_U32:
+			if (op == IR_SEXT) {
+				new_val.i64 = (int64_t)val_insn->val.i32;
+			} else {
+				new_val.u64 = (uint64_t)val_insn->val.u32;
+			}
+			break;
+	}
+	return ir_const(ctx, new_val, type);
+}
+
+static ir_ref ir_ext_ref(ir_ctx *ctx, ir_ref var_ref, ir_ref src_ref, ir_op op, ir_type type)
+{
+	ir_ref new_ext_ref = ir_emit1(ctx, IR_OPTX(op, type, 1), src_ref);
+
+	ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_count * sizeof(ir_use_list));
+	ctx->use_lists[new_ext_ref].count = 0;
+	ctx->use_lists[new_ext_ref].refs = IR_UNUSED;
+	ir_use_list_add(ctx, new_ext_ref, var_ref);
+	if (!IR_IS_CONST_REF(src_ref)) {
+		ir_use_list_replace_one(ctx, src_ref, var_ref, new_ext_ref);
+	}
+	return new_ext_ref;
+}
+
+static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn, ir_bitqueue *worklist)
+{
+	ir_type type = insn->type;
+	ir_op op = insn->op;
+	ir_ref ref = insn->op1;
+	ir_insn *phi_insn = &ctx->ir_base[ref];
+	ir_insn *op_insn;
+	ir_use_list *use_list;
+	ir_ref n, *p, use, op_ref;
+
+	/* Check for simple induction variable in the form: x2 = PHI(loop, x1, x3); x3 = ADD(x2, _); */
+	if (phi_insn->op != IR_PHI
+	 || phi_insn->inputs_count != 3 /* (2 values) */
+	 || ctx->ir_base[phi_insn->op1].op != IR_LOOP_BEGIN) {
+		return 0;
+	}
+
+	op_ref = phi_insn->op3;
+	op_insn = &ctx->ir_base[op_ref];
+	if ((op_insn->op != IR_ADD && op_insn->op != IR_SUB && op_insn->op != IR_MUL)
+	 || op_insn->op1 != ref
+	 || op_insn->op2 == ref
+	 || ctx->use_lists[op_ref].count != 1) {
+		return 0;
+	}
+
+	/* Check if we may change the type of the induction variable */
+	use_list = &ctx->use_lists[ref];
+	n = use_list->count;
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		use = *p;
+		if (use == op_ref || use == ext_ref) {
+			continue;
+		} else {
+			ir_insn *use_insn = &ctx->ir_base[use];
+
+			if ((use_insn->op >= IR_EQ && use_insn->op <= IR_UGT)
+			 && use_insn->op1 == ref
+			 && use_insn->op2 != ref) {
+				continue;
+			} else if (use_insn->op == IR_IF) {
+				continue;
+			} else {
+				return 0;
+			}
+		}
+	}
+
+	phi_insn->type = insn->type;
+	op_insn->type = insn->type;
+
+	use_list = &ctx->use_lists[ref];
+	n = use_list->count;
+	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
+		use = *p;
+		if (use == ext_ref) {
+			continue;
+		} else {
+			ir_insn *use_insn = &ctx->ir_base[use];
+
+			if (use_insn->op == IR_IF) {
+				continue;
+			}
+			IR_ASSERT(((use_insn->op >= IR_EQ && use_insn->op <= IR_UGT)
+			  || use_insn->op == IR_ADD || use_insn->op == IR_SUB || use_insn->op == IR_MUL)
+			 && use_insn->op1 == ref
+			 && use_insn->op2 != ref);
+			if (IR_IS_CONST_REF(use_insn->op2)
+			 && !IR_IS_SYM_CONST(ctx->ir_base[use_insn->op2].op)) {
+				ctx->ir_base[use].op2 = ir_ext_const(ctx, &ctx->ir_base[use_insn->op2], op, type);
+			} else {
+				ctx->ir_base[use].op2 = ir_ext_ref(ctx, use, use_insn->op2, op, type);
+			}
+		}
+	}
+
+	ir_sccp_replace_insn2(ctx, ext_ref, ref, worklist);
+
+	phi_insn = &ctx->ir_base[ref];
+	if (IR_IS_CONST_REF(phi_insn->op2)
+	 && !IR_IS_SYM_CONST(ctx->ir_base[phi_insn->op2].op)) {
+		ctx->ir_base[ref].op2 = ir_ext_const(ctx, &ctx->ir_base[phi_insn->op2], op, type);
+	} else {
+		ctx->ir_base[ref].op2 = ir_ext_ref(ctx, ref, phi_insn->op2, op, type);
+	}
+
+	return 1;
+}
+
 int ir_sccp(ir_ctx *ctx)
 {
 	ir_ref i, j, n, *p, use;
@@ -1025,12 +1164,19 @@ int ir_sccp(ir_ctx *ctx)
 				}
 				if (!may_benefit) {
 					IR_MAKE_BOTTOM(i);
-					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC) {
+					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
+					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
 						ir_bitqueue_add(&worklist2, i);
 					}
 				} else if (!ir_sccp_fold(ctx, _values, i, insn->opt, insn->op1, insn->op2, insn->op3)) {
 					/* not changed */
 					continue;
+				} else if (_values[i].optx == IR_BOTTOM) {
+					insn = &ctx->ir_base[i];
+					if (insn->op == IR_FP2FP || insn->op == IR_FP2INT || insn->op == IR_TRUNC
+					 || insn->op == IR_ZEXT || insn->op == IR_SEXT) {
+						ir_bitqueue_add(&worklist2, i);
+					}
 				}
 			} else {
 				IR_MAKE_BOTTOM(i);
@@ -1298,15 +1444,17 @@ int ir_sccp(ir_ctx *ctx)
 								ir_ref ref = ir_promote_d2f(ctx, insn->op1, i);
 								insn->op1 = ref;
 								ir_sccp_replace_insn2(ctx, i, ref, &worklist2);
+								break;
 							}
 						} else {
 							if (ir_may_promote_f2d(ctx, insn->op1)) {
 								ir_ref ref = ir_promote_f2d(ctx, insn->op1, i);
 								insn->op1 = ref;
 								ir_sccp_replace_insn2(ctx, i, ref, &worklist2);
+								break;
 							}
 						}
-						break;
+						goto folding;
 					case IR_FP2INT:
 						if (ctx->ir_base[insn->op1].type == IR_DOUBLE) {
 							if (ir_may_promote_d2f(ctx, insn->op1)) {
@@ -1317,15 +1465,25 @@ int ir_sccp(ir_ctx *ctx)
 								insn->op1 = ir_promote_f2d(ctx, insn->op1, i);
 							}
 						}
-						break;
+						goto folding;
 					case IR_TRUNC:
 						if (ir_may_promote_i2i(ctx, insn->type, insn->op1)) {
 							ir_ref ref = ir_promote_i2i(ctx, insn->type, insn->op1, i);
 							insn->op1 = ref;
 							ir_sccp_replace_insn2(ctx, i, ref, &worklist2);
+							break;
 						}
+						goto folding;
+					case IR_SEXT:
+					case IR_ZEXT:
+						if (ir_try_promote_ext(ctx, i, insn, &worklist2)) {
+							break;
+						}
+						goto folding;
+					case IR_PHI:
 						break;
 					default:
+folding:
 						ir_sccp_fold2(ctx, i, &worklist2);
 						break;
 				}

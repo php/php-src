@@ -550,7 +550,7 @@ if test "$PHP_FPM" != "no"; then
     CFLAGS="$CFLAGS_save"
   fi
 
-  PHP_SUBST_OLD(php_fpm_systemd)
+  AC_SUBST([php_fpm_systemd])
   AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
@@ -565,14 +565,14 @@ if test "$PHP_FPM" != "no"; then
     php_fpm_group="$PHP_FPM_GROUP"
   fi
 
-  PHP_SUBST_OLD(php_fpm_user)
-  PHP_SUBST_OLD(php_fpm_group)
+  AC_SUBST([php_fpm_user])
+  AC_SUBST([php_fpm_group])
   php_fpm_sysconfdir=`eval echo $sysconfdir`
-  PHP_SUBST_OLD(php_fpm_sysconfdir)
+  AC_SUBST([php_fpm_sysconfdir])
   php_fpm_localstatedir=`eval echo $localstatedir`
-  PHP_SUBST_OLD(php_fpm_localstatedir)
+  AC_SUBST([php_fpm_localstatedir])
   php_fpm_prefix=`eval echo $prefix`
-  PHP_SUBST_OLD(php_fpm_prefix)
+  AC_SUBST([php_fpm_prefix])
 
   AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
   AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])

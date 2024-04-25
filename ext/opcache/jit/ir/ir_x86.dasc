@@ -1285,6 +1285,9 @@ op2_const:
 			insn = &ctx->ir_base[ref];
 			if (IR_IS_CONST_REF(insn->op3)) {
 				n = ir_add_const_tmp_reg(ctx, insn->op3, 3, n, constraints);
+			} else if (ir_rule(ctx, insn->op3) == IR_STATIC_ALLOCA) {
+				constraints->tmp_regs[n] = IR_TMP_REG(3, IR_ADDR, IR_LOAD_SUB_REF, IR_DEF_SUB_REF);
+				n++;
 			}
 			break;
 		case IR_STORE_INT:
@@ -2281,7 +2284,7 @@ binop_fp:
 					}
 				}
 				ctx->flags |= IR_USE_FRAME_POINTER;
-				ctx->flags2 |= IR_HAS_ALLOCA;
+				ctx->flags2 |= IR_HAS_ALLOCA | IR_16B_FRAME_ALIGNMENT;
 			}
 			return IR_ALLOCA;
 		case IR_VSTORE:
@@ -2807,7 +2810,7 @@ store_int:
 
 				for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 					if (ctx->ir_base[*p].op != IR_VA_END) {
-						return IR_VADDR;
+						return IR_STATIC_ALLOCA;
 					}
 				}
 			}
@@ -7431,7 +7434,9 @@ static void ir_emit_vstore_int(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	fp = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 	mem = IR_MEM_BO(fp, IR_SPILL_POS_TO_OFFSET(var_insn->op3));
 	if ((op3_reg == IR_REG_NONE || IR_REG_SPILLED(op3_reg))
-	 && !IR_IS_CONST_REF(insn->op3) && ir_is_same_mem_var(ctx, insn->op3, var_insn->op3)) {
+	 && !IR_IS_CONST_REF(insn->op3)
+	 && ir_rule(ctx, insn->op3) != IR_STATIC_ALLOCA
+	 && ir_is_same_mem_var(ctx, insn->op3, var_insn->op3)) {
 		return; // fake store
 	}
 	if (IR_IS_CONST_REF(insn->op3)) {
@@ -7458,7 +7463,9 @@ static void ir_emit_vstore_fp(ir_ctx *ctx, ir_ref ref, ir_insn *insn)
 	fp = (ctx->flags & IR_USE_FRAME_POINTER) ? IR_REG_FRAME_POINTER : IR_REG_STACK_POINTER;
 	mem = IR_MEM_BO(fp, IR_SPILL_POS_TO_OFFSET(var_insn->op3));
 	if ((op3_reg == IR_REG_NONE || IR_REG_SPILLED(op3_reg))
-	 && !IR_IS_CONST_REF(insn->op3) && ir_is_same_mem_var(ctx, insn->op3, var_insn->op3)) {
+	 && !IR_IS_CONST_REF(insn->op3)
+	 && ir_rule(ctx, insn->op3) != IR_STATIC_ALLOCA
+	 && ir_is_same_mem_var(ctx, insn->op3, var_insn->op3)) {
 		return; // fake store
 	}
 	if (IR_IS_CONST_REF(insn->op3)) {
@@ -7763,18 +7770,14 @@ static void ir_emit_alloca(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		IR_ASSERT(IR_IS_TYPE_UNSIGNED(val->type) || val->val.i64 >= 0);
 		IR_ASSERT(IR_IS_SIGNED_32BIT(val->val.i64));
 
-		if (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) {
-			/* Stack must be 16 byte aligned */
-			size = IR_ALIGNED_SIZE(size, 16);
-		} else {
-			size = IR_ALIGNED_SIZE(size, 8);
-		}
+		/* Stack must be 16 byte aligned */
+		size = IR_ALIGNED_SIZE(size, 16);
 		|	ASM_REG_IMM_OP sub, IR_ADDR, IR_REG_RSP, size
 		if (!(ctx->flags & IR_USE_FRAME_POINTER)) {
 			ctx->call_stack_size += size;
 		}
 	} else {
-		int32_t alignment = (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) ? 16 : 8;
+		int32_t alignment = 16;
 		ir_reg op2_reg = ctx->regs[def][2];
 		ir_type type = ctx->ir_base[insn->op2].type;
 
@@ -7821,18 +7824,14 @@ static void ir_emit_afree(ir_ctx *ctx, ir_ref def, ir_insn *insn)
 		IR_ASSERT(IR_IS_TYPE_UNSIGNED(val->type) || val->val.i64 > 0);
 		IR_ASSERT(IR_IS_SIGNED_32BIT(val->val.i64));
 
-		if (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) {
-			/* Stack must be 16 byte aligned */
-			size = IR_ALIGNED_SIZE(size, 16);
-		} else {
-			size = IR_ALIGNED_SIZE(size, 8);
-		}
+		/* Stack must be 16 byte aligned */
+		size = IR_ALIGNED_SIZE(size, 16);
 		|	ASM_REG_IMM_OP add, IR_ADDR, IR_REG_RSP, size
 		if (!(ctx->flags & IR_USE_FRAME_POINTER)) {
 			ctx->call_stack_size -= size;
 		}
 	} else {
-//		int32_t alignment = (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) ? 16 : 8;
+//		int32_t alignment = 16;
 		ir_reg op2_reg = ctx->regs[def][2];
 		ir_type type = ctx->ir_base[insn->op2].type;
 

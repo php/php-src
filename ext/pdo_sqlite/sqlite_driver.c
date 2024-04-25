@@ -426,7 +426,6 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_va
 		 * the context */
 		if (agg_context) {
 			if (Z_ISUNDEF(retval)) {
-				zval_ptr_dtor(&agg_context->val);
 				return FAILURE;
 			}
 			zval_ptr_dtor(Z_REFVAL(agg_context->val));
@@ -750,7 +749,7 @@ static char *make_filename_safe(const char *filename)
 		}
 		return estrdup(filename);
 	}
-	if (*filename && memcmp(filename, ":memory:", sizeof(":memory:"))) {
+	if (*filename && strcmp(filename, ":memory:")) {
 		char *fullpath = expand_filepath(filename, NULL);
 
 		if (!fullpath) {
