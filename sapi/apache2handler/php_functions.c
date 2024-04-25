@@ -50,7 +50,6 @@
 
 #include "php_apache.h"
 #include "php_functions_arginfo.h"
-#include "ext/standard/sha1.h"
 #include "ext/standard/php_standard.h"
 
 #ifdef ZTS
