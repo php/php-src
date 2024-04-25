@@ -178,14 +178,10 @@ bool ir_check(const ir_ctx *ctx)
 												/* boolean not */
 												break;
 											}
-											if (sizeof(void*) == 8) {
-												if (insn->type == IR_ADDR && (use_insn->type == IR_U64 || use_insn->type == IR_I64)) {
-													break;
-												}
-											} else {
-												if (insn->type == IR_ADDR && (use_insn->type == IR_U32 || use_insn->type == IR_I32)) {
-													break;
-												}
+											if (insn->type == IR_ADDR && (use_insn->type == IR_UINTPTR_T || use_insn->type == IR_INTPTR_T)) {
+												break;
+											} else if (use_insn->type == IR_ADDR && (insn->type == IR_UINTPTR_T || insn->type == IR_INTPTR_T)) {
+												break;
 											}
 											fprintf(stderr, "ir_base[%d].ops[%d] (%d) type is incompatible with result type (%d != %d)\n",
 												i, j, use, use_insn->type, insn->type);

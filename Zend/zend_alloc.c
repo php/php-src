@@ -1065,6 +1065,9 @@ get_chunk:
 
 found:
 	if (steps > 2 && pages_count < 8) {
+		ZEND_MM_CHECK(chunk->next->prev == chunk, "zend_mm_heap corrupted");
+		ZEND_MM_CHECK(chunk->prev->next == chunk, "zend_mm_heap corrupted");
+
 		/* move chunk into the head of the linked-list */
 		chunk->prev->next = chunk->next;
 		chunk->next->prev = chunk->prev;
@@ -1116,6 +1119,9 @@ static zend_never_inline void *zend_mm_alloc_large(zend_mm_heap *heap, size_t si
 
 static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_chunk *chunk)
 {
+	ZEND_MM_CHECK(chunk->next->prev == chunk, "zend_mm_heap corrupted");
+	ZEND_MM_CHECK(chunk->prev->next == chunk, "zend_mm_heap corrupted");
+
 	chunk->next->prev = chunk->prev;
 	chunk->prev->next = chunk->next;
 	heap->chunks_count--;

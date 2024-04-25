@@ -823,6 +823,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->pid = 0;
 	executor_globals->oldact = (struct sigaction){0};
 #endif
+	memset(executor_globals->strtod_state.freelist, 0,
+			sizeof(executor_globals->strtod_state.freelist));
+	executor_globals->strtod_state.p5s = NULL;
+	executor_globals->strtod_state.result = NULL;
 }
 /* }}} */
 
@@ -918,7 +922,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
 	zend_startup_hrtime();
-	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */

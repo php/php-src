@@ -194,10 +194,8 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	zend_string *str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
+	/* Cannot fail because the type is either null or a string. */
+	zend_string *str = zval_get_string(newval);
 
 	if (php_dom_follow_spec_intern(obj)) {
 		if (!zend_string_equals_literal(str, "1.0") && !zend_string_equals_literal(str, "1.1")) {
@@ -396,10 +394,8 @@ zend_result dom_document_document_uri_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	zend_string *str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
+	/* Cannot fail because the type is either null or a string. */
+	zend_string *str = zval_get_string(newval);
 
 	if (docp->URL != NULL) {
 		xmlFree(BAD_CAST docp->URL);
@@ -1780,7 +1776,6 @@ PHP_METHOD(DOMDocument, xinclude)
 	} else {
 		RETVAL_FALSE;
 	}
-
 }
 /* }}} */
 

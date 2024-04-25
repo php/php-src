@@ -698,7 +698,7 @@ int main(void) {
   ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [
     dnl Cross compilation.
     case $host_alias in
-      *linux*)
+      *linux*|*midipix)
         ac_cv_func_getaddrinfo=yes
         ;;
       *)
@@ -1227,6 +1227,7 @@ if test "$PHP_PEAR" != "no"; then
     esac
   fi
 
+  PHP_SUBST([PEAR_INSTALLDIR])
   PHP_ADD_BUILD_DIR([pear])
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
 fi
@@ -1262,6 +1263,7 @@ AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
   [aix*|os400*], [fiber_os="aix"],
   [freebsd*], [fiber_os="freebsd"],
+  [midipix], [fiber_os="midipix"],
   [fiber_os="other"]
 )
 
@@ -1294,6 +1296,15 @@ elif test "$fiber_os" = 'freebsd'; then
       ;;
     *)
       fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
+      ;;
+  esac
+elif test "$fiber_os" = 'midipix'; then
+  case $fiber_cpu in
+    i386*)
+      fiber_asm="no"
+      ;;
+    x86_64)
+      fiber_asm_file="x86_64_ms_pe_gas"
       ;;
   esac
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
@@ -1464,6 +1475,9 @@ AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
+AC_SUBST([PHP_INSTALLED_SAPIS])
+AC_SUBST([SAPI_LIBNAME_SHARED])
+AC_SUBST([SAPI_LIBNAME_STATIC])
 
 PHP_UTILIZE_RPATHS
 
@@ -1489,8 +1503,6 @@ fi
 if test -n "${PHP_BUILD_ARCH}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
 fi
-
-PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
 
 PHP_SUBST(PHP_FASTCGI_OBJS)
 PHP_SUBST(PHP_SAPI_OBJS)
@@ -1542,7 +1554,6 @@ PHP_SUBST_OLD(INSTALL_IT)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
-PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST(OVERALL_TARGET)
 PHP_SUBST(PHP_RPATHS)
@@ -1553,8 +1564,6 @@ PHP_SUBST(SHELL)
 PHP_SUBST(PHP_FRAMEWORKS)
 PHP_SUBST(PHP_FRAMEWORKPATH)
 PHP_SUBST(INSTALL_HEADERS)
-PHP_SUBST_OLD(SAPI_LIBNAME_SHARED)
-PHP_SUBST_OLD(SAPI_LIBNAME_STATIC)
 
 old_CC=$CC
 
@@ -1699,6 +1708,17 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+
+if printf "#if __ELF__\nelf\n#endif\n" | $CC -E - | grep elf > /dev/null; then
+  PHP_ADD_SOURCES(main, debug_gdb_scripts.c)
+
+  cat >> Makefile.objects <<EOF
+$abs_srcdir/main/debug_gdb_scripts.c: $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php $abs_srcdir/scripts/gdb/php_gdb.py $abs_srcdir/.gdbinit
+	@if test ! -z "\$(PHP)"; then \\
+		\$(PHP) $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php; \\
+	fi;
+EOF
+fi
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 

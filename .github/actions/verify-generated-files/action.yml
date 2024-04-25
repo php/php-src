@@ -8,6 +8,7 @@ runs:
         [[ "$OSTYPE" == "darwin"* ]] && export PATH="$(brew --prefix)/opt/bison/bin:$PATH"
         scripts/dev/credits
         scripts/dev/genfiles
+        scripts/gdb/debug_gdb_scripts_gen.php
         Zend/zend_vm_gen.php
         ext/tokenizer/tokenizer_data_gen.php
         build/gen_stub.php -f --generate-optimizer-info --verify

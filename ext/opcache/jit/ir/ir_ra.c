@@ -722,8 +722,10 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					  || (ctx->rules[ref] & IR_RULE_MASK) == IR_ALLOCA)
 					 && ctx->use_lists[ref].count > 0) {
 						insn = &ctx->ir_base[ref];
-						insn->op3 = ctx->vars;
-						ctx->vars = ref;
+						if (insn->op != IR_VADDR) {
+							insn->op3 = ctx->vars;
+							ctx->vars = ref;
+						}
 					}
 					continue;
 				}
@@ -1338,8 +1340,10 @@ int ir_compute_live_ranges(ir_ctx *ctx)
 					  || (ctx->rules[ref] & IR_RULE_MASK) == IR_ALLOCA)
 					 && ctx->use_lists[ref].count > 0) {
 						insn = &ctx->ir_base[ref];
-						insn->op3 = ctx->vars;
-						ctx->vars = ref;
+						if (insn->op != IR_VADDR) {
+							insn->op3 = ctx->vars;
+							ctx->vars = ref;
+						}
 					}
 					continue;
 				}
@@ -1932,20 +1936,33 @@ int ir_coalesce(ir_ctx *ctx)
 								IR_ASSERT(ir_op_flags[input_insn->op] & IR_OP_FLAG_COMMUTATIVE);
 								if (input_insn->op2 == use
 								 && input_insn->op1 != use
-								 && (ctx->live_intervals[v1]->use_pos->flags & IR_DEF_REUSES_OP1_REG)
-								 && ctx->live_intervals[v2]->end == IR_USE_LIVE_POS_FROM_REF(input)) {
+								 && (ctx->live_intervals[v1]->use_pos->flags & IR_DEF_REUSES_OP1_REG)) {
 									ir_live_range *r = &ctx->live_intervals[v2]->range;
 
-									while (r->next) {
+									do {
+										if (r->end == IR_USE_LIVE_POS_FROM_REF(input)) {
+											break;
+										}
 										r = r->next;
+									} while (r);
+									if (r) {
+										r->end = IR_LOAD_LIVE_POS_FROM_REF(input);
+										if (!r->next) {
+											ctx->live_intervals[v2]->end = IR_LOAD_LIVE_POS_FROM_REF(input);
+										}
+										if (ir_vregs_overlap(ctx, v1, v2)) {
+											r->end = IR_USE_LIVE_POS_FROM_REF(input);
+											if (!r->next) {
+												ctx->live_intervals[v2]->end = IR_USE_LIVE_POS_FROM_REF(input);
+											}
+										} else {
+											ir_swap_operands(ctx, input, input_insn);
+											IR_ASSERT(!ir_vregs_overlap(ctx, v1, v2));
+											ir_vregs_coalesce(ctx, v1, v2, input, use);
+											compact = 1;
+											continue;
+										}
 									}
-									r->end = IR_LOAD_LIVE_POS_FROM_REF(input);
-									ctx->live_intervals[v2]->end = IR_LOAD_LIVE_POS_FROM_REF(input);
-									ir_swap_operands(ctx, input, input_insn);
-									IR_ASSERT(!ir_vregs_overlap(ctx, v1, v2));
-									ir_vregs_coalesce(ctx, v1, v2, input, use);
-									compact = 1;
-									continue;
 								}
 							}
 #endif
@@ -2609,14 +2626,11 @@ static int32_t ir_allocate_big_spill_slot(ir_ctx *ctx, int32_t size, ir_reg_allo
 		return ir_allocate_small_spill_slot(ctx, size, data);
 	}
 
-	if (ctx->flags2 & IR_16B_FRAME_ALIGNMENT) {
-		/* Stack must be 16 byte aligned */
-		size = IR_ALIGNED_SIZE(size, 16);
-	} else {
-		size = IR_ALIGNED_SIZE(size, 8);
-	}
-	ret = ctx->stack_frame_size;
-	ctx->stack_frame_size += size;
+	/* Align stack allocated data to 16 byte */
+	ctx->flags2 |= IR_16B_FRAME_ALIGNMENT;
+	ret = IR_ALIGNED_SIZE(ctx->stack_frame_size, 16);
+	size = IR_ALIGNED_SIZE(size, 8);
+	ctx->stack_frame_size = ret + size;
 
 	return ret;
 }
@@ -3497,13 +3511,27 @@ static int ir_linear_scan(ir_ctx *ctx)
 	data.handled = NULL;
 
 	while (vars) {
-		ir_insn *insn = &ctx->ir_base[vars];
+		ir_ref var = vars;
+		ir_insn *insn = &ctx->ir_base[var];
 
 		IR_ASSERT(insn->op == IR_VAR || insn->op == IR_ALLOCA);
 		vars = insn->op3; /* list next */
 
 		if (insn->op == IR_VAR) {
-			insn->op3 = ir_allocate_spill_slot(ctx, insn->type, &data);
+			ir_ref slot = ir_allocate_spill_slot(ctx, insn->type, &data);;
+			ir_use_list *use_list;
+			ir_ref n, *p;
+
+			insn->op3 = slot;
+			use_list = &ctx->use_lists[var];
+			n = use_list->count;
+			p = &ctx->use_edges[use_list->refs];
+			for (; n > 0; p++, n--) {
+				insn = &ctx->ir_base[*p];
+				if (insn->op == IR_VADDR) {
+					insn->op3 = slot;
+				}
+			}
 		} else {
 			ir_insn *val = &ctx->ir_base[insn->op2];
 
@@ -4050,7 +4078,8 @@ static void assign_regs(ir_ctx *ctx)
 					if (IR_IS_CONST_REF(ops[ival->tmp_op_num])) {
 						/* constant rematerialization */
 						reg |= IR_REG_SPILL_LOAD;
-					} else if (ctx->ir_base[ops[ival->tmp_op_num]].op == IR_ALLOCA) {
+					} else if (ctx->ir_base[ops[ival->tmp_op_num]].op == IR_ALLOCA
+							|| ctx->ir_base[ops[ival->tmp_op_num]].op == IR_VADDR) {
 						/* local address rematerialization */
 						reg |= IR_REG_SPILL_LOAD;
 					}

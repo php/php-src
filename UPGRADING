@@ -31,11 +31,10 @@ PHP 8.4 UPGRADE NOTES
   . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
 
 - DOM:
-  . New methods and constants were added to some DOM classes. If you inherit
-    from these and you happen to have a method or property with the same name,
-    you might encounter errors if the declaration is incompatible.
-    Consult sections 2. New Features and 6. New Functions for a list of
-    newly implemented methods and constants.
+  . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
+    constants.
+    If you have a method or constant with the same name, you might encounter errors
+    if the declaration is incompatible.
   . Some DOM methods previously returned false or a PHP_ERR DOMException if a new
     node could not be allocated. They consistently throw an INVALID_STATE_ERR
     DOMException now. This situation is extremely unlikely though and probably
@@ -56,6 +55,8 @@ PHP 8.4 UPGRADE NOTES
   . mb_encode_numericentity() and mb_decode_numericentity() now check that
     the $map is only composed of integers, if not a ValueError is thrown.
   . mb_http_input() now always throws a ValueError if the $type is invalid.
+  . mb_http_output() now checks that the $encoding parameter does not
+    contain any null bytes. If it does, a ValueError is now thrown.
   . On invalid strings (those with encoding errors), mb_substr() now interprets
     character indices in the same manner as most other mbstring functions. This
     means that character indices returned by mb_strpos() can be passed to mb_substr().
@@ -247,11 +248,15 @@ PHP 8.4 UPGRADE NOTES
   . Added constant POSIX_SC_CHILD_MAX
   . Added constant POSIX_SC_CLK_TCK
 
+- Readfile:
+  . Added ability to change .php_history path through PHP_HISTFILE env variable.
+
 - Reflection:
   . ReflectionAttribute now contains a $name property to improve the debugging
     experience.
   . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
     now returns the attached doc comments.
+  . ReflectionConstant was introduced.
 
 - Standard:
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
@@ -462,6 +467,7 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
     RFC: https://wiki.php.net/rfc/mb_trim
+    Note: this was amended by GH-13820 to fix GH-13815.
   . Added mb_ucfirst and mb_lcfirst functions.
     RFC: https://wiki.php.net/rfc/mb_ucfirst
 
@@ -590,6 +596,8 @@ PHP 8.4 UPGRADE NOTES
   . QosClass::UserInteractive (macOs only).
   . QosClass::UserInitiated (macOs only).
   . QosClass::Utility (macOs only).
+  . SIGCKPT (DragonFlyBSD only).
+  . SIGCKPTEXIT (DragonFlyBSD only).
 
 - Standard:
   . PHP_ROUND_CEILING.
@@ -638,6 +646,12 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 14. Performance Improvements
 ========================================
+
+- Core:
+  . Improved the performance of floating point number parsing and formatting in
+    ZTS builds under highly concurrent loads. This affects the `printf()` family
+    of functions as well as serialization functions such as `json_encode()`,
+    `serialize()`.
 
 - DOM:
   . The performance of DOMNode::C14N() is greatly improved for the case without

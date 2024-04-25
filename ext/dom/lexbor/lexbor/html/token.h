@@ -33,8 +33,8 @@ enum lxb_html_token_type {
 typedef struct {
     const lxb_char_t      *begin;
     const lxb_char_t      *end;
-    size_t                 line;
-    size_t                 column;
+    size_t                line;
+    size_t                column;
 
     const lxb_char_t      *text_start;
     const lxb_char_t      *text_end;

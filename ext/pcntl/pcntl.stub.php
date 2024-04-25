@@ -243,6 +243,20 @@ const SIGSYS = UNKNOWN;
  */
 const SIGBABY = UNKNOWN;
 #endif
+#ifdef SIGCKPT
+/**
+ * @var int
+ * @cvalue LONG_CONST(SIGCKPT)
+ */
+const SIGCKPT = UNKNOWN;
+#endif
+#ifdef SIGCKPTEXIT
+/**
+ * @var int
+ * @cvalue LONG_CONST(SIGCKPTEXIT)
+ */
+const SIGCKPTEXIT = UNKNOWN;
+#endif
 #ifdef SIGRTMIN
 /**
  * @var int

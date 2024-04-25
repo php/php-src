@@ -826,3 +826,26 @@ final class ReflectionFiber
 
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
 }
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class ReflectionConstant implements Reflector
+{
+    public string $name;
+
+    public function __construct(string $name) {}
+
+    public function getName(): string {}
+
+    public function getNamespaceName(): string {}
+
+    public function getShortName(): string {}
+
+    public function getValue(): mixed {}
+
+    public function isDeprecated(): bool {}
+
+    public function __toString(): string {}
+}

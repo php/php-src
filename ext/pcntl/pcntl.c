@@ -203,7 +203,26 @@ PHP_FUNCTION(pcntl_fork)
 	id = fork();
 	if (id == -1) {
 		PCNTL_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		switch (errno) {
+			case EAGAIN:
+				php_error_docref(NULL, E_WARNING, "Error %d: Reached the maximum limit of number of processes", errno);
+				break;
+			case ENOMEM:
+				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory", errno);
+				break;
+			// unlikely, especially nowadays.
+			case ENOSYS:
+				php_error_docref(NULL, E_WARNING, "Error %d: Unimplemented", errno);
+				break;
+			// QNX is the only platform returning it so far and is a different case from EAGAIN.
+			// Retries can be handled with sleep eventually.
+			case EBADF:
+				php_error_docref(NULL, E_WARNING, "Error %d: File descriptor concurrency issue", errno);
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+
+		}
 	} else if (id == 0) {
 		zend_max_execution_timer_init();
 	}
