@@ -40,7 +40,6 @@
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
 #include "zend_exceptions.h"
-#include "ext/spl/spl_array.h"
 #include "ext/random/php_random.h"
 #include "zend_frameless_function.h"
 
