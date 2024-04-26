@@ -331,6 +331,28 @@ const OPENSSL_KEYTYPE_DH = UNKNOWN;
  */
 const OPENSSL_KEYTYPE_EC = UNKNOWN;
 #endif
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_X25519
+ */
+const OPENSSL_KEYTYPE_X25519 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_ED25519
+ */
+const OPENSSL_KEYTYPE_ED25519 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_X448
+ */
+const OPENSSL_KEYTYPE_X448 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_ED448
+ */
+const OPENSSL_KEYTYPE_ED448 = UNKNOWN;
+#endif
 
 /**
  * @var int

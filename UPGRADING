@@ -222,6 +222,13 @@ PHP 8.4 UPGRADE NOTES
   . NumberFormatter::ROUND_HALFODD added to complement existing
     NumberFormatter::ROUND_HALFEVEN functionality.
 
+- OpenSSL:
+  . Added support for Curve25519 + Curve448 based keys. Specifically x25519,
+    ed25519, x448 and ed448 fields are supported in openssl_pkey_new and
+    openssl_pkey_get_details as well as openssl_sign and openssl_verify were
+    extended to support those keys.
+    
+
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
 

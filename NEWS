@@ -132,6 +132,7 @@ PHP                                                                        NEWS
   . Bumped minimum required OpenSSL version to 1.1.1. (Ayesh Karunaratne)
   . Added compile-time option --with-openssl-legacy-provider to enable legacy
     provider. (Adam Saponara)
+  . Added support for Curve25519 + Curve448 based keys. (Manuel Mausz)
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
