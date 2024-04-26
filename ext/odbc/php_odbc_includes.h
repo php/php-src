@@ -248,7 +248,13 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
     zend_long default_cursortype;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	HashTable non_persistent_connections;
+	/* Stores ODBC links throughout the duration of a request. The connection member may be either persistent or
+	 * non-persistent. In the former case, it is a pointer to an item in EG(persistent_list). This solution makes it
+	 * possible to properly free links during RSHUTDOWN (or when they are explicitly closed), while persistent
+	 * connections themselves are going to be freed later during the shutdown process (or when they are explicitly
+	 * closed).
+	 */
+	HashTable connections;
 ZEND_END_MODULE_GLOBALS(odbc)
 
 int odbc_add_result(HashTable *list, odbc_result *result);

@@ -1,5 +1,5 @@
 --TEST--
-odbc_close_all(): Basic test
+odbc_close(): Basic test
 --EXTENSIONS--
 odbc
 --SKIPIF--
@@ -19,7 +19,8 @@ var_dump($conn2);
 var_dump($result1);
 var_dump($result2);
 
-odbc_close_all();
+odbc_close($conn1);
+odbc_close($conn2);
 
 try {
     odbc_columns($conn1, '', '', '', '');

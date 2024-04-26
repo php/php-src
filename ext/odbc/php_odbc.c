@@ -102,7 +102,7 @@ static int _close_pconn_with_res(zval *zv, void *p)
 	}
 
 	odbc_connection *list_conn = ((odbc_connection *)(le->ptr));
-	odbc_connection *obj_conn = odbc_link_from_obj((zend_object*)p)->connection;
+	odbc_connection *obj_conn = (odbc_connection *) p;
 	if (list_conn == obj_conn) {
 		return ZEND_HASH_APPLY_REMOVE;
 	}
@@ -138,10 +138,10 @@ static void odbc_link_free(odbc_link *link)
 		zend_hash_destroy(&link->connection->results);
 		efree(link->connection);
 		ODBCG(num_links)--;
+	}
 
-		if (link->hash) {
-			zend_hash_del(&ODBCG(non_persistent_connections), link->hash);
-		}
+	if (link->hash) {
+		zend_hash_del(&ODBCG(connections), link->hash);
 	}
 
 	link->connection = NULL;
@@ -317,6 +317,7 @@ static void _close_odbc_pconn(zend_resource *rsrc)
 		SQLFreeConnect(conn->hdbc);
 		SQLFreeEnv(conn->henv);
 	}
+	free(conn);
 
 	ODBCG(num_links)--;
 	ODBCG(num_persistent)--;
@@ -501,12 +502,12 @@ static PHP_GINIT_FUNCTION(odbc)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	odbc_globals->num_persistent = 0;
-	zend_hash_init(&odbc_globals->non_persistent_connections, 0, NULL, NULL, 1);
+	zend_hash_init(&odbc_globals->connections, 0, NULL, NULL, 1);
 }
 
 static PHP_GSHUTDOWN_FUNCTION(odbc)
 {
-	zend_hash_destroy(&odbc_globals->non_persistent_connections);
+	zend_hash_destroy(&odbc_globals->connections);
 }
 
 /* {{{ PHP_MINIT_FUNCTION */
@@ -878,14 +879,14 @@ PHP_FUNCTION(odbc_close_all)
 	}
 
 	/* Loop through the non-persistent connection list, now close all non-persistent connections and their results */
-	ZEND_HASH_FOREACH_VAL(&ODBCG(non_persistent_connections), zv) {
+	ZEND_HASH_FOREACH_VAL(&ODBCG(connections), zv) {
 		odbc_link *link = Z_ODBC_LINK_P(zv);
 		if (link->connection) {
 			odbc_link_free(link);
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	zend_hash_clean(&ODBCG(non_persistent_connections));
+	zend_hash_clean(&ODBCG(connections));
 
 	zend_hash_apply(&EG(persistent_list), _close_pconn);
 }
@@ -2299,7 +2300,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	char *hashed_details;
-	int hashed_details_len = spprintf(&hashed_details, 0, "%s_%s_%s_%s_%d", ODBC_TYPE, db, uid, pwd, cur_opt);
+	int hashed_details_len = spprintf(&hashed_details, 0, "%d_%s_%s_%s_%s_%d", persistent, ODBC_TYPE, db, uid, pwd, cur_opt);
 
 try_and_get_another_connection:
 
@@ -2332,6 +2333,8 @@ try_and_get_another_connection:
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 			}
+
+			zend_hash_str_add_new(&ODBCG(connections), hashed_details, hashed_details_len, return_value);
 
 			ODBCG(num_persistent)++;
 			ODBCG(num_links)++;
@@ -2381,15 +2384,22 @@ try_and_get_another_connection:
 				}
 			}
 
-			object_init_ex(return_value, odbc_connection_ce);
-			odbc_link *link = Z_ODBC_LINK_P(return_value);
-			link->connection = db_conn;
-			link->hash = zend_string_init(hashed_details, hashed_details_len, persistent);
-			link->persistent = true;
+			zval *tmp;
+			if ((tmp = zend_hash_str_find(&ODBCG(connections), hashed_details, hashed_details_len)) == NULL) {
+				object_init_ex(return_value, odbc_connection_ce);
+				odbc_link *link = Z_ODBC_LINK_P(return_value);
+				link->connection = db_conn;
+				link->hash = zend_string_init(hashed_details, hashed_details_len, persistent);
+				link->persistent = true;
+			} else {
+				ZVAL_COPY(return_value, tmp);
+
+				ZEND_ASSERT(Z_ODBC_CONNECTION_P(return_value) == db_conn && "Persistent connection has changed");
+			}
 		}
-	} else {
+	} else { /* non-persistent */
 		zval *tmp;
-		if ((tmp = zend_hash_str_find(&ODBCG(non_persistent_connections), hashed_details, hashed_details_len)) == NULL) { /* non-persistent, new */
+		if ((tmp = zend_hash_str_find(&ODBCG(connections), hashed_details, hashed_details_len)) == NULL) { /* non-persistent, new */
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
 				php_error_docref(NULL, E_WARNING, "Too many open connections (" ZEND_LONG_FMT ")", ODBCG(num_links));
 				efree(hashed_details);
@@ -2403,7 +2413,7 @@ try_and_get_another_connection:
 			}
 			ODBCG(num_links)++;
 
-			zend_hash_str_add_new(&ODBCG(non_persistent_connections), hashed_details, hashed_details_len, return_value);
+			zend_hash_str_add_new(&ODBCG(connections), hashed_details, hashed_details_len, return_value);
 		} else { /* non-persistent, pre-existing */
 			ZVAL_COPY(return_value, tmp);
 		}
@@ -2417,19 +2427,21 @@ PHP_FUNCTION(odbc_close)
 {
 	zval *pv_conn;
 	odbc_link *link;
+	odbc_connection *connection;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pv_conn, odbc_connection_ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	link = Z_ODBC_LINK_P(pv_conn);
-	CHECK_ODBC_CONNECTION(link->connection);
-
-	if (link->persistent) {
-		zend_hash_apply_with_argument(&EG(persistent_list), _close_pconn_with_res, (void *) Z_OBJ_P(pv_conn));
-	}
+	connection = Z_ODBC_CONNECTION_P(pv_conn);
+	CHECK_ODBC_CONNECTION(connection);
 
 	odbc_link_free(link);
+
+	if (link->persistent) {
+		zend_hash_apply_with_argument(&EG(persistent_list), _close_pconn_with_res, (void *) connection);
+	}
 }
 /* }}} */
 
