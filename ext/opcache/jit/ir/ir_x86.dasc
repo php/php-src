@@ -10922,18 +10922,20 @@ void *ir_emit_thunk(ir_code_buffer *code_buffer, void *addr, size_t *size_ptr)
 void ir_fix_thunk(void *thunk_entry, void *addr)
 {
 	unsigned char *code = thunk_entry;
-	void **addr_ptr;
 
-	if (sizeof(void*) == 8) {
+	if (sizeof(void*) == 8 && !IR_IS_SIGNED_32BIT(((unsigned char*)addr - (code + 5)))) {
 		int32_t *offset_ptr;
+		void **addr_ptr;
 
 		IR_ASSERT(code[0] == 0xff && code[1] == 0x25);
 		offset_ptr = (int32_t*)(code + 2);
 		addr_ptr = (void**)(code + 6 + *offset_ptr);
 		*addr_ptr = addr;
 	} else {
-		IR_ASSERT(code[0] == 0xe9);
-		addr_ptr = (void**)(code + 1);
-		*addr_ptr = (void*)((unsigned char*)addr - (code + 5));
+		int32_t *addr_ptr;
+
+		code[0] = 0xe9;
+		addr_ptr = (int32_t*)(code + 1);
+		*addr_ptr = (int32_t)(intptr_t)(void*)((unsigned char*)addr - (code + 5));
 	}
 }

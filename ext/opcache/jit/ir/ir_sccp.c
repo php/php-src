@@ -251,10 +251,22 @@ next:
 	}
 }
 
+static bool ir_is_dead_load_ex(ir_ctx *ctx, ir_ref ref, uint32_t flags, ir_insn *insn)
+{
+	if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
+		return ctx->use_lists[ref].count == 1;
+	} else if (insn->op == IR_ALLOCA) {
+		return ctx->use_lists[ref].count == 1;
+	}
+	return 0;
+}
+
 static bool ir_is_dead_load(ir_ctx *ctx, ir_ref ref)
 {
 	if (ctx->use_lists[ref].count == 1) {
-		if ((ir_op_flags[ctx->ir_base[ref].op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
+		uint32_t flags = ir_op_flags[ctx->ir_base[ref].op];
+
+		if ((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)) {
 			return 1;
 		} else if (ctx->ir_base[ref].op == IR_ALLOCA) {
 			return 1;
@@ -273,6 +285,25 @@ static bool ir_is_dead(ir_ctx *ctx, ir_ref ref)
 	return 0;
 }
 
+static ir_ref ir_find1(ir_ctx *ctx, uint32_t optx, ir_ref op1)
+{
+	IR_ASSERT(!IR_IS_CONST_REF(op1));
+
+	ir_use_list *use_list = &ctx->use_lists[op1];
+	ir_ref *p, n = use_list->count;
+
+	for (p = ctx->use_edges + use_list->refs; n > 0; p++, n--) {
+		ir_ref use = *p;
+		ir_insn *use_insn = &ctx->ir_base[use];
+
+		if (use_insn->optx == optx) {
+			IR_ASSERT(use_insn->op1 == op1);
+			return use;
+		}
+	}
+	return IR_UNUSED;
+}
+
 static bool ir_sccp_is_true(ir_ctx *ctx, ir_insn *_values, ir_ref a)
 {
 	ir_insn *v = IR_IS_CONST_REF(a) ? &ctx->ir_base[a] : &_values[a];
@@ -285,6 +316,8 @@ static bool ir_sccp_is_equal(ir_ctx *ctx, ir_insn *_values, ir_ref a, ir_ref b)
 	ir_insn *v1 = IR_IS_CONST_REF(a) ? &ctx->ir_base[a] : &_values[a];
 	ir_insn *v2 = IR_IS_CONST_REF(b) ? &ctx->ir_base[b] : &_values[b];
 
+	IR_ASSERT(!IR_IS_SYM_CONST(v1->op));
+	IR_ASSERT(!IR_IS_SYM_CONST(v2->op));
 	return v1->val.u64 == v2->val.u64;
 }
 
@@ -316,10 +349,8 @@ static void ir_sccp_remove_insn(ir_ctx *ctx, ir_insn *_values, ir_ref ref, ir_bi
 		*p = IR_UNUSED;
 		if (input > 0 && _values[input].op == IR_BOTTOM) {
 			ir_use_list_remove_all(ctx, input, ref);
-			/* schedule DCE */
-			if ((IR_IS_FOLDABLE_OP(ctx->ir_base[input].op) && ctx->use_lists[input].count == 0)
-			 || ((ir_op_flags[ctx->ir_base[input].op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
-					&& ctx->use_lists[input].count == 1)) {
+			if (ir_is_dead(ctx, input)) {
+				/* schedule DCE */
 				ir_bitqueue_add(worklist, input);
 			}
 		}
@@ -340,12 +371,11 @@ static void ir_sccp_remove_insn2(ir_ctx *ctx, ir_ref ref, ir_bitqueue *worklist)
 		*p = IR_UNUSED;
 		if (input > 0) {
 			ir_use_list_remove_all(ctx, input, ref);
-			/* schedule DCE */
-			if ((IR_IS_FOLDABLE_OP(ctx->ir_base[input].op) && ctx->use_lists[input].count == 0)
-			 || ((ir_op_flags[ctx->ir_base[input].op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
-					&& ctx->use_lists[input].count == 1)) {
+			if (ir_is_dead(ctx, input)) {
+				/* schedule DCE */
 				ir_bitqueue_add(worklist, input);
 			} else if (ctx->ir_base[input].op == IR_PHI && ctx->use_lists[input].count == 1) {
+				/* try to optimize PHI into ABS/MIN/MAX/COND */
 				ir_bitqueue_add(worklist, ctx->ir_base[input].op1);
 			}
 		}
@@ -368,12 +398,11 @@ static void ir_sccp_replace_insn(ir_ctx *ctx, ir_insn *_values, ir_ref ref, ir_r
 		*p = IR_UNUSED;
 		if (input > 0) {
 			ir_use_list_remove_all(ctx, input, ref);
-			/* schedule DCE */
-			if (worklist
-			 && ((IR_IS_FOLDABLE_OP(ctx->ir_base[input].op) && ctx->use_lists[input].count == 0)
-			  || ((ir_op_flags[ctx->ir_base[input].op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
-					&& ctx->use_lists[input].count == 1))) {
-				ir_bitqueue_add(worklist, input);
+			if (_values[input].op == IR_BOTTOM) {
+				if (ir_is_dead(ctx, input)) {
+					/* schedule DCE */
+					ir_bitqueue_add(worklist, input);
+				}
 			}
 		}
 	}
@@ -426,10 +455,11 @@ static void ir_sccp_replace_insn2(ir_ctx *ctx, ir_ref ref, ir_ref new_ref, ir_bi
 		*p = IR_UNUSED;
 		if (input > 0) {
 			ir_use_list_remove_all(ctx, input, ref);
-			/* schedule DCE */
-			if ((IR_IS_FOLDABLE_OP(ctx->ir_base[input].op) && ctx->use_lists[input].count == 0)
-			 || ((ir_op_flags[ctx->ir_base[input].op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
-			  && ctx->use_lists[input].count == 1)) {
+			if (ir_is_dead(ctx, input)) {
+				/* schedule DCE */
+				ir_bitqueue_add(worklist, input);
+			} else if (ctx->ir_base[input].op == IR_PHI && ctx->use_lists[input].count == 1) {
+				/* try to optimize PHI into ABS/MIN/MAX/COND */
 				ir_bitqueue_add(worklist, input);
 			}
 		}
@@ -833,6 +863,7 @@ static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
 {
 	ir_insn *insn = &ctx->ir_base[ref];
 	uint32_t count;
+	ir_ref old_ref;
 
 	IR_ASSERT(insn->type == IR_FLOAT);
 	if (IR_IS_CONST_REF(ref)) {
@@ -863,6 +894,15 @@ static ir_ref ir_promote_f2d(ir_ctx *ctx, ir_ref ref, ir_ref use)
 				}
 				return insn->op1;
 			case IR_INT2FP:
+				old_ref = ir_find1(ctx, IR_OPTX(IR_INT2FP, IR_DOUBLE, 1), insn->op1);
+				if (old_ref) {
+					IR_ASSERT(ctx->use_lists[ref].count == 1);
+					ir_use_list_remove_one(ctx, insn->op1, ref);
+					CLEAR_USES(ref);
+					MAKE_NOP(insn);
+					ir_use_list_add(ctx, old_ref, use);
+					return old_ref;
+				}
 				insn->type = IR_DOUBLE;
 				return ref;
 			case IR_NEG:
@@ -1030,36 +1070,28 @@ static ir_ref ir_ext_const(ir_ctx *ctx, ir_insn *val_insn, ir_op op, ir_type typ
 static ir_ref ir_ext_ref(ir_ctx *ctx, ir_ref var_ref, ir_ref src_ref, ir_op op, ir_type type)
 {
 	uint32_t optx = IR_OPTX(op, type, 1);
-	ir_ref new_ext_ref;
+	ir_ref ref;
 
 	if (!IR_IS_CONST_REF(src_ref)) {
-		ir_use_list *use_list = &ctx->use_lists[src_ref];
-		ir_ref *p, n = use_list->count;
-
-		for (p = ctx->use_edges + use_list->refs; n > 0; p++, n--) {
-			ir_ref use = *p;
-			ir_insn *use_insn = &ctx->ir_base[use];
-
-			if (use_insn->optx == optx) {
-				IR_ASSERT(use_insn->op1 == src_ref);
-				ir_use_list_add(ctx, use, var_ref);
-				if (!IR_IS_CONST_REF(src_ref)) {
-					ir_use_list_remove_one(ctx, src_ref, var_ref);
-				}
-				return use;
+		ref = ir_find1(ctx, optx, src_ref);
+		if (ref) {
+			ir_use_list_add(ctx, ref, var_ref);
+			if (!IR_IS_CONST_REF(src_ref)) {
+				ir_use_list_remove_one(ctx, src_ref, var_ref);
 			}
+			return ref;
 		}
 	}
 
-	new_ext_ref = ir_emit1(ctx, optx, src_ref);
+	ref = ir_emit1(ctx, optx, src_ref);
 	ctx->use_lists = ir_mem_realloc(ctx->use_lists, ctx->insns_count * sizeof(ir_use_list));
-	ctx->use_lists[new_ext_ref].count = 0;
-	ctx->use_lists[new_ext_ref].refs = IR_UNUSED;
-	ir_use_list_add(ctx, new_ext_ref, var_ref);
+	ctx->use_lists[ref].count = 0;
+	ctx->use_lists[ref].refs = IR_UNUSED;
+	ir_use_list_add(ctx, ref, var_ref);
 	if (!IR_IS_CONST_REF(src_ref)) {
-		ir_use_list_replace_one(ctx, src_ref, var_ref, new_ext_ref);
+		ir_use_list_replace_one(ctx, src_ref, var_ref, ref);
 	}
-	return new_ext_ref;
+	return ref;
 }
 
 static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn, ir_bitqueue *worklist)
@@ -1111,10 +1143,9 @@ static bool ir_try_promote_ext(ir_ctx *ctx, ir_ref ext_ref, ir_insn *insn, ir_bi
 	phi_insn->type = insn->type;
 	op_insn->type = insn->type;
 
-	use_list = &ctx->use_lists[ref];
-	n = use_list->count;
-	for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
-		use = *p;
+	for (n = 0; n < ctx->use_lists[ref].count; n++) {
+		/* "use_lists" may be reallocated by ir_ext_ref() */
+		use = ctx->use_edges[ctx->use_lists[ref].refs + n];
 		if (use == ext_ref) {
 			continue;
 		} else {
@@ -2320,9 +2351,7 @@ int ir_sccp(ir_ctx *ctx)
 					}
 				}
 				IR_MAKE_BOTTOM(i);
-			} else if (((flags & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
-						|| insn->op == IR_ALLOCA)
-					&& ctx->use_lists[i].count == 1) {
+			} else if (ir_is_dead_load_ex(ctx, i, flags, insn)) {
 				/* dead load */
 				_values[i].optx = IR_LOAD;
 			} else {
@@ -2430,7 +2459,7 @@ int ir_sccp(ir_ctx *ctx)
 						}
 					}
 				}
-				ir_sccp_replace_insn(ctx, _values, i, IR_UNUSED, NULL);
+				ir_sccp_replace_insn(ctx, _values, i, IR_UNUSED, &worklist2);
 			}
 		} else if (value->op == IR_IF) {
 			/* remove one way IF/SWITCH */
@@ -2523,10 +2552,7 @@ folding:
 			} else if (insn->op == IR_MERGE) {
 				ir_optimize_merge(ctx, i, insn, &worklist2);
 			}
-		} else if (((ir_op_flags[insn->op] & (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_MASK)) == (IR_OP_FLAG_MEM|IR_OP_FLAG_MEM_LOAD)
-					|| insn->op == IR_ALLOCA)
-				&& ctx->use_lists[i].count == 1) {
-			/* dead load */
+		} else if (ir_is_dead_load(ctx, i)) {
 			ir_ref next = ctx->use_edges[ctx->use_lists[i].refs];
 
 			/* remove LOAD from double linked control list */

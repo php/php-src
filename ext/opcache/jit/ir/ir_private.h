@@ -865,8 +865,9 @@ ir_ref ir_const_ex(ir_ctx *ctx, ir_val val, uint8_t type, uint32_t optx);
 
 IR_ALWAYS_INLINE bool ir_const_is_true(const ir_insn *v)
 {
-
-	if (v->type == IR_BOOL) {
+	if (IR_IS_SYM_CONST(v->op)) {
+		return 1;
+	} else if (v->type == IR_BOOL) {
 		return v->val.b;
 	} else if (IR_IS_TYPE_INT(v->type)) {
 		return v->val.i64 != 0;

@@ -549,8 +549,9 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 			if (bb->predecessors_count == 1) {
 				uint32_t pred_b = edges[bb->predecessors];
 
-				IR_ASSERT(blocks[pred_b].idom > 0);
-				if (bb->idom != pred_b) {
+				if (blocks[pred_b].idom <= 0) {
+					//IR_ASSERT("Wrong blocks order: BB is before its single predecessor");
+				} else if (bb->idom != pred_b) {
 					bb->idom = pred_b;
 					changed = 1;
 				}
@@ -663,7 +664,7 @@ int ir_build_dominators_tree(ir_ctx *ctx)
 		if (UNEXPECTED(idom > b)) {
 			/* In rare cases, LOOP_BEGIN.op1 may be a back-edge. Skip back-edges. */
 			ctx->flags2 &= ~IR_NO_LOOPS;
-			IR_ASSERT(k > 1);
+			IR_ASSERT(k > 1 && "Wrong blocks order: BB is before its single predecessor");
 			ir_list_push(&worklist, idom);
 			while (1) {
 				k--;
