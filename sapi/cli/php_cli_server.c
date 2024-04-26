@@ -458,6 +458,27 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 }
 /* }}} */
 
+PHP_FUNCTION(apache_connection_stream) /* {{{ */
+{
+    php_cli_server_client *client = SG(server_context);
+
+    // Check for proper parsing of parameters (none expected)
+    ZEND_PARSE_PARAMETERS_NONE();
+
+    // Use php_stream_sock_open_from_socket() to create a PHP stream
+    php_stream *stream = php_stream_sock_open_from_socket(client->sock, NULL);
+
+    // Check if the stream was successfully created
+    if (!stream) {
+        php_error_docref(NULL, E_WARNING, "Failed to open stream from socket in cli server");
+        RETURN_FALSE;
+    }
+
+    // Convert the php_stream to a zval and return it
+    php_stream_to_zval(stream, return_value);
+}
+/* }}} */
+
 /* {{{ cli_server module */
 
 static void cli_server_init_globals(zend_cli_server_globals *cg)
@@ -506,6 +527,7 @@ const zend_function_entry server_additional_functions[] = {
 	PHP_FE(cli_get_process_title,	arginfo_cli_get_process_title)
 	PHP_FE(apache_request_headers,	arginfo_apache_request_headers)
 	PHP_FE(apache_response_headers,	arginfo_apache_response_headers)
+	PHP_FE(apache_connection_stream,	NULL)
 	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_getallheaders)
 	PHP_FE_END
 };
