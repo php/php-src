@@ -1,7 +1,7 @@
-From 9d60c0fda0b51e9374a234c48df36130d2c988ee Mon Sep 17 00:00:00 2001
+From 7c7c35d8ea9f65f081564b3ad1bfe9f0db33dd69 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sat, 26 Aug 2023 15:08:59 +0200
-Subject: [PATCH] Expose line and column information for use in PHP
+Subject: [PATCH 1/6] Expose line and column information for use in PHP
 
 ---
  source/lexbor/dom/interfaces/node.h  |  2 ++
@@ -15,7 +15,7 @@ Subject: [PATCH] Expose line and column information for use in PHP
  8 files changed, 48 insertions(+), 5 deletions(-)
 
 diff --git a/source/lexbor/dom/interfaces/node.h b/source/lexbor/dom/interfaces/node.h
-index 4a10197..ff9c924 100755
+index c37b790..8ac218b 100644
 --- a/source/lexbor/dom/interfaces/node.h
 +++ b/source/lexbor/dom/interfaces/node.h
 @@ -58,6 +58,8 @@ struct lxb_dom_node {
@@ -28,7 +28,7 @@ index 4a10197..ff9c924 100755
      LXB_DOM_NODE_USER_VARIABLES
  #endif /* LXB_DOM_NODE_USER_VARIABLES */
 diff --git a/source/lexbor/html/token.h b/source/lexbor/html/token.h
-index 79accd0..0b7f4fd 100755
+index 79accd0..0b7f4fd 100644
 --- a/source/lexbor/html/token.h
 +++ b/source/lexbor/html/token.h
 @@ -33,6 +33,8 @@ enum lxb_html_token_type {
@@ -41,7 +41,7 @@ index 79accd0..0b7f4fd 100755
      const lxb_char_t      *text_start;
      const lxb_char_t      *text_end;
 diff --git a/source/lexbor/html/tokenizer.c b/source/lexbor/html/tokenizer.c
-index 741bced..0bd9aec 100755
+index 741bced..0bd9aec 100644
 --- a/source/lexbor/html/tokenizer.c
 +++ b/source/lexbor/html/tokenizer.c
 @@ -91,6 +91,7 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
@@ -90,7 +90,7 @@ index 741bced..0bd9aec 100755
  
      return tkz->status;
 diff --git a/source/lexbor/html/tokenizer.h b/source/lexbor/html/tokenizer.h
-index ba9602f..74bb55e 100755
+index ba9602f..74bb55e 100644
 --- a/source/lexbor/html/tokenizer.h
 +++ b/source/lexbor/html/tokenizer.h
 @@ -73,6 +73,8 @@ struct lxb_html_tokenizer {
@@ -103,7 +103,7 @@ index ba9602f..74bb55e 100755
      /* Entities */
      const lexbor_sbst_entry_static_t *entity;
 diff --git a/source/lexbor/html/tokenizer/state.h b/source/lexbor/html/tokenizer/state.h
-index 0892846..77b86ac 100755
+index 0892846..77b86ac 100644
 --- a/source/lexbor/html/tokenizer/state.h
 +++ b/source/lexbor/html/tokenizer/state.h
 @@ -90,6 +90,8 @@ extern "C" {
@@ -116,7 +116,7 @@ index 0892846..77b86ac 100755
      while (0)
  
 diff --git a/source/lexbor/html/tree.c b/source/lexbor/html/tree.c
-index 0f067e4..bdec6a5 100755
+index 0f067e4..bdec6a5 100644
 --- a/source/lexbor/html/tree.c
 +++ b/source/lexbor/html/tree.c
 @@ -434,6 +434,9 @@ lxb_html_tree_create_element_for_token(lxb_html_tree_t *tree,
@@ -152,7 +152,7 @@ index 0f067e4..bdec6a5 100755
                                              tree->document->dom_document.text);
      if (tree->status != LXB_STATUS_OK) {
 diff --git a/source/lexbor/html/tree/error.c b/source/lexbor/html/tree/error.c
-index e6e43f4..88ad8c4 100755
+index e6e43f4..88ad8c4 100644
 --- a/source/lexbor/html/tree/error.c
 +++ b/source/lexbor/html/tree/error.c
 @@ -21,8 +21,9 @@ lxb_html_tree_error_add(lexbor_array_obj_t *parse_errors,
@@ -168,7 +168,7 @@ index e6e43f4..88ad8c4 100755
      return entry;
  }
 diff --git a/source/lexbor/html/tree/error.h b/source/lexbor/html/tree/error.h
-index 2fd06cb..ed1859f 100755
+index 2fd06cb..ed1859f 100644
 --- a/source/lexbor/html/tree/error.h
 +++ b/source/lexbor/html/tree/error.h
 @@ -97,8 +97,9 @@ lxb_html_tree_error_id_t;
@@ -184,5 +184,5 @@ index 2fd06cb..ed1859f 100755
  lxb_html_tree_error_t;
  
 -- 
-2.43.0
+2.44.0
 
