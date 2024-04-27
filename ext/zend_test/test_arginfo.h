@@ -1,6 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: dd3f852ea9f8e3a356ed226380edf5cc336f8a4e */
 
+ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
+	"but it is included on an older PHP version");
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 

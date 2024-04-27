@@ -58,7 +58,7 @@ void zend_accel_blacklist_init(zend_blacklist *blacklist)
 		zend_accel_blacklist_shutdown(blacklist);
 	}
 
-	blacklist->entries = (zend_blacklist_entry *) calloc(sizeof(zend_blacklist_entry), blacklist->size);
+	blacklist->entries = (zend_blacklist_entry *) calloc(blacklist->size, sizeof(zend_blacklist_entry));
 	if (!blacklist->entries) {
 		zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Blacklist initialization: no memory\n");
 		return;

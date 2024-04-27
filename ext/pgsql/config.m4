@@ -54,7 +54,7 @@ if test "$PHP_PGSQL" != "no"; then
     AC_MSG_ERROR(Cannot find libpq.so. Please specify correct PostgreSQL installation path)
   fi
 
-  if test -z "$PGSQL_INCLUDE" -a -z "$PGSQL_LIBDIR" ; then
+  if test -z "$PGSQL_INCLUDE" && test -z "$PGSQL_LIBDIR"; then
     AC_MSG_ERROR([Unable to find libpq anywhere under $PGSQL_SEARCH_PATHS])
   fi
 

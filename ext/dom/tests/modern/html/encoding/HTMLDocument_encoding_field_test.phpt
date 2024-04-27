@@ -6,23 +6,23 @@ dom
 <?php
 
 $dom = DOM\HTMLDocument::createEmpty();
-var_dump($dom->encoding);
-$dom->encoding = "CSeuckr";
-var_dump($dom->encoding);
+var_dump($dom->charset);
+$dom->inputEncoding = "CSeuckr";
+var_dump($dom->characterSet);
 try {
-    $dom->encoding = "nope";
+    $dom->charset = "nope";
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump($dom->encoding);
-$dom->encoding = "Windows-1251";
-var_dump($dom->encoding);
+var_dump($dom->charset);
+$dom->inputEncoding = "Windows-1251";
+var_dump($dom->characterSet);
 try {
-    $dom->encoding = NULL;
+    $dom->charset = "";
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump($dom->encoding);
+var_dump($dom->inputEncoding);
 echo $dom->saveHTML();
 
 try {

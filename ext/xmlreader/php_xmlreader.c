@@ -112,15 +112,8 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 /* {{{ xmlreader_get_property_ptr_ptr */
 zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
-	xmlreader_object *obj;
 	zval *retval = NULL;
-	xmlreader_prop_handler *hnd = NULL;
-
-	obj = php_xmlreader_fetch_object(object);
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
+	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 
 	if (hnd == NULL) {
 		retval = zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
@@ -133,15 +126,9 @@ zval *xmlreader_get_property_ptr_ptr(zend_object *object, zend_string *name, int
 /* {{{ xmlreader_read_property */
 zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
-	xmlreader_object *obj;
 	zval *retval = NULL;
-	xmlreader_prop_handler *hnd = NULL;
-
-	obj = php_xmlreader_fetch_object(object);
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
+	xmlreader_object *obj = php_xmlreader_fetch_object(object);
+	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 
 	if (hnd != NULL) {
 		if (xmlreader_property_reader(obj, hnd, rv) == FAILURE) {
@@ -160,14 +147,8 @@ zval *xmlreader_read_property(zend_object *object, zend_string *name, int type, 
 /* {{{ xmlreader_write_property */
 zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
-	xmlreader_object *obj;
-	xmlreader_prop_handler *hnd = NULL;
+	xmlreader_prop_handler *hnd = zend_hash_find_ptr(&xmlreader_prop_handlers, name);
 
-	obj = php_xmlreader_fetch_object(object);
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
 	if (hnd != NULL) {
 		zend_throw_error(NULL, "Cannot modify readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 	} else {
@@ -354,7 +335,6 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 	intern = zend_object_alloc(sizeof(xmlreader_object), class_type);
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->prop_handler = &xmlreader_prop_handlers;
 
 	return &intern->std;
 }
@@ -1088,7 +1068,6 @@ PHP_METHOD(XMLReader, expand)
 {
 #ifdef HAVE_DOM
 	zval *id, *basenode = NULL;
-	int ret;
 	xmlreader_object *intern;
 	xmlNode *node, *nodec;
 	xmlDocPtr docp = NULL;
@@ -1118,7 +1097,7 @@ PHP_METHOD(XMLReader, expand)
 				php_error_docref(NULL, E_NOTICE, "Cannot expand this node type");
 				RETURN_FALSE;
 			} else {
-				DOM_RET_OBJ(nodec, &ret, (dom_object *)domobj);
+				DOM_RET_OBJ(nodec, (dom_object *)domobj);
 			}
 		}
 	} else {

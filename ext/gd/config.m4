@@ -150,6 +150,8 @@ dnl or run test insufficient.
 AC_DEFUN([PHP_GD_CHECK_FORMAT],[
   old_LIBS="${LIBS}"
   LIBS="${LIBS} ${GD_SHARED_LIBADD}"
+  old_CFLAGS="${CFLAGS}"
+  CFLAGS="${CFLAGS} ${GDLIB_CFLAGS}"
   AC_MSG_CHECKING([for working gdImageCreateFrom$1 in libgd])
   AC_LANG_PUSH([C])
   AC_RUN_IFELSE([AC_LANG_SOURCE([
@@ -180,6 +182,7 @@ int main(int argc, char** argv) {
     AC_MSG_RESULT([no])
   ])
   AC_LANG_POP([C])
+  CFLAGS="${old_CFLAGS}"
   LIBS="${old_LIBS}"
 ])
 
@@ -212,9 +215,6 @@ if test "$PHP_GD" != "no"; then
                   libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_rotate.c libgd/gd_color_match.c \
                   libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c \
                   libgd/gd_bmp.c libgd/gd_tga.c"
-
-dnl check for fabsf and floorf which are available since C99
-    AC_CHECK_FUNCS(fabsf floorf)
 
 dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])

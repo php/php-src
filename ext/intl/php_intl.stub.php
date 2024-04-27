@@ -300,7 +300,7 @@ function collator_set_attribute(Collator $object, int $attribute, int $value): b
 
 function collator_get_strength(Collator $object): int {}
 
-function collator_set_strength(Collator $object, int $strength): bool {}
+function collator_set_strength(Collator $object, int $strength): true {}
 
 function collator_sort(Collator $object, array &$array, int $flags = Collator::SORT_REGULAR): bool {}
 
@@ -445,6 +445,8 @@ function grapheme_strstr(string $haystack, string $needle, bool $beforeNeedle = 
 
 function grapheme_stristr(string $haystack, string $needle, bool $beforeNeedle = false): string|false {}
 
+function grapheme_str_split(string $string, int $length = 1): array|false {}
+
 /** @param int $next */
 function grapheme_extract(string $haystack, int $size, int $type = GRAPHEME_EXTR_COUNT, int $offset = 0, &$next = null): string|false {}
 
@@ -461,7 +463,7 @@ function idn_to_utf8(string $domain, int $flags = IDNA_DEFAULT, int $variant = I
 
 function locale_get_default(): string {}
 
-function locale_set_default(string $locale): bool {}
+function locale_set_default(string $locale): true {}
 
 function locale_get_primary_language(string $locale): ?string {}
 

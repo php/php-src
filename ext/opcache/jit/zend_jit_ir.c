@@ -2737,7 +2737,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_SRC) {
 		if (name) fprintf(stderr, "%s: ; after folding\n", name);
-		ir_save(ctx, stderr);
+		ir_save(ctx, 0, stderr);
 	}
 
 #if ZEND_DEBUG
@@ -2756,28 +2756,30 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCCP) {
 		if (name) fprintf(stderr, "%s: ; after SCCP\n", name);
-		ir_save(ctx, stderr);
+		ir_save(ctx, 0, stderr);
 	}
 
 	ir_build_cfg(ctx);
 	ir_build_dominators_tree(ctx);
 	ir_find_loops(ctx);
 
-	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCCP) {
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
-			ir_dump_cfg(ctx, stderr);
-		}
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_CFG) {
+		if (name) fprintf(stderr, "%s: ; after CFG\n", name);
+		ir_save(ctx, IR_SAVE_CFG, stderr);
 	}
 
 	ir_gcm(ctx);
+
+	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_GCM) {
+		if (name) fprintf(stderr, "%s: ; after GCM\n", name);
+		ir_save(ctx, IR_SAVE_CFG|IR_SAVE_CFG_MAP, stderr);
+	}
+
 	ir_schedule(ctx);
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE) {
 		if (name) fprintf(stderr, "%s: ; after schedule\n", name);
-		ir_save(ctx, stderr);
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
-			ir_dump_cfg(ctx, stderr);
-		}
+		ir_save(ctx, IR_SAVE_CFG, stderr);
 	}
 
 	ir_match(ctx);
@@ -2791,13 +2793,8 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 
 	if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_AFTER_REGS) {
 		if (name) fprintf(stderr, "%s: ; after register allocation\n", name);
-		ir_save(ctx, stderr);
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
-			ir_dump_cfg(ctx, stderr);
-		}
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_REGS) {
-			ir_dump_live_ranges(ctx, stderr);
-		}
+		ir_save(ctx, IR_SAVE_CFG|IR_SAVE_RULES|IR_SAVE_REGS, stderr);
+		ir_dump_live_ranges(ctx, stderr);
 	}
 
 	ir_schedule_blocks(ctx);
@@ -2808,13 +2805,7 @@ static void *zend_jit_ir_compile(ir_ctx *ctx, size_t *size, const char *name)
 			ir_dump_codegen(ctx, stderr);
 		} else {
 			if (name) fprintf(stderr, "%s: ; final\n", name);
-			ir_save(ctx, stderr);
-		}
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_CFG) {
-			ir_dump_cfg(ctx, stderr);
-		}
-		if (JIT_G(debug) & ZEND_JIT_DEBUG_IR_REGS) {
-			ir_dump_live_ranges(ctx, stderr);
+			ir_save(ctx, IR_SAVE_CFG|IR_SAVE_RULES|IR_SAVE_REGS, stderr);
 		}
 	}
 
@@ -3250,7 +3241,8 @@ static void zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__x86_64__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+#if defined(__has_attribute) && __has_attribute(tls_model) && !defined(__FreeBSD__) && \
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
@@ -3263,7 +3255,7 @@ static void zend_jit_setup(void)
 			"leaq _tsrm_ls_cache@tlsgd(%%rip), %0\n"
 			: "=a" (ti));
 		tsrm_tls_offset = ti[1];
-		tsrm_tls_index = ti[0] * 16;
+		tsrm_tls_index = ti[0] * 8;
 #else
 		size_t *ti;
 
@@ -3277,7 +3269,7 @@ static void zend_jit_setup(void)
 # elif defined(__GNUC__) && defined(__i386__)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
 	if (tsrm_ls_cache_tcb_offset == 0) {
-#if !defined(__FreeBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
+#if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
 		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
@@ -3322,9 +3314,10 @@ static void zend_jit_setup(void)
 #endif
 	zend_long debug = JIT_G(debug);
 	if (!(debug & ZEND_JIT_DEBUG_ASM_STUBS)) {
-		JIT_G(debug) &= ~(ZEND_JIT_DEBUG_IR_SRC|ZEND_JIT_DEBUG_IR_FINAL|ZEND_JIT_DEBUG_IR_CFG|ZEND_JIT_DEBUG_IR_REGS|
+		JIT_G(debug) &= ~(ZEND_JIT_DEBUG_IR_SRC|ZEND_JIT_DEBUG_IR_FINAL|
 			ZEND_JIT_DEBUG_IR_CODEGEN|
-			ZEND_JIT_DEBUG_IR_AFTER_SCCP|ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE|ZEND_JIT_DEBUG_IR_AFTER_REGS);
+			ZEND_JIT_DEBUG_IR_AFTER_SCCP|ZEND_JIT_DEBUG_IR_AFTER_CFG|ZEND_JIT_DEBUG_IR_AFTER_GCM|
+			ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE|ZEND_JIT_DEBUG_IR_AFTER_REGS);
 	}
 
 	zend_jit_calc_trace_prologue_size();
@@ -9885,7 +9878,10 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		}
 
 		if (ZEND_OBSERVER_ENABLED) {
-			if (GCC_GLOBAL_REGS) {
+			if (trace && (trace->op != ZEND_JIT_TRACE_END || trace->stop != ZEND_JIT_TRACE_STOP_INTERPRETER)) {
+				ZEND_ASSERT(trace[1].op == ZEND_JIT_TRACE_VM || trace[1].op == ZEND_JIT_TRACE_END);
+				jit_SET_EX_OPLINE(jit, trace[1].opline);
+			} else if (GCC_GLOBAL_REGS) {
 				// EX(opline) = opline
 				ir_STORE(jit_EX(opline), jit_IP(jit));
 			}
@@ -15248,7 +15244,7 @@ static int zend_jit_switch(zend_jit_ctx *jit, const zend_op *opline, const zend_
 			jit->b = -1;
 		}
 	} else {
-		zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+		zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[opline - op_array->opcodes] : NULL;
 		uint32_t op1_info = OP1_INFO();
 		zend_jit_addr op1_addr = OP1_ADDR();
 		const zend_op *default_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
@@ -16309,7 +16305,7 @@ static int zend_jit_trace_start(zend_jit_ctx        *jit,
 	if (parent) {
 		int i;
 		int parent_vars_count = parent->exit_info[exit_num].stack_size;
-		zend_jit_trace_stack *parent_stack =
+		zend_jit_trace_stack *parent_stack = parent_vars_count == 0 ? NULL :
 			parent->stack_map +
 			parent->exit_info[exit_num].stack_offset;
 

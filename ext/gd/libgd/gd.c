@@ -8,36 +8,6 @@
 
 #include "php.h"
 
-#ifdef _MSC_VER
-# if _MSC_VER >= 1300
-/* in MSVC.NET these are available but only for __cplusplus and not _MSC_EXTENSIONS */
-#  if !defined(_MSC_EXTENSIONS) && defined(__cplusplus)
-#   define HAVE_FABSF 1
-extern float fabsf(float x);
-#   define HAVE_FLOORF 1
-extern float floorf(float x);
-#  endif /*MSVC.NET */
-# endif /* MSC */
-#endif
-#ifndef HAVE_FABSF
-# define HAVE_FABSF 0
-#endif
-#ifndef HAVE_FLOORF
-# define HAVE_FLOORF 0
-#endif
-#if HAVE_FABSF == 0
-/* float fabsf(float x); */
-# ifndef fabsf
-#  define fabsf(x) ((float)(fabs(x)))
-# endif
-#endif
-#if HAVE_FLOORF == 0
-# ifndef floorf
-/* float floorf(float x);*/
-#  define floorf(x) ((float)(floor(x)))
-# endif
-#endif
-
 #ifdef _OSD_POSIX		/* BS2000 uses the EBCDIC char set instead of ASCII */
 #define CHARSET_EBCDIC
 #define __attribute__(any)	/*nothing */

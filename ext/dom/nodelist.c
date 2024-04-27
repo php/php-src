@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "nodelist.h"
 #include "zend_interfaces.h"
 
 /*
@@ -93,13 +94,9 @@ int php_dom_get_nodelist_length(dom_object *obj)
 		}
 	} else {
 		xmlNodePtr basep = nodep;
-		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-			nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-		} else {
-			nodep = nodep->children;
-		}
+		nodep = php_dom_first_child_of_container_node(basep);
 		dom_get_elements_by_tag_name_ns_raw(
-			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, INT_MAX - 1 /* because of <= */);
+			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, INT_MAX - 1 /* because of <= */);
 	}
 
 	objmap->cached_length = count;
@@ -137,17 +134,12 @@ PHP_METHOD(DOMNodeList, count)
 
 void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value)
 {
-	int ret;
 	xmlNodePtr itemnode = NULL;
 	bool cache_itemnode = false;
 	if (index >= 0) {
 		if (objmap != NULL) {
 			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-				}
+				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
 					HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
@@ -194,13 +186,9 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 							itemnode = nodep;
 						} else {
 							if (restart) {
-								if (basep->type == XML_DOCUMENT_NODE || basep->type == XML_HTML_DOCUMENT_NODE) {
-									nodep = xmlDocGetRootElement((xmlDoc*) basep);
-								} else {
-									nodep = basep->children;
-								}
+								nodep = php_dom_first_child_of_container_node(basep);
 							}
-							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, relative_index);
+							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, relative_index);
 						}
 						cache_itemnode = true;
 					}
@@ -209,7 +197,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 		}
 
 		if (itemnode) {
-			DOM_RET_OBJ(itemnode, &ret, objmap->baseobj);
+			DOM_RET_OBJ(itemnode, objmap->baseobj);
 			if (cache_itemnode) {
 				/* Hold additional reference for the cache, must happen before releasing the cache
 				 * because we might be the last reference holder.
@@ -260,6 +248,65 @@ ZEND_METHOD(DOMNodeList, getIterator)
 	}
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
+dom_nodelist_dimension_index dom_modern_nodelist_get_index(const zval *offset)
+{
+	dom_nodelist_dimension_index ret;
+
+	ZVAL_DEREF(offset);
+
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		ret.type = DOM_NODELIST_DIM_LONG;
+		ret.lval = Z_LVAL_P(offset);
+	} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+		ret.type = DOM_NODELIST_DIM_LONG;
+		ret.lval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+	} else if (Z_TYPE_P(offset) == IS_STRING) {
+		zend_ulong lval;
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
+			ret.type = DOM_NODELIST_DIM_LONG;
+			ret.lval = (zend_long) lval;
+		} else {
+			ret.type = DOM_NODELIST_DIM_STRING;
+			ret.str = Z_STR_P(offset);
+		}
+	} else {
+		ret.type = DOM_NODELIST_DIM_ILLEGAL;
+	}
+
+	return ret;
+}
+
+zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+{
+	if (UNEXPECTED(!offset)) {
+		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
+		return NULL;
+	}
+
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(offset);
+	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
+		zend_illegal_container_offset(object->ce->name, offset, type);
+		return NULL;
+	}
+
+	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
+	return rv;
+}
+
+int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
+{
+	/* If it exists, it cannot be empty because nodes aren't empty. */
+	ZEND_IGNORE_VALUE(check_empty);
+
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(member);
+	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
+		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
+		return 0;
+	}
+
+	return index.lval >= 0 && index.lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
 }
 
 #endif

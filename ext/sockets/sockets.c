@@ -219,8 +219,8 @@ ZEND_GET_MODULE(sockets)
 
 static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
-	struct sockaddr_in  la;
-	struct hostent		*hp;
+	struct sockaddr_in  la = {0};
+	struct hostent	    *hp;
 
 #ifndef PHP_WIN32
 	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
@@ -641,7 +641,7 @@ PHP_FUNCTION(socket_select)
 PHP_FUNCTION(socket_create_listen)
 {
 	php_socket	*php_sock;
-	zend_long		port, backlog = 128;
+	zend_long	port, backlog = SOMAXCONN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &port, &backlog) == FAILURE) {
 		RETURN_THROWS();
@@ -764,7 +764,7 @@ PHP_FUNCTION(socket_listen)
 {
 	zval		*arg1;
 	php_socket	*php_sock;
-	zend_long		backlog = 0;
+	zend_long	backlog = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|l", &arg1, socket_ce, &backlog) == FAILURE) {
 		RETURN_THROWS();
@@ -915,7 +915,7 @@ PHP_FUNCTION(socket_read)
 PHP_FUNCTION(socket_getsockname)
 {
 	zval					*arg1, *addr, *port = NULL;
-	php_sockaddr_storage	sa_storage;
+	php_sockaddr_storage	sa_storage = {0};
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;
@@ -983,7 +983,7 @@ PHP_FUNCTION(socket_getsockname)
 PHP_FUNCTION(socket_getpeername)
 {
 	zval					*arg1, *arg2, *arg3 = NULL;
-	php_sockaddr_storage	sa_storage;
+	php_sockaddr_storage	sa_storage = {0};
 	php_socket				*php_sock;
 	struct sockaddr			*sa;
 	struct sockaddr_in		*sin;

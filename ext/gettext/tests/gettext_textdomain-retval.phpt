@@ -18,11 +18,18 @@ bindtextdomain ("messages", "./locale");
 echo textdomain('test'), "\n";
 echo textdomain(null), "\n";
 echo textdomain('foo'), "\n";
+
+try {
+	textdomain('');
+} catch (\ValueError $e) {
+	echo $e->getMessage();
+}
 ?>
 --EXPECT--
 test
 test
 foo
+textdomain(): Argument #1 ($domain) cannot be empty
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09

@@ -2779,7 +2779,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 	zend_jit_trace_stack *stack;
 	uint32_t parent_vars_count = parent_trace ?
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_size : 0;
-	zend_jit_trace_stack *parent_stack = parent_trace ?
+	zend_jit_trace_stack *parent_stack = parent_vars_count ?
 		zend_jit_traces[parent_trace].stack_map +
 		zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset : NULL;
 	checkpoint = zend_arena_checkpoint(CG(arena));
@@ -2881,7 +2881,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 					RA_IVAL_DEL(ssa_op->op1_use);
 					count--;
 				} else if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op1_use)) {
-					zend_jit_trace_use_var(idx, ssa_op->op1_use, ssa_op->op1_def, ssa_op->op1_use_chain, 
+					zend_jit_trace_use_var(idx, ssa_op->op1_use, ssa_op->op1_def, ssa_op->op1_use_chain,
 						ra,
 						ssa, ssa_opcodes, op_array, op_array_ssa);
 					if (opline->op1_type != IS_CV) {
@@ -7227,7 +7227,9 @@ static const void *zend_jit_trace_exit_to_vm(uint32_t trace_num, uint32_t exit_n
 
 	/* Deoptimization */
 	stack_size = zend_jit_traces[trace_num].exit_info[exit_num].stack_size;
-	stack = zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset;
+	stack =  zend_jit_traces[trace_num].exit_info[exit_num].stack_size ?
+		zend_jit_traces[trace_num].stack_map + zend_jit_traces[trace_num].exit_info[exit_num].stack_offset :
+		NULL;
 
 	if (!zend_jit_trace_deoptimization(&ctx,
 			zend_jit_traces[trace_num].exit_info[exit_num].flags,
@@ -7769,7 +7771,7 @@ static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
 	for (i = 0; i < t->exit_count; i++) {
 		const zend_op_array *op_array = t->exit_info[i].op_array;
 		uint32_t stack_size = t->exit_info[i].stack_size;
-		zend_jit_trace_stack *stack = t->stack_map + t->exit_info[i].stack_offset;
+		zend_jit_trace_stack *stack = t->exit_info[i].stack_size ? t->stack_map + t->exit_info[i].stack_offset : NULL;
 
 		fprintf(stderr, "     exit_%d:", i);
 		if (t->exit_info[i].opline) {
@@ -8386,7 +8388,7 @@ int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf 
 	/* Deoptimization of VM stack state */
 	uint32_t i;
 	uint32_t stack_size = t->exit_info[exit_num].stack_size;
-	zend_jit_trace_stack *stack = t->stack_map + t->exit_info[exit_num].stack_offset;
+	zend_jit_trace_stack *stack = stack_size ? t->stack_map + t->exit_info[exit_num].stack_offset : NULL;
 
 	if (t->exit_info[exit_num].flags & ZEND_JIT_EXIT_RESTORE_CALL) {
 		zend_execute_data *call = (zend_execute_data *)regs->gpr[ZREG_RX];

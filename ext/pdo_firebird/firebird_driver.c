@@ -780,7 +780,7 @@ static bool php_firebird_begin_transaction(pdo_dbh_t *dbh, bool is_auto_commit_t
 			/*
 			* firebird's `read committed` has the option to wait until other transactions
 			* commit or rollback if there is indeterminate data.
-			* Introducing too many configuration values ​​at once can cause confusion, so
+			* Introducing too many configuration values at once can cause confusion, so
 			* we don't support in PDO that feature yet.
 			*/
 			case PDO_FB_READ_COMMITTED:

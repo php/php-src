@@ -13,6 +13,8 @@ if (PHP_MBSTRING != "no") {
 		ADD_FLAG("CFLAGS_MBSTRING", "-Iext/mbstring -Iext/mbstring/libmbfl -Iext/mbstring/libmbfl/mbfl \
 			/D HAVE_STRICMP /D MBFL_DLL_EXPORT=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1")
 
+		ADD_FLAG("CFLAGS_BD_EXT_MBSTRING", "/utf-8")
+
 		FSO.CopyFile("ext\\mbstring\\libmbfl\\config.h.w32",
 			"ext\\mbstring\\libmbfl\\config.h", true);
 
@@ -44,7 +46,7 @@ if (PHP_MBSTRING != "no") {
 				AC_DEFINE('HAVE_MBREGEX', 1);
 
 				/* XXX libonig is only usable as a static library ATM, code change required to link with a DLL. */
-				ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+				ADD_FLAG("CFLAGS_MBSTRING", "/DONIG_EXTERN=extern /DPHP_ONIG_BAD_KOI8_ENTRY=1 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 /utf-8");
 
 				ADD_SOURCES("ext/mbstring", "php_mbregex.c", "mbstring");
 				PHP_INSTALL_HEADERS("ext/mbstring", "php_mbregex.h php_onig_compat.h");

@@ -27,7 +27,6 @@
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
-#include "zend_interfaces.h"
 
 #ifdef PDO_USE_MYSQLND
 #	define pdo_mysql_stmt_execute_prepared(stmt) pdo_mysql_stmt_execute_prepared_mysqlnd(stmt)
@@ -491,14 +490,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 					case IS_DOUBLE:
 						mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_DOUBLE);
 						break;
-					case IS_OBJECT:
-						if(zend_class_implements_interface(Z_OBJCE_P(parameter), zend_ce_stringable)) {
-							mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_VAR_STRING);
-							break;
-						}
-						ZEND_FALLTHROUGH;
 					default:
-						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a scalar value or null");
 						PDO_DBG_RETURN(0);
 				}
 
@@ -538,19 +530,7 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 						b->buffer = &Z_DVAL_P(parameter);
 						PDO_DBG_RETURN(1);
 
-					case IS_OBJECT:
-						if(zend_class_implements_interface(Z_OBJCE_P(parameter), zend_ce_stringable)) {
-							convert_to_string(parameter);
-							b->buffer_type = MYSQL_TYPE_STRING;
-							b->buffer = Z_STRVAL_P(parameter);
-							b->buffer_length = Z_STRLEN_P(parameter);
-							*b->length = Z_STRLEN_P(parameter);
-							PDO_DBG_RETURN(1);
-						}
-						ZEND_FALLTHROUGH;
-
 					default:
-						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a scalar value or null");
 						PDO_DBG_RETURN(0);
 				}
 #endif /* PDO_USE_MYSQLND */

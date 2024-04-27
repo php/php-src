@@ -1582,7 +1582,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
 
             /* State 14.9 */
             if (last->parent != NULL) {
-                lxb_dom_node_remove(last);
+                lxb_dom_node_remove_wo_events(last);
             }
 
             lxb_dom_node_insert_child_wo_events(node, last);
@@ -1592,7 +1592,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
         }
 
         if (last->parent != NULL) {
-            lxb_dom_node_remove(last);
+            lxb_dom_node_remove_wo_events(last);
         }
 
         /* State 15 */
@@ -1630,7 +1630,7 @@ lxb_html_tree_adoption_agency_algorithm(lxb_html_tree_t *tree,
         while (node != NULL) {
             next = node->next;
 
-            lxb_dom_node_remove(node);
+            lxb_dom_node_remove_wo_events(node);
             lxb_dom_node_insert_child_wo_events(lxb_dom_interface_node(element),
                                                 node);
             node = next;

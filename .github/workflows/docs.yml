@@ -14,6 +14,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+    if: github.repository == 'php/php-src'
     steps:
       - name: git checkout
         uses: actions/checkout@v4

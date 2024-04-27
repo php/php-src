@@ -4,6 +4,7 @@ Observer: Frameless calls are disabled when there are observers
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 --FILE--
 <?php
 function _strpos(string $str) {

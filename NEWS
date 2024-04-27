@@ -13,7 +13,13 @@ PHP                                                                        NEWS
     array to hashed). (ilutov)
   . Fixed zend fiber build for solaris default mode (32 bits). (David Carlier)
   . Fixed zend call stack size for macOs/arm64. (David Carlier)
-  . Added support for Zend Max Execution Timers on FreeBSD (Kévin Dunglas)
+  . Added support for Zend Max Execution Timers on FreeBSD. (Kévin Dunglas)
+  . Ensure fiber stack is not backed by THP. (crrodriguez)
+  . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
+  . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
+  . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
+  . Added fiber Sys-V loongarch64 support. (qiangxuhui)
+  . Adjusted closure names to include the parent function's name. (timwolla)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -22,7 +28,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
-  . Added DateTime[Immutable]::[get|set]Microseconds. (Marc Bennewitz)
+  . Added DateTime[Immutable]::[get|set]Microsecond. (Marc Bennewitz)
 
 - DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
@@ -34,9 +40,11 @@ PHP                                                                        NEWS
   . Handle OOM more consistently. (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
   . Added DOMXPath::quote() static method. (divinity76)
+  . Implemented opt-in ext/dom spec compliance RFC. (nielsdos)
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)
+  . Fixed bug #65106 (PHP fails to compile ext/fileinfo). (Guillaume Outters)
 
 - FPM:
   . Implement GH-12385 (flush headers without body when calling flush()).
@@ -46,6 +54,14 @@ PHP                                                                        NEWS
 
 - FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
+  . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
+
+- Gettext:
+  . bind_textdomain_codeset, textdomain and d(*)gettext functions
+    now throw an exception on empty domain. (David Carlier)
+
+- Hash:
+  . Changed return type of hash_update() to true. (nielsdos)
 
 - IMAP:
   . Moved to PECL. (Derick Rethans)
@@ -69,6 +85,7 @@ PHP                                                                        NEWS
     - ValueError if the integer index does not fit in a signed 32 bit integer
   . ResourceBundle::get() now has a tentative return type of:
     ResourceBundle|array|string|int|null
+  . Added the new Grapheme function grapheme_str_split. (youkidearitai)
 
 - LDAP:
   . Added LDAP_OPT_X_TLS_PROTOCOL_MAX/LDAP_OPT_X_TLS_PROTOCOL_TLS1_3
@@ -79,11 +96,22 @@ PHP                                                                        NEWS
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
+  . Added mb_ucfirst and mb_lcfirst. (Yuya Hamada)
+
+- MySQLnd:
+  . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)
+  . Fixed bug GH-10599 (Apache crash on Windows when using a self-referencing
+    anonymous function inside a class with an active mysqli connection).
+    (nielsdos)
 
 - Opcache:
   . Added large shared segments support for FreeBSD. (David Carlier)
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues. (danog)
+  . Increased the maximum value of opcache.interned_strings_buffer to 32767 on
+    64bit archs. (Arnaud)
+  . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
+    zend_jit.c). (nielsdos)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
@@ -94,12 +122,25 @@ PHP                                                                        NEWS
     Florian Sowade)
   . Added X509_PURPOSE_OCSP_HELPER and X509_PURPOSE_TIMESTAMP_SIGN constants.
     (Vincent Jardin)
+  . Bumped minimum required OpenSSL version to 1.1.1. (Ayesh Karunaratne)
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
+  . Fixed bug with url_rewriter.hosts not used by output_add_rewrite_var().
+    (haszi)
+
+- PCNTL:
+  . Added pcntl_setns for Linux. (David Carlier)
+  . Added pcntl_getaffinity/pcntl_setaffinity. (David Carlier)
+  . Updated pcntl_get_signal_handler signal id upper limit to be
+    more in line with platforms limits. (David Carlier)
+  . Added pcntl_getcpu for Linux/FreeBSD. (David Carlier)
+  . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
+  . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
+  . Add "/r" modifier. (Ayesh)
 
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
@@ -118,9 +159,6 @@ PHP                                                                        NEWS
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Added class PdoMysql. (danack, kocsismate)
-  . Fixed binding of Stringable objects. (SakiTakamachi)
-  . Added an error message when a non-scalar value is bound with PARAM_INT.
-    (SakiTakamachi)
 
 - PDO_ODBC:
   . Added class PdoOdbc. (danack, kocsismate)
@@ -136,6 +174,8 @@ PHP                                                                        NEWS
 
 - PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
+  . Persistent connections support the PGSQL_CONNECT_FORCE_RENEW flag.
+    (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
@@ -143,6 +183,8 @@ PHP                                                                        NEWS
 
 - POSIX:
   . Added POSIX_SC_CHILD_MAX and POSIX_SC_CLK_TCK constants. (Jakub Zelenka)
+  . Updated posix_isatty to set the error number on file descriptors.
+    (David Carlier)
 
 - PSpell:
   . Moved to PECL. (Derick Rethans)
@@ -161,6 +203,12 @@ PHP                                                                        NEWS
 
 - Sockets:
   . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
+  . Added the TCP_SYNCNT constant for Linux to set number of attempts to send
+    SYN packets from the client. (David Carlier)
+  . Added the SO_EXCLBIND constant for exclusive socket binding on illumos/solaris.
+    (David Carlier)
+  . Updated the socket_create_listen backlog argument default value to SOMAXCONN.
+    (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
@@ -176,6 +224,7 @@ PHP                                                                        NEWS
 - Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Added the SO_EXECLUSIVEADDRUSE windows constant. (David Carlier)
+  . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
 
 - Sodium:
   . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
@@ -201,13 +250,19 @@ PHP                                                                        NEWS
   . Added the http_get_last_response_headers() and
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
+  . Add php_base64_encode_ex() API. (Remi)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
+
+- XMLReader:
+  . Declares class constant types. (Ayesh)
 
 - XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
+  . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars.
+    (nielsdos)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

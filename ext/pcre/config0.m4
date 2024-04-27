@@ -66,7 +66,7 @@ else
   pcre2lib/pcre2_string_utils.c pcre2lib/pcre2_study.c pcre2lib/pcre2_substitute.c  pcre2lib/pcre2_substring.c \
   pcre2lib/pcre2_tables.c pcre2lib/pcre2_ucd.c pcre2lib/pcre2_valid_utf.c pcre2lib/pcre2_xclass.c \
   pcre2lib/pcre2_find_bracket.c pcre2lib/pcre2_convert.c pcre2lib/pcre2_extuni.c pcre2lib/pcre2_script_run.c"
-  PHP_PCRE_CFLAGS="-Wno-implicit-fallthrough -DHAVE_CONFIG_H -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_PCRE_CFLAGS="-Wno-implicit-fallthrough -DHAVE_CONFIG_H -DHAVE_MEMMOVE -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
 

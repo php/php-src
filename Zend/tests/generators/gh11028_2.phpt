@@ -19,6 +19,6 @@ Warning: Undefined variable $a in %s on line %d
 
 Fatal error: Uncaught Error: Keys must be of type int|string during array unpacking in %s:%d
 Stack trace:
-#0 %s(%d): {closure}()
+#0 %s(%d): {closure:%s:%d}()
 #1 {main}
   thrown in %s on line %d

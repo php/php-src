@@ -279,7 +279,7 @@ ZEND_METHOD(Closure, bindTo)
 		Z_PARAM_OBJ_OR_STR_OR_NULL(scope_obj, scope_str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	do_closure_bind(return_value, getThis(), newthis, scope_obj, scope_str);
+	do_closure_bind(return_value, ZEND_THIS, newthis, scope_obj, scope_str);
 }
 
 static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
@@ -603,6 +603,15 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 			ZVAL_STR_COPY(&val, closure->func.common.function_name);
 		}
 		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_FUNCTION), &val);
+	} else {
+		ZVAL_STR_COPY(&val, closure->func.common.function_name);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_NAME), &val);
+
+		ZVAL_STR_COPY(&val, closure->func.op_array.filename);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_FILE), &val);
+
+		ZVAL_LONG(&val, closure->func.op_array.line_start);
+		zend_hash_update(debug_info, ZSTR_KNOWN(ZEND_STR_LINE), &val);
 	}
 
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {

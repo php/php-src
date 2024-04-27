@@ -2232,7 +2232,7 @@ function openlog(string $prefix, int $flags, int $facility): true {}
 
 function closelog(): true {}
 
-function syslog(int $priority, string $message): true {} // TODO make return type void
+function syslog(int $priority, string $message): true {}
 #endif
 
 /** @refcount 1 */
@@ -3744,19 +3744,19 @@ function get_headers(string $url, bool $associative = false, $context = null): a
  * @param resource $brigade
  * @refcount 1
  */
-function stream_bucket_make_writeable($brigade): ?object {}
+function stream_bucket_make_writeable($brigade): ?StreamBucket {}
 
 /** @param resource $brigade */
-function stream_bucket_prepend($brigade, object $bucket): void {}
+function stream_bucket_prepend($brigade, StreamBucket $bucket): void {}
 
 /** @param resource $brigade */
-function stream_bucket_append($brigade, object $bucket): void {}
+function stream_bucket_append($brigade, StreamBucket $bucket): void {}
 
 /**
  * @param resource $stream
  * @refcount 1
  */
-function stream_bucket_new($stream, string $buffer): object {}
+function stream_bucket_new($stream, string $buffer): StreamBucket {}
 
 /**
  * @return array<int, string>

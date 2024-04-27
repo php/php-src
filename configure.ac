@@ -287,8 +287,11 @@ dnl SAPI configuration.
 dnl ----------------------------------------------------------------------------
 
 dnl Paths to the targets are relative to the build directory.
-SAPI_SHARED=libs/libphp.[]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp.a
+SAPI_LIBNAME=libphp
+SAPI_LIBNAME_SHARED=$SAPI_LIBNAME.[]$SHLIB_DL_SUFFIX_NAME
+SAPI_LIBNAME_STATIC=$SAPI_LIBNAME.a
+SAPI_SHARED=libs/$SAPI_LIBNAME_SHARED
+SAPI_STATIC=libs/$SAPI_LIBNAME_STATIC
 SAPI_LIBTOOL=libphp.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
@@ -344,7 +347,7 @@ PHP_TEST_WRITE_STDOUT
 
 dnl Check for /usr/pkg/{lib,include} which is where NetBSD puts binary and
 dnl source packages. This should be harmless on other OSs.
-if test -d /usr/pkg/include -a -d /usr/pkg/lib ; then
+if test -d /usr/pkg/include && test -d /usr/pkg/lib; then
    CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
    LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
@@ -357,9 +360,8 @@ dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try to avoid -lnsl
 dnl checks, if we already have the functions which are usually in libnsl. Also,
 dnl uClibc will bark at linking with glibc's libnsl.
 
-PHP_CHECK_FUNC(socket, socket, network)
+AC_SEARCH_LIBS([socket], [socket network])
 PHP_CHECK_FUNC(socketpair, socket, network)
-PHP_CHECK_FUNC(htonl, socket, network)
 PHP_CHECK_FUNC(gethostname, nsl, network)
 PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
 AC_SEARCH_LIBS([dlopen], [dl],
@@ -397,7 +399,6 @@ grp.h \
 ieeefp.h \
 langinfo.h \
 linux/sock_diag.h \
-os/signpost.h \
 poll.h \
 pty.h \
 pwd.h \
@@ -454,6 +455,11 @@ PHP_BROKEN_GETCWD
 if test "$GCC" = "yes"; then
   PHP_BROKEN_GCC_STRLEN_OPT
 fi
+
+dnl Detect the headers required to use makedev, major, and minor.
+dnl Autoconf <= 2.69 didn't check glibc 2.25 deprecated macros in sys/types.h.
+m4_version_prereq([2.70],,[ac_cv_header_sys_types_h_makedev=no])
+AC_HEADER_MAJOR
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl ----------------------------------------------------------------------------
@@ -599,7 +605,7 @@ glob \
 localtime_r \
 lchown \
 memcntl \
-memmove \
+memfd_create \
 mkstemp \
 mmap \
 nice \
@@ -692,7 +698,7 @@ int main(void) {
   ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [
     dnl Cross compilation.
     case $host_alias in
-      *linux*)
+      *linux*|*midipix)
         ac_cv_func_getaddrinfo=yes
         ;;
       *)
@@ -745,9 +751,8 @@ if test "$ac_cv_func___crc32d" = "yes"; then
 fi
 
 dnl Check for asm goto support.
-AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
-int main(void) {
+AC_CACHE_CHECK([for asm goto], [ac_cv__asm_goto],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
 #if defined(__x86_64__) || defined(__i386__)
     __asm__ goto("jmp %l0\n" :::: end);
 #elif defined(__aarch64__)
@@ -755,23 +760,9 @@ int main(void) {
 #endif
 end:
     return 0;
-}
-  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no], [
-    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-int main(void) {
-#if defined(__x86_64__) || defined(__i386__)
-    __asm__ goto("jmp %l0\n" :::: end);
-#elif defined(__aarch64__)
-    __asm__ goto("b %l0\n" :::: end);
-#endif
-end:
-    return 0;
-}
-  ]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])
-])])
-
+]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])])
 if test "$ac_cv__asm_goto" = yes; then
-  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+  AC_DEFINE([HAVE_ASM_GOTO], [1], [Define if asm goto support is available.])
 fi
 
 dnl Check valgrind support.
@@ -1038,7 +1029,7 @@ PHP_ARG_ENABLE([dtrace],
   [no])
 
 if test "$PHP_DTRACE" = "yes"; then
-  AC_CHECK_HEADERS([sys/sdt.h], [
+  AC_CHECK_HEADER([sys/sdt.h], [
     PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
       Zend/zend_execute.c Zend/zend_exceptions.c \
       Zend/zend_dtrace.c Zend/zend.c])
@@ -1124,7 +1115,7 @@ case $host_alias in
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
     AC_RUN_IFELSE(
-        [AC_LANG_SOURCE([[int main() {return 0;}]])],
+        [AC_LANG_PROGRAM()],
         [ac_cv_common_page_size=yes],
         [ac_cv_common_page_size=no],
         [ac_cv_common_page_size=no])
@@ -1138,7 +1129,7 @@ case $host_alias in
         save_LDFLAGS=$LDFLAGS
         LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
         AC_RUN_IFELSE(
-            [AC_LANG_SOURCE([[int main() {return 0;}]])],
+            [AC_LANG_PROGRAM()],
             [ac_cv_max_page_size=yes],
             [ac_cv_max_page_size=no],
             [ac_cv_max_page_size=no])
@@ -1236,6 +1227,8 @@ if test "$PHP_PEAR" != "no"; then
     esac
   fi
 
+  PHP_SUBST([PEAR_INSTALLDIR])
+  PHP_ADD_BUILD_DIR([pear])
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
 fi
 
@@ -1258,7 +1251,9 @@ AS_CASE([$host_cpu],
   [ppc64*|powerpc64*], [fiber_cpu="ppc64"],
   [ppc*|powerpc*], [fiber_cpu="ppc32"],
   [riscv64*], [fiber_cpu="riscv64"],
+  [sparc64], [fiber_cpu="sparc64"],
   [s390x*], [fiber_cpu="s390x"],
+  [loongarch64*], [fiber_cpu="loongarch64"],
   [mips64*], [fiber_cpu="mips64"],
   [mips*], [fiber_cpu="mips32"],
   [fiber_cpu="unknown"]
@@ -1268,6 +1263,7 @@ AS_CASE([$host_os],
   [darwin*], [fiber_os="mac"],
   [aix*|os400*], [fiber_os="aix"],
   [freebsd*], [fiber_os="freebsd"],
+  [midipix], [fiber_os="midipix"],
   [fiber_os="other"]
 )
 
@@ -1279,7 +1275,9 @@ AS_CASE([$fiber_cpu],
   [ppc64], [fiber_asm_file_prefix="ppc64_sysv"],
   [ppc32], [fiber_asm_file_prefix="ppc32_sysv"],
   [riscv64], [fiber_asm_file_prefix="riscv64_sysv"],
+  [sparc64], [fiber_asm_file_prefix="sparc64_sysv"],
   [s390x], [fiber_asm_file_prefix="s390x_sysv"],
+  [loongarch64], [fiber_asm_file_prefix="loongarch64_sysv"],
   [mips64], [fiber_asm_file_prefix="mips64_n64"],
   [mips32], [fiber_asm_file_prefix="mips32_o32"],
   [fiber_asm_file_prefix="unknown"]
@@ -1298,6 +1296,15 @@ elif test "$fiber_os" = 'freebsd'; then
       ;;
     *)
       fiber_asm_file="${fiber_asm_file_prefix}_elf_gas"
+      ;;
+  esac
+elif test "$fiber_os" = 'midipix'; then
+  case $fiber_cpu in
+    i386*)
+      fiber_asm="no"
+      ;;
+    x86_64)
+      fiber_asm_file="x86_64_ms_pe_gas"
       ;;
   esac
 elif test "$fiber_asm_file_prefix" != 'unknown'; then
@@ -1378,6 +1385,7 @@ test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
 test "$program_prefix" = "NONE" && program_prefix=
 test "$program_suffix" = "NONE" && program_suffix=
 
+orig_libdir=$libdir
 case $libdir in
   '${exec_prefix}/lib')
     libdir=$libdir/php
@@ -1389,8 +1397,6 @@ case `eval echo $datadir` in
     ;;
 esac
 
-phplibdir=`pwd`/modules
-$php_shtool mkdir -p $phplibdir
 phptempdir=`pwd`/libs
 
 old_exec_prefix=$exec_prefix
@@ -1469,6 +1475,9 @@ AC_SUBST(EXPANDED_SYSCONFDIR)
 AC_SUBST(EXPANDED_LOCALSTATEDIR)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
 AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
+AC_SUBST([PHP_INSTALLED_SAPIS])
+AC_SUBST([SAPI_LIBNAME_SHARED])
+AC_SUBST([SAPI_LIBNAME_STATIC])
 
 PHP_UTILIZE_RPATHS
 
@@ -1495,8 +1504,6 @@ if test -n "${PHP_BUILD_ARCH}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
 fi
 
-PHP_SUBST_OLD(PHP_INSTALLED_SAPIS)
-
 PHP_SUBST(PHP_FASTCGI_OBJS)
 PHP_SUBST(PHP_SAPI_OBJS)
 PHP_SUBST(PHP_BINARY_OBJS)
@@ -1515,9 +1522,9 @@ PHP_SUBST(exec_prefix)
 PHP_SUBST_OLD(program_prefix)
 PHP_SUBST_OLD(program_suffix)
 PHP_SUBST(includedir)
+PHP_SUBST_OLD(orig_libdir)
 PHP_SUBST(libdir)
 PHP_SUBST(mandir)
-PHP_SUBST(phplibdir)
 PHP_SUBST(phptempdir)
 PHP_SUBST(prefix)
 PHP_SUBST(localstatedir)
@@ -1547,7 +1554,6 @@ PHP_SUBST_OLD(INSTALL_IT)
 PHP_SUBST(LIBTOOL)
 PHP_SUBST(LN_S)
 PHP_SUBST_OLD(NATIVE_RPATHS)
-PHP_SUBST_OLD(PEAR_INSTALLDIR)
 PHP_SUBST_OLD(PHP_LDFLAGS)
 PHP_SUBST(OVERALL_TARGET)
 PHP_SUBST(PHP_RPATHS)
@@ -1703,6 +1709,17 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
+if printf "#if __ELF__\nelf\n#endif\n" | $CC -E - | grep elf > /dev/null; then
+  PHP_ADD_SOURCES(main, debug_gdb_scripts.c)
+
+  cat >> Makefile.objects <<EOF
+$abs_srcdir/main/debug_gdb_scripts.c: $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php $abs_srcdir/scripts/gdb/php_gdb.py $abs_srcdir/.gdbinit
+	@if test ! -z "\$(PHP)"; then \\
+		\$(PHP) $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php; \\
+	fi;
+EOF
+fi
+
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 
 PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
@@ -1752,22 +1769,21 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/zend_dump.c \
     , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
-PHP_ADD_BUILD_DIR(main main/streams)
-PHP_ADD_BUILD_DIR(TSRM)
-PHP_ADD_BUILD_DIR(Zend Zend/asm Zend/Optimizer)
-
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
 
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
-
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
-dnl Make directories when building in a separate build directory.
-$php_shtool mkdir -p pear
-$php_shtool mkdir -p scripts
-$php_shtool mkdir -p scripts/man1
+PHP_ADD_BUILD_DIR([m4_normalize([
+  main
+  main/streams
+  scripts
+  scripts/man1
+  TSRM
+  Zend
+  Zend/asm
+  Zend/Optimizer
+])])
 
 ALL_OUTPUT_FILES="main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \
@@ -1802,8 +1818,6 @@ fi
 
 dnl Create configuration headers.
 dnl ----------------------------------------------------------------------------
-test -d Zend || $php_shtool mkdir Zend
-
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
 FEO

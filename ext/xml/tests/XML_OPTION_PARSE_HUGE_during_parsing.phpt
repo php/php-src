@@ -21,7 +21,7 @@ xml_parse($parser, "<foo/>", true);
 Fatal error: Uncaught Error: Cannot change option XML_OPTION_PARSE_HUGE while parsing in %s:%d
 Stack trace:
 #0 %s(%d): xml_parser_set_option(Object(XMLParser), 5, true)
-#1 [internal function]: {closure}(Object(XMLParser), 'FOO', Array)
+#1 [internal function]: {closure:%s:%d}(Object(XMLParser), 'FOO', Array)
 #2 %s(%d): xml_parse(Object(XMLParser), '<foo/>', true)
 #3 {main}
   thrown in %s on line %d
