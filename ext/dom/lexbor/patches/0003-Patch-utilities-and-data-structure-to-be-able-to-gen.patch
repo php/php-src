@@ -1,7 +1,7 @@
-From d9c670e2a58fbfd3670a5ca69cd583b3573e77ef Mon Sep 17 00:00:00 2001
+From 0514a1cb2f45ab6dd814118780d56a713f4925a2 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Thu, 24 Aug 2023 22:57:48 +0200
-Subject: [PATCH] Patch utilities and data structure to be able to generate
+Subject: [PATCH 3/6] Patch utilities and data structure to be able to generate
  smaller lookup tables
 
 Changed the generation script to check if everything fits in 32-bits.
@@ -15,7 +15,7 @@ tables in size.
  4 files changed, 13 insertions(+), 7 deletions(-)
 
 diff --git a/source/lexbor/core/shs.h b/source/lexbor/core/shs.h
-index 7a63a07..c84dfaa 100755
+index 7a63a07..c84dfaa 100644
 --- a/source/lexbor/core/shs.h
 +++ b/source/lexbor/core/shs.h
 @@ -27,9 +27,9 @@ lexbor_shs_entry_t;
@@ -98,5 +98,5 @@ index 3e75812..2370c66 100755
          result.append("};")
  
 -- 
-2.41.0
+2.44.0
 

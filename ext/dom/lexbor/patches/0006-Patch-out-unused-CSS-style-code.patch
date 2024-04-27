@@ -1,38 +1,50 @@
-From c19debb4d26f731b39860f27073b69927aa611f0 Mon Sep 17 00:00:00 2001
+From 168dad55b6278cd45e0f0b2aed802ce9bace3274 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
-Date: Wed, 23 Aug 2023 21:48:12 +0200
-Subject: [PATCH] Patch out CSS parser
+Date: Sun, 7 Jan 2024 21:59:28 +0100
+Subject: [PATCH 6/6] Patch out unused CSS style code
 
 ---
  source/lexbor/css/rule.h                      |  2 ++
- source/lexbor/html/interfaces/document.c      | 16 ++++++++++
+ source/lexbor/html/interfaces/document.c      | 29 +++++++++++++++++++
+ source/lexbor/html/interfaces/document.h      |  2 --
  source/lexbor/html/interfaces/element.c       | 29 +++++++++++++++++++
  source/lexbor/html/interfaces/style_element.c |  6 ++++
- 4 files changed, 53 insertions(+)
+ 5 files changed, 66 insertions(+), 2 deletions(-)
 
 diff --git a/source/lexbor/css/rule.h b/source/lexbor/css/rule.h
-index 7cc4f0b..f68491e 100644
+index 7cc4f0b..bd191f9 100644
 --- a/source/lexbor/css/rule.h
 +++ b/source/lexbor/css/rule.h
-@@ -344,7 +344,9 @@ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
-     }
- 
-     if (rule->ref_count == 0) {
+@@ -339,6 +339,7 @@ lxb_css_rule_ref_dec(lxb_css_rule_t *rule)
+ lxb_inline void
+ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
+ {
 +#if 0
-         (void) lxb_css_rule_destroy(rule, true);
-+#endif
+     if (rule->ref_count > 0) {
+         rule->ref_count--;
      }
+@@ -346,6 +347,7 @@ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
+     if (rule->ref_count == 0) {
+         (void) lxb_css_rule_destroy(rule, true);
+     }
++#endif
  }
  
+ lxb_inline void
 diff --git a/source/lexbor/html/interfaces/document.c b/source/lexbor/html/interfaces/document.c
-index 73184f0..b4de5b8 100755
+index bd3c02b..aa305a9 100644
 --- a/source/lexbor/html/interfaces/document.c
 +++ b/source/lexbor/html/interfaces/document.c
-@@ -72,8 +72,10 @@ static lxb_status_t
- lxb_html_document_style_cb(lxb_dom_node_t *node,
-                            lxb_css_selector_specificity_t spec, void *ctx);
+@@ -58,6 +58,7 @@ static lxb_html_document_css_custom_entry_t *
+ lxb_html_document_css_customs_insert(lxb_html_document_t *document,
+                                      const lxb_char_t *key, size_t length);
  
 +#if 0
+ static lxb_status_t
+ lxb_html_document_style_remove_by_rule_cb(lxb_dom_node_t *node,
+                                           lxb_css_selector_specificity_t spec,
+@@ -74,6 +75,7 @@ lxb_html_document_style_cb(lxb_dom_node_t *node,
+ 
  static lxb_status_t
  lxb_html_document_done(lxb_html_document_t *document);
 +#endif
@@ -96,7 +108,7 @@ index 73184f0..b4de5b8 100755
      size_t length;
      lxb_css_stylesheet_t *sst;
      lxb_html_document_css_t *css = &document->css;
-@@ -586,6 +597,7 @@ lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
+@@ -586,29 +597,37 @@ lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
  
          (void) lxb_css_stylesheet_destroy(sst, destroy_memory);
      }
@@ -104,7 +116,71 @@ index 73184f0..b4de5b8 100755
  }
  
  lxb_status_t
-@@ -849,6 +861,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
+ lxb_html_document_style_attach(lxb_html_document_t *document,
+                                lxb_css_rule_style_t *style)
+ {
++#if 0
+     lxb_html_document_css_t *css = &document->css;
+ 
+     return lxb_selectors_find(css->selectors, lxb_dom_interface_node(document),
+                               style->selector, lxb_html_document_style_cb, style);
++#endif
++    return LXB_STATUS_OK;
+ }
+ 
+ lxb_status_t
+ lxb_html_document_style_remove(lxb_html_document_t *document,
+                                lxb_css_rule_style_t *style)
+ {
++#if 0
+     lxb_html_document_css_t *css = &document->css;
+ 
+     return lxb_selectors_find(css->selectors, lxb_dom_interface_node(document),
+                               style->selector,
+                               lxb_html_document_style_remove_by_rule_cb, style);
++#endif
++    return LXB_STATUS_OK;
+ }
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_document_style_remove_by_rule_cb(lxb_dom_node_t *node,
+                                           lxb_css_selector_specificity_t spec,
+@@ -646,20 +665,25 @@ lxb_html_document_style_remove_avl_cb(lexbor_avl_t *avl,
+                                           style, context->list);
+     return LXB_STATUS_OK;
+ }
++#endif
+ 
+ lxb_status_t
+ lxb_html_document_style_attach_by_element(lxb_html_document_t *document,
+                                           lxb_html_element_t *element,
+                                           lxb_css_rule_style_t *style)
+ {
++#if 0
+     lxb_html_document_css_t *css = &document->css;
+ 
+     return lxb_selectors_match_node(css->selectors,
+                                     lxb_dom_interface_node(element),
+                                     style->selector,
+                                     lxb_html_document_style_cb, style);
++#endif
++    return LXB_STATUS_OK;
+ }
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_document_style_cb(lxb_dom_node_t *node,
+                            lxb_css_selector_specificity_t spec, void *ctx)
+@@ -675,6 +699,7 @@ lxb_html_document_style_cb(lxb_dom_node_t *node,
+     return lxb_html_element_style_list_append(lxb_html_interface_element(node),
+                                               style->declarations, spec);
+ }
++#endif
+ 
+ lxb_html_document_t *
+ lxb_html_document_destroy(lxb_html_document_t *document)
+@@ -851,6 +876,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
      return LXB_STATUS_OK;
  }
  
@@ -112,7 +188,7 @@ index 73184f0..b4de5b8 100755
  static lxb_status_t
  lxb_html_document_done(lxb_html_document_t *document)
  {
-@@ -873,6 +886,7 @@ lxb_html_document_done(lxb_html_document_t *document)
+@@ -875,6 +901,7 @@ lxb_html_document_done(lxb_html_document_t *document)
  
      return LXB_STATUS_OK;
  }
@@ -120,7 +196,7 @@ index 73184f0..b4de5b8 100755
  
  const lxb_char_t *
  lxb_html_document_title(lxb_html_document_t *document, size_t *len)
-@@ -960,6 +974,7 @@ lxb_html_document_import_node(lxb_html_document_t *doc, lxb_dom_node_t *node,
+@@ -962,6 +989,7 @@ lxb_html_document_import_node(lxb_html_document_t *doc, lxb_dom_node_t *node,
      return lxb_dom_document_import_node(&doc->dom_document, node, deep);
  }
  
@@ -128,7 +204,7 @@ index 73184f0..b4de5b8 100755
  static lxb_status_t
  lxb_html_document_event_insert(lxb_dom_node_t *node)
  {
-@@ -1231,6 +1246,7 @@ lxb_html_document_event_set_value(lxb_dom_node_t *node,
+@@ -1233,6 +1261,7 @@ lxb_html_document_event_set_value(lxb_dom_node_t *node,
      return lxb_html_element_style_parse(lxb_html_interface_element(node),
                                          value, length);
  }
@@ -136,8 +212,28 @@ index 73184f0..b4de5b8 100755
  
  /*
   * No inline functions for ABI.
+diff --git a/source/lexbor/html/interfaces/document.h b/source/lexbor/html/interfaces/document.h
+index 7e8d1ea..827ff64 100644
+--- a/source/lexbor/html/interfaces/document.h
++++ b/source/lexbor/html/interfaces/document.h
+@@ -20,7 +20,6 @@ extern "C" {
+ #include "lexbor/dom/interfaces/attr.h"
+ #include "lexbor/dom/interfaces/document.h"
+ #include "lexbor/css/css.h"
+-#include "lexbor/selectors/selectors.h"
+ 
+ 
+ typedef lxb_status_t
+@@ -45,7 +44,6 @@ typedef struct {
+     lxb_css_memory_t    *memory;
+     lxb_css_selectors_t *css_selectors;
+     lxb_css_parser_t    *parser;
+-    lxb_selectors_t     *selectors;
+ 
+     lexbor_avl_t        *styles;
+     lexbor_array_t      *stylesheets;
 diff --git a/source/lexbor/html/interfaces/element.c b/source/lexbor/html/interfaces/element.c
-index 229d3d7..363040c 100755
+index 229d3d7..363040c 100644
 --- a/source/lexbor/html/interfaces/element.c
 +++ b/source/lexbor/html/interfaces/element.c
 @@ -38,9 +38,11 @@ static lxb_status_t
@@ -306,7 +402,7 @@ index 229d3d7..363040c 100755
  }
 +#endif
 diff --git a/source/lexbor/html/interfaces/style_element.c b/source/lexbor/html/interfaces/style_element.c
-index 66d55c4..9a402ef 100755
+index 66d55c4..9a402ef 100644
 --- a/source/lexbor/html/interfaces/style_element.c
 +++ b/source/lexbor/html/interfaces/style_element.c
 @@ -35,7 +35,9 @@ lxb_html_style_element_interface_destroy(lxb_html_style_element_t *style_element
@@ -345,5 +441,5 @@ index 66d55c4..9a402ef 100755
          return css->parser->status;
      }
 -- 
-2.41.0
+2.44.0
 
