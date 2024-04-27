@@ -516,7 +516,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 		Z_PARAM_LONG(flags)
@@ -544,6 +544,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	efree(func);
+	zend_release_fcall_info_cache(&fcc);
 	RETURN_FALSE;
 }
 
@@ -566,14 +567,15 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
+	bool is_throw = false;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_FUNC(step_fci, step_fcc)
-		Z_PARAM_FUNC(fini_fci, fini_fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(step_fci, step_fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fini_fci, fini_fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(is_throw = true; goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
@@ -600,6 +602,18 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	efree(func);
+
+error:
+	if (ZEND_FCC_INITIALIZED(step_fcc)) {
+		zend_release_fcall_info_cache(&step_fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(fini_fcc)) {
+		zend_release_fcall_info_cache(&fini_fcc);
+	}
+
+	if (is_throw) {
+		RETURN_THROWS();
+	}
 	RETURN_FALSE;
 }
 
@@ -641,7 +655,7 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(collation_name, collation_name_len)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -662,6 +676,8 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 
 		RETURN_TRUE;
 	}
+
+	zend_release_fcall_info_cache(&fcc);
 
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
