@@ -73,7 +73,7 @@ static const php_dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_
     }
 }
 
-static xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xmlDocPtr lxml_doc, const lxb_char_t *data, size_t data_length, bool compact_text_nodes)
+static zend_always_inline xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xmlDocPtr lxml_doc, const lxb_char_t *data, size_t data_length, bool compact_text_nodes)
 {
     if (compact_text_nodes && data_length < LXML_INTERNED_STRINGS_SIZE) {
         /* See xmlSAX2TextNode() in libxml2 */
