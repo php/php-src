@@ -47,7 +47,6 @@ static zend_always_inline zend_class_entry *dom_get_dtd_namednodemap_ce(bool mod
 
 DOM_DEF_GET_CE_FUNC(node)
 DOM_DEF_GET_CE_FUNC(documenttype)
-DOM_DEF_GET_CE_FUNC(element)
 DOM_DEF_GET_CE_FUNC(attr)
 DOM_DEF_GET_CE_FUNC(entity)
 DOM_DEF_GET_CE_FUNC(entityreference)

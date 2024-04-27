@@ -1423,7 +1423,8 @@ zend_result dom_html_document_body_write(dom_object *obj, zval *newval)
 		dom_object *newval_intern = Z_DOMOBJ_P(newval);
 		if (newval_intern->ptr != NULL) {
 			xmlNodePtr newval_node = ((php_libxml_node_ptr *) newval_intern->ptr)->node;
-			if (php_dom_ns_is_fast(newval_node, php_dom_ns_is_html_magic_token) && dom_accept_body_name(newval_node->name)) {
+			/* Note: because this property has type HTMLElement, we know the namespace is correct. */
+			if (dom_accept_body_name(newval_node->name)) {
 				/* 2. If the new value is the same as the body element, return. */
 				const xmlNode *current_body_element = dom_html_document_element_read_raw(docp, dom_accept_body_name);
 				if (current_body_element == newval_node) {

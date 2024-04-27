@@ -1374,6 +1374,10 @@ namespace Dom
         public function replaceChildren(Node|string ...$nodes): void {}
     }
 
+    class HTMLElement extends Element
+    {
+    }
+
     class Attr extends Node
     {
         /** @readonly */
@@ -1581,9 +1585,9 @@ namespace Dom
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
 
-        public ?Element $body;
+        public ?HTMLElement $body;
         /** @readonly */
-        public ?Element $head;
+        public ?HTMLElement $head;
         public string $title;
     }
 

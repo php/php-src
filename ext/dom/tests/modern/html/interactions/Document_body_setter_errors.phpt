@@ -11,7 +11,7 @@ function testNormalReplace($cb)
     var_dump($dom->body?->nodeName);
     try {
         $dom->body = $cb($dom);
-    } catch (DOMException $e) {
+    } catch (Throwable $e) {
         echo $e->getMessage(), "\n";
     }
     var_dump($dom->body?->nodeName);
@@ -50,11 +50,11 @@ The new body must either be a body or a frameset tag
 string(4) "BODY"
 --- Right element tag in wrong namespace ---
 string(4) "BODY"
-The new body must either be a body or a frameset tag
+Cannot assign Dom\Element to property Dom\Document::$body of type ?Dom\HTMLElement
 string(4) "BODY"
 --- Right element tag in no namespace ---
 string(4) "BODY"
-The new body must either be a body or a frameset tag
+Cannot assign Dom\Element to property Dom\Document::$body of type ?Dom\HTMLElement
 string(4) "BODY"
 --- Set body without document element ---
 A body can only be set if there is a document element

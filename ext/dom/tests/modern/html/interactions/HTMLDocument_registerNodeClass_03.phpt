@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-class Custom extends Dom\Element {
+class Custom extends Dom\HTMLElement {
     public int $test = 1;
 
     public function reverseTagName(): string {
@@ -15,7 +15,7 @@ class Custom extends Dom\Element {
 }
 
 $dom = Dom\HTMLDocument::createFromString("<div>foo</div>", LIBXML_NOERROR);
-$dom->registerNodeClass("Dom\\Element", "Custom");
+$dom->registerNodeClass("Dom\\HTMLElement", "Custom");
 
 var_dump($dom->getElementsByTagName('div')[0]->reverseTagName());
 
