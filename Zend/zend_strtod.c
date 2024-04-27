@@ -4523,7 +4523,7 @@ ZEND_API char *zend_gcvt(double value, int ndigit, char dec_point, char exponent
 		 * Infinity or NaN, convert to inf or nan with sign.
 		 * We assume the buffer is at least ndigit long.
 		 */
-		snprintf(buf, ndigit + 1, "%s%s", (sign && *digits == 'I') ? "-" : "", *digits == 'I' ? "INF" : "NAN");
+		snprintf(buf, (sign && *digits == 'I') + 4, "%s%s", (sign && *digits == 'I') ? "-" : "", *digits == 'I' ? "INF" : "NAN");
 		zend_freedtoa(digits);
 		return (buf);
 	}
