@@ -12,5 +12,5 @@ try {
 var_dump(STDIN);
 ?>
 --EXPECT--
-odbc_close(): Argument #1 ($odbc) must be of type ODBC\Connection, resource given
+odbc_close(): Argument #1 ($odbc) must be of type Odbc\Connection, resource given
 resource(1) of type (stream)

@@ -48,13 +48,13 @@ try {
 
 ?>
 --EXPECTF--
-object(ODBC\Connection)#%d (%d) {
+object(Odbc\Connection)#%d (%d) {
 }
-object(ODBC\Connection)#%d (%d) {
+object(Odbc\Connection)#%d (%d) {
 }
-object(ODBC\Result)#%d (%d) {
+object(Odbc\Result)#%d (%d) {
 }
-object(ODBC\Result)#%d (%d) {
+object(Odbc\Result)#%d (%d) {
 }
 ODBC connection has already been closed
 ODBC connection has already been closed

@@ -67,6 +67,12 @@ PHP 8.4 UPGRADE NOTES
 - ODBC:
   . odbc_fetch_row() returns false when a value less than or equal to 0 is
     passed for parameter $row. Now, a warning is emitted in this case.
+  . odbc_connect() and odbc_pconnect() will now return an Odbc\Connection
+    object rather than a resource. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . odbc_prepare(), odbc_exec(), and various other functions will now return
+    an Odbc\Result object rather than a resource. Return value checks using
+    is_resource() should be replaced with checks for `false`.
 
 - Opcache:
   . The JIT config defaults changed from opcache.jit=tracing and

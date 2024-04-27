@@ -58,6 +58,6 @@ odbc_exec($conn, 'DROP TABLE free_result');
 bool(true)
 string(1) "1"
 bool(true)
-odbc_free_result(): Argument #1 ($statement) must be of type ODBC\Result, ODBC\Connection given
+odbc_free_result(): Argument #1 ($statement) must be of type Odbc\Result, Odbc\Connection given
 ODBC result has already been closed
 ODBC result has already been closed

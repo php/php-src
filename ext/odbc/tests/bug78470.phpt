@@ -12,5 +12,5 @@ $conn = odbc_connect($dsn, $user, $pass);
 var_dump(odbc_specialcolumns($conn, SQL_BEST_ROWID, '', '', '', SQL_SCOPE_CURROW, SQL_NO_NULLS));
 ?>
 --EXPECTF--
-object(ODBC\Result)#%d (%d) {
+object(Odbc\Result)#%d (%d) {
 }

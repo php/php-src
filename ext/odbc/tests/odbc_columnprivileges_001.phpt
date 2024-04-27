@@ -22,7 +22,7 @@ var_dump(odbc_fetch_row($result));
 
 ?>
 --EXPECTF--
-object(ODBC\Result)#%d (%d) {
+object(Odbc\Result)#%d (%d) {
 }
 bool(false)
 
@@ -31,9 +31,9 @@ Deprecated: odbc_columnprivileges(): Passing null to parameter #3 ($schema) of t
 Deprecated: odbc_columnprivileges(): Passing null to parameter #4 ($table) of type string is deprecated in %s on line %d
 
 Deprecated: odbc_columnprivileges(): Passing null to parameter #5 ($column) of type string is deprecated in %s on line %d
-object(ODBC\Result)#%d (%d) {
+object(Odbc\Result)#%d (%d) {
 }
 bool(false)
-object(ODBC\Result)#%d (%d) {
+object(Odbc\Result)#%d (%d) {
 }
 bool(false)

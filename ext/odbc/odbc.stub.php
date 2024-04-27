@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-namespace ODBC {
+namespace Odbc {
     /**
      * @strict-properties
      * @not-serializable
@@ -234,7 +234,7 @@ namespace {
      */
     const SQL_TIMESTAMP = UNKNOWN;
 
-    #if (defined(ODBCVER) && (ODBCVER >= 0x0300))
+#if (defined(ODBCVER) && (ODBCVER >= 0x0300))
     /**
      * @var int
      * @cvalue SQL_TYPE_DATE
@@ -327,116 +327,116 @@ namespace {
      */
     const SQL_QUICK = UNKNOWN;
 
-    #endif
+#endif
 
     function odbc_close_all(): void {}
 
-    function odbc_binmode(ODBC\Result $statement, int $mode): true {}
+    function odbc_binmode(Odbc\Result $statement, int $mode): true {}
 
-    function odbc_longreadlen(ODBC\Result $statement, int $length): true {}
+    function odbc_longreadlen(Odbc\Result $statement, int $length): true {}
 
-    function odbc_prepare(ODBC\Connection $odbc, string $query): ODBC\Result|false {}
+    function odbc_prepare(Odbc\Connection $odbc, string $query): Odbc\Result|false {}
 
-    function odbc_execute(ODBC\Result $statement, array $params = []): bool {}
+    function odbc_execute(Odbc\Result $statement, array $params = []): bool {}
 
-    function odbc_cursor(ODBC\Result $statement): string|false {}
+    function odbc_cursor(Odbc\Result $statement): string|false {}
 
-    #ifdef HAVE_SQLDATASOURCES
-    function odbc_data_source(ODBC\Connection $odbc, int $fetch_type): array|null|false {}
-    #endif
-
-    function odbc_exec(ODBC\Connection $odbc, string $query): ODBC\Result|false {}
-
-    /** @alias odbc_exec */
-    function odbc_do(ODBC\Connection $odbc, string $query): ODBC\Result|false {}
-
-#ifdef PHP_ODBC_HAVE_FETCH_HASH
-/** @param resource $statement */
-function odbc_fetch_object($statement, ?int $row = null): stdClass|false {}
-
-/** @param resource $statement */
-function odbc_fetch_array($statement, ?int $row = null): array|false {}
+#ifdef HAVE_SQLDATASOURCES
+    function odbc_data_source(Odbc\Connection $odbc, int $fetch_type): array|null|false {}
 #endif
 
-/**
- * @param resource $statement
- * @param array $array
- */
-function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
+    function odbc_exec(Odbc\Connection $odbc, string $query): Odbc\Result|false {}
 
-    function odbc_fetch_row(ODBC\Result $statement, ?int $row = null): bool {}
+    /** @alias odbc_exec */
+    function odbc_do(Odbc\Connection $odbc, string $query): Odbc\Result|false {}
 
-    function odbc_result(ODBC\Result $statement, string|int $field): string|bool|null {}
+#ifdef PHP_ODBC_HAVE_FETCH_HASH
+    /** @param resource $statement */
+    function odbc_fetch_object($statement, ?int $row = null): stdClass|false {}
+
+    /** @param resource $statement */
+    function odbc_fetch_array($statement, ?int $row = null): array|false {}
+#endif
+
+    /**
+     * @param resource $statement
+     * @param array $array
+     */
+    function odbc_fetch_into($statement, &$array, ?int $row = null): int|false {}
+
+    function odbc_fetch_row(Odbc\Result $statement, ?int $row = null): bool {}
+
+    function odbc_result(Odbc\Result $statement, string|int $field): string|bool|null {}
 
     /** @deprecated */
-    function odbc_result_all(ODBC\Result $statement, string $format = ""): int|false {}
+    function odbc_result_all(Odbc\Result $statement, string $format = ""): int|false {}
 
-    function odbc_free_result(ODBC\Result $statement): true {}
+    function odbc_free_result(Odbc\Result $statement): true {}
 
-    function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
+    function odbc_connect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER): Odbc\Connection|false {}
 
-    function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER): ODBC\Connection|false {}
+    function odbc_pconnect(string $dsn, ?string $user = null, #[\SensitiveParameter] ?string $password = null, int $cursor_option = SQL_CUR_USE_DRIVER): Odbc\Connection|false {}
 
-    function odbc_close(ODBC\Connection $odbc): void {}
+    function odbc_close(Odbc\Connection $odbc): void {}
 
-    function odbc_num_rows(ODBC\Result $statement): int {}
+    function odbc_num_rows(Odbc\Result $statement): int {}
 
-    #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
-    function odbc_next_result(ODBC\Result $statement): bool {}
-    #endif
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
+    function odbc_next_result(Odbc\Result $statement): bool {}
+#endif
 
-    function odbc_num_fields(ODBC\Result $statement): int {}
+    function odbc_num_fields(Odbc\Result $statement): int {}
 
-    function odbc_field_name(ODBC\Result $statement, int $field): string|false {}
+    function odbc_field_name(Odbc\Result $statement, int $field): string|false {}
 
-    function odbc_field_type(ODBC\Result $statement, int $field): string|false {}
+    function odbc_field_type(Odbc\Result $statement, int $field): string|false {}
 
-    function odbc_field_len(ODBC\Result $statement, int $field): int|false {}
+    function odbc_field_len(Odbc\Result $statement, int $field): int|false {}
 
     /** @alias odbc_field_len */
-    function odbc_field_precision(ODBC\Result $statement, int $field): int|false {}
+    function odbc_field_precision(Odbc\Result $statement, int $field): int|false {}
 
-    function odbc_field_scale(ODBC\Result $statement, int $field): int|false {}
+    function odbc_field_scale(Odbc\Result $statement, int $field): int|false {}
 
-    function odbc_field_num(ODBC\Result $statement, string $field): int|false {}
+    function odbc_field_num(Odbc\Result $statement, string $field): int|false {}
 
-    function odbc_autocommit(ODBC\Connection $odbc, ?bool $enable = null): int|bool {}
+    function odbc_autocommit(Odbc\Connection $odbc, ?bool $enable = null): int|bool {}
 
-    function odbc_commit(ODBC\Connection $odbc): bool {}
+    function odbc_commit(Odbc\Connection $odbc): bool {}
 
-    function odbc_rollback(ODBC\Connection $odbc): bool {}
+    function odbc_rollback(Odbc\Connection $odbc): bool {}
 
-    function odbc_error(?ODBC\Connection $odbc = null): string {}
+    function odbc_error(?Odbc\Connection $odbc = null): string {}
 
-    function odbc_errormsg(?ODBC\Connection $odbc = null): string {}
+    function odbc_errormsg(?Odbc\Connection $odbc = null): string {}
 
-    function odbc_setoption(ODBC\Connection|ODBC\Result $odbc, int $which, int $option, int $value): bool {}
+    function odbc_setoption(Odbc\Connection|Odbc\Result $odbc, int $which, int $option, int $value): bool {}
 
-    function odbc_tables(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $types = null): ODBC\Result|false {}
+    function odbc_tables(Odbc\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $types = null): Odbc\Result|false {}
 
-    function odbc_columns(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $column = null): ODBC\Result|false {}
+    function odbc_columns(Odbc\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $table = null, ?string $column = null): Odbc\Result|false {}
 
-    function odbc_gettypeinfo(ODBC\Connection $odbc, int $data_type = 0): ODBC\Result|false {}
+    function odbc_gettypeinfo(Odbc\Connection $odbc, int $data_type = 0): Odbc\Result|false {}
 
-    function odbc_primarykeys(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table): ODBC\Result|false {}
+    function odbc_primarykeys(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table): Odbc\Result|false {}
 
-    #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-    function odbc_procedurecolumns(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null, ?string $column = null): ODBC\Result|false {}
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
+    function odbc_procedurecolumns(Odbc\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null, ?string $column = null): Odbc\Result|false {}
 
-    function odbc_procedures(ODBC\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null): ODBC\Result|false {}
+    function odbc_procedures(Odbc\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null): Odbc\Result|false {}
 
-    function odbc_foreignkeys(ODBC\Connection $odbc, ?string $pk_catalog, string $pk_schema, string $pk_table, string $fk_catalog, string $fk_schema, string $fk_table): ODBC\Result|false {}
-    #endif
+    function odbc_foreignkeys(Odbc\Connection $odbc, ?string $pk_catalog, string $pk_schema, string $pk_table, string $fk_catalog, string $fk_schema, string $fk_table): Odbc\Result|false {}
+#endif
 
-    function odbc_specialcolumns(ODBC\Connection $odbc, int $type, ?string $catalog, string $schema, string $table, int $scope, int $nullable): ODBC\Result|false {}
+    function odbc_specialcolumns(Odbc\Connection $odbc, int $type, ?string $catalog, string $schema, string $table, int $scope, int $nullable): Odbc\Result|false {}
 
-    function odbc_statistics(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table, int $unique, int $accuracy): ODBC\Result|false {}
+    function odbc_statistics(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table, int $unique, int $accuracy): Odbc\Result|false {}
 
-    #if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
-    function odbc_tableprivileges(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table): ODBC\Result|false {}
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
+    function odbc_tableprivileges(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table): Odbc\Result|false {}
 
-    function odbc_columnprivileges(ODBC\Connection $odbc, ?string $catalog, string $schema, string $table, string $column): ODBC\Result|false {}
-    #endif
+    function odbc_columnprivileges(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table, string $column): Odbc\Result|false {}
+#endif
 
     /* odbc_utils.c */
 
