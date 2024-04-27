@@ -102,7 +102,8 @@ typedef struct _php_libxml_ref_obj {
 	php_libxml_private_data_header *private_data;
 	const php_libxml_document_handlers *handlers;
 	int refcount;
-	php_libxml_class_type class_type;
+	php_libxml_class_type class_type : 8;
+	bool quirks_mode;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {

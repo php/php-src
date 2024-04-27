@@ -24,6 +24,7 @@
 #include "html5_parser.h"
 #include <lexbor/html/parser.h>
 #include <lexbor/html/interfaces/element.h>
+#include <lexbor/dom/dom.h>
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLtree.h>
 #include <Zend/zend.h>
@@ -380,6 +381,7 @@ void lexbor_libxml2_bridge_copy_observations(lxb_html_tree_t *tree, lexbor_libxm
     observations->has_explicit_html_tag = tree->has_explicit_html_tag;
     observations->has_explicit_head_tag = tree->has_explicit_head_tag;
     observations->has_explicit_body_tag = tree->has_explicit_body_tag;
+    observations->quirks_mode = lxb_dom_interface_document(tree->document)->compat_mode == LXB_DOM_DOCUMENT_CMODE_QUIRKS;
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */
