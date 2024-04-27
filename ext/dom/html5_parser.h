@@ -47,6 +47,7 @@ typedef struct _lexbor_libxml2_bridge_extracted_observations {
     bool has_explicit_html_tag;
     bool has_explicit_head_tag;
     bool has_explicit_body_tag;
+    bool quirks_mode;
 } lexbor_libxml2_bridge_extracted_observations;
 
 typedef struct _lexbor_libxml2_bridge_parse_context {

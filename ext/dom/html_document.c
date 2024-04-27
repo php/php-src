@@ -917,6 +917,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
+	intern->document->quirks_mode = ctx.observations.quirks_mode;
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
@@ -1137,6 +1138,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
+	intern->document->quirks_mode = ctx.observations.quirks_mode;
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
