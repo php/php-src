@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7a2c28838f431eff28dea8cc5356dbcd38921592 */
+ * Stub hash: eda699f0d524fae5ae76a3a395438a16989c2af8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1674,6 +1674,10 @@ static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_Dom_HTMLElement_methods[] = {
+	ZEND_FE_END
+};
+
 static const zend_function_entry class_Dom_Attr_methods[] = {
 	ZEND_RAW_FENTRY("isId", zim_DOMAttr_isId, arginfo_class_Dom_Attr_isId, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
@@ -3080,6 +3084,16 @@ static zend_class_entry *register_class_Dom_Element(zend_class_entry *class_entr
 	return class_entry;
 }
 
+static zend_class_entry *register_class_Dom_HTMLElement(zend_class_entry *class_entry_Dom_Element)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "HTMLElement", class_Dom_HTMLElement_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Dom_Element);
+
+	return class_entry;
+}
+
 static zend_class_entry *register_class_Dom_Attr(zend_class_entry *class_entry_Dom_Node)
 {
 	zend_class_entry ce, *class_entry;
@@ -3445,15 +3459,15 @@ static zend_class_entry *register_class_Dom_Document(zend_class_entry *class_ent
 	zval property_body_default_value;
 	ZVAL_UNDEF(&property_body_default_value);
 	zend_string *property_body_name = zend_string_init("body", sizeof("body") - 1, 1);
-	zend_string *property_body_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
-	zend_declare_typed_property(class_entry, property_body_name, &property_body_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_body_class_Dom_Element, 0, MAY_BE_NULL));
+	zend_string *property_body_class_Dom_HTMLElement = zend_string_init("Dom\\HTMLElement", sizeof("Dom\\HTMLElement")-1, 1);
+	zend_declare_typed_property(class_entry, property_body_name, &property_body_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_body_class_Dom_HTMLElement, 0, MAY_BE_NULL));
 	zend_string_release(property_body_name);
 
 	zval property_head_default_value;
 	ZVAL_UNDEF(&property_head_default_value);
 	zend_string *property_head_name = zend_string_init("head", sizeof("head") - 1, 1);
-	zend_string *property_head_class_Dom_Element = zend_string_init("Dom\\Element", sizeof("Dom\\Element")-1, 1);
-	zend_declare_typed_property(class_entry, property_head_name, &property_head_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_head_class_Dom_Element, 0, MAY_BE_NULL));
+	zend_string *property_head_class_Dom_HTMLElement = zend_string_init("Dom\\HTMLElement", sizeof("Dom\\HTMLElement")-1, 1);
+	zend_declare_typed_property(class_entry, property_head_name, &property_head_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_head_class_Dom_HTMLElement, 0, MAY_BE_NULL));
 	zend_string_release(property_head_name);
 
 	zval property_title_default_value;

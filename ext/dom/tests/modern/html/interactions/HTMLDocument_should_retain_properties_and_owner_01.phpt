@@ -5,10 +5,10 @@ dom
 --FILE--
 <?php
 
-class MyElement extends Dom\Element {}
+class MyElement extends Dom\HTMLElement {}
 
 $dom = Dom\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
-$dom->registerNodeClass("Dom\\Element", "MyElement");
+$dom->registerNodeClass("Dom\\HTMLElement", "MyElement");
 
 // Destroy reference to the DOM
 $child = $dom->documentElement;

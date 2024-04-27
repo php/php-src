@@ -14,5 +14,5 @@ try {
 echo $dom->saveXml();
 ?>
 --EXPECT--
-Cannot modify readonly property Dom\Element::$prefix
+Cannot modify readonly property Dom\HTMLElement::$prefix
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

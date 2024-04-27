@@ -63,6 +63,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_attr_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_attr_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_element_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_element_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_html_element_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_text_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_text_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_comment_class_entry;
@@ -1042,6 +1043,11 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_element_prop_handlers, "textContent", dom_node_text_content_read, dom_node_text_content_write);
 	zend_hash_add_new_ptr(&classes, dom_modern_element_class_entry->name, &dom_modern_element_prop_handlers);
 
+	dom_html_element_class_entry = register_class_Dom_HTMLElement(dom_modern_element_class_entry);
+	dom_html_element_class_entry->create_object = dom_objects_new;
+	dom_html_element_class_entry->default_object_handlers = &dom_object_handlers;
+	zend_hash_add_new_ptr(&classes, dom_html_element_class_entry->name, &dom_modern_element_prop_handlers);
+
 	dom_text_class_entry = register_class_DOMText(dom_characterdata_class_entry);
 	dom_text_class_entry->create_object = dom_objects_new;
 	dom_text_class_entry->default_object_handlers = &dom_object_handlers;
@@ -1541,6 +1547,19 @@ void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type
 }
 /* }}} */
 
+static zend_always_inline zend_class_entry *dom_get_element_ce(const xmlNode *node, bool modern)
+{
+	if (modern) {
+		if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token)) {
+			return dom_html_element_class_entry;
+		} else {
+			return dom_modern_element_class_entry;
+		}
+	} else {
+		return dom_element_class_entry;
+	}
+}
+
 /* {{{ php_dom_create_object */
 PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
 {
@@ -1572,7 +1591,7 @@ PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, do
 		}
 		case XML_ELEMENT_NODE:
 		{
-			ce = dom_get_element_ce(modern);
+			ce = dom_get_element_ce(obj, modern);
 			break;
 		}
 		case XML_ATTRIBUTE_NODE:
