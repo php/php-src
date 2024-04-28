@@ -120,9 +120,8 @@ static int _close_pconn(zval *zv)
 /* disconnect, and if it fails, then issue a rollback for any pending transaction (lurcher) */
 static void safe_odbc_disconnect( void *handle )
 {
-	int ret;
+	int ret = SQLDisconnect( handle );
 
-	ret = SQLDisconnect( handle );
 	if ( ret == SQL_ERROR )
 	{
 		SQLTransact( NULL, handle, SQL_ROLLBACK );
@@ -177,7 +176,6 @@ static zend_object *odbc_connection_create_object(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &odbc_connection_object_handlers;
 
 	return &intern->std;
 }
@@ -210,7 +208,6 @@ static zend_object *odbc_result_create_object(zend_class_entry *class_type)
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
-	intern->std.handlers = &odbc_result_object_handlers;
 
 	return &intern->std;
 }
