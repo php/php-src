@@ -226,7 +226,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 last_added_attr = lxml_attr;
 
                 /* xmlIsID does some other stuff too that is irrelevant here. */
-                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd') {
+                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd' && attr->node.ns == LXB_NS_HTML) {
                     xmlAddID(NULL, lxml_doc, value, lxml_attr);
                 }
 
