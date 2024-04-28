@@ -52,6 +52,7 @@ ZEND_DECLARE_MODULE_GLOBALS(zend_test)
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
 static zend_class_entry *zend_test_child_class;
+static zend_class_entry *zend_test_type_inference;
 static zend_class_entry *zend_attribute_test_class;
 static zend_class_entry *zend_test_trait;
 static zend_class_entry *zend_test_attribute;
@@ -1033,6 +1034,24 @@ static ZEND_METHOD(_ZendTestClass, takesUnionType)
 	RETURN_NULL();
 }
 
+static ZEND_METHOD(_ZendTestTypeInference, getIntArray)
+{
+	array_init(return_value);
+
+	add_next_index_long(return_value, 1);
+	add_next_index_long(return_value, 2);
+	add_next_index_long(return_value, 3);
+}
+
+static ZEND_METHOD(_ZendTestTypeInference, createIntArray)
+{
+	array_init(return_value);
+
+	add_next_index_long(return_value, 1);
+	add_next_index_long(return_value, 2);
+	add_next_index_long(return_value, 3);
+}
+
 // Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
 //
 // We need to generate it "manually" because gen_stubs.php does not support codegen for DNF types ATM.
@@ -1128,6 +1147,8 @@ PHP_MINIT_FUNCTION(zend_test)
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
+
+	zend_test_type_inference = register_class__ZendTestTypeInference();
 
 	zend_attribute_test_class = register_class_ZendAttributeTest();
 

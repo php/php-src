@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dd3f852ea9f8e3a356ed226380edf5cc336f8a4e */
+ * Stub hash: 5f058b73b4cbad82192a950e2e714608ff289198 */
 
 ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
 	"but it is included on an older PHP version");
@@ -189,6 +189,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class__ZendTestChildClass_returnsThrowable, 0, 0, Exception, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class__ZendTestTypeInference_getIntArray arginfo_zend_test_array_return
+
+#define arginfo_class__ZendTestTypeInference_createIntArray arginfo_zend_test_array_return
+
 #define arginfo_class_ZendAttributeTest_testMethod arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_class__ZendTestTrait_testMethod arginfo_zend_test_is_pcre_bundled
@@ -280,6 +284,8 @@ static ZEND_METHOD(_ZendTestClass, variadicTest);
 static ZEND_METHOD(_ZendTestClass, takesUnionType);
 static ZEND_METHOD(_ZendTestMagicCall, __call);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
+static ZEND_METHOD(_ZendTestTypeInference, getIntArray);
+static ZEND_METHOD(_ZendTestTypeInference, createIntArray);
 static ZEND_METHOD(ZendAttributeTest, testMethod);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
 static ZEND_METHOD(ZendTestParameterAttribute, __construct);
@@ -424,6 +430,12 @@ static const zend_function_entry class__ZendTestMagicCall_methods[] = {
 
 static const zend_function_entry class__ZendTestChildClass_methods[] = {
 	ZEND_ME(_ZendTestChildClass, returnsThrowable, arginfo_class__ZendTestChildClass_returnsThrowable, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class__ZendTestTypeInference_methods[] = {
+	ZEND_ME(_ZendTestTypeInference, getIntArray, arginfo_class__ZendTestTypeInference_getIntArray, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(_ZendTestTypeInference, createIntArray, arginfo_class__ZendTestTypeInference_createIntArray, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
 
@@ -666,6 +678,16 @@ static zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *cl
 
 	INIT_CLASS_ENTRY(ce, "_ZendTestChildClass", class__ZendTestChildClass_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry__ZendTestClass);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class__ZendTestTypeInference(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "_ZendTestTypeInference", class__ZendTestTypeInference_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
 
 	return class_entry;
 }
