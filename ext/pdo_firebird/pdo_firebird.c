@@ -66,7 +66,7 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 	REGISTER_PDO_CLASS_CONST_LONG("FB_SERIALIZABLE", (zend_long) PDO_FB_SERIALIZABLE);
 	REGISTER_PDO_CLASS_CONST_LONG("FB_WRITABLE_TRANSACTION", (zend_long) PDO_FB_WRITABLE_TRANSACTION);
 
-	if (FAILURE == php_pdo_register_driver(&pdo_firebird_driver)) {
+	if (UNEXPECTED(FAILURE == php_pdo_register_driver(&pdo_firebird_driver))) {
 		return FAILURE;
 	}
 

@@ -86,7 +86,7 @@ static int pdo_firebird_stmt_dtor(pdo_stmt_t *stmt) /* {{{ */
 	int result = 1;
 
 	/* release the statement */
-	if (isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop)) {
+	if (UNEXPECTED(isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_drop))) {
 		php_firebird_error_stmt(stmt);
 		result = 0;
 	}
@@ -118,7 +118,7 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 
 	do {
 		/* named or open cursors should be closed first */
-		if ((*S->name || S->cursor_open) && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close)) {
+		if (UNEXPECTED((*S->name || S->cursor_open) && isc_dsql_free_statement(H->isc_status, &S->stmt, DSQL_close))) {
 			break;
 		}
 		S->cursor_open = 0;
@@ -137,10 +137,10 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 		}
 
 		if (S->statement_type == isc_info_sql_stmt_exec_procedure) {
-			if (isc_dsql_execute2(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda, &S->out_sqlda)) {
+			if (UNEXPECTED(isc_dsql_execute2(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda, &S->out_sqlda))) {
 				break;
 			}
-		} else if (isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
+		} else if (UNEXPECTED(isc_dsql_execute(H->isc_status, &H->tr, &S->stmt, PDO_FB_SQLDA_VERSION, S->in_sqlda))) {
 			break;
 		}
 
@@ -154,18 +154,17 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 			case isc_info_sql_stmt_update:
 			case isc_info_sql_stmt_delete:
 			case isc_info_sql_stmt_exec_procedure:
-				if (isc_dsql_sql_info(H->isc_status, &S->stmt, sizeof ( info_count),
-					info_count, sizeof(result), result)) {
+				if (UNEXPECTED(isc_dsql_sql_info(H->isc_status, &S->stmt, sizeof ( info_count), info_count, sizeof(result), result))) {
 					break;
 				}
 				if (result[0] == isc_info_sql_records) {
 					unsigned i = 3, result_size = isc_vax_integer(&result[1], 2);
-					if (result_size > sizeof(result)) {
+					if (UNEXPECTED(result_size > sizeof(result))) {
 						goto error;
 					}
 					while (result[i] != isc_info_end && i < result_size) {
 						short len = (short) isc_vax_integer(&result[i + 1], 2);
-						if (len != 1 && len != 2 && len != 4) {
+						if (UNEXPECTED(len != 1 && len != 2 && len != 4)) {
 							goto error;
 						}
 						if (result[i] != isc_info_req_select_count) {
@@ -180,7 +179,7 @@ static int pdo_firebird_stmt_execute(pdo_stmt_t *stmt) /* {{{ */
 				;
 		}
 
-		if (stmt->dbh->auto_commit && !S->H->in_manually_txn && !php_firebird_commit_transaction(stmt->dbh, /* retain */ true)) {
+		if (UNEXPECTED(stmt->dbh->auto_commit && !S->H->in_manually_txn && !php_firebird_commit_transaction(stmt->dbh, /* retain */ true))) {
 			break;
 		}
 
@@ -205,7 +204,7 @@ static int pdo_firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 	pdo_firebird_db_handle *H = S->H;
 
-	if (!stmt->executed) {
+	if (UNEXPECTED(!stmt->executed)) {
 		const char *msg = "Cannot fetch from a closed cursor";
 		php_firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 	} else if (!S->exhausted) {
@@ -215,7 +214,7 @@ static int pdo_firebird_stmt_fetch(pdo_stmt_t *stmt, /* {{{ */
 			return 1;
 		}
 		if (isc_dsql_fetch(H->isc_status, &S->stmt, PDO_FB_SQLDA_VERSION, &S->out_sqlda)) {
-			if (H->isc_status[0] && H->isc_status[1]) {
+			if (UNEXPECTED(H->isc_status[0] && H->isc_status[1])) {
 				php_firebird_error_stmt(stmt);
 			}
 			S->exhausted = 1;
@@ -304,7 +303,7 @@ static int php_firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, IS
 	int retval = 0;
 	size_t len = 0;
 
-	if (isc_open_blob(H->isc_status, &H->db, &H->tr, &blobh, blob_id)) {
+	if (UNEXPECTED(isc_open_blob(H->isc_status, &H->db, &H->tr, &blobh, blob_id))) {
 		php_firebird_error_stmt(stmt);
 		return 0;
 	}
@@ -320,8 +319,7 @@ static int php_firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, IS
 		unsigned short item_len;
 		char item = bl_info[i++];
 
-		if (item == isc_info_end || item == isc_info_truncated || item == isc_info_error
-				|| i >= sizeof(bl_info)) {
+		if (UNEXPECTED(item == isc_info_end || item == isc_info_truncated || item == isc_info_error || i >= sizeof(bl_info))) {
 			const char *msg = "Couldn't determine BLOB size";
 			php_firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 			goto fetch_blob_end;
@@ -363,7 +361,7 @@ static int php_firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, IS
 		ZSTR_VAL(str)[len] = '\0';
 		ZVAL_STR(result, str);
 
-		if (H->isc_status[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment)) {
+		if (UNEXPECTED(H->isc_status[0] == 1 && (stat != 0 && stat != isc_segstr_eof && stat != isc_segment))) {
 			const char *msg = "Error reading from BLOB";
 			php_firebird_error_stmt_with_info(stmt, "HY000", strlen("HY000"), msg, strlen(msg));
 			goto fetch_blob_end;
@@ -372,7 +370,7 @@ static int php_firebird_fetch_blob(pdo_stmt_t *stmt, int colno, zval *result, IS
 	retval = 1;
 
 fetch_blob_end:
-	if (isc_close_blob(H->isc_status, &blobh)) {
+	if (UNEXPECTED(isc_close_blob(H->isc_status, &blobh))) {
 		php_firebird_error_stmt(stmt);
 		return 0;
 	}
@@ -514,7 +512,7 @@ static int php_firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *par
 	unsigned short chunk_size;
 	int result = 1;
 
-	if (isc_create_blob(H->isc_status, &H->db, &H->tr, &h, blob_id)) {
+	if (UNEXPECTED(isc_create_blob(H->isc_status, &H->db, &H->tr, &h, blob_id))) {
 		php_firebird_error_stmt(stmt);
 		return 0;
 	}
@@ -527,7 +525,7 @@ static int php_firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *par
 
 	for (rem_cnt = Z_STRLEN(data); rem_cnt > 0; rem_cnt -= chunk_size) {
 		chunk_size = rem_cnt > USHRT_MAX ? USHRT_MAX : (unsigned short)rem_cnt;
-		if (isc_put_segment(H->isc_status, &h, chunk_size, &Z_STRVAL(data)[put_cnt])) {
+		if (UNEXPECTED(isc_put_segment(H->isc_status, &h, chunk_size, &Z_STRVAL(data)[put_cnt]))) {
 			php_firebird_error_stmt(stmt);
 			result = 0;
 			break;
@@ -539,7 +537,7 @@ static int php_firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *par
 		zval_ptr_dtor_str(&data);
 	}
 
-	if (isc_close_blob(H->isc_status, &h)) {
+	if (UNEXPECTED(isc_close_blob(H->isc_status, &h))) {
 		php_firebird_error_stmt(stmt);
 		return 0;
 	}
@@ -557,7 +555,7 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 		return 1;
 	}
 
-	if (!sqlda || param->paramno >= sqlda->sqld) {
+	if (UNEXPECTED(!sqlda || param->paramno >= sqlda->sqld)) {
 		const char *msg = "Invalid parameter index";
 		php_firebird_error_stmt_with_info(stmt, "HY093", strlen("HY093"), msg, strlen(msg));
 		return 0;
@@ -583,7 +581,7 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 					break;
 				}
 			}
-			if (i >= sqlda->sqld) {
+			if (UNEXPECTED(i >= sqlda->sqld)) {
 				const char *msg = "Invalid parameter name";
 				php_firebird_error_stmt_with_info(stmt, "HY093", strlen("HY093"), msg, strlen(msg));
 				return 0;
@@ -644,7 +642,7 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				case SQL_BLOB: {
 					if (Z_TYPE_P(parameter) == IS_NULL) {
 						/* Check if field allow NULL values */
-						if (~var->sqltype & 1) {
+						if (UNEXPECTED(~var->sqltype & 1)) {
 							const char *msg = "Parameter requires non-null value";
 							php_firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
 							return 0;
@@ -758,7 +756,7 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 					ZEND_FALLTHROUGH;
 				case IS_NULL:
 					/* complain if this field doesn't allow NULL values */
-					if (~var->sqltype & 1) {
+					if (UNEXPECTED(~var->sqltype & 1)) {
 						const char *msg = "Parameter requires non-null value";
 						php_firebird_error_stmt_with_info(stmt, "HY105", strlen("HY105"), msg, strlen(msg));
 						return 0;
@@ -808,7 +806,7 @@ static int pdo_firebird_stmt_set_attribute(pdo_stmt_t *stmt, zend_long attr, zva
 				return 0;
 			}
 
-			if (isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0)) {
+			if (UNEXPECTED(isc_dsql_set_cursor_name(S->H->isc_status, &S->stmt, Z_STRVAL_P(val),0))) {
 				php_firebird_error_stmt(stmt);
 				return 0;
 			}
@@ -843,7 +841,7 @@ static int pdo_firebird_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
 
 	/* close the statement handle */
-	if ((*S->name || S->cursor_open) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close)) {
+	if (UNEXPECTED((*S->name || S->cursor_open) && isc_dsql_free_statement(S->H->isc_status, &S->stmt, DSQL_close))) {
 		php_firebird_error_stmt(stmt);
 		return 0;
 	}
