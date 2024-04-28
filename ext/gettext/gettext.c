@@ -81,7 +81,7 @@ PHP_MINFO_FUNCTION(php_gettext)
 /* {{{ Set the textdomain to "domain". Returns the current domain */
 PHP_FUNCTION(textdomain)
 {
-	char *retval = NULL, *domain_name = NULL;
+	char *domain_name = NULL, *retval = NULL;
 	zend_string *domain = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
@@ -91,9 +91,10 @@ PHP_FUNCTION(textdomain)
 
 	if (domain != NULL) {
 		PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
-	}
-
-	if (domain != NULL && !zend_string_equals_literal(domain, "0")) {
+		if (zend_string_equals_literal(domain, "0")) {
+			zend_argument_value_error(1, "cannot be zero");
+			RETURN_THROWS();
+		}
 		domain_name = ZSTR_VAL(domain);
 	}
 
