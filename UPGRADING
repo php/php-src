@@ -652,6 +652,10 @@ PHP 8.4 UPGRADE NOTES
   and the line of definition to make them easier to distinguish, for example
   within stack traces.
 
+* run-tests.php now skips online tests by default. Set the SKIP_ONLINE_TESTS
+  environment variable to 0, or pass the --online flag to run-tests.php to
+  execute them.
+
 ========================================
 14. Performance Improvements
 ========================================
