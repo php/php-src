@@ -4498,6 +4498,10 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 
 	*is_private = false;
 
+	if (!ctx || !bld || !bctx) {
+		goto cleanup;
+	}
+
 	zval *curve_name_zv = zend_hash_str_find(Z_ARRVAL_P(data), "curve_name", sizeof("curve_name") - 1);
 	if (curve_name_zv && Z_TYPE_P(curve_name_zv) == IS_STRING && Z_STRLEN_P(curve_name_zv) > 0) {
 		nid = OBJ_sn2nid(Z_STRVAL_P(curve_name_zv));
@@ -4709,6 +4713,10 @@ static void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_
 
 	RETVAL_FALSE;
 
+	if (!bld) {
+		goto cleanup;
+	}
+
 	zval *priv_key = zend_hash_str_find(Z_ARRVAL_P(data), "priv_key", sizeof("priv_key") - 1);
 	if (priv_key && Z_TYPE_P(priv_key) == IS_STRING && Z_STRLEN_P(priv_key) > 0) {
 		if (!OSSL_PARAM_BLD_push_octet_string(bld, OSSL_PKEY_PARAM_PRIV_KEY, Z_STRVAL_P(priv_key), Z_STRLEN_P(priv_key))) {
@@ -4724,11 +4732,11 @@ static void php_openssl_pkey_object_curve_25519_448(zval *return_value, int key_
 	}
 
 	params = OSSL_PARAM_BLD_to_param(bld);
-	if (!params) {
+	ctx = EVP_PKEY_CTX_new_id(key_type, NULL);
+	if (!params || !ctx) {
 		goto cleanup;
 	}
 
-	ctx = EVP_PKEY_CTX_new_id(key_type, NULL);
 	if (pub_key || priv_key) {
 		if (EVP_PKEY_fromdata_init(ctx) <= 0 ||
 				EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_KEYPAIR, params) <= 0) {
