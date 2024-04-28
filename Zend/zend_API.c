@@ -2323,13 +2323,11 @@ ZEND_API zend_result zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 				}
 				zend_string_efree(lcname);
 			} else if (dep->type == MODULE_DEP_CONFLICTS) {
-				zend_module_entry *conflict_mod;
-
 				name_len = strlen(dep->name);
 				lcname = zend_string_alloc(name_len, 0);
 				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
 
-				if ((conflict_mod = zend_hash_find_ptr(&module_registry, lcname)) != NULL) {
+				if (zend_hash_exists(&module_registry, lcname) || zend_get_extension(dep->name)) {
 					zend_string_efree(lcname);
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module \"%s\" because conflicting module \"%s\" is already loaded", module->name, dep->name);
