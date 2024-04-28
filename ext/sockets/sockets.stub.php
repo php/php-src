@@ -1782,6 +1782,13 @@ const SO_DETACH_BPF = UNKNOWN;
  */
 const SO_EXCLUSIVEADDRUSE = UNKNOWN;
 #endif
+#if defined(SO_NOSIGPIPE)
+/**
+ * @var int
+ * @cvalue SO_NOSIGPIPE
+ */
+const SO_NOSIGPIPE = UNKNOWN;
+#endif
 #if defined(TCP_QUICKACK)
 /**
  * @var int
