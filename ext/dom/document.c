@@ -913,7 +913,7 @@ PHP_METHOD(DOM_Document, createElementNS)
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
-		xmlNodePtr nodep = xmlNewDocNode(docp, ns, localname, NULL);
+		xmlNodePtr nodep = xmlNewDocNodeEatName(docp, ns, localname, NULL);
 		if (UNEXPECTED(nodep == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		} else {
@@ -921,9 +921,9 @@ PHP_METHOD(DOM_Document, createElementNS)
 		}
 	} else {
 		php_dom_throw_error(errorcode, dom_get_strict_error(intern->document));
+		xmlFree(localname);
 	}
 
-	xmlFree(localname);
 	xmlFree(prefix);
 }
 /* }}} end dom_document_create_element_ns */
