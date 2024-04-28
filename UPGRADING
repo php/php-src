@@ -611,7 +611,7 @@ PHP 8.4 UPGRADE NOTES
   . SOCK_DCCP (NetBSD only).
   . TCP_SYNCNT (Linux only).
   . SO_EXCLBIND (Solaris/Illumos only).
-  . SO_NOSIGPIPE (macOs only).
+  . SO_NOSIGPIPE (macOs and FreeBSD).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES

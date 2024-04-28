@@ -209,8 +209,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Updated the socket_create_listen backlog argument default value to SOMAXCONN.
     (David Carlier)
-  . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for macOs.
-    (David Carlier)
+  . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
+    macOs and FreeBSD. (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
