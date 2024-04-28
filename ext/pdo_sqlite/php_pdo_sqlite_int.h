@@ -26,28 +26,23 @@ typedef struct {
 	char *errmsg;
 } pdo_sqlite_error_info;
 
-struct pdo_sqlite_fci {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-};
-
 struct pdo_sqlite_func {
 	struct pdo_sqlite_func *next;
 
-	zval func, step, fini;
 	int argc;
 	const char *funcname;
 
 	/* accelerated callback references */
-	struct pdo_sqlite_fci afunc, astep, afini;
+	zend_fcall_info_cache func;
+	zend_fcall_info_cache step;
+	zend_fcall_info_cache fini;
 };
 
 struct pdo_sqlite_collation {
 	struct pdo_sqlite_collation *next;
 
 	const char *name;
-	zval callback;
-	struct pdo_sqlite_fci fc;
+	zend_fcall_info_cache callback;
 };
 
 typedef struct {

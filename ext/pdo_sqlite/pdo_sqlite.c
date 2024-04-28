@@ -335,25 +335,18 @@ PHP_METHOD(PdoSqlite, openBlob)
 static int php_sqlite_collation_callback(void *context, int string1_len, const void *string1,
 	int string2_len, const void *string2)
 {
-	int ret;
+	int ret = 0;
 	zval zargs[2];
 	zval retval;
 	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
 
-	collation->fc.fci.size = sizeof(collation->fc.fci);
-	ZVAL_COPY_VALUE(&collation->fc.fci.function_name, &collation->callback);
-	collation->fc.fci.object = NULL;
-	collation->fc.fci.retval = &retval;
-
 	// Prepare the arguments.
 	ZVAL_STRINGL(&zargs[0], (char *) string1, string1_len);
 	ZVAL_STRINGL(&zargs[1], (char *) string2, string2_len);
-	collation->fc.fci.param_count = 2;
-	collation->fc.fci.params = zargs;
 
-	if ((ret = zend_call_function(&collation->fc.fci, &collation->fc.fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
-	} else if (!Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
+
+	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			zend_string *func_name = get_active_function_or_method_name();
 			zend_type_error("%s(): Return value of the callback must be of type int, %s returned",
@@ -361,7 +354,6 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 			zend_string_release(func_name);
 			return FAILURE;
 		}
-		ret = 0;
 		if (Z_LVAL(retval) > 0) {
 			ret = 1;
 		} else if (Z_LVAL(retval) < 0) {
