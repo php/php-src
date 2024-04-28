@@ -204,7 +204,7 @@ PHP_MINIT_FUNCTION(pdo_dblib)
 		return FAILURE;
 	}
 
-	PdoDblib_ce = register_class_PdoDblib(pdo_dbh_ce);
+	PdoDblib_ce = register_class_Pdo_Dblib(pdo_dbh_ce);
 	PdoDblib_ce->create_object = pdo_dbh_new;
 
 	if (FAILURE == php_pdo_register_driver(&pdo_dblib_driver)) {

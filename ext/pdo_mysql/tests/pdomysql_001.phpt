@@ -12,7 +12,7 @@ MySQLPDOTest::skip();
 
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 
-$db = MySQLPDOTest::factory(PdoMysql::class);
+$db = MySQLPDOTest::factory(Pdo\Mysql::class);
 
 $db->query('CREATE TABLE pdomysql_001 (id INT, name TEXT)');
 

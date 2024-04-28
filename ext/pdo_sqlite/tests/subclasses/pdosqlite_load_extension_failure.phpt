@@ -1,19 +1,19 @@
 --TEST--
-PdoSqlite load extension
+Pdo\Sqlite load extension
 --EXTENSIONS--
 pdo_sqlite
 --SKIPIF--
 <?php
-if (!method_exists(PdoSqlite::class, "loadExtension")) {
+if (!method_exists(Pdo\Sqlite::class, "loadExtension")) {
     die("skip loading sqlite extensions is not supported");
 }
 ?>
 --FILE--
 <?php
 
-$db = PdoSqlite::connect('sqlite::memory:');
-if (!$db instanceof PdoSqlite) {
-    echo "Wrong class type. Should be PdoSqlite but is " . get_class($db) . "\n";
+$db = Pdo\Sqlite::connect('sqlite::memory:');
+if (!$db instanceof Pdo\Sqlite) {
+    echo "Wrong class type. Should be Pdo\Sqlite but is " . get_class($db) . "\n";
 }
 
 try {

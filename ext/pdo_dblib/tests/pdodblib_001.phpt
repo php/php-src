@@ -1,5 +1,5 @@
 --TEST--
-PdoDblib basic
+Pdo\Dblib basic
 --EXTENSIONS--
 pdo_dblib
 --SKIPIF--
@@ -11,7 +11,7 @@ getDbConnection();
 <?php
 
 require __DIR__ . '/config.inc';
-$db = getDbConnection(PdoDblib::class);
+$db = getDbConnection(Pdo\Dblib::class);
 
 $db->query("CREATE TABLE #pdo_dblib_001(name VARCHAR(32)); ");
 $db->query("INSERT INTO #pdo_dblib_001 VALUES('PHP'), ('PHP6');");
