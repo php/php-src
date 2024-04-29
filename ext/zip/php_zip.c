@@ -1488,6 +1488,47 @@ PHP_METHOD(ZipArchive, open)
 }
 /* }}} */
 
+/* {{{ Create new read-only zip using given buffer */
+PHP_METHOD(ZipArchive, openBuffer)
+{
+	struct zip *intern;
+	zend_string *buffer;
+	zval *self = ZEND_THIS;
+	ze_zip_object *ze_obj;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &buffer) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zip_error_t err;
+	zip_error_init(&err);
+
+	zip_source_t * zip_source = zip_source_buffer_create(ZSTR_VAL(buffer), ZSTR_LEN(buffer), 0, &err);
+
+	if (!zip_source) {
+		zend_throw_error(NULL, "Cannot open zip: %s", zip_error_strerror(&err));
+		zip_error_fini(&err);
+		RETURN_THROWS();
+	}
+
+	ze_obj = Z_ZIP_P(self);
+
+	intern = zip_open_from_source(zip_source, ZIP_RDONLY, &err);
+	if (!intern) {
+		zip_source_free(zip_source);
+		zend_throw_error(NULL, "Cannot open zip: %s", zip_error_strerror(&err));
+		zip_error_fini(&err);
+		RETURN_THROWS();
+	}
+
+	zip_source_keep(zip_source);
+	zip_error_fini(&err);
+
+	ze_obj->za = intern;
+	ze_obj->source = zip_source;
+}
+/* }}} */
+
 /* {{{ Set the password for the active archive */
 PHP_METHOD(ZipArchive, setPassword)
 {
@@ -1542,12 +1583,22 @@ PHP_METHOD(ZipArchive, close)
 		ze_obj->err_sys = 0;
 	}
 
-	/* clear cache as empty zip are not created but deleted */
-	php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);
+	// if we have a filename, we need to free it
+	if (ze_obj->filename) {
+		/* clear cache as empty zip are not created but deleted */
+		php_clear_stat_cache(1, ze_obj->filename, ze_obj->filename_len);	
 
-	efree(ze_obj->filename);
-	ze_obj->filename = NULL;
-	ze_obj->filename_len = 0;
+		efree(ze_obj->filename);
+		ze_obj->filename = NULL;
+		ze_obj->filename_len = 0;
+	}
+
+	if (ze_obj->source) {
+		zip_source_close(ze_obj->source);
+		zip_source_free(ze_obj->source);
+		ze_obj->source = NULL;
+	}
+
 	ze_obj->za = NULL;
 
 	RETURN_BOOL(!err);
