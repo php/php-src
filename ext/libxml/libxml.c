@@ -151,18 +151,16 @@ static void php_libxml_unlink_entity(void *data, void *table, xmlChar *name)
 /* {{{ internal functions for interoperability */
 static void php_libxml_unregister_node(xmlNodePtr nodep)
 {
-	php_libxml_node_object *wrapper;
-
 	php_libxml_node_ptr *nodeptr = nodep->_private;
 
 	if (nodeptr != NULL) {
-		wrapper = nodeptr->_private;
+		php_libxml_node_object *wrapper = nodeptr->_private;
 		if (wrapper) {
 			php_libxml_decrement_node_ptr(wrapper);
 			php_libxml_decrement_doc_ref(wrapper);
 		} else {
-			if (nodeptr->node != NULL && nodeptr->node->type != XML_DOCUMENT_NODE) {
-				nodeptr->node->_private = NULL;
+			if (nodep->type != XML_DOCUMENT_NODE) {
+				nodep->_private = NULL;
 			}
 			nodeptr->node = NULL;
 		}
