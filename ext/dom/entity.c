@@ -44,7 +44,7 @@ zend_result dom_entity_public_id_read(dom_object *obj, zval *retval)
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY || !nodep->ExternalID) {
 		ZVAL_NULL(retval);
 	} else {
-		ZVAL_STRING(retval, (char *) (nodep->ExternalID));
+		ZVAL_STRING(retval, (const char *) nodep->ExternalID);
 	}
 
 	return SUCCESS;
@@ -64,7 +64,7 @@ zend_result dom_entity_system_id_read(dom_object *obj, zval *retval)
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(retval);
 	} else {
-		ZVAL_STRING(retval, (char *) (nodep->SystemID));
+		ZVAL_STRING(retval, (const char *) nodep->SystemID);
 	}
 
 	return SUCCESS;
