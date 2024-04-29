@@ -49,6 +49,33 @@
 #include <sys/cpuset.h>
 typedef cpuset_t cpu_set_t;
 #endif
+ #define PCNTL_CPUSET(mask) &mask
+ #define PCNTL_CPUSET_SIZE(mask) sizeof(mask)
+ #define PCNTL_CPU_ISSET(i, mask) CPU_ISSET(i, &mask)
+ #define PCNTL_CPU_SET(i, mask) CPU_SET(i, &mask)
+ #define PCNTL_CPU_ZERO(mask) CPU_ZERO(&mask)
+ #define PCNTL_CPU_DESTROY(mask) ((void)0)
+#elif defined(__NetBSD__)
+#include <sys/syscall.h>
+#include <sched.h>
+typedef cpuset_t *cpu_set_t;
+ #define sched_getaffinity(p, c, m) syscall(SYS__sched_getaffinity, p, 0, c, m)
+ #define sched_setaffinity(p, c, m) syscall(SYS__sched_setaffinity, p, 0, c, m)
+ #define PCNTL_CPUSET(mask) mask
+ #define PCNTL_CPUSET_SIZE(mask) cpuset_size(mask)
+ #define PCNTL_CPU_ISSET(i, mask) cpuset_isset((cpuid_t)i, mask)
+ #define PCNTL_CPU_SET(i, mask) cpuset_set((cpuid_t)i, mask)
+ #define PCNTL_CPU_ZERO(mask)										\
+	do {												\
+		mask = cpuset_create(); 								\
+		if (UNEXPECTED(!mask)) {								\
+			php_error_docref(NULL, E_WARNING, "cpuset_create: Insufficient memory");	\
+			RETURN_FALSE;   								\
+		}											\
+		cpuset_zero(mask);									\
+	} while(0)
+ #define PCNTL_CPU_DESTROY(mask) cpuset_destroy(mask)
+ #define HAVE_SCHED_SETAFFINITY 1
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
@@ -1533,9 +1560,10 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
 
-	CPU_ZERO(&mask);
+	PCNTL_CPU_ZERO(mask);
 
-	if (sched_getaffinity(pid, sizeof(mask), &mask) != 0) {
+	if (sched_getaffinity(pid, PCNTL_CPUSET_SIZE(mask), PCNTL_CPUSET(mask)) != 0) {
+		PCNTL_CPU_DESTROY(mask);
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
@@ -1558,10 +1586,11 @@ PHP_FUNCTION(pcntl_getcpuaffinity)
 	array_init(return_value);
 
 	for (zend_ulong i = 0; i < maxcpus; i ++) {
-		if (CPU_ISSET(i, &mask)) {
+		if (PCNTL_CPU_ISSET(i, mask)) {
 			add_next_index_long(return_value, i);
 		}
 	}
+	PCNTL_CPU_DESTROY(mask);
 }
 
 PHP_FUNCTION(pcntl_setcpuaffinity)
@@ -1585,7 +1614,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
 	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
-	CPU_ZERO(&mask);
+	PCNTL_CPU_ZERO(mask);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
 		ZVAL_DEREF(ncpu);
@@ -1595,6 +1624,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 				zend_ulong tmp;
 				if (!ZEND_HANDLE_NUMERIC(Z_STR_P(ncpu), tmp)) {
 					zend_argument_value_error(2, "cpu id invalid value (%s)", ZSTR_VAL(Z_STR_P(ncpu)));
+					PCNTL_CPU_DESTROY(mask);
 					RETURN_THROWS();
 				}
 
@@ -1603,6 +1633,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 				zend_string *wcpu = zval_get_string_func(ncpu);
 				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
 				zend_string_release(wcpu);
+				PCNTL_CPU_DESTROY(mask);
 				RETURN_THROWS();
 			}
 		} else {
@@ -1614,12 +1645,13 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			RETURN_THROWS();
 		}
 		       
-		if (!CPU_ISSET(cpu, &mask)) {
-			CPU_SET(cpu, &mask);
+		if (!PCNTL_CPU_ISSET(cpu, mask)) {
+			PCNTL_CPU_SET(cpu, mask);
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (sched_setaffinity(pid, sizeof(mask), &mask) != 0) {
+	if (sched_setaffinity(pid, PCNTL_CPUSET_SIZE(mask), PCNTL_CPUSET(mask)) != 0) {
+		PCNTL_CPU_DESTROY(mask);
 		PCNTL_G(last_error) = errno;
 		switch (errno) {
 			case ESRCH:
@@ -1636,6 +1668,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		}
 		RETURN_FALSE;
 	} else {
+		PCNTL_CPU_DESTROY(mask);
 		RETURN_TRUE;
 	}
 }
