@@ -135,7 +135,7 @@
 
 #if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
 
-# if __has_feature(address_sanitizer)
+# if __has_feature(address_sanitizer) && !defined(__SANITIZE_ADDRESS__)
 #  define __SANITIZE_ADDRESS__
 # endif
 
