@@ -389,20 +389,16 @@ PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
 static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
 {
 	php_stream_statbuf ssbuf;
-	php_stream_context *context = NULL;
-	php_stream_wrapper *wrapper = NULL;
 	char *resolved_path;
 	const char *path_to_open = NULL;
-	void *ret_val = NULL;
-	int isescaped=0;
-	xmlURI *uri;
+	bool isescaped = false;
 
 	if (strstr(filename, "%00")) {
 		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
 		return NULL;
 	}
 
-	uri = xmlParseURI(filename);
+	xmlURI *uri = xmlParseURI(filename);
 	if (uri && (uri->scheme == NULL ||
 			(xmlStrncmp(BAD_CAST uri->scheme, BAD_CAST "file", 4) == 0))) {
 		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
@@ -440,7 +436,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	   that the streams layer puts out at times, but for libxml we
 	   may try to open files that don't exist, but it is not a failure
 	   in xml processing (eg. DTD files)  */
-	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0);
+	php_stream_wrapper *wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL) == -1) {
 			if (isescaped) {
@@ -450,12 +446,12 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_libxml_get_stream_context();
+	php_stream_context *context = php_libxml_get_stream_context();
 
-	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
+	php_stream *ret_val = php_stream_open_wrapper_ex(path_to_open, mode, REPORT_ERRORS, NULL, context);
 	if (ret_val) {
 		/* Prevent from closing this by fclose() */
-		((php_stream*)ret_val)->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+		ret_val->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	}
 	if (isescaped) {
 		xmlFree(resolved_path);
