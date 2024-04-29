@@ -37,8 +37,15 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		*result = bc_copy_num(BCG(_zero_));
 		return;
 	}
+	/* Just like bcadd('1', '1', 4) becomes '2.0000', it pads with zeros at the end if necessary. */
 	if (precision >= 0 && num->n_scale <= precision) {
-		*result = bc_copy_num(num);
+		if (num->n_scale == precision) {
+			*result = bc_copy_num(num);
+		} else if(num->n_scale < precision) {
+			*result = bc_new_num(num->n_len, precision);
+			(*result)->n_sign = num->n_sign;
+			memcpy((*result)->n_value, num->n_value, num->n_len + num->n_scale);
+		}
 		return;
 	}
 
