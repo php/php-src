@@ -151,5 +151,7 @@ PHP                                                                        NEWS
     (ilutov)
   . Support minimum version for libzip dependency updated to 1.0.0.
     (David Carlier)
+  . Added ZipArchive::openString() method.
+    (Tim Starling, Soner Sayakci, Ghaith Olabi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

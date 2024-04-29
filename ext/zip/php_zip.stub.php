@@ -646,6 +646,8 @@ class ZipArchive implements Countable
     /** @tentative-return-type */
     public function open(string $filename, int $flags = 0): bool|int {}
 
+    public function openString(string $data): bool|int {}
+
     /**
      * @tentative-return-type
      */
