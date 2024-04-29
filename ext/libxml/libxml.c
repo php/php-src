@@ -639,22 +639,22 @@ void php_libxml_issue_error(int level, const char *msg)
 static void php_libxml_internal_error_handler_ex(php_libxml_error_level error_type, void *ctx, const char *msg, va_list ap, int line, int column)
 {
 	char *buf;
-	int len, len_iter, output = 0;
+	bool output = false;
 
-	len = vspprintf(&buf, 0, msg, ap);
-	len_iter = len;
+	size_t len = vspprintf(&buf, 0, msg, ap);
+	size_t len_iter = len;
 
 	/* remove any trailing \n */
 	while (len_iter && buf[--len_iter] == '\n') {
 		buf[len_iter] = '\0';
-		output = 1;
+		output = true;
 	}
 
 	smart_str_appendl(&LIBXML(error_buffer), buf, len);
 
 	efree(buf);
 
-	if (output == 1) {
+	if (output) {
 		if (LIBXML(error_list)) {
 			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s), line, column);
 		} else if (!EG(exception)) {
