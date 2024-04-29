@@ -331,13 +331,11 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 			node = curnode;
 			switch (node->type) {
 				/* Skip property freeing for the following types */
+				case XML_ENTITY_REF_NODE:
 				case XML_NOTATION_NODE:
 					break;
 				case XML_ENTITY_DECL:
 					php_libxml_unlink_entity_decl((xmlEntityPtr) node);
-					break;
-				case XML_ENTITY_REF_NODE:
-					php_libxml_node_free_list((xmlNodePtr) node->properties);
 					break;
 				case XML_ATTRIBUTE_NODE:
 					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
