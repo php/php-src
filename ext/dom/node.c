@@ -1218,16 +1218,15 @@ Since:
 */
 static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *node_ce)
 {
-	zval *id, *node;
+	zval *node;
 	xmlNodePtr child, nodep;
 	dom_object *intern, *childobj;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	if (!dom_node_children_valid(nodep)) {
 		RETURN_FALSE;
@@ -1420,26 +1419,14 @@ Since:
 */
 PHP_METHOD(DOMNode, hasChildNodes)
 {
-	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
-	if (!dom_node_children_valid(nodep)) {
-		RETURN_FALSE;
-	}
-
-	if (nodep->children) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(dom_node_children_valid(nodep) && nodep->children != NULL);
 }
 /* }}} end dom_node_has_child_nodes */
 
@@ -1552,25 +1539,14 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMNode, hasAttributes)
 {
-	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
-	if (nodep->type != XML_ELEMENT_NODE)
-		RETURN_FALSE;
-
-	if (nodep->properties) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(nodep->type == XML_ELEMENT_NODE && nodep->properties != NULL);
 }
 /* }}} end dom_node_has_attributes */
 
