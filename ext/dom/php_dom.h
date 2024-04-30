@@ -139,6 +139,7 @@ xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
 xmlNodePtr php_dom_create_fake_namespace_decl(xmlNodePtr nodep, xmlNsPtr original, zval *return_value, dom_object *parent_intern);
+xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
 
 void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc);
 void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc);

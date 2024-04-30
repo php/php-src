@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.20
 
+- DOM:
+  . Fix crashes when entity declaration is removed while still having entity
+    references. (nielsdos)
 
 09 May 2024, PHP 8.2.19
 
