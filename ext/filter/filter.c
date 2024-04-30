@@ -71,10 +71,6 @@ static const filter_list_entry filter_list[] = {
 #define PARSE_SERVER 5
 #endif
 
-#ifndef PARSE_SESSION
-#define PARSE_SESSION 6
-#endif
-
 static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
 static unsigned int php_sapi_filter_init(void);
 
@@ -152,8 +148,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	filter_globals->default_filter = FILTER_DEFAULT;
 }
 /* }}} */
-
-#define PARSE_REQUEST 99
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(filter)
