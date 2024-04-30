@@ -3127,6 +3127,7 @@ class ClassInfo {
     public array $attributes;
     public ?ExposedDocComment $exposedDocComment;
     public bool $isNotSerializable;
+    public bool $isDataClass;
     /** @var Name[] */
     public array $extends;
     /** @var Name[] */
@@ -3163,6 +3164,7 @@ class ClassInfo {
         array $attributes,
         ?ExposedDocComment $exposedDocComment,
         bool $isNotSerializable,
+        bool $isDataClass,
         array $extends,
         array $implements,
         array $constInfos,
@@ -3183,6 +3185,7 @@ class ClassInfo {
         $this->attributes = $attributes;
         $this->exposedDocComment = $exposedDocComment;
         $this->isNotSerializable = $isNotSerializable;
+        $this->isDataClass = $isDataClass;
         $this->extends = $extends;
         $this->implements = $implements;
         $this->constInfos = $constInfos;
@@ -3410,6 +3413,10 @@ class ClassInfo {
         $php83Flags = $php82Flags;
         $php84Flags = $php83Flags;
 
+        if ($this->isDataClass) {
+            $php84Flags[] = "ZEND_ACC_DATA_CLASS";
+        }
+
         return [
             PHP_70_VERSION_ID => $php70Flags,
             PHP_80_VERSION_ID => $php80Flags,
@@ -3426,6 +3433,7 @@ class ClassInfo {
         $this->exposedDocComment = null;
         $this->isStrictProperties = false;
         $this->isNotSerializable = false;
+        $this->isDataClass = false;
 
         foreach ($this->propertyInfos as $propertyInfo) {
             $propertyInfo->discardInfoForOldPhpVersions($phpVersionIdMinimumCompatibility);
@@ -4438,6 +4446,7 @@ function parseClass(
     $isDeprecated = false;
     $isStrictProperties = false;
     $isNotSerializable = false;
+    $isDataClass = false;
     $allowsDynamicProperties = false;
     $attributes = [];
 
@@ -4452,6 +4461,8 @@ function parseClass(
                 $isStrictProperties = true;
             } else if ($tag->name === 'not-serializable') {
                 $isNotSerializable = true;
+            } else if ($tag->name === 'data-class') {
+                $isDataClass = true;
             } else if ($tag->name === 'undocumentable') {
                 $isUndocumentable = true;
             }
@@ -4510,6 +4521,7 @@ function parseClass(
         $attributes,
         createExposedDocComment($comments),
         $isNotSerializable,
+        $isDataClass,
         $extends,
         $implements,
         $consts,

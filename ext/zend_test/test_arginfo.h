@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dd3f852ea9f8e3a356ed226380edf5cc336f8a4e */
+ * Stub hash: 469b5b9dc86f06feddaff51553fcdd1c52aaa7da */
 
 ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
 	"but it is included on an older PHP version");
@@ -209,6 +209,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ZendTestForbidDynamicCall_callStatic arginfo_zend_test_void_return
 
+#define arginfo_class_ZendTestBox_setNull arginfo_zend_test_void_return
+
 #if (PHP_VERSION_ID >= 80100)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZendTestNS_Foo_method, 0, 0, IS_LONG, 0)
 #else
@@ -289,6 +291,7 @@ static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestChildClassWithMethodWithParameterAttribute, override);
 static ZEND_METHOD(ZendTestForbidDynamicCall, call);
 static ZEND_METHOD(ZendTestForbidDynamicCall, callStatic);
+static ZEND_METHOD(ZendTestBox, setNull);
 static ZEND_METHOD(ZendTestNS_Foo, method);
 static ZEND_METHOD(ZendTestNS_UnlikelyCompileError, method);
 static ZEND_METHOD(ZendTestNS_NotUnlikelyCompileError, method);
@@ -473,6 +476,11 @@ static const zend_function_entry class_ZendTestClassWithPropertyAttribute_method
 static const zend_function_entry class_ZendTestForbidDynamicCall_methods[] = {
 	ZEND_ME(ZendTestForbidDynamicCall, call, arginfo_class_ZendTestForbidDynamicCall_call, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZendTestForbidDynamicCall, callStatic, arginfo_class_ZendTestForbidDynamicCall_callStatic, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_ZendTestBox_methods[] = {
+	ZEND_ME(ZendTestBox, setNull, arginfo_class_ZendTestBox_setNull, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -911,6 +919,25 @@ static zend_class_entry *register_class_ZendTestForbidDynamicCall(void)
 	INIT_CLASS_ENTRY(ce, "ZendTestForbidDynamicCall", class_ZendTestForbidDynamicCall_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestBox(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestBox", class_ZendTestBox_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+#if (PHP_VERSION_ID >= 80400)
+	class_entry->ce_flags |= ZEND_ACC_DATA_CLASS;
+#endif
+
+	zval property_value_default_value;
+	ZVAL_UNDEF(&property_value_default_value);
+	zend_string *property_value_name = zend_string_init("value", sizeof("value") - 1, 1);
+	zend_declare_typed_property(class_entry, property_value_name, &property_value_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+	zend_string_release(property_value_name);
 
 	return class_entry;
 }

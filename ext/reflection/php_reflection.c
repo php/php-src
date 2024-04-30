@@ -3462,6 +3462,13 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
 			RETURN_THROWS();
 		}
+
+		if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"May not invoke mutating method \"%s::%s()\" through reflection",
+				ZSTR_VAL(Z_OBJCE_P(object)->name), ZSTR_VAL(mptr->common.function_name));
+			RETURN_THROWS();
+		}
 	}
 	/* Copy the zend_function when calling via handler (e.g. Closure::__invoke()) */
 	callback = _copy_function(mptr);
@@ -5797,6 +5804,13 @@ ZEND_METHOD(ReflectionProperty, setValue)
 		zend_update_static_property_ex(intern->ce, ref->unmangled_name, value);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
+			RETURN_THROWS();
+		}
+
+		if (UNEXPECTED(Z_OBJCE_P(object)->ce_flags & ZEND_ACC_DATA_CLASS)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"May not set property value of data class \"%s\" through reflection",
+				ZSTR_VAL(Z_OBJCE_P(object)->name));
 			RETURN_THROWS();
 		}
 

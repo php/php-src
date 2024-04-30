@@ -341,6 +341,22 @@ static void zend_weakmap_free_obj(zend_object *object)
 	zend_object_std_dtor(&wm->std);
 }
 
+static zend_result zend_weakmap_check_offset(zval *offset)
+{
+	if (Z_TYPE_P(offset) != IS_OBJECT) {
+		zend_type_error("WeakMap key must be an object");
+		return FAILURE;
+	}
+
+	zend_object *obj = Z_OBJ_P(offset);
+	if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_DATA_CLASS)) {
+		zend_type_error("Instance of data class %s may not be used as key", ZSTR_VAL(obj->ce->name));
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}
+
 static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
 {
 	if (offset == NULL) {
@@ -349,8 +365,7 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 	}
 
 	ZVAL_DEREF(offset);
-	if (Z_TYPE_P(offset) != IS_OBJECT) {
-		zend_type_error("WeakMap key must be an object");
+	if (zend_weakmap_check_offset(offset) == FAILURE) {
 		return NULL;
 	}
 
@@ -380,8 +395,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	}
 
 	ZVAL_DEREF(offset);
-	if (Z_TYPE_P(offset) != IS_OBJECT) {
-		zend_type_error("WeakMap key must be an object");
+	if (zend_weakmap_check_offset(offset) == FAILURE) {
 		return;
 	}
 
@@ -409,8 +423,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
 	ZVAL_DEREF(offset);
-	if (Z_TYPE_P(offset) != IS_OBJECT) {
-		zend_type_error("WeakMap key must be an object");
+	if (zend_weakmap_check_offset(offset) == FAILURE) {
 		return 0;
 	}
 
@@ -429,8 +442,7 @@ static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int che
 static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
 {
 	ZVAL_DEREF(offset);
-	if (Z_TYPE_P(offset) != IS_OBJECT) {
-		zend_type_error("WeakMap key must be an object");
+	if (zend_weakmap_check_offset(offset) == FAILURE) {
 		return;
 	}
 

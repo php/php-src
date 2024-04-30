@@ -156,6 +156,13 @@ namespace {
         public static function callStatic(): void {}
     }
 
+    /** @data-class */
+    class ZendTestBox {
+        public mixed $value;
+
+        public /* mutating */ function setNull(): void {}
+    }
+
     enum ZendTestUnitEnum {
         case Foo;
         case Bar;
