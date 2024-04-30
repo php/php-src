@@ -446,6 +446,7 @@ static bool _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue
 			/* See php_curl_set_callable_handler */
 			if (ZEND_FCC_INITIALIZED(mh->handlers.server_push)) {
 				zend_fcc_dtor(&mh->handlers.server_push);
+				mh->handlers.server_push = empty_fcall_info_cache;
 			}
 
 			char *error_str = NULL;
@@ -543,6 +544,7 @@ static void curl_multi_free_obj(zend_object *object)
 
 	if (ZEND_FCC_INITIALIZED(mh->handlers.server_push)) {
 		zend_fcc_dtor(&mh->handlers.server_push);
+		mh->handlers.server_push = empty_fcall_info_cache;
 	}
 
 	zend_object_std_dtor(&mh->std);
