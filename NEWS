@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - DOM:
   . Fix crashes when entity declaration is removed while still having entity
     references. (nielsdos)
+  . Fix references not handled correctly in C14N. (nielsdos)
 
 09 May 2024, PHP 8.2.19
 
