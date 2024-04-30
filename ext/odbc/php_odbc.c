@@ -182,7 +182,7 @@ static zend_object *odbc_connection_create_object(zend_class_entry *class_type)
 
 static zend_function *odbc_connection_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "Cannot directly construct ODBC\\Connection, use odbc_connect() or odbc_pconnect() instead");
+	zend_throw_error(NULL, "Cannot directly construct Odbc\\Connection, use odbc_connect() or odbc_pconnect() instead");
 	return NULL;
 }
 
@@ -214,7 +214,7 @@ static zend_object *odbc_result_create_object(zend_class_entry *class_type)
 
 static zend_function *odbc_result_get_constructor(zend_object *object)
 {
-	zend_throw_error(NULL, "Cannot directly construct ODBC\\Result, use an appropriate odbc_* function instead");
+	zend_throw_error(NULL, "Cannot directly construct Odbc\\Result, use an appropriate odbc_* function instead");
 	return NULL;
 }
 
@@ -2760,7 +2760,7 @@ PHP_FUNCTION(odbc_setoption)
 	switch (pv_which) {
 		case 1:		/* SQLSetConnectOption */
 			if (!instanceof_function(Z_OBJCE_P(pv_handle), odbc_connection_ce)) {
-				zend_argument_type_error(1, "must be of type ODBC\\Connection for SQLSetConnectOption()");
+				zend_argument_type_error(1, "must be of type Odbc\\Connection for SQLSetConnectOption()");
 				RETURN_THROWS();
 			}
 			link = Z_ODBC_LINK_P(pv_handle);
@@ -2778,7 +2778,7 @@ PHP_FUNCTION(odbc_setoption)
 			break;
 		case 2:		/* SQLSetStmtOption */
 			if (!instanceof_function(Z_OBJCE_P(pv_handle), odbc_result_ce)) {
-				zend_argument_type_error(1, "must be of type ODBC\\Result for SQLSetStmtOption()");
+				zend_argument_type_error(1, "must be of type Odbc\\Result for SQLSetStmtOption()");
 				RETURN_THROWS();
 			}
 			result = Z_ODBC_RESULT_P(pv_handle);
