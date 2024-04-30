@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c81572d388f2539d861df717b3cc8c0491fe72a0 */
+ * Stub hash: f3fd5084866ba31bfa4e7e2bf78d95107cfe4b61 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -418,6 +418,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant_isEnumCase arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
+#define arginfo_class_ReflectionClassConstant_isDeprecated arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionClassConstant_hasType arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionClassConstant_getType arginfo_class_ReflectionFunctionAbstract_getTentativeReturnType
@@ -783,6 +785,7 @@ ZEND_METHOD(ReflectionClassConstant, getDeclaringClass);
 ZEND_METHOD(ReflectionClassConstant, getDocComment);
 ZEND_METHOD(ReflectionClassConstant, getAttributes);
 ZEND_METHOD(ReflectionClassConstant, isEnumCase);
+ZEND_METHOD(ReflectionClassConstant, isDeprecated);
 ZEND_METHOD(ReflectionClassConstant, hasType);
 ZEND_METHOD(ReflectionClassConstant, getType);
 ZEND_METHOD(ReflectionParameter, __construct);
@@ -1068,6 +1071,7 @@ static const zend_function_entry class_ReflectionClassConstant_methods[] = {
 	ZEND_ME(ReflectionClassConstant, getDocComment, arginfo_class_ReflectionClassConstant_getDocComment, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getAttributes, arginfo_class_ReflectionClassConstant_getAttributes, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, isEnumCase, arginfo_class_ReflectionClassConstant_isEnumCase, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClassConstant, isDeprecated, arginfo_class_ReflectionClassConstant_isDeprecated, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, hasType, arginfo_class_ReflectionClassConstant_hasType, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClassConstant, getType, arginfo_class_ReflectionClassConstant_getType, ZEND_ACC_PUBLIC)
 	ZEND_FE_END

@@ -38,6 +38,11 @@ namespace {
          */
         public const int|string TYPED_CLASS_CONST3 = UNKNOWN;
 
+        /**
+         * @deprecated
+         */
+        public const int ZEND_TEST_DEPRECATED = 42;
+
         /** @var mixed */
         public static $_StaticProp;
         public static int $staticIntProp = 123;
