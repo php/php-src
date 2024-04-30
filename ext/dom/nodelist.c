@@ -50,7 +50,7 @@ static zend_always_inline void reset_objmap_cache(dom_nnodemap_object *objmap)
 	objmap->cached_length = -1;
 }
 
-int php_dom_get_nodelist_length(dom_object *obj)
+zend_long php_dom_get_nodelist_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
 	if (!objmap) {
