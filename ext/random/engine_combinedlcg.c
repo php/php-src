@@ -101,7 +101,7 @@ static bool unserialize(void *state, HashTable *data)
 	return true;
 }
 
-const php_random_algo php_random_algo_combinedlcg = {
+PHPAPI const php_random_algo php_random_algo_combinedlcg = {
 	sizeof(php_random_status_state_combinedlcg),
 	generate,
 	range,
