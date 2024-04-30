@@ -107,6 +107,8 @@ static HashTable dom_documentfragment_prop_handlers;
 static HashTable dom_modern_documentfragment_prop_handlers;
 static HashTable dom_node_prop_handlers;
 static HashTable dom_modern_node_prop_handlers;
+static HashTable dom_entity_reference_prop_handlers;
+static HashTable dom_modern_entity_reference_prop_handlers;
 static HashTable dom_nodelist_prop_handlers;
 static HashTable dom_namednodemap_prop_handlers;
 static HashTable dom_characterdata_prop_handlers;
@@ -1146,12 +1148,26 @@ PHP_MINIT_FUNCTION(dom)
 	dom_entityreference_class_entry = register_class_DOMEntityReference(dom_node_class_entry);
 	dom_entityreference_class_entry->create_object = dom_objects_new;
 	dom_entityreference_class_entry->default_object_handlers = &dom_object_handlers;
-	zend_hash_add_new_ptr(&classes, dom_entityreference_class_entry->name, &dom_node_prop_handlers);
+
+	zend_hash_init(&dom_entity_reference_prop_handlers, 0, NULL, NULL, true);
+	zend_hash_merge(&dom_entity_reference_prop_handlers, &dom_node_prop_handlers, NULL, false);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_entity_reference_prop_handlers, "firstChild", dom_entity_reference_child_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_entity_reference_prop_handlers, "lastChild", dom_entity_reference_child_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_entity_reference_prop_handlers, "textContent", dom_entity_reference_text_content_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_entity_reference_prop_handlers, "childNodes", dom_entity_reference_child_nodes_read, NULL);
+	zend_hash_add_new_ptr(&classes, dom_entityreference_class_entry->name, &dom_entity_reference_prop_handlers);
 
 	dom_modern_entityreference_class_entry = register_class_DOM_EntityReference(dom_modern_node_class_entry);
 	dom_modern_entityreference_class_entry->create_object = dom_objects_new;
 	dom_modern_entityreference_class_entry->default_object_handlers = &dom_object_handlers;
-	zend_hash_add_new_ptr(&classes, dom_modern_entityreference_class_entry->name, &dom_modern_node_prop_handlers);
+
+	zend_hash_init(&dom_modern_entity_reference_prop_handlers, 0, NULL, NULL, true);
+	zend_hash_merge(&dom_modern_entity_reference_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "firstChild", dom_entity_reference_child_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "lastChild", dom_entity_reference_child_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "textContent", dom_entity_reference_text_content_read, NULL);
+	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_entity_reference_prop_handlers, "childNodes", dom_entity_reference_child_nodes_read, NULL);
+	zend_hash_add_new_ptr(&classes, dom_modern_entityreference_class_entry->name, &dom_modern_entity_reference_prop_handlers);
 
 	dom_processinginstruction_class_entry = register_class_DOMProcessingInstruction(dom_node_class_entry);
 	dom_processinginstruction_class_entry->create_object = dom_objects_new;
@@ -1240,6 +1256,8 @@ PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 	zend_hash_destroy(&dom_modern_documentfragment_prop_handlers);
 	zend_hash_destroy(&dom_node_prop_handlers);
 	zend_hash_destroy(&dom_modern_node_prop_handlers);
+	zend_hash_destroy(&dom_entity_reference_prop_handlers);
+	zend_hash_destroy(&dom_modern_entity_reference_prop_handlers);
 	zend_hash_destroy(&dom_namespace_node_prop_handlers);
 	zend_hash_destroy(&dom_nodelist_prop_handlers);
 	zend_hash_destroy(&dom_namednodemap_prop_handlers);

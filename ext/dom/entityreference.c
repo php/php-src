@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMEntityReference extends DOMNode
@@ -64,5 +65,64 @@ PHP_METHOD(DOMEntityReference, __construct)
 	php_libxml_increment_node_ptr((php_libxml_node_object *)intern, node, (void *)intern);
 }
 /* }}} end DOMEntityReference::__construct */
+
+/* The following property handlers are necessary because of special lifetime management with entities and entity
+ * references. The issue is that entity references hold a reference to an entity declaration, but don't
+ * register that reference anywhere. When the entity declaration disappears we have no way of notifying the
+ * entity references. Override the property handlers for the declaration-accessing properties to fix this problem. */
+
+xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference)
+{
+	xmlEntityPtr entity = xmlGetDocEntity(reference->doc, reference->name);
+	reference->children = (xmlNodePtr) entity;
+	reference->last = (xmlNodePtr) entity;
+	reference->content = entity ? entity->content : NULL;
+	return entity;
+}
+
+int dom_entity_reference_child_read(dom_object *obj, zval *retval)
+{
+	xmlNodePtr nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, true);
+		return FAILURE;
+	}
+
+	xmlEntityPtr entity = dom_entity_reference_fetch_and_sync_declaration(nodep);
+	if (entity == NULL) {
+		ZVAL_NULL(retval);
+		return SUCCESS;
+	}
+
+	php_dom_create_object((xmlNodePtr) entity, retval, obj);
+	return SUCCESS;
+}
+
+int dom_entity_reference_text_content_read(dom_object *obj, zval *retval)
+{
+	xmlNodePtr nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, true);
+		return FAILURE;
+	}
+
+	dom_entity_reference_fetch_and_sync_declaration(nodep);
+	return dom_node_text_content_read(obj, retval);
+}
+
+int dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
+{
+	xmlNodePtr nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, true);
+		return FAILURE;
+	}
+
+	dom_entity_reference_fetch_and_sync_declaration(nodep);
+	return dom_node_child_nodes_read(obj, retval);
+}
 
 #endif

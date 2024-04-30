@@ -89,6 +89,11 @@ zend_result dom_entity_actual_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_entity_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_entity_version_read(dom_object *obj, zval *retval);
 
+/* entity reference properties */
+int dom_entity_reference_child_read(dom_object *obj, zval *retval);
+int dom_entity_reference_text_content_read(dom_object *obj, zval *retval);
+int dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval);
+
 /* namednodemap properties */
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);
 
