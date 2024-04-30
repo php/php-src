@@ -19,6 +19,12 @@ $callback = [$o, 'strtoupper'];
 var_dump($db->createfunction('', $callback));
 
 try {
+    var_dump($db->createfunction(new stdClass(), $callback, new stdClass()));
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
+try {
     var_dump($db->createfunction('strtoupper', $callback, new stdClass()));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
@@ -39,6 +45,7 @@ var_dump($db->createfunction('strtoupper', $callback));
 ?>
 --EXPECT--
 bool(false)
+TypeError: SQLite3::createFunction(): Argument #1 ($name) must be of type string, stdClass given
 TypeError: SQLite3::createFunction(): Argument #3 ($argCount) must be of type int, stdClass given
 Invalid SQLite3 object:
 Error: The SQLite3 object has not been correctly initialised or is already closed

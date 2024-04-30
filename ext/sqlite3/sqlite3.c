@@ -943,8 +943,8 @@ PHP_METHOD(SQLite3, createFunction)
 	php_sqlite3_func *func;
 	char *sql_func;
 	size_t sql_func_len;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	zend_long sql_func_num_args = -1;
 	zend_long flags = 0;
 	db_obj = Z_SQLITE3_DB_P(object);
@@ -989,8 +989,10 @@ PHP_METHOD(SQLite3, createAggregate)
 	php_sqlite3_func *func;
 	char *sql_func;
 	size_t sql_func_len;
-	zend_fcall_info step_fci, fini_fci;
-	zend_fcall_info_cache step_fcc, fini_fcc;
+	zend_fcall_info step_fci = empty_fcall_info;
+	zend_fcall_info_cache step_fcc = empty_fcall_info_cache;
+	zend_fcall_info fini_fci = empty_fcall_info;
+	zend_fcall_info_cache fini_fcc = empty_fcall_info_cache;
 	zend_long sql_func_num_args = -1;
 	db_obj = Z_SQLITE3_DB_P(object);
 
@@ -1026,12 +1028,8 @@ PHP_METHOD(SQLite3, createAggregate)
 	efree(func);
 
 	error:
-	if (ZEND_FCC_INITIALIZED(step_fcc)) {
-		zend_release_fcall_info_cache(&step_fcc);
-	}
-	if (ZEND_FCC_INITIALIZED(fini_fcc)) {
-		zend_release_fcall_info_cache(&fini_fcc);
-	}
+	zend_release_fcall_info_cache(&step_fcc);
+	zend_release_fcall_info_cache(&fini_fcc);
 
 	RETURN_FALSE;
 }
@@ -1045,8 +1043,8 @@ PHP_METHOD(SQLite3, createCollation)
 	php_sqlite3_collation *collation;
 	char *collation_name;
 	size_t collation_name_len;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sF", &collation_name, &collation_name_len, &fci, &fcc) == FAILURE) {
@@ -1312,15 +1310,14 @@ PHP_METHOD(SQLite3, enableExceptions)
 /* {{{ Register a callback function to be used as an authorizer by SQLite. The callback should return SQLite3::OK, SQLite3::IGNORE or SQLite3::DENY. */
 PHP_METHOD(SQLite3, setAuthorizer)
 {
-	php_sqlite3_db_object *db_obj;
-	zval *object = ZEND_THIS;
-	db_obj = Z_SQLITE3_DB_P(object);
-	zend_fcall_info			fci;
-	zend_fcall_info_cache	fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE_OR_NULL(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
+
+	php_sqlite3_db_object *db_obj = Z_SQLITE3_DB_P(ZEND_THIS);
 
 	SQLITE3_CHECK_INITIALIZED_FREE_TRAMPOLINE(db_obj, db_obj->initialised, SQLite3, &fcc);
 

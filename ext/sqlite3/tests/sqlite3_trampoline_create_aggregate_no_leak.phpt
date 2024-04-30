@@ -29,6 +29,11 @@ $finalize = [$o, 'finalize'];
 var_dump($db->createAggregate('', $step, $finalize, 1));
 
 try {
+    var_dump($db->createAggregate(new stdClass(), $step, $finalize, new stdClass()));
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+try {
     var_dump($db->createAggregate('S', $step, $finalize, new stdClass()));
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
@@ -68,6 +73,7 @@ echo "Done\n";
 ?>
 --EXPECT--
 bool(false)
+TypeError: SQLite3::createAggregate(): Argument #1 ($name) must be of type string, stdClass given
 TypeError: SQLite3::createAggregate(): Argument #4 ($argCount) must be of type int, stdClass given
 TypeError: SQLite3::createAggregate(): Argument #3 ($finalCallback) must be a valid callback, function "no_func" not found or invalid function name
 TypeError: SQLite3::createAggregate(): Argument #2 ($stepCallback) must be a valid callback, function "no_func" not found or invalid function name
