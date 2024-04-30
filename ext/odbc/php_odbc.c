@@ -503,6 +503,7 @@ static PHP_GINIT_FUNCTION(odbc)
 #endif
 	odbc_globals->num_persistent = 0;
 	zend_hash_init(&odbc_globals->connections, 0, NULL, NULL, true);
+	GC_MAKE_PERSISTENT_LOCAL(&odbc_globals->connections);
 }
 
 static PHP_GSHUTDOWN_FUNCTION(odbc)
@@ -2129,6 +2130,9 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	zend_hash_init(&link->connection->results, 0, NULL, ZVAL_PTR_DTOR, true);
 	link->persistent = persistent;
 	link->hash = zend_string_init(hash, hash_len, persistent);
+	if (persistent) {
+		GC_MAKE_PERSISTENT_LOCAL(link->hash);
+	}
 	ret = SQLAllocEnv(&link->connection->henv);
 	if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
 		odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLAllocEnv");
