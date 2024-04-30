@@ -37,9 +37,5 @@ unset($v);
 
 echo $doc->C14N(true, false, $xpath, $prefixes);
 ?>
---EXPECTF--
-Fatal error: Uncaught TypeError: DOMNode::C14N(): Argument #3 ($xpath) "query" option must be a string, string given in %s:%d
-Stack trace:
-#0 %s(%d): DOMNode->C14N(true, false, Array, Array)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+<contain xmlns="http://www.example.com/ns/foo"><bar></bar><bar></bar></contain>
