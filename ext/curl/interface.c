@@ -1518,7 +1518,6 @@ static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_f
 {
 	if (ZEND_FCC_INITIALIZED(*handler_fcc)) {
 		zend_fcc_dtor(handler_fcc);
-		handler_fcc->function_handler = NULL;
 	}
 
 	char *error = NULL;
@@ -2699,15 +2698,12 @@ static void curl_free_obj(zend_object *object)
 	smart_str_free(&ch->handlers.write->buf);
 	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
 		zend_fcc_dtor(&ch->handlers.write->fcc);
-		ch->handlers.write->fcc = empty_fcall_info_cache;
 	}
 	if (ZEND_FCC_INITIALIZED(ch->handlers.write_header->fcc)) {
 		zend_fcc_dtor(&ch->handlers.write_header->fcc);
-		ch->handlers.write_header->fcc = empty_fcall_info_cache;
 	}
 	if (ZEND_FCC_INITIALIZED(ch->handlers.read->fcc)) {
 		zend_fcc_dtor(&ch->handlers.read->fcc);
-		ch->handlers.read->fcc = empty_fcall_info_cache;
 	}
 	zval_ptr_dtor(&ch->handlers.std_err);
 	if (ch->header.str) {
@@ -2724,20 +2720,16 @@ static void curl_free_obj(zend_object *object)
 
 	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
 		zend_fcc_dtor(&ch->handlers.progress);
-		ch->handlers.progress = empty_fcall_info_cache;
 	}
 	if (ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
 		zend_fcc_dtor(&ch->handlers.xferinfo);
-		ch->handlers.xferinfo = empty_fcall_info_cache;
 	}
 	if (ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
 		zend_fcc_dtor(&ch->handlers.fnmatch);
-		ch->handlers.fnmatch = empty_fcall_info_cache;
 	}
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
 		zend_fcc_dtor(&ch->handlers.sshhostkey);
-		ch->handlers.sshhostkey = empty_fcall_info_cache;
 	}
 #endif
 
@@ -2804,23 +2796,19 @@ static void _php_curl_reset_handlers(php_curl *ch)
 
 	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
 		zend_fcc_dtor(&ch->handlers.progress);
-		ch->handlers.progress = empty_fcall_info_cache;
 	}
 
 	if (ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
 		zend_fcc_dtor(&ch->handlers.xferinfo);
-		ch->handlers.xferinfo = empty_fcall_info_cache;
 	}
 
 	if (ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
 		zend_fcc_dtor(&ch->handlers.fnmatch);
-		ch->handlers.fnmatch = empty_fcall_info_cache;
 	}
 
 #if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
 		zend_fcc_dtor(&ch->handlers.sshhostkey);
-		ch->handlers.sshhostkey = empty_fcall_info_cache;
 	}
 #endif
 }
