@@ -73,7 +73,7 @@ static zend_long range(void *state, zend_long min, zend_long max)
 	}, min, max);
 }
 
-const php_random_algo php_random_algo_user = {
+PHPAPI const php_random_algo php_random_algo_user = {
 	sizeof(php_random_status_state_user),
 	generate,
 	range,
