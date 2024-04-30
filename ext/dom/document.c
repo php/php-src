@@ -525,19 +525,17 @@ Since:
 */
 PHP_METHOD(DOMDocument, createTextNode)
 {
-	zval *id;
 	xmlNode *node;
 	xmlDocPtr docp;
 	size_t value_len;
 	dom_object *intern;
 	char *value;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(value, value_len)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
 	node = xmlNewDocText(docp, BAD_CAST value);
 	if (!node) {
@@ -899,11 +897,12 @@ PHP_METHOD(DOM_Document, createElementNS)
 {
 	xmlDocPtr docp;
 	dom_object *intern;
-	zend_string *name = NULL, *uri;
+	zend_string *name, *uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!S", &uri, &name) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR_OR_NULL(uri)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
