@@ -80,7 +80,7 @@ xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr referenc
 	return entity;
 }
 
-int dom_entity_reference_child_read(dom_object *obj, zval *retval)
+zend_result dom_entity_reference_child_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -99,7 +99,7 @@ int dom_entity_reference_child_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
-int dom_entity_reference_text_content_read(dom_object *obj, zval *retval)
+zend_result dom_entity_reference_text_content_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
@@ -112,7 +112,7 @@ int dom_entity_reference_text_content_read(dom_object *obj, zval *retval)
 	return dom_node_text_content_read(obj, retval);
 }
 
-int dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
+zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval)
 {
 	xmlNodePtr nodep = dom_object_get_node(obj);
 
