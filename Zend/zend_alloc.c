@@ -197,6 +197,44 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 
 #define ZEND_MM_BINS 30
 
+#if defined(_MSC_VER)
+# if UINTPTR_MAX == UINT64_MAX
+#  define BSWAPPTR(u) _byteswap_uint64(u)
+# else
+#  define BSWAPPTR(u) _byteswap_ulong(u)
+# endif
+#else
+# if UINTPTR_MAX == UINT64_MAX
+#  if __has_builtin(__builtin_bswap64)
+#   define BSWAPPTR(u) __builtin_bswap64(u)
+#  else
+zend_always_inline uintptr_t BSWAPPTR(uintptr_t u)
+{
+   return (((u & 0xff00000000000000ULL) >> 56)
+          | ((u & 0x00ff000000000000ULL) >> 40)
+          | ((u & 0x0000ff0000000000ULL) >> 24)
+          | ((u & 0x000000ff00000000ULL) >>  8)
+          | ((u & 0x00000000ff000000ULL) <<  8)
+          | ((u & 0x0000000000ff0000ULL) << 24)
+          | ((u & 0x000000000000ff00ULL) << 40)
+          | ((u & 0x00000000000000ffULL) << 56));
+}
+#  endif /* __has_builtin(__builtin_bswap64) */
+# else /* UINTPTR_MAX == UINT64_MAX */
+#  if __has_builtin(__builtin_bswap32)
+#   define BSWAPPTR(u) __builtin_bswap32(u)
+#  else
+zend_always_inline uintptr_t BSWAPPTR(uintptr_t u)
+{
+  return (((u & 0xff000000) >> 24)
+          | ((u & 0x00ff0000) >>  8)
+          | ((u & 0x0000ff00) <<  8)
+          | ((u & 0x000000ff) << 24));
+}
+#  endif /* __has_builtin(__builtin_bswap32) */
+# endif /* UINTPTR_MAX == UINT64_MAX */
+#endif /* defined(_MSC_VER) */
+
 typedef struct  _zend_mm_page      zend_mm_page;
 typedef struct  _zend_mm_bin       zend_mm_bin;
 typedef struct  _zend_mm_free_slot zend_mm_free_slot;
@@ -248,7 +286,7 @@ struct _zend_mm_heap {
 	size_t             size;                    /* current memory usage */
 	size_t             peak;                    /* peak memory usage */
 #endif
-	uintptr_t          key;                     /* free slot shadow ptr key */
+	uintptr_t          shadow_key;              /* free slot shadow ptr xor key */
 	zend_mm_free_slot *free_slot[ZEND_MM_BINS]; /* free lists for small sizes */
 #if ZEND_MM_STAT || ZEND_MM_LIMIT
 	size_t             real_size;               /* current size of allocated pages */
@@ -347,14 +385,6 @@ static const uint32_t bin_elements[] = {
 	_BIN_DATA_PAGES(num, size, elements, pages, x, y),
 static const uint32_t bin_pages[] = {
 	ZEND_MM_BINS_INFO(_BIN_DATA_PAGES_C, x, y)
-};
-
-#define _BIN_SHADOW_OFFSET(num, size, elements, pages, x, y) \
-	(_BIN_DATA_SIZE(num, size, elements, pages, x, y) - sizeof(zend_mm_free_slot*))
-#define _BIN_SHADOW_OFFSET_C(num, size, elements, pages, x, y) \
-	_BIN_SHADOW_OFFSET(num, size, elements, pages, x, y),
-static const uint32_t bin_shadow_offset[] = {
-	ZEND_MM_BINS_INFO(_BIN_SHADOW_OFFSET_C, x, y)
 };
 
 #if ZEND_DEBUG
@@ -1272,40 +1302,58 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 
 #define ZEND_MM_SMALL_SIZE_TO_BIN(size)  zend_mm_small_size_to_bin(size)
 
+/* We keep track of free slots by organizing them in a linked list, with the
+ * first word of every free slot being a pointer to the next one.
+ *
+ * In order to frustrate corruptions, we check the consistency of these pointers
+ * before dereference by comparing them with a shadow.
+ *
+ * The shadow is a copy of the pointer, stored at the end of the slot. It is
+ * XOR'ed with a random key, and converted to big-endian so that smaller
+ * corruptions affect the most significant bytes, which has a high chance of
+ * resulting in an invalid address instead of pointing to an adjacent slot.
+ */
+
+#define ZEND_MM_FREE_SLOT_PTR_SHADOW(free_slot, bin_num) \
+	*((zend_mm_free_slot**)((char*)(free_slot) + bin_data_size[(bin_num)] - sizeof(zend_mm_free_slot*)))
+
 static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
 {
-	return (zend_mm_free_slot*)((uintptr_t)slot ^ heap->key);
+#if WORDS_BIGENDIAN
+	return (zend_mm_free_slot*)(((uintptr_t)slot) ^ heap->shadow_key);
+#else
+	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot) ^ heap->shadow_key);
+#endif
 }
 
 static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
 {
-	return (zend_mm_free_slot*)((uintptr_t)slot ^ heap->key);
+#if WORDS_BIGENDIAN
+	return (zend_mm_free_slot*)((uintptr_t)slot ^ heap->shadow_key));
+#else
+	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot ^ heap->shadow_key));
+#endif
 }
 
 static zend_always_inline void zend_mm_set_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot *slot, zend_mm_free_slot *next)
 {
 	slot->next_free_slot = next;
-	*(zend_mm_free_slot**)((char*)slot + bin_shadow_offset[bin_num]) = zend_mm_encode_free_slot(heap, next);
+	ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num) = zend_mm_encode_free_slot(heap, next);
 }
 
 static zend_always_inline void zend_mm_copy_next_free_slot(zend_mm_free_slot* dest, uint32_t bin_num, zend_mm_free_slot* from)
 {
 	dest->next_free_slot = from->next_free_slot;
-	*(zend_mm_free_slot**)((char*)dest + bin_shadow_offset[bin_num]) = *(zend_mm_free_slot**)((char*)from + bin_shadow_offset[bin_num]);
-}
-
-static ZEND_COLD ZEND_NORETURN void zend_mm_free_slot_corrupted(void)
-{
-	zend_mm_panic("zend_mm_heap corrupted");
+	ZEND_MM_FREE_SLOT_PTR_SHADOW(dest, bin_num) = ZEND_MM_FREE_SLOT_PTR_SHADOW(from, bin_num);
 }
 
 static zend_always_inline zend_mm_free_slot *zend_mm_check_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot* slot)
 {
 	zend_mm_free_slot *next = slot->next_free_slot;
-	zend_mm_free_slot *shadow = *(zend_mm_free_slot**)((char*)slot + bin_shadow_offset[bin_num]);
+	zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num);
 	if (EXPECTED(next != NULL)) {
 		if (UNEXPECTED(next != zend_mm_decode_free_slot(heap, shadow))) {
-			zend_mm_free_slot_corrupted();
+			zend_mm_panic("zend_mm_heap corrupted");
 		}
 	}
 	return (zend_mm_free_slot*)next;
@@ -1971,15 +2019,17 @@ static zend_result zend_mm_refresh_key(zend_mm_heap *heap)
 {
 	php_random_result result = php_random_algo_xoshiro256starstar.generate(&heap->random_state);
 	ZEND_ASSERT(result.size == sizeof(uint64_t));
-	heap->key = (uintptr_t) result.result;
+	heap->shadow_key = (uintptr_t) result.result;
 	return SUCCESS;
 }
 
 static zend_result zend_mm_init_key(zend_mm_heap *heap)
 {
 	uint64_t seed[4];
-	if (php_random_bytes(&seed, sizeof(seed), false) != SUCCESS) {
-		return FAILURE;
+	if (php_random_bytes_silent(&seed, sizeof(seed)) != SUCCESS) {
+		for (int i = 0; i < sizeof(seed)/sizeof(seed[0]); i++) {
+			seed[i] = php_random_generate_fallback_seed();
+		}
 	}
 
 	php_random_xoshiro256starstar_seed256(&heap->random_state,
