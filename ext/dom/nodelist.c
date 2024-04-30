@@ -49,6 +49,16 @@ static zend_always_inline void reset_objmap_cache(dom_nnodemap_object *objmap)
 	objmap->cached_length = -1;
 }
 
+static xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep)
+{
+	if (nodep->type == XML_ENTITY_REF_NODE) {
+		/* See entityreference.c */
+		dom_entity_reference_fetch_and_sync_declaration(nodep);
+	}
+
+	return nodep->children;
+}
+
 int php_dom_get_nodelist_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
@@ -83,7 +93,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 
 	int count = 0;
 	if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-		xmlNodePtr curnode = nodep->children;
+		xmlNodePtr curnode = dom_nodelist_iter_start_first_child(nodep);
 		if (curnode) {
 			count++;
 			while (curnode->next != NULL) {
@@ -185,7 +195,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 						int count = 0;
 						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
 							if (restart) {
-								nodep = nodep->children;
+								nodep = dom_nodelist_iter_start_first_child(nodep);
 							}
 							while (count < relative_index && nodep != NULL) {
 								count++;

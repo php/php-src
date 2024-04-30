@@ -1821,7 +1821,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		char *xquery;
 
 		/* Find "query" key */
-		tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_QUERY));
+		tmp = zend_hash_find_deref(ht, ZSTR_KNOWN(ZEND_STR_QUERY));
 		if (!tmp) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_value_error(3 + mode, "must have a \"query\" key");
@@ -1837,12 +1837,13 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		ctxp = xmlXPathNewContext(docp);
 		ctxp->node = nodep;
 
-		tmp = zend_hash_str_find(ht, "namespaces", sizeof("namespaces")-1);
+		tmp = zend_hash_str_find_deref(ht, "namespaces", sizeof("namespaces")-1);
 		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
 			zval *tmpns;
 			zend_string *prefix;
 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
+				ZVAL_DEREF(tmpns);
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
 						xmlXPathRegisterNs(ctxp, (xmlChar *) ZSTR_VAL(prefix), (xmlChar *) Z_STRVAL_P(tmpns));
