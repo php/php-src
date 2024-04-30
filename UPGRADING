@@ -257,6 +257,7 @@ PHP 8.4 UPGRADE NOTES
   . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
     now returns the attached doc comments.
   . ReflectionConstant was introduced.
+  . ReflectionClassConstant::isDeprecated() was introduced.
 
 - Standard:
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
