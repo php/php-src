@@ -1472,7 +1472,14 @@ void phpdbg_setup_watchpoints(void) {
 	PHPDBG_G(watch_tmp) = NULL;
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
-	PHPDBG_G(watch_userfaultfd) = syscall(SYS_userfaultfd, O_CLOEXEC);
+	int flags = O_CLOEXEC;
+#ifdef UFFD_USER_MODE_ONLY
+	// unpriviliged userfaultfd are disabled by default,
+	// with this flag it allows ranges from the user space
+	// being reported.
+	flags |= UFFD_USER_MODE_ONLY;
+#endif
+	PHPDBG_G(watch_userfaultfd) = syscall(SYS_userfaultfd, flags);
 	if (PHPDBG_G(watch_userfaultfd) < 0) {
 		PHPDBG_G(watch_userfaultfd) = 0;
 	} else {
