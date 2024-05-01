@@ -40,12 +40,8 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 	size_t digits = 0;
 	size_t str_scale = 0;
 	char *ptr = str;
-	char *nptr;
-	char *integer_ptr;
-	char *integer_end;
 	char *fractional_ptr = NULL;
 	char *fractional_end = NULL;
-	char *decimal_point;
 	bool zero_int = false;
 
 	/* Prepare num. */
@@ -60,14 +56,14 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 	while (*ptr == '0') {
 		ptr++;
 	}
-	integer_ptr = ptr;
+	const char *integer_ptr = ptr;
 	/* digits before the decimal point */
 	while (*ptr >= '0' && *ptr <= '9') {
 		ptr++;
 		digits++;
 	}
 	/* decimal point */
-	decimal_point = (*ptr == '.') ? ptr : NULL;
+	char *decimal_point = (*ptr == '.') ? ptr : NULL;
 
 	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
 	if (!decimal_point && *ptr != '\0') {
@@ -91,9 +87,16 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 			/* invalid num */
 			goto fail;
 		}
+		/* Move the pointer to the beginning of the fraction. */
 		fractional_ptr = decimal_point + 1;
 
+		/* Calculate the length of the fraction excluding trailing zero. */
 		str_scale = fractional_end - fractional_ptr;
+
+		/*
+		 * If set the scale manually and it is smaller than the automatically calculated scale,
+		 * adjust it to match the manual setting.
+		 */
 		if (str_scale > scale && !auto_scale) {
 			fractional_end -= str_scale - scale;
 			str_scale = scale;
@@ -113,17 +116,21 @@ after_fractional:
 	}
 	*num = bc_new_num (digits, str_scale);
 	(*num)->n_sign = *str == '-' ? MINUS : PLUS;
-	nptr = (*num)->n_value;
+	char *nptr = (*num)->n_value;
 
 	if (zero_int) {
 		nptr++;
+		/*
+		 * If zero_int is true and the str_scale is 0, there is an early return,
+		 * so here str_scale is always greater than 0.
+		 */
 		while (fractional_ptr < fractional_end) {
 			*nptr = CH_VAL(*fractional_ptr);
 			nptr++;
 			fractional_ptr++;
 		}
 	} else {
-		integer_end = integer_ptr + digits;
+		const char *integer_end = integer_ptr + digits;
 		while (integer_ptr < integer_end) {
 			*nptr = CH_VAL(*integer_ptr);
 			nptr++;
