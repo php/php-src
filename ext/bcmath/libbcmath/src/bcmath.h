@@ -131,7 +131,13 @@ bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min);
 	*(result) = sub_ex;                             \
 } while (0)
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale);
+bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale);
+
+#define bc_multiply_ex(n1, n2, result, scale_min) do {	\
+	bc_num mul_ex = bc_multiply(n1, n2, scale_min); \
+	bc_free_num (result);                           \
+	*(result) = mul_ex;                             \
+} while (0)
 
 bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
 

@@ -162,7 +162,7 @@ void bc_out_num(bc_num num, int o_base, void (*out_char)(char), bool leading_zer
 				pre_space = false;
 				t_num = bc_copy_num(BCG(_one_));
 				while (t_num->n_len <= num->n_scale) {
-					bc_multiply(frac_part, base, &frac_part, num->n_scale);
+					bc_multiply_ex(frac_part, base, &frac_part, num->n_scale);
 					fdigit = bc_num2long(frac_part);
 					bc_int2num(&int_part, fdigit);
 					bc_sub_ex(frac_part, int_part, &frac_part, 0);
@@ -172,7 +172,7 @@ void bc_out_num(bc_num num, int o_base, void (*out_char)(char), bool leading_zer
 						bc_out_long(fdigit, max_o_digit->n_len, pre_space, out_char);
 						pre_space = true;
 					}
-					bc_multiply(t_num, base, &t_num, 0);
+					bc_multiply_ex(t_num, base, &t_num, 0);
 				}
 				bc_free_num (&t_num);
 			}

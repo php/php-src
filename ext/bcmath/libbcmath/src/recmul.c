@@ -253,7 +253,7 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
+bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 {
 	bc_num pval;
 	size_t len1, len2;
@@ -276,6 +276,5 @@ void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
 	if (bc_is_zero(pval)) {
 		pval->n_sign = PLUS;
 	}
-	bc_free_num(prod);
-	*prod = pval;
+	return pval;
 }

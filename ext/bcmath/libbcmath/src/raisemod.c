@@ -72,10 +72,10 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 		while (!bc_is_zero(exponent)) {
 			(void) bc_divmod(exponent, BCG(_two_), &exponent, &parity, 0);
 			if (!bc_is_zero(parity)) {
-				bc_multiply(temp, power, &temp, scale);
+				bc_multiply_ex(temp, power, &temp, scale);
 				(void) bc_modulo(temp, modulus, &temp, scale);
 			}
-			bc_multiply(power, power, &power, scale);
+			bc_multiply_ex(power, power, &power, scale);
 			(void) bc_modulo(power, modulus, &power, scale);
 		}
 	}
