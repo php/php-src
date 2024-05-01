@@ -56,7 +56,6 @@ static bc_num new_sub_num(size_t length, size_t scale, char *value)
 	temp->n_len = length;
 	temp->n_scale = scale;
 	temp->n_refs = 1;
-	temp->n_ptr = NULL;
 	temp->n_value = value;
 	return temp;
 }
@@ -273,7 +272,6 @@ void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
 
 	/* Assign to prod and clean up the number. */
 	pval->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
-	pval->n_value = pval->n_ptr;
 	pval->n_len = len2 + len1 + 1 - full_scale;
 	pval->n_scale = prod_scale;
 	_bc_rm_leading_zeros(pval);
