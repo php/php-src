@@ -134,17 +134,7 @@ PHP_MINFO_FUNCTION(bcmath)
    Convert to bc_num detecting scale */
 static zend_result php_str2num(bc_num *num, char *str)
 {
-	char *p;
-
-	if (!(p = strchr(str, '.'))) {
-		if (!bc_str2num(num, str, 0)) {
-			return FAILURE;
-		}
-
-		return SUCCESS;
-	}
-
-	if (!bc_str2num(num, str, strlen(p+1))) {
+	if (!bc_str2num(num, str, 0, true)) {
 		return FAILURE;
 	}
 
@@ -624,12 +614,12 @@ PHP_FUNCTION(bccomp)
 	bc_init_num(&first);
 	bc_init_num(&second);
 
-	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
+	if (!bc_str2num(&first, ZSTR_VAL(left), scale, false)) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
+	if (!bc_str2num(&second, ZSTR_VAL(right), scale, false)) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}

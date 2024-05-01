@@ -35,20 +35,23 @@
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
-bool bc_str2num(bc_num *num, char *str, size_t scale)
+bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 {
 	size_t digits = 0;
-	size_t strscale = 0;
-	char *ptr, *nptr;
-	size_t trailing_zeros = 0;
+	size_t str_scale = 0;
+	char *ptr = str;
+	char *nptr;
+	char *integer_ptr;
+	char *integer_end;
+	char *fractional_ptr = NULL;
+	char *fractional_end = NULL;
+	char *decimal_point;
 	bool zero_int = false;
 
 	/* Prepare num. */
 	bc_free_num (num);
 
 	/* Check for valid number and count digits. */
-	ptr = str;
-
 	if ((*ptr == '+') || (*ptr == '-')) {
 		/* Skip Sign */
 		ptr++;
@@ -57,77 +60,91 @@ bool bc_str2num(bc_num *num, char *str, size_t scale)
 	while (*ptr == '0') {
 		ptr++;
 	}
+	integer_ptr = ptr;
 	/* digits before the decimal point */
 	while (*ptr >= '0' && *ptr <= '9') {
 		ptr++;
 		digits++;
 	}
 	/* decimal point */
-	if (*ptr == '.') {
-		ptr++;
-	}
-	/* digits after the decimal point */
-	while (*ptr >= '0' && *ptr <= '9') {
-		if (*ptr == '0') {
-			trailing_zeros++;
-		} else {
-			trailing_zeros = 0;
-		}
-		ptr++;
-		strscale++;
+	decimal_point = (*ptr == '.') ? ptr : NULL;
+
+	/* If a string other than numbers exists */
+	if (!decimal_point && *ptr != '\0') {
+		goto fail;
 	}
 
-	if (trailing_zeros > 0) {
-		/* Trailing zeros should not take part in the computation of the overall scale, as it is pointless. */
-		strscale = strscale - trailing_zeros;
+	/* search and validate fractional end if exists */
+	if (decimal_point) {
+		/* search */
+		fractional_ptr = fractional_end = decimal_point + 1;
+		if (*fractional_ptr == '\0') {
+			goto after_fractional;
+		}
+
+		/* validate */
+		while (*fractional_ptr >= '0' && *fractional_ptr <= '9') {
+			fractional_end = *fractional_ptr != '0' ? fractional_ptr + 1 : fractional_end;
+			fractional_ptr++;
+		}
+		if (*fractional_ptr != '\0') {
+			/* invalid num */
+			goto fail;
+		}
+		fractional_ptr = decimal_point + 1;
+
+		str_scale = fractional_end - fractional_ptr;
+		if (str_scale > scale && !auto_scale) {
+			fractional_end -= str_scale - scale;
+			str_scale = scale;
+		}
 	}
-	if ((*ptr != '\0') || (digits + strscale == 0)) {
-		*num = bc_copy_num(BCG(_zero_));
-		return *ptr == '\0';
+
+after_fractional:
+
+	if (digits + str_scale == 0) {
+		goto zero;
 	}
 
 	/* Adjust numbers and allocate storage and initialize fields. */
-	strscale = MIN(strscale, scale);
 	if (digits == 0) {
 		zero_int = true;
 		digits = 1;
 	}
-	*num = bc_new_num (digits, strscale);
-
-	/* Build the whole number. */
-	ptr = str;
-	if (*ptr == '-') {
-		(*num)->n_sign = MINUS;
-		ptr++;
-	} else {
-		(*num)->n_sign = PLUS;
-		if (*ptr == '+') ptr++;
-	}
-	/* Skip leading zeros. */
-	while (*ptr == '0') {
-		ptr++;
-	}
+	*num = bc_new_num (digits, str_scale);
+	(*num)->n_sign = *str == '-' ? MINUS : PLUS;
 	nptr = (*num)->n_value;
-	if (zero_int) {
-		*nptr++ = 0;
-		digits = 0;
-	}
-	for (; digits > 0; digits--) {
-		*nptr++ = CH_VAL(*ptr++);
-	}
 
-	/* Build the fractional part. */
-	if (strscale > 0) {
-		/* skip the decimal point! */
-		ptr++;
-		for (; strscale > 0; strscale--) {
-			*nptr++ = CH_VAL(*ptr++);
+	if (zero_int) {
+		nptr++;
+		while (fractional_ptr < fractional_end) {
+			*nptr = CH_VAL(*fractional_ptr);
+			nptr++;
+			fractional_ptr++;
+		}
+	} else {
+		integer_end = integer_ptr + digits;
+		while (integer_ptr < integer_end) {
+			*nptr = CH_VAL(*integer_ptr);
+			nptr++;
+			integer_ptr++;
+		}
+		if (str_scale > 0) {
+			while (fractional_ptr < fractional_end) {
+				*nptr = CH_VAL(*fractional_ptr);
+				nptr++;
+				fractional_ptr++;
+			}
 		}
 	}
 
-	if (bc_is_zero(*num)) {
-		(*num)->n_sign = PLUS;
-	}
-
 	return true;
+
+zero:
+	*num = bc_copy_num(BCG(_zero_));
+	return true;
+
+fail:
+	*num = bc_copy_num(BCG(_zero_));
+	return false;
 }
