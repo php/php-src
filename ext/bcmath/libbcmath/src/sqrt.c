@@ -92,7 +92,7 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		bc_free_num (&guess1);
 		guess1 = bc_copy_num(guess);
 		bc_divide(*num, guess, &guess, cscale);
-		bc_add(guess, guess1, &guess, 0);
+		bc_add_ex(guess, guess1, &guess, 0);
 		bc_multiply(guess, point5, &guess, cscale);
 		bc_sub(guess, guess1, &diff, cscale + 1);
 		if (bc_is_near_zero(diff, cscale)) {
