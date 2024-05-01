@@ -16,6 +16,9 @@
 
 #include "bcmath.h"
 #include "convert.h"
+#ifdef __SSE2__
+# include <emmintrin.h>
+#endif
 
 /* This will be 0x01010101 for 32-bit and 0x0101010101010101 */
 #define SWAR_ONES (~((size_t) 0) / 0xFF)
@@ -30,6 +33,19 @@ static char *bc_copy_and_shift_numbers(char *restrict dest, const char *source, 
 		bulk_shift = -bulk_shift;
 		shift = -shift;
 	}
+
+#ifdef __SSE2__
+	/* SIMD SSE2 bulk shift + copy */
+	__m128i shift_vector = _mm_set1_epi8(shift);
+	while (source + sizeof(__m128i) <= source_end) {
+		__m128i bytes = _mm_loadu_si128((const __m128i *) source);
+		bytes = _mm_add_epi8(bytes, shift_vector);
+		_mm_storeu_si128((__m128i *) dest, bytes);
+
+		source += sizeof(__m128i);
+		dest += sizeof(__m128i);
+	}
+#endif
 
 	/* Handle sizeof(size_t) (i.e. 4/8) bytes at once.
 	 * We know that adding/subtracting an individual byte cannot overflow,
