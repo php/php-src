@@ -485,8 +485,8 @@ static void php_sqlite3_func_callback(sqlite3_context *context, int argc, sqlite
 void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	struct pdo_sqlite_func *func;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
@@ -501,7 +501,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
@@ -525,6 +525,8 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	efree(func);
+
+error:
 	zend_release_fcall_info_cache(&fcc);
 	RETURN_FALSE;
 }
@@ -540,18 +542,16 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	struct pdo_sqlite_func *func;
-	zend_fcall_info step_fci, fini_fci;
-	zend_fcall_info_cache step_fcc, fini_fcc;
+	zend_fcall_info step_fci = empty_fcall_info;
+	zend_fcall_info fini_fci = empty_fcall_info;
+	zend_fcall_info_cache step_fcc = empty_fcall_info_cache;
+	zend_fcall_info_cache fini_fcc = empty_fcall_info_cache;
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
-	bool is_throw = false;
-
-	step_fcc.function_handler = NULL;
-	fini_fcc.function_handler = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
@@ -559,7 +559,7 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fini_fci, fini_fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
-	ZEND_PARSE_PARAMETERS_END_EX(is_throw = true; goto error;);
+	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
@@ -574,7 +574,6 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 		func->funcname = estrdup(func_name);
 
 		zend_fcc_dup(&func->step, &step_fcc);
-
 		zend_fcc_dup(&func->fini, &fini_fcc);
 
 		func->argc = argc;
@@ -590,10 +589,6 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 error:
 	zend_release_fcall_info_cache(&step_fcc);
 	zend_release_fcall_info_cache(&fini_fcc);
-
-	if (is_throw) {
-		RETURN_THROWS();
-	}
 	RETURN_FALSE;
 }
 
@@ -625,8 +620,8 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_create_collation_callback callback)
 {
 	struct pdo_sqlite_collation *collation;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	char *collation_name;
 	size_t collation_name_len;
 	pdo_dbh_t *dbh;
