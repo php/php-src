@@ -36,6 +36,7 @@
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
+/* Assumes `num` points to NULL, i.e. does yet not hold a number. */
 bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 {
 	size_t digits = 0;
@@ -45,8 +46,7 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 	char *fractional_end = NULL;
 	bool zero_int = false;
 
-	/* Prepare num. */
-	bc_free_num (num);
+	ZEND_ASSERT(*num == NULL);
 
 	/* Check for valid number and count digits. */
 	if ((*ptr == '+') || (*ptr == '-')) {

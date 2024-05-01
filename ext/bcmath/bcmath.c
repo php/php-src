@@ -148,7 +148,7 @@ PHP_FUNCTION(bcadd)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -167,8 +167,6 @@ PHP_FUNCTION(bcadd)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -199,7 +197,7 @@ PHP_FUNCTION(bcsub)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -218,8 +216,6 @@ PHP_FUNCTION(bcsub)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -250,7 +246,7 @@ PHP_FUNCTION(bcmul)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -269,8 +265,6 @@ PHP_FUNCTION(bcmul)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -301,7 +295,7 @@ PHP_FUNCTION(bcdiv)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -320,8 +314,6 @@ PHP_FUNCTION(bcdiv)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -355,7 +347,7 @@ PHP_FUNCTION(bcmod)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -374,8 +366,6 @@ PHP_FUNCTION(bcmod)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -409,7 +399,7 @@ PHP_FUNCTION(bcpowmod)
 	zend_string *base_str, *exponent_str, *modulus_str;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num bc_base, bc_expo, bc_modulus, result;
+	bc_num bc_base = NULL, bc_expo = NULL, bc_modulus = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
@@ -429,9 +419,6 @@ PHP_FUNCTION(bcpowmod)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&bc_base);
-	bc_init_num(&bc_expo);
-	bc_init_num(&bc_modulus);
 	bc_init_num(&result);
 
 	if (php_str2num(&bc_base, ZSTR_VAL(base_str)) == FAILURE) {
@@ -487,7 +474,7 @@ PHP_FUNCTION(bcpow)
 	zend_string *base_str, *exponent_str;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, bc_exponent, result;
+	bc_num first = NULL, bc_exponent = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -506,8 +493,6 @@ PHP_FUNCTION(bcpow)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&bc_exponent);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(base_str)) == FAILURE) {
@@ -549,7 +534,7 @@ PHP_FUNCTION(bcsqrt)
 	zend_string *left;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num result;
+	bc_num result = NULL;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -566,8 +551,6 @@ PHP_FUNCTION(bcsqrt)
 	} else {
 		scale = (int) scale_param;
 	}
-
-	bc_init_num(&result);
 
 	if (php_str2num(&result, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
@@ -592,7 +575,7 @@ PHP_FUNCTION(bccomp)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second;
+	bc_num first = NULL, second = NULL;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -610,9 +593,6 @@ PHP_FUNCTION(bccomp)
 	} else {
 		scale = (int) scale_param;
 	}
-
-	bc_init_num(&first);
-	bc_init_num(&second);
 
 	if (!bc_str2num(&first, ZSTR_VAL(left), scale, false)) {
 		zend_argument_value_error(1, "is not well-formed");
@@ -637,13 +617,12 @@ PHP_FUNCTION(bccomp)
 static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
 {
 	zend_string *numstr;
-	bc_num num, result;
+	bc_num num = NULL, result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(numstr)
 	ZEND_PARSE_PARAMETERS_END();
 
-	bc_init_num(&num);
 	bc_init_num(&result);
 
 	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
@@ -681,7 +660,7 @@ PHP_FUNCTION(bcround)
 	zend_string *numstr;
 	zend_long precision = 0;
 	zend_long mode = PHP_ROUND_HALF_UP;
-	bc_num num, result;
+	bc_num num = NULL, result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(numstr)
@@ -705,7 +684,6 @@ PHP_FUNCTION(bcround)
 			return;
 	}
 
-	bc_init_num(&num);
 	bc_init_num(&result);
 
 	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
