@@ -32,6 +32,8 @@
 ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
+static PHP_RINIT_FUNCTION(bcmath);
+static PHP_RSHUTDOWN_FUNCTION(bcmath);
 static PHP_MINIT_FUNCTION(bcmath);
 static PHP_MSHUTDOWN_FUNCTION(bcmath);
 static PHP_MINFO_FUNCTION(bcmath);
@@ -42,8 +44,8 @@ zend_module_entry bcmath_module_entry = {
 	ext_functions,
 	PHP_MINIT(bcmath),
 	PHP_MSHUTDOWN(bcmath),
-	NULL,
-	NULL,
+	PHP_RINIT(bcmath),
+	PHP_RSHUTDOWN(bcmath),
 	PHP_MINFO(bcmath),
 	PHP_BCMATH_VERSION,
 	PHP_MODULE_GLOBALS(bcmath),
@@ -82,6 +84,93 @@ PHP_INI_BEGIN()
 PHP_INI_END()
 /* }}} */
 
+static void bcmath_destroy_lru_entry(php_bc_lru_entry *entry)
+{
+	/* No need to clean up str as that reference is held by the table. */
+	bc_free_num(&entry->num);
+}
+
+static void bcmath_lru_init(php_bc_lru_cache *cache)
+{
+	cache->head = cache->tail = NULL;
+	zend_hash_init(&cache->table, PHP_BCMATH_LRU_SIZE, NULL, NULL, false);
+	zend_hash_real_init_mixed(&cache->table);
+}
+
+static void bcmath_lru_destroy(php_bc_lru_cache *cache)
+{
+	php_bc_lru_entry *entry;
+	ZEND_HASH_MAP_FOREACH_PTR(&cache->table, entry) {
+		bcmath_destroy_lru_entry(entry);
+		efree(entry);
+	} ZEND_HASH_FOREACH_END();
+	zend_hash_destroy(&cache->table);
+}
+
+static void bcmath_lru_new_entry(php_bc_lru_cache *cache, zend_string *str, bc_num num)
+{
+	php_bc_lru_entry *entry = emalloc(sizeof(*entry));
+	entry->str = str;
+	entry->num = num;
+
+	entry->next = cache->head;
+	entry->prev = NULL;
+
+	if (cache->head) {
+		cache->head->prev = entry;
+	} else {
+		cache->tail = entry;
+	}
+
+	cache->head = entry;
+
+	zend_hash_add_new_ptr(&cache->table, str, entry);
+}
+
+static void bcmath_lru_move_to_head(php_bc_lru_cache *cache, php_bc_lru_entry *entry)
+{
+	if (entry == cache->head) {
+		return;
+	}
+
+	if (entry == cache->tail) {
+		cache->tail = entry->prev;
+	}
+
+	if (entry->prev) {
+		entry->prev->next = entry->next;
+	}
+
+	if (entry->next) {
+		entry->next->prev = entry->prev;
+	}
+
+	entry->next = cache->head;
+	entry->prev = NULL;
+
+	cache->head->prev = entry;
+	cache->head = entry;
+}
+
+static void bcmath_lru_evict_oldest_and_reuse(php_bc_lru_cache *cache, zend_string *str, bc_num num)
+{
+	zend_hash_del(&cache->table, cache->tail->str);
+	bcmath_destroy_lru_entry(cache->tail);
+	cache->tail->str = str;
+	cache->tail->num = num;
+	zend_hash_add_new_ptr(&cache->table, str, cache->tail);
+	bcmath_lru_move_to_head(cache, cache->tail);
+}
+
+static void bcmath_lru_add(php_bc_lru_cache *cache, zend_string *str, bc_num num)
+{
+	if (zend_hash_num_elements(&cache->table) == PHP_BCMATH_LRU_SIZE) {
+		bcmath_lru_evict_oldest_and_reuse(cache, str, num);
+	} else {
+		bcmath_lru_new_entry(cache, str, num);
+	}
+}
+
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(bcmath)
 {
@@ -101,6 +190,18 @@ static PHP_GSHUTDOWN_FUNCTION(bcmath)
 	_bc_free_num_ex(&bcmath_globals->_two_, 1);
 }
 /* }}} */
+
+static PHP_RINIT_FUNCTION(bcmath)
+{
+	bcmath_lru_init(&bcmath_globals.lru_cache);
+	return SUCCESS;
+}
+
+static PHP_RSHUTDOWN_FUNCTION(bcmath)
+{
+	bcmath_lru_destroy(&bcmath_globals.lru_cache);
+	return SUCCESS;
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(bcmath)
@@ -132,11 +233,21 @@ PHP_MINFO_FUNCTION(bcmath)
 
 /* {{{ php_str2num
    Convert to bc_num detecting scale */
-static zend_result php_str2num(bc_num *num, const zend_string *str)
+static zend_result php_str2num(bc_num *num, zend_string *str)
 {
+	php_bc_lru_cache *cache = &BCG(lru_cache);
+	php_bc_lru_entry *cache_entry = zend_hash_find_ptr(&cache->table, str);
+	if (cache_entry) {
+		bcmath_lru_move_to_head(cache, cache_entry);
+		*num = bc_copy_num(cache_entry->num);
+		return SUCCESS;
+	}
+
 	if (!bc_str2num(num, ZSTR_VAL(str), ZSTR_VAL(str) + ZSTR_LEN(str), 0, true)) {
 		return FAILURE;
 	}
+
+	bcmath_lru_add(cache, str, bc_copy_num(*num));
 
 	return SUCCESS;
 }
