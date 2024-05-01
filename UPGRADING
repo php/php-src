@@ -458,6 +458,10 @@ PHP 8.4 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- BCMath:
+  . Added bcfloor(), bcceil(), bcround().
+    RFC: https://wiki.php.net/rfc/adding_bcround_bcfloor_bcceil_to_bcmath
+
 - DOM:
   . Added DOMNode::compareDocumentPosition().
   . Added DOMXPath::registerPhpFunctionNS().
