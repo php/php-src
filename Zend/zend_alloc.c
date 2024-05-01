@@ -1317,7 +1317,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 #define ZEND_MM_FREE_SLOT_PTR_SHADOW(free_slot, bin_num) \
 	*((zend_mm_free_slot**)((char*)(free_slot) + bin_data_size[(bin_num)] - sizeof(zend_mm_free_slot*)))
 
-static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
+static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(const zend_mm_heap *heap, const zend_mm_free_slot *slot)
 {
 #if WORDS_BIGENDIAN
 	return (zend_mm_free_slot*)(((uintptr_t)slot) ^ heap->shadow_key);
@@ -1350,8 +1350,8 @@ static zend_always_inline void zend_mm_copy_next_free_slot(zend_mm_free_slot* de
 static zend_always_inline zend_mm_free_slot *zend_mm_check_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot* slot)
 {
 	zend_mm_free_slot *next = slot->next_free_slot;
-	zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num);
 	if (EXPECTED(next != NULL)) {
+		zend_mm_free_slot *shadow = ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num);
 		if (UNEXPECTED(next != zend_mm_decode_free_slot(heap, shadow))) {
 			zend_mm_panic("zend_mm_heap corrupted");
 		}
