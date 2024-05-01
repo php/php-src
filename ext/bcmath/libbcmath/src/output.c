@@ -79,7 +79,7 @@ void bc_out_num(bc_num num, int o_base, void (*out_char)(char), bool leading_zer
 	int index, fdigit;
 	bool pre_space;
 	stk_rec *digits, *temp;
-	bc_num int_part, frac_part, base, cur_dig, t_num, max_o_digit;
+	bc_num int_part, base, cur_dig, t_num, max_o_digit;
 
 	/* The negative sign if needed. */
 	if (num->n_sign == MINUS) (*out_char)('-');
@@ -120,10 +120,9 @@ void bc_out_num(bc_num num, int o_base, void (*out_char)(char), bool leading_zer
 			digits = NULL;
 			bc_init_num(&int_part);
 			bc_divide(num, BCG(_one_), &int_part, 0);
-			bc_init_num(&frac_part);
 			bc_init_num(&cur_dig);
 			bc_init_num(&base);
-			bc_sub(num, int_part, &frac_part, 0);
+			bc_num frac_part = bc_sub(num, int_part, 0);
 			/* Make the INT_PART and FRAC_PART positive. */
 			int_part->n_sign = PLUS;
 			frac_part->n_sign = PLUS;
@@ -166,7 +165,7 @@ void bc_out_num(bc_num num, int o_base, void (*out_char)(char), bool leading_zer
 					bc_multiply(frac_part, base, &frac_part, num->n_scale);
 					fdigit = bc_num2long(frac_part);
 					bc_int2num(&int_part, fdigit);
-					bc_sub(frac_part, int_part, &frac_part, 0);
+					bc_sub_ex(frac_part, int_part, &frac_part, 0);
 					if (o_base <= 16) {
 						(*out_char)(ref_str[fdigit]);
 					} else {

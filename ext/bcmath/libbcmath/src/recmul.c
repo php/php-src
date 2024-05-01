@@ -163,7 +163,7 @@ static void _bc_shift_addsub(bc_num accum, bc_num val, int shift, bool sub)
 static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod)
 {
 	bc_num u0, u1, v0, v1;
-	bc_num m1, m2, m3, d1, d2;
+	bc_num m1, m2, m3;
 	size_t n;
 	bool m1zero;
 
@@ -203,10 +203,8 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
 
 	/* Calculate sub results ... */
 
-	bc_init_num(&d1);
-	bc_init_num(&d2);
-	bc_sub(u1, u0, &d1, 0);
-	bc_sub(v0, v1, &d2, 0);
+	bc_num d1 = bc_sub(u1, u0, 0);
+	bc_num d2 = bc_sub(v0, v1, 0);
 
 
 	/* Do recursive multiplies and shifted adds. */

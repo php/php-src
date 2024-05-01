@@ -123,7 +123,13 @@ bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min);
 	*(result) = add_ex;                             \
 } while (0)
 
-void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min);
+bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min);
+
+#define bc_sub_ex(n1, n2, result, scale_min) do {	\
+	bc_num sub_ex = bc_sub(n1, n2, scale_min);		\
+	bc_free_num (result);                           \
+	*(result) = sub_ex;                             \
+} while (0)
 
 void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale);
 
