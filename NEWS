@@ -4,7 +4,7 @@ PHP                                                                        NEWS
 
 - BCMath:
   . [RFC] Add bcfloor, bcceil and bcround to BCMath (Saki Takamachi)
-  . Refactor BCMath 1 (Saki Takamachi)
+  . Improve performance (Saki Takamachi)
 
 - Core:
   . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
