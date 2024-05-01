@@ -6598,6 +6598,7 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 
 	fci.retval = &retval;
 	fci.param_count = 2;
+	fci.params = args;
 
 	ZEND_HASH_FOREACH_KEY_VAL(array, num_key, str_key, operand) {
 		/* Set up the key */
@@ -6608,7 +6609,6 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 		}
 
 		ZVAL_COPY(&args[0], operand);
-		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
 			int retval_true;
