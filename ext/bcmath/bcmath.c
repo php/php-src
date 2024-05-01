@@ -195,7 +195,7 @@ PHP_FUNCTION(bcsub)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first = NULL, second = NULL, result;
+	bc_num first = NULL, second = NULL, result = NULL;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -214,8 +214,6 @@ PHP_FUNCTION(bcsub)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&result);
-
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -226,7 +224,7 @@ PHP_FUNCTION(bcsub)
 		goto cleanup;
 	}
 
-	bc_sub (first, second, &result, scale);
+	result = bc_sub (first, second, scale);
 
 	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
