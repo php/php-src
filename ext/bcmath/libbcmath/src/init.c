@@ -77,14 +77,6 @@ void bc_init_numbers(void)
 }
 
 
-/* Make a copy of a number! Just increments the reference count! */
-bc_num bc_copy_num(bc_num num)
-{
-	num->n_refs++;
-	return num;
-}
-
-
 /* Initialize a number NUM by making it a copy of zero. */
 void bc_init_num(bc_num *num)
 {
