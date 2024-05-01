@@ -17,10 +17,13 @@
 #include "bcmath.h"
 #include "convert.h"
 
+/* This will be 0x01010101 for 32-bit and 0x0101010101010101 */
 #define SWAR_ONES (~((size_t) 0) / 0xFF)
+/* This repeats a byte `x` into an entire 32/64-bit word.
+ * Example: SWAR_REPEAT(0xAB) will be 0xABABABAB for 32-bit and 0xABABABABABABABAB for 64-bit. */
 #define SWAR_REPEAT(x) (SWAR_ONES * (x))
 
-static char *bc_copy_and_shift_numbers(char *dest, const char *source, const char *source_end, unsigned char shift, bool add)
+static char *bc_copy_and_shift_numbers(char *restrict dest, const char *source, const char *source_end, unsigned char shift, bool add)
 {
 	size_t bulk_shift = SWAR_REPEAT(shift);
 	if (!add) {
@@ -28,6 +31,10 @@ static char *bc_copy_and_shift_numbers(char *dest, const char *source, const cha
 		shift = -shift;
 	}
 
+	/* Handle sizeof(size_t) (i.e. 4/8) bytes at once.
+	 * We know that adding/subtracting an individual byte cannot overflow,
+	 * so it is possible to add/subtract an entire word of bytes at once
+	 * by using SWAR_REPEAT. */
 	while (source + sizeof(size_t) <= source_end) {
 		size_t bytes;
 		memcpy(&bytes, source, sizeof(bytes));
@@ -48,12 +55,12 @@ static char *bc_copy_and_shift_numbers(char *dest, const char *source, const cha
 	return dest;
 }
 
-char *bc_copy_ch_val(char *dest, const char *source, const char *source_end)
+char *bc_copy_ch_val(char *restrict dest, const char *source, const char *source_end)
 {
 	return bc_copy_and_shift_numbers(dest, source, source_end, '0', false);
 }
 
-char *bc_copy_bcd_val(char *dest, const char *source, const char *source_end)
+char *bc_copy_bcd_val(char *restrict dest, const char *source, const char *source_end)
 {
 	return bc_copy_and_shift_numbers(dest, source, source_end, '0', true);
 }
