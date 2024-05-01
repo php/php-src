@@ -1903,6 +1903,8 @@ function array_find_key(array $array, callable $callback): mixed {}
 
 function array_any(array $array, callable $callback): bool {}
 
+function array_all(array $array, callable $callback): bool {}
+
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
 /**
