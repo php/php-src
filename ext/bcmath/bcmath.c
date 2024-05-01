@@ -181,7 +181,7 @@ PHP_FUNCTION(bcadd)
 
 	bc_add (first, second, &result, scale);
 
-	RETVAL_STR(bc_num2str_ex(result, scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
@@ -230,7 +230,7 @@ PHP_FUNCTION(bcsub)
 
 	bc_sub (first, second, &result, scale);
 
-	RETVAL_STR(bc_num2str_ex(result, scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
@@ -279,7 +279,7 @@ PHP_FUNCTION(bcmul)
 
 	bc_multiply (first, second, &result, scale);
 
-	RETVAL_STR(bc_num2str_ex(result, scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
@@ -331,7 +331,7 @@ PHP_FUNCTION(bcdiv)
 		goto cleanup;
 	}
 
-	RETVAL_STR(bc_num2str_ex(result, scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
@@ -383,7 +383,7 @@ PHP_FUNCTION(bcmod)
 		goto cleanup;
 	}
 
-	RETVAL_STR(bc_num2str_ex(result, scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
@@ -454,7 +454,7 @@ PHP_FUNCTION(bcpowmod)
 			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 			goto cleanup;
 		case OK:
-			RETVAL_STR(bc_num2str_ex(result, scale));
+			RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
@@ -518,7 +518,7 @@ PHP_FUNCTION(bcpow)
 
 	bc_raise(first, exponent, &result, scale);
 
-	RETVAL_STR(bc_num2str_ex(result, scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 
 	cleanup: {
 		bc_free_num(&first);
@@ -558,7 +558,7 @@ PHP_FUNCTION(bcsqrt)
 	}
 
 	if (bc_sqrt (&result, scale) != 0) {
-		RETVAL_STR(bc_num2str_ex(result, scale));
+		RETVAL_NEW_STR(bc_num2str_ex(result, scale));
 	} else {
 		zend_argument_value_error(1, "must be greater than or equal to 0");
 	}
@@ -631,7 +631,7 @@ static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
 	}
 
 	bc_floor_or_ceil(num, is_floor, &result);
-	RETVAL_STR(bc_num2str_ex(result, 0));
+	RETVAL_NEW_STR(bc_num2str_ex(result, 0));
 
 	cleanup: {
 		bc_free_num(&num);
@@ -692,7 +692,7 @@ PHP_FUNCTION(bcround)
 	}
 
 	bc_round(num, precision, mode, &result);
-	RETVAL_STR(bc_num2str_ex(result, result->n_scale));
+	RETVAL_NEW_STR(bc_num2str_ex(result, result->n_scale));
 
 	cleanup: {
 		bc_free_num(&num);
