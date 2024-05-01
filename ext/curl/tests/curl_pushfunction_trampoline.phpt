@@ -1,9 +1,5 @@
 --TEST--
-Test CURLMOPT_PUSHFUNCTION with non-existent callback function
---CREDITS--
-Davey Shafik
-Kévin Dunglas
-Niels Dossche
+Test trampoline for curl option CURLMOPT_PUSHFUNCTION
 --EXTENSIONS--
 curl
 --SKIPIF--
@@ -17,12 +13,20 @@ if ($curl_version['version_number'] < 0x080100) {
 ?>
 --FILE--
 <?php
-// Test adapted from curl_pushfunction.phpt
+
+class TrampolineTest {
+    public function __call(string $name, array $arguments) {
+        echo 'Trampoline for ', $name, PHP_EOL;
+	    return CURL_PUSH_OK;
+    }
+}
+$o = new TrampolineTest();
+$callback = [$o, 'trampoline'];
 
 $mh = curl_multi_init();
 
 curl_multi_setopt($mh, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
-curl_multi_setopt($mh, CURLMOPT_PUSHFUNCTION, "nonexistent");
+curl_multi_setopt($mh, CURLMOPT_PUSHFUNCTION, $callback);
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "https://localhost/serverpush");
@@ -31,8 +35,9 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
 curl_multi_add_handle($mh, $ch);
 
+$responses = [];
 $active = null;
-while(true) {
+do {
     $status = curl_multi_exec($mh, $active);
 
     do {
@@ -40,15 +45,22 @@ while(true) {
         if (false !== $info && $info['msg'] == CURLMSG_DONE) {
             $handle = $info['handle'];
             if ($handle !== null) {
+		        $responses[] = curl_multi_getcontent($info['handle']);
                 curl_multi_remove_handle($mh, $handle);
                 curl_close($handle);
-                break 2;
             }
         }
     } while ($info);
-}
+} while (count($responses) !== 2);
 
 curl_multi_close($mh);
+
+sort($responses);
+print_r($responses);
 ?>
---EXPECTF--
-Warning: curl_multi_exec(): Cannot call the CURLMOPT_PUSHFUNCTION in %s on line %d
+--EXPECT--
+Array
+(
+    [0] => main response
+    [1] => pushed response
+)
