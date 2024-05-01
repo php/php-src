@@ -10,6 +10,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
           MYSQL_ROOT_PASSWORD: ''
           MYSQL_DATABASE: test
+        command: --mysql_native_password=ON
       - image: postgres:16
         environment:
           POSTGRES_PASSWORD: postgres
