@@ -69,7 +69,7 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 	/* decimal point */
 	decimal_point = (*ptr == '.') ? ptr : NULL;
 
-	/* If a string other than numbers exists */
+	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
 	if (!decimal_point && *ptr != '\0') {
 		goto fail;
 	}
