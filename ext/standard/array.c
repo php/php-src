@@ -6586,7 +6586,6 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 	zend_ulong num_key;
 	zend_string *str_key;
 	zval retval;
-	zval *key;
 	zval args[2];
 	zval *operand;
 	*has_result = false;
@@ -6599,14 +6598,13 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 
 	fci.retval = &retval;
 	fci.param_count = 2;
-	key = &args[1];
 
 	ZEND_HASH_FOREACH_KEY_VAL(array, num_key, str_key, operand) {
 		/* Set up the key */
 		if (!str_key) {
-			ZVAL_LONG(key, num_key);
+			ZVAL_LONG(&args[1], num_key);
 		} else {
-			ZVAL_STR_COPY(key, str_key);
+			ZVAL_STR_COPY(&args[1], str_key);
 		}
 
 		ZVAL_COPY(&args[0], operand);
