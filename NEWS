@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.8
 
+- CGI:
+  . Fixed buffer limit on Windows, replacing read call usage by _read.
+    (David Carlier)
+
 - DOM:
   . Fix crashes when entity declaration is removed while still having entity
     references. (nielsdos)
