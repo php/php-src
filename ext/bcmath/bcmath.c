@@ -193,13 +193,13 @@ static PHP_GSHUTDOWN_FUNCTION(bcmath)
 
 static PHP_RINIT_FUNCTION(bcmath)
 {
-	bcmath_lru_init(&bcmath_globals.lru_cache);
+	bcmath_lru_init(&BCG(lru_cache));
 	return SUCCESS;
 }
 
 static PHP_RSHUTDOWN_FUNCTION(bcmath)
 {
-	bcmath_lru_destroy(&bcmath_globals.lru_cache);
+	bcmath_lru_destroy(&BCG(lru_cache));
 	return SUCCESS;
 }
 
