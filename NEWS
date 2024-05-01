@@ -3,8 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.0alpha1
 
 - BCMath:
-  . [RFC] Add bcfloor, bcceil and bcround to BCMath (Saki Takamachi)
-  . Improve performance (Saki Takamachi)
+  . [RFC] Add bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
+  . Improve performance. (Saki Takamachi, nielsdos)
 
 - Core:
   . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,

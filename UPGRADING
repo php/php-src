@@ -665,6 +665,9 @@ PHP 8.4 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- BCMath:
+  . Improved performance of number conversions.
+
 - Core:
   . Improved the performance of floating point number parsing and formatting in
     ZTS builds under highly concurrent loads. This affects the `printf()` family
