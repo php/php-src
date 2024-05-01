@@ -6657,7 +6657,7 @@ PHP_FUNCTION(array_find)
 	zval *array = NULL;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	bool has_result = NULL;
+	bool has_result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY(array)
@@ -6680,7 +6680,7 @@ PHP_FUNCTION(array_find_key)
 	zval *array = NULL;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	bool has_result = NULL;
+	bool has_result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY(array)
@@ -6703,7 +6703,7 @@ PHP_FUNCTION(array_any)
 	zval *array = NULL;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	bool has_result = NULL;
+	bool has_result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY(array)
@@ -6724,7 +6724,7 @@ PHP_FUNCTION(array_all)
 	zval *array = NULL;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
-	bool has_result = NULL;
+	bool has_result;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ARRAY(array)
