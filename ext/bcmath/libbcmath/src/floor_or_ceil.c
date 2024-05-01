@@ -18,22 +18,19 @@
 #include "private.h"
 #include <stddef.h>
 
-void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
+bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 {
-	/* clear result */
-	bc_free_num(result);
-
 	/*  Initialize result */
-	*result = bc_new_num(num->n_len, 0);
-	(*result)->n_sign = num->n_sign;
+	bc_num result = bc_new_num(num->n_len, 0);
+	result->n_sign = num->n_sign;
 
 	/* copy integer part */
-	memcpy((*result)->n_value, num->n_value, num->n_len);
+	memcpy(result->n_value, num->n_value, num->n_len);
 
 	/* If the number is positive and we are flooring, then nothing else needs to be done.
 	 * Similarly, if the number is negative and we are ceiling, then nothing else needs to be done. */
-	if (num->n_scale == 0 || (*result)->n_sign == (is_floor ? PLUS : MINUS)) {
-		return;
+	if (num->n_scale == 0 || result->n_sign == (is_floor ? PLUS : MINUS)) {
+		return result;
 	}
 
 	/* check fractional part. */
@@ -46,12 +43,12 @@ void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result)
 
 	/* If all digits past the decimal point are 0 */
 	if (count == 0) {
-		return;
+		return result;
 	}
 
 	/* Increment the absolute value of the result by 1 and add sign information */
-	bc_num tmp = _bc_do_add(*result, BCG(_one_), 0);
-	tmp->n_sign = (*result)->n_sign;
-	bc_free_num(result);
-	*result = tmp;
+	bc_num tmp = _bc_do_add(result, BCG(_one_), 0);
+	tmp->n_sign = result->n_sign;
+	bc_free_num(&result);
+	return tmp;
 }

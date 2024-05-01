@@ -611,20 +611,18 @@ PHP_FUNCTION(bccomp)
 static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
 {
 	zend_string *numstr;
-	bc_num num = NULL, result;
+	bc_num num = NULL, result = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(numstr)
 	ZEND_PARSE_PARAMETERS_END();
-
-	bc_init_num(&result);
 
 	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	bc_floor_or_ceil(num, is_floor, &result);
+	result = bc_floor_or_ceil(num, is_floor);
 	RETVAL_NEW_STR(bc_num2str_ex(result, 0));
 
 	cleanup: {
