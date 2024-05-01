@@ -30,6 +30,7 @@
 *************************************************************************/
 
 #include "bcmath.h"
+#include "convert.h"
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -124,24 +125,12 @@ after_fractional:
 		 * If zero_int is true and the str_scale is 0, there is an early return,
 		 * so here str_scale is always greater than 0.
 		 */
-		while (fractional_ptr < fractional_end) {
-			*nptr = CH_VAL(*fractional_ptr);
-			nptr++;
-			fractional_ptr++;
-		}
+		nptr = bc_copy_ch_val(nptr, fractional_ptr, fractional_end);
 	} else {
 		const char *integer_end = integer_ptr + digits;
-		while (integer_ptr < integer_end) {
-			*nptr = CH_VAL(*integer_ptr);
-			nptr++;
-			integer_ptr++;
-		}
+		nptr = bc_copy_ch_val(nptr, integer_ptr, integer_end);
 		if (str_scale > 0) {
-			while (fractional_ptr < fractional_end) {
-				*nptr = CH_VAL(*fractional_ptr);
-				nptr++;
-				fractional_ptr++;
-			}
+			nptr = bc_copy_ch_val(nptr, fractional_ptr, fractional_end);
 		}
 	}
 
