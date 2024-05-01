@@ -61,7 +61,7 @@ bool bc_divmod(bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, size_t scale
 	if (quot) {
 		quotient = bc_copy_num(temp);
 	}
-	bc_multiply(temp, num2, &temp, rscale);
+	bc_multiply_ex(temp, num2, &temp, rscale);
 	bc_sub_ex(num1, temp, rem, rscale);
 	bc_free_num (&temp);
 
