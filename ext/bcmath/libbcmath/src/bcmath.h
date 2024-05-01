@@ -88,7 +88,12 @@ bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent);
 
 void _bc_free_num_ex(bc_num *num, bool persistent);
 
-bc_num bc_copy_num(bc_num num);
+/* Make a copy of a number! Just increments the reference count! */
+static inline bc_num bc_copy_num(bc_num num)
+{
+	num->n_refs++;
+	return num;
+}
 
 void bc_init_num(bc_num *num);
 
