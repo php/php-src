@@ -39,11 +39,11 @@ typedef enum {PLUS, MINUS} sign;
 typedef struct bc_struct *bc_num;
 
 typedef struct bc_struct {
-	size_t n_len;   /* The number of digits before the decimal point. */
-	size_t n_scale; /* The number of digits after the decimal point. */
-	char  *n_value; /* The number. Not zero char terminated. */
-	int    n_refs;  /* The number of pointers to this number. */
-	sign   n_sign;
+	size_t        n_len;   /* The number of digits before the decimal point. */
+	size_t        n_scale; /* The number of digits after the decimal point. */
+	char         *n_value; /* The number. Not zero char terminated. */
+	unsigned int  n_refs;  /* The number of pointers to this number. */
+	sign          n_sign;
 } bc_struct;
 
 #ifdef HAVE_CONFIG_H
