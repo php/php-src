@@ -102,12 +102,13 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 }
 /* }}} */
 
-static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
+static void _pdo_pgsql_notice(void *context, const char *message) /* {{{ */
 {
 	int ret;
 	zval zarg;
 	zval retval;
 	pdo_pgsql_fci * fc;
+	pdo_dbh_t * dbh = (pdo_dbh_t *)context;
 	if ((fc = ((pdo_pgsql_db_handle *)dbh->driver_data)->notice_callback)) {
 		ZVAL_STRINGL(&zarg, (char *) message, strlen(message));
 		fc->fci.param_count = 1;
@@ -1415,7 +1416,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 		goto cleanup;
 	}
 
-	PQsetNoticeProcessor(H->server, (void(*)(void*,const char*))_pdo_pgsql_notice, (void *)dbh);
+	PQsetNoticeProcessor(H->server, _pdo_pgsql_notice, (void *)dbh);
 
 	H->attached = 1;
 	H->pgoid = -1;
