@@ -75,7 +75,7 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 	if (decimal_point) {
 		/* search */
 		fractional_ptr = fractional_end = decimal_point + 1;
-		if (*fractional_ptr == '\0') {
+		if (UNEXPECTED(*fractional_ptr == '\0')) {
 			goto after_fractional;
 		}
 
