@@ -33,17 +33,55 @@
 #include "convert.h"
 #include <stdbool.h>
 #include <stddef.h>
+#ifdef __SSE2__
+# include <emmintrin.h>
+#endif
 
 /* Convert strings to bc numbers.  Base 10 only.*/
+static const char *bc_count_digits(const char *str, const char *end)
+{
+	/* Process in bulk */
+#ifdef __SSE2__
+	const __m128i offset = _mm_set1_epi8((signed char) (SCHAR_MIN - '0'));
+	/* we use the less than comparator, so add 1 */
+	const __m128i threshold = _mm_set1_epi8(SCHAR_MIN + ('9' + 1 - '0'));
+
+	while (str + sizeof(__m128i) <= end) {
+		__m128i bytes = _mm_loadu_si128((const __m128i *) str);
+		/* Wrapping-add the offset to the bytes, such that all bytes below '0' are positive and others are negative.
+		 * More specifically, '0' will be -128 and '9' will be -119. */
+		bytes = _mm_add_epi8(bytes, offset);
+		/* Now mark all bytes that are <= '9', i.e. <= -119, i.e. < -118, i.e. the threshold. */
+		bytes = _mm_cmplt_epi8(bytes, threshold);
+
+		int mask = _mm_movemask_epi8(bytes);
+		if (mask != 0xffff) {
+			/* At least one of the bytes is not within range. Move to the first offending byte. */
+#ifdef PHP_HAVE_BUILTIN_CTZL
+			return str + __builtin_ctz(~mask);
+#else
+			break;
+#endif
+		}
+
+		str += sizeof(__m128i);
+	}
+#endif
+
+	while (*str >= '0' && *str <= '9') {
+		str++;
+	}
+
+	return str;
+}
 
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
-bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
+bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale)
 {
-	size_t digits = 0;
 	size_t str_scale = 0;
-	char *ptr = str;
-	char *fractional_ptr = NULL;
-	char *fractional_end = NULL;
+	const char *ptr = str;
+	const char *fractional_ptr = NULL;
+	const char *fractional_end = NULL;
 	bool zero_int = false;
 
 	ZEND_ASSERT(*num == NULL);
@@ -59,12 +97,10 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 	}
 	const char *integer_ptr = ptr;
 	/* digits before the decimal point */
-	while (*ptr >= '0' && *ptr <= '9') {
-		ptr++;
-		digits++;
-	}
+	ptr = bc_count_digits(ptr, end);
+	size_t digits = ptr - integer_ptr;
 	/* decimal point */
-	char *decimal_point = (*ptr == '.') ? ptr : NULL;
+	const char *decimal_point = (*ptr == '.') ? ptr : NULL;
 
 	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
 	if (!decimal_point && *ptr != '\0') {
@@ -80,14 +116,17 @@ bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale)
 		}
 
 		/* validate */
-		while (*fractional_ptr >= '0' && *fractional_ptr <= '9') {
-			fractional_end = *fractional_ptr != '0' ? fractional_ptr + 1 : fractional_end;
-			fractional_ptr++;
-		}
-		if (*fractional_ptr != '\0') {
+		fractional_end = bc_count_digits(fractional_ptr, end);
+		if (*fractional_end != '\0') {
 			/* invalid num */
 			goto fail;
 		}
+
+		/* Exclude trailing zeros. */
+		while (fractional_end - 1 > decimal_point && fractional_end[-1] == '0') {
+			fractional_end--;
+		}
+
 		/* Move the pointer to the beginning of the fraction. */
 		fractional_ptr = decimal_point + 1;
 

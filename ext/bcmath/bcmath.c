@@ -132,9 +132,9 @@ PHP_MINFO_FUNCTION(bcmath)
 
 /* {{{ php_str2num
    Convert to bc_num detecting scale */
-static zend_result php_str2num(bc_num *num, char *str)
+static zend_result php_str2num(bc_num *num, const zend_string *str)
 {
-	if (!bc_str2num(num, str, 0, true)) {
+	if (!bc_str2num(num, ZSTR_VAL(str), ZSTR_VAL(str) + ZSTR_LEN(str), 0, true)) {
 		return FAILURE;
 	}
 
@@ -167,12 +167,12 @@ PHP_FUNCTION(bcadd)
 		scale = (int) scale_param;
 	}
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&second, right) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -214,12 +214,12 @@ PHP_FUNCTION(bcsub)
 		scale = (int) scale_param;
 	}
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&second, right) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -261,12 +261,12 @@ PHP_FUNCTION(bcmul)
 		scale = (int) scale_param;
 	}
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&second, right) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -310,12 +310,12 @@ PHP_FUNCTION(bcdiv)
 
 	bc_init_num(&result);
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&second, right) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -362,12 +362,12 @@ PHP_FUNCTION(bcmod)
 
 	bc_init_num(&result);
 
-	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&second, ZSTR_VAL(right)) == FAILURE) {
+	if (php_str2num(&second, right) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -415,17 +415,17 @@ PHP_FUNCTION(bcpowmod)
 
 	bc_init_num(&result);
 
-	if (php_str2num(&bc_base, ZSTR_VAL(base_str)) == FAILURE) {
+	if (php_str2num(&bc_base, base_str) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&bc_expo, ZSTR_VAL(exponent_str)) == FAILURE) {
+	if (php_str2num(&bc_expo, exponent_str) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&bc_modulus, ZSTR_VAL(modulus_str)) == FAILURE) {
+	if (php_str2num(&bc_modulus, modulus_str) == FAILURE) {
 		zend_argument_value_error(3, "is not well-formed");
 		goto cleanup;
 	}
@@ -489,12 +489,12 @@ PHP_FUNCTION(bcpow)
 
 	bc_init_num(&result);
 
-	if (php_str2num(&first, ZSTR_VAL(base_str)) == FAILURE) {
+	if (php_str2num(&first, base_str) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (php_str2num(&bc_exponent, ZSTR_VAL(exponent_str)) == FAILURE) {
+	if (php_str2num(&bc_exponent, exponent_str) == FAILURE) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -546,7 +546,7 @@ PHP_FUNCTION(bcsqrt)
 		scale = (int) scale_param;
 	}
 
-	if (php_str2num(&result, ZSTR_VAL(left)) == FAILURE) {
+	if (php_str2num(&result, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
@@ -588,12 +588,12 @@ PHP_FUNCTION(bccomp)
 		scale = (int) scale_param;
 	}
 
-	if (!bc_str2num(&first, ZSTR_VAL(left), scale, false)) {
+	if (!bc_str2num(&first, ZSTR_VAL(left), ZSTR_VAL(left) + ZSTR_LEN(left), scale, false)) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (!bc_str2num(&second, ZSTR_VAL(right), scale, false)) {
+	if (!bc_str2num(&second, ZSTR_VAL(right), ZSTR_VAL(right) + ZSTR_LEN(right), scale, false)) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -617,7 +617,7 @@ static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
 		Z_PARAM_STR(numstr)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
+	if (php_str2num(&num, numstr) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
@@ -678,7 +678,7 @@ PHP_FUNCTION(bcround)
 
 	bc_init_num(&result);
 
-	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
+	if (php_str2num(&num, numstr) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
