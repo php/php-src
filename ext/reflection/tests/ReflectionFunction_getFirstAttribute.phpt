@@ -25,7 +25,9 @@ $function = new ReflectionFunction('foo');
 var_dump($function->getFirstAttribute(Stringable::class));
 ?>
 --EXPECT--
-object(ReflectionAttribute)#2 (0) {
+object(ReflectionAttribute)#2 (1) {
+  ["name"]=>
+  string(11) "AnAttribute"
 }
 string(6) "second"
 string(5) "first"
