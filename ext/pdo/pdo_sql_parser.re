@@ -53,6 +53,11 @@ struct placeholder {
 	struct placeholder *next;
 };
 
+struct custom_quote {
+	const char *pos;
+	size_t len;
+};
+
 static void free_param_name(zval *el) {
 	zend_string_release(Z_PTR_P(el));
 }
@@ -70,6 +75,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string
 	int query_type = PDO_PLACEHOLDER_NONE;
 	struct placeholder *placeholders = NULL, *placetail = NULL, *plc = NULL;
 	int (*scan)(pdo_scanner_t *s);
+	struct custom_quote custom_quote = {NULL, 0};
 
 	scan = stmt->dbh->methods->scanner ? stmt->dbh->methods->scanner : default_scanner;
 
@@ -78,6 +84,25 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string
 
 	/* phase 1: look for args */
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
+		if (custom_quote.pos) {
+			/* Inside a custom quote */
+			if (t == PDO_PARSER_CUSTOM_QUOTE && custom_quote.len == s.cur - s.tok && !strncmp(s.tok, custom_quote.pos, custom_quote.len)) {
+				/* Matching closing quote found, end custom quoting */
+				custom_quote.pos = NULL;
+				custom_quote.len = 0;
+			}
+
+			continue;
+		}
+
+		if (t == PDO_PARSER_CUSTOM_QUOTE) {
+			/* Start of a custom quote, keep a reference to search for the matching closing quote */
+			custom_quote.pos = s.tok;
+			custom_quote.len = s.cur - s.tok;
+
+			continue;
+		}
+
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS || t == PDO_PARSER_ESCAPED_QUESTION) {
 			if (t == PDO_PARSER_ESCAPED_QUESTION && stmt->supports_placeholders == PDO_PLACEHOLDER_POSITIONAL) {
 				/* escaped question marks unsupported, treat as text */

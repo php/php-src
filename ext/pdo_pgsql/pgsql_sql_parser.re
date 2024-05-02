@@ -29,8 +29,10 @@ int pdo_pgsql_scanner(pdo_scanner_t *s)
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
 	ESCQUESTION	= [?][?];
-	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
-	SPECIALS	= [eE:?"'/-];
+	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--".*);
+	DOLQ_START	= [A-Za-z\200-\377_];
+	DOLQ_CONT	= [A-Za-z\200-\377_0-9];
+	SPECIALS	= [$eE:?"'/-];
 	MULTICHAR	= [:]{2,};
 	ANYNOEOF	= [\001-\377];
 	*/
@@ -39,6 +41,7 @@ int pdo_pgsql_scanner(pdo_scanner_t *s)
 		[eE](['](([']['])|([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
 		(["]((["]["])|ANYNOEOF\["])*["])		{ RET(PDO_PARSER_TEXT); }
 		(['](([']['])|ANYNOEOF\['])*['])		{ RET(PDO_PARSER_TEXT); }
+		[$](DOLQ_START DOLQ_CONT*)?[$]			{ RET(PDO_PARSER_CUSTOM_QUOTE); }
 		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
 		ESCQUESTION								{ RET(PDO_PARSER_ESCAPED_QUESTION); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
