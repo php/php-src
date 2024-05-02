@@ -28,7 +28,7 @@
 #ifdef ZEND_CHECK_STACK_LIMIT
 
 typedef struct _zend_call_stack {
-	void *base;
+	void *base; /* high address of the stack */
 	size_t max_size;
 } zend_call_stack;
 

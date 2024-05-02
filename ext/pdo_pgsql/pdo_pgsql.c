@@ -22,7 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
-#include "pdo/php_pdo_int.h"
+#include "pdo/php_pdo_error.h"
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"

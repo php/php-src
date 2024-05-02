@@ -325,6 +325,8 @@ interface DateTimeInterface
     /** @tentative-return-type */
     public function getTimestamp(): int;
 
+    public function getMicrosecond(): int;
+
     /** @tentative-return-type */
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval;
 
@@ -412,6 +414,8 @@ class DateTime implements DateTimeInterface
      */
     public function getOffset(): int {}
 
+    public function getMicrosecond(): int {}
+
     /**
      * @tentative-return-type
      * @alias date_time_set
@@ -435,6 +439,8 @@ class DateTime implements DateTimeInterface
      * @alias date_timestamp_set
      */
     public function setTimestamp(int $timestamp): DateTime {}
+
+    public function setMicrosecond(int $microsecond): static {}
 
     /**
      * @tentative-return-type
@@ -504,6 +510,11 @@ class DateTimeImmutable implements DateTimeInterface
     public function getTimestamp(): int {}
 
     /**
+     * @alias DateTime::getMicrosecond
+     */
+    public function getMicrosecond(): int {}
+
+    /**
      * @tentative-return-type
      * @alias date_diff
      */
@@ -532,6 +543,8 @@ class DateTimeImmutable implements DateTimeInterface
 
     /** @tentative-return-type */
     public function setTimestamp(int $timestamp): DateTimeImmutable {}
+
+    public function setMicrosecond(int $microsecond): static {}
 
     /** @tentative-return-type */
     public static function createFromMutable(DateTime $object): static {}

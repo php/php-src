@@ -315,14 +315,8 @@ static void _close_pgsql_plink(zend_resource *rsrc)
 		PQclear(res);
 	}
 	PQfinish(link);
-	/* See https://github.com/php/php-src/issues/12974 why we need to check the if */
-#ifdef ZTS
-	if (pgsql_module_entry.module_started)
-#endif
-	{
-		PGG(num_persistent)--;
-		PGG(num_links)--;
-	}
+	PGG(num_persistent)--;
+	PGG(num_links)--;
 	rsrc->ptr = NULL;
 }
 
@@ -566,6 +560,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* try to find if we already have this link in our persistent list */
 		if ((le = zend_hash_find_ptr(&EG(persistent_list), str.s)) == NULL) {  /* we don't */
+newpconn:
 			if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 				php_error_docref(NULL, E_WARNING,
 								 "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
@@ -596,6 +591,18 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		} else {  /* we do */
 			if (le->type != le_plink) {
 				goto err;
+			}
+			if (connect_type & PGSQL_CONNECT_FORCE_NEW) {
+				PGresult *pg_result;
+
+				while ((pg_result = PQgetResult(le->ptr))) {
+					PQclear(pg_result);
+				}
+				PQfinish(le->ptr);
+				le->ptr = NULL;
+				PGG(num_links)--;
+				PGG(num_persistent)--;
+				goto newpconn;
 			}
 			/* ensure that the link did not die */
 			if (PGG(auto_reset_persistent) & 1) {
@@ -1290,7 +1297,7 @@ PHP_FUNCTION(pg_execute)
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
-
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
@@ -3717,7 +3724,7 @@ PHP_FUNCTION(pg_send_query_params)
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
-
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
@@ -3884,7 +3891,7 @@ PHP_FUNCTION(pg_send_execute)
 		params = (char **)safe_emalloc(sizeof(char *), num_params, 0);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
-
+			ZVAL_DEREF(tmp);
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {

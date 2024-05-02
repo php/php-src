@@ -64,6 +64,7 @@ function get_matrix_include(array $branches) {
             'debug' => true,
             'zts' => true,
             'configuration_parameters' => "CFLAGS='-DZEND_RC_DEBUG=1 -DPROFITABILITY_CHECKS=0 -DZEND_VERIFY_FUNC_INFO=1 -DZEND_VERIFY_TYPE_INFERENCE'",
+                'run_tests_parameters' => '-d zend_test.observer.enabled=1 -d zend_test.observer.show_output=0',
             'timeout_minutes' => 360,
             'test_function_jit' => true,
             'asan' => false,
@@ -100,8 +101,9 @@ function get_macos_matrix_include(array $branches) {
                     'branch' => $branch,
                     'debug' => $debug,
                     'zts' => $zts,
-                    'os' => $branch === 'master' ? '13' : '12',
+                    'os' => $branch['name'] === 'master' ? '13' : '12',
                     'arch' => 'X64',
+                    'test_jit' => true,
                 ];
                 if ($branch['version']['minor'] >= 4 || $branch['version']['major'] >= 9) {
                     $jobs[] = [
@@ -110,6 +112,7 @@ function get_macos_matrix_include(array $branches) {
                         'zts' => $zts,
                         'os' => '14',
                         'arch' => 'ARM64',
+                        'test_jit' => !$zts,
                     ];
                 }
             }

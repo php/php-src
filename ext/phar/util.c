@@ -1890,6 +1890,13 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			}
 
 			md_ctx = EVP_MD_CTX_create();
+			if (md_ctx == NULL) {
+				EVP_PKEY_free(key);
+				if (error) {
+					spprintf(error, 0, "unable to initialize openssl signature for phar \"%s\"", phar->fname);
+				}
+				return FAILURE;
+			}
 
 			siglen = EVP_PKEY_size(key);
 			sigbuf = emalloc(siglen + 1);

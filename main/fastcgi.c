@@ -681,12 +681,7 @@ int fcgi_listen(const char *path, int backlog)
 		if (!*host || !strncmp(host, "*", sizeof("*")-1)) {
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
 		} else {
-#ifdef HAVE_INET_PTON
 			if (!inet_pton(AF_INET, host, &sa.sa_inet.sin_addr)) {
-#else
-			sa.sa_inet.sin_addr.s_addr = inet_addr(host);
-			if (sa.sa_inet.sin_addr.s_addr == INADDR_NONE) {
-#endif
 				struct hostent *hep;
 
 				if(strlen(host) > MAXFQDNLEN) {
@@ -963,9 +958,9 @@ static inline ssize_t safe_read(fcgi_request *req, const void *buf, size_t count
 		tmp = count - n;
 
 		if (!req->tcp) {
-			unsigned int in_len = tmp > UINT_MAX ? UINT_MAX : (unsigned int)tmp;
+			unsigned int in_len = tmp > INT_MAX ? INT_MAX : (unsigned int)tmp;
 
-			ret = read(req->fd, ((char*)buf)+n, in_len);
+			ret = _read(req->fd, ((char*)buf)+n, in_len);
 		} else {
 			int in_len = tmp > INT_MAX ? INT_MAX : (int)tmp;
 

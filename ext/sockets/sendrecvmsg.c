@@ -123,7 +123,7 @@ static void init_ancillary_registry(void)
 #endif
 
 #ifdef SO_PASSCRED
-#ifdef ANC_CREDS_UCRED
+#ifdef HAVE_STRUCT_UCRED
 	PUT_ENTRY(sizeof(struct ucred), 0, 0, from_zval_write_ucred,
 			to_zval_read_ucred, SOL_SOCKET, SCM_CREDENTIALS);
 #else
@@ -326,7 +326,7 @@ PHP_FUNCTION(socket_cmsg_space)
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
 }
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 int php_do_setsockopt_ipv6_rfc3542(php_socket *php_sock, int level, int optname, zval *arg4)
 {
 	struct err_s	err = {0};

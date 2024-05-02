@@ -1239,7 +1239,7 @@ lxb_dom_node_text_content_set(lxb_dom_node_t *node,
 }
 
 bool
-lxb_dom_node_is_empty(lxb_dom_node_t *root)
+lxb_dom_node_is_empty(const lxb_dom_node_t *root)
 {
     lxb_char_t chr;
     lexbor_str_t *str;

@@ -93,14 +93,9 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
-EXTENSION:           oci8
-PRIMARY MAINTAINER:  Christopher Jones <sixd@php.net> (2007 - 2017)
-                     Antony Dovgal <tony2001@php.net> (2003 - 2009)
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
 EXTENSION:           odbc
 PRIMARY MAINTAINER:  Daniel R. Kalowsky <kalowsky@php.net> (2000 - 2004)
+                     Calvin Buckley <calvin@cmpct.info> (2024 - )
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Working
@@ -134,14 +129,8 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_odbc
-PRIMARY MAINTAINER:  Unknown
-MAINTENANCE:         Odd fixes
-STATUS:              Working
-SINCE:               5.1
--------------------------------------------------------------------------------
-EXTENSION:           pdo_oci
-PRIMARY MAINTAINER:  Christopher Jones <sixd@php.net> (2007 - 2017)
-MAINTENANCE:         Odd fixes
+PRIMARY MAINTAINER:  Calvin Buckley <calvin@cmpct.info> (2024 - )
+MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------

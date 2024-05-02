@@ -35,9 +35,9 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || \
-    defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || \
-    defined(__sun)
+#if (defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)) || \
+    defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || \
+    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun)
 # include <pthread.h>
 #endif
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -68,6 +68,7 @@ typedef int boolean_t;
 #include <sys/lwp.h>
 #include <sys/procfs.h>
 #include <libproc.h>
+#include <thread.h>
 #endif
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -312,6 +313,7 @@ static bool zend_call_stack_get_freebsd_sysctl(zend_call_stack *stack)
 	int mib[2] = {CTL_KERN, KERN_USRSTACK};
 	size_t len = sizeof(stack_base);
 	struct rlimit rlim;
+	size_t numguards = 0;
 
 	/* This method is relevant only for the main thread */
 	ZEND_ASSERT(zend_call_stack_is_main_thread());
@@ -328,7 +330,13 @@ static bool zend_call_stack_get_freebsd_sysctl(zend_call_stack *stack)
 		return false;
 	}
 
-	size_t guard_size = getpagesize();
+	len = sizeof(numguards);
+	/* For most of the cases, we do not necessarily need to do so as, by default, it is `1` page, but is user writable */
+	if (sysctlbyname("security.bsd.stack_guard_page", &numguards, &len, NULL, 0) != 0) {
+		return false;
+	}
+
+	size_t guard_size = numguards * getpagesize();
 
 	stack->base = stack_base;
 	stack->max_size = rlim.rlim_cur - guard_size;
@@ -427,7 +435,9 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 	void *base = pthread_get_stackaddr_np(pthread_self());
 	size_t max_size;
 
-	if (pthread_main_np()) {
+#if !defined(__aarch64__)
+	if (pthread_main_np())
+	{
 		/* pthread_get_stacksize_np() returns a too low value for the main
 		 * thread in OSX 10.9, 10.10:
 		 * https://mail.openjdk.org/pipermail/hotspot-dev/2013-October/011353.html
@@ -437,7 +447,10 @@ static bool zend_call_stack_get_macos(zend_call_stack *stack)
 		/* Stack size is 8MiB by default for main threads
 		 * https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/CreatingThreads/CreatingThreads.html */
 		max_size = 8 * 1024 * 1024;
-	} else {
+	}
+	else
+#endif
+	{
 		max_size = pthread_get_stacksize_np(pthread_self());
 	}
 
@@ -661,32 +674,13 @@ static bool zend_call_stack_get_netbsd(zend_call_stack *stack)
 #if defined(__sun)
 static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 {
-	pthread_attr_t attr;
-	int error;
-	void *addr;
-	size_t max_size, guard_size;
-
-	error = pthread_attr_get_np(pthread_self(), &attr);
-	if (error) {
+	stack_t s;
+	if (thr_stksegment(&s) < 0) {
 		return false;
 	}
 
-	error = pthread_attr_getstack(&attr, &addr, &max_size);
-	if (error) {
-		return false;
-	}
-
-	error = pthread_attr_getguardsize(&attr, &guard_size);
-	if (error) {
-		return false;
-	}
-
-	addr = (char *)addr + guard_size;
-	max_size -= guard_size;
-
-	stack->base = (char *)addr + max_size;
-	stack->max_size = max_size;
-
+	stack->max_size = s.ss_size;
+	stack->base = s.ss_sp;
 	return true;
 }
 
@@ -711,7 +705,7 @@ static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 	}
 
 	size = (1 << 20);
-	snprintf(path, sizeof(path), "/proc/%d/map", pid);
+	snprintf(path, sizeof(path), "/proc/%d/map", (int)pid);
 
 	if ((fd = open(path, O_RDONLY)) == -1) {
 		Prelease(proc, 0);

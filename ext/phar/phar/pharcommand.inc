@@ -630,15 +630,15 @@ class PharCommand extends CLICommand
      * This function will take a directory and iterate through
      * it and get the files to insert into the Phar archive.
      *
-     * @param Phar        $phar      The phar object.
-     * @param string      $input     The input directory
-     * @param string      $regex     The regex used in RegexIterator.
-     * @param string      $invregex  The InvertedRegexIterator expression.
-     * @param SplFileInfo $stub Stub file object
-     * @param mixed       $compress  Compression algorithm or NULL
-     * @param boolean     $noloader  Whether to prevent adding the loader
+     * @param Phar         $phar      The phar object.
+     * @param string       $input     The input directory
+     * @param string       $regex     The regex used in RegexIterator.
+     * @param string       $invregex  The InvertedRegexIterator expression.
+     * @param ?SplFileInfo $stub Stub file object
+     * @param mixed        $compress  Compression algorithm or NULL
+     * @param boolean      $noloader  Whether to prevent adding the loader
      */
-    static function phar_add(Phar $phar, $level, $input, $regex, $invregex, SplFileInfo $stub = NULL, $compress = NULL, $noloader = false)
+    static function phar_add(Phar $phar, $level, $input, $regex, $invregex, ?SplFileInfo $stub, $compress = NULL, $noloader = false)
     {
         if ($input && is_file($input) && !is_dir($input)) {
             return self::phar_add_file($phar, $level, $input, $input, $compress);

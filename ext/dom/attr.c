@@ -24,6 +24,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 
 #include "php_dom.h"
+#include "dom_properties.h"
 
 /*
 * class DOMAttr extends DOMNode
@@ -47,16 +48,16 @@ PHP_METHOD(DOMAttr, __construct)
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
 
-	name_valid = xmlValidateName((xmlChar *) name, 0);
+	name_valid = xmlValidateName(BAD_CAST name, 0);
 	if (name_valid != 0) {
-		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
+		php_dom_throw_error(INVALID_CHARACTER_ERR, true);
 		RETURN_THROWS();
 	}
 
-	nodep = xmlNewProp(NULL, (xmlChar *) name, (xmlChar *) value);
+	nodep = xmlNewProp(NULL, BAD_CAST name, BAD_CAST value);
 
 	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
+		php_dom_throw_error(INVALID_STATE_ERR, true);
 		RETURN_THROWS();
 	}
 
@@ -72,20 +73,19 @@ PHP_METHOD(DOMAttr, __construct)
 /* {{{ name	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
+Modern spec URL: https://dom.spec.whatwg.org/#dom-attr-name
 Since:
 */
 zend_result dom_attr_name_read(dom_object *obj, zval *retval)
 {
-	xmlAttrPtr attrp;
+	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
 
-	attrp = (xmlAttrPtr) dom_object_get_node(obj);
-
-	if (attrp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
+	if (php_dom_follow_spec_intern(obj)) {
+		zend_string *str = dom_node_get_node_name_attribute_or_element((xmlNodePtr) attrp, false);
+		ZVAL_NEW_STR(retval, str);
+	} else {
+		ZVAL_STRING(retval, (char *) attrp->name);
 	}
-
-	ZVAL_STRING(retval, (char *) attrp->name);
 
 	return SUCCESS;
 }
@@ -99,7 +99,7 @@ Since:
 */
 zend_result dom_attr_specified_read(dom_object *obj, zval *retval)
 {
-	/* TODO */
+	/* From spec: "useless; always returns true" */
 	ZVAL_TRUE(retval);
 	return SUCCESS;
 }
@@ -113,41 +113,27 @@ Since:
 */
 zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 {
-	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
-	xmlChar *content;
-
-	if (attrp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
-	/* Can't avoid a content copy because it's an attribute node */
-	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_STRING(retval, (char *) content);
-		xmlFree(content);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, attrp, obj);
+	php_dom_get_content_into_zval(attrp, retval, false);
 	return SUCCESS;
-
 }
 
 zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 {
-	xmlAttrPtr attrp = (xmlAttrPtr) dom_object_get_node(obj);
-
-	if (attrp == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 	zend_string *str = Z_STR_P(newval);
 
 	dom_remove_all_children((xmlNodePtr) attrp);
-	xmlNodeSetContentLen((xmlNodePtr) attrp, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str));
+
+	if (php_dom_follow_spec_intern(obj)) {
+		xmlNodePtr node = xmlNewDocTextLen(attrp->doc, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
+		xmlAddChild((xmlNodePtr) attrp, node);
+	} else {
+		xmlNodeSetContentLen((xmlNodePtr) attrp, BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str));
+	}
 
 	return SUCCESS;
 }
@@ -161,16 +147,9 @@ Since: DOM Level 2
 */
 zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 {
-	xmlNodePtr nodep, nodeparent;
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	nodep = dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
-
-	nodeparent = nodep->parent;
+	xmlNodePtr nodeparent = nodep->parent;
 	if (!nodeparent) {
 		ZVAL_NULL(retval);
 		return SUCCESS;
@@ -178,7 +157,6 @@ zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 
 	php_dom_create_object(nodeparent, retval, obj);
 	return SUCCESS;
-
 }
 
 /* }}} */
@@ -220,5 +198,46 @@ PHP_METHOD(DOMAttr, isId)
 	}
 }
 /* }}} end dom_attr_is_id */
+
+xmlChar *dom_attr_value(const xmlAttr *attr, bool *free)
+{
+	/* For attributes we can have an optimized fast-path.
+	 * This fast-path is only possible in the (common) case where the attribute
+	 * has a single text child. Note that if the child or the content is NULL, this
+	 * is equivalent to not having content (i.e. the attribute has the empty string as value). */
+
+	*free = false;
+
+	if (attr->children == NULL) {
+		return BAD_CAST "";
+	}
+
+	if (attr->children->type == XML_TEXT_NODE && attr->children->next == NULL) {
+		if (attr->children->content == NULL) {
+			return BAD_CAST "";
+		} else {
+			return attr->children->content;
+		}
+	}
+
+	xmlChar *value = xmlNodeGetContent((const xmlNode *) attr);
+	if (UNEXPECTED(value == NULL)) {
+		return BAD_CAST "";
+	}
+
+	*free = true;
+	return value;
+}
+
+bool dom_compare_value(const xmlAttr *attr, const xmlChar *value)
+{
+	bool free;
+	xmlChar *attr_value = dom_attr_value(attr, &free);
+	bool result = xmlStrEqual(attr_value, value);
+	if (free) {
+		xmlFree(attr_value);
+	}
+	return result;
+}
 
 #endif

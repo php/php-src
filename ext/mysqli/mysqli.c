@@ -49,7 +49,7 @@ static PHP_GINIT_FUNCTION(mysqli);
 	} \
 }
 
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 static HashTable classes;
 static zend_object_handlers mysqli_object_handlers;

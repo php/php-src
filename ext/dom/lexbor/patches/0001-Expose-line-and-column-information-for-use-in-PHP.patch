@@ -1,4 +1,4 @@
-From faee2893e499bdcaa3a511bcff197366b8a87968 Mon Sep 17 00:00:00 2001
+From 9d60c0fda0b51e9374a234c48df36130d2c988ee Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Sat, 26 Aug 2023 15:08:59 +0200
 Subject: [PATCH] Expose line and column information for use in PHP
@@ -6,13 +6,13 @@ Subject: [PATCH] Expose line and column information for use in PHP
 ---
  source/lexbor/dom/interfaces/node.h  |  2 ++
  source/lexbor/html/token.h           |  2 ++
- source/lexbor/html/tokenizer.c       | 22 +++++++++++++++++++++-
+ source/lexbor/html/tokenizer.c       | 24 +++++++++++++++++++++++-
  source/lexbor/html/tokenizer.h       |  2 ++
  source/lexbor/html/tokenizer/state.h |  2 ++
  source/lexbor/html/tree.c            | 11 +++++++++++
  source/lexbor/html/tree/error.c      |  5 +++--
  source/lexbor/html/tree/error.h      |  5 +++--
- 8 files changed, 46 insertions(+), 5 deletions(-)
+ 8 files changed, 48 insertions(+), 5 deletions(-)
 
 diff --git a/source/lexbor/dom/interfaces/node.h b/source/lexbor/dom/interfaces/node.h
 index 4a10197..ff9c924 100755
@@ -41,7 +41,7 @@ index 79accd0..0b7f4fd 100755
      const lxb_char_t      *text_start;
      const lxb_char_t      *text_end;
 diff --git a/source/lexbor/html/tokenizer.c b/source/lexbor/html/tokenizer.c
-index 741bced..a399758 100755
+index 741bced..0bd9aec 100755
 --- a/source/lexbor/html/tokenizer.c
 +++ b/source/lexbor/html/tokenizer.c
 @@ -91,6 +91,7 @@ lxb_html_tokenizer_init(lxb_html_tokenizer_t *tkz)
@@ -61,17 +61,18 @@ index 741bced..a399758 100755
  
      return LXB_STATUS_OK;
  }
-@@ -312,7 +315,24 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
+@@ -312,7 +315,26 @@ lxb_html_tokenizer_chunk(lxb_html_tokenizer_t *tkz, const lxb_char_t *data,
      tkz->last = end;
  
      while (data < end) {
 -        data = tkz->state(tkz, data, end);
++        size_t current_column = tkz->current_column;
 +        const lxb_char_t *new_data = tkz->state(tkz, data, end);
 +        while (data < new_data) {
 +            /* Codepoints < 0x80 are encoded the same as their ASCII counterpart, so '\n' will uniquely identify a newline. */
 +            if (*data == '\n') {
 +                tkz->current_line++;
-+                tkz->current_column = 0;
++                current_column = 0;
 +            } else {
 +                /* Other characters can be mapped back to the unicode codepoint offset because UTF-8 is a prefix code.
 +                 * Continuation bytes start with 0b10XXXXXX so we can skip those to only get the start of an encoded code point. */
@@ -79,11 +80,12 @@ index 741bced..a399758 100755
 +                    /* Continuation byte, do nothing */
 +                } else {
 +                    /* First byte for a codepoint */
-+                    tkz->current_column++;
++                    current_column++;
 +                }
 +            }
 +            data++;
 +        }
++        tkz->current_column = current_column;
      }
  
      return tkz->status;
@@ -182,5 +184,5 @@ index 2fd06cb..ed1859f 100755
  lxb_html_tree_error_t;
  
 -- 
-2.41.0
+2.43.0
 

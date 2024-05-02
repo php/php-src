@@ -243,6 +243,11 @@ static int zend_jit_is_constant_cmp_long_long(const zend_op  *opline,
 	return 0;
 }
 
+#define ADVANCE_SSA_OP(ssa_op, offset) \
+	do { \
+		if (ssa_op) ssa_op += offset; \
+	} while (0)
+
 static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, const zend_ssa_op *ssa_op, const zend_op *opline, int call_level, zend_jit_trace_rec *trace)
 {
 	int skip;
@@ -250,7 +255,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	if (trace) {
 		zend_jit_trace_rec *p = trace;
 
-		ssa_op++;
+		ADVANCE_SSA_OP(ssa_op, 1);
 		while (1) {
 			if (p->op == ZEND_JIT_TRACE_VM) {
 				switch (p->opline->opcode) {
@@ -282,6 +287,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_FE_FETCH_R:
 					case ZEND_FE_FETCH_RW:
 					case ZEND_BIND_INIT_STATIC_OR_JMP:
+					case ZEND_JMP_FRAMELESS:
 						return 1;
 					case ZEND_DO_ICALL:
 					case ZEND_DO_UCALL:
@@ -304,7 +310,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 							return 1;
 						}
 				}
-				ssa_op += zend_jit_trace_op_len(opline);
+				ADVANCE_SSA_OP(ssa_op, zend_jit_trace_op_len(opline));
 			} else if (p->op == ZEND_JIT_TRACE_ENTER ||
 			           p->op == ZEND_JIT_TRACE_BACK ||
 			           p->op == ZEND_JIT_TRACE_END) {
@@ -318,7 +324,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 		const zend_op *end = op_array->opcodes + op_array->last;
 
 		opline++;
-		ssa_op++;
+		ADVANCE_SSA_OP(ssa_op, 1);
 		skip = (call_level == 1);
 		while (opline != end) {
 			if (!skip) {
@@ -365,6 +371,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
 				case ZEND_BIND_INIT_STATIC_OR_JMP:
+				case ZEND_JMP_FRAMELESS:
 					return 1;
 				case ZEND_DO_ICALL:
 				case ZEND_DO_UCALL:
@@ -379,7 +386,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					return 0;
 			}
 			opline++;
-			ssa_op++;
+			ADVANCE_SSA_OP(ssa_op, 1);
 		}
 
 		return 1;
@@ -393,7 +400,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 		}
 
 		opline++;
-		ssa_op++;
+		ADVANCE_SSA_OP(ssa_op, 1);
 		skip = (call_level == 1);
 		while (opline != end) {
 			if (skip) {
@@ -419,7 +426,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				}
 			}
 			opline++;
-			ssa_op++;
+			ADVANCE_SSA_OP(ssa_op, 1);
 		}
 
 		return 0;
@@ -439,7 +446,7 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
 			if (ZEND_TYPE_IS_ONLY_MASK(arg_info->type)) {
 				zend_op *opline = call_info->arg_info[num_args].opline;
-				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+				zend_ssa_op *ssa_op = ssa->ops ? &ssa->ops[opline - op_array->opcodes] : NULL;
 				uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
 				if ((OP1_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
 					break;
@@ -2557,6 +2564,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto jit_failure;
 					}
 					break;
+				case ZEND_JMP_FRAMELESS:
+					if (!zend_jit_jmp_frameless(&ctx, opline, /* exit_addr */ NULL, /* guard */ 0)) {
+						goto jit_failure;
+					}
+					break;
 				case ZEND_NEW:
 					if (!zend_jit_handler(&ctx, opline, 1)) {
 						return 0;
@@ -2594,6 +2606,23 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						call_level--;
 					}
 					break;
+				case ZEND_FRAMELESS_ICALL_0:
+					jit_frameless_icall0(jit, opline);
+					goto done;
+				case ZEND_FRAMELESS_ICALL_1:
+					op1_info = OP1_INFO();
+					jit_frameless_icall1(jit, opline, op1_info);
+					goto done;
+				case ZEND_FRAMELESS_ICALL_2:
+					op1_info = OP1_INFO();
+					op2_info = OP2_INFO();
+					jit_frameless_icall2(jit, opline, op1_info, op2_info);
+					goto done;
+				case ZEND_FRAMELESS_ICALL_3:
+					op1_info = OP1_INFO();
+					op2_info = OP2_INFO();
+					jit_frameless_icall3(jit, opline, op1_info, op2_info, OP1_DATA_INFO());
+					goto done;
 				default:
 					if (!zend_jit_handler(&ctx, opline,
 							zend_may_throw(opline, ssa_op, op_array, ssa))) {

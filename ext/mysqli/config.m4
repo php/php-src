@@ -64,7 +64,6 @@ if test "$PHP_MYSQLI" != "no"; then
                   mysqli_report.c mysqli_driver.c mysqli_warning.c \
                   mysqli_exception.c mysqli_result_iterator.c"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
-  PHP_SUBST(MYSQLI_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([ext/mysqli], [php_mysqli_structs.h mysqli_mysqlnd.h])
   PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
 fi

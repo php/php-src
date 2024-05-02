@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2021 Alexander Borisov
+ * Copyright (C) 2018-2024 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -631,6 +631,12 @@ lxb_html_document_style_remove_by_rule_cb(lxb_dom_node_t *node,
     lxb_css_rule_style_t *style = ctx;
     lxb_html_document_remove_ctx_t context;
 
+    /* FIXME: we don't have support for anything other than HTML. */
+
+    if (node->ns != LXB_NS_HTML) {
+        return LXB_STATUS_OK;
+    }
+
     el = lxb_html_interface_element(node);
 
     if (el->style == NULL) {
@@ -654,6 +660,10 @@ lxb_html_document_style_remove_avl_cb(lexbor_avl_t *avl,
     lxb_html_document_remove_ctx_t *context = ctx;
     lxb_html_style_node_t *style = (lxb_html_style_node_t *) node;
 
+    if (context->list == NULL) {
+        return LXB_STATUS_OK;
+    }
+
     lxb_html_element_style_remove_by_list(context->doc, root,
                                           style, context->list);
     return LXB_STATUS_OK;
@@ -666,8 +676,10 @@ lxb_html_document_style_attach_by_element(lxb_html_document_t *document,
 {
     lxb_html_document_css_t *css = &document->css;
 
-    return lxb_selectors_find_reverse(css->selectors, lxb_dom_interface_node(element),
-                              style->selector, lxb_html_document_style_cb, style);
+    return lxb_selectors_match_node(css->selectors,
+                                    lxb_dom_interface_node(element),
+                                    style->selector,
+                                    lxb_html_document_style_cb, style);
 }
 
 static lxb_status_t
@@ -679,6 +691,12 @@ lxb_html_document_style_cb(lxb_dom_node_t *node,
     // FIXME: we don't have support for anything other than HTML.
 
     if (node->ns != LXB_NS_HTML) {
+        return LXB_STATUS_OK;
+    }
+
+    /* Valid behavior when there are no declarations in the style. */
+
+    if (style->declarations == NULL) {
         return LXB_STATUS_OK;
     }
 
@@ -811,12 +829,14 @@ lxb_html_document_parse_fragment_chunk_begin(lxb_html_document_t *document,
                                              lxb_dom_element_t *element)
 {
     lxb_status_t status;
-    lxb_html_parser_t *parser = document->dom_document.parser;
+    lxb_html_parser_t *parser;
 
     status = lxb_html_document_parser_prepare(document);
     if (status != LXB_STATUS_OK) {
         return status;
     }
+
+    parser = document->dom_document.parser;
 
     return lxb_html_parse_fragment_chunk_begin(parser, document,
                                                element->node.local_name,

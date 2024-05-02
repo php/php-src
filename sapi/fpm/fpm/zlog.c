@@ -25,6 +25,7 @@
 #define EXTRA_SPACE_FOR_PREFIX 128
 
 static int zlog_fd = -1;
+static bool zlog_fd_is_stderr = false;
 static int zlog_level = ZLOG_NOTICE;
 static int zlog_limit = ZLOG_DEFAULT_LIMIT;
 static zlog_bool zlog_buffering = ZLOG_DEFAULT_BUFFERING;
@@ -88,11 +89,13 @@ size_t zlog_print_time(struct timeval *tv, char *timebuf, size_t timebuf_len) /*
 }
 /* }}} */
 
-int zlog_set_fd(int new_fd) /* {{{ */
+int zlog_set_fd(int new_fd, zlog_bool is_stderr) /* {{{ */
 {
 	int old_fd = zlog_fd;
 
 	zlog_fd = new_fd;
+	zlog_fd_is_stderr = is_stderr;
+
 	return old_fd;
 }
 /* }}} */
@@ -244,7 +247,7 @@ void vzlog(const char *function, int line, int flags, const char *fmt, va_list a
 		zend_quiet_write(zlog_fd > -1 ? zlog_fd : STDERR_FILENO, buf, len);
 	}
 
-	if (zlog_fd != STDERR_FILENO && zlog_fd != -1 &&
+	if (!zlog_fd_is_stderr && zlog_fd != -1 &&
 			!launched && (flags & ZLOG_LEVEL_MASK) >= ZLOG_NOTICE) {
 		zend_quiet_write(STDERR_FILENO, buf, len);
 	}

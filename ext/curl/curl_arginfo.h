@@ -138,7 +138,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(curl_close);
 ZEND_FUNCTION(curl_copy_handle);
 ZEND_FUNCTION(curl_errno);
@@ -174,7 +173,6 @@ ZEND_FUNCTION(curl_share_setopt);
 ZEND_FUNCTION(curl_share_strerror);
 ZEND_FUNCTION(curl_strerror);
 ZEND_FUNCTION(curl_version);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_close, arginfo_curl_close)
@@ -215,16 +213,13 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_CurlHandle_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_CurlMultiHandle_methods[] = {
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_CurlShareHandle_methods[] = {
 	ZEND_FE_END

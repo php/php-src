@@ -2,7 +2,7 @@ name: Push
 on:
   push:
     paths-ignore:
-      - docs/*
+      - docs/**
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
@@ -11,8 +11,8 @@ on:
       - CODING_STANDARDS.md
       - .cirrus.yml
       - .travis.yml
-      - travis/*
-      - .circleci/*
+      - travis/**
+      - .circleci/**
     branches:
       - PHP-8.1
       - PHP-8.2
@@ -20,7 +20,7 @@ on:
       - master
   pull_request:
     paths-ignore:
-      - docs/*
+      - docs/**
       - NEWS
       - UPGRADING
       - UPGRADING.INTERNALS
@@ -29,8 +29,8 @@ on:
       - CODING_STANDARDS.md
       - .cirrus.yml
       - .travis.yml
-      - travis/*
-      - .circleci/*
+      - travis/**
+      - .circleci/**
     branches:
       - '**'
 permissions:
@@ -43,6 +43,7 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:
       mysql:
         image: mysql:8
@@ -79,7 +80,9 @@ jobs:
             zts: true
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-${{ !matrix.asan && '22' || '20' }}.04
+    container:
+      image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -88,6 +91,7 @@ jobs:
       - name: LLVM 16 (ASAN-only)
         if: ${{ matrix.asan }}
         run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y lsb-release wget software-properties-common gnupg
           wget https://apt.llvm.org/llvm.sh
           chmod u+x llvm.sh
           sudo ./llvm.sh 16
@@ -102,9 +106,6 @@ jobs:
       - name: Create MSSQL container
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/setup-mssql
-      - name: Create Oracle container
-        if: ${{ !matrix.asan }}
-        uses: ./.github/actions/setup-oracle
       - name: Setup Caddy server
         uses: ./.github/actions/setup-caddy
       - name: ccache
@@ -121,7 +122,7 @@ jobs:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow" CC=clang-16 CXX=clang++-16' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang-16 CXX=clang++-16' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -148,6 +149,7 @@ jobs:
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
   MACOS_DEBUG_NTS:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -189,6 +191,7 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
@@ -215,13 +218,17 @@ jobs:
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
     name: BENCHMARKING
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
+      # and other operations, so we disable it during benchmarking.
+      - name: Disable ASLR
+        run: echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
       - name: apt
         run: |
           set -x

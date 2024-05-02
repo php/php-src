@@ -1335,12 +1335,6 @@ static void php_html_entities(INTERNAL_FUNCTION_PARAMETERS, int all)
 }
 /* }}} */
 
-/* {{{ register_html_constants */
-void register_html_constants(INIT_FUNC_ARGS)
-{
-}
-/* }}} */
-
 /* {{{ Convert special characters to HTML entities */
 PHP_FUNCTION(htmlspecialchars)
 {

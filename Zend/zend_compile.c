@@ -35,6 +35,7 @@
 #include "zend_enum.h"
 #include "zend_observer.h"
 #include "zend_call_stack.h"
+#include "zend_frameless_function.h"
 
 #define SET_NODE(target, src) do { \
 		target ## _type = (src)->op_type; \
@@ -324,6 +325,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 	CG(context).last_brk_cont = 0;
 	CG(context).brk_cont_array = NULL;
 	CG(context).labels = NULL;
+	CG(context).in_jmp_frameless_branch = false;
 }
 /* }}} */
 
@@ -787,7 +789,15 @@ static void zend_do_free(znode *op1) /* {{{ */
 			if (opline->opcode == ZEND_FETCH_THIS) {
 				opline->opcode = ZEND_NOP;
 			}
-			SET_UNUSED(opline->result);
+			if (!ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) {
+				SET_UNUSED(opline->result);
+			} else {
+				/* Frameless calls usually use the return value, so always emit a free. This should be
+				 * faster than checking RETURN_VALUE_USED inside the handler. */
+				// FIXME: We may actually look at the function signature to determine whether a free
+				// is necessary.
+				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
+			}
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
 				if ((opline->opcode == ZEND_FETCH_LIST_R ||
@@ -1207,12 +1217,12 @@ static zend_never_inline ZEND_COLD ZEND_NORETURN void do_bind_function_error(zen
 	old_function = (zend_function*)Z_PTR_P(zv);
 	if (old_function->type == ZEND_USER_FUNCTION
 		&& old_function->op_array.last > 0) {
-		zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
+		zend_error_noreturn(error_level, "Cannot redeclare function %s() (previously declared in %s:%d)",
 					op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name),
 					ZSTR_VAL(old_function->op_array.filename),
 					old_function->op_array.opcodes[0].lineno);
 	} else {
-		zend_error_noreturn(error_level, "Cannot redeclare %s()",
+		zend_error_noreturn(error_level, "Cannot redeclare function %s()",
 			op_array ? ZSTR_VAL(op_array->function_name) : ZSTR_VAL(old_function->common.function_name));
 	}
 }
@@ -1250,7 +1260,9 @@ ZEND_API zend_class_entry *zend_bind_class_in_slot(
 		success = zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce) != NULL;
 	}
 	if (UNEXPECTED(!success)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		zend_class_entry *old_class = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
+		ZEND_ASSERT(old_class);
+		zend_class_redeclaration_error(E_COMPILE_ERROR, old_class);
 		return NULL;
 	}
 
@@ -1288,7 +1300,7 @@ ZEND_API zend_result do_bind_class(zval *lcname, zend_string *lc_parent_name) /*
 	if (UNEXPECTED(!zv)) {
 		ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
 		ZEND_ASSERT(ce);
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		zend_class_redeclaration_error(E_COMPILE_ERROR, ce);
 		return FAILURE;
 	}
 
@@ -1991,9 +2003,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, bool nullify_hand
 	zend_hash_init(&ce->constants_table, 8, NULL, NULL, persistent_hashes);
 	zend_hash_init(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes);
 
-	if (ce->type == ZEND_USER_CLASS) {
-		ce->info.user.doc_comment = NULL;
-	}
+	ce->doc_comment = NULL;
+
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
 
@@ -2352,6 +2363,7 @@ static inline void zend_update_jump_target(uint32_t opnum_jump, uint32_t opnum_t
 		case ZEND_COALESCE:
 		case ZEND_JMP_NULL:
 		case ZEND_BIND_INIT_STATIC_OR_JMP:
+		case ZEND_JMP_FRAMELESS:
 			opline->op2.opline_num = opnum_target;
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()
@@ -3924,19 +3936,6 @@ static bool zend_compile_function_name(znode *name_node, zend_ast *name_ast) /* 
 }
 /* }}} */
 
-static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno) /* {{{ */
-{
-	zend_op *opline = get_next_op();
-	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
-	opline->op2_type = IS_CONST;
-	opline->op2.constant = zend_add_ns_func_name_literal(
-		Z_STR(name_node->u.constant));
-	opline->result.num = zend_alloc_cache_slot();
-
-	zend_compile_call_common(result, args_ast, NULL, lineno);
-}
-/* }}} */
-
 static void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno) /* {{{ */
 {
 	if (name_node->op_type == IS_CONST && Z_TYPE(name_node->u.constant) == IS_STRING) {
@@ -4131,6 +4130,27 @@ static bool fbc_is_finalized(zend_function *fbc) {
 	return !ZEND_USER_CODE(fbc->type) || (fbc->common.fn_flags & ZEND_ACC_DONE_PASS_TWO);
 }
 
+static bool zend_compile_ignore_class(zend_class_entry *ce, zend_string *filename)
+{
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		return CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
+	} else {
+		return (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES)
+			&& ce->info.user.filename != filename;
+	}
+}
+
+static bool zend_compile_ignore_function(zend_function *fbc, zend_string *filename)
+{
+	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+		return CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS;
+	} else {
+		return (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS)
+			|| ((CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES)
+				&& fbc->op_array.filename != filename);
+	}
+}
+
 static zend_result zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, uint32_t num_args) /* {{{ */
 {
 	zend_string *name, *lcname;
@@ -4145,11 +4165,9 @@ static zend_result zend_try_compile_ct_bound_init_user_func(zend_ast *name_ast, 
 	lcname = zend_string_tolower(name);
 
 	fbc = zend_hash_find_ptr(CG(function_table), lcname);
-	if (!fbc || !fbc_is_finalized(fbc)
-	 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
-	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
-	 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
-	) {
+	if (!fbc
+	 || !fbc_is_finalized(fbc)
+	 || zend_compile_ignore_function(fbc, CG(active_op_array)->filename)) {
 		zend_string_release_ex(lcname, 0);
 		return FAILURE;
 	}
@@ -4529,22 +4547,161 @@ static zend_result zend_compile_func_array_slice(znode *result, zend_ast_list *a
 }
 /* }}} */
 
-static zend_result zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
+static uint32_t find_frameless_function_offset(uint32_t arity, void *handler)
 {
-	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
-		return FAILURE;
+	void **handlers = zend_flf_handlers;
+	void **current = handlers;
+	while (current) {
+		if (*current == handler) {
+			return current - handlers;
+		}
+		current++;
 	}
 
-	if (fbc->type != ZEND_INTERNAL_FUNCTION) {
-		/* If the function is part of disabled_functions, it may be redeclared as a userland
-		 * function with a different implementation. Don't use the VM builtin in that case. */
-		return FAILURE;
+	return (uint32_t)-1;
+}
+
+static const zend_frameless_function_info *find_frameless_function_info(zend_ast_list *args, zend_function *fbc, uint32_t type)
+{
+	if (ZEND_OBSERVER_ENABLED || zend_execute_internal) {
+		return NULL;
 	}
 
-	if (zend_args_contain_unpack_or_named(args)) {
-		return FAILURE;
+	if (type != BP_VAR_R) {
+		return NULL;
 	}
 
+	if (ZEND_USER_CODE(fbc->type)) {
+		return NULL;
+	}
+
+	const zend_frameless_function_info *frameless_function_info = fbc->internal_function.frameless_function_infos;
+	if (!frameless_function_info) {
+		return NULL;
+	}
+
+	if (args->children > 3) {
+		return NULL;
+	}
+
+	while (frameless_function_info->handler) {
+		if (frameless_function_info->num_args >= args->children
+		 && fbc->common.required_num_args <= args->children
+		 && (!(fbc->common.fn_flags & ZEND_ACC_VARIADIC)
+		  || frameless_function_info->num_args == args->children)) {
+			uint32_t num_args = frameless_function_info->num_args;
+			uint32_t offset = find_frameless_function_offset(num_args, frameless_function_info->handler);
+			if (offset == (uint32_t)-1) {
+				continue;
+			}
+			return frameless_function_info;
+		}
+		frameless_function_info++;
+	}
+
+	return NULL;
+}
+
+static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *args, zend_function *fbc, const zend_frameless_function_info *frameless_function_info, uint32_t type)
+{
+	uint32_t num_args = frameless_function_info->num_args;
+	uint32_t offset = find_frameless_function_offset(num_args, frameless_function_info->handler);
+	znode arg_zvs[3];
+	for (uint32_t i = 0; i < num_args; i++) {
+		if (i < args->children) {
+			zend_compile_expr(&arg_zvs[i], args->child[i]);
+		} else {
+			zend_internal_arg_info *arg_info = (zend_internal_arg_info *)&fbc->common.arg_info[i];
+			arg_zvs[i].op_type = IS_CONST;
+			if (zend_get_default_from_internal_arg_info(&arg_zvs[i].u.constant, arg_info) == FAILURE) {
+				ZEND_UNREACHABLE();
+			}
+		}
+	}
+	uint8_t opcode = ZEND_FRAMELESS_ICALL_0 + num_args;
+	uint32_t opnum = get_next_op_number();
+	zend_op *opline = zend_emit_op_tmp(result, opcode, NULL, NULL);
+	opline->extended_value = offset;
+	if (num_args >= 1) {
+		SET_NODE(opline->op1, &arg_zvs[0]);
+	}
+	if (num_args >= 2) {
+		SET_NODE(opline->op2, &arg_zvs[1]);
+	}
+	if (num_args >= 3) {
+		zend_emit_op_data(&arg_zvs[2]);
+	}
+	return opnum;
+}
+
+static uint32_t zend_compile_frameless_icall(znode *result, zend_ast_list *args, zend_function *fbc, uint32_t type)
+{
+	const zend_frameless_function_info *frameless_function_info = find_frameless_function_info(args, fbc, type);
+	if (!frameless_function_info) {
+		return (uint32_t)-1;
+	}
+
+	return zend_compile_frameless_icall_ex(result, args, fbc, frameless_function_info, type);
+}
+
+static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast, uint32_t lineno, uint32_t type) /* {{{ */
+{
+	int name_constants = zend_add_ns_func_name_literal(Z_STR(name_node->u.constant));
+
+	/* Find frameless function with same name. */
+	zend_function *frameless_function = NULL;
+	if (args_ast->kind != ZEND_AST_CALLABLE_CONVERT
+	 && !zend_args_contain_unpack_or_named(zend_ast_get_list(args_ast))
+	 /* Avoid blowing up op count with nested frameless branches. */
+	 && !CG(context).in_jmp_frameless_branch) {
+		zend_string *lc_func_name = Z_STR_P(CT_CONSTANT_EX(CG(active_op_array), name_constants + 2));
+		frameless_function = zend_hash_find_ptr(CG(function_table), lc_func_name);
+	}
+
+	/* Check whether any frameless handler may actually be used. */
+	uint32_t jmp_fl_opnum = 0;
+	const zend_frameless_function_info *frameless_function_info = NULL;
+	if (frameless_function) {
+		frameless_function_info = find_frameless_function_info(zend_ast_get_list(args_ast), frameless_function, type);
+		if (frameless_function_info) {
+			CG(context).in_jmp_frameless_branch = true;
+			znode op1;
+			op1.op_type = IS_CONST;
+			ZVAL_COPY(&op1.u.constant, CT_CONSTANT_EX(CG(active_op_array), name_constants + 1));
+			jmp_fl_opnum = get_next_op_number();
+			zend_emit_op(NULL, ZEND_JMP_FRAMELESS, &op1, NULL);
+		}
+	}
+
+	/* Compile ns call. */
+	zend_op *opline = get_next_op();
+	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
+	opline->op2_type = IS_CONST;
+	opline->op2.constant = name_constants;
+	opline->result.num = zend_alloc_cache_slot();
+	zend_compile_call_common(result, args_ast, NULL, lineno);
+
+	/* Compile frameless call. */
+	if (frameless_function_info) {
+		uint32_t jmp_end_opnum = zend_emit_jump(0);
+		uint32_t jmp_fl_target = get_next_op_number();
+
+		uint32_t flf_icall_opnum = zend_compile_frameless_icall_ex(NULL, zend_ast_get_list(args_ast), frameless_function, frameless_function_info, type);
+
+		zend_op *jmp_fl = &CG(active_op_array)->opcodes[jmp_fl_opnum];
+		jmp_fl->op2.opline_num = jmp_fl_target;
+		jmp_fl->extended_value = zend_alloc_cache_slot();
+		zend_op *flf_icall = &CG(active_op_array)->opcodes[flf_icall_opnum];
+		SET_NODE(flf_icall->result, result);
+		zend_update_jump_target_to_next(jmp_end_opnum);
+
+		CG(context).in_jmp_frameless_branch = false;
+	}
+}
+/* }}} */
+
+static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
+{
 	if (zend_string_equals_literal(lcname, "strlen")) {
 		return zend_compile_func_strlen(result, args);
 	} else if (zend_string_equals_literal(lcname, "is_null")) {
@@ -4613,7 +4770,29 @@ static zend_result zend_try_compile_special_func(znode *result, zend_string *lcn
 		return FAILURE;
 	}
 }
-/* }}} */
+
+static zend_result zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
+{
+	if (CG(compiler_options) & ZEND_COMPILE_NO_BUILTINS) {
+		return FAILURE;
+	}
+
+	if (fbc->type != ZEND_INTERNAL_FUNCTION) {
+		/* If the function is part of disabled_functions, it may be redeclared as a userland
+		 * function with a different implementation. Don't use the VM builtin in that case. */
+		return FAILURE;
+	}
+
+	if (zend_args_contain_unpack_or_named(args)) {
+		return FAILURE;
+	}
+
+	if (zend_try_compile_special_func_ex(result, lcname, args, fbc, type) == SUCCESS) {
+		return SUCCESS;
+	}
+
+	return zend_compile_frameless_icall(result, args, fbc, type) != (uint32_t)-1 ? SUCCESS : FAILURE;
+}
 
 static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
@@ -4636,7 +4815,7 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 					&& !is_callable_convert) {
 				zend_compile_assert(result, zend_ast_get_list(args_ast), Z_STR(name_node.u.constant), NULL, ast->lineno);
 			} else {
-				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno);
+				zend_compile_ns_call(result, &name_node, args_ast, ast->lineno, type);
 			}
 			return;
 		}
@@ -4649,7 +4828,8 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 		zend_op *opline;
 
 		lcname = zend_string_tolower(Z_STR_P(name));
-		fbc = zend_hash_find_ptr(CG(function_table), lcname);
+		zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
+		fbc = fbc_zv ? Z_PTR_P(fbc_zv) : NULL;
 
 		/* Special assert() handling should apply independently of compiler flags. */
 		if (fbc && zend_string_equals_literal(lcname, "assert") && !is_callable_convert) {
@@ -4659,11 +4839,9 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			return;
 		}
 
-		if (!fbc || !fbc_is_finalized(fbc)
-		 || (fbc->type == ZEND_INTERNAL_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_FUNCTIONS))
-		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS))
-		 || (fbc->type == ZEND_USER_FUNCTION && (CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) && fbc->op_array.filename != CG(active_op_array)->filename)
-		) {
+		if (!fbc
+		 || !fbc_is_finalized(fbc)
+		 || zend_compile_ignore_function(fbc, CG(active_op_array)->filename)) {
 			zend_string_release_ex(lcname, 0);
 			zend_compile_dynamic_call(result, &name_node, args_ast, ast->lineno);
 			return;
@@ -4683,6 +4861,12 @@ static void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 
 		opline = zend_emit_op(NULL, ZEND_INIT_FCALL, NULL, &name_node);
 		opline->result.num = zend_alloc_cache_slot();
+
+		/* Store offset to function from symbol table in op2.extra. */
+		if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+			Bucket *fbc_bucket = (Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+			Z_EXTRA_P(CT_CONSTANT(opline->op2)) = fbc_bucket - CG(function_table)->arData;
+		}
 
 		zend_compile_call_common(result, args_ast, fbc, ast->lineno);
 	}
@@ -4830,7 +5014,11 @@ static void zend_compile_static_call(znode *result, zend_ast *ast, uint32_t type
 		if (opline->op1_type == IS_CONST) {
 			zend_string *lcname = Z_STR_P(CT_CONSTANT(opline->op1) + 1);
 			ce = zend_hash_find_ptr(CG(class_table), lcname);
-			if (!ce && CG(active_class_entry)
+			if (ce) {
+				if (zend_compile_ignore_class(ce, CG(active_op_array)->filename)) {
+					ce = NULL;
+				}
+			} else if (CG(active_class_entry)
 					&& zend_string_equals_ci(CG(active_class_entry)->name, lcname)) {
 				ce = CG(active_class_entry);
 			}
@@ -6961,7 +7149,9 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 		if (ZEND_TYPE_CONTAINS_CODE(arg_infos[-1].type, IS_VOID)
 				&& (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			zend_error(E_DEPRECATED, "Returning by reference from a void function is deprecated");
+			zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
+			zend_error(E_DEPRECATED, "%s(): Returning by reference from a void function is deprecated", ZSTR_VAL(func_name));
+			zend_string_release(func_name);
 		}
 	} else {
 		if (list->children == 0) {
@@ -7059,6 +7249,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename_ex(type_ast, force_nullable, &forced_allow_nullable);
+			if (forced_allow_nullable) {
+				zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
+				zend_error(E_DEPRECATED,
+				   "%s(): Implicitly marking parameter $%s as nullable is deprecated, the explicit nullable type "
+				   "must be used instead", ZSTR_VAL(func_name), ZSTR_VAL(name));
+				zend_string_release(func_name);
+			}
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
@@ -7083,11 +7280,13 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 			/* Ignore parameters of the form "Type $param = null".
 			 * This is the PHP 5 style way of writing "?Type $param", so allow it for now. */
 			if (!forced_allow_nullable) {
+				zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
 				zend_ast *required_param_ast = list->child[last_required_param];
 				zend_error(E_DEPRECATED,
-					"Optional parameter $%s declared before required parameter $%s "
+					"%s(): Optional parameter $%s declared before required parameter $%s "
 					"is implicitly treated as a required parameter",
-					ZSTR_VAL(name), ZSTR_VAL(zend_ast_get_str(required_param_ast->child[1])));
+					ZSTR_VAL(func_name), ZSTR_VAL(name), ZSTR_VAL(zend_ast_get_str(required_param_ast->child[1])));
+				zend_string_release(func_name);
 			}
 
 			/* Regardless of whether we issue a deprecation, convert this parameter into
@@ -7507,16 +7706,56 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 	zend_string *unqualified_name, *name, *lcname;
 	zend_op *opline;
 
-	unqualified_name = decl->name;
-	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
+	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
+		zend_string *filename = op_array->filename;
+		uint32_t start_lineno = decl->start_lineno;
+
+		zend_string *class = zend_empty_string;
+		zend_string *separator = zend_empty_string;
+		zend_string *function = filename;
+		char *parens = "";
+		
+		if (CG(active_op_array) && CG(active_op_array)->function_name) {
+			if (CG(active_op_array)->fn_flags & ZEND_ACC_CLOSURE) {
+				/* If the parent function is a closure, don't redundantly
+				 * add the classname and parentheses.
+				 */
+				function = CG(active_op_array)->function_name;
+			} else {
+				function = CG(active_op_array)->function_name;
+				parens = "()";
+
+				if (CG(active_class_entry) && CG(active_class_entry)->name) {
+					class = CG(active_class_entry)->name;
+					separator = ZSTR_KNOWN(ZEND_STR_PAAMAYIM_NEKUDOTAYIM);
+				}
+			}
+		}
+
+		unqualified_name = zend_strpprintf_unchecked(
+			0,
+			"{closure:%S%S%S%s:%" PRIu32 "}",
+			class,
+			separator,
+			function,
+			parens,
+			start_lineno
+		);
+
+		op_array->function_name = name = unqualified_name;
+	} else {
+		unqualified_name = decl->name;
+		op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
+	}
+
 	lcname = zend_string_tolower(name);
 
 	if (FC(imports_function)) {
 		zend_string *import_name =
 			zend_hash_find_ptr_lc(FC(imports_function), unqualified_name);
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
-				"because the name is already in use", ZSTR_VAL(name));
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare function %s() (previously declared as local import)",
+				ZSTR_VAL(name));
 		}
 	}
 
@@ -8081,8 +8320,8 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 			zend_string *import_name =
 				zend_hash_find_ptr_lc(FC(imports), unqualified_name);
 			if (import_name && !zend_string_equals_ci(lcname, import_name)) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare class %s "
-						"because the name is already in use", ZSTR_VAL(name));
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare class %s "
+						"(previously declared as local import)", ZSTR_VAL(name));
 			}
 		}
 
@@ -8119,7 +8358,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	ce->info.user.line_end = decl->end_lineno;
 
 	if (decl->doc_comment) {
-		ce->info.user.doc_comment = zend_string_copy(decl->doc_comment);
+		ce->doc_comment = zend_string_copy(decl->doc_comment);
 	}
 
 	if (UNEXPECTED((decl->flags & ZEND_ACC_ANON_CLASS))) {
@@ -8174,9 +8413,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 					ce->parent_name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
 				if (parent_ce
-				 && ((parent_ce->type != ZEND_INTERNAL_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES))
-				 && ((parent_ce->type != ZEND_USER_CLASS) || !(CG(compiler_options) & ZEND_COMPILE_IGNORE_OTHER_FILES) || (parent_ce->info.user.filename == ce->info.user.filename))) {
-
+				 && !zend_compile_ignore_class(parent_ce, ce->info.user.filename)) {
 					if (zend_try_early_bind(ce, parent_ce, lcname, NULL)) {
 						zend_string_release(lcname);
 						return;

@@ -326,7 +326,7 @@ static void date_throw_uninitialized_error(zend_class_entry *ce)
 }
 
 #define DATE_CHECK_INITIALIZED(member, ce) \
-	if (!(member)) { \
+	if (UNEXPECTED(!member)) { \
 		date_throw_uninitialized_error(ce); \
 		RETURN_THROWS(); \
 	}
@@ -2377,15 +2377,15 @@ static void update_errors_warnings(timelib_error_container **last_errors) /* {{{
 	*last_errors = NULL;
 } /* }}} */
 
-static void php_date_set_time_fraction(timelib_time *time, int microseconds)
+static void php_date_set_time_fraction(timelib_time *time, int microsecond)
 {
-	time->us = microseconds;
+	time->us = microsecond;
 }
 
 static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
 {
 #if HAVE_GETTIMEOFDAY
-	struct timeval tp = {0}; /* For setting microseconds */
+	struct timeval tp = {0}; /* For setting microsecond */
 
 	gettimeofday(&tp, NULL);
 	*sec = tp.tv_sec;
@@ -2525,16 +2525,14 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	zend_long sec;
 	int usec;
 
-	if (UNEXPECTED(isnan(sec_dval)
-		|| sec_dval >= (double)TIMELIB_LONG_MAX
-		|| sec_dval < (double)TIMELIB_LONG_MIN
-	)) {
-		zend_throw_error(
+	if (UNEXPECTED(isnan(sec_dval) || !PHP_DATE_DOUBLE_FITS_LONG(sec_dval))) {
+		zend_argument_error(
 			date_ce_date_range_error,
-			"Seconds must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ", %g given",
+			1,
+			"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
 			TIMELIB_LONG_MIN,
 			TIMELIB_LONG_MAX,
-			sec_dval
+			ts
 		);
 		return false;
 	}
@@ -2543,6 +2541,18 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	usec = (int)(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(usec < 0)) {
+		if (UNEXPECTED(sec == TIMELIB_LONG_MIN)) {
+			zend_argument_error(
+				date_ce_date_range_error,
+				1,
+				"must be a finite number between " TIMELIB_LONG_FMT " and " TIMELIB_LONG_FMT ".999999, %g given",
+				TIMELIB_LONG_MIN,
+				TIMELIB_LONG_MAX,
+				ts
+			);
+			return false;
+		}
+
 		sec = sec - 1;
 		usec = 1000000 + usec;
 	}
@@ -3844,12 +3854,76 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 }
 /* }}} */
 
+/* {{{ */
+PHP_METHOD(DateTimeImmutable, setMicrosecond)
+{
+	zval *object, new_object;
+	php_date_obj *dateobj, *new_dateobj;
+	zend_long us;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &us) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(us < 0 || us > 999999)) {
+		zend_argument_error(
+			date_ce_date_range_error,
+			1,
+			"must be between 0 and 999999, " ZEND_LONG_FMT " given",
+			us
+		);
+		RETURN_THROWS();
+	}
+
+	object = ZEND_THIS;
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+
+	date_clone_immutable(object, &new_object);
+	new_dateobj = Z_PHPDATE_P(&new_object);
+
+	php_date_set_time_fraction(new_dateobj->time, (int)us);
+
+	RETURN_OBJ(Z_OBJ(new_object));
+}
+/* }}} */
+
+/* {{{ */
+PHP_METHOD(DateTime, setMicrosecond)
+{
+	zval *object;
+	php_date_obj *dateobj;
+	zend_long us;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &us) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (UNEXPECTED(us < 0 || us > 999999)) {
+		zend_argument_error(
+			date_ce_date_range_error,
+			1,
+			"must be between 0 and 999999, " ZEND_LONG_FMT " given",
+			us
+		);
+		RETURN_THROWS();
+	}
+
+	object = ZEND_THIS;
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+	php_date_set_time_fraction(dateobj->time, (int)us);
+
+	RETURN_OBJ_COPY(Z_OBJ_P(object));
+}
+/* }}} */
+
 /* {{{ Gets the Unix timestamp. */
 PHP_FUNCTION(date_timestamp_get)
 {
 	zval         *object;
 	php_date_obj *dateobj;
-	zend_long          timestamp;
+	zend_long     timestamp;
 	int           epoch_does_not_fit_in_zend_long;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, date_ce_interface) == FAILURE) {
@@ -3870,6 +3944,21 @@ PHP_FUNCTION(date_timestamp_get)
 	}
 
 	RETURN_LONG(timestamp);
+}
+/* }}} */
+
+PHP_METHOD(DateTime, getMicrosecond) /* {{{ */
+{
+	zval *object;
+	php_date_obj *dateobj;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	object = ZEND_THIS;
+	dateobj = Z_PHPDATE_P(object);
+	DATE_CHECK_INITIALIZED(dateobj->time, Z_OBJCE_P(object));
+
+	RETURN_LONG((zend_long)dateobj->time->us);
 }
 /* }}} */
 

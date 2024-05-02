@@ -7,10 +7,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_IntlPartsIterator_getRuleStatus, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(IntlPartsIterator, getBreakIterator);
 ZEND_METHOD(IntlPartsIterator, getRuleStatus);
-
 
 static const zend_function_entry class_IntlPartsIterator_methods[] = {
 	ZEND_ME(IntlPartsIterator, getBreakIterator, arginfo_class_IntlPartsIterator_getBreakIterator, ZEND_ACC_PUBLIC)

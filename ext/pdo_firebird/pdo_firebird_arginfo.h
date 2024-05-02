@@ -1,9 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 037c073de9e3e3593c62cb7da8ee7202c38c2723 */
 
-
-
-
 static const zend_function_entry class_PdoFirebird_methods[] = {
 	ZEND_FE_END
 };

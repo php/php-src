@@ -37,7 +37,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_FiberError___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(Fiber, __construct);
 ZEND_METHOD(Fiber, start);
 ZEND_METHOD(Fiber, resume);
@@ -50,7 +49,6 @@ ZEND_METHOD(Fiber, getReturn);
 ZEND_METHOD(Fiber, getCurrent);
 ZEND_METHOD(Fiber, suspend);
 ZEND_METHOD(FiberError, __construct);
-
 
 static const zend_function_entry class_Fiber_methods[] = {
 	ZEND_ME(Fiber, __construct, arginfo_class_Fiber___construct, ZEND_ACC_PUBLIC)
@@ -66,7 +64,6 @@ static const zend_function_entry class_Fiber_methods[] = {
 	ZEND_ME(Fiber, suspend, arginfo_class_Fiber_suspend, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_FiberError_methods[] = {
 	ZEND_ME(FiberError, __construct, arginfo_class_FiberError___construct, ZEND_ACC_PUBLIC)

@@ -1,9 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: 3cc19acf5943c09a011f15d9ef6d0f443d4b8a71 */
 
-
-
-
 static const zend_function_entry class_PdoOdbc_methods[] = {
 	ZEND_FE_END
 };

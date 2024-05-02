@@ -42,6 +42,7 @@
 #include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
 #include "ext/random/php_random.h"
+#include "zend_frameless_function.h"
 
 /* {{{ defines */
 
@@ -188,7 +189,7 @@ static zend_always_inline int php_array_key_compare_string_case_unstable_i(Bucke
 		l2 = s->key->len;
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
-		l2 = buf2 + sizeof(buf2) - 1 - s1;
+		l2 = buf2 + sizeof(buf2) - 1 - s2;
 	}
 	return zend_binary_strcasecmp_l(s1, l1, s2, l2);
 }
@@ -238,7 +239,7 @@ static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, in
 		l2 = s->key->len;
 	} else {
 		s2 = zend_print_long_to_buf(buf2 + sizeof(buf2) - 1, s->h);
-		l2 = buf2 + sizeof(buf2) - 1 - s1;
+		l2 = buf2 + sizeof(buf2) - 1 - s2;
 	}
 	return strnatcmp_ex(s1, l1, s2, l2, fold_case);
 }
@@ -1285,6 +1286,45 @@ PHP_FUNCTION(min)
 }
 /* }}} */
 
+ZEND_FRAMELESS_FUNCTION(min, 2)
+{
+	zval *lhs, *rhs;
+
+	Z_FLF_PARAM_ZVAL(1, lhs);
+	Z_FLF_PARAM_ZVAL(2, rhs);
+
+	double lhs_dval;
+
+	if (Z_TYPE_P(lhs) == IS_LONG) {
+		zend_long lhs_lval = Z_LVAL_P(lhs);
+
+		if (EXPECTED(Z_TYPE_P(rhs) == IS_LONG)) {
+			RETURN_COPY_VALUE(lhs_lval < Z_LVAL_P(rhs) ? lhs : rhs);
+		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval((double) lhs_lval) == lhs_lval)) {
+			/* if lhs_lval can be exactly represented as a double, go to double dedicated code */
+			lhs_dval = (double) lhs_lval;
+			goto double_compare;
+		} else {
+			goto generic_compare;
+		}
+	} else if (Z_TYPE_P(lhs) == IS_DOUBLE) {
+		lhs_dval = Z_DVAL_P(lhs);
+
+		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
+double_compare:
+			RETURN_COPY_VALUE(lhs_dval < Z_DVAL_P(rhs) ? lhs : rhs);
+		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
+			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
+			RETURN_COPY_VALUE(lhs_dval < (double)Z_LVAL_P(rhs) ? lhs : rhs);
+		} else {
+			goto generic_compare;
+		}
+	} else {
+generic_compare:
+		RETURN_COPY(zend_compare(lhs, rhs) < 0 ? lhs : rhs);
+	}
+}
+
 /* {{{
  * proto mixed max(array values)
  * proto mixed max(mixed arg1 [, mixed arg2 [, mixed ...]])
@@ -1373,6 +1413,45 @@ PHP_FUNCTION(max)
 	}
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(max, 2)
+{
+	zval *lhs, *rhs;
+
+	Z_FLF_PARAM_ZVAL(1, lhs);
+	Z_FLF_PARAM_ZVAL(2, rhs);
+
+	double lhs_dval;
+
+	if (Z_TYPE_P(lhs) == IS_LONG) {
+		zend_long lhs_lval = Z_LVAL_P(lhs);
+
+		if (EXPECTED(Z_TYPE_P(rhs) == IS_LONG)) {
+			RETURN_COPY_VALUE(lhs_lval >= Z_LVAL_P(rhs) ? lhs : rhs);
+		} else if (Z_TYPE_P(rhs) == IS_DOUBLE && (zend_dval_to_lval((double) lhs_lval) == lhs_lval)) {
+			/* if lhs_lval can be exactly represented as a double, go to double dedicated code */
+			lhs_dval = (double) lhs_lval;
+			goto double_compare;
+		} else {
+			goto generic_compare;
+		}
+	} else if (Z_TYPE_P(lhs) == IS_DOUBLE) {
+		lhs_dval = Z_DVAL_P(lhs);
+
+		if (EXPECTED(Z_TYPE_P(rhs) == IS_DOUBLE)) {
+double_compare:
+			RETURN_COPY_VALUE(lhs_dval >= Z_DVAL_P(rhs) ? lhs : rhs);
+		} else if (Z_TYPE_P(rhs) == IS_LONG && (zend_dval_to_lval((double) Z_LVAL_P(rhs)) == Z_LVAL_P(rhs))) {
+			/* if the value can be exactly represented as a double, use double dedicated code otherwise generic */
+			RETURN_COPY_VALUE(lhs_dval >= (double)Z_LVAL_P(rhs) ? lhs : rhs);
+		} else {
+			goto generic_compare;
+		}
+	} else {
+generic_compare:
+		RETURN_COPY(zend_compare(lhs, rhs) >= 0 ? lhs : rhs);
+	}
+}
 
 typedef struct {
 	zend_fcall_info fci;
@@ -1558,21 +1637,11 @@ PHP_FUNCTION(array_walk_recursive)
  * 0 = return boolean
  * 1 = return key
  */
-static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) /* {{{ */
+static inline void _php_search_array(zval *return_value, zval *value, zval *array, bool strict, int behavior) /* {{{ */
 {
-	zval *value,				/* value to check for */
-		 *array,				/* array to check in */
-		 *entry;				/* pointer to array entry */
+	zval *entry; /* pointer to array entry */
 	zend_ulong num_idx;
 	zend_string *str_idx;
-	bool strict = 0;		/* strict comparison or not */
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ZVAL(value)
-		Z_PARAM_ARRAY(array)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_BOOL(strict)
-	ZEND_PARSE_PARAMETERS_END();
 
 	if (strict) {
 		if (Z_TYPE_P(value) == IS_LONG) {
@@ -1656,12 +1725,58 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 }
 /* }}} */
 
+/* void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+ * 0 = return boolean
+ * 1 = return key
+ */
+static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior)
+{
+	zval *value,		/* value to check for */
+		 *array;		/* array to check in */
+	bool strict = 0;	/* strict comparison or not */
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ZVAL(value)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(strict)
+	ZEND_PARSE_PARAMETERS_END();
+
+	_php_search_array(return_value, value, array, strict, behavior);
+}
+
 /* {{{ Checks if the given value exists in the array */
 PHP_FUNCTION(in_array)
 {
 	php_search_array(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(in_array, 2)
+{
+	zval *value, *array;
+
+	Z_FLF_PARAM_ZVAL(1, value);
+	Z_FLF_PARAM_ARRAY(2, array);
+
+	_php_search_array(return_value, value, array, false, 0);
+
+flf_clean:;
+}
+
+ZEND_FRAMELESS_FUNCTION(in_array, 3)
+{
+	zval *value, *array;
+	bool strict;
+
+	Z_FLF_PARAM_ZVAL(1, value);
+	Z_FLF_PARAM_ARRAY(2, array);
+	Z_FLF_PARAM_BOOL(3, strict);
+
+	_php_search_array(return_value, value, array, strict, 0);
+
+flf_clean:;
+}
 
 /* {{{ Searches the array for a given value and returns the corresponding key if successful */
 PHP_FUNCTION(array_search)
@@ -3096,8 +3211,11 @@ boundary_error:
 #undef RANGE_CHECK_LONG_INIT_ARRAY
 
 /* {{{ php_array_data_shuffle */
-PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_status *status, zval *array) /* {{{ */
+PHPAPI bool php_array_data_shuffle(php_random_algo_with_state engine, zval *array) /* {{{ */
 {
+	const php_random_algo *algo = engine.algo;
+	void *state = engine.state;
+
 	int64_t idx, j, n_elems, rnd_idx, n_left;
 	zval *zv, temp;
 	HashTable *hash;
@@ -3138,7 +3256,7 @@ PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_statu
 			}
 		}
 		while (--n_left) {
-			rnd_idx = algo->range(status, 0, n_left);
+			rnd_idx = algo->range(state, 0, n_left);
 			if (EG(exception)) {
 				return false;
 			}
@@ -3166,7 +3284,7 @@ PHPAPI bool php_array_data_shuffle(const php_random_algo *algo, php_random_statu
 			}
 		}
 		while (--n_left) {
-			rnd_idx = algo->range(status, 0, n_left);
+			rnd_idx = algo->range(state, 0, n_left);
 			if (EG(exception)) {
 				return false;
 			}
@@ -3195,7 +3313,7 @@ PHP_FUNCTION(shuffle)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_array_data_shuffle(php_random_default_algo(), php_random_default_status(), array);
+	php_array_data_shuffle(php_random_default_engine(), array);
 
 	RETURN_TRUE;
 }
@@ -6076,8 +6194,11 @@ clean_up:
 /* }}} */
 
 /* {{{ php_array_pick_keys */
-PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *status, zval *input, zend_long num_req, zval *retval, bool silent)
+PHPAPI bool php_array_pick_keys(php_random_algo_with_state engine, zval *input, zend_long num_req, zval *retval, bool silent)
 {
+	const php_random_algo *algo = engine.algo;
+	void *state = engine.state;
+
 	HashTable *ht = Z_ARRVAL_P(input);
 	uint32_t num_avail = zend_hash_num_elements(ht);
 	zend_long i, randval;
@@ -6102,7 +6223,7 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 			/* If less than 1/2 of elements are used, don't sample. Instead search for a
 			 * specific offset using linear scan. */
 			i = 0;
-			randval = algo->range(status, 0, num_avail - 1);
+			randval = algo->range(state, 0, num_avail - 1);
 			if (EG(exception)) {
 				return false;
 			}
@@ -6125,7 +6246,7 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 		 * For N=10 this becomes smaller than 0.1%. */
 		if (HT_IS_PACKED(ht)) {
 			do {
-				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				randval = algo->range(state, 0, ht->nNumUsed - 1);
 				if (EG(exception)) {
 					return false;
 				}
@@ -6137,7 +6258,7 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 			} while (true);
 		} else {
 			do {
-				randval = algo->range(status, 0, ht->nNumUsed - 1);
+				randval = algo->range(state, 0, ht->nNumUsed - 1);
 				if (EG(exception)) {
 					return false;
 				}
@@ -6175,7 +6296,7 @@ PHPAPI bool php_array_pick_keys(const php_random_algo *algo, php_random_status *
 	i = num_req;
 	int failures = 0;
 	while (i) {
-		randval = algo->range(status, 0, num_avail - 1);
+		randval = algo->range(state, 0, num_avail - 1);
 		if (EG(exception)) {
 			goto fail;
 		}
@@ -6235,8 +6356,7 @@ PHP_FUNCTION(array_rand)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!php_array_pick_keys(
-			php_random_default_algo(),
-			php_random_default_status(),
+			php_random_default_engine(),
 			input,
 			num_req,
 			return_value,

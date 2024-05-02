@@ -36,7 +36,6 @@
 raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *result, size_t scale)
 {
 	bc_num power, exponent, modulus, parity, temp;
-	size_t rscale;
 
 	/* Check the base for scale digits. */
 	if (base->n_scale != 0) {
@@ -66,7 +65,6 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 	bc_init_num(&parity);
 
 	/* Do the calculation. */
-	rscale = MAX(scale, power->n_scale);
 	if (!bc_compare(modulus, BCG(_one_))) {
 		bc_free_num (&temp);
 		temp = bc_new_num (1, scale);
@@ -74,10 +72,10 @@ raise_mod_status bc_raisemod(bc_num base, bc_num expo, bc_num mod, bc_num *resul
 		while (!bc_is_zero(exponent)) {
 			(void) bc_divmod(exponent, BCG(_two_), &exponent, &parity, 0);
 			if (!bc_is_zero(parity)) {
-				bc_multiply(temp, power, &temp, rscale);
+				bc_multiply(temp, power, &temp, scale);
 				(void) bc_modulo(temp, modulus, &temp, scale);
 			}
-			bc_multiply(power, power, &power, rscale);
+			bc_multiply(power, power, &power, scale);
 			(void) bc_modulo(power, modulus, &power, scale);
 		}
 	}

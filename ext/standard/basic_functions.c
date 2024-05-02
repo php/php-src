@@ -68,8 +68,6 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 
 #ifndef PHP_WIN32
 # include <netdb.h>
-#else
-#include "win32/inet.h"
 #endif
 
 #ifdef HAVE_ARPA_INET_H
@@ -115,6 +113,7 @@ PHPAPI php_basic_globals basic_globals;
 
 #include "php_fopen_wrappers.h"
 #include "streamsfuncs.h"
+#include "zend_frameless_function.h"
 #include "basic_functions_arginfo.h"
 
 typedef struct _user_tick_function_entry {
@@ -419,6 +418,9 @@ PHP_RINIT_FUNCTION(basic) /* {{{ */
 	BASIC_RINIT_SUBMODULE(dir)
 	BASIC_RINIT_SUBMODULE(url_scanner_ex)
 
+	/* Initialize memory for last http headers */
+	ZVAL_UNDEF(&BG(last_http_headers));
+
 	/* Setup default context */
 	FG(default_context) = NULL;
 
@@ -482,6 +484,9 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	BASIC_RSHUTDOWN_SUBMODULE(user_filters)
 	BASIC_RSHUTDOWN_SUBMODULE(browscap)
+
+	/* Free last http headers */
+	zval_ptr_dtor(&BG(last_http_headers));
 
 	BG(page_uid) = -1;
 	BG(page_gid) = -1;
@@ -554,7 +559,6 @@ PHP_FUNCTION(inet_ntop)
 }
 /* }}} */
 
-#ifdef HAVE_INET_PTON
 /* {{{ Converts a human readable IP address to a packed binary string */
 PHP_FUNCTION(inet_pton)
 {
@@ -587,42 +591,22 @@ PHP_FUNCTION(inet_pton)
 	RETURN_STRINGL(buffer, af == AF_INET ? 4 : 16);
 }
 /* }}} */
-#endif /* HAVE_INET_PTON */
 
 /* {{{ Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address */
 PHP_FUNCTION(ip2long)
 {
 	char *addr;
 	size_t addr_len;
-#ifdef HAVE_INET_PTON
 	struct in_addr ip;
-#else
-	zend_ulong ip;
-#endif
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(addr, addr_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef HAVE_INET_PTON
 	if (addr_len == 0 || inet_pton(AF_INET, addr, &ip) != 1) {
 		RETURN_FALSE;
 	}
 	RETURN_LONG(ntohl(ip.s_addr));
-#else
-	if (addr_len == 0 || (ip = inet_addr(addr)) == INADDR_NONE) {
-		/* The only special case when we should return -1 ourselves,
-		 * because inet_addr() considers it wrong. We return 0xFFFFFFFF and
-		 * not -1 or ~0 because of 32/64bit issues. */
-		if (addr_len == sizeof("255.255.255.255") - 1 &&
-			!memcmp(addr, "255.255.255.255", sizeof("255.255.255.255") - 1)
-		) {
-			RETURN_LONG(0xFFFFFFFF);
-		}
-		RETURN_FALSE;
-	}
-	RETURN_LONG(ntohl(ip));
-#endif
 }
 /* }}} */
 
@@ -642,11 +626,10 @@ PHP_FUNCTION(long2ip)
 	ip = (zend_ulong)sip;
 
 	myaddr.s_addr = htonl(ip);
-	if (inet_ntop(AF_INET, &myaddr, str, sizeof(str))) {
-		RETURN_STRING(str);
-	} else {
-		RETURN_FALSE;
-	}
+	const char* result = inet_ntop(AF_INET, &myaddr, str, sizeof(str));
+	ZEND_ASSERT(result != NULL);
+
+	RETURN_STRING(str);
 }
 /* }}} */
 
@@ -727,7 +710,7 @@ PHP_FUNCTION(getenv)
 
 	if (!str) {
 		array_init(return_value);
-		php_import_environment_variables(return_value);
+		php_load_environment_variables(return_value);
 		return;
 	}
 

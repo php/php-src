@@ -326,11 +326,6 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	zend_string *str = zend_string_safe_alloc(1, len, 0, 0);
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
-	if (end < *p) {
-		zend_string_efree(str);
-		return NULL;
-	}
-
 	for (i = 0; i < len; i++) {
 		if (*p >= end) {
 			zend_string_efree(str);

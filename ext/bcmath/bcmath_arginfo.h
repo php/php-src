@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f28dafc2a279f5421cd0d0e668fde0032e996ebc */
+ * Stub hash: cd3d182e13cb0ca22b27c13a8d0a86c20fde5b76 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -43,6 +43,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcscale, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcfloor, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_bcceil arginfo_bcfloor
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcround, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
+ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(bcadd);
 ZEND_FUNCTION(bcsub);
@@ -54,7 +65,9 @@ ZEND_FUNCTION(bcpow);
 ZEND_FUNCTION(bcsqrt);
 ZEND_FUNCTION(bccomp);
 ZEND_FUNCTION(bcscale);
-
+ZEND_FUNCTION(bcfloor);
+ZEND_FUNCTION(bcceil);
+ZEND_FUNCTION(bcround);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcadd, arginfo_bcadd)
@@ -67,5 +80,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(bcsqrt, arginfo_bcsqrt)
 	ZEND_FE(bccomp, arginfo_bccomp)
 	ZEND_FE(bcscale, arginfo_bcscale)
+	ZEND_FE(bcfloor, arginfo_bcfloor)
+	ZEND_FE(bcceil, arginfo_bcceil)
+	ZEND_FE(bcround, arginfo_bcround)
 	ZEND_FE_END
 };

@@ -71,7 +71,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 	char *message = NULL;
 	const char *msg;
 
-	if (dbh && dbh->error_mode == PDO_ERRMODE_SILENT) {
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
 #if 0
 		/* BUG: if user is running in silent mode and hits an error at the driver level
 		 * when they use the PDO methods to call up the error information, they may
@@ -98,7 +98,7 @@ void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, pdo_error_type sqlst
 		spprintf(&message, 0, "SQLSTATE[%s]: %s", *pdo_err, msg);
 	}
 
-	if (dbh && dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
+	if (dbh->error_mode != PDO_ERRMODE_EXCEPTION) {
 		php_error_docref(NULL, E_WARNING, "%s", message);
 	} else {
 		zval ex, info;
@@ -134,7 +134,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	zend_string *message = NULL;
 	zval info;
 
-	if (dbh == NULL || dbh->error_mode == PDO_ERRMODE_SILENT) {
+	if (dbh->error_mode == PDO_ERRMODE_SILENT) {
 		return;
 	}
 
@@ -197,9 +197,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 		zval_ptr_dtor(&info);
 	}
 
-	if (message) {
-		zend_string_release_ex(message, 0);
-	}
+	zend_string_release_ex(message, false);
 
 	if (supp) {
 		efree(supp);
@@ -1336,6 +1334,7 @@ bool pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 		} else {
 			func.fn_flags = ZEND_ACC_PUBLIC | ZEND_ACC_NEVER_CACHE;
 		}
+		func.doc_comment = NULL;
 		if (funcs->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)funcs->arg_info;
 

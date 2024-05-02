@@ -19,6 +19,7 @@
 
 #include "libbcmath/src/bcmath.h"
 #include "zend_API.h"
+#include "ext/standard/php_math_round_mode.h"
 
 extern zend_module_entry bcmath_module_entry;
 #define phpext_bcmath_ptr &bcmath_module_entry

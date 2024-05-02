@@ -369,11 +369,7 @@ void *zend_shared_alloc(size_t size)
 	ZEND_ASSERT(ZCG(locked));
 
 	int i;
-	unsigned int block_size = ZEND_ALIGNED_SIZE(size);
-
-	if (UNEXPECTED(block_size < size)) {
-		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Possible integer overflow in shared memory allocation (%zu + %zu)", size, PLATFORM_ALIGNMENT);
-	}
+	size_t block_size = ZEND_ALIGNED_SIZE(size);
 
 	if (block_size > ZSMMG(shared_free)) { /* No hope to find a big-enough block */
 		SHARED_ALLOC_FAILED();

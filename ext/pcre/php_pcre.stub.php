@@ -98,7 +98,10 @@ const PCRE_VERSION_MINOR = UNKNOWN;
  */
 const PCRE_JIT_SUPPORT = UNKNOWN;
 
-/** @param array $matches */
+/**
+ * @param array $matches
+ * @frameless-function {"arity": 2}
+ */
 function preg_match(string $pattern, string $subject, &$matches = null, int $flags = 0, int $offset = 0): int|false {}
 
 /** @param array $matches */
@@ -107,6 +110,7 @@ function preg_match_all(string $pattern, string $subject, &$matches = null, int 
 /**
  * @param int $count
  * @return string|array<int|string, string>|null
+ * @frameless-function {"arity": 3}
  */
 function preg_replace(string|array $pattern, string|array $replacement, string|array $subject, int $limit = -1, &$count = null): string|array|null {}
 

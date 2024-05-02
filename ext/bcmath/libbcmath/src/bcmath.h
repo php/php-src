@@ -39,16 +39,11 @@ typedef enum {PLUS, MINUS} sign;
 typedef struct bc_struct *bc_num;
 
 typedef struct bc_struct {
-	sign   n_sign;
-	size_t n_len;   /* The number of digits before the decimal point. */
-	size_t n_scale; /* The number of digits after the decimal point. */
-	int    n_refs;  /* The number of pointers to this number. */
-	char  *n_ptr;   /* The pointer to the actual storage.
-	                  If NULL, n_value points to the inside of another number
-	                  (bc_multiply...) and should not be "freed." */
-	char  *n_value; /* The number. Not zero char terminated.
-	                   May not point to the same place as n_ptr as
-	                   in the case of leading zeros generated. */
+	size_t        n_len;   /* The number of digits before the decimal point. */
+	size_t        n_scale; /* The number of digits after the decimal point. */
+	char         *n_value; /* The number. Not zero char terminated. */
+	unsigned int  n_refs;  /* The number of pointers to this number. */
+	sign          n_sign;
 } bc_struct;
 
 #ifdef HAVE_CONFIG_H
@@ -58,7 +53,9 @@ typedef struct bc_struct {
 #include "zend.h"
 #include <stdbool.h>
 #include "zend_string.h"
-#include "../../php_bcmath.h" /* Needed for BCG() macro */
+
+/* Needed for BCG() macro and PHP_ROUND_XXX */
+#include "../../php_bcmath.h"
 
 /* The base used in storing the numbers in n_value above.
    Currently, this MUST be 10. */
@@ -95,7 +92,7 @@ bc_num bc_copy_num(bc_num num);
 
 void bc_init_num(bc_num *num);
 
-bool bc_str2num(bc_num *num, char *str, size_t scale);
+bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale);
 
 zend_string *bc_num2str_ex(bc_num num, size_t scale);
 
@@ -124,6 +121,10 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
 bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 
 bool bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, size_t scale);
+
+void bc_floor_or_ceil(bc_num num, bool is_floor, bc_num *result);
+
+void bc_round(bc_num num, zend_long places, zend_long mode, bc_num *result);
 
 typedef enum {
 	OK,

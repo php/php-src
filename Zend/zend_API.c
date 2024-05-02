@@ -41,6 +41,7 @@ ZEND_API HashTable module_registry;
 static zend_module_entry **module_request_startup_handlers;
 static zend_module_entry **module_request_shutdown_handlers;
 static zend_module_entry **module_post_deactivate_handlers;
+static zend_module_entry **modules_dl_loaded;
 
 static zend_class_entry  **class_cleanup_handlers;
 
@@ -437,6 +438,26 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce)
+{
+	if (old_ce->type == ZEND_INTERNAL_CLASS) {
+		zend_error(type, "Cannot redeclare %s %s",
+			zend_get_object_type(old_ce),
+			ZSTR_VAL(new_name));
+	} else {
+		zend_error(type, "Cannot redeclare %s %s (previously declared in %s:%d)",
+			zend_get_object_type(old_ce),
+			ZSTR_VAL(new_name),
+			ZSTR_VAL(old_ce->info.user.filename),
+			old_ce->info.user.line_start);
+	}
+}
+
+ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, zend_class_entry *old_ce)
+{
+	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
+}
+
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
 {
 	zend_class_entry *ce_base = *pce;
@@ -467,7 +488,7 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **p
 /* }}} */
 
 static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32_t arg_num) {
-	zend_function *func = EG(current_execute_data)->func;
+	zend_function *func = zend_active_function();
 	ZEND_ASSERT(arg_num > 0);
 	uint32_t arg_offset = arg_num - 1;
 	if (arg_offset >= func->common.num_args) {
@@ -517,6 +538,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_bool_slow(const zval *arg, bool *dest
 	return zend_parse_arg_bool_weak(arg, dest, arg_num);
 }
 /* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_bool_slow(const zval *arg, bool *dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	return zend_parse_arg_bool_weak(arg, dest, arg_num);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_weak(const zval *arg, zend_long *dest, uint32_t arg_num) /* {{{ */
 {
@@ -596,6 +625,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_long_slow(const zval *arg, zend_long 
 	return zend_parse_arg_long_weak(arg, dest, arg_num);
 }
 /* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_long_slow(const zval *arg, zend_long *dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	return zend_parse_arg_long_weak(arg, dest, arg_num);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_double_weak(const zval *arg, double *dest, uint32_t arg_num) /* {{{ */
 {
@@ -737,6 +774,14 @@ ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_slow(zval *arg, zend_string **des
 	return zend_parse_arg_str_weak(arg, dest, arg_num);
 }
 /* }}} */
+
+ZEND_API bool ZEND_FASTCALL zend_flf_parse_arg_str_slow(zval *arg, zend_string **dest, uint32_t arg_num)
+{
+	if (UNEXPECTED(ZEND_FLF_ARG_USES_STRICT_TYPES())) {
+		return 0;
+	}
+	return zend_parse_arg_str_weak(arg, dest, arg_num);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_str_or_long_slow(zval *arg, zend_string **dest_str, zend_long *dest_long, uint32_t arg_num) /* {{{ */
 {
@@ -1651,7 +1696,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 			    (property_info->flags & ZEND_ACC_STATIC) == 0) {
 				zval *slot = OBJ_PROP(object, property_info->offset);
 
-				if (UNEXPECTED(ZEND_TYPE_IS_SET(property_info->type))) {
+				if (ZEND_TYPE_IS_SET(property_info->type)) {
 					zval tmp;
 
 					ZVAL_COPY_VALUE(&tmp, prop);
@@ -2374,6 +2419,7 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	int startup_count = 0;
 	int shutdown_count = 0;
 	int post_deactivate_count = 0;
+	int dl_loaded_count = 0;
 	zend_class_entry *ce;
 	int class_count = 0;
 
@@ -2388,6 +2434,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		if (module->post_deactivate_func) {
 			post_deactivate_count++;
 		}
+		if (module->handle) {
+			dl_loaded_count++;
+		}
 	} ZEND_HASH_FOREACH_END();
 	module_request_startup_handlers = (zend_module_entry**)realloc(
 		module_request_startup_handlers,
@@ -2400,6 +2449,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	module_request_shutdown_handlers[shutdown_count] = NULL;
 	module_post_deactivate_handlers = module_request_shutdown_handlers + shutdown_count + 1;
 	module_post_deactivate_handlers[post_deactivate_count] = NULL;
+	/* Cannot reuse module_request_startup_handlers because it is freed in zend_destroy_modules, which happens before zend_unload_modules. */
+	modules_dl_loaded = realloc(modules_dl_loaded, sizeof(zend_module_entry*) * (dl_loaded_count + 1));
+	modules_dl_loaded[dl_loaded_count] = NULL;
 	startup_count = 0;
 
 	ZEND_HASH_MAP_FOREACH_PTR(&module_registry, module) {
@@ -2411,6 +2463,9 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 		}
 		if (module->post_deactivate_func) {
 			module_post_deactivate_handlers[--post_deactivate_count] = module;
+		}
+		if (module->handle) {
+			modules_dl_loaded[--dl_loaded_count] = module;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2824,10 +2879,12 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 	while (ptr->fname) {
 		fname_len = strlen(ptr->fname);
 		internal_function->handler = ptr->handler;
+		internal_function->doc_comment = ptr->doc_comment ? zend_string_init_interned(ptr->doc_comment, strlen(ptr->doc_comment), 1) : NULL;
 		internal_function->function_name = zend_string_init_interned(ptr->fname, fname_len, 1);
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		internal_function->attributes = NULL;
+		internal_function->frameless_function_infos = ptr->frameless_function_infos;
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
@@ -2930,6 +2987,27 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 			free(reg_function);
 			zend_string_release(lowercase_name);
 			break;
+		}
+		if (reg_function->frameless_function_infos) {
+			const zend_frameless_function_info *flf_info = reg_function->frameless_function_infos;
+			while (flf_info->handler) {
+				if (zend_flf_count == zend_flf_capacity) {
+					if (!zend_flf_capacity) {
+						zend_flf_capacity = 8;
+					} else {
+						zend_flf_capacity *= 2;
+					}
+					/* +1 for NULL terminator */
+					zend_flf_handlers = realloc(zend_flf_handlers, (zend_flf_capacity + 1) * sizeof(void *));
+					zend_flf_functions = realloc(zend_flf_functions, (zend_flf_capacity + 1) * sizeof(zend_function *));
+				}
+				zend_flf_handlers[zend_flf_count] = flf_info->handler;
+				zend_flf_functions[zend_flf_count] = (zend_function *)reg_function;
+				zend_flf_count++;
+				flf_info++;
+			}
+			zend_flf_handlers[zend_flf_count] = NULL;
+			zend_flf_functions[zend_flf_count] = NULL;
 		}
 
 		/* Get parameter count including variadic parameter. */
@@ -3192,17 +3270,22 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		clean_module_functions(module);
 	}
 
-#if HAVE_LIBDL
-	if (module->handle && !getenv("ZEND_DONT_UNLOAD_MODULES")) {
-		DL_UNLOAD(module->handle);
-	}
-#endif
-
 #if ZEND_RC_DEBUG
 	zend_rc_debug = orig_rc_debug;
 #endif
 }
 /* }}} */
+
+void module_registry_unload(const zend_module_entry *module)
+{
+#if HAVE_LIBDL
+	if (!getenv("ZEND_DONT_UNLOAD_MODULES")) {
+		DL_UNLOAD(module->handle);
+	}
+#else
+	ZEND_IGNORE_VALUE(module);
+#endif
+}
 
 ZEND_API void zend_activate_modules(void) /* {{{ */
 {
@@ -3248,6 +3331,18 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 }
 /* }}} */
 
+void zend_unload_modules(void) /* {{{ */
+{
+	zend_module_entry **modules = modules_dl_loaded;
+	while (*modules) {
+		module_registry_unload(*modules);
+		modules++;
+	}
+	free(modules_dl_loaded);
+	modules_dl_loaded = NULL;
+}
+/* }}} */
+
 ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
@@ -3266,6 +3361,9 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 				break;
 			}
 			module_destructor(module);
+			if (module->handle) {
+				module_registry_unload(module);
+			}
 			zend_string_release_ex(key, 0);
 		} ZEND_HASH_MAP_FOREACH_END_DEL();
 	} else {

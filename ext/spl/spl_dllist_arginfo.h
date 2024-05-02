@@ -83,7 +83,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplQueue_dequeue arginfo_class_SplDoublyLinkedList_pop
 
-
 ZEND_METHOD(SplDoublyLinkedList, add);
 ZEND_METHOD(SplDoublyLinkedList, pop);
 ZEND_METHOD(SplDoublyLinkedList, shift);
@@ -110,7 +109,6 @@ ZEND_METHOD(SplDoublyLinkedList, unserialize);
 ZEND_METHOD(SplDoublyLinkedList, serialize);
 ZEND_METHOD(SplDoublyLinkedList, __serialize);
 ZEND_METHOD(SplDoublyLinkedList, __unserialize);
-
 
 static const zend_function_entry class_SplDoublyLinkedList_methods[] = {
 	ZEND_ME(SplDoublyLinkedList, add, arginfo_class_SplDoublyLinkedList_add, ZEND_ACC_PUBLIC)
@@ -142,13 +140,11 @@ static const zend_function_entry class_SplDoublyLinkedList_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SplQueue_methods[] = {
-	ZEND_MALIAS(SplDoublyLinkedList, enqueue, push, arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC)
-	ZEND_MALIAS(SplDoublyLinkedList, dequeue, shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("enqueue", zim_SplDoublyLinkedList_push, arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("dequeue", zim_SplDoublyLinkedList_shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SplStack_methods[] = {
 	ZEND_FE_END

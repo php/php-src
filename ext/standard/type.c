@@ -342,15 +342,8 @@ PHP_FUNCTION(is_object)
 }
 /* }}} */
 
-/* {{{ Returns true if value is a number or a numeric string */
-PHP_FUNCTION(is_numeric)
+static inline void _zend_is_numeric(zval *return_value, zval *arg)
 {
-	zval *arg;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(arg)
-	ZEND_PARSE_PARAMETERS_END();
-
 	switch (Z_TYPE_P(arg)) {
 		case IS_LONG:
 		case IS_DOUBLE:
@@ -370,7 +363,28 @@ PHP_FUNCTION(is_numeric)
 			break;
 	}
 }
+
+/* {{{ Returns true if value is a number or a numeric string */
+PHP_FUNCTION(is_numeric)
+{
+	zval *arg;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	_zend_is_numeric(return_value, arg);
+}
 /* }}} */
+
+ZEND_FRAMELESS_FUNCTION(is_numeric, 1)
+{
+	zval *arg;
+
+	Z_FLF_PARAM_ZVAL(1, arg);
+
+	_zend_is_numeric(return_value, arg);
+}
 
 /* {{{ Returns true if value is a scalar */
 PHP_FUNCTION(is_scalar)

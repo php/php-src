@@ -68,9 +68,16 @@ function get_class_methods(object|string $object_or_class): array {}
 /** @param object|string $object_or_class */
 function method_exists($object_or_class, string $method): bool {}
 
-/** @param object|string $object_or_class */
+/**
+ * @param object|string $object_or_class
+ * @frameless-function {"arity": 2}
+ */
 function property_exists($object_or_class, string $property): bool {}
 
+/**
+ * @frameless-function {"arity": 1}
+ * @frameless-function {"arity": 2}
+ */
 function class_exists(string $class, bool $autoload = true): bool {}
 
 function interface_exists(string $interface, bool $autoload = true): bool {}

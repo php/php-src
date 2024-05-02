@@ -2222,6 +2222,8 @@ static void php_cli_server_request_shutdown(php_cli_server *server, php_cli_serv
 	destroy_request_info(&SG(request_info));
 	SG(server_context) = NULL;
 	SG(rfc1867_uploaded_files) = NULL;
+	SG(request_parse_body_context).throw_exceptions = false;
+	memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 }
 /* }}} */
 
@@ -2241,20 +2243,13 @@ static bool php_cli_server_dispatch_router(php_cli_server *server, php_cli_serve
 
 	zend_try {
 		zval retval;
-
-		/* Normally php_execute_script restarts the timer with max_execution_time if it has
-		 * previously been initialized with max_input_time. We're not using php_execute_script here
-		 * because it does not provide a way to get the return value of the main script, so we need
-		 * to restart the timer manually. */
-		if (PG(max_input_time) != -1) {
-#ifdef PHP_WIN32
-			zend_unset_timeout();
-#endif
-			zend_set_timeout(INI_INT("max_execution_time"), 0);
-		}
-
 		ZVAL_UNDEF(&retval);
-		if (SUCCESS == zend_execute_scripts(ZEND_REQUIRE, &retval, 1, &zfd)) {
+		int sg_options_back = SG(options);
+		/* Don't chdir to the router script because the file path may be relative. */
+		SG(options) |= SAPI_OPTION_NO_CHDIR;
+		bool result = php_execute_script_ex(&zfd, &retval);
+		SG(options) = sg_options_back;
+		if (result) {
 			if (Z_TYPE(retval) != IS_UNDEF) {
 				decline = Z_TYPE(retval) == IS_FALSE;
 				zval_ptr_dtor(&retval);
@@ -2322,6 +2317,8 @@ static zend_result php_cli_server_dispatch(php_cli_server *server, php_cli_serve
 			sapi_module.send_headers = send_header_func;
 			SG(sapi_headers).send_default_content_type = 1;
 			SG(rfc1867_uploaded_files) = NULL;
+			SG(request_parse_body_context).throw_exceptions = false;
+			memset(&SG(request_parse_body_context).options_cache, 0, sizeof(SG(request_parse_body_context).options_cache));
 		}
 		if (FAILURE == php_cli_server_begin_send_static(server, client)) {
 			php_cli_server_close_connection(server, client);

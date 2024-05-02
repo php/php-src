@@ -65,7 +65,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_setAttribute
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(PDO, __construct);
 ZEND_METHOD(PDO, connect);
 ZEND_METHOD(PDO, beginTransaction);
@@ -82,7 +81,6 @@ ZEND_METHOD(PDO, query);
 ZEND_METHOD(PDO, quote);
 ZEND_METHOD(PDO, rollBack);
 ZEND_METHOD(PDO, setAttribute);
-
 
 static const zend_function_entry class_PDO_methods[] = {
 	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)

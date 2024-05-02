@@ -1,9 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead.
  * Stub hash: d2a7022c8e6e259b452786e00867b4a167d58277 */
 
-
-
-
 static const zend_function_entry class_PdoDblib_methods[] = {
 	ZEND_FE_END
 };

@@ -30,7 +30,7 @@ Stack trace:
 #0 %sno-switch-gc.php(%d): Fiber::suspend()
 #1 [internal function]: class@anonymous->__destruct()
 #2 %sno-switch-gc.php(%d): gc_collect_cycles()
-#3 [internal function]: {closure}()
+#3 [internal function]: {closure:%s:%d}()
 #4 %sno-switch-gc.php(%d): Fiber->start()
 #5 {main}
   thrown in %sno-switch-gc.php on line %d

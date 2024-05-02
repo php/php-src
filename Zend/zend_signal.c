@@ -183,8 +183,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	zend_signal_entry_t p_sig;
 #ifdef ZTS
 	if (tsrm_is_shutdown() || !tsrm_is_managed_thread()) {
-		p_sig.flags = 0;
-		p_sig.handler = SIG_DFL;
+		p_sig = global_orig_handlers[signo-1];
 	} else
 #endif
 	p_sig = SIGG(handlers)[signo-1];

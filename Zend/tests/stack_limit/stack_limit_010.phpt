@@ -15,7 +15,10 @@ $stack = zend_test_zend_call_stack_get();
 var_dump($stack);
 
 $expectedMaxSize = match(php_uname('s')) {
-    'Darwin' => 8*1024*1024,
+    'Darwin' => match(php_uname('m')) {
+        'x86_64' => 8*1024*1024,
+        'arm64' => 8372224,
+    },
     'FreeBSD' => match(php_uname('m')) {
         'amd64' => 512*1024*1024 - 4096,
         'i386' => 64*1024*1024 - 4096,
@@ -24,6 +27,7 @@ $expectedMaxSize = match(php_uname('s')) {
         'true' => 16*1024*1024, // https://github.com/actions/runner-images/pull/3328
         default => 8*1024*1024,
     },
+    'SunOS' => 10 * 1024 * 1024,
     'Windows NT' => 67108864 - 4*4096, // Set by sapi/cli/config.w32
 };
 

@@ -49,6 +49,18 @@ try {
 } catch (\Throwable $e) {
     echo $e->getMessage(), "\n";
 }
+// Fetch reference
+try {
+    echo "Reference to dimension:\n";
+    $r = &$container[$dimension];
+    echo "Value of reference:\n";
+    var_dump($r);
+    $r = 100;
+    echo "Value of container dimension after write to reference (should be int(100) if successful):\n";
+    var_dump($container[$dimension]);
+} catch (\Throwable $e) {
+    echo $e->getMessage(), "\n";
+}
 // Unset
 try {
     echo "unset():\n";

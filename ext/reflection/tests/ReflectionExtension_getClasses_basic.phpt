@@ -134,4 +134,9 @@ array(25) {
     ["name"]=>
     string(15) "ReflectionFiber"
   }
+  ["ReflectionConstant"]=>
+  object(ReflectionClass)#26 (1) {
+    ["name"]=>
+    string(18) "ReflectionConstant"
+  }
 }

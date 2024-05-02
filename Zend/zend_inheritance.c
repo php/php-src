@@ -97,7 +97,7 @@ static zend_function *zend_duplicate_internal_function(zend_function *func, zend
 	zend_function *new_function;
 
 	if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
-		new_function = pemalloc(sizeof(zend_internal_function), 1);
+		new_function = (zend_function *)pemalloc(sizeof(zend_internal_function), 1);
 		memcpy(new_function, func, sizeof(zend_internal_function));
 	} else {
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_internal_function));
@@ -1318,7 +1318,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				child_info->offset = parent_info->offset;
 			}
 
-			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
+			if (ZEND_TYPE_IS_SET(parent_info->type)) {
 				inheritance_status status = property_types_compatible(parent_info, child_info);
 				if (status == INHERITANCE_ERROR) {
 					emit_incompatible_property_error(child_info, parent_info);
@@ -1751,7 +1751,7 @@ static bool do_inherit_constant_check(
 		);
 	}
 
-	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && UNEXPECTED(ZEND_TYPE_IS_SET(parent_constant->type))) {
+	if (!(ZEND_CLASS_CONST_FLAGS(parent_constant) & ZEND_ACC_PRIVATE) && ZEND_TYPE_IS_SET(parent_constant->type)) {
 		inheritance_status status = class_constant_types_compatible(parent_constant, child_constant);
 		if (status == INHERITANCE_ERROR) {
 			emit_incompatible_class_constant_error(child_constant, parent_constant, name);
@@ -1996,9 +1996,9 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	} else {
 		new_fn = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_fn, fn, sizeof(zend_op_array));
-		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
+	new_fn->common.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 
 	/* Reassign method name, in case it is an alias. */
 	new_fn->common.function_name = name;
@@ -3331,7 +3331,9 @@ static zend_always_inline bool register_early_bound_ce(zval *delayed_early_bindi
 				return true;
 			}
 		}
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		zend_class_entry *old_ce = zend_hash_find_ptr(EG(class_table), lcname);
+		ZEND_ASSERT(old_ce);
+		zend_class_redeclaration_error(E_COMPILE_ERROR, old_ce);
 		return false;
 	}
 	if (zend_hash_add_ptr(CG(class_table), lcname, ce) != NULL) {

@@ -10,7 +10,7 @@ $body = $dom->appendChild($dom->createElement("body"));
 foreach (["style", "script", "xmp", "iframe", "noembed", "noframes", "plaintext", "noscript"] as $tag) {
     $tag = $body->appendChild($dom->createElementNS("some:ns", $tag));
     $tag->textContent = "&\"<>\xc2\xa0 foobar";
-    $body->appendChild(new DOMText("\n"));
+    $body->append("\n");
 }
 echo $dom->saveHTML();
 

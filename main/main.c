@@ -1413,6 +1413,14 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					zend_objects_store_mark_destructed(&EG(objects_store));
+					if (CG(in_compilation) && (type == E_COMPILE_ERROR || type == E_PARSE)) {
+						/* We bailout during compilation which may for example leave stale entries in CG(loop_var_stack).
+						 * If code is compiled during shutdown, we need to make sure the compiler is reset to a clean state,
+						 * otherwise this will lead to incorrect compilation during shutdown.
+						 * We don't do a full re-initialization via init_compiler() because that will also reset streams and resources. */
+						shutdown_compiler();
+						zend_init_compiler_data_structures();
+					}
 					zend_bailout();
 					return;
 				}
@@ -2137,16 +2145,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 
 	le_index_ptr = zend_register_list_destructors_ex(NULL, NULL, "index pointer", 0);
 
-    register_main_symbols(module_number);
-
-    REGISTER_MAIN_STRINGL_CONSTANT("PHP_SAPI", sapi_module.name, strlen(sapi_module.name), CONST_PERSISTENT | CONST_NO_FILE_CACHE);
-
 	php_binary_init();
-	if (PG(php_binary)) {
-		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", PG(php_binary), strlen(PG(php_binary)), CONST_PERSISTENT | CONST_NO_FILE_CACHE);
-	} else {
-		REGISTER_MAIN_STRINGL_CONSTANT("PHP_BINARY", "", 0, CONST_PERSISTENT | CONST_NO_FILE_CACHE);
-	}
+	register_main_symbols(module_number);
 
 	/* this will read in php.ini, set up the configuration parameters,
 	   load zend extensions and register php function extensions
@@ -2431,8 +2431,7 @@ void php_module_shutdown(void)
 }
 /* }}} */
 
-/* {{{ php_execute_script */
-PHPAPI bool php_execute_script(zend_file_handle *primary_file)
+PHPAPI bool php_execute_script_ex(zend_file_handle *primary_file, zval *retval)
 {
 	zend_file_handle *prepend_file_p = NULL, *append_file_p = NULL;
 	zend_file_handle prepend_file, append_file;
@@ -2442,7 +2441,7 @@ PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 	char *old_cwd;
 	ALLOCA_FLAG(use_heap)
 #endif
-	bool retval = false;
+	bool result = true;
 
 #ifndef HAVE_BROKEN_GETCWD
 # define OLD_CWD_SIZE 4096
@@ -2501,7 +2500,17 @@ PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 			zend_set_timeout(INI_INT("max_execution_time"), 0);
 		}
 
-		retval = (zend_execute_scripts(ZEND_REQUIRE, NULL, 3, prepend_file_p, primary_file, append_file_p) == SUCCESS);
+		if (prepend_file_p && result) {
+			result = zend_execute_script(ZEND_REQUIRE, NULL, prepend_file_p) == SUCCESS;
+		}
+		if (result) {
+			result = zend_execute_script(ZEND_REQUIRE, retval, primary_file) == SUCCESS;
+		}
+		if (append_file_p && result) {
+			result = zend_execute_script(ZEND_REQUIRE, NULL, append_file_p) == SUCCESS;
+		}
+	} zend_catch {
+		result = false;
 	} zend_end_try();
 
 	if (prepend_file_p) {
@@ -2529,7 +2538,13 @@ PHPAPI bool php_execute_script(zend_file_handle *primary_file)
 	}
 	free_alloca(old_cwd, use_heap);
 #endif
-	return retval;
+	return result;
+}
+
+/* {{{ php_execute_script */
+PHPAPI bool php_execute_script(zend_file_handle *primary_file)
+{
+	return php_execute_script_ex(primary_file, NULL);
 }
 /* }}} */
 

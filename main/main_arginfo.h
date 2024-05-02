@@ -1,7 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2542736c885829255e4226783b60db1453342b65 */
-
-
+ * Stub hash: 7ff3d7dc2636153044513390669cb46e9a5b5a0a */
 
 static void register_main_symbols(int module_number)
 {
@@ -99,4 +97,6 @@ static void register_main_symbols(int module_number)
 #if defined(ZEND_VERIFY_TYPE_INFERENCE)
 	REGISTER_BOOL_CONSTANT("ZEND_VERIFY_TYPE_INFERENCE", ZEND_VERIFY_TYPE_INFERENCE, CONST_PERSISTENT);
 #endif
+	REGISTER_STRING_CONSTANT("PHP_SAPI", sapi_module.name, CONST_PERSISTENT | CONST_NO_FILE_CACHE);
+	REGISTER_STRING_CONSTANT("PHP_BINARY", PG(php_binary) ? PG(php_binary) : "", CONST_PERSISTENT | CONST_NO_FILE_CACHE);
 }

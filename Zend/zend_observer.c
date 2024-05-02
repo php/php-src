@@ -147,7 +147,12 @@ static void zend_observer_fcall_install(zend_execute_data *execute_data)
 	}
 }
 
-static bool zend_observer_remove_handler(void **first_handler, void *old_handler) {
+/* We need to provide the ability to retrieve the handler which will move onto the position the current handler was.
+ * The fundamental problem is that, if a handler is removed while it's being executed, it will move handlers around:
+ * the previous next handler is now at the place where the current handler was.
+ * Hence, the next handler executed will be the one after the next handler.
+ * Callees must thus invoke the next handler themselves, with the same arguments they were passed. */
+static bool zend_observer_remove_handler(void **first_handler, void *old_handler, void **next_handler) {
 	size_t registered_observers = zend_observers_fcall_list.count;
 
 	void **last_handler = first_handler + registered_observers - 1;
@@ -155,11 +160,13 @@ static bool zend_observer_remove_handler(void **first_handler, void *old_handler
 		if (*cur_handler == old_handler) {
 			if (registered_observers == 1 || (cur_handler == first_handler && cur_handler[1] == NULL)) {
 				*cur_handler = ZEND_OBSERVER_NOT_OBSERVED;
+				*next_handler = NULL;
 			} else {
 				if (cur_handler != last_handler) {
 					memmove(cur_handler, cur_handler + 1, sizeof(cur_handler) * (last_handler - cur_handler));
 				}
 				*last_handler = NULL;
+				*next_handler = *cur_handler;
 			}
 			return true;
 		}
@@ -184,8 +191,8 @@ ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_obse
 	}
 }
 
-ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin) {
-	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function), begin);
+ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next) {
+	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function), begin, (void **)next);
 }
 
 ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observer_fcall_end_handler end) {
@@ -200,9 +207,9 @@ ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observ
 	*end_handler = end;
 }
 
-ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end) {
+ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next) {
 	size_t registered_observers = zend_observers_fcall_list.count;
-	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function) + registered_observers, end);
+	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function) + registered_observers, end, (void **)next);
 }
 
 static inline zend_execute_data **prev_observed_frame(zend_execute_data *execute_data) {

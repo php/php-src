@@ -151,7 +151,7 @@ AC_CHECK_FUNCS(getpid kill pthread_getattr_np pthread_attr_get_np pthread_get_st
 dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
 AC_CHECK_FUNCS([sigsetjmp],,
   [AC_CHECK_DECL([sigsetjmp],
-    [AC_DEFINE([HAVE_SIGSETJMP],[1],[Define to 1 if you have the 'sigsetjmp' function.])],,
+    [AC_DEFINE([HAVE_SIGSETJMP], [1])],,
     [#include <setjmp.h>])])
 
 dnl Test whether the stack grows downwards
@@ -223,16 +223,6 @@ test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
   CFLAGS="$CFLAGS -DZTS"
-fi
-
-AC_C_INLINE
-
-AC_MSG_CHECKING(target system is Darwin)
-if echo "$target" | grep "darwin" > /dev/null; then
-  AC_DEFINE([DARWIN], 1, [Define if the target system is darwin])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
 fi
 
 dnl Test and set the alignment define for ZEND_MM. This also does the
@@ -314,7 +304,7 @@ AC_ARG_ENABLE([zend-max-execution-timers],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
     [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
 
-AS_CASE(["$host_alias"], [*linux*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
+AS_CASE(["$host_alias"], [*linux*|*freebsd*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
 
 PHP_CHECK_FUNC(timer_create, rt)
 if test "$ac_cv_func_timer_create" != "yes"; then

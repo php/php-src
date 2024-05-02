@@ -29,11 +29,7 @@ if (!CHECK_HEADER_ADD_INCLUDE('KeccakHash.h', 'CFLAGS_HASH', hash_sha3_dir)) {
 
 ADD_FLAG('CFLAGS_HASH', '/DKeccakP200_excluded /DKeccakP400_excluded /DKeccakP800_excluded /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 
-var hash_murmur_dir = 'ext/hash/murmur';
-if (!CHECK_HEADER_ADD_INCLUDE('PMurHash.h', 'CFLAGS_HASH', hash_murmur_dir)) {
-	ERROR('Unable to locate murmur headers');
-}
-ADD_SOURCES(hash_murmur_dir, 'PMurHash.c PMurHash128.c', 'hash');
+ADD_SOURCES('ext/hash/murmur', 'PMurHash.c PMurHash128.c', 'hash');
 
 PHP_INSTALL_HEADERS('ext/hash',	'php_hash.h php_hash_md.h php_hash_sha.h ' +
 									'php_hash_ripemd.h php_hash_haval.h php_hash_tiger.h ' +

@@ -97,7 +97,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
-struct sigaction act, old_term, old_quit, old_int;
+static struct sigaction act, old_term, old_quit, old_int;
 #endif
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
@@ -116,7 +116,7 @@ static int parent = 1;
 
 #ifndef PHP_WIN32
 /* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
-static int exit_signal = 0;
+static volatile sig_atomic_t exit_signal = 0;
 
 /* Is Parent waiting for children to exit */
 static int parent_waiting = 0;
@@ -486,9 +486,9 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes)
 	while (read_bytes < count_bytes) {
 #ifdef PHP_WIN32
 		size_t diff = count_bytes - read_bytes;
-		unsigned int to_read = (diff > UINT_MAX) ? UINT_MAX : (unsigned int)diff;
+		unsigned int to_read = (diff > INT_MAX) ? INT_MAX : (unsigned int)diff;
 
-		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, to_read);
+		tmp_read_bytes = _read(STDIN_FILENO, buffer + read_bytes, to_read);
 #else
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 #endif
@@ -1454,7 +1454,7 @@ static void init_request_info(fcgi_request *request)
 /**
  * Clean up child processes upon exit
  */
-void fastcgi_cleanup(int signal)
+static void fastcgi_cleanup(int signal)
 {
 #ifdef DEBUG_FASTCGI
 	fprintf(stderr, "FastCGI shutdown, pid %d\n", getpid());
@@ -1468,7 +1468,7 @@ void fastcgi_cleanup(int signal)
 	if (parent && parent_waiting) {
 		exit_signal = 1;
 	} else {
-		exit(0);
+		_exit(0);
 	}
 }
 #else
@@ -1918,9 +1918,16 @@ consult the installation file that came with this distribution, or visit \n\
 #endif
 
 	if (bindpath) {
-		int backlog = 128;
+		int backlog = MIN(SOMAXCONN, 128);
 		if (getenv("PHP_FCGI_BACKLOG")) {
 			backlog = atoi(getenv("PHP_FCGI_BACKLOG"));
+		}
+		if (backlog < -1 || backlog > SOMAXCONN) {
+			fprintf(stderr, "Invalid backlog %d, needs to be between -1 and %d\n", backlog, SOMAXCONN);
+#ifdef ZTS
+			tsrm_shutdown();
+#endif
+			return FAILURE;
 		}
 		fcgi_fd = fcgi_listen(bindpath, backlog);
 		if (fcgi_fd < 0) {

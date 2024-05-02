@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #include "zend_llist.h"
+#include "zend_frameless_function.h"
 
 #define SET_UNUSED(op) do { \
 	op ## _type = IS_UNUSED; \
@@ -198,6 +199,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
+	bool       in_jmp_frameless_branch;
 } zend_oparray_context;
 
 /* Class, property and method flags                  class|meth.|prop.|const*/
@@ -462,6 +464,7 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
@@ -484,7 +487,6 @@ struct _zend_op_array {
 	zend_string *filename;
 	uint32_t line_start;
 	uint32_t line_end;
-	zend_string *doc_comment;
 
 	int last_literal;
 	uint32_t num_dynamic_func_defs;
@@ -520,11 +522,13 @@ typedef struct _zend_internal_function {
 	zend_internal_arg_info *arg_info;
 	HashTable *attributes;
 	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
 	uint32_t T;         /* number of temporary variables */
 	/* END of common elements */
 
 	zif_handler handler;
 	struct _zend_module_entry *module;
+	const zend_frameless_function_info *frameless_function_infos;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
 
@@ -546,6 +550,7 @@ union _zend_function {
 		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
 		HashTable   *attributes;
 		ZEND_MAP_PTR_DEF(void **, run_time_cache);
+		zend_string *doc_comment;
 		uint32_t T;         /* number of temporary variables */
 	} common;
 
@@ -654,6 +659,11 @@ ZEND_STATIC_ASSERT(ZEND_MM_ALIGNED_SIZE(sizeof(zval)) == sizeof(zval),
 	(EG(current_execute_data)->prev_execute_data && \
 	 EG(current_execute_data)->prev_execute_data->func && \
 	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)->prev_execute_data))
+
+#define ZEND_FLF_ARG_USES_STRICT_TYPES() \
+	(EG(current_execute_data) && \
+	 EG(current_execute_data)->func && \
+	 ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)))
 
 #define ZEND_RET_USES_STRICT_TYPES() \
 	ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))
@@ -867,6 +877,7 @@ ZEND_API zend_op_array *compile_filename(int type, zend_string *filename);
 ZEND_API zend_ast *zend_compile_string_to_ast(
 		zend_string *code, struct _zend_arena **ast_arena, zend_string *filename);
 ZEND_API zend_result zend_execute_scripts(int type, zval *retval, int file_count, ...);
+ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle);
 ZEND_API zend_result open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, uint8_t type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);

@@ -9,7 +9,7 @@ if (PHP_SOAP != "no") {
 		CHECK_HEADER_ADD_INCLUDE("libxml/tree.h", "CFLAGS_SOAP", PHP_PHP_BUILD + "\\include\\libxml2")
 		) {
 		EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c', null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
-		AC_DEFINE('HAVE_PHP_SOAP', 1, "SOAP support");
+		AC_DEFINE('HAVE_SOAP', 1, "SOAP support");
 
 		if (!PHP_SOAP_SHARED) {
 			ADD_FLAG('CFLAGS_SOAP', "/D LIBXML_STATIC ");

@@ -134,17 +134,7 @@ PHP_MINFO_FUNCTION(bcmath)
    Convert to bc_num detecting scale */
 static zend_result php_str2num(bc_num *num, char *str)
 {
-	char *p;
-
-	if (!(p = strchr(str, '.'))) {
-		if (!bc_str2num(num, str, 0)) {
-			return FAILURE;
-		}
-
-		return SUCCESS;
-	}
-
-	if (!bc_str2num(num, str, strlen(p+1))) {
+	if (!bc_str2num(num, str, 0, true)) {
 		return FAILURE;
 	}
 
@@ -158,7 +148,7 @@ PHP_FUNCTION(bcadd)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -177,8 +167,6 @@ PHP_FUNCTION(bcadd)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -209,7 +197,7 @@ PHP_FUNCTION(bcsub)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -228,8 +216,6 @@ PHP_FUNCTION(bcsub)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -260,7 +246,7 @@ PHP_FUNCTION(bcmul)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -279,8 +265,6 @@ PHP_FUNCTION(bcmul)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -311,7 +295,7 @@ PHP_FUNCTION(bcdiv)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -330,8 +314,6 @@ PHP_FUNCTION(bcdiv)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -365,7 +347,7 @@ PHP_FUNCTION(bcmod)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second, result;
+	bc_num first = NULL, second = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -384,8 +366,6 @@ PHP_FUNCTION(bcmod)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(left)) == FAILURE) {
@@ -419,7 +399,7 @@ PHP_FUNCTION(bcpowmod)
 	zend_string *base_str, *exponent_str, *modulus_str;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num bc_base, bc_expo, bc_modulus, result;
+	bc_num bc_base = NULL, bc_expo = NULL, bc_modulus = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
@@ -439,9 +419,6 @@ PHP_FUNCTION(bcpowmod)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&bc_base);
-	bc_init_num(&bc_expo);
-	bc_init_num(&bc_modulus);
 	bc_init_num(&result);
 
 	if (php_str2num(&bc_base, ZSTR_VAL(base_str)) == FAILURE) {
@@ -497,7 +474,7 @@ PHP_FUNCTION(bcpow)
 	zend_string *base_str, *exponent_str;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, bc_exponent, result;
+	bc_num first = NULL, bc_exponent = NULL, result;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -516,8 +493,6 @@ PHP_FUNCTION(bcpow)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&bc_exponent);
 	bc_init_num(&result);
 
 	if (php_str2num(&first, ZSTR_VAL(base_str)) == FAILURE) {
@@ -559,7 +534,7 @@ PHP_FUNCTION(bcsqrt)
 	zend_string *left;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num result;
+	bc_num result = NULL;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -576,8 +551,6 @@ PHP_FUNCTION(bcsqrt)
 	} else {
 		scale = (int) scale_param;
 	}
-
-	bc_init_num(&result);
 
 	if (php_str2num(&result, ZSTR_VAL(left)) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
@@ -602,7 +575,7 @@ PHP_FUNCTION(bccomp)
 	zend_string *left, *right;
 	zend_long scale_param;
 	bool scale_param_is_null = 1;
-	bc_num first, second;
+	bc_num first = NULL, second = NULL;
 	int scale = BCG(bc_precision);
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
@@ -621,15 +594,12 @@ PHP_FUNCTION(bccomp)
 		scale = (int) scale_param;
 	}
 
-	bc_init_num(&first);
-	bc_init_num(&second);
-
-	if (!bc_str2num(&first, ZSTR_VAL(left), scale)) {
+	if (!bc_str2num(&first, ZSTR_VAL(left), scale, false)) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
 	}
 
-	if (!bc_str2num(&second, ZSTR_VAL(right), scale)) {
+	if (!bc_str2num(&second, ZSTR_VAL(right), scale, false)) {
 		zend_argument_value_error(2, "is not well-formed");
 		goto cleanup;
 	}
@@ -639,6 +609,94 @@ PHP_FUNCTION(bccomp)
 	cleanup: {
 		bc_free_num(&first);
 		bc_free_num(&second);
+	};
+}
+/* }}} */
+
+/* {{{ floor or ceil */
+static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
+{
+	zend_string *numstr;
+	bc_num num = NULL, result;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(numstr)
+	ZEND_PARSE_PARAMETERS_END();
+
+	bc_init_num(&result);
+
+	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	bc_floor_or_ceil(num, is_floor, &result);
+	RETVAL_STR(bc_num2str_ex(result, 0));
+
+	cleanup: {
+		bc_free_num(&num);
+		bc_free_num(&result);
+	};
+}
+/* }}} */
+
+/* {{{ Returns floor of num */
+PHP_FUNCTION(bcfloor)
+{
+	bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+}
+/* }}} */
+
+/* {{{ Returns ceil of num */
+PHP_FUNCTION(bcceil)
+{
+	bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+/* }}} */
+
+/* {{{ Returns num rounded to the digits specified by precision. */
+PHP_FUNCTION(bcround)
+{
+	zend_string *numstr;
+	zend_long precision = 0;
+	zend_long mode = PHP_ROUND_HALF_UP;
+	bc_num num = NULL, result;
+
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(numstr)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(precision)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (mode) {
+		case PHP_ROUND_HALF_UP:
+		case PHP_ROUND_HALF_DOWN:
+		case PHP_ROUND_HALF_EVEN:
+		case PHP_ROUND_HALF_ODD:
+		case PHP_ROUND_CEILING:
+		case PHP_ROUND_FLOOR:
+		case PHP_ROUND_TOWARD_ZERO:
+		case PHP_ROUND_AWAY_FROM_ZERO:
+			break;
+		default:
+			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
+			return;
+	}
+
+	bc_init_num(&result);
+
+	if (php_str2num(&num, ZSTR_VAL(numstr)) == FAILURE) {
+		zend_argument_value_error(1, "is not well-formed");
+		goto cleanup;
+	}
+
+	bc_round(num, precision, mode, &result);
+	RETVAL_STR(bc_num2str_ex(result, result->n_scale));
+
+	cleanup: {
+		bc_free_num(&num);
+		bc_free_num(&result);
 	};
 }
 /* }}} */

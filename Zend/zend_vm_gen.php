@@ -2432,7 +2432,7 @@ function gen_vm($def, $skel) {
                     "/^
                         ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_|COLD_|COLD_CONST_|COLD_CONSTCONST_)?HANDLER\(
                             \s*([0-9]+)\s*,
-                            \s*([A-Z_]+)\s*,
+                            \s*([A-Z_][A-Z0-9_]*)\s*,
                             \s*([A-Z_|]+)\s*,
                             \s*([A-Z_|]+)\s*
                             (,\s*([A-Z_|]+)\s*)?
