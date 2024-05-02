@@ -38,7 +38,6 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 {
 	zend_string *str;
 	char *sptr;
-	size_t index;
 	bool signch;
 	size_t min_scale = MIN(num->n_scale, scale);
 
@@ -64,8 +63,15 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 	if (scale > 0) {
 		*sptr++ = '.';
 		sptr = bc_copy_bcd_val(sptr, nptr, nptr + min_scale);
-		for (index = num->n_scale; index < scale; index++) {
-			*sptr++ = BCD_CHAR(0);
+
+		size_t scale_diff;
+		if (scale > num->n_scale && (scale_diff = scale - num->n_scale) > 8) {
+			memset(sptr, BCD_CHAR(0), scale_diff);
+			sptr += scale_diff;
+		} else {
+			for (size_t index = num->n_scale; index < scale; index++) {
+				*sptr++ = BCD_CHAR(0);
+			}
 		}
 	}
 
