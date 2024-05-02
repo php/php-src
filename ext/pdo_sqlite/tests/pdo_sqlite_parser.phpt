@@ -31,8 +31,10 @@ foreach ($queries as $k => $query) {
 // One parameter
 $queries = [
     "SELECT * FROM {$table} WHERE '1' = ?",
-    "SELECT * FROM {$table} WHERE \"?\" IN (?, '?')",
+    "SELECT * FROM {$table} WHERE \"?\" IN (?, \"?\")",
     "SELECT * FROM {$table} WHERE `a``?` = ?",
+    "SELECT * FROM {$table} WHERE \"a`?\" = ?",
+    "SELECT * FROM {$table} WHERE [a`?] = ?",
 ];
 
 foreach ($queries as $k => $query) {
@@ -50,6 +52,8 @@ if (file_exists($filename)) {
 }
 ?>
 --EXPECT--
+bool(true)
+bool(true)
 bool(true)
 bool(true)
 bool(true)

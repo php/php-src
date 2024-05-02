@@ -28,8 +28,8 @@ int pdo_sqlite_scanner(pdo_scanner_t *s)
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
-	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--"[^\r\n]*);
-	SPECIALS	= [:?"'`/-];
+	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|"--".*);
+	SPECIALS	= [:?"'`/[-];
 	MULTICHAR	= ([:]{2,}|[?]{2,});
 	ANYNOEOF	= [\001-\377];
 	*/
@@ -38,6 +38,7 @@ int pdo_sqlite_scanner(pdo_scanner_t *s)
 		(["]((["]["])|ANYNOEOF)*["])			{ RET(PDO_PARSER_TEXT); }
 		(['](([']['])|ANYNOEOF)*['])			{ RET(PDO_PARSER_TEXT); }
 		([`](([`][`])|ANYNOEOF)*[`])			{ RET(PDO_PARSER_TEXT); }
+		("["ANYNOEOF*"]")						{ RET(PDO_PARSER_TEXT); }
 		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
 		QUESTION								{ RET(PDO_PARSER_BIND_POS); }
