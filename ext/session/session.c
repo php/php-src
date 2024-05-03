@@ -1501,7 +1501,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 			zval_ptr_dtor_str(sid);
 			ZVAL_STR(sid, smart_str_extract(&var));
 		} else {
-			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s), 0);
+			REGISTER_STRINGL_CONSTANT("SID", ZSTR_VAL(var.s), ZSTR_LEN(var.s),  CONST_DEPRECATED);
 			smart_str_free(&var);
 		}
 	} else {
@@ -1509,7 +1509,7 @@ PHPAPI zend_result php_session_reset_id(void) /* {{{ */
 			zval_ptr_dtor_str(sid);
 			ZVAL_EMPTY_STRING(sid);
 		} else {
-			REGISTER_STRINGL_CONSTANT("SID", "", 0, 0);
+			REGISTER_STRINGL_CONSTANT("SID", "", 0, CONST_DEPRECATED);
 		}
 	}
 
