@@ -81,6 +81,8 @@ echo "\nURL-Rewriting with transparent session id support without output_add_rew
 echo $testTags;
 
 --EXPECTF--
+Deprecated: ini_set(): Usage of session.trans_sid_hosts INI setting is deprecated in %s on line 44
+
 Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 47
 
 Deprecated: ini_set(): Enabling session.use_trans_sid INI setting is deprecated in %s on line 50
