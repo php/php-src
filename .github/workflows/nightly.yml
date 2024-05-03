@@ -161,7 +161,7 @@ jobs:
       image: ubuntu:${{ (matrix.branch.ref == 'PHP-8.3' || matrix.branch.ref == 'master') && '22.04' || '20.04' }}
     services:
       mysql:
-        image: mysql:8.3
+        image: mysql:8
         ports:
           - 3306:3306
         env:
