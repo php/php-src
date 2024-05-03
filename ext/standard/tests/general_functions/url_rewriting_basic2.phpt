@@ -88,6 +88,7 @@ echo "\nURL-Rewriting with output_add_rewrite_var() without transparent session 
 echo $testTags;
 
 --EXPECTF--
+Deprecated: ini_set(): Usage of session.trans_sid_hosts INI setting is deprecated in %s on line 44
 URL-Rewriting with output_add_rewrite_var() without transparent session id support
 
 <a href="?%3Cname%3E=%3Cvalue%3E"></a>

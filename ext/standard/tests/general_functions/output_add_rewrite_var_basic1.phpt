@@ -75,6 +75,8 @@ Test use_trans_sid=1
 <form action="bad://php.net/bar.php" method="get"> </form>
 <form action="//www.php.net/bar.php" method="get"> </form>
 --EXPECTF--
+Deprecated: ini_set(): Usage of session.trans_sid_hosts INI setting is deprecated in %s on line 5
+
 Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 6
 Without session
 <a href="?%3CNAME%3E=%3CVALUE%3E"> </a>
