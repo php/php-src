@@ -41,6 +41,9 @@ ini_set("session.referer_check", "");
 // Setting deprecated values directly in session_start()
 // Expecting deprecation here
 session_start([ 'use_cookies' => '0', 'use_only_cookies' => '0', 'use_trans_sid' => '1']);
+
+echo SID;
+
 ?>
 --EXPECTF--
 Deprecated: ini_set(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 6
@@ -56,3 +59,6 @@ Deprecated: ini_set(): Usage of session.referer_check INI setting is deprecated 
 Deprecated: session_start(): Disabling session.use_only_cookies INI setting is deprecated in %s on line 32
 
 Deprecated: session_start(): Enabling session.use_trans_sid INI setting is deprecated in %s on line 32
+
+Deprecated: Constant SID is deprecated in %s on line 34
+PHPSESSID=%s
