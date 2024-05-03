@@ -356,16 +356,17 @@ test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
 dnl First, library checks.
 dnl ----------------------------------------------------------------------------
 
-dnl Some systems (OpenServer 5) dislike -lsocket -lnsl, so we try to avoid -lnsl
-dnl checks, if we already have the functions which are usually in libnsl. Also,
-dnl uClibc will bark at linking with glibc's libnsl.
-
 AC_SEARCH_LIBS([socket], [socket network])
-PHP_CHECK_FUNC(socketpair, socket, network)
-PHP_CHECK_FUNC(gethostname, nsl, network)
-PHP_CHECK_FUNC(gethostbyaddr, nsl, network)
+
+AC_CHECK_FUNCS([socketpair],,
+  [AC_SEARCH_LIBS([socketpair], [socket network],
+    [AC_DEFINE([HAVE_SOCKETPAIR], [1])])])
+
+AC_SEARCH_LIBS([gethostbyaddr], [nsl network])
+
 AC_SEARCH_LIBS([dlopen], [dl],
   [AC_DEFINE([HAVE_LIBDL], [1], [Define to 1 if the dl library is available.])])
+
 AC_SEARCH_LIBS([sin], [m])
 
 case $host_alias in
@@ -588,6 +589,7 @@ ftok \
 funopen \
 gai_strerror \
 getcwd \
+gethostname \
 getloadavg \
 getlogin \
 getprotobyname \
