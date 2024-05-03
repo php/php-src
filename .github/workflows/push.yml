@@ -48,7 +48,7 @@ jobs:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.3
         ports:
           - 3306:3306
         env:
