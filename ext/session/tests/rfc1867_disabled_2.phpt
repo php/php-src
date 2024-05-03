@@ -1,6 +1,7 @@
 --TEST--
 session rfc1867 disabled 2
 --INI--
+error_reporting=-1
 file_uploads=1
 upload_max_filesize=1024
 session.save_path=
