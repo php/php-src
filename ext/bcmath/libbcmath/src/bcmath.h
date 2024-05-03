@@ -97,7 +97,7 @@ static inline bc_num bc_copy_num(bc_num num)
 
 void bc_init_num(bc_num *num);
 
-bool bc_str2num(bc_num *num, char *str, size_t scale, bool auto_scale);
+bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale);
 
 zend_string *bc_num2str_ex(bc_num num, size_t scale);
 
