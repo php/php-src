@@ -5,10 +5,10 @@ jobs:
     resource_class: arm.medium
     docker:
       - image: cimg/base:current-22.04
-      - image: mysql:8.3
+      - image: mysql:8
         environment:
           MYSQL_ALLOW_EMPTY_PASSWORD: true
-          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: test
       - image: postgres:16
         environment:
@@ -18,10 +18,10 @@ jobs:
       LANGUAGE: ''
       LANG: en_US.UTF-8
       MYSQL_TEST_HOST: '127.0.0.1'
-      MYSQL_TEST_PASSWD: ''
+      MYSQL_TEST_PASSWD: root
       MYSQL_TEST_USER: root
       PDO_MYSQL_TEST_DSN: 'mysql:host=127.0.0.1;dbname=test'
-      PDO_MYSQL_TEST_PASS: ''
+      PDO_MYSQL_TEST_PASS: root
       PDO_MYSQL_TEST_USER: root
       PDO_PGSQL_TEST_DSN: 'pgsql:host=127.0.0.1 port=5432 dbname=test user=postgres password=postgres'
     steps:
