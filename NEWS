@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fix crash when calling childNodes next() when iterator is exhausted.
     (nielsdos)
 
+- XML:
+  . Fixed bug GH-14124 (Segmentation fault with XML extension under certain
+    memory limit). (nielsdos)
+
 09 May 2024, PHP 8.3.7
 
 - Core:
