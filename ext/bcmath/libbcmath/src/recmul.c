@@ -68,7 +68,7 @@ static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *
 
 	int prodlen = n1len + n2len + 1;
 
-	*prod = bc_new_num (prodlen, 0);
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
 
 	n1end = (char *) (n1->n_value + n1len - 1);
 	n2end = (char *) (n2->n_value + n2len - 1);

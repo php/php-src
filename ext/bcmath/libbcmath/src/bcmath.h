@@ -86,6 +86,8 @@ void bc_init_numbers(void);
 
 bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent);
 
+bc_num _bc_new_num_nonzeroed_ex(size_t length, size_t scale, bool persistent);
+
 void _bc_free_num_ex(bc_num *num, bool persistent);
 
 /* Make a copy of a number! Just increments the reference count! */
@@ -167,8 +169,9 @@ void bc_raise_bc_exponent(bc_num base, bc_num exponent, bc_num *resul, size_t sc
 bool bc_sqrt(bc_num *num, size_t scale);
 
 /* Prototypes needed for external utility routines. */
-#define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
-#define bc_free_num(num)			_bc_free_num_ex((num), 0)
-#define bc_num2str(num)				bc_num2str_ex((num), (num->n_scale))
+#define bc_new_num(length, scale)			_bc_new_num_ex((length), (scale), 0)
+#define bc_new_num_nonzeroed(length, scale)	_bc_new_num_nonzeroed_ex((length), (scale), 0)
+#define bc_free_num(num)					_bc_free_num_ex((num), 0)
+#define bc_num2str(num)						bc_num2str_ex((num), (num->n_scale))
 
 #endif

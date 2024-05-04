@@ -35,8 +35,7 @@
 #include <string.h>
 #include "zend_alloc.h"
 
-/* new_num allocates a number and sets fields to known values. */
-bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent)
+static zend_always_inline bc_num _bc_new_num_nonzeroed_ex_internal(size_t length, size_t scale, bool persistent)
 {
 	/* PHP Change: malloc() -> pemalloc(), removed free_list code, merged n_ptr and n_value */
 	bc_num temp = safe_pemalloc(1, sizeof(bc_struct) + length, scale, persistent);
@@ -45,10 +44,21 @@ bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent)
 	temp->n_scale = scale;
 	temp->n_refs = 1;
 	temp->n_value = (char *) temp + sizeof(bc_struct);
+	return temp;
+}
+
+/* new_num allocates a number and sets fields to known values. */
+bc_num _bc_new_num_ex(size_t length, size_t scale, bool persistent)
+{
+	bc_num temp = _bc_new_num_nonzeroed_ex_internal(length, scale, persistent);
 	memset(temp->n_value, 0, length + scale);
 	return temp;
 }
 
+bc_num _bc_new_num_nonzeroed_ex(size_t length, size_t scale, bool persistent)
+{
+	return _bc_new_num_nonzeroed_ex_internal(length, scale, persistent);
+}
 
 /* "Frees" a bc_num NUM.  Actually decreases reference count and only
    frees the storage if reference count is zero. */
