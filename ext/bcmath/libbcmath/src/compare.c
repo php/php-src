@@ -39,7 +39,7 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
-int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
+int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 {
 	char *n1ptr, *n2ptr;
 
@@ -85,9 +85,6 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 		count--;
 	}
 
-	if (ignore_last && count == 1 && n1->n_scale == n2->n_scale) {
-		return (0);
-	}
 	if (count != 0) {
 		if (*n1ptr > *n2ptr) {
 			/* Magnitude of n1 > n2. */
@@ -141,5 +138,5 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign, bool ignore_last)
 /* This is the "user callable" routine to compare numbers N1 and N2. */
 int bc_compare(bc_num n1, bc_num n2)
 {
-	return _bc_do_compare(n1, n2, true, false);
+	return _bc_do_compare(n1, n2, true);
 }

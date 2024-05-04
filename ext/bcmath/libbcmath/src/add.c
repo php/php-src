@@ -49,7 +49,7 @@ bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 	} else {
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
-		switch (_bc_do_compare(n1, n2, false, false)) {
+		switch (_bc_do_compare(n1, n2, false)) {
 			case -1:
 				/* n1 is less than n2, subtract n1 from n2. */
 				sum = _bc_do_sub(n2, n1, scale_min);

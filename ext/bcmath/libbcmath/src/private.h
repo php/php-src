@@ -35,7 +35,7 @@
 #include <stddef.h>
 
 /* routines */
-int _bc_do_compare (bc_num n1, bc_num n2, bool use_sign, bool ignore_last);
+int _bc_do_compare (bc_num n1, bc_num n2, bool use_sign);
 bc_num _bc_do_add (bc_num n1, bc_num n2, size_t scale_min);
 bc_num _bc_do_sub (bc_num n1, bc_num n2, size_t scale_min);
 void _bc_rm_leading_zeros (bc_num num);
