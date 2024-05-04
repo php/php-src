@@ -129,7 +129,7 @@ ftp_open(const char *host, short port, zend_long timeout_sec)
 
 	ftp->fd = php_network_connect_socket_to_host(host,
 			(unsigned short) (port ? port : 21), SOCK_STREAM,
-			0, &tv, NULL, NULL, NULL, 0, STREAM_SOCKOP_NONE);
+			0, &tv, NULL, NULL, NULL, 0, STREAM_SOCKOP_NONE, -1);
 	if (ftp->fd == -1) {
 		goto bail;
 	}
