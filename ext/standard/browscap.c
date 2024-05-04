@@ -18,7 +18,6 @@
 #include "php_browscap.h"
 #include "php_ini.h"
 #include "php_string.h"
-#include "ext/pcre/php_pcre.h"
 
 #include "zend_ini_scanner.h"
 #include "zend_globals.h"

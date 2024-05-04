@@ -24,7 +24,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_var.h"
-#include "ext/spl/spl_exceptions.h"
 
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
