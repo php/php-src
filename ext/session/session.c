@@ -836,7 +836,7 @@ static PHP_INI_MH(OnUpdateRefererCheck)
 {
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
-	if (strcmp("", ZSTR_VAL(new_value)) != 0) {
+	if (ZSTR_LEN(new_value) != 0) {
 		php_error_docref(NULL, E_DEPRECATED, "Usage of session.referer_check INI setting is deprecated");
 	}
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
