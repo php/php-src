@@ -24,4 +24,4 @@ $parser = createParser(true);
 xml_parse_into_struct($parser, $long_xml_head . $long_xml_tail, $values, $index);
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of %d bytes exhausted at %s in %s on line %d
+Fatal error: Allowed memory size of %d bytes exhausted %s in %s on line %d
