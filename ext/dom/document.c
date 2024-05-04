@@ -912,7 +912,17 @@ PHP_METHOD(DOM_Document, createElementNS)
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
-		xmlNodePtr nodep = xmlNewDocNodeEatName(docp, ns, localname, NULL);
+
+		/* Try to create the node with the local name interned. */
+		const xmlChar *interned_localname = xmlDictLookup(docp->dict, localname, -1);
+		xmlNodePtr nodep;
+		if (interned_localname == NULL) {
+			nodep = xmlNewDocNodeEatName(docp, ns, localname, NULL);
+		} else {
+			xmlFree(localname);
+			nodep = xmlNewDocNodeEatName(docp, ns, BAD_CAST interned_localname, NULL);
+		}
+
 		if (UNEXPECTED(nodep == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
 		} else {
