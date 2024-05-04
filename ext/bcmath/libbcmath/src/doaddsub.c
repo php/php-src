@@ -51,14 +51,6 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	sum_digits = MAX (n1->n_len, n2->n_len) + 1;
 	sum = bc_new_num (sum_digits, MAX(sum_scale, scale_min));
 
-	/* Zero extra digits made by scale_min. */
-	if (scale_min > sum_scale) {
-		sumptr = (char *) (sum->n_value + sum_scale + sum_digits);
-		for (int count = scale_min - sum_scale; count > 0; count--) {
-			*sumptr++ = 0;
-		}
-	}
-
 	/* Start with the fraction part.  Initialize the pointers. */
 	n1bytes = n1->n_scale;
 	n2bytes = n2->n_scale;
@@ -144,14 +136,6 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	min_len = MIN(n1->n_len, n2->n_len);
 	min_scale = MIN(n1->n_scale, n2->n_scale);
 	diff = bc_new_num (diff_len, MAX(diff_scale, scale_min));
-
-	/* Zero extra digits made by scale_min. */
-	if (scale_min > diff_scale) {
-		diffptr = (char *) (diff->n_value + diff_len + diff_scale);
-		for (count = scale_min - diff_scale; count > 0; count--) {
-			*diffptr++ = 0;
-		}
-	}
 
 	/* Initialize the subtract. */
 	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
