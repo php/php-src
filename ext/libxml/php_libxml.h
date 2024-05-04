@@ -172,6 +172,8 @@ PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
 PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void);
 PHP_LIBXML_API bool php_libxml_uses_internal_errors(void);
 
+PHP_LIBXML_API xmlChar *php_libxml_attr_value(const xmlAttr *attr, bool *free);
+
 PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *start, const char *end);
 PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_stream *s);
 

@@ -1438,6 +1438,36 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 }
 /* }}} */
 
+PHP_LIBXML_API xmlChar *php_libxml_attr_value(const xmlAttr *attr, bool *free)
+{
+	/* For attributes we can have an optimized fast-path.
+	 * This fast-path is only possible in the (common) case where the attribute
+	 * has a single text child. Note that if the child or the content is NULL, this
+	 * is equivalent to not having content (i.e. the attribute has the empty string as value). */
+
+	*free = false;
+
+	if (attr->children == NULL) {
+		return BAD_CAST "";
+	}
+
+	if (attr->children->type == XML_TEXT_NODE && attr->children->next == NULL) {
+		if (attr->children->content == NULL) {
+			return BAD_CAST "";
+		} else {
+			return attr->children->content;
+		}
+	}
+
+	xmlChar *value = xmlNodeGetContent((const xmlNode *) attr);
+	if (UNEXPECTED(value == NULL)) {
+		return BAD_CAST "";
+	}
+
+	*free = true;
+	return value;
+}
+
 #if defined(PHP_WIN32) && defined(COMPILE_DL_LIBXML)
 PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {

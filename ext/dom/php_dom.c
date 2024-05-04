@@ -2245,7 +2245,7 @@ void php_dom_get_content_into_zval(const xmlNode *nodep, zval *return_value, boo
 
 		case XML_ATTRIBUTE_NODE: {
 			bool free;
-			xmlChar *value = dom_attr_value((const xmlAttr *) nodep, &free);
+			xmlChar *value = php_libxml_attr_value((const xmlAttr *) nodep, &free);
 			RETURN_STRING_FAST((const char *) value);
 			if (free) {
 				xmlFree(value);
