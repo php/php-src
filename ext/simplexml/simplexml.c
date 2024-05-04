@@ -1416,17 +1416,22 @@ PHP_METHOD(SimpleXMLElement, asXML)
 
 #define SXE_NS_PREFIX(ns) (ns->prefix ? (char*)ns->prefix : "")
 
-static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{{ */
+static inline void sxe_add_namespace_name_raw(zval *return_value, const char *prefix, const char *href)
 {
-	char *prefix = SXE_NS_PREFIX(ns);
 	zend_string *key = zend_string_init(prefix, strlen(prefix), 0);
 	zval zv;
 
 	if (!zend_hash_exists(Z_ARRVAL_P(return_value), key)) {
-		ZVAL_STRING(&zv, (char*)ns->href);
+		ZVAL_STRING(&zv, href);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
 	}
 	zend_string_release_ex(key, 0);
+}
+
+static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{{ */
+{
+	char *prefix = SXE_NS_PREFIX(ns);
+	sxe_add_namespace_name_raw(return_value, prefix, (const char *) ns->href);
 }
 /* }}} */
 
@@ -1484,7 +1489,7 @@ PHP_METHOD(SimpleXMLElement, getNamespaces)
 }
 /* }}} */
 
-static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, bool recursive, zval *return_value) /* {{{ */
+static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, bool recursive, bool include_xmlns_attributes, zval *return_value) /* {{{ */
 {
 	xmlNsPtr ns;
 
@@ -1494,10 +1499,24 @@ static void sxe_add_registered_namespaces(php_sxe_object *sxe, xmlNodePtr node, 
 			sxe_add_namespace_name(return_value, ns);
 			ns = ns->next;
 		}
+		if (include_xmlns_attributes) {
+			for (const xmlAttr *attr = node->properties; attr; attr = attr->next) {
+				/* Attributes in the xmlns namespace should be treated as namespace declarations too. */
+				if (attr->ns && xmlStrEqual(attr->ns->href, (const xmlChar *) "http://www.w3.org/2000/xmlns/")) {
+					const char *prefix = attr->ns->prefix ? (const char *) attr->name : "";
+					bool free;
+					xmlChar *href = php_libxml_attr_value(attr, &free);
+					sxe_add_namespace_name_raw(return_value, prefix, (const char *) href);
+					if (free) {
+						xmlFree(href);
+					}
+				}
+			}
+		}
 		if (recursive) {
 			node = node->children;
 			while (node) {
-				sxe_add_registered_namespaces(sxe, node, recursive, return_value);
+				sxe_add_registered_namespaces(sxe, node, recursive, include_xmlns_attributes, return_value);
 				node = node->next;
 			}
 		}
@@ -1532,8 +1551,11 @@ PHP_METHOD(SimpleXMLElement, getDocNamespaces)
 		RETURN_FALSE;
 	}
 
+	/* Only do this for modern documents to keep BC. */
+	bool include_xmlns_attributes = sxe->document->class_type == PHP_LIBXML_CLASS_MODERN;
+
 	array_init(return_value);
-	sxe_add_registered_namespaces(sxe, node, recursive, return_value);
+	sxe_add_registered_namespaces(sxe, node, recursive, include_xmlns_attributes, return_value);
 }
 /* }}} */
 
