@@ -116,6 +116,7 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
 #define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
+#define STREAM_SOCKOP_SO_LINGER           (1 << 6)
 
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
@@ -265,7 +266,8 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
-		int *error_code, const char *bindto, unsigned short bindport, long sockopts
+		int *error_code, const char *bindto, unsigned short bindport, long sockopts,
+		long linger
 		);
 
 PHPAPI int php_network_connect_socket(php_socket_t sockfd,
@@ -280,7 +282,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	php_network_connect_socket((sock), (addr), (addrlen), 0, (timeout), NULL, NULL)
 
 PHPAPI php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
-		int socktype, long sockopts, zend_string **error_string, int *error_code
+		int socktype, long sockopts, long linger, zend_string **error_string, int *error_code
 		);
 
 PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
