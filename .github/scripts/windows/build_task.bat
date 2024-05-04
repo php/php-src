@@ -40,7 +40,6 @@ if "%PLATFORM%" == "x86" (
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
-	--disable-debug-pack ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
 	--enable-object-out-dir=%PHP_BUILD_OBJ_DIR% ^
