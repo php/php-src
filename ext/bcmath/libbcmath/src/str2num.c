@@ -154,12 +154,12 @@ after_fractional:
 		zero_int = true;
 		digits = 1;
 	}
-	*num = bc_new_num (digits, str_scale);
+	*num = bc_new_num_nonzeroed(digits, str_scale);
 	(*num)->n_sign = *str == '-' ? MINUS : PLUS;
 	char *nptr = (*num)->n_value;
 
 	if (zero_int) {
-		nptr++;
+		*nptr++ = 0;
 		/*
 		 * If zero_int is true and the str_scale is 0, there is an early return,
 		 * so here str_scale is always greater than 0.

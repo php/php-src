@@ -59,7 +59,6 @@ bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min)
 				/* They are equal! return zero! */
 				size_t res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
 				diff = bc_new_num (1, res_scale);
-				memset(diff->n_value, 0, res_scale + 1);
 				break;
 			}
 			case 1:

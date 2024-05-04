@@ -58,7 +58,6 @@ bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 			case 0:
 				/* They are equal! return zero with the correct scale! */
 				sum = bc_new_num (1, MAX(scale_min, MAX(n1->n_scale, n2->n_scale)));
-				memset(sum->n_value, 0, sum->n_scale + 1);
 				break;
 			case 1:
 				/* n2 is less than n1, subtract n2 from n1. */
