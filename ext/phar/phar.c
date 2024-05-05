@@ -3367,9 +3367,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 }
 /* }}} */
 
-typedef zend_op_array* (zend_compile_t)(zend_file_handle*, int);
-typedef zend_compile_t* (compile_hook)(zend_compile_t *ptr);
-
 static void mime_type_dtor(zval *zv)
 {
 	free(Z_PTR_P(zv));
