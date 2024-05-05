@@ -1411,7 +1411,6 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			goto after_open_fp;
 		case IS_OBJECT:
 			if (instanceof_function(Z_OBJCE_P(value), spl_ce_SplFileInfo)) {
-				char *test = NULL;
 				spl_filesystem_object *intern = PHAR_FETCH_INTERNAL_EX(value);
 
 				if (!base_len) {
@@ -1421,41 +1420,34 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 				switch (intern->type) {
 					case SPL_FS_DIR: {
+						char *tmp;
 						zend_string *test_str = spl_filesystem_object_get_path(intern);
-						fname_len = spprintf(&fname, 0, "%s%c%s", ZSTR_VAL(test_str), DEFAULT_SLASH, intern->u.dir.entry.d_name);
+						fname_len = spprintf(&tmp, 0, "%s%c%s", ZSTR_VAL(test_str), DEFAULT_SLASH, intern->u.dir.entry.d_name);
 						zend_string_release_ex(test_str, /* persistent */ false);
-						if (php_stream_stat_path(fname, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
+						if (php_stream_stat_path(tmp, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
 							/* ignore directories */
-							efree(fname);
+							efree(tmp);
 							return ZEND_HASH_APPLY_KEEP;
 						}
 
-						test = expand_filepath(fname, NULL);
-						efree(fname);
-
-						if (test) {
-							fname = test;
-							fname_len = strlen(fname);
-						} else {
-							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
-							return ZEND_HASH_APPLY_STOP;
-						}
-
-						save = fname;
-						goto phar_spl_fileinfo;
+						fname = expand_filepath(tmp, NULL);
+						efree(tmp);
+						break;
 					}
 					case SPL_FS_INFO:
 					case SPL_FS_FILE:
 						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
-						if (!fname) {
-							zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
-							return ZEND_HASH_APPLY_STOP;
-						}
-
-						fname_len = strlen(fname);
-						save = fname;
-						goto phar_spl_fileinfo;
+						break;
 				}
+
+				if (!fname) {
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Could not resolve file path");
+					return ZEND_HASH_APPLY_STOP;
+				}
+
+				fname_len = strlen(fname);
+				save = fname;
+				goto phar_spl_fileinfo;
 			}
 			ZEND_FALLTHROUGH;
 		default:
