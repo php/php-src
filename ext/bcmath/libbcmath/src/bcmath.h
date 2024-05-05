@@ -78,6 +78,66 @@ typedef struct bc_struct {
 #define LONG_MAX 0x7ffffff
 #endif
 
+/* This will be 0x01010101 for 32-bit and 0x0101010101010101 for 64-bit */
+#define SWAR_ONES (~((size_t) 0) / 0xFF)
+/* This repeats a byte `x` into an entire 32/64-bit word.
+ * Example: SWAR_REPEAT(0xAB) will be 0xABABABAB for 32-bit and 0xABABABABABABABAB for 64-bit. */
+#define SWAR_REPEAT(x) (SWAR_ONES * (x))
+
+/* Bytes swap */
+#if defined(_MSC_VER)
+#  include <stdlib.h>
+#  define BSWAP32(u) _byteswap_ulong(u)
+#  define BSWAP64(u) _byteswap_uint64(u)
+#else
+#  ifdef __has_builtin
+#    if __has_builtin(__builtin_bswap32)
+#      define BSWAP32(u) __builtin_bswap32(u)
+#    endif // __has_builtin(__builtin_bswap32)
+#    if __has_builtin(__builtin_bswap64)
+#      define BSWAP64(u) __builtin_bswap64(u)
+#    endif // __has_builtin(__builtin_bswap64)
+#  elif defined(__GNUC__)
+#    define BSWAP32(u) __builtin_bswap32(u)
+#    define BSWAP64(u) __builtin_bswap64(u)
+#  endif // __has_builtin
+#endif // defined(_MSC_VER)
+#ifndef BSWAP32
+inline uint32_t BSWAP32(uint32_t u)
+{
+  return (((u & 0xff000000) >> 24)
+          | ((u & 0x00ff0000) >>  8)
+          | ((u & 0x0000ff00) <<  8)
+          | ((u & 0x000000ff) << 24));
+}
+#endif
+#ifndef BSWAP64
+inline uint64_t BSWAP64(uint64_t u)
+{
+   return (((u & 0xff00000000000000ULL) >> 56)
+          | ((u & 0x00ff000000000000ULL) >> 40)
+          | ((u & 0x0000ff0000000000ULL) >> 24)
+          | ((u & 0x000000ff00000000ULL) >>  8)
+          | ((u & 0x00000000ff000000ULL) <<  8)
+          | ((u & 0x0000000000ff0000ULL) << 24)
+          | ((u & 0x000000000000ff00ULL) << 40)
+          | ((u & 0x00000000000000ffULL) << 56));
+}
+#endif
+
+#if SIZEOF_SIZE_T >= 8
+#define BC_BSWAP(u) BSWAP64(u)
+#define BC_UINT_T uint64_t
+#else
+#define BC_BSWAP(u) BSWAP32(u)
+#define BC_UINT_T uint32_t
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#define BC_LITTLE_ENDIAN 0
+#else
+#define BC_LITTLE_ENDIAN 1
+#endif
 
 /* Function Prototypes */
 
