@@ -384,10 +384,8 @@ void destroy_phar_manifest_entry(zval *zv) /* {{{ */
 }
 /* }}} */
 
-int phar_entry_delref(phar_entry_data *idata) /* {{{ */
+void phar_entry_delref(phar_entry_data *idata) /* {{{ */
 {
-	int ret = 0;
-
 	if (idata->internal_file && !idata->internal_file->is_persistent) {
 		if (--idata->internal_file->fp_refcount < 0) {
 			idata->internal_file->fp_refcount = 0;
@@ -405,7 +403,6 @@ int phar_entry_delref(phar_entry_data *idata) /* {{{ */
 
 	phar_archive_delref(idata->phar);
 	efree(idata);
-	return ret;
 }
 /* }}} */
 

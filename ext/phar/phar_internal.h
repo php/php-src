@@ -588,7 +588,7 @@ extern HashTable cached_alias;
 #endif
 
 int phar_archive_delref(phar_archive_data *phar);
-int phar_entry_delref(phar_entry_data *idata);
+void phar_entry_delref(phar_entry_data *idata);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security);
