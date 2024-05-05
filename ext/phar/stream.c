@@ -372,7 +372,7 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	size_t got;
+	ssize_t got;
 	phar_entry_info *entry;
 
 	if (data->internal_file->link) {
