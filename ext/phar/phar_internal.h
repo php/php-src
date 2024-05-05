@@ -526,7 +526,6 @@ void phar_request_initialize(void);
 void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
-int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
 int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
 int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
 int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
@@ -557,8 +556,6 @@ void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata
 void phar_metadata_tracker_clone(phar_metadata_tracker* tracker);
 void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, int persistent);
 int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, int persistent, HashTable *unserialize_options, const char* method_name);
-void phar_release_entry_metadata(phar_entry_info *entry);
-void phar_release_archive_metadata(phar_archive_data *phar);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
