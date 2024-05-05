@@ -137,19 +137,19 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	phar_entry_fp *cached_fp;
 	HashTable   phar_alias_map;
 	int         phar_SERVER_mung_list;
-	int         readonly;
 	char*       cache_list;
-	int         manifest_cached;
-	int         persist;
-	int         has_zlib;
-	int         has_bz2;
+	bool        readonly;
+	bool        manifest_cached;
+	bool        persist;
+	bool        has_zlib;
+	bool        has_bz2;
 	bool   readonly_orig;
 	bool   require_hash_orig;
 	bool   intercepted;
-	int         request_init;
-	int         require_hash;
-	int         request_done;
-	int         request_ends;
+	bool        request_init;
+	bool        require_hash;
+	bool        request_done;
+	bool        request_ends;
 	zif_handler orig_fopen;
 	zif_handler orig_file_get_contents;
 	zif_handler orig_is_file;
@@ -175,7 +175,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	uint32_t    cwd_len;
-	int         cwd_init;
+	bool        cwd_init;
 	char        *openssl_privatekey;
 	uint32_t    openssl_privatekey_len;
 	/* phar_get_archive cache */
