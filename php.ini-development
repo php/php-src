@@ -75,7 +75,7 @@
 
 ; php.ini-production contains settings which hold security, performance and
 ; best practices at its core. But please be aware, these settings may break
-; compatibility with older or less security conscience applications. We
+; compatibility with older or less security-conscious applications. We
 ; recommending using the production ini in production and testing environments.
 
 ; php.ini-development is very similar to its production variant, except it is
