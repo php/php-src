@@ -861,9 +861,9 @@ struct _phar_zip_pass {
 	php_stream *filefp;
 	php_stream *centralfp;
 	php_stream *old;
-	int free_fp;
-	int free_ufp;
 	char **error;
+	bool free_fp;
+	bool free_ufp;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
 static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ */
