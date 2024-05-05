@@ -1341,6 +1341,44 @@ struct _phar_t {
 	int count;
 };
 
+/* This is the same as phar_get_or_create_entry_data(), but allows overriding metadata via SplFileInfo. */
+static phar_entry_data *phar_build_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, char **error, zval *file_info)
+{
+	bool override_timestamp = false;
+	uint32_t timestamp;
+
+	/* Expects an instance of SplFileInfo if it is an object, which is verified in phar_build(). */
+	if (Z_TYPE_P(file_info) == IS_OBJECT && Z_OBJCE_P(file_info)->type == ZEND_USER_CLASS) {
+		zval rv;
+		/* Phars only have a single timestamp.
+		 * Use modification time to be consistent with the zip and tar file format. */
+		zend_call_method_with_0_params(Z_OBJ_P(file_info), Z_OBJCE_P(file_info), NULL, "getMTime", &rv);
+
+		if (UNEXPECTED(Z_TYPE(rv) != IS_LONG)) {
+			/* Either an exception happened, or the function returned false to indicate failure. */
+			ZEND_ASSERT(Z_TYPE(rv) == IS_UNDEF || Z_TYPE(rv) == IS_FALSE);
+			*error = estrdup("getMTime() failed");
+			return NULL;
+		}
+
+		/* Sanity check bounds. See GH-14141. */
+		if (Z_LVAL(rv) > UINT32_MAX) {
+			*error = estrdup("timestamp is limited to 32-bit");
+			return NULL;
+		}
+
+		override_timestamp = true;
+		timestamp = Z_LVAL(rv);
+	}
+
+	phar_entry_data *data = phar_get_or_create_entry_data(fname, fname_len, path, path_len, "w+b", 0, error, 1);
+	if (data && override_timestamp) {
+		data->internal_file->timestamp = timestamp;
+	}
+
+	return data;
+}
+
 static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 {
 	zval *value;
@@ -1418,26 +1456,48 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 					return ZEND_HASH_APPLY_STOP;
 				}
 
-				switch (intern->type) {
-					case SPL_FS_DIR: {
-						char *tmp;
-						zend_string *test_str = spl_filesystem_object_get_path(intern);
-						fname_len = spprintf(&tmp, 0, "%s%c%s", ZSTR_VAL(test_str), DEFAULT_SLASH, intern->u.dir.entry.d_name);
-						zend_string_release_ex(test_str, /* persistent */ false);
-						if (php_stream_stat_path(tmp, &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
-							/* ignore directories */
-							efree(tmp);
-							return ZEND_HASH_APPLY_KEEP;
-						}
+				zend_string *tmp_dir_str = NULL;
 
-						fname = expand_filepath(tmp, NULL);
-						efree(tmp);
-						break;
+				/* Take into account that SplFileObject may be overridden.
+				 * The purpose here is to grab the path name of the file to add. */
+				if (Z_OBJCE_P(value)->type == ZEND_USER_CLASS) {
+					zval rv;
+					zend_call_method_with_0_params(Z_OBJ_P(value), Z_OBJCE_P(value), NULL, "getPathname", &rv);
+					if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
+						ZEND_ASSERT(EG(exception));
+						return ZEND_HASH_APPLY_STOP;
 					}
-					case SPL_FS_INFO:
-					case SPL_FS_FILE:
-						fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
-						break;
+					tmp_dir_str = Z_STR(rv);
+				} else {
+					/* Not a user class, so we can grab the data internally quickly. */
+					switch (intern->type) {
+						case SPL_FS_DIR: {
+							zend_string *test_str = spl_filesystem_object_get_path(intern);
+							const char slash = DEFAULT_SLASH;
+							tmp_dir_str = zend_string_concat3(
+								ZSTR_VAL(test_str), ZSTR_LEN(test_str),
+								&slash, 1,
+								intern->u.dir.entry.d_name, strlen(intern->u.dir.entry.d_name)
+							);
+							zend_string_release_ex(test_str, /* persistent */ false);
+							break;
+						}
+						case SPL_FS_INFO:
+						case SPL_FS_FILE:
+							fname = expand_filepath(ZSTR_VAL(intern->file_name), NULL);
+							break;
+					}
+				}
+
+				if (tmp_dir_str) {
+					if (php_stream_stat_path(ZSTR_VAL(tmp_dir_str), &ssb) == 0 && S_ISDIR(ssb.sb.st_mode)) {
+						/* ignore directories */
+						zend_string_release(tmp_dir_str);
+						return ZEND_HASH_APPLY_KEEP;
+					}
+
+					fname = expand_filepath(ZSTR_VAL(tmp_dir_str), NULL);
+					zend_string_release_ex(tmp_dir_str, /* persistent */ false);
 				}
 
 				if (!fname) {
