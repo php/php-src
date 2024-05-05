@@ -73,7 +73,6 @@ typedef struct bc_struct {
 #endif
 #define MAX(a, b)      ((a)>(b)?(a):(b))
 #define MIN(a, b)      ((a)>(b)?(b):(a))
-#define ODD(a)        ((a)&1)
 
 #ifndef LONG_MAX
 #define LONG_MAX 0x7ffffff
