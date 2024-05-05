@@ -84,11 +84,11 @@ $workdir = __DIR__.'/002';
 --- Iteration 0 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content/hello.txt cannot be created: timestamp is limited to 32-bit
+Entry content%chello.txt cannot be created: timestamp is limited to 32-bit
 --- Iteration 1 ---
 [ Found: %shello.txt ]
 [MTime]
-Entry content/hello.txt cannot be created: getMTime() failed
+Entry content%chello.txt cannot be created: getMTime() failed
 --- Iteration 2 ---
 [ Found: %shello.txt ]
 [MTime]
