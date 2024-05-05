@@ -1231,7 +1231,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	}
 
 	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
-	mydata->internal_file_start = halt_offset + manifest_len + 4;
 	mydata->halt_offset = halt_offset;
 	mydata->flags = manifest_flags;
 	endbuffer = strrchr(mydata->fname, '/');
@@ -1472,7 +1471,6 @@ int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, si
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
-	mydata->internal_file_start = -1;
 	mydata->fp = NULL;
 	mydata->is_writeable = 1;
 	mydata->is_brandnew = 1;
@@ -3181,7 +3179,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		php_stream_close(oldfile);
 	}
 
-	phar->internal_file_start = halt_offset + manifest_len + 4;
 	phar->halt_offset = halt_offset;
 	phar->is_brandnew = 0;
 

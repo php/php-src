@@ -285,7 +285,6 @@ struct _phar_archive_data {
 	char                     *alias;
 	uint32_t                      alias_len;
 	char                     version[12];
-	size_t                   internal_file_start;
 	size_t                   halt_offset;
 	HashTable                manifest;
 	/* hash of virtual directories, as in path/to/file.txt has path/to and path as virtual directories */
