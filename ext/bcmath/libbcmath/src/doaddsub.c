@@ -166,7 +166,57 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Now do the equal length scale and integer parts. */
-	for (count = 0; count < min_len + min_scale; count++) {
+	count = 0;
+	if (min_len + min_scale >= sizeof(BC_UINT_T)) {
+		diffptr++;
+		n1ptr++;
+		n2ptr++;
+		while (count + sizeof(BC_UINT_T) <= min_len + min_scale) {
+			diffptr -= sizeof(BC_UINT_T);
+			n1ptr -= sizeof(BC_UINT_T);
+			n2ptr -= sizeof(BC_UINT_T);
+
+			BC_UINT_T n1bytes;
+			BC_UINT_T n2bytes;
+			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
+			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
+
+#if BC_LITTLE_ENDIAN
+			/* Bytes swap */
+			n1bytes = BC_BSWAP(n1bytes);
+			n2bytes = BC_BSWAP(n2bytes);
+#endif
+
+			n1bytes -= n2bytes + borrow;
+			/* If the most significant 4 bits of the 8 bytes are not 0, a carry-down has occurred. */
+			bool tmp_borrow = n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1));
+
+			/*
+			 * If any one of the upper 4 bits of each of the 8 bytes is 1, subtract 6 from that byte.
+			 * The fact that the upper 4 bits are not 0 means that a carry-down has occurred, and when
+			 * the hexadecimal number is carried down, there is a difference of 6 from the decimal
+			 * calculation, so 6 is subtracted.
+			 * Also, set all upper 4 bits to 0.
+			 */
+			BC_UINT_T borrow_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0x06;
+			n1bytes = (n1bytes & SWAR_REPEAT(0x0F)) - borrow_mask;
+
+#if BC_LITTLE_ENDIAN
+			/* Bytes swap */
+			n1bytes = BC_BSWAP(n1bytes);
+#endif
+
+			memcpy(diffptr, &n1bytes, sizeof(n1bytes));
+
+			borrow = tmp_borrow;
+			count += sizeof(BC_UINT_T);
+		}
+		diffptr--;
+		n1ptr--;
+		n2ptr--;
+	}
+
+	for (; count < min_len + min_scale; count++) {
 		val = *n1ptr-- - *n2ptr-- - borrow;
 		if (val < 0) {
 			val += BASE;
