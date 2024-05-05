@@ -606,7 +606,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security) /* {{{ */
+ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, bool security, uint32_t timestamp) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -668,7 +668,7 @@ ZEND_ATTRIBUTE_NONNULL phar_entry_data *phar_get_or_create_entry_data(char *fnam
 
 	phar_add_virtual_dirs(phar, path, path_len);
 	etemp.is_modified = 1;
-	etemp.timestamp = time(0);
+	etemp.timestamp = timestamp;
 	etemp.is_crc_checked = 1;
 	etemp.phar = phar;
 	etemp.filename = zend_string_init(path, path_len, false);

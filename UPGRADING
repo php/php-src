@@ -37,6 +37,11 @@ PHP 8.6 UPGRADE NOTES
     IntlNumberRangeFormatter::IDENTITY_FALLBACK_RANGE identity fallbacks.
     It is supported from icu 63.
 
+- Phar:
+  . Overriding the getMTime() and getPathname() methods of SplFileInfo now
+    influences the result of the phar buildFrom family of functions.
+    This makes it possible to override the timestamp and names of files.
+
 - Streams:
   . Added stream socket context option so_reuseaddr that allows disabling
     address reuse (SO_REUSEADDR) and explicitly uses SO_EXCLUSIVEADDRUSE on
