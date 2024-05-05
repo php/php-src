@@ -124,33 +124,36 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
-
-	size_t diff_scale = MAX(n1->n_scale, n2->n_scale);
-	size_t diff_len = EXPECTED(n1->n_len >= n2->n_len) ? n1->n_len : n2->n_len;
-	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
-	size_t min_len = n1->n_len >= n2->n_len ? n2->n_len : n1->n_len;
-	size_t min_bytes = min_len + min_scale;
-	size_t borrow = 0;
+	size_t diff_scale, diff_len;
+	size_t min_scale, min_len;
+	size_t borrow, count;
 	int val;
 	char *n1ptr, *n2ptr, *diffptr;
 
 	/* Allocate temporary storage. */
-	diff = bc_new_num (n1->n_len, MAX(diff_scale, scale_min));
+	diff_len = MAX(n1->n_len, n2->n_len);
+	diff_scale = MAX(n1->n_scale, n2->n_scale);
+	min_len = MIN(n1->n_len, n2->n_len);
+	min_scale = MIN(n1->n_scale, n2->n_scale);
+	diff = bc_new_num (diff_len, MAX(diff_scale, scale_min));
 
 	/* Initialize the subtract. */
 	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
 	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
 	diffptr = (char *) (diff->n_value + diff_len + diff_scale - 1);
 
+	/* Subtract the numbers. */
+	borrow = 0;
+
 	/* Take care of the longer scaled number. */
 	if (n1->n_scale != min_scale) {
 		/* n1 has the longer scale */
-		for (size_t count = n1->n_scale - min_scale; count > 0; count--) {
+		for (count = n1->n_scale - min_scale; count > 0; count--) {
 			*diffptr-- = *n1ptr--;
 		}
 	} else {
 		/* n2 has the longer scale */
-		for (size_t count = n2->n_scale - min_scale; count > 0; count--) {
+		for (count = n2->n_scale - min_scale; count > 0; count--) {
 			val = -*n2ptr-- - borrow;
 			if (val < 0) {
 				val += BASE;
@@ -163,57 +166,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Now do the equal length scale and integer parts. */
-	size_t sub_count = 0;
-	if (min_bytes >= sizeof(BC_UINT_T)) {
-		diffptr++;
-		n1ptr++;
-		n2ptr++;
-		while (sub_count + sizeof(BC_UINT_T) <= min_bytes) {
-			diffptr -= sizeof(BC_UINT_T);
-			n1ptr -= sizeof(BC_UINT_T);
-			n2ptr -= sizeof(BC_UINT_T);
-
-			BC_UINT_T n1bytes;
-			BC_UINT_T n2bytes;
-			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
-			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
-
-#if BC_LITTLE_ENDIAN
-			/* Bytes swap */
-			n1bytes = BC_BSWAP(n1bytes);
-			n2bytes = BC_BSWAP(n2bytes);
-#endif
-
-			n1bytes -= (n2bytes + borrow);
-			/* If the most significant 4 bits of the 8 bytes are not 0, a carry-down has occurred. */
-			bool tmp_borrow = n1bytes >= ((BC_UINT_T) 0x10 << (8 * (sizeof(BC_UINT_T) - 1)));
-
-			/*
-			 * If any one of the upper 4 bits of each of the 8 bytes is 1, subtract 6 from that byte.
-			 * The fact that the upper 4 bits are not 0 means that a carry-down has occurred, and when
-			 * the hexadecimal number is carried down, there is a difference of 6 from the decimal
-			 * calculation, so 6 is subtracted.
-			 * Also, set all upper 4 bits to 0.
-			 */
-			BC_UINT_T borrow_mask = (((n1bytes | (n1bytes >> 1) | (n1bytes >> 2) | (n1bytes >> 3)) & SWAR_REPEAT(0x10)) * 0x06) >> 4;
-			n1bytes = (n1bytes & SWAR_REPEAT(0x0F)) - borrow_mask;
-
-#if BC_LITTLE_ENDIAN
-			/* Bytes swap */
-			n1bytes = BC_BSWAP(n1bytes);
-#endif
-
-			memcpy(diffptr, &n1bytes, sizeof(n1bytes));
-
-			borrow = tmp_borrow;
-			sub_count += sizeof(BC_UINT_T);
-		}
-		diffptr--;
-		n1ptr--;
-		n2ptr--;
-	}
-
-	for (; sub_count < min_bytes; sub_count++) {
+	for (count = 0; count < min_len + min_scale; count++) {
 		val = *n1ptr-- - *n2ptr-- - borrow;
 		if (val < 0) {
 			val += BASE;
@@ -226,7 +179,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 
 	/* If n1 has more digits than n2, we now do that subtract. */
 	if (diff_len != min_len) {
-		for (size_t count = diff_len - min_len; count > 0; count--) {
+		for (count = diff_len - min_len; count > 0; count--) {
 			val = *n1ptr-- - borrow;
 			if (val < 0) {
 				val += BASE;
