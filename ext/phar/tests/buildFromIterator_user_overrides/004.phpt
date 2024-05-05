@@ -56,9 +56,9 @@ $workdir = __DIR__.'/004';
 @rmdir($workdir);
 ?>
 --EXPECTF--
-[ Found: %shello2.txt ]
+[ Found: %shello%d.txt ]
 string(%d) "%shello1.txt"
-[ Found: %shello1.txt ]
+[ Found: %shello%d.txt ]
 string(%d) "%shello1.txt"
 bool(false)
 bool(true)
