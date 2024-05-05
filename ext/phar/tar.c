@@ -19,7 +19,7 @@
 
 #include "phar_internal.h"
 
-static uint32_t phar_tar_number(char *buf, size_t len) /* {{{ */
+static uint32_t phar_tar_number(const char *buf, size_t len) /* {{{ */
 {
 	uint32_t num = 0;
 	size_t i = 0;

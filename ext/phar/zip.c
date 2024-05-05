@@ -150,7 +150,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
+static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate) /* {{{ */
 {
 	int dtime = PHAR_GET_16(cdtime), ddate = PHAR_GET_16(cddate);
 	struct tm *tm, tmbuf;
