@@ -1076,12 +1076,12 @@ static void perform_delayable_implementation_check(
 }
 
 
-#define ZEND_INHERITANCE_LAZY_CHILD_CLONE    (1<<0)
-#define ZEND_INHERITANCE_CHECK_SILENCE       (1<<1) /* don't throw errors */
-#define ZEND_INHERITANCE_CHECK_PROTO         (1<<2) /* check method prototype (it might be already checked before) */
-#define ZEND_INHERITANCE_CHECK_VISIBILITY    (1<<3)
-#define ZEND_INHERITANCE_SET_CHILD_CHANGED   (1<<4)
-#define ZEND_INHERITANCE_SET_CHILD_PROTO     (1<<5)
+#define ZEND_INHERITANCE_LAZY_CHILD_CLONE     (1<<0)
+#define ZEND_INHERITANCE_CHECK_SILENT         (1<<1) /* don't throw errors */
+#define ZEND_INHERITANCE_CHECK_PROTO          (1<<2) /* check method prototype (it might be already checked before) */
+#define ZEND_INHERITANCE_CHECK_VISIBILITY     (1<<3)
+#define ZEND_INHERITANCE_SET_CHILD_CHANGED    (1<<4)
+#define ZEND_INHERITANCE_SET_CHILD_PROTO      (1<<5)
 
 static inheritance_status do_inheritance_check_on_method(
 		zend_function *child, zend_class_entry *child_scope,
@@ -1113,7 +1113,7 @@ static inheritance_status do_inheritance_check_on_method(
 	}
 
 	if ((flags & ZEND_INHERITANCE_CHECK_PROTO) && UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
-		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1126,7 +1126,7 @@ static inheritance_status do_inheritance_check_on_method(
 	 */
 	if ((flags & ZEND_INHERITANCE_CHECK_PROTO)
 	 && UNEXPECTED((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC))) {
-		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
 			return INHERITANCE_ERROR;
 		}
 		if (child_flags & ZEND_ACC_STATIC) {
@@ -1143,7 +1143,7 @@ static inheritance_status do_inheritance_check_on_method(
 	/* Disallow making an inherited method abstract. */
 	if ((flags & ZEND_INHERITANCE_CHECK_PROTO)
 	 && UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT))) {
-		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1178,7 +1178,7 @@ static inheritance_status do_inheritance_check_on_method(
 	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
 	if ((flags & ZEND_INHERITANCE_CHECK_VISIBILITY)
 			&& (child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
-		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1187,7 +1187,7 @@ static inheritance_status do_inheritance_check_on_method(
 	}
 
 	if (flags & ZEND_INHERITANCE_CHECK_PROTO) {
-		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENT) {
 			return zend_do_perform_implementation_check(child, child_scope, parent, parent_scope);
 		}
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
@@ -1735,8 +1735,8 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
 
 	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
-	 /* We are not setting the prototype of overridden interface methods because of abstract
-	  * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
+		/* We are not setting the prototype of overridden interface methods because of abstract
+		 * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
 		flags |= ZEND_INHERITANCE_LAZY_CHILD_CLONE | ZEND_INHERITANCE_SET_CHILD_PROTO;
 	}
 
@@ -3119,7 +3119,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 					child_func, child_func->common.scope,
 					parent_func, parent_func->common.scope,
 					ce, NULL,
-					ZEND_INHERITANCE_CHECK_SILENCE | ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY);
+					ZEND_INHERITANCE_CHECK_SILENT | ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY);
 			if (UNEXPECTED(status == INHERITANCE_WARNING)) {
 				overall_status = INHERITANCE_WARNING;
 			} else if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
