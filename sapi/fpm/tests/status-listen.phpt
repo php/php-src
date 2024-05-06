@@ -29,6 +29,7 @@ $expectedStatusData = [
     'max active processes' => 1,
     'max children reached' => 0,
     'slow requests'        => 0,
+    'memory peak'          => 2097152,
 ];
 
 $tester = new FPM\Tester($cfg);
