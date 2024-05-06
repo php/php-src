@@ -1075,28 +1075,36 @@ static void perform_delayable_implementation_check(
 	}
 }
 
-static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
+
+#define ZEND_INHERITANCE_LAZY_CHILD_CLONE    (1<<0)
+#define ZEND_INHERITANCE_CHECK_SILENCE       (1<<1) /* don't throw errors */
+#define ZEND_INHERITANCE_CHECK_PROTO         (1<<2) /* check method prototype (it might be already checked before) */
+#define ZEND_INHERITANCE_CHECK_VISIBILITY    (1<<3)
+#define ZEND_INHERITANCE_SET_CHILD_CHANGED   (1<<4)
+#define ZEND_INHERITANCE_SET_CHILD_PROTO     (1<<5)
+
+static inheritance_status do_inheritance_check_on_method(
 		zend_function *child, zend_class_entry *child_scope,
 		zend_function *parent, zend_class_entry *parent_scope,
-		zend_class_entry *ce, zval *child_zv,
-		bool check_visibility, bool check_only, bool checked) /* {{{ */
+		zend_class_entry *ce, zval *child_zv, uint32_t flags) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
 	zend_function *proto;
 
 #define SEPARATE_METHOD() do { \
-			if (child_scope != ce && child->type == ZEND_USER_FUNCTION && child_zv) { \
+			if ((flags & ZEND_INHERITANCE_LAZY_CHILD_CLONE) \
+			 && child_scope != ce && child->type == ZEND_USER_FUNCTION) { \
 				/* op_array wasn't duplicated yet */ \
 				zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array)); \
 				memcpy(new_function, child, sizeof(zend_op_array)); \
 				Z_PTR_P(child_zv) = child = new_function; \
-				child_zv = NULL; \
+				flags &= ~ZEND_INHERITANCE_LAZY_CHILD_CLONE; \
 			} \
 		} while(0)
 
-	if (UNEXPECTED((parent_flags & ZEND_ACC_PRIVATE) && !(parent_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_CTOR))) {
-		if (!check_only) {
+	if (UNEXPECTED((parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)) == ZEND_ACC_PRIVATE)) {
+		if (flags & ZEND_INHERITANCE_SET_CHILD_CHANGED) {
 			SEPARATE_METHOD();
 			child->common.fn_flags |= ZEND_ACC_CHANGED;
 		}
@@ -1104,8 +1112,8 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		return INHERITANCE_SUCCESS;
 	}
 
-	if (!checked && UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
-		if (check_only) {
+	if ((flags & ZEND_INHERITANCE_CHECK_PROTO) && UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1116,8 +1124,9 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 	child_flags	= child->common.fn_flags;
 	/* You cannot change from static to non static and vice versa.
 	 */
-	if (!checked && UNEXPECTED((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC))) {
-		if (check_only) {
+	if ((flags & ZEND_INHERITANCE_CHECK_PROTO)
+	 && UNEXPECTED((child_flags & ZEND_ACC_STATIC) != (parent_flags & ZEND_ACC_STATIC))) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
 			return INHERITANCE_ERROR;
 		}
 		if (child_flags & ZEND_ACC_STATIC) {
@@ -1132,8 +1141,9 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 	}
 
 	/* Disallow making an inherited method abstract. */
-	if (!checked && UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT))) {
-		if (check_only) {
+	if ((flags & ZEND_INHERITANCE_CHECK_PROTO)
+	 && UNEXPECTED((child_flags & ZEND_ACC_ABSTRACT) > (parent_flags & ZEND_ACC_ABSTRACT))) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1141,11 +1151,8 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			ZEND_FN_SCOPE_NAME(parent), ZSTR_VAL(child->common.function_name), ZEND_FN_SCOPE_NAME(child));
 	}
 
-	if (!check_only
-	 && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))
-	 /* In the case of abstract traits, don't mark the method as changed. We don't actually have a
-	  * private parent method. */
-	 && !(parent->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+	if ((flags & ZEND_INHERITANCE_SET_CHILD_CHANGED)
+	 && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
 		SEPARATE_METHOD();
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
@@ -1162,22 +1169,16 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 		parent = proto;
 	}
 
-	if (!check_only
-	 && child->common.prototype != proto
-	 /* We are not setting the prototype of overridden interface methods because of abstract
-	  * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
-	 && !(ce->ce_flags & ZEND_ACC_INTERFACE)
-	 /* Parent is a trait when its method is abstract. We only need to verify its signature then,
-	  * don't actually use it as a prototype. See Zend/tests/gh14009_004.phpt. */
-	 && !(parent->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+	if ((flags & ZEND_INHERITANCE_SET_CHILD_PROTO)
+	 && child->common.prototype != proto) {
 		SEPARATE_METHOD();
 		child->common.prototype = proto;
 	}
 
 	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
-	if (!checked && check_visibility
+	if ((flags & ZEND_INHERITANCE_CHECK_VISIBILITY)
 			&& (child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
-		if (check_only) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
 			return INHERITANCE_ERROR;
 		}
 		zend_error_at_noreturn(E_COMPILE_ERROR, func_filename(child), func_lineno(child),
@@ -1185,8 +1186,8 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 			ZEND_FN_SCOPE_NAME(child), ZSTR_VAL(child->common.function_name), zend_visibility_string(parent_flags), ZEND_FN_SCOPE_NAME(parent), (parent_flags&ZEND_ACC_PUBLIC) ? "" : " or weaker");
 	}
 
-	if (!checked) {
-		if (check_only) {
+	if (flags & ZEND_INHERITANCE_CHECK_PROTO) {
+		if (flags & ZEND_INHERITANCE_CHECK_SILENCE) {
 			return zend_do_perform_implementation_check(child, child_scope, parent, parent_scope);
 		}
 		perform_delayable_implementation_check(ce, child, child_scope, parent, parent_scope);
@@ -1198,15 +1199,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(
 }
 /* }}} */
 
-static zend_never_inline void do_inheritance_check_on_method(
-		zend_function *child, zend_class_entry *child_scope,
-		zend_function *parent, zend_class_entry *parent_scope,
-		zend_class_entry *ce, zval *child_zv, bool check_visibility)
-{
-	do_inheritance_check_on_method_ex(child, child_scope, parent, parent_scope, ce, child_zv, check_visibility, 0, 0);
-}
-
-static zend_always_inline void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, bool checked) /* {{{ */
+static void do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce, bool is_interface, uint32_t flags) /* {{{ */
 {
 	zval *child = zend_hash_find_known_hash(&ce->function_table, key);
 
@@ -1218,15 +1211,8 @@ static zend_always_inline void do_inherit_method(zend_string *key, zend_function
 			return;
 		}
 
-		if (checked) {
-			do_inheritance_check_on_method_ex(
-				func, func->common.scope, parent, parent->common.scope, ce, child,
-				/* check_visibility */ 1, 0, checked);
-		} else {
-			do_inheritance_check_on_method(
-				func, func->common.scope, parent, parent->common.scope, ce, child,
-				/* check_visibility */ 1);
-		}
+		do_inheritance_check_on_method(
+			func, func->common.scope, parent, parent->common.scope, ce, child, flags);
 	} else {
 
 		if (is_interface || (parent->common.fn_flags & (ZEND_ACC_ABSTRACT))) {
@@ -1632,16 +1618,15 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		zend_hash_extend(&ce->function_table,
 			zend_hash_num_elements(&ce->function_table) +
 			zend_hash_num_elements(&parent_ce->function_table), 0);
+		uint32_t flags =
+			ZEND_INHERITANCE_LAZY_CHILD_CLONE | ZEND_INHERITANCE_SET_CHILD_CHANGED | ZEND_INHERITANCE_SET_CHILD_PROTO;
 
-		if (checked) {
-			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
-				do_inherit_method(key, func, ce, 0, 1);
-			} ZEND_HASH_FOREACH_END();
-		} else {
-			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
-				do_inherit_method(key, func, ce, 0, 0);
-			} ZEND_HASH_FOREACH_END();
+		if (!checked) {
+			flags |= ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
 		}
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&parent_ce->function_table, key, func) {
+			do_inherit_method(key, func, ce, 0, flags);
+		} ZEND_HASH_FOREACH_END();
 	}
 
 	do_inherit_parent_constructor(ce);
@@ -1747,13 +1732,20 @@ static void do_interface_implementation(zend_class_entry *ce, zend_class_entry *
 	zend_function *func;
 	zend_string *key;
 	zend_class_constant *c;
+	uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
+
+	if (!(ce->ce_flags & ZEND_ACC_INTERFACE)) {
+	 /* We are not setting the prototype of overridden interface methods because of abstract
+	  * constructors. See Zend/tests/interface_constructor_prototype_001.phpt. */
+		flags |= ZEND_INHERITANCE_LAZY_CHILD_CLONE | ZEND_INHERITANCE_SET_CHILD_PROTO;
+	}
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->constants_table, key, c) {
 		do_inherit_iface_constant(key, c, ce, iface);
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&iface->function_table, key, func) {
-		do_inherit_method(key, func, ce, 1, 0);
+		do_inherit_method(key, func, ce, 1, flags);
 	} ZEND_HASH_FOREACH_END();
 
 	do_implement_interface(ce, iface);
@@ -1882,6 +1874,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
+	bool check_inheritance = false;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
 		/* if it is the same function with the same visibility and has not been assigned a class scope yet, regardless
@@ -1901,7 +1894,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 			 */
 			do_inheritance_check_on_method(
 				existing_fn, fixup_trait_scope(existing_fn, ce), fn, fixup_trait_scope(fn, ce),
-				ce, NULL, /* check_visibility */ 0);
+				ce, NULL, ZEND_INHERITANCE_CHECK_PROTO);
 			return;
 		}
 
@@ -1916,11 +1909,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
 		} else {
-			/* Inherited members are overridden by members inserted by traits.
-			 * Check whether the trait method fulfills the inheritance requirements. */
-			do_inheritance_check_on_method(
-				fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
-				ce, NULL, /* check_visibility */ 1);
+			check_inheritance = true;
 		}
 	}
 
@@ -1940,6 +1929,15 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_method(ce, fn, key);
+
+	if (check_inheritance) {
+		/* Inherited members are overridden by members inserted by traits.
+		 * Check whether the trait method fulfills the inheritance requirements. */
+		do_inheritance_check_on_method(
+			fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
+			ce, NULL,
+			ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY | ZEND_INHERITANCE_SET_CHILD_PROTO);
+	}
 }
 /* }}} */
 
@@ -3117,10 +3115,11 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 		if (zv) {
 			zend_function *child_func = Z_FUNC_P(zv);
 			inheritance_status status =
-				do_inheritance_check_on_method_ex(
+				do_inheritance_check_on_method(
 					child_func, child_func->common.scope,
 					parent_func, parent_func->common.scope,
-					ce, NULL, /* check_visibility */ 1, 1, 0);
+					ce, NULL,
+					ZEND_INHERITANCE_CHECK_SILENCE | ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY);
 			if (UNEXPECTED(status == INHERITANCE_WARNING)) {
 				overall_status = INHERITANCE_WARNING;
 			} else if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
