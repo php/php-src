@@ -124,8 +124,10 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
+	/* The caller is guaranteed that n1 is always large. */
 	size_t diff_len = EXPECTED(n1->n_len >= n2->n_len) ? n1->n_len : n2->n_len;
 	size_t diff_scale = MAX(n1->n_scale, n2->n_scale);
+	/* Same condition as EXPECTED before, but using EXPECTED again will make it slower. */
 	size_t min_len = n1->n_len >= n2->n_len ? n2->n_len : n1->n_len;
 	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
 	size_t min_bytes = min_len + min_scale;
@@ -164,6 +166,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 
 	/* Now do the equal length scale and integer parts. */
 	count = 0;
+	/* Uses SIMD to perform calculations at high speed. */
 	if (min_bytes >= sizeof(BC_UINT_T)) {
 		diffptr++;
 		n1ptr++;
@@ -179,27 +182,27 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
 
 #if BC_LITTLE_ENDIAN
-			/* Bytes swap */
+			/* Little endian requires changing the order of bytes. */
 			n1bytes = BC_BSWAP(n1bytes);
 			n2bytes = BC_BSWAP(n2bytes);
 #endif
 
 			n1bytes -= n2bytes + borrow;
-			/* If the most significant 4 bits of the 8 bytes are not 0, a carry-down has occurred. */
+			/* If the most significant bit is 1, a carry down has occurred. */
 			bool tmp_borrow = n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1));
 
 			/*
-			 * If any one of the upper 4 bits of each of the 8 bytes is 1, subtract 6 from that byte.
-			 * The fact that the upper 4 bits are not 0 means that a carry-down has occurred, and when
-			 * the hexadecimal number is carried down, there is a difference of 6 from the decimal
-			 * calculation, so 6 is subtracted.
-			 * Also, set all upper 4 bits to 0.
+			 * Check the most significant bit of each of the 16 bytes, and if it is 1, a carry down has
+			 * occurred. When carrying down occurs, due to the difference between decimal and hexadecimal
+			 * numbers, an extra 6 is added to the lower 4 bits.
+			 * Therefore, for a byte that has been carried down, set all the upper 4 bits to 0 and subtract
+			 * 6 from the lower 4 bits to adjust it to the correct value as a decimal number.
 			 */
 			BC_UINT_T borrow_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0x06;
 			n1bytes = (n1bytes & SWAR_REPEAT(0x0F)) - borrow_mask;
 
 #if BC_LITTLE_ENDIAN
-			/* Bytes swap */
+			/* Little endian requires changing the order of bytes back. */
 			n1bytes = BC_BSWAP(n1bytes);
 #endif
 
@@ -213,6 +216,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 		n2ptr--;
 	}
 
+	/* Calculate the remaining bytes that are less than the size of BC_UINT_T using a normal loop. */
 	for (; count < min_bytes; count++) {
 		val = *n1ptr-- - *n2ptr-- - borrow;
 		if (val < 0) {
