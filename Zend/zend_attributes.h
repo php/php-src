@@ -86,6 +86,8 @@ ZEND_API zend_attribute *zend_add_attribute(
 		HashTable **attributes, zend_string *name, uint32_t argc,
 		uint32_t flags, uint32_t offset, uint32_t lineno);
 
+uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope);
+
 END_EXTERN_C()
 
 static zend_always_inline zend_attribute *zend_add_class_attribute(zend_class_entry *ce, zend_string *name, uint32_t argc)

@@ -37,30 +37,38 @@ static HashTable internal_attributes;
 
 void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
 {
+}
+
+uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
+{
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
 	if (attr->argc > 0) {
 		zval flags;
 
-		/* As this is run in the middle of compilation, fetch the attribute value without
-		 * specifying a scope. The class is not fully linked yet, and we may seen an
-		 * inconsistent state. */
-		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, NULL)) {
-			return;
+		if (FAILURE == zend_get_attribute_value(&flags, attr, 0, scope)) {
+			ZEND_ASSERT(EG(exception));
+			return 0;
 		}
 
 		if (Z_TYPE(flags) != IS_LONG) {
-			zend_error_noreturn(E_ERROR,
+			zend_throw_error(NULL,
 				"Attribute::__construct(): Argument #1 ($flags) must be of type int, %s given",
 				zend_zval_value_name(&flags)
 			);
+			zval_ptr_dtor(&flags);
+			return 0;
 		}
 
-		if (Z_LVAL(flags) & ~ZEND_ATTRIBUTE_FLAGS) {
-			zend_error_noreturn(E_ERROR, "Invalid attribute flags specified");
+		uint32_t flags_l = Z_LVAL(flags);
+		if (flags_l & ~ZEND_ATTRIBUTE_FLAGS) {
+			zend_throw_error(NULL, "Invalid attribute flags specified");
+			return 0;
 		}
 
-		zval_ptr_dtor(&flags);
+		return flags_l;
 	}
+
+	return ZEND_ATTRIBUTE_TARGET_ALL;
 }
 
 static void validate_allow_dynamic_properties(

@@ -1,9 +1,19 @@
 --TEST--
-Validation for "Attribute" does not use a scope when evaluating constant ASTs
+Validation for "Attribute" uses the class scope when evaluating constant ASTs
 --FILE--
 <?php
 #[Attribute(parent::x)]
 class x extends y {}
+
+class y {
+    protected const x = Attribute::TARGET_CLASS;
+}
+
+#[x]
+class z {}
+
+var_dump((new ReflectionClass(z::class))->getAttributes()[0]->newInstance());
 ?>
---EXPECTF--
-Fatal error: Cannot access "parent" when no class scope is active in %s on line %d
+--EXPECT--
+object(x)#1 (0) {
+}
