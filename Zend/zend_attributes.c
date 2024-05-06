@@ -35,10 +35,6 @@ static zend_object_handlers attributes_object_handlers_sensitive_parameter_value
 
 static HashTable internal_attributes;
 
-void validate_attribute(zend_attribute *attr, uint32_t target, zend_class_entry *scope)
-{
-}
-
 uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope)
 {
 	// TODO: More proper signature validation: Too many args, incorrect arg names.
@@ -367,7 +363,6 @@ void zend_register_attribute_ce(void)
 
 	zend_ce_attribute = register_class_Attribute();
 	attr = zend_mark_internal_attribute(zend_ce_attribute);
-	attr->validator = validate_attribute;
 
 	zend_ce_return_type_will_change_attribute = register_class_ReturnTypeWillChange();
 	zend_mark_internal_attribute(zend_ce_return_type_will_change_attribute);
