@@ -16,6 +16,7 @@
 
 #include "bcmath.h"
 #include "convert.h"
+#include "private.h"
 #ifdef __SSE2__
 # include <emmintrin.h>
 #endif

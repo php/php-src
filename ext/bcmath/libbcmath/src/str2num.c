@@ -31,6 +31,7 @@
 
 #include "bcmath.h"
 #include "convert.h"
+#include "private.h"
 #include <stdbool.h>
 #include <stddef.h>
 #ifdef __SSE2__
