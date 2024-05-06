@@ -128,6 +128,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	size_t diff_scale = MAX(n1->n_scale, n2->n_scale);
 	size_t min_len = n1->n_len >= n2->n_len ? n2->n_len : n1->n_len;
 	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
+	size_t min_bytes = min_len + min_scale;
 	size_t borrow = 0;
 	size_t count;
 	int val;
@@ -163,11 +164,11 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 
 	/* Now do the equal length scale and integer parts. */
 	count = 0;
-	if (min_len + min_scale >= sizeof(BC_UINT_T)) {
+	if (min_bytes >= sizeof(BC_UINT_T)) {
 		diffptr++;
 		n1ptr++;
 		n2ptr++;
-		while (count + sizeof(BC_UINT_T) <= min_len + min_scale) {
+		while (count + sizeof(BC_UINT_T) <= min_bytes) {
 			diffptr -= sizeof(BC_UINT_T);
 			n1ptr -= sizeof(BC_UINT_T);
 			n2ptr -= sizeof(BC_UINT_T);
@@ -212,7 +213,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 		n2ptr--;
 	}
 
-	for (; count < min_len + min_scale; count++) {
+	for (; count < min_bytes; count++) {
 		val = *n1ptr-- - *n2ptr-- - borrow;
 		if (val < 0) {
 			val += BASE;
