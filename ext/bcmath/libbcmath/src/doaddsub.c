@@ -124,26 +124,22 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
-	size_t diff_scale, diff_len;
-	size_t min_scale, min_len;
-	size_t borrow, count;
+	size_t diff_len = MAX(n1->n_len, n2->n_len);
+	size_t diff_scale = MAX(n1->n_scale, n2->n_scale);
+	size_t min_len = MIN(n1->n_len, n2->n_len);
+	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
+	size_t borrow = 0;
+	size_t count;
 	int val;
 	char *n1ptr, *n2ptr, *diffptr;
 
 	/* Allocate temporary storage. */
-	diff_len = MAX(n1->n_len, n2->n_len);
-	diff_scale = MAX(n1->n_scale, n2->n_scale);
-	min_len = MIN(n1->n_len, n2->n_len);
-	min_scale = MIN(n1->n_scale, n2->n_scale);
 	diff = bc_new_num (diff_len, MAX(diff_scale, scale_min));
 
 	/* Initialize the subtract. */
 	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
 	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
 	diffptr = (char *) (diff->n_value + diff_len + diff_scale - 1);
-
-	/* Subtract the numbers. */
-	borrow = 0;
 
 	/* Take care of the longer scaled number. */
 	if (n1->n_scale != min_scale) {
