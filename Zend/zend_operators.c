@@ -122,7 +122,7 @@ static _locale_t current_locale = NULL;
 
 #define BLOCKCONV_LOAD(input) \
 	int8x16_t blconv_operand = vld1q_s8((const int8_t*)(input)); \
-	uint8x16_t blconv_mask = vcltq_s8((int8x16_t) vaddq_u8((uint8x16_t) blconv_operand, (uint8x16_t) blconv_offset), blconv_threshold);
+	uint8x16_t blconv_mask = vcltq_s8(vreinterpretq_u8_s8(vaddq_u8(vreinterpretq_s8_u8(blconv_operand), vreinterpretq_s8_u8(blconv_offset))), blconv_threshold);
 
 #define BLOCKCONV_FOUND() vmaxvq_u8(blconv_mask)
 
