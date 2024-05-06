@@ -805,11 +805,16 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 
 static void zend_persist_class_constant(zval *zv)
 {
-	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
+	zend_class_constant *orig_c = Z_PTR_P(zv);
+	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(orig_c);
 	zend_class_entry *ce;
 
 	if (c) {
 		Z_PTR_P(zv) = c;
+		return;
+	} else if (((orig_c->ce->ce_flags & ZEND_ACC_IMMUTABLE) && !(Z_CONSTANT_FLAGS(orig_c->value) & CONST_OWNED))
+	 || orig_c->ce->type == ZEND_INTERNAL_CLASS) {
+		/* Class constant comes from a different file in shm or internal class, keep existing pointer. */
 		return;
 	} else if (!ZCG(current_persistent_script)->corrupted
 	 && zend_accel_in_shm(Z_PTR_P(zv))) {
