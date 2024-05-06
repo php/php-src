@@ -1586,6 +1586,69 @@ static void ir_match_fuse_addr(ir_ctx *ctx, ir_ref addr_ref)
 	}
 }
 
+static bool ir_match_may_fuse_SI(ir_ctx *ctx, ir_ref ref, ir_ref use)
+{
+	ir_insn *op2_insn, *insn = &ctx->ir_base[use];
+
+	if (insn->op == IR_ADD) {
+		if (insn->op1 == ref) {
+			if (IR_IS_CONST_REF(insn->op2)) {
+				op2_insn = &ctx->ir_base[insn->op2];
+				if (IR_IS_SYM_CONST(op2_insn->op)) {
+					if (ir_may_fuse_addr(ctx, op2_insn)) {
+						return 1; // LEA_SI_O
+					}
+				} else if (IR_IS_SIGNED_32BIT(op2_insn->val.i64)) {
+					return 1; // LEA_SI_O
+				}
+			} else if (insn->op2 != ref) {
+				return 1; // LEA_SI_B or LEA_SI_OB
+			}
+		} else if (insn->op2 == ref && insn->op1 != insn->op2) {
+			return 1; // LEA_B_SI or LEA_OB_SI
+		}
+	}
+	return 0;
+}
+
+static bool ir_match_fuse_addr_all_useges(ir_ctx *ctx, ir_ref ref)
+{
+	uint32_t rule = ctx->rules[ref];
+	ir_use_list *use_list;
+	ir_ref n, *p, use;
+
+	if (rule == (IR_FUSED | IR_SIMPLE | IR_LEA_SI)) {
+		return 1;
+	} else if (!rule) {
+		ir_insn *insn = &ctx->ir_base[ref];
+
+		IR_ASSERT(IR_IS_TYPE_INT(insn->type) && ir_type_size[insn->type] >= 4);
+		if (insn->op == IR_MUL
+		 && IR_IS_CONST_REF(insn->op2)) {
+			insn = &ctx->ir_base[insn->op2];
+			if (!IR_IS_SYM_CONST(insn->op)
+			 &&	(insn->val.u64 == 2 || insn->val.u64 == 4 || insn->val.u64 == 8)) {
+				ctx->rules[ref] = IR_LEA_SI;
+
+				use_list = &ctx->use_lists[ref];
+				n = use_list->count;
+				IR_ASSERT(n > 1);
+				p = &ctx->use_edges[use_list->refs];
+				for (; n > 0; p++, n--) {
+					use = *p;
+					if (!ir_match_may_fuse_SI(ctx, ref, use)) {
+						return 0;
+					}
+				}
+
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+
 /* A naive check if there is a STORE or CALL between this LOAD and the fusion root */
 static bool ir_match_has_mem_deps(ir_ctx *ctx, ir_ref ref, ir_ref root)
 {
@@ -1895,13 +1958,13 @@ static uint32_t ir_match_insn(ir_ctx *ctx, ir_ref ref)
 					} else if ((ir_type_size[insn->type] >= 4 && insn->op == IR_ADD && IR_IS_SIGNED_32BIT(op2_insn->val.i64)) ||
 							(ir_type_size[insn->type] >= 4 && insn->op == IR_SUB && IR_IS_SIGNED_NEG_32BIT(op2_insn->val.i64))) {
 lea:
-						if (ctx->use_lists[insn->op1].count == 1) {
+						if (ctx->use_lists[insn->op1].count == 1 || ir_match_fuse_addr_all_useges(ctx, insn->op1)) {
 							uint32_t rule = ctx->rules[insn->op1];
 
 							if (!rule) {
 								ctx->rules[insn->op1] = rule = ir_match_insn(ctx, insn->op1);
 							}
-							if (rule == IR_LEA_SI) {
+							if (rule == IR_LEA_SI || rule == (IR_FUSED | IR_SIMPLE | IR_LEA_SI)) {
 								/* z = MUL(Y, 2|4|8) ... ADD(z, imm32) => SKIP ... LEA [Y*2|4|8+im32] */
 								ctx->rules[insn->op1] = IR_FUSED | IR_SIMPLE | IR_LEA_SI;
 								return IR_LEA_SI_O;
@@ -1938,19 +2001,19 @@ lea:
 					}
 				} else if ((ctx->flags & IR_OPT_CODEGEN) && insn->op == IR_ADD && ir_type_size[insn->type] >= 4) {
 					if (insn->op1 != insn->op2) {
-						if (ctx->use_lists[insn->op1].count == 1) {
+						if (ctx->use_lists[insn->op1].count == 1 || ir_match_fuse_addr_all_useges(ctx, insn->op1)) {
 							uint32_t rule =ctx->rules[insn->op1];
 							if (!rule) {
 								ctx->rules[insn->op1] = rule = ir_match_insn(ctx, insn->op1);
 							}
 							if (rule == IR_LEA_OB) {
 								ctx->rules[insn->op1] = IR_FUSED | IR_SIMPLE | IR_LEA_OB;
-								if (ctx->use_lists[insn->op2].count == 1) {
+								if (ctx->use_lists[insn->op2].count == 1 || ir_match_fuse_addr_all_useges(ctx, insn->op2)) {
 									rule = ctx->rules[insn->op2];
 									if (!rule) {
 										ctx->rules[insn->op2] = rule = ir_match_insn(ctx, insn->op2);
 									}
-									if (rule == IR_LEA_SI) {
+									if (rule == IR_LEA_SI || rule == (IR_FUSED | IR_SIMPLE | IR_LEA_SI)) {
 										/* x = ADD(X, imm32) ... y = MUL(Y, 2|4|8) ... ADD(x, y) => SKIP ... SKIP ... LEA */
 										ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_LEA_SI;
 										return IR_LEA_OB_SI;
@@ -1958,7 +2021,7 @@ lea:
 								}
 								/* x = ADD(X, imm32) ... ADD(x, Y) => SKIP ... LEA */
 								return IR_LEA_OB_I;
-							} else if (rule == IR_LEA_SI) {
+							} else if (rule == IR_LEA_SI || rule == (IR_FUSED | IR_SIMPLE | IR_LEA_SI)) {
 								ctx->rules[insn->op1] = IR_FUSED | IR_SIMPLE | IR_LEA_SI;
 								if (ctx->use_lists[insn->op2].count == 1) {
 									rule = ctx->rules[insn->op2];
@@ -1975,7 +2038,7 @@ lea:
 								return IR_LEA_SI_B;
 							}
 						}
-						if (ctx->use_lists[insn->op2].count == 1) {
+						if (ctx->use_lists[insn->op2].count == 1 || ir_match_fuse_addr_all_useges(ctx, insn->op2)) {
 							uint32_t rule = ctx->rules[insn->op2];
 							if (!rule) {
 								ctx->rules[insn->op2] = rule = ir_match_insn(ctx, insn->op2);
@@ -1984,7 +2047,7 @@ lea:
 								ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_LEA_OB;
 								/* x = ADD(X, imm32) ... ADD(Y, x) => SKIP ... LEA */
 								return IR_LEA_I_OB;
-							} else if (rule == IR_LEA_SI) {
+							} else if (rule == IR_LEA_SI || rule == (IR_FUSED | IR_SIMPLE | IR_LEA_SI)) {
 								ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_LEA_SI;
 								/* x = MUL(X, 2|4|8) ... ADD(Y, x) => SKIP ... LEA */
 								return IR_LEA_B_SI;
@@ -2497,7 +2560,7 @@ store_int:
 				return IR_RETURN_FP;
 			}
 		case IR_IF:
-			if (ir_in_same_block(ctx, insn->op2) && ctx->use_lists[insn->op2].count == 1) {
+			if (!IR_IS_CONST_REF(insn->op2) && ctx->use_lists[insn->op2].count == 1) {
 				op2_insn = &ctx->ir_base[insn->op2];
 				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UGT) {
 					if (IR_IS_TYPE_INT(ctx->ir_base[op2_insn->op1].type)) {
@@ -2545,15 +2608,14 @@ store_int:
 					ir_match_fuse_load_test_int(ctx, op2_insn, ref);
 					ctx->rules[insn->op2] = IR_FUSED | IR_TEST_INT;
 					return IR_TEST_AND_BRANCH_INT;
-				} else if (op2_insn->op == IR_OVERFLOW) {
+				} else if (op2_insn->op == IR_OVERFLOW && ir_in_same_block(ctx, insn->op2)) {
 					/* c = OVERFLOW(_) ... IF(c) => SKIP_OVERFLOW ... OVERFLOW_AND_BRANCH */
 					ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_OVERFLOW;
 					return IR_OVERFLOW_AND_BRANCH;
 				}
 			}
 			if (IR_IS_TYPE_INT(ctx->ir_base[insn->op2].type)) {
-				if (insn->op2 == ref - 1 /* previous instruction */
-				 && ir_in_same_block(ctx, insn->op2)) {
+				if (insn->op2 == ref - 1) { /* previous instruction */
 					op2_insn = &ctx->ir_base[insn->op2];
 					if (op2_insn->op == IR_ADD ||
 					    op2_insn->op == IR_SUB ||
@@ -2575,7 +2637,6 @@ store_int:
 				} else if ((ctx->flags & IR_OPT_CODEGEN)
 				 && insn->op1 == ref - 1 /* previous instruction */
 				 && insn->op2 == ref - 2 /* previous instruction */
-				 && ir_in_same_block(ctx, insn->op2)
 				 && ctx->use_lists[insn->op2].count == 2
 				 && IR_IS_TYPE_INT(ctx->ir_base[insn->op2].type)) {
 					ir_insn *store_insn = &ctx->ir_base[insn->op1];
@@ -2626,7 +2687,7 @@ store_int:
 				break;
 			}
 		case IR_COND:
-			if (ir_in_same_block(ctx, insn->op1) && ctx->use_lists[insn->op1].count == 1) {
+			if (!IR_IS_CONST_REF(insn->op1) && ctx->use_lists[insn->op1].count == 1) {
 				ir_insn *op1_insn = &ctx->ir_base[insn->op1];
 
 				if (op1_insn->op >= IR_EQ && op1_insn->op <= IR_UGT) {
@@ -2644,7 +2705,7 @@ store_int:
 			return IR_COND;
 		case IR_GUARD:
 		case IR_GUARD_NOT:
-			if (ir_in_same_block(ctx, insn->op2) && ctx->use_lists[insn->op2].count == 1) {
+			if (!IR_IS_CONST_REF(insn->op2) && ctx->use_lists[insn->op2].count == 1) {
 				op2_insn = &ctx->ir_base[insn->op2];
 				if (op2_insn->op >= IR_EQ && op2_insn->op <= IR_UGT
 					// TODO: register allocator may clobber operands of CMP before they are used in the GUARD_CMP
@@ -2734,7 +2795,7 @@ store_int:
 					ir_match_fuse_load_test_int(ctx, op2_insn, ref);
 					ctx->rules[insn->op2] = IR_FUSED | IR_TEST_INT;
 					return IR_GUARD_TEST_INT;
-				} else if (op2_insn->op == IR_OVERFLOW) {
+				} else if (op2_insn->op == IR_OVERFLOW && ir_in_same_block(ctx, insn->op2)) {
 					/* c = OVERFLOW(_) ... GUARD(c) => SKIP_OVERFLOW ... GUARD_OVERFLOW */
 					ctx->rules[insn->op2] = IR_FUSED | IR_SIMPLE | IR_OVERFLOW;
 					return IR_GUARD_OVERFLOW;

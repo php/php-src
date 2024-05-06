@@ -1151,13 +1151,11 @@ static void ir_insert_chain_before(ir_chain *chains, uint32_t c, uint32_t before
 }
 
 #ifndef IR_DEBUG_BB_SCHEDULE_GRAPH
-# define IR_DEBUG_BB_SCHEDULE_GRAPH 0
-#endif
-#ifndef IR_DEBUG_BB_SCHEDULE_EDGES
-# define IR_DEBUG_BB_SCHEDULE_EDGES 0
-#endif
-#ifndef IR_DEBUG_BB_SCHEDULE_CHAINS
-# define IR_DEBUG_BB_SCHEDULE_CHAINS 0
+# ifdef IR_DEBUG
+#  define IR_DEBUG_BB_SCHEDULE_GRAPH 1
+# else
+#  define IR_DEBUG_BB_SCHEDULE_GRAPH 0
+# endif
 #endif
 
 #if IR_DEBUG_BB_SCHEDULE_GRAPH
@@ -1210,20 +1208,17 @@ static void ir_dump_cfg_freq_graph(ir_ctx *ctx, float *bb_freq, uint32_t edges_c
 }
 #endif
 
-#if IR_DEBUG_BB_SCHEDULE_EDGES
+#ifdef IR_DEBUG
 static void ir_dump_edges(ir_ctx *ctx, uint32_t edges_count, ir_edge_info *edges)
 {
 	uint32_t i;
 
 	fprintf(stderr, "Edges:\n");
 	for (i = 0; i < edges_count; i++) {
-		fprintf(stderr, "\tBB%d -> BB%d [label=\"%0.3f\"]\n", edges[i].from, edges[i].to, edges[i].freq);
+		fprintf(stderr, "\tBB%d -> BB%d %0.3f\n", edges[i].from, edges[i].to, edges[i].freq);
 	}
-	fprintf(stderr, "}\n");
 }
-#endif
 
-#if IR_DEBUG_BB_SCHEDULE_CHAINS
 static void ir_dump_chains(ir_ctx *ctx, ir_chain *chains)
 {
 	uint32_t b, tail, i;
@@ -1507,8 +1502,10 @@ restart:
 	/* 2. Sort EDGEs according to their frequencies */
 	qsort(edges, edges_count, sizeof(ir_edge_info), ir_edge_info_cmp);
 
-#if IR_DEBUG_BB_SCHEDULE_EDGES
-	ir_dump_edges(ctx, edges_count, edges);
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_BB_SCHEDULE) {
+		ir_dump_edges(ctx, edges_count, edges);
+	}
 #endif
 
 	/* 3. Process EDGEs in the decreasing frequency order and join the connected chains */
@@ -1555,13 +1552,17 @@ restart:
 	}
 
 #if IR_DEBUG_BB_SCHEDULE_GRAPH
-	ir_dump_cfg_freq_graph(ctx, bb_freq, edges_count, edges, chains);
+	if (ctx->flags & IR_DEBUG_BB_SCHEDULE) {
+		ir_dump_cfg_freq_graph(ctx, bb_freq, edges_count, edges, chains);
+	}
 #endif
 
 	ir_mem_free(bb_freq);
 
-#if IR_DEBUG_BB_SCHEDULE_CHAINS
-	ir_dump_chains(ctx, chains);
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_BB_SCHEDULE) {
+		ir_dump_chains(ctx, chains);
+	}
 #endif
 
 	/* 4. Merge empty entry blocks */
@@ -1585,8 +1586,10 @@ restart:
 			}
 		}
 
-#if IR_DEBUG_BB_SCHEDULE_CHAINS
-		ir_dump_chains(ctx, chains);
+#ifdef IR_DEBUG
+		if (ctx->flags & IR_DEBUG_BB_SCHEDULE) {
+			ir_dump_chains(ctx, chains);
+		}
 #endif
 	}
 
@@ -1619,8 +1622,10 @@ restart:
 		}
 	}
 
-#if IR_DEBUG_BB_SCHEDULE_CHAINS
-	ir_dump_chains(ctx, chains);
+#ifdef IR_DEBUG
+	if (ctx->flags & IR_DEBUG_BB_SCHEDULE) {
+		ir_dump_chains(ctx, chains);
+	}
 #endif
 
 	/* 7. Form a final BB order */

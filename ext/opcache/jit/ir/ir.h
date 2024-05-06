@@ -541,6 +541,7 @@ void ir_strtab_free(ir_strtab *strtab);
 # define IR_DEBUG_GCM_SPLIT    (1<<28)
 # define IR_DEBUG_SCHEDULE     (1<<29)
 # define IR_DEBUG_RA           (1<<30)
+# define IR_DEBUG_BB_SCHEDULE  (1U<<31)
 #endif
 
 typedef struct _ir_ctx           ir_ctx;

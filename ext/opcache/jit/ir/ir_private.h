@@ -582,6 +582,17 @@ IR_ALWAYS_INLINE void ir_bitqueue_init(ir_bitqueue *q, uint32_t n)
 	q->set = ir_bitset_malloc(n);
 }
 
+IR_ALWAYS_INLINE void ir_bitqueue_grow(ir_bitqueue *q, uint32_t n)
+{
+	uint32_t len = ir_bitset_len(n);
+	IR_ASSERT(len >= q->len);
+	if (len > q->len) {
+		q->set = ir_mem_realloc(q->set, len * (IR_BITSET_BITS / 8));
+		memset(q->set + q->len, 0, (len - q->len) * (IR_BITSET_BITS / 8));
+		q->len = len;
+	}
+}
+
 IR_ALWAYS_INLINE void ir_bitqueue_free(ir_bitqueue *q)
 {
 	ir_mem_free(q->set);

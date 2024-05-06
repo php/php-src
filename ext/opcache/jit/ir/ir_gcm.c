@@ -84,6 +84,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 		return lca;
 	}
 
+#if 0 /* This is not necessary anymore. Conditions may be fused with IF across BBs. */
 	if (ctx->ir_base[ref].op >= IR_EQ && ctx->ir_base[ref].op <= IR_UGT) {
 		ir_use_list *use_list = &ctx->use_lists[ref];
 
@@ -96,6 +97,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 			}
 		}
 	}
+#endif
 
 	flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
 	if ((flags & IR_BB_LOOP_WITH_ENTRY)
@@ -487,9 +489,19 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 		b = ir_gcm_select_best_block(ctx, ref, lca);
 
 		ctx->cfg_map[ref] = b;
-		if (ctx->ir_base[ref + 1].op == IR_OVERFLOW) {
-			/* OVERFLOW is a projection and must be scheduled together with previous ADD/SUB/MUL_OV */
-			ctx->cfg_map[ref + 1] = b;
+
+		/* OVERFLOW is a projection of ADD/SUB/MUL_OV and must be scheduled into the same block */
+		if (ctx->ir_base[ref].op >= IR_ADD_OV && ctx->ir_base[ref].op <= IR_MUL_OV) {
+			ir_use_list *use_list = &ctx->use_lists[ref];
+			ir_ref n, *p, use;
+
+			for (n = use_list->count, p = &ctx->use_edges[use_list->refs]; n < 0; p++, n--) {
+				use = *p;
+				if (ctx->ir_base[use].op == IR_OVERFLOW) {
+					ctx->cfg_map[use] = b;
+					break;
+				}
+			}
 		}
 	}
 }
