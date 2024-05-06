@@ -139,6 +139,10 @@ PHP 8.4 UPGRADE NOTES
   . SoapClient::$httpurl is now a Soap\Url object rather than a resource.
     Checks using is_resource() (i.e. is_resource($client->httpurl)) should be
     replaced with checks for null (i.e. $client->httpurl !== null).
+  . SoapClient::$sdl is now a Soap\Sdl object rather than a resource.
+    Checks using is_resource() (i.e. is_resource($client->sdl)) should be
+    replaced with checks for null (i.e. $client->sdl !== null).
+
 - SPL:
   . Out of bounds accesses in SplFixedArray now throw an exception of type
     OutOfBoundsException instead of RuntimeException. As OutOfBoundsException
