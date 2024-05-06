@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed buffer limit on Windows, replacing read call usage by _read.
     (David Carlier)
 
+- Core:
+  . Fixed bug GH-13970 (Incorrect validation of #[Attribute] flags type for
+    non-compile-time expressions). (ilutov)
+
 - DOM:
   . Fix crashes when entity declaration is removed while still having entity
     references. (nielsdos)

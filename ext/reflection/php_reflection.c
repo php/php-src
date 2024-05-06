@@ -6772,16 +6772,9 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	if (ce->type == ZEND_USER_CLASS) {
-		uint32_t flags = ZEND_ATTRIBUTE_TARGET_ALL;
-
-		if (marker->argc > 0) {
-			zval tmp;
-
-			if (FAILURE == zend_get_attribute_value(&tmp, marker, 0, ce)) {
-				RETURN_THROWS();
-			}
-
-			flags = (uint32_t) Z_LVAL(tmp);
+		uint32_t flags = zend_attribute_attribute_get_flags(marker, ce);
+		if (EG(exception)) {
+			RETURN_THROWS();
 		}
 
 		if (!(attr->target & flags)) {
