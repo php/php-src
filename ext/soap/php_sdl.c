@@ -3449,12 +3449,10 @@ void delete_sdl_impl(void *handle)
 	efree(tmp);
 }
 
-void delete_sdl(void *handle)
+void delete_sdl(sdl *handle)
 {
-	sdlPtr tmp = (sdlPtr)handle;
-
-	if (!tmp->is_persistent) {
-		delete_sdl_impl(tmp);
+	if (!handle->is_persistent) {
+		delete_sdl_impl(handle);
 	}
 }
 

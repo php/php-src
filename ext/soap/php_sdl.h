@@ -260,7 +260,7 @@ encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len);
 sdlBindingPtr get_binding_from_type(sdlPtr sdl, sdlBindingType type);
 sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
 
-void delete_sdl(void *handle);
+void delete_sdl(sdl *handle);
 void delete_sdl_impl(void *handle);
 
 void sdl_set_uri_credentials(sdlCtx *ctx, char *uri);

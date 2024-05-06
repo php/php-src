@@ -10,6 +10,14 @@ namespace Soap {
     final class Url
     {
     }
+
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Sdl
+    {
+    }
 }
 
 namespace {
@@ -528,8 +536,7 @@ namespace {
         private ?string $location = null;
         private bool $trace = false;
         private ?int $compression = null;
-        /** @var resource|null */
-        private $sdl = null;
+        private ?Soap\Sdl $sdl = null;
         /** @var resource|null */
         private $typemap = null;
         /** @var resource|null */

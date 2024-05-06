@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 038c8f9ba355fba63e661148b48cdf0299b922f6 */
+ * Stub hash: 70fce84457c1e8fc45832d1fa6e7e070c67ad03f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -177,6 +177,10 @@ static const zend_function_entry class_Soap_Url_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_Soap_Sdl_methods[] = {
+	ZEND_FE_END
+};
+
 static const zend_function_entry class_SoapParam_methods[] = {
 	ZEND_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -319,6 +323,17 @@ static zend_class_entry *register_class_Soap_Url(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", class_Soap_Url_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Soap_Sdl(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", class_Soap_Sdl_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
@@ -548,7 +563,8 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property_sdl_default_value;
 	ZVAL_NULL(&property_sdl_default_value);
 	zend_string *property_sdl_name = zend_string_init("sdl", sizeof("sdl") - 1, 1);
-	zend_declare_typed_property(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
+	zend_string *property_sdl_class_Soap_Sdl = zend_string_init("Soap\\Sdl", sizeof("Soap\\Sdl")-1, 1);
+	zend_declare_typed_property(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_sdl_class_Soap_Sdl, 0, MAY_BE_NULL));
 	zend_string_release(property_sdl_name);
 
 	zval property_typemap_default_value;

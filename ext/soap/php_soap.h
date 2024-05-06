@@ -193,6 +193,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 extern zend_class_entry* soap_class_entry;
 extern zend_class_entry* soap_var_class_entry;
 extern zend_class_entry* soap_url_class_entry;
+extern zend_class_entry* soap_sdl_class_entry;
 
 void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
 
@@ -263,4 +264,10 @@ static inline soap_url_object *soap_url_object_fetch(zend_object *obj)
 }
 
 #define Z_SOAP_URL_P(zv) soap_url_object_fetch(Z_OBJ_P(zv))
+
+typedef struct soap_sdl_object {
+	sdl *sdl;
+	zend_object std;
+} soap_sdl_object;
+
 #endif
