@@ -842,7 +842,6 @@ int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t a
 	}
 
 	if (phar->is_brandnew) {
-		phar->internal_file_start = 0;
 		phar->is_zip = 1;
 		phar->is_tar = 0;
 		return SUCCESS;
