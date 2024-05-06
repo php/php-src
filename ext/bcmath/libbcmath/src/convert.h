@@ -17,7 +17,6 @@
 #ifndef BCMATH_CONVERT_H
 #define BCMATH_CONVERT_H
 
-char *bc_copy_ch_val(char *restrict dest, const char *source, const char *source_end);
-char *bc_copy_bcd_val(char *restrict dest, const char *source, const char *source_end);
+char *bc_copy_and_toggle_bcd(char *restrict dest, const char *source, const char *source_end);
 
 #endif
