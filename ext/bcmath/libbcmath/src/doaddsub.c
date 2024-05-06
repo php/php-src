@@ -124,9 +124,9 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
-	size_t diff_len = MAX(n1->n_len, n2->n_len);
+	size_t diff_len = EXPECTED(n1->n_len >= n2->n_len) ? n1->n_len : n2->n_len;
 	size_t diff_scale = MAX(n1->n_scale, n2->n_scale);
-	size_t min_len = MIN(n1->n_len, n2->n_len);
+	size_t min_len = n1->n_len >= n2->n_len ? n2->n_len : n1->n_len;
 	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
 	size_t borrow = 0;
 	size_t count;
