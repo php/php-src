@@ -1389,6 +1389,20 @@ PHP_FUNCTION(fdiv)
 }
 /* }}} */
 
+/* {{{ Perform floating-point exponentiation with IEEE-754 semantics. */
+PHP_FUNCTION(fpow)
+{
+    double dividend, divisor;
+
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_DOUBLE(dividend)
+        Z_PARAM_DOUBLE(divisor)
+    ZEND_PARSE_PARAMETERS_END();
+
+    RETURN_DOUBLE(pow(dividend, divisor));
+}
+/* }}} */
+
 /* {{{ Returns the integer quotient of the division of dividend by divisor */
 PHP_FUNCTION(intdiv)
 {

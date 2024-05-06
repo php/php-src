@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1ef54fdebc6a206c4af3438130db0cd12a62c8b6 */
+ * Stub hash: 5d8e13990ce18bebc9c7e6a0a9a7ad8b7593d35b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1732,6 +1732,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_fdiv arginfo_fmod
 
+#define arginfo_fpow arginfo_fmod
+
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_float, _IS_BOOL, 0, "false")
@@ -2789,6 +2791,7 @@ ZEND_FUNCTION(base_convert);
 ZEND_FUNCTION(number_format);
 ZEND_FUNCTION(fmod);
 ZEND_FUNCTION(fdiv);
+ZEND_FUNCTION(fpow);
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
 #endif
@@ -3428,6 +3431,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("number_format", zif_number_format, arginfo_number_format, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fmod", zif_fmod, arginfo_fmod, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fdiv", zif_fdiv, arginfo_fdiv, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("fpow", zif_fpow, arginfo_fpow, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(microtime, arginfo_microtime)
 #endif
