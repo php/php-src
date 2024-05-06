@@ -192,7 +192,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 			bool tmp_borrow = n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1));
 
 			/*
-			 * Check the most significant bit of each of the 16 bytes, and if it is 1, a carry down has
+			 * Check the most significant bit of each of the bytes, and if it is 1, a carry down has
 			 * occurred. When carrying down occurs, due to the difference between decimal and hexadecimal
 			 * numbers, an extra 6 is added to the lower 4 bits.
 			 * Therefore, for a byte that has been carried down, set all the upper 4 bits to 0 and subtract
