@@ -290,6 +290,7 @@ PHP 8.4 UPGRADE NOTES
 
 - FPM:
   . Flushing headers without a body will now succeed. See GH-12785.
+  . Status page has a new field to display a memory peak.
 
 - Hash:
   . Added HashContext::__debugInfo().

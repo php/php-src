@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
     ext/dom/xml_common.h). (nielsdos)
 
+- FPM:
+  . Added memory peak to the scoreboard / status page. (Flávio Heleno)
+
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
