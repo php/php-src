@@ -57,13 +57,13 @@ zend_string *bc_num2str_ex(bc_num num, size_t scale)
 
 	/* Load the whole number. */
 	const char *nptr = num->n_value;
-	sptr = bc_copy_bcd_val(sptr, nptr, nptr + num->n_len);
+	sptr = bc_copy_and_toggle_bcd(sptr, nptr, nptr + num->n_len);
 	nptr += num->n_len;
 
 	/* Now the fraction. */
 	if (scale > 0) {
 		*sptr++ = '.';
-		sptr = bc_copy_bcd_val(sptr, nptr, nptr + min_scale);
+		sptr = bc_copy_and_toggle_bcd(sptr, nptr, nptr + min_scale);
 		for (index = num->n_scale; index < scale; index++) {
 			*sptr++ = BCD_CHAR(0);
 		}
