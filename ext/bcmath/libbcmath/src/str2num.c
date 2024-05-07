@@ -130,7 +130,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 	const char *decimal_point = (*ptr == '.') ? ptr : NULL;
 
 	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
-	if (!decimal_point && *ptr != '\0') {
+	if (UNEXPECTED(!decimal_point && *ptr != '\0')) {
 		goto fail;
 	}
 
@@ -138,13 +138,13 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 	if (decimal_point) {
 		/* search */
 		fractional_ptr = fractional_end = decimal_point + 1;
-		if (*fractional_ptr == '\0') {
+		if (UNEXPECTED(*fractional_ptr == '\0')) {
 			goto after_fractional;
 		}
 
 		/* validate */
 		fractional_end = bc_count_digits(fractional_ptr, end);
-		if (*fractional_end != '\0') {
+		if (UNEXPECTED(*fractional_end != '\0')) {
 			/* invalid num */
 			goto fail;
 		}
