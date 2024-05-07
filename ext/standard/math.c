@@ -1392,14 +1392,14 @@ PHP_FUNCTION(fdiv)
 /* {{{ Perform floating-point exponentiation with IEEE-754 semantics. */
 PHP_FUNCTION(fpow)
 {
-    double dividend, divisor;
+    double base, exponent;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
-        Z_PARAM_DOUBLE(dividend)
-        Z_PARAM_DOUBLE(divisor)
+        Z_PARAM_DOUBLE(base)
+        Z_PARAM_DOUBLE(exponent)
     ZEND_PARSE_PARAMETERS_END();
 
-    RETURN_DOUBLE(pow(dividend, divisor));
+    RETURN_DOUBLE(pow(base, exponent));
 }
 /* }}} */
 
