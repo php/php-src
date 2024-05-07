@@ -78,16 +78,19 @@ static const char *bc_count_digits(const char *str, const char *end)
 
 static inline const char *bc_skip_zero_reverse(const char *str, const char *end)
 {
-
+	/* Check in bulk */
 #ifdef __SSE2__
 	const __m128i c_zero_repeat = _mm_set1_epi8((signed char) '0');
 	while (str - sizeof(__m128i) >= end) {
 		str -= sizeof(__m128i);
 		__m128i bytes = _mm_loadu_si128((const __m128i *) str);
+		/* Checks if all numeric strings are equal to '0'. */
 		bytes = _mm_cmpeq_epi8(bytes, c_zero_repeat);
 
 		int mask = _mm_movemask_epi8(bytes);
+		/* The probability of having 16 trailing 0s in a row is very low, so we use EXPECTED. */
 		if (EXPECTED(mask != 0xffff)) {
+			/* Move the pointer back and check each character in loop. */
 			str += sizeof(__m128i);
 			break;
 		}
@@ -138,6 +141,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 	if (decimal_point) {
 		/* search */
 		fractional_ptr = fractional_end = decimal_point + 1;
+		/* For strings that end with a decimal point, such as "012." */
 		if (UNEXPECTED(*fractional_ptr == '\0')) {
 			goto after_fractional;
 		}
