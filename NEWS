@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-13970 (Incorrect validation of #[Attribute] flags type for
     non-compile-time expressions). (ilutov)
+  . Fixed bug GH-14140 (Floating point bug in range operation on Apple Silicon
+    hardware). (Derick, Saki)
 
 - DOM:
   . Fix crashes when entity declaration is removed while still having entity
