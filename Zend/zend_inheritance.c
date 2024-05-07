@@ -1936,7 +1936,8 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		do_inheritance_check_on_method(
 			fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
 			ce, NULL,
-			ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY | ZEND_INHERITANCE_SET_CHILD_PROTO);
+			ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY |
+			ZEND_INHERITANCE_SET_CHILD_CHANGED| ZEND_INHERITANCE_SET_CHILD_PROTO);
 	}
 }
 /* }}} */
