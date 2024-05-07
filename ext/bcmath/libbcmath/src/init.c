@@ -37,7 +37,8 @@
 
 static bc_num _bc_new_num_nonzeroed_ex_internal(size_t length, size_t scale, bool persistent)
 {
-	size_t required_size = zend_safe_address_guarded(1, sizeof(bc_struct) + length, scale);
+	size_t required_size = zend_safe_address_guarded(1, sizeof(bc_struct) + ZEND_MM_ALIGNMENT + length, scale);
+	required_size &= -ZEND_MM_ALIGNMENT;
 	bc_num temp;
 
 	if (!persistent && BCG(arena) && required_size <= BC_ARENA_SIZE - BCG(arena_offset)) {
