@@ -8981,7 +8981,7 @@ ZEND_API bool zend_binary_op_produces_error(uint32_t opcode, const zval *op1, co
 		return 1;
 	}
 	if ((opcode == ZEND_POW) && zval_get_long(op1) == 0 && zval_get_long(op2) < 0) {
-		/* 0 ** (<=0) throws a division by zero error. */
+		/* 0 ** (<0) throws a division by zero error. */
         return 1;
 	}
 	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {

@@ -1399,7 +1399,7 @@ ZEND_API zend_result ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *o
 		return SUCCESS;
 	}
 
-    ZEND_ASSERT(0 && "Operation must succeed");
+	ZEND_ASSERT(0 && "Operation must succeed");
 	return FAILURE;
 }
 /* }}} */
