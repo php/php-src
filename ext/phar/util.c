@@ -438,10 +438,7 @@ really_get_entry:
 		(*ret)->position = 0;
 		(*ret)->fp = NULL;
 		(*ret)->phar = phar;
-		(*ret)->for_write = for_write;
 		(*ret)->internal_file = entry;
-		(*ret)->is_zip = entry->is_zip;
-		(*ret)->is_tar = entry->is_tar;
 
 		if (!phar->is_persistent) {
 			++(entry->phar->refcount);
@@ -486,10 +483,7 @@ really_get_entry:
 	*ret = (phar_entry_data *) emalloc(sizeof(phar_entry_data));
 	(*ret)->position = 0;
 	(*ret)->phar = phar;
-	(*ret)->for_write = for_write;
 	(*ret)->internal_file = entry;
-	(*ret)->is_zip = entry->is_zip;
-	(*ret)->is_tar = entry->is_tar;
 	(*ret)->fp = phar_get_efp(entry, 1);
 	if (entry->link) {
 		phar_entry_info *link = phar_get_link_source(entry);
@@ -616,9 +610,6 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 	ret->phar = phar;
 	ret->fp = entry->fp;
 	ret->position = ret->zero = 0;
-	ret->for_write = 1;
-	ret->is_zip = entry->is_zip;
-	ret->is_tar = entry->is_tar;
 	ret->internal_file = entry;
 
 	return ret;
