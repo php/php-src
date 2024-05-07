@@ -166,11 +166,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, bool finished_exec
 			zend_generator_cleanup_unfinished_execution(generator, execute_data, 0);
 		}
 
-		/* Free closure object */
-		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
-			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
-		}
-
 		efree(execute_data);
 	}
 }
@@ -330,6 +325,10 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 
 	zend_generator_close(generator, 0);
 
+	if (generator->func && (generator->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(generator->func));
+	}
+
 	/* we can't immediately free them in zend_generator_close() else yield from won't be able to fetch it */
 	zval_ptr_dtor(&generator->value);
 	zval_ptr_dtor(&generator->key);
@@ -354,10 +353,19 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 	zend_execute_data *call = NULL;
 
 	if (!execute_data) {
-		/* If the generator has been closed, it can only hold on to three values: The value, key
-		 * and retval. These three zvals are stored sequentially starting at &generator->value. */
-		*table = &generator->value;
-		*n = 3;
+		if (UNEXPECTED(generator->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+			zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+			zend_get_gc_buffer_add_zval(gc_buffer, &generator->value);
+			zend_get_gc_buffer_add_zval(gc_buffer, &generator->key);
+			zend_get_gc_buffer_add_zval(gc_buffer, &generator->retval);
+			zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(generator->func));
+			zend_get_gc_buffer_use(gc_buffer, table, n);
+		} else {
+			/* If the non-closure generator has been closed, it can only hold on to three values: The value, key
+			 * and retval. These three zvals are stored sequentially starting at &generator->value. */
+			*table = &generator->value;
+			*n = 3;
+		}
 		return NULL;
 	}
 
