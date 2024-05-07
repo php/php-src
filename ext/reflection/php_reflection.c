@@ -2354,22 +2354,20 @@ ZEND_METHOD(ReflectionGenerator, getExecutingFile)
 ZEND_METHOD(ReflectionGenerator, getFunction)
 {
 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
-	zend_execute_data *ex = generator->execute_data;
+	zend_function *func = generator->func;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	REFLECTION_CHECK_VALID_GENERATOR(ex)
-
-	if (ex->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+	if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 		zval closure;
-		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(ex->func));
-		reflection_function_factory(ex->func, &closure, return_value);
-	} else if (ex->func->op_array.scope) {
-		reflection_method_factory(ex->func->op_array.scope, ex->func, NULL, return_value);
+		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(func));
+		reflection_function_factory(func, &closure, return_value);
+	} else if (func->op_array.scope) {
+		reflection_method_factory(func->op_array.scope, func, NULL, return_value);
 	} else {
-		reflection_function_factory(ex->func, NULL, return_value);
+		reflection_function_factory(func, NULL, return_value);
 	}
 }
 /* }}} */

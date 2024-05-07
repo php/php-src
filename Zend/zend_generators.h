@@ -88,6 +88,8 @@ struct _zend_generator {
 
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;
+
+	zend_function *func;
 };
 
 static const uint8_t ZEND_GENERATOR_CURRENTLY_RUNNING = 0x1;
