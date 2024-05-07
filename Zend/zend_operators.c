@@ -1287,7 +1287,7 @@ ZEND_API zend_result ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
-static void ZEND_COLD zend_power_base_0_exponent_lt_eq_0_error(void)
+static void ZEND_COLD zend_power_base_0_exponent_lt_0_error(void)
 {
 	zend_error(E_DEPRECATED, "Power of base 0 and negative exponent is deprecated");
 }
@@ -1295,7 +1295,7 @@ static void ZEND_COLD zend_power_base_0_exponent_lt_eq_0_error(void)
 static zend_result safe_pow(double *result, double base, double exponent)
 {
 	if (UNEXPECTED(base == 0.0 && exponent < 0.0)) {
-		zend_power_base_0_exponent_lt_eq_0_error();
+		zend_power_base_0_exponent_lt_0_error();
 	}
 
 	*result = pow(base, exponent);
