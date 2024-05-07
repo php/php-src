@@ -1010,6 +1010,35 @@ ZEND_METHOD(Generator, getReturn)
 }
 /* }}} */
 
+ZEND_METHOD(Generator, __debugInfo)
+{
+	zend_generator *generator;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+
+	array_init(return_value);
+
+	zend_function *func = generator->func;
+
+	zval val;
+	if (func->common.scope) {
+		zend_string *class_name = func->common.scope->name;
+		zend_string *func_name = func->common.function_name;
+		zend_string *combined = zend_string_concat3(
+			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+			"::", strlen("::"),
+			ZSTR_VAL(func_name), ZSTR_LEN(func_name)
+		);
+		ZVAL_NEW_STR(&val, combined);
+	} else {
+		ZVAL_STR_COPY(&val, func->common.function_name);
+	}
+
+	zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FUNCTION), &val);
+}
+
 /* get_iterator implementation */
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ */
