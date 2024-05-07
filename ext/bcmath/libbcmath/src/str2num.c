@@ -76,6 +76,32 @@ static const char *bc_count_digits(const char *str, const char *end)
 	return str;
 }
 
+static inline const char *bc_skip_zero_reverse(const char *str, const char *end)
+{
+
+#ifdef __SSE2__
+	const __m128i c_zero_repeat = _mm_set1_epi8((signed char) '0');
+	while (str - sizeof(__m128i) >= end) {
+		str -= sizeof(__m128i);
+		__m128i bytes = _mm_loadu_si128((const __m128i *) str);
+		bytes = _mm_cmpeq_epi8(bytes, c_zero_repeat);
+
+		int mask = _mm_movemask_epi8(bytes);
+		if (EXPECTED(mask != 0xffff)) {
+			str += sizeof(__m128i);
+			break;
+		}
+	}
+#endif
+
+	/* Exclude trailing zeros. */
+	while (str - 1 >= end && str[-1] == '0') {
+		str--;
+	}
+
+	return str;
+}
+
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
 bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale)
 {
@@ -124,9 +150,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 		}
 
 		/* Exclude trailing zeros. */
-		while (fractional_end - 1 > decimal_point && fractional_end[-1] == '0') {
-			fractional_end--;
-		}
+		fractional_end = bc_skip_zero_reverse(fractional_end, fractional_ptr);
 
 		/* Move the pointer to the beginning of the fraction. */
 		fractional_ptr = decimal_point + 1;
