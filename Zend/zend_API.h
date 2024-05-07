@@ -1765,8 +1765,8 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 #define Z_PARAM_OBJ_OR_STR_OR_NULL(destination_object, destination_string) \
 	Z_PARAM_OBJ_OR_STR_EX(destination_object, destination_string, 1);
 
-#define Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, allow_null) \
-	Z_PARAM_PROLOGUE(0, 0); \
+#define Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, allow_null, deref) \
+	Z_PARAM_PROLOGUE(deref, 0); \
 	if (UNEXPECTED(!zend_parse_arg_obj_or_str(_arg, &destination_object, base_ce, &destination_string, allow_null, _i))) { \
 		if (base_ce) { \
 			_error = ZSTR_VAL((base_ce)->name); \
@@ -1780,10 +1780,10 @@ ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string 
 	}
 
 #define Z_PARAM_OBJ_OF_CLASS_OR_STR(destination_object, base_ce, destination_string) \
-	Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, 0);
+	Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, 0, /* deref */ false);
 
 #define Z_PARAM_OBJ_OF_CLASS_OR_STR_OR_NULL(destination_object, base_ce, destination_string) \
-	Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, 1);
+	Z_PARAM_OBJ_OF_CLASS_OR_STR_EX(destination_object, base_ce, destination_string, 1, /* deref */ false);
 
 /* old "d" */
 #define Z_PARAM_DOUBLE_EX(dest, is_null, check_null, deref) \
