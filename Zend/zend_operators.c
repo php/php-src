@@ -1294,7 +1294,7 @@ static void ZEND_COLD zend_power_base_0_exponent_lt_eq_0_error(void)
 
 static zend_result safe_pow(double *result, double base, double exponent)
 {
-	if (base == 0.0 && exponent < 0.0) {
+	if (UNEXPECTED(base == 0.0 && exponent < 0.0)) {
 		zend_power_base_0_exponent_lt_eq_0_error();
 	}
 
