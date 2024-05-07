@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = Dom\HTMLDocument::createFromString('<!doctype html><p align="\'">foo &apos;</p>');
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

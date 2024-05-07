@@ -8,14 +8,14 @@ dom
 $dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/utf8_bom.html");
 var_dump($dom->charset);
 $dom->documentElement->firstChild->nextElementSibling->textContent = "é";
-$output = $dom->saveHTML();
+$output = $dom->saveHtml();
 echo $output, "\n";
-$dom->saveHTMLFile(__DIR__ . "/utf8_bom_output.tmp");
+$dom->saveHtmlFile(__DIR__ . "/utf8_bom_output.tmp");
 var_dump(file_get_contents(__DIR__ . "/utf8_bom_output.tmp") === $output);
 
 echo "--- After changing encoding to UTF-8 ---\n";
 $dom->charset = "UTF-8";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --CLEAN--

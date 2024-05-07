@@ -14,10 +14,10 @@ echo "--- Modern behaviour ---\n";
 $dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 $comment->replaceData(0, -1, "A");
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 $comment = $dom->createComment("foobarbaz");
 $comment->replaceData(2, -(2**32 - 2), "A");
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 echo "--- Legacy behaviour ---\n";
 
@@ -28,13 +28,13 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 try {
     $comment->replaceData(2, -(2**32 - 2), "A");
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--

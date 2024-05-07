@@ -12,7 +12,7 @@ $dom->append($element);
 // Create a UTF-8 string where an invalid UTF-8 byte sequence falls over the boundary of the 4096 byte buffer
 // Note: the strange ?1?7 sequence is the GB18030 encoding for the unicode replacement character
 $element->append(str_repeat("A", 4096 - 2 - strlen("<container>")) . "\xff\xff\xff");
-var_dump($dom->saveHTML());
+var_dump($dom->saveHtml());
 
 ?>
 --EXPECT--

@@ -10,7 +10,7 @@ echo "--- Modern behaviour ---\n";
 $dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 $comment->deleteData(3, -1);
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 echo "--- Legacy behaviour ---\n";
 
@@ -21,7 +21,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--

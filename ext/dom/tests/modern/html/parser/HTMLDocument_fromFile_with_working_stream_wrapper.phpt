@@ -35,14 +35,14 @@ stream_wrapper_register("euw", EchoUriWrapper::class, 0);
 echo "--- Stream wrapper case ---\n";
 
 $dom = Dom\HTMLDocument::createFromFile("euw://<p>hello</p>");
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 echo "--- Stream wrapper in two chunks case ---\n";
 
 libxml_use_internal_errors(true);
 // To properly test this, keep the 4096 in sync with document.c's input stream buffer size.
 $dom = Dom\HTMLDocument::createFromFile("euw://<!doctype html><html>" . str_repeat("\n", 4096-22) . "<></html>");
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 foreach (libxml_get_errors() as $error) {
     var_dump($error->line, $error->column);

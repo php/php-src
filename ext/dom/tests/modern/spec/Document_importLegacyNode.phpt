@@ -33,7 +33,7 @@ foreach ($new->getElementsByTagName('child') as $child) {
     }
 }
 
-echo $new->saveXML(), "\n";
+echo $new->saveXml(), "\n";
 
 ?>
 --EXPECT--

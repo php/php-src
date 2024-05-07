@@ -18,9 +18,9 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 $comment->insertData(-(2**32 - 1), "A");
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 echo "--- Legacy behaviour ---\n";
 
@@ -31,13 +31,13 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 try {
     $comment->insertData(-(2**32 - 1), "A");
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--

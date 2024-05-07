@@ -33,7 +33,7 @@ var_dump($container->setAttributeNodeNS($attribute5) === null);
 
 echo "--- Resulting document ---\n";
 
-echo $dom1->saveHTML(), "\n";
+echo $dom1->saveHtml(), "\n";
 
 ?>
 --EXPECT--

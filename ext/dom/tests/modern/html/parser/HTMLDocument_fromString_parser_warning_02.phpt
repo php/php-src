@@ -7,7 +7,7 @@ dom
 
 $html = file_get_contents(__DIR__."/parser_warning_02.html");
 $dom = Dom\HTMLDocument::createFromString($html);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECTF--

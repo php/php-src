@@ -12,7 +12,7 @@ foreach (["style", "script", "xmp", "iframe", "noembed", "noframes", "plaintext"
     $tag->textContent = "&\"<>\xc2\xa0 foobar";
     $body->append("\n");
 }
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

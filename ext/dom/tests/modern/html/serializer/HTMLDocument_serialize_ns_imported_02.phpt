@@ -7,7 +7,7 @@ dom
 
 $xml = Dom\XMLDocument::createFromFile(__DIR__.'/sample.xml');
 $xml->documentElement->appendChild($xml->createElementNS('some:ns2', 'child'));
-echo $xml->saveXML(), "\n";
+echo $xml->saveXml(), "\n";
 
 echo "--- After import into HTML ---\n";
 
@@ -16,8 +16,8 @@ $html = Dom\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 $p = $html->documentElement->firstChild->nextSibling->firstChild;
 $p->appendChild($html->importNode($xml->documentElement, true));
 
-echo $html->saveXML(), "\n";
-echo $html->saveHTML(), "\n";
+echo $html->saveXml(), "\n";
+echo $html->saveHtml(), "\n";
 
 ?>
 --EXPECT--

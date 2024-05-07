@@ -18,12 +18,12 @@ $text = $container->appendChild($dom->createTextNode("text"));
 $pi = $container->appendChild($dom->createProcessingInstruction("target", "data"));
 $fragment = $dom->createDocumentFragment();
 
-var_dump($dom->saveHTML($comment));
-var_dump($dom->saveHTML($cdata));
-var_dump($dom->saveHTML($emptyElement));
-var_dump($dom->saveHTML($text));
-var_dump($dom->saveHTML($pi));
-var_dump($dom->saveHTML($fragment));
+var_dump($dom->saveHtml($comment));
+var_dump($dom->saveHtml($cdata));
+var_dump($dom->saveHtml($emptyElement));
+var_dump($dom->saveHtml($text));
+var_dump($dom->saveHtml($pi));
+var_dump($dom->saveHtml($fragment));
 
 ?>
 --EXPECT--

@@ -1265,7 +1265,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	return SUCCESS;
 }
 
-PHP_METHOD(Dom_HTMLDocument, saveHTMLFile)
+PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 {
 	zval *id;
 	xmlDoc *docp;
@@ -1304,7 +1304,7 @@ PHP_METHOD(Dom_HTMLDocument, saveHTMLFile)
 	RETURN_LONG(bytes);
 }
 
-PHP_METHOD(Dom_HTMLDocument, saveHTML)
+PHP_METHOD(Dom_HTMLDocument, saveHtml)
 {
 	zval *nodep = NULL;
 	const xmlDoc *docp;

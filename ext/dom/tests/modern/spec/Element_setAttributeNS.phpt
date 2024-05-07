@@ -13,7 +13,7 @@ $container = $dom->appendChild($dom->createElement("container"));
 echo "--- xmlns attribute ---\n";
 
 $container->setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:foo", "1");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 dumpAttrs($container);
 
 echo "--- name validation ---\n";
@@ -31,7 +31,7 @@ $container = $dom->appendChild($dom->createElement("container"));
 
 $container->setAttributeNS("urn:a", "x:foo", "1");
 $container->setAttributeNS("urn:a", "y:foo", "2");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 dumpAttrs($container);
 
 echo "--- ns attributes with different namespace but same prefix ---\n";
@@ -41,7 +41,7 @@ $container = $dom->appendChild($dom->createElement("container"));
 
 $container->setAttributeNS("urn:a", "x:foo", "1");
 $container->setAttributeNS("urn:b", "x:foo", "2");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 dumpAttrs($container);
 
 ?>

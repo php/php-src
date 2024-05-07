@@ -8,19 +8,19 @@ dom
 echo "--- No elements ---\n";
 
 $dom = Dom\HTMLDocument::createFromString("", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Single element ---\n";
 
 $dom = Dom\HTMLDocument::createFromString("<p>foo</p>", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 var_dump($dom->documentElement->namespaceURI);
 var_dump($dom->documentElement->prefix);
 
 echo "--- Multiple elements ---\n";
 
 $dom = Dom\HTMLDocument::createFromString("<p>foo</p><strong>bar</strong>", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 var_dump($dom->documentElement->namespaceURI);
 var_dump($dom->documentElement->prefix);
 var_dump($dom->documentElement->nextSibling->namespaceURI);

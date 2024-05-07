@@ -18,7 +18,7 @@ $bDOM = Dom\XMLDocument::createEmpty();
 $node = $bDOM->importNode($aDOM->getElementsByTagNameNS('http://example.com/A', 'B')->item(0), true);
 $bDOM->appendChild($node);
 
-echo $bDOM->saveXML(), "\n";
+echo $bDOM->saveXml(), "\n";
 
 ?>
 --EXPECT--

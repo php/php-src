@@ -9,7 +9,7 @@ $dom = Dom\XMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElementNS("http://www.w3.org/XML/1998/namespace", "xml:test"));
 $root->appendChild($dom->createElementNS("http://www.w3.org/XML/1998/namespace", "xml:child"));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

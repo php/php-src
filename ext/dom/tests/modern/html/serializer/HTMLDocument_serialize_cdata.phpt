@@ -12,7 +12,7 @@ $cdata = $dom->createCDATASection("foobaré\"<>-&");
 $dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElement("container"));
 $container->appendChild($dom->importNode($cdata));
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

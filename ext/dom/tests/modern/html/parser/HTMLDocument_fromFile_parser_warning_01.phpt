@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = Dom\HTMLDocument::createFromFile(__DIR__."/parser_warning_01.html", LIBXML_NOERROR);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

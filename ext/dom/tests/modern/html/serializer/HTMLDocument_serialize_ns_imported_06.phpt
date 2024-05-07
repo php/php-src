@@ -7,7 +7,7 @@ dom
 
 $xml = Dom\XMLDocument::createFromFile(__DIR__.'/sample.xml');
 $xml->documentElement->firstElementChild->appendChild($xml->createElementNS('some:ns2', 'child'));
-echo $xml->saveXML(), "\n";
+echo $xml->saveXml(), "\n";
 
 echo "--- After clone + import into HTML ---\n";
 
@@ -16,8 +16,8 @@ $html = Dom\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 $p = $html->documentElement->firstElementChild->nextElementSibling->firstElementChild;
 $p->appendChild($html->adoptNode($xml->documentElement->firstElementChild->cloneNode(true)));
 
-echo $html->saveXML(), "\n";
-echo $html->saveHTML(), "\n";
+echo $html->saveXml(), "\n";
+echo $html->saveHtml(), "\n";
 
 ?>
 --EXPECT--

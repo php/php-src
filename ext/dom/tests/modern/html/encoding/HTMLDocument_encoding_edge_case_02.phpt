@@ -12,7 +12,7 @@ $dom->append($element);
 // Create a UTF-8 string where a UTF-8 byte sequence falls over the boundary of the 4096 byte buffer
 // *and* the sequence also falls over the boundary for the result
 $element->append(str_repeat("A", 4096 - 2 - strlen("<container>")) . "\xf0\x90\x8d\x88AA");
-var_dump($output = $dom->saveHTML());
+var_dump($output = $dom->saveHtml());
 
 // GB18030 encoding of the above UTF-8 symbol
 var_dump($output[4094] == "\x90");

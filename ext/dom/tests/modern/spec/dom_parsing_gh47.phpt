@@ -23,10 +23,10 @@ $document = Dom\XMLDocument::createFromString(<<<XML
 </html>
 XML);
 
-echo $document->saveXML(), "\n";
+echo $document->saveXml(), "\n";
 
 $people = $document->getElementsByTagNameNS(null, 'people')->item(0);
-echo $document->saveXML($people), "\n";
+echo $document->saveXml($people), "\n";
 
 ?>
 --EXPECT--

@@ -66,7 +66,7 @@ try {
 
 echo "--- Document output ---\n";
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Document fragment edge cases with multiple elements ---\n";
 

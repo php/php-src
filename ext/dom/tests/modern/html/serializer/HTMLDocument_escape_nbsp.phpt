@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = Dom\HTMLDocument::createFromString("<p>these must transform: \xc2\xa0\xc2\xa0 but these not: \xa0|\xc2...</p><br>", LIBXML_NOERROR);
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

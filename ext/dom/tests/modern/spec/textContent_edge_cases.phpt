@@ -34,7 +34,7 @@ echo "pi node text content: ";
 var_dump($pi->textContent);
 
 $container->textContent = NULL;
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

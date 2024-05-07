@@ -15,7 +15,7 @@ XML);
 
 $importer = Dom\XMLDocument::createEmpty();
 $imported = $importer->importNode($dom->documentElement, true);
-echo $importer->saveXML($imported), "\n";
+echo $importer->saveXml($imported), "\n";
 
 var_dump($imported->firstChild);
 

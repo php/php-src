@@ -11,7 +11,7 @@ function test_document_fragment_with_import() {
     $frag = $doc->createDocumentFragment();
     $frag->appendChild($doc->importNode($root->firstChild));
     $root->appendChild($frag);
-    echo $doc->saveXML(), "\n";
+    echo $doc->saveXml(), "\n";
 }
 
 function test_document_fragment_without_import() {
@@ -22,7 +22,7 @@ function test_document_fragment_without_import() {
     $element = $doc->documentElement->firstChild;
     $element->appendChild($frag);
     unset($frag); // Free fragment, should not break getting the namespaceURI below
-    echo $doc->saveXML(), "\n";
+    echo $doc->saveXml(), "\n";
     unset($doc);
     var_dump($element->firstChild->tagName);
     var_dump($element->firstChild->namespaceURI);
@@ -46,7 +46,7 @@ XML;
     $importedNode = $dom2->importNode($dom->documentElement, true);
     $dom2->appendChild($importedNode);
 
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 }
 
 function test_partial_document_import() {
@@ -71,17 +71,17 @@ XML;
     unset($importedNode);
     unset($dom);
 
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 }
 
 function test_document_import_with_attributes() {
     $dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><div xmlns="https://php.net/default" xmlns:example="https://php.net/example"><p example:test="test"/><i/></div>');
     $dom2 = Dom\XMLDocument::createFromString('<?xml version="1.0"?><div xmlns:example="https://php.net/somethingelse"/>');
     $dom2->documentElement->appendChild($dom2->importNode($dom->documentElement->firstChild));
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 
     $dom2->documentElement->firstChild->appendChild($dom2->importNode($dom->documentElement->firstChild->nextSibling));
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 }
 
 function test_appendChild_with_shadowing() {
@@ -92,7 +92,7 @@ function test_appendChild_with_shadowing() {
     $b->remove();
     $a->appendChild($b);
 
-    echo $dom->saveXML(), "\n";
+    echo $dom->saveXml(), "\n";
 }
 
 echo "-- Test document fragment with import --\n";

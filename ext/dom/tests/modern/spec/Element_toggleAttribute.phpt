@@ -13,14 +13,14 @@ $container->toggleAttribute('xmlns:foo');
 $container->toggleAttribute('xmlns:bar');
 $container->toggleAttribute('xmlns');
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 $container->toggleAttribute('hidden');
 $container->toggleAttribute('xmlns:foo');
 $container->toggleAttribute('xmlns:bar');
 $container->toggleAttribute('xmlns');
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

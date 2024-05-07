@@ -10,13 +10,13 @@ $sxe = simplexml_load_string('<container xmlns="urn:a">foo</container>');
 
 $element = Dom\import_simplexml($sxe);
 var_dump($element->attributes);
-echo $element->ownerDocument->saveXML($element), "\n";
+echo $element->ownerDocument->saveXml($element), "\n";
 
 $element->appendChild($element->ownerDocument->createElementNS('urn:a', 'child'));
-echo $element->ownerDocument->saveXML($element), "\n";
+echo $element->ownerDocument->saveXml($element), "\n";
 
 $sxe->addChild('name', 'value');
-echo $element->ownerDocument->saveXML($element), "\n";
+echo $element->ownerDocument->saveXml($element), "\n";
 
 // This should fail because it has been imported already above in modern DOM
 try {

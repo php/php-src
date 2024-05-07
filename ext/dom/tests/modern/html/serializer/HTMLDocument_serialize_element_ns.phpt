@@ -16,7 +16,7 @@ $root->append($dom->createElementNS("http://www.w3.org/2000/svg", "s:svg"), "\n"
 $root->append($dom->createElementNS("http://www.w3.org/1998/Math/MathML", "m:math"), "\n");
 
 // Note: XML declarations are not emitted in HTML5
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

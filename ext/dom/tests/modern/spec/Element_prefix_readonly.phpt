@@ -11,7 +11,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveXML();
+echo $dom->saveXml();
 ?>
 --EXPECT--
 Cannot modify readonly property Dom\Element::$prefix

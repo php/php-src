@@ -13,7 +13,7 @@ $dom = Dom\HTMLDocument::createFromString($header . str_repeat("A", $padding_req
 // GB18030 byte sequence crossing the 4096 boundary
 var_dump($dom->charset);
 $dom->charset = "UTF-8";
-var_dump($dom->saveHTML());
+var_dump($dom->saveHtml());
 
 ?>
 --EXPECT--

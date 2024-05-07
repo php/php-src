@@ -17,7 +17,7 @@ $aDOM = Dom\XMLDocument::createEmpty();
 $imported = $aDOM->importNode($fromdom->documentElement->firstElementChild, true);
 $aDOM->appendChild($imported);
 
-echo $aDOM->saveXML(), "\n";
+echo $aDOM->saveXml(), "\n";
 
 var_dump($aDOM->documentElement->firstElementChild->prefix);
 ?>

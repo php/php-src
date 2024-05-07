@@ -38,7 +38,7 @@ var_dump($attr3->prefix, $attr3->namespaceURI, $attr3->localName);
 
 echo "--- Resulting document ---\n";
 
-echo $dom1->saveHTML(), "\n";
+echo $dom1->saveHtml(), "\n";
 
 ?>
 --EXPECT--

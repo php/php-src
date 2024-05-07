@@ -11,7 +11,7 @@ if (getenv('SKIP_ASAN') && LIBXML_VERSION < 20911) die('xleak leaks under libxml
 
 $dom = Dom\XMLDocument::createFromString('<?xml version="1.0" encoding="Windows-1251"?><container/>');
 var_dump($dom->charset);
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

@@ -37,9 +37,9 @@ foreach ($xpath->query("//*[name()='body']//*") as $node) {
 }
 
 echo "--- HTML serialization ---\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 echo "--- XML serialization ---\n";
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

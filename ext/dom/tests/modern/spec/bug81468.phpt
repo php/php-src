@@ -11,7 +11,7 @@ $dom = Dom\XMLDocument::createEmpty();
 $dom
   ->appendChild($dom->createElementNS('some:namespace', 'foo'))
   ->appendChild($dom->createElement('bar'));
-echo ($xml = $dom->saveXML()), "\n";
+echo ($xml = $dom->saveXml()), "\n";
 
 $xpath = new Dom\XPath($dom);
 $xpath->registerNamespace('n', 'some:namespace');
@@ -21,7 +21,7 @@ echo "/n:foo/n:bar -> ", count($xpath->query('/n:foo/n:bar')), "\n";
 //
 
 $dom = Dom\XMLDocument::createFromString($xml);
-echo ($xml = $dom->saveXML()), "\n";
+echo ($xml = $dom->saveXml()), "\n";
 
 $xpath = new Dom\XPath($dom);
 $xpath->registerNamespace('n', 'some:namespace');

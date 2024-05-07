@@ -13,26 +13,26 @@ var_dump($dom->implementation->createDocument(null, ""));
 
 echo "--- (null, \"qname\") ---\n";
 
-echo $dom->implementation->createDocument(null, "qname")->saveXML(), "\n";
+echo $dom->implementation->createDocument(null, "qname")->saveXml(), "\n";
 
 echo "--- (\"\", \"qname\") ---\n";
 
-echo $dom->implementation->createDocument("", "qname")->saveXML(), "\n";
+echo $dom->implementation->createDocument("", "qname")->saveXml(), "\n";
 
 echo "--- (\"urn:a\", \"qname\") ---\n";
 
-echo $dom->implementation->createDocument("urn:a", "qname")->saveXML(), "\n";
+echo $dom->implementation->createDocument("urn:a", "qname")->saveXml(), "\n";
 
 echo "--- With doctype ---\n";
 
 $dtd = $dom->implementation->createDocumentType("mydoc", "", "");
-echo $dom->implementation->createDocument(null, "", $dtd)->saveXML(), "\n";
+echo $dom->implementation->createDocument(null, "", $dtd)->saveXml(), "\n";
 
 echo "--- With auto-adopting doctype ---\n";
 
 $dom2 = Dom\XMLDocument::createEmpty();
 $dtd = $dom2->implementation->createDocumentType("mydoc", "", "");
-echo $dom->implementation->createDocument(null, "", $dtd)->saveXML(), "\n";
+echo $dom->implementation->createDocument(null, "", $dtd)->saveXml(), "\n";
 
 ?>
 --EXPECT--

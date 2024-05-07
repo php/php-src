@@ -9,7 +9,7 @@ $dom = Dom\XMLDocument::createFromString("<root/>");
 $root = $dom->documentElement;
 $root->setAttribute("foo", "<>\"& \t\n\rfoo   ");
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

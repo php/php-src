@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3225ca142d9e2ad08757e19ab819392f24371a08 */
+ * Stub hash: 092131be963d78c73c5285688de8434b898ba604 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -880,7 +880,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_DocumentType_replaceWith arginfo_class_Dom_ParentNode_append
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_DocumentFragment_appendXML, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_DocumentFragment_appendXml, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -963,13 +963,13 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_relaxNGValidate, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_relaxNgValidate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_relaxNGValidateSource, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_relaxNgValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -1001,21 +1001,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_HTMLDocument_createFrom
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, overrideEncoding, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveXML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveXml, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, Dom\\\116ode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveXMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveXmlFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_HTMLDocument_saveHTML, 0, 0, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_HTMLDocument_saveHtml, 0, 0, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, Dom\\\116ode, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveHTMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveHtmlFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -1046,9 +1046,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_XMLDocument_xinclude, 
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Dom_XMLDocument_saveXML arginfo_class_Dom_HTMLDocument_saveXML
+#define arginfo_class_Dom_XMLDocument_saveXml arginfo_class_Dom_HTMLDocument_saveXml
 
-#define arginfo_class_Dom_XMLDocument_saveXMLFile arginfo_class_Dom_HTMLDocument_saveXMLFile
+#define arginfo_class_Dom_XMLDocument_saveXmlFile arginfo_class_Dom_HTMLDocument_saveXmlFile
 
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Dom_XPath___construct, 0, 0, 1)
@@ -1282,9 +1282,9 @@ ZEND_METHOD(Dom_Document, importLegacyNode);
 ZEND_METHOD(Dom_HTMLDocument, createEmpty);
 ZEND_METHOD(Dom_HTMLDocument, createFromFile);
 ZEND_METHOD(Dom_HTMLDocument, createFromString);
-ZEND_METHOD(Dom_XMLDocument, saveXML);
-ZEND_METHOD(Dom_HTMLDocument, saveHTML);
-ZEND_METHOD(Dom_HTMLDocument, saveHTMLFile);
+ZEND_METHOD(Dom_XMLDocument, saveXml);
+ZEND_METHOD(Dom_HTMLDocument, saveHtml);
+ZEND_METHOD(Dom_HTMLDocument, saveHtmlFile);
 ZEND_METHOD(Dom_XMLDocument, createEmpty);
 ZEND_METHOD(Dom_XMLDocument, createFromFile);
 ZEND_METHOD(Dom_XMLDocument, createFromString);
@@ -1709,7 +1709,7 @@ static const zend_function_entry class_Dom_DocumentType_methods[] = {
 };
 
 static const zend_function_entry class_Dom_DocumentFragment_methods[] = {
-	ZEND_RAW_FENTRY("appendXML", zim_DOMDocumentFragment_appendXML, arginfo_class_Dom_DocumentFragment_appendXML, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("appendXml", zim_DOMDocumentFragment_appendXML, arginfo_class_Dom_DocumentFragment_appendXml, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_Dom_DocumentFragment_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_Dom_DocumentFragment_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMElement_replaceChildren, arginfo_class_Dom_DocumentFragment_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1751,10 +1751,10 @@ static const zend_function_entry class_Dom_Document_methods[] = {
 	ZEND_RAW_FENTRY("schemaValidateSource", zim_DOMDocument_schemaValidateSource, arginfo_class_Dom_Document_schemaValidateSource, ZEND_ACC_PUBLIC, NULL, NULL)
 #endif
 #if defined(LIBXML_SCHEMAS_ENABLED)
-	ZEND_RAW_FENTRY("relaxNGValidate", zim_DOMDocument_relaxNGValidate, arginfo_class_Dom_Document_relaxNGValidate, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("relaxNgValidate", zim_DOMDocument_relaxNGValidate, arginfo_class_Dom_Document_relaxNgValidate, ZEND_ACC_PUBLIC, NULL, NULL)
 #endif
 #if defined(LIBXML_SCHEMAS_ENABLED)
-	ZEND_RAW_FENTRY("relaxNGValidateSource", zim_DOMDocument_relaxNGValidateSource, arginfo_class_Dom_Document_relaxNGValidateSource, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("relaxNgValidateSource", zim_DOMDocument_relaxNGValidateSource, arginfo_class_Dom_Document_relaxNgValidateSource, ZEND_ACC_PUBLIC, NULL, NULL)
 #endif
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_Dom_Document_append, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("prepend", zim_DOMElement_prepend, arginfo_class_Dom_Document_prepend, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1767,10 +1767,10 @@ static const zend_function_entry class_Dom_HTMLDocument_methods[] = {
 	ZEND_ME(Dom_HTMLDocument, createEmpty, arginfo_class_Dom_HTMLDocument_createEmpty, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Dom_HTMLDocument, createFromFile, arginfo_class_Dom_HTMLDocument_createFromFile, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Dom_HTMLDocument, createFromString, arginfo_class_Dom_HTMLDocument_createFromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_RAW_FENTRY("saveXML", zim_Dom_XMLDocument_saveXML, arginfo_class_Dom_HTMLDocument_saveXML, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("saveXMLFile", zim_DOMDocument_save, arginfo_class_Dom_HTMLDocument_saveXMLFile, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_ME(Dom_HTMLDocument, saveHTML, arginfo_class_Dom_HTMLDocument_saveHTML, ZEND_ACC_PUBLIC)
-	ZEND_ME(Dom_HTMLDocument, saveHTMLFile, arginfo_class_Dom_HTMLDocument_saveHTMLFile, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("saveXml", zim_Dom_XMLDocument_saveXml, arginfo_class_Dom_HTMLDocument_saveXml, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_HTMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Dom_HTMLDocument, saveHtml, arginfo_class_Dom_HTMLDocument_saveHtml, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_HTMLDocument, saveHtmlFile, arginfo_class_Dom_HTMLDocument_saveHtmlFile, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1781,8 +1781,8 @@ static const zend_function_entry class_Dom_XMLDocument_methods[] = {
 	ZEND_RAW_FENTRY("createEntityReference", zim_DOMDocument_createEntityReference, arginfo_class_Dom_XMLDocument_createEntityReference, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("validate", zim_DOMDocument_validate, arginfo_class_Dom_XMLDocument_validate, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("xinclude", zim_DOMDocument_xinclude, arginfo_class_Dom_XMLDocument_xinclude, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_ME(Dom_XMLDocument, saveXML, arginfo_class_Dom_XMLDocument_saveXML, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("saveXMLFile", zim_DOMDocument_save, arginfo_class_Dom_XMLDocument_saveXMLFile, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Dom_XMLDocument, saveXml, arginfo_class_Dom_XMLDocument_saveXml, ZEND_ACC_PUBLIC)
+	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_XMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 

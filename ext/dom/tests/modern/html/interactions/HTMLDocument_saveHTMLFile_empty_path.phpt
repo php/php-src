@@ -1,5 +1,5 @@
 --TEST--
-Dom\HTMLDocument::saveHTMLFile() empty path
+Dom\HTMLDocument::saveHtmlFile() empty path
 --EXTENSIONS--
 dom
 --FILE--
@@ -7,12 +7,12 @@ dom
 
 $dom = Dom\HTMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement("root"));
-$dom->saveHTMLFile("");
+$dom->saveHtmlFile("");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: Dom\HTMLDocument::saveHTMLFile(): Argument #1 ($filename) must not be empty in %s:%d
+Fatal error: Uncaught ValueError: Dom\HTMLDocument::saveHtmlFile(): Argument #1 ($filename) must not be empty in %s:%d
 Stack trace:
-#0 %s(%d): Dom\HTMLDocument->saveHTMLFile('')
+#0 %s(%d): Dom\HTMLDocument->saveHtmlFile('')
 #1 {main}
   thrown in %s on line %d

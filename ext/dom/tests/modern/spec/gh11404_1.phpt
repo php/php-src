@@ -13,7 +13,7 @@ $nodeB = $dom1->createElementNS(null, 'none');
 $dom1->documentElement->appendChild($nodeA);
 $dom1->documentElement->appendChild($nodeB);
 
-echo $dom1->saveXML(), "\n";
+echo $dom1->saveXml(), "\n";
 
 var_dump($nodeA->namespaceURI, $nodeB->namespaceURI);
 

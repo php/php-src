@@ -7,7 +7,7 @@ dom
 
 $dom = Dom\XMLDocument::createFromString('<test xmlns="urn:a"><a:child xmlns:a=" "/></test>');
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECTF--

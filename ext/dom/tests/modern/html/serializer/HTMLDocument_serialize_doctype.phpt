@@ -16,10 +16,10 @@ $dom = Dom\HTMLDocument::createFromString(<<<HTML
 HTML, LIBXML_NOERROR);
 
 echo "--- XML encoding ---\n";
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 echo "--- HTML encoding ---\n";
 // We don't expect to see the public ID and the system ID because the serialization algorithm doesn't serialize those
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

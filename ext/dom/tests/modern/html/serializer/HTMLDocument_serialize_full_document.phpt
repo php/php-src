@@ -27,7 +27,7 @@ $dom = Dom\HTMLDocument::createFromString(<<<HTML
     </body>
 </html>
 HTML);
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

@@ -1482,7 +1482,7 @@ namespace Dom
         public int $childElementCount;
 
         /** @implementation-alias DOMDocumentFragment::appendXML */
-        public function appendXML(string $data): bool {}
+        public function appendXml(string $data): bool {}
         /** @implementation-alias DOMElement::append */
         public function append(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::prepend */
@@ -1568,9 +1568,9 @@ namespace Dom
         /** @implementation-alias DOMDocument::schemaValidateSource */
         public function schemaValidateSource(string $source, int $flags = 0): bool {}
         /** @implementation-alias DOMDocument::relaxNGValidate */
-        public function relaxNGValidate(string $filename): bool {}
+        public function relaxNgValidate(string $filename): bool {}
         /** @implementation-alias DOMDocument::relaxNGValidateSource */
-        public function relaxNGValidateSource(string $source): bool {}
+        public function relaxNgValidateSource(string $source): bool {}
 #endif
 
         /** @implementation-alias DOMElement::append */
@@ -1591,15 +1591,15 @@ namespace Dom
 
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
-        /** @implementation-alias Dom\XMLDocument::saveXML */
-        public function saveXML(?Node $node = null, int $options = 0): string|false {}
+        /** @implementation-alias Dom\XMLDocument::saveXml */
+        public function saveXml(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
-        public function saveXMLFile(string $filename, int $options = 0): int|false {}
+        public function saveXmlFile(string $filename, int $options = 0): int|false {}
 
-        public function saveHTML(?Node $node = null): string {}
+        public function saveHtml(?Node $node = null): string {}
 
-        public function saveHTMLFile(string $filename): int|false {}
+        public function saveHtmlFile(string $filename): int|false {}
     }
 
     final class XMLDocument extends Document
@@ -1628,10 +1628,10 @@ namespace Dom
         /** @implementation-alias DOMDocument::xinclude */
         public function xinclude(int $options = 0): int|false {}
 
-        public function saveXML(?Node $node = null, int $options = 0): string|false {}
+        public function saveXml(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
-        public function saveXMLFile(string $filename, int $options = 0): int|false {}
+        public function saveXmlFile(string $filename, int $options = 0): int|false {}
     }
 
 #ifdef LIBXML_XPATH_ENABLED

@@ -13,11 +13,11 @@ $xml = Dom\XMLDocument::createFromString(<<<XML
 XML);
 
 $el = $xml->documentElement->firstChild;
-echo $xml->saveXML(), "\n";
+echo $xml->saveXml(), "\n";
 
 $html = Dom\HTMLDocument::createEmpty();
 $html->append($html->importNode($el, true));
-echo $html->saveHTML(), "\n";
+echo $html->saveHtml(), "\n";
 
 ?>
 --EXPECT--

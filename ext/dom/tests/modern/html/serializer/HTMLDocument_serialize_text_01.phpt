@@ -8,7 +8,7 @@ dom
 $dom = Dom\HTMLDocument::createFromString("<p></p>", LIBXML_NOERROR);
 $p = $dom->documentElement->firstChild->nextSibling->firstChild;
 $p->textContent = "this is <some> &text! \"\"";
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

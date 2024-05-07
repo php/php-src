@@ -16,7 +16,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

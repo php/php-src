@@ -49,7 +49,7 @@ foreach ($attrs as $attr) {
     $root->setAttributeNodeNS($attr);
 }
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 echo "\n--- NULL prefix cases ---\n";
 
@@ -64,7 +64,7 @@ foreach ($attrs as $attr) {
     $root->setAttributeNodeNS($attr);
 }
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 ?>
 --EXPECT--
 --- Error cases ---

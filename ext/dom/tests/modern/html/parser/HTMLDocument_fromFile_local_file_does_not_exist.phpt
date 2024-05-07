@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/../foobar");
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECTF--

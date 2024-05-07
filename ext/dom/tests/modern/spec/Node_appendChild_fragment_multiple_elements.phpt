@@ -17,7 +17,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo $dom->saveXML($fragment), "\n";
+echo $dom->saveXml($fragment), "\n";
 
 ?>
 --EXPECT--

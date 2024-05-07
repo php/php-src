@@ -19,7 +19,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-var_dump($dom->saveHTML());
+var_dump($dom->saveHtml());
 
 ?>
 --EXPECT--

@@ -7,7 +7,7 @@ dom
 function test(string $html) {
     echo "Testing: $html\n";
     $dom = Dom\HTMLDocument::createFromString($html, LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
-    $output = $dom->saveHTML();
+    $output = $dom->saveHtml();
     echo $output, "\n";
 
     // Also test the loadHTMLFile variation. We won't print out the result, just checking the result is the same.
@@ -15,7 +15,7 @@ function test(string $html) {
     fwrite($temp, $html);
     fclose($temp);
     $dom = Dom\HTMLDocument::createFromFile(__DIR__."/DOM_HTMLDocument_loadHTML_LIBXML_HTML_NOIMPLIED_input.tmp", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
-    var_dump($output === $dom->saveHTML());
+    var_dump($output === $dom->saveHtml());
 }
 
 echo "--- Missing html, head, body ---\n";

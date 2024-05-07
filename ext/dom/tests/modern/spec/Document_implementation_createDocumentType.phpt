@@ -20,7 +20,7 @@ foreach ($test_matrix as $test_item) {
 
     $dom->append($dom->importNode($dtd));
 
-    echo $dom->saveXML(), "\n";
+    echo $dom->saveXml(), "\n";
 }
 
 ?>

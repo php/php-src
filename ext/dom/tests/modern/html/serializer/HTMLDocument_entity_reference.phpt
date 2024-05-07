@@ -12,8 +12,8 @@ $root->appendChild($dom1->createEntityReference('nbsp'));
 $dom2 = Dom\HTMLDocument::createEmpty();
 $dom2->appendChild($dom2->importLegacyNode($root, true));
 
-echo $dom2->saveXML(), "\n";
-echo $dom2->saveHTML(), "\n";
+echo $dom2->saveXml(), "\n";
+echo $dom2->saveHtml(), "\n";
 
 ?>
 --EXPECT--

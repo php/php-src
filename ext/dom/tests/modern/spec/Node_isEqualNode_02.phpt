@@ -17,10 +17,10 @@ $e2->setAttribute("bar2", "baz");
 $e2->setAttributeNodeNS($child = $dom->createAttributeNS("http://example.com", "foo:bar"));
 $e2->removeAttributeNode($child);
 
-$dom2 = Dom\HTMLDocument::createFromString("<!DOCTYPE HTML>" . $dom->saveHTML());
+$dom2 = Dom\HTMLDocument::createFromString("<!DOCTYPE HTML>" . $dom->saveHtml());
 
-var_dump($dom->saveHTML($dom->getElementsByTagName("container")[0]));
-var_dump($dom2->saveHTML($dom2->getElementsByTagName("container")[0]));
+var_dump($dom->saveHtml($dom->getElementsByTagName("container")[0]));
+var_dump($dom2->saveHtml($dom2->getElementsByTagName("container")[0]));
 var_dump($dom->getElementsByTagName("container")[0]->isEqualNode($dom2->getElementsByTagName("container")[0]));
 
 ?>

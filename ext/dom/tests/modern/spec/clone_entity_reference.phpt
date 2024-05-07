@@ -14,7 +14,7 @@ $dom = Dom\XMLDocument::createFromString(<<<XML
 XML);
 
 $clone = $dom->documentElement->cloneNode(true);
-echo $dom->saveXML($clone), "\n";
+echo $dom->saveXml($clone), "\n";
 
 var_dump($clone->firstChild->firstChild);
 

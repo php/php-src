@@ -6,10 +6,10 @@ dom
 <?php
 
 $doc = Dom\XMLDocument::createFromString('<root><child/><br xmlns="http://www.w3.org/1999/xhtml"/></root>');
-echo $doc->saveXML($doc, LIBXML_NOEMPTYTAG), "\n";
+echo $doc->saveXml($doc, LIBXML_NOEMPTYTAG), "\n";
 
 $doc->formatOutput = true;
-echo $doc->saveXML($doc, LIBXML_NOEMPTYTAG), "\n";
+echo $doc->saveXml($doc, LIBXML_NOEMPTYTAG), "\n";
 
 ?>
 --EXPECT--

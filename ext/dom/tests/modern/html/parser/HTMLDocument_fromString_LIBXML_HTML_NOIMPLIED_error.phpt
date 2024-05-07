@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = Dom\HTMLDocument::createFromString("<div>foo</div>", LIBXML_HTML_NOIMPLIED);
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

@@ -22,7 +22,7 @@ $html = <<<HTML
 </html>
 HTML;
 $dom = Dom\HTMLDocument::createFromString($html);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

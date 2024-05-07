@@ -24,7 +24,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--

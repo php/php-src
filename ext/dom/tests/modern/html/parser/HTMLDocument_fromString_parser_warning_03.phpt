@@ -7,7 +7,7 @@ dom
 
 $html = file_get_contents(__DIR__."/parser_warning_03.html");
 $dom = Dom\HTMLDocument::createFromString($html, LIBXML_NOERROR);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

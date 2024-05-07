@@ -7,7 +7,7 @@ dom
 
 $dom = Dom\HTMLDocument::createEmpty();
 $dom->appendChild($dom->createComment("foobaré\"<>-&"));
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

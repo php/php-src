@@ -28,7 +28,7 @@ $default_p = $body->lastElementChild;
 var_dump($default_p->prefix);
 var_dump($default_p->namespaceURI);
 
-echo $dom2->saveXML();
+echo $dom2->saveXml();
 
 ?>
 --EXPECT--

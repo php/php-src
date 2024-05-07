@@ -16,7 +16,7 @@ try {
 $foo->insertAdjacentText("afterbegin", "bar");
 $foo->insertAdjacentText("beforeend", "baz");
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 var_dump($foo->firstChild->textContent);
 var_dump($foo->firstChild->nextSibling->textContent);

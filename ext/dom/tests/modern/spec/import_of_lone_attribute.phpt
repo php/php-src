@@ -13,7 +13,7 @@ $attr = $root->getAttributeNodeNS("urn:a", "foo");
 
 $importer = Dom\XMLDocument::createEmpty();
 $attr = $importer->importNode($attr, true);
-echo $importer->saveXML($attr), "\n";
+echo $importer->saveXml($attr), "\n";
 
 unset($dom);
 unset($root);

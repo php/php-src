@@ -7,7 +7,7 @@ dom
 
 $root = Dom\XMLDocument::createFromString('<root xmlns:ns2="uri2"><child xmlns:ns1="uri1" xmlns:a0="uri1" xmlns:NS1="uri1"/></root>')->documentElement;
 $root->firstChild->setAttributeNS('uri3', 'attr1', 'value1');
-echo $root->ownerDocument->saveXML(), "\n";
+echo $root->ownerDocument->saveXml(), "\n";
 
 ?>
 --EXPECT--

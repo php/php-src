@@ -9,15 +9,15 @@ $dom = Dom\XMLDocument::createEmpty();
 
 echo "---\n";
 
-echo $dom->implementation->createHTMLDocument()->saveXML(), "\n";
+echo $dom->implementation->createHTMLDocument()->saveXml(), "\n";
 
 echo "---\n";
 
-echo $dom->implementation->createHTMLDocument("")->saveXML(), "\n";
+echo $dom->implementation->createHTMLDocument("")->saveXml(), "\n";
 
 echo "---\n";
 
-echo $dom->implementation->createHTMLDocument("my <title>")->saveXML(), "\n";
+echo $dom->implementation->createHTMLDocument("my <title>")->saveXml(), "\n";
 
 ?>
 --EXPECT--

@@ -7,7 +7,7 @@ dom
 
 $dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/fallback_encoding.html");
 var_dump($dom->inputEncoding);
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --CLEAN--

@@ -25,7 +25,7 @@ try {
 }
 $dom->appendChild($dom->createProcessingInstruction("foo", ""));
 $dom->appendChild($dom->createProcessingInstruction("foo", "bar"));
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 ?>
 --EXPECT--
 int(5)

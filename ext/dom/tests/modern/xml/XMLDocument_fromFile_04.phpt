@@ -6,7 +6,7 @@ dom
 <?php
 
 $dom = Dom\XMLDocument::createFromFile(__DIR__."/../../book.xml");
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

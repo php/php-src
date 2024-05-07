@@ -23,7 +23,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 var_dump($dom->inputEncoding);
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 try {
     $dom = Dom\HTMLDocument::createEmpty("bogus");

@@ -108,14 +108,14 @@ try {
 echo "--- Replace parent with itself ---\n";
 
 $dom->replaceChild($parent, $parent);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 echo "--- Replace parent with single-child fragment ---\n";
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createElement("new-child"));
 $dom->replaceChild($fragment, $parent);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

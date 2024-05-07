@@ -14,7 +14,7 @@ $root->setAttributeNodeNS($dom->createAttributeNS("http://www.w3.org/2000/xmlns/
 $root->setAttributeNodeNS($dom->createAttributeNS("http://www.w3.org/1999/xlink", "z:f"));
 
 // Note: XML declarations are not emitted in HTML5
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

@@ -16,7 +16,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom1->saveHTML(), "\n";
+echo $dom1->saveHtml(), "\n";
 
 ?>
 --EXPECT--

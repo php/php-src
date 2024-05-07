@@ -1693,7 +1693,7 @@ PHP_METHOD(DOMDocument, saveXML)
 	dom_document_save_xml(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(Dom_XMLDocument, saveXML)
+PHP_METHOD(Dom_XMLDocument, saveXml)
 {
 	dom_document_save_xml(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }

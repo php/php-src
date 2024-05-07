@@ -14,7 +14,7 @@ $dom = Dom\XMLDocument::createFromString(<<<XML
 </root>
 XML);
 
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

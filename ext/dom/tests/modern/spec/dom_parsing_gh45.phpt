@@ -9,7 +9,7 @@ $root = Dom\XMLDocument::createFromString('<el1 xmlns:p="u1" xmlns:q="u1"><el2 x
 $root->firstChild->setAttributeNS('u1', 'name', 'v');
 $attr = $root->firstChild->getAttributeNodeNS("u1", "name");
 var_dump($attr->prefix, $attr->namespaceURI);
-echo $root->ownerDocument->saveXML($root), "\n";
+echo $root->ownerDocument->saveXml($root), "\n";
 
 ?>
 --EXPECT--

@@ -14,11 +14,11 @@ $e2 = $dom->documentElement->appendChild($dom->createElementNS("urn:example2", "
 $e2->setAttributeNS("urn:example2", "example2:bar", "baz1");
 $e2->setAttributeNS("urn:example1", "example2:bar", "baz2");
 
-$dom2 = Dom\HTMLDocument::createFromString("<!DOCTYPE HTML>" . $dom->saveHTML());
+$dom2 = Dom\HTMLDocument::createFromString("<!DOCTYPE HTML>" . $dom->saveHtml());
 
 // Shouldn't match because the attributes can't roundtrip.
-var_dump($dom->saveHTML($dom->getElementsByTagName("container")[0]));
-var_dump($dom2->saveHTML($dom2->getElementsByTagName("container")[0]));
+var_dump($dom->saveHtml($dom->getElementsByTagName("container")[0]));
+var_dump($dom2->saveHtml($dom2->getElementsByTagName("container")[0]));
 var_dump($dom->getElementsByTagName("container")[0]->isEqualNode($dom2->getElementsByTagName("container")[0]));
 
 ?>
