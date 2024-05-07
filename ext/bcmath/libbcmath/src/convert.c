@@ -16,15 +16,10 @@
 
 #include "bcmath.h"
 #include "convert.h"
+#include "private.h"
 #ifdef __SSE2__
 # include <emmintrin.h>
 #endif
-
-/* This will be 0x01010101 for 32-bit and 0x0101010101010101 */
-#define SWAR_ONES (~((size_t) 0) / 0xFF)
-/* This repeats a byte `x` into an entire 32/64-bit word.
- * Example: SWAR_REPEAT(0xAB) will be 0xABABABAB for 32-bit and 0xABABABABABABABAB for 64-bit. */
-#define SWAR_REPEAT(x) (SWAR_ONES * (x))
 
 static char *bc_copy_and_shift_numbers(char *restrict dest, const char *source, const char *source_end, unsigned char shift, bool add)
 {
