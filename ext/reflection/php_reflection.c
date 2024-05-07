@@ -2251,18 +2251,11 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 {
 	zval *generator, *object;
 	reflection_object *intern;
-	zend_execute_data *ex;
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &generator, zend_ce_generator) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	ex = ((zend_generator *) Z_OBJ_P(generator))->execute_data;
-	if (!ex) {
-		_DO_THROW("Cannot create ReflectionGenerator based on a terminated Generator");
 		RETURN_THROWS();
 	}
 
