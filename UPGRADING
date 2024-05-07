@@ -135,6 +135,10 @@ PHP 8.4 UPGRADE NOTES
   . Calling simplexml_import_dom() with a non-XML object now throws a TypeError
     instead of a ValueError.
 
+- SOAP:
+  . SoapClient::$httpurl is now a Soap\Url object rather than a resource.
+    Checks using is_resource() (i.e. is_resource($client->httpurl)) should be
+    replaced with checks for null (i.e. $client->httpurl !== null).
 - SPL:
   . Out of bounds accesses in SplFixedArray now throw an exception of type
     OutOfBoundsException instead of RuntimeException. As OutOfBoundsException

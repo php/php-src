@@ -484,8 +484,8 @@ try_again:
 	if (stream != NULL) {
 		php_url *orig;
 		tmp = Z_CLIENT_HTTPURL_P(this_ptr);
-		if (Z_TYPE_P(tmp) == IS_RESOURCE &&
-			(orig = (php_url *) zend_fetch_resource_ex(tmp, "httpurl", le_url)) != NULL &&
+		if (Z_TYPE_P(tmp) == IS_OBJECT && instanceof_function(Z_OBJCE_P(tmp), soap_url_class_entry) &&
+			(orig = Z_SOAP_URL_P(tmp)->url) != NULL &&
 		    ((use_proxy && !use_ssl) ||
 		     (((use_ssl && orig->scheme != NULL && zend_string_equals_literal(orig->scheme, "https")) ||
 		      (!use_ssl && orig->scheme == NULL) ||
@@ -536,9 +536,15 @@ try_again:
 
 	if (stream) {
 		zval *cookies, *login, *password;
-		zend_resource *ret = zend_register_resource(phpurl, le_url);
-		ZVAL_RES(Z_CLIENT_HTTPURL_P(this_ptr), ret);
-		GC_ADDREF(ret);
+
+		zval *url_zval = Z_CLIENT_HTTPURL_P(this_ptr);
+		if (Z_TYPE_P(url_zval) == IS_OBJECT) {
+			zval_ptr_dtor(url_zval);
+		}
+
+		object_init_ex(url_zval, soap_url_class_entry);
+		soap_url_object *url_obj = Z_SOAP_URL_P(url_zval);
+		url_obj->url = phpurl;
 
 		if (context &&
 		    (tmp = php_stream_context_get_option(context, "http", "protocol_version")) != NULL &&

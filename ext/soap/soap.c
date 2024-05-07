@@ -30,7 +30,6 @@
 
 
 static int le_sdl = 0;
-int le_url = 0;
 static int le_typemap = 0;
 
 typedef struct _soapHeader {
@@ -65,7 +64,6 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int inde
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent);
 
 static void delete_service(void *service);
-static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -178,8 +176,10 @@ static zend_class_entry* soap_fault_class_entry;
 static zend_class_entry* soap_header_class_entry;
 static zend_class_entry* soap_param_class_entry;
 zend_class_entry* soap_var_class_entry;
+zend_class_entry *soap_url_class_entry;
 
 static zend_object_handlers soap_server_object_handlers;
+static zend_object_handlers soap_url_object_handlers;
 
 typedef struct {
 	soapServicePtr service;
@@ -206,6 +206,34 @@ static void soap_server_object_free(zend_object *obj) {
 	zend_object_std_dtor(obj);
 }
 
+static zend_object *soap_url_object_create(zend_class_entry *ce)
+{
+	soap_url_object *url_obj = zend_object_alloc(sizeof(soap_url_object), ce);
+
+	zend_object_std_init(&url_obj->std, ce);
+	object_properties_init(&url_obj->std, ce);
+
+	return &url_obj->std;
+}
+
+static void soap_url_object_free(zend_object *obj)
+{
+	soap_url_object *url_obj = soap_url_object_fetch(obj);
+
+	if (url_obj->url) {
+		php_url_free(url_obj->url);
+		url_obj->url = NULL;
+	}
+
+	zend_object_std_dtor(&url_obj->std);
+}
+
+static zend_function *soap_url_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct Soap\\Url");
+
+	return NULL;
+}
 ZEND_DECLARE_MODULE_GLOBALS(soap)
 
 static void (*old_error_handler)(int, zend_string *, const uint32_t, zend_string *);
@@ -395,11 +423,6 @@ static void delete_sdl_res(zend_resource *res)
 	delete_sdl(res->ptr);
 }
 
-static void delete_url_res(zend_resource *res)
-{
-	delete_url(res->ptr);
-}
-
 static void delete_hashtable_res(zend_resource *res)
 {
 	delete_hashtable(res->ptr);
@@ -436,8 +459,18 @@ PHP_MINIT_FUNCTION(soap)
 	soap_header_class_entry = register_class_SoapHeader();
 
 	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);
-	le_url = zend_register_list_destructors_ex(delete_url_res, NULL, "SOAP URL", module_number);
 	le_typemap = zend_register_list_destructors_ex(delete_hashtable_res, NULL, "SOAP table", module_number);
+
+	soap_url_class_entry = register_class_Soap_Url();
+	soap_url_class_entry->create_object = soap_url_object_create;
+	soap_url_class_entry->default_object_handlers = &soap_url_object_handlers;
+
+	memcpy(&soap_url_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	soap_url_object_handlers.offset = XtOffsetOf(soap_url_object, std);
+	soap_url_object_handlers.free_obj = soap_url_object_free;
+	soap_url_object_handlers.get_constructor = soap_url_object_get_constructor;
+	soap_url_object_handlers.clone_obj = NULL;
+	soap_url_object_handlers.compare = zend_objects_not_comparable;
 
 	register_soap_symbols(module_number);
 
@@ -4352,12 +4385,6 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 	}
 	smart_str_free(&spaces);
 	smart_str_0(buf);
-}
-/* }}} */
-
-static void delete_url(void *handle) /* {{{ */
-{
-	php_url_free((php_url*)handle);
 }
 /* }}} */
 
