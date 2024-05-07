@@ -1520,6 +1520,11 @@ static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_f
 		zend_fcc_dtor(handler_fcc);
 	}
 
+	if (Z_TYPE_P(callable) == IS_NULL) {
+		handler_fcc->function_handler = NULL;
+		return true;
+	}
+
 	char *error = NULL;
 	if (UNEXPECTED(!zend_is_callable_ex(callable, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, handler_fcc, /* error */ &error))) {
 		if (!EG(exception)) {
