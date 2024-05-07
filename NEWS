@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.7
+09 May 2024, PHP 8.3.7
 
 - Core:
   . Fixed zend_call_stack build with Linux/uclibc-ng without thread support.
