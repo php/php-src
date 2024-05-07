@@ -28,9 +28,6 @@
 #include "zend_interfaces.h"
 #include "ext/standard/php_incomplete_class.h"
 
-
-static int le_typemap = 0;
-
 typedef struct _soapHeader {
 	sdlFunctionPtr                    function;
 	zval                              function_name;
@@ -63,7 +60,6 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int inde
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent);
 
 static void delete_service(void *service);
-static void delete_hashtable(void *hashtable);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 
@@ -133,8 +129,6 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 			ss = NULL; \
 		} \
 	}
-
-#define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource_ex(tmp, "typemap", le_typemap)
 
 #define Z_PARAM_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
 #define Z_PARAM_DATA_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
@@ -454,11 +448,6 @@ PHP_RINIT_FUNCTION(soap)
 	return SUCCESS;
 }
 
-static void delete_hashtable_res(zend_resource *res)
-{
-	delete_hashtable(res->ptr);
-}
-
 PHP_MINIT_FUNCTION(soap)
 {
 	/* TODO: add ini entry for always use soap errors */
@@ -488,8 +477,6 @@ PHP_MINIT_FUNCTION(soap)
 	soap_param_class_entry = register_class_SoapParam();
 
 	soap_header_class_entry = register_class_SoapHeader();
-
-	le_typemap = zend_register_list_destructors_ex(delete_hashtable_res, NULL, "SOAP table", module_number);
 
 	soap_url_class_entry = register_class_Soap_Url();
 	soap_url_class_entry->create_object = soap_url_object_create;
@@ -2148,8 +2135,7 @@ PHP_METHOD(SoapClient, __construct)
 	if (typemap_ht) {
 		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
 		if (typemap) {
-			zend_resource *res = zend_register_resource(typemap, le_typemap);
-			ZVAL_RES(Z_CLIENT_TYPEMAP_P(this_ptr), res);
+			ZVAL_ARR(Z_CLIENT_TYPEMAP_P(this_ptr), typemap);
 		}
 	}
 	SOAP_CLIENT_END_CODE();
@@ -2281,8 +2267,8 @@ static void do_soap_call(zend_execute_data *execute_data,
 	}
 
 	tmp = Z_CLIENT_TYPEMAP_P(this_ptr);
-	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
-		FETCH_TYPEMAP_RES(typemap, tmp);
+	if (Z_TYPE_P(tmp) == IS_ARRAY) {
+		typemap = Z_ARR_P(tmp);
 	}
 
 	clear_soap_fault(this_ptr);
@@ -4478,10 +4464,4 @@ static void delete_service(void *data) /* {{{ */
 }
 /* }}} */
 
-static void delete_hashtable(void *data) /* {{{ */
-{
-	HashTable *ht = (HashTable*)data;
-	zend_hash_destroy(ht);
-	efree(ht);
-}
 /* }}} */
