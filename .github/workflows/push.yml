@@ -225,6 +225,7 @@ jobs:
         with:
           key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         run: |
           set -x

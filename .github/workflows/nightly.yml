@@ -801,6 +801,7 @@ jobs:
         with:
           key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: build PHP
         run: |
           cd php
