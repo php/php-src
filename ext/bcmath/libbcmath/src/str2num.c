@@ -152,9 +152,6 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 		/* Exclude trailing zeros. */
 		fractional_end = bc_skip_zero_reverse(fractional_end, fractional_ptr);
 
-		/* Move the pointer to the beginning of the fraction. */
-		fractional_ptr = decimal_point + 1;
-
 		/* Calculate the length of the fraction excluding trailing zero. */
 		str_scale = fractional_end - fractional_ptr;
 
