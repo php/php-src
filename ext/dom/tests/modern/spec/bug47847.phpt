@@ -4,7 +4,7 @@ Bug #47847 (importNode loses the namespace of an XML element)
 dom
 --FILE--
 <?php
-$fromdom = DOM\XMLDocument::createFromString(<<<XML
+$fromdom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <ns:container xmlns:ns="http://php.net">
 <ns:inner xmlns="http://php.net">
@@ -13,7 +13,7 @@ $fromdom = DOM\XMLDocument::createFromString(<<<XML
 </ns:container>
 XML);
 
-$aDOM = DOM\XMLDocument::createEmpty();
+$aDOM = Dom\XMLDocument::createEmpty();
 $imported = $aDOM->importNode($fromdom->documentElement->firstElementChild, true);
 $aDOM->appendChild($imported);
 

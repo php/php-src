@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::createFromString() with LIBXML_HTML_NOIMPLIED - tree error should not happen
+Dom\HTMLDocument::createFromString() with LIBXML_HTML_NOIMPLIED - tree error should not happen
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString("<div>foo</div>", LIBXML_HTML_NOIMPLIED);
+$dom = Dom\HTMLDocument::createFromString("<div>foo</div>", LIBXML_HTML_NOIMPLIED);
 echo $dom->saveHTML();
 
 ?>

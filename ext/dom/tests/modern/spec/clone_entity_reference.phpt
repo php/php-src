@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
     <!ENTITY foo "bar">
@@ -21,7 +21,7 @@ var_dump($clone->firstChild->firstChild);
 ?>
 --EXPECTF--
 <root>&foo;</root>
-object(DOM\Entity)#4 (17) {
+object(Dom\Entity)#4 (17) {
   ["publicId"]=>
   NULL
   ["systemId"]=>

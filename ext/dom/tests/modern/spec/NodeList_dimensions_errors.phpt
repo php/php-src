@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root><a/><b/><c/></root>');
+$dom = Dom\XMLDocument::createFromString('<root><a/><b/><c/></root>');
 $children = $dom->documentElement->childNodes;
 
 try {
@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot append to DOM\NodeList
+Cannot append to Dom\NodeList

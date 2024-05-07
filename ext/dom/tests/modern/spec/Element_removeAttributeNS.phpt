@@ -6,7 +6,7 @@ dom
 <?php
 
 function createFreshBody() {
-    $dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><body align="foo" foo:bar="baz"></body></html>');
+    $dom = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html><body align="foo" foo:bar="baz"></body></html>');
     $body = $dom->getElementsByTagName("body")[0];
     return $body;
 }

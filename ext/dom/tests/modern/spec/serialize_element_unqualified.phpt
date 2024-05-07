@@ -5,10 +5,10 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root xmlns:p1="u1"><child xmlns:p2="u1"><p1:child2/></child></root>');
+$dom = Dom\XMLDocument::createFromString('<root xmlns:p1="u1"><child xmlns:p2="u1"><p1:child2/></child></root>');
 echo $dom->saveXML(), "\n";
 
-$dom = DOM\XMLDocument::createFromString('<root xmlns:p1="u1"><child xmlns:p2="u1"></child></root>');
+$dom = Dom\XMLDocument::createFromString('<root xmlns:p1="u1"><child xmlns:p2="u1"></child></root>');
 $root = $dom->documentElement;
 $child2 = $root->ownerDocument->createElementNS('u1', 'child2');
 $root->firstChild->appendChild($child2);

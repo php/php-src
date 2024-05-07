@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <!DOCTYPE root [
 <!ENTITY test "entity is only for test purposes">
@@ -26,7 +26,7 @@ var_dump($doctype->notations["GIF"]);
 
 ?>
 --EXPECTF--
-object(DOM\DocumentType)#2 (24) {
+object(Dom\DocumentType)#2 (24) {
   ["name"]=>
   string(4) "root"
   ["entities"]=>
@@ -78,7 +78,7 @@ object(DOM\DocumentType)#2 (24) {
   ["textContent"]=>
   NULL
 }
-object(DOM\Entity)#4 (17) {
+object(Dom\Entity)#4 (17) {
   ["publicId"]=>
   NULL
   ["systemId"]=>
@@ -114,7 +114,7 @@ object(DOM\Entity)#4 (17) {
   ["textContent"]=>
   NULL
 }
-object(DOM\Entity)#3 (17) {
+object(Dom\Entity)#3 (17) {
   ["publicId"]=>
   string(1) "-"
   ["systemId"]=>
@@ -150,7 +150,7 @@ object(DOM\Entity)#3 (17) {
   ["textContent"]=>
   NULL
 }
-object(DOM\Notation)#4 (13) {
+object(Dom\Notation)#4 (13) {
   ["nodeType"]=>
   int(12)
   ["nodeName"]=>

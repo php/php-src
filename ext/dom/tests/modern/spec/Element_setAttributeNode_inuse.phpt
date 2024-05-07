@@ -1,11 +1,11 @@
 --TEST--
-DOM\Element::setAttributeNode(NS) inuse error
+Dom\Element::setAttributeNode(NS) inuse error
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom1 = DOM\HTMLDocument::createEmpty();
+$dom1 = Dom\HTMLDocument::createEmpty();
 $container = $dom1->appendChild($dom1->createElement("container"));
 $attr1 = $dom1->createAttribute("my-attribute");
 $attr1->value = "1";

@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 $comment->replaceData(0, -1, "A");
 echo $dom->saveHTML($comment), "\n";

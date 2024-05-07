@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<container>text<?pi value?></container>');
+$dom = Dom\XMLDocument::createFromString('<container>text<?pi value?></container>');
 
 echo "document text content: ";
 var_dump($dom->textContent);
@@ -39,7 +39,7 @@ echo $dom->saveXML(), "\n";
 ?>
 --EXPECT--
 document text content: NULL
-Cannot modify readonly property DOM\XMLDocument::$textContent
+Cannot modify readonly property Dom\XMLDocument::$textContent
 text node text content: string(4) "text"
 pi node text content: string(5) "value"
 text node text content: string(0) ""

@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization escape text 03 - special tags in namespace should encode content
+Dom\HTMLDocument serialization escape text 03 - special tags in namespace should encode content
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $body = $dom->appendChild($dom->createElement("body"));
 foreach (["style", "script", "xmp", "iframe", "noembed", "noframes", "plaintext", "noscript"] as $tag) {
     $tag = $body->appendChild($dom->createElementNS("some:ns", $tag));

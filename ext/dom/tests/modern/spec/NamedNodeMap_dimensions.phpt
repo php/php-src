@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root a="1" b="2" c="3"></root>');
+$dom = Dom\XMLDocument::createFromString('<root a="1" b="2" c="3"></root>');
 $attributes = $dom->documentElement->attributes;
 
 $test_values = [-1, 0, 1, 2, 3, 1.0, 1.1, true, null, "0", "", "1", "8", "a", "b", "c", "d"];
@@ -58,9 +58,9 @@ string(1) "b"
 bool(true)
 bool(false)
 --- true ---
-Cannot access offset of type bool on DOM\NamedNodeMap
+Cannot access offset of type bool on Dom\NamedNodeMap
 --- null ---
-Cannot access offset of type null on DOM\NamedNodeMap
+Cannot access offset of type null on Dom\NamedNodeMap
 --- "0" ---
 string(1) "a"
 bool(true)

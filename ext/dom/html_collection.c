@@ -89,7 +89,7 @@ static void dom_html_collection_named_item_into_zval(zval *return_value, zend_st
 	}
 }
 
-PHP_METHOD(DOM_HTMLCollection, namedItem)
+PHP_METHOD(Dom_HTMLCollection, namedItem)
 {
 	zend_string *key;
 	ZEND_PARSE_PARAMETERS_START(1, 1)

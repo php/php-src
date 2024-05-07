@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$xml = DOM\XMLDocument::createFromString(<<<XML
+$xml = Dom\XMLDocument::createFromString(<<<XML
 <!DOCTYPE root [
     <!ENTITY foo "foo">
 ]>
@@ -15,7 +15,7 @@ XML);
 $el = $xml->documentElement->firstChild;
 echo $xml->saveXML(), "\n";
 
-$html = DOM\HTMLDocument::createEmpty();
+$html = Dom\HTMLDocument::createEmpty();
 $html->append($html->importNode($el, true));
 echo $html->saveHTML(), "\n";
 

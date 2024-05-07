@@ -1,11 +1,11 @@
 --TEST--
-DOM\XMLDocument::createFromFile 04
+Dom\XMLDocument::createFromFile 04
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromFile(__DIR__."/../../book.xml");
+$dom = Dom\XMLDocument::createFromFile(__DIR__."/../../book.xml");
 echo $dom->saveXML();
 
 ?>

@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument Windows-1251 encoding test
+Dom\HTMLDocument Windows-1251 encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/windows1251.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/windows1251.html");
 var_dump($dom->charset);
 $dom->documentElement->firstChild->nextElementSibling->textContent .= "é"; // Note: won't show up in Windows 1251 because it doesn't exist there
 $output = $dom->saveHTML();

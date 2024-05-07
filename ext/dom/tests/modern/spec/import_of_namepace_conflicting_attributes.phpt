@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement('root'));
 
 $root->setAttributeNS("urn:a", "a:root1", "bar");
@@ -25,7 +25,7 @@ var_dump($root2->prefix, $root2->namespaceURI);
 $child->removeAttribute("a:child1");
 $root->setAttributeNodeNS($child1);
 
-$importer = DOM\XMLDocument::createEmpty();
+$importer = Dom\XMLDocument::createEmpty();
 $imported = $importer->importNode($root, true);
 echo $importer->saveXML($imported), "\n";
 

@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization of full document
+Dom\HTMLDocument serialization of full document
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE HTML>
 <html lang="en">
     <head>

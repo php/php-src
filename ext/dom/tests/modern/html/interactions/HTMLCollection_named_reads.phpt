@@ -21,7 +21,7 @@ $xml = <<<XML
 </root>
 XML;
 
-$dom = DOM\XMLDocument::createFromString($xml);
+$dom = Dom\XMLDocument::createFromString($xml);
 
 function test($obj, $name) {
     echo "--- Query \"$name\" ---\n";

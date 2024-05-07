@@ -7,12 +7,12 @@ dom
 
 require __DIR__ . "/dump_attr.inc";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElementNS("urn:a", "container"));
 
 $attrs = [];
 
-function setAttribute($container, string $name, string $value): DOM\Attr {
+function setAttribute($container, string $name, string $value): Dom\Attr {
     $container->setAttribute($name, $value);
     return $container->getAttributeNode($name);
 }

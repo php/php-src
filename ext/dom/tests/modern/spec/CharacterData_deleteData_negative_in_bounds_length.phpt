@@ -7,7 +7,7 @@ dom
 
 echo "--- Modern behaviour ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 $comment->deleteData(3, -1);
 echo $dom->saveHTML($comment), "\n";

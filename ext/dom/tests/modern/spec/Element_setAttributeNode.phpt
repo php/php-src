@@ -1,11 +1,11 @@
 --TEST--
-DOM\Element::setAttributeNode(NS) in the same document
+Dom\Element::setAttributeNode(NS) in the same document
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom1 = DOM\HTMLDocument::createEmpty();
+$dom1 = Dom\HTMLDocument::createEmpty();
 $container = $dom1->appendChild($dom1->createElement("container"));
 
 echo "--- Without namespace ---\n";

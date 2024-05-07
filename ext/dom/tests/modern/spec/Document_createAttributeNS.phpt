@@ -16,7 +16,7 @@ function testErrorCase($dom, $ns, $qname) {
     }
 }
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $attrs = [];
 $attrs[] = $dom->createAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:foo');
 $attrs[] = $dom->createAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:bar');

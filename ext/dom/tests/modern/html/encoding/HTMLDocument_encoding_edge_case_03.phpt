@@ -1,12 +1,12 @@
 --TEST--
-DOM\HTMLDocument edge case encoding 03
+Dom\HTMLDocument edge case encoding 03
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
 // UTF-8 -> GB18030
-$dom = DOM\HTMLDocument::createEmpty("GB18030");
+$dom = Dom\HTMLDocument::createEmpty("GB18030");
 $element = $dom->createElement("container");
 $dom->append($element);
 // Create a UTF-8 string where an invalid UTF-8 byte sequence falls over the boundary of the 4096 byte buffer

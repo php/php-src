@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::lookupNamespaceURI()
+Dom\Node::lookupNamespaceURI()
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
     <body>
@@ -56,7 +56,7 @@ var_dump($body->lookupNamespaceURI(NULL));
 var_dump($body->lookupNamespaceURI("a"));
 
 echo "--- lookup in empty document ---\n";
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 var_dump($dom->lookupNamespaceURI(""));
 var_dump($dom->lookupNamespaceURI(NULL));
 var_dump($dom->lookupNamespaceURI("a"));

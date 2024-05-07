@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$aDOM = DOM\XMLDocument::createFromString(<<<EOXML
+$aDOM = Dom\XMLDocument::createFromString(<<<EOXML
 <A xmlns="http://example.com/A">
 <B>
 <C xmlns="http://example.com/C" xmlns:default="http://example.com/Z" />
@@ -14,7 +14,7 @@ $aDOM = DOM\XMLDocument::createFromString(<<<EOXML
 EOXML
 );
 
-$bDOM = DOM\XMLDocument::createEmpty();
+$bDOM = Dom\XMLDocument::createEmpty();
 $node = $bDOM->importNode($aDOM->getElementsByTagNameNS('http://example.com/A', 'B')->item(0), true);
 $bDOM->appendChild($node);
 

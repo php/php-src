@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::createFromString() - empty document
+Dom\HTMLDocument::createFromString() - empty document
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString('');
+$dom = Dom\HTMLDocument::createFromString('');
 echo $dom->saveHTML(), "\n";
 
 ?>

@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$root = DOM\XMLDocument::createFromString('<el1 xmlns:p="u1" xmlns:q="u1"><el2 xmlns:q="u2"/></el1>')->documentElement;
+$root = Dom\XMLDocument::createFromString('<el1 xmlns:p="u1" xmlns:q="u1"><el2 xmlns:q="u2"/></el1>')->documentElement;
 $root->firstChild->setAttributeNS('u1', 'name', 'v');
 $attr = $root->firstChild->getAttributeNodeNS("u1", "name");
 var_dump($attr->prefix, $attr->namespaceURI);

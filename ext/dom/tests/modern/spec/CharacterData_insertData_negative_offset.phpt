@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 try {
     $comment->insertData(-1, "A");

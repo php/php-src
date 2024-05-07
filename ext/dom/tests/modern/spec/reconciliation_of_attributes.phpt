@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement('root'));
 
 $root->setAttributeNS("urn:a", "a:root1", "bar");

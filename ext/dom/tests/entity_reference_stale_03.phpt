@@ -6,7 +6,7 @@ dom
 <?php
 
 foreach (['firstChild', 'lastChild', 'textContent', 'childNodes'] as $prop) {
-    $dom = DOM\XMLDocument::createFromString(<<<XML
+    $dom = Dom\XMLDocument::createFromString(<<<XML
     <!DOCTYPE foo [
     <!ENTITY foo "bar">
     ]>
@@ -28,7 +28,7 @@ foreach (['firstChild', 'lastChild', 'textContent', 'childNodes'] as $prop) {
 NULL
 NULL
 NULL
-object(DOM\NodeList)#1 (1) {
+object(Dom\NodeList)#1 (1) {
   ["length"]=>
   int(0)
 }

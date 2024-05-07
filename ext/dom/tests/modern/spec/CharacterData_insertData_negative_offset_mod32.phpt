@@ -11,7 +11,7 @@ if (PHP_INT_SIZE === 4) die('skip not for 32-bit');
 
 echo "--- Modern behaviour ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 try {
     $comment->insertData(-1, "A");

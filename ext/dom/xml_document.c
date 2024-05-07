@@ -86,7 +86,7 @@ static void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_m
 	}
 }
 
-PHP_METHOD(DOM_XMLDocument, createEmpty)
+PHP_METHOD(Dom_XMLDocument, createEmpty)
 {
 	const char *version = NULL;
 	size_t encoding_len = strlen("UTF-8");
@@ -238,12 +238,12 @@ void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml
 	dom_mark_namespaces_as_attributes_too(ns_mapper, lxml_doc);
 }
 
-PHP_METHOD(DOM_XMLDocument, createFromString)
+PHP_METHOD(Dom_XMLDocument, createFromString)
 {
 	load_from_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
 }
 
-PHP_METHOD(DOM_XMLDocument, createFromFile)
+PHP_METHOD(Dom_XMLDocument, createFromFile)
 {
 	load_from_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }

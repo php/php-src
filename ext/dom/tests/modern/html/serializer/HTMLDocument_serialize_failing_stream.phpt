@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument serialization with a failing stream
+Dom\HTMLDocument serialization with a failing stream
 --EXTENSIONS--
 dom
 --FILE--
@@ -33,7 +33,7 @@ class FailingWrapper {
 
 stream_wrapper_register("failing", "FailingWrapper");
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement("root"));
 $dom->saveHTMLFile("failing://foo");
 
@@ -44,6 +44,6 @@ string(1) "<"
 Fatal error: Uncaught Error: fail in %s:%d
 Stack trace:
 #0 [internal function]: FailingWrapper->stream_write('root')
-#1 %s(%d): DOM\HTMLDocument->saveHTMLFile('failing://foo')
+#1 %s(%d): Dom\HTMLDocument->saveHTMLFile('failing://foo')
 #2 {main}
   thrown in %s on line %d

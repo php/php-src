@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::appendChild() with attribute should fail
+Dom\Node::appendChild() with attribute should fail
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 
 $element = $dom->createElement('foo');
 $attr = $dom->createAttribute('bar');

@@ -1,10 +1,10 @@
 --TEST--
-DOM\HTMLDocument::createProcessingInstruction()
+Dom\HTMLDocument::createProcessingInstruction()
 --EXTENSIONS--
 dom
 --FILE--
 <?php
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->createProcessingInstruction("?>", "");
 } catch (DOMException $e) {

@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument UTF-8 BOM encoding test
+Dom\HTMLDocument UTF-8 BOM encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/utf8_bom.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/utf8_bom.html");
 var_dump($dom->charset);
 $dom->documentElement->firstChild->nextElementSibling->textContent = "é";
 $output = $dom->saveHTML();

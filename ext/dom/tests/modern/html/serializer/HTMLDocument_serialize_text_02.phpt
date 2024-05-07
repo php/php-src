@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization escape text 02 - special tags in html namespace
+Dom\HTMLDocument serialization escape text 02 - special tags in html namespace
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $body = $dom->appendChild($dom->createElement("body"));
 foreach (["style", "script", "xmp", "iframe", "noembed", "noframes", "plaintext", "noscript"] as $tag) {
     $tag = $body->appendChild($dom->createElement($tag));

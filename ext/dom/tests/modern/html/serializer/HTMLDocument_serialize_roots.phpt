@@ -1,15 +1,15 @@
 --TEST--
-DOM\HTMLDocument serialization of different roots
+Dom\HTMLDocument serialization of different roots
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
 // Note: can't create CData in an HTML document.
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $cdata = $dom->createCDATASection("cdata");
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElement("container"));
 $comment = $container->appendChild($dom->createComment("comment"));
 $cdata = $container->appendChild($dom->importNode($cdata));

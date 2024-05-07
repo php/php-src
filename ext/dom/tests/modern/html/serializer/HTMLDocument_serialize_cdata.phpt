@@ -1,15 +1,15 @@
 --TEST--
-DOM\HTMLDocument serialization of CData
+Dom\HTMLDocument serialization of CData
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
 // Note: can't create CData in an HTML document.
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $cdata = $dom->createCDATASection("foobaré\"<>-&");
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElement("container"));
 $container->appendChild($dom->importNode($cdata));
 echo $dom->saveHTML();

@@ -4,7 +4,7 @@ Attribute entity expansion
 dom
 --FILE--
 <?php
-$doc = DOM\HTMLDocument::createEmpty();
+$doc = Dom\HTMLDocument::createEmpty();
 $elt = $doc->createElement('elt');
 $doc->appendChild($elt);
 $elt->setAttribute('a','&');

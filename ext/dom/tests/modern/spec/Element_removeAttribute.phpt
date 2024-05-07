@@ -7,7 +7,7 @@ dom
 
 echo "--- Remove after parsing ---\n";
 
-$dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><body align="foo" foo:bar="baz"></body></html>');
+$dom = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html><body align="foo" foo:bar="baz"></body></html>');
 $body = $dom->getElementsByTagName("body")[0];
 var_dump($body->removeAttribute("align"));
 var_dump($body->removeAttribute("foo:bar"));

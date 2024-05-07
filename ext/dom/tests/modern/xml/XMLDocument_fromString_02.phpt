@@ -1,11 +1,11 @@
 --TEST--
-DOM\XMLDocument::createFromString 02
+Dom\XMLDocument::createFromString 02
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<?xml version="1.0"?><container/>');
+$dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><container/>');
 var_dump($dom->saveXMLFile("php://stdout"));
 
 ?>

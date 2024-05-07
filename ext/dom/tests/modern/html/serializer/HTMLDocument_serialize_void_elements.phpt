@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization of void elements
+Dom\HTMLDocument serialization of void elements
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->createElement("container");
 $dom->append($container);
 

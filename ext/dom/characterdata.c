@@ -184,7 +184,7 @@ PHP_METHOD(DOMCharacterData, appendData)
 	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
-PHP_METHOD(DOM_CharacterData, appendData)
+PHP_METHOD(Dom_CharacterData, appendData)
 {
 	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
@@ -255,7 +255,7 @@ PHP_METHOD(DOMCharacterData, insertData)
 	dom_character_data_insert_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
-PHP_METHOD(DOM_CharacterData, insertData)
+PHP_METHOD(Dom_CharacterData, insertData)
 {
 	dom_character_data_insert_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
@@ -327,7 +327,7 @@ PHP_METHOD(DOMCharacterData, deleteData)
 	dom_character_data_delete_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
-PHP_METHOD(DOM_CharacterData, deleteData)
+PHP_METHOD(Dom_CharacterData, deleteData)
 {
 	dom_character_data_delete_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
@@ -407,7 +407,7 @@ PHP_METHOD(DOMCharacterData, replaceData)
 	dom_character_data_replace_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 
-PHP_METHOD(DOM_CharacterData, replaceData)
+PHP_METHOD(Dom_CharacterData, replaceData)
 {
 	dom_character_data_replace_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }

@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::insertBefore() with DocumentFragment and a document element
+Dom\Node::insertBefore() with DocumentFragment and a document element
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><head></head><body></body></html>');
+$dom = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html><head></head><body></body></html>');
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createElement('a'));

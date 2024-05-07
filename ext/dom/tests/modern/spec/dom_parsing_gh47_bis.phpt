@@ -7,10 +7,10 @@ dom
 
 // Adapted from https://github.com/web-platform-tests/wpt/blob/master/domparsing/XMLSerializer-serializeToString.html
 
-$dom = DOM\XMLDocument::createFromString('<root xmlns=""><child xmlns=""/></root>');
+$dom = Dom\XMLDocument::createFromString('<root xmlns=""><child xmlns=""/></root>');
 echo $dom->saveXML(), "\n";
 
-$dom = DOM\XMLDocument::createFromString('<root xmlns="urn:u1"><child xmlns="urn:u1"/></root>');
+$dom = Dom\XMLDocument::createFromString('<root xmlns="urn:u1"><child xmlns="urn:u1"/></root>');
 echo $dom->saveXML(), "\n";
 
 ?>

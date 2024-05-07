@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromString() with LIBXML_HTML_NOIMPLIED namespace check
+Dom\HTMLDocument::createFromString() with LIBXML_HTML_NOIMPLIED namespace check
 --EXTENSIONS--
 dom
 --FILE--
@@ -7,19 +7,19 @@ dom
 
 echo "--- No elements ---\n";
 
-$dom = DOM\HTMLDocument::createFromString("", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromString("", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
 echo $dom->saveXML(), "\n";
 
 echo "--- Single element ---\n";
 
-$dom = DOM\HTMLDocument::createFromString("<p>foo</p>", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromString("<p>foo</p>", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
 echo $dom->saveXML(), "\n";
 var_dump($dom->documentElement->namespaceURI);
 var_dump($dom->documentElement->prefix);
 
 echo "--- Multiple elements ---\n";
 
-$dom = DOM\HTMLDocument::createFromString("<p>foo</p><strong>bar</strong>", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromString("<p>foo</p><strong>bar</strong>", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
 echo $dom->saveXML(), "\n";
 var_dump($dom->documentElement->namespaceURI);
 var_dump($dom->documentElement->prefix);

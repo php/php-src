@@ -889,7 +889,7 @@ namespace
         public function replaceChildren(...$nodes): void {}
     }
 
-    /** @alias DOM\DOMException */
+    /** @alias Dom\DOMException */
     final class DOMException extends Exception
     {
         /**
@@ -1025,7 +1025,7 @@ namespace
     function dom_import_simplexml(object $node): DOMElement {}
 }
 
-namespace DOM
+namespace Dom
 {
     /**
      * @var int
@@ -1330,7 +1330,7 @@ namespace DOM
         public function getAttributeNode(string $qualifiedName): ?Attr {}
         /** @implementation-alias DOMElement::getAttributeNodeNS */
         public function getAttributeNodeNS(?string $namespace, string $localName): ?Attr {}
-        /** @implementation-alias DOM\Element::setAttributeNodeNS */
+        /** @implementation-alias Dom\Element::setAttributeNodeNS */
         public function setAttributeNode(Attr $attr) : ?Attr {}
         public function setAttributeNodeNS(Attr $attr) : ?Attr {}
         public function removeAttributeNode(Attr $attr) : Attr {}
@@ -1525,9 +1525,9 @@ namespace DOM
         public ?DocumentType $doctype;
         /** @readonly */
         public ?Element $documentElement;
-        /** @implementation-alias DOM\Element::getElementsByTagName */
+        /** @implementation-alias Dom\Element::getElementsByTagName */
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
-        /** @implementation-alias DOM\Element::getElementsByTagNameNS */
+        /** @implementation-alias Dom\Element::getElementsByTagNameNS */
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
 
         public function createElement(string $localName): Element {}
@@ -1591,7 +1591,7 @@ namespace DOM
 
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
-        /** @implementation-alias DOM\XMLDocument::saveXML */
+        /** @implementation-alias Dom\XMLDocument::saveXML */
         public function saveXML(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */

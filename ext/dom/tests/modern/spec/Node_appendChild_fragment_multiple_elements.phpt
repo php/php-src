@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::appendChild() with fragment of multiple elements
+Dom\Node::appendChild() with fragment of multiple elements
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createElement('foo'));

@@ -5,9 +5,9 @@ dom
 --FILE--
 <?php
 
-$dom1 = DOM\XMLDocument::createFromString('<?xml version="1.0" ?><with xmlns="some:ns" />');
+$dom1 = Dom\XMLDocument::createFromString('<?xml version="1.0" ?><with xmlns="some:ns" />');
 
-$dom2 = DOM\XMLDocument::createFromString('<?xml version="1.0" ?><none />');
+$dom2 = Dom\XMLDocument::createFromString('<?xml version="1.0" ?><none />');
 
 $dom1->documentElement->append(
     $dom1->importNode(

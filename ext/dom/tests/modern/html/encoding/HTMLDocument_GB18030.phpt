@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument GB18030 encoding test
+Dom\HTMLDocument GB18030 encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/gb18030.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/gb18030.html");
 var_dump($dom->charset);
 $dom->documentElement->firstChild->nextElementSibling->textContent = "é";
 $output = $dom->saveHTML();

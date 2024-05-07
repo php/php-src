@@ -1021,7 +1021,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	dom_node_insert_before(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, insertBefore)
+PHP_METHOD(Dom_Node, insertBefore)
 {
 	dom_node_insert_before(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1207,7 +1207,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	dom_node_replace_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, replaceChild)
+PHP_METHOD(Dom_Node, replaceChild)
 {
 	dom_node_replace_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1257,7 +1257,7 @@ PHP_METHOD(DOMNode, removeChild)
 	dom_node_remove_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(DOM_Node, removeChild)
+PHP_METHOD(Dom_Node, removeChild)
 {
 	dom_node_remove_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
@@ -1389,7 +1389,7 @@ PHP_METHOD(DOMNode, appendChild)
 	dom_node_append_child_legacy(return_value, intern, childobj, nodep, child);
 }
 
-PHP_METHOD(DOM_Node, appendChild)
+PHP_METHOD(Dom_Node, appendChild)
 {
 	zval *node;
 	xmlNodePtr nodep, child;
@@ -1580,7 +1580,7 @@ PHP_METHOD(DOMNode, isSameNode)
 	dom_node_is_same_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, node);
 }
 
-PHP_METHOD(DOM_Node, isSameNode)
+PHP_METHOD(Dom_Node, isSameNode)
 {
 	zval *node;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_modern_node_class_entry) != SUCCESS) {
@@ -1780,7 +1780,7 @@ PHP_METHOD(DOMNode, isEqualNode)
 	dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, isEqualNode)
+PHP_METHOD(Dom_Node, isEqualNode)
 {
 	dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1877,7 +1877,7 @@ PHP_METHOD(DOMNode, lookupPrefix)
 	dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, lookupPrefix)
+PHP_METHOD(Dom_Node, lookupPrefix)
 {
 	dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1989,7 +1989,7 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 	RETURN_FALSE;
 }
 
-PHP_METHOD(DOM_Node, isDefaultNamespace)
+PHP_METHOD(Dom_Node, isDefaultNamespace)
 {
 	zval *id;
 	xmlNodePtr nodep;
@@ -2291,7 +2291,7 @@ PHP_METHOD(DOMNode, getNodePath)
 	dom_node_get_node_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, getNodePath)
+PHP_METHOD(Dom_Node, getNodePath)
 {
 	dom_node_get_node_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -2354,7 +2354,7 @@ PHP_METHOD(DOMNode, contains)
 	RETURN_BOOL(dom_node_contains(thisp, otherp));
 }
 
-PHP_METHOD(DOM_Node, contains)
+PHP_METHOD(Dom_Node, contains)
 {
 	zval *other, *id;
 	xmlNodePtr otherp, thisp;
@@ -2570,7 +2570,7 @@ PHP_METHOD(DOMNode, compareDocumentPosition)
 	dom_node_compare_document_position(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(DOM_Node, compareDocumentPosition)
+PHP_METHOD(Dom_Node, compareDocumentPosition)
 {
 	dom_node_compare_document_position(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
@@ -2585,7 +2585,7 @@ PHP_METHOD(DOM_Node, compareDocumentPosition)
  *   - If the user implements __sleep / __wakeup, then it's also not a problem because they will not enter the throwing methods.
  */
 
-PHP_METHOD(DOM_Node, __construct)
+PHP_METHOD(Dom_Node, __construct)
 {
 	ZEND_UNREACHABLE();
 }

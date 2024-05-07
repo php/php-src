@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $foo = $dom->appendChild($dom->createElement("foo"));
 try {
     $foo->insertAdjacentText("beforebegin", "bar");

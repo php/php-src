@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $element = $dom->createElement("div");
 $span = $dom->createElement("span");
 $span->textContent = "qux";

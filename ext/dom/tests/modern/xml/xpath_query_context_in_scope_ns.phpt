@@ -1,5 +1,5 @@
 --TEST--
-Test DOM\XPath::query() with registering a context node's in-scope namespaces
+Test Dom\XPath::query() with registering a context node's in-scope namespaces
 --EXTENSIONS--
 dom
 --FILE--
@@ -21,7 +21,7 @@ function dump($xpath, $query, $context) {
     }
 }
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <a xmlns="urn:a" xmlns:d="urn:d">
     <b:b xmlns:b="urn:b">
         <c:c1 xmlns:c="urn:c1">
@@ -39,7 +39,7 @@ XML);
 $c1 = $dom->getElementsByTagNameNS('*', 'c1')->item(0);
 $c2 = $dom->getElementsByTagNameNS('*', 'c1')->item(0);
 
-$xpath = new DOM\XPath($dom);
+$xpath = new Dom\XPath($dom);
 
 echo "=== Tests with c1 ===\n\n";
 

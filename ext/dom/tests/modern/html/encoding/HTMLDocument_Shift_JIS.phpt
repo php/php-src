@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument Shift JIS encoding test
+Dom\HTMLDocument Shift JIS encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/shift_jis.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/shift_jis.html");
 var_dump($dom->charset);
 $dom->documentElement->firstChild->nextElementSibling->textContent .= "é";
 $output = $dom->saveHTML();

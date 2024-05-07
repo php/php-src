@@ -1,16 +1,16 @@
 --TEST--
-DOM\XMLDocument debug
+Dom\XMLDocument debug
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 var_dump($dom);
 
 ?>
 --EXPECT--
-object(DOM\XMLDocument)#1 (29) {
+object(Dom\XMLDocument)#1 (29) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>

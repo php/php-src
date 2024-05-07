@@ -4,7 +4,7 @@ ParentNode/ChildNode pre-insertion validation
 dom
 --FILE--
 <?php
-$dom = DOM\XMLDocument::createFromString("<!DOCTYPE root><root/>");
+$dom = Dom\XMLDocument::createFromString("<!DOCTYPE root><root/>");
 $doctype = $dom->doctype;
 $dom->removeChild($doctype);
 
@@ -70,7 +70,7 @@ echo $dom->saveXML(), "\n";
 
 echo "--- Document fragment edge cases with multiple elements ---\n";
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $fragment = $dom->createDocumentFragment();
 $fragment->append($dom->createElement("foo"));
 $fragment->append($dom->createElement("bar"));
@@ -82,7 +82,7 @@ try {
 
 echo "--- Document fragment edge cases with text ---\n";
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $fragment = $dom->createDocumentFragment();
 $fragment->append("foo");
 $fragment->append($dom->createCDATASection("bar"));

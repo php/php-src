@@ -7,7 +7,7 @@ dom
 
 require __DIR__ . "/dump_attr.inc";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElement("container"));
 
 echo "--- xmlns attribute ---\n";
@@ -26,7 +26,7 @@ try {
 
 echo "--- ns attributes with same namespace but different prefix ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElement("container"));
 
 $container->setAttributeNS("urn:a", "x:foo", "1");
@@ -36,7 +36,7 @@ dumpAttrs($container);
 
 echo "--- ns attributes with different namespace but same prefix ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElement("container"));
 
 $container->setAttributeNS("urn:a", "x:foo", "1");

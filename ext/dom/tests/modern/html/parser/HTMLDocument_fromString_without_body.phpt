@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::createFromString() - document without body
+Dom\HTMLDocument::createFromString() - document without body
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString('<!doctype html><p align="\'">foo &apos;</p>');
+$dom = Dom\HTMLDocument::createFromString('<!doctype html><p align="\'">foo &apos;</p>');
 echo $dom->saveHTML(), "\n";
 
 ?>

@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument edge case encoding 07
+Dom\HTMLDocument edge case encoding 07
 --EXTENSIONS--
 dom
 --FILE--
@@ -9,7 +9,7 @@ dom
 $header = "<!doctype html><html><head><meta charset=\"gb18030\"></head><body>";
 $padding_required_until_4095 = 4095 - strlen($header);
 $trailer = "\x90\x30";
-$dom = DOM\HTMLDocument::createFromString($header . str_repeat("A", $padding_required_until_4095) . $trailer);
+$dom = Dom\HTMLDocument::createFromString($header . str_repeat("A", $padding_required_until_4095) . $trailer);
 // GB18030 *broken* byte sequence crossing the 4096 boundary
 var_dump($dom->charset);
 $dom->charset = "UTF-8";

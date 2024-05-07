@@ -12,7 +12,7 @@ $html = str_repeat("\n", 65536) . <<<EOF
 </body>
 EOF;
 
-$dom = DOM\HTMLDocument::createFromString($html);
+$dom = Dom\HTMLDocument::createFromString($html);
 var_dump($dom->documentElement->firstChild->nextSibling->firstChild->nextSibling->getLineNo());
 
 ?>

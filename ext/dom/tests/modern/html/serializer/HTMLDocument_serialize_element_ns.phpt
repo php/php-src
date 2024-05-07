@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization of element in a namespace
+Dom\HTMLDocument serialization of element in a namespace
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement("root"));
 
 $root->append("\n");

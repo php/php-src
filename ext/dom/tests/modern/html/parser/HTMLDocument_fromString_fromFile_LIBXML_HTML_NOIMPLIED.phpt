@@ -1,12 +1,12 @@
 --TEST--
-DOM\HTMLDocument::createFromString()/createFromFile() with LIBXML_HTML_NOIMPLIED
+Dom\HTMLDocument::createFromString()/createFromFile() with LIBXML_HTML_NOIMPLIED
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 function test(string $html) {
     echo "Testing: $html\n";
-    $dom = DOM\HTMLDocument::createFromString($html, LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
+    $dom = Dom\HTMLDocument::createFromString($html, LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
     $output = $dom->saveHTML();
     echo $output, "\n";
 
@@ -14,7 +14,7 @@ function test(string $html) {
     $temp = fopen(__DIR__."/DOM_HTMLDocument_loadHTML_LIBXML_HTML_NOIMPLIED_input.tmp", "w");
     fwrite($temp, $html);
     fclose($temp);
-    $dom = DOM\HTMLDocument::createFromFile(__DIR__."/DOM_HTMLDocument_loadHTML_LIBXML_HTML_NOIMPLIED_input.tmp", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
+    $dom = Dom\HTMLDocument::createFromFile(__DIR__."/DOM_HTMLDocument_loadHTML_LIBXML_HTML_NOIMPLIED_input.tmp", LIBXML_HTML_NOIMPLIED | LIBXML_NOERROR);
     var_dump($output === $dom->saveHTML());
 }
 

@@ -5,13 +5,13 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement('root'));
 
 $root->setAttributeNS("urn:a", "a:foo", "bar");
 $attr = $root->getAttributeNodeNS("urn:a", "foo");
 
-$importer = DOM\XMLDocument::createEmpty();
+$importer = Dom\XMLDocument::createEmpty();
 $attr = $importer->importNode($attr, true);
 echo $importer->saveXML($attr), "\n";
 

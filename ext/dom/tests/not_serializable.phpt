@@ -34,7 +34,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 try {
     serialize($dom);
 } catch (Exception $e) {
@@ -42,7 +42,7 @@ try {
 }
 
 try {
-    serialize(new DOM\XPath($dom));
+    serialize(new Dom\XPath($dom));
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
@@ -53,5 +53,5 @@ Serialization of 'DOMDocument' is not allowed, unless serialization methods are 
 Serialization of 'DOMElement' is not allowed, unless serialization methods are implemented in a subclass
 Serialization of 'DOMXPath' is not allowed
 Serialization of 'DOMNameSpaceNode' is not allowed, unless serialization methods are implemented in a subclass
-Serialization of 'DOM\XMLDocument' is not allowed, unless serialization methods are implemented in a subclass
-Serialization of 'DOM\XPath' is not allowed
+Serialization of 'Dom\XMLDocument' is not allowed, unless serialization methods are implemented in a subclass
+Serialization of 'Dom\XPath' is not allowed

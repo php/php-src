@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::isEqualNode edge cases 02
+Dom\Node::isEqualNode edge cases 02
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $dom->append($dom->createElement("container"));
 $e1 = $dom->documentElement->appendChild($dom->createElement("foo1"));
 $e1->after("\n");
@@ -17,7 +17,7 @@ $e2->setAttribute("bar2", "baz");
 $e2->setAttributeNodeNS($child = $dom->createAttributeNS("http://example.com", "foo:bar"));
 $e2->removeAttributeNode($child);
 
-$dom2 = DOM\HTMLDocument::createFromString("<!DOCTYPE HTML>" . $dom->saveHTML());
+$dom2 = Dom\HTMLDocument::createFromString("<!DOCTYPE HTML>" . $dom->saveHTML());
 
 var_dump($dom->saveHTML($dom->getElementsByTagName("container")[0]));
 var_dump($dom2->saveHTML($dom2->getElementsByTagName("container")[0]));

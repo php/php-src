@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString("<root/>");
+$dom = Dom\XMLDocument::createFromString("<root/>");
 $root = $dom->documentElement;
 $root->setAttribute("foo", "<>\"& \t\n\rfoo   ");
 

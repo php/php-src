@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$document = DOM\XMLDocument::createFromString(<<<XML
+$document = Dom\XMLDocument::createFromString(<<<XML
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>

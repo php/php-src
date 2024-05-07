@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument UTF-16LE BOM encoding test
+Dom\HTMLDocument UTF-16LE BOM encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/utf16le_bom.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/utf16le_bom.html");
 var_dump($dom->inputEncoding);
 $dom->documentElement->firstChild->nextElementSibling->textContent = "é";
 $output = $dom->saveHTML();

@@ -1,5 +1,5 @@
 --TEST--
-DOM\Node::normalize()
+Dom\Node::normalize()
 --EXTENSIONS--
 dom
 --FILE--
@@ -19,7 +19,7 @@ dom
  * Normalize title. Calculate the number of title text nodes (1).
 */
 
-$doc = DOM\XMLDocument::createEmpty();
+$doc = Dom\XMLDocument::createEmpty();
 
 $root = $doc->createElement('book');
 $doc->appendChild($root);

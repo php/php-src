@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$doc = DOM\XMLDocument::createFromString('<root><child/><br xmlns="http://www.w3.org/1999/xhtml"/></root>');
+$doc = Dom\XMLDocument::createFromString('<root><child/><br xmlns="http://www.w3.org/1999/xhtml"/></root>');
 echo $doc->saveXML($doc, LIBXML_NOEMPTYTAG), "\n";
 
 $doc->formatOutput = true;

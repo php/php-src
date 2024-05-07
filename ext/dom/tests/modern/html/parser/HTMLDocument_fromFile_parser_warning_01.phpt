@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() - parser warning 01
+Dom\HTMLDocument::createFromFile() - parser warning 01
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__."/parser_warning_01.html", LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromFile(__DIR__."/parser_warning_01.html", LIBXML_NOERROR);
 echo $dom->saveHTML(), "\n";
 
 ?>

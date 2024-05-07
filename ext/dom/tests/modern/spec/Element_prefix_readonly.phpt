@@ -1,10 +1,10 @@
 --TEST--
-Ensure that DOM\Node::$prefix is read-only
+Ensure that Dom\Node::$prefix is read-only
 --EXTENSIONS--
 dom
 --FILE--
 <?php
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $div = $dom->createElement('div');
 try {
     $div->prefix = "foo";
@@ -14,5 +14,5 @@ try {
 echo $dom->saveXML();
 ?>
 --EXPECT--
-Cannot modify readonly property DOM\Element::$prefix
+Cannot modify readonly property Dom\Element::$prefix
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>

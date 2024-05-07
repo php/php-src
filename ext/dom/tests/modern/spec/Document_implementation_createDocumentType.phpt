@@ -13,7 +13,7 @@ $test_matrix = [
 ];
 
 foreach ($test_matrix as $test_item) {
-    $dom = DOM\XMLDocument::createEmpty();
+    $dom = Dom\XMLDocument::createEmpty();
     $dtd = $dom->implementation->createDocumentType($test_item['uri'], $test_item['public'], $test_item['system']);
 
     var_dump($dtd);
@@ -25,7 +25,7 @@ foreach ($test_matrix as $test_item) {
 
 ?>
 --EXPECT--
-object(DOM\DocumentType)#3 (23) {
+object(Dom\DocumentType)#3 (23) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -76,7 +76,7 @@ object(DOM\DocumentType)#3 (23) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname PUBLIC "public" "system">
 
-object(DOM\DocumentType)#2 (23) {
+object(Dom\DocumentType)#2 (23) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -127,7 +127,7 @@ object(DOM\DocumentType)#2 (23) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname PUBLIC "public" "">
 
-object(DOM\DocumentType)#1 (23) {
+object(Dom\DocumentType)#1 (23) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>
@@ -178,7 +178,7 @@ object(DOM\DocumentType)#1 (23) {
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE qname SYSTEM "system">
 
-object(DOM\DocumentType)#4 (23) {
+object(Dom\DocumentType)#4 (23) {
   ["name"]=>
   string(5) "qname"
   ["entities"]=>

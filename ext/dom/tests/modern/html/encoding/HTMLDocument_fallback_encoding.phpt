@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument fallback encoding test
+Dom\HTMLDocument fallback encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/fallback_encoding.html");
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/fallback_encoding.html");
 var_dump($dom->inputEncoding);
 echo $dom->saveHTML();
 

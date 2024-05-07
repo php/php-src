@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root><a/><b/><c/></root>');
+$dom = Dom\XMLDocument::createFromString('<root><a/><b/><c/></root>');
 $children = $dom->documentElement->childNodes;
 
 $test_values = [-1, 0, 1, 2, 3, 1.0, 1.1, true, null, "0", "1", "", "foo"];
@@ -58,9 +58,9 @@ string(1) "b"
 bool(true)
 bool(false)
 --- true ---
-Cannot access offset of type bool on DOM\NodeList
+Cannot access offset of type bool on Dom\NodeList
 --- null ---
-Cannot access offset of type null on DOM\NodeList
+Cannot access offset of type null on Dom\NodeList
 --- "0" ---
 string(1) "a"
 bool(true)
@@ -70,6 +70,6 @@ string(1) "b"
 bool(true)
 bool(false)
 --- "" ---
-Cannot access offset of type string on DOM\NodeList
+Cannot access offset of type string on Dom\NodeList
 --- "foo" ---
-Cannot access offset of type string on DOM\NodeList
+Cannot access offset of type string on Dom\NodeList

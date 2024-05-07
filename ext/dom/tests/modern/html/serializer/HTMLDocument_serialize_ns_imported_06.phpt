@@ -1,17 +1,17 @@
 --TEST--
-DOM\HTMLDocument serialization with an imported namespace node 06
+Dom\HTMLDocument serialization with an imported namespace node 06
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$xml = DOM\XMLDocument::createFromFile(__DIR__.'/sample.xml');
+$xml = Dom\XMLDocument::createFromFile(__DIR__.'/sample.xml');
 $xml->documentElement->firstElementChild->appendChild($xml->createElementNS('some:ns2', 'child'));
 echo $xml->saveXML(), "\n";
 
 echo "--- After clone + import into HTML ---\n";
 
-$html = DOM\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
+$html = Dom\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 
 $p = $html->documentElement->firstElementChild->nextElementSibling->firstElementChild;
 $p->appendChild($html->adoptNode($xml->documentElement->firstElementChild->cloneNode(true)));

@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::normalize() edge case
+Dom\Node::normalize() edge case
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$doc = DOM\XMLDocument::createEmpty();
+$doc = Dom\XMLDocument::createEmpty();
 $container = $doc->appendChild($doc->createElement("container"));
 
 $container->appendChild($doc->createTextNode(""));
