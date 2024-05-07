@@ -214,7 +214,7 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 	return SUCCESS;
 }
 
-static int call_attribute_constructor(
+static zend_result call_attribute_constructor(
 	zend_attribute *attr, zend_class_entry *ce, zend_object *obj,
 	zval *args, uint32_t argc, HashTable *named_params, zend_string *filename)
 {
