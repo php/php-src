@@ -1252,7 +1252,7 @@ namespace Dom
         public function getIterator(): \Iterator {}
     }
 
-    class DTDNamedNodeMap implements \IteratorAggregate, \Countable
+    class DtdNamedNodeMap implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1452,9 +1452,9 @@ namespace Dom
         /** @readonly */
         public string $name;
         /** @readonly */
-        public DTDNamedNodeMap $entities;
+        public DtdNamedNodeMap $entities;
         /** @readonly */
-        public DTDNamedNodeMap $notations;
+        public DtdNamedNodeMap $notations;
         /** @readonly */
         public string $publicId;
         /** @readonly */

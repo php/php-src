@@ -926,7 +926,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_add_new_ptr(&classes, dom_modern_namednodemap_class_entry->name, &dom_namednodemap_prop_handlers);
 
-	dom_modern_dtd_namednodemap_class_entry = register_class_Dom_DTDNamedNodeMap(zend_ce_aggregate, zend_ce_countable);
+	dom_modern_dtd_namednodemap_class_entry = register_class_Dom_DtdNamedNodeMap(zend_ce_aggregate, zend_ce_countable);
 	dom_modern_dtd_namednodemap_class_entry->create_object = dom_nnodemap_objects_new;
 	dom_modern_dtd_namednodemap_class_entry->default_object_handlers = &dom_modern_nnodemap_object_handlers;
 	dom_modern_dtd_namednodemap_class_entry->get_iterator = php_dom_get_iterator;

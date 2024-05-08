@@ -1,5 +1,5 @@
 --TEST--
-DTDNamedNodeMap
+DtdNamedNodeMap
 --EXTENSIONS--
 dom
 --FILE--
