@@ -29,6 +29,16 @@
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
 
+/* Always pair SETUP with TEARDOWN, and do so in the outer scope!
+ * Should not be used when data can escape the function. */
+#define BC_ARENA_SETUP \
+	char bc_arena[BC_ARENA_SIZE]; \
+	BCG(arena) = bc_arena;
+
+#define BC_ARENA_TEARDOWN \
+	BCG(arena) = NULL; \
+	BCG(arena_offset) = 0;
+
 ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
@@ -89,6 +99,8 @@ static PHP_GINIT_FUNCTION(bcmath)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 	bcmath_globals->bc_precision = 0;
+	bcmath_globals->arena = NULL;
+	bcmath_globals->arena_offset = 0;
 	bc_init_numbers();
 }
 /* }}} */
@@ -99,6 +111,8 @@ static PHP_GSHUTDOWN_FUNCTION(bcmath)
 	_bc_free_num_ex(&bcmath_globals->_zero_, 1);
 	_bc_free_num_ex(&bcmath_globals->_one_, 1);
 	_bc_free_num_ex(&bcmath_globals->_two_, 1);
+	bcmath_globals->arena = NULL;
+	bcmath_globals->arena_offset = 0;
 }
 /* }}} */
 
@@ -167,6 +181,8 @@ PHP_FUNCTION(bcadd)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -185,6 +201,7 @@ PHP_FUNCTION(bcadd)
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -214,6 +231,8 @@ PHP_FUNCTION(bcsub)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -232,6 +251,7 @@ PHP_FUNCTION(bcsub)
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -261,6 +281,8 @@ PHP_FUNCTION(bcmul)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	if (php_str2num(&first, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -279,6 +301,7 @@ PHP_FUNCTION(bcmul)
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -308,6 +331,8 @@ PHP_FUNCTION(bcdiv)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	bc_init_num(&result);
 
 	if (php_str2num(&first, left) == FAILURE) {
@@ -331,6 +356,7 @@ PHP_FUNCTION(bcdiv)
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -360,6 +386,8 @@ PHP_FUNCTION(bcmod)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	bc_init_num(&result);
 
 	if (php_str2num(&first, left) == FAILURE) {
@@ -383,6 +411,7 @@ PHP_FUNCTION(bcmod)
 		bc_free_num(&first);
 		bc_free_num(&second);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -412,6 +441,8 @@ PHP_FUNCTION(bcpowmod)
 	} else {
 		scale = (int) scale_param;
 	}
+
+	BC_ARENA_SETUP;
 
 	bc_init_num(&result);
 
@@ -458,6 +489,7 @@ PHP_FUNCTION(bcpowmod)
 		bc_free_num(&bc_expo);
 		bc_free_num(&bc_modulus);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -486,6 +518,8 @@ PHP_FUNCTION(bcpow)
 	} else {
 		scale = (int) scale_param;
 	}
+
+	BC_ARENA_SETUP;
 
 	bc_init_num(&result);
 
@@ -518,6 +552,7 @@ PHP_FUNCTION(bcpow)
 		bc_free_num(&first);
 		bc_free_num(&bc_exponent);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -546,6 +581,8 @@ PHP_FUNCTION(bcsqrt)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	if (php_str2num(&result, left) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -559,6 +596,7 @@ PHP_FUNCTION(bcsqrt)
 
 	cleanup: {
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -588,6 +626,8 @@ PHP_FUNCTION(bccomp)
 		scale = (int) scale_param;
 	}
 
+	BC_ARENA_SETUP;
+
 	if (!bc_str2num(&first, ZSTR_VAL(left), ZSTR_VAL(left) + ZSTR_LEN(left), scale, false)) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -603,6 +643,7 @@ PHP_FUNCTION(bccomp)
 	cleanup: {
 		bc_free_num(&first);
 		bc_free_num(&second);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -617,6 +658,8 @@ static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
 		Z_PARAM_STR(numstr)
 	ZEND_PARSE_PARAMETERS_END();
 
+	BC_ARENA_SETUP;
+
 	if (php_str2num(&num, numstr) == FAILURE) {
 		zend_argument_value_error(1, "is not well-formed");
 		goto cleanup;
@@ -628,6 +671,7 @@ static void bcfloor_or_bcceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)
 	cleanup: {
 		bc_free_num(&num);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */
@@ -676,6 +720,8 @@ PHP_FUNCTION(bcround)
 			return;
 	}
 
+	BC_ARENA_SETUP;
+
 	bc_init_num(&result);
 
 	if (php_str2num(&num, numstr) == FAILURE) {
@@ -689,6 +735,7 @@ PHP_FUNCTION(bcround)
 	cleanup: {
 		bc_free_num(&num);
 		bc_free_num(&result);
+		BC_ARENA_TEARDOWN;
 	};
 }
 /* }}} */

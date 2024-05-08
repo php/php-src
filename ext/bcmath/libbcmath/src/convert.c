@@ -21,20 +21,16 @@
 # include <emmintrin.h>
 #endif
 
-static char *bc_copy_and_shift_numbers(char *restrict dest, const char *source, const char *source_end, unsigned char shift, bool add)
+char *bc_copy_and_toggle_bcd(char *restrict dest, const char *source, const char *source_end)
 {
-	size_t bulk_shift = SWAR_REPEAT(shift);
-	if (!add) {
-		bulk_shift = -bulk_shift;
-		shift = -shift;
-	}
+	const size_t bulk_shift = SWAR_REPEAT('0');
 
 #ifdef __SSE2__
 	/* SIMD SSE2 bulk shift + copy */
-	__m128i shift_vector = _mm_set1_epi8(shift);
+	__m128i shift_vector = _mm_set1_epi8('0');
 	while (source + sizeof(__m128i) <= source_end) {
 		__m128i bytes = _mm_loadu_si128((const __m128i *) source);
-		bytes = _mm_add_epi8(bytes, shift_vector);
+		bytes = _mm_xor_si128(bytes, shift_vector);
 		_mm_storeu_si128((__m128i *) dest, bytes);
 
 		source += sizeof(__m128i);
@@ -50,7 +46,7 @@ static char *bc_copy_and_shift_numbers(char *restrict dest, const char *source, 
 		size_t bytes;
 		memcpy(&bytes, source, sizeof(bytes));
 
-		bytes += bulk_shift;
+		bytes ^= bulk_shift;
 		memcpy(dest, &bytes, sizeof(bytes));
 
 		source += sizeof(size_t);
@@ -58,20 +54,10 @@ static char *bc_copy_and_shift_numbers(char *restrict dest, const char *source, 
 	}
 
 	while (source < source_end) {
-		*dest = *source + shift;
+		*dest = *source ^ '0';
 		dest++;
 		source++;
 	}
 
 	return dest;
-}
-
-char *bc_copy_ch_val(char *restrict dest, const char *source, const char *source_end)
-{
-	return bc_copy_and_shift_numbers(dest, source, source_end, '0', false);
-}
-
-char *bc_copy_bcd_val(char *restrict dest, const char *source, const char *source_end)
-{
-	return bc_copy_and_shift_numbers(dest, source, source_end, '0', true);
 }

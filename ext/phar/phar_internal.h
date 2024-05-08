@@ -458,9 +458,6 @@ typedef struct _phar_entry_data {
 	zend_off_t                    position;
 	/* for copies of the phar fp, defines where 0 is */
 	zend_off_t                    zero;
-	uint32_t             for_write:1;
-	uint32_t             is_zip:1;
-	uint32_t             is_tar:1;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 

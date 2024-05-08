@@ -35,14 +35,25 @@
 #include <string.h>
 #include "zend_alloc.h"
 
-static zend_always_inline bc_num _bc_new_num_nonzeroed_ex_internal(size_t length, size_t scale, bool persistent)
+static bc_num _bc_new_num_nonzeroed_ex_internal(size_t length, size_t scale, bool persistent)
 {
-	/* PHP Change: malloc() -> pemalloc(), removed free_list code, merged n_ptr and n_value */
-	bc_num temp = safe_pemalloc(1, sizeof(bc_struct) + length, scale, persistent);
+	size_t required_size = zend_safe_address_guarded(1, sizeof(bc_struct) + (ZEND_MM_ALIGNMENT - 1) + length, scale);
+	required_size &= -ZEND_MM_ALIGNMENT;
+	bc_num temp;
+
+	if (!persistent && BCG(arena) && required_size <= BC_ARENA_SIZE - BCG(arena_offset)) {
+		temp = (bc_num) (BCG(arena) + BCG(arena_offset));
+		BCG(arena_offset) += required_size;
+		temp->n_refs = 2; /* prevent freeing */
+	} else {
+		/* PHP Change: malloc() -> pemalloc(), removed free_list code, merged n_ptr and n_value */
+		temp = pemalloc(required_size, persistent);
+		temp->n_refs = 1;
+	}
+
 	temp->n_sign = PLUS;
 	temp->n_len = length;
 	temp->n_scale = scale;
-	temp->n_refs = 1;
 	temp->n_value = (char *) temp + sizeof(bc_struct);
 	return temp;
 }

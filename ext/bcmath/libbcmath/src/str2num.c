@@ -190,12 +190,12 @@ after_fractional:
 		 * If zero_int is true and the str_scale is 0, there is an early return,
 		 * so here str_scale is always greater than 0.
 		 */
-		nptr = bc_copy_ch_val(nptr, fractional_ptr, fractional_end);
+		nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
 	} else {
 		const char *integer_end = integer_ptr + digits;
-		nptr = bc_copy_ch_val(nptr, integer_ptr, integer_end);
+		nptr = bc_copy_and_toggle_bcd(nptr, integer_ptr, integer_end);
 		if (str_scale > 0) {
-			nptr = bc_copy_ch_val(nptr, fractional_ptr, fractional_end);
+			nptr = bc_copy_and_toggle_bcd(nptr, fractional_ptr, fractional_end);
 		}
 	}
 
