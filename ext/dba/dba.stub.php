@@ -2,8 +2,18 @@
 
 /** @generate-class-entries */
 
+namespace Dba {
+    /**
+     * @strict-properties
+     * @not-serializable
+     */
+    final class Connection
+    {
+    }
+}
+
 namespace {
-    #ifdef DBA_LMDB
+#ifdef DBA_LMDB
     /** @var int */
     const DBA_LMDB_USE_SUB_DIR = 0;
     /**
@@ -11,49 +21,38 @@ namespace {
      * @cvalue MDB_NOSUBDIR
      */
     const DBA_LMDB_NO_SUB_DIR = UNKNOWN;
-    #endif
+#endif
 
-    /** @return resource|false */
-    function dba_popen(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null) {}
+    function dba_popen(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null): Dba\Connection|false {}
 
-    /** @return resource|false */
-    function dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null) {}
+    function dba_open(string $path, string $mode, ?string $handler = null, int $permission = 0o644, int $map_size = 0, ?int $flags = null): Dba\Connection|false {}
 
-    /** @param resource $dba */
-    function dba_close($dba): void {}
+    function dba_close(Dba\Connection $dba): void {}
 
-    /** @param resource $dba */
-    function dba_exists(string|array $key, $dba): bool {}
+    function dba_exists(string|array $key, Dba\Connection $dba): bool {}
 
     /**
-     * @param resource|int $dba overloaded legacy signature has params flipped
-     * @param resource|int $skip overloaded legacy signature has params flipped
+     * @param Dba\Connection|int $dba overloaded legacy signature has params flipped
+     * @param Dba\Connection|int $skip overloaded legacy signature has params flipped
      */
     function dba_fetch(string|array $key, $dba, $skip = 0): string|false {}
 
     /** @return array<int, string>|false */
     function dba_key_split(string|false|null $key): array|false {}
 
-    /** @param resource $dba */
-    function dba_firstkey($dba): string|false {}
+    function dba_firstkey(Dba\Connection $dba): string|false {}
 
-    /** @param resource $dba */
-    function dba_nextkey($dba): string|false {}
+    function dba_nextkey(Dba\Connection $dba): string|false {}
 
-    /** @param resource $dba */
-    function dba_delete(string|array $key, $dba): bool {}
+    function dba_delete(string|array $key, Dba\Connection $dba): bool {}
 
-    /** @param resource $dba */
-    function dba_insert(string|array $key, string $value, $dba): bool {}
+    function dba_insert(string|array $key, string $value, Dba\Connection $dba): bool {}
 
-    /** @param resource $dba */
-    function dba_replace(string|array $key, string $value, $dba): bool {}
+    function dba_replace(string|array $key, string $value, Dba\Connection $dba): bool {}
 
-    /** @param resource $dba */
-    function dba_optimize($dba): bool {}
+    function dba_optimize(Dba\Connection $dba): bool {}
 
-    /** @param resource $dba */
-    function dba_sync($dba): bool {}
+    function dba_sync(Dba\Connection $dba): bool {}
 
     /**
      * @return array<int|string, string>
