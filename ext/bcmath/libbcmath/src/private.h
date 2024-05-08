@@ -53,9 +53,14 @@
 #    if __has_builtin(__builtin_bswap64)
 #      define BSWAP64(u) __builtin_bswap64(u)
 #    endif // __has_builtin(__builtin_bswap64)
-#  elif defined(__GNUC__)
-#    define BSWAP32(u) __builtin_bswap32(u)
-#    define BSWAP64(u) __builtin_bswap64(u)
+#  endif
+#  ifdef __GNUC__
+#    ifndef BSWAP32
+#      define BSWAP32(u) __builtin_bswap32(u)
+#    endif
+#    ifndef BSWAP64
+#      define BSWAP64(u) __builtin_bswap64(u)
+#    endif
 #  endif // __has_builtin
 #endif // defined(_MSC_VER)
 #ifndef BSWAP32
