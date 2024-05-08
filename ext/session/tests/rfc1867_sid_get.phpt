@@ -1,7 +1,6 @@
 --TEST--
 session rfc1867 sid get
 --INI--
-error_reporting=-1
 file_uploads=1
 upload_max_filesize=1024
 session.save_path=
