@@ -82,10 +82,10 @@ void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 	zend_hash_destroy(&intern->storage);
 } /* }}} */
 
-static zend_result spl_check_data_class(zend_object *obj)
+static zend_result spl_check_struct(zend_object *obj)
 {
-	if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_DATA_CLASS)) {
-		zend_type_error("Instance of data class %s may not be used as key", ZSTR_VAL(obj->ce->name));
+	if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_STRUCT)) {
+		zend_type_error("Instance of struct %s may not be used as key", ZSTR_VAL(obj->ce->name));
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -447,7 +447,7 @@ PHP_METHOD(SplObjectStorage, attach)
 		Z_PARAM_ZVAL(inf)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(spl_check_data_class(obj) == FAILURE)) {
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -459,7 +459,7 @@ static int spl_object_storage_has_dimension(zend_object *object, zval *offset, i
 	if (EXPECTED(offset)) {
 		ZVAL_DEREF(offset);
 		if (Z_TYPE_P(offset) == IS_OBJECT
-		 && UNEXPECTED(spl_check_data_class(Z_OBJ_P(offset)) == FAILURE)) {
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
 			return 0;
 		}
 	}
@@ -486,7 +486,7 @@ static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset
 	if (EXPECTED(offset)) {
 		ZVAL_DEREF(offset);
 		if (Z_TYPE_P(offset) == IS_OBJECT
-		 && UNEXPECTED(spl_check_data_class(Z_OBJ_P(offset)) == FAILURE)) {
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
 			return NULL;
 		}
 	}
@@ -517,7 +517,7 @@ static void spl_object_storage_write_dimension(zend_object *object, zval *offset
 	if (EXPECTED(offset)) {
 		ZVAL_DEREF(offset);
 		if (Z_TYPE_P(offset) == IS_OBJECT
-		 && UNEXPECTED(spl_check_data_class(Z_OBJ_P(offset)) == FAILURE)) {
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
 			return;
 		}
 	}
@@ -535,7 +535,7 @@ static void spl_object_storage_unset_dimension(zend_object *object, zval *offset
 	if (EXPECTED(offset)) {
 		ZVAL_DEREF(offset);
 		if (Z_TYPE_P(offset) == IS_OBJECT
-		 && UNEXPECTED(spl_check_data_class(Z_OBJ_P(offset)) == FAILURE)) {
+		 && UNEXPECTED(spl_check_struct(Z_OBJ_P(offset)) == FAILURE)) {
 			return;
 		}
 	}
@@ -558,7 +558,7 @@ PHP_METHOD(SplObjectStorage, detach)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(spl_check_data_class(obj) == FAILURE)) {
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -577,7 +577,7 @@ PHP_METHOD(SplObjectStorage, getHash)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(spl_check_data_class(obj) == FAILURE)) {
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -597,7 +597,7 @@ PHP_METHOD(SplObjectStorage, offsetGet)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(spl_check_data_class(obj) == FAILURE)) {
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
 		RETURN_THROWS();
 	}
 
@@ -697,7 +697,7 @@ PHP_METHOD(SplObjectStorage, contains)
 		Z_PARAM_OBJ(obj)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(spl_check_data_class(obj) == FAILURE)) {
+	if (UNEXPECTED(spl_check_struct(obj) == FAILURE)) {
 		RETURN_THROWS();
 	}
 

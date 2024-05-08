@@ -1,9 +1,9 @@
 --TEST--
-SPL: ArrayObject disallow data classes
+SPL: ArrayObject disallow structs
 --FILE--
 <?php
 
-data class DC {}
+struct DC {}
 
 $dc = new DC();
 

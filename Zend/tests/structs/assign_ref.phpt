@@ -1,9 +1,9 @@
 --TEST--
-Assign ref on data classes
+Assign ref on structs
 --FILE--
 <?php
 
-data class Box {
+struct Box {
     public $value;
 }
 

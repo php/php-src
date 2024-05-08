@@ -1,9 +1,9 @@
 --TEST--
-Mutating method calls on data classes
+Mutating method calls on structs
 --FILE--
 <?php
 
-data class Point {
+struct Point {
     public function __construct(
         public int $x,
         public int $y,
@@ -15,7 +15,7 @@ data class Point {
     }
 }
 
-data class Shape {
+struct Shape {
     public function __construct(
         public Point $position,
     ) {}

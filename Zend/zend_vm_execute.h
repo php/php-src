@@ -37556,7 +37556,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_THIS_SPEC_UN
 	if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
 		zval *result = EX_VAR(opline->result.var);
 
-		if (EXPECTED(!(Z_OBJCE(EX(This))->ce_flags & ZEND_ACC_DATA_CLASS))) {
+		if (EXPECTED(!(Z_OBJCE(EX(This))->ce_flags & ZEND_ACC_STRUCT))) {
 			ZVAL_OBJ(result, Z_OBJ(EX(This)));
 			Z_ADDREF_P(result);
 		} else {

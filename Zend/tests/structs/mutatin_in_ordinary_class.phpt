@@ -9,4 +9,4 @@ class Point {
 
 ?>
 --EXPECTF--
-Fatal error: Mutating modifier may only be added to data class methods in %s on line %d
+Fatal error: Mutating modifier may only be added to struct methods in %s on line %d

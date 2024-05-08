@@ -1,9 +1,9 @@
 --TEST--
-Assign op on data classes
+Assign op on structs
 --FILE--
 <?php
 
-data class Box {
+struct Box {
     public function __construct(
         public $value,
     ) {}

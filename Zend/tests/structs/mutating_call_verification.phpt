@@ -1,9 +1,9 @@
 --TEST--
-Mutating method calls on data classes
+Mutating method calls on structs
 --FILE--
 <?php
 
-data class D {
+struct D {
     public function nonMutating() {
         echo __FUNCTION__, "\n";
     }

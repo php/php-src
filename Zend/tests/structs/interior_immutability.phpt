@@ -1,9 +1,9 @@
 --TEST--
-Basic data classes
+Basic structs
 --FILE--
 <?php
 
-data class Child {
+struct Child {
     public function __construct(
         public $value,
     ) {}

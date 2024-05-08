@@ -349,8 +349,8 @@ static zend_result zend_weakmap_check_offset(zval *offset)
 	}
 
 	zend_object *obj = Z_OBJ_P(offset);
-	if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_DATA_CLASS)) {
-		zend_type_error("Instance of data class %s may not be used as key", ZSTR_VAL(obj->ce->name));
+	if (UNEXPECTED(obj->ce->ce_flags & ZEND_ACC_STRUCT)) {
+		zend_type_error("Instance of struct %s may not be used as key", ZSTR_VAL(obj->ce->name));
 		return FAILURE;
 	}
 

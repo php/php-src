@@ -1,9 +1,9 @@
 --TEST--
-++/-- on data classes
+++/-- on structs
 --FILE--
 <?php
 
-data class Box {
+struct Box {
     public function __construct(
         public $value,
     ) {}

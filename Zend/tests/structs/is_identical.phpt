@@ -1,9 +1,9 @@
 --TEST--
-=== on data classes
+=== on structs
 --FILE--
 <?php
 
-data class Box {
+struct Box {
     public function __construct(
         public $value,
     ) {}
@@ -29,7 +29,7 @@ foreach ($values as $l) {
 }
 
 #[\AllowDynamicProperties]
-data class Point {}
+struct Point {}
 
 $a = new Point();
 $a->x = 1;

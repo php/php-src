@@ -1,5 +1,5 @@
 --TEST--
-Data classes implementing ArrayAccess
+Structs implementing ArrayAccess
 --FILE--
 <?php
 
@@ -23,19 +23,19 @@ abstract class VectorBase implements ArrayAccess {
     }
 }
 
-data class VectorByVal extends VectorBase {
+struct VectorByVal extends VectorBase {
     public function offsetGet(mixed $offset): mixed {
         return $this->elements[$offset];
     }
 }
 
-data class VectorByRef extends VectorBase {
+struct VectorByRef extends VectorBase {
     public function &offsetGet(mixed $offset): mixed {
         return $this->elements[$offset];
     }
 }
 
-data class Box {
+struct Box {
     public function __construct(
         public int $value,
     ) {}

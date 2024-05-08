@@ -3209,7 +3209,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 						 * to make sure no actual modification is possible. */
 						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
 						if (Z_TYPE_P(ptr) == IS_OBJECT
-						 && EXPECTED(!(Z_OBJCE_P(ptr)->ce_flags & ZEND_ACC_DATA_CLASS))) {
+						 && EXPECTED(!(Z_OBJCE_P(ptr)->ce_flags & ZEND_ACC_STRUCT))) {
 							ZVAL_COPY(result, ptr);
 						} else if (Z_PROP_FLAG_P(ptr) & IS_PROP_REINITABLE) {
 							Z_PROP_FLAG_P(ptr) &= ~IS_PROP_REINITABLE;

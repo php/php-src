@@ -3414,7 +3414,7 @@ class ClassInfo {
         $php84Flags = $php83Flags;
 
         if ($this->isDataClass) {
-            $php84Flags[] = "ZEND_ACC_DATA_CLASS";
+            $php84Flags[] = "ZEND_ACC_STRUCT";
         }
 
         return [

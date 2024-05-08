@@ -1,9 +1,9 @@
 --TEST--
-Data classes in references
+Structs in references
 --FILE--
 <?php
 
-data class Point {
+struct Point {
     public function __construct(
         public int $x,
         public int $y,

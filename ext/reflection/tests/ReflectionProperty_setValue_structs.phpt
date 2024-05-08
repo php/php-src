@@ -1,9 +1,9 @@
 --TEST--
-Test ReflectionProperty::setValue() on data class
+Test ReflectionProperty::setValue() on structs
 --FILE--
 <?php
 
-data class Box {
+struct Box {
     public function __construct(
         public $value,
     ) {}
@@ -31,5 +31,5 @@ try {
 
 ?>
 --EXPECT--
-ReflectionException: May not set property value of data class "Box" through reflection
+ReflectionException: May not set property value of struct "Box" through reflection
 ReflectionException: May not invoke mutating method "Box::setNull()" through reflection

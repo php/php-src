@@ -1,10 +1,10 @@
 --TEST--
-Iteration of data classes
+Iteration of structs
 --FILE--
 <?php
 
 #[AllowDynamicProperties]
-data class Box {
+struct Box {
     public $value;
 }
 

@@ -2372,7 +2372,7 @@ static int hash_zval_identical_function(zval *z1, zval *z2) /* {{{ */
 }
 /* }}} */
 
-static bool zend_is_identical_data_class(const zval *op1, const zval *op2) /* {{{ */
+static bool zend_is_identical_struct(const zval *op1, const zval *op2) /* {{{ */
 {
 	ZEND_ASSERT(Z_TYPE_P(op1) == IS_OBJECT);
 	ZEND_ASSERT(Z_TYPE_P(op2) == IS_OBJECT);
@@ -2452,9 +2452,9 @@ ZEND_API bool ZEND_FASTCALL zend_is_identical(const zval *op1, const zval *op2) 
 			if (Z_OBJ_P(op1) == Z_OBJ_P(op2)) {
 				return true;
 			}
-			if (UNEXPECTED(Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_DATA_CLASS)
+			if (UNEXPECTED(Z_OBJCE_P(op1)->ce_flags & ZEND_ACC_STRUCT)
 			 && Z_OBJCE_P(op1) == Z_OBJCE_P(op2)) {
-				return zend_is_identical_data_class(op1, op2);
+				return zend_is_identical_struct(op1, op2);
 			}
 			return false;
 		default:

@@ -315,8 +315,8 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Data classes are value types                           |     |     |     */
-#define ZEND_ACC_DATA_CLASS              (1 << 30) /*  X  |     |     |     */
+/* Structs are value types                                |     |     |     */
+#define ZEND_ACC_STRUCT              (1 << 30) /*  X      |     |     |     */
 /*                                                        |     |     |     */
 /* Function Flags (unused: 30)                            |     |     |     */
 /* ==============                                         |     |     |     */
@@ -380,7 +380,7 @@ typedef struct _zend_oparray_context {
 /* has #[\Override] attribute                             |     |     |     */
 #define ZEND_ACC_OVERRIDE                (1 << 28) /*     |  X  |     |     */
 /*                                                        |     |     |     */
-/* Mutating function of a data class                      |     |     |     */
+/* Mutating function of a struct                      |     |     |     */
 #define ZEND_ACC_MUTATING                (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* op_array uses strict mode types                        |     |     |     */

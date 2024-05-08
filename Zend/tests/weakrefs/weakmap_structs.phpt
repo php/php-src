@@ -1,9 +1,9 @@
 --TEST--
-WeakMaps disallow data classes
+WeakMaps disallow structs
 --FILE--
 <?php
 
-data class DC {}
+struct DC {}
 
 function test($c) {
     $map = new WeakMap();
@@ -31,7 +31,7 @@ test(function ($map, $dc) {
 
 ?>
 --EXPECT--
-Instance of data class DC may not be used as key
-Instance of data class DC may not be used as key
-Instance of data class DC may not be used as key
-Instance of data class DC may not be used as key
+Instance of struct DC may not be used as key
+Instance of struct DC may not be used as key
+Instance of struct DC may not be used as key
+Instance of struct DC may not be used as key

@@ -1,5 +1,5 @@
 --TEST--
-Internal data classes
+Internal structs
 --EXTENSIONS--
 zend_test
 --FILE--

@@ -1,24 +1,19 @@
 --TEST--
-FETCH_THIS in data class method must separate
+Basic structs
 --FILE--
 <?php
 
-data class Point {
+struct Point {
     public function __construct(
         public int $x,
         public int $y,
     ) {}
-
-    public function replace($x, $y) {
-        $self = $this;
-        $this->x = $x;
-        $this->y = $y;
-        return $self;
-    }
 }
 
 $a = new Point(1, 1);
-$b = $a->replace(2, 2);
+$b = $a;
+$b->x = 2;
+$b->y = 2;
 var_dump($a);
 var_dump($b);
 
@@ -26,13 +21,13 @@ var_dump($b);
 --EXPECT--
 object(Point)#1 (2) {
   ["x"]=>
-  int(2)
+  int(1)
   ["y"]=>
-  int(2)
+  int(1)
 }
 object(Point)#2 (2) {
   ["x"]=>
-  int(1)
+  int(2)
   ["y"]=>
-  int(1)
+  int(2)
 }

@@ -7776,8 +7776,8 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 	if (is_method) {
 		bool has_body = stmt_ast != NULL;
 		lcname = zend_begin_method_decl(op_array, decl->name, has_body);
-		if ((op_array->fn_flags & ZEND_ACC_MUTATING) && !(op_array->scope->ce_flags & ZEND_ACC_DATA_CLASS)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Mutating modifier may only be added to data class methods");
+		if ((op_array->fn_flags & ZEND_ACC_MUTATING) && !(op_array->scope->ce_flags & ZEND_ACC_STRUCT)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Mutating modifier may only be added to struct methods");
 		}
 	} else {
 		lcname = zend_begin_func_decl(result, op_array, decl, toplevel);
@@ -8256,6 +8256,10 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	zend_op *opline;
 
 	zend_class_entry *original_ce = CG(active_class_entry);
+
+	if (decl->flags & ZEND_ACC_STRUCT) {
+		// TODO: ABSTRACT, FINAL, READONLY
+	}
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;
