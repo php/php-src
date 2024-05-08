@@ -944,6 +944,16 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Cannot use the final modifier on an abstract class", 0);
 		return 0;
 	}
+	if ((new_flags & ZEND_ACC_STRUCT) && (new_flags & ZEND_ACC_FINAL)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the final modifier on a struct, as structs are implicitly final", 0);
+		return 0;
+	}
+	if ((new_flags & ZEND_ACC_STRUCT) && (new_flags & ZEND_ACC_ABSTRACT)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the abstract modifier on a struct, as structs are implicitly final", 0);
+		return 0;
+	}
 	return new_flags;
 }
 /* }}} */
@@ -8256,10 +8266,6 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	zend_op *opline;
 
 	zend_class_entry *original_ce = CG(active_class_entry);
-
-	if (decl->flags & ZEND_ACC_STRUCT) {
-		// TODO: ABSTRACT, FINAL, READONLY
-	}
 
 	if (EXPECTED((decl->flags & ZEND_ACC_ANON_CLASS) == 0)) {
 		zend_string *unqualified_name = decl->name;

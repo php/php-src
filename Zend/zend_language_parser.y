@@ -595,9 +595,9 @@ is_variadic:
 ;
 
 class_declaration_statement:
-		class_modifiers class_like { $<num>$ = CG(zend_lineno); }
+		class_modifiers class_like { $<num>$ = zend_add_class_modifier($1, $2); if (!$<num>$) { YYERROR; } } { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
-			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1 | $2, $<num>3, $7, zend_ast_get_str($4), $5, $6, $9, NULL, NULL); }
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $<num>3, $<num>4, $8, zend_ast_get_str($5), $6, $7, $10, NULL, NULL); }
 	|	class_like { $<num>$ = CG(zend_lineno); }
 		T_STRING extends_from implements_list backup_doc_comment '{' class_statement_list '}'
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, $1, $<num>2, $6, zend_ast_get_str($3), $4, $5, $8, NULL, NULL); }
