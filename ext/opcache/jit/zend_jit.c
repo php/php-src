@@ -1742,7 +1742,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							/* scope is NULL for closures. */
+							if (ce) {
+								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							}
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -1790,7 +1793,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							/* scope is NULL for closures. */
+							if (ce) {
+								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							}
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -1831,7 +1837,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (opline->op1_type == IS_UNUSED) {
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							/* scope is NULL for closures. */
+							if (ce) {
+								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							}
 							op1_addr = 0;
 							on_this = 1;
 						} else {
@@ -2305,7 +2314,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							/* scope is NULL for closures. */
+							if (ce) {
+								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							}
 							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
@@ -2456,7 +2468,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
 							op1_addr = 0;
 							ce = op_array->scope;
-							ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							/* scope is NULL for closures. */
+							if (ce) {
+								ce_is_instanceof = (ce->ce_flags & ZEND_ACC_FINAL) != 0;
+							}
 							on_this = 1;
 						} else {
 							op1_info = OP1_INFO();
