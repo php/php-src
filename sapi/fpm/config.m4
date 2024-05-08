@@ -265,7 +265,11 @@ AC_DEFUN([AC_FPM_LQ],
 
   AC_MSG_CHECKING([for TCP_INFO])
 
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_info ti; int x = TCP_INFO;]])], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
+    #include <netinet/tcp.h>
+  ]], [[
+    struct tcp_info ti; int x = TCP_INFO;
+  ]])], [
     have_lq=tcp_info
     AC_MSG_RESULT([yes])
   ], [
