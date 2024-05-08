@@ -52,7 +52,7 @@ bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min)
 		switch (_bc_do_compare(n1, n2, false)) {
 			case -1:
 				/* n1 is less than n2, subtract n1 from n2. */
-				diff = _bc_do_sub(n2, n1, scale_min);
+				diff = _bc_do_sub(n2, n1);
 				diff->n_sign = (n2->n_sign == PLUS ? MINUS : PLUS);
 				break;
 			case 0: {
@@ -63,7 +63,7 @@ bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min)
 			}
 			case 1:
 				/* n2 is less than n1, subtract n2 from n1. */
-				diff = _bc_do_sub(n1, n2, scale_min);
+				diff = _bc_do_sub(n1, n2);
 				diff->n_sign = n1->n_sign;
 				break;
 		}
