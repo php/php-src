@@ -152,7 +152,7 @@ rewritten to comply with these rules.
 1. Method names follow the *studlyCaps* (also referred to as *bumpy case* or
     *camel caps*) naming convention, with care taken to minimize the letter
     count. The initial letter of the name is lowercase, and each letter that
-    starts a new `word` is capitalized.
+    starts a new "word" is capitalized.
 
 1. Class names should be descriptive nouns in *PascalCase* and as short as
     possible. Each word in the class name should start with a capital letter,
