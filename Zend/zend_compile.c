@@ -313,9 +313,11 @@ static bool zend_is_not_imported(zend_string *name) {
 	return !FC(imports) || zend_hash_find_ptr_lc(FC(imports), name) == NULL;
 }
 
-void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
+void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_array *op_array) /* {{{ */
 {
 	*prev_context = CG(context);
+	CG(context).prev = CG(context).op_array ? prev_context : NULL;
+	CG(context).op_array = op_array;
 	CG(context).opcodes_size = INITIAL_OP_ARRAY_SIZE;
 	CG(context).vars_size = 0;
 	CG(context).literals_size = 0;
@@ -2920,11 +2922,21 @@ static bool is_global_var_fetch(zend_ast *ast)
 
 static bool this_guaranteed_exists(void) /* {{{ */
 {
-	zend_op_array *op_array = CG(active_op_array);
-	/* Instance methods always have a $this.
-	 * This also includes closures that have a scope and use $this. */
-	return op_array->scope != NULL
-		&& (op_array->fn_flags & ZEND_ACC_STATIC) == 0;
+	zend_oparray_context *ctx = &CG(context);
+	while (ctx) {
+		/* Instance methods always have a $this.
+		 * This also includes closures that have a scope and use $this. */
+		zend_op_array *op_array = ctx->op_array;
+		if (op_array->fn_flags & ZEND_ACC_STATIC) {
+			return false;
+		} else if (op_array->scope) {
+			return true;
+		} else if (!(op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+			return false;
+		}
+		ctx = ctx->prev;
+	}
+	return false;
 }
 /* }}} */
 
@@ -7869,7 +7881,7 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		op_array->fn_flags |= ZEND_ACC_TOP_LEVEL;
 	}
 
-	zend_oparray_context_begin(&orig_oparray_context);
+	zend_oparray_context_begin(&orig_oparray_context, op_array);
 
 	{
 		/* Push a separator to the loop variable stack */
