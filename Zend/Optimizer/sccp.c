@@ -900,27 +900,6 @@ static inline int ct_eval_func_call(
 
 			ZVAL_LONG(result, zend_hash_num_elements(Z_ARRVAL_P(args[0])));
 			return SUCCESS;
-		} else if (zend_string_equals_literal(name, "ini_get")) {
-			zend_ini_entry *ini_entry;
-
-			if (Z_TYPE_P(args[0]) != IS_STRING) {
-				return FAILURE;
-			}
-
-			ini_entry = zend_hash_find_ptr(EG(ini_directives), Z_STR_P(args[0]));
-			if (!ini_entry) {
-				if (PG(enable_dl)) {
-					return FAILURE;
-				}
-				ZVAL_FALSE(result);
-			} else if (ini_entry->modifiable != ZEND_INI_SYSTEM) {
-				return FAILURE;
-			} else if (ini_entry->value) {
-				ZVAL_STR_COPY(result, ini_entry->value);
-			} else {
-				ZVAL_EMPTY_STRING(result);
-			}
-			return SUCCESS;
 		}
 	}
 
