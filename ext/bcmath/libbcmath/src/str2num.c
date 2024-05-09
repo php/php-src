@@ -76,14 +76,14 @@ static const char *bc_count_digits(const char *str, const char *end)
 	return str;
 }
 
-static inline const char *bc_skip_zero_reverse(const char *str, const char *end)
+static inline const char *bc_skip_zero_reverse(const char *scaner, const char *stop)
 {
 	/* Check in bulk */
 #ifdef __SSE2__
-	const __m128i c_zero_repeat = _mm_set1_epi8((signed char) '0');
-	while (str - sizeof(__m128i) >= end) {
-		str -= sizeof(__m128i);
-		__m128i bytes = _mm_loadu_si128((const __m128i *) str);
+	const __m128i c_zero_repeat = _mm_set1_epi8('0');
+	while (scaner - sizeof(__m128i) >= stop) {
+		scaner -= sizeof(__m128i);
+		__m128i bytes = _mm_loadu_si128((const __m128i *) scaner);
 		/* Checks if all numeric strings are equal to '0'. */
 		bytes = _mm_cmpeq_epi8(bytes, c_zero_repeat);
 
@@ -91,18 +91,18 @@ static inline const char *bc_skip_zero_reverse(const char *str, const char *end)
 		/* The probability of having 16 trailing 0s in a row is very low, so we use EXPECTED. */
 		if (EXPECTED(mask != 0xffff)) {
 			/* Move the pointer back and check each character in loop. */
-			str += sizeof(__m128i);
+			scaner += sizeof(__m128i);
 			break;
 		}
 	}
 #endif
 
 	/* Exclude trailing zeros. */
-	while (str - 1 >= end && str[-1] == '0') {
-		str--;
+	while (scaner - 1 >= stop && scaner[-1] == '0') {
+		scaner--;
 	}
 
-	return str;
+	return scaner;
 }
 
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
