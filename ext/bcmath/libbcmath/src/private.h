@@ -43,28 +43,23 @@
 /* Bytes swap */
 #if defined(_MSC_VER)
 #  include <stdlib.h>
-#  define BSWAP32(u) _byteswap_ulong(u)
-#  define BSWAP64(u) _byteswap_uint64(u)
+#  define BC_BSWAP32(u) _byteswap_ulong(u)
+#  define BC_BSWAP64(u) _byteswap_uint64(u)
 #else
 #  ifdef __has_builtin
 #    if __has_builtin(__builtin_bswap32)
-#      define BSWAP32(u) __builtin_bswap32(u)
+#      define BC_BSWAP32(u) __builtin_bswap32(u)
 #    endif // __has_builtin(__builtin_bswap32)
 #    if __has_builtin(__builtin_bswap64)
-#      define BSWAP64(u) __builtin_bswap64(u)
+#      define BC_BSWAP64(u) __builtin_bswap64(u)
 #    endif // __has_builtin(__builtin_bswap64)
-#  endif
-#  ifdef __GNUC__
-#    ifndef BSWAP32
-#      define BSWAP32(u) __builtin_bswap32(u)
-#    endif
-#    ifndef BSWAP64
-#      define BSWAP64(u) __builtin_bswap64(u)
-#    endif
+#  elif defined(__GNUC__)
+#    define BC_BSWAP32(u) __builtin_bswap32(u)
+#    define BC_BSWAP64(u) __builtin_bswap64(u)
 #  endif // __has_builtin
 #endif // defined(_MSC_VER)
-#ifndef BSWAP32
-inline uint32_t BSWAP32(uint32_t u)
+#ifndef BC_BSWAP32
+static inline uint32_t BC_BSWAP32(uint32_t u)
 {
   return (((u & 0xff000000) >> 24)
           | ((u & 0x00ff0000) >>  8)
@@ -72,8 +67,8 @@ inline uint32_t BSWAP32(uint32_t u)
           | ((u & 0x000000ff) << 24));
 }
 #endif
-#ifndef BSWAP64
-inline uint64_t BSWAP64(uint64_t u)
+#ifndef BC_BSWAP64
+static inline uint64_t BC_BSWAP64(uint64_t u)
 {
    return (((u & 0xff00000000000000ULL) >> 56)
           | ((u & 0x00ff000000000000ULL) >> 40)
@@ -87,10 +82,10 @@ inline uint64_t BSWAP64(uint64_t u)
 #endif
 
 #if SIZEOF_SIZE_T >= 8
-#define BC_BSWAP(u) BSWAP64(u)
+#define BC_BSWAP(u) BC_BSWAP64(u)
 #define BC_UINT_T uint64_t
 #else
-#define BC_BSWAP(u) BSWAP32(u)
+#define BC_BSWAP(u) BC_BSWAP32(u)
 #define BC_UINT_T uint32_t
 #endif
 
