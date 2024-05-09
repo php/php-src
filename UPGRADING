@@ -535,12 +535,12 @@ PHP 8.4 UPGRADE NOTES
 - DOM:
   . Implemented DOM HTML5 parsing and serialization.
     RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
-    This RFC adds the new DOM namespace along with new classes and
+    This RFC adds the new Dom namespace along with new classes and
     constant aliases.
     There are two new classes to handle HTML and XML documents:
-    DOM\HTMLDocument and DOM\XMLDocument.
+    Dom\HTMLDocument and Dom\XMLDocument.
     These classes provide a cleaner API to handle HTML and XML documents.
-    Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
+    Furthermore, the Dom\HTMLDocument class implements spec-compliant HTML5
     parsing and serialization.
   . Implemented opt-in ext/dom spec compliance RFC.
     This adds new classes in the DOM namespace that correspond to modern
