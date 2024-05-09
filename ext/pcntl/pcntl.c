@@ -78,6 +78,12 @@ typedef cpuset_t *cpu_set_t;
  #define HAVE_SCHED_SETAFFINITY 1
 #endif
 
+#if defined(HAVE_GETCPUID)
+#include <sys/processor.h>
+#define sched_getcpu getcpuid
+#define HAVE_SCHED_GETCPU 1
+#endif
+
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 #include <pthread/qos.h>
 static zend_class_entry *QosClass_ce;

@@ -7,7 +7,21 @@ if test "$PHP_PCNTL" != "no"; then
   AC_CHECK_FUNCS([fork], [], [AC_MSG_ERROR([pcntl: fork() not supported by this platform])])
   AC_CHECK_FUNCS([waitpid], [], [AC_MSG_ERROR([pcntl: waitpid() not supported by this platform])])
   AC_CHECK_FUNCS([sigaction], [], [AC_MSG_ERROR([pcntl: sigaction() not supported by this platform])])
-  AC_CHECK_FUNCS([getpriority setpriority wait3 wait4 sigwaitinfo sigtimedwait unshare rfork forkx pidfd_open sched_setaffinity pthread_set_qos_class_self_np])
+  AC_CHECK_FUNCS(m4_normalize([
+    forkx
+    getcpuid
+    getpriority
+    pidfd_open
+    pthread_set_qos_class_self_np
+    rfork
+    sched_setaffinity
+    setpriority
+    sigwaitinfo
+    sigtimedwait
+    unshare
+    wait3
+    wait4
+  ]))
 
   dnl if unsupported, -1 means automatically ENOSYS in this context
   AC_MSG_CHECKING([if sched_getcpu is supported])
