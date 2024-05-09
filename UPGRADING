@@ -681,7 +681,7 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 
 - BCMath:
-  . Improved performance of number conversions.
+  . Improved performance of number conversions and operations.
 
 - Core:
   . Improved the performance of floating point number parsing and formatting in
