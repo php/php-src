@@ -41,7 +41,7 @@
 #define SWAR_REPEAT(x) (SWAR_ONES * (x))
 
 /* Bytes swap */
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
 #  include <stdlib.h>
 #  define BC_BSWAP32(u) _byteswap_ulong(u)
 #  define BC_BSWAP64(u) _byteswap_uint64(u)
@@ -57,7 +57,7 @@
 #      define BC_BSWAP64(u) __builtin_bswap64(u)
 #    endif // __has_builtin(__builtin_bswap64)
 #  endif // __GNUC__
-#endif // defined(_MSC_VER)
+#endif // _MSC_VER
 #ifndef BC_BSWAP32
 static inline uint32_t BC_BSWAP32(uint32_t u)
 {
@@ -82,17 +82,17 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 #endif
 
 #if SIZEOF_SIZE_T >= 8
-#define BC_BSWAP(u) BC_BSWAP64(u)
-#define BC_UINT_T uint64_t
+#  define BC_BSWAP(u) BC_BSWAP64(u)
+#  define BC_UINT_T uint64_t
 #else
-#define BC_BSWAP(u) BC_BSWAP32(u)
-#define BC_UINT_T uint32_t
+#  define BC_BSWAP(u) BC_BSWAP32(u)
+#  define BC_UINT_T uint32_t
 #endif
 
 #ifdef WORDS_BIGENDIAN
-#define BC_LITTLE_ENDIAN 0
+#  define BC_LITTLE_ENDIAN 0
 #else
-#define BC_LITTLE_ENDIAN 1
+#  define BC_LITTLE_ENDIAN 1
 #endif
 
 
