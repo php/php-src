@@ -46,17 +46,17 @@
 #  define BC_BSWAP32(u) _byteswap_ulong(u)
 #  define BC_BSWAP64(u) _byteswap_uint64(u)
 #else
-#  ifdef __has_builtin
+#  ifdef __GNUC__
+#    define BC_BSWAP32(u) __builtin_bswap32(u)
+#    define BC_BSWAP64(u) __builtin_bswap64(u)
+#  elif defined(__has_builtin)
 #    if __has_builtin(__builtin_bswap32)
 #      define BC_BSWAP32(u) __builtin_bswap32(u)
 #    endif // __has_builtin(__builtin_bswap32)
 #    if __has_builtin(__builtin_bswap64)
 #      define BC_BSWAP64(u) __builtin_bswap64(u)
 #    endif // __has_builtin(__builtin_bswap64)
-#  elif defined(__GNUC__)
-#    define BC_BSWAP32(u) __builtin_bswap32(u)
-#    define BC_BSWAP64(u) __builtin_bswap64(u)
-#  endif // __has_builtin
+#  endif // __GNUC__
 #endif // defined(_MSC_VER)
 #ifndef BC_BSWAP32
 static inline uint32_t BC_BSWAP32(uint32_t u)
