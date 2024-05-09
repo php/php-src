@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html></html>');
+$dom = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html></html>');
 
 $dt1 = clone $dom->doctype;
 var_dump($dt1 === $dom->doctype);

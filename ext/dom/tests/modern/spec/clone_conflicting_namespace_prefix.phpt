@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <root>
     <a:root1 xmlns:a="urn:a">
@@ -20,7 +20,7 @@ XML);
 
 $dom->documentElement->firstElementChild->setAttributeNS("urn:y", "a:foo", "bar");
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $clone = clone $dom->documentElement->firstElementChild;
 var_dump($clone->nodeName, $clone->namespaceURI);
@@ -29,7 +29,7 @@ foreach ($clone->attributes as $attr) {
     var_dump($attr->name, $attr->namespaceURI);
 }
 
-echo $dom->saveXML($clone), "\n";
+echo $dom->saveXml($clone), "\n";
 
 ?>
 --EXPECT--

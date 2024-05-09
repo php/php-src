@@ -722,13 +722,13 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 										   "LIBXML_NOERROR, "
 										   "LIBXML_COMPACT, "
 										   "LIBXML_HTML_NOIMPLIED, "
-										   "DOM\\NO_DEFAULT_NS)");
+										   "Dom\\NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;
 }
 
-PHP_METHOD(DOM_HTMLDocument, createEmpty)
+PHP_METHOD(Dom_HTMLDocument, createEmpty)
 {
 	const char *encoding = "UTF-8";
 	size_t encoding_len = strlen("UTF-8");
@@ -775,7 +775,7 @@ static bool dom_should_register_error_handlers(zend_long options)
 	return php_libxml_uses_internal_errors() || ((EG(error_reporting) | EG(user_error_handler_error_reporting)) & E_WARNING);
 }
 
-PHP_METHOD(DOM_HTMLDocument, createFromString)
+PHP_METHOD(Dom_HTMLDocument, createFromString)
 {
 	const char *source, *override_encoding = NULL;
 	size_t source_len, override_encoding_len;
@@ -926,7 +926,7 @@ fail_oom:
 	RETURN_THROWS();
 }
 
-PHP_METHOD(DOM_HTMLDocument, createFromFile)
+PHP_METHOD(Dom_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
 	php_dom_libxml_ns_mapper *ns_mapper = NULL;
@@ -1265,7 +1265,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	return SUCCESS;
 }
 
-PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
+PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 {
 	zval *id;
 	xmlDoc *docp;
@@ -1304,7 +1304,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
 	RETURN_LONG(bytes);
 }
 
-PHP_METHOD(DOM_HTMLDocument, saveHTML)
+PHP_METHOD(Dom_HTMLDocument, saveHtml)
 {
 	zval *nodep = NULL;
 	const xmlDoc *docp;

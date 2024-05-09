@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::$nodeValue on an element
+Dom\Node::$nodeValue on an element
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $foo = $dom->createElement("foo");
 $foo->textContent = "bar";
 var_dump($foo->nodeValue);

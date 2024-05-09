@@ -23,9 +23,9 @@ $tests = [
 
 foreach ($tests as $test) {
     echo "---\n";
-    $dom = DOM\XMLDocument::createFromString($test);
+    $dom = Dom\XMLDocument::createFromString($test);
     $dom->formatOutput = true;
-    echo $dom->saveXML(), "\n";
+    echo $dom->saveXml(), "\n";
 }
 
 ?>

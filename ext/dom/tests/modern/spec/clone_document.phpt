@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
     <!ELEMENT child (#PCDATA)>
@@ -28,19 +28,19 @@ var_dump($dom->getElementsByTagName("child2")[0]->firstChild->nodeName);
 echo "---\n";
 
 $clone = clone $dom;
-echo $clone->saveXML(), "\n";
+echo $clone->saveXml(), "\n";
 
 var_dump($clone->getElementsByTagName("child2")[0]->firstChild->nodeName);
 
 echo "---\n";
 
 $clone = $dom->cloneNode(false);
-echo $clone->saveXML(), "\n";
+echo $clone->saveXml(), "\n";
 
 echo "---\n";
 
 $clone = $dom->documentElement->cloneNode(false);
-echo $clone->ownerDocument->saveXML($clone), "\n";
+echo $clone->ownerDocument->saveXml($clone), "\n";
 
 ?>
 --EXPECT--

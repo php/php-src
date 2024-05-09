@@ -1,5 +1,5 @@
 --TEST--
-DOM\Node::$nodeName
+Dom\Node::$nodeName
 --EXTENSIONS--
 dom
 --FILE--
@@ -7,7 +7,7 @@ dom
 
 echo "--- For HTML document ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 
 $dom->appendChild($dom->createElement('container'));
 var_dump($dom->createAttributeNS('http://www.w3.org/1999/xhtml', 'html')->nodeName);
@@ -24,7 +24,7 @@ var_dump($dom->createElementNS(null, 'html')->nodeName);
 
 echo "--- For XML document ---\n";
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 
 $dom->appendChild($dom->createElement('container'));
 var_dump($dom->createAttributeNS('http://www.w3.org/1999/xhtml', 'html')->nodeName);

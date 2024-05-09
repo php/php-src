@@ -7,7 +7,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $comment = $dom->createComment("foobarbaz");
 try {
     var_dump($comment->substringData(0, 2**31+1));
@@ -24,7 +24,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
-echo $dom->saveHTML($comment), "\n";
+echo $dom->saveHtml($comment), "\n";
 
 ?>
 --EXPECT--

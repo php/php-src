@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElementNS("urn:a", "a:root"));
 $root->setAttribute("foo", "bar");
 
@@ -17,19 +17,19 @@ $child->appendChild($dom->createTextNode("c"));
 $child2 = $root->appendChild($dom->createElement("child2"));
 $child2->appendChild($dom->createTextNode("d"));
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 $clone = clone $root;
 var_dump($clone->firstChild->textContent);
 var_dump($clone->firstChild->nextSibling->textContent);
 var_dump($clone->firstChild->nextSibling->nextSibling->textContent);
-echo $dom->saveXML($clone), "\n";
+echo $dom->saveXml($clone), "\n";
 
 $clone = $child2->cloneNode(true);
-echo $dom->saveXML($clone), "\n";
+echo $dom->saveXml($clone), "\n";
 
 $clone = $child2->cloneNode(false);
-echo $dom->saveXML($clone), "\n";
+echo $dom->saveXml($clone), "\n";
 
 ?>
 --EXPECT--

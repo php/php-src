@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::isDefaultNamespace()
+Dom\Node::isDefaultNamespace()
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
     <body>

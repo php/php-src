@@ -889,7 +889,7 @@ namespace
         public function replaceChildren(...$nodes): void {}
     }
 
-    /** @alias DOM\DOMException */
+    /** @alias Dom\DOMException */
     final class DOMException extends Exception
     {
         /**
@@ -1025,7 +1025,7 @@ namespace
     function dom_import_simplexml(object $node): DOMElement {}
 }
 
-namespace DOM
+namespace Dom
 {
     /**
      * @var int
@@ -1252,7 +1252,7 @@ namespace DOM
         public function getIterator(): \Iterator {}
     }
 
-    class DTDNamedNodeMap implements \IteratorAggregate, \Countable
+    class DtdNamedNodeMap implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1330,7 +1330,7 @@ namespace DOM
         public function getAttributeNode(string $qualifiedName): ?Attr {}
         /** @implementation-alias DOMElement::getAttributeNodeNS */
         public function getAttributeNodeNS(?string $namespace, string $localName): ?Attr {}
-        /** @implementation-alias DOM\Element::setAttributeNodeNS */
+        /** @implementation-alias Dom\Element::setAttributeNodeNS */
         public function setAttributeNode(Attr $attr) : ?Attr {}
         public function setAttributeNodeNS(Attr $attr) : ?Attr {}
         public function removeAttributeNode(Attr $attr) : Attr {}
@@ -1452,9 +1452,9 @@ namespace DOM
         /** @readonly */
         public string $name;
         /** @readonly */
-        public DTDNamedNodeMap $entities;
+        public DtdNamedNodeMap $entities;
         /** @readonly */
-        public DTDNamedNodeMap $notations;
+        public DtdNamedNodeMap $notations;
         /** @readonly */
         public string $publicId;
         /** @readonly */
@@ -1482,7 +1482,7 @@ namespace DOM
         public int $childElementCount;
 
         /** @implementation-alias DOMDocumentFragment::appendXML */
-        public function appendXML(string $data): bool {}
+        public function appendXml(string $data): bool {}
         /** @implementation-alias DOMElement::append */
         public function append(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::prepend */
@@ -1525,9 +1525,9 @@ namespace DOM
         public ?DocumentType $doctype;
         /** @readonly */
         public ?Element $documentElement;
-        /** @implementation-alias DOM\Element::getElementsByTagName */
+        /** @implementation-alias Dom\Element::getElementsByTagName */
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
-        /** @implementation-alias DOM\Element::getElementsByTagNameNS */
+        /** @implementation-alias Dom\Element::getElementsByTagNameNS */
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
 
         public function createElement(string $localName): Element {}
@@ -1568,9 +1568,9 @@ namespace DOM
         /** @implementation-alias DOMDocument::schemaValidateSource */
         public function schemaValidateSource(string $source, int $flags = 0): bool {}
         /** @implementation-alias DOMDocument::relaxNGValidate */
-        public function relaxNGValidate(string $filename): bool {}
+        public function relaxNgValidate(string $filename): bool {}
         /** @implementation-alias DOMDocument::relaxNGValidateSource */
-        public function relaxNGValidateSource(string $source): bool {}
+        public function relaxNgValidateSource(string $source): bool {}
 #endif
 
         /** @implementation-alias DOMElement::append */
@@ -1591,15 +1591,15 @@ namespace DOM
 
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
-        /** @implementation-alias DOM\XMLDocument::saveXML */
-        public function saveXML(?Node $node = null, int $options = 0): string|false {}
+        /** @implementation-alias Dom\XMLDocument::saveXml */
+        public function saveXml(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
-        public function saveXMLFile(string $filename, int $options = 0): int|false {}
+        public function saveXmlFile(string $filename, int $options = 0): int|false {}
 
-        public function saveHTML(?Node $node = null): string {}
+        public function saveHtml(?Node $node = null): string {}
 
-        public function saveHTMLFile(string $filename): int|false {}
+        public function saveHtmlFile(string $filename): int|false {}
     }
 
     final class XMLDocument extends Document
@@ -1628,10 +1628,10 @@ namespace DOM
         /** @implementation-alias DOMDocument::xinclude */
         public function xinclude(int $options = 0): int|false {}
 
-        public function saveXML(?Node $node = null, int $options = 0): string|false {}
+        public function saveXml(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
-        public function saveXMLFile(string $filename, int $options = 0): int|false {}
+        public function saveXmlFile(string $filename, int $options = 0): int|false {}
     }
 
 #ifdef LIBXML_XPATH_ENABLED

@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE root [
     <!ENTITY foo "bar">
@@ -13,16 +13,16 @@ $dom = DOM\XMLDocument::createFromString(<<<XML
 <root>&foo;</root>
 XML);
 
-$importer = DOM\XMLDocument::createEmpty();
+$importer = Dom\XMLDocument::createEmpty();
 $imported = $importer->importNode($dom->documentElement, true);
-echo $importer->saveXML($imported), "\n";
+echo $importer->saveXml($imported), "\n";
 
 var_dump($imported->firstChild);
 
 ?>
 --EXPECT--
 <root>&foo;</root>
-object(DOM\EntityReference)#3 (14) {
+object(Dom\EntityReference)#3 (14) {
   ["nodeType"]=>
   int(5)
   ["nodeName"]=>

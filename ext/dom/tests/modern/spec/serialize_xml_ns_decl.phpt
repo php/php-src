@@ -1,14 +1,14 @@
 --TEST--
-Document::saveXML() with XML namespace declaration
+Document::saveXml() with XML namespace declaration
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 $root = $dom->documentElement;
 $root->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:xml', 'http://www.w3.org/XML/1998/namespace');
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

@@ -5,7 +5,7 @@ simplexml
 dom
 --FILE--
 <?php
-$dom = DOM\XMLDocument::createFromFile(__DIR__."/book.xml");
+$dom = Dom\XMLDocument::createFromFile(__DIR__."/book.xml");
 $s = simplexml_import_dom($dom);
 $books = $s->book;
 foreach ($books as $book) {

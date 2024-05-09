@@ -1,11 +1,11 @@
 --TEST--
-DOM\XMLDocument::documentURI
+Dom\XMLDocument::documentURI
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromFile(__DIR__ . "/test foo.xml", LIBXML_NOERROR);
+$dom = Dom\XMLDocument::createFromFile(__DIR__ . "/test foo.xml", LIBXML_NOERROR);
 var_dump($dom->documentURI);
 
 ?>

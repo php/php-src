@@ -457,7 +457,7 @@ PHP_METHOD(DOMDocument, createElement)
 	DOM_RET_OBJ(node, intern);
 }
 
-PHP_METHOD(DOM_Document, createElement)
+PHP_METHOD(Dom_Document, createElement)
 {
 	xmlNode *node;
 	xmlDocPtr docp;
@@ -662,7 +662,7 @@ PHP_METHOD(DOMDocument, createProcessingInstruction)
 	dom_document_create_processing_instruction(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Document, createProcessingInstruction)
+PHP_METHOD(Dom_Document, createProcessingInstruction)
 {
 	dom_document_create_processing_instruction(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -827,13 +827,13 @@ static void dom_modern_document_import_node(INTERNAL_FUNCTION_PARAMETERS, zend_c
 	DOM_RET_OBJ(retnodep, intern);
 }
 
-PHP_METHOD(DOM_Document, importNode)
+PHP_METHOD(Dom_Document, importNode)
 {
 	dom_modern_document_import_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
 /* }}} end dom_document_import_node */
 
-PHP_METHOD(DOM_Document, importLegacyNode)
+PHP_METHOD(Dom_Document, importLegacyNode)
 {
 	dom_modern_document_import_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
@@ -893,7 +893,7 @@ PHP_METHOD(DOMDocument, createElementNS)
 	DOM_RET_OBJ(nodep, intern);
 }
 
-PHP_METHOD(DOM_Document, createElementNS)
+PHP_METHOD(Dom_Document, createElementNS)
 {
 	xmlDocPtr docp;
 	dom_object *intern;
@@ -1199,7 +1199,7 @@ PHP_METHOD(DOMDocument, adoptNode)
 	dom_document_adopt_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Document, adoptNode)
+PHP_METHOD(Dom_Document, adoptNode)
 {
 	dom_document_adopt_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1693,7 +1693,7 @@ PHP_METHOD(DOMDocument, saveXML)
 	dom_document_save_xml(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(DOM_XMLDocument, saveXML)
+PHP_METHOD(Dom_XMLDocument, saveXml)
 {
 	dom_document_save_xml(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
@@ -2266,7 +2266,7 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 	dom_document_register_node_class(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Document, registerNodeClass)
+PHP_METHOD(Dom_Document, registerNodeClass)
 {
 	dom_document_register_node_class(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }

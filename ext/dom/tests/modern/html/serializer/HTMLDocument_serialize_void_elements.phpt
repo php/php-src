@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization of void elements
+Dom\HTMLDocument serialization of void elements
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->createElement("container");
 $dom->append($container);
 
@@ -35,14 +35,14 @@ foreach ($tags as $tag) {
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
     echo "$tag: ";
-    var_dump($dom->saveHTML($element));
+    var_dump($dom->saveHtml($element));
 
     $element = $container->appendChild($dom->createElementNS("http://php.net/foo", "x:$tag"));
     $element->appendChild($dom->createElement("inner"));
     $element->after("\n");
 }
 
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 
 ?>
 --EXPECT--

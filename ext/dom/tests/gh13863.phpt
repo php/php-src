@@ -26,7 +26,7 @@ function createTestDoc(DomType $type) {
         $doc->preserveWhiteSpace = false;
         $doc->loadXML($xml);
     } else {
-        $doc = DOM\XMLDocument::createFromString($xml, LIBXML_NOBLANKS);
+        $doc = Dom\XMLDocument::createFromString($xml, LIBXML_NOBLANKS);
     }
 
     return $doc;

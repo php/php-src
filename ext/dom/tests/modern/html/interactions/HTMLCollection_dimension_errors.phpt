@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 
 try {
     $dom->getElementsByTagName('root')[][1] = 1;
@@ -27,6 +27,6 @@ try {
 
 ?>
 --EXPECT--
-Cannot append to DOM\HTMLCollection
-Cannot access offset of type bool on DOM\HTMLCollection
+Cannot append to Dom\HTMLCollection
+Cannot access offset of type bool on Dom\HTMLCollection
 Cannot access offset of type bool in isset or empty

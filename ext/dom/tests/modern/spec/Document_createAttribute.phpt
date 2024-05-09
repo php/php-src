@@ -8,7 +8,7 @@ require __DIR__ . "/dump_attr.inc";
 
 echo "--- HTML document ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $attr = $dom->createAttribute('foo');
 dumpAttr($attr);
 $attr = $dom->createAttribute('FoOo');
@@ -16,7 +16,7 @@ dumpAttr($attr);
 
 echo "--- XML document ---\n";
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $attr = $dom->createAttribute('foo');
 dumpAttr($attr);
 $attr = $dom->createAttribute('FoOo');

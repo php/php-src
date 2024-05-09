@@ -25,7 +25,7 @@ $dom->loadXML($xml);
 $sxe = simplexml_import_dom($dom);
 var_dump($sxe->getDocNamespaces(true));
 
-$dom = DOM\XMLDocument::createFromString($xml);
+$dom = Dom\XMLDocument::createFromString($xml);
 $sxe = simplexml_import_dom($dom);
 var_dump($sxe->getDocNamespaces(true));
 

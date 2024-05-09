@@ -4,12 +4,12 @@ Bug #48339 (DOMElement::setIdAttribute() throws 'Not Found Error' exception)
 dom
 --FILE--
 <?php
-$document = DOM\XMLDocument::createEmpty();
+$document = Dom\XMLDocument::createEmpty();
 $element = $document->createElement('test');
 $element = $document->appendChild($element);
 $element->setAttribute("xml:id", 1);
 $element->setIdAttribute("xml:id", TRUE);
-echo $document->saveXML(), "\n";
+echo $document->saveXml(), "\n";
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

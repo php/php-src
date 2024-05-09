@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <root>
     <a:root1 xmlns:a="urn:a">
@@ -23,7 +23,7 @@ $a_child = $dom->getElementsByTagName("a:child")[0];
 
 $root->append($a_child);
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "---\n";
 
@@ -31,7 +31,7 @@ echo "---\n";
 $root->remove();
 unset($root);
 
-echo $dom->saveXML($a_child), "\n";
+echo $dom->saveXml($a_child), "\n";
 
 ?>
 --EXPECT--

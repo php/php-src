@@ -7,25 +7,25 @@ dom
 
 echo "--- Parsing ---\n";
 
-$dom = DOM\HTMLDocument::createFromString("<!doctype html><html><body><noscript><p>hi</p></noscript></body></html>", DOM\HTML_NO_DEFAULT_NS);
+$dom = Dom\HTMLDocument::createFromString("<!doctype html><html><body><noscript><p>hi</p></noscript></body></html>", Dom\HTML_NO_DEFAULT_NS);
 var_dump($dom->documentElement->textContent);
 var_dump($dom->documentElement->namespaceURI);
-echo $dom->saveHTML(), "\n";
-echo $dom->saveXML(), "\n";
+echo $dom->saveHtml(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Modifying the text content: tag ---\n";
 
-$xpath = new DOM\XPath($dom);
+$xpath = new Dom\XPath($dom);
 $noscript = $xpath->query("//noscript")[0];
 $noscript->textContent = "<p>bye</p>";
-echo $dom->saveHTML(), "\n";
-echo $dom->saveXML(), "\n";
+echo $dom->saveHtml(), "\n";
+echo $dom->saveXml(), "\n";
 
 echo "--- Modifying the text content: trick ---\n";
 
 $noscript->textContent = "<!-- </noscript> -->";
-echo $dom->saveHTML(), "\n";
-echo $dom->saveXML(), "\n";
+echo $dom->saveHtml(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

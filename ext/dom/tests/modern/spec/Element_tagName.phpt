@@ -1,5 +1,5 @@
 --TEST--
-DOM\Element::$tagName HTML-uppercased qualified name
+Dom\Element::$tagName HTML-uppercased qualified name
 --EXTENSIONS--
 dom
 --FILE--
@@ -7,7 +7,7 @@ dom
 
 echo "--- For HTML document ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 var_dump($dom->createElementNS('http://www.w3.org/1999/xhtml', 'html')->tagName);
 var_dump($dom->createElementNS('http://www.w3.org/1999/xhtml/', 'html')->tagName);
 var_dump($dom->createElementNS('http://www.w3.org/1999/xhtml', 'foo:html')->tagName);
@@ -17,7 +17,7 @@ var_dump($dom->createElementNS(null, 'html')->tagName);
 
 echo "--- For XML document ---\n";
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 var_dump($dom->createElementNS('http://www.w3.org/1999/xhtml', 'html')->tagName);
 var_dump($dom->createElementNS('http://www.w3.org/1999/xhtml/', 'html')->tagName);
 var_dump($dom->createElementNS('http://www.w3.org/1999/xhtml', 'foo:html')->tagName);
