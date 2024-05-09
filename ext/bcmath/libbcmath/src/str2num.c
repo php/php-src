@@ -76,6 +76,35 @@ static const char *bc_count_digits(const char *str, const char *end)
 	return str;
 }
 
+static inline const char *bc_skip_zero_reverse(const char *scanner, const char *stop)
+{
+	/* Check in bulk */
+#ifdef __SSE2__
+	const __m128i c_zero_repeat = _mm_set1_epi8('0');
+	while (scanner - sizeof(__m128i) >= stop) {
+		scanner -= sizeof(__m128i);
+		__m128i bytes = _mm_loadu_si128((const __m128i *) scanner);
+		/* Checks if all numeric strings are equal to '0'. */
+		bytes = _mm_cmpeq_epi8(bytes, c_zero_repeat);
+
+		int mask = _mm_movemask_epi8(bytes);
+		/* The probability of having 16 trailing 0s in a row is very low, so we use EXPECTED. */
+		if (EXPECTED(mask != 0xffff)) {
+			/* Move the pointer back and check each character in loop. */
+			scanner += sizeof(__m128i);
+			break;
+		}
+	}
+#endif
+
+	/* Exclude trailing zeros. */
+	while (scanner - 1 >= stop && scanner[-1] == '0') {
+		scanner--;
+	}
+
+	return scanner;
+}
+
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
 bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale)
 {
@@ -104,7 +133,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 	const char *decimal_point = (*ptr == '.') ? ptr : NULL;
 
 	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
-	if (!decimal_point && *ptr != '\0') {
+	if (UNEXPECTED(!decimal_point && *ptr != '\0')) {
 		goto fail;
 	}
 
@@ -112,24 +141,20 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 	if (decimal_point) {
 		/* search */
 		fractional_ptr = fractional_end = decimal_point + 1;
-		if (*fractional_ptr == '\0') {
+		/* For strings that end with a decimal point, such as "012." */
+		if (UNEXPECTED(*fractional_ptr == '\0')) {
 			goto after_fractional;
 		}
 
 		/* validate */
 		fractional_end = bc_count_digits(fractional_ptr, end);
-		if (*fractional_end != '\0') {
+		if (UNEXPECTED(*fractional_end != '\0')) {
 			/* invalid num */
 			goto fail;
 		}
 
 		/* Exclude trailing zeros. */
-		while (fractional_end - 1 > decimal_point && fractional_end[-1] == '0') {
-			fractional_end--;
-		}
-
-		/* Move the pointer to the beginning of the fraction. */
-		fractional_ptr = decimal_point + 1;
+		fractional_end = bc_skip_zero_reverse(fractional_end, fractional_ptr);
 
 		/* Calculate the length of the fraction excluding trailing zero. */
 		str_scale = fractional_end - fractional_ptr;
