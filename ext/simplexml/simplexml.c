@@ -1358,10 +1358,11 @@ PHP_METHOD(SimpleXMLElement, asXML)
 		RETURN_FALSE;
 	}
 
+	xmlDocPtr doc = sxe->document->ptr;
+
 	if (filename) {
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-			int bytes;
-			bytes = xmlSaveFile(filename, (xmlDocPtr) sxe->document->ptr);
+			zend_long bytes = sxe->document->handlers->dump_doc_to_file(filename, doc, false, (const char *) doc->encoding);
 			if (bytes == -1) {
 				RETURN_FALSE;
 			} else {
@@ -1380,7 +1381,6 @@ PHP_METHOD(SimpleXMLElement, asXML)
 		}
 	}
 
-	xmlDocPtr doc = sxe->document->ptr;
 	zend_string *result;
 	if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
 		result = sxe->document->handlers->dump_doc_to_str(doc, 0, (const char *) doc->encoding);
