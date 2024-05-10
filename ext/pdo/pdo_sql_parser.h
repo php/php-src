@@ -30,4 +30,4 @@
 #define YYCURSOR        cursor
 #define YYLIMIT         s->end
 #define YYMARKER        s->ptr
-#define YYFILL(n)		{ RET(PDO_PARSER_EOI); }
+#define YYFILL(n)		{ if (YYLIMIT - 1 <= YYCURSOR) RET(PDO_PARSER_EOI); }

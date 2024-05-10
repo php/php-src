@@ -29,12 +29,13 @@ $queries = [
 foreach ($queries as $k => $query) {
     $stmt = $db->prepare($query);
     $stmt->execute();
-    var_dump($stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
+    var_dump($query, $stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
 }
 
 // One parameter
 $queries = [
     "SELECT * FROM {$table} WHERE 1 = ?",
+    "SELECT * FROM {$table} WHERE 1 = --?",
     "SELECT * FROM {$table} WHERE \"?\" IN (?, '?')",
     "SELECT * FROM {$table} WHERE `a``?` = ?",
 ];
@@ -42,17 +43,26 @@ $queries = [
 foreach ($queries as $k => $query) {
     $stmt = $db->prepare($query);
     $stmt->execute([1]);
-    var_dump($stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
+    var_dump($query, $stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
 }
 
 $db->exec("DROP TABLE pdo_mysql_parser");
 
 ?>
 --EXPECT--
+string(30) "SELECT * FROM pdo_mysql_parser"
 bool(true)
+string(35) "SELECT * FROM pdo_mysql_parser -- ?"
 bool(true)
+string(34) "SELECT * FROM pdo_mysql_parser # ?"
 bool(true)
+string(38) "SELECT * FROM pdo_mysql_parser /* ? */"
 bool(true)
+string(42) "SELECT * FROM pdo_mysql_parser WHERE 1 = ?"
 bool(true)
+string(44) "SELECT * FROM pdo_mysql_parser WHERE 1 = --?"
 bool(true)
+string(52) "SELECT * FROM pdo_mysql_parser WHERE "?" IN (?, '?')"
+bool(true)
+string(47) "SELECT * FROM pdo_mysql_parser WHERE `a``?` = ?"
 bool(true)

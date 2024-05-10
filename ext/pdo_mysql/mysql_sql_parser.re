@@ -28,7 +28,7 @@ int pdo_mysql_scanner(pdo_scanner_t *s)
 	/*!re2c
 	BINDCHR		= [:][a-zA-Z0-9_]+;
 	QUESTION	= [?];
-	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|("--"|[#])[^\r\n]*);
+	COMMENTS	= ("/*"([^*]+|[*]+[^/*])*[*]*"*/"|(("--"[ \t\v\f\r])|[#]).*);
 	SPECIALS	= [:?"'`/#-];
 	MULTICHAR	= ([:]{2,}|[?]{2,});
 	ANYNOEOF	= [\001-\377];
