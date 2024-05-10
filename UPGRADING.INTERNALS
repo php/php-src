@@ -202,6 +202,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added a way to attached private data to a php_libxml_ref_obj.
    - Added a way to fix a class type onto php_libxml_ref_obj.
    - Added php_libxml_uses_internal_errors().
+   - Added a way to override document handlers (e.g. serialization) with
+     php_libxml_document_handlers.
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.
