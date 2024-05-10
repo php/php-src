@@ -83,6 +83,7 @@ static zend_result php_libxml_post_deactivate(void);
 
 static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
 static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding);
+static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding);
 
 /* }}} */
 
@@ -108,6 +109,7 @@ zend_module_entry libxml_module_entry = {
 static const php_libxml_document_handlers php_libxml_default_document_handlers = {
 	.dump_node_to_str = php_libxml_default_dump_node_to_str,
 	.dump_doc_to_str = php_libxml_default_dump_doc_to_str,
+	.dump_doc_to_file = php_libxml_default_dump_doc_to_file,
 };
 
 static void php_libxml_set_old_ns_list(xmlDocPtr doc, xmlNsPtr first, xmlNsPtr last)
@@ -1531,6 +1533,11 @@ static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePt
 	zend_string *str = zend_string_init((const char *) content, size, false);
 	xmlOutputBufferClose(buf);
 	return str;
+}
+
+static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding)
+{
+	return xmlSaveFormatFileEnc(filename, doc, encoding, format);
 }
 
 #if defined(PHP_WIN32) && defined(COMPILE_DL_LIBXML)

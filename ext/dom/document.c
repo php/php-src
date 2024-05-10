@@ -1540,7 +1540,7 @@ PHP_METHOD(DOMDocument, save)
 	zval *id;
 	xmlDoc *docp;
 	size_t file_len = 0;
-	int bytes, format, saveempty = 0;
+	int saveempty = 0;
 	dom_object *intern;
 	char *file;
 	zend_long options = 0;
@@ -1560,13 +1560,12 @@ PHP_METHOD(DOMDocument, save)
 	/* encoding handled by property on doc */
 
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
-	format = doc_props->formatoutput;
+	bool format = doc_props->formatoutput;
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
 		saveempty = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = 1;
 	}
-	// TODO: use modern API when necessary
-	bytes = xmlSaveFormatFileEnc(file, docp, NULL, format);
+	zend_long bytes = intern->document->handlers->dump_doc_to_file(file, docp, format, (const char *) docp->encoding);
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
 		xmlSaveNoEmptyTags = saveempty;
 	}

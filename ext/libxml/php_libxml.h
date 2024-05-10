@@ -75,6 +75,7 @@ typedef struct _php_libxml_private_data_header {
 typedef struct php_libxml_document_handlers {
 	zend_string *(*dump_node_to_str)(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
 	zend_string *(*dump_doc_to_str)(xmlDocPtr doc, int options, const char *encoding);
+	zend_long (*dump_doc_to_file)(const char *filename, xmlDocPtr doc, bool format, const char *encoding);
 } php_libxml_document_handlers;
 
 /**
