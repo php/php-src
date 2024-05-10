@@ -140,11 +140,11 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Now add carry the longer integer part. */
-	if (sum_len - 1 != min_len) {
+	if (n1->n_len != n2->n_len) {
 		if (n2->n_len > n1->n_len) {
 			n1ptr = n2ptr;
 		}
-		for (count = sum_len - 1 - min_len; count > 0; count--) {
+		for (count = sum_len - min_len; count > 1; count--) {
 			*sumptr = *n1ptr-- + carry;
 			if (*sumptr >= BASE) {
 				*sumptr -= BASE;
