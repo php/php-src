@@ -293,7 +293,7 @@ static zend_string *php_new_dom_dump_doc_to_str(xmlDocPtr doc, int options, cons
 	return php_new_dom_dump_node_to_str(doc, (xmlNodePtr) doc, options & XML_SAVE_FORMAT, encoding);
 }
 
-static zend_long php_new_dom_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding)
+zend_long php_new_dom_dump_node_to_file(const char *filename, xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
 {
 	xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
 	xmlOutputBufferPtr out = xmlOutputBufferCreateFilename(filename, handler, 0);
@@ -307,7 +307,7 @@ static zend_long php_new_dom_dump_doc_to_file(const char *filename, xmlDocPtr do
 	int status = -1;
 	xmlSaveCtxtPtr ctxt = xmlSaveToIO(out->writecallback, NULL, stream, encoding, XML_SAVE_AS_XML);
 	if (EXPECTED(ctxt != NULL)) {
-		status = dom_xml_serialize(ctxt, out, (xmlNodePtr) doc, format);
+		status = dom_xml_serialize(ctxt, out, node, format);
 		status |= xmlOutputBufferFlush(out);
 		(void) xmlSaveClose(ctxt);
 	}
@@ -319,9 +319,15 @@ static zend_long php_new_dom_dump_doc_to_file(const char *filename, xmlDocPtr do
 	return status < 0 ? status : (zend_long) offset;
 }
 
+static zend_long php_new_dom_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding)
+{
+	return php_new_dom_dump_node_to_file(filename, doc, (xmlNodePtr) doc, format, encoding);
+}
+
 static const php_libxml_document_handlers php_new_dom_default_document_handlers = {
 	.dump_node_to_str = php_new_dom_dump_node_to_str,
 	.dump_doc_to_str = php_new_dom_dump_doc_to_str,
+	.dump_node_to_file = php_new_dom_dump_node_to_file,
 	.dump_doc_to_file = php_new_dom_dump_doc_to_file,
 };
 
