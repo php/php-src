@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fix crash when calling childNodes next() when iterator is exhausted.
     (nielsdos)
 
+- Hash:
+  . ext/hash: Swap the checking order of `__has_builtin` and `__GNUC__`
+    (Saki Takamachi)
+
 09 May 2024, PHP 8.2.19
 
 - Core:
