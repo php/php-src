@@ -186,19 +186,17 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 /* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
 {
-	if (ZSTR_LEN(name) == sizeof("open") - 1
-			&& (ZSTR_VAL(name)[0] == 'o' || ZSTR_VAL(name)[0] == 'O')
-			&& (ZSTR_VAL(name)[1] == 'p' || ZSTR_VAL(name)[1] == 'P')
-			&& (ZSTR_VAL(name)[2] == 'e' || ZSTR_VAL(name)[2] == 'E')
-			&& (ZSTR_VAL(name)[3] == 'n' || ZSTR_VAL(name)[3] == 'N')) {
-		return (zend_function*)&xmlreader_open_fn;
-	} else if (ZSTR_LEN(name) == sizeof("xml") - 1
-			&& (ZSTR_VAL(name)[0] == 'x' || ZSTR_VAL(name)[0] == 'X')
-			&& (ZSTR_VAL(name)[1] == 'm' || ZSTR_VAL(name)[1] == 'M')
-			&& (ZSTR_VAL(name)[2] == 'l' || ZSTR_VAL(name)[2] == 'L')) {
-		return (zend_function*)&xmlreader_xml_fn;
+	zend_function *method = zend_std_get_method(obj, name, key);
+	if (method && (method->common.fn_flags & ZEND_ACC_STATIC) && method->common.type == ZEND_INTERNAL_FUNCTION) {
+		/* There are only two static internal methods and they both have overrides. */
+		if (ZSTR_LEN(name) == sizeof("xml") - 1) {
+			return (zend_function *) &xmlreader_xml_fn;
+		} else {
+			ZEND_ASSERT(ZSTR_LEN(name) == sizeof("open") - 1);
+			return (zend_function *) &xmlreader_open_fn;
+		}
 	}
-	return zend_std_get_method(obj, name, key);;
+	return method;
 }
 /* }}} */
 
