@@ -756,7 +756,7 @@ PHP_METHOD(Dom_HTMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
 	return;
 
@@ -916,7 +916,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
@@ -1136,7 +1136,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 

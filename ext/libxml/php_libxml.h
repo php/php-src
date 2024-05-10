@@ -68,6 +68,16 @@ typedef struct _php_libxml_private_data_header {
 } php_libxml_private_data_header;
 
 /**
+ * It's possible to set custom handlers for certain actions depending on the type of document.
+ * For example, there exist multiple ways to serialize an XML document,
+ * therefore this structure allows setting up a custom handler.
+ */
+typedef struct php_libxml_document_handlers {
+	zend_string *(*dump_node_to_str)(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
+	zend_string *(*dump_doc_to_str)(xmlDocPtr doc, int options, const char *encoding);
+} php_libxml_document_handlers;
+
+/**
  * Multiple representations are possible of the same underlying node data.
  * This is the case for example when a SimpleXML node is imported into DOM.
  * It must not be possible to obtain both a legacy and a modern representation
@@ -88,6 +98,7 @@ typedef struct _php_libxml_ref_obj {
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
 	php_libxml_private_data_header *private_data;
+	const php_libxml_document_handlers *handlers;
 	int refcount;
 	php_libxml_class_type class_type;
 } php_libxml_ref_obj;

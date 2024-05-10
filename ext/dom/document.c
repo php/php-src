@@ -1565,6 +1565,7 @@ PHP_METHOD(DOMDocument, save)
 		saveempty = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = 1;
 	}
+	// TODO: use modern API when necessary
 	bytes = xmlSaveFormatFileEnc(file, docp, NULL, format);
 	if (options & LIBXML_SAVE_NOEMPTYTAG) {
 		xmlSaveNoEmptyTags = saveempty;
@@ -1584,10 +1585,8 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	zval *nodep = NULL;
 	xmlDoc *docp;
 	xmlNode *node;
-	xmlBufferPtr buf;
-	const xmlChar *mem;
 	dom_object *intern, *nodeobj;
-	int size, format, old_xml_save_no_empty_tags;
+	int old_xml_save_no_empty_tags;
 	zend_long options = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!l", &nodep, node_ce, &options) != SUCCESS) {
@@ -1597,9 +1596,9 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
 	libxml_doc_props const* doc_props = dom_get_doc_props_read_only(intern->document);
-	format = doc_props->formatoutput;
+	bool format = doc_props->formatoutput;
 
-	int status = -1;
+	zend_string *res;
 	if (nodep != NULL) {
 		/* Dump contents of Node */
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
@@ -1608,38 +1607,13 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 			RETURN_FALSE;
 		}
 
-		buf = xmlBufferCreate();
-		if (!buf) {
-			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
-			RETURN_FALSE;
-		}
-		/* Save libxml2 global, override its vaule, and restore after saving. */
+		/* Save libxml2 global, override its value, and restore after saving (don't move me or risk breaking the state
+		 * w.r.t. the implicit return in DOM_GET_OBJ). */
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
-		if (php_dom_follow_spec_intern(intern)) {
-			xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, XML_SAVE_AS_XML);
-			if (EXPECTED(ctxt != NULL)) {
-				xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler((const char *) docp->encoding);
-				xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, handler);
-				if (EXPECTED(out != NULL)) {
-					status = dom_xml_serialize(ctxt, out, node, format);
-					status |= xmlOutputBufferFlush(out);
-					status |= xmlOutputBufferClose(out);
-				}
-				(void) xmlSaveClose(ctxt);
-				xmlCharEncCloseFunc(handler);
-			}
-		} else {
-			status = xmlNodeDump(buf, docp, node, 0, format);
-		}
+		res = intern->document->handlers->dump_node_to_str(docp, node, format, (const char *) docp->encoding);
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
 	} else {
-		buf = xmlBufferCreate();
-		if (!buf) {
-			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
-			RETURN_FALSE;
-		}
-
 		int converted_options = XML_SAVE_AS_XML;
 		if (options & XML_SAVE_NO_DECL) {
 			converted_options |= XML_SAVE_NO_DECL;
@@ -1647,45 +1621,20 @@ static void dom_document_save_xml(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 		if (format) {
 			converted_options |= XML_SAVE_FORMAT;
 		}
-		/* Save libxml2 global, override its vaule, and restore after saving. */
+
+		/* Save libxml2 global, override its value, and restore after saving. */
 		old_xml_save_no_empty_tags = xmlSaveNoEmptyTags;
 		xmlSaveNoEmptyTags = (options & LIBXML_SAVE_NOEMPTYTAG) ? 1 : 0;
-		/* Encoding is handled from the encoding property set on the document */
-		xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, (const char *) docp->encoding, converted_options);
+		res = intern->document->handlers->dump_doc_to_str(docp, converted_options, (const char *) docp->encoding);
 		xmlSaveNoEmptyTags = old_xml_save_no_empty_tags;
-		if (UNEXPECTED(!ctxt)) {
-			xmlBufferFree(buf);
-			php_error_docref(NULL, E_WARNING, "Could not create save context");
-			RETURN_FALSE;
-		}
-		if (php_dom_follow_spec_intern(intern)) {
-			xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler((const char *) docp->encoding);
-			xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, handler);
-			if (EXPECTED(out != NULL)) {
-				status = dom_xml_serialize(ctxt, out, (xmlNodePtr) docp, format);
-				status |= xmlOutputBufferFlush(out);
-				status |= xmlOutputBufferClose(out);
-			} else {
-				xmlCharEncCloseFunc(handler);
-			}
-		} else {
-			status = xmlSaveDoc(ctxt, docp);
-		}
-		(void) xmlSaveClose(ctxt);
 	}
-	if (UNEXPECTED(status < 0)) {
-		xmlBufferFree(buf);
+
+	if (!res) {
 		php_error_docref(NULL, E_WARNING, "Could not save document");
 		RETURN_FALSE;
+	} else {
+		RETURN_NEW_STR(res);
 	}
-	mem = xmlBufferContent(buf);
-	if (!mem) {
-		xmlBufferFree(buf);
-		RETURN_FALSE;
-	}
-	size = xmlBufferLength(buf);
-	RETVAL_STRINGL((const char *) mem, size);
-	xmlBufferFree(buf);
 }
 
 PHP_METHOD(DOMDocument, saveXML)

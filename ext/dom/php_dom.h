@@ -173,7 +173,7 @@ void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 xmlDocPtr php_dom_create_html_doc(void);
 xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
-
+void dom_set_xml_class(php_libxml_ref_obj *document);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 
 typedef enum {

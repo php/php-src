@@ -1343,8 +1343,6 @@ PHP_METHOD(SimpleXMLElement, asXML)
 	php_sxe_object     *sxe;
 	xmlNodePtr          node;
 	xmlOutputBufferPtr  outbuf;
-	xmlChar            *strval;
-	int                 strval_len;
 	char               *filename = NULL;
 	size_t                 filename_len;
 
@@ -1382,34 +1380,18 @@ PHP_METHOD(SimpleXMLElement, asXML)
 		}
 	}
 
+	xmlDocPtr doc = sxe->document->ptr;
+	zend_string *result;
 	if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-		xmlDocDumpMemoryEnc((xmlDocPtr) sxe->document->ptr, &strval, &strval_len, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-		if (!strval) {
-			RETVAL_FALSE;
-		} else {
-			RETVAL_STRINGL((char *)strval, strval_len);
-		}
-		xmlFree(strval);
+		result = sxe->document->handlers->dump_doc_to_str(doc, 0, (const char *) doc->encoding);
 	} else {
-		char *return_content;
-		size_t return_len;
-		/* Should we be passing encoding information instead of NULL? */
-		outbuf = xmlAllocOutputBuffer(NULL);
+		result = sxe->document->handlers->dump_node_to_str(doc, node, false, (const char *) doc->encoding);
+	}
 
-		if (outbuf == NULL) {
-			RETURN_FALSE;
-		}
-
-		xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, (const char *) ((xmlDocPtr) sxe->document->ptr)->encoding);
-		xmlOutputBufferFlush(outbuf);
-		return_content = (char *)xmlOutputBufferGetContent(outbuf);
-		return_len = xmlOutputBufferGetSize(outbuf);
-		if (!return_content) {
-			RETVAL_FALSE;
-		} else {
-			RETVAL_STRINGL(return_content, return_len);
-		}
-		xmlOutputBufferClose(outbuf);
+	if (!result) {
+		RETURN_FALSE;
+	} else {
+		RETURN_NEW_STR(result);
 	}
 }
 /* }}} */

@@ -306,7 +306,7 @@ PHP_METHOD(Dom_Implementation, createDocument)
 		(xmlNodePtr) document,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 
 	/* 4. If doctype is non-null, append doctype to document. */
@@ -407,7 +407,7 @@ PHP_METHOD(Dom_Implementation, createHTMLDocument)
 		(xmlNodePtr) doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 }
 /* }}} */
