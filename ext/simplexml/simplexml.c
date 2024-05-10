@@ -1342,7 +1342,6 @@ PHP_METHOD(SimpleXMLElement, asXML)
 {
 	php_sxe_object     *sxe;
 	xmlNodePtr          node;
-	xmlOutputBufferPtr  outbuf;
 	char               *filename = NULL;
 	size_t                 filename_len;
 
@@ -1361,22 +1360,15 @@ PHP_METHOD(SimpleXMLElement, asXML)
 	xmlDocPtr doc = sxe->document->ptr;
 
 	if (filename) {
+		zend_long bytes;
 		if (node->parent && (XML_DOCUMENT_NODE == node->parent->type)) {
-			zend_long bytes = sxe->document->handlers->dump_doc_to_file(filename, doc, false, (const char *) doc->encoding);
-			if (bytes == -1) {
-				RETURN_FALSE;
-			} else {
-				RETURN_TRUE;
-			}
+			bytes = sxe->document->handlers->dump_doc_to_file(filename, doc, false, (const char *) doc->encoding);
 		} else {
-			outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
-
-			if (outbuf == NULL) {
-				RETURN_FALSE;
-			}
-
-			xmlNodeDumpOutput(outbuf, (xmlDocPtr) sxe->document->ptr, node, 0, 0, NULL);
-			xmlOutputBufferClose(outbuf);
+			bytes = sxe->document->handlers->dump_node_to_file(filename, doc, node, false, NULL);
+		}
+		if (bytes == -1) {
+			RETURN_FALSE;
+		} else {
 			RETURN_TRUE;
 		}
 	}
