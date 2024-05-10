@@ -94,16 +94,22 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 			n2bytes = BC_BSWAP(n2bytes);
 #endif
 
+			/*
+			 * In order to add 1 to the "next digit" when a carry occurs, adjust it so that it
+			 * overflows when add 10.
+			 * e.g.
+			 * 00001001(9) + 00000001(1) = 00001010(10) to
+			 * 11111111 + 00000001 = 00000000(0) and carry 1
+			 */
 			n1bytes += SWAR_REPEAT(0xF6) + n2bytes + carry;
-			/* If the most significant bit is 1, a carry down has occurred. */
+			/* If the most significant bit is 0, a carry has occurred. */
 			carry = !(n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1)));
 
 			/*
-			 * Check the most significant bit of each of the bytes, and if it is 1, a carry down has
-			 * occurred. When carrying down occurs, due to the difference between decimal and hexadecimal
-			 * numbers, an extra 6 is added to the lower 4 bits.
-			 * Therefore, for a byte that has been carried down, set all the upper 4 bits to 0 and subtract
-			 * 6 from the lower 4 bits to adjust it to the correct value as a decimal number.
+			 * The calculation result is a mixture of bytes that have been carried and bytes that have not.
+			 * The most significant bit of each byte is 0 if it is carried forward, and 1 if it is not.
+			 * Using this, subtract the 0xF6 added for adjustment from the byte that has not been carried
+			 * over to return it to the correct value as a decimal number.
 			 */
 			BC_UINT_T sum_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0xF6;
 			n1bytes -= sum_mask;
