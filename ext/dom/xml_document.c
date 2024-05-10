@@ -42,23 +42,23 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 								  | XML_PARSE_HUGE
 								  | XML_PARSE_BIG_LINES;
 	if ((options & ~VALID_OPTIONS) != 0) {
-		zend_argument_value_error(2, "contains invalid flags (allowed flags: "
-									 "LIBXML_RECOVER, "
-									 "LIBXML_NOENT, "
-									 "LIBXML_DTDLOAD, "
-									 "LIBXML_DTDATTR, "
-									 "LIBXML_DTDVALID, "
-									 "LIBXML_NOERROR, "
-									 "LIBXML_NOWARNING, "
-									 "LIBXML_NOBLANKS, "
-									 "LIBXML_XINCLUDE, "
-									 "LIBXML_NSCLEAN, "
-									 "LIBXML_NOCDATA, "
-									 "LIBXML_NONET, "
-									 "LIBXML_PEDANTIC, "
-									 "LIBXML_COMPACT, "
-									 "LIBXML_PARSEHUGE, "
-									 "LIBXML_BIGLINES)");
+		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: "
+										   "LIBXML_RECOVER, "
+										   "LIBXML_NOENT, "
+										   "LIBXML_DTDLOAD, "
+										   "LIBXML_DTDATTR, "
+										   "LIBXML_DTDVALID, "
+										   "LIBXML_NOERROR, "
+										   "LIBXML_NOWARNING, "
+										   "LIBXML_NOBLANKS, "
+										   "LIBXML_XINCLUDE, "
+										   "LIBXML_NSCLEAN, "
+										   "LIBXML_NOCDATA, "
+										   "LIBXML_NONET, "
+										   "LIBXML_PEDANTIC, "
+										   "LIBXML_COMPACT, "
+										   "LIBXML_PARSEHUGE, "
+										   "LIBXML_BIGLINES)");
 		return false;
 	}
 	return true;
