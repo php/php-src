@@ -22,6 +22,8 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "xml_serializer.h"
+#include <libxml/xmlsave.h>
 
 static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
@@ -118,7 +120,7 @@ PHP_METHOD(Dom_XMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
 	return;
 
@@ -227,7 +229,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	dom_document_convert_to_modern(intern->document, lxml_doc);
 }
 
@@ -246,6 +248,60 @@ PHP_METHOD(Dom_XMLDocument, createFromString)
 PHP_METHOD(Dom_XMLDocument, createFromFile)
 {
 	load_from_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
+}
+
+static zend_string *php_new_dom_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
+{
+	xmlBufferPtr buf = xmlBufferCreate();
+	if (!buf) {
+		return NULL;
+	}
+
+	int status = -1;
+	xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, encoding, XML_SAVE_AS_XML);
+	if (EXPECTED(ctxt != NULL)) {
+		xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
+		xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, handler);
+		if (EXPECTED(out != NULL)) {
+			status = dom_xml_serialize(ctxt, out, node, format);
+			status |= xmlOutputBufferFlush(out);
+			status |= xmlOutputBufferClose(out);
+		}
+		(void) xmlSaveClose(ctxt);
+		xmlCharEncCloseFunc(handler);
+	}
+
+	if (UNEXPECTED(status < 0)) {
+		xmlBufferFree(buf);
+		return NULL;
+	}
+
+	const xmlChar *content = xmlBufferContent(buf);
+	if (!content) {
+		xmlBufferFree(buf);
+		return NULL;
+	}
+
+	int size = xmlBufferLength(buf);
+	zend_string *res = zend_string_init((const char *) content, size, false);
+	xmlBufferFree(buf);
+	return res;
+}
+
+static zend_string *php_new_dom_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding)
+{
+	return php_new_dom_dump_node_to_str(doc, (xmlNodePtr) doc, options & XML_SAVE_FORMAT, encoding);
+}
+
+static const php_libxml_document_handlers php_new_dom_default_document_handlers = {
+	.dump_node_to_str = php_new_dom_dump_node_to_str,
+	.dump_doc_to_str = php_new_dom_dump_doc_to_str,
+};
+
+void dom_set_xml_class(php_libxml_ref_obj *document)
+{
+	document->class_type = PHP_LIBXML_CLASS_MODERN;
+	document->handlers = &php_new_dom_default_document_handlers;
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

@@ -81,6 +81,9 @@ static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
 static zend_result php_libxml_post_deactivate(void);
 
+static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
+static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding);
+
 /* }}} */
 
 zend_module_entry libxml_module_entry = {
@@ -101,6 +104,11 @@ zend_module_entry libxml_module_entry = {
 };
 
 /* }}} */
+
+static const php_libxml_document_handlers php_libxml_default_document_handlers = {
+	.dump_node_to_str = php_libxml_default_dump_node_to_str,
+	.dump_doc_to_str = php_libxml_default_dump_doc_to_str,
+};
 
 static void php_libxml_set_old_ns_list(xmlDocPtr doc, xmlNsPtr first, xmlNsPtr last)
 {
@@ -1344,6 +1352,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
 		object->document->private_data = NULL;
 		object->document->class_type = PHP_LIBXML_CLASS_UNSET;
+		object->document->handlers = &php_libxml_default_document_handlers;
 	}
 
 	return ret_refcount;
@@ -1466,6 +1475,62 @@ PHP_LIBXML_API xmlChar *php_libxml_attr_value(const xmlAttr *attr, bool *free)
 
 	*free = true;
 	return value;
+}
+
+static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding)
+{
+	xmlBufferPtr buf = xmlBufferCreate();
+	if (!buf) {
+		return NULL;
+	}
+
+	/* Encoding is handled from the encoding property set on the document */
+	xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, encoding, options);
+	if (!ctxt) {
+		xmlBufferFree(buf);
+		return NULL;
+	}
+
+	long status = xmlSaveDoc(ctxt, doc);
+	(void) xmlSaveClose(ctxt);
+	if (status < 0) {
+		xmlBufferFree(buf);
+		return NULL;
+	}
+
+	const xmlChar *content = xmlBufferContent(buf);
+	if (!content) {
+		xmlBufferFree(buf);
+		return NULL;
+	}
+
+	int size = xmlBufferLength(buf);
+	zend_string *str = zend_string_init((const char *) content, size, false);
+	xmlBufferFree(buf);
+	return str;
+}
+
+static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
+{
+	// TODO: should this alloc take an encoding? For now keep it NULL for BC.
+	xmlOutputBufferPtr buf = xmlAllocOutputBuffer(NULL);
+	if (!buf) {
+		return NULL;
+	}
+
+	xmlNodeDumpOutput(buf, doc, node, 0, format, encoding);
+
+	if (xmlOutputBufferFlush(buf) < 0) {
+		xmlOutputBufferClose(buf);
+		return NULL;
+	}
+
+	const xmlChar *content = xmlOutputBufferGetContent(buf);
+	size_t size = xmlOutputBufferGetSize(buf);
+
+	zend_string *str = zend_string_init((const char *) content, size, false);
+	xmlOutputBufferClose(buf);
+	return str;
 }
 
 #if defined(PHP_WIN32) && defined(COMPILE_DL_LIBXML)

@@ -246,6 +246,7 @@ static void dom_copy_document_ref(php_libxml_ref_obj *source_doc, php_libxml_ref
 		}
 
 		dest_doc->class_type = source_doc->class_type;
+		dest_doc->handlers = source_doc->handlers;
 	}
 }
 
