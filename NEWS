@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed buffer limit on Windows, replacing read call usage by _read.
     (David Carlier)
 
+- Core:
+  . Fixed bug GH-13970 (Incorrect validation of #[Attribute] flags type for
+    non-compile-time expressions). (ilutov)
+
 - DOM:
   . Fix crashes when entity declaration is removed while still having entity
     references. (nielsdos)
@@ -16,6 +20,14 @@ PHP                                                                        NEWS
 - Hash:
   . ext/hash: Swap the checking order of `__has_builtin` and `__GNUC__`
     (Saki Takamachi)
+
+- Opcache:
+  . Fixed bug GH-14109 (Fix accidental persisting of internal class constant in
+    shm). (ilutov)
+
+- XML:
+  . Fixed bug GH-14124 (Segmentation fault with XML extension under certain
+    memory limit). (nielsdos)
 
 09 May 2024, PHP 8.2.19
 
