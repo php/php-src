@@ -72,7 +72,57 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Now add the remaining fraction part and equal size integer parts. */
-	for (count = 0; count < min_bytes; count++) {
+	count = 0;
+	/* Uses SIMD to perform calculations at high speed. */
+	if (min_bytes >= sizeof(BC_UINT_T)) {
+		sumptr++;
+		n1ptr++;
+		n2ptr++;
+		while (count + sizeof(BC_UINT_T) <= min_bytes) {
+			sumptr -= sizeof(BC_UINT_T);
+			n1ptr -= sizeof(BC_UINT_T);
+			n2ptr -= sizeof(BC_UINT_T);
+
+			BC_UINT_T n1bytes;
+			BC_UINT_T n2bytes;
+			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
+			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
+
+#if BC_LITTLE_ENDIAN
+			/* Little endian requires changing the order of bytes. */
+			n1bytes = BC_BSWAP(n1bytes);
+			n2bytes = BC_BSWAP(n2bytes);
+#endif
+
+			n1bytes += SWAR_REPEAT(0xF6) + n2bytes + carry;
+			/* If the most significant bit is 1, a carry down has occurred. */
+			carry = !(n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1)));
+
+			/*
+			 * Check the most significant bit of each of the bytes, and if it is 1, a carry down has
+			 * occurred. When carrying down occurs, due to the difference between decimal and hexadecimal
+			 * numbers, an extra 6 is added to the lower 4 bits.
+			 * Therefore, for a byte that has been carried down, set all the upper 4 bits to 0 and subtract
+			 * 6 from the lower 4 bits to adjust it to the correct value as a decimal number.
+			 */
+			BC_UINT_T sum_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0xF6;
+			n1bytes -= sum_mask;
+
+#if BC_LITTLE_ENDIAN
+			/* Little endian requires changing the order of bytes back. */
+			n1bytes = BC_BSWAP(n1bytes);
+#endif
+
+			memcpy(sumptr, &n1bytes, sizeof(n1bytes));
+
+			count += sizeof(BC_UINT_T);
+		}
+		sumptr--;
+		n1ptr--;
+		n2ptr--;
+	}
+
+	for (; count < min_bytes; count++) {
 		*sumptr = *n1ptr-- + *n2ptr-- + carry;
 		if (*sumptr >= BASE) {
 			*sumptr -= BASE;
