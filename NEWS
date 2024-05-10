@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fix crash when calling childNodes next() when iterator is exhausted.
     (nielsdos)
 
+- Hash:
+  . ext/hash: Swap the checking order of `__has_builtin` and `__GNUC__`
+    (Saki Takamachi)
+
 - Opcache:
   . Fixed bug GH-14109 (Fix accidental persisting of internal class constant in
     shm). (ilutov)
