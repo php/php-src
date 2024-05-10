@@ -343,6 +343,7 @@ static int cli_is_valid_code(char *code, size_t len, zend_string **prompt) /* {{
 					case ' ':
 					case '\t':
 					case '\'':
+					case '"':
 						break;
 					case '\r':
 					case '\n':
