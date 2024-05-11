@@ -693,6 +693,7 @@ PHP 8.4 UPGRADE NOTES
   . The performance of DOMNode::C14N() is greatly improved for the case without
     an xpath query. This can give a time improvement of easily two order of
     magnitude for documents with tens of thousands of nodes.
+  . Improved performance and reduce memory consumption of XML serialization.
 
 - FTP:
   . Improved the performance of FTP uploads up to a factor of 10x for large
@@ -707,6 +708,9 @@ PHP 8.4 UPGRADE NOTES
 
 - MySQLnd:
   . Improved the performance of MySQLnd quoting.
+
+- SimpleXML:
+  . Improved performance and reduce memory consumption of XML serialization.
 
 - Standard:
   . Improved the performance of strpbrk().

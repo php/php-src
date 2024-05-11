@@ -250,42 +250,38 @@ PHP_METHOD(Dom_XMLDocument, createFromFile)
 	load_from_helper(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 
+static int php_new_dom_write_smart_str(void *context, const char *buffer, int len)
+{
+	smart_str *str = context;
+	smart_str_appendl(str, buffer, len);
+	return len;
+}
+
 static zend_string *php_new_dom_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
 {
-	xmlBufferPtr buf = xmlBufferCreate();
-	if (!buf) {
-		return NULL;
-	}
+	smart_str str = {0};
 
 	int status = -1;
-	xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, encoding, XML_SAVE_AS_XML);
+	xmlSaveCtxtPtr ctxt = xmlSaveToIO(php_new_dom_write_smart_str, NULL, &str, encoding, XML_SAVE_AS_XML);
 	if (EXPECTED(ctxt != NULL)) {
 		xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
-		xmlOutputBufferPtr out = xmlOutputBufferCreateBuffer(buf, handler);
+		xmlOutputBufferPtr out = xmlOutputBufferCreateIO(php_new_dom_write_smart_str, NULL, &str, handler);
 		if (EXPECTED(out != NULL)) {
 			status = dom_xml_serialize(ctxt, out, node, format);
 			status |= xmlOutputBufferFlush(out);
 			status |= xmlOutputBufferClose(out);
+		} else {
+			xmlCharEncCloseFunc(handler);
 		}
 		(void) xmlSaveClose(ctxt);
-		xmlCharEncCloseFunc(handler);
 	}
 
 	if (UNEXPECTED(status < 0)) {
-		xmlBufferFree(buf);
+		smart_str_free_ex(&str, false);
 		return NULL;
 	}
 
-	const xmlChar *content = xmlBufferContent(buf);
-	if (!content) {
-		xmlBufferFree(buf);
-		return NULL;
-	}
-
-	int size = xmlBufferLength(buf);
-	zend_string *res = zend_string_init((const char *) content, size, false);
-	xmlBufferFree(buf);
-	return res;
+	return smart_str_extract(&str);
 }
 
 static zend_string *php_new_dom_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding)

@@ -1481,43 +1481,38 @@ PHP_LIBXML_API xmlChar *php_libxml_attr_value(const xmlAttr *attr, bool *free)
 	return value;
 }
 
+static int php_libxml_write_smart_str(void *context, const char *buffer, int len)
+{
+	smart_str *str = context;
+	smart_str_appendl(str, buffer, len);
+	return len;
+}
+
 static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding)
 {
-	xmlBufferPtr buf = xmlBufferCreate();
-	if (!buf) {
-		return NULL;
-	}
+	smart_str str = {0};
 
 	/* Encoding is handled from the encoding property set on the document */
-	xmlSaveCtxtPtr ctxt = xmlSaveToBuffer(buf, encoding, options);
+	xmlSaveCtxtPtr ctxt = xmlSaveToIO(php_libxml_write_smart_str, NULL, &str, encoding, options);
 	if (!ctxt) {
-		xmlBufferFree(buf);
 		return NULL;
 	}
 
 	long status = xmlSaveDoc(ctxt, doc);
 	(void) xmlSaveClose(ctxt);
 	if (status < 0) {
-		xmlBufferFree(buf);
+		smart_str_free_ex(&str, false);
 		return NULL;
 	}
 
-	const xmlChar *content = xmlBufferContent(buf);
-	if (!content) {
-		xmlBufferFree(buf);
-		return NULL;
-	}
-
-	int size = xmlBufferLength(buf);
-	zend_string *str = zend_string_init((const char *) content, size, false);
-	xmlBufferFree(buf);
-	return str;
+	return smart_str_extract(&str);
 }
 
 static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
 {
-	// TODO: should this alloc take an encoding? For now keep it NULL for BC.
-	xmlOutputBufferPtr buf = xmlAllocOutputBuffer(NULL);
+	smart_str str = {0};
+	// TODO: should this buffer take an encoding? For now keep it NULL for BC.
+	xmlOutputBufferPtr buf = xmlOutputBufferCreateIO(php_libxml_write_smart_str, NULL, &str, NULL);
 	if (!buf) {
 		return NULL;
 	}
@@ -1525,16 +1520,14 @@ static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePt
 	xmlNodeDumpOutput(buf, doc, node, 0, format, encoding);
 
 	if (xmlOutputBufferFlush(buf) < 0) {
+		smart_str_free_ex(&str, false);
 		xmlOutputBufferClose(buf);
 		return NULL;
 	}
 
-	const xmlChar *content = xmlOutputBufferGetContent(buf);
-	size_t size = xmlOutputBufferGetSize(buf);
-
-	zend_string *str = zend_string_init((const char *) content, size, false);
 	xmlOutputBufferClose(buf);
-	return str;
+
+	return smart_str_extract(&str);
 }
 
 static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding)
