@@ -1053,8 +1053,14 @@ PHP_FUNCTION(socket_getpeername)
 /* {{{ Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket_create)
 {
-	zend_long	domain, type, protocol;
-	php_socket	*php_sock;
+	zend_long domain, type = SOCK_STREAM, protocol = SOL_TCP;
+    php_socket *php_sock;
+
+    if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
+        domain = AF_INET;
+    } else {
+        domain = AF_UNIX;
+    }
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &domain, &type, &protocol) == FAILURE) {
 		RETURN_THROWS();
