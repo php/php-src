@@ -12,6 +12,7 @@ if test "$PHP_PCNTL" != "no"; then
     getcpuid
     getpriority
     pidfd_open
+    pset_bind
     pthread_set_qos_class_self_np
     rfork
     sched_setaffinity
