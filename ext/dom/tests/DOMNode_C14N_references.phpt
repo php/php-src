@@ -38,4 +38,4 @@ unset($v);
 echo $doc->C14N(true, false, $xpath, $prefixes);
 ?>
 --EXPECT--
-<contain xmlns="http://www.example.com/ns/foo"><bar></bar><bar></bar></contain>
+<contain xmlns="http://www.example.com/ns/foo" xmlns:test="urn::test"><bar></bar><bar></bar></contain>
