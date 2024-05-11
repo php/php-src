@@ -20,6 +20,8 @@ PHP                                                                        NEWS
   . Fix references not handled correctly in C14N. (nielsdos)
   . Fix crash when calling childNodes next() when iterator is exhausted.
     (nielsdos)
+  . Fix crash in ParentNode::append() when dealing with a fragment
+    containing text nodes. (nielsdos)
 
 - Hash:
   . ext/hash: Swap the checking order of `__has_builtin` and `__GNUC__`
