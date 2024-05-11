@@ -2429,6 +2429,9 @@ send_again:
 
 			zend_iterator_dtor(iter);
 		}
+	} else if (Z_TYPE_P(args) == IS_INDIRECT) {
+		args = Z_INDIRECT_P(args);
+		goto send_again;
 	} else if (EXPECTED(Z_ISREF_P(args))) {
 		args = Z_REFVAL_P(args);
 		goto send_again;

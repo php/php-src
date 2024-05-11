@@ -3668,6 +3668,7 @@ static zend_always_inline zend_result _zend_update_type_info(
 							case ZEND_SEND_VAR_NO_REF:
 							case ZEND_SEND_VAR_NO_REF_EX:
 							case ZEND_SEND_REF:
+							case ZEND_SEND_UNPACK:
 							case ZEND_ASSIGN_REF:
 							case ZEND_YIELD:
 							case ZEND_INIT_ARRAY:

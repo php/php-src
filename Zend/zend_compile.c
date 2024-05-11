@@ -3685,7 +3685,11 @@ static uint32_t zend_compile_args(
 			uses_arg_unpack = 1;
 			fbc = NULL;
 
-			zend_compile_expr(&arg_node, arg->child[0]);
+			if (zend_is_variable(arg->child[0])) {
+				zend_compile_var(&arg_node, arg->child[0], BP_VAR_RW, /* by_ref */ false);
+			} else {
+				zend_compile_expr(&arg_node, arg->child[0]);
+			}
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL);
 			opline->op2.num = arg_count;
 			opline->result.var = EX_NUM_TO_VAR(arg_count - 1);
