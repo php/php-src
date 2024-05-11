@@ -4,7 +4,7 @@ Bug #72660 (NULL Pointer dereference in zend_virtual_cwd)
 zip
 --SKIPIF--
 <?php
-if(PHP_ZTS == 0) { die('skip ZTS required'); }
+if(!PHP_ZTS) { die('skip ZTS required'); }
 ?>
 --FILE--
 <?php

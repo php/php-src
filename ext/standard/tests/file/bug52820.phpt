@@ -12,9 +12,7 @@ curl_setopt($handle, CURLOPT_VERBOSE, true);
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
 if (!@curl_setopt($handle, CURLOPT_STDERR, fopen("php://memory", "w+")))
     die("skip fopencookie not supported on this platform");
-if (getenv('CIRRUS_CI') && strpos(php_uname('m'), 'aarch64') !== false) {
-    die('xfail Broken on Cirrus+ARM');
-}
+if (getenv('CIRCLECI')) die('xfail Broken on CircleCI');
 ?>
 --FILE--
 <?php

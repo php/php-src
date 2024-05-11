@@ -123,7 +123,7 @@ static zend_result php_curl_option_url(php_curl *ch, const zend_string *url) /* 
 		curl_easy_setopt(ch->cp, CURLOPT_PROTOCOLS, CURLPROTO_ALL & ~CURLPROTO_FILE);
 	}
 
-#if LIBCURL_VERSION_NUM > 0x073800 && defined(PHP_WIN32)
+#ifdef PHP_WIN32
 	if (
 		zend_string_starts_with_literal_ci(url, "file://")
 		&& '/' != ZSTR_VAL(url)[sizeof("file://") - 1]
@@ -261,6 +261,7 @@ PHP_MINFO_FUNCTION(curl)
 	php_info_print_table_row(2, "Age", str);
 
 	/* To update on each new cURL release using src/main.c in cURL sources */
+	/* make sure to sync this list with curl_version as well */
 	if (d->features) {
 		struct feat {
 			const char *name;
@@ -285,42 +286,28 @@ PHP_MINFO_FUNCTION(curl)
 			{"SSL",  CURL_VERSION_SSL},
 			{"SSPI",  CURL_VERSION_SSPI},
 			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
-#if LIBCURL_VERSION_NUM >= 0x072100 /* 7.33.0 */
 			{"HTTP2", CURL_VERSION_HTTP2},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072600 /* 7.38.0 */
 			{"GSSAPI", CURL_VERSION_GSSAPI},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072800 /* 7.40.0 */
 			{"KERBEROS5", CURL_VERSION_KERBEROS5},
 			{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072f00 /* 7.47.0 */
 			{"PSL", CURL_VERSION_PSL},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073400 /* 7.52.0 */
 			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073900 /* 7.57.0 */
 			{"BROTLI", CURL_VERSION_BROTLI},
-#endif
-#if LIBCURL_VERSION_NUM >= 0x074001 /* 7.64.1 */
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
 			{"ALTSVC", CURL_VERSION_ALTSVC},
 #endif
-#if LIBCURL_VERSION_NUM >= 0x074200 /* 7.66.0 */
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
 			{"HTTP3", CURL_VERSION_HTTP3},
 #endif
-#if LIBCURL_VERSION_NUM >= 0x074800 /* 7.72.0 */
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
 			{"UNICODE", CURL_VERSION_UNICODE},
 			{"ZSTD", CURL_VERSION_ZSTD},
 #endif
-#if LIBCURL_VERSION_NUM >= 0x074a00 /* 7.74.0 */
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
 			{"HSTS", CURL_VERSION_HSTS},
 #endif
-#if LIBCURL_VERSION_NUM >= 0x074c00 /* 7.76.0 */
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
 			{"GSASL", CURL_VERSION_GSASL},
 #endif
 			{NULL, 0}
@@ -487,37 +474,41 @@ static HashTable *curl_get_gc(zend_object *object, zval **table, int *n)
 
 	zend_get_gc_buffer_add_zval(gc_buffer, &curl->postfields);
 	if (curl->handlers.read) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.read->func_name);
+		if (ZEND_FCC_INITIALIZED(curl->handlers.read->fcc)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.read->fcc);
+		}
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.read->stream);
 	}
 
 	if (curl->handlers.write) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write->func_name);
+		if (ZEND_FCC_INITIALIZED(curl->handlers.write->fcc)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.write->fcc);
+		}
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write->stream);
 	}
 
 	if (curl->handlers.write_header) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write_header->func_name);
+		if (ZEND_FCC_INITIALIZED(curl->handlers.write_header->fcc)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.write_header->fcc);
+		}
 		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.write_header->stream);
 	}
 
-	if (curl->handlers.progress) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.progress->func_name);
+	if (ZEND_FCC_INITIALIZED(curl->handlers.progress)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.progress);
 	}
 
-#if LIBCURL_VERSION_NUM >= 0x072000
-	if (curl->handlers.xferinfo) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.xferinfo->func_name);
-	}
-#endif
-
-	if (curl->handlers.fnmatch) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.fnmatch->func_name);
+	if (ZEND_FCC_INITIALIZED(curl->handlers.xferinfo)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.xferinfo);
 	}
 
-#if LIBCURL_VERSION_NUM >= 0x075400
-	if (curl->handlers.sshhostkey) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &curl->handlers.sshhostkey->func_name);
+	if (ZEND_FCC_INITIALIZED(curl->handlers.fnmatch)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.fnmatch);
+	}
+
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	if (ZEND_FCC_INITIALIZED(curl->handlers.sshhostkey)) {
+		zend_get_gc_buffer_add_fcc(gc_buffer, &curl->handlers.sshhostkey);
 	}
 #endif
 
@@ -565,20 +556,11 @@ PHP_MSHUTDOWN_FUNCTION(curl)
 }
 /* }}} */
 
-/* {{{ curl_write_nothing
- * Used as a work around. See _php_curl_close_ex
- */
-static size_t curl_write_nothing(char *data, size_t size, size_t nmemb, void *ctx)
-{
-	return size * nmemb;
-}
-/* }}} */
-
 /* {{{ curl_write */
 static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl *ch = (php_curl *) ctx;
-	php_curl_write *t = ch->handlers.write;
+	php_curl_write *write_handler = ch->handlers.write;
 	size_t length = size * nmemb;
 
 #if PHP_CURL_DEBUG
@@ -586,43 +568,31 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 	fprintf(stderr, "data = %s, size = %d, nmemb = %d, ctx = %x\n", data, size, nmemb, ctx);
 #endif
 
-	switch (t->method) {
+	switch (write_handler->method) {
 		case PHP_CURL_STDOUT:
 			PHPWRITE(data, length);
 			break;
 		case PHP_CURL_FILE:
-			return fwrite(data, size, nmemb, t->fp);
+			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_RETURN:
 			if (length > 0) {
-				smart_str_appendl(&t->buf, data, (int) length);
+				smart_str_appendl(&write_handler->buf, data, (int) length);
 			}
 			break;
 		case PHP_CURL_USER: {
 			zval argv[2];
 			zval retval;
-			int  error;
-			zend_fcall_info fci;
 
 			GC_ADDREF(&ch->std);
 			ZVAL_OBJ(&argv[0], &ch->std);
 			ZVAL_STRINGL(&argv[1], data, length);
 
-			fci.size = sizeof(fci);
-			fci.object = NULL;
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.retval = &retval;
-			fci.param_count = 2;
-			fci.params = argv;
-			fci.named_params = NULL;
-
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Could not call the CURLOPT_WRITEFUNCTION");
-				length = -1;
-			} else if (!Z_ISUNDEF(retval)) {
+			ch->in_callback = true;
+			zend_call_known_fcc(&write_handler->fcc, &retval, /* param_count */ 2, argv, /* named_params */ NULL);
+			ch->in_callback = false;
+			if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
+				/* TODO Check callback returns an int or something castable to int */
 				length = zval_get_long(&retval);
 			}
 
@@ -640,33 +610,22 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 {
 	php_curl *ch = (php_curl *) ctx;
-	php_curl_callback *t = ch->handlers.fnmatch;
 	int rval = CURL_FNMATCHFUNC_FAIL;
 	zval argv[3];
 	zval retval;
-	zend_result error;
-	zend_fcall_info fci;
 
 	GC_ADDREF(&ch->std);
 	ZVAL_OBJ(&argv[0], &ch->std);
 	ZVAL_STRING(&argv[1], pattern);
 	ZVAL_STRING(&argv[2], string);
 
-	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 3;
-	fci.params = argv;
-	fci.named_params = NULL;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.fnmatch, &retval, /* param_count */ 3, argv, /* named_params */ NULL);
+	ch->in_callback = false;
 
-	ch->in_callback = 1;
-	error = zend_call_function(&fci, &t->fci_cache);
-	ch->in_callback = 0;
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_FNMATCH_FUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		/* TODO Check callback returns an int or something castable to int */
 		rval = zval_get_long(&retval);
 	}
 	zval_ptr_dtor(&argv[0]);
@@ -680,7 +639,6 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 static size_t curl_progress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	php_curl_callback *t = ch->handlers.progress;
 	size_t	rval = 0;
 
 #if PHP_CURL_DEBUG
@@ -688,48 +646,37 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 	fprintf(stderr, "clientp = %x, dltotal = %f, dlnow = %f, ultotal = %f, ulnow = %f\n", clientp, dltotal, dlnow, ultotal, ulnow);
 #endif
 
-	zval argv[5];
+	zval args[5];
 	zval retval;
-	zend_result error;
-	zend_fcall_info fci;
 
 	GC_ADDREF(&ch->std);
-	ZVAL_OBJ(&argv[0], &ch->std);
-	ZVAL_LONG(&argv[1], (zend_long)dltotal);
-	ZVAL_LONG(&argv[2], (zend_long)dlnow);
-	ZVAL_LONG(&argv[3], (zend_long)ultotal);
-	ZVAL_LONG(&argv[4], (zend_long)ulnow);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], (zend_long)dltotal);
+	ZVAL_LONG(&args[2], (zend_long)dlnow);
+	ZVAL_LONG(&args[3], (zend_long)ultotal);
+	ZVAL_LONG(&args[4], (zend_long)ulnow);
 
-	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 5;
-	fci.params = argv;
-	fci.named_params = NULL;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.progress, &retval, /* param_count */ 5, args, /* named_params */ NULL);
+	ch->in_callback = false;
 
-	ch->in_callback = 1;
-	error = zend_call_function(&fci, &t->fci_cache);
-	ch->in_callback = 0;
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_PROGRESSFUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		/* TODO Check callback returns an int or something castable to int */
 		if (0 != zval_get_long(&retval)) {
 			rval = 1;
 		}
 	}
-	zval_ptr_dtor(&argv[0]);
+
+	zval_ptr_dtor(&args[0]);
 	return rval;
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM >= 0x072000
 /* {{{ curl_xferinfo */
 static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
 	php_curl *ch = (php_curl *)clientp;
-	php_curl_callback *t = ch->handlers.xferinfo;
 	size_t rval = 0;
 
 #if PHP_CURL_DEBUG
@@ -739,8 +686,6 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 
 	zval argv[5];
 	zval retval;
-	zend_result error;
-	zend_fcall_info fci;
 
 	GC_ADDREF(&ch->std);
 	ZVAL_OBJ(&argv[0], &ch->std);
@@ -749,36 +694,27 @@ static size_t curl_xferinfo(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
 	ZVAL_LONG(&argv[3], ultotal);
 	ZVAL_LONG(&argv[4], ulnow);
 
-	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 5;
-	fci.params = argv;
-	fci.named_params = NULL;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.xferinfo, &retval, /* param_count */ 5, argv, /* named_params */ NULL);
+	ch->in_callback = false;
 
-	ch->in_callback = 1;
-	error = zend_call_function(&fci, &t->fci_cache);
-	ch->in_callback = 0;
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_XFERINFOFUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
+		/* TODO Check callback returns an int or something castable to int */
 		if (0 != zval_get_long(&retval)) {
 			rval = 1;
 		}
 	}
+
 	zval_ptr_dtor(&argv[0]);
 	return rval;
 }
 /* }}} */
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x075400
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
 static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key, size_t keylen)
 {
 	php_curl *ch = (php_curl *)clientp;
-	php_curl_callback *t = ch->handlers.sshhostkey;
 	int rval = CURLKHMATCH_MISMATCH; /* cancel connection in case of an exception */
 
 #if PHP_CURL_DEBUG
@@ -786,31 +722,20 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 	fprintf(stderr, "clientp = %x, keytype = %d, key = %s, keylen = %zu\n", clientp, keytype, key, keylen);
 #endif
 
-	zval argv[4];
+	zval args[4];
 	zval retval;
-	zend_result error;
-	zend_fcall_info fci;
 
 	GC_ADDREF(&ch->std);
-	ZVAL_OBJ(&argv[0], &ch->std);
-	ZVAL_LONG(&argv[1], keytype);
-	ZVAL_STRINGL(&argv[2], key, keylen);
-	ZVAL_LONG(&argv[3], keylen);
+	ZVAL_OBJ(&args[0], &ch->std);
+	ZVAL_LONG(&args[1], keytype);
+	ZVAL_STRINGL(&args[2], key, keylen);
+	ZVAL_LONG(&args[3], keylen);
 
-	fci.size = sizeof(fci);
-	ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-	fci.object = NULL;
-	fci.retval = &retval;
-	fci.param_count = 4;
-	fci.params = argv;
-	fci.named_params = NULL;
+	ch->in_callback = true;
+	zend_call_known_fcc(&ch->handlers.sshhostkey, &retval, /* param_count */ 4, args, /* named_params */ NULL);
+	ch->in_callback = false;
 
-	ch->in_callback = 1;
-	error = zend_call_function(&fci, &t->fci_cache);
-	ch->in_callback = 0;
-	if (error == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_SSH_HOSTKEYFUNCTION");
-	} else if (!Z_ISUNDEF(retval)) {
+	if (!Z_ISUNDEF(retval)) {
 		_php_curl_verify_handlers(ch, /* reporterror */ true);
 		if (Z_TYPE(retval) == IS_LONG) {
 			zend_long retval_long = Z_LVAL(retval);
@@ -823,8 +748,9 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 			zend_throw_error(NULL, "The CURLOPT_SSH_HOSTKEYFUNCTION callback must return either CURLKHMATCH_OK or CURLKHMATCH_MISMATCH");
 		}
 	}
-	zval_ptr_dtor(&argv[0]);
-	zval_ptr_dtor(&argv[2]);
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor(&args[2]);
 	return rval;
 }
 #endif
@@ -833,46 +759,33 @@ static int curl_ssh_hostkeyfunction(void *clientp, int keytype, const char *key,
 static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl *ch = (php_curl *)ctx;
-	php_curl_read *t = ch->handlers.read;
+	php_curl_read *read_handler = ch->handlers.read;
 	int length = 0;
 
-	switch (t->method) {
+	switch (read_handler->method) {
 		case PHP_CURL_DIRECT:
-			if (t->fp) {
-				length = fread(data, size, nmemb, t->fp);
+			if (read_handler->fp) {
+				length = fread(data, size, nmemb, read_handler->fp);
 			}
 			break;
 		case PHP_CURL_USER: {
 			zval argv[3];
 			zval retval;
-			zend_result error;
-			zend_fcall_info fci;
 
 			GC_ADDREF(&ch->std);
 			ZVAL_OBJ(&argv[0], &ch->std);
-			if (t->res) {
-				GC_ADDREF(t->res);
-				ZVAL_RES(&argv[1], t->res);
+			if (read_handler->res) {
+				GC_ADDREF(read_handler->res);
+				ZVAL_RES(&argv[1], read_handler->res);
 			} else {
 				ZVAL_NULL(&argv[1]);
 			}
 			ZVAL_LONG(&argv[2], (int)size * nmemb);
 
-			fci.size = sizeof(fci);
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.object = NULL;
-			fci.retval = &retval;
-			fci.param_count = 3;
-			fci.params = argv;
-			fci.named_params = NULL;
-
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Cannot call the CURLOPT_READFUNCTION");
-				length = CURL_READFUNC_ABORT;
-			} else if (!Z_ISUNDEF(retval)) {
+			ch->in_callback = true;
+			zend_call_known_fcc(&read_handler->fcc, &retval, /* param_count */ 3, argv, /* named_params */ NULL);
+			ch->in_callback = false;
+			if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				if (Z_TYPE(retval) == IS_STRING) {
 					length = MIN((int) (size * nmemb), Z_STRLEN(retval));
@@ -880,6 +793,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 				} else if (Z_TYPE(retval) == IS_LONG) {
 					length = Z_LVAL_P(&retval);
 				}
+				// TODO Do type error if invalid type?
 				zval_ptr_dtor(&retval);
 			}
 
@@ -897,10 +811,10 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx)
 {
 	php_curl *ch = (php_curl *) ctx;
-	php_curl_write *t = ch->handlers.write_header;
+	php_curl_write *write_handler = ch->handlers.write_header;
 	size_t length = size * nmemb;
 
-	switch (t->method) {
+	switch (write_handler->method) {
 		case PHP_CURL_STDOUT:
 			/* Handle special case write when we're returning the entire transfer
 			 */
@@ -911,32 +825,20 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			}
 			break;
 		case PHP_CURL_FILE:
-			return fwrite(data, size, nmemb, t->fp);
+			return fwrite(data, size, nmemb, write_handler->fp);
 		case PHP_CURL_USER: {
 			zval argv[2];
 			zval retval;
-			zend_result error;
-			zend_fcall_info fci;
 
 			GC_ADDREF(&ch->std);
 			ZVAL_OBJ(&argv[0], &ch->std);
 			ZVAL_STRINGL(&argv[1], data, length);
 
-			fci.size = sizeof(fci);
-			ZVAL_COPY_VALUE(&fci.function_name, &t->func_name);
-			fci.object = NULL;
-			fci.retval = &retval;
-			fci.param_count = 2;
-			fci.params = argv;
-			fci.named_params = NULL;
-
-			ch->in_callback = 1;
-			error = zend_call_function(&fci, &t->fci_cache);
-			ch->in_callback = 0;
-			if (error == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "Could not call the CURLOPT_HEADERFUNCTION");
-				length = -1;
-			} else if (!Z_ISUNDEF(retval)) {
+			ch->in_callback = true;
+			zend_call_known_fcc(&write_handler->fcc, &retval, /* param_count */ 2, argv, /* named_params */ NULL);
+			ch->in_callback = false;
+			if (!Z_ISUNDEF(retval)) {
+				// TODO: Check for valid int type for return value
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				length = zval_get_long(&retval);
 			}
@@ -974,11 +876,7 @@ static int curl_debug(CURL *cp, curl_infotype type, char *buf, size_t buf_len, v
 /* {{{ curl_free_post */
 static void curl_free_post(void **post)
 {
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	curl_mime_free((curl_mime *)*post);
-#else
-	curl_formfree((struct HttpPost *)*post);
-#endif
 }
 /* }}} */
 
@@ -997,15 +895,6 @@ static void curl_free_cb_arg(void **cb_arg_p)
 	efree(cb_arg);
 }
 /* }}} */
-
-#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
-/* {{{ curl_free_buffers */
-static void curl_free_buffers(void **buffer)
-{
-	zend_string_release((zend_string *) *buffer);
-}
-/* }}} */
-#endif
 
 /* {{{ curl_free_slist */
 static void curl_free_slist(zval *el)
@@ -1031,6 +920,68 @@ PHP_FUNCTION(curl_version)
 	CAAL("version_number", d->version_num);
 	CAAL("age", d->age);
 	CAAL("features", d->features);
+	/* Add an array of features */
+	{
+		struct feat {
+			const char *name;
+			int bitmask;
+		};
+
+		unsigned int i;
+		zval feature_list;
+		array_init(&feature_list);
+
+		/* Sync this list with PHP_MINFO_FUNCTION(curl) as well */
+		static const struct feat feats[] = {
+			{"AsynchDNS", CURL_VERSION_ASYNCHDNS},
+			{"CharConv", CURL_VERSION_CONV},
+			{"Debug", CURL_VERSION_DEBUG},
+			{"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
+			{"IDN", CURL_VERSION_IDN},
+			{"IPv6", CURL_VERSION_IPV6},
+			{"krb4", CURL_VERSION_KERBEROS4},
+			{"Largefile", CURL_VERSION_LARGEFILE},
+			{"libz", CURL_VERSION_LIBZ},
+			{"NTLM", CURL_VERSION_NTLM},
+			{"NTLMWB", CURL_VERSION_NTLM_WB},
+			{"SPNEGO", CURL_VERSION_SPNEGO},
+			{"SSL",  CURL_VERSION_SSL},
+			{"SSPI",  CURL_VERSION_SSPI},
+			{"TLS-SRP", CURL_VERSION_TLSAUTH_SRP},
+			{"HTTP2", CURL_VERSION_HTTP2},
+			{"GSSAPI", CURL_VERSION_GSSAPI},
+			{"KERBEROS5", CURL_VERSION_KERBEROS5},
+			{"UNIX_SOCKETS", CURL_VERSION_UNIX_SOCKETS},
+			{"PSL", CURL_VERSION_PSL},
+			{"HTTPS_PROXY", CURL_VERSION_HTTPS_PROXY},
+			{"MULTI_SSL", CURL_VERSION_MULTI_SSL},
+			{"BROTLI", CURL_VERSION_BROTLI},
+#if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
+			{"ALTSVC", CURL_VERSION_ALTSVC},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+			{"HTTP3", CURL_VERSION_HTTP3},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074800 /* Available since 7.72.0 */
+			{"UNICODE", CURL_VERSION_UNICODE},
+			{"ZSTD", CURL_VERSION_ZSTD},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074a00 /* Available since 7.74.0 */
+			{"HSTS", CURL_VERSION_HSTS},
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074c00 /* Available since 7.76.0 */
+			{"GSASL", CURL_VERSION_GSASL},
+#endif
+		};
+
+		for(i = 0; i < sizeof(feats) / sizeof(feats[0]); i++) {
+			if (feats[i].name) {
+				add_assoc_bool(&feature_list, feats[i].name, d->features & feats[i].bitmask ? true : false);
+			}
+		}
+
+		CAAZ("feature_list", &feature_list);
+	}
 	CAAL("ssl_version_number", d->ssl_version_num);
 	CAAS("version", d->version);
 	CAAS("host", d->host);
@@ -1060,12 +1011,10 @@ PHP_FUNCTION(curl_version)
 		CAAL("iconv_ver_num", d->iconv_ver_num);
 		CAAS("libssh_version", d->libssh_version);
 	}
-#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0 */
 	if (d->age >= 4) {
 		CAAL("brotli_ver_num", d->brotli_ver_num);
 		CAAS("brotli_version", d->brotli_version);
 	}
-#endif
 }
 /* }}} */
 
@@ -1087,13 +1036,11 @@ void init_curl_handle(php_curl *ch)
 	ch->handlers.write = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.write_header = ecalloc(1, sizeof(php_curl_write));
 	ch->handlers.read = ecalloc(1, sizeof(php_curl_read));
-	ch->handlers.progress = NULL;
-#if LIBCURL_VERSION_NUM >= 0x072000
-	ch->handlers.xferinfo = NULL;
-#endif
-	ch->handlers.fnmatch = NULL;
-#if LIBCURL_VERSION_NUM >= 0x075400
-	ch->handlers.sshhostkey = NULL;
+	ch->handlers.progress = empty_fcall_info_cache;
+	ch->handlers.xferinfo = empty_fcall_info_cache;
+	ch->handlers.fnmatch = empty_fcall_info_cache;
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	ch->handlers.sshhostkey = empty_fcall_info_cache;
 #endif
 	ch->clone = emalloc(sizeof(uint32_t));
 	*ch->clone = 1;
@@ -1102,10 +1049,6 @@ void init_curl_handle(php_curl *ch)
 
 	zend_llist_init(&ch->to_free->post,  sizeof(struct HttpPost *), (llist_dtor_func_t)curl_free_post,   0);
 	zend_llist_init(&ch->to_free->stream, sizeof(struct mime_data_cb_arg *), (llist_dtor_func_t)curl_free_cb_arg, 0);
-
-#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
-	zend_llist_init(&ch->to_free->buffers, sizeof(zend_string *), (llist_dtor_func_t)curl_free_buffers, 0);
-#endif
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
@@ -1219,13 +1162,10 @@ PHP_FUNCTION(curl_init)
 }
 /* }}} */
 
-static void _php_copy_callback(php_curl *ch, php_curl_callback **new_callback, php_curl_callback *source_callback, CURLoption option)
+static void php_curl_copy_fcc_with_option(php_curl *ch, CURLoption option, zend_fcall_info_cache *target_fcc, zend_fcall_info_cache *source_fcc)
 {
-	if (source_callback) {
-		*new_callback = ecalloc(1, sizeof(php_curl_callback));
-		if (!Z_ISUNDEF(source_callback->func_name)) {
-			ZVAL_COPY(&(*new_callback)->func_name, &source_callback->func_name);
-		}
+	if (ZEND_FCC_INITIALIZED(*source_fcc)) {
+		zend_fcc_dup(target_fcc, source_fcc);
 		curl_easy_setopt(ch->cp, option, (void *) ch);
 	}
 }
@@ -1253,14 +1193,14 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	ch->handlers.read->fp = source->handlers.read->fp;
 	ch->handlers.read->res = source->handlers.read->res;
 
-	if (!Z_ISUNDEF(source->handlers.write->func_name)) {
-		ZVAL_COPY(&ch->handlers.write->func_name, &source->handlers.write->func_name);
+	if (ZEND_FCC_INITIALIZED(source->handlers.read->fcc)) {
+		zend_fcc_dup(&source->handlers.read->fcc, &source->handlers.read->fcc);
 	}
-	if (!Z_ISUNDEF(source->handlers.read->func_name)) {
-		ZVAL_COPY(&ch->handlers.read->func_name, &source->handlers.read->func_name);
+	if (ZEND_FCC_INITIALIZED(source->handlers.write->fcc)) {
+		zend_fcc_dup(&source->handlers.write->fcc, &source->handlers.write->fcc);
 	}
-	if (!Z_ISUNDEF(source->handlers.write_header->func_name)) {
-		ZVAL_COPY(&ch->handlers.write_header->func_name, &source->handlers.write_header->func_name);
+	if (ZEND_FCC_INITIALIZED(source->handlers.write_header->fcc)) {
+		zend_fcc_dup(&source->handlers.write_header->fcc, &source->handlers.write_header->fcc);
 	}
 
 	curl_easy_setopt(ch->cp, CURLOPT_ERRORBUFFER,       ch->err.str);
@@ -1269,13 +1209,11 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_DEBUGDATA,         (void *) ch);
 
-	_php_copy_callback(ch, &ch->handlers.progress, source->handlers.progress, CURLOPT_PROGRESSDATA);
-#if LIBCURL_VERSION_NUM >= 0x072000
-	_php_copy_callback(ch, &ch->handlers.xferinfo, source->handlers.xferinfo, CURLOPT_XFERINFODATA);
-#endif
-	_php_copy_callback(ch, &ch->handlers.fnmatch, source->handlers.fnmatch, CURLOPT_FNMATCH_DATA);
-#if LIBCURL_VERSION_NUM >= 0x075400
-	_php_copy_callback(ch, &ch->handlers.sshhostkey, source->handlers.sshhostkey, CURLOPT_SSH_HOSTKEYDATA);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_PROGRESSDATA, &ch->handlers.progress, &source->handlers.progress);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_XFERINFODATA, &ch->handlers.xferinfo, &source->handlers.xferinfo);
+	php_curl_copy_fcc_with_option(ch, CURLOPT_FNMATCH_DATA, &ch->handlers.fnmatch, &source->handlers.fnmatch);
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	php_curl_copy_fcc_with_option(ch, CURLOPT_SSH_HOSTKEYDATA, &ch->handlers.sshhostkey, &source->handlers.sshhostkey);
 #endif
 
 	ZVAL_COPY(&ch->private_data, &source->private_data);
@@ -1290,7 +1228,6 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	(*source->clone)++;
 }
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 static size_t read_cb(char *buffer, size_t size, size_t nitems, void *arg) /* {{{ */
 {
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) arg;
@@ -1334,26 +1271,16 @@ static void free_cb(void *arg) /* {{{ */
 	}
 }
 /* }}} */
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 static inline CURLcode add_simple_field(curl_mime *mime, zend_string *string_key, zval *current)
-#else
-static inline CURLcode add_simple_field(struct HttpPost **first, struct HttpPost **last, zend_string *string_key, zval *current)
-#endif
 {
 	CURLcode error = CURLE_OK;
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	curl_mimepart *part;
 	CURLcode form_error;
-#else
-	CURLFORMcode form_error;
-#endif
 	zend_string *postval, *tmp_postval;
 
 	postval = zval_get_tmp_string(current, &tmp_postval);
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	part = curl_mime_addpart(mime);
 	if (part == NULL) {
 		zend_tmp_string_release(tmp_postval);
@@ -1364,23 +1291,7 @@ static inline CURLcode add_simple_field(struct HttpPost **first, struct HttpPost
 		|| (form_error = curl_mime_data(part, ZSTR_VAL(postval), ZSTR_LEN(postval))) != CURLE_OK) {
 		error = form_error;
 	}
-#else
-	/* The arguments after _NAMELENGTH and _CONTENTSLENGTH
-		* must be explicitly cast to long in curl_formadd
-		* use since curl needs a long not an int. */
-	form_error = curl_formadd(first, last,
-		CURLFORM_COPYNAME, ZSTR_VAL(string_key),
-		CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
-		CURLFORM_COPYCONTENTS, ZSTR_VAL(postval),
-		CURLFORM_CONTENTSLENGTH, ZSTR_LEN(postval),
-		CURLFORM_END
-	);
 
-	if (form_error != CURL_FORMADD_OK) {
-		/* Not nice to convert between enums but we only have place for one error type */
-		error = (CURLcode)form_error;
-	}
-#endif
 	zend_tmp_string_release(tmp_postval);
 
 	return error;
@@ -1393,24 +1304,16 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 	zval *current;
 	zend_string *string_key;
 	zend_ulong num_key;
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	curl_mime *mime = NULL;
 	curl_mimepart *part;
 	CURLcode form_error;
-#else
-	struct HttpPost *first = NULL;
-	struct HttpPost *last  = NULL;
-	CURLFORMcode form_error;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	if (zend_hash_num_elements(postfields) > 0) {
 		mime = curl_mime_init(ch->cp);
 		if (mime == NULL) {
 			return FAILURE;
 		}
 	}
-#endif
 
 	ZEND_HASH_FOREACH_KEY_VAL(postfields, num_key, string_key, current) {
 		zend_string *postval;
@@ -1427,13 +1330,11 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			/* new-style file upload */
 			zval *prop, rv;
 			char *type = NULL, *filename = NULL;
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 			struct mime_data_cb_arg *cb_arg;
 			php_stream *stream;
 			php_stream_statbuf ssb;
 			size_t filesize = -1;
 			curl_seek_callback seekfunc = seek_cb;
-#endif
 
 			prop = zend_read_property_ex(curl_CURLFile_class, Z_OBJ_P(current), ZSTR_KNOWN(ZEND_STR_NAME), /* silent */ false, &rv);
 			ZVAL_DEREF(prop);
@@ -1457,7 +1358,6 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 					filename = Z_STRVAL_P(prop);
 				}
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 				zval_ptr_dtor(&ch->postfields);
 				ZVAL_COPY(&ch->postfields, zpostfields);
 
@@ -1485,19 +1385,6 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 					error = form_error;
 				}
 				zend_llist_add_element(&ch->to_free->stream, &cb_arg);
-#else
-				form_error = curl_formadd(&first, &last,
-								CURLFORM_COPYNAME, ZSTR_VAL(string_key),
-								CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
-								CURLFORM_FILENAME, filename ? filename : ZSTR_VAL(postval),
-								CURLFORM_CONTENTTYPE, type ? type : "application/octet-stream",
-								CURLFORM_FILE, ZSTR_VAL(postval),
-								CURLFORM_END);
-				if (form_error != CURL_FORMADD_OK) {
-					/* Not nice to convert between enums but we only have place for one error type */
-					error = (CURLcode)form_error;
-				}
-#endif
 			}
 
 			zend_string_release_ex(string_key, 0);
@@ -1539,7 +1426,6 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 
 			postval = Z_STR_P(prop);
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 			zval_ptr_dtor(&ch->postfields);
 			ZVAL_COPY(&ch->postfields, zpostfields);
 
@@ -1554,23 +1440,6 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 				|| (form_error = curl_mime_type(part, type)) != CURLE_OK) {
 				error = form_error;
 			}
-#else
-			postval = zend_string_copy(postval);
-			zend_llist_add_element(&ch->to_free->buffers, &postval);
-
-			form_error = curl_formadd(&first, &last,
-							CURLFORM_COPYNAME, ZSTR_VAL(string_key),
-							CURLFORM_NAMELENGTH, ZSTR_LEN(string_key),
-							CURLFORM_BUFFER, filename,
-							CURLFORM_CONTENTTYPE, type,
-							CURLFORM_BUFFERPTR, ZSTR_VAL(postval),
-							CURLFORM_BUFFERLENGTH, ZSTR_LEN(postval),
-							CURLFORM_END);
-			if (form_error != CURL_FORMADD_OK) {
-				/* Not nice to convert between enums but we only have place for one error type */
-				error = (CURLcode)form_error;
-			}
-#endif
 
 			zend_string_release_ex(string_key, 0);
 			continue;
@@ -1580,22 +1449,14 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 			zval *current_element;
 
 			ZEND_HASH_FOREACH_VAL(HASH_OF(current), current_element) {
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 				add_simple_field(mime, string_key, current_element);
-#else
-				add_simple_field(&first, &last, string_key, current_element);
-#endif
 			} ZEND_HASH_FOREACH_END();
 
 			zend_string_release_ex(string_key, 0);
 			continue;
 		}
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 		add_simple_field(mime, string_key, current);
-#else
-		add_simple_field(&first, &last, string_key, current);
-#endif
 
 		zend_string_release_ex(string_key, 0);
 	} ZEND_HASH_FOREACH_END();
@@ -1608,13 +1469,8 @@ static inline zend_result build_mime_structure_from_hash(php_curl *ch, zval *zpo
 	if ((*ch->clone) == 1) {
 		zend_llist_clean(&ch->to_free->post);
 	}
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 	zend_llist_add_element(&ch->to_free->post, &mime);
 	error = curl_easy_setopt(ch->cp, CURLOPT_MIMEPOST, mime);
-#else
-	zend_llist_add_element(&ch->to_free->post, &first);
-	error = curl_easy_setopt(ch->cp, CURLOPT_HTTPPOST, first);
-#endif
 
 	SAVE_CURL_ERROR(ch, error);
 	return error == CURLE_OK ? SUCCESS : FAILURE;
@@ -1658,12 +1514,68 @@ PHP_FUNCTION(curl_copy_handle)
 }
 /* }}} */
 
+static bool php_curl_set_callable_handler(zend_fcall_info_cache *const handler_fcc, zval *callable, bool is_array_config, const char *option_name)
+{
+	if (ZEND_FCC_INITIALIZED(*handler_fcc)) {
+		zend_fcc_dtor(handler_fcc);
+	}
+
+	if (Z_TYPE_P(callable) == IS_NULL) {
+		return true;
+	}
+
+	char *error = NULL;
+	if (UNEXPECTED(!zend_is_callable_ex(callable, /* object */ NULL, /* check_flags */ 0, /* callable_name */ NULL, handler_fcc, /* error */ &error))) {
+		if (!EG(exception)) {
+			zend_argument_type_error(2 + !is_array_config, "must be a valid callback for option %s, %s", option_name, error);
+		}
+		efree(error);
+		return false;
+	}
+	zend_fcc_addref(handler_fcc);
+	return true;
+}
+
+
+#define HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(curl_ptr, constant_no_function, handler_type) \
+	case constant_no_function##FUNCTION: { \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handlers.handler_type->fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		if (!result) { \
+			return FAILURE; \
+		} \
+		curl_ptr->handlers.handler_type->method = PHP_CURL_USER; \
+		break; \
+	}
+
+#define HANDLE_CURL_OPTION_CALLABLE(curl_ptr, constant_no_function, handler_fcc, c_callback) \
+	case constant_no_function##FUNCTION: { \
+		bool result = php_curl_set_callable_handler(&curl_ptr->handler_fcc, zvalue, is_array_config, #constant_no_function "FUNCTION"); \
+		if (!result) { \
+			return FAILURE; \
+		} \
+		curl_easy_setopt(curl_ptr->cp, constant_no_function##FUNCTION, (c_callback)); \
+		curl_easy_setopt(curl_ptr->cp, constant_no_function##DATA, curl_ptr); \
+		break; \
+	}
+
 static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue, bool is_array_config) /* {{{ */
 {
 	CURLcode error = CURLE_OK;
 	zend_long lval;
 
 	switch (option) {
+		/* Callable options */
+		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_WRITE, write);
+		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_HEADER, write_header);
+		HANDLE_CURL_OPTION_CALLABLE_PHP_CURL_USER(ch, CURLOPT_READ, read);
+
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_PROGRESS, handlers.progress, curl_progress);
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_XFERINFO, handlers.xferinfo, curl_xferinfo);
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_FNMATCH_, handlers.fnmatch, curl_fnmatch);
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+		HANDLE_CURL_OPTION_CALLABLE(ch, CURLOPT_SSH_HOSTKEY, handlers.sshhostkey, curl_ssh_hostkeyfunction);
+#endif
+
 		/* Long options */
 		case CURLOPT_SSL_VERIFYHOST:
 			lval = zval_get_long(zvalue);
@@ -1758,64 +1670,30 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_TCP_KEEPALIVE:
 		case CURLOPT_TCP_KEEPIDLE:
 		case CURLOPT_TCP_KEEPINTVL:
-#if LIBCURL_VERSION_NUM >= 0x071f00 /* Available since 7.31.0 */
 		case CURLOPT_SASL_IR:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072400 /* Available since 7.36.0 */
 		case CURLOPT_EXPECT_100_TIMEOUT_MS:
 		case CURLOPT_SSL_ENABLE_ALPN:
 		case CURLOPT_SSL_ENABLE_NPN:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
 		case CURLOPT_HEADEROPT:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072900 /* Available since 7.41.0 */
 		case CURLOPT_SSL_VERIFYSTATUS:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072a00 /* Available since 7.42.0 */
 		case CURLOPT_PATH_AS_IS:
 		case CURLOPT_SSL_FALSESTART:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072b00 /* Available since 7.43.0 */
 		case CURLOPT_PIPEWAIT:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072e00 /* Available since 7.46.0 */
 		case CURLOPT_STREAM_WEIGHT:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073000 /* Available since 7.48.0 */
 		case CURLOPT_TFTP_NO_OPTIONS:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
 		case CURLOPT_TCP_FASTOPEN:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073300 /* Available since 7.51.0 */
 		case CURLOPT_KEEP_SENDING_ON_ERROR:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
 		case CURLOPT_PROXY_SSL_OPTIONS:
 		case CURLOPT_PROXY_SSL_VERIFYHOST:
 		case CURLOPT_PROXY_SSL_VERIFYPEER:
 		case CURLOPT_PROXY_SSLVERSION:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073600 /* Available since 7.54.0 */
 		case CURLOPT_SUPPRESS_CONNECT_HEADERS:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
 		case CURLOPT_SOCKS5_AUTH:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
 		case CURLOPT_SSH_COMPRESSION:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
 		case CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
 		case CURLOPT_DNS_SHUFFLE_ADDRESSES:
 		case CURLOPT_HAPROXYPROTOCOL:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
 		case CURLOPT_DISALLOW_USERNAME_IN_URL:
-#endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 		case CURLOPT_UPKEEP_INTERVAL_MS:
 		case CURLOPT_UPLOAD_BUFFERSIZE:
@@ -1910,20 +1788,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_TRANSFER_ENCODING:
 		case CURLOPT_DNS_SERVERS:
 		case CURLOPT_MAIL_AUTH:
-#if LIBCURL_VERSION_NUM >= 0x072200 /* Available since 7.34.0 */
 		case CURLOPT_LOGIN_OPTIONS:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
 		case CURLOPT_PINNEDPUBLICKEY:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072b00 /* Available since 7.43.0 */
 		case CURLOPT_PROXY_SERVICE_NAME:
 		case CURLOPT_SERVICE_NAME:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072d00 /* Available since 7.45.0 */
 		case CURLOPT_DEFAULT_PROTOCOL:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
 		case CURLOPT_PRE_PROXY:
 		case CURLOPT_PROXY_CAINFO:
 		case CURLOPT_PROXY_CAPATH:
@@ -1938,17 +1807,10 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_PROXY_TLSAUTH_PASSWORD:
 		case CURLOPT_PROXY_TLSAUTH_TYPE:
 		case CURLOPT_PROXY_TLSAUTH_USERNAME:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073500 /* Available since 7.53.0 */
 		case CURLOPT_ABSTRACT_UNIX_SOCKET:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
 		case CURLOPT_REQUEST_TARGET:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
 		case CURLOPT_PROXY_TLS13_CIPHERS:
 		case CURLOPT_TLS13_CIPHERS:
-#endif
 #if LIBCURL_VERSION_NUM >= 0x074001 /* Available since 7.64.1 */
 		case CURLOPT_ALTSVC:
 #endif
@@ -1993,15 +1855,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_FTP_ACCOUNT:
 		case CURLOPT_RTSP_SESSION_ID:
 		case CURLOPT_ACCEPT_ENCODING:
-#if LIBCURL_VERSION_NUM >= 0x072100 /* Available since 7.33.0 */
 		case CURLOPT_DNS_INTERFACE:
 		case CURLOPT_DNS_LOCAL_IP4:
 		case CURLOPT_DNS_LOCAL_IP6:
 		case CURLOPT_XOAUTH2_BEARER:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
 		case CURLOPT_UNIX_SOCKET_PATH:
-#endif
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 		case CURLOPT_DOH_URL:
 #endif
@@ -2146,12 +2004,8 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_TELNETOPTIONS:
 		case CURLOPT_MAIL_RCPT:
 		case CURLOPT_RESOLVE:
-#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
 		case CURLOPT_PROXYHEADER:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
 		case CURLOPT_CONNECT_TO:
-#endif
 		{
 			zval *current;
 			HashTable *ph;
@@ -2185,16 +2039,12 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					case CURLOPT_RESOLVE:
 						name = "CURLOPT_RESOLVE";
 						break;
-#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
 					case CURLOPT_PROXYHEADER:
 						name = "CURLOPT_PROXYHEADER";
 						break;
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
 					case CURLOPT_CONNECT_TO:
 						name = "CURLOPT_CONNECT_TO";
 						break;
-#endif
 				}
 
 				zend_type_error("%s(): The %s option must have an array value", get_active_function_name(), name);
@@ -2235,15 +2085,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 
-		case CURLOPT_HEADERFUNCTION:
-			if (!Z_ISUNDEF(ch->handlers.write_header->func_name)) {
-				zval_ptr_dtor(&ch->handlers.write_header->func_name);
-				ch->handlers.write_header->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.write_header->func_name, zvalue);
-			ch->handlers.write_header->method = PHP_CURL_USER;
-			break;
-
 		case CURLOPT_POSTFIELDS:
 			if (Z_TYPE_P(zvalue) == IS_ARRAY) {
 				if (zend_hash_num_elements(HASH_OF(zvalue)) == 0) {
@@ -2264,41 +2105,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			}
 			break;
 
-		case CURLOPT_PROGRESSFUNCTION:
-			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSFUNCTION,	curl_progress);
-			curl_easy_setopt(ch->cp, CURLOPT_PROGRESSDATA, ch);
-			if (ch->handlers.progress == NULL) {
-				ch->handlers.progress = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(ch->handlers.progress->func_name)) {
-				zval_ptr_dtor(&ch->handlers.progress->func_name);
-				ch->handlers.progress->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.progress->func_name, zvalue);
-			break;
-
-#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
-		case CURLOPT_SSH_HOSTKEYFUNCTION:
-			curl_easy_setopt(ch->cp, CURLOPT_SSH_HOSTKEYFUNCTION, curl_ssh_hostkeyfunction);
-			curl_easy_setopt(ch->cp, CURLOPT_SSH_HOSTKEYDATA, ch);
-			if (ch->handlers.sshhostkey == NULL) {
-				ch->handlers.sshhostkey = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(ch->handlers.sshhostkey->func_name)) {
-				zval_ptr_dtor(&ch->handlers.sshhostkey->func_name);
-				ch->handlers.sshhostkey->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.sshhostkey->func_name, zvalue);
-			break;
-#endif
-
-		case CURLOPT_READFUNCTION:
-			if (!Z_ISUNDEF(ch->handlers.read->func_name)) {
-				zval_ptr_dtor(&ch->handlers.read->func_name);
-				ch->handlers.read->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.read->func_name, zvalue);
-			ch->handlers.read->method = PHP_CURL_USER;
-			break;
-
 		case CURLOPT_RETURNTRANSFER:
 			if (zend_is_true(zvalue)) {
 				ch->handlers.write->method = PHP_CURL_RETURN;
@@ -2307,36 +2113,11 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 			}
 			break;
 
-		case CURLOPT_WRITEFUNCTION:
-			if (!Z_ISUNDEF(ch->handlers.write->func_name)) {
-				zval_ptr_dtor(&ch->handlers.write->func_name);
-				ch->handlers.write->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.write->func_name, zvalue);
-			ch->handlers.write->method = PHP_CURL_USER;
-			break;
-
-#if LIBCURL_VERSION_NUM >= 0x072000
-		case CURLOPT_XFERINFOFUNCTION:
-			curl_easy_setopt(ch->cp, CURLOPT_XFERINFOFUNCTION,	curl_xferinfo);
-			curl_easy_setopt(ch->cp, CURLOPT_XFERINFODATA, ch);
-			if (ch->handlers.xferinfo == NULL) {
-				ch->handlers.xferinfo = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(ch->handlers.xferinfo->func_name)) {
-				zval_ptr_dtor(&ch->handlers.xferinfo->func_name);
-				ch->handlers.xferinfo->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.xferinfo->func_name, zvalue);
-			break;
-#endif
-
 		/* Curl off_t options */
 		case CURLOPT_MAX_RECV_SPEED_LARGE:
 		case CURLOPT_MAX_SEND_SPEED_LARGE:
 		case CURLOPT_MAXFILESIZE_LARGE:
-#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
 		case CURLOPT_TIMEVALUE_LARGE:
-#endif
 			lval = zval_get_long(zvalue);
 			error = curl_easy_setopt(ch->cp, option, (curl_off_t)lval);
 			break;
@@ -2360,7 +2141,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_ISSUERCERT:
 		case CURLOPT_SSH_KNOWNHOSTS:
 		{
-		    zend_string *tmp_str;
+			zend_string *tmp_str;
 			zend_string *str = zval_get_tmp_string(zvalue, &tmp_str);
 			zend_result ret;
 
@@ -2399,18 +2180,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					ch->share = sh;
 				}
 			}
-			break;
-
-		case CURLOPT_FNMATCH_FUNCTION:
-			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_FUNCTION, curl_fnmatch);
-			curl_easy_setopt(ch->cp, CURLOPT_FNMATCH_DATA, ch);
-			if (ch->handlers.fnmatch == NULL) {
-				ch->handlers.fnmatch = ecalloc(1, sizeof(php_curl_callback));
-			} else if (!Z_ISUNDEF(ch->handlers.fnmatch->func_name)) {
-				zval_ptr_dtor(&ch->handlers.fnmatch->func_name);
-				ch->handlers.fnmatch->fci_cache = empty_fcall_info_cache;
-			}
-			ZVAL_COPY(&ch->handlers.fnmatch->func_name, zvalue);
 			break;
 
 		/* Curl blob options */
@@ -2608,9 +2377,7 @@ PHP_FUNCTION(curl_getinfo)
 		double d_code;
 		struct curl_certinfo *ci = NULL;
 		zval listcode;
-#if LIBCURL_VERSION_NUM >= 0x073d00 /* 7.61.0 */
 		curl_off_t co;
-#endif
 
 		array_init(return_value);
 
@@ -2700,12 +2467,9 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_LOCAL_PORT, &l_code) == CURLE_OK) {
 			CAAL("local_port", l_code);
 		}
-#if LIBCURL_VERSION_NUM >= 0x073200 /* Available since 7.50.0 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_HTTP_VERSION, &l_code) == CURLE_OK) {
 			CAAL("http_version", l_code);
 		}
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_PROTOCOL, &l_code) == CURLE_OK) {
 			CAAL("protocol", l_code);
 		}
@@ -2715,8 +2479,6 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_SCHEME, &s_code) == CURLE_OK) {
 			CAAS("scheme", s_code);
 		}
-#endif
-#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
 		if (curl_easy_getinfo(ch->cp, CURLINFO_APPCONNECT_TIME_T, &co) == CURLE_OK) {
 			CAAL("appconnect_time_us", co);
 		}
@@ -2738,7 +2500,6 @@ PHP_FUNCTION(curl_getinfo)
 		if (curl_easy_getinfo(ch->cp, CURLINFO_TOTAL_TIME_T, &co) == CURLE_OK) {
 			CAAL("total_time_us", co);
 		}
-#endif
 		if (ch->header.str) {
 			CAASTR("request_header", ch->header.str);
 		}
@@ -2834,7 +2595,6 @@ PHP_FUNCTION(curl_getinfo)
 						}
 						break;
 					}
-#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
 					case CURLINFO_OFF_T:
 					{
 						curl_off_t c_off;
@@ -2845,7 +2605,6 @@ PHP_FUNCTION(curl_getinfo)
 						}
 						break;
 					}
-#endif
 					default:
 						RETURN_FALSE;
 				}
@@ -2911,14 +2670,6 @@ PHP_FUNCTION(curl_close)
 }
 /* }}} */
 
-static void _php_curl_free_callback(php_curl_callback* callback)
-{
-	if (callback) {
-		zval_ptr_dtor(&callback->func_name);
-		efree(callback);
-	}
-}
-
 static void curl_free_obj(zend_object *object)
 {
 	php_curl *ch = curl_from_obj(object);
@@ -2935,30 +2686,12 @@ static void curl_free_obj(zend_object *object)
 
 	_php_curl_verify_handlers(ch, /* reporterror */ false);
 
-	/*
-	 * Libcurl is doing connection caching. When easy handle is cleaned up,
-	 * if the handle was previously used by the curl_multi_api, the connection
-	 * remains open un the curl multi handle is cleaned up. Some protocols are
-	 * sending content like the FTP one, and libcurl try to use the
-	 * WRITEFUNCTION or the HEADERFUNCTION. Since structures used in those
-	 * callback are freed, we need to use an other callback to which avoid
-	 * segfaults.
-	 *
-	 * Libcurl commit d021f2e8a00 fix this issue and should be part of 7.28.2
-	 */
-	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION, curl_write_nothing);
-	curl_easy_setopt(ch->cp, CURLOPT_WRITEFUNCTION, curl_write_nothing);
-
 	curl_easy_cleanup(ch->cp);
 
 	/* cURL destructors should be invoked only by last curl handle */
 	if (--(*ch->clone) == 0) {
 		zend_llist_clean(&ch->to_free->post);
 		zend_llist_clean(&ch->to_free->stream);
-
-#if LIBCURL_VERSION_NUM < 0x073800 /* 7.56.0 */
-		zend_llist_clean(&ch->to_free->buffers);
-#endif
 
 		zend_hash_destroy(ch->to_free->slist);
 		efree(ch->to_free->slist);
@@ -2967,9 +2700,15 @@ static void curl_free_obj(zend_object *object)
 	}
 
 	smart_str_free(&ch->handlers.write->buf);
-	zval_ptr_dtor(&ch->handlers.write->func_name);
-	zval_ptr_dtor(&ch->handlers.read->func_name);
-	zval_ptr_dtor(&ch->handlers.write_header->func_name);
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write->fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.write_header->fcc)) {
+		zend_fcc_dtor(&ch->handlers.write_header->fcc);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.read->fcc)) {
+		zend_fcc_dtor(&ch->handlers.read->fcc);
+	}
 	zval_ptr_dtor(&ch->handlers.std_err);
 	if (ch->header.str) {
 		zend_string_release_ex(ch->header.str, 0);
@@ -2983,13 +2722,19 @@ static void curl_free_obj(zend_object *object)
 	efree(ch->handlers.write_header);
 	efree(ch->handlers.read);
 
-	_php_curl_free_callback(ch->handlers.progress);
-#if LIBCURL_VERSION_NUM >= 0x072000
-	_php_curl_free_callback(ch->handlers.xferinfo);
-#endif
-	_php_curl_free_callback(ch->handlers.fnmatch);
-#if LIBCURL_VERSION_NUM >= 0x075400
-	_php_curl_free_callback(ch->handlers.sshhostkey);
+	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
+		zend_fcc_dtor(&ch->handlers.progress);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
+		zend_fcc_dtor(&ch->handlers.xferinfo);
+	}
+	if (ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
+		zend_fcc_dtor(&ch->handlers.fnmatch);
+	}
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
+		zend_fcc_dtor(&ch->handlers.sshhostkey);
+	}
 #endif
 
 	zval_ptr_dtor(&ch->postfields);
@@ -3053,31 +2798,21 @@ static void _php_curl_reset_handlers(php_curl *ch)
 		ZVAL_UNDEF(&ch->handlers.std_err);
 	}
 
-	if (ch->handlers.progress) {
-		zval_ptr_dtor(&ch->handlers.progress->func_name);
-		efree(ch->handlers.progress);
-		ch->handlers.progress = NULL;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.progress)) {
+		zend_fcc_dtor(&ch->handlers.progress);
 	}
 
-#if LIBCURL_VERSION_NUM >= 0x072000
-	if (ch->handlers.xferinfo) {
-		zval_ptr_dtor(&ch->handlers.xferinfo->func_name);
-		efree(ch->handlers.xferinfo);
-		ch->handlers.xferinfo = NULL;
-	}
-#endif
-
-	if (ch->handlers.fnmatch) {
-		zval_ptr_dtor(&ch->handlers.fnmatch->func_name);
-		efree(ch->handlers.fnmatch);
-		ch->handlers.fnmatch = NULL;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.xferinfo)) {
+		zend_fcc_dtor(&ch->handlers.xferinfo);
 	}
 
-#if LIBCURL_VERSION_NUM >= 0x075400
-	if (ch->handlers.sshhostkey) {
-		zval_ptr_dtor(&ch->handlers.sshhostkey->func_name);
-		efree(ch->handlers.sshhostkey);
-		ch->handlers.sshhostkey = NULL;
+	if (ZEND_FCC_INITIALIZED(ch->handlers.fnmatch)) {
+		zend_fcc_dtor(&ch->handlers.fnmatch);
+	}
+
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+	if (ZEND_FCC_INITIALIZED(ch->handlers.sshhostkey)) {
+		zend_fcc_dtor(&ch->handlers.sshhostkey);
 	}
 #endif
 }

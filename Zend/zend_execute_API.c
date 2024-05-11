@@ -38,6 +38,7 @@
 #include "zend_inheritance.h"
 #include "zend_observer.h"
 #include "zend_call_stack.h"
+#include "zend_frameless_function.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -506,7 +507,7 @@ ZEND_API const char *get_active_class_name(const char **space) /* {{{ */
 		return "";
 	}
 
-	func = EG(current_execute_data)->func;
+	func = zend_active_function();
 
 	switch (func->type) {
 		case ZEND_USER_FUNCTION:
@@ -536,7 +537,7 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 		return NULL;
 	}
 
-	func = EG(current_execute_data)->func;
+	func = zend_active_function();
 
 	switch (func->type) {
 		case ZEND_USER_FUNCTION: {
@@ -558,11 +559,26 @@ ZEND_API const char *get_active_function_name(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_function *zend_active_function_ex(zend_execute_data *execute_data)
+{
+	zend_function *func = EX(func);
+
+	/* Resolve function if op is a frameless call. */
+	if (ZEND_USER_CODE(func->type)) {
+		const zend_op *op = EX(opline);
+		if (ZEND_OP_IS_FRAMELESS_ICALL(op->opcode)) {
+			func = ZEND_FLF_FUNC(op);
+		}
+	}
+
+	return func;
+}
+
 ZEND_API zend_string *get_active_function_or_method_name(void) /* {{{ */
 {
 	ZEND_ASSERT(zend_is_executing());
 
-	return get_function_or_method_name(EG(current_execute_data)->func);
+	return get_function_or_method_name(zend_active_function());
 }
 /* }}} */
 
@@ -578,13 +594,11 @@ ZEND_API zend_string *get_function_or_method_name(const zend_function *func) /* 
 
 ZEND_API const char *get_active_function_arg_name(uint32_t arg_num) /* {{{ */
 {
-	zend_function *func;
-
 	if (!zend_is_executing()) {
 		return NULL;
 	}
 
-	func = EG(current_execute_data)->func;
+	zend_function *func = zend_active_function();
 
 	return get_function_arg_name(func, arg_num);
 }
@@ -1213,9 +1227,15 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		autoload_name = zend_string_copy(name);
 	}
 
+	zend_string *previous_filename = EG(filename_override);
+	zend_long previous_lineno = EG(lineno_override);
+	EG(filename_override) = NULL;
+	EG(lineno_override) = -1;
 	zend_exception_save();
 	ce = zend_autoload(autoload_name, lc_name);
 	zend_exception_restore();
+	EG(filename_override) = previous_filename;
+	EG(lineno_override) = previous_lineno;
 
 	zend_string_release_ex(autoload_name, 0);
 	zend_hash_del(EG(in_autoload), lc_name);
@@ -1539,6 +1559,11 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 	{
 		struct itimerval t_r;		/* timeout requested */
 		int signo;
+
+		// Prevent EINVAL error
+		if (seconds < 0 || seconds > 999999999) {
+			seconds = 0;
+		}
 
 		if(seconds) {
 			t_r.it_value.tv_sec = seconds;

@@ -39,7 +39,7 @@
    N2 is subtracted from N1 and the result placed in RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
+bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff = NULL;
 
@@ -49,7 +49,7 @@ void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 	} else {
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
-		switch (_bc_do_compare(n1, n2, false, false)) {
+		switch (_bc_do_compare(n1, n2, false)) {
 			case -1:
 				/* n1 is less than n2, subtract n1 from n2. */
 				diff = _bc_do_sub(n2, n1, scale_min);
@@ -59,7 +59,6 @@ void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 				/* They are equal! return zero! */
 				size_t res_scale = MAX (scale_min, MAX(n1->n_scale, n2->n_scale));
 				diff = bc_new_num (1, res_scale);
-				memset(diff->n_value, 0, res_scale + 1);
 				break;
 			}
 			case 1:
@@ -70,7 +69,5 @@ void bc_sub(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 		}
 	}
 
-	/* Clean up and return. */
-	bc_free_num (result);
-	*result = diff;
+	return diff;
 }

@@ -291,8 +291,11 @@ static void sapi_cgibin_flush(void *server_context) /* {{{ */
 	/* fpm has started, let use fcgi instead of stdout */
 	if (fpm_is_running) {
 		fcgi_request *request = (fcgi_request*) server_context;
-		if (!parent && request && !fcgi_flush(request, 0)) {
-			php_handle_aborted_connection();
+		if (!parent && request) {
+			sapi_send_headers();
+			if (!fcgi_flush(request, 0)) {
+				php_handle_aborted_connection();
+			}
 		}
 		return;
 	}
@@ -516,7 +519,21 @@ static void cgi_php_load_env_var(const char *var, unsigned int var_len, char *va
 }
 /* }}} */
 
-void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
+static void cgi_php_load_env_var_unfilterd(const char *var, unsigned int var_len, char *val, unsigned int val_len, void *arg)
+{
+	zval *array_ptr = (zval *) arg;
+	php_register_variable_safe(var, val, val_len, array_ptr);
+}
+
+static void cgi_php_load_environment_variables(zval *array_ptr)
+{
+	php_php_import_environment_variables(array_ptr);
+
+	fcgi_request *request = (fcgi_request*) SG(server_context);
+	fcgi_loadenv(request, cgi_php_load_env_var_unfilterd, array_ptr);
+}
+
+static void cgi_php_import_environment_variables(zval *array_ptr)
 {
 	fcgi_request *request = NULL;
 
@@ -542,7 +559,6 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 	request = (fcgi_request*) SG(server_context);
 	fcgi_loadenv(request, cgi_php_load_env_var, array_ptr);
 }
-/* }}} */
 
 static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
 {
@@ -1165,7 +1181,7 @@ static void init_request_info(void)
 									size_t decoded_path_info_len = 0;
 									if (strchr(path_info, '%')) {
 										decoded_path_info = estrdup(path_info);
-										decoded_path_info_len = php_url_decode(decoded_path_info, strlen(path_info));
+										decoded_path_info_len = php_raw_url_decode(decoded_path_info, strlen(path_info));
 									}
 									size_t snlen = strlen(env_script_name);
 									size_t env_script_file_info_start = 0;
@@ -1840,6 +1856,7 @@ consult the installation file that came with this distribution, or visit \n\
 	/* make php call us to get _ENV vars */
 	php_php_import_environment_variables = php_import_environment_variables;
 	php_import_environment_variables = cgi_php_import_environment_variables;
+	php_load_environment_variables = cgi_php_load_environment_variables;
 
 	/* library is already initialized, now init our request */
 	request = fpm_init_request(fcgi_fd);

@@ -29,6 +29,8 @@ ob_end_flush();
 --EXPECTF--
 *** Testing session_set_save_handler() : error functionality ***
 
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+
 Fatal error: Uncaught Exception: Do something bad..! in %s:%d
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')

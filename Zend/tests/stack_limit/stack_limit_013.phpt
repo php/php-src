@@ -116,5 +116,6 @@ $test = [
     1
 ];
 
+?>
 --EXPECTF--
-Fatal error: Maximum call stack size of %d bytes reached during compilation. Try splitting expression in %s on line %d
+Fatal error: Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached during compilation. Try splitting expression in %s on line %d

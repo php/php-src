@@ -14,6 +14,7 @@ $mf = new MessageFormatter('en_US', $fmt);
 var_dump($mf->format(array("foo" => 7, "\x80" => "bar")));
 
 var_dump($mf->format(array("foo" => "\x80")));
+?>
 --EXPECTF--
 Warning: MessageFormatter::format(): Invalid UTF-8 data in argument key: '€' in %s on line %d
 bool(false)

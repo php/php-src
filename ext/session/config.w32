@@ -5,5 +5,5 @@ ARG_ENABLE("session", "session support", "yes");
 if (PHP_SESSION == "yes") {
 	EXTENSION("session", "mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c", false /* never shared */, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 	AC_DEFINE("HAVE_PHP_SESSION", 1, "Session support");
-	PHP_INSTALL_HEADERS("ext/session/", "mod_mm.h php_session.h mod_files.h mod_user.h");
+	PHP_INSTALL_HEADERS("ext/session", "mod_mm.h php_session.h mod_files.h mod_user.h");
 }

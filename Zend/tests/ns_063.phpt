@@ -10,5 +10,6 @@ class Bar {
 }
 new Bar();
 echo "ok\n";
+?>
 --EXPECT--
 ok

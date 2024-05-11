@@ -4,15 +4,14 @@ PDO::ATTR_ERRMODE
 pdo_mysql
 --SKIPIF--
 <?php
-require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 MySQLPDOTest::skip();
-$db = MySQLPDOTest::factory();
 ?>
 --INI--
 error_reporting=E_ALL
 --FILE--
 <?php
-    require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+    require_once __DIR__ . '/inc/mysql_pdo_test.inc';
     $db = MySQLPDOTest::factory();
 
     try {
@@ -74,7 +73,6 @@ error_reporting=E_ALL
         $line = __LINE__ + 1;
         $db->query('THIS IS NOT VALID SQL');
     } catch (PDOException $e) {
-
         $code = $db->errorCode();
         $info = $db->errorInfo();
 
@@ -107,7 +105,6 @@ error_reporting=E_ALL
         if ($e->getFile() !== __FILE__)
             printf("[020] Exception has been thrown in file '%s', exception object reports file '%s'\n",
                 __FILE__, $e->getFile());
-
     }
 
     function my_handler($e) {

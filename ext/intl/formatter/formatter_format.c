@@ -114,7 +114,7 @@ PHP_FUNCTION( numfmt_format )
 			}
 			RETURN_THROWS();
 		default:
-			zend_argument_value_error(getThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
+			zend_argument_value_error(hasThis() ? 2 : 3, "must be a NumberFormatter::TYPE_* constant");
 			RETURN_THROWS();
 	}
 

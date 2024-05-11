@@ -147,7 +147,7 @@ static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options);
 static PHP_INI_MH(php_tidy_set_clean_output);
 static void php_tidy_clean_output_start(const char *name, size_t name_len);
 static php_output_handler *php_tidy_output_handler_init(const char *handler_name, size_t handler_name_len, size_t chunk_size, int flags);
-static int php_tidy_output_handler(void **nothing, php_output_context *output_context);
+static zend_result php_tidy_output_handler(void **nothing, php_output_context *output_context);
 
 static PHP_MINIT_FUNCTION(tidy);
 static PHP_MSHUTDOWN_FUNCTION(tidy);
@@ -662,8 +662,12 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 		do {
 			name = (char *)tidyAttrName(tempattr);
 			val = (char *)tidyAttrValue(tempattr);
-			if (name && val) {
-				add_assoc_string(&attribute, name, val);
+			if (name) {
+				if (val) {
+					add_assoc_string(&attribute, name, val);
+				} else {
+					add_assoc_str(&attribute, name, zend_empty_string);
+				}
 			}
 		} while((tempattr = tidyAttrNext(tempattr)));
 	} else {
@@ -949,9 +953,9 @@ static php_output_handler *php_tidy_output_handler_init(const char *handler_name
 	return php_output_handler_create_internal(handler_name, handler_name_len, php_tidy_output_handler, chunk_size, flags);
 }
 
-static int php_tidy_output_handler(void **nothing, php_output_context *output_context)
+static zend_result php_tidy_output_handler(void **nothing, php_output_context *output_context)
 {
-	int status = FAILURE;
+	zend_result status = FAILURE;
 	TidyDoc doc;
 	TidyBuffer inbuf, outbuf, errbuf;
 
@@ -1172,7 +1176,7 @@ PHP_FUNCTION(tidy_get_opt_doc)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
+		zend_argument_value_error(hasThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
 		RETURN_THROWS();
 	}
 
@@ -1316,7 +1320,7 @@ PHP_FUNCTION(tidy_getopt)
 	opt = tidyGetOptionByName(obj->ptdoc->doc, optname);
 
 	if (!opt) {
-		zend_argument_value_error(getThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
+		zend_argument_value_error(hasThis() ? 1 : 2, "is an invalid configuration option, \"%s\" given", optname);
 		RETURN_THROWS();
 	}
 

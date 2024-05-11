@@ -84,7 +84,7 @@ array(1) {
   [0]=>
   array(2) {
     ["function"]=>
-    string(9) "{closure}"
+    string(%d) "{closure:%s:%d}"
     ["args"]=>
     array(0) {
     }
@@ -96,7 +96,7 @@ object(Generator)#4 (0) {
 }
 object(ReflectionFunction)#7 (1) {
   ["name"]=>
-  string(9) "{closure}"
+  string(%d) "{closure:%s:%d}"
 }
 NULL
 object(Generator)#5 (0) {

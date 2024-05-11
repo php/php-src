@@ -2,6 +2,10 @@
 openssl_x509_parse() tests
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (OPENSSL_VERSION_NUMBER >= 0x30200000) die('skip For OpenSSL < 3.2');
+?>
 --FILE--
 <?php
 $cert = "file://" . __DIR__ . "/cert.crt";

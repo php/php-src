@@ -1,4 +1,4 @@
-.TH PHP-FPM 8 "2023" "The PHP Group" "Scripting Language"
+.TH PHP-FPM 8 "2024" "The PHP Group" "Scripting Language"
 .SH NAME
 .TP 15
 php-fpm \- PHP FastCGI Process Manager 'PHP-FPM'
@@ -185,12 +185,6 @@ For a more or less complete description of PHP look here:
 .PD 0
 .P
 .B http://www.php.net/manual/
-.PD 1
-.P
-A nice introduction to PHP by Stig Bakken can be found here:
-.PD 0
-.P
-.B http://www.zend.com/zend/art/intro.php
 .PD 1
 .SH BUGS
 You can view the list of known bugs or report any new bug you

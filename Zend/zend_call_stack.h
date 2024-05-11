@@ -28,7 +28,7 @@
 #ifdef ZEND_CHECK_STACK_LIMIT
 
 typedef struct _zend_call_stack {
-	void *base;
+	void *base; /* high address of the stack */
 	size_t max_size;
 } zend_call_stack;
 
@@ -91,6 +91,9 @@ static inline size_t zend_call_stack_default_size(void)
 #endif
 #ifdef __HAIKU__
 	return 64 * 4096;
+#endif
+#ifdef __sun
+	return 8 * 4096;
 #endif
 
 	return 2 * 1024 * 1024;

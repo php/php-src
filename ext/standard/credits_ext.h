@@ -30,7 +30,6 @@ CREDIT_LINE("GD imaging", "Rasmus Lerdorf, Stig Bakken, Jim Winstead, Jouni Ahto
 CREDIT_LINE("GetText", "Alex Plotnick");
 CREDIT_LINE("GNU GMP support", "Stanislav Malyshev");
 CREDIT_LINE("Iconv", "Rui Hirokawa, Stig Bakken, Moriyoshi Koizumi");
-CREDIT_LINE("IMAP", "Rex Logan, Mark Musone, Brian Wang, Kaj-Michael Lang, Antoni Pamies Olive, Rasmus Lerdorf, Andrew Skalski, Chuck Hagenbuch, Daniel R Kalowsky");
 CREDIT_LINE("Input Filter", "Rasmus Lerdorf, Derick Rethans, Pierre-Alain Joye, Ilia Alshanetsky");
 CREDIT_LINE("Internationalization", "Ed Batutis, Vladimir Iordanov, Dmitry Lakhtyuk, Stanislav Malyshev, Vadim Savchuk, Kirti Velankar");
 CREDIT_LINE("JSON", "Jakub Zelenka, Omar Kilani, Scott MacVicar");
@@ -40,12 +39,10 @@ CREDIT_LINE("Multibyte String Functions", "Tsukada Takuya, Rui Hirokawa");
 CREDIT_LINE("MySQL driver for PDO", "George Schlossnagle, Wez Furlong, Ilia Alshanetsky, Johannes Schlueter");
 CREDIT_LINE("MySQLi", "Zak Greant, Georg Richter, Andrey Hristov, Ulf Wendel");
 CREDIT_LINE("MySQLnd", "Andrey Hristov, Ulf Wendel, Georg Richter, Johannes Schlüter");
-CREDIT_LINE("OCI8", "Stig Bakken, Thies C. Arntzen, Andy Sautins, David Benson, Maxim Maletsky, Harald Radi, Antony Dovgal, Andi Gutmans, Wez Furlong, Christopher Jones, Oracle Corporation");
 CREDIT_LINE("ODBC driver for PDO", "Wez Furlong");
 CREDIT_LINE("ODBC", "Stig Bakken, Andreas Karajannis, Frank M. Kromann, Daniel R. Kalowsky");
 CREDIT_LINE("Opcache", "Andi Gutmans, Zeev Suraski, Stanislav Malyshev, Dmitry Stogov, Xinchen Hui");
 CREDIT_LINE("OpenSSL", "Stig Venaas, Wez Furlong, Sascha Kettler, Scott MacVicar, Eliot Lear");
-CREDIT_LINE("Oracle (OCI) driver for PDO", "Wez Furlong");
 CREDIT_LINE("pcntl", "Jason Greene, Arnaud Le Blanc");
 CREDIT_LINE("Perl Compatible Regexps", "Andrei Zmievski");
 CREDIT_LINE("PHP Archive", "Gregory Beaver, Marcus Boerger");
@@ -54,7 +51,6 @@ CREDIT_LINE("PHP hash", "Sara Golemon, Rasmus Lerdorf, Stefan Esser, Michael Wal
 CREDIT_LINE("Posix", "Kristian Koehntopp");
 CREDIT_LINE("PostgreSQL driver for PDO", "Edin Kadribasic, Ilia Alshanetsky");
 CREDIT_LINE("PostgreSQL", "Jouni Ahto, Zeev Suraski, Yasuo Ohgaki, Chris Kings-Lynne");
-CREDIT_LINE("Pspell", "Vlad Krupin");
 CREDIT_LINE("random", "Go Kudo, Tim Düsterhus, Guilliam Xavier, Christoph M. Becker, Jakub Zelenka, Bob Weinand, Máté Kocsis, and Original RNG implementators");
 CREDIT_LINE("Readline", "Thies C. Arntzen");
 CREDIT_LINE("Reflection", "Marcus Boerger, Timm Friebe, George Schlossnagle, Andrei Zmievski, Johannes Schlueter");

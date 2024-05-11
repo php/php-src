@@ -28,7 +28,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLStringFile___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mime, IS_STRING, 0, "\"application/octet-stream\"")
 ZEND_END_ARG_INFO()
 
-
 ZEND_METHOD(CURLFile, __construct);
 ZEND_METHOD(CURLFile, getFilename);
 ZEND_METHOD(CURLFile, getMimeType);
@@ -36,7 +35,6 @@ ZEND_METHOD(CURLFile, getPostFilename);
 ZEND_METHOD(CURLFile, setMimeType);
 ZEND_METHOD(CURLFile, setPostFilename);
 ZEND_METHOD(CURLStringFile, __construct);
-
 
 static const zend_function_entry class_CURLFile_methods[] = {
 	ZEND_ME(CURLFile, __construct, arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC)
@@ -47,7 +45,6 @@ static const zend_function_entry class_CURLFile_methods[] = {
 	ZEND_ME(CURLFile, setPostFilename, arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_CURLStringFile_methods[] = {
 	ZEND_ME(CURLStringFile, __construct, arginfo_class_CURLStringFile___construct, ZEND_ACC_PUBLIC)

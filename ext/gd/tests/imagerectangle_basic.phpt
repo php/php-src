@@ -5,6 +5,12 @@ Ivan Rosolen <contato [at] ivanrosolen [dot] com>
 #testfest PHPSP on 2009-06-30
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 // Create a image

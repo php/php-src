@@ -72,13 +72,16 @@ session_write_close();
 
 ob_end_flush();
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Open
 Create SID OLD
 Read
 Write
 Close
 New handlers:
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 Open
 Validate ID
 Read

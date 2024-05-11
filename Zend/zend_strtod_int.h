@@ -104,24 +104,4 @@
 #endif
 #endif
 
-#ifdef ZTS
-#define MULTIPLE_THREADS 1
-
-#define  ACQUIRE_DTOA_LOCK(x) \
-	if (0 == x) { \
-		tsrm_mutex_lock(dtoa_mutex); \
-	} else if (1 == x) { \
-		tsrm_mutex_lock(pow5mult_mutex); \
-	}
-
-#define FREE_DTOA_LOCK(x) \
-	if (0 == x) { \
-		tsrm_mutex_unlock(dtoa_mutex); \
-	} else if (1 == x) { \
-		tsrm_mutex_unlock(pow5mult_mutex); \
-	}
-
-
-#endif
-
 #endif /* ZEND_STRTOD_INT_H */

@@ -13,6 +13,7 @@
 const CURLOPT_AUTOREFERER = UNKNOWN;
 /**
  * @var int
+ * @deprecated has no effect since 5.1.2
  * @cvalue CURLOPT_BINARYTRANSFER
  */
 const CURLOPT_BINARYTRANSFER = UNKNOWN;
@@ -471,13 +472,11 @@ const CURLOPT_WRITEFUNCTION = UNKNOWN;
  * @cvalue CURLOPT_WRITEHEADER
  */
 const CURLOPT_WRITEHEADER = UNKNOWN;
-#if LIBCURL_VERSION_NUM >= 0x072000
 /**
  * @var int
  * @cvalue CURLOPT_XFERINFOFUNCTION
  */
 const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
-#endif
 
 /* */
 /**
@@ -775,13 +774,11 @@ const CURLE_SSL_ENGINE_SETFAILED = UNKNOWN;
  * @cvalue CURLE_SSL_PEER_CERTIFICATE
  */
 const CURLE_SSL_PEER_CERTIFICATE = UNKNOWN;
-#if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
 /**
  * @var int
  * @cvalue CURLE_SSL_PINNEDPUBKEYNOTMATCH
  */
 const CURLE_SSL_PINNEDPUBKEYNOTMATCH = UNKNOWN;
-#endif
 /**
  * @var int
  * @cvalue CURLE_TELNET_OPTION_SYNTAX
@@ -997,13 +994,11 @@ const CURLM_OK = UNKNOWN;
  * @cvalue CURLM_OUT_OF_MEMORY
  */
 const CURLM_OUT_OF_MEMORY = UNKNOWN;
-#if LIBCURL_VERSION_NUM >= 0x072001 /* Available since 7.32.1 */
 /**
  * @var int
  * @cvalue CURLM_ADDED_ALREADY
  */
 const CURLM_ADDED_ALREADY = UNKNOWN;
-#endif
 
 /* Curl proxy constants */
 /**
@@ -2384,7 +2379,6 @@ const CURL_REDIR_POST_303 = UNKNOWN;
  */
 const CURLSSH_AUTH_AGENT = UNKNOWN;
 
-#if LIBCURL_VERSION_NUM >= 0x071e00 /* Available since 7.30.0 */
 /**
  * @var int
  * @cvalue CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE
@@ -2410,17 +2404,13 @@ const CURLMOPT_MAX_PIPELINE_LENGTH = UNKNOWN;
  * @cvalue CURLMOPT_MAX_TOTAL_CONNECTIONS
  */
 const CURLMOPT_MAX_TOTAL_CONNECTIONS = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x071f00 /* Available since 7.31.0 */
 /**
  * @var int
  * @cvalue CURLOPT_SASL_IR
  */
 const CURLOPT_SASL_IR = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072100 /* Available since 7.33.0 */
 /**
  * @var int
  * @cvalue CURLOPT_DNS_INTERFACE
@@ -2452,9 +2442,7 @@ const CURL_HTTP_VERSION_2_0 = UNKNOWN;
  * @cvalue CURL_VERSION_HTTP2
  */
 const CURL_VERSION_HTTP2 = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072200 /* Available since 7.34.0 */
 /**
  * @var int
  * @cvalue CURLOPT_LOGIN_OPTIONS
@@ -2476,9 +2464,7 @@ const CURL_SSLVERSION_TLSv1_1 = UNKNOWN;
  * @cvalue CURL_SSLVERSION_TLSv1_2
  */
 const CURL_SSLVERSION_TLSv1_2 = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072400 /* Available since 7.36.0 */
 /**
  * @var int
  * @cvalue CURLOPT_EXPECT_100_TIMEOUT_MS
@@ -2494,9 +2480,7 @@ const CURLOPT_SSL_ENABLE_ALPN = UNKNOWN;
  * @cvalue CURLOPT_SSL_ENABLE_NPN
  */
 const CURLOPT_SSL_ENABLE_NPN = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072500 /* Available since 7.37.0 */
 /**
  * @var int
  * @cvalue CURLHEADER_SEPARATE
@@ -2517,9 +2501,7 @@ const CURLOPT_HEADEROPT = UNKNOWN;
  * @cvalue CURLOPT_PROXYHEADER
  */
 const CURLOPT_PROXYHEADER = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072600 /* Available since 7.38.0 */
 /**
  * @var int
  * @cvalue CURLAUTH_NEGOTIATE
@@ -2530,17 +2512,13 @@ const CURLAUTH_NEGOTIATE = UNKNOWN;
  * @cvalue CURL_VERSION_GSSAPI
  */
 const CURL_VERSION_GSSAPI = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072700 /* Available since 7.39.0 */
 /**
  * @var int
  * @cvalue CURLOPT_PINNEDPUBLICKEY
  */
 const CURLOPT_PINNEDPUBLICKEY = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072800 /* Available since 7.40.0 */
 /**
  * @var int
  * @cvalue CURLOPT_UNIX_SOCKET_PATH
@@ -2566,17 +2544,13 @@ const CURL_VERSION_KERBEROS5 = UNKNOWN;
  * @cvalue CURL_VERSION_UNIX_SOCKETS
  */
 const CURL_VERSION_UNIX_SOCKETS = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072900 /* Available since 7.41.0 */
 /**
  * @var int
  * @cvalue CURLOPT_SSL_VERIFYSTATUS
  */
 const CURLOPT_SSL_VERIFYSTATUS = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072a00 /* Available since 7.42.0 */
 /**
  * @var int
  * @cvalue CURLOPT_PATH_AS_IS
@@ -2587,9 +2561,7 @@ const CURLOPT_PATH_AS_IS = UNKNOWN;
  * @cvalue CURLOPT_SSL_FALSESTART
  */
 const CURLOPT_SSL_FALSESTART = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072b00 /* Available since 7.43.0 */
 /**
  * @var int
  * @cvalue CURL_HTTP_VERSION_2
@@ -2627,25 +2599,19 @@ const CURLPIPE_HTTP1 = UNKNOWN;
  * @cvalue CURLPIPE_MULTIPLEX
  */
 const CURLPIPE_MULTIPLEX = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072c00 /* Available since 7.44.0 */
 /**
  * @var int
  * @cvalue CURLSSLOPT_NO_REVOKE
  */
 const CURLSSLOPT_NO_REVOKE = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072d00 /* Available since 7.45.0 */
 /**
  * @var int
  * @cvalue CURLOPT_DEFAULT_PROTOCOL
  */
 const CURLOPT_DEFAULT_PROTOCOL = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072e00 /* Available since 7.46.0 */
 /**
  * @var int
  * @cvalue CURLOPT_STREAM_WEIGHT
@@ -2666,9 +2632,7 @@ const CURL_PUSH_OK = UNKNOWN;
  * @cvalue CURL_PUSH_DENY
  */
 const CURL_PUSH_DENY = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x072f00 /* Available since 7.47.0 */
 /**
  * @var int
  * @cvalue CURL_HTTP_VERSION_2TLS
@@ -2679,17 +2643,13 @@ const CURL_HTTP_VERSION_2TLS = UNKNOWN;
  * @cvalue CURL_VERSION_PSL
  */
 const CURL_VERSION_PSL = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073000 /* Available since 7.48.0 */
 /**
  * @var int
  * @cvalue CURLOPT_TFTP_NO_OPTIONS
  */
 const CURLOPT_TFTP_NO_OPTIONS = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073100 /* Available since 7.49.0 */
 /**
  * @var int
  * @cvalue CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE
@@ -2705,17 +2665,13 @@ const CURLOPT_CONNECT_TO = UNKNOWN;
  * @cvalue CURLOPT_TCP_FASTOPEN
  */
 const CURLOPT_TCP_FASTOPEN = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073200 /* Available since 7.50.0 */
 /**
  * @var int
  * @cvalue CURLINFO_HTTP_VERSION
  */
 const CURLINFO_HTTP_VERSION = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073300 /* Available since 7.51.0 */
 /**
  * @var int
  * @cvalue CURLE_WEIRD_SERVER_REPLY
@@ -2726,9 +2682,7 @@ const CURLE_WEIRD_SERVER_REPLY = UNKNOWN;
  * @cvalue CURLOPT_KEEP_SENDING_ON_ERROR
  */
 const CURLOPT_KEEP_SENDING_ON_ERROR = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073400 /* Available since 7.52.0 */
 /**
  * @var int
  * @cvalue CURL_SSLVERSION_TLSv1_3
@@ -2849,9 +2803,7 @@ const CURLOPT_PROXY_TLSAUTH_USERNAME = UNKNOWN;
  * @cvalue CURLPROXY_HTTPS
  */
 const CURLPROXY_HTTPS = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073500 /* Available since 7.53.0 */
 /**
  * @var int
  * @cvalue CURL_MAX_READ_SIZE
@@ -2862,9 +2814,7 @@ const CURL_MAX_READ_SIZE = UNKNOWN;
  * @cvalue CURLOPT_ABSTRACT_UNIX_SOCKET
  */
 const CURLOPT_ABSTRACT_UNIX_SOCKET = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073600 /* Available since 7.54.0 */
 /**
  * @var int
  * @cvalue CURL_SSLVERSION_MAX_DEFAULT
@@ -2900,17 +2850,13 @@ const CURL_SSLVERSION_MAX_TLSv1_3 = UNKNOWN;
  * @cvalue CURLOPT_SUPPRESS_CONNECT_HEADERS
  */
 const CURLOPT_SUPPRESS_CONNECT_HEADERS = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073601 /* Available since 7.54.1 */
 /**
  * @var int
  * @cvalue CURLAUTH_GSSAPI
  */
 const CURLAUTH_GSSAPI = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073700 /* Available since 7.55.0 */
 /**
  * @var int
  * @cvalue CURLINFO_CONTENT_LENGTH_DOWNLOAD_T
@@ -2951,9 +2897,7 @@ const CURLOPT_REQUEST_TARGET = UNKNOWN;
  * @cvalue CURLOPT_SOCKS5_AUTH
  */
 const CURLOPT_SOCKS5_AUTH = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* Available since 7.56.0 */
 /**
  * @var int
  * @cvalue CURLOPT_SSH_COMPRESSION
@@ -2964,9 +2908,7 @@ const CURLOPT_SSH_COMPRESSION = UNKNOWN;
  * @cvalue CURL_VERSION_MULTI_SSL
  */
 const CURL_VERSION_MULTI_SSL = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073900 /* Available since 7.57.0 */
 /**
  * @var int
  * @cvalue CURL_VERSION_BROTLI
@@ -2977,17 +2919,13 @@ const CURL_VERSION_BROTLI = UNKNOWN;
  * @cvalue CURL_LOCK_DATA_CONNECT
  */
 const CURL_LOCK_DATA_CONNECT = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073a00 /* Available since 7.58.0 */
 /**
  * @var int
  * @cvalue CURLSSH_AUTH_GSSAPI
  */
 const CURLSSH_AUTH_GSSAPI = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073b00 /* Available since 7.59.0 */
 /**
  * @var int
  * @cvalue CURLINFO_FILETIME_T
@@ -3003,9 +2941,7 @@ const CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS = UNKNOWN;
  * @cvalue CURLOPT_TIMEVALUE_LARGE
  */
 const CURLOPT_TIMEVALUE_LARGE = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073c00 /* Available since 7.60.0 */
 /**
  * @var int
  * @cvalue CURLOPT_DNS_SHUFFLE_ADDRESSES
@@ -3016,9 +2952,7 @@ const CURLOPT_DNS_SHUFFLE_ADDRESSES = UNKNOWN;
  * @cvalue CURLOPT_HAPROXYPROTOCOL
  */
 const CURLOPT_HAPROXYPROTOCOL = UNKNOWN;
-#endif
 
-#if LIBCURL_VERSION_NUM >= 0x073d00 /* Available since 7.61.0 */
 /**
  * @var int
  * @cvalue CURL_LOCK_DATA_PSL
@@ -3079,7 +3013,6 @@ const CURLOPT_PROXY_TLS13_CIPHERS = UNKNOWN;
  * @cvalue CURLOPT_TLS13_CIPHERS
  */
 const CURLOPT_TLS13_CIPHERS = UNKNOWN;
-#endif
 
 #if LIBCURL_VERSION_NUM >= 0x073E00 /* Available since 7.62.0 */
 /**

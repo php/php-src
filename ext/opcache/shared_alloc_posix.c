@@ -40,6 +40,33 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 {
 	zend_shared_segment_posix *shared_segment;
 	char shared_segment_name[sizeof("/ZendAccelerator.") + 20];
+	int shared_segment_flags = O_RDWR|O_CREAT|O_TRUNC;
+	mode_t shared_segment_mode = 0600;
+
+#if defined(HAVE_SHM_CREATE_LARGEPAGE)
+	/**
+	 * architectures have 3 entries max and we are interested
+	 * from the second offset minimum to be worthy creating
+	 * a special shared segment tagged as 'large'.
+	 * only then amd64/i386/arm64 and perharps risc64*
+	 * archs are on interest here.
+	 */
+	size_t i, shared_segment_sizes = 0, shared_segment_lg_index = 0;
+	size_t shared_segment_sindexes[3] = {0};
+	const size_t entries = sizeof(shared_segment_sindexes) / sizeof(shared_segment_sindexes[0]);
+
+	shared_segment_sizes = getpagesizes(shared_segment_sindexes, entries);
+
+	if (shared_segment_sizes > 0) {
+		for (i = shared_segment_sizes - 1; i >= 0; i --) {
+			if (shared_segment_sindexes[i] != 0 &&
+			    !(requested_size % shared_segment_sindexes[i])) {
+				shared_segment_lg_index = i;
+				break;
+			}
+		}
+	}
+#endif
 
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment_posix **) calloc(1, sizeof(zend_shared_segment_posix) + sizeof(void *));
@@ -51,12 +78,24 @@ static int create_segments(size_t requested_size, zend_shared_segment_posix ***s
 	(*shared_segments_p)[0] = shared_segment;
 
 	sprintf(shared_segment_name, "/ZendAccelerator.%d", getpid());
-	shared_segment->shm_fd = shm_open(shared_segment_name, O_RDWR|O_CREAT|O_TRUNC, 0600);
+#if defined(HAVE_SHM_CREATE_LARGEPAGE)
+	if (shared_segment_lg_index > 0) {
+		shared_segment->shm_fd =  shm_create_largepage(shared_segment_name, shared_segment_flags, shared_segment_lg_index, SHM_LARGEPAGE_ALLOC_DEFAULT, shared_segment_mode);
+		if (shared_segment->shm_fd != -1) {
+			goto truncate_segment;
+		}
+	}
+#endif
+
+	shared_segment->shm_fd = shm_open(shared_segment_name, shared_segment_flags, shared_segment_mode);
 	if (shared_segment->shm_fd == -1) {
 		*error_in = "shm_open";
 		return ALLOC_FAILURE;
 	}
 
+#if defined(HAVE_SHM_CREATE_LARGEPAGE)
+truncate_segment:
+#endif
 	if (ftruncate(shared_segment->shm_fd, requested_size) != 0) {
 		*error_in = "ftruncate";
 		shm_unlink(shared_segment_name);

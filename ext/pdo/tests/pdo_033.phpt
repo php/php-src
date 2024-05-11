@@ -22,18 +22,19 @@ $quoted = $db->quote($unquoted);
 
 $len = strlen($unquoted);
 
-@$db->exec("DROP TABLE test");
+$db->query("CREATE TABLE test033 (t char($len))");
+$db->query("INSERT INTO test033 (t) VALUES($quoted)");
 
-$db->query("CREATE TABLE test (t char($len))");
-$db->query("INSERT INTO test (t) VALUES($quoted)");
-
-$stmt = $db->prepare('SELECT * from test');
+$stmt = $db->prepare('SELECT * from test033');
 $stmt->execute();
 
 print_r($stmt->fetchAll(PDO::FETCH_ASSOC));
-
-$db->exec("DROP TABLE test");
-
+?>
+--CLEAN--
+<?php
+require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+$db = PDOTest::factory();
+PDOTest::dropTableIfExists($db, "test033");
 ?>
 --EXPECT--
 Array

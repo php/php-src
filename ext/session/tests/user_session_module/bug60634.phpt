@@ -11,31 +11,33 @@ session
 
 ob_start();
 
-function open($save_path, $session_name) {
-    return true;
+class MySessionHandler implements SessionHandlerInterface {
+    function open($save_path, $session_name): bool {
+        return true;
+    }
+
+    function close(): bool {
+        die("close: goodbye cruel world\n");
+    }
+
+    function read($id): string|false {
+        return '';
+    }
+
+    function write($id, $session_data): bool {
+        die("write: goodbye cruel world\n");
+    }
+
+    function destroy($id): bool {
+        return true;
+    }
+
+    function gc($maxlifetime): int {
+        return 1;
+    }
 }
 
-function close() {
-    die("close: goodbye cruel world\n");
-}
-
-function read($id) {
-    return '';
-}
-
-function write($id, $session_data) {
-    die("write: goodbye cruel world\n");
-}
-
-function destroy($id) {
-    return true;
-}
-
-function gc($maxlifetime) {
-    return true;
-}
-
-session_set_save_handler('open', 'close', 'read', 'write', 'destroy', 'gc');
+session_set_save_handler(new MySessionHandler());
 session_start();
 session_write_close();
 echo "um, hi\n";

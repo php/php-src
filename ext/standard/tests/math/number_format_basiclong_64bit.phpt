@@ -12,10 +12,12 @@ define("MAX_32Bit", 2147483647);
 define("MIN_64Bit", -9223372036854775807 - 1);
 define("MIN_32Bit", -2147483647 - 1);
 
-$longVals = array(
+$numbers = array(
     MAX_64Bit, MIN_64Bit, MAX_32Bit, MIN_32Bit, MAX_64Bit - MAX_32Bit, MIN_64Bit - MIN_32Bit,
     MAX_32Bit + 1, MIN_32Bit - 1, MAX_32Bit * 2, (MAX_32Bit * 2) + 1, (MAX_32Bit * 2) - 1,
-    MAX_64Bit -1, MAX_64Bit + 1, MIN_64Bit + 1, MIN_64Bit - 1
+    MAX_64Bit - 1, MAX_64Bit + 1, MIN_64Bit + 1, MIN_64Bit - 1,
+    // floats rounded as int
+    MAX_64Bit - 1024.0, MIN_64Bit + 1024.0
 );
 
 $precisions = array(
@@ -31,12 +33,12 @@ $precisions = array(
     PHP_INT_MIN,
 );
 
-foreach ($longVals as $longVal) {
+foreach ($numbers as $number) {
     echo "--- testing: ";
-    var_dump($longVal);
+    var_dump($number);
     foreach ($precisions as $precision) {
         echo "... with precision " . $precision . ": ";
-        var_dump(number_format($longVal, $precision));
+        var_dump(number_format($number, $precision));
     }
 }
 
@@ -199,8 +201,30 @@ foreach ($longVals as $longVal) {
 --- testing: float(-9.223372036854776E+18)
 ... with precision 5: string(32) "-9,223,372,036,854,775,808.00000"
 ... with precision 0: string(26) "-9,223,372,036,854,775,808"
-... with precision -1: string(26) "-9,223,372,036,854,775,808"
-... with precision -5: string(26) "-9,223,372,036,854,800,384"
+... with precision -1: string(26) "-9,223,372,036,854,775,810"
+... with precision -5: string(26) "-9,223,372,036,854,800,000"
+... with precision -10: string(26) "-9,223,372,040,000,000,000"
+... with precision -11: string(26) "-9,223,372,000,000,000,000"
+... with precision -17: string(26) "-9,200,000,000,000,000,000"
+... with precision -19: string(27) "-10,000,000,000,000,000,000"
+... with precision -20: string(1) "0"
+... with precision -9223372036854775808: string(1) "0"
+--- testing: float(9.223372036854775E+18)
+... with precision 5: string(31) "9,223,372,036,854,774,784.00000"
+... with precision 0: string(25) "9,223,372,036,854,774,784"
+... with precision -1: string(25) "9,223,372,036,854,774,780"
+... with precision -5: string(25) "9,223,372,036,854,800,000"
+... with precision -10: string(25) "9,223,372,040,000,000,000"
+... with precision -11: string(25) "9,223,372,000,000,000,000"
+... with precision -17: string(25) "9,200,000,000,000,000,000"
+... with precision -19: string(26) "10,000,000,000,000,000,000"
+... with precision -20: string(1) "0"
+... with precision -9223372036854775808: string(1) "0"
+--- testing: float(-9.223372036854775E+18)
+... with precision 5: string(32) "-9,223,372,036,854,774,784.00000"
+... with precision 0: string(26) "-9,223,372,036,854,774,784"
+... with precision -1: string(26) "-9,223,372,036,854,774,780"
+... with precision -5: string(26) "-9,223,372,036,854,800,000"
 ... with precision -10: string(26) "-9,223,372,040,000,000,000"
 ... with precision -11: string(26) "-9,223,372,000,000,000,000"
 ... with precision -17: string(26) "-9,200,000,000,000,000,000"

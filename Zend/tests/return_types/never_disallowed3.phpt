@@ -1,5 +1,5 @@
 --TEST--
-never return type: unacceptable cases: implicit return
+never return type: unacceptable cases: implicit return in a function
 --FILE--
 <?php
 

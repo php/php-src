@@ -32,6 +32,7 @@ extern const mbfl_encoding mbfl_encoding_euc_kr;
 extern const mbfl_encoding mbfl_encoding_uhc;
 
 extern const mbfl_encoding mbfl_encoding_gb18030;
+extern const mbfl_encoding mbfl_encoding_gb18030_2022;
 extern const mbfl_encoding mbfl_encoding_cp936;
 extern const mbfl_encoding mbfl_encoding_big5;
 extern const mbfl_encoding mbfl_encoding_cp950;

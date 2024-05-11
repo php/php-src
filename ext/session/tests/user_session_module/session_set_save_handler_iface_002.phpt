@@ -78,8 +78,10 @@ try {
 
 session_start();
 ?>
---EXPECT--
+--EXPECTF--
 *** Testing session_set_save_handler() function: interface wrong ***
+
+Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
 bool(true)
 session_set_save_handler(): Argument #1 ($open) must be of type SessionHandlerInterface, MySession2 given
 good handler writing

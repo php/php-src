@@ -12,7 +12,7 @@ const AF_UNIX = UNKNOWN;
  * @cvalue AF_INET
  */
 const AF_INET = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue AF_INET6
@@ -52,6 +52,19 @@ const SOCK_SEQPACKET = UNKNOWN;
  * @cvalue SOCK_RDM
  */
 const SOCK_RDM = UNKNOWN;
+#endif
+#ifdef SOCK_CONN_DGRAM
+/**
+ * @var int
+ * @cvalue SOCK_CONN_DGRAM
+ */
+const SOCK_CONN_DGRAM = UNKNOWN;
+/**
+ * is an alias of SOCK_CONN_DGRAM
+ * @var int
+ * @cvalue SOCK_DCCP
+ */
+const SOCK_DCCP = UNKNOWN;
 #endif
 
 /**
@@ -397,6 +410,13 @@ const SO_MEMINFO = UNKNOWN;
  */
 const SO_BPF_EXTENSIONS = UNKNOWN;
 #endif
+#ifdef SO_EXCLBIND
+/**
+ * @var int
+ * @cvalue SO_EXCLBIND
+ */
+const SO_EXCLBIND = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -531,6 +551,13 @@ const SKF_AD_MAX = UNKNOWN;
  */
 const TCP_CONGESTION = UNKNOWN;
 #endif
+#ifdef TCP_SYNCNT
+/**
+ * @var int
+ * @cvalue TCP_SYNCNT
+ */
+const TCP_SYNCNT = UNKNOWN;
+#endif
 #ifdef SO_ZEROCOPY
 /**
  * @var int
@@ -649,7 +676,7 @@ const IP_MULTICAST_LOOP = UNKNOWN;
  */
 const IP_BIND_ADDRESS_NO_PORT = UNKNOWN;
 #endif
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_MULTICAST_IF
@@ -1542,7 +1569,7 @@ const SOCKET_NO_ADDRESS = UNKNOWN;
  * @cvalue IPPROTO_IP
  */
 const IPPROTO_IP = UNKNOWN;
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPPROTO_IPV6
@@ -1568,7 +1595,7 @@ const SOL_UDP = UNKNOWN;
 const SOL_UDPLITE = UNKNOWN;
 #endif
 
-#if HAVE_IPV6
+#ifdef HAVE_IPV6
 /**
  * @var int
  * @cvalue IPV6_UNICAST_HOPS
@@ -1591,14 +1618,14 @@ const AI_CANONNAME = UNKNOWN;
  * @cvalue AI_NUMERICHOST
  */
 const AI_NUMERICHOST = UNKNOWN;
-#if HAVE_AI_V4MAPPED
+#ifdef AI_V4MAPPED
 /**
  * @var int
  * @cvalue AI_V4MAPPED
  */
 const AI_V4MAPPED = UNKNOWN;
 #endif
-#if HAVE_AI_ALL
+#ifdef AI_ALL
 /**
  * @var int
  * @cvalue AI_ALL
@@ -1610,7 +1637,7 @@ const AI_ALL = UNKNOWN;
  * @cvalue AI_ADDRCONFIG
  */
 const AI_ADDRCONFIG = UNKNOWN;
-#if HAVE_AI_IDN
+#ifdef AI_IDN
 /**
  * @var int
  * @cvalue AI_IDN
@@ -1748,6 +1775,20 @@ const SO_DETACH_FILTER = UNKNOWN;
  */
 const SO_DETACH_BPF = UNKNOWN;
 #endif
+#if defined(SO_EXCLUSIVEADDRUSE)
+/**
+ * @var int
+ * @cvalue SO_EXCLUSIVEADDRUSE
+ */
+const SO_EXCLUSIVEADDRUSE = UNKNOWN;
+#endif
+#if defined(SO_NOSIGPIPE)
+/**
+ * @var int
+ * @cvalue SO_NOSIGPIPE
+ */
+const SO_NOSIGPIPE = UNKNOWN;
+#endif
 #if defined(TCP_QUICKACK)
 /**
  * @var int
@@ -1851,7 +1892,7 @@ final class AddressInfo
 
 function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
-function socket_create_listen(int $port, int $backlog = 128): Socket|false {}
+function socket_create_listen(int $port, int $backlog = SOMAXCONN): Socket|false {}
 
 function socket_accept(Socket $socket): Socket|false {}
 

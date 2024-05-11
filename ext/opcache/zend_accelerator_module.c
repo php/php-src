@@ -41,7 +41,17 @@
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
 #define MAX_ACCEL_FILES 1000000
-#define MAX_INTERNED_STRINGS_BUFFER_SIZE ((zend_long)((UINT32_MAX-PLATFORM_ALIGNMENT-sizeof(zend_accel_shared_globals))/(1024*1024)))
+/* Max value of opcache.interned_strings_buffer */
+#define MAX_INTERNED_STRINGS_BUFFER_SIZE ((zend_long)MIN( \
+	MIN( \
+		/* STRTAB_STR_TO_POS() must not overflow (zend_string_table_pos_t) */ \
+		(ZEND_STRING_TABLE_POS_MAX - sizeof(zend_string_table)) / (1024 * 1024 / ZEND_STRING_TABLE_POS_ALIGNMENT), \
+		/* nTableMask must not overflow (uint32_t) */ \
+		UINT32_MAX / (32 * 1024 * sizeof(zend_string_table_pos_t)) \
+	), \
+	/* SHM allocation must not overflow (size_t) */ \
+	(SIZE_MAX - sizeof(zend_accel_shared_globals)) / (1024 * 1024) \
+))
 #define TOKENTOSTR(X) #X
 
 static zif_handler orig_file_exists = NULL;
@@ -73,7 +83,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 		return FAILURE;
 	}
 	if (UNEXPECTED(memsize > ZEND_LONG_MAX / (1024 * 1024))) {
-		*p = ZEND_LONG_MAX;
+		*p = ZEND_LONG_MAX & ~(1024 * 1024 - 1);
 	} else {
 		*p = memsize * (1024 * 1024);
 	}
@@ -317,7 +327,7 @@ ZEND_INI_BEGIN()
 	STD_PHP_INI_ENTRY("opcache.cache_id"                      , ""    , PHP_INI_SYSTEM, OnUpdateString,           accel_directives.cache_id,               zend_accel_globals, accel_globals)
 #endif
 #ifdef HAVE_JIT
-	STD_PHP_INI_ENTRY("opcache.jit"                           , "tracing",                    PHP_INI_ALL,    OnUpdateJit,      options,               zend_jit_globals, jit_globals)
+	STD_PHP_INI_ENTRY("opcache.jit"                           , "disable",                    PHP_INI_ALL,    OnUpdateJit,      options,               zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_buffer_size"               , ZEND_JIT_DEFAULT_BUFFER_SIZE, PHP_INI_SYSTEM, OnUpdateLong,     buffer_size,           zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_debug"                     , "0",                          PHP_INI_ALL,    OnUpdateJitDebug, debug,                 zend_jit_globals, jit_globals)
 	STD_PHP_INI_ENTRY("opcache.jit_bisect_limit"              , "0",                          PHP_INI_ALL,    OnUpdateLong,     bisect_limit,          zend_jit_globals, jit_globals)

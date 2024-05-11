@@ -1,9 +1,7 @@
 --TEST--
 Bug #77978 (Dirname ending in colon unzips to wrong dir)
---SKIPIF--
-<?php
-if (!extension_loaded("zip")) die("skip zip extension not available");
-?>
+--EXTENSIONS--
+zip
 --FILE--
 <?php
 $file = __DIR__ . "/bug77978.zip";

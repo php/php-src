@@ -7,6 +7,9 @@ gd
 --SKIPIF--
 <?php
     if (!function_exists("imagecreatetruecolor")) die("skip GD Version not compatible");
+    if (!(imagetypes() & IMG_PNG)) {
+        die("skip No PNG support");
+    }
 ?>
 --FILE--
 <?php

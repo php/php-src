@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 141073d610f862b525406fb7f48ac58b6691080e */
+ * Stub hash: 03c07f68bea7d7b96e6dc11f180f45663b859ed3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_language, 0, 0, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, language, IS_STRING, 1, "null")
@@ -118,6 +118,20 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mb_strtolower arginfo_mb_strtoupper
 
+#define arginfo_mb_ucfirst arginfo_mb_strtoupper
+
+#define arginfo_mb_lcfirst arginfo_mb_strtoupper
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_trim, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, characters, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+#define arginfo_mb_ltrim arginfo_mb_trim
+
+#define arginfo_mb_rtrim arginfo_mb_trim
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_detect_encoding, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, encodings, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_NULL, "null")
@@ -177,7 +191,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_send_mail, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, additional_params, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_get_info, 0, 0, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_get_info, 0, 0, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_STRING, 0, "\"all\"")
 ZEND_END_ARG_INFO()
 
@@ -310,7 +324,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_regex_set_options, 0, 0, IS_S
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(mb_language);
 ZEND_FUNCTION(mb_internal_encoding);
 ZEND_FUNCTION(mb_http_input);
@@ -339,6 +352,11 @@ ZEND_FUNCTION(mb_convert_encoding);
 ZEND_FUNCTION(mb_convert_case);
 ZEND_FUNCTION(mb_strtoupper);
 ZEND_FUNCTION(mb_strtolower);
+ZEND_FUNCTION(mb_ucfirst);
+ZEND_FUNCTION(mb_lcfirst);
+ZEND_FUNCTION(mb_trim);
+ZEND_FUNCTION(mb_ltrim);
+ZEND_FUNCTION(mb_rtrim);
 ZEND_FUNCTION(mb_detect_encoding);
 ZEND_FUNCTION(mb_list_encodings);
 ZEND_FUNCTION(mb_encoding_aliases);
@@ -404,7 +422,6 @@ ZEND_FUNCTION(mb_ereg_search_setpos);
 ZEND_FUNCTION(mb_regex_set_options);
 #endif
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_language, arginfo_mb_language)
 	ZEND_FE(mb_internal_encoding, arginfo_mb_internal_encoding)
@@ -434,6 +451,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mb_convert_case, arginfo_mb_convert_case)
 	ZEND_FE(mb_strtoupper, arginfo_mb_strtoupper)
 	ZEND_FE(mb_strtolower, arginfo_mb_strtolower)
+	ZEND_FE(mb_ucfirst, arginfo_mb_ucfirst)
+	ZEND_FE(mb_lcfirst, arginfo_mb_lcfirst)
+	ZEND_FE(mb_trim, arginfo_mb_trim)
+	ZEND_FE(mb_ltrim, arginfo_mb_ltrim)
+	ZEND_FE(mb_rtrim, arginfo_mb_rtrim)
 	ZEND_FE(mb_detect_encoding, arginfo_mb_detect_encoding)
 	ZEND_FE(mb_list_encodings, arginfo_mb_list_encodings)
 	ZEND_FE(mb_encoding_aliases, arginfo_mb_encoding_aliases)

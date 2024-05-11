@@ -908,11 +908,10 @@ static void user_space_stream_notifier_dtor(php_stream_notifier *notifier)
 	}
 }
 
-static int parse_context_options(php_stream_context *context, HashTable *options)
+static zend_result parse_context_options(php_stream_context *context, HashTable *options)
 {
 	zval *wval, *oval;
 	zend_string *wkey, *okey;
-	int ret = SUCCESS;
 
 	ZEND_HASH_FOREACH_STR_KEY_VAL(options, wkey, wval) {
 		ZVAL_DEREF(wval);
@@ -930,12 +929,11 @@ static int parse_context_options(php_stream_context *context, HashTable *options
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	return ret;
+	return SUCCESS;
 }
 
-static int parse_context_params(php_stream_context *context, HashTable *params)
+static zend_result parse_context_params(php_stream_context *context, HashTable *params)
 {
-	int ret = SUCCESS;
 	zval *tmp;
 
 	if (NULL != (tmp = zend_hash_str_find(params, "notification", sizeof("notification")-1))) {
@@ -959,7 +957,7 @@ static int parse_context_params(php_stream_context *context, HashTable *params)
 		}
 	}
 
-	return ret;
+	return SUCCESS;
 }
 
 /* given a zval which is either a stream or a context, return the underlying
@@ -1023,6 +1021,15 @@ PHP_FUNCTION(stream_context_set_option)
 	size_t optionname_len;
 	zval *zvalue = NULL;
 
+	if (ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Calling stream_context_set_option() with 2 arguments is deprecated, "
+			"use stream_context_set_options() instead"
+		);
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_RESOURCE(zcontext)
 		Z_PARAM_ARRAY_HT_OR_STR(options, wrappername)
@@ -1048,7 +1055,11 @@ PHP_FUNCTION(stream_context_set_option)
 			RETURN_THROWS();
 		}
 
-		RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
+		if (parse_context_options(context, options) == FAILURE) {
+			RETURN_THROWS();
+		}
+
+		RETURN_TRUE;
 	} else {
 		if (!optionname) {
 			zend_argument_value_error(3, "cannot be null when argument #2 ($wrapper_or_options) is a string");
@@ -1081,7 +1092,11 @@ PHP_FUNCTION(stream_context_set_options)
 		RETURN_THROWS();
 	}
 
-	RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
+	if (parse_context_options(context, options) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_TRUE;
 }
 
 /* {{{ Set parameters for a file context */
@@ -1102,7 +1117,11 @@ PHP_FUNCTION(stream_context_set_params)
 		RETURN_THROWS();
 	}
 
-	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
+	if (parse_context_params(context, params) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1197,11 +1216,15 @@ PHP_FUNCTION(stream_context_create)
 	context = php_stream_context_alloc();
 
 	if (options) {
-		parse_context_options(context, options);
+		if (parse_context_options(context, options) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	if (params) {
-		parse_context_params(context, params);
+		if (parse_context_params(context, params) == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 
 	RETURN_RES(context->res);
@@ -1613,9 +1636,6 @@ PHP_FUNCTION(stream_is_local)
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
-		if (stream == NULL) {
-			RETURN_FALSE;
-		}
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {

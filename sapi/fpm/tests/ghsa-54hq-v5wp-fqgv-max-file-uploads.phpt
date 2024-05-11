@@ -45,7 +45,7 @@ $tester->close();
 
 ?>
 --EXPECT--
-Warning: Maximum number of allowable file uploads has been exceeded in Unknown on line 0
+Warning: PHP Request Startup: Maximum number of allowable file uploads has been exceeded in Unknown on line 0
 int(5)
 --CLEAN--
 <?php

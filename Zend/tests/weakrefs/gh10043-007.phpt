@@ -27,6 +27,7 @@ unset($container, $canary);
 gc_collect_cycles();
 echo 2;
 
+?>
 --EXPECT--
 1container
 canary

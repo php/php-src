@@ -29,6 +29,7 @@ var_dump(ini_get("dl_test.long"));
 var_dump(ini_get("dl_test.string"));
 
 echo "OK\n";
+?>
 --EXPECT--
 bool(true)
 The extension dl_test is loaded and working!

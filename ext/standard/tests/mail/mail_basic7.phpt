@@ -258,4 +258,4 @@ Subject: Test Subject
 foo9: %&$#!
 
 A Message
-ValueError: Header "foo10" has invalid format, or contains invalid characters
+ValueError: Header "foo10" contains NULL character that is not allowed in the header

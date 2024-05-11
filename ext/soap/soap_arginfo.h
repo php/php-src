@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4dfc98696d4bc5e36610bdf03de906dbae049cf3 */
+ * Stub hash: 81d0b54b93829f3cd4b12731f6b6ae140b06a0f1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_use_soap_error_handler, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
@@ -136,7 +136,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SoapClient___set
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, location, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-
 ZEND_FUNCTION(use_soap_error_handler);
 ZEND_FUNCTION(is_soap_fault);
 ZEND_METHOD(SoapParam, __construct);
@@ -168,25 +167,29 @@ ZEND_METHOD(SoapClient, __getCookies);
 ZEND_METHOD(SoapClient, __setSoapHeaders);
 ZEND_METHOD(SoapClient, __setLocation);
 
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(use_soap_error_handler, arginfo_use_soap_error_handler)
 	ZEND_FE(is_soap_fault, arginfo_is_soap_fault)
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_Soap_Url_methods[] = {
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Soap_Sdl_methods[] = {
+	ZEND_FE_END
+};
 
 static const zend_function_entry class_SoapParam_methods[] = {
 	ZEND_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SoapHeader_methods[] = {
 	ZEND_ME(SoapHeader, __construct, arginfo_class_SoapHeader___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SoapFault_methods[] = {
 	ZEND_ME(SoapFault, __construct, arginfo_class_SoapFault___construct, ZEND_ACC_PUBLIC)
@@ -194,12 +197,10 @@ static const zend_function_entry class_SoapFault_methods[] = {
 	ZEND_FE_END
 };
 
-
 static const zend_function_entry class_SoapVar_methods[] = {
 	ZEND_ME(SoapVar, __construct, arginfo_class_SoapVar___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SoapServer_methods[] = {
 	ZEND_ME(SoapServer, __construct, arginfo_class_SoapServer___construct, ZEND_ACC_PUBLIC)
@@ -213,7 +214,6 @@ static const zend_function_entry class_SoapServer_methods[] = {
 	ZEND_ME(SoapServer, handle, arginfo_class_SoapServer_handle, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SoapClient_methods[] = {
 	ZEND_ME(SoapClient, __construct, arginfo_class_SoapClient___construct, ZEND_ACC_PUBLIC)
@@ -316,6 +316,28 @@ static void register_soap_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv2", SOAP_SSL_METHOD_SSLv2, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv3", SOAP_SSL_METHOD_SSLv3, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SOAP_SSL_METHOD_SSLv23", SOAP_SSL_METHOD_SSLv23, CONST_PERSISTENT);
+}
+
+static zend_class_entry *register_class_Soap_Url(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", class_Soap_Url_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Soap_Sdl(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", class_Soap_Sdl_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class_SoapParam(void)
@@ -541,13 +563,14 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property_sdl_default_value;
 	ZVAL_NULL(&property_sdl_default_value);
 	zend_string *property_sdl_name = zend_string_init("sdl", sizeof("sdl") - 1, 1);
-	zend_declare_typed_property(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
+	zend_string *property_sdl_class_Soap_Sdl = zend_string_init("Soap\\Sdl", sizeof("Soap\\Sdl")-1, 1);
+	zend_declare_typed_property(class_entry, property_sdl_name, &property_sdl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_sdl_class_Soap_Sdl, 0, MAY_BE_NULL));
 	zend_string_release(property_sdl_name);
 
 	zval property_typemap_default_value;
 	ZVAL_NULL(&property_typemap_default_value);
 	zend_string *property_typemap_name = zend_string_init("typemap", sizeof("typemap") - 1, 1);
-	zend_declare_typed_property(class_entry, property_typemap_name, &property_typemap_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
+	zend_declare_typed_property(class_entry, property_typemap_name, &property_typemap_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ARRAY|MAY_BE_NULL));
 	zend_string_release(property_typemap_name);
 
 	zval property_httpsocket_default_value;
@@ -559,7 +582,8 @@ static zend_class_entry *register_class_SoapClient(void)
 	zval property_httpurl_default_value;
 	ZVAL_NULL(&property_httpurl_default_value);
 	zend_string *property_httpurl_name = zend_string_init("httpurl", sizeof("httpurl") - 1, 1);
-	zend_declare_typed_property(class_entry, property_httpurl_name, &property_httpurl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_NONE(0));
+	zend_string *property_httpurl_class_Soap_Url = zend_string_init("Soap\\\125rl", sizeof("Soap\\\125rl")-1, 1);
+	zend_declare_typed_property(class_entry, property_httpurl_name, &property_httpurl_default_value, ZEND_ACC_PRIVATE, NULL, (zend_type) ZEND_TYPE_INIT_CLASS(property_httpurl_class_Soap_Url, 0, MAY_BE_NULL));
 	zend_string_release(property_httpurl_name);
 
 	zval property__login_default_value;

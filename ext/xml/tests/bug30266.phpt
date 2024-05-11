@@ -42,6 +42,7 @@ class XML_Parser
 $p1 = new Xml_Parser();
 try {
     $p1->parse('<tag1><tag2></tag2></tag1>');
+    echo "Exception swallowed\n";
 } catch (Exception $e) {
     echo "OK\n";
 }

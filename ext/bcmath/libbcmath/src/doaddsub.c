@@ -51,14 +51,6 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	sum_digits = MAX (n1->n_len, n2->n_len) + 1;
 	sum = bc_new_num (sum_digits, MAX(sum_scale, scale_min));
 
-	/* Zero extra digits made by scale_min. */
-	if (scale_min > sum_scale) {
-		sumptr = (char *) (sum->n_value + sum_scale + sum_digits);
-		for (int count = scale_min - sum_scale; count > 0; count--) {
-			*sumptr++ = 0;
-		}
-	}
-
 	/* Start with the fraction part.  Initialize the pointers. */
 	n1bytes = n1->n_scale;
 	n2bytes = n2->n_scale;
@@ -132,34 +124,25 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num diff;
-	size_t diff_scale, diff_len;
-	size_t min_scale, min_len;
-	size_t borrow, count;
+	/* The caller is guaranteed that n1 is always large. */
+	size_t diff_len = EXPECTED(n1->n_len >= n2->n_len) ? n1->n_len : n2->n_len;
+	size_t diff_scale = MAX(n1->n_scale, n2->n_scale);
+	/* Same condition as EXPECTED before, but using EXPECTED again will make it slower. */
+	size_t min_len = n1->n_len >= n2->n_len ? n2->n_len : n1->n_len;
+	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
+	size_t min_bytes = min_len + min_scale;
+	size_t borrow = 0;
+	size_t count;
 	int val;
 	char *n1ptr, *n2ptr, *diffptr;
 
 	/* Allocate temporary storage. */
-	diff_len = MAX(n1->n_len, n2->n_len);
-	diff_scale = MAX(n1->n_scale, n2->n_scale);
-	min_len = MIN(n1->n_len, n2->n_len);
-	min_scale = MIN(n1->n_scale, n2->n_scale);
 	diff = bc_new_num (diff_len, MAX(diff_scale, scale_min));
-
-	/* Zero extra digits made by scale_min. */
-	if (scale_min > diff_scale) {
-		diffptr = (char *) (diff->n_value + diff_len + diff_scale);
-		for (count = scale_min - diff_scale; count > 0; count--) {
-			*diffptr++ = 0;
-		}
-	}
 
 	/* Initialize the subtract. */
 	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
 	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
 	diffptr = (char *) (diff->n_value + diff_len + diff_scale - 1);
-
-	/* Subtract the numbers. */
-	borrow = 0;
 
 	/* Take care of the longer scaled number. */
 	if (n1->n_scale != min_scale) {
@@ -182,7 +165,59 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Now do the equal length scale and integer parts. */
-	for (count = 0; count < min_len + min_scale; count++) {
+	count = 0;
+	/* Uses SIMD to perform calculations at high speed. */
+	if (min_bytes >= sizeof(BC_UINT_T)) {
+		diffptr++;
+		n1ptr++;
+		n2ptr++;
+		while (count + sizeof(BC_UINT_T) <= min_bytes) {
+			diffptr -= sizeof(BC_UINT_T);
+			n1ptr -= sizeof(BC_UINT_T);
+			n2ptr -= sizeof(BC_UINT_T);
+
+			BC_UINT_T n1bytes;
+			BC_UINT_T n2bytes;
+			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
+			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
+
+#if BC_LITTLE_ENDIAN
+			/* Little endian requires changing the order of bytes. */
+			n1bytes = BC_BSWAP(n1bytes);
+			n2bytes = BC_BSWAP(n2bytes);
+#endif
+
+			n1bytes -= n2bytes + borrow;
+			/* If the most significant bit is 1, a carry down has occurred. */
+			bool tmp_borrow = n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1));
+
+			/*
+			 * Check the most significant bit of each of the bytes, and if it is 1, a carry down has
+			 * occurred. When carrying down occurs, due to the difference between decimal and hexadecimal
+			 * numbers, an extra 6 is added to the lower 4 bits.
+			 * Therefore, for a byte that has been carried down, set all the upper 4 bits to 0 and subtract
+			 * 6 from the lower 4 bits to adjust it to the correct value as a decimal number.
+			 */
+			BC_UINT_T borrow_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0x06;
+			n1bytes = (n1bytes & SWAR_REPEAT(0x0F)) - borrow_mask;
+
+#if BC_LITTLE_ENDIAN
+			/* Little endian requires changing the order of bytes back. */
+			n1bytes = BC_BSWAP(n1bytes);
+#endif
+
+			memcpy(diffptr, &n1bytes, sizeof(n1bytes));
+
+			borrow = tmp_borrow;
+			count += sizeof(BC_UINT_T);
+		}
+		diffptr--;
+		n1ptr--;
+		n2ptr--;
+	}
+
+	/* Calculate the remaining bytes that are less than the size of BC_UINT_T using a normal loop. */
+	for (; count < min_bytes; count++) {
 		val = *n1ptr-- - *n2ptr-- - borrow;
 		if (val < 0) {
 			val += BASE;

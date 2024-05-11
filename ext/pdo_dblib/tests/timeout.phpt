@@ -6,15 +6,18 @@ pdo_dblib
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
 
+$db = getDbConnection();
+
 $sql = 'WAITFOR DELAY \'00:00:02\'';
 
 // regular timeout attribute, set after instance created, will affect query timeout, causing this query to fail
-$db = new PDO($dsn, $user, $pass);
+$db = getDbConnection();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $db->setAttribute(PDO::ATTR_TIMEOUT, 1);
 $stmt = $db->prepare($sql);
@@ -28,7 +31,7 @@ if (!$stmt->execute()) {
 }
 
 // pdo_dblib-specific timeout attribute, set after instance created, will control query timeout, causing this query to fail
-$db = new PDO($dsn, $user, $pass);
+$db = getDbConnection();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 $db->setAttribute(PDO::DBLIB_ATTR_QUERY_TIMEOUT, 1);
 $stmt = $db->prepare($sql);
@@ -42,7 +45,7 @@ if (!$stmt->execute()) {
 }
 
 // regular timeout attribute will affect query timeout, causing this query to fail
-$db = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::ATTR_TIMEOUT => 1]);
+$db = getDbConnection(PDO::class, [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::ATTR_TIMEOUT => 1]);
 $stmt = $db->prepare($sql);
 if (!$stmt->execute()) {
     echo "OK\n";
@@ -54,7 +57,7 @@ if (!$stmt->execute()) {
 }
 
 // pdo_dblib-specific timeout attribute will control query timeout, causing this query to fail
-$db = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::DBLIB_ATTR_QUERY_TIMEOUT => 1]);
+$db = getDbConnection(PDO::class, [PDO::ATTR_ERRMODE => PDO::ERRMODE_SILENT, PDO::DBLIB_ATTR_QUERY_TIMEOUT => 1]);
 $stmt = $db->prepare($sql);
 if (!$stmt->execute()) {
     echo "OK\n";

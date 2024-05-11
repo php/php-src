@@ -67,8 +67,16 @@ static void observer_show_opcode(zend_execute_data *execute_data)
 	php_printf("%*s<!-- opcode: '%s' -->\n", 2 * ZT_G(observer_nesting_depth), "", zend_get_opcode_name(EX(opline)->opcode));
 }
 
+static inline void assert_observer_opline(zend_execute_data *execute_data) {
+	ZEND_ASSERT(!ZEND_USER_CODE(EX(func)->type) ||
+		(EX(opline) >= EX(func)->op_array.opcodes && EX(opline) < EX(func)->op_array.opcodes + EX(func)->op_array.last) ||
+		(EX(opline) >= EG(exception_op) && EX(opline) < EG(exception_op) + 3));
+}
+
 static void observer_begin(zend_execute_data *execute_data)
 {
+	assert_observer_opline(execute_data);
+
 	if (!ZT_G(observer_show_output)) {
 		return;
 	}
@@ -112,6 +120,8 @@ static void get_retval_info(zval *retval, smart_str *buf)
 
 static void observer_end(zend_execute_data *execute_data, zval *retval)
 {
+	assert_observer_opline(execute_data);
+
 	if (!ZT_G(observer_show_output)) {
 		return;
 	}
@@ -297,8 +307,9 @@ static ZEND_INI_MH(zend_test_observer_OnUpdateCommaList)
 	if (stage != PHP_INI_STAGE_STARTUP && stage != PHP_INI_STAGE_ACTIVATE && stage != PHP_INI_STAGE_DEACTIVATE && stage != PHP_INI_STAGE_SHUTDOWN) {
 		ZEND_HASH_FOREACH_STR_KEY(*p, funcname) {
 			if ((func = zend_hash_find_ptr(EG(function_table), funcname))) {
-				zend_observer_remove_begin_handler(func, observer_begin);
-				zend_observer_remove_end_handler(func, observer_end);
+				void *old_handler;
+				zend_observer_remove_begin_handler(func, observer_begin, (zend_observer_fcall_begin_handler *)&old_handler);
+				zend_observer_remove_end_handler(func, observer_end, (zend_observer_fcall_end_handler *)&old_handler);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

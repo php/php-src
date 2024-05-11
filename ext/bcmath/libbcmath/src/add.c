@@ -39,7 +39,7 @@
    N1 is added to N2 and the result placed into RESULT.  SCALE_MIN
    is the minimum scale for the result. */
 
-void bc_add(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
+bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num sum = NULL;
 
@@ -49,7 +49,7 @@ void bc_add(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 	} else {
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
-		switch (_bc_do_compare(n1, n2, false, false)) {
+		switch (_bc_do_compare(n1, n2, false)) {
 			case -1:
 				/* n1 is less than n2, subtract n1 from n2. */
 				sum = _bc_do_sub(n2, n1, scale_min);
@@ -58,7 +58,6 @@ void bc_add(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 			case 0:
 				/* They are equal! return zero with the correct scale! */
 				sum = bc_new_num (1, MAX(scale_min, MAX(n1->n_scale, n2->n_scale)));
-				memset(sum->n_value, 0, sum->n_scale + 1);
 				break;
 			case 1:
 				/* n2 is less than n1, subtract n2 from n1. */
@@ -67,7 +66,5 @@ void bc_add(bc_num n1, bc_num n2, bc_num *result, size_t scale_min)
 		}
 	}
 
-	/* Clean up and return. */
-	bc_free_num (result);
-	*result = sum;
+	return sum;
 }

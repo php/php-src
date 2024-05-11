@@ -31,6 +31,7 @@
 
 /* Needed for gmp_random() */
 #include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #define GMP_ROUND_ZERO      0
 #define GMP_ROUND_PLUSINF   1
@@ -582,7 +583,13 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	const char *num_str = ZSTR_VAL(val);
 	bool skip_lead = false;
 
-	if (ZSTR_LEN(val) >= 2 && num_str[0] == '0') {
+	size_t num_len = ZSTR_LEN(val);
+	while (isspace(*num_str)) {
+		++num_str;
+		--num_len;
+	}
+
+	if (num_len >= 2 && num_str[0] == '0') {
 		if ((base == 0 || base == 16) && (num_str[1] == 'x' || num_str[1] == 'X')) {
 			base = 16;
 			skip_lead = true;
@@ -865,7 +872,7 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 static bool gmp_verify_base(zend_long base, uint32_t arg_num)
 {
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		zend_argument_value_error(arg_num, "must be between 2 and %d", GMP_MAX_BASE);
+		zend_argument_value_error(arg_num, "must be 0 or between 2 and %d", GMP_MAX_BASE);
 		return false;
 	}
 
@@ -1584,11 +1591,15 @@ ZEND_FUNCTION(gmp_invert)
 		RETURN_THROWS();
 	}
 
+	if (Z_TYPE_P(b_arg) == IS_LONG && Z_LVAL_P(b_arg) == 0) {
+		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
+		RETURN_THROWS();
+	}
+
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a, 2);
 
-	// TODO Early check if b_arg IS_LONG?
-	if (0 == mpz_cmp_ui(gmpnum_b, 0)) {
+	if (!mpz_cmp_ui(gmpnum_b, 0)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 		FREE_GMP_TEMP(temp_a);
 		FREE_GMP_TEMP(temp_b);
@@ -1729,9 +1740,9 @@ static void gmp_init_random(void)
 		/* Initialize */
 		gmp_randinit_mt(GMPG(rand_state));
 		/* Seed */
-		zend_long seed = 0;
-		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
-			seed = GENERATE_SEED();
+		unsigned long int seed = 0;
+		if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+			seed = (unsigned long int)php_random_generate_fallback_seed();
 		}
 		gmp_randseed_ui(GMPG(rand_state), seed);
 

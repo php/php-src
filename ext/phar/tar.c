@@ -19,7 +19,7 @@
 
 #include "phar_internal.h"
 
-static uint32_t phar_tar_number(char *buf, size_t len) /* {{{ */
+static uint32_t phar_tar_number(const char *buf, size_t len) /* {{{ */
 {
 	uint32_t num = 0;
 	size_t i = 0;
@@ -146,7 +146,6 @@ int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t a
 	if (phar->is_brandnew) {
 		phar->is_tar = 1;
 		phar->is_zip = 0;
-		phar->internal_file_start = 0;
 		return SUCCESS;
 	}
 

@@ -843,7 +843,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	res = psal;
 	while (n-- > 0) {
 		pptr = session->peername;
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6) && defined(HAVE_INET_NTOP)
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 		if (force_ipv6 && (*res)->sa_family != AF_INET6) {
 			res++;
 			continue;
@@ -859,12 +859,6 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 			res++;
 			continue;
 		}
-#else
-		if ((*res)->sa_family != AF_INET) {
-			res++;
-			continue;
-		}
-		strcat(pptr, inet_ntoa(((struct sockaddr_in*)(*res))->sin_addr));
 #endif
 		break;
 	}

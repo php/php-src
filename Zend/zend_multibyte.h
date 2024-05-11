@@ -70,7 +70,7 @@ ZEND_API zend_result zend_multibyte_parse_encoding_list(const char *encoding_lis
 
 ZEND_API const zend_encoding *zend_multibyte_get_internal_encoding(void);
 ZEND_API const zend_encoding *zend_multibyte_get_script_encoding(void);
-ZEND_API int zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size);
+ZEND_API zend_result zend_multibyte_set_script_encoding(const zend_encoding **encoding_list, size_t encoding_list_size);
 ZEND_API zend_result zend_multibyte_set_internal_encoding(const zend_encoding *encoding);
 ZEND_API zend_result zend_multibyte_set_script_encoding_by_string(const char *new_value, size_t new_value_length);
 

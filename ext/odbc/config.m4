@@ -14,7 +14,6 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
   case $ac_solid_uname_s in
     AIX) ac_solid_os=a3x;;   # a4x for AIX4/ Solid 2.3/3.0 only
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
-    IRIX) ac_solid_os=irx;;  # Solid 2.3(?)/ 3.0 only
     Linux)
       if ldd -v /bin/sh | grep GLIBC > /dev/null; then
         AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
@@ -47,8 +46,8 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
   fi
 
 dnl Check for the library files, and setup the ODBC_LIBS path.
-if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so -a \
-  ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
+if test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.so && \
+  test ! -f $1/lib${ac_solid_prefix}${ac_solid_os}${ac_solid_version}.a; then
   dnl we have an error and should bail out, as we can't find the libs!
   echo ""
   echo "*********************************************************************"
@@ -326,7 +325,6 @@ PHP_ARG_WITH([iodbc],,
     PHP_EVAL_INCLINE($ODBC_CFLAGS)
     ODBC_TYPE=iodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
-    AC_DEFINE(HAVE_ODBC2,1,[ ])
   else
     AC_MSG_RESULT(no)
   fi
@@ -397,7 +395,7 @@ PHP_ARG_WITH([dbmaker],,
       dnl check DBMaker version (from 5.0 to 2.0)
       DBMAKER_VERSION=5.0
 
-      while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION -a "$DBMAKER_VERSION" != "2.9"; do
+      while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION && test "$DBMAKER_VERSION" != "2.9"; do
         DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | $AWK '{ print $1-1;}'`
         MAJOR_V=`echo $DM_VER | $AWK '{ print $1/10; }'  | $AWK -F. '{ print $1; }'`
         MINOR_V=`echo $DM_VER | $AWK '{ print $1%10; }'`
@@ -440,7 +438,7 @@ if test "no" != "$PHP_ODBCVER"; then
     AC_DEFINE_UNQUOTED(ODBCVER, $PHP_ODBCVER, [ The highest supported ODBC version ])
   fi
 else
-  AC_DEFINE(ODBCVER, 0x0300, [ The highest supported ODBC version ])
+  AC_DEFINE(ODBCVER, 0x0350, [ The highest supported ODBC version ])
 fi
 
 dnl Extension setup
@@ -456,10 +454,10 @@ if test -n "$ODBC_TYPE"; then
   PHP_SUBST(ODBC_SHARED_LIBADD)
   PHP_SUBST(ODBC_INCDIR)
   PHP_SUBST(ODBC_LIBDIR)
-  PHP_SUBST_OLD(ODBC_CFLAGS)
-  PHP_SUBST_OLD(ODBC_LIBS)
-  PHP_SUBST_OLD(ODBC_LFLAGS)
-  PHP_SUBST_OLD(ODBC_TYPE)
+  AC_SUBST([ODBC_CFLAGS])
+  AC_SUBST([ODBC_LIBS])
+  AC_SUBST([ODBC_LFLAGS])
+  AC_SUBST([ODBC_TYPE])
 
   PHP_NEW_EXTENSION(odbc, php_odbc.c odbc_utils.c, $ext_shared,, [$ODBC_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 else

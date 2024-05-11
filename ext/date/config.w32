@@ -19,5 +19,5 @@ tl_config.WriteLine("#define timelib_strndup estrndup");
 tl_config.WriteLine("#define timelib_free    efree");
 tl_config.Close();
 
-PHP_INSTALL_HEADERS("ext/date/", "php_date.h lib/timelib.h lib/timelib_config.h");
+PHP_INSTALL_HEADERS("ext/date", "php_date.h lib/timelib.h lib/timelib_config.h");
 AC_DEFINE('HAVE_TIMELIB_CONFIG_H', 1, 'Have timelib_config.h')

@@ -98,14 +98,12 @@ static void pretty_print(const char *text)
 		} else if (UNEXPECTED(p[0] == '*') && p[1] == '*') {
 			if (bold_escape_len) {
 				in_bold = !in_bold;
-				memcpy (q, in_bold ? bold_on_escape : bold_off_escape, bold_escape_len);
-				q += bold_escape_len;
+				q = zend_mempcpy(q, in_bold ? bold_on_escape : bold_off_escape, bold_escape_len);
 				/* bold on/off has zero print width so line count is unchanged */
 			}
 			p++;
 		} else if (UNEXPECTED(p[0] == '$') && p[1] == 'P') {
-			memcpy (q, prompt_escape, prompt_escape_len);
-			q += prompt_escape_len;
+			q = zend_mempcpy(q, prompt_escape, prompt_escape_len);
 			line_count += prompt_len;
 			p++;
 		} else if (UNEXPECTED(p[0] == '\\')) {

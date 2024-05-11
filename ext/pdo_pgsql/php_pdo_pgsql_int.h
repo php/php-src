@@ -109,4 +109,14 @@ extern const php_stream_ops pdo_pgsql_lob_stream_ops;
 void pdo_libpq_version(char *buf, size_t len);
 void pdo_pgsql_close_lob_streams(pdo_dbh_t *dbh);
 
+void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAMETERS);
+void pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAMETERS);
+
 #endif /* PHP_PDO_PGSQL_INT_H */

@@ -28,13 +28,11 @@ SELECT '
 SQL;
 
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
-    case 'oci':
-        $query .= ' FROM DUAL';
-        break;
-    case 'firebird':
-        $query .= ' FROM RDB$DATABASE';
-        break;
+    case 'oci': $from = ' FROM DUAL'; break;
+    case 'firebird': $from = ' FROM RDB$DATABASE'; break;
+    default: $from = ''; break;
 }
+$query .= $from;
 
 $stmt = $db->query($query);
 var_dump($stmt->debugDumpParams());

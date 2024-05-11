@@ -653,6 +653,11 @@ PDO_API zend_result php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
 PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
 
+/* Call this in MINIT to register the PDO driver specific class entry.
+ * Registering the driver specific class entry might fail and should be reported accordingly in MINIT.
+ * Unregistering the class entry is not necessary, since php_pdo_unregister_driver() takes care of it. */
+PDO_API zend_result php_pdo_register_driver_specific_ce(const pdo_driver_t *driver, zend_class_entry *ce);
+
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables
  * according to the data you pass in and array of pdo_data_src_parser structures */

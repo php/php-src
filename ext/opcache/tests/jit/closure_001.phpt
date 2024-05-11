@@ -4,7 +4,6 @@ Closures should be always called with ZEND_ACC_CLOSURE flag set
 opcache.enable=1
 opcache.enable_cli=1
 opcache.file_update_protection=0
-opcache.jit_buffer_size=1M
 opcache.protect_memory=1
 opcache.jit_hot_func=2
 --EXTENSIONS--
@@ -31,16 +30,34 @@ var_dump($f->call($foo));
 var_dump($f->call($foo));
 var_dump($f());
 ?>
---EXPECT--
-object(Closure)#3 (1) {
+--EXPECTF--
+object(Closure)#3 (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["this"]=>
   object(Foo)#1 (0) {
   }
 }
-object(Closure)#3 (1) {
+object(Closure)#3 (4) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
   ["this"]=>
   object(Foo)#1 (0) {
   }
 }
-object(Closure)#3 (0) {
+object(Closure)#3 (3) {
+  ["name"]=>
+  string(%d) "{closure:%s:%d}"
+  ["file"]=>
+  string(%d) "%s"
+  ["line"]=>
+  int(%d)
 }

@@ -123,26 +123,26 @@ bool(true)
 Toggling namespaces:
 bool(false)
 <?xml version="1.0"?>
-<default:container xmlns:foo="some:ns2" xmlns:anotherone="some:ns3" xmlns:default="some:ns"><foo:bar/><default:baz/></default:container>
+<container xmlns:foo="some:ns2" xmlns:anotherone="some:ns3" xmlns="some:ns"><foo:bar/><baz/></container>
 bool(false)
 <?xml version="1.0"?>
-<default:container xmlns:foo="some:ns2" xmlns:default="some:ns"><foo:bar/><default:baz/></default:container>
+<container xmlns:foo="some:ns2" xmlns="some:ns"><foo:bar/><baz/></container>
 bool(true)
 <?xml version="1.0"?>
-<default:container xmlns:foo="some:ns2" xmlns:default="some:ns" xmlns:anotherone=""><foo:bar/><default:baz/></default:container>
+<container xmlns:foo="some:ns2" xmlns="some:ns" xmlns:anotherone=""><foo:bar/><baz/></container>
 bool(false)
 <?xml version="1.0"?>
-<default:container xmlns:default="some:ns" xmlns:anotherone="" xmlns:foo="some:ns2"><foo:bar/><default:baz/></default:container>
+<container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2"/><baz/></container>
 bool(false)
 <?xml version="1.0"?>
-<default:container xmlns:default="some:ns" xmlns:anotherone="" xmlns:foo="some:ns2"><foo:bar/><default:baz/></default:container>
+<container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2"/><baz/></container>
 Toggling namespaced attributes:
 bool(true)
 bool(true)
 bool(true)
 bool(false)
 <?xml version="1.0"?>
-<default:container xmlns:default="some:ns" xmlns:anotherone="" xmlns:foo="some:ns2" test:test=""><foo:bar foo:test="" doesnotexist:test=""/><default:baz/></default:container>
+<container xmlns="some:ns" xmlns:anotherone="" test:test=""><foo:bar xmlns:foo="some:ns2" foo:test="" doesnotexist:test=""/><baz/></container>
 namespace of test:test = NULL
 namespace of foo:test = string(8) "some:ns2"
 namespace of doesnotexist:test = NULL
@@ -153,6 +153,6 @@ bool(false)
 bool(true)
 bool(false)
 <?xml version="1.0"?>
-<default:container xmlns:default="some:ns" xmlns:anotherone="" xmlns:foo="some:ns2"><foo:bar doesnotexist:test2=""/><default:baz/></default:container>
+<container xmlns="some:ns" xmlns:anotherone=""><foo:bar xmlns:foo="some:ns2" doesnotexist:test2=""/><baz/></container>
 Checking toggled namespace:
 string(0) ""

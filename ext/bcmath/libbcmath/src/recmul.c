@@ -56,7 +56,6 @@ static bc_num new_sub_num(size_t length, size_t scale, char *value)
 	temp->n_len = length;
 	temp->n_scale = scale;
 	temp->n_refs = 1;
-	temp->n_ptr = NULL;
 	temp->n_value = value;
 	return temp;
 }
@@ -69,7 +68,7 @@ static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *
 
 	int prodlen = n1len + n2len + 1;
 
-	*prod = bc_new_num (prodlen, 0);
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
 
 	n1end = (char *) (n1->n_value + n1len - 1);
 	n2end = (char *) (n2->n_value + n2len - 1);
@@ -164,7 +163,7 @@ static void _bc_shift_addsub(bc_num accum, bc_num val, int shift, bool sub)
 static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod)
 {
 	bc_num u0, u1, v0, v1;
-	bc_num m1, m2, m3, d1, d2;
+	bc_num m1, m2, m3;
 	size_t n;
 	bool m1zero;
 
@@ -204,10 +203,8 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
 
 	/* Calculate sub results ... */
 
-	bc_init_num(&d1);
-	bc_init_num(&d2);
-	bc_sub(u1, u0, &d1, 0);
-	bc_sub(v0, v1, &d2, 0);
+	bc_num d1 = bc_sub(u1, u0, 0);
+	bc_num d2 = bc_sub(v0, v1, 0);
 
 
 	/* Do recursive multiplies and shifted adds. */
@@ -256,7 +253,7 @@ static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *pr
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
+bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 {
 	bc_num pval;
 	size_t len1, len2;
@@ -273,13 +270,11 @@ void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
 
 	/* Assign to prod and clean up the number. */
 	pval->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
-	pval->n_value = pval->n_ptr;
 	pval->n_len = len2 + len1 + 1 - full_scale;
 	pval->n_scale = prod_scale;
 	_bc_rm_leading_zeros(pval);
 	if (bc_is_zero(pval)) {
 		pval->n_sign = PLUS;
 	}
-	bc_free_num(prod);
-	*prod = pval;
+	return pval;
 }

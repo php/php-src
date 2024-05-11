@@ -394,6 +394,20 @@ static int php_skip_variable(php_stream * stream)
 }
 /* }}} */
 
+static size_t php_read_stream_all_chunks(php_stream *stream, char *buffer, size_t length)
+{
+	size_t read_total = 0;
+	do {
+		ssize_t read_now = php_stream_read(stream, buffer, length - read_total);
+		read_total += read_now;
+		if (read_now < stream->chunk_size && read_total != length) {
+			return 0;
+		}
+	} while (read_total < length);
+
+	return read_total;
+}
+
 /* {{{ php_read_APP */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
@@ -410,7 +424,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 
 	buffer = emalloc(length);
 
-	if (php_stream_read(stream, buffer, (size_t) length) != length) {
+	if (php_read_stream_all_chunks(stream, buffer, length) != length) {
 		efree(buffer);
 		return 0;
 	}
@@ -735,10 +749,10 @@ static signed short php_ifd_get16s(void *Short, int motorola_intel)
 static int php_ifd_get32s(void *Long, int motorola_intel)
 {
 	if (motorola_intel) {
-		return  ((( char *)Long)[0] << 24) | (((unsigned char *)Long)[1] << 16)
-		      | (((unsigned char *)Long)[2] << 8 ) | (((unsigned char *)Long)[3] << 0 );
+		return  ((unsigned)((( char *)Long)[0]) << 24) | (((unsigned char *)Long)[1] << 16)
+		      | ((( char *)Long)[2] << 8 ) | (((unsigned char *)Long)[3] << 0 );
 	} else {
-		return  ((( char *)Long)[3] << 24) | (((unsigned char *)Long)[2] << 16)
+		return  ((unsigned)((( char *)Long)[3]) << 24) | (((unsigned char *)Long)[2] << 16)
 		      | (((unsigned char *)Long)[1] << 8 ) | (((unsigned char *)Long)[0] << 0 );
 	}
 }

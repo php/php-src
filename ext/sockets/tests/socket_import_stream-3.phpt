@@ -15,6 +15,7 @@ $so = @socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
 ));
 if ($so === false)
     die("SKIP joining group 224.0.0.23 on interface lo failed");
+?>
 --FILE--
 <?php
 

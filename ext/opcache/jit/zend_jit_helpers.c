@@ -67,6 +67,14 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name,
 	return fbc;
 }
 
+static uint32_t ZEND_FASTCALL zend_jit_jmp_frameless_helper(zval *func_name, void **cache_slot)
+{
+	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name));
+	zend_jmp_fl_result result = (func == NULL) + 1;
+	*cache_slot = (void *)(uintptr_t)result;
+	return result;
+}
+
 static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name, void **cache_slot)
 {
 	zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
@@ -95,7 +103,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 	if (Z_TYPE_P(object) == IS_UNDEF && opline->op1_type == IS_CV) {
 		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
 
-		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			return;
 		}
@@ -340,7 +348,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
 
-	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	return EG(exception) == NULL;
 }
 
@@ -354,7 +362,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint3
 	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
 		GC_ADDREF(ht);
 	}
-	zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+	zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && GC_DELREF(ht) != 1) {
 		if (!GC_REFCOUNT(ht)) {
 			zend_array_destroy(ht);
@@ -620,7 +628,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_is_helper(zend_array *ht, zval *dim
 			hval = 1;
 			goto num_index;
 		default:
-			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim, BP_VAR_IS);
+			zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_ARRAY), dim,
+				EG(current_execute_data)->opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ?
+					BP_VAR_IS : BP_VAR_RW);
 			undef_result_after_exception();
 			return;
 	}
@@ -1098,6 +1108,9 @@ static zend_string* ZEND_FASTCALL zend_jit_fetch_dim_str_r_helper(zend_string *s
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return ZSTR_EMPTY_ALLOC();
+	}
 	return zend_jit_fetch_dim_str_offset(str, offset);
 }
 
@@ -1126,8 +1139,11 @@ try_string_offset:
 				dim = Z_REFVAL_P(dim);
 				goto try_string_offset;
 			default:
-				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim, BP_VAR_IS);
-				break;
+				zend_illegal_container_offset(ZSTR_KNOWN(ZEND_STR_STRING), dim,
+					EG(current_execute_data)->opline->opcode == ZEND_ISSET_ISEMPTY_DIM_OBJ ?
+						BP_VAR_IS : BP_VAR_RW);
+				ZVAL_NULL(result);
+				return;
 		}
 
 		offset = zval_get_long_func(dim, /* is_strict */ false);
@@ -1579,7 +1595,9 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 			}
 			zval_ptr_dtor(&res);
 		} else {
-			zend_error(E_WARNING, "Attempt to assign property of non-object");
+			/* Exception is thrown in this case */
+			GC_DELREF(obj);
+			return;
 		}
 		if (UNEXPECTED(GC_DELREF(obj) == 0)) {
 			zend_objects_store_del(obj);
@@ -1931,7 +1949,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 		if (EXPECTED(retval)) {
 			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 			CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-			ZVAL_COPY(result, retval);
+			ZVAL_COPY_DEREF(result, retval);
 			return;
 		}
 	}
@@ -2408,7 +2426,7 @@ static void ZEND_FASTCALL zend_jit_invalid_property_incdec(zval *container, cons
 	if (Z_TYPE_P(container) == IS_UNDEF && opline->op1_type == IS_CV) {
 		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
 
-		zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(cv));
+		zend_error_unchecked(E_WARNING, "Undefined variable $%S", cv);
 	}
 	if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -2659,7 +2677,7 @@ static void ZEND_FASTCALL zend_jit_assign_obj_op_helper(zend_object *zobj, zend_
 //???				} else {
 //???					prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(object), orig_zptr);
 //???				}
-				if (UNEXPECTED(prop_info)) {
+				if (prop_info) {
 					/* special case for typed properties */
 					zend_jit_assign_op_to_typed_prop(zptr, prop_info, value, binary_op);
 				} else {
@@ -2862,7 +2880,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				fast_long_increment_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -2878,7 +2896,7 @@ static void ZEND_FASTCALL zend_jit_pre_inc_obj_helper(zend_object *zobj, zend_st
 						}
 					}
 
-					if (UNEXPECTED(prop_info)) {
+					if (prop_info) {
 						zend_jit_inc_typed_prop(prop, prop_info);
 					} else {
 						increment_function(prop);
@@ -2932,7 +2950,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				fast_long_decrement_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -2948,7 +2966,7 @@ static void ZEND_FASTCALL zend_jit_pre_dec_obj_helper(zend_object *zobj, zend_st
 						}
 					}
 
-					if (UNEXPECTED(prop_info)) {
+					if (prop_info) {
 						zend_jit_dec_typed_prop(prop, prop_info);
 					} else {
 						decrement_function(prop);
@@ -3001,7 +3019,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				ZVAL_LONG(result, Z_LVAL_P(prop));
 				fast_long_increment_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_inc_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -3016,7 +3034,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_obj_helper(zend_object *zobj, zend_s
 					}
 				}
 
-				if (UNEXPECTED(prop_info)) {
+				if (prop_info) {
 					zend_jit_post_inc_typed_prop(prop, prop_info, result);
 				} else {
 					ZVAL_COPY(result, prop);
@@ -3062,7 +3080,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 			if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 				ZVAL_LONG(result, Z_LVAL_P(prop));
 				fast_long_decrement_function(prop);
-				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)
+				if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && prop_info
 						&& !(ZEND_TYPE_FULL_MASK(prop_info->type) & MAY_BE_DOUBLE)) {
 					zend_long val = _zend_jit_throw_dec_prop_error(prop_info);
 					ZVAL_LONG(prop, val);
@@ -3077,7 +3095,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_obj_helper(zend_object *zobj, zend_s
 					}
 				}
 
-				if (UNEXPECTED(prop_info)) {
+				if (prop_info) {
 					zend_jit_post_dec_typed_prop(prop, prop_info, result);
 				} else {
 					ZVAL_COPY(result, prop);
@@ -3150,8 +3168,7 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 
 	char *target = ZSTR_VAL(ret);
 	for (i = 0; i <= count; i++) {
-		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
-		target += ZSTR_LEN(rope[i]);
+		target = zend_mempcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
 		zend_string_release_ex(rope[i], 0);
 	}
 	*target = '\0';

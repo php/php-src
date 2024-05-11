@@ -5,6 +5,7 @@ Test filesize() function: usage variations - file mode & holes in file
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip only valid for Windows');
 }
+?>
 --FILE--
 <?php
 $file_path = __DIR__;

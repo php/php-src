@@ -5,10 +5,13 @@ pdo_dblib
 --SKIPIF--
 <?php
 require __DIR__ . '/config.inc';
+getDbConnection();
 ?>
 --FILE--
 <?php
 require __DIR__ . '/config.inc';
+
+$db = getDbConnection();
 
 $stmt = $db->prepare("SELECT 1, 2 AS named, 3");
 $stmt->execute();

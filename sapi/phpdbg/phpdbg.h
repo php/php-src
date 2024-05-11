@@ -90,7 +90,7 @@
 /* {{{ strings */
 #define PHPDBG_NAME "phpdbg"
 #define PHPDBG_AUTHORS "Felipe Pena, Joe Watkins and Bob Weinand" /* Ordered by last name */
-#define PHPDBG_ISSUES "http://bugs.php.net/report.php"
+#define PHPDBG_ISSUES "https://github.com/php/php-src/issues"
 #define PHPDBG_VERSION PHP_VERSION
 #define PHPDBG_INIT_FILENAME ".phpdbginit"
 #define PHPDBG_DEFAULT_PROMPT "prompt>"
@@ -256,7 +256,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	HashTable *watchlist_mem;                    /* triggered watchpoints */
 	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
 	bool watchpoint_hit;                    /* a watchpoint was hit */
-	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
+	void (*original_free_function)(void * ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);      /* the original AG(mm_heap)->_free function */
 	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */

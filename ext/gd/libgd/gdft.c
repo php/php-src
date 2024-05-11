@@ -401,7 +401,17 @@ static void *fontFetch (char **error, void *key)
 #ifdef NETWARE
 		if (*name == '/' || (name[0] != 0 && strstr(name, ":/"))) {
 #else
-		if (*name == '/' || (name[0] != 0 && name[1] == ':' && (name[2] == '/' || name[2] == '\\'))) {
+		/* Actual length doesn't matter, just the minimum does up to length 2. */
+		unsigned int min_length = 0;
+		if (name[0] != '\0') {
+			if (name[1] != '\0') {
+				min_length = 2;
+			} else {
+				min_length = 1;
+			}
+		}
+		ZEND_IGNORE_VALUE(min_length); /* On Posix systems this may be unused */
+		if (IS_ABSOLUTE_PATH(name, min_length)) {
 #endif
 			snprintf(fullname, sizeof(fullname) - 1, "%s", name);
 			if (access(fullname, R_OK) == 0) {

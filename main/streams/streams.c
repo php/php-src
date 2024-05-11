@@ -636,6 +636,17 @@ PHPAPI zend_result _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 					/* some fatal error. Theoretically, the stream is borked, so all
 					 * further reads should fail. */
 					stream->eof = 1;
+					/* free all data left in brigades */
+					while ((bucket = brig_inp->head)) {
+						/* Remove unconsumed buckets from the input brigade */
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
+					while ((bucket = brig_outp->head)) {
+						/* Remove unconsumed buckets from the output brigade */
+						php_stream_bucket_unlink(bucket);
+						php_stream_bucket_delref(bucket);
+					}
 					efree(chunk_buf);
 					retval = FAILURE;
 					goto out_is_eof;
@@ -1153,8 +1164,15 @@ static ssize_t _php_stream_write_buffer(php_stream *stream, const char *buf, siz
 
 	bool old_eof = stream->eof;
 
+	/* See GH-13071: userspace stream is subject to the memory limit. */
+	size_t chunk_size = count;
+	if (php_stream_is(stream, PHP_STREAM_IS_USERSPACE)) {
+		/* If the stream is unbuffered, we can only write one byte at a time. */
+		chunk_size = stream->chunk_size;
+	}
+
 	while (count > 0) {
-		ssize_t justwrote = stream->ops->write(stream, buf, count);
+		ssize_t justwrote = stream->ops->write(stream, buf, MIN(chunk_size, count));
 		if (justwrote <= 0) {
 			/* If we already successfully wrote some bytes and a write error occurred
 			 * later, report the successfully written bytes. */
@@ -1322,8 +1340,13 @@ PHPAPI zend_off_t _php_stream_tell(php_stream *stream)
 PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 {
 	if (stream->fclose_stdiocast == PHP_STREAM_FCLOSE_FOPENCOOKIE) {
-		/* flush to commit data written to the fopencookie FILE* */
-		fflush(stream->stdiocast);
+		/* flush can call seek internally so we need to prevent an infinite loop */
+		if (!stream->fclose_stdiocast_flush_in_progress) {
+			stream->fclose_stdiocast_flush_in_progress = 1;
+			/* flush to commit data written to the fopencookie FILE* */
+			fflush(stream->stdiocast);
+			stream->fclose_stdiocast_flush_in_progress = 0;
+		}
 	}
 
 	/* handle the case where we are in the buffer */

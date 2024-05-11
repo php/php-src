@@ -5,6 +5,12 @@ Edgar Ferreira da Silva <contato [at] edgarfs [dot] com [dot] br>
 #testfest PHPSP on 2009-06-20
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (!(imagetypes() & IMG_PNG)) {
+    die("skip No PNG support");
+}
+?>
 --FILE--
 <?php
 

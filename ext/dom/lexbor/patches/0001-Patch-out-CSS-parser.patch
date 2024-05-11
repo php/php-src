@@ -1,0 +1,349 @@
+From c19debb4d26f731b39860f27073b69927aa611f0 Mon Sep 17 00:00:00 2001
+From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
+Date: Wed, 23 Aug 2023 21:48:12 +0200
+Subject: [PATCH] Patch out CSS parser
+
+---
+ source/lexbor/css/rule.h                      |  2 ++
+ source/lexbor/html/interfaces/document.c      | 16 ++++++++++
+ source/lexbor/html/interfaces/element.c       | 29 +++++++++++++++++++
+ source/lexbor/html/interfaces/style_element.c |  6 ++++
+ 4 files changed, 53 insertions(+)
+
+diff --git a/source/lexbor/css/rule.h b/source/lexbor/css/rule.h
+index 7cc4f0b..f68491e 100644
+--- a/source/lexbor/css/rule.h
++++ b/source/lexbor/css/rule.h
+@@ -344,7 +344,9 @@ lxb_css_rule_ref_dec_destroy(lxb_css_rule_t *rule)
+     }
+ 
+     if (rule->ref_count == 0) {
++#if 0
+         (void) lxb_css_rule_destroy(rule, true);
++#endif
+     }
+ }
+ 
+diff --git a/source/lexbor/html/interfaces/document.c b/source/lexbor/html/interfaces/document.c
+index 73184f0..b4de5b8 100755
+--- a/source/lexbor/html/interfaces/document.c
++++ b/source/lexbor/html/interfaces/document.c
+@@ -72,8 +72,10 @@ static lxb_status_t
+ lxb_html_document_style_cb(lxb_dom_node_t *node,
+                            lxb_css_selector_specificity_t spec, void *ctx);
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_document_done(lxb_html_document_t *document);
++#endif
+ 
+ 
+ lxb_status_t
+@@ -86,6 +88,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document);
+ static lexbor_action_t
+ lxb_html_document_title_walker(lxb_dom_node_t *node, void *ctx);
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_document_event_insert(lxb_dom_node_t *node);
+ 
+@@ -112,6 +115,7 @@ lxb_html_document_event_destroy(lxb_dom_node_t *node);
+ static lxb_status_t
+ lxb_html_document_event_set_value(lxb_dom_node_t *node,
+                                   const lxb_char_t *value, size_t length);
++#endif
+ 
+ 
+ lxb_html_document_t *
+@@ -171,7 +175,9 @@ lxb_html_document_interface_destroy(lxb_html_document_t *document)
+ 
+     if (doc->node.owner_document == doc) {
+         (void) lxb_html_parser_unref(doc->parser);
++#if 0
+         lxb_html_document_css_destroy(document);
++#endif
+     }
+ 
+     (void) lxb_dom_document_destroy(doc);
+@@ -193,11 +199,14 @@ lxb_html_document_clean(lxb_html_document_t *document)
+     document->iframe_srcdoc = NULL;
+     document->ready_state = LXB_HTML_DOCUMENT_READY_STATE_UNDEF;
+ 
++#if 0
+     lxb_html_document_css_clean(document);
++#endif
+ 
+     lxb_dom_document_clean(lxb_dom_interface_document(document));
+ }
+ 
++#if 0
+ lxb_status_t
+ lxb_html_document_css_init(lxb_html_document_t *document)
+ {
+@@ -330,6 +339,7 @@ lxb_html_document_css_clean(lxb_html_document_t *document)
+         lexbor_dobject_clean(css->weak);
+     }
+ }
++#endif
+ 
+ void
+ lxb_html_document_css_parser_attach(lxb_html_document_t *document,
+@@ -575,6 +585,7 @@ void
+ lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
+                                          bool destroy_memory)
+ {
++#if 0
+     size_t length;
+     lxb_css_stylesheet_t *sst;
+     lxb_html_document_css_t *css = &document->css;
+@@ -586,6 +597,7 @@ lxb_html_document_stylesheet_destroy_all(lxb_html_document_t *document,
+ 
+         (void) lxb_css_stylesheet_destroy(sst, destroy_memory);
+     }
++#endif
+ }
+ 
+ lxb_status_t
+@@ -849,6 +861,7 @@ lxb_html_document_parser_prepare(lxb_html_document_t *document)
+     return LXB_STATUS_OK;
+ }
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_document_done(lxb_html_document_t *document)
+ {
+@@ -873,6 +886,7 @@ lxb_html_document_done(lxb_html_document_t *document)
+ 
+     return LXB_STATUS_OK;
+ }
++#endif
+ 
+ const lxb_char_t *
+ lxb_html_document_title(lxb_html_document_t *document, size_t *len)
+@@ -960,6 +974,7 @@ lxb_html_document_import_node(lxb_html_document_t *doc, lxb_dom_node_t *node,
+     return lxb_dom_document_import_node(&doc->dom_document, node, deep);
+ }
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_document_event_insert(lxb_dom_node_t *node)
+ {
+@@ -1231,6 +1246,7 @@ lxb_html_document_event_set_value(lxb_dom_node_t *node,
+     return lxb_html_element_style_parse(lxb_html_interface_element(node),
+                                         value, length);
+ }
++#endif
+ 
+ /*
+  * No inline functions for ABI.
+diff --git a/source/lexbor/html/interfaces/element.c b/source/lexbor/html/interfaces/element.c
+index 229d3d7..363040c 100755
+--- a/source/lexbor/html/interfaces/element.c
++++ b/source/lexbor/html/interfaces/element.c
+@@ -38,9 +38,11 @@ static lxb_status_t
+ lxb_html_element_style_serialize_cb(lexbor_avl_t *avl, lexbor_avl_node_t **root,
+                                     lexbor_avl_node_t *node, void *ctx);
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_element_style_serialize_str_cb(const lxb_char_t *data,
+                                         size_t len, void *ctx);
++#endif
+ 
+ 
+ lxb_html_element_t *
+@@ -102,6 +104,7 @@ const lxb_css_rule_declaration_t *
+ lxb_html_element_style_by_name(lxb_html_element_t *element,
+                                const lxb_char_t *name, size_t size)
+ {
++#if 0
+     uintptr_t id;
+     lxb_html_style_node_t *node;
+     lxb_dom_document_t *ddoc = lxb_dom_interface_node(element)->owner_document;
+@@ -115,11 +118,14 @@ lxb_html_element_style_by_name(lxb_html_element_t *element,
+     node = (void *) lexbor_avl_search(doc->css.styles, element->style, id);
+ 
+     return (node != NULL) ? node->entry.value : NULL;
++#endif
++    return NULL;
+ }
+ 
+ const lxb_css_rule_declaration_t *
+ lxb_html_element_style_by_id(lxb_html_element_t *element, uintptr_t id)
+ {
++#if 0
+     const lxb_html_style_node_t *node;
+ 
+     node = lxb_html_element_style_node_by_id(element, id);
+@@ -128,6 +134,8 @@ lxb_html_element_style_by_id(lxb_html_element_t *element, uintptr_t id)
+     }
+ 
+     return node->entry.value;
++#endif
++    return NULL;
+ }
+ 
+ const lxb_html_style_node_t *
+@@ -144,6 +152,7 @@ const lxb_html_style_node_t *
+ lxb_html_element_style_node_by_name(lxb_html_element_t *element,
+                                     const lxb_char_t *name, size_t size)
+ {
++#if 0
+     uintptr_t id;
+     lxb_dom_document_t *ddoc = lxb_dom_interface_node(element)->owner_document;
+     lxb_html_document_t *doc = lxb_html_interface_document(ddoc);
+@@ -155,11 +164,14 @@ lxb_html_element_style_node_by_name(lxb_html_element_t *element,
+ 
+     return (lxb_html_style_node_t *) lexbor_avl_search(doc->css.styles,
+                                                        element->style, id);
++#endif
++    return NULL;
+ }
+ 
+ const void *
+ lxb_html_element_css_property_by_id(lxb_html_element_t *element, uintptr_t id)
+ {
++#if 0
+     lxb_css_rule_declaration_t *declr;
+     const lxb_html_style_node_t *node;
+ 
+@@ -171,6 +183,8 @@ lxb_html_element_css_property_by_id(lxb_html_element_t *element, uintptr_t id)
+     declr = node->entry.value;
+ 
+     return declr->u.user;
++#endif
++    return NULL;
+ }
+ 
+ lxb_status_t
+@@ -224,6 +238,7 @@ lxb_status_t
+ lxb_html_element_style_parse(lxb_html_element_t *element,
+                              const lxb_char_t *style, size_t size)
+ {
++#if 0
+     lxb_css_rule_declaration_list_t *list;
+ 
+     lxb_dom_document_t *ddoc = lxb_dom_interface_node(element)->owner_document;
+@@ -240,6 +255,8 @@ lxb_html_element_style_parse(lxb_html_element_t *element,
+ 
+     return lxb_html_element_style_list_append(element, list,
+                                               lxb_css_selector_sp_up_s(0));
++#endif
++    return LXB_STATUS_ERROR;
+ }
+ 
+ lxb_status_t
+@@ -393,6 +410,7 @@ void
+ lxb_html_element_style_remove_by_name(lxb_html_element_t *element,
+                                       const lxb_char_t *name, size_t size)
+ {
++#if 0
+     uintptr_t id;
+     lxb_dom_document_t *ddoc = lxb_dom_interface_node(element)->owner_document;
+     lxb_html_document_t *doc = lxb_html_interface_document(ddoc);
+@@ -403,11 +421,13 @@ lxb_html_element_style_remove_by_name(lxb_html_element_t *element,
+     }
+ 
+     lxb_html_element_style_remove_by_id(element, id);
++#endif
+ }
+ 
+ void
+ lxb_html_element_style_remove_by_id(lxb_html_element_t *element, uintptr_t id)
+ {
++#if 0
+     lxb_html_style_node_t *node;
+     lxb_dom_document_t *ddoc = lxb_dom_interface_node(element)->owner_document;
+     lxb_html_document_t *doc = lxb_html_interface_document(ddoc);
+@@ -417,6 +437,7 @@ lxb_html_element_style_remove_by_id(lxb_html_element_t *element, uintptr_t id)
+     if (node != NULL) {
+         lxb_html_element_style_remove_all(doc, &element->style, node);
+     }
++#endif
+ }
+ 
+ lxb_html_style_node_t *
+@@ -576,6 +597,7 @@ static lxb_status_t
+ lxb_html_element_style_serialize_cb(lexbor_avl_t *avl, lexbor_avl_node_t **root,
+                                     lexbor_avl_node_t *node, void *ctx)
+ {
++#if 0
+     lxb_status_t status;
+     lexbor_serialize_ctx_t *context = ctx;
+ 
+@@ -589,6 +611,8 @@ lxb_html_element_style_serialize_cb(lexbor_avl_t *avl, lexbor_avl_node_t **root,
+     context->count = 1;
+ 
+     return lxb_css_rule_serialize(node->value, context->cb, context->ctx);
++#endif
++    return LXB_STATUS_ERROR;
+ }
+ 
+ lxb_status_t
+@@ -596,6 +620,7 @@ lxb_html_element_style_serialize_str(lxb_html_element_t *element,
+                                      lexbor_str_t *str,
+                                      lxb_html_element_style_opt_t opt)
+ {
++#if 0
+     lxb_dom_document_t *doc;
+     lxb_html_element_style_ctx_t context;
+ 
+@@ -614,8 +639,11 @@ lxb_html_element_style_serialize_str(lxb_html_element_t *element,
+ 
+     return lxb_html_element_style_serialize(element, opt,
+                             lxb_html_element_style_serialize_str_cb, &context);
++#endif
++    return LXB_STATUS_ERROR;
+ }
+ 
++#if 0
+ static lxb_status_t
+ lxb_html_element_style_serialize_str_cb(const lxb_char_t *data,
+                                         size_t len, void *ctx)
+@@ -630,3 +658,4 @@ lxb_html_element_style_serialize_str_cb(const lxb_char_t *data,
+ 
+     return LXB_STATUS_OK;
+ }
++#endif
+diff --git a/source/lexbor/html/interfaces/style_element.c b/source/lexbor/html/interfaces/style_element.c
+index 66d55c4..9a402ef 100755
+--- a/source/lexbor/html/interfaces/style_element.c
++++ b/source/lexbor/html/interfaces/style_element.c
+@@ -35,7 +35,9 @@ lxb_html_style_element_interface_destroy(lxb_html_style_element_t *style_element
+     (void) lxb_dom_node_interface_destroy(lxb_dom_interface_node(style_element));
+ 
+     if (sst != NULL) {
++#if 0
+         (void) lxb_css_stylesheet_destroy(sst, true);
++#endif
+     }
+ 
+     return NULL;
+@@ -44,8 +46,10 @@ lxb_html_style_element_interface_destroy(lxb_html_style_element_t *style_element
+ lxb_status_t
+ lxb_html_style_element_parse(lxb_html_style_element_t *element)
+ {
++#if 0
+     lexbor_str_t *str;
+     lxb_dom_text_t *text;
++#endif
+     lxb_dom_node_t *node;
+ 
+     lxb_dom_document_t *ddoc = lxb_dom_interface_node(element)->owner_document;
+@@ -61,11 +65,13 @@ lxb_html_style_element_parse(lxb_html_style_element_t *element)
+         return LXB_STATUS_OK;
+     }
+ 
++#if 0
+     text = lxb_dom_interface_text(lxb_dom_interface_node(element)->first_child);
+     str = &text->char_data.data;
+ 
+     element->stylesheet = lxb_css_stylesheet_parse(css->parser, str->data,
+                                                    str->length);
++#endif
+     if (element->stylesheet == NULL) {
+         return css->parser->status;
+     }
+-- 
+2.41.0
+

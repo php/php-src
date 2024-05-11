@@ -198,8 +198,7 @@ ZEND_API HashTable *zend_user_it_get_gc(zend_object_iterator *_iter, zval **tabl
 
 static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
-	// FIXME: Adjust the actual function prototype in zend_object_iterator_funcs
-	(int (*)(zend_object_iterator *)) zend_user_it_valid,
+	zend_user_it_valid,
 	zend_user_it_get_current_data,
 	zend_user_it_get_current_key,
 	zend_user_it_move_forward,

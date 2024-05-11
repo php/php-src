@@ -20,6 +20,7 @@ class HasDestructor {
 $values->setSize(5);
 $values->offsetSet(4, new HasDestructor());
 echo "Done\n";
+?>
 --EXPECT--
 object(SplFixedArray)#1 (1) {
   [0]=>

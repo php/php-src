@@ -27,7 +27,7 @@
 #include "php_reflection.h"
 #include "ext/standard/info.h"
 #include "ext/standard/sha1.h"
-#include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #include "zend.h"
 #include "zend_API.h"
@@ -97,6 +97,7 @@ PHPAPI zend_class_entry *reflection_enum_ptr;
 PHPAPI zend_class_entry *reflection_enum_unit_case_ptr;
 PHPAPI zend_class_entry *reflection_enum_backed_case_ptr;
 PHPAPI zend_class_entry *reflection_fiber_ptr;
+PHPAPI zend_class_entry *reflection_constant_ptr;
 
 /* Exception throwing macro */
 #define _DO_THROW(msg) \
@@ -309,8 +310,8 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	zend_string *sub_indent = strpprintf(0, "%s    ", indent);
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?) */
-	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->info.user.doc_comment));
+	if (ce->doc_comment) {
+		smart_str_append_printf(str, "%s%s", indent, ZSTR_VAL(ce->doc_comment));
 		smart_str_appendc(str, '\n');
 	}
 
@@ -538,20 +539,48 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 {
 	const char *type = zend_zval_type_name(value);
+	uint32_t flags = Z_CONSTANT_FLAGS_P(value);
+
+	smart_str_appends(str, indent);
+	smart_str_appends(str, "Constant [ ");
+
+	if (flags & (CONST_PERSISTENT|CONST_NO_FILE_CACHE|CONST_DEPRECATED)) {
+		bool first = true;
+		smart_str_appends(str, "<");
+
+#define DUMP_CONST_FLAG(flag, output) \
+	do { \
+		if (flags & flag) { \
+			if (!first) smart_str_appends(str, ", "); \
+			smart_str_appends(str, output); \
+			first = false; \
+		} \
+	} while (0)
+		DUMP_CONST_FLAG(CONST_PERSISTENT, "persistent");
+		DUMP_CONST_FLAG(CONST_NO_FILE_CACHE, "no_file_cache");
+		DUMP_CONST_FLAG(CONST_DEPRECATED, "deprecated");
+#undef DUMP_CONST_FLAG
+
+		smart_str_appends(str, "> ");
+	}
+
+	smart_str_appends(str, type);
+	smart_str_appendc(str, ' ');
+	smart_str_appends(str, name);
+	smart_str_appends(str, " ] { ");
 
 	if (Z_TYPE_P(value) == IS_ARRAY) {
-		smart_str_append_printf(str, "%s    Constant [ %s %s ] { Array }\n",
-						indent, type, name);
+		smart_str_append(str, ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED));
 	} else if (Z_TYPE_P(value) == IS_STRING) {
-		smart_str_append_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-						indent, type, name, Z_STRVAL_P(value));
+		smart_str_appends(str, Z_STRVAL_P(value));
 	} else {
 		zend_string *tmp_value_str;
 		zend_string *value_str = zval_get_tmp_string(value, &tmp_value_str);
-		smart_str_append_printf(str, "%s    Constant [ %s %s ] { %s }\n",
-						indent, type, name, ZSTR_VAL(value_str));
+		smart_str_append(str, value_str);
 		zend_tmp_string_release(tmp_value_str);
 	}
+
+	smart_str_appends(str, " }\n");
 }
 /* }}} */
 
@@ -566,6 +595,10 @@ static void _class_const_string(smart_str *str, zend_string *name, zend_class_co
 	const char *final = ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_FINAL ? "final " : "";
 	zend_string *type_str = ZEND_TYPE_IS_SET(c->type) ? zend_type_to_string(c->type) : NULL;
 	const char *type = type_str ? ZSTR_VAL(type_str) : zend_zval_type_name(&c->value);
+
+	if (c->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(c->doc_comment));
+	}
 	smart_str_append_printf(str, "%sConstant [ %s%s %s %s ] { ",
 		indent, final, visibility, type, ZSTR_VAL(name));
 	if (Z_TYPE(c->value) == IS_ARRAY) {
@@ -780,6 +813,8 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	 */
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->op_array.doc_comment));
+	} else if (fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(fptr->internal_function.doc_comment));
 	}
 
 	smart_str_appendl(str, indent, strlen(indent));
@@ -889,6 +924,9 @@ static zval *property_get_default(zend_property_info *prop_info) {
 /* {{{ _property_string */
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent)
 {
+	if (prop && prop->doc_comment) {
+		smart_str_append_printf(str, "%s%s\n", indent, ZSTR_VAL(prop->doc_comment));
+	}
 	smart_str_append_printf(str, "%sProperty [ ", indent);
 	if (!prop) {
 		smart_str_append_printf(str, "<dynamic> public $%s", prop_name);
@@ -1050,7 +1088,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 
 		ZEND_HASH_MAP_FOREACH_PTR(EG(zend_constants), constant) {
 			if (ZEND_CONSTANT_MODULE_NUMBER(constant) == module->module_number) {
-				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, indent);
+				_const_string(&str_constants, ZSTR_VAL(constant->name), &constant->value, "    ");
 				num_constants++;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1122,6 +1160,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 	reference->target = target;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_ATTRIBUTE;
+	ZVAL_STR_COPY(reflection_prop_name(object), data->name);
 }
 /* }}} */
 
@@ -1914,10 +1953,17 @@ ZEND_METHOD(ReflectionFunctionAbstract, getDocComment)
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.doc_comment) {
 		RETURN_STR_COPY(fptr->op_array.doc_comment);
 	}
+
+	if (fptr->type == ZEND_INTERNAL_FUNCTION && ((zend_internal_function *) fptr)->doc_comment) {
+		RETURN_STR_COPY(((zend_internal_function *) fptr)->doc_comment);
+	}
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -3204,6 +3250,14 @@ static void instantiate_reflection_method(INTERNAL_FUNCTION_PARAMETERS, bool is_
 	zend_function *mptr;
 
 	if (is_constructor) {
+		if (ZEND_NUM_ARGS() == 1) {
+			zend_error(E_DEPRECATED, "Calling ReflectionMethod::__construct() with 1 argument is deprecated, "
+				"use ReflectionMethod::createFromMethodName() instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
+		}
+
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_OBJ_OR_STR(arg1_obj, arg1_str)
 			Z_PARAM_OPTIONAL
@@ -3555,10 +3609,13 @@ ZEND_METHOD(ReflectionFunctionAbstract, getShortName)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	zend_string *name = fptr->common.function_name;
-	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
-	if (backslash) {
-		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
+	if ((fptr->common.fn_flags & (ZEND_ACC_CLOSURE | ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+		const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+		if (backslash) {
+			RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
+		}
 	}
+
 	RETURN_STR_COPY(name);
 }
 /* }}} */
@@ -4010,6 +4067,20 @@ ZEND_METHOD(ReflectionClassConstant, isEnumCase)
 	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_CLASS_CONST_IS_CASE);
 }
 
+ZEND_METHOD(ReflectionClassConstant, isDeprecated)
+{
+	reflection_object *intern;
+	zend_constant *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	RETURN_BOOL(ZEND_CLASS_CONST_FLAGS(ref) & ZEND_ACC_DEPRECATED);
+}
+
 /* {{{ reflection_class_object_ctor */
 static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_object)
 {
@@ -4387,8 +4458,8 @@ ZEND_METHOD(ReflectionClass, getDocComment)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->type == ZEND_USER_CLASS && ce->info.user.doc_comment) {
-		RETURN_STR_COPY(ce->info.user.doc_comment);
+	if (ce->doc_comment) {
+		RETURN_STR_COPY(ce->doc_comment);
 	}
 	RETURN_FALSE;
 }
@@ -6499,7 +6570,7 @@ ZEND_METHOD(ReflectionReference, getId)
 		RETURN_THROWS();
 	}
 
-	intern = Z_REFLECTION_P(getThis());
+	intern = Z_REFLECTION_P(ZEND_THIS);
 	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
 		_DO_THROW("Corrupted ReflectionReference object");
 		RETURN_THROWS();
@@ -6772,16 +6843,9 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	}
 
 	if (ce->type == ZEND_USER_CLASS) {
-		uint32_t flags = ZEND_ATTRIBUTE_TARGET_ALL;
-
-		if (marker->argc > 0) {
-			zval tmp;
-
-			if (FAILURE == zend_get_attribute_value(&tmp, marker, 0, ce)) {
-				RETURN_THROWS();
-			}
-
-			flags = (uint32_t) Z_LVAL(tmp);
+		uint32_t flags = zend_attribute_attribute_get_flags(marker, ce);
+		if (EG(exception)) {
+			RETURN_THROWS();
 		}
 
 		if (!(attr->target & flags)) {
@@ -7182,6 +7246,140 @@ static zval *_reflection_write_property(zend_object *object, zend_string *name, 
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionConstant, __construct)
+{
+	zend_string *name;
+
+	zval *object = ZEND_THIS;
+	reflection_object *intern = Z_REFLECTION_P(object);
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	/* Build name with lowercased ns. */
+	bool backslash_prefixed = ZSTR_VAL(name)[0] == '\\';
+	char *source = ZSTR_VAL(name) + backslash_prefixed;
+	size_t source_len = ZSTR_LEN(name) - backslash_prefixed;
+	zend_string *lc_name = zend_string_alloc(source_len, /* persistent */ false);
+	const char *ns_end = zend_memrchr(source, '\\', source_len);
+	size_t ns_len = 0;
+	if (ns_end) {
+		ns_len = ns_end - ZSTR_VAL(name);
+		zend_str_tolower_copy(ZSTR_VAL(lc_name), source, ns_len);
+	}
+	memcpy(ZSTR_VAL(lc_name) + ns_len, source + ns_len, source_len - ns_len);
+
+	zend_constant *const_ = zend_get_constant_ptr(lc_name);
+	zend_string_release_ex(lc_name, /* persistent */ false);
+	if (!const_) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Constant \"%s\" does not exist", ZSTR_VAL(name));
+		RETURN_THROWS();
+	}
+
+	intern->ptr = const_;
+	intern->ref_type = REF_TYPE_OTHER;
+
+	zval *name_zv = reflection_prop_name(object);
+	zval_ptr_dtor(name_zv);
+	ZVAL_STR_COPY(name_zv, name);
+}
+
+ZEND_METHOD(ReflectionConstant, getName)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+	RETURN_STR_COPY(const_->name);
+}
+
+ZEND_METHOD(ReflectionConstant, getNamespaceName)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	const char *backslash = zend_memrchr(ZSTR_VAL(const_->name), '\\', ZSTR_LEN(const_->name));
+	if (backslash) {
+		size_t length = backslash - ZSTR_VAL(const_->name);
+		RETURN_STRINGL(ZSTR_VAL(const_->name), length);
+	} else {
+		RETURN_EMPTY_STRING();
+	}
+}
+
+ZEND_METHOD(ReflectionConstant, getShortName)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+
+	const char *backslash = zend_memrchr(ZSTR_VAL(const_->name), '\\', ZSTR_LEN(const_->name));
+	if (backslash) {
+		size_t prefix = backslash - ZSTR_VAL(const_->name) + 1;
+		size_t length = ZSTR_LEN(const_->name) - prefix;
+		RETURN_STRINGL(ZSTR_VAL(const_->name) + prefix, length);
+	} else {
+		RETURN_STR_COPY(const_->name);
+	}
+}
+
+ZEND_METHOD(ReflectionConstant, getValue)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+	RETURN_COPY(&const_->value);
+}
+
+ZEND_METHOD(ReflectionConstant, isDeprecated)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+	RETURN_BOOL(ZEND_CONSTANT_FLAGS(const_) & CONST_DEPRECATED);
+}
+
+ZEND_METHOD(ReflectionConstant, __toString)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+	smart_str str = {0};
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+	_const_string(&str, ZSTR_VAL(const_->name), &const_->value, "");
+	RETURN_STR(smart_str_extract(&str));
+}
+
 PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
@@ -7280,6 +7478,10 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_fiber_ptr = register_class_ReflectionFiber();
 	reflection_fiber_ptr->create_object = reflection_objects_new;
 	reflection_fiber_ptr->default_object_handlers = &reflection_object_handlers;
+
+	reflection_constant_ptr = register_class_ReflectionConstant(reflector_ptr);
+	reflection_constant_ptr->create_object = reflection_objects_new;
+	reflection_constant_ptr->default_object_handlers = &reflection_object_handlers;
 
 	REFLECTION_G(key_initialized) = 0;
 

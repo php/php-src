@@ -10,7 +10,7 @@ class NewCtor {
 
 }
 echo "New-style constructor:\n";
-$methodInfo = new ReflectionMethod("NewCtor::__construct");
+$methodInfo = new ReflectionMethod("NewCtor", "__construct");
 var_dump($methodInfo->isConstructor());
 
 class ExtendsNewCtor extends NewCtor {

@@ -20,6 +20,23 @@
 #include "lib/timelib.h"
 #include "Zend/zend_hash.h"
 
+/* Same as SIZEOF_ZEND_LONG but using TIMELIB_LONG_MAX/MIN */
+#if TIMELIB_LONG_MAX == INT32_MAX
+# define PHP_DATE_SIZEOF_LONG 4
+#elif TIMELIB_LONG_MAX == INT64_MAX
+# define PHP_DATE_SIZEOF_LONG 8
+#else
+# error "Unknown TIMELIB LONG SIZE"
+#endif
+
+/* Same as ZEND_DOUBLE_FITS_LONG but using TIMELIB_LONG_MAX/MIN */
+#if PHP_DATE_SIZEOF_LONG == 4
+# define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) > (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
+#elif PHP_DATE_SIZEOF_LONG == 8
+  /* >= as (double)TIMELIB_LONG_MAX is outside signed range */
+# define PHP_DATE_DOUBLE_FITS_LONG(d) (!((d) >= (double)TIMELIB_LONG_MAX || (d) < (double)TIMELIB_LONG_MIN))
+#endif
+
 #include "php_version.h"
 #define PHP_DATE_VERSION PHP_VERSION
 
@@ -123,6 +140,7 @@ PHPAPI int php_idate(char format, time_t ts, bool localtime);
 
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, bool gm);
 PHPAPI zend_string *php_format_date(const char *format, size_t format_len, time_t ts, bool localtime);
+PHPAPI zend_string *php_format_date_obj(const char *format, size_t format_len, php_date_obj *date_obj);
 
 /* Mechanism to set new TZ database */
 PHPAPI void php_date_set_tzdb(timelib_tzdb *tzdb);
@@ -142,6 +160,7 @@ PHPAPI zend_class_entry *php_date_get_period_ce(void);
 
 PHPAPI zval *php_date_instantiate(zend_class_entry *pce, zval *object);
 PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, size_t time_str_len, const char *format, zval *timezone_object, int flags);
-
+PHPAPI void php_date_initialize_from_ts_long(php_date_obj *dateobj, zend_long sec, int usec);
+PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts);
 
 #endif /* PHP_DATE_H */

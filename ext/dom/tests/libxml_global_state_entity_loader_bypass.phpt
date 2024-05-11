@@ -1,10 +1,11 @@
 --TEST--
 GHSA-3qrf-m4j2-pcrr (libxml global state entity loader bypass)
+--EXTENSIONS--
+dom
+libxml
+zend_test
 --SKIPIF--
 <?php
-if (!extension_loaded('libxml')) die('skip libxml extension not available');
-if (!extension_loaded('dom')) die('skip dom extension not available');
-if (!extension_loaded('zend-test')) die('skip zend-test extension not available');
 if (!function_exists('zend_test_override_libxml_global_state')) die('skip not for Windows');
 ?>
 --FILE--

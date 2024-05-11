@@ -106,7 +106,6 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/filters/mbfilter_utf7.c
     libmbfl/filters/mbfilter_utf7imap.c
     libmbfl/filters/mbfilter_utf8.c
-    libmbfl/filters/mbfilter_utf8_mobile.c
     libmbfl/filters/mbfilter_uuencode.c
     libmbfl/mbfl/mbfilter.c
     libmbfl/mbfl/mbfilter_8bit.c

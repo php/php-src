@@ -3,7 +3,9 @@ Bug #38802 (ignore_errors and max_redirects)
 --INI--
 allow_url_fopen=1
 --SKIPIF--
-<?php require 'server.inc'; http_server_skipif();
+<?php
+require 'server.inc'; http_server_skipif();
+?>
 --FILE--
 <?php
 require 'server.inc';

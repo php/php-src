@@ -135,6 +135,16 @@ function mb_strtoupper(string $string, ?string $encoding = null): string {}
 /** @refcount 1 */
 function mb_strtolower(string $string, ?string $encoding = null): string {}
 
+function mb_ucfirst(string $string, ?string $encoding = null): string {}
+
+function mb_lcfirst(string $string, ?string $encoding = null): string {}
+
+function mb_trim(string $string, ?string $characters = null, ?string $encoding = null): string {}
+
+function mb_ltrim(string $string, ?string $characters = null, ?string $encoding = null): string {}
+
+function mb_rtrim(string $string, ?string $characters = null, ?string $encoding = null): string {}
+
 /** @refcount 1 */
 function mb_detect_encoding(string $string, array|string|null $encodings = null, bool $strict = false): string|false {}
 
@@ -170,10 +180,10 @@ function mb_decode_numericentity(string $string, array $map, ?string $encoding =
 function mb_send_mail(string $to, string $subject, string $message, array|string $additional_headers = [], ?string $additional_params = null): bool {}
 
 /**
- * @return array<int|string, int|string|array>|string|int|false
+ * @return array<int|string, int|string|array>|string|int|false|null
  * @refcount 1
  */
-function mb_get_info(string $type = "all"): array|string|int|false {}
+function mb_get_info(string $type = "all"): array|string|int|false|null {}
 
 function mb_check_encoding(array|string|null $value = null, ?string $encoding = null): bool {}
 

@@ -13,7 +13,7 @@ q
 prompt> [User Function foo (8 ops)]
 
 foo:
-     ; (lines=8, args=1, vars=1, tmps=2)
+     ; (lines=8, args=1, vars=1, tmps=%d)
      ; %s:14-16
 L0014 0000 CV0($baz) = RECV 1
 L0015 0001 INIT_FCALL %d %d string("var_dump")
@@ -26,7 +26,7 @@ L0016 0007 RETURN null
 prompt> [User Class: Foo\Bar (2 methods)]
 
 Foo\Bar::Foo:
-     ; (lines=5, args=1, vars=1, tmps=1)
+     ; (lines=5, args=1, vars=1, tmps=%d)
      ; %s:5-7
 L0005 0000 CV0($bar) = RECV 1
 L0006 0001 INIT_NS_FCALL_BY_NAME 1 string("Foo\\var_dump")
@@ -35,14 +35,14 @@ L0006 0003 DO_FCALL
 L0007 0004 RETURN null
 
 Foo\Bar::baz:
-     ; (lines=1, args=0, vars=0, tmps=0)
+     ; (lines=1, args=0, vars=0, tmps=%d)
      ; %s:9-9
 L0009 0000 RETURN null
 prompt> [Not Executing!]
 prompt> [Context %s (9 ops)]
 
 $_main:
-     ; (lines=9, args=0, vars=0, tmps=4)
+     ; (lines=9, args=0, vars=0, tmps=%d)
      ; %s:1-21
 L0018 0000 V0 = NEW 0 string("Foo\\Bar")
 L0018 0001 DO_FCALL

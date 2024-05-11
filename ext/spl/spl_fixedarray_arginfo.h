@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0b508ad6499b70c92bf25960b30fefa913532a3c */
+ * Stub hash: 35a9585a433b9e3d57263c07ccafd1b6edd2f10b */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -28,7 +28,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFixedArray_getSize arginfo_class_SplFixedArray_count
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray_setSize, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_setSize, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -54,7 +54,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplFixedArray_jsonSerialize arginfo_class_SplFixedArray___serialize
 
-
 ZEND_METHOD(SplFixedArray, __construct);
 ZEND_METHOD(SplFixedArray, __wakeup);
 ZEND_METHOD(SplFixedArray, __serialize);
@@ -70,7 +69,6 @@ ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
 ZEND_METHOD(SplFixedArray, getIterator);
 ZEND_METHOD(SplFixedArray, jsonSerialize);
-
 
 static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, __construct, arginfo_class_SplFixedArray___construct, ZEND_ACC_PUBLIC)

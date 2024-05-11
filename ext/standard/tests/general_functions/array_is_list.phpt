@@ -68,6 +68,7 @@ $arr = [1, 2, 3];
 $arr[4] = 5;
 test_is_list("append with gap", $arr);
 
+?>
 --EXPECT--
 empty: true
 one: true

@@ -62,6 +62,7 @@
 #endif
 
 #ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
 # include <sanitizer/common_interface_defs.h>
 #endif
 
@@ -244,6 +245,12 @@ static zend_fiber_stack *zend_fiber_stack_allocate(size_t size)
 		return NULL;
 	}
 
+#if defined(MADV_NOHUGEPAGE)
+	/* Multiple reasons to fail, ignore all errors only needed
+	 * for linux < 6.8 */
+	(void) madvise(pointer, alloc_size, MADV_NOHUGEPAGE);
+#endif
+
 	zend_mmap_set_name(pointer, alloc_size, "zend_fiber_stack");
 
 # if ZEND_FIBER_GUARD_PAGES
@@ -299,6 +306,12 @@ static void zend_fiber_stack_free(zend_fiber_stack *stack)
 	const size_t page_size = zend_fiber_get_page_size();
 
 	void *pointer = (void *) ((uintptr_t) stack->pointer - ZEND_FIBER_GUARD_PAGES * page_size);
+
+#ifdef __SANITIZE_ADDRESS__
+	/* If another mmap happens after unmapping, it may trigger the stale stack red zones
+	 * so we have to unpoison it before unmapping. */
+	ASAN_UNPOISON_MEMORY_REGION(pointer, stack->size + ZEND_FIBER_GUARD_PAGES * page_size);
+#endif
 
 #ifdef ZEND_WIN32
 	VirtualFree(pointer, 0, MEM_RELEASE);
@@ -656,6 +669,10 @@ static zend_always_inline zend_fiber_transfer zend_fiber_resume(zend_fiber *fibe
 {
 	zend_fiber *previous = EG(active_fiber);
 
+	if (previous) {
+		previous->execute_data = EG(current_execute_data);
+	}
+
 	fiber->caller = EG(current_fiber_context);
 	EG(active_fiber) = fiber;
 
@@ -673,6 +690,7 @@ static zend_always_inline zend_fiber_transfer zend_fiber_suspend(zend_fiber *fib
 	zend_fiber_context *caller = fiber->caller;
 	fiber->previous = EG(current_fiber_context);
 	fiber->caller = NULL;
+	fiber->execute_data = EG(current_execute_data);
 
 	return zend_fiber_switch_to(caller, value, false);
 }
@@ -851,7 +869,6 @@ ZEND_METHOD(Fiber, suspend)
 
 	ZEND_ASSERT(fiber->context.status == ZEND_FIBER_STATUS_RUNNING || fiber->context.status == ZEND_FIBER_STATUS_SUSPENDED);
 
-	fiber->execute_data = EG(current_execute_data);
 	fiber->stack_bottom->prev_execute_data = NULL;
 
 	zend_fiber_transfer transfer = zend_fiber_suspend(fiber, value);

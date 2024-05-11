@@ -274,7 +274,8 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 	Z_STR(startfile) = zend_string_init(startfilename, strlen(startfilename), 0);
 
 	zend_hash_internal_pointer_reset_ex(Z_ARRVAL(zbacktrace), &position);
-	tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position);
+
+	zval *function_name = NULL;
 	while ((tmp = zend_hash_get_current_data_ex(Z_ARRVAL(zbacktrace), &position))) {
 		if (file) { /* userland */
 			phpdbg_out("frame #%d: ", i);
@@ -289,10 +290,18 @@ void phpdbg_dump_backtrace(size_t num) /* {{{ */
 
 		file = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FILE));
 		line = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_LINE));
+		function_name = zend_hash_find(Z_ARRVAL_P(tmp), ZSTR_KNOWN(ZEND_STR_FUNCTION));
+
 		zend_hash_move_forward_ex(Z_ARRVAL(zbacktrace), &position);
 	}
 
-	phpdbg_writeln("frame #%d: {main} at %s:"ZEND_LONG_FMT, i, Z_STRVAL_P(file), Z_LVAL_P(line));
+	/* This is possible for fibers' start closure for example, which have a frame that doesn't contain the info
+	 * of which location stated the fiber if that stack frame is already torn down. same behaviour with debug_backtrace(). */
+	if (file == NULL) {
+		phpdbg_writeln(" => %s (internal function)", Z_STRVAL_P(function_name));
+	} else {
+		phpdbg_writeln("frame #%d: {main} at %s:"ZEND_LONG_FMT, i, Z_STRVAL_P(file), Z_LVAL_P(line));
+	}
 
 	zval_ptr_dtor_nogc(&zbacktrace);
 	zend_string_release(Z_STR(startfile));

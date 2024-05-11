@@ -1,9 +1,7 @@
 --TEST--
 GH-8086 (mb_send_mail() function not working correctly in PHP 8.x)
---SKIPIF--
-<?php
-if (!extension_loaded("mbstring")) die("skip mbstring extension not available");
-?>
+--EXTENSIONS--
+mbstring
 --INI--
 sendmail_path={MAIL:{PWD}/gh8086.eml}
 mail.mixed_lf_and_crlf=on

@@ -63,7 +63,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	char *arch = NULL, *entry = NULL, *error;
 	size_t arch_len, entry_len;
 
-	if (strlen(filename) < 7 || strncasecmp(filename, "phar://", 7)) {
+	if (strncasecmp(filename, "phar://", 7)) {
 		return NULL;
 	}
 	if (mode[0] == 'a') {
@@ -254,6 +254,17 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				php_url_free(resource);
 				goto phar_stub;
 			} else {
+				php_stream *stream = phar_get_pharfp(phar);
+				if (stream == NULL) {
+					if (UNEXPECTED(FAILURE == phar_open_archive_fp(phar))) {
+						php_stream_wrapper_log_error(wrapper, options, "phar error: could not reopen phar \"%s\"", ZSTR_VAL(resource->host));
+						efree(internal_file);
+						php_url_free(resource);
+						return NULL;
+					}
+					stream = phar_get_pharfp(phar);
+				}
+
 				phar_entry_info *entry;
 
 				entry = (phar_entry_info *) ecalloc(1, sizeof(phar_entry_info));
@@ -266,7 +277,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 				entry->is_crc_checked = 1;
 
 				idata = (phar_entry_data *) ecalloc(1, sizeof(phar_entry_data));
-				idata->fp = phar_get_pharfp(phar);
+				idata->fp = stream;
 				idata->phar = phar;
 				idata->internal_file = entry;
 				if (!phar->is_persistent) {
@@ -361,7 +372,7 @@ static int phar_stream_close(php_stream *stream, int close_handle) /* {{{ */
 static ssize_t phar_stream_read(php_stream *stream, char *buf, size_t count) /* {{{ */
 {
 	phar_entry_data *data = (phar_entry_data *)stream->abstract;
-	size_t got;
+	ssize_t got;
 	phar_entry_info *entry;
 
 	if (data->internal_file->link) {
@@ -847,8 +858,9 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		entry->link = entry->tmp = NULL;
 		source = entry;
 
-		/* add to the manifest, and then store the pointer to the new guy in entry */
-		entry = zend_hash_str_add_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
+		/* add to the manifest, and then store the pointer to the new guy in entry
+		 * if it already exists, we overwrite the destination like what copy('phar://...', 'phar://...') does. */
+		entry = zend_hash_str_update_mem(&(phar->manifest), ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1, (void **)&new, sizeof(phar_entry_info));
 
 		entry->filename = estrndup(ZSTR_VAL(resource_to->path)+1, ZSTR_LEN(resource_to->path)-1);
 		if (FAILURE == phar_copy_entry_fp(source, entry, &error)) {

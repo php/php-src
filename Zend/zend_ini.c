@@ -217,7 +217,6 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 	 * lead to death.
 	 */
 	if (directives != EG(ini_directives)) {
-		ZEND_ASSERT(module_type == MODULE_TEMPORARY);
 		directives = EG(ini_directives);
 	} else {
 		ZEND_ASSERT(module_type == MODULE_PERSISTENT);
@@ -940,7 +939,7 @@ ZEND_INI_DISP(zend_ini_color_displayer_cb) /* {{{ */
 	}
 	if (value) {
 		if (zend_uv.html_errors) {
-			zend_printf("<font style=\"color: %s\">%s</font>", value, value);
+			zend_printf("<span style=\"color: %s\">%s</span>", value, value);
 		} else {
 			ZEND_PUTS(value);
 		}

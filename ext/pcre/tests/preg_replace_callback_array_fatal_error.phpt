@@ -13,6 +13,7 @@ var_dump(preg_replace_callback_array(
         "/a/" => 'b',
         "/b/" => 'invalid callable'), 'a'));
 
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: preg_replace_callback_array(): Argument #1 ($pattern) must contain only valid callbacks in %spreg_replace_callback_array_fatal_error.php:%d
 Stack trace:

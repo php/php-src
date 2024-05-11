@@ -58,7 +58,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_readline_on_new_line, 0, 0, IS_V
 ZEND_END_ARG_INFO()
 #endif
 
-
 ZEND_FUNCTION(readline);
 ZEND_FUNCTION(readline_info);
 ZEND_FUNCTION(readline_add_history);
@@ -84,7 +83,6 @@ ZEND_FUNCTION(readline_redisplay);
 #if HAVE_RL_CALLBACK_READ_CHAR && HAVE_RL_ON_NEW_LINE
 ZEND_FUNCTION(readline_on_new_line);
 #endif
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(readline, arginfo_readline)

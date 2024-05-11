@@ -19,12 +19,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_sem_remove arginfo_sem_release
 
-
 ZEND_FUNCTION(sem_get);
 ZEND_FUNCTION(sem_acquire);
 ZEND_FUNCTION(sem_release);
 ZEND_FUNCTION(sem_remove);
-
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sem_get, arginfo_sem_get)
@@ -33,7 +31,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(sem_remove, arginfo_sem_remove)
 	ZEND_FE_END
 };
-
 
 static const zend_function_entry class_SysvSemaphore_methods[] = {
 	ZEND_FE_END

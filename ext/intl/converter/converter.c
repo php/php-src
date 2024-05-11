@@ -265,8 +265,7 @@ static void php_converter_append_fromUnicode_target(zval *val, UConverterFromUni
 		{
 			size_t vallen = Z_STRLEN_P(val);
 			if (TARGET_CHECK(args, vallen)) {
-				memcpy(args->target, Z_STRVAL_P(val), vallen);
-				args->target += vallen;
+				args->target = zend_mempcpy(args->target, Z_STRVAL_P(val), vallen);
 			}
 			return;
 		}

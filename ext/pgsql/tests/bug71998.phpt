@@ -3,17 +3,18 @@ Bug #71998 Function pg_insert does not insert when column type = inet
 --EXTENSIONS--
 pgsql
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php include("inc/skipif.inc"); ?>
 --FILE--
 <?php
 // Kudos for the IP regex to
 // http://stackoverflow.com/a/17871737/3358424
 
-include('config.inc');
+include('inc/config.inc');
+$table_name = 'table_bug71998';
 
 $db = pg_connect($conn_str);
 
-pg_query($db, "CREATE TABLE tmp_statistics (id integer NOT NULL, remote_addr inet);");
+pg_query($db, "CREATE TABLE {$table_name} (id integer NOT NULL, remote_addr inet);");
 
 $ips = array(
     /* IPv4*/
@@ -59,7 +60,7 @@ foreach ($ips as $ip) {
     $data = array("id" => ++$i, "remote_addr" => $ip);
     $r = true;
     try {
-    	@pg_insert($db, 'tmp_statistics', $data);
+    	@pg_insert($db, $table_name, $data);
     } catch (\ValueError $e) {
         echo $e->getMessage() . PHP_EOL;
         $r = false;
@@ -70,19 +71,27 @@ foreach ($ips as $ip) {
         //echo pg_last_error($db);
     }
 
-    //pg_query($db, "INSERT INTO tmp_statistics (id, remote_addr) VALUES (2, '127.0.0.1')"); // OK, record inserted
+    //pg_query($db, "INSERT INTO {$table_name} (id, remote_addr) VALUES (2, '127.0.0.1')"); // OK, record inserted
 }
 
 
-$r = pg_query($db, "SELECT * FROM tmp_statistics");
+$r = pg_query($db, "SELECT * FROM {$table_name}");
 while (false != ($row = pg_fetch_row($r))) {
     var_dump($row);
 }
 echo $errors, " errors caught\n";
 
-pg_query($db, "DROP TABLE tmp_statistics");
 pg_close($db);
 
+?>
+--CLEAN--
+<?php
+require_once('inc/config.inc');
+$table_name = 'table_bug71998';
+
+$db = @pg_connect($conn_str);
+
+pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
 --EXPECT--
 pg_insert(): Field "remote_addr" must be a valid IPv4 or IPv6 address string, "256.257.258.259" given

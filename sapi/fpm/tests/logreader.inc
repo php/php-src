@@ -116,8 +116,11 @@ class LogReader
      */
     public function printLogs(): void
     {
+        if (empty($this->sources)) {
+            return;
+        }
         $hasMultipleDescriptors = count($this->sources) > 1;
-        echo "LOGS:\n";
+        echo "\nLOGS:\n";
         foreach ($this->sources as $name => $source) {
             if ($hasMultipleDescriptors) {
                 echo ">>> source: $name\n";
@@ -128,6 +131,7 @@ class LogReader
             }
             $this->printSeparator();
         }
+        echo "\n";
     }
 
     /**
@@ -142,9 +146,8 @@ class LogReader
         if (is_null($errorMessage)) {
             return false;
         }
-        echo "ERROR: " . $errorMessage . "\n\n";
+        echo "ERROR: " . $errorMessage . "\n";
         $this->printLogs();
-        echo "\n";
 
         return false;
     }
@@ -163,10 +166,10 @@ class LogReader
      */
     public function readUntil(
         callable $matcher,
-        string $notFoundMessage = null,
+        ?string $notFoundMessage = null,
         bool $checkAllLogs = false,
-        int $timeoutSeconds = null,
-        int $timeoutMicroseconds = null
+        ?int $timeoutSeconds = null,
+        ?int $timeoutMicroseconds = null
     ): bool {
         if (is_null($timeoutSeconds) && is_null($timeoutMicroseconds)) {
             $timeoutSeconds      = 3;

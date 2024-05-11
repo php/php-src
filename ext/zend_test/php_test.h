@@ -55,6 +55,9 @@ ZEND_BEGIN_MODULE_GLOBALS(zend_test)
 	int register_passes;
 	bool print_stderr_mshutdown;
 	zend_long limit_copy_file_range;
+	int observe_opline_in_zendmm;
+	zend_mm_heap* zend_orig_heap;
+	zend_mm_heap* zend_test_heap;
 	zend_test_fiber *active_fiber;
 	zend_long quantity_value;
 	zend_string *str_test;

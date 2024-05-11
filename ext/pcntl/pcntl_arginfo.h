@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3b03373d1bb68de779baaa62db14d98ca9018339 */
+ * Stub hash: 775838bf2abbf32933f5cec6e4a85e07e8cea247 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -132,6 +132,41 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_forkx, 0, 1, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PIDFD_OPEN)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setns, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, nstype, IS_LONG, 0, "CLONE_NEWNET")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_SCHED_SETAFFINITY)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getcpuaffinity, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_SCHED_SETAFFINITY)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setcpuaffinity, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cpu_ids, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_SCHED_GETCPU)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_getcpu, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_pcntl_getqos_class, 0, 0, QosClass, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setqos_class, 0, 0, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, qos_class, QosClass, 0, "QosClass::Default")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
@@ -177,7 +212,24 @@ ZEND_FUNCTION(pcntl_rfork);
 #if defined(HAVE_FORKX)
 ZEND_FUNCTION(pcntl_forkx);
 #endif
-
+#if defined(HAVE_PIDFD_OPEN)
+ZEND_FUNCTION(pcntl_setns);
+#endif
+#if defined(HAVE_SCHED_SETAFFINITY)
+ZEND_FUNCTION(pcntl_getcpuaffinity);
+#endif
+#if defined(HAVE_SCHED_SETAFFINITY)
+ZEND_FUNCTION(pcntl_setcpuaffinity);
+#endif
+#if defined(HAVE_SCHED_GETCPU)
+ZEND_FUNCTION(pcntl_getcpu);
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_FUNCTION(pcntl_getqos_class);
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+ZEND_FUNCTION(pcntl_setqos_class);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
@@ -207,7 +259,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_exec, arginfo_pcntl_exec)
 	ZEND_FE(pcntl_alarm, arginfo_pcntl_alarm)
 	ZEND_FE(pcntl_get_last_error, arginfo_pcntl_get_last_error)
-	ZEND_FALIAS(pcntl_errno, pcntl_get_last_error, arginfo_pcntl_errno)
+	ZEND_RAW_FENTRY("pcntl_errno", zif_pcntl_get_last_error, arginfo_pcntl_errno, 0, NULL, NULL)
 #if defined(HAVE_GETPRIORITY)
 	ZEND_FE(pcntl_getpriority, arginfo_pcntl_getpriority)
 #endif
@@ -225,8 +277,32 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_FORKX)
 	ZEND_FE(pcntl_forkx, arginfo_pcntl_forkx)
 #endif
+#if defined(HAVE_PIDFD_OPEN)
+	ZEND_FE(pcntl_setns, arginfo_pcntl_setns)
+#endif
+#if defined(HAVE_SCHED_SETAFFINITY)
+	ZEND_FE(pcntl_getcpuaffinity, arginfo_pcntl_getcpuaffinity)
+#endif
+#if defined(HAVE_SCHED_SETAFFINITY)
+	ZEND_FE(pcntl_setcpuaffinity, arginfo_pcntl_setcpuaffinity)
+#endif
+#if defined(HAVE_SCHED_GETCPU)
+	ZEND_FE(pcntl_getcpu, arginfo_pcntl_getcpu)
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	ZEND_FE(pcntl_getqos_class, arginfo_pcntl_getqos_class)
+#endif
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	ZEND_FE(pcntl_setqos_class, arginfo_pcntl_setqos_class)
+#endif
 	ZEND_FE_END
 };
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+static const zend_function_entry class_QosClass_methods[] = {
+	ZEND_FE_END
+};
+#endif
 
 static void register_pcntl_symbols(int module_number)
 {
@@ -297,6 +373,12 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(SIGSYS)
 	REGISTER_LONG_CONSTANT("SIGBABY", LONG_CONST(SIGSYS), CONST_PERSISTENT);
+#endif
+#if defined(SIGCKPT)
+	REGISTER_LONG_CONSTANT("SIGCKPT", LONG_CONST(SIGCKPT), CONST_PERSISTENT);
+#endif
+#if defined(SIGCKPTEXIT)
+	REGISTER_LONG_CONSTANT("SIGCKPTEXIT", LONG_CONST(SIGCKPTEXIT), CONST_PERSISTENT);
 #endif
 #if defined(SIGRTMIN)
 	REGISTER_LONG_CONSTANT("SIGRTMIN", LONG_CONST(SIGRTMIN), CONST_PERSISTENT);
@@ -581,3 +663,22 @@ static void register_pcntl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PCNTL_ECAPMODE", ECAPMODE, CONST_PERSISTENT);
 #endif
 }
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+static zend_class_entry *register_class_QosClass(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("QosClass", IS_UNDEF, class_QosClass_methods);
+
+	zend_enum_add_case_cstr(class_entry, "UserInteractive", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "UserInitiated", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Default", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Utility", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Background", NULL);
+
+	return class_entry;
+}
+#endif

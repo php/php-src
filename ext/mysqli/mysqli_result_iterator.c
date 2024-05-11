@@ -74,7 +74,7 @@ static void php_mysqli_result_iterator_dtor(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ */
-static int php_mysqli_result_iterator_valid(zend_object_iterator *iter)
+static zend_result php_mysqli_result_iterator_valid(zend_object_iterator *iter)
 {
 	php_mysqli_result_iterator *iterator = (php_mysqli_result_iterator*) iter;
 

@@ -32,6 +32,7 @@
 #endif
 
 #include "ext/random/php_random.h"
+#include "ext/random/php_random_csprng.h"
 
 #ifdef HAVE_GETTIMEOFDAY
 ZEND_TLS struct timeval prev_tv = { 0, 0 };

@@ -17,21 +17,17 @@ runs:
           g++-multilib \
           gcc-multilib \
           language-pack-de \
-          libaspell-dev:i386 \
           libbz2-dev:i386 \
           libc6:i386 \
           libcurl4-openssl-dev:i386 \
           libffi-dev:i386 \
           libfreetype6-dev:i386 \
           libgmp-dev:i386 \
-          libgssapi-krb5-2:i386 \
           libicu-dev:i386 \
           libjpeg-dev:i386 \
-          libkrb5-dev:i386 \
           libonig-dev:i386 \
           libpng-dev:i386 \
           libpq-dev:i386 \
-          libpspell-dev:i386 \
           libreadline-dev:i386 \
           libsasl2-dev:i386 \
           libsodium-dev:i386 \
