@@ -978,7 +978,7 @@ cannot_add:
 /* }}} end dom_node_insert_before */
 
 /* https://dom.spec.whatwg.org/#dom-node-insertbefore */
-static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
+static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, xmlNodePtr parentp, xmlNodePtr child)
 {
 	xmlNodePtr refp = NULL;
 	dom_object *refobjp;
@@ -1010,7 +1010,7 @@ static void dom_node_insert_before(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	if (modern) {
-		dom_node_insert_before_modern(return_value, ref, intern, childobj, parentp, child);
+		dom_node_insert_before_modern(return_value, ref, intern, parentp, child);
 	} else {
 		dom_node_insert_before_legacy(return_value, ref, intern, childobj, parentp, child);
 	}
