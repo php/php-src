@@ -2911,6 +2911,23 @@ PHP_FUNCTION(pg_set_error_context_visibility)
 }
 #endif
 
+#ifdef HAVE_PG_RESULT_MEMORY_SIZE
+PHP_FUNCTION(pg_result_memory_size)
+{
+	zval *result;
+	pgsql_result_handle *pg_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &result, pgsql_result_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pg_result = Z_PGSQL_RESULT_P(result);
+	CHECK_PGSQL_RESULT(pg_result);
+
+	RETURN_LONG(PQresultMemorySize(pg_result->result));
+}
+#endif
+
 /* {{{ Set client encoding */
 PHP_FUNCTION(pg_set_client_encoding)
 {

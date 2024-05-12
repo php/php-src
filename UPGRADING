@@ -339,6 +339,7 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
+  . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
 - Reflection:
   . Calling ReflectionMethod::__construct() with 1 argument is deprecated.

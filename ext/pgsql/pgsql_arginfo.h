@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a37b9df0c3b172d1160b1a7ef953cbd5a0a811b6 */
+ * Stub hash: e06a7116c1048975cbb348ffcdb36c9b65cee659 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -459,6 +459,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility,
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_result_memory_size, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, result, PgSql\\Result, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -552,6 +558,9 @@ ZEND_FUNCTION(pg_delete);
 ZEND_FUNCTION(pg_select);
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_FUNCTION(pg_set_error_context_visibility);
+#endif
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+ZEND_FUNCTION(pg_result_memory_size);
 #endif
 
 static const zend_function_entry ext_functions[] = {
@@ -671,6 +680,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_select, arginfo_pg_select)
 #if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	ZEND_FE(pg_set_error_context_visibility, arginfo_pg_set_error_context_visibility)
+#endif
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+	ZEND_FE(pg_result_memory_size, arginfo_pg_result_memory_size)
 #endif
 	ZEND_FE_END
 };
