@@ -567,6 +567,9 @@ AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true]
   fi
 ])
 
+dnl Check for __attribute__ ((__aligned__)) support in the compiler.
+PHP_CHECK_VARIABLE_ATTRIBUTE([aligned])
+
 dnl Check for IPv6 support.
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>

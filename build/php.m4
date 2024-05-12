@@ -2743,3 +2743,32 @@ AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS], [
   AC_DEFINE_UNQUOTED([PHP_HAVE_AVX512_VBMI_SUPPORTS],
    [$have_avx512_vbmi_supports], [Whether the compiler supports AVX512 VBMI])
 ])
+
+dnl
+dnl PHP_CHECK_VARIABLE_ATTRIBUTE(attribute)
+dnl
+dnl Check whether the compiler supports the GNU C variable attribute.
+dnl
+AC_DEFUN([PHP_CHECK_VARIABLE_ATTRIBUTE],
+[AS_VAR_PUSHDEF([php_var], [php_cv_have_variable_attribute_$1])
+AC_CACHE_CHECK([for variable __attribute__(($1))], [php_var],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([m4_case([$1],
+  [aligned],
+    [unsigned char test[32] __attribute__(($1(__alignof__(int))));],
+  [
+    m4_warn([syntax], [Unsupported variable attribute $1, the test may fail])
+    int var __attribute__(($1));
+  ])],
+  [])],
+dnl By default, compilers may not classify attribute warnings as errors
+dnl (-Werror=attributes) when encountering an unknown attribute. Accept the
+dnl attribute only if no warnings were generated.
+  [AS_IF([test -s conftest.err],
+    [AS_VAR_SET([php_var], [no])],
+    [AS_VAR_SET([php_var], [yes])])],
+  [AS_VAR_SET([php_var], [no])])
+])
+AS_VAR_IF([php_var], [yes],
+  [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_ATTRIBUTE_$1]), [1],
+    [Define to 1 if the compiler supports the '$1' variable attribute.])])
+])
