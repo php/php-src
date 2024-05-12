@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fix crash in ParentNode::append() when dealing with a fragment
     containing text nodes. (nielsdos)
 
+- FPM:
+  . Fix bug GH-14175 (Show decimal number instead of scientific notation in
+    systemd status). (Benjamin Cremer)
+
 - Hash:
   . ext/hash: Swap the checking order of `__has_builtin` and `__GNUC__`
     (Saki Takamachi)
