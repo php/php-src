@@ -23,7 +23,7 @@ enum dom_nodelist_dimension_index_type {
 	DOM_NODELIST_DIM_LONG,
 };
 
-typedef struct _dom_nodelist_dimension_index {
+typedef struct dom_nodelist_dimension_index {
 	union {
 		zend_long lval;
 		zend_string *str;
