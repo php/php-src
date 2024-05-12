@@ -30,8 +30,6 @@
 * Since:
 */
 
-extern zend_class_entry *dom_domexception_class_entry;
-
 void php_dom_throw_error_with_message(int error_code, char *error_message, bool strict_error) /* {{{ */
 {
 	if (strict_error) {
