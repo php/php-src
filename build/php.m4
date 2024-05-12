@@ -2771,4 +2771,5 @@ dnl attribute only if no warnings were generated.
 AS_VAR_IF([php_var], [yes],
   [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_ATTRIBUTE_$1]), [1],
     [Define to 1 if the compiler supports the '$1' variable attribute.])])
+AS_VAR_POPDEF([php_var])
 ])
