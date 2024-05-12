@@ -30,7 +30,6 @@
 #include <lexbor/encoding/encoding.h>
 
 /* Implementation defined, but as HTML5 defaults in all other cases to UTF-8, we'll do the same. */
-#define DOM_FALLBACK_ENCODING_NAME "UTF-8"
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
 
 typedef struct dom_line_column_cache {

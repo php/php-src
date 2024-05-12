@@ -662,7 +662,6 @@ static zval *dom_nodemap_read_dimension(zend_object *object, zval *offset, int t
 static int dom_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
 static zval *dom_modern_nodemap_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_modern_nodemap_has_dimension(zend_object *object, zval *member, int check_empty);
-static zend_object *dom_objects_store_clone_obj(zend_object *zobject);
 
 #ifdef LIBXML_XPATH_ENABLED
 void dom_xpath_objects_free_storage(zend_object *object);
