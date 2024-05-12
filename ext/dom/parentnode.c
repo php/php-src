@@ -108,7 +108,7 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 }
 /* }}} */
 
-static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNodePtr node_to_find)
+static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNode *node_to_find)
 {
 	for (uint32_t i = 0; i < nodesc; i++) {
 		if (Z_TYPE(nodes[i]) == IS_OBJECT) {
@@ -691,7 +691,7 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	php_dom_pre_insert(context->document, fragment, parentNode, viable_previous_sibling);
 }
 
-static zend_result dom_child_removal_preconditions(const xmlNodePtr child, int stricterror)
+static zend_result dom_child_removal_preconditions(const xmlNode *child, int stricterror)
 {
 	if (dom_node_is_read_only(child) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
