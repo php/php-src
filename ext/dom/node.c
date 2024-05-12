@@ -2224,9 +2224,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETVAL_FALSE;
 	} else {
 		if (mode == 0) {
-			ret = xmlOutputBufferGetSize(buf);
-			if (ret > 0) {
-				RETVAL_STRINGL((char *) xmlOutputBufferGetContent(buf), ret);
+			size_t size = xmlOutputBufferGetSize(buf);
+			if (size > 0) {
+				RETVAL_STRINGL((char *) xmlOutputBufferGetContent(buf), size);
 			} else {
 				RETVAL_EMPTY_STRING();
 			}
