@@ -41,75 +41,123 @@
 bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 {
 	bc_num sum;
-	size_t sum_scale, sum_digits;
+	size_t sum_len = MAX(n1->n_len, n2->n_len) + 1;
+	size_t sum_scale = MAX(n1->n_scale, n2->n_scale);
+	size_t min_len = MIN (n1->n_len, n2->n_len);
+	size_t min_scale = MIN(n1->n_scale, n2->n_scale);
+	size_t min_bytes = min_len + min_scale;
 	char *n1ptr, *n2ptr, *sumptr;
-	size_t n1bytes, n2bytes;
-	bool carry;
+	bool carry = 0;
+	size_t count;
 
 	/* Prepare sum. */
-	sum_scale = MAX (n1->n_scale, n2->n_scale);
-	sum_digits = MAX (n1->n_len, n2->n_len) + 1;
-	sum = bc_new_num (sum_digits, MAX(sum_scale, scale_min));
+	sum = bc_new_num (sum_len, MAX(sum_scale, scale_min));
 
 	/* Start with the fraction part.  Initialize the pointers. */
-	n1bytes = n1->n_scale;
-	n2bytes = n2->n_scale;
-	n1ptr = (char *) (n1->n_value + n1->n_len + n1bytes - 1);
-	n2ptr = (char *) (n2->n_value + n2->n_len + n2bytes - 1);
-	sumptr = (char *) (sum->n_value + sum_scale + sum_digits - 1);
+	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
+	n2ptr = (char *) (n2->n_value + n2->n_len + n2->n_scale - 1);
+	sumptr = (char *) (sum->n_value + sum_scale + sum_len - 1);
 
 	/* Add the fraction part.  First copy the longer fraction.*/
-	if (n1bytes != n2bytes) {
-		if (n1bytes > n2bytes) {
-			while (n1bytes > n2bytes) {
-				*sumptr-- = *n1ptr--;
-				n1bytes--;
-			}
-		} else {
-			while (n2bytes > n1bytes) {
-				*sumptr-- = *n2ptr--;
-				n2bytes--;
-			}
+	if (n1->n_scale != min_scale) {
+		/* n1 has the longer scale */
+		for (count = n1->n_scale - min_scale; count > 0; count--) {
+			*sumptr-- = *n1ptr--;
+		}
+	} else {
+		/* n2 has the longer scale */
+		for (count = n2->n_scale - min_scale; count > 0; count--) {
+			*sumptr-- = *n2ptr--;
 		}
 	}
 
 	/* Now add the remaining fraction part and equal size integer parts. */
-	n1bytes += n1->n_len;
-	n2bytes += n2->n_len;
-	carry = 0;
-	while ((n1bytes > 0) && (n2bytes > 0)) {
+	count = 0;
+	/* Uses SIMD to perform calculations at high speed. */
+	if (min_bytes >= sizeof(BC_UINT_T)) {
+		sumptr++;
+		n1ptr++;
+		n2ptr++;
+		while (count + sizeof(BC_UINT_T) <= min_bytes) {
+			sumptr -= sizeof(BC_UINT_T);
+			n1ptr -= sizeof(BC_UINT_T);
+			n2ptr -= sizeof(BC_UINT_T);
+
+			BC_UINT_T n1bytes;
+			BC_UINT_T n2bytes;
+			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
+			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
+
+#if BC_LITTLE_ENDIAN
+			/* Little endian requires changing the order of bytes. */
+			n1bytes = BC_BSWAP(n1bytes);
+			n2bytes = BC_BSWAP(n2bytes);
+#endif
+
+			/*
+			 * In order to add 1 to the "next digit" when a carry occurs, adjust it so that it
+			 * overflows when add 10.
+			 * e.g.
+			 * 00001001(9) + 00000001(1) = 00001010(10) to
+			 * 11111111 + 00000001 = 00000000(0) and carry 1
+			 */
+			n1bytes += SWAR_REPEAT(0xF6) + n2bytes + carry;
+			/* If the most significant bit is 0, a carry has occurred. */
+			carry = !(n1bytes & ((BC_UINT_T) 1 << (8 * sizeof(BC_UINT_T) - 1)));
+
+			/*
+			 * The calculation result is a mixture of bytes that have been carried and bytes that have not.
+			 * The most significant bit of each byte is 0 if it is carried forward, and 1 if it is not.
+			 * Using this, subtract the 0xF6 added for adjustment from the byte that has not been carried
+			 * over to return it to the correct value as a decimal number.
+			 */
+			BC_UINT_T sum_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0xF6;
+			n1bytes -= sum_mask;
+
+#if BC_LITTLE_ENDIAN
+			/* Little endian requires changing the order of bytes back. */
+			n1bytes = BC_BSWAP(n1bytes);
+#endif
+
+			memcpy(sumptr, &n1bytes, sizeof(n1bytes));
+
+			count += sizeof(BC_UINT_T);
+		}
+		sumptr--;
+		n1ptr--;
+		n2ptr--;
+	}
+
+	for (; count < min_bytes; count++) {
 		*sumptr = *n1ptr-- + *n2ptr-- + carry;
-		if (*sumptr > (BASE - 1)) {
-			carry = 1;
+		if (*sumptr >= BASE) {
 			*sumptr -= BASE;
+			carry = 1;
 		} else {
 			carry = 0;
 		}
 		sumptr--;
-		n1bytes--;
-		n2bytes--;
 	}
 
 	/* Now add carry the longer integer part. */
-	if (n1bytes == 0) {
-		n1bytes = n2bytes;
-		n1ptr = n2ptr;
-	}
-	while (n1bytes-- > 0) {
-		*sumptr = *n1ptr-- + carry;
-		if (*sumptr > (BASE - 1)) {
-			carry = true;
-			*sumptr -= BASE;
-		} else {
-			carry = false;
+	if (n1->n_len != n2->n_len) {
+		if (n2->n_len > n1->n_len) {
+			n1ptr = n2ptr;
 		}
-		sumptr--;
+		for (count = sum_len - min_len; count > 1; count--) {
+			*sumptr = *n1ptr-- + carry;
+			if (*sumptr >= BASE) {
+				*sumptr -= BASE;
+				carry = 1;
+			} else {
+				carry = 0;
+			}
+			sumptr--;
+		}
 	}
 
 	/* Set final carry. */
-	if (carry) {
-		*sumptr += 1;
-	}
+	*sumptr += carry;
 
 	/* Adjust sum and return. */
 	_bc_rm_leading_zeros(sum);
