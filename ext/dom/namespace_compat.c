@@ -54,9 +54,9 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 	if (zv == NULL) {
 		prefix_map = emalloc(sizeof(HashTable));
 		zend_hash_init(prefix_map, 0, NULL, php_dom_libxml_ns_mapper_prefix_map_element_dtor, false);
-		zval zv;
-		ZVAL_ARR(&zv, prefix_map);
-		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv);
+		zval zv_prefix_map;
+		ZVAL_ARR(&zv_prefix_map, prefix_map);
+		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv_prefix_map);
 	} else {
 		/* cast to Bucket* only works if this holds, I would prefer a static assert but we're stuck at C99. */
 		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0);
