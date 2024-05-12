@@ -146,8 +146,7 @@ typedef struct _dom_prop_handler {
 	dom_write_t write_func;
 } dom_prop_handler;
 
-/* {{{ int dom_node_is_read_only(xmlNodePtr node) */
-int dom_node_is_read_only(xmlNodePtr node) {
+int dom_node_is_read_only(const xmlNode *node) {
 	switch (node->type) {
 		case XML_ENTITY_REF_NODE:
 		case XML_ENTITY_NODE:
@@ -168,9 +167,8 @@ int dom_node_is_read_only(xmlNodePtr node) {
 			}
 	}
 }
-/* }}} end dom_node_is_read_only */
 
-bool dom_node_children_valid(xmlNodePtr node) {
+bool dom_node_children_valid(const xmlNode *node) {
 	switch (node->type) {
 		case XML_DOCUMENT_TYPE_NODE:
 		case XML_DTD_NODE:
