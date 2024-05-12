@@ -363,7 +363,7 @@ static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
 #endif
 }
 
-static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
+static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
 {
 	ZEND_ASSERT(node->ns != NULL);
 
@@ -404,12 +404,12 @@ static zend_always_inline void php_dom_libxml_reconcile_modern_single_element_no
 	ZEND_ASSERT(node->nsDef == NULL);
 
 	if (node->ns != NULL) {
-		php_dom_libxml_reconcile_modern_single_node(ctx, node, node);
+		php_dom_libxml_reconcile_modern_single_node(ctx, node);
 	}
 
 	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
 		if (attr->ns != NULL) {
-			php_dom_libxml_reconcile_modern_single_node(ctx, node, (xmlNodePtr) attr);
+			php_dom_libxml_reconcile_modern_single_node(ctx, (xmlNodePtr) attr);
 		}
 	}
 }
