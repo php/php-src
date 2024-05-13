@@ -100,9 +100,15 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	size_t n2_arr_size = n2len / BC_LONGABLE_DIGITS + (n2len % BC_LONGABLE_DIGITS ? 1 : 0);
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
-	unsigned long *n1_l = emalloc(n1_arr_size * sizeof(unsigned long));
-	unsigned long *n2_l = emalloc(n2_arr_size * sizeof(unsigned long));
-	unsigned long *prod_l = ecalloc(prod_arr_size, sizeof(unsigned long));
+	unsigned long *buf = emalloc((n1_arr_size + n2_arr_size + prod_arr_size) * sizeof(unsigned long));
+
+	unsigned long *n1_l = buf;
+	unsigned long *n2_l = buf + n1_arr_size;
+	unsigned long *prod_l = n2_l + n2_arr_size;
+
+	for (i = 0; i < prod_arr_size; i++) {
+		prod_l[i] = 0;
+	}
 
 	/* Convert n1 to long[] */
 	i = 0;
@@ -162,9 +168,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 		prod_l[i] /= BASE;
 	}
 
-	efree(n1_l);
-	efree(n2_l);
-	efree(prod_l);
+	efree(buf);
 }
 
 /* The multiply routine.  N2 times N1 is put int PROD with the scale of
