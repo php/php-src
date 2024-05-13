@@ -84,13 +84,13 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 #if SIZEOF_SIZE_T >= 8
 #  define BC_BSWAP(u) BC_BSWAP64(u)
 #  define BC_UINT_T uint64_t
-#  define BC_LONGABLE_DIGITS 8
-#  define BC_LONGABLE_OVERFLOW 100000000
+#  define BC_MUL_UINT_DIGITS 8
+#  define BC_MUL_UINT_OVERFLOW 100000000
 #else
 #  define BC_BSWAP(u) BC_BSWAP32(u)
 #  define BC_UINT_T uint32_t
-#  define BC_LONGABLE_DIGITS 4
-#  define BC_LONGABLE_OVERFLOW 10000
+#  define BC_MUL_UINT_DIGITS 4
+#  define BC_MUL_UINT_OVERFLOW 10000
 #endif
 
 #ifdef WORDS_BIGENDIAN

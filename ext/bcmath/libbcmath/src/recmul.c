@@ -40,10 +40,10 @@
 /* Multiply utility routines */
 
 /*
- * Converts BCD to long, going backwards from pointer n by the number of
+ * Converts BCD to uint, going backwards from pointer n by the number of
  * characters specified by len.
  */
-static inline BC_UINT_T bc_partial_convert_to_long(const char *n, size_t len)
+static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
 {
 	BC_UINT_T num = 0;
 	BC_UINT_T base = 1;
@@ -66,8 +66,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 	char *n1end = n1->n_value + n1len - 1;
 	char *n2end = n2->n_value + n2len - 1;
 
-	BC_UINT_T n1_l = bc_partial_convert_to_long(n1end, n1len);
-	BC_UINT_T n2_l = bc_partial_convert_to_long(n2end, n2len);
+	BC_UINT_T n1_l = bc_partial_convert_to_uint(n1end, n1len);
+	BC_UINT_T n2_l = bc_partial_convert_to_uint(n2end, n2len);
 	BC_UINT_T prod_l = n1_l * n2_l;
 
 	size_t prodlen = n1len + n2len;
@@ -96,8 +96,8 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = n1len / BC_LONGABLE_DIGITS + (n1len % BC_LONGABLE_DIGITS ? 1 : 0);
-	size_t n2_arr_size = n2len / BC_LONGABLE_DIGITS + (n2len % BC_LONGABLE_DIGITS ? 1 : 0);
+	size_t n1_arr_size = n1len / BC_MUL_UINT_DIGITS + (n1len % BC_MUL_UINT_DIGITS ? 1 : 0);
+	size_t n2_arr_size = n2len / BC_MUL_UINT_DIGITS + (n2len % BC_MUL_UINT_DIGITS ? 1 : 0);
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
 	BC_UINT_T *buf = emalloc((n1_arr_size + n2_arr_size + prod_arr_size) * sizeof(BC_UINT_T));
@@ -110,21 +110,21 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 		prod_l[i] = 0;
 	}
 
-	/* Convert n1 to long[] */
+	/* Convert n1 to uint[] */
 	i = 0;
 	while (n1len > 0) {
-		size_t len = MIN(BC_LONGABLE_DIGITS, n1len);
-		n1_l[i] = bc_partial_convert_to_long(n1end, len);
+		size_t len = MIN(BC_MUL_UINT_DIGITS, n1len);
+		n1_l[i] = bc_partial_convert_to_uint(n1end, len);
 		n1end -= len;
 		n1len -= len;
 		i++;
 	}
 
-	/* Convert n2 to long[] */
+	/* Convert n2 to uint[] */
 	i = 0;
 	while (n2len > 0) {
-		size_t len = MIN(BC_LONGABLE_DIGITS, n2len);
-		n2_l[i] = bc_partial_convert_to_long(n2end, len);
+		size_t len = MIN(BC_MUL_UINT_DIGITS, n2len);
+		n2_l[i] = bc_partial_convert_to_uint(n2end, len);
 		n2end -= len;
 		n2len -= len;
 		i++;
@@ -142,8 +142,8 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	 * However, the last digit does nothing.
 	 */
 	for (i = 0; i < prod_arr_size - 1; i++) {
-		prod_l[i + 1] += prod_l[i] / BC_LONGABLE_OVERFLOW;
-		prod_l[i] %= BC_LONGABLE_OVERFLOW;
+		prod_l[i + 1] += prod_l[i] / BC_MUL_UINT_OVERFLOW;
+		prod_l[i] %= BC_MUL_UINT_OVERFLOW;
 	}
 
 	/* Convert to bc_num */
@@ -152,7 +152,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	char *pend = pptr + prodlen - 1;
 	i = 0;
 	while (i < prod_arr_size - 1) {
-		for (size_t j = 0; j < BC_LONGABLE_DIGITS; j++) {
+		for (size_t j = 0; j < BC_MUL_UINT_DIGITS; j++) {
 			*pend-- = prod_l[i] % BASE;
 			prod_l[i] /= BASE;
 		}
@@ -186,7 +186,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	if (len1 <= BC_LONGABLE_DIGITS && len2 <= BC_LONGABLE_DIGITS) {
+	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);
