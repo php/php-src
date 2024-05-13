@@ -121,7 +121,7 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
     (Jakub Zelenka)
-  . Implement request #48520 (openssl_csr_new - allow multiple values in DN).
+  . Implemented request #48520 (openssl_csr_new - allow multiple values in DN).
     (Jakub Zelenka)
   . Introduced new serial_hex parameter to openssl_csr_sign. (Jakub Zelenka,
     Florian Sowade)
@@ -146,8 +146,8 @@ PHP                                                                        NEWS
   . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
 
 - PCRE:
-  . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
-  . Add "/r" modifier. (Ayesh)
+  . Upgraded bundled pcre2lib to version 10.43. (nielsdos)
+  . Added "/r" modifier. (Ayesh)
 
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
