@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fix crash in ParentNode::append() when dealing with a fragment
     containing text nodes. (nielsdos)
 
+- FFI:
+  . Fixed bug GH-14215 (Cannot use FFI::load on CRLF header file with
+    apache2handler). (nielsdos)
+
 - FPM:
   . Fix bug GH-14175 (Show decimal number instead of scientific notation in
     systemd status). (Benjamin Cremer)
