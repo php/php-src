@@ -144,6 +144,9 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 #ifndef ZEND_MM_ERROR
 # define ZEND_MM_ERROR 1   /* report system errors                           */
 #endif
+#ifndef ZEND_MM_HEAP_PROTECTION
+# define ZEND_MM_HEAP_PROTECTION 1 /* protect heap against corruptions       */
+#endif
 
 #ifndef ZEND_MM_CHECK
 # define ZEND_MM_CHECK(condition, message)  do { \
@@ -364,7 +367,7 @@ struct _zend_mm_huge_list {
 
 #define _BIN_DATA_SIZE(num, size, elements, pages, x, y) \
 	/* Need two words for free slot pointer and shadow */ \
-	MAX(size, sizeof(zend_mm_free_slot*)*2)
+	(ZEND_MM_HEAP_PROTECTION ? MAX(size, sizeof(zend_mm_free_slot*)*2) : size)
 #define _BIN_DATA_SIZE_C(num, size, elements, pages, x, y) \
 	_BIN_DATA_SIZE(num, size, elements, pages, x, y),
 static const uint32_t bin_data_size[] = {
@@ -1302,6 +1305,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 
 #define ZEND_MM_SMALL_SIZE_TO_BIN(size)  zend_mm_small_size_to_bin(size)
 
+#if ZEND_MM_HEAP_PROTECTION
 /* We keep track of free slots by organizing them in a linked list, with the
  * first word of every free slot being a pointer to the next one.
  *
@@ -1352,6 +1356,13 @@ static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_
 	}
 	return (zend_mm_free_slot*)next;
 }
+
+#else /* ZEND_MM_HEAP_PROTECTION */
+# define zend_mm_set_next_free_slot(heap, bin_num, slot, next) do { \
+		(slot)->next_free_slot = (next);                            \
+	} while (0)
+# define zend_mm_get_next_free_slot(heap, bin_num, slot) (slot)->next_free_slot
+#endif /* ZEND_MM_HEAP_PROTECTION */
 
 static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint32_t bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
