@@ -2219,7 +2219,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_fetch_dim_read(&ctx, opline, ssa, ssa_op,
 								OP1_INFO(), OP1_REG_ADDR(), 0,
-								OP2_INFO(), RES_INFO(), RES_REG_ADDR(), IS_UNKNOWN)) {
+								OP2_INFO(), OP2_REG_ADDR(),
+								RES_INFO(), RES_REG_ADDR(), IS_UNKNOWN)) {
 							goto jit_failure;
 						}
 						goto done;

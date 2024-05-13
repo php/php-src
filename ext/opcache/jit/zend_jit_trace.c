@@ -2909,9 +2909,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 			if (ssa_op->op2_use >= 0
 			 && ssa_op->op2_use != ssa_op->op1_use
 			 && RA_HAS_IVAL(ssa_op->op2_use)) {
-				/* Quick workaround to disable register allocation for unsupported operand */
-				// TODO: Find a general solution ???
-				if (!support_opline || opline->opcode == ZEND_FETCH_DIM_R) {
+				if (!support_opline) {
 					RA_IVAL_DEL(ssa_op->op2_use);
 					count--;
 				} else if (!zend_ssa_is_no_val_use(opline, ssa_op, ssa_op->op2_use)) {
@@ -5717,7 +5715,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_fetch_dim_read(&ctx, opline, ssa, ssa_op,
 								op1_info, op1_addr, avoid_refcounting,
-								op2_info, res_info, RES_REG_ADDR(), val_type)) {
+								op2_info, OP2_REG_ADDR(),
+								res_info, RES_REG_ADDR(), val_type)) {
 							goto jit_failure;
 						}
 						if (ssa_op->op1_def >= 0 && op1_type != IS_UNKNOWN) {
