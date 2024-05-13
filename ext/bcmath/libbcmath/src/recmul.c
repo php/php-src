@@ -37,6 +37,15 @@
 #include "zend_alloc.h"
 
 
+#if SIZEOF_SIZE_T >= 8
+#  define BC_MUL_UINT_DIGITS 8
+#  define BC_MUL_UINT_OVERFLOW 100000000
+#else
+#  define BC_MUL_UINT_DIGITS 4
+#  define BC_MUL_UINT_OVERFLOW 10000
+#endif
+
+
 /* Multiply utility routines */
 
 /*
