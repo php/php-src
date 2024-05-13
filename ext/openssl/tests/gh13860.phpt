@@ -9,7 +9,7 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 --FILE--
 <?php
 $serverCode = <<<'CODE'
-    $serverUri = "tcp://128.0.0.1:64326";
+    $serverUri = "tcp://127.0.0.1:64326";
     $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
     $serverCtx = stream_context_create();
 
