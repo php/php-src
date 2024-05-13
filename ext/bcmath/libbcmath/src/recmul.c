@@ -43,10 +43,10 @@
  * Converts BCD to long, going backwards from pointer n by the number of
  * characters specified by len.
  */
-static inline unsigned long bc_partial_convert_to_long(const char *n, size_t len)
+static inline BC_UINT_T bc_partial_convert_to_long(const char *n, size_t len)
 {
-	unsigned long num = 0;
-	unsigned long base = 1;
+	BC_UINT_T num = 0;
+	BC_UINT_T base = 1;
 
 	for (size_t i = 0; i < len; i++) {
 		num += *n * base;
@@ -66,9 +66,9 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 	char *n1end = n1->n_value + n1len - 1;
 	char *n2end = n2->n_value + n2len - 1;
 
-	unsigned long n1_l = bc_partial_convert_to_long(n1end, n1len);
-	unsigned long n2_l = bc_partial_convert_to_long(n2end, n2len);
-	unsigned long prod_l = n1_l * n2_l;
+	BC_UINT_T n1_l = bc_partial_convert_to_long(n1end, n1len);
+	BC_UINT_T n2_l = bc_partial_convert_to_long(n2end, n2len);
+	BC_UINT_T prod_l = n1_l * n2_l;
 
 	size_t prodlen = n1len + n2len;
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -82,7 +82,7 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 }
 
 /*
- * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of unsigned longs.
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_UINT_Ts.
  * The array is generated starting with the smaller digits.
  * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
  *
@@ -100,11 +100,11 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	size_t n2_arr_size = n2len / BC_LONGABLE_DIGITS + (n2len % BC_LONGABLE_DIGITS ? 1 : 0);
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
-	unsigned long *buf = emalloc((n1_arr_size + n2_arr_size + prod_arr_size) * sizeof(unsigned long));
+	BC_UINT_T *buf = emalloc((n1_arr_size + n2_arr_size + prod_arr_size) * sizeof(BC_UINT_T));
 
-	unsigned long *n1_l = buf;
-	unsigned long *n2_l = buf + n1_arr_size;
-	unsigned long *prod_l = n2_l + n2_arr_size;
+	BC_UINT_T *n1_l = buf;
+	BC_UINT_T *n2_l = buf + n1_arr_size;
+	BC_UINT_T *prod_l = n2_l + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
 		prod_l[i] = 0;
