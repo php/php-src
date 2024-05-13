@@ -695,6 +695,9 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 #ifdef IR_HAVE_SWAP_INT
 		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM) {
 			/* a simple cycle from 2 elements */
+			if (ir_type_size[types[to]] > ir_type_size[type]) {
+				type = types[to];
+			}
 			ir_emit_swap(ctx, type, to, from);
 			ir_bitset_excl(todo, from);
 			ir_bitset_excl(todo, to);
@@ -713,7 +716,7 @@ IR_ALWAYS_INLINE void ir_dessa_resolve_cycle(ir_ctx *ctx, int32_t *pred, int32_t
 		}
 	} else {
 #ifdef IR_HAVE_SWAP_FP
-		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM) {
+		if (pred[from] == to && to < IR_REG_NUM && from < IR_REG_NUM && types[to] == type) {
 			/* a simple cycle from 2 elements */
 			ir_emit_swap_fp(ctx, type, to, from);
 			IR_REGSET_EXCL(todo, from);

@@ -2328,7 +2328,10 @@ static ir_live_pos ir_first_use_pos_after(ir_live_interval *ival, ir_live_pos po
 {
 	ir_use_pos *p = ival->use_pos;
 
-	while (p && p->pos <= pos) {
+	while (p && p->pos < pos) {
+		p = p->next;
+	}
+	if (p && p->pos == pos && p->op_num != 0) {
 		p = p->next;
 	}
 	while (p && !(p->flags & flags)) {

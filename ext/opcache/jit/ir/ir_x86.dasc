@@ -1262,11 +1262,11 @@ op2_const:
 		case IR_COND_CMP_INT:
 			insn = &ctx->ir_base[ref];
 			if (IR_IS_TYPE_INT(insn->type)) {
-				if (IR_IS_CONST_REF(insn->op3)) {
+				if (IR_IS_CONST_REF(insn->op3) || ir_rule(ctx, insn->op3) == IR_STATIC_ALLOCA) {
 					flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG | IR_OP2_MUST_BE_IN_REG | IR_OP3_MUST_BE_IN_REG;
 					constraints->tmp_regs[0] = IR_TMP_REG(3, insn->type, IR_LOAD_SUB_REF, IR_SAVE_SUB_REF);
 					n = 1;
-				} else if (IR_IS_CONST_REF(insn->op2)) {
+				} else if (IR_IS_CONST_REF(insn->op2) || ir_rule(ctx, insn->op2) == IR_STATIC_ALLOCA) {
 					flags = IR_USE_MUST_BE_IN_REG | IR_OP1_SHOULD_BE_IN_REG | IR_OP2_MUST_BE_IN_REG | IR_OP3_MUST_BE_IN_REG;
 					constraints->tmp_regs[0] = IR_TMP_REG(2, insn->type, IR_LOAD_SUB_REF, IR_SAVE_SUB_REF);
 					n = 1;
