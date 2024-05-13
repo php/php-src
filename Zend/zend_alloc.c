@@ -54,13 +54,12 @@
 #include "zend.h"
 #include "zend_alloc.h"
 #include "zend_globals.h"
+#include "zend_hrtime.h"
 #include "zend_operators.h"
 #include "zend_multiply.h"
 #include "zend_bitset.h"
 #include "zend_mmap.h"
 #include "zend_portability.h"
-#include "ext/random/php_random_csprng.h"
-#include "ext/random/php_random.h"
 #include <signal.h>
 
 #ifdef HAVE_UNISTD_H
@@ -248,6 +247,10 @@ typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
 static bool zend_mm_use_huge_pages = false;
 
+typedef struct _zend_mm_rand_state {
+	uint32_t state[4];
+} zend_mm_rand_state;
+
 /*
  * Memory is retrieved from OS by chunks of fixed size 2MB.
  * Inside chunk it's managed by pages of fixed size 4096B.
@@ -323,7 +326,7 @@ struct _zend_mm_heap {
 	HashTable *tracked_allocs;
 #endif
 	pid_t pid;
-	php_random_status_state_xoshiro256starstar random_state;
+	zend_mm_rand_state rand_state;
 };
 
 struct _zend_mm_chunk {
@@ -2024,29 +2027,104 @@ static void zend_mm_free_huge(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZE
 #endif
 }
 
+/********/
+/* Rand */
+/********/
+
+/* Xoshiro256** PRNG based on implementation from Go Kudo in
+ * ext/random/engine_xoshiro256starstar.c, based on code from David Blackman,
+ * Sebastiano Vigna. */
+
+static inline uint64_t splitmix64(uint64_t *seed)
+{
+	uint64_t r;
+
+	r = (*seed += 0x9e3779b97f4a7c15ULL);
+	r = (r ^ (r >> 30)) * 0xbf58476d1ce4e5b9ULL;
+	r = (r ^ (r >> 27)) * 0x94d049bb133111ebULL;
+	return (r ^ (r >> 31));
+}
+
+ZEND_ATTRIBUTE_CONST static inline uint64_t rotl(const uint64_t x, int k)
+{
+	return (x << k) | (x >> (64 - k));
+}
+
+static inline uint64_t zend_mm_rand_generate(zend_mm_rand_state *s)
+{
+	const uint64_t r = rotl(s->state[1] * 5, 7) * 9;
+	const uint64_t t = s->state[1] << 17;
+
+	s->state[2] ^= s->state[0];
+	s->state[3] ^= s->state[1];
+	s->state[1] ^= s->state[2];
+	s->state[0] ^= s->state[3];
+
+	s->state[2] ^= t;
+
+	s->state[3] = rotl(s->state[3], 45);
+
+	return r;
+}
+
+static inline void zend_mm_rand_seed256(zend_mm_rand_state *state, uint64_t s0, uint64_t s1, uint64_t s2, uint64_t s3)
+{
+	state->state[0] = s0;
+	state->state[1] = s1;
+	state->state[2] = s2;
+	state->state[3] = s3;
+}
+
+static inline void zend_mm_rand_seed64(zend_mm_rand_state *state, uint64_t seed)
+{
+	uint64_t s[4];
+
+	s[0] = splitmix64(&seed);
+	s[1] = splitmix64(&seed);
+	s[2] = splitmix64(&seed);
+	s[3] = splitmix64(&seed);
+
+	zend_mm_rand_seed256(state, s[0], s[1], s[2], s[3]);
+}
+
 /******************/
 /* Initialization */
 /******************/
 
 static zend_result zend_mm_refresh_key(zend_mm_heap *heap)
 {
-	php_random_result result = php_random_algo_xoshiro256starstar.generate(&heap->random_state);
-	ZEND_ASSERT(result.size == sizeof(uint64_t));
-	heap->shadow_key = (uintptr_t) result.result;
+	heap->shadow_key = (uintptr_t) zend_mm_rand_generate(&heap->rand_state);
+
 	return SUCCESS;
 }
 
 static zend_result zend_mm_init_key(zend_mm_heap *heap)
 {
 	uint64_t seed[4];
-	if (php_random_bytes_silent(&seed, sizeof(seed)) != SUCCESS) {
-		for (int i = 0; i < sizeof(seed)/sizeof(seed[0]); i++) {
-			seed[i] = php_random_generate_fallback_seed();
-		}
+	char errstr[128];
+	if (zend_os_csprng_random_bytes(&seed, sizeof(seed), errstr, sizeof(errstr)) == SUCCESS) {
+		zend_mm_rand_seed256(&heap->rand_state,
+				seed[0], seed[1], seed[2], seed[3]);
+	} else {
+		/* Fallback to weak seed generation */
+#if ZEND_MM_ERROR
+		fprintf(stderr, "Could not generate secure random seed: %s\n", errstr);
+#endif
+		zend_hrtime_t nanotime = zend_hrtime();
+		uint64_t v = 0;
+		v ^= (uint64_t) nanotime;
+		splitmix64(&v);
+		v ^= (uint64_t) getpid();
+		splitmix64(&v);
+#ifdef ZTS
+		THREAD_T tid = tsrm_thread_id();
+		uint64_t tmp = 0;
+		memcpy(&tmp, tid, MIN(sizeof(tmp), sizeof(tid)));
+		v ^= tmp;
+		splitmix64(&v);
+#endif
+		zend_mm_rand_seed64(&heap->rand_state, v);
 	}
-
-	php_random_xoshiro256starstar_seed256(&heap->random_state,
-			seed[0], seed[1], seed[2], seed[3]);
 
 	return zend_mm_refresh_key(heap);
 }

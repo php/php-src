@@ -49,6 +49,7 @@
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
 #include "ext/date/php_date.h"
+#include "ext/random/php_random_csprng.h"
 #include "php_variables.h"
 #include "ext/standard/credits.h"
 #ifdef PHP_WIN32
@@ -2114,6 +2115,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zuf.printf_to_smart_str_function = php_printf_to_smart_str;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
+	zuf.os_csprng_randomn_bytes_function = php_random_bytes_ex;
 	zend_startup(&zuf);
 	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
