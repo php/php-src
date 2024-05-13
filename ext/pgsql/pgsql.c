@@ -174,6 +174,18 @@ static void pgsql_link_free(pgsql_link_handle *link)
 {
 	PGresult *res;
 
+#ifdef LIBPQ_HAS_PIPELINING
+	if (!link->synced) {
+		PGcancel *c;
+		char err[256];
+
+		c = PQgetCancel(link->conn);
+		PQcancel(c, err, sizeof(err));
+		PQfreeCancel(c);
+		PQpipelineSync(link->conn);
+	}
+#endif
+
 	while ((res = PQgetResult(link->conn))) {
 		PQclear(res);
 	}
@@ -357,6 +369,20 @@ static int _rollback_transactions(zval *el)
 	if (PQsetnonblocking(link, 0)) {
 		php_error_docref("ref.pgsql", E_NOTICE, "Cannot set connection to blocking mode");
 		return -1;
+	}
+
+	if (PQtransactionStatus(link) != PQTRANS_IDLE) {
+		PGcancel *c;
+		char err[256];
+
+		c = PQgetCancel(link);
+		PQcancel(c, err, sizeof(err));
+		PQfreeCancel(c);
+#ifdef LIBPQ_HAS_PIPELINING
+		if (PQpipelineSync(link)) {
+			PQexitPipelineMode(link);
+		}
+#endif
 	}
 
 	while ((res = PQgetResult(link))) {
@@ -639,6 +665,9 @@ newpconn:
 		link->hash = zend_string_copy(str.s);
 		link->notices = NULL;
 		link->persistent = 1;
+#ifdef LIBPQ_HAS_PIPELINING
+		link->synced = 1;
+#endif
 	} else { /* Non persistent connection */
 		zval *index_ptr;
 
@@ -686,6 +715,9 @@ newpconn:
 		link->hash = zend_string_copy(str.s);
 		link->notices = NULL;
 		link->persistent = 0;
+#ifdef LIBPQ_HAS_PIPELINING
+		link->synced = 1;
+#endif
 
 		/* add it to the hash */
 		zend_hash_update(&PGG(connections), str.s, return_value);
@@ -999,17 +1031,23 @@ PHP_FUNCTION(pg_query)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 	pgsql_result = PQexec(pgsql, query);
 	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
 		PQclear(pgsql_result);
@@ -1093,17 +1131,23 @@ PHP_FUNCTION(pg_query_params)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
@@ -1198,17 +1242,23 @@ PHP_FUNCTION(pg_prepare)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 	pgsql_result = PQprepare(pgsql, stmtname, query, 0, NULL);
 	if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
 		PQclear(pgsql_result);
@@ -1279,17 +1329,23 @@ PHP_FUNCTION(pg_execute)
 
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (PQpipelineStatus(pgsql) == PQ_PIPELINE_OFF) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE,"Cannot set connection to blocking mode");
+			RETURN_FALSE;
+		}
+		while ((pgsql_result = PQgetResult(pgsql))) {
+			PQclear(pgsql_result);
+			leftover = 1;
+		}
+		if (leftover) {
+			php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
-	while ((pgsql_result = PQgetResult(pgsql))) {
-		PQclear(pgsql_result);
-		leftover = 1;
-	}
-	if (leftover) {
-		php_error_docref(NULL, E_NOTICE, "Found results on this connection. Use pg_get_result() to get these results first");
-	}
+#endif
 
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
@@ -3547,6 +3603,9 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	pgsql_link_handle *link;
 	PGconn *pgsql;
 	PGresult *pgsql_result;
+#ifdef LIBPQ_HAS_PIPELINING
+	bool is_pipeline_mode;
+#endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
 		RETURN_THROWS();
@@ -3556,10 +3615,17 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	CHECK_PGSQL_LINK(link);
 	pgsql = link->conn;
 
-	if (PQsetnonblocking(pgsql, 1)) {
-		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
-		RETURN_FALSE;
+#ifdef LIBPQ_HAS_PIPELINING
+	is_pipeline_mode = (PQpipelineStatus(pgsql) == PQ_PIPELINE_ON);
+	if (!is_pipeline_mode) {
+#endif
+		if (PQsetnonblocking(pgsql, 1)) {
+			php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
+			RETURN_FALSE;
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
+#endif
 	switch(entry_type) {
 		case PHP_PG_ASYNC_IS_BUSY:
 			PQconsumeInput(pgsql);
@@ -3575,17 +3641,31 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 			if (rc < 0) {
 				zend_error(E_WARNING, "cannot cancel the query: %s", err);
 			}
-			while ((pgsql_result = PQgetResult(pgsql))) {
-				PQclear(pgsql_result);
+#ifdef LIBPQ_HAS_PIPELINING
+			if (!is_pipeline_mode) {
+#endif
+				while ((pgsql_result = PQgetResult(pgsql))) {
+					PQclear(pgsql_result);
+				}
+#ifdef LIBPQ_HAS_PIPELINING
+			} else {
+				link->synced = 1;
 			}
+#endif
 			PQfreeCancel(c);
 			break;
 		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
-	if (PQsetnonblocking(pgsql, 0)) {
-		php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
+#ifdef LIBPQ_HAS_PIPELINING
+	if (!is_pipeline_mode) {
+#endif
+		if (PQsetnonblocking(pgsql, 0)) {
+			php_error_docref(NULL, E_NOTICE, "Cannot set connection to blocking mode");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
+#endif
 	convert_to_boolean(return_value);
 }
 /* }}} */
@@ -3623,6 +3703,9 @@ PHP_FUNCTION(pg_send_query)
 	char *query;
 	size_t len;
 	PGconn *pgsql;
+#ifdef LIBPQ_HAS_PIPELINING
+	bool is_pipeline_mode;
+#endif
 	int is_non_blocking;
 	int ret;
 
@@ -3634,23 +3717,41 @@ PHP_FUNCTION(pg_send_query)
 	CHECK_PGSQL_LINK(link);
 	pgsql = link->conn;
 
-	is_non_blocking = PQisnonblocking(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+	is_pipeline_mode = (PQpipelineStatus(pgsql) == PQ_PIPELINE_ON);
+	if (is_pipeline_mode) {
+		is_non_blocking = 1;
+	} else {
+#endif
+		is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
-		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
-		RETURN_FALSE;
-	}
+		if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
+			php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
+			RETURN_FALSE;
+		}
 
-	if (_php_pgsql_link_has_results(pgsql)) {
-		php_error_docref(NULL, E_NOTICE,
-			"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		if (_php_pgsql_link_has_results(pgsql)) {
+			php_error_docref(NULL, E_NOTICE,
+				"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
+#endif
 
 	if (is_non_blocking) {
 		if (!PQsendQuery(pgsql, query)) {
 			RETURN_FALSE;
 		}
-		ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		if (is_pipeline_mode) {
+			link->synced = 0;
+			ret = 0;
+		} else {
+#endif
+			ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		}
+#endif
 	} else {
 		if (!PQsendQuery(pgsql, query)) {
 			if ((PGG(auto_reset_persistent) & 2) && PQstatus(pgsql) != CONNECTION_OK) {
@@ -3695,6 +3796,9 @@ PHP_FUNCTION(pg_send_query_params)
 	char *query;
 	size_t query_len;
 	PGconn *pgsql;
+#ifdef LIBPQ_HAS_PIPELINING
+	bool is_pipeline_mode;
+#endif
 	int is_non_blocking;
 	int ret;
 
@@ -3706,17 +3810,26 @@ PHP_FUNCTION(pg_send_query_params)
 	CHECK_PGSQL_LINK(link);
 	pgsql = link->conn;
 
-	is_non_blocking = PQisnonblocking(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+	is_pipeline_mode = (PQpipelineStatus(pgsql) == PQ_PIPELINE_ON);
+	if (is_pipeline_mode) {
+		is_non_blocking = 1;
+	} else {
+#endif
+		is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
-		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
-		RETURN_FALSE;
-	}
+		if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
+			php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
+			RETURN_FALSE;
+		}
 
-	if (_php_pgsql_link_has_results(pgsql)) {
-		php_error_docref(NULL, E_NOTICE,
-			"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		if (_php_pgsql_link_has_results(pgsql)) {
+			php_error_docref(NULL, E_NOTICE,
+				"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
+#endif
 
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
@@ -3755,7 +3868,16 @@ PHP_FUNCTION(pg_send_query_params)
 	}
 
 	if (is_non_blocking) {
-		ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		if (is_pipeline_mode) {
+			link->synced = 0;
+			ret = 0;
+		} else {
+#endif
+			ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		}
+#endif
 	} else {
 		/* Wait to finish sending buffer */
 		while ((ret = PQflush(pgsql))) {
@@ -3789,6 +3911,9 @@ PHP_FUNCTION(pg_send_prepare)
 	char *query, *stmtname;
 	size_t stmtname_len, query_len;
 	PGconn *pgsql;
+#ifdef LIBPQ_HAS_PIPELINING
+	bool is_pipeline_mode;
+#endif
 	int is_non_blocking;
 	int ret;
 
@@ -3800,17 +3925,26 @@ PHP_FUNCTION(pg_send_prepare)
 	CHECK_PGSQL_LINK(link);
 	pgsql = link->conn;
 
-	is_non_blocking = PQisnonblocking(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+	is_pipeline_mode = (PQpipelineStatus(pgsql) == PQ_PIPELINE_ON);
+	if (is_pipeline_mode) {
+		is_non_blocking = 1;
+	} else {
+#endif
+		is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
-		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
-		RETURN_FALSE;
-	}
+		if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
+			php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
+			RETURN_FALSE;
+		}
 
-	if (_php_pgsql_link_has_results(pgsql)) {
-		php_error_docref(NULL, E_NOTICE,
-			"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		if (_php_pgsql_link_has_results(pgsql)) {
+			php_error_docref(NULL, E_NOTICE,
+				"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
+#endif
 
 	if (!PQsendPrepare(pgsql, stmtname, query, 0, NULL)) {
 		if (is_non_blocking) {
@@ -3826,7 +3960,16 @@ PHP_FUNCTION(pg_send_prepare)
 	}
 
 	if (is_non_blocking) {
-		ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		if (is_pipeline_mode) {
+			link->synced = 0;
+			ret = 0;
+		} else {
+#endif
+			ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		}
+#endif
 	} else {
 		/* Wait to finish sending buffer */
 		while ((ret = PQflush(pgsql))) {
@@ -3862,6 +4005,9 @@ PHP_FUNCTION(pg_send_execute)
 	char *stmtname;
 	size_t stmtname_len;
 	PGconn *pgsql;
+#ifdef LIBPQ_HAS_PIPELINING
+	bool is_pipeline_mode;
+#endif
 	int is_non_blocking;
 	int ret;
 
@@ -3873,17 +4019,26 @@ PHP_FUNCTION(pg_send_execute)
 	CHECK_PGSQL_LINK(link);
 	pgsql = link->conn;
 
-	is_non_blocking = PQisnonblocking(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+	is_pipeline_mode = (PQpipelineStatus(pgsql) == PQ_PIPELINE_ON);
+	if (is_pipeline_mode) {
+		is_non_blocking = 1;
+	} else {
+#endif
+		is_non_blocking = PQisnonblocking(pgsql);
 
-	if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
-		php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
-		RETURN_FALSE;
-	}
+		if (is_non_blocking == 0 && PQsetnonblocking(pgsql, 1) == -1) {
+			php_error_docref(NULL, E_NOTICE, "Cannot set connection to nonblocking mode");
+			RETURN_FALSE;
+		}
 
-	if (_php_pgsql_link_has_results(pgsql)) {
-		php_error_docref(NULL, E_NOTICE,
-			"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		if (_php_pgsql_link_has_results(pgsql)) {
+			php_error_docref(NULL, E_NOTICE,
+				"There are results on this connection. Call pg_get_result() until it returns FALSE");
+		}
+#ifdef LIBPQ_HAS_PIPELINING
 	}
+#endif
 
 	num_params = zend_hash_num_elements(Z_ARRVAL_P(pv_param_arr));
 	if (num_params > 0) {
@@ -3924,7 +4079,16 @@ PHP_FUNCTION(pg_send_execute)
 	}
 
 	if (is_non_blocking) {
-		ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		if (is_pipeline_mode) {
+			link->synced = 0;
+			ret = 0;
+		} else {
+#endif
+			ret = PQflush(pgsql);
+#ifdef LIBPQ_HAS_PIPELINING
+		}
+#endif
 	} else {
 		/* Wait to finish sending buffer */
 		while ((ret = PQflush(pgsql))) {
@@ -3965,6 +4129,12 @@ PHP_FUNCTION(pg_get_result)
 	link = Z_PGSQL_LINK_P(pgsql_link);
 	CHECK_PGSQL_LINK(link);
 	pgsql = link->conn;
+#ifdef LIBPQ_HAS_PIPELINING
+	if (!link->synced) {
+		php_error_docref(NULL, E_NOTICE,
+			"The connection is in pipeline mode. A synchronization message must be sent before results can be received. Call pg_pipeline_sync()");
+	}
+#endif
 
 	pgsql_result = PQgetResult(pgsql);
 	if (!pgsql_result) {
@@ -5913,5 +6083,104 @@ PHP_FUNCTION(pg_select)
 	return;
 }
 /* }}} */
+
+#ifdef LIBPQ_HAS_PIPELINING
+PHP_FUNCTION(pg_enter_pipeline_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+	int ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	PQsetnonblocking(pgsql_handle->conn, 1);
+
+	ret = PQenterPipelineMode(pgsql_handle->conn);
+	if (ret) {
+		pgsql_handle->synced = 0;
+	}
+
+	RETURN_BOOL(ret);
+}
+
+PHP_FUNCTION(pg_exit_pipeline_mode)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+	int ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	PQsetnonblocking(pgsql_handle->conn, 0);
+
+	ret = PQexitPipelineMode(pgsql_handle->conn);
+	if (ret) {
+		pgsql_handle->synced = 1;
+	}
+
+	RETURN_BOOL(ret);
+}
+
+PHP_FUNCTION(pg_send_flush_request)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_BOOL(PQsendFlushRequest(pgsql_handle->conn));
+}
+
+PHP_FUNCTION(pg_pipeline_sync)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+	int ret;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	ret = PQpipelineSync(pgsql_handle->conn);
+	if (ret) {
+		pgsql_handle->synced = 1;
+	}
+
+	RETURN_BOOL(ret);
+}
+
+PHP_FUNCTION(pg_pipeline_status)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *pgsql_handle;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pgsql_link, pgsql_link_ce) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	pgsql_handle = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(pgsql_handle);
+
+	RETURN_LONG(PQpipelineStatus(pgsql_handle->conn));
+}
+#endif
 
 #endif
