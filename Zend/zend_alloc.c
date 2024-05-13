@@ -1341,13 +1341,7 @@ static zend_always_inline void zend_mm_set_next_free_slot(zend_mm_heap *heap, ui
 	ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num) = zend_mm_encode_free_slot(heap, next);
 }
 
-static zend_always_inline void zend_mm_copy_next_free_slot(zend_mm_free_slot* dest, uint32_t bin_num, zend_mm_free_slot* from)
-{
-	dest->next_free_slot = from->next_free_slot;
-	ZEND_MM_FREE_SLOT_PTR_SHADOW(dest, bin_num) = ZEND_MM_FREE_SLOT_PTR_SHADOW(from, bin_num);
-}
-
-static zend_always_inline zend_mm_free_slot *zend_mm_check_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot* slot)
+static zend_always_inline zend_mm_free_slot *zend_mm_get_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot* slot)
 {
 	zend_mm_free_slot *next = slot->next_free_slot;
 	if (EXPECTED(next != NULL)) {
@@ -1428,7 +1422,7 @@ static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_
 
 	if (EXPECTED(heap->free_slot[bin_num] != NULL)) {
 		zend_mm_free_slot *p = heap->free_slot[bin_num];
-		heap->free_slot[bin_num] = zend_mm_check_next_free_slot(heap, bin_num, p);
+		heap->free_slot[bin_num] = zend_mm_get_next_free_slot(heap, bin_num, p);
 		return p;
 	} else {
 		return zend_mm_alloc_small_slow(heap, bin_num ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -2135,7 +2129,7 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 				has_free_pages = true;
 			}
 			chunk->map[page_num] = ZEND_MM_SRUN_EX(i, free_counter);
-			p = zend_mm_check_next_free_slot(heap, i, p);
+			p = zend_mm_get_next_free_slot(heap, i, p);
 		}
 
 		if (!has_free_pages) {
@@ -2161,18 +2155,18 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 			ZEND_ASSERT(ZEND_MM_SRUN_BIN_NUM(info) == i);
 			if (ZEND_MM_SRUN_FREE_COUNTER(info) == bin_elements[i]) {
 				/* remove from cache */
+				p = zend_mm_get_next_free_slot(heap, i, p);
 				if (q == (zend_mm_free_slot*)&heap->free_slot[i]) {
-					q->next_free_slot = zend_mm_check_next_free_slot(heap, i, p);
+					q->next_free_slot = p;
 				} else {
-					zend_mm_copy_next_free_slot((zend_mm_free_slot*)q, i, p);
+					zend_mm_set_next_free_slot(heap, i, q, p);
 				}
-				p = zend_mm_check_next_free_slot(heap, i, p);
 			} else {
 				q = p;
 				if (q == (zend_mm_free_slot*)&heap->free_slot[i]) {
 					p = q->next_free_slot;
 				} else {
-					p = zend_mm_check_next_free_slot(heap, i, q);
+					p = zend_mm_get_next_free_slot(heap, i, q);
 				}
 			}
 		}
