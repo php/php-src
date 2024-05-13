@@ -194,9 +194,9 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
-	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
+	_setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
+	_setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
+	_setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
 	/* This hard-coded string of INI settings is parsed and read into PHP's
