@@ -3,8 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.0alpha1
 
 - BCMath:
-  . [RFC] Add bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
-  . Improve performance. (Saki Takamachi, nielsdos)
+  . [RFC] Added bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
+  . Improved performance. (Saki Takamachi, nielsdos)
 
 - Core:
   . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
@@ -38,20 +38,20 @@ PHP                                                                        NEWS
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
   . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
     (nielsdos)
-  . Fix cloning attribute with namespace disappearing namespace. (nielsdos)
-  . Implement DOM HTML5 parsing and serialization RFC. (nielsdos)
-  . Fix DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
+  . Fixed cloning attribute with namespace disappearing namespace. (nielsdos)
+  . Implemented DOM HTML5 parsing and serialization RFC. (nielsdos)
+  . Fixed DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
   . Handle OOM more consistently. (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
   . Added DOMXPath::quote() static method. (divinity76)
   . Implemented opt-in ext/dom spec compliance RFC. (nielsdos)
 
 - Fileinfo:
-  . Update to libmagic 5.45. (nielsdos)
+  . Updated to libmagic 5.45. (nielsdos)
   . Fixed bug #65106 (PHP fails to compile ext/fileinfo). (Guillaume Outters)
 
 - FPM:
-  . Implement GH-12385 (flush headers without body when calling flush()).
+  . Implemented GH-12385 (flush headers without body when calling flush()).
     (nielsdos)
   . Added DragonFlyBSD system to the list which set FPM_BACKLOG_DEFAULT
     to SOMAXCONN. (David Carlier)
