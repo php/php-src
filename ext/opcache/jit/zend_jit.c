@@ -2270,7 +2270,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_isset_isempty_dim(&ctx, opline,
 								OP1_INFO(), OP1_REG_ADDR(), 0,
-								OP2_INFO(), IS_UNKNOWN,
+								OP2_INFO(), OP2_REG_ADDR(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
