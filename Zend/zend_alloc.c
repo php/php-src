@@ -71,6 +71,8 @@
 # include <wincrypt.h>
 # include <process.h>
 # include "win32/winutil.h"
+# define getpid _getpid
+typedef int pid_t;
 #endif
 
 #include <stdio.h>
