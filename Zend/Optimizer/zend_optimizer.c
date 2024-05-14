@@ -705,34 +705,20 @@ bool zend_optimizer_replace_by_const(zend_op_array *op_array,
 
 /* Update jump offsets after a jump was migrated to another opline */
 void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, zend_op *opline) {
+	uint32_t flags = zend_get_opcode_flags(opline->opcode);
+	if ((ZEND_VM_OP1_FLAGS(flags) & ZEND_VM_OP_MASK) == ZEND_VM_OP_JMP_ADDR) {
+		ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op1, ZEND_OP1_JMP_ADDR(opline));
+	}
+	if ((ZEND_VM_OP2_FLAGS(flags) & ZEND_VM_OP_MASK) == ZEND_VM_OP_JMP_ADDR
+	 /* The address is unset for the last ZEND_CATCH. */
+	 && (new_opline->opcode != ZEND_CATCH || !(opline->extended_value & ZEND_LAST_CATCH))) {
+		ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
+	}
+	if ((flags & ZEND_VM_EXT_MASK) == ZEND_VM_EXT_JMP_ADDR) {
+		new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+	}
+
 	switch (new_opline->opcode) {
-		case ZEND_JMP:
-		case ZEND_FAST_CALL:
-			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op1, ZEND_OP1_JMP_ADDR(opline));
-			break;
-		case ZEND_JMPZ:
-		case ZEND_JMPNZ:
-		case ZEND_JMPZ_EX:
-		case ZEND_JMPNZ_EX:
-		case ZEND_FE_RESET_R:
-		case ZEND_FE_RESET_RW:
-		case ZEND_JMP_SET:
-		case ZEND_COALESCE:
-		case ZEND_ASSERT_CHECK:
-		case ZEND_JMP_NULL:
-		case ZEND_BIND_INIT_STATIC_OR_JMP:
-		case ZEND_JMP_FRAMELESS:
-			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
-			break;
-		case ZEND_FE_FETCH_R:
-		case ZEND_FE_FETCH_RW:
-			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			break;
-		case ZEND_CATCH:
-			if (!(opline->extended_value & ZEND_LAST_CATCH)) {
-				ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
-			}
-			break;
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
 		case ZEND_MATCH:
@@ -742,7 +728,6 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 			ZEND_HASH_FOREACH_VAL(jumptable, zv) {
 				Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
 			} ZEND_HASH_FOREACH_END();
-			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			break;
 		}
 	}
