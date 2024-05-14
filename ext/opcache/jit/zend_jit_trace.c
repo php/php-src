@@ -5767,7 +5767,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP2_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
 						if (!zend_jit_fetch_dim(&ctx, opline,
-								op1_info, op1_addr, op2_info, RES_REG_ADDR(), val_type)) {
+								op1_info, op1_addr,
+								op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
+								RES_REG_ADDR(), val_type)) {
 							goto jit_failure;
 						}
 						if (ssa_op->result_def > 0

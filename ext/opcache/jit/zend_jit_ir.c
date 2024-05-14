@@ -12429,15 +12429,13 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
                               uint32_t        op1_info,
                               zend_jit_addr   op1_addr,
                               uint32_t        op2_info,
+                              zend_jit_addr   op2_addr,
                               zend_jit_addr   res_addr,
                               uint8_t         dim_type)
 {
-	zend_jit_addr op2_addr;
 	int may_throw = 0;
 	ir_ref end_inputs = IR_UNUSED;
 	ir_ref ref, if_type = IR_UNUSED, ht_ref;
-
-	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
 
 	if (opline->opcode == ZEND_FETCH_DIM_RW) {
 		jit_SET_EX_OPLINE(jit, opline);
@@ -12496,7 +12494,7 @@ static int zend_jit_fetch_dim(zend_jit_ctx   *jit,
 				may_throw = 1;
 			}
 			if (!zend_jit_fetch_dimension_address_inner(jit, opline, type, op1_info,
-					op2_info, OP2_ADDR(), dim_type, NULL, NULL, NULL,
+					op2_info, op2_addr, dim_type, NULL, NULL, NULL,
 					0, ht_ref, found_inputs, found_vals, &end_inputs, NULL)) {
 				return 0;
 			}
@@ -16572,11 +16570,15 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
 					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
 		case ZEND_ASSIGN_DIM:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_LIST_W:
 			op1_info = OP1_INFO();
 			op2_info = OP2_INFO();
 			if (trace) {
 				if (opline->op1_type == IS_CV) {
-					if ((opline+1)->op1_type == IS_CV
+					if (opline->opcode == ZEND_ASSIGN_DIM
+					 && (opline+1)->op1_type == IS_CV
 					 && (opline+1)->op1.var == opline->op1.var) {
 						/* skip $a[x] = $a; */
 						return 0;
@@ -16591,6 +16593,10 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 				if (trace->op1_type != IS_UNKNOWN
 				 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 					op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
+				}
+			} else {
+				if (opline->op1_type != IS_CV) {
+					return 0;
 				}
 			}
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
