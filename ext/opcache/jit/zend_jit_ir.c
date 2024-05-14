@@ -5858,18 +5858,25 @@ static int zend_jit_concat(zend_jit_ctx *jit, const zend_op *opline, uint32_t op
 	return zend_jit_concat_helper(jit, opline, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr, may_throw);
 }
 
-static int zend_jit_assign_op(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op1_def_info, zend_ssa_range *op1_range, uint32_t op2_info, zend_ssa_range *op2_range, int may_overflow, int may_throw)
+static int zend_jit_assign_op(zend_jit_ctx   *jit,
+                              const zend_op  *opline,
+                              uint32_t        op1_info,
+                              zend_jit_addr   op1_addr,
+                              zend_ssa_range *op1_range,
+                              uint32_t        op1_def_info,
+                              zend_jit_addr   op1_def_addr,
+                              uint32_t        op1_mem_info,
+                              uint32_t        op2_info,
+                              zend_jit_addr   op2_addr,
+                              zend_ssa_range *op2_range,
+                              int             may_overflow,
+                              int             may_throw)
 {
 	int result = 1;
-	zend_jit_addr op1_addr, op2_addr;
 	ir_ref slow_path = IR_UNUSED;
-
 
 	ZEND_ASSERT(opline->op1_type == IS_CV && opline->result_type == IS_UNUSED);
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF) && !(op2_info & MAY_BE_UNDEF));
-
-	op1_addr = OP1_ADDR();
-	op2_addr = OP2_ADDR();
 
 	if (op1_info & MAY_BE_REF) {
 		ir_ref ref, ref2, arg2, op1_noref_path;
@@ -5887,7 +5894,15 @@ static int zend_jit_assign_op(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 		if_op1_typed = jit_if_TYPED_REF(jit, ref2);
 		ir_IF_TRUE_cold(if_op1_typed);
 
-		arg2 = jit_ZVAL_ADDR(jit, op2_addr);
+		if (Z_MODE(op2_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
+			if (!zend_jit_spill_store_inv(jit, op2_addr, real_addr, op2_info)) {
+				return 0;
+			}
+			arg2 = jit_ZVAL_ADDR(jit, real_addr);
+		} else {
+			arg2 = jit_ZVAL_ADDR(jit, op2_addr);
+		}
 		jit_SET_EX_OPLINE(jit, opline);
 		if ((opline->op2_type & (IS_TMP_VAR|IS_VAR))
 		 && (op2_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
@@ -5905,7 +5920,8 @@ static int zend_jit_assign_op(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 
 		ir_MERGE_WITH(op1_noref_path);
 		ref = ir_PHI_2(IR_ADDR, ref2, ref);
-		op1_addr = ZEND_ADDR_REF_ZVAL(ref);
+		ZEND_ASSERT(op1_addr == op1_def_addr);
+		op1_def_addr = op1_addr = ZEND_ADDR_REF_ZVAL(ref);
 	}
 
 	switch (opline->extended_value) {
@@ -5913,7 +5929,7 @@ static int zend_jit_assign_op(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 		case ZEND_SUB:
 		case ZEND_MUL:
 		case ZEND_DIV:
-			result = zend_jit_math_helper(jit, opline, opline->extended_value, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->op1.var, op1_addr, op1_def_info, op1_info, may_overflow, may_throw);
+			result = zend_jit_math_helper(jit, opline, opline->extended_value, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->op1.var, op1_def_addr, op1_def_info, op1_mem_info, may_overflow, may_throw);
 			break;
 		case ZEND_BW_OR:
 		case ZEND_BW_AND:
@@ -5924,10 +5940,10 @@ static int zend_jit_assign_op(zend_jit_ctx *jit, const zend_op *opline, uint32_t
 			result = zend_jit_long_math_helper(jit, opline, opline->extended_value,
 				opline->op1_type, opline->op1, op1_addr, op1_info, op1_range,
 				opline->op2_type, opline->op2, op2_addr, op2_info, op2_range,
-				opline->op1.var, op1_addr, op1_def_info, op1_info, may_throw);
+				opline->op1.var, op1_def_addr, op1_def_info, op1_mem_info, may_throw);
 			break;
 		case ZEND_CONCAT:
-			result = zend_jit_concat_helper(jit, opline, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, op1_addr, may_throw);
+			result = zend_jit_concat_helper(jit, opline, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, op1_def_addr, may_throw);
 			break;
 		default:
 			ZEND_UNREACHABLE();
@@ -16487,6 +16503,13 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			return (op_array->type != ZEND_EVAL_CODE && op_array->function_name);
 		case ZEND_ASSIGN:
 			return (opline->op1_type == IS_CV);
+		case ZEND_ASSIGN_OP:
+			if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+				return 0;
+			}
+			op1_info = OP1_INFO();
+			op2_info = OP2_INFO();
+			return zend_jit_supported_binary_op(opline->extended_value, op1_info, op2_info);
 		case ZEND_ADD:
 		case ZEND_SUB:
 		case ZEND_MUL:
