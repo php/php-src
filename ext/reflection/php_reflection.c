@@ -6727,92 +6727,6 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 }
 /* }}} */
 
-static int call_attribute_constructor(
-	zend_attribute *attr, zend_class_entry *ce, zend_object *obj,
-	zval *args, uint32_t argc, HashTable *named_params, zend_string *filename)
-{
-	zend_function *ctor = ce->constructor;
-	zend_execute_data *call = NULL;
-	ZEND_ASSERT(ctor != NULL);
-
-	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		zend_throw_error(NULL, "Attribute constructor of class %s must be public", ZSTR_VAL(ce->name));
-		return FAILURE;
-	}
-
-	if (filename) {
-		/* Set up dummy call frame that makes it look like the attribute was invoked
-		 * from where it occurs in the code. */
-		zend_function dummy_func;
-		zend_op *opline;
-
-		memset(&dummy_func, 0, sizeof(zend_function));
-
-		call = zend_vm_stack_push_call_frame_ex(
-			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_execute_data), sizeof(zval)) +
-			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op), sizeof(zval)) +
-			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_function), sizeof(zval)),
-			0, &dummy_func, 0, NULL);
-
-		opline = (zend_op*)(call + 1);
-		memset(opline, 0, sizeof(zend_op));
-		opline->opcode = ZEND_DO_FCALL;
-		opline->lineno = attr->lineno;
-
-		call->opline = opline;
-		call->call = NULL;
-		call->return_value = NULL;
-		call->func = (zend_function*)(call->opline + 1);
-		call->prev_execute_data = EG(current_execute_data);
-
-		memset(call->func, 0, sizeof(zend_function));
-		call->func->type = ZEND_USER_FUNCTION;
-		call->func->op_array.fn_flags =
-			attr->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
-		call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
-		call->func->op_array.filename = filename;
-
-		EG(current_execute_data) = call;
-	}
-
-	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
-
-	if (filename) {
-		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_call_frame(call);
-	}
-
-	if (EG(exception)) {
-		zend_object_store_ctor_failed(obj);
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-
-static void attribute_ctor_cleanup(
-		zval *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
-{
-	if (obj) {
-		zval_ptr_dtor(obj);
-	}
-
-	if (args) {
-		uint32_t i;
-
-		for (i = 0; i < argc; i++) {
-			zval_ptr_dtor(&args[i]);
-		}
-
-		efree(args);
-	}
-
-	if (named_params) {
-		zend_array_destroy(named_params);
-	}
-}
-/* }}} */
-
 /* {{{ Returns the attribute as an object */
 ZEND_METHOD(ReflectionAttribute, newInstance)
 {
@@ -6821,10 +6735,6 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	zend_attribute *marker;
 
 	zend_class_entry *ce;
-	zval obj;
-
-	zval *args = NULL;
-	HashTable *named_params = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -6870,44 +6780,11 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		}
 	}
 
-	if (SUCCESS != object_init_ex(&obj, ce)) {
+	zval obj;
+
+	if (SUCCESS != zend_get_attribute_object(&obj, ce, attr->data, attr->scope, attr->filename)) {
 		RETURN_THROWS();
 	}
-
-	uint32_t argc = 0;
-	if (attr->data->argc) {
-		args = emalloc(attr->data->argc * sizeof(zval));
-
-		for (uint32_t i = 0; i < attr->data->argc; i++) {
-			zval val;
-			if (FAILURE == zend_get_attribute_value(&val, attr->data, i, attr->scope)) {
-				attribute_ctor_cleanup(&obj, args, argc, named_params);
-				RETURN_THROWS();
-			}
-			if (attr->data->args[i].name) {
-				if (!named_params) {
-					named_params = zend_new_array(0);
-				}
-				zend_hash_add_new(named_params, attr->data->args[i].name, &val);
-			} else {
-				ZVAL_COPY_VALUE(&args[i], &val);
-				argc++;
-			}
-		}
-	}
-
-	if (ce->constructor) {
-		if (FAILURE == call_attribute_constructor(attr->data, ce, Z_OBJ(obj), args, argc, named_params, attr->filename)) {
-			attribute_ctor_cleanup(&obj, args, argc, named_params);
-			RETURN_THROWS();
-		}
-	} else if (argc || named_params) {
-		attribute_ctor_cleanup(&obj, args, argc, named_params);
-		zend_throw_error(NULL, "Attribute class %s does not have a constructor, cannot pass arguments", ZSTR_VAL(ce->name));
-		RETURN_THROWS();
-	}
-
-	attribute_ctor_cleanup(NULL, args, argc, named_params);
 
 	RETURN_COPY_VALUE(&obj);
 }
