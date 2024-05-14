@@ -19,7 +19,7 @@ PHP                                                                        NEWS
   . Fixed zend call stack size for macOs/arm64. (David Carlier)
   . Added support for Zend Max Execution Timers on FreeBSD. (Kévin Dunglas)
   . Ensure fiber stack is not backed by THP. (crrodriguez)
-  . Implement GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
+  . Implemented GH-13609 (Dump wrapped object in WeakReference class). (nielsdos)
   . Added sparc64 arch assembly support for zend fiber. (Claudio Jeker)
   . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
   . Added fiber Sys-V loongarch64 support. (qiangxuhui)
@@ -36,7 +36,7 @@ PHP                                                                        NEWS
 
 - DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
-  . Implement #53655 (Improve speed of DOMNode::C14N() on large XML documents).
+  . Implemented #53655 (Improve speed of DOMNode::C14N() on large XML documents).
     (nielsdos)
   . Fixed cloning attribute with namespace disappearing namespace. (nielsdos)
   . Implemented DOM HTML5 parsing and serialization RFC. (nielsdos)
@@ -159,7 +159,7 @@ PHP                                                                        NEWS
 
 - PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Feature: Add transaction isolation level and mode settings to pdo_firebird.
+  . Feature: Added transaction isolation level and mode settings to pdo_firebird.
     (SakiTakamachi)
   . Added class PdoFirebird. (danack, kocsismate)
 
@@ -199,7 +199,7 @@ PHP                                                                        NEWS
   . Moved to PECL. (Derick Rethans)
 
 - Reflection:
-  . Implement GH-12908 (Show attribute name/class in ReflectionAttribute dump).
+  . Implemented GH-12908 (Show attribute name/class in ReflectionAttribute dump).
     (nielsdos)
 
 - SimpleXML:
@@ -208,7 +208,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-12208 (SimpleXML infinite loop when a cast is used inside a
     foreach). (nielsdos)
   . Fixed bug #55098 (SimpleXML iteration produces infinite loop). (nielsdos)
-  . Fix signature of simplexml_import_dom(). (nielsdos)
+  . Fixed signature of simplexml_import_dom(). (nielsdos)
 
 - Sockets:
   . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
@@ -225,7 +225,7 @@ PHP                                                                        NEWS
   . Removed the deprecated inet_ntoa call support. (David Carlier)
 
 - SOAP:
-  . Add support for clark notation for namespaces in class map. (lxShaDoWxl)
+  . Added support for clark notation for namespaces in class map. (lxShaDoWxl)
   . Mitigate #51561 (SoapServer with a extented class and using sessions,
     lost the setPersistence()). (nielsdos)
   . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
@@ -238,33 +238,33 @@ PHP                                                                        NEWS
   . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
 
 - Sodium:
-  . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
+  . Added support for AEGIS-128L and AEGIS-256 (jedisct1)
   . Enable AES-GCM on aarch64 with the ARM crypto extensions (jedisct1)
 
 - SPL:
-  . Implement SeekableIterator for SplObjectStorage. (nielsdos)
+  . Implemented SeekableIterator for SplObjectStorage. (nielsdos)
 
 - Standard:
-  . Implement GH-12188 (Indication for the int size in phpinfo()). (timwolla)
-  . Partly fix GH-12143 (Incorrect round() result for 0.49999999999999994).
+  . Implemented GH-12188 (Indication for the int size in phpinfo()). (timwolla)
+  . Partly fixed GH-12143 (Incorrect round() result for 0.49999999999999994).
     (timwolla)
-  . Fix GH-12252 (round(): Validate the rounding mode). (timwolla)
-  . Increase the default BCrypt cost to 12. (timwolla)
+  . Fixed GH-12252 (round(): Validate the rounding mode). (timwolla)
+  . Increased the default BCrypt cost to 12. (timwolla)
   . Fixed bug GH-12592 (strcspn() odd behaviour with NUL bytes and empty mask).
     (nielsdos)
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Cast large floats that are within int range to int in number_format so
     the precision is not lost. (Marc Bennewitz)
-  . Add support for 4 new rounding modes to the round() function. (Jorg Sowa)
+  . Added support for 4 new rounding modes to the round() function. (Jorg Sowa)
   . debug_zval_dump() now indicates whether an array is packed. (Max Semenik)
-  . Fix GH-12143 (Optimize round). (SakiTakamachi)
+  . Fixed GH-12143 (Optimize round). (SakiTakamachi)
   . Changed return type of long2ip to string from string|false. (Jorg Sowa)
-  . Fix GH-12143 (Extend the maximum precision round can handle by one digit).
+  . Fixed GH-12143 (Extend the maximum precision round can handle by one digit).
     (SakiTakamachi)
   . Added the http_get_last_response_headers() and
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
-  . Add php_base64_encode_ex() API. (Remi)
+  . Added php_base64_encode_ex() API. (Remi)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
@@ -273,7 +273,7 @@ PHP                                                                        NEWS
   . Declares class constant types. (Ayesh)
 
 - XSL:
-  . Implement request #64137 (XSLTProcessor::setParameter() should allow both
+  . Implemented request #64137 (XSLTProcessor::setParameter() should allow both
     quotes to be used). (nielsdos)
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
   . Added XSLTProcessor::$maxTemplateDepth and XSLTProcessor::$maxTemplateVars.
