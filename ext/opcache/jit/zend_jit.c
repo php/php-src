@@ -1702,7 +1702,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (!zend_jit_assign_dim(&ctx, opline,
-								OP1_INFO(), OP1_REG_ADDR(), OP2_INFO(), OP1_DATA_INFO(), IS_UNKNOWN,
+								OP1_INFO(), OP1_REG_ADDR(),
+								OP2_INFO(), (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
+								OP1_DATA_INFO(), OP1_DATA_REG_ADDR(),
+								(ctx.ra && (ssa_op+1)->op1_def >= 0) ? OP1_DATA_DEF_REG_ADDR() : 0,
+								(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
+								IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2008,7 +2013,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							/* For EX variant write into the result of EX opcode. */
 							if ((opline+1)->opcode == ZEND_JMPZ_EX
 									|| (opline+1)->opcode == ZEND_JMPNZ_EX) {
-								res_addr = OP_REG_ADDR(opline + 1, result_type, result, result_def);
+								res_addr = OP_REG_ADDR(opline + 1, ssa_op + 1, result_type, result, result_def);
 							}
 						} else {
 							smart_branch_opcode = 0;
@@ -2044,7 +2049,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							/* For EX variant write into the result of EX opcode. */
 							if ((opline+1)->opcode == ZEND_JMPZ_EX
 									|| (opline+1)->opcode == ZEND_JMPNZ_EX) {
-								res_addr = OP_REG_ADDR(opline + 1, result_type, result, result_def);
+								res_addr = OP_REG_ADDR(opline + 1, ssa_op + 1, result_type, result, result_def);
 							}
 						} else {
 							smart_branch_opcode = 0;
