@@ -3282,7 +3282,11 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 
 	code_size = buf.st_size;
 	code = emalloc(code_size + 1);
-	fd = open(filename, O_RDONLY, 0);
+	int open_flags = O_RDONLY;
+#ifdef PHP_WIN32
+	open_flags |= _O_BINARY;
+#endif
+	fd = open(filename, open_flags, 0);
 	if (fd < 0 || read(fd, code, code_size) != code_size) {
 		if (preload) {
 			zend_error(E_WARNING, "FFI: Failed pre-loading '%s', cannot read_file", filename);

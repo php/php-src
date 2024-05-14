@@ -246,6 +246,10 @@ function zend_test_override_libxml_global_state(): void {}
 #endif
 
     function zend_test_is_pcre_bundled(): bool {}
+
+#if defined(PHP_WIN32)
+    function zend_test_set_fmode(bool $binary): void {}
+#endif
 }
 
 namespace ZendTestNS {
