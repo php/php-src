@@ -105,7 +105,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = n1len / BC_MUL_UINT_DIGITS + (n1len % BC_MUL_UINT_DIGITS ? 1 : 0);
+	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
 	size_t n2_arr_size = n2len / BC_MUL_UINT_DIGITS + (n2len % BC_MUL_UINT_DIGITS ? 1 : 0);
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
