@@ -2119,7 +2119,7 @@ static zend_result zend_mm_init_key(zend_mm_heap *heap)
 #ifdef ZTS
 		THREAD_T tid = tsrm_thread_id();
 		uint64_t tmp = 0;
-		memcpy(&tmp, tid, MIN(sizeof(tmp), sizeof(tid)));
+		memcpy(&tmp, &tid, MIN(sizeof(tmp), sizeof(tid)));
 		v ^= tmp;
 		splitmix64(&v);
 #endif
