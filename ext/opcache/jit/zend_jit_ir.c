@@ -6232,8 +6232,14 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		ir_IF_TRUE_cold(if_typed);
 		jit_SET_EX_OPLINE(jit, opline);
 		if (Z_MODE(val_addr) == IS_REG) {
-			ZEND_ASSERT(opline->opcode == ZEND_ASSIGN);
-			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
+			zend_jit_addr real_addr;
+
+			if (opline->opcode == ZEND_ASSIGN_DIM) {
+				real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+			} else {
+				ZEND_ASSERT(opline->opcode == ZEND_ASSIGN);
+				real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op2.var);
+			}
 			if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
 				return 0;
 			}
@@ -12788,18 +12794,29 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 	return 1;
 }
 
-static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, zend_jit_addr op1_addr, uint32_t op2_info, uint32_t val_info, uint8_t dim_type, int may_throw)
+static int zend_jit_assign_dim(zend_jit_ctx  *jit,
+                               const zend_op *opline,
+                               uint32_t       op1_info,
+                               zend_jit_addr  op1_addr,
+                               uint32_t       op2_info,
+                               zend_jit_addr  op2_addr,
+                               uint32_t       val_info,
+                               zend_jit_addr  op3_addr,
+                               zend_jit_addr  op3_def_addr,
+                               zend_jit_addr  res_addr,
+                               uint8_t        dim_type,
+                               int            may_throw)
 {
-	zend_jit_addr op2_addr, op3_addr, res_addr;
 	ir_ref if_type = IR_UNUSED;
 	ir_ref end_inputs = IR_UNUSED, ht_ref;
 
-	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
-	op3_addr = OP1_DATA_ADDR();
-	if (opline->result_type == IS_UNUSED) {
-		res_addr = 0;
-	} else {
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+	if (op3_addr != op3_def_addr && op3_def_addr) {
+		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, op3_addr, op3_def_addr, val_info)) {
+			return 0;
+		}
+		if (Z_MODE(op3_def_addr) == IS_REG && Z_MODE(op3_addr) != IS_REG) {
+			op3_addr = op3_def_addr;
+		}
 	}
 
 	if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && (val_info & MAY_BE_UNDEF)) {
@@ -12852,7 +12869,7 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 			ir_refs_init(found_values, 8);
 
 			if (!zend_jit_fetch_dimension_address_inner(jit, opline, BP_VAR_W, op1_info,
-					op2_info, OP2_ADDR(), dim_type, NULL, NULL, NULL,
+					op2_info, op2_addr, dim_type, NULL, NULL, NULL,
 					0, ht_ref, found_inputs, found_values, &end_inputs, NULL)) {
 				return 0;
 			}
@@ -12870,7 +12887,9 @@ static int zend_jit_assign_dim(zend_jit_ctx *jit, const zend_op *opline, uint32_
 				var_addr = ZEND_ADDR_REF_ZVAL(ref);
 
 				// JIT: value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
-				if (opline->op1_type == IS_VAR) {
+				if (opline->op1_type == IS_VAR
+				 && Z_MODE(op3_addr) != IS_REG
+				 && (res_addr == 0 || Z_MODE(res_addr) != IS_REG)) {
 					ZEND_ASSERT(opline->result_type == IS_UNUSED);
 					if (!zend_jit_assign_to_variable_call(jit, opline, var_addr, var_addr, var_info, -1, (opline+1)->op1_type, op3_addr, val_info, res_addr, 0)) {
 						return 0;
@@ -16548,6 +16567,31 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			 && trace->op1_type != IS_UNKNOWN
 			 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
 				op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
+			}
+			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
+					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
+					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+		case ZEND_ASSIGN_DIM:
+			op1_info = OP1_INFO();
+			op2_info = OP2_INFO();
+			if (trace) {
+				if (opline->op1_type == IS_CV) {
+					if ((opline+1)->op1_type == IS_CV
+					 && (opline+1)->op1.var == opline->op1.var) {
+						/* skip $a[x] = $a; */
+						return 0;
+					}
+				} else if (opline->op1_type == IS_VAR) {
+					if (trace->op1_type == IS_UNKNOWN
+					 || !(trace->op1_type & IS_TRACE_INDIRECT)
+					 || opline->result_type != IS_UNUSED) {
+						return 0;
+					}
+				}
+				if (trace->op1_type != IS_UNKNOWN
+				 && (trace->op1_type & ~(IS_TRACE_REFERENCE|IS_TRACE_INDIRECT|IS_TRACE_PACKED)) == IS_ARRAY) {
+					op1_info &= ~((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY);
+				}
 			}
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
 					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
