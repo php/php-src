@@ -458,7 +458,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
+	if (EXPECTED(len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS)) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);
