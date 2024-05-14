@@ -51,4 +51,5 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   mysqlnd_sources="$mysqlnd_base_sources $mysqlnd_ps_sources"
   PHP_NEW_EXTENSION(mysqlnd, $mysqlnd_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_INSTALL_HEADERS([ext/mysqlnd/])
+  PHP_SUBST([MYSQLND_SHARED_LIBADD])
 fi
