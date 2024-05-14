@@ -367,29 +367,19 @@ struct _zend_mm_huge_list {
 #define ZEND_MM_PAGE_ADDR(chunk, page_num) \
 	((void*)(((zend_mm_page*)(chunk)) + (page_num)))
 
-#define _BIN_DATA_SIZE(num, size, elements, pages, x, y) \
-	/* Need two words for free slot pointer and shadow */ \
-	(ZEND_MM_HEAP_PROTECTION ? MAX(size, sizeof(zend_mm_free_slot*)*2) : size)
-#define _BIN_DATA_SIZE_C(num, size, elements, pages, x, y) \
-	_BIN_DATA_SIZE(num, size, elements, pages, x, y),
+#define _BIN_DATA_SIZE(num, size, elements, pages, x, y) size,
 static const uint32_t bin_data_size[] = {
-	ZEND_MM_BINS_INFO(_BIN_DATA_SIZE_C, x, y)
+	ZEND_MM_BINS_INFO(_BIN_DATA_SIZE, x, y)
 };
 
-#define _BIN_DATA_ELEMENTS(num, size, elements, pages, x, y) \
-	/* Adjusting size requires adjusting elements */ \
-	(elements / (_BIN_DATA_SIZE(num, size, elements, pages, x, y) / size))
-#define _BIN_DATA_ELEMENTS_C(num, size, elements, pages, x, y) \
-	_BIN_DATA_ELEMENTS(num, size, elements, pages, x, y),
+#define _BIN_DATA_ELEMENTS(num, size, elements, pages, x, y) elements,
 static const uint32_t bin_elements[] = {
-	ZEND_MM_BINS_INFO(_BIN_DATA_ELEMENTS_C, x, y)
+	ZEND_MM_BINS_INFO(_BIN_DATA_ELEMENTS, x, y)
 };
 
-#define _BIN_DATA_PAGES(num, size, elements, pages, x, y) pages
-#define _BIN_DATA_PAGES_C(num, size, elements, pages, x, y) \
-	_BIN_DATA_PAGES(num, size, elements, pages, x, y),
+#define _BIN_DATA_PAGES(num, size, elements, pages, x, y) pages,
 static const uint32_t bin_pages[] = {
-	ZEND_MM_BINS_INFO(_BIN_DATA_PAGES_C, x, y)
+	ZEND_MM_BINS_INFO(_BIN_DATA_PAGES, x, y)
 };
 
 #if ZEND_DEBUG
@@ -1343,6 +1333,8 @@ static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_he
 
 static zend_always_inline void zend_mm_set_next_free_slot(zend_mm_heap *heap, uint32_t bin_num, zend_mm_free_slot *slot, zend_mm_free_slot *next)
 {
+	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_SMALL_SIZE);
+
 	slot->next_free_slot = next;
 	ZEND_MM_FREE_SLOT_PTR_SHADOW(slot, bin_num) = zend_mm_encode_free_slot(heap, next);
 }
@@ -1424,6 +1416,8 @@ static zend_never_inline void *zend_mm_alloc_small_slow(zend_mm_heap *heap, uint
 
 static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_num ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
+	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_SMALL_SIZE);
+
 #if ZEND_MM_STAT
 	do {
 		size_t size = heap->size + bin_data_size[bin_num];
@@ -1444,6 +1438,8 @@ static zend_always_inline void *zend_mm_alloc_small(zend_mm_heap *heap, int bin_
 
 static zend_always_inline void zend_mm_free_small(zend_mm_heap *heap, void *ptr, int bin_num)
 {
+	ZEND_ASSERT(bin_data_size[bin_num] >= ZEND_MM_MIN_SMALL_SIZE);
+
 	zend_mm_free_slot *p;
 
 #if ZEND_MM_STAT
@@ -1493,6 +1489,11 @@ static zend_always_inline zend_mm_debug_info *zend_mm_get_debug_info(zend_mm_hea
 static zend_always_inline void *zend_mm_alloc_heap(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *ptr;
+#if ZEND_MM_HEAP_PROTECTION
+	if (size < ZEND_MM_MIN_SMALL_SIZE) {
+		size = ZEND_MM_MIN_SMALL_SIZE;
+	}
+#endif /* ZEND_MM_HEAP_PROTECTION */
 #if ZEND_DEBUG
 	size_t real_size = size;
 	zend_mm_debug_info *dbg;
@@ -1714,6 +1715,11 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 		zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE);
 		int page_num = (int)(page_offset / ZEND_MM_PAGE_SIZE);
 		zend_mm_page_info info = chunk->map[page_num];
+#if ZEND_MM_HEAP_PROTECTION
+		if (size < ZEND_MM_MIN_SMALL_SIZE) {
+			size = ZEND_MM_MIN_SMALL_SIZE;
+		}
+#endif /* ZEND_MM_HEAP_PROTECTION */
 #if ZEND_DEBUG
 		size_t real_size = size;
 
@@ -2677,6 +2683,7 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 
 # define _ZEND_BIN_ALLOCATOR(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void* ZEND_FASTCALL _emalloc_ ## _size(void) { \
+		ZEND_ASSERT(_size >= ZEND_MM_MIN_SMALL_SIZE); \
 		ZEND_MM_CUSTOM_ALLOCATOR(_size); \
 		return zend_mm_alloc_small(AG(mm_heap), _num ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC); \
 	}
@@ -2698,6 +2705,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 #if ZEND_DEBUG
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
+		ZEND_ASSERT(_size >= ZEND_MM_MIN_SMALL_SIZE); \
 		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
 		{ \
 			size_t page_offset = ZEND_MM_ALIGNED_OFFSET(ptr, ZEND_MM_CHUNK_SIZE); \
@@ -2712,6 +2720,7 @@ ZEND_API void* ZEND_FASTCALL _emalloc_huge(size_t size)
 #else
 # define _ZEND_BIN_FREE(_num, _size, _elements, _pages, x, y) \
 	ZEND_API void ZEND_FASTCALL _efree_ ## _size(void *ptr) { \
+		ZEND_ASSERT(_size >= ZEND_MM_MIN_SMALL_SIZE); \
 		ZEND_MM_CUSTOM_DEALLOCATOR(ptr); \
 		{ \
 			zend_mm_chunk *chunk = (zend_mm_chunk*)ZEND_MM_ALIGNED_BASE(ptr, ZEND_MM_CHUNK_SIZE); \

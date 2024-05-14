@@ -90,7 +90,7 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC void* ZEND_FASTCALL _emalloc_large(size_t size) Z
 ZEND_API ZEND_ATTRIBUTE_MALLOC void* ZEND_FASTCALL _emalloc_huge(size_t size) ZEND_ATTRIBUTE_ALLOC_SIZE(1);
 
 # define _ZEND_BIN_ALLOCATOR_SELECTOR_START(_num, _size, _elements, _pages, size, y) \
-	((size <= _size) ? _emalloc_ ## _size() :
+	((size <= _size && _size >= ZEND_MM_MIN_SMALL_SIZE) ? _emalloc_ ## _size() :
 # define _ZEND_BIN_ALLOCATOR_SELECTOR_END(_num, _size, _elements, _pages, size, y) \
 	)
 
@@ -115,7 +115,7 @@ ZEND_API void ZEND_FASTCALL _efree_large(void *, size_t size);
 ZEND_API void ZEND_FASTCALL _efree_huge(void *, size_t size);
 
 # define _ZEND_BIN_DEALLOCATOR_SELECTOR_START(_num, _size, _elements, _pages, ptr, size) \
-	if (size <= _size) { _efree_ ## _size(ptr); } else
+	if (size <= _size && _size >= ZEND_MM_MIN_SMALL_SIZE) { _efree_ ## _size(ptr); } else
 
 # define ZEND_DEALLOCATOR(ptr, size) \
 	ZEND_MM_BINS_INFO(_ZEND_BIN_DEALLOCATOR_SELECTOR_START, ptr, size) \
