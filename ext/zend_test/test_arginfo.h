@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1f258f37425d3f6458c447ac2e7b3cbe0a221be0 */
+ * Stub hash: 53027610adee7e1c675b1c1b38886100ce4e63ef */
 
 ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
 	"but it is included on an older PHP version");
@@ -147,6 +147,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_is_pcre_bundled, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(PHP_WIN32)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_fmode, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, binary, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -268,6 +274,9 @@ static ZEND_FUNCTION(get_open_basedir);
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
 static ZEND_FUNCTION(zend_test_is_pcre_bundled);
+#if defined(PHP_WIN32)
+static ZEND_FUNCTION(zend_test_set_fmode);
+#endif
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -360,6 +369,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
 	ZEND_FE(zend_test_is_pcre_bundled, arginfo_zend_test_is_pcre_bundled)
+#if defined(PHP_WIN32)
+	ZEND_FE(zend_test_set_fmode, arginfo_zend_test_set_fmode)
+#endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
