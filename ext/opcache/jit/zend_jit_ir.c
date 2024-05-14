@@ -12604,6 +12604,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
                                       zend_jit_addr   op1_addr,
                                       bool       op1_avoid_refcounting,
                                       uint32_t        op2_info,
+                                      zend_jit_addr   op2_addr,
                                       uint8_t         dim_type,
                                       int             may_throw,
                                       uint8_t         smart_branch_opcode,
@@ -12611,7 +12612,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
                                       uint32_t        target_label2,
                                       const void     *exit_addr)
 {
-	zend_jit_addr op2_addr, res_addr;
+	zend_jit_addr res_addr;
 	ir_ref if_type = IR_UNUSED;
 	ir_ref false_inputs = IR_UNUSED, end_inputs = IR_UNUSED;
 	ir_refs *true_inputs;
@@ -12621,7 +12622,6 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 	// TODO: support for empty() ???
 	ZEND_ASSERT(!(opline->extended_value & ZEND_ISEMPTY));
 
-	op2_addr = OP2_ADDR();
 	res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
 	if (op1_info & MAY_BE_REF) {
@@ -12654,7 +12654,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			}
 		}
 		if (!zend_jit_fetch_dimension_address_inner(jit, opline, BP_JIT_IS, op1_info,
-				op2_info, OP2_ADDR(), dim_type, found_exit_addr, not_found_exit_addr, NULL,
+				op2_info, op2_addr, dim_type, found_exit_addr, not_found_exit_addr, NULL,
 				0, ht_ref, true_inputs, NULL, &false_inputs, NULL)) {
 			return 0;
 		}
@@ -16556,6 +16556,11 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			return 1;
 		case ZEND_FETCH_CONSTANT:
 			return 1;
+		case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+			if ((opline->extended_value & ZEND_ISEMPTY)) {
+				return 0;
+			}
+			ZEND_FALLTHROUGH;
 		case ZEND_FETCH_DIM_R:
 		case ZEND_FETCH_DIM_IS:
 		case ZEND_FETCH_LIST_R:

@@ -5849,7 +5849,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_isset_isempty_dim(&ctx, opline,
 								op1_info, op1_addr, avoid_refcounting,
-								op2_info, val_type,
+								op2_info, OP2_REG_ADDR(), val_type,
 								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info),
 								smart_branch_opcode, -1, -1,
 								exit_addr)) {
