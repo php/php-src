@@ -12978,9 +12978,20 @@ static int zend_jit_assign_dim(zend_jit_ctx  *jit,
 	return 1;
 }
 
-static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op1_def_info, zend_jit_addr op1_addr, uint32_t op2_info, uint32_t op1_data_info, zend_ssa_range *op1_data_range, uint8_t dim_type, int may_throw)
+static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
+                                  const zend_op  *opline,
+                                  uint32_t        op1_info,
+                                  uint32_t        op1_def_info,
+                                  zend_jit_addr   op1_addr,
+                                  uint32_t        op2_info,
+                                  zend_jit_addr   op2_addr,
+                                  uint32_t        op1_data_info,
+                                  zend_jit_addr   op3_addr,
+                                  zend_ssa_range *op1_data_range,
+                                  uint8_t         dim_type,
+                                  int             may_throw)
 {
-	zend_jit_addr op2_addr, op3_addr, var_addr = IS_UNUSED;
+	zend_jit_addr var_addr = IS_UNUSED;
 	const void *not_found_exit_addr = NULL;
 	uint32_t var_info = MAY_BE_NULL;
 	ir_ref if_type = IS_UNUSED;
@@ -12988,9 +12999,6 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 	bool emit_fast_path = 1;
 
 	ZEND_ASSERT(opline->result_type == IS_UNUSED);
-
-	op2_addr = (opline->op2_type != IS_UNUSED) ? OP2_ADDR() : 0;
-	op3_addr = OP1_DATA_ADDR();
 
 	jit_SET_EX_OPLINE(jit, opline);
 
@@ -13046,7 +13054,7 @@ static int zend_jit_assign_dim_op(zend_jit_ctx *jit, const zend_op *opline, uint
 			}
 
 			if (!zend_jit_fetch_dimension_address_inner(jit, opline, BP_VAR_RW, op1_info,
-					op2_info, OP2_ADDR(), dim_type, NULL, not_found_exit_addr, NULL,
+					op2_info, op2_addr, dim_type, NULL, not_found_exit_addr, NULL,
 					0, ht_ref, found_inputs, found_values, &end_inputs, NULL)) {
 				return 0;
 			}
@@ -16597,6 +16605,14 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
 					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
 					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+		case ZEND_ASSIGN_DIM_OP:
+			if (opline->result_type != IS_UNUSED) {
+				return 0;
+			}
+			if (!zend_jit_supported_binary_op(opline->extended_value, MAY_BE_ANY, OP1_DATA_INFO())) {
+				return 0;
+			}
+			ZEND_FALLTHROUGH;
 		case ZEND_ASSIGN_DIM:
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_DIM_RW:
@@ -16605,7 +16621,8 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			op2_info = OP2_INFO();
 			if (trace) {
 				if (opline->op1_type == IS_CV) {
-					if (opline->opcode == ZEND_ASSIGN_DIM
+					if ((opline->opcode == ZEND_ASSIGN_DIM
+					  || opline->opcode == ZEND_ASSIGN_DIM_OP)
 					 && (opline+1)->op1_type == IS_CV
 					 && (opline+1)->op1.var == opline->op1.var) {
 						/* skip $a[x] = $a; */
