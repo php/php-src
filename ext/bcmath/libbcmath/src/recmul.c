@@ -75,9 +75,9 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 	char *n1end = n1->n_value + n1len - 1;
 	char *n2end = n2->n_value + n2len - 1;
 
-	BC_UINT_T n1_l = bc_partial_convert_to_uint(n1end, n1len);
-	BC_UINT_T n2_l = bc_partial_convert_to_uint(n2end, n2len);
-	BC_UINT_T prod_l = n1_l * n2_l;
+	BC_UINT_T n1_uint = bc_partial_convert_to_uint(n1end, n1len);
+	BC_UINT_T n2_uint = bc_partial_convert_to_uint(n2end, n2len);
+	BC_UINT_T prod_uint = n1_uint * n2_uint;
 
 	size_t prodlen = n1len + n2len;
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -85,8 +85,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 	char *pend = pptr + prodlen - 1;
 
 	while (pend >= pptr) {
-		*pend-- = prod_l % BASE;
-		prod_l /= BASE;
+		*pend-- = prod_uint % BASE;
+		prod_uint /= BASE;
 	}
 }
 
@@ -111,19 +111,19 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 
 	BC_UINT_T *buf = emalloc((n1_arr_size + n2_arr_size + prod_arr_size) * sizeof(BC_UINT_T));
 
-	BC_UINT_T *n1_l = buf;
-	BC_UINT_T *n2_l = buf + n1_arr_size;
-	BC_UINT_T *prod_l = n2_l + n2_arr_size;
+	BC_UINT_T *n1_uint = buf;
+	BC_UINT_T *n2_uint = buf + n1_arr_size;
+	BC_UINT_T *prod_uint = n2_uint + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
-		prod_l[i] = 0;
+		prod_uint[i] = 0;
 	}
 
 	/* Convert n1 to uint[] */
 	i = 0;
 	while (n1len > 0) {
 		size_t len = MIN(BC_MUL_UINT_DIGITS, n1len);
-		n1_l[i] = bc_partial_convert_to_uint(n1end, len);
+		n1_uint[i] = bc_partial_convert_to_uint(n1end, len);
 		n1end -= len;
 		n1len -= len;
 		i++;
@@ -133,7 +133,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	i = 0;
 	while (n2len > 0) {
 		size_t len = MIN(BC_MUL_UINT_DIGITS, n2len);
-		n2_l[i] = bc_partial_convert_to_uint(n2end, len);
+		n2_uint[i] = bc_partial_convert_to_uint(n2end, len);
 		n2end -= len;
 		n2len -= len;
 		i++;
@@ -142,17 +142,17 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	/* Multiplication and addition */
 	for (i = 0; i < n1_arr_size; i++) {
 		for (size_t j = 0; j < n2_arr_size; j++) {
-			prod_l[i + j] += n1_l[i] * n2_l[j];
+			prod_uint[i + j] += n1_uint[i] * n2_uint[j];
 		}
 	}
 
 	/*
-	 * Move a value exceeding 8 digits by carrying to the next digit.
+	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
 	for (i = 0; i < prod_arr_size - 1; i++) {
-		prod_l[i + 1] += prod_l[i] / BC_MUL_UINT_OVERFLOW;
-		prod_l[i] %= BC_MUL_UINT_OVERFLOW;
+		prod_uint[i + 1] += prod_uint[i] / BC_MUL_UINT_OVERFLOW;
+		prod_uint[i] %= BC_MUL_UINT_OVERFLOW;
 	}
 
 	/* Convert to bc_num */
@@ -162,8 +162,8 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	i = 0;
 	while (i < prod_arr_size - 1) {
 		for (size_t j = 0; j < BC_MUL_UINT_DIGITS; j++) {
-			*pend-- = prod_l[i] % BASE;
-			prod_l[i] /= BASE;
+			*pend-- = prod_uint[i] % BASE;
+			prod_uint[i] /= BASE;
 		}
 		i++;
 	}
@@ -173,8 +173,8 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	 * Also need to fill it to the end with zeros, so loop until the end of the string.
 	 */
 	while (pend >= pptr) {
-		*pend-- = prod_l[i] % BASE;
-		prod_l[i] /= BASE;
+		*pend-- = prod_uint[i] % BASE;
+		prod_uint[i] /= BASE;
 	}
 
 	efree(buf);
