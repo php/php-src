@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "private.h" /* For _bc_rm_leading_zeros() */
 #include "zend_alloc.h"
 
@@ -45,23 +46,292 @@
 #  define BC_MUL_UINT_OVERFLOW 10000
 #endif
 
+#define BC_UINT_TO_BCD_ONE_DIGIT(num, bcd) do { \
+	bcd = num % 10; \
+	num /= 10; \
+} while (0)
+
 
 /* Multiply utility routines */
 
 /*
  * Converts BCD to uint, going backwards from pointer n by the number of
  * characters specified by len.
+ *
+ * Since the upper limit of len is known, open the loop to save loop cost.
  */
 static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
 {
-	BC_UINT_T num = 0;
-	BC_UINT_T base = 1;
+	BC_UINT_T num = n[0];
 
-	for (size_t i = 0; i < len; i++) {
-		num += *n * base;
-		base *= BASE;
-		n--;
+	switch (len) {
+		case 1:
+			return num;
+		case 2:
+			num += n[-1] * 10;
+			return num;
+		case 3:
+			num += n[-1] * 10;
+			num += n[-2] * 100;
+			return num;
+		case 4:
+			num += n[-1] * 10;
+			num += n[-2] * 100;
+			num += n[-3] * 1000;
+			return num;
+#if BC_MUL_UINT_DIGITS == 8
+		case 5:
+			num += n[-1] * 10;
+			num += n[-2] * 100;
+			num += n[-3] * 1000;
+			num += n[-4] * 10000;
+			return num;
+		case 6:
+			num += n[-1] * 10;
+			num += n[-2] * 100;
+			num += n[-3] * 1000;
+			num += n[-4] * 10000;
+			num += n[-5] * 100000;
+			return num;
+		case 7:
+			num += n[-1] * 10;
+			num += n[-2] * 100;
+			num += n[-3] * 1000;
+			num += n[-4] * 10000;
+			num += n[-5] * 100000;
+			num += n[-6] * 1000000;
+			return num;
+		case 8:
+			num += n[-1] * 10;
+			num += n[-2] * 100;
+			num += n[-3] * 1000;
+			num += n[-4] * 10000;
+			num += n[-5] * 100000;
+			num += n[-6] * 1000000;
+			num += n[-7] * 10000000;
+			return num;
+#endif
 	}
+
+	return num;
+}
+
+/*
+ * Since the number of digits is fixed, open the loop and saves cost.
+ */
+static inline BC_UINT_T bc_partial_convert_to_uint_fixed_digits(const char *n)
+{
+	BC_UINT_T num = n[0];
+	num += n[-1] * 10;
+	num += n[-2] * 100;
+	num += n[-3] * 1000;
+#if BC_MUL_UINT_DIGITS == 8
+	num += n[-4] * 10000;
+	num += n[-5] * 100000;
+	num += n[-6] * 1000000;
+	num += n[-7] * 10000000;
+#endif
+
+	return num;
+}
+
+/*
+ * Convert HEX to BCD. The number of digits can be up to 16 decimal digits (64-bit).
+ */
+static inline void bc_uint_to_bcd(BC_UINT_T num, char *bcd, size_t len)
+{
+	switch (len) {
+		case 0:
+			return;
+		case 1:
+			*bcd = num % 10;
+			return;
+		case 2:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			bcd[-1] = num % 10;
+			return;
+		case 3:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			bcd[-2] = num % 10;
+			return;
+		case 4:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			bcd[-3] = num % 10;
+			return;
+		case 5:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			bcd[-4] = num % 10;
+			return;
+		case 6:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			bcd[-5] = num % 10;
+			return;
+		case 7:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			bcd[-6] = num % 10;
+			return;
+		case 8:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			bcd[-7] = num % 10;
+			return;
+#if BC_MUL_UINT_DIGITS == 8
+		case 9:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			bcd[-8] = num % 10;
+			return;
+		case 10:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			bcd[-9] = num % 10;
+			return;
+		case 11:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-9]);
+			bcd[-10] = num % 10;
+			return;
+		case 12:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-9]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-10]);
+			bcd[-11] = num % 10;
+			return;
+		case 13:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-9]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-10]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-11]);
+			bcd[-12] = num % 10;
+			return;
+		case 14:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-9]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-10]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-11]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-12]);
+			bcd[-13] = num % 10;
+			return;
+		case 15:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-9]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-10]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-11]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-12]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-13]);
+			bcd[-14] = num % 10;
+			return;
+		case 16:
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-8]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-9]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-10]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-11]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-12]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-13]);
+			BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-14]);
+			bcd[-15] = num % 10;
+			return;
+#endif
+	}
+}
+
+/*
+ * Converts 8 decimal digits of HEX to 8 digits of BCD (64-bit).
+ * Since the number of digits is fixed, open the loop and saves cost.
+ */
+static inline BC_UINT_T bc_uint_to_bcd_fixed_digits(BC_UINT_T num, char *bcd)
+{
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[0]);
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-1]);
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-2]);
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-3]);
+#if BC_MUL_UINT_DIGITS == 8
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-4]);
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-5]);
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-6]);
+	BC_UINT_TO_BCD_ONE_DIGIT(num, bcd[-7]);
+#endif
 
 	return num;
 }
@@ -81,13 +351,9 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 
 	size_t prodlen = n1len + n2len;
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
-	char *pptr = (*prod)->n_value;
-	char *pend = pptr + prodlen - 1;
+	char *pend = (*prod)->n_value + prodlen - 1;
 
-	while (pend >= pptr) {
-		*pend-- = prod_uint % BASE;
-		prod_uint /= BASE;
-	}
+	bc_uint_to_bcd(prod_uint, pend, prodlen);
 }
 
 /*
@@ -121,22 +387,26 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 
 	/* Convert n1 to uint[] */
 	i = 0;
-	while (n1len > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, n1len);
-		n1_uint[i] = bc_partial_convert_to_uint(n1end, len);
-		n1end -= len;
-		n1len -= len;
+	while (n1len >= BC_MUL_UINT_DIGITS) {
+		n1_uint[i] = bc_partial_convert_to_uint_fixed_digits(n1end);
+		n1end -= BC_MUL_UINT_DIGITS;
+		n1len -= BC_MUL_UINT_DIGITS;
 		i++;
+	}
+	if (n1len > 0) {
+		n1_uint[i] = bc_partial_convert_to_uint(n1end, n1len);
 	}
 
 	/* Convert n2 to uint[] */
 	i = 0;
-	while (n2len > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, n2len);
-		n2_uint[i] = bc_partial_convert_to_uint(n2end, len);
-		n2end -= len;
-		n2len -= len;
+	while (n2len >= BC_MUL_UINT_DIGITS) {
+		n2_uint[i] = bc_partial_convert_to_uint_fixed_digits(n2end);
+		n2end -= BC_MUL_UINT_DIGITS;
+		n2len -= BC_MUL_UINT_DIGITS;
 		i++;
+	}
+	if (n2len > 0) {
+		n2_uint[i] = bc_partial_convert_to_uint(n2end, n2len);
 	}
 
 	/* Multiplication and addition */
@@ -157,25 +427,18 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
-	char *pptr = (*prod)->n_value;
-	char *pend = pptr + prodlen - 1;
-	i = 0;
-	while (i < prod_arr_size - 1) {
-		for (size_t j = 0; j < BC_MUL_UINT_DIGITS; j++) {
-			*pend-- = prod_uint[i] % BASE;
-			prod_uint[i] /= BASE;
-		}
-		i++;
+	char *pend = (*prod)->n_value + prodlen - 1;
+	for (i = 0; i < prod_arr_size - 1; i++) {
+		prod_uint[i] = bc_uint_to_bcd_fixed_digits(prod_uint[i], pend);
+		pend -= BC_MUL_UINT_DIGITS;
+		prodlen -= BC_MUL_UINT_DIGITS;
 	}
 
 	/*
 	 * The last digit may carry over.
 	 * Also need to fill it to the end with zeros, so loop until the end of the string.
 	 */
-	while (pend >= pptr) {
-		*pend-- = prod_uint[i] % BASE;
-		prod_uint[i] /= BASE;
-	}
+	bc_uint_to_bcd(prod_uint[i], pend, prodlen);
 
 	efree(buf);
 }
