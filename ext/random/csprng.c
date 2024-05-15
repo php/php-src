@@ -62,22 +62,17 @@
 # include <sanitizer/msan_interface.h>
 #endif
 
-#define php_random_bytes_error(...) do { \
-		if (errstr) { \
-			snprintf(errstr, errstr_size, __VA_ARGS__); \
-		} \
-	} while (0)
-
 #ifndef PHP_WIN32
 static zend_atomic_int random_fd = ZEND_ATOMIC_INT_INITIALIZER(-1);
 #endif
 
+ZEND_ATTRIBUTE_NONNULL
 PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, size_t errstr_size)
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
 	if (php_win32_get_random_bytes(bytes, size) == FAILURE) {
-		php_random_bytes_error("Failed to retrieve randomness from the operating system (BCryptGenRandom)");
+		snprintf(errstr, errstr_size, "Failed to retrieve randomness from the operating system (BCryptGenRandom)");
 		return FAILURE;
 	}
 #elif HAVE_COMMONCRYPTO_COMMONRANDOM_H
@@ -88,7 +83,7 @@ PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, s
 	 * the vast majority of the time, it works fine ; but better make sure we catch failures
 	 */
 	if (CCRandomGenerateBytes(bytes, size) != kCCSuccess) {
-		php_random_bytes_error("Failed to retrieve randomness from the operating system (CCRandomGenerateBytes)");
+		snprintf(errstr, errstr_size, "Failed to retrieve randomness from the operating system (CCRandomGenerateBytes)");
 		return FAILURE;
 	}
 #elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
@@ -162,9 +157,9 @@ PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, s
 			fd = open("/dev/urandom", O_RDONLY);
 			if (fd < 0) {
 				if (errno != 0) {
-					php_random_bytes_error("Cannot open /dev/urandom: %s", strerror(errno));
+					snprintf(errstr, errstr_size, "Cannot open /dev/urandom: %s", strerror(errno));
 				} else {
-					php_random_bytes_error("Cannot open /dev/urandom");
+					snprintf(errstr, errstr_size, "Cannot open /dev/urandom");
 				}
 				return FAILURE;
 			}
@@ -180,9 +175,9 @@ PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, s
 			) {
 				close(fd);
 				if (errno != 0) {
-					php_random_bytes_error("Error reading from /dev/urandom: %s", strerror(errno));
+					snprintf(errstr, errstr_size, "Error reading from /dev/urandom: %s", strerror(errno));
 				} else {
-					php_random_bytes_error("Error reading from /dev/urandom");
+					snprintf(errstr, errstr_size, "Error reading from /dev/urandom");
 				}
 				return FAILURE;
 			}
@@ -201,9 +196,9 @@ PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, s
 
 			if (n <= 0) {
 				if (errno != 0) {
-					php_random_bytes_error("Could not gather sufficient random data: %s", strerror(errno));
+					snprintf(errstr, errstr_size, "Could not gather sufficient random data: %s", strerror(errno));
 				} else {
-					php_random_bytes_error("Could not gather sufficient random data");
+					snprintf(errstr, errstr_size, "Could not gather sufficient random data");
 				}
 				return FAILURE;
 			}
@@ -219,9 +214,7 @@ PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, s
 PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw)
 {
 	char errstr[128];
-
-	zend_result result = php_random_bytes_ex(bytes, size,
-			should_throw ? errstr : NULL, should_throw ? sizeof(errstr) : 0);
+	zend_result result = php_random_bytes_ex(bytes, size, errstr, sizeof(errstr));
 
 	if (result == FAILURE && should_throw) {
 		zend_throw_exception(random_ce_Random_RandomException, errstr, 0);
