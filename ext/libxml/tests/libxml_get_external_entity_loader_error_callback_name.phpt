@@ -3,7 +3,7 @@ libxml_get_external_entity_loader() display correct callable name
 --EXTENSIONS--
 dom
 --SKIPIF--
-<?php if (!function_exists("proc_open")) die("skip no proc_open"); ?>
+<?php if (PHP_OS_FAMILY == 'Windows') die('skip PTY is not supported on Windows'); ?>
 --FILE--
 <?php
 
