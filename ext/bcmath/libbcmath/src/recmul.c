@@ -66,6 +66,18 @@ static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
 	return num;
 }
 
+static inline void bc_convert_to_uint(BC_UINT_T *n_uint, char *nend, size_t nlen)
+{
+	size_t i = 0;
+	while (nlen > 0) {
+		size_t len = MIN(BC_MUL_UINT_DIGITS, nlen);
+		n_uint[i] = bc_partial_convert_to_uint(nend, len);
+		nend -= len;
+		nlen -= len;
+		i++;
+	}
+}
+
 /*
  * If the n_values ​​of n1 and n2 are both 4 (32-bit) or 8 (64-bit) digits or less,
  * the calculation will be performed at high speed without using an array.
@@ -106,10 +118,10 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 	size_t prodlen = n1len + n2len;
 
 	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
-	size_t n2_arr_size = n2len / BC_MUL_UINT_DIGITS + (n2len % BC_MUL_UINT_DIGITS ? 1 : 0);
+	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
-	BC_UINT_T *buf = emalloc((n1_arr_size + n2_arr_size + prod_arr_size) * sizeof(BC_UINT_T));
+	BC_UINT_T *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_UINT_T), 0);
 
 	BC_UINT_T *n1_uint = buf;
 	BC_UINT_T *n2_uint = buf + n1_arr_size;
@@ -119,25 +131,9 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_nu
 		prod_uint[i] = 0;
 	}
 
-	/* Convert n1 to uint[] */
-	i = 0;
-	while (n1len > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, n1len);
-		n1_uint[i] = bc_partial_convert_to_uint(n1end, len);
-		n1end -= len;
-		n1len -= len;
-		i++;
-	}
-
-	/* Convert n2 to uint[] */
-	i = 0;
-	while (n2len > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, n2len);
-		n2_uint[i] = bc_partial_convert_to_uint(n2end, len);
-		n2end -= len;
-		n2len -= len;
-		i++;
-	}
+	/* Convert to uint[] */
+	bc_convert_to_uint(n1_uint, n1end, n1len);
+	bc_convert_to_uint(n2_uint, n2end, n2len);
 
 	/* Multiplication and addition */
 	for (i = 0; i < n1_arr_size; i++) {
