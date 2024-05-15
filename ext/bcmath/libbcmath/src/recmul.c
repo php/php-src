@@ -121,6 +121,11 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
+	/*
+	 * let's say that N is the max of n1len and n2len (and a multiple of BC_MUL_UINT_DIGITS for simplicity),
+	 * then this sum is <= N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS - 1
+	 * which is equal to N - 1 if BC_MUL_UINT_DIGITS is 4, and N/2 - 1 if BC_MUL_UINT_DIGITS is 8.
+	 */
 	BC_UINT_T *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_UINT_T), 0);
 
 	BC_UINT_T *n1_uint = buf;
