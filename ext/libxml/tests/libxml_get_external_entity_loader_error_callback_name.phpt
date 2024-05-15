@@ -2,6 +2,8 @@
 libxml_get_external_entity_loader() display correct callable name
 --EXTENSIONS--
 dom
+--SKIPIF--
+<?php if (!function_exists("proc_open")) die("skip no proc_open"); ?>
 --FILE--
 <?php
 

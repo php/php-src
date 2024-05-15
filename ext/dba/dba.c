@@ -326,6 +326,19 @@ static zend_function *dba_connection_get_constructor(zend_object *object)
 	return NULL;
 }
 
+static zend_result dba_connection_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		/* For better backward compatibility, make (int) $dba return the object ID,
+		 * similar to how it previously returned the resource ID. */
+		ZVAL_LONG(result, obj->handle);
+
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
+}
+
 static inline dba_connection *dba_connection_from_obj(zend_object *obj)
 {
 	return (dba_connection *)((char *)(obj) - XtOffsetOf(dba_connection, std));
@@ -404,6 +417,7 @@ PHP_MINIT_FUNCTION(dba)
 	dba_connection_object_handlers.free_obj = dba_connection_free_obj;
 	dba_connection_object_handlers.get_constructor = dba_connection_get_constructor;
 	dba_connection_object_handlers.clone_obj = NULL;
+	dba_connection_object_handlers.cast_object = dba_connection_cast_object;
 	dba_connection_object_handlers.compare = zend_objects_not_comparable;
 
 	return SUCCESS;
