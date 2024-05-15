@@ -5545,7 +5545,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								/* unconditional branch */
 								exit_addr = NULL;
 							} else if (opline->result_type == IS_TMP_VAR) {
-								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->result.var));
 
 								SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
@@ -5817,14 +5816,19 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							bool exit_if_true = 0;
 							const zend_op *exit_opline = zend_jit_trace_get_exit_opline(p + 1, opline + 1, &exit_if_true);
 							uint32_t exit_point;
+							int32_t old_ref = 0;
+							uint8_t old_flags = 0;
 
 							if (ra) {
+								if (opline->op2_type != IS_CONST) {
+									old_ref = STACK_REF(stack, EX_VAR_TO_NUM(opline->op2.var));
+									old_flags = STACK_FLAGS(stack, EX_VAR_TO_NUM(opline->op2.var));
+								}
 								zend_jit_trace_cleanup_stack(&ctx, stack, opline, ssa_op, ssa, ssa_opcodes);
 							}
 							if (ssa_op->op1_use >= 0
 							 && ssa->var_info[ssa_op->op1_use].avoid_refcounting) {
 								/* Temporary reset ZREG_ZVAL_TRY_ADDREF */
-								zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 								uint32_t old_info = STACK_INFO(stack, EX_VAR_TO_NUM(opline->op1.var));
 
 								SET_STACK_REG(stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
@@ -5836,6 +5840,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 							if (!exit_addr) {
 								goto jit_failure;
+							}
+							if (old_ref) {
+								SET_STACK_REF_EX(stack, EX_VAR_TO_NUM(opline->op2.var), old_ref, old_flags);
 							}
 							smart_branch_opcode = exit_if_true ? ZEND_JMPNZ : ZEND_JMPZ;
 						} else {
