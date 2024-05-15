@@ -1699,6 +1699,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_assign_dim_op(&ctx, opline,
 								OP1_INFO(), OP1_DEF_INFO(), OP1_REG_ADDR(),
 								OP2_INFO(), (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
+								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 								OP1_DATA_INFO(), OP1_DATA_REG_ADDR(), OP1_DATA_RANGE(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
@@ -1714,6 +1715,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_assign_dim(&ctx, opline,
 								OP1_INFO(), OP1_REG_ADDR(),
 								OP2_INFO(), (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
+								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 								OP1_DATA_INFO(), OP1_DATA_REG_ADDR(),
 								(ctx.ra && (ssa_op+1)->op1_def >= 0) ? OP1_DATA_DEF_REG_ADDR() : 0,
 								(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
@@ -2234,7 +2236,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_fetch_dim_read(&ctx, opline, ssa, ssa_op,
 								OP1_INFO(), OP1_REG_ADDR(), 0,
-								OP2_INFO(), OP2_REG_ADDR(),
+								OP2_INFO(), OP2_REG_ADDR(), OP2_RANGE(),
 								RES_INFO(), RES_REG_ADDR(), IS_UNKNOWN)) {
 							goto jit_failure;
 						}
@@ -2252,6 +2254,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_fetch_dim(&ctx, opline,
 								OP1_INFO(), OP1_REG_ADDR(),
 								OP2_INFO(), (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
+								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : 0,
 								RES_REG_ADDR(), IS_UNKNOWN)) {
 							goto jit_failure;
 						}
@@ -2280,7 +2283,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_isset_isempty_dim(&ctx, opline,
 								OP1_INFO(), OP1_REG_ADDR(), 0,
-								OP2_INFO(), OP2_REG_ADDR(), IS_UNKNOWN,
+								OP2_INFO(), OP2_REG_ADDR(), OP2_RANGE(), IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
