@@ -3034,7 +3034,8 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 						 && (ssa->vars[ssa_op->op1_def].use_chain >= 0
 					      || ssa->vars[ssa_op->op1_def].phi_use_chain)
 						 && ssa->vars[ssa_op->op1_def].alias == NO_ALIAS
-						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)) {
+						 && zend_jit_var_supports_reg(ssa, ssa_op->op1_def)
+						 && !(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)) {
 							vars_op_array[ssa_op->op1_def] = op_array;
 							RA_IVAL_START(ssa_op->op1_def, idx);
 							count++;
