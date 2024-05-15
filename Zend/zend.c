@@ -95,6 +95,7 @@ ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 ZEND_API zend_result (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
 ZEND_API zend_result (*zend_os_csprng_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size) = NULL;
+ZEND_API zend_result (*zend_general_random_bytes)(zend_utility_general_random_state *state, void *bytes, size_t size) = NULL;
 
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
@@ -914,8 +915,9 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
 	/* Set up early utility functions. zend_mm depends on
-	 * zend_os_csprng_random_bytes */
-	zend_os_csprng_random_bytes = utility_functions->os_csprng_randomn_bytes_function;
+	 * zend_general_random_bytes */
+	zend_os_csprng_random_bytes = utility_functions->os_csprng_random_bytes_function;
+	zend_general_random_bytes = utility_functions->general_random_bytes_function;
 
 	start_memory_manager();
 

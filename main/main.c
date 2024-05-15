@@ -2115,7 +2115,8 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zuf.printf_to_smart_str_function = php_printf_to_smart_str;
 	zuf.getenv_function = sapi_getenv;
 	zuf.resolve_path_function = php_resolve_path_for_zend;
-	zuf.os_csprng_randomn_bytes_function = php_random_bytes_ex;
+	zuf.os_csprng_random_bytes_function = php_random_bytes_ex;
+	zuf.general_random_bytes_function = php_general_random_bytes_for_zend;
 	zend_startup(&zuf);
 	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
