@@ -66,7 +66,7 @@ static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
 	return num;
 }
 
-static inline void bc_convert_to_uint(BC_UINT_T *n_uint, char *nend, size_t nlen)
+static inline void bc_convert_to_uint(BC_UINT_T *n_uint, const char *nend, size_t nlen)
 {
 	size_t i = 0;
 	while (nlen > 0) {
