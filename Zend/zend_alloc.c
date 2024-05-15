@@ -1330,7 +1330,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 
 static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(const zend_mm_heap *heap, const zend_mm_free_slot *slot)
 {
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
 	return (zend_mm_free_slot*)(((uintptr_t)slot) ^ heap->shadow_key);
 #else
 	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot) ^ heap->shadow_key);
@@ -1339,7 +1339,7 @@ static zend_always_inline zend_mm_free_slot* zend_mm_encode_free_slot(const zend
 
 static zend_always_inline zend_mm_free_slot* zend_mm_decode_free_slot(zend_mm_heap *heap, zend_mm_free_slot *slot)
 {
-#if WORDS_BIGENDIAN
+#ifdef WORDS_BIGENDIAN
 	return (zend_mm_free_slot*)((uintptr_t)slot ^ heap->shadow_key));
 #else
 	return (zend_mm_free_slot*)(BSWAPPTR((uintptr_t)slot ^ heap->shadow_key));

@@ -746,7 +746,7 @@ PHPAPI zend_result php_general_random_bytes_for_zend(zend_utility_general_random
 		size_t chunk_size = MIN(size, sizeof(result.size));
 		memcpy(bytes, &result.result, chunk_size);
 		size -= chunk_size;
-		bytes += chunk_size;
+		bytes = (char*)bytes + chunk_size;
 	}
 
 	return SUCCESS;
