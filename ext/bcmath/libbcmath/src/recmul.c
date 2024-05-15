@@ -113,8 +113,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
 static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
 {
 	size_t i;
-	char *n1end = n1->n_value + n1len - 1;
-	char *n2end = n2->n_value + n2len - 1;
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
 	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
