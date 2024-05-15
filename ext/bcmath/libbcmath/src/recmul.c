@@ -84,8 +84,8 @@ static inline void bc_convert_to_uint(BC_UINT_T *n_uint, const char *nend, size_
  */
 static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
 {
-	char *n1end = n1->n_value + n1len - 1;
-	char *n2end = n2->n_value + n2len - 1;
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
 
 	BC_UINT_T n1_uint = bc_partial_convert_to_uint(n1end, n1len);
 	BC_UINT_T n2_uint = bc_partial_convert_to_uint(n2end, n2len);
