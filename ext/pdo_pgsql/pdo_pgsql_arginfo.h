@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2be4e9679d29fcbc3330b78f9e63c4c6e1284f19 */
+ * Stub hash: 57eb44ac4546230b33165b7226b05d006b651e46 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoPgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -88,6 +88,14 @@ static zend_class_entry *register_class_PdoPgsql(zend_class_entry *class_entry_P
 	zend_string *const_ATTR_DISABLE_PREPARES_name = zend_string_init_interned("ATTR_DISABLE_PREPARES", sizeof("ATTR_DISABLE_PREPARES") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_DISABLE_PREPARES_name, &const_ATTR_DISABLE_PREPARES_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_DISABLE_PREPARES_name);
+#if defined(HAVE_PG_RESULT_MEMORY_SIZE)
+
+	zval const_ATTR_RESULT_MEMORY_SIZE_value;
+	ZVAL_LONG(&const_ATTR_RESULT_MEMORY_SIZE_value, PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE);
+	zend_string *const_ATTR_RESULT_MEMORY_SIZE_name = zend_string_init_interned("ATTR_RESULT_MEMORY_SIZE", sizeof("ATTR_RESULT_MEMORY_SIZE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_RESULT_MEMORY_SIZE_name, &const_ATTR_RESULT_MEMORY_SIZE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_RESULT_MEMORY_SIZE_name);
+#endif
 
 	zval const_TRANSACTION_IDLE_value;
 	ZVAL_LONG(&const_TRANSACTION_IDLE_value, PGSQL_TRANSACTION_IDLE);

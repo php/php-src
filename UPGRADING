@@ -421,6 +421,10 @@ PHP 8.4 UPGRADE NOTES
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
 
+- PDO_PGSQL:
+  . getAttribute() can now retrieve the memory usage of query results.
+    PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE was added for this feature.
+
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.
 

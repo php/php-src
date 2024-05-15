@@ -175,6 +175,7 @@ PHP                                                                        NEWS
     PDO constructor arguments. (SakiTakamachi)
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
   . Added class PdoPgsql. (danack, kocsismate)
+  . Retrieve the memory usage of the query result resource. (KentarouTakeda)
 
 - PDO_SQLITE:
   . Added class PdoSqlite. (danack, kocsismate)
