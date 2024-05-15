@@ -266,7 +266,8 @@ jobs:
             --with-mysqli=mysqlnd \
             --with-openssl \
             --with-pdo-sqlite \
-            --with-valgrind
+            --with-valgrind \
+            CFLAGS="-O2 -g"
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
