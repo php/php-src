@@ -3966,6 +3966,33 @@ static bool zend_jit_trace_must_store_type(const zend_op_array *op_array,
 	return 1;
 }
 
+static bool zend_jit_trace_may_throw(const zend_op       *opline,
+                                     const zend_ssa_op   *ssa_op,
+                                     const zend_op_array *op_array,
+                                     const zend_ssa      *ssa,
+                                     uint32_t             t1,
+                                     uint32_t             t2,
+                                     uint32_t             t3,
+                                     uint32_t             val_type)
+{
+    switch (opline->opcode) {
+		case ZEND_ASSIGN_DIM_OP:
+			if (opline->extended_value != ZEND_CONCAT
+			 && val_type == IS_LONG
+			 && (t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY
+			 && MAY_BE_PACKED_ONLY(t1)
+			 && !(t1 & MAY_BE_ARRAY_OF_REF)
+			 && (t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_LONG
+			 && (t3 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_LONG) {
+				return 0;
+			}
+			break;
+		default:
+			break;
+	}
+	return zend_may_throw_ex(opline, ssa_op, op_array, ssa, t1, t2);
+}
+
 static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num)
 {
 	const void *handler = NULL;
@@ -4644,7 +4671,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 								op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_RANGE(), val_type,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa, op1_info, op2_info))) {
+								zend_jit_trace_may_throw(opline, ssa_op, op_array, ssa,
+									op1_info, op2_info, op1_data_info, val_type))) {
 							goto jit_failure;
 						}
 						goto done;
