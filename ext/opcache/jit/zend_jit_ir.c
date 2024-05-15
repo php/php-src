@@ -13013,7 +13013,9 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 
 	ZEND_ASSERT(opline->result_type == IS_UNUSED);
 
-	jit_SET_EX_OPLINE(jit, opline);
+	if (may_throw) {
+		jit_SET_EX_OPLINE(jit, opline);
+	}
 
 	op1_addr = zend_jit_prepare_array_update(jit, opline, op1_info, op1_addr, &if_type, &ht_ref, &may_throw);
 
