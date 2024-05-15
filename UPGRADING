@@ -339,7 +339,6 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
-  . Added pg_result_memory_size to get the visibility the memory used by a query result.
   . pg_put_line is no longer necessary to determine the end of a COPY, pg_end_copy
     only needs to be called.
 
@@ -510,6 +509,9 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getcpu to get the cpu id from where the current process runs.
   . Added pcntl_getqos_class to get the QoS level (aka performance and related
     energy consumption) of the current process and pcntl_setqos_class to set it.
+
+- PGSQL:
+  . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
