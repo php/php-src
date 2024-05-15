@@ -110,7 +110,7 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc
  * Multiply and add these groups of numbers to perform multiplication fast.
  * How much to shift the digits when adding values ​​can be calculated from the index of the array.
  */
-static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
+static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
 	size_t i;
 	const char *n1end = n1->n_value + n1len - 1;
