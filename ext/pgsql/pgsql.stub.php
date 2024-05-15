@@ -827,7 +827,10 @@ namespace {
 
     function pg_end_copy(?PgSql\Connection $connection = null): bool {}
 
-    /** @param PgSql\Connection|string $connection */
+    /** 
+     * @param PgSql\Connection|string $connection
+     * @deprecated
+     */
     function pg_put_line($connection, string $query = UNKNOWN): bool {}
 
     /**

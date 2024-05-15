@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e06a7116c1048975cbb348ffcdb36c9b65cee659 */
+ * Stub hash: 556793d50df7fe97cabe210e1f2cfcaa819f09d5 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -646,7 +646,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_client_encoding, arginfo_pg_client_encoding)
 	ZEND_RAW_FENTRY("pg_clientencoding", zif_pg_client_encoding, arginfo_pg_clientencoding, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_end_copy, arginfo_pg_end_copy)
-	ZEND_FE(pg_put_line, arginfo_pg_put_line)
+	ZEND_RAW_FENTRY("pg_put_line", zif_pg_put_line, arginfo_pg_put_line, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(pg_copy_to, arginfo_pg_copy_to)
 	ZEND_FE(pg_copy_from, arginfo_pg_copy_from)
 	ZEND_FE(pg_escape_string, arginfo_pg_escape_string)
