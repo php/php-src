@@ -347,8 +347,11 @@ extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
-extern ZEND_API zend_result (*zend_os_csprng_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size);
-extern ZEND_API zend_result (*zend_general_random_bytes)(zend_utility_general_random_state *state, void *bytes, size_t size);
+/* Generate 'size' random bytes into 'bytes' with the OS CSPRNG. */
+extern ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_os_csprng_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size);
+/* Generate 'size' random bytes into 'bytes' with a general purpose PRNG.
+ * 'state' must be zeroed before the first call and can be reused. */
+extern ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_general_random_bytes)(zend_utility_general_random_state *state, void *bytes, size_t size);
 
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);
