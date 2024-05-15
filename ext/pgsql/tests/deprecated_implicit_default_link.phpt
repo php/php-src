@@ -130,6 +130,10 @@ Deprecated: pg_client_encoding(): Automatic fetching of PostgreSQL connection is
 
 Deprecated: pg_end_copy(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 
+Deprecated: Function pg_put_line() is deprecated in %s on line %d
+
+Deprecated: Function pg_put_line() is deprecated in %s on line %d
+
 Deprecated: pg_put_line(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d
 
 Deprecated: pg_escape_string(): Automatic fetching of PostgreSQL connection is deprecated in %s on line %d

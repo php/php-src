@@ -31,7 +31,12 @@ $table_name = 'table_06copy_2';
 $db = pg_connect($conn_str);
 pg_query($db, "DROP TABLE IF EXISTS {$table_name}");
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function pg_put_line() is deprecated in %s on line %d
+
+Deprecated: Function pg_put_line() is deprecated in %s on line %d
+
+Deprecated: Function pg_put_line() is deprecated in %s on line %d
 array(2) {
   [0]=>
   string(1) "1"
