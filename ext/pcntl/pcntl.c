@@ -76,6 +76,29 @@ typedef cpuset_t *cpu_set_t;
 	} while(0)
  #define PCNTL_CPU_DESTROY(mask) cpuset_destroy(mask)
  #define HAVE_SCHED_SETAFFINITY 1
+#elif defined(HAVE_PSET_BIND)
+#include <sys/pset.h>
+typedef psetid_t cpu_set_t;
+ #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, (p <= 0 ? getpid() : p), &m)
+ #define sched_setaffinity(p, c, m) pset_bind(m, P_PID, (p <= 0 ? getpid() : p), NULL)
+ #define PCNTL_CPUSET(mask) mask
+ #define PCNTL_CPU_ISSET(i, mask) (pset_assign(PS_QUERY, (processorid_t)i, &query) == 0 && query == mask)
+ #define PCNTL_CPU_SET(i, mask) pset_assign(mask, (processorid_t)i, NULL)
+ #define PCNTL_CPU_ZERO(mask) 														\
+	psetid_t query;																	\
+	do {																			\
+		if (UNEXPECTED(pset_create(&mask) != 0)) {									\
+			php_error_docref(NULL, E_WARNING, "pset_create: %s", strerror(errno));	\
+			RETURN_FALSE;															\
+		}																			\
+	 } while (0)
+ #define PCNTL_CPU_DESTROY(mask) 													\
+	do {																			\
+		if (UNEXPECTED(mask != PS_NONE && pset_destroy(mask) != 0)) {				\
+			php_error_docref(NULL, E_WARNING, "pset_destroy: %s", strerror(errno));	\
+		}																			\
+	} while (0)
+ #define HAVE_SCHED_SETAFFINITY 1
 #endif
 
 #if defined(HAVE_GETCPUID)
