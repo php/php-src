@@ -27,10 +27,12 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_observer_fcall_op_array_extension;
+extern ZEND_API int zend_observer_fcall_internal_function_extension;
 extern ZEND_API bool zend_observer_errors_observed;
 extern ZEND_API bool zend_observer_function_declared_observed;
 extern ZEND_API bool zend_observer_class_linked_observed;
 
+/* Omit zend_observer_fcall_internal_function_extension check, they are set at the same time. */
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
 #define ZEND_OBSERVER_FCALL_BEGIN(execute_data) do { \
