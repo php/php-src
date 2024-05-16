@@ -43,6 +43,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-14100 (Corrected spelling mistake in php.ini files).
     (Marcus Xavier)
 
+- MySQLnd:
+  . Fix bug GH-14255 (mysqli_fetch_assoc reports error from
+    nested query). (Kamil Tekiela)
+
 - Opcache:
   . Fixed bug GH-14109 (Fix accidental persisting of internal class constant in
     shm). (ilutov)
