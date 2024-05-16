@@ -168,7 +168,7 @@ up:
 			bc_num scaled_one = bc_new_num((*result)->n_len, (*result)->n_scale);
 			scaled_one->n_value[rounded_len - 1] = 1;
 
-			tmp = _bc_do_add(*result, scaled_one, (*result)->n_scale);
+			tmp = _bc_do_add(*result, scaled_one);
 			tmp->n_sign = (*result)->n_sign;
 			bc_free_num(&scaled_one);
 		}

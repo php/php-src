@@ -47,7 +47,7 @@ bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 	}
 
 	/* Increment the absolute value of the result by 1 and add sign information */
-	bc_num tmp = _bc_do_add(result, BCG(_one_), 0);
+	bc_num tmp = _bc_do_add(result, BCG(_one_));
 	tmp->n_sign = result->n_sign;
 	bc_free_num(&result);
 	return tmp;
