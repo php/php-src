@@ -26,11 +26,10 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_insecure_for_zend(
 {
 	php_random_bytes_insecure_state_for_zend *state = (php_random_bytes_insecure_state_for_zend*) opaque_state;
 
-	if (!state->initialized) {
+	if (UNEXPECTED(!state->initialized)) {
 		uint64_t t[4];
-		php_random_fallback_seed_state fallback_state = {
-			.initialized = false,
-		};
+		php_random_fallback_seed_state fallback_state;
+		fallback_state.initialized = false;
 
 		do {
 			/* Skip the CSPRNG if it has already failed */
