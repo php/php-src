@@ -12,7 +12,7 @@ $batch_file_content = <<<EOT
 @echo off
 powershell -Command "Write-Output '%1%'"
 EOT;
-$batch_file_path = __DIR__ . '/ghsa-54hq-v5wp-fqgv.cmd';
+$batch_file_path = __DIR__ . '/ghsa-54hq-v5wp-fqgv_2.cmd';
 
 file_put_contents($batch_file_path, $batch_file_content);
 
@@ -25,5 +25,5 @@ proc_close($proc);
 "&notepad<>^()!.exe
 --CLEAN--
 <?php
-@unlink(__DIR__ . '/ghsa-54hq-v5wp-fqgv.cmd');
+@unlink(__DIR__ . '/ghsa-54hq-v5wp-fqgv_2.cmd');
 ?>
