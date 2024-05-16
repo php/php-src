@@ -295,7 +295,9 @@ jobs:
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
           path: benchmark/repos/data
       - name: Benchmark
-        run: php benchmark/benchmark.php true
+        run: |
+          file $(which php)
+          php benchmark/benchmark.php true
       - name: Store result
         if: github.event_name == 'push'
         run: |
