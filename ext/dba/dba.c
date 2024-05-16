@@ -239,9 +239,7 @@ static int le_pdb;
 
 static zend_class_entry *dba_connection_ce;
 static zend_object_handlers dba_connection_object_handlers;
-/* }}} */
 
-/* {{{ dba_close */
 static void dba_close_info(dba_info *info)
 {
 	ZEND_ASSERT(info != NULL && "connection has already been closed");
@@ -496,7 +494,7 @@ static dba_info *php_dba_find(const zend_string *path)
 {
 	zval *zv;
 
-	ZEND_HASH_FOREACH_VAL(&DBA_G(connections), zv) {
+	ZEND_HASH_MAP_FOREACH_VAL(&DBA_G(connections), zv) {
 		dba_info *info = Z_DBA_INFO_P(zv);
 		if (info && zend_string_equals(path, info->path)) {
 			return info;
@@ -519,9 +517,6 @@ static zend_always_inline zend_string *php_dba_zend_string_dup_safe(zend_string 
 		return duplicated_str;
 	}
 }
-
-
-#define FREE_RESOURCE_KEY() efree(resource_key);
 
 /* {{{ php_dba_open */
 static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
@@ -587,7 +582,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), resource_key, resource_key_len)) != NULL) {
 			if (le->type != le_pdb) {
 				// TODO This should never happen
-				FREE_RESOURCE_KEY();
+				efree(resource_key);
 				RETURN_FALSE;
 			}
 
@@ -604,7 +599,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 			}
 
 			zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			return;
 		}
 	}
@@ -613,7 +608,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 		hptr = DBA_G(default_hptr);
 		if (!hptr) {
 			php_error_docref(NULL, E_WARNING, "No default handler selected");
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			RETURN_FALSE;
 		}
 		ZEND_ASSERT(hptr->name);
@@ -623,7 +618,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 
 		if (!hptr->name) {
 			php_error_docref(NULL, E_WARNING, "Handler \"%s\" is not available", ZSTR_VAL(handler_str));
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			RETURN_FALSE;
 		}
 	}
@@ -647,18 +642,18 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 
 	if (ZSTR_LEN(mode) == 0) {
 		zend_argument_value_error(2, "cannot be empty");
-		FREE_RESOURCE_KEY();
+		efree(resource_key);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(mode) > 3) {
 		zend_argument_value_error(2, "must be at most 3 characters");
-		FREE_RESOURCE_KEY();
+		efree(resource_key);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(mode) == 3) {
 		if (ZSTR_VAL(mode)[2] != 't') {
 			zend_argument_value_error(2, "third character must be \"t\"");
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			RETURN_THROWS();
 		}
 		is_test_lock = true;
@@ -671,7 +666,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 			case '-':
 				if ((hptr->flags & DBA_LOCK_ALL) == 0) {
 					php_error_docref(NULL, E_WARNING, "Locking cannot be disabled for handler %s", hptr->name);
-					FREE_RESOURCE_KEY();
+					efree(resource_key);
 					RETURN_FALSE;
 				}
 				is_lock_ignored = true;
@@ -693,7 +688,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 				break;
 			default:
 				zend_argument_value_error(2, "second character must be one of \"d\", \"l\", \"-\", or \"t\"");
-				FREE_RESOURCE_KEY();
+				efree(resource_key);
 				RETURN_THROWS();
 		}
 	} else {
@@ -762,7 +757,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 			break;
 		default:
 			zend_argument_value_error(2, "first character must be one of \"r\", \"w\", \"c\", or \"n\"");
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			RETURN_THROWS();
 	}
 	if (!lock_file_mode) {
@@ -771,17 +766,17 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	if (is_test_lock) {
 		if (is_lock_ignored) {
 			zend_argument_value_error(2, "cannot combine mode \"-\" (no lock) and \"t\" (test lock)");
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			RETURN_THROWS();
 		}
 		if (!lock_mode) {
 			if ((hptr->flags & DBA_LOCK_ALL) == 0) {
 				php_error_docref(NULL, E_WARNING, "Handler %s uses its own locking which doesn't support mode modifier t (test lock)", hptr->name);
-				FREE_RESOURCE_KEY();
+				efree(resource_key);
 				RETURN_FALSE;
 			} else {
 				php_error_docref(NULL, E_WARNING, "Handler %s doesn't uses locking for this mode which makes modifier t (test lock) obsolete", hptr->name);
-				FREE_RESOURCE_KEY();
+				efree(resource_key);
 				RETURN_FALSE;
 			}
 		} else {
@@ -871,7 +866,7 @@ restart:
 		}
 		if (!connection->info->lock.fp) {
 			/* stream operation already wrote an error message */
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -892,7 +887,7 @@ restart:
 		}
 		if (!connection->info->fp) {
 			/* stream operation already wrote an error message */
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
@@ -902,7 +897,7 @@ restart:
 			 */
 			if (SUCCESS != php_stream_cast(connection->info->fp, PHP_STREAM_AS_FD, (void*)&connection->info->fd, 1)) {
 				php_error_docref(NULL, E_WARNING, "Could not cast stream");
-				FREE_RESOURCE_KEY();
+				efree(resource_key);
 				zval_ptr_dtor(return_value);
 				RETURN_FALSE;
 #ifdef F_SETFL
@@ -938,7 +933,7 @@ restart:
 				php_error_docref(NULL, E_WARNING, "Driver initialization failed for handler: %s", hptr->name);
 			}
 		}
-		FREE_RESOURCE_KEY();
+		efree(resource_key);
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -948,14 +943,14 @@ restart:
 	if (persistent) {
 		if (zend_register_persistent_resource(resource_key, resource_key_len, connection->info, le_pdb) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Could not register persistent resource");
-			FREE_RESOURCE_KEY();
+			efree(resource_key);
 			zval_ptr_dtor(return_value);
 			RETURN_FALSE;
 		}
 	}
 
 	zend_hash_add_new(&DBA_G(connections), connection->hash, return_value);
-	FREE_RESOURCE_KEY();
+	efree(resource_key);
 }
 /* }}} */
 
@@ -1302,7 +1297,7 @@ PHP_FUNCTION(dba_list)
 	array_init(return_value);
 
 	zval *zv;
-	ZEND_HASH_FOREACH_VAL(&DBA_G(connections), zv) {
+	ZEND_HASH_MAP_FOREACH_VAL(&DBA_G(connections), zv) {
 		dba_info *info = Z_DBA_INFO_P(zv);
 		if (info) {
 			add_next_index_str(return_value, zend_string_copy(info->path));
