@@ -21,7 +21,6 @@
 # include "php.h"
 
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
-
 ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, size_t errstr_size);
 
 PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);

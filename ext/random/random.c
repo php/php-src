@@ -699,55 +699,6 @@ uint64_t php_random_generate_fallback_seed(void)
 	return php_random_generate_fallback_seed_ex(&RANDOM_G(fallback_seed_state));
 }
 
-static void php_general_random_bytes_for_zend_initialize(php_random_state_for_zend *state)
-{
-	uint64_t t[4];
-	php_random_fallback_seed_state fallback_state = {
-		.initialized = false,
-	};
-
-	do {
-		/* Skip the CSPRNG if it has already failed */
-		if (!fallback_state.initialized) {
-			char errstr[128];
-			if (php_random_bytes_ex(&t, sizeof(t), errstr, sizeof(errstr)) == FAILURE) {
-#if ZEND_DEBUG
-				fprintf(stderr, "php_random_bytes_ex: Failed to generate a random seed: %s\n", errstr);
-#endif
-				goto fallback;
-			}
-		} else {
-fallback:
-			t[0] = php_random_generate_fallback_seed_ex(&fallback_state);
-			t[1] = php_random_generate_fallback_seed_ex(&fallback_state);
-			t[2] = php_random_generate_fallback_seed_ex(&fallback_state);
-			t[3] = php_random_generate_fallback_seed_ex(&fallback_state);
-		}
-	} while (UNEXPECTED(t[0] == 0 && t[1] == 0 && t[2] == 0 && t[3] == 0));
-
-	php_random_xoshiro256starstar_seed256(&state->xoshiro256starstar_state, t[0], t[1], t[2], t[3]);
-}
-
-PHPAPI zend_result php_general_random_bytes_for_zend(zend_utility_general_random_state *opaque_state, void *bytes, size_t size)
-{
-	php_random_state_for_zend *state = (php_random_state_for_zend*) opaque_state;
-
-	if (!state->initialized) {
-		php_general_random_bytes_for_zend_initialize(state);
-		state->initialized = true;
-	}
-
-	while (size > 0) {
-		php_random_result result = php_random_algo_xoshiro256starstar.generate(&state->xoshiro256starstar_state);
-		ZEND_ASSERT(result.size == 8 && sizeof(result.result) == 8);
-		size_t chunk_size = MIN(size, 8);
-		bytes = zend_mempcpy(bytes, &result.result, chunk_size);
-		size -= chunk_size;
-	}
-
-	return SUCCESS;
-}
-
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {

@@ -338,7 +338,7 @@ struct _zend_mm_heap {
 	HashTable *tracked_allocs;
 #endif
 	pid_t pid;
-	zend_utility_general_random_state rand_state;
+	zend_utility_random_bytes_insecure_state rand_state;
 };
 
 struct _zend_mm_chunk {
@@ -2045,7 +2045,7 @@ static void zend_mm_free_huge(zend_mm_heap *heap, void *ptr ZEND_FILE_LINE_DC ZE
 
 static zend_result zend_mm_refresh_key(zend_mm_heap *heap)
 {
-	return zend_general_random_bytes(&heap->rand_state, &heap->shadow_key, sizeof(heap->shadow_key));
+	return zend_random_bytes_insecure(&heap->rand_state, &heap->shadow_key, sizeof(heap->shadow_key));
 }
 
 static zend_result zend_mm_init_key(zend_mm_heap *heap)

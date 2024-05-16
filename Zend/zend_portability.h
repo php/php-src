@@ -800,8 +800,12 @@ typedef union {
 	short s;
 	int i;
 	long l;
+#if SIZEOF_LONG_LONG
+	long long ll;
+#endif
 	float f;
 	double d;
+	long double ld;
 	void *p;
 	void (*fun)();
 } zend_max_align_t;
