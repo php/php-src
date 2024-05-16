@@ -66,8 +66,7 @@
 static zend_atomic_int random_fd = ZEND_ATOMIC_INT_INITIALIZER(-1);
 #endif
 
-ZEND_ATTRIBUTE_NONNULL
-PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, size_t errstr_size)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, size_t errstr_size)
 {
 #ifdef PHP_WIN32
 	/* Defer to CryptGenRandom on Windows */
@@ -211,7 +210,7 @@ PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, s
 	return SUCCESS;
 }
 
-PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw)
 {
 	char errstr[128];
 	zend_result result = php_random_bytes_ex(bytes, size, errstr, sizeof(errstr));
