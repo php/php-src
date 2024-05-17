@@ -7,5 +7,4 @@ PHP_ARG_ENABLE([tokenizer],
 if test "$PHP_TOKENIZER" != "no"; then
   PHP_NEW_EXTENSION(tokenizer, tokenizer.c tokenizer_data.c, $ext_shared)
   PHP_ADD_MAKEFILE_FRAGMENT
-  AC_DEFINE([HAVE_TOKENIZER], [1], [Whether the tokenizer extension is available.])
 fi

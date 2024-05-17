@@ -117,6 +117,4 @@ if test "$PHP_INTL" != "no"; then
   PHP_ADD_BUILD_DIR($ext_builddir/spoofchecker)
   PHP_ADD_BUILD_DIR($ext_builddir/breakiterator)
   PHP_ADD_BUILD_DIR($ext_builddir/uchar)
-
-  AC_DEFINE([HAVE_INTL], [1], [Whether the intl extension is available.])
 fi
