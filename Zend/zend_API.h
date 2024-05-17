@@ -833,7 +833,7 @@ ZEND_API void zend_call_known_function(
 		uint32_t param_count, zval *params, HashTable *named_params);
 
 static zend_always_inline void zend_call_known_fcc(
-	zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
+	const zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
 {
 	zend_function *func = fcc->function_handler;
 	/* Need to copy trampolines as they get released after they are called */
