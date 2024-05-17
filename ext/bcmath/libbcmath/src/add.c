@@ -44,7 +44,7 @@ bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 	bc_num sum = NULL;
 
 	if (n1->n_sign == n2->n_sign) {
-		sum = _bc_do_add(n1, n2, scale_min);
+		sum = _bc_do_add(n1, n2);
 		sum->n_sign = n1->n_sign;
 	} else {
 		/* subtraction must be done. */

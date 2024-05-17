@@ -44,7 +44,7 @@ bc_num bc_sub(bc_num n1, bc_num n2, size_t scale_min)
 	bc_num diff = NULL;
 
 	if (n1->n_sign != n2->n_sign) {
-		diff = _bc_do_add(n1, n2, scale_min);
+		diff = _bc_do_add(n1, n2);
 		diff->n_sign = n1->n_sign;
 	} else {
 		/* subtraction must be done. */

@@ -38,7 +38,7 @@
    returned.  The signs of N1 and N2 are ignored.
    SCALE_MIN is to set the minimum scale of the result. */
 
-bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
+bc_num _bc_do_add(bc_num n1, bc_num n2)
 {
 	bc_num sum;
 	size_t sum_len = MAX(n1->n_len, n2->n_len) + 1;
@@ -51,7 +51,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	size_t count;
 
 	/* Prepare sum. */
-	sum = bc_new_num (sum_len, MAX(sum_scale, scale_min));
+	sum = bc_new_num_nonzeroed(sum_len, sum_scale);
 
 	/* Start with the fraction part.  Initialize the pointers. */
 	n1ptr = (char *) (n1->n_value + n1->n_len + n1->n_scale - 1);
@@ -157,7 +157,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2, size_t scale_min)
 	}
 
 	/* Set final carry. */
-	*sumptr += carry;
+	*sumptr = carry;
 
 	/* Adjust sum and return. */
 	_bc_rm_leading_zeros(sum);
