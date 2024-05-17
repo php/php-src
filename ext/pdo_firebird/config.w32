@@ -11,6 +11,7 @@ if (PHP_PDO_FIREBIRD != "no") {
 		) {
 
 		EXTENSION("pdo_firebird", "pdo_firebird.c firebird_driver.c firebird_statement.c");
+		AC_DEFINE('HAVE_PDO_FIREBIRD', 1, 'Whether the pdo_firebird extension is available.');
 	} else {
 		WARNING("pdo_firebird not enabled; libraries and headers not found");
 	}
