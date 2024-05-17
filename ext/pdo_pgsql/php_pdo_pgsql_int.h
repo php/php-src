@@ -86,7 +86,7 @@ extern const struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_PREPARES = PDO_ATTR_DRIVER_SPECIFIC,
-	PRO_PGSQL_ATTR_RESULT_MEMORY_SIZE,
+	PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE,
 };
 
 struct pdo_pgsql_lob_self {

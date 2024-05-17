@@ -711,7 +711,7 @@ static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 
 	switch (attr) {
 #ifdef HAVE_PG_RESULT_MEMORY_SIZE
-		case PRO_PGSQL_ATTR_RESULT_MEMORY_SIZE:
+		case PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE:
 			if(stmt->executed) {
 				ZVAL_LONG(val, PQresultMemorySize(S->result));
 			} else {
