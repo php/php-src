@@ -115,7 +115,8 @@ require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile
-resource(%d) of type (dba)
+object(Dba\Connection)#%d (%d) {
+}
 === Invalid arguments dba_open() ===
 
 Warning: dba_open(): Handler "bogus" is not available in %s on line %d
