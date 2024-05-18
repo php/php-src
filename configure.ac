@@ -531,6 +531,7 @@ AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ]],[[
   int align = __alignof__(int);
+  (void)align;
 ]])],[
   ac_cv_alignof_exists=yes
 ],[
@@ -571,7 +572,14 @@ dnl Check for IPv6 support.
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>]], [[struct sockaddr_in6 s; struct in6_addr t=in6addr_any; int i=AF_INET6; s; t.s6_addr[0] = 0;]])],
+#include <netinet/in.h>]], [[
+  struct sockaddr_in6 s;
+  struct in6_addr t = in6addr_any;
+  int i = AF_INET6;
+  (void)s;
+  t.s6_addr[0] = 0;
+  (void)i;
+]])],
   [ac_cv_ipv6_support=yes], [ac_cv_ipv6_support=no])])
 
 dnl Checks for library functions.
