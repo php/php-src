@@ -37,8 +37,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Added DOMNode::compareDocumentPosition(). (nielsdos)
-  . Implemented #53655 (Improve speed of DOMNode::C14N() on large XML documents).
-    (nielsdos)
+  . Implemented #53655 (Improve speed of DOMNode::C14N() on large XML
+    documents). (nielsdos)
   . Fixed cloning attribute with namespace disappearing namespace. (nielsdos)
   . Implemented DOM HTML5 parsing and serialization RFC. (nielsdos)
   . Fixed DOMElement->prefix with empty string creates bogus prefix. (nielsdos)
@@ -160,8 +160,8 @@ PHP                                                                        NEWS
 
 - PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Feature: Added transaction isolation level and mode settings to pdo_firebird.
-    (SakiTakamachi)
+  . Feature: Added transaction isolation level and mode settings to
+    pdo_firebird. (SakiTakamachi)
   . Added class PdoFirebird. (danack, kocsismate)
 
 - PDO_MYSQL:
@@ -200,8 +200,8 @@ PHP                                                                        NEWS
   . Moved to PECL. (Derick Rethans)
 
 - Reflection:
-  . Implemented GH-12908 (Show attribute name/class in ReflectionAttribute dump).
-    (nielsdos)
+  . Implemented GH-12908 (Show attribute name/class in ReflectionAttribute
+    dump). (nielsdos)
 
 - SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
@@ -215,10 +215,10 @@ PHP                                                                        NEWS
   . Added multicast group support for ipv4 on FreeBSD. (jonathan@tangential.ca)
   . Added the TCP_SYNCNT constant for Linux to set number of attempts to send
     SYN packets from the client. (David Carlier)
-  . Added the SO_EXCLBIND constant for exclusive socket binding on illumos/solaris.
-    (David Carlier)
-  . Updated the socket_create_listen backlog argument default value to SOMAXCONN.
-    (David Carlier)
+  . Added the SO_EXCLBIND constant for exclusive socket binding on
+    illumos/solaris. (David Carlier)
+  . Updated the socket_create_listen backlog argument default value to
+    SOMAXCONN. (David Carlier)
   . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
     macOs and FreeBSD. (David Carlier)
 
