@@ -574,8 +574,8 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 #include <sys/socket.h>
 #include <netinet/in.h>]], [[
   struct sockaddr_in6 s;
-  struct in6_addr t=in6addr_any;
-  int i=AF_INET6;
+  struct in6_addr t = in6addr_any;
+  int i = AF_INET6;
   (void)s;
   t.s6_addr[0] = 0;
   (void)i;
