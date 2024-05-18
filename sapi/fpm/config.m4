@@ -265,7 +265,12 @@ AC_DEFUN([AC_FPM_LQ],
 
   AC_MSG_CHECKING([for TCP_INFO])
 
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_info ti; int x = TCP_INFO;]])], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[
+    struct tcp_info ti;
+    int x = TCP_INFO;
+    (void)ti;
+    (void)x;
+  ]])], [
     have_lq=tcp_info
     AC_MSG_RESULT([yes])
   ], [
@@ -278,7 +283,12 @@ AC_DEFUN([AC_FPM_LQ],
 
   AC_MSG_CHECKING([for TCP_CONNECTION_INFO])
 
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[struct tcp_connection_info ti; int x = TCP_CONNECTION_INFO;]])], [
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[
+    struct tcp_connection_info ti;
+    int x = TCP_CONNECTION_INFO;
+    (void)ti;
+    (void)x;
+  ]])], [
     have_lq=tcp_connection_info
     AC_MSG_RESULT([yes])
   ], [
@@ -292,7 +302,12 @@ AC_DEFUN([AC_FPM_LQ],
   if test "$have_lq" = "no" ; then
     AC_MSG_CHECKING([for SO_LISTENQLEN])
 
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>]], [[int x = SO_LISTENQLIMIT; int y = SO_LISTENQLEN;]])], [
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>]], [[
+      int x = SO_LISTENQLIMIT;
+      int y = SO_LISTENQLEN;
+      (void)x;
+      (void)y;
+    ]])], [
       have_lq=so_listenq
       AC_MSG_RESULT([yes])
     ], [
