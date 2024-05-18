@@ -265,7 +265,7 @@ PHP                                                                        NEWS
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
   . Add php_base64_encode_ex() API. (Remi)
-  . [RFC] Deprecated raising zero to the power of negative number. (Jorg Sowa)
+  . Implemented "Raising zero to the power of negative number" RFC (Jorg Sowa)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

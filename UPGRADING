@@ -352,6 +352,7 @@ PHP 8.4 UPGRADE NOTES
 - Standard:
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
+  . Raising zero to the power of negative number is deprecated.
 
 ========================================
 5. Changed Functions
@@ -524,6 +525,7 @@ PHP 8.4 UPGRADE NOTES
   . Added the http_get_last_response_headers() and
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
+  . Added function fpow() following rules of IEEE 754.
 
 - XSL:
   . Added XSLTProcessor::registerPhpFunctionNS().
