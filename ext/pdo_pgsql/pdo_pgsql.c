@@ -30,7 +30,7 @@
 
 static zend_class_entry *PdoPgsql_ce;
 
-/* {{{ pdo_sqlite_deps */
+/* {{{ pdo_pgsql_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
