@@ -401,6 +401,47 @@ static bool _php_pgsql_identifier_is_escaped(const char *identifier, size_t len)
 	return true;
 }
 
+#ifndef HAVE_PG_CHANGE_PASSWORD
+static PGresult *PQchangePassword(PGconn *conn, const char *user, const char *passwd)
+{
+	/**
+	 * It is more appropriate to let the configured password encryption algorithm
+	 * being picked up, so we pass NULL
+	 */
+	char *enc = PQencryptPasswordConn(conn, passwd, user, NULL);
+
+	if (!enc) {
+		return NULL;
+	}
+
+	char *fmtenc = PQescapeLiteral(conn, enc, strlen(enc));
+	PQfreemem(enc);
+
+	if (!fmtenc) {
+		return NULL;
+	}
+
+	char *fmtuser = PQescapeIdentifier(conn, user, strlen(user));
+
+	if (!fmtuser) {
+		PQfreemem(fmtenc);
+		return NULL;
+	}
+
+	char *query;
+
+	spprintf(&query, 0, "ALTER USER %s PASSWORD %s", fmtuser, fmtenc);
+
+	PGresult *pg_result = PQexec(conn, query);
+
+	efree(query);
+	PQfreemem(fmtuser);
+	PQfreemem(fmtenc);
+
+	return pg_result;
+}
+#endif
+
 /* {{{ PHP_INI */
 PHP_INI_BEGIN()
 STD_PHP_INI_BOOLEAN( "pgsql.allow_persistent",      "1",  PHP_INI_SYSTEM, OnUpdateBool, allow_persistent,      zend_pgsql_globals, pgsql_globals)
@@ -6047,5 +6088,41 @@ PHP_FUNCTION(pg_select)
 	return;
 }
 /* }}} */
+
+PHP_FUNCTION(pg_change_password)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	PGresult *pg_result;
+	zend_string *user, *passwd;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_STR(user)
+		Z_PARAM_STR(passwd)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(user) == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	/* it is technically possible, but better to disallow it */
+	if (ZSTR_LEN(passwd) == 0) {
+		zend_argument_value_error(3, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	pg_result = PQchangePassword(link->conn, ZSTR_VAL(user), ZSTR_VAL(passwd));
+	if (PQresultStatus(pg_result) == PGRES_COMMAND_OK) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
+	PQclear(pg_result);
+}
 
 #endif

@@ -67,6 +67,7 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, lo_truncate64, AC_DEFINE(HAVE_PG_LO64,1,[PostgreSQL 9.3 or later]))
   AC_CHECK_LIB(pq, PQsetErrorContextVisibility, AC_DEFINE(HAVE_PG_CONTEXT_VISIBILITY,1,[PostgreSQL 9.6 or later]))
   AC_CHECK_LIB(pq, PQresultMemorySize, AC_DEFINE(HAVE_PG_RESULT_MEMORY_SIZE,1,[PostgreSQL 12 or later]))
+  AC_CHECK_LIB(pq, PQchangePassword, AC_DEFINE(HAVE_PG_CHANGE_PASSWORD,1,[PostgreSQL 17 or later]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
 
