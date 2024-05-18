@@ -94,14 +94,6 @@ namespace
      * @cvalue XML_NAMESPACE_DECL
      */
     const XML_NAMESPACE_DECL_NODE = UNKNOWN;
-#ifdef XML_GLOBAL_NAMESPACE
-    /**
-     * @var int
-     * @cvalue XML_GLOBAL_NAMESPACE
-     */
-    const XML_GLOBAL_NAMESPACE = UNKNOWN;
-#endif
-
     /**
      * @var int
      * @cvalue XML_LOCAL_NAMESPACE
