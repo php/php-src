@@ -947,6 +947,8 @@ namespace {
 #ifdef HAVE_PG_RESULT_MEMORY_SIZE
     function pg_result_memory_size(PgSql\Result $result): int {}
 #endif
+
+    function pg_change_password(PgSql\Connection $connection, string $user, #[\SensitiveParameter] string $password): bool {}
 }
 
 namespace PgSql {

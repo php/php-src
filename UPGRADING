@@ -513,6 +513,10 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getqos_class to get the QoS level (aka performance and related
     energy consumption) of the current process and pcntl_setqos_class to set it.
 
+- PGSQL:
+  . Added pg_change_password to alter a given user's password. It handles
+    transparently the password encryption from the database settings.
+
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
     functions to support the AEGIS family of authenticated encryption algorithms,

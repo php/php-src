@@ -186,6 +186,7 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added pg_result_memory_size to get the query result memory usage.
     (KentarouTakeda)
+  . Added pg_change_password to alter an user's password. (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
