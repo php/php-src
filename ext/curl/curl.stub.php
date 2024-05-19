@@ -478,343 +478,6 @@ const CURLOPT_WRITEHEADER = UNKNOWN;
  */
 const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
 
-/* */
-/**
- * @var int
- * @cvalue CURLE_ABORTED_BY_CALLBACK
- */
-const CURLE_ABORTED_BY_CALLBACK = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_BAD_CALLING_ORDER
- */
-const CURLE_BAD_CALLING_ORDER = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_BAD_CONTENT_ENCODING
- */
-const CURLE_BAD_CONTENT_ENCODING = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_BAD_DOWNLOAD_RESUME
- */
-const CURLE_BAD_DOWNLOAD_RESUME = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_BAD_FUNCTION_ARGUMENT
- */
-const CURLE_BAD_FUNCTION_ARGUMENT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_BAD_PASSWORD_ENTERED
- */
-const CURLE_BAD_PASSWORD_ENTERED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_COULDNT_CONNECT
- */
-const CURLE_COULDNT_CONNECT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_COULDNT_RESOLVE_HOST
- */
-const CURLE_COULDNT_RESOLVE_HOST = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_COULDNT_RESOLVE_PROXY
- */
-const CURLE_COULDNT_RESOLVE_PROXY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FAILED_INIT
- */
-const CURLE_FAILED_INIT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FILE_COULDNT_READ_FILE
- */
-const CURLE_FILE_COULDNT_READ_FILE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_ACCESS_DENIED
- */
-const CURLE_FTP_ACCESS_DENIED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_BAD_DOWNLOAD_RESUME
- */
-const CURLE_FTP_BAD_DOWNLOAD_RESUME = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_CANT_GET_HOST
- */
-const CURLE_FTP_CANT_GET_HOST = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_CANT_RECONNECT
- */
-const CURLE_FTP_CANT_RECONNECT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_COULDNT_GET_SIZE
- */
-const CURLE_FTP_COULDNT_GET_SIZE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_COULDNT_RETR_FILE
- */
-const CURLE_FTP_COULDNT_RETR_FILE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_COULDNT_SET_ASCII
- */
-const CURLE_FTP_COULDNT_SET_ASCII = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_COULDNT_SET_BINARY
- */
-const CURLE_FTP_COULDNT_SET_BINARY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_COULDNT_STOR_FILE
- */
-const CURLE_FTP_COULDNT_STOR_FILE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_COULDNT_USE_REST
- */
-const CURLE_FTP_COULDNT_USE_REST = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_PARTIAL_FILE
- */
-const CURLE_FTP_PARTIAL_FILE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_PORT_FAILED
- */
-const CURLE_FTP_PORT_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_QUOTE_ERROR
- */
-const CURLE_FTP_QUOTE_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_USER_PASSWORD_INCORRECT
- */
-const CURLE_FTP_USER_PASSWORD_INCORRECT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_WEIRD_227_FORMAT
- */
-const CURLE_FTP_WEIRD_227_FORMAT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_WEIRD_PASS_REPLY
- */
-const CURLE_FTP_WEIRD_PASS_REPLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_WEIRD_PASV_REPLY
- */
-const CURLE_FTP_WEIRD_PASV_REPLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_WEIRD_SERVER_REPLY
- */
-const CURLE_FTP_WEIRD_SERVER_REPLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_WEIRD_USER_REPLY
- */
-const CURLE_FTP_WEIRD_USER_REPLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FTP_WRITE_ERROR
- */
-const CURLE_FTP_WRITE_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_FUNCTION_NOT_FOUND
- */
-const CURLE_FUNCTION_NOT_FOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_GOT_NOTHING
- */
-const CURLE_GOT_NOTHING = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_HTTP_NOT_FOUND
- */
-const CURLE_HTTP_NOT_FOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_HTTP_PORT_FAILED
- */
-const CURLE_HTTP_PORT_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_HTTP_POST_ERROR
- */
-const CURLE_HTTP_POST_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_HTTP_RANGE_ERROR
- */
-const CURLE_HTTP_RANGE_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_HTTP_RETURNED_ERROR
- */
-const CURLE_HTTP_RETURNED_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_LDAP_CANNOT_BIND
- */
-const CURLE_LDAP_CANNOT_BIND = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_LDAP_SEARCH_FAILED
- */
-const CURLE_LDAP_SEARCH_FAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_LIBRARY_NOT_FOUND
- */
-const CURLE_LIBRARY_NOT_FOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_MALFORMAT_USER
- */
-const CURLE_MALFORMAT_USER = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_OBSOLETE
- */
-const CURLE_OBSOLETE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_OK
- */
-const CURLE_OK = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_OPERATION_TIMEDOUT
- */
-const CURLE_OPERATION_TIMEDOUT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_OPERATION_TIMEOUTED
- */
-const CURLE_OPERATION_TIMEOUTED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_OUT_OF_MEMORY
- */
-const CURLE_OUT_OF_MEMORY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_PARTIAL_FILE
- */
-const CURLE_PARTIAL_FILE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_READ_ERROR
- */
-const CURLE_READ_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_RECV_ERROR
- */
-const CURLE_RECV_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SEND_ERROR
- */
-const CURLE_SEND_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SHARE_IN_USE
- */
-const CURLE_SHARE_IN_USE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_CACERT
- */
-const CURLE_SSL_CACERT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_CERTPROBLEM
- */
-const CURLE_SSL_CERTPROBLEM = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_CIPHER
- */
-const CURLE_SSL_CIPHER = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_CONNECT_ERROR
- */
-const CURLE_SSL_CONNECT_ERROR = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_ENGINE_NOTFOUND
- */
-const CURLE_SSL_ENGINE_NOTFOUND = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_ENGINE_SETFAILED
- */
-const CURLE_SSL_ENGINE_SETFAILED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_PEER_CERTIFICATE
- */
-const CURLE_SSL_PEER_CERTIFICATE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_SSL_PINNEDPUBKEYNOTMATCH
- */
-const CURLE_SSL_PINNEDPUBKEYNOTMATCH = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_TELNET_OPTION_SYNTAX
- */
-const CURLE_TELNET_OPTION_SYNTAX = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_TOO_MANY_REDIRECTS
- */
-const CURLE_TOO_MANY_REDIRECTS = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_UNKNOWN_TELNET_OPTION
- */
-const CURLE_UNKNOWN_TELNET_OPTION = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_UNSUPPORTED_PROTOCOL
- */
-const CURLE_UNSUPPORTED_PROTOCOL = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_URL_MALFORMAT
- */
-const CURLE_URL_MALFORMAT = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_URL_MALFORMAT_USER
- */
-const CURLE_URL_MALFORMAT_USER = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_WRITE_ERROR
- */
-const CURLE_WRITE_ERROR = UNKNOWN;
-
 /* cURL info constants */
 /**
  * @var int
@@ -1256,17 +919,7 @@ const CURLOPT_FTP_CREATE_MISSING_DIRS = UNKNOWN;
  */
 const CURLOPT_PROXYAUTH = UNKNOWN;
 
-/* Available since 7.10.8 */
-/**
- * @var int
- * @cvalue CURLE_FILESIZE_EXCEEDED
- */
-const CURLE_FILESIZE_EXCEEDED = UNKNOWN;
-/**
- * @var int
- * @cvalue CURLE_LDAP_INVALID_URL
- */
-const CURLE_LDAP_INVALID_URL = UNKNOWN;
+
 /**
  * @var int
  * @cvalue CURLINFO_HTTPAUTH_AVAIL
@@ -1313,12 +966,7 @@ const CURL_IPRESOLVE_V6 = UNKNOWN;
  */
 const CURL_IPRESOLVE_WHATEVER = UNKNOWN;
 
-/* Available since 7.11.0 */
-/**
- * @var int
- * @cvalue CURLE_FTP_SSL_FAILED
- */
-const CURLE_FTP_SSL_FAILED = UNKNOWN;
+
 /**
  * @var int
  * @cvalue CURLFTPSSL_ALL
@@ -1506,12 +1154,6 @@ const CURLOPT_MAX_RECV_SPEED_LARGE = UNKNOWN;
  */
 const CURLOPT_MAX_SEND_SPEED_LARGE = UNKNOWN;
 
-/* Available since 7.16.0 */
-/**
- * @var int
- * @cvalue CURLE_SSL_CACERT_BADFILE
- */
-const CURLE_SSL_CACERT_BADFILE = UNKNOWN;
 /**
  * @var int
  * @cvalue CURLOPT_SSL_SESSIONID_CACHE
@@ -1523,12 +1165,6 @@ const CURLOPT_SSL_SESSIONID_CACHE = UNKNOWN;
  */
 const CURLMOPT_PIPELINING = UNKNOWN;
 
-/* Available since 7.16.1 */
-/**
- * @var int
- * @cvalue CURLE_SSH
- */
-const CURLE_SSH = UNKNOWN;
 /**
  * @var int
  * @cvalue CURLOPT_FTP_SSL_CCC
@@ -2672,11 +2308,7 @@ const CURLOPT_TCP_FASTOPEN = UNKNOWN;
  */
 const CURLINFO_HTTP_VERSION = UNKNOWN;
 
-/**
- * @var int
- * @cvalue CURLE_WEIRD_SERVER_REPLY
- */
-const CURLE_WEIRD_SERVER_REPLY = UNKNOWN;
+
 /**
  * @var int
  * @cvalue CURLOPT_KEEP_SENDING_ON_ERROR
@@ -3202,11 +2834,6 @@ const CURL_VERSION_ZSTD = UNKNOWN;
 #if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
 /**
  * @var int
- * @cvalue CURLE_PROXY
- */
-const CURLE_PROXY = UNKNOWN;
-/**
- * @var int
  * @cvalue CURLINFO_PROXY_ERROR
  */
 const CURLINFO_PROXY_ERROR = UNKNOWN;
@@ -3552,6 +3179,606 @@ const CURLOPT_QUICK_EXIT = UNKNOWN;
  * @cvalue CURLOPT_SAFE_UPLOAD
  */
 const CURLOPT_SAFE_UPLOAD = UNKNOWN;
+
+/* Curl error codes - https://curl.se/libcurl/c/libcurl-errors.html */
+/**
+ * @var int
+ * @cvalue CURLE_OK
+ */
+const CURLE_OK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_UNSUPPORTED_PROTOCOL
+ */
+const CURLE_UNSUPPORTED_PROTOCOL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FAILED_INIT
+ */
+const CURLE_FAILED_INIT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_URL_MALFORMAT
+ */
+const CURLE_URL_MALFORMAT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_NOT_BUILT_IN
+ */
+const CURLE_NOT_BUILT_IN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_COULDNT_RESOLVE_PROXY
+ */
+const CURLE_COULDNT_RESOLVE_PROXY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_COULDNT_RESOLVE_HOST
+ */
+const CURLE_COULDNT_RESOLVE_HOST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_COULDNT_CONNECT
+ */
+const CURLE_COULDNT_CONNECT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_WEIRD_SERVER_REPLY
+ */
+const CURLE_WEIRD_SERVER_REPLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_REMOTE_ACCESS_DENIED
+ */
+const CURLE_REMOTE_ACCESS_DENIED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_ACCEPT_FAILED
+ */
+const CURLE_FTP_ACCEPT_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_WEIRD_PASS_REPLY
+ */
+const CURLE_FTP_WEIRD_PASS_REPLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_ACCEPT_TIMEOUT
+ */
+const CURLE_FTP_ACCEPT_TIMEOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_WEIRD_PASV_REPLY
+ */
+const CURLE_FTP_WEIRD_PASV_REPLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_WEIRD_227_FORMAT
+ */
+const CURLE_FTP_WEIRD_227_FORMAT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_CANT_GET_HOST
+ */
+const CURLE_FTP_CANT_GET_HOST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP2
+ */
+const CURLE_HTTP2 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_SET_TYPE
+ */
+const CURLE_FTP_COULDNT_SET_TYPE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_PARTIAL_FILE
+ */
+const CURLE_PARTIAL_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_RETR_FILE
+ */
+const CURLE_FTP_COULDNT_RETR_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_QUOTE_ERROR
+ */
+const CURLE_QUOTE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP_RETURNED_ERROR
+ */
+const CURLE_HTTP_RETURNED_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_WRITE_ERROR
+ */
+const CURLE_WRITE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_UPLOAD_FAILED
+ */
+const CURLE_UPLOAD_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_READ_ERROR
+ */
+const CURLE_READ_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_OUT_OF_MEMORY
+ */
+const CURLE_OUT_OF_MEMORY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_OPERATION_TIMEDOUT
+ */
+const CURLE_OPERATION_TIMEDOUT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_PORT_FAILED
+ */
+const CURLE_FTP_PORT_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_USE_REST
+ */
+const CURLE_FTP_COULDNT_USE_REST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_RANGE_ERROR
+ */
+const CURLE_RANGE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP_POST_ERROR
+ */
+const CURLE_HTTP_POST_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CONNECT_ERROR
+ */
+const CURLE_SSL_CONNECT_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_BAD_DOWNLOAD_RESUME
+ */
+const CURLE_BAD_DOWNLOAD_RESUME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FILE_COULDNT_READ_FILE
+ */
+const CURLE_FILE_COULDNT_READ_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_LDAP_CANNOT_BIND
+ */
+const CURLE_LDAP_CANNOT_BIND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_LDAP_SEARCH_FAILED
+ */
+const CURLE_LDAP_SEARCH_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FUNCTION_NOT_FOUND
+ */
+const CURLE_FUNCTION_NOT_FOUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_ABORTED_BY_CALLBACK
+ */
+const CURLE_ABORTED_BY_CALLBACK = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_BAD_FUNCTION_ARGUMENT
+ */
+const CURLE_BAD_FUNCTION_ARGUMENT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_INTERFACE_FAILED
+ */
+const CURLE_INTERFACE_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TOO_MANY_REDIRECTS
+ */
+const CURLE_TOO_MANY_REDIRECTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_UNKNOWN_OPTION
+ */
+const CURLE_UNKNOWN_OPTION = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x074E00 /* Available since 7.78.0 */
+/**
+ * @var int
+ * @cvalue CURLE_SETOPT_OPTION_SYNTAX
+ */
+const CURLE_SETOPT_OPTION_SYNTAX = UNKNOWN;
+#endif
+/**
+ * @var int
+ * @cvalue CURLE_GOT_NOTHING
+ */
+const CURLE_GOT_NOTHING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_ENGINE_NOTFOUND
+ */
+const CURLE_SSL_ENGINE_NOTFOUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_ENGINE_SETFAILED
+ */
+const CURLE_SSL_ENGINE_SETFAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SEND_ERROR
+ */
+const CURLE_SEND_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_RECV_ERROR
+ */
+const CURLE_RECV_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CERTPROBLEM
+ */
+const CURLE_SSL_CERTPROBLEM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CIPHER
+ */
+const CURLE_SSL_CIPHER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_PEER_FAILED_VERIFICATION
+ */
+const CURLE_PEER_FAILED_VERIFICATION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_BAD_CONTENT_ENCODING
+ */
+const CURLE_BAD_CONTENT_ENCODING = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FILESIZE_EXCEEDED
+ */
+const CURLE_FILESIZE_EXCEEDED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_USE_SSL_FAILED
+ */
+const CURLE_USE_SSL_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SEND_FAIL_REWIND
+ */
+const CURLE_SEND_FAIL_REWIND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_ENGINE_INITFAILED
+ */
+const CURLE_SSL_ENGINE_INITFAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_LOGIN_DENIED
+ */
+const CURLE_LOGIN_DENIED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TFTP_NOTFOUND
+ */
+const CURLE_TFTP_NOTFOUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TFTP_PERM
+ */
+const CURLE_TFTP_PERM = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_REMOTE_DISK_FULL
+ */
+const CURLE_REMOTE_DISK_FULL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TFTP_ILLEGAL
+ */
+const CURLE_TFTP_ILLEGAL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TFTP_UNKNOWNID
+ */
+const CURLE_TFTP_UNKNOWNID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_REMOTE_FILE_EXISTS
+ */
+const CURLE_REMOTE_FILE_EXISTS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TFTP_NOSUCHUSER
+ */
+const CURLE_TFTP_NOSUCHUSER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CACERT_BADFILE
+ */
+const CURLE_SSL_CACERT_BADFILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_REMOTE_FILE_NOT_FOUND
+ */
+const CURLE_REMOTE_FILE_NOT_FOUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSH
+ */
+const CURLE_SSH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_SHUTDOWN_FAILED
+ */
+const CURLE_SSL_SHUTDOWN_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CRL_BADFILE
+ */
+const CURLE_SSL_CRL_BADFILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_ISSUER_ERROR
+ */
+const CURLE_SSL_ISSUER_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_PRET_FAILED
+ */
+const CURLE_FTP_PRET_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_RTSP_CSEQ_ERROR
+ */
+const CURLE_RTSP_CSEQ_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_RTSP_SESSION_ERROR
+ */
+const CURLE_RTSP_SESSION_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_BAD_FILE_LIST
+ */
+const CURLE_FTP_BAD_FILE_LIST = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_CHUNK_FAILED
+ */
+const CURLE_CHUNK_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_PINNEDPUBKEYNOTMATCH
+ */
+const CURLE_SSL_PINNEDPUBKEYNOTMATCH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_INVALIDCERTSTATUS
+ */
+const CURLE_SSL_INVALIDCERTSTATUS = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_RECURSIVE_API_CALL
+ */
+const CURLE_RECURSIVE_API_CALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP2_STREAM
+ */
+const CURLE_HTTP2_STREAM = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x074200 /* Available since 7.66.0 */
+/**
+ * @var int
+ * @cvalue CURLE_AUTH_ERROR
+ */
+const CURLE_AUTH_ERROR = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074400 /* Available since 7.68.0 */
+/**
+ * @var int
+ * @cvalue CURLE_HTTP3
+ */
+const CURLE_HTTP3 = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074500 /* Available since 7.69.0 */
+/**
+ * @var int
+ * @cvalue CURLE_QUIC_CONNECT_ERROR
+ */
+const CURLE_QUIC_CONNECT_ERROR = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074900 /* Available since 7.73.0 */
+/**
+ * @var int
+ * @cvalue CURLE_PROXY
+ */
+const CURLE_PROXY = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x074D00 /* Available since 7.77.0 */
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CLIENTCERT
+ */
+const CURLE_SSL_CLIENTCERT = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x075400 /* Available since 7.84.0 */
+/**
+ * @var int
+ * @cvalue CURLE_UNRECOVERABLE_POLL
+ */
+const CURLE_UNRECOVERABLE_POLL = UNKNOWN;
+#endif
+#if LIBCURL_VERSION_NUM >= 0x080600 /* Available since 8.6.0 */
+/**
+ * @var int
+ * @cvalue CURLE_TOO_LARGE
+ */
+const CURLE_TOO_LARGE = UNKNOWN;
+#endif
+
+/* Deprecated Curl error codes */
+/**
+ * @var int
+ * @cvalue CURLE_BAD_CALLING_ORDER
+ */
+const CURLE_BAD_CALLING_ORDER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_BAD_PASSWORD_ENTERED
+ */
+const CURLE_BAD_PASSWORD_ENTERED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_ACCESS_DENIED
+ */
+const CURLE_FTP_ACCESS_DENIED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_BAD_DOWNLOAD_RESUME
+ */
+const CURLE_FTP_BAD_DOWNLOAD_RESUME = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_CANT_RECONNECT
+ */
+const CURLE_FTP_CANT_RECONNECT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_GET_SIZE
+ */
+const CURLE_FTP_COULDNT_GET_SIZE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_SET_ASCII
+ */
+const CURLE_FTP_COULDNT_SET_ASCII = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_SET_BINARY
+ */
+const CURLE_FTP_COULDNT_SET_BINARY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_COULDNT_STOR_FILE
+ */
+const CURLE_FTP_COULDNT_STOR_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_PARTIAL_FILE
+ */
+const CURLE_FTP_PARTIAL_FILE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_QUOTE_ERROR
+ */
+const CURLE_FTP_QUOTE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_USER_PASSWORD_INCORRECT
+ */
+const CURLE_FTP_USER_PASSWORD_INCORRECT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_WEIRD_SERVER_REPLY
+ */
+const CURLE_FTP_WEIRD_SERVER_REPLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_WEIRD_USER_REPLY
+ */
+const CURLE_FTP_WEIRD_USER_REPLY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_WRITE_ERROR
+ */
+const CURLE_FTP_WRITE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP_NOT_FOUND
+ */
+const CURLE_HTTP_NOT_FOUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP_PORT_FAILED
+ */
+const CURLE_HTTP_PORT_FAILED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_HTTP_RANGE_ERROR
+ */
+const CURLE_HTTP_RANGE_ERROR = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_LIBRARY_NOT_FOUND
+ */
+const CURLE_LIBRARY_NOT_FOUND = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_MALFORMAT_USER
+ */
+const CURLE_MALFORMAT_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_OBSOLETE
+ */
+const CURLE_OBSOLETE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_OPERATION_TIMEOUTED
+ */
+const CURLE_OPERATION_TIMEOUTED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SHARE_IN_USE
+ */
+const CURLE_SHARE_IN_USE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_CACERT
+ */
+const CURLE_SSL_CACERT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_SSL_PEER_CERTIFICATE
+ */
+const CURLE_SSL_PEER_CERTIFICATE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_TELNET_OPTION_SYNTAX
+ */
+const CURLE_TELNET_OPTION_SYNTAX = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_UNKNOWN_TELNET_OPTION
+ */
+const CURLE_UNKNOWN_TELNET_OPTION = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_URL_MALFORMAT_USER
+ */
+const CURLE_URL_MALFORMAT_USER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_LDAP_INVALID_URL
+ */
+const CURLE_LDAP_INVALID_URL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURLE_FTP_SSL_FAILED
+ */
+const CURLE_FTP_SSL_FAILED = UNKNOWN;
 
 /**
  * @strict-properties
