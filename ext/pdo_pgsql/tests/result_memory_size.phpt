@@ -1,7 +1,6 @@
 --TEST--
 PDO PgSQL PDOStatement::getAttribute(PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE)
 --EXTENSIONS--
-pdo
 pdo_pgsql
 --SKIPIF--
 <?php
