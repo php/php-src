@@ -275,22 +275,6 @@ else
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
 fi
 
-dnl
-dnl Check for __attribute__ ((__aligned__)) support in the compiler
-dnl
-AC_CACHE_CHECK(whether the compiler supports aligned attribute, ac_cv_attribute_aligned,[
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-]],[[
-  unsigned char test[32] __attribute__ ((__aligned__ (__alignof__ (int))));
-]])],[
-  ac_cv_attribute_aligned=yes
-],[
-  ac_cv_attribute_aligned=no
-])])
-if test "$ac_cv_attribute_aligned" = "yes"; then
-  AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
-fi
-
 if test "$cross_compiling" = yes ; then
   case $host_alias in
     *linux*)
