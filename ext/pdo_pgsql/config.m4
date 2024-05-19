@@ -67,6 +67,7 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   LDFLAGS="-L$PGSQL_LIBDIR $LDFLAGS"
 
   AC_CHECK_LIB(pq, PQlibVersion,, AC_MSG_ERROR([Unable to build the PDO PostgreSQL driver: at least libpq 9.1 is required]))
+  AC_CHECK_LIB(pq, PQresultMemorySize, AC_DEFINE(HAVE_PG_RESULT_MEMORY_SIZE,1,[PostgreSQL 12 or later]))
 
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
