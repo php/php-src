@@ -43,4 +43,4 @@ Result set with only 1 row: int(%d)
 Result set with many rows: int(%d)
 Large result sets should require more memory than small ones: bool(true)
 Statements that are not executed should not consume memory: NULL
-and should emit Error: HY000: 0: statement has not been executed yet
+and should emit Error: HY000: 0: statement '%s' has not been executed yet

@@ -715,7 +715,10 @@ static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 			if(stmt->executed) {
 				ZVAL_LONG(val, PQresultMemorySize(S->result));
 			} else {
-				pdo_pgsql_error_stmt_msg(stmt, 0, "HY000", "statement has not been executed yet");
+				char *tmp;
+				spprintf(&tmp, 0, "statement '%s' has not been executed yet", S->stmt_name);
+
+				pdo_pgsql_error_stmt_msg(stmt, 0, "HY000", tmp);
 				ZVAL_NULL(val);
 			}
 			return 1;
