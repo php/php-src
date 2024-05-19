@@ -35,8 +35,12 @@ $statement = $db->prepare('select 1');
 $result_3 = $statement->getAttribute(PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE);
 var_dump($result_3);
 
+echo 'and should emit Error: ';
+printf("%s: %d: %s\n", ...$statement->errorInfo());
+
 --EXPECTF--
 Result set with only 1 row: int(%d)
 Result set with many rows: int(%d)
 Large result sets should require more memory than small ones: bool(true)
 Statements that are not executed should not consume memory: NULL
+and should emit Error: HY000: 0: statement has not been executed yet
