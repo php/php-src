@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "zend_compile.h"
+
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
