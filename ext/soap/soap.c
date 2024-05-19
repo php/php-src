@@ -228,6 +228,17 @@ static zend_function *soap_url_object_get_constructor(zend_object *object)
 	return NULL;
 }
 
+static zend_result soap_url_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		ZVAL_LONG(result, obj->handle);
+
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
+}
+
 static inline soap_sdl_object *soap_sdl_object_fetch(zend_object *obj)
 {
 	return (soap_sdl_object *) ((char *) obj - XtOffsetOf(soap_sdl_object, std));
@@ -262,6 +273,17 @@ static zend_function *soap_sdl_object_get_constructor(zend_object *object)
 	zend_throw_error(NULL, "Cannot directly construct Soap\\Sdl");
 
 	return NULL;
+}
+
+static zend_result soap_sdl_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		ZVAL_LONG(result, obj->handle);
+
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
 }
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
@@ -487,6 +509,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_url_object_handlers.free_obj = soap_url_object_free;
 	soap_url_object_handlers.get_constructor = soap_url_object_get_constructor;
 	soap_url_object_handlers.clone_obj = NULL;
+	soap_url_object_handlers.cast_object = soap_url_cast_object;
 	soap_url_object_handlers.compare = zend_objects_not_comparable;
 
 	soap_sdl_class_entry = register_class_Soap_Sdl();
@@ -498,6 +521,7 @@ PHP_MINIT_FUNCTION(soap)
 	soap_sdl_object_handlers.free_obj = soap_sdl_object_free;
 	soap_sdl_object_handlers.get_constructor = soap_sdl_object_get_constructor;
 	soap_sdl_object_handlers.clone_obj = NULL;
+	soap_url_object_handlers.cast_object = soap_sdl_cast_object;
 	soap_sdl_object_handlers.compare = zend_objects_not_comparable;
 
 	register_soap_symbols(module_number);
