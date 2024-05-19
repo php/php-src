@@ -719,6 +719,8 @@ static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 				spprintf(&tmp, 0, "statement '%s' has not been executed yet", S->stmt_name);
 
 				pdo_pgsql_error_stmt_msg(stmt, 0, "HY000", tmp);
+				efree(tmp);
+
 				ZVAL_NULL(val);
 			}
 			return 1;
