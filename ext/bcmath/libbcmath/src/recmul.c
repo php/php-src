@@ -112,6 +112,52 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	}
 }
 
+#if BC_LITTLE_ENDIAN
+# define BC_ENCODE_LUT(A, B) ((A) | (B) << 4)
+#else
+# define BC_ENCODE_LUT(A, B) ((B) | (A) << 4)
+#endif
+
+#define LUT_ITERATE(_, A) \
+	_(A, 0), _(A, 1), _(A, 2), _(A, 3), _(A, 4), _(A, 5), _(A, 6), _(A, 7), _(A, 8), _(A, 9)
+
+/* This LUT encodes the decimal representation of numbers 0-100
+ * such that we can avoid taking modulos and divisions which would be slow. */
+static const unsigned char LUT[100] = {
+	LUT_ITERATE(BC_ENCODE_LUT, 0),
+	LUT_ITERATE(BC_ENCODE_LUT, 1),
+	LUT_ITERATE(BC_ENCODE_LUT, 2),
+	LUT_ITERATE(BC_ENCODE_LUT, 3),
+	LUT_ITERATE(BC_ENCODE_LUT, 4),
+	LUT_ITERATE(BC_ENCODE_LUT, 5),
+	LUT_ITERATE(BC_ENCODE_LUT, 6),
+	LUT_ITERATE(BC_ENCODE_LUT, 7),
+	LUT_ITERATE(BC_ENCODE_LUT, 8),
+	LUT_ITERATE(BC_ENCODE_LUT, 9),
+};
+
+static inline unsigned short bc_expand_lut(unsigned char c)
+{
+	return (c & 0x0f) | (c & 0xf0) << 4;
+}
+
+/* Writes the character representation of the number encoded in value.
+ * E.g. if value = 1234, then the string "1234" will be written to str. */
+static void bc_write_bcd_representation(uint32_t value, char *str)
+{
+	uint32_t upper = value / 100; /* e.g. 12 */
+	uint32_t lower = value % 100; /* e.g. 34 */
+
+#if BC_LITTLE_ENDIAN
+	/* Note: little endian, so `lower` comes before `upper`! */
+	uint32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
+#else
+	/* Note: big endian, so `upper` comes before `lower`! */
+	uint32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
+#endif
+	memcpy(str, &digits, sizeof(digits));
+}
+
 /*
  * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_UINT_Ts.
  * The array is generated starting with the smaller digits.
@@ -180,9 +226,13 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	char *pend = pptr + prodlen - 1;
 	i = 0;
 	while (i < prod_arr_size - 1) {
-		for (size_t j = 0; j < BC_MUL_UINT_DIGITS; j++) {
-			*pend-- = prod_uint[i] % BASE;
-			prod_uint[i] /= BASE;
+		if (BC_MUL_UINT_DIGITS == 4) {
+			bc_write_bcd_representation(prod_uint[i], pend - 3);
+			pend -= 4;
+		} else {
+			bc_write_bcd_representation(prod_uint[i] / 10000, pend - 7);
+			bc_write_bcd_representation(prod_uint[i] % 10000, pend - 3);
+			pend -= 8;
 		}
 		i++;
 	}
