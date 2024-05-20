@@ -1071,11 +1071,13 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 
 #ifdef SIGTRAP
 			case SIGTRAP:
-# ifdef si_syscall
-				add_assoc_long_ex(user_siginfo, "syscall", sizeof("syscall")-1, (zend_long)siginfo->si_syscall);
-# endif
-# ifdef si_trapno
-				add_assoc_long_ex(user_siginfo, "trapno", sizeof("trapno")-1, (zend_long)siginfo->si_trapno);
+# if defined(si_syscall) && defined(__FreeBSD__)
+				if (siginfo->si_code == TRAP_CAP) {
+					add_assoc_long_ex(user_siginfo, "syscall", sizeof("syscall")-1, (zend_long)siginfo->si_syscall);
+				} else {
+					add_assoc_long_ex(user_siginfo, "trapno", sizeof("trapno")-1, (zend_long)siginfo->si_trapno);
+				}
+
 # endif
 				break;
 
