@@ -92,7 +92,7 @@ static inline void bc_convert_to_uint(BC_UINT_T *n_uint, const char *nend, size_
  * If the n_values of n1 and n2 are both 4 (32-bit) or 8 (64-bit) digits or less,
  * the calculation will be performed at high speed without using an array.
  */
-static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
+static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
