@@ -179,6 +179,8 @@ PHP                                                                        NEWS
 
 - PDO_SQLITE:
   . Added class PdoSqlite. (danack, kocsismate)
+  . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
+    (nielsdos)
 
 - PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
