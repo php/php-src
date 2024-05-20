@@ -38,17 +38,9 @@ typedef struct {
 	DWORD engine_thread;
 	LONG refcount;
 	php_stream *stream;
-	zend_resource *res;
 } php_istream;
 
-static int le_istream;
 static void istream_destructor(php_istream *stm);
-
-static void istream_dtor(zend_resource *rsrc)
-{
-	php_istream *stm = (php_istream *)rsrc->ptr;
-	istream_destructor(stm);
-}
 
 #define FETCH_STM()	\
 	php_istream *stm = (php_istream*)This; \
@@ -93,8 +85,7 @@ static ULONG STDMETHODCALLTYPE stm_release(IStream *This)
 	ret = InterlockedDecrement(&stm->refcount);
 	if (ret == 0) {
 		/* destroy it */
-		if (stm->res)
-			zend_list_delete(stm->res);
+		istream_destructor(stm);
 	}
 	return ret;
 }
@@ -271,7 +262,6 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->stream = stream;
 
 	GC_ADDREF(stream->res);
-	stm->res = zend_register_resource(stm, le_istream);
 
 	return (IStream*)stm;
 }
@@ -722,7 +712,4 @@ void php_com_persist_minit(INIT_FUNC_ARGS)
 	helper_ce = register_class_COMPersistHelper();
 	helper_ce->create_object = helper_new;
 	helper_ce->default_object_handlers = &helper_handlers;
-
-	le_istream = zend_register_list_destructors_ex(istream_dtor,
-			NULL, "com_dotnet_istream_wrapper", module_number);
 }
