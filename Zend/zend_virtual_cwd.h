@@ -63,6 +63,8 @@
 #include <errno.h>
 #endif
 
+#include "zend_stream.h"
+
 #ifdef ZEND_WIN32
 #include "win32/readdir.h"
 #include <sys/utime.h>

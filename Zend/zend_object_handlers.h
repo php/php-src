@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "zend_types.h"
+
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \

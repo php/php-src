@@ -20,7 +20,7 @@
 #define ZEND_ENUM_H
 
 #include "zend.h"
-#include "zend_types.h"
+#include "zend_API.h"
 
 #include <stdint.h>
 
