@@ -39,6 +39,7 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
 
 #ifdef HAVE_PGSQL
 
@@ -6117,11 +6118,7 @@ PHP_FUNCTION(pg_change_password)
 	CHECK_PGSQL_LINK(link);
 
 	pg_result = PQchangePassword(link->conn, ZSTR_VAL(user), ZSTR_VAL(passwd));
-	if (PQresultStatus(pg_result) == PGRES_COMMAND_OK) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	RETVAL_BOOL(PQresultStatus(pg_result) == PGRES_COMMAND_OK);
 	PQclear(pg_result);
 }
 

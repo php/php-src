@@ -948,7 +948,7 @@ namespace {
     function pg_result_memory_size(PgSql\Result $result): int {}
 #endif
 
-    function pg_change_password(PgSql\Connection $connection, string $user, string $password): bool {}
+    function pg_change_password(PgSql\Connection $connection, string $user, #[\SensitiveParameter] string $password): bool {}
 }
 
 namespace PgSql {
