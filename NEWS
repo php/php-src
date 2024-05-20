@@ -98,6 +98,8 @@ PHP                                                                        NEWS
 
 - LibXML:
   . Added LIBXML_RECOVER constant. (nielsdos)
+  . libxml_set_streams_context() now throws immediately on an invalid context
+    instead of at the use-site. (nielsdos)
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
