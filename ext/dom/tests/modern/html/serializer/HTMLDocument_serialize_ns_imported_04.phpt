@@ -1,23 +1,23 @@
 --TEST--
-DOM\HTMLDocument serialization with an imported namespace node 04
+Dom\HTMLDocument serialization with an imported namespace node 04
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$xml = DOM\XMLDocument::createFromFile(__DIR__.'/sample.xml');
+$xml = Dom\XMLDocument::createFromFile(__DIR__.'/sample.xml');
 $xml->documentElement->appendChild($xml->createElementNS('some:ns2', 'child'));
-echo $xml->saveXML(), "\n";
+echo $xml->saveXml(), "\n";
 
 echo "--- After import into HTML ---\n";
 
-$html = DOM\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
+$html = Dom\HTMLDocument::createFromString('<p>foo</p>', LIBXML_NOERROR);
 
 $p = $html->documentElement->firstChild->nextSibling->firstChild;
 $p->appendChild($html->importNode($xml->documentElement, false));
 
-echo $html->saveXML(), "\n";
-echo $html->saveHTML(), "\n";
+echo $html->saveXml(), "\n";
+echo $html->saveHtml(), "\n";
 
 ?>
 --EXPECT--

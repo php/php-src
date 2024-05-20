@@ -36,8 +36,8 @@ $ret = $client->dotest2("???");
 var_dump($ret);
 echo "ok\n";
 ?>
---EXPECT--
-object(book)#2 (2) {
+--EXPECTF--
+object(book)#%d (%d) {
   ["a"]=>
   string(5) "Blaat"
   ["b"]=>

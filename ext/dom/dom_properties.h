@@ -36,8 +36,6 @@ zend_result dom_document_doctype_read(dom_object *obj, zval *retval);
 zend_result dom_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval);
 zend_result dom_document_document_element_read(dom_object *obj, zval *retval);
-zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval);
-zend_result dom_document_actual_encoding_write(dom_object *obj, zval *newval);
 zend_result dom_document_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_document_encoding_write(dom_object *obj, zval *newval);
 zend_result dom_document_standalone_read(dom_object *obj, zval *retval);
@@ -88,6 +86,11 @@ zend_result dom_entity_notation_name_read(dom_object *obj, zval *retval);
 zend_result dom_entity_actual_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_entity_encoding_read(dom_object *obj, zval *retval);
 zend_result dom_entity_version_read(dom_object *obj, zval *retval);
+
+/* entity reference properties */
+zend_result dom_entity_reference_child_read(dom_object *obj, zval *retval);
+zend_result dom_entity_reference_text_content_read(dom_object *obj, zval *retval);
+zend_result dom_entity_reference_child_nodes_read(dom_object *obj, zval *retval);
 
 /* namednodemap properties */
 zend_result dom_namednodemap_length_read(dom_object *obj, zval *retval);

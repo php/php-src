@@ -694,7 +694,7 @@ static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 	struct rlimit rlim;
 	char path[PATH_MAX];
 	size_t size;
-	ssize_t len;
+	ssize_t len = -1;
 	pid_t pid;
 	int error, fd;
 

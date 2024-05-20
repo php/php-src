@@ -16,7 +16,7 @@ function testErrorCase($dom, $ns, $qname) {
     }
 }
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $attrs = [];
 $attrs[] = $dom->createAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:foo');
 $attrs[] = $dom->createAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:bar');
@@ -49,7 +49,7 @@ foreach ($attrs as $attr) {
     $root->setAttributeNodeNS($attr);
 }
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 echo "\n--- NULL prefix cases ---\n";
 
@@ -64,7 +64,7 @@ foreach ($attrs as $attr) {
     $root->setAttributeNodeNS($attr);
 }
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 ?>
 --EXPECT--
 --- Error cases ---

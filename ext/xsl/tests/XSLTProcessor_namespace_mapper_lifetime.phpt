@@ -6,7 +6,7 @@ xsl
 --FILE--
 <?php
 
-$input = DOM\XMLDocument::createFromString(<<<XML
+$input = Dom\XMLDocument::createFromString(<<<XML
 <root>
     <hello>World</hello>
 </root>
@@ -26,8 +26,8 @@ XML;
 $processor = new XSLTProcessor();
 // The fact that this is a temporary is important!
 // And yes, this is done twice on purpose to check for leaks
-$processor->importStylesheet(DOM\XMLDocument::createFromString($xslXML));
-$processor->importStylesheet(DOM\XMLDocument::createFromString($xslXML));
+$processor->importStylesheet(Dom\XMLDocument::createFromString($xslXML));
+$processor->importStylesheet(Dom\XMLDocument::createFromString($xslXML));
 $processor->registerPHPFunctions();
 echo $processor->transformToXML($input), "\n";
 

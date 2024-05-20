@@ -28,11 +28,6 @@
 #include "zend_interfaces.h"
 #include "ext/standard/php_incomplete_class.h"
 
-
-static int le_sdl = 0;
-int le_url = 0;
-static int le_typemap = 0;
-
 typedef struct _soapHeader {
 	sdlFunctionPtr                    function;
 	zval                              function_name;
@@ -65,8 +60,6 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int inde
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent);
 
 static void delete_service(void *service);
-static void delete_url(void *handle);
-static void delete_hashtable(void *hashtable);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 
@@ -130,16 +123,12 @@ static void soap_error_handler(int error_num, zend_string *error_filename, const
 #define FETCH_THIS_SDL(ss) \
 	{ \
 		zval *__tmp = Z_CLIENT_SDL_P(ZEND_THIS); \
-		if (Z_TYPE_P(__tmp) == IS_RESOURCE) { \
-			FETCH_SDL_RES(ss,__tmp); \
+		if (Z_TYPE_P(__tmp) == IS_OBJECT && instanceof_function(Z_OBJCE_P(__tmp), soap_sdl_class_entry)) { \
+			ss = Z_SOAP_SDL_P(__tmp)->sdl; \
 		} else { \
 			ss = NULL; \
 		} \
 	}
-
-#define FETCH_SDL_RES(ss,tmp) ss = (sdlPtr) zend_fetch_resource_ex(tmp, "sdl", le_sdl)
-
-#define FETCH_TYPEMAP_RES(ss,tmp) ss = (HashTable*) zend_fetch_resource_ex(tmp, "typemap", le_typemap)
 
 #define Z_PARAM_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 0))
 #define Z_PARAM_DATA_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), 1))
@@ -178,8 +167,12 @@ static zend_class_entry* soap_fault_class_entry;
 static zend_class_entry* soap_header_class_entry;
 static zend_class_entry* soap_param_class_entry;
 zend_class_entry* soap_var_class_entry;
+zend_class_entry *soap_url_class_entry;
+zend_class_entry *soap_sdl_class_entry;
 
 static zend_object_handlers soap_server_object_handlers;
+static zend_object_handlers soap_url_object_handlers;
+static zend_object_handlers soap_sdl_object_handlers;
 
 typedef struct {
 	soapServicePtr service;
@@ -204,6 +197,93 @@ static void soap_server_object_free(zend_object *obj) {
 		delete_service(server_obj->service);
 	}
 	zend_object_std_dtor(obj);
+}
+
+static zend_object *soap_url_object_create(zend_class_entry *ce)
+{
+	soap_url_object *url_obj = zend_object_alloc(sizeof(soap_url_object), ce);
+
+	zend_object_std_init(&url_obj->std, ce);
+	object_properties_init(&url_obj->std, ce);
+
+	return &url_obj->std;
+}
+
+static void soap_url_object_free(zend_object *obj)
+{
+	soap_url_object *url_obj = soap_url_object_fetch(obj);
+
+	if (url_obj->url) {
+		php_url_free(url_obj->url);
+		url_obj->url = NULL;
+	}
+
+	zend_object_std_dtor(&url_obj->std);
+}
+
+static zend_function *soap_url_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct Soap\\Url");
+
+	return NULL;
+}
+
+static zend_result soap_url_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		ZVAL_LONG(result, obj->handle);
+
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
+}
+
+static inline soap_sdl_object *soap_sdl_object_fetch(zend_object *obj)
+{
+	return (soap_sdl_object *) ((char *) obj - XtOffsetOf(soap_sdl_object, std));
+}
+
+#define Z_SOAP_SDL_P(zv) soap_sdl_object_fetch(Z_OBJ_P(zv))
+
+static zend_object *soap_sdl_object_create(zend_class_entry *ce)
+{
+	soap_sdl_object *sdl_obj = zend_object_alloc(sizeof(soap_sdl_object), ce);
+
+	zend_object_std_init(&sdl_obj->std, ce);
+	object_properties_init(&sdl_obj->std, ce);
+
+	return &sdl_obj->std;
+}
+
+static void soap_sdl_object_free(zend_object *obj)
+{
+	soap_sdl_object *sdl_obj = soap_sdl_object_fetch(obj);
+
+	if (sdl_obj->sdl) {
+		delete_sdl(sdl_obj->sdl);
+		sdl_obj->sdl = NULL;
+	}
+
+	zend_object_std_dtor(&sdl_obj->std);
+}
+
+static zend_function *soap_sdl_object_get_constructor(zend_object *object)
+{
+	zend_throw_error(NULL, "Cannot directly construct Soap\\Sdl");
+
+	return NULL;
+}
+
+static zend_result soap_sdl_cast_object(zend_object *obj, zval *result, int type)
+{
+	if (type == IS_LONG) {
+		ZVAL_LONG(result, obj->handle);
+
+		return SUCCESS;
+	}
+
+	return zend_std_cast_object_tostring(obj, result, type);
 }
 
 ZEND_DECLARE_MODULE_GLOBALS(soap)
@@ -390,21 +470,6 @@ PHP_RINIT_FUNCTION(soap)
 	return SUCCESS;
 }
 
-static void delete_sdl_res(zend_resource *res)
-{
-	delete_sdl(res->ptr);
-}
-
-static void delete_url_res(zend_resource *res)
-{
-	delete_url(res->ptr);
-}
-
-static void delete_hashtable_res(zend_resource *res)
-{
-	delete_hashtable(res->ptr);
-}
-
 PHP_MINIT_FUNCTION(soap)
 {
 	/* TODO: add ini entry for always use soap errors */
@@ -435,9 +500,29 @@ PHP_MINIT_FUNCTION(soap)
 
 	soap_header_class_entry = register_class_SoapHeader();
 
-	le_sdl = zend_register_list_destructors_ex(delete_sdl_res, NULL, "SOAP SDL", module_number);
-	le_url = zend_register_list_destructors_ex(delete_url_res, NULL, "SOAP URL", module_number);
-	le_typemap = zend_register_list_destructors_ex(delete_hashtable_res, NULL, "SOAP table", module_number);
+	soap_url_class_entry = register_class_Soap_Url();
+	soap_url_class_entry->create_object = soap_url_object_create;
+	soap_url_class_entry->default_object_handlers = &soap_url_object_handlers;
+
+	memcpy(&soap_url_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	soap_url_object_handlers.offset = XtOffsetOf(soap_url_object, std);
+	soap_url_object_handlers.free_obj = soap_url_object_free;
+	soap_url_object_handlers.get_constructor = soap_url_object_get_constructor;
+	soap_url_object_handlers.clone_obj = NULL;
+	soap_url_object_handlers.cast_object = soap_url_cast_object;
+	soap_url_object_handlers.compare = zend_objects_not_comparable;
+
+	soap_sdl_class_entry = register_class_Soap_Sdl();
+	soap_sdl_class_entry->create_object = soap_sdl_object_create;
+	soap_sdl_class_entry->default_object_handlers = &soap_sdl_object_handlers;
+
+	memcpy(&soap_sdl_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	soap_sdl_object_handlers.offset = XtOffsetOf(soap_sdl_object, std);
+	soap_sdl_object_handlers.free_obj = soap_sdl_object_free;
+	soap_sdl_object_handlers.get_constructor = soap_sdl_object_get_constructor;
+	soap_sdl_object_handlers.clone_obj = NULL;
+	soap_url_object_handlers.cast_object = soap_sdl_cast_object;
+	soap_sdl_object_handlers.compare = zend_objects_not_comparable;
 
 	register_soap_symbols(module_number);
 
@@ -2053,15 +2138,20 @@ PHP_METHOD(SoapClient, __construct)
 
 	if (wsdl) {
 		int    old_soap_version;
-		zend_resource *res;
 
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
 
 		sdl = get_sdl(this_ptr, ZSTR_VAL(wsdl), cache_wsdl);
-		res = zend_register_resource(sdl, le_sdl);
 
-		ZVAL_RES(Z_CLIENT_SDL_P(this_ptr), res);
+		zval *sdl_zval = Z_CLIENT_SDL_P(this_ptr);
+		if (Z_TYPE_P(sdl_zval) == IS_OBJECT) {
+			zval_ptr_dtor(sdl_zval);
+		}
+
+		object_init_ex(sdl_zval, soap_sdl_class_entry);
+		soap_sdl_object *sdl_object = Z_SOAP_SDL_P(sdl_zval);
+		sdl_object->sdl = sdl;
 
 		SOAP_GLOBAL(soap_version) = old_soap_version;
 	}
@@ -2069,8 +2159,7 @@ PHP_METHOD(SoapClient, __construct)
 	if (typemap_ht) {
 		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
 		if (typemap) {
-			zend_resource *res = zend_register_resource(typemap, le_typemap);
-			ZVAL_RES(Z_CLIENT_TYPEMAP_P(this_ptr), res);
+			ZVAL_ARR(Z_CLIENT_TYPEMAP_P(this_ptr), typemap);
 		}
 	}
 	SOAP_CLIENT_END_CODE();
@@ -2194,13 +2283,16 @@ static void do_soap_call(zend_execute_data *execute_data,
 	}
 
 	tmp = Z_CLIENT_SDL_P(this_ptr);
-	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
-		FETCH_SDL_RES(sdl,tmp);
+	if (Z_TYPE_P(tmp) == IS_OBJECT) {
+#ifdef ZEND_DEBUG
+		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(tmp), soap_sdl_class_entry));
+#endif
+		sdl = Z_SOAP_SDL_P(tmp)->sdl;
 	}
 
 	tmp = Z_CLIENT_TYPEMAP_P(this_ptr);
-	if (Z_TYPE_P(tmp) == IS_RESOURCE) {
-		FETCH_TYPEMAP_RES(typemap, tmp);
+	if (Z_TYPE_P(tmp) == IS_ARRAY) {
+		typemap = Z_ARR_P(tmp);
 	}
 
 	clear_soap_fault(this_ptr);
@@ -2503,13 +2595,12 @@ PHP_METHOD(SoapClient, __soapCall)
 /* {{{ Returns list of SOAP functions */
 PHP_METHOD(SoapClient, __getFunctions)
 {
-	sdlPtr sdl;
-
-	FETCH_THIS_SDL(sdl);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	sdl *sdl;
+	FETCH_THIS_SDL(sdl);
 
 	if (sdl) {
 		smart_str buf = {0};
@@ -2529,13 +2620,12 @@ PHP_METHOD(SoapClient, __getFunctions)
 /* {{{ Returns list of SOAP types */
 PHP_METHOD(SoapClient, __getTypes)
 {
-	sdlPtr sdl;
-
-	FETCH_THIS_SDL(sdl);
-
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	sdl *sdl;
+	FETCH_THIS_SDL(sdl);
 
 	if (sdl) {
 		sdlTypePtr type;
@@ -4355,12 +4445,6 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 }
 /* }}} */
 
-static void delete_url(void *handle) /* {{{ */
-{
-	php_url_free((php_url*)handle);
-}
-/* }}} */
-
 static void delete_service(void *data) /* {{{ */
 {
 	soapServicePtr service = (soapServicePtr)data;
@@ -4404,10 +4488,4 @@ static void delete_service(void *data) /* {{{ */
 }
 /* }}} */
 
-static void delete_hashtable(void *data) /* {{{ */
-{
-	HashTable *ht = (HashTable*)data;
-	zend_hash_destroy(ht);
-	efree(ht);
-}
 /* }}} */

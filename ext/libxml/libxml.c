@@ -81,6 +81,11 @@ static PHP_MSHUTDOWN_FUNCTION(libxml);
 static PHP_MINFO_FUNCTION(libxml);
 static zend_result php_libxml_post_deactivate(void);
 
+static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
+static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding);
+static zend_long php_libxml_dump_node_to_file(const char *filename, xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
+static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding);
+
 /* }}} */
 
 zend_module_entry libxml_module_entry = {
@@ -101,6 +106,13 @@ zend_module_entry libxml_module_entry = {
 };
 
 /* }}} */
+
+static const php_libxml_document_handlers php_libxml_default_document_handlers = {
+	.dump_node_to_str = php_libxml_default_dump_node_to_str,
+	.dump_doc_to_str = php_libxml_default_dump_doc_to_str,
+	.dump_node_to_file = php_libxml_dump_node_to_file,
+	.dump_doc_to_file = php_libxml_default_dump_doc_to_file,
+};
 
 static void php_libxml_set_old_ns_list(xmlDocPtr doc, xmlNsPtr first, xmlNsPtr last)
 {
@@ -151,18 +163,16 @@ static void php_libxml_unlink_entity(void *data, void *table, xmlChar *name)
 /* {{{ internal functions for interoperability */
 static void php_libxml_unregister_node(xmlNodePtr nodep)
 {
-	php_libxml_node_object *wrapper;
-
 	php_libxml_node_ptr *nodeptr = nodep->_private;
 
 	if (nodeptr != NULL) {
-		wrapper = nodeptr->_private;
+		php_libxml_node_object *wrapper = nodeptr->_private;
 		if (wrapper) {
 			php_libxml_decrement_node_ptr(wrapper);
 			php_libxml_decrement_doc_ref(wrapper);
 		} else {
-			if (nodeptr->node != NULL && nodeptr->node->type != XML_DOCUMENT_NODE) {
-				nodeptr->node->_private = NULL;
+			if (nodep->type != XML_DOCUMENT_NODE) {
+				nodep->_private = NULL;
 			}
 			nodeptr->node = NULL;
 		}
@@ -333,13 +343,11 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 			node = curnode;
 			switch (node->type) {
 				/* Skip property freeing for the following types */
+				case XML_ENTITY_REF_NODE:
 				case XML_NOTATION_NODE:
 					break;
 				case XML_ENTITY_DECL:
 					php_libxml_unlink_entity_decl((xmlEntityPtr) node);
-					break;
-				case XML_ENTITY_REF_NODE:
-					php_libxml_node_free_list((xmlNodePtr) node->properties);
 					break;
 				case XML_ATTRIBUTE_NODE:
 					if ((node->doc != NULL) && (((xmlAttrPtr) node)->atype == XML_ATTRIBUTE_ID)) {
@@ -391,20 +399,16 @@ PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void)
 static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char *mode, const int read_only)
 {
 	php_stream_statbuf ssbuf;
-	php_stream_context *context = NULL;
-	php_stream_wrapper *wrapper = NULL;
 	char *resolved_path;
 	const char *path_to_open = NULL;
-	void *ret_val = NULL;
-	int isescaped=0;
-	xmlURI *uri;
+	bool isescaped = false;
 
 	if (strstr(filename, "%00")) {
 		php_error_docref(NULL, E_WARNING, "URI must not contain percent-encoded NUL bytes");
 		return NULL;
 	}
 
-	uri = xmlParseURI(filename);
+	xmlURI *uri = xmlParseURI(filename);
 	if (uri && (uri->scheme == NULL ||
 			(xmlStrncmp(BAD_CAST uri->scheme, BAD_CAST "file", 4) == 0))) {
 		resolved_path = xmlURIUnescapeString(filename, 0, NULL);
@@ -442,7 +446,7 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	   that the streams layer puts out at times, but for libxml we
 	   may try to open files that don't exist, but it is not a failure
 	   in xml processing (eg. DTD files)  */
-	wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0);
+	php_stream_wrapper *wrapper = php_stream_locate_url_wrapper(resolved_path, &path_to_open, 0);
 	if (wrapper && read_only && wrapper->wops->url_stat) {
 		if (wrapper->wops->url_stat(wrapper, path_to_open, PHP_STREAM_URL_STAT_QUIET, &ssbuf, NULL) == -1) {
 			if (isescaped) {
@@ -452,12 +456,12 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 		}
 	}
 
-	context = php_libxml_get_stream_context();
+	php_stream_context *context = php_libxml_get_stream_context();
 
-	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
+	php_stream *ret_val = php_stream_open_wrapper_ex(path_to_open, mode, REPORT_ERRORS, NULL, context);
 	if (ret_val) {
 		/* Prevent from closing this by fclose() */
-		((php_stream*)ret_val)->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+		ret_val->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	}
 	if (isescaped) {
 		xmlFree(resolved_path);
@@ -647,22 +651,22 @@ void php_libxml_issue_error(int level, const char *msg)
 static void php_libxml_internal_error_handler_ex(php_libxml_error_level error_type, void *ctx, const char *msg, va_list ap, int line, int column)
 {
 	char *buf;
-	int len, len_iter, output = 0;
+	bool output = false;
 
-	len = vspprintf(&buf, 0, msg, ap);
-	len_iter = len;
+	size_t len = vspprintf(&buf, 0, msg, ap);
+	size_t len_iter = len;
 
 	/* remove any trailing \n */
 	while (len_iter && buf[--len_iter] == '\n') {
 		buf[len_iter] = '\0';
-		output = 1;
+		output = true;
 	}
 
 	smart_str_appendl(&LIBXML(error_buffer), buf, len);
 
 	efree(buf);
 
-	if (output == 1) {
+	if (output) {
 		if (LIBXML(error_list)) {
 			_php_list_set_error_structure(NULL, ZSTR_VAL(LIBXML(error_buffer).s), line, column);
 		} else if (!EG(exception)) {
@@ -1352,6 +1356,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->cache_tag.modification_nr = 1; /* iterators start at 0, such that they will start in an uninitialised state */
 		object->document->private_data = NULL;
 		object->document->class_type = PHP_LIBXML_CLASS_UNSET;
+		object->document->handlers = &php_libxml_default_document_handlers;
 	}
 
 	return ret_refcount;
@@ -1414,18 +1419,8 @@ PHP_LIBXML_API void php_libxml_node_free_resource(xmlNodePtr node)
 		default:
 			if (node->parent == NULL || node->type == XML_NAMESPACE_DECL) {
 				php_libxml_node_free_list((xmlNodePtr) node->children);
-				switch (node->type) {
-					/* Skip property freeing for the following types */
-					case XML_ATTRIBUTE_DECL:
-					case XML_DTD_NODE:
-					case XML_DOCUMENT_TYPE_NODE:
-					case XML_ENTITY_DECL:
-					case XML_ATTRIBUTE_NODE:
-					case XML_NAMESPACE_DECL:
-					case XML_TEXT_NODE:
-						break;
-					default:
-						php_libxml_node_free_list((xmlNodePtr) node->properties);
+				if (node->type == XML_ELEMENT_NODE) {
+					php_libxml_node_free_list((xmlNodePtr) node->properties);
 				}
 				php_libxml_unregister_node(node);
 				php_libxml_node_free(node);
@@ -1455,6 +1450,101 @@ PHP_LIBXML_API void php_libxml_node_decrement_resource(php_libxml_node_object *o
 	}
 }
 /* }}} */
+
+PHP_LIBXML_API xmlChar *php_libxml_attr_value(const xmlAttr *attr, bool *free)
+{
+	/* For attributes we can have an optimized fast-path.
+	 * This fast-path is only possible in the (common) case where the attribute
+	 * has a single text child. Note that if the child or the content is NULL, this
+	 * is equivalent to not having content (i.e. the attribute has the empty string as value). */
+
+	*free = false;
+
+	if (attr->children == NULL) {
+		return BAD_CAST "";
+	}
+
+	if (attr->children->type == XML_TEXT_NODE && attr->children->next == NULL) {
+		if (attr->children->content == NULL) {
+			return BAD_CAST "";
+		} else {
+			return attr->children->content;
+		}
+	}
+
+	xmlChar *value = xmlNodeGetContent((const xmlNode *) attr);
+	if (UNEXPECTED(value == NULL)) {
+		return BAD_CAST "";
+	}
+
+	*free = true;
+	return value;
+}
+
+static int php_libxml_write_smart_str(void *context, const char *buffer, int len)
+{
+	smart_str *str = context;
+	smart_str_appendl(str, buffer, len);
+	return len;
+}
+
+static zend_string *php_libxml_default_dump_doc_to_str(xmlDocPtr doc, int options, const char *encoding)
+{
+	smart_str str = {0};
+
+	/* Encoding is handled from the encoding property set on the document */
+	xmlSaveCtxtPtr ctxt = xmlSaveToIO(php_libxml_write_smart_str, NULL, &str, encoding, options);
+	if (!ctxt) {
+		return NULL;
+	}
+
+	long status = xmlSaveDoc(ctxt, doc);
+	(void) xmlSaveClose(ctxt);
+	if (status < 0) {
+		smart_str_free_ex(&str, false);
+		return NULL;
+	}
+
+	return smart_str_extract(&str);
+}
+
+static zend_string *php_libxml_default_dump_node_to_str(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
+{
+	smart_str str = {0};
+	// TODO: should this buffer take an encoding? For now keep it NULL for BC.
+	xmlOutputBufferPtr buf = xmlOutputBufferCreateIO(php_libxml_write_smart_str, NULL, &str, NULL);
+	if (!buf) {
+		return NULL;
+	}
+
+	xmlNodeDumpOutput(buf, doc, node, 0, format, encoding);
+
+	if (xmlOutputBufferFlush(buf) < 0) {
+		smart_str_free_ex(&str, false);
+		xmlOutputBufferClose(buf);
+		return NULL;
+	}
+
+	xmlOutputBufferClose(buf);
+
+	return smart_str_extract(&str);
+}
+
+static zend_long php_libxml_default_dump_doc_to_file(const char *filename, xmlDocPtr doc, bool format, const char *encoding)
+{
+	return xmlSaveFormatFileEnc(filename, doc, encoding, format);
+}
+
+static zend_long php_libxml_dump_node_to_file(const char *filename, xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding)
+{
+	xmlOutputBufferPtr outbuf = xmlOutputBufferCreateFilename(filename, NULL, 0);
+	if (!outbuf) {
+		return -1;
+	}
+
+	xmlNodeDumpOutput(outbuf, doc, node, 0, format, encoding);
+	return xmlOutputBufferClose(outbuf);
+}
 
 #if defined(PHP_WIN32) && defined(COMPILE_DL_LIBXML)
 PHP_LIBXML_API BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)

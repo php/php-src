@@ -2115,7 +2115,7 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 	ir_insn *insn;
 	uint32_t len;
 	ir_bitset todo, ready;
-	bool have_constants = 0;
+	bool have_constants_or_addresses = 0;
 
 	bb = &ctx->cfg_blocks[b];
 	if (!(bb->flags & IR_BB_DESSA_MOVES)) {
@@ -2141,8 +2141,8 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 		insn = &ctx->ir_base[ref];
 		if (insn->op == IR_PHI) {
 			input = ir_insn_op(insn, k);
-			if (IR_IS_CONST_REF(input)) {
-				have_constants = 1;
+			if (IR_IS_CONST_REF(input) || !ctx->vregs[input]) {
+				have_constants_or_addresses = 1;
 			} else if (ctx->vregs[input] != ctx->vregs[ref]) {
 				s = ctx->vregs[input];
 				d = ctx->vregs[ref];
@@ -2204,13 +2204,13 @@ int ir_gen_dessa_moves(ir_ctx *ctx, uint32_t b, emit_copy_t emit_copy)
 	ir_mem_free(todo);
 	ir_mem_free(loc);
 
-	if (have_constants) {
+	if (have_constants_or_addresses) {
 		for (i = 0, p = &ctx->use_edges[use_list->refs]; i < use_list->count; i++, p++) {
 			ref = *p;
 			insn = &ctx->ir_base[ref];
 			if (insn->op == IR_PHI) {
 				input = ir_insn_op(insn, k);
-				if (IR_IS_CONST_REF(input)) {
+				if (IR_IS_CONST_REF(input) || !ctx->vregs[input]) {
 					emit_copy(ctx, insn->type, input, ref);
 				}
 			}
@@ -2328,7 +2328,10 @@ static ir_live_pos ir_first_use_pos_after(ir_live_interval *ival, ir_live_pos po
 {
 	ir_use_pos *p = ival->use_pos;
 
-	while (p && p->pos <= pos) {
+	while (p && p->pos < pos) {
+		p = p->next;
+	}
+	if (p && p->pos == pos && p->op_num != 0) {
 		p = p->next;
 	}
 	while (p && !(p->flags & flags)) {

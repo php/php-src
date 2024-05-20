@@ -10,6 +10,13 @@ PHP_ARG_WITH([system-ciphers],
   [no],
   [no])
 
+PHP_ARG_WITH([openssl-legacy-provider],
+  [whether to load legacy algorithm provider],
+  [AS_HELP_STRING([--with-openssl-legacy-provider],
+    [OPENSSL: Load legacy algorithm provider in addition to default provider])],
+  [no],
+  [no])
+
 if test "$PHP_OPENSSL" != "no"; then
   PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
   PHP_SUBST(OPENSSL_SHARED_LIBADD)
@@ -24,5 +31,9 @@ if test "$PHP_OPENSSL" != "no"; then
 
   if test "$PHP_SYSTEM_CIPHERS" != "no"; then
     AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])
+  fi
+
+  if test "$PHP_OPENSSL_LEGACY_PROVIDER" != "no"; then
+    AC_DEFINE(LOAD_OPENSSL_LEGACY_PROVIDER,1,[ Load legacy algorithm provider in addition to default provider ])
   fi
 fi

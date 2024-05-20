@@ -162,12 +162,17 @@ zval *xmlreader_write_property(zend_object *object, zend_string *name, zval *val
 /* {{{ */
 static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name, const zval *key)
 {
-	if (zend_string_equals_literal_ci(name, "open")) {
-		return (zend_function*)&xmlreader_open_fn;
-	} else if (zend_string_equals_literal_ci(name, "xml")) {
-		return (zend_function*)&xmlreader_xml_fn;
+	zend_function *method = zend_std_get_method(obj, name, key);
+	if (method && (method->common.fn_flags & ZEND_ACC_STATIC) && method->common.type == ZEND_INTERNAL_FUNCTION) {
+		/* There are only two static internal methods and they both have overrides. */
+		if (ZSTR_LEN(name) == sizeof("xml") - 1) {
+			return (zend_function *) &xmlreader_xml_fn;
+		} else {
+			ZEND_ASSERT(ZSTR_LEN(name) == sizeof("open") - 1);
+			return (zend_function *) &xmlreader_open_fn;
+		}
 	}
-	return zend_std_get_method(obj, name, key);
+	return method;
 }
 /* }}} */
 

@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root><child/></root>');
+$dom = Dom\XMLDocument::createFromString('<root><child/></root>');
 var_dump($dom->documentURI);
 var_dump($dom->URL);
 
@@ -29,7 +29,7 @@ var_dump($dom->URL);
 --EXPECTF--
 string(%d) "%s"
 string(%d) "%s"
-Cannot assign null to property DOM\Document::$URL of type string
+Cannot assign null to property Dom\Document::$URL of type string
 string(0) ""
 string(0) ""
 string(%d) "%s"

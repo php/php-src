@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root><child/></root>');
+$dom = Dom\XMLDocument::createFromString('<root><child/></root>');
 var_dump($dom->xmlVersion);
 
 foreach (['0.1', '1.0', '1.1', '', 'foo'] as $version) {

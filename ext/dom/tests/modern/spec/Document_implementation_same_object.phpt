@@ -5,12 +5,12 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 var_dump($dom->implementation === $dom->implementation);
 $implementation = $dom->implementation;
 var_dump($dom->implementation === $implementation);
 
-$dom2 = DOM\XMLDocument::createEmpty();
+$dom2 = Dom\XMLDocument::createEmpty();
 var_dump($dom2->implementation === $dom->implementation);
 
 var_dump($implementation);
@@ -26,6 +26,6 @@ try {
 bool(true)
 bool(true)
 bool(false)
-object(DOM\Implementation)#2 (0) {
+object(Dom\Implementation)#2 (0) {
 }
-Trying to clone an uncloneable object of class DOM\Implementation
+Trying to clone an uncloneable object of class Dom\Implementation

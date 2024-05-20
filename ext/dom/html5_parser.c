@@ -73,7 +73,7 @@ static const php_dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_
     }
 }
 
-static xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xmlDocPtr lxml_doc, const lxb_char_t *data, size_t data_length, bool compact_text_nodes)
+static zend_always_inline xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xmlDocPtr lxml_doc, const lxb_char_t *data, size_t data_length, bool compact_text_nodes)
 {
     if (compact_text_nodes && data_length < LXML_INTERNED_STRINGS_SIZE) {
         /* See xmlSAX2TextNode() in libxml2 */
@@ -132,7 +132,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             xmlNodePtr lxml_element = xmlNewDocNode(lxml_doc, NULL, name, NULL);
             if (UNEXPECTED(lxml_element == NULL)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                goto out;
+                break;
             }
             xmlAddChild(lxml_parent, lxml_element);
             lxml_element->line = sanitize_line_nr(node->line);
@@ -175,13 +175,13 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 
                 if (UNEXPECTED(local_name_length >= INT_MAX || value_length >= INT_MAX)) {
                     retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OVERFLOW;
-                    goto out;
+                    break;
                 }
 
                 xmlAttrPtr lxml_attr = xmlMalloc(sizeof(xmlAttr));
                 if (UNEXPECTED(lxml_attr == NULL)) {
                     retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                    goto out;
+                    break;
                 }
 
                 memset(lxml_attr, 0, sizeof(xmlAttr));
@@ -193,7 +193,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 if (UNEXPECTED(lxml_text == NULL)) {
                     xmlFreeProp(lxml_attr);
                     retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                    goto out;
+                    break;
                 }
 
                 lxml_attr->children = lxml_attr->last = lxml_text;
@@ -226,7 +226,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 last_added_attr = lxml_attr;
 
                 /* xmlIsID does some other stuff too that is irrelevant here. */
-                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd') {
+                if (local_name_length == 2 && local_name[0] == 'i' && local_name[1] == 'd' && attr->node.ns == LXB_NS_HTML) {
                     xmlAddID(NULL, lxml_doc, value, lxml_attr);
                 }
 
@@ -238,12 +238,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             size_t data_length = text->char_data.data.length;
             if (UNEXPECTED(data_length >= INT_MAX)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OVERFLOW;
-                goto out;
+                break;
             }
             xmlNodePtr lxml_text = lexbor_libxml2_bridge_new_text_node_fast(lxml_doc, data, data_length, compact_text_nodes);
             if (UNEXPECTED(lxml_text == NULL)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                goto out;
+                break;
             }
             xmlAddChild(lxml_parent, lxml_text);
             if (node->line >= USHRT_MAX) {
@@ -266,7 +266,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             );
             if (UNEXPECTED(lxml_dtd == NULL)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                goto out;
+                break;
             }
             /* libxml2 doesn't support line numbers on this anyway, it returns -1 instead, so don't bother */
         } else if (node->type == LXB_DOM_NODE_TYPE_COMMENT) {
@@ -274,14 +274,13 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             xmlNodePtr lxml_comment = xmlNewDocComment(lxml_doc, comment->char_data.data.data);
             if (UNEXPECTED(lxml_comment == NULL)) {
                 retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-                goto out;
+                break;
             }
             xmlAddChild(lxml_parent, lxml_comment);
             lxml_comment->line = sanitize_line_nr(node->line);
         }
     }
 
-out:
     lexbor_array_obj_destroy(&work_list, false);
     return retval;
 }

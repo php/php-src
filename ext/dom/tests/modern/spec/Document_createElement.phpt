@@ -9,7 +9,7 @@ require __DIR__ . "/element_dump.inc";
 
 echo "--- Into rootless document ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $element = $dom->createElement("HTML");
 $element->textContent = "&hello";
 dumpElement($element);
@@ -19,7 +19,7 @@ dumpElement($element);
 
 echo "--- Into document with HTML root ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $element = $dom->createElement("HTML");
 $element->textContent = "&hello";
 $dom->appendChild($element);
@@ -28,7 +28,7 @@ dumpElement($element);
 
 echo "--- Into document with non-HTML root ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $element = $dom->createElementNS("urn:a", "container");
 $dom->appendChild($element);
 $element = $dom->createElement("HEad");

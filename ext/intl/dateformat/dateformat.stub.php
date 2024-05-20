@@ -161,6 +161,11 @@ class IntlDateFormatter
 
     /**
      * @param int $offset
+     */
+    public function parseToCalendar(string $string, &$offset = null): int|float|false {}
+
+    /**
+     * @param int $offset
      * @return array<string, int>|false
      * @tentative-return-type
      * @alias datefmt_localtime

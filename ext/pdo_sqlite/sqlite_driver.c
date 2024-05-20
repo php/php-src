@@ -112,14 +112,14 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 		}
 
 		efree((char*)func->funcname);
-		if (!Z_ISUNDEF(func->func)) {
-			zval_ptr_dtor(&func->func);
+		if (ZEND_FCC_INITIALIZED(func->func)) {
+			zend_fcc_dtor(&func->func);
 		}
-		if (!Z_ISUNDEF(func->step)) {
-			zval_ptr_dtor(&func->step);
+		if (ZEND_FCC_INITIALIZED(func->step)) {
+			zend_fcc_dtor(&func->step);
 		}
-		if (!Z_ISUNDEF(func->fini)) {
-			zval_ptr_dtor(&func->fini);
+		if (ZEND_FCC_INITIALIZED(func->fini)) {
+			zend_fcc_dtor(&func->fini);
 		}
 		efree(func);
 	}
@@ -139,8 +139,8 @@ static void pdo_sqlite_cleanup_callbacks(pdo_sqlite_db_handle *H)
 		}
 
 		efree((char*)collation->name);
-		if (!Z_ISUNDEF(collation->callback)) {
-			zval_ptr_dtor(&collation->callback);
+		if (ZEND_FCC_INITIALIZED(collation->callback)) {
+			zend_fcc_dtor(&collation->callback);
 		}
 		efree(collation);
 	}
@@ -309,12 +309,12 @@ typedef struct {
 	zend_long row;
 } aggregate_context;
 
-static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_value **argv, sqlite3_context *context, int is_agg)
+static int do_callback(zend_fcall_info_cache *fcc, int argc, sqlite3_value **argv, sqlite3_context *context, int is_agg)
 {
 	zval *zargs = NULL;
 	zval retval;
 	int i;
-	int ret;
+	int ret = SUCCESS;
 	int fake_argc;
 	aggregate_context *agg_context = NULL;
 
@@ -324,14 +324,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_va
 
 	fake_argc = argc + is_agg;
 
-	fc->fci.size = sizeof(fc->fci);
-	ZVAL_COPY_VALUE(&fc->fci.function_name, cb);
-	fc->fci.object = NULL;
-	fc->fci.retval = &retval;
-	fc->fci.param_count = fake_argc;
-
 	/* build up the params */
-
 	if (fake_argc) {
 		zargs = safe_emalloc(fake_argc, sizeof(zval), 0);
 	}
@@ -372,11 +365,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb, int argc, sqlite3_va
 		}
 	}
 
-	fc->fci.params = zargs;
-
-	if ((ret = zend_call_function(&fc->fci, &fc->fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
-	}
+	zend_call_known_fcc(fcc, &retval, fake_argc, zargs, /* named_params */ NULL);
 
 	/* clean up the params */
 	if (zargs) {
@@ -445,41 +434,33 @@ static void php_sqlite3_func_step_callback(sqlite3_context *context, int argc, s
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 
-	do_callback(&func->astep, &func->step, argc, argv, context, 1);
+	do_callback(&func->step, argc, argv, context, 1);
 }
 
 static void php_sqlite3_func_final_callback(sqlite3_context *context)
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 
-	do_callback(&func->afini, &func->fini, 0, NULL, context, 1);
+	do_callback(&func->fini, 0, NULL, context, 1);
 }
 
 static int php_sqlite3_collation_callback(void *context, int string1_len, const void *string1, int string2_len, const void *string2)
 {
-	int ret;
+	int ret = 0;
 	zval zargs[2];
 	zval retval;
 	struct pdo_sqlite_collation *collation = (struct pdo_sqlite_collation*) context;
 
-	collation->fc.fci.size = sizeof(collation->fc.fci);
-	ZVAL_COPY_VALUE(&collation->fc.fci.function_name, &collation->callback);
-	collation->fc.fci.object = NULL;
-	collation->fc.fci.retval = &retval;
-
 	/* Prepare the arguments. */
 	ZVAL_STRINGL(&zargs[0], (char *) string1, string1_len);
 	ZVAL_STRINGL(&zargs[1], (char *) string2, string2_len);
-	collation->fc.fci.param_count = 2;
-	collation->fc.fci.params = zargs;
 
-	if ((ret = zend_call_function(&collation->fc.fci, &collation->fc.fcc)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "An error occurred while invoking the callback");
-	} else if (!Z_ISUNDEF(retval)) {
+	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
+
+	if (!Z_ISUNDEF(retval)) {
 		if (Z_TYPE(retval) != IS_LONG) {
 			convert_to_long(&retval);
 		}
-		ret = 0;
 		if (Z_LVAL(retval) > 0) {
 			ret = 1;
 		} else if (Z_LVAL(retval) < 0) {
@@ -498,14 +479,14 @@ static void php_sqlite3_func_callback(sqlite3_context *context, int argc, sqlite
 {
 	struct pdo_sqlite_func *func = (struct pdo_sqlite_func*)sqlite3_user_data(context);
 
-	do_callback(&func->afunc, &func->func, argc, argv, context, 0);
+	do_callback(&func->func, argc, argv, context, 0);
 }
 
 void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	struct pdo_sqlite_func *func;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
@@ -516,11 +497,11 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
 		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
@@ -533,7 +514,7 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
-		ZVAL_COPY(&func->func, &fci.function_name);
+		zend_fcc_dup(&func->func, &fcc);
 
 		func->argc = argc;
 
@@ -544,6 +525,9 @@ void pdo_sqlite_create_function_internal(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	efree(func);
+
+error:
+	zend_release_fcall_info_cache(&fcc);
 	RETURN_FALSE;
 }
 
@@ -558,8 +542,10 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateFunction)
 void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	struct pdo_sqlite_func *func;
-	zend_fcall_info step_fci, fini_fci;
-	zend_fcall_info_cache step_fcc, fini_fcc;
+	zend_fcall_info step_fci = empty_fcall_info;
+	zend_fcall_info fini_fci = empty_fcall_info;
+	zend_fcall_info_cache step_fcc = empty_fcall_info_cache;
+	zend_fcall_info_cache fini_fcc = empty_fcall_info_cache;
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
@@ -569,11 +555,11 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 
 	ZEND_PARSE_PARAMETERS_START(3, 4)
 		Z_PARAM_STRING(func_name, func_name_len)
-		Z_PARAM_FUNC(step_fci, step_fcc)
-		Z_PARAM_FUNC(fini_fci, fini_fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(step_fci, step_fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fini_fci, fini_fcc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(argc)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_END_EX(goto error;);
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
@@ -587,9 +573,8 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	if (ret == SQLITE_OK) {
 		func->funcname = estrdup(func_name);
 
-		ZVAL_COPY(&func->step, &step_fci.function_name);
-
-		ZVAL_COPY(&func->fini, &fini_fci.function_name);
+		zend_fcc_dup(&func->step, &step_fcc);
+		zend_fcc_dup(&func->fini, &fini_fcc);
 
 		func->argc = argc;
 
@@ -600,6 +585,10 @@ void pdo_sqlite_create_aggregate_internal(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	efree(func);
+
+error:
+	zend_release_fcall_info_cache(&step_fcc);
+	zend_release_fcall_info_cache(&fini_fcc);
 	RETURN_FALSE;
 }
 
@@ -631,8 +620,8 @@ PHP_METHOD(PDO_SQLite_Ext, sqliteCreateAggregate)
 void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqlite_create_collation_callback callback)
 {
 	struct pdo_sqlite_collation *collation;
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	char *collation_name;
 	size_t collation_name_len;
 	pdo_dbh_t *dbh;
@@ -641,7 +630,7 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STRING(collation_name, collation_name_len)
-		Z_PARAM_FUNC(fci, fcc)
+		Z_PARAM_FUNC_NO_TRAMPOLINE_FREE(fci, fcc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -655,13 +644,15 @@ void pdo_sqlite_create_collation_internal(INTERNAL_FUNCTION_PARAMETERS, pdo_sqli
 	if (ret == SQLITE_OK) {
 		collation->name = estrdup(collation_name);
 
-		ZVAL_COPY(&collation->callback, &fci.function_name);
+		zend_fcc_dup(&collation->callback, &fcc);
 
 		collation->next = H->collations;
 		H->collations = collation;
 
 		RETURN_TRUE;
 	}
+
+	zend_release_fcall_info_cache(&fcc);
 
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
@@ -706,15 +697,23 @@ static void pdo_sqlite_get_gc(pdo_dbh_t *dbh, zend_get_gc_buffer *gc_buffer)
 
 	struct pdo_sqlite_func *func = H->funcs;
 	while (func) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &func->func);
-		zend_get_gc_buffer_add_zval(gc_buffer, &func->step);
-		zend_get_gc_buffer_add_zval(gc_buffer, &func->fini);
+		if (ZEND_FCC_INITIALIZED(func->func)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &func->func);
+		}
+		if (ZEND_FCC_INITIALIZED(func->step)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &func->step);
+		}
+		if (ZEND_FCC_INITIALIZED(func->fini)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &func->fini);
+		}
 		func = func->next;
 	}
 
 	struct pdo_sqlite_collation *collation = H->collations;
 	while (collation) {
-		zend_get_gc_buffer_add_zval(gc_buffer, &collation->callback);
+		if (ZEND_FCC_INITIALIZED(collation->callback)) {
+			zend_get_gc_buffer_add_fcc(gc_buffer, &collation->callback);
+		}
 		collation = collation->next;
 	}
 }

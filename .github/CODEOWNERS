@@ -10,7 +10,7 @@
 
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
-/ext/bcmath @Girgias
+/ext/bcmath @Girgias @nielsdos @SakiTakamachi
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias
@@ -37,10 +37,13 @@
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
+/ext/simplexml @nielsdos
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/xml @nielsdos
 /ext/xmlreader @nielsdos
+/ext/xmlwriter @nielsdos
 /ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka

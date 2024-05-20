@@ -384,10 +384,8 @@ void destroy_phar_manifest_entry(zval *zv) /* {{{ */
 }
 /* }}} */
 
-int phar_entry_delref(phar_entry_data *idata) /* {{{ */
+void phar_entry_delref(phar_entry_data *idata) /* {{{ */
 {
-	int ret = 0;
-
 	if (idata->internal_file && !idata->internal_file->is_persistent) {
 		if (--idata->internal_file->fp_refcount < 0) {
 			idata->internal_file->fp_refcount = 0;
@@ -405,7 +403,6 @@ int phar_entry_delref(phar_entry_data *idata) /* {{{ */
 
 	phar_archive_delref(idata->phar);
 	efree(idata);
-	return ret;
 }
 /* }}} */
 
@@ -1231,7 +1228,6 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, ch
 	}
 
 	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
-	mydata->internal_file_start = halt_offset + manifest_len + 4;
 	mydata->halt_offset = halt_offset;
 	mydata->flags = manifest_flags;
 	endbuffer = strrchr(mydata->fname, '/');
@@ -1472,7 +1468,6 @@ int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, si
 	mydata->fname_len = fname_len;
 	snprintf(mydata->version, sizeof(mydata->version), "%s", PHP_PHAR_API_VERSION);
 	mydata->is_temporary_alias = alias ? 0 : 1;
-	mydata->internal_file_start = -1;
 	mydata->fp = NULL;
 	mydata->is_writeable = 1;
 	mydata->is_brandnew = 1;
@@ -3181,7 +3176,6 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 		php_stream_close(oldfile);
 	}
 
-	phar->internal_file_start = halt_offset + manifest_len + 4;
 	phar->halt_offset = halt_offset;
 	phar->is_brandnew = 0;
 
@@ -3366,9 +3360,6 @@ static zend_op_array *phar_compile_file(zend_file_handle *file_handle, int type)
 	return res;
 }
 /* }}} */
-
-typedef zend_op_array* (zend_compile_t)(zend_file_handle*, int);
-typedef zend_compile_t* (compile_hook)(zend_compile_t *ptr);
 
 static void mime_type_dtor(zval *zv)
 {

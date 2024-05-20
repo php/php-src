@@ -80,25 +80,25 @@ class XSLTProcessor
     public int $maxTemplateVars;
 
     /**
-     * @param DOMDocument|DOM\Document|SimpleXMLElement $stylesheet
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $stylesheet
      * @tentative-return-type
      */
     public function importStylesheet(object $stylesheet): bool {}
 
     /**
-     * @param DOMDocument|DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToDoc(object $document, ?string $returnClass = null): object|false {}
 
     /**
-     * @param DOMDocument|DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToUri(object $document, string $uri): int {}
 
     /**
-     * @param DOMDocument|DOM\Document|SimpleXMLElement $document
+     * @param DOMDocument|Dom\Document|SimpleXMLElement $document
      * @tentative-return-type
      */
     public function transformToXml(object $document): string|null|false {}

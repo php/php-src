@@ -554,6 +554,8 @@ class ReflectionClassConstant implements Reflector
 
     public function isEnumCase(): bool {}
 
+    public function isDeprecated(): bool {}
+
     public function hasType(): bool {}
 
     public function getType(): ?ReflectionType {}

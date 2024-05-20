@@ -161,7 +161,7 @@ PHP_METHOD(DOMXPath, __construct)
 	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_document_class_entry);
 }
 
-PHP_METHOD(DOM_XPath, __construct)
+PHP_METHOD(Dom_XPath, __construct)
 {
 	dom_xpath_construct(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_abstract_base_document_class_entry);
 }
@@ -391,7 +391,7 @@ PHP_METHOD(DOMXPath, query)
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, false);
 }
 
-PHP_METHOD(DOM_XPath, query)
+PHP_METHOD(Dom_XPath, query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY, true);
 }
@@ -403,7 +403,7 @@ PHP_METHOD(DOMXPath, evaluate)
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, false);
 }
 
-PHP_METHOD(DOM_XPath, evaluate)
+PHP_METHOD(Dom_XPath, evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE, true);
 }

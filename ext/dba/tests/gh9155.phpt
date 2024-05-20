@@ -22,4 +22,5 @@ var_dump($db);
 require_once(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
-resource(%d) of type (dba)
+object(Dba\Connection)#%d (%d) {
+}

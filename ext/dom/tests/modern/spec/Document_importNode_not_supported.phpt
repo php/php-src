@@ -10,7 +10,7 @@ $dom = new DOMDocument();
 var_dump($dom->importNode($dom));
 
 // For modern documents this should throw
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->importNode($dom);
 } catch (DOMException $e) {

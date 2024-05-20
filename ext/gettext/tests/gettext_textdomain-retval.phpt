@@ -20,6 +20,12 @@ echo textdomain(null), "\n";
 echo textdomain('foo'), "\n";
 
 try {
+	textdomain('0');
+} catch (\ValueError $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
 	textdomain('');
 } catch (\ValueError $e) {
 	echo $e->getMessage();
@@ -29,6 +35,7 @@ try {
 test
 test
 foo
+textdomain(): Argument #1 ($domain) cannot be zero
 textdomain(): Argument #1 ($domain) cannot be empty
 --CREDITS--
 Christian Weiske, cweiske@php.net

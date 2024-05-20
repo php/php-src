@@ -1,12 +1,12 @@
 --TEST--
-DOM\HTMLDocument::createFromFile() - parser warning 02
+Dom\HTMLDocument::createFromFile() - parser warning 02
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__."/parser_warning_02.html", LIBXML_NOERROR);
-echo $dom->saveHTML(), "\n";
+$dom = Dom\HTMLDocument::createFromFile(__DIR__."/parser_warning_02.html", LIBXML_NOERROR);
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

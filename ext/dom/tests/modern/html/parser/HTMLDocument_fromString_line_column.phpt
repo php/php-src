@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::createFromString() - line and column test
+Dom\HTMLDocument::createFromString() - line and column test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!doctype html>
 <html>
     <head>
@@ -22,7 +22,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 </html>
 HTML);
 
-$xpath = new DOM\XPath($dom);
+$xpath = new Dom\XPath($dom);
 
 foreach ($xpath->query("//*") as $element) {
     echo "Element: '", $element->tagName, "', ", $element->getLineNo(), "\n";

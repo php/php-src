@@ -8,7 +8,7 @@ dom
 require __DIR__ . "/node_list_dump.inc";
 require __DIR__ . "/create_element_util.inc";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild(createElement($dom, "container"));
 $container->appendChild(createElement($dom, "HTML", "1"));
 $container->appendChild(createElementNS($dom, "http://www.w3.org/1999/xhtml", "html", "2"));

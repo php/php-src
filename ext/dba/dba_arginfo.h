@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1a02eaf9da45edb40720620e3beef43fd19dd520 */
+ * Stub hash: da00cabc7b6930f1b834af8978b38945df96212f */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dba_popen, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dba_popen, 0, 2, Dba\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, handler, IS_STRING, 1, "null")
@@ -13,12 +13,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_dba_open arginfo_dba_popen
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_close, 0, 1, IS_VOID, 0)
-	ZEND_ARG_INFO(0, dba)
+	ZEND_ARG_OBJ_INFO(0, dba, Dba\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_exists, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
-	ZEND_ARG_INFO(0, dba)
+	ZEND_ARG_OBJ_INFO(0, dba, Dba\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_fetch, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
@@ -32,7 +32,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_key_split, 0, 1, MAY_BE_ARRA
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dba_firstkey, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, dba)
+	ZEND_ARG_OBJ_INFO(0, dba, Dba\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_nextkey arginfo_dba_firstkey
@@ -42,13 +42,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_insert, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_STRING|MAY_BE_ARRAY, NULL)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-	ZEND_ARG_INFO(0, dba)
+	ZEND_ARG_OBJ_INFO(0, dba, Dba\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_replace arginfo_dba_insert
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dba_optimize, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, dba)
+	ZEND_ARG_OBJ_INFO(0, dba, Dba\\Connection, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_dba_sync arginfo_dba_optimize
@@ -95,6 +95,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_Dba_Connection_methods[] = {
+	ZEND_FE_END
+};
+
 static void register_dba_symbols(int module_number)
 {
 #if defined(DBA_LMDB)
@@ -103,4 +107,15 @@ static void register_dba_symbols(int module_number)
 #if defined(DBA_LMDB)
 	REGISTER_LONG_CONSTANT("DBA_LMDB_NO_SUB_DIR", MDB_NOSUBDIR, CONST_PERSISTENT);
 #endif
+}
+
+static zend_class_entry *register_class_Dba_Connection(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_NS_CLASS_ENTRY(ce, "Dba", "Connection", class_Dba_Connection_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+
+	return class_entry;
 }

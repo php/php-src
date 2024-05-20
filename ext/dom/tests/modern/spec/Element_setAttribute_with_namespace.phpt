@@ -7,32 +7,32 @@ dom
 
 require __DIR__ . "/dump_attr.inc";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $container = $dom->appendChild($dom->createElementNS("urn:a", "container"));
 
 $attrs = [];
 
-function setAttribute($container, string $name, string $value): DOM\Attr {
+function setAttribute($container, string $name, string $value): Dom\Attr {
     $container->setAttribute($name, $value);
     return $container->getAttributeNode($name);
 }
 
 $attrs[] = setAttribute($container, "foo:bar", "&hello1");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 $attrs[] = setAttribute($container, "foo:bar", "&hello2");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 $attrs[] = setAttribute($container, "bar", "&hello3");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 $attrs[] = setAttribute($container, "xmlns", "&hello4");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 $attrs[] = setAttribute($container, "XMLns", "&hello5");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 $attrs[] = setAttribute($container, "BAR", "&hello6");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 
 $container->setAttributeNode($dom->createAttributeNS("urn:b", "in:ns"));
 $attrs[] = setAttribute($container, "in:ns", "&hello7");
-echo $dom->saveHTML($container), "\n";
+echo $dom->saveHtml($container), "\n";
 
 // Dump at the end to check whether they influenced each other
 foreach ($attrs as $attr) {

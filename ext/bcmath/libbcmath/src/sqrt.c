@@ -79,7 +79,7 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		bc_int2num(&guess, 10);
 
 		bc_int2num(&guess1, (*num)->n_len);
-		bc_multiply(guess1, point5, &guess1, 0);
+		bc_multiply_ex(guess1, point5, &guess1, 0);
 		guess1->n_scale = 0;
 		bc_raise_bc_exponent(guess, guess1, &guess, 0);
 		bc_free_num (&guess1);
@@ -92,9 +92,9 @@ bool bc_sqrt(bc_num *num, size_t scale)
 		bc_free_num (&guess1);
 		guess1 = bc_copy_num(guess);
 		bc_divide(*num, guess, &guess, cscale);
-		bc_add(guess, guess1, &guess, 0);
-		bc_multiply(guess, point5, &guess, cscale);
-		bc_sub(guess, guess1, &diff, cscale + 1);
+		bc_add_ex(guess, guess1, &guess, 0);
+		bc_multiply_ex(guess, point5, &guess, cscale);
+		bc_sub_ex(guess, guess1, &diff, cscale + 1);
 		if (bc_is_near_zero(diff, cscale)) {
 			if (cscale < rscale + 1) {
 				cscale = MIN (cscale * 3, rscale + 1);

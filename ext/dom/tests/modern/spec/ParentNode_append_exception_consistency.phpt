@@ -4,7 +4,7 @@ Consistency of parent node after exception in ParentNode::append()
 dom
 --FILE--
 <?php
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $fragment = $dom->createDocumentFragment();
 $fragment->append($element = $dom->createElement("foo"));
 $fragment->append($dom->createElement("bar"));
@@ -18,7 +18,7 @@ var_dump($element->parentNode);
 ?>
 --EXPECT--
 Exception: Cannot have more than one element child in a document
-object(DOM\DocumentFragment)#2 (17) {
+object(Dom\DocumentFragment)#2 (17) {
   ["firstElementChild"]=>
   string(22) "(object value omitted)"
   ["lastElementChild"]=>

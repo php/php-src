@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::insertBefore() with DocumentFragment and dtd
+Dom\Node::insertBefore() with DocumentFragment and dtd
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString('<!DOCTYPE html><html><head></head><body></body></html>');
+$dom = Dom\HTMLDocument::createFromString('<!DOCTYPE html><html><head></head><body></body></html>');
 $dom->documentElement->remove();
 
 $fragment = $dom->createDocumentFragment();
@@ -17,7 +17,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

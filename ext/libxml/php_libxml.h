@@ -68,6 +68,18 @@ typedef struct _php_libxml_private_data_header {
 } php_libxml_private_data_header;
 
 /**
+ * It's possible to set custom handlers for certain actions depending on the type of document.
+ * For example, there exist multiple ways to serialize an XML document,
+ * therefore this structure allows setting up a custom handler.
+ */
+typedef struct php_libxml_document_handlers {
+	zend_string *(*dump_node_to_str)(xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
+	zend_string *(*dump_doc_to_str)(xmlDocPtr doc, int options, const char *encoding);
+	zend_long (*dump_node_to_file)(const char *filename, xmlDocPtr doc, xmlNodePtr node, bool format, const char *encoding);
+	zend_long (*dump_doc_to_file)(const char *filename, xmlDocPtr doc, bool format, const char *encoding);
+} php_libxml_document_handlers;
+
+/**
  * Multiple representations are possible of the same underlying node data.
  * This is the case for example when a SimpleXML node is imported into DOM.
  * It must not be possible to obtain both a legacy and a modern representation
@@ -88,6 +100,7 @@ typedef struct _php_libxml_ref_obj {
 	libxml_doc_props *doc_props;
 	php_libxml_cache_tag cache_tag;
 	php_libxml_private_data_header *private_data;
+	const php_libxml_document_handlers *handlers;
 	int refcount;
 	php_libxml_class_type class_type;
 } php_libxml_ref_obj;
@@ -171,6 +184,8 @@ PHP_LIBXML_API bool php_libxml_disable_entity_loader(bool disable);
 PHP_LIBXML_API void php_libxml_set_old_ns(xmlDocPtr doc, xmlNsPtr ns);
 PHP_LIBXML_API php_stream_context *php_libxml_get_stream_context(void);
 PHP_LIBXML_API bool php_libxml_uses_internal_errors(void);
+
+PHP_LIBXML_API xmlChar *php_libxml_attr_value(const xmlAttr *attr, bool *free);
 
 PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_string(const char *start, const char *end);
 PHP_LIBXML_API zend_string *php_libxml_sniff_charset_from_stream(const php_stream *s);

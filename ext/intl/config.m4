@@ -82,7 +82,7 @@ if test "$PHP_INTL" != "no"; then
   PHP_REQUIRE_CXX()
 
   AC_MSG_CHECKING([if intl requires -std=gnu++17])
-  AS_IF([test "$PKG_CONFIG icu-uc --atleast-version=74"],[
+  AS_IF([$PKG_CONFIG icu-uc --atleast-version=74],[
     AC_MSG_RESULT([yes])
     PHP_CXX_COMPILE_STDCXX(17, mandatory, PHP_INTL_STDCXX)
   ],[

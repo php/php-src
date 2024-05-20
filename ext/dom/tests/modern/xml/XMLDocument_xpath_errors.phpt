@@ -1,13 +1,13 @@
 --TEST--
-DOM\XMLDocument interaction with XPath evaluate - errors
+Dom\XMLDocument interaction with XPath evaluate - errors
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root/>');
+$dom = Dom\XMLDocument::createFromString('<root/>');
 
-$xpath = new DOM\XPath($dom);
+$xpath = new Dom\XPath($dom);
 
 try {
     var_dump($xpath->evaluate('-'));
@@ -17,5 +17,5 @@ try {
 
 ?>
 --EXPECTF--
-Warning: DOM\XPath::evaluate(): Invalid expression in %s on line %d
+Warning: Dom\XPath::evaluate(): Invalid expression in %s on line %d
 string(35) "Could not evaluate XPath expression"

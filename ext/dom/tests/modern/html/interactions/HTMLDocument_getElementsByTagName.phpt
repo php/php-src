@@ -1,11 +1,11 @@
 --TEST--
-Test DOM\HTMLDocument::getElementsByTagName(NS)
+Test Dom\HTMLDocument::getElementsByTagName(NS)
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
 <head>

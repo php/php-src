@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument::registerNodeClass 03
+Dom\HTMLDocument::registerNodeClass 03
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-class Custom extends DOM\Element {
+class Custom extends Dom\Element {
     public int $test = 1;
 
     public function reverseTagName(): string {
@@ -14,8 +14,8 @@ class Custom extends DOM\Element {
     }
 }
 
-$dom = DOM\HTMLDocument::createFromString("<div>foo</div>", LIBXML_NOERROR);
-$dom->registerNodeClass("DOM\\Element", "Custom");
+$dom = Dom\HTMLDocument::createFromString("<div>foo</div>", LIBXML_NOERROR);
+$dom->registerNodeClass("Dom\\Element", "Custom");
 
 var_dump($dom->getElementsByTagName('div')[0]->reverseTagName());
 

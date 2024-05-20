@@ -54,9 +54,9 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 	if (zv == NULL) {
 		prefix_map = emalloc(sizeof(HashTable));
 		zend_hash_init(prefix_map, 0, NULL, php_dom_libxml_ns_mapper_prefix_map_element_dtor, false);
-		zval zv;
-		ZVAL_ARR(&zv, prefix_map);
-		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv);
+		zval zv_prefix_map;
+		ZVAL_ARR(&zv_prefix_map, prefix_map);
+		zend_hash_add_new(&mapper->uri_to_prefix_map, *uri, &zv_prefix_map);
 	} else {
 		/* cast to Bucket* only works if this holds, I would prefer a static assert but we're stuck at C99. */
 		ZEND_ASSERT(XtOffsetOf(Bucket, val) == 0);
@@ -363,7 +363,7 @@ static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
 #endif
 }
 
-static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr ns_holder, xmlNodePtr node)
+static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
 {
 	ZEND_ASSERT(node->ns != NULL);
 
@@ -404,12 +404,12 @@ static zend_always_inline void php_dom_libxml_reconcile_modern_single_element_no
 	ZEND_ASSERT(node->nsDef == NULL);
 
 	if (node->ns != NULL) {
-		php_dom_libxml_reconcile_modern_single_node(ctx, node, node);
+		php_dom_libxml_reconcile_modern_single_node(ctx, node);
 	}
 
 	for (xmlAttrPtr attr = node->properties; attr != NULL; attr = attr->next) {
 		if (attr->ns != NULL) {
-			php_dom_libxml_reconcile_modern_single_node(ctx, node, (xmlNodePtr) attr);
+			php_dom_libxml_reconcile_modern_single_node(ctx, (xmlNodePtr) attr);
 		}
 	}
 }

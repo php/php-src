@@ -102,6 +102,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-oci8 has been removed.
    - The configure option --with-zlib-dir has been removed.
    - The configure option --with-kerberos has been removed.
+   - The configure option --with-openssl-dir has been removed. SSL support in
+     ext/ftp and ext/mysqlnd is enabled implicitly, when building with
+     ext/openssl (--with-openssl), or explicitly by using new configure options
+     --with-ftp-ssl and --with-mysqlnd-ssl.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
@@ -118,6 +122,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol ZEND_FIBER_ASM has been removed.
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
    - Symbol HAVE_MYSQL has been removed.
+   - Symbol HAVE_PDO_SQLITELIB has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -202,6 +207,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added a way to attached private data to a php_libxml_ref_obj.
    - Added a way to fix a class type onto php_libxml_ref_obj.
    - Added php_libxml_uses_internal_errors().
+   - Added a way to override document handlers (e.g. serialization) with
+     php_libxml_document_handlers.
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.

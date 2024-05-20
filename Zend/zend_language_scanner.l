@@ -614,7 +614,7 @@ static zend_op_array *zend_compile(int type)
 		}
 
 		zend_file_context_begin(&original_file_context);
-		zend_oparray_context_begin(&original_oparray_context);
+		zend_oparray_context_begin(&original_oparray_context, op_array);
 		zend_compile_top_stmt(CG(ast));
 		CG(zend_lineno) = last_lineno;
 		zend_emit_final_return(type == ZEND_USER_FUNCTION);

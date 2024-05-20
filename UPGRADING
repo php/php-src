@@ -68,6 +68,12 @@ PHP 8.4 UPGRADE NOTES
 - ODBC:
   . odbc_fetch_row() returns false when a value less than or equal to 0 is
     passed for parameter $row. Now, a warning is emitted in this case.
+  . odbc_connect() and odbc_pconnect() will now return an Odbc\Connection
+    object rather than a resource. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+  . odbc_prepare(), odbc_exec(), and various other functions will now return
+    an Odbc\Result object rather than a resource. Return value checks using
+    is_resource() should be replaced with checks for `false`.
 
 - Opcache:
   . The JIT config defaults changed from opcache.jit=tracing and
@@ -128,6 +134,17 @@ PHP 8.4 UPGRADE NOTES
     GH-12208, #55098.
   . Calling simplexml_import_dom() with a non-XML object now throws a TypeError
     instead of a ValueError.
+
+- SOAP:
+  . SoapClient::$httpurl is now a Soap\Url object rather than a resource.
+    Checks using is_resource() (i.e. is_resource($client->httpurl)) should be
+    replaced with checks for null (i.e. $client->httpurl !== null).
+  . SoapClient::$sdl is now a Soap\Sdl object rather than a resource.
+    Checks using is_resource() (i.e. is_resource($client->sdl)) should be
+    replaced with checks for null (i.e. $client->sdl !== null).
+  . SoapClient::$typemap is now an array rather than a resource.
+    Checks using is_resource() (i.e. is_resource($client->typemap)) should be
+    replaced with checks for null (i.e. $client->typemap !== null).
 
 - SPL:
   . Out of bounds accesses in SplFixedArray now throw an exception of type
@@ -257,6 +274,7 @@ PHP 8.4 UPGRADE NOTES
   . ReflectionClassConstant::__toString() and ReflectionProperty::__toString()
     now returns the attached doc comments.
   . ReflectionConstant was introduced.
+  . ReflectionClassConstant::isDeprecated() was introduced.
 
 - Standard:
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
@@ -321,6 +339,7 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
+  . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
 - Reflection:
   . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
@@ -402,6 +421,10 @@ PHP 8.4 UPGRADE NOTES
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
 
+- PDO_PGSQL:
+  . getAttribute() can now retrieve the memory usage of query results.
+    PDO::PGSQL_ATTR_RESULT_MEMORY_SIZE was added for this feature.
+
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.
 
@@ -451,6 +474,10 @@ PHP 8.4 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- BCMath:
+  . Added bcfloor(), bcceil(), bcround().
+    RFC: https://wiki.php.net/rfc/adding_bcround_bcfloor_bcceil_to_bcmath
+
 - DOM:
   . Added DOMNode::compareDocumentPosition().
   . Added DOMXPath::registerPhpFunctionNS().
@@ -463,6 +490,8 @@ PHP 8.4 UPGRADE NOTES
     the IANA identifier from a given timezone.
   . Added grapheme_str_split which allow to support emoji and Variation
     Selectors.
+  . Added IntlDateFormatter::parseToCalendar which behaves like
+    IntlDateFormatter::parse except the time zone is updated.
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
@@ -491,6 +520,10 @@ PHP 8.4 UPGRADE NOTES
   . sodium_crypto_aead_aes256gcm_*() functions are now enabled on aarch64 CPUs
     with the ARM cryptographic extensions.
 
+- SPL:
+  . Added seek() method to SplObjectStorage, now it implements
+    SeekableIterator.
+
 - Standard:
   . Added the http_get_last_response_headers() and
     http_clear_last_response_headers() that allows retrieving the same content
@@ -507,12 +540,12 @@ PHP 8.4 UPGRADE NOTES
 - DOM:
   . Implemented DOM HTML5 parsing and serialization.
     RFC: https://wiki.php.net/rfc/domdocument_html5_parser.
-    This RFC adds the new DOM namespace along with new classes and
+    This RFC adds the new Dom namespace along with new classes and
     constant aliases.
     There are two new classes to handle HTML and XML documents:
-    DOM\HTMLDocument and DOM\XMLDocument.
+    Dom\HTMLDocument and Dom\XMLDocument.
     These classes provide a cleaner API to handle HTML and XML documents.
-    Furthermore, the DOM\HTMLDocument class implements spec-compliant HTML5
+    Furthermore, the Dom\HTMLDocument class implements spec-compliant HTML5
     parsing and serialization.
   . Implemented opt-in ext/dom spec compliance RFC.
     This adds new classes in the DOM namespace that correspond to modern
@@ -611,6 +644,7 @@ PHP 8.4 UPGRADE NOTES
   . SOCK_DCCP (NetBSD only).
   . TCP_SYNCNT (Linux only).
   . SO_EXCLBIND (Solaris/Illumos only).
+  . SO_NOSIGPIPE (macOs and FreeBSD).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES
@@ -643,9 +677,16 @@ PHP 8.4 UPGRADE NOTES
   and the line of definition to make them easier to distinguish, for example
   within stack traces.
 
+* run-tests.php now skips online tests by default. Set the SKIP_ONLINE_TESTS
+  environment variable to 0, or pass the --online flag to run-tests.php to
+  execute them.
+
 ========================================
 14. Performance Improvements
 ========================================
+
+- BCMath:
+  . Improved performance of number conversions and operations.
 
 - Core:
   . Improved the performance of floating point number parsing and formatting in
@@ -657,6 +698,7 @@ PHP 8.4 UPGRADE NOTES
   . The performance of DOMNode::C14N() is greatly improved for the case without
     an xpath query. This can give a time improvement of easily two order of
     magnitude for documents with tens of thousands of nodes.
+  . Improved performance and reduce memory consumption of XML serialization.
 
 - FTP:
   . Improved the performance of FTP uploads up to a factor of 10x for large
@@ -671,6 +713,9 @@ PHP 8.4 UPGRADE NOTES
 
 - MySQLnd:
   . Improved the performance of MySQLnd quoting.
+
+- SimpleXML:
+  . Improved performance and reduce memory consumption of XML serialization.
 
 - Standard:
   . Improved the performance of strpbrk().

@@ -572,7 +572,7 @@ PHP_METHOD(DOMElement, removeAttribute)
 	RETURN_BOOL(dom_remove_attribute(nodep, attrp));
 }
 
-PHP_METHOD(DOM_Element, removeAttribute)
+PHP_METHOD(Dom_Element, removeAttribute)
 {
 	xmlNodePtr nodep, attrp;
 	dom_object *intern;
@@ -749,7 +749,7 @@ PHP_METHOD(DOMElement, removeAttributeNode)
 	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(DOM_Element, removeAttributeNode)
+PHP_METHOD(Dom_Element, removeAttributeNode)
 {
 	dom_element_remove_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
@@ -785,7 +785,7 @@ PHP_METHOD(DOMElement, getElementsByTagName)
 	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Element, getElementsByTagName)
+PHP_METHOD(Dom_Element, getElementsByTagName)
 {
 	dom_element_get_elements_by_tag_name(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1172,7 +1172,7 @@ PHP_METHOD(DOMElement, setAttributeNodeNS)
 	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* use_ns */ true, /* modern */ false);
 }
 
-PHP_METHOD(DOM_Element, setAttributeNodeNS)
+PHP_METHOD(Dom_Element, setAttributeNodeNS)
 {
 	dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, /* use_ns */ true, /* modern */ true);
 }
@@ -1208,7 +1208,7 @@ PHP_METHOD(DOMElement, getElementsByTagNameNS)
 	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Element, getElementsByTagNameNS)
+PHP_METHOD(Dom_Element, getElementsByTagNameNS)
 {
 	dom_element_get_elements_by_tag_name_ns(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1387,7 +1387,7 @@ PHP_METHOD(DOMElement, setIdAttributeNode)
 	dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_attr_class_entry);
 }
 
-PHP_METHOD(DOM_Element, setIdAttributeNode)
+PHP_METHOD(Dom_Element, setIdAttributeNode)
 {
 	dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_attr_class_entry);
 }
@@ -1595,7 +1595,7 @@ PHP_METHOD(DOMElement, insertAdjacentElement)
 	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_element_class_entry);
 }
 
-PHP_METHOD(DOM_Element, insertAdjacentElement)
+PHP_METHOD(Dom_Element, insertAdjacentElement)
 {
 	dom_element_insert_adjacent_element(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_element_class_entry);
 }

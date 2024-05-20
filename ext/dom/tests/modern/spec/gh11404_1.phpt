@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom1 = DOM\XMLDocument::createFromString('<?xml version="1.0"?><with xmlns="some:ns" />');
+$dom1 = Dom\XMLDocument::createFromString('<?xml version="1.0"?><with xmlns="some:ns" />');
 
 $nodeA = $dom1->createElement('none');
 $nodeB = $dom1->createElementNS(null, 'none');
@@ -13,7 +13,7 @@ $nodeB = $dom1->createElementNS(null, 'none');
 $dom1->documentElement->appendChild($nodeA);
 $dom1->documentElement->appendChild($nodeB);
 
-echo $dom1->saveXML(), "\n";
+echo $dom1->saveXml(), "\n";
 
 var_dump($nodeA->namespaceURI, $nodeB->namespaceURI);
 

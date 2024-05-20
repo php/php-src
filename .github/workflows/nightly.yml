@@ -159,7 +159,7 @@ jobs:
       image: ubuntu:${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.3
         ports:
           - 3306:3306
         env:
@@ -745,7 +745,7 @@ jobs:
         uses: ./.github/actions/build-libmysqlclient
         with:
           configurationParameters: --enable-werror
-          libmysql: mysql-8.0.35-linux-glibc2.28-x86_64.tar.xz
+          libmysql: mysql-8.0.36-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
         uses: ./.github/actions/test-libmysqlclient
@@ -824,6 +824,7 @@ jobs:
         with:
           key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: build PHP
         run: |
           cd php

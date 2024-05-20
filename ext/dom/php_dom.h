@@ -122,7 +122,6 @@ static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zen
 
 #define DOM_HTML_NO_DEFAULT_NS (1U << 31)
 
-dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);
 libxml_doc_props const* dom_get_doc_props_read_only(const php_libxml_ref_obj *document);
 zend_object *dom_objects_new(zend_class_entry *class_type);
@@ -146,8 +145,8 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
-int dom_node_is_read_only(xmlNodePtr node);
-bool dom_node_children_valid(xmlNodePtr node);
+int dom_node_is_read_only(const xmlNode *node);
+bool dom_node_children_valid(const xmlNode *node);
 void php_dom_create_iterator(zval *return_value, dom_iterator_type iterator_type, bool modern);
 void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, const char *local, size_t local_len, const char *ns, size_t ns_len);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
@@ -167,14 +166,13 @@ bool php_dom_has_sibling_following_node(xmlNodePtr node, xmlElementType type);
 bool php_dom_has_sibling_preceding_node(xmlNodePtr node, xmlElementType type);
 bool php_dom_has_child_of_type(xmlNodePtr node, xmlElementType type);
 void php_dom_update_document_after_clone(dom_object *original, xmlNodePtr original_node, dom_object *clone, xmlNodePtr cloned_node);
-void php_dom_document_constructor(INTERNAL_FUNCTION_PARAMETERS);
 xmlAttrPtr php_dom_get_attribute_node(xmlNodePtr elem, const xmlChar *name, size_t name_len);
 xmlChar *php_dom_libxml_fix_file_path(xmlChar *path);
 void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc);
 dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_entry *ce, xmlNodePtr obj, dom_object *parent);
 xmlDocPtr php_dom_create_html_doc(void);
-
-xmlChar *dom_attr_value(const xmlAttr *attr, bool *free);
+xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
+void dom_set_xml_class(php_libxml_ref_obj *document);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 
 typedef enum {

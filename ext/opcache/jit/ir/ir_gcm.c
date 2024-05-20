@@ -84,6 +84,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 		return lca;
 	}
 
+#if 0 /* This is not necessary anymore. Conditions may be fused with IF across BBs. */
 	if (ctx->ir_base[ref].op >= IR_EQ && ctx->ir_base[ref].op <= IR_UGT) {
 		ir_use_list *use_list = &ctx->use_lists[ref];
 
@@ -96,6 +97,7 @@ static uint32_t ir_gcm_select_best_block(ir_ctx *ctx, ir_ref ref, uint32_t lca)
 			}
 		}
 	}
+#endif
 
 	flags = (bb->flags & IR_BB_LOOP_HEADER) ? bb->flags : ctx->cfg_blocks[bb->loop_header].flags;
 	if ((flags & IR_BB_LOOP_WITH_ENTRY)
@@ -389,6 +391,13 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	n = ctx->use_lists[ref].refs;
 	for (i = 0; i < clones_count; i++) {
 		clone = clones[i].ref;
+		if (clones[i].use_count == 1) {
+			/* TOTALLY_USEFUL block may be a head of a diamond above the real usage.
+			 * Sink it down to the real usage block.
+			 * Clones with few uses we be sunk into the LCA block.
+			 */
+			clones[i].block = uses[clones[i].use].block;
+		}
 		ctx->cfg_map[clone] = clones[i].block;
 		ctx->use_lists[clone].count = clones[i].use_count;
 		ctx->use_lists[clone].refs = n;
@@ -403,19 +412,29 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 				ir_insn *insn = &ctx->ir_base[use];
 				ir_ref k, l = insn->inputs_count;
 
-				for (k = 1; k <= l; k++) {
-					if (ir_insn_op(insn, k) == ref) {
-						if (insn->op == IR_PHI) {
+				if (insn->op == IR_PHI) {
+					for (k = 1; k <= l; k++) {
+						if (ir_insn_op(insn, k) == ref) {
 							j = ctx->cfg_map[ir_insn_op(&ctx->ir_base[insn->op1], k - 1)];
-							while (ir_sparse_set_in(&data->totally_useful, ctx->cfg_blocks[j].idom)) {
-								j = ctx->cfg_blocks[j].idom;
-							}
 							if (j != clones[i].block) {
-								continue;
+								uint32_t dom_depth = ctx->cfg_blocks[clones[i].block].dom_depth;
+								while (ctx->cfg_blocks[j].dom_depth > dom_depth) {
+									j = ctx->cfg_blocks[j].dom_parent;
+								}
+								if (j != clones[i].block) {
+									continue;
+								}
 							}
+							ir_insn_set_op(insn, k, clone);
+							break;
 						}
-						ir_insn_set_op(insn, k, clone);
-						break;
+					}
+				} else {
+					for (k = 1; k <= l; k++) {
+						if (ir_insn_op(insn, k) == ref) {
+							ir_insn_set_op(insn, k, clone);
+							break;
+						}
 					}
 				}
 			}
@@ -487,9 +506,19 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 		b = ir_gcm_select_best_block(ctx, ref, lca);
 
 		ctx->cfg_map[ref] = b;
-		if (ctx->ir_base[ref + 1].op == IR_OVERFLOW) {
-			/* OVERFLOW is a projection and must be scheduled together with previous ADD/SUB/MUL_OV */
-			ctx->cfg_map[ref + 1] = b;
+
+		/* OVERFLOW is a projection of ADD/SUB/MUL_OV and must be scheduled into the same block */
+		if (ctx->ir_base[ref].op >= IR_ADD_OV && ctx->ir_base[ref].op <= IR_MUL_OV) {
+			ir_use_list *use_list = &ctx->use_lists[ref];
+			ir_ref n, *p, use;
+
+			for (n = use_list->count, p = &ctx->use_edges[use_list->refs]; n < 0; p++, n--) {
+				use = *p;
+				if (ctx->ir_base[use].op == IR_OVERFLOW) {
+					ctx->cfg_map[use] = b;
+					break;
+				}
+			}
 		}
 	}
 }

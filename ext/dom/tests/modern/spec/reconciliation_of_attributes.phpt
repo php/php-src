@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $root = $dom->appendChild($dom->createElement('root'));
 
 $root->setAttributeNS("urn:a", "a:root1", "bar");
@@ -21,7 +21,7 @@ $child1 = $child->getAttributeNodeNS("urn:x", "child1");
 $child->setAttributeNS("urn:a", "a:child2", "bar");
 $child2 = $child->getAttributeNodeNS("urn:a", "child2");
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($root1->prefix, $root1->namespaceURI);
 var_dump($root2->prefix, $root2->namespaceURI);
@@ -33,7 +33,7 @@ $root->setAttributeNodeNS($child1);
 var_dump($child1->prefix, $child1->namespaceURI);
 var_dump($child2->prefix, $child2->namespaceURI);
 
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

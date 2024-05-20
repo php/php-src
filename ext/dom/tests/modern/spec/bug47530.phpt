@@ -6,23 +6,23 @@ dom
 <?php
 
 function test_document_fragment_with_import() {
-    $doc = DOM\XMLDocument::createFromString('<html xmlns="https://php.net/something" xmlns:ns="https://php.net/whatever"><element ns:foo="https://php.net/bar"/></html>');
+    $doc = Dom\XMLDocument::createFromString('<html xmlns="https://php.net/something" xmlns:ns="https://php.net/whatever"><element ns:foo="https://php.net/bar"/></html>');
     $root = $doc->documentElement;
     $frag = $doc->createDocumentFragment();
     $frag->appendChild($doc->importNode($root->firstChild));
     $root->appendChild($frag);
-    echo $doc->saveXML(), "\n";
+    echo $doc->saveXml(), "\n";
 }
 
 function test_document_fragment_without_import() {
-    $doc = DOM\XMLDocument::createFromString('<html xmlns=""><element xmlns:foo="https://php.net/bar"/></html>');
+    $doc = Dom\XMLDocument::createFromString('<html xmlns=""><element xmlns:foo="https://php.net/bar"/></html>');
     $frag = $doc->createDocumentFragment();
     $frag->appendChild($doc->createElementNS('https://php.net/bar', 'bar'));
     $frag->appendChild($doc->createElementNS('', 'bar'));
     $element = $doc->documentElement->firstChild;
     $element->appendChild($frag);
     unset($frag); // Free fragment, should not break getting the namespaceURI below
-    echo $doc->saveXML(), "\n";
+    echo $doc->saveXml(), "\n";
     unset($doc);
     var_dump($element->firstChild->tagName);
     var_dump($element->firstChild->namespaceURI);
@@ -40,13 +40,13 @@ function test_document_import() {
 </feed>
 XML;
 
-    $dom = DOM\XMLDocument::createFromString($xml);
+    $dom = Dom\XMLDocument::createFromString($xml);
 
-    $dom2 = DOM\XMLDocument::createEmpty();
+    $dom2 = Dom\XMLDocument::createEmpty();
     $importedNode = $dom2->importNode($dom->documentElement, true);
     $dom2->appendChild($importedNode);
 
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 }
 
 function test_partial_document_import() {
@@ -61,9 +61,9 @@ function test_partial_document_import() {
 </feed>
 XML;
 
-    $dom = DOM\XMLDocument::createFromString($xml);
+    $dom = Dom\XMLDocument::createFromString($xml);
 
-    $dom2 = DOM\XMLDocument::createFromString('<?xml version="1.0"?><container xmlns:test="https://php.net/test" xmlns="https://php.net/example"/>');
+    $dom2 = Dom\XMLDocument::createFromString('<?xml version="1.0"?><container xmlns:test="https://php.net/test" xmlns="https://php.net/example"/>');
     $importedNode = $dom2->importNode($dom->documentElement, true);
     $dom2->documentElement->appendChild($importedNode);
 
@@ -71,28 +71,28 @@ XML;
     unset($importedNode);
     unset($dom);
 
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 }
 
 function test_document_import_with_attributes() {
-    $dom = DOM\XMLDocument::createFromString('<?xml version="1.0"?><div xmlns="https://php.net/default" xmlns:example="https://php.net/example"><p example:test="test"/><i/></div>');
-    $dom2 = DOM\XMLDocument::createFromString('<?xml version="1.0"?><div xmlns:example="https://php.net/somethingelse"/>');
+    $dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><div xmlns="https://php.net/default" xmlns:example="https://php.net/example"><p example:test="test"/><i/></div>');
+    $dom2 = Dom\XMLDocument::createFromString('<?xml version="1.0"?><div xmlns:example="https://php.net/somethingelse"/>');
     $dom2->documentElement->appendChild($dom2->importNode($dom->documentElement->firstChild));
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 
     $dom2->documentElement->firstChild->appendChild($dom2->importNode($dom->documentElement->firstChild->nextSibling));
-    echo $dom2->saveXML(), "\n";
+    echo $dom2->saveXml(), "\n";
 }
 
 function test_appendChild_with_shadowing() {
-    $dom = DOM\XMLDocument::createFromString('<?xml version="1.0"?><container xmlns:default="http://php.net/default"><a xmlns:foo="http://php.net/bar"/><b xmlns:foo="http://php.net/foo"><default:test foo:bar=""/><foo:test2/></b></container>');
+    $dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><container xmlns:default="http://php.net/default"><a xmlns:foo="http://php.net/bar"/><b xmlns:foo="http://php.net/foo"><default:test foo:bar=""/><foo:test2/></b></container>');
 
     $a = $dom->documentElement->firstElementChild;
     $b = $a->nextSibling;
     $b->remove();
     $a->appendChild($b);
 
-    echo $dom->saveXML(), "\n";
+    echo $dom->saveXml(), "\n";
 }
 
 echo "-- Test document fragment with import --\n";

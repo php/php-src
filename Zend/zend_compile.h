@@ -190,6 +190,8 @@ typedef struct _zend_live_range {
 
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
+	struct _zend_oparray_context *prev;
+	zend_op_array *op_array;
 	uint32_t   opcodes_size;
 	int        vars_size;
 	int        literals_size;
@@ -802,7 +804,7 @@ void init_compiler(void);
 void shutdown_compiler(void);
 void zend_init_compiler_data_structures(void);
 
-void zend_oparray_context_begin(zend_oparray_context *prev_context);
+void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_array *op_array);
 void zend_oparray_context_end(zend_oparray_context *prev_context);
 void zend_file_context_begin(zend_file_context *prev_context);
 void zend_file_context_end(zend_file_context *prev_context);

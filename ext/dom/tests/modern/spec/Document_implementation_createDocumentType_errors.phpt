@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 try {
     $dom->implementation->createDocumentType("invalid name", "public", "system");
 } catch (DOMException $e) {

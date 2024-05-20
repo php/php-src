@@ -11,9 +11,9 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     var_dump($errno, $errstr);
 }, E_WARNING);
 
-DOM\HTMLDocument::createFromString('<html></html>');
+Dom\HTMLDocument::createFromString('<html></html>');
 
 ?>
 --EXPECT--
 int(2)
-string(113) "DOM\HTMLDocument::createFromString(): tree error unexpected-token-in-initial-mode in Entity, line: 1, column: 2-5"
+string(113) "Dom\HTMLDocument::createFromString(): tree error unexpected-token-in-initial-mode in Entity, line: 1, column: 2-5"

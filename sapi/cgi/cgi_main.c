@@ -486,9 +486,9 @@ static size_t sapi_cgi_read_post(char *buffer, size_t count_bytes)
 	while (read_bytes < count_bytes) {
 #ifdef PHP_WIN32
 		size_t diff = count_bytes - read_bytes;
-		unsigned int to_read = (diff > UINT_MAX) ? UINT_MAX : (unsigned int)diff;
+		unsigned int to_read = (diff > INT_MAX) ? INT_MAX : (unsigned int)diff;
 
-		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, to_read);
+		tmp_read_bytes = _read(STDIN_FILENO, buffer + read_bytes, to_read);
 #else
 		tmp_read_bytes = read(STDIN_FILENO, buffer + read_bytes, count_bytes - read_bytes);
 #endif
@@ -1779,9 +1779,9 @@ int main(int argc, char *argv[])
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY; /* sets default for file streams to binary */
-	setmode(_fileno(stdin),  O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);	/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
+	_setmode(_fileno(stdin),  O_BINARY);	/* make the stdio mode be binary */
+	_setmode(_fileno(stdout), O_BINARY);	/* make the stdio mode be binary */
+	_setmode(_fileno(stderr), O_BINARY);	/* make the stdio mode be binary */
 #endif
 
 	if (!fastcgi) {

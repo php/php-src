@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bd41c14d3e28c21238365a28d1ee9806521719af */
+ * Stub hash: 49801a700489ac5c4ffb8c3916278ec7aa002ab6 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -310,7 +310,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop, 0, 2, LDAP\\Resul
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_data, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "NULL")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 	ZEND_ARG_INFO(1, response_data)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
 ZEND_END_ARG_INFO()
@@ -321,7 +321,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_exop_sync, 0, 2, LDAP\\
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, request_oid, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, request_data, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "NULL")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_data, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, response_oid, "null")
 ZEND_END_ARG_INFO()

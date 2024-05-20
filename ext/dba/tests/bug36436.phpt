@@ -29,7 +29,8 @@ $db_name = 'bug36436.db';
 cleanup_standard_db($db_name);
 ?>
 --EXPECTF--
-resource(%d) of type (dba persistent)
+object(Dba\Connection)#%d (%d) {
+}
 string(16) "Content String 1"
 string(13) "[key10]name10"
 string(13) "[key30]name30"

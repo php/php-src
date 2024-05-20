@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root a="1" b="2" c="3"></root>');
+$dom = Dom\XMLDocument::createFromString('<root a="1" b="2" c="3"></root>');
 $attributes = $dom->documentElement->attributes;
 
 try {
@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot append to DOM\NamedNodeMap
+Cannot append to Dom\NamedNodeMap

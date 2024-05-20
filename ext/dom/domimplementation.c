@@ -107,7 +107,7 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	DOM_RET_OBJ((xmlNodePtr) doctype, NULL);
 }
 
-PHP_METHOD(DOM_Implementation, createDocumentType)
+PHP_METHOD(Dom_Implementation, createDocumentType)
 {
 	size_t name_len, publicid_len = 0, systemid_len = 0;
 	const char *name, *publicid = NULL, *systemid = NULL;
@@ -249,7 +249,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 	}
 }
 
-PHP_METHOD(DOM_Implementation, createDocument)
+PHP_METHOD(Dom_Implementation, createDocument)
 {
 	zval *dtd = NULL;
 	xmlDtdPtr doctype = NULL;
@@ -306,7 +306,7 @@ PHP_METHOD(DOM_Implementation, createDocument)
 		(xmlNodePtr) document,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 
 	/* 4. If doctype is non-null, append doctype to document. */
@@ -343,7 +343,7 @@ error:
 /* }}} end dom_domimplementation_create_document */
 
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument */
-PHP_METHOD(DOM_Implementation, createHTMLDocument)
+PHP_METHOD(Dom_Implementation, createHTMLDocument)
 {
 	const char *title = NULL;
 	size_t title_len = 0;
@@ -407,7 +407,7 @@ PHP_METHOD(DOM_Implementation, createHTMLDocument)
 		(xmlNodePtr) doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 }
 /* }}} */

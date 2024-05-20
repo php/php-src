@@ -30,16 +30,15 @@
 #include <lexbor/encoding/encoding.h>
 
 /* Implementation defined, but as HTML5 defaults in all other cases to UTF-8, we'll do the same. */
-#define DOM_FALLBACK_ENCODING_NAME "UTF-8"
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
 
-typedef struct _dom_line_column_cache {
+typedef struct dom_line_column_cache {
 	size_t last_line;
 	size_t last_column;
 	size_t last_offset;
 } dom_line_column_cache;
 
-typedef struct _dom_lexbor_libxml2_bridge_application_data {
+typedef struct dom_lexbor_libxml2_bridge_application_data {
 	const char *input_name;
 	const lxb_codepoint_t *current_input_codepoints;
 	const char *current_input_characters;
@@ -49,14 +48,14 @@ typedef struct _dom_lexbor_libxml2_bridge_application_data {
 	bool html_no_implied;
 } dom_lexbor_libxml2_bridge_application_data;
 
-typedef struct _dom_character_encoding_data {
+typedef struct dom_character_encoding_data {
 	const lxb_encoding_data_t *encoding_data;
 	size_t bom_shift;
 } dom_character_encoding_data;
 
 typedef zend_result (*dom_write_output)(void*, const char *, size_t);
 
-typedef struct _dom_output_ctx {
+typedef struct dom_output_ctx {
 	const lxb_encoding_data_t *encoding_data;
 	const lxb_encoding_data_t *decoding_data;
 	lxb_encoding_encode_t *encode;
@@ -67,7 +66,7 @@ typedef struct _dom_output_ctx {
 	dom_write_output write_output;
 } dom_output_ctx;
 
-typedef struct _dom_decoding_encoding_ctx {
+typedef struct dom_decoding_encoding_ctx {
 	/* We can skip some conversion if the input and output encoding are both UTF-8,
 	 * we only have to validate and substitute replacement characters */
 	bool fast_path; /* Put first, near the encode & decode structures, for cache locality */
@@ -722,13 +721,13 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 										   "LIBXML_NOERROR, "
 										   "LIBXML_COMPACT, "
 										   "LIBXML_HTML_NOIMPLIED, "
-										   "DOM\\NO_DEFAULT_NS)");
+										   "Dom\\NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;
 }
 
-PHP_METHOD(DOM_HTMLDocument, createEmpty)
+PHP_METHOD(Dom_HTMLDocument, createEmpty)
 {
 	const char *encoding = "UTF-8";
 	size_t encoding_len = strlen("UTF-8");
@@ -756,7 +755,7 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
 	return;
 
@@ -775,7 +774,7 @@ static bool dom_should_register_error_handlers(zend_long options)
 	return php_libxml_uses_internal_errors() || ((EG(error_reporting) | EG(user_error_handler_error_reporting)) & E_WARNING);
 }
 
-PHP_METHOD(DOM_HTMLDocument, createFromString)
+PHP_METHOD(Dom_HTMLDocument, createFromString)
 {
 	const char *source, *override_encoding = NULL;
 	size_t source_len, override_encoding_len;
@@ -916,7 +915,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
@@ -926,7 +925,7 @@ fail_oom:
 	RETURN_THROWS();
 }
 
-PHP_METHOD(DOM_HTMLDocument, createFromFile)
+PHP_METHOD(Dom_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
 	php_dom_libxml_ns_mapper *ns_mapper = NULL;
@@ -1136,7 +1135,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
+	dom_set_xml_class(intern->document);
 	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
 	return;
 
@@ -1265,7 +1264,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	return SUCCESS;
 }
 
-PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
+PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 {
 	zval *id;
 	xmlDoc *docp;
@@ -1304,7 +1303,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
 	RETURN_LONG(bytes);
 }
 
-PHP_METHOD(DOM_HTMLDocument, saveHTML)
+PHP_METHOD(Dom_HTMLDocument, saveHtml)
 {
 	zval *nodep = NULL;
 	const xmlDoc *docp;

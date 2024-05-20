@@ -692,6 +692,12 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				}
 			}
 			op1_type |= flags;
+		} else if (opline->op1_type == IS_UNUSED && (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
+			uint32_t op1_flags = ZEND_VM_OP1_FLAGS(zend_get_opcode_flags(opline->opcode));
+			if ((op1_flags & ZEND_VM_OP_MASK) == ZEND_VM_OP_THIS) {
+				op1_type = IS_OBJECT;
+				ce1 = Z_OBJCE(EX(This));
+			}
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)
 		 && opline->opcode != ZEND_INSTANCEOF
