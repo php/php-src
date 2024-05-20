@@ -22,7 +22,7 @@ AC_DEFUN([PHP_FUZZER_TARGET], [
 if test "$PHP_FUZZER" != "no"; then
   AC_MSG_RESULT([yes])
 
-  AS_IF([test "$enable_zts" = "yes"], [AC_MSG_ERROR(m4_normalize([
+  AS_VAR_IF([enable_zts], [yes], [AC_MSG_ERROR(m4_normalize([
     Thread safety (--enable-zts) is not supported when building fuzzing module
     (--enable-fuzzer). Please build fuzzer without ZTS.
   ]))])
