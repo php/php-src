@@ -90,6 +90,13 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string
 				/* Matching closing quote found, end custom quoting */
 				custom_quote.pos = NULL;
 				custom_quote.len = 0;
+			} else if (t == PDO_PARSER_ESCAPED_QUESTION) {
+				/* An escaped question mark has been used inside a dollar quoted string, most likely as a workaround
+				 * as a single "?" would have been parsed as placeholder, due to the lack of support for dollar quoted
+				 * strings. For now, we emit a deprecation notice, but still process it */
+				php_error_docref(NULL, E_DEPRECATED, "Escaping question marks inside dollar quoted strings is not required anymore and is deprecated");
+
+				goto placeholder;
 			}
 
 			continue;
@@ -119,6 +126,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, zend_string *inquery, zend_string
 				query_type |= PDO_PLACEHOLDER_POSITIONAL;
 			}
 
+placeholder:
 			plc = emalloc(sizeof(*plc));
 			memset(plc, 0, sizeof(*plc));
 			plc->next = NULL;

@@ -11,10 +11,8 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-
-require_once __DIR__ . "/config.inc";
-
-$db = new PdoPgsql($config['ENV']['PDOTEST_DSN']);
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $query = <<<'EOF'
@@ -25,10 +23,12 @@ UNION ALL
 SELECT U&'d\0061t\+000061? ' || ? AS b /* :name */
 UNION ALL
 SELECT $__$Is this a $$dollar$$ 'escaping'? $__$ || ? AS b -- ?
+UNION ALL
+SELECT $$Escaped question mark here?? $$ || ? AS b -- ?
 EOF;
 
 $stmt = $db->prepare($query);
-$stmt->execute(['World', 'World', 'base', 'Yes']);
+$stmt->execute(['World', 'World', 'base', 'Yes', 'Yes']);
 
 while ($row = $stmt->fetchColumn()) {
     var_dump($row);
@@ -56,10 +56,12 @@ try {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: PDO::prepare(): Escaping question marks inside dollar quoted strings is not required anymore and is deprecated in %s on line %d
 string(14) "He'll'o? World"
 string(14) "He'll'o?\World"
 string(10) "data? base"
 string(36) "Is this a $$dollar$$ 'escaping'? Yes"
+string(31) "Escaped question mark here? Yes"
 bool(true)
 bool(true)
