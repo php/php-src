@@ -128,7 +128,7 @@ int bc_modulo(bc_num num1, bc_num num2, bc_num *resul, int scale);
 
 int bc_divmod(bc_num num1, bc_num num2, bc_num *quo, bc_num *rem, int scale);
 
-int bc_raisemod(bc_num base, bc_num expo, bc_num mo, bc_num *result, int scale);
+zend_result bc_raisemod(bc_num base, bc_num expo, bc_num mo, bc_num *result, int scale);
 
 void bc_raise(bc_num num1, bc_num num2, bc_num *resul, int scale);
 
