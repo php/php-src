@@ -1498,7 +1498,7 @@ static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colors
       colorsWanted = maxColors;
     }
   if (!cimP) {
-    nim->pixels = gdCalloc (sizeof (unsigned char *), oim->sy);
+    nim->pixels = gdCalloc (oim->sy, sizeof (unsigned char *));
     if (!nim->pixels)
       {
         /* No can do */
@@ -1506,7 +1506,7 @@ static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colors
       }
     for (i = 0; (i < nim->sy); i++)
       {
-        nim->pixels[i] = gdCalloc (sizeof (unsigned char *), oim->sx);
+        nim->pixels[i] = gdCalloc (oim->sx, sizeof (unsigned char *));
         if (!nim->pixels[i])
   	{
   	  goto outOfMemory;
@@ -1514,7 +1514,7 @@ static int gdImageTrueColorToPaletteBody (gdImagePtr oim, int dither, int colors
       }
   }
 
-  cquantize = (my_cquantize_ptr) gdCalloc (sizeof (my_cquantizer), 1);
+  cquantize = (my_cquantize_ptr) gdCalloc (1, sizeof (my_cquantizer));
   if (!cquantize)
     {
       /* No can do */
