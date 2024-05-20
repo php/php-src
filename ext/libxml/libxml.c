@@ -1049,10 +1049,12 @@ PHP_FUNCTION(libxml_set_streams_context)
 		Z_PARAM_RESOURCE(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!Z_ISUNDEF(LIBXML(stream_context))) {
-		zval_ptr_dtor(&LIBXML(stream_context));
+	if (php_stream_context_from_zval(arg, true) != NULL) {
+		if (!Z_ISUNDEF(LIBXML(stream_context))) {
+			zval_ptr_dtor(&LIBXML(stream_context));
+		}
+		ZVAL_COPY(&LIBXML(stream_context), arg);
 	}
-	ZVAL_COPY(&LIBXML(stream_context), arg);
 }
 /* }}} */
 
