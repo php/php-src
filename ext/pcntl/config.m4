@@ -4,9 +4,9 @@ PHP_ARG_ENABLE([pcntl],
     [Enable pcntl support (CLI/CGI only)])])
 
 if test "$PHP_PCNTL" != "no"; then
-  AC_CHECK_FUNCS([fork], [], [AC_MSG_ERROR([pcntl: fork() not supported by this platform])])
-  AC_CHECK_FUNCS([waitpid], [], [AC_MSG_ERROR([pcntl: waitpid() not supported by this platform])])
-  AC_CHECK_FUNCS([sigaction], [], [AC_MSG_ERROR([pcntl: sigaction() not supported by this platform])])
+  AC_CHECK_FUNCS([fork waitpid sigaction],,
+    [AC_MSG_ERROR([ext/pcntl: required function $ac_func() not found.])])
+
   AC_CHECK_FUNCS(m4_normalize([
     forkx
     getcpuid
