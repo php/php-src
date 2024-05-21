@@ -199,6 +199,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Implement GH-12908 (Show attribute name/class in ReflectionAttribute dump).
     (nielsdos)
+  . Make ReflectionGenerator::getFunction() legal after generator termination.
+    (timwolla)
 
 - SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called

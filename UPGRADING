@@ -416,6 +416,10 @@ PHP 8.4 UPGRADE NOTES
   . posix_isatty now sets the error number when the file descriptor/stream argument
     is invalid.
 
+- Reflection:
+  . ReflectionGenerator::getFunction() may now be called after the generator
+    finished executing.
+
 - Sockets:
   . Parameter $backlog of socket_create_listen() now has a default value of SOMAXCONN.
     Previously, it was 128.
