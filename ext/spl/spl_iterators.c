@@ -1898,11 +1898,16 @@ PHP_METHOD(RegexIterator, accept)
 			zval *replacement = zend_read_property(intern->std.ce, Z_OBJ_P(ZEND_THIS), "replacement", sizeof("replacement")-1, 1, &rv);
 			zend_string *replacement_str = zval_try_get_string(replacement);
 
-			if (UNEXPECTED(!replacement_str)) {
-				RETURN_THROWS();
-			}
+			/* Property type is ?string, so this should always succeed. */
+			ZEND_ASSERT(replacement_str != NULL);
 
 			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement_str, -1, &count);
+
+			if (UNEXPECTED(!result)) {
+				zend_string_release(replacement_str);
+				zend_string_release_ex(subject, false);
+				RETURN_FALSE;
+			}
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
@@ -1920,7 +1925,7 @@ PHP_METHOD(RegexIterator, accept)
 	if (intern->u.regex.flags & REGIT_INVERTED) {
 		RETVAL_BOOL(Z_TYPE_P(return_value) != IS_TRUE);
 	}
-	zend_string_release_ex(subject, 0);
+	zend_string_release_ex(subject, false);
 } /* }}} */
 
 /* {{{ Returns current regular expression */
