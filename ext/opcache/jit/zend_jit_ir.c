@@ -14094,6 +14094,10 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 		// ZVAL_COPY
 		jit_ZVAL_COPY(jit, res_addr, -1, val_addr, res_info, !result_avoid_refcounting);
+
+		if (!zend_jit_store_var_if_necessary(jit, opline->result.var, res_addr, res_info)) {
+			return 0;
+		}
 	} else {
 		ir_MERGE_list(end_inputs);
 	}
