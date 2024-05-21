@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: f1bbbb97912bd83638aaf6a1d843ead2181894a0 */
+ * Stub hash: 14174ab18f198b9916f83986d10c93b657d8ffb9 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
@@ -46,7 +46,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlSetNoticeCallback, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlSetNoticeCallback, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 ZEND_END_ARG_INFO()
 
