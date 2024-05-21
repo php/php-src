@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.20
+?? ??? ????, PHP 8.2.21
+
+
+06 Jun 2024, PHP 8.2.20
 
 - CGI:
   . Fixed buffer limit on Windows, replacing read call usage by _read.
