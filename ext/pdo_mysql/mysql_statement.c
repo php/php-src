@@ -581,7 +581,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	}
 
 	if (!S->current_row) {
-		S->current_row = ecalloc(sizeof(zval), stmt->column_count);
+		S->current_row = ecalloc(stmt->column_count, sizeof(zval));
 	}
 	for (unsigned i = 0; i < stmt->column_count; i++) {
 		zval_ptr_dtor_nogc(&S->current_row[i]);
