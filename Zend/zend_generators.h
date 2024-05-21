@@ -88,6 +88,10 @@ struct _zend_generator {
 	/* Fake execute_data for stacktraces */
 	zend_execute_data execute_fake;
 
+	/* The underlying function, equivalent to execute_data->func while
+	 * the generator is alive. */
+	zend_function *func;
+
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;
 };
