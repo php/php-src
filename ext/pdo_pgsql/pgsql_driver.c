@@ -104,23 +104,13 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 
 static void _pdo_pgsql_notice(void *context, const char *message) /* {{{ */
 {
-	int ret;
 	zval zarg;
-	zval retval;
-	pdo_pgsql_fci * fc;
+	zend_fcall_info_cache *fc;
 	pdo_dbh_t * dbh = (pdo_dbh_t *)context;
 	if ((fc = ((pdo_pgsql_db_handle *)dbh->driver_data)->notice_callback)) {
 		ZVAL_STRINGL(&zarg, (char *) message, strlen(message));
-		fc->fci.param_count = 1;
-		fc->fci.params = &zarg;
-		fc->fci.retval = &retval;
-		if ((ret = zend_call_function(&fc->fci, &fc->fcc)) != FAILURE) {
-			zval_ptr_dtor(&retval);
-		}
+		zend_call_known_fcc(fc, NULL, 1, &zarg, NULL);
 		zval_ptr_dtor(&zarg);
-		if (ret == FAILURE) {
-			pdo_raise_impl_error(dbh, NULL, "HY000", "could not call user-supplied function");
-		}
 	}
 }
 /* }}} */
@@ -145,7 +135,7 @@ static void pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 static void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H) /* {{{ */
 {
 	if (H->notice_callback) {
-		zval_ptr_dtor(&H->notice_callback->fci.function_name);
+		zend_fcc_dtor(H->notice_callback);
 		efree(H->notice_callback);
 		H->notice_callback = NULL;
 	}
@@ -1256,46 +1246,27 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
    Sets a callback to receive DB notices (after client_min_messages has been set) */
 PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 {
-	zval *callback;
-	zend_string *cbname;
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
-	pdo_pgsql_fci *fc;
-
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback)) {
-		RETURN_FALSE;
-	}
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
 	
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 	
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
-
-	if (Z_TYPE_P(callback) == IS_NULL) {
-		pdo_pgsql_cleanup_notice_callback(H);
-		RETURN_TRUE;
-	} else {
-		if (!(fc = H->notice_callback)) {
-			fc = (pdo_pgsql_fci*)ecalloc(1, sizeof(pdo_pgsql_fci));
-		} else {
-			zval_ptr_dtor(&fc->fci.function_name);
-			memcpy(&fc->fcc, &empty_fcall_info_cache, sizeof(fc->fcc));
-		}
-
-		if (FAILURE == zend_fcall_info_init(callback, 0, &fc->fci, &fc->fcc, &cbname, NULL)) {
-			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
-			zend_string_release_ex(cbname, 0);
-			efree(fc);
-			H->notice_callback = NULL;
-			RETURN_FALSE;
-		}
-		Z_TRY_ADDREF_P(&fc->fci.function_name);
-		zend_string_release_ex(cbname, 0);
-
-		H->notice_callback = fc;
-
-		RETURN_TRUE;
+	
+	pdo_pgsql_cleanup_notice_callback(H);
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "F!", &fci, &fcc)) {
+		RETURN_FALSE;
 	}
+	
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		H->notice_callback = ecalloc(1, sizeof(zend_fcall_info_cache));
+		zend_fcc_dup(H->notice_callback, &fcc);
+	}
+	
+	RETURN_TRUE;
 }
 /* }}} */
 

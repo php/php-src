@@ -32,11 +32,6 @@ typedef struct {
 	char *errmsg;
 } pdo_pgsql_error_info;
 
-typedef struct {
-	zend_fcall_info fci;
-	zend_fcall_info_cache fcc;
-} pdo_pgsql_fci;
-
 /* stuff we use in a pgsql database handle */
 typedef struct {
 	PGconn		*server;
@@ -51,7 +46,7 @@ typedef struct {
 	bool		disable_native_prepares; /* deprecated since 5.6 */
 	bool		disable_prepares;
 	HashTable       *lob_streams;
-	pdo_pgsql_fci * notice_callback;
+	zend_fcall_info_cache *notice_callback;
 } pdo_pgsql_db_handle;
 
 typedef struct {
