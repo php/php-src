@@ -297,6 +297,7 @@ PHP_MINFO_FUNCTION(soap);
 
 static const zend_module_dep soap_deps[] = {
 	ZEND_MOD_REQUIRED("date")
+	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_END
 };
 
