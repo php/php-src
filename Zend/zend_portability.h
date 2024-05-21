@@ -269,6 +269,16 @@ char *alloca();
 # define ZEND_ATTRIBUTE_UNUSED
 #endif
 
+#if ZEND_GCC_VERSION >= 3003 || __has_attribute(nonnull)
+/* All pointer arguments must be non-null */
+# define ZEND_ATTRIBUTE_NONNULL  __attribute__((nonnull))
+/* Specified arguments must be non-null (1-based) */
+# define ZEND_ATTRIBUTE_NONNULL_ARGS(...)  __attribute__((nonnull(__VA_ARGS__)))
+#else
+# define ZEND_ATTRIBUTE_NONNULL
+# define ZEND_ATTRIBUTE_NONNULL_ARGS(...)
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_COLD __attribute__((cold))
 # ifdef __OPTIMIZE__
