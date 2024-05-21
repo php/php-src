@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.21
 
+- SPL:
+  . Fixed bug GH-14290 (Member access within null pointer in extension spl).
+    (nielsdos)
 
 06 Jun 2024, PHP 8.2.20
 
