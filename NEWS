@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.9
 
+- Opcache:
+  . Fixed bug GH-14267 (opcache.jit=off does not allow enabling JIT at runtime).
+    (ilutov)
+
 - SPL:
   . Fixed bug GH-14290 (Member access within null pointer in extension spl).
     (nielsdos)

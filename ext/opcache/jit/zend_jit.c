@@ -4803,12 +4803,12 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		return FAILURE;
 	}
 
-	if (ZSTR_LEN(jit) == 0
-	 || zend_string_equals_literal_ci(jit, "disable")) {
+	if (zend_string_equals_literal_ci(jit, "disable")) {
 		JIT_G(enabled) = 0;
 		JIT_G(on) = 0;
 		return SUCCESS;
-	} else if (zend_string_equals_literal_ci(jit, "0")
+	} else if (ZSTR_LEN(jit) == 0
+			|| zend_string_equals_literal_ci(jit, "0")
 			|| zend_string_equals_literal_ci(jit, "off")
 			|| zend_string_equals_literal_ci(jit, "no")
 			|| zend_string_equals_literal_ci(jit, "false")) {
