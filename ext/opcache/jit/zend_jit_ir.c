@@ -7744,8 +7744,13 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
 	SET_STACK_TYPE(stack, EX_VAR_TO_NUM(opline->result.var), IS_UNKNOWN, 1);
 
 	if (deref) {
-		ir_ref if_type = jit_if_Z_TYPE(jit, val_addr, type);
+		ir_ref if_type;
 
+		if (type == IS_NULL && (opline->opcode == ZEND_FETCH_DIM_IS || opline->opcode == ZEND_FETCH_OBJ_IS)) {
+			if_type = ir_IF(ir_ULE(jit_Z_TYPE(jit, val_addr), ir_CONST_U8(type)));
+		} else {
+			if_type = jit_if_Z_TYPE(jit, val_addr, type);
+		}
 		ir_IF_TRUE(if_type);
 		end1 = ir_END();
 		ref1 = ref;
@@ -7770,7 +7775,11 @@ static zend_jit_addr zend_jit_guard_fetch_result_type(zend_jit_ctx         *jit,
 		return 0;
 	}
 
-	jit_guard_Z_TYPE(jit, val_addr, type, res_exit_addr);
+	if (!deref && type == IS_NULL && (opline->opcode == ZEND_FETCH_DIM_IS || opline->opcode == ZEND_FETCH_OBJ_IS)) {
+		ir_GUARD(ir_ULE(jit_Z_TYPE(jit, val_addr), ir_CONST_U8(type)), ir_CONST_ADDR(res_exit_addr));
+	} else {
+		jit_guard_Z_TYPE(jit, val_addr, type, res_exit_addr);
+	}
 
 	if (deref) {
 		ir_MERGE_WITH(end1);
@@ -11576,39 +11585,20 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				if (packed_loaded) {
 					ir_ref type_ref = jit_Z_TYPE_ref(jit, ref);
 
-					if (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) {
-						ir_ref if_def = ir_IF(type_ref);
-						ir_IF_TRUE(if_def);
-						ir_refs_add(found_inputs, ir_END());
-						ir_refs_add(found_vals, ref);
-						ir_IF_FALSE(if_def);
-						if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
-							jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
-						} else if (type == BP_VAR_IS && not_found_exit_addr) {
-							jit_SIDE_EXIT(jit, ir_CONST_ADDR(not_found_exit_addr));
-						} else if (type == BP_VAR_IS && result_type_guard) {
-							ir_END_list(*not_found_inputs);
-						} else {
-							ir_END_list(idx_not_found_inputs);
-						}
-					} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
+					if (result_type_guard) {
 						/* perform IS_UNDEF check only after result type guard (during deoptimization) */
-						if (!result_type_guard) {
-							ir_GUARD(type_ref, ir_CONST_ADDR(exit_addr));
-						}
+					} else if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
+						ir_GUARD(type_ref, ir_CONST_ADDR(exit_addr));
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
 						ir_GUARD(type_ref, ir_CONST_ADDR(not_found_exit_addr));
-					} else if (type == BP_VAR_IS && result_type_guard) {
-						ir_ref if_def = ir_IF(type_ref);
-						ir_IF_FALSE(if_def);
-						ir_END_list(*not_found_inputs);
-						ir_IF_TRUE(if_def);
 					} else {
 						ir_ref if_def = ir_IF(type_ref);
 						ir_IF_FALSE(if_def);
 						ir_END_list(idx_not_found_inputs);
 						ir_IF_TRUE(if_def);
 					}
+					ir_refs_add(found_inputs, ir_END());
+					ir_refs_add(found_vals, ref);
 				}
 				if (op1_info & MAY_BE_ARRAY_NUMERIC_HASH) {
 					if (if_packed) {
@@ -11641,10 +11631,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 					}
 					ir_refs_add(found_inputs, ir_END());
 					ir_refs_add(found_vals, ref);
-				} else if (packed_loaded) {
-					ir_refs_add(found_inputs, ir_END());
-					ir_refs_add(found_vals, ref);
-				} else {
+				} else if (!packed_loaded) {
 					if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE && type == BP_VAR_R) {
 						jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
 					} else if (type == BP_VAR_IS && not_found_exit_addr) {
