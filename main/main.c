@@ -1748,6 +1748,8 @@ zend_result php_request_startup(void)
 {
 	zend_result retval = SUCCESS;
 
+	ZEND_ASSERT(zend_mm_check_in_input());
+
 	zend_interned_strings_activate();
 
 #ifdef HAVE_DTRACE
@@ -1822,6 +1824,8 @@ zend_result php_request_startup(void)
 	} zend_end_try();
 
 	SG(sapi_started) = 1;
+
+	zend_mm_input_end();
 
 	return retval;
 }

@@ -1,7 +1,7 @@
 --TEST--
 Bug #70258 (Segfault if do_resize fails to allocated memory)
 --INI--
-memory_limit=2M
+memory_limit=4M
 --SKIPIF--
 <?php
 $zend_mm_enabled = getenv("USE_ZEND_ALLOC");
@@ -25,4 +25,4 @@ $a = new A;
 $a->core();
 ?>
 --EXPECTF--
-Fatal error: Allowed memory size of 2097152 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
+Fatal error: Allowed memory size of 4194304 bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
