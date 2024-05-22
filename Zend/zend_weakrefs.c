@@ -421,7 +421,8 @@ static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int che
 	}
 
 	if (check_empty) {
-		return i_zend_is_true(zv);
+		// todo: make zend_weakmap_has_dimension return bool as well
+		return (int)i_zend_is_true(zv);
 	}
 	return Z_TYPE_P(zv) != IS_NULL;
 }

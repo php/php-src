@@ -6548,7 +6548,7 @@ PHP_FUNCTION(array_filter)
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
-				int retval_true;
+				bool retval_true;
 
 				zval_ptr_dtor(&args[0]);
 				if (use_type == ARRAY_FILTER_USE_BOTH) {

@@ -263,7 +263,6 @@ static void spl_recursive_it_move_forward_ex(spl_recursive_it_object *object, zv
 	zend_class_entry          *ce;
 	zval                      retval, child;
 	zend_object_iterator      *sub_iter;
-	int                       has_children;
 
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
@@ -308,7 +307,7 @@ next_step:
 					}
 				}
 				if (Z_TYPE(retval) != IS_UNDEF) {
-					has_children = zend_is_true(&retval);
+					bool has_children = zend_is_true(&retval);
 					zval_ptr_dtor(&retval);
 					if (has_children) {
 						if (object->max_depth == -1 || object->max_depth > object->level) {

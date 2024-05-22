@@ -949,11 +949,12 @@ static zval *php_zip_read_property(zend_object *object, zend_string *name, int t
 }
 /* }}} */
 
+// todo: make php_zip_has_property return bool as well
 static int php_zip_has_property(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
 	ze_zip_object *obj;
 	zip_prop_handler *hnd = NULL;
-	int retval = 0;
+	bool retval = false;
 
 	obj = php_zip_fetch_object(object);
 
@@ -965,7 +966,7 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 		zval tmp, *prop;
 
 		if (type == 2) {
-			retval = 1;
+			retval = true;
 		} else if ((prop = php_zip_property_reader(obj, hnd, &tmp)) != NULL) {
 			if (type == 1) {
 				retval = zend_is_true(&tmp);
@@ -976,10 +977,10 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 
 		zval_ptr_dtor(&tmp);
 	} else {
-		retval = zend_std_has_property(object, name, type, cache_slot);
+		retval = (bool)zend_std_has_property(object, name, type, cache_slot);
 	}
 
-	return retval;
+	return (int)retval;
 }
 /* }}} */
 

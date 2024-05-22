@@ -1113,20 +1113,20 @@ static php_conv_err_t php_conv_get_ulong_prop_ex(const HashTable *ht, zend_ulong
 	}
 }
 
-static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, int *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_bool_prop_ex(const HashTable *ht, bool *pretval, char *field_name, size_t field_name_len)
 {
 	zval *tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1);
 	if (tmpval != NULL) {
 		*pretval = zend_is_true(tmpval);
 		return PHP_CONV_ERR_SUCCESS;
 	} else {
-		*pretval = 0;
+		*pretval = false;
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
 }
 
 /* XXX this might need an additional fix so it uses size_t, whereby unsigned is quite big so leaving as is for now */
-static int php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
+static php_conv_err_t php_conv_get_uint_prop_ex(const HashTable *ht, unsigned int *pretval, char *field_name, size_t field_name_len)
 {
 	zend_ulong l;
 	php_conv_err_t err;
@@ -1206,8 +1206,8 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 			int opts = 0;
 
 			if (options != NULL) {
-				int opt_binary = 0;
-				int opt_force_encode_first = 0;
+				bool opt_binary = false;
+				bool opt_force_encode_first = false;
 
 				GET_STR_PROP(options, lbchars, lbchars_len, "line-break-chars", 0);
 				GET_UINT_PROP(options, line_len, "line-length");

@@ -309,7 +309,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 			if (opline->op1_type == IS_CONST) {
-				int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
+				bool should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 
 				if (opline->opcode == ZEND_JMPZ) {
 					should_jmp = !should_jmp;

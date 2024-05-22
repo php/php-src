@@ -1061,7 +1061,7 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 {
 	zend_class_entry *ce = object->ce;
 	zval retval, tmp_offset;
-	int result;
+	bool result;
 
 	zend_class_arrayaccess_funcs *funcs = ce->arrayaccess_funcs_ptr;
 	if (EXPECTED(funcs)) {
@@ -1081,7 +1081,9 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 	    zend_bad_array_access(ce);
 		return 0;
 	}
-	return result;
+
+	// todo: make zend_std_has_dimension return bool as well
+	return (int)result;
 }
 /* }}} */
 
@@ -1812,7 +1814,7 @@ ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
 
 ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
-	int result;
+	bool result;
 	zval *value = NULL;
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
@@ -1826,7 +1828,7 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(value) & IS_PROP_UNINIT)) {
 			/* Skip __isset() for uninitialized typed properties */
-			result = 0;
+			result = false;
 			goto exit;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
@@ -1862,17 +1864,17 @@ found:
 					result = (Z_TYPE_P(value) != IS_NULL);
 				} else {
 					ZEND_ASSERT(has_set_exists == ZEND_PROPERTY_EXISTS);
-					result = 1;
+					result = true;
 				}
 				goto exit;
 			}
 		}
 	} else if (UNEXPECTED(EG(exception))) {
-		result = 0;
+		result = false;
 		goto exit;
 	}
 
-	result = 0;
+	result = false;
 	if ((has_set_exists != ZEND_PROPERTY_EXISTS) && zobj->ce->__isset) {
 		uint32_t *guard = zend_get_property_guard(zobj, name);
 
@@ -1893,7 +1895,7 @@ found:
 					result = i_zend_is_true(&rv);
 					zval_ptr_dtor(&rv);
 				} else {
-					result = 0;
+					result = false;
 				}
 			}
 			(*guard) &= ~IN_ISSET;
@@ -1902,7 +1904,8 @@ found:
 	}
 
 exit:
-	return result;
+	// todo: make zend_std_has_property return bool as well
+	return (int)result;
 }
 /* }}} */
 

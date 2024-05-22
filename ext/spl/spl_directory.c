@@ -851,7 +851,7 @@ PHP_METHOD(DirectoryIterator, seek)
 	}
 
 	while (intern->u.dir.index < pos) {
-		bool valid = 0;
+		bool valid = false;
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_valid, "valid", &retval);
 		valid = zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
