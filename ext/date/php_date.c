@@ -3352,9 +3352,9 @@ PHP_METHOD(DateTime, modify)
 	zend_error_handling  zeh;
 
 	object = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &modify, &modify_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(modify, modify_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, date_ce_date_malformed_string_exception, &zeh);
 	if (!php_date_modify(object, modify, modify_len)) {
@@ -3870,9 +3870,9 @@ PHP_METHOD(DateTimeImmutable, setMicrosecond)
 	php_date_obj *dateobj, *new_dateobj;
 	zend_long us;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &us) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(us)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(us < 0 || us > 999999)) {
 		zend_argument_error(
@@ -3904,9 +3904,9 @@ PHP_METHOD(DateTime, setMicrosecond)
 	php_date_obj *dateobj;
 	zend_long us;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &us) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(us)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(us < 0 || us > 999999)) {
 		zend_argument_error(
@@ -5126,9 +5126,11 @@ PHP_METHOD(DatePeriod, createFromISO8601String)
 	char *isostr = NULL;
 	size_t isostr_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(isostr, isostr_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	object_init_ex(return_value, execute_data->This.value.ce ? execute_data->This.value.ce : date_ce_period);
 	dpobj = Z_PHPPERIOD_P(return_value);
