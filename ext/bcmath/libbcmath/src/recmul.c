@@ -33,20 +33,31 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <limits.h>
 #include "private.h" /* For _bc_rm_leading_zeros() */
 #include "zend_alloc.h"
 
 
 #if SIZEOF_SIZE_T >= 8
 #  define BC_MUL_UINT_DIGITS 8
-#  define BC_MUL_UINT_OVERFLOW 100000000
+#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 100000000
+#  define BC_MUL_MAX_ADD_COUNT (ULONG_MAX / (BC_MUL_UINT_OVERFLOW * BC_MUL_UINT_OVERFLOW))
 #else
 #  define BC_MUL_UINT_DIGITS 4
-#  define BC_MUL_UINT_OVERFLOW 10000
+#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 10000
+#  define BC_MUL_MAX_ADD_COUNT (UINT_MAX / (BC_MUL_UINT_OVERFLOW * BC_MUL_UINT_OVERFLOW))
 #endif
 
 
 /* Multiply utility routines */
+
+static inline void bc_digits_adjustment(BC_UINT_T *prod_uint, size_t prod_arr_size)
+{
+	for (size_t i = 0; i < prod_arr_size - 1; i++) {
+		prod_uint[i + 1] += prod_uint[i] / BC_MUL_UINT_OVERFLOW;
+		prod_uint[i] %= BC_MUL_UINT_OVERFLOW;
+	}
+}
 
 /*
  * Converts BCD to uint, going backwards from pointer n by the number of
@@ -141,7 +152,18 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	bc_convert_to_uint(n2_uint, n2end, n2len);
 
 	/* Multiplication and addition */
+	size_t count = 0;
 	for (i = 0; i < n1_arr_size; i++) {
+		/*
+		 * This calculation adds the result multiple times to the array entries.
+		 * When multiplying large numbers of digits, there is a possibility of
+		 * overflow, so digit adjustment is performed beforehand.
+		 */
+		if (UNEXPECTED(count >= BC_MUL_MAX_ADD_COUNT)) {
+			bc_digits_adjustment(prod_uint, prod_arr_size);
+			count = 0;
+		}
+		count++;
 		for (size_t j = 0; j < n2_arr_size; j++) {
 			prod_uint[i + j] += n1_uint[i] * n2_uint[j];
 		}
@@ -151,10 +173,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	for (i = 0; i < prod_arr_size - 1; i++) {
-		prod_uint[i + 1] += prod_uint[i] / BC_MUL_UINT_OVERFLOW;
-		prod_uint[i] %= BC_MUL_UINT_OVERFLOW;
-	}
+	bc_digits_adjustment(prod_uint, prod_arr_size);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
