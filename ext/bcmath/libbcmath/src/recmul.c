@@ -33,7 +33,6 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
-#include <limits.h>
 #include "private.h" /* For _bc_rm_leading_zeros() */
 #include "zend_alloc.h"
 
