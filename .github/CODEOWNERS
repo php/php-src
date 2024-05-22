@@ -38,25 +38,24 @@
 /ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka
-/Zend @iluuu1994
-/Zend/Optimizer @dstogov
+/Zend/Optimizer @dstogov @iluuu1994
 /Zend/zend.* @dstogov
 /Zend/zend_alloc.* @dstogov
-/Zend/zend_API.* @dstogov
+/Zend/zend_API.* @dstogov @iluuu1994
 /Zend/zend_call_stack.* @arnaud-lb
 /Zend/zend_closures.* @dstogov
-/Zend/zend_execute.* @dstogov
-/Zend/zend_execute_API.c @dstogov
+/Zend/zend_execute.* @dstogov @iluuu1994
+/Zend/zend_execute_API.c @dstogov @iluuu1994
 /Zend/zend_gc.* @dstogov @arnaud-lb
 /Zend/zend_hash.* @dstogov
-/Zend/zend_inheritance.* @dstogov
+/Zend/zend_inheritance.* @dstogov @iluuu1994
 /Zend/zend_max_execution_timer.* @arnaud-lb
-/Zend/zend_object_handlers.* @dstogov
-/Zend/zend_objects.* @dstogov
-/Zend/zend_objects_API.* @dstogov
-/Zend/zend_opcode.* @dstogov
+/Zend/zend_object_handlers.* @dstogov @iluuu1994
+/Zend/zend_objects.* @dstogov @iluuu1994
+/Zend/zend_objects_API.* @dstogov @iluuu1994
+/Zend/zend_opcode.* @dstogov @iluuu1994
 /Zend/zend_string.* @dstogov
-/Zend/zend_type*.h @dstogov
+/Zend/zend_type*.h @dstogov @iluuu1994
 /Zend/zend_variables.* @dstogov
-/Zend/zend_vm* @dstogov
+/Zend/zend_vm* @dstogov @iluuu1994
 *.stub.php @kocsismate
