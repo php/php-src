@@ -56,4 +56,7 @@ class Pgsql extends PDO
     public function getNotify(int $fetchMode = \PDO::FETCH_DEFAULT, int $timeoutMilliseconds = 0): array|false {}
 
     public function getPid(): int {}
+
+    /** @implementation-alias PDO_PGSql_Ext::pgsqlSetNoticeCallback */
+    public function setNoticeCallback(?callable $callback): void {}
 }

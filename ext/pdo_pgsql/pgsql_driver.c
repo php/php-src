@@ -1241,8 +1241,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
 }
 /* }}} */
 
-/* {{{ proto void PDO::pgsqlSetNoticeCallback(mixed callback)
-   Sets a callback to receive DB notices (after client_min_messages has been set) */
+/* {{{ Sets a callback to receive DB notices (after client_min_messages has been set) */
 PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 {
 	zend_fcall_info fci = empty_fcall_info;
