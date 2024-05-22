@@ -543,7 +543,7 @@ ZEND_API void zend_ssa_find_false_dependencies(const zend_op_array *op_array, ze
 /* }}} */
 
 /* From "Hacker's Delight" */
-zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
+static zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
@@ -567,7 +567,7 @@ zend_ulong minOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 	return a | c;
 }
 
-zend_ulong maxOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
+static zend_ulong maxOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
@@ -590,7 +590,7 @@ zend_ulong maxOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 	return b | d;
 }
 
-zend_ulong minAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
+static zend_ulong minAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
@@ -613,7 +613,7 @@ zend_ulong minAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 	return a & c;
 }
 
-zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
+static zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 {
 	zend_ulong m, temp;
 
@@ -635,16 +635,6 @@ zend_ulong maxAND(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
 		m = m >> 1;
 	}
 	return b & d;
-}
-
-zend_ulong minXOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
-{
-	return minAND(a, b, ~d, ~c) | minAND(~b, ~a, c, d);
-}
-
-zend_ulong maxXOR(zend_ulong a, zend_ulong b, zend_ulong c, zend_ulong d)
-{
-	return maxOR(0, maxAND(a, b, ~d, ~c), 0, maxAND(~b, ~a, c, d));
 }
 
 /* Based on "Hacker's Delight" */

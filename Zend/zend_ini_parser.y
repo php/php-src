@@ -32,7 +32,7 @@
 #include "win32/syslog.h"
 #endif
 
-int ini_parse(void);
+static int ini_parse(void);
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
 #define ZEND_INI_PARSER_ARG	(CG(ini_parser_param))->arg

@@ -1239,7 +1239,7 @@ static void do_inherit_method(zend_string *key, zend_function *parent, zend_clas
 }
 /* }}} */
 
-inheritance_status property_types_compatible(
+static inheritance_status property_types_compatible(
 		const zend_property_info *parent_info, const zend_property_info *child_info) {
 	if (ZEND_TYPE_PURE_MASK(parent_info->type) == ZEND_TYPE_PURE_MASK(child_info->type)
 			&& ZEND_TYPE_NAME(parent_info->type) == ZEND_TYPE_NAME(child_info->type)) {

@@ -81,7 +81,7 @@ static sigset_t            global_sigmask;
 
 /* {{{ zend_signal_handler_defer
  *  Blocks signals if in critical section */
-void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
+static void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;

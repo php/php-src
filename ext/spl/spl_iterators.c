@@ -2868,7 +2868,7 @@ PHP_METHOD(EmptyIterator, next)
 	}
 } /* }}} */
 
-zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
+static zend_result spl_append_it_next_iterator(spl_dual_it_object *intern) /* {{{*/
 {
 	spl_dual_it_free(intern);
 

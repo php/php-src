@@ -185,7 +185,7 @@ typedef struct _php_openssl_x509_request_object {
 	zend_object std;
 } php_openssl_request_object;
 
-zend_class_entry *php_openssl_request_ce;
+static zend_class_entry *php_openssl_request_ce;
 
 static inline php_openssl_request_object *php_openssl_request_from_obj(zend_object *obj) {
 	return (php_openssl_request_object *)((char *)(obj) - XtOffsetOf(php_openssl_request_object, std));
@@ -225,7 +225,7 @@ typedef struct _php_openssl_pkey_object {
 	zend_object std;
 } php_openssl_pkey_object;
 
-zend_class_entry *php_openssl_pkey_ce;
+static zend_class_entry *php_openssl_pkey_ce;
 
 static inline php_openssl_pkey_object *php_openssl_pkey_from_obj(zend_object *obj) {
 	return (php_openssl_pkey_object *)((char *)(obj) - XtOffsetOf(php_openssl_pkey_object, std));
@@ -486,7 +486,7 @@ void php_openssl_store_errors(void)
 /* }}} */
 
 /* {{{ php_openssl_errors_set_mark */
-void php_openssl_errors_set_mark(void) {
+static void php_openssl_errors_set_mark(void) {
 	if (!OPENSSL_G(errors)) {
 		return;
 	}
@@ -500,7 +500,7 @@ void php_openssl_errors_set_mark(void) {
 /* }}} */
 
 /* {{{ php_openssl_errors_restore_mark */
-void php_openssl_errors_restore_mark(void) {
+static void php_openssl_errors_restore_mark(void) {
 	if (!OPENSSL_G(errors)) {
 		return;
 	}

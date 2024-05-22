@@ -64,7 +64,7 @@
 #define PHP_ICONV_IMPL_VALUE "unknown"
 #endif
 
-char *get_iconv_version(void) {
+static char *get_iconv_version(void) {
 	char *version = "unknown";
 
 #ifdef HAVE_LIBICONV
