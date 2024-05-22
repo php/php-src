@@ -20,6 +20,7 @@
 #include "main/php.h"
 #include "main/php_globals.h"
 #include "zend.h"
+#include "zend_alloc.h"
 #include "zend_extensions.h"
 #include "zend_compile.h"
 #include "ZendAccelerator.h"
@@ -5167,6 +5168,7 @@ static zend_result accel_finish_startup_preload(bool in_child)
 	orig_error_reporting = EG(error_reporting);
 	EG(error_reporting) = 0;
 
+	zend_mm_userinput_begin();
 	const zend_result rc = php_request_startup();
 	zend_mm_set_max_allocs(0);
 

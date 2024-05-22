@@ -1,7 +1,7 @@
 --TEST--
 GH-14639 (Member access within null pointer in ext/spl/spl_observer.c)
 --INI--
-memory_limit=2M
+memory_limit=4M
 --SKIPIF--
 <?php
 if (getenv("USE_ZEND_ALLOC") === "0") {
