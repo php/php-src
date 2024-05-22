@@ -284,34 +284,34 @@ function date_sun_info(int $timestamp, float $latitude, float $longitude): array
 
 interface DateTimeInterface
 {
-    /** @var string */
-    public const ATOM = DATE_ATOM;
-    /** @var string */
-    public const COOKIE = DATE_COOKIE;
-    /** @var string */
-    public const ISO8601 = DATE_ISO8601;
-    /** @var string */
-    public const ISO8601_EXPANDED = DATE_ISO8601_EXPANDED;
-    /** @var string */
-    public const RFC822 = DATE_RFC822;
-    /** @var string */
-    public const RFC850 = DATE_RFC850;
-    /** @var string */
-    public const RFC1036 = DATE_RFC1036;
-    /** @var string */
-    public const RFC1123 = DATE_RFC1123;
-    /** @var string */
-    public const RFC7231 = DATE_RFC7231;
-    /** @var string */
-    public const RFC2822 = DATE_RFC2822;
-    /** @var string */
-    public const RFC3339 = DATE_RFC3339;
-    /** @var string */
-    public const RFC3339_EXTENDED = DATE_RFC3339_EXTENDED;
-    /** @var string */
-    public const RSS = DATE_RSS;
-    /** @var string */
-    public const W3C = DATE_W3C;
+
+    public const string ATOM = DATE_ATOM;
+
+    public const string COOKIE = DATE_COOKIE;
+
+    public const string ISO8601 = DATE_ISO8601;
+
+    public const string ISO8601_EXPANDED = DATE_ISO8601_EXPANDED;
+
+    public const string RFC822 = DATE_RFC822;
+
+    public const string RFC850 = DATE_RFC850;
+
+    public const string RFC1036 = DATE_RFC1036;
+
+    public const string RFC1123 = DATE_RFC1123;
+
+    public const string RFC7231 = DATE_RFC7231;
+
+    public const string RFC2822 = DATE_RFC2822;
+
+    public const string RFC3339 = DATE_RFC3339;
+
+    public const string RFC3339_EXTENDED = DATE_RFC3339_EXTENDED;
+
+    public const string RSS = DATE_RSS;
+
+    public const string W3C = DATE_W3C;
 
     /** @tentative-return-type */
     public function format(string $format): string;
@@ -555,76 +555,34 @@ class DateTimeImmutable implements DateTimeInterface
 
 class DateTimeZone
 {
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_AFRICA
-     */
-    public const AFRICA = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_AMERICA
-     */
-    public const AMERICA = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ANTARCTICA
-     */
-    public const ANTARCTICA = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ARCTIC
-     */
-    public const ARCTIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ASIA
-     */
-    public const ASIA = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ATLANTIC
-     */
-    public const ATLANTIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_AUSTRALIA
-     */
-    public const AUSTRALIA = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_EUROPE
-     */
-    public const EUROPE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_INDIAN
-     */
-    public const INDIAN = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_PACIFIC
-     */
-    public const PACIFIC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_UTC
-     */
-    public const UTC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL
-     */
-    public const ALL = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_GROUP_ALL_W_BC
-     */
-    public const ALL_WITH_BC = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_TIMEZONE_PER_COUNTRY
-     */
-    public const PER_COUNTRY = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_AFRICA */
+    public const int AFRICA = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_AMERICA */
+    public const int AMERICA = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ANTARCTICA */
+    public const int ANTARCTICA = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ARCTIC */
+    public const int ARCTIC = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ASIA */
+    public const int ASIA = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ATLANTIC */
+    public const int ATLANTIC = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_AUSTRALIA */
+    public const int AUSTRALIA = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_EUROPE */
+    public const int EUROPE = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_INDIAN */
+    public const int INDIAN = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_PACIFIC */
+    public const int PACIFIC = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_UTC */
+    public const int UTC = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ALL */
+    public const int ALL = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_GROUP_ALL_W_BC */
+    public const int ALL_WITH_BC = UNKNOWN;
+    /** @cvalue PHP_DATE_TIMEZONE_PER_COUNTRY */
+    public const int PER_COUNTRY = UNKNOWN;
 
     public function __construct(string $timezone) {}
 
@@ -707,16 +665,10 @@ class DateInterval
 
 class DatePeriod implements IteratorAggregate
 {
-    /**
-     * @var int
-     * @cvalue PHP_DATE_PERIOD_EXCLUDE_START_DATE
-     */
-    public const EXCLUDE_START_DATE = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE
-     */
-    public const INCLUDE_END_DATE = UNKNOWN;
+    /** @cvalue PHP_DATE_PERIOD_EXCLUDE_START_DATE */
+    public const int EXCLUDE_START_DATE = UNKNOWN;
+    /** @cvalue PHP_DATE_PERIOD_INCLUDE_END_DATE */
+    public const int INCLUDE_END_DATE = UNKNOWN;
 
     /** @readonly */
     public ?DateTimeInterface $start;
