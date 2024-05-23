@@ -243,7 +243,7 @@ Additional meta information can be attached to functions, with the following PHP
 
 -  ``@genstubs-expose-comment-block``: By adding this annotation at the beginning of a PHPDoc block,
    the content of the PHPDoc block will be exposed for
-   `ReflectionFunctionAbstract::getDocComment()`. This feature as added in PHP 8.4.0.
+   `ReflectionFunctionAbstract::getDocComment()`. This feature was added in PHP 8.4.0.
 
 .. _tentative return type: https://wiki.php.net/rfc/internal_method_return_types
 
@@ -615,8 +615,8 @@ behavior is free from side-effects and is not affected by the global state.
 
 The list of such functions in the optimizer was maintained manually until PHP 8.2.
 
-Since PHP 8.2, the ``@compile-time-eval`` PHPDoc tag can be applied to any function which conform to
-the above restrictions in order for them to qualify as evaluable at compile-time. The feature
+Since PHP 8.2, the ``@compile-time-eval`` PHPDoc tag can be applied to any function which conforms
+to the above restrictions in order for them to qualify as evaluable at compile-time. The feature
 internally works by adding the ``ZEND_ACC_COMPILE_TIME_EVAL`` function flag.
 
 In PHP 8.4, arity-based frameless functions were introduced. This is another optimization technique,
@@ -709,10 +709,8 @@ Running ``./build/gen_stub.php --replace-classsynopses ./ ../doc-en/`` will upda
 signatures in the English documentation whose stub counterpart is found.
 
 If a symbol is not intended to be documented, the ``@undocumentable`` PHPDoc tag should be added to
-it. Doing so will prevent any documentation to be created for the given symbol.
-
-To avoid a whole stub file to be added to the manual, this PHPDoc tag should be applied to the file
-itself.
+it. Doing so will prevent any documentation to be created for the given symbol. To avoid a whole
+stub file to be added to the manual, this PHPDoc tag should be applied to the file itself.
 
 These flags are useful for symbols which exist only for testing purposes (e.g. the ones declared for
 ``ext/zend_test``), or by some other reason documentation is not possible.
