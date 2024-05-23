@@ -64,8 +64,6 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
 # define PHP_RAND_MAX PHP_MT_RAND_MAX
 
-PHPAPI void php_srand(zend_long seed);
-
 typedef struct _php_random_status_state_combinedlcg {
 	int32_t state[2];
 } php_random_status_state_combinedlcg;
