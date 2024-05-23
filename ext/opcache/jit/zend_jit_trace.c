@@ -1843,7 +1843,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
 						break;
 					}
-					if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
+					if (opline->opcode == ZEND_ASSIGN_OBJ
+					 || opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 						if (opline->op1_type == IS_CV
 						 && (opline+1)->op1_type == IS_CV
 						 && (opline+1)->op1.var == opline->op1.var) {
