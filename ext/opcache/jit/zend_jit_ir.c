@@ -14145,6 +14145,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
                                uint32_t              val_info,
                                zend_jit_addr         val_addr,
                                zend_jit_addr         val_def_addr,
+                               zend_jit_addr         res_addr,
                                bool                  op1_indirect,
                                zend_class_entry     *ce,
                                bool                  ce_is_instanceof,
@@ -14157,13 +14158,13 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	zval *member;
 	zend_string *name;
 	zend_property_info *prop_info;
-	zend_jit_addr res_addr = 0;
 	zend_jit_addr prop_addr;
 	ir_ref obj_ref = IR_UNUSED;
 	ir_ref prop_ref = IR_UNUSED;
 	ir_ref delayed_end_input = IR_UNUSED;
 	ir_ref end_inputs = IR_UNUSED;
 	ir_ref slow_inputs = IR_UNUSED;
+	uint32_t res_info = RES_INFO();
 
 	if (val_addr != val_def_addr && val_def_addr) {
 		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
@@ -14172,10 +14173,6 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		if (Z_MODE(val_def_addr) == IS_REG && Z_MODE(val_addr) != IS_REG) {
 			val_addr = val_def_addr;
 		}
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 	}
 
 	ZEND_ASSERT(opline->op2_type == IS_CONST);
@@ -14216,7 +14213,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 					jit_ZVAL_ADDR(jit, op1_addr),
 					ir_CONST_ADDR(ZSTR_VAL(name)));
 
-				if (RETURN_VALUE_USED(opline)) {
+				if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) != IS_REG) {
 					jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
 				}
 
@@ -14286,7 +14283,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 
 		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
-			ir_ref arg3;
+			ir_ref arg3, arg4;
 			ir_ref prop_info_ref = ir_LOAD_A(
 				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2));
 			ir_ref if_has_prop_info = ir_IF(prop_info_ref);
@@ -14302,18 +14299,33 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				arg3 = jit_ZVAL_ADDR(jit, val_addr);
 			}
 
+			if (!RETURN_VALUE_USED(opline)) {
+				arg4 = IR_NULL;
+			} else if (Z_MODE(res_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+				arg4 = jit_ZVAL_ADDR(jit, real_addr);
+			} else {
+				arg4 = jit_ZVAL_ADDR(jit, res_addr);
+			}
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
 				prop_ref,
 				prop_info_ref,
 				arg3,
-				RETURN_VALUE_USED(opline) ? jit_ZVAL_ADDR(jit, res_addr) : IR_NULL);
+				arg4);
 
 			if ((opline+1)->op1_type == IS_CONST) {
 				// TODO: ???
 				// if (Z_TYPE_P(value) == orig_type) {
 				// CACHE_PTR_EX(cache_slot + 2, NULL);
+			}
+
+			if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+				if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
+					return 0;
+				}
 			}
 
 			ir_END_list(end_inputs);
@@ -14340,7 +14352,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			}
 		}
 		if (ZEND_TYPE_IS_SET(prop_info->type)) {
-			ir_ref ref, arg3;
+			ir_ref ref, arg3, arg4;
 
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 			jit_SET_EX_OPLINE(jit, opline);
@@ -14363,18 +14375,34 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			} else {
 				arg3 = jit_ZVAL_ADDR(jit, val_addr);
 			}
+			if (!RETURN_VALUE_USED(opline)) {
+				arg4 = IR_NULL;
+			} else if (Z_MODE(res_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+				arg4 = jit_ZVAL_ADDR(jit, real_addr);
+			} else {
+				arg4 = jit_ZVAL_ADDR(jit, res_addr);
+			}
 			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
 				prop_ref,
 				ref,
 				arg3,
-				RETURN_VALUE_USED(opline) ? jit_ZVAL_ADDR(jit, res_addr) : IR_NULL);
+				arg4);
 
+			if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+				if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
+					return 0;
+				}
+			}
 			ir_END_list(end_inputs);
 		}
 	}
 
 	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
-		if (Z_MODE(val_addr) != IS_REG && opline->result_type == IS_UNUSED) {
+		if (Z_MODE(val_addr) != IS_REG
+		 && (res_addr == 0 || Z_MODE(res_addr) != IS_REG)
+		 && opline->result_type == IS_UNUSED) {
 			if (!zend_jit_assign_to_variable_call(jit, opline, prop_addr, prop_addr, -1, -1, (opline+1)->op1_type, val_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
@@ -14395,7 +14423,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	}
 
 	if (slow_inputs) {
-		ir_ref arg3;
+		ir_ref arg3, arg5;
 
 		ir_MERGE_list(slow_inputs);
 		jit_SET_EX_OPLINE(jit, opline);
@@ -14409,6 +14437,14 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		} else {
 			arg3 = jit_ZVAL_ADDR(jit, val_addr);
 		}
+		if (!RETURN_VALUE_USED(opline)) {
+			arg5 = IR_NULL;
+		} else if (Z_MODE(res_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+			arg5 = jit_ZVAL_ADDR(jit, real_addr);
+		} else {
+			arg5 = jit_ZVAL_ADDR(jit, res_addr);
+		}
 
 		// JIT: value = zobj->handlers->write_property(zobj, name, value, CACHE_ADDR(opline->extended_value));
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
@@ -14417,8 +14453,14 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			ir_CONST_ADDR(name),
 			arg3,
 			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
-			RETURN_VALUE_USED(opline) ? jit_ZVAL_ADDR(jit, res_addr) : IR_NULL);
+			arg5);
 
+		if (RETURN_VALUE_USED(opline) && Z_MODE(res_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
+			if (!zend_jit_load_reg(jit, real_addr, res_addr, res_info)) {
+				return 0;
+			}
+		}
 		ir_END_list(end_inputs);
 	}
 
