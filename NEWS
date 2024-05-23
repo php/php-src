@@ -28,7 +28,7 @@ PHP                                                                        NEWS
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
   . Bumped required libcurl version to 7.61.0. (Ayesh)
-  . Added feature_list key to the curl_version() return value (Ayesh)
+  . Added feature_list key to the curl_version() return value. (Ayesh)
 
 - Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
@@ -158,7 +158,7 @@ PHP                                                                        NEWS
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoDbLib (danack, kocsismate)
+  . Added class PdoDbLib. (danack, kocsismate)
 
 - PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
@@ -249,8 +249,8 @@ PHP                                                                        NEWS
   . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
 
 - Sodium:
-  . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
-  . Enable AES-GCM on aarch64 with the ARM crypto extensions (jedisct1)
+  . Add support for AEGIS-128L and AEGIS-256. (jedisct1)
+  . Enable AES-GCM on aarch64 with the ARM crypto extensions. (jedisct1)
 
 - SPL:
   . Implement SeekableIterator for SplObjectStorage. (nielsdos)
@@ -276,7 +276,7 @@ PHP                                                                        NEWS
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
   . Add php_base64_encode_ex() API. (Remi)
-  . Implemented "Raising zero to the power of negative number" RFC (Jorg Sowa)
+  . Implemented "Raising zero to the power of negative number" RFC. (Jorg Sowa)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)
