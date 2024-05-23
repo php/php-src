@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 
 echo "*** Testing octdec() : basic functionality ***\n";
 
-$values = array(01234567,
+$values = [01234567,
                 0567,
                 017777777777,
                 020000000000,
@@ -25,7 +25,7 @@ $values = array(01234567,
                 31.1013e5,
                 true,
                 false,
-                );
+                ];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = octdec($values[$i]);

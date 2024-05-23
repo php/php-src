@@ -24,7 +24,7 @@ $threesixty = M_PI * 2.0;
 
 echo "cos 30 = ";
 var_dump(cos($thirty));
-if (allowed_rounding_error(cos($thirty),0.86602540378444)) {
+if (allowed_rounding_error(cos($thirty), 0.86602540378444)) {
     echo "Pass\n";
 }
 else {
@@ -33,7 +33,7 @@ else {
 
 echo "cos 60 = ";
 var_dump(cos($sixty));
-if (allowed_rounding_error(cos($sixty),0.5)) {
+if (allowed_rounding_error(cos($sixty), 0.5)) {
     echo "Pass\n";
 }
 else {
@@ -42,7 +42,7 @@ else {
 
 echo "cos 90 = ";
 var_dump(cos($ninety));
-if (allowed_rounding_error(cos($ninety),0.0)) {
+if (allowed_rounding_error(cos($ninety), 0.0)) {
     echo "Pass\n";
 }
 else {
@@ -51,7 +51,7 @@ else {
 
 echo "cos 180 = ";
 var_dump(cos($oneeighty));
-if (allowed_rounding_error(cos($oneeighty),-1.0)) {
+if (allowed_rounding_error(cos($oneeighty), -1.0)) {
     echo "Pass\n";
 }
 else {
@@ -60,7 +60,7 @@ else {
 
 echo "cos 270 = ";
 var_dump(cos($twoseventy));
-if (allowed_rounding_error(cos($twoseventy),0.0)) {
+if (allowed_rounding_error(cos($twoseventy), 0.0)) {
     echo "Pass\n";
 }
 else {
@@ -69,7 +69,7 @@ else {
 
 echo "cos 360 = ";
 var_dump(cos($threesixty));
-if (allowed_rounding_error(cos($threesixty),1.0)) {
+if (allowed_rounding_error(cos($threesixty), 1.0)) {
     echo "Pass\n";
 }
 else {

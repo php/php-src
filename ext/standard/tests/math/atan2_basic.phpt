@@ -4,7 +4,7 @@ Test atan2() - basic function test of atan2()
 serialize_precision=14
 --FILE--
 <?php
-$valuesy = array(23,
+$valuesy = [23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -14,9 +14,9 @@ $valuesy = array(23,
                 "23.45",
                 "2.345e1",
                 true,
-                false);
+                false];
 
-$valuesx = array(23,
+$valuesx = [23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -26,7 +26,7 @@ $valuesx = array(23,
                 "23.45",
                 "2.345e1",
                 true,
-                false);
+                false];
 
 for ($i = 0; $i < count($valuesy); $i++) {
     for ($j = 0; $j < count($valuesx); $j++) {

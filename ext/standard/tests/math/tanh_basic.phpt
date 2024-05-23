@@ -31,7 +31,7 @@ else {
 
 echo "tanh 3  = ";
 var_dump(tanh(3.0));
-if (allowed_rounding_error(tanh(3.0),0.99505475368673 )) {
+if (allowed_rounding_error(tanh(3.0), 0.99505475368673 )) {
     echo "Pass\n";
 }
 else {
@@ -40,7 +40,7 @@ else {
 
 echo "tanh -3  = ";
 var_dump(tanh(-3.0));
-if (allowed_rounding_error(tanh(-3.0),-0.99505475368673 )) {
+if (allowed_rounding_error(tanh(-3.0), -0.99505475368673 )) {
     echo "Pass\n";
 }
 else {

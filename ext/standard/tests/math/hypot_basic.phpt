@@ -7,7 +7,7 @@ serialize_precision=15
 
 echo "*** Testing hypot() : basic functionality ***\n";
 
-$valuesy = array(23,
+$valuesy = [23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -17,9 +17,9 @@ $valuesy = array(23,
                 "23.45",
                 "2.345e1",
                 true,
-                false);
+                false];
 
-$valuesx = array(33,
+$valuesx = [33,
                 -33,
                 3.345e1,
                 -3.345e1,
@@ -29,7 +29,7 @@ $valuesx = array(33,
                 "43.45",
                 "1.345e1",
                 true,
-                false);
+                false];
 
 for ($i = 0; $i < count($valuesy); $i++) {
     for ($j = 0; $j < count($valuesx); $j++) {

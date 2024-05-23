@@ -5,7 +5,7 @@ precision=14
 --FILE--
 <?php
 echo "*** Testing floor() : basic functionality ***\n";
-$values = array(0,
+$values = [0,
                 -0,
                 0.5,
                 -0.5,
@@ -25,7 +25,7 @@ $values = array(0,
                 true,
                 false,
                 null,
-                );
+                ];
 
 foreach($values as $value) {
     echo "\n-- floor $value --\n";

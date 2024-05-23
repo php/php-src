@@ -2,7 +2,7 @@
 Test number_format() - basic function test number_format()
 --FILE--
 <?php
-$values = array(1234.5678,
+$values = [1234.5678,
                 -1234.5678,
                 1234.6578e4,
                 -1234.56789e4,
@@ -16,7 +16,7 @@ $values = array(1234.5678,
                 "123.456789",
                 "12.3456789e1",
                 true,
-                false);
+                false];
 
 echo "\n number_format tests.....default\n";
 for ($i = 0; $i < count($values); $i++) {
@@ -38,13 +38,13 @@ for ($i = 0; $i < count($values); $i++) {
 
 echo "\n number_format tests.....French format\n";
 for ($i = 0; $i < count($values); $i++) {
-    $res = number_format($values[$i], 2, ',' , ' ');
+    $res = number_format($values[$i], 2, ',', ' ');
     var_dump($res);
 }
 
 echo "\n number_format tests.....multichar format\n";
 for ($i = 0; $i < count($values); $i++) {
-    $res = number_format($values[$i], 2, ' DECIMALS ' , ' THOUSAND ');
+    $res = number_format($values[$i], 2, ' DECIMALS ', ' THOUSAND ');
     var_dump($res);
 }
 ?>

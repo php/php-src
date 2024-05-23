@@ -6,7 +6,7 @@ precision=14
 <?php
 echo "*** Testing round() : basic functionality ***\n";
 
-$values = array(123456789,
+$values = [123456789,
                 123.456789,
                 -4.5679123,
                 1.23E4,
@@ -14,9 +14,9 @@ $values = array(123456789,
                 0x234567,
                 067777777,
                 "1.234567",
-                "2.3456789e8");
+                "2.3456789e8"];
 
-$precision = array(2,
+$precision = [2,
                 8,
                 0x3,
                 04,
@@ -26,7 +26,7 @@ $precision = array(2,
                 "3.6",
                 "2.1e1",
                 true,
-                false);
+                false];
 
 for ($i = 0; $i < count($values); $i++) {
     echo "round: $values[$i]\n";

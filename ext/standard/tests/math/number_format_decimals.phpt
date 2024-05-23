@@ -6,7 +6,7 @@ Test number_format() - test function with different decimal places
 define("MAX_INT32", 2147483647);
 define("MIN_INT32", -2147483647 - 1);
 
-$values = array(
+$values = [
     1.5151,
     15.151,
     151.51,
@@ -27,9 +27,9 @@ $values = array(
     -999999.0,
     MAX_INT32,
     MIN_INT32,
-);
+];
 
-$decimals = array(0, 1, 2, 3, 4, 5, -1, -2, -3, -4, -5, PHP_INT_MIN);
+$decimals = [0, 1, 2, 3, 4, 5, -1, -2, -3, -4, -5, PHP_INT_MIN];
 
 foreach ($values as $value) {
     echo 'testing ';

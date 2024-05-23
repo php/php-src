@@ -14,7 +14,7 @@ require($file_path."/allowed_rounding_error.inc");
 echo "atan 1.7320508075689 = ";
 $atan1 = 360 * atan(1.7320508075689) / (2.0 * M_PI);
 var_dump($atan1);
-if (allowed_rounding_error($atan1 ,60 )) {
+if (allowed_rounding_error($atan1, 60 )) {
     echo "Pass\n";
 }
 else {
@@ -24,7 +24,7 @@ else {
 echo "atan 0.57735026918963 = ";
 $atan2 = 360 * atan(0.57735026918963) / (2.0 * M_PI);
 var_dump($atan2);
-if (allowed_rounding_error($atan2 ,30 )) {
+if (allowed_rounding_error($atan2, 30 )) {
     echo "Pass\n";
 }
 else {

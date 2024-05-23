@@ -23,7 +23,7 @@ var_dump($nan==='abc');
 var_dump($nan===$nan);
 
 // INF
-$inf = pow(0,-2);
+$inf = pow(0, -2);
 var_dump($inf);
 var_dump(is_infinite($inf));
 //

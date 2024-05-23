@@ -6,7 +6,7 @@ precision=14
 <?php
 echo "*** Testing log1p() : basic functionality ***\n";
 
-$values = array(23,
+$values = [23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -16,7 +16,7 @@ $values = array(23,
                 "23.45",
                 "2.345e1",
                 true,
-                false);
+                false];
 
 echo "\n LOG1p tests\n";
 

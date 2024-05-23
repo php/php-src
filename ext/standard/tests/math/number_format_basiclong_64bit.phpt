@@ -12,15 +12,15 @@ define("MAX_32Bit", 2147483647);
 define("MIN_64Bit", -9223372036854775807 - 1);
 define("MIN_32Bit", -2147483647 - 1);
 
-$numbers = array(
+$numbers = [
     MAX_64Bit, MIN_64Bit, MAX_32Bit, MIN_32Bit, MAX_64Bit - MAX_32Bit, MIN_64Bit - MIN_32Bit,
     MAX_32Bit + 1, MIN_32Bit - 1, MAX_32Bit * 2, (MAX_32Bit * 2) + 1, (MAX_32Bit * 2) - 1,
     MAX_64Bit - 1, MAX_64Bit + 1, MIN_64Bit + 1, MIN_64Bit - 1,
     // floats rounded as int
-    MAX_64Bit - 1024.0, MIN_64Bit + 1024.0
-);
+    MAX_64Bit - 1024.0, MIN_64Bit + 1024.0,
+];
 
-$precisions = array(
+$precisions = [
     5,
     0,
     -1,
@@ -31,7 +31,7 @@ $precisions = array(
     -19,
     -20,
     PHP_INT_MIN,
-);
+];
 
 foreach ($numbers as $number) {
     echo "--- testing: ";

@@ -13,7 +13,7 @@ require($file_path."/allowed_rounding_error.inc");
 
 echo "sinh .5  = ";
 var_dump(sinh(0.5));
-if (allowed_rounding_error(sinh(0.5),0.52109530549375)){
+if (allowed_rounding_error(sinh(0.5), 0.52109530549375)){
     echo "Pass\n";
 }
 else {

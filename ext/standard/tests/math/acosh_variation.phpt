@@ -11,7 +11,7 @@ precision = 10
 
 //Test acosh with a different input values
 
-$values = array(23,
+$values = [23,
         -23,
         2.345e1,
         -2.345e1,
@@ -22,7 +22,7 @@ $values = array(23,
         "2.345e1",
         "1000",
         true,
-        false);
+        false];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = acosh($values[$i]);

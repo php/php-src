@@ -8,7 +8,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 precision=14
 --FILE--
 <?php
-$values = array(111000111,
+$values = [111000111,
                 011100000,
                 1111111111111111111111111111111,
                 10000000000000000000000000000000,
@@ -26,7 +26,7 @@ $values = array(111000111,
                 011237,
                 true,
                 false,
-                );
+                ];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = bindec($values[$i]);

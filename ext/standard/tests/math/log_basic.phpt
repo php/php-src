@@ -4,7 +4,7 @@ Test log() - basic function test log()
 precision=14
 --FILE--
 <?php
-$values = array(23,
+$values = [23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -14,7 +14,7 @@ $values = array(23,
                 "23.45",
                 "2.345e1",
                 true,
-                false);
+                false];
 
 echo "\n LOG tests...no base\n";
 for ($i = 0; $i < count($values); $i++) {

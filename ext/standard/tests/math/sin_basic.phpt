@@ -24,7 +24,7 @@ $threesixty = M_PI * 2.0;
 
 echo "sin 30 = ";
 var_dump(sin($thirty));
-if (allowed_rounding_error(sin($thirty),0.5)) {
+if (allowed_rounding_error(sin($thirty), 0.5)) {
     echo "Pass\n";
 }
 else {
@@ -33,7 +33,7 @@ else {
 
 echo "sin 60 = ";
 var_dump(sin($sixty));
-if (allowed_rounding_error(sin($sixty),0.86602540378444)) {
+if (allowed_rounding_error(sin($sixty), 0.86602540378444)) {
     echo "Pass\n";
 }
 else {
@@ -42,7 +42,7 @@ else {
 
 echo "sin 90 = ";
 var_dump(sin($ninety));
-if (allowed_rounding_error(sin($ninety),1.0)) {
+if (allowed_rounding_error(sin($ninety), 1.0)) {
     echo "Pass\n";
 }
 else {
@@ -51,7 +51,7 @@ else {
 
 echo "sin 180 = ";
 var_dump(sin($oneeighty));
-if (allowed_rounding_error(sin($oneeighty),0.0)) {
+if (allowed_rounding_error(sin($oneeighty), 0.0)) {
     echo "Pass\n";
 }
 else {
@@ -60,7 +60,7 @@ else {
 
 echo "sin 270 = ";
 var_dump(sin($twoseventy));
-if (allowed_rounding_error(sin($twoseventy),-1.0)) {
+if (allowed_rounding_error(sin($twoseventy), -1.0)) {
     echo "Pass\n";
 }
 else {
@@ -69,7 +69,7 @@ else {
 
 echo "sin 360 = ";
 var_dump(sin($threesixty));
-if (allowed_rounding_error(sin($threesixty),0.0)) {
+if (allowed_rounding_error(sin($threesixty), 0.0)) {
     echo "Pass\n";
 }
 else {

@@ -24,7 +24,7 @@ class classA
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = [
        // int data
 /*1*/  0,
        1,
@@ -52,7 +52,7 @@ $inputs = array(
        // empty data
 /*17*/ "",
        '',
-       array(),
+       [],
 
        // string data
 /*20*/ "abcxyz",
@@ -69,8 +69,8 @@ $inputs = array(
 /*25*/ @$unset_var,
 
        // resource variable
-/*26*/ $fp
-);
+/*26*/ $fp,
+];
 
 // loop through each element of $inputs to check the behaviour of round()
 $iterator = 1;

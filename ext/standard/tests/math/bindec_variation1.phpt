@@ -17,7 +17,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = [
        // int data
 /*1*/  0,
        1,
@@ -40,7 +40,7 @@ $inputs = array(
        // empty data
 /*16*/ "",
        '',
-       array(),
+       [],
 
        // string data
 /*19*/ "abcxyz",
@@ -48,8 +48,8 @@ $inputs = array(
        $heredoc,
 
        // resource variable
-/*24*/ $fp
-);
+/*24*/ $fp,
+];
 
 // loop through each element of $inputs to check the behaviour of bindec()
 $iterator = 1;

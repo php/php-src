@@ -19,7 +19,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = [
        // int data
 /*1*/  0,
        1,
@@ -44,7 +44,7 @@ $inputs = array(
        // empty data
 /*18*/ "",
        '',
-       array(),
+       [],
 
        // string data
 /*21*/ "abcxyz",
@@ -52,8 +52,8 @@ $inputs = array(
        $heredoc,
 
        // resource variable
-/*26*/ $fp
-);
+/*26*/ $fp,
+];
 
 // loop through each element of $inputs to check the behaviour of hexdec()
 $iterator = 1;

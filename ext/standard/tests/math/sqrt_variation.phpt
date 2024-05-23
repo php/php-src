@@ -12,7 +12,7 @@ precision = 14
 //Test sqrt with a different input values
 echo "*** Testing sqrt() : usage variations ***\n";
 
-$values = array(23,
+$values = [23,
         -23,
         2.345e1,
         -2.345e1,
@@ -23,7 +23,7 @@ $values = array(23,
         "2.345e1",
         "1000",
         true,
-        false);
+        false];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = sqrt($values[$i]);

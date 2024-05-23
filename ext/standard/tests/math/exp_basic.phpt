@@ -4,7 +4,7 @@ Test exp() - basic function test for exp()
 serialize_precision=14
 --FILE--
 <?php
-$values = array(10,
+$values = [10,
                 10.3,
                 3.9505e3,
                 037,
@@ -15,7 +15,7 @@ $values = array(10,
                 "039",
                 true,
                 false,
-                );
+                ];
 
 $iterator = 1;
 foreach($values as $value) {

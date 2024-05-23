@@ -16,7 +16,7 @@ $thirty = M_PI / 6.0;
 
 echo "tan 60 = ";
 var_dump(tan($sixty));
-if (allowed_rounding_error(tan($sixty),1.7320508075689)) {
+if (allowed_rounding_error(tan($sixty), 1.7320508075689)) {
     echo "Pass\n";
 }
 else {
@@ -25,7 +25,7 @@ else {
 
 echo "tan 30 = ";
 var_dump(tan($thirty));
-if (allowed_rounding_error(tan($thirty),0.57735026918963)) {
+if (allowed_rounding_error(tan($thirty), 0.57735026918963)) {
     echo "Pass\n";
 }
 else {

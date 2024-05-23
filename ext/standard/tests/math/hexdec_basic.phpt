@@ -6,7 +6,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-$values = array(0x123abc,
+$values = [0x123abc,
                 0x789DEF,
                 0x7FFFFFFF,
                 0x80000000,
@@ -23,7 +23,7 @@ $values = array(0x123abc,
                 '011237',
                 true,
                 false,
-                );
+                ];
 for ($i = 0; $i < count($values); $i++) {
     $res = hexdec($values[$i]);
     var_dump($res);

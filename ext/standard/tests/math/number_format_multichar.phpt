@@ -2,7 +2,7 @@
 Test number_format() - multiple character separator support
 --FILE--
 <?php
-$values = array(1234.5678,
+$values = [1234.5678,
                 -1234.5678,
                 1234.6578e4,
                 -1234.56789e4,
@@ -12,7 +12,7 @@ $values = array(1234.5678,
                 "123.456789",
                 "12.3456789e1",
                 true,
-                false);
+                false];
 
 echo " number_format tests.....multiple character decimal point\n";
 for ($i = 0; $i < count($values); $i++) {
@@ -22,13 +22,13 @@ for ($i = 0; $i < count($values); $i++) {
 
 echo "\n number_format tests.....multiple character thousand separator\n";
 for ($i = 0; $i < count($values); $i++) {
-    $res = number_format($values[$i], 2, '.' , '&thinsp;');
+    $res = number_format($values[$i], 2, '.', '&thinsp;');
     var_dump($res);
 }
 
 echo "\n number_format tests.....multiple character decimal and thousep\n";
 for ($i = 0; $i < count($values); $i++) {
-    $res = number_format($values[$i], 2, '&#183;' , '&thinsp;');
+    $res = number_format($values[$i], 2, '&#183;', '&thinsp;');
     var_dump($res);
 }
 ?>

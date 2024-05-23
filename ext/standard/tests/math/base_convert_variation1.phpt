@@ -13,7 +13,7 @@ EOT;
 // get a resource variable
 $fp = fopen(__FILE__, "r");
 
-$inputs = array(
+$inputs = [
        // int data
 /*1*/  0,
        1,
@@ -37,7 +37,7 @@ $inputs = array(
        // empty data
 /*17*/ "",
        '',
-       array(),
+       [],
 
        // string data
 /*20*/ "abcxyz",
@@ -45,8 +45,8 @@ $inputs = array(
        $heredoc,
 
        // resource variable
-/*25*/ $fp
-);
+/*25*/ $fp,
+];
 
 // loop through each element of $inputs to check the behaviour of base_convert()
 $iterator = 1;

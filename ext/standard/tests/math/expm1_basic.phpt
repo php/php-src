@@ -5,7 +5,7 @@ serialize_precision=14
 --FILE--
 <?php
 echo "*** Testing expm1() : basic functionality ***\n";
-$values = array(10,
+$values = [10,
                 10.3,
                 3.9505e3,
                 037,
@@ -16,7 +16,7 @@ $values = array(10,
                 "039",
                 true,
                 false,
-                );
+                ];
 
 // loop through each element of $values to check the behaviour of expm1()
 $iterator = 1;

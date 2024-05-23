@@ -2,7 +2,7 @@
 Test decoct() - basic function test decoct()
 --FILE--
 <?php
-$values = array(10,
+$values = [10,
                 3950.5,
                 3.9505e3,
                 03,
@@ -14,7 +14,7 @@ $values = array(10,
                 "0x5F",
                 true,
                 false,
-                );
+                ];
 
 foreach ($values as $value) {
     try {

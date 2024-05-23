@@ -6,7 +6,7 @@ precision = 14
 <?php
 echo "*** Testing abs() : basic functionality ***\n";
 
-$values = array(23,
+$values = [23,
                 -23,
                 2.345e1,
                 -2.345e1,
@@ -19,7 +19,7 @@ $values = array(23,
                 "-2.345e1",
                 null,
                 true,
-                false);
+                false];
 
 for ($i = 0; $i < count($values); $i++) {
     $res = abs($values[$i]);

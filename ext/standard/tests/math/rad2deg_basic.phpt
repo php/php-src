@@ -19,7 +19,7 @@ $arg_3 = 6.283185307;
 echo "rad2deg $arg_0= ";
 $r0 = rad2deg($arg_0);
 var_dump($r0);
-if (allowed_rounding_error($r0 ,0 )) {
+if (allowed_rounding_error($r0, 0 )) {
     echo "Pass\n";
 }
 else {
@@ -28,7 +28,7 @@ else {
 echo "rad2deg $arg_1 = ";
 $r1 = rad2deg($arg_1);
 var_dump($r1);
-if (allowed_rounding_error($r1 ,90.000000011752)) {
+if (allowed_rounding_error($r1, 90.000000011752)) {
     echo "Pass\n";
 }
 else {
@@ -37,7 +37,7 @@ else {
 echo "rad2deg $arg_2  = ";
 $r2 = rad2deg($arg_2);
 var_dump($r2);
-if (allowed_rounding_error($r2 ,180.0000000235 )) {
+if (allowed_rounding_error($r2, 180.0000000235 )) {
     echo "Pass\n";
 }
 else {
@@ -46,7 +46,7 @@ else {
 echo "rad2deg $arg_3 = ";
 $r3 = rad2deg($arg_3);
 var_dump($r3);
-if (allowed_rounding_error($r3 ,359.99999998971 )) {
+if (allowed_rounding_error($r3, 359.99999998971 )) {
     echo "Pass\n";
 }
 else {
