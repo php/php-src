@@ -14340,7 +14340,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			}
 		}
 		if (ZEND_TYPE_IS_SET(prop_info->type)) {
-			ir_ref ref;
+			ir_ref ref, arg3;
 
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 			jit_SET_EX_OPLINE(jit, opline);
@@ -14354,10 +14354,19 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 				ref = ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_class_entry, properties_info_table)));
 				ref = ir_LOAD_A(ir_ADD_OFFSET(ref, prop_info_offset));
 			}
+			if (Z_MODE(val_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+				if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
+					return 0;
+				}
+				arg3 = jit_ZVAL_ADDR(jit, real_addr);
+			} else {
+				arg3 = jit_ZVAL_ADDR(jit, val_addr);
+			}
 			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
 				prop_ref,
 				ref,
-				jit_ZVAL_ADDR(jit, val_addr),
+				arg3,
 				RETURN_VALUE_USED(opline) ? jit_ZVAL_ADDR(jit, res_addr) : IR_NULL);
 
 			ir_END_list(end_inputs);
@@ -14612,11 +14621,21 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			}
 		}
 		if (ZEND_TYPE_IS_SET(prop_info->type)) {
-			ir_ref if_ref, if_typed, noref_path, ref_path, reference, ref;
+			ir_ref if_ref, if_typed, noref_path, ref_path, reference, ref, arg2;
 
 			may_throw = 1;
 
 			jit_SET_EX_OPLINE(jit, opline);
+
+			if (Z_MODE(val_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+				if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
+					return 0;
+				}
+				arg2 = jit_ZVAL_ADDR(jit, real_addr);
+			} else {
+				arg2 = jit_ZVAL_ADDR(jit, val_addr);
+			}
 
 			if_ref = jit_if_Z_TYPE(jit, prop_addr, IS_REFERENCE);
 			ir_IF_FALSE(if_ref);
@@ -14632,7 +14651,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 
 			ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_op_to_typed_ref),
 				reference,
-				jit_ZVAL_ADDR(jit, val_addr),
+				arg2,
 				ir_CONST_FC_FUNC(binary_op));
 
 			ir_END_list(end_inputs);
@@ -14656,7 +14675,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_op_to_typed_prop),
 				prop_ref,
 				ref,
-				jit_ZVAL_ADDR(jit, val_addr),
+				arg2,
 				ir_CONST_FC_FUNC(binary_op));
 
 			ir_END_list(end_inputs);
@@ -14680,7 +14699,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		}
 
 		if (var_info & MAY_BE_REF) {
-			ir_ref if_ref, if_typed, noref_path, ref_path, reference, ref;
+			ir_ref if_ref, if_typed, noref_path, ref_path, reference, ref, arg2;
 
 			may_throw = 1;
 
@@ -14698,9 +14717,18 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 
 			jit_SET_EX_OPLINE(jit, opline);
 
+			if (Z_MODE(val_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+				if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
+					return 0;
+				}
+				arg2 = jit_ZVAL_ADDR(jit, real_addr);
+			} else {
+				arg2 = jit_ZVAL_ADDR(jit, val_addr);
+			}
 			ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_op_to_typed_ref),
 				reference,
-				jit_ZVAL_ADDR(jit, val_addr),
+				arg2,
 				ir_CONST_FC_FUNC(binary_op));
 
 			ir_END_list(end_inputs);
@@ -14793,16 +14821,27 @@ long_math:
 	}
 
 	if (slow_inputs) {
+		ir_ref arg3;
+
 		ir_MERGE_list(slow_inputs);
 
 		may_throw = 1;
 
+		if (Z_MODE(val_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+			if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
+				return 0;
+			}
+			arg3 = jit_ZVAL_ADDR(jit, real_addr);
+		} else {
+			arg3 = jit_ZVAL_ADDR(jit, val_addr);
+		}
 		jit_SET_EX_OPLINE(jit, opline);
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
 		ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_obj_op_helper),
 			obj_ref,
 			ir_CONST_ADDR(name),
-			jit_ZVAL_ADDR(jit, val_addr),
+			arg3,
 			ir_ADD_OFFSET(run_time_cache, (opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
 			ir_CONST_FC_FUNC(binary_op));
 
