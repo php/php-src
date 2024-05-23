@@ -4851,7 +4851,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_data_info = OP1_DATA_INFO();
 						CHECK_OP1_DATA_TRACE_TYPE();
 						if (!zend_jit_assign_obj_op(&ctx, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, op1_data_info, OP1_DATA_RANGE(),
+								op1_info, op1_addr, op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_RANGE(),
 								op1_indirect, ce, ce_is_instanceof, on_this, delayed_fetch_this, op1_ce,
 								val_type)) {
 							goto jit_failure;
@@ -4934,7 +4934,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_data_info = OP1_DATA_INFO();
 						CHECK_OP1_DATA_TRACE_TYPE();
 						if (!zend_jit_assign_obj(&ctx, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, op1_data_info,
+								op1_info, op1_addr, op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
 								op1_indirect, ce, ce_is_instanceof, on_this, delayed_fetch_this, op1_ce,
 								val_type,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {

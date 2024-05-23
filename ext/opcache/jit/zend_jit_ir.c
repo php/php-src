@@ -6254,7 +6254,7 @@ static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
 		if (Z_MODE(val_addr) == IS_REG) {
 			zend_jit_addr real_addr;
 
-			if (opline->opcode == ZEND_ASSIGN_DIM) {
+			if (opline->opcode == ZEND_ASSIGN_DIM || opline->opcode == ZEND_ASSIGN_OBJ) {
 				real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
 			} else {
 				ZEND_ASSERT(opline->opcode == ZEND_ASSIGN);
@@ -14143,6 +14143,8 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
                                uint32_t              op1_info,
                                zend_jit_addr         op1_addr,
                                uint32_t              val_info,
+                               zend_jit_addr         val_addr,
+                               zend_jit_addr         val_def_addr,
                                bool                  op1_indirect,
                                zend_class_entry     *ce,
                                bool                  ce_is_instanceof,
@@ -14155,7 +14157,6 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	zval *member;
 	zend_string *name;
 	zend_property_info *prop_info;
-	zend_jit_addr val_addr = OP1_DATA_ADDR();
 	zend_jit_addr res_addr = 0;
 	zend_jit_addr prop_addr;
 	ir_ref obj_ref = IR_UNUSED;
@@ -14163,6 +14164,15 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	ir_ref delayed_end_input = IR_UNUSED;
 	ir_ref end_inputs = IR_UNUSED;
 	ir_ref slow_inputs = IR_UNUSED;
+
+	if (val_addr != val_def_addr && val_def_addr) {
+		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
+			return 0;
+		}
+		if (Z_MODE(val_def_addr) == IS_REG && Z_MODE(val_addr) != IS_REG) {
+			val_addr = val_def_addr;
+		}
+	}
 
 	if (RETURN_VALUE_USED(opline)) {
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
@@ -14276,17 +14286,28 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
 
 		if (!ce || ce_is_instanceof || (ce->ce_flags & (ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_TRAIT))) {
+			ir_ref arg3;
 			ir_ref prop_info_ref = ir_LOAD_A(
 				ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*) * 2));
 			ir_ref if_has_prop_info = ir_IF(prop_info_ref);
 			ir_IF_TRUE_cold(if_has_prop_info);
+
+			if (Z_MODE(val_addr) == IS_REG) {
+				zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+				if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
+					return 0;
+				}
+				arg3 = jit_ZVAL_ADDR(jit, real_addr);
+			} else {
+				arg3 = jit_ZVAL_ADDR(jit, val_addr);
+			}
 
 			// JIT: value = zend_assign_to_typed_prop(prop_info, property_val, value EXECUTE_DATA_CC);
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_to_typed_prop),
 				prop_ref,
 				prop_info_ref,
-				jit_ZVAL_ADDR(jit, val_addr),
+				arg3,
 				RETURN_VALUE_USED(opline) ? jit_ZVAL_ADDR(jit, res_addr) : IR_NULL);
 
 			if ((opline+1)->op1_type == IS_CONST) {
@@ -14344,7 +14365,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	}
 
 	if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
-		if (opline->result_type == IS_UNUSED) {
+		if (Z_MODE(val_addr) != IS_REG && opline->result_type == IS_UNUSED) {
 			if (!zend_jit_assign_to_variable_call(jit, opline, prop_addr, prop_addr, -1, -1, (opline+1)->op1_type, val_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
@@ -14365,15 +14386,27 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	}
 
 	if (slow_inputs) {
+		ir_ref arg3;
+
 		ir_MERGE_list(slow_inputs);
 		jit_SET_EX_OPLINE(jit, opline);
+
+		if (Z_MODE(val_addr) == IS_REG) {
+			zend_jit_addr real_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline+1)->op1.var);
+			if (!zend_jit_spill_store_inv(jit, val_addr, real_addr, val_info)) {
+				return 0;
+			}
+			arg3 = jit_ZVAL_ADDR(jit, real_addr);
+		} else {
+			arg3 = jit_ZVAL_ADDR(jit, val_addr);
+		}
 
 		// JIT: value = zobj->handlers->write_property(zobj, name, value, CACHE_ADDR(opline->extended_value));
 		ir_ref run_time_cache = ir_LOAD_A(jit_EX(run_time_cache));
 		ir_CALL_5(IR_VOID, ir_CONST_FC_FUNC(zend_jit_assign_obj_helper),
 			obj_ref,
 			ir_CONST_ADDR(name),
-			jit_ZVAL_ADDR(jit, val_addr),
+			arg3,
 			ir_ADD_OFFSET(run_time_cache, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS),
 			RETURN_VALUE_USED(opline) ? jit_ZVAL_ADDR(jit, res_addr) : IR_NULL);
 
@@ -14412,6 +14445,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
                                   uint32_t              op1_info,
                                   zend_jit_addr         op1_addr,
                                   uint32_t              val_info,
+                                  zend_jit_addr         val_addr,
                                   zend_ssa_range       *val_range,
                                   bool                  op1_indirect,
                                   zend_class_entry     *ce,
@@ -14424,7 +14458,6 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 	zval *member;
 	zend_string *name;
 	zend_property_info *prop_info;
-	zend_jit_addr val_addr = OP1_DATA_ADDR();
 	zend_jit_addr prop_addr;
 	bool use_prop_guard = 0;
 	bool may_throw = 0;
@@ -16692,7 +16725,16 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			return ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_ARRAY) &&
 					(((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) ||
 					 ((op2_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING));
+		case ZEND_ASSIGN_OBJ_OP:
+			if (opline->result_type != IS_UNUSED) {
+				return 0;
+			}
+			if (!zend_jit_supported_binary_op(opline->extended_value, MAY_BE_ANY, OP1_DATA_INFO())) {
+				return 0;
+			}
+			ZEND_FALLTHROUGH;
 		case ZEND_FETCH_OBJ_R:
+		case ZEND_ASSIGN_OBJ:
 			if (opline->op2_type != IS_CONST
 			 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
 			 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
