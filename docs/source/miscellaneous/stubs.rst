@@ -163,9 +163,6 @@ This results in the following arginfo file:
 
 .. code:: c
 
-   /* This is a generated file, edit the .stub.php file instead.
-    * Stub hash: 377cb85cf4568134395f5834f193fdb5560f9205 */
-
    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_addElephantsToHerd, 0, 2, IS_STRING, 0)
        ZEND_ARG_INFO(1, herd)
        ZEND_ARG_TYPE_INFO(ZEND_SEND_PREFER_REF, elephantName, IS_STRING, 0)
@@ -193,9 +190,6 @@ In order to generate these, add the file-level ``@generate-function-entries`` PH
 Now, the following C code is generated:
 
 .. code:: c
-
-   /* This is a generated file, edit the .stub.php file instead.
-    * Stub hash: cf2623bf018b829c95e956dcc79d161d9678f96f */
 
    ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fahrenheitToCelcius, 0, 1, IS_DOUBLE, 0)
        ZEND_ARG_TYPE_INFO(0, fahrenheit, IS_DOUBLE, 0)
@@ -288,9 +282,6 @@ Given the following stub:
 The following arginfo file is generated:
 
 .. code:: c
-
-   /* This is a generated file, edit the .stub.php file instead.
-    * Stub hash: 6cb86300f1bf294019e10cb330dde2c142ed9794 */
 
    static const zend_function_entry class_Number_methods[] = {
        ZEND_FE_END
