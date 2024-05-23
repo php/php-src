@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-14267 (opcache.jit=off does not allow enabling JIT at runtime).
     (ilutov)
 
+- Sodium:
+  . Fix memory leaks in ext/sodium on failure of some functions. (nielsdos)
+
 - SPL:
   . Fixed bug GH-14290 (Member access within null pointer in extension spl).
     (nielsdos)
