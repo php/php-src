@@ -7,6 +7,10 @@ opcache.jit=disable
 opcache.jit_buffer_size=32M
 --EXTENSIONS--
 opcache
+--SKIPIF--
+<?php
+if (ini_get('opcache.jit') === false) die('skip PHP is compiled without JIT');
+?>
 --FILE--
 <?php
 ini_set('opcache.jit', 'tracing');
