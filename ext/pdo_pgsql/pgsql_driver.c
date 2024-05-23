@@ -1251,7 +1251,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 	}
 
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup);
 
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -1261,6 +1261,14 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 		H->notice_callback = emalloc(sizeof(zend_fcall_info_cache));
 		zend_fcc_dup(H->notice_callback, &fcc);
 	}
+
+	return;
+
+cleanup:
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		zend_fcc_dtor(&fcc);
+	}
+	RETURN_THROWS();
 }
 /* }}} */
 
