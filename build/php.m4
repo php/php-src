@@ -1224,33 +1224,21 @@ dnl
 dnl PHP_MISSING_TIME_R_DECL
 dnl
 AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
-  AC_MSG_CHECKING([for missing declarations of reentrant functions])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = localtime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_LOCALTIME_R_DECL,1,[Whether localtime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = gmtime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_GMTIME_R_DECL,1,[Whether gmtime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = asctime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_ASCTIME_R_DECL,1,[Whether asctime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = ctime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_CTIME_R_DECL,1,[Whether ctime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)(void) = strtok_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
-  ])
-  AC_MSG_RESULT([done])
+AC_CHECK_DECL([localtime_r],,
+  [AC_DEFINE([MISSING_LOCALTIME_R_DECL], [1], [Whether localtime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([gmtime_r],,
+  [AC_DEFINE([MISSING_GMTIME_R_DECL], [1], [Whether gmtime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([asctime_r],,
+  [AC_DEFINE([MISSING_ASCTIME_R_DECL], [1], [Whether asctime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([ctime_r],,
+  [AC_DEFINE([MISSING_CTIME_R_DECL], [1], [Whether ctime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([strtok_r],,
+  [AC_DEFINE([MISSING_STRTOK_R_DECL], [1], [Whether strtok_r is declared])],
+  [#include <string.h>])
 ])
 
 dnl
