@@ -1,9 +1,14 @@
 <?php
 require_once dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 require_once dirname(__FILE__) . '/config.inc';
+if (!isset($db)) {
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+}
+if (!isset($rounds) || empty($rounds)) {
+    $rounds = [ null, 'Re' ];
+}
 
-attach($db);
+attach($db, array_shift($rounds));
 
 $db->beginTransaction();
 $db->exec("set client_min_messages to notice");
@@ -11,9 +16,15 @@ $db->exec("create temporary table t (a varchar(3))");
 $db->exec("create function hey() returns trigger as \$\$ begin new.a := 'oh'; raise notice 'I tampered your data, did you know?'; return new; end; \$\$ language plpgsql");
 $db->exec("create trigger hop before insert on t for each row execute procedure hey()");
 $db->exec("insert into t values ('ah')");
-attach($db, 'Re');
+while (count($rounds)) {
+try {
+attach($db, array_shift($rounds));
+} catch (TypeError $err) {
+echo "Caught TypeError: ".$err->getMessage()."\n";
+}
 $db->exec("delete from t");
 $db->exec("insert into t values ('ah')");
+}
 $db->pgsqlSetNoticeCallback(null);
 $db->exec("delete from t");
 $db->exec("insert into t values ('ah')");
