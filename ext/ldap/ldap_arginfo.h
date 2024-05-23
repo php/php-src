@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 49801a700489ac5c4ffb8c3916278ec7aa002ab6 */
+ * Stub hash: 7415695a7ae90e6abd45617baf8a9ecf9232b801 */
 
 #if defined(HAVE_ORALDAP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
@@ -668,13 +668,13 @@ static void register_ldap_symbols(int module_number)
 #if defined(LDAP_OPT_X_SASL_USERNAME)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_USERNAME", LDAP_OPT_X_SASL_USERNAME, CONST_PERSISTENT);
 #endif
-#if defined(ORALDAP)
+#if defined(HAVE_ORALDAP)
 	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT);
 #endif
-#if defined(ORALDAP)
+#if defined(HAVE_ORALDAP)
 	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT);
 #endif
-#if defined(ORALDAP)
+#if defined(HAVE_ORALDAP)
 	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT);
 #endif
 #if (LDAP_API_VERSION > 2000)
