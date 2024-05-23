@@ -622,7 +622,7 @@ static inline void fallback_seed_add(PHP_SHA1_CTX *c, void *p, size_t l){
 	PHP_SHA1Update(c, p, l);
 }
 
-uint64_t php_random_generate_fallback_seed(void)
+PHPAPI uint64_t php_random_generate_fallback_seed(void)
 {
 	/* Mix various values using SHA-1 as a PRF to obtain as
 	 * much entropy as possible, hopefully generating an
