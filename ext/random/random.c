@@ -453,13 +453,6 @@ PHPAPI void php_srand(zend_long seed)
 }
 /* }}} */
 
-/* {{{ php_rand */
-PHPAPI zend_long php_rand(void)
-{
-	return php_mt_rand();
-}
-/* }}} */
-
 /* {{{ Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
