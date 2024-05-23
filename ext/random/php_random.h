@@ -58,12 +58,6 @@ PHPAPI uint32_t php_mt_rand(void);
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
-# ifndef RAND_MAX
-#  define RAND_MAX PHP_MT_RAND_MAX
-# endif
-
-# define PHP_RAND_MAX PHP_MT_RAND_MAX
-
 typedef struct _php_random_status_state_combinedlcg {
 	int32_t state[2];
 } php_random_status_state_combinedlcg;
