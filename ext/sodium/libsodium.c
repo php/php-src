@@ -992,6 +992,7 @@ PHP_FUNCTION(sodium_crypto_sign_publickey_from_secretkey)
 
 	if (crypto_sign_ed25519_sk_to_pk((unsigned char *) ZSTR_VAL(publickey),
 									 (const unsigned char *) secretkey) != 0) {
+		zend_string_efree(publickey);
 		zend_throw_exception(sodium_exception_ce,
 				   "internal error", 0);
 		RETURN_THROWS();
@@ -2705,6 +2706,7 @@ PHP_FUNCTION(sodium_crypto_kx_seed_keypair)
 	crypto_generichash(sk, crypto_kx_SECRETKEYBYTES,
 					   seed, crypto_kx_SEEDBYTES, NULL, 0);
 	if (crypto_scalarmult_base(pk, sk) != 0) {
+		zend_string_efree(keypair);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
@@ -2726,6 +2728,7 @@ PHP_FUNCTION(sodium_crypto_kx_keypair)
 	pk = sk + crypto_kx_SECRETKEYBYTES;
 	randombytes_buf(sk, crypto_kx_SECRETKEYBYTES);
 	if (crypto_scalarmult_base(pk, sk) != 0) {
+		zend_string_efree(keypair);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
@@ -2902,6 +2905,7 @@ PHP_FUNCTION(sodium_crypto_auth)
 	if (crypto_auth((unsigned char *) ZSTR_VAL(mac),
 					(const unsigned char *) msg, msg_len,
 					(const unsigned char *) key) != 0) {
+		zend_string_efree(mac);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
@@ -2961,6 +2965,7 @@ PHP_FUNCTION(sodium_crypto_sign_ed25519_sk_to_curve25519)
 
 	if (crypto_sign_ed25519_sk_to_curve25519((unsigned char *) ZSTR_VAL(ecdhkey),
 											 (const unsigned char *) eddsakey) != 0) {
+		zend_string_efree(ecdhkey);
 		zend_throw_exception(sodium_exception_ce, "conversion failed", 0);
 		RETURN_THROWS();
 	}
@@ -2988,6 +2993,7 @@ PHP_FUNCTION(sodium_crypto_sign_ed25519_pk_to_curve25519)
 
 	if (crypto_sign_ed25519_pk_to_curve25519((unsigned char *) ZSTR_VAL(ecdhkey),
 											 (const unsigned char *) eddsakey) != 0) {
+		zend_string_efree(ecdhkey);
 		zend_throw_exception(sodium_exception_ce, "conversion failed", 0);
 		RETURN_THROWS();
 	}
@@ -3292,6 +3298,7 @@ PHP_FUNCTION(sodium_pad)
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 	if (sodium_pad(NULL, (unsigned char *) ZSTR_VAL(padded), unpadded_len,
 				   (size_t) blocksize, xpadded_len + 1U) != 0) {
+		zend_string_efree(padded);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		RETURN_THROWS();
 	}
