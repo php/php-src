@@ -622,7 +622,7 @@ static inline void fallback_seed_add(PHP_SHA1_CTX *c, void *p, size_t l){
 	PHP_SHA1Update(c, p, l);
 }
 
-uint64_t php_random_generate_fallback_seed(void)
+uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_state *state)
 {
 	/* Mix various values using SHA-1 as a PRF to obtain as
 	 * much entropy as possible, hopefully generating an
@@ -640,7 +640,7 @@ uint64_t php_random_generate_fallback_seed(void)
 	char buf[64 + 1];
 
 	PHP_SHA1Init(&c);
-	if (!RANDOM_G(fallback_seed_initialized)) {
+	if (!state->initialized) {
 		/* Current time. */
 		gettimeofday(&tv, NULL);
 		fallback_seed_add(&c, &tv, sizeof(tv));
@@ -656,7 +656,7 @@ uint64_t php_random_generate_fallback_seed(void)
 		fallback_seed_add(&c, &tid, sizeof(tid));
 #endif
 		/* Pointer values to benefit from ASLR. */
-		pointer = &RANDOM_G(fallback_seed_initialized);
+		pointer = state;
 		fallback_seed_add(&c, &pointer, sizeof(pointer));
 		pointer = &c;
 		fallback_seed_add(&c, &pointer, sizeof(pointer));
@@ -680,35 +680,29 @@ uint64_t php_random_generate_fallback_seed(void)
 		gettimeofday(&tv, NULL);
 		fallback_seed_add(&c, &tv, sizeof(tv));
 		/* Previous state. */
-		fallback_seed_add(&c, RANDOM_G(fallback_seed), 20);
+		fallback_seed_add(&c, state->seed, 20);
 	}
-	PHP_SHA1Final(RANDOM_G(fallback_seed), &c);
-	RANDOM_G(fallback_seed_initialized) = true;
+	PHP_SHA1Final(state->seed, &c);
+	state->initialized = true;
 
 	uint64_t result = 0;
 
 	for (int i = 0; i < sizeof(result); i++) {
-		result = result | (((uint64_t)RANDOM_G(fallback_seed)[i]) << (i * 8));
+		result = result | (((uint64_t)state->seed[i]) << (i * 8));
 	}
 
 	return result;
 }
 
+uint64_t php_random_generate_fallback_seed(void)
+{
+	return php_random_generate_fallback_seed_ex(&RANDOM_G(fallback_seed_state));
+}
+
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {
-	random_globals->random_fd = -1;
-	random_globals->fallback_seed_initialized = false;
-}
-/* }}} */
-
-/* {{{ PHP_GSHUTDOWN_FUNCTION */
-static PHP_GSHUTDOWN_FUNCTION(random)
-{
-	if (random_globals->random_fd >= 0) {
-		close(random_globals->random_fd);
-		random_globals->random_fd = -1;
-	}
+	random_globals->fallback_seed_state.initialized = false;
 }
 /* }}} */
 
@@ -780,6 +774,15 @@ PHP_MINIT_FUNCTION(random)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
+PHP_MSHUTDOWN_FUNCTION(random)
+{
+	php_random_csprng_shutdown();
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(random)
 {
@@ -796,14 +799,14 @@ zend_module_entry random_module_entry = {
 	"random",					/* Extension name */
 	ext_functions,				/* zend_function_entry */
 	PHP_MINIT(random),			/* PHP_MINIT - Module initialization */
-	NULL,						/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(random),		/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(random),			/* PHP_RINIT - Request initialization */
 	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
 	NULL,						/* PHP_MINFO - Module info */
 	PHP_VERSION,				/* Version */
 	PHP_MODULE_GLOBALS(random),	/* ZTS Module globals */
 	PHP_GINIT(random),			/* PHP_GINIT - Global initialization */
-	PHP_GSHUTDOWN(random),		/* PHP_GSHUTDOWN - Global shutdown */
+	NULL,						/* PHP_GSHUTDOWN - Global shutdown */
 	NULL,						/* Post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };

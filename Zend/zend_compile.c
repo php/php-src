@@ -1918,7 +1918,9 @@ ZEND_API bool zend_is_auto_global_str(const char *name, size_t len) /* {{{ */ {
 
 	if ((auto_global = zend_hash_str_find_ptr(CG(auto_globals), name, len)) != NULL) {
 		if (auto_global->armed) {
+			zend_mm_input_begin();
 			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+			zend_mm_input_end();
 		}
 		return 1;
 	}
@@ -1932,7 +1934,9 @@ ZEND_API bool zend_is_auto_global(zend_string *name) /* {{{ */
 
 	if ((auto_global = zend_hash_find_ptr(CG(auto_globals), name)) != NULL) {
 		if (auto_global->armed) {
+			zend_mm_input_begin();
 			auto_global->armed = auto_global->auto_global_callback(auto_global->name);
+			zend_mm_input_end();
 		}
 		return 1;
 	}
@@ -1958,6 +1962,8 @@ ZEND_API zend_result zend_register_auto_global(zend_string *name, bool jit, zend
 ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 {
 	zend_auto_global *auto_global;
+
+	ZEND_ASSERT(zend_mm_check_in_input());
 
 	ZEND_HASH_MAP_FOREACH_PTR(CG(auto_globals), auto_global) {
 		if (auto_global->jit) {

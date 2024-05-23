@@ -5,7 +5,7 @@ GH-11189: Exceeding memory limit in zend_hash_do_resize leaves the array in an i
 if (getenv("USE_ZEND_ALLOC") === "0") die("skip ZMM is disabled");
 ?>
 --INI--
-memory_limit=2M
+memory_limit=4M
 --FILE--
 <?php
 
