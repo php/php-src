@@ -174,6 +174,17 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
      should either be inlined and undefined behavior fixed or it should be
      replaced by a non-biased scaler.
+   - The php_srand() and php_rand() functions have been removed. These were
+     slim wrappers around the corresponding php_mt_srand() and php_mt_rand()
+     function since PHP 7.1, but using zend_long instead of uint32_t as their
+     input/output types. This made their behavior incompatible between 32-bit
+     and 64-bit builds of PHP. Users of these functions are encouraged to
+     migrate to one of the more modern engines provided since PHP 8.2. If that
+     is not possible, due to backwards compatibility requirements, then the
+     php_mt_srand() and php_mt_rand() functions should be called directly and
+     the values appropriately casted.
+   - The PHP_RAND_MAX and RAND_MAX constants corresponding to the removed
+     php_rand() have also been removed.
    - The generate member of a php_random_algo is now expected to return
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
