@@ -1057,6 +1057,7 @@ ZEND_API void zend_std_write_dimension(zend_object *object, zval *offset, zval *
 }
 /* }}} */
 
+// todo: make zend_std_has_dimension return bool as well
 ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
 {
 	zend_class_entry *ce = object->ce;
@@ -1082,8 +1083,7 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 		return 0;
 	}
 
-	// todo: make zend_std_has_dimension return bool as well
-	return (int)result;
+	return result;
 }
 /* }}} */
 
@@ -1812,6 +1812,7 @@ ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2)
 	return ZEND_UNCOMPARABLE;
 }
 
+// todo: make zend_std_has_property return bool as well
 ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	bool result;
@@ -1904,8 +1905,7 @@ found:
 	}
 
 exit:
-	// todo: make zend_std_has_property return bool as well
-	return (int)result;
+	return result;
 }
 /* }}} */
 

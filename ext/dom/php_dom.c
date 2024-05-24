@@ -404,6 +404,7 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 	return zend_std_write_property(object, name, value, cache_slot);
 }
 
+// todo: make dom_property_exists return bool as well
 /* {{{ dom_property_exists */
 static int dom_property_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
@@ -428,11 +429,10 @@ static int dom_property_exists(zend_object *object, zend_string *name, int check
 			zval_ptr_dtor(&tmp);
 		}
 	} else {
-		retval = (bool)zend_std_has_property(object, name, check_empty, cache_slot);
+		retval = zend_std_has_property(object, name, check_empty, cache_slot);
 	}
 
-	// todo: make dom_property_exists return bool as well
-	return (int)retval;
+	return retval;
 }
 /* }}} */
 

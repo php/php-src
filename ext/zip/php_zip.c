@@ -977,10 +977,10 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 
 		zval_ptr_dtor(&tmp);
 	} else {
-		retval = (bool)zend_std_has_property(object, name, type, cache_slot);
+		retval = zend_std_has_property(object, name, type, cache_slot);
 	}
 
-	return (int)retval;
+	return retval;
 }
 /* }}} */
 
