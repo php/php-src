@@ -405,6 +405,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	zend_hash_index_add_new(&wm->ht, obj_key, value);
 }
 
+// todo: make zend_weakmap_has_dimension return bool as well
 /* int return and check_empty due to Object Handler API */
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {

@@ -197,7 +197,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	zval *id, *docp = NULL;
 	xmlDoc *doc = NULL, *newdoc = NULL;
 	xsltStylesheetPtr sheetp;
-	int clone_docu = 0;
+	bool clone_docu = false;
 	xmlNode *nodep = NULL;
 	zval *cloneDocu, rv;
 	zend_string *member;
@@ -257,7 +257,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
 	clone_docu = zend_is_true(cloneDocu);
 	zend_string_release_ex(member, 0);
-	if (clone_docu == 0) {
+	if (!clone_docu) {
 		/* Check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation.
 		 * xsl:key elements may only occur at the top level. Furthermore, all elements at the top level must be in a
 		 * namespace (if not, then the stylesheet is not well-formed and this function will have returned false earlier). */

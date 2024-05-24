@@ -491,8 +491,8 @@ PHP_FUNCTION(phpdbg_get_executable)
 {
 	HashTable *options = NULL;
 	zval *option_buffer;
-	bool by_function = 0;
-	bool by_opcode = 0;
+	bool by_function = false;
+	bool by_opcode = false;
 	HashTable *insert_ht;
 
 	zend_function *func;
@@ -592,8 +592,8 @@ PHP_FUNCTION(phpdbg_end_oplog)
 
 	HashTable *options = NULL;
 	zval *option_buffer;
-	bool by_function = 0;
-	bool by_opcode = 0;
+	bool by_function = false;
+	bool by_opcode = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
 		RETURN_THROWS();

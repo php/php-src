@@ -86,6 +86,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   for internal functions. If you need a cache slot for both internal and user
   functions, you may obtain a slot for each through the corresponding function.
 
+* zend_is_true now returns bool rather than int. Note that on PHP 8 this has
+  always returned 0 or 1, so conversion should be trivial.
 
 ========================
 2. Build system changes

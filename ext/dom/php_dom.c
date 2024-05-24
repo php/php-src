@@ -404,12 +404,13 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 	return zend_std_write_property(object, name, value, cache_slot);
 }
 
+// todo: make dom_property_exists return bool as well
 /* {{{ dom_property_exists */
 static int dom_property_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
 	dom_prop_handler *hnd = NULL;
-	int retval = 0;
+	bool retval = false;
 
 	if (obj->prop_handler != NULL) {
 		hnd = zend_hash_find_ptr(obj->prop_handler, name);
@@ -418,7 +419,7 @@ static int dom_property_exists(zend_object *object, zend_string *name, int check
 		zval tmp;
 
 		if (check_empty == 2) {
-			retval = 1;
+			retval = true;
 		} else if (hnd->read_func(obj, &tmp) == SUCCESS) {
 			if (check_empty == 1) {
 				retval = zend_is_true(&tmp);
@@ -1441,7 +1442,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 	dom_xpath_object *intern = zend_object_alloc(sizeof(dom_xpath_object), class_type);
 
 	php_dom_xpath_callbacks_ctor(&intern->xpath_callbacks);
-	intern->register_node_ns = 1;
+	intern->register_node_ns = true;
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
 

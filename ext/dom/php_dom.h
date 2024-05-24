@@ -66,7 +66,7 @@ extern zend_module_entry dom_module_entry;
 
 typedef struct _dom_xpath_object {
 	php_dom_xpath_callbacks xpath_callbacks;
-	int register_node_ns;
+	bool register_node_ns;
 	dom_object dom;
 } dom_xpath_object;
 

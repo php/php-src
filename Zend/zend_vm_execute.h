@@ -10856,8 +10856,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 {
 	USE_OPLINE
 	zval *value;
-	/* Should be bool result? as below got: result = (opline->extended_value & ZEND_ISEMPTY) */
-	int result;
+	bool result;
 	zval *varname;
 	zend_string *name, *tmp_name;
 	HashTable *target_symbol_table;
@@ -10893,7 +10892,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 		}
 	}
 
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, true);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
@@ -18221,8 +18220,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 {
 	USE_OPLINE
 	zval *value;
-	/* Should be bool result? as below got: result = (opline->extended_value & ZEND_ISEMPTY) */
-	int result;
+	bool result;
 	zval *varname;
 	zend_string *name, *tmp_name;
 	HashTable *target_symbol_table;
@@ -18259,7 +18257,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 		}
 	}
 
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, true);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
@@ -49703,8 +49701,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUS
 {
 	USE_OPLINE
 	zval *value;
-	/* Should be bool result? as below got: result = (opline->extended_value & ZEND_ISEMPTY) */
-	int result;
+	bool result;
 	zval *varname;
 	zend_string *name, *tmp_name;
 	HashTable *target_symbol_table;
@@ -49740,7 +49737,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUS
 		}
 	}
 
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, true);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
