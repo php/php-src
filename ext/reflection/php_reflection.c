@@ -74,6 +74,7 @@ static zend_always_inline zval *reflection_prop_class(zval *object) {
 
 /* Class entry pointers */
 PHPAPI zend_class_entry *reflector_ptr;
+PHPAPI zend_class_entry *reflector_with_attributes_ptr;
 PHPAPI zend_class_entry *reflection_exception_ptr;
 PHPAPI zend_class_entry *reflection_ptr;
 PHPAPI zend_class_entry *reflection_function_abstract_ptr;
@@ -1165,7 +1166,7 @@ static void reflection_attribute_factory(zval *object, HashTable *attributes, ze
 /* }}} */
 
 static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *scope,
-		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename) /* {{{ */
+		uint32_t offset, uint32_t target, zend_string *name, zend_class_entry *base, zend_string *filename, bool first) /* {{{ */
 {
 	ZEND_ASSERT(attributes != NULL);
 
@@ -1178,7 +1179,12 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 
 		ZEND_HASH_PACKED_FOREACH_PTR(attributes, attr) {
 			if (attr->offset == offset && zend_string_equals(attr->lcname, filter)) {
-				reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+				reflection_attribute_factory(first ? ret : &tmp, attributes, attr, scope, target, filename);
+
+                if (first) {
+                    break;
+                }
+
 				add_next_index_zval(ret, &tmp);
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -1210,7 +1216,12 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 			}
 		}
 
-		reflection_attribute_factory(&tmp, attributes, attr, scope, target, filename);
+		reflection_attribute_factory(first ? ret : &tmp, attributes, attr, scope, target, filename);
+
+        if (first) {
+            break;
+        }
+
 		add_next_index_zval(ret, &tmp);
 	} ZEND_HASH_FOREACH_END();
 
@@ -1219,7 +1230,7 @@ static int read_attributes(zval *ret, HashTable *attributes, zend_class_entry *s
 /* }}} */
 
 static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attributes,
-		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename) /* {{{ */
+		uint32_t offset, zend_class_entry *scope, uint32_t target, zend_string *filename, bool first) /* {{{ */
 {
 	zend_string *name = NULL;
 	zend_long flags = 0;
@@ -1247,14 +1258,20 @@ static void reflect_attributes(INTERNAL_FUNCTION_PARAMETERS, HashTable *attribut
 	}
 
 	if (!attributes) {
-		RETURN_EMPTY_ARRAY();
+        if (first) {
+            RETURN_NULL();
+        } else {
+            RETURN_EMPTY_ARRAY();
+        }
 	}
 
-	array_init(return_value);
+    if (! first) {
+        array_init(return_value);
+    }
 
-	if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename)) {
-		RETURN_THROWS();
-	}
+    if (FAILURE == read_attributes(return_value, attributes, scope, offset, target, name, base, filename, first)) {
+        RETURN_THROWS();
+    }
 }
 /* }}} */
 
@@ -1985,10 +2002,37 @@ ZEND_METHOD(ReflectionFunctionAbstract, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		fptr->common.attributes, 0, fptr->common.scope, target,
-		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL);
+		fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL, false);
 }
 /* }}} */
 
+
+/* {{{ Returns the first attribute of this function */
+ZEND_METHOD(ReflectionFunctionAbstract, getFirstAttribute)
+{
+    reflection_object *intern;
+    zend_function *fptr;
+    uint32_t target;
+    zend_string *name = NULL;
+    zend_long flags = 0;
+
+    GET_REFLECTION_OBJECT_PTR(fptr);
+
+    if (fptr->common.scope && (fptr->common.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE)) != ZEND_ACC_CLOSURE) {
+        target = ZEND_ATTRIBUTE_TARGET_METHOD;
+    } else {
+        target = ZEND_ATTRIBUTE_TARGET_FUNCTION;
+    }
+    
+    if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!l", &name, &flags) == FAILURE) {
+        RETURN_THROWS();
+    }
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       fptr->common.attributes, 0, fptr->common.scope, target,
+                       fptr->type == ZEND_USER_FUNCTION ? fptr->op_array.filename : NULL, true);
+}
+/* }}} */
 /* {{{ Returns an associative array containing this function's static variables and their values */
 ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables)
 {
@@ -2857,8 +2901,26 @@ ZEND_METHOD(ReflectionParameter, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
-		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL);
+		param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL, false);
 }
+/* }}} */
+
+/* {{{ Get the first parameter attribute. */
+ZEND_METHOD(ReflectionParameter, getFirstAttribute)
+{
+    reflection_object *intern;
+    parameter_reference *param;
+
+    GET_REFLECTION_OBJECT_PTR(param);
+
+    HashTable *attributes = param->fptr->common.attributes;
+    zend_class_entry *scope = param->fptr->common.scope;
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       attributes, param->offset + 1, scope, ZEND_ATTRIBUTE_TARGET_PARAMETER,
+                       param->fptr->type == ZEND_USER_FUNCTION ? param->fptr->op_array.filename : NULL, true);
+}
+/* }}} */
 
 /* {{{ Returns whether this parameter is an optional parameter */
 ZEND_METHOD(ReflectionParameter, getPosition)
@@ -4044,7 +4106,21 @@ ZEND_METHOD(ReflectionClassConstant, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
-		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL);
+		ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL, false);
+}
+/* }}} */
+
+/* {{{ Returns the first attribute of this constant */
+ZEND_METHOD(ReflectionClassConstant, getFirstAttribute)
+{
+    reflection_object *intern;
+    zend_class_constant *ref;
+
+    GET_REFLECTION_OBJECT_PTR(ref);
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       ref->attributes, 0, ref->ce, ZEND_ATTRIBUTE_TARGET_CLASS_CONST,
+                       ref->ce->type == ZEND_USER_CLASS ? ref->ce->info.user.filename : NULL, true);
 }
 /* }}} */
 
@@ -4466,7 +4542,21 @@ ZEND_METHOD(ReflectionClass, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
-		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL);
+		ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL, false);
+}
+/* }}} */
+
+/* {{{ Returns the first attribute for this class */
+ZEND_METHOD(ReflectionClass, getFirstAttribute)
+{
+    reflection_object *intern;
+    zend_class_entry *ce;
+
+    GET_REFLECTION_OBJECT_PTR(ce);
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       ce->attributes, 0, ce, ZEND_ATTRIBUTE_TARGET_CLASS,
+                       ce->type == ZEND_USER_CLASS ? ce->info.user.filename : NULL, true);
 }
 /* }}} */
 
@@ -5903,7 +5993,25 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 
 	reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
 		ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
-		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL);
+		ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL, false);
+}
+/* }}} */
+
+/* {{{ Returns the first attribute of this property */
+ZEND_METHOD(ReflectionProperty, getFirstAttribute)
+{
+    reflection_object *intern;
+    property_reference *ref;
+
+    GET_REFLECTION_OBJECT_PTR(ref);
+
+    if (ref->prop == NULL) {
+        RETURN_EMPTY_ARRAY();
+    }
+
+    reflect_attributes(INTERNAL_FUNCTION_PARAM_PASSTHRU,
+                       ref->prop->attributes, 0, ref->prop->ce, ZEND_ATTRIBUTE_TARGET_PROPERTY,
+                       ref->prop->ce->type == ZEND_USER_CLASS ? ref->prop->ce->info.user.filename : NULL, true);
 }
 /* }}} */
 
@@ -7263,7 +7371,9 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	reflector_ptr = register_class_Reflector(zend_ce_stringable);
 
-	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr);
+    reflector_with_attributes_ptr = register_class_ReflectorWithAttributes();
+
+	reflection_function_abstract_ptr = register_class_ReflectionFunctionAbstract(reflector_ptr, reflector_with_attributes_ptr);
 	reflection_function_abstract_ptr->default_object_handlers = &reflection_object_handlers;
 	reflection_function_abstract_ptr->create_object = reflection_objects_new;
 
@@ -7275,7 +7385,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_generator_ptr->create_object = reflection_objects_new;
 	reflection_generator_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr);
+	reflection_parameter_ptr = register_class_ReflectionParameter(reflector_ptr, reflector_with_attributes_ptr);
 	reflection_parameter_ptr->create_object = reflection_objects_new;
 	reflection_parameter_ptr->default_object_handlers = &reflection_object_handlers;
 
@@ -7299,7 +7409,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_method_ptr->create_object = reflection_objects_new;
 	reflection_method_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr);
+	reflection_class_ptr = register_class_ReflectionClass(reflector_ptr, reflector_with_attributes_ptr);
 	reflection_class_ptr->create_object = reflection_objects_new;
 	reflection_class_ptr->default_object_handlers = &reflection_object_handlers;
 
@@ -7307,7 +7417,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_object_ptr->create_object = reflection_objects_new;
 	reflection_object_ptr->default_object_handlers = &reflection_object_handlers;
 
-	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr);
+	reflection_property_ptr = register_class_ReflectionProperty(reflector_ptr, reflector_with_attributes_ptr);
 	reflection_property_ptr->create_object = reflection_objects_new;
 	reflection_property_ptr->default_object_handlers = &reflection_object_handlers;
 

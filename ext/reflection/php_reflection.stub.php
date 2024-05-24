@@ -16,8 +16,15 @@ interface Reflector extends Stringable
 {
 }
 
+interface ReflectorWithAttributes
+{
+    public function getAttributes(?string $name = null, int $flags = 0): array;
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
+}
+
 /** @not-serializable */
-abstract class ReflectionFunctionAbstract implements Reflector
+abstract class ReflectionFunctionAbstract implements Reflector, ReflectorWithAttributes
 {
     public string $name;
 
@@ -111,7 +118,9 @@ abstract class ReflectionFunctionAbstract implements Reflector
 
     public function getTentativeReturnType(): ?ReflectionType {}
 
-    public function getAttributes(?string $name = null, int $flags = 0): array {}
+    public function getAttributes(?string $name = null, int $flags = 0): array;
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 class ReflectionFunction extends ReflectionFunctionAbstract
@@ -234,7 +243,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 }
 
 /** @not-serializable */
-class ReflectionClass implements Reflector
+class ReflectionClass implements Reflector, ReflectorWithAttributes
 {
     /**
      * @cvalue ZEND_ACC_IMPLICIT_ABSTRACT_CLASS
@@ -414,6 +423,8 @@ class ReflectionClass implements Reflector
     public function getShortName(): string {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 class ReflectionObject extends ReflectionClass
@@ -422,7 +433,7 @@ class ReflectionObject extends ReflectionClass
 }
 
 /** @not-serializable */
-class ReflectionProperty implements Reflector
+class ReflectionProperty implements Reflector, ReflectorWithAttributes
 {
     /** @cvalue ZEND_ACC_STATIC */
     public const int IS_STATIC = UNKNOWN;
@@ -500,6 +511,8 @@ class ReflectionProperty implements Reflector
     public function getDefaultValue(): mixed {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */
@@ -550,8 +563,6 @@ class ReflectionClassConstant implements Reflector
     /** @tentative-return-type */
     public function getDocComment(): string|false {}
 
-    public function getAttributes(?string $name = null, int $flags = 0): array {}
-
     public function isEnumCase(): bool {}
 
     public function isDeprecated(): bool {}
@@ -559,10 +570,14 @@ class ReflectionClassConstant implements Reflector
     public function hasType(): bool {}
 
     public function getType(): ?ReflectionType {}
+
+    public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */
-class ReflectionParameter implements Reflector
+class ReflectionParameter implements Reflector, ReflectorWithAttributes
 {
     public string $name;
 
@@ -640,6 +655,8 @@ class ReflectionParameter implements Reflector
     public function isPromoted(): bool {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    public function getFirstAttribute(?string $name = null, int $flags = 0): ?ReflectionAttribute;
 }
 
 /** @not-serializable */
