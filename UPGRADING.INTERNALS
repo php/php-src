@@ -140,6 +140,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
+   - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have

@@ -1794,7 +1794,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
 ])
 
 dnl
-dnl PHP_SETUP_OPENSSL(shared-add [, action-found [, action-not-found]])
+dnl PHP_SETUP_OPENSSL(shared-add [, action-found])
 dnl
 dnl Common setup macro for openssl.
 dnl
@@ -1807,7 +1807,6 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
     PHP_EVAL_INCLINE($OPENSSL_CFLAGS)
 ifelse([$2],[],:,[$2])
-ifelse([$3],[],,[else $3])
   fi
 ])
 
