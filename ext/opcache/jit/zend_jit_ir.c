@@ -4521,7 +4521,24 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 			run_time_cache = ir_PHI_2(IR_ADDR, run_time_cache, run_time_cache2);
 		}
 	}
-	*observer_handler = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
+	if (func) {
+		*observer_handler = ir_ADD_OFFSET(run_time_cache, ZEND_OBSERVER_HANDLE(func) * sizeof(void *));
+	} else {
+		// JIT: if (ZEND_USER_CODE(func->type)) {
+		ir_ref tmp = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type)));
+		ir_ref if_internal_func = ir_IF(ir_AND_U8(tmp, ir_CONST_U8(1)));
+		ir_IF_TRUE(if_internal_func);
+		
+		ir_ref observer_handler_internal = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_internal_function_extension * sizeof(void *));
+
+		ir_ref if_internal_func_end = ir_END();
+		ir_IF_FALSE(if_internal_func);
+
+		ir_ref observer_handler_user = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_op_array_extension * sizeof(void *));
+
+		ir_MERGE_WITH(if_internal_func_end);
+		*observer_handler = ir_PHI_2(IR_ADDR, observer_handler_internal, observer_handler_user);
+	}
 
 	data.if_unobserved = ir_IF(ir_EQ(ir_LOAD_A(*observer_handler), ir_CONST_ADDR(ZEND_OBSERVER_NONE_OBSERVED)));
 	ir_IF_FALSE(data.if_unobserved);

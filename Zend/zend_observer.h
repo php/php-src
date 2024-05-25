@@ -41,9 +41,12 @@ typedef struct _zend_observer_fcall_handlers {
 	zend_observer_fcall_end_handler end;
 } zend_observer_fcall_handlers;
 
+
+#define ZEND_OBSERVER_HANDLE(function) (ZEND_USER_CODE((function)->type) \
+	? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
+
 #define ZEND_OBSERVER_DATA(function) \
-	ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_USER_CODE((function)->type) \
-		? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
+	((zend_observer_fcall_begin_handler *)&ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_OBSERVER_HANDLE(function)))
 
 #define ZEND_OBSERVER_NONE_OBSERVED ((void *) 3) // Neither begin nor end handler present
 
@@ -99,7 +102,7 @@ static zend_always_inline bool zend_observer_fcall_has_no_observers(zend_execute
 		return true;
 	}
 
-	*handler = (zend_observer_fcall_begin_handler *)ZEND_MAP_PTR_GET(runtime_cache) + zend_observer_fcall_op_array_extension;
+	*handler = (zend_observer_fcall_begin_handler *)ZEND_MAP_PTR_GET(runtime_cache) + ZEND_OBSERVER_HANDLE(function);
 	return zend_observer_handler_is_unobserved(*handler);
 }
 
