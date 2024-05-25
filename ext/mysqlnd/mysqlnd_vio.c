@@ -112,6 +112,20 @@ MYSQLND_METHOD(mysqlnd_vio, network_write)(MYSQLND_VIO * const vio, const zend_u
 }
 /* }}} */
 
+static void mysqlnd_fixup_regular_list(php_stream *net_stream)
+{
+	/*
+	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
+	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
+	  unregistered until the script ends. So, we need to take care of that.
+	*/
+	dtor_func_t origin_dtor = EG(regular_list).pDestructor;
+	EG(regular_list).pDestructor = NULL;
+	zend_hash_index_del(&EG(regular_list), net_stream->res->handle);
+	EG(regular_list).pDestructor = origin_dtor;
+	efree(net_stream->res);
+	net_stream->res = NULL;
+}
 
 /* {{{ mysqlnd_vio::open_pipe */
 static php_stream *
@@ -119,7 +133,6 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 									   MYSQLND_STATS * const conn_stats, MYSQLND_ERROR_INFO * const error_info)
 {
 	unsigned int streams_options = 0;
-	dtor_func_t origin_dtor;
 	php_stream * net_stream = NULL;
 
 	DBG_ENTER("mysqlnd_vio::open_pipe");
@@ -132,16 +145,34 @@ MYSQLND_METHOD(mysqlnd_vio, open_pipe)(MYSQLND_VIO * const vio, const MYSQLND_CS
 		SET_CLIENT_ERROR(error_info, CR_CONNECTION_ERROR, UNKNOWN_SQLSTATE, "Unknown error while connecting");
 		DBG_RETURN(NULL);
 	}
-	/*
-	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered until the script ends. So, we need to take care of that.
-	*/
-	origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	EG(regular_list).pDestructor = origin_dtor;
-	net_stream->res = NULL;
+
+	if (persistent) {
+		/* This is a similar hack as for mysqlnd_vio::open_tcp_or_unix.
+		 * The main difference here is that we have no access to the hashed key.
+		 * We can however perform a loop over the persistent resource list to find
+		 * which one corresponds to our newly allocated stream.
+		 * This loop is pretty cheap because it will normally either be the last entry or second to last entry
+		 * in the list, depending on whether the socket connection itself is persistent or not.
+		 * That's why we use a reverse loop. */
+		Bucket *bucket;
+		/* Use a bucket loop to make deletion cheap. */
+		ZEND_HASH_MAP_REVERSE_FOREACH_BUCKET(&EG(persistent_list), bucket) {
+			zend_resource *current_res = Z_RES(bucket->val);
+			if (current_res->ptr == net_stream) {
+				dtor_func_t origin_dtor = EG(persistent_list).pDestructor;
+				EG(persistent_list).pDestructor = NULL;
+				zend_hash_del_bucket(&EG(persistent_list), bucket);
+				EG(persistent_list).pDestructor = origin_dtor;
+				pefree(current_res, 1);
+				break;
+			}
+		} ZEND_HASH_FOREACH_END();
+#if ZEND_DEBUG
+		php_stream_auto_cleanup(net_stream);
+#endif
+	}
+
+	mysqlnd_fixup_regular_list(net_stream);
 
 	DBG_RETURN(net_stream);
 }
@@ -205,6 +236,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 		zend_resource *le;
 
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_details_len))) {
+			ZEND_ASSERT(le->ptr == net_stream);
 			origin_dtor = EG(persistent_list).pDestructor;
 			/*
 			  in_free will let streams code skip destructing - big HACK,
@@ -218,22 +250,12 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 		}
 #if ZEND_DEBUG
 		/* Shut-up the streams, they don't know what they are doing */
-		net_stream->__exposed = 1;
+		php_stream_auto_cleanup(net_stream);
 #endif
 		mnd_sprintf_free(hashed_details);
 	}
 
-	/*
-	  Streams are not meant for C extensions! Thus we need a hack. Every connected stream will
-	  be registered as resource (in EG(regular_list). So far, so good. However, it won't be
-	  unregistered until the script ends. So, we need to take care of that.
-	*/
-	origin_dtor = EG(regular_list).pDestructor;
-	EG(regular_list).pDestructor = NULL;
-	zend_hash_index_del(&EG(regular_list), net_stream->res->handle); /* ToDO: should it be res->handle, do streams register with addref ?*/
-	efree(net_stream->res);
-	net_stream->res = NULL;
-	EG(regular_list).pDestructor = origin_dtor;
+	mysqlnd_fixup_regular_list(net_stream);
 	DBG_RETURN(net_stream);
 }
 /* }}} */
