@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.23
 
+- Soap:
+  . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
+
 01 Aug 2024, PHP 8.2.22
 
 - Core:
