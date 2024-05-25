@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.9
 
+- Core:
+  . Fixed bug GH-14315 (Incompatible pointer type warnings). (Peter Kokot)
+
 - Curl:
   . Fixed bug GH-14307 (Test curl_basic_024 fails with curl 8.8.0). (nielsdos)
 
