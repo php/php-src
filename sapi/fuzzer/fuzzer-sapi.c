@@ -56,8 +56,6 @@ static const char HARDCODED_INI[] =
 	",crypt"
 	/* openlog() has a known memory-management issue. */
 	",openlog"
-	/* Can cause long loops that bypass the executor step limit. */
-	"\ndisable_classes=InfiniteIterator"
 ;
 
 static int startup(sapi_module_struct *sapi_module)
@@ -128,6 +126,21 @@ static sapi_module_struct fuzzer_module = {
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
 
+static ZEND_COLD zend_object *disable_class_create_handler(zend_class_entry *class_type) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot construct class %s, as it is disabled", ZSTR_VAL(class_type->name));
+	return NULL;
+}
+
+static void fuzzer_disable_classes(void)
+{
+	/* Overwrite built-in constructor for InfiniteIterator as it
+	 * can cause long loops that bypass the executor step limit. */
+	/* Lowercase as this is how the CE as stored */
+	zend_class_entry *InfiniteIterator_class = zend_hash_str_find(CG(class_table), "infiniteiterator", strlen("infiniteiterator"));
+	InfiniteIterator_class->create_object = disable_class_create_handler;
+}
+
 int fuzzer_init_php(const char *extra_ini)
 {
 #ifdef __SANITIZE_ADDRESS__
@@ -182,6 +195,8 @@ int fuzzer_request_startup(void)
 	 * don't complain about them during shutdown. */
 	SIGG(check) = 0;
 #endif
+
+	fuzzer_disable_classes();
 
 	return SUCCESS;
 }
