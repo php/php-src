@@ -17070,15 +17070,15 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline, i
 
 	// push all args
 	switch (call_num_args) {
-		case 3: jit_ZVAL_COPY(jit, ZEND_ADDR_MEM_ZVAL(ZREG_RX, EX_NUM_TO_VAR(2)), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op1_data_ref), op1_data_info, 1); ZEND_FALLTHROUGH;
-		case 2: jit_ZVAL_COPY(jit, ZEND_ADDR_MEM_ZVAL(ZREG_RX, EX_NUM_TO_VAR(1)), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op2_ref), op2_info, 1); ZEND_FALLTHROUGH;
-		case 1: jit_ZVAL_COPY(jit, ZEND_ADDR_MEM_ZVAL(ZREG_RX, EX_NUM_TO_VAR(0)), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op1_ref), op1_info, 1);
+		case 3: jit_ZVAL_COPY(jit, ZEND_ADDR_REF_ZVAL(ir_ADD_OFFSET(call_ref, EX_NUM_TO_VAR(2))), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op1_data_ref), op1_data_info, 1); ZEND_FALLTHROUGH;
+		case 2: jit_ZVAL_COPY(jit, ZEND_ADDR_REF_ZVAL(ir_ADD_OFFSET(call_ref, EX_NUM_TO_VAR(1))), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op2_ref), op2_info, 1); ZEND_FALLTHROUGH;
+		case 1: jit_ZVAL_COPY(jit, ZEND_ADDR_REF_ZVAL(ir_ADD_OFFSET(call_ref, EX_NUM_TO_VAR(0))), MAY_BE_ANY & ~MAY_BE_REF, ZEND_ADDR_REF_ZVAL(op1_ref), op1_info, 1);
 	}
 
 	// call and free args
 	ir_CALL_4(IR_VOID, ir_CONST_FC_FUNC(zend_jit_observed_frameless_helper_call),
 		call_ref,
-		ir_CONST_ADDR(fbc->internal_function.handler),
+		ir_CONST_FC_FUNC(fbc->internal_function.handler),
 		observer_handler,
 		res_ref);
 
