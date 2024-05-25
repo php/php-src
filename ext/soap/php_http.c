@@ -1258,12 +1258,12 @@ try_again:
 
 		if ((strcmp(content_encoding,"gzip") == 0 ||
 		     strcmp(content_encoding,"x-gzip") == 0) &&
-		     zend_hash_str_exists(EG(function_table), "gzinflate", sizeof("gzinflate")-1)) {
-			ZVAL_STRING(&func, "gzinflate");
-			ZVAL_STRINGL(&params[0], http_body->val+10, http_body->len-10);
-		} else if (strcmp(content_encoding,"deflate") == 0 &&
-		           zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1)) {
+		     zend_hash_str_exists(EG(function_table), "gzuncompress", sizeof("gzuncompress")-1)) {
 			ZVAL_STRING(&func, "gzuncompress");
+			ZVAL_STR_COPY(&params[0], http_body);
+		} else if (strcmp(content_encoding,"deflate") == 0 &&
+		           zend_hash_str_exists(EG(function_table), "gzinflate", sizeof("gzinflate")-1)) {
+			ZVAL_STRING(&func, "gzinflate");
 			ZVAL_STR_COPY(&params[0], http_body);
 		} else {
 			efree(content_encoding);
