@@ -541,6 +541,8 @@ PHP 8.4 UPGRADE NOTES
 - PGSQL:
   . Added pg_change_password to alter a given user's password. It handles
     transparently the password encryption from the database settings.
+  . Added pg_put_copy_data to send COPY commands and pg_put_copy_end to send
+    end-of-data to the server.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()

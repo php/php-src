@@ -195,6 +195,8 @@ PHP                                                                        NEWS
   . Added pg_result_memory_size to get the query result memory usage.
     (KentarouTakeda)
   . Added pg_change_password to alter an user's password. (David Carlier)
+  . Added pg_put_copy_data/pg_put_copy_end to send COPY commands and signal
+    the end of the COPY. (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
