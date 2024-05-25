@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c5cb23b6536c1908d3dcc804f5fa176323f4db07 */
+ * Stub hash: b3645285a405c83fec3ae55195ed577cec5f5356 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -471,6 +471,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_change_password, 0, 3, _IS_BO
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_put_copy_data, 0, 2, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, cmd, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_put_copy_end, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, error, IS_STRING, 0, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -569,6 +579,8 @@ ZEND_FUNCTION(pg_set_error_context_visibility);
 ZEND_FUNCTION(pg_result_memory_size);
 #endif
 ZEND_FUNCTION(pg_change_password);
+ZEND_FUNCTION(pg_put_copy_data);
+ZEND_FUNCTION(pg_put_copy_end);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_connect, arginfo_pg_connect)
@@ -692,6 +704,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_result_memory_size, arginfo_pg_result_memory_size)
 #endif
 	ZEND_FE(pg_change_password, arginfo_pg_change_password)
+	ZEND_FE(pg_put_copy_data, arginfo_pg_put_copy_data)
+	ZEND_FE(pg_put_copy_end, arginfo_pg_put_copy_end)
 	ZEND_FE_END
 };
 
