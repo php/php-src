@@ -5,14 +5,14 @@ soap
 zlib
 --SKIPIF--
 <?php
-    if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+    if (!file_exists(__DIR__ . "/../../../../sapi/cli/tests/php_cli_server.inc")) {
         echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
     }
 ?>
 --FILE--
 <?php
 
-include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__ . "/../../../../sapi/cli/tests/php_cli_server.inc";
 
 function get_data($max)
 {
