@@ -940,8 +940,16 @@ static void zend_calc_live_ranges(
 			if (EXPECTED(last_use[var_num] != (uint32_t) -1)) {
 				/* Skip trivial live-range */
 				if (opnum + 1 != last_use[var_num]) {
-					/* OP_DATA is really part of the previous opcode. E.g. result for ZEND_FRAMELESS_ICALL_3. */
-					uint32_t num = opnum - (opline->opcode == ZEND_OP_DATA);
+					uint32_t num;
+
+#if 1
+					/* OP_DATA uses only op1 operand */
+					ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
+					num = opnum;
+#else
+					/* OP_DATA is really part of the previous opcode. */
+					num = opnum - (opline->opcode == ZEND_OP_DATA);
+#endif
 					emit_live_range(op_array, var_num, num, last_use[var_num], needs_live_range);
 				}
 				last_use[var_num] = (uint32_t) -1;
@@ -1121,11 +1129,6 @@ ZEND_API void pass_two(zend_op_array *op_array)
 			case ZEND_BIND_INIT_STATIC_OR_JMP:
 			case ZEND_JMP_FRAMELESS:
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
-				break;
-			case ZEND_FRAMELESS_ICALL_3:
-				// Copy result to OP_DATA to ensure dispatch in observer fallback can be aligned with the last opcode of the call
-				opline[1].result.var = opline->result.var;
-				opline[1].result_type = opline->result_type;
 				break;
 			case ZEND_ASSERT_CHECK:
 			{
