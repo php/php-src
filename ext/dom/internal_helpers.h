@@ -63,4 +63,31 @@ DOM_DEF_GET_CE_FUNC(domimplementation)
 
 #endif
 
+static zend_always_inline size_t dom_minimum_modification_nr_since_parsing(php_libxml_ref_obj *doc_ptr)
+{
+	/* For old-style DOM, we need a "new DOMDocument" + a load, so the minimum modification nr is 2.
+	 * For new-style DOM, we need only to call a named constructor, so the minimum modification nr is 1. */
+	return doc_ptr->class_type == PHP_LIBXML_CLASS_MODERN ? 1 : 2;
+}
+
+static zend_always_inline void dom_mark_document_cache_as_modified_since_parsing(php_libxml_ref_obj *doc_ptr)
+{
+	if (doc_ptr) {
+		doc_ptr->cache_tag.modification_nr = MAX(dom_minimum_modification_nr_since_parsing(doc_ptr) + 1,
+												 doc_ptr->cache_tag.modification_nr);
+	}
+}
+
+/* Marks the ID cache as potentially stale */
+static zend_always_inline void dom_mark_ids_modified(php_libxml_ref_obj *doc_ptr)
+{
+	/* Although this is currently a wrapper function, it's best to abstract the actual implementation away. */
+	dom_mark_document_cache_as_modified_since_parsing(doc_ptr);
+}
+
+static zend_always_inline bool dom_is_document_cache_modified_since_parsing(php_libxml_ref_obj *doc_ptr)
+{
+	return !doc_ptr || doc_ptr->cache_tag.modification_nr > dom_minimum_modification_nr_since_parsing(doc_ptr);
+}
+
 #endif
