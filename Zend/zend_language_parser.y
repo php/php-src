@@ -1230,6 +1230,7 @@ expr:
 			$$ = $2;
 			if ($$->kind == ZEND_AST_CONDITIONAL) $$->attr = ZEND_PARENTHESIZED_CONDITIONAL;
 		}
+	|	new_dereferenceable { $$ = $1; }
 	|	new_non_dereferenceable { $$ = $1; }
 	|	expr '?' expr ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
@@ -1329,6 +1330,8 @@ function_call:
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
+	|	new_dereferenceable T_PAAMAYIM_NEKUDOTAYIM member_name argument_list
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALL, $1, $3, $4); }
 	|	callable_expr { $<num>$ = CG(zend_lineno); } argument_list {
 			$$ = zend_ast_create(ZEND_AST_CALL, $1, $3);
 			$$->lineno = $<num>2;
@@ -1403,9 +1406,13 @@ class_constant:
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
 			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
+	|	new_dereferenceable T_PAAMAYIM_NEKUDOTAYIM identifier
+			{ $$ = zend_ast_create_class_const_or_name($1, $3); }
 	|	class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
+			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
+	|	new_dereferenceable T_PAAMAYIM_NEKUDOTAYIM '{' expr '}'
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $4); }
 ;
 
@@ -1428,12 +1435,14 @@ fully_dereferenceable:
 array_object_dereferenceable:
 		fully_dereferenceable	{ $$ = $1; }
 	|	constant				{ $$ = $1; }
+	|	new_dereferenceable		{ $$ = $1; }
 ;
 
 callable_expr:
 		callable_variable		{ $$ = $1; }
 	|	'(' expr ')'			{ $$ = $2; }
 	|	dereferenceable_scalar	{ $$ = $1; }
+	|	new_dereferenceable		{ $$ = $1; }
 ;
 
 callable_variable:
@@ -1448,7 +1457,6 @@ callable_variable:
 	|	array_object_dereferenceable T_NULLSAFE_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_NULLSAFE_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
-	|	new_dereferenceable { $$ = $1; }
 ;
 
 variable:
@@ -1472,6 +1480,8 @@ static_member:
 		class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM simple_variable
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
+	|	new_dereferenceable T_PAAMAYIM_NEKUDOTAYIM simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_STATIC_PROP, $1, $3); }
 ;
 
