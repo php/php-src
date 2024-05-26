@@ -6617,15 +6617,15 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 
 		ZVAL_COPY(&args[0], operand);
 
-		if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
+		zend_result result = zend_call_function(&fci, &fci_cache);
+		if (EXPECTED(result == SUCCESS)) {
 			int retval_true;
 
 			retval_true = zend_is_true(&retval);
 			zval_ptr_dtor(&retval);
 
-			if (negate_condition) {
-				retval_true = !retval_true;
-			}
+			/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
+			retval_true ^= negate_condition;
 
 			if (retval_true) {
 				if (result_value != NULL) {
@@ -6640,14 +6640,13 @@ static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, z
 				zval_ptr_dtor(&args[1]);
 
 				return SUCCESS;
-			} else {
-				zval_ptr_dtor(&args[0]);
-				zval_ptr_dtor(&args[1]);
 			}
-		} else {
-			zval_ptr_dtor(&args[0]);
-			zval_ptr_dtor(&args[1]);
+		}
 
+		zval_ptr_dtor(&args[0]);
+		zval_ptr_dtor(&args[1]);
+
+		if (UNEXPECTED(result != SUCCESS)) {
 			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
