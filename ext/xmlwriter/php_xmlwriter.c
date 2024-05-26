@@ -175,9 +175,15 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 }
 /* }}} */
 
+static const zend_module_dep xmlwriter_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_END
+};
+
 /* {{{ xmlwriter_module_entry */
 zend_module_entry xmlwriter_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	xmlwriter_deps,
 	"xmlwriter",
 	ext_functions,
 	PHP_MINIT(xmlwriter),
