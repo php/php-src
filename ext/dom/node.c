@@ -185,6 +185,7 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
+			dom_attr_value_will_change(obj, (xmlAttrPtr) nodep);
 			if (php_dom_follow_spec_intern(obj)) {
 				dom_remove_all_children(nodep);
 				xmlAddChild(nodep, xmlNewTextLen(BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str)));
