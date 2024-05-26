@@ -1,5 +1,5 @@
 --TEST--
-Immediate property access on new object with ctor parentheses
+Immediate property access on new object without constructor parentheses
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Immediate method call on new object with ctor parentheses
+Immediate method call on new object without constructor parentheses
 --FILE--
 <?php
 
