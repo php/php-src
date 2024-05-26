@@ -54,7 +54,7 @@ if test "$PHP_PGSQL" != "no"; then
     AC_MSG_ERROR(Cannot find libpq.so. Please specify correct PostgreSQL installation path)
   fi
 
-  if test -z "$PGSQL_INCLUDE" -a -z "$PGSQL_LIBDIR" ; then
+  if test -z "$PGSQL_INCLUDE" && test -z "$PGSQL_LIBDIR"; then
     AC_MSG_ERROR([Unable to find libpq anywhere under $PGSQL_SEARCH_PATHS])
   fi
 
@@ -66,6 +66,8 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, pg_encoding_to_char,AC_DEFINE(HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT,1,[Whether libpq is compiled with --enable-multibyte]))
   AC_CHECK_LIB(pq, lo_truncate64, AC_DEFINE(HAVE_PG_LO64,1,[PostgreSQL 9.3 or later]))
   AC_CHECK_LIB(pq, PQsetErrorContextVisibility, AC_DEFINE(HAVE_PG_CONTEXT_VISIBILITY,1,[PostgreSQL 9.6 or later]))
+  AC_CHECK_LIB(pq, PQresultMemorySize, AC_DEFINE(HAVE_PG_RESULT_MEMORY_SIZE,1,[PostgreSQL 12 or later]))
+  AC_CHECK_LIB(pq, PQchangePassword, AC_DEFINE(HAVE_PG_CHANGE_PASSWORD,1,[PostgreSQL 17 or later]))
   LIBS=$old_LIBS
   LDFLAGS=$old_LDFLAGS
 

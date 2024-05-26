@@ -13,7 +13,8 @@ function bar(callable $a = null) {
 foo("strpos", 123, "strpos");
 bar("substr");
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: bar(): Implicitly marking parameter $a as nullable is deprecated, the explicit nullable type must be used instead in %s on line %d
 string(6) "strpos"
 int(123)
 string(6) "strpos"

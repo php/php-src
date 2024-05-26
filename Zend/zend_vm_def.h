@@ -3959,6 +3959,24 @@ ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_INIT_FCALL, Z_EXTRA_P(RT_CONSTANT(op, op->op2)) != 0, ZEND_INIT_FCALL_OFFSET, NUM, CONST, NUM|CACHE_SLOT)
+{
+	USE_OPLINE
+	zend_function *fbc;
+	zend_execute_data *call;
+	fbc = CACHED_PTR(opline->result.num);
+	if (UNEXPECTED(fbc == NULL)) {
+		fbc = Z_PTR(EG(function_table)->arData[Z_EXTRA_P(RT_CONSTANT(opline, opline->op2))].val);
+		CACHE_PTR(opline->result.num, fbc);
+	}
+	call = _zend_vm_stack_push_call_frame_ex(
+		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
+		fbc, opline->extended_value, NULL);
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 {
 	USE_OPLINE
@@ -4510,6 +4528,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 
 		/* Save execution context in generator object. */
 		generator = (zend_generator *) Z_OBJ_P(EX(return_value));
+		generator->func = gen_execute_data->func;
 		generator->execute_data = gen_execute_data;
 		generator->frozen_call_stack = NULL;
 		generator->execute_fake.opline = NULL;
@@ -7294,8 +7313,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|
 {
 	USE_OPLINE
 	zval *value;
-	/* Should be bool result? as below got: result = (opline->extended_value & ZEND_ISEMPTY) */
-	int result;
+	bool result;
 	zval *varname;
 	zend_string *name, *tmp_name;
 	HashTable *target_symbol_table;
@@ -7332,7 +7350,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|
 		}
 	}
 
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, true);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|CV, UNUSED|CLASS_FETCH|CONST|VAR) */
@@ -8000,6 +8018,8 @@ ZEND_VM_HELPER(zend_dispatch_try_catch_finally_helper, ANY, ANY, uint32_t try_ca
 	}
 
 	/* Uncaught exception */
+
+	/* Don't use ZEND_OBSERVER_ENABLED because it gets replaced by zend_vm_gen.php. */
 	if (zend_observer_fcall_op_array_extension != -1) {
 		zend_observer_fcall_end(execute_data, NULL);
 	}

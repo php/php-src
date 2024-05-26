@@ -120,13 +120,13 @@ static DWORD orig_cp = 0;
 #define PHP_MODE_REFLECTION_ZEND_EXTENSION 12
 #define PHP_MODE_SHOW_INI_CONFIG        13
 
-cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
+static cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
 PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void)
 {
 	return &cli_shell_callbacks;
 }
 
-const char HARDCODED_INI[] =
+static const char HARDCODED_INI[] =
 	"html_errors=0\n"
 	"register_argc_argv=1\n"
 	"implicit_flush=1\n"
@@ -1240,9 +1240,9 @@ int main(int argc, char *argv[])
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;			/*sets default for file streams to binary */
-	setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
+	_setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
+	_setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */
+	_setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
 	php_ini_builder_init(&ini_builder);

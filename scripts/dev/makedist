@@ -167,8 +167,9 @@ else
 fi
 
 # Reset the modification and access times of all files to be packaged.
-echo "makedist: Resetting the modification and access times of package files."
-touch -c NEWS
+commitDate="$(git log -1 --format=%cI $treeish)"
+echo "makedist: Resetting the modification and access times of package files to $commitDate"
+touch -c -d"$commitDate" NEWS
 find . -exec touch -r NEWS -c {} \;
 
 cd ..

@@ -12,6 +12,7 @@
    +----------------------------------------------------------------------+
    | Authors: Sammy Kaye Powers <me@sammyk.me>                            |
    |          Go Kudo <zeriyoshi@php.net>                                 |
+   |          Tim Düsterhus <timwolla@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -31,6 +32,7 @@
 
 #include "php_random.h"
 #include "php_random_csprng.h"
+#include "ext/standard/sha1.h"
 
 #if HAVE_UNISTD_H
 # include <unistd.h>
@@ -309,9 +311,10 @@ PHPAPI const php_random_algo *php_random_default_algo(void)
 /* {{{ php_random_default_status */
 PHPAPI void *php_random_default_status(void)
 {
-	php_random_status_state_mt19937 *state = RANDOM_G(mt19937);
+	php_random_status_state_mt19937 *state = &RANDOM_G(mt19937);
 
 	if (!RANDOM_G(mt19937_seeded)) {
+		state->mode = MT_RAND_MT19937;
 		php_random_mt19937_seed_default(state);
 		RANDOM_G(mt19937_seeded) = true;
 	}
@@ -390,7 +393,7 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 /* {{{ php_combined_lcg */
 PHPAPI double php_combined_lcg(void)
 {
-	php_random_status_state_combinedlcg *state = RANDOM_G(combined_lcg);
+	php_random_status_state_combinedlcg *state = &RANDOM_G(combined_lcg);
 
 	if (!RANDOM_G(combined_lcg_seeded)) {
 		php_random_combinedlcg_seed_default(state);
@@ -472,7 +475,7 @@ PHP_FUNCTION(mt_srand)
 	zend_long seed = 0;
 	bool seed_is_null = true;
 	zend_long mode = MT_RAND_MT19937;
-	php_random_status_state_mt19937 *state = RANDOM_G(mt19937);
+	php_random_status_state_mt19937 *state = &RANDOM_G(mt19937);
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -611,16 +614,91 @@ PHP_FUNCTION(random_int)
 }
 /* }}} */
 
+static inline void fallback_seed_add(PHP_SHA1_CTX *c, void *p, size_t l){
+	/* Wrapper around PHP_SHA1Update allowing to pass
+	 * arbitrary pointers without (unsigned char*) casts
+	 * everywhere.
+	 */
+	PHP_SHA1Update(c, p, l);
+}
+
+PHPAPI uint64_t php_random_generate_fallback_seed(void)
+{
+	/* Mix various values using SHA-1 as a PRF to obtain as
+	 * much entropy as possible, hopefully generating an
+	 * unpredictable and independent uint64_t. Nevertheless
+	 * the output of this function MUST NOT be treated as
+	 * being cryptographically safe.
+	 */
+	PHP_SHA1_CTX c;
+	struct timeval tv;
+	void *pointer;
+	pid_t pid;
+#ifdef ZTS
+	THREAD_T tid;
+#endif
+	char buf[64 + 1];
+
+	PHP_SHA1Init(&c);
+	if (!RANDOM_G(fallback_seed_initialized)) {
+		/* Current time. */
+		gettimeofday(&tv, NULL);
+		fallback_seed_add(&c, &tv, sizeof(tv));
+		/* Various PIDs. */
+		pid = getpid();
+		fallback_seed_add(&c, &pid, sizeof(pid));
+#ifndef WIN32
+		pid = getppid();
+		fallback_seed_add(&c, &pid, sizeof(pid));
+#endif
+#ifdef ZTS
+		tid = tsrm_thread_id();
+		fallback_seed_add(&c, &tid, sizeof(tid));
+#endif
+		/* Pointer values to benefit from ASLR. */
+		pointer = &RANDOM_G(fallback_seed_initialized);
+		fallback_seed_add(&c, &pointer, sizeof(pointer));
+		pointer = &c;
+		fallback_seed_add(&c, &pointer, sizeof(pointer));
+		/* Updated time. */
+		gettimeofday(&tv, NULL);
+		fallback_seed_add(&c, &tv, sizeof(tv));
+		/* Hostname. */
+		memset(buf, 0, sizeof(buf));
+		if (gethostname(buf, sizeof(buf) - 1) == 0) {
+			fallback_seed_add(&c, buf, strlen(buf));
+		}
+		/* CSPRNG. */
+		if (php_random_bytes_silent(buf, 16) == SUCCESS) {
+			fallback_seed_add(&c, buf, 16);
+		}
+		/* Updated time. */
+		gettimeofday(&tv, NULL);
+		fallback_seed_add(&c, &tv, sizeof(tv));
+	} else {
+		/* Current time. */
+		gettimeofday(&tv, NULL);
+		fallback_seed_add(&c, &tv, sizeof(tv));
+		/* Previous state. */
+		fallback_seed_add(&c, RANDOM_G(fallback_seed), 20);
+	}
+	PHP_SHA1Final(RANDOM_G(fallback_seed), &c);
+	RANDOM_G(fallback_seed_initialized) = true;
+
+	uint64_t result = 0;
+
+	for (int i = 0; i < sizeof(result); i++) {
+		result = result | (((uint64_t)RANDOM_G(fallback_seed)[i]) << (i * 8));
+	}
+
+	return result;
+}
+
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {
 	random_globals->random_fd = -1;
-
-	random_globals->combined_lcg = php_random_status_alloc(&php_random_algo_combinedlcg, true);
-	random_globals->combined_lcg_seeded = false;
-
-	random_globals->mt19937 = php_random_status_alloc(&php_random_algo_mt19937, true);
-	random_globals->mt19937_seeded = false;
+	random_globals->fallback_seed_initialized = false;
 }
 /* }}} */
 
@@ -631,12 +709,6 @@ static PHP_GSHUTDOWN_FUNCTION(random)
 		close(random_globals->random_fd);
 		random_globals->random_fd = -1;
 	}
-
-	php_random_status_free(random_globals->combined_lcg, true);
-	random_globals->combined_lcg = NULL;
-
-	php_random_status_free(random_globals->mt19937, true);
-	random_globals->mt19937 = NULL;
 }
 /* }}} */
 

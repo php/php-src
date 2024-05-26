@@ -53,6 +53,19 @@ const SOCK_SEQPACKET = UNKNOWN;
  */
 const SOCK_RDM = UNKNOWN;
 #endif
+#ifdef SOCK_CONN_DGRAM
+/**
+ * @var int
+ * @cvalue SOCK_CONN_DGRAM
+ */
+const SOCK_CONN_DGRAM = UNKNOWN;
+/**
+ * is an alias of SOCK_CONN_DGRAM
+ * @var int
+ * @cvalue SOCK_DCCP
+ */
+const SOCK_DCCP = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -397,6 +410,13 @@ const SO_MEMINFO = UNKNOWN;
  */
 const SO_BPF_EXTENSIONS = UNKNOWN;
 #endif
+#ifdef SO_EXCLBIND
+/**
+ * @var int
+ * @cvalue SO_EXCLBIND
+ */
+const SO_EXCLBIND = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -530,6 +550,13 @@ const SKF_AD_MAX = UNKNOWN;
  * @cvalue TCP_CONGESTION
  */
 const TCP_CONGESTION = UNKNOWN;
+#endif
+#ifdef TCP_SYNCNT
+/**
+ * @var int
+ * @cvalue TCP_SYNCNT
+ */
+const TCP_SYNCNT = UNKNOWN;
 #endif
 #ifdef SO_ZEROCOPY
 /**
@@ -1755,6 +1782,13 @@ const SO_DETACH_BPF = UNKNOWN;
  */
 const SO_EXCLUSIVEADDRUSE = UNKNOWN;
 #endif
+#if defined(SO_NOSIGPIPE)
+/**
+ * @var int
+ * @cvalue SO_NOSIGPIPE
+ */
+const SO_NOSIGPIPE = UNKNOWN;
+#endif
 #if defined(TCP_QUICKACK)
 /**
  * @var int
@@ -1858,7 +1892,7 @@ final class AddressInfo
 
 function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
-function socket_create_listen(int $port, int $backlog = 128): Socket|false {}
+function socket_create_listen(int $port, int $backlog = SOMAXCONN): Socket|false {}
 
 function socket_accept(Socket $socket): Socket|false {}
 

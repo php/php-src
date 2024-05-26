@@ -62,4 +62,6 @@
 
 #endif /* HAVE_GLOB */
 
+char dirsep_str[2], pathsep_str[2];
+
 #endif /* PHP_DIR_INT_H */

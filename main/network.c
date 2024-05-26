@@ -1236,7 +1236,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 
 #if defined(HAVE_GETHOSTBYNAME_R)
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
 {
 	struct hostent *hp;
 	int herr,res;
@@ -1262,7 +1262,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 }
 #endif
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
 {
 	struct hostent *hp;
 	int herr;
@@ -1283,7 +1283,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 }
 #endif
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
 {
 	if (*hstbuflen == 0) {
 		*hstbuflen = sizeof(struct hostent_data);

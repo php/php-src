@@ -714,7 +714,7 @@ static void do_fetch_opt_finish(pdo_stmt_t *stmt, int free_ctor_agrs) /* {{{ */
 /* }}} */
 
 /* perform a fetch.
- * If return_value is not null, store values into it according to HOW. */
+ * Stores values into return_value according to HOW. */
 static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type how, enum pdo_fetch_orientation ori, zend_long offset, zval *return_all) /* {{{ */
 {
 	int flags, idx, old_arg_count = 0;
@@ -742,11 +742,6 @@ static bool do_fetch(pdo_stmt_t *stmt, zval *return_value, enum pdo_fetch_type h
 		colno = 1;
 	} else {
 		colno = stmt->fetch.column;
-	}
-
-	/* If no return value we are done */
-	if (!return_value) {
-		return true;
 	}
 
 	if (how == PDO_FETCH_LAZY) {
@@ -2349,6 +2344,7 @@ static void row_dim_write(zend_object *object, zval *member, zval *value)
 	}
 }
 
+// todo: make row_prop_exists return bool as well
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
 	pdo_row_t *row = (pdo_row_t *)object;
@@ -2368,11 +2364,14 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 		return false;
 	}
 	ZEND_ASSERT(retval == &tmp_val);
-	int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+	bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
 	zval_ptr_dtor_nogc(retval);
+
 	return res;
 }
 
+
+// todo: make row_dim_exists return bool as well
 static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 {
 	if (Z_TYPE_P(offset) == IS_LONG) {
@@ -2391,7 +2390,7 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 			return false;
 		}
 		ZEND_ASSERT(retval == &tmp_val);
-		int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+		bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
 		zval_ptr_dtor_nogc(retval);
 		return res;
 	} else {

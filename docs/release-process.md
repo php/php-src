@@ -777,10 +777,10 @@ slightly different steps. We'll call attention where the steps differ.
    > want their email client to automatically send the reply to each list, as
    > often occurs.
 
-11. Coordinate with the social media team (i.e., Derick) to post a tweet with
-    the release announcement and link to the news entry on php.net.
-    ([@official_php](https://twitter.com/official_php))
-
+13. Coordinate with the social media team (i.e., Derick) to
+    [create a PR request](https://github.com/derickr/toot-together/blob/main/toots/README.md)
+    for posting the release announcement to Mastodon. Posts need to be
+    approved.
 
 ## Re-releasing the same version or a patch-level (i.e., `-plN`)
 
@@ -924,7 +924,7 @@ feature development that cannot go into the new version.
    ```sh
    grep -Fxf 82/NEWS 83/NEWS
    ```
-    
+
 
 5. On the announcement day for the initial stable version (or shortly before),
    update the `Expires` field in the <https://www.php.net/.well-known/security.txt>
@@ -943,7 +943,7 @@ feature development that cannot go into the new version.
    yearly cadence, coinciding with our X.Y.0 releases.
 
    Please see the instructions for
-   [making changes to security.txt](security-policies.md#making-changes-to-securitytxt).
+   [making changes to security.txt][security-txt].
 
 
 ## Prime the selection of release managers for the next version
@@ -971,12 +971,42 @@ volunteers to begin the selection process for the next release managers.
 
 ## New release manager checklist
 
-1. Email systems@php.net to get setup for access to downloads.php.net and to be
-   added to the release-managers@php.net distribution list.
+1. Request membership to the
+   [release managers group](https://github.com/orgs/php/teams/release-managers) on GitHub.
 
-2. Request membership to the release managers group on GitHub.
+2. Subscribe to the php-announce@lists.php.net mailing list by emailing
+   php-announce+subscribe@lists.php.net
 
-3. Create a [GPG key][] for your @php.net address.
+3. Email systems@php.net to get setup for access to downloads.php.net, to be
+   added to the release-managers@php.net distribution list, and to be added to
+   the moderators for php-announce@lists.php.net so you are able to moderate
+   your release announcements.
+
+   Provide the following information in a single email:
+
+   - Prefered Unix username (will also become part of location to download RCs,
+     such as `https://downloads.php.net/~derick/`).
+   - An SSH public key, preferably a new unique one for PHP systems and
+     projects.
+   - Read [Machine Access](https://wiki.php.net/systems#machine_access) to set
+     up access to downloads.php.net through jump hosts, and provide a
+     `.google_authenticator` file for 2FA.
+   - Your @php.net email address to use for the release-managers@php.net
+     distribution list and php-announce@lists.php.net moderator address. This
+     should preferably not forward to a Gmail address.
+   - Your GitHub account name, so that your membership to the release managers
+     group may be approved.
+
+   A system admin will then contact you to go through with steps 5 through 8 of
+   [2FA setup instructions](https://wiki.php.net/systems#fa_setup_instructions).
+
+   > 💬 **Hint** \
+   > To send email from your @php.net address, you will need to use a custom
+   > SMTP server. If you use Gmail, you may
+   > "[Send emails from a different address or alias][]."
+
+
+4. Create a [GPG key][] for your @php.net address.
 
    > 💡 **Tip** \
    > If you're new to GPG, follow GitHub's instructions for
@@ -1041,15 +1071,6 @@ volunteers to begin the selection process for the next release managers.
    git push
    ```
 
-4. Request moderation access to php-announce@lists.php.net
-   so you are able to moderate your release announcements. All the announcements
-   should be sent from your @php.net address.
-
-   > 💬 **Hint** \
-   > To send email from your @php.net address, you will need to use a custom
-   > SMTP server. If you use Gmail, you may
-   > "[Send emails from a different address or alias][]."
-
 5. Make sure you have the following repositories cloned locally:
 
    * https://github.com/php/php-src
@@ -1084,3 +1105,4 @@ volunteers to begin the selection process for the next release managers.
 [Generating a new GPG key]: https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 [sign your GPG key]: https://carouth.com/articles/signing-pgp-keys/
 [Send emails from a different address or alias]: https://support.google.com/mail/answer/22370?hl=en
+[security-txt]: https://github.com/php/policies/blob/main/security-policies.rst#making-changes-to-securitytxt

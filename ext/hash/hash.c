@@ -24,7 +24,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_var.h"
-#include "ext/spl/spl_exceptions.h"
 
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
@@ -42,7 +41,7 @@
 # endif
 #endif
 
-HashTable php_hash_hashtable;
+static HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
 static zend_object_handlers php_hashcontext_handlers;
 

@@ -546,6 +546,30 @@ int ir_disasm(const char    *name,
 						continue;
 					}
 				}
+			} else if ((sym = ir_disasm_resolver(addr, &offset))) {
+				r = q = strstr(p, "(%rip)");
+				if (r && r > p) {
+					r--;
+					while (r > p && ((*r >= '0' && *r <= '9') || (*r >= 'a' && *r <= 'f') || (*r >= 'A' && *r <= 'F'))) {
+						r--;
+					}
+					if (r > p && *r == 'x' && *(r - 1) == '0') {
+						r -= 2;
+					}
+					if (r > p) {
+						fwrite(p, 1, r - p, f);
+					}
+					fputs(sym, f);
+					if (offset != 0) {
+						if (offset > 0) {
+							fprintf(f, "+0x%" PRIx64, offset);
+						} else {
+							fprintf(f, "-0x%" PRIx64, -offset);
+						}
+					}
+					fprintf(f, "%s\n", q);
+					continue;
+				}
 			}
 		}
 #endif

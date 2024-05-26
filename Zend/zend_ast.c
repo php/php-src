@@ -491,7 +491,7 @@ static zend_result zend_ast_add_unpacked_element(zval *result, zval *expr) {
 	return FAILURE;
 }
 
-zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
+static zend_class_entry *zend_ast_fetch_class(zend_ast *ast, zend_class_entry *scope)
 {
 	return zend_fetch_class_with_scope(zend_ast_get_str(ast), (ast->attr >> ZEND_CONST_EXPR_NEW_FETCH_TYPE_SHIFT) | ZEND_FETCH_CLASS_EXCEPTION, scope);
 }

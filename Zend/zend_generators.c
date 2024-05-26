@@ -166,11 +166,6 @@ ZEND_API void zend_generator_close(zend_generator *generator, bool finished_exec
 			zend_generator_cleanup_unfinished_execution(generator, execute_data, 0);
 		}
 
-		/* Free closure object */
-		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
-			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
-		}
-
 		efree(execute_data);
 	}
 }
@@ -330,6 +325,10 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 
 	zend_generator_close(generator, 0);
 
+	if (generator->func && (generator->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(generator->func));
+	}
+
 	/* we can't immediately free them in zend_generator_close() else yield from won't be able to fetch it */
 	zval_ptr_dtor(&generator->value);
 	zval_ptr_dtor(&generator->key);
@@ -354,10 +353,19 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 	zend_execute_data *call = NULL;
 
 	if (!execute_data) {
-		/* If the generator has been closed, it can only hold on to three values: The value, key
-		 * and retval. These three zvals are stored sequentially starting at &generator->value. */
-		*table = &generator->value;
-		*n = 3;
+		if (UNEXPECTED(generator->func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+			zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+			zend_get_gc_buffer_add_zval(gc_buffer, &generator->value);
+			zend_get_gc_buffer_add_zval(gc_buffer, &generator->key);
+			zend_get_gc_buffer_add_zval(gc_buffer, &generator->retval);
+			zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(generator->func));
+			zend_get_gc_buffer_use(gc_buffer, table, n);
+		} else {
+			/* If the non-closure generator has been closed, it can only hold on to three values: The value, key
+			 * and retval. These three zvals are stored sequentially starting at &generator->value. */
+			*table = &generator->value;
+			*n = 3;
+		}
 		return NULL;
 	}
 
@@ -579,7 +587,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 				EG(current_execute_data) = original_execute_data;
 
-				if (!((old_root ? old_root : generator)->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+				if (!(old_root->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
 					new_root->node.parent = NULL;
 					OBJ_RELEASE(&new_root_parent->std);
 					zend_generator_resume(generator);
@@ -1010,6 +1018,35 @@ ZEND_METHOD(Generator, getReturn)
 }
 /* }}} */
 
+ZEND_METHOD(Generator, __debugInfo)
+{
+	zend_generator *generator;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
+
+	array_init(return_value);
+
+	zend_function *func = generator->func;
+
+	zval val;
+	if (func->common.scope) {
+		zend_string *class_name = func->common.scope->name;
+		zend_string *func_name = func->common.function_name;
+		zend_string *combined = zend_string_concat3(
+			ZSTR_VAL(class_name), ZSTR_LEN(class_name),
+			"::", strlen("::"),
+			ZSTR_VAL(func_name), ZSTR_LEN(func_name)
+		);
+		ZVAL_NEW_STR(&val, combined);
+	} else {
+		ZVAL_STR_COPY(&val, func->common.function_name);
+	}
+
+	zend_hash_update(Z_ARR_P(return_value), ZSTR_KNOWN(ZEND_STR_FUNCTION), &val);
+}
+
 /* get_iterator implementation */
 
 static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ */
@@ -1098,7 +1135,7 @@ static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 };
 
 /* by_ref is int due to Iterator API */
-zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
+static zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
 	zend_object_iterator *iterator;
 	zend_generator *generator = (zend_generator*)Z_OBJ_P(object);

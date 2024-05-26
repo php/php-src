@@ -730,7 +730,7 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 				}
 				// Real dynamically created internal functions like enum methods must have their own run_time_cache pointer. They're always on the same scope as their defining class.
 				// However, copies - as caused by inheritance of internal methods - must retain the original run_time_cache pointer, shared with the source function.
-				if (!op_array->scope || op_array->scope == ce) {
+				if (!op_array->scope || (op_array->scope == ce && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE))) {
 					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 				}
 			}
@@ -806,11 +806,16 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 
 static void zend_persist_class_constant(zval *zv)
 {
-	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(Z_PTR_P(zv));
+	zend_class_constant *orig_c = Z_PTR_P(zv);
+	zend_class_constant *c = zend_shared_alloc_get_xlat_entry(orig_c);
 	zend_class_entry *ce;
 
 	if (c) {
 		Z_PTR_P(zv) = c;
+		return;
+	} else if (((orig_c->ce->ce_flags & ZEND_ACC_IMMUTABLE) && !(Z_CONSTANT_FLAGS(orig_c->value) & CONST_OWNED))
+	 || orig_c->ce->type == ZEND_INTERNAL_CLASS) {
+		/* Class constant comes from a different file in shm or internal class, keep existing pointer. */
 		return;
 	} else if (!ZCG(current_persistent_script)->corrupted
 	 && zend_accel_in_shm(Z_PTR_P(zv))) {
@@ -904,10 +909,11 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			ce->default_static_members_table = zend_shared_memdup_free(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
 
 			/* Persist only static properties in this class.
-			 * Static properties from parent classes will be handled in class_copy_ctor */
-			i = (ce->parent && (ce->ce_flags & ZEND_ACC_LINKED)) ? ce->parent->default_static_members_count : 0;
-			for (; i < ce->default_static_members_count; i++) {
-				zend_persist_zval(&ce->default_static_members_table[i]);
+			 * Static properties from parent classes will be handled in class_copy_ctor and are marked with IS_INDIRECT */
+			for (i = 0; i < ce->default_static_members_count; i++) {
+				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
+					zend_persist_zval(&ce->default_static_members_table[i]);
+				}
 			}
 			if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 				if (ce->ce_flags & ZEND_ACC_LINKED) {

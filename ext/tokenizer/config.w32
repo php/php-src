@@ -4,5 +4,4 @@ ARG_ENABLE("tokenizer", "tokenizer support", "yes");
 
 if (PHP_TOKENIZER == "yes") {
 	EXTENSION("tokenizer", "tokenizer.c tokenizer_data.c");
-	AC_DEFINE("HAVE_TOKENIZER", 1, "Tokenizer support");
 }

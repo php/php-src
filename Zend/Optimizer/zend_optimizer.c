@@ -831,6 +831,64 @@ zend_class_entry *zend_optimizer_get_class_entry_from_op1(
 	return NULL;
 }
 
+const zend_class_constant *zend_fetch_class_const_info(
+	const zend_script *script, const zend_op_array *op_array, const zend_op *opline, bool *is_prototype) {
+	const zend_class_entry *ce = NULL;
+	bool is_static_reference = false;
+
+	if (!opline || !op_array || opline->op2_type != IS_CONST || Z_TYPE_P(CRT_CONSTANT(opline->op2)) != IS_STRING) {
+		return NULL;
+	}
+	if (opline->op1_type == IS_CONST) {
+		zval *op1 = CRT_CONSTANT(opline->op1);
+		if (Z_TYPE_P(op1) == IS_STRING) {
+			if (script) {
+				ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
+			} else {
+				zend_class_entry *tmp = zend_hash_find_ptr(EG(class_table), Z_STR_P(op1 + 1));
+				if (tmp != NULL) {
+					if (tmp->type == ZEND_INTERNAL_CLASS) {
+						ce = tmp;
+					} else if (tmp->type == ZEND_USER_CLASS
+						&& tmp->info.user.filename
+						&& tmp->info.user.filename == op_array->filename) {
+						ce = tmp;
+					}
+				}
+			}
+		}
+	} else if (opline->op1_type == IS_UNUSED
+		&& op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)
+		&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+		int fetch_type = opline->op1.num & ZEND_FETCH_CLASS_MASK;
+		if (fetch_type == ZEND_FETCH_CLASS_SELF) {
+			ce = op_array->scope;
+		} else if (fetch_type == ZEND_FETCH_CLASS_STATIC) {
+			ce = op_array->scope;
+			is_static_reference = true;
+		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT) {
+			if (op_array->scope->ce_flags & ZEND_ACC_LINKED) {
+				ce = op_array->scope->parent;
+			}
+		}
+	}
+	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
+		return NULL;
+	}
+	zend_class_constant *const_info = zend_hash_find_ptr(&ce->constants_table, Z_STR_P(CRT_CONSTANT(opline->op2)));
+	if (!const_info) {
+		return NULL;
+	}
+	if ((ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_DEPRECATED)
+		|| ((ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_PPP_MASK) != ZEND_ACC_PUBLIC && const_info->ce != op_array->scope)) {
+		return NULL;
+	}
+	*is_prototype = is_static_reference
+		&& !(const_info->ce->ce_flags & ZEND_ACC_FINAL) && !(ZEND_CLASS_CONST_FLAGS(const_info) & ZEND_ACC_FINAL);
+
+	return const_info;
+}
+
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, bool *is_prototype)
 {

@@ -4,6 +4,7 @@ Observer: End handlers fire after a userland fatal error
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_all=1
 zend_test.observer.show_return_value=1
 --FILE--
@@ -29,13 +30,13 @@ echo 'You should not see this.';
   </set_error_handler:NULL>
   <!-- init foo() -->
   <foo>
-    <!-- init {closure}() -->
-    <{closure}>
+    <!-- init {closure:%s:%d}() -->
+    <{closure:%s:%d}>
       <!-- init trigger_error() -->
       <trigger_error>
 
 Fatal error: Foo error in %s on line %d
       </trigger_error:NULL>
-    </{closure}:NULL>
+    </{closure:%s:%d}:NULL>
   </foo:NULL>
 </file '%s'>

@@ -1,21 +1,21 @@
 --TEST--
-DOM\HTMLDocument GB18030 encoding test
+Dom\HTMLDocument GB18030 encoding test
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/gb18030.html");
-var_dump($dom->encoding);
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/gb18030.html");
+var_dump($dom->charset);
 $dom->documentElement->firstChild->nextElementSibling->textContent = "é";
-$output = $dom->saveHTML();
+$output = $dom->saveHtml();
 echo $output, "\n";
-$dom->saveHTMLFile(__DIR__ . "/gb18030_output.tmp");
+$dom->saveHtmlFile(__DIR__ . "/gb18030_output.tmp");
 var_dump(file_get_contents(__DIR__ . "/gb18030_output.tmp") === $output);
 
 echo "--- After changing encoding to UTF-8 ---\n";
-$dom->encoding = "UTF-8";
-echo $dom->saveHTML(), "\n";
+$dom->charset = "UTF-8";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --CLEAN--

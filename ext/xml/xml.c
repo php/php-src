@@ -186,7 +186,7 @@ zend_module_entry xml_module_entry = {
 /* All the encoding functions are set to NULL right now, since all
  * the encoding is currently done internally by expat/xmltok.
  */
-const xml_encoding xml_encodings[] = {
+static const xml_encoding xml_encodings[] = {
 	{ (XML_Char *)"ISO-8859-1", xml_decode_iso_8859_1, xml_encode_iso_8859_1 },
 	{ (XML_Char *)"US-ASCII",   xml_decode_us_ascii,   xml_encode_us_ascii   },
 	{ (XML_Char *)"UTF-8",      NULL,                  NULL                  },
@@ -1363,6 +1363,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	parser->level = 0;
 	xml_parser_free_ltags(parser);
 	parser->ltags = safe_emalloc(XML_MAXLEVEL, sizeof(char *), 0);
+	memset(parser->ltags, 0, XML_MAXLEVEL * sizeof(char *));
 
 	XML_SetElementHandler(parser->parser, _xml_startElementHandler, _xml_endElementHandler);
 	XML_SetCharacterDataHandler(parser->parser, _xml_characterDataHandler);

@@ -102,9 +102,16 @@ int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *
 }
 /* }}} */
 
-static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
+static void _pdo_pgsql_notice(void *context, const char *message) /* {{{ */
 {
-/*	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data; */
+	pdo_dbh_t * dbh = (pdo_dbh_t *)context;
+	zend_fcall_info_cache *fc = ((pdo_pgsql_db_handle *)dbh->driver_data)->notice_callback;
+	if (fc) {
+		zval zarg;
+		ZVAL_STRING(&zarg, message);
+		zend_call_known_fcc(fc, NULL, 1, &zarg, NULL);
+		zval_ptr_dtor_str(&zarg);
+	}
 }
 /* }}} */
 
@@ -121,6 +128,16 @@ static void pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 	}
 	if (einfo->errmsg) {
 		add_next_index_string(info, einfo->errmsg);
+	}
+}
+/* }}} */
+
+static void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H) /* {{{ */
+{
+	if (H->notice_callback) {
+		zend_fcc_dtor(H->notice_callback);
+		efree(H->notice_callback);
+		H->notice_callback = NULL;
 	}
 }
 /* }}} */
@@ -229,6 +246,7 @@ static void pgsql_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 			pefree(H->lob_streams, dbh->is_persistent);
 			H->lob_streams = NULL;
 		}
+		pdo_pgsql_cleanup_notice_callback(H);
 		if (H->server) {
 			PQfinish(H->server);
 			H->server = NULL;
@@ -1224,6 +1242,30 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
 }
 /* }}} */
 
+/* {{{ proto void PDO::pgsqlSetNoticeCallback(mixed callback)
+   Sets a callback to receive DB notices (after client_min_messages has been set) */
+PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "F!", &fci, &fcc)) {
+		RETURN_THROWS();
+	}
+	
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK;
+	
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+	
+	pdo_pgsql_cleanup_notice_callback(H);
+	
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		H->notice_callback = emalloc(sizeof(zend_fcall_info_cache));
+		zend_fcc_dup(H->notice_callback, &fcc);
+	}
+}
+/* }}} */
+
 static const zend_function_entry *pdo_pgsql_get_driver_methods(pdo_dbh_t *dbh, int kind)
 {
 	switch (kind) {
@@ -1341,7 +1383,7 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 		goto cleanup;
 	}
 
-	PQsetNoticeProcessor(H->server, (void(*)(void*,const char*))_pdo_pgsql_notice, (void *)&dbh);
+	PQsetNoticeProcessor(H->server, _pdo_pgsql_notice, (void *)dbh);
 
 	H->attached = 1;
 	H->pgoid = -1;

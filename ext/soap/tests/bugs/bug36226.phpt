@@ -105,7 +105,7 @@ object(IVREvents)#%d (6) {
   ["logOnEvent"]=>
   array(1) {
     [0]=>
-    object(LogOnEvent)#10 (2) {
+    object(LogOnEvent)#%d (%d) {
       ["audienceMemberId"]=>
       int(34567)
       ["timestamp"]=>

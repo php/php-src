@@ -1,32 +1,32 @@
 --TEST--
-DOM\HTMLDocument test values for encoding field
+Dom\HTMLDocument test values for encoding field
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
-var_dump($dom->encoding);
-$dom->encoding = "CSeuckr";
-var_dump($dom->encoding);
+$dom = Dom\HTMLDocument::createEmpty();
+var_dump($dom->charset);
+$dom->inputEncoding = "CSeuckr";
+var_dump($dom->characterSet);
 try {
-    $dom->encoding = "nope";
+    $dom->charset = "nope";
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump($dom->encoding);
-$dom->encoding = "Windows-1251";
-var_dump($dom->encoding);
+var_dump($dom->charset);
+$dom->inputEncoding = "Windows-1251";
+var_dump($dom->characterSet);
 try {
-    $dom->encoding = NULL;
+    $dom->charset = "";
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
-var_dump($dom->encoding);
-echo $dom->saveHTML();
+var_dump($dom->inputEncoding);
+echo $dom->saveHtml();
 
 try {
-    $dom = DOM\HTMLDocument::createEmpty("bogus");
+    $dom = Dom\HTMLDocument::createEmpty("bogus");
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -40,4 +40,4 @@ string(6) "EUC-KR"
 string(12) "windows-1251"
 Invalid document encoding
 string(12) "windows-1251"
-DOM\HTMLDocument::createEmpty(): Argument #1 ($encoding) must be a valid document encoding
+Dom\HTMLDocument::createEmpty(): Argument #1 ($encoding) must be a valid document encoding

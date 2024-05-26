@@ -22,7 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "pdo/php_pdo.h"
-#include "pdo/php_pdo_int.h"
+#include "pdo/php_pdo_error.h"
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
@@ -30,7 +30,7 @@
 
 static zend_class_entry *PdoPgsql_ce;
 
-/* {{{ pdo_sqlite_deps */
+/* {{{ pdo_pgsql_deps */
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
@@ -156,6 +156,9 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INTRANS", (zend_long)PGSQL_TRANSACTION_INTRANS);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_INERROR", (zend_long)PGSQL_TRANSACTION_INERROR);
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_TRANSACTION_UNKNOWN", (zend_long)PGSQL_TRANSACTION_UNKNOWN);
+#ifdef HAVE_PG_RESULT_MEMORY_SIZE
+	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_RESULT_MEMORY_SIZE", (zend_long)PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE);
+#endif
 
 	PdoPgsql_ce = register_class_PdoPgsql(pdo_dbh_ce);
 	PdoPgsql_ce->create_object = pdo_dbh_new;

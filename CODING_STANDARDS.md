@@ -152,62 +152,74 @@ rewritten to comply with these rules.
 1. Method names follow the *studlyCaps* (also referred to as *bumpy case* or
     *camel caps*) naming convention, with care taken to minimize the letter
     count. The initial letter of the name is lowercase, and each letter that
-    starts a new `word` is capitalized:
-
-    Good:
-
-    ```php
-    connect()
-    getData()
-    buildSomeWidget()
-    ```
-
-    Bad:
-
-    ```php
-    get_Data()
-    buildsomewidget()
-    getI()
-    ```
+    starts a new "word" is capitalized.
 
 1. Class names should be descriptive nouns in *PascalCase* and as short as
     possible. Each word in the class name should start with a capital letter,
     without underscore delimiters. The class name should be prefixed with the
     name of the "parent set" (e.g. the name of the extension) if no namespaces
-    are used. Abbreviations and acronyms as well as initialisms should be
-    avoided wherever possible, unless they are much more widely used than the
-    long form (e.g. HTTP or URL). Abbreviations start with a capital letter
-    followed by lowercase letters, whereas acronyms and initialisms are written
-    according to their standard notation. Usage of acronyms and initialisms is
-    not allowed if they are not widely adopted and recognized as such.
+    are used.
 
-    Good:
+1.  Abbreviations and acronyms as well as initialisms should be avoided wherever
+    possible, unless they are much more widely used than the long form (e.g. HTTP
+    or URL). Abbreviations, acronyms, and initialisms should be treated like
+    regular words, thus they should be written with an uppercase first character,
+    followed by lowercase characters.
+
+1.  Diverging from this policy is allowed to keep internal consistency within a
+    single extension, if the name follows an established, language-agnostic
+    standard, or for other reasons, if those reasons are properly justified
+    and voted on as part of the RFC process.
+
+
+    Good method names:
+
+    ```php
+    connect()
+    getData()
+    buildSomeWidget()
+    performHttpRequest()
+    ```
+
+    Bad method names:
+
+    ```php
+    get_Data()
+    buildsomewidget()
+    getI()
+    performHTTPRequest()
+    ```
+
+    Good class names:
 
     ```php
     Curl
     CurlResponse
-    HTTPStatusCode
-    URL
-    BTreeMap // B-tree Map
-    Id // Identifier
-    ID // Identity Document
+    HttpStatusCode
+    Url
+    BtreeMap // B-tree Map
+    UserId // User Identifier
     Char // Character
     Intl // Internationalization
-    Radar // Radio Detecting and Ranging
+    Ssl\Certificate
+    Ssl\Crl // Certificate Revocation List
+    Ssl\CrlUrl
     ```
 
-    Bad:
+    Bad class names:
 
     ```php
     curl
     curl_response
-    HttpStatusCode
-    Url
-    BtreeMap
-    ID // Identifier
+    HTTPStatusCode
+    URL
+    BTreeMap
+    UserID // User Identifier
     CHAR
     INTL
-    RADAR // Radio Detecting and Ranging
+    SSL\Certificate
+    SSL\CRL
+    SSL\CRLURL
     ```
 
 ## Internal function naming conventions

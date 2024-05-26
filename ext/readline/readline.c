@@ -456,7 +456,7 @@ char **php_readline_completion_cb(const char *text, int start, int end)
 				matches = rl_completion_matches(text,_readline_command_generator);
 			} else {
 				/* libedit will read matches[2] */
-				matches = calloc(sizeof(char *), 3);
+				matches = calloc(3, sizeof(char *));
 				if (!matches) {
 					return NULL;
 				}

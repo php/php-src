@@ -521,7 +521,8 @@ ZEND_API const char *zend_get_type_by_const(int type);
 
 #define ZEND_THIS                           (&EX(This))
 
-#define getThis()							((Z_TYPE_P(ZEND_THIS) == IS_OBJECT) ? ZEND_THIS : NULL)
+#define hasThis()							(Z_TYPE_P(ZEND_THIS) == IS_OBJECT)
+#define getThis()							(hasThis() ? ZEND_THIS : NULL)
 #define ZEND_IS_METHOD_CALL()				(EX(func)->common.scope != NULL)
 
 #define WRONG_PARAM_COUNT					ZEND_WRONG_PARAM_COUNT()
@@ -837,7 +838,7 @@ ZEND_API void zend_call_known_function(
 		uint32_t param_count, zval *params, HashTable *named_params);
 
 static zend_always_inline void zend_call_known_fcc(
-	zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
+	const zend_fcall_info_cache *fcc, zval *retval_ptr, uint32_t param_count, zval *params, HashTable *named_params)
 {
 	zend_function *func = fcc->function_handler;
 	/* Need to copy trampolines as they get released after they are called */
@@ -1562,6 +1563,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_en
 ZEND_API ZEND_COLD void zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void zend_argument_type_error(uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *format, ...);
+ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, zend_class_entry *old_ce);
+ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce);
 
 #define ZPP_ERROR_OK                            0
 #define ZPP_ERROR_FAILURE                       1

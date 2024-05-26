@@ -59,9 +59,10 @@
 #if PHP_OPENSSL_API_VERSION >= 0x30000
 #include <openssl/core_names.h>
 #include <openssl/param_build.h>
+#include <openssl/provider.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER < 0x10100000L || defined(LIBRESSL_VERSION_NUMBER)) && !defined(OPENSSL_NO_ENGINE)
+#if defined(LIBRESSL_VERSION_NUMBER) && !defined(OPENSSL_NO_ENGINE)
 #include <openssl/engine.h>
 #endif
 
@@ -99,7 +100,7 @@
 #define HAVE_EVP_PKEY_EC 1
 
 /* the OPENSSL_EC_EXPLICIT_CURVE value was added
- * in OpenSSL 1.1.0; previous versions should 
+ * in OpenSSL 1.1.0; previous versions should
  * use 0 instead.
  */
 #ifndef OPENSSL_EC_EXPLICIT_CURVE
@@ -184,7 +185,7 @@ typedef struct _php_openssl_x509_request_object {
 	zend_object std;
 } php_openssl_request_object;
 
-zend_class_entry *php_openssl_request_ce;
+static zend_class_entry *php_openssl_request_ce;
 
 static inline php_openssl_request_object *php_openssl_request_from_obj(zend_object *obj) {
 	return (php_openssl_request_object *)((char *)(obj) - XtOffsetOf(php_openssl_request_object, std));
@@ -224,7 +225,7 @@ typedef struct _php_openssl_pkey_object {
 	zend_object std;
 } php_openssl_pkey_object;
 
-zend_class_entry *php_openssl_pkey_ce;
+static zend_class_entry *php_openssl_pkey_ce;
 
 static inline php_openssl_pkey_object *php_openssl_pkey_from_obj(zend_object *obj) {
 	return (php_openssl_pkey_object *)((char *)(obj) - XtOffsetOf(php_openssl_pkey_object, std));
@@ -485,7 +486,7 @@ void php_openssl_store_errors(void)
 /* }}} */
 
 /* {{{ php_openssl_errors_set_mark */
-void php_openssl_errors_set_mark(void) {
+static void php_openssl_errors_set_mark(void) {
 	if (!OPENSSL_G(errors)) {
 		return;
 	}
@@ -499,7 +500,7 @@ void php_openssl_errors_set_mark(void) {
 /* }}} */
 
 /* {{{ php_openssl_errors_restore_mark */
-void php_openssl_errors_restore_mark(void) {
+static void php_openssl_errors_restore_mark(void) {
 	if (!OPENSSL_G(errors)) {
 		return;
 	}
@@ -1269,7 +1270,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_openssl_pkey_object_handlers.clone_obj = NULL;
 	php_openssl_pkey_object_handlers.compare = zend_objects_not_comparable;
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 	OPENSSL_config(NULL);
 	SSL_library_init();
 	OpenSSL_add_all_ciphers();
@@ -1277,6 +1278,10 @@ PHP_MINIT_FUNCTION(openssl)
 	OpenSSL_add_all_algorithms();
 	SSL_load_error_strings();
 #else
+#if PHP_OPENSSL_API_VERSION >= 0x30000 && defined(LOAD_OPENSSL_LEGACY_PROVIDER)
+	OSSL_PROVIDER_load(NULL, "legacy");
+	OSSL_PROVIDER_load(NULL, "default");
+#endif
 	OPENSSL_init_ssl(OPENSSL_INIT_LOAD_CONFIG, NULL);
 #endif
 
@@ -1309,9 +1314,7 @@ PHP_MINIT_FUNCTION(openssl)
 	php_stream_xport_register("tlsv1.0", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.1", php_openssl_ssl_socket_factory);
 	php_stream_xport_register("tlsv1.2", php_openssl_ssl_socket_factory);
-#if OPENSSL_VERSION_NUMBER >= 0x10101000
 	php_stream_xport_register("tlsv1.3", php_openssl_ssl_socket_factory);
-#endif
 
 	/* override the default tcp socket provider */
 	php_stream_xport_register("tcp", php_openssl_ssl_socket_factory);
@@ -1364,7 +1367,7 @@ PHP_MINFO_FUNCTION(openssl)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(openssl)
 {
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 	EVP_cleanup();
 
 	/* prevent accessing locking callback from unloaded extension */
@@ -1391,9 +1394,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl)
 	php_stream_xport_unregister("tlsv1.0");
 	php_stream_xport_unregister("tlsv1.1");
 	php_stream_xport_unregister("tlsv1.2");
-#if OPENSSL_VERSION_NUMBER >= 0x10101000
 	php_stream_xport_unregister("tlsv1.3");
-#endif
 
 	/* reinstate the default tcp handler */
 	php_stream_xport_register("tcp", php_stream_generic_socket_factory);
@@ -4609,7 +4610,7 @@ static EVP_PKEY *php_openssl_pkey_init_ec(zval *data, bool *is_private) {
 		EVP_PKEY_CTX_free(ctx);
 		ctx = EVP_PKEY_CTX_new(param_key, NULL);
 	}
-	
+
 	if (EVP_PKEY_check(ctx) || EVP_PKEY_public_check_quick(ctx)) {
 		*is_private = d != NULL;
 		EVP_PKEY_up_ref(param_key);

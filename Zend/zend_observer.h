@@ -27,10 +27,12 @@
 BEGIN_EXTERN_C()
 
 extern ZEND_API int zend_observer_fcall_op_array_extension;
+extern ZEND_API int zend_observer_fcall_internal_function_extension;
 extern ZEND_API bool zend_observer_errors_observed;
 extern ZEND_API bool zend_observer_function_declared_observed;
 extern ZEND_API bool zend_observer_class_linked_observed;
 
+/* Omit zend_observer_fcall_internal_function_extension check, they are set at the same time. */
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
 
 #define ZEND_OBSERVER_FCALL_BEGIN(execute_data) do { \
@@ -62,9 +64,9 @@ ZEND_API void zend_observer_fcall_register(zend_observer_fcall_init);
 // Call during runtime, but only if you have used zend_observer_fcall_register.
 // You must not have more than one begin and one end handler active at the same time. Remove the old one first, if there is an existing one.
 ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin);
-ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin);
+ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next);
 ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observer_fcall_end_handler end);
-ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end);
+ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next);
 
 ZEND_API void zend_observer_startup(void); // Called by engine before MINITs
 ZEND_API void zend_observer_post_startup(void); // Called by engine after MINITs

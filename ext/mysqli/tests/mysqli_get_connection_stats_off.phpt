@@ -8,9 +8,6 @@ mysqli
 --SKIPIF--
 <?PHP
 require_once 'skipifconnectfailure.inc';
-if (!function_exists('mysqli_get_connection_stats')) {
-    die("skip only available with mysqlnd");
-}
 ?>
 --FILE--
 <?php

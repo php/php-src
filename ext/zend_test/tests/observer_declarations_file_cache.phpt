@@ -4,6 +4,7 @@ Observer: Observe function and class declarations with file_cache_only
 zend_test
 --INI--
 zend_test.observer.enabled=1
+zend_test.observer.show_output=1
 zend_test.observer.observe_declaring=1
 opcache.enable_cli=1
 opcache.file_cache="{TMP}"

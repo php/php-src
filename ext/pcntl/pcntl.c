@@ -42,8 +42,78 @@
 #endif
 
 #include <errno.h>
-#ifdef HAVE_UNSHARE
+#if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
+#if defined(__FreeBSD__)
+#include <sys/types.h>
+#include <sys/cpuset.h>
+typedef cpuset_t cpu_set_t;
+#endif
+ #define PCNTL_CPUSET(mask) &mask
+ #define PCNTL_CPUSET_SIZE(mask) sizeof(mask)
+ #define PCNTL_CPU_ISSET(i, mask) CPU_ISSET(i, &mask)
+ #define PCNTL_CPU_SET(i, mask) CPU_SET(i, &mask)
+ #define PCNTL_CPU_ZERO(mask) CPU_ZERO(&mask)
+ #define PCNTL_CPU_DESTROY(mask) ((void)0)
+#elif defined(__NetBSD__)
+#include <sys/syscall.h>
+#include <sched.h>
+typedef cpuset_t *cpu_set_t;
+ #define sched_getaffinity(p, c, m) syscall(SYS__sched_getaffinity, p, 0, c, m)
+ #define sched_setaffinity(p, c, m) syscall(SYS__sched_setaffinity, p, 0, c, m)
+ #define PCNTL_CPUSET(mask) mask
+ #define PCNTL_CPUSET_SIZE(mask) cpuset_size(mask)
+ #define PCNTL_CPU_ISSET(i, mask) cpuset_isset((cpuid_t)i, mask)
+ #define PCNTL_CPU_SET(i, mask) cpuset_set((cpuid_t)i, mask)
+ #define PCNTL_CPU_ZERO(mask)										\
+	do {												\
+		mask = cpuset_create(); 								\
+		if (UNEXPECTED(!mask)) {								\
+			php_error_docref(NULL, E_WARNING, "cpuset_create: Insufficient memory");	\
+			RETURN_FALSE;   								\
+		}											\
+		cpuset_zero(mask);									\
+	} while(0)
+ #define PCNTL_CPU_DESTROY(mask) cpuset_destroy(mask)
+ #define HAVE_SCHED_SETAFFINITY 1
+#elif defined(HAVE_PSET_BIND)
+#include <sys/pset.h>
+typedef psetid_t cpu_set_t;
+ #define sched_getaffinity(p, c, m) pset_bind(PS_QUERY, P_PID, (p <= 0 ? getpid() : p), &m)
+ #define sched_setaffinity(p, c, m) pset_bind(m, P_PID, (p <= 0 ? getpid() : p), NULL)
+ #define PCNTL_CPUSET(mask) mask
+ #define PCNTL_CPU_ISSET(i, mask) (pset_assign(PS_QUERY, (processorid_t)i, &query) == 0 && query == mask)
+ #define PCNTL_CPU_SET(i, mask) pset_assign(mask, (processorid_t)i, NULL)
+ #define PCNTL_CPU_ZERO(mask) 														\
+	psetid_t query;																	\
+	do {																			\
+		if (UNEXPECTED(pset_create(&mask) != 0)) {									\
+			php_error_docref(NULL, E_WARNING, "pset_create: %s", strerror(errno));	\
+			RETURN_FALSE;															\
+		}																			\
+	 } while (0)
+ #define PCNTL_CPU_DESTROY(mask) 													\
+	do {																			\
+		if (UNEXPECTED(mask != PS_NONE && pset_destroy(mask) != 0)) {				\
+			php_error_docref(NULL, E_WARNING, "pset_destroy: %s", strerror(errno));	\
+		}																			\
+	} while (0)
+ #define HAVE_SCHED_SETAFFINITY 1
+#endif
+
+#if defined(HAVE_GETCPUID)
+#include <sys/processor.h>
+#define sched_getcpu getcpuid
+#define HAVE_SCHED_GETCPU 1
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+#include <pthread/qos.h>
+static zend_class_entry *QosClass_ce;
+#endif
+
+#ifdef HAVE_PIDFD_OPEN
+#include <sys/syscall.h>
 #endif
 
 #ifdef HAVE_FORKX
@@ -56,9 +126,10 @@
 
 #define LONG_CONST(c) (zend_long) c
 
-#include "pcntl_arginfo.h"
-
+#include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"
+
+#include "pcntl_arginfo.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -127,6 +198,9 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+	QosClass_ce = register_class_QosClass();
+#endif
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
@@ -185,7 +259,26 @@ PHP_FUNCTION(pcntl_fork)
 	id = fork();
 	if (id == -1) {
 		PCNTL_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		switch (errno) {
+			case EAGAIN:
+				php_error_docref(NULL, E_WARNING, "Error %d: Reached the maximum limit of number of processes", errno);
+				break;
+			case ENOMEM:
+				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory", errno);
+				break;
+			// unlikely, especially nowadays.
+			case ENOSYS:
+				php_error_docref(NULL, E_WARNING, "Error %d: Unimplemented", errno);
+				break;
+			// QNX is the only platform returning it so far and is a different case from EAGAIN.
+			// Retries can be handled with sleep eventually.
+			case EBADF:
+				php_error_docref(NULL, E_WARNING, "Error %d: File descriptor concurrency issue", errno);
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+
+		}
 	} else if (id == 0) {
 		zend_max_execution_timer_init();
 	}
@@ -683,8 +776,17 @@ PHP_FUNCTION(pcntl_signal_get_handler)
 		Z_PARAM_LONG(signo)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (signo < 1 || signo > 32) {
-		zend_argument_value_error(1, "must be between 1 and 32");
+	// note: max signal on mac is SIGUSR2 (31), no real time signals.
+	int sigmax = NSIG - 1;
+#if defined(SIGRTMAX)
+	// oddily enough, NSIG on freebsd reports only 32 whereas SIGRTMIN starts at 65.
+	if (sigmax < SIGRTMAX) {
+		sigmax = SIGRTMAX;
+	}
+#endif
+
+	if (signo < 1 || signo > sigmax) {
+		zend_argument_value_error(1, "must be between 1 and %d", sigmax);
 		RETURN_THROWS();
 	}
 
@@ -966,6 +1068,20 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 # endif
 				break;
 #endif
+
+#ifdef SIGTRAP
+			case SIGTRAP:
+# if defined(si_syscall) && defined(__FreeBSD__)
+				if (siginfo->si_code == TRAP_CAP) {
+					add_assoc_long_ex(user_siginfo, "syscall", sizeof("syscall")-1, (zend_long)siginfo->si_syscall);
+				} else {
+					add_assoc_long_ex(user_siginfo, "trapno", sizeof("trapno")-1, (zend_long)siginfo->si_trapno);
+				}
+
+# endif
+				break;
+
+#endif
 		}
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
 		if (SIGRTMIN <= signo && signo <= SIGRTMAX) {
@@ -996,7 +1112,7 @@ PHP_FUNCTION(pcntl_getpriority)
 	/* needs to be cleared, since any returned value is valid */
 	errno = 0;
 
-	pid = pid_is_null ? getpid() : pid;
+	pid = pid_is_null ? 0 : pid;
 	pri = getpriority(who, pid);
 
 	if (errno) {
@@ -1050,7 +1166,7 @@ PHP_FUNCTION(pcntl_setpriority)
 		Z_PARAM_LONG(who)
 	ZEND_PARSE_PARAMETERS_END();
 
-	pid = pid_is_null ? getpid() : pid;
+	pid = pid_is_null ? 0 : pid;
 
 	if (setpriority(who, pid, pri)) {
 		PCNTL_G(last_error) = errno;
@@ -1262,7 +1378,7 @@ PHP_FUNCTION(pcntl_unshare)
 		switch (errno) {
 #ifdef EINVAL
 			case EINVAL:
-				zend_argument_value_error(1, "must be a combination of CLONE_* flags");
+				zend_argument_value_error(1, "must be a combination of CLONE_* flags, or at least one flag is unsupported by the kernel");
 				RETURN_THROWS();
 				break;
 #endif
@@ -1401,6 +1517,296 @@ PHP_FUNCTION(pcntl_forkx)
 }
 #endif
 /* }}} */
+
+#ifdef HAVE_PIDFD_OPEN
+// The `pidfd_open` syscall is available since 5.3
+// and `setns` since 3.0.
+PHP_FUNCTION(pcntl_setns)
+{
+	zend_long pid, nstype = CLONE_NEWNET;
+	bool pid_is_null = 1;
+	int fd, ret;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_LONG(nstype)
+	ZEND_PARSE_PARAMETERS_END();
+
+	pid = pid_is_null ? getpid() : pid;
+	fd = syscall(SYS_pidfd_open, pid, 0);
+	if (errno) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case EINVAL:
+			case ESRCH:
+				zend_argument_value_error(1, "is not a valid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+
+			case ENFILE:
+				php_error_docref(NULL, E_WARNING, "Error %d: File descriptors per-process limit reached", errno);
+				break;
+
+			case ENODEV:
+				php_error_docref(NULL, E_WARNING, "Error %d: Anonymous inode fs unsupported", errno);
+				break;
+
+			case ENOMEM:
+				php_error_docref(NULL, E_WARNING, "Error %d: Insufficient memory for pidfd_open", errno);
+				break;
+
+			default:
+			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	}
+	ret = setns(fd, (int)nstype);
+	close(fd);
+
+	if (ret == -1) {
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "process no longer available (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+
+			case EINVAL:
+				zend_argument_value_error(2, "is an invalid nstype (%d)", nstype);
+				RETURN_THROWS();
+
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Error %d: No required capability for this process", errno);
+				break;
+
+			default:
+			        php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+#endif
+
+#ifdef HAVE_SCHED_SETAFFINITY
+PHP_FUNCTION(pcntl_getcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// 0 == getpid in this context, we're just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+
+	PCNTL_CPU_ZERO(mask);
+
+	if (sched_getaffinity(pid, PCNTL_CPUSET_SIZE(mask), PCNTL_CPUSET(mask)) != 0) {
+		PCNTL_CPU_DESTROY(mask);
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			case EINVAL:
+				zend_value_error("invalid cpu affinity mask size");
+				RETURN_THROWS();
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+
+		RETURN_FALSE;
+	}
+
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	array_init(return_value);
+
+	for (zend_ulong i = 0; i < maxcpus; i ++) {
+		if (PCNTL_CPU_ISSET(i, mask)) {
+			add_next_index_long(return_value, i);
+		}
+	}
+	PCNTL_CPU_DESTROY(mask);
+}
+
+PHP_FUNCTION(pcntl_setcpuaffinity)
+{
+	zend_long pid;
+	bool pid_is_null = 1;
+	cpu_set_t mask;
+	zval *hmask = NULL, *ncpu;
+
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(pid, pid_is_null)
+		Z_PARAM_ARRAY(hmask)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
+		zend_argument_value_error(2, "must not be empty");
+		RETURN_THROWS();
+	}
+
+	// 0 == getpid in this context, we're just saving a syscall
+	pid = pid_is_null ? 0 : pid;
+	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	PCNTL_CPU_ZERO(mask);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {
+		ZVAL_DEREF(ncpu);
+		zend_long cpu;
+		if (Z_TYPE_P(ncpu) != IS_LONG) {
+			if (Z_TYPE_P(ncpu) == IS_STRING) {
+				zend_ulong tmp;
+				if (!ZEND_HANDLE_NUMERIC(Z_STR_P(ncpu), tmp)) {
+					zend_argument_value_error(2, "cpu id invalid value (%s)", ZSTR_VAL(Z_STR_P(ncpu)));
+					PCNTL_CPU_DESTROY(mask);
+					RETURN_THROWS();
+				}
+
+				cpu = (zend_long)tmp;
+			} else {
+				zend_string *wcpu = zval_get_string_func(ncpu);
+				zend_argument_value_error(2, "cpu id invalid type (%s)", ZSTR_VAL(wcpu));
+				zend_string_release(wcpu);
+				PCNTL_CPU_DESTROY(mask);
+				RETURN_THROWS();
+			}
+		} else {
+			cpu = Z_LVAL_P(ncpu);
+		}
+
+		if (cpu < 0 || cpu >= maxcpus) {
+			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
+			RETURN_THROWS();
+		}
+		       
+		if (!PCNTL_CPU_ISSET(cpu, mask)) {
+			PCNTL_CPU_SET(cpu, mask);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (sched_setaffinity(pid, PCNTL_CPUSET_SIZE(mask), PCNTL_CPUSET(mask)) != 0) {
+		PCNTL_CPU_DESTROY(mask);
+		PCNTL_G(last_error) = errno;
+		switch (errno) {
+			case ESRCH:
+				zend_argument_value_error(1, "invalid process (" ZEND_LONG_FMT ")", pid);
+				RETURN_THROWS();
+			case EPERM:
+				php_error_docref(NULL, E_WARNING, "Calling process not having the proper privileges");
+				break;
+			case EINVAL:
+				zend_argument_value_error(2, "invalid cpu affinity mask size or unmapped cpu id(s)");
+				RETURN_THROWS();
+			default:
+				php_error_docref(NULL, E_WARNING, "Error %d", errno);
+		}
+		RETURN_FALSE;
+	} else {
+		PCNTL_CPU_DESTROY(mask);
+		RETURN_TRUE;
+	}
+}
+#endif
+
+#if defined(HAVE_SCHED_GETCPU)
+PHP_FUNCTION(pcntl_getcpu)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	RETURN_LONG(sched_getcpu());
+}
+#endif
+
+#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
+static qos_class_t qos_zval_to_lval(const zval *qos_obj)
+{
+	qos_class_t qos_class = QOS_CLASS_DEFAULT;
+	zend_string *entry = Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(qos_obj)));
+
+	if (zend_string_equals_literal(entry, "UserInteractive")) {
+		qos_class = QOS_CLASS_USER_INTERACTIVE;
+	} else if (zend_string_equals_literal(entry, "UserInitiated")) {
+		qos_class = QOS_CLASS_USER_INITIATED;
+	} else if (zend_string_equals_literal(entry, "Utility")) {
+		qos_class = QOS_CLASS_UTILITY;
+	} else if (zend_string_equals_literal(entry, "Background")) {
+		qos_class = QOS_CLASS_BACKGROUND;
+	}
+
+	return qos_class;
+}
+
+static zend_object *qos_lval_to_zval(qos_class_t qos_class)
+{
+	const char *entryname;
+	switch (qos_class)
+	{
+	case QOS_CLASS_USER_INTERACTIVE:
+		entryname = "UserInteractive";
+		break;
+	case QOS_CLASS_USER_INITIATED:
+		entryname = "UserInitiated";
+		break;
+	case QOS_CLASS_UTILITY:
+		entryname = "Utility";
+		break;
+	case QOS_CLASS_BACKGROUND:
+		entryname = "Background";
+		break;
+	case QOS_CLASS_DEFAULT:
+	default:
+		entryname = "Default";
+		break;
+	}
+
+	return zend_enum_get_case_cstr(QosClass_ce, entryname);
+}
+
+PHP_FUNCTION(pcntl_getqos_class)
+{
+	qos_class_t qos_class;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	if (UNEXPECTED(pthread_get_qos_class_np(pthread_self(), &qos_class, NULL) != 0))
+	{
+		// unlikely unless an external tool set the QOS class with a wrong value
+		PCNTL_G(last_error) = errno;
+		zend_throw_error(NULL, "invalid QOS class %u", qos_class);
+		RETURN_THROWS();
+	}
+
+	RETURN_OBJ_COPY(qos_lval_to_zval(qos_class));
+}
+
+PHP_FUNCTION(pcntl_setqos_class)
+{
+	zval *qos_obj;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(qos_obj, QosClass_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	qos_class_t qos_class = qos_zval_to_lval(qos_obj);
+
+	if (UNEXPECTED(pthread_set_qos_class_self_np((qos_class_t)qos_class, 0) != 0))
+	{
+		// unlikely, unless it is a new os issue, as we draw from the specified enum values
+		PCNTL_G(last_error) = errno;
+		zend_throw_error(NULL, "pcntl_setqos_class failed");
+		RETURN_THROWS();
+	}
+}
+#endif
 
 static void pcntl_interrupt_function(zend_execute_data *execute_data)
 {

@@ -56,4 +56,4 @@ See if strictErrorChecking is off
 bool(false)
 Should raise PHP error because strictErrorChecking is off
 
-Warning: DOM\Document::createAttribute(): Invalid Character Error in %s on line %d
+Warning: DOMDocument::createAttribute(): Invalid Character Error in %s on line %d

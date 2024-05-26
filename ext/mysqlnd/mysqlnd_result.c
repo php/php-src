@@ -970,6 +970,13 @@ MYSQLND_METHOD(mysqlnd_res, fetch_into)(MYSQLND_RES * result, const unsigned int
 	bool fetched_anything;
 	zval *row_data;
 
+	// We clean the error here because in unbuffered mode we could receive a new error
+	// and therefore consumers of this method are checking for errors
+	MYSQLND_CONN_DATA *conn = result->conn;
+	if (conn) {
+		SET_EMPTY_ERROR(conn->error_info);
+	}
+
 	DBG_ENTER("mysqlnd_res::fetch_into");
 	if (FAIL == result->m.fetch_row(result, &row_data, flags, &fetched_anything)) {
 		RETVAL_FALSE;

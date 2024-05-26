@@ -64,7 +64,7 @@ object(stdClass)#%d (8) {
 }
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://test-uri/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:test><testParam xsi:type="ns1:testType"><dateTime xsi:type="xsd:dateTime">2023-10-14T13:37:42.123400+02:00</dateTime><time xsi:type="xsd:time">13:37:42.123400+02:00</time><date xsi:type="xsd:date">2023-10-14+02:00</date><gYearMonth xsi:type="xsd:gYearMonth">2023-10+02:00</gYearMonth><gYear xsi:type="xsd:gYear">2023+02:00</gYear><gMonthDay xsi:type="xsd:gMonthDay">--10-14+02:00</gMonthDay><gDay xsi:type="xsd:gDay">---14+02:00</gDay><gMonth xsi:type="xsd:gMonth">--10--+02:00</gMonth></testParam></ns1:test></SOAP-ENV:Body></SOAP-ENV:Envelope>
-object(stdClass)#9 (8) {
+object(stdClass)#%d (%d) {
   ["dateTime"]=>
   string(32) "2023-10-14T13:37:42.123400+02:00"
   ["time"]=>
@@ -84,7 +84,7 @@ object(stdClass)#9 (8) {
 }
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://test-uri/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:test><testParam xsi:type="ns1:testType"><dateTime xsi:type="xsd:dateTime">2023-10-14T13:37:42.123400Z</dateTime><time xsi:type="xsd:time">13:37:42.123400Z</time><date xsi:type="xsd:date">2023-10-14Z</date><gYearMonth xsi:type="xsd:gYearMonth">2023-10Z</gYearMonth><gYear xsi:type="xsd:gYear">2023Z</gYear><gMonthDay xsi:type="xsd:gMonthDay">--10-14Z</gMonthDay><gDay xsi:type="xsd:gDay">---14Z</gDay><gMonth xsi:type="xsd:gMonth">--10--Z</gMonth></testParam></ns1:test></SOAP-ENV:Body></SOAP-ENV:Envelope>
-object(stdClass)#8 (8) {
+object(stdClass)#%d (%d) {
   ["dateTime"]=>
   string(27) "2023-10-14T13:37:42.123400Z"
   ["time"]=>

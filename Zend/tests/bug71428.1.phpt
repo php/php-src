@@ -3,7 +3,7 @@ bug #71428.1: inheritance with null default values
 --FILE--
 <?php
 class A {
-    public function m(array $a = null) {}
+    public function m(?array $a = null) {}
 }
 class B extends A {
     public function m(array $a = []) {}

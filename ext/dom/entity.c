@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "dom_properties.h"
 
 
 /*
@@ -38,17 +39,12 @@ Since:
 */
 zend_result dom_entity_public_id_read(dom_object *obj, zval *retval)
 {
-	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY || !nodep->ExternalID) {
 		ZVAL_NULL(retval);
 	} else {
-		ZVAL_STRING(retval, (char *) (nodep->ExternalID));
+		ZVAL_STRING(retval, (const char *) nodep->ExternalID);
 	}
 
 	return SUCCESS;
@@ -63,17 +59,12 @@ Since:
 */
 zend_result dom_entity_system_id_read(dom_object *obj, zval *retval)
 {
-	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(retval);
 	} else {
-		ZVAL_STRING(retval, (char *) (nodep->SystemID));
+		ZVAL_STRING(retval, (const char *) nodep->SystemID);
 	}
 
 	return SUCCESS;
@@ -88,12 +79,7 @@ Since:
 */
 zend_result dom_entity_notation_name_read(dom_object *obj, zval *retval)
 {
-	xmlEntity *nodep = (xmlEntity *) dom_object_get_node(obj);
-
-	if (nodep == NULL) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return FAILURE;
-	}
+	DOM_PROP_NODE(xmlEntityPtr, nodep, obj);
 
 	if (nodep->etype != XML_EXTERNAL_GENERAL_UNPARSED_ENTITY) {
 		ZVAL_NULL(retval);

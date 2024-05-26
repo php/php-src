@@ -64,7 +64,7 @@
 #define PHP_ICONV_IMPL_VALUE "unknown"
 #endif
 
-char *get_iconv_version(void) {
+static char *get_iconv_version(void) {
 	char *version = "unknown";
 
 #ifdef HAVE_LIBICONV
@@ -155,9 +155,9 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 static php_iconv_err_t php_iconv_stream_filter_register_factory(void);
 static php_iconv_err_t php_iconv_stream_filter_unregister_factory(void);
 
-static int php_iconv_output_conflict(const char *handler_name, size_t handler_name_len);
+static zend_result php_iconv_output_conflict(const char *handler_name, size_t handler_name_len);
 static php_output_handler *php_iconv_output_handler_init(const char *name, size_t name_len, size_t chunk_size, int flags);
-static int php_iconv_output_handler(void **nothing, php_output_context *output_context);
+static zend_result php_iconv_output_handler(void **nothing, php_output_context *output_context);
 /* }}} */
 
 /* {{{ static globals */
@@ -281,7 +281,7 @@ static const char *get_output_encoding(void) {
 }
 
 
-static int php_iconv_output_conflict(const char *handler_name, size_t handler_name_len)
+static zend_result php_iconv_output_conflict(const char *handler_name, size_t handler_name_len)
 {
 	if (php_output_get_level()) {
 		if (php_output_handler_conflict(handler_name, handler_name_len, ZEND_STRL("ob_iconv_handler"))
@@ -297,7 +297,7 @@ static php_output_handler *php_iconv_output_handler_init(const char *handler_nam
 	return php_output_handler_create_internal(handler_name, handler_name_len, php_iconv_output_handler, chunk_size, flags);
 }
 
-static int php_iconv_output_handler(void **nothing, php_output_context *output_context)
+static zend_result php_iconv_output_handler(void **nothing, php_output_context *output_context)
 {
 	char *s, *content_type, *mimetype = NULL;
 	int output_status, mimetype_len = 0;

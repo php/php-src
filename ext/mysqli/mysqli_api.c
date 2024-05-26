@@ -31,7 +31,7 @@
 #include "mysqli_priv.h"
 #include "ext/mysqlnd/mysql_float_to_double.h"
 
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 /* {{{ Get number of affected rows in previous MySQL operation */
 PHP_FUNCTION(mysqli_affected_rows)
@@ -157,7 +157,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_THROWS();
 	}
 
-	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, getThis() ? 1 : 2));
+	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, hasThis() ? 1 : 2));
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 }
 /* }}} */

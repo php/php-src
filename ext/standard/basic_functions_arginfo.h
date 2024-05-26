@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2094d8e51f7bfd0fd7b61060786a1e8ae182b0d3 */
+ * Stub hash: 5d8e13990ce18bebc9c7e6a0a9a7ad8b7593d35b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1732,6 +1732,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_fdiv arginfo_fmod
 
+#define arginfo_fpow arginfo_fmod
+
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_float, _IS_BOOL, 0, "false")
@@ -2104,18 +2106,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, StreamBucket, 1)
 	ZEND_ARG_INFO(0, brigade)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_prepend, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, brigade)
-	ZEND_ARG_TYPE_INFO(0, bucket, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_INFO(0, bucket, StreamBucket, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_stream_bucket_append arginfo_stream_bucket_prepend
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_new, 0, 2, IS_OBJECT, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_bucket_new, 0, 2, StreamBucket, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, buffer, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -2789,6 +2791,7 @@ ZEND_FUNCTION(base_convert);
 ZEND_FUNCTION(number_format);
 ZEND_FUNCTION(fmod);
 ZEND_FUNCTION(fdiv);
+ZEND_FUNCTION(fpow);
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
 #endif
@@ -3428,6 +3431,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("number_format", zif_number_format, arginfo_number_format, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fmod", zif_fmod, arginfo_fmod, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fdiv", zif_fdiv, arginfo_fdiv, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("fpow", zif_fpow, arginfo_fpow, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(microtime, arginfo_microtime)
 #endif

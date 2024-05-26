@@ -20,6 +20,8 @@
 #ifndef ZEND_ATTRIBUTES_H
 #define ZEND_ATTRIBUTES_H
 
+#include "zend_compile.h"
+
 #define ZEND_ATTRIBUTE_TARGET_CLASS			(1<<0)
 #define ZEND_ATTRIBUTE_TARGET_FUNCTION		(1<<1)
 #define ZEND_ATTRIBUTE_TARGET_METHOD		(1<<2)
@@ -74,6 +76,7 @@ ZEND_API zend_attribute *zend_get_parameter_attribute(HashTable *attributes, zen
 ZEND_API zend_attribute *zend_get_parameter_attribute_str(HashTable *attributes, const char *str, size_t len, uint32_t offset);
 
 ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, uint32_t i, zend_class_entry *scope);
+ZEND_API zend_result zend_get_attribute_object(zval *out, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename);
 
 ZEND_API zend_string *zend_get_attribute_target_names(uint32_t targets);
 ZEND_API bool zend_is_attribute_repeated(HashTable *attributes, zend_attribute *attr);
@@ -85,6 +88,8 @@ ZEND_API zend_internal_attribute *zend_internal_attribute_get(zend_string *lcnam
 ZEND_API zend_attribute *zend_add_attribute(
 		HashTable **attributes, zend_string *name, uint32_t argc,
 		uint32_t flags, uint32_t offset, uint32_t lineno);
+
+uint32_t zend_attribute_attribute_get_flags(zend_attribute *attr, zend_class_entry *scope);
 
 END_EXTERN_C()
 

@@ -116,8 +116,9 @@ if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
   changequote([,])
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -162,7 +163,6 @@ AC_PROG_LIBTOOL
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
-phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 CFLAGS_CLEAN='$(CFLAGS) -D_GNU_SOURCE'
 CXXFLAGS_CLEAN='$(CXXFLAGS)'
@@ -188,7 +188,6 @@ PHP_SUBST(prefix)
 PHP_SUBST(exec_prefix)
 PHP_SUBST(libdir)
 PHP_SUBST(prefix)
-PHP_SUBST(phplibdir)
 PHP_SUBST(phpincludedir)
 
 PHP_SUBST(CC)
@@ -209,11 +208,6 @@ PHP_SUBST(LIBTOOL)
 PHP_SUBST(SHELL)
 PHP_SUBST(INSTALL_HEADERS)
 PHP_SUBST(BUILD_CC)
-
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
-
-test -d modules || $php_shtool mkdir modules
 
 AC_CONFIG_HEADERS([config.h])
 

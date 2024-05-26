@@ -23,6 +23,7 @@
 
 #include <stdio.h>
 
+#include "zend_types.h"
 #include "../TSRM/TSRM.h"
 
 #ifndef ZEND_MM_ALIGNMENT

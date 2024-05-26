@@ -1,11 +1,11 @@
 --TEST--
-DOM\HTMLDocument serialization of document type
+Dom\HTMLDocument serialization of document type
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE HTML1234 PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
 <head>
@@ -16,10 +16,10 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML, LIBXML_NOERROR);
 
 echo "--- XML encoding ---\n";
-echo $dom->saveXML();
+echo $dom->saveXml(), "\n";
 echo "--- HTML encoding ---\n";
 // We don't expect to see the public ID and the system ID because the serialization algorithm doesn't serialize those
-echo $dom->saveHTML();
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

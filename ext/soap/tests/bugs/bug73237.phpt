@@ -16,20 +16,20 @@ EOF;
 $client = new LocalSoapClient(__DIR__."/bug73237.wsdl");
 var_dump($client->query(""));
 ?>
---EXPECT--
-object(stdClass)#2 (1) {
+--EXPECTF--
+object(stdClass)#%d (%d) {
   ["result"]=>
-  object(stdClass)#3 (4) {
+  object(stdClass)#%d (%d) {
     ["done"]=>
     string(4) "true"
     ["queryLocator"]=>
     NULL
     ["records"]=>
-    object(SoapVar)#6 (6) {
+    object(SoapVar)#%d (%d) {
       ["enc_type"]=>
       int(0)
       ["enc_value"]=>
-      object(stdClass)#4 (3) {
+      object(stdClass)#%d (%d) {
         ["type"]=>
         string(14) "CampaignMember"
         ["Id"]=>
@@ -44,7 +44,7 @@ object(stdClass)#2 (1) {
           [0]=>
           string(175) "<sf:CampaignId>701i0000001lreeAAA</sf:CampaignId><sf:Status>Sent</sf:Status><sf:ContactId xsi:nil="true"/><sf:LeadId>00Qi000001UrbYFEAZ</sf:LeadId><sf:Contact xsi:nil="true"/>"
           ["Lead"]=>
-          object(stdClass)#5 (3) {
+          object(stdClass)#%d (%d) {
             ["type"]=>
             string(4) "Lead"
             ["Id"]=>

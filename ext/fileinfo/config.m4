@@ -14,6 +14,8 @@ if test "$PHP_FILEINFO" != "no"; then
     libmagic/readcdf.c libmagic/softmagic.c libmagic/der.c \
     libmagic/buffer.c libmagic/is_csv.c"
 
+  AC_CHECK_HEADERS([sys/sysmacros.h])
+
   AC_CHECK_FUNCS([strcasestr],,[
     AC_MSG_NOTICE(using libmagic strcasestr implementation)
     libmagic_sources="$libmagic_sources libmagic/strcasestr.c"

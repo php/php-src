@@ -8,7 +8,7 @@ $standard = new ReflectionExtension('standard');
 var_dump($standard->getClassNames());
 ?>
 --EXPECT--
-array(4) {
+array(5) {
   [0]=>
   string(22) "__PHP_Incomplete_Class"
   [1]=>
@@ -16,5 +16,7 @@ array(4) {
   [2]=>
   string(15) "php_user_filter"
   [3]=>
+  string(12) "StreamBucket"
+  [4]=>
   string(9) "Directory"
 }

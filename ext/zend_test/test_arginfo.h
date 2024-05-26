@@ -1,5 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: dd3f852ea9f8e3a356ed226380edf5cc336f8a4e */
+ * Stub hash: 53027610adee7e1c675b1c1b38886100ce4e63ef */
+
+ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
+	"but it is included on an older PHP version");
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -144,6 +147,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_is_pcre_bundled, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(PHP_WIN32)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_fmode, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, binary, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -265,6 +274,9 @@ static ZEND_FUNCTION(get_open_basedir);
 static ZEND_FUNCTION(zend_test_override_libxml_global_state);
 #endif
 static ZEND_FUNCTION(zend_test_is_pcre_bundled);
+#if defined(PHP_WIN32)
+static ZEND_FUNCTION(zend_test_set_fmode);
+#endif
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -357,6 +369,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_override_libxml_global_state, arginfo_zend_test_override_libxml_global_state)
 #endif
 	ZEND_FE(zend_test_is_pcre_bundled, arginfo_zend_test_is_pcre_bundled)
+#if defined(PHP_WIN32)
+	ZEND_FE(zend_test_set_fmode, arginfo_zend_test_set_fmode)
+#endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
@@ -582,6 +597,16 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zend_declare_class_constant_ex(class_entry, const_TYPED_CLASS_CONST3_name, &const_TYPED_CLASS_CONST3_value, ZEND_ACC_PUBLIC, NULL);
 #endif
 	zend_string_release(const_TYPED_CLASS_CONST3_name);
+
+	zval const_ZEND_TEST_DEPRECATED_value;
+	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_value, 42);
+	zend_string *const_ZEND_TEST_DEPRECATED_name = zend_string_init_interned("ZEND_TEST_DEPRECATED", sizeof("ZEND_TEST_DEPRECATED") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#else
+	zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_name, &const_ZEND_TEST_DEPRECATED_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
+#endif
+	zend_string_release(const_ZEND_TEST_DEPRECATED_name);
 
 	zval property__StaticProp_default_value;
 	ZVAL_NULL(&property__StaticProp_default_value);

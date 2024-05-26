@@ -36,250 +36,303 @@
 #include "private.h" /* For _bc_rm_leading_zeros() */
 #include "zend_alloc.h"
 
-/* Recursive vs non-recursive multiply crossover ranges. */
-#if defined(MULDIGITS)
-#include "muldigits.h"
+
+#if SIZEOF_SIZE_T >= 8
+#  define BC_MUL_UINT_DIGITS 8
+#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 100000000
 #else
-#define MUL_BASE_DIGITS 80
+#  define BC_MUL_UINT_DIGITS 4
+#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 10000
 #endif
 
-int mul_base_digits = MUL_BASE_DIGITS;
-#define MUL_SMALL_DIGITS mul_base_digits/4
+#define BC_MUL_MAX_ADD_COUNT (~((BC_UINT_T) 0) / (BC_MUL_UINT_OVERFLOW * BC_MUL_UINT_OVERFLOW))
+
 
 /* Multiply utility routines */
 
-static bc_num new_sub_num(size_t length, size_t scale, char *value)
+static inline void bc_digits_adjustment(BC_UINT_T *prod_uint, size_t prod_arr_size)
 {
-	bc_num temp = (bc_num) emalloc(sizeof(bc_struct));
-
-	temp->n_sign = PLUS;
-	temp->n_len = length;
-	temp->n_scale = scale;
-	temp->n_refs = 1;
-	temp->n_ptr = NULL;
-	temp->n_value = value;
-	return temp;
-}
-
-static void _bc_simp_mul(bc_num n1, size_t n1len, bc_num n2, int n2len, bc_num *prod)
-{
-	char *n1ptr, *n2ptr, *pvptr;
-	char *n1end, *n2end;        /* To the end of n1 and n2. */
-	int sum = 0;
-
-	int prodlen = n1len + n2len + 1;
-
-	*prod = bc_new_num (prodlen, 0);
-
-	n1end = (char *) (n1->n_value + n1len - 1);
-	n2end = (char *) (n2->n_value + n2len - 1);
-	pvptr = (char *) ((*prod)->n_value + prodlen - 1);
-
-	/* Here is the loop... */
-	for (int index = 0; index < prodlen - 1; index++) {
-		n1ptr = (char *) (n1end - MAX(0, index - n2len + 1));
-		n2ptr = (char *) (n2end - MIN(index, n2len - 1));
-		while ((n1ptr >= n1->n_value) && (n2ptr <= n2end)) {
-			sum += *n1ptr * *n2ptr;
-			n1ptr--;
-			n2ptr++;
-		}
-		*pvptr-- = sum % BASE;
-		sum = sum / BASE;
-	}
-	*pvptr = sum;
-}
-
-
-/* A special adder/subtractor for the recursive divide and conquer
-   multiply algorithm.  Note: if sub is called, accum must
-   be larger that what is being subtracted.  Also, accum and val
-   must have n_scale = 0.  (e.g. they must look like integers. *) */
-static void _bc_shift_addsub(bc_num accum, bc_num val, int shift, bool sub)
-{
-	signed char *accp, *valp;
-	unsigned int carry = 0;
-	size_t count = val->n_len;
-
-	if (val->n_value[0] == 0) {
-		count--;
-	}
-	assert(accum->n_len + accum->n_scale >= shift + count);
-
-	/* Set up pointers and others */
-	accp = (signed char *) (accum->n_value + accum->n_len + accum->n_scale - shift - 1);
-	valp = (signed char *) (val->n_value + val->n_len - 1);
-
-	if (sub) {
-		/* Subtraction, carry is really borrow. */
-		while (count--) {
-			*accp -= *valp-- + carry;
-			if (*accp < 0) {
-				carry = 1;
-				*accp-- += BASE;
-			} else {
-				carry = 0;
-				accp--;
-			}
-		}
-		while (carry) {
-			*accp -= carry;
-			if (*accp < 0) {
-				*accp-- += BASE;
-			} else {
-				carry = 0;
-			}
-		}
-	} else {
-		/* Addition */
-		while (count--) {
-			*accp += *valp-- + carry;
-			if (*accp > (BASE - 1)) {
-				carry = 1;
-				*accp-- -= BASE;
-			} else {
-				carry = 0;
-				accp--;
-			}
-		}
-		while (carry) {
-			*accp += carry;
-			if (*accp > (BASE - 1)) {
-				*accp-- -= BASE;
-			} else {
-				carry = 0;
-			}
-		}
+	for (size_t i = 0; i < prod_arr_size - 1; i++) {
+		prod_uint[i + 1] += prod_uint[i] / BC_MUL_UINT_OVERFLOW;
+		prod_uint[i] %= BC_MUL_UINT_OVERFLOW;
 	}
 }
 
-/* Recursive divide and conquer multiply algorithm.
-   Based on
-   Let u = u0 + u1*(b^n)
-   Let v = v0 + v1*(b^n)
-   Then uv = (B^2n+B^n)*u1*v1 + B^n*(u1-u0)*(v0-v1) + (B^n+1)*u0*v0
-
-   B is the base of storage, number of digits in u1,u0 close to equal.
-*/
-static void _bc_rec_mul(bc_num u, size_t ulen, bc_num v, size_t vlen, bc_num *prod)
+/* This is based on the technique described in https://kholdstare.github.io/technical/2020/05/26/faster-integer-parsing.html.
+ * This function transforms AABBCCDD into 1000 * AA + 100 * BB + 10 * CC + DD,
+ * with the caveat that all components must be in the interval [0, 25] to prevent overflow
+ * due to the multiplication by power of 10 (10 * 25 = 250 is the largest number that fits in a byte).
+ * The advantage of this method instead of using shifts + 3 multiplications is that this is cheaper
+ * due to its divide-and-conquer nature.
+ */
+#if SIZEOF_SIZE_T == 4
+static uint32_t bc_parse_chunk_chars(const char *str)
 {
-	bc_num u0, u1, v0, v1;
-	bc_num m1, m2, m3, d1, d2;
-	size_t n;
-	bool m1zero;
+	uint32_t tmp;
+	memcpy(&tmp, str, sizeof(tmp));
+#if !BC_LITTLE_ENDIAN
+	tmp = BC_BSWAP(tmp);
+#endif
 
-	/* Base case? */
-	if ((ulen + vlen) < mul_base_digits
-		|| ulen < MUL_SMALL_DIGITS
-		|| vlen < MUL_SMALL_DIGITS
-	) {
-		_bc_simp_mul(u, ulen, v, vlen, prod);
-		return;
+	uint32_t lower_digits = (tmp & 0x0f000f00) >> 8;
+	uint32_t upper_digits = (tmp & 0x000f000f) * 10;
+
+	tmp = lower_digits + upper_digits;
+
+	lower_digits = (tmp & 0x00ff0000) >> 16;
+	upper_digits = (tmp & 0x000000ff) * 100;
+
+	return lower_digits + upper_digits;
+}
+#elif SIZEOF_SIZE_T == 8
+static uint64_t bc_parse_chunk_chars(const char *str)
+{
+	uint64_t tmp;
+	memcpy(&tmp, str, sizeof(tmp));
+#if !BC_LITTLE_ENDIAN
+	tmp = BC_BSWAP(tmp);
+#endif
+
+	uint64_t lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
+	uint64_t upper_digits = (tmp & 0x000f000f000f000f) * 10;
+
+	tmp = lower_digits + upper_digits;
+
+	lower_digits = (tmp & 0x00ff000000ff0000) >> 16;
+	upper_digits = (tmp & 0x000000ff000000ff) * 100;
+
+	tmp = lower_digits + upper_digits;
+
+	lower_digits = (tmp & 0x0000ffff00000000) >> 32;
+	upper_digits = (tmp & 0x000000000000ffff) * 10000;
+
+	return lower_digits + upper_digits;
+}
+#endif
+
+/*
+ * Converts BCD to uint, going backwards from pointer n by the number of
+ * characters specified by len.
+ */
+static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
+{
+	if (len == BC_MUL_UINT_DIGITS) {
+		return bc_parse_chunk_chars(n - BC_MUL_UINT_DIGITS + 1);
 	}
 
-	/* Calculate n -- the u and v split point in digits. */
-	n = (MAX(ulen, vlen) + 1) / 2;
+	BC_UINT_T num = 0;
+	BC_UINT_T base = 1;
 
-	/* Split u and v. */
-	if (ulen < n) {
-		u1 = bc_copy_num(BCG(_zero_));
-		u0 = new_sub_num(ulen, 0, u->n_value);
-	} else {
-		u1 = new_sub_num(ulen - n, 0, u->n_value);
-		u0 = new_sub_num(n, 0, u->n_value + ulen - n);
-	}
-	if (vlen < n) {
-		v1 = bc_copy_num(BCG(_zero_));
-		v0 = new_sub_num(vlen, 0, v->n_value);
-	} else {
-		v1 = new_sub_num(vlen - n, 0, v->n_value);
-		v0 = new_sub_num(n, 0, v->n_value + vlen - n);
-	}
-	_bc_rm_leading_zeros(u1);
-	_bc_rm_leading_zeros(u0);
-	_bc_rm_leading_zeros(v1);
-	_bc_rm_leading_zeros(v0);
-
-	m1zero = bc_is_zero(u1) || bc_is_zero(v1);
-
-	/* Calculate sub results ... */
-
-	bc_init_num(&d1);
-	bc_init_num(&d2);
-	bc_sub(u1, u0, &d1, 0);
-	bc_sub(v0, v1, &d2, 0);
-
-
-	/* Do recursive multiplies and shifted adds. */
-	if (m1zero) {
-		m1 = bc_copy_num(BCG(_zero_));
-	} else {
-		_bc_rec_mul(u1, u1->n_len, v1, v1->n_len, &m1);
+	for (size_t i = 0; i < len; i++) {
+		num += *n * base;
+		base *= BASE;
+		n--;
 	}
 
-	if (bc_is_zero(d1) || bc_is_zero(d2)) {
-		m2 = bc_copy_num(BCG(_zero_));
-	} else {
-		_bc_rec_mul(d1, d1->n_len, d2, d2->n_len, &m2);
+	return num;
+}
+
+static inline void bc_convert_to_uint(BC_UINT_T *n_uint, const char *nend, size_t nlen)
+{
+	size_t i = 0;
+	while (nlen > 0) {
+		size_t len = MIN(BC_MUL_UINT_DIGITS, nlen);
+		n_uint[i] = bc_partial_convert_to_uint(nend, len);
+		nend -= len;
+		nlen -= len;
+		i++;
+	}
+}
+
+/*
+ * If the n_values of n1 and n2 are both 4 (32-bit) or 8 (64-bit) digits or less,
+ * the calculation will be performed at high speed without using an array.
+ */
+static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
+{
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
+
+	BC_UINT_T n1_uint = bc_partial_convert_to_uint(n1end, n1len);
+	BC_UINT_T n2_uint = bc_partial_convert_to_uint(n2end, n2len);
+	BC_UINT_T prod_uint = n1_uint * n2_uint;
+
+	size_t prodlen = n1len + n2len;
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+
+	while (pend >= pptr) {
+		*pend-- = prod_uint % BASE;
+		prod_uint /= BASE;
+	}
+}
+
+#if BC_LITTLE_ENDIAN
+# define BC_ENCODE_LUT(A, B) ((A) | (B) << 4)
+#else
+# define BC_ENCODE_LUT(A, B) ((B) | (A) << 4)
+#endif
+
+#define LUT_ITERATE(_, A) \
+	_(A, 0), _(A, 1), _(A, 2), _(A, 3), _(A, 4), _(A, 5), _(A, 6), _(A, 7), _(A, 8), _(A, 9)
+
+/* This LUT encodes the decimal representation of numbers 0-100
+ * such that we can avoid taking modulos and divisions which would be slow. */
+static const unsigned char LUT[100] = {
+	LUT_ITERATE(BC_ENCODE_LUT, 0),
+	LUT_ITERATE(BC_ENCODE_LUT, 1),
+	LUT_ITERATE(BC_ENCODE_LUT, 2),
+	LUT_ITERATE(BC_ENCODE_LUT, 3),
+	LUT_ITERATE(BC_ENCODE_LUT, 4),
+	LUT_ITERATE(BC_ENCODE_LUT, 5),
+	LUT_ITERATE(BC_ENCODE_LUT, 6),
+	LUT_ITERATE(BC_ENCODE_LUT, 7),
+	LUT_ITERATE(BC_ENCODE_LUT, 8),
+	LUT_ITERATE(BC_ENCODE_LUT, 9),
+};
+
+static inline unsigned short bc_expand_lut(unsigned char c)
+{
+	return (c & 0x0f) | (c & 0xf0) << 4;
+}
+
+/* Writes the character representation of the number encoded in value.
+ * E.g. if value = 1234, then the string "1234" will be written to str. */
+static void bc_write_bcd_representation(uint32_t value, char *str)
+{
+	uint32_t upper = value / 100; /* e.g. 12 */
+	uint32_t lower = value % 100; /* e.g. 34 */
+
+#if BC_LITTLE_ENDIAN
+	/* Note: little endian, so `lower` comes before `upper`! */
+	uint32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
+#else
+	/* Note: big endian, so `upper` comes before `lower`! */
+	uint32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
+#endif
+	memcpy(str, &digits, sizeof(digits));
+}
+
+/*
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_UINT_Ts.
+ * The array is generated starting with the smaller digits.
+ * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
+ *
+ * Multiply and add these groups of numbers to perform multiplication fast.
+ * How much to shift the digits when adding values can be calculated from the index of the array.
+ */
+static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
+{
+	size_t i;
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
+	size_t prodlen = n1len + n2len;
+
+	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
+	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
+	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
+
+	/*
+	 * let's say that N is the max of n1len and n2len (and a multiple of BC_MUL_UINT_DIGITS for simplicity),
+	 * then this sum is <= N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS - 1
+	 * which is equal to N - 1 if BC_MUL_UINT_DIGITS is 4, and N/2 - 1 if BC_MUL_UINT_DIGITS is 8.
+	 */
+	BC_UINT_T *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_UINT_T), 0);
+
+	BC_UINT_T *n1_uint = buf;
+	BC_UINT_T *n2_uint = buf + n1_arr_size;
+	BC_UINT_T *prod_uint = n2_uint + n2_arr_size;
+
+	for (i = 0; i < prod_arr_size; i++) {
+		prod_uint[i] = 0;
 	}
 
-	if (bc_is_zero(u0) || bc_is_zero(v0)) {
-		m3 = bc_copy_num(BCG(_zero_));
-	} else {
-		_bc_rec_mul(u0, u0->n_len, v0, v0->n_len, &m3);
+	/* Convert to uint[] */
+	bc_convert_to_uint(n1_uint, n1end, n1len);
+	bc_convert_to_uint(n2_uint, n2end, n2len);
+
+	/* Multiplication and addition */
+	size_t count = 0;
+	for (i = 0; i < n1_arr_size; i++) {
+		/*
+		 * This calculation adds the result multiple times to the array entries.
+		 * When multiplying large numbers of digits, there is a possibility of
+		 * overflow, so digit adjustment is performed beforehand.
+		 */
+		if (UNEXPECTED(count >= BC_MUL_MAX_ADD_COUNT)) {
+			bc_digits_adjustment(prod_uint, prod_arr_size);
+			count = 0;
+		}
+		count++;
+		for (size_t j = 0; j < n2_arr_size; j++) {
+			prod_uint[i + j] += n1_uint[i] * n2_uint[j];
+		}
 	}
 
-	/* Initialize product */
-	*prod = bc_new_num(ulen + vlen + 1, 0);
+	/*
+	 * Move a value exceeding 4/8 digits by carrying to the next digit.
+	 * However, the last digit does nothing.
+	 */
+	bc_digits_adjustment(prod_uint, prod_arr_size);
 
-	if (!m1zero) {
-		_bc_shift_addsub(*prod, m1, 2 * n, false);
-		_bc_shift_addsub(*prod, m1, n, false);
+	/* Convert to bc_num */
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+	i = 0;
+	while (i < prod_arr_size - 1) {
+#if BC_MUL_UINT_DIGITS == 4
+		bc_write_bcd_representation(prod_uint[i], pend - 3);
+		pend -= 4;
+#else
+		bc_write_bcd_representation(prod_uint[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_uint[i] % 10000, pend - 3);
+		pend -= 8;
+#endif
+		i++;
 	}
-	_bc_shift_addsub(*prod, m3, n, false);
-	_bc_shift_addsub(*prod, m3, 0, false);
-	_bc_shift_addsub(*prod, m2, n, d1->n_sign != d2->n_sign);
 
-	/* Now clean up! */
-	bc_free_num (&u1);
-	bc_free_num (&u0);
-	bc_free_num (&v1);
-	bc_free_num (&m1);
-	bc_free_num (&v0);
-	bc_free_num (&m2);
-	bc_free_num (&m3);
-	bc_free_num (&d1);
-	bc_free_num (&d2);
+	/*
+	 * The last digit may carry over.
+	 * Also need to fill it to the end with zeros, so loop until the end of the string.
+	 */
+	while (pend >= pptr) {
+		*pend-- = prod_uint[i] % BASE;
+		prod_uint[i] /= BASE;
+	}
+
+	efree(buf);
 }
 
 /* The multiply routine.  N2 times N1 is put int PROD with the scale of
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
 
-void bc_multiply(bc_num n1, bc_num n2, bc_num *prod, size_t scale)
+bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 {
-	bc_num pval;
-	size_t len1, len2;
-	size_t full_scale, prod_scale;
+	bc_num prod;
 
 	/* Initialize things. */
-	len1 = n1->n_len + n1->n_scale;
-	len2 = n2->n_len + n2->n_scale;
-	full_scale = n1->n_scale + n2->n_scale;
-	prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
+	size_t len1 = n1->n_len + n1->n_scale;
+	size_t len2 = n2->n_len + n2->n_scale;
+	size_t full_scale = n1->n_scale + n2->n_scale;
+	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	_bc_rec_mul(n1, len1, n2, len2, &pval);
+	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
+		bc_fast_mul(n1, len1, n2, len2, &prod);
+	} else {
+		bc_standard_mul(n1, len1, n2, len2, &prod);
+	}
 
 	/* Assign to prod and clean up the number. */
-	pval->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
-	pval->n_value = pval->n_ptr;
-	pval->n_len = len2 + len1 + 1 - full_scale;
-	pval->n_scale = prod_scale;
-	_bc_rm_leading_zeros(pval);
-	if (bc_is_zero(pval)) {
-		pval->n_sign = PLUS;
+	prod->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
+	prod->n_len -= full_scale;
+	prod->n_scale = prod_scale;
+	_bc_rm_leading_zeros(prod);
+	if (bc_is_zero(prod)) {
+		prod->n_sign = PLUS;
 	}
-	bc_free_num(prod);
-	*prod = pval;
+	return prod;
 }

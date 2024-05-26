@@ -8,7 +8,7 @@ permissions:
 jobs:
   GENERATE_MATRIX:
     name: Generate Matrix
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       branches: ${{ steps.set-matrix.outputs.branches }}
@@ -159,7 +159,7 @@ jobs:
       image: ubuntu:${{ matrix.branch.version.minor >= 3 && '22.04' || '20.04' }}
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.3
         ports:
           - 3306:3306
         env:
@@ -288,7 +288,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   COVERAGE_DEBUG_NTS:
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     services:
       postgres:
         image: postgres
@@ -410,6 +410,7 @@ jobs:
           echo opcache.jit_hot_side_exit=1 >> /etc/php.d/opcache.ini
           php -v
       - name: Test AMPHP
+        if: always()
         run: |
           repositories="amp cache dns file http parallel parser pipeline process serialization socket sync websocket-client websocket-server"
           X=0
@@ -427,6 +428,7 @@ jobs:
           done
           exit $X
       - name: Test Laravel
+        if: always()
         run: |
           git clone https://github.com/laravel/framework.git --branch=master --depth=1
           cd framework
@@ -439,6 +441,7 @@ jobs:
             exit 1
           fi
       - name: Test ReactPHP
+        if: always()
         run: |
           repositories="async cache child-process datagram dns event-loop promise promise-stream promise-timer stream"
           X=0
@@ -456,6 +459,7 @@ jobs:
           done
           exit $X
       - name: Test Revolt PHP
+        if: always()
         run: |
           git clone https://github.com/revoltphp/event-loop.git --depth=1
           cd event-loop
@@ -466,6 +470,7 @@ jobs:
             exit 1
           fi
       - name: Test Symfony
+        if: always()
         run: |
           git clone https://github.com/symfony/symfony.git --depth=1
           cd symfony
@@ -497,6 +502,7 @@ jobs:
             exit 1
           fi
       - name: 'Symfony Preloading'
+        if: always()
         run: |
           php /usr/bin/composer create-project symfony/symfony-demo symfony_demo --no-progress --ignore-platform-reqs
           cd symfony_demo
@@ -739,7 +745,7 @@ jobs:
         uses: ./.github/actions/build-libmysqlclient
         with:
           configurationParameters: --enable-werror
-          libmysql: mysql-8.0.35-linux-glibc2.28-x86_64.tar.xz
+          libmysql: mysql-8.0.36-linux-glibc2.28-x86_64.tar.xz
           withMysqli: ${{ matrix.branch.ref == 'PHP-8.1' }}
       - name: Test mysql-8.0
         uses: ./.github/actions/test-libmysqlclient
@@ -763,7 +769,7 @@ jobs:
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
   PECL:
-    if: github.repository_owner == 'php' || github.event_name == 'workflow_dispatch'
+    if: github.repository == 'php/php-src' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     env:
       CC: ccache gcc
@@ -818,6 +824,7 @@ jobs:
         with:
           key: "${{github.job}}-${{hashFiles('php/main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: build PHP
         run: |
           cd php

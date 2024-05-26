@@ -943,6 +943,12 @@ namespace {
 #ifdef HAVE_PG_CONTEXT_VISIBILITY
     function pg_set_error_context_visibility(PgSql\Connection $connection, int $visibility): int {}
 #endif
+
+#ifdef HAVE_PG_RESULT_MEMORY_SIZE
+    function pg_result_memory_size(PgSql\Result $result): int {}
+#endif
+
+    function pg_change_password(PgSql\Connection $connection, string $user, #[\SensitiveParameter] string $password): bool {}
 }
 
 namespace PgSql {

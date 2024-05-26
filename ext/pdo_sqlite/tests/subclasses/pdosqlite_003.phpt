@@ -28,11 +28,7 @@ if (!$db instanceof PdoSqlite) {
     echo "Wrong class type. Should be PdoSqlite but is " . get_class($db) . "\n";
 }
 
-$result = $db->loadExtension(getSpatialiteExtensionLocation(););
-if ($result !== true) {
-    echo "Failed to load extension mod_spatialite.so";
-    exit(-1);
-}
+$db->loadExtension(getSpatialiteExtensionLocation());
 
 $result = $db->query('SELECT AsText(Buffer(GeomFromText("LINESTRING(0 0, 1 0)"), 0.2)) as geometry_data;');
 

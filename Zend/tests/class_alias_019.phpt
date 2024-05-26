@@ -14,4 +14,4 @@ class_alias('\foo', 'foo');
 
 ?>
 --EXPECTF--
-Warning: Cannot declare class foo, because the name is already in use in %s on line %d
+Warning: Cannot redeclare class foo (previously declared in %s:%d) in %s on line %d

@@ -6,7 +6,7 @@ Tests for DateTime[Immutable]::[get|set]Microseconds
 class MyDateTime extends DateTime {};
 class MyDateTimeImmutable extends DateTimeImmutable {};
 
-$microsecondsList = array(
+$microsecondList = array(
     0,
     999999,
     -1,
@@ -18,56 +18,56 @@ $dti = new DateTimeImmutable('2023-04-05T06:07:08.901234+00:00');
 $myDt = new MyDateTime('2023-04-05T06:07:08.901234+00:00');
 $myDti = new MyDateTimeImmutable('2023-04-05T06:07:08.901234+00:00');
 
-echo 'DateTime::getMicroseconds(): ' . var_export($dt->getMicroseconds(), true) . "\n";
+echo 'DateTime::getMicrosecond(): ' . var_export($dt->getMicrosecond(), true) . "\n";
 var_dump($dt);
 
-echo 'DateTimeImmutable::getMicroseconds(): ' . var_export($dti->getMicroseconds(), true) . "\n";
+echo 'DateTimeImmutable::getMicrosecond(): ' . var_export($dti->getMicrosecond(), true) . "\n";
 var_dump($dti);
 
-echo 'MyDateTime::getMicroseconds(): ' . var_export($myDt->getMicroseconds(), true) . "\n";
+echo 'MyDateTime::getMicrosecond(): ' . var_export($myDt->getMicrosecond(), true) . "\n";
 var_dump($myDt);
 
-echo 'MyDateTimeImmutable::getMicroseconds(): ' . var_export($myDti->getMicroseconds(), true) . "\n";
+echo 'MyDateTimeImmutable::getMicrosecond(): ' . var_export($myDti->getMicrosecond(), true) . "\n";
 var_dump($myDti);
 
-foreach ($microsecondsList as $microseconds) {
+foreach ($microsecondList as $microsecond) {
     echo "##################################\n";
 
-    echo 'DateTime::setMicroseconds('.var_export($microseconds, true).'): ';
+    echo 'DateTime::setMicrosecond('.var_export($microsecond, true).'): ';
     try {
-        var_dump($dt->setMicroseconds($microseconds));
+        var_dump($dt->setMicrosecond($microsecond));
     } catch (Throwable $e) {
         echo get_class($e) . ': ' . $e->getMessage() . "\n";
     }
-    echo 'DateTime::getMicroseconds(): ' . var_export($dt->getMicroseconds(), true) . "\n";
+    echo 'DateTime::getMicrosecond(): ' . var_export($dt->getMicrosecond(), true) . "\n";
 
-    echo 'DateTimeImmutable::setMicroseconds('.var_export($microseconds, true).'): ';
+    echo 'DateTimeImmutable::setMicrosecond('.var_export($microsecond, true).'): ';
     try {
-        var_dump($dti->setMicroseconds($microseconds));
+        var_dump($dti->setMicrosecond($microsecond));
     } catch (Throwable $e) {
         echo get_class($e) . ': ' . $e->getMessage() . "\n";
     }
-    echo 'DateTimeImmutable::getMicroseconds(): ' . var_export($dti->getMicroseconds(), true) . "\n";
+    echo 'DateTimeImmutable::getMicrosecond(): ' . var_export($dti->getMicrosecond(), true) . "\n";
 
-    echo 'MyDateTime::setMicroseconds('.var_export($microseconds, true).'): ';
+    echo 'MyDateTime::setMicrosecond('.var_export($microsecond, true).'): ';
     try {
-        var_dump($myDt->setMicroseconds($microseconds));
+        var_dump($myDt->setMicrosecond($microsecond));
     } catch (Throwable $e) {
         echo get_class($e) . ': ' . $e->getMessage() . "\n";
     }
-    echo 'MyDateTime::getMicroseconds(): ' . var_export($myDt->getMicroseconds(), true) . "\n";
+    echo 'MyDateTime::getMicrosecond(): ' . var_export($myDt->getMicrosecond(), true) . "\n";
 
-    echo 'MyDateTimeImmutable::setMicroseconds('.var_export($microseconds, true).'): ';
+    echo 'MyDateTimeImmutable::setMicrosecond('.var_export($microsecond, true).'): ';
     try {
-        var_dump($myDti->setMicroseconds($microseconds));
+        var_dump($myDti->setMicrosecond($microsecond));
     } catch (Throwable $e) {
         echo get_class($e) . ': ' . $e->getMessage() . "\n";
     }
-    echo 'MyDateTimeImmutable::getMicroseconds(): ' . var_export($myDti->getMicroseconds(), true) . "\n";
+    echo 'MyDateTimeImmutable::getMicrosecond(): ' . var_export($myDti->getMicrosecond(), true) . "\n";
 }
 ?>
 --EXPECTF--
-DateTime::getMicroseconds(): 901234
+DateTime::getMicrosecond(): 901234
 object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.901234"
@@ -76,7 +76,7 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTimeImmutable::getMicroseconds(): 901234
+DateTimeImmutable::getMicrosecond(): 901234
 object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.901234"
@@ -85,7 +85,7 @@ object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-MyDateTime::getMicroseconds(): 901234
+MyDateTime::getMicrosecond(): 901234
 object(MyDateTime)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.901234"
@@ -94,7 +94,7 @@ object(MyDateTime)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-MyDateTimeImmutable::getMicroseconds(): 901234
+MyDateTimeImmutable::getMicrosecond(): 901234
 object(MyDateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.901234"
@@ -104,7 +104,7 @@ object(MyDateTimeImmutable)#%d (3) {
   string(6) "+00:00"
 }
 ##################################
-DateTime::setMicroseconds(0): object(DateTime)#%d (3) {
+DateTime::setMicrosecond(0): object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.000000"
   ["timezone_type"]=>
@@ -112,8 +112,8 @@ DateTime::setMicroseconds(0): object(DateTime)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTime::getMicroseconds(): 0
-DateTimeImmutable::setMicroseconds(0): object(DateTimeImmutable)#%d (3) {
+DateTime::getMicrosecond(): 0
+DateTimeImmutable::setMicrosecond(0): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.000000"
   ["timezone_type"]=>
@@ -121,8 +121,8 @@ DateTimeImmutable::setMicroseconds(0): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTimeImmutable::getMicroseconds(): 901234
-MyDateTime::setMicroseconds(0): object(MyDateTime)#%d (3) {
+DateTimeImmutable::getMicrosecond(): 901234
+MyDateTime::setMicrosecond(0): object(MyDateTime)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.000000"
   ["timezone_type"]=>
@@ -130,8 +130,8 @@ MyDateTime::setMicroseconds(0): object(MyDateTime)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-MyDateTime::getMicroseconds(): 0
-MyDateTimeImmutable::setMicroseconds(0): object(MyDateTimeImmutable)#%d (3) {
+MyDateTime::getMicrosecond(): 0
+MyDateTimeImmutable::setMicrosecond(0): object(MyDateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.000000"
   ["timezone_type"]=>
@@ -139,9 +139,9 @@ MyDateTimeImmutable::setMicroseconds(0): object(MyDateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-MyDateTimeImmutable::getMicroseconds(): 901234
+MyDateTimeImmutable::getMicrosecond(): 901234
 ##################################
-DateTime::setMicroseconds(999999): object(DateTime)#%d (3) {
+DateTime::setMicrosecond(999999): object(DateTime)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.999999"
   ["timezone_type"]=>
@@ -149,8 +149,8 @@ DateTime::setMicroseconds(999999): object(DateTime)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTime::getMicroseconds(): 999999
-DateTimeImmutable::setMicroseconds(999999): object(DateTimeImmutable)#%d (3) {
+DateTime::getMicrosecond(): 999999
+DateTimeImmutable::setMicrosecond(999999): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.999999"
   ["timezone_type"]=>
@@ -158,8 +158,8 @@ DateTimeImmutable::setMicroseconds(999999): object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-DateTimeImmutable::getMicroseconds(): 901234
-MyDateTime::setMicroseconds(999999): object(MyDateTime)#%d (3) {
+DateTimeImmutable::getMicrosecond(): 901234
+MyDateTime::setMicrosecond(999999): object(MyDateTime)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.999999"
   ["timezone_type"]=>
@@ -167,8 +167,8 @@ MyDateTime::setMicroseconds(999999): object(MyDateTime)#%d (3) {
   ["timezone"]=>
   string(6) "+00:00"
 }
-MyDateTime::getMicroseconds(): 999999
-MyDateTimeImmutable::setMicroseconds(999999): object(MyDateTimeImmutable)#%d (3) {
+MyDateTime::getMicrosecond(): 999999
+MyDateTimeImmutable::setMicrosecond(999999): object(MyDateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "2023-04-05 06:07:08.999999"
   ["timezone_type"]=>
@@ -176,22 +176,22 @@ MyDateTimeImmutable::setMicroseconds(999999): object(MyDateTimeImmutable)#%d (3)
   ["timezone"]=>
   string(6) "+00:00"
 }
-MyDateTimeImmutable::getMicroseconds(): 901234
+MyDateTimeImmutable::getMicrosecond(): 901234
 ##################################
-DateTime::setMicroseconds(-1): DateRangeError: DateTime::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, -1 given
-DateTime::getMicroseconds(): 999999
-DateTimeImmutable::setMicroseconds(-1): DateRangeError: DateTimeImmutable::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, -1 given
-DateTimeImmutable::getMicroseconds(): 901234
-MyDateTime::setMicroseconds(-1): DateRangeError: DateTime::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, -1 given
-MyDateTime::getMicroseconds(): 999999
-MyDateTimeImmutable::setMicroseconds(-1): DateRangeError: DateTimeImmutable::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, -1 given
-MyDateTimeImmutable::getMicroseconds(): 901234
+DateTime::setMicrosecond(-1): DateRangeError: DateTime::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, -1 given
+DateTime::getMicrosecond(): 999999
+DateTimeImmutable::setMicrosecond(-1): DateRangeError: DateTimeImmutable::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, -1 given
+DateTimeImmutable::getMicrosecond(): 901234
+MyDateTime::setMicrosecond(-1): DateRangeError: DateTime::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, -1 given
+MyDateTime::getMicrosecond(): 999999
+MyDateTimeImmutable::setMicrosecond(-1): DateRangeError: DateTimeImmutable::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, -1 given
+MyDateTimeImmutable::getMicrosecond(): 901234
 ##################################
-DateTime::setMicroseconds(1000000): DateRangeError: DateTime::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, 1000000 given
-DateTime::getMicroseconds(): 999999
-DateTimeImmutable::setMicroseconds(1000000): DateRangeError: DateTimeImmutable::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, 1000000 given
-DateTimeImmutable::getMicroseconds(): 901234
-MyDateTime::setMicroseconds(1000000): DateRangeError: DateTime::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, 1000000 given
-MyDateTime::getMicroseconds(): 999999
-MyDateTimeImmutable::setMicroseconds(1000000): DateRangeError: DateTimeImmutable::setMicroseconds(): Argument #1 ($microseconds) must be between 0 and 999999, 1000000 given
-MyDateTimeImmutable::getMicroseconds(): 901234
+DateTime::setMicrosecond(1000000): DateRangeError: DateTime::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, 1000000 given
+DateTime::getMicrosecond(): 999999
+DateTimeImmutable::setMicrosecond(1000000): DateRangeError: DateTimeImmutable::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, 1000000 given
+DateTimeImmutable::getMicrosecond(): 901234
+MyDateTime::setMicrosecond(1000000): DateRangeError: DateTime::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, 1000000 given
+MyDateTime::getMicrosecond(): 999999
+MyDateTimeImmutable::setMicrosecond(1000000): DateRangeError: DateTimeImmutable::setMicrosecond(): Argument #1 ($microsecond) must be between 0 and 999999, 1000000 given
+MyDateTimeImmutable::getMicrosecond(): 901234

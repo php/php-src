@@ -19,6 +19,7 @@
 
 #include "libbcmath/src/bcmath.h"
 #include "zend_API.h"
+#include "ext/standard/php_math_round_mode.h"
 
 extern zend_module_entry bcmath_module_entry;
 #define phpext_bcmath_ptr &bcmath_module_entry
@@ -26,11 +27,15 @@ extern zend_module_entry bcmath_module_entry;
 #include "php_version.h"
 #define PHP_BCMATH_VERSION PHP_VERSION
 
+#define BC_ARENA_SIZE 256
+
 ZEND_BEGIN_MODULE_GLOBALS(bcmath)
 	bc_num _zero_;
 	bc_num _one_;
 	bc_num _two_;
 	int bc_precision;
+	char *arena;
+	size_t arena_offset;
 ZEND_END_MODULE_GLOBALS(bcmath)
 
 #if defined(ZTS) && defined(COMPILE_DL_BCMATH)

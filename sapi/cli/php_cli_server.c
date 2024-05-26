@@ -487,7 +487,7 @@ static PHP_MINFO_FUNCTION(cli_server)
 	DISPLAY_INI_ENTRIES();
 }
 
-zend_module_entry cli_server_module_entry = {
+static zend_module_entry cli_server_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cli_server",
 	NULL,

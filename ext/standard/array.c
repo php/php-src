@@ -40,7 +40,6 @@
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
 #include "zend_exceptions.h"
-#include "ext/spl/spl_array.h"
 #include "ext/random/php_random.h"
 #include "zend_frameless_function.h"
 
@@ -6549,7 +6548,7 @@ PHP_FUNCTION(array_filter)
 			fci.params = args;
 
 			if (zend_call_function(&fci, &fci_cache) == SUCCESS) {
-				int retval_true;
+				bool retval_true;
 
 				zval_ptr_dtor(&args[0]);
 				if (use_type == ARRAY_FILTER_USE_BOTH) {

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0af5e8985dd4645bf23490b8cec312f8fd1fee2e */
+ * Stub hash: d376e984db0db6ccd9356f632f9d7e1382b2afb7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Generator_rewind, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -24,6 +24,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Generator_getReturn arginfo_class_Generator_current
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Generator___debugInfo, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_METHOD(Generator, rewind);
 ZEND_METHOD(Generator, valid);
 ZEND_METHOD(Generator, current);
@@ -32,6 +35,7 @@ ZEND_METHOD(Generator, next);
 ZEND_METHOD(Generator, send);
 ZEND_METHOD(Generator, throw);
 ZEND_METHOD(Generator, getReturn);
+ZEND_METHOD(Generator, __debugInfo);
 
 static const zend_function_entry class_Generator_methods[] = {
 	ZEND_ME(Generator, rewind, arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
@@ -42,6 +46,7 @@ static const zend_function_entry class_Generator_methods[] = {
 	ZEND_ME(Generator, send, arginfo_class_Generator_send, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, throw, arginfo_class_Generator_throw, ZEND_ACC_PUBLIC)
 	ZEND_ME(Generator, getReturn, arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, __debugInfo, arginfo_class_Generator___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

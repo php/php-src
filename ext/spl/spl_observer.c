@@ -73,7 +73,7 @@ static inline spl_SplObjectStorage *spl_object_storage_from_obj(zend_object *obj
 
 #define Z_SPLOBJSTORAGE_P(zv)  spl_object_storage_from_obj(Z_OBJ_P((zv)))
 
-void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
+static void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 
@@ -87,20 +87,21 @@ static zend_result spl_object_storage_get_hash(zend_hash_key *key, spl_SplObject
 		zval param;
 		zval rv;
 		ZVAL_OBJ(&param, obj);
-		zend_call_method_with_1_params(
-			&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, &param);
-		if (!Z_ISUNDEF(rv)) {
-			if (Z_TYPE(rv) == IS_STRING) {
-				key->key = Z_STR(rv);
-				return SUCCESS;
-			} else {
-				zend_throw_exception(spl_ce_RuntimeException, "Hash needs to be a string", 0);
-
+		zend_call_method_with_1_params(&intern->std, intern->std.ce, &intern->fptr_get_hash, "getHash", &rv, &param);
+		if (UNEXPECTED(Z_ISUNDEF(rv))) {
+			/* An exception has occurred */
+			return FAILURE;
+		} else {
+			/* TODO PHP 9: Remove this as this will be enforced from the return type */
+			if (UNEXPECTED(Z_TYPE(rv) != IS_STRING)) {
+				zend_type_error("%s::getHash(): Return value must be of type string, %s returned",
+					ZSTR_VAL(intern->std.ce->name), zend_zval_value_name(&rv));
 				zval_ptr_dtor(&rv);
 				return FAILURE;
+			} else {
+				key->key = Z_STR(rv);
+				return SUCCESS;
 			}
-		} else {
-			return FAILURE;
 		}
 	} else {
 		key->key = NULL;
@@ -439,6 +440,7 @@ PHP_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
+// todo: make spl_object_storage_has_dimension return bool as well
 static int spl_object_storage_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
@@ -755,6 +757,49 @@ PHP_METHOD(SplObjectStorage, next)
 
 	zend_hash_move_forward_ex(&intern->storage, &intern->pos);
 	intern->index++;
+} /* }}} */
+
+/* {{{ Seek to position. */
+PHP_METHOD(SplObjectStorage, seek)
+{
+	zend_long position;
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &position) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (position < 0 || position >= zend_hash_num_elements(&intern->storage)) {
+		zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", position);
+		RETURN_THROWS();
+	}
+
+	if (position == 0) {
+		/* fast path */
+		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+		intern->index = 0;
+	} else if (position > intern->index) {
+		/* unlike the optimization below, it's not cheap to go to the end */
+		do {
+			zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+			intern->index++;
+		} while (position > intern->index);
+	} else if (position < intern->index) {
+		/* optimization: check if it's more profitable to reset and do a forwards seek instead, it's cheap to reset */
+		if (intern->index - position > position) {
+			zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+			intern->index = 0;
+			do {
+				zend_hash_move_forward_ex(&intern->storage, &intern->pos);
+				intern->index++;
+			} while (position > intern->index);
+		} else {
+			do {
+				zend_hash_move_backwards_ex(&intern->storage, &intern->pos);
+				intern->index--;
+			} while (position < intern->index);
+		}
+	}
 } /* }}} */
 
 /* {{{ Serializes storage */
@@ -1325,7 +1370,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_ce_SplObserver = register_class_SplObserver();
 	spl_ce_SplSubject = register_class_SplSubject();
 
-	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, zend_ce_iterator, zend_ce_serializable, zend_ce_arrayaccess);
+	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, spl_ce_SeekableIterator, zend_ce_serializable, zend_ce_arrayaccess);
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
 	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
 

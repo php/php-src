@@ -46,6 +46,7 @@ typedef struct {
 	bool		disable_native_prepares; /* deprecated since 5.6 */
 	bool		disable_prepares;
 	HashTable       *lob_streams;
+	zend_fcall_info_cache *notice_callback;
 } pdo_pgsql_db_handle;
 
 typedef struct {
@@ -86,6 +87,7 @@ extern const struct pdo_stmt_methods pgsql_stmt_methods;
 
 enum {
 	PDO_PGSQL_ATTR_DISABLE_PREPARES = PDO_ATTR_DRIVER_SPECIFIC,
+	PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE,
 };
 
 struct pdo_pgsql_lob_self {

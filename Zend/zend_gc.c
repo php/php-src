@@ -608,7 +608,7 @@ static void gc_adjust_threshold(int count)
 	/* TODO Very simple heuristic for dynamic GC buffer resizing:
 	 * If there are "too few" collections, increase the collection threshold
 	 * by a fixed step */
-	if (count < GC_THRESHOLD_TRIGGER) {
+	if (count < GC_THRESHOLD_TRIGGER || GC_G(num_roots) >= GC_G(gc_threshold)) {
 		/* increase */
 		if (GC_G(gc_threshold) < GC_THRESHOLD_MAX) {
 			new_threshold = GC_G(gc_threshold) + GC_THRESHOLD_STEP;
@@ -718,7 +718,7 @@ static void ZEND_FASTCALL gc_extra_root(zend_refcounted *ref)
 
 	if (EXPECTED(GC_HAS_UNUSED())) {
 		idx = GC_FETCH_UNUSED();
-	} else if (EXPECTED(GC_HAS_NEXT_UNUSED_UNDER_THRESHOLD())) {
+	} else if (EXPECTED(GC_HAS_NEXT_UNUSED())) {
 		idx = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();
@@ -1990,7 +1990,13 @@ rerun_gc:
 
 finish:
 	zend_get_gc_buffer_release();
+
+	/* Prevent GC from running during zend_gc_check_root_tmpvars, before
+	 * gc_threshold is adjusted, as this may result in unbounded recursion */
+	GC_G(gc_active) = 1;
 	zend_gc_check_root_tmpvars();
+	GC_G(gc_active) = 0;
+
 	GC_G(collector_time) += zend_hrtime() - start_time;
 	return total_count;
 }

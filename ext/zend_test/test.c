@@ -739,6 +739,18 @@ static ZEND_FUNCTION(zend_test_is_pcre_bundled)
 #endif
 }
 
+#ifdef PHP_WIN32
+static ZEND_FUNCTION(zend_test_set_fmode)
+{
+	bool binary;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_BOOL(binary)
+	ZEND_PARSE_PARAMETERS_END();
+
+	_fmode = binary ? _O_BINARY : _O_TEXT;
+}
+#endif
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);
@@ -1368,6 +1380,9 @@ PHP_ZEND_TEST_API int gh11934b_ffi_var_test_cdata;
 /**
  * This function allows us to simulate early return of copy_file_range by setting the limit_copy_file_range ini setting.
  */
+#ifdef __MUSL__
+typedef off_t off64_t;
+#endif
 PHP_ZEND_TEST_API ssize_t copy_file_range(int fd_in, off64_t *off_in, int fd_out, off64_t *off_out, size_t len, unsigned int flags)
 {
 	ssize_t (*original_copy_file_range)(int, off64_t *, int, off64_t *, size_t, unsigned int) = dlsym(RTLD_NEXT, "copy_file_range");

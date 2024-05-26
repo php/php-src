@@ -32,8 +32,8 @@ class DummyClass {
 $client = new TestSoapClient(__DIR__."/../classmap.wsdl", ['classmap' => ['Struct' => 'DummyClass']]);
 var_dump($client->dotest2("???"));
 ?>
---EXPECT--
-object(DummyClass)#2 (2) {
+--EXPECTF--
+object(DummyClass)#%d (%d) {
   ["a"]=>
   array(2) {
     [0]=>

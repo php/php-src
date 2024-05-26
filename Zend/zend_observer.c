@@ -24,22 +24,24 @@
 #include "zend_vm.h"
 
 #define ZEND_OBSERVER_DATA(function) \
-	ZEND_OP_ARRAY_EXTENSION((&(function)->common), zend_observer_fcall_op_array_extension)
+	ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_USER_CODE((function)->type) \
+		? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
 
 #define ZEND_OBSERVER_NOT_OBSERVED ((void *) 2)
 
 #define ZEND_OBSERVABLE_FN(function) \
 	(ZEND_MAP_PTR(function->common.run_time_cache) && !(function->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 
-zend_llist zend_observers_fcall_list;
-zend_llist zend_observer_function_declared_callbacks;
-zend_llist zend_observer_class_linked_callbacks;
-zend_llist zend_observer_error_callbacks;
-zend_llist zend_observer_fiber_init;
-zend_llist zend_observer_fiber_switch;
-zend_llist zend_observer_fiber_destroy;
+static zend_llist zend_observers_fcall_list;
+static zend_llist zend_observer_function_declared_callbacks;
+static zend_llist zend_observer_class_linked_callbacks;
+static zend_llist zend_observer_error_callbacks;
+static zend_llist zend_observer_fiber_init;
+static zend_llist zend_observer_fiber_switch;
+static zend_llist zend_observer_fiber_destroy;
 
 int zend_observer_fcall_op_array_extension;
+int zend_observer_fcall_internal_function_extension;
 bool zend_observer_errors_observed;
 bool zend_observer_function_declared_observed;
 bool zend_observer_class_linked_observed;
@@ -64,6 +66,7 @@ ZEND_API void zend_observer_startup(void)
 	zend_llist_init(&zend_observer_fiber_destroy, sizeof(zend_observer_fiber_destroy_handler), NULL, 1);
 
 	zend_observer_fcall_op_array_extension = -1;
+	zend_observer_fcall_internal_function_extension = -1;
 }
 
 ZEND_API void zend_observer_post_startup(void)
@@ -73,6 +76,9 @@ ZEND_API void zend_observer_post_startup(void)
 		 * Allocate each a begin and an end pointer */
 		zend_observer_fcall_op_array_extension =
 			zend_get_op_array_extension_handles("Zend Observer", (int) zend_observers_fcall_list.count * 2);
+
+		zend_observer_fcall_internal_function_extension =
+			zend_get_internal_function_extension_handles("Zend Observer", (int) zend_observers_fcall_list.count * 2);
 
 		/* ZEND_CALL_TRAMPOLINE has SPEC(OBSERVER) but zend_init_call_trampoline_op()
 		 * is called before any extensions have registered as an observer. So we
@@ -147,7 +153,12 @@ static void zend_observer_fcall_install(zend_execute_data *execute_data)
 	}
 }
 
-static bool zend_observer_remove_handler(void **first_handler, void *old_handler) {
+/* We need to provide the ability to retrieve the handler which will move onto the position the current handler was.
+ * The fundamental problem is that, if a handler is removed while it's being executed, it will move handlers around:
+ * the previous next handler is now at the place where the current handler was.
+ * Hence, the next handler executed will be the one after the next handler.
+ * Callees must thus invoke the next handler themselves, with the same arguments they were passed. */
+static bool zend_observer_remove_handler(void **first_handler, void *old_handler, void **next_handler) {
 	size_t registered_observers = zend_observers_fcall_list.count;
 
 	void **last_handler = first_handler + registered_observers - 1;
@@ -155,11 +166,13 @@ static bool zend_observer_remove_handler(void **first_handler, void *old_handler
 		if (*cur_handler == old_handler) {
 			if (registered_observers == 1 || (cur_handler == first_handler && cur_handler[1] == NULL)) {
 				*cur_handler = ZEND_OBSERVER_NOT_OBSERVED;
+				*next_handler = NULL;
 			} else {
 				if (cur_handler != last_handler) {
 					memmove(cur_handler, cur_handler + 1, sizeof(cur_handler) * (last_handler - cur_handler));
 				}
 				*last_handler = NULL;
+				*next_handler = *cur_handler;
 			}
 			return true;
 		}
@@ -184,8 +197,8 @@ ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_obse
 	}
 }
 
-ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin) {
-	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function), begin);
+ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next) {
+	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function), begin, (void **)next);
 }
 
 ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observer_fcall_end_handler end) {
@@ -200,9 +213,9 @@ ZEND_API void zend_observer_add_end_handler(zend_function *function, zend_observ
 	*end_handler = end;
 }
 
-ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end) {
+ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_observer_fcall_end_handler end, zend_observer_fcall_end_handler *next) {
 	size_t registered_observers = zend_observers_fcall_list.count;
-	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function) + registered_observers, end);
+	return zend_observer_remove_handler((void **)&ZEND_OBSERVER_DATA(function) + registered_observers, end, (void **)next);
 }
 
 static inline zend_execute_data **prev_observed_frame(zend_execute_data *execute_data) {

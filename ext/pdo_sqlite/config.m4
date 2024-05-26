@@ -16,7 +16,6 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
   PHP_EVAL_INCLINE($SQLITE_CFLAGS)
   PHP_EVAL_LIBLINE($SQLITE_LIBS, PDO_SQLITE_SHARED_LIBADD)
-  AC_DEFINE(HAVE_PDO_SQLITELIB, 1, [Define to 1 if you have the pdo_sqlite extension enabled.])
 
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_close_v2, [
     AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
