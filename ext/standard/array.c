@@ -6580,6 +6580,121 @@ PHP_FUNCTION(array_filter)
 }
 /* }}} */
 
+/* {{{ Internal function to find an array element for a user closure. */
+static zend_result php_array_find(const HashTable *array, zend_fcall_info fci, zend_fcall_info_cache fci_cache, zval *result_key, zval *result_value, bool negate_condition)
+{
+	zend_ulong num_key;
+	zend_string *str_key;
+	zval retval;
+	zval args[2];
+	zval *operand;
+
+	if (result_value != NULL) {
+  		ZVAL_UNDEF(result_value);
+	}
+
+	if (result_key != NULL) {
+  		ZVAL_UNDEF(result_key);
+	}
+
+	if (zend_hash_num_elements(array) == 0) {
+		return SUCCESS;
+	}
+
+	ZEND_ASSERT(ZEND_FCI_INITIALIZED(fci));
+
+	fci.retval = &retval;
+	fci.param_count = 2;
+	fci.params = args;
+
+	ZEND_HASH_FOREACH_KEY_VAL(array, num_key, str_key, operand) {
+		/* Set up the key */
+		if (!str_key) {
+			ZVAL_LONG(&args[1], num_key);
+		} else {
+			ZVAL_STR_COPY(&args[1], str_key);
+		}
+
+		ZVAL_COPY(&args[0], operand);
+
+		zend_result result = zend_call_function(&fci, &fci_cache);
+		if (EXPECTED(result == SUCCESS)) {
+			int retval_true;
+
+			retval_true = zend_is_true(&retval);
+			zval_ptr_dtor(&retval);
+
+			/* This negates the condition, if negate_condition is true. Otherwise it does nothing with `retval_true`. */
+			retval_true ^= negate_condition;
+
+			if (retval_true) {
+				if (result_value != NULL) {
+					ZVAL_COPY(result_value, &args[0]);
+				}
+
+				if (result_key != NULL) {
+					ZVAL_COPY(result_key, &args[1]);
+				}
+
+				zval_ptr_dtor(&args[0]);
+				zval_ptr_dtor(&args[1]);
+
+				return SUCCESS;
+			}
+		}
+
+		zval_ptr_dtor(&args[0]);
+		zval_ptr_dtor(&args[1]);
+
+		if (UNEXPECTED(result != SUCCESS)) {
+			return FAILURE;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ Search within an array and returns true if all elements are empty. */
+PHP_FUNCTION(any_empty)
+{
+	zval *array = NULL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_array_find(Z_ARR_P(array), fci, fci_cache, return_value, NULL, true) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(Z_TYPE_P(return_value) == IS_UNDEF);
+}
+/* }}} */
+
+/* {{{ Search within an array and returns true if all elements are empty. */
+PHP_FUNCTION(all_empty)
+{
+	zval *array = NULL;
+	zend_fcall_info fci;
+	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ARRAY(array)
+		Z_PARAM_FUNC(fci, fci_cache)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (php_array_find(Z_ARR_P(array), fci, fci_cache, return_value, NULL, true) != SUCCESS) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(Z_TYPE_P(return_value) == IS_UNDEF);
+}
+/* }}} */
+
 /* {{{ Applies the callback to the elements in given arrays. */
 PHP_FUNCTION(array_map)
 {
