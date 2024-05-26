@@ -100,8 +100,8 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	xmlFree(localname);
 
 	if (doctype == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create DocumentType");
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ((xmlNodePtr) doctype, NULL);
