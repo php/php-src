@@ -355,12 +355,9 @@ PHP_DOM_EXPORT void php_dom_reconcile_attribute_namespace_after_insertion(xmlAtt
 static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
 {
 	zend_ulong value = (zend_ulong) (uintptr_t) ptr;
-	/* Shift 3/4 for better hash distribution because the low 3/4 bits are always 0. */
-#if SIZEOF_ZEND_LONG == 8
-	return value >> 4;
-#else
-	return value >> 3;
-#endif
+	/* Rotate 3/4 bits for better hash distribution because the low 3/4 bits are normally 0. */
+	const size_t rol_amount = (SIZEOF_ZEND_LONG == 8) ? 4 : 3;
+	return (value >> rol_amount) | (value << (sizeof(value) * 8 - rol_amount));
 }
 
 static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)
