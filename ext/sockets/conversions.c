@@ -1243,7 +1243,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 	to_zval_read_aggregation(msghdr_c, zv, descriptors, ctx);
 }
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
