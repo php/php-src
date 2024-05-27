@@ -6,12 +6,12 @@ soap.wsdl_cache_enabled=0
 soap
 --SKIPIF--
 <?php
-require __DIR__.'/../../standard/tests/http/server.inc';
+require __DIR__.'/../../../standard/tests/http/server.inc';
 http_server_skipif();
 ?>
 --FILE--
 <?php
-require __DIR__.'/../../standard/tests/http/server.inc';
+require __DIR__.'/../../../standard/tests/http/server.inc';
 
 function chunk_body($body, $n)
 {
@@ -25,7 +25,7 @@ function chunk_body($body, $n)
     return join('', $chunks);
 }
 
-$wsdl = file_get_contents(__DIR__.'/server030.wsdl');
+$wsdl = file_get_contents(__DIR__.'/../server030.wsdl');
 
 $soap = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
