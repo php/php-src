@@ -23,7 +23,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "Zend/zend_exceptions.h"
-#include "../spl/spl_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"
 
