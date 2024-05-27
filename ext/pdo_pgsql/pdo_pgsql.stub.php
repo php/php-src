@@ -57,6 +57,5 @@ class Pgsql extends PDO
 
     public function getPid(): int {}
 
-    /** @implementation-alias PDO_PGSql_Ext::pgsqlSetNoticeCallback */
     public function setNoticeCallback(?callable $callback): void {}
 }

@@ -64,7 +64,7 @@ ZEND_METHOD(Pdo_Pgsql, lobOpen);
 ZEND_METHOD(Pdo_Pgsql, lobUnlink);
 ZEND_METHOD(Pdo_Pgsql, getNotify);
 ZEND_METHOD(Pdo_Pgsql, getPid);
-ZEND_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback);
+ZEND_METHOD(Pdo_Pgsql, setNoticeCallback);
 
 static const zend_function_entry class_Pdo_Pgsql_methods[] = {
 	ZEND_ME(Pdo_Pgsql, escapeIdentifier, arginfo_class_Pdo_Pgsql_escapeIdentifier, ZEND_ACC_PUBLIC)
@@ -77,7 +77,7 @@ static const zend_function_entry class_Pdo_Pgsql_methods[] = {
 	ZEND_ME(Pdo_Pgsql, lobUnlink, arginfo_class_Pdo_Pgsql_lobUnlink, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Pgsql, getNotify, arginfo_class_Pdo_Pgsql_getNotify, ZEND_ACC_PUBLIC)
 	ZEND_ME(Pdo_Pgsql, getPid, arginfo_class_Pdo_Pgsql_getPid, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("setNoticeCallback", zim_PDO_PGSql_Ext_pgsqlSetNoticeCallback, arginfo_class_Pdo_Pgsql_setNoticeCallback, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Pdo_Pgsql, setNoticeCallback, arginfo_class_Pdo_Pgsql_setNoticeCallback, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
