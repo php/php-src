@@ -25,8 +25,8 @@ if test "$PHP_PCNTL" != "no"; then
   ]))
 
   dnl if unsupported, -1 means automatically ENOSYS in this context
-  AC_MSG_CHECKING([if sched_getcpu is supported])
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK([if sched_getcpu is supported], [php_cv_func_sched_getcpu],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <sched.h>
 int main(void) {
   if (sched_getcpu() == -1) {
@@ -34,14 +34,12 @@ int main(void) {
   }
   return 0;
 }
-  ]])],[
-    AC_MSG_RESULT(yes)
-    AC_DEFINE([HAVE_SCHED_GETCPU],1,[Whether sched_getcpu is properly supported])
-  ],[
-    AC_MSG_RESULT(no)
-  ],[
-    AC_MSG_RESULT([no, cross-compiling])
-  ])
+  ])],
+  [php_cv_func_sched_getcpu=yes],
+  [php_cv_func_sched_getcpu=no],
+  [php_cv_func_sched_getcpu=no])])
+  AS_VAR_IF([php_cv_func_sched_getcpu], [yes],
+    [AC_DEFINE([HAVE_SCHED_GETCPU], [1], [Whether sched_getcpu is properly supported])])
 
   AC_CHECK_TYPE([siginfo_t],[PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"],,[#include <signal.h>])
 
