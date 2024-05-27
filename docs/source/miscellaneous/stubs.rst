@@ -63,8 +63,8 @@ The following sections will introduce these capabilities.
  Generating arginfo Structures
 *******************************
 
-The purpose of stubs files is to make it easier to declare arginfo structures,
-validate parameters parsing declarations, and maintain documentation.
+The purpose of stubs files is to make it easier to declare arginfo structures, validate parameters
+parsing declarations, and maintain documentation.
 
 Previously, you had to manually use the different ``ZEND_BEGIN_ARG_* ... ZEND_END_ARG_INFO()``
 macros. This is a tedious and error-prone process. Being able to use pure PHP code on which the C
