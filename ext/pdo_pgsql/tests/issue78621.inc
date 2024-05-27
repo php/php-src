@@ -2,7 +2,7 @@
 require_once dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
 require_once dirname(__FILE__) . '/config.inc';
 if (!isset($db)) {
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+    $db = new Pdo\Pgsql($config['ENV']['PDOTEST_DSN']);
 }
 if (!isset($rounds) || empty($rounds)) {
     $rounds = [ null, 'Re' ];
@@ -17,15 +17,15 @@ $db->exec("create function hey() returns trigger as \$\$ begin new.a := 'oh'; ra
 $db->exec("create trigger hop before insert on t for each row execute procedure hey()");
 $db->exec("insert into t values ('ah')");
 while (count($rounds)) {
-try {
-attach($db, array_shift($rounds));
-} catch (TypeError $err) {
-echo "Caught TypeError: ".$err->getMessage()."\n";
+    try {
+        attach($db, array_shift($rounds));
+    } catch (TypeError $err) {
+        echo "Caught TypeError: ".$err->getMessage()."\n";
+    }
+    $db->exec("delete from t");
+    $db->exec("insert into t values ('ah')");
 }
-$db->exec("delete from t");
-$db->exec("insert into t values ('ah')");
-}
-$db->pgsqlSetNoticeCallback(null);
+$db->setNoticeCallback(null);
 $db->exec("delete from t");
 $db->exec("insert into t values ('ah')");
 var_dump($db->query("select * from t")->fetchAll(PDO::FETCH_ASSOC));

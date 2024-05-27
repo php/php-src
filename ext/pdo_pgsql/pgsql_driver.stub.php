@@ -37,8 +37,4 @@ class PDO_PGSql_Ext {
     /* Do NOT add new methods here. See https://wiki.php.net/rfc/pdo_driver_specific_subclasses
      * Any new feature should be declared only on Pdo\Pgsql.
      */
-#if 1
-    /** @implementation-alias Pdo\Pgsql::setNoticeCallback */
-    public function pgsqlSetNoticeCallback(?callable $callback): void {}
-#endif
 }

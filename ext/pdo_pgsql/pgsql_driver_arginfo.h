@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d8fac4d68600af70db47e772439c0a8196b34daa */
+ * Stub hash: dd20abc5d8580d72b25bfb3c598b1ca54a501fcc */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, tableName, IS_STRING, 0)
@@ -46,12 +46,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#if 1
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PDO_PGSql_Ext_pgsqlSetNoticeCallback, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
-ZEND_END_ARG_INFO()
-#endif
-
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlCopyFromArray);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlCopyFromFile);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlCopyToArray);
@@ -61,9 +55,6 @@ ZEND_METHOD(PDO_PGSql_Ext, pgsqlLOBOpen);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlLOBUnlink);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlGetNotify);
 ZEND_METHOD(PDO_PGSql_Ext, pgsqlGetPid);
-#if 1
-ZEND_METHOD(Pdo_Pgsql, setNoticeCallback);
-#endif
 
 static const zend_function_entry class_PDO_PGSql_Ext_methods[] = {
 	ZEND_ME(PDO_PGSql_Ext, pgsqlCopyFromArray, arginfo_class_PDO_PGSql_Ext_pgsqlCopyFromArray, ZEND_ACC_PUBLIC)
@@ -75,8 +66,5 @@ static const zend_function_entry class_PDO_PGSql_Ext_methods[] = {
 	ZEND_ME(PDO_PGSql_Ext, pgsqlLOBUnlink, arginfo_class_PDO_PGSql_Ext_pgsqlLOBUnlink, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO_PGSql_Ext, pgsqlGetNotify, arginfo_class_PDO_PGSql_Ext_pgsqlGetNotify, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO_PGSql_Ext, pgsqlGetPid, arginfo_class_PDO_PGSql_Ext_pgsqlGetPid, ZEND_ACC_PUBLIC)
-#if 1
-	ZEND_RAW_FENTRY("pgsqlSetNoticeCallback", zim_Pdo_Pgsql_setNoticeCallback, arginfo_class_PDO_PGSql_Ext_pgsqlSetNoticeCallback, ZEND_ACC_PUBLIC, NULL, NULL)
-#endif
 	ZEND_FE_END
 };

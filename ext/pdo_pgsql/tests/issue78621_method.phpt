@@ -1,5 +1,5 @@
 --TEST--
-pgsqlSetNoticeCallback catches Postgres "raise notice".
+Pdo\Pgsql::setNoticeCallback catches Postgres "raise notice".
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
@@ -27,8 +27,8 @@ function attach($db, $prefix = '')
     global $flavor;
     switch($flavor)
     {
-        case 0: $db->pgsqlSetNoticeCallback([ $logger, 'disp'.$prefix ]); break;
-        case 1: $db->pgsqlSetNoticeCallback([ $logger, 'whatever'.$prefix ]); break;
+        case 0: $db->setNoticeCallback([ $logger, 'disp'.$prefix ]); break;
+        case 1: $db->setNoticeCallback([ $logger, 'whatever'.$prefix ]); break;
     }
 }
 echo "Testing with method explicitely plugged:\n";
