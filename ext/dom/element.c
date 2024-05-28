@@ -1318,8 +1318,6 @@ PHP_METHOD(DOMElement, setIdAttribute)
 	} else {
 		php_set_attribute_id(attrp, is_id);
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute */
 
@@ -1349,8 +1347,6 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 	} else {
 		php_set_attribute_id(attrp, is_id);
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute_ns */
 
@@ -1378,8 +1374,6 @@ static void dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	} else {
 		php_set_attribute_id(attrp, is_id);
 	}
-
-	RETURN_NULL();
 }
 
 PHP_METHOD(DOMElement, setIdAttributeNode)
