@@ -1364,7 +1364,7 @@ int main(void) {
   [php_cv_type_cookie_off64_t=no],
   [AS_CASE([$host_alias],
     [*linux*], [php_cv_type_cookie_off64_t=yes],
-    [*], [php_cv_type_cookie_off64_t=no])]
+    [php_cv_type_cookie_off64_t=no])]
   )])
   AS_VAR_IF([php_cv_type_cookie_off64_t], [yes],
     [AC_DEFINE([COOKIE_SEEKER_USES_OFF64_T], [1],
