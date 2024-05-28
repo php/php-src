@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9a1e6842b2c5b891e11087d40aa8c9f56a2269a3 */
+ * Stub hash: dc1252cd6b927d6970d2b06fc3665e682d66f4ff */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -170,6 +170,18 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNodeList_item, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNodeList_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNodeList_offsetFetch, 1, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMNodeList_offsetExists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMCharacterData_appendData, 0, 1, IS_TRUE, 0)
@@ -509,6 +521,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 
+#define arginfo_class_DOMNamedNodeMap_offsetGet arginfo_class_DOMNodeList_offsetGet
+
+#define arginfo_class_DOMNamedNodeMap_offsetFetch arginfo_class_DOMNodeList_offsetFetch
+
+#define arginfo_class_DOMNamedNodeMap_offsetExists arginfo_class_DOMNodeList_offsetExists
+
 #define arginfo_class_DOMEntityReference___construct arginfo_class_DOMDocument_createEntityReference
 
 #define arginfo_class_DOMProcessingInstruction___construct arginfo_class_DOMAttr___construct
@@ -691,6 +709,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_NodeList_item, 0, 1, Do
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_NodeList_offsetGet, 0, 1, Dom\\Attr, 1)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_NodeList_offsetFetch, 1, 1, Dom\\Attr, 1)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Dom_NodeList_offsetExists arginfo_class_DOMNodeList_offsetExists
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_NamedNodeMap_item, 0, 1, Dom\\Attr, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -707,6 +735,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Dom_NamedNodeMap_count arginfo_class_Dom_Node_getLineNo
 
 #define arginfo_class_Dom_NamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
+
+#define arginfo_class_Dom_NamedNodeMap_offsetGet arginfo_class_Dom_NodeList_offsetGet
+
+#define arginfo_class_Dom_NamedNodeMap_offsetFetch arginfo_class_Dom_NodeList_offsetFetch
+
+#define arginfo_class_Dom_NamedNodeMap_offsetExists arginfo_class_DOMNodeList_offsetExists
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Dom_DtdNamedNodeMap_item, 0, 1, Dom\\Entity|Dom\\\116otation, MAY_BE_NULL)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -725,6 +759,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_DtdNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
 
+#define arginfo_class_Dom_DtdNamedNodeMap_offsetGet arginfo_class_Dom_NodeList_offsetGet
+
+#define arginfo_class_Dom_DtdNamedNodeMap_offsetFetch arginfo_class_Dom_NodeList_offsetFetch
+
+#define arginfo_class_Dom_DtdNamedNodeMap_offsetExists arginfo_class_DOMNodeList_offsetExists
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_HTMLCollection_item, 0, 1, Dom\\Element, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -736,6 +776,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Dom_HTMLCollection_count arginfo_class_Dom_Node_getLineNo
 
 #define arginfo_class_Dom_HTMLCollection_getIterator arginfo_class_DOMNodeList_getIterator
+
+#define arginfo_class_Dom_HTMLCollection_offsetGet arginfo_class_Dom_NodeList_offsetGet
+
+#define arginfo_class_Dom_HTMLCollection_offsetFetch arginfo_class_Dom_NodeList_offsetFetch
+
+#define arginfo_class_Dom_HTMLCollection_offsetExists arginfo_class_DOMNodeList_offsetExists
 
 #define arginfo_class_Dom_Element_hasAttributes arginfo_class_Dom_Node_hasChildNodes
 
@@ -1127,6 +1173,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_TokenList_getIterator arginfo_class_DOMNodeList_getIterator
 
+#define arginfo_class_Dom_TokenList_offsetGet arginfo_class_DOMNodeList_offsetGet
+
+#define arginfo_class_Dom_TokenList_offsetFetch arginfo_class_DOMNodeList_offsetFetch
+
+#define arginfo_class_Dom_TokenList_offsetExists arginfo_class_DOMNodeList_offsetExists
+
 #define arginfo_class_Dom_NamespaceInfo___construct arginfo_class_DOMDocumentFragment___construct
 
 #if defined(LIBXML_XPATH_ENABLED)
@@ -1212,6 +1264,9 @@ ZEND_METHOD(DOMDocument, replaceChildren);
 ZEND_METHOD(DOMNodeList, count);
 ZEND_METHOD(DOMNodeList, getIterator);
 ZEND_METHOD(DOMNodeList, item);
+ZEND_METHOD(DOMNodeList, offsetGet);
+ZEND_METHOD(DOMNodeList, offsetFetch);
+ZEND_METHOD(DOMNodeList, offsetExists);
 ZEND_METHOD(DOMCharacterData, appendData);
 ZEND_METHOD(DOMCharacterData, substringData);
 ZEND_METHOD(DOMCharacterData, insertData);
@@ -1301,6 +1356,9 @@ ZEND_METHOD(DOMNamedNodeMap, getNamedItemNS);
 ZEND_METHOD(DOMNamedNodeMap, item);
 ZEND_METHOD(DOMNamedNodeMap, count);
 ZEND_METHOD(DOMNamedNodeMap, getIterator);
+ZEND_METHOD(DOMNamedNodeMap, offsetGet);
+ZEND_METHOD(DOMNamedNodeMap, offsetFetch);
+ZEND_METHOD(DOMNamedNodeMap, offsetExists);
 ZEND_METHOD(DOMEntityReference, __construct);
 ZEND_METHOD(DOMProcessingInstruction, __construct);
 #if defined(LIBXML_XPATH_ENABLED)
@@ -1388,6 +1446,9 @@ ZEND_METHOD(Dom_TokenList, replace);
 ZEND_METHOD(Dom_TokenList, supports);
 ZEND_METHOD(Dom_TokenList, count);
 ZEND_METHOD(Dom_TokenList, getIterator);
+ZEND_METHOD(Dom_TokenList, offsetGet);
+ZEND_METHOD(Dom_TokenList, offsetFetch);
+ZEND_METHOD(Dom_TokenList, offsetExists);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, __construct);
 #endif
@@ -1487,6 +1548,9 @@ static const zend_function_entry class_DOMNodeList_methods[] = {
 	ZEND_ME(DOMNodeList, count, arginfo_class_DOMNodeList_count, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNodeList, getIterator, arginfo_class_DOMNodeList_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNodeList, item, arginfo_class_DOMNodeList_item, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNodeList, offsetGet, arginfo_class_DOMNodeList_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNodeList, offsetFetch, arginfo_class_DOMNodeList_offsetFetch, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNodeList, offsetExists, arginfo_class_DOMNodeList_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1616,6 +1680,9 @@ static const zend_function_entry class_DOMNamedNodeMap_methods[] = {
 	ZEND_ME(DOMNamedNodeMap, item, arginfo_class_DOMNamedNodeMap_item, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNamedNodeMap, count, arginfo_class_DOMNamedNodeMap_count, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNamedNodeMap, getIterator, arginfo_class_DOMNamedNodeMap_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNamedNodeMap, offsetGet, arginfo_class_DOMNamedNodeMap_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNamedNodeMap, offsetFetch, arginfo_class_DOMNamedNodeMap_offsetFetch, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNamedNodeMap, offsetExists, arginfo_class_DOMNamedNodeMap_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -1704,6 +1771,9 @@ static const zend_function_entry class_Dom_NodeList_methods[] = {
 	ZEND_RAW_FENTRY("count", zim_DOMNodeList_count, arginfo_class_Dom_NodeList_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIterator", zim_DOMNodeList_getIterator, arginfo_class_Dom_NodeList_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("item", zim_DOMNodeList_item, arginfo_class_Dom_NodeList_item, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", zim_DOMNodeList_offsetGet, arginfo_class_Dom_NodeList_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetFetch", zim_DOMNodeList_offsetFetch, arginfo_class_Dom_NodeList_offsetFetch, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetExists", zim_DOMNodeList_offsetExists, arginfo_class_Dom_NodeList_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1713,6 +1783,9 @@ static const zend_function_entry class_Dom_NamedNodeMap_methods[] = {
 	ZEND_RAW_FENTRY("getNamedItemNS", zim_DOMNamedNodeMap_getNamedItemNS, arginfo_class_Dom_NamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("count", zim_DOMNamedNodeMap_count, arginfo_class_Dom_NamedNodeMap_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIterator", zim_DOMNamedNodeMap_getIterator, arginfo_class_Dom_NamedNodeMap_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", zim_DOMNamedNodeMap_offsetGet, arginfo_class_Dom_NamedNodeMap_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetFetch", zim_DOMNamedNodeMap_offsetFetch, arginfo_class_Dom_NamedNodeMap_offsetFetch, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetExists", zim_DOMNamedNodeMap_offsetExists, arginfo_class_Dom_NamedNodeMap_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1722,6 +1795,9 @@ static const zend_function_entry class_Dom_DtdNamedNodeMap_methods[] = {
 	ZEND_RAW_FENTRY("getNamedItemNS", zim_DOMNamedNodeMap_getNamedItemNS, arginfo_class_Dom_DtdNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("count", zim_DOMNamedNodeMap_count, arginfo_class_Dom_DtdNamedNodeMap_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIterator", zim_DOMNamedNodeMap_getIterator, arginfo_class_Dom_DtdNamedNodeMap_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", zim_DOMNamedNodeMap_offsetGet, arginfo_class_Dom_DtdNamedNodeMap_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetFetch", zim_DOMNamedNodeMap_offsetFetch, arginfo_class_Dom_DtdNamedNodeMap_offsetFetch, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetExists", zim_DOMNamedNodeMap_offsetExists, arginfo_class_Dom_DtdNamedNodeMap_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1730,6 +1806,9 @@ static const zend_function_entry class_Dom_HTMLCollection_methods[] = {
 	ZEND_ME(Dom_HTMLCollection, namedItem, arginfo_class_Dom_HTMLCollection_namedItem, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("count", zim_DOMNodeList_count, arginfo_class_Dom_HTMLCollection_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getIterator", zim_DOMNodeList_getIterator, arginfo_class_Dom_HTMLCollection_getIterator, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", zim_DOMNodeList_offsetGet, arginfo_class_Dom_HTMLCollection_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetFetch", zim_DOMNodeList_offsetFetch, arginfo_class_Dom_HTMLCollection_offsetFetch, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetExists", zim_DOMNodeList_offsetExists, arginfo_class_Dom_HTMLCollection_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1922,6 +2001,9 @@ static const zend_function_entry class_Dom_TokenList_methods[] = {
 	ZEND_ME(Dom_TokenList, supports, arginfo_class_Dom_TokenList_supports, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_TokenList, count, arginfo_class_Dom_TokenList_count, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_TokenList, getIterator, arginfo_class_Dom_TokenList_getIterator, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, offsetGet, arginfo_class_Dom_TokenList_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, offsetFetch, arginfo_class_Dom_TokenList_offsetFetch, ZEND_ACC_PUBLIC)
+	ZEND_ME(Dom_TokenList, offsetExists, arginfo_class_Dom_TokenList_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -2373,13 +2455,13 @@ static zend_class_entry *register_class_DOMDocumentFragment(zend_class_entry *cl
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_DOMNodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DOMNodeList", class_DOMNodeList_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -2719,13 +2801,13 @@ static zend_class_entry *register_class_DOMText(zend_class_entry *class_entry_DO
 	return class_entry;
 }
 
-static zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_DOMNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DOMNamedNodeMap", class_DOMNamedNodeMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -3032,13 +3114,13 @@ static zend_class_entry *register_class_Dom_Node(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Dom_NodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_Dom_NodeList(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Dom", "NodeList", class_Dom_NodeList_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -3049,13 +3131,13 @@ static zend_class_entry *register_class_Dom_NodeList(zend_class_entry *class_ent
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Dom_NamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_Dom_NamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Dom", "NamedNodeMap", class_Dom_NamedNodeMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -3066,13 +3148,13 @@ static zend_class_entry *register_class_Dom_NamedNodeMap(zend_class_entry *class
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Dom_DtdNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_Dom_DtdNamedNodeMap(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Dom", "DtdNamedNodeMap", class_Dom_DtdNamedNodeMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -3083,13 +3165,13 @@ static zend_class_entry *register_class_Dom_DtdNamedNodeMap(zend_class_entry *cl
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Dom_HTMLCollection(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_Dom_HTMLCollection(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Dom", "HTMLCollection", class_Dom_HTMLCollection_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);
@@ -3675,14 +3757,14 @@ static zend_class_entry *register_class_Dom_XMLDocument(zend_class_entry *class_
 	return class_entry;
 }
 
-static zend_class_entry *register_class_Dom_TokenList(zend_class_entry *class_entry_Dom_IteratorAggregate, zend_class_entry *class_entry_Dom_Countable)
+static zend_class_entry *register_class_Dom_TokenList(zend_class_entry *class_entry_Dom_IteratorAggregate, zend_class_entry *class_entry_Dom_Countable, zend_class_entry *class_entry_Dom_DimensionFetchable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Dom", "TokenList", class_Dom_TokenList_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
-	zend_class_implements(class_entry, 2, class_entry_Dom_IteratorAggregate, class_entry_Dom_Countable);
+	zend_class_implements(class_entry, 3, class_entry_Dom_IteratorAggregate, class_entry_Dom_Countable, class_entry_Dom_DimensionFetchable);
 
 	zval property_length_default_value;
 	ZVAL_UNDEF(&property_length_default_value);

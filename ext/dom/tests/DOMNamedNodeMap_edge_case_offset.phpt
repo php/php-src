@@ -26,4 +26,4 @@ try {
 --EXPECT--
 int(1)
 must be between 0 and 2147483647
-Cannot access DOMNamedNodeMap without offset
+Cannot fetch append object of type DOMNamedNodeMap

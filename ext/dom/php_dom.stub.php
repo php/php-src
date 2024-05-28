@@ -501,7 +501,7 @@ namespace
         public function replaceChildren(...$nodes): void {}
     }
 
-    class DOMNodeList implements IteratorAggregate, Countable
+    class DOMNodeList implements IteratorAggregate, Countable, DimensionFetchable
     {
         /** @readonly */
         public int $length;
@@ -513,6 +513,13 @@ namespace
 
         /** @return DOMElement|DOMNode|DOMNameSpaceNode|null */
         public function item(int $index) {}
+
+        /** @return DOMElement|DOMNode|DOMNameSpaceNode */
+        public function offsetGet(mixed $offset): mixed {}
+
+        /** @return DOMElement|DOMNode|DOMNameSpaceNode */
+        public function &offsetFetch(mixed $offset): mixed {}
+        public function offsetExists(mixed $offset): bool {}
     }
 
     class DOMCharacterData extends DOMNode implements DOMChildNode
@@ -911,7 +918,7 @@ namespace
         public function splitText(int $offset) {}
     }
 
-    class DOMNamedNodeMap implements IteratorAggregate, Countable
+    class DOMNamedNodeMap implements IteratorAggregate, Countable, DimensionFetchable
     {
         /** @readonly */
         public int $length;
@@ -929,6 +936,13 @@ namespace
         public function count(): int {}
 
         public function getIterator(): Iterator {}
+
+        /** @return DOMAttr */
+        public function offsetGet(mixed $offset): mixed {}
+
+        /** @return DOMAttr */
+        public function &offsetFetch(mixed $offset): mixed {}
+        public function offsetExists(mixed $offset): bool {}
     }
 
     class DOMEntity extends DOMNode
@@ -1213,7 +1227,7 @@ namespace Dom
         public function __wakeup(): void {}
     }
 
-    class NodeList implements \IteratorAggregate, \Countable
+    class NodeList implements \IteratorAggregate, \Countable, \DimensionFetchable
     {
         /** @readonly */
         public int $length;
@@ -1226,9 +1240,17 @@ namespace Dom
 
         /** @implementation-alias DOMNodeList::item */
         public function item(int $index): ?Node {}
+
+        /** @implementation-alias DOMNodeList::offsetGet */
+        public function offsetGet(mixed $offset): ?Attr {}
+
+        /** @implementation-alias DOMNodeList::offsetFetch */
+        public function &offsetFetch(mixed $offset): ?Attr {}
+        /** @implementation-alias DOMNodeList::offsetExists */
+        public function offsetExists(mixed $offset): bool {}
     }
 
-    class NamedNodeMap implements \IteratorAggregate, \Countable
+    class NamedNodeMap implements \IteratorAggregate, \Countable, \DimensionFetchable
     {
         /** @readonly */
         public int $length;
@@ -1245,9 +1267,17 @@ namespace Dom
 
         /** @implementation-alias DOMNamedNodeMap::getIterator */
         public function getIterator(): \Iterator {}
+
+        /** @implementation-alias DOMNamedNodeMap::offsetGet */
+        public function offsetGet(mixed $offset): ?Attr {}
+
+        /** @implementation-alias DOMNamedNodeMap::offsetFetch */
+        public function &offsetFetch(mixed $offset): ?Attr {}
+        /** @implementation-alias DOMNamedNodeMap::offsetExists */
+        public function offsetExists(mixed $offset): bool {}
     }
 
-    class DtdNamedNodeMap implements \IteratorAggregate, \Countable
+    class DtdNamedNodeMap implements \IteratorAggregate, \Countable, \DimensionFetchable
     {
         /** @readonly */
         public int $length;
@@ -1264,9 +1294,17 @@ namespace Dom
 
         /** @implementation-alias DOMNamedNodeMap::getIterator */
         public function getIterator(): \Iterator {}
+
+        /** @implementation-alias DOMNamedNodeMap::offsetGet */
+        public function offsetGet(mixed $offset): ?Attr {}
+
+        /** @implementation-alias DOMNamedNodeMap::offsetFetch */
+        public function &offsetFetch(mixed $offset): ?Attr {}
+        /** @implementation-alias DOMNamedNodeMap::offsetExists */
+        public function offsetExists(mixed $offset): bool {}
     }
 
-    class HTMLCollection implements \IteratorAggregate, \Countable
+    class HTMLCollection implements \IteratorAggregate, \Countable, \DimensionFetchable
     {
         /** @readonly */
         public int $length;
@@ -1281,6 +1319,14 @@ namespace Dom
 
         /** @implementation-alias DOMNodeList::getIterator */
         public function getIterator(): \Iterator {}
+
+        /** @implementation-alias DOMNodeList::offsetGet */
+        public function offsetGet(mixed $offset): ?Attr {}
+
+        /** @implementation-alias DOMNodeList::offsetFetch */
+        public function &offsetFetch(mixed $offset): ?Attr {}
+        /** @implementation-alias DOMNodeList::offsetExists */
+        public function offsetExists(mixed $offset): bool {}
     }
 
     enum AdjacentPosition : string
@@ -1684,7 +1730,7 @@ namespace Dom
      * @not-serializable
      * @strict-properties
      */
-    final class TokenList implements IteratorAggregate, Countable
+    final class TokenList implements IteratorAggregate, Countable, DimensionFetchable
     {
         /** @implementation-alias Dom\Node::__construct */
         private function __construct() {}
@@ -1703,6 +1749,13 @@ namespace Dom
         public function count(): int {}
 
         public function getIterator(): \Iterator {}
+
+        /** @return string */
+        public function offsetGet(mixed $offset): mixed {}
+
+        /** @return string */
+        public function &offsetFetch(mixed $offset): mixed {}
+        public function offsetExists(mixed $offset): bool {}
     }
 
     /**

@@ -27,6 +27,6 @@ try {
 
 ?>
 --EXPECT--
-Cannot append to Dom\HTMLCollection
+Cannot fetch append object of type Dom\HTMLCollection
 Cannot access offset of type bool on Dom\HTMLCollection
 Cannot access offset of type bool in isset or empty

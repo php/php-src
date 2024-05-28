@@ -241,6 +241,90 @@ PHP_METHOD(DOMNamedNodeMap, getNamedItemNS)
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
 
+PHP_METHOD(DOMNamedNodeMap, offsetGet)
+{
+	zend_string *key = NULL;
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(key, index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	dom_nnodemap_object *object_map = intern->ptr;
+
+	if (key) {
+		// TODO Handle numeric string?
+		php_dom_named_node_map_get_named_item_into_zval(object_map, key, return_value);
+	} else  {
+		if (index < 0 || ZEND_LONG_INT_OVFL(index)) {
+			zend_argument_value_error(1, "must be between 0 and %d", INT_MAX);
+			RETURN_THROWS();
+		}
+
+		php_dom_named_node_map_get_item_into_zval(object_map, index, return_value);
+	}
+}
+
+PHP_METHOD(DOMNamedNodeMap, offsetFetch)
+{
+	zend_string *key = NULL;
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(key, index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	dom_nnodemap_object *object_map = intern->ptr;
+
+	if (key) {
+		// TODO Handle numeric string?
+		php_dom_named_node_map_get_named_item_into_zval(object_map, key, return_value);
+		if (Z_TYPE_P(return_value) == IS_NULL) {
+			ZVAL_MAKE_REF(return_value);
+		}
+	} else  {
+		if (index < 0 || ZEND_LONG_INT_OVFL(index)) {
+			zend_argument_value_error(1, "must be between 0 and %d", INT_MAX);
+			RETURN_THROWS();
+		}
+
+		php_dom_named_node_map_get_item_into_zval(object_map, index, return_value);
+		if (Z_TYPE_P(return_value) == IS_NULL) {
+			ZVAL_MAKE_REF(return_value);
+		}
+	}
+}
+
+
+PHP_METHOD(DOMNamedNodeMap, offsetExists)
+{
+	zend_string *key = NULL;
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_LONG(key, index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+
+	if (key) {
+		dom_nnodemap_object *object_map = intern->ptr;
+		// TODO Handle numeric string?
+		RETURN_BOOL(php_dom_named_node_map_get_named_item(object_map, key, false) != NULL);
+	} else  {
+		// TODO Still check for valid offset greater than or equal to 0?
+		if (index < 0) {
+			// TODO Check standard wording
+			zend_argument_value_error(1, "must be greater or equal than 0");
+			RETURN_THROWS();
+		}
+
+		RETURN_BOOL(index < php_dom_get_namednodemap_length(intern) );
+	}
+}
+
 /* {{{ */
 PHP_METHOD(DOMNamedNodeMap, count)
 {
