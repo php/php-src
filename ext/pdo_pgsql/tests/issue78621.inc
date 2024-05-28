@@ -19,11 +19,15 @@ $db->exec("insert into t values ('ah')");
 while (count($rounds)) {
     try {
         attach($db, array_shift($rounds));
-    } catch (TypeError $err) {
-        echo "Caught TypeError: ".$err->getMessage()."\n";
+    } catch (Throwable $err) {
+        echo "Caught ".get_class($err).": ".$err->getMessage()."\n";
     }
-    $db->exec("delete from t");
-    $db->exec("insert into t values ('ah')");
+    try {
+        $db->exec("delete from t");
+        $db->exec("insert into t values ('ah')");
+    } catch (Throwable $err) {
+        echo "Caught ".get_class($err)." ".$err->getMessage()."\n";
+    }
 }
 $db->setNoticeCallback(null);
 $db->exec("delete from t");

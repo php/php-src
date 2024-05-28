@@ -16,26 +16,24 @@ class Logger
     public function __call(string $method, array $args)
     {
         $realMethod = strtr($method, [ 'whatever' => 'disp' ]);
+        if (!method_exists($this, $realMethod)) {
+            throw new BadMethodCallException('Call to undefined method '.__CLASS__.'::'.$realMethod);
+        }
         echo "$method trampoline for $realMethod\n";
         return call_user_func_array([ $this, $realMethod ], $args);
     }
 }
 $logger = new Logger();
-function attach($db, $prefix = '')
+function attach($db, $method)
 {
     global $logger;
-    global $flavor;
-    switch($flavor)
-    {
-        case 0: $db->setNoticeCallback([ $logger, 'disp'.$prefix ]); break;
-        case 1: $db->setNoticeCallback([ $logger, 'whatever'.$prefix ]); break;
-    }
+    $db->setNoticeCallback([ $logger, $method ]);
 }
 echo "Testing with method explicitely plugged:\n";
-$flavor = 0;
+$rounds = [ 'disp', 'dispRe' ];
 require dirname(__FILE__) . '/issue78621.inc';
 echo "Testing with a bit of magic:\n";
-++$flavor;
+$rounds = [ 'whatever', 'whateverRe', 'unexisting' ];
 require dirname(__FILE__) . '/issue78621.inc';
 ?>
 --EXPECT--
@@ -55,6 +53,7 @@ whatever trampoline for disp
 NOTICE:  I tampered your data, did you know?
 whateverRe trampoline for dispRe
 ReNOTICE:  I tampered your data, did you know?
+Caught BadMethodCallException Call to undefined method Logger::unexisting
 array(1) {
   [0]=>
   array(1) {
