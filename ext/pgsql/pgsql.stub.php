@@ -951,7 +951,7 @@ namespace {
     function pg_change_password(PgSql\Connection $connection, string $user, #[\SensitiveParameter] string $password): bool {}
 
     function pg_put_copy_data(PgSql\Connection $connection, string $cmd): int {}
-    function pg_put_copy_end(PgSql\Connection $connection, string $error = null): int {}
+    function pg_put_copy_end(PgSql\Connection $connection, ?string $error = null): int {}
 }
 
 namespace PgSql {
