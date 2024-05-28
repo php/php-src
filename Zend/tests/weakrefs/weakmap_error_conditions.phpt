@@ -78,8 +78,8 @@ WeakMap key must be an object
 WeakMap key must be an object
 WeakMap key must be an object
 WeakMap key must be an object
-Cannot append to WeakMap
-Cannot append to WeakMap
+Cannot append to object of type WeakMap
+Cannot fetch append object of type WeakMap
 Object stdClass#2 not contained in WeakMap
 
 Warning: Undefined property: WeakMap::$prop in %s on line %d

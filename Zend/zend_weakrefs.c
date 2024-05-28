@@ -342,14 +342,8 @@ static void zend_weakmap_free_obj(zend_object *object)
 	zend_object_std_dtor(&wm->std);
 }
 
-static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+static zval *zend_weakmap_read_dimension(zend_object *object, /* const */ zval *offset, zval *rv)
 {
-	if (offset == NULL) {
-		zend_throw_error(NULL, "Cannot append to WeakMap");
-		return NULL;
-	}
-
-	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return NULL;
@@ -359,28 +353,38 @@ static zval *zend_weakmap_read_dimension(zend_object *object, zval *offset, int 
 	zend_object *obj_addr = Z_OBJ_P(offset);
 	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(obj_addr));
 	if (zv == NULL) {
-		if (type != BP_VAR_IS) {
-			zend_throw_error(NULL,
-				"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
-			return NULL;
-		}
+		zend_throw_error(NULL,
+			"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
 		return NULL;
 	}
 
-	if (type == BP_VAR_W || type == BP_VAR_RW) {
-		ZVAL_MAKE_REF(zv);
-	}
-	return zv;
+	ZVAL_COPY(rv, zv);
+	return rv;
 }
 
-static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval *value)
+static zval *zend_weakmap_fetch_dimension(zend_object *object, /* const */ zval *offset, zval *rv)
 {
-	if (offset == NULL) {
-		zend_throw_error(NULL, "Cannot append to WeakMap");
-		return;
+	if (Z_TYPE_P(offset) != IS_OBJECT) {
+		zend_type_error("WeakMap key must be an object");
+		return NULL;
 	}
 
-	ZVAL_DEREF(offset);
+	zend_weakmap *wm = zend_weakmap_from(object);
+	zend_object *obj_addr = Z_OBJ_P(offset);
+	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(obj_addr));
+	if (zv == NULL) {
+		zend_throw_error(NULL,
+			"Object %s#%d not contained in WeakMap", ZSTR_VAL(obj_addr->ce->name), obj_addr->handle);
+		return NULL;
+	}
+
+	ZVAL_MAKE_REF(zv);
+	ZVAL_COPY(rv, zv);
+	return rv;
+}
+
+static void zend_weakmap_write_dimension(zend_object *object, /* const */ zval *offset, zval *value)
+{
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return;
@@ -406,11 +410,8 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	zend_hash_index_add_new(&wm->ht, obj_key, value);
 }
 
-// todo: make zend_weakmap_has_dimension return bool as well
-/* int return and check_empty due to Object Handler API */
-static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
+static bool zend_weakmap_has_dimension(zend_object *object, /* const */ zval *offset)
 {
-	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return 0;
@@ -419,18 +420,14 @@ static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int che
 	zend_weakmap *wm = zend_weakmap_from(object);
 	zval *zv = zend_hash_index_find(&wm->ht, zend_object_to_weakref_key(Z_OBJ_P(offset)));
 	if (!zv) {
-		return 0;
+		return false;
 	}
 
-	if (check_empty) {
-		return i_zend_is_true(zv);
-	}
-	return Z_TYPE_P(zv) != IS_NULL;
+	return true;
 }
 
-static void zend_weakmap_unset_dimension(zend_object *object, zval *offset)
+static void zend_weakmap_unset_dimension(zend_object *object, /* const */ zval *offset)
 {
-	ZVAL_DEREF(offset);
 	if (Z_TYPE_P(offset) != IS_OBJECT) {
 		zend_type_error("WeakMap key must be an object");
 		return;
@@ -698,12 +695,24 @@ ZEND_METHOD(WeakMap, offsetGet)
 		RETURN_THROWS();
 	}
 
-	zval *zv = zend_weakmap_read_dimension(Z_OBJ_P(ZEND_THIS), key, BP_VAR_R, NULL);
+	zval *zv = zend_weakmap_read_dimension(Z_OBJ_P(ZEND_THIS), key, return_value);
 	if (!zv) {
 		RETURN_THROWS();
 	}
+}
 
-	ZVAL_COPY(return_value, zv);
+ZEND_METHOD(WeakMap, offsetFetch)
+{
+	zval *key;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zval *zv = zend_weakmap_fetch_dimension(Z_OBJ_P(ZEND_THIS), key, return_value);
+	if (!zv) {
+		RETURN_THROWS();
+	}
 }
 
 ZEND_METHOD(WeakMap, offsetSet)
@@ -725,7 +734,7 @@ ZEND_METHOD(WeakMap, offsetExists)
 		RETURN_THROWS();
 	}
 
-	RETURN_BOOL(zend_weakmap_has_dimension(Z_OBJ_P(ZEND_THIS), key, /* check_empty */ 0));
+	RETURN_BOOL(zend_weakmap_has_dimension(Z_OBJ_P(ZEND_THIS), key));
 }
 
 ZEND_METHOD(WeakMap, offsetUnset)
@@ -759,6 +768,14 @@ ZEND_METHOD(WeakMap, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
+static /* const */ zend_class_dimensions_functions zend_weakmap_dimensions_functions = {
+	.read_dimension  = zend_weakmap_read_dimension,
+	.has_dimension   = zend_weakmap_has_dimension,
+	.fetch_dimension = zend_weakmap_fetch_dimension,
+	.write_dimension = zend_weakmap_write_dimension,
+	.unset_dimension = zend_weakmap_unset_dimension
+};
+
 void zend_register_weakref_ce(void) /* {{{ */
 {
 	zend_ce_weakref = register_class_WeakReference();
@@ -773,19 +790,22 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakref_handlers.get_debug_info = zend_weakref_get_debug_info;
 	zend_weakref_handlers.clone_obj = NULL;
 
-	zend_ce_weakmap = register_class_WeakMap(zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
+	zend_ce_weakmap = register_class_WeakMap(
+		zend_ce_countable,
+		zend_ce_aggregate,
+		zend_ce_dimension_fetch,
+		zend_ce_dimension_write,
+		zend_ce_dimension_unset
+	);
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
 	zend_ce_weakmap->default_object_handlers = &zend_weakmap_handlers;
+	zend_ce_weakmap->dimension_handlers = &zend_weakmap_dimensions_functions;
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);
 	zend_weakmap_handlers.free_obj = zend_weakmap_free_obj;
-	zend_weakmap_handlers.read_dimension = zend_weakmap_read_dimension;
-	zend_weakmap_handlers.write_dimension = zend_weakmap_write_dimension;
-	zend_weakmap_handlers.has_dimension = zend_weakmap_has_dimension;
-	zend_weakmap_handlers.unset_dimension = zend_weakmap_unset_dimension;
 	zend_weakmap_handlers.count_elements = zend_weakmap_count_elements;
 	zend_weakmap_handlers.get_properties_for = zend_weakmap_get_properties_for;
 	zend_weakmap_handlers.get_gc = zend_weakmap_get_gc;

@@ -63,6 +63,8 @@ var_dump($map->offsetExists($obj2));
 var_dump($map->count());
 var_dump($map->offsetUnset($obj2));
 var_dump($map->count());
+// TODO
+//var_dump($map->offsetFetch($obj2));
 
 ?>
 --EXPECT--
@@ -150,7 +152,7 @@ object(WeakMap)#1 (2) {
       int(1)
     }
     ["value"]=>
-    array(1) {
+    &array(1) {
       [0]=>
       int(42)
     }
@@ -163,7 +165,7 @@ object(WeakMap)#1 (2) {
       int(2)
     }
     ["value"]=>
-    int(42)
+    &int(42)
   }
 }
 
