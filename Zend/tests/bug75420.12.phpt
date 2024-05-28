@@ -16,6 +16,6 @@ var_dump(empty($obj[$name]));
 var_dump($name);
 ?>
 --EXPECT--
-string(6) "foofoo"
+int(24)
 bool(false)
 int(24)

@@ -21,6 +21,8 @@ Cannot read-write offset of object of type DimensionRead
 isset():
 string(27) "DimensionRead::offsetExists"
 VAR_DUMP_OF_OFFSET
+string(24) "DimensionRead::offsetGet"
+VAR_DUMP_OF_OFFSET
 bool(true)
 empty():
 string(27) "DimensionRead::offsetExists"

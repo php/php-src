@@ -77,10 +77,12 @@ string(2) "ok"
 string(2) "ok"
 string(2) "ok"
 string(2) "ok"
+string(2) "ok"
 NULL
 string(2) "ok"
 string(2) "ok"
 ---
+string(2) "ok"
 string(2) "ok"
 string(2) "ok"
 string(2) "ok"

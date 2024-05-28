@@ -248,6 +248,8 @@ Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 29
 isset():
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 36
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 36
 bool(true)
 empty():
 

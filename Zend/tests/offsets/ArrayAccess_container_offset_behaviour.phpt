@@ -27,6 +27,8 @@ int(25)
 isset():
 string(15) "CLASS_NAME::offsetExists"
 VAR_DUMP_OF_OFFSET
+string(12) "CLASS_NAME::offsetGet"
+VAR_DUMP_OF_OFFSET
 bool(true)
 empty():
 string(15) "CLASS_NAME::offsetExists"

@@ -3264,7 +3264,24 @@ static zend_never_inline bool ZEND_FASTCALL zend_isset_dim_slow(zval *container,
 				ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_IS));
 
 				ZVAL_DEREF(offset);
-				return obj->ce->dimension_handlers->has_dimension(obj, offset);
+				bool exists = obj->ce->dimension_handlers->has_dimension(obj, offset);
+				if (!exists) {
+					return false;
+				}
+
+				zval *retval;
+				zval slot;
+				retval = obj->ce->dimension_handlers->read_dimension(obj, offset, &slot);
+
+				if (UNEXPECTED(!retval)) {
+					ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
+					return true;
+				}
+				ZEND_ASSERT(Z_TYPE_P(retval) != IS_UNDEF);
+				/* Check if value is null, if it is we consider it to not be set */
+				bool result = Z_TYPE_P(retval) != IS_NULL;
+				zval_ptr_dtor(retval);
+				return result;
 			} else {
 				zend_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_IS);
 				return false;

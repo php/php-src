@@ -27,6 +27,8 @@ int(25)
 isset():
 string(32) "DimensionReadWrite::offsetExists"
 VAR_DUMP_OF_OFFSET
+string(29) "DimensionReadWrite::offsetGet"
+VAR_DUMP_OF_OFFSET
 bool(true)
 empty():
 string(32) "DimensionReadWrite::offsetExists"

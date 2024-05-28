@@ -56,6 +56,8 @@ Deprecated: Implicit conversion from float 1.1 to int loses precision in %s on l
 Deprecated: Implicit conversion from float 1.1 to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float 1.1 to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float 1.1 to int loses precision in %s on line %d
 string(1) "b"
 bool(true)
 bool(false)

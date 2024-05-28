@@ -227,7 +227,7 @@ DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: fal
 read-write op
 DimensionHandlersNoArrayAccess, read: true, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 isset op
-DimensionHandlersNoArrayAccess, read: false, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 empty op
 DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 null coalescing op
