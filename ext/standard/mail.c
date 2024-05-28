@@ -247,7 +247,6 @@ PHP_FUNCTION(mail)
 	HashTable *headers_ht = NULL;
 	size_t to_len, message_len;
 	size_t subject_len, i;
-	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
@@ -312,8 +311,9 @@ PHP_FUNCTION(mail)
 		subject_r = subject;
 	}
 
+	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
 	if (force_extra_parameters) {
-		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
+		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(force_extra_parameters));
 	} else if (extra_cmd) {
 		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
 	}
