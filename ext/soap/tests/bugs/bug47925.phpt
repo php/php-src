@@ -32,8 +32,8 @@ function test($compressed_response, $compression_name) {
     http_server_kill($pid);
 }
 
-test(gzcompress($plain_response), "gzip");
-test(gzdeflate($plain_response), "deflate");
+test(gzencode($plain_response), "gzip");
+test(gzcompress($plain_response), "deflate");
 ?>
 --EXPECT--
 int(7)
