@@ -1302,7 +1302,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 		}
 
 		switch ((*p)->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 		case AF_INET6:
 			sa = pemalloc(sizeof(struct sockaddr_in6), 1);
 			*(struct sockaddr_in6 *)sa = *(struct sockaddr_in6 *)*p;
@@ -1348,7 +1348,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 				goto out;
 			}
 			switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 			case AF_INET6:
 				*port = ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
 				break;
