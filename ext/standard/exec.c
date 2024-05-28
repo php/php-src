@@ -279,15 +279,19 @@ PHP_FUNCTION(passthru)
 
    *NOT* safe for binary strings
 */
-PHPAPI zend_string *php_escape_shell_cmd(const char *str)
+PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 {
 	size_t x, y;
-	size_t l = strlen(str);
-	uint64_t estimate = (2 * (uint64_t)l) + 1;
 	zend_string *cmd;
 #ifndef PHP_WIN32
 	char *p = NULL;
 #endif
+
+	ZEND_ASSERT(ZSTR_LEN(unescaped_cmd) == strlen(ZSTR_VAL(unescaped_cmd)) && "Must be a binary safe string");
+	size_t l = ZSTR_LEN(unescaped_cmd);
+	const char *str = ZSTR_VAL(unescaped_cmd);
+
+	uint64_t estimate = (2 * (uint64_t)l) + 1;
 
 	/* max command line length - two single quotes - \0 byte length */
 	if (l > cmd_max_len - 2 - 1) {
@@ -471,18 +475,13 @@ PHPAPI zend_string *php_escape_shell_arg(const char *str)
 /* {{{ Escape shell metacharacters */
 PHP_FUNCTION(escapeshellcmd)
 {
-	char *command;
-	size_t command_len;
+	zend_string *command;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_PATH_STR(command)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (command_len) {
-		if (command_len != strlen(command)) {
-			zend_argument_value_error(1, "must not contain any null bytes");
-			RETURN_THROWS();
-		}
+	if (ZSTR_LEN(command)) {
 		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
 		RETVAL_EMPTY_STRING();
