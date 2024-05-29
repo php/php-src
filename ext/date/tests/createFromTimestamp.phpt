@@ -15,6 +15,11 @@ $timestamps = array(
     -1696883232.013981,
     0.123456,
     -0.123456,
+    1.000_001,
+    -1.000_001,
+    1.000_000_1,
+    -1.000_000_1,
+    1599828571.235_612,
     0,
     0.0,
     -0.0,
@@ -148,6 +153,86 @@ DateTime::createFromTimestamp(-0.123456): object(DateTime)#%d (3) {
 DateTimeImmutable::createFromTimestamp(-0.123456): object(DateTimeImmutable)#%d (3) {
   ["date"]=>
   string(26) "1969-12-31 23:59:59.876544"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(1.000001): object(DateTime)#1 (3) {
+  ["date"]=>
+  string(26) "1970-01-01 00:00:01.000001"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(1.000001): object(DateTimeImmutable)#1 (3) {
+  ["date"]=>
+  string(26) "1970-01-01 00:00:01.000001"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(-1.000001): object(DateTime)#1 (3) {
+  ["date"]=>
+  string(26) "1969-12-31 23:59:58.999999"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(-1.000001): object(DateTimeImmutable)#1 (3) {
+  ["date"]=>
+  string(26) "1969-12-31 23:59:58.999999"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(1.0000001): object(DateTime)#1 (3) {
+  ["date"]=>
+  string(26) "1970-01-01 00:00:01.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(1.0000001): object(DateTimeImmutable)#1 (3) {
+  ["date"]=>
+  string(26) "1970-01-01 00:00:01.000000"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(-1.0000001): object(DateTime)#1 (3) {
+  ["date"]=>
+  string(26) "1969-12-31 23:59:58.999999"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(-1.0000001): object(DateTimeImmutable)#1 (3) {
+  ["date"]=>
+  string(26) "1969-12-31 23:59:58.999999"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(1599828571.235612): object(DateTime)#1 (3) {
+  ["date"]=>
+  string(26) "2020-09-11 12:49:31.235612"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(1599828571.235612): object(DateTimeImmutable)#1 (3) {
+  ["date"]=>
+  string(26) "2020-09-11 12:49:31.235612"
   ["timezone_type"]=>
   int(1)
   ["timezone"]=>
