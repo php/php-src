@@ -4435,7 +4435,6 @@ PHP_FUNCTION(mb_send_mail)
 	zend_string *str_headers = NULL;
 	size_t i;
 	char *to_r = NULL;
-	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	bool suppress_content_type = false;
 	bool suppress_content_transfer_encoding = false;
 
@@ -4653,10 +4652,11 @@ PHP_FUNCTION(mb_send_mail)
 
 	str_headers = smart_str_extract(&str);
 
+	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
 	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));

@@ -246,6 +246,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  g. ext/standard
    - Added the php_base64_encode_ex() API with flag parameters, value can be
      PHP_BASE64_NO_PADDING to encode without the padding character '='.
+   - The php_escape_shell_cmd() now takes a zend_string* instead of a char*
+     Moreover, providing it with a binary safe string is the responsibility of
+     the caller now.
+   - The php_escape_shell_arg() now takes a zend_string* instead of a char*
+     Moreover, providing it with a binary safe string is the responsibility of
+     the caller now.
 
 ========================
 4. OpCode changes

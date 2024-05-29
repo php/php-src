@@ -652,6 +652,11 @@ static PHP_INI_MH(OnUpdateMailLog)
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnChangeMailForceExtra)
 {
+	/* Check that INI setting does not have any nul bytes */
+	if (new_value && ZSTR_LEN(new_value) != strlen(ZSTR_VAL(new_value))) {
+		/* TODO Emit warning? */
+		return FAILURE;
+	}
 	/* Don't allow changing it in htaccess */
 	if (stage == PHP_INI_STAGE_HTACCESS) {
 			return FAILURE;
