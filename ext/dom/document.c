@@ -785,8 +785,13 @@ PHP_METHOD(DOMDocument, importNode)
 			if (nsptr == NULL || nsptr->prefix == NULL) {
 				int errorcode;
 				nsptr = dom_get_ns(root, (char *) nodep->ns->href, &errorcode, (char *) nodep->ns->prefix);
+
+				/* If there is no root, the namespace cannot be attached to it, so we have to attach it to the old list. */
+				if (nsptr != NULL && root == NULL) {
+					dom_set_old_ns(nodep->doc, nsptr);
+				}
 			}
-			xmlSetNs(retnodep, nsptr);
+			retnodep->ns = nsptr;
 		}
 	}
 
