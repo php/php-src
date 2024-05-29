@@ -145,6 +145,10 @@ PHP 8.4 UPGRADE NOTES
   . SoapClient::$typemap is now an array rather than a resource.
     Checks using is_resource() (i.e. is_resource($client->typemap)) should be
     replaced with checks for null (i.e. $client->typemap !== null).
+  . The SOAP extension gained an optional dependency on the session extension.
+    If you build PHP without the session extension and with --enable-rtld-now,
+    you will experience errors on startup if you also use the SOAP extension.
+    To solve this, either don't use rtld-now or load the session extension.
 
 - SPL:
   . Out of bounds accesses in SplFixedArray now throw an exception of type
@@ -300,6 +304,7 @@ PHP 8.4 UPGRADE NOTES
   . Instances of DateTimeInterface that are passed to xsd:datetime or similar
     elements are now serialized as such instead of being serialized as an
     empty string.
+  . Session persistence now works with a shared session module.
 
 - XSL:
   . It is now possible to use parameters that contain both single and double

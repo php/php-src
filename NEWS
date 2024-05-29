@@ -245,6 +245,8 @@ PHP                                                                        NEWS
   . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
     wsdl operation !has output). (nielsdos)
   . Fixed bug #44383 (PHP DateTime not converted to xsd:datetime). (nielsdos)
+  . Fixed bug GH-11941 (soap with session persistence will silently fail when
+    "session" built as a shared object). (nielsdos)
 
 - Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

@@ -20,13 +20,18 @@
 #include "config.h"
 #endif
 #include "php_soap.h"
-#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 #include "ext/session/php_session.h"
-#endif
 #include "soap_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "ext/standard/php_incomplete_class.h"
+
+/* We only have session support if PHP was configured with session support
+ * or if the session module could be loaded dynamically, which will only
+ * work if soap is loaded dynamically as well. */
+#if defined(HAVE_PHP_SESSION) || defined(COMPILE_DL_SOAP)
+# define SOAP_HAS_SESSION_SUPPORT
+#endif
 
 typedef struct _soapHeader {
 	sdlFunctionPtr                    function;
@@ -298,6 +303,7 @@ PHP_MINFO_FUNCTION(soap);
 static const zend_module_dep soap_deps[] = {
 	ZEND_MOD_REQUIRED("date")
 	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_OPTIONAL("session")
 	ZEND_MOD_END
 };
 
@@ -995,6 +1001,12 @@ PHP_METHOD(SoapServer, setPersistence)
 	if (service->type == SOAP_CLASS) {
 		if (value == SOAP_PERSISTENCE_SESSION ||
 			value == SOAP_PERSISTENCE_REQUEST) {
+			if (value == SOAP_PERSISTENCE_SESSION && !zend_hash_str_exists(&module_registry, "session", sizeof("session")-1)) {
+				SOAP_SERVER_END_CODE();
+				zend_throw_error(NULL, "SoapServer::setPersistence(): Session persistence cannot be enabled because the session module is not enabled");
+				RETURN_THROWS();
+			}
+
 			service->soap_class.persistence = value;
 		} else {
 			zend_argument_value_error(
@@ -1406,22 +1418,18 @@ PHP_METHOD(SoapServer, handle)
 		soap_obj = &service->soap_object;
 		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else if (service->type == SOAP_CLASS) {
-#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
-		/* If persistent then set soap_obj from from the previous created session (if available) */
+		/* If persistent then set soap_obj from the previous created session (if available) */
+#ifdef SOAP_HAS_SESSION_SUPPORT
 		if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-			zval *session_vars, *tmp_soap_p;
-
-			if (PS(session_status) != php_session_active &&
-			    PS(session_status) != php_session_disabled) {
+			php_session_status session_status = php_get_session_status();
+			if (session_status != php_session_active &&
+				session_status != php_session_disabled) {
 				php_session_start();
 			}
 
 			/* Find the soap object and assign */
-			session_vars = &PS(http_session_vars);
-			ZVAL_DEREF(session_vars);
-			if (Z_TYPE_P(session_vars) == IS_ARRAY &&
-			    (tmp_soap_p = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
-			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT) {
+			zval *tmp_soap_p = php_get_session_var_str("_bogus_session_name", sizeof("_bogus_session_name")-1);
+			if (tmp_soap_p != NULL && Z_TYPE_P(tmp_soap_p) == IS_OBJECT) {
 				if (EXPECTED(Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce)) {
 					soap_obj = tmp_soap_p;
 				} else if (Z_OBJCE_P(tmp_soap_p) == php_ce_incomplete_class) {
@@ -1431,9 +1439,9 @@ PHP_METHOD(SoapServer, handle)
 			}
 		}
 #endif
+
 		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
-
 			object_init_ex(&tmp_soap, service->soap_class.ce);
 
 			/* Call constructor */
@@ -1448,25 +1456,23 @@ PHP_METHOD(SoapServer, handle)
 					goto fail;
 				}
 			}
-#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
-			/* If session then update session hash with new object */
-			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-				zval *session_vars = &PS(http_session_vars), *tmp_soap_p;
 
-				ZVAL_DEREF(session_vars);
-				if (Z_TYPE_P(session_vars) == IS_ARRAY &&
-				    (tmp_soap_p = zend_hash_str_update(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
+			/* If session then update session hash with new object */
+#ifdef SOAP_HAS_SESSION_SUPPORT
+			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
+				zend_string *session_var_name = ZSTR_INIT_LITERAL("_bogus_session_name", false);
+				zval *tmp_soap_p = php_set_session_var(session_var_name, &tmp_soap, NULL);
+				if (tmp_soap_p != NULL) {
 					soap_obj = tmp_soap_p;
 				} else {
 					soap_obj = &tmp_soap;
 				}
-			} else {
+				zend_string_release_ex(session_var_name, false);
+			} else
+#endif
+			{
 				soap_obj = &tmp_soap;
 			}
-#else
-			soap_obj = &tmp_soap;
-#endif
-
 		}
 		function_table = &((Z_OBJCE_P(soap_obj))->function_table);
 	} else {
@@ -1534,15 +1540,10 @@ PHP_METHOD(SoapServer, handle)
 		if (service->type == SOAP_CLASS || service->type == SOAP_OBJECT) {
 			call_status = call_user_function(NULL, soap_obj, &function_name, &retval, num_params, params);
 			if (service->type == SOAP_CLASS) {
-#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 				if (service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
 					zval_ptr_dtor(soap_obj);
 					soap_obj = NULL;
 				}
-#else
-				zval_ptr_dtor(soap_obj);
-				soap_obj = NULL;
-#endif
 			}
 		} else {
 			call_status = call_user_function(EG(function_table), NULL, &function_name, &retval, num_params, params);
@@ -1557,11 +1558,7 @@ PHP_METHOD(SoapServer, handle)
 			php_output_discard();
 			_soap_server_exception(service, function, ZEND_THIS);
 			if (service->type == SOAP_CLASS) {
-#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 				if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-#else
-				if (soap_obj) {
-#endif
 					zval_ptr_dtor(soap_obj);
 				}
 			}
@@ -1597,11 +1594,7 @@ PHP_METHOD(SoapServer, handle)
 		php_output_discard();
 		_soap_server_exception(service, function, ZEND_THIS);
 		if (service->type == SOAP_CLASS) {
-#if defined(HAVE_PHP_SESSION) && !defined(COMPILE_DL_SESSION)
 			if (soap_obj && service->soap_class.persistence != SOAP_PERSISTENCE_SESSION) {
-#else
-			if (soap_obj) {
-#endif
 				zval_ptr_dtor(soap_obj);
 			}
 		}
