@@ -197,6 +197,7 @@ PHP                                                                        NEWS
   . Added pg_change_password to alter an user's password. (David Carlier)
   . Added pg_put_copy_data/pg_put_copy_end to send COPY commands and signal
     the end of the COPY. (David Carlier)
+  . Added pg_socket_poll to poll on the connection. (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
