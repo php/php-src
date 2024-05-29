@@ -2403,7 +2403,6 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 }
 /* }}} */
 
-/* {{{ */
 ZEND_METHOD(ReflectionGenerator, isClosed)
 {
 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
@@ -2415,7 +2414,6 @@ ZEND_METHOD(ReflectionGenerator, isClosed)
 
 	RETURN_BOOL(ex == NULL);
 }
-/* }}} */
 
 /* {{{ Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(ReflectionParameter, __construct)
