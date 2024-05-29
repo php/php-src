@@ -215,6 +215,7 @@ PHP                                                                        NEWS
     (nielsdos)
   . Make ReflectionGenerator::getFunction() legal after generator termination.
     (timwolla)
+  . Added ReflectionGenerator::isClosed(). (timwolla)
 
 - SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called

@@ -19,4 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-Cannot fetch information from a terminated Generator
+Cannot fetch information from a closed Generator

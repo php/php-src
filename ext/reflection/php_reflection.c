@@ -2271,7 +2271,7 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
-		_DO_THROW("Cannot fetch information from a terminated Generator"); \
+		_DO_THROW("Cannot fetch information from a closed Generator"); \
 		RETURN_THROWS(); \
 	}
 
@@ -2402,6 +2402,18 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 	RETURN_OBJ_COPY(&current->std);
 }
 /* }}} */
+
+ZEND_METHOD(ReflectionGenerator, isClosed)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_execute_data *ex = generator->execute_data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(ex == NULL);
+}
 
 /* {{{ Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(ReflectionParameter, __construct)
