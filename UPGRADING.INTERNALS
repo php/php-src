@@ -253,6 +253,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      Moreover, providing it with a binary safe string is the responsibility of
      the caller now.
 
+ h. ext/session
+   - Added the php_get_session_status() API to get the session status, which is
+     equivalent to reading PS(session_status) but works with shared objects too.
+   - Added the php_get_session_var_str() API to set a session variable without
+     needing to create a zend_string.
+
 ========================
 4. OpCode changes
 ========================

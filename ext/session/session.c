@@ -225,6 +225,14 @@ PHPAPI zval* php_get_session_var(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+PHPAPI zval* php_get_session_var_str(const char *name, size_t name_len)
+{
+	IF_SESSION_VARS() {
+		return zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, name_len);
+	}
+	return NULL;
+}
+
 static void php_session_track_init(void) /* {{{ */
 {
 	zval session_vars;
@@ -1631,6 +1639,11 @@ PHPAPI zend_result php_session_flush(int write) /* {{{ */
 	return FAILURE;
 }
 /* }}} */
+
+PHPAPI php_session_status php_get_session_status(void)
+{
+	return PS(session_status);
+}
 
 static zend_result php_session_abort(void) /* {{{ */
 {
