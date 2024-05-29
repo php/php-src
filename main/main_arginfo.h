@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7ff3d7dc2636153044513390669cb46e9a5b5a0a */
+ * Stub hash: 793b455a47a0422cee767ef2f6a448a369520542 */
 
 static void register_main_symbols(int module_number)
 {
@@ -19,6 +19,7 @@ static void register_main_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("PHP_EXTENSION_DIR", PHP_EXTENSION_DIR, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PHP_PREFIX", PHP_PREFIX, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("PHP_BINDIR", PHP_BINDIR, CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PHP_SBINDIR", PHP_SBINDIR, CONST_PERSISTENT);
 #if !defined(PHP_WIN32)
 	REGISTER_STRING_CONSTANT("PHP_MANDIR", PHP_MANDIR, CONST_PERSISTENT);
 #endif
