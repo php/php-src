@@ -24,6 +24,8 @@ PHP                                                                        NEWS
   . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
   . Added fiber Sys-V loongarch64 support. (qiangxuhui)
   . Adjusted closure names to include the parent function's name. (timwolla)
+  . Improve randomness of uploaded file names and files created by tempnam().
+    (Arnaud)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)

@@ -29,6 +29,8 @@ PHP 8.4 UPGRADE NOTES
 
 - Core:
   . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
+  . The name of uploaded files and files created by the tempnam() function are
+    now 13 bytes longer. Total length is platform-dependent.
 
 - DOM:
   . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
@@ -237,7 +239,7 @@ PHP 8.4 UPGRADE NOTES
     ed25519, x448 and ed448 fields are supported in openssl_pkey_new and
     openssl_pkey_get_details as well as openssl_sign and openssl_verify were
     extended to support those keys.
-    
+
 
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
