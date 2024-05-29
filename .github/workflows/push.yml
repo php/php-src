@@ -149,6 +149,51 @@ jobs:
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
+  LINUX_X32:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: LINUX_X32_DEBUG_ZTS
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        uses: ./.github/actions/apt-x32
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+      - name: ./configure
+        uses: ./.github/actions/configure-x32
+        with:
+          configurationParameters: >-
+            --enable-debug
+            --enable-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux-x32
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     strategy:
