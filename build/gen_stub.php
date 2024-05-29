@@ -2217,10 +2217,10 @@ class EvaluatedValue
         $isUnknownConstValue = false;
 
         $evaluator = new ConstExprEvaluator(
-            static function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
-                // $expr is a ConstFetch with a name of a C macro here
+            function (Expr $expr) use ($allConstInfos, &$isUnknownConstValue) {
+                // $expr is a ConstFetch with a name of a C macro here. Class constants are not supported yet
                 if (!$expr instanceof Expr\ConstFetch) {
-                    throw new Exception($this->getVariableTypeName() . " " . $this->name->__toString() . " has an unsupported value");
+                    throw new Exception("Cannot evaluate expression");
                 }
 
                 $constName = $expr->name->__toString();
@@ -2379,7 +2379,7 @@ abstract class VariableLike
     abstract protected function getFieldSynopsisName(): string;
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    abstract protected function getFieldSynopsisValueString(array $allConstInfos): ?string;
+    abstract public function getFieldSynopsisValueString(array $allConstInfos): ?string;
 
     abstract public function discardInfoForOldPhpVersions(?int $minimumPhpVersionIdCompatibility): void;
 
@@ -2604,7 +2604,7 @@ class ConstInfo extends VariableLike
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    protected function getFieldSynopsisValueString(array $allConstInfos): ?string
+    public function getFieldSynopsisValueString(array $allConstInfos): ?string
     {
         $value = EvaluatedValue::createFromExpression($this->value, null, $this->cValue, $allConstInfos);
         if ($value->isUnknownConstValue) {
@@ -2939,7 +2939,7 @@ class PropertyInfo extends VariableLike
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
-    protected function getFieldSynopsisValueString(array $allConstInfos): ?string
+    public function getFieldSynopsisValueString(array $allConstInfos): ?string
     {
         return $this->defaultValueString;
     }
@@ -3061,10 +3061,12 @@ class PropertyInfo extends VariableLike
 class EnumCaseInfo {
     public string $name;
     public ?Expr $value;
+    public ?string $valueString;
 
-    public function __construct(string $name, ?Expr $value) {
+    public function __construct(string $name, ?Expr $value, ?string $valueString) {
         $this->name = $name;
         $this->value = $value;
+        $this->valueString = $valueString;
     }
 
     /** @param array<string, ConstInfo> $allConstInfos */
@@ -3081,6 +3083,51 @@ class EnumCaseInfo {
         }
 
         return $code;
+    }
+
+    /** @param array<string, ConstInfo> $allConstInfos */
+    public function getEnumItemElement(DOMDocument $doc, array $allConstInfos): DOMElement
+    {
+        $enumItemElement = $doc->createElement("enumitem");
+
+        $enumItemElement->appendChild(new DOMText("\n     "));
+        $enumIdentifierElement = $doc->createElement("enumidentifier");
+        $enumIdentifierElement->appendChild(new DOMText($this->name));
+        $enumItemElement->appendChild($enumIdentifierElement);
+
+        $valueString = $this->getEnumValueString($allConstInfos);
+        if ($valueString) {
+            $enumValueElement = $doc->createElement("enumvalue");
+            $enumItemElement->appendChild(new DOMText("\n     "));
+            $initializerElement = $doc->createElement("initializer", $valueString);
+            $enumValueElement->appendChild($initializerElement);
+            $enumItemElement->appendChild($enumValueElement);
+        }
+
+        $enumItemElement->appendChild(new DOMText("\n    "));
+
+        return $enumItemElement;
+    }
+
+    /** @param array<string, ConstInfo> $allConstInfos */
+    protected function getEnumValueString(array $allConstInfos): ?string
+    {
+        if ($this->value === null) {
+            return null;
+        };
+
+        $value = EvaluatedValue::createFromExpression($this->value, null, null, $allConstInfos);
+        if ($value->isUnknownConstValue) {
+            return null;
+        }
+
+        if ($value->originatingConsts) {
+            return implode("\n", array_map(function (ConstInfo $const) use ($allConstInfos) {
+                return $const->getFieldSynopsisValueString($allConstInfos);
+            }, $value->originatingConsts));
+        }
+
+        return $this->valueString;
     }
 }
 
@@ -3468,17 +3515,36 @@ class ClassInfo {
      * @param array<string, ConstInfo> $allConstInfos
      */
     public function getClassSynopsisElement(DOMDocument $doc, array $classMap, array $allConstInfos): ?DOMElement {
+        $isEnum = $this->type === "enum";
 
-        $classSynopsis = $doc->createElement("classsynopsis");
-        $classSynopsis->setAttribute("class", $this->type === "interface" ? "interface" : "class");
+        $classSynopsis = $doc->createElement($isEnum ? "enumsynopsis" : "classsynopsis");
+        $synopsisInfoName = $isEnum ? "synopsisinfo" : "classsynopsisinfo";
+
+        if (!$isEnum) {
+            $classSynopsis->setAttribute("class", $this->type);
+        }
 
         $exceptionOverride = $this->type === "class" && $this->isException($classMap) ? "exception" : null;
-        $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, 4);
-        if (!$ooElement) {
-            return null;
-        }
         $classSynopsis->appendChild(new DOMText("\n    "));
-        $classSynopsis->appendChild($ooElement);
+
+        $ooElement = self::createOoElement($doc, $this, $exceptionOverride, true, null, 4);
+        if ($ooElement) {
+            $classSynopsis->appendChild($ooElement);
+        }
+
+        if ($isEnum) {
+            $enumNameElement = $doc->createElement("enumname");
+            $enumNameElement->appendChild(new DOMText($this->name->toString()));
+            $classSynopsis->appendChild($enumNameElement);
+
+            if ($this->enumBackingType) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $enumNameElement = $doc->createElement("modifier");
+                $enumNameElement->setAttribute("role", "enum_backing_type");
+                $enumNameElement->appendChild(new DOMText($this->enumBackingType->name));
+                $classSynopsis->appendChild($enumNameElement);
+            }
+        }
 
         foreach ($this->extends as $k => $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
@@ -3500,6 +3566,11 @@ class ClassInfo {
 
             $classSynopsis->appendChild(new DOMText("\n\n    "));
             $classSynopsis->appendChild($ooElement);
+        }
+
+        // Enums implicitly implement either UnitEnum or BackEnum. This way inherited methods can be displayed.
+        if ($isEnum) {
+            $this->implements[] = new Name\FullyQualified($this->enumBackingType ? "BackedEnum" : "UnitEnum");
         }
 
         foreach ($this->implements as $k => $interface) {
@@ -3535,13 +3606,14 @@ class ClassInfo {
             $doc,
             $classSynopsis,
             $parentsWithInheritedConstants,
+            $synopsisInfoName,
             "&Constants;",
             "&InheritedConstants;"
         );
 
         if (!empty($this->constInfos)) {
             $classSynopsis->appendChild(new DOMText("\n\n    "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Constants;");
+            $classSynopsisInfo = $doc->createElement($synopsisInfoName, "&Constants;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
@@ -3552,9 +3624,22 @@ class ClassInfo {
             }
         }
 
+        if (!empty($this->enumCaseInfos)) {
+            $classSynopsis->appendChild(new DOMText("\n\n    "));
+            $classSynopsisInfo = $doc->createElement($synopsisInfoName, "&EnumCases;");
+            $classSynopsisInfo->setAttribute("role", "comment");
+            $classSynopsis->appendChild($classSynopsisInfo);
+
+            foreach ($this->enumCaseInfos as $enumCaseInfo) {
+                $classSynopsis->appendChild(new DOMText("\n    "));
+                $enumItemElement = $enumCaseInfo->getEnumItemElement($doc, $allConstInfos);
+                $classSynopsis->appendChild($enumItemElement);
+            }
+        }
+
         if (!empty($this->propertyInfos)) {
             $classSynopsis->appendChild(new DOMText("\n\n    "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Properties;");
+            $classSynopsisInfo = $doc->createElement($synopsisInfoName, "&Properties;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
@@ -3569,13 +3654,14 @@ class ClassInfo {
             $doc,
             $classSynopsis,
             $parentsWithInheritedProperties,
+            $synopsisInfoName,
             "&Properties;",
             "&InheritedProperties;"
         );
 
         if (!empty($this->funcInfos)) {
             $classSynopsis->appendChild(new DOMText("\n\n    "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&Methods;");
+            $classSynopsisInfo = $doc->createElement($synopsisInfoName, "&Methods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
@@ -3612,7 +3698,7 @@ class ClassInfo {
 
         if (!empty($parentsWithInheritedMethods)) {
             $classSynopsis->appendChild(new DOMText("\n\n    "));
-            $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "&InheritedMethods;");
+            $classSynopsisInfo = $doc->createElement($synopsisInfoName, "&InheritedMethods;");
             $classSynopsisInfo->setAttribute("role", "comment");
             $classSynopsis->appendChild($classSynopsisInfo);
 
@@ -3650,8 +3736,7 @@ class ClassInfo {
     ): ?DOMElement {
         $indentation = str_repeat(" ", $indentationLevel);
 
-        if ($classInfo->type !== "class" && $classInfo->type !== "interface") {
-            echo "Class synopsis generation is not implemented for " . $classInfo->type . "\n";
+        if ($classInfo->type === "enum") {
             return null;
         }
 
@@ -3745,6 +3830,8 @@ class ClassInfo {
             );
         }
 
+        $isEnum = $this->type === "enum";
+
         foreach ($this->implements as $parent) {
             $parentInfo = $classMap[$parent->toString()] ?? null;
             if (!$parentInfo) {
@@ -3758,13 +3845,25 @@ class ClassInfo {
             $unusedParentsWithInheritedProperties = [];
             $unusedParentsWithInheritedMethods = [];
 
-            $parentInfo->collectInheritedMembers(
-                $parentsWithInheritedConstants,
-                $unusedParentsWithInheritedProperties,
-                $unusedParentsWithInheritedMethods,
-                $hasConstructor,
-                $classMap
-            );
+            if ($isEnum) {
+                $parentInfo->collectInheritedMembers(
+                    $parentsWithInheritedConstants,
+                    $unusedParentsWithInheritedProperties,
+                    // We only want to collect inherited methods in case of enums
+                    $parentsWithInheritedMethods,
+                    $hasConstructor,
+                    $classMap
+                );
+            } else {
+                $parentInfo->collectInheritedMembers(
+                    $parentsWithInheritedConstants,
+                    $unusedParentsWithInheritedProperties,
+                    // We only want to collect inherited methods in case of enums
+                    $unusedParentsWithInheritedMethods,
+                    $hasConstructor,
+                    $classMap
+                );
+            }
         }
     }
 
@@ -3886,14 +3985,14 @@ class ClassInfo {
     /**
      * @param Name[] $parents
      */
-    private function appendInheritedMemberSectionToClassSynopsis(DOMDocument $doc, DOMElement $classSynopsis, array $parents, string $label, string $inheritedLabel): void
+    private function appendInheritedMemberSectionToClassSynopsis(DOMDocument $doc, DOMElement $classSynopsis, array $parents, string $synopsisInfoName, string $label, string $inheritedLabel): void
     {
         if (empty($parents)) {
             return;
         }
 
         $classSynopsis->appendChild(new DOMText("\n\n    "));
-        $classSynopsisInfo = $doc->createElement("classsynopsisinfo", "$inheritedLabel");
+        $classSynopsisInfo = $doc->createElement($synopsisInfoName, "$inheritedLabel");
         $classSynopsisInfo->setAttribute("role", "comment");
         $classSynopsis->appendChild($classSynopsisInfo);
 
@@ -4738,7 +4837,10 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     );
                 } else if ($classStmt instanceof Stmt\EnumCase) {
                     $enumCaseInfos[] = new EnumCaseInfo(
-                        $classStmt->name->toString(), $classStmt->expr);
+                        $classStmt->name->toString(),
+                        $classStmt->expr,
+                        $classStmt->expr ? $prettyPrinter->prettyPrintExpr($classStmt->expr) : null
+                    );
                 } else {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }

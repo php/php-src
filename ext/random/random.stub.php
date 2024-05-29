@@ -155,11 +155,12 @@ namespace Random
         public function __unserialize(array $data): void {}
     }
 
-    enum IntervalBoundary {
-        case ClosedOpen;
-        case ClosedClosed;
-        case OpenClosed;
-        case OpenOpen;
+    enum IntervalBoundary: int {
+        const int ClosedC = 2;
+        case ClosedOpen = 1;
+        case ClosedClosed = IntervalBoundary::ClosedC;
+        case OpenClosed = 3;
+        case OpenOpen = 4;
     }
 
     /**
