@@ -732,7 +732,7 @@ static ZEND_FUNCTION(get_open_basedir)
 static ZEND_FUNCTION(zend_test_is_pcre_bundled)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
-#if HAVE_BUNDLED_PCRE
+#ifdef HAVE_BUNDLED_PCRE
 	RETURN_TRUE;
 #else
 	RETURN_FALSE;
