@@ -155,11 +155,6 @@ static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, php
 					xsl_add_ns_to_map(table, sheet, cur, prefix, ns->href);
 				}
 			}
-
-			if (cur->children != NULL) {
-				cur = cur->children;
-				continue;
-			}
 		}
 
 		cur = php_dom_next_in_tree_order(cur, (const xmlNode *) doc);

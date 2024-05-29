@@ -1023,11 +1023,6 @@ static void dom_remove_eliminated_ns(xmlNodePtr node, xmlNsPtr eliminatedNs)
 
 		if (node->type == XML_ELEMENT_NODE) {
 			dom_remove_eliminated_ns_single_element(node, eliminatedNs);
-
-			if (node->children) {
-				node = node->children;
-				continue;
-			}
 		}
 
 		node = php_dom_next_in_tree_order(node, base);

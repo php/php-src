@@ -77,11 +77,6 @@ static void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_m
 	while (node != NULL) {
 		if (node->type == XML_ELEMENT_NODE) {
 			php_dom_ns_compat_mark_attribute_list(ns_mapper, node);
-
-			if (node->children) {
-				node = node->children;
-				continue;
-			}
 		}
 
 		node = php_dom_next_in_tree_order(node, NULL);

@@ -1762,11 +1762,6 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep,
 					(*cur)++;
 				}
 			}
-
-			if (nodep->children) {
-				nodep = nodep->children;
-				continue;
-			}
 		}
 
 		nodep = php_dom_next_in_tree_order(nodep, basep);

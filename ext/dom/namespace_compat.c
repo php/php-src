@@ -439,11 +439,6 @@ PHP_DOM_EXPORT void php_dom_libxml_reconcile_modern(php_dom_libxml_ns_mapper *ns
 
 		if (node->type == XML_ELEMENT_NODE) {
 			php_dom_libxml_reconcile_modern_single_element_node(&ctx, node);
-
-			if (node->children) {
-				node = node->children;
-				continue;
-			}
 		}
 
 		node = php_dom_next_in_tree_order(node, base);
