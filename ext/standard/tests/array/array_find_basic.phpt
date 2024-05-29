@@ -1,5 +1,5 @@
 --TEST--
-basic array_find test
+Test array_find() function : basic functionality
 --FILE--
 <?php
 $array1 = [
@@ -31,7 +31,7 @@ var_dump(array_find([], fn($value) => true));
 var_dump(array_find($array1, fn($value, $key) => $key === "c"));
 var_dump(array_find($array1, fn($value, $key) => false));
 
-echo '*** Test aborting after found result ***' . PHP_EOL;
+echo '*** Test Exception after found result ***' . PHP_EOL;
 try {
     var_dump(array_find($array1, function ($value) {
         if ($value > 1) {
@@ -79,7 +79,7 @@ NULL
 NULL
 int(3)
 NULL
-*** Test aborting after found result ***
+*** Test Exception after found result ***
 int(1)
 *** Test aborting with exception ***
 int(1)

@@ -1,5 +1,5 @@
 --TEST--
-basic array_any test
+Test array_all() function : basic functionality
 --FILE--
 <?php
 $array1 = [
@@ -29,7 +29,7 @@ var_dump(array_all($array2, fn($value) => $value > 0));
 var_dump(array_all($array2, fn($value) => $value > 1));
 var_dump(array_all([], fn($value) => true));
 
-echo '*** Test aborting after found result ***' . PHP_EOL;
+echo '*** Test Exception after false result ***' . PHP_EOL;
 try {
     var_dump(array_all($array2, function ($value) {
         if ($value > 1) {
@@ -75,7 +75,7 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-*** Test aborting after found result ***
+*** Test Exception after false result ***
 bool(false)
 *** Test aborting with exception ***
 int(1)

@@ -1,5 +1,5 @@
 --TEST--
-basic array_find_key test
+Test array_find_key() function : basic functionality
 --FILE--
 <?php
 $array1 = [
@@ -32,7 +32,7 @@ var_dump(array_find_key([], fn($value) => true));
 var_dump(array_find_key($array1, fn($value, $key) => $key === "c"));
 var_dump(array_find_key($array1, fn($value, $key) => false));
 
-echo '*** Test aborting after found result ***' . PHP_EOL;
+echo '*** Test Exception after found result ***' . PHP_EOL;
 try {
     var_dump(array_find_key($array1, function ($value) {
         if ($value > 1) {
@@ -80,7 +80,7 @@ NULL
 NULL
 string(1) "c"
 NULL
-*** Test aborting after found result ***
+*** Test Exception after found result ***
 string(1) "a"
 *** Test aborting with exception ***
 int(1)
