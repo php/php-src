@@ -249,6 +249,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The php_escape_shell_cmd() now takes a zend_string* instead of a char*
      Moreover, providing it with a binary safe string is the responsibility of
      the caller now.
+   - The php_escape_shell_arg() now takes a zend_string* instead of a char*
+     Moreover, providing it with a binary safe string is the responsibility of
+     the caller now.
 
 ========================
 4. OpCode changes

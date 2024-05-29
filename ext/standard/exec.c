@@ -389,11 +389,15 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 /* }}} */
 
 /* {{{ php_escape_shell_arg */
-PHPAPI zend_string *php_escape_shell_arg(const char *str)
+PHPAPI zend_string *php_escape_shell_arg(const zend_string *unescaped_arg)
 {
 	size_t x, y = 0;
-	size_t l = strlen(str);
 	zend_string *cmd;
+
+	ZEND_ASSERT(ZSTR_LEN(unescaped_arg) == strlen(ZSTR_VAL(unescaped_arg)) && "Must be a binary safe string");
+	size_t l = ZSTR_LEN(unescaped_arg);
+	const char *str = ZSTR_VAL(unescaped_arg);
+
 	uint64_t estimate = (4 * (uint64_t)l) + 3;
 
 	/* max command line length - two single quotes - \0 byte length */
@@ -492,17 +496,11 @@ PHP_FUNCTION(escapeshellcmd)
 /* {{{ Quote and escape an argument for use in a shell command */
 PHP_FUNCTION(escapeshellarg)
 {
-	char *argument;
-	size_t argument_len;
+	zend_string *argument;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(argument, argument_len)
+		Z_PARAM_PATH_STR(argument)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (argument_len != strlen(argument)) {
-		zend_argument_value_error(1, "must not contain any null bytes");
-		RETURN_THROWS();
-	}
 
 	RETVAL_STR(php_escape_shell_arg(argument));
 }
