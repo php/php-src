@@ -15,8 +15,6 @@
  */
 
 #include "php.h"
-#include "php_filestat.h"
-#include "php_globals.h"
 
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 

@@ -26,7 +26,6 @@
 #include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
 

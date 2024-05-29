@@ -27,14 +27,12 @@
 #include "zend_attributes.h"
 
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "ext/standard/php_standard.h"
 #include "Zend/zend_interfaces.h"
 #include "zend_smart_str.h"
 
 #include "php_odbc.h"
 #include "php_odbc_includes.h"
-#include "php_globals.h"
 
 /* actually lives in main/ */
 #include "php_odbc_utils.h"
@@ -42,7 +40,6 @@
 #ifdef HAVE_UODBC
 
 #include <fcntl.h>
-#include "ext/standard/head.h"
 #include "php_ini.h"
 
 #define PHP_ODBC_BINMODE_PASSTHRU 0

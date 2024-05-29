@@ -22,9 +22,7 @@
 /* {{{ includes */
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/flock_compat.h"
-#include "ext/standard/exec.h"
 #include "ext/standard/php_filestat.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
@@ -61,7 +59,6 @@
 # endif
 #endif
 
-#include "ext/standard/head.h"
 #include "php_string.h"
 #include "file.h"
 
@@ -73,14 +70,9 @@
 # endif
 #endif
 
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
-
 #include "fsock.h"
 #include "fopen_wrappers.h"
-#include "streamsfuncs.h"
-#include "php_globals.h"
+#include "streamsfuncs.h" /* To define constants in the arg_info */
 
 #ifdef HAVE_SYS_FILE_H
 # include <sys/file.h>

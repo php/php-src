@@ -25,7 +25,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_mysqli.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"

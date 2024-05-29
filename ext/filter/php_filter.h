@@ -22,10 +22,6 @@
 #include "zend_API.h"
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/html.h"
-#include "php_variables.h"
 
 extern zend_module_entry filter_module_entry;
 #define phpext_filter_ptr &filter_module_entry
