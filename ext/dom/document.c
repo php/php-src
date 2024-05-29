@@ -788,7 +788,7 @@ PHP_METHOD(DOMDocument, importNode)
 
 				/* If there is no root, the namespace cannot be attached to it, so we have to attach it to the old list. */
 				if (nsptr != NULL && root == NULL) {
-					dom_set_old_ns(nodep->doc, nsptr);
+					php_libxml_set_old_ns(nodep->doc, nsptr);
 				}
 			}
 			retnodep->ns = nsptr;
