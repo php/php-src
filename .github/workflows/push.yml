@@ -150,7 +150,7 @@ jobs:
       PDO_MYSQL_TEST_HOST: mysql
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.3
         ports:
           - 3306:3306
         env:
