@@ -61,7 +61,7 @@ static int _php_source_op_to_ipv4_op(enum source_op sop);
 
 zend_result php_string_to_if_index(const char *val, unsigned *out)
 {
-#if HAVE_IF_NAMETOINDEX
+#ifdef HAVE_IF_NAMETOINDEX
 	unsigned int ind;
 
 	ind = if_nametoindex(val);

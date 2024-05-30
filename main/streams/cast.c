@@ -128,7 +128,7 @@ static int stream_cookie_closer(void *cookie)
 }
 #endif /* elif defined(HAVE_FOPENCOOKIE) */
 
-#if HAVE_FOPENCOOKIE
+#ifdef HAVE_FOPENCOOKIE
 static cookie_io_functions_t stream_cookie_functions =
 {
 	stream_cookie_reader, stream_cookie_writer,
@@ -220,7 +220,7 @@ PHPAPI int _php_stream_cast(php_stream *stream, int castas, void **ret, int show
 			goto exit_success;
 		}
 
-#if HAVE_FOPENCOOKIE
+#ifdef HAVE_FOPENCOOKIE
 		/* if just checking, say yes we can be a FILE*, but don't actually create it yet */
 		if (ret == NULL) {
 			goto exit_success;

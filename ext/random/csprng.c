@@ -52,7 +52,7 @@
 # endif
 #endif
 
-#if HAVE_COMMONCRYPTO_COMMONRANDOM_H
+#ifdef HAVE_COMMONCRYPTO_COMMONRANDOM_H
 # include <CommonCrypto/CommonCryptoError.h>
 # include <CommonCrypto/CommonRandom.h>
 #endif
@@ -71,7 +71,7 @@ PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw)
 		}
 		return FAILURE;
 	}
-#elif HAVE_COMMONCRYPTO_COMMONRANDOM_H
+#elif defined(HAVE_COMMONCRYPTO_COMMONRANDOM_H)
 	/*
 	 * Purposely prioritized upon arc4random_buf for modern macOs releases
 	 * arc4random api on this platform uses `ccrng_generate` which returns

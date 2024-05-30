@@ -58,7 +58,7 @@
 
 #ifdef PHP_ICONV_IMPL
 #define PHP_ICONV_IMPL_VALUE PHP_ICONV_IMPL
-#elif HAVE_LIBICONV
+#elif defined(HAVE_LIBICONV)
 #define PHP_ICONV_IMPL_VALUE "libiconv"
 #else
 #define PHP_ICONV_IMPL_VALUE "unknown"
