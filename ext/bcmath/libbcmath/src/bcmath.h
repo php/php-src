@@ -106,7 +106,13 @@ void bc_int2num(bc_num *num, int val);
 
 long bc_num2long(bc_num num);
 
-int bc_compare(bc_num n1, bc_num n2);
+typedef enum {
+	BCMATH_EQUAL = 0,
+	BCMATH_LEFT_GREATER = 1,
+	BCMATH_RIGHT_GREATER = -1
+} bcmath_compare_result;
+
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2);
 
 bool bc_is_zero(bc_num num);
 

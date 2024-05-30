@@ -50,16 +50,16 @@ bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min)
 		/* subtraction must be done. */
 		/* Compare magnitudes. */
 		switch (_bc_do_compare(n1, n2, false)) {
-			case -1:
+			case BCMATH_RIGHT_GREATER:
 				/* n1 is less than n2, subtract n1 from n2. */
 				sum = _bc_do_sub(n2, n1);
 				sum->n_sign = n2->n_sign;
 				break;
-			case 0:
+			case BCMATH_EQUAL:
 				/* They are equal! return zero with the correct scale! */
 				sum = bc_new_num (1, MAX(scale_min, MAX(n1->n_scale, n2->n_scale)));
 				break;
-			case 1:
+			case BCMATH_LEFT_GREATER:
 				/* n2 is less than n1, subtract n2 from n1. */
 				sum = _bc_do_sub(n1, n2);
 				sum->n_sign = n1->n_sign;
