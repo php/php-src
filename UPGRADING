@@ -615,8 +615,14 @@ PHP 8.4 UPGRADE NOTES
 
 - Intl:
   . The class constants are typed now.
+  . The behaviour of Intl class has been normalized to always throw Error
+    exceptions when attempting to use a non-initialized object,
+    or when cloning fails.
+  . The idn_to_ascii() and idn_to_utf8() now always throw ValueErrors if the
+    $domain name is empty or too long, and if $variant is not
+    INTL_IDNA_VARIANT_UTS46.
 
-- Intl:
+- OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.
 
 - PDO:
