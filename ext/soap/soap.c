@@ -66,6 +66,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
+static void delete_argv(struct _soap_class *class);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 
@@ -929,6 +930,8 @@ PHP_METHOD(SoapServer, setClass)
 
 	service->type = SOAP_CLASS;
 	service->soap_class.ce = ce;
+
+	delete_argv(&service->soap_class);
 
 	service->soap_class.persistence = SOAP_PERSISTENCE_REQUEST;
 	service->soap_class.argc = num_args;
@@ -4342,6 +4345,16 @@ static void delete_url(void *handle) /* {{{ */
 }
 /* }}} */
 
+static void delete_argv(struct _soap_class *class)
+{
+	if (class->argc) {
+		for (int i = 0; i < class->argc; i++) {
+			zval_ptr_dtor(&class->argv[i]);
+		}
+		efree(class->argv);
+	}
+}
+
 static void delete_service(void *data) /* {{{ */
 {
 	soapServicePtr service = (soapServicePtr)data;
@@ -4356,13 +4369,7 @@ static void delete_service(void *data) /* {{{ */
 		efree(service->typemap);
 	}
 
-	if (service->soap_class.argc) {
-		int i;
-		for (i = 0; i < service->soap_class.argc;i++) {
-			zval_ptr_dtor(&service->soap_class.argv[i]);
-		}
-		efree(service->soap_class.argv);
-	}
+	delete_argv(&service->soap_class);
 
 	if (service->actor) {
 		efree(service->actor);
