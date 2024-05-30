@@ -5,10 +5,7 @@ PHP_ARG_WITH([sqlite3],
   [yes])
 
 if test $PHP_SQLITE3 != "no"; then
-  PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7])
-
-  PHP_EVAL_INCLINE($SQLITE_CFLAGS)
-  PHP_EVAL_LIBLINE($SQLITE_LIBS, SQLITE3_SHARED_LIBADD)
+  PHP_SETUP_SQLITE([SQLITE3_SHARED_LIBADD])
   AC_DEFINE(HAVE_SQLITE3, 1, [Define to 1 if you have the sqlite3 extension enabled.])
 
   PHP_CHECK_LIBRARY(sqlite3, sqlite3_errstr, [
