@@ -5326,7 +5326,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
 
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (!preg_match('/(?:[\w\.]*constants[\w\.]*|tokens).xml$/i', basename($pathName))) {
+        if (!preg_match('/(?:[\w\.]*constants[\w\._]*|tokens).xml$/i', basename($pathName))) {
             continue;
         }
 
