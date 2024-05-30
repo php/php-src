@@ -18,8 +18,6 @@
 #include <php.h>
 #include <unicode/utrans.h>
 
-#include "zend_smart_str.h"
-
 smart_str transliterator_parse_error_to_string( UParseError* pe );
 
 #endif /* #ifndef TRANSLITERATOR_TRANSLITERATOR_H */

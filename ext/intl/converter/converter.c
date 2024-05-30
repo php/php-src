@@ -929,8 +929,6 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 	zend_object *retval = php_converter_object_ctor(object->ce, &objval);
 	UErrorCode error = U_ZERO_ERROR;
 
-	intl_errors_reset(&oldobj->error);
-
 #if U_ICU_VERSION_MAJOR_NUM > 70
 	objval->src = ucnv_clone(oldobj->src, &error);
 #else
@@ -944,14 +942,9 @@ static zend_object *php_converter_clone_object(zend_object *object) {
 		objval->dest = ucnv_safeClone(oldobj->dest, NULL, NULL, &error);
 #endif
 	}
+
 	if (U_FAILURE(error)) {
-		zend_string *err_msg;
-		THROW_UFAILURE(oldobj, "ucnv_safeClone", error);
-
-		err_msg = intl_error_get_message(&oldobj->error);
-		zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-		zend_string_release_ex(err_msg, 0);
-
+		zend_throw_error(NULL, "Failed to clone UConverter");
 		return retval;
 	}
 
