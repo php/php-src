@@ -683,18 +683,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed(void)
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {
-	random_globals->random_fd = -1;
 	random_globals->fallback_seed_initialized = false;
-}
-/* }}} */
-
-/* {{{ PHP_GSHUTDOWN_FUNCTION */
-static PHP_GSHUTDOWN_FUNCTION(random)
-{
-	if (random_globals->random_fd >= 0) {
-		close(random_globals->random_fd);
-		random_globals->random_fd = -1;
-	}
 }
 /* }}} */
 
@@ -766,6 +755,15 @@ PHP_MINIT_FUNCTION(random)
 }
 /* }}} */
 
+/* {{{ PHP_MSHUTDOWN_FUNCTION */
+PHP_MSHUTDOWN_FUNCTION(random)
+{
+	php_random_csprng_shutdown();
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(random)
 {
@@ -782,14 +780,14 @@ zend_module_entry random_module_entry = {
 	"random",					/* Extension name */
 	ext_functions,				/* zend_function_entry */
 	PHP_MINIT(random),			/* PHP_MINIT - Module initialization */
-	NULL,						/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(random),		/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(random),			/* PHP_RINIT - Request initialization */
 	NULL,						/* PHP_RSHUTDOWN - Request shutdown */
 	NULL,						/* PHP_MINFO - Module info */
 	PHP_VERSION,				/* Version */
 	PHP_MODULE_GLOBALS(random),	/* ZTS Module globals */
 	PHP_GINIT(random),			/* PHP_GINIT - Global initialization */
-	PHP_GSHUTDOWN(random),		/* PHP_GSHUTDOWN - Global shutdown */
+	NULL,						/* PHP_GSHUTDOWN - Global shutdown */
 	NULL,						/* Post deactivate */
 	STANDARD_MODULE_PROPERTIES_EX
 };
