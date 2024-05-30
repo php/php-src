@@ -338,6 +338,13 @@ PHP_MINIT_FUNCTION(gd)
 	php_gd_object_minit_helper();
 	php_gd_font_minit_helper();
 
+#if defined(HAVE_GD_MEMORY_ALLOCATORS) && !ZEND_DEBUG
+	gdSetMemoryMallocMethod(_emalloc);
+	gdSetMemoryCallocMethod(_ecalloc);
+	gdSetMemoryReallocMethod(_erealloc);
+	gdSetMemoryFreeMethod(_efree);
+#endif
+
 #if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 	gdFontCacheMutexSetup();
 #endif
@@ -354,6 +361,12 @@ PHP_MINIT_FUNCTION(gd)
 /* {{{ PHP_MSHUTDOWN_FUNCTION */
 PHP_MSHUTDOWN_FUNCTION(gd)
 {
+#if defined(HAVE_GD_MEMORY_ALLOCATORS)
+	gdClearMemoryMallocMethod();
+	gdClearMemoryCallocMethod();
+	gdClearMemoryReallocMethod();
+	gdClearMemoryFreeMethod();
+#endif
 #if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 	gdFontCacheMutexShutdown();
 #endif
