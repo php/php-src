@@ -1,5 +1,5 @@
 --TEST--
-Test PdoSqlite::createFunction() arguments error
+Test Pdo\Sqlite::createFunction() arguments error
 --EXTENSIONS--
 pdo_sqlite
 --FILE--
@@ -7,7 +7,7 @@ pdo_sqlite
 
 declare(strict_types=1);
 
-$db = new PdoSqlite('sqlite::memory:');
+$db = new Pdo\Sqlite('sqlite::memory:');
 
 class TrampolineTest {
     public function __call(string $name, array $arguments) {
@@ -42,8 +42,8 @@ try {
 echo 'done!';
 ?>
 --EXPECT--
-PdoSqlite::createFunction(): Argument #1 ($function_name) must be of type string, null given
-PdoSqlite::createFunction(): Argument #2 ($callback) must be a valid callback, no array or string given
-PdoSqlite::createFunction(): Argument #3 ($num_args) must be of type int, null given
-PdoSqlite::createFunction(): Argument #4 ($flags) must be of type int, null given
+Pdo\Sqlite::createFunction(): Argument #1 ($function_name) must be of type string, null given
+Pdo\Sqlite::createFunction(): Argument #2 ($callback) must be a valid callback, no array or string given
+Pdo\Sqlite::createFunction(): Argument #3 ($num_args) must be of type int, null given
+Pdo\Sqlite::createFunction(): Argument #4 ($flags) must be of type int, null given
 done!
