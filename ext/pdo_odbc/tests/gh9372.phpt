@@ -4,8 +4,8 @@ Bug GH-9372 (HY010 when binding overlong parameter)
 pdo_odbc
 --SKIPIF--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+ODBCPDOTest::skip();
 ?>
 --FILE--
 <?php
@@ -13,14 +13,16 @@ PDOTest::skip();
 // The test is written in a way to always pass, unless the execution
 // fails with a different code than 22001 (String data, right truncation).
 
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$db = ODBCPDOTest::factory();
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$db->exec("CREATE TABLE gh9372 (col VARCHAR(10))");
-$db->exec("INSERT INTO gh9372 VALUES ('something')");
+$table_name = 'gh9372_pdo_odbc';
 
-$stmt = $db->prepare("SELECT * FROM gh9372 WHERE col = ?");
+$db->exec("CREATE TABLE {$table_name} (col VARCHAR(10))");
+$db->exec("INSERT INTO {$table_name} VALUES ('something')");
+
+$stmt = $db->prepare("SELECT * FROM {$table_name} WHERE col = ?");
 $stmt->bindValue(1, 'something else');
 try {
     $stmt->execute();
@@ -30,7 +32,7 @@ try {
     }
 }
 
-$stmt = $db->prepare("SELECT * FROM gh9372 WHERE col = ?");
+$stmt = $db->prepare("SELECT * FROM {$table_name} WHERE col = ?");
 $stream = fopen("php://memory", "w+");
 fwrite($stream, 'something else');
 rewind($stream);
@@ -45,8 +47,8 @@ try {
 ?>
 --CLEAN--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
-$db->exec("DROP TABLE gh9372");
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$db = ODBCPDOTest::factory();
+$db->exec("DROP TABLE IF EXISTS gh9372_pdo_odbc");
 ?>
 --EXPECT--
