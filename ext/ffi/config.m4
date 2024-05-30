@@ -15,7 +15,7 @@ if test "$PHP_FFI" != "no"; then
 
   AC_DEFUN([PHP_FFI_CHECK_DECL],
     [AC_CHECK_DECL([$1],
-      [AC_DEFINE(AS_TR_CPP([HAVE_$1]), [1],
+      [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
         [Whether libffi supports the '$1' calling convention.])],,
       [#include <ffi.h>])])
 
