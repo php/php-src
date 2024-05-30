@@ -54,7 +54,7 @@ ZEND_API zend_gdbjit_descriptor __jit_debug_descriptor = {
 	1, ZEND_GDBJIT_NOACTION, NULL, NULL
 };
 
-ZEND_API zend_never_inline void __jit_debug_register_code(void)
+ZEND_API ZEND_ATTRIBUTE_NAKED zend_never_inline void __jit_debug_register_code(void)
 {
 	__asm__ __volatile__("");
 }

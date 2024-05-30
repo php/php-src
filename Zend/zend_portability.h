@@ -269,6 +269,13 @@ char *alloca();
 # define ZEND_ATTRIBUTE_UNUSED
 #endif
 
+#if (ZEND_GCC_VERSION >= 8000 || __has_attribute(naked)) && \
+    (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__aarch64__) || defined(__powerpc64__))
+# define ZEND_ATTRIBUTE_NAKED __attribute__((naked))
+#else
+# define ZEND_ATTRIBUTE_NAKED
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_COLD __attribute__((cold))
 # ifdef __OPTIMIZE__
