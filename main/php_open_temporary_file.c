@@ -87,7 +87,7 @@
  * SUCH DAMAGE.
  */
 
-static const char letters[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+static const char base32alphabet[] = "0123456789abcdefghijklmnopqrstuv";
 
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
@@ -148,9 +148,9 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	random_prefix = emalloc(len);
 	p = zend_mempcpy(random_prefix, pfx, strlen(pfx));
 	while (p + 1 < random_prefix + len) {
-		*p = letters[random % strlen(letters)];
+		*p = base32alphabet[random % strlen(base32alphabet)];
 		p++;
-		random /= strlen(letters);
+		random /= strlen(base32alphabet);
 	}
 	*p = '\0';
 
