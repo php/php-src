@@ -18,6 +18,7 @@
 #include "zend_long.h"
 #include "php_open_temporary_file.h"
 #include "ext/random/php_random.h"
+#include "zend_operators.h"
 
 #include <errno.h>
 #include <sys/types.h>
@@ -86,6 +87,8 @@
  * SUCH DAMAGE.
  */
 
+static const char letters[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
 #ifdef PHP_WIN32
@@ -96,8 +99,9 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	char opened_path[MAXPATHLEN];
 	char *trailing_slash;
 #endif
-	uint64_t random[2];
+	uint64_t random;
 	char *random_prefix;
+	char *p;
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
 	int fd = -1;
@@ -134,11 +138,18 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 
 	/* Extend the prefix to increase randomness */
 	if (php_random_bytes_silent(&random, sizeof(random)) == FAILURE) {
-		random[0] = php_random_generate_fallback_seed();
-		random[1] = php_random_generate_fallback_seed();
+		random = php_random_generate_fallback_seed();
 	}
 
-	spprintf(&random_prefix, 0, "%s%016" PRIx64 "%016" PRIx64, pfx, random[0], random[1]);
+	random_prefix = emalloc(strlen(pfx) + sizeof(random) * 2);
+	p = zend_mempcpy(random_prefix, pfx, strlen(pfx));
+	/* Use a compact encoding to not increase the path len too much */
+	while (random) {
+		*p = letters[random % strlen(letters)];
+		p++;
+		random /= strlen(letters);
+	}
+	*p = '\0';
 
 #ifndef PHP_WIN32
 	if (IS_SLASH(new_state.cwd[new_state.cwd_length - 1])) {
