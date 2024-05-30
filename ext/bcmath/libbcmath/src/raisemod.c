@@ -81,7 +81,7 @@ zend_result bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, i
 
   /* Do the calculation. */
   rscale = MAX(scale, power->n_scale);
-  if ( !bc_compare(modulus, BCG(_one_)) )
+  if ( !_bc_do_compare(modulus, BCG(_one_), false, false) )
     {
       bc_free_num (&temp);
       temp = bc_new_num (1, scale);
