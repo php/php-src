@@ -58,7 +58,7 @@ ZEND_GET_MODULE(pdo_pgsql)
 #endif
 
 /* Escape an identifier for insertion into a text field	*/
-PHP_METHOD(PdoPgsql, escapeIdentifier)
+PHP_METHOD(Pdo_Pgsql, escapeIdentifier)
 {
 	zend_string *from = NULL;
 	char *tmp;
@@ -92,55 +92,55 @@ PHP_METHOD(PdoPgsql, escapeIdentifier)
 }
 
 /* Returns true if the copy worked fine or false if error */
-PHP_METHOD(PdoPgsql, copyFromArray)
+PHP_METHOD(Pdo_Pgsql, copyFromArray)
 {
 	pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Returns true if the copy worked fine or false if error */
-PHP_METHOD(PdoPgsql, copyFromFile)
+PHP_METHOD(Pdo_Pgsql, copyFromFile)
 {
 	pgsqlCopyFromFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Returns true if the copy worked fine or false if error */
-PHP_METHOD(PdoPgsql, copyToFile)
+PHP_METHOD(Pdo_Pgsql, copyToFile)
 {
 	pgsqlCopyToFile_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Returns true if the copy worked fine or false if error */
-PHP_METHOD(PdoPgsql, copyToArray)
+PHP_METHOD(Pdo_Pgsql, copyToArray)
 {
 	pgsqlCopyToArray_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Creates a new large object, returning its identifier.  Must be called inside a transaction. */
-PHP_METHOD(PdoPgsql, lobCreate)
+PHP_METHOD(Pdo_Pgsql, lobCreate)
 {
 	pgsqlLOBCreate_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Opens an existing large object stream.  Must be called inside a transaction. */
-PHP_METHOD(PdoPgsql, lobOpen)
+PHP_METHOD(Pdo_Pgsql, lobOpen)
 {
 	pgsqlLOBOpen_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Deletes the large object identified by oid.  Must be called inside a transaction. */
-PHP_METHOD(PdoPgsql, lobUnlink)
+PHP_METHOD(Pdo_Pgsql, lobUnlink)
 {
 	pgsqlLOBUnlink_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Get asynchronous notification */
-PHP_METHOD(PdoPgsql, getNotify)
+PHP_METHOD(Pdo_Pgsql, getNotify)
 {
 	pgsqlGetNotify_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 /* Get backend(server) pid */
-PHP_METHOD(PdoPgsql, getPid)
+PHP_METHOD(Pdo_Pgsql, getPid)
 {
 	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -160,7 +160,7 @@ PHP_MINIT_FUNCTION(pdo_pgsql)
 	REGISTER_PDO_CLASS_CONST_LONG("PGSQL_ATTR_RESULT_MEMORY_SIZE", (zend_long)PDO_PGSQL_ATTR_RESULT_MEMORY_SIZE);
 #endif
 
-	PdoPgsql_ce = register_class_PdoPgsql(pdo_dbh_ce);
+	PdoPgsql_ce = register_class_Pdo_Pgsql(pdo_dbh_ce);
 	PdoPgsql_ce->create_object = pdo_dbh_new;
 
 	if (php_pdo_register_driver(&pdo_pgsql_driver) == FAILURE) {

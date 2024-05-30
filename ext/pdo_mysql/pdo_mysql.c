@@ -84,10 +84,8 @@ static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 };
 #endif
 
-/* proto string PDO::mysqlGetWarningCount()
- * Returns the number of SQL warnings during the execution of the last statement
- */
-PHP_METHOD(PdoMysql, getWarningCount)
+/* Returns the number of SQL warnings during the execution of the last statement */
+PHP_METHOD(Pdo_Mysql, getWarningCount)
 {
 	pdo_dbh_t *dbh;
 	pdo_mysql_db_handle *H;
@@ -151,7 +149,7 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
 #endif
 
-	pdo_mysql_ce = register_class_PdoMysql(pdo_dbh_ce);
+	pdo_mysql_ce = register_class_Pdo_Mysql(pdo_dbh_ce);
 	pdo_mysql_ce->create_object = pdo_dbh_new;
 
 	if (php_pdo_register_driver(&pdo_mysql_driver) == FAILURE) {

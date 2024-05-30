@@ -2,11 +2,13 @@
 
 /** @generate-class-entries */
 
+namespace Pdo;
+
 /**
  * @strict-properties
  * @not-serializable
  */
-class PdoFirebird extends PDO
+class Firebird extends PDO
 {
     /** @cvalue PDO_FB_ATTR_DATE_FORMAT */
     public const int ATTR_DATE_FORMAT = UNKNOWN;

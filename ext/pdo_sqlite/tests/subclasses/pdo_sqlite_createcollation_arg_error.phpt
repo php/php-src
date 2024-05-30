@@ -1,5 +1,5 @@
 --TEST--
-Test PdoSqlite::createCollation() arguments error
+Test Pdo\Sqlite::createCollation() arguments error
 --EXTENSIONS--
 pdo_sqlite
 --FILE--
@@ -7,7 +7,7 @@ pdo_sqlite
 
 declare(strict_types=1);
 
-$db = new PdoSqlite('sqlite::memory:');
+$db = new Pdo\Sqlite('sqlite::memory:');
 
 class TrampolineTest {
     public function __call(string $name, array $arguments) {
@@ -30,6 +30,6 @@ try {
 echo 'done!';
 ?>
 --EXPECT--
-PdoSqlite::createCollation(): Argument #1 ($name) must be of type string, null given
-PdoSqlite::createCollation(): Argument #2 ($callback) must be a valid callback, no array or string given
+Pdo\Sqlite::createCollation(): Argument #1 ($name) must be of type string, null given
+Pdo\Sqlite::createCollation(): Argument #2 ($callback) must be a valid callback, no array or string given
 done!

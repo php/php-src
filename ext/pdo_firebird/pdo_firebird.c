@@ -70,7 +70,7 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 		return FAILURE;
 	}
 
-	PdoFirebird_ce = register_class_PdoFirebird(pdo_dbh_ce);
+	PdoFirebird_ce = register_class_Pdo_Firebird(pdo_dbh_ce);
 	PdoFirebird_ce->create_object = pdo_dbh_new;
 
 #ifdef ZEND_SIGNALS

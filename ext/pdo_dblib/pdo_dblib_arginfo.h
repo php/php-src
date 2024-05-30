@@ -1,16 +1,16 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d2a7022c8e6e259b452786e00867b4a167d58277 */
+ * Stub hash: 7589c5d95f17513e35fa7884cd0ac4c6df253d09 */
 
-static const zend_function_entry class_PdoDblib_methods[] = {
+static const zend_function_entry class_Pdo_Dblib_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_PdoDblib(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_Pdo_Dblib(zend_class_entry *class_entry_Pdo_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PdoDblib", class_PdoDblib_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Dblib", class_Pdo_Dblib_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Pdo_PDO);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval const_ATTR_CONNECTION_TIMEOUT_value;
