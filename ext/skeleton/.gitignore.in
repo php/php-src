@@ -39,3 +39,4 @@ tests/**/*.sh
 tests/**/*.db
 tests/**/*.mem
 tmp-php.ini
+php-sdk*/
