@@ -262,34 +262,97 @@ static int pdo_firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 static int pdo_firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
 {
 	pdo_firebird_stmt *S = (pdo_firebird_stmt *) stmt->driver_data;
-	XSQLVAR *var = &S->out_sqlda.sqlvar[colno];
-
 	enum pdo_param_type param_type;
+	XSQLVAR *var;
+	char* native_type;
+	zval flags;
+
+	if (!stmt->executed) {
+		return FAILURE;
+	}
+	if (colno >= S->out_sqlda.sqld) {
+		/* error invalid column */
+		return FAILURE;
+	}
+
+	array_init(return_value);
+	array_init(&flags);
+
+	var = &S->out_sqlda.sqlvar[colno];
+
+	if (!(var->sqltype & 1)) {
+		add_next_index_string(&flags, "not_null");
+	}
+	add_assoc_zval(return_value, "flags", &flags);
+
 	if (var->sqlscale < 0) {
+		native_type = "decimal";
 		param_type = PDO_PARAM_STR;
 	} else {
 		switch (var->sqltype & ~1) {
+			case SQL_VARYING:
+				native_type = "varchar";
+				param_type = PDO_PARAM_STR;
+				break;
+			case SQL_TEXT:
+				native_type = "char";
+				param_type = PDO_PARAM_STR;
+				break;
 			case SQL_SHORT:
-			case SQL_LONG:
-#if SIZEOF_ZEND_LONG >= 8
-			case SQL_INT64:
-#endif
+				native_type = "smallint";
 				param_type = PDO_PARAM_INT;
+				break;
+			case SQL_LONG:
+				native_type = "integer";
+				param_type = PDO_PARAM_INT;
+				break;
+			case SQL_INT64:
+				native_type = "bigint";
+#if SIZEOF_ZEND_LONG >= 8
+				param_type = PDO_PARAM_INT;
+#else
+				param_type = PDO_PARAM_STR;
+#endif
+				break;
+			case SQL_FLOAT:
+				native_type = "float";
+				param_type = PDO_PARAM_STR;
+				break;
+			case SQL_DOUBLE:
+				native_type = "double";
+				param_type = PDO_PARAM_STR;
 				break;
 #ifdef SQL_BOOLEAN
 			case SQL_BOOLEAN:
+				native_type = "boolean";
 				param_type = PDO_PARAM_BOOL;
 				break;
 #endif
+			case SQL_TYPE_DATE:
+				native_type = "date";
+				param_type = PDO_PARAM_STR;
+				break;
+			case SQL_TYPE_TIME:
+				native_type = "time";
+				param_type = PDO_PARAM_STR;
+				break;
+			case SQL_TIMESTAMP:
+				native_type = "timestamp";
+				param_type = PDO_PARAM_STR;
+				break;
+			case SQL_BLOB:
+				native_type = "blob";
+				param_type = PDO_PARAM_STR;
+				break;
 			default:
+				native_type = "[UNKNOWN]";
 				param_type = PDO_PARAM_STR;
 				break;
 		}
 	}
-
-	array_init(return_value);
+	add_assoc_string(return_value, "native_type", native_type);
 	add_assoc_long(return_value, "pdo_type", param_type);
-	return 1;
+	return SUCCESS;
 }
 
 /* fetch a blob into a fetch buffer */
