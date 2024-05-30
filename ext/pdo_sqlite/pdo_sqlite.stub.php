@@ -33,10 +33,10 @@ class PdoSqlite extends PDO
 
     // Registers an aggregating User Defined Function for use in SQL statements
     public function createAggregate(
-        string $name,
-        callable $step,
-        callable $finalize,
-        int $numArgs = -1
+        string $function_name,
+        callable $step_func,
+        callable $finalize_func,
+        int $num_args = -1
     ): bool {}
 
     // Registers a User Defined Function for use as a collating function in SQL statements

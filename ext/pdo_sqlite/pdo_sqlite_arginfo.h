@@ -1,11 +1,11 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 167d0e30af99bd31c46ea1649c661b6aa38eaccb */
+ * Stub hash: 8229994166dfff0c6805c8efac131910fc0b05e1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createAggregate, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, step, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO(0, finalize, IS_CALLABLE, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, numArgs, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO(0, function_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, step_func, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, finalize_func, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, num_args, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PdoSqlite_createCollation, 0, 2, _IS_BOOL, 0)
