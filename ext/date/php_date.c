@@ -2538,7 +2538,7 @@ PHPAPI bool php_date_initialize_from_ts_double(php_date_obj *dateobj, double ts)
 	}
 
 	sec = (zend_long)sec_dval;
-	usec = (int)(fmod(ts, 1) * 1000000);
+	usec = (int) round(fmod(ts, 1) * 1000000);
 
 	if (UNEXPECTED(usec < 0)) {
 		if (UNEXPECTED(sec == TIMELIB_LONG_MIN)) {
