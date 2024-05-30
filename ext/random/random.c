@@ -683,7 +683,6 @@ PHPAPI uint64_t php_random_generate_fallback_seed(void)
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(random)
 {
-	random_globals->random_fd = -1;
 	random_globals->fallback_seed_initialized = false;
 }
 /* }}} */

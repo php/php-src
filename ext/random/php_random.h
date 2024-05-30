@@ -195,7 +195,6 @@ PHP_MSHUTDOWN_FUNCTION(random);
 PHP_RINIT_FUNCTION(random);
 
 ZEND_BEGIN_MODULE_GLOBALS(random)
-	int random_fd;
 	bool combined_lcg_seeded;
 	bool mt19937_seeded;
 	bool fallback_seed_initialized;
