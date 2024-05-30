@@ -169,32 +169,32 @@ PHP                                                                        NEWS
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoDbLib. (danack, kocsismate)
+  . Added class Pdo\DbLib. (danack, kocsismate)
 
 - PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Feature: Add transaction isolation level and mode settings to pdo_firebird.
     (SakiTakamachi)
-  . Added class PdoFirebird. (danack, kocsismate)
+  . Added class Pdo\Firebird. (danack, kocsismate)
 
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoMysql. (danack, kocsismate)
+  . Added class Pdo\Mysql. (danack, kocsismate)
 
 - PDO_ODBC:
-  . Added class PdoOdbc. (danack, kocsismate)
+  . Added class Pdo\Odbc. (danack, kocsismate)
 
 - PDO_PGSQL:
   . Fixed GH-12423, DSN credentials being prioritized over the user/password
     PDO constructor arguments. (SakiTakamachi)
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
-  . Added class PdoPgsql. (danack, kocsismate)
+  . Added class Pdo\Pgsql. (danack, kocsismate)
   . Retrieve the memory usage of the query result resource. (KentarouTakeda)
-  . Added PDO::pgsqlSetNoticeCallBack method to receive DB notices.
+  . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
     (outtersg) 
 
 - PDO_SQLITE:
-  . Added class PdoSqlite. (danack, kocsismate)
+  . Added class Pdo\Sqlite. (danack, kocsismate)
   . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
     (nielsdos)
 
