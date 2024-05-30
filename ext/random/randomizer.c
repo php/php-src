@@ -284,8 +284,8 @@ PHP_METHOD(Random_Randomizer, getBytes)
 		Z_PARAM_LONG(length)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (length < 1) {
-		zend_argument_value_error(1, "must be greater than 0");
+	if (length < 0) {
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -402,8 +402,8 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		RETURN_THROWS();
 	}
 
-	if (length < 1) {
-		zend_argument_value_error(2, "must be greater than 0");
+	if (length < 0) {
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
