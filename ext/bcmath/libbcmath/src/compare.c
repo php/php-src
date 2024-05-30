@@ -39,7 +39,7 @@
    than N2 and +1 if N1 is greater than N2.  If USE_SIGN is false, just
    compare the magnitudes. */
 
-int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
+bcmath_compare_result _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 {
 	char *n1ptr, *n2ptr;
 
@@ -47,10 +47,10 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 	if (use_sign && n1->n_sign != n2->n_sign) {
 		if (n1->n_sign == PLUS) {
 			/* Positive N1 > Negative N2 */
-			return (1);
+			return BCMATH_LEFT_GREATER;
 		} else {
 			/* Negative N1 < Positive N1 */
-			return (-1);
+			return BCMATH_RIGHT_GREATER;
 		}
 	}
 
@@ -59,16 +59,16 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 		if (n1->n_len > n2->n_len) {
 			/* Magnitude of n1 > n2. */
 			if (!use_sign || n1->n_sign == PLUS) {
-				return (1);
+				return BCMATH_LEFT_GREATER;
 			} else {
-				return (-1);
+				return BCMATH_RIGHT_GREATER;
 			}
 		} else {
 			/* Magnitude of n1 < n2. */
 			if (!use_sign || n1->n_sign == PLUS) {
-				return (-1);
+				return BCMATH_RIGHT_GREATER;
 			} else {
-				return (1);
+				return BCMATH_LEFT_GREATER;
 			}
 		}
 	}
@@ -89,16 +89,16 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 		if (*n1ptr > *n2ptr) {
 			/* Magnitude of n1 > n2. */
 			if (!use_sign || n1->n_sign == PLUS) {
-				return (1);
+				return BCMATH_LEFT_GREATER;
 			} else {
-				return (-1);
+				return BCMATH_RIGHT_GREATER;
 			}
 		} else {
 			/* Magnitude of n1 < n2. */
 			if (!use_sign || n1->n_sign == PLUS) {
-				return (-1);
+				return BCMATH_RIGHT_GREATER;
 			} else {
-				return (1);
+				return BCMATH_LEFT_GREATER;
 			}
 		}
 	}
@@ -110,9 +110,9 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 				if (*n1ptr++ != 0) {
 					/* Magnitude of n1 > n2. */
 					if (!use_sign || n1->n_sign == PLUS) {
-						return (1);
+						return BCMATH_LEFT_GREATER;
 					} else {
-						return (-1);
+						return BCMATH_RIGHT_GREATER;
 					}
 				}
 			}
@@ -121,9 +121,9 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 				if (*n2ptr++ != 0) {
 					/* Magnitude of n1 < n2. */
 					if (!use_sign || n1->n_sign == PLUS) {
-						return (-1);
+						return BCMATH_RIGHT_GREATER;
 					} else {
-						return (1);
+						return BCMATH_LEFT_GREATER;
 					}
 				}
 			}
@@ -131,12 +131,12 @@ int _bc_do_compare(bc_num n1, bc_num n2, bool use_sign)
 	}
 
 	/* They must be equal! */
-	return (0);
+	return BCMATH_EQUAL;
 }
 
 
 /* This is the "user callable" routine to compare numbers N1 and N2. */
-int bc_compare(bc_num n1, bc_num n2)
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2)
 {
 	return _bc_do_compare(n1, n2, true);
 }
