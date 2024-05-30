@@ -57,17 +57,17 @@ if (file_exists($file_path)) {
 --EXPECTF--
 *** Testing tempnam() maximum prefix size ***
 -- Iteration 0 --
-File name is => begin_%rx{7}%r_end%r.{16,17}%r
-File name length is => %r33|34%r
+File name is => begin_%rx{7}%r_end%r.{19}%r
+File name length is => 36
 -- Iteration 1 --
-File name is => begin_%rx{53}%r_end%r.{16,17}%r
-File name length is => %r79|80%r
+File name is => begin_%rx{53}%r_end%r.{19}%r
+File name length is => 82
 -- Iteration 2 --
-File name is => begin_%rx{54}%r_en%r.{16,17}%r
-File name length is => %r79|80%r
+File name is => begin_%rx{54}%r_en%r.{19}%r
+File name length is => 82
 -- Iteration 3 --
-File name is => begin_%rx{55}%r_e%r.{16,17}%r
-File name length is => %r79|80%r
+File name is => begin_%rx{55}%r_e%r.{19}%r
+File name length is => 82
 -- Iteration 4 --
-File name is => begin_%rx{57}%r%r.{16,17}%r
-File name length is => %r79|80%r
+File name is => begin_%rx{57}%r%r.{19}%r
+File name length is => 82

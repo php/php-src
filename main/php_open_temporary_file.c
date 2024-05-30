@@ -87,7 +87,7 @@
  * SUCH DAMAGE.
  */
 
-static const char letters[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+static const char letters[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
@@ -102,6 +102,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	uint64_t random;
 	char *random_prefix;
 	char *p;
+	size_t len;
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
 	int fd = -1;
@@ -141,10 +142,12 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		random = php_random_generate_fallback_seed();
 	}
 
-	random_prefix = emalloc(strlen(pfx) + sizeof(random) * 2);
+	/* Use a compact encoding to not increase the path len too much, but do not
+	 * mix case to avoid losing randomness on case-insensitive file systems */
+	len = strlen(pfx) + 13 /* log(2**64)/log(strlen(letters)) */ + 1;
+	random_prefix = emalloc(len);
 	p = zend_mempcpy(random_prefix, pfx, strlen(pfx));
-	/* Use a compact encoding to not increase the path len too much */
-	while (random) {
+	while (p + 1 < random_prefix + len) {
 		*p = letters[random % strlen(letters)];
 		p++;
 		random /= strlen(letters);
