@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a846c9dd240b6f0666cd5e805abfacabe360cf4c */
+ * Stub hash: 1d7459545b5752edf4101459ed5a3d67185055a5 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplObserver_update, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
@@ -250,13 +250,13 @@ static zend_class_entry *register_class_SplSubject(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_SeekableIterator, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_ArrayAccess)
+static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_SeekableIterator, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_DimensionFetchable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_DimensionUnsetable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplObjectStorage", class_SplObjectStorage_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
+	zend_class_implements(class_entry, 6, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_DimensionFetchable, class_entry_DimensionWritable, class_entry_DimensionUnsetable);
 
 	return class_entry;
 }

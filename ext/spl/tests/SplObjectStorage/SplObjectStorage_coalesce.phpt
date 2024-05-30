@@ -30,20 +30,27 @@ var_dump(empty($s[$o2]));
 var_dump($s->contains($o2));
 try {
     $s['invalid'] = 123;
-} catch (Error $e) {
+} catch (Throwable $e) {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
 try {
     var_dump(isset($s['invalid']));
-} catch (Error $e) {
+} catch (Throwable $e) {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
-$a = &$s[$o1];
+
+// Fetching is not supported
+try {
+    $a = &$s[$o1];
+} catch (Throwable $e) {
+    printf("%s: %s\n", $e::class, $e->getMessage());
+}
+
 
 var_dump($s);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(7) "default"
 string(7) "dynamic"
 string(7) "dynamic"
@@ -57,17 +64,16 @@ bool(true)
 object(stdClass)#4 (0) {
 }
 check isset/empty/contains for null. offsetExists returns true as long as the entry is there.
-bool(true)
+bool(false)
 bool(true)
 bool(true)
 check isset/empty/contains for false.
 bool(true)
 bool(true)
 bool(true)
-TypeError: SplObjectStorage::offsetSet(): Argument #1 ($object) must be of type object, string given
-TypeError: SplObjectStorage::offsetExists(): Argument #1 ($object) must be of type object, string given
-
-Notice: Indirect modification of overloaded element of SplObjectStorage has no effect in %s on line 38
+TypeError: Cannot access offset of type string on SplObjectStorage
+TypeError: Cannot access offset of type string on SplObjectStorage
+Error: Cannot fetch offset of object of type SplObjectStorage
 object(SplObjectStorage)#1 (1) {
   ["storage":"SplObjectStorage":private]=>
   array(2) {

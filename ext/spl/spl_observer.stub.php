@@ -20,7 +20,7 @@ interface SplSubject
     public function notify(): void;
 }
 
-class SplObjectStorage implements Countable, SeekableIterator, Serializable, ArrayAccess
+class SplObjectStorage implements Countable, SeekableIterator, Serializable, DimensionFetchable, DimensionWritable, DimensionUnsetable
 {
     /** @tentative-return-type */
     public function attach(object $object, mixed $info = null): void {}
