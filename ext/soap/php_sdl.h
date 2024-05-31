@@ -257,9 +257,6 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr data, const xmlChar *ty
 encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type);
 encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, size_t len);
 
-sdlBindingPtr get_binding_from_type(sdlPtr sdl, sdlBindingType type);
-sdlBindingPtr get_binding_from_name(sdlPtr sdl, char *name, char *ns);
-
 void delete_sdl(sdl *handle);
 void delete_sdl_impl(void *handle);
 
