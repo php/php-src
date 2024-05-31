@@ -65,7 +65,6 @@ static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int inde
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent);
 
 static void delete_service(void *service);
-static void delete_hashtable(void *hashtable);
 static void delete_argv(struct _soap_class *class);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
