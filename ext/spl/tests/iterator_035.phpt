@@ -9,12 +9,17 @@ $a = new ArrayIterator();
 $a[] = $tmp;
 $a[] = &$tmp;
 
+var_dump($a);
 echo "Done\n";
 ?>
---EXPECTF--
-Notice: Indirect modification of overloaded element of ArrayIterator has no effect in %s on line %d
-
-Fatal error: Uncaught Error: Cannot assign by reference to an array dimension of an object in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+object(ArrayIterator)#1 (1) {
+  ["storage":"ArrayIterator":private]=>
+  array(2) {
+    [0]=>
+    int(1)
+    [1]=>
+    &int(1)
+  }
+}
+Done

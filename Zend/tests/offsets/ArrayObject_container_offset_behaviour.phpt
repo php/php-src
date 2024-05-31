@@ -183,49 +183,6 @@ OUTPUT;
 
 $EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_INVALID_OFFSETS) . '$/s';
 
-const EXPECTED_OUTPUT_NULL_OFFSET = <<<OUTPUT
-Read before write:
-
-Warning: Undefined array key "" in %s on line 8
-NULL
-Write:
-Read:
-
-Warning: Undefined array key "" in %s on line 22
-NULL
-Read-Write:
-
-Warning: Undefined array key "" in %s on line 29
-isset():
-bool(false)
-empty():
-bool(true)
-null coalesce:
-string(7) "default"
-Reference to dimension:
-Value of reference:
-NULL
-Value of container dimension after write to reference (should be int(100) if successful):
-int(100)
-unset():
-Nested read:
-
-Warning: Undefined array key "" in %s on line 74
-
-Warning: Trying to access array offset on null in %s on line 74
-NULL
-Nested write:
-Nested Read-Write:
-Nested isset():
-bool(true)
-Nested empty():
-bool(false)
-Nested null coalesce:
-int(30)
-Nested unset():
-
-OUTPUT;
-
 const EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS = <<<OUTPUT
 Read before write:
 
@@ -346,7 +303,6 @@ foreach ($offsets as $dimension) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
-        && $varOutput !== EXPECTED_OUTPUT_NULL_OFFSET
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_ArrayObject_container_{$failuresNb}.txt", $varOutput);
@@ -377,7 +333,6 @@ foreach ($offsets as $offset) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
-        && $varOutput !== EXPECTED_OUTPUT_NULL_OFFSET
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_ArrayObject_container_{$failuresNb}.txt", $varOutput);

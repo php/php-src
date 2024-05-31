@@ -59,12 +59,8 @@ var_dump($y['a2']);
 
 ?>
 --EXPECTF--
-offsetSet('a1')
-offsetGet('a1')
 object(stdClass)#%s (0) {
 }
-offsetGet('a1')
-offsetGet('a1')
 object(stdClass)#%s (1) {
   ["b"]=>
   string(10) "some value"
@@ -73,7 +69,6 @@ offsetSet('a2')
 offsetGet('a2')
 object(stdClass)#%s (0) {
 }
-offsetGet('a2')
 offsetGet('a2')
 object(stdClass)#%s (1) {
   ["b"]=>

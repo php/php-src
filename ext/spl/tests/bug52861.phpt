@@ -1,5 +1,5 @@
 --TEST--
-Bug #52861 (unset failes with ArrayObject and deep arrays)
+Bug #52861 (unset fails with ArrayObject and deep arrays)
 --FILE--
 <?php
 $arrayObject = new ArrayObject(array('foo' => array('bar' => array('baz' => 'boo'))));

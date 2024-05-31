@@ -102,7 +102,7 @@ Cannot unset offset in a non-array variable
 OUTPUT;
 
 ob_start();
-foreach (['A', 'B'] as $class) {
+foreach (['A'] as $class) {
     foreach ($offsets as $dimension) {
         $container = new $class();
         $error = "(new $class())[" . zend_test_var_export($dimension) . '] has different outputs' . "\n";

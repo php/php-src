@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c52e89992bd3c04877daab47f4328af0b6ce619e */
+ * Stub hash: f063d5aafc6624d9b3e15ac572d2f6c68d205919 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_MASK(0, array, MAY_BE_ARRAY|MAY_BE_OBJECT, "[]")
@@ -15,6 +15,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_offs
 	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_offsetFetch, 1, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_offsetSet, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -26,6 +30,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_append, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_fetchAppend, 1, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayObject_getArrayCopy, 0, 0, IS_ARRAY, 0)
@@ -94,11 +101,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator_offsetGet arginfo_class_ArrayObject_offsetGet
 
+#define arginfo_class_ArrayIterator_offsetFetch arginfo_class_ArrayObject_offsetFetch
+
 #define arginfo_class_ArrayIterator_offsetSet arginfo_class_ArrayObject_offsetSet
 
 #define arginfo_class_ArrayIterator_offsetUnset arginfo_class_ArrayObject_offsetUnset
 
 #define arginfo_class_ArrayIterator_append arginfo_class_ArrayObject_append
+
+#define arginfo_class_ArrayIterator_fetchAppend arginfo_class_ArrayObject_fetchAppend
 
 #define arginfo_class_ArrayIterator_getArrayCopy arginfo_class_ArrayObject_getArrayCopy
 
@@ -156,9 +167,11 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(ArrayObject, __construct);
 ZEND_METHOD(ArrayObject, offsetExists);
 ZEND_METHOD(ArrayObject, offsetGet);
+ZEND_METHOD(ArrayObject, offsetFetch);
 ZEND_METHOD(ArrayObject, offsetSet);
 ZEND_METHOD(ArrayObject, offsetUnset);
 ZEND_METHOD(ArrayObject, append);
+ZEND_METHOD(ArrayObject, fetchAppend);
 ZEND_METHOD(ArrayObject, getArrayCopy);
 ZEND_METHOD(ArrayObject, count);
 ZEND_METHOD(ArrayObject, getFlags);
@@ -192,9 +205,11 @@ static const zend_function_entry class_ArrayObject_methods[] = {
 	ZEND_ME(ArrayObject, __construct, arginfo_class_ArrayObject___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, offsetExists, arginfo_class_ArrayObject_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, offsetGet, arginfo_class_ArrayObject_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(ArrayObject, offsetFetch, arginfo_class_ArrayObject_offsetFetch, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, offsetSet, arginfo_class_ArrayObject_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, offsetUnset, arginfo_class_ArrayObject_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, append, arginfo_class_ArrayObject_append, ZEND_ACC_PUBLIC)
+	ZEND_ME(ArrayObject, fetchAppend, arginfo_class_ArrayObject_fetchAppend, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, getArrayCopy, arginfo_class_ArrayObject_getArrayCopy, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, count, arginfo_class_ArrayObject_count, ZEND_ACC_PUBLIC)
 	ZEND_ME(ArrayObject, getFlags, arginfo_class_ArrayObject_getFlags, ZEND_ACC_PUBLIC)
@@ -221,9 +236,11 @@ static const zend_function_entry class_ArrayIterator_methods[] = {
 	ZEND_ME(ArrayIterator, __construct, arginfo_class_ArrayIterator___construct, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("offsetExists", zim_ArrayObject_offsetExists, arginfo_class_ArrayIterator_offsetExists, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("offsetGet", zim_ArrayObject_offsetGet, arginfo_class_ArrayIterator_offsetGet, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetFetch", zim_ArrayObject_offsetFetch, arginfo_class_ArrayIterator_offsetFetch, ZEND_ACC_PUBLIC|ZEND_ACC_RETURN_REFERENCE, NULL, NULL)
 	ZEND_RAW_FENTRY("offsetSet", zim_ArrayObject_offsetSet, arginfo_class_ArrayIterator_offsetSet, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("offsetUnset", zim_ArrayObject_offsetUnset, arginfo_class_ArrayIterator_offsetUnset, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("append", zim_ArrayObject_append, arginfo_class_ArrayIterator_append, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("fetchAppend", zim_ArrayObject_fetchAppend, arginfo_class_ArrayIterator_fetchAppend, ZEND_ACC_PUBLIC|ZEND_ACC_RETURN_REFERENCE, NULL, NULL)
 	ZEND_RAW_FENTRY("getArrayCopy", zim_ArrayObject_getArrayCopy, arginfo_class_ArrayIterator_getArrayCopy, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("count", zim_ArrayObject_count, arginfo_class_ArrayIterator_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getFlags", zim_ArrayObject_getFlags, arginfo_class_ArrayIterator_getFlags, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -254,13 +271,13 @@ static const zend_function_entry class_RecursiveArrayIterator_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_DimensionFetchable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_FetchAppendable, zend_class_entry *class_entry_DimensionUnsetable, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArrayObject", class_ArrayObject_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
+	zend_class_implements(class_entry, 7, class_entry_IteratorAggregate, class_entry_DimensionFetchable, class_entry_DimensionWritable, class_entry_FetchAppendable, class_entry_DimensionUnsetable, class_entry_Serializable, class_entry_Countable);
 
 	zval const_STD_PROP_LIST_value;
 	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);
@@ -277,13 +294,13 @@ static zend_class_entry *register_class_ArrayObject(zend_class_entry *class_entr
 	return class_entry;
 }
 
-static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_entry_SeekableIterator, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_ArrayIterator(zend_class_entry *class_entry_SeekableIterator, zend_class_entry *class_entry_DimensionFetchable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_FetchAppendable, zend_class_entry *class_entry_DimensionUnsetable, zend_class_entry *class_entry_Serializable, zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArrayIterator", class_ArrayIterator_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 4, class_entry_SeekableIterator, class_entry_ArrayAccess, class_entry_Serializable, class_entry_Countable);
+	zend_class_implements(class_entry, 7, class_entry_SeekableIterator, class_entry_DimensionFetchable, class_entry_DimensionWritable, class_entry_FetchAppendable, class_entry_DimensionUnsetable, class_entry_Serializable, class_entry_Countable);
 
 	zval const_STD_PROP_LIST_value;
 	ZVAL_LONG(&const_STD_PROP_LIST_value, SPL_ARRAY_STD_PROP_LIST);

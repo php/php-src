@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayIterator implements ArrayAccess
+SPL: ArrayObject implements ArrayAccess
 --FILE--
 <?php
 

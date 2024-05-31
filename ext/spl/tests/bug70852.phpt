@@ -10,6 +10,4 @@ var_dump($y[NULL]++);
 --EXPECTF--
 Warning: Undefined array key "" in %s on line %d
 NULL
-
-Warning: Undefined array key "" in %s on line %d
 NULL

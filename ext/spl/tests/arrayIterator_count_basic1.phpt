@@ -1,16 +1,16 @@
 --TEST--
-SPL: ArrayObject::count() basic functionality.
+SPL: ArrayIterator::count() basic functionality.
 --FILE--
-==ArrayObject==
+==ArrayIterator==
 <?php
-class C extends ArrayObject {
+class D extends ArrayIterator {
   function count(): int {
     return 99;
   }
 }
 
-$c = new C;
-$ao = new ArrayObject;
+$c = new D;
+$ao = new ArrayIterator;
 
 var_dump(count($c), count($ao));
 
@@ -27,7 +27,7 @@ unset($ao[0]);
 var_dump($c->count(), $ao->count());
 ?>
 --EXPECT--
-==ArrayObject==
+==ArrayIterator==
 int(99)
 int(0)
 int(99)

@@ -54,9 +54,14 @@ Error: Cannot use a scalar value as an array
 new stdClass() container:
 Error: Cannot use object of type stdClass as array
 new ArrayObject() container:
-
-Notice: Indirect modification of overloaded element of ArrayObject has no effect in %s on line %d
-Error: ArrayObject::fetchAppend() must return a reference type
+object(ArrayObject)#2 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(1) {
+    [0]=>
+    &NULL
+  }
+}
+NULL
 new A() container:
 string(12) "A::offsetGet"
 NULL
@@ -66,13 +71,11 @@ object(A)#3 (0) {
 }
 int(5)
 new B() container:
-string(12) "B::offsetGet"
-NULL
-
-Notice: Indirect modification of overloaded element of B has no effect in %s on line %d
 object(B)#4 (1) {
   ["storage":"ArrayObject":private]=>
-  array(0) {
+  array(1) {
+    [0]=>
+    &NULL
   }
 }
-int(5)
+NULL

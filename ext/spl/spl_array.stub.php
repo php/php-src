@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
+class ArrayObject implements IteratorAggregate, DimensionFetchable, DimensionWritable, FetchAppendable, DimensionUnsetable, Serializable, Countable
 {
     /** @cvalue SPL_ARRAY_STD_PROP_LIST */
     public const int STD_PROP_LIST = UNKNOWN;
@@ -17,6 +17,8 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     /** @tentative-return-type */
     public function offsetGet(mixed $key): mixed {}
 
+    public function &offsetFetch(mixed $offset): mixed {}
+
     /** @tentative-return-type */
     public function offsetSet(mixed $key, mixed $value): void {}
 
@@ -25,6 +27,8 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
 
     /** @tentative-return-type */
     public function append(mixed $value): void {}
+
+    public function &fetchAppend(): mixed {}
 
     /** @tentative-return-type */
     public function getArrayCopy(): array {}
@@ -84,7 +88,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function __debugInfo(): array {}
 }
 
-class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
+class ArrayIterator implements SeekableIterator, DimensionFetchable, DimensionWritable, FetchAppendable, DimensionUnsetable, Serializable, Countable
 {
     /** @cvalue SPL_ARRAY_STD_PROP_LIST */
     public const int STD_PROP_LIST = UNKNOWN;
@@ -105,6 +109,9 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
      */
     public function offsetGet(mixed $key): mixed {}
 
+    /** @implementation-alias ArrayObject::offsetFetch */
+    public function &offsetFetch(mixed $offset): mixed {}
+
     /**
      * @tentative-return-type
      * @implementation-alias ArrayObject::offsetSet
@@ -122,6 +129,9 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
      * @implementation-alias ArrayObject::append
      */
     public function append(mixed $value): void {}
+
+    /** @implementation-alias ArrayObject::fetchAppend */
+    public function &fetchAppend(): mixed {}
 
     /**
      * @tentative-return-type

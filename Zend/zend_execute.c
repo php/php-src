@@ -2923,12 +2923,18 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			ZVAL_UNDEF(result);
 			goto clean_up;
 		}
-		if (!Z_ISREF_P(retval) && Z_TYPE_P(retval) != IS_OBJECT) {
+		if (
+			!Z_ISREF_P(retval)
+			&& Z_TYPE_P(retval) != IS_OBJECT
+		) {
 			zend_class_entry *ce = obj->ce;
 			zend_throw_error(NULL, "%s::%s() must return a reference type",
 				ZSTR_VAL(ce->name), offset ? "offsetFetch" : "fetchAppend");
 			ZVAL_UNDEF(result);
 			goto clean_up;
+		}
+		if (result != retval) {
+			ZVAL_INDIRECT(result, retval);
 		}
 	} else {
 		zend_use_object_as_array(obj);

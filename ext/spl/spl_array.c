@@ -47,9 +47,6 @@ typedef struct _spl_array_object {
 	bool			  is_child;
 	Bucket			  *bucket;
 	zend_function     *fptr_offset_get;
-	zend_function     *fptr_offset_set;
-	zend_function     *fptr_offset_has;
-	zend_function     *fptr_offset_del;
 	zend_function     *fptr_count;
 	zend_class_entry* ce_get_iterator;
 	zend_object       std;
@@ -200,18 +197,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (intern->fptr_offset_get->common.scope == parent) {
 			intern->fptr_offset_get = NULL;
 		}
-		intern->fptr_offset_set = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
-		if (intern->fptr_offset_set->common.scope == parent) {
-			intern->fptr_offset_set = NULL;
-		}
-		intern->fptr_offset_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
-		if (intern->fptr_offset_has->common.scope == parent) {
-			intern->fptr_offset_has = NULL;
-		}
-		intern->fptr_offset_del = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset",  sizeof("offsetunset") - 1);
-		if (intern->fptr_offset_del->common.scope == parent) {
-			intern->fptr_offset_del = NULL;
-		}
+
 		/* Find count() method */
 		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
@@ -258,10 +244,11 @@ static void spl_hash_key_release(spl_hash_key *key) {
 
 /* This function does not throw any exceptions for illegal offsets, calls to
  * zend_illegal_container_offset(); need to be made if the return value is FAILURE */
-static zend_result get_hash_key(spl_hash_key *key, spl_array_object *intern, zval *offset)
+static zend_result get_hash_key(spl_hash_key *key, spl_array_object *intern, const zval *offset)
 {
+	ZEND_ASSERT(Z_TYPE_P(offset) != IS_REFERENCE);
 	key->release_key = false;
-try_again:
+
 	switch (Z_TYPE_P(offset)) {
 	case IS_NULL:
 		key->key = ZSTR_EMPTY_ALLOC();
@@ -294,9 +281,6 @@ try_again:
 		key->key = NULL;
 		key->h = Z_LVAL_P(offset);
 		break;
-	case IS_REFERENCE:
-		ZVAL_DEREF(offset);
-		goto try_again;
 	default:
 		return FAILURE;
 	}
@@ -308,16 +292,17 @@ try_again:
 	return SUCCESS;
 }
 
-static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object *intern, const zend_string *ce_name,
-	zval *offset, int type) /* {{{ */
-{
+static zval *spl_array_get_dimension_ptr(
+	spl_array_object *intern,
+	const zend_string *ce_name,
+	const zval *offset,
+	int type
+) {
 	zval *retval;
 	spl_hash_key key;
 	HashTable *ht = spl_array_get_hash_table(intern);
 
-	if (!offset || Z_ISUNDEF_P(offset) || !ht) {
-		return &EG(uninitialized_zval);
-	}
+	ZEND_ASSERT(ht);
 
 	if ((type == BP_VAR_W || type == BP_VAR_RW) && intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
@@ -395,58 +380,37 @@ static zval *spl_array_get_dimension_ptr(bool check_inherited, spl_array_object 
 		}
 	}
 	return retval;
-} /* }}} */
+}
 
-static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty);
-
-static zval *spl_array_read_dimension_ex(int check_inherited, zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
+static zval *spl_array_read_dimension_ex(zend_object *object, const zval *offset, int type, zval *rv) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
-	zval *ret;
+	zval *ret = spl_array_get_dimension_ptr(intern, object->ce->name, offset, type);
 
-	if (check_inherited &&
-			(intern->fptr_offset_get || (type == BP_VAR_IS && intern->fptr_offset_has))) {
-		if (type == BP_VAR_IS) {
-			if (!spl_array_has_dimension(object, offset, 0)) {
-				return &EG(uninitialized_zval);
-			}
-		}
-
-		if (intern->fptr_offset_get) {
-			zval tmp;
-			if (!offset) {
-				ZVAL_UNDEF(&tmp);
-				offset = &tmp;
-			}
-			zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
-
-			if (!Z_ISUNDEF_P(rv)) {
-				return rv;
-			}
-			return &EG(uninitialized_zval);
-		}
+	if (ret == &EG(error_zval) || EG(exception)) {
+		return NULL;
 	}
 
-	ret = spl_array_get_dimension_ptr(check_inherited, intern, object->ce->name, offset, type);
-
-	/* When in a write context,
-	 * ZE has to be fooled into thinking this is in a reference set
-	 * by separating (if necessary) and returning as IS_REFERENCE (with refcount == 1)
-	 */
-
-	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
-	    !Z_ISREF_P(ret) &&
-	    EXPECTED(ret != &EG(uninitialized_zval))) {
-		ZVAL_NEW_REF(ret, ret);
+	if (type == BP_VAR_W) {
+		ZVAL_MAKE_REF(ret);
+		//ZVAL_COPY(rv, ret);
+		return ret;
+	} else {
+		ZVAL_COPY_DEREF(rv, ret);
+		return rv;
 	}
 
-	return ret;
 } /* }}} */
 
-static zval *spl_array_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
+static zval *spl_array_read_dimension(zend_object *object, /* const */ zval *offset, zval *rv) /* {{{ */
 {
-	return spl_array_read_dimension_ex(1, object, offset, type, rv);
+	return spl_array_read_dimension_ex(object, offset, BP_VAR_R, rv);
 } /* }}} */
+
+static zval *spl_array_fetch_dimension(zend_object *object, /* const */ zval *offset, zval *rv)
+{
+	return spl_array_read_dimension_ex(object, offset, BP_VAR_W, rv);
+}
 
 /*
  * The assertion(HT_ASSERT_RC1(ht)) failed because the refcount was increased manually when intern->is_child is true.
@@ -464,22 +428,10 @@ static uint32_t spl_array_set_refcount(bool is_child, HashTable *ht, uint32_t re
 	return old_refcount;
 } /* }}} */
 
-static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_write_dimension(zend_object *object, /* const */ zval *offset, zval *value) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
-	HashTable *ht;
 	spl_hash_key key;
-
-	if (check_inherited && intern->fptr_offset_set) {
-		zval tmp;
-
-		if (!offset) {
-			ZVAL_NULL(&tmp);
-			offset = &tmp;
-		}
-		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
-		return;
-	}
 
 	if (intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
@@ -489,16 +441,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	Z_TRY_ADDREF_P(value);
 
 	uint32_t refcount = 0;
-	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
-		ht = spl_array_get_hash_table(intern);
-		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
-		zend_hash_next_index_insert(ht, value);
-
-		if (refcount) {
-			spl_array_set_refcount(intern->is_child, ht, refcount);
-		}
-		return;
-	}
+	HashTable *ht = spl_array_get_hash_table(intern);
 
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_W);
@@ -506,7 +449,6 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	ht = spl_array_get_hash_table(intern);
 	refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 	if (key.key) {
 		zend_hash_update_ind(ht, key.key, value);
@@ -520,21 +462,60 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 } /* }}} */
 
-static void spl_array_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_append(zend_object *object, zval *value)
 {
-	spl_array_write_dimension_ex(1, object, offset, value);
-} /* }}} */
-
-static void spl_array_unset_dimension_ex(int check_inherited, zend_object *object, zval *offset) /* {{{ */
-{
-	HashTable *ht;
 	spl_array_object *intern = spl_array_from_obj(object);
-	spl_hash_key key;
 
-	if (check_inherited && intern->fptr_offset_del) {
-		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_del, "offsetUnset", NULL, offset);
+	if (spl_array_is_object(intern)) {
+		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
 		return;
 	}
+	if (intern->nApplyCount > 0) {
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
+		return;
+	}
+
+	Z_TRY_ADDREF_P(value);
+	HashTable *ht = spl_array_get_hash_table(intern);
+	uint32_t refcount = spl_array_set_refcount(intern->is_child, ht, 1);
+	zend_hash_next_index_insert(ht, value);
+
+	if (refcount) {
+		spl_array_set_refcount(intern->is_child, ht, refcount);
+	}
+}
+
+static zval* spl_array_fetch_append(zend_object *object, zval *rv)
+{
+	spl_array_object *intern = spl_array_from_obj(object);
+
+	if (spl_array_is_object(intern)) {
+		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
+		return NULL;
+	}
+
+	HashTable *ht = spl_array_get_hash_table(intern);
+	uint32_t refcount = spl_array_set_refcount(intern->is_child, ht, 1);
+
+	zval dummy;
+	ZVAL_NULL(&dummy);
+	zval *ret = zend_hash_next_index_insert(ht, &dummy);
+
+	if (refcount) {
+		spl_array_set_refcount(intern->is_child, ht, refcount);
+	}
+
+	// TODO Use indirect to fix "Cannot assign by reference to an array dimension of an object" Error being thrown?
+	ZVAL_MAKE_REF(ret);
+	ZVAL_COPY(rv, ret);
+
+	return rv;
+}
+
+static void spl_array_unset_dimension(zend_object *object, /* const */ zval *offset) /* {{{ */
+{
+	spl_array_object *intern = spl_array_from_obj(object);
+	spl_hash_key key;
 
 	if (intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
@@ -546,7 +527,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
-	ht = spl_array_get_hash_table(intern);
+	HashTable *ht = spl_array_get_hash_table(intern);
 	uint32_t refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 
 	if (key.key) {
@@ -577,80 +558,27 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 } /* }}} */
 
-static void spl_array_unset_dimension(zend_object *object, zval *offset) /* {{{ */
-{
-	spl_array_unset_dimension_ex(1, object, offset);
-} /* }}} */
-
-/* check_empty can take value 0, 1, or 2
- * 0/1 are used as normal boolean, but 2 is used for the case when this function is called from
- * the offsetExists() method, in which case it needs to report the offset exist even if the value is null */
-static bool spl_array_has_dimension_ex(bool check_inherited, zend_object *object, zval *offset, int check_empty) /* {{{ */
+static bool spl_array_has_dimension(zend_object *object, /* const */ zval *offset) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
-	zval rv, *value = NULL, *tmp;
+	zval *tmp = NULL;
 
-	if (check_inherited && intern->fptr_offset_has) {
-		zend_call_method_with_1_params(object, object->ce, &intern->fptr_offset_has, "offsetExists", &rv, offset);
+	const HashTable *ht = spl_array_get_hash_table(intern);
+	spl_hash_key key;
 
-		if (!zend_is_true(&rv)) {
-			zval_ptr_dtor(&rv);
-			return 0;
-		}
-		zval_ptr_dtor(&rv);
-
-		/* For isset calls we don't need to check the value, so return early */
-		if (!check_empty) {
-			return 1;
-		} else if (intern->fptr_offset_get) {
-			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv);
-		}
+	if (get_hash_key(&key, intern, offset) == FAILURE) {
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
+		return false;
 	}
 
-	if (!value) {
-		HashTable *ht = spl_array_get_hash_table(intern);
-		spl_hash_key key;
-
-		if (get_hash_key(&key, intern, offset) == FAILURE) {
-			zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
-			return 0;
-		}
-
-		if (key.key) {
-			tmp = zend_hash_find(ht, key.key);
-			spl_hash_key_release(&key);
-		} else {
-			tmp = zend_hash_index_find(ht, key.h);
-		}
-
-		if (!tmp) {
-			return 0;
-		}
-
-		/* check_empty is only equal to 2 if it is called from offsetExists on this class,
-		 * where it needs to report an offset exists even if the value is null */
-		if (check_empty == 2) {
-			return 1;
-		}
-
-		if (check_empty && check_inherited && intern->fptr_offset_get) {
-			value = spl_array_read_dimension_ex(1, object, offset, BP_VAR_R, &rv);
-		} else {
-			value = tmp;
-		}
+	if (key.key) {
+		tmp = zend_hash_find(ht, key.key);
+		spl_hash_key_release(&key);
+	} else {
+		tmp = zend_hash_index_find(ht, key.h);
 	}
 
-	if (value == &rv) {
-		zval_ptr_dtor(&rv);
-	}
-
-	/* empty() check the value is not falsy, isset() only check it is not null */
-	return check_empty ? zend_is_true(value) : Z_TYPE_P(value) != IS_NULL;
-} /* }}} */
-
-static int spl_array_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
-{
-	return spl_array_has_dimension_ex(/* check_inherited */ true, object, offset, check_empty);
+	return tmp != NULL;
 } /* }}} */
 
 /* {{{ Returns whether the requested $index exists. */
@@ -660,21 +588,39 @@ PHP_METHOD(ArrayObject, offsetExists)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
-	RETURN_BOOL(spl_array_has_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), index, 2));
+	RETURN_BOOL(spl_array_has_dimension(Z_OBJ_P(ZEND_THIS), index));
 } /* }}} */
 
 /* {{{ Returns the value at the specified $index. */
 PHP_METHOD(ArrayObject, offsetGet)
 {
-	zval *value, *index;
+	zval *index;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
-	value = spl_array_read_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, BP_VAR_R, return_value);
-	if (value != return_value) {
-		RETURN_COPY_DEREF(value);
+
+	zval *value = spl_array_read_dimension(Z_OBJ_P(ZEND_THIS), index, return_value);
+	if (value == NULL) {
+		RETURN_THROWS();
 	}
 } /* }}} */
+
+
+PHP_METHOD(ArrayObject, offsetFetch)
+{
+	zval *index = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	zval *value = spl_array_fetch_dimension(Z_OBJ_P(ZEND_THIS), index, return_value);
+	if (value == NULL) {
+		RETURN_THROWS();
+	}
+	ZVAL_COPY(return_value, value);
+	ZEND_ASSERT(Z_ISREF_P(return_value));
+	ZEND_ASSERT(Z_ISREF_P(value));
+}
 
 /* {{{ Sets the value at the specified $index to $newval. */
 PHP_METHOD(ArrayObject, offsetSet)
@@ -683,19 +629,14 @@ PHP_METHOD(ArrayObject, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
+	spl_array_write_dimension(Z_OBJ_P(ZEND_THIS), index, value);
 } /* }}} */
 
+
+// TODO Remove to just use spl_array_append()
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
-
-	if (spl_array_is_object(intern)) {
-		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
-		return;
-	}
-
-	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
+	spl_array_append(Z_OBJ_P(object), append_value);
 } /* }}} */
 
 /* {{{ Appends the value (cannot be called for objects). */
@@ -706,8 +647,16 @@ PHP_METHOD(ArrayObject, append)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_iterator_append(ZEND_THIS, value);
+	spl_array_append(Z_OBJ_P(ZEND_THIS), value);
 } /* }}} */
+
+PHP_METHOD(ArrayObject, fetchAppend)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	spl_array_fetch_append(Z_OBJ_P(ZEND_THIS), return_value);
+}
 
 /* {{{ Unsets the value at the specified $index. */
 PHP_METHOD(ArrayObject, offsetUnset)
@@ -716,7 +665,7 @@ PHP_METHOD(ArrayObject, offsetUnset)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_unset_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index);
+	spl_array_unset_dimension(Z_OBJ_P(ZEND_THIS), index);
 } /* }}} */
 
 /* {{{ Return a copy of the contained array */
@@ -814,7 +763,7 @@ static zval *spl_array_read_property(zend_object *object, zend_string *name, int
 		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
 		zval member;
 		ZVAL_STR(&member, name);
-		return spl_array_read_dimension(object, &member, type, rv);
+		return spl_array_read_dimension_ex(object, &member, type, rv);
 	}
 	return zend_std_read_property(object, name, type, cache_slot, rv);
 } /* }}} */
@@ -846,7 +795,8 @@ static zval *spl_array_get_property_ptr_ptr(zend_object *object, zend_string *na
 			return NULL;
 		}
 		ZVAL_STR(&member, name);
-		return spl_array_get_dimension_ptr(1, intern, object->ce->name, &member, type);
+
+		return spl_array_get_dimension_ptr(intern, object->ce->name, &member, type);
 	}
 	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 } /* }}} */
@@ -859,7 +809,8 @@ static int spl_array_has_property(zend_object *object, zend_string *name, int ha
 		&& !zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, NULL)) {
 		zval member;
 		ZVAL_STR(&member, name);
-		return spl_array_has_dimension(object, &member, has_set_exists);
+		// TODO Need fixing with empty?
+		return spl_array_has_dimension(object, &member);
 	}
 	return zend_std_has_property(object, name, has_set_exists, cache_slot);
 } /* }}} */
@@ -1871,22 +1822,37 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 }
 /* }}} */
 
+static /* const */ zend_class_dimensions_functions spl_array_dimensions_functions = {
+	.read_dimension  = spl_array_read_dimension,
+	.has_dimension   = spl_array_has_dimension,
+	.fetch_dimension = spl_array_fetch_dimension,
+	.write_dimension = spl_array_write_dimension,
+	.append          = spl_array_append,
+	.fetch_append    = spl_array_fetch_append,
+	.unset_dimension = spl_array_unset_dimension
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_array) */
 PHP_MINIT_FUNCTION(spl_array)
 {
-	spl_ce_ArrayObject = register_class_ArrayObject(zend_ce_aggregate, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
+	spl_ce_ArrayObject = register_class_ArrayObject(
+		zend_ce_aggregate,
+		zend_ce_dimension_fetch,
+		zend_ce_dimension_write,
+		zend_ce_dimension_fetch_append,
+		zend_ce_dimension_unset,
+		zend_ce_serializable,
+		zend_ce_countable
+	);
 	spl_ce_ArrayObject->create_object = spl_array_object_new;
 	spl_ce_ArrayObject->default_object_handlers = &spl_handler_ArrayObject;
+	spl_ce_ArrayObject->dimension_handlers = &spl_array_dimensions_functions;
 
 	memcpy(&spl_handler_ArrayObject, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_ArrayObject.offset = XtOffsetOf(spl_array_object, std);
 
 	spl_handler_ArrayObject.clone_obj = spl_array_object_clone;
-	spl_handler_ArrayObject.read_dimension = spl_array_read_dimension;
-	spl_handler_ArrayObject.write_dimension = spl_array_write_dimension;
-	spl_handler_ArrayObject.unset_dimension = spl_array_unset_dimension;
-	spl_handler_ArrayObject.has_dimension = spl_array_has_dimension;
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
 	spl_handler_ArrayObject.get_properties_for = spl_array_get_properties_for;
@@ -1900,14 +1866,24 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.compare = spl_array_compare_objects;
 	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 
-	spl_ce_ArrayIterator = register_class_ArrayIterator(spl_ce_SeekableIterator, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
+	spl_ce_ArrayIterator = register_class_ArrayIterator(
+		spl_ce_SeekableIterator,
+		zend_ce_dimension_fetch,
+		zend_ce_dimension_write,
+		zend_ce_dimension_fetch_append,
+		zend_ce_dimension_unset,
+		zend_ce_serializable,
+		zend_ce_countable
+	);
 	spl_ce_ArrayIterator->create_object = spl_array_object_new;
 	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayObject;
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
+	spl_ce_ArrayIterator->dimension_handlers = &spl_array_dimensions_functions;
 
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
+	spl_ce_RecursiveArrayIterator->dimension_handlers = &spl_array_dimensions_functions;
 
 	return SUCCESS;
 }
