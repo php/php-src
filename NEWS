@@ -283,6 +283,7 @@ PHP                                                                        NEWS
     as the magic $http_response_header variable.
   . Add php_base64_encode_ex() API. (Remi)
   . Implemented "Raising zero to the power of negative number" RFC. (Jorg Sowa)
+  . Added array_find(), array_find_key(), array_all(), and array_any(). (josh)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

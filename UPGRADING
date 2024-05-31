@@ -566,6 +566,9 @@ PHP 8.4 UPGRADE NOTES
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
   . Added function fpow() following rules of IEEE 754.
+  . Added functions array_find(), array_find_key(), array_all(), and
+    array_any().
+    RFC: https://wiki.php.net/rfc/array_find
 
 - XSL:
   . Added XSLTProcessor::registerPhpFunctionNS().
