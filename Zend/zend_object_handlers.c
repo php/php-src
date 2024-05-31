@@ -159,7 +159,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 	HashTable *ht;
 
 	if (!ce->__debugInfo) {
-		*is_temp = 0;
+		*is_temp = false;
 		return object->handlers->get_properties(object);
 	}
 
@@ -178,14 +178,14 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 			return Z_ARRVAL(retval);
 		}
 	} else if (Z_TYPE(retval) == IS_NULL) {
-		*is_temp = 1;
-		ht = zend_new_array(0);
-		return ht;
+		*is_temp = 0;
+		zval_ptr_dtor(&retval);
+		return (HashTable*)&zend_empty_array;
+	} else {
+		zval_ptr_dtor(&retval);
+		zend_type_error(ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+		return NULL;
 	}
-
-	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
-
-	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
 }
 /* }}} */
 
