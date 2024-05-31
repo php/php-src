@@ -174,13 +174,13 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	return enc;
 }
 
-encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, int len)
+encodePtr get_encoder_ex(sdlPtr sdl, const char *nscat, size_t len)
 {
 	encodePtr enc;
 
-	if ((enc = zend_hash_str_find_ptr(&SOAP_GLOBAL(defEnc), (char*)nscat, len)) != NULL) {
+	if ((enc = zend_hash_str_find_ptr(&SOAP_GLOBAL(defEnc), nscat, len)) != NULL) {
 		return enc;
-	} else if (sdl && sdl->encoders && (enc = zend_hash_str_find_ptr(sdl->encoders, (char*)nscat, len)) != NULL) {
+	} else if (sdl && sdl->encoders && (enc = zend_hash_str_find_ptr(sdl->encoders, nscat, len)) != NULL) {
 		return enc;
 	}
 	return NULL;
