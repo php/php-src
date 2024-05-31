@@ -1583,6 +1583,10 @@ class FuncInfo {
             $flags[] = "ZEND_ACC_DEPRECATED";
         }
 
+        if ($this->return->byRef) {
+            $flags[] = "ZEND_ACC_RETURN_REFERENCE";
+        }
+
         $php82AndAboveFlags = $flags;
         if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
             $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
