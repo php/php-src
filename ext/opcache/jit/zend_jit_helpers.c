@@ -3279,29 +3279,8 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	return ret;
 }
 
-static zend_execute_data* ZEND_FASTCALL zend_jit_observed_frameless_helper_push(zend_execute_data *execute_data, uint32_t stack_size, zend_function *fbc, uint32_t args)
+static void ZEND_FASTCALL zend_jit_observed_frameless_helper(zend_execute_data *execute_data)
 {
-	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(stack_size, ZEND_CALL_NESTED_FUNCTION, fbc, args, NULL);
-	call->prev_execute_data = execute_data;
-	EG(current_execute_data) = call;
-
-	return call;
-}
-
-static void ZEND_FASTCALL zend_jit_observed_frameless_helper_call(zend_execute_data *call, zif_handler handler, void *observer_handler, zval *result)
-{
-	zend_observer_fcall_begin_prechecked(call, observer_handler);
-	handler(call, result);
-	zend_observer_fcall_end(call, result);
-
-	EG(current_execute_data) = call->prev_execute_data;
-	zend_vm_stack_free_args(call);
-
-	uint32_t call_info = ZEND_CALL_INFO(call);
-	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
-		zend_vm_stack_free_call_frame_ex(call_info, call);
-	} else {
-		EG(vm_stack_top) = (zval*)call;
-	}
+	zend_frameless_observed_call(execute_data);
 }
 
