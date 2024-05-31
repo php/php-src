@@ -1028,7 +1028,7 @@ PHP_METHOD(SoapServer, setClass)
 {
 	soapServicePtr service;
 	zend_class_entry *ce = NULL;
-	int num_args = 0;
+	uint32_t num_args = 0;
 	zval *argv = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "C*", &ce, &argv, &num_args) == FAILURE) {
@@ -1047,9 +1047,8 @@ PHP_METHOD(SoapServer, setClass)
 	service->soap_class.persistence = SOAP_PERSISTENCE_REQUEST;
 	service->soap_class.argc = num_args;
 	if (service->soap_class.argc > 0) {
-		int i;
-		service->soap_class.argv = safe_emalloc(sizeof(zval), service->soap_class.argc, 0);
-		for (i = 0;i < service->soap_class.argc;i++) {
+		service->soap_class.argv = safe_emalloc(service->soap_class.argc, sizeof(zval), 0);
+		for (uint32_t i = 0; i < service->soap_class.argc; i++) {
 			ZVAL_COPY(&service->soap_class.argv[i], &argv[i]);
 		}
 	}
@@ -4450,7 +4449,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 static void delete_argv(struct _soap_class *class)
 {
 	if (class->argc) {
-		for (int i = 0; i < class->argc; i++) {
+		for (uint32_t i = 0; i < class->argc; i++) {
 			zval_ptr_dtor(&class->argv[i]);
 		}
 		efree(class->argv);
