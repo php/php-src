@@ -37,7 +37,7 @@ typedef struct _soapHeader {
 	sdlFunctionPtr                    function;
 	zval                              function_name;
 	int                               mustUnderstand;
-	int                               num_params;
+	uint32_t                          num_params;
 	zval                             *parameters;
 	zval                              retval;
 	sdlSoapBindingFunctionHeaderPtr   hdr;
@@ -54,14 +54,14 @@ static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fa
 static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, char *name);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
 
-static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, int index, int);
+static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int);
 static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
 static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params);
 
-static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, const char* actor, zval *function_name, int *num_params, zval **parameters, int *version, soapHeader **headers);
+static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, const char* actor, zval *function_name, uint32_t *num_params, zval **parameters, int *version, soapHeader **headers);
 static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *function_name, const char *uri,zval *ret, soapHeader *headers, int version);
-static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, const char *function_name, const char *uri, zval *arguments, int arg_count, int version, HashTable *soap_headers);
-static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val, int index,const char *name, int style, xmlNodePtr parent);
+static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, const char *function_name, const char *uri, zval *arguments, uint32_t arg_count, int version, HashTable *soap_headers);
+static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val, uint32_t index,const char *name, int style, xmlNodePtr parent);
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, const char *paramName, int style, xmlNodePtr parent);
 
 static void delete_service(soapServicePtr service);
@@ -1244,7 +1244,8 @@ PHP_METHOD(SoapServer, handle)
 	xmlDocPtr doc_request = NULL, doc_return = NULL;
 	zval function_name, *params, *soap_obj, retval;
 	char cont_len[30];
-	int num_params = 0, size, i, call_status = 0;
+	uint32_t num_params = 0;
+	int size, i, call_status = 0;
 	xmlChar *buf;
 	HashTable *function_table;
 	soapHeader *soap_headers = NULL;
@@ -1653,7 +1654,7 @@ fail:
 	zval_ptr_dtor(&retval);
 	while (soap_headers != NULL) {
 		soapHeader *h = soap_headers;
-		int i;
+		uint32_t i;
 
 		soap_headers = soap_headers->next;
 		if (h->parameters) {
@@ -2238,7 +2239,7 @@ static void do_soap_call(zend_execute_data *execute_data,
                          zval* this_ptr,
                          char* function,
                          size_t function_len,
-                         int arg_count,
+                         uint32_t arg_count,
                          zval* real_args,
                          zval* return_value,
                          char* location,
@@ -2480,7 +2481,7 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 	zval *args;
 	zval *real_args = NULL;
 	zval *param;
-	int arg_count;
+	uint32_t arg_count;
 	zval *tmp;
 	bool free_soap_headers = 0;
 	zval *this_ptr;
@@ -2904,9 +2905,9 @@ static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fau
 }
 /* }}} */
 
-static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, int *num_params, zval **parameters) /* {{{ */
+static void deserialize_parameters(xmlNodePtr params, sdlFunctionPtr function, uint32_t *num_params, zval **parameters) /* {{{ */
 {
-	int cur_param = 0,num_of_params = 0;
+	uint32_t cur_param = 0,num_of_params = 0;
 	zval *tmp_parameters = NULL;
 
 	if (function != NULL) {
@@ -3047,7 +3048,7 @@ static xmlNodePtr get_envelope(xmlNodePtr trav, int *version, char **envelope_ns
 	return NULL;
 }
 
-static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, const char* actor, zval *function_name, int *num_params, zval **parameters, int *version, soapHeader **headers) /* {{{ */
+static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, const char* actor, zval *function_name, uint32_t *num_params, zval **parameters, int *version, soapHeader **headers) /* {{{ */
 {
 	char* envelope_ns = NULL;
 	xmlNodePtr trav,env,head,body,func;
@@ -3329,7 +3330,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, co
 {
 	xmlNodePtr method = NULL, param;
 	sdlParamPtr parameter = NULL;
-	int param_count;
+	uint32_t param_count;
 	int style, use;
 	xmlNsPtr ns = NULL;
 
@@ -3800,13 +3801,14 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *fu
 }
 /* }}} */
 
-static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, const char *function_name, const char *uri, zval *arguments, int arg_count, int version, HashTable *soap_headers) /* {{{ */
+static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, const char *function_name, const char *uri, zval *arguments, uint32_t arg_count, int version, HashTable *soap_headers) /* {{{ */
 {
 	xmlDoc *doc;
 	xmlNodePtr envelope = NULL, body, method = NULL, head = NULL;
 	xmlNsPtr ns = NULL;
 	zval *zstyle, *zuse;
-	int i, style, use;
+	uint32_t i;
+	int style, use;
 	HashTable *hdrs = NULL;
 
 	encode_reset_ns();
@@ -3902,7 +3904,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 	}
 
 	if (function && function->requestParameters) {
-		int n = zend_hash_num_elements(function->requestParameters);
+		uint32_t n = zend_hash_num_elements(function->requestParameters);
 
 		if (n > arg_count) {
 			for (i = arg_count; i < n; i++) {
@@ -4000,7 +4002,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 }
 /* }}} */
 
-static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, int index, const char *name, int style, xmlNodePtr parent) /* {{{ */
+static xmlNodePtr serialize_parameter(sdlParamPtr param, zval *param_val, uint32_t index, const char *name, int style, xmlNodePtr parent) /* {{{ */
 {
 	const char *paramName;
 	xmlNodePtr xmlParam;
@@ -4065,7 +4067,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, const char *param
 }
 /* }}} */
 
-static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, int index, int response) /* {{{ */
+static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int response) /* {{{ */
 {
 	sdlParamPtr tmp;
 	HashTable   *ht;
@@ -4107,7 +4109,7 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name) /* {{{
 {
 	sdlFunctionPtr tmp;
 
-	int len = strlen(function_name);
+	size_t len = strlen(function_name);
 	char *str = estrndup(function_name,len);
 	zend_str_tolower(str,len);
 	if (sdl != NULL) {
@@ -4339,7 +4341,7 @@ static void type_to_string(sdlTypePtr type, smart_str *buf, int level) /* {{{ */
 					attr->extraAttributes &&
 				    (ext = zend_hash_str_find_ptr(attr->extraAttributes, WSDL_NAMESPACE":arrayType", sizeof(WSDL_NAMESPACE":arrayType")-1)) != NULL) {
 					char *end = strchr(ext->val, '[');
-					int len;
+					size_t len;
 					if (end == NULL) {
 						len = strlen(ext->val);
 					} else {
