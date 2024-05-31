@@ -112,7 +112,7 @@
 typedef struct {
 	char last_state[6];
 	char last_err_msg[SQL_MAX_MESSAGE_LENGTH];
-	SDWORD last_error;
+	SQLINTEGER last_error;
 	const char *file, *what;
 	int line;
 } pdo_odbc_errinfo;
