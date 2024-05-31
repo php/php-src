@@ -59,7 +59,7 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
 static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr node);
 
 static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, char* actor, zval *function_name, int *num_params, zval **parameters, int *version, soapHeader **headers);
-static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name,char *uri,zval *ret, soapHeader *headers, int version);
+static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *function_name,char *uri,zval *ret, soapHeader *headers, int version);
 static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function, char *function_name, char *uri, zval *arguments, int arg_count, int version, HashTable *soap_headers);
 static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style, xmlNodePtr parent);
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent);
@@ -1582,15 +1582,19 @@ PHP_METHOD(SoapServer, handle)
 			goto fail;
 		}
 
-		if (function && function->responseName) {
-			response_name = estrdup(function->responseName);
+		bool has_response_name = function && function->responseName;
+		if (has_response_name) {
+			response_name = function->responseName;
 		} else {
 			response_name = emalloc(Z_STRLEN(function_name) + sizeof("Response"));
 			memcpy(response_name,Z_STRVAL(function_name),Z_STRLEN(function_name));
 			memcpy(response_name+Z_STRLEN(function_name),"Response",sizeof("Response"));
 		}
 		doc_return = serialize_response_call(function, response_name, service->uri, &retval, soap_headers, soap_version);
-		efree(response_name);
+
+		if (!has_response_name) {
+			efree(response_name);
+		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Function '%s' call failed", Z_STRVAL(function_name));
 		return;
@@ -3325,7 +3329,7 @@ static void set_soap_header_attributes(xmlNodePtr h, zval *header, int version) 
 }
 /* }}} */
 
-static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, char *function_name, char *uri, zval *ret, int version, int main, xmlNodePtr *node) /* {{{ */
+static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, const char *function_name, char *uri, zval *ret, int version, int main, xmlNodePtr *node) /* {{{ */
 {
 	xmlNodePtr method = NULL, param;
 	sdlParamPtr parameter = NULL;
@@ -3427,7 +3431,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 }
 /* }}} */
 
-static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, soapHeader* headers, int version) /* {{{ */
+static xmlDocPtr serialize_response_call(sdlFunctionPtr function, const char *function_name, char *uri, zval *ret, soapHeader* headers, int version) /* {{{ */
 {
 	xmlDocPtr doc;
 	xmlNodePtr envelope = NULL, body, param;
