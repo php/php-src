@@ -66,6 +66,7 @@ static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, 
 static void delete_service(void *service);
 static void delete_url(void *handle);
 static void delete_hashtable(void *hashtable);
+static void delete_argv(struct _soap_class *class);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 
@@ -899,11 +900,9 @@ PHP_METHOD(SoapServer, setPersistence)
 			zend_argument_value_error(
 				1, "must be either SOAP_PERSISTENCE_SESSION or SOAP_PERSISTENCE_REQUEST when the SOAP server is used in class mode"
 			);
-			RETURN_THROWS();
 		}
 	} else {
 		zend_throw_error(NULL, "SoapServer::setPersistence(): Persistence cannot be set when the SOAP server is used in function mode");
-		RETURN_THROWS();
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -929,6 +928,8 @@ PHP_METHOD(SoapServer, setClass)
 
 	service->type = SOAP_CLASS;
 	service->soap_class.ce = ce;
+
+	delete_argv(&service->soap_class);
 
 	service->soap_class.persistence = SOAP_PERSISTENCE_REQUEST;
 	service->soap_class.argc = num_args;
@@ -961,6 +962,7 @@ PHP_METHOD(SoapServer, setObject)
 
 	service->type = SOAP_OBJECT;
 
+	zval_ptr_dtor(&service->soap_object);
 	ZVAL_OBJ_COPY(&service->soap_object, Z_OBJ_P(obj));
 
 	SOAP_SERVER_END_CODE();
@@ -1042,6 +1044,7 @@ PHP_METHOD(SoapServer, addFunction)
 
 				if (Z_TYPE_P(tmp_function) != IS_STRING) {
 					zend_argument_type_error(1, "must contain only strings");
+					SOAP_SERVER_END_CODE();
 					RETURN_THROWS();
 				}
 
@@ -1049,6 +1052,7 @@ PHP_METHOD(SoapServer, addFunction)
 
 				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
 					zend_type_error("SoapServer::addFunction(): Function \"%s\" not found", Z_STRVAL_P(tmp_function));
+					SOAP_SERVER_END_CODE();
 					RETURN_THROWS();
 				}
 
@@ -1066,6 +1070,7 @@ PHP_METHOD(SoapServer, addFunction)
 
 		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
 			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
+			SOAP_SERVER_END_CODE();
 			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
@@ -1086,11 +1091,9 @@ PHP_METHOD(SoapServer, addFunction)
 			service->soap_functions.functions_all = TRUE;
 		} else {
 			zend_argument_value_error(1, "must be SOAP_FUNCTIONS_ALL when an integer is passed");
-			RETURN_THROWS();
 		}
 	} else {
 		zend_argument_type_error(1, "must be of type array|string|int, %s given", zend_zval_value_name(function_name));
-		RETURN_THROWS();
 	}
 
 	SOAP_SERVER_END_CODE();
@@ -1150,6 +1153,7 @@ PHP_METHOD(SoapServer, handle)
 
 	if (arg && ZEND_SIZE_T_INT_OVFL(arg_len)) {
 		soap_server_fault("Server", "Input string is too long", NULL, NULL, NULL);
+		SOAP_SERVER_END_CODE();
 		return;
 	}
 
@@ -1231,10 +1235,12 @@ PHP_METHOD(SoapServer, handle)
 						php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
 					} else {
 						php_error_docref(NULL, E_WARNING,"Can't uncompress compressed request");
+						SOAP_SERVER_END_CODE();
 						return;
 					}
 				} else {
 					php_error_docref(NULL, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_P(encoding));
+					SOAP_SERVER_END_CODE();
 					return;
 				}
 			}
@@ -1246,6 +1252,7 @@ PHP_METHOD(SoapServer, handle)
 			}
 		} else {
 			zval_ptr_dtor(&retval);
+			SOAP_SERVER_END_CODE();
 			return;
 		}
 	} else {
@@ -1520,7 +1527,7 @@ PHP_METHOD(SoapServer, handle)
 			sapi_add_header("Content-Type: text/xml; charset=utf-8", sizeof("Content-Type: text/xml; charset=utf-8")-1, 1);
 		}
 
-		if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+		if (INI_INT("zlib.output_compression")) {
 			sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
 		} else {
 			snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
@@ -1622,6 +1629,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 
 	if (!service || !service->soap_headers_ptr) {
 		zend_throw_error(NULL, "SoapServer::addSoapHeader() may be called only during SOAP request processing");
+		SOAP_SERVER_END_CODE();
 		RETURN_THROWS();
 	}
 
@@ -1668,7 +1676,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 	if (use_http_error_status) {
 		sapi_add_header("HTTP/1.1 500 Internal Server Error", sizeof("HTTP/1.1 500 Internal Server Error")-1, 1);
 	}
-	if (zend_ini_long("zlib.output_compression", sizeof("zlib.output_compression"), 0)) {
+	if (INI_INT("zlib.output_compression")) {
 		sapi_add_header("Connection: close", sizeof("Connection: close")-1, 1);
 	} else {
 		snprintf(cont_len, sizeof(cont_len), "Content-Length: %d", size);
@@ -4342,6 +4350,16 @@ static void delete_url(void *handle) /* {{{ */
 }
 /* }}} */
 
+static void delete_argv(struct _soap_class *class)
+{
+	if (class->argc) {
+		for (int i = 0; i < class->argc; i++) {
+			zval_ptr_dtor(&class->argv[i]);
+		}
+		efree(class->argv);
+	}
+}
+
 static void delete_service(void *data) /* {{{ */
 {
 	soapServicePtr service = (soapServicePtr)data;
@@ -4356,13 +4374,7 @@ static void delete_service(void *data) /* {{{ */
 		efree(service->typemap);
 	}
 
-	if (service->soap_class.argc) {
-		int i;
-		for (i = 0; i < service->soap_class.argc;i++) {
-			zval_ptr_dtor(&service->soap_class.argv[i]);
-		}
-		efree(service->soap_class.argv);
-	}
+	delete_argv(&service->soap_class);
 
 	if (service->actor) {
 		efree(service->actor);

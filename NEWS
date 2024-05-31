@@ -28,6 +28,10 @@ PHP                                                                        NEWS
 
 - Soap:
   . Fixed bug #47925 (PHPClient can't decompress response). (nielsdos)
+  . Fix missing error restore code. (nielsdos)
+  . Fix memory leak if calling SoapServer::setObject() twice. (nielsdos)
+  . Fix memory leak if calling SoapServer::setClass() twice. (nielsdos)
+  . Fix reading zlib ini settings in ext-soap. (nielsdos)
 
 - Sodium:
   . Fix memory leaks in ext/sodium on failure of some functions. (nielsdos)
