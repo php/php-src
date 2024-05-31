@@ -1656,7 +1656,7 @@ static int register_bound_parameter_to_sqlite(struct php_sqlite3_bound_param *pa
 			/* pre-increment for character + 1 for null */
 			zend_string *temp = zend_string_alloc(ZSTR_LEN(param->name) + 1, 0);
 			ZSTR_VAL(temp)[0] = ':';
-			memmove(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
+			memcpy(ZSTR_VAL(temp) + 1, ZSTR_VAL(param->name), ZSTR_LEN(param->name) + 1);
 			param->name = temp;
 		} else {
 			param->name = zend_string_copy(param->name);
