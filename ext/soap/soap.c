@@ -64,7 +64,7 @@ static xmlDocPtr serialize_function_call(zval *this_ptr, sdlFunctionPtr function
 static xmlNodePtr serialize_parameter(sdlParamPtr param,zval *param_val,int index,char *name, int style, xmlNodePtr parent);
 static xmlNodePtr serialize_zval(zval *val, sdlParamPtr param, char *paramName, int style, xmlNodePtr parent);
 
-static void delete_service(void *service);
+static void delete_service(soapServicePtr service);
 static void delete_argv(struct _soap_class *class);
 
 static void soap_error_handler(int error_num, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
@@ -4456,10 +4456,8 @@ static void delete_argv(struct _soap_class *class)
 	}
 }
 
-static void delete_service(void *data) /* {{{ */
+static void delete_service(soapServicePtr service) /* {{{ */
 {
-	soapServicePtr service = (soapServicePtr)data;
-
 	if (service->soap_functions.ft) {
 		zend_hash_destroy(service->soap_functions.ft);
 		efree(service->soap_functions.ft);
