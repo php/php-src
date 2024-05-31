@@ -32,6 +32,7 @@ PHP                                                                        NEWS
   . Fix memory leak if calling SoapServer::setObject() twice. (nielsdos)
   . Fix memory leak if calling SoapServer::setClass() twice. (nielsdos)
   . Fix reading zlib ini settings in ext-soap. (nielsdos)
+  . Fix memory leaks with string function name lookups. (nielsdos)
 
 - Sodium:
   . Fix memory leaks in ext/sodium on failure of some functions. (nielsdos)
