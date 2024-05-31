@@ -133,7 +133,7 @@ typedef struct {
 	char *data;
 	zend_ulong datalen;
 	SQLLEN fetched_len;
-	SWORD	coltype;
+	SQLSMALLINT coltype;
 	char colname[128];
 	unsigned is_long;
 	unsigned is_unicode:1;

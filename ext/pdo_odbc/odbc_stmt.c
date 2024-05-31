@@ -32,7 +32,7 @@ enum pdo_odbc_conv_result {
 	PDO_ODBC_CONV_FAIL
 };
 
-static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SWORD sqltype)
+static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SQLSMALLINT sqltype)
 {
 	if (!S->assume_utf8) return 0;
 	switch (sqltype) {
@@ -287,7 +287,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 {
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	RETCODE rc;
-	SWORD sqltype = 0, ctype = 0, scale = 0, nullable = 0;
+	SQLSMALLINT sqltype = 0, ctype = 0, scale = 0, nullable = 0;
 	SQLULEN precision = 0;
 	pdo_odbc_param *P;
 	zval *parameter;
@@ -563,7 +563,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 	struct pdo_column_data *col = &stmt->columns[colno];
 	RETCODE rc;
-	SWORD	colnamelen;
+	SQLSMALLINT colnamelen;
 	SQLULEN	colsize;
 	SQLLEN displaysize = 0;
 
