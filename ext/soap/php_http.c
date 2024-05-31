@@ -22,6 +22,7 @@
 #include "ext/random/php_random_csprng.h"
 #include "ext/hash/php_hash.h"
 
+static char *get_http_header_value(char *headers, char *type);
 static char *get_http_header_value_ex(char *headers, char *type, size_t *len);
 static char *get_http_header_value_dup(char *headers, char *type);
 static zend_string *get_http_body(php_stream *socketd, int close, char *headers);
@@ -1408,6 +1409,12 @@ static char *get_http_header_value_ex(char *headers, char *type, size_t *len)
 	} while (pos);
 
 	return NULL;
+}
+
+static char *get_http_header_value(char *headers, char *type)
+{
+	size_t len;
+	return get_http_header_value_ex(headers, type, &len);
 }
 
 static char *get_http_header_value_dup(char *headers, char *type)
