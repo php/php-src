@@ -1897,6 +1897,14 @@ function array_reduce(array $array, callable $callback, mixed $initial = null): 
 
 function array_filter(array $array, ?callable $callback = null, int $mode = 0): array {}
 
+function array_find(array $array, callable $callback): mixed {}
+
+function array_find_key(array $array, callable $callback): mixed {}
+
+function array_any(array $array, callable $callback): bool {}
+
+function array_all(array $array, callable $callback): bool {}
+
 function array_map(?callable $callback, array $array, array ...$arrays): array {}
 
 /**
