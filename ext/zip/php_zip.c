@@ -1146,9 +1146,15 @@ static PHP_MSHUTDOWN_FUNCTION(zip);
 static PHP_MINFO_FUNCTION(zip);
 /* }}} */
 
+static const zend_module_dep zip_deps[] = {
+	ZEND_MOD_REQUIRED("pcre")
+	ZEND_MOD_END
+};
+
 /* {{{ zip_module_entry */
 zend_module_entry zip_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	zip_deps,
 	"zip",
 	ext_functions,
 	PHP_MINIT(zip),
