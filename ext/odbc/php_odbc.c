@@ -370,35 +370,6 @@ static PHP_INI_DISP(display_link_nums)
 }
 /* }}} */
 
-/* {{{ PHP_INI_DISP(display_defPW) */
-static PHP_INI_DISP(display_defPW)
-{
-	char *value;
-
-	if (type == PHP_INI_DISPLAY_ORIG && ini_entry->modified) {
-		value = ZSTR_VAL(ini_entry->orig_value);
-	} else if (ini_entry->value) {
-		value = ZSTR_VAL(ini_entry->value);
-	} else {
-		value = NULL;
-	}
-
-	if (value) {
-#if PHP_DEBUG
-		php_printf("%s", value);
-#else
-		PUTS("********");
-#endif
-	} else {
-		if (PG(html_errors)) {
-			PUTS("<i>no value</i>");
-		} else {
-			PUTS("no value");
-		}
-	}
-}
-/* }}} */
-
 /* {{{ PHP_INI_DISP(display_binmode) */
 static PHP_INI_DISP(display_binmode)
 {
@@ -501,12 +472,6 @@ PHP_INI_BEGIN()
 			max_persistent, zend_odbc_globals, odbc_globals, display_link_nums)
 	STD_PHP_INI_ENTRY_EX("odbc.max_links", "-1", PHP_INI_SYSTEM, OnUpdateLong,
 			max_links, zend_odbc_globals, odbc_globals, display_link_nums)
-	STD_PHP_INI_ENTRY("odbc.default_db", NULL, PHP_INI_ALL, OnUpdateString,
-			defDB, zend_odbc_globals, odbc_globals)
-	STD_PHP_INI_ENTRY("odbc.default_user", NULL, PHP_INI_ALL, OnUpdateString,
-			defUser, zend_odbc_globals, odbc_globals)
-	STD_PHP_INI_ENTRY_EX("odbc.default_pw", NULL, PHP_INI_ALL, OnUpdateString,
-			defPW, zend_odbc_globals, odbc_globals, display_defPW)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultlrl", "4096", PHP_INI_ALL, OnUpdateLong,
 			defaultlrl, zend_odbc_globals, odbc_globals, display_lrl)
 	STD_PHP_INI_ENTRY_EX("odbc.defaultbinmode", "1", PHP_INI_ALL, OnUpdateLong,
