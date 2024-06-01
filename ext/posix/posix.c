@@ -1337,3 +1337,101 @@ PHP_FUNCTION(posix_fpathconf)
 	RETURN_LONG(ret);
 }
 #endif
+
+#ifdef HAVE_MKFIFOAT
+PHP_FUNCTION(posix_mkfifoat)
+{
+	zend_string *path;
+	zend_long mode, fd = 0;
+	zval *z_fd;
+	int result;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_ZVAL(z_fd)
+		Z_PARAM_PATH_STR(path)
+		Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
+			zend_argument_type_error(1, "must be of type int|resource, %s given",
+				zend_zval_value_name(z_fd));
+			RETURN_THROWS();
+		}
+	}
+
+	if (php_check_open_basedir_ex(ZSTR_VAL(path), 0)) {
+		RETURN_FALSE;
+	}
+
+	result = mkfifoat(fd, ZSTR_VAL(path), mode);
+	if (result < 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
+
+#ifdef HAVE_MKNODAT
+PHP_FUNCTION(posix_mknodat)
+{
+	zend_string *path;
+	zend_long mode, fd = 0;
+	zend_long major = 0, minor = 0;
+	zval *z_fd;
+	int result;
+	dev_t php_dev = 0;
+
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_ZVAL(z_fd)
+		Z_PARAM_PATH_STR(path)
+		Z_PARAM_LONG(mode)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(major)
+		Z_PARAM_LONG(minor)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(z_fd) == IS_RESOURCE) {
+		if (!php_posix_stream_get_fd(z_fd, &fd)) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (!zend_parse_arg_long(z_fd, &fd, /* is_null */ NULL, /* check_null */ false, /* arg_num */ 1)) {
+			zend_argument_type_error(1, "must be of type int|resource, %s given",
+				zend_zval_value_name(z_fd));
+			RETURN_THROWS();
+		}
+	}
+
+	if (php_check_open_basedir_ex(ZSTR_VAL(path), 0)) {
+		RETURN_FALSE;
+	}
+
+	if ((mode & S_IFCHR) || (mode & S_IFBLK)) {
+		if (major == 0) {
+			zend_argument_value_error(4, "cannot be 0 for the POSIX_S_IFCHR and POSIX_S_IFBLK modes");
+			RETURN_THROWS();
+		} else {
+#ifdef HAVE_MAKEDEV
+			php_dev = makedev(major, minor);
+#else
+			php_error_docref(NULL, E_WARNING, "Cannot create a block or character device, creating a normal file instead");
+#endif
+		}
+	}
+
+	result = mknodat(fd, ZSTR_VAL(path), mode, php_dev);
+	if (result < 0) {
+		POSIX_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	RETURN_TRUE;
+}
+#endif
