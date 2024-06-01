@@ -923,7 +923,7 @@ PHP_METHOD(SoapServer, __construct)
 
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			service->class_map = zend_array_dup(Z_ARRVAL_P(tmp));
+			create_normalized_classmap(&service->class_map, tmp);
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -1395,7 +1395,7 @@ PHP_METHOD(SoapServer, handle)
 	old_encoding = SOAP_GLOBAL(encoding);
 	SOAP_GLOBAL(encoding) = service->encoding;
 	old_class_map = SOAP_GLOBAL(class_map);
-	SOAP_GLOBAL(class_map) = service->class_map;
+	SOAP_GLOBAL(class_map) = Z_ARR(service->class_map);
 	old_typemap = SOAP_GLOBAL(typemap);
 	SOAP_GLOBAL(typemap) = service->typemap;
 	old_features = SOAP_GLOBAL(features);
@@ -2084,7 +2084,7 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
+			create_normalized_classmap(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -4484,10 +4484,7 @@ static void delete_service(soapServicePtr service) /* {{{ */
 	if (service->encoding) {
 		xmlCharEncCloseFunc(service->encoding);
 	}
-	if (service->class_map) {
-		zend_hash_destroy(service->class_map);
-		FREE_HASHTABLE(service->class_map);
-	}
+	zval_ptr_dtor(&service->class_map);
 	zval_ptr_dtor(&service->soap_object);
 	efree(service);
 }
