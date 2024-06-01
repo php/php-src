@@ -258,6 +258,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      equivalent to reading PS(session_status) but works with shared objects too.
    - Added the php_get_session_var_str() API to set a session variable without
      needing to create a zend_string.
+   - The ext/session/php_session.h doesn't transitively include the
+     ext/hash/php_hash.h header anymore.
 
 ========================
 4. OpCode changes

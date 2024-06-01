@@ -18,7 +18,6 @@
 #define PHP_SESSION_H
 
 #include "ext/standard/php_var.h"
-#include "ext/hash/php_hash.h"
 #include "ext/random/php_random.h"
 
 #define PHP_SESSION_API 20161017
