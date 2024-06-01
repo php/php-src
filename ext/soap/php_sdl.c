@@ -20,7 +20,6 @@
 #include "ext/libxml/php_libxml.h"
 #include "libxml/uri.h"
 
-#include "ext/standard/md5.h"
 #include "zend_virtual_cwd.h"
 #include "main/php_open_temporary_file.h"
 

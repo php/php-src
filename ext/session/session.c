@@ -32,7 +32,6 @@
 #include <fcntl.h>
 
 #include "php_ini.h"
-#include "SAPI.h"
 #include "rfc1867.h"
 #include "php_variables.h"
 #include "php_session.h"

@@ -20,10 +20,9 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_basename() */
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
 #include "zend_attributes.h"

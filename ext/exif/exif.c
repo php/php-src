@@ -43,7 +43,7 @@
 #include "exif_arginfo.h"
 #include <math.h>
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* for php_basename() */
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 

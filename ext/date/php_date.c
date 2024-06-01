@@ -15,13 +15,10 @@
  */
 
 #include "php.h"
-#include "php_streams.h"
 #include "php_main.h"
-#include "php_globals.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
-#include "ext/standard/php_math.h"
 #include "php_date.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"

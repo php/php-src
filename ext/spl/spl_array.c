@@ -19,8 +19,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"

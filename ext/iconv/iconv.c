@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "main/php_output.h"
 #include "SAPI.h"

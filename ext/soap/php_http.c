@@ -17,10 +17,7 @@
 */
 
 #include "php_soap.h"
-#include "ext/standard/base64.h"
-#include "ext/standard/md5.h"
-#include "ext/random/php_random_csprng.h"
-#include "ext/hash/php_hash.h"
+#include "ext/hash/php_hash.h" /* For php_hash_bin2hex() */
 
 static char *get_http_header_value_nodup(char *headers, char *type, size_t *len);
 static char *get_http_header_value(char *headers, char *type);
