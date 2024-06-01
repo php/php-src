@@ -27,9 +27,9 @@ var_dump($test);
 --EXPECT--
 object(Test)#1 (1) {
   ["x"]=>
-  int(0)
+  string(1) "0"
 }
 object(Test)#3 (1) {
   ["x"]=>
-  int(1)
+  string(1) "1"
 }
