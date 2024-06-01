@@ -21,7 +21,6 @@
 #include "file.h"
 #include "php_dir.h"
 #include "php_dir_int.h"
-#include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
 #include "dir_arginfo.h"

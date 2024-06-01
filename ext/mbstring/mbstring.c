@@ -28,14 +28,12 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
 #include "ext/standard/exec.h"
-#include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
-#include "libmbfl/mbfl/mbfilter_wchar.h"
 #include "libmbfl/mbfl/eaw_table.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_cjk.h"
@@ -43,13 +41,11 @@
 #include "libmbfl/filters/mbfilter_htmlent.h"
 #include "libmbfl/filters/mbfilter_uuencode.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
-#include "libmbfl/filters/mbfilter_utf8.h"
 #include "libmbfl/filters/mbfilter_utf16.h"
 #include "libmbfl/filters/mbfilter_singlebyte.h"
 #include "libmbfl/filters/translit_kana_jisx0201_jisx0208.h"
 #include "libmbfl/filters/unicode_prop.h"
 
-#include "php_variables.h"
 #include "php_globals.h"
 #include "rfc1867.h"
 #include "php_content_types.h"
@@ -68,6 +64,15 @@
 #include "mbstring_arginfo.h"
 
 #include "rare_cp_bitvec.h"
+
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
+#ifdef __SSE3__
+#include <immintrin.h>
+#include <pmmintrin.h>
+#endif
 
 /* }}} */
 

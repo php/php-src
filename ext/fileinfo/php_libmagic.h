@@ -17,10 +17,7 @@
 #ifndef PHP_LIBMAGIC_H
 #define PHP_LIBMAGIC_H
 
-#include "php_fileinfo.h"
-
 #include "main/php_network.h"
-#include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 
 #ifdef PHP_WIN32

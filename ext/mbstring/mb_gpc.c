@@ -21,15 +21,9 @@
 #include "php_variables.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "mbstring.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/php_mail.h"
 #include "ext/standard/url.h"
-#include "main/php_output.h"
-#include "ext/standard/info.h"
 
 #include "php_globals.h"
-#include "rfc1867.h"
-#include "php_content_types.h"
 #include "SAPI.h"
 #include "TSRM.h"
 

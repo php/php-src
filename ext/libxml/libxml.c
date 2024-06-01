@@ -23,7 +23,6 @@
 #include "SAPI.h"
 
 #include "zend_variables.h"
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 

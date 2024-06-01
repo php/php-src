@@ -19,11 +19,9 @@
 #include "php.h"
 #include <ctype.h>
 #include "php_string.h"
-#include "ext/standard/head.h"
 #include "ext/standard/file.h"
 #include "basic_functions.h"
 #include "exec.h"
-#include "php_globals.h"
 #include "SAPI.h"
 
 #ifdef HAVE_SYS_WAIT_H

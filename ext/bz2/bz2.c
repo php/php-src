@@ -26,7 +26,6 @@
 
 /* PHP Includes */
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "main/php_network.h"
 
 /* for fileno() */

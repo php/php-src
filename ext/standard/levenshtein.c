@@ -15,7 +15,6 @@
  */
 
 #include "php.h"
-#include "php_string.h"
 
 /* {{{ reference_levdist
  * reference implementation, only optimized for memory usage, not speed */

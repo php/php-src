@@ -16,6 +16,8 @@
 
 #include "php_filter.h"
 #include "filter_private.h"
+#include "ext/standard/php_string.h"
+#include "ext/standard/html.h"
 #include "zend_smart_str.h"
 
 /* {{{ STRUCTS */

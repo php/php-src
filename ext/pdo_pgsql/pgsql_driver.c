@@ -22,8 +22,7 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_addcslashes_str() in _pdo_pgsql_escape_credentials() */
 #include "main/php_network.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
