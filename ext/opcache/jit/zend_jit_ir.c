@@ -17078,15 +17078,15 @@ static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 {
 	jit_SET_EX_OPLINE(jit, opline);
 
-	ir_ref skip_observer = IR_UNUSED;
-	if (ZEND_OBSERVER_ENABLED) {
-		skip_observer = jit_frameless_observer(jit, opline);
-	}
-
 	void *function = ZEND_FLF_HANDLER(opline);
 	zend_jit_addr res_addr = RES_ADDR();
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		skip_observer = jit_frameless_observer(jit, opline);
+	}
 
 	ir_CALL_1(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref);
 
@@ -17100,11 +17100,6 @@ static void jit_frameless_icall0(zend_jit_ctx *jit, const zend_op *opline)
 static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
-
-	ir_ref skip_observer = IR_UNUSED;
-	if (ZEND_OBSERVER_ENABLED) {
-		skip_observer = jit_frameless_observer(jit, opline);
-	}
 
 	/* Avoid dropping RC check in case op escapes. */
 	if (op1_info & MAY_BE_RC1) {
@@ -17124,25 +17119,24 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 		op1_ref = jit_ZVAL_DEREF_ref(jit, op1_ref);
 	}
 
-	ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref);
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		skip_observer = jit_frameless_observer(jit, opline);
+	}
 
-	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
+	ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref);
 
 	if (skip_observer != IR_UNUSED) {
 		ir_MERGE_WITH(skip_observer);
 	}
 
+	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	zend_jit_check_exception(jit);
 }
 
 static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
-
-	ir_ref skip_observer = IR_UNUSED;
-	if (ZEND_OBSERVER_ENABLED) {
-		skip_observer = jit_frameless_observer(jit, opline);
-	}
 
 	/* Avoid dropping RC check in case op escapes. */
 	if (op1_info & MAY_BE_RC1) {
@@ -17174,7 +17168,16 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 		op2_ref = jit_ZVAL_DEREF_ref(jit, op2_ref);
 	}
 
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		skip_observer = jit_frameless_observer(jit, opline);
+	}
+
 	ir_CALL_3(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref);
+
+	if (skip_observer != IR_UNUSED) {
+		ir_MERGE_WITH(skip_observer);
+	}
 
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
@@ -17183,22 +17186,12 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 		jit_set_Z_TYPE_INFO(jit, op1_addr, IS_UNDEF);
 	}
 	jit_FREE_OP(jit, opline->op2_type, opline->op2, op2_info, NULL);
-
-	if (skip_observer != IR_UNUSED) {
-		ir_MERGE_WITH(skip_observer);
-	}
-
 	zend_jit_check_exception(jit);
 }
 
 static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint32_t op1_info, uint32_t op2_info, uint32_t op1_data_info)
 {
 	jit_SET_EX_OPLINE(jit, opline);
-
-	ir_ref skip_observer = IR_UNUSED;
-	if (ZEND_OBSERVER_ENABLED) {
-		skip_observer = jit_frameless_observer(jit, opline);
-	}
 
 	/* Avoid dropping RC check in case op escapes. */
 	if (op1_info & MAY_BE_RC1) {
@@ -17242,7 +17235,16 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 		op3_ref = jit_ZVAL_DEREF_ref(jit, op3_ref);
 	}
 
+	ir_ref skip_observer = IR_UNUSED;
+	if (ZEND_OBSERVER_ENABLED) {
+		skip_observer = jit_frameless_observer(jit, opline);
+	}
+
 	ir_CALL_4(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref, op3_ref);
+
+	if (skip_observer != IR_UNUSED) {
+		ir_MERGE_WITH(skip_observer);
+	}
 
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
@@ -17260,11 +17262,6 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 		jit_set_Z_TYPE_INFO(jit, op2_addr, IS_UNDEF);
 	}
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, NULL);
-
-	if (skip_observer != IR_UNUSED) {
-		ir_MERGE_WITH(skip_observer);
-	}
-
 	zend_jit_check_exception(jit);
 }
 

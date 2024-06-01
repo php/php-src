@@ -1540,33 +1540,20 @@ static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *
 	}
 }
 
-static void zend_frameless_observed_call_push(zend_execute_data *call, uint8_t arg, zval *zv, uint8_t op_type) {
-	ZVAL_COPY(ZEND_CALL_VAR_NUM(call, arg), zv);
-	if (op_type & (IS_TMP_VAR|IS_VAR)) {
-		zval_ptr_dtor_nogc(zv);
-		ZVAL_UNDEF(zv);
-	}
-}
-
 ZEND_API void zend_frameless_observed_call(EXECUTE_DATA_D OPLINE_DC)
 {
 	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
 	zend_function *fbc = ZEND_FLF_FUNC(opline);
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 
 	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(num_args, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, num_args, NULL);
 	call->prev_execute_data = execute_data;
 
 	switch (num_args) {
-		case 3: zend_frameless_observed_call_push(call, 2, get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1), (opline+1)->op1_type); ZEND_FALLTHROUGH;
-		case 2: zend_frameless_observed_call_push(call, 1, get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R), opline->op2_type); ZEND_FALLTHROUGH;
-		case 1: zend_frameless_observed_call_push(call, 0, get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R), opline->op1_type);
-
-		if (EG(exception)) {
-			goto free_args;
-		}
+		case 3: ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, 2), zend_get_zval_ptr(opline+1, (opline+1)->op1_type, &(opline+1)->op1, execute_data)); ZEND_FALLTHROUGH;
+		case 2: ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, 1), zend_get_zval_ptr(opline, opline->op2_type, &opline->op2, execute_data)); ZEND_FALLTHROUGH;
+		case 1: ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, 0), zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data));
 	}
 
 	EG(current_execute_data) = call;
@@ -1577,7 +1564,10 @@ ZEND_API void zend_frameless_observed_call(EXECUTE_DATA_D OPLINE_DC)
 
 	EG(current_execute_data) = execute_data;
 
-free_args: ;
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_rethrow_exception(execute_data);
+	}
+
 	zend_vm_stack_free_args(call);
 
 	uint32_t call_info = ZEND_CALL_INFO(call);
