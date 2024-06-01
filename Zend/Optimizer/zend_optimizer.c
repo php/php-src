@@ -31,7 +31,6 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 #include "php.h"
-#include "zend_observer.h"
 
 #ifndef ZEND_OPTIMIZER_MAX_REGISTERED_PASSES
 # define ZEND_OPTIMIZER_MAX_REGISTERED_PASSES 32
@@ -1097,8 +1096,6 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 	}
 #endif
 
-	op_array->T -= ZEND_OBSERVER_ENABLED;
-
 	op_array->fn_flags &= ~ZEND_ACC_DONE_PASS_TWO;
 }
 
@@ -1127,8 +1124,6 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 		op_array->literals = NULL;
 	}
 #endif
-
-	op_array->T += ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
@@ -1237,8 +1232,6 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 		op_array->literals = NULL;
 	}
 #endif
-
-	op_array->T += ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
@@ -1364,7 +1357,7 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 				&ctx->script->function_table,
 				Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 			if (func) {
-				opline->op1.num = zend_vm_calc_ct_used_stack(opline->extended_value, func);
+				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, func);
 			}
 		}
 		opline++;
@@ -1383,7 +1376,7 @@ static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 
 			if (opline && call_info->callee_func && opline->opcode == ZEND_INIT_FCALL) {
 				ZEND_ASSERT(!call_info->is_prototype);
-				opline->op1.num = zend_vm_calc_ct_used_stack(opline->extended_value, call_info->callee_func);
+				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, call_info->callee_func);
 			}
 			call_info = call_info->next_callee;
 		}
