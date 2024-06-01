@@ -2805,7 +2805,7 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 	if (info_data->format == TAG_FMT_UNDEFINED || info_data->format == TAG_FMT_STRING
 	  || (byte_count>1 && (info_data->format == TAG_FMT_BYTE || info_data->format == TAG_FMT_SBYTE))
 	) {
-		memmove(value_ptr, info_data->value.s, byte_count);
+		memcpy(value_ptr, info_data->value.s, byte_count);
 		return value_ptr;
 	} else if (info_data->format == TAG_FMT_BYTE) {
 		*value_ptr = info_data->value.u;
@@ -2849,11 +2849,11 @@ static void* exif_ifd_make_value(image_info_data *info_data, int motorola_intel)
 					data_ptr += 8;
 					break;
 				case TAG_FMT_SINGLE:
-					memmove(data_ptr, &info_value->f, 4);
+					memcpy(data_ptr, &info_value->f, 4);
 					data_ptr += 4;
 					break;
 				case TAG_FMT_DOUBLE:
-					memmove(data_ptr, &info_value->d, 8);
+					memcpy(data_ptr, &info_value->d, 8);
 					data_ptr += 8;
 					break;
 			}
@@ -2906,9 +2906,9 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 			ImageInfo->Thumbnail.size += new_size;
 			/* fill in data */
 			if (ImageInfo->motorola_intel) {
-				memmove(new_data, "MM\x00\x2a\x00\x00\x00\x08", 8);
+				memcpy(new_data, "MM\x00\x2a\x00\x00\x00\x08", 8);
 			} else {
-				memmove(new_data, "II\x2a\x00\x08\x00\x00\x00", 8);
+				memcpy(new_data, "II\x2a\x00\x08\x00\x00\x00", 8);
 			}
 			new_data += 8;
 			php_ifd_set16u(new_data, info_list->count, ImageInfo->motorola_intel);
