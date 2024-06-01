@@ -28,6 +28,8 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 {
 	zend_basic_block *blocks = cfg->blocks;
 
+	zend_check_stack_limit("Try reducing function size");
+
 	while (1) {
 		int i;
 
