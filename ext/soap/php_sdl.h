@@ -94,9 +94,9 @@ typedef struct _sdlSoapBindingFunctionHeader {
 	char                *name;
 	char                *ns;
 	sdlEncodingUse       use;
+	sdlRpcEncodingStyle  encodingStyle; /* not implemented yet */
 	sdlTypePtr           element;
 	encodePtr            encode;
-	sdlRpcEncodingStyle  encodingStyle; /* not implemented yet */
 	HashTable           *headerfaults;  /* array of sdlSoapBindingFunctionHeaderPtr */
 } sdlSoapBindingFunctionHeader, *sdlSoapBindingFunctionHeaderPtr;
 
@@ -195,9 +195,9 @@ typedef enum _sdlForm {
 
 struct _sdlType {
 	sdlTypeKind         kind;
+	char                nillable;
 	char               *name;
 	char               *namens;
-	char                nillable;
 	HashTable          *elements;             /* array of sdlTypePtr */
 	HashTable          *attributes;           /* array of sdlAttributePtr */
 	sdlRestrictionsPtr  restrictions;
