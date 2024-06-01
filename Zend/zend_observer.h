@@ -48,7 +48,9 @@ typedef struct _zend_observer_fcall_handlers {
 #define ZEND_OBSERVER_DATA(function) \
 	((zend_observer_fcall_begin_handler *)&ZEND_OP_ARRAY_EXTENSION((&(function)->common), ZEND_OBSERVER_HANDLE(function)))
 
-#define ZEND_OBSERVER_NONE_OBSERVED ((void *) 3) // Neither begin nor end handler present
+/* Neither begin nor end handler present. Needs to be set in the slot of the begin handler.
+ * Optimization reducing runtime checks. */
+#define ZEND_OBSERVER_NONE_OBSERVED ((void *) 3)
 
 /* Omit zend_observer_fcall_internal_function_extension check, they are set at the same time. */
 #define ZEND_OBSERVER_ENABLED (zend_observer_fcall_op_array_extension != -1)
@@ -84,12 +86,14 @@ ZEND_API void zend_observer_activate(void);
 ZEND_API void zend_observer_shutdown(void);
 
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin(zend_execute_data *execute_data);
+/* prechecked: the call is actually observed. */
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_begin_prechecked(zend_execute_data *execute_data, zend_observer_fcall_begin_handler *observer_data);
 
 static zend_always_inline bool zend_observer_handler_is_unobserved(zend_observer_fcall_begin_handler *handler) {
 	return *handler == ZEND_OBSERVER_NONE_OBSERVED;
 }
 
+/* Initial check for observers has not happened yet or no observers are installed. */
 static zend_always_inline bool zend_observer_fcall_has_no_observers(zend_execute_data *execute_data, bool allow_generator, zend_observer_fcall_begin_handler **handler) {
 	zend_function *function = EX(func);
 	void *ZEND_MAP_PTR(runtime_cache) = ZEND_MAP_PTR(function->common.run_time_cache);
@@ -106,6 +110,7 @@ static zend_always_inline bool zend_observer_fcall_has_no_observers(zend_execute
 	return zend_observer_handler_is_unobserved(*handler);
 }
 
+/* zend_observer_fcall_begin(), but with generator check inlined and optimized away. */
 static zend_always_inline void zend_observer_fcall_begin_specialized(zend_execute_data *execute_data, bool allow_generator) {
 	zend_observer_fcall_begin_handler *handler;
 	if (!zend_observer_fcall_has_no_observers(execute_data, allow_generator, &handler)) {
@@ -115,6 +120,7 @@ static zend_always_inline void zend_observer_fcall_begin_specialized(zend_execut
 
 ZEND_API void ZEND_FASTCALL zend_observer_generator_resume(zend_execute_data *execute_data);
 
+/* prechecked: the call is actually observed. */
 ZEND_API void ZEND_FASTCALL zend_observer_fcall_end_prechecked(zend_execute_data *execute_data, zval *return_value);
 static zend_always_inline void zend_observer_fcall_end(zend_execute_data *execute_data, zval *return_value) {
 	if (execute_data == EG(current_observed_frame)) {

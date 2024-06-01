@@ -3278,4 +3278,3 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	*target = '\0';
 	return ret;
 }
-

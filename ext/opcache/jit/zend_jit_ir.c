@@ -4485,6 +4485,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 	if (func) {
 		ZEND_ASSERT((func->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) == 0);
 	} else {
+		// JIT: if (function->common.fn_flags & (ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_GENERATOR)) {
 		ZEND_ASSERT(rx != IR_UNUSED);
 		ir_ref if_trampoline_or_generator = ir_IF(ir_AND_U32(
 			ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
@@ -4494,6 +4495,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		ir_IF_FALSE(if_trampoline_or_generator);
 	}
 	if (func && (func->common.fn_flags & ZEND_ACC_CLOSURE) == 0 && ZEND_MAP_PTR_IS_OFFSET(func->common.run_time_cache)) {
+		// JIT: ZEND_MAP_PTR_GET_IMM(func->common.runtime_cache)
 		run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)), (uintptr_t)ZEND_MAP_PTR(func->common.run_time_cache)));
 	} else {
 		ZEND_ASSERT(rx != IR_UNUSED);
@@ -4501,6 +4503,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		if (func && ZEND_USER_CODE(func->type)) { // not a closure and definitely not an internal function
 			run_time_cache = ir_LOAD_A(jit_CALL(rx, run_time_cache));
 		} else {
+			// JIT: ZEND_MAP_PTR_GET(func->common.runtime_cache)
 			run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CALL(rx, func)), offsetof(zend_op_array, run_time_cache__ptr)));
 			ir_ref if_odd = ir_IF(ir_AND_A(run_time_cache, ir_CONST_ADDR(1)));
 			ir_IF_TRUE(if_odd);
@@ -4510,6 +4513,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 			ir_ref if_odd_end = ir_END();
 			ir_IF_FALSE(if_odd);
 
+			// JIT: if (func->common.runtime_cache != NULL) {
 			ir_ref if_rt_cache = ir_IF(ir_EQ(run_time_cache, IR_NULL));
 			ir_IF_TRUE(if_rt_cache);
 			ir_END_list(data.ir_end_inputs);
@@ -4519,12 +4523,13 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 			run_time_cache = ir_PHI_2(IR_ADDR, run_time_cache, run_time_cache2);
 		}
 	}
+	// JIT: observer_handler = runtime_cache + ZEND_OBSERVER_HANDLE(function)
 	if (func) {
 		*observer_handler = ir_ADD_OFFSET(run_time_cache, ZEND_OBSERVER_HANDLE(func) * sizeof(void *));
 	} else {
-		// JIT: if (ZEND_USER_CODE(func->type)) {
+		// JIT: (func->type == ZEND_INTERNAL_FUNCTION ? zend_observer_fcall_internal_function_extension : zend_observer_fcall_op_array_extension) * sizeof(void *)
 		ir_ref tmp = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type)));
-		ir_ref if_internal_func = ir_IF(ir_AND_U8(tmp, ir_CONST_U8(1)));
+		ir_ref if_internal_func = ir_IF(ir_AND_U8(tmp, ir_CONST_U8(ZEND_INTERNAL_FUNCTION)));
 		ir_IF_TRUE(if_internal_func);
 		
 		ir_ref observer_handler_internal = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_internal_function_extension * sizeof(void *));
@@ -4538,11 +4543,13 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		*observer_handler = ir_PHI_2(IR_ADDR, observer_handler_internal, observer_handler_user);
 	}
 
+	// JIT: if (*observer_handler == ZEND_OBSERVER_NONE_OBSERVED) {
 	data.if_unobserved = ir_IF(ir_EQ(ir_LOAD_A(*observer_handler), ir_CONST_ADDR(ZEND_OBSERVER_NONE_OBSERVED)));
 	ir_IF_FALSE(data.if_unobserved);
 	return data;
 }
 
+/* For frameless the true branch of if_unobserved is used and this function not called. */
 static void jit_observer_fcall_is_unobserved_end(zend_jit_ctx *jit, struct jit_observer_fcall_is_unobserved_data *data) {
 	ir_END_list(data->ir_end_inputs);
 	ir_IF_TRUE(data->if_unobserved);
@@ -4555,6 +4562,7 @@ static void jit_observer_fcall_begin(zend_jit_ctx *jit, ir_ref rx, ir_ref observ
 }
 
 static void jit_observer_fcall_end(zend_jit_ctx *jit, ir_ref rx, ir_ref res_ref) {
+	// JIT: if (execute_data == EG(current_observed_frame)) {
 	ir_ref has_end_observer = ir_IF(ir_EQ(rx, ir_LOAD_A(jit_EG(current_observed_frame))));
 	ir_IF_TRUE(has_end_observer);
 	ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_observer_fcall_end_prechecked),
@@ -17058,7 +17066,7 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline) {
 	// Not need for runtime cache or generator checks here, we just need if_unobserved
 	ir_ref if_unobserved = jit_observer_fcall_is_unobserved_start(jit, fbc, &observer_handler, IR_UNUSED, IR_UNUSED).if_unobserved;
 
-	// push call frame
+	// Call zend_frameless_observed_call for the main logic. 
 	if (GCC_GLOBAL_REGS) {
 		// FP register will point to the right place, but zend_frameless_observed_call needs IP to be also pointing to the precise opline.
 		ir_ref old_ip = ir_HARD_COPY_A(ir_RLOAD_A(ZREG_IP));
@@ -17150,7 +17158,6 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	zend_jit_addr res_addr = RES_ADDR();
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
-
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);
@@ -17210,7 +17217,6 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	zend_jit_addr op1_addr = OP1_ADDR();
 	zend_jit_addr op2_addr = OP2_ADDR();
 	zend_jit_addr op3_addr = OP1_DATA_ADDR();
-
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);

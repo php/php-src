@@ -199,6 +199,7 @@ ZEND_API void zend_observer_add_begin_handler(zend_function *function, zend_obse
 ZEND_API bool zend_observer_remove_begin_handler(zend_function *function, zend_observer_fcall_begin_handler begin, zend_observer_fcall_begin_handler *next) {
 	void **begin_handlers = (void **)ZEND_OBSERVER_DATA(function);
 	if (zend_observer_remove_handler(begin_handlers, begin, (void**)next)) {
+		// Ensure invariant: ZEND_OBSERVER_NONE_OBSERVED in begin_handlers if both are not observed
 		if (*begin_handlers == ZEND_OBSERVER_NOT_OBSERVED) {
 			size_t registered_observers = zend_observers_fcall_list.count;
 			if (begin_handlers[registered_observers] /* first end handler */ == ZEND_OBSERVER_NOT_OBSERVED) {
@@ -230,6 +231,7 @@ ZEND_API bool zend_observer_remove_end_handler(zend_function *function, zend_obs
 	void **begin_handlers = (void **)ZEND_OBSERVER_DATA(function);
 	void **end_handlers = begin_handlers + registered_observers;
 	if (zend_observer_remove_handler(end_handlers, end, (void**)next)) {
+		// Ensure invariant: ZEND_OBSERVER_NONE_OBSERVED in begin_handlers if both are not observed
 		if (*begin_handlers == ZEND_OBSERVER_NOT_OBSERVED && *end_handlers == ZEND_OBSERVER_NOT_OBSERVED) {
 			*begin_handlers = ZEND_OBSERVER_NONE_OBSERVED;
 		}

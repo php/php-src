@@ -1860,7 +1860,8 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 			}
 			zend_function *func = ZEND_FLF_FUNC(opline);
 			/* Assume frameless functions are not recursive with themselves.
-			 * This condition may be true when observers are enabled. */
+			 * This condition may be true when observers are enabled:
+			 * Observers will put a call frame on top of the frameless opcode. */
 			if (last_call && last_call->func == func) {
 				goto not_frameless_call;
 			}
