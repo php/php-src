@@ -2286,7 +2286,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	tmp = Z_CLIENT_SDL_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_OBJECT) {
-#ifdef ZEND_DEBUG
+#if ZEND_DEBUG
 		ZEND_ASSERT(instanceof_function(Z_OBJCE_P(tmp), soap_sdl_class_entry));
 #endif
 		sdl = Z_SOAP_SDL_P(tmp)->sdl;
