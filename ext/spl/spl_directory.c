@@ -29,7 +29,6 @@
 
 #include "php_spl.h"
 #include "spl_functions.h"
-#include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_directory.h"
 #include "spl_directory_arginfo.h"
@@ -1516,7 +1515,6 @@ PHP_METHOD(RecursiveDirectoryIterator, hasChildren)
 /* {{{ Returns an iterator for the current entry if it is a directory */
 PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 {
-	zval zpath, zflags;
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	spl_filesystem_object *subdir;
 	char slash = SPL_HAS_FLAG(intern->flags, SPL_FILE_DIR_UNIXPATHS) ? '/' : DEFAULT_SLASH;
@@ -1529,10 +1527,16 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 		RETURN_THROWS();
 	}
 
-	ZVAL_LONG(&zflags, intern->flags);
-	ZVAL_STR_COPY(&zpath, intern->file_name);
-	spl_instantiate_arg_ex2(Z_OBJCE_P(ZEND_THIS), return_value, &zpath, &zflags);
-	zval_ptr_dtor(&zpath);
+	zval params[2];
+	ZVAL_STR_COPY(&params[0], intern->file_name);
+	ZVAL_LONG(&params[1], intern->flags);
+	/* Instantiate object and call constructor */
+	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
+	zval_ptr_dtor(&params[0]);
+	zval_ptr_dtor(&params[1]);
+	if (is_initialized == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	subdir = spl_filesystem_from_obj(Z_OBJ_P(return_value));
 	if (subdir) {
