@@ -35,6 +35,8 @@ PHP                                                                        NEWS
   . Fix memory leak if calling SoapServer::setClass() twice. (nielsdos)
   . Fix reading zlib ini settings in ext-soap. (nielsdos)
   . Fix memory leaks with string function name lookups. (nielsdos)
+  . Fixed bug #69280 (SoapClient classmap doesn't support fully qualified class
+    name). (nielsdos)
 
 - Sodium:
   . Fix memory leaks in ext/sodium on failure of some functions. (nielsdos)

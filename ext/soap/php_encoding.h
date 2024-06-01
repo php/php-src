@@ -214,6 +214,8 @@ encodePtr get_conversion(int encode);
 void delete_encoder(zval *zv);
 void delete_encoder_persistent(zval *zv);
 
+void create_normalized_classmap(zval *return_value, zval *class_map);
+
 extern const encode defaultEncoding[];
 extern int numDefaultEncodings;
 
