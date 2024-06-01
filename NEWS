@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-14343 (Memory leak in xml and dom). (nielsdos)
 
+- Intl:
+  . Fix reference handling in SpoofChecker. (nielsdos)
+
 - MySQLnd:
   . Partially fix bug GH-10599 (Apache crash on Windows when using a
     self-referencing anonymous function inside a class with an active
