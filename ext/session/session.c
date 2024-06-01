@@ -2998,7 +2998,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 /* }}} */
 
 static const zend_module_dep session_deps[] = { /* {{{ */
-	ZEND_MOD_REQUIRED("spl")
+	ZEND_MOD_OPTIONAL("spl")
 	ZEND_MOD_END
 };
 /* }}} */
