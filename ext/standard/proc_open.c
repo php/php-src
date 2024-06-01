@@ -105,8 +105,20 @@ int openpty(int *master, int *slave, char *name, struct termios *termp, struct w
 
 	/* Getting the slave path and pushing pseudo terminal */
 	sd = open(slaveid, O_NOCTTY|O_RDONLY);
-	if (sd == -1 || ioctl(sd, I_PUSH, "ptem") == -1) {
+	if (sd == -1) {
 		goto fail;
+	}
+	int pt = ioctl(sd, I_FIND, "ptem");
+	if (pt == -1) {
+		goto fail;
+	} else if (pt == 0) {
+		/* The streams pseudo term module must be pushed before the term line discipline module */
+		if (ioctl(sd, I_PUSH, "ptem") == -1) {
+			goto fail;
+		}
+		if (ioctl(sd, I_PUSH, "ldterm") == -1) {
+			goto fail;
+		}
 	}
 	if (termp) {
 		if (tcgetattr(sd, termp) < 0) {
