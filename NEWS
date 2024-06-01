@@ -37,6 +37,7 @@ PHP                                                                        NEWS
   . Fix memory leaks with string function name lookups. (nielsdos)
   . Fixed bug #69280 (SoapClient classmap doesn't support fully qualified class
     name). (nielsdos)
+  . Fixed bug #76232 (SoapClient Cookie Header Semicolon). (nielsdos)
 
 - Sodium:
   . Fix memory leaks in ext/sodium on failure of some functions. (nielsdos)
