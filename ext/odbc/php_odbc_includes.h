@@ -233,9 +233,6 @@ typedef struct odbc_result {
 } odbc_result;
 
 ZEND_BEGIN_MODULE_GLOBALS(odbc)
-	char *defDB;
-	char *defUser;
-	char *defPW;
 	bool allow_persistent;
 	bool check_persistent;
 	zend_long max_persistent;
