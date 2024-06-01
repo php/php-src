@@ -1548,9 +1548,8 @@ static void zend_frameless_observed_call_push(zend_execute_data *call, uint8_t a
 	}
 }
 
-ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
+ZEND_API void zend_frameless_observed_call(EXECUTE_DATA_D OPLINE_DC)
 {
-	const zend_op *opline = EX(opline);
 	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
 	zend_function *fbc = ZEND_FLF_FUNC(opline);
 

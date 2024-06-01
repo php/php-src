@@ -9603,7 +9603,7 @@ ZEND_VM_HELPER(zend_frameless_observed_call, ANY, ANY)
 {
 	USE_OPLINE
 
-	zend_frameless_observed_call(execute_data);
+	zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);

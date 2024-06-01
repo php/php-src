@@ -3069,7 +3069,6 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_pre_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_post_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_rope_end);
-	REGISTER_HELPER(zend_jit_observed_frameless_helper);
 
 #ifndef ZTS
 	REGISTER_DATA(EG(current_execute_data));
@@ -17051,6 +17050,7 @@ static bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa,
 	return 1;
 }
 
+void zend_frameless_observed_call(void); // we just care about the symbol to use it here, IP and FP may need to be passed depending on global regs
 static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline) {
 	// JIT: zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(fbc))
 	ir_ref observer_handler;
@@ -17059,7 +17059,15 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline) {
 	ir_ref if_unobserved = jit_observer_fcall_is_unobserved_start(jit, fbc, &observer_handler, IR_UNUSED, IR_UNUSED).if_unobserved;
 
 	// push call frame
-	ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_observed_frameless_helper), jit_FP(jit));
+	if (GCC_GLOBAL_REGS) {
+		// FP register will point to the right place, but zend_frameless_observed_call needs IP to be also pointing to the precise opline.
+		ir_ref old_ip = ir_HARD_COPY_A(ir_RLOAD_A(ZREG_IP));
+		ir_RSTORE(ZREG_IP, ir_CONST_ADDR(opline));
+		ir_CALL(IR_VOID, ir_CONST_ADDR((size_t)zend_frameless_observed_call));
+		ir_RSTORE(ZREG_IP, old_ip); // restore it so that further offset calculations are not wrong
+	} else {
+		ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)zend_frameless_observed_call), jit_FP(jit), ir_CONST_ADDR(opline));
+	}
 
 	ir_ref skip = ir_END();
 	ir_IF_TRUE(if_unobserved);

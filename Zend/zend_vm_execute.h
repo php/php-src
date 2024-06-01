@@ -3697,7 +3697,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_frameless_ob
 {
 	USE_OPLINE
 
-	zend_frameless_observed_call(execute_data);
+	zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
 
 	if (UNEXPECTED(EG(exception) != NULL)) {
 		zend_rethrow_exception(execute_data);

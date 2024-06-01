@@ -3279,8 +3279,3 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	return ret;
 }
 
-static void ZEND_FASTCALL zend_jit_observed_frameless_helper(zend_execute_data *execute_data)
-{
-	zend_frameless_observed_call(execute_data);
-}
-

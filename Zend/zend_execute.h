@@ -430,8 +430,6 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
 
-ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
-
 zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,
 		uint32_t *arg_num_ptr, void **cache_slot);
