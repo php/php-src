@@ -3710,7 +3710,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 
 #if 0 || 0
 	if (0 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -3744,7 +3744,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_OBSERVE
 
 #if 0 || 1
 	if (1 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -3780,7 +3780,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 
 #if 0 || 0
 	if (0 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -3820,7 +3820,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 
 #if 0 || 1
 	if (1 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -4245,7 +4245,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED_
 
 #if 0 || 0
 	if (0 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -4271,7 +4271,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_OBSERVE
 
 #if 0 || 1
 	if (1 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -37489,7 +37489,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_0_SPEC_UNUSED_
 
 #if 0 || 0
 	if (0 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{
@@ -37509,7 +37509,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_0_SPEC_OBSERVE
 
 #if 0 || 1
 	if (1 && UNEXPECTED(zend_observer_handler_is_unobserved(ZEND_OBSERVER_DATA(ZEND_FLF_FUNC(opline))) == false)) {
-		zend_frameless_observed_call(EXECUTE_DATA_C OPLINE_CC);
+		zend_frameless_observed_call(execute_data);
 	} else
 #endif
 	{

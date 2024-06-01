@@ -1540,11 +1540,11 @@ static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *
 	}
 }
 
-ZEND_API void zend_frameless_observed_call(EXECUTE_DATA_D OPLINE_DC)
+ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
 {
+	const zend_op *opline = EX(opline);
 	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
 	zend_function *fbc = ZEND_FLF_FUNC(opline);
-
 	zval *result = EX_VAR(opline->result.var);
 
 	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(num_args, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, num_args, NULL);
