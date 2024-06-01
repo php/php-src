@@ -458,6 +458,7 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 	 * to pretend the exception happened during the YIELD opcode. */
 	EG(current_execute_data) = generator->execute_data;
 	generator->execute_data->opline--;
+	generator->execute_data->prev_execute_data = original_execute_data;
 
 	if (exception) {
 		zend_throw_exception_object(exception);
