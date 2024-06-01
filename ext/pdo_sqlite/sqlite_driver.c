@@ -27,6 +27,8 @@
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
 #include "sqlite_driver_arginfo.h"
+#include "ext/standard/php_string.h"
+#include "zend_smart_str.h"
 
 int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line) /* {{{ */
 {
@@ -219,19 +221,80 @@ static zend_string *pdo_sqlite_last_insert_id(pdo_dbh_t *dbh, const zend_string 
 	return zend_i64_to_str(sqlite3_last_insert_rowid(H->db));
 }
 
-/* NB: doesn't handle binary strings... use prepared stmts for that */
 static zend_string* sqlite_handle_quoter(pdo_dbh_t *dbh, const zend_string *unquoted, enum pdo_param_type paramtype)
 {
-	char *quoted;
+	const char *ptr = ZSTR_VAL(unquoted);
+	const char *const end = ZSTR_VAL(unquoted) + ZSTR_LEN(unquoted);
+	smart_str output = {0};
+	bool is_in_quote = false;
 	if (ZSTR_LEN(unquoted) > (INT_MAX - 3) / 2) {
+		// php_error_docref(NULL, E_WARNING, "String is too long to quote");
 		return NULL;
 	}
-	quoted = safe_emalloc(2, ZSTR_LEN(unquoted), 3);
-	/* TODO use %Q format? */
-	sqlite3_snprintf(2*ZSTR_LEN(unquoted) + 3, quoted, "'%q'", ZSTR_VAL(unquoted));
-	zend_string *quoted_str = zend_string_init(quoted, strlen(quoted), 0);
-	efree(quoted);
-	return quoted_str;
+	if(ptr == end) {
+		smart_str_appendl(&output, "''", 2);
+		return smart_str_extract(&output);
+	}
+	const bool has_null_bytes = memchr(ptr, '\0', ZSTR_LEN(unquoted)) != NULL;
+	if(has_null_bytes) {
+		smart_str_appendc(&output, '(');
+	} else {
+		// todo: a faster implementation of the loop below is possible when we know there are no null bytes
+		// (but lets just keep it simple while fixing the problem, and worry about micro-optimizations later)
+	}
+	while (ptr < end) {
+		// \x00 and ' needs special handling
+		const char special_characters[2] = "'\0";
+		const size_t bytes_until_special = php_strcspn(ptr, special_characters, end, special_characters + sizeof(special_characters));
+		if (bytes_until_special) {
+			if(!is_in_quote) {
+				if(ptr != ZSTR_VAL(unquoted)) {
+					smart_str_appendl(&output, "||", 2);
+				}
+				smart_str_appendc(&output, '\'');
+				is_in_quote = true;
+			}
+			smart_str_appendl(&output, ptr, bytes_until_special);
+			ptr += bytes_until_special;
+			ZEND_ASSERT(ptr <= end);
+			if(ptr == end) {
+				break;
+			}
+		}
+		if(*ptr == '\'') {
+			if(!is_in_quote) {
+				if(ptr != ZSTR_VAL(unquoted)) {
+					smart_str_appendl(&output, "||", 2);
+				}
+				smart_str_appendc(&output, '\'');
+				is_in_quote = true;
+			}
+			const size_t number_of_consecutive_single_quotes = php_strspn(ptr, special_characters, end, special_characters + 1);
+			smart_str_appendl(&output, ptr, number_of_consecutive_single_quotes);
+			smart_str_appendl(&output, ptr, number_of_consecutive_single_quotes);
+			ptr += number_of_consecutive_single_quotes;
+		} else {
+			ZEND_ASSERT(*ptr == '\0');
+			if(is_in_quote) {
+				smart_str_appendl(&output, "'||", 3);
+				is_in_quote = false;
+			}
+			const size_t number_of_consecutive_nulls = php_strspn(ptr, special_characters + 1, end, special_characters + 2); // ...
+			smart_str_appendl(&output, "x'", 2);
+			for(size_t i = 0; i < number_of_consecutive_nulls; ++i) {
+				smart_str_appendl(&output, "00", 2);
+			}
+			smart_str_appendc(&output, '\'');
+			ptr += number_of_consecutive_nulls;
+		}
+	}
+	if(is_in_quote) {
+		smart_str_appendc(&output, '\'');
+	}
+	if(has_null_bytes) {
+		smart_str_appendc(&output, ')');
+	}
+	return smart_str_extract(&output);
 }
 
 static bool sqlite_handle_begin(pdo_dbh_t *dbh)
