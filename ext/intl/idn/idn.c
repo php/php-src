@@ -118,10 +118,13 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz",
-			&domain, &option, &variant, &idna_info) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STR(domain)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(option)
+		Z_PARAM_LONG(variant)
+		Z_PARAM_ZVAL(idna_info)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(domain) == 0) {
 		zend_argument_value_error(1, "cannot be empty");
