@@ -40,6 +40,17 @@ class Spoofchecker
     public const int HIDDEN_OVERLAY = UNKNOWN;
 #endif
 
+    /** @cvalue USET_IGNORE_SPACE */
+    public const int IGNORE_SPACE = UNKNOWN;
+    /** @cvalue USET_CASE_INSENSITIVE */
+    public const int CASE_INSENSITIVE = UNKNOWN;
+    /** @cvalue USET_ADD_CASE_MAPPINGS */
+    public const int ADD_CASE_MAPPINGS = UNKNOWN;
+#if U_ICU_VERSION_MAJOR_NUM >= 73
+    /** @cvalue USET_SIMPLE_CASE_INSENSITIVE */
+    public const int SIMPLE_CASE_INSENSITIVE = UNKNOWN;
+#endif
+
     public function __construct() {}
 
     /**
@@ -64,4 +75,5 @@ class Spoofchecker
     /** @tentative-return-type */
     public function setRestrictionLevel(int $level): void {}
 #endif
+    public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
 }
