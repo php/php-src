@@ -395,10 +395,12 @@ static inline bool bc_rec_mul_near_overflow(size_t calc_arr_size)
  * since all sizes are equal to half_size.
  */
 static void bc_rec_mul_recursive_fast(
-	const BC_UINT_T *n1, BC_UINT_T *n1_buf,
-	const BC_UINT_T *n2, BC_UINT_T *n2_buf,
+	const BC_UINT_T *n1, BC_UINT_T *n1_buf, size_t n1_arr_size,
+	const BC_UINT_T *n2, BC_UINT_T *n2_buf,	size_t n2_arr_size,
 	size_t calc_arr_size, BC_UINT_T *ret)
 {
+	ZEND_ASSERT(n1_arr_size == calc_arr_size && n2_arr_size == calc_arr_size);
+
 	/*
 	 * Size 2 is the smallest unit.
 	 * The calculation itself is skipped for the combination of size 2 and 0, and the array
@@ -420,10 +422,10 @@ static void bc_rec_mul_recursive_fast(
 
 	/* low */
 	BC_UINT_T *low = ret;
-	bc_rec_mul_recursive_fast(n1, n1_buf, n2, n2_buf, half_size, low);
+	bc_rec_mul_recursive_fast(n1, n1_buf, half_size, n2, n2_buf, half_size, half_size, low);
 	/* high */
 	BC_UINT_T *high = ret + calc_arr_size;
-	bc_rec_mul_recursive_fast(n1 + half_size, n1_buf, n2 + half_size, n2_buf, half_size, high);
+	bc_rec_mul_recursive_fast(n1 + half_size, n1_buf, half_size, n2 + half_size, n2_buf, half_size, half_size, high);
 
 	/* prepare mid */
 	for (i = 0; i < half_size; i++) {
@@ -434,7 +436,7 @@ static void bc_rec_mul_recursive_fast(
 
 	/* mid */
 	BC_UINT_T *mid = high + calc_arr_size;
-	bc_rec_mul_recursive_fast(n1_buf, n1_buf + half_size, n2_buf, n2_buf + half_size, half_size, mid);
+	bc_rec_mul_recursive_fast(n1_buf, n1_buf + half_size, half_size, n2_buf, n2_buf + half_size, half_size, half_size, mid);
 
 	/*
 	 * Add to ret.
@@ -528,7 +530,7 @@ static void bc_rec_mul_recursive(
 		 * When n1_low_size and n2_low_size are both equal to half_size, use a version
 		 * that skips the size check.
 		 */
-		bc_rec_mul_recursive_fast(n1, n1_buf, n2, n2_buf, half_size, low);
+		bc_rec_mul_recursive_fast(n1, n1_buf, n1_low_size, n2, n2_buf, n2_low_size, half_size, low);
 	} else {
 		bc_rec_mul_recursive(n1, n1_buf, n1_low_size, n2, n2_buf, n2_low_size, half_size, low);
 	}
@@ -611,7 +613,8 @@ static void bc_rec_mul_recursive(
 		 * When n1_mid_size and n2_mid_size are both equal to half_size, use a version
 		 * that skips the size check.
 		 */
-		bc_rec_mul_recursive_fast(n1_buf, n1_buf + half_size, n2_buf, n2_buf + half_size, half_size, mid);
+		bc_rec_mul_recursive_fast(
+			n1_buf, n1_buf + n1_mid_size, n1_mid_size, n2_buf, n2_buf + n2_mid_size, n2_mid_size, half_size, mid);
 	} else {
 		bc_rec_mul_recursive(
 			n1_buf, n1_buf + n1_mid_size, n1_mid_size, n2_buf, n2_buf + n2_mid_size, n2_mid_size, half_size, mid);
@@ -803,7 +806,7 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 			 * n1_arr_size = n2_arr_size = calc_arr_size.
 			 * In this case, use the fast version that omits the size check.
 			 */
-			bc_rec_mul_recursive_fast(n1_uint, n1_buf, n2_uint, n2_buf, calc_arr_size, prod_uint);
+			bc_rec_mul_recursive_fast(n1_uint, n1_buf, n1_arr_size, n2_uint, n2_buf, n2_arr_size, calc_arr_size, prod_uint);
 		} else {
 			bc_rec_mul_recursive(n1_uint, n1_buf, n1_arr_size, n2_uint, n2_buf, n2_arr_size, calc_arr_size, prod_uint);
 		}
