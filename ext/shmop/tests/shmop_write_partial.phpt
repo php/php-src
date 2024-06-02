@@ -23,5 +23,4 @@ shmop_delete($shm_id);
 --EXPECT--
 int(16)
 string(16) "aaaaaaaaaaaaaaaa"
-int(5)
-string(16) "aaaaaaaaaaabbbbb"
+ValueError: shmop_write(): Argument #2 ($data) cannot write data of size 8 from offset 11 into a segment of size 16

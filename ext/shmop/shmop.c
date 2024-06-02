@@ -320,11 +320,15 @@ PHP_FUNCTION(shmop_write)
 		RETURN_THROWS();
 	}
 
-	size_t offset_unsigned = (size_t) offset;
-	size_t writesize = (ZSTR_LEN(data) < shmop->size - offset_unsigned) ? ZSTR_LEN(data) : shmop->size - offset_unsigned;
-	memcpy(shmop->addr + ((size_t)offset), ZSTR_VAL(data), writesize);
+	if (ZSTR_LEN(data) > shmop->size - (size_t)offset) {
+		zend_argument_value_error(2, "cannot write data of size %zu from offset " ZEND_LONG_FMT
+			" into a segment of size %d", ZSTR_LEN(data), offset, shmop->size);
+		RETURN_THROWS();
+	}
 
-	RETURN_LONG(writesize);
+	memcpy(shmop->addr + ((size_t)offset), ZSTR_VAL(data), ZSTR_LEN(data));
+
+	RETURN_LONG(ZSTR_LEN(data));
 }
 /* }}} */
 
