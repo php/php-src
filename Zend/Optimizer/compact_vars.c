@@ -18,6 +18,7 @@
 
 #include "Optimizer/zend_optimizer_internal.h"
 #include "zend_bitset.h"
+#include "zend_observer.h"
 
 /* This pass removes all CVs and temporaries that are completely unused. It does *not* merge any CVs or TMPs.
  * This pass does not operate on SSA form anymore. */
@@ -117,7 +118,7 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 		op_array->last_var = num_cvs;
 	}
 
-	op_array->T = num_tmps;
+	op_array->T = num_tmps + ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 
 	free_alloca(vars_map, use_heap2);
 }

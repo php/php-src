@@ -26,6 +26,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 #include "zend_bitset.h"
+#include "zend_observer.h"
 
 #define INVALID_VAR ((uint32_t)-1)
 #define GET_AVAILABLE_T()					\
@@ -173,5 +174,5 @@ void zend_optimize_temporary_variables(zend_op_array *op_array, zend_optimizer_c
 	}
 
 	zend_arena_release(&ctx->arena, checkpoint);
-	op_array->T = max + 1;
+	op_array->T = max + 1 + ZEND_OBSERVER_ENABLED; // reserve last temporary for observers if enabled
 }
