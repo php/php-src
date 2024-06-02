@@ -26,14 +26,14 @@ var_dump($test->prop);
 
 ?>
 --EXPECT--
-object(Test)#1 (1) {
+object(Test)#1 (2) {
   ["prop"]=>
   &string(1) "x"
   ["val"]=>
   uninitialized(int)
 }
 Value of type string returned from Test::__get() must be compatible with unset property Test::$val of type int
-object(Test)#1 (1) {
+object(Test)#1 (2) {
   ["prop"]=>
   &string(1) "x"
   ["val"]=>

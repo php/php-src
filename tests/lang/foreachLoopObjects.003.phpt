@@ -232,7 +232,13 @@ object(C)#%d (17) {
 
 Removing properties from an object.
 string(10) "Original a"
-object(C)#%d (2) {
+object(C)#%d (5) {
+  ["a"]=>
+  unset
+  ["b"]=>
+  unset
+  ["c"]=>
+  unset
   ["d":protected]=>
   string(10) "Original d"
   ["e":"C":private]=>
@@ -241,7 +247,13 @@ object(C)#%d (2) {
 
 Removing properties from an object, using &$value.
 string(10) "Original a"
-object(C)#%d (2) {
+object(C)#%d (5) {
+  ["a"]=>
+  unset
+  ["b"]=>
+  unset
+  ["c"]=>
+  unset
   ["d":protected]=>
   string(10) "Original d"
   ["e":"C":private]=>

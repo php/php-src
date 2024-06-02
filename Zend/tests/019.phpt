@@ -1237,7 +1237,9 @@ object(Point)#%d (3) {
   ["lable"]=>
   string(6) "Point1"
 }
-object(Point)#%d (2) {
+object(Point)#%d (3) {
+  ["x"]=>
+  unset
   ["y"]=>
   int(40)
   ["lable"]=>
@@ -1245,7 +1247,13 @@ object(Point)#%d (2) {
 }
 bool(false)
 bool(true)
-object(Point)#%d (0) {
+object(Point)#%d (3) {
+  ["x"]=>
+  unset
+  ["y"]=>
+  unset
+  ["lable"]=>
+  unset
 }
 bool(true)
 bool(false)

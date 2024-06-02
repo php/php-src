@@ -48,6 +48,8 @@ object(Node)#2 (2) {
   object(Node)#1 (2) {
     ["parent"]=>
     NULL
+    ["children"]=>
+    unset
   }
   ["children"]=>
   array(0) {
@@ -58,6 +60,8 @@ object(Node)#3 (2) {
   object(Node)#1 (2) {
     ["parent"]=>
     NULL
+    ["children"]=>
+    unset
   }
   ["children"]=>
   array(0) {

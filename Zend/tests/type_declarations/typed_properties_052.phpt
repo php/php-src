@@ -18,7 +18,7 @@ $obj = new A;
 var_dump($obj);
 ?>
 --EXPECT--
-object(A)#1 (0) {
+object(A)#1 (6) {
   ["a1"]=>
   uninitialized(A)
   ["b1"]=>

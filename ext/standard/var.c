@@ -75,11 +75,13 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	}
 
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
-		ZEND_ASSERT(ZEND_TYPE_IS_SET(prop_info->type));
-		zend_string *type_str = zend_type_to_string(prop_info->type);
-		php_printf("%*cuninitialized(%s)\n",
-			level + 1, ' ', ZSTR_VAL(type_str));
-		zend_string_release(type_str);
+		if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+			zend_string *type_str = zend_type_to_string(prop_info->type);
+			php_printf("%*cuninitialized(%s)\n", level + 1, ' ', ZSTR_VAL(type_str));
+			zend_string_release(type_str);
+		} else {
+			php_printf("%*cunset\n", level + 1, ' ');
+		}
 	} else {
 		php_var_dump(zv, level + 2);
 	}
@@ -168,7 +170,7 @@ again:
 			}
 
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), zend_array_count(myht));
+			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), zend_hash_num_elements(myht));
 			zend_string_release_ex(class_name, 0);
 
 			zend_ulong num;
@@ -185,9 +187,7 @@ again:
 					}
 				}
 
-				if (!Z_ISUNDEF_P(val) || prop_info) {
-					php_object_property_dump(prop_info, val, num, key, level);
-				}
+				php_object_property_dump(prop_info, val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
 			zend_release_properties(myht);
 
@@ -368,7 +368,7 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		}
 
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), zend_array_count(myht), Z_REFCOUNT_P(struc));
+		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), zend_hash_num_elements(myht), Z_REFCOUNT_P(struc));
 		zend_string_release_ex(class_name, 0);
 
 		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {

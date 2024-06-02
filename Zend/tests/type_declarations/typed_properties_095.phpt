@@ -63,7 +63,7 @@ var_dump(_ZendTestClass::$staticIntProp);
 int(123)
 Cannot assign string to property _ZendTestClass::$intProp of type int
 Cannot assign _ZendTestClass to property _ZendTestClass::$classProp of type ?stdClass
-object(_ZendTestClass)#1 (3) {
+object(_ZendTestClass)#1 (6) {
   ["intProp"]=>
   int(456)
   ["classProp"]=>
@@ -81,7 +81,7 @@ object(_ZendTestClass)#1 (3) {
 int(123)
 Cannot assign string to property _ZendTestClass::$intProp of type int
 Cannot assign Test to property _ZendTestClass::$classProp of type ?stdClass
-object(Test)#4 (3) {
+object(Test)#4 (6) {
   ["intProp"]=>
   int(456)
   ["classProp"]=>

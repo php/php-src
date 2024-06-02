@@ -41,9 +41,11 @@ string(10) "Original d"
 
 Warning: Undefined property: C::$b in %s on line %d
 string(10) "Original e"
-object(C)#%d (4) {
+object(C)#%d (5) {
   ["a"]=>
   string(10) "Original a"
+  ["b"]=>
+  unset
   ["c"]=>
   string(10) "Original c"
   ["d"]=>
