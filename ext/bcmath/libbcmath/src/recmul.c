@@ -446,7 +446,7 @@ static void bc_rec_mul_recursive_fast(
 	 * Perform digit adjustment to avoid overflow.
 	 */
 	if (UNEXPECTED(bc_rec_mul_near_overflow(calc_size))) {
-		for (i = 0; i < calc_size * 2; i++) {
+		for (i = 0; i < calc_size * 2 - 1; i++) {
 			bc_digits_adjustment_single(ret + i);
 		}
 	}
@@ -556,26 +556,21 @@ static void bc_rec_mul_recursive(
 	}
 
 	/* Add to ret */
+	i = 0;
+	size_t limit_size;
 	if (!skip_high) {
-		/* Calculate the maximum size to prevent buffer overruns. */
-		size_t  limit_size = MIN(high_ret_size, half_size) + half_size;
+		limit_size = MIN(high_ret_size, half_size) + half_size;
 		for (i = 0; i < high_ret_size; i++) {
 			mid[i] -= low[i] + high[i];
 		}
-		for (; i < mid_ret_size; i++) {
-			mid[i] -= low[i];
-		}
-		for (i = 0; i < limit_size; i++) {
-			ret[i + half_size] -= mid[i];
-		}
 	} else {
-		/* Calculate the maximum size to prevent buffer overruns. */
-		for (i = 0; i < mid_ret_size; i++) {
-			mid[i] -= low[i];
-		}
-		for (i = 0; i < mid_ret_size; i++) {
-			ret[i + half_size] -= mid[i];
-		}
+		limit_size = MIN(low_ret_size + high_ret_size, mid_ret_size + half_size);
+	}
+	for (; i < mid_ret_size; i++) {
+		mid[i] -= low[i];
+	}
+	for (i = 0; i < limit_size; i++) {
+		ret[i + half_size] -= mid[i];
 	}
 
 	/*
@@ -583,7 +578,7 @@ static void bc_rec_mul_recursive(
 	 */
 	if (UNEXPECTED(bc_rec_mul_near_overflow(calc_size))) {
 		size_t ret_size = low_ret_size + high_ret_size;
-		for (i = 0; i < ret_size; i++) {
+		for (i = 0; i < ret_size - 1; i++) {
 			bc_digits_adjustment_single(ret + i);
 		}
 	}
@@ -632,7 +627,7 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	 * For computational efficiency, the size of prod_uint is slightly larger.
 	 * Therefore, calculate the actual required size to avoid overflow when converting to BCD.
 	 */
-	size_t prod_arr_real_size = n1_arr_size + n2_arr_size - 1;
+	size_t prod_arr_real_size = (prodlen + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
 
 	/*
 	 * Adjust size to a multiple of 2 for computational efficiency.
@@ -753,13 +748,6 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	 */
 	for (i = 0; i < prod_arr_real_size - 1; i++) {
 		bc_digits_adjustment_single(prod_uint + i);
-	}
-	/*
-	 * If adjusting digits to prevent overflow in the middle of divide and conquer,
-	 * adjust the topmost entry
-	 */
-	if (UNEXPECTED(calc_size >= BC_REC_MUL_DO_ADJUST_EXPO)) {
-		prod_uint[prod_arr_real_size - 1] += prod_uint[prod_arr_real_size] * BC_MUL_UINT_OVERFLOW;
 	}
 
 	/* Convert to bc_num */
