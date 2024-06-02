@@ -2047,7 +2047,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 
 	switch (type->kind) {
 		case ZEND_FFI_TYPE_VOID:
-			return NULL;
+			*is_temp = false;
+			return (HashTable*)&zend_empty_array;
 		case ZEND_FFI_TYPE_BOOL:
 		case ZEND_FFI_TYPE_CHAR:
 		case ZEND_FFI_TYPE_ENUM:
@@ -2274,7 +2275,8 @@ static int zend_ffi_ctype_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 static HashTable *zend_ffi_ctype_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
 {
-	return NULL;
+	*is_temp = false;
+	return (HashTable*)&zend_empty_array;
 }
 /* }}} */
 

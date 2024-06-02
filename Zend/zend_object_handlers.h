@@ -82,9 +82,15 @@ typedef void (*zend_object_unset_property_t)(zend_object *object, zend_string *m
 /* Used to remove a dimension of the object */
 typedef void (*zend_object_unset_dimension_t)(zend_object *object, zval *offset);
 
-/* Used to get hash of the properties of the object, as hash of zval's */
+/* Used to get hash of the properties of the object, as hash of zval's
+ * Must only return NULL when an exception occurs, if no properties
+ * return (HashTable*)&zend_empty_array;
+ */
 typedef HashTable *(*zend_object_get_properties_t)(zend_object *object);
 
+/* Must only return NULL when an exception occurs, if no properties
+ * return (HashTable*)&zend_empty_array;
+ */
 typedef HashTable *(*zend_object_get_debug_info_t)(zend_object *object, int *is_temp);
 
 typedef enum _zend_prop_purpose {
