@@ -1,7 +1,11 @@
 --TEST--
-Bug #74341 (openssl_x509_parse fails to parse ASN.1 UTCTime without seconds)
+GH-13343: openssl_x509_parse should not allow omitted seconds in UTCTimes for OpenSSL 3.3+
 --EXTENSIONS--
 openssl
+--SKIPIF--
+<?php
+if (OPENSSL_VERSION_NUMBER < 0x30300000) die('skip For OpenSSL >= 3.3');
+?>
 --FILE--
 <?php
 
@@ -43,10 +47,7 @@ lOzTF7xAUxmPUnNb2teatMf2Rmj0fs+d
 -----END CERTIFICATE-----
 ';
 
-$parsed_cert = openssl_x509_parse($pem_cert);
-var_dump($parsed_cert['validFrom_time_t']);
-var_dump($parsed_cert['validTo_time_t']);
+var_dump(openssl_x509_parse($pem_cert));
 ?>
 --EXPECT--
-int(1389052800)
-int(1459494000)
+bool(false)

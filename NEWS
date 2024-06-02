@@ -143,6 +143,8 @@ PHP                                                                        NEWS
   . Added compile-time option --with-openssl-legacy-provider to enable legacy
     provider. (Adam Saponara)
   . Added support for Curve25519 + Curve448 based keys. (Manuel Mausz)
+  . Fixed bug GH-13343 (openssl_x509_parse should not allow omitted seconds in
+    UTCTimes). (Jakub Zelenka)
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)

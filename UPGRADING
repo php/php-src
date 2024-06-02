@@ -426,6 +426,9 @@ PHP 8.4 UPGRADE NOTES
     a single entry.
   . New serial_hex parameter added to openssl_csr_sign to allow setting serial
     number in the hexadecimal format.
+  . Parsing ASN.1 UTCTime by openssl_x509_parse fails if seconds are omitted
+    for OpenSSL version below 3.2 (-1 is returned for such fields). The
+    OpenSSL version 3.3+ does not load such certificates already.
 
 - ODBC:
   . Parameter $row of odbc_fetch_object(), odbc_fetch_array(), and
