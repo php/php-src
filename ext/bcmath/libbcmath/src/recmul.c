@@ -65,13 +65,16 @@
  * As can see by actually doing it, the value added to [3] in this example is the
  * accumulation of all (high + low - mid) when calculating 2 digits.
  * In this example, the ret size is 8, so the calculation length is 4, and from 4^1.585,
+ * (If normal multiplication of N digits and N digits involves multiplying one digit N^2
+ * times, the Karatsuba-algorithm requires N^log2(3) times of calculation. N^log2(3) is
+ * approximately N^1.585.)
  * there is a minimum unit calculation set of 9, so add (high + low - mid) 9 times.
  *
  * At this time, if consider one portion (high + low - mid) using ab*cd as an example,
  * this becomes: ac + bd - (a-b)(c-d) = ac + bd - ac + ad + bc - bd = ad + bc
- * Can see that the maximum value of this is obtained when 99*99.
+ * Can see that the maximum value of this is obtained by 99*99.
  *
- * This law holds true regardless of the calculation length, so when considering the
+ * This law holds regardless of the calculation length, so when considering the
  * maximum value, all mids are canceled out and can be ignored. Therefore, mid and all
  * calculations that further divide mid can be ignored from the calculation results that
  * are being accumulated.
@@ -84,9 +87,11 @@
  * BC_MUL_MAX_ADD_COUNT (because the calculation length is always adjusted to the power of 2).
  */
 #if SIZEOF_SIZE_T >= 8
+   /* BC_MUL_MAX_ADD_COUNT is 1844 in 64-bit, so specify the next smallest power of 2. */
 #  define BC_REC_MUL_DO_ADJUST_EXPO 1024
 #  define BC_USE_REC_MUL_DIGITS 160 * 8
 #else
+   /* As with 64-bit, specify the next smallest power of 2 after 42. */
 #  define BC_REC_MUL_DO_ADJUST_EXPO 32
 #  define BC_USE_REC_MUL_DIGITS 160 * 8
 #endif
@@ -385,6 +390,9 @@ static inline bool bc_rec_mul_near_overflow(size_t calc_size)
  * if the size of n1 and n2 are both equal to calc_size, the calculation is performed
  * without checking the number of digits.
  * See bc_rec_mul's comment for the meaning of high, mid, and low.
+ *
+ * Also, functions called recursively within this function will always use the fast version,
+ * since all sizes are equal to half_size.
  */
 static void bc_rec_mul_recursive_fast(
 	const BC_UINT_T *n1, BC_UINT_T *n1_buf,
@@ -461,6 +469,11 @@ static void bc_rec_mul_recursive_fast(
  * mid = (12 - 34) * (56 - 78)
  * ret = high * 100^2 + (high + low - mid) * 100 + low
  * This function differs from "fast" in that it does things like check the number of digits.
+ *
+ * Since the sizes of n1 and n2 are always even numbers, the possible combinations when size=2,
+ * which is the smallest calculation unit, are 2size * 0size or 2size * 2size.
+ * The former always uses the fast version, and the latter skips the calculation, so there is
+ * no need for this function to calculate the smallest unit.
  */
 static void bc_rec_mul_recursive(
 	const BC_UINT_T *n1, BC_UINT_T *n1_buf, size_t n1_size,
@@ -499,10 +512,22 @@ static void bc_rec_mul_recursive(
 		fast = n2_size == half_size;
 	}
 
-	/* low */
+	/*
+	 * low
+	 * low_ret_size may be smaller than calc size as a programmatic convenience to save buffer size.
+	 * If the size of n1 and n2 is always equal to calc_size and padded on the left with 0, then
+	 * low_ret_size is always calc_size.
+	 * e.g.: Value when saving buffer (value when filled with 0)
+	 * n1low = 1234(1234), n2low = 12(0012), calc_size = 8
+	 * n1_low_size = 4(4), n2_low_size = 2(4), low_ret_size = 6(8)
+	 */
 	BC_UINT_T *low = ret;
 	size_t low_ret_size = n1_low_size + n2_low_size;
 	if (fast) {
+		/*
+		 * When n1_low_size and n2_low_size are both equal to half_size, use a version
+		 * that skips the size check.
+		 */
 		bc_rec_mul_recursive_fast(n1, n1_buf, n2, n2_buf, half_size, low);
 	} else {
 		bc_rec_mul_recursive(n1, n1_buf, n1_low_size, n2, n2_buf, n2_low_size, half_size, low);
@@ -518,10 +543,6 @@ static void bc_rec_mul_recursive(
 		 * Actually, should think of filling calc_size - low_ret_size with 0 and filling
 		 * high_ret_size - (calc_size - low_ret_size) with 0, but the result is the same,
 		 * so write it like this.
-		 *
-		 * Also, in the first called bc_rec_mul, this zero padding may slightly overrun
-		 * the ret area. However, since mid's buffer follows ret consecutively, there is
-		 * no problem with it overrunning.
 		 */
 		for (i = 0; i < high_ret_size; i++) {
 			high[i] = 0;
@@ -549,6 +570,10 @@ static void bc_rec_mul_recursive(
 	size_t n2_mid_size = n2_low_size;
 	size_t mid_ret_size = low_ret_size;
 	if (fast) {
+		/*
+		 * When n1_mid_size and n2_mid_size are both equal to half_size, use a version
+		 * that skips the size check.
+		 */
 		bc_rec_mul_recursive_fast(n1_buf, n1_buf + half_size, n2_buf, n2_buf + half_size, half_size, mid);
 	} else {
 		bc_rec_mul_recursive(
@@ -679,12 +704,13 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	 * These are the necessary buffers for the divide and conquer "mid".
 	 * Assuming the computation length is M, the first split uses a buffer of M/2, and the second
 	 * split uses a buffer of M/4.... The required buffer size increases by half until the size
-	 * reaches 2. In other words, it is the sum of a geometric progression of 2 with a geometric
-	 * ratio of 2 from 2 to N-1, where the calculation length is N.
+	 * reaches 2. In other words, it is the sum of a geometric progression of 1/2 with a geometric
+	 * ratio of 1/2 from M(1) to 2(N).
 	 * This sum can be calculated using the following formula, where the first term is a and the
-	 * geometric ratio is r: a(r^(N-1) - 1)(r - 1)
-	 * Here, a and r are both 2, so this formula becomes: 2(2^(N-1) - 1)(2 - 1) = 2^N - 2
-	 * In other words, the calculation length minus 2 is the required buffer size.
+	 * geometric ratio is r: a(r^(N-1) - 1)/(r - 1)
+	 * M((1/2)^N - 1)/(1/2 - 1) = -2M((1/2)^N - 1) = -2M((1/2)^N) + 2M = -M((1/2)^(N-1)) + 2M
+	 * Here, M((1/2)^(N-1)) is the last term, 2, so this formula becomes: 2M - 2
+	 * In other words, the calculation length - 2 is the required buffer size.
 	 *
 	 * However, if n_arr_size is very small compared to the calculation length, may not need a buffer
 	 * half of the calculation length when dividing. If n_arr_size is smaller than half of the calculation
@@ -703,8 +729,9 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	 * prod_uint:
 	 * Share the results and the buffers used in intermediate calculations. The result is prod_arr_size.
 	 * The buffer increases by half like n_buf, but when calc_size is 2, the required buffer size is 4.
-	 * In other words, they are almost the same geometric progression, but the first term is 4.
-	 * a(r^(N-1) - 1)(r - 1): 4(2^(N-1) - 1)(2 - 1) = 2^N - 2 = 2(2^N - 2)
+	 * In other words, they are almost the same geometric progression, but the last term is 4.
+	 * a(r^(N-1) - 1)/(r - 1): -M((1/2)^(N-1)) + 2M (Up to this point, it is the same as n1_buf and n2_buf)
+	 * The last term is 4, so -M((1/2)^(N-1)) is 4. So: 2M - 4
 	 * Therefore, the required size is prod_arr_size + calc_size * 2 - 4.
 	 */
 	n1_buf_size -= 2;
@@ -734,6 +761,11 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	 */
 	if (n1_arr_size >= n2_arr_size) {
 		if (n2_arr_size == calc_size) {
+			/*
+			 * n1_arr_size is never greater than calc_size, so if this condition is met,
+			 * n1_arr_size = n2_arr_size = calc_size.
+			 * In this case, use the fast version that omits the size check.
+			 */
 			bc_rec_mul_recursive_fast(n1_uint, n1_buf, n2_uint, n2_buf, calc_size, prod_uint);
 		} else {
 			bc_rec_mul_recursive(n1_uint, n1_buf, n1_arr_size, n2_uint, n2_buf, n2_arr_size, calc_size, prod_uint);
