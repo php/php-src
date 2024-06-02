@@ -717,7 +717,7 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 		return (time_t)-1;
 	}
 
-	if (timestr_len < 13 && timestr_len != 11) {
+	if (timestr_len < 13) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", timestr->data);
 		return (time_t)-1;
 	}
@@ -735,13 +735,9 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 
 	thestr = strbuf + timestr_len - 3;
 
-	if (timestr_len == 11) {
-		thetime.tm_sec = 0;
-	} else {
-		thetime.tm_sec = atoi(thestr);
-		*thestr = '\0';
-		thestr -= 2;
-	}
+	thetime.tm_sec = atoi(thestr);
+	*thestr = '\0';
+	thestr -= 2;
 	thetime.tm_min = atoi(thestr);
 	*thestr = '\0';
 	thestr -= 2;
