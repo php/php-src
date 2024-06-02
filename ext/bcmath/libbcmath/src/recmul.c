@@ -38,11 +38,11 @@
 
 
 #if SIZEOF_SIZE_T >= 8
-#  define BC_MUL_UINT_DIGITS 8
-#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 100000000
+#  define BC_MUL_INT_DIGITS 8
+#  define BC_MUL_INT_OVERFLOW (BC_INT_T) 100000000
 #else
-#  define BC_MUL_UINT_DIGITS 4
-#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 10000
+#  define BC_MUL_INT_DIGITS 4
+#  define BC_MUL_INT_OVERFLOW (BC_INT_T) 10000
 #endif
 
 /*
@@ -51,7 +51,11 @@
  * difference appears from this order of magnitude).
  * If the number of digits is small, the overhead impact is large and slow.
  */
-#define BC_MUL_MAX_ADD_COUNT (~((BC_UINT_T) 0) / (BC_MUL_UINT_OVERFLOW * BC_MUL_UINT_OVERFLOW))
+#if SIZEOF_SIZE_T >= 8
+#  define BC_MUL_MAX_ADD_COUNT (((BC_INT_T) 0x0fffffffffffffff) / (BC_MUL_INT_OVERFLOW * BC_MUL_INT_OVERFLOW))
+#else
+#  define BC_MUL_MAX_ADD_COUNT (((BC_INT_T) 0x0fffffff) / (BC_MUL_INT_OVERFLOW * BC_MUL_INT_OVERFLOW))
+#endif
 
 /*
  * In divide-and-conquer calculations, additions are concentrated on array
@@ -87,28 +91,28 @@
  * BC_MUL_MAX_ADD_COUNT (because the calculation length is always adjusted to the power of 2).
  */
 #if SIZEOF_SIZE_T >= 8
-   /* BC_MUL_MAX_ADD_COUNT is 1844 in 64-bit, so specify the next smallest power of 2. */
-#  define BC_REC_MUL_DO_ADJUST_EXPO 1024
+   /* BC_MUL_MAX_ADD_COUNT is 922 in 64-bit, so specify the next smallest power of 2. */
+#  define BC_REC_MUL_DO_ADJUST_EXPO 512
 #  define BC_USE_REC_MUL_DIGITS 160 * 8
 #else
-   /* As with 64-bit, specify the next smallest power of 2 after 42. */
-#  define BC_REC_MUL_DO_ADJUST_EXPO 32
+   /* As with 64-bit, specify the next smallest power of 2 after 21. */
+#  define BC_REC_MUL_DO_ADJUST_EXPO 16
 #  define BC_USE_REC_MUL_DIGITS 160 * 8
 #endif
 
 
 /* Multiply utility routines */
 
-static inline void bc_digits_adjustment_single(BC_UINT_T *ret)
+static inline void bc_digits_adjustment_single(BC_INT_T *ret)
 {
-	ret[1] += ret[0] / BC_MUL_UINT_OVERFLOW;
-	ret[0] %= BC_MUL_UINT_OVERFLOW;
+	ret[1] += ret[0] / BC_MUL_INT_OVERFLOW;
+	ret[0] %= BC_MUL_INT_OVERFLOW;
 }
 
-static inline void bc_digits_adjustment(BC_UINT_T *prod_uint, size_t prod_arr_size)
+static inline void bc_digits_adjustment(BC_INT_T *prod_int, size_t prod_arr_size)
 {
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
-		bc_digits_adjustment_single(prod_uint + i);
+		bc_digits_adjustment_single(prod_int + i);
 	}
 }
 
@@ -168,14 +172,14 @@ static uint64_t bc_parse_chunk_chars(const char *str)
  * Converts BCD to uint, going backwards from pointer n by the number of
  * characters specified by len.
  */
-static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
+static inline BC_INT_T bc_partial_convert_to_int(const char *n, size_t len)
 {
-	if (len == BC_MUL_UINT_DIGITS) {
-		return bc_parse_chunk_chars(n - BC_MUL_UINT_DIGITS + 1);
+	if (len == BC_MUL_INT_DIGITS) {
+		return bc_parse_chunk_chars(n - BC_MUL_INT_DIGITS + 1);
 	}
 
-	BC_UINT_T num = 0;
-	BC_UINT_T base = 1;
+	BC_INT_T num = 0;
+	BC_INT_T base = 1;
 
 	for (size_t i = 0; i < len; i++) {
 		num += *n * base;
@@ -186,12 +190,12 @@ static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
 	return num;
 }
 
-static inline void bc_convert_to_uint(BC_UINT_T *n_uint, const char *nend, size_t nlen)
+static inline void bc_convert_to_int(BC_INT_T *n_int, const char *nend, size_t nlen)
 {
 	size_t i = 0;
 	while (nlen > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, nlen);
-		n_uint[i] = bc_partial_convert_to_uint(nend, len);
+		size_t len = MIN(BC_MUL_INT_DIGITS, nlen);
+		n_int[i] = bc_partial_convert_to_int(nend, len);
 		nend -= len;
 		nlen -= len;
 		i++;
@@ -207,9 +211,9 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
 
-	BC_UINT_T n1_uint = bc_partial_convert_to_uint(n1end, n1len);
-	BC_UINT_T n2_uint = bc_partial_convert_to_uint(n2end, n2len);
-	BC_UINT_T prod_uint = n1_uint * n2_uint;
+	BC_INT_T n1_int = bc_partial_convert_to_int(n1end, n1len);
+	BC_INT_T n2_int = bc_partial_convert_to_int(n2end, n2len);
+	BC_INT_T prod_int = n1_int * n2_int;
 
 	size_t prodlen = n1len + n2len;
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -217,8 +221,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	char *pend = pptr + prodlen - 1;
 
 	while (pend >= pptr) {
-		*pend-- = prod_uint % BASE;
-		prod_uint /= BASE;
+		*pend-- = prod_int % BASE;
+		prod_int /= BASE;
 	}
 }
 
@@ -253,34 +257,34 @@ static inline unsigned short bc_expand_lut(unsigned char c)
 
 /* Writes the character representation of the number encoded in value.
  * E.g. if value = 1234, then the string "1234" will be written to str. */
-static void bc_write_bcd_representation(uint32_t value, char *str)
+static void bc_write_bcd_representation(int32_t value, char *str)
 {
-	uint32_t upper = value / 100; /* e.g. 12 */
-	uint32_t lower = value % 100; /* e.g. 34 */
+	int32_t upper = value / 100; /* e.g. 12 */
+	int32_t lower = value % 100; /* e.g. 34 */
 
 #if BC_LITTLE_ENDIAN
 	/* Note: little endian, so `lower` comes before `upper`! */
-	uint32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
+	int32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
 #else
 	/* Note: big endian, so `upper` comes before `lower`! */
-	uint32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
+	int32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
 #endif
 	memcpy(str, &digits, sizeof(digits));
 }
 
-static inline void bc_mul_convert_uint_to_bcd(BC_UINT_T *prod_uint, size_t prodlen,  size_t prod_arr_size, bc_num *prod)
+static inline void bc_mul_convert_int_to_bcd(BC_INT_T *prod_int, size_t prodlen,  size_t prod_arr_size, bc_num *prod)
 {
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
 	char *pptr = (*prod)->n_value;
 	char *pend = pptr + prodlen - 1;
 	size_t i = 0;
 	while (i < prod_arr_size - 1) {
-#if BC_MUL_UINT_DIGITS == 4
-		bc_write_bcd_representation(prod_uint[i], pend - 3);
+#if BC_MUL_INT_DIGITS == 4
+		bc_write_bcd_representation(prod_int[i], pend - 3);
 		pend -= 4;
 #else
-		bc_write_bcd_representation(prod_uint[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_uint[i] % 10000, pend - 3);
+		bc_write_bcd_representation(prod_int[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_int[i] % 10000, pend - 3);
 		pend -= 8;
 #endif
 		i++;
@@ -291,13 +295,13 @@ static inline void bc_mul_convert_uint_to_bcd(BC_UINT_T *prod_uint, size_t prodl
 	 * Also need to fill it to the end with zeros, so loop until the end of the string.
 	 */
 	while (pend >= pptr) {
-		*pend-- = prod_uint[i] % BASE;
-		prod_uint[i] /= BASE;
+		*pend-- = prod_int[i] % BASE;
+		prod_int[i] /= BASE;
 	}
 }
 
 /*
- * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_UINT_Ts.
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_INT_Ts.
  * The array is generated starting with the smaller digits.
  * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
  *
@@ -311,28 +315,28 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
-	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
+	size_t n1_arr_size = (n1len + BC_MUL_INT_DIGITS - 1) / BC_MUL_INT_DIGITS;
+	size_t n2_arr_size = (n2len + BC_MUL_INT_DIGITS - 1) / BC_MUL_INT_DIGITS;
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
 	/*
-	 * let's say that N is the max of n1len and n2len (and a multiple of BC_MUL_UINT_DIGITS for simplicity),
-	 * then this sum is <= N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS - 1
-	 * which is equal to N - 1 if BC_MUL_UINT_DIGITS is 4, and N/2 - 1 if BC_MUL_UINT_DIGITS is 8.
+	 * let's say that N is the max of n1len and n2len (and a multiple of BC_MUL_INT_DIGITS for simplicity),
+	 * then this sum is <= N/BC_MUL_INT_DIGITS + N/BC_MUL_INT_DIGITS + N/BC_MUL_INT_DIGITS + N/BC_MUL_INT_DIGITS - 1
+	 * which is equal to N - 1 if BC_MUL_INT_DIGITS is 4, and N/2 - 1 if BC_MUL_INT_DIGITS is 8.
 	 */
-	BC_UINT_T *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_UINT_T), 0);
+	BC_INT_T *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_INT_T), 0);
 
-	BC_UINT_T *n1_uint = buf;
-	BC_UINT_T *n2_uint = buf + n1_arr_size;
-	BC_UINT_T *prod_uint = n2_uint + n2_arr_size;
+	BC_INT_T *n1_int = buf;
+	BC_INT_T *n2_int = buf + n1_arr_size;
+	BC_INT_T *prod_int = n2_int + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
-		prod_uint[i] = 0;
+		prod_int[i] = 0;
 	}
 
 	/* Convert to uint[] */
-	bc_convert_to_uint(n1_uint, n1end, n1len);
-	bc_convert_to_uint(n2_uint, n2end, n2len);
+	bc_convert_to_int(n1_int, n1end, n1len);
+	bc_convert_to_int(n2_int, n2end, n2len);
 
 	/* Multiplication and addition */
 	size_t count = 0;
@@ -343,12 +347,12 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		 * overflow, so digit adjustment is performed beforehand.
 		 */
 		if (UNEXPECTED(count >= BC_MUL_MAX_ADD_COUNT)) {
-			bc_digits_adjustment(prod_uint, prod_arr_size);
+			bc_digits_adjustment(prod_int, prod_arr_size);
 			count = 0;
 		}
 		count++;
 		for (size_t j = 0; j < n2_arr_size; j++) {
-			prod_uint[i + j] += n1_uint[i] * n2_uint[j];
+			prod_int[i + j] += n1_int[i] * n2_int[j];
 		}
 	}
 
@@ -356,10 +360,10 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	bc_digits_adjustment(prod_uint, prod_arr_size);
+	bc_digits_adjustment(prod_int, prod_arr_size);
 
 	/* Convert to bc_num */
-	bc_mul_convert_uint_to_bcd(prod_uint, prodlen, prod_arr_size, prod);
+	bc_mul_convert_int_to_bcd(prod_int, prodlen, prod_arr_size, prod);
 
 	efree(buf);
 }
@@ -395,9 +399,9 @@ static inline bool bc_rec_mul_near_overflow(size_t calc_arr_size)
  * since all sizes are equal to half_size.
  */
 static void bc_rec_mul_recursive_fast(
-	const BC_UINT_T *n1, BC_UINT_T *n1_buf, size_t n1_arr_size,
-	const BC_UINT_T *n2, BC_UINT_T *n2_buf,	size_t n2_arr_size,
-	size_t calc_arr_size, BC_UINT_T *ret)
+	const BC_INT_T *n1, BC_INT_T *n1_buf, size_t n1_arr_size,
+	const BC_INT_T *n2, BC_INT_T *n2_buf,	size_t n2_arr_size,
+	size_t calc_arr_size, BC_INT_T *ret)
 {
 	ZEND_ASSERT(n1_arr_size == calc_arr_size && n2_arr_size == calc_arr_size);
 
@@ -408,8 +412,8 @@ static void bc_rec_mul_recursive_fast(
 	 * Therefore, the minimum unit calculation is always performed using this func.
 	 */
 	if (calc_arr_size == 2) {
-		BC_UINT_T low = n1[0] * n2[0];
-		BC_UINT_T high = n1[1] * n2[1];
+		BC_INT_T low = n1[0] * n2[0];
+		BC_INT_T high = n1[1] * n2[1];
 		ret[0] = low;
 		ret[1] = low + high - (n1[1] - n1[0]) * (n2[1] - n2[0]);
 		ret[2] = high;
@@ -421,10 +425,10 @@ static void bc_rec_mul_recursive_fast(
 	size_t half_size = calc_arr_size / 2;
 
 	/* low */
-	BC_UINT_T *low = ret;
+	BC_INT_T *low = ret;
 	bc_rec_mul_recursive_fast(n1, n1_buf, half_size, n2, n2_buf, half_size, half_size, low);
 	/* high */
-	BC_UINT_T *high = ret + calc_arr_size;
+	BC_INT_T *high = ret + calc_arr_size;
 	bc_rec_mul_recursive_fast(n1 + half_size, n1_buf, half_size, n2 + half_size, n2_buf, half_size, half_size, high);
 
 	/* prepare mid */
@@ -435,7 +439,7 @@ static void bc_rec_mul_recursive_fast(
 	}
 
 	/* mid */
-	BC_UINT_T *mid = high + calc_arr_size;
+	BC_INT_T *mid = high + calc_arr_size;
 	bc_rec_mul_recursive_fast(n1_buf, n1_buf + half_size, half_size, n2_buf, n2_buf + half_size, half_size, half_size, mid);
 
 	/*
@@ -478,9 +482,9 @@ static void bc_rec_mul_recursive_fast(
  * no need for this function to calculate the smallest unit.
  */
 static void bc_rec_mul_recursive(
-	const BC_UINT_T *n1, BC_UINT_T *n1_buf, size_t n1_arr_size,
-	const BC_UINT_T *n2, BC_UINT_T *n2_buf, size_t n2_arr_size,
-	size_t calc_arr_size, BC_UINT_T *ret)
+	const BC_INT_T *n1, BC_INT_T *n1_buf, size_t n1_arr_size,
+	const BC_INT_T *n2, BC_INT_T *n2_buf, size_t n2_arr_size,
+	size_t calc_arr_size, BC_INT_T *ret)
 {
 	size_t i;
 	size_t half_size = calc_arr_size / 2;
@@ -523,7 +527,7 @@ static void bc_rec_mul_recursive(
 	 * n1low = 1234(1234), n2low = 12(0012), calc_arr_size = 8
 	 * n1_low_size = 4(4), n2_low_size = 2(4), low_ret_size = 6(8)
 	 */
-	BC_UINT_T *low = ret;
+	BC_INT_T *low = ret;
 	size_t low_ret_size = n1_low_size + n2_low_size;
 	if (fast) {
 		/*
@@ -536,7 +540,7 @@ static void bc_rec_mul_recursive(
 	}
 
 	/* high */
-	BC_UINT_T *high = low + low_ret_size;
+	BC_INT_T *high = low + low_ret_size;
 	size_t high_ret_size = n1_high_size + n2_high_size;
 	if (!skip_high) {
 		bc_rec_mul_recursive(n1 + half_size, n1_buf, n1_high_size, n2 + half_size, n2_buf, n2_high_size, half_size, high);
@@ -604,7 +608,7 @@ static void bc_rec_mul_recursive(
 	 * The important thing here is to place the pointer in consecutive positions on low and high
 	 * in this call.
 	 */
-	BC_UINT_T *mid = high + high_ret_size;
+	BC_INT_T *mid = high + high_ret_size;
 	size_t n1_mid_size = n1_low_size;
 	size_t n2_mid_size = n2_low_size;
 	size_t mid_ret_size = low_ret_size;
@@ -686,13 +690,13 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
-	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
+	size_t n1_arr_size = (n1len + BC_MUL_INT_DIGITS - 1) / BC_MUL_INT_DIGITS;
+	size_t n2_arr_size = (n2len + BC_MUL_INT_DIGITS - 1) / BC_MUL_INT_DIGITS;
 	/*
-	 * For computational efficiency, the size of prod_uint is slightly larger.
+	 * For computational efficiency, the size of prod_int is slightly larger.
 	 * Therefore, calculate the actual required size to avoid overflow when converting to BCD.
 	 */
-	size_t prod_arr_real_size = (prodlen + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
+	size_t prod_arr_real_size = (prodlen + BC_MUL_INT_DIGITS - 1) / BC_MUL_INT_DIGITS;
 
 	/*
 	 * Adjust size to a multiple of 2 for computational efficiency.
@@ -737,7 +741,7 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	/*
 	 * How to calculate memory size
 	 *
-	 * n1_uint, n2_uint:
+	 * n1_int, n2_int:
 	 * Use arr_size. The sum of these is prod_arr_size.
 	 *
 	 * n1_buf, n2_buf:
@@ -766,7 +770,7 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	 * divide and conquer 5: 2size * 2size (n2 requires 2 buf size)
 	 * So, the required buffer size is (8 * 3) + (2^3 - 2) = 30.
 	 *
-	 * prod_uint:
+	 * prod_int:
 	 * Share the results and the buffers used in intermediate calculations. The result is prod_arr_size.
 	 * The buffer increases by half like n_buf, but when calc_arr_size is 2, the required buffer size is 4.
 	 * In other words, they are almost the same geometric progression, but the last term is 4.
@@ -777,23 +781,23 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	n1_buf_size -= 2;
 	n2_buf_size -= 2;
 
-	BC_UINT_T *buf = safe_emalloc(prod_arr_size * 2 + calc_arr_size * 2 - 4 + n1_buf_size + n2_buf_size, sizeof(BC_UINT_T), 0);
-	BC_UINT_T *n1_uint = buf;
-	BC_UINT_T *n2_uint = buf + n1_arr_size;
-	BC_UINT_T *n1_buf = n2_uint + n2_arr_size;
-	BC_UINT_T *n2_buf = n1_buf + n1_buf_size;
-	BC_UINT_T *prod_uint = n2_buf + n2_buf_size;
+	BC_INT_T *buf = safe_emalloc(prod_arr_size * 2 + calc_arr_size * 2 - 4 + n1_buf_size + n2_buf_size, sizeof(BC_INT_T), 0);
+	BC_INT_T *n1_int = buf;
+	BC_INT_T *n2_int = buf + n1_arr_size;
+	BC_INT_T *n1_buf = n2_int + n2_arr_size;
+	BC_INT_T *n2_buf = n1_buf + n1_buf_size;
+	BC_INT_T *prod_int = n2_buf + n2_buf_size;
 
 	/*
 	 * The last entry may not be initialized because the size is adjusted to an even number for
 	 * computational efficiency. So, initialize it to 0.
 	 */
-	n1_uint[n1_arr_size - 1] = 0;
-	n2_uint[n2_arr_size - 1] = 0;
+	n1_int[n1_arr_size - 1] = 0;
+	n2_int[n2_arr_size - 1] = 0;
 
 	/* Convert to uint[] */
-	bc_convert_to_uint(n1_uint, n1end, n1len);
-	bc_convert_to_uint(n2_uint, n2end, n2len);
+	bc_convert_to_int(n1_int, n1end, n1len);
+	bc_convert_to_int(n2_int, n2end, n2len);
 
 	/*
 	 * divide and conquer mul.
@@ -806,24 +810,28 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 			 * n1_arr_size = n2_arr_size = calc_arr_size.
 			 * In this case, use the fast version that omits the size check.
 			 */
-			bc_rec_mul_recursive_fast(n1_uint, n1_buf, n1_arr_size, n2_uint, n2_buf, n2_arr_size, calc_arr_size, prod_uint);
+			bc_rec_mul_recursive_fast(n1_int, n1_buf, n1_arr_size, n2_int, n2_buf, n2_arr_size, calc_arr_size, prod_int);
 		} else {
-			bc_rec_mul_recursive(n1_uint, n1_buf, n1_arr_size, n2_uint, n2_buf, n2_arr_size, calc_arr_size, prod_uint);
+			bc_rec_mul_recursive(n1_int, n1_buf, n1_arr_size, n2_int, n2_buf, n2_arr_size, calc_arr_size, prod_int);
 		}
 	} else {
-		bc_rec_mul_recursive(n2_uint, n2_buf, n2_arr_size, n1_uint, n1_buf, n1_arr_size, calc_arr_size, prod_uint);
+		bc_rec_mul_recursive(n2_int, n2_buf, n2_arr_size, n1_int, n1_buf, n1_arr_size, calc_arr_size, prod_int);
 	}
 
 	/*
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	for (i = 0; i < prod_arr_real_size - 1; i++) {
-		bc_digits_adjustment_single(prod_uint + i);
+	for (i = 0; i < prod_arr_real_size; i++) {
+		bc_digits_adjustment_single(prod_int + i);
+		if (prod_int[i] < 0){
+			prod_int[i + 1]--;
+			prod_int[i] += BC_MUL_INT_OVERFLOW;
+		}
 	}
 
 	/* Convert to bc_num */
-	bc_mul_convert_uint_to_bcd(prod_uint, prodlen, prod_arr_real_size, prod);
+	bc_mul_convert_int_to_bcd(prod_int, prodlen, prod_arr_real_size, prod);
 
 	efree(buf);
 }
@@ -843,7 +851,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
+	if (len1 <= BC_MUL_INT_DIGITS && len2 <= BC_MUL_INT_DIGITS) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
 	} else if (UNEXPECTED(len1 >= BC_USE_REC_MUL_DIGITS && len2 >= BC_USE_REC_MUL_DIGITS)) {
 		bc_rec_mul(n1, len1, n2, len2, &prod);
