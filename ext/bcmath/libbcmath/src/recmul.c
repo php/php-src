@@ -517,7 +517,7 @@ static void bc_rec_mul_recursive(
 	 * low_ret_size may be smaller than calc size as a programmatic convenience to save buffer size.
 	 * If the size of n1 and n2 is always equal to calc_size and padded on the left with 0, then
 	 * low_ret_size is always calc_size.
-	 * e.g.: Value when saving buffer (value when filled with 0)
+	 * e.g. Value when saving buffer (value when filled with 0)
 	 * n1low = 1234(1234), n2low = 12(0012), calc_size = 8
 	 * n1_low_size = 4(4), n2_low_size = 2(4), low_ret_size = 6(8)
 	 */
@@ -540,9 +540,31 @@ static void bc_rec_mul_recursive(
 		bc_rec_mul_recursive(n1 + half_size, n1_buf, n1_high_size, n2 + half_size, n2_buf, n2_high_size, half_size, high);
 	} else {
 		/*
-		 * Actually, should think of filling calc_size - low_ret_size with 0 and filling
-		 * high_ret_size - (calc_size - low_ret_size) with 0, but the result is the same,
-		 * so write it like this.
+		 * Please see an example of calculation using Karatsuba-algorithm when n2 is very small.
+		 * e.g. 12345678 * 90
+		 * high = 1234 * 0
+		 * low = 5678 * 90
+		 * mid = (1234 - 5678)(0 - 90)
+		 * ret = high * 10000^2 + (high + low - mid) * 10000 + low
+		 *
+		 * So if follow the Karatsuba-algorithm and strictly separate high and low, the pointer
+		 * for high will always be low + calc_size.
+		 * However, as mentioned in the low comment, low_ret_size may be less than calc_size to
+		 * save buffers. This is the case in this example as well.
+		 * low = 5678 * 90, so low_ret_size is 4 + 2 = 6
+		 *
+		 * On the other hand, in this example, the size of n1 (12345678, size is 8) and
+		 * n2 (90, size is 2) tells us that the size ofret is 8 + 2 = 10.
+		 * So, if strictly following the Karatsuba-algorithm, low_ret_size is calc_size
+		 * of 8, so high_ret_size is necessarily 2.
+		 * However, if we simply calculate the size of high in this example, we get:
+		 * high = 1234 * 0, so high_ret_size is 4.
+		 *
+		 * In this way, the amount by which low_ret_size is less than calc_size is always
+		 * equal to the amount by which high_ret_size exceeds ret_size.
+		 *
+		 * Therefore, to efficiently initialize to 0, high_ret_size simply uses the value
+		 * we found.
 		 */
 		for (i = 0; i < high_ret_size; i++) {
 			high[i] = 0;
@@ -564,7 +586,22 @@ static void bc_rec_mul_recursive(
 		n2_buf[i] = -n2[i];
 	}
 
-	/* mid */
+	/*
+	 * mid
+	 * low and high write the result directly to ret, but mid requires a little more computation
+	 * than those, so the result is temporarily recorded in a buffer.
+	 * However, please note that the buffer area is shared with the ret area.
+	 * For example, when calculating 4 digits, record the 8 digits for low, 8 digits for high,
+	 * and then the 8 digits for mid.
+	 * The mid recorded here will be overwritten to low or high in the next recursive calculation.
+	 * Or, if mid is written in an area that exceeds the ret size, it will remain as is. However,
+	 * the result is only used up to the ret size, so the remnants of the mid calculation result
+	 * will not affect ret.
+	 * (The memory required for all calculations is pre-computed and reserved.)
+	 *
+	 * The important thing here is to place the pointer in consecutive positions on low and high
+	 * in this call.
+	 */
 	BC_UINT_T *mid = high + high_ret_size;
 	size_t n1_mid_size = n1_low_size;
 	size_t n2_mid_size = n2_low_size;
