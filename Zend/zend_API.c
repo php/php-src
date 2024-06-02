@@ -1846,21 +1846,31 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* 
 }
 /* }}} */
 
-ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params) /* {{{ */
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
 {
 	zend_result status = _object_and_properties_init(arg, class_type, NULL);
 	if (UNEXPECTED(status == FAILURE)) {
 		return FAILURE;
 	}
-	/* A constructor does not return a value */
-	zend_call_known_instance_method(
+	/* A constructor does not return a value, however if an exception is thrown
+	 * zend_call_known_function() will set the retval to IS_UNDEF */
+	zval retval;
+	ZVAL_UNDEF(&retval);
+	zend_call_known_function(
 		class_type->constructor,
 		Z_OBJ_P(arg),
+		class_type,
 		/* retval */ NULL,
 		param_count,
-		params
+		params,
+		named_params
 	);
-	return SUCCESS;
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		return FAILURE;
+	} else {
+		zval_ptr_dtor(&retval);
+		return SUCCESS;
+	}
 }
 /* }}} */
 
