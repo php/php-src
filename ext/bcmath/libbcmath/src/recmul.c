@@ -86,6 +86,9 @@
 #if SIZEOF_SIZE_T >= 8
 #  define BC_REC_MUL_DO_ADJUST_EXPO 1024
 #  define BC_USE_REC_MUL_DIGITS 160 * 8
+#else
+#  define BC_REC_MUL_DO_ADJUST_EXPO 32
+#  define BC_USE_REC_MUL_DIGITS 160 * 8
 #endif
 
 
@@ -355,8 +358,6 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 
 	efree(buf);
 }
-
-#if SIZEOF_SIZE_T >= 8
 
 /*
  * In divide-and-conquer calculations, determine whether the calculation length is
@@ -767,8 +768,6 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	efree(buf);
 }
 
-#endif // SIZEOF_SIZE_T >= 8
-
 /* The multiply routine.  N2 times N1 is put int PROD with the scale of
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
@@ -786,14 +785,8 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	/* Do the multiply */
 	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
-#if SIZEOF_SIZE_T >= 8
-	/*
-	 * Only use this in 64-bit, as it quickly overflows and is inconvenient
-	 * in 32-bit environments.
-	 */
 	} else if (UNEXPECTED(len1 >= BC_USE_REC_MUL_DIGITS && len2 >= BC_USE_REC_MUL_DIGITS)) {
 		bc_rec_mul(n1, len1, n2, len2, &prod);
-#endif
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);
 	}
