@@ -57,7 +57,7 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
-		int unmangle = zend_unmangle_property_name(key, &class_name, &prop_name);
+		zend_result unmangle = zend_unmangle_property_name(key, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name && unmangle == SUCCESS) {
