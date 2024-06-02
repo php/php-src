@@ -91,7 +91,7 @@ typedef HashTable *(*zend_object_get_properties_t)(zend_object *object);
 /* Must only return NULL when an exception occurs, if no properties
  * return (HashTable*)&zend_empty_array;
  */
-typedef HashTable *(*zend_object_get_debug_info_t)(zend_object *object, int *is_temp);
+typedef HashTable *(*zend_object_get_debug_info_t)(zend_object *object, bool *is_temp);
 
 typedef enum _zend_prop_purpose {
 	/* Used for debugging. Supersedes get_debug_info handler. */
@@ -218,7 +218,7 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *object);
 ZEND_API struct _zend_property_info *zend_get_property_info(const zend_class_entry *ce, zend_string *member, int silent);
 ZEND_API HashTable *zend_std_get_properties(zend_object *object);
 ZEND_API HashTable *zend_std_get_gc(zend_object *object, zval **table, int *n);
-ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp);
+ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, bool *is_temp);
 ZEND_API zend_result zend_std_cast_object_tostring(zend_object *object, zval *writeobj, int type);
 ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot);
 ZEND_API zval *zend_std_read_property(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
