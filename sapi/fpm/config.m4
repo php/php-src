@@ -6,18 +6,15 @@ PHP_ARG_ENABLE([fpm],,
 
 dnl Configure checks.
 AC_DEFUN([AC_FPM_CLOCK],
-[
-  AC_CHECK_FUNCS([clock_gettime],,
-    [AC_SEARCH_LIBS([clock_gettime], [rt],
-      [ac_cv_func_clock_gettime=yes
-      AC_DEFINE([HAVE_CLOCK_GETTIME], [1])])])
+[AC_CHECK_FUNCS([clock_gettime],,
+  [AC_SEARCH_LIBS([clock_gettime], [rt],
+    [ac_cv_func_clock_gettime=yes
+    AC_DEFINE([HAVE_CLOCK_GETTIME], [1])])])
 
-  have_clock_get_time=no
-
-  if test "$ac_cv_func_clock_gettime" = "no"; then
-    AC_MSG_CHECKING([for clock_get_time])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <mach/mach.h>
+AS_VAR_IF([ac_cv_func_clock_gettime], [no],
+  [AC_CACHE_CHECK([for clock_get_time], [php_cv_func_clock_get_time],
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
+      #include <mach/mach.h>
       #include <mach/clock.h>
       #include <mach/mach_error.h>
 
@@ -37,18 +34,14 @@ AC_DEFUN([AC_FPM_CLOCK],
 
         return 0;
       }
-    ]])], [
-      have_clock_get_time=yes
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ], [AC_MSG_RESULT([no (cross-compiling)])])
-  fi
-
-  if test "$have_clock_get_time" = "yes"; then
-    AC_DEFINE([HAVE_CLOCK_GET_TIME], 1, [do we have clock_get_time?])
-  fi
-])
+    ])],
+    [php_cv_func_clock_get_time=yes],
+    [php_cv_func_clock_get_time=no],
+    [php_cv_func_clock_get_time=no])])
+  AS_VAR_IF([php_cv_func_clock_get_time], [yes],
+    [AC_DEFINE([HAVE_CLOCK_GET_TIME], [1],
+      [Define to 1 if you have the 'clock_get_time' function.])])
+])])
 
 AC_DEFUN([AC_FPM_TRACE],
 [
