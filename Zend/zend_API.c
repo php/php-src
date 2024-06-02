@@ -1846,6 +1846,24 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* 
 }
 /* }}} */
 
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params) /* {{{ */
+{
+	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	if (UNEXPECTED(status == FAILURE)) {
+		return FAILURE;
+	}
+	/* A constructor does not return a value */
+	zend_call_known_instance_method(
+		class_type->constructor,
+		Z_OBJ_P(arg),
+		/* retval */ NULL,
+		param_count,
+		params
+	);
+	return SUCCESS;
+}
+/* }}} */
+
 ZEND_API void object_init(zval *arg) /* {{{ */
 {
 	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
