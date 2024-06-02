@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . /dev/poll events.mechanism for Solaris/Illumos setting had been retired.
     (David Carlier)
 
+- Intl:
+  . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
+    (David Carlier)
+
 - Opcache:
   . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
     (Arnaud)

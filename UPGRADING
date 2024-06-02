@@ -609,6 +609,8 @@ PHP 8.4 UPGRADE NOTES
     Selectors.
   . Added IntlDateFormatter::parseToCalendar which behaves like
     IntlDateFormatter::parse except the time zone is updated.
+  . Added SpoofChecker::setAllowedChars to limit the range of unicode
+    chars.
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim functions.
