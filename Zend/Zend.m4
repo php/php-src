@@ -159,9 +159,8 @@ AC_CHECK_FUNCS([sigsetjmp],,
 
 dnl Test whether the stack grows downwards
 dnl Assumes contiguous stack
-AC_MSG_CHECKING(whether the stack grows downwards)
-
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([whether the stack grows downwards], [php_cv_have_stack_limit],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <stdint.h>
 
 int (*volatile f)(uintptr_t);
@@ -177,14 +176,13 @@ int main(void) {
     f = stack_grows_downwards;
     return f((uintptr_t)&local) ? 0 : 1;
 }
-]])], [
-  AC_DEFINE([ZEND_CHECK_STACK_LIMIT], 1, [Define if checking the stack limit is supported])
-  AC_MSG_RESULT(yes)
-], [
-  AC_MSG_RESULT(no)
-], [
-  AC_MSG_RESULT(no)
-])
+])],
+[php_cv_have_stack_limit=yes],
+[php_cv_have_stack_limit=no],
+[php_cv_have_stack_limit=no])])
+AS_VAR_IF([php_cv_have_stack_limit], [yes],
+  [AC_DEFINE([ZEND_CHECK_STACK_LIMIT], [1],
+    [Define to 1 if checking the stack limit is supported.])])
 
 ZEND_CHECK_FLOAT_PRECISION
 ])
