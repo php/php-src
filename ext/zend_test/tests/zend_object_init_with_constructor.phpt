@@ -1,5 +1,5 @@
 --TEST--
-Zend: Test zend_forbid_dynamic_call() for methods
+Zend: Test object_init_with_constructor() API
 --EXTENSIONS--
 zend_test
 sysvmsg
