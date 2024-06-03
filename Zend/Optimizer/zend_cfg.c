@@ -28,14 +28,23 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 {
 	zend_basic_block *blocks = cfg->blocks;
 
-	{
-		while (1) {
+	zend_worklist work;
+	ALLOCA_FLAG(list_use_heap)
+	ZEND_WORKLIST_ALLOCA(&work, cfg->blocks_count, list_use_heap);
+
+	zend_worklist_push(&work, b - cfg->blocks);
+
+	while (zend_worklist_len(&work)) {
+		b = cfg->blocks + zend_worklist_pop(&work);
+
+		bool finished = false;
+		while (!finished) {
 			int i;
 
 			b->flags |= ZEND_BB_REACHABLE;
 			if (b->successors_count == 0) {
 				b->flags |= ZEND_BB_EXIT;
-				return;
+				break;
 			}
 
 			for (i = 0; i < b->successors_count; i++) {
@@ -90,7 +99,8 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				if (i == b->successors_count - 1) {
 					/* Tail call optimization */
 					if (succ->flags & ZEND_BB_REACHABLE) {
-						return;
+						finished = true;
+						break;
 					}
 
 					b = succ;
@@ -98,12 +108,14 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				} else {
 					/* Recursively check reachability */
 					if (!(succ->flags & ZEND_BB_REACHABLE)) {
-						zend_mark_reachable(opcodes, cfg, succ);
+						zend_worklist_push(&work, succ - cfg->blocks);
 					}
 				}
 			}
 		}
 	}
+
+	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
 }
 /* }}} */
 
