@@ -1511,7 +1511,7 @@ const SOCKET_ENOMEDIUM = UNKNOWN;
 const SOCKET_EMEDIUMTYPE = UNKNOWN;
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 /**
  * @var int
  * @cvalue WSAESTALE
