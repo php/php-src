@@ -14,7 +14,10 @@ $values = array(1234.5678,
                 "123.456789",
                 "12.3456789e1",
                 true,
-                false);
+                false,
+                INF,
+                -INF,
+                NAN);
 
 echo "\n-- number_format tests.....default --\n";
 for ($i = 0; $i < count($values); $i++) {
@@ -55,6 +58,9 @@ string(3) "123"
 string(3) "123"
 string(1) "1"
 string(1) "0"
+string(3) "inf"
+string(4) "-inf"
+string(3) "nan"
 
 -- number_format tests.....with two dp --
 string(8) "1,234.57"
@@ -68,6 +74,9 @@ string(6) "123.46"
 string(6) "123.46"
 string(4) "1.00"
 string(4) "0.00"
+string(3) "inf"
+string(4) "-inf"
+string(3) "nan"
 
 -- number_format tests.....English format --
 string(8) "1 234.57"
@@ -81,6 +90,9 @@ string(6) "123.46"
 string(6) "123.46"
 string(4) "1.00"
 string(4) "0.00"
+string(3) "inf"
+string(4) "-inf"
+string(3) "nan"
 
 -- number_format tests.....French format --
 string(8) "1 234,57"
@@ -94,3 +106,6 @@ string(6) "123,46"
 string(6) "123,46"
 string(4) "1,00"
 string(4) "0,00"
+string(3) "inf"
+string(4) "-inf"
+string(3) "nan"
