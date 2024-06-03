@@ -8,7 +8,7 @@ if test "$PHP_DOM" != "no"; then
   PHP_SETUP_LIBXML([DOM_SHARED_LIBADD], [
     AC_DEFINE([HAVE_DOM], [1],
       [Define to 1 if the PHP extension 'dom' is available.])
-    PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/lexbor -DLEXBOR_STATIC"
+    PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/lexbor -DLEXBOR_STATIC -Wno-uninitialized"
     LEXBOR_DIR="lexbor/lexbor"
     LEXBOR_SOURCES=m4_normalize(["
       $LEXBOR_DIR/core/array_obj.c
@@ -22,6 +22,7 @@ if test "$PHP_DOM" != "no"; then
       $LEXBOR_DIR/core/hash.c
       $LEXBOR_DIR/core/mem.c
       $LEXBOR_DIR/core/mraw.c
+      $LEXBOR_DIR/core/plog.c
       $LEXBOR_DIR/core/print.c
       $LEXBOR_DIR/core/serialize.c
       $LEXBOR_DIR/core/shs.c
@@ -184,8 +185,12 @@ if test "$PHP_DOM" != "no"; then
       $LEXBOR_DIR/html/tree/open_elements.c
       $LEXBOR_DIR/ns/ns.c
       $LEXBOR_DIR/ports/posix/lexbor/core/memory.c
+      $LEXBOR_DIR/punycode/punycode.c
       $LEXBOR_DIR/selectors-adapted/selectors.c
       $LEXBOR_DIR/tag/tag.c
+      $LEXBOR_DIR/unicode/idna.c
+      $LEXBOR_DIR/unicode/unicode.c
+      $LEXBOR_DIR/url/url.c
     "])
     PHP_NEW_EXTENSION([dom], m4_normalize([
         attr.c
@@ -242,6 +247,9 @@ if test "$PHP_DOM" != "no"; then
       $ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core
       $ext_builddir/$LEXBOR_DIR/selectors-adapted
       $ext_builddir/$LEXBOR_DIR/tag
+      $ext_builddir/$LEXBOR_DIR/punycode
+      $ext_builddir/$LEXBOR_DIR/unicode
+      $ext_builddir/$LEXBOR_DIR/url
     ])
     PHP_SUBST([DOM_SHARED_LIBADD])
     PHP_INSTALL_HEADERS([ext/dom], m4_normalize([
