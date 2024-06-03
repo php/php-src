@@ -110,6 +110,8 @@ static void* dasm_labels[zend_lb_MAX];
 
 #if ZTS
 static size_t tsrm_ls_cache_tcb_offset = 0;
+static size_t tsrm_tls_index = 0;
+static size_t tsrm_tls_offset = 0;
 # ifdef __APPLE__
 struct TLVDescriptor {
 	void*       (*thunk)(struct TLVDescriptor*);
@@ -117,6 +119,13 @@ struct TLVDescriptor {
 	uint64_t    offset;
 };
 typedef struct TLVDescriptor TLVDescriptor;
+# elif defined(__FreeBSD__)
+/* https://github.com/freebsd/freebsd-src/blob/c52ca7dd09066648b1cc40f758289404d68ab886/libexec/rtld-elf/aarch64/reloc.c#L180-L184 */
+typedef struct TLSDescriptor {
+	void*   thunk;
+	int     index;
+	size_t  offset;
+} TLSDescriptor;
 # endif
 #endif
 
@@ -494,8 +503,14 @@ static bool logical_immediate_p(uint64_t value, uint32_t reg_size)
 |	MEM_ACCESS_64_WITH_UOFFSET_64 ldr, reg, TMP3, (((TLVDescriptor*)tsrm_ls_cache_tcb_offset)->offset), TMP1
 ||#else
 |	.long 0xd53bd051 // TODO: hard-coded: mrs TMP3, tpidr_el0
-||	ZEND_ASSERT(tsrm_ls_cache_tcb_offset <= LDR_STR_PIMM64);
-|	ldr reg, [TMP3, #tsrm_ls_cache_tcb_offset]
+||	if (tsrm_ls_cache_tcb_offset == 0) {
+|		ldr TMP3, [TMP3, #0]
+|		MEM_ACCESS_64_WITH_UOFFSET_64 ldr, TMP3, TMP3, tsrm_tls_index, TMP1
+|		MEM_ACCESS_64_WITH_UOFFSET_64 ldr, reg, TMP3, tsrm_tls_offset, TMP1
+||	} else {
+||		ZEND_ASSERT(tsrm_ls_cache_tcb_offset <= LDR_STR_PIMM64);
+|		ldr reg, [TMP3, #tsrm_ls_cache_tcb_offset]
+||	}
 ||#endif
 |.endmacro
 
@@ -2754,7 +2769,27 @@ static int zend_jit_setup(void)
 
 #if ZTS
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
+# if defined(__FreeBSD__)
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		TLSDescriptor **where;
+
+		__asm__(
+			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
+			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
+			: "=r" (where));
+		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst
+		 * section "Relocations for thread-local storage".
+		 * The first entry holds a pointer to the variable's TLS descriptor resolver function and the second entry holds
+		 * a platform-specific offset or pointer. */
+		TLSDescriptor *tlsdesc = where[1];
+
+		tsrm_tls_offset = tlsdesc->offset;
+		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
+		tsrm_tls_index = (tlsdesc->index + 1) * 8;
+	}
+# else
 	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
+# endif
 #endif
 
     memset(sp_adj, 0, sizeof(sp_adj));
