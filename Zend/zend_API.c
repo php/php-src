@@ -1855,10 +1855,21 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 	}
 	zend_object *obj = Z_OBJ_P(arg);
 	zend_function *constructor = obj->handlers->get_constructor(obj);
-	if (UNEXPECTED(constructor == NULL)) {
-		zval_ptr_dtor(arg);
-		ZVAL_UNDEF(arg);
-		return FAILURE;
+	if (constructor == NULL) {
+		/* The constructor can be NULL for 2 different reasons:
+		 * - It is not defined
+		 * - We are not allowed to call the constructor (e.g. private, or internal opaque class)
+		 *   and an exception has been thrown
+		 * in the former case, we are done and the object is initialized,
+		 * in the latter we need to destroy the object as initialization failed
+		 */
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		} else {
+			return SUCCESS;
+		}
 	}
 	/* A constructor should not return a value, however if an exception is thrown
 	 * zend_call_known_function() will set the retval to IS_UNDEF */
