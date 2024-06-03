@@ -376,6 +376,18 @@ int emu(const opcode_handler_t *ip, void *fp) {
     ZEND_GCC_GLOBAL_REGS=no
   ])
 fi
+
+AC_ARG_ENABLE([lto],
+  [AS_HELP_STRING([--enable-lto],
+    [enable Link Time Optimization])],
+  [
+    AX_CHECK_COMPILE_FLAG([-flto],
+    [CFLAGS="$CFLAGS -flto" CXXFLAGS="$CXXFLAGS -flto" ZEND_GCC_GLOBAL_REGS=no],
+    [AC_MSG_WARN([LTO is unsupported])])
+  ]
+  []
+  [])
+
 if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
   AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
 fi
