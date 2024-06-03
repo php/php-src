@@ -460,6 +460,26 @@ static ZEND_FUNCTION(zend_call_method)
 	zend_call_method(obj, ce, NULL, ZSTR_VAL(method_name), ZSTR_LEN(method_name), return_value, argc - 2, arg1, arg2);
 }
 
+/* Instantiate a class and run the constructor via object_init_with_constructor */
+static ZEND_FUNCTION(zend_object_init_with_constructor)
+{
+	zend_class_entry *ce = NULL;
+	zval *args;
+	uint32_t num_args;
+	HashTable *named_args;
+
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_CLASS(ce)
+		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_result status = object_init_with_constructor(return_value, ce, num_args, args, named_args);
+	if (status == FAILURE) {
+		RETURN_THROWS();
+	}
+	ZEND_ASSERT(!EG(exception));
+}
+
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

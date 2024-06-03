@@ -1852,15 +1852,19 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 	if (UNEXPECTED(status == FAILURE)) {
 		return FAILURE;
 	}
-	/* A constructor does not return a value, however if an exception is thrown
+	zend_object * obj = Z_OBJ_P(arg);
+	zend_function *constructor = obj->handlers->get_constructor(obj);
+	if (UNEXPECTED(constructor == NULL)) {
+		return FAILURE;
+	}
+	/* A constructor should not return a value, however if an exception is thrown
 	 * zend_call_known_function() will set the retval to IS_UNDEF */
 	zval retval;
-	ZVAL_UNDEF(&retval);
 	zend_call_known_function(
-		class_type->constructor,
-		Z_OBJ_P(arg),
+		constructor,
+		obj,
 		class_type,
-		/* retval */ NULL,
+		/* retval */ &retval,
 		param_count,
 		params,
 		named_params
@@ -1868,6 +1872,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 	if (Z_TYPE(retval) == IS_UNDEF) {
 		return FAILURE;
 	} else {
+		/* Unlikely, but user constructors may return any value they want */
 		zval_ptr_dtor(&retval);
 		return SUCCESS;
 	}
