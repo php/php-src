@@ -1008,7 +1008,7 @@ optimize_nop:
 static bool zend_dfa_try_to_replace_result(zend_op_array *op_array, zend_ssa *ssa, int def, int cv_var)
 {
 	int result_var = ssa->ops[def].result_def;
-	int cv = EX_NUM_TO_VAR(ssa->vars[cv_var].var);
+	uint32_t cv = EX_NUM_TO_VAR(ssa->vars[cv_var].var);
 
 	if (result_var >= 0
 	 && !(ssa->var_info[cv_var].type & MAY_BE_REF)
