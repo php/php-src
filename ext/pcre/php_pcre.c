@@ -550,11 +550,6 @@ static zend_string **make_subpats_table(uint32_t num_subpats, pcre_cache_entry *
 		unsigned short name_idx = 0x100 * (unsigned char)name_table[0] + (unsigned char)name_table[1];
 		const char *name = name_table + 2;
 		subpat_names[name_idx] = zend_string_init(name, strlen(name), 0);
-		if (is_numeric_string(ZSTR_VAL(subpat_names[name_idx]), ZSTR_LEN(subpat_names[name_idx]), NULL, NULL, 0) > 0) {
-			php_error_docref(NULL, E_WARNING, "Numeric named subpatterns are not allowed");
-			free_subpats_table(subpat_names, num_subpats);
-			return NULL;
-		}
 		name_table += name_size;
 	}
 	return subpat_names;
