@@ -20,6 +20,7 @@
 #include "filter_private.h"
 #include "ext/standard/url.h"
 #include "ext/pcre/php_pcre.h"
+#include "ext/uri/php_uri.h"
 
 #include "zend_multiply.h"
 
@@ -591,7 +592,7 @@ static bool php_filter_is_valid_ipv6_hostname(const zend_string *s)
 
 void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 {
-	php_url *url;
+	zend_result result;
 	size_t old_len = Z_STRLEN_P(value);
 
 	php_filter_url(value, flags, option_array, charset);
@@ -600,52 +601,138 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	/* Use parse_url - if it returns false, we return NULL */
-	url = php_url_parse_ex(Z_STRVAL_P(value), Z_STRLEN_P(value));
+	/* Parse options */
+	zval *option_val;
+	zend_string *parser_name;
+	int parser_name_set;
+	FETCH_STR_OPTION(parser_name, "parser");
 
-	if (url == NULL) {
+	uri_handler_t *uri_handler = php_uri_get_handler(parser_name_set ? parser_name : NULL);
+	if (uri_handler == NULL) {
+		zend_throw_error(NULL, "Invalid URI parser used");
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->scheme != NULL &&
-		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
+	/* Use parse_url - if it returns false, we return NULL */
+	uri_internal_t *internal_uri = php_uri_parse(uri_handler, Z_STR_P(value));
+	if (internal_uri == NULL) {
+		RETURN_VALIDATION_FAILED
+	}
 
-		if (url->host == NULL) {
-			goto bad_url;
+	zval scheme;
+	result = php_uri_get_scheme(internal_uri, &scheme);
+	if (result == FAILURE) {
+		php_uri_free(internal_uri);
+		RETURN_VALIDATION_FAILED
+	}
+
+	zval host;
+	result = php_uri_get_host(internal_uri, &host);
+	if (result == FAILURE) {
+		zval_ptr_dtor(&scheme);
+		php_uri_free(internal_uri);
+		RETURN_VALIDATION_FAILED
+	}
+
+	if (Z_TYPE(scheme) == IS_STRING &&
+		(zend_string_equals_literal_ci(Z_STR(scheme), "http") || zend_string_equals_literal_ci(Z_STR(scheme), "https"))) {
+		const char *s;
+		size_t l;
+
+		if (Z_TYPE(host) != IS_STRING) {
+			php_uri_free(internal_uri);
+			zval_ptr_dtor(&scheme);
+			zval_ptr_dtor(&host);
+			RETURN_VALIDATION_FAILED
 		}
 
+		s = Z_STRVAL(host);
+		l = Z_STRLEN(host);
+
 		if (
+			/* @todo Find a better solution than hardcoding the uri handler name. Skipping these checks is needed because
+			 * both uriparser and lexbor performs comprehensive validations. Also, the [] pair is removed by these
+			 * libraries in case of ipv6 URIs, therefore php_filter_is_valid_ipv6_hostname() would case false positive
+			 * failures. */
+			strcmp(uri_handler->name, "parse_url") == 0 &&
 			/* An IPv6 enclosed by square brackets is a valid hostname.*/
 			!php_filter_is_valid_ipv6_hostname(url->host) &&
 			/* Validate domain.
 			 * This includes a loose check for an IPv4 address. */
-			!php_filter_validate_domain_ex(url->host, FILTER_FLAG_HOSTNAME)
+			!_php_filter_validate_domain(Z_STRVAL(host), l, FILTER_FLAG_HOSTNAME)
 		) {
-			php_url_free(url);
+			php_uri_free(internal_uri);
+			zval_ptr_dtor(&scheme);
+			zval_ptr_dtor(&host);
 			RETURN_VALIDATION_FAILED
 		}
 	}
 
+	zval path;
+	result = php_uri_get_path(internal_uri, &path);
+	if (result == FAILURE) {
+		php_uri_free(internal_uri);
+		zval_ptr_dtor(&scheme);
+		zval_ptr_dtor(&host);
+		RETURN_VALIDATION_FAILED
+	}
+
+	zval query;
+	result = php_uri_get_query(internal_uri, &query);
+	if (result == FAILURE) {
+		php_uri_free(internal_uri);
+		zval_ptr_dtor(&scheme);
+		zval_ptr_dtor(&host);
+		zval_ptr_dtor(&path);
+		RETURN_VALIDATION_FAILED
+	}
+
 	if (
-		url->scheme == NULL ||
-		/* some schemas allow the host to be empty */
-		(url->host == NULL && (!zend_string_equals_literal(url->scheme, "mailto") && !zend_string_equals_literal(url->scheme, "news") && !zend_string_equals_literal(url->scheme, "file"))) ||
-		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
+		Z_TYPE(scheme) == IS_NULL ||
+		/* some schemes allow the host to be empty */
+		(Z_TYPE(host) == IS_NULL && (!zend_string_equals_literal(Z_STR(scheme), "mailto") && !zend_string_equals_literal(Z_STR(scheme), "news") && !zend_string_equals_literal(Z_STR(scheme), "file"))) ||
+		((flags & FILTER_FLAG_PATH_REQUIRED) && Z_TYPE(path) == IS_NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && Z_TYPE(query) == IS_NULL)
 	) {
-bad_url:
-		php_url_free(url);
+		php_uri_free(internal_uri);
+		zval_ptr_dtor(&scheme);
+		zval_ptr_dtor(&host);
+		zval_ptr_dtor(&path);
+		zval_ptr_dtor(&query);
 		RETURN_VALIDATION_FAILED
 	}
 
-	if ((url->user != NULL && !is_userinfo_valid(url->user))
-		|| (url->pass != NULL && !is_userinfo_valid(url->pass))
-	) {
-		php_url_free(url);
-		RETURN_VALIDATION_FAILED
+	zval_ptr_dtor(&scheme);
+	zval_ptr_dtor(&host);
+	zval_ptr_dtor(&path);
+	zval_ptr_dtor(&query);
 
+	zval user;
+	result = php_uri_get_user(internal_uri, &user);
+	if (result == FAILURE) {
+		php_uri_free(internal_uri);
+		RETURN_VALIDATION_FAILED
 	}
 
-	php_url_free(url);
+	zval password;
+	result = php_uri_get_password(internal_uri, &password);
+	if (result == FAILURE) {
+		php_uri_free(internal_uri);
+		zval_ptr_dtor(&user);
+		RETURN_VALIDATION_FAILED
+	}
+
+	if ((Z_TYPE(user) != IS_NULL && !is_userinfo_valid(Z_STR(user)))
+		|| (Z_TYPE(password) != IS_NULL && !is_userinfo_valid(Z_STR(password)))
+	) {
+		php_uri_free(internal_uri);
+		zval_ptr_dtor(&user);
+		zval_ptr_dtor(&password);
+		RETURN_VALIDATION_FAILED
+	}
+
+	php_uri_free(internal_uri);
+	zval_ptr_dtor(&user);
+	zval_ptr_dtor(&password);
 }
 /* }}} */
 

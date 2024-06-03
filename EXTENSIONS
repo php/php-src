@@ -503,6 +503,12 @@ PRIMARY MAINTAINER:  Andrei Zmievski <andrei@php.net> (2002 - 2002)
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
+EXTENSION:           uri
+PRIMARY MAINTAINER   Máté Kocsis <kocsismate@php.net> (2024 - 2024)
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               8.5.0
+-------------------------------------------------------------------------------
 EXTENSION:           zip
 PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net> (2006 - 2011)
                      Remi Collet <remi@php.net> (2013-2020)
