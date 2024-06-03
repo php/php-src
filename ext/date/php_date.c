@@ -4294,7 +4294,7 @@ PHP_FUNCTION(timezone_transitions_get)
 {
 	zval                *object, element;
 	php_timezone_obj    *tzobj;
-	int                  begin = 0;
+	uint64_t             begin = 0;
 	bool                 found;
 	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = INT32_MAX;
 
@@ -4383,8 +4383,7 @@ PHP_FUNCTION(timezone_transitions_get)
 			add_nominal();
 		}
 	} else {
-		unsigned int i;
-		for (i = begin; i < tzobj->tzi.tz->bit64.timecnt; ++i) {
+		for (uint64_t i = begin; i < tzobj->tzi.tz->bit64.timecnt; ++i) {
 			if (tzobj->tzi.tz->trans[i] < timestamp_end) {
 				add(i, tzobj->tzi.tz->trans[i]);
 			} else {
@@ -4393,7 +4392,6 @@ PHP_FUNCTION(timezone_transitions_get)
 		}
 	}
 	if (tzobj->tzi.tz->posix_info && tzobj->tzi.tz->posix_info->dst_end) {
-		int i, j;
 		timelib_sll start_y, end_y, dummy_m, dummy_d;
 		timelib_sll last_transition_ts = tzobj->tzi.tz->trans[tzobj->tzi.tz->bit64.timecnt - 1];
 
@@ -4403,12 +4401,12 @@ PHP_FUNCTION(timezone_transitions_get)
 		/* Find out year for final boundary timestamp */
 		timelib_unixtime2date(timestamp_end, &end_y, &dummy_m, &dummy_d);
 
-		for (i = start_y; i <= end_y; i++) {
+		for (timelib_sll i = start_y; i <= end_y; i++) {
 			timelib_posix_transitions transitions = { 0 };
 
 			timelib_get_transitions_for_year(tzobj->tzi.tz, i, &transitions);
 
-			for (j = 0; j < transitions.count; j++) {
+			for (size_t j = 0; j < transitions.count; j++) {
 				if (transitions.times[j] <= last_transition_ts) {
 					continue;
 				}
