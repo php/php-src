@@ -18,6 +18,12 @@ class ThrowingUser {
     }
 }
 
+abstract class AbstractClass {
+    public function __construct() {
+        return new stdClass();
+    }
+}
+
 class TestUser {
     public function __construct(int $int_param, string $string_param) {
         return new stdClass();
@@ -39,6 +45,12 @@ try {
 }
 try {
     $o = zend_object_init_with_constructor("ZendTestUnitEnum");
+    var_dump($o);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+try {
+    $o = zend_object_init_with_constructor("AbstractClass");
     var_dump($o);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
@@ -88,11 +100,12 @@ Testing impossible initializations
 Error: Cannot instantiate interface _ZendTestInterface
 Error: Cannot instantiate trait _ZendTestTrait
 Error: Cannot instantiate enum ZendTestUnitEnum
+Error: Cannot instantiate abstract class AbstractClass
 Error: Cannot directly construct SysvMessageQueue, use msg_get_queue() instead
 Error: Call to private PrivateUser::__construct() from global scope
 Exception: Don't construct
 Testing param passing
 ArgumentCountError: Too few arguments to function TestUser::__construct(), 0 passed and exactly 2 expected
 TypeError: TestUser::__construct(): Argument #1 ($int_param) must be of type int, string given
-object(TestUser)#3 (0) {
+object(TestUser)#1 (0) {
 }
