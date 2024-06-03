@@ -731,8 +731,35 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
     return ret;
 }
 
-static int stream_array_emulate_read_fd_set(zval *stream_array)
-{
+static php_socket_t stream_array_get_max_fd(zval *array) {
+    zval *elem;
+    php_stream *stream;
+    php_socket_t max_fd = 0;
+    php_socket_t this_fd;
+
+    if (Z_TYPE_P(array) != IS_ARRAY) {
+        return 0;
+    }
+
+    ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), elem) {
+        ZVAL_DEREF(elem);
+        php_stream_from_zval_no_verify(stream, elem);
+        if (stream == NULL) {
+            continue;
+        }
+
+        if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
+            if (this_fd > max_fd) {
+                max_fd = this_fd;
+            }
+        }
+    } ZEND_HASH_FOREACH_END();
+
+    return max_fd;
+}
+
+
+static int stream_array_emulate_read_fd_set(zval *stream_array) {
 	zval *elem, *dest_elem;
 	HashTable *ht;
 	php_stream *stream;
@@ -786,8 +813,8 @@ PHP_FUNCTION(stream_select) {
     zval *r_array, *w_array, *e_array;
     struct timeval tv, *tv_p = NULL;
     fd_bigset rfds, wfds, efds;
-    php_socket_t max_fd = 0;
-    int retval, sets = 0;
+    php_socket_t max_fd = -1;
+    int retval = 0;
     zend_long sec, usec = 0;
     bool secnull;
     bool usecnull = 1;
@@ -802,37 +829,44 @@ PHP_FUNCTION(stream_select) {
         Z_PARAM_LONG_OR_NULL(usec, usecnull)
     ZEND_PARSE_PARAMETERS_END();
 
-    FD_BIGSET_ZERO(&rfds, 15000); // Adjust the number of file descriptors as needed
-    FD_BIGSET_ZERO(&wfds, 15000);
-    FD_BIGSET_ZERO(&efds, 15000);
-
+    // Determine the largest file descriptor
     if (r_array != NULL) {
-        set_count = stream_array_to_fd_bigset(r_array, &rfds, &max_fd);
-        if (set_count > max_set_count)
-            max_set_count = set_count;
-        sets += set_count;
+        max_fd = stream_array_get_max_fd(r_array);
+    }
+    if (w_array != NULL) {
+        php_socket_t tmp_max_fd = stream_array_get_max_fd(w_array);
+        if (tmp_max_fd > max_fd) {
+            max_fd = tmp_max_fd;
+        }
+    }
+    if (e_array != NULL) {
+        php_socket_t tmp_max_fd = stream_array_get_max_fd(e_array);
+        if (tmp_max_fd > max_fd) {
+            max_fd = tmp_max_fd;
+        }
+    }
+
+    if (max_fd == -1) {
+        zend_value_error("No stream arrays were passed or all arrays were empty");
+        RETURN_THROWS();
+    }
+
+    // Allocate fd_bigset based on max_fd
+    FD_BIGSET_ZERO(&rfds, max_fd + 1);
+    FD_BIGSET_ZERO(&wfds, max_fd + 1);
+    FD_BIGSET_ZERO(&efds, max_fd + 1);
+
+    // Populate the fd_bigset structures
+    if (r_array != NULL) {
+        stream_array_to_fd_bigset(r_array, &rfds, &max_fd);
     }
 
     if (w_array != NULL) {
-        set_count = stream_array_to_fd_bigset(w_array, &wfds, &max_fd);
-        if (set_count > max_set_count)
-            max_set_count = set_count;
-        sets += set_count;
+        stream_array_to_fd_bigset(w_array, &wfds, &max_fd);
     }
 
     if (e_array != NULL) {
-        set_count = stream_array_to_fd_bigset(e_array, &efds, &max_fd);
-        if (set_count > max_set_count)
-            max_set_count = set_count;
-        sets += set_count;
-    }
-
-    if (!sets) {
-        zend_value_error("No stream arrays were passed");
-        FD_BIGSET_FREE(&rfds);
-        FD_BIGSET_FREE(&wfds);
-        FD_BIGSET_FREE(&efds);
-        RETURN_THROWS();
+        stream_array_to_fd_bigset(e_array, &efds, &max_fd);
     }
 
     if (secnull && !usecnull) {
@@ -865,7 +899,9 @@ PHP_FUNCTION(stream_select) {
         tv_p = &tv;
     }
 
-    // Support for buffered data
+    /* slight hack to support buffered data; if there is data sitting in the
+	 * read buffer of any of the streams in the read array, let's pretend
+	 * that we selected, but return only the readable sockets */
     if (r_array != NULL) {
         retval = stream_array_emulate_read_fd_set(r_array);
         if (retval > 0) {
@@ -884,15 +920,14 @@ PHP_FUNCTION(stream_select) {
         }
     }
 
-	#ifdef __USE_XOPEN
-		retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
-	#else
-		retval = php_select(max_fd + 1, (fd_set *)rfds.__fds_bits, (fd_set *)wfds.__fds_bits, (fd_set *)efds.__fds_bits, tv_p);
-	#endif
-	
+#ifdef __USE_XOPEN
+    retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
+#else
+    retval = php_select(max_fd + 1, (fd_set *)rfds.__fds_bits, (fd_set *)wfds.__fds_bits, (fd_set *)efds.__fds_bits, tv_p);
+#endif
+
     if (retval == -1) {
-        php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
-            errno, strerror(errno), max_fd);
+        php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)", errno, strerror(errno), max_fd);
         FD_BIGSET_FREE(&rfds);
         FD_BIGSET_FREE(&wfds);
         FD_BIGSET_FREE(&efds);
@@ -909,6 +944,7 @@ PHP_FUNCTION(stream_select) {
 
     RETURN_LONG(retval);
 }
+
 /* }}} */
 
 /* {{{ stream_context related functions */
