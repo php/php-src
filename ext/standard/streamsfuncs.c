@@ -616,7 +616,7 @@ PHP_FUNCTION(stream_get_wrappers)
 }
 /* }}} */
 
-/* {{{ stream_select_big related macros and struct */
+/* {{{ fd_bigset related macros and typedefs to remove FD_SETSIZE limitation in stream_select */
 typedef struct {
 #ifdef __USE_XOPEN
     char *fds_bits;
@@ -729,96 +729,6 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
     ZVAL_ARR(stream_array, ht);
 
     return ret;
-}
-/* }}} */
-
-/* {{{ stream_select related functions */
-static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t *max_fd)
-{
-	zval *elem;
-	php_stream *stream;
-	int cnt = 0;
-
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
-
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
-		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
-			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
-			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
-		php_socket_t this_fd;
-
-		ZVAL_DEREF(elem);
-		php_stream_from_zval_no_verify(stream, elem);
-		if (stream == NULL) {
-			continue;
-		}
-		/* get the fd.
-		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
-		 * when casting.  It is only used here so that the buffered data warning
-		 * is not displayed.
-		 * */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
-
-			PHP_SAFE_FD_SET(this_fd, fds);
-
-			if (this_fd > *max_fd) {
-				*max_fd = this_fd;
-			}
-			cnt++;
-		}
-	} ZEND_HASH_FOREACH_END();
-	return cnt ? 1 : 0;
-}
-
-static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
-{
-	zval *elem, *dest_elem;
-	HashTable *ht;
-	php_stream *stream;
-	int ret = 0;
-	zend_string *key;
-	zend_ulong num_ind;
-
-	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
-		return 0;
-	}
-	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
-
-	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
-		php_socket_t this_fd;
-
-		ZVAL_DEREF(elem);
-		php_stream_from_zval_no_verify(stream, elem);
-		if (stream == NULL) {
-			continue;
-		}
-		/* get the fd
-		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
-		 * when casting.  It is only used here so that the buffered data warning
-		 * is not displayed.
-		 */
-		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
-			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
-				if (!key) {
-					dest_elem = zend_hash_index_update(ht, num_ind, elem);
-				} else {
-					dest_elem = zend_hash_update(ht, key, elem);
-				}
-
-				zval_add_ref(dest_elem);
-				ret++;
-				continue;
-			}
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	/* destroy old array and add new one */
-	zval_ptr_dtor(stream_array);
-	ZVAL_ARR(stream_array, ht);
-
-	return ret;
 }
 
 static int stream_array_emulate_read_fd_set(zval *stream_array)
