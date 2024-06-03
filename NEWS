@@ -121,6 +121,8 @@ PHP                                                                        NEWS
     64bit archs. (Arnaud)
   . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
     zend_jit.c). (nielsdos)
+  . Fixed bug GH-14361 (Deep recursion in zend_cfg.c causes segfault).
+    (nielsdos)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
