@@ -10,11 +10,17 @@ class PrivateUser {
     private function __construct() {
         return new stdClass();
     }
+    public function __destruct() {
+        echo 'Destructor for ', __CLASS__, PHP_EOL;
+    }
 }
 
 class ThrowingUser {
     public function __construct() {
         throw new Exception("Don't construct");
+    }
+    public function __destruct() {
+        echo 'Destructor for ', __CLASS__, PHP_EOL;
     }
 }
 
@@ -22,11 +28,17 @@ abstract class AbstractClass {
     public function __construct() {
         return new stdClass();
     }
+    public function __destruct() {
+        echo 'Destructor for ', __CLASS__, PHP_EOL;
+    }
 }
 
 class TestUser {
     public function __construct(int $int_param, string $string_param) {
         return new stdClass();
+    }
+    public function __destruct() {
+        echo 'Destructor for ', __CLASS__, PHP_EOL;
     }
 }
 
@@ -102,10 +114,15 @@ Error: Cannot instantiate trait _ZendTestTrait
 Error: Cannot instantiate enum ZendTestUnitEnum
 Error: Cannot instantiate abstract class AbstractClass
 Error: Cannot directly construct SysvMessageQueue, use msg_get_queue() instead
+Destructor for PrivateUser
 Error: Call to private PrivateUser::__construct() from global scope
+Destructor for ThrowingUser
 Exception: Don't construct
 Testing param passing
+Destructor for TestUser
 ArgumentCountError: Too few arguments to function TestUser::__construct(), 0 passed and exactly 2 expected
+Destructor for TestUser
 TypeError: TestUser::__construct(): Argument #1 ($int_param) must be of type int, string given
-object(TestUser)#1 (0) {
+object(TestUser)#3 (0) {
 }
+Destructor for TestUser
