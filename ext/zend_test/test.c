@@ -473,11 +473,14 @@ static ZEND_FUNCTION(zend_object_init_with_constructor)
 		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named_args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_result status = object_init_with_constructor(return_value, ce, num_args, args, named_args);
+	zval obj;
+	/* We don't use return_value directly to check for memory leaks of the API on failure */
+	zend_result status = object_init_with_constructor(&obj, ce, num_args, args, named_args);
 	if (status == FAILURE) {
 		RETURN_THROWS();
 	}
 	ZEND_ASSERT(!EG(exception));
+	ZVAL_COPY_VALUE(return_value, &obj);
 }
 
 static ZEND_FUNCTION(zend_get_unit_enum)

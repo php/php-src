@@ -1850,11 +1850,14 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 {
 	zend_result status = _object_and_properties_init(arg, class_type, NULL);
 	if (UNEXPECTED(status == FAILURE)) {
+		ZVAL_UNDEF(arg);
 		return FAILURE;
 	}
 	zend_object *obj = Z_OBJ_P(arg);
 	zend_function *constructor = obj->handlers->get_constructor(obj);
 	if (UNEXPECTED(constructor == NULL)) {
+		zval_ptr_dtor(arg);
+		ZVAL_UNDEF(arg);
 		return FAILURE;
 	}
 	/* A constructor should not return a value, however if an exception is thrown
@@ -1870,6 +1873,8 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 		named_params
 	);
 	if (Z_TYPE(retval) == IS_UNDEF) {
+		zval_ptr_dtor(arg);
+		ZVAL_UNDEF(arg);
 		return FAILURE;
 	} else {
 		/* Unlikely, but user constructors may return any value they want */
