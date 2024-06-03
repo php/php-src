@@ -25,6 +25,9 @@
 #include "file.h"
 #include "zend_simd.h"
 #include "Zend/zend_smart_str.h"
+#include "ext/uri/php_uri.h"
+
+HashTable parse_url_property_handlers;
 
 /* {{{ free_url */
 PHPAPI void php_url_free(php_url *theurl)
@@ -46,6 +49,13 @@ PHPAPI void php_url_free(php_url *theurl)
 	efree(theurl);
 }
 /* }}} */
+
+static void parse_url_free_uri(void *uri)
+{
+	php_url *parse_url_uri = (php_url *) uri;
+
+	php_url_free(parse_url_uri);
+}
 
 static void php_replace_controlchars(char *str, size_t len)
 {
@@ -311,7 +321,171 @@ parse_host:
 
 	return ret;
 }
-/* }}} */
+
+static zend_result parse_url_read_scheme(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->scheme) {
+		ZVAL_STR_COPY(retval, parse_url_uri->scheme);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_user(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->user) {
+		ZVAL_STR_COPY(retval, parse_url_uri->user);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_password(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->pass) {
+		ZVAL_STR_COPY(retval, parse_url_uri->pass);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_host(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->host) {
+		ZVAL_STR_COPY(retval, parse_url_uri->host);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_port(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->port) {
+		ZVAL_LONG(retval, parse_url_uri->port);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_path(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->path) {
+		ZVAL_STR_COPY(retval, parse_url_uri->path);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_query(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->query) {
+		ZVAL_STR_COPY(retval, parse_url_uri->query);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_read_fragment(const uri_internal_t *internal_uri, zval *retval)
+{
+	php_url *parse_url_uri = (php_url *) internal_uri->uri;
+
+	if (parse_url_uri->fragment) {
+		ZVAL_STR_COPY(retval, parse_url_uri->fragment);
+	} else {
+		ZVAL_NULL(retval);
+	}
+
+	return SUCCESS;
+}
+
+static zend_result parse_url_init_parser(void)
+{
+	zend_hash_init(&parse_url_property_handlers, 0, NULL, NULL, true);
+
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_SCHEME), parse_url_read_scheme);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_USER), parse_url_read_user);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_PASSWORD), parse_url_read_password);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_HOST), parse_url_read_host);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_PORT), parse_url_read_port);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_PATH), parse_url_read_path);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_QUERY), parse_url_read_query);
+	URI_REGISTER_PROPERTY_READ_HANDLER(&parse_url_property_handlers, ZSTR_KNOWN(ZEND_STR_FRAGMENT), parse_url_read_fragment);
+
+	return SUCCESS;
+}
+
+static zend_class_entry *parse_url_get_uri_ce(void)
+{
+	ZEND_UNREACHABLE();
+
+	return NULL;
+}
+
+static void *parse_url_clone_uri(void *uri)
+{
+	ZEND_UNREACHABLE();
+
+	return NULL;
+}
+
+static void *parse_url_parse_uri(const zend_string *uri_str, const zend_string *base_uri_str, zval *errors)
+{
+	bool has_port;
+
+	return php_url_parse_ex2(ZSTR_VAL(uri_str), ZSTR_LEN(uri_str), &has_port);
+}
+
+static zend_string *parse_url_uri_to_string(void *uri)
+{
+	ZEND_UNREACHABLE();
+}
+
+static zend_result parse_url_destroy_parser(void)
+{
+	zend_hash_destroy(&parse_url_property_handlers);
+
+	return SUCCESS;
+}
+
+const uri_handler_t parse_url_uri_handler = {
+	"parse_url",
+	parse_url_init_parser,
+	parse_url_parse_uri,
+	parse_url_get_uri_ce,
+	parse_url_clone_uri,
+	parse_url_uri_to_string,
+	parse_url_free_uri,
+	parse_url_destroy_parser,
+	&parse_url_property_handlers
+};
 
 /* {{{ Parse a URL and return its components */
 PHP_FUNCTION(parse_url)
@@ -547,7 +721,7 @@ static zend_always_inline zend_string *php_url_encode_helper(char const *s, size
 }
 
 /* {{{ php_url_encode */
-PHPAPI zend_string *php_url_encode(char const *s, size_t len)
+PHPAPI zend_string *php_url_encode(char const *s, size_t len) // todo check
 {
 	return php_url_encode_helper(s, len, false);
 }
@@ -753,3 +927,12 @@ no_name_header:
 	php_stream_close(stream);
 }
 /* }}} */
+
+PHP_MINIT_FUNCTION(url)
+{
+	if (uri_handler_register(&parse_url_uri_handler) == FAILURE) {
+		return FAILURE;
+	}
+
+	return SUCCESS;
+}

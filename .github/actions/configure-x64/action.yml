@@ -47,6 +47,7 @@ runs:
           --enable-pcntl \
           --without-readline --with-libedit \
           --enable-mbstring \
+          --enable-uri \
           --with-curl \
           --with-gettext \
           --enable-sockets \

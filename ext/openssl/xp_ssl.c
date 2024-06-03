@@ -24,6 +24,7 @@
 #include "php.h"
 #include "ext/standard/file.h"
 #include "ext/standard/url.h"
+#include "ext/uri/php_uri.h"
 #include "streams/php_streams_int.h"
 #include "zend_smart_str.h"
 #include "php_openssl.h"
@@ -2612,21 +2613,25 @@ static zend_long php_openssl_get_crypto_method(
 static char *php_openssl_get_url_name(const char *resourcename,
 		size_t resourcenamelen, int is_persistent)  /* {{{ */
 {
-	php_url *url;
-
 	if (!resourcename) {
 		return NULL;
 	}
 
-	url = php_url_parse_ex(resourcename, resourcenamelen);
-	if (!url) {
+	uri_handler_t *uri_handler = php_uri_get_handler(NULL);
+
+	zend_string *resource = zend_string_init(resourcename, resourcenamelen, false);
+	uri_internal_t *internal_uri = php_uri_parse(uri_handler, resource);
+	if (internal_uri == NULL) {
+		zend_string_release(resource);
 		return NULL;
 	}
 
-	if (url->host) {
-		const char * host = ZSTR_VAL(url->host);
+	zval host_zv;
+	zend_result result = php_uri_get_host(internal_uri, &host_zv);
+	if (result == SUCCESS && Z_TYPE(host_zv) == IS_STRING) {
+		const char * host = Z_STRVAL(host_zv);
 		char * url_name = NULL;
-		size_t len = ZSTR_LEN(url->host);
+		size_t len = Z_STRLEN(host_zv);
 
 		/* skip trailing dots */
 		while (len && host[len-1] == '.') {
@@ -2637,11 +2642,15 @@ static char *php_openssl_get_url_name(const char *resourcename,
 			url_name = pestrndup(host, len, is_persistent);
 		}
 
-		php_url_free(url);
+		zend_string_release(resource);
+		php_uri_free(internal_uri);
+		zval_ptr_dtor(&host_zv);
 		return url_name;
 	}
 
-	php_url_free(url);
+	zend_string_release(resource);
+	php_uri_free(internal_uri);
+	zval_ptr_dtor(&host_zv);
 	return NULL;
 }
 /* }}} */
