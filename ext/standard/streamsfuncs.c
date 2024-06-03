@@ -884,8 +884,12 @@ PHP_FUNCTION(stream_select) {
         }
     }
 
-    retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
-
+	#ifdef __USE_XOPEN
+		retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
+	#else
+		retval = php_select(max_fd + 1, (fd_set *)rfds.__fds_bits, (fd_set *)wfds.__fds_bits, (fd_set *)efds.__fds_bits, tv_p);
+	#endif
+	
     if (retval == -1) {
         php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
             errno, strerror(errno), max_fd);
