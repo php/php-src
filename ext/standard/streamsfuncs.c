@@ -818,7 +818,6 @@ PHP_FUNCTION(stream_select) {
     zend_long sec, usec = 0;
     bool secnull;
     bool usecnull = 1;
-    int set_count, max_set_count = 0;
 
     ZEND_PARSE_PARAMETERS_START(4, 5)
         Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
