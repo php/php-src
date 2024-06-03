@@ -1873,6 +1873,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 		named_params
 	);
 	if (Z_TYPE(retval) == IS_UNDEF) {
+		zend_object_store_ctor_failed(obj);
 		zval_ptr_dtor(arg);
 		ZVAL_UNDEF(arg);
 		return FAILURE;

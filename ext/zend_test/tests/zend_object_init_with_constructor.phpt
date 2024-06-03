@@ -116,12 +116,9 @@ Error: Cannot instantiate abstract class AbstractClass
 Error: Cannot directly construct SysvMessageQueue, use msg_get_queue() instead
 Destructor for PrivateUser
 Error: Call to private PrivateUser::__construct() from global scope
-Destructor for ThrowingUser
 Exception: Don't construct
 Testing param passing
-Destructor for TestUser
 ArgumentCountError: Too few arguments to function TestUser::__construct(), 0 passed and exactly 2 expected
-Destructor for TestUser
 TypeError: TestUser::__construct(): Argument #1 ($int_param) must be of type int, string given
 object(TestUser)#3 (0) {
 }
