@@ -514,10 +514,9 @@ static zend_always_inline zend_string *php_url_encode_impl(const char *s, size_t
 			_mm_storeu_si128((__m128i*)to, in);
 			to += 16;
 		} else {
-			int i;
 			unsigned char xmm[16];
 			_mm_storeu_si128((__m128i*)xmm, in);
-			for (i = 0; i < sizeof(xmm); i++) {
+			for (size_t i = 0; i < sizeof(xmm); i++) {
 				if ((bits & (0x1 << i))) {
 					*to++ = xmm[i];
 				} else {
