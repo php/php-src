@@ -28,76 +28,78 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 {
 	zend_basic_block *blocks = cfg->blocks;
 
-	while (1) {
-		int i;
+	{
+		while (1) {
+			int i;
 
-		b->flags |= ZEND_BB_REACHABLE;
-		if (b->successors_count == 0) {
-			b->flags |= ZEND_BB_EXIT;
-			return;
-		}
+			b->flags |= ZEND_BB_REACHABLE;
+			if (b->successors_count == 0) {
+				b->flags |= ZEND_BB_EXIT;
+				return;
+			}
 
-		for (i = 0; i < b->successors_count; i++) {
-			zend_basic_block *succ = blocks + b->successors[i];
+			for (i = 0; i < b->successors_count; i++) {
+				zend_basic_block* succ = blocks + b->successors[i];
 
-			if (b->len != 0) {
-				uint8_t opcode = opcodes[b->start + b->len - 1].opcode;
-				if (opcode == ZEND_MATCH) {
-					succ->flags |= ZEND_BB_TARGET;
-				} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {
-					if (i == b->successors_count - 1) {
-						succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
-					} else {
+				if (b->len != 0) {
+					uint8_t opcode = opcodes[b->start + b->len - 1].opcode;
+					if (opcode == ZEND_MATCH) {
 						succ->flags |= ZEND_BB_TARGET;
-					}
-				} else if (b->successors_count == 1) {
-					if (opcode == ZEND_JMP) {
-						succ->flags |= ZEND_BB_TARGET;
-					} else {
-						succ->flags |= ZEND_BB_FOLLOW;
+					} else if (opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING) {
+						if (i == b->successors_count - 1) {
+							succ->flags |= ZEND_BB_FOLLOW | ZEND_BB_TARGET;
+						} else {
+							succ->flags |= ZEND_BB_TARGET;
+						}
+					} else if (b->successors_count == 1) {
+						if (opcode == ZEND_JMP) {
+							succ->flags |= ZEND_BB_TARGET;
+						} else {
+							succ->flags |= ZEND_BB_FOLLOW;
 
-						if ((cfg->flags & ZEND_CFG_STACKLESS)) {
-							if (opcode == ZEND_INCLUDE_OR_EVAL ||
-								opcode == ZEND_GENERATOR_CREATE ||
-								opcode == ZEND_YIELD ||
-								opcode == ZEND_YIELD_FROM ||
-								opcode == ZEND_DO_FCALL ||
-								opcode == ZEND_DO_UCALL ||
-								opcode == ZEND_DO_FCALL_BY_NAME) {
-								succ->flags |= ZEND_BB_ENTRY;
+							if ((cfg->flags & ZEND_CFG_STACKLESS)) {
+								if (opcode == ZEND_INCLUDE_OR_EVAL ||
+									opcode == ZEND_GENERATOR_CREATE ||
+									opcode == ZEND_YIELD ||
+									opcode == ZEND_YIELD_FROM ||
+									opcode == ZEND_DO_FCALL ||
+									opcode == ZEND_DO_UCALL ||
+									opcode == ZEND_DO_FCALL_BY_NAME) {
+									succ->flags |= ZEND_BB_ENTRY;
+								}
+							}
+							if ((cfg->flags & ZEND_CFG_RECV_ENTRY)) {
+								if (opcode == ZEND_RECV ||
+									opcode == ZEND_RECV_INIT) {
+									succ->flags |= ZEND_BB_RECV_ENTRY;
+								}
 							}
 						}
-						if ((cfg->flags & ZEND_CFG_RECV_ENTRY)) {
-							if (opcode == ZEND_RECV ||
-								opcode == ZEND_RECV_INIT) {
-								succ->flags |= ZEND_BB_RECV_ENTRY;
-							}
+					} else {
+						ZEND_ASSERT(b->successors_count == 2);
+						if (i == 0) {
+							succ->flags |= ZEND_BB_TARGET;
+						} else {
+							succ->flags |= ZEND_BB_FOLLOW;
 						}
 					}
 				} else {
-					ZEND_ASSERT(b->successors_count == 2);
-					if (i == 0) {
-						succ->flags |= ZEND_BB_TARGET;
-					} else {
-						succ->flags |= ZEND_BB_FOLLOW;
+					succ->flags |= ZEND_BB_FOLLOW;
+				}
+
+				if (i == b->successors_count - 1) {
+					/* Tail call optimization */
+					if (succ->flags & ZEND_BB_REACHABLE) {
+						return;
 					}
-				}
-			} else {
-				succ->flags |= ZEND_BB_FOLLOW;
-			}
 
-			if (i == b->successors_count - 1) {
-				/* Tail call optimization */
-				if (succ->flags & ZEND_BB_REACHABLE) {
-					return;
-				}
-
-				b = succ;
-				break;
-			} else {
-				/* Recursively check reachability */
-				if (!(succ->flags & ZEND_BB_REACHABLE)) {
-					zend_mark_reachable(opcodes, cfg, succ);
+					b = succ;
+					break;
+				} else {
+					/* Recursively check reachability */
+					if (!(succ->flags & ZEND_BB_REACHABLE)) {
+						zend_mark_reachable(opcodes, cfg, succ);
+					}
 				}
 			}
 		}
