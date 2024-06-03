@@ -8976,7 +8976,7 @@ static void zend_compile_collection_data_structure(zend_class_entry *ce, zend_as
 static void zend_compile_collection_key_type(zend_class_entry *ce, zend_ast *collection_key_type_ast)
 {
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
-	zend_type type = zend_compile_typename(collection_key_type_ast, 0);
+	zend_type type = zend_compile_typename(collection_key_type_ast);
 	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
 	if (ZEND_TYPE_IS_COMPLEX(type) || (type_mask != MAY_BE_LONG && type_mask != MAY_BE_STRING)) {
 		zend_string *type_string = zend_type_to_string(type);
@@ -8996,7 +8996,7 @@ static void zend_compile_collection_key_type(zend_class_entry *ce, zend_ast *col
 static void zend_compile_collection_item_type(zend_class_entry *ce, zend_ast *collection_item_type_ast)
 {
 	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_COLLECTION);
-	zend_type type = zend_compile_typename(collection_item_type_ast, 0);
+	zend_type type = zend_compile_typename(collection_item_type_ast);
 
 	if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_NEVER|MAY_BE_CALLABLE)) {
 		zend_string *str = zend_type_to_string(type);
