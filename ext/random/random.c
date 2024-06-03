@@ -338,9 +338,10 @@ PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len)
 	i = 0;
 #ifdef WORDS_BIGENDIAN
 	/* force little endian */
-	for (zend_long j = (len - 1); 0 <= j; j--) {
+	for (size_t h = len; 0 < h; h--) {
+		size_t j = h-1;
 #else
-	for (zend_long j = 0; j < len; j++) {
+	for (size_t j = 0; j < len; j++) {
 #endif
 		ZSTR_VAL(str)[i++] = hexconvtab[((unsigned char *) ptr)[j] >> 4];
 		ZSTR_VAL(str)[i++] = hexconvtab[((unsigned char *) ptr)[j] & 15];
@@ -362,9 +363,10 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 
 #ifdef WORDS_BIGENDIAN
 	/* force little endian */
-	for (zend_long j = (len - 1); 0 <= j; j--) {
+	for (size_t h = len; 0 < h; h--) {
+		size_t j = h-1;
 #else
-	for (zend_long j = 0; j < len; j++) {
+	for (size_t j = 0; j < len; j++) {
 #endif
 		c = str[i++];
 		l = c & ~0x20;
@@ -673,7 +675,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed(void)
 
 	uint64_t result = 0;
 
-	for (int i = 0; i < sizeof(result); i++) {
+	for (size_t i = 0; i < sizeof(result); i++) {
 		result = result | (((uint64_t)RANDOM_G(fallback_seed)[i]) << (i * 8));
 	}
 
