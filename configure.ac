@@ -1127,40 +1127,31 @@ dnl Extensions post-config.
 dnl ----------------------------------------------------------------------------
 
 dnl Align segments on huge page boundary
-case $host_alias in
-  i[[3456]]86-*-linux-* | x86_64-*-linux-*)
-	AC_MSG_CHECKING(linker support for -zcommon-page-size=2097152)
+AS_CASE([$host_alias], [[i[3456]86-*-linux-* | x86_64-*-linux-*]],
+  [AC_CACHE_CHECK([linker support for -zcommon-page-size=2097152],
+    [php_cv_have_common_page_size], [
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
-    AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM()],
-        [ac_cv_common_page_size=yes],
-        [ac_cv_common_page_size=no],
-        [ac_cv_common_page_size=no])
-    LDFLAGS=$save_LDFLAGS
-    if test "$ac_cv_common_page_size" = "yes"; then
-        AC_MSG_RESULT([yes])
-        EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
-    else
-        AC_MSG_RESULT([no])
-        AC_MSG_CHECKING(linker support for -zmax-page-size=2097152)
-        save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
-        AC_RUN_IFELSE(
-            [AC_LANG_PROGRAM()],
-            [ac_cv_max_page_size=yes],
-            [ac_cv_max_page_size=no],
-            [ac_cv_max_page_size=no])
-        LDFLAGS=$save_LDFLAGS
-        if test "$ac_cv_max_page_size" = "yes"; then
-            AC_MSG_RESULT([yes])
-            EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zmax-page-size=2097152"
-        else
-            AC_MSG_RESULT([no])
-        fi
-    fi
-    ;;
-esac
+    AC_RUN_IFELSE([AC_LANG_PROGRAM()],
+      [php_cv_have_common_page_size=yes],
+      [php_cv_have_common_page_size=no],
+      [php_cv_have_common_page_size=no])
+    LDFLAGS=$save_LDFLAGS])
+  AS_VAR_IF([php_cv_have_common_page_size], [yes],
+    [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"],
+    [AC_CACHE_CHECK([linker support for -zmax-page-size=2097152],
+      [php_cv_have_max_page_size], [
+      save_LDFLAGS=$LDFLAGS
+      LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
+      AC_RUN_IFELSE([AC_LANG_PROGRAM()],
+        [php_cv_have_max_page_size=yes],
+        [php_cv_have_max_page_size=no],
+        [php_cv_have_max_page_size=no])
+      LDFLAGS=$save_LDFLAGS])
+    AS_VAR_IF([php_cv_have_max_page_size], [yes],
+      [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zmax-page-size=2097152"])
+  ])
+])
 
 enable_shared=yes
 enable_static=yes
