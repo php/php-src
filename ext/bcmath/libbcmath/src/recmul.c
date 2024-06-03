@@ -124,16 +124,16 @@ static inline void bc_digits_adjustment(BC_INT_T *prod_int, size_t prod_arr_size
  * due to its divide-and-conquer nature.
  */
 #if SIZEOF_SIZE_T == 4
-static uint32_t bc_parse_chunk_chars(const char *str)
+static int32_t bc_parse_chunk_chars(const char *str)
 {
-	uint32_t tmp;
+	int32_t tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
 	tmp = BC_BSWAP(tmp);
 #endif
 
-	uint32_t lower_digits = (tmp & 0x0f000f00) >> 8;
-	uint32_t upper_digits = (tmp & 0x000f000f) * 10;
+	int32_t lower_digits = (tmp & 0x0f000f00) >> 8;
+	int32_t upper_digits = (tmp & 0x000f000f) * 10;
 
 	tmp = lower_digits + upper_digits;
 
@@ -143,16 +143,16 @@ static uint32_t bc_parse_chunk_chars(const char *str)
 	return lower_digits + upper_digits;
 }
 #elif SIZEOF_SIZE_T == 8
-static uint64_t bc_parse_chunk_chars(const char *str)
+static int64_t bc_parse_chunk_chars(const char *str)
 {
-	uint64_t tmp;
+	int64_t tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
 	tmp = BC_BSWAP(tmp);
 #endif
 
-	uint64_t lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
-	uint64_t upper_digits = (tmp & 0x000f000f000f000f) * 10;
+	int64_t lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
+	int64_t upper_digits = (tmp & 0x000f000f000f000f) * 10;
 
 	tmp = lower_digits + upper_digits;
 
@@ -169,7 +169,7 @@ static uint64_t bc_parse_chunk_chars(const char *str)
 #endif
 
 /*
- * Converts BCD to uint, going backwards from pointer n by the number of
+ * Converts BCD to int, going backwards from pointer n by the number of
  * characters specified by len.
  */
 static inline BC_INT_T bc_partial_convert_to_int(const char *n, size_t len)
@@ -334,7 +334,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		prod_int[i] = 0;
 	}
 
-	/* Convert to uint[] */
+	/* Convert to int[] */
 	bc_convert_to_int(n1_int, n1end, n1len);
 	bc_convert_to_int(n2_int, n2end, n2len);
 
@@ -462,6 +462,10 @@ static void bc_rec_mul_recursive_fast(
 	if (UNEXPECTED(bc_rec_mul_near_overflow(calc_arr_size))) {
 		for (i = 0; i < calc_arr_size * 2 - 1; i++) {
 			bc_digits_adjustment_single(ret + i);
+			if (ret[i] < 0){
+				ret[i + 1]--;
+				ret[i] += BC_MUL_INT_OVERFLOW;
+			}
 		}
 	}
 }
@@ -649,6 +653,10 @@ static void bc_rec_mul_recursive(
 		size_t ret_size = low_ret_size + high_ret_size;
 		for (i = 0; i < ret_size - 1; i++) {
 			bc_digits_adjustment_single(ret + i);
+			if (ret[i] < 0){
+				ret[i + 1]--;
+				ret[i] += BC_MUL_INT_OVERFLOW;
+			}
 		}
 	}
 }
@@ -795,7 +803,7 @@ static void bc_rec_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num 
 	n1_int[n1_arr_size - 1] = 0;
 	n2_int[n2_arr_size - 1] = 0;
 
-	/* Convert to uint[] */
+	/* Convert to int[] */
 	bc_convert_to_int(n1_int, n1end, n1len);
 	bc_convert_to_int(n2_int, n2end, n2len);
 
