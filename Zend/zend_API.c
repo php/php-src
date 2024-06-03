@@ -1852,7 +1852,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 	if (UNEXPECTED(status == FAILURE)) {
 		return FAILURE;
 	}
-	zend_object * obj = Z_OBJ_P(arg);
+	zend_object *obj = Z_OBJ_P(arg);
 	zend_function *constructor = obj->handlers->get_constructor(obj);
 	if (UNEXPECTED(constructor == NULL)) {
 		return FAILURE;
