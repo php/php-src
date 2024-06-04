@@ -352,6 +352,15 @@ static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stu
 
 #if defined(IR_TARGET_AARCH64)
 
+# ifdef __FreeBSD__
+/* https://github.com/freebsd/freebsd-src/blob/c52ca7dd09066648b1cc40f758289404d68ab886/libexec/rtld-elf/aarch64/reloc.c#L180-L184 */
+typedef struct TLSDescriptor {
+	void*   thunk;
+	int     index;
+	size_t  offset;
+} TLSDescriptor;
+# endif
+
 #define IR_HAS_VENEERS (1U<<31) /* IR_RESERVED_FLAG_1 */
 
 static const void *zend_jit_get_veneer(ir_ctx *ctx, const void *addr)
@@ -3185,7 +3194,28 @@ static void zend_jit_setup(void)
 #ifdef ZTS
 #if defined(IR_TARGET_AARCH64)
 	tsrm_ls_cache_tcb_offset = tsrm_get_ls_cache_tcb_offset();
+
+# ifdef __FreeBSD__
+	if (tsrm_ls_cache_tcb_offset == 0) {
+		TLSDescriptor **where;
+
+		__asm__(
+			"adrp %0, :tlsdesc:_tsrm_ls_cache\n"
+			"add %0, %0, :tlsdesc_lo12:_tsrm_ls_cache\n"
+			: "=r" (where));
+		/* See https://github.com/ARM-software/abi-aa/blob/2a70c42d62e9c3eb5887fa50b71257f20daca6f9/aaelf64/aaelf64.rst
+		 * section "Relocations for thread-local storage".
+		 * The first entry holds a pointer to the variable's TLS descriptor resolver function and the second entry holds
+		 * a platform-specific offset or pointer. */
+		TLSDescriptor *tlsdesc = where[1];
+
+		tsrm_tls_offset = tlsdesc->offset;
+		/* Index is offset by 1 on FreeBSD (https://github.com/freebsd/freebsd-src/blob/22ca6db50f4e6bd75a141f57cf953d8de6531a06/lib/libc/gen/tls.c#L88) */
+		tsrm_tls_index = (tlsdesc->index + 1) * 8;
+	}
+# else
 	ZEND_ASSERT(tsrm_ls_cache_tcb_offset != 0);
+# endif
 # elif defined(_WIN64)
 	tsrm_tls_index  = _tls_index * sizeof(void*);
 
