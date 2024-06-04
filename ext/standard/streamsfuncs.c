@@ -668,7 +668,10 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
     }
 
     ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
-        php_socket_t this_fd;
+		/* Temporary int fd is needed for the STREAM data type on windows, passing this_fd directly to php_stream_cast()
+			would eventually bring a wrong result on x64. php_stream_cast() casts to int internally, and this will leave
+			the higher bits of a SOCKET variable uninitialized on systems with little endian. */
+		php_socket_t this_fd;
 
         ZVAL_DEREF(elem);
         php_stream_from_zval_no_verify(stream, elem);
@@ -676,7 +679,12 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
             continue;
         }
 
-        if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 * */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
             FD_BIGSET_SET(this_fd, set);
 
             if (this_fd > *max_fd) {
@@ -685,9 +693,9 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
             cnt++;
         }
     } ZEND_HASH_FOREACH_END();
-
     return cnt ? 1 : 0;
 }
+
 static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
     zval *elem, *dest_elem;
     HashTable *ht;
@@ -710,7 +718,12 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
             continue;
         }
 
-        if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
+		/* get the fd
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 */
+		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
             if (FD_BIGSET_ISSET(this_fd, fds)) {
                 if (!key) {
                     dest_elem = zend_hash_index_update(ht, num_ind, elem);
@@ -725,6 +738,7 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
         }
     } ZEND_HASH_FOREACH_END();
 
+	/* destroy old array and add new one */
     zval_ptr_dtor(stream_array);
     ZVAL_ARR(stream_array, ht);
 
@@ -734,11 +748,11 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
 static php_socket_t stream_array_get_max_fd(zval *array) {
     zval *elem;
     php_stream *stream;
-    php_socket_t max_fd = 0;
+    php_socket_t max_fd = -1;
     php_socket_t this_fd;
 
     if (Z_TYPE_P(array) != IS_ARRAY) {
-        return 0;
+        return -1;
     }
 
     ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), elem) {
@@ -748,7 +762,7 @@ static php_socket_t stream_array_get_max_fd(zval *array) {
             continue;
         }
 
-        if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
+        if (php_stream_can_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL) && SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
             if (this_fd > max_fd) {
                 max_fd = this_fd;
             }
@@ -815,6 +829,7 @@ PHP_FUNCTION(stream_select) {
     fd_bigset rfds, wfds, efds;
     php_socket_t max_fd = -1;
     int retval = 0;
+	int sets = 0;
     zend_long sec, usec = 0;
     bool secnull;
     bool usecnull = 1;
@@ -828,52 +843,35 @@ PHP_FUNCTION(stream_select) {
         Z_PARAM_LONG_OR_NULL(usec, usecnull)
     ZEND_PARSE_PARAMETERS_END();
 
-    // Determine the largest file descriptor
+    /* Determine the largest file descriptor */
     if (r_array != NULL) {
         max_fd = stream_array_get_max_fd(r_array);
+		sets = sets + 1;
     }
+
     if (w_array != NULL) {
         php_socket_t tmp_max_fd = stream_array_get_max_fd(w_array);
-        if (tmp_max_fd > max_fd) {
-            max_fd = tmp_max_fd;
-        }
+		if (tmp_max_fd > max_fd) {
+			max_fd = tmp_max_fd;
+		}
+		sets = sets + 1;
     }
     if (e_array != NULL) {
         php_socket_t tmp_max_fd = stream_array_get_max_fd(e_array);
-        if (tmp_max_fd > max_fd) {
-            max_fd = tmp_max_fd;
-        }
+		if (tmp_max_fd > max_fd) {
+			max_fd = tmp_max_fd;
+		}
+		sets = sets + 1;
     }
 
-    if (max_fd == -1) {
-        zend_value_error("No stream arrays were passed or all arrays were empty");
-        RETURN_THROWS();
-    }
-
-    // Allocate fd_bigset based on max_fd
-    FD_BIGSET_ZERO(&rfds, max_fd + 1);
-    FD_BIGSET_ZERO(&wfds, max_fd + 1);
-    FD_BIGSET_ZERO(&efds, max_fd + 1);
-
-    // Populate the fd_bigset structures
-    if (r_array != NULL) {
-        stream_array_to_fd_bigset(r_array, &rfds, &max_fd);
-    }
-
-    if (w_array != NULL) {
-        stream_array_to_fd_bigset(w_array, &wfds, &max_fd);
-    }
-
-    if (e_array != NULL) {
-        stream_array_to_fd_bigset(e_array, &efds, &max_fd);
-    }
+	if (!sets) {
+		zend_value_error("No stream arrays were passed");
+		RETURN_THROWS();
+	}
 
     if (secnull && !usecnull) {
         if (usec != 0) {
             zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
-            FD_BIGSET_FREE(&rfds);
-            FD_BIGSET_FREE(&wfds);
-            FD_BIGSET_FREE(&efds);
             RETURN_THROWS();
         }
     }
@@ -881,18 +879,13 @@ PHP_FUNCTION(stream_select) {
     if (!secnull) {
         if (sec < 0) {
             zend_argument_value_error(4, "must be greater than or equal to 0");
-            FD_BIGSET_FREE(&rfds);
-            FD_BIGSET_FREE(&wfds);
-            FD_BIGSET_FREE(&efds);
             RETURN_THROWS();
         } else if (usec < 0) {
             zend_argument_value_error(5, "must be greater than or equal to 0");
-            FD_BIGSET_FREE(&rfds);
-            FD_BIGSET_FREE(&wfds);
-            FD_BIGSET_FREE(&efds);
             RETURN_THROWS();
         }
 
+		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
         tv.tv_sec = (long)(sec + (usec / 1000000));
         tv.tv_usec = (long)(usec % 1000000);
         tv_p = &tv;
@@ -912,11 +905,26 @@ PHP_FUNCTION(stream_select) {
                 zval_ptr_dtor(e_array);
                 ZVAL_EMPTY_ARRAY(e_array);
             }
-            FD_BIGSET_FREE(&rfds);
-            FD_BIGSET_FREE(&wfds);
-            FD_BIGSET_FREE(&efds);
             RETURN_LONG(retval);
         }
+    }
+
+    /* Allocate fd_bigset based on max_fd */
+    FD_BIGSET_ZERO(&rfds, max_fd + 1);
+    FD_BIGSET_ZERO(&wfds, max_fd + 1);
+    FD_BIGSET_ZERO(&efds, max_fd + 1);
+
+    /* Populate the fd_bigset structures */
+    if (r_array != NULL) {
+        stream_array_to_fd_bigset(r_array, &rfds, &max_fd);
+    }
+
+    if (w_array != NULL) {
+        stream_array_to_fd_bigset(w_array, &wfds, &max_fd);
+    }
+
+    if (e_array != NULL) {
+        stream_array_to_fd_bigset(e_array, &efds, &max_fd);
     }
 
 #ifdef __USE_XOPEN
