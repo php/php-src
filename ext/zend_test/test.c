@@ -1321,8 +1321,7 @@ PHP_ZEND_TEST_API struct bug79096 bug79096(void)
 
 PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems)
 {
-	int i;
-	for (i = 0; i < elems; i++) {
+	for (size_t i = 0; i < elems; i++) {
 		array[i] = i;
 	}
 }
