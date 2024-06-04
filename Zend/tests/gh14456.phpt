@@ -19,5 +19,4 @@ try {
 }
 ?>
 --EXPECT--
-Destructor for PrivateUser
 Error: Call to private PrivateUser::__construct() from global scope
