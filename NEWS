@@ -32,6 +32,9 @@ PHP                                                                        NEWS
   . Fixed TLS access in JIT on FreeBSD/amd64. (Arnaud)
   . Fixed bug GH-11188 (Error when building TSRM in ARM64). (nielsdos)
 
+- PDO ODBC:
+  . Fixed bug GH-14367 (incompatible SDWORD type with iODBC). (Calvin Buckley)
+
 - Soap:
   . Fixed bug #47925 (PHPClient can't decompress response). (nielsdos)
   . Fix missing error restore code. (nielsdos)
