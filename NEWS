@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - CGI:
   . Fixed buffer limit on Windows, replacing read call usage by _read.
     (David Carlier)
+  . Fixed bug GHSA-3qgc-jrrr-25jv (Bypass of CVE-2012-1823, Argument Injection
+    in PHP-CGI). (CVE-2024-4577) (nielsdos)
 
 - CLI:
   . Fixed bug GH-14189 (PHP Interactive shell input state incorrectly handles
@@ -29,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-14215 (Cannot use FFI::load on CRLF header file with
     apache2handler). (nielsdos)
 
+- Filter:
+  . Fixed bug GHSA-w8qr-v226-r27w (Filter bypass in filter_var FILTER_VALIDATE_URL).
+    (CVE-2024-5458) (nielsdos)
+
 - FPM:
   . Fix bug GH-14175 (Show decimal number instead of scientific notation in
     systemd status). (Benjamin Cremer)
@@ -52,6 +58,20 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-14109 (Fix accidental persisting of internal class constant in
     shm). (ilutov)
+
+- OpenSSL:
+  . The openssl_private_decrypt function in PHP, when using PKCS1 padding
+    (OPENSSL_PKCS1_PADDING, which is the default), is vulnerable to the Marvin Attack
+    unless it is used with an OpenSSL version that includes the changes from this pull
+    request: https://github.com/openssl/openssl/pull/13817 (rsa_pkcs1_implicit_rejection).
+    These changes are part of OpenSSL 3.2 and have also been backported to stable
+    versions of various Linux distributions, as well as to the PHP builds provided for
+    Windows since the previous release. All distributors and builders should ensure that
+    this version is used to prevent PHP from being vulnerable. (CVE-2024-2408)
+
+- Standard:
+  . Fixed bug GHSA-9fcc-425m-g385 (Bypass of CVE-2024-1874).
+    (CVE-2024-5585) (nielsdos)
 
 - XML:
   . Fixed bug GH-14124 (Segmentation fault with XML extension under certain
