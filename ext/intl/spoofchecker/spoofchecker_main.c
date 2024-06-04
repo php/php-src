@@ -167,3 +167,42 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 }
 /* }}} */
 #endif
+
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+PHP_METHOD(Spoofchecker, areBidiConfusable)
+{
+	int ret;
+	char *id1, *id2;
+	size_t length1, length2;
+	zend_long direction;
+	zval *error_code = NULL;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "lss|z", &direction, &id1, &length1,
+										 &id2, &length2, &error_code)) {
+		RETURN_THROWS();
+	}
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+	if (direction != UBIDI_LTR && direction != UBIDI_RTL) {
+		zend_argument_value_error(1, "must be either SpoofChecker::UBIDI_LTR or SpoofChecker::UBIDI_RTL");
+		RETURN_THROWS();
+	}
+	if(length1 > INT32_MAX || length2 > INT32_MAX) {
+		SPOOFCHECKER_ERROR_CODE(co) = U_BUFFER_OVERFLOW_ERROR;
+	} else {
+		ret = uspoof_areBidiConfusableUTF8(co->uspoof, (UBiDiDirection)direction, id1, (int32_t)length1, id2, (int32_t)length2, SPOOFCHECKER_ERROR_CODE_P(co));
+	}
+	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
+		php_error_docref(NULL, E_WARNING, "(%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		RETURN_TRUE;
+	}
+
+	if (error_code) {
+		zval_ptr_dtor(error_code);
+		ZVAL_LONG(Z_REFVAL_P(error_code), ret);
+		Z_TRY_ADDREF_P(error_code);
+	}
+	RETVAL_BOOL(ret != 0);
+}
+#endif
