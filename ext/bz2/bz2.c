@@ -96,7 +96,7 @@ static ssize_t php_bz2iop_read(php_stream *stream, char *buf, size_t count)
 
 static ssize_t php_bz2iop_write(php_stream *stream, const char *buf, size_t count)
 {
-	ssize_t wrote = 0;
+	size_t wrote = 0;
 	struct php_bz2_stream_data_t *self = (struct php_bz2_stream_data_t *)stream->abstract;
 
 	do {
