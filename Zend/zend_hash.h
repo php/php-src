@@ -646,7 +646,7 @@ static zend_always_inline void *zend_hash_add_ptr(HashTable *ht, zend_string *ke
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_add(ht, key, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -660,7 +660,7 @@ static zend_always_inline void *zend_hash_add_new_ptr(HashTable *ht, zend_string
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_add_new(ht, key, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -674,7 +674,7 @@ static zend_always_inline void *zend_hash_str_add_ptr(HashTable *ht, const char 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_add(ht, str, len, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -688,7 +688,7 @@ static zend_always_inline void *zend_hash_str_add_new_ptr(HashTable *ht, const c
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_add_new(ht, str, len, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
@@ -701,7 +701,7 @@ static zend_always_inline void *zend_hash_update_ptr(HashTable *ht, zend_string 
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_update(ht, key, &tmp);
-	ZEND_ASSUME(Z_PTR_P(zv));
+	ZEND_ASSERT(Z_PTR_P(zv));
 	return Z_PTR_P(zv);
 }
 
@@ -711,7 +711,7 @@ static zend_always_inline void *zend_hash_str_update_ptr(HashTable *ht, const ch
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_str_update(ht, str, len, &tmp);
-	ZEND_ASSUME(Z_PTR_P(zv));
+	ZEND_ASSERT(Z_PTR_P(zv));
 	return Z_PTR_P(zv);
 }
 
@@ -809,7 +809,7 @@ static zend_always_inline void *zend_hash_index_update_ptr(HashTable *ht, zend_u
 
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_index_update(ht, h, &tmp);
-	ZEND_ASSUME(Z_PTR_P(zv));
+	ZEND_ASSERT(Z_PTR_P(zv));
 	return Z_PTR_P(zv);
 }
 
@@ -833,7 +833,7 @@ static zend_always_inline void *zend_hash_next_index_insert_ptr(HashTable *ht, v
 	ZVAL_PTR(&tmp, pData);
 	zv = zend_hash_next_index_insert(ht, &tmp);
 	if (zv) {
-		ZEND_ASSUME(Z_PTR_P(zv));
+		ZEND_ASSERT(Z_PTR_P(zv));
 		return Z_PTR_P(zv);
 	} else {
 		return NULL;
