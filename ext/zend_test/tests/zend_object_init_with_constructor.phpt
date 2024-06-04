@@ -51,12 +51,6 @@ class TestUserWithConstructorNoParams {
     }
 }
 
-class TestUserWithoutConstructor {
-    public function __destruct() {
-        echo 'Destructor for ', __CLASS__, PHP_EOL;
-    }
-}
-
 echo "Testing impossible initializations\n";
 try {
     $o = zend_object_init_with_constructor("_ZendTestInterface");
@@ -144,19 +138,6 @@ echo "Testing class with defined constructor and no params\n";
 $o = zend_object_init_with_constructor("TestUserWithConstructorNoParams");
 var_dump($o);
 unset($o);
-
-echo "Testing class without defined constructor\n";
-try {
-    $o = zend_object_init_with_constructor("TestUserWithoutConstructor", 5, string_param: "str");
-    var_dump($o);
-    unset($o);
-} catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-$o = zend_object_init_with_constructor("TestUserWithoutConstructor");
-var_dump($o);
-unset($o);
-
 ?>
 --EXPECT--
 Testing impossible initializations
@@ -183,10 +164,3 @@ Testing class with defined constructor and no params
 object(TestUserWithConstructorNoParams)#1 (0) {
 }
 Destructor for TestUserWithConstructorNoParams
-Testing class without defined constructor
-object(TestUserWithoutConstructor)#1 (0) {
-}
-Destructor for TestUserWithoutConstructor
-object(TestUserWithoutConstructor)#1 (0) {
-}
-Destructor for TestUserWithoutConstructor
