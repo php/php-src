@@ -788,7 +788,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			if (!Z_ISUNDEF(retval)) {
 				_php_curl_verify_handlers(ch, /* reporterror */ true);
 				if (Z_TYPE(retval) == IS_STRING) {
-					length = MIN((int) (size * nmemb), Z_STRLEN(retval));
+					length = MIN((size * nmemb), Z_STRLEN(retval));
 					memcpy(data, Z_STRVAL(retval), length);
 				} else if (Z_TYPE(retval) == IS_LONG) {
 					length = Z_LVAL_P(&retval);
