@@ -2212,9 +2212,9 @@ PHP_FUNCTION(imagecolorset)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red, 2);
-	CHECK_RGBA_RANGE(green, Green, 3);
-	CHECK_RGBA_RANGE(blue, Blue, 4);
+	CHECK_RGBA_RANGE(red, Red, 3);
+	CHECK_RGBA_RANGE(green, Green, 4);
+	CHECK_RGBA_RANGE(blue, Blue, 5);
 
 	col = color;
 
