@@ -916,7 +916,7 @@ do_repeat:
 			/* is also accessible. */
 			php_self = "Standard input code";
 			if (behavior < PHP_MODE_CLI_DIRECT
-			 && (!interactive || PHP_MODE_STANDARD != PHP_MODE_STANDARD)) {
+			 && !interactive) {
 				zend_stream_init_fp(&file_handle, stdin, php_self);
 				file_handle.primary_script = 1;
 			}
