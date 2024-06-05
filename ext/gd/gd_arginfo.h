@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: 078828abb16cc2a3cc5113bb232e54fc315177d4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -575,6 +575,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageresolution, 0, 1, MAY_BE_AR
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, resolution_y, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_GD_IMAGECLONE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imageclone, 0, 1, GdImage, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(gd_info);
 ZEND_FUNCTION(imageloadfont);
 ZEND_FUNCTION(imagesetstyle);
@@ -713,6 +719,9 @@ ZEND_FUNCTION(imageaffinematrixconcat);
 ZEND_FUNCTION(imagegetinterpolation);
 ZEND_FUNCTION(imagesetinterpolation);
 ZEND_FUNCTION(imageresolution);
+#if defined(HAVE_GD_IMAGECLONE)
+ZEND_FUNCTION(imageclone);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gd_info, arginfo_gd_info)
@@ -859,6 +868,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagegetinterpolation, arginfo_imagegetinterpolation)
 	ZEND_FE(imagesetinterpolation, arginfo_imagesetinterpolation)
 	ZEND_FE(imageresolution, arginfo_imageresolution)
+#if defined(HAVE_GD_IMAGECLONE)
+	ZEND_FE(imageclone, arginfo_imageclone)
+#endif
 	ZEND_FE_END
 };
 

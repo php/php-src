@@ -4169,3 +4169,26 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 }
 
 /* }}} */
+
+#if defined(HAVE_GD_IMAGECLONE)
+PHP_FUNCTION(imageclone)
+{
+	zval *IM;
+	gdImagePtr im;
+	gdImagePtr new;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(IM, gd_image_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im = php_gd_libgdimageptr_from_zval_p(IM);
+	/* TODO adding the implementation in the bundled part ? */
+	new = gdImageClone(im);
+
+	if (!new) {
+		RETURN_FALSE;
+	}
+
+	php_gd_assign_libgdimageptr_as_extgdimage(return_value, new);
+}
+#endif
