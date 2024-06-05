@@ -86,6 +86,8 @@ PHP 8.4 UPGRADE NOTES
     JIT, set the opcache.jit config value accordingly.
   . The maximum value of the opcache.interned_strings_buffer setting on 64bit
     architectures is now 32767 (it was previously 4095).
+  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
+    of JIT startup initialization issues.
 
 - PCRE:
   . The bundled pcre2lib has been updated to version 10.43.
@@ -526,10 +528,6 @@ PHP 8.4 UPGRADE NOTES
     Note: this was amended by GH-13820 to fix GH-13815.
   . Added mb_ucfirst and mb_lcfirst functions.
     RFC: https://wiki.php.net/rfc/mb_ucfirst
-
-- Opcache:
-  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
-    of JIT startup initialization issues.
 
 - PCNTL:
   . Added pcntl_setns allowing a process to be reassociated with a namespace in order
