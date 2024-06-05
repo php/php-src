@@ -18,6 +18,9 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-14343 (Memory leak in xml and dom). (nielsdos)
 
+- GD:
+  . Fix parameter numbers for imagecolorset(). (Giovanni Giacobbi)
+
 - Intl:
   . Fix reference handling in SpoofChecker. (nielsdos)
 
