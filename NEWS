@@ -62,6 +62,10 @@ PHP                                                                        NEWS
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
 
+- GD:
+  . Fix parameter numbers and missing alpha check for imagecolorset().
+    (Giovanni Giacobbi)
+
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions
     now throw an exception on empty domain. (David Carlier)
