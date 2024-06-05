@@ -2136,9 +2136,9 @@ function crypt(#[\SensitiveParameter] string $string, string $salt): string {}
 #ifdef HAVE_STRPTIME
 /**
  * @return array<string, int|string>|false
- * @deprecated
  * @refcount 1
  */
+#[\Deprecated(since: '8.2', message: 'use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead')]
 function strptime(string $timestamp, string $format): array|false {}
 #endif
 
@@ -2301,7 +2301,7 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $flags =
 
 function assert(mixed $assertion, Throwable|string|null $description = null): bool {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.3')]
 function assert_options(int $option, mixed $value = UNKNOWN): mixed {}
 
 /* string.c */
@@ -2655,15 +2655,15 @@ function substr_compare(string $haystack, string $needle, int $offset, ?int $len
 /**
  * @compile-time-eval
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.2', message: 'visit the php.net documentation for various alternatives')]
 function utf8_encode(string $string): string {}
 
 /**
  * @compile-time-eval
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.2', message: 'visit the php.net documentation for various alternatives')]
 function utf8_decode(string $string): string {}
 
 /* dir.c */

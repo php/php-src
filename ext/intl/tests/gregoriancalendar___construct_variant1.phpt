@@ -18,7 +18,7 @@ var_dump($intlcal->getTime(), (float)strtotime('2012-02-29 16:07:08') * 1000);
 var_dump($intlcal->getType());
 ?>
 --EXPECTF--
-Deprecated: Function intlgregcal_create_instance() is deprecated in %s on line %d
+Deprecated: Function intlgregcal_create_instance() is deprecated since 8.4, use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead in %s on line %d
 string(16) "Europe/Amsterdam"
 float(1330527600000)
 float(1330527600000)
