@@ -625,7 +625,6 @@ typedef struct {
 #endif
     size_t size;
 } fd_bigset;
-
 #ifdef __USE_XOPEN
 #define FD_BIGSET_ZERO(set, num_fds) do { \
     (set)->size = (num_fds + 7) / 8; \
@@ -678,7 +677,6 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
         if (stream == NULL) {
             continue;
         }
-
 		/* get the fd.
 		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
 		 * when casting.  It is only used here so that the buffered data warning
@@ -690,8 +688,8 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
                 if (this_fd > *max_fd) {
                     *max_fd = this_fd;
                 }
-                cnt++;
             }
+            cnt++;
         }
     } ZEND_HASH_FOREACH_END();
 
@@ -719,6 +717,11 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds, long 
             continue;
         }
 
+		/* get the fd.
+		 * NB: Most other code will NOT use the PHP_STREAM_CAST_INTERNAL flag
+		 * when casting.  It is only used here so that the buffered data warning
+		 * is not displayed.
+		 */
         if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
             if (this_fd < max_fds && FD_BIGSET_ISSET(this_fd, fds)) { // Check if within bounds and if the bit is set
                 if (!key) {
@@ -728,11 +731,13 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds, long 
                 }
 
                 zval_add_ref(dest_elem);
-                ret++;
+	            ret++;
+				continue;
             }
         }
     } ZEND_HASH_FOREACH_END();
 
+	/* destroy old array and add new one */
     zval_ptr_dtor(stream_array);
     ZVAL_ARR(stream_array, ht);
 
@@ -799,7 +804,7 @@ PHP_FUNCTION(stream_select) {
     zend_long sec, usec = 0;
     bool secnull;
     bool usecnull = 1;
-    int set_count, max_set_count = 0;
+    int set_count = 0, max_set_count = 0;
 
     ZEND_PARSE_PARAMETERS_START(4, 5)
         Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
@@ -824,22 +829,22 @@ PHP_FUNCTION(stream_select) {
 
     if (r_array != NULL) {
         set_count = stream_array_to_fd_bigset(r_array, &rfds, &max_fd, max_fds);
-        if (set_count > max_set_count)
-            max_set_count = set_count;
-        sets += set_count;
-    }
+		if (set_count > max_set_count)
+			max_set_count = set_count;
+		sets += set_count;    
+	}
 
     if (w_array != NULL) {
         set_count = stream_array_to_fd_bigset(w_array, &wfds, &max_fd, max_fds);
-        if (set_count > max_set_count)
-            max_set_count = set_count;
-        sets += set_count;
-    }
+		if (set_count > max_set_count)
+			max_set_count = set_count;
+		sets += set_count;
+	}
 
     if (e_array != NULL) {
         set_count = stream_array_to_fd_bigset(e_array, &efds, &max_fd, max_fds);
-        if (set_count > max_set_count)
-            max_set_count = set_count;
+		if (set_count > max_set_count)
+			max_set_count = set_count;
         sets += set_count;
     }
 
@@ -851,14 +856,16 @@ PHP_FUNCTION(stream_select) {
         RETURN_THROWS();
     }
 
-    if (secnull && !usecnull) {
-        if (usec != 0) {
-            zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
-            FD_BIGSET_FREE(&rfds);
-            FD_BIGSET_FREE(&wfds);
-            FD_BIGSET_FREE(&efds);
-            RETURN_THROWS();
-        }
+	if (max_set_count == 0) {
+		RETURN_FALSE;
+	}
+
+    if (secnull && !usecnull && usec != 0) {
+		zend_argument_value_error(5, "must be null when argument #4 ($seconds) is null");
+		FD_BIGSET_FREE(&rfds);
+		FD_BIGSET_FREE(&wfds);
+		FD_BIGSET_FREE(&efds);
+		RETURN_THROWS();
     }
 
     if (!secnull) {
@@ -881,8 +888,10 @@ PHP_FUNCTION(stream_select) {
         tv_p = &tv;
     }
 
-    // Support for buffered data
-    if (r_array != NULL) {
+	/* slight hack to support buffered data; if there is data sitting in the
+	 * read buffer of any of the streams in the read array, let's pretend
+	 * that we selected, but return only the readable sockets */
+	if (r_array != NULL) {
         retval = stream_array_emulate_read_fd_set(r_array);
         if (retval > 0) {
             if (w_array != NULL) {
