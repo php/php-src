@@ -12,7 +12,7 @@ function shmop_open(int $key, string $mode, int $permissions, int $size): Shmop|
 
 function shmop_read(Shmop $shmop, int $offset, int $size): string {}
 
-/** @deprecated */
+#[\Deprecated]
 function shmop_close(Shmop $shmop): void {}
 
 function shmop_size(Shmop $shmop): int {}

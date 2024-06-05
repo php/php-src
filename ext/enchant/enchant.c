@@ -22,6 +22,7 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"

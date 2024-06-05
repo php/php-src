@@ -70,28 +70,28 @@ function hash_equals(#[\SensitiveParameter] string $known_string, #[\SensitivePa
 function hash_hkdf(string $algo, #[\SensitiveParameter] string $key, int $length = 0, string $info = "", string $salt = ""): string {}
 
 #ifdef PHP_MHASH_BC
-/** @deprecated */
+#[\Deprecated]
 function mhash_get_block_size(int $algo): int|false {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated]
 function mhash_get_hash_name(int $algo): string|false {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated]
 function mhash_keygen_s2k(int $algo, string $password, string $salt, int $length): string|false {}
 
-/** @deprecated */
+#[\Deprecated]
 function mhash_count(): int {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated]
 function mhash(int $algo, string $data, ?string $key = null): string|false {}
 #endif
 

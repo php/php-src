@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 34cebf41d91e4dacb8655a935c629ac62f0bb5ab */
+ * Stub hash: 30ed66d5e97f6615a461d39f40f85a18ba618711 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_close_all, 0, 0, IS_VOID, 0)
 ZEND_END_ARG_INFO()
@@ -492,6 +492,13 @@ static void register_odbc_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SQL_QUICK", SQL_QUICK, CONST_PERSISTENT);
 #endif
 
+
+	zend_attribute *attribute_Deprecated_func_odbc_result_all_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_result_all", sizeof("odbc_result_all") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_odbc_result_all_0_arg0;
+	zend_string *attribute_Deprecated_func_odbc_result_all_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_odbc_result_all_0_arg0, attribute_Deprecated_func_odbc_result_all_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_odbc_result_all_0->args[0].value, &attribute_Deprecated_func_odbc_result_all_0_arg0);
+	attribute_Deprecated_func_odbc_result_all_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_connect", sizeof("odbc_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
