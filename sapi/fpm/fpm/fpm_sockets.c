@@ -278,6 +278,7 @@ static int fpm_sockets_get_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	sock = fpm_sockets_hash_op(0, sa, 0, wp->listen_address_domain, FPM_GET_USE_SOCKET);
 	if (sock >= 0) {
+		listen(sock, wp->config->listen_backlog); /* change backlog via listen() */
 		return sock;
 	}
 
