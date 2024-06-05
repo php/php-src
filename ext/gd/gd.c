@@ -4108,20 +4108,36 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	switch (image_type) {
 #ifdef HAVE_GD_JPG
 		case PHP_GDIMG_TYPE_JPG:
+			if (quality < -1 || quality > 100) {
+				zend_argument_value_error(3, "must be at between -1 and 100");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			}
 			gdImageJpegCtx(im, ctx, (int) quality);
 			break;
 #endif
 #ifdef HAVE_GD_WEBP
 		case PHP_GDIMG_TYPE_WEBP:
-			if (quality == -1) {
-				quality = 80;
+			if (quality < -1) {
+				zend_argument_value_error(3, "must be greater than or equal to -1");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
 			}
 			gdImageWebpCtx(im, ctx, (int) quality);
 			break;
 #endif
 #ifdef HAVE_GD_AVIF
 		case PHP_GDIMG_TYPE_AVIF:
-			if (speed == -1) {
+			if (quality < -1 || quality > 100) {
+				zend_argument_value_error(3, "must be between -1 and 100");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			}
+			if (speed < -1 || speed > 10) {
+				zend_argument_value_error(4, "must be between -1 and 10");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			} else if (speed == -1) {
 				speed = 6;
 			}
 			gdImageAvifCtx(im, ctx, (int) quality, (int) speed);
@@ -4129,6 +4145,11 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 #endif
 #ifdef HAVE_GD_PNG
 		case PHP_GDIMG_TYPE_PNG:
+			if (quality < -1 || quality > 9) {
+				zend_argument_value_error(3, "must be between -1 and 9");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			}
 #ifdef HAVE_GD_BUNDLED
 			gdImagePngCtxEx(im, ctx, (int) quality, (int) basefilter);
 #else
