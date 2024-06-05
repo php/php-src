@@ -65,6 +65,8 @@ PHP                                                                        NEWS
 - GD:
   . Fix parameter numbers and missing alpha check for imagecolorset().
     (Giovanni Giacobbi)
+  . imagepng/imagejpeg/imagewep/imageavif now throw an exception on
+    invalid quality parameter. (David Carlier)
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions
