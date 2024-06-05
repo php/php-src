@@ -56,7 +56,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-14290 (Member access within null pointer in extension spl).
     (nielsdos)
 
-06 June 2024, PHP 8.3.8
+06 Jun 2024, PHP 8.3.8
 
 - CGI:
   . Fixed buffer limit on Windows, replacing read call usage by _read.
