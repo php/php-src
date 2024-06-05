@@ -44,7 +44,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   PHP_CHECK_PDO_INCLUDES
 
   PDO_DBLIB_DEFS="-DPDO_DBLIB_FLAVOUR=\\\"freetds\\\""
-  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,,-I$pdo_cv_inc_path $PDO_DBLIB_DEFS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION(pdo_dblib, pdo_dblib.c dblib_driver.c dblib_stmt.c, $ext_shared,, $PDO_DBLIB_DEFS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(PDO_DBLIB_SHARED_LIBADD)
 
   PHP_ADD_EXTENSION_DEP(pdo_dblib, pdo)

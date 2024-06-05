@@ -24,9 +24,9 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h" /* For php_addcslashes_str() in _pdo_pgsql_escape_credentials() */
 #include "main/php_network.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
-#include "pdo/php_pdo_error.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo_error.h"
 #include "ext/standard/file.h"
 #include "php_pdo_pgsql.h"
 #include "php_pdo_pgsql_int.h"
@@ -1250,14 +1250,14 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "F!", &fci, &fcc)) {
 		RETURN_THROWS();
 	}
-	
+
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
-	
+
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
-	
+
 	pdo_pgsql_cleanup_notice_callback(H);
-	
+
 	if (ZEND_FCC_INITIALIZED(fcc)) {
 		H->notice_callback = emalloc(sizeof(zend_fcall_info_cache));
 		zend_fcc_dup(H->notice_callback, &fcc);

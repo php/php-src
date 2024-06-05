@@ -21,8 +21,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 /* this file actually lives in main/ */
 #include "php_odbc_utils.h"
 #include "php_pdo_odbc.h"

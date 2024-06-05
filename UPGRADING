@@ -767,6 +767,9 @@ PHP 8.4 UPGRADE NOTES
 - MySQLnd:
   . Improved the performance of MySQLnd quoting.
 
+- PCRE:
+  . Improved the performance of named capture groups.
+
 - SimpleXML:
   . Improved performance and reduce memory consumption of XML serialization.
 
