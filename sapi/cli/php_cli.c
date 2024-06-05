@@ -107,19 +107,6 @@ static DWORD orig_cp = 0;
 #define O_BINARY 0
 #endif
 
-#define PHP_MODE_STANDARD      1
-#define PHP_MODE_HIGHLIGHT     2
-#define PHP_MODE_LINT          4
-#define PHP_MODE_STRIP         5
-#define PHP_MODE_CLI_DIRECT    6
-#define PHP_MODE_PROCESS_STDIN 7
-#define PHP_MODE_REFLECTION_FUNCTION    8
-#define PHP_MODE_REFLECTION_CLASS       9
-#define PHP_MODE_REFLECTION_EXTENSION   10
-#define PHP_MODE_REFLECTION_EXT_INFO    11
-#define PHP_MODE_REFLECTION_ZEND_EXTENSION 12
-#define PHP_MODE_SHOW_INI_CONFIG        13
-
 static cli_shell_callbacks_t cli_shell_callbacks = { NULL, NULL, NULL };
 PHP_CLI_API cli_shell_callbacks_t *php_cli_get_shell_callbacks(void)
 {
@@ -602,7 +589,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 {
 	int c;
 	zend_file_handle file_handle;
-	int behavior = PHP_MODE_STANDARD;
+	php_cli_server_context context = {
+		.mode = PHP_CLI_MODE_STANDARD
+	};
 	char *reflection_what = NULL;
 	volatile int request_started = 0;
 	char *php_optarg = NULL, *orig_optarg = NULL;
@@ -694,7 +683,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					break;
 				}
 				if (!interactive) {
-					if (behavior != PHP_MODE_STANDARD) {
+					if (context.mode != PHP_CLI_MODE_STANDARD) {
 						param_error = param_mode_conflict;
 						break;
 					}
@@ -708,21 +697,21 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				break;
 
 			case 'F':
-				if (behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					if (exec_run || script_file) {
 						param_error = "You can use -R or -F only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD) {
+				} else if (context.mode != PHP_CLI_MODE_STANDARD) {
 					param_error = param_mode_conflict;
 					break;
 				}
-				behavior=PHP_MODE_PROCESS_STDIN;
+				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
 				script_file = php_optarg;
 				break;
 
 			case 'f': /* parse file */
-				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_CLI_DIRECT || context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					param_error = param_mode_conflict;
 					break;
 				} else if (script_file) {
@@ -733,10 +722,10 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				break;
 
 			case 'l': /* syntax check mode */
-				if (behavior != PHP_MODE_STANDARD) {
+				if (context.mode != PHP_CLI_MODE_STANDARD) {
 					break;
 				}
-				behavior=PHP_MODE_LINT;
+				context.mode=PHP_CLI_MODE_LINT;
 				/* We want to set the error exit status if at least one lint failed.
 				 * If all were successful we set the exit status to 0.
 				 * We already set EG(exit_status) here such that only failures set the exit status. */
@@ -748,75 +737,75 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				break;
 
 			case 'r': /* run code from command line */
-				if (behavior == PHP_MODE_CLI_DIRECT) {
+				if (context.mode == PHP_CLI_MODE_CLI_DIRECT) {
 					if (exec_direct || script_file) {
 						param_error = "You can use -r only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD || interactive) {
+				} else if (context.mode != PHP_CLI_MODE_STANDARD || interactive) {
 					param_error = param_mode_conflict;
 					break;
 				}
-				behavior=PHP_MODE_CLI_DIRECT;
+				context.mode=PHP_CLI_MODE_CLI_DIRECT;
 				exec_direct=php_optarg;
 				break;
 
 			case 'R':
-				if (behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					if (exec_run || script_file) {
 						param_error = "You can use -R or -F only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD) {
+				} else if (context.mode != PHP_CLI_MODE_STANDARD) {
 					param_error = param_mode_conflict;
 					break;
 				}
-				behavior=PHP_MODE_PROCESS_STDIN;
+				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
 				exec_run=php_optarg;
 				break;
 
 			case 'B':
-				if (behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					if (exec_begin) {
 						param_error = "You can use -B only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD || interactive) {
+				} else if (context.mode != PHP_CLI_MODE_STANDARD || interactive) {
 					param_error = param_mode_conflict;
 					break;
 				}
-				behavior=PHP_MODE_PROCESS_STDIN;
+				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
 				exec_begin=php_optarg;
 				break;
 
 			case 'E':
-				if (behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					if (exec_end) {
 						param_error = "You can use -E only once.\n";
 						break;
 					}
-				} else if (behavior != PHP_MODE_STANDARD || interactive) {
+				} else if (context.mode != PHP_CLI_MODE_STANDARD || interactive) {
 					param_error = param_mode_conflict;
 					break;
 				}
-				behavior=PHP_MODE_PROCESS_STDIN;
+				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
 				exec_end=php_optarg;
 				break;
 
 			case 's': /* generate highlighted HTML from source */
-				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_CLI_DIRECT || context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					param_error = "Source highlighting only works for files.\n";
 					break;
 				}
-				behavior=PHP_MODE_HIGHLIGHT;
+				context.mode=PHP_CLI_MODE_HIGHLIGHT;
 				break;
 
 			case 'w':
-				if (behavior == PHP_MODE_CLI_DIRECT || behavior == PHP_MODE_PROCESS_STDIN) {
+				if (context.mode == PHP_CLI_MODE_CLI_DIRECT || context.mode == PHP_CLI_MODE_PROCESS_STDIN) {
 					param_error = "Source stripping only works for files.\n";
 					break;
 				}
-				behavior=PHP_MODE_STRIP;
+				context.mode=PHP_CLI_MODE_STRIP;
 				break;
 
 			case 'z': /* load extension file */
@@ -826,27 +815,27 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				hide_argv = true;
 				break;
 			case 10:
-				behavior=PHP_MODE_REFLECTION_FUNCTION;
+				context.mode=PHP_CLI_MODE_REFLECTION_FUNCTION;
 				reflection_what = php_optarg;
 				break;
 			case 11:
-				behavior=PHP_MODE_REFLECTION_CLASS;
+				context.mode=PHP_CLI_MODE_REFLECTION_CLASS;
 				reflection_what = php_optarg;
 				break;
 			case 12:
-				behavior=PHP_MODE_REFLECTION_EXTENSION;
+				context.mode=PHP_CLI_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
 			case 13:
-				behavior=PHP_MODE_REFLECTION_ZEND_EXTENSION;
+				context.mode=PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION;
 				reflection_what = php_optarg;
 				break;
 			case 14:
-				behavior=PHP_MODE_REFLECTION_EXT_INFO;
+				context.mode=PHP_CLI_MODE_REFLECTION_EXT_INFO;
 				reflection_what = php_optarg;
 				break;
 			case 15:
-				behavior = PHP_MODE_SHOW_INI_CONFIG;
+				context.mode = PHP_CLI_MODE_SHOW_INI_CONFIG;
 				break;
 			case 16:
 				num_repeats = atoi(php_optarg);
@@ -869,8 +858,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||
-					argc > php_optind && behavior!=PHP_MODE_CLI_DIRECT &&
-					behavior!=PHP_MODE_PROCESS_STDIN &&
+					argc > php_optind && context.mode!=PHP_CLI_MODE_CLI_DIRECT &&
+					context.mode!=PHP_CLI_MODE_PROCESS_STDIN &&
 					strcmp(argv[php_optind-1],"--")
 				);
 		}
@@ -890,8 +879,8 @@ do_repeat:
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind
 		  && !script_file
-		  && behavior!=PHP_MODE_CLI_DIRECT
-		  && behavior!=PHP_MODE_PROCESS_STDIN
+		  && context.mode!=PHP_CLI_MODE_CLI_DIRECT
+		  && context.mode!=PHP_CLI_MODE_PROCESS_STDIN
 		  && strcmp(argv[php_optind-1],"--"))
 		{
 			script_file=argv[php_optind];
@@ -910,12 +899,12 @@ do_repeat:
 				php_self = script_file;
 			}
 		} else {
-			/* We could handle PHP_MODE_PROCESS_STDIN in a different manner  */
+			/* We could handle PHP_CLI_MODE_PROCESS_STDIN in a different manner  */
 			/* here but this would make things only more complicated. And it */
 			/* is consistent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
 			php_self = "Standard input code";
-			if (behavior < PHP_MODE_CLI_DIRECT
+			if (context.mode < PHP_CLI_MODE_CLI_DIRECT
 			 && !interactive) {
 				zend_stream_init_fp(&file_handle, stdin, php_self);
 				file_handle.primary_script = 1;
@@ -930,6 +919,7 @@ do_repeat:
 		SG(request_info).path_translated = translated_path ? translated_path : php_self;
 		argv[php_optind-1] = php_self;
 		SG(request_info).argv=argv+php_optind-1;
+		SG(server_context) = &context;
 
 		if (php_request_startup()==FAILURE) {
 			*arg_excp = arg_free;
@@ -956,8 +946,8 @@ do_repeat:
 		zend_is_auto_global(ZSTR_KNOWN(ZEND_STR_AUTOGLOBAL_SERVER));
 
 		PG(during_request_startup) = 0;
-		switch (behavior) {
-		case PHP_MODE_STANDARD:
+		switch (context.mode) {
+		case PHP_CLI_MODE_STANDARD:
 			cli_register_file_handles();
 
 			if (interactive) {
@@ -966,7 +956,7 @@ do_repeat:
 				php_execute_script(&file_handle);
 			}
 			break;
-		case PHP_MODE_LINT:
+		case PHP_CLI_MODE_LINT:
 			if (php_lint_script(&file_handle) == SUCCESS) {
 				zend_printf("No syntax errors detected in %s\n", php_self);
 			} else {
@@ -974,13 +964,13 @@ do_repeat:
 				EG(exit_status) = 255;
 			}
 			break;
-		case PHP_MODE_STRIP:
+		case PHP_CLI_MODE_STRIP:
 			if (open_file_for_scanning(&file_handle)==SUCCESS) {
 				zend_strip();
 			}
 			goto out;
 			break;
-		case PHP_MODE_HIGHLIGHT:
+		case PHP_CLI_MODE_HIGHLIGHT:
 			{
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -991,12 +981,12 @@ do_repeat:
 				goto out;
 			}
 			break;
-		case PHP_MODE_CLI_DIRECT:
+		case PHP_CLI_MODE_CLI_DIRECT:
 			cli_register_file_handles();
 			zend_eval_string_ex(exec_direct, NULL, "Command line code", 1);
 			break;
 
-		case PHP_MODE_PROCESS_STDIN:
+		case PHP_CLI_MODE_PROCESS_STDIN:
 			{
 				char *input;
 				size_t len, index = 0;
@@ -1042,32 +1032,32 @@ do_repeat:
 				break;
 			}
 
-			case PHP_MODE_REFLECTION_FUNCTION:
-			case PHP_MODE_REFLECTION_CLASS:
-			case PHP_MODE_REFLECTION_EXTENSION:
-			case PHP_MODE_REFLECTION_ZEND_EXTENSION:
+			case PHP_CLI_MODE_REFLECTION_FUNCTION:
+			case PHP_CLI_MODE_REFLECTION_CLASS:
+			case PHP_CLI_MODE_REFLECTION_EXTENSION:
+			case PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION:
 				{
 					zend_class_entry *pce = NULL;
 					zval arg, ref;
 					zend_execute_data execute_data;
 
-					switch (behavior) {
+					switch (context.mode) {
 						default:
 							break;
-						case PHP_MODE_REFLECTION_FUNCTION:
+						case PHP_CLI_MODE_REFLECTION_FUNCTION:
 							if (strstr(reflection_what, "::")) {
 								pce = reflection_method_ptr;
 							} else {
 								pce = reflection_function_ptr;
 							}
 							break;
-						case PHP_MODE_REFLECTION_CLASS:
+						case PHP_CLI_MODE_REFLECTION_CLASS:
 							pce = reflection_class_ptr;
 							break;
-						case PHP_MODE_REFLECTION_EXTENSION:
+						case PHP_CLI_MODE_REFLECTION_EXTENSION:
 							pce = reflection_extension_ptr;
 							break;
-						case PHP_MODE_REFLECTION_ZEND_EXTENSION:
+						case PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION:
 							pce = reflection_zend_extension_ptr;
 							break;
 					}
@@ -1096,7 +1086,7 @@ do_repeat:
 
 					break;
 				}
-			case PHP_MODE_REFLECTION_EXT_INFO:
+			case PHP_CLI_MODE_REFLECTION_EXT_INFO:
 				{
 					size_t len = strlen(reflection_what);
 					char *lcname = zend_str_tolower_dup(reflection_what, len);
@@ -1117,7 +1107,7 @@ do_repeat:
 					break;
 				}
 
-			case PHP_MODE_SHOW_INI_CONFIG:
+			case PHP_CLI_MODE_SHOW_INI_CONFIG:
 				{
 					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
 					zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
@@ -1140,7 +1130,7 @@ out:
 		free(translated_path);
 		translated_path = NULL;
 	}
-	if (behavior == PHP_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
+	if (context.mode == PHP_CLI_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
 		script_file = NULL;
 		goto do_repeat;
 	}
