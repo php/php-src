@@ -1870,8 +1870,9 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 		}
 
 		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
-		 * However, if there are named arguments, an Error must be thrown to be consistent with new ClassName() */
-		if (UNEXPECTED(named_params != NULL)) {
+		 * However, if there are named arguments (and it is not empty),
+		 * an Error must be thrown to be consistent with new ClassName() */
+		if (UNEXPECTED(named_params != NULL && zend_hash_num_elements(named_params) != 0)) {
 			/* Throw standard Error */
 			zend_string *arg_name = NULL;
 			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
