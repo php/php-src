@@ -2888,6 +2888,7 @@ class ConstInfo extends VariableLike
 
 class PropertyInfo extends VariableLike
 {
+    public int $classFlags;
     public PropertyName $name;
     public ?Expr $defaultValue;
     public ?string $defaultValueString;
@@ -2898,6 +2899,7 @@ class PropertyInfo extends VariableLike
      */
     public function __construct(
         PropertyName $name,
+        int $classFlags,
         int $flags,
         ?Type $type,
         ?Type $phpDocType,
@@ -2910,6 +2912,7 @@ class PropertyInfo extends VariableLike
         ?ExposedDocComment $exposedDocComment
     ) {
         $this->name = $name;
+        $this->classFlags = $classFlags;
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
@@ -3024,6 +3027,8 @@ class PropertyInfo extends VariableLike
 
         if ($this->flags & Modifiers::READONLY) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
+        } elseif ($this->classFlags & Modifiers::READONLY) {
+            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_82_VERSION_ID);
         }
 
         return $flags;
@@ -4383,6 +4388,7 @@ function parseConstLike(
  */
 function parseProperty(
     Name $class,
+    int $classFlags,
     int $flags,
     Stmt\PropertyProperty $property,
     ?Node $type,
@@ -4425,6 +4431,7 @@ function parseProperty(
 
     return new PropertyInfo(
         new PropertyName($class, $property->name->__toString()),
+        $classFlags,
         $flags,
         $propertyType,
         $phpDocType ? Type::fromString($phpDocType) : null,
@@ -4713,6 +4720,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     foreach ($classStmt->props as $property) {
                         $propertyInfos[] = parseProperty(
                             $className,
+                            $classFlags,
                             $classStmt->flags,
                             $property,
                             $classStmt->type,
