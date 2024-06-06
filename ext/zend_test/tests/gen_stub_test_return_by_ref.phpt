@@ -1,7 +1,5 @@
 --TEST--
 gen_stub.php: Test that return by ref flag is set
---XFAIL--
-Does not work currently
 --EXTENSIONS--
 zend_test
 --FILE--
@@ -12,7 +10,7 @@ var_dump($reflectionMethod->returnsReference());
 
 $o = new _ZendTestClass();
 var_dump($o);
-$i = $o->returnByRefIntProp();
+$i =& $o->returnByRefIntProp();
 var_dump($i);
 $i = 24;
 var_dump($i);
@@ -39,7 +37,7 @@ int(123)
 int(24)
 object(_ZendTestClass)#2 (3) {
   ["intProp"]=>
-  int(24)
+  &int(24)
   ["classProp"]=>
   NULL
   ["classUnionProp"]=>
