@@ -1846,6 +1846,74 @@ ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* 
 }
 /* }}} */
 
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
+{
+	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	if (UNEXPECTED(status == FAILURE)) {
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+	zend_object *obj = Z_OBJ_P(arg);
+	zend_function *constructor = obj->handlers->get_constructor(obj);
+	if (constructor == NULL) {
+		/* The constructor can be NULL for 2 different reasons:
+		 * - It is not defined
+		 * - We are not allowed to call the constructor (e.g. private, or internal opaque class)
+		 *   and an exception has been thrown
+		 * in the former case, we are (mostly) done and the object is initialized,
+		 * in the latter we need to destroy the object as initialization failed
+		 */
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		}
+
+		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
+		 * However, if there are named arguments (and it is not empty),
+		 * an Error must be thrown to be consistent with new ClassName() */
+		if (UNEXPECTED(named_params != NULL && zend_hash_num_elements(named_params) != 0)) {
+			/* Throw standard Error */
+			zend_string *arg_name = NULL;
+			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
+			ZEND_ASSERT(arg_name != NULL);
+			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
+			zend_string_release(arg_name);
+			/* Do not call destructor, free object, and set arg to IS_UNDEF */
+			zend_object_store_ctor_failed(obj);
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		} else {
+			return SUCCESS;
+		}
+	}
+	/* A constructor should not return a value, however if an exception is thrown
+	 * zend_call_known_function() will set the retval to IS_UNDEF */
+	zval retval;
+	zend_call_known_function(
+		constructor,
+		obj,
+		class_type,
+		&retval,
+		param_count,
+		params,
+		named_params
+	);
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		/* Do not call destructor, free object, and set arg to IS_UNDEF */
+		zend_object_store_ctor_failed(obj);
+		zval_ptr_dtor(arg);
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	} else {
+		/* Unlikely, but user constructors may return any value they want */
+		zval_ptr_dtor(&retval);
+		return SUCCESS;
+	}
+}
+/* }}} */
+
 ZEND_API void object_init(zval *arg) /* {{{ */
 {
 	ZVAL_OBJ(arg, zend_objects_new(zend_standard_class_def));
