@@ -277,4 +277,98 @@ void zend_ffi_val_float_number(zend_ffi_val *val, const char *str, size_t str_le
 void zend_ffi_val_string(zend_ffi_val *val, const char *str, size_t str_len);
 void zend_ffi_val_character(zend_ffi_val *val, const char *str, size_t str_len);
 
+
+/* FFI internals exported for JIT */
+
+typedef enum _zend_ffi_type_kind {
+	ZEND_FFI_TYPE_VOID,
+	ZEND_FFI_TYPE_FLOAT,
+	ZEND_FFI_TYPE_DOUBLE,
+#ifdef HAVE_LONG_DOUBLE
+	ZEND_FFI_TYPE_LONGDOUBLE,
+#endif
+	ZEND_FFI_TYPE_UINT8,
+	ZEND_FFI_TYPE_SINT8,
+	ZEND_FFI_TYPE_UINT16,
+	ZEND_FFI_TYPE_SINT16,
+	ZEND_FFI_TYPE_UINT32,
+	ZEND_FFI_TYPE_SINT32,
+	ZEND_FFI_TYPE_UINT64,
+	ZEND_FFI_TYPE_SINT64,
+	ZEND_FFI_TYPE_ENUM,
+	ZEND_FFI_TYPE_BOOL,
+	ZEND_FFI_TYPE_CHAR,
+	ZEND_FFI_TYPE_POINTER,
+	ZEND_FFI_TYPE_FUNC,
+	ZEND_FFI_TYPE_ARRAY,
+	ZEND_FFI_TYPE_STRUCT,
+} zend_ffi_type_kind;
+
+typedef enum _zend_ffi_flags {
+	ZEND_FFI_FLAG_CONST      = (1 << 0),
+	ZEND_FFI_FLAG_OWNED      = (1 << 1),
+	ZEND_FFI_FLAG_PERSISTENT = (1 << 2),
+} zend_ffi_flags;
+
+struct _zend_ffi_type {
+	zend_ffi_type_kind     kind;
+	size_t                 size;
+	uint32_t               align;
+	uint32_t               attr;
+	union {
+		struct {
+			zend_string        *tag_name;
+			zend_ffi_type_kind  kind;
+		} enumeration;
+		struct {
+			zend_ffi_type *type;
+			zend_long      length;
+		} array;
+		struct {
+			zend_ffi_type *type;
+		} pointer;
+		struct {
+			zend_string   *tag_name;
+			HashTable      fields;
+		} record;
+		struct {
+			zend_ffi_type *ret_type;
+			HashTable     *args;
+			int           abi; /*ffi_abi*/
+		} func;
+	};
+};
+
+typedef struct _zend_ffi_field {
+	size_t                 offset;
+	bool                   is_const;
+	bool                   is_nested; /* part of nested anonymous struct */
+	uint8_t                first_bit;
+	uint8_t                bits;
+	zend_ffi_type         *type;
+} zend_ffi_field;
+
+typedef struct _zend_ffi_cdata {
+	zend_object            std;
+	zend_ffi_type         *type;
+	void                  *ptr;
+	void                  *ptr_holder;
+	zend_ffi_flags         flags;
+} zend_ffi_cdata;
+
+typedef struct _zend_ffi_ctype {
+	zend_object            std;
+	zend_ffi_type         *type;
+} zend_ffi_ctype;
+
+extern ZEND_API zend_class_entry *zend_ffi_cdata_ce;
+
+#define ZEND_FFI_TYPE_OWNED        (1<<0)
+
+#define ZEND_FFI_TYPE(t) \
+	((zend_ffi_type*)(((uintptr_t)(t)) & ~ZEND_FFI_TYPE_OWNED))
+
+#define ZEND_FFI_TYPE_IS_OWNED(t) \
+	(((uintptr_t)(t)) & ZEND_FFI_TYPE_OWNED)
+
 #endif	/* PHP_FFI_H */
