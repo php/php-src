@@ -146,7 +146,6 @@ Error: Cannot instantiate trait _ZendTestTrait
 Error: Cannot instantiate enum ZendTestUnitEnum
 Error: Cannot instantiate abstract class AbstractClass
 Error: Cannot directly construct SysvMessageQueue, use msg_get_queue() instead
-Destructor for PrivateUser
 Error: Call to private PrivateUser::__construct() from global scope
 Exception: Don't construct
 Testing param passing
