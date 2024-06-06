@@ -8274,11 +8274,10 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	ir_ref used_stack_ref = IR_UNUSED;
 	bool stack_check = 1;
 	ir_ref rx, ref, top, if_enough_stack, cold_path = IR_UNUSED;
-	uint32_t num_args = ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode) ? ZEND_FLF_NUM_ARGS(opline->opcode) : opline->extended_value;
 
 	ZEND_ASSERT(func_ref != IR_NULL);
 	if (func) {
-		used_stack = zend_vm_calc_used_stack(num_args, func);
+		used_stack = zend_vm_calc_used_stack(opline->extended_value, func);
 		if ((int)used_stack <= checked_stack) {
 			stack_check = 0;
 		}
@@ -8361,7 +8360,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 #ifdef _WIN32
 			if (0) {
 #else
-			if ((opline->opcode == ZEND_INIT_FCALL || ZEND_OP_IS_FRAMELESS_ICALL(opline->opcode)) && func && func->type == ZEND_INTERNAL_FUNCTION) {
+			if (opline->opcode == ZEND_INIT_FCALL && func && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 				jit_SET_EX_OPLINE(jit, opline);
 				ref = ir_CALL_1(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_int_extend_stack_helper), used_stack_ref);
@@ -8514,7 +8513,7 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 	}
 
 	// JIT: ZEND_CALL_NUM_ARGS(call) = num_args;
-	ir_STORE(jit_CALL(rx, This.u2.num_args), ir_CONST_U32(num_args));
+	ir_STORE(jit_CALL(rx, This.u2.num_args), ir_CONST_U32(opline->extended_value));
 
 	return 1;
 }
@@ -17179,7 +17178,6 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 
 	jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, NULL);
 	/* Set OP1 to UNDEF in case FREE_OP2() throws. */
-	// TODO: I believe this is only necessary when jit_ir_needs_dtor is true for either op
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR)) != 0 && (opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0) {
 		jit_set_Z_TYPE_INFO(jit, op1_addr, IS_UNDEF);
 	}

@@ -3702,7 +3702,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		HANDLE_EXCEPTION();
@@ -3736,7 +3736,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_OBSERVE
 	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		HANDLE_EXCEPTION();
@@ -3771,7 +3771,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	zval *arg3 = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -3811,7 +3811,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	zval *arg3 = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -4238,7 +4238,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED_
 	zval *result = EX_VAR(opline->result.var);
 	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		HANDLE_EXCEPTION();
 	}
@@ -4264,7 +4264,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_OBSERVE
 	zval *result = EX_VAR(opline->result.var);
 	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP(opline->op1_type, opline->op1.var);
 		HANDLE_EXCEPTION();
 	}

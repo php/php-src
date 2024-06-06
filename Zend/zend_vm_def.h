@@ -9627,7 +9627,7 @@ ZEND_VM_HANDLER(205, ZEND_FRAMELESS_ICALL_1, ANY, UNUSED, SPEC(OBSERVER))
 	zval *result = EX_VAR(opline->result.var);
 	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP1();
 		HANDLE_EXCEPTION();
 	}
@@ -9654,7 +9654,7 @@ ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY, SPEC(OBSERVER))
 	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP1();
 		FREE_OP2();
 		HANDLE_EXCEPTION();
@@ -9689,7 +9689,7 @@ ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY, SPEC(OBSERVER))
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg3 = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
-	if (UNEXPECTED(EG(exception) != NULL)) {
+	if (EG(exception)) {
 		FREE_OP1();
 		FREE_OP2();
 		FREE_OP_DATA();

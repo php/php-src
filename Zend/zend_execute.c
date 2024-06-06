@@ -1540,6 +1540,15 @@ static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *
 	}
 }
 
+static void frameless_observed_call_copy(zend_execute_data *call, uint32_t arg, zval *zv)
+{
+	if (Z_ISUNDEF_P(zv)) {
+		ZVAL_NULL(ZEND_CALL_VAR_NUM(call, arg));
+	} else {
+		ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, arg), zv);
+	}
+}
+
 ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
 {
 	const zend_op *opline = EX(opline);
@@ -1551,9 +1560,9 @@ ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
 	call->prev_execute_data = execute_data;
 
 	switch (num_args) {
-		case 3: ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, 2), zend_get_zval_ptr(opline+1, (opline+1)->op1_type, &(opline+1)->op1, execute_data)); ZEND_FALLTHROUGH;
-		case 2: ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, 1), zend_get_zval_ptr(opline, opline->op2_type, &opline->op2, execute_data)); ZEND_FALLTHROUGH;
-		case 1: ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, 0), zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data));
+		case 3: frameless_observed_call_copy(call, 2, zend_get_zval_ptr(opline+1, (opline+1)->op1_type, &(opline+1)->op1, execute_data)); ZEND_FALLTHROUGH;
+		case 2: frameless_observed_call_copy(call, 1, zend_get_zval_ptr(opline, opline->op2_type, &opline->op2, execute_data)); ZEND_FALLTHROUGH;
+		case 1: frameless_observed_call_copy(call, 0, zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data));
 	}
 
 	EG(current_execute_data) = call;

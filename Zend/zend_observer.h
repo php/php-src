@@ -33,15 +33,6 @@ extern ZEND_API bool zend_observer_errors_observed;
 extern ZEND_API bool zend_observer_function_declared_observed;
 extern ZEND_API bool zend_observer_class_linked_observed;
 
-typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
-typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
-
-typedef struct _zend_observer_fcall_handlers {
-	zend_observer_fcall_begin_handler begin;
-	zend_observer_fcall_end_handler end;
-} zend_observer_fcall_handlers;
-
-
 #define ZEND_OBSERVER_HANDLE(function) (ZEND_USER_CODE((function)->type) \
 	? zend_observer_fcall_op_array_extension : zend_observer_fcall_internal_function_extension)
 
@@ -66,6 +57,14 @@ typedef struct _zend_observer_fcall_handlers {
 			zend_observer_fcall_end(execute_data, return_value); \
 		} \
 	} while (0)
+
+typedef void (*zend_observer_fcall_begin_handler)(zend_execute_data *execute_data);
+typedef void (*zend_observer_fcall_end_handler)(zend_execute_data *execute_data, zval *retval);
+
+typedef struct _zend_observer_fcall_handlers {
+	zend_observer_fcall_begin_handler begin;
+	zend_observer_fcall_end_handler end;
+} zend_observer_fcall_handlers;
 
 /* If the fn should not be observed then return {NULL, NULL} */
 typedef zend_observer_fcall_handlers (*zend_observer_fcall_init)(zend_execute_data *execute_data);
