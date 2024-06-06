@@ -3504,6 +3504,7 @@ PHP_FUNCTION(imagecrop)
 	gdRect rect;
 	zval *z_rect;
 	zval *tmp;
+	zend_long lval;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oa", &IM, gd_image_ce, &z_rect) == FAILURE)  {
 		RETURN_THROWS();
@@ -3512,28 +3513,48 @@ PHP_FUNCTION(imagecrop)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
-		rect.x = zval_get_long(tmp);
+		lval = zval_get_long(tmp);
+		if (ZEND_LONG_EXCEEDS_INT(lval)) {
+			zend_argument_value_error(2, "invalid \"x\" key value");
+			RETURN_THROWS();
+		}
+		rect.x = lval;
 	} else {
 		zend_argument_value_error(2, "must have an \"x\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
-		rect.y = zval_get_long(tmp);
+		lval = zval_get_long(tmp);
+		if (ZEND_LONG_EXCEEDS_INT(lval)) {
+			zend_argument_value_error(2, "invalid \"y\" key value");
+			RETURN_THROWS();
+		}
+		rect.y = lval;
 	} else {
 		zend_argument_value_error(2, "must have a \"y\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
-		rect.width = zval_get_long(tmp);
+		lval = zval_get_long(tmp);
+		if (ZEND_LONG_EXCEEDS_INT(lval)) {
+			zend_argument_value_error(2, "invalid \"width\" key value");
+			RETURN_THROWS();
+		}
+		rect.width = lval;
 	} else {
 		zend_argument_value_error(2, "must have a \"width\" key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
-		rect.height = zval_get_long(tmp);
+		lval = zval_get_long(tmp);
+		if (ZEND_LONG_EXCEEDS_INT(lval)) {
+			zend_argument_value_error(2, "invalid \"height\" key value");
+			RETURN_THROWS();
+		}
+		rect.height = lval;
 	} else {
 		zend_argument_value_error(2, "must have a \"height\" key");
 		RETURN_THROWS();
@@ -3695,29 +3716,50 @@ PHP_FUNCTION(imageaffine)
 	}
 
 	if (z_rect != NULL) {
+		zend_long lval;
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
-			rect.x = zval_get_long(tmp);
+			lval = zval_get_long(tmp);
+			if (ZEND_LONG_EXCEEDS_INT(lval)) {
+				zend_argument_value_error(3, "invalid \"x\" key value");
+				RETURN_THROWS();
+			}
+			rect.x = lval;
 		} else {
 			zend_argument_value_error(3, "must have an \"x\" key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
-			rect.y = zval_get_long(tmp);
+			lval = zval_get_long(tmp);
+			if (ZEND_LONG_EXCEEDS_INT(lval)) {
+				zend_argument_value_error(3, "invalid \"y\" key value");
+				RETURN_THROWS();
+			}
+			rect.y = lval;
 		} else {
 			zend_argument_value_error(3, "must have a \"y\" key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
-			rect.width = zval_get_long(tmp);
+			lval = zval_get_long(tmp);
+			if (ZEND_LONG_EXCEEDS_INT(lval)) {
+				zend_argument_value_error(3, "invalid \"width\" key value");
+				RETURN_THROWS();
+			}
+			rect.width = lval;
 		} else {
 			zend_argument_value_error(3, "must have a \"width\" key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
-			rect.height = zval_get_long(tmp);
+			lval = zval_get_long(tmp);
+			if (ZEND_LONG_EXCEEDS_INT(lval)) {
+				zend_argument_value_error(3, "invalid \"height\" key value");
+				RETURN_THROWS();
+			}
+			rect.height = lval;
 		} else {
 			zend_argument_value_error(3, "must have a \"height\" key");
 			RETURN_THROWS();
