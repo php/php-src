@@ -1686,6 +1686,7 @@ ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 				if (UNEXPECTED(constructor->op_array.fn_flags & ZEND_ACC_PRIVATE)
 				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
 					zend_bad_constructor_call(constructor, scope);
+					zend_object_store_ctor_failed(zobj);
 					constructor = NULL;
 				}
 			}
