@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 53027610adee7e1c675b1c1b38886100ce4e63ef */
+ * Stub hash: 9f38fdbb3b987bccaa873bd005559ce52b96b0dd */
 
 ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
 	"but it is included on an older PHP version");
@@ -187,6 +187,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_takesUnionT
 	ZEND_ARG_OBJ_TYPE_MASK(0, arg, stdclass|Iterator, 0, NULL)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestClass_returnByRefIntProp, 1, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestMagicCall___call, 0, 2, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
@@ -287,6 +290,7 @@ static ZEND_METHOD(_ZendTestClass, returnsStatic);
 static ZEND_METHOD(_ZendTestClass, returnsThrowable);
 static ZEND_METHOD(_ZendTestClass, variadicTest);
 static ZEND_METHOD(_ZendTestClass, takesUnionType);
+static ZEND_METHOD(_ZendTestClass, returnByRefIntProp);
 static ZEND_METHOD(_ZendTestMagicCall, __call);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
 static ZEND_METHOD(ZendAttributeTest, testMethod);
@@ -426,6 +430,7 @@ static const zend_function_entry class__ZendTestClass_methods[] = {
 	ZEND_ME(_ZendTestClass, returnsThrowable, arginfo_class__ZendTestClass_returnsThrowable, ZEND_ACC_PUBLIC)
 	ZEND_ME(_ZendTestClass, variadicTest, arginfo_class__ZendTestClass_variadicTest, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(_ZendTestClass, takesUnionType, arginfo_class__ZendTestClass_takesUnionType, ZEND_ACC_PUBLIC)
+	ZEND_ME(_ZendTestClass, returnByRefIntProp, arginfo_class__ZendTestClass_returnByRefIntProp, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

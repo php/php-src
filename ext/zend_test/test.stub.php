@@ -65,6 +65,8 @@ namespace {
         static public function variadicTest(string|Iterator ...$elements) : static {}
 
         public function takesUnionType(stdclass|Iterator $arg): void {}
+
+        public function &returnByRefIntProp(): int {}
     }
 
     class _ZendTestMagicCall

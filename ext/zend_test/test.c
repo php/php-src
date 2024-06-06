@@ -1045,6 +1045,19 @@ static ZEND_METHOD(_ZendTestClass, takesUnionType)
 	RETURN_NULL();
 }
 
+static ZEND_METHOD(_ZendTestClass, returnByRefIntProp)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_object *obj = Z_OBJ_P(ZEND_THIS);
+	zend_string *name = zend_string_init("intProp", strlen("intProp"), false);
+	zval *int_prop = obj->handlers->get_property_ptr_ptr(obj, name, BP_VAR_W, NULL);
+	zend_string_release_ex(name, false);
+
+	//ZVAL_MAKE_REF(int_prop, int_prop);
+	RETURN_COPY(int_prop);
+}
+
 // Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
 //
 // We need to generate it "manually" because gen_stubs.php does not support codegen for DNF types ATM.
