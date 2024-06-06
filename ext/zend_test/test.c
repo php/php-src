@@ -1054,8 +1054,29 @@ static ZEND_METHOD(_ZendTestClass, returnByRefIntProp)
 	zval *int_prop = obj->handlers->get_property_ptr_ptr(obj, name, BP_VAR_W, NULL);
 	zend_string_release_ex(name, false);
 
-	//ZVAL_MAKE_REF(int_prop, int_prop);
-	RETURN_COPY(int_prop);
+	ZEND_ASSERT(int_prop);
+	ZEND_ASSERT(!Z_ISERROR_P(int_prop));
+
+	/* Copied from zend_assign_to_variable_reference() */
+	zend_reference *ref;
+
+	if (EXPECTED(!Z_ISREF_P(int_prop))) {
+		ZVAL_NEW_REF(int_prop, int_prop);
+	}
+	//else if (UNEXPECTED(return_value == int_prop)) {
+	//	return;
+	//}
+
+	ref = Z_REF_P(int_prop);
+	GC_ADDREF(ref);
+	if (Z_REFCOUNTED_P(return_value)) {
+		zend_refcounted *garbage = NULL;
+		garbage = Z_COUNTED_P(return_value);
+		if (garbage) {
+			GC_DTOR(garbage);
+		}
+	}
+	ZVAL_REF(return_value, ref);
 }
 
 // Returns a newly allocated DNF type `Iterator|(Traversable&Countable)`.
