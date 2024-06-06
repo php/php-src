@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 17fe31686cb631f3d36d712e0793ae7a397e9841 */
+ * Stub hash: 547f69ae7fb97f00b0e955447f8811285ff8cb6c */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Url_Url___construct, 0, 0, 8)
 	ZEND_ARG_TYPE_INFO(0, scheme, IS_STRING, 1)
@@ -96,55 +96,55 @@ static zend_class_entry *register_class_Url_Url(zend_class_entry *class_entry_St
 
 	INIT_NS_CLASS_ENTRY(ce, "Url", "Url", class_Url_Url_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_READONLY_CLASS;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_READONLY_CLASS;
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	zval property_scheme_default_value;
 	ZVAL_UNDEF(&property_scheme_default_value);
 	zend_string *property_scheme_name = zend_string_init("scheme", sizeof("scheme") - 1, 1);
-	zend_declare_typed_property(class_entry, property_scheme_name, &property_scheme_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_scheme_name, &property_scheme_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_scheme_name);
 
 	zval property_host_default_value;
 	ZVAL_UNDEF(&property_host_default_value);
 	zend_string *property_host_name = zend_string_init("host", sizeof("host") - 1, 1);
-	zend_declare_typed_property(class_entry, property_host_name, &property_host_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_host_name, &property_host_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_host_name);
 
 	zval property_port_default_value;
 	ZVAL_UNDEF(&property_port_default_value);
 	zend_string *property_port_name = zend_string_init("port", sizeof("port") - 1, 1);
-	zend_declare_typed_property(class_entry, property_port_name, &property_port_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_port_name, &property_port_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG|MAY_BE_NULL));
 	zend_string_release(property_port_name);
 
 	zval property_user_default_value;
 	ZVAL_UNDEF(&property_user_default_value);
 	zend_string *property_user_name = zend_string_init("user", sizeof("user") - 1, 1);
-	zend_declare_typed_property(class_entry, property_user_name, &property_user_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_user_name, &property_user_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_user_name);
 
 	zval property_password_default_value;
 	ZVAL_UNDEF(&property_password_default_value);
 	zend_string *property_password_name = zend_string_init("password", sizeof("password") - 1, 1);
-	zend_declare_typed_property(class_entry, property_password_name, &property_password_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_password_name, &property_password_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_password_name);
 
 	zval property_path_default_value;
 	ZVAL_UNDEF(&property_path_default_value);
 	zend_string *property_path_name = zend_string_init("path", sizeof("path") - 1, 1);
-	zend_declare_typed_property(class_entry, property_path_name, &property_path_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_path_name, &property_path_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_path_name);
 
 	zval property_query_default_value;
 	ZVAL_UNDEF(&property_query_default_value);
 	zend_string *property_query_name = zend_string_init("query", sizeof("query") - 1, 1);
-	zend_declare_typed_property(class_entry, property_query_name, &property_query_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_query_name, &property_query_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_query_name);
 
 	zval property_fragment_default_value;
 	ZVAL_UNDEF(&property_fragment_default_value);
 	zend_string *property_fragment_name = zend_string_init("fragment", sizeof("fragment") - 1, 1);
-	zend_declare_typed_property(class_entry, property_fragment_name, &property_fragment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
+	zend_declare_typed_property(class_entry, property_fragment_name, &property_fragment_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING|MAY_BE_NULL));
 	zend_string_release(property_fragment_name);
 
 	return class_entry;
@@ -156,7 +156,7 @@ static zend_class_entry *register_class_Url_UrlParser(void)
 
 	INIT_NS_CLASS_ENTRY(ce, "Url", "UrlParser", class_Url_UrlParser_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	return class_entry;
 }

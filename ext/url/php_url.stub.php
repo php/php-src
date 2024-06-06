@@ -15,7 +15,8 @@ enum UrlComponent: int {
     case Fragment = 7;
 }
 
-readonly class Url implements \Stringable {
+/** @strict-properties */
+final readonly class Url implements \Stringable {
     public ?string $scheme;
     public ?string $host;
     public ?int $port;
@@ -39,6 +40,10 @@ readonly class Url implements \Stringable {
     public function __toString(): string {}
 }
 
+/**
+ * @strict-properties
+ * @not-serializable
+ */
 final class UrlParser
 {
     /** @refcount 1 */

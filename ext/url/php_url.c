@@ -44,12 +44,14 @@ static lxb_url_parser_t *init_parser(void)
 	lexbor_mraw_t *mraw = lexbor_mraw_create();
 	lxb_status_t status = lexbor_mraw_init(mraw, 4096 * 2);
 	if (status != LXB_STATUS_OK) {
+		lexbor_mraw_destroy(mraw, true);
 		return NULL;
 	}
 
 	lxb_url_parser_t *parser = lxb_url_parser_create();
 	status = lxb_url_parser_init(parser, mraw);
 	if (status != LXB_STATUS_OK) {
+		lxb_url_parser_destroy(parser, true);
 		return NULL;
 	}
 
@@ -64,8 +66,7 @@ static void destroy_parser(lxb_url_parser_t *parser)
 
 #define PARSE_URL(url) \
 	do { \
-		lxb_url = lxb_url_parse(URL_G(parser), NULL, (unsigned char *) ZSTR_VAL(url), ZSTR_LEN(url)); \
-		if (lxb_url == NULL) { \
+		if (ZSTR_LEN(url) == 0 || (lxb_url = lxb_url_parse(URL_G(parser), NULL, (unsigned char *) ZSTR_VAL(url), ZSTR_LEN(url))) == NULL) { \
 			zend_argument_value_error(1, "is not a valid URL"); \
 			RETURN_THROWS(); \
 		} \
@@ -158,19 +159,19 @@ static void cleanup_parser(void)
 void parse_url_to_array(zend_string *url, zval *return_value)
 {
 	zval tmp;
-	lxb_url_t *lxb_url;
+	lxb_url_t *lxb_url = NULL;
 
 	PARSE_URL(url);
 
 	array_init(return_value);
 
 	url_scheme_to_zval(lxb_url, &tmp);
-	if (Z_STRLEN(tmp) > 0) {
+	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
 	}
 
 	url_host_to_zval(lxb_url, &tmp);
-	if (Z_STRLEN(tmp) > 0) {
+	if (Z_TYPE(tmp) == IS_STRING && Z_STRLEN(tmp) > 0) {
 		zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
 	}
 
@@ -210,70 +211,88 @@ void parse_url_to_array(zend_string *url, zval *return_value)
 void parse_url_to_object(zend_string *url, zval *return_value)
 {
 	zval tmp;
-	lxb_url_t *lxb_url;
+	lxb_url_t *lxb_url = NULL;
 
 	PARSE_URL(url);
 
 	object_init_ex(return_value, url_ce);
 
 	url_scheme_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_SCHEME)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_SCHEME)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_SCHEME), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_host_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_HOST)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_HOST)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_HOST), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_port_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_PORT)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_PORT)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_PORT), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_user_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_USER)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_USER)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_USER), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_password_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_PASSWORD)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_PASSWORD)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_PASSWORD), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_path_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_PATH)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_PATH)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_PATH), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_query_string_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_QUERY)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_QUERY)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_QUERY), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	url_fragment_to_zval(lxb_url, &tmp);
-	zend_update_property(
-	url_ce, Z_OBJ_P(return_value),
-	ZSTR_VAL(ZSTR_KNOWN(ZEND_STR_FRAGMENT)), ZSTR_LEN(ZSTR_KNOWN(ZEND_STR_FRAGMENT)),
-	&tmp
-	);
+	zend_update_property_ex(url_ce, Z_OBJ_P(return_value), ZSTR_KNOWN(ZEND_STR_FRAGMENT), &tmp);
+	zval_ptr_dtor(&tmp);
 
 	cleanup_parser();
 }
+
+void url_update_str_property(const zend_execute_data *execute_data, zend_string *name, zend_string *value)
+{
+	zval zv;
+
+	if (value) {
+		ZVAL_STR(&zv, value);
+	} else {
+		ZVAL_NULL(&zv);
+	}
+
+	zend_update_property_ex(url_ce, Z_OBJ_P(getThis()), name, &zv);
+}
+
+void url_update_long_property(const zend_execute_data *execute_data, zend_string *name, zend_long value, bool value_is_null)
+{
+	zval zv;
+
+	if (!value_is_null) {
+		ZVAL_LONG(&zv, value);
+	} else {
+		ZVAL_NULL(&zv);
+	}
+
+	zend_update_property_ex(url_ce, Z_OBJ_P(getThis()), name, &zv);
+}
+
+#define UPDATE_STR_PROPERTY(e, n, v) \
+	do { \
+		url_update_str_property(e, n, v); \
+		if (EG(exception)) { \
+			RETURN_THROWS(); \
+		} \
+	} while(0)
+
+#define UPDATE_LONG_PROPERTY(e, n, v, vn) \
+	do { \
+		url_update_long_property(e, n, v, vn); \
+		if (EG(exception)) { \
+			RETURN_THROWS(); \
+		} \
+	} while(0)
 
 PHP_METHOD(Url_Url, __construct)
 {
@@ -292,9 +311,14 @@ PHP_METHOD(Url_Url, __construct)
 		Z_PARAM_STR_OR_NULL(fragment)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_update_property_str(url_ce, Z_OBJ_P(getThis()), "scheme", sizeof("scheme")-1, scheme);
-
-	// TODO Not implemented yet
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_SCHEME), scheme);
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_HOST), host);
+	UPDATE_LONG_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_PORT), port, port_is_null);
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_USER), user);
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_PASSWORD), password);
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_PATH), path);
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_QUERY), query);
+	UPDATE_STR_PROPERTY(execute_data, ZSTR_KNOWN(ZEND_STR_FRAGMENT), fragment);
 }
 
 PHP_METHOD(Url_Url, __toString)
