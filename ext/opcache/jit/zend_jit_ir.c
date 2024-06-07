@@ -13845,6 +13845,153 @@ static int zend_jit_assign_dim_op(zend_jit_ctx   *jit,
 }
 
 #ifdef HAVE_FFI
+static int zend_jit_ffi_assign_op_helper(zend_jit_ctx   *jit,
+                                         const zend_op  *opline,
+                                         uint8_t         opcode,
+                                         zend_ffi_type  *el_type,
+                                         ir_ref          op1,
+                                         uint32_t        op2_info,
+                                         zend_jit_addr   op2_addr)
+{
+	ir_op op;
+	ir_type type;
+	ir_ref op2;
+
+	switch (opcode) {
+		case ZEND_ADD:
+			op = IR_ADD;
+			break;
+		case ZEND_SUB:
+			op = IR_SUB;
+			break;
+		case ZEND_MUL:
+			op = IR_MUL;
+			break;
+		case ZEND_BW_OR:
+			op = IR_OR;
+			break;
+		case ZEND_BW_AND:
+			op = IR_AND;
+			break;
+		case ZEND_BW_XOR:
+			op = IR_XOR;
+			break;
+		case ZEND_SL:
+			// TODO: negative shift
+			op = IR_SHL;
+			break;
+		case ZEND_SR:
+			// TODO: negative shift
+			op = IR_SAR; /* TODO: SAR or SHR */
+			break;
+		case ZEND_MOD:
+			// TODO: mod by zero and -1
+			op = IR_MOD;
+			break;
+		default:
+			ZEND_UNREACHABLE();
+			return 0;
+	}
+
+	switch (el_type->kind) {
+		case ZEND_FFI_TYPE_FLOAT:
+			ZEND_ASSERT(op == IR_ADD || op == IR_SUB || op == IR_MUL);
+			type = IR_FLOAT;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_INT2F(jit_Z_LVAL(jit, op2_addr));
+			} else if (op2_info == MAY_BE_DOUBLE) {
+				op2 = ir_D2F(jit_Z_DVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_DOUBLE:
+			ZEND_ASSERT(op == IR_ADD || op == IR_SUB || op == IR_MUL);
+			type = IR_DOUBLE;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_INT2D(jit_Z_LVAL(jit, op2_addr));
+			} else if (op2_info == MAY_BE_DOUBLE) {
+				op2 = jit_Z_DVAL(jit, op2_addr);
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT8:
+			type = IR_U8;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_TRUNC_U8(jit_Z_LVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT8:
+			type = IR_I8;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_TRUNC_I8(jit_Z_LVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT16:
+			type = IR_U16;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_TRUNC_U16(jit_Z_LVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT16:
+			type = IR_I16;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_TRUNC_I16(jit_Z_LVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT32:
+			type = IR_U32;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_TRUNC_U32(jit_Z_LVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_SINT32:
+			type = IR_I32;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_TRUNC_I32(jit_Z_LVAL(jit, op2_addr));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		case ZEND_FFI_TYPE_UINT64:
+		case ZEND_FFI_TYPE_SINT64:
+			type = IR_I64;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = jit_Z_LVAL(jit, op2_addr);
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+		default:
+			ZEND_UNREACHABLE();
+			return 0;
+	}
+
+	ir_STORE(op1, ir_BINARY_OP(op, type, ir_LOAD(type, op1), op2));
+
+	return 1;
+}
+
 static int zend_jit_ffi_assign_dim_op(zend_jit_ctx   *jit,
                                       const zend_op  *opline,
                                       uint32_t        op1_info,
@@ -13871,80 +14018,9 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx   *jit,
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
 
-
-	ZEND_ASSERT(opline->extended_value == ZEND_ADD);
-
-	switch (el_type->kind) {
-		case ZEND_FFI_TYPE_FLOAT:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_F(ir_LOAD_F(ptr), ir_INT2F(jit_Z_LVAL(jit, op3_addr))));
-			} else if (op1_data_info == MAY_BE_DOUBLE) {
-				ir_STORE(ptr, ir_ADD_F(ir_LOAD_F(ptr), ir_D2F(jit_Z_DVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_DOUBLE:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_D(ir_LOAD_D(ptr), ir_INT2D(jit_Z_LVAL(jit, op3_addr))));
-			} else if (op1_data_info == MAY_BE_DOUBLE) {
-				ir_STORE(ptr, ir_ADD_D(ir_LOAD_D(ptr), jit_Z_DVAL(jit, op3_addr)));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_UINT8:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_U8(ir_LOAD_U8(ptr), ir_TRUNC_U8(jit_Z_LVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_SINT8:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_I8(ir_LOAD_I8(ptr), ir_TRUNC_I8(jit_Z_LVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_UINT16:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_U16(ir_LOAD_U16(ptr), ir_TRUNC_U16(jit_Z_LVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_SINT16:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_I16(ir_LOAD_I16(ptr), ir_TRUNC_I16(jit_Z_LVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_UINT32:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_U32(ir_LOAD_U32(ptr), ir_TRUNC_U32(jit_Z_LVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_SINT32:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_I32(ir_LOAD_I32(ptr), ir_TRUNC_I32(jit_Z_LVAL(jit, op3_addr))));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		case ZEND_FFI_TYPE_UINT64:
-		case ZEND_FFI_TYPE_SINT64:
-			if (op1_data_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_ADD_I64(ir_LOAD_I64(ptr), jit_Z_LVAL(jit, op3_addr)));
-			} else {
-				ZEND_UNREACHABLE();
-			}
-			break;
-		default:
-			ZEND_UNREACHABLE();
+	if (!zend_jit_ffi_assign_op_helper(jit, opline, opline->extended_value,
+			el_type, ptr, op1_data_info, op3_addr)) {
+		return 0;
 	}
 
 	return 1;
