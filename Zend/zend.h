@@ -250,6 +250,7 @@ typedef struct _zend_utility_values {
 
 typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 
+#define zend_bailout_without_gc_protect()		_zend_bailout_without_gc_protect(__FILE__, __LINE__)
 #define zend_bailout()		_zend_bailout(__FILE__, __LINE__)
 
 #define zend_try												\
@@ -275,6 +276,7 @@ void zend_register_standard_ini_entries(void);
 zend_result zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
+ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout_without_gc_protect(const char *filename, uint32_t lineno);
 ZEND_API ZEND_COLD ZEND_NORETURN void _zend_bailout(const char *filename, uint32_t lineno);
 ZEND_API size_t zend_get_page_size(void);
 
