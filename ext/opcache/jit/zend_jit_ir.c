@@ -12751,7 +12751,7 @@ static int zend_jit_ffi_abc(zend_jit_ctx       *jit,
 				jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
 			}
 		} else if (!op2_range || op2_range->min < 0 || op2_range->max >= ffi_type->array.length) {
-			if (op2_range->max < 0 || op2_range->min >= ffi_type->array.length) {
+			if (op2_range && (op2_range->max < 0 || op2_range->min >= ffi_type->array.length)) {
 				/* Always out of range */
 				exit_point = zend_jit_trace_get_exit_point(opline, 0);
 				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
@@ -13549,7 +13549,6 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx  *jit,
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
-
 
 	ZEND_ASSERT(!res_addr);
 
