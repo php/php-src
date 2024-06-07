@@ -43,13 +43,13 @@ __halt_compiler();
 bool(true)
 object(PharFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
-  string(%s) "phar:///%s/phar_oo_011.phar.php/hi"
+  string(%d) "phar://%s/phar_oo_011.phar.php/hi"
   ["fileName":"SplFileInfo":private]=>
   string(2) "hi"
 }
 bool(true)
-phar:///%s/phar_oo_011.phar.php/hi/f.php
-bool(true)
+phar://%s/phar_oo_011.phar.php/hi/f.php
+bool(false)
 LogicException: Cannot use SplFileObject with directories
 bool(true)
 hi
