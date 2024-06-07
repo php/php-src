@@ -12861,6 +12861,12 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
 		ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
 	}
 
+	if (opline->opcode != ZEND_FETCH_LIST_R && !op1_avoid_refcounting) {
+		if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+			jit_FREE_OP(jit,  opline->op1_type, opline->op1, op1_info, opline);
+		}
+	}
+
 	return 1;
 }
 #endif
