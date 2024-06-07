@@ -694,6 +694,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	int portno, err;
 	long sockopts = STREAM_SOCKOP_NONE;
 	long linger = -1;
+	void *option = NULL;
 	zval *tmpzval = NULL;
 
 #ifdef AF_UNIX
@@ -755,25 +756,30 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 
 #ifdef SO_LINGER
 	if (PHP_STREAM_CONTEXT(stream)
-		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_linger")) != NULL) {
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "linger")) != NULL) {
 		bool failed;
 		linger = parse_linger(tmpzval, &failed);
 
 		if (failed) {
 			if (xparam->want_errortext) {
-				xparam->outputs.error_text = strpprintf(0, "Invalid `so_linger` value");
+				xparam->outputs.error_text = strpprintf(0, "Invalid `linger` value");
+			}
+			if (host) {
+				efree(host);
 			}
 			return -1;
 		} else {
 			sockopts |= STREAM_SOCKOP_SO_LINGER;
 		}
+
+		option = &linger;
 	}
 #endif
 
 	sock->socket = php_network_bind_socket_to_local_addr(host, portno,
 			stream->ops == &php_stream_udp_socket_ops ? SOCK_DGRAM : SOCK_STREAM,
 			sockopts,
-			linger,
+			option,
 			xparam->want_errortext ? &xparam->outputs.error_text : NULL,
 			&err
 			);
@@ -795,6 +801,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	zval *tmpzval = NULL;
 	long sockopts = STREAM_SOCKOP_NONE;
 	long linger = -1;
+	void *option = NULL;
 
 #ifdef AF_UNIX
 	if (stream->ops == &php_stream_unix_socket_ops || stream->ops == &php_stream_unixdg_socket_ops) {
@@ -852,30 +859,38 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 
 #ifdef SO_LINGER
 	if (PHP_STREAM_CONTEXT(stream)
-		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "so_linger")) != NULL) {
+		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "linger")) != NULL) {
 		bool failed;
 		linger = parse_linger(tmpzval, &failed);
 
 		if (failed) {
 			if (xparam->want_errortext) {
-				xparam->outputs.error_text = strpprintf(0, "Invalid `so_linger` value");
+				xparam->outputs.error_text = strpprintf(0, "Invalid `linger` value");
+			}
+			if (host) {
+				efree(host);
+			}
+			if (bindto) {
+				efree(bindto);
 			}
 			return -1;
 		} else {
 			sockopts |= STREAM_SOCKOP_SO_LINGER;
 		}
+
+		option = &linger;
 	}
 #endif
 
 	if (stream->ops != &php_stream_udp_socket_ops /* TCP_NODELAY is only applicable for TCP */
 #ifdef AF_UNIX
-		&& stream->ops != &php_stream_unix_socket_ops
-		&& stream->ops != &php_stream_unixdg_socket_ops
+			&& stream->ops != &php_stream_unix_socket_ops
+			&& stream->ops != &php_stream_unixdg_socket_ops
 #endif
-		&& PHP_STREAM_CONTEXT(stream)
-		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL
-		&& zend_is_true(tmpzval)
-	) {
+			&& PHP_STREAM_CONTEXT(stream)
+			&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL
+			&& zend_is_true(tmpzval)
+	   ) {
 		sockopts |= STREAM_SOCKOP_TCP_NODELAY;
 	}
 
@@ -892,7 +907,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 			bindto,
 			bindport,
 			sockopts,
-			linger
+			option
 			);
 
 	ret = sock->socket == -1 ? -1 : 0;

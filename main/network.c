@@ -402,7 +402,7 @@ static inline void sub_times(struct timeval a, struct timeval b, struct timeval 
  * */
 /* {{{ php_network_bind_socket_to_local_addr */
 php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned port,
-		int socktype, long sockopts, long linger, zend_string **error_string, int *error_code
+		int socktype, long sockopts, void *option, zend_string **error_string, int *error_code
 		)
 {
 	int num_addrs, n, err = 0;
@@ -472,6 +472,8 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 #endif
 #ifdef SO_LINGER
 		if (sockopts & STREAM_SOCKOP_SO_LINGER) {
+			ZEND_ASSERT(option != NULL);
+			long linger = *(long *)option;
 			struct linger val = {
 				.l_onoff = (linger > 0),
 				.l_linger = (int)linger
@@ -776,7 +778,7 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
 		int *error_code, const char *bindto, unsigned short bindport, long sockopts,
-		long linger
+		void *option
 		)
 {
 	int num_addrs, n, fatal = 0;
@@ -910,6 +912,8 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 #ifdef SO_LINGER
 		{
 			if (sockopts & STREAM_SOCKOP_SO_LINGER) {
+				ZEND_ASSERT(option != NULL);
+				long linger = *(long *)option;
 				struct linger val = {
 					.l_onoff = linger > 0,
 					.l_linger = (int)linger
