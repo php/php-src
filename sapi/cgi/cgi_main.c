@@ -2210,7 +2210,7 @@ parent_loop_end:
 		} else {
 			parent = 0;
 		}
-#endif
+#endif /* PHP_WIN32 */
 	}
 
 	zend_first_try {
