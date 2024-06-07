@@ -18,7 +18,6 @@ if (PHP_ENCHANT == "yes") {
 			EXTENSION("enchant", "enchant.c");
 			AC_DEFINE('HAVE_ENCHANT', 1, 'Have Enchant support', false);
 			AC_DEFINE('HAVE_ENCHANT_GET_VERSION', 1);
-			ADD_FLAG("CFLAG_ENCHANT", "/D _WIN32");
 		}
 	} else {
 		WARNING('Could not find enchant.h; skipping');
