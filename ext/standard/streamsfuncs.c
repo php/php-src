@@ -630,9 +630,17 @@ typedef struct {
     (set)->size = (num_fds + 7) / 8; \
     (set)->fds_bits = (char *)ecalloc((set)->size, sizeof(char)); \
 } while (0)
-#define FD_BIGSET_SET(fd, set) ((set)->fds_bits[(fd) / 8] |= (1 << ((fd) % 8)))
-#define FD_BIGSET_ISSET(fd, set) ((set)->fds_bits[(fd) / 8] & (1 << ((fd) % 8)))
-#define FD_BIGSET_CLR(fd, set) ((set)->fds_bits[(fd) / 8] &= ~(1 << ((fd) % 8)))
+#define FD_BIGSET_SET(fd, set) do { \
+    if ((fd) / 8 < (set)->size) { \
+        (set)->fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
+    } \
+} while (0)
+#define FD_BIGSET_ISSET(fd, set) (((fd) / 8 < (set)->size) ? ((set)->fds_bits[(fd) / 8] & (1 << ((fd) % 8))) : 0)
+#define FD_BIGSET_CLR(fd, set) do { \
+    if ((fd) / 8 < (set)->size) { \
+        (set)->fds_bits[(fd) / 8] &= ~(1 << ((fd) % 8)); \
+    } \
+} while (0)
 #define FD_BIGSET_FREE(set) do { \
     if ((set)->fds_bits) { \
         efree((set)->fds_bits); \
@@ -645,9 +653,17 @@ typedef struct {
     (set)->size = (num_fds + 7) / 8; \
     (set)->__fds_bits = (char *)ecalloc((set)->size, sizeof(char)); \
 } while (0)
-#define FD_BIGSET_SET(fd, set) ((set)->__fds_bits[(fd) / 8] |= (1 << ((fd) % 8)))
-#define FD_BIGSET_ISSET(fd, set) ((set)->__fds_bits[(fd) / 8] & (1 << ((fd) % 8)))
-#define FD_BIGSET_CLR(fd, set) ((set)->__fds_bits[(fd) / 8] &= ~(1 << ((fd) % 8)))
+#define FD_BIGSET_SET(fd, set) do { \
+    if ((fd) / 8 < (set)->size) { \
+        (set)->__fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
+    } \
+} while (0)
+#define FD_BIGSET_ISSET(fd, set) (((fd) / 8 < (set)->size) ? ((set)->__fds_bits[(fd) / 8] & (1 << ((fd) % 8))) : 0)
+#define FD_BIGSET_CLR(fd, set) do { \
+    if ((fd) / 8 < (set)->size) { \
+        (set)->__fds_bits[(fd) / 8] &= ~(1 << ((fd) % 8)); \
+    } \
+} while (0)
 #define FD_BIGSET_FREE(set) do { \
     if ((set)->__fds_bits) { \
         efree((set)->__fds_bits); \
@@ -656,6 +672,7 @@ typedef struct {
     (set)->size = 0; \
 } while (0)
 #endif
+
 
 int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *max_fd, long max_fds) {
     zval *elem;
@@ -683,12 +700,10 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
 		 * is not displayed.
 		 * */
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != -1) {
-            if (this_fd < max_fds) {  // Check if the descriptor is within the limit
-                FD_BIGSET_SET(this_fd, set);
-                if (this_fd > *max_fd) {
-                    *max_fd = this_fd;
-                }
-            }
+			FD_BIGSET_SET(this_fd, set);
+			if (this_fd > *max_fd) {
+				*max_fd = this_fd;
+			}
             cnt++;
         }
     } ZEND_HASH_FOREACH_END();
@@ -723,7 +738,7 @@ static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds, long 
 		 * is not displayed.
 		 */
         if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
-            if (this_fd < max_fds && FD_BIGSET_ISSET(this_fd, fds)) { // Check if within bounds and if the bit is set
+            if (FD_BIGSET_ISSET(this_fd, fds)) { // Check if within bounds and if the bit is set
                 if (!key) {
                     dest_elem = zend_hash_index_update(ht, num_ind, elem);
                 } else {
@@ -821,6 +836,9 @@ PHP_FUNCTION(stream_select) {
 #else
 	/* Check if the file descriptor identifier is a terminal */
 	long max_fds = sysconf(_SC_OPEN_MAX);
+	if (max_fds == -1) {
+		max_fds = FD_SETSIZE;
+	}
 #endif
 
     FD_BIGSET_ZERO(&rfds, max_fds);
@@ -829,22 +847,25 @@ PHP_FUNCTION(stream_select) {
 
     if (r_array != NULL) {
         set_count = stream_array_to_fd_bigset(r_array, &rfds, &max_fd, max_fds);
-		if (set_count > max_set_count)
+		if (set_count > max_set_count) {
 			max_set_count = set_count;
+		}
 		sets += set_count;    
 	}
 
     if (w_array != NULL) {
         set_count = stream_array_to_fd_bigset(w_array, &wfds, &max_fd, max_fds);
-		if (set_count > max_set_count)
+		if (set_count > max_set_count) {
 			max_set_count = set_count;
+		}
 		sets += set_count;
 	}
 
     if (e_array != NULL) {
         set_count = stream_array_to_fd_bigset(e_array, &efds, &max_fd, max_fds);
-		if (set_count > max_set_count)
+		if (set_count > max_set_count) {
 			max_set_count = set_count;
+		}
         sets += set_count;
     }
 
