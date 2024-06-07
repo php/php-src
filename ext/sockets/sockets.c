@@ -51,7 +51,7 @@
 # include <sys/uio.h>
 # define set_errno(a) (errno = a)
 # include "php_sockets.h"
-# if HAVE_IF_NAMETOINDEX
+# ifdef HAVE_IF_NAMETOINDEX
 #  include <net/if.h>
 # endif
 # if defined(HAVE_LINUX_SOCK_DIAG_H)
