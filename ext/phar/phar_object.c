@@ -3529,6 +3529,10 @@ PHP_METHOD(Phar, offsetExists)
 		}
 		RETURN_TRUE;
 	} else {
+		/* If the info class is not based on PharFileInfo, directories are not directly instantiable */
+		if (UNEXPECTED(!instanceof_function(phar_obj->spl.info_class, phar_ce_entry))) {
+			RETURN_FALSE;
+		}
 		RETURN_BOOL(zend_hash_exists(&phar_obj->archive->virtual_dirs, file_name));
 	}
 }
