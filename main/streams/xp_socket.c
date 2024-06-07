@@ -754,7 +754,7 @@ static inline int php_tcp_sockop_bind(php_stream *stream, php_netstream_data_t *
 	}
 #endif
 
-#ifdef SO_LINGER
+#ifdef PHP_SO_LINGER
 	if (PHP_STREAM_CONTEXT(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "linger")) != NULL) {
 		bool failed;
@@ -857,7 +857,7 @@ static inline int php_tcp_sockop_connect(php_stream *stream, php_netstream_data_
 	}
 #endif
 
-#ifdef SO_LINGER
+#ifdef PHP_SO_LINGER
 	if (PHP_STREAM_CONTEXT(stream)
 		&& (tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "linger")) != NULL) {
 		bool failed;

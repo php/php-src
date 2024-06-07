@@ -54,6 +54,14 @@
 # define PHP_IS_TRANSIENT_ERROR(err) (err == EAGAIN)
 #endif
 
+#ifdef SO_LINGER
+# ifdef SO_LINGER_SEC
+#  define PHP_SO_LINGER SO_LINGER_SEC
+# else
+#  define PHP_SO_LINGER SO_LINGER
+# endif
+#endif
+
 #ifdef PHP_WIN32
 #define php_socket_errno() WSAGetLastError()
 #else

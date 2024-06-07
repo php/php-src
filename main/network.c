@@ -470,7 +470,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 			setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char*)&sockoptval, sizeof(sockoptval));
 		}
 #endif
-#ifdef SO_LINGER
+#ifdef PHP_SO_LINGER
 		if (sockopts & STREAM_SOCKOP_SO_LINGER) {
 			ZEND_ASSERT(option != NULL);
 			long linger = *(long *)option;
@@ -478,7 +478,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 				.l_onoff = (linger > 0),
 				.l_linger = (int)linger
 			};
-			setsockopt(sock, IPPROTO_TCP, SO_LINGER, (char*)&val, sizeof(val));
+			setsockopt(sock, IPPROTO_TCP, PHP_SO_LINGER, (char*)&val, sizeof(val));
 		}
 #endif
 
@@ -909,7 +909,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 			}
 		}
 #endif
-#ifdef SO_LINGER
+#ifdef PHP_SO_LINGER
 		{
 			if (sockopts & STREAM_SOCKOP_SO_LINGER) {
 				ZEND_ASSERT(option != NULL);
@@ -918,7 +918,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 					.l_onoff = linger > 0,
 					.l_linger = (int)linger
 				};
-				setsockopt(sock, IPPROTO_TCP, SO_LINGER, (char*)&val, sizeof(val));
+				setsockopt(sock, IPPROTO_TCP, PHP_SO_LINGER, (char*)&val, sizeof(val));
 			}
 		}
 #endif

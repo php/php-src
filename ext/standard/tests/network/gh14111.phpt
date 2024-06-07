@@ -1,23 +1,38 @@
 --TEST--
 Testing linger `socket` option.
---SKIPIF--
-<?php
-//if (getenv("SKIP_ONLINE_TESTS")) die('skip online test');
-if (!in_array('https', stream_get_wrappers())) die('skip: https wrapper is required');
-?>
 --FILE--
 <?php
+for ($i=0; $i<100; $i++) {
+  $port = rand(10000, 65000);
+  /* Setup socket server */
+  $server = @stream_socket_server("tcp://127.0.0.1:$port");
+  if ($server) {
+    break;
+  }
+}
+$client = stream_socket_client("tcp://127.0.0.1:$port");
 $context = stream_context_create(['socket' => ['linger' => false]]);
-var_dump(file_get_contents('https://httpbin.org/get', false, $context) !== false);
+$socket = stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 0, STREAM_CLIENT_CONNECT, $context);
+var_dump($socket);
 $context = stream_context_create(['socket' => ['linger' => PHP_INT_MAX + 1]]);
-var_dump(file_get_contents('https://httpbin.org/get', false, $context) !== false);
-$context = stream_context_create(['socket' => ['linger' => 3]]);
-var_dump(file_get_contents('https://httpbin.org/get', false, $context) !== false);
+$socket = stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 0, STREAM_CLIENT_CONNECT, $context);
+var_dump($socket);
+$context = stream_context_create(['socket' => ['linger' => 5]]);
+$socket = stream_socket_client("tcp://127.0.0.1:$port", $errno, $errstr, 1, STREAM_CLIENT_CONNECT, $context);
+var_dump($socket);
+stream_set_blocking($socket, true);
+var_dump(stream_socket_sendto($socket, "data"));
+$data = base64_decode("1oIBAAABAAAAAAAAB2V4YW1wbGUDb3JnAAABAAE=");
+stream_set_blocking($socket, 0);
+stream_socket_sendto($socket, $data);
+stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
+stream_socket_shutdown($server, STREAM_SHUT_RDWR);
 ?>
 --EXPECTF--
-Warning: file_get_contents(https://httpbin.org/get): Failed to open stream: Invalid `linger` value in %s on line %d
+Warning: stream_socket_client(): Unable to connect to tcp://127.0.0.1:%d (Invalid `linger` value) in %s on line %d
 bool(false)
 
-Warning: file_get_contents(https://httpbin.org/get): Failed to open stream: Invalid `linger` value in %s on line %d
+Warning: stream_socket_client(): Unable to connect to tcp://127.0.0.1:%d (Invalid `linger` value) in %s on line %d
 bool(false)
-bool(true)
+resource(%d) of type (stream)
+int(4)
