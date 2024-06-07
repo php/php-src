@@ -12801,6 +12801,11 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
 
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+		cdata_ref = ir_LOAD_A(cdata_ref);
+	}
+
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
 
 	switch (el_type->kind) {
@@ -13548,6 +13553,11 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx  *jit,
 
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+		cdata_ref = ir_LOAD_A(cdata_ref);
+	}
+
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
 
 	ZEND_ASSERT(!res_addr);
@@ -14015,6 +14025,11 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx   *jit,
 
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	if (op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+		cdata_ref = ir_LOAD_A(cdata_ref);
+	}
+
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
 
 	if (!zend_jit_ffi_assign_op_helper(jit, opline, opline->extended_value,
