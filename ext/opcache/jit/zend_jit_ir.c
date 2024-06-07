@@ -12725,6 +12725,56 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 }
 
 #ifdef HAVE_FFI
+static int zend_jit_ffi_abc(zend_jit_ctx       *jit,
+                            const zend_op      *opline,
+                            zend_ffi_type      *ffi_type,
+                            uint32_t            op2_info,
+                            zend_jit_addr       op2_addr,
+                            zend_ssa_range     *op2_range)
+{
+	int32_t exit_point;
+	const void *exit_addr;
+
+	ZEND_ASSERT(op2_info == MAY_BE_LONG);
+	if (ffi_type->kind == ZEND_FFI_TYPE_ARRAY
+	 && !(ffi_type->attr & (ZEND_FFI_ATTR_VLA|ZEND_FFI_ATTR_INCOMPLETE_ARRAY))) {
+		if (Z_MODE(op2_addr) == IS_CONST_ZVAL) {
+			zval *zv = Z_ZV(op2_addr);
+			ZEND_ASSERT(Z_TYPE_P(zv) == IS_LONG);
+			if (Z_LVAL_P(zv) < 0 || Z_LVAL_P(zv) >= ffi_type->array.length) {
+				/* Always out of range */
+				exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+				jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
+			}
+		} else if (!op2_range || op2_range->min < 0 || op2_range->max >= ffi_type->array.length) {
+			if (op2_range->max < 0 || op2_range->min >= ffi_type->array.length) {
+				/* Always out of range */
+				exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+				jit_SIDE_EXIT(jit, ir_CONST_ADDR(exit_addr));
+			} else {
+				/* Array Bounds Check */
+				exit_point = zend_jit_trace_get_exit_point(opline, 0);
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+				ir_GUARD(ir_ULT(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(ffi_type->array.length)),
+					ir_CONST_ADDR(exit_addr));
+			}
+		}
+	}
+
+	return 1;
+}
+
 static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
                                        const zend_op      *opline,
                                        zend_ssa           *ssa,
@@ -12744,9 +12794,11 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
 
 	// TODO: ce guard ???
 	// TODO: ffi type guard ???
-	if (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY) {
-		// TODO: array bounds check ???
+
+	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
+		return 0;
 	}
+
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
@@ -13489,9 +13541,11 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx  *jit,
 
 	// TODO: ce guard ???
 	// TODO: ffi type guard ???
-	if (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY) {
-		// TODO: array bounds check ???
+
+	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
+		return 0;
 	}
+
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
@@ -13808,9 +13862,11 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx   *jit,
 
 	// TODO: ce guard ???
 	// TODO: ffi type guard ???
-	if (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY) {
-		// TODO: array bounds check ???
+
+	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
+		return 0;
 	}
+
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
