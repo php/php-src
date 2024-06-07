@@ -386,6 +386,9 @@ PHP_MSHUTDOWN_FUNCTION(url)
 
 PHP_RINIT_FUNCTION(url)
 {
+#if defined(COMPILE_DL_URL) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	URL_G(parser) = init_parser();
 	URL_G(urls) = 0;
 
@@ -411,3 +414,10 @@ zend_module_entry url_module_entry = {
 	PHP_VERSION,                      /* Version */
 	STANDARD_MODULE_PROPERTIES
 };
+
+#ifdef COMPILE_DL_URL
+#ifdef ZTS
+ZEND_TSRMLS_CACHE_DEFINE()
+#endif
+ZEND_GET_MODULE(url)
+#endif
