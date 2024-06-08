@@ -38,7 +38,7 @@
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 #include <editline/readline.h>
 #else
 #include <readline/readline.h>
@@ -687,7 +687,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (history_lines_to_write) {
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 			write_history(history_file);
 #else
 			append_history(history_lines_to_write, history_file);

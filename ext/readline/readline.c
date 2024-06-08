@@ -25,7 +25,7 @@
 #include "readline_cli.h"
 #include "readline_arginfo.h"
 
-#if HAVE_LIBREADLINE || HAVE_LIBEDIT
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
 
 #ifndef HAVE_RL_COMPLETION_MATCHES
 #define rl_completion_matches completion_matches
@@ -74,7 +74,7 @@ ZEND_GET_MODULE(readline)
 
 PHP_MINIT_FUNCTION(readline)
 {
-#if HAVE_LIBREADLINE
+#ifdef HAVE_LIBREADLINE
 		/* libedit don't need this call which set the tty in cooked mode */
 	using_history();
 #endif
@@ -291,7 +291,7 @@ PHP_FUNCTION(readline_clear_history)
 		RETURN_THROWS();
 	}
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 	/* clear_history is the only function where rl_initialize
 	   is not call to ensure correct allocation */
 	using_history();
@@ -572,7 +572,7 @@ PHP_FUNCTION(readline_redisplay)
 		RETURN_THROWS();
 	}
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 	/* seems libedit doesn't take care of rl_initialize in rl_redisplay
 	 * see bug #72538 */
 	using_history();
