@@ -5862,7 +5862,7 @@ fprintf(stderr, "++ %2ld op=%3d %s\n", Fecode - mb->start_code, *Fecode,
 
       {
       ptrdiff_t diff = Feptr - mb->start_subject;
-      uint32_t available = (diff > 65535)? 65535 : ((diff > 0)? diff : 0);
+      uint32_t available = (diff > 65535)? 65535 : ((diff > 0)? (int)diff : 0);
       if (Lmin > available) RRETURN(MATCH_NOMATCH);
       if (Lmax > available) Lmax = available;
       Feptr -= Lmax;
