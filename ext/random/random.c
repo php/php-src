@@ -34,7 +34,7 @@
 #include "php_random_csprng.h"
 #include "ext/standard/sha1.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
@@ -46,7 +46,7 @@
 # include <sys/time.h>
 #endif
 
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 #endif
 

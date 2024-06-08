@@ -3346,7 +3346,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 
 void module_registry_unload(const zend_module_entry *module)
 {
-#if HAVE_LIBDL
+#ifdef HAVE_LIBDL
 	if (!getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(module->handle);
 	}

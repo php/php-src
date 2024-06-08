@@ -31,7 +31,7 @@
 #include "php_random.h"
 #include "php_random_csprng.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
@@ -45,7 +45,7 @@
 # include <sys/syscall.h>
 #endif
 
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
 # if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || \
      defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000) || defined(__midipix__)

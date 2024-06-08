@@ -30,7 +30,7 @@
 #include "win32/winutil.h"
 #endif
 
-#if HAVE_SCANDIR && HAVE_ALPHASORT && HAVE_DIRENT_H
+#if defined(HAVE_SCANDIR) && defined(HAVE_ALPHASORT) && defined(HAVE_DIRENT_H)
 #include <dirent.h>
 #endif
 

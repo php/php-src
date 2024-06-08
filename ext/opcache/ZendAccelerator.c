@@ -962,7 +962,7 @@ static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
 	return SUCCESS;
 }
 
-#if ZEND_WIN32
+#ifdef ZEND_WIN32
 static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_handle, size_t *size)
 {
 	static unsigned __int64 utc_base = 0;
@@ -2177,7 +2177,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 	} else {
 
-#if !ZEND_WIN32
+#ifndef ZEND_WIN32
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
