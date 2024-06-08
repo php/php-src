@@ -39,13 +39,13 @@
 
 #if SIZEOF_SIZE_T >= 8
 #  define BC_VECTOR_SIZE 8
-#  define BC_MUL_UINT_OVERFLOW (BC_VECTOR) 100000000
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 #else
 #  define BC_VECTOR_SIZE 4
-#  define BC_MUL_UINT_OVERFLOW (BC_VECTOR) 10000
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
-#define BC_MUL_MAX_ADD_COUNT (~((BC_VECTOR) 0) / (BC_MUL_UINT_OVERFLOW * BC_MUL_UINT_OVERFLOW))
+#define BC_MUL_MAX_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
 /* Multiply utility routines */
@@ -53,8 +53,8 @@
 static inline void bc_digits_adjustment(BC_VECTOR *prod_uint, size_t prod_arr_size)
 {
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
-		prod_uint[i + 1] += prod_uint[i] / BC_MUL_UINT_OVERFLOW;
-		prod_uint[i] %= BC_MUL_UINT_OVERFLOW;
+		prod_uint[i + 1] += prod_uint[i] / BC_VECTOR_BOUNDARY_NUM;
+		prod_uint[i] %= BC_VECTOR_BOUNDARY_NUM;
 	}
 }
 
