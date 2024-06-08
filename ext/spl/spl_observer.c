@@ -427,7 +427,7 @@ PHP_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
-static bool spl_object_storage_has_dimension(zend_object *object, zval *offset)
+static bool spl_object_storage_has_dimension(zend_object *object, /* const */ zval *offset)
 {
 	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
@@ -443,7 +443,7 @@ static bool spl_object_storage_has_dimension(zend_object *object, zval *offset)
 	return true;
 }
 
-static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset, zval *rv)
+static zval *spl_object_storage_read_dimension(zend_object *object, /* const */ zval *offset, zval *rv)
 {
 	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
@@ -475,7 +475,7 @@ static void spl_object_storage_write_dimension(zend_object *object, zval *offset
 	spl_object_storage_attach_handle(intern, Z_OBJ_P(offset), inf);
 }
 
-static void spl_object_storage_unset_dimension(zend_object *object, zval *offset)
+static void spl_object_storage_unset_dimension(zend_object *object, /* const */ zval *offset)
 {
 	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
@@ -1347,6 +1347,15 @@ PHP_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
+static /* const */ zend_class_dimensions_functions spl_object_storage_dimensions_functions = {
+	.read_dimension  = spl_object_storage_read_dimension,
+	.has_dimension   = spl_object_storage_has_dimension,
+	// TODO Support fetching?
+	//.fetch_dimension = spl_object_storage_fetch_dimension,
+	.write_dimension = spl_object_storage_write_dimension,
+	.unset_dimension = spl_object_storage_unset_dimension
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */
 PHP_MINIT_FUNCTION(spl_observer)
 {
@@ -1363,14 +1372,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	);
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
 	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
-
-	/* The dimension_handlers struct is allocated during the implementation of zend_ce_dimension_read */
-	spl_ce_SplObjectStorage->dimension_handlers->read_dimension = spl_object_storage_read_dimension;
-	spl_ce_SplObjectStorage->dimension_handlers->has_dimension = spl_object_storage_has_dimension;
-	// TODO Support fetching?
-	//spl_ce_SplObjectStorage->dimension_handlers->fetch_dimension = spl_object_storage_fetch_dimension;
-	spl_ce_SplObjectStorage->dimension_handlers->write_dimension = spl_object_storage_write_dimension;
-	spl_ce_SplObjectStorage->dimension_handlers->unset_dimension = spl_object_storage_unset_dimension;
+	spl_ce_SplObjectStorage->dimension_handlers = &spl_object_storage_dimensions_functions;
 
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
@@ -1383,14 +1385,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
 	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;
 	spl_ce_MultipleIterator->default_object_handlers = &spl_handler_SplObjectStorage;
-
-	// Should MultipleIterator implement the interfaces?
-	///* The dimension_handlers struct is allocated during the implementation of zend_ce_dimension_read */
-	//spl_ce_MultipleIterator->dimension_handlers->read_dimension = spl_object_storage_read_dimension;
-	//spl_ce_MultipleIterator->dimension_handlers->has_dimension = spl_object_storage_has_dimension;
-	////spl_ce_MultipleIterator->dimension_handlers->fetch_dimension = spl_object_storage_fetch_dimension;
-	//spl_ce_MultipleIterator->dimension_handlers->write_dimension = spl_object_storage_write_dimension;
-	//spl_ce_MultipleIterator->dimension_handlers->unset_dimension = spl_object_storage_unset_dimension;
 
 	return SUCCESS;
 }
