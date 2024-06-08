@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -136,6 +136,7 @@ const pcre2_compile_context PRIV(default_compile_context) = {
   NULL,                                      /* Stack guard data */
   PRIV(default_tables),                      /* Character tables */
   PCRE2_UNSET,                               /* Max pattern length */
+  PCRE2_UNSET,                               /* Max pattern compiled length */
   BSR_DEFAULT,                               /* Backslash R default */
   NEWLINE_DEFAULT,                           /* Newline convention */
   PARENS_NEST_LIMIT,                         /* As it says */
@@ -349,6 +350,13 @@ PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
 pcre2_set_max_pattern_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
 {
 ccontext->max_pattern_length = length;
+return 0;
+}
+
+PCRE2_EXP_DEFN int PCRE2_CALL_CONVENTION
+pcre2_set_max_pattern_compiled_length(pcre2_compile_context *ccontext, PCRE2_SIZE length)
+{
+ccontext->max_pattern_compiled_length = length;
 return 0;
 }
 

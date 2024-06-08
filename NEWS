@@ -162,6 +162,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
   . Add "/r" modifier. (Ayesh)
+  . Upgrade bundled pcre2lib to version 10.44. (Ayesh)
 
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
