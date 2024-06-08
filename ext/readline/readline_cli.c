@@ -25,20 +25,13 @@
 #define rl_completion_matches completion_matches
 #endif
 
-#include "php_globals.h"
-#include "php_variables.h"
 #include "zend_hash.h"
-#include "zend_modules.h"
 
 #include "SAPI.h"
 #include <locale.h>
 #include "zend.h"
-#include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
-#include "php_main.h"
-#include "fopen_wrappers.h"
-#include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
 #ifdef __riscos__

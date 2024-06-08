@@ -24,7 +24,7 @@
 
 #include "zend_variables.h"
 #include "ext/standard/info.h"
-#include "ext/standard/html.h"
+#include "ext/standard/html.h" /* For php_next_utf8_char() */
 
 #ifdef HAVE_XML
 

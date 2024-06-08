@@ -21,11 +21,10 @@
 
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xmlwriter.h"
 #include "php_xmlwriter_arginfo.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_dirname() */
 
 static zend_class_entry *xmlwriter_class_entry_ce;
 

@@ -18,10 +18,8 @@
 #ifndef PHP_FILTER_H
 #define PHP_FILTER_H
 
-#include "SAPI.h"
 #include "zend_API.h"
 #include "php.h"
-#include "php_ini.h"
 
 extern zend_module_entry filter_module_entry;
 #define phpext_filter_ptr &filter_module_entry

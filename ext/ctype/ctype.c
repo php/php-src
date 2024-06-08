@@ -19,10 +19,8 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_ctype.h"
 #include "ctype_arginfo.h"
-#include "SAPI.h"
 #include "ext/standard/info.h"
 
 #include <ctype.h>

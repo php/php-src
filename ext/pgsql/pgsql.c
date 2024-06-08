@@ -30,7 +30,7 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
 #ifdef PHP_WIN32
