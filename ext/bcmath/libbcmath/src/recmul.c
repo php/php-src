@@ -52,11 +52,11 @@
 
 /* Multiply utility routines */
 
-static inline void bc_digits_adjustment(BC_VECTOR *prod_uint, size_t prod_arr_size)
+static inline void bc_digits_adjustment(BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
-		prod_uint[i + 1] += prod_uint[i] / BC_VECTOR_BOUNDARY_NUM;
-		prod_uint[i] %= BC_VECTOR_BOUNDARY_NUM;
+		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
+		prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
 	}
 }
 
@@ -116,7 +116,7 @@ static uint64_t bc_parse_chunk_chars(const char *str)
  * Converts bc_num to BC_VECTOR, going backwards from pointer n by the number of
  * characters specified by len.
  */
-static inline BC_VECTOR bc_partial_convert_to_uint(const char *n, size_t len)
+static inline BC_VECTOR bc_partial_convert_to_vector(const char *n, size_t len)
 {
 	if (len == BC_VECTOR_SIZE) {
 		return bc_parse_chunk_chars(n - BC_VECTOR_SIZE + 1);
@@ -134,12 +134,12 @@ static inline BC_VECTOR bc_partial_convert_to_uint(const char *n, size_t len)
 	return num;
 }
 
-static inline void bc_convert_to_uint(BC_VECTOR *n_uint, const char *nend, size_t nlen)
+static inline void bc_convert_to_vector(BC_VECTOR *n_vector, const char *nend, size_t nlen)
 {
 	size_t i = 0;
 	while (nlen > 0) {
 		size_t len = MIN(BC_VECTOR_SIZE, nlen);
-		n_uint[i] = bc_partial_convert_to_uint(nend, len);
+		n_vector[i] = bc_partial_convert_to_vector(nend, len);
 		nend -= len;
 		nlen -= len;
 		i++;
@@ -155,9 +155,9 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
 
-	BC_VECTOR n1_uint = bc_partial_convert_to_uint(n1end, n1len);
-	BC_VECTOR n2_uint = bc_partial_convert_to_uint(n2end, n2len);
-	BC_VECTOR prod_uint = n1_uint * n2_uint;
+	BC_VECTOR n1_vector = bc_partial_convert_to_vector(n1end, n1len);
+	BC_VECTOR n2_vector = bc_partial_convert_to_vector(n2end, n2len);
+	BC_VECTOR prod_vector = n1_vector * n2_vector;
 
 	size_t prodlen = n1len + n2len;
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -165,8 +165,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	char *pend = pptr + prodlen - 1;
 
 	while (pend >= pptr) {
-		*pend-- = prod_uint % BASE;
-		prod_uint /= BASE;
+		*pend-- = prod_vector % BASE;
+		prod_vector /= BASE;
 	}
 }
 
@@ -242,17 +242,17 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 */
 	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
 
-	BC_VECTOR *n1_uint = buf;
-	BC_VECTOR *n2_uint = buf + n1_arr_size;
-	BC_VECTOR *prod_uint = n2_uint + n2_arr_size;
+	BC_VECTOR *n1_vector = buf;
+	BC_VECTOR *n2_vector = buf + n1_arr_size;
+	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
-		prod_uint[i] = 0;
+		prod_vector[i] = 0;
 	}
 
 	/* Convert to uint[] */
-	bc_convert_to_uint(n1_uint, n1end, n1len);
-	bc_convert_to_uint(n2_uint, n2end, n2len);
+	bc_convert_to_vector(n1_vector, n1end, n1len);
+	bc_convert_to_vector(n2_vector, n2end, n2len);
 
 	/* Multiplication and addition */
 	size_t count = 0;
@@ -263,12 +263,12 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		 * overflow, so digit adjustment is performed beforehand.
 		 */
 		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
-			bc_digits_adjustment(prod_uint, prod_arr_size);
+			bc_digits_adjustment(prod_vector, prod_arr_size);
 			count = 0;
 		}
 		count++;
 		for (size_t j = 0; j < n2_arr_size; j++) {
-			prod_uint[i + j] += n1_uint[i] * n2_uint[j];
+			prod_vector[i + j] += n1_vector[i] * n2_vector[j];
 		}
 	}
 
@@ -276,7 +276,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	bc_digits_adjustment(prod_uint, prod_arr_size);
+	bc_digits_adjustment(prod_vector, prod_arr_size);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -285,11 +285,11 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	i = 0;
 	while (i < prod_arr_size - 1) {
 #if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_uint[i], pend - 3);
+		bc_write_bcd_representation(prod_vector[i], pend - 3);
 		pend -= 4;
 #else
-		bc_write_bcd_representation(prod_uint[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_uint[i] % 10000, pend - 3);
+		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
 		pend -= 8;
 #endif
 		i++;
@@ -300,8 +300,8 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Also need to fill it to the end with zeros, so loop until the end of the string.
 	 */
 	while (pend >= pptr) {
-		*pend-- = prod_uint[i] % BASE;
-		prod_uint[i] /= BASE;
+		*pend-- = prod_vector[i] % BASE;
+		prod_vector[i] /= BASE;
 	}
 
 	efree(buf);
