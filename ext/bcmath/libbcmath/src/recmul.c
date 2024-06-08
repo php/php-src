@@ -77,7 +77,7 @@ static BC_VECTOR bc_parse_chunk_chars(const char *str)
 	BC_VECTOR tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
-	tmp = BC_BSWAP(tmp);
+	tmp = (int32_t) BC_BSWAP((uint32_t) tmp);
 #endif
 
 	BC_VECTOR lower_digits = (tmp & 0x0f000f00) >> 8;
@@ -96,7 +96,7 @@ static BC_VECTOR bc_parse_chunk_chars(const char *str)
 	BC_VECTOR tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
-	tmp = BC_BSWAP(tmp);
+	tmp = (int64_t) BC_BSWAP((uint64_t) tmp);
 #endif
 
 	BC_VECTOR lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
