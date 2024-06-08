@@ -316,7 +316,7 @@ void *phpdbg_watchpoint_userfaultfd_thread(void *phpdbg_globals) {
 
 	struct uffd_msg fault_msg = {0};
 	while (read(globals->watch_userfaultfd, &fault_msg, sizeof(fault_msg)) == sizeof(fault_msg)) {
-    	void *page = phpdbg_get_page_boundary((char *)(uintptr_t) fault_msg.arg.pagefault.address);
+		void *page = phpdbg_get_page_boundary((char *)(uintptr_t) fault_msg.arg.pagefault.address);
 		zend_hash_index_add_empty_element(globals->watchlist_mem, (zend_ulong) page);
 		struct uffdio_writeprotect unprotect = {
 			.mode = 0,
