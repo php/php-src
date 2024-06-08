@@ -24,7 +24,6 @@
 #include "zend_alloc.h"
 // Assume already included via zend_class_entry definition
 //#include "zend_dimension_handlers.h"
-// TODO other includes Re zend_callable header to do??
 
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 
@@ -57,11 +56,6 @@ static zval *zend_user_class_read_dimension(zend_object *object, zval *offset, z
 		return NULL;
 	}
 	return rv;
-}
-
-static zval *zend_call_internal_object_handler_read_dimension(zend_object *object, zval *offset, zval *rv)
-{
-	return object->handlers->read_dimension(object, offset, BP_VAR_R, rv);
 }
 
 /* rv is a slot provided by the callee that is returned */
@@ -131,46 +125,6 @@ static zval *zend_legacy_ArrayAccess_fetch_append(zend_object *object, zval *rv)
 	return retval;
 }
 
-static zval *zend_call_internal_object_handler_fetch_dimension(zend_object *object, zval *offset, zval *rv)
-{
-	zval *retval;
-	retval = object->handlers->read_dimension(object, offset, BP_VAR_W, rv);
-
-	//ZEND_ASSERT(Z_TYPE_P(retval) != IS_UNDEF)
-	if (UNEXPECTED(retval == &EG(uninitialized_zval))) {
-		zend_class_entry *ce = object->ce;
-
-		ZVAL_NULL(rv);
-		retval = rv;
-		zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-	} else if (EXPECTED(retval && Z_TYPE_P(retval) != IS_UNDEF)) {
-		if (!Z_ISREF_P(retval)) {
-			if (rv != retval) {
-				ZVAL_COPY(rv, retval);
-				retval = rv;
-			}
-			if (Z_TYPE_P(retval) != IS_OBJECT) {
-				zend_class_entry *ce = object->ce;
-				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-				ZVAL_NEW_REF(retval, retval);
-			}
-		} else {
-			//if (UNEXPECTED(Z_REFCOUNT_P(retval) == 1)) {
-			//	ZVAL_UNREF(retval);
-			//}
-			if (rv != retval) {
-				ZVAL_INDIRECT(rv, retval);
-			}
-		}
-	}
-	return retval;
-}
-
-static zval *zend_call_internal_object_handler_fetch_append(zend_object *object, zval *rv)
-{
-	return zend_call_internal_object_handler_fetch_dimension(object, NULL, rv);
-}
-
 static bool zend_user_class_has_dimension(zend_object *object, zval *offset)
 {
 	zend_class_entry *ce = object->ce;
@@ -197,11 +151,6 @@ static bool zend_user_class_has_dimension(zend_object *object, zval *offset)
 	zval_ptr_dtor(&tmp_offset);
 	OBJ_RELEASE(object);
 	return is_set;
-}
-
-static bool zend_call_internal_object_handler_has_dimension(zend_object *object, zval *offset)
-{
-	return object->handlers->has_dimension(object, offset, false);
 }
 
 static void zend_user_class_write_dimension(zend_object *object, zval *offset, zval *value)
@@ -270,16 +219,6 @@ static zval *zend_user_class_fetch_append(zend_object *object, zval *rv)
 	return rv;
 }
 
-static void zend_call_internal_object_handler_write_dimension(zend_object *object, zval *offset, zval *value)
-{
-	object->handlers->write_dimension(object, offset, value);
-}
-
-static void zend_call_internal_object_handler_append(zend_object *object, zval *value)
-{
-	object->handlers->write_dimension(object, NULL, value);
-}
-
 static void zend_user_class_unset_dimension(zend_object *object, zval *offset)
 {
 	zend_class_entry *ce = object->ce;
@@ -294,11 +233,6 @@ static void zend_user_class_unset_dimension(zend_object *object, zval *offset)
 	zend_call_known_instance_method_with_1_params(zf, object, /* retval */ NULL, &tmp_offset);
 	OBJ_RELEASE(object);
 	zval_ptr_dtor(&tmp_offset);
-}
-
-static void zend_call_internal_object_handler_unset_dimension(zend_object *object, zval *offset)
-{
-	object->handlers->unset_dimension(object, offset);
 }
 
 // TODO Internal classes must define this?
@@ -332,37 +266,29 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->read_dimension = zend_call_internal_object_handler_read_dimension;
-		funcs->has_dimension = zend_call_internal_object_handler_has_dimension;
-		funcs->fetch_dimension = zend_call_internal_object_handler_fetch_dimension;
-		funcs->write_dimension = zend_call_internal_object_handler_write_dimension;
-		funcs->unset_dimension = zend_call_internal_object_handler_unset_dimension;
-		funcs->append = zend_call_internal_object_handler_append;
-		funcs->fetch_append = zend_call_internal_object_handler_fetch_append;
-	} else {
-		funcs->read_dimension = zend_user_class_read_dimension;
-		funcs->has_dimension = zend_user_class_has_dimension;
-		funcs->fetch_dimension = zend_legacy_ArrayAccess_fetch_dimension;
-		funcs->write_dimension = zend_user_class_write_dimension;
-		funcs->unset_dimension = zend_user_class_unset_dimension;
-		funcs->append = zend_legacy_ArrayAccess_append;
-		funcs->fetch_append = zend_legacy_ArrayAccess_fetch_append;
-	}
+
+	funcs->read_dimension = zend_user_class_read_dimension;
+	funcs->has_dimension = zend_user_class_has_dimension;
+	funcs->fetch_dimension = zend_legacy_ArrayAccess_fetch_dimension;
+	funcs->write_dimension = zend_user_class_write_dimension;
+	funcs->unset_dimension = zend_user_class_unset_dimension;
+	funcs->append = zend_legacy_ArrayAccess_append;
+	funcs->fetch_append = zend_legacy_ArrayAccess_fetch_append;
 
 	return SUCCESS;
 }
 
 static int zend_implement_dimension_read(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
 	// TODO: Check if the class that interface implements this relies on the parent handler or not?
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->read_dimension = zend_call_internal_object_handler_read_dimension;
-		funcs->has_dimension = zend_call_internal_object_handler_has_dimension;
-	} else {
+	if (!funcs->read_dimension) {
 		funcs->read_dimension = zend_user_class_read_dimension;
 		funcs->has_dimension = zend_user_class_has_dimension;
 	}
@@ -371,12 +297,14 @@ static int zend_implement_dimension_read(zend_class_entry *interface, zend_class
 
 static int zend_implement_dimension_write(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->write_dimension = zend_call_internal_object_handler_write_dimension;
-	} else {
+	if (!funcs->write_dimension) {
 		funcs->write_dimension = zend_user_class_write_dimension;
 	}
 	return SUCCESS;
@@ -384,12 +312,14 @@ static int zend_implement_dimension_write(zend_class_entry *interface, zend_clas
 
 static int zend_implement_dimension_unset(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->unset_dimension = zend_call_internal_object_handler_unset_dimension;
-	} else {
+	if (!funcs->unset_dimension) {
 		funcs->unset_dimension = zend_user_class_unset_dimension;
 	}
 	return SUCCESS;
@@ -397,12 +327,14 @@ static int zend_implement_dimension_unset(zend_class_entry *interface, zend_clas
 
 static int zend_implement_appendable(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->append = zend_call_internal_object_handler_append;
-	} else {
+	if (!funcs->append) {
 		funcs->append = zend_user_class_append;
 	}
 	return SUCCESS;
@@ -410,12 +342,14 @@ static int zend_implement_appendable(zend_class_entry *interface, zend_class_ent
 
 static int zend_implement_dimension_fetch(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->fetch_dimension = zend_call_internal_object_handler_fetch_dimension;
-	} else {
+	if (!funcs->fetch_dimension) {
 		funcs->fetch_dimension = zend_user_class_fetch_dimension;
 	}
 	return SUCCESS;
@@ -423,12 +357,14 @@ static int zend_implement_dimension_fetch(zend_class_entry *interface, zend_clas
 
 static int zend_implement_dimension_fetch_append(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (class_type->type == ZEND_INTERNAL_CLASS) {
-		funcs->fetch_append = zend_call_internal_object_handler_fetch_append;
-	} else {
+	if (!funcs->fetch_append) {
 		funcs->fetch_append = zend_user_class_fetch_append;
 	}
 	return SUCCESS;

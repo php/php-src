@@ -22,6 +22,8 @@
 
 //BEGIN_EXTERN_C()
 
+#include "zend_types.h"
+
 typedef struct _zend_class_dimensions_functions {
 	/* rv is a slot provided by the callee that is returned */
 	zval *(*/* const */ read_dimension)(zend_object *object, zval *offset, zval *rv);
