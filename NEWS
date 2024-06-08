@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Adjusted closure names to include the parent function's name. (timwolla)
   . Improve randomness of uploaded file names and files created by tempnam().
     (Arnaud)
+  . Fixed bug GH-14510 (memleak due to missing pthread_attr_destroy()-call).
+    (Florian Engelhardt)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -196,7 +198,7 @@ PHP                                                                        NEWS
   . Added class Pdo\Pgsql. (danack, kocsismate)
   . Retrieve the memory usage of the query result resource. (KentarouTakeda)
   . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
-    (outtersg) 
+    (outtersg)
 
 - PDO_SQLITE:
   . Added class Pdo\Sqlite. (danack, kocsismate)
