@@ -43,6 +43,7 @@
 #define PHP_GDIMG_TYPE_BMP      12
 #define PHP_GDIMG_TYPE_TGA      13
 #define PHP_GDIMG_TYPE_AVIF     14
+#define PHP_GDIMG_TYPE_HEIF     15
 
 #define PHP_IMG_GIF    1
 #define PHP_IMG_JPG    2
@@ -54,6 +55,7 @@
 #define PHP_IMG_BMP   64
 #define PHP_IMG_TGA  128
 #define PHP_IMG_AVIF 256
+#define PHP_IMG_HEIF 384
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER
@@ -103,6 +105,10 @@ PHPAPI extern const char php_sig_bmp[2];
 PHPAPI extern const char php_sig_riff[4];
 PHPAPI extern const char php_sig_webp[4];
 PHPAPI extern const char php_sig_avif[4];
+PHPAPI extern const char php_sig_heifheic[12];
+PHPAPI extern const char php_sig_heifheix[12];
+PHPAPI extern const char php_sig_heifmif1[12];
+PHPAPI extern const char php_sig_heifmsf1[12];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry

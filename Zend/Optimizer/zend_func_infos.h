@@ -122,6 +122,9 @@ static const func_info_t func_infos[] = {
 #if defined(HAVE_GD_WEBP)
 	F1("imagecreatefromwebp", MAY_BE_OBJECT|MAY_BE_FALSE),
 #endif
+#if defined(HAVE_GD_HEIF)
+	F1("imagecreatefromheif", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
 	F1("imagecreatefromxbm", MAY_BE_OBJECT|MAY_BE_FALSE),
 #if defined(HAVE_GD_XPM)
 	F1("imagecreatefromxpm", MAY_BE_OBJECT|MAY_BE_FALSE),

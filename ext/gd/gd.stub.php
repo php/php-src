@@ -53,6 +53,11 @@ const IMG_BMP = UNKNOWN;
  */
 const IMG_TGA = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue PHP_IMG_HEIF
+ */
+const IMG_HEIF = UNKNOWN;
 /* constant for webp encoding */
 
 #ifdef gdWebpLossless
@@ -412,6 +417,39 @@ const IMG_FILTER_PIXELATE = UNKNOWN;
  */
 const IMG_FILTER_SCATTER = UNKNOWN;
 
+#ifdef HAVE_GD_HEIF
+/**
+ * @var string
+ * @cvalue GD_HEIF_CHROMA_420
+ */
+const HEIF_CHROMA_420 = UNKNOWN;
+/**
+ * @var string
+ * @cvalue GD_HEIF_CHROMA_422
+ */
+const HEIF_CHROMA_422 = UNKNOWN;
+/**
+ * @var string
+ * @cvalue GD_HEIF_CHROMA_444
+ */
+const HEIF_CHROMA_444 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_HEIF_CODEC_UNKNOWN
+ */
+const HEIF_CODEC_UNKNOWN = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_HEIF_CODEC_HEVC
+ */
+const HEIF_CODEC_HEVC = UNKNOWN;
+/**
+ * @var int
+ * @cvalue GD_HEIF_CODEC_AV1
+ */
+const HEIF_CODEC_AV1 = UNKNOWN;
+#endif
+
 #ifdef GD_VERSION_STRING
 /**
  * @var string
@@ -569,6 +607,11 @@ function imagecreatefrompng(string $filename): GdImage|false {}
 function imagecreatefromwebp(string $filename): GdImage|false {}
 #endif
 
+#ifdef HAVE_GD_HEIF
+/** @refcount 1 */
+function imagecreatefromheif(string $filename): GdImage|false {}
+#endif
+
 /** @refcount 1 */
 function imagecreatefromxbm(string $filename): GdImage|false {}
 
@@ -625,6 +668,11 @@ function imagejpeg(GdImage $image, $file = null, int $quality = -1): bool {}
 
 /** @param resource|string|null $file */
 function imagewbmp(GdImage $image, $file = null, ?int $foreground_color = null): bool {}
+
+#ifdef HAVE_GD_HEIF
+/** @param resource|string|null $file */
+function imageheif(GdImage $image, $file = null, int $quality = -1, ?int $codec = null, ?string $chroma = null): bool {}
+#endif
 
 function imagegd(GdImage $image, ?string $file = null): bool {}
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: 5d369508d02201da41e26a46d4d017c1ab4206fd */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -171,6 +171,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromwebp, 0, 1, G
 ZEND_END_ARG_INFO()
 #endif
 
+#if defined(HAVE_GD_HEIF)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromheif, 0, 1, GdImage, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 #define arginfo_imagecreatefromxbm arginfo_imagecreatefromgif
 
 #if defined(HAVE_GD_XPM)
@@ -255,6 +261,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagewbmp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, file, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, foreground_color, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GD_HEIF)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageheif, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, file, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, quality, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, codec, IS_LONG, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, chroma, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
@@ -619,6 +635,9 @@ ZEND_FUNCTION(imagecreatefrompng);
 #if defined(HAVE_GD_WEBP)
 ZEND_FUNCTION(imagecreatefromwebp);
 #endif
+#if defined(HAVE_GD_HEIF)
+ZEND_FUNCTION(imagecreatefromheif);
+#endif
 ZEND_FUNCTION(imagecreatefromxbm);
 #if defined(HAVE_GD_XPM)
 ZEND_FUNCTION(imagecreatefromxpm);
@@ -648,6 +667,9 @@ ZEND_FUNCTION(imagewebp);
 ZEND_FUNCTION(imagejpeg);
 #endif
 ZEND_FUNCTION(imagewbmp);
+#if defined(HAVE_GD_HEIF)
+ZEND_FUNCTION(imageheif);
+#endif
 ZEND_FUNCTION(imagegd);
 ZEND_FUNCTION(imagegd2);
 #if defined(HAVE_GD_BMP)
@@ -759,6 +781,9 @@ static const zend_function_entry ext_functions[] = {
 #if defined(HAVE_GD_WEBP)
 	ZEND_FE(imagecreatefromwebp, arginfo_imagecreatefromwebp)
 #endif
+#if defined(HAVE_GD_HEIF)
+	ZEND_FE(imagecreatefromheif, arginfo_imagecreatefromheif)
+#endif
 	ZEND_FE(imagecreatefromxbm, arginfo_imagecreatefromxbm)
 #if defined(HAVE_GD_XPM)
 	ZEND_FE(imagecreatefromxpm, arginfo_imagecreatefromxpm)
@@ -788,6 +813,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagejpeg, arginfo_imagejpeg)
 #endif
 	ZEND_FE(imagewbmp, arginfo_imagewbmp)
+#if defined(HAVE_GD_HEIF)
+	ZEND_FE(imageheif, arginfo_imageheif)
+#endif
 	ZEND_FE(imagegd, arginfo_imagegd)
 	ZEND_FE(imagegd2, arginfo_imagegd2)
 #if defined(HAVE_GD_BMP)
@@ -882,6 +910,7 @@ static void register_gd_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IMG_WEBP", PHP_IMG_WEBP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BMP", PHP_IMG_BMP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_TGA", PHP_IMG_TGA, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_HEIF", PHP_IMG_HEIF, CONST_PERSISTENT);
 #if defined(gdWebpLossless)
 	REGISTER_LONG_CONSTANT("IMG_WEBP_LOSSLESS", gdWebpLossless, CONST_PERSISTENT);
 #endif
@@ -953,6 +982,24 @@ static void register_gd_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IMG_FILTER_SMOOTH", IMAGE_FILTER_SMOOTH, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_PIXELATE", IMAGE_FILTER_PIXELATE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_FILTER_SCATTER", IMAGE_FILTER_SCATTER, CONST_PERSISTENT);
+#if defined(HAVE_GD_HEIF)
+	REGISTER_STRING_CONSTANT("HEIF_CHROMA_420", GD_HEIF_CHROMA_420, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_GD_HEIF)
+	REGISTER_STRING_CONSTANT("HEIF_CHROMA_422", GD_HEIF_CHROMA_422, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_GD_HEIF)
+	REGISTER_STRING_CONSTANT("HEIF_CHROMA_444", GD_HEIF_CHROMA_444, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_GD_HEIF)
+	REGISTER_LONG_CONSTANT("HEIF_CODEC_UNKNOWN", GD_HEIF_CODEC_UNKNOWN, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_GD_HEIF)
+	REGISTER_LONG_CONSTANT("HEIF_CODEC_HEVC", GD_HEIF_CODEC_HEVC, CONST_PERSISTENT);
+#endif
+#if defined(HAVE_GD_HEIF)
+	REGISTER_LONG_CONSTANT("HEIF_CODEC_AV1", GD_HEIF_CODEC_AV1, CONST_PERSISTENT);
+#endif
 #if defined(GD_VERSION_STRING)
 	REGISTER_STRING_CONSTANT("GD_VERSION", GD_VERSION_STRING, CONST_PERSISTENT);
 #endif
