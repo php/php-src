@@ -328,14 +328,14 @@ static zval *dimension_handlers_no_ArrayAccess_fetch_append(zend_object *object,
 	return rv;
 }
 
-static const zend_class_dimensions_functions dimension_handlers_no_ArrayAccess_dimension_functions = {
-	dimension_handlers_no_ArrayAccess_ce_handler_read_dimension,
-	dimension_handlers_no_ArrayAccess_ce_handler_has_dimension,
-	dimension_handlers_no_ArrayAccess_fetch_dimension,
-	dimension_handlers_no_ArrayAccess_write_dimension,
-	dimension_handlers_no_ArrayAccess_append_dimension,
-	dimension_handlers_no_ArrayAccess_fetch_append,
-	dimension_handlers_no_ArrayAccess_unset_dimension
+static /* const */ zend_class_dimensions_functions dimension_handlers_no_ArrayAccess_dimension_functions = {
+	.read_dimension  = dimension_handlers_no_ArrayAccess_ce_handler_read_dimension,
+	.has_dimension   = dimension_handlers_no_ArrayAccess_ce_handler_has_dimension,
+	.fetch_dimension = dimension_handlers_no_ArrayAccess_fetch_dimension,
+	.write_dimension = dimension_handlers_no_ArrayAccess_write_dimension,
+	.append          = dimension_handlers_no_ArrayAccess_append_dimension,
+	.fetch_append    = dimension_handlers_no_ArrayAccess_fetch_append,
+	.unset_dimension = dimension_handlers_no_ArrayAccess_unset_dimension
 };
 
 void zend_test_object_handlers_init(void)
@@ -370,6 +370,5 @@ void zend_test_object_handlers_init(void)
 	dimension_handlers_no_ArrayAccess_object_handlers.has_dimension = dimension_handlers_no_ArrayAccess_has_dimension;
 	dimension_handlers_no_ArrayAccess_object_handlers.unset_dimension = dimension_handlers_no_ArrayAccess_unset_dimension;
 
-	dimension_handlers_no_ArrayAccess_ce->dimension_handlers = malloc(sizeof(zend_class_dimensions_functions));
-	memcpy(dimension_handlers_no_ArrayAccess_ce->dimension_handlers, &dimension_handlers_no_ArrayAccess_dimension_functions, sizeof(zend_class_dimensions_functions));
+	dimension_handlers_no_ArrayAccess_ce->dimension_handlers = &dimension_handlers_no_ArrayAccess_dimension_functions;
 }
