@@ -337,7 +337,7 @@ int main(void) {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	$ZEND_JIT_SRC,
-	shared,,"-Wno-implicit-fallthrough -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
+	shared,,"-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
