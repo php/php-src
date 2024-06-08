@@ -68,16 +68,16 @@ static inline void bc_digits_adjustment(BC_VECTOR *prod_vector, size_t prod_arr_
  * due to its divide-and-conquer nature.
  */
 #if SIZEOF_SIZE_T == 4
-static uint32_t bc_parse_chunk_chars(const char *str)
+static BC_VECTOR bc_parse_chunk_chars(const char *str)
 {
-	uint32_t tmp;
+	BC_VECTOR tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
 	tmp = BC_BSWAP(tmp);
 #endif
 
-	uint32_t lower_digits = (tmp & 0x0f000f00) >> 8;
-	uint32_t upper_digits = (tmp & 0x000f000f) * 10;
+	BC_VECTOR lower_digits = (tmp & 0x0f000f00) >> 8;
+	BC_VECTOR upper_digits = (tmp & 0x000f000f) * 10;
 
 	tmp = lower_digits + upper_digits;
 
@@ -87,16 +87,16 @@ static uint32_t bc_parse_chunk_chars(const char *str)
 	return lower_digits + upper_digits;
 }
 #elif SIZEOF_SIZE_T == 8
-static uint64_t bc_parse_chunk_chars(const char *str)
+static BC_VECTOR bc_parse_chunk_chars(const char *str)
 {
-	uint64_t tmp;
+	BC_VECTOR tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
 	tmp = BC_BSWAP(tmp);
 #endif
 
-	uint64_t lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
-	uint64_t upper_digits = (tmp & 0x000f000f000f000f) * 10;
+	BC_VECTOR lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
+	BC_VECTOR upper_digits = (tmp & 0x000f000f000f000f) * 10;
 
 	tmp = lower_digits + upper_digits;
 
