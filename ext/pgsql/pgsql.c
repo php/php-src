@@ -3211,6 +3211,7 @@ PHP_FUNCTION(pg_copy_to)
 	pgsql_link_handle *link;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
+	zend_string *pg_escape = NULL;
 	char *pg_null_as = NULL;
 	size_t pg_null_as_len = 0;
 	bool free_pg_null = false;
@@ -3218,14 +3219,15 @@ PHP_FUNCTION(pg_copy_to)
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
-	char *csv = (char *)NULL;
+	char *csv = NULL;
 
-	ZEND_PARSE_PARAMETERS_START(2, 4)
+	ZEND_PARSE_PARAMETERS_START(2, 5)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 		Z_PARAM_PATH_STR(table_name)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(pg_delimiter)
 		Z_PARAM_STRING(pg_null_as, pg_null_as_len)
+		Z_PARAM_STR(pg_escape)
 	ZEND_PARSE_PARAMETERS_END();
 
 	link = Z_PGSQL_LINK_P(pgsql_link);
@@ -3242,8 +3244,14 @@ PHP_FUNCTION(pg_copy_to)
 		pg_null_as = estrdup("\\\\N");
 		free_pg_null = true;
 	}
+	if (!pg_escape) {
+		pg_escape = ZSTR_CHAR('"');
+	} else if (ZSTR_LEN(pg_escape) != 1) {
+		zend_argument_value_error(5, "must be one character");
+		RETURN_THROWS();
+	}
 
-	spprintf(&query, 0, "COPY %s TO STDOUT DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
+	spprintf(&query, 0, "COPY %s TO STDOUT CSV DELIMITER E'%c' ESCAPE E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), *ZSTR_VAL(pg_escape), pg_null_as);
 
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
@@ -3310,6 +3318,7 @@ PHP_FUNCTION(pg_copy_from)
 	zval *value;
 	zend_string *table_name;
 	zend_string *pg_delimiter = NULL;
+	zend_string *pg_escape = NULL;
 	char *pg_null_as = NULL;
 	size_t pg_null_as_len;
 	bool pg_null_as_free = false;
@@ -3318,13 +3327,14 @@ PHP_FUNCTION(pg_copy_from)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	ZEND_PARSE_PARAMETERS_START(3, 5)
+	ZEND_PARSE_PARAMETERS_START(3, 6)
 		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
 		Z_PARAM_PATH_STR(table_name)
 		Z_PARAM_ARRAY(pg_rows)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(pg_delimiter)
 		Z_PARAM_STRING(pg_null_as, pg_null_as_len)
+		Z_PARAM_STR(pg_escape)
 	ZEND_PARSE_PARAMETERS_END();
 
 	link = Z_PGSQL_LINK_P(pgsql_link);
@@ -3341,8 +3351,14 @@ PHP_FUNCTION(pg_copy_from)
 		pg_null_as = estrdup("\\\\N");
 		pg_null_as_free = true;
 	}
+	if (!pg_escape) {
+		pg_escape = ZSTR_CHAR('"');
+	} else if (ZSTR_LEN(pg_escape) != 1) {
+		zend_argument_value_error(6, "must be one character");
+		RETURN_THROWS();
+	}
 
-	spprintf(&query, 0, "COPY %s FROM STDIN DELIMITER E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), pg_null_as);
+	spprintf(&query, 0, "COPY %s FROM STDIN CSV DELIMITER E'%c' ESCAPE E'%c' NULL AS E'%s'", ZSTR_VAL(table_name), *ZSTR_VAL(pg_delimiter), *ZSTR_VAL(pg_escape), pg_null_as);
 	while ((pgsql_result = PQgetResult(pgsql))) {
 		PQclear(pgsql_result);
 	}
