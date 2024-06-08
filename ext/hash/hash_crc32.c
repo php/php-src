@@ -29,7 +29,7 @@ PHP_HASH_API void PHP_CRC32Update(PHP_CRC32_CTX *context, const unsigned char *i
 {
 	size_t i = 0;
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 	i += crc32_x86_simd_update(X86_CRC32, &context->state, input, len);
 #endif
 
@@ -42,7 +42,7 @@ PHP_HASH_API void PHP_CRC32BUpdate(PHP_CRC32_CTX *context, const unsigned char *
 {
 	size_t i = 0;
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 	i += crc32_x86_simd_update(X86_CRC32B, &context->state, input, len);
 #endif
 
@@ -55,7 +55,7 @@ PHP_HASH_API void PHP_CRC32CUpdate(PHP_CRC32_CTX *context, const unsigned char *
 {
 	size_t i = 0;
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 	i += crc32_x86_simd_update(X86_CRC32C, &context->state, input, len);
 #endif
 
