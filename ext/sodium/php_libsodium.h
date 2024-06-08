@@ -26,6 +26,8 @@ extern zend_module_entry sodium_module_entry;
 # include "TSRM.h"
 #endif
 
+#include <sodium.h>
+
 #define SODIUM_LIBRARY_VERSION() (char *) (void *) sodium_version_string()
 
 #define SODIUM_CRYPTO_BOX_KEYPAIRBYTES() crypto_box_SECRETKEYBYTES + crypto_box_PUBLICKEYBYTES
