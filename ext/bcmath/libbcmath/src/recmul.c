@@ -33,15 +33,17 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
-#include "private.h" /* For _bc_rm_leading_zeros() */
+#include "private.h"
 #include "zend_alloc.h"
 
 
 #if SIZEOF_SIZE_T >= 8
 #  define BC_VECTOR_SIZE 8
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 #else
 #  define BC_VECTOR_SIZE 4
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
@@ -111,7 +113,7 @@ static uint64_t bc_parse_chunk_chars(const char *str)
 #endif
 
 /*
- * Converts BCD to uint, going backwards from pointer n by the number of
+ * Converts bc_num to BC_VECTOR, going backwards from pointer n by the number of
  * characters specified by len.
  */
 static inline BC_VECTOR bc_partial_convert_to_uint(const char *n, size_t len)
@@ -215,7 +217,7 @@ static void bc_write_bcd_representation(uint32_t value, char *str)
 }
 
 /*
- * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTORs.
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
  * The array is generated starting with the smaller digits.
  * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
  *
