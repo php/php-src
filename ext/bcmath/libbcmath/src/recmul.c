@@ -38,10 +38,10 @@
 
 
 #if SIZEOF_SIZE_T >= 8
-#  define BC_MUL_UINT_DIGITS 8
+#  define BC_VECTOR_SIZE 8
 #  define BC_MUL_UINT_OVERFLOW (BC_VECTOR) 100000000
 #else
-#  define BC_MUL_UINT_DIGITS 4
+#  define BC_VECTOR_SIZE 4
 #  define BC_MUL_UINT_OVERFLOW (BC_VECTOR) 10000
 #endif
 
@@ -116,8 +116,8 @@ static uint64_t bc_parse_chunk_chars(const char *str)
  */
 static inline BC_VECTOR bc_partial_convert_to_uint(const char *n, size_t len)
 {
-	if (len == BC_MUL_UINT_DIGITS) {
-		return bc_parse_chunk_chars(n - BC_MUL_UINT_DIGITS + 1);
+	if (len == BC_VECTOR_SIZE) {
+		return bc_parse_chunk_chars(n - BC_VECTOR_SIZE + 1);
 	}
 
 	BC_VECTOR num = 0;
@@ -136,7 +136,7 @@ static inline void bc_convert_to_uint(BC_VECTOR *n_uint, const char *nend, size_
 {
 	size_t i = 0;
 	while (nlen > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, nlen);
+		size_t len = MIN(BC_VECTOR_SIZE, nlen);
 		n_uint[i] = bc_partial_convert_to_uint(nend, len);
 		nend -= len;
 		nlen -= len;
@@ -229,14 +229,14 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
-	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
+	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
 
 	/*
-	 * let's say that N is the max of n1len and n2len (and a multiple of BC_MUL_UINT_DIGITS for simplicity),
-	 * then this sum is <= N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS - 1
-	 * which is equal to N - 1 if BC_MUL_UINT_DIGITS is 4, and N/2 - 1 if BC_MUL_UINT_DIGITS is 8.
+	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
+	 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
+	 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
 	 */
 	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
 
@@ -282,7 +282,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	char *pend = pptr + prodlen - 1;
 	i = 0;
 	while (i < prod_arr_size - 1) {
-#if BC_MUL_UINT_DIGITS == 4
+#if BC_VECTOR_SIZE == 4
 		bc_write_bcd_representation(prod_uint[i], pend - 3);
 		pend -= 4;
 #else
@@ -320,7 +320,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
+	if (len1 <= BC_VECTOR_SIZE && len2 <= BC_VECTOR_SIZE) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);
