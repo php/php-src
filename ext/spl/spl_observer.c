@@ -28,7 +28,6 @@
 
 #include "php_spl.h"
 #include "spl_functions.h"
-#include "spl_engine.h"
 #include "spl_observer.h"
 #include "spl_observer_arginfo.h"
 #include "spl_iterators.h"
