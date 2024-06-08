@@ -472,19 +472,14 @@ static void spl_filesystem_info_set_filename(spl_filesystem_object *intern, zend
 	intern->path = zend_string_init(ZSTR_VAL(path), path_len, 0);
 } /* }}} */
 
-static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_object *source, zend_string *file_path, zend_class_entry *ce, zval *return_value) /* {{{ */
+// TODO Do not pass return_value pointer but actually use value returned by function at call site?
+static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *file_path, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	zval arg1;
 
-	if (!file_path || !ZSTR_LEN(file_path)) {
-#ifdef PHP_WIN32
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot create SplFileInfo for empty path");
-#endif
-		return NULL;
-	}
-
-	ce = ce ? ce : source->info_class;
+	ZEND_ASSERT(file_path && ZSTR_LEN(file_path) > 0);
+	ZEND_ASSERT(ce != NULL);
 
 	intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 	RETVAL_OBJ(&intern->std);
@@ -1383,18 +1378,22 @@ PHP_METHOD(SplFileInfo, getFileInfo)
 PHP_METHOD(SplFileInfo, getPathInfo)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
-	zend_class_entry *ce = intern->info_class;
+	zend_class_entry *ce = NULL;
 	zend_string *path;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|C!", &ce) == FAILURE) {
 		RETURN_THROWS();
 	}
 
+	if (ce == NULL) {
+		ce = intern->info_class;
+	}
+
 	path = spl_filesystem_object_get_pathname(intern);
 	if (path && ZSTR_LEN(path)) {
 		zend_string *dpath = zend_string_init(ZSTR_VAL(path), ZSTR_LEN(path), 0);
 		ZSTR_LEN(dpath) = php_dirname(ZSTR_VAL(dpath), ZSTR_LEN(path));
-		spl_filesystem_object_create_info(intern, dpath, ce, return_value);
+		spl_filesystem_object_create_info(dpath, ce, return_value);
 		zend_string_release(dpath);
 	}
 }
