@@ -47,6 +47,10 @@
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
+/*
+ * Adding more than this many times may cause uint32_t/uint64_t to overflow.
+ * Typically this is 1844 for 64bit and 42 for 32bit.
+ */
 #define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
