@@ -556,14 +556,11 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				Z_ADDREF_P(iterator);
 			}
 
-			/* Instantiate object and call constructor */
 			zval params[2];
-			ZVAL_COPY(&params[0], iterator); // TODO Prevent copy?
-			zval_ptr_dtor(iterator);
+			ZVAL_COPY_VALUE(&params[0], iterator);
 			ZVAL_LONG(&params[1], user_caching_it_flags);
 			zend_result is_initialized = object_init_with_constructor(&caching_it, spl_ce_RecursiveCachingIterator, 2, params, NULL);
 			zval_ptr_dtor(&params[0]);
-			zval_ptr_dtor(&params[1]);
 			if (is_initialized == FAILURE) {
 				RETURN_THROWS();
 			}
@@ -1687,12 +1684,10 @@ PHP_METHOD(RecursiveFilterIterator, getChildren)
 
 	zval childrens;
 	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &childrens);
-	if (EG(exception) || Z_TYPE(childrens) == IS_UNDEF) {
-		zval_ptr_dtor(&childrens);
+	if (Z_TYPE(childrens) == IS_UNDEF) {
 		RETURN_THROWS();
 	}
 
-	/* Instantiate object and call constructor */
 	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 1, &childrens, NULL);
 	zval_ptr_dtor(&childrens);
 	if (is_initialized == FAILURE) {
@@ -1711,15 +1706,13 @@ PHP_METHOD(RecursiveCallbackFilterIterator, getChildren)
 
 	zval params[2];
 	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &params[0]);
-	if (EG(exception) || Z_TYPE(params[0]) == IS_UNDEF) {
-		zval_ptr_dtor(&params[0]);
+	if (Z_TYPE(params[0]) == IS_UNDEF) {
 		RETURN_THROWS();
 	}
 
 	/* Get callable to pass to the constructor */
 	zend_get_callable_zval_from_fcc(&intern->u.callback_filter, &params[1]);
 
-	/* Instantiate object and call constructor */
 	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
 	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&params[1]);
@@ -1988,17 +1981,16 @@ PHP_METHOD(RecursiveRegexIterator, getChildren)
 	}
 
 	zval args[5];
-	args[0] = retval;
+	ZVAL_COPY_VALUE(&args[0], &retval);
 	ZVAL_STR_COPY(&args[1], intern->u.regex.regex);
 	ZVAL_LONG(&args[2], intern->u.regex.mode);
 	ZVAL_LONG(&args[3], intern->u.regex.flags);
 	ZVAL_LONG(&args[4], intern->u.regex.preg_flags);
 
-	/* Instantiate object and call constructor */
 	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 5, args, NULL);
 
 	zval_ptr_dtor(&args[0]);
-	zval_ptr_dtor(&args[1]);
+	zval_ptr_dtor_str(&args[1]);
 	if (is_initialized == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -2300,7 +2292,6 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 					} else {
 						ZVAL_LONG(&args[1], intern->u.caching.flags & CIT_PUBLIC);
 
-						/* Instantiate object and call constructor */
 						zend_result is_initialized = object_init_with_constructor(
 							&intern->u.caching.zchildren,
 							spl_ce_RecursiveCachingIterator,

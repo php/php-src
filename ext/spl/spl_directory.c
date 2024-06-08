@@ -1530,10 +1530,9 @@ PHP_METHOD(RecursiveDirectoryIterator, getChildren)
 	zval params[2];
 	ZVAL_STR_COPY(&params[0], intern->file_name);
 	ZVAL_LONG(&params[1], intern->flags);
-	/* Instantiate object and call constructor */
+
 	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
-	zval_ptr_dtor(&params[0]);
-	zval_ptr_dtor(&params[1]);
+	zval_ptr_dtor_str(&params[0]);
 	if (is_initialized == FAILURE) {
 		RETURN_THROWS();
 	}
