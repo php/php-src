@@ -45,7 +45,7 @@
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
-#define BC_MUL_MAX_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
+#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
 /* Multiply utility routines */
@@ -260,7 +260,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		 * When multiplying large numbers of digits, there is a possibility of
 		 * overflow, so digit adjustment is performed beforehand.
 		 */
-		if (UNEXPECTED(count >= BC_MUL_MAX_ADD_COUNT)) {
+		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
 			bc_digits_adjustment(prod_uint, prod_arr_size);
 			count = 0;
 		}
