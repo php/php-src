@@ -46,7 +46,14 @@ typedef struct {
 
 FILE *fopencookie(void *cookie, const char *mode, COOKIE_IO_FUNCTIONS_T *funcs)
 {
-	return funopen(cookie, funcs->reader, funcs->writer, funcs->seeker, funcs->closer);
+	FILE *file = funopen(cookie, funcs->reader, funcs->writer, funcs->seeker, funcs->closer);
+	if (file) {
+		/* Buffering of FILE handles is stateful.
+		 * A bailout during these can corrupt the state of the FILE handle
+		 * and cause memory corruption errors. See GH-11078. */
+		setvbuf(file, NULL, _IONBF, 0);
+	}
+	return file;
 }
 # define HAVE_FOPENCOOKIE 1
 # define PHP_EMULATE_FOPENCOOKIE 1
