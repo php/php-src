@@ -203,17 +203,17 @@ static inline unsigned short bc_expand_lut(unsigned char c)
 
 /* Writes the character representation of the number encoded in value.
  * E.g. if value = 1234, then the string "1234" will be written to str. */
-static void bc_write_bcd_representation(int32_t value, char *str)
+static void bc_write_bcd_representation(uint32_t value, char *str)
 {
-	int32_t upper = value / 100; /* e.g. 12 */
-	int32_t lower = value % 100; /* e.g. 34 */
+	uint32_t upper = value / 100; /* e.g. 12 */
+	uint32_t lower = value % 100; /* e.g. 34 */
 
 #if BC_LITTLE_ENDIAN
 	/* Note: little endian, so `lower` comes before `upper`! */
-	int32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
+	uint32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
 #else
 	/* Note: big endian, so `upper` comes before `lower`! */
-	int32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
+	uint32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
 #endif
 	memcpy(str, &digits, sizeof(digits));
 }
