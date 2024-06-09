@@ -25,8 +25,8 @@ function main() {
     $data['Zend/bench.php JIT'] = runBench(true);
     $data['Symfony Demo 2.2.3'] = runSymfonyDemo(false);
     $data['Symfony Demo 2.2.3 JIT'] = runSymfonyDemo(true);
-    $data['Wordpress 6.2'] = runWordpress(false);
-    $data['Wordpress 6.2 JIT'] = runWordpress(true);
+    // $data['Wordpress 6.2'] = runWordpress(false);
+    // $data['Wordpress 6.2 JIT'] = runWordpress(true);
     $result = json_encode($data, JSON_PRETTY_PRINT) . "\n";
 
     fwrite(STDOUT, $result);
