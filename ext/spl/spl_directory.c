@@ -27,11 +27,11 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
-#include "spl_functions.h" /* For spl_gen_private_prop_name() */
 #include "spl_iterators.h"
 #include "spl_directory.h"
 #include "spl_directory_arginfo.h"
 #include "spl_exceptions.h"
+#include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 #define SPL_HAS_FLAG(flags, test_flag) ((flags & test_flag) ? 1 : 0)
 
@@ -600,84 +600,69 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(object);
 	zval tmp;
-	HashTable *rv;
-	zend_string *pnstr;
-	zend_string *path;
-	char stmp[2];
+	HashTable *debug_info;
+	zend_string *path_name;
 
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);
 	}
 
-	rv = zend_array_dup(intern->std.properties);
+	// TODO Do zend_new_array() + zend_hash_copy() trick?
+	debug_info = zend_array_dup(intern->std.properties);
 
-	pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "pathName", sizeof("pathName")-1);
-	path = spl_filesystem_object_get_pathname(intern);
-	if (path) {
-		ZVAL_STR_COPY(&tmp, path);
+	path_name = spl_filesystem_object_get_pathname(intern);
+	if (path_name) {
+		ZVAL_STR_COPY(&tmp, path_name);
 	} else {
 		ZVAL_EMPTY_STRING(&tmp);
 	}
-	zend_symtable_update(rv, pnstr, &tmp);
-	zend_string_release_ex(pnstr, 0);
+	/* IMPORTANT: Do not free path_name as spl_filesystem_object_get_pathname()
+	 * updates/sets the intern->file_name and returns the pointer to
+	 * intern->file_name which must remain allocated. */
+	spl_set_private_debug_info_property(spl_ce_SplFileInfo, "pathName", strlen("pathName"), debug_info, &tmp);
 
 	if (intern->file_name) {
-		zend_string *path;
-
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileInfo, "fileName", sizeof("fileName")-1);
-		path = spl_filesystem_object_get_path(intern);
-
+		zend_string *path = spl_filesystem_object_get_path(intern);
 		if (path && ZSTR_LEN(path) && ZSTR_LEN(path) < ZSTR_LEN(intern->file_name)) {
 			/* +1 to skip the trailing / of the path in the file name */
 			ZVAL_STRINGL(&tmp, ZSTR_VAL(intern->file_name) + ZSTR_LEN(path) + 1, ZSTR_LEN(intern->file_name) - (ZSTR_LEN(path) + 1));
 		} else {
 			ZVAL_STR_COPY(&tmp, intern->file_name);
 		}
-		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release_ex(pnstr, /* persistent */ false);
 		if (path) {
 			zend_string_release_ex(path, /* persistent */ false);
 		}
+
+		spl_set_private_debug_info_property(spl_ce_SplFileInfo, "fileName", strlen("fileName"), debug_info, &tmp);
 	}
 	if (intern->type == SPL_FS_DIR) {
 #ifdef HAVE_GLOB
-		pnstr = spl_gen_private_prop_name(spl_ce_DirectoryIterator, "glob", sizeof("glob")-1);
-		if (php_stream_is(intern->u.dir.dirp ,&php_glob_stream_ops)) {
+		if (php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
 			ZVAL_STR_COPY(&tmp, intern->path);
 		} else {
 			ZVAL_FALSE(&tmp);
 		}
-		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release_ex(pnstr, 0);
+		spl_set_private_debug_info_property(spl_ce_DirectoryIterator, "glob", strlen("glob"), debug_info, &tmp);
 #endif
-		pnstr = spl_gen_private_prop_name(spl_ce_RecursiveDirectoryIterator, "subPathName", sizeof("subPathName")-1);
 		if (intern->u.dir.sub_path) {
 			ZVAL_STR_COPY(&tmp, intern->u.dir.sub_path);
 		} else {
 			ZVAL_EMPTY_STRING(&tmp);
 		}
-		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release_ex(pnstr, 0);
+		spl_set_private_debug_info_property(spl_ce_RecursiveDirectoryIterator, "subPathName", strlen("subPathName"), debug_info, &tmp);
 	}
 	if (intern->type == SPL_FS_FILE) {
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "openMode", sizeof("openMode")-1);
 		ZVAL_STR_COPY(&tmp, intern->u.file.open_mode);
-		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release_ex(pnstr, 0);
-		stmp[1] = '\0';
-		stmp[0] = intern->u.file.delimiter;
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "delimiter", sizeof("delimiter")-1);
-		ZVAL_STRINGL(&tmp, stmp, 1);
-		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release_ex(pnstr, 0);
-		stmp[0] = intern->u.file.enclosure;
-		pnstr = spl_gen_private_prop_name(spl_ce_SplFileObject, "enclosure", sizeof("enclosure")-1);
-		ZVAL_STRINGL(&tmp, stmp, 1);
-		zend_symtable_update(rv, pnstr, &tmp);
-		zend_string_release_ex(pnstr, 0);
+		spl_set_private_debug_info_property(spl_ce_SplFileObject, "openMode", strlen("openMode"), debug_info, &tmp);
+
+		ZVAL_STR(&tmp, ZSTR_CHAR((zend_uchar)intern->u.file.delimiter));
+		spl_set_private_debug_info_property(spl_ce_SplFileObject, "delimiter", strlen("delimiter"), debug_info, &tmp);
+
+		ZVAL_STR(&tmp, ZSTR_CHAR((zend_uchar)intern->u.file.enclosure));
+		spl_set_private_debug_info_property(spl_ce_SplFileObject, "enclosure", strlen("enclosure"), debug_info, &tmp);
 	}
 
-	return rv;
+	return debug_info;
 }
 /* }}} */
 

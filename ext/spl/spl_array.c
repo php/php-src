@@ -24,11 +24,11 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "spl_functions.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
+#include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 /* Defined later in the file */
 static zend_object_handlers spl_handler_ArrayIterator;
@@ -763,9 +763,6 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 
 static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 {
-	zval *storage;
-	zend_string *zname;
-	zend_class_entry *base;
 	spl_array_object *intern = spl_array_from_obj(obj);
 
 	if (!intern->std.properties) {
@@ -780,14 +777,13 @@ static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 		debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-		storage = &intern->array;
+		zval *storage = &intern->array;
 		Z_TRY_ADDREF_P(storage);
 
-		base = obj->handlers == &spl_handler_ArrayIterator
+		const zend_class_entry *base_class_ce = instanceof_function(obj->ce, spl_ce_ArrayIterator)
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
-		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
-		zend_symtable_update(debug_info, zname, storage);
-		zend_string_release_ex(zname, 0);
+
+		spl_set_private_debug_info_property(base_class_ce, "storage", strlen("storage"), debug_info, storage);
 
 		return debug_info;
 	}

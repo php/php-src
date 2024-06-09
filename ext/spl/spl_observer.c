@@ -27,11 +27,11 @@
 #include "zend_exceptions.h"
 
 #include "php_spl.h" /* For php_spl_object_hash() */
-#include "spl_functions.h" /* For spl_gen_private_prop_name() */
 #include "spl_observer.h"
 #include "spl_observer_arginfo.h"
 #include "spl_iterators.h"
 #include "spl_exceptions.h"
+#include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 PHPAPI zend_class_entry     *spl_ce_SplObserver;
 PHPAPI zend_class_entry     *spl_ce_SplSubject;
@@ -321,7 +321,6 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 	spl_SplObjectStorageElement *element;
 	HashTable *props;
 	zval tmp, storage;
-	zend_string *zname;
 	HashTable *debug_info;
 
 	props = obj->handlers->get_properties(obj);
@@ -343,9 +342,7 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
 	} ZEND_HASH_FOREACH_END();
 
-	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
-	zend_symtable_update(debug_info, zname, &storage);
-	zend_string_release_ex(zname, 0);
+	spl_set_private_debug_info_property(spl_ce_SplObjectStorage, "storage", strlen("storage"), debug_info, &storage);
 
 	return debug_info;
 }
