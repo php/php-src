@@ -16121,7 +16121,7 @@ static const void *zend_jit_trace_allocate_exit_group(uint32_t n)
 			char name[32];
 
 			for (i = 0; i < ZEND_JIT_EXIT_POINTS_PER_GROUP; i++) {
-				sprintf(name, "jit$$trace_exit_%d", n + i);
+				snprintf(name, sizeof(name), "jit$$trace_exit_%d", n + i);
 				ir_disasm_add_symbol(name, (uintptr_t)entry + (i * ZEND_JIT_EXIT_POINTS_SPACING), ZEND_JIT_EXIT_POINTS_SPACING);
 			}
 		}
