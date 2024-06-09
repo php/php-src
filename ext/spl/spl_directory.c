@@ -183,7 +183,7 @@ static void spl_filesystem_object_free_storage(zend_object *object) /* {{{ */
    - clone
    - new
  */
-static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type)
+static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 {
 	spl_filesystem_object *intern;
 
@@ -199,14 +199,6 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type)
 	object_properties_init(&intern->std, class_type);
 
 	return &intern->std;
-}
-/* }}} */
-
-/* {{{ spl_filesystem_object_new */
-/* See spl_filesystem_object_new_ex */
-static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
-{
-	return spl_filesystem_object_new_ex(class_type);
 }
 /* }}} */
 
@@ -385,7 +377,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 /* {{{ spl_filesystem_object_clone */
 /* Local zend_object creation (on stack)
    Load the 'other' object
-   Create a new empty object (See spl_filesystem_object_new_ex)
+   Create a new empty object (See spl_filesystem_object_new)
    Open the directory
    Clone other members (properties)
  */
@@ -396,7 +388,7 @@ static zend_object *spl_filesystem_object_clone(zend_object *old_object)
 	spl_filesystem_object *source;
 
 	source = spl_filesystem_from_obj(old_object);
-	new_object = spl_filesystem_object_new_ex(old_object->ce);
+	new_object = spl_filesystem_object_new(old_object->ce);
 	intern = spl_filesystem_from_obj(new_object);
 
 	intern->flags = source->flags;
@@ -481,7 +473,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(zend_string *fil
 	ZEND_ASSERT(file_path && ZSTR_LEN(file_path) > 0);
 	ZEND_ASSERT(ce != NULL);
 
-	intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
+	intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
 	RETVAL_OBJ(&intern->std);
 
 	if (ce->constructor->common.scope != spl_ce_SplFileInfo) {
@@ -517,7 +509,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 		case SPL_FS_INFO:
 			ce = ce ? ce : source->info_class;
 
-			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
+			intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
 			RETVAL_OBJ(&intern->std);
 
 			if (spl_filesystem_object_get_file_name(source) == FAILURE) {
@@ -546,7 +538,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 				return NULL;
 			}
 
-			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
+			intern = spl_filesystem_from_obj(spl_filesystem_object_new(ce));
 			RETVAL_OBJ(&intern->std);
 
 			if (spl_filesystem_object_get_file_name(source) == FAILURE) {
