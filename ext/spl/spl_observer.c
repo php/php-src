@@ -20,18 +20,17 @@
 #endif
 
 #include "php.h"
-#include "ext/standard/php_array.h"
+#include "ext/standard/php_array.h" /* For PHP_COUNT_* constants */
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
+#include "php_spl.h" /* For php_spl_object_hash() */
+#include "spl_functions.h" /* For spl_gen_private_prop_name() */
 #include "spl_observer.h"
 #include "spl_observer_arginfo.h"
 #include "spl_iterators.h"
-#include "spl_array.h"
 #include "spl_exceptions.h"
 
 PHPAPI zend_class_entry     *spl_ce_SplObserver;

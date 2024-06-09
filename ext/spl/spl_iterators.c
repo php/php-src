@@ -23,12 +23,9 @@
 #include "zend_interfaces.h"
 #include "ext/pcre/php_pcre.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
 #include "spl_iterators.h"
 #include "spl_iterators_arginfo.h"
-#include "spl_directory.h"
-#include "spl_array.h"
+#include "spl_array.h" /* For spl_ce_ArrayIterator */
 #include "spl_exceptions.h"
 #include "zend_smart_str.h"
 

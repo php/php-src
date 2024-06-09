@@ -23,13 +23,10 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "php_spl.h"
 #include "spl_fixedarray_arginfo.h"
-#include "spl_functions.h"
 #include "spl_fixedarray.h"
 #include "spl_exceptions.h"
-#include "spl_iterators.h"
-#include "ext/json/php_json.h"
+#include "ext/json/php_json.h" /* For php_json_serializable_ce */
 
 static zend_object_handlers spl_handler_SplFixedArray;
 PHPAPI zend_class_entry *spl_ce_SplFixedArray;

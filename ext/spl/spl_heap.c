@@ -22,9 +22,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "php_spl.h"
 #include "spl_functions.h"
-#include "spl_iterators.h"
 #include "spl_heap.h"
 #include "spl_heap_arginfo.h"
 #include "spl_exceptions.h"

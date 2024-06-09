@@ -18,7 +18,6 @@
 #define SPL_HEAP_H
 
 #include "php.h"
-#include "php_spl.h"
 
 #define SPL_PQUEUE_EXTR_MASK     0x00000003
 #define SPL_PQUEUE_EXTR_BOTH     0x00000003
