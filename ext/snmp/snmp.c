@@ -528,7 +528,7 @@ retry:
 								buf2[0] = '\0';
 								count = rootlen;
 								while(count < vars->name_length){
-									sprintf(buf, "%lu.", vars->name[count]);
+									snprintf(buf, sizeof(buf), "%lu.", vars->name[count]);
 									strcat(buf2, buf);
 									count++;
 								}
@@ -873,8 +873,9 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 
 	/* put back non-standard SNMP port */
 	if (remote_port != SNMP_PORT) {
-		pptr = session->peername + strlen(session->peername);
-		sprintf(pptr, ":%d", remote_port);
+		size_t peername_length = strlen(session->peername);
+		pptr = session->peername + peername_length;
+		snprintf(pptr, MAX_NAME_LEN - peername_length, ":%d", remote_port);
 	}
 
 	php_network_freeaddresses(psal);
