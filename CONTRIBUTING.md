@@ -131,12 +131,8 @@ should be credited, the `Co-authored-by` tag in the commit message may be used.
 
 ## Writing documentation
 
-There are two ways to contribute to the PHP manual. You can edit the manual and
-send patches anonymously via [the online editor](https://edit.php.net/), or you
-can check the XML source out from Subversion and edit that and build it
-[per the instructions on the documentation site](http://doc.php.net/tutorial/).
-Patches created that way should be sent to the
-[documentation mailing list](mailto:phpdoc@lists.php.net).
+Editing the manual is done by checking out the XML sources using Git and editing
+and building it [per the instructions on the documentation site](http://doc.php.net/tutorial/).
 
 ## Getting help
 
