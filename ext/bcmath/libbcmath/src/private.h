@@ -83,10 +83,10 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 
 #if SIZEOF_SIZE_T >= 8
 #  define BC_BSWAP(u) BC_BSWAP64(u)
-   typedef uint64_t BC_VECTOR;
+   typedef int64_t BC_VECTOR;
 #else
 #  define BC_BSWAP(u) BC_BSWAP32(u)
-   typedef uint32_t BC_VECTOR;
+   typedef int32_t BC_VECTOR;
 #endif
 
 #ifdef WORDS_BIGENDIAN
