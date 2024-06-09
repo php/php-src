@@ -1641,9 +1641,7 @@ PHP_FUNCTION(openssl_spki_new)
 		goto cleanup;
 	}
 
-	s = zend_string_alloc(strlen(spkac) + strlen(spkstr), 0);
-	sprintf(ZSTR_VAL(s), "%s%s", spkac, spkstr);
-	ZSTR_LEN(s) = strlen(ZSTR_VAL(s));
+	s = zend_string_concat2(spkac, strlen(spkac), spkstr, strlen(spkstr));
 	OPENSSL_free(spkstr);
 
 	RETVAL_STR(s);
