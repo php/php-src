@@ -102,7 +102,11 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 			 * 11111111 + 00000001 = 00000000(0) and carry 1
 			 */
 			n1bytes += SWAR_REPEAT(0xF6) + n2bytes + carry;
-			/* If the most significant bit is 0, a carry has occurred. */
+			/*
+			 * If the most significant bit is 0, a carry has occurred.
+			 * For signed types, the most significant bit represents the sign, so n1bytes being greater
+			 * than or equal to 0 is the same as n1bytes having the most significant bit being 0.
+			 */
 			carry = n1bytes >= 0;
 
 			/*
@@ -236,7 +240,11 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 #endif
 
 			n1bytes -= n2bytes + borrow;
-			/* If the most significant bit is 1, a carry down has occurred. */
+			/*
+			 * If the most significant bit is 1, a carry down has occurred.
+			 * For signed types, the most significant bit represents the sign, so n1bytes less than 0
+			 * is the same as n1bytes with the most significant bit equal to 1.
+			 */
 			bool tmp_borrow = n1bytes < 0;
 
 			/*
