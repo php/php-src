@@ -1262,7 +1262,7 @@ int fpm_conf_write_pid(void)
 			return -1;
 		}
 
-		len = sprintf(buf, "%d", (int) fpm_globals.parent_pid);
+		len = snprintf(buf, sizeof(buf), "%d", (int) fpm_globals.parent_pid);
 
 		if (len != write(fd, buf, len)) {
 			zlog(ZLOG_SYSERROR, "Unable to write to the PID file.");
