@@ -23,11 +23,9 @@
 #include "zend_exceptions.h"
 #include "zend_hash.h"
 
-#include "php_spl.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
-#include "spl_functions.h"
-#include "spl_iterators.h"
+#include "spl_functions.h" /* For spl_gen_private_prop_name() */
 #include "spl_dllist.h"
 #include "spl_dllist_arginfo.h"
 #include "spl_exceptions.h"

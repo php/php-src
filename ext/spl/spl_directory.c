@@ -27,8 +27,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
+#include "spl_functions.h" /* For spl_gen_private_prop_name() */
 #include "spl_iterators.h"
 #include "spl_directory.h"
 #include "spl_directory_arginfo.h"

@@ -18,7 +18,6 @@
 #define SPL_DIRECTORY_H
 
 #include "php.h"
-#include "php_spl.h"
 
 extern PHPAPI zend_class_entry *spl_ce_SplFileInfo;
 extern PHPAPI zend_class_entry *spl_ce_DirectoryIterator;

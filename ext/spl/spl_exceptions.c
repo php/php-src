@@ -23,7 +23,6 @@
 #include "zend_exceptions.h"
 #include "spl_exceptions_arginfo.h"
 
-#include "php_spl.h"
 #include "spl_exceptions.h"
 
 PHPAPI zend_class_entry *spl_ce_LogicException;

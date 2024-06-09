@@ -19,7 +19,6 @@
 #endif
 
 #include "php.h"
-#include "php_spl.h"
 
 /* {{{ spl_add_class_name */
 void spl_add_class_name(zval *list, zend_class_entry *pce, int allow, int ce_flags)
