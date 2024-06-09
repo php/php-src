@@ -75,8 +75,7 @@ struct _spl_filesystem_object {
 			zval               *zcontext;
 			zend_string        *open_mode;
 			zval               current_zval;
-			char               *current_line;
-			size_t             current_line_len;
+			zend_string       *current_line;
 			size_t             max_line_len;
 			zend_long               current_line_num;
 			zval               zresource;

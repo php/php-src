@@ -93,7 +93,7 @@ static inline spl_filesystem_object* spl_filesystem_iterator_to_object(spl_files
 static void spl_filesystem_file_free_line(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->u.file.current_line) {
-		efree(intern->u.file.current_line);
+		zend_string_release_ex(intern->u.file.current_line, /* persistent */ false);
 		intern->u.file.current_line = NULL;
 	}
 	if (!Z_ISUNDEF(intern->u.file.current_zval)) {
@@ -1884,8 +1884,7 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 	}
 
 	if (!buf) {
-		intern->u.file.current_line = estrdup("");
-		intern->u.file.current_line_len = 0;
+		intern->u.file.current_line = ZSTR_EMPTY_ALLOC();
 	} else {
 		if (!csv && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)) {
 			if (line_len > 0 && buf[line_len - 1] == '\n') {
@@ -1897,8 +1896,8 @@ static zend_result spl_filesystem_file_read_ex(spl_filesystem_object *intern, bo
 			}
 		}
 
-		intern->u.file.current_line = buf;
-		intern->u.file.current_line_len = line_len;
+		intern->u.file.current_line = zend_string_init(buf, line_len, /* persistent */ false);
+		efree(buf);
 	}
 	intern->u.file.current_line_num += line_add;
 
@@ -1911,14 +1910,18 @@ static inline zend_result spl_filesystem_file_read(spl_filesystem_object *intern
 	return spl_filesystem_file_read_ex(intern, silent, line_add, csv);
 }
 
-static bool is_line_empty(spl_filesystem_object *intern)
+static bool is_line_empty(const spl_filesystem_object *intern)
 {
-	char *current_line = intern->u.file.current_line;
-	size_t current_line_len = intern->u.file.current_line_len;
-	return current_line_len == 0
-		|| ((SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)
-			&& ((current_line_len == 1 && current_line[0] == '\n')
-				|| (current_line_len == 2 && current_line[0] == '\r' && current_line[1] == '\n'))));
+	const char *current_line = ZSTR_VAL(intern->u.file.current_line);
+	size_t current_line_len = ZSTR_LEN(intern->u.file.current_line);
+	return current_line_len == 0 || (
+		SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV)
+		&& SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_DROP_NEW_LINE)
+		&& (
+			(current_line_len == 1 && current_line[0] == '\n')
+			|| (current_line_len == 2 && current_line[0] == '\r' && current_line[1] == '\n')
+		)
+	);
 }
 
 static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, char delimiter, char enclosure, int escape, zval *return_value, bool silent) /* {{{ */
@@ -1930,8 +1933,11 @@ static zend_result spl_filesystem_file_read_csv(spl_filesystem_object *intern, c
 		}
 	} while (is_line_empty(intern) && SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_SKIP_EMPTY));
 
-	size_t buf_len = intern->u.file.current_line_len;
-	char *buf = estrndup(intern->u.file.current_line, buf_len);
+	/* We need to duplicate the current line content as php_fgetcsv() will free it.
+	 * This is because it might reach the end of the line when it's in an enclosure and
+	 * thus must fetch the next line from the stream */
+	size_t buf_len = ZSTR_LEN(intern->u.file.current_line);
+	char *buf = estrndup(ZSTR_VAL(intern->u.file.current_line), buf_len);
 
 	if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		zval_ptr_dtor(&intern->u.file.current_zval);
@@ -1983,8 +1989,7 @@ static zend_result spl_filesystem_file_read_line_ex(zval * this_ptr, spl_filesys
 			intern->u.file.current_line_num++;
 		}
 		spl_filesystem_file_free_line(intern);
-		intern->u.file.current_line = estrndup(Z_STRVAL(retval), Z_STRLEN(retval));
-		intern->u.file.current_line_len = Z_STRLEN(retval);
+		intern->u.file.current_line = zend_string_copy(Z_STR(retval));
 		zval_ptr_dtor(&retval);
 		return SUCCESS;
 	} else {
@@ -2159,7 +2164,7 @@ PHP_METHOD(SplFileObject, fgets)
 	if (spl_filesystem_file_read_ex(intern, /* silent */ false, /* line_add */ 1, /* csv */ false) == FAILURE) {
 		RETURN_THROWS();
 	}
-	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
+	RETURN_STR_COPY(intern->u.file.current_line);
 } /* }}} */
 
 /* {{{ Return current line from file */
@@ -2177,7 +2182,7 @@ PHP_METHOD(SplFileObject, current)
 		spl_filesystem_file_read_line(ZEND_THIS, intern, true);
 	}
 	if (intern->u.file.current_line && (!SPL_HAS_FLAG(intern->flags, SPL_FILE_OBJECT_READ_CSV) || Z_ISUNDEF(intern->u.file.current_zval))) {
-		RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
+		RETURN_STR_COPY(intern->u.file.current_line);
 	} else if (!Z_ISUNDEF(intern->u.file.current_zval)) {
 		ZEND_ASSERT(!Z_ISREF(intern->u.file.current_zval));
 		ZEND_ASSERT(Z_TYPE(intern->u.file.current_zval) == IS_ARRAY);
@@ -2575,7 +2580,7 @@ PHP_METHOD(SplFileObject, fpassthru)
 /* {{{ Implements a mostly ANSI compatible fscanf() */
 PHP_METHOD(SplFileObject, fscanf)
 {
-	int result, num_varargs = 0;
+	uint32_t num_varargs = 0;
 	zend_string *format_str;
 	zval *varargs= NULL;
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
@@ -2591,7 +2596,7 @@ PHP_METHOD(SplFileObject, fscanf)
 		RETURN_THROWS();
 	}
 
-	result = php_sscanf_internal(intern->u.file.current_line, ZSTR_VAL(format_str), num_varargs, varargs, 0, return_value);
+	int result = php_sscanf_internal(ZSTR_VAL(intern->u.file.current_line), ZSTR_VAL(format_str), (int)num_varargs, varargs, 0, return_value);
 
 	if (SCAN_ERROR_WRONG_PARAM_COUNT == result) {
 		WRONG_PARAM_COUNT;
@@ -2740,7 +2745,7 @@ PHP_METHOD(SplFileObject, __toString)
 		}
 	}
 
-	RETURN_STRINGL(intern->u.file.current_line, intern->u.file.current_line_len);
+	RETURN_STR_COPY(intern->u.file.current_line);
 }
 
 /* {{{ PHP_MINIT_FUNCTION(spl_directory) */
