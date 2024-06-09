@@ -2538,8 +2538,6 @@ PHP_METHOD(SplFileObject, fseek)
 PHP_METHOD(SplFileObject, fgetc)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
-	char buf[2];
-	int result;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2549,7 +2547,7 @@ PHP_METHOD(SplFileObject, fgetc)
 
 	spl_filesystem_file_free_line(intern);
 
-	result = php_stream_getc(intern->u.file.stream);
+	int result = php_stream_getc(intern->u.file.stream);
 
 	if (result == EOF) {
 		RETURN_FALSE;
@@ -2557,10 +2555,8 @@ PHP_METHOD(SplFileObject, fgetc)
 	if (result == '\n') {
 		intern->u.file.current_line_num++;
 	}
-	buf[0] = result;
-	buf[1] = '\0';
 
-	RETURN_STRINGL(buf, 1);
+	RETURN_STR(ZSTR_CHAR((zend_uchar)result));
 } /* }}} */
 
 /* {{{ Output all remaining data from a file pointer */
