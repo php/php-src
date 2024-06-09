@@ -19,8 +19,6 @@
 
 #include "php.h"
 
-typedef zend_object* (*create_object_func_t)(zend_class_entry *class_type);
-
 /* sub: whether to allow subclasses/interfaces
    allow = 0: allow all classes and interfaces
    allow > 0: allow all that match and mask ce_flags
