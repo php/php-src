@@ -29,9 +29,9 @@ Foo\Bar::Foo:
      ; (lines=5, args=1, vars=1, tmps=%d)
      ; %s:5-7
 L0005 0000 CV0($bar) = RECV 1
-L0006 0001 INIT_NS_FCALL_BY_NAME 1 string("Foo\\var_dump")
-L0006 0002 SEND_VAR_EX CV0($bar) 1
-L0006 0003 DO_FCALL
+L0006 0001 INIT_FCALL %d %d string("var_dump")
+L0006 0002 SEND_VAR CV0($bar) 1
+L0006 0003 DO_ICALL
 L0007 0004 RETURN null
 
 Foo\Bar::baz:
