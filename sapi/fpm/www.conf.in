@@ -348,7 +348,7 @@ pm.max_spare_servers = 3
 ;      %d/%b/%Y:%H:%M:%S %z (default)
 ;      The strftime(3) format must be encapsulated in a %{<strftime_format>}t tag
 ;      e.g. for a ISO8601 formatted timestring, use: %{%Y-%m-%dT%H:%M:%S%z}t
-;  %u: remote user
+;  %u: basic auth user if specified in Authorization header
 ;
 ; Default: "%R - %u %t \"%m %r\" %s"
 ;access.format = "%R - %u %t \"%m %r%Q%q\" %s %f %{milli}d %{kilo}M %C%%"
