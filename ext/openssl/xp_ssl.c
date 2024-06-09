@@ -498,7 +498,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 			OPENSSL_free(cert_name);
 		} else if (san->type == GEN_IPADD) {
 			if (san->d.iPAddress->length == 4) {
-				sprintf(ipbuffer, "%d.%d.%d.%d",
+				snprintf(ipbuffer, sizeof(ipbuffer), "%d.%d.%d.%d",
 					san->d.iPAddress->data[0],
 					san->d.iPAddress->data[1],
 					san->d.iPAddress->data[2],
