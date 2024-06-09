@@ -257,7 +257,7 @@ PHP_MINFO_FUNCTION(curl)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "cURL support",    "enabled");
 	php_info_print_table_row(2, "cURL Information", d->version);
-	sprintf(str, "%d", d->age);
+	snprintf(str, sizeof(str), "%d", d->age);
 	php_info_print_table_row(2, "Age", str);
 
 	/* To update on each new cURL release using src/main.c in cURL sources */
@@ -324,7 +324,7 @@ PHP_MINFO_FUNCTION(curl)
 	n = 0;
 	p = (char **) d->protocols;
 	while (*p != NULL) {
-			n += sprintf(str + n, "%s%s", *p, *(p + 1) != NULL ? ", " : "");
+			n += snprintf(str + n, sizeof(str) - n, "%s%s", *p, *(p + 1) != NULL ? ", " : "");
 			p++;
 	}
 	php_info_print_table_row(2, "Protocols", str);
