@@ -183,7 +183,7 @@ namespace {
      * @cvalue PQERRORS_VERBOSE
      */
     const PGSQL_ERRORS_VERBOSE = UNKNOWN;
-    #if PGVERSION_NUM > 110000
+    #if PG_VERSION_NUM > 110000
     /**
      * @var int
      * @cvalue PQERRORS_SQLSTATE
