@@ -34,7 +34,7 @@
 #include "ext/date/php_date.h"
 #include "opcache_arginfo.h"
 
-#if HAVE_JIT
+#ifdef HAVE_JIT
 #include "jit/zend_jit.h"
 #endif
 
@@ -480,7 +480,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 	} else {
 		php_info_print_table_row(2, "File Cache", "Disabled");
 	}
-#if HAVE_JIT
+#ifdef HAVE_JIT
 	if (JIT_G(enabled)) {
 		if (JIT_G(on)) {
 			php_info_print_table_row(2, "JIT", "On");
@@ -758,7 +758,7 @@ ZEND_FUNCTION(opcache_get_status)
 			add_assoc_zval(return_value, "scripts", &scripts);
 		}
 	}
-#if HAVE_JIT
+#ifdef HAVE_JIT
 	zend_jit_status(return_value);
 #endif
 }

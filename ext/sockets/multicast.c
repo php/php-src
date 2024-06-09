@@ -54,7 +54,7 @@ static int _php_mcast_source_op(php_socket *sock, int level, struct sockaddr *gr
 
 #ifdef RFC3678_API
 static int _php_source_op_to_rfc3678_op(enum source_op sop);
-#elif HAS_MCAST_EXT
+#elif defined(HAS_MCAST_EXT)
 static const char *_php_source_op_to_string(enum source_op sop);
 static int _php_source_op_to_ipv4_op(enum source_op sop);
 #endif

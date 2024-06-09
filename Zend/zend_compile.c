@@ -8857,9 +8857,9 @@ static bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 
 			if (zend_string_equals_literal(dirname, ".")) {
 				dirname = zend_string_extend(dirname, MAXPATHLEN, 0);
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 				ZEND_IGNORE_VALUE(VCWD_GETCWD(ZSTR_VAL(dirname), MAXPATHLEN));
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 				ZEND_IGNORE_VALUE(VCWD_GETWD(ZSTR_VAL(dirname)));
 #endif
 				ZSTR_LEN(dirname) = strlen(ZSTR_VAL(dirname));
