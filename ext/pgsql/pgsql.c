@@ -116,7 +116,7 @@ char pgsql_libpq_version[16];
 #define PQfreemem free
 #endif
 
-#if PG_VERSION_NUM < 120000
+#ifndef HAVE_PQERRORS_SQLSTATE
 #define PQERRORS_SQLSTATE 0
 #endif
 
