@@ -101,7 +101,7 @@ PHP_METHOD(Dom_XMLDocument, createEmpty)
 		zend_argument_value_error(2, "is not a valid document encoding");
 		RETURN_THROWS();
 	}
-	
+
 	xmlDocPtr lxml_doc = xmlNewDoc((const xmlChar *) version);
 	if (UNEXPECTED(lxml_doc == NULL)) {
 		goto oom;
@@ -197,7 +197,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		if (!php_is_stream_path((char *) lxml_doc->URL)) {
 			/* Check for "file:/" instead of "file://" because of libxml2 quirk */
 			if (strncmp((const char *) lxml_doc->URL, "file:/", sizeof("file:/") - 1) != 0) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 				xmlChar *buffer = xmlStrdup((const xmlChar *) "file:///");
 #else
 				xmlChar *buffer = xmlStrdup((const xmlChar *) "file://");
@@ -212,7 +212,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 					}
 				}
 			} else {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 				lxml_doc->URL = php_dom_libxml_fix_file_path(BAD_CAST lxml_doc->URL);
 #endif
 			}

@@ -33,7 +33,7 @@
 #endif
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -44,7 +44,7 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_POLL_H
+#ifdef HAVE_POLL_H
 #include <poll.h>
 #elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
@@ -54,7 +54,7 @@
 #ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -774,7 +774,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	struct sockaddr **sal, **psal, *sa;
 	struct timeval working_timeout;
 	socklen_t socklen;
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	struct timeval limit_time, time_now;
 #endif
 
@@ -787,7 +787,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 	if (timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 		gettimeofday(&limit_time, NULL);
 		limit_time.tv_sec += working_timeout.tv_sec;
 		limit_time.tv_usec += working_timeout.tv_usec;
@@ -906,7 +906,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		}
 
 		/* adjust timeout for next attempt */
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 		if (timeout) {
 			gettimeofday(&time_now, NULL);
 

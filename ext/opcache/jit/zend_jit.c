@@ -691,7 +691,7 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 # pragma clang diagnostic pop
 #endif
 
-#if _WIN32
+#ifdef _WIN32
 # include <Windows.h>
 #else
 # include <sys/mman.h>
@@ -3246,7 +3246,7 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old, new;
 #ifdef ZTS
@@ -3277,7 +3277,7 @@ ZEND_EXT_API void zend_jit_protect(void)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old;
 
@@ -3520,7 +3520,7 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		DWORD old;
 

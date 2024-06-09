@@ -40,12 +40,12 @@
 #include "php_network.h"
 #include "zend_smart_str.h"
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -54,7 +54,7 @@
 #else
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -368,7 +368,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 	memset(file_handle, 0, sizeof(zend_file_handle));
 
 	path_info = SG(request_info).request_uri;
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 	if (PG(user_dir) && *PG(user_dir) && path_info && '/' == path_info[0] && '~' == path_info[1]) {
 		char *s = strchr(path_info + 2, '/');
 

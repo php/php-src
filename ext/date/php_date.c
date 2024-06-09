@@ -2381,7 +2381,7 @@ static void php_date_set_time_fraction(timelib_time *time, int microsecond)
 
 static void php_date_get_current_time_with_fraction(time_t *sec, suseconds_t *usec)
 {
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	struct timeval tp = {0}; /* For setting microsecond */
 
 	gettimeofday(&tp, NULL);

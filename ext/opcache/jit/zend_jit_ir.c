@@ -3125,7 +3125,7 @@ static void zend_jit_calc_trace_prologue_size(void)
 	zend_jit_trace_prologue_size = size;
 }
 
-#if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
+#if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
 static uintptr_t zend_jit_hybrid_vm_sp_adj = 0;
 
 typedef struct _Unwind_Context _Unwind_Context;
@@ -3239,7 +3239,7 @@ static void zend_jit_setup(void)
 			zend_accel_error_noreturn(ACCEL_LOG_FATAL, "Could not enable JIT: offset >= size");
 		}
 	} while(0);
-# elif ZEND_WIN32
+# elif defined(ZEND_WIN32)
 	tsrm_tls_index  = _tls_index * sizeof(void*);
 
 	/* To find offset of "_tsrm_ls_cache" in TLS segment we perform a linear scan of local TLS memory */
@@ -3339,7 +3339,7 @@ static void zend_jit_setup(void)
 # endif
 #endif
 
-#if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
+#if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
 	if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 		zend_jit_set_sp_adj_vm(); // set zend_jit_hybrid_vm_sp_adj
 	}
@@ -5441,7 +5441,7 @@ static int zend_jit_add_arrays(zend_jit_ctx *jit, const zend_op *opline, uint32_
 static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
                                      const zend_op  *opline,
                                      uint8_t         opcode,
-                                     uint8_t         op1_type, 
+                                     uint8_t         op1_type,
                                      znode_op        op1,
                                      zend_jit_addr   op1_addr,
                                      uint32_t        op1_info,
@@ -7982,7 +7982,7 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 
 	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 		mask = opline->extended_value;
-		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {			
+		if (!(op1_info & MAY_BE_GUARD) && !(op1_info & (MAY_BE_ANY - mask))) {
 			jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 			if (exit_addr) {
 				if (smart_branch_opcode == ZEND_JMPNZ) {
@@ -11840,7 +11840,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				if (opline->op2_type != IS_CONST) {
 					ir_ref if_num, end1, ref2;
 
-					if_num = ir_IF( 
+					if_num = ir_IF(
 						ir_ULE(
 							ir_LOAD_C(ir_ADD_OFFSET(key, offsetof(zend_string, val))),
 							ir_CONST_CHAR('9')));
@@ -16030,7 +16030,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 //					ir_mem_unprotect(entry, size);
 					if (!(jit->ctx.flags & IR_FUNCTION)
 					 && zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-#if !ZEND_WIN32 && !defined(IR_TARGET_AARCH64)
+#if !defined(ZEND_WIN32) && !defined(IR_TARGET_AARCH64)
 						sp_offset = zend_jit_hybrid_vm_sp_adj;
 #else
 						sp_offset = sizeof(void*);
