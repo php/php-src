@@ -171,7 +171,7 @@ PHP_FUNCTION(readline_info)
 				: ZSTR_CHAR(rl_completion_append_character));
 		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
 #endif
-#if HAVE_ERASE_EMPTY_LINE
+#ifdef HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
 #ifndef PHP_WIN32
@@ -235,7 +235,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_INTERNED_STR(
 				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));
 #endif
-#if HAVE_ERASE_EMPTY_LINE
+#ifdef HAVE_ERASE_EMPTY_LINE
 		} else if (zend_string_equals_literal_ci(what, "erase_empty_line")) {
 			oldval = rl_erase_empty_line;
 			if (value) {
