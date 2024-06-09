@@ -74,17 +74,17 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 	/* Now add the remaining fraction part and equal size integer parts. */
 	count = 0;
 	/* Uses SIMD to perform calculations at high speed. */
-	if (min_bytes >= sizeof(BC_VECTOR)) {
+	if (min_bytes >= sizeof(BC_U_VECTOR)) {
 		sumptr++;
 		n1ptr++;
 		n2ptr++;
-		while (count + sizeof(BC_VECTOR) <= min_bytes) {
-			sumptr -= sizeof(BC_VECTOR);
-			n1ptr -= sizeof(BC_VECTOR);
-			n2ptr -= sizeof(BC_VECTOR);
+		while (count + sizeof(BC_U_VECTOR) <= min_bytes) {
+			sumptr -= sizeof(BC_U_VECTOR);
+			n1ptr -= sizeof(BC_U_VECTOR);
+			n2ptr -= sizeof(BC_U_VECTOR);
 
-			BC_VECTOR n1bytes;
-			BC_VECTOR n2bytes;
+			BC_U_VECTOR n1bytes;
+			BC_U_VECTOR n2bytes;
 			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
 			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
 
@@ -103,7 +103,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 			 */
 			n1bytes += SWAR_REPEAT(0xF6) + n2bytes + carry;
 			/* If the most significant bit is 0, a carry has occurred. */
-			carry = !(n1bytes & ((BC_VECTOR) 1 << (8 * sizeof(BC_VECTOR) - 1)));
+			carry = !(n1bytes & ((BC_U_VECTOR) 1 << (8 * sizeof(BC_U_VECTOR) - 1)));
 
 			/*
 			 * The calculation result is a mixture of bytes that have been carried and bytes that have not.
@@ -111,7 +111,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 			 * Using this, subtract the 0xF6 added for adjustment from the byte that has not been carried
 			 * over to return it to the correct value as a decimal number.
 			 */
-			BC_VECTOR sum_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0xF6;
+			BC_U_VECTOR sum_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0xF6;
 			n1bytes -= sum_mask;
 
 #if BC_LITTLE_ENDIAN
@@ -121,7 +121,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 
 			memcpy(sumptr, &n1bytes, sizeof(n1bytes));
 
-			count += sizeof(BC_VECTOR);
+			count += sizeof(BC_U_VECTOR);
 		}
 		sumptr--;
 		n1ptr--;
@@ -215,17 +215,17 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 	/* Now do the equal length scale and integer parts. */
 	count = 0;
 	/* Uses SIMD to perform calculations at high speed. */
-	if (min_bytes >= sizeof(BC_VECTOR)) {
+	if (min_bytes >= sizeof(BC_U_VECTOR)) {
 		diffptr++;
 		n1ptr++;
 		n2ptr++;
-		while (count + sizeof(BC_VECTOR) <= min_bytes) {
-			diffptr -= sizeof(BC_VECTOR);
-			n1ptr -= sizeof(BC_VECTOR);
-			n2ptr -= sizeof(BC_VECTOR);
+		while (count + sizeof(BC_U_VECTOR) <= min_bytes) {
+			diffptr -= sizeof(BC_U_VECTOR);
+			n1ptr -= sizeof(BC_U_VECTOR);
+			n2ptr -= sizeof(BC_U_VECTOR);
 
-			BC_VECTOR n1bytes;
-			BC_VECTOR n2bytes;
+			BC_U_VECTOR n1bytes;
+			BC_U_VECTOR n2bytes;
 			memcpy(&n1bytes, n1ptr, sizeof(n1bytes));
 			memcpy(&n2bytes, n2ptr, sizeof(n2bytes));
 
@@ -237,7 +237,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 
 			n1bytes -= n2bytes + borrow;
 			/* If the most significant bit is 1, a carry down has occurred. */
-			bool tmp_borrow = n1bytes & ((BC_VECTOR) 1 << (8 * sizeof(BC_VECTOR) - 1));
+			bool tmp_borrow = n1bytes & ((BC_U_VECTOR) 1 << (8 * sizeof(BC_U_VECTOR) - 1));
 
 			/*
 			 * Check the most significant bit of each of the bytes, and if it is 1, a carry down has
@@ -246,7 +246,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 			 * Therefore, for a byte that has been carried down, set all the upper 4 bits to 0 and subtract
 			 * 6 from the lower 4 bits to adjust it to the correct value as a decimal number.
 			 */
-			BC_VECTOR borrow_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0x06;
+			BC_U_VECTOR borrow_mask = ((n1bytes & SWAR_REPEAT(0x80)) >> 7) * 0x06;
 			n1bytes = (n1bytes & SWAR_REPEAT(0x0F)) - borrow_mask;
 
 #if BC_LITTLE_ENDIAN
@@ -257,14 +257,14 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 			memcpy(diffptr, &n1bytes, sizeof(n1bytes));
 
 			borrow = tmp_borrow;
-			count += sizeof(BC_VECTOR);
+			count += sizeof(BC_U_VECTOR);
 		}
 		diffptr--;
 		n1ptr--;
 		n2ptr--;
 	}
 
-	/* Calculate the remaining bytes that are less than the size of BC_VECTOR using a normal loop. */
+	/* Calculate the remaining bytes that are less than the size of BC_U_VECTOR using a normal loop. */
 	for (; count < min_bytes; count++) {
 		val = *n1ptr-- - *n2ptr-- - borrow;
 		if (val < 0) {
