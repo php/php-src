@@ -254,7 +254,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		prod_vector[i] = 0;
 	}
 
-	/* Convert to uint[] */
+	/* Convert to BC_VECTOR[] */
 	bc_convert_to_vector(n1_vector, n1end, n1len);
 	bc_convert_to_vector(n2_vector, n2end, n2len);
 
