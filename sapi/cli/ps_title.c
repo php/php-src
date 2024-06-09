@@ -321,7 +321,7 @@ const char* ps_title_errno(int rc)
 
 #ifdef PS_USE_WIN32
     case PS_TITLE_WINDOWS_ERROR:
-        sprintf(windows_error_details, "Windows error code: %lu", GetLastError());
+        snprintf(windows_error_details, sizeof(windows_error_details), "Windows error code: %lu", GetLastError());
         return windows_error_details;
 #endif
     }
