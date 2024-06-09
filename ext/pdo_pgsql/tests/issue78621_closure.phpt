@@ -1,5 +1,5 @@
 --TEST--
-pgsqlSetNoticeCallback catches Postgres "raise notice".
+Pdo\Pgsql::setNoticeCallback catches Postgres "raise notice".
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
@@ -16,13 +16,13 @@ function attach($db, $prefix = '')
     switch($flavor)
     {
         case 0:
-            $db->pgsqlSetNoticeCallback(function($message) use($prefix) { echo $prefix.trim($message)."\n"; });
+            $db->setNoticeCallback(function($message) use($prefix) { echo $prefix.trim($message)."\n"; });
             // https://github.com/php/php-src/pull/4823#pullrequestreview-335623806
             $eraseCallbackMemoryHere = (object)[1];
             break;
         case 1:
             $closure = function($message) use($prefix) { echo $prefix.'('.get_class($this).')'.trim($message)."\n"; };
-            $db->pgsqlSetNoticeCallback($closure->bindTo(new \stdClass));
+            $db->setNoticeCallback($closure->bindTo(new \stdClass));
             break;
     }
 }

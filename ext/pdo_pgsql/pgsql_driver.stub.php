@@ -34,6 +34,7 @@ class PDO_PGSql_Ext {
     /** @tentative-return-type */
     public function pgsqlGetPid(): int {}
 
-    /** @tentative-return-type */
-    public function pgsqlSetNoticeCallback(?callable $callback): void {}
+    /* Do NOT add new methods here. See https://wiki.php.net/rfc/pdo_driver_specific_subclasses
+     * Any new feature should be declared only on Pdo\Pgsql.
+     */
 }

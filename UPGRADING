@@ -263,22 +263,22 @@ PHP 8.4 UPGRADE NOTES
     or by invoking their constructor directly.
 
 - PDO_DBLIB:
-  . Added class PdoDbLib.
+  . Added class Pdo\DbLib.
 
 - PDO_FIREBIRD:
-  . Added class PdoFirebird.
+  . Added class Pdo\Firebird.
 
 - PDO_MYSQL:
-  . Added class PdoMysql.
+  . Added class Pdo\Mysql.
 
 - PDO_ODBC:
-  . Added class PdoOdbc.
+  . Added class Pdo\Odbc.
 
 - PDO_PGSQL:
-  . Added class PdoPgsql.
+  . Added class Pdo\Pgsql.
 
 - PDO_SQLITE:
-  . Added class PdoSqlite.
+  . Added class Pdo\Sqlite.
 
 - POSIX:
   . Added constant POSIX_SC_CHILD_MAX
@@ -546,7 +546,7 @@ PHP 8.4 UPGRADE NOTES
     energy consumption) of the current process and pcntl_setqos_class to set it.
 
 - PDO_PGSQL:
-  . Added PDO::pgsqlSetNoticeCallback to allow a callback to be triggered on
+  . Added Pdo\Pgsql::setNoticeCallback() to allow a callback to be triggered on
     every notice sent (e.g. RAISE NOTICE).
 
 - PGSQL:
