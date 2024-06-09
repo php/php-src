@@ -103,7 +103,7 @@ bc_num _bc_do_add(bc_num n1, bc_num n2)
 			 */
 			n1bytes += SWAR_REPEAT(0xF6) + n2bytes + carry;
 			/* If the most significant bit is 0, a carry has occurred. */
-			carry = !(n1bytes & ((BC_VECTOR) 1 << (8 * sizeof(BC_VECTOR) - 1)));
+			carry = n1bytes >= 0;
 
 			/*
 			 * The calculation result is a mixture of bytes that have been carried and bytes that have not.
@@ -237,7 +237,7 @@ bc_num _bc_do_sub(bc_num n1, bc_num n2)
 
 			n1bytes -= n2bytes + borrow;
 			/* If the most significant bit is 1, a carry down has occurred. */
-			bool tmp_borrow = n1bytes & ((BC_VECTOR) 1 << (8 * sizeof(BC_VECTOR) - 1));
+			bool tmp_borrow = n1bytes < 0;
 
 			/*
 			 * Check the most significant bit of each of the bytes, and if it is 1, a carry down has
