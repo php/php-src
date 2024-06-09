@@ -36,7 +36,7 @@ typedef struct _spl_filesystem_object  spl_filesystem_object;
 typedef void (*spl_foreign_dtor_t)(spl_filesystem_object *object);
 typedef void (*spl_foreign_clone_t)(spl_filesystem_object *src, spl_filesystem_object *dst);
 
-PHPAPI zend_string *spl_filesystem_object_get_path(spl_filesystem_object *intern);
+PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *intern);
 
 typedef struct _spl_other_handler {
 	spl_foreign_dtor_t     dtor;

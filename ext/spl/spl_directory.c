@@ -202,7 +202,7 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-PHPAPI zend_string *spl_filesystem_object_get_path(spl_filesystem_object *intern) /* {{{ */
+PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *intern) /* {{{ */
 {
 #ifdef HAVE_GLOB
 	if (intern->type == SPL_FS_DIR && php_stream_is(intern->u.dir.dirp, &php_glob_stream_ops)) {
