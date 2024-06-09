@@ -77,8 +77,21 @@ void spl_add_classes(zend_class_entry *pce, zval *list, bool sub, int allow, int
 }
 /* }}} */
 
-zend_string * spl_gen_private_prop_name(zend_class_entry *ce, char *prop_name, size_t prop_len) /* {{{ */
+void spl_set_private_debug_info_property(
+	const zend_class_entry *ce,
+	const char *property,
+	size_t property_len,
+	HashTable *debug_info,
+	zval *value
+)
 {
-	return zend_mangle_property_name(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), prop_name, prop_len, 0);
+	zend_string *mangled_named = zend_mangle_property_name(
+		ZSTR_VAL(ce->name),
+		ZSTR_LEN(ce->name),
+		property,
+		property_len,
+		/* persistent */ false
+	);
+	zend_hash_update(debug_info, mangled_named, value);
+	zend_string_release_ex(mangled_named, /* persistent */ false);
 }
-/* }}} */
