@@ -360,7 +360,7 @@ GetDataBlock(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 		if (rv > 0) {
 			tmp = safe_emalloc(3 * rv, sizeof(char), 1);
 			for (i=0;i<rv;i++) {
-				sprintf(&tmp[3*sizeof(char)*i], " %02x", buf[i]);
+				snprintf(tmp + 3 * i, 4, " %02x", buf[i]);
 			}
 		} else {
 			tmp = estrdup("");
