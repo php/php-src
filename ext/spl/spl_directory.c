@@ -186,10 +186,7 @@ static zend_object *spl_filesystem_object_new(zend_class_entry *class_type)
 {
 	spl_filesystem_object *intern;
 
-	intern = emalloc(sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
-	memset(intern, 0,
-		MAX(XtOffsetOf(spl_filesystem_object, u.dir.entry),
-			XtOffsetOf(spl_filesystem_object, u.file.escape) + sizeof(int)));
+	intern = ecalloc(1, sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
