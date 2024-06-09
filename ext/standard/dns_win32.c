@@ -282,7 +282,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, bool raw
 							tp[0] = ':';
 							tp++;
 						}
-						tp += sprintf((char*)tp,"%x", out[i]);
+						tp += snprintf((char*)tp, sizeof(buf) - (tp - (char *) buf), "%x", out[i]);
 					} else {
 						if (!have_v6_break) {
 							have_v6_break = 1;
