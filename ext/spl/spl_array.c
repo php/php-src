@@ -31,7 +31,6 @@
 #include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 /* Defined later in the file */
-static zend_object_handlers spl_handler_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
@@ -162,11 +161,18 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (clone_orig) {
 			if (other->ar_flags & SPL_ARRAY_IS_SELF) {
 				ZVAL_UNDEF(&intern->array);
-			} else if (orig->handlers == &spl_handler_ArrayObject) {
+			} else if (instanceof_function(class_type, spl_ce_ArrayObject)) {
 				ZVAL_ARR(&intern->array,
 					zend_array_dup(spl_array_get_hash_table(other)));
 			} else {
-				ZEND_ASSERT(orig->handlers == &spl_handler_ArrayIterator);
+				#if ZEND_DEBUG
+				/* This is because the call to instanceof_function will remain because
+				 * the compiler can't prove in this compile unit that this function is
+				 * side-effect-free.
+				 * See https://github.com/php/php-src/pull/14518#discussion_r1638740932 */
+				ZEND_ASSERT(instanceof_function(class_type, spl_ce_ArrayIterator));
+				#endif
+
 				ZVAL_OBJ_COPY(&intern->array, orig);
 				intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 			}
@@ -947,7 +953,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		}
 	} else {
-		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
+		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject) {
 			zval_ptr_dtor(&intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
@@ -1895,10 +1901,8 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	spl_ce_ArrayIterator = register_class_ArrayIterator(spl_ce_SeekableIterator, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
 	spl_ce_ArrayIterator->create_object = spl_array_object_new;
-	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayIterator;
+	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayObject;
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
-
-	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
