@@ -13,5 +13,4 @@ declare_local_class_exists();
 var_dump(CLASS_EXISTS('Foo'));
 ?>
 --EXPECT--
-string(16) "Foo\class_exists"
-bool(true)
+bool(false)

@@ -614,16 +614,16 @@ static int zend_add_ns_func_name_literal(zend_string *name) /* {{{ */
 	/* Original name */
 	int ret = zend_add_literal_string(&name);
 
-	/* Lowercased name */
-	zend_string *lc_name = zend_string_tolower(name);
-	zend_add_literal_string(&lc_name);
-
 	/* Lowercased unqualified name */
 	if (zend_get_unqualified_name(name, &unqualified_name, &unqualified_name_len)) {
-		lc_name = zend_string_alloc(unqualified_name_len, 0);
+		zend_string *lc_name = zend_string_alloc(unqualified_name_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lc_name), unqualified_name, unqualified_name_len);
 		zend_add_literal_string(&lc_name);
 	}
+
+	/* Lowercased name */
+	zend_string *lc_name = zend_string_tolower(name);
+	zend_add_literal_string(&lc_name);
 
 	return ret;
 }
@@ -1016,9 +1016,11 @@ static zend_string *zend_prefix_with_ns(zend_string *name) {
 	}
 }
 
+static bool zend_compile_ignore_function(zend_function *fbc, zend_string *filename);
+
 static zend_string *zend_resolve_non_class_name(
 	zend_string *name, uint32_t type, bool *is_fully_qualified,
-	bool case_sensitive, HashTable *current_import_sub
+	bool case_sensitive, bool function
 ) {
 	char *compound;
 	*is_fully_qualified = 0;
@@ -1039,6 +1041,7 @@ static zend_string *zend_resolve_non_class_name(
 		return zend_prefix_with_ns(name);
 	}
 
+	HashTable *current_import_sub = function ? FC(imports_function) : FC(imports_const);
 	if (current_import_sub) {
 		/* If an unqualified name is a function/const alias, replace it. */
 		zend_string *import_name;
@@ -1070,6 +1073,19 @@ static zend_string *zend_resolve_non_class_name(
 		}
 	}
 
+	if (!compound && function) {
+		zend_string *lcname = zend_string_tolower(name);
+		zval *fbc_zv = zend_hash_find(CG(function_table), lcname);
+		if (fbc_zv
+		 && CG(active_op_array)
+		 && !zend_compile_ignore_function(Z_PTR_P(fbc_zv), CG(active_op_array)->filename)) {
+			*is_fully_qualified = true;
+			zend_string_release(lcname);
+			return zend_string_copy(name);
+		}
+		zend_string_release(lcname);
+	}
+
 	return zend_prefix_with_ns(name);
 }
 /* }}} */
@@ -1077,13 +1093,13 @@ static zend_string *zend_resolve_non_class_name(
 static zend_string *zend_resolve_function_name(zend_string *name, uint32_t type, bool *is_fully_qualified)
 {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 0, FC(imports_function));
+		name, type, is_fully_qualified, 0, /* function */ true);
 }
 
 static zend_string *zend_resolve_const_name(zend_string *name, uint32_t type, bool *is_fully_qualified)
 {
 	return zend_resolve_non_class_name(
-		name, type, is_fully_qualified, 1, FC(imports_const));
+		name, type, is_fully_qualified, 1, /* function */ false);
 }
 
 static zend_string *zend_resolve_class_name(zend_string *name, uint32_t type) /* {{{ */
