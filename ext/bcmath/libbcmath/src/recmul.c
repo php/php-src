@@ -41,17 +41,15 @@
 #  define BC_VECTOR_SIZE 8
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
+/* Adding more than this many times may cause int64_t to overflow. Typically this is 922. */
+#  define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (((BC_VECTOR) 0x7fffffffffffffff) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 #else
 #  define BC_VECTOR_SIZE 4
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
+/* Adding more than this many times may cause int32_t to overflow. Typically this is 21. */
+#  define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (((BC_VECTOR) 0x7fffffff) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 #endif
-
-/*
- * Adding more than this many times may cause uint32_t/uint64_t to overflow.
- * Typically this is 1844 for 64bit and 42 for 32bit.
- */
-#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
 /* Multiply utility routines */
