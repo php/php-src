@@ -477,12 +477,13 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		return NULL;
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /s /c ")+2);
+	size_t cmd_buffer_size = strlen(command) + strlen(TWG(comspec)) + sizeof(" /s /c ") + 2;
+	cmd = malloc(cmd_buffer_size);
 	if (!cmd) {
 		return NULL;
 	}
 
-	sprintf(cmd, "%s /s /c \"%s\"", TWG(comspec), command);
+	snprintf(cmd, cmd_buffer_size, "%s /s /c \"%s\"", TWG(comspec), command);
 	cmdw = php_win32_cp_any_to_w(cmd);
 	if (!cmdw) {
 		free(cmd);
