@@ -1080,12 +1080,14 @@ static int add_array_entry(const char* loc_name, zval* hash_arr, char* key_name)
 			if( cur_key_name ){
 				efree( cur_key_name);
 			}
-			cur_key_name = (char*)ecalloc( 25,  25);
-			sprintf( cur_key_name , "%s%d", key_name , cnt++);
+			/* Over-allocates a few bytes for the integer so we don't have to reallocate. */
+			size_t cur_key_name_size = (sizeof("-2147483648") - 1) + strlen(key_name) + 1;
+			cur_key_name = emalloc(cur_key_name_size);
+			snprintf( cur_key_name, cur_key_name_size , "%s%d", key_name , cnt++);
 			add_assoc_string( hash_arr, cur_key_name , token);
 			/* tokenize on the "_" or "-" and stop  at singleton if any */
 			while( (token = php_strtok_r(NULL , DELIMITER , &last_ptr)) && (strlen(token)>1) ){
-				sprintf( cur_key_name , "%s%d", key_name , cnt++);
+				snprintf( cur_key_name , cur_key_name_size, "%s%d", key_name , cnt++);
 				add_assoc_string( hash_arr, cur_key_name , token);
 			}
 /*
