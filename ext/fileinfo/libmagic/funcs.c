@@ -371,7 +371,7 @@ file_buffer(struct magic_set *ms, php_stream *stream, zend_stat_t *st,
 	}
 #endif
 
-#if PHP_FILEINFO_UNCOMPRESS
+#ifdef PHP_FILEINFO_UNCOMPRESS
 	/* try compression stuff */
 	if ((ms->flags & MAGIC_NO_CHECK_COMPRESS) == 0) {
 		m = file_zmagic(ms, &b, inname);
@@ -507,7 +507,7 @@ simple:
 		if (file_printf(ms, "%s", code_mime) == -1)
 			rv = -1;
 	}
-#if PHP_FILEINFO_UNCOMPRESS
+#ifdef PHP_FILEINFO_UNCOMPRESS
  done_encoding:
 #endif
 	efree(rbuf);
