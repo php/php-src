@@ -117,8 +117,6 @@ static zend_class_entry *zend_ffi_parser_exception_ce;
 static zend_class_entry *zend_ffi_ce;
 static zend_class_entry *zend_ffi_ctype_ce;
 
-ZEND_API zend_class_entry *zend_ffi_cdata_ce;
-
 static zend_object_handlers zend_ffi_handlers;
 static zend_object_handlers zend_ffi_cdata_handlers;
 static zend_object_handlers zend_ffi_cdata_value_handlers;
