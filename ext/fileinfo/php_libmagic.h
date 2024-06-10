@@ -22,7 +22,6 @@
 
 #ifdef PHP_WIN32
 #include "win32/param.h"
-#include "win32/unistd.h"
 
 #ifdef _WIN64
 #define FINFO_LSEEK_FUNC _lseeki64
