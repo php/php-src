@@ -20,6 +20,7 @@
 #include "php_ini.h"
 #include "php_variables.h"
 #include "zend_highlight.h"
+#include "zend_portability.h"
 #include "zend.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/info.h"
@@ -1194,6 +1195,7 @@ static int parse_opt( int argc, char * argv[], int *climode,
         case '?':
             if ( *((*(p-1))+2) == 's' )
                 exit( 99 );
+            ZEND_FALLTHROUGH;
         case 'h':
         case 'i':
         case 'l':
