@@ -98,6 +98,8 @@ ZEND_API void (*zend_accel_schedule_restart_hook)(int reason) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size) = NULL;
 ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(zend_random_bytes_insecure_state *state, void *bytes, size_t size) = NULL;
 
+ZEND_API zend_class_entry *zend_ffi_cdata_ce = NULL;
+
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
 
