@@ -119,7 +119,6 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 
 	error = pthread_getattr_np(pthread_self(), &attr);
 	if (error) {
-		pthread_attr_destroy(&attr);
 		return false;
 	}
 
