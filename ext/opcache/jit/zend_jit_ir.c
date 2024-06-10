@@ -16011,7 +16011,7 @@ static void *zend_jit_finish(zend_jit_ctx *jit)
 	entry = zend_jit_ir_compile(&jit->ctx, &size, str ? ZSTR_VAL(str) : NULL);
 	if (entry) {
 		if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF|ZEND_JIT_DEBUG_PERF_DUMP)) {
-#if HAVE_CAPSTONE
+#ifdef HAVE_CAPSTONE
 			if (JIT_G(debug) & ZEND_JIT_DEBUG_ASM) {
 				if (str) {
 					ir_disasm_add_symbol(ZSTR_VAL(str), (uintptr_t)entry, size);
