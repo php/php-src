@@ -750,6 +750,38 @@ static ZEND_FUNCTION(zend_test_set_fmode)
 }
 #endif
 
+static ZEND_FUNCTION(zend_test_cast_fread)
+{
+	zval *stream_zv;
+	php_stream *stream;
+	FILE *fp;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(stream_zv);
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_stream_from_zval(stream, stream_zv);
+
+	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void *) &fp, REPORT_ERRORS) == FAILURE) {
+		return;
+	}
+
+	size_t size = 10240; /* Must be large enough to trigger the issue */
+	char *buf = malloc(size);
+	bool bail = false;
+	zend_try {
+		(void) !fread(buf, 1, size, fp);
+	} zend_catch {
+		bail = true;
+	} zend_end_try();
+
+	free(buf);
+
+	if (bail) {
+		zend_bailout();
+	}
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);

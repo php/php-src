@@ -60,6 +60,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-14290 (Member access within null pointer in extension spl).
     (nielsdos)
 
+- Streams:
+  . Fixed bug GH-11078 (PHP Fatal error triggers pointer being freed was not
+    allocated and malloc: double free for ptr errors). (nielsdos)
+
 06 Jun 2024, PHP 8.3.8
 
 - CGI:
