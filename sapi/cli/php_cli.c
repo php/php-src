@@ -1032,89 +1032,89 @@ do_repeat:
 				break;
 			}
 
-			case PHP_CLI_MODE_REFLECTION_FUNCTION:
-			case PHP_CLI_MODE_REFLECTION_CLASS:
-			case PHP_CLI_MODE_REFLECTION_EXTENSION:
-			case PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION:
-				{
-					zend_class_entry *pce = NULL;
-					zval arg, ref;
-					zend_execute_data execute_data;
+		case PHP_CLI_MODE_REFLECTION_FUNCTION:
+		case PHP_CLI_MODE_REFLECTION_CLASS:
+		case PHP_CLI_MODE_REFLECTION_EXTENSION:
+		case PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION:
+			{
+				zend_class_entry *pce = NULL;
+				zval arg, ref;
+				zend_execute_data execute_data;
 
-					switch (context.mode) {
-						default:
-							break;
-						case PHP_CLI_MODE_REFLECTION_FUNCTION:
-							if (strstr(reflection_what, "::")) {
-								pce = reflection_method_ptr;
-							} else {
-								pce = reflection_function_ptr;
-							}
-							break;
-						case PHP_CLI_MODE_REFLECTION_CLASS:
-							pce = reflection_class_ptr;
-							break;
-						case PHP_CLI_MODE_REFLECTION_EXTENSION:
-							pce = reflection_extension_ptr;
-							break;
-						case PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION:
-							pce = reflection_zend_extension_ptr;
-							break;
-					}
-
-					ZVAL_STRING(&arg, reflection_what);
-					object_init_ex(&ref, pce);
-
-					memset(&execute_data, 0, sizeof(zend_execute_data));
-					EG(current_execute_data) = &execute_data;
-					zend_call_known_instance_method_with_1_params(
-						pce->constructor, Z_OBJ(ref), NULL, &arg);
-
-					if (EG(exception)) {
-						zval rv;
-						zval *msg = zend_read_property_ex(zend_ce_exception, EG(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ false, &rv);
-						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
-						zend_object_release(EG(exception));
-						EG(exception) = NULL;
-						EG(exit_status) = 1;
-					} else {
-						zend_print_zval(&ref, 0);
-						zend_write("\n", 1);
-					}
-					zval_ptr_dtor(&ref);
-					zval_ptr_dtor(&arg);
-
-					break;
-				}
-			case PHP_CLI_MODE_REFLECTION_EXT_INFO:
-				{
-					size_t len = strlen(reflection_what);
-					char *lcname = zend_str_tolower_dup(reflection_what, len);
-					zend_module_entry *module;
-
-					if ((module = zend_hash_str_find_ptr(&module_registry, lcname, len)) == NULL) {
-						if (!strcmp(reflection_what, "main")) {
-							display_ini_entries(NULL);
+				switch (context.mode) {
+					default:
+						break;
+					case PHP_CLI_MODE_REFLECTION_FUNCTION:
+						if (strstr(reflection_what, "::")) {
+							pce = reflection_method_ptr;
 						} else {
-							zend_printf("Extension '%s' not present.\n", reflection_what);
-							EG(exit_status) = 1;
+							pce = reflection_function_ptr;
 						}
+						break;
+					case PHP_CLI_MODE_REFLECTION_CLASS:
+						pce = reflection_class_ptr;
+						break;
+					case PHP_CLI_MODE_REFLECTION_EXTENSION:
+						pce = reflection_extension_ptr;
+						break;
+					case PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION:
+						pce = reflection_zend_extension_ptr;
+						break;
+				}
+
+				ZVAL_STRING(&arg, reflection_what);
+				object_init_ex(&ref, pce);
+
+				memset(&execute_data, 0, sizeof(zend_execute_data));
+				EG(current_execute_data) = &execute_data;
+				zend_call_known_instance_method_with_1_params(
+					pce->constructor, Z_OBJ(ref), NULL, &arg);
+
+				if (EG(exception)) {
+					zval rv;
+					zval *msg = zend_read_property_ex(zend_ce_exception, EG(exception), ZSTR_KNOWN(ZEND_STR_MESSAGE), /* silent */ false, &rv);
+					zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
+					zend_object_release(EG(exception));
+					EG(exception) = NULL;
+					EG(exit_status) = 1;
+				} else {
+					zend_print_zval(&ref, 0);
+					zend_write("\n", 1);
+				}
+				zval_ptr_dtor(&ref);
+				zval_ptr_dtor(&arg);
+
+				break;
+			}
+		case PHP_CLI_MODE_REFLECTION_EXT_INFO:
+			{
+				size_t len = strlen(reflection_what);
+				char *lcname = zend_str_tolower_dup(reflection_what, len);
+				zend_module_entry *module;
+
+				if ((module = zend_hash_str_find_ptr(&module_registry, lcname, len)) == NULL) {
+					if (!strcmp(reflection_what, "main")) {
+						display_ini_entries(NULL);
 					} else {
-						php_info_print_module(module);
+						zend_printf("Extension '%s' not present.\n", reflection_what);
+						EG(exit_status) = 1;
 					}
-
-					efree(lcname);
-					break;
+				} else {
+					php_info_print_module(module);
 				}
 
-			case PHP_CLI_MODE_SHOW_INI_CONFIG:
-				{
-					zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
-					zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
-					zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
-					zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
-					break;
-				}
+				efree(lcname);
+				break;
+			}
+
+		case PHP_CLI_MODE_SHOW_INI_CONFIG:
+			{
+				zend_printf("Configuration File (php.ini) Path: %s\n", PHP_CONFIG_FILE_PATH);
+				zend_printf("Loaded Configuration File:         %s\n", php_ini_opened_path ? php_ini_opened_path : "(none)");
+				zend_printf("Scan for additional .ini files in: %s\n", php_ini_scanned_path  ? php_ini_scanned_path : "(none)");
+				zend_printf("Additional .ini files parsed:      %s\n", php_ini_scanned_files ? php_ini_scanned_files : "(none)");
+				break;
+			}
 		}
 	} zend_end_try();
 
