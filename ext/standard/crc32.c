@@ -55,7 +55,7 @@ static inline int has_crc32_insn(void) {
 	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
 		res = 0;
 	return res;
-# elif defined(WIN32)
+# elif defined(_WIN32)
 	res = (int)IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE);
 	return res;
 # else

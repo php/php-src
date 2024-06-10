@@ -635,7 +635,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed(void)
 		/* Various PIDs. */
 		pid = getpid();
 		fallback_seed_add(&c, &pid, sizeof(pid));
-#ifndef WIN32
+#ifndef PHP_WIN32
 		pid = getppid();
 		fallback_seed_add(&c, &pid, sizeof(pid));
 #endif
