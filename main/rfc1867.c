@@ -175,6 +175,7 @@ PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
+	SG(rfc1867_uploaded_files) = NULL;
 }
 /* }}} */
 
