@@ -2972,6 +2972,12 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 		if (
 			!Z_ISREF_P(retval)
 			&& Z_TYPE_P(retval) != IS_OBJECT
+			/* Support indirect for:
+			 * $ao[$i] = &$var;
+			 * and
+			 * $ao[] = &$var;
+			 * cases */
+			&& Z_TYPE_P(retval) != IS_INDIRECT
 		) {
 			zend_class_entry *ce = obj->ce;
 			zend_throw_error(NULL, "%s::%s() must return a reference type",

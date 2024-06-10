@@ -7,19 +7,23 @@ $tmp = 1;
 
 $a = new ArrayIterator();
 $a[] = $tmp;
-$a[] = &$tmp;
-
 var_dump($a);
+try {
+    $a[] = &$tmp;
+    var_dump($a);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+
 echo "Done\n";
 ?>
 --EXPECT--
 object(ArrayIterator)#1 (1) {
   ["storage":"ArrayIterator":private]=>
-  array(2) {
+  array(1) {
     [0]=>
     int(1)
-    [1]=>
-    &int(1)
   }
 }
+Error: Cannot assign by reference to an array dimension of an object
 Done

@@ -20,6 +20,7 @@ foreach ([1, 2, 3] as $i => $var)
 {
     $ao[$i] = &$var;
 }
+var_dump($ao);
 $ao[] = &$var;
 var_dump($ao);
 ?>
@@ -36,6 +37,17 @@ array(4) {
   &int(3)
 }
 Using ArrayObject
+object(ArrayObject)#1 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(3) {
+    [0]=>
+    &int(3)
+    [1]=>
+    &int(3)
+    [2]=>
+    &int(3)
+  }
+}
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   array(4) {

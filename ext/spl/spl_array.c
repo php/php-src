@@ -412,6 +412,27 @@ static zval *spl_array_fetch_dimension(zend_object *object, /* const */ zval *of
 	return spl_array_read_dimension_ex(object, offset, BP_VAR_W, rv);
 }
 
+/* We have a dedicated handler for ArrayObject as it needs to handle constructs like:
+$ao = new ArrayObject;
+foreach ([1, 2, 3] as $i => $var)
+{
+	$ao[$i] = &$var;
+}
+$ao[] = &$var;
+ * which are normally reserved for arrays */
+static zval *spl_array_object_fetch_dimension(zend_object *object, /* const */ zval *offset, zval *rv)
+{
+	spl_array_object *intern = spl_array_from_obj(object);
+	zval *ret = spl_array_get_dimension_ptr(intern, object->ce->name, offset, BP_VAR_W);
+
+	if (ret == &EG(error_zval) || EG(exception)) {
+		return NULL;
+	}
+
+	ZVAL_INDIRECT(rv, ret);
+	return rv;
+}
+
 /*
  * The assertion(HT_ASSERT_RC1(ht)) failed because the refcount was increased manually when intern->is_child is true.
  * We have to set the refcount to 1 to make assertion success and restore the refcount to the original value after
@@ -505,10 +526,41 @@ static zval* spl_array_fetch_append(zend_object *object, zval *rv)
 		spl_array_set_refcount(intern->is_child, ht, refcount);
 	}
 
-	// TODO Use indirect to fix "Cannot assign by reference to an array dimension of an object" Error being thrown?
 	ZVAL_MAKE_REF(ret);
 	ZVAL_COPY(rv, ret);
 
+	return rv;
+}
+
+/* We have a dedicated handler for ArrayObject as it needs to handle constructs like:
+$ao = new ArrayObject;
+foreach ([1, 2, 3] as $i => $var)
+{
+	$ao[$i] = &$var;
+}
+$ao[] = &$var;
+ * which are normally reserved for arrays */
+static zval *spl_array_object_fetch_append(zend_object *object, zval *rv)
+{
+	spl_array_object *intern = spl_array_from_obj(object);
+
+	if (spl_array_is_object(intern)) {
+		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
+		return NULL;
+	}
+
+	HashTable *ht = spl_array_get_hash_table(intern);
+	uint32_t refcount = spl_array_set_refcount(intern->is_child, ht, 1);
+
+	zval dummy;
+	ZVAL_NULL(&dummy);
+	zval *ret = zend_hash_next_index_insert(ht, &dummy);
+
+	if (refcount) {
+		spl_array_set_refcount(intern->is_child, ht, refcount);
+	}
+
+	ZVAL_INDIRECT(rv, ret);
 	return rv;
 }
 
@@ -1822,7 +1874,16 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 }
 /* }}} */
 
-static /* const */ zend_class_dimensions_functions spl_array_dimensions_functions = {
+static /* const */ zend_class_dimensions_functions spl_array_object_dimensions_functions = {
+	.read_dimension  = spl_array_read_dimension,
+	.has_dimension   = spl_array_has_dimension,
+	.fetch_dimension = spl_array_object_fetch_dimension,
+	.write_dimension = spl_array_write_dimension,
+	.append          = spl_array_append,
+	.fetch_append    = spl_array_object_fetch_append,
+	.unset_dimension = spl_array_unset_dimension
+};
+static /* const */ zend_class_dimensions_functions spl_array_iterator_dimensions_functions = {
 	.read_dimension  = spl_array_read_dimension,
 	.has_dimension   = spl_array_has_dimension,
 	.fetch_dimension = spl_array_fetch_dimension,
@@ -1846,7 +1907,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	);
 	spl_ce_ArrayObject->create_object = spl_array_object_new;
 	spl_ce_ArrayObject->default_object_handlers = &spl_handler_ArrayObject;
-	spl_ce_ArrayObject->dimension_handlers = &spl_array_dimensions_functions;
+	spl_ce_ArrayObject->dimension_handlers = &spl_array_object_dimensions_functions;
 
 	memcpy(&spl_handler_ArrayObject, &std_object_handlers, sizeof(zend_object_handlers));
 
@@ -1878,12 +1939,12 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_ce_ArrayIterator->create_object = spl_array_object_new;
 	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayObject;
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
-	spl_ce_ArrayIterator->dimension_handlers = &spl_array_dimensions_functions;
+	spl_ce_ArrayIterator->dimension_handlers = &spl_array_iterator_dimensions_functions;
 
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;
 	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
-	spl_ce_RecursiveArrayIterator->dimension_handlers = &spl_array_dimensions_functions;
+	spl_ce_RecursiveArrayIterator->dimension_handlers = &spl_array_iterator_dimensions_functions;
 
 	return SUCCESS;
 }
