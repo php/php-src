@@ -1708,14 +1708,57 @@ static zend_always_inline int zend_binary_op(zval *ret, zval *op1, zval *op2 OPL
 	return zend_binary_ops[opcode - ZEND_ADD](ret, op1, op2);
 }
 
+static zend_never_inline void zend_fetch_object_dimension_address(zval *result, zend_object *obj, zval *offset, int offset_type, int type EXECUTE_DATA_DC);
+static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *ref, zval *value OPLINE_DC EXECUTE_DATA_DC);
+
 static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *value;
-	zval *z;
-	zval rv, res;
+
+	GC_ADDREF(obj);
+	if (UNEXPECTED(dim == NULL)) {
+		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1);
+		if (EXPECTED(obj->ce->dimension_handlers)) {
+			if (obj->ce->dimension_handlers->fetch_append) {
+				ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ false, BP_VAR_FETCH));
+
+				zval zref;
+				zend_fetch_object_dimension_address(&zref, obj, NULL, 0, BP_VAR_W EXECUTE_DATA_CC);
+
+				ZEND_ASSERT(Z_TYPE(zref) != IS_INDIRECT && "No support for indirect vars yet");
+				ZEND_ASSERT(Z_ISREF(zref));
+
+				zend_reference *ref = Z_REF(zref);
+				zval *var_ptr = Z_REFVAL(zref);
+				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+					zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_NULL(EX_VAR(opline->result.var));
+					}
+					goto clean_up;
+				}
+				zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+				}
+				zval_ptr_dtor(&zref);
+			} else {
+				zend_invalid_use_of_object_as_array(obj, /* has_offset */ false, BP_VAR_FETCH);
+				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+					ZVAL_NULL(EX_VAR(opline->result.var));
+				}
+			}
+		} else {
+			zend_use_object_as_array(obj);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+		}
+		goto clean_up;
+	}
 
 	ZEND_ASSERT(dim && "Offset is NULL for Read-Write operation");
-	GC_ADDREF(obj);
 	if (UNEXPECTED(Z_ISUNDEF_P(dim))) {
 		dim = ZVAL_UNDEFINED_OP2();
 	}
@@ -1728,6 +1771,9 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zv
 			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_RW));
 
 			ZVAL_DEREF(dim);
+			zval *z;
+			zval rv, res;
+
 			z = obj->ce->dimension_handlers->read_dimension(obj, dim, &rv);
 			if (UNEXPECTED(z == NULL)) {
 				ZEND_ASSERT(EG(exception) && "returned NULL without exception");

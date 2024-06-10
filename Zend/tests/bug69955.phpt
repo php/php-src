@@ -26,11 +26,9 @@ $c10 = new C10;
 
 var_dump($c10[] += 5);
 ?>
---EXPECT--
+--EXPECTF--
 Inside C10::offsetGet
 NULL
 
-Inside C10::offsetSet
-NULL
-int(105)
+Notice: Indirect modification of overloaded element of C10 has no effect in %s on line %d
 int(105)
