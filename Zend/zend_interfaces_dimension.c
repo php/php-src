@@ -100,17 +100,15 @@ static zval *zend_legacy_ArrayAccess_fetch_dimension(zend_object *object, zval *
 	if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 		ZEND_ASSERT(EG(exception));
 		return NULL;
-	} else {
-		if (!Z_ISREF_P(rv)) {
-			if (Z_TYPE_P(rv) != IS_OBJECT) {
-				zend_class_entry *ce = object->ce;
-				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-
-				/* "Create" a ref to the value even if it is not to have BC behaviour */
-				ZVAL_NEW_REF(rv, rv);
-			}
-		}
 	}
+	if (!Z_ISREF_P(rv) && Z_TYPE_P(rv) != IS_OBJECT) {
+		zend_class_entry *ce = object->ce;
+		zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+
+		/* "Create" a ref to the value even if it is not to have BC behaviour */
+		ZVAL_NEW_REF(rv, rv);
+	}
+
 	return rv;
 }
 
