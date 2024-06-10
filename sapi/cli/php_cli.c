@@ -596,11 +596,11 @@ static int do_cli(int argc, char **argv) /* {{{ */
 	volatile int request_started = 0;
 	char *php_optarg = NULL, *orig_optarg = NULL;
 	int php_optind = 1, orig_optind = 1;
-	char *exec_direct=NULL, *exec_run=NULL, *exec_begin=NULL, *exec_end=NULL;
-	char *arg_free=NULL, **arg_excp=&arg_free;
-	char *script_file=NULL, *translated_path = NULL;
+	char *exec_direct = NULL, *exec_run = NULL, *exec_begin = NULL, *exec_end = NULL;
+	char *arg_free = NULL, **arg_excp = &arg_free;
+	char *script_file = NULL, *translated_path = NULL;
 	bool interactive = false;
-	const char *param_error=NULL;
+	const char *param_error = NULL;
 	bool hide_argv = false;
 	int num_repeats = 1;
 	pid_t pid = getpid();
@@ -615,7 +615,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			switch (c) {
 
 			case 'i': /* php info & quit */
-				if (php_request_startup()==FAILURE) {
+				if (php_request_startup() == FAILURE) {
 					goto err;
 				}
 				request_started = 1;
@@ -651,7 +651,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'm': /* list compiled in modules */
-				if (php_request_startup()==FAILURE) {
+				if (php_request_startup() == FAILURE) {
 					goto err;
 				}
 				request_started = 1;
@@ -706,7 +706,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = param_mode_conflict;
 					break;
 				}
-				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
+				context.mode = PHP_CLI_MODE_PROCESS_STDIN;
 				script_file = php_optarg;
 				break;
 
@@ -725,7 +725,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				if (context.mode != PHP_CLI_MODE_STANDARD) {
 					break;
 				}
-				context.mode=PHP_CLI_MODE_LINT;
+				context.mode = PHP_CLI_MODE_LINT;
 				/* We want to set the error exit status if at least one lint failed.
 				 * If all were successful we set the exit status to 0.
 				 * We already set EG(exit_status) here such that only failures set the exit status. */
@@ -746,8 +746,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = param_mode_conflict;
 					break;
 				}
-				context.mode=PHP_CLI_MODE_CLI_DIRECT;
-				exec_direct=php_optarg;
+				context.mode = PHP_CLI_MODE_CLI_DIRECT;
+				exec_direct = php_optarg;
 				break;
 
 			case 'R':
@@ -760,8 +760,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = param_mode_conflict;
 					break;
 				}
-				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
-				exec_run=php_optarg;
+				context.mode = PHP_CLI_MODE_PROCESS_STDIN;
+				exec_run = php_optarg;
 				break;
 
 			case 'B':
@@ -774,8 +774,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = param_mode_conflict;
 					break;
 				}
-				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
-				exec_begin=php_optarg;
+				context.mode = PHP_CLI_MODE_PROCESS_STDIN;
+				exec_begin = php_optarg;
 				break;
 
 			case 'E':
@@ -788,8 +788,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = param_mode_conflict;
 					break;
 				}
-				context.mode=PHP_CLI_MODE_PROCESS_STDIN;
-				exec_end=php_optarg;
+				context.mode = PHP_CLI_MODE_PROCESS_STDIN;
+				exec_end = php_optarg;
 				break;
 
 			case 's': /* generate highlighted HTML from source */
@@ -797,7 +797,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = "Source highlighting only works for files.\n";
 					break;
 				}
-				context.mode=PHP_CLI_MODE_HIGHLIGHT;
+				context.mode = PHP_CLI_MODE_HIGHLIGHT;
 				break;
 
 			case 'w':
@@ -805,7 +805,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					param_error = "Source stripping only works for files.\n";
 					break;
 				}
-				context.mode=PHP_CLI_MODE_STRIP;
+				context.mode = PHP_CLI_MODE_STRIP;
 				break;
 
 			case 'z': /* load extension file */
@@ -815,23 +815,23 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				hide_argv = true;
 				break;
 			case 10:
-				context.mode=PHP_CLI_MODE_REFLECTION_FUNCTION;
+				context.mode = PHP_CLI_MODE_REFLECTION_FUNCTION;
 				reflection_what = php_optarg;
 				break;
 			case 11:
-				context.mode=PHP_CLI_MODE_REFLECTION_CLASS;
+				context.mode = PHP_CLI_MODE_REFLECTION_CLASS;
 				reflection_what = php_optarg;
 				break;
 			case 12:
-				context.mode=PHP_CLI_MODE_REFLECTION_EXTENSION;
+				context.mode = PHP_CLI_MODE_REFLECTION_EXTENSION;
 				reflection_what = php_optarg;
 				break;
 			case 13:
-				context.mode=PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION;
+				context.mode = PHP_CLI_MODE_REFLECTION_ZEND_EXTENSION;
 				reflection_what = php_optarg;
 				break;
 			case 14:
-				context.mode=PHP_CLI_MODE_REFLECTION_EXT_INFO;
+				context.mode = PHP_CLI_MODE_REFLECTION_EXT_INFO;
 				reflection_what = php_optarg;
 				break;
 			case 15:
@@ -858,8 +858,8 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||
-					argc > php_optind && context.mode!=PHP_CLI_MODE_CLI_DIRECT &&
-					context.mode!=PHP_CLI_MODE_PROCESS_STDIN &&
+					argc > php_optind && context.mode != PHP_CLI_MODE_CLI_DIRECT &&
+					context.mode != PHP_CLI_MODE_PROCESS_STDIN &&
 					strcmp(argv[php_optind-1],"--")
 				);
 		}
@@ -879,11 +879,11 @@ do_repeat:
 		/* only set script_file if not set already and not in direct mode and not at end of parameter list */
 		if (argc > php_optind
 		  && !script_file
-		  && context.mode!=PHP_CLI_MODE_CLI_DIRECT
-		  && context.mode!=PHP_CLI_MODE_PROCESS_STDIN
-		  && strcmp(argv[php_optind-1],"--"))
+		  && context.mode != PHP_CLI_MODE_CLI_DIRECT
+		  && context.mode != PHP_CLI_MODE_PROCESS_STDIN
+		  && strcmp(argv[php_optind - 1],"--"))
 		{
-			script_file=argv[php_optind];
+			script_file = argv[php_optind];
 			php_optind++;
 		}
 		if (script_file) {
@@ -913,15 +913,15 @@ do_repeat:
 
 		/* before registering argv to module exchange the *new* argv[0] */
 		/* we can achieve this without allocating more memory */
-		SG(request_info).argc=argc-php_optind+1;
-		arg_excp = argv+php_optind-1;
-		arg_free = argv[php_optind-1];
+		SG(request_info).argc = argc - php_optind + 1;
+		arg_excp = argv + php_optind - 1;
+		arg_free = argv[php_optind - 1];
 		SG(request_info).path_translated = translated_path ? translated_path : php_self;
-		argv[php_optind-1] = php_self;
-		SG(request_info).argv=argv+php_optind-1;
+		argv[php_optind - 1] = php_self;
+		SG(request_info).argv = argv + php_optind - 1;
 		SG(server_context) = &context;
 
-		if (php_request_startup()==FAILURE) {
+		if (php_request_startup() == FAILURE) {
 			*arg_excp = arg_free;
 			PUTS("Could not startup.\n");
 			goto err;
@@ -965,7 +965,7 @@ do_repeat:
 			}
 			break;
 		case PHP_CLI_MODE_STRIP:
-			if (open_file_for_scanning(&file_handle)==SUCCESS) {
+			if (open_file_for_scanning(&file_handle) == SUCCESS) {
 				zend_strip();
 			}
 			goto out;
@@ -974,7 +974,7 @@ do_repeat:
 			{
 				zend_syntax_highlighter_ini syntax_highlighter_ini;
 
-				if (open_file_for_scanning(&file_handle)==SUCCESS) {
+				if (open_file_for_scanning(&file_handle) == SUCCESS) {
 					php_get_highlight_struct(&syntax_highlighter_ini);
 					zend_highlight(&syntax_highlighter_ini);
 				}
@@ -1002,7 +1002,7 @@ do_repeat:
 				if (exec_begin) {
 					zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1);
 				}
-				while (EG(exit_status) == SUCCESS && (input=php_stream_gets(s_in_process, NULL, 0)) != NULL) {
+				while (EG(exit_status) == SUCCESS && (input = php_stream_gets(s_in_process, NULL, 0)) != NULL) {
 					len = strlen(input);
 					while (len > 0 && len-- && (input[len]=='\n' || input[len]=='\r')) {
 						input[len] = '\0';
@@ -1130,7 +1130,7 @@ out:
 		free(translated_path);
 		translated_path = NULL;
 	}
-	if (context.mode == PHP_CLI_MODE_LINT && argc > php_optind && strcmp(argv[php_optind],"--")) {
+	if (context.mode == PHP_CLI_MODE_LINT && argc > php_optind && strcmp(argv[php_optind], "--")) {
 		script_file = NULL;
 		goto do_repeat;
 	}
