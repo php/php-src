@@ -2979,8 +2979,13 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			ZVAL_UNDEF(result);
 			goto clean_up;
 		}
-		if (result != retval) {
-			ZVAL_INDIRECT(result, retval);
+		if (Z_ISREF_P(retval)) {
+			if (Z_TYPE_P(Z_REFVAL_P(retval)) == IS_OBJECT) {
+				/* We need to seperate objects returned by reference */
+				SEPARATE_ZVAL(retval);
+			} else if (result != retval) {
+				ZVAL_INDIRECT(result, retval);
+			}
 		}
 	} else {
 		zend_use_object_as_array(obj);
