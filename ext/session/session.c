@@ -392,8 +392,8 @@ static zend_long php_session_gc(bool immediate) /* {{{ */
 
 	/* GC must be done before reading session data. */
 	if ((PS(mod_data) || PS(mod_user_implemented))) {
-		if (!collect && PS(gc_probability) > 0) {
-			collect = php_random_range(PS(random), 0, PS(gc_divisor) - 1) < PS(gc_probability);
+		if (!collect && PS(gc_probability) != 0 && PS(gc_divisor) != 0) {
+			collect = php_random_range(PS(random), 0, llabs(PS(gc_divisor)) - 1) < llabs(PS(gc_probability));
 		}
 
 		if (collect) {
