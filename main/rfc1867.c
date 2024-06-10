@@ -174,6 +174,7 @@ PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
 	} ZEND_HASH_FOREACH_END();
 	zend_hash_destroy(SG(rfc1867_uploaded_files));
 	FREE_HASHTABLE(SG(rfc1867_uploaded_files));
+	SG(rfc1867_uploaded_files) = NULL;
 }
 /* }}} */
 
@@ -1134,7 +1135,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			register_http_post_files_variable(lbuf, s, &PG(http_globals)[TRACK_VARS_FILES], 0);
 			s = NULL;
 
-			/* Add full path of supplied file for folder uploads via 
+			/* Add full path of supplied file for folder uploads via
 			 * <input type="file" name="files" multiple webkitdirectory>
 			 */
 			/* Add $foo[full_path] */
