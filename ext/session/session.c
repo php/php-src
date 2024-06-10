@@ -387,8 +387,12 @@ static zend_long php_session_gc(bool immediate) /* {{{ */
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 			return num;
 		}
-		nrand = (zend_long) ((float) PS(gc_divisor) * php_combined_lcg());
-		if (PS(gc_probability) > 0 && nrand < PS(gc_probability)) {
+		if(PS(gc_divisor) == 0 || PS(gc_probability) == 0) {
+			return num;
+		}
+
+		nrand = (zend_long) ((float) llabs(PS(gc_divisor)) * php_combined_lcg());
+		if (llabs(PS(gc_probability)) > 0 && nrand < llabs(PS(gc_probability))) {
 			PS(mod)->s_gc(&PS(mod_data), PS(gc_maxlifetime), &num);
 		}
 	}
