@@ -86,7 +86,6 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 	uint32_t count = 0;
 
 	result = 0;
-	total_size = 0;
 	do {
 		php_random_result r = algo->generate(state);
 		result = result | (((uint32_t) r.result) << (total_size * 8));
@@ -145,7 +144,6 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 	uint32_t count = 0;
 
 	result = 0;
-	total_size = 0;
 	do {
 		php_random_result r = algo->generate(state);
 		result = result | (r.result << (total_size * 8));
@@ -520,7 +518,7 @@ PHP_FUNCTION(mt_getrandmax)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	/*
-	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
+	 * Melo: it could be 2^^32, but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
 	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
@@ -614,7 +612,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed(void)
 {
 	/* Mix various values using SHA-1 as a PRF to obtain as
 	 * much entropy as possible, hopefully generating an
-	 * unpredictable and independent uint64_t. Nevertheless
+	 * unpredictable and independent uint64_t. Nevertheless,
 	 * the output of this function MUST NOT be treated as
 	 * being cryptographically safe.
 	 */
