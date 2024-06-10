@@ -361,8 +361,6 @@ typedef struct _zend_ffi_ctype {
 	zend_ffi_type         *type;
 } zend_ffi_ctype;
 
-extern ZEND_API zend_class_entry *zend_ffi_cdata_ce;
-
 #define ZEND_FFI_TYPE_OWNED        (1<<0)
 
 #define ZEND_FFI_TYPE(t) \
