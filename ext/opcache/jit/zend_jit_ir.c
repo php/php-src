@@ -12833,6 +12833,7 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
 			jit_set_Z_LVAL(jit, res_addr, ir_SEXT_L(ir_LOAD_I16(ptr)));
 			res_type = IS_LONG;
 			break;
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 		case ZEND_FFI_TYPE_UINT32:
 			jit_set_Z_LVAL(jit, res_addr, ir_ZEXT_L(ir_LOAD_U32(ptr)));
 			res_type = IS_LONG;
@@ -12849,6 +12850,16 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
 			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_I32(ptr));
 			res_type = IS_LONG;
 			break;
+#else
+		case ZEND_FFI_TYPE_UINT32:
+			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_U32(ptr));
+			res_type = IS_LONG;
+			break;
+		case ZEND_FFI_TYPE_SINT32:
+			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_I32(ptr));
+			res_type = IS_LONG;
+			break;
+#endif
 		default:
 			ZEND_UNREACHABLE();
 	}
@@ -13615,6 +13626,7 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx  *jit,
 				ZEND_UNREACHABLE();
 			}
 			break;
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 		case ZEND_FFI_TYPE_UINT32:
 			if (val_info == MAY_BE_LONG) {
 				ir_STORE(ptr, ir_TRUNC_U32(jit_Z_LVAL(jit, op3_addr)));
@@ -13637,6 +13649,16 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx  *jit,
 				ZEND_UNREACHABLE();
 			}
 			break;
+#else
+		case ZEND_FFI_TYPE_UINT32:
+		case ZEND_FFI_TYPE_SINT32:
+			if (val_info == MAY_BE_LONG) {
+				ir_STORE(ptr, jit_Z_LVAL(jit, op3_addr));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			break;
+#endif
 		default:
 			ZEND_UNREACHABLE();
 	}
@@ -13969,6 +13991,7 @@ static int zend_jit_ffi_assign_op_helper(zend_jit_ctx   *jit,
 				return 0;
 			}
 			break;
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 		case ZEND_FFI_TYPE_UINT32:
 			type = IR_U32;
 			if (op2_info == MAY_BE_LONG) {
@@ -13997,6 +14020,18 @@ static int zend_jit_ffi_assign_op_helper(zend_jit_ctx   *jit,
 				return 0;
 			}
 			break;
+#else
+		case ZEND_FFI_TYPE_UINT32:
+		case ZEND_FFI_TYPE_SINT32:
+			type = IR_I32;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = jit_Z_LVAL(jit, op2_addr);
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
+#endif
 		default:
 			ZEND_UNREACHABLE();
 			return 0;
