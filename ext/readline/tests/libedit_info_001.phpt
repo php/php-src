@@ -30,7 +30,7 @@ array(%d) {
   ["point"]=>
   int(0)
   ["end"]=>
-  int%a
+  int(0)%A
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>

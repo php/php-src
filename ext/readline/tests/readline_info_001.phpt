@@ -45,7 +45,7 @@ array(%d) {
   ["completion_append_character"]=>
   string(1) " "
   ["completion_suppress_append"]=>
-  bool%a
+  bool(false)%A
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>
