@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35c11b9781669cff5ad72aa78b9b3732f7b827f1 */
+ * Stub hash: 810a94e09724a27d46c99495593da999cfc46243 */
 
 ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
 	"but it is included on an older PHP version");
@@ -158,6 +158,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_fmode, 0, 1, IS_VO
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_cast_fread, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -283,6 +287,7 @@ static ZEND_FUNCTION(zend_test_is_pcre_bundled);
 #if defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_set_fmode);
 #endif
+static ZEND_FUNCTION(zend_test_cast_fread);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -379,6 +384,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(zend_test_set_fmode, arginfo_zend_test_set_fmode)
 #endif
+	ZEND_FE(zend_test_cast_fread, arginfo_zend_test_cast_fread)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
