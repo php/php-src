@@ -133,12 +133,12 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 	ZEND_ASSERT(!zend_call_stack_is_main_thread());
 
 	error = pthread_getattr_np(pthread_self(), &attr);
-	if (error) {
+	if (UNEXPECTED(error)) {
 		return false;
 	}
 
 	error = pthread_attr_getstack(&attr, &addr, &max_size);
-	if (error) {
+	if (UNEXPECTED(error)) {
 		pthread_attr_destroy(&attr);
 		return false;
 	}
@@ -148,7 +148,7 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 		size_t guard_size;
 		/* In glibc prior to 2.8, addr and size include the guard pages */
 		error = pthread_attr_getguardsize(&attr, &guard_size);
-		if (error) {
+		if (UNEXPECTED(error)) {
 			pthread_attr_destroy(&attr);
 			return false;
 		}
