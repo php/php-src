@@ -81,9 +81,8 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 	const php_random_algo *algo = engine.algo;
 	void *state = engine.state;
 
-	uint32_t result, limit;
-	size_t total_size = 0;
-	uint32_t count = 0;
+	uint32_t result;
+	size_t total_size;
 
 	result = 0;
 	total_size = 0;
@@ -110,9 +109,10 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 	}
 
 	/* Ceiling under which UINT32_MAX % max == 0 */
-	limit = UINT32_MAX - (UINT32_MAX % umax) - 1;
+	uint32_t limit = UINT32_MAX - (UINT32_MAX % umax) - 1;
 
 	/* Discard numbers over the limit to avoid modulo bias */
+	uint32_t count = 0;
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > PHP_RANDOM_RANGE_ATTEMPTS) {
@@ -140,9 +140,8 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 	const php_random_algo *algo = engine.algo;
 	void *state = engine.state;
 
-	uint64_t result, limit;
-	size_t total_size = 0;
-	uint32_t count = 0;
+	uint64_t result;
+	size_t total_size;
 
 	result = 0;
 	total_size = 0;
@@ -169,9 +168,10 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 	}
 
 	/* Ceiling under which UINT64_MAX % max == 0 */
-	limit = UINT64_MAX - (UINT64_MAX % umax) - 1;
+	uint64_t limit = UINT64_MAX - (UINT64_MAX % umax) - 1;
 
 	/* Discard numbers over the limit to avoid modulo bias */
+	uint32_t count = 0;
 	while (UNEXPECTED(result > limit)) {
 		/* If the requirements cannot be met in a cycles, return fail */
 		if (++count > PHP_RANDOM_RANGE_ATTEMPTS) {
@@ -520,7 +520,7 @@ PHP_FUNCTION(mt_getrandmax)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	/*
-	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain
+	 * Melo: it could be 2^^32, but we only use 2^^31 to maintain
 	 * compatibility with the previous php_rand
 	 */
 	RETURN_LONG(PHP_MT_RAND_MAX); /* 2^^31 */
@@ -614,7 +614,7 @@ PHPAPI uint64_t php_random_generate_fallback_seed(void)
 {
 	/* Mix various values using SHA-1 as a PRF to obtain as
 	 * much entropy as possible, hopefully generating an
-	 * unpredictable and independent uint64_t. Nevertheless
+	 * unpredictable and independent uint64_t. Nevertheless,
 	 * the output of this function MUST NOT be treated as
 	 * being cryptographically safe.
 	 */
