@@ -81,11 +81,8 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 	const php_random_algo *algo = engine.algo;
 	void *state = engine.state;
 
-	uint32_t result, limit;
+	uint32_t result = 0;
 	size_t total_size = 0;
-	uint32_t count = 0;
-
-	result = 0;
 	do {
 		php_random_result r = algo->generate(state);
 		result = result | (((uint32_t) r.result) << (total_size * 8));
@@ -109,7 +106,8 @@ PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t u
 	}
 
 	/* Ceiling under which UINT32_MAX % max == 0 */
-	limit = UINT32_MAX - (UINT32_MAX % umax) - 1;
+	uint32_t limit = UINT32_MAX - (UINT32_MAX % umax) - 1;
+	uint32_t count = 0;
 
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
@@ -139,11 +137,8 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 	const php_random_algo *algo = engine.algo;
 	void *state = engine.state;
 
-	uint64_t result, limit;
+	uint64_t result = 0;
 	size_t total_size = 0;
-	uint32_t count = 0;
-
-	result = 0;
 	do {
 		php_random_result r = algo->generate(state);
 		result = result | (r.result << (total_size * 8));
@@ -167,7 +162,8 @@ PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t u
 	}
 
 	/* Ceiling under which UINT64_MAX % max == 0 */
-	limit = UINT64_MAX - (UINT64_MAX % umax) - 1;
+	uint64_t limit = UINT64_MAX - (UINT64_MAX % umax) - 1;
+	uint32_t count = 0;
 
 	/* Discard numbers over the limit to avoid modulo bias */
 	while (UNEXPECTED(result > limit)) {
