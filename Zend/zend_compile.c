@@ -10193,6 +10193,8 @@ static void zend_compile_rope_finalize(znode *result, uint32_t rope_elements, ze
 	if (rope_elements == 1) {
 		if (opline->op2_type == IS_CONST) {
 			GET_NODE(result, opline->op2);
+			ZVAL_UNDEF(CT_CONSTANT(opline->op2));
+			SET_UNUSED(opline->op2);
 			MAKE_NOP(opline);
 		} else {
 			opline->opcode = ZEND_CAST;
