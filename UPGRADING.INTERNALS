@@ -156,6 +156,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Unused symbols CONFIGURATION_FILE_PATH, DISCARD_PATH, HAVE_ERRMSG_H,
      HAVE_REGCOMP, HAVE_RINT, NEED_ISBLANK, PHP_URL_FOPEN, REGEX, HSREGEX,
      USE_CONFIG_FILE have been removed.
+   - The HAVE_OPENSSL symbol has been removed.
+   - The HAVE_OPENSSL_EXT symbol is now consistently defined to value 1 whether
+     the openssl extension is available either as shared or built statically.
 
 ========================
 3. Module changes

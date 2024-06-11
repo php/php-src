@@ -88,7 +88,7 @@
 # include "win32/select.h"
 #endif
 
-#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
 

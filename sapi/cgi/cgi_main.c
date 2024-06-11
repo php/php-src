@@ -87,7 +87,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fastcgi.h"
 #include "cgi_main_arginfo.h"
 
-#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
 
