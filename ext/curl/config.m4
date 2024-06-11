@@ -15,8 +15,7 @@ if test "$PHP_CURL" != "no"; then
     [*SSL*], [
       CURL_SSL=yes
       AC_MSG_RESULT([yes])
-    ],
-    [*], [
+    ], [
       CURL_SSL=no
       AC_MSG_RESULT([no])
     ])
