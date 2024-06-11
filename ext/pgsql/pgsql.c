@@ -123,9 +123,15 @@ char pgsql_libpq_version[16];
 ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
+static const zend_module_dep pgsql_module_deps[] = {
+	ZEND_MOD_REQUIRED("pcre")
+	ZEND_MOD_END
+};
+
 /* {{{ pgsql_module_entry */
 zend_module_entry pgsql_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pgsql_module_deps,
 	"pgsql",
 	ext_functions,
 	PHP_MINIT(pgsql),
