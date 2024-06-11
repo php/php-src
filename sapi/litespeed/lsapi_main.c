@@ -1668,7 +1668,7 @@ static int add_associate_array( const char * pKey, int keyLen, const char * pVal
 
 
 /* {{{ Fetch all HTTP request headers */
-PHP_FUNCTION(litespeed_request_headers)
+PHP_FUNCTION(apache_request_headers)
 {
     if (zend_parse_parameters_none() == FAILURE) {
         RETURN_THROWS();

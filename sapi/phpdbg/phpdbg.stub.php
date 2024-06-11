@@ -22,4 +22,8 @@ function phpdbg_start_oplog(): void {}
 
 function phpdbg_end_oplog(array $options = []): ?array {}
 
+/**
+ * @return array<string, array>
+ * @refcount 1
+ */
 function phpdbg_get_executable(array $options = []): array {}

@@ -2,6 +2,10 @@
 
 /** @generate-class-entries */
 
+/**
+ * @return array<int, array>
+ * @refcount 1
+ */
 function token_get_all(string $code, int $flags = 0): array {}
 
 function token_name(int $id): string {}
