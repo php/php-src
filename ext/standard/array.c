@@ -26,9 +26,6 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-#ifdef PHP_WIN32
-#include "win32/unistd.h"
-#endif
 #include "zend_globals.h"
 #include "zend_interfaces.h"
 #include "php_array.h"
