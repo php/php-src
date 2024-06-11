@@ -1725,24 +1725,60 @@ static zend_never_inline void zend_binary_assign_op_obj_dim(zend_object *obj, zv
 				zval zref;
 				zend_fetch_object_dimension_address(&zref, obj, NULL, 0, BP_VAR_W EXECUTE_DATA_CC);
 
-				ZEND_ASSERT(Z_TYPE(zref) != IS_INDIRECT && "No support for indirect vars yet");
-				ZEND_ASSERT(Z_ISREF(zref));
+				switch (Z_TYPE(zref)) {
+					case IS_REFERENCE: {
+						zend_reference *ref = Z_REF(zref);
+						zval *var_ptr = Z_REFVAL(zref);
+						if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
+							zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
+							if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+								ZVAL_NULL(EX_VAR(opline->result.var));
+							}
+							goto clean_up;
+						}
+						zend_result status = zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+						if (UNEXPECTED(status == FAILURE)) {
+							if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+								ZVAL_NULL(EX_VAR(opline->result.var));
+							}
+							goto clean_up;
+						}
 
-				zend_reference *ref = Z_REF(zref);
-				zval *var_ptr = Z_REFVAL(zref);
-				if (UNEXPECTED(ZEND_REF_HAS_TYPE_SOURCES(ref))) {
-					zend_binary_assign_op_typed_ref(ref, value OPLINE_CC EXECUTE_DATA_CC);
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_NULL(EX_VAR(opline->result.var));
+						if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+							ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+						}
+						zval_ptr_dtor(&zref);
+						break;
 					}
-					goto clean_up;
+					case IS_OBJECT: {
+						//zend_result status = Z_OBJ_HT_P(&zref)->do_operation(opline->extended_value, &zref, &zref, value);
+						zval *var_ptr = &zref;
+						zend_result status = zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+						if (UNEXPECTED(status == FAILURE)) {
+							if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+								ZVAL_NULL(EX_VAR(opline->result.var));
+							}
+							goto clean_up;
+						}
+						if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+							ZVAL_COPY(EX_VAR(opline->result.var), &zref);
+						}
+						break;
+					}
+					case IS_INDIRECT: {
+						zval *var_ptr = Z_INDIRECT_P(&zref);
+						zend_result status = zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
+						if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+							if (UNEXPECTED(status == FAILURE)) {
+								ZVAL_NULL(EX_VAR(opline->result.var));
+							} else {
+								ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
+							}
+						}
+						break;
+					}
+					EMPTY_SWITCH_DEFAULT_CASE();
 				}
-				zend_binary_op(var_ptr, var_ptr, value OPLINE_CC);
-
-				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-					ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
-				}
-				zval_ptr_dtor(&zref);
 			} else {
 				zend_invalid_use_of_object_as_array(obj, /* has_offset */ false, BP_VAR_FETCH);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -2989,9 +3025,10 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			if (Z_TYPE_P(Z_REFVAL_P(retval)) == IS_OBJECT) {
 				/* We need to seperate objects returned by reference */
 				SEPARATE_ZVAL(retval);
-			} else if (result != retval) {
-				ZVAL_INDIRECT(result, retval);
 			}
+		}
+		if (result != retval) {
+			ZVAL_INDIRECT(result, retval);
 		}
 	} else {
 		zend_use_object_as_array(obj);
