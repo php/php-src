@@ -10188,9 +10188,9 @@ static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_n
 }
 /* }}} */
 
-static void zend_compile_rope_finalize(znode *result, uint32_t j, zend_op *init_opline, zend_op *opline)
+static void zend_compile_rope_finalize(znode *result, uint32_t rope_elements, zend_op *init_opline, zend_op *opline)
 {
-	if (j == 1) {
+	if (rope_elements == 1) {
 		if (opline->op2_type == IS_CONST) {
 			GET_NODE(result, opline->op2);
 			MAKE_NOP(opline);
@@ -10202,7 +10202,7 @@ static void zend_compile_rope_finalize(znode *result, uint32_t j, zend_op *init_
 			SET_UNUSED(opline->op2);
 			zend_make_tmp_result(result, opline);
 		}
-	} else if (j == 2) {
+	} else if (rope_elements == 2) {
 		opline->opcode = ZEND_FAST_CONCAT;
 		opline->extended_value = 0;
 		opline->op1_type = init_opline->op2_type;
@@ -10212,13 +10212,13 @@ static void zend_compile_rope_finalize(znode *result, uint32_t j, zend_op *init_
 	} else {
 		uint32_t var;
 
-		init_opline->extended_value = j;
+		init_opline->extended_value = rope_elements;
 		opline->opcode = ZEND_ROPE_END;
 		zend_make_tmp_result(result, opline);
 		var = opline->op1.var = get_temporary_variable();
 
 		/* Allocates the necessary number of zval slots to keep the rope */
-		uint32_t i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+		uint32_t i = ((rope_elements * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
 		while (i > 1) {
 			get_temporary_variable();
 			i--;
