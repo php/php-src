@@ -220,6 +220,34 @@ static void bc_write_bcd_representation(uint32_t value, char *str)
 	memcpy(str, &digits, sizeof(digits));
 }
 
+static inline void bc_mul_vector_to_bc_num(BC_VECTOR *prod_vector, size_t prodlen, size_t prod_arr_size, bc_num *prod)
+{
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+	size_t i = 0;
+	while (i < prod_arr_size - 1) {
+#if BC_VECTOR_SIZE == 4
+		bc_write_bcd_representation(prod_vector[i], pend - 3);
+		pend -= 4;
+#else
+		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
+		pend -= 8;
+#endif
+		i++;
+	}
+
+	/*
+	 * The last digit may carry over.
+	 * Also need to fill it to the end with zeros, so loop until the end of the string.
+	 */
+	while (pend >= pptr) {
+		*pend-- = prod_vector[i] % BASE;
+		prod_vector[i] /= BASE;
+	}
+}
+
 /*
  * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
  * The array is generated starting with the smaller digits.
@@ -283,30 +311,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	bc_mul_carry_calc(prod_vector, prod_arr_size);
 
 	/* Convert to bc_num */
-	*prod = bc_new_num_nonzeroed(prodlen, 0);
-	char *pptr = (*prod)->n_value;
-	char *pend = pptr + prodlen - 1;
-	i = 0;
-	while (i < prod_arr_size - 1) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_vector[i], pend - 3);
-		pend -= 4;
-#else
-		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
-		pend -= 8;
-#endif
-		i++;
-	}
-
-	/*
-	 * The last digit may carry over.
-	 * Also need to fill it to the end with zeros, so loop until the end of the string.
-	 */
-	while (pend >= pptr) {
-		*pend-- = prod_vector[i] % BASE;
-		prod_vector[i] /= BASE;
-	}
+	bc_mul_vector_to_bc_num(prod_vector, prodlen, prod_arr_size, prod);
 
 	efree(buf);
 }
