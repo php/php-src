@@ -10188,6 +10188,57 @@ static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_n
 }
 /* }}} */
 
+static void zend_compile_rope_finalize(znode *result, uint32_t j, zend_op *init_opline, zend_op *opline)
+{
+	if (j == 1) {
+		if (opline->op2_type == IS_CONST) {
+			GET_NODE(result, opline->op2);
+			MAKE_NOP(opline);
+		} else {
+			opline->opcode = ZEND_CAST;
+			opline->extended_value = IS_STRING;
+			opline->op1_type = opline->op2_type;
+			opline->op1 = opline->op2;
+			SET_UNUSED(opline->op2);
+			zend_make_tmp_result(result, opline);
+		}
+	} else if (j == 2) {
+		opline->opcode = ZEND_FAST_CONCAT;
+		opline->extended_value = 0;
+		opline->op1_type = init_opline->op2_type;
+		opline->op1 = init_opline->op2;
+		zend_make_tmp_result(result, opline);
+		MAKE_NOP(init_opline);
+	} else {
+		uint32_t var;
+
+		init_opline->extended_value = j;
+		opline->opcode = ZEND_ROPE_END;
+		zend_make_tmp_result(result, opline);
+		var = opline->op1.var = get_temporary_variable();
+
+		/* Allocates the necessary number of zval slots to keep the rope */
+		uint32_t i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+		while (i > 1) {
+			get_temporary_variable();
+			i--;
+		}
+
+		/* Update all the previous opcodes to use the same variable */
+		while (opline != init_opline) {
+			opline--;
+			if (opline->opcode == ZEND_ROPE_ADD &&
+			    opline->result.var == (uint32_t)-1) {
+				opline->op1.var = var;
+				opline->result.var = var;
+			} else if (opline->opcode == ZEND_ROPE_INIT &&
+			           opline->result.var == (uint32_t)-1) {
+				opline->result.var = var;
+			}
+		}
+	}
+}
+
 static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 {
 	uint32_t i, j;
@@ -10263,53 +10314,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		opline = zend_compile_rope_add_ex(opline, result, j++, &last_const_node);
 	}
 	init_opline = CG(active_op_array)->opcodes + rope_init_lineno;
-	if (j == 1) {
-		if (opline->op2_type == IS_CONST) {
-			GET_NODE(result, opline->op2);
-			MAKE_NOP(opline);
-		} else {
-			opline->opcode = ZEND_CAST;
-			opline->extended_value = IS_STRING;
-			opline->op1_type = opline->op2_type;
-			opline->op1 = opline->op2;
-			SET_UNUSED(opline->op2);
-			zend_make_tmp_result(result, opline);
-		}
-	} else if (j == 2) {
-		opline->opcode = ZEND_FAST_CONCAT;
-		opline->extended_value = 0;
-		opline->op1_type = init_opline->op2_type;
-		opline->op1 = init_opline->op2;
-		zend_make_tmp_result(result, opline);
-		MAKE_NOP(init_opline);
-	} else {
-		uint32_t var;
-
-		init_opline->extended_value = j;
-		opline->opcode = ZEND_ROPE_END;
-		zend_make_tmp_result(result, opline);
-		var = opline->op1.var = get_temporary_variable();
-
-		/* Allocates the necessary number of zval slots to keep the rope */
-		i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
-		while (i > 1) {
-			get_temporary_variable();
-			i--;
-		}
-
-		/* Update all the previous opcodes to use the same variable */
-		while (opline != init_opline) {
-			opline--;
-			if (opline->opcode == ZEND_ROPE_ADD &&
-			    opline->result.var == (uint32_t)-1) {
-				opline->op1.var = var;
-				opline->result.var = var;
-			} else if (opline->opcode == ZEND_ROPE_INIT &&
-			           opline->result.var == (uint32_t)-1) {
-				opline->result.var = var;
-			}
-		}
-	}
+	zend_compile_rope_finalize(result, j, init_opline, opline);
 }
 /* }}} */
 
