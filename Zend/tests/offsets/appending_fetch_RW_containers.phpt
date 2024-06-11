@@ -63,6 +63,9 @@ string(12) "A::offsetGet"
 NULL
 
 Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
+string(12) "A::offsetSet"
+NULL
+string(6) "5value"
 object(A)#3 (0) {
 }
 new B() container:

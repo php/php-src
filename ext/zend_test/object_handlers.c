@@ -310,10 +310,9 @@ static zval *dimension_handlers_no_ArrayAccess_fetch_dimension(zend_object *obje
 		ZVAL_COPY(OBJ_PROP_NUM(object, 7), offset);
 	}
 	/* Normal logic */
-	// TODO Return a ref?
-	//ZVAL_COPY_VALUE(rv, value);
 	GC_ADDREF(object);
 	ZVAL_OBJ(rv, object);
+	ZVAL_MAKE_REF(rv);
 	return rv;
 }
 
@@ -322,9 +321,9 @@ static zval *dimension_handlers_no_ArrayAccess_fetch_append(zend_object *object,
 	/* hasOffset */
 	ZVAL_BOOL(OBJ_PROP_NUM(object, 5), false);
 	/* Normal logic */
-	// TODO Return a ref?
 	GC_ADDREF(object);
 	ZVAL_OBJ(rv, object);
+	ZVAL_MAKE_REF(rv);
 	return rv;
 }
 

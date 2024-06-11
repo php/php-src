@@ -31,4 +31,8 @@ Inside C10::offsetGet
 NULL
 
 Notice: Indirect modification of overloaded element of C10 has no effect in %s on line %d
+
+Inside C10::offsetSet
+NULL
+int(105)
 int(105)

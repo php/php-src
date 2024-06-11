@@ -381,14 +381,7 @@ static zval *spl_fixedarray_object_fetch_dimension_helper(const spl_fixedarray_o
 		zend_throw_exception(spl_ce_OutOfBoundsException, "Index invalid or out of range", 0);
 		return NULL;
 	} else {
-		if (Z_TYPE(intern->array.elements[index]) == IS_OBJECT) {
-			ZVAL_COPY(rv, &intern->array.elements[index]);
-		} else {
-			ZVAL_NEW_REF(&intern->array.elements[index], &intern->array.elements[index]);
-			zend_reference *ref = Z_REF(intern->array.elements[index]);
-			GC_ADDREF(ref);
-			ZVAL_REF(rv, ref);
-		}
+		ZVAL_INDIRECT(rv, &intern->array.elements[index]);
 		return rv;
 	}
 }

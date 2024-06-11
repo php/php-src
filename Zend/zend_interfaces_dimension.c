@@ -74,39 +74,38 @@ static zval *zend_user_class_fetch_dimension(zend_object *object, zval *offset, 
 	if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 		ZEND_ASSERT(EG(exception));
 		return NULL;
-	} else {
-		if (!Z_ISREF_P(rv)) {
-			if (Z_TYPE_P(rv) != IS_OBJECT) {
-				zend_class_entry *ce = object->ce;
-				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
-			}
-		}
-		//else if (UNEXPECTED(Z_REFCOUNT_P(rv) == 1)) {
-		//	ZVAL_UNREF(rv); // Why is this wanted???
-		//}
 	}
+
+	ZEND_ASSERT(Z_ISREF_P(rv));
 	return rv;
 }
 
 static zval *zend_legacy_ArrayAccess_fetch_dimension(zend_object *object, zval *offset, zval *rv)
 {
 	zend_class_entry *ce = object->ce;
-	zend_function *zf = zend_hash_str_find_ptr(&ce->function_table, "offsetget", strlen("offsetget"));
+	zend_function *user_function = zend_hash_str_find_ptr(&ce->function_table, "offsetget", strlen("offsetget"));
 
 	GC_ADDREF(object);
-	zend_call_known_instance_method_with_1_params(zf, object, rv, offset);
+	zend_call_known_function(user_function, object, object->ce, rv, 1, offset, NULL);
 	OBJ_RELEASE(object);
 
 	if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 		ZEND_ASSERT(EG(exception));
 		return NULL;
 	}
-	if (!Z_ISREF_P(rv) && Z_TYPE_P(rv) != IS_OBJECT) {
-		zend_class_entry *ce = object->ce;
-		zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
 
-		/* "Create" a ref to the value even if it is not to have BC behaviour */
-		ZVAL_NEW_REF(rv, rv);
+	/* Warn about not returning by-ref */
+	if (!Z_ISREF_P(rv)) {
+		if (Z_TYPE_P(rv) != IS_OBJECT) {
+			zend_class_entry *ce = object->ce;
+			// TODO Make this an E_WARNING
+			zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+			if (UNEXPECTED(EG(exception))) {
+				zval_ptr_dtor(rv);
+				ZVAL_UNDEF(rv);
+				return NULL;
+			}
+		}
 	}
 
 	return rv;
@@ -214,6 +213,7 @@ static zval *zend_user_class_fetch_append(zend_object *object, zval *rv)
 		ZEND_ASSERT(EG(exception));
 		return NULL;
 	}
+	ZEND_ASSERT(Z_ISREF_P(rv));
 	return rv;
 }
 
