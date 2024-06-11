@@ -588,6 +588,7 @@ add_op1_def:
 			break;
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
+		case ZEND_CLONE_INIT_PROP:
 			next = opline + 1;
 			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];

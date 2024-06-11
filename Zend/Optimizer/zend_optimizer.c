@@ -533,6 +533,7 @@ bool zend_optimizer_update_op2_const(zend_op_array *op_array,
 			break;
 		case ZEND_ASSIGN_OBJ:
 		case ZEND_ASSIGN_OBJ_REF:
+		case ZEND_CLONE_INIT_PROP:
 		case ZEND_FETCH_OBJ_R:
 		case ZEND_FETCH_OBJ_W:
 		case ZEND_FETCH_OBJ_RW:

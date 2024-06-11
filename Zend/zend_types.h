@@ -1559,7 +1559,10 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
  * the Z_EXTRA space when copying property default values etc. We define separate
  * macros for this purpose, so this workaround is easier to remove in the future. */
 #define IS_PROP_UNINIT (1<<0)
-#define IS_PROP_REINITABLE (1<<1)  /* It has impact only on readonly properties */
+/* Unlocks readonly properties during cloning for exactly one assignment. It has no impact on regular properties. */
+#define IS_PROP_REINITABLE (1<<1)
+/* Re-locks readonly properties during "clone with" operations. It has no impact on regular properties. */
+#define IS_PROP_REINITED (1<<2)
 #define Z_PROP_FLAG_P(z) Z_EXTRA_P(z)
 #define ZVAL_COPY_VALUE_PROP(z, v) \
 	do { *(z) = *(v); } while (0)
