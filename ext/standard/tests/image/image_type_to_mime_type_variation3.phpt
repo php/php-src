@@ -1,5 +1,5 @@
 --TEST--
-image_type_to_mime_type() (passinf equivalent integer values)
+image_type_to_mime_type() (passing equivalent integer values)
 --CREDITS--
 Sanjay Mantoor <sanjay.mantoor@gmail.com>
 --FILE--
@@ -75,4 +75,7 @@ string\(10\) "image\/webp"
 string\(10\) "image\/avif"
 
 -- Iteration 20 --
+string\(10\) "image\/heif"
+
+-- Iteration 21 --
 string\(24\) "application\/octet-stream"

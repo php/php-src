@@ -459,6 +459,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_TGA
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
 #endif
+#ifdef HAVE_GD_HEIF
+	php_info_print_table_row(2, "HEIF Support", "enabled");
+#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -517,6 +520,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "TGA Read Support", 1);
 #else
 	add_assoc_bool(return_value, "TGA Read Support", 0);
+#endif
+#ifdef HAVE_GD_HEIF
+	add_assoc_bool(return_value, "HEIF Support", 1);
+#else
+	add_assoc_bool(return_value, "HEIF Support", 0);
 #endif
 #ifdef USE_GD_JISX0208
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
@@ -1350,6 +1358,9 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_AVIF
 	ret |= PHP_IMG_AVIF;
 #endif
+#ifdef HAVE_GD_HEIF
+	ret |= PHP_IMG_HEIF;
+#endif
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1399,6 +1410,11 @@ static int _php_image_type(zend_string *data)
 		return PHP_GDIMG_TYPE_BMP;
 	} else if(!memcmp(ZSTR_VAL(data), php_sig_riff, sizeof(php_sig_riff)) && !memcmp(ZSTR_VAL(data) + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
 		return PHP_GDIMG_TYPE_WEBP;
+	} else if (!memcmp(ZSTR_VAL(data), php_sig_heifheic, sizeof(php_sig_heifheic)) ||
+                   !memcmp(ZSTR_VAL(data), php_sig_heifheix, sizeof(php_sig_heifheix)) ||
+                   !memcmp(ZSTR_VAL(data), php_sig_heifmif1, sizeof(php_sig_heifmif1)) ||
+                   !memcmp(ZSTR_VAL(data), php_sig_heifmsf1, sizeof(php_sig_heifmsf1))) {
+		return PHP_GDIMG_TYPE_HEIF;
 	}
 
 	php_stream *image_stream = php_stream_memory_open(TEMP_STREAM_READONLY, data);
@@ -1517,7 +1533,15 @@ PHP_FUNCTION(imagecreatefromstring)
 			php_error_docref(NULL, E_WARNING, "No AVIF support in this PHP build");
 			RETURN_FALSE;
 #endif
-
+#ifdef HAVE_GD_HEIF
+		case PHP_GDIMG_TYPE_HEIF:
+			abort();
+			im = _php_image_create_from_string(data, "HEIF", gdImageCreateFromHeifCtx);
+			break;
+#else
+			php_error_docref(NULL, E_WARNING, "No HEIF support in this PHP build");
+			RETURN_FALSE;
+#endif
 		default:
 			php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");
 			RETURN_FALSE;
@@ -1722,6 +1746,12 @@ PHP_FUNCTION(imagecreatefromwbmp)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_WBM, "WBMP", gdImageCreateFromWBMP, gdImageCreateFromWBMPCtx);
 }
 /* }}} */
+#ifdef HAVE_GD_HEIF
+PHP_FUNCTION(imagecreatefromheif)
+{
+	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_HEIF, "HEIF", gdImageCreateFromHeif, gdImageCreateFromHeifCtx);
+}
+#endif
 
 /* {{{ Create a new image from GD file or URL */
 PHP_FUNCTION(imagecreatefromgd)
@@ -1951,6 +1981,12 @@ PHP_FUNCTION(imagejpeg)
 }
 /* }}} */
 #endif /* HAVE_GD_JPG */
+#ifdef HAVE_GD_HEIF
+PHP_FUNCTION(imageheif)
+{
+	_php_image_output_ctx(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_HEIF, "HEIF");
+}
+#endif
 
 /* {{{ Output WBMP image to browser or file */
 PHP_FUNCTION(imagewbmp)
@@ -4286,10 +4322,13 @@ static gdIOCtx *create_output_context(void) {
 static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn)
 {
 	zval *imgind;
-	zend_long quality = -1, basefilter = -1, speed = -1;
+	zend_long quality = -1, basefilter = -1, speed = -1, codec = -1;
 	gdImagePtr im;
 	gdIOCtx *ctx = NULL;
 	zval *to_zval = NULL;
+	char *chroma = NULL;
+	size_t chroma_len;
+	bool codec_is_null = true;
 
 	if (image_type == PHP_GDIMG_TYPE_GIF) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!", &imgind, gd_image_ce, &to_zval) == FAILURE) {
@@ -4301,6 +4340,10 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		}
 	} else if (image_type == PHP_GDIMG_TYPE_AVIF) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!ll", &imgind, gd_image_ce, &to_zval, &quality, &speed) == FAILURE) {
+			RETURN_THROWS();
+		}
+	} else if (image_type == PHP_GDIMG_TYPE_HEIF) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!l!ls", &imgind, gd_image_ce, &to_zval, &quality, &codec, &codec_is_null, &chroma, &chroma_len) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
@@ -4356,6 +4399,37 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 				speed = 6;
 			}
 			gdImageAvifCtx(im, ctx, (int) quality, (int) speed);
+			break;
+#endif
+#ifdef HAVE_GD_HEIF
+		case PHP_GDIMG_TYPE_HEIF:
+			if (quality < -1) {
+				zend_argument_value_error(3, "must be greater than or equal to -1");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			}
+			if (codec_is_null) {
+				codec = GD_HEIF_CODEC_HEVC;
+			}
+			if (codec < GD_HEIF_CODEC_HEVC || codec > GD_HEIF_CODEC_AV1) {
+				zend_argument_value_error(4, "must be between HEIF_CODEC_HEVC or HEIF_CODEC_AV1");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			}
+			if (chroma == NULL) {
+				chroma = GD_HEIF_CHROMA_420;
+				chroma_len = strlen(chroma);
+			}
+			if (chroma_len != 3 ||
+			    (strcmp(chroma, GD_HEIF_CHROMA_420) &&
+			    strcmp(chroma, GD_HEIF_CHROMA_422) &&
+			    strcmp(chroma, GD_HEIF_CHROMA_444))) {
+				zend_argument_value_error(5, "must be between HEIF_CHROMA_420, HEIF_CHROMA_422 or HEIF_CHROMA_444");
+				ctx->gd_free(ctx);
+				RETURN_THROWS();
+			}
+
+			gdImageHeifCtx(im, ctx, (int) quality, (gdHeifCodec)codec, chroma);
 			break;
 #endif
 #ifdef HAVE_GD_PNG

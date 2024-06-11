@@ -195,6 +195,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
   PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
   PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
+  PHP_GD_CHECK_FORMAT([Heif], [HAVE_GD_HEIF])
   PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
