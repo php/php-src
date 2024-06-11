@@ -36,7 +36,7 @@
 #include "zend_accelerator_util_funcs.h"
 #include "zend_accelerator_hash.h"
 
-#if HAVE_JIT
+#ifdef HAVE_JIT
 #include "jit/zend_jit.h"
 #endif
 

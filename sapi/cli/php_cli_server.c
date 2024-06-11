@@ -2840,9 +2840,9 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	} else {
 		char *ret = NULL;
 
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 		ret = VCWD_GETCWD(document_root_buf, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 		ret = VCWD_GETWD(document_root_buf);
 #endif
 		document_root = ret ? document_root_buf: ".";

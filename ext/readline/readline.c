@@ -38,7 +38,7 @@
 #include <readline/history.h>
 #endif
 
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 
 static zval _prepped_callback;
 
@@ -79,7 +79,7 @@ PHP_MINIT_FUNCTION(readline)
 	using_history();
 #endif
 	ZVAL_UNDEF(&_readline_completion);
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 	ZVAL_UNDEF(&_prepped_callback);
 #endif
 
@@ -97,7 +97,7 @@ PHP_RSHUTDOWN_FUNCTION(readline)
 {
 	zval_ptr_dtor(&_readline_completion);
 	ZVAL_UNDEF(&_readline_completion);
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();
 		zval_ptr_dtor(&_prepped_callback);
@@ -493,7 +493,7 @@ PHP_FUNCTION(readline_completion_function)
 
 /* }}} */
 
-#if HAVE_RL_CALLBACK_READ_CHAR
+#ifdef HAVE_RL_CALLBACK_READ_CHAR
 
 static void php_rl_callback_handler(char *the_line)
 {
@@ -583,7 +583,7 @@ PHP_FUNCTION(readline_redisplay)
 
 #endif
 
-#if HAVE_RL_ON_NEW_LINE
+#ifdef HAVE_RL_ON_NEW_LINE
 /* {{{ Inform readline that the cursor has moved to a new line */
 PHP_FUNCTION(readline_on_new_line)
 {

@@ -1354,7 +1354,7 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 }
 /* }}} */
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	cwd_state new_state;
@@ -1425,7 +1425,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 	}
 
 	if (link) {
-#if HAVE_LCHOWN
+#ifdef HAVE_LCHOWN
 		ret = lchown(new_state.cwd, owner, group);
 #else
 		ret = -1;
