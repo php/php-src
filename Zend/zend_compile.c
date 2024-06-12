@@ -4773,6 +4773,14 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 		return FAILURE;
 	}
 
+	/* Handle empty format strings. */
+	if (Z_STRLEN_P(format_string) == 0) {
+		result->op_type = IS_CONST;
+		ZVAL_EMPTY_STRING(&result->u.constant);
+
+		return SUCCESS;
+	}
+
 	znode *elements = NULL;
 
 	if (string_placeholder_count > 0) {
@@ -4853,16 +4861,6 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 		znode const_node;
 		const_node.op_type = IS_CONST;
 		ZVAL_STRINGL(&const_node.u.constant, offset, end - offset);
-		if (rope_elements == 0) {
-			rope_init_lineno = get_next_op_number();
-		}
-		opline = zend_compile_rope_add(result, rope_elements++, &const_node);
-	}
-	if (rope_elements == 0) {
-		/* Handle empty format strings. */
-		znode const_node;
-		const_node.op_type = IS_CONST;
-		ZVAL_EMPTY_STRING(&const_node.u.constant);
 		if (rope_elements == 0) {
 			rope_init_lineno = get_next_op_number();
 		}
