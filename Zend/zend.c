@@ -914,7 +914,8 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	php_win32_cp_set_by_id(65001);
 #endif
 
-	/* Set up early utility functions. */
+	/* Set up early utility functions. zend_mm depends on
+	 * zend_random_bytes_insecure */
 	zend_random_bytes = utility_functions->random_bytes_function;
 	zend_random_bytes_insecure = utility_functions->random_bytes_insecure_function;
 
