@@ -27,6 +27,7 @@ PHP_NEW_EXTENSION(random,
       engine_secure.c \
       engine_user.c \
       gammasection.c \
-      randomizer.c,
+      randomizer.c \
+      zend_utils.c,
       no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 PHP_INSTALL_HEADERS([ext/random], [php_random.h php_random_csprng.h php_random_uint128.h])
