@@ -619,8 +619,8 @@ static int _php_source_op_to_ipv4_op(enum source_op sop)
 zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	MIB_IPADDRTABLE *addr_table;
-    ULONG size;
-    DWORD retval;
+	ULONG size;
+	DWORD retval;
 	DWORD i;
 
 	(void) php_sock; /* not necessary */
@@ -635,8 +635,7 @@ zend_result php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struc
 retry:
 	retval = GetIpAddrTable(addr_table, &size, 0);
 	if (retval == ERROR_INSUFFICIENT_BUFFER) {
-		efree(addr_table);
-		addr_table = emalloc(size);
+		erealloc(addr_table, size);
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
@@ -662,8 +661,8 @@ retry:
 zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *if_index)
 {
 	MIB_IPADDRTABLE *addr_table;
-    ULONG size;
-    DWORD retval;
+	ULONG size;
+	DWORD retval;
 	DWORD i;
 
 	(void) php_sock; /* not necessary */
@@ -678,8 +677,7 @@ zend_result php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, uns
 retry:
 	retval = GetIpAddrTable(addr_table, &size, 0);
 	if (retval == ERROR_INSUFFICIENT_BUFFER) {
-		efree(addr_table);
-		addr_table = emalloc(size);
+		erealloc(addr_table, size);
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
