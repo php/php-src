@@ -4758,6 +4758,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 		switch (*q) {
 		case 's':
+		case 'd':
 			placeholder_count++;
 			break;
 		case '%':
@@ -4794,11 +4795,6 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	 */
 	for (uint32_t i = 0; i < placeholder_count; i++) {
 		zend_compile_expr(elements + i, args->child[1 + i]);
-		if (elements[i].op_type == IS_CONST) {
-			if (Z_TYPE(elements[i].u.constant) != IS_ARRAY) {
-				convert_to_string(&elements[i].u.constant);
-			}
-		}
 	}
 
 	uint32_t rope_elements = 0;
@@ -4817,7 +4813,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 		char *q = p + 1;
 		ZEND_ASSERT(q < end);
-		ZEND_ASSERT(*q == 's' || *q == '%');
+		ZEND_ASSERT(*q == 's' || *q == 'd' || *q == '%');
 
 		if (*q == '%') {
 			/* Optimization to not create a dedicated rope element for the literal '%':
@@ -4837,15 +4833,26 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 			opline = zend_compile_rope_add(result, rope_elements++, &const_node);
 		}
 
-		if (*q == 's') {
-			/* Perform the cast of constant arrays when actually evaluating corresponding placeholder
-			 * for correct error reporting.
-			 */
-			if (elements[placeholder_count].op_type == IS_CONST) {
-				if (Z_TYPE(elements[placeholder_count].u.constant) == IS_ARRAY) {
-					zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_STRING;
+		if (*q != '%') {
+			switch (*q) {
+			case 's':
+				/* Perform the cast of constants when actually evaluating the corresponding placeholder
+				 * for correct error reporting.
+				 */
+				if (elements[placeholder_count].op_type == IS_CONST) {
+					if (Z_TYPE(elements[placeholder_count].u.constant) == IS_ARRAY) {
+						zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_STRING;
+					} else {
+						convert_to_string(&elements[placeholder_count].u.constant);
+					}
 				}
+				break;
+			case 'd':
+				zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_LONG;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE();
 			}
+
 			if (rope_elements == 0) {
 				rope_init_lineno = get_next_op_number();
 			}
