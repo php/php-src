@@ -1,7 +1,6 @@
-dnl
-dnl Check for arc4random on BSD systems
-dnl
-AC_CHECK_DECLS([arc4random_buf])
+AC_CHECK_DECL([arc4random_buf],
+  [AC_DEFINE([HAVE_ARC4RANDOM_BUF], [1],
+    [Define to 1 if you have the 'arc4random_buf' function.])])
 
 dnl
 dnl Check for CCRandomGenerateBytes
