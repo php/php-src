@@ -112,10 +112,6 @@ char pgsql_libpq_version[16];
 		RETURN_THROWS(); \
 	}
 
-#ifndef HAVE_PQFREEMEM
-#define PQfreemem free
-#endif
-
 #ifndef HAVE_PQERRORS_SQLSTATE
 #define PQERRORS_SQLSTATE 0
 #endif
