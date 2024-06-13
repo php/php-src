@@ -77,20 +77,25 @@ static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_siz
  * converted to absolute values, and calculated appropriately.
  * However, "negative values" ​​are not corrected to positive values.
  */
+static inline void bc_karatsuba_mul_carry_calc_single(BC_VECTOR *ret)
+{
+	if (ret[0] <= BC_VECTOR_MAX_HALF) {
+		/* "positive number" */
+		ret[1] += ret[0] / BC_VECTOR_BOUNDARY_NUM;
+		ret[0] %= BC_VECTOR_BOUNDARY_NUM;
+	} else {
+		/* "negative number" */
+		BC_VECTOR abs = (BC_VECTOR) 0 - ret[0];
+		BC_VECTOR borrow = abs / BC_VECTOR_BOUNDARY_NUM;
+		ret[1] -= borrow;
+		ret[0] +=  BC_VECTOR_BOUNDARY_NUM * borrow;
+	}
+}
+
 static inline void bc_karatsuba_mul_carry_calc(BC_VECTOR *ret, size_t ret_arr_size)
 {
 	for (size_t i = 0; i < ret_arr_size - 1; i++) {
-		if (ret[i] <= BC_VECTOR_MAX_HALF) {
-			/* "positive number" */
-			ret[i + 1] += ret[i] / BC_VECTOR_BOUNDARY_NUM;
-			ret[i] %= BC_VECTOR_BOUNDARY_NUM;
-		} else {
-			/* "negative number" */
-			BC_VECTOR abs = (BC_VECTOR) 0 - ret[i];
-			BC_VECTOR borrow = abs / BC_VECTOR_BOUNDARY_NUM;
-			ret[i + 1] -= borrow;
-			ret[i] +=  BC_VECTOR_BOUNDARY_NUM * borrow;
-		}
+		bc_karatsuba_mul_carry_calc_single(&ret[i]);
 	}
 }
 
@@ -408,9 +413,13 @@ static inline void bc_karatsuba_mul_add_buf_to_mid(BC_VECTOR *mid, const BC_VECT
 /*
  * The Karatsuba algorithm uses recursive divide-and-conquer computation. This function is
  * a process that is called recursively.
+ * When calc_arr_size, n1_size and n2_size are equal, can skip the size check.
+ * This function is a faster version that can be used in such cases.
  */
-static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, BC_VECTOR *n2, size_t calc_arr_size)
+static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, size_t n1_size, BC_VECTOR *n2, size_t n2_size, size_t calc_arr_size)
 {
+	ZEND_ASSERT(n1_size == n2_size && n1_size == calc_arr_size && calc_arr_size >= 2);
+
 	BC_VECTOR *ret = safe_emalloc(calc_arr_size * 2, sizeof(BC_VECTOR), 0);
 
 	if (calc_arr_size == 2) {
@@ -427,9 +436,9 @@ static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, BC_VECTOR *n2, 
 	size_t half_size = calc_arr_size / 2;
 
 	/* low */
-	BC_VECTOR *low = bc_karatsuba_mul_fast_recursive(n1, n2, half_size);
+	BC_VECTOR *low = bc_karatsuba_mul_fast_recursive(n1, half_size, n2, half_size, half_size);
 	/* high */
-	BC_VECTOR *high = bc_karatsuba_mul_fast_recursive(n1 + half_size, n2 + half_size, half_size);
+	BC_VECTOR *high = bc_karatsuba_mul_fast_recursive(n1 + half_size, half_size, n2 + half_size, half_size, half_size);
 
 	/* prepare mid */
 	BC_VECTOR *n1_buf = safe_emalloc(calc_arr_size, sizeof(BC_VECTOR), 0);
@@ -446,7 +455,7 @@ static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, BC_VECTOR *n2, 
 	}
 
 	/* mid */
-	BC_VECTOR *mid = bc_karatsuba_mul_fast_recursive(n1_buf, n2_buf, half_size);
+	BC_VECTOR *mid = bc_karatsuba_mul_fast_recursive(n1_buf, half_size, n2_buf, half_size, half_size);
 
 	/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
 	bc_karatsuba_mul_add_buf_to_mid(mid, n1_buf, n2_buf_carry, half_size);
@@ -483,6 +492,229 @@ static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, BC_VECTOR *n2, 
 }
 
 /*
+ * The Karatsuba algorithm uses recursive divide-and-conquer computation. This function is
+ * a process that is called recursively. n1_size is always larger than n2_size.
+ */
+static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_VECTOR *n2, size_t n2_size, size_t calc_arr_size)
+{
+	size_t ret_size = n1_size + n2_size;
+	BC_VECTOR *ret = safe_emalloc(ret_size, sizeof(BC_VECTOR), 0);
+
+	size_t i;
+	size_t half_size = calc_arr_size / 2;
+
+	/* low */
+	BC_VECTOR *low;
+	size_t low_ret_size;
+	if (n2_size >= half_size) {
+		/* n1_size is always greater than n2_size, so if n2_size is greater than half_size, low can use the fast version. */
+		low = bc_karatsuba_mul_fast_recursive(n1, half_size, n2, half_size, half_size);
+		low_ret_size = calc_arr_size;
+	} else {
+		low = bc_karatsuba_mul_recursive(n1, MIN(n1_size, half_size), n2, n2_size, half_size);
+		low_ret_size = MIN(n1_size, half_size) + n2_size;
+	}
+
+	/* high */
+	BC_VECTOR *high = NULL;
+	size_t high_ret_size;
+	/*
+	 * If this condition is met, all values ​​used for high of n2 are 0, so it is obvious that the calculation result will be 0.
+	 * Therefore, will skip the calculation.
+	 */
+	if (n2_size > half_size) {
+		high = bc_karatsuba_mul_recursive(n1 + half_size, n1_size - half_size, n2 + half_size, n2_size - half_size, half_size);
+		high_ret_size = n1_size - half_size + n2_size - half_size;
+	}
+
+	/* mid */
+	BC_VECTOR *mid_ex = NULL; // The ex suffix is ​​added because the meaning is slightly different from the fast version mid.
+	BC_VECTOR *n1_buf = NULL;
+	BC_VECTOR n1_buf_carry = 0;
+	BC_VECTOR n2_buf_carry = 0;
+	size_t mid_ret_size;
+
+	/*
+	 * When n1_size and n2_size are less than half_size, the calculation result of mid
+	 * is exactly the same as low. So in that case can skip it.
+	 * Taking ab * cd as an example, if both n1_size and n2_size are less than half_size, a and c are 0.
+	 * If decompose this using the Karatsuba algorithm, we get the following.
+	 * low = b * d
+	 * high = 0 * 0
+	 * mid = (0 - b) * (0 - d)
+	 * ret = high * 100 + (high + low - mid) * 10 + low
+	 *     = 0 + (0 + b * d - (-b * -d)) * 10 + b * d
+	 *     = (b * d - b * d) * 10 + b * d
+	 *     = b * d
+	 * So in this case, only low is added to the result.
+	 */
+	if (n2_size > half_size) {
+		/* If n1_size and n2_size are both greater than half_size, calculate mid as usual. */
+
+		/* prepare mid */
+		mid_ret_size = calc_arr_size;
+		n1_buf = safe_emalloc(calc_arr_size, sizeof(BC_VECTOR), 0);
+		BC_VECTOR *n2_buf = n1_buf + half_size;
+
+		for (i = 0; i < n1_size - half_size; i++) {
+			/*
+			 * Calculation of carry during subtraction is also performed at the same time.
+			 * Carries that cannot fit into the buffer are recorded in n1_buf_carry and n2_buf_carry.
+			 */
+			bc_karatsuba_mul_buf_calc_for_mid(&n1_buf[i], n1[i + half_size], n1[i], &n1_buf_carry);
+		}
+		for (; i < half_size; i++) {
+			bc_karatsuba_mul_buf_calc_for_mid(&n1_buf[i], 0, n1[i], &n1_buf_carry);
+		}
+
+		for (i = 0; i < n2_size - half_size; i++) {
+			bc_karatsuba_mul_buf_calc_for_mid(&n2_buf[i], n2[i + half_size], n2[i], &n2_buf_carry);
+		}
+		for (; i < half_size; i++) {
+			bc_karatsuba_mul_buf_calc_for_mid(&n2_buf[i], 0, n2[i], &n2_buf_carry);
+		}
+
+		/* mid */
+		mid_ex = bc_karatsuba_mul_fast_recursive(n1_buf, half_size, n2_buf, half_size, half_size);
+
+		/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
+		bc_karatsuba_mul_add_buf_to_mid(mid_ex, n1_buf, n2_buf_carry, half_size);
+		bc_karatsuba_mul_add_buf_to_mid(mid_ex, n2_buf, n1_buf_carry, half_size);
+
+		if (ret_size - half_size >= mid_ret_size) {
+			for (i = 0; i < high_ret_size; i++) {
+				mid_ex[i] -= high[i] + low[i];
+			}
+			for (; i < low_ret_size; i++) {
+				mid_ex[i] -= low[i];
+			}
+		} else {
+			/*
+			 * In this case, the large values ​​of mid and low cancel each other out, and mid_ex becomes a small value.
+			 * However, due to differences in the calculation process, results may be incorrect if carry-over calculations
+			 * are not performed.
+			 * Values ​​larger than ret_size - half_size will be to 0, so it is sufficient to carry up to ret_size - half_size.
+			 */
+			for (i = 0; i < high_ret_size; i++) {
+				mid_ex[i] -= high[i] + low[i];
+				bc_karatsuba_mul_carry_calc_single(&mid_ex[i]);
+			}
+			for (; i < ret_size - half_size; i++) {
+				mid_ex[i] -= low[i];
+				bc_karatsuba_mul_carry_calc_single(&mid_ex[i]);
+			}
+			for (; i < low_ret_size; i++) {
+				mid_ex[i] -= low[i];
+			}
+		}
+	} else if (n1_size > half_size) {
+		/*
+		 * If only n1_size is greater than half_size, do the calculation a little differently.
+		 * For example, in the multiplication ab * cd, when only n1_size is greater than half_size, c is 0.
+		 * If we decompose this using the Karatsuba algorithm, we get the following.
+		 * low = b * d
+		 * high = a * 0
+		 * mid = (a - b) * (0 - d)
+		 * ret = high * 100 + (high + low - mid) * 10 + low
+		 *     = 0 + (0 + b * d - (a - b) * -d) * 10 + b * d
+		 *     = ((b + a - b) * d) * 10 + b * d
+		 *     = (a * d) * 10 + b * d
+		 * So use a * d instead of high + low - mid.
+		 */
+		size_t n1_high_size = n1_size - half_size;
+		mid_ret_size = n1_high_size + n2_size;
+
+		/* mid ex */
+		if (n1_high_size == half_size && n2_size == half_size) {
+			mid_ex = bc_karatsuba_mul_fast_recursive(n1 + half_size, half_size, n2, half_size, half_size);
+		} else {
+			if (n1_high_size >= n2_size) {
+				mid_ex = bc_karatsuba_mul_recursive(n1 + half_size, n1_high_size, n2, n2_size, half_size);
+			} else {
+				mid_ex = bc_karatsuba_mul_recursive(n2, n2_size, n1 + half_size, n1_high_size, half_size);
+			}
+		}
+	}
+
+	/* Add low and high to ret */
+
+	/*
+	 * When skipping mid, there is no need to add mid. This is because mid is equal to
+	 * low at this time, so the calculation result will always be 0.
+	 */
+	if (n2_size > half_size) {
+		/* Case of not skipping high and mid */
+		for (i = 0; i < high_ret_size; i++) {
+			ret[i] = low[i];
+			ret[i + calc_arr_size] = high[i];
+		}
+		for (; i < low_ret_size; i++) {
+			ret[i] = low[i];
+		}
+		/* low_ret_size and mid ret size are always equal. */
+		if (ret_size - half_size > mid_ret_size) {
+			for (i = 0; i < mid_ret_size; i++) {
+				ret[i + half_size] -= mid_ex[i];
+			}
+			/* n1_buf and n2_buf, if there is a carry that doesn't fit in the buffer, add/subtract it extra. */
+			if (UNEXPECTED(n1_buf_carry != 0 && n2_buf_carry != 0)) {
+				if ((n1_buf_carry == 1 && n2_buf_carry == 1) || (n1_buf_carry == (BC_VECTOR) -1 && n2_buf_carry == (BC_VECTOR) -1)) {
+					ret[i + half_size] -= 1;
+				} else {
+					ret[i + half_size] += 1;
+				}
+			}
+		} else {
+			for (i = 0; i < ret_size - half_size; i++) {
+				ret[i + half_size] -= mid_ex[i];
+			}
+			/* n1_buf and n2_buf, if there is a carry that doesn't fit in the buffer, add/subtract it extra. */
+			if (UNEXPECTED(n1_buf_carry != 0 && n2_buf_carry != 0)) {
+				if ((n1_buf_carry == 1 && n2_buf_carry == 1) || (n1_buf_carry == (BC_VECTOR) -1 && n2_buf_carry == (BC_VECTOR) -1)) {
+					ret[i + half_size - 1] -= BC_VECTOR_BOUNDARY_NUM;
+				} else {
+					ret[i + half_size - 1] += BC_VECTOR_BOUNDARY_NUM;
+				}
+			}
+		}
+	} else if (n1_size > half_size) {
+		/* Case to skip high and not use buffer for sub for mid calculation */
+		for (i = 0; i < low_ret_size; i++) {
+			ret[i] = low[i];
+		}
+		for (; i < ret_size; i++) {
+			ret[i] = 0;
+		}
+		for (i = 0; i < mid_ret_size; i++) {
+			ret[i + half_size] += mid_ex[i];
+		}
+	} else {
+		/* Cases of skipping both high and mid */
+		for (i = 0; i < low_ret_size; i++) {
+			ret[i] = low[i];
+		}
+	}
+
+	/* Calc carry if need */
+	if (UNEXPECTED(bc_karatsuba_mul_need_carry_calc(calc_arr_size))) {
+		bc_karatsuba_mul_carry_calc(ret, ret_size);
+	}
+
+	efree(low);
+	if (high) {
+		efree(high);
+	}
+	if (mid_ex) {
+		efree(mid_ex);
+	}
+	if (n1_buf) {
+		efree(n1_buf);
+	}
+
+	return ret;
+}
+
+/*
  * Returns the next largest power of 2 of val.
  * https://graphics.stanford.edu/%7Eseander/bithacks.html#RoundUpPowerOf2
  */
@@ -508,39 +740,50 @@ static inline size_t bc_mul_next_pow_2(size_t v)
  */
 static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
 {
-	size_t i;
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n_arr_size = n1len >= n2len ? (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE : (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	/* Adjust n1_arr_size and n2_arr_size to multiples of 2 for computational efficiency. */
+	size_t n1_arr_size = ((n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE + 1) & ~1;
+	size_t n2_arr_size = ((n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE + 1) & ~1;
+	size_t prod_arr_size = n1_arr_size + n2_arr_size;
 	size_t prod_arr_real_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 
-	size_t calc_arr_size = bc_mul_next_pow_2(n_arr_size);
+	size_t calc_arr_size = bc_mul_next_pow_2(MAX(n1_arr_size, n2_arr_size));
 
-	BC_VECTOR *buf = safe_emalloc(calc_arr_size * 2, sizeof(BC_VECTOR), 0);
+	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size, sizeof(BC_VECTOR), 0);
 
 	BC_VECTOR *n1_vector = buf;
-	BC_VECTOR *n2_vector = buf + calc_arr_size;
+	BC_VECTOR *n2_vector = buf + n1_arr_size;
 	BC_VECTOR *prod_vector = NULL;
 
-	for (i = 0; i < calc_arr_size; i++) {
-		n1_vector[i] = 0;
-		n2_vector[i] = 0;
-	}
+	/* Since adjusted the size to be a multiple of 2, the last entry may not be initialized. So, set it to 0. */
+	n1_vector[n1_arr_size - 1] = 0;
+	n2_vector[n2_arr_size - 1] = 0;
 
 	/* Convert to BC_VECTOR[] */
 	bc_convert_to_vector(n1_vector, n1end, n1len);
 	bc_convert_to_vector(n2_vector, n2end, n2len);
 
 	/* Do multiplication */
-	prod_vector = bc_karatsuba_mul_fast_recursive(n1_vector, n2_vector, calc_arr_size);
+	if (n1_arr_size >= n2_arr_size) {
+		if (n2_arr_size == calc_arr_size) {
+			/* If this condition is met, n1_arr_size, n2_arr_size, and calc_size are all equal, so use the fast version. */
+			prod_vector = bc_karatsuba_mul_fast_recursive(n1_vector, n1_arr_size, n2_vector, n2_arr_size, calc_arr_size);
+		} else {
+			prod_vector = bc_karatsuba_mul_recursive(n1_vector, n1_arr_size, n2_vector, n2_arr_size, calc_arr_size);
+		}
+	} else {
+		/* Pass the arguments in reverse so that n1_size on the function side is always larger than n2_size. */
+		prod_vector = bc_karatsuba_mul_recursive(n2_vector, n2_arr_size, n1_vector, n1_arr_size, calc_arr_size);
+	}
 
 	/*
 	 * Calc carry
 	 * It is almost the same as bc_karatsuba_mul_carry_calc, but all "negative values" ​​are corrected to positive values.
 	 */
-	size_t calc_carry_size = MIN(calc_arr_size * 2 - 1, prod_arr_real_size);
+	size_t calc_carry_size = MIN(prod_arr_size - 1, prod_arr_real_size);
 	for (size_t i = 0; i < calc_carry_size; i++) {
 		if (prod_vector[i] <= BC_VECTOR_MAX_HALF) {
 			/* "positive number" */
