@@ -97,6 +97,7 @@ jobs:
             ${{ matrix.configuration_parameters }}
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
+            CFLAGS="-fcf-protection=full" LDFLAGS="-Wl,-z,cet-report=error"
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
@@ -105,6 +106,8 @@ jobs:
         uses: ./.github/actions/setup-x64
       - name: Test
         uses: ./.github/actions/test-linux
+        env:
+          GLIBC_TUNABLES: 'glibc.cpu.hwcaps=SHSTK'
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
           runTestsParameters: >-
@@ -112,6 +115,8 @@ jobs:
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
+        env:
+          GLIBC_TUNABLES: 'glibc.cpu.hwcaps=SHSTK'
         with:
           testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
