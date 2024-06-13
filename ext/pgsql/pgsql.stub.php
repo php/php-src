@@ -498,6 +498,12 @@ namespace {
     function pg_version(?PgSql\Connection $connection = null): array {}
 
     /**
+     * @return array<string, string|null>
+     * @refcount 1
+     */
+    function pg_jit(?PgSql\Connection $connection = null): array {}
+
+    /**
      * @param PgSql\Connection|string $connection
      * @refcount 1
      */

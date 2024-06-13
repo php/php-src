@@ -864,6 +864,7 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_TTY 5
 #define PHP_PG_HOST 6
 #define PHP_PG_VERSION 7
+#define PHP_PG_JIT 8
 
 /* php_pgsql_get_link_info */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
@@ -929,6 +930,25 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			PHP_PQ_COPY_PARAM("application_name");
 			return;
 		}
+		case PHP_PG_JIT: {
+			PGresult *res;
+			array_init(return_value);
+			res = PQexec(pgsql, "SHOW jit_provider");
+			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+                            add_assoc_null(return_value, "jit_provider");
+			} else {
+                            add_assoc_string(return_value, "jit_provider", PQgetvalue(res, 0, 0));
+			}
+			PQclear(res);
+			res = PQexec(pgsql, "SHOW jit");
+			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+                            add_assoc_null(return_value, "jit");
+			} else {
+                            add_assoc_string(return_value, "jit", PQgetvalue(res, 0, 0));
+			}
+			PQclear(res);
+			return;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (result) {
@@ -978,6 +998,11 @@ PHP_FUNCTION(pg_host)
 PHP_FUNCTION(pg_version)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_VERSION);
+}
+
+PHP_FUNCTION(pg_jit)
+{
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_JIT);
 }
 
 /* Returns the value of a server parameter */
