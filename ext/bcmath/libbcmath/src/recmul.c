@@ -41,10 +41,14 @@
 #  define BC_VECTOR_SIZE 8
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
+/* It is the next smallest power of 2 after BC_VECTOR_NO_OVERFLOW_ADD_COUNT / 2 */
+#  define BC_KARATSUBA_MUL_NEED_CARRY_CALC_SIZE 512
 #else
 #  define BC_VECTOR_SIZE 4
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
+/* It is the next smallest power of 2 after BC_VECTOR_NO_OVERFLOW_ADD_COUNT / 2 */
+#  define BC_KARATSUBA_MUL_NEED_CARRY_CALC_SIZE 16
 #endif
 
 /*
@@ -52,6 +56,7 @@
  * Typically this is 1844 for 64bit and 42 for 32bit.
  */
 #define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
+#define BC_VECTOR_MAX_HALF (~((BC_VECTOR) 0) / 2)
 
 
 /* Multiply utility routines */
@@ -61,6 +66,31 @@ static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_siz
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
 		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
 		prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
+	}
+}
+
+/*
+ * When calculating carry with the karatsuba algorithm, negative values ​​must be taken into account.
+ * To accurately calculate "negative values" ​​in unsigned integers, use this function before the value exceeds
+ * half of the maximum value of the type by any means other than underflow.
+ * All values ​​greater than half of the maximum value are interpreted as negative values ​​due to underflow,
+ * converted to absolute values, and calculated appropriately.
+ * However, "negative values" ​​are not corrected to positive values.
+ */
+static inline void bc_karatsuba_mul_carry_calc(BC_VECTOR *ret, size_t ret_arr_size)
+{
+	for (size_t i = 0; i < ret_arr_size - 1; i++) {
+		if (ret[i] <= BC_VECTOR_MAX_HALF) {
+			/* "positive number" */
+			ret[i + 1] += ret[i] / BC_VECTOR_BOUNDARY_NUM;
+			ret[i] %= BC_VECTOR_BOUNDARY_NUM;
+		} else {
+			/* "negative number" */
+			BC_VECTOR abs = (BC_VECTOR) 0 - ret[i];
+			BC_VECTOR borrow = abs / BC_VECTOR_BOUNDARY_NUM;
+			ret[i + 1] -= borrow;
+			ret[i] +=  BC_VECTOR_BOUNDARY_NUM * borrow;
+		}
 	}
 }
 
@@ -316,6 +346,225 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	efree(buf);
 }
 
+/*
+ * BC_VECTOR may overflow during the calculation of Karatsuba algorithm. Since the calc_arr_size
+ * that can overflow is known, we need to do the carry-over calculation before that.
+ * This function determines whether a carry calculation needs to be performed.
+ */
+static inline bool bc_karatsuba_mul_need_carry_calc(size_t calc_arr_size)
+{
+retry:
+	if (EXPECTED(calc_arr_size < BC_KARATSUBA_MUL_NEED_CARRY_CALC_SIZE)) {
+		return false;
+	}
+
+	calc_arr_size /= BC_KARATSUBA_MUL_NEED_CARRY_CALC_SIZE;
+	if (UNEXPECTED(calc_arr_size == 1)) {
+		return true;
+	}
+	goto retry;
+}
+
+static inline void bc_karatsuba_mul_buf_calc_for_mid(BC_VECTOR *buf, BC_VECTOR high, BC_VECTOR low, BC_VECTOR *carry)
+{
+	*buf = high - low + *carry;
+
+	/*
+	 * Carry may occur during subtraction. If we perform multiplication while a carry is occurring,
+	 * BC_VECTOR may overflow sooner than expected, so we calculate the carry.
+	 */
+	if (*buf >= BC_VECTOR_BOUNDARY_NUM && *buf <= BC_VECTOR_MAX_HALF) {
+		*carry = 1;
+		*buf -= BC_VECTOR_BOUNDARY_NUM;
+	} else if ((BC_VECTOR) 0 - *buf >= BC_VECTOR_BOUNDARY_NUM && *buf > BC_VECTOR_MAX_HALF) {
+		*carry = -1;
+		*buf += BC_VECTOR_BOUNDARY_NUM;
+	} else {
+		*carry = 0;
+	}
+}
+
+/*
+ * When a subtraction results in a carry that cannot fit in the buffer, add the result to mid.
+ * Carry is always 1 or -1, so can just add/subtract the buffer as is.
+ */
+static inline void bc_karatsuba_mul_add_buf_to_mid(BC_VECTOR *mid, const BC_VECTOR *buf, BC_VECTOR carry, size_t half_size)
+{
+	if (EXPECTED(carry == 0)) {
+		return;
+	}
+
+	if (carry == 1) {
+		for (size_t i = 0; i < half_size; i++) {
+			mid[i + half_size] += buf[i];
+		}
+	} else {
+		for (size_t i = 0; i < half_size; i++) {
+			mid[i + half_size] -= buf[i];
+		}
+	}
+}
+
+/*
+ * The Karatsuba algorithm uses recursive divide-and-conquer computation. This function is
+ * a process that is called recursively.
+ */
+static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, BC_VECTOR *n2, size_t calc_arr_size)
+{
+	BC_VECTOR *ret = safe_emalloc(calc_arr_size * 2, sizeof(BC_VECTOR), 0);
+
+	if (calc_arr_size == 2) {
+		BC_VECTOR low = n1[0] * n2[0];
+		BC_VECTOR high = n1[1] * n2[1];
+		ret[0] = low;
+		ret[1] = low + high - (n1[1] - n1[0]) * (n2[1] - n2[0]);
+		ret[2] = high;
+		ret[3] = 0;
+		return ret;
+	}
+
+	size_t i;
+	size_t half_size = calc_arr_size / 2;
+
+	/* low */
+	BC_VECTOR *low = bc_karatsuba_mul_recursive(n1, n2, half_size);
+	/* high */
+	BC_VECTOR *high = bc_karatsuba_mul_recursive(n1 + half_size, n2 + half_size, half_size);
+
+	/* prepare mid */
+	BC_VECTOR *n1_buf = safe_emalloc(calc_arr_size, sizeof(BC_VECTOR), 0);
+	BC_VECTOR *n2_buf = n1_buf + half_size;
+	BC_VECTOR n1_buf_carry = 0;
+	BC_VECTOR n2_buf_carry = 0;
+	for (i = 0; i < half_size; i++) {
+		/*
+		 * Calculation of carry during subtraction is also performed at the same time.
+		 * Carries that cannot fit into the buffer are recorded in n1_buf_carry and n2_buf_carry.
+		 */
+		bc_karatsuba_mul_buf_calc_for_mid(&n1_buf[i], n1[i + half_size], n1[i], &n1_buf_carry);
+		bc_karatsuba_mul_buf_calc_for_mid(&n2_buf[i], n2[i + half_size], n2[i], &n2_buf_carry);
+	}
+
+	/* mid */
+	BC_VECTOR *mid = bc_karatsuba_mul_recursive(n1_buf, n2_buf, half_size);
+
+	/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
+	bc_karatsuba_mul_add_buf_to_mid(mid, n1_buf, n2_buf_carry, half_size);
+	bc_karatsuba_mul_add_buf_to_mid(mid, n2_buf, n1_buf_carry, half_size);
+
+	/* Add to ret */
+	for (i = 0; i < calc_arr_size; i++) {
+		ret[i] = low[i];
+		ret[i + calc_arr_size] = high[i];
+	}
+	for (i = 0; i < calc_arr_size; i++) {
+		ret[i + half_size] += low[i] + high[i] - mid[i];
+	}
+	/* n1_buf and n2_buf, if there is a carry that doesn't fit in the buffer, add/subtract it extra. */
+	if (UNEXPECTED(n1_buf_carry != 0 && n2_buf_carry != 0)) {
+		if ((n1_buf_carry == 1 && n2_buf_carry == 1) || (n1_buf_carry == (BC_VECTOR) -1 && n2_buf_carry == (BC_VECTOR) -1)) {
+			ret[i + half_size] -= 1;
+		} else {
+			ret[i + half_size] += 1;
+		}
+	}
+
+	/* Calc carry if need */
+	if (UNEXPECTED(bc_karatsuba_mul_need_carry_calc(calc_arr_size))) {
+		bc_karatsuba_mul_carry_calc(ret, calc_arr_size * 2);
+	}
+
+	efree(low);
+	efree(high);
+	efree(mid);
+	efree(n1_buf);
+
+	return ret;
+}
+
+/*
+ * Returns the next largest power of 2 of val.
+ * https://graphics.stanford.edu/%7Eseander/bithacks.html#RoundUpPowerOf2
+ */
+static inline size_t bc_mul_next_pow_2(size_t v)
+{
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+#if SIZEOF_SIZE_T >= 8
+	v |= v >> 32;
+#endif
+	v++;
+
+	return v;
+}
+
+/*
+ * For multiplication of very large values, use the Karatsuba algorithm.
+ * https://en.wikipedia.org/w/index.php?title=Karatsuba_algorithm&oldid=1190009898
+ */
+static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc_num *prod)
+{
+	size_t i;
+	const char *n1end = n1->n_value + n1len - 1;
+	const char *n2end = n2->n_value + n2len - 1;
+	size_t prodlen = n1len + n2len;
+
+	size_t n_arr_size = n1len >= n2len ? (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE : (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t prod_arr_real_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+
+	size_t calc_arr_size = bc_mul_next_pow_2(n_arr_size);
+
+	BC_VECTOR *buf = safe_emalloc(calc_arr_size * 2, sizeof(BC_VECTOR), 0);
+
+	BC_VECTOR *n1_vector = buf;
+	BC_VECTOR *n2_vector = buf + calc_arr_size;
+	BC_VECTOR *prod_vector = NULL;
+
+	for (i = 0; i < calc_arr_size; i++) {
+		n1_vector[i] = 0;
+		n2_vector[i] = 0;
+	}
+
+	/* Convert to BC_VECTOR[] */
+	bc_convert_to_vector(n1_vector, n1end, n1len);
+	bc_convert_to_vector(n2_vector, n2end, n2len);
+
+	/* Do multiplication */
+	prod_vector = bc_karatsuba_mul_recursive(n1_vector, n2_vector, calc_arr_size);
+
+	/*
+	 * Calc carry
+	 * It is almost the same as bc_karatsuba_mul_carry_calc, but all "negative values" ​​are corrected to positive values.
+	 */
+	size_t calc_carry_size = MIN(calc_arr_size * 2 - 1, prod_arr_real_size);
+	for (size_t i = 0; i < calc_carry_size; i++) {
+		if (prod_vector[i] <= BC_VECTOR_MAX_HALF) {
+			/* "positive number" */
+			prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
+			prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
+		} else {
+			/* "negative number" */
+			BC_VECTOR abs = (BC_VECTOR) 0 - prod_vector[i];
+			BC_VECTOR borrow = abs / BC_VECTOR_BOUNDARY_NUM;
+			if (EXPECTED(abs % BC_VECTOR_BOUNDARY_NUM != 0)) {
+				borrow++;
+			}
+			prod_vector[i + 1] -= borrow;
+			prod_vector[i] +=  BC_VECTOR_BOUNDARY_NUM * borrow;
+		}
+	}
+
+	/* Convert to bc_num */
+	bc_mul_vector_to_bc_num(prod_vector, prodlen, prod_arr_real_size, prod);
+
+	efree(buf);
+	efree(prod_vector);
+}
+
 /* The multiply routine.  N2 times N1 is put int PROD with the scale of
    the result being MIN(N2 scale+N1 scale, MAX (SCALE, N2 scale, N1 scale)).
    */
@@ -333,6 +582,9 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	/* Do the multiply */
 	if (len1 <= BC_VECTOR_SIZE && len2 <= BC_VECTOR_SIZE) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
+	/* wip: to check behavior */
+	} else if (len1 > BC_VECTOR_SIZE * 2 && len2 > BC_VECTOR_SIZE * 2) {
+		bc_karatsuba_mul(n1, len1, n2, len2, &prod);
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);
 	}
