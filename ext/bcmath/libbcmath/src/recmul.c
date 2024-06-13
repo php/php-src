@@ -416,11 +416,12 @@ static inline void bc_karatsuba_mul_add_buf_to_mid(BC_VECTOR *mid, const BC_VECT
  * When calc_arr_size, n1_size and n2_size are equal, can skip the size check.
  * This function is a faster version that can be used in such cases.
  */
-static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, size_t n1_size, BC_VECTOR *n2, size_t n2_size, size_t calc_arr_size)
+static void bc_karatsuba_mul_fast_recursive(
+	BC_VECTOR *n1, BC_VECTOR *n1_buf, size_t n1_size,
+	BC_VECTOR *n2, BC_VECTOR *n2_buf, size_t n2_size,
+	size_t calc_arr_size, BC_VECTOR *ret)
 {
 	ZEND_ASSERT(n1_size == n2_size && n1_size == calc_arr_size && calc_arr_size >= 2);
-
-	BC_VECTOR *ret = safe_emalloc(calc_arr_size * 2, sizeof(BC_VECTOR), 0);
 
 	if (calc_arr_size == 2) {
 		BC_VECTOR low = n1[0] * n2[0];
@@ -429,20 +430,20 @@ static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, size_t n1_size,
 		ret[1] = low + high - (n1[1] - n1[0]) * (n2[1] - n2[0]);
 		ret[2] = high;
 		ret[3] = 0;
-		return ret;
+		return;
 	}
 
 	size_t i;
 	size_t half_size = calc_arr_size / 2;
 
 	/* low */
-	BC_VECTOR *low = bc_karatsuba_mul_fast_recursive(n1, half_size, n2, half_size, half_size);
+	BC_VECTOR *low = ret;
+	bc_karatsuba_mul_fast_recursive(n1, n1_buf, half_size, n2, n2_buf, half_size, half_size, low);
 	/* high */
-	BC_VECTOR *high = bc_karatsuba_mul_fast_recursive(n1 + half_size, half_size, n2 + half_size, half_size, half_size);
+	BC_VECTOR *high = low + calc_arr_size;
+	bc_karatsuba_mul_fast_recursive(n1 + half_size, n1_buf, half_size, n2 + half_size, n2_buf, half_size, half_size, high);
 
 	/* prepare mid */
-	BC_VECTOR *n1_buf = safe_emalloc(calc_arr_size, sizeof(BC_VECTOR), 0);
-	BC_VECTOR *n2_buf = n1_buf + half_size;
 	BC_VECTOR n1_buf_carry = 0;
 	BC_VECTOR n2_buf_carry = 0;
 	for (i = 0; i < half_size; i++) {
@@ -455,26 +456,29 @@ static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, size_t n1_size,
 	}
 
 	/* mid */
-	BC_VECTOR *mid = bc_karatsuba_mul_fast_recursive(n1_buf, half_size, n2_buf, half_size, half_size);
+	BC_VECTOR *mid = high + calc_arr_size;
+	bc_karatsuba_mul_fast_recursive(n1_buf, n1_buf + half_size, half_size, n2_buf, n2_buf + half_size, half_size, half_size, mid);
 
 	/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
 	bc_karatsuba_mul_add_buf_to_mid(mid, n1_buf, n2_buf_carry, half_size);
 	bc_karatsuba_mul_add_buf_to_mid(mid, n2_buf, n1_buf_carry, half_size);
 
 	/* Add to ret */
-	for (i = 0; i < calc_arr_size; i++) {
-		ret[i] = low[i];
-		ret[i + calc_arr_size] = high[i];
+	for (i = 0; i < half_size; i++) {
+		mid[i] -= high[i] + low[i];
 	}
-	for (i = 0; i < calc_arr_size; i++) {
+	for (; i < calc_arr_size; i++) {
 		ret[i + half_size] += low[i] + high[i] - mid[i];
+	}
+	for (i = 0; i < half_size; i++) {
+		ret[i + half_size] -= mid[i];
 	}
 	/* n1_buf and n2_buf, if there is a carry that doesn't fit in the buffer, add/subtract it extra. */
 	if (UNEXPECTED(n1_buf_carry != 0 && n2_buf_carry != 0)) {
 		if ((n1_buf_carry == 1 && n2_buf_carry == 1) || (n1_buf_carry == (BC_VECTOR) -1 && n2_buf_carry == (BC_VECTOR) -1)) {
-			ret[i + half_size] -= 1;
+			ret[calc_arr_size + half_size] -= 1;
 		} else {
-			ret[i + half_size] += 1;
+			ret[calc_arr_size + half_size] += 1;
 		}
 	}
 
@@ -482,54 +486,49 @@ static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, size_t n1_size,
 	if (UNEXPECTED(bc_karatsuba_mul_need_carry_calc(calc_arr_size))) {
 		bc_karatsuba_mul_carry_calc(ret, calc_arr_size * 2);
 	}
-
-	efree(low);
-	efree(high);
-	efree(mid);
-	efree(n1_buf);
-
-	return ret;
 }
 
 /*
  * The Karatsuba algorithm uses recursive divide-and-conquer computation. This function is
  * a process that is called recursively. n1_size is always larger than n2_size.
  */
-static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_VECTOR *n2, size_t n2_size, size_t calc_arr_size)
+static void bc_karatsuba_mul_recursive(
+	BC_VECTOR *n1, BC_VECTOR *n1_buf, size_t n1_size,
+	BC_VECTOR *n2, BC_VECTOR *n2_buf, size_t n2_size,
+	size_t calc_arr_size, BC_VECTOR *ret)
 {
 	size_t ret_size = n1_size + n2_size;
-	BC_VECTOR *ret = safe_emalloc(ret_size, sizeof(BC_VECTOR), 0);
 
 	size_t i;
 	size_t half_size = calc_arr_size / 2;
 
 	/* low */
-	BC_VECTOR *low;
+	BC_VECTOR *low = ret;
 	size_t low_ret_size;
 	if (n2_size >= half_size) {
 		/* n1_size is always greater than n2_size, so if n2_size is greater than half_size, low can use the fast version. */
-		low = bc_karatsuba_mul_fast_recursive(n1, half_size, n2, half_size, half_size);
+		bc_karatsuba_mul_fast_recursive(n1, n1_buf, half_size, n2, n2_buf, half_size, half_size, low);
 		low_ret_size = calc_arr_size;
 	} else {
-		low = bc_karatsuba_mul_recursive(n1, MIN(n1_size, half_size), n2, n2_size, half_size);
+		bc_karatsuba_mul_recursive(n1, n1_buf, MIN(n1_size, half_size), n2, n2_buf, n2_size, half_size, low);
 		low_ret_size = MIN(n1_size, half_size) + n2_size;
 	}
 
 	/* high */
-	BC_VECTOR *high = NULL;
+	BC_VECTOR *high;
 	size_t high_ret_size;
 	/*
 	 * If this condition is met, all values ​​used for high of n2 are 0, so it is obvious that the calculation result will be 0.
 	 * Therefore, will skip the calculation.
 	 */
 	if (n2_size > half_size) {
-		high = bc_karatsuba_mul_recursive(n1 + half_size, n1_size - half_size, n2 + half_size, n2_size - half_size, half_size);
+		high = low + calc_arr_size;
+		bc_karatsuba_mul_recursive(n1 + half_size, n1_buf, n1_size - half_size, n2 + half_size, n2_buf, n2_size - half_size, half_size, high);
 		high_ret_size = n1_size - half_size + n2_size - half_size;
 	}
 
 	/* mid */
-	BC_VECTOR *mid_ex = NULL; // The ex suffix is ​​added because the meaning is slightly different from the fast version mid.
-	BC_VECTOR *n1_buf = NULL;
+	BC_VECTOR *mid_ex = ret + ret_size; // The ex suffix is ​​added because the meaning is slightly different from the fast version mid.
 	BC_VECTOR n1_buf_carry = 0;
 	BC_VECTOR n2_buf_carry = 0;
 	size_t mid_ret_size;
@@ -553,8 +552,6 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_V
 
 		/* prepare mid */
 		mid_ret_size = calc_arr_size;
-		n1_buf = safe_emalloc(calc_arr_size, sizeof(BC_VECTOR), 0);
-		BC_VECTOR *n2_buf = n1_buf + half_size;
 
 		for (i = 0; i < n1_size - half_size; i++) {
 			/*
@@ -575,7 +572,7 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_V
 		}
 
 		/* mid */
-		mid_ex = bc_karatsuba_mul_fast_recursive(n1_buf, half_size, n2_buf, half_size, half_size);
+		bc_karatsuba_mul_fast_recursive(n1_buf, n1_buf + half_size, half_size, n2_buf, n2_buf + half_size, half_size, half_size, mid_ex);
 
 		/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
 		bc_karatsuba_mul_add_buf_to_mid(mid_ex, n1_buf, n2_buf_carry, half_size);
@@ -626,12 +623,12 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_V
 
 		/* mid ex */
 		if (n1_high_size == half_size && n2_size == half_size) {
-			mid_ex = bc_karatsuba_mul_fast_recursive(n1 + half_size, half_size, n2, half_size, half_size);
+			bc_karatsuba_mul_fast_recursive(n1 + half_size, n1_buf, half_size, n2, n2_buf, half_size, half_size, mid_ex);
 		} else {
 			if (n1_high_size >= n2_size) {
-				mid_ex = bc_karatsuba_mul_recursive(n1 + half_size, n1_high_size, n2, n2_size, half_size);
+				bc_karatsuba_mul_recursive(n1 + half_size, n1_buf, n1_high_size, n2, n2_buf, n2_size, half_size, mid_ex);
 			} else {
-				mid_ex = bc_karatsuba_mul_recursive(n2, n2_size, n1 + half_size, n1_high_size, half_size);
+				bc_karatsuba_mul_recursive(n2, n2_buf, n2_size, n1 + half_size, n1_buf, n1_high_size, half_size, mid_ex);
 			}
 		}
 	}
@@ -644,13 +641,6 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_V
 	 */
 	if (n2_size > half_size) {
 		/* Case of not skipping high and mid */
-		for (i = 0; i < high_ret_size; i++) {
-			ret[i] = low[i];
-			ret[i + calc_arr_size] = high[i];
-		}
-		for (; i < low_ret_size; i++) {
-			ret[i] = low[i];
-		}
 		/* low_ret_size and mid ret size are always equal. */
 		if (ret_size - half_size > mid_ret_size) {
 			for (i = 0; i < mid_ret_size; i++) {
@@ -679,19 +669,11 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_V
 		}
 	} else if (n1_size > half_size) {
 		/* Case to skip high and not use buffer for sub for mid calculation */
-		for (i = 0; i < low_ret_size; i++) {
-			ret[i] = low[i];
-		}
-		for (; i < ret_size; i++) {
+		for (i = low_ret_size; i < ret_size; i++) {
 			ret[i] = 0;
 		}
 		for (i = 0; i < mid_ret_size; i++) {
 			ret[i + half_size] += mid_ex[i];
-		}
-	} else {
-		/* Cases of skipping both high and mid */
-		for (i = 0; i < low_ret_size; i++) {
-			ret[i] = low[i];
 		}
 	}
 
@@ -699,19 +681,6 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, size_t n1_size, BC_V
 	if (UNEXPECTED(bc_karatsuba_mul_need_carry_calc(calc_arr_size))) {
 		bc_karatsuba_mul_carry_calc(ret, ret_size);
 	}
-
-	efree(low);
-	if (high) {
-		efree(high);
-	}
-	if (mid_ex) {
-		efree(mid_ex);
-	}
-	if (n1_buf) {
-		efree(n1_buf);
-	}
-
-	return ret;
 }
 
 /*
@@ -750,13 +719,79 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	size_t prod_arr_size = n1_arr_size + n2_arr_size;
 	size_t prod_arr_real_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 
-	size_t calc_arr_size = bc_mul_next_pow_2(MAX(n1_arr_size, n2_arr_size));
+	size_t calc_arr_size;
+	size_t small_arr_pow_size;
+	if (n1_arr_size >= n2_arr_size) {
+		calc_arr_size = bc_mul_next_pow_2(n1_arr_size);
+		small_arr_pow_size = bc_mul_next_pow_2(n2_arr_size);
+	} else {
+		calc_arr_size = bc_mul_next_pow_2(n2_arr_size);
+		small_arr_pow_size = bc_mul_next_pow_2(n1_arr_size);
+	}
 
-	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size, sizeof(BC_VECTOR), 0);
-
+	/*
+	 * How to calculate memory size
+	 *
+	 * sub_n1_buf and sub_n2_buf:
+	 * These are the necessary buffers for the divide and conquer "mid".
+	 * Assuming the computation length is M, the first split uses a buffer of M/2, and the second
+	 * split uses a buffer of M/4.... The required buffer size increases by half until the size
+	 * reaches 2. In other words, it is the sum of a geometric progression of 1/2 with a geometric
+	 * ratio of 1/2 from M(1) to 2(N).
+	 * This sum can be calculated using the following formula, where the first term is a and the
+	 * geometric ratio is r: a(r^(N-1) - 1)/(r - 1)
+	 * M((1/2)^N - 1)/(1/2 - 1) = -2M((1/2)^N - 1) = -2M((1/2)^N) + 2M = -M((1/2)^(N-1)) + 2M
+	 * Here, M((1/2)^(N-1)) is the last term, 2, so this formula becomes: 2M - 2
+	 * In other words, the calculation length - 2 is the required buffer size.
+	 * However, there are cases where the calculation of mid can be skipped, and the calculation length
+	 * is actually the next largest power of 2 of the smaller of n1_arr_size and n2_arr_size.
+	 * Let the smaller calculation length be small_arr_pow_size.
+	 *
+	 * prod_vector:
+	 * Share the results and the buffers used in intermediate calculations. The result is prod_arr_size.
+	 * The buffer increases by half like n_buf, but when calc_arr_size is 2, the required buffer size is 4.
+	 * In other words, they are almost the same geometric progression, but the last term is 4.
+	 * a(r^(N-1) - 1)/(r - 1): -M((1/2)^(N-1)) + 2M (Up to this point, it is the same as sub_n1_buf and sub_n2_buf)
+	 * The last term is 4, so -M((1/2)^(N-1)) is 4. So: 2M - 4
+	 * Therefore, the required size is prod_arr_size + calc_arr_size * 2 - 4.
+	 *
+	 * -----------------------------------------------
+	 *
+	 * Consider the case where prodlen is the maximum value of size_t (x).
+	 *
+	 * prod_arr_size is x/4 for 32-bit and x/8 for 64-bit.
+	 *
+	 * calc_arr_size and small_arr_pow_size depend on the larger
+	 * and smaller of n1len and n2len, respectively. We are considering the case where prodlen is the maximum value
+	 * of size_t, so when n1len increases, n2len decreases. In this case, calc_arr_size and small_arr_pow_size are each
+	 * the largest when n1len is only slightly larger than n2len (or vice versa). This is because it takes a value that
+	 * is a power of 2 larger than n1_arr_size/n2_arr_size.
+	 * For the maximum values, calc_arr_size is approximately x/4 and small_arr_pow_size is approximately x/8 for 32-bit,
+	 * and x/8 and x/16, respectively, for 64-bit.
+	 *
+	 * Need two each of prod_arr_size, calc_arr_size, and small_arr_pow_size, so the total is approximately 5x/4 for 32-bit
+	 * and 5x/8 for 64-bit.
+	 * Therefore, 64-bit allocates memory all at once, while 32-bit allocates memory in parts.
+	 */
+#if SIZEOF_SIZE_T >= 8
+	BC_VECTOR *buf = safe_emalloc(prod_arr_size * 2 + small_arr_pow_size * 2 - 4 + calc_arr_size * 2 - 4, sizeof(BC_VECTOR), 0 );
 	BC_VECTOR *n1_vector = buf;
 	BC_VECTOR *n2_vector = buf + n1_arr_size;
-	BC_VECTOR *prod_vector = NULL;
+
+	BC_VECTOR *sub_n1_buf = n2_vector + n2_arr_size;
+	BC_VECTOR *sub_n2_buf = sub_n1_buf + small_arr_pow_size - 2;
+
+	BC_VECTOR *prod_vector = sub_n2_buf + small_arr_pow_size - 2;
+#else
+	BC_VECTOR *buf = safe_emalloc(prod_arr_size + small_arr_pow_size * 2 - 4, sizeof(BC_VECTOR), 0 );
+	BC_VECTOR *n1_vector = buf;
+	BC_VECTOR *n2_vector = buf + n1_arr_size;
+
+	BC_VECTOR *sub_n1_buf = n2_vector + n2_arr_size;
+	BC_VECTOR *sub_n2_buf = sub_n1_buf + small_arr_pow_size - 2;
+
+	BC_VECTOR *prod_vector = safe_emalloc(prod_arr_size + calc_arr_size * 2 - 4, sizeof(BC_VECTOR), 0);
+#endif
 
 	/* Since adjusted the size to be a multiple of 2, the last entry may not be initialized. So, set it to 0. */
 	n1_vector[n1_arr_size - 1] = 0;
@@ -770,13 +805,13 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	if (n1_arr_size >= n2_arr_size) {
 		if (n2_arr_size == calc_arr_size) {
 			/* If this condition is met, n1_arr_size, n2_arr_size, and calc_size are all equal, so use the fast version. */
-			prod_vector = bc_karatsuba_mul_fast_recursive(n1_vector, n1_arr_size, n2_vector, n2_arr_size, calc_arr_size);
+			bc_karatsuba_mul_fast_recursive(n1_vector, sub_n1_buf, n1_arr_size, n2_vector, sub_n2_buf, n2_arr_size, calc_arr_size, prod_vector);
 		} else {
-			prod_vector = bc_karatsuba_mul_recursive(n1_vector, n1_arr_size, n2_vector, n2_arr_size, calc_arr_size);
+			bc_karatsuba_mul_recursive(n1_vector, sub_n1_buf, n1_arr_size, n2_vector, sub_n2_buf, n2_arr_size, calc_arr_size, prod_vector);
 		}
 	} else {
 		/* Pass the arguments in reverse so that n1_size on the function side is always larger than n2_size. */
-		prod_vector = bc_karatsuba_mul_recursive(n2_vector, n2_arr_size, n1_vector, n1_arr_size, calc_arr_size);
+		bc_karatsuba_mul_recursive(n2_vector, sub_n2_buf, n2_arr_size, n1_vector, sub_n1_buf, n1_arr_size, calc_arr_size, prod_vector);
 	}
 
 	/*
@@ -805,7 +840,9 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	bc_mul_vector_to_bc_num(prod_vector, prodlen, prod_arr_real_size, prod);
 
 	efree(buf);
+#if SIZEOF_SIZE_T < 8
 	efree(prod_vector);
+#endif
 }
 
 /* The multiply routine.  N2 times N1 is put int PROD with the scale of
