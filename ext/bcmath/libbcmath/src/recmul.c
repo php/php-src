@@ -237,7 +237,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 
 	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
+	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 
 	/*
 	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
