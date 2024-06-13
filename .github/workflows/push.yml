@@ -87,12 +87,9 @@ jobs:
         uses: ./.github/actions/setup-x64
       - name: Test
         uses: ./.github/actions/test-linux
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
@@ -170,7 +167,6 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
