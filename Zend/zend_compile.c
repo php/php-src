@@ -4718,11 +4718,13 @@ static void zend_compile_rope_finalize(znode *result, uint32_t j, zend_op *init_
 
 static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args) /* {{{ */
 {
+	/* Bail out if we do not have a format string. */
 	if (args->children < 1) {
 		return FAILURE;
 	}
 
 	zend_eval_const_expr(&args->child[0]);
+	/* Bail out if the format string is not constant. */
 	if (args->child[0]->kind != ZEND_AST_ZVAL) {
 		return FAILURE;
 	}
