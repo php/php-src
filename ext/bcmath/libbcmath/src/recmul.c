@@ -739,11 +739,9 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	/* Adjust n1_arr_size and n2_arr_size to multiples of 2 for computational efficiency. */
-	size_t n1_arr_size = ((n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE + 1) & ~1;
-	size_t n2_arr_size = ((n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE + 1) & ~1;
-	size_t prod_arr_size = n1_arr_size + n2_arr_size;
-	size_t prod_arr_real_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 
 	size_t calc_arr_size;
 	size_t small_arr_pow_size;
@@ -819,10 +817,6 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	BC_VECTOR *prod_vector = safe_emalloc(prod_arr_size + calc_arr_size * 2 - 4, sizeof(BC_VECTOR), 0);
 #endif
 
-	/* Since adjusted the size to be a multiple of 2, the last entry may not be initialized. So, set it to 0. */
-	n1_vector[n1_arr_size - 1] = 0;
-	n2_vector[n2_arr_size - 1] = 0;
-
 	/* Convert to BC_VECTOR[] */
 	bc_convert_to_vector(n1_vector, n1end, n1len);
 	bc_convert_to_vector(n2_vector, n2end, n2len);
@@ -844,8 +838,7 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	 * Calc carry
 	 * It is almost the same as bc_karatsuba_mul_carry_calc, but all "negative values" ​​are corrected to positive values.
 	 */
-	size_t calc_carry_size = MIN(prod_arr_size - 1, prod_arr_real_size);
-	for (size_t i = 0; i < calc_carry_size; i++) {
+	for (size_t i = 0; i < prod_arr_size - 1; i++) {
 		if (prod_vector[i] <= BC_VECTOR_MAX_HALF) {
 			/* "positive number" */
 			prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
@@ -863,7 +856,7 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	}
 
 	/* Convert to bc_num */
-	bc_mul_vector_to_bc_num(prod_vector, prodlen, prod_arr_real_size, prod);
+	bc_mul_vector_to_bc_num(prod_vector, prodlen, prod_arr_size, prod);
 
 	efree(buf);
 #if SIZEOF_SIZE_T < 8
