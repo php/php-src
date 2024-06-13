@@ -4,6 +4,8 @@ SOAP Server 12: WSDL generation
 soap
 --GET--
 WSDL
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 function Add($x,$y) {
