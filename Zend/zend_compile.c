@@ -4739,9 +4739,9 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 	char *p;
 	char *end;
-	uint32_t string_placeholder_count;
+	uint32_t placeholder_count;
 	
-	string_placeholder_count = 0;
+	placeholder_count = 0;
 	p = Z_STRVAL_P(format_string);
 	end = p + Z_STRLEN_P(format_string);
 
@@ -4758,7 +4758,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 		switch (*q) {
 		case 's':
-			string_placeholder_count++;
+			placeholder_count++;
 			break;
 		case '%':
 			break;
@@ -4771,7 +4771,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	}
 
 	/* Bail out if the number of placeholders does not match the number of values. */
-	if (string_placeholder_count != (args->children - 1)) {
+	if (placeholder_count != (args->children - 1)) {
 		return FAILURE;
 	}
 
@@ -4785,14 +4785,14 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 	znode *elements = NULL;
 
-	if (string_placeholder_count > 0) {
-		elements = safe_emalloc(sizeof(*elements), string_placeholder_count, 0);
+	if (placeholder_count > 0) {
+		elements = safe_emalloc(sizeof(*elements), placeholder_count, 0);
 	}
 
 	/* Compile the value expressions first for error handling that is consistent
 	 * with a function call: Values that fail to convert to a string may emit errors.
 	 */
-	for (uint32_t i = 0; i < string_placeholder_count; i++) {
+	for (uint32_t i = 0; i < placeholder_count; i++) {
 		zend_compile_expr(elements + i, args->child[1 + i]);
 		if (elements[i].op_type == IS_CONST) {
 			if (Z_TYPE(elements[i].u.constant) != IS_ARRAY) {
@@ -4805,7 +4805,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	uint32_t rope_init_lineno = -1;
 	zend_op *opline = NULL;
 
-	string_placeholder_count = 0;
+	placeholder_count = 0;
 	p = Z_STRVAL_P(format_string);
 	end = p + Z_STRLEN_P(format_string);
 	char *offset = p;
@@ -4841,17 +4841,17 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 			/* Perform the cast of constant arrays when actually evaluating corresponding placeholder
 			 * for correct error reporting.
 			 */
-			if (elements[string_placeholder_count].op_type == IS_CONST) {
-				if (Z_TYPE(elements[string_placeholder_count].u.constant) == IS_ARRAY) {
-					zend_emit_op_tmp(&elements[string_placeholder_count], ZEND_CAST, &elements[string_placeholder_count], NULL)->extended_value = IS_STRING;
+			if (elements[placeholder_count].op_type == IS_CONST) {
+				if (Z_TYPE(elements[placeholder_count].u.constant) == IS_ARRAY) {
+					zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_STRING;
 				}
 			}
 			if (rope_elements == 0) {
 				rope_init_lineno = get_next_op_number();
 			}
-			opline = zend_compile_rope_add(result, rope_elements++, &elements[string_placeholder_count]);
+			opline = zend_compile_rope_add(result, rope_elements++, &elements[placeholder_count]);
 
-			string_placeholder_count++;
+			placeholder_count++;
 		}
 
 		p = q;
