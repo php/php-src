@@ -1303,7 +1303,7 @@ dnl See if we have broken header files like SunOS has.
 dnl
 AC_DEFUN([PHP_MISSING_FCLOSE_DECL],[
   AC_MSG_CHECKING([for fclose declaration])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int (*func)(void) = fclose]])],[
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]], [[int (*func)(FILE *) = fclose]])],[
     AC_DEFINE(MISSING_FCLOSE_DECL,0,[ ])
     AC_MSG_RESULT([ok])
   ],[
