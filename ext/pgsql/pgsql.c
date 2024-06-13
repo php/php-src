@@ -278,10 +278,6 @@ static void pgsql_lob_free_obj(zend_object *obj)
 
 /* Compatibility definitions */
 
-#ifndef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-#define pg_encoding_to_char(x) "SQL_ASCII"
-#endif
-
 static zend_string *_php_pgsql_trim_message(const char *message)
 {
 	size_t i = strlen(message);
@@ -601,11 +597,7 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PostgreSQL Support", "enabled");
 	php_info_print_table_row(2, "PostgreSQL (libpq) Version", pgsql_libpq_version);
-#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte character support", "enabled");
-#else
-	php_info_print_table_row(2, "Multibyte character support", "disabled");
-#endif
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_links));

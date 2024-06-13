@@ -48,10 +48,6 @@ extern zend_module_entry pgsql_module_entry;
 # endif
 #endif
 
-#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-const char * pg_encoding_to_char(int encoding);
-#endif
-
 PHP_MINIT_FUNCTION(pgsql);
 PHP_MSHUTDOWN_FUNCTION(pgsql);
 PHP_RINIT_FUNCTION(pgsql);
