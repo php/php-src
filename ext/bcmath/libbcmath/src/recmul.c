@@ -43,12 +43,14 @@
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 /* It is the next smallest power of 2 after BC_VECTOR_NO_OVERFLOW_ADD_COUNT / 2 */
 #  define BC_KARATSUBA_MUL_NEED_CARRY_CALC_SIZE 512
+#  define BC_MUL_USE_KARATSUBA_SIZE (BC_VECTOR_SIZE * 32)
 #else
 #  define BC_VECTOR_SIZE 4
 /* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
 #  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 /* It is the next smallest power of 2 after BC_VECTOR_NO_OVERFLOW_ADD_COUNT / 2 */
 #  define BC_KARATSUBA_MUL_NEED_CARRY_CALC_SIZE 16
+#  define BC_MUL_USE_KARATSUBA_SIZE (BC_VECTOR_SIZE * 16)
 #endif
 
 /*
@@ -57,6 +59,13 @@
  */
 #define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 #define BC_VECTOR_MAX_HALF (~((BC_VECTOR) 0) / 2)
+
+/*
+ * If the number is small, the overhead will be large, so when dividing and conquering using
+ * Karatsuba algorithm, if the size becomes smaller than this value, normal multiplication is
+ * performed without dividing it any further.
+ */
+#define BC_MUL_KARATSUBA_DO_CALC_SIZE 16
 
 
 /* Multiply utility routines */
@@ -410,6 +419,23 @@ static inline void bc_karatsuba_mul_add_buf_to_mid(BC_VECTOR *mid, const BC_VECT
 	}
 }
 
+static inline void bc_karatsuba_mul_do_calc(BC_VECTOR *n1, size_t n1_size, BC_VECTOR *n2, size_t n2_size, BC_VECTOR *ret)
+{
+	for (size_t i = 0; i < n1_size + n2_size; i++) {
+		ret[i] = 0;
+	}
+
+	for (size_t i = 0; i < n1_size; i++) {
+		for (size_t j = 0; j < n2_size; j++) {
+			ret[i + j] += n1[i] * n2[j];
+		}
+	}
+#if SIZEOF_SIZE_T < 8
+	/* In the case of 32-bit, there is a possibility of overflow, so carry-over calculations are performed. */
+	bc_karatsuba_mul_carry_calc(ret, n1_size + n2_size);
+#endif
+}
+
 /*
  * The Karatsuba algorithm uses recursive divide-and-conquer computation. This function is
  * a process that is called recursively.
@@ -421,17 +447,12 @@ static void bc_karatsuba_mul_fast_recursive(
 	BC_VECTOR *n2, BC_VECTOR *n2_buf, size_t n2_size,
 	size_t calc_arr_size, BC_VECTOR *ret)
 {
-	ZEND_ASSERT(n1_size == n2_size && n1_size == calc_arr_size && calc_arr_size >= 2);
-
-	if (calc_arr_size == 2) {
-		BC_VECTOR low = n1[0] * n2[0];
-		BC_VECTOR high = n1[1] * n2[1];
-		ret[0] = low;
-		ret[1] = low + high - (n1[1] - n1[0]) * (n2[1] - n2[0]);
-		ret[2] = high;
-		ret[3] = 0;
+	if (calc_arr_size <= BC_MUL_KARATSUBA_DO_CALC_SIZE) {
+		bc_karatsuba_mul_do_calc(n1, n1_size, n2, n2_size, ret);
 		return;
 	}
+
+	ZEND_ASSERT(n1_size == n2_size && n1_size == calc_arr_size);
 
 	size_t i;
 	size_t half_size = calc_arr_size / 2;
@@ -497,6 +518,11 @@ static void bc_karatsuba_mul_recursive(
 	BC_VECTOR *n2, BC_VECTOR *n2_buf, size_t n2_size,
 	size_t calc_arr_size, BC_VECTOR *ret)
 {
+	if (calc_arr_size <= BC_MUL_KARATSUBA_DO_CALC_SIZE) {
+		bc_karatsuba_mul_do_calc(n1, n1_size, n2, n2_size, ret);
+		return;
+	}
+
 	size_t ret_size = n1_size + n2_size;
 
 	size_t i;
@@ -862,8 +888,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	/* Do the multiply */
 	if (len1 <= BC_VECTOR_SIZE && len2 <= BC_VECTOR_SIZE) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
-	/* wip: to check behavior */
-	} else if (len1 > BC_VECTOR_SIZE * 2 && len2 > BC_VECTOR_SIZE * 2) {
+	} else if (UNEXPECTED(len1 >= BC_MUL_USE_KARATSUBA_SIZE && len2 >= BC_MUL_USE_KARATSUBA_SIZE)) {
 		bc_karatsuba_mul(n1, len1, n2, len2, &prod);
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);
