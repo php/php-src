@@ -53,8 +53,11 @@
 /Zend/zend_API.* @dstogov @iluuu1994
 /Zend/zend_call_stack.* @arnaud-lb
 /Zend/zend_closures.* @dstogov
+/Zend/zend_compile.* @iluuu1994
+/Zend/zend_enum.* @iluuu1994
 /Zend/zend_execute.* @dstogov @iluuu1994
 /Zend/zend_execute_API.c @dstogov @iluuu1994
+/Zend/zend_frameless_function.* @iluuu1994
 /Zend/zend_gc.* @dstogov @arnaud-lb
 /Zend/zend_hash.* @dstogov
 /Zend/zend_inheritance.* @dstogov @iluuu1994
