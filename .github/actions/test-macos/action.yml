@@ -1,8 +1,5 @@
 name: Test
 inputs:
-  testArtifacts:
-    default: null
-    required: false
   runTestsParameters:
     default: ''
     required: false
@@ -17,7 +14,6 @@ runs:
         set -x
         export SKIP_IO_CAPTURE_TESTS=1
         export CI_NO_IPV6=1
-        export TEST_PHP_JUNIT=junit.out.xml
         export STACK_LIMIT_DEFAULTS_CHECK=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
@@ -29,9 +25,3 @@ runs:
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120
-    - uses: actions/upload-artifact@v4
-      if: always() && inputs.testArtifacts != null
-      with:
-        name: ${{ github.job }}_${{ inputs.testArtifacts }}
-        path: ${{ github.workspace }}/junit.out.xml
-        retention-days: 5

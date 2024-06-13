@@ -106,14 +106,12 @@ jobs:
       - name: Test
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
           idleCpu: ${{ matrix.asan && 'true' || 'false' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
@@ -122,7 +120,6 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
@@ -133,7 +130,6 @@ jobs:
         if: matrix.test_function_jit
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
           jitType: function
           runTestsParameters: >-
             ${{ matrix.run_tests_parameters }}
@@ -257,12 +253,9 @@ jobs:
         run: sudo make install
       - name: Test
         uses: ./.github/actions/test-macos
-        with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
@@ -271,7 +264,6 @@ jobs:
       - name: Test OpCache
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} OpCache
           runTestsParameters: >-
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
@@ -279,7 +271,6 @@ jobs:
       - name: Test Function JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.branch.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Function JIT
           jitType: function
           runTestsParameters: >-
             -d zend_extension=opcache.so
