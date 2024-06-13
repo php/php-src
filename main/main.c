@@ -2124,7 +2124,6 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zuf.random_bytes_function = php_random_bytes_ex;
 	zuf.random_bytes_insecure_function = php_random_bytes_insecure_for_zend;
 	zend_startup(&zuf);
-	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
 
 	zend_observer_startup();
