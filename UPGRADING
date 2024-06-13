@@ -561,6 +561,7 @@ PHP 8.4 UPGRADE NOTES
     end-of-data to the server.
   . Added pg_socket_poll to check if there is any read and/or write events
     with an optional timeout.
+  . Added pg_jit to get informations on the server JIT support.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
