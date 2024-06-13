@@ -20,8 +20,8 @@
 #ifndef ZEND_LIST_H
 #define ZEND_LIST_H
 
-#include "zend_hash.h"
-#include "zend_globals.h"
+#include "zend_portability.h"
+#include "zend_types.h"
 
 BEGIN_EXTERN_C()
 

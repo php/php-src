@@ -19,7 +19,9 @@
 #ifndef ZEND_INI_H
 #define ZEND_INI_H
 
-#include "zend_modules.h"
+#include "zend_portability.h"
+#include "zend_types.h"
+#include "zend_stream.h"
 
 #define ZEND_INI_USER	(1<<0)
 #define ZEND_INI_PERDIR	(1<<1)
@@ -29,6 +31,9 @@
 
 #define ZEND_INI_MH(name) int name(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage)
 #define ZEND_INI_DISP(name) ZEND_COLD void name(zend_ini_entry *ini_entry, int type)
+
+typedef struct _zend_module_entry zend_module_entry;
+typedef struct _zend_ini_entry zend_ini_entry;
 
 typedef struct _zend_ini_entry_def {
 	const char *name;

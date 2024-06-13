@@ -21,9 +21,8 @@
 #ifndef ZEND_ALLOC_H
 #define ZEND_ALLOC_H
 
-#include <stdio.h>
-
-#include "zend_types.h"
+#include "zend_portability.h"
+#include "zend_types.h" /* For zend_result */
 #include "../TSRM/TSRM.h"
 
 #ifndef ZEND_MM_ALIGNMENT

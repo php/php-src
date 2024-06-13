@@ -30,6 +30,7 @@
 
 #include "mbfilter.h"
 #include "mbfilter_base64.h"
+#include "zend_multiply.h" /* For zend_safe_address_guarded() */
 
 static size_t mb_base64_to_wchar(unsigned char **in, size_t *in_len, uint32_t *buf, size_t bufsize, unsigned int *state);
 static void mb_wchar_to_base64(uint32_t *in, size_t len, mb_convert_buf *buf, bool end);

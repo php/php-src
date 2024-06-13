@@ -19,7 +19,7 @@
 #ifndef _ZEND_ARENA_H_
 #define _ZEND_ARENA_H_
 
-#include "zend.h"
+#include "zend_alloc.h"
 
 #ifndef ZEND_TRACK_ARENA_ALLOC
 

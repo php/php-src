@@ -20,6 +20,7 @@
 #ifndef ZEND_SORT_H
 #define ZEND_SORT_H
 
+#include "zend_portability.h"
 #include "zend_types.h"
 
 BEGIN_EXTERN_C()
