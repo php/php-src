@@ -56,7 +56,7 @@
 
 /* Multiply utility routines */
 
-static inline void bc_digits_adjustment(BC_VECTOR *prod_vector, size_t prod_arr_size)
+static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
 		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
@@ -267,7 +267,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		 * overflow, so digit adjustment is performed beforehand.
 		 */
 		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
-			bc_digits_adjustment(prod_vector, prod_arr_size);
+			bc_mul_carry_calc(prod_vector, prod_arr_size);
 			count = 0;
 		}
 		count++;
@@ -280,7 +280,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	bc_digits_adjustment(prod_vector, prod_arr_size);
+	bc_mul_carry_calc(prod_vector, prod_arr_size);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
