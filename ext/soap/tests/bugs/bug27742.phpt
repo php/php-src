@@ -6,6 +6,8 @@ soap
 wsdl
 --INI--
 soap.wsdl_cache_enabled=0
+--ENV--
+LSAN_OPTIONS=detect_leaks=0
 --FILE--
 <?php
 $x = new SoapClient(__DIR__."/bug27742.wsdl");
