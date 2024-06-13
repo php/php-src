@@ -4712,6 +4712,171 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 }
 /* }}} */
 
+static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_node);
+static zend_op *zend_compile_rope_add_ex(zend_op *opline, znode *result, uint32_t num, znode *elem_node);
+static void zend_compile_rope_finalize(znode *result, uint32_t j, zend_op *init_opline, zend_op *opline);
+
+static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args) /* {{{ */
+{
+	/* Bail out if we do not have a format string. */
+	if (args->children < 1) {
+		return FAILURE;
+	}
+
+	zend_eval_const_expr(&args->child[0]);
+	/* Bail out if the format string is not constant. */
+	if (args->child[0]->kind != ZEND_AST_ZVAL) {
+		return FAILURE;
+	}
+
+	zval *format_string = zend_ast_get_zval(args->child[0]);
+	if (Z_TYPE_P(format_string) != IS_STRING) {
+		return FAILURE;
+	}
+	if (Z_STRLEN_P(format_string) >= 256) {
+		return FAILURE;
+	}
+
+	char *p;
+	char *end;
+	uint32_t string_placeholder_count;
+	
+	string_placeholder_count = 0;
+	p = Z_STRVAL_P(format_string);
+	end = p + Z_STRLEN_P(format_string);
+
+	for (;;) {
+		p = memchr(p, '%', end - p);
+		if (!p) {
+			break;
+		}
+
+		char *q = p + 1;
+		if (q == end) {
+			return FAILURE;
+		}
+
+		switch (*q) {
+		case 's':
+			string_placeholder_count++;
+			break;
+		case '%':
+			break;
+		default:
+			return FAILURE;
+		}
+
+		p = q;
+		p++;
+	}
+
+	/* Bail out if the number of placeholders does not match the number of values. */
+	if (string_placeholder_count != (args->children - 1)) {
+		return FAILURE;
+	}
+
+	/* Handle empty format strings. */
+	if (Z_STRLEN_P(format_string) == 0) {
+		result->op_type = IS_CONST;
+		ZVAL_EMPTY_STRING(&result->u.constant);
+
+		return SUCCESS;
+	}
+
+	znode *elements = NULL;
+
+	if (string_placeholder_count > 0) {
+		elements = safe_emalloc(sizeof(*elements), string_placeholder_count, 0);
+	}
+
+	/* Compile the value expressions first for error handling that is consistent
+	 * with a function call: Values that fail to convert to a string may emit errors.
+	 */
+	for (uint32_t i = 0; i < string_placeholder_count; i++) {
+		zend_compile_expr(elements + i, args->child[1 + i]);
+		if (elements[i].op_type == IS_CONST) {
+			if (Z_TYPE(elements[i].u.constant) != IS_ARRAY) {
+				convert_to_string(&elements[i].u.constant);
+			}
+		}
+	}
+
+	uint32_t rope_elements = 0;
+	uint32_t rope_init_lineno = -1;
+	zend_op *opline = NULL;
+
+	string_placeholder_count = 0;
+	p = Z_STRVAL_P(format_string);
+	end = p + Z_STRLEN_P(format_string);
+	char *offset = p;
+	for (;;) {
+		p = memchr(p, '%', end - p);
+		if (!p) {
+			break;
+		}
+
+		char *q = p + 1;
+		ZEND_ASSERT(q < end);
+		ZEND_ASSERT(*q == 's' || *q == '%');
+
+		if (*q == '%') {
+			/* Optimization to not create a dedicated rope element for the literal '%':
+			 * Include the first '%' within the "constant" part instead of dropping the
+			 * full placeholder.
+			 */
+			p++;
+		}
+
+		if (p != offset) {
+			znode const_node;
+			const_node.op_type = IS_CONST;
+			ZVAL_STRINGL(&const_node.u.constant, offset, p - offset);
+			if (rope_elements == 0) {
+				rope_init_lineno = get_next_op_number();
+			}
+			opline = zend_compile_rope_add(result, rope_elements++, &const_node);
+		}
+
+		if (*q == 's') {
+			/* Perform the cast of constant arrays when actually evaluating corresponding placeholder
+			 * for correct error reporting.
+			 */
+			if (elements[string_placeholder_count].op_type == IS_CONST) {
+				if (Z_TYPE(elements[string_placeholder_count].u.constant) == IS_ARRAY) {
+					zend_emit_op_tmp(&elements[string_placeholder_count], ZEND_CAST, &elements[string_placeholder_count], NULL)->extended_value = IS_STRING;
+				}
+			}
+			if (rope_elements == 0) {
+				rope_init_lineno = get_next_op_number();
+			}
+			opline = zend_compile_rope_add(result, rope_elements++, &elements[string_placeholder_count]);
+
+			string_placeholder_count++;
+		}
+
+		p = q;
+		p++;
+		offset = p;
+	}
+	if (end != offset) {
+		/* Add the constant part after the last placeholder. */
+		znode const_node;
+		const_node.op_type = IS_CONST;
+		ZVAL_STRINGL(&const_node.u.constant, offset, end - offset);
+		if (rope_elements == 0) {
+			rope_init_lineno = get_next_op_number();
+		}
+		opline = zend_compile_rope_add(result, rope_elements++, &const_node);
+	}
+	ZEND_ASSERT(opline != NULL);
+
+	zend_op *init_opline = CG(active_op_array)->opcodes + rope_init_lineno;
+	zend_compile_rope_finalize(result, rope_elements, init_opline, opline);
+	efree(elements);
+
+	return SUCCESS;
+}
+
 static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *lcname, zend_ast_list *args, zend_function *fbc, uint32_t type) /* {{{ */
 {
 	if (zend_string_equals_literal(lcname, "strlen")) {
@@ -4778,6 +4943,8 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 		return zend_compile_func_array_slice(result, args);
 	} else if (zend_string_equals_literal(lcname, "array_key_exists")) {
 		return zend_compile_func_array_key_exists(result, args);
+	} else if (zend_string_equals_literal(lcname, "sprintf")) {
+		return zend_compile_func_sprintf(result, args);	
 	} else {
 		return FAILURE;
 	}
@@ -10188,6 +10355,59 @@ static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_n
 }
 /* }}} */
 
+static void zend_compile_rope_finalize(znode *result, uint32_t rope_elements, zend_op *init_opline, zend_op *opline)
+{
+	if (rope_elements == 1) {
+		if (opline->op2_type == IS_CONST) {
+			GET_NODE(result, opline->op2);
+			ZVAL_UNDEF(CT_CONSTANT(opline->op2));
+			SET_UNUSED(opline->op2);
+			MAKE_NOP(opline);
+		} else {
+			opline->opcode = ZEND_CAST;
+			opline->extended_value = IS_STRING;
+			opline->op1_type = opline->op2_type;
+			opline->op1 = opline->op2;
+			SET_UNUSED(opline->op2);
+			zend_make_tmp_result(result, opline);
+		}
+	} else if (rope_elements == 2) {
+		opline->opcode = ZEND_FAST_CONCAT;
+		opline->extended_value = 0;
+		opline->op1_type = init_opline->op2_type;
+		opline->op1 = init_opline->op2;
+		zend_make_tmp_result(result, opline);
+		MAKE_NOP(init_opline);
+	} else {
+		uint32_t var;
+
+		init_opline->extended_value = rope_elements;
+		opline->opcode = ZEND_ROPE_END;
+		zend_make_tmp_result(result, opline);
+		var = opline->op1.var = get_temporary_variable();
+
+		/* Allocates the necessary number of zval slots to keep the rope */
+		uint32_t i = ((rope_elements * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
+		while (i > 1) {
+			get_temporary_variable();
+			i--;
+		}
+
+		/* Update all the previous opcodes to use the same variable */
+		while (opline != init_opline) {
+			opline--;
+			if (opline->opcode == ZEND_ROPE_ADD &&
+			    opline->result.var == (uint32_t)-1) {
+				opline->op1.var = var;
+				opline->result.var = var;
+			} else if (opline->opcode == ZEND_ROPE_INIT &&
+			           opline->result.var == (uint32_t)-1) {
+				opline->result.var = var;
+			}
+		}
+	}
+}
+
 static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 {
 	uint32_t i, j;
@@ -10263,53 +10483,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		opline = zend_compile_rope_add_ex(opline, result, j++, &last_const_node);
 	}
 	init_opline = CG(active_op_array)->opcodes + rope_init_lineno;
-	if (j == 1) {
-		if (opline->op2_type == IS_CONST) {
-			GET_NODE(result, opline->op2);
-			MAKE_NOP(opline);
-		} else {
-			opline->opcode = ZEND_CAST;
-			opline->extended_value = IS_STRING;
-			opline->op1_type = opline->op2_type;
-			opline->op1 = opline->op2;
-			SET_UNUSED(opline->op2);
-			zend_make_tmp_result(result, opline);
-		}
-	} else if (j == 2) {
-		opline->opcode = ZEND_FAST_CONCAT;
-		opline->extended_value = 0;
-		opline->op1_type = init_opline->op2_type;
-		opline->op1 = init_opline->op2;
-		zend_make_tmp_result(result, opline);
-		MAKE_NOP(init_opline);
-	} else {
-		uint32_t var;
-
-		init_opline->extended_value = j;
-		opline->opcode = ZEND_ROPE_END;
-		zend_make_tmp_result(result, opline);
-		var = opline->op1.var = get_temporary_variable();
-
-		/* Allocates the necessary number of zval slots to keep the rope */
-		i = ((j * sizeof(zend_string*)) + (sizeof(zval) - 1)) / sizeof(zval);
-		while (i > 1) {
-			get_temporary_variable();
-			i--;
-		}
-
-		/* Update all the previous opcodes to use the same variable */
-		while (opline != init_opline) {
-			opline--;
-			if (opline->opcode == ZEND_ROPE_ADD &&
-			    opline->result.var == (uint32_t)-1) {
-				opline->op1.var = var;
-				opline->result.var = var;
-			} else if (opline->opcode == ZEND_ROPE_INIT &&
-			           opline->result.var == (uint32_t)-1) {
-				opline->result.var = var;
-			}
-		}
-	}
+	zend_compile_rope_finalize(result, j, init_opline, opline);
 }
 /* }}} */
 
