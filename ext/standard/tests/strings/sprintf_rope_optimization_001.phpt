@@ -96,6 +96,10 @@ try {
 	var_dump(sprintf(""));
 } catch (\Throwable $e) {echo $e, PHP_EOL; } echo PHP_EOL;
 
+try {
+	var_dump(sprintf());
+} catch (\Throwable $e) {echo $e, PHP_EOL; } echo PHP_EOL;
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -163,5 +167,10 @@ Warning: Array to string conversion in %s on line 89
 string(17) "Array-Array-Array"
 
 string(0) ""
+
+ArgumentCountError: sprintf() expects at least 1 argument, 0 given in %s:97
+Stack trace:
+#0 %s(97): sprintf()
+#1 {main}
 
 Done
