@@ -65,7 +65,13 @@ try {
 } catch (\Throwable $e) {echo $e, PHP_EOL; } echo PHP_EOL;
 
 try {
-	var_dump(sprintf('%d/%d/%d', PHP_INT_MAX, 0, PHP_INT_MIN));
+	if (PHP_INT_SIZE == 8) {
+		var_dump(sprintf('%d/%d/%d', PHP_INT_MAX, 0, PHP_INT_MIN));
+		var_dump("2147483647/0/-2147483648");
+	} else {
+		var_dump("9223372036854775807/0/-9223372036854775808");
+		var_dump(sprintf('%d/%d/%d', PHP_INT_MAX, 0, PHP_INT_MIN));
+	}
 } catch (\Throwable $e) {echo $e, PHP_EOL; } echo PHP_EOL;
 
 try {
@@ -117,6 +123,7 @@ string(5) "1/1/1"
 string(5) "0/0/0"
 
 string(42) "9223372036854775807/0/-9223372036854775808"
+string(24) "2147483647/0/-2147483648"
 
 string(5) "1/0/1"
 
