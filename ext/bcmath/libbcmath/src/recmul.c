@@ -409,7 +409,7 @@ static inline void bc_karatsuba_mul_add_buf_to_mid(BC_VECTOR *mid, const BC_VECT
  * The Karatsuba algorithm uses recursive divide-and-conquer computation. This function is
  * a process that is called recursively.
  */
-static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, BC_VECTOR *n2, size_t calc_arr_size)
+static BC_VECTOR *bc_karatsuba_mul_fast_recursive(BC_VECTOR *n1, BC_VECTOR *n2, size_t calc_arr_size)
 {
 	BC_VECTOR *ret = safe_emalloc(calc_arr_size * 2, sizeof(BC_VECTOR), 0);
 
@@ -427,9 +427,9 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, BC_VECTOR *n2, size_
 	size_t half_size = calc_arr_size / 2;
 
 	/* low */
-	BC_VECTOR *low = bc_karatsuba_mul_recursive(n1, n2, half_size);
+	BC_VECTOR *low = bc_karatsuba_mul_fast_recursive(n1, n2, half_size);
 	/* high */
-	BC_VECTOR *high = bc_karatsuba_mul_recursive(n1 + half_size, n2 + half_size, half_size);
+	BC_VECTOR *high = bc_karatsuba_mul_fast_recursive(n1 + half_size, n2 + half_size, half_size);
 
 	/* prepare mid */
 	BC_VECTOR *n1_buf = safe_emalloc(calc_arr_size, sizeof(BC_VECTOR), 0);
@@ -446,7 +446,7 @@ static BC_VECTOR *bc_karatsuba_mul_recursive(BC_VECTOR *n1, BC_VECTOR *n2, size_
 	}
 
 	/* mid */
-	BC_VECTOR *mid = bc_karatsuba_mul_recursive(n1_buf, n2_buf, half_size);
+	BC_VECTOR *mid = bc_karatsuba_mul_fast_recursive(n1_buf, n2_buf, half_size);
 
 	/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
 	bc_karatsuba_mul_add_buf_to_mid(mid, n1_buf, n2_buf_carry, half_size);
@@ -534,7 +534,7 @@ static void bc_karatsuba_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, b
 	bc_convert_to_vector(n2_vector, n2end, n2len);
 
 	/* Do multiplication */
-	prod_vector = bc_karatsuba_mul_recursive(n1_vector, n2_vector, calc_arr_size);
+	prod_vector = bc_karatsuba_mul_fast_recursive(n1_vector, n2_vector, calc_arr_size);
 
 	/*
 	 * Calc carry
