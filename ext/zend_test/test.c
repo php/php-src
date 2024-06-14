@@ -712,10 +712,7 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 	int int_value = zend_ini_parse_bool(new_value);
 
 	if (int_value == 1) {
-		// `zend_mm_heap` is a private struct, so we have not way to find the
-		// actual size, but 4096 bytes should be enough
-		ZT_G(zend_test_heap) = malloc(4096);
-		memset(ZT_G(zend_test_heap), 0, 4096);
+		ZT_G(zend_test_heap) = zend_mm_startup();
 		zend_mm_set_custom_handlers(
 			ZT_G(zend_test_heap),
 			zend_test_custom_malloc,
@@ -725,7 +722,7 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 		ZT_G(zend_orig_heap) = zend_mm_get_heap();
 		zend_mm_set_heap(ZT_G(zend_test_heap));
 	} else if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
+		zend_mm_shutdown(ZT_G(zend_test_heap), true, true);
 		ZT_G(zend_test_heap) = NULL;
 		zend_mm_set_heap(ZT_G(zend_orig_heap));
 	}
@@ -1342,7 +1339,13 @@ PHP_RSHUTDOWN_FUNCTION(zend_test)
 	zend_hash_destroy(&ZT_G(global_weakmap));
 
 	if (ZT_G(zend_test_heap))  {
-		free(ZT_G(zend_test_heap));
+		zend_mm_set_custom_handlers(
+			ZT_G(zend_test_heap),
+			NULL,
+			NULL,
+			NULL
+		);
+		zend_mm_shutdown(ZT_G(zend_test_heap), true, true);
 		ZT_G(zend_test_heap) = NULL;
 		zend_mm_set_heap(ZT_G(zend_orig_heap));
 	}
