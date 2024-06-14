@@ -369,4 +369,6 @@ typedef struct _zend_ffi_ctype {
 #define ZEND_FFI_TYPE_IS_OWNED(t) \
 	(((uintptr_t)(t)) & ZEND_FFI_TYPE_OWNED)
 
+ZEND_API void _zend_ffi_type_dtor(zend_ffi_type *type);
+
 #endif	/* PHP_FFI_H */
