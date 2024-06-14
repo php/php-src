@@ -128,7 +128,7 @@ static zend_internal_function zend_ffi_cast_fn;
 static zend_internal_function zend_ffi_type_fn;
 
 /* forward declarations */
-static void _zend_ffi_type_dtor(zend_ffi_type *type);
+//???static void _zend_ffi_type_dtor(zend_ffi_type *type);
 static void zend_ffi_finalize_type(zend_ffi_dcl *dcl);
 static bool zend_ffi_is_same_type(zend_ffi_type *type1, zend_ffi_type *type2);
 static zend_ffi_type *zend_ffi_remember_type(zend_ffi_type *type);
@@ -2206,7 +2206,7 @@ static zend_object *zend_ffi_new(zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
-static void _zend_ffi_type_dtor(zend_ffi_type *type) /* {{{ */
+ZEND_API void _zend_ffi_type_dtor(zend_ffi_type *type) /* {{{ */
 {
 	type = ZEND_FFI_TYPE(type);
 
@@ -2964,6 +2964,13 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	FFI_G(tags) = NULL;
 
 	if (code && ZSTR_LEN(code)) {
+		if (zend_ffi_cache_cdef_get) {
+			ffi = zend_ffi_cache_cdef_get(code);
+			if (ffi) {
+				RETURN_OBJ(&ffi->std);
+			}
+		}
+
 		/* Parse C definitions */
 		FFI_G(default_type_attr) = ZEND_FFI_ATTR_STORED;
 
@@ -3012,6 +3019,10 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	ffi->lib = handle;
 	ffi->symbols = FFI_G(symbols);
 	ffi->tags = FFI_G(tags);
+
+	if (zend_ffi_cache_cdef_add) {
+		ffi = zend_ffi_cache_cdef_add(code, ffi);
+	}
 
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
@@ -3756,7 +3767,10 @@ ZEND_METHOD(FFI, new) /* {{{ */
 
 		FFI_G(default_type_attr) = 0;
 
-		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
+		if (zend_ffi_cache_type_get
+		 && zend_ffi_cache_type_get(type_def, &dcl) == SUCCESS) {
+			/* pass */
+		} else if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
 			if (clean_tags && FFI_G(tags)) {
 				zend_hash_destroy(FFI_G(tags));
@@ -3769,23 +3783,27 @@ ZEND_METHOD(FFI, new) /* {{{ */
 				FFI_G(symbols) = NULL;
 			}
 			return;
+		} else {
+			if (clean_tags && FFI_G(tags)) {
+				zend_ffi_tags_cleanup(&dcl);
+			}
+			if (clean_symbols && FFI_G(symbols)) {
+				zend_hash_destroy(FFI_G(symbols));
+				efree(FFI_G(symbols));
+				FFI_G(symbols) = NULL;
+			}
+			FFI_G(symbols) = NULL;
+			FFI_G(tags) = NULL;
+
+			if (zend_ffi_cache_type_add) {
+				zend_ffi_cache_type_add(type_def, &dcl);
+			}
 		}
 
 		type = ZEND_FFI_TYPE(dcl.type);
 		if (dcl.attr & ZEND_FFI_ATTR_CONST) {
 			is_const = 1;
 		}
-
-		if (clean_tags && FFI_G(tags)) {
-			zend_ffi_tags_cleanup(&dcl);
-		}
-		if (clean_symbols && FFI_G(symbols)) {
-			zend_hash_destroy(FFI_G(symbols));
-			efree(FFI_G(symbols));
-			FFI_G(symbols) = NULL;
-		}
-		FFI_G(symbols) = NULL;
-		FFI_G(tags) = NULL;
 
 		type_ptr = dcl.type;
 	} else {
@@ -3906,7 +3924,10 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 
 		FFI_G(default_type_attr) = 0;
 
-		if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
+		if (zend_ffi_cache_type_get
+		 && zend_ffi_cache_type_get(type_def, &dcl) == SUCCESS) {
+			/* pass */
+		} else if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
 			if (clean_tags && FFI_G(tags)) {
 				zend_hash_destroy(FFI_G(tags));
@@ -3919,23 +3940,27 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 				FFI_G(symbols) = NULL;
 			}
 			return;
+		} else {
+			if (clean_tags && FFI_G(tags)) {
+				zend_ffi_tags_cleanup(&dcl);
+			}
+			if (clean_symbols && FFI_G(symbols)) {
+				zend_hash_destroy(FFI_G(symbols));
+				efree(FFI_G(symbols));
+				FFI_G(symbols) = NULL;
+			}
+			FFI_G(symbols) = NULL;
+			FFI_G(tags) = NULL;
+
+			if (zend_ffi_cache_type_add) {
+				zend_ffi_cache_type_add(type_def, &dcl);
+			}
 		}
 
 		type = ZEND_FFI_TYPE(dcl.type);
 		if (dcl.attr & ZEND_FFI_ATTR_CONST) {
 			is_const = 1;
 		}
-
-		if (clean_tags && FFI_G(tags)) {
-			zend_ffi_tags_cleanup(&dcl);
-		}
-		if (clean_symbols && FFI_G(symbols)) {
-			zend_hash_destroy(FFI_G(symbols));
-			efree(FFI_G(symbols));
-			FFI_G(symbols) = NULL;
-		}
-		FFI_G(symbols) = NULL;
-		FFI_G(tags) = NULL;
 
 		type_ptr = dcl.type;
 	} else {
@@ -4078,7 +4103,10 @@ ZEND_METHOD(FFI, type) /* {{{ */
 
 	FFI_G(default_type_attr) = 0;
 
-	if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
+	if (zend_ffi_cache_type_get
+	 && zend_ffi_cache_type_get(type_def, &dcl) == SUCCESS) {
+		/* pass */
+	} else if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
 		if (clean_tags && FFI_G(tags)) {
 			zend_hash_destroy(FFI_G(tags));
@@ -4091,18 +4119,21 @@ ZEND_METHOD(FFI, type) /* {{{ */
 			FFI_G(symbols) = NULL;
 		}
 		return;
-	}
-
-	if (clean_tags && FFI_G(tags)) {
-		zend_ffi_tags_cleanup(&dcl);
-	}
-	if (clean_symbols && FFI_G(symbols)) {
-		zend_hash_destroy(FFI_G(symbols));
-		efree(FFI_G(symbols));
+	} else {
+		if (clean_tags && FFI_G(tags)) {
+			zend_ffi_tags_cleanup(&dcl);
+		}
+		if (clean_symbols && FFI_G(symbols)) {
+			zend_hash_destroy(FFI_G(symbols));
+			efree(FFI_G(symbols));
+			FFI_G(symbols) = NULL;
+		}
 		FFI_G(symbols) = NULL;
+		FFI_G(tags) = NULL;
+		if (zend_ffi_cache_type_add) {
+			zend_ffi_cache_type_add(type_def, &dcl);
+		}
 	}
-	FFI_G(symbols) = NULL;
-	FFI_G(tags) = NULL;
 
 	ctype = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
 	ctype->type = dcl.type;
