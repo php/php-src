@@ -214,6 +214,7 @@ PHP                                                                        NEWS
     the end of the COPY. (David Carlier)
   . Added pg_socket_poll to poll on the connection. (David Carlier)
   . Added pg_jit to get infos on server JIT support. (David Carlier)
+  . Added pg_set_chunked_rows_size to fetch results per chunk. (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c4b75f8f59a1c4f906cf89fb6aea66436a4eedc3 */
+ * Stub hash: 8feb7d195444838a4c016910593d30dd76aafe89 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -490,6 +490,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_socket_poll, 0, 3, IS_LONG, 0
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, timeout, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_chunked_rows_size, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, connection, Pgsql\\Connection, 0)
+	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(pg_connect);
 ZEND_FUNCTION(pg_pconnect);
 ZEND_FUNCTION(pg_connect_poll);
@@ -592,6 +599,9 @@ ZEND_FUNCTION(pg_change_password);
 ZEND_FUNCTION(pg_put_copy_data);
 ZEND_FUNCTION(pg_put_copy_end);
 ZEND_FUNCTION(pg_socket_poll);
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+ZEND_FUNCTION(pg_set_chunked_rows_size);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_connect, arginfo_pg_connect)
@@ -719,6 +729,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_put_copy_data, arginfo_pg_put_copy_data)
 	ZEND_FE(pg_put_copy_end, arginfo_pg_put_copy_end)
 	ZEND_FE(pg_socket_poll, arginfo_pg_socket_poll)
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+	ZEND_FE(pg_set_chunked_rows_size, arginfo_pg_set_chunked_rows_size)
+#endif
 	ZEND_FE_END
 };
 
@@ -783,6 +796,9 @@ static void register_pgsql_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PGSQL_EMPTY_QUERY", PGRES_EMPTY_QUERY, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COMMAND_OK", PGRES_COMMAND_OK, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_OK", PGRES_TUPLES_OK, CONST_PERSISTENT);
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+	REGISTER_LONG_CONSTANT("PGSQL_TUPLES_CHUNK", PGRES_TUPLES_CHUNK, CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("PGSQL_COPY_OUT", PGRES_COPY_OUT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_COPY_IN", PGRES_COPY_IN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BAD_RESPONSE", PGRES_BAD_RESPONSE, CONST_PERSISTENT);

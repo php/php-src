@@ -245,6 +245,13 @@ namespace {
      * @cvalue PGRES_TUPLES_OK
      */
     const PGSQL_TUPLES_OK = UNKNOWN;
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    /**
+     * @var int
+     * @cvalue PGRES_TUPLES_CHUNK
+     */
+    const PGSQL_TUPLES_CHUNK = UNKNOWN;
+#endif
     /**
      * @var int
      * @cvalue PGRES_COPY_OUT
@@ -963,6 +970,10 @@ namespace {
      * @param resource $socket
      */
     function pg_socket_poll($socket, int $read, int $write, int $timeout = -1): int {}
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    function pg_set_chunked_rows_size(Pgsql\Connection $connection, int $size): bool {}
+#endif
 }
 
 namespace PgSql {
