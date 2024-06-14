@@ -2617,6 +2617,11 @@ static zend_ffi_type* accel_ffi_persist_type_copy(void** ptr, zend_ffi_type *typ
 			break;
 		case ZEND_FFI_TYPE_STRUCT:
 			ht = &new_type->record.fields;
+			GC_SET_REFCOUNT(ht, 2);
+			GC_ADD_FLAGS(ht, IS_ARRAY_IMMUTABLE);
+			HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
+			ht->pDestructor = NULL;
+			ht->nInternalPointer = 0;
 			if (HT_IS_PACKED(ht)) {
 				memcpy(*ptr, ht->arPacked, HT_PACKED_USED_SIZE(ht));
 				ht->arPacked = (zval*)(*ptr);
@@ -2643,6 +2648,11 @@ static zend_ffi_type* accel_ffi_persist_type_copy(void** ptr, zend_ffi_type *typ
 				memcpy(ht, new_type->func.args, sizeof(HashTable));
 				(*ptr) = (void*)((char*)(*ptr) + sizeof(HashTable));
 				new_type->func.args = ht;
+				GC_SET_REFCOUNT(ht, 2);
+				GC_ADD_FLAGS(ht, IS_ARRAY_IMMUTABLE);
+				HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
+				ht->pDestructor = NULL;
+				ht->nInternalPointer = 0;
 				ZEND_ASSERT(HT_IS_PACKED(ht));
 				memcpy(*ptr, ht->arPacked, HT_PACKED_USED_SIZE(ht));
 				ht->arPacked = (zval*)(*ptr);
