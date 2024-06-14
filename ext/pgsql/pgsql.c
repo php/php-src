@@ -40,9 +40,7 @@
 #include "php_globals.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
-#if !defined(HAVE_PG_SOCKET_POLL)
 #include "php_network.h"
-#endif
 
 #ifdef HAVE_PGSQL
 
@@ -935,16 +933,16 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			array_init(return_value);
 			res = PQexec(pgsql, "SHOW jit_provider");
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-                            add_assoc_null(return_value, "jit_provider");
+				add_assoc_null(return_value, "jit_provider");
 			} else {
-                            add_assoc_string(return_value, "jit_provider", PQgetvalue(res, 0, 0));
+				add_assoc_string(return_value, "jit_provider", PQgetvalue(res, 0, 0));
 			}
 			PQclear(res);
 			res = PQexec(pgsql, "SHOW jit");
 			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-                            add_assoc_null(return_value, "jit");
+				add_assoc_null(return_value, "jit");
 			} else {
-                            add_assoc_string(return_value, "jit", PQgetvalue(res, 0, 0));
+				add_assoc_string(return_value, "jit", PQgetvalue(res, 0, 0));
 			}
 			PQclear(res);
 			return;
@@ -4346,7 +4344,7 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 				}
 
 				if (ret) {
-				*(php_socket_t *)ret = fd_number;
+					*(php_socket_t *)ret = fd_number;
 				}
 			}
 				return SUCCESS;
@@ -6248,3 +6246,29 @@ PHP_FUNCTION(pg_socket_poll)
 
 	RETURN_LONG((zend_long)PQsocketPoll(socket, (int)read, (int)write, (int)ts));
 }
+
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+PHP_FUNCTION(pg_set_chunked_rows_size)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	zend_long size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (size < 1 || size > INT_MAX) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	/** can still fail if it is not allowed e.g. already fetched results **/
+
+	RETURN_BOOL(PQsetChunkedRowsMode(link->conn, (int)size) == 1);
+}
+#endif

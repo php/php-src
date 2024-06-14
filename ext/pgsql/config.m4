@@ -70,6 +70,7 @@ if test "$PHP_PGSQL" != "no"; then
   AC_CHECK_LIB(pq, PQresultMemorySize, AC_DEFINE(HAVE_PG_RESULT_MEMORY_SIZE,1,[PostgreSQL 12 or later]))
   AC_CHECK_LIB(pq, PQchangePassword, AC_DEFINE(HAVE_PG_CHANGE_PASSWORD,1,[PostgreSQL 17 or later]))
   AC_CHECK_LIB(pq, PQsocketPoll, AC_DEFINE(HAVE_PG_SOCKET_POLL,1,[PostgreSQL 17 or later]))
+  AC_CHECK_LIB(pq, PQsetChunkedRowsMode, AC_DEFINE(HAVE_PG_SET_CHUNKED_ROWS_SIZE,1,[PostgreSQL 17 or later]))
 
   dnl Available since PostgreSQL 12.
   AC_CACHE_CHECK([if PGVerbosity enum has PQERRORS_SQLSTATE],
