@@ -1,6 +1,7 @@
 ARG_ENABLE('phpdbg', 'Build phpdbg', 'no');
 ARG_ENABLE('phpdbgs', 'Build phpdbg shared', 'no');
-ARG_ENABLE('phpdbg-debug', 'Build phpdbg in debug mode for phpdbg development', 'no');
+ARG_ENABLE('phpdbg-debug', 'Build phpdbg in debug mode to enable additional \
+diagnostic output for developing and troubleshooting phpdbg itself', 'no');
 
 PHPDBG_SOURCES='phpdbg.c phpdbg_prompt.c phpdbg_cmd.c phpdbg_info.c phpdbg_help.c phpdbg_break.c ' +
 		'phpdbg_print.c phpdbg_bp.c phpdbg_list.c phpdbg_utils.c ' +
