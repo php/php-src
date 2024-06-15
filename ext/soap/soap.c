@@ -1141,9 +1141,7 @@ PHP_METHOD(SoapServer, addFunction)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
 	/* TODO: could use zend_is_callable here */
 
@@ -1162,7 +1160,6 @@ PHP_METHOD(SoapServer, addFunction)
 
 				if (Z_TYPE_P(tmp_function) != IS_STRING) {
 					zend_argument_type_error(1, "must contain only strings");
-					SOAP_SERVER_END_CODE();
 					RETURN_THROWS();
 				}
 
@@ -1171,7 +1168,6 @@ PHP_METHOD(SoapServer, addFunction)
 				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
 					zend_string_release_ex(key, false);
 					zend_type_error("SoapServer::addFunction(): Function \"%s\" not found", Z_STRVAL_P(tmp_function));
-					SOAP_SERVER_END_CODE();
 					RETURN_THROWS();
 				}
 
@@ -1190,7 +1186,6 @@ PHP_METHOD(SoapServer, addFunction)
 		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
 			zend_string_release_ex(key, false);
 			zend_argument_type_error(1, "must be a valid function name, function \"%s\" not found", Z_STRVAL_P(function_name));
-			SOAP_SERVER_END_CODE();
 			RETURN_THROWS();
 		}
 		if (service->soap_functions.ft == NULL) {
@@ -1215,8 +1210,6 @@ PHP_METHOD(SoapServer, addFunction)
 	} else {
 		zend_argument_type_error(1, "must be of type array|string|int, %s given", zend_zval_value_name(function_name));
 	}
-
-	SOAP_SERVER_END_CODE();
 }
 /* }}} */
 
