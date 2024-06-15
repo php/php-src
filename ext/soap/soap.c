@@ -1720,13 +1720,10 @@ PHP_METHOD(SoapServer, addSoapHeader)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
 	if (!service || !service->soap_headers_ptr) {
 		zend_throw_error(NULL, "SoapServer::addSoapHeader() may be called only during SOAP request processing");
-		SOAP_SERVER_END_CODE();
 		RETURN_THROWS();
 	}
 
@@ -1738,8 +1735,6 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	memset(*p, 0, sizeof(soapHeader));
 	ZVAL_NULL(&(*p)->function_name);
 	ZVAL_OBJ_COPY(&(*p)->retval, Z_OBJ_P(fault));
-
-	SOAP_SERVER_END_CODE();
 }
 /* }}} */
 
