@@ -1053,9 +1053,7 @@ PHP_METHOD(SoapServer, setClass)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
 	service->type = SOAP_CLASS;
 	service->soap_class.ce = ce;
@@ -1070,8 +1068,6 @@ PHP_METHOD(SoapServer, setClass)
 			ZVAL_COPY(&service->soap_class.argv[i], &argv[i]);
 		}
 	}
-
-	SOAP_SERVER_END_CODE();
 }
 /* }}} */
 
