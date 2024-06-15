@@ -2182,9 +2182,9 @@ PHP_METHOD(SoapClient, __construct)
 }
 /* }}} */
 
-static int do_request(zval *this_ptr, xmlDoc *request, const char *location, const char *action, int version, bool one_way, zval *response) /* {{{ */
+static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, const char *action, int version, bool one_way, zval *response) /* {{{ */
 {
-	int    ret = TRUE;
+	bool   ret = true;
 	char  *buf;
 	int    buf_size;
 	zval   func;
@@ -2196,7 +2196,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, const char *location, con
 	xmlDocDumpMemory(request, (xmlChar**)&buf, &buf_size);
 	if (!buf) {
 		add_soap_fault(this_ptr, "HTTP", "Error build soap request", NULL, NULL);
-		return FALSE;
+		return false;
 	}
 
 	zend_try {
@@ -2219,14 +2219,14 @@ static int do_request(zval *this_ptr, xmlDoc *request, const char *location, con
 
 		if (call_user_function(NULL, this_ptr, &func, response, 5, params) != SUCCESS) {
 			add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() failed", NULL, NULL);
-			ret = FALSE;
+			ret = false;
 		} else if (Z_TYPE_P(response) != IS_STRING) {
 			if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_error)) {
 				/* Programmer error in __doRequest() implementation, let it bubble up. */
 			} else if (Z_TYPE_P(Z_CLIENT_SOAP_FAULT_P(this_ptr)) != IS_OBJECT) {
 				add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL);
 			}
-			ret = FALSE;
+			ret = false;
 		} else if (Z_TYPE_P(trace) == IS_TRUE) {
 			zval_ptr_dtor(Z_CLIENT_LAST_RESPONSE_P(this_ptr));
 			ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_P(this_ptr), Z_STR_P(response));
@@ -2243,7 +2243,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, const char *location, con
 		zend_bailout();
 	}
 	if (ret && Z_TYPE_P(Z_CLIENT_SOAP_FAULT_P(this_ptr)) == IS_OBJECT) {
-		ret = FALSE;
+		ret = false;
 	}
 	return ret;
 }
@@ -2267,7 +2267,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 	sdlPtr old_sdl = NULL;
 	sdlFunctionPtr fn;
 	xmlDocPtr request = NULL;
-	int ret = FALSE;
+	bool ret = false;
 	int soap_version;
 	zval response;
 	xmlCharEncodingHandlerPtr old_encoding;
