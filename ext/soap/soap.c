@@ -1971,8 +1971,6 @@ PHP_METHOD(SoapClient, __construct)
 		RETURN_THROWS();
 	}
 
-	SOAP_CLIENT_BEGIN_CODE();
-
 	cache_wsdl = SOAP_GLOBAL(cache_enabled) ? SOAP_GLOBAL(cache_mode) : 0;
 
 	if (options != NULL) {
@@ -1985,7 +1983,8 @@ PHP_METHOD(SoapClient, __construct)
 			    Z_TYPE_P(tmp) == IS_STRING) {
 				ZVAL_STR_COPY(Z_CLIENT_URI_P(this_ptr), Z_STR_P(tmp));
 			} else {
-				php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
+				zend_argument_value_error(2, "must provide \"uri\" option as it is required in nonWSDL mode");
+				RETURN_THROWS();
 			}
 
 			if ((tmp = zend_hash_str_find(ht, "style", sizeof("style")-1)) != NULL &&
@@ -2013,7 +2012,8 @@ PHP_METHOD(SoapClient, __construct)
 		    Z_TYPE_P(tmp) == IS_STRING) {
 			ZVAL_STR_COPY(Z_CLIENT_LOCATION_P(this_ptr), Z_STR_P(tmp));
 		} else if (!wsdl) {
-			php_error_docref(NULL, E_ERROR, "'location' option is required in nonWSDL mode");
+			zend_argument_value_error(2, "must provide \"location\" option as it is required in nonWSDL mode");
+			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "soap_version", sizeof("soap_version")-1)) != NULL) {
@@ -2092,7 +2092,8 @@ PHP_METHOD(SoapClient, __construct)
 
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_P(tmp));
 			if (encoding == NULL) {
-				php_error_docref(NULL, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_P(tmp));
+				zend_argument_value_error(2, "provided \"encoding\" option \"%s\" is invalid", Z_STRVAL_P(tmp));
+				RETURN_THROWS();
 			} else {
 				xmlCharEncCloseFunc(encoding);
 				ZVAL_STR_COPY(Z_CLIENT_ENCODING_P(this_ptr), Z_STR_P(tmp));
@@ -2148,11 +2149,22 @@ PHP_METHOD(SoapClient, __construct)
 				"The \"ssl_method\" option is deprecated. "
 				"Use \"ssl\" stream context options instead");
 		}
-	} else if (!wsdl) {
-		php_error_docref(NULL, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
+	}
+
+	if (options == NULL && wsdl == NULL) {
+		zend_argument_value_error(2, "must provide \"uri\" and \"location\" options as they are required in nonWSDL mode");
+		RETURN_THROWS();
 	}
 
 	ZVAL_LONG(Z_CLIENT_SOAP_VERSION_P(this_ptr), soap_version);
+
+	if (typemap_ht) {
+		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
+		if (UNEXPECTED(typemap == NULL)) {
+			RETURN_THROWS();
+		}
+		ZVAL_ARR(Z_CLIENT_TYPEMAP_P(this_ptr), typemap);
+	}
 
 	if (wsdl) {
 		int    old_soap_version;
@@ -2160,7 +2172,9 @@ PHP_METHOD(SoapClient, __construct)
 		old_soap_version = SOAP_GLOBAL(soap_version);
 		SOAP_GLOBAL(soap_version) = soap_version;
 
+		SOAP_CLIENT_BEGIN_CODE();
 		sdl = get_sdl(this_ptr, ZSTR_VAL(wsdl), cache_wsdl);
+		SOAP_CLIENT_END_CODE();
 
 		zval *sdl_zval = Z_CLIENT_SDL_P(this_ptr);
 		if (Z_TYPE_P(sdl_zval) == IS_OBJECT) {
@@ -2173,14 +2187,6 @@ PHP_METHOD(SoapClient, __construct)
 
 		SOAP_GLOBAL(soap_version) = old_soap_version;
 	}
-
-	if (typemap_ht) {
-		HashTable *typemap = soap_create_typemap(sdl, typemap_ht);
-		if (typemap) {
-			ZVAL_ARR(Z_CLIENT_TYPEMAP_P(this_ptr), typemap);
-		}
-	}
-	SOAP_CLIENT_END_CODE();
 }
 /* }}} */
 
