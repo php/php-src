@@ -1082,16 +1082,12 @@ PHP_METHOD(SoapServer, setObject)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
 	service->type = SOAP_OBJECT;
 
 	zval_ptr_dtor(&service->soap_object);
 	ZVAL_OBJ_COPY(&service->soap_object, Z_OBJ_P(obj));
-
-	SOAP_SERVER_END_CODE();
 }
 /* }}} */
 
