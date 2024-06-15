@@ -92,7 +92,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, uint3
 	bool _old_in_compilation = CG(in_compilation); \
 	zend_execute_data *_old_current_execute_data = EG(current_execute_data); \
 	zval *_old_stack_top = EG(vm_stack_top); \
-	int _bailout = 0;\
+	bool _bailout = false;\
 	SOAP_GLOBAL(use_soap_error_handler) = 1;\
 	SOAP_GLOBAL(error_code) = "Client";\
 	Z_OBJ(SOAP_GLOBAL(error_object)) = Z_OBJ_P(ZEND_THIS);\
@@ -104,7 +104,7 @@ static void soap_error_handler(int error_num, zend_string *error_filename, uint3
 		EG(current_execute_data) = _old_current_execute_data; \
 		if (EG(exception) == NULL || \
 		    !instanceof_function(EG(exception)->ce, soap_fault_class_entry)) {\
-			_bailout = 1;\
+			_bailout = true;\
 		}\
 		if (_old_stack_top != EG(vm_stack_top)) { \
 			while (EG(vm_stack)->prev != NULL && \
@@ -2189,7 +2189,7 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 	int    buf_size;
 	zval   func;
 	zval  params[5];
-	int    _bailout = 0;
+	bool  _bailout = false;
 
 	ZVAL_NULL(response);
 
@@ -2232,7 +2232,7 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 			ZVAL_STR_COPY(Z_CLIENT_LAST_RESPONSE_P(this_ptr), Z_STR_P(response));
 		}
 	} zend_catch {
-		_bailout = 1;
+		_bailout = true;
 	} zend_end_try();
 	zval_ptr_dtor(&func);
 	zval_ptr_dtor(&params[2]);
