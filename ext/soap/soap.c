@@ -157,6 +157,15 @@ static void soap_error_handler(int error_num, zend_string *error_filename, uint3
 #define Z_FAULT_NAME_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 5))
 #define Z_FAULT_HEADERFAULT_P(zv) php_soap_deref(OBJ_PROP_NUM(Z_OBJ_P(zv), FAULT_PROP_START_OFFSET + 6))
 
+#define FETCH_THIS_SERVICE_NO_BAILOUT(ss) \
+	{ \
+		ss = soap_server_object_fetch(Z_OBJ_P(ZEND_THIS))->service; \
+		if (!ss) { \
+			zend_throw_error(NULL, "Cannot fetch SoapServer object"); \
+			RETURN_THROWS(); \
+		} \
+	}
+
 #define FETCH_THIS_SERVICE(ss) \
 	{ \
 		ss = soap_server_object_fetch(Z_OBJ_P(ZEND_THIS))->service; \
@@ -1009,15 +1018,12 @@ PHP_METHOD(SoapServer, setPersistence)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
 	if (service->type == SOAP_CLASS) {
 		if (value == SOAP_PERSISTENCE_SESSION ||
 			value == SOAP_PERSISTENCE_REQUEST) {
 			if (value == SOAP_PERSISTENCE_SESSION && !zend_hash_str_exists(&module_registry, "session", sizeof("session")-1)) {
-				SOAP_SERVER_END_CODE();
 				zend_throw_error(NULL, "SoapServer::setPersistence(): Session persistence cannot be enabled because the session module is not enabled");
 				RETURN_THROWS();
 			}
@@ -1031,8 +1037,6 @@ PHP_METHOD(SoapServer, setPersistence)
 	} else {
 		zend_throw_error(NULL, "SoapServer::setPersistence(): Persistence cannot be set when the SOAP server is used in function mode");
 	}
-
-	SOAP_SERVER_END_CODE();
 }
 /* }}} */
 
