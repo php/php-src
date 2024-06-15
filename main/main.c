@@ -2108,6 +2108,11 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 #endif
 	gc_globals_ctor();
 
+	zend_observer_startup();
+#if ZEND_DEBUG
+	zend_observer_error_register(report_zend_debug_error_notify_cb);
+#endif
+
 	zuf.error_function = php_error_cb;
 	zuf.printf_function = php_printf;
 	zuf.write_function = php_output_write;
@@ -2126,11 +2131,6 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_startup(&zuf);
 	zend_reset_lc_ctype_locale();
 	zend_update_current_locale();
-
-	zend_observer_startup();
-#if ZEND_DEBUG
-	zend_observer_error_register(report_zend_debug_error_notify_cb);
-#endif
 
 #if HAVE_TZSET
 	tzset();

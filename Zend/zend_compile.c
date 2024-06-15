@@ -4575,7 +4575,7 @@ static uint32_t find_frameless_function_offset(uint32_t arity, void *handler)
 
 static const zend_frameless_function_info *find_frameless_function_info(zend_ast_list *args, zend_function *fbc, uint32_t type)
 {
-	if (ZEND_OBSERVER_ENABLED || zend_execute_internal) {
+	if (zend_execute_internal) {
 		return NULL;
 	}
 

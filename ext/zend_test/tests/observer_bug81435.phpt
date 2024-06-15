@@ -1,5 +1,5 @@
 --TEST--
-Bug #81435 (Observer current_observed_frame may point to an old (overwritten) frame)
+Bug #81435 (Observer EG(current_observed_frame) may point to an old (overwritten) frame)
 --EXTENSIONS--
 zend_test
 --INI--
