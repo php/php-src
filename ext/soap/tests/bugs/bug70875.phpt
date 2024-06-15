@@ -9,7 +9,7 @@ soap.wsdl_cache_enabled=0
 
 class bug70875 extends SOAPClient
 {
-    public function __doRequest($request, $location, $action, $version, $one_way = 0): ?string
+    public function __doRequest($request, $location, $action, $version, $one_way = 0): never
     {
         die("no SIGSEGV");
     }

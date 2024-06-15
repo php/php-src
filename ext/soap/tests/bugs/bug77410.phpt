@@ -9,7 +9,7 @@ $client = new class(__DIR__ . '/bug77410.wsdl', [
     'cache_wsdl' => WSDL_CACHE_NONE,
     'trace' => 1,
 ]) extends SoapClient {
-    public function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    public function __doRequest($request, $location, $action, $version, $one_way = 0): string {
         echo $request, "\n";
         return '';
     }

@@ -6,7 +6,7 @@ soap
 <?php
 
 $client = new class(null, [ 'location' => '', 'uri' => 'http://example.org']) extends SoapClient {
-    public function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+    public function __doRequest($request, $location, $action, $version, $one_way = 0): string {
         echo $request;
         return '';
     }
