@@ -277,6 +277,9 @@ static xmlRelaxNGPtr _xmlreader_get_relaxNG(char *source, size_t source_len, siz
 #endif
 
 static const zend_module_dep xmlreader_deps[] = {
+#ifdef HAVE_DOM
+	ZEND_MOD_REQUIRED("dom")
+#endif
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_END
 };
