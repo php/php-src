@@ -807,7 +807,7 @@ typedef union {
 	double d;
 	long double ld;
 	void *p;
-	void (*fun)();
+	void (*fun)(void);
 } zend_max_align_t;
 #endif
 
