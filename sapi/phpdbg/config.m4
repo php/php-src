@@ -8,7 +8,8 @@ PHP_ARG_ENABLE([phpdbg],
 PHP_ARG_ENABLE([phpdbg-debug],
   [for phpdbg debug build],
   [AS_HELP_STRING([--enable-phpdbg-debug],
-    [Build phpdbg in debug mode])],
+    [Build phpdbg in debug mode to enable additional diagnostic output for
+    developing and troubleshooting phpdbg itself])],
   [no],
   [no])
 
@@ -23,13 +24,10 @@ if test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
   AC_DEFINE(HAVE_PHPDBG, 1, [ ])
 
-  if test "$PHP_PHPDBG_DEBUG" != "no"; then
-    AC_DEFINE(PHPDBG_DEBUG, 1, [ ])
-  else
-    AC_DEFINE(PHPDBG_DEBUG, 0, [ ])
-  fi
-
   PHP_PHPDBG_CFLAGS="-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  AS_VAR_IF([PHP_PHPDBG_DEBUG], [no],,
+    [AS_VAR_APPEND([PHP_PHPDBG_CFLAGS], [" -DPHPDBG_DEBUG=1"])])
+
   PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_io.c phpdbg_out.c"
 
   AC_MSG_CHECKING([for phpdbg and readline integration])
