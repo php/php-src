@@ -20,7 +20,7 @@ if (PHP_PHPDBG == "yes") {
 }
 
 if (PHP_PHPDBGS == "yes") {
-	SAPI('phpdbgs', PHPDBG_SOURCES, PHPDBG_DLL, '/D PHP_PHPDBG_EXPORTS /I win32');
+	SAPI('phpdbgs', PHPDBG_SOURCES, PHPDBG_DLL, '/D PHP_PHPDBG_EXPORTS');
 	ADD_FLAG("LIBS_PHPDBGS", "ws2_32.lib user32.lib");
 	ADD_FLAG("CFLAGS_PHPDBGS", "/D YY_NO_UNISTD_H");
 }
