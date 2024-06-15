@@ -1102,9 +1102,7 @@ PHP_METHOD(SoapServer, getFunctions)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
-	FETCH_THIS_SERVICE(service);
+	FETCH_THIS_SERVICE_NO_BAILOUT(service);
 
 	array_init(return_value);
 	if (service->type == SOAP_OBJECT) {
@@ -1129,8 +1127,6 @@ PHP_METHOD(SoapServer, getFunctions)
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-
-	SOAP_SERVER_END_CODE();
 }
 /* }}} */
 
