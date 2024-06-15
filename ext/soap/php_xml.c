@@ -24,15 +24,15 @@
 /* Channel libxml file io layer through the PHP streams subsystem.
  * This allows use of ftps:// and https:// urls */
 
-static int is_blank(const xmlChar* str)
+static bool is_blank(const xmlChar* str)
 {
 	while (*str != '\0') {
 		if (*str != ' '  && *str != 0x9 && *str != 0xa && *str != 0xd) {
-			return 0;
+			return false;
 		}
 		str++;
 	}
-	return 1;
+	return true;
 }
 
 /* removes all empty text, comments and other insignoficant nodes */
