@@ -33,6 +33,9 @@ if test "$PHP_PGSQL" != "no"; then
       [Define to 1 if libpq has the 'PQsetChunkedRowsMode' function (PostgreSQL
       17 or later).])],,
     [$PGSQL_LIBS])
+  PHP_CHECK_LIBRARY([pq], [PQclosePrepared],
+    [AC_DEFINE([HAVE_PG_CLOSE_STMT], [1], [PostgreSQL 17 or later])],,
+    [$PGSQL_LIBS])
 
   old_CFLAGS=$CFLAGS
   CFLAGS="$CFLAGS $PGSQL_CFLAGS"

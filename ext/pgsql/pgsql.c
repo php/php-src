@@ -6256,3 +6256,39 @@ PHP_FUNCTION(pg_set_chunked_rows_size)
 	RETURN_BOOL(PQsetChunkedRowsMode(link->conn, (int)size) == 1);
 }
 #endif
+
+#if defined(HAVE_PG_CLOSE_STMT)
+PHP_FUNCTION(pg_close_stmt)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	PGresult *pgsql_result;
+	zend_string *stmt;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_STR(stmt)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(stmt) == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	pgsql_result = PQclosePrepared(link->conn, ZSTR_VAL(stmt));
+
+	if (!pgsql_result) {
+		RETURN_FALSE;
+	} else {
+		pgsql_result_handle *pg_result;
+		object_init_ex(return_value, pgsql_result_ce);
+		pg_result = Z_PGSQL_RESULT_P(return_value);
+		pg_result->conn = link->conn;
+		pg_result->result = pgsql_result;
+		pg_result->row = 0;
+	}
+}
+#endif
