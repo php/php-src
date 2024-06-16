@@ -4282,12 +4282,28 @@ PHP_FUNCTION(imageresolution)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (!res_x_is_null && !res_y_is_null) {
+		if (res_x < 0 || ZEND_SIZE_T_UINT_OVFL(res_x)) {
+			zend_argument_value_error(2, "must be between 0 and %u", UINT_MAX);
+			RETURN_THROWS();
+		}
+		if (res_y < 0 || ZEND_SIZE_T_UINT_OVFL(res_y)) {
+			zend_argument_value_error(3, "must be between 0 and %u", UINT_MAX);
+			RETURN_THROWS();
+		}
 		gdImageSetResolution(im, res_x, res_y);
 		RETURN_TRUE;
 	} else if (!res_x_is_null && res_y_is_null) {
+		if (res_x < 0 || ZEND_SIZE_T_UINT_OVFL(res_x)) {
+			zend_argument_value_error(2, "must be between 0 and %u", UINT_MAX);
+			RETURN_THROWS();
+		}
 		gdImageSetResolution(im, res_x, res_x);
 		RETURN_TRUE;
 	} else if (res_x_is_null && !res_y_is_null) {
+		if (res_y < 0 || ZEND_SIZE_T_UINT_OVFL(res_y)) {
+			zend_argument_value_error(3, "must be between 0 and %u", UINT_MAX);
+			RETURN_THROWS();
+		}
 		gdImageSetResolution(im, res_y, res_y);
 		RETURN_TRUE;
 	}
