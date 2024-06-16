@@ -480,7 +480,7 @@ static void bc_karatsuba_mul_fast_recursive(
 	BC_VECTOR *mid = high + calc_arr_size;
 	bc_karatsuba_mul_fast_recursive(n1_buf, n1_buf + half_size, half_size, n2_buf, n2_buf + half_size, half_size, half_size, mid);
 
-	/* If n1_buf has a carry, add n2_buf. The opposite is true when n2_buf has a carry. */
+	/* If n1_buf has a carry, add n2_buf. Similarly, if n2_buf has a carry one must add it to n1_buf. */
 	bc_karatsuba_mul_add_buf_to_mid(mid, n1_buf, n2_buf_carry, half_size);
 	bc_karatsuba_mul_add_buf_to_mid(mid, n2_buf, n1_buf_carry, half_size);
 
