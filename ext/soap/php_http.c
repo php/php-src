@@ -308,18 +308,16 @@ static php_stream* http_connect(zval* this_ptr, php_url *phpurl, int use_ssl, ph
 	return stream;
 }
 
-static int in_domain(const char *host, const char *domain)
+static bool in_domain(const zend_string *host, const zend_string *domain)
 {
-	if (domain[0] == '.') {
-		int l1 = strlen(host);
-		int l2 = strlen(domain);
-		if (l1 > l2) {
-			return strcmp(host+l1-l2,domain) == 0;
+	if (ZSTR_VAL(domain)[0] == '.') {
+		if (ZSTR_LEN(host) > ZSTR_LEN(domain)) {
+			return strcmp(ZSTR_VAL(host)+ZSTR_LEN(host)-ZSTR_LEN(domain), ZSTR_VAL(domain)) == 0;
 		} else {
 			return 0;
 		}
 	} else {
-		return strcmp(host,domain) == 0;
+		return zend_string_equals(host,domain);
 	}
 }
 
@@ -852,7 +850,7 @@ try_again:
 						   strncmp(phpurl->path?ZSTR_VAL(phpurl->path):"/",Z_STRVAL_P(tmp),Z_STRLEN_P(tmp)) == 0) &&
 						  ((tmp = zend_hash_index_find(Z_ARRVAL_P(data), 2)) == NULL ||
 						   Z_TYPE_P(tmp) != IS_STRING ||
-						   in_domain(ZSTR_VAL(phpurl->host),Z_STRVAL_P(tmp))) &&
+						   in_domain(phpurl->host, Z_STR_P(tmp))) &&
 						  (use_ssl || (tmp = zend_hash_index_find(Z_ARRVAL_P(data), 3)) == NULL)) {
 							if (!first_cookie) {
 								smart_str_appends(&soap_headers, "; ");
