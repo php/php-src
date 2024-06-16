@@ -29,6 +29,6 @@ imageresolution($exp, 0, 0);
 var_dump(imageresolution($exp) == $res);
 ?>
 --EXPECTF--
-imageresolution(): Argument #2 ($resolution_x) must be lower than %d
-imageresolution(): Argument #3 ($resolution_y) must be lower than %d
+imageresolution(): Argument #2 ($resolution_x) must be between 0 and %d
+imageresolution(): Argument #3 ($resolution_y) must be between 0 and %d
 bool(true)
