@@ -703,41 +703,61 @@ PHP_METHOD(SoapFault, __construct)
 /* {{{ SoapFault constructor */
 PHP_METHOD(SoapFault, __toString)
 {
-	zval *faultcode, *faultstring, *file, *line, trace, rv1, rv2, rv3, rv4;
-	zend_string *str;
-	zval *this_ptr;
-	zend_string *faultcode_val, *faultstring_val, *file_val;
-	zend_long line_val;
+	zval *line, rv1, rv2, rv3, rv4, rv5;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	this_ptr = ZEND_THIS;
-	faultcode = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultcode", sizeof("faultcode")-1, 1, &rv1);
-	faultstring = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultstring", sizeof("faultstring")-1, 1, &rv2);
-	file = zend_read_property_ex(soap_fault_class_entry, Z_OBJ_P(this_ptr), ZSTR_KNOWN(ZEND_STR_FILE), /* silent */ true, &rv3);
+	zval *this_ptr = ZEND_THIS;
+
+	/* SoapFault uses typed properties */
+	const zval *faultcode = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultcode", sizeof("faultcode")-1, /* silent */ true, &rv1);
+	const zend_string *faultcode_val;
+	if (UNEXPECTED(Z_TYPE_P(faultcode) == IS_NULL)) {
+		faultcode_val = zend_empty_string;
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(faultcode) == IS_STRING);
+		faultcode_val = Z_STR_P(faultcode);
+	}
+
+	const zval *faultstring = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultstring", sizeof("faultstring")-1, /* silent */ true, &rv2);
+	const zend_string *faultstring_val;
+	if (UNEXPECTED(Z_TYPE_P(faultstring) == IS_NULL)) {
+		faultstring_val = zend_empty_string;
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(faultstring) == IS_STRING);
+		faultstring_val = Z_STR_P(faultstring);
+	}
+
+	/* Exception uses typed properties */
+	const zval *file = zend_read_property_ex(soap_fault_class_entry, Z_OBJ_P(this_ptr), ZSTR_KNOWN(ZEND_STR_FILE), /* silent */ true, &rv3);
+	ZEND_ASSERT(Z_TYPE_P(file) == IS_STRING);
+	const zend_string *file_val = Z_STR_P(file);
+
 	line = zend_read_property_ex(soap_fault_class_entry, Z_OBJ_P(this_ptr), ZSTR_KNOWN(ZEND_STR_LINE), /* silent */ true, &rv4);
+	ZEND_ASSERT(Z_TYPE_P(line) == IS_LONG);
+	zend_long line_val = Z_LVAL_P(line);
 
-	zend_call_method_with_0_params(
-		Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), NULL, "gettraceasstring", &trace);
+	/* Grab private $trace property from base Exception class */
+	zval *trace = zend_read_property_ex(zend_ce_exception, Z_OBJ_P(this_ptr), ZSTR_KNOWN(ZEND_STR_TRACE), /* silent */ true, &rv5);
+	ZEND_ASSERT(Z_TYPE_P(trace) == IS_ARRAY);
+	zend_string *trace_str = zend_trace_to_string(Z_ARRVAL_P(trace), /* include_main */ true);
 
-	faultcode_val = zval_get_string(faultcode);
-	faultstring_val = zval_get_string(faultstring);
-	file_val = zval_get_string(file);
-	line_val = zval_get_long(line);
-	convert_to_string(&trace);
+	size_t max_length = ZSTR_LEN(faultcode_val)
+		+ ZSTR_LEN(faultstring_val)
+		+ ZSTR_LEN(file_val)
+		+ ZSTR_LEN(trace_str)
+		+ sizeof("9223372036854775807")
+		+ sizeof("SoapFault exception: []  in :\nStack trace:\n");
+	zend_string *str = strpprintf(max_length,
+		"SoapFault exception: [%s] %s in %s:" ZEND_LONG_FMT "\nStack trace:\n%s",
+		ZSTR_VAL(faultcode_val), ZSTR_VAL(faultstring_val), ZSTR_VAL(file_val), line_val, ZSTR_VAL(trace_str)
+	);
 
-	str = strpprintf(0, "SoapFault exception: [%s] %s in %s:" ZEND_LONG_FMT "\nStack trace:\n%s",
-	               ZSTR_VAL(faultcode_val), ZSTR_VAL(faultstring_val), ZSTR_VAL(file_val), line_val,
-	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
+	zend_string_release(trace_str);
 
-	zend_string_release_ex(file_val, 0);
-	zend_string_release_ex(faultstring_val, 0);
-	zend_string_release_ex(faultcode_val, 0);
-	zval_ptr_dtor(&trace);
-
-	RETVAL_STR(str);
+	RETURN_NEW_STR(str);
 }
 /* }}} */
 
