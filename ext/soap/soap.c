@@ -2617,7 +2617,8 @@ PHP_METHOD(SoapClient, __soapCall)
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
 		soap_headers = Z_ARRVAL_P(headers);
 		if (!verify_soap_headers_array(soap_headers)) {
-			php_error_docref(NULL, E_ERROR, "Invalid SOAP header");
+			zend_argument_type_error(4, "must be on array of SoapHeader objects");
+			RETURN_THROWS();
 		}
 		free_soap_headers = false;
 	} else if (Z_TYPE_P(headers) == IS_OBJECT && instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry)) {
@@ -2828,7 +2829,8 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		convert_to_null(Z_CLIENT_DEFAULT_HEADERS_P(this_ptr));
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
 		if (!verify_soap_headers_array(Z_ARRVAL_P(headers))) {
-			php_error_docref(NULL, E_ERROR, "Invalid SOAP header");
+			zend_argument_type_error(1, "must be on array of SoapHeader objects");
+			RETURN_THROWS();
 		}
 		zval_ptr_dtor(Z_CLIENT_DEFAULT_HEADERS_P(this_ptr));
 		ZVAL_COPY(Z_CLIENT_DEFAULT_HEADERS_P(this_ptr), headers);
