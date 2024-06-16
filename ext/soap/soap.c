@@ -55,7 +55,7 @@ static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *acto
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int);
-static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name);
+static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t function_name_length);
 static sdlFunctionPtr get_doc_function(sdlPtr sdl, xmlNodePtr params);
 
 static sdlFunctionPtr deserialize_function_call(sdlPtr sdl, xmlDocPtr request, const char* actor, zval *function_name, uint32_t *num_params, zval **parameters, int *version, soapHeader **headers);
@@ -2321,7 +2321,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	zend_try {
 	 	if (sdl != NULL) {
-			fn = get_function(sdl, ZSTR_VAL(function));
+			fn = get_function(sdl, ZSTR_VAL(function), ZSTR_LEN(function));
 			if (fn != NULL) {
 				sdlBindingPtr binding = fn->binding;
 				bool one_way = 0;
@@ -3024,7 +3024,8 @@ static sdlFunctionPtr find_function(sdlPtr sdl, xmlNodePtr func, zval* function_
 {
 	sdlFunctionPtr function;
 
-	function = get_function(sdl, (char*)func->name);
+	size_t xml_func_name_length = strlen((char*)func->name);
+	function = get_function(sdl, (char*)func->name, xml_func_name_length);
 	if (function && function->binding && function->binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)function->bindingAttributes;
 		if (fnb->style == SOAP_DOCUMENT) {
@@ -3042,7 +3043,7 @@ static sdlFunctionPtr find_function(sdlPtr sdl, xmlNodePtr func, zval* function_
 	if (function != NULL) {
 		ZVAL_STRING(function_name, (char *)function->functionName);
 	} else {
-		ZVAL_STRING(function_name, (char *)func->name);
+		ZVAL_STRINGL(function_name, (char *)func->name, xml_func_name_length);
 	}
 
 	return function;
@@ -4131,18 +4132,17 @@ static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, ze
 }
 /* }}} */
 
-static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name) /* {{{ */
+static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t function_name_length) /* {{{ */
 {
 	sdlFunctionPtr tmp;
 
-	size_t len = strlen(function_name);
-	char *str = estrndup(function_name,len);
-	zend_str_tolower(str,len);
+	char *str = estrndup(function_name, function_name_length);
+	zend_str_tolower(str, function_name_length);
 	if (sdl != NULL) {
-		if ((tmp = zend_hash_str_find_ptr(&sdl->functions, str, len)) != NULL) {
+		if ((tmp = zend_hash_str_find_ptr(&sdl->functions, str, function_name_length)) != NULL) {
 			efree(str);
 			return tmp;
-		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr(sdl->requests, str, len)) != NULL) {
+		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr(sdl->requests, str, function_name_length)) != NULL) {
 			efree(str);
 			return tmp;
 		}
