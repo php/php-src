@@ -2231,14 +2231,13 @@ static bool do_request(zval *this_ptr, xmlDoc *request, const char *location, co
 
 static void do_soap_call(zend_execute_data *execute_data,
                          zval* this_ptr,
-                         char* function,
-                         size_t function_len,
+                         const zend_string *function,
                          uint32_t arg_count,
                          zval* real_args,
                          zval* return_value,
-                         char* location,
-                         char* soap_action,
-                         char* call_uri,
+                         const zend_string* location,
+                         const zend_string* soap_action,
+                         const zend_string* call_uri,
                          HashTable* soap_headers,
                          zval* output_headers
                         ) /* {{{ */
@@ -2274,7 +2273,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 	if (location == NULL) {
 		tmp = Z_CLIENT_LOCATION_P(this_ptr);
 		if (Z_TYPE_P(tmp) == IS_STRING) {
-			location = Z_STRVAL_P(tmp);
+			location = Z_STR_P(tmp);
 		}
 	}
 
@@ -2322,7 +2321,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 	zend_try {
 	 	if (sdl != NULL) {
-			fn = get_function(sdl, function);
+			fn = get_function(sdl, ZSTR_VAL(function));
 			if (fn != NULL) {
 				sdlBindingPtr binding = fn->binding;
 				bool one_way = 0;
@@ -2333,17 +2332,20 @@ static void do_soap_call(zend_execute_data *execute_data,
 					one_way = 1;
 				}
 
+				const char *location_c_str;
 				if (location == NULL) {
-					location = binding->location;
-					ZEND_ASSERT(location);
+					location_c_str = binding->location;
+					ZEND_ASSERT(location_c_str);
+				} else {
+					location_c_str = ZSTR_VAL(location);
 				}
 				if (binding->bindingType == BINDING_SOAP) {
 					sdlSoapBindingFunctionPtr fnb = (sdlSoapBindingFunctionPtr)fn->bindingAttributes;
 					request = serialize_function_call(this_ptr, fn, NULL, fnb->input.ns, real_args, arg_count, soap_version, soap_headers);
-	 				ret = do_request(this_ptr, request, location, fnb->soapAction, soap_version, one_way, &response);
+					ret = do_request(this_ptr, request, location_c_str, fnb->soapAction, soap_version, one_way, &response);
 				} else {
 	 				request = serialize_function_call(this_ptr, fn, NULL, sdl->target_ns, real_args, arg_count, soap_version, soap_headers);
-	 				ret = do_request(this_ptr, request, location, NULL, soap_version, one_way, &response);
+					ret = do_request(this_ptr, request, location_c_str, NULL, soap_version, one_way, &response);
 				}
 
 				xmlFreeDoc(request);
@@ -2360,7 +2362,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 	 		} else {
 	 			smart_str error = {0};
 	 			smart_str_appends(&error,"Function (\"");
-	 			smart_str_appends(&error,function);
+				smart_str_append(&error,function);
 	 			smart_str_appends(&error,"\") is not a valid method for this service");
 	 			smart_str_0(&error);
 				add_soap_fault(this_ptr, "Client", ZSTR_VAL(error.s), NULL, NULL);
@@ -2374,20 +2376,20 @@ static void do_soap_call(zend_execute_data *execute_data,
 				add_soap_fault(this_ptr, "Client", "Error could not find \"location\" property", NULL, NULL);
 			} else {
 				if (call_uri == NULL) {
-					call_uri = Z_STRVAL_P(uri);
+					call_uri = Z_STR_P(uri);
 				}
-		 		request = serialize_function_call(this_ptr, NULL, function, call_uri, real_args, arg_count, soap_version, soap_headers);
+				request = serialize_function_call(this_ptr, NULL, ZSTR_VAL(function), ZSTR_VAL(call_uri), real_args, arg_count, soap_version, soap_headers);
 
 		 		if (soap_action == NULL) {
-					smart_str_appends(&action, call_uri);
+					smart_str_append(&action, call_uri);
 					smart_str_appendc(&action, '#');
-					smart_str_appends(&action, function);
+					smart_str_append(&action, function);
 				} else {
-					smart_str_appends(&action, soap_action);
+					smart_str_append(&action, soap_action);
 				}
 				smart_str_0(&action);
 
-				ret = do_request(this_ptr, request, location, ZSTR_VAL(action.s), soap_version, 0, &response);
+				ret = do_request(this_ptr, request, ZSTR_VAL(location), ZSTR_VAL(action.s), soap_version, 0, &response);
 
 		 		smart_str_free(&action);
 				xmlFreeDoc(request);
@@ -2395,7 +2397,7 @@ static void do_soap_call(zend_execute_data *execute_data,
 
 				if (ret && Z_TYPE(response) == IS_STRING) {
 					encode_reset_ns();
-					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, function, return_value, output_headers);
+					ret = parse_packet_soap(this_ptr, Z_STRVAL(response), Z_STRLEN(response), NULL, NULL, return_value, output_headers);
 					encode_finish();
 				}
 
@@ -2463,71 +2465,22 @@ static void verify_soap_headers_array(HashTable *ht) /* {{{ */
 /* }}} */
 
 /* {{{ Calls a SOAP function */
-void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
-{
-	char *function, *location=NULL, *soap_action = NULL, *uri = NULL;
-	size_t function_len;
-	int i = 0;
-	HashTable* soap_headers = NULL;
-	zval *options = NULL;
-	zval *headers = NULL;
-	zval *output_headers = NULL;
-	zval *args;
-	zval *real_args = NULL;
-	zval *param;
-	uint32_t arg_count;
-	zval *tmp;
-	bool free_soap_headers = 0;
-	zval *this_ptr;
-
-	if (is_soap_call) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zz",
-			&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
-			RETURN_THROWS();
-		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa", &function, &function_len, &args) == FAILURE) {
-			RETURN_THROWS();
-		}
-	}
-
-	if (options) {
-		HashTable *hto = Z_ARRVAL_P(options);
-		if ((tmp = zend_hash_str_find(hto, "location", sizeof("location")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_STRING) {
-			location = Z_STRVAL_P(tmp);
-		}
-
-		if ((tmp = zend_hash_str_find(hto, "soapaction", sizeof("soapaction")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_STRING) {
-			soap_action = Z_STRVAL_P(tmp);
-		}
-
-		if ((tmp = zend_hash_str_find(hto, "uri", sizeof("uri")-1)) != NULL &&
-			Z_TYPE_P(tmp) == IS_STRING) {
-			uri = Z_STRVAL_P(tmp);
-		}
-	}
-
-	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
-	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
-		soap_headers = Z_ARRVAL_P(headers);
-		verify_soap_headers_array(soap_headers);
-		free_soap_headers = 0;
-	} else if (Z_TYPE_P(headers) == IS_OBJECT &&
-	           instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry)) {
-	    soap_headers = zend_new_array(0);
-		zend_hash_next_index_insert(soap_headers, headers);
-		Z_ADDREF_P(headers);
-		free_soap_headers = 1;
-	} else {
-		zend_argument_type_error(4, "must be of type SoapHeader|array|null, %s given", zend_zval_value_name(headers));
-		RETURN_THROWS();
-	}
-
+static void soap_client_call_common(
+	zval *this_ptr,
+	const zend_string *function,
+	HashTable *args,
+	const zend_string *location,
+	const zend_string *soap_action,
+	const zend_string *uri,
+	HashTable* soap_headers,
+	bool free_soap_headers,
+	zval *output_headers,
+	zend_execute_data *execute_data,
+	zval *return_value
+) {
 	/* Add default headers */
 	this_ptr = ZEND_THIS;
-	tmp = Z_CLIENT_DEFAULT_HEADERS_P(this_ptr);
+	zval *tmp = Z_CLIENT_DEFAULT_HEADERS_P(this_ptr);
 	if (Z_TYPE_P(tmp) == IS_ARRAY) {
 		HashTable *default_headers = Z_ARRVAL_P(tmp);
 		if (soap_headers) {
@@ -2547,27 +2500,23 @@ void soap_client_call_impl(INTERNAL_FUNCTION_PARAMETERS, bool is_soap_call)
 		}
 	}
 
-	arg_count = zend_hash_num_elements(Z_ARRVAL_P(args));
-
+	uint32_t arg_count = zend_hash_num_elements(args);
+	zval *real_args = NULL;
 	if (arg_count > 0) {
+		zval *param;
+		int i = 0;
+
 		real_args = safe_emalloc(sizeof(zval), arg_count, 0);
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), param) {
+		ZEND_HASH_FOREACH_VAL(args, param) {
 			/*zval_add_ref(param);*/
 			ZVAL_DEREF(param);
 			ZVAL_COPY_VALUE(&real_args[i], param);
 			i++;
 		} ZEND_HASH_FOREACH_END();
 	}
-	if (output_headers) {
-		output_headers = zend_try_array_init(output_headers);
-		if (!output_headers) {
-			goto cleanup;
-		}
-	}
 
-	do_soap_call(execute_data, this_ptr, function, function_len, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers);
+	do_soap_call(execute_data, this_ptr, function, arg_count, real_args, return_value, location, soap_action, uri, soap_headers, output_headers);
 
-cleanup:
 	if (arg_count > 0) {
 		efree(real_args);
 	}
@@ -2580,12 +2529,95 @@ cleanup:
 
 PHP_METHOD(SoapClient, __call)
 {
-	soap_client_call_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+	zend_string *function = NULL;
+	HashTable *args = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sh", &function, &args) == FAILURE) {
+		RETURN_THROWS();
+	}
+	soap_client_call_common(
+		ZEND_THIS,
+		function,
+		args,
+		/* location */ NULL,
+		/* soap_action */ NULL,
+		/* uri */ NULL,
+		/* soap_headers */ NULL,
+		/* free_soap_headers */ false,
+		/* output_headers */ NULL,
+		execute_data,
+		return_value
+	);
 }
 
 PHP_METHOD(SoapClient, __soapCall)
 {
-	soap_client_call_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	zend_string *function = NULL;
+	HashTable *args = NULL;
+	HashTable *options = NULL;
+	zval *headers = NULL;
+	zval *output_headers = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sh|h!zz", &function, &args, &options, &headers, &output_headers) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+
+	zend_string *location = NULL;
+	zend_string *soap_action = NULL;
+	zend_string *uri = NULL;
+	if (options) {
+		zval *tmp;
+		if ((tmp = zend_hash_str_find(options, "location", sizeof("location")-1)) != NULL && Z_TYPE_P(tmp) == IS_STRING) {
+			location = Z_STR_P(tmp);
+		}
+
+		if ((tmp = zend_hash_str_find(options, "soapaction", sizeof("soapaction")-1)) != NULL && Z_TYPE_P(tmp) == IS_STRING) {
+			soap_action = Z_STR_P(tmp);
+		}
+
+		if ((tmp = zend_hash_str_find(options, "uri", sizeof("uri")-1)) != NULL && Z_TYPE_P(tmp) == IS_STRING) {
+			uri = Z_STR_P(tmp);
+		}
+	}
+
+	if (output_headers) {
+		output_headers = zend_try_array_init(output_headers);
+		if (output_headers == NULL) {
+			RETURN_THROWS();
+		}
+	}
+
+	HashTable* soap_headers = NULL;
+	bool free_soap_headers = false;
+	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
+	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
+		soap_headers = Z_ARRVAL_P(headers);
+		verify_soap_headers_array(soap_headers);
+		free_soap_headers = false;
+	} else if (Z_TYPE_P(headers) == IS_OBJECT && instanceof_function(Z_OBJCE_P(headers), soap_header_class_entry)) {
+		soap_headers = zend_new_array(0);
+		zend_hash_next_index_insert(soap_headers, headers);
+		Z_ADDREF_P(headers);
+		free_soap_headers = true;
+	} else {
+		zend_argument_type_error(4, "must be of type SoapHeader|array|null, %s given", zend_zval_value_name(headers));
+		RETURN_THROWS();
+	}
+
+	soap_client_call_common(
+		ZEND_THIS,
+		function,
+		args,
+		location,
+		soap_action,
+		uri,
+		soap_headers,
+		free_soap_headers,
+		output_headers,
+		execute_data,
+		return_value
+	);
 }
 
 /* {{{ Returns list of SOAP functions */
