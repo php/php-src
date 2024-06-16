@@ -16,4 +16,3 @@ foreach (new DatePeriod($start, $interval, $end, DatePeriod::INCLUDE_END_DATE) a
 2010-06-08
 2010-06-09
 2010-06-10
-
