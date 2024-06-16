@@ -2,6 +2,10 @@
 Wrong image resolution
 --EXTENSIONS--
 gd
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE != 8) die("skip on non 64 bits architectures");
+?>
 --FILE--
 <?php
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'imageresolution_png.png';
