@@ -926,6 +926,7 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Multiple abstract modifiers are not allowed", 0);
 		return 0;
 	}
+
 	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
 		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
 		return 0;
@@ -939,6 +940,12 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Cannot use the final modifier on an abstract class", 0);
 		return 0;
 	}
+	if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Multiple static modifiers are not allowed", 0);
+		return 0;
+	}
+
 	return new_flags;
 }
 /* }}} */
@@ -953,6 +960,10 @@ uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 	}
 	if (new_flag & ZEND_ACC_FINAL) {
 		zend_throw_exception(zend_ce_compile_error, "Cannot use the final modifier on an anonymous class", 0);
+		return 0;
+	}
+	if (new_flag & ZEND_ACC_STATIC) {
+		zend_throw_exception(zend_ce_compile_error, "Cannot use the static modifier on an anonymous class", 0);
 		return 0;
 	}
 	if ((flags & ZEND_ACC_READONLY_CLASS) && (new_flag & ZEND_ACC_READONLY_CLASS)) {
@@ -4740,7 +4751,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	char *p;
 	char *end;
 	uint32_t string_placeholder_count;
-	
+
 	string_placeholder_count = 0;
 	p = Z_STRVAL_P(format_string);
 	end = p + Z_STRLEN_P(format_string);
@@ -4944,7 +4955,7 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 	} else if (zend_string_equals_literal(lcname, "array_key_exists")) {
 		return zend_compile_func_array_key_exists(result, args);
 	} else if (zend_string_equals_literal(lcname, "sprintf")) {
-		return zend_compile_func_sprintf(result, args);	
+		return zend_compile_func_sprintf(result, args);
 	} else {
 		return FAILURE;
 	}
@@ -8573,7 +8584,7 @@ static void zend_compile_class_decl(znode *result, zend_ast *ast, bool toplevel)
 	/* Reset lineno for final opcodes and errors */
 	CG(zend_lineno) = ast->lineno;
 
-	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+	if ((ce->ce_flags & (ZEND_ACC_STATIC|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
 	}
 

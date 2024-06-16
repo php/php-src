@@ -106,6 +106,10 @@ PHP_METHOD(PhpToken, tokenize)
 		zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(token_class->name));
 		RETURN_THROWS();
 	}
+	if (token_class->ce_flags & ZEND_ACC_STATIC) {
+		zend_throw_error(NULL, "Cannot instantiate static class %s", ZSTR_VAL(token_class->name));
+		RETURN_THROWS();
+	}
 	if (zend_update_class_constants(token_class) == FAILURE) {
 		RETURN_THROWS();
 	}
