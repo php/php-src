@@ -270,7 +270,7 @@ static inline void bc_mul_vector_to_bc_num(BC_VECTOR *prod_vector, size_t prodle
 	char *pptr = (*prod)->n_value;
 	char *pend = pptr + prodlen - 1;
 	size_t i = 0;
-	while (i < prod_arr_size - 1) {
+	for (; i < prod_arr_size - 1; i++) {
 #if BC_VECTOR_SIZE == 4
 		bc_write_bcd_representation(prod_vector[i], pend - 3);
 		pend -= 4;
@@ -279,7 +279,6 @@ static inline void bc_mul_vector_to_bc_num(BC_VECTOR *prod_vector, size_t prodle
 		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
 		pend -= 8;
 #endif
-		i++;
 	}
 
 	/*
