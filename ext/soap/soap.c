@@ -49,9 +49,9 @@ static void function_to_string(sdlFunctionPtr function, smart_str *buf);
 static void type_to_string(sdlTypePtr type, smart_str *buf, int level);
 
 static void clear_soap_fault(zval *obj);
-static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, const char *name);
+static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *name);
 static void add_soap_fault_ex(zval *fault, zval *obj, char *fault_code, char *fault_string, char *fault_actor, zval *fault_detail);
-static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, char *name);
+static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, zend_string *name);
 static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeader* hdr);
 
 static sdlParamPtr get_param(sdlFunctionPtr function, const char *param_name, zend_ulong index, int);
@@ -650,8 +650,9 @@ static void soap_fault_dtor_properties(zval *obj)
 /* {{{ SoapFault constructor */
 PHP_METHOD(SoapFault, __construct)
 {
-	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *name = NULL, *fault_code_ns = NULL;
-	size_t fault_string_len, fault_actor_len = 0, name_len = 0, fault_code_len = 0;
+	char *fault_string = NULL, *fault_code = NULL, *fault_actor = NULL, *fault_code_ns = NULL;
+	size_t fault_string_len, fault_actor_len = 0, fault_code_len = 0;
+	zend_string *name = NULL;
 	zval *details = NULL, *headerfault = NULL, *this_ptr;
 	zend_string *code_str;
 	HashTable *code_ht;
@@ -662,7 +663,7 @@ PHP_METHOD(SoapFault, __construct)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING_OR_NULL(fault_actor, fault_actor_len)
 		Z_PARAM_ZVAL_OR_NULL(details)
-		Z_PARAM_STRING_OR_NULL(name, name_len)
+		Z_PARAM_STR_OR_NULL(name)
 		Z_PARAM_ZVAL_OR_NULL(headerfault)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -687,7 +688,7 @@ PHP_METHOD(SoapFault, __construct)
 		RETURN_THROWS();
 	}
 
-	if (name != NULL && name_len == 0) {
+	if (name != NULL && ZSTR_LEN(name) == 0) {
 		name = NULL;
 	}
 
@@ -1685,15 +1686,16 @@ fail:
 /* {{{ Issue SoapFault indicating an error */
 PHP_METHOD(SoapServer, fault)
 {
-	char *code, *string, *actor=NULL, *name=NULL;
-	size_t code_len, string_len, actor_len = 0, name_len = 0;
+	char *code, *string, *actor=NULL;
+	size_t code_len, string_len, actor_len = 0;
 	zval* details = NULL;
+	zend_string *name = NULL;
 	soapServicePtr service;
 	xmlCharEncodingHandlerPtr old_encoding;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szs",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|szS",
 	    &code, &code_len, &string, &string_len, &actor, &actor_len, &details,
-	    &name, &name_len) == FAILURE) {
+	    &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1788,7 +1790,7 @@ static void soap_server_fault_ex(sdlFunctionPtr function, zval* fault, soapHeade
 }
 /* }}} */
 
-static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, char* name) /* {{{ */
+static ZEND_NORETURN void soap_server_fault(char* code, char* string, char *actor, zval* details, zend_string* name) /* {{{ */
 {
 	zval ret;
 
@@ -2882,7 +2884,7 @@ void add_soap_fault(zval *obj, char *fault_code, char *fault_string, char *fault
 }
 /* }}} */
 
-static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, const char *name) /* {{{ */
+static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fault_code, const char *fault_string, const char *fault_actor, zval *fault_detail, zend_string *name) /* {{{ */
 {
 	if (Z_TYPE_P(obj) != IS_OBJECT) {
 		object_init_ex(obj, soap_fault_class_entry);
@@ -2931,7 +2933,7 @@ static void set_soap_fault(zval *obj, const char *fault_code_ns, const char *fau
 		ZVAL_COPY(Z_FAULT_DETAIL_P(obj), fault_detail);
 	}
 	if (name != NULL) {
-		ZVAL_STRING(Z_FAULT_NAME_P(obj), name);
+		ZVAL_STR_COPY(Z_FAULT_NAME_P(obj), name);
 	}
 }
 /* }}} */
