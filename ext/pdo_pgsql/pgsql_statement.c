@@ -74,12 +74,17 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	if (S->stmt_name) {
 		if (S->is_prepared && server_obj_usable) {
 			pdo_pgsql_db_handle *H = S->H;
-			char *q = NULL;
 			PGresult *res;
-
+#ifndef HAVE_PQCLOSEPREPARED
+			// TODO (??) libpq does not support close statement protocol < postgres 17
+			// check if we can circumvent this.
+			char *q = NULL;
 			spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
 			res = PQexec(H->server, q);
 			efree(q);
+#else
+			res = PQclosePrepared(H->server, S->stmt_name);
+#endif
 			if (res) {
 				PQclear(res);
 			}
@@ -203,10 +208,14 @@ stmt_retry:
 					 * deallocate it and retry ONCE (thies 2005.12.15)
 					 */
 					if (sqlstate && !strcmp(sqlstate, "42P05")) {
-						char buf[100]; /* stmt_name == "pdo_crsr_%08x" */
 						PGresult *res;
+#ifndef HAVE_PQCLOSEPREPARED
+						char buf[100]; /* stmt_name == "pdo_crsr_%08x" */
 						snprintf(buf, sizeof(buf), "DEALLOCATE %s", S->stmt_name);
 						res = PQexec(H->server, buf);
+#else
+						res = PQclosePrepared(H->server, S->stmt_name);
+#endif
 						if (res) {
 							PQclear(res);
 						}
