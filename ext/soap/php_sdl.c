@@ -3423,240 +3423,176 @@ void delete_sdl(sdl *handle)
 	}
 }
 
-static void delete_binding(zval *zv)
+static void delete_binding_ex(zval *zv, bool persistent)
 {
 	sdlBindingPtr binding = Z_PTR_P(zv);
 
 	if (binding->location) {
-		efree(binding->location);
+		pefree(binding->location, persistent);
 	}
 	if (binding->name) {
-		efree(binding->name);
+		pefree(binding->name, persistent);
 	}
 
 	if (binding->bindingType == BINDING_SOAP) {
 		sdlSoapBindingPtr soapBind = binding->bindingAttributes;
 		if (soapBind) {
-			efree(soapBind);
+			pefree(soapBind, persistent);
 		}
 	}
-	efree(binding);
+	pefree(binding, persistent);
+}
+
+static void delete_binding(zval *zv)
+{
+	delete_binding_ex(zv, false);
 }
 
 static void delete_binding_persistent(zval *zv)
 {
-	sdlBindingPtr binding = Z_PTR_P(zv);
+	delete_binding_ex(zv, true);
+}
 
-	if (binding->location) {
-		free(binding->location);
+static void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body, bool persistent)
+{
+	if (body.ns) {
+		pefree(body.ns, persistent);
 	}
-	if (binding->name) {
-		free(binding->name);
+	if (body.headers) {
+		zend_hash_destroy(body.headers);
+		pefree(body.headers, persistent);
+	}
+}
+
+static void delete_function_ex(zval *zv, bool persistent)
+{
+	sdlFunctionPtr function = Z_PTR_P(zv);
+
+	if (function->functionName) {
+		pefree(function->functionName, persistent);
+	}
+	if (function->requestName) {
+		pefree(function->requestName, persistent);
+	}
+	if (function->responseName) {
+		pefree(function->responseName, persistent);
+	}
+	if (function->requestParameters) {
+		zend_hash_destroy(function->requestParameters);
+		pefree(function->requestParameters, persistent);
+	}
+	if (function->responseParameters) {
+		zend_hash_destroy(function->responseParameters);
+		pefree(function->responseParameters, persistent);
+	}
+	if (function->faults) {
+		zend_hash_destroy(function->faults);
+		pefree(function->faults, persistent);
 	}
 
-	if (binding->bindingType == BINDING_SOAP) {
-		sdlSoapBindingPtr soapBind = binding->bindingAttributes;
-		if (soapBind) {
-			free(soapBind);
+	if (function->bindingAttributes &&
+	    function->binding && function->binding->bindingType == BINDING_SOAP) {
+		sdlSoapBindingFunctionPtr soapFunction = function->bindingAttributes;
+		if (soapFunction->soapAction) {
+			pefree(soapFunction->soapAction, persistent);
 		}
+		delete_sdl_soap_binding_function_body(soapFunction->input, persistent);
+		delete_sdl_soap_binding_function_body(soapFunction->output, persistent);
+		pefree(soapFunction, persistent);
 	}
-	free(binding);
-}
-
-static void delete_sdl_soap_binding_function_body(sdlSoapBindingFunctionBody body)
-{
-	if (body.ns) {
-		efree(body.ns);
-	}
-	if (body.headers) {
-		zend_hash_destroy(body.headers);
-		efree(body.headers);
-	}
-}
-
-static void delete_sdl_soap_binding_function_body_persistent(sdlSoapBindingFunctionBody body)
-{
-	if (body.ns) {
-		free(body.ns);
-	}
-	if (body.headers) {
-		zend_hash_destroy(body.headers);
-		free(body.headers);
-	}
+	pefree(function, persistent);
 }
 
 static void delete_function(zval *zv)
 {
-	sdlFunctionPtr function = Z_PTR_P(zv);
-
-	if (function->functionName) {
-		efree(function->functionName);
-	}
-	if (function->requestName) {
-		efree(function->requestName);
-	}
-	if (function->responseName) {
-		efree(function->responseName);
-	}
-	if (function->requestParameters) {
-		zend_hash_destroy(function->requestParameters);
-		efree(function->requestParameters);
-	}
-	if (function->responseParameters) {
-		zend_hash_destroy(function->responseParameters);
-		efree(function->responseParameters);
-	}
-	if (function->faults) {
-		zend_hash_destroy(function->faults);
-		efree(function->faults);
-	}
-
-	if (function->bindingAttributes &&
-	    function->binding && function->binding->bindingType == BINDING_SOAP) {
-		sdlSoapBindingFunctionPtr soapFunction = function->bindingAttributes;
-		if (soapFunction->soapAction) {
-			efree(soapFunction->soapAction);
-		}
-		delete_sdl_soap_binding_function_body(soapFunction->input);
-		delete_sdl_soap_binding_function_body(soapFunction->output);
-		efree(soapFunction);
-	}
-	efree(function);
+	delete_function_ex(zv, false);
 }
 
 static void delete_function_persistent(zval *zv)
 {
-	sdlFunctionPtr function = Z_PTR_P(zv);
+	delete_function_ex(zv, true);
+}
 
-	if (function->functionName) {
-		free(function->functionName);
+static void delete_parameter_ex(zval *zv, bool persistent)
+{
+	sdlParamPtr param = Z_PTR_P(zv);
+	if (param->paramName) {
+		pefree(param->paramName, persistent);
 	}
-	if (function->requestName) {
-		free(function->requestName);
-	}
-	if (function->responseName) {
-		free(function->responseName);
-	}
-	if (function->requestParameters) {
-		zend_hash_destroy(function->requestParameters);
-		free(function->requestParameters);
-	}
-	if (function->responseParameters) {
-		zend_hash_destroy(function->responseParameters);
-		free(function->responseParameters);
-	}
-	if (function->faults) {
-		zend_hash_destroy(function->faults);
-		free(function->faults);
-	}
-
-	if (function->bindingAttributes &&
-	    function->binding && function->binding->bindingType == BINDING_SOAP) {
-		sdlSoapBindingFunctionPtr soapFunction = function->bindingAttributes;
-		if (soapFunction->soapAction) {
-			free(soapFunction->soapAction);
-		}
-		delete_sdl_soap_binding_function_body_persistent(soapFunction->input);
-		delete_sdl_soap_binding_function_body_persistent(soapFunction->output);
-		free(soapFunction);
-	}
-	free(function);
+	pefree(param, persistent);
 }
 
 static void delete_parameter(zval *zv)
 {
-	sdlParamPtr param = Z_PTR_P(zv);
-	if (param->paramName) {
-		efree(param->paramName);
-	}
-	efree(param);
+	delete_parameter_ex(zv, false);
 }
 
 static void delete_parameter_persistent(zval *zv)
 {
-	sdlParamPtr param = Z_PTR_P(zv);
-	if (param->paramName) {
-		free(param->paramName);
+	delete_parameter_ex(zv, true);
+}
+
+static void delete_header_int_ex(sdlSoapBindingFunctionHeaderPtr hdr, bool persistent)
+{
+	if (hdr->name) {
+		pefree(hdr->name, persistent);
 	}
-	free(param);
+	if (hdr->ns) {
+		pefree(hdr->ns, persistent);
+	}
+	if (hdr->headerfaults) {
+		zend_hash_destroy(hdr->headerfaults);
+		pefree(hdr->headerfaults, persistent);
+	}
+	pefree(hdr, persistent);
 }
 
 static void delete_header_int(sdlSoapBindingFunctionHeaderPtr hdr)
 {
-	if (hdr->name) {
-		efree(hdr->name);
-	}
-	if (hdr->ns) {
-		efree(hdr->ns);
-	}
-	if (hdr->headerfaults) {
-		zend_hash_destroy(hdr->headerfaults);
-		efree(hdr->headerfaults);
-	}
-	efree(hdr);
+	delete_header_int_ex(hdr, false);
 }
 
 static void delete_header(zval *zv)
 {
-	delete_header_int(Z_PTR_P(zv));
+	sdlSoapBindingFunctionHeaderPtr hdr = Z_PTR_P(zv);
+	delete_header_int_ex(hdr, false);
 }
 
 static void delete_header_persistent(zval *zv)
 {
 	sdlSoapBindingFunctionHeaderPtr hdr = Z_PTR_P(zv);
-	if (hdr->name) {
-		free(hdr->name);
+	delete_header_int_ex(hdr, true);
+}
+
+static void delete_fault_ex(zval *zv, bool persistent)
+{
+	sdlFaultPtr fault = Z_PTR_P(zv);
+	if (fault->name) {
+		pefree(fault->name, persistent);
 	}
-	if (hdr->ns) {
-		free(hdr->ns);
+	if (fault->details) {
+		zend_hash_destroy(fault->details);
+		pefree(fault->details, persistent);
 	}
-	if (hdr->headerfaults) {
-		zend_hash_destroy(hdr->headerfaults);
-		free(hdr->headerfaults);
+	if (fault->bindingAttributes) {
+		sdlSoapBindingFunctionFaultPtr binding = (sdlSoapBindingFunctionFaultPtr)fault->bindingAttributes;
+
+		if (binding->ns) {
+			pefree(binding->ns, persistent);
+		}
+		pefree(fault->bindingAttributes, persistent);
 	}
-	free(hdr);
+	pefree(fault, persistent);
 }
 
 static void delete_fault(zval *zv)
 {
-	sdlFaultPtr fault = Z_PTR_P(zv);
-	if (fault->name) {
-		efree(fault->name);
-	}
-	if (fault->details) {
-		zend_hash_destroy(fault->details);
-		efree(fault->details);
-	}
-	if (fault->bindingAttributes) {
-		sdlSoapBindingFunctionFaultPtr binding = (sdlSoapBindingFunctionFaultPtr)fault->bindingAttributes;
-
-		if (binding->ns) {
-			efree(binding->ns);
-		}
-		efree(fault->bindingAttributes);
-	}
-	efree(fault);
+	delete_fault_ex(zv, false);
 }
 
 static void delete_fault_persistent(zval *zv)
 {
-	sdlFaultPtr fault = Z_PTR_P(zv);
-	if (fault->name) {
-		free(fault->name);
-	}
-	if (fault->details) {
-		zend_hash_destroy(fault->details);
-		free(fault->details);
-	}
-	if (fault->bindingAttributes) {
-		sdlSoapBindingFunctionFaultPtr binding = (sdlSoapBindingFunctionFaultPtr)fault->bindingAttributes;
-
-		if (binding->ns) {
-			free(binding->ns);
-		}
-		free(fault->bindingAttributes);
-	}
-	free(fault);
+	delete_fault_ex(zv, true);
 }
 
 static void delete_document(zval *zv)
