@@ -59,6 +59,11 @@ PHP 8.5 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- PGSQL@
+  . pg_close_stmt offers an alternative way to close a prepared
+    statement from the DEALLOCATE sql command in that we can reuse
+    its name afterwards.
+
 ========================================
 7. New Classes and Interfaces
 ========================================

@@ -8,6 +8,10 @@ PHP                                                                        NEWS
     Pdo\Pgsql::prepare(…, [ PDO::ATTR_PREFETCH => 0 ]) make fetch() lazy
     instead of storing the whole result set in memory (Guillaume Outters)
 
+- PGSQL:
+  . Added pg_close_stmt to close a prepared statement while allowing
+    its name to be reused. (David Carlier)
+
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
 
