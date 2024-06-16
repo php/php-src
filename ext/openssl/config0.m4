@@ -24,7 +24,10 @@ if test "$PHP_OPENSSL" != "no"; then
     [AC_DEFINE([HAVE_OPENSSL_EXT], [1],
       [Define to 1 if the openssl extension is available.])])
 
-  AC_CHECK_FUNCS([RAND_egd])
+  PHP_CHECK_LIBRARY([crypto], [RAND_egd],
+    [AC_DEFINE([HAVE_RAND_EGD], [1],
+      [Define to 1 if OpenSSL crypto library has the 'RAND_egd' function.])],,
+    [$OPENSSL_LIBS])
 
   if test "$PHP_SYSTEM_CIPHERS" != "no"; then
     AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])
