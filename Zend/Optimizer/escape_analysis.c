@@ -162,7 +162,7 @@ static bool is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, i
 					script, op_array, opline);
 				uint32_t forbidden_flags =
 					/* These flags will always cause an exception */
-					ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
+					ZEND_ACC_STATIC | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
 					| ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
 				if (ce
 				 && !ce->parent
