@@ -4757,14 +4757,14 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 		}
 
 		switch (*q) {
-		case 's':
-		case 'd':
-			placeholder_count++;
-			break;
-		case '%':
-			break;
-		default:
-			return FAILURE;
+			case 's':
+			case 'd':
+				placeholder_count++;
+				break;
+			case '%':
+				break;
+			default:
+				return FAILURE;
 		}
 
 		p = q;
@@ -4835,22 +4835,22 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 
 		if (*q != '%') {
 			switch (*q) {
-			case 's':
-				/* Perform the cast of constants when actually evaluating the corresponding placeholder
-				 * for correct error reporting.
-				 */
-				if (elements[placeholder_count].op_type == IS_CONST) {
-					if (Z_TYPE(elements[placeholder_count].u.constant) == IS_ARRAY) {
-						zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_STRING;
-					} else {
-						convert_to_string(&elements[placeholder_count].u.constant);
+				case 's':
+					/* Perform the cast of constants when actually evaluating the corresponding placeholder
+					 * for correct error reporting.
+					 */
+					if (elements[placeholder_count].op_type == IS_CONST) {
+						if (Z_TYPE(elements[placeholder_count].u.constant) == IS_ARRAY) {
+							zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_STRING;
+						} else {
+							convert_to_string(&elements[placeholder_count].u.constant);
+						}
 					}
-				}
-				break;
-			case 'd':
-				zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_LONG;
-				break;
-			EMPTY_SWITCH_DEFAULT_CASE();
+					break;
+				case 'd':
+					zend_emit_op_tmp(&elements[placeholder_count], ZEND_CAST, &elements[placeholder_count], NULL)->extended_value = IS_LONG;
+					break;
+				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 
 			if (rope_elements == 0) {
