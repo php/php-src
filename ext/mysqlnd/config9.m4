@@ -31,13 +31,10 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
 				   mysqlnd_result.c mysqlnd_result_meta.c mysqlnd_debug.c mysqlnd_commands.c \
 				   mysqlnd_block_alloc.c mysqlnd_read_buffer.c mysqlnd_plugin.c php_mysqlnd.c"
 
-
-  if test "$PHP_MYSQLND_COMPRESSION_SUPPORT" != "no"; then
-    PKG_CHECK_MODULES([ZLIB], [zlib])
-    PHP_EVAL_LIBLINE($ZLIB_LIBS, MYSQLND_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($ZLIB_CFLAGS)
-    AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], 1, [Enable compressed protocol support])
-  fi
+  AS_VAR_IF([PHP_MYSQLND_COMPRESSION_SUPPORT], [no],,
+    [PHP_SETUP_ZLIB([MYSQLND_SHARED_LIBADD],
+      [AC_DEFINE([MYSQLND_COMPRESSION_ENABLED], [1],
+        [Define to 1 if mysqlnd has compressed protocol support.])])])
 
   AC_DEFINE([MYSQLND_SSL_SUPPORTED], 1, [Enable core mysqlnd SSL code])
 

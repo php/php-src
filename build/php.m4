@@ -1929,6 +1929,20 @@ PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7], [
 ])
 ])
 
+dnl
+dnl PHP_SETUP_ZLIB(shared-add [, action-found, [action-not-found]])
+dnl
+dnl Common setup macro for zlib library. If zlib is not found on the system, the
+dnl default error by PKG_CHECK_MODULES is emitted, unless the action-not-found
+dnl is given.
+dnl
+AC_DEFUN([PHP_SETUP_ZLIB], [dnl
+PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.0.4], [dnl
+  PHP_EVAL_INCLINE([$ZLIB_CFLAGS])
+  PHP_EVAL_LIBLINE([$ZLIB_LIBS], [$1])
+  $2], [$3])dnl
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------
