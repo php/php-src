@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 53cb11e3aaa2215f8dbb39778dfbc1bd28f629af */
+ * Stub hash: bcb4a31e75b86f5b33e96c10234be82ca7131789 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -1385,6 +1385,12 @@ static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_
 	zend_string *const_IS_READONLY_name = zend_string_init_interned("IS_READONLY", sizeof("IS_READONLY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IS_READONLY_name, &const_IS_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IS_READONLY_name);
+
+	zval const_IS_STATIC_value;
+	ZVAL_LONG(&const_IS_STATIC_value, ZEND_ACC_STATIC);
+	zend_string *const_IS_STATIC_name = zend_string_init_interned("IS_STATIC", sizeof("IS_STATIC") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IS_STATIC_name, &const_IS_STATIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IS_STATIC_name);
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);

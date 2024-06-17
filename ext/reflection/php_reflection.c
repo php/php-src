@@ -348,6 +348,9 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 		if (ce->ce_flags & ZEND_ACC_READONLY_CLASS) {
 			smart_str_append_printf(str, "readonly ");
 		}
+		if (ce->ce_flags & ZEND_ACC_STATIC) {
+			smart_str_append_printf(str, "static ");
+		}
 		smart_str_append_printf(str, "class ");
 	}
 	smart_str_append_printf(str, "%s", ZSTR_VAL(ce->name));
@@ -1575,7 +1578,6 @@ ZEND_METHOD(Reflection, getModifierNames)
 	if (modifiers & ZEND_ACC_FINAL) {
 		add_next_index_stringl(return_value, "final", sizeof("final")-1);
 	}
-
 	/* These are mutually exclusive */
 	switch (modifiers & ZEND_ACC_PPP_MASK) {
 		case ZEND_ACC_PUBLIC:
@@ -4934,7 +4936,7 @@ ZEND_METHOD(ReflectionClass, isInstantiable)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_ENUM)) {
+	if (ce->ce_flags & (ZEND_ACC_STATIC|ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_ENUM)) {
 		RETURN_FALSE;
 	}
 
@@ -4959,7 +4961,7 @@ ZEND_METHOD(ReflectionClass, isCloneable)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
-	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_ENUM)) {
+	if (ce->ce_flags & (ZEND_ACC_STATIC|ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_ENUM)) {
 		RETURN_FALSE;
 	}
 	if (!Z_ISUNDEF(intern->obj)) {
@@ -5028,7 +5030,7 @@ ZEND_METHOD(ReflectionClass, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
-	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_READONLY_CLASS;
+	uint32_t keep_flags = ZEND_ACC_STATIC| ZEND_ACC_FINAL | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS | ZEND_ACC_READONLY_CLASS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -5433,7 +5435,7 @@ ZEND_METHOD(ReflectionClass, isIterable)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	if (ce->ce_flags & (ZEND_ACC_INTERFACE | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |
+	if (ce->ce_flags & (ZEND_ACC_STATIC| ZEND_ACC_INTERFACE | ZEND_ACC_IMPLICIT_ABSTRACT_CLASS |
 	                    ZEND_ACC_TRAIT     | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
 		RETURN_FALSE;
 	}

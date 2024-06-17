@@ -758,7 +758,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		if (ce == NULL) {
 			ce = zend_standard_class_def;
 		}
-		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_STATIC|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_throw_error(NULL, "Class %s cannot be instantiated", ZSTR_VAL(ce->name));
 			RETURN_THROWS();
 		}

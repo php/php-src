@@ -249,6 +249,8 @@ class ReflectionClass implements Reflector
     public const int IS_FINAL = UNKNOWN;
     /** @cvalue ZEND_ACC_READONLY_CLASS */
     public const int IS_READONLY = UNKNOWN;
+    /** @cvalue ZEND_ACC_STATIC */
+    public const int IS_STATIC = UNKNOWN;
 
     public string $name;
 
