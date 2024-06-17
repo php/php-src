@@ -3137,11 +3137,6 @@ ZEND_API zend_mm_heap *zend_mm_get_heap(void)
 	return AG(mm_heap);
 }
 
-ZEND_API void zend_mm_heap_free(zend_mm_heap *heap)
-{
-	zend_mm_chunk_free(heap, heap->main_chunk, ZEND_MM_CHUNK_SIZE);
-}
-
 ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap)
 {
 #if ZEND_MM_CUSTOM

@@ -125,7 +125,15 @@ void zend_test_mm_custom_handlers_shutdown(void)
 		return;
 	}
 	zend_mm_set_heap(ZT_G(original_heap));
-	zend_mm_heap_free(ZT_G(observed_heap));
+	zend_mm_set_custom_handlers(
+		ZT_G(observed_heap),
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL
+	);
+	zend_mm_shutdown(ZT_G(observed_heap), true, true);
 	ZT_G(observed_heap) = NULL;
 	printf("Prev heap at %p restored in ZendMM\n", ZT_G(original_heap));
 }
