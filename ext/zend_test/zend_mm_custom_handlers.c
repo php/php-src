@@ -106,7 +106,7 @@ void zend_test_mm_custom_handlers_init(void)
 		);
 	}
 	printf("Prev handlers at %p, %p, %p, %p, %p\n", ZT_G(custom_malloc), ZT_G(custom_free), ZT_G(custom_realloc), ZT_G(custom_gc), ZT_G(custom_shutdown));
-	ZT_G(observed_heap) = zend_mm_heap_create();
+	ZT_G(observed_heap) = zend_mm_startup();
 	zend_mm_set_custom_handlers(
 		ZT_G(observed_heap),
 		observe_malloc,
