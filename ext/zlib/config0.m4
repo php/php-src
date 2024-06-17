@@ -1,7 +1,7 @@
 PHP_ARG_WITH([zlib],
   [for ZLIB support],
   [AS_HELP_STRING([--with-zlib],
-    [Include ZLIB support (requires zlib >= 1.2.0.4)])])
+    [Include ZLIB support (requires zlib library)])])
 
 if test "$PHP_ZLIB" != "no"; then
   PHP_SETUP_ZLIB([ZLIB_SHARED_LIBADD], [dnl
