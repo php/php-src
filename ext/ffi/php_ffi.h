@@ -361,6 +361,39 @@ typedef struct _zend_ffi_ctype {
 	zend_ffi_type         *type;
 } zend_ffi_ctype;
 
+typedef enum _zend_ffi_tag_kind {
+	ZEND_FFI_TAG_ENUM,
+	ZEND_FFI_TAG_STRUCT,
+	ZEND_FFI_TAG_UNION
+} zend_ffi_tag_kind;
+
+typedef struct _zend_ffi_tag {
+	zend_ffi_tag_kind      kind;
+	zend_ffi_type         *type;
+} zend_ffi_tag;
+
+typedef enum _zend_ffi_symbol_kind {
+	ZEND_FFI_SYM_TYPE,
+	ZEND_FFI_SYM_CONST,
+	ZEND_FFI_SYM_VAR,
+	ZEND_FFI_SYM_FUNC
+} zend_ffi_symbol_kind;
+
+typedef struct _zend_ffi_symbol {
+	zend_ffi_symbol_kind   kind;
+	bool                   is_const;
+	zend_ffi_type         *type;
+	union {
+		void *addr;
+		int64_t value;
+	};
+} zend_ffi_symbol;
+
+typedef struct _zend_ffi_scope {
+	HashTable             *symbols;
+	HashTable             *tags;
+} zend_ffi_scope;
+
 #define ZEND_FFI_TYPE_OWNED        (1<<0)
 
 #define ZEND_FFI_TYPE(t) \
@@ -368,7 +401,5 @@ typedef struct _zend_ffi_ctype {
 
 #define ZEND_FFI_TYPE_IS_OWNED(t) \
 	(((uintptr_t)(t)) & ZEND_FFI_TYPE_OWNED)
-
-ZEND_API void _zend_ffi_type_dtor(zend_ffi_type *type);
 
 #endif	/* PHP_FFI_H */

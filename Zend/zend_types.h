@@ -819,7 +819,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
 #define IS_STR_VALID_UTF8           (1<<9)        /* valid UTF-8 according to PCRE */
 #define IS_STR_FFI_TYPE             (1<<10)       /* intrned string associated with FFI type */
-#define IS_STR_FFI_DECL             (1<<11)       /* intrned string associated with FFI declaration object */
+#define IS_STR_FFI_SCOPE            (1<<11)       /* intrned string associated with FFI declaration object */
 
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
