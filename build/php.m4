@@ -1937,7 +1937,7 @@ dnl default error by PKG_CHECK_MODULES is emitted, unless the action-not-found
 dnl is given.
 dnl
 AC_DEFUN([PHP_SETUP_ZLIB], [dnl
-PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.3.1], [dnl
+PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.11], [dnl
   PHP_EVAL_INCLINE([$ZLIB_CFLAGS])
   PHP_EVAL_LIBLINE([$ZLIB_LIBS], [$1])
   $2], [$3])dnl
