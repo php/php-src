@@ -3008,7 +3008,6 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 				persistent = true;
 			}
 		}
-
 	}
 
 	ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
@@ -3209,7 +3208,8 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 {
 	struct stat buf;
 	int fd;
-	char *code, *code_pos, *scope_name, *lib, *err;
+	zend_string *code;
+	char *code_pos, *scope_name, *lib, *err;
 	size_t code_size, scope_name_len;
 	zend_ffi *ffi;
 	DL_HANDLE handle = NULL;
@@ -3218,6 +3218,7 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	zend_ffi_symbol *sym;
 	zend_ffi_tag *tag;
 	void *addr;
+	bool persistent = false;
 
 	if (stat(filename, &buf) != 0) {
 		if (preload) {
@@ -3238,24 +3239,36 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	}
 
 	code_size = buf.st_size;
-	code = emalloc(code_size + 1);
+	code = zend_string_alloc(code_size, 0);
 	int open_flags = O_RDONLY;
 #ifdef PHP_WIN32
 	open_flags |= _O_BINARY;
 #endif
 	fd = open(filename, open_flags, 0);
-	if (fd < 0 || read(fd, code, code_size) != code_size) {
+	if (fd < 0 || read(fd, ZSTR_VAL(code), code_size) != code_size) {
 		if (preload) {
 			zend_error(E_WARNING, "FFI: Failed pre-loading '%s', cannot read_file", filename);
 		} else {
 			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', cannot read_file", filename);
 		}
-		efree(code);
+		zend_string_release(code);
 		close(fd);
 		return NULL;
 	}
 	close(fd);
-	code[code_size] = 0;
+	ZSTR_VAL(code)[code_size] = 0;
+
+	if (!preload && zend_ffi_cache_scope_get) {
+		zend_ffi_scope *scope = zend_ffi_cache_scope_get(code);
+		if (scope) {
+			ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+			ffi->lib = handle;
+			ffi->symbols = scope->symbols;
+			ffi->tags = scope->tags;
+			ffi->persistent = true;
+			return ffi;
+		}
+	}
 
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
@@ -3267,13 +3280,13 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 	scope_name = NULL;
 	scope_name_len = 0;
 	lib = NULL;
-	code_pos = zend_ffi_parse_directives(filename, code, &scope_name, &lib, preload);
+	code_pos = zend_ffi_parse_directives(filename, ZSTR_VAL(code), &scope_name, &lib, preload);
 	if (!code_pos) {
-		efree(code);
+		zend_string_release(code);
 		FFI_G(persistent) = 0;
 		return NULL;
 	}
-	code_size -= code_pos - code;
+	code_size -= code_pos - ZSTR_VAL(code);
 
 	if (zend_ffi_parse_decl(code_pos, code_size) == FAILURE) {
 		if (preload) {
@@ -3456,21 +3469,45 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 		ffi->tags = scope->tags;
 		ffi->persistent = 1;
 	} else {
+		if (zend_ffi_cache_scope_add) {
+			zend_ffi_scope scope, *cached_scope;
+
+			scope.symbols = FFI_G(symbols);
+			scope.tags = FFI_G(tags);
+			cached_scope = zend_ffi_cache_scope_add(code, &scope);
+			if (cached_scope) {
+				if (FFI_G(symbols)) {
+					zend_hash_destroy(FFI_G(symbols));
+					efree(FFI_G(symbols));
+					FFI_G(symbols) = NULL;
+				}
+				if (FFI_G(tags)) {
+					zend_hash_destroy(FFI_G(tags));
+					efree(FFI_G(tags));
+					FFI_G(tags) = NULL;
+				}
+				FFI_G(symbols) = cached_scope->symbols;
+				FFI_G(tags) = cached_scope->tags;
+				persistent = true;
+			}
+		}
+
 		ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
 		ffi->lib = handle;
 		ffi->symbols = FFI_G(symbols);
 		ffi->tags = FFI_G(tags);
+		ffi->persistent = persistent;
 	}
 
-	efree(code);
+	zend_string_release(code);
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
-	FFI_G(persistent) = 0;
+	FFI_G(persistent) = persistent;
 
 	return ffi;
 
 cleanup:
-	efree(code);
+	zend_string_release(code);
 	if (FFI_G(symbols)) {
 		zend_hash_destroy(FFI_G(symbols));
 		pefree(FFI_G(symbols), preload);
