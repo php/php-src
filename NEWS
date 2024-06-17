@@ -48,6 +48,9 @@ PHP                                                                        NEWS
 - PDO ODBC:
   . Fixed bug GH-14367 (incompatible SDWORD type with iODBC). (Calvin Buckley)
 
+- PHPDBG:
+  . Fixed bug GH-13681 (segfault on watchpoint addition failure). (David Carlier)
+
 - Soap:
   . Fixed bug #47925 (PHPClient can't decompress response). (nielsdos)
   . Fix missing error restore code. (nielsdos)
