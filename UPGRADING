@@ -240,6 +240,32 @@ PHP 8.4 UPGRADE NOTES
     openssl_pkey_get_details as well as openssl_sign and openssl_verify were
     extended to support those keys.
 
+- PDO:
+  . Added support for driver specific SQL parsers. The default parser supports:
+    - single and double quoted literals, with doubling as escaping mechanism.
+    - two-dashes and non-nested C-style comments.
+
+- PDO_MYSQL:
+  . Added custom parser supporting:
+    - single and double-quoted literals, with doubling and backslash as escaping
+      mechanism
+    - backtick literal identifiers and with doubling as escaping mechanism
+    - two dashes followed by at least 1 whitespace, non-nested C-style comments,
+      and hash-comments
+
+- PDO_PGSQL:
+  . Added custom parser supporting:
+    - single and double quoted literals, with doubling as escaping mechanism
+    - C-style "escape" string literals (E'string')
+    - dollar-quoted string literals
+    - two-dashes and C-style comments (non-nested)
+    - support for "??" as escape sequence for the "?" operator
+
+- PDO_SQLITE:
+  . Added custom parser supporting:
+    - single, double quoted, and backtick literals, with doubling as escaping mechanism
+    - square brackets quoting for identifiers
+    - two-dashes and C-style comments (non-nested)
 
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
@@ -354,6 +380,11 @@ PHP 8.4 UPGRADE NOTES
     ldap_connect_wallet() instead.
   . Calling ldap_exop() with more than 4 arguments is deprecated. Use
     ldap_exop_sync() instead.
+
+- PDO_PGSQL:
+  . Using escaped question marks (??) inside dollar-quoted strings is deprecated.
+    Since PDO_PGSQL has its own SQL parser with dollar-quoted strings support, it
+    is no longer necessary to escape question marks inside them.
 
 - PgSQL:
   . Calling pgsql_fetch_result() with 2 arguments is deprecated. Use the
