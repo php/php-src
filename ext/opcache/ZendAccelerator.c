@@ -2716,7 +2716,7 @@ static zend_ffi_dcl* accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dc
 
 	if (!ZEND_FFI_TYPE_IS_OWNED(dcl->type)
 	 && (dcl->type->attr & ZEND_FFI_ATTR_PERSISTENT)) {
-		return SUCCESS;
+		return NULL;
 	}
 
 	SHM_UNPROTECT();
