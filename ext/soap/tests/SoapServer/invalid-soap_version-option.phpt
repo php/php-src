@@ -25,5 +25,5 @@ try {
 
 ?>
 --EXPECT--
-<?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>SOAP-ENV:Server</faultcode><faultstring>SoapServer::__construct(): 'soap_version' option must be SOAP_1_1 or SOAP_1_2</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+ValueError: SoapServer::__construct(): Argument #2 ($options) "soap_version" option must be SOAP_1_1 or SOAP_1_2
+ValueError: SoapServer::__construct(): Argument #2 ($options) "soap_version" option must be SOAP_1_1 or SOAP_1_2

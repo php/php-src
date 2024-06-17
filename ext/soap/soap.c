@@ -920,8 +920,6 @@ PHP_METHOD(SoapServer, __construct)
 		RETURN_THROWS();
 	}
 
-	SOAP_SERVER_BEGIN_CODE();
-
 	service = emalloc(sizeof(soapService));
 	memset(service, 0, sizeof(soapService));
 	service->send_errors = 1;
@@ -934,18 +932,19 @@ PHP_METHOD(SoapServer, __construct)
 
 		if ((tmp = zend_hash_str_find(ht, "soap_version", sizeof("soap_version")-1)) != NULL) {
 			if (Z_TYPE_P(tmp) == IS_LONG &&
-			    (Z_LVAL_P(tmp) == SOAP_1_1 || Z_LVAL_P(tmp) == SOAP_1_2)) {
+				(Z_LVAL_P(tmp) == SOAP_1_1 || Z_LVAL_P(tmp) == SOAP_1_2)) {
 				version = Z_LVAL_P(tmp);
 			} else {
-				php_error_docref(NULL, E_ERROR, "'soap_version' option must be SOAP_1_1 or SOAP_1_2");
+				zend_argument_value_error(2, "\"soap_version\" option must be SOAP_1_1 or SOAP_1_2");
+				goto error;
 			}
 		}
 
-		if ((tmp = zend_hash_str_find(ht, "uri", sizeof("uri")-1)) != NULL &&
-		    Z_TYPE_P(tmp) == IS_STRING) {
+		if ((tmp = zend_hash_str_find(ht, "uri", sizeof("uri")-1)) != NULL && Z_TYPE_P(tmp) == IS_STRING) {
 			service->uri = estrndup(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
 		} else if (!wsdl) {
-			php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
+			zend_argument_value_error(2, "must provide \"uri\" option as it is required in nonWSDL mode");
+			goto error;
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "actor", sizeof("actor")-1)) != NULL &&
@@ -959,7 +958,8 @@ PHP_METHOD(SoapServer, __construct)
 
 			encoding = xmlFindCharEncodingHandler(Z_STRVAL_P(tmp));
 			if (encoding == NULL) {
-				php_error_docref(NULL, E_ERROR, "Invalid 'encoding' option - '%s'", Z_STRVAL_P(tmp));
+				zend_argument_value_error(2, "provided \"encoding\" option \"%s\" is invalid", Z_STRVAL_P(tmp));
+				goto error;
 			} else {
 			  service->encoding = encoding;
 			}
@@ -997,7 +997,8 @@ PHP_METHOD(SoapServer, __construct)
 		}
 
 	} else if (!wsdl) {
-		php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
+		zend_argument_value_error(2, "must provide \"uri\" option as it is required in nonWSDL mode");
+		goto error;
 	}
 
 	service->version = version;
@@ -1005,8 +1006,18 @@ PHP_METHOD(SoapServer, __construct)
 	service->soap_functions.functions_all = FALSE;
 	service->soap_functions.ft = zend_new_array(0);
 
+	if (typemap_ht) {
+		service->typemap = soap_create_typemap(service->sdl, typemap_ht);
+		if (UNEXPECTED(service->typemap == NULL)) {
+			goto error;
+		}
+	}
+
 	if (wsdl) {
+		SOAP_SERVER_BEGIN_CODE();
 		service->sdl = get_sdl(ZEND_THIS, ZSTR_VAL(wsdl), cache_wsdl);
+		SOAP_SERVER_END_CODE();
+
 		if (service->uri == NULL) {
 			if (service->sdl->target_ns) {
 				service->uri = estrdup(service->sdl->target_ns);
@@ -1017,14 +1028,13 @@ PHP_METHOD(SoapServer, __construct)
 		}
 	}
 
-	if (typemap_ht) {
-		service->typemap = soap_create_typemap(service->sdl, typemap_ht);
-	}
-
 	soap_server_object *server_obj = soap_server_object_fetch(Z_OBJ_P(ZEND_THIS));
 	server_obj->service = service;
+	return;
 
-	SOAP_SERVER_END_CODE();
+	error:
+	efree(service);
+	RETURN_THROWS();
 }
 /* }}} */
 
