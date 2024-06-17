@@ -2699,21 +2699,20 @@ static zend_ffi_dcl* accel_ffi_persist_type(zend_ffi_dcl *dcl)
 	return new_dcl;
 }
 
-static zend_result accel_ffi_cache_type_get(zend_string *str, zend_ffi_dcl *dcl)
+static zend_ffi_dcl* accel_ffi_cache_type_get(zend_string *str)
 {
 	str = accel_find_interned_string(str);
 	if (str && (str->gc.u.type_info & IS_STR_FFI_TYPE)) {
 		// TODO: ???
 		zend_ffi_dcl *ptr = (zend_ffi_dcl*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
-		memcpy(dcl, ptr, sizeof(zend_ffi_dcl));
-		return SUCCESS;
+		return ptr;
 	}
-	return FAILURE;
+	return NULL;
 }
 
-static zend_result accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dcl)
+static zend_ffi_dcl* accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dcl)
 {
-	zend_result ret = FAILURE;
+	zend_ffi_dcl *new_dcl = NULL;
 
 	if (!ZEND_FFI_TYPE_IS_OWNED(dcl->type)
 	 && (dcl->type->attr & ZEND_FFI_ATTR_PERSISTENT)) {
@@ -2723,24 +2722,19 @@ static zend_result accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dcl)
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
-	if (accel_ffi_cache_type_get(str, dcl) == FAILURE) {
+	new_dcl = accel_ffi_cache_type_get(str);
+	if (!new_dcl) {
 		str = accel_new_interned_string(zend_string_copy(str));
 		if (IS_ACCEL_INTERNED(str)) {
-			zend_ffi_dcl *new_dcl = accel_ffi_persist_type(dcl);
-
+			new_dcl = accel_ffi_persist_type(dcl);
 			if (new_dcl) {
 				// TODO: ???
-				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_TYPE|IS_STR_FFI_DECL)));
+				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_TYPE|IS_STR_FFI_SCOPE)));
 				ZEND_ASSERT((char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p > 0 &&
 					(char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p < 0x7fffffff);
 				str->gc.u.type_info |= IS_STR_FFI_TYPE;
-				if (ZEND_FFI_TYPE_IS_OWNED(dcl->type)) {
-					_zend_ffi_type_dtor(dcl->type);
-				}
-				dcl->type = new_dcl->type;
 				// TODO: ???
 				str->gc.refcount = (char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p;
-				ret = SUCCESS;
 			}
 		}
 	}
@@ -2748,22 +2742,211 @@ static zend_result accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dcl)
 	zend_shared_alloc_unlock();
 	SHM_PROTECT();
 
-	return ret;
+	return new_dcl;
 }
 
-static zend_ffi* accel_ffi_cache_cdef_get(zend_string *str)
+static ssize_t accel_ffi_persist_scope_calc(zend_ffi_scope *scope)
+{
+	HashTable *ht;
+	Bucket *b;
+	zend_ffi_symbol *sym;
+	zend_ffi_tag *tag;
+	ssize_t size = 0;
+
+	if (scope->symbols) {
+		ht = scope->symbols;
+		size += sizeof(HashTable);
+		if (HT_IS_PACKED(ht)) {
+			size += HT_PACKED_USED_SIZE(ht);
+		} else {
+			size += HT_USED_SIZE(ht);
+		}
+		ZEND_HASH_FOREACH_BUCKET(ht, b) {
+			if (b->key) {
+				b->key = accel_new_interned_string(b->key);
+				if (!IS_ACCEL_INTERNED(b->key)) {
+					return -1;
+				}
+			}
+			size += sizeof(zend_ffi_symbol);
+			sym = (zend_ffi_symbol*)Z_PTR(b->val);
+			if (sym->type) {
+				ssize_t s = accel_ffi_persist_type_calc(sym->type);
+				if (s == -1) {
+					return -1;
+				}
+				size += s;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (scope->tags) {
+		ht = scope->tags;
+		size += sizeof(HashTable);
+		if (HT_IS_PACKED(ht)) {
+			size += HT_PACKED_USED_SIZE(ht);
+		} else {
+			size += HT_USED_SIZE(ht);
+		}
+		ZEND_HASH_FOREACH_BUCKET(ht, b) {
+			if (b->key) {
+				b->key = accel_new_interned_string(b->key);
+				if (!IS_ACCEL_INTERNED(b->key)) {
+					return -1;
+				}
+			}
+			size += sizeof(zend_ffi_tag);
+			tag = (zend_ffi_tag*)Z_PTR(b->val);
+			if (tag->type) {
+				ssize_t s = accel_ffi_persist_type_calc(tag->type);
+				if (s == -1) {
+					return -1;
+				}
+				size += s;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	return size;
+}
+
+static void accel_ffi_persist_scope_copy(void **ptr, zend_ffi_scope *scope)
+{
+	HashTable *ht;
+	Bucket *b;
+	zend_ffi_symbol *sym;
+	zend_ffi_tag *tag;
+
+	if (scope->symbols) {
+		ht = (*ptr);
+		memcpy(ht, scope->symbols, sizeof(HashTable));
+		(*ptr) = (void*)((char*)(*ptr) + sizeof(HashTable));
+		scope->symbols = ht;
+		GC_SET_REFCOUNT(ht, 2);
+		GC_ADD_FLAGS(ht, IS_ARRAY_IMMUTABLE);
+		HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
+		ht->pDestructor = NULL;
+		ht->nInternalPointer = 0;
+		if (HT_IS_PACKED(ht)) {
+			memcpy(*ptr, ht->arPacked, HT_PACKED_USED_SIZE(ht));
+			ht->arPacked = (zval*)(*ptr);
+			(*ptr) = (void*)((char*)(*ptr) + HT_PACKED_USED_SIZE(ht));
+		} else {
+			memcpy(*ptr, HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht));
+			HT_SET_DATA_ADDR(ht, (Bucket*)(*ptr));
+			(*ptr) = (void*)((char*)(*ptr) + HT_USED_SIZE(ht));
+		}
+		ZEND_HASH_FOREACH_BUCKET(ht, b) {
+		    sym = (zend_ffi_symbol*)(*ptr);
+			memcpy(sym, Z_PTR(b->val), sizeof(zend_ffi_symbol));
+			Z_PTR(b->val) = sym;
+			(*ptr) = (void*)((char*)(*ptr) + sizeof(zend_ffi_symbol));
+			if (sym->type) {
+				sym->type = accel_ffi_persist_type_copy(ptr, sym->type);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	if (scope->tags) {
+		ht = (*ptr);
+		memcpy(ht, scope->tags, sizeof(HashTable));
+		(*ptr) = (void*)((char*)(*ptr) + sizeof(HashTable));
+		scope->tags = ht;
+		GC_SET_REFCOUNT(ht, 2);
+		GC_ADD_FLAGS(ht, IS_ARRAY_IMMUTABLE);
+		HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
+		ht->pDestructor = NULL;
+		ht->nInternalPointer = 0;
+		if (HT_IS_PACKED(ht)) {
+			memcpy(*ptr, ht->arPacked, HT_PACKED_USED_SIZE(ht));
+			ht->arPacked = (zval*)(*ptr);
+			(*ptr) = (void*)((char*)(*ptr) + HT_PACKED_USED_SIZE(ht));
+		} else {
+			memcpy(*ptr, HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht));
+			HT_SET_DATA_ADDR(ht, (Bucket*)(*ptr));
+			(*ptr) = (void*)((char*)(*ptr) + HT_USED_SIZE(ht));
+		}
+		ZEND_HASH_FOREACH_BUCKET(ht, b) {
+		    tag = (zend_ffi_tag*)(*ptr);
+			memcpy(tag, Z_PTR(b->val), sizeof(zend_ffi_tag));
+			Z_PTR(b->val) = tag;
+			(*ptr) = (void*)((char*)(*ptr) + sizeof(zend_ffi_tag));
+			if (tag->type) {
+				tag->type = accel_ffi_persist_type_copy(ptr, tag->type);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+}
+
+static zend_ffi_scope* accel_ffi_persist_scope(zend_ffi_scope *scope)
+{
+	void *ptr;
+	zend_ffi_scope *new_scope;
+	ssize_t size;
+
+	zend_shared_alloc_init_xlat_table();
+	size = accel_ffi_persist_scope_calc(scope);
+	zend_shared_alloc_destroy_xlat_table();
+
+	if (size == -1) {
+		return NULL;
+	}
+	new_scope = zend_shared_alloc(sizeof(zend_ffi_scope) + size);
+	if (!new_scope) {
+		return NULL;
+	}
+
+	new_scope->symbols = scope->symbols;
+	new_scope->tags = scope->tags;
+	ptr = (char*)new_scope + sizeof(zend_ffi_scope);
+
+	zend_shared_alloc_init_xlat_table();
+
+	accel_ffi_persist_scope_copy(&ptr, new_scope);
+
+	zend_shared_alloc_destroy_xlat_table();
+
+	return new_scope;
+}
+
+static zend_ffi_scope* accel_ffi_cache_scope_get(zend_string *str)
 {
 	str = accel_find_interned_string(str);
-	if (str && (str->gc.u.type_info & IS_STR_FFI_DECL)) {
+	if (str && (str->gc.u.type_info & IS_STR_FFI_SCOPE)) {
 		// TODO: ???
+		zend_ffi_scope *ptr = (zend_ffi_scope*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
+		return ptr;
 	}
 	return NULL;
 }
 
-static zend_ffi* accel_ffi_cache_cdef_add(zend_string *str, zend_ffi *ffi)
+static zend_ffi_scope* accel_ffi_cache_scope_add(zend_string *str, zend_ffi_scope *scope)
 {
-	// TODO: ???
-	return ffi;
+	zend_ffi_scope *new_scope = NULL;
+
+	SHM_UNPROTECT();
+	zend_shared_alloc_lock();
+
+	new_scope = accel_ffi_cache_scope_get(str);
+	if (!new_scope) {
+		str = accel_new_interned_string(zend_string_copy(str));
+		if (IS_ACCEL_INTERNED(str)) {
+			new_scope = accel_ffi_persist_scope(scope);
+			if (new_scope) {
+				// TODO: ???
+				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_TYPE|IS_STR_FFI_SCOPE)));
+				ZEND_ASSERT((char*)new_scope - (char*)ZSMMG(shared_segments)[0]->p > 0 &&
+					(char*)new_scope - (char*)ZSMMG(shared_segments)[0]->p < 0x7fffffff);
+				str->gc.u.type_info |= IS_STR_FFI_SCOPE;
+				// TODO: ???
+				str->gc.refcount = (char*)new_scope - (char*)ZSMMG(shared_segments)[0]->p;
+			}
+		}
+	}
+
+	zend_shared_alloc_unlock();
+	SHM_PROTECT();
+
+	return new_scope;
 }
 #endif
 
@@ -3656,10 +3839,10 @@ file_cache_fallback:
 		zend_inheritance_cache_add = zend_accel_inheritance_cache_add;
 
 #if HAVE_FFI
-		zend_ffi_cache_cdef_get = accel_ffi_cache_cdef_get;
-		zend_ffi_cache_cdef_add = accel_ffi_cache_cdef_add;
 		zend_ffi_cache_type_get = accel_ffi_cache_type_get;
 		zend_ffi_cache_type_add = accel_ffi_cache_type_add;
+		zend_ffi_cache_scope_get = accel_ffi_cache_scope_get;
+		zend_ffi_cache_scope_add = accel_ffi_cache_scope_add;
 #endif
 	}
 
@@ -3716,10 +3899,10 @@ void accel_shutdown(void)
 	zend_inheritance_cache_add = accelerator_orig_inheritance_cache_add;
 
 #if HAVE_FFI
-	zend_ffi_cache_cdef_get = NULL;
-	zend_ffi_cache_cdef_add = NULL;
 	zend_ffi_cache_type_get = NULL;
 	zend_ffi_cache_type_add = NULL;
+	zend_ffi_cache_scope_get = NULL;
+	zend_ffi_cache_scope_add = NULL;
 #endif
 
 	if ((ini_entry = zend_hash_str_find_ptr(EG(ini_directives), "include_path", sizeof("include_path")-1)) != NULL) {

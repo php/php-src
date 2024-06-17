@@ -99,10 +99,10 @@ ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(void *bytes, si
 ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(zend_random_bytes_insecure_state *state, void *bytes, size_t size) = NULL;
 
 ZEND_API zend_class_entry *zend_ffi_cdata_ce = NULL;
-ZEND_API zend_ffi*   (*zend_ffi_cache_cdef_get)(zend_string *cdef) = NULL;
-ZEND_API zend_ffi*   (*zend_ffi_cache_cdef_add)(zend_string *cdef, zend_ffi *ffi) = NULL;
-ZEND_API zend_result (*zend_ffi_cache_type_get)(zend_string *str, zend_ffi_dcl *dcl) = NULL;
-ZEND_API zend_result (*zend_ffi_cache_type_add)(zend_string *str, zend_ffi_dcl *dcl) = NULL;
+ZEND_API zend_ffi_dcl*   (*zend_ffi_cache_type_get)(zend_string *str) = NULL;
+ZEND_API zend_ffi_dcl*   (*zend_ffi_cache_type_add)(zend_string *str, zend_ffi_dcl *dcl) = NULL;
+ZEND_API zend_ffi_scope* (*zend_ffi_cache_scope_get)(zend_string *str) = NULL;
+ZEND_API zend_ffi_scope* (*zend_ffi_cache_scope_add)(zend_string *str, zend_ffi_scope *scope) = NULL;
 
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
