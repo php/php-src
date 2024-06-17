@@ -100,6 +100,10 @@ try {
 	var_dump(sprintf());
 } catch (\Throwable $e) {echo $e, PHP_EOL; } echo PHP_EOL;
 
+try {
+	var_dump(sprintf('%s-%s-%s', true, false, true));
+} catch (\Throwable $e) {echo $e, PHP_EOL; } echo PHP_EOL;
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -172,5 +176,7 @@ ArgumentCountError: sprintf() expects at least 1 argument, 0 given in %s:97
 Stack trace:
 #0 %s(97): sprintf()
 #1 {main}
+
+string(4) "1--1"
 
 Done
