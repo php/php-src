@@ -1272,7 +1272,7 @@ static void _zend_extension_string(smart_str *str, zend_extension *extension, ch
 /* }}} */
 
 /* {{{ _function_check_flag */
-static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask)
+static void _function_check_flag(INTERNAL_FUNCTION_PARAMETERS, zend_fn_flags mask)
 {
 	reflection_object *intern;
 	zend_function *mptr;
@@ -3724,7 +3724,7 @@ ZEND_METHOD(ReflectionMethod, getModifiers)
 {
 	reflection_object *intern;
 	zend_function *mptr;
-	uint32_t keep_flags = ZEND_ACC_PPP_MASK
+	zend_fn_flags keep_flags = ZEND_ACC_PPP_MASK
 		| ZEND_ACC_STATIC | ZEND_ACC_ABSTRACT | ZEND_ACC_FINAL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -3921,7 +3921,7 @@ ZEND_METHOD(ReflectionClassConstant, hasType)
 	RETVAL_BOOL(ZEND_TYPE_IS_SET(ref->type));
 }
 
-static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ */
+static void _class_constant_check_flag(INTERNAL_FUNCTION_PARAMETERS, zend_class_const_flags mask) /* {{{ */
 {
 	reflection_object *intern;
 	zend_class_constant *ref;
@@ -3966,7 +3966,7 @@ ZEND_METHOD(ReflectionClassConstant, getModifiers)
 {
 	reflection_object *intern;
 	zend_class_constant *ref;
-	uint32_t keep_flags = ZEND_ACC_FINAL | ZEND_ACC_PPP_MASK;
+	zend_class_const_flags keep_flags = ZEND_ACC_FINAL | ZEND_ACC_PPP_MASK;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -4549,7 +4549,7 @@ ZEND_METHOD(ReflectionClass, getMethod)
 /* }}} */
 
 /* {{{ _addmethod */
-static bool _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_long filter)
+static bool _addmethod(zend_function *mptr, zend_class_entry *ce, HashTable *ht, zend_fn_flags filter)
 {
 	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
 		return 0;
@@ -4574,6 +4574,7 @@ ZEND_METHOD(ReflectionClass, getMethods)
 	zend_long filter;
 	bool filter_is_null = 1;
 
+	// FIXME: sizeof(zend_long) < sizeof(zend_fn_flags) on 32-bit platforms
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -4706,7 +4707,7 @@ ZEND_METHOD(ReflectionClass, getProperty)
 /* }}} */
 
 /* {{{ _addproperty */
-static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_entry *ce, HashTable *ht, long filter)
+static void _addproperty(zend_property_info *pptr, zend_string *key, zend_class_entry *ce, HashTable *ht, zend_long filter)
 {
 	if ((pptr->flags & ZEND_ACC_PRIVATE) && pptr->ce != ce) {
 		return;
@@ -4752,6 +4753,7 @@ ZEND_METHOD(ReflectionClass, getProperties)
 	zend_long filter;
 	bool filter_is_null = 1;
 
+	// FIXME: sizeof(zend_long) < sizeof(zend_prop_flags) on 32-bit platforms
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &filter, &filter_is_null) == FAILURE) {
 		RETURN_THROWS();
 	}

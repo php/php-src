@@ -196,7 +196,7 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
-char *zend_visibility_string(uint32_t fn_flags) /* {{{ */
+char *zend_visibility_string(zend_fn_flags fn_flags) /* {{{ */
 {
 	if (fn_flags & ZEND_ACC_PUBLIC) {
 		return "public";
@@ -1091,8 +1091,8 @@ static inheritance_status do_inheritance_check_on_method(
 		zend_function *parent, zend_class_entry *parent_scope,
 		zend_class_entry *ce, zval *child_zv, uint32_t flags) /* {{{ */
 {
-	uint32_t child_flags;
-	uint32_t parent_flags = parent->common.fn_flags;
+	zend_fn_flags child_flags;
+	zend_fn_flags parent_flags = parent->common.fn_flags;
 	zend_function *proto;
 
 #define SEPARATE_METHOD() do { \
@@ -2049,7 +2049,7 @@ static void zend_fixup_trait_method(zend_function *fn, zend_class_entry *ce) /* 
 }
 /* }}} */
 
-static void zend_traits_check_private_final_inheritance(uint32_t original_fn_flags, zend_function *fn_copy, zend_string *name)
+static void zend_traits_check_private_final_inheritance(zend_fn_flags original_fn_flags, zend_function *fn_copy, zend_string *name)
 {
 	/* If the function was originally already private+final, then it will have already been warned about.
 	 * If the function became private+final only after applying modifiers, we need to emit the same warning. */
@@ -2500,7 +2500,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 			continue;
 		}
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&traits[i]->properties_info, prop_name, property_info) {
-			uint32_t flags = property_info->flags;
+			zend_prop_flags flags = property_info->flags;
 
 			/* next: check for conflicts with current class */
 			if ((colliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
@@ -2509,7 +2509,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					flags |= ZEND_ACC_CHANGED;
 				} else {
 					bool is_compatible = false;
-					uint32_t flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
+					zend_prop_flags flags_mask = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
 
 					if ((colliding_prop->flags & flags_mask) == (flags & flags_mask) &&
 						property_types_compatible(property_info, colliding_prop) == INHERITANCE_SUCCESS
@@ -3028,7 +3028,7 @@ ZEND_API zend_class_entry *zend_do_link_class(zend_class_entry *ce, zend_string 
 	zend_class_entry **traits_and_interfaces = NULL;
 	zend_class_entry *proto = NULL;
 	zend_class_entry *orig_linking_class;
-	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	zend_ce_flags is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	uint32_t i, j;
 	zval *zv;
 	ALLOCA_FLAG(use_heap)
@@ -3375,7 +3375,7 @@ ZEND_API zend_class_entry *zend_try_early_bind(zend_class_entry *ce, zend_class_
 		return ce;
 	}
 
-	uint32_t is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
+	zend_ce_flags is_cacheable = ce->ce_flags & ZEND_ACC_IMMUTABLE;
 	UPDATE_IS_CACHEABLE(parent_ce);
 	if (is_cacheable) {
 		if (zend_inheritance_cache_get && zend_inheritance_cache_add) {

@@ -8296,9 +8296,9 @@ static int zend_jit_free_trampoline(zend_jit_ctx *jit, int8_t func_reg)
 {
 	// JIT: if (UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	ir_ref func = ir_RLOAD_A(func_reg);
-	ir_ref if_trampoline = ir_IF(ir_AND_U32(
-		ir_LOAD_U32(ir_ADD_OFFSET(func, offsetof(zend_function, common.fn_flags))),
-		ir_CONST_U32(ZEND_ACC_CALL_VIA_TRAMPOLINE)));
+	ir_ref if_trampoline = ir_IF(ir_AND_U64(
+		ir_LOAD_U64(ir_ADD_OFFSET(func, offsetof(zend_function, common.fn_flags))),
+		ir_CONST_U64(ZEND_ACC_CALL_VIA_TRAMPOLINE)));
 
 	ir_IF_TRUE(if_trampoline);
 	ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_free_trampoline_helper), func);
@@ -8516,7 +8516,8 @@ static int zend_jit_push_call_frame(zend_jit_ctx *jit, const zend_op *opline, co
 		//      (closure->func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE);
 		call_info = ir_OR_U32(
 			ir_AND_U32(
-				ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags))),
+				// Truncate high bytes, call_info is stored in type_info, which is only 32-bits.
+				ir_TRUNC_U32(ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_closure, func.common.fn_flags)))),
 				ir_CONST_U32(ZEND_ACC_FAKE_CLOSURE)),
 			ir_CONST_U32(ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_DYNAMIC | ZEND_CALL_CLOSURE));
 		// JIT: if (Z_TYPE(closure->this_ptr) != IS_UNDEF) {
@@ -8961,9 +8962,9 @@ static int zend_jit_init_method_call(zend_jit_ctx         *jit,
 
 	if (!func) {
 		// JIT: if (fbc->common.fn_flags & ZEND_ACC_STATIC) {
-		if_static = ir_IF(ir_AND_U32(
-			ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
-			ir_CONST_U32(ZEND_ACC_STATIC)));
+		if_static = ir_IF(ir_AND_U64(
+			ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_function, common.fn_flags))),
+			ir_CONST_U64(ZEND_ACC_STATIC)));
 		ir_IF_TRUE_cold(if_static);
 	}
 
@@ -9762,9 +9763,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 				func_ref = ir_LOAD_A(jit_CALL(rx, func));
 				ir_GUARD_NOT(
-					ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)),
+					ir_AND_U64(
+						ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_CONST_U64(ZEND_ACC_DEPRECATED)),
 					ir_CONST_ADDR(exit_addr));
 			}
 		}
@@ -9792,9 +9793,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			if (!trace) {
 				ir_ref if_deprecated, ret;
 
-				if_deprecated = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)));
+				if_deprecated = ir_IF(ir_AND_U64(
+						ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_CONST_U64(ZEND_ACC_DEPRECATED)));
 				ir_IF_TRUE_cold(if_deprecated);
 
 				if (GCC_GLOBAL_REGS) {
@@ -9984,9 +9985,9 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			if (!func || (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0) {
 				if (!func) {
 					// JIT: if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0))
-					ir_ref if_has_type_hints = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_HAS_TYPE_HINTS)));
+					ir_ref if_has_type_hints = ir_IF(ir_AND_U64(
+						ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_CONST_U64(ZEND_ACC_HAS_TYPE_HINTS)));
 					ir_IF_TRUE(if_has_type_hints);
 					ir_END_list(merge_inputs);
 					ir_IF_FALSE(if_has_type_hints);
@@ -10151,16 +10152,16 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 					}
 					ZEND_ASSERT(func_ref);
 					ir_GUARD_NOT(
-						ir_AND_U32(
-							ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-							ir_CONST_U32(ZEND_ACC_DEPRECATED)),
+						ir_AND_U64(
+							ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+							ir_CONST_U64(ZEND_ACC_DEPRECATED)),
 						ir_CONST_ADDR(exit_addr));
 				} else {
 					ir_ref if_deprecated, ret;
 
-					if_deprecated = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)));
+					if_deprecated = ir_IF(ir_AND_U64(
+						ir_LOAD_U64(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
+						ir_CONST_U64(ZEND_ACC_DEPRECATED)));
 					ir_IF_TRUE_cold(if_deprecated);
 
 					if (GCC_GLOBAL_REGS) {
@@ -13980,8 +13981,8 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_IF_TRUE_cold(if_has_prop_info);
 
 			ir_ref if_readonly = ir_IF(
-				ir_AND_U32(ir_LOAD_U32(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, flags))),
-					ir_CONST_U32(ZEND_ACC_READONLY)));
+				ir_AND_U64(ir_LOAD_U64(ir_ADD_OFFSET(prop_info_ref, offsetof(zend_property_info, flags))),
+					ir_CONST_U64(ZEND_ACC_READONLY)));
 			ir_IF_TRUE(if_readonly);
 
 			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);

@@ -431,7 +431,7 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
 
 void zend_enum_register_funcs(zend_class_entry *ce)
 {
-	const uint32_t fn_flags =
+	const zend_fn_flags fn_flags =
 		ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_ARENA_ALLOCATED;
 	zend_internal_function *cases_function = zend_arena_calloc(&CG(arena), sizeof(zend_internal_function), 1);
 	cases_function->handler = zend_enum_cases_func;

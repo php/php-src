@@ -37,7 +37,7 @@ typedef struct _zend_function_entry {
 	zif_handler handler;
 	const struct _zend_internal_arg_info *arg_info;
 	uint32_t num_args;
-	uint32_t flags;
+	zend_fn_flags flags;
 	const zend_frameless_function_info *frameless_function_infos;
 	const char *doc_comment;
 } zend_function_entry;
@@ -422,19 +422,19 @@ ZEND_API bool zend_make_callable(zval *callable, zend_string **callable_name);
 ZEND_API const char *zend_get_module_version(const char *module_name);
 ZEND_API zend_result zend_get_module_started(const char *module_name);
 
-ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type);
+ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, zend_prop_flags access_type, zend_string *doc_comment, zend_type type);
 
-ZEND_API void zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment);
-ZEND_API void zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, int access_type);
-ZEND_API void zend_declare_property_null(zend_class_entry *ce, const char *name, size_t name_length, int access_type);
-ZEND_API void zend_declare_property_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, int access_type);
-ZEND_API void zend_declare_property_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, int access_type);
-ZEND_API void zend_declare_property_double(zend_class_entry *ce, const char *name, size_t name_length, double value, int access_type);
-ZEND_API void zend_declare_property_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value, int access_type);
-ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_len, int access_type);
+ZEND_API void zend_declare_property_ex(zend_class_entry *ce, zend_string *name, zval *property, zend_prop_flags access_type, zend_string *doc_comment);
+ZEND_API void zend_declare_property(zend_class_entry *ce, const char *name, size_t name_length, zval *property, zend_prop_flags access_type);
+ZEND_API void zend_declare_property_null(zend_class_entry *ce, const char *name, size_t name_length, zend_prop_flags access_type);
+ZEND_API void zend_declare_property_bool(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, zend_prop_flags access_type);
+ZEND_API void zend_declare_property_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value, zend_prop_flags access_type);
+ZEND_API void zend_declare_property_double(zend_class_entry *ce, const char *name, size_t name_length, double value, zend_prop_flags access_type);
+ZEND_API void zend_declare_property_string(zend_class_entry *ce, const char *name, size_t name_length, const char *value, zend_prop_flags access_type);
+ZEND_API void zend_declare_property_stringl(zend_class_entry *ce, const char *name, size_t name_length, const char *value, size_t value_len, zend_prop_flags access_type);
 
-ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment, zend_type type);
-ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, int access_type, zend_string *doc_comment);
+ZEND_API zend_class_constant *zend_declare_typed_class_constant(zend_class_entry *ce, zend_string *name, zval *value, zend_class_const_flags access_type, zend_string *doc_comment, zend_type type);
+ZEND_API zend_class_constant *zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *name, zval *value, zend_class_const_flags access_type, zend_string *doc_comment);
 ZEND_API void zend_declare_class_constant(zend_class_entry *ce, const char *name, size_t name_length, zval *value);
 ZEND_API void zend_declare_class_constant_null(zend_class_entry *ce, const char *name, size_t name_length);
 ZEND_API void zend_declare_class_constant_long(zend_class_entry *ce, const char *name, size_t name_length, zend_long value);

@@ -251,7 +251,7 @@ typedef struct _zend_oparray_context {
 /* or IS_CONSTANT_VISITED_MARK                            |     |     |     */
 #define ZEND_CLASS_CONST_IS_CASE         (1 << 6)  /*     |     |     |  X  */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 30,31)                            |     |     |     */
+/* Class Flags (unused: 30-63)                            |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -317,7 +317,7 @@ typedef struct _zend_oparray_context {
 /* Class cannot be serialized or unserialized             |     |     |     */
 #define ZEND_ACC_NOT_SERIALIZABLE        (1 << 29) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 29-30)                         |     |     |     */
+/* Function Flags (unused: 29-30,32-63)                   |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -396,12 +396,16 @@ typedef struct _zend_oparray_context {
 // Must not clash with ZEND_SHORT_CIRCUITING_CHAIN_MASK
 #define ZEND_JMP_NULL_BP_VAR_IS 4
 
-char *zend_visibility_string(uint32_t fn_flags);
+typedef uint64_t zend_fn_flags;
+
+char *zend_visibility_string(zend_fn_flags fn_flags);
+
+typedef uint64_t zend_prop_flags;
 
 typedef struct _zend_property_info {
 	uint32_t offset; /* property offset for object properties or
 	                      property index for static properties */
-	uint32_t flags;
+	zend_prop_flags flags;
 	zend_string *name;
 	zend_string *doc_comment;
 	HashTable *attributes;
@@ -417,6 +421,8 @@ typedef struct _zend_property_info {
 	((uint32_t)(XtOffsetOf(zend_object, properties_table) + sizeof(zval) * (num)))
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
+
+typedef uint32_t zend_class_const_flags;
 
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */
@@ -457,7 +463,7 @@ struct _zend_op_array {
 	/* Common elements */
 	uint8_t type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-	uint32_t fn_flags;
+	zend_fn_flags fn_flags;
 	zend_string *function_name;
 	zend_class_entry *scope;
 	zend_function *prototype;
@@ -515,7 +521,7 @@ typedef struct _zend_internal_function {
 	/* Common elements */
 	uint8_t type;
 	uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-	uint32_t fn_flags;
+	zend_fn_flags fn_flags;
 	zend_string* function_name;
 	zend_class_entry *scope;
 	zend_function *prototype;
@@ -543,7 +549,7 @@ union _zend_function {
 	struct {
 		uint8_t type;  /* never used */
 		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-		uint32_t fn_flags;
+		zend_fn_flags fn_flags;
 		zend_string *function_name;
 		zend_class_entry *scope;
 		zend_function *prototype;

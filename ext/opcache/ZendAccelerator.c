@@ -3916,7 +3916,7 @@ static void preload_link(void)
 			 * prevent freeing of interface names. */
 			void *checkpoint = zend_arena_checkpoint(CG(arena));
 			zend_class_entry *orig_ce = ce;
-			uint32_t temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
+			zend_ce_flags temporary_flags = ZEND_ACC_FILE_CACHED|ZEND_ACC_CACHED;
 			ce->ce_flags |= temporary_flags;
 			if (ce->parent_name) {
 				zend_string_addref(ce->parent_name);
@@ -4165,7 +4165,7 @@ static void preload_fix_trait_methods(zend_class_entry *ce)
 
 			zend_string *function_name = op_array->function_name;
 			zend_class_entry *scope = op_array->scope;
-			uint32_t fn_flags = op_array->fn_flags;
+			zend_fn_flags fn_flags = op_array->fn_flags;
 			zend_function *prototype = op_array->prototype;
 			HashTable *ht = op_array->static_variables;
 			*op_array = *orig_op_array;
