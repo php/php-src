@@ -4777,7 +4777,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
 						 && op2_info == MAY_BE_LONG) {
-							if (!zend_jit_ffi_assign_dim_op(&ctx, opline,
+							if (!zend_jit_ffi_assign_dim_op(&ctx, opline, ssa, ssa_op,
 									op1_info, op1_def_info, op1_addr,
 									op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 									(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
@@ -5112,7 +5112,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
 						 && op2_info == MAY_BE_LONG) {
-							if (!zend_jit_ffi_assign_dim(&ctx, opline,
+							if (!zend_jit_ffi_assign_dim(&ctx, opline, ssa, ssa_op,
 									op1_info, op1_addr,
 									op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 									(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
