@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.21
+?? ??? ????, PHP 8.2.22
+
+
+04 Jul 2024, PHP 8.2.21
 
 - Core:
   . Fixed bug GH-14315 (Incompatible pointer type warnings). (Peter Kokot)
