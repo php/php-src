@@ -44,6 +44,13 @@
 
 #if HAVE_FFI
 # include "ext/ffi/php_ffi.h"
+
+# define FFI_TYPE_GUARD (1<<0)
+
+typedef struct zend_jit_ffi_info {
+	zend_ffi_type *type;
+	uint32_t       info;
+} zend_jit_ffi_info;
 #endif
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP

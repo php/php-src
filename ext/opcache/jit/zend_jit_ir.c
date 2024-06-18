@@ -12804,7 +12804,8 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
                                        zend_ssa_range     *op2_range,
                                        uint32_t            res_info,
                                        zend_jit_addr       res_addr,
-                                       zend_ffi_type      *op1_ffi_type)
+                                       zend_ffi_type      *op1_ffi_type,
+                                       zend_jit_ffi_info  *ffi_info)
 {
 	uint32_t res_type;
 	zend_ffi_type *el_type = ZEND_FFI_TYPE(op1_ffi_type->array.type);
@@ -12823,9 +12824,15 @@ static int zend_jit_ffi_fetch_dim_read(zend_jit_ctx       *jit,
 		}
 	}
 
-	// TODO: ffi type guard ???
-	if (!zend_jit_ffi_type_guard(jit, opline, obj_ref, op1_ffi_type)) {
-		return 0;
+	if (ffi_info
+	 && ssa_op->op1_use >= 0
+	 && (ffi_info[ssa_op->op1_use].type != op1_ffi_type
+	  || (ffi_info[ssa_op->op1_use].info & FFI_TYPE_GUARD))) {
+		if (!zend_jit_ffi_type_guard(jit, opline, obj_ref, op1_ffi_type)) {
+			return 0;
+		}
+		ffi_info[ssa_op->op1_use].info &= ~FFI_TYPE_GUARD;
+		ffi_info[ssa_op->op1_use].type = op1_ffi_type;
 	}
 
 	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
@@ -13591,7 +13598,8 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx      *jit,
                                    zend_jit_addr      op3_addr,
                                    zend_jit_addr      op3_def_addr,
                                    zend_jit_addr      res_addr,
-                                   zend_ffi_type     *op1_ffi_type)
+                                   zend_ffi_type     *op1_ffi_type,
+                                   zend_jit_ffi_info *ffi_info)
 {
 	zend_ffi_type *el_type = ZEND_FFI_TYPE(op1_ffi_type->array.type);
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
@@ -13614,9 +13622,19 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx      *jit,
 		}
 	}
 
-	// TODO: ffi type guard ???
-	if (!zend_jit_ffi_type_guard(jit, opline, obj_ref, op1_ffi_type)) {
-		return 0;
+	if (ffi_info
+	 && ssa_op->op1_use >= 0
+	 && (ffi_info[ssa_op->op1_use].type != op1_ffi_type
+	  || (ffi_info[ssa_op->op1_use].info & FFI_TYPE_GUARD))) {
+		if (!zend_jit_ffi_type_guard(jit, opline, obj_ref, op1_ffi_type)) {
+			return 0;
+		}
+		ffi_info[ssa_op->op1_use].info &= ~FFI_TYPE_GUARD;
+		ffi_info[ssa_op->op1_use].type = op1_ffi_type;
+		if (ssa_op->op1_def >= 0) {
+			ffi_info[ssa_op->op1_def].info &= ~FFI_TYPE_GUARD;
+			ffi_info[ssa_op->op1_def].type = op1_ffi_type;
+		}
 	}
 
 	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
@@ -14109,7 +14127,8 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx      *jit,
                                       uint32_t           op1_data_info,
                                       zend_jit_addr      op3_addr,
                                       zend_ssa_range    *op1_data_range,
-                                      zend_ffi_type     *op1_ffi_type)
+                                      zend_ffi_type     *op1_ffi_type,
+                                      zend_jit_ffi_info *ffi_info)
 {
 	zend_ffi_type *el_type = ZEND_FFI_TYPE(op1_ffi_type->array.type);
 	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
@@ -14132,9 +14151,19 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx      *jit,
 		}
 	}
 
-	// TODO: ffi type guard ???
-	if (!zend_jit_ffi_type_guard(jit, opline, obj_ref, op1_ffi_type)) {
-		return 0;
+	if (ffi_info
+	 && ssa_op->op1_use >= 0
+	 && (ffi_info[ssa_op->op1_use].type != op1_ffi_type
+	  || (ffi_info[ssa_op->op1_use].info & FFI_TYPE_GUARD))) {
+		if (!zend_jit_ffi_type_guard(jit, opline, obj_ref, op1_ffi_type)) {
+			return 0;
+		}
+		ffi_info[ssa_op->op1_use].info &= ~FFI_TYPE_GUARD;
+		ffi_info[ssa_op->op1_use].type = op1_ffi_type;
+		if (ssa_op->op1_def >= 0) {
+			ffi_info[ssa_op->op1_def].info &= ~FFI_TYPE_GUARD;
+			ffi_info[ssa_op->op1_def].type = op1_ffi_type;
+		}
 	}
 
 	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
