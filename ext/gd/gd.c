@@ -3645,6 +3645,16 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_ARRAY(hash_colors)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (scatter_sub < 0 || ZEND_SIZE_T_INT_OVFL(scatter_sub)) {
+		zend_argument_value_error(3, "must be between 0 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	if (scatter_plus < 0 || ZEND_SIZE_T_INT_OVFL(scatter_plus)) {
+		zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (hash_colors) {
@@ -3939,6 +3949,12 @@ PHP_FUNCTION(imagescale)
 		Z_PARAM_LONG(tmp_h)
 		Z_PARAM_LONG(tmp_m)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (tmp_m < GD_DEFAULT || tmp_m >= GD_METHOD_COUNT) {
+		zend_argument_value_error(4, "must be one of the GD_* constants");
+		RETURN_THROWS();
+	}
+
 	method = tmp_m;
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
@@ -3958,9 +3974,16 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_h <= 0 || tmp_h > INT_MAX || tmp_w <= 0 || tmp_w > INT_MAX) {
-		RETURN_FALSE;
+	if (tmp_w <= 0 || ZEND_SIZE_T_INT_OVFL(tmp_w)) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT_MAX);
+		RETURN_THROWS();
 	}
+
+	if (tmp_h <= 0 || ZEND_SIZE_T_INT_OVFL(tmp_h)) {
+		zend_argument_value_error(3, "must be between 1 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
 
 	new_width = tmp_w;
 	new_height = tmp_h;

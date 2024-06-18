@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-14801 (Fix build for armv7). (andypost)
 
+- GD:
+  . Check overflow/underflow for imagescale/imagefilter. (David Carlier)
+
 - LibXML:
   . Added LIBXML_NO_XXE constant. (nielsdos)
 

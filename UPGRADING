@@ -442,6 +442,10 @@ PHP 8.4 UPGRADE NOTES
   . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
     quality parameter value is passed. In addition, imageavif will throw an exception
     if an invalid speed parameter value is passed.
+  . imagescale throws an exception if the width/height argument underflows/overflows or
+    if the mode argument is invalid.
+    imagefilter with IMG_FILTER_SCATTER throws an exception if the sub/plus arguments
+    underflows/overflows.
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
