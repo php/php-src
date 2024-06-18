@@ -171,6 +171,7 @@ PHP                                                                        NEWS
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
+  . Added support for PDO driver-specific SQL parsers. (Matteo Beccati)
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
@@ -185,6 +186,7 @@ PHP                                                                        NEWS
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Added class Pdo\Mysql. (danack, kocsismate)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PDO_ODBC:
   . Added class Pdo\Odbc. (danack, kocsismate)
@@ -197,11 +199,13 @@ PHP                                                                        NEWS
   . Retrieve the memory usage of the query result resource. (KentarouTakeda)
   . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
     (outtersg)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PDO_SQLITE:
   . Added class Pdo\Sqlite. (danack, kocsismate)
   . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
     (nielsdos)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)

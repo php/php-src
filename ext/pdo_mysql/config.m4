@@ -85,9 +85,10 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
   fi
 
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c mysql_sql_parser.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
   PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+  PHP_ADD_MAKEFILE_FRAGMENT
 
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
