@@ -208,6 +208,13 @@ const SO_DONTROUTE = UNKNOWN;
  * @cvalue SO_LINGER
  */
 const SO_LINGER = UNKNOWN;
+#ifdef SO_LINGER_SEC
+/**
+ * @var int
+ * @cvalue SO_LINGER_SEC
+ */
+const SO_LINGER_SEC = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_BROADCAST

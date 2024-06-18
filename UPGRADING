@@ -742,6 +742,7 @@ PHP 8.4 UPGRADE NOTES
   . TCP_SYNCNT (Linux only).
   . SO_EXCLBIND (Solaris/Illumos only).
   . SO_NOSIGPIPE (macOs and FreeBSD).
+  . SO_LINGER_SEC (macOs only).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES

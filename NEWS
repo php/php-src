@@ -257,6 +257,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
     macOs and FreeBSD. (David Carlier)
+  . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
+    (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
