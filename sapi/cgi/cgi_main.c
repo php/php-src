@@ -1910,18 +1910,17 @@ int main(int argc, char *argv[])
 
 	/* check force_cgi after startup, so we have proper output */
 	if (cgi && CGIG(force_redirect)) {
-		/* Apache will generate REDIRECT_STATUS,
-		 * Netscape and redirect.so will generate HTTP_REDIRECT_STATUS.
-		 * redirect.so and installation instructions available from
-		 * http://www.koehntopp.de/php.
-		 *   -- kk@netuse.de
-		 */
-		if (!getenv("REDIRECT_STATUS") &&
-			!getenv ("HTTP_REDIRECT_STATUS") &&
-			/* this is to allow a different env var to be configured
-			 * in case some server does something different than above */
-			(!CGIG(redirect_status_env) || !getenv(CGIG(redirect_status_env)))
-		) {
+		/* This is to allow a different environment variable to be configured
+		 * in case the we cannot auto-detect which environment variable to use.
+		 * Checking this first to allow user overrides in case the environment
+		 * variable can be set by an untrusted party. */
+		const char *redirect_status_env = CGIG(redirect_status_env);
+		if (!redirect_status_env) {
+			/* Apache will generate REDIRECT_STATUS. */
+			redirect_status_env = "REDIRECT_STATUS";
+		}
+
+		if (!getenv(redirect_status_env)) {
 			zend_try {
 				SG(sapi_headers).http_response_code = 400;
 				PUTS("<b>Security Alert!</b> The PHP CGI cannot be accessed directly.\n\n\
