@@ -383,7 +383,7 @@ class DateTime implements DateTimeInterface
     /**
      * @tentative-return-type
      */
-    public function modify(string $modifier): DateTime|false {}
+    public function modify(string $modifier): DateTime {}
 
     /**
      * @tentative-return-type
@@ -521,7 +521,7 @@ class DateTimeImmutable implements DateTimeInterface
     public function diff(DateTimeInterface $targetObject, bool $absolute = false): DateInterval {}
 
     /** @tentative-return-type */
-    public function modify(string $modifier): DateTimeImmutable|false {}
+    public function modify(string $modifier): DateTimeImmutable {}
 
     /** @tentative-return-type */
     public function add(DateInterval $interval): DateTimeImmutable {}
@@ -644,7 +644,7 @@ class DateInterval
     /**
      * @tentative-return-type
      */
-    public static function createFromDateString(string $datetime): DateInterval|false {}
+    public static function createFromDateString(string $datetime): DateInterval {}
 
     /**
      * @tentative-return-type
