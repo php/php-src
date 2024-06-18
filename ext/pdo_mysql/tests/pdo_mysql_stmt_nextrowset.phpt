@@ -40,7 +40,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
         while ($stmt->fetch()) ;
 
         $db->exec('DROP PROCEDURE IF EXISTS p');
-        $db->exec('CREATE PROCEDURE p(OUT ver_param VARCHAR(25)) BEGIN SELECT VERSION() INTO ver_param; END;');
+        $db->exec('CREATE PROCEDURE p(OUT ver_param VARCHAR(40)) BEGIN SELECT VERSION() INTO ver_param; END;');
         $db->exec('CALL p(@VERSION)');
         $stmt = $db->query('SELECT @VERSION as _version');
         var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
