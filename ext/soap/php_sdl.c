@@ -1174,7 +1174,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
                                        smart_str_appendc(buf,(char)((val >> 16) & 0xff)); \
                                        smart_str_appendc(buf,(char)((val >> 24) & 0xff));
 #define WSDL_CACHE_PUT_1(val,buf)      smart_str_appendc(buf,val);
-#define WSDL_CACHE_PUT_N(val,n,buf)    smart_str_appendl(buf,(char*)val,n);
+#define WSDL_CACHE_PUT_N(val,n,buf)    smart_str_appendl(buf,val,n);
 
 #define WSDL_NO_STRING_MARKER 0x7fffffff
 
@@ -2117,7 +2117,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	WSDL_CACHE_PUT_N("wsdl", 4, out);
 	WSDL_CACHE_PUT_1(WSDL_CACHE_VERSION,out);
 	WSDL_CACHE_PUT_1(0,out);
-	WSDL_CACHE_PUT_N(&t, sizeof(t), out);
+	WSDL_CACHE_PUT_N((char*)&t, sizeof(t), out);
 
 	sdl_serialize_string(uri, out);
 	sdl_serialize_string(sdl->source, out);
