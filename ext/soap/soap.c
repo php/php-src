@@ -714,20 +714,20 @@ PHP_METHOD(SoapFault, __toString)
 	/* SoapFault uses typed properties */
 	const zval *faultcode = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultcode", sizeof("faultcode")-1, /* silent */ true, &rv1);
 	const zend_string *faultcode_val;
-	if (UNEXPECTED(Z_TYPE_P(faultcode) == IS_NULL)) {
-		faultcode_val = zend_empty_string;
-	} else {
-		ZEND_ASSERT(Z_TYPE_P(faultcode) == IS_STRING);
+	if (EXPECTED(Z_TYPE_P(faultcode) == IS_STRING)) {
 		faultcode_val = Z_STR_P(faultcode);
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(faultcode) == IS_NULL);
+		faultcode_val = zend_empty_string;
 	}
 
 	const zval *faultstring = zend_read_property(soap_fault_class_entry, Z_OBJ_P(this_ptr), "faultstring", sizeof("faultstring")-1, /* silent */ true, &rv2);
 	const zend_string *faultstring_val;
-	if (UNEXPECTED(Z_TYPE_P(faultstring) == IS_NULL)) {
-		faultstring_val = zend_empty_string;
-	} else {
-		ZEND_ASSERT(Z_TYPE_P(faultstring) == IS_STRING);
+	if (EXPECTED(Z_TYPE_P(faultstring) == IS_STRING)) {
 		faultstring_val = Z_STR_P(faultstring);
+	} else {
+		ZEND_ASSERT(Z_TYPE_P(faultstring) == IS_NULL);
+		faultstring_val = zend_empty_string;
 	}
 
 	/* Exception uses typed properties */
