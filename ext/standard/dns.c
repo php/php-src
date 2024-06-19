@@ -641,7 +641,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						tp[0] = ':';
 						tp++;
 					}
-					tp += sprintf((char*)tp,"%x",s);
+					tp += snprintf((char*)tp, sizeof(name) - (tp - (uint8_t *) name), "%x", s);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -686,7 +686,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						tp[0] = ':';
 						tp++;
 					}
-					sprintf((char*)tp, "%x", cp[0] & 0xFF);
+					snprintf((char*)tp, sizeof(name) - (tp - (uint8_t *) name), "%x", cp[0] & 0xFF);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;
@@ -711,7 +711,7 @@ static uint8_t *php_parserr(uint8_t *cp, uint8_t *end, querybuf *answer, int typ
 						tp[0] = ':';
 						tp++;
 					}
-					tp += sprintf((char*)tp,"%x",s);
+					tp += snprintf((char*)tp, sizeof(name) - (tp - (uint8_t *) name),"%x",s);
 				} else {
 					if (!have_v6_break) {
 						have_v6_break = 1;

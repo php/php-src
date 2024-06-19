@@ -24,7 +24,7 @@
 #endif
 #include <stddef.h>
 
-#if HAVE_UTIME
+#ifdef HAVE_UTIME
 # ifdef PHP_WIN32
 #  include <sys/utime.h>
 # else
@@ -816,7 +816,7 @@ static int statbuf_from_array(zval *array, php_stream_statbuf *ssb)
 	STAT_PROP_ENTRY(nlink);
 	STAT_PROP_ENTRY(uid);
 	STAT_PROP_ENTRY(gid);
-#if HAVE_STRUCT_STAT_ST_RDEV
+#ifdef HAVE_STRUCT_STAT_ST_RDEV
 	STAT_PROP_ENTRY(rdev);
 #endif
 	STAT_PROP_ENTRY(size);

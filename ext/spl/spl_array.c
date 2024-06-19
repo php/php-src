@@ -19,22 +19,18 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
 #include "spl_array_arginfo.h"
 #include "spl_exceptions.h"
+#include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 /* Defined later in the file */
-static zend_object_handlers spl_handler_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_ArrayIterator;
 PHPAPI zend_class_entry  *spl_ce_RecursiveArrayIterator;
 
@@ -165,11 +161,18 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (clone_orig) {
 			if (other->ar_flags & SPL_ARRAY_IS_SELF) {
 				ZVAL_UNDEF(&intern->array);
-			} else if (orig->handlers == &spl_handler_ArrayObject) {
+			} else if (instanceof_function(class_type, spl_ce_ArrayObject)) {
 				ZVAL_ARR(&intern->array,
 					zend_array_dup(spl_array_get_hash_table(other)));
 			} else {
-				ZEND_ASSERT(orig->handlers == &spl_handler_ArrayIterator);
+				#if ZEND_DEBUG
+				/* This is because the call to instanceof_function will remain because
+				 * the compiler can't prove in this compile unit that this function is
+				 * side-effect-free.
+				 * See https://github.com/php/php-src/pull/14518#discussion_r1638740932 */
+				ZEND_ASSERT(instanceof_function(class_type, spl_ce_ArrayIterator));
+				#endif
+
 				ZVAL_OBJ_COPY(&intern->array, orig);
 				intern->ar_flags |= SPL_ARRAY_USE_OTHER;
 			}
@@ -766,9 +769,6 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 
 static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 {
-	zval *storage;
-	zend_string *zname;
-	zend_class_entry *base;
 	spl_array_object *intern = spl_array_from_obj(obj);
 
 	if (!intern->std.properties) {
@@ -783,14 +783,13 @@ static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 		debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
-		storage = &intern->array;
+		zval *storage = &intern->array;
 		Z_TRY_ADDREF_P(storage);
 
-		base = obj->handlers == &spl_handler_ArrayIterator
+		const zend_class_entry *base_class_ce = instanceof_function(obj->ce, spl_ce_ArrayIterator)
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
-		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
-		zend_symtable_update(debug_info, zname, storage);
-		zend_string_release_ex(zname, 0);
+
+		spl_set_private_debug_info_property(base_class_ce, "storage", strlen("storage"), debug_info, storage);
 
 		return debug_info;
 	}
@@ -954,7 +953,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 			}
 		}
 	} else {
-		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
+		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject) {
 			zval_ptr_dtor(&intern->array);
 			if (just_array)	{
 				spl_array_object *other = Z_SPLARRAY_P(array);
@@ -1902,10 +1901,8 @@ PHP_MINIT_FUNCTION(spl_array)
 
 	spl_ce_ArrayIterator = register_class_ArrayIterator(spl_ce_SeekableIterator, zend_ce_arrayaccess, zend_ce_serializable, zend_ce_countable);
 	spl_ce_ArrayIterator->create_object = spl_array_object_new;
-	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayIterator;
+	spl_ce_ArrayIterator->default_object_handlers = &spl_handler_ArrayObject;
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
-
-	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 
 	spl_ce_RecursiveArrayIterator = register_class_RecursiveArrayIterator(spl_ce_ArrayIterator, spl_ce_RecursiveIterator);
 	spl_ce_RecursiveArrayIterator->create_object = spl_array_object_new;

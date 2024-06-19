@@ -21,11 +21,10 @@
 
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xmlwriter.h"
 #include "php_xmlwriter_arginfo.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_dirname() */
 
 static zend_class_entry *xmlwriter_class_entry_ce;
 
@@ -175,9 +174,15 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 }
 /* }}} */
 
+static const zend_module_dep xmlwriter_deps[] = {
+	ZEND_MOD_REQUIRED("libxml")
+	ZEND_MOD_END
+};
+
 /* {{{ xmlwriter_module_entry */
 zend_module_entry xmlwriter_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	xmlwriter_deps,
 	"xmlwriter",
 	ext_functions,
 	PHP_MINIT(xmlwriter),

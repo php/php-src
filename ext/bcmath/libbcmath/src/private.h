@@ -83,10 +83,10 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 
 #if SIZEOF_SIZE_T >= 8
 #  define BC_BSWAP(u) BC_BSWAP64(u)
-#  define BC_UINT_T uint64_t
+   typedef uint64_t BC_VECTOR;
 #else
 #  define BC_BSWAP(u) BC_BSWAP32(u)
-#  define BC_UINT_T uint32_t
+   typedef uint32_t BC_VECTOR;
 #endif
 
 #ifdef WORDS_BIGENDIAN
@@ -97,7 +97,7 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 
 
 /* routines */
-int _bc_do_compare (bc_num n1, bc_num n2, bool use_sign);
+bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, bool use_sign);
 bc_num _bc_do_add (bc_num n1, bc_num n2);
 bc_num _bc_do_sub (bc_num n1, bc_num n2);
 void _bc_rm_leading_zeros (bc_num num);

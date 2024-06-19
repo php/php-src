@@ -183,7 +183,7 @@ namespace {
      * @cvalue PQERRORS_VERBOSE
      */
     const PGSQL_ERRORS_VERBOSE = UNKNOWN;
-    #if PGVERSION_NUM > 110000
+    #ifdef HAVE_PQERRORS_SQLSTATE
     /**
      * @var int
      * @cvalue PQERRORS_SQLSTATE
@@ -245,6 +245,13 @@ namespace {
      * @cvalue PGRES_TUPLES_OK
      */
     const PGSQL_TUPLES_OK = UNKNOWN;
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    /**
+     * @var int
+     * @cvalue PGRES_TUPLES_CHUNK
+     */
+    const PGSQL_TUPLES_CHUNK = UNKNOWN;
+#endif
     /**
      * @var int
      * @cvalue PGRES_COPY_OUT
@@ -496,6 +503,12 @@ namespace {
      * @refcount 1
      */
     function pg_version(?PgSql\Connection $connection = null): array {}
+
+    /**
+     * @return array<string, string|null>
+     * @refcount 1
+     */
+    function pg_jit(?PgSql\Connection $connection = null): array {}
 
     /**
      * @param PgSql\Connection|string $connection
@@ -946,6 +959,20 @@ namespace {
 
 #ifdef HAVE_PG_RESULT_MEMORY_SIZE
     function pg_result_memory_size(PgSql\Result $result): int {}
+#endif
+
+    function pg_change_password(PgSql\Connection $connection, string $user, #[\SensitiveParameter] string $password): bool {}
+
+    function pg_put_copy_data(PgSql\Connection $connection, string $cmd): int {}
+    function pg_put_copy_end(PgSql\Connection $connection, ?string $error = null): int {}
+
+    /**
+     * @param resource $socket
+     */
+    function pg_socket_poll($socket, int $read, int $write, int $timeout = -1): int {}
+
+#ifdef HAVE_PG_SET_CHUNKED_ROWS_SIZE
+    function pg_set_chunked_rows_size(Pgsql\Connection $connection, int $size): bool {}
 #endif
 }
 

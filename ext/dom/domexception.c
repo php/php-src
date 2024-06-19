@@ -30,7 +30,7 @@
 * Since:
 */
 
-void php_dom_throw_error_with_message(int error_code, char *error_message, bool strict_error) /* {{{ */
+void php_dom_throw_error_with_message(dom_exception_code error_code, const char *error_message, bool strict_error) /* {{{ */
 {
 	if (strict_error) {
 		zend_throw_exception(dom_domexception_class_entry, error_message, error_code);
@@ -41,9 +41,9 @@ void php_dom_throw_error_with_message(int error_code, char *error_message, bool 
 /* }}} */
 
 /* {{{ php_dom_throw_error */
-void php_dom_throw_error(int error_code, bool strict_error)
+void php_dom_throw_error(dom_exception_code error_code, bool strict_error)
 {
-	char *error_message;
+	const char *error_message;
 
 	switch (error_code)
 	{

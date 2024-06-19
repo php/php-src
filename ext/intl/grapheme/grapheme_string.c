@@ -39,9 +39,9 @@ PHP_FUNCTION(grapheme_strlen)
 	zend_long ret_len;
 	UErrorCode status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &string, &string_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(string, string_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret_len = grapheme_ascii_check((unsigned char *)string, string_len);
 
@@ -89,9 +89,12 @@ PHP_FUNCTION(grapheme_strpos)
 	size_t noffset = 0;
 	zend_long ret_pos;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(loffset)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
@@ -139,9 +142,12 @@ PHP_FUNCTION(grapheme_stripos)
 	zend_long ret_pos;
 	int is_ascii;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(loffset)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
@@ -200,9 +206,12 @@ PHP_FUNCTION(grapheme_strrpos)
 	zend_long ret_pos;
 	int is_ascii;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(loffset)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
@@ -255,9 +264,12 @@ PHP_FUNCTION(grapheme_strripos)
 	zend_long ret_pos;
 	int is_ascii;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &haystack, &haystack_len, &needle, &needle_len, &loffset) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(loffset)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ( OUTSIDE_STRING(loffset, haystack_len) ) {
 		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
@@ -325,11 +337,14 @@ PHP_FUNCTION(grapheme_substr)
 	UBreakIterator* bi = NULL;
 	int sub_str_start_pos, sub_str_end_pos;
 	int32_t (*iter_func)(UBreakIterator *);
-	bool no_length = 1;
+	bool no_length = true;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!", &str, &str_len, &lstart, &length, &no_length) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_LONG(lstart)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(length, no_length)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (lstart < INT32_MIN || lstart > INT32_MAX) {
 		zend_argument_value_error(2, "is too large");
@@ -526,11 +541,14 @@ static void strstr_common_handler(INTERNAL_FUNCTION_PARAMETERS, int f_ignore_cas
 	const char *found;
 	size_t haystack_len, needle_len;
 	int32_t ret_pos, uchar_pos;
-	bool part = 0;
+	bool part = false;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &haystack, &haystack_len, &needle, &needle_len, &part) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(part)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if ( !f_ignore_case ) {
 
@@ -702,9 +720,14 @@ PHP_FUNCTION(grapheme_extract)
 	int ret_pos;
 	zval *next = NULL; /* return offset of next part of the string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|llz", &str, &str_len, &size, &extract_type, &lstart, &next) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 5)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_LONG(size)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(extract_type)
+		Z_PARAM_LONG(lstart)
+		Z_PARAM_ZVAL(next)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (lstart < 0) {
 		lstart += str_len;

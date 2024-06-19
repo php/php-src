@@ -19,7 +19,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xsl.h"
 #include "php_xsl_arginfo.h"

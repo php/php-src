@@ -455,6 +455,20 @@ static bool ir_split_partially_dead_node(ir_ctx *ctx, ir_ref ref, uint32_t b)
 }
 #endif
 
+#ifdef IR_DEBUG
+static bool ir_gcm_dominates(ir_ctx *ctx, uint32_t b1, uint32_t b2)
+{
+	uint32_t b1_depth = ctx->cfg_blocks[b1].dom_depth;
+	const ir_block *bb2 = &ctx->cfg_blocks[b2];
+
+	while (bb2->dom_depth > b1_depth) {
+		b2 = bb2->dom_parent;
+		bb2 = &ctx->cfg_blocks[b2];
+	}
+	return b1 == b2;
+}
+#endif
+
 static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 {
 	ir_ref n, use;
@@ -494,6 +508,7 @@ static void ir_gcm_schedule_late(ir_ctx *ctx, ir_ref ref, uint32_t b)
 	}
 
 	IR_ASSERT(lca != 0 && "No Common Ancestor");
+	IR_ASSERT(ir_gcm_dominates(ctx, ctx->cfg_map[ref], lca) && "Early placement doesn't dominate the late");
 
 #if IR_GCM_SPLIT
 	if (ctx->use_lists[ref].count > 1

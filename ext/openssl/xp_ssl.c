@@ -159,7 +159,7 @@ static struct timeval php_openssl_subtract_timeval(struct timeval a, struct time
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
 
-const php_stream_ops php_openssl_socket_ops;
+static const php_stream_ops php_openssl_socket_ops;
 
 /* Certificate contexts used for server-side SNI selection */
 typedef struct _php_openssl_sni_cert_t {
@@ -498,7 +498,7 @@ static bool php_openssl_matches_san_list(X509 *peer, const char *subject_name) /
 			OPENSSL_free(cert_name);
 		} else if (san->type == GEN_IPADD) {
 			if (san->d.iPAddress->length == 4) {
-				sprintf(ipbuffer, "%d.%d.%d.%d",
+				snprintf(ipbuffer, sizeof(ipbuffer), "%d.%d.%d.%d",
 					san->d.iPAddress->data[0],
 					san->d.iPAddress->data[1],
 					san->d.iPAddress->data[2],
@@ -1650,7 +1650,7 @@ static int php_openssl_server_alpn_callback(SSL *ssl_handle,
 
 #endif
 
-zend_result php_openssl_setup_crypto(php_stream *stream,
+static zend_result php_openssl_setup_crypto(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock,
 		php_stream_xport_crypto_param *cparam) /* {{{ */
 {
@@ -2701,7 +2701,7 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 }
 /* }}} */
 
-const php_stream_ops php_openssl_socket_ops = {
+static const php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_write, php_openssl_sockop_read,
 	php_openssl_sockop_close, php_openssl_sockop_flush,
 	"tcp_socket/ssl",

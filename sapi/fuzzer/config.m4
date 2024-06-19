@@ -1,12 +1,11 @@
-AC_MSG_CHECKING(for clang fuzzer SAPI)
-
-PHP_ARG_ENABLE([fuzzer],,
+PHP_ARG_ENABLE([fuzzer],
+  [for Clang fuzzer SAPI],
   [AS_HELP_STRING([--enable-fuzzer],
-    [Build PHP as clang fuzzing test module (for developers)])],
+    [Build PHP as Clang fuzzing test module (for developers)])],
   [no],
   [no])
 
-dnl For newer clang versions see https://llvm.org/docs/LibFuzzer.html#fuzzer-usage
+dnl For newer Clang versions see https://llvm.org/docs/LibFuzzer.html#fuzzer-usage
 dnl for relevant flags.
 
 dnl Macro to define fuzzing target
@@ -20,7 +19,11 @@ AC_DEFUN([PHP_FUZZER_TARGET], [
 ])
 
 if test "$PHP_FUZZER" != "no"; then
-  AC_MSG_RESULT([yes])
+  AS_VAR_IF([enable_zts], [yes], [AC_MSG_ERROR(m4_normalize([
+    Thread safety (--enable-zts) is not supported when building fuzzing module
+    (--enable-fuzzer). Please build fuzzer without ZTS.
+  ]))])
+
   dnl Don't use PHP_REQUIRE_CXX() to avoid unnecessarily pulling in -lstdc++
   AC_PROG_CXX
   AC_PROG_CXXCPP
@@ -72,5 +75,3 @@ if test "$PHP_FUZZER" != "no"; then
 
   PHP_SUBST(PHP_FUZZER_BINARIES)
 fi
-
-AC_MSG_RESULT($PHP_FUZZER)

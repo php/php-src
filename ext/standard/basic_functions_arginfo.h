@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1ef54fdebc6a206c4af3438130db0cd12a62c8b6 */
+ * Stub hash: 7d588414e84ed62088cd5b1c668b29c0e51d406f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -335,6 +335,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_array_find_key arginfo_array_find
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_any, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_array_all arginfo_array_any
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_map, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
@@ -1732,6 +1746,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_fdiv arginfo_fmod
 
+#define arginfo_fpow arginfo_fmod
+
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, as_float, _IS_BOOL, 0, "false")
@@ -2403,6 +2419,10 @@ ZEND_FUNCTION(array_sum);
 ZEND_FUNCTION(array_product);
 ZEND_FUNCTION(array_reduce);
 ZEND_FUNCTION(array_filter);
+ZEND_FUNCTION(array_find);
+ZEND_FUNCTION(array_find_key);
+ZEND_FUNCTION(array_any);
+ZEND_FUNCTION(array_all);
 ZEND_FUNCTION(array_map);
 ZEND_FUNCTION(array_key_exists);
 ZEND_FUNCTION(array_chunk);
@@ -2789,6 +2809,7 @@ ZEND_FUNCTION(base_convert);
 ZEND_FUNCTION(number_format);
 ZEND_FUNCTION(fmod);
 ZEND_FUNCTION(fdiv);
+ZEND_FUNCTION(fpow);
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
 #endif
@@ -3027,6 +3048,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("array_product", zif_array_product, arginfo_array_product, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(array_reduce, arginfo_array_reduce)
 	ZEND_FE(array_filter, arginfo_array_filter)
+	ZEND_FE(array_find, arginfo_array_find)
+	ZEND_FE(array_find_key, arginfo_array_find_key)
+	ZEND_FE(array_any, arginfo_array_any)
+	ZEND_FE(array_all, arginfo_array_all)
 	ZEND_FE(array_map, arginfo_array_map)
 	ZEND_RAW_FENTRY("array_key_exists", zif_array_key_exists, arginfo_array_key_exists, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("key_exists", zif_array_key_exists, arginfo_key_exists, 0, NULL, NULL)
@@ -3428,6 +3453,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("number_format", zif_number_format, arginfo_number_format, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fmod", zif_fmod, arginfo_fmod, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fdiv", zif_fdiv, arginfo_fdiv, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("fpow", zif_fpow, arginfo_fpow, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(microtime, arginfo_microtime)
 #endif

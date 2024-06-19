@@ -26,8 +26,8 @@
 #include "zend_exceptions.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
@@ -1274,7 +1274,8 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	pdo_firebird_in_manually_transaction,
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 /* }}} */
 

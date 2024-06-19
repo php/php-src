@@ -58,6 +58,7 @@ static zend_class_entry *zend_test_attribute;
 static zend_class_entry *zend_test_repeatable_attribute;
 static zend_class_entry *zend_test_parameter_attribute;
 static zend_class_entry *zend_test_property_attribute;
+static zend_class_entry *zend_test_attribute_with_arguments;
 static zend_class_entry *zend_test_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_child_class_with_method_with_parameter_attribute;
 static zend_class_entry *zend_test_class_with_property_attribute;
@@ -460,6 +461,29 @@ static ZEND_FUNCTION(zend_call_method)
 	zend_call_method(obj, ce, NULL, ZSTR_VAL(method_name), ZSTR_LEN(method_name), return_value, argc - 2, arg1, arg2);
 }
 
+/* Instantiate a class and run the constructor via object_init_with_constructor */
+static ZEND_FUNCTION(zend_object_init_with_constructor)
+{
+	zend_class_entry *ce = NULL;
+	zval *args;
+	uint32_t num_args;
+	HashTable *named_args;
+
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_CLASS(ce)
+		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval obj;
+	/* We don't use return_value directly to check for memory leaks of the API on failure */
+	zend_result status = object_init_with_constructor(&obj, ce, num_args, args, named_args);
+	if (status == FAILURE) {
+		RETURN_THROWS();
+	}
+	ZEND_ASSERT(!EG(exception));
+	ZVAL_COPY_VALUE(return_value, &obj);
+}
+
 static ZEND_FUNCTION(zend_get_unit_enum)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -550,6 +574,11 @@ static ZEND_FUNCTION(zend_test_parameter_with_attribute)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(1);
+}
+
+static ZEND_FUNCTION(zend_test_attribute_with_named_argument)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
 }
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -732,7 +761,7 @@ static ZEND_FUNCTION(get_open_basedir)
 static ZEND_FUNCTION(zend_test_is_pcre_bundled)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
-#if HAVE_BUNDLED_PCRE
+#ifdef HAVE_BUNDLED_PCRE
 	RETURN_TRUE;
 #else
 	RETURN_FALSE;
@@ -750,6 +779,38 @@ static ZEND_FUNCTION(zend_test_set_fmode)
 	_fmode = binary ? _O_BINARY : _O_TEXT;
 }
 #endif
+
+static ZEND_FUNCTION(zend_test_cast_fread)
+{
+	zval *stream_zv;
+	php_stream *stream;
+	FILE *fp;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(stream_zv);
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_stream_from_zval(stream, stream_zv);
+
+	if (php_stream_cast(stream, PHP_STREAM_AS_STDIO, (void *) &fp, REPORT_ERRORS) == FAILURE) {
+		return;
+	}
+
+	size_t size = 10240; /* Must be large enough to trigger the issue */
+	char *buf = malloc(size);
+	bool bail = false;
+	zend_try {
+		(void) !fread(buf, 1, size, fp);
+	} zend_catch {
+		bail = true;
+	} zend_end_try();
+
+	free(buf);
+
+	if (bail) {
+		zend_bailout();
+	}
+}
 
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
@@ -932,6 +993,19 @@ static ZEND_METHOD(ZendTestPropertyAttribute, __construct)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_STR_COPY(OBJ_PROP_NUM(Z_OBJ_P(ZEND_THIS), 0), parameter);
+}
+
+static ZEND_METHOD(ZendTestAttributeWithArguments, __construct)
+{
+	zval *arg;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_string *property_name = zend_string_init("arg", strlen("arg"), 0);
+	zend_update_property_ex(zend_test_attribute_with_arguments, Z_OBJ_P(ZEND_THIS), property_name, arg);
+	zend_string_release(property_name);
 }
 
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override)
@@ -1162,6 +1236,9 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_property_attribute = register_class_ZendTestPropertyAttribute();
 	zend_mark_internal_attribute(zend_test_property_attribute);
 
+	zend_test_attribute_with_arguments = register_class_ZendTestAttributeWithArguments();
+	zend_mark_internal_attribute(zend_test_attribute_with_arguments);
+
 	zend_test_class_with_method_with_parameter_attribute = register_class_ZendTestClassWithMethodWithParameterAttribute();
 	zend_test_child_class_with_method_with_parameter_attribute = register_class_ZendTestChildClassWithMethodWithParameterAttribute(zend_test_class_with_method_with_parameter_attribute);
 
@@ -1321,8 +1398,7 @@ PHP_ZEND_TEST_API struct bug79096 bug79096(void)
 
 PHP_ZEND_TEST_API void bug79532(off_t *array, size_t elems)
 {
-	int i;
-	for (i = 0; i < elems; i++) {
+	for (size_t i = 0; i < elems; i++) {
 		array[i] = i;
 	}
 }

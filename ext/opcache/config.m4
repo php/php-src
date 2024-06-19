@@ -105,8 +105,8 @@ if test "$PHP_OPCACHE" != "no"; then
 
   AC_CHECK_FUNCS([mprotect shm_create_largepage])
 
-  AC_MSG_CHECKING(for sysvipc shared memory support)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK([for sysvipc shared memory support], [php_cv_shm_ipc],
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/ipc.h>
@@ -170,14 +170,17 @@ int main(void) {
   }
   return 0;
 }
-]])],[have_shm_ipc=yes],[have_shm_ipc=no],[have_shm_ipc=no])
-  if test "$have_shm_ipc" = "yes"; then
-    AC_DEFINE(HAVE_SHM_IPC, 1, [Define if you have SysV IPC SHM support])
-  fi
-  AC_MSG_RESULT([$have_shm_ipc])
+]])],
+[php_cv_shm_ipc=yes],
+[php_cv_shm_ipc=no],
+[php_cv_shm_ipc=no])])
+AS_VAR_IF([php_cv_shm_ipc], [yes],
+  [AC_DEFINE([HAVE_SHM_IPC], [1],
+    [Define to 1 if you have the SysV IPC SHM support.])])
 
-  AC_MSG_CHECKING(for mmap() using MAP_ANON shared memory support)
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_CACHE_CHECK([for mmap() using MAP_ANON shared memory support],
+  [php_cv_shm_mmap_anon],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
@@ -223,20 +226,15 @@ int main(void) {
   }
   return 0;
 }
-]])],[have_shm_mmap_anon=yes],[have_shm_mmap_anon=no],[
-  case $host_alias in
-    *linux*|*midipix)
-      have_shm_mmap_anon=yes
-      ;;
-    *)
-      have_shm_mmap_anon=no
-      ;;
-  esac
-])
-  if test "$have_shm_mmap_anon" = "yes"; then
-    AC_DEFINE(HAVE_SHM_MMAP_ANON, 1, [Define if you have mmap(MAP_ANON) SHM support])
-  fi
-  AC_MSG_RESULT([$have_shm_mmap_anon])
+]])],
+[php_cv_shm_mmap_anon=yes],
+[php_cv_shm_mmap_anon=no],
+[AS_CASE([host_alias],
+  [*linux*|*midipix], [php_cv_shm_mmap_anon=yes],
+  [php_cv_shm_mmap_anon=no])])])
+AS_VAR_IF([php_cv_shm_mmap_anon], [yes],
+  [AC_DEFINE([HAVE_SHM_MMAP_ANON], [1],
+    [Define to 1 if you have the mmap(MAP_ANON) SHM support.])])
 
   dnl Check POSIX shared memory object operations and link required library as
   dnl needed: rt (older Linux and Solaris <= 10). Most systems have it in the C
@@ -339,11 +337,11 @@ int main(void) {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	$ZEND_JIT_SRC,
-	shared,,"-Wno-implicit-fallthrough -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
+	shared,,"-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
-  if test "$have_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$have_shm_mmap_anon" != "yes"; then
+  if test "$php_cv_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$php_cv_shm_mmap_anon" != "yes"; then
     AC_MSG_ERROR([No supported shared memory caching support was found when configuring opcache. Check config.log for any errors or missing dependencies.])
   fi
 

@@ -91,6 +91,10 @@ static zend_always_inline php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_ob
 
 static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *nodep, const xmlNode *basep)
 {
+	if (nodep->type == XML_ELEMENT_NODE && nodep->children) {
+		return nodep->children;
+	}
+
 	if (nodep->next) {
 		return nodep->next;
 	} else {

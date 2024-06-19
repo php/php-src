@@ -455,7 +455,8 @@ can be built that way. \
 
 	var snapshot_build_exclusions = new Array(
 		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
-		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer'
+		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer',
+		'phpdbg-debug'
 	);
 	var force;
 

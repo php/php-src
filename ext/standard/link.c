@@ -15,8 +15,6 @@
  */
 
 #include "php.h"
-#include "php_filestat.h"
-#include "php_globals.h"
 
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 
@@ -39,7 +37,7 @@
 #include <pwd.h>
 #endif
 #endif
-#if HAVE_GRP_H
+#ifdef HAVE_GRP_H
 # include <grp.h>
 #endif
 #include <errno.h>

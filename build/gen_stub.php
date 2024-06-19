@@ -394,6 +394,10 @@ class SimpleType {
         return $this->isBuiltin && $this->name === 'array';
     }
 
+    public function isMixed(): bool {
+        return $this->isBuiltin && $this->name === 'mixed';
+    }
+
     public function toTypeCode(): string {
         assert($this->isBuiltin);
         switch ($this->name) {
@@ -1010,7 +1014,7 @@ class PropertyName implements VariableLikeName {
         $this->property = $property;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return $this->class->toString() . "::$" . $this->property;
     }
@@ -2101,6 +2105,13 @@ OUPUT_EXAMPLE
                 }
 
                 $methodSynopsis->appendChild($methodparam);
+                foreach ($arg->attributes as $attribute) {
+                    $attribute = $doc->createElement("modifier", "#[\\" . $attribute->class . "]");
+                    $attribute->setAttribute("role", "attribute");
+
+                    $methodparam->appendChild($attribute);
+                }
+
                 $methodparam->appendChild($arg->getMethodSynopsisType()->getTypeForDoc($doc));
 
                 $parameter = $doc->createElement('parameter', $arg->name);
@@ -2241,7 +2252,7 @@ class EvaluatedValue
                     return null;
                 }
 
-                throw new Exception("Constant " . $originatingConstName->__toString() . " cannot be found");
+                throw new Exception("Constant " . $constName . " cannot be found");
             }
         );
 
@@ -2877,6 +2888,7 @@ class ConstInfo extends VariableLike
 
 class PropertyInfo extends VariableLike
 {
+    public int $classFlags;
     public PropertyName $name;
     public ?Expr $defaultValue;
     public ?string $defaultValueString;
@@ -2887,6 +2899,7 @@ class PropertyInfo extends VariableLike
      */
     public function __construct(
         PropertyName $name,
+        int $classFlags,
         int $flags,
         ?Type $type,
         ?Type $phpDocType,
@@ -2899,6 +2912,7 @@ class PropertyInfo extends VariableLike
         ?ExposedDocComment $exposedDocComment
     ) {
         $this->name = $name;
+        $this->classFlags = $classFlags;
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
@@ -3013,6 +3027,8 @@ class PropertyInfo extends VariableLike
 
         if ($this->flags & Modifiers::READONLY) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
+        } elseif ($this->classFlags & Modifiers::READONLY) {
+            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_82_VERSION_ID);
         }
 
         return $flags;
@@ -3108,7 +3124,7 @@ class AttributeInfo {
             $code .= $value->initializeZval($zvalName);
             $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
             if ($arg->name) {
-                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
             }
         }
         return $code;
@@ -4226,7 +4242,7 @@ function parseFunctionLike(
                 $type && !$type->isNullable()
             ) {
                 $simpleType = $type->tryToSimpleType();
-                if ($simpleType === null) {
+                if ($simpleType === null || !$simpleType->isMixed()) {
                     throw new Exception("Parameter $varName has null default, but is not nullable");
                 }
             }
@@ -4335,13 +4351,26 @@ function parseConstLike(
         throw new Exception("Missing type for constant " . $name->__toString());
     }
 
+    $constType = $type ? Type::fromNode($type) : null;
+    $constPhpDocType = $phpDocType ? Type::fromString($phpDocType) : null;
+
+    if ($const->value instanceof Expr\ConstFetch &&
+        $const->value->name->toLowerString() === "null" &&
+        $constType && !$constType->isNullable()
+    ) {
+        $simpleType = $constType->tryToSimpleType();
+        if ($simpleType === null || !$simpleType->isMixed()) {
+            throw new Exception("Constant " . $name->__toString() . " has null value, but is not nullable");
+        }
+    }
+
     return new ConstInfo(
         $name,
         $flags,
         $const->value,
         $prettyPrinter->prettyPrintExpr($const->value),
-        $type ? Type::fromNode($type) : null,
-        $phpDocType ? Type::fromString($phpDocType) : null,
+        $constType,
+        $constPhpDocType,
         $deprecated,
         $cond,
         $cValue,
@@ -4359,6 +4388,7 @@ function parseConstLike(
  */
 function parseProperty(
     Name $class,
+    int $classFlags,
     int $flags,
     Stmt\PropertyProperty $property,
     ?Node $type,
@@ -4394,14 +4424,14 @@ function parseProperty(
         $propertyType && !$propertyType->isNullable()
     ) {
         $simpleType = $propertyType->tryToSimpleType();
-        if ($simpleType === null) {
-            throw new Exception(
-                "Property $class::\$$property->name has null default, but is not nullable");
+        if ($simpleType === null || !$simpleType->isMixed()) {
+            throw new Exception("Property $class::\$$property->name has null default, but is not nullable");
         }
     }
 
     return new PropertyInfo(
         new PropertyName($class, $property->name->__toString()),
+        $classFlags,
         $flags,
         $propertyType,
         $phpDocType ? Type::fromString($phpDocType) : null,
@@ -4690,6 +4720,7 @@ function handleStatements(FileInfo $fileInfo, array $stmts, PrettyPrinterAbstrac
                     foreach ($classStmt->props as $property) {
                         $propertyInfos[] = parseProperty(
                             $className,
+                            $classFlags,
                             $classStmt->flags,
                             $property,
                             $classStmt->type,
@@ -5303,7 +5334,7 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
 
     foreach ($it as $file) {
         $pathName = $file->getPathName();
-        if (!preg_match('/(?:[\w\.]*constants[\w\.]*|tokens).xml$/i', basename($pathName))) {
+        if (!preg_match('/(?:[\w\.]*constants[\w\._]*|tokens).xml$/i', basename($pathName))) {
             continue;
         }
 
@@ -5312,7 +5343,9 @@ function replacePredefinedConstants(string $targetDirectory, array $constMap, ar
             continue;
         }
 
-        if (stripos($xml, "<appendix") === false && stripos($xml, "<sect2") === false && stripos($xml, "<chapter") === false) {
+        if (stripos($xml, "<appendix") === false && stripos($xml, "<sect2") === false &&
+            stripos($xml, "<chapter") === false && stripos($xml, 'role="constant_list"') === false
+        ) {
             continue;
         }
 
@@ -5552,19 +5585,21 @@ function replaceClassSynopses(
             $replacedXml = preg_replace(
                 [
                     "/REPLACED-ENTITY-([A-Za-z0-9._{}%-]+?;)/",
-                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<phpdoc:(classref|exceptionref)\s+xmlns:phpdoc=\"([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
-                    '/<phpdoc:(classref|exceptionref)\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns:phpdoc="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<reference\s+role="(\w+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<reference\s+role="(\w+)"\s+xmlns="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<reference\s+role="(\w+)"\s+xmlns="([^"]+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<reference\s+role="(\w+)"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xmlns="([^"]+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<reference\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+role="(\w+)"\s+xml:id="([^"]+)"\s*>/i',
+                    '/<reference\s+xmlns=\"([^"]+)\"\s+xmlns:xlink="([^"]+)"\s+xmlns:xi="([^"]+)"\s+xml:id="([^"]+)"\s+role="(\w+)"\s*>/i',
                 ],
                 [
                     "&$1",
-                    "<phpdoc:$1 xml:id=\"$4\" xmlns:phpdoc=\"$2\" xmlns=\"$3\">",
-                    "<phpdoc:$1 xml:id=\"$5\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xi=\"$4\">",
-                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$3\" xmlns:xlink=\"$4\" xmlns:xi=\"$5\">",
-                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$2\" xmlns=\"$5\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
-                    "<phpdoc:$1 xml:id=\"$6\" xmlns:phpdoc=\"$5\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
+                    "<reference xml:id=\"$3\" role=\"$1\" xmlns=\"$2\">",
+                    "<reference xml:id=\"$4\" role=\"$1\" xmlns=\"$2\" xmlns:xi=\"$3\">",
+                    "<reference xml:id=\"$5\" role=\"$1\" xmlns=\"$2\" xmlns:xlink=\"$3\" xmlns:xi=\"$4\">",
+                    "<reference xml:id=\"$5\" role=\"$1\" xmlns=\"$4\" xmlns:xlink=\"$2\" xmlns:xi=\"$2\">",
+                    "<reference xml:id=\"$5\" role=\"$4\" xmlns=\"$1\" xmlns:xlink=\"$2\" xmlns:xi=\"$3\">",
+                    "<reference xml:id=\"$4\" role=\"$5\" xmlns=\"$1\" xmlns:xlink=\"$2\" xmlns:xi=\"$3\">",
                 ],
                 $replacedXml
             );

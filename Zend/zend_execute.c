@@ -873,14 +873,10 @@ ZEND_COLD zend_never_inline void zend_magic_get_property_type_inconsistency_erro
 ZEND_COLD void zend_match_unhandled_error(const zval *value)
 {
 	smart_str msg = {0};
-
-	if (Z_TYPE_P(value) <= IS_STRING) {
-		smart_str_append_scalar(&msg, value, EG(exception_string_param_max_len));
-	} else {
+	if (smart_str_append_zval(&msg, value, EG(exception_string_param_max_len)) != SUCCESS) {
 		smart_str_appendl(&msg, "of type ", sizeof("of type ")-1);
 		smart_str_appends(&msg, zend_zval_type_name(value));
 	}
-
 	smart_str_0(&msg);
 
 	zend_throw_exception_ex(
@@ -1539,6 +1535,54 @@ static zend_never_inline void zend_assign_to_object_dim(zend_object *obj, zval *
 		ZVAL_COPY(EX_VAR(opline->result.var), value);
 	}
 }
+
+static void frameless_observed_call_copy(zend_execute_data *call, uint32_t arg, zval *zv)
+{
+	if (Z_ISUNDEF_P(zv)) {
+		ZVAL_NULL(ZEND_CALL_VAR_NUM(call, arg));
+	} else {
+		ZVAL_COPY_DEREF(ZEND_CALL_VAR_NUM(call, arg), zv);
+	}
+}
+
+ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
+{
+	const zend_op *opline = EX(opline);
+	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
+	zend_function *fbc = ZEND_FLF_FUNC(opline);
+	zval *result = EX_VAR(opline->result.var);
+
+	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(num_args, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, num_args, NULL);
+	call->prev_execute_data = execute_data;
+
+	switch (num_args) {
+		case 3: frameless_observed_call_copy(call, 2, zend_get_zval_ptr(opline+1, (opline+1)->op1_type, &(opline+1)->op1, execute_data)); ZEND_FALLTHROUGH;
+		case 2: frameless_observed_call_copy(call, 1, zend_get_zval_ptr(opline, opline->op2_type, &opline->op2, execute_data)); ZEND_FALLTHROUGH;
+		case 1: frameless_observed_call_copy(call, 0, zend_get_zval_ptr(opline, opline->op1_type, &opline->op1, execute_data));
+	}
+
+	EG(current_execute_data) = call;
+
+	zend_observer_fcall_begin_prechecked(call, ZEND_OBSERVER_DATA(fbc));
+	fbc->internal_function.handler(call, result);
+	zend_observer_fcall_end(call, result);
+
+	EG(current_execute_data) = execute_data;
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_rethrow_exception(execute_data);
+	}
+
+	zend_vm_stack_free_args(call);
+
+	uint32_t call_info = ZEND_CALL_INFO(call);
+	if (UNEXPECTED(call_info & ZEND_CALL_ALLOCATED)) {
+		zend_vm_stack_free_call_frame_ex(call_info, call);
+	} else {
+		EG(vm_stack_top) = (zval*)call;
+	}
+}
+
 
 static zend_always_inline int zend_binary_op(zval *ret, zval *op1, zval *op2 OPLINE_DC)
 {

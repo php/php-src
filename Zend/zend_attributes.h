@@ -20,6 +20,8 @@
 #ifndef ZEND_ATTRIBUTES_H
 #define ZEND_ATTRIBUTES_H
 
+#include "zend_compile.h"
+
 #define ZEND_ATTRIBUTE_TARGET_CLASS			(1<<0)
 #define ZEND_ATTRIBUTE_TARGET_FUNCTION		(1<<1)
 #define ZEND_ATTRIBUTE_TARGET_METHOD		(1<<2)

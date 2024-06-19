@@ -22,7 +22,9 @@ $timestamps = array(
     PHP_INT_MIN - 1025.0,
     NAN,
     +INF,
-    -INF
+    -INF,
+    1599828571.235628,
+    -1599828571.235628,
 );
 
 foreach ($timestamps as $ts) {
@@ -211,6 +213,38 @@ DateTime::createFromTimestamp(INF): DateRangeError: DateTime::createFromTimestam
 DateTimeImmutable::createFromTimestamp(INF): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, INF given
 DateTime::createFromTimestamp(-INF): DateRangeError: DateTime::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, -INF given
 DateTimeImmutable::createFromTimestamp(-INF): DateRangeError: DateTimeImmutable::createFromTimestamp(): Argument #1 ($timestamp) must be a finite number between %i and %i.999999, -INF given
+DateTime::createFromTimestamp(1599828571.235628): object(DateTime)#%d (3) {
+  ["date"]=>
+  string(26) "2020-09-11 12:49:31.235628"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(1599828571.235628): object(DateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "2020-09-11 12:49:31.235628"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTime::createFromTimestamp(-1599828571.235628): object(DateTime)#%d (3) {
+  ["date"]=>
+  string(26) "1919-04-22 11:10:28.764372"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
+DateTimeImmutable::createFromTimestamp(-1599828571.235628): object(DateTimeImmutable)#%d (3) {
+  ["date"]=>
+  string(26) "1919-04-22 11:10:28.764372"
+  ["timezone_type"]=>
+  int(1)
+  ["timezone"]=>
+  string(6) "+00:00"
+}
 MyDateTime::createFromTimestamp(0): object(MyDateTime)#%d (3) {
   ["date"]=>
   string(26) "1970-01-01 00:00:00.000000"

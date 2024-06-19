@@ -41,7 +41,7 @@
 # endif
 #endif
 
-HashTable php_hash_hashtable;
+static HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
 static zend_object_handlers php_hashcontext_handlers;
 

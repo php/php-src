@@ -24,7 +24,7 @@
 
 #include "zend_variables.h"
 #include "ext/standard/info.h"
-#include "ext/standard/html.h"
+#include "ext/standard/html.h" /* For php_next_utf8_char() */
 
 #ifdef HAVE_XML
 
@@ -186,7 +186,7 @@ zend_module_entry xml_module_entry = {
 /* All the encoding functions are set to NULL right now, since all
  * the encoding is currently done internally by expat/xmltok.
  */
-const xml_encoding xml_encodings[] = {
+static const xml_encoding xml_encodings[] = {
 	{ (XML_Char *)"ISO-8859-1", xml_decode_iso_8859_1, xml_encode_iso_8859_1 },
 	{ (XML_Char *)"US-ASCII",   xml_decode_us_ascii,   xml_encode_us_ascii   },
 	{ (XML_Char *)"UTF-8",      NULL,                  NULL                  },
@@ -270,7 +270,7 @@ static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_le
 	ZEND_ASSERT(!parser->isparsing);
 
 	/* libxml2 specific options */
-#if LIBXML_EXPAT_COMPAT
+#ifdef LIBXML_EXPAT_COMPAT
 	/* See xmlInitSAXParserCtxt() and xmlCtxtUseOptions() */
 	if (parser->parsehuge) {
 		parser->parser->parser->options |= XML_PARSE_HUGE;

@@ -137,7 +137,7 @@ php
 # ------------------------------------------------------------------------------
 /ext/json/json_scanner.c
 /ext/json/php_json_scanner_defs.h
-/ext/pdo/pdo_sql_parser.c
+/ext/pdo*/*_sql_parser.c
 /ext/phar/phar_path_check.c
 /ext/standard/url_scanner_ex.c
 /ext/standard/var_unserializer.c

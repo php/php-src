@@ -6,7 +6,7 @@ pdo_sqlite
 <?php
 
 // This test was copied from the pdo_sqlite test for sqliteCreateAggregate
-$pdo = new PdoSqlite('sqlite::memory:');
+$pdo = new Pdo\Sqlite('sqlite::memory:');
 
 try {
     $pdo->createAggregate('foo', 'a', '');
@@ -21,5 +21,5 @@ try {
 
 ?>
 --EXPECT--
-PdoSqlite::createAggregate(): Argument #2 ($step) must be a valid callback, function "a" not found or invalid function name
-PdoSqlite::createAggregate(): Argument #3 ($finalize) must be a valid callback, function "" not found or invalid function name
+Pdo\Sqlite::createAggregate(): Argument #2 ($step) must be a valid callback, function "a" not found or invalid function name
+Pdo\Sqlite::createAggregate(): Argument #3 ($finalize) must be a valid callback, function "" not found or invalid function name

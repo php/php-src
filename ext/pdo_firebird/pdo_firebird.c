@@ -21,8 +21,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 #include "pdo_firebird_arginfo.h"
@@ -70,7 +70,7 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 		return FAILURE;
 	}
 
-	PdoFirebird_ce = register_class_PdoFirebird(pdo_dbh_ce);
+	PdoFirebird_ce = register_class_Pdo_Firebird(pdo_dbh_ce);
 	PdoFirebird_ce->create_object = pdo_dbh_new;
 
 #ifdef ZEND_SIGNALS

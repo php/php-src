@@ -20,22 +20,18 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_array.h"
+#include "ext/standard/php_array.h" /* For PHP_COUNT_* constants */
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
-#include "spl_engine.h"
+#include "php_spl.h" /* For php_spl_object_hash() */
 #include "spl_observer.h"
 #include "spl_observer_arginfo.h"
 #include "spl_iterators.h"
-#include "spl_array.h"
 #include "spl_exceptions.h"
+#include "spl_functions.h" /* For spl_set_private_debug_info_property() */
 
 PHPAPI zend_class_entry     *spl_ce_SplObserver;
 PHPAPI zend_class_entry     *spl_ce_SplSubject;
@@ -73,7 +69,7 @@ static inline spl_SplObjectStorage *spl_object_storage_from_obj(zend_object *obj
 
 #define Z_SPLOBJSTORAGE_P(zv)  spl_object_storage_from_obj(Z_OBJ_P((zv)))
 
-void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
+static void spl_SplObjectStorage_free_storage(zend_object *object) /* {{{ */
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 
@@ -325,7 +321,6 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 	spl_SplObjectStorageElement *element;
 	HashTable *props;
 	zval tmp, storage;
-	zend_string *zname;
 	HashTable *debug_info;
 
 	props = obj->handlers->get_properties(obj);
@@ -347,9 +342,7 @@ static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ 
 		zend_hash_next_index_insert(Z_ARRVAL(storage), &tmp);
 	} ZEND_HASH_FOREACH_END();
 
-	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
-	zend_symtable_update(debug_info, zname, &storage);
-	zend_string_release_ex(zname, 0);
+	spl_set_private_debug_info_property(spl_ce_SplObjectStorage, "storage", strlen("storage"), debug_info, &storage);
 
 	return debug_info;
 }
@@ -440,6 +433,7 @@ PHP_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
+// todo: make spl_object_storage_has_dimension return bool as well
 static int spl_object_storage_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);

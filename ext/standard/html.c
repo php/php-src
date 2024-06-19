@@ -41,12 +41,8 @@
 #include <php_config.h>
 #endif
 #include "php_standard.h"
-#include "php_string.h"
 #include "SAPI.h"
 #include <locale.h>
-#ifdef HAVE_LANGINFO_H
-#include <langinfo.h>
-#endif
 
 #include <zend_hash.h>
 #include "html_tables.h"

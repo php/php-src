@@ -21,8 +21,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_sqlite.h"
 #include "php_pdo_sqlite_int.h"
 #include "zend_exceptions.h"
@@ -280,6 +280,15 @@ static int pdo_sqlite_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 	}
 
 	return 1;
+}
+
+static bool pdo_sqlite_in_transaction(pdo_dbh_t *dbh)
+{
+	pdo_sqlite_db_handle* H = (pdo_sqlite_db_handle*) dbh->driver_data;
+	/* It's not possible in sqlite3 to explicitly turn autocommit off other
+	 * than manually starting a transaction. Manual transactions always are
+	 * the mode of operation when autocommit is off. */
+	return H->db && sqlite3_get_autocommit(H->db) == 0;
 }
 
 static bool pdo_sqlite_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
@@ -733,8 +742,9 @@ static const struct pdo_dbh_methods sqlite_methods = {
 	NULL,	/* check_liveness: not needed */
 	get_driver_methods,
 	pdo_sqlite_request_shutdown,
-	NULL, /* in transaction, use PDO's internal tracking mechanism */
-	pdo_sqlite_get_gc
+	pdo_sqlite_in_transaction,
+	pdo_sqlite_get_gc,
+    pdo_sqlite_scanner
 };
 
 static char *make_filename_safe(const char *filename)

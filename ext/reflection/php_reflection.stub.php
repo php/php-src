@@ -163,6 +163,8 @@ final class ReflectionGenerator
 
     /** @tentative-return-type */
     public function getExecutingGenerator(): Generator {}
+
+    public function isClosed(): bool {}
 }
 
 class ReflectionMethod extends ReflectionFunctionAbstract

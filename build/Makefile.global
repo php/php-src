@@ -161,4 +161,3 @@ prof-use:
 	fi;
 
 .PHONY: all clean install distclean test prof-gen prof-clean prof-use
-.NOEXPORT:

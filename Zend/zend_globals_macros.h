@@ -20,6 +20,8 @@
 #ifndef ZEND_GLOBALS_MACROS_H
 #define ZEND_GLOBALS_MACROS_H
 
+#include "zend_portability.h"
+
 typedef struct _zend_compiler_globals zend_compiler_globals;
 typedef struct _zend_executor_globals zend_executor_globals;
 typedef struct _zend_php_scanner_globals zend_php_scanner_globals;

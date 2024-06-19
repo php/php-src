@@ -6,6 +6,7 @@ session
 session.save_handler=files
 open_basedir=.
 error_reporting=E_ALL
+session.save_path=
 --FILE--
 <?php
 session_set_save_handler(new \SessionHandler(), true);

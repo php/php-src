@@ -21,7 +21,6 @@
 #include "php.h"
 #include <unistd.h>
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_posix.h"
 
 #ifdef HAVE_POSIX

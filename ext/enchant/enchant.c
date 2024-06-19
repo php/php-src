@@ -23,7 +23,6 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "Zend/zend_exceptions.h"
-#include "../spl/spl_exceptions.h"
 #include <enchant.h>
 #include "php_enchant.h"
 
@@ -343,7 +342,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	if (!value_len) {
 		RETURN_FALSE;
@@ -382,7 +381,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 		RETURN_THROWS();
 	}
 
-#if HAVE_ENCHANT_BROKER_SET_PARAM
+#ifdef HAVE_ENCHANT_BROKER_SET_PARAM
 	enchant_broker *pbroker;
 	char *value;
 	PHP_ENCHANT_GET_BROKER;

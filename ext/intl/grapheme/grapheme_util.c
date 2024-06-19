@@ -28,8 +28,6 @@
 #include <unicode/ubrk.h>
 #include <unicode/usearch.h>
 
-#include "ext/standard/php_string.h"
-
 ZEND_EXTERN_MODULE_GLOBALS( intl )
 
 /* }}} */

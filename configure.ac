@@ -220,6 +220,9 @@ case $host_cpu in
     ;;
 esac
 
+dnl See https://github.com/php/php-src/issues/14140
+AX_CHECK_COMPILE_FLAG([-ffp-contract=off], [CFLAGS="$CFLAGS -ffp-contract=off"])
+
 dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 dnl supports it. This can help reduce the binary size and startup time.
 AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
@@ -837,8 +840,9 @@ if test "$PHP_GCOV" = "yes"; then
 
   dnl Remove all optimization flags from CFLAGS.
   changequote({,})
-  CFLAGS=`echo "$CFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
+  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
   changequote([,])
 
   dnl Add the special gcc flags.
@@ -857,8 +861,9 @@ if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
-  CFLAGS=`echo "$CFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
+  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
   changequote([,])
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -1122,40 +1127,31 @@ dnl Extensions post-config.
 dnl ----------------------------------------------------------------------------
 
 dnl Align segments on huge page boundary
-case $host_alias in
-  i[[3456]]86-*-linux-* | x86_64-*-linux-*)
-	AC_MSG_CHECKING(linker support for -zcommon-page-size=2097152)
+AS_CASE([$host_alias], [[i[3456]86-*-linux-* | x86_64-*-linux-*]],
+  [AC_CACHE_CHECK([linker support for -zcommon-page-size=2097152],
+    [php_cv_have_common_page_size], [
     save_LDFLAGS=$LDFLAGS
     LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
-    AC_RUN_IFELSE(
-        [AC_LANG_PROGRAM()],
-        [ac_cv_common_page_size=yes],
-        [ac_cv_common_page_size=no],
-        [ac_cv_common_page_size=no])
-    LDFLAGS=$save_LDFLAGS
-    if test "$ac_cv_common_page_size" = "yes"; then
-        AC_MSG_RESULT([yes])
-        EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
-    else
-        AC_MSG_RESULT([no])
-        AC_MSG_CHECKING(linker support for -zmax-page-size=2097152)
-        save_LDFLAGS=$LDFLAGS
-        LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
-        AC_RUN_IFELSE(
-            [AC_LANG_PROGRAM()],
-            [ac_cv_max_page_size=yes],
-            [ac_cv_max_page_size=no],
-            [ac_cv_max_page_size=no])
-        LDFLAGS=$save_LDFLAGS
-        if test "$ac_cv_max_page_size" = "yes"; then
-            AC_MSG_RESULT([yes])
-            EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zmax-page-size=2097152"
-        else
-            AC_MSG_RESULT([no])
-        fi
-    fi
-    ;;
-esac
+    AC_RUN_IFELSE([AC_LANG_PROGRAM()],
+      [php_cv_have_common_page_size=yes],
+      [php_cv_have_common_page_size=no],
+      [php_cv_have_common_page_size=no])
+    LDFLAGS=$save_LDFLAGS])
+  AS_VAR_IF([php_cv_have_common_page_size], [yes],
+    [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"],
+    [AC_CACHE_CHECK([linker support for -zmax-page-size=2097152],
+      [php_cv_have_max_page_size], [
+      save_LDFLAGS=$LDFLAGS
+      LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
+      AC_RUN_IFELSE([AC_LANG_PROGRAM()],
+        [php_cv_have_max_page_size=yes],
+        [php_cv_have_max_page_size=no],
+        [php_cv_have_max_page_size=no])
+      LDFLAGS=$save_LDFLAGS])
+    AS_VAR_IF([php_cv_have_max_page_size], [yes],
+      [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zmax-page-size=2097152"])
+  ])
+])
 
 enable_shared=yes
 enable_static=yes
@@ -1326,9 +1322,9 @@ else
   fiber_asm="no"
 fi
 
-dnl Check whether syscall to create shadow stack exists, should be a better way, but...
-AC_CACHE_CHECK([whether syscall to create shadow stack exists], ac_cv_syscall_shadow_stack_exists,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([whether syscall to create shadow stack exists],
+[php_cv_have_shadow_stack_syscall],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <unistd.h>
 #include <sys/mman.h>
 int main(void) {
@@ -1338,18 +1334,19 @@ int main(void) {
     munmap(base, 0x20000);
     return 0;
   }
-  else
-    return 1;
+  return 1;
 }
-  ]])], [ac_cv_syscall_shadow_stack_exists=yes], [ac_cv_syscall_shadow_stack_exists=no], [ac_cv_syscall_shadow_stack_exists=no])
+])],
+  [php_cv_have_shadow_stack_syscall=yes],
+  [php_cv_have_shadow_stack_syscall=no],
+  [php_cv_have_shadow_stack_syscall=no])
 ])
-if test "$ac_cv_syscall_shadow_stack_exists" = yes; then
-  AC_DEFINE([SHADOW_STACK_SYSCALL], 1, [ ])
-  # asm file can't see macro from AC_DEFINE, workaround this via cflag
-  fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=1"
-  # if the syscall doesn't exist, we may block the final ELF from __PROPERTY_SHSTK
-  # via redefine macro as "-D__CET__=1"
-fi
+dnl The asm files can't see macro from AC_DEFINE, workaround this via cflag. If
+dnl the syscall doesn't exist, we may block the final ELF from __PROPERTY_SHSTK
+dnl via redefine macro as "-D__CET__=1".
+AS_VAR_IF([php_cv_have_shadow_stack_syscall], [yes],
+  [fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=1"],
+  [fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=0"])
 
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
@@ -1780,7 +1777,7 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/escape_analysis.c \
 	Optimizer/compact_vars.c \
 	Optimizer/zend_dump.c \
-    , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+    , [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)

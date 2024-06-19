@@ -33,7 +33,7 @@
 #endif
 
 #include <sys/types.h>
-#if HAVE_SYS_SOCKET_H
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -44,7 +44,7 @@
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-#if HAVE_POLL_H
+#ifdef HAVE_POLL_H
 #include <poll.h>
 #elif HAVE_SYS_POLL_H
 #include <sys/poll.h>
@@ -54,7 +54,7 @@
 #ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
-#if HAVE_ARPA_INET_H
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #endif
@@ -87,7 +87,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 # define PHP_TIMEOUT_ERROR_VALUE		ETIMEDOUT
 #endif
 
-#if HAVE_GETADDRINFO
+#ifdef HAVE_GETADDRINFO
 #ifdef HAVE_GAI_STRERROR
 #  define PHP_GAI_STRERROR(x) (gai_strerror(x))
 #else
@@ -150,7 +150,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 {
 	struct sockaddr **sap;
 	int n;
-#if HAVE_GETADDRINFO
+#ifdef HAVE_GETADDRINFO
 # ifdef HAVE_IPV6
 	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
 # endif
@@ -163,7 +163,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 	if (host == NULL) {
 		return 0;
 	}
-#if HAVE_GETADDRINFO
+#ifdef HAVE_GETADDRINFO
 	memset(&hints, '\0', sizeof(hints));
 
 	hints.ai_family = AF_INET; /* default to regular inet (see below) */
@@ -422,7 +422,7 @@ php_socket_t php_network_bind_socket_to_local_addr(const char *host, unsigned po
 		sa = *sal;
 
 		switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 			case AF_INET6:
 				((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
 				socklen = sizeof(struct sockaddr_in6);
@@ -566,7 +566,7 @@ PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_lo
 
 	/* copy the details from the first item */
 	switch ((*psal)->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 		case AF_INET6:
 			*in6 = **(struct sockaddr_in6**)psal;
 			in6->sin6_port = htons(port);
@@ -774,7 +774,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 	struct sockaddr **sal, **psal, *sa;
 	struct timeval working_timeout;
 	socklen_t socklen;
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 	struct timeval limit_time, time_now;
 #endif
 
@@ -787,7 +787,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 
 	if (timeout) {
 		memcpy(&working_timeout, timeout, sizeof(working_timeout));
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 		gettimeofday(&limit_time, NULL);
 		limit_time.tv_sec += working_timeout.tv_sec;
 		limit_time.tv_usec += working_timeout.tv_usec;
@@ -802,7 +802,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		sa = *sal;
 
 		switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 			case AF_INET6:
 				if (!bindto || strchr(bindto, ':')) {
 					((struct sockaddr_in6 *)sa)->sin6_port = htons(port);
@@ -906,7 +906,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 		}
 
 		/* adjust timeout for next attempt */
-#if HAVE_GETTIMEOFDAY
+#ifdef HAVE_GETTIMEOFDAY
 		if (timeout) {
 			gettimeofday(&time_now, NULL);
 
@@ -1236,7 +1236,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 
 #if defined(HAVE_GETHOSTBYNAME_R)
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
 {
 	struct hostent *hp;
 	int herr,res;
@@ -1262,7 +1262,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 }
 #endif
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
 {
 	struct hostent *hp;
 	int herr;
@@ -1283,7 +1283,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 }
 #endif
 #ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
-struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
+static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
 {
 	if (*hstbuflen == 0) {
 		*hstbuflen = sizeof(struct hostent_data);

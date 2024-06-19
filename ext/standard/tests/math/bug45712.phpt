@@ -42,7 +42,7 @@ var_dump($inf==='abc');
 var_dump($inf===$inf);
 
 ?>
---EXPECT--
+--EXPECTF--
 float(NAN)
 bool(true)
 bool(false)
@@ -57,6 +57,8 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
+
+Deprecated: Power of base 0 and negative exponent is deprecated in %s on line %d
 float(INF)
 bool(true)
 bool(false)

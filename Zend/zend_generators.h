@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "zend_compile.h"
+
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
@@ -85,6 +87,10 @@ struct _zend_generator {
 
 	/* Fake execute_data for stacktraces */
 	zend_execute_data execute_fake;
+
+	/* The underlying function, equivalent to execute_data->func while
+	 * the generator is alive. */
+	zend_function *func;
 
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;

@@ -36,10 +36,19 @@ gd
     echo_status(imageavif($img, $outfile, -1));
 
     echo 'Encoding AVIF with illegal quality: ';
-    echo_status(imageavif($img, $outfile, 1234));
+    try {
+    	imageavif($img, $outfile, 1234);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . PHP_EOL;
+    }
 
     echo 'Encoding AVIF with illegal speed: ';
-    echo_status(imageavif($img, $outfile, 70, 1234));
+
+    try {
+    	imageavif($img, $outfile, 70, 1234);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . PHP_EOL;
+    }
 
     echo 'Encoding AVIF losslessly... ';
     echo_status(imageavif($img, $outfile, 100, 0));
@@ -66,8 +75,8 @@ Default AVIF encoding: ok
 Encoding AVIF at quality 70: ok
 Encoding AVIF at quality 70 with speed 5: ok
 Encoding AVIF with default quality: ok
-Encoding AVIF with illegal quality: ok
-Encoding AVIF with illegal speed: ok
+Encoding AVIF with illegal quality: imageavif(): Argument #3 ($quality) must be between -1 and 100
+Encoding AVIF with illegal speed: imageavif(): Argument #4 ($speed) must be between -1 and 10
 Encoding AVIF losslessly... ok
 Decoding the AVIF we just wrote...
 How many pixels are different in the two images? 0

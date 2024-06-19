@@ -183,7 +183,7 @@ zend_result dom_element_id_read(dom_object *obj, zval *retval)
 	return dom_element_reflected_attribute_read(obj, retval, "id");
 }
 
-static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id);
+static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id, php_libxml_ref_obj *document);
 
 zend_result dom_element_id_write(dom_object *obj, zval *newval)
 {
@@ -191,7 +191,7 @@ zend_result dom_element_id_write(dom_object *obj, zval *newval)
 	if (!attr) {
 		return FAILURE;
 	}
-	php_set_attribute_id(attr, true);
+	php_set_attribute_id(attr, true, obj->document);
 	return SUCCESS;
 }
 /* }}} */
@@ -352,6 +352,16 @@ static xmlNodePtr dom_create_attribute(xmlNodePtr nodep, const char *name, const
 	}
 }
 
+static void dom_check_register_attribute_id(xmlAttrPtr attr, php_libxml_ref_obj *document)
+{
+	dom_mark_ids_modified(document);
+
+	if (attr->atype != XML_ATTRIBUTE_ID && attr->doc->type == XML_HTML_DOCUMENT_NODE && attr->ns == NULL && xmlStrEqual(attr->name, BAD_CAST "id")) {
+		/* To respect XML's ID behaviour, we only do this registration for HTML documents. */
+		attr->atype = XML_ATTRIBUTE_ID;
+	}
+}
+
 /* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Modern spec URL: https://dom.spec.whatwg.org/#dom-element-setattribute
 Since:
@@ -360,7 +370,6 @@ PHP_METHOD(DOMElement, setAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
-	xmlNodePtr attr = NULL;
 	int name_valid;
 	size_t name_len, value_len;
 	dom_object *intern;
@@ -394,23 +403,28 @@ PHP_METHOD(DOMElement, setAttribute)
 		}
 
 		/* Can't use xmlSetNsProp unconditionally here because that doesn't take into account the qualified name matching... */
-		attr = (xmlNodePtr) php_dom_get_attribute_node(nodep, BAD_CAST name, name_len);
+		xmlAttrPtr attr = php_dom_get_attribute_node(nodep, BAD_CAST name, name_len);
 		if (attr != NULL) {
-			dom_remove_all_children(attr);
+			dom_attr_value_will_change(intern, attr);
+			dom_remove_all_children((xmlNodePtr) attr);
 			xmlNodePtr node = xmlNewDocText(attr->doc, BAD_CAST value);
-			xmlAddChild(attr, node);
+			xmlAddChild((xmlNodePtr) attr, node);
 		} else {
-			attr = (xmlNodePtr) xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
+			attr = xmlSetNsProp(nodep, NULL, name_processed, BAD_CAST value);
+			if (EXPECTED(attr != NULL)) {
+				dom_check_register_attribute_id(attr, intern->document);
+			}
 		}
 
 		if (name_processed != BAD_CAST name) {
 			efree(name_processed);
 		}
 	} else {
-		attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
+		xmlNodePtr attr = dom_get_attribute_or_nsdecl(intern, nodep, BAD_CAST name, name_len);
 		if (attr != NULL) {
 			switch (attr->type) {
 				case XML_ATTRIBUTE_NODE:
+					dom_attr_value_will_change(intern, (xmlAttrPtr) attr);
 					node_list_unlink(attr->children);
 					break;
 				case XML_NAMESPACE_DECL:
@@ -693,7 +707,10 @@ static void dom_element_set_attribute_node_common(INTERNAL_FUNCTION_PARAMETERS, 
 
 	xmlAddChild(nodep, (xmlNodePtr) attrp);
 	if (!modern) {
+		dom_mark_ids_modified(intern->document);
 		php_dom_reconcile_attribute_namespace_after_insertion(attrp);
+	} else {
+		dom_check_register_attribute_id(attrp, intern->document);
 	}
 
 	/* Returns old property if removed otherwise NULL */
@@ -870,6 +887,8 @@ static void dom_set_attribute_ns_legacy(dom_object *intern, xmlNodePtr elemp, ch
 	int errorcode = dom_check_qname(name, &localname, &prefix, uri_len, name_len);
 
 	if (errorcode == 0) {
+		dom_mark_ids_modified(intern->document);
+
 		if (uri_len > 0) {
 			nodep = (xmlNodePtr) xmlHasNsProp(elemp, BAD_CAST localname, BAD_CAST uri);
 			if (nodep != NULL && nodep->type != XML_ATTRIBUTE_DECL) {
@@ -958,8 +977,11 @@ static void dom_set_attribute_ns_modern(dom_object *intern, xmlNodePtr elemp, ze
 	if (errorcode == 0) {
 		php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
 		xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), uri);
-		if (UNEXPECTED(xmlSetNsProp(elemp, ns, localname, BAD_CAST value) == NULL)) {
+		xmlAttrPtr attr = xmlSetNsProp(elemp, ns, localname, BAD_CAST value);
+		if (UNEXPECTED(attr == NULL)) {
 			php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		} else {
+			dom_check_register_attribute_id(attr, intern->document);
 		}
 	} else {
 		php_dom_throw_error(errorcode, /* strict */ true);
@@ -1023,11 +1045,6 @@ static void dom_remove_eliminated_ns(xmlNodePtr node, xmlNsPtr eliminatedNs)
 
 		if (node->type == XML_ELEMENT_NODE) {
 			dom_remove_eliminated_ns_single_element(node, eliminatedNs);
-
-			if (node->children) {
-				node = node->children;
-				continue;
-			}
 		}
 
 		node = php_dom_next_in_tree_order(node, base);
@@ -1275,20 +1292,16 @@ PHP_METHOD(DOMElement, hasAttributeNS)
 }
 /* }}} end dom_element_has_attribute_ns */
 
-static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id) /* {{{ */
+static void php_set_attribute_id(xmlAttrPtr attrp, bool is_id, php_libxml_ref_obj *document) /* {{{ */
 {
-	if (is_id == 1 && attrp->atype != XML_ATTRIBUTE_ID) {
-		xmlChar *id_val;
-
-		id_val = xmlNodeListGetString(attrp->doc, attrp->children, 1);
-		if (id_val != NULL) {
-			xmlAddID(NULL, attrp->doc, id_val, attrp);
-			xmlFree(id_val);
-		}
-	} else if (is_id == 0 && attrp->atype == XML_ATTRIBUTE_ID) {
+	if (is_id && attrp->atype != XML_ATTRIBUTE_ID) {
+		attrp->atype = XML_ATTRIBUTE_ID;
+	} else if (!is_id && attrp->atype == XML_ATTRIBUTE_ID) {
 		xmlRemoveID(attrp->doc, attrp);
 		attrp->atype = 0;
 	}
+
+	dom_mark_ids_modified(document);
 }
 /* }}} */
 
@@ -1316,10 +1329,8 @@ PHP_METHOD(DOMElement, setIdAttribute)
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 	} else {
-		php_set_attribute_id(attrp, is_id);
+		php_set_attribute_id(attrp, is_id, intern->document);
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute */
 
@@ -1347,10 +1358,8 @@ PHP_METHOD(DOMElement, setIdAttributeNS)
 	if (attrp == NULL || attrp->type == XML_ATTRIBUTE_DECL) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 	} else {
-		php_set_attribute_id(attrp, is_id);
+		php_set_attribute_id(attrp, is_id, intern->document);
 	}
-
-	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute_ns */
 
@@ -1376,10 +1385,8 @@ static void dom_element_set_id_attribute_node(INTERNAL_FUNCTION_PARAMETERS, zend
 	if (attrp->parent != nodep) {
 		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(intern->document));
 	} else {
-		php_set_attribute_id(attrp, is_id);
+		php_set_attribute_id(attrp, is_id, intern->document);
 	}
-
-	RETURN_NULL();
 }
 
 PHP_METHOD(DOMElement, setIdAttributeNode)

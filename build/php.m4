@@ -1224,33 +1224,21 @@ dnl
 dnl PHP_MISSING_TIME_R_DECL
 dnl
 AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
-  AC_MSG_CHECKING([for missing declarations of reentrant functions])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = localtime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_LOCALTIME_R_DECL,1,[Whether localtime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[struct tm *(*func)(void) = gmtime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_GMTIME_R_DECL,1,[Whether gmtime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = asctime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_ASCTIME_R_DECL,1,[Whether asctime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]], [[char *(*func)(void) = ctime_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_CTIME_R_DECL,1,[Whether ctime_r is declared])
-  ])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <string.h>]], [[char *(*func)(void) = strtok_r]])],[
-    :
-  ],[
-    AC_DEFINE(MISSING_STRTOK_R_DECL,1,[Whether strtok_r is declared])
-  ])
-  AC_MSG_RESULT([done])
+AC_CHECK_DECL([localtime_r],,
+  [AC_DEFINE([MISSING_LOCALTIME_R_DECL], [1], [Whether localtime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([gmtime_r],,
+  [AC_DEFINE([MISSING_GMTIME_R_DECL], [1], [Whether gmtime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([asctime_r],,
+  [AC_DEFINE([MISSING_ASCTIME_R_DECL], [1], [Whether asctime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([ctime_r],,
+  [AC_DEFINE([MISSING_CTIME_R_DECL], [1], [Whether ctime_r is declared])],
+  [#include <time.h>])
+AC_CHECK_DECL([strtok_r],,
+  [AC_DEFINE([MISSING_STRTOK_R_DECL], [1], [Whether strtok_r is declared])],
+  [#include <string.h>])
 ])
 
 dnl
@@ -1331,24 +1319,20 @@ int main(void)
 dnl
 dnl PHP_FOPENCOOKIE
 dnl
-AC_DEFUN([PHP_FOPENCOOKIE], [
-  AC_CHECK_FUNC(fopencookie, [have_glibc_fopencookie=yes])
-
-  if test "$have_glibc_fopencookie" = "yes"; then
-dnl glibcs (since 2.1.2?) have a type called cookie_io_functions_t.
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#include <stdio.h>
-]], [[cookie_io_functions_t cookie;]])],[have_cookie_io_functions_t=yes],[])
-
-    if test "$have_cookie_io_functions_t" = "yes"; then
-dnl Newer glibcs have a different seeker definition.
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
+dnl Check for cookie_io_functions_t type and fopencookie(). When using glibc,
+dnl checks here require _GNU_SOURCE defined via AC_USE_SYSTEM_EXTENSIONS. Some
+dnl glibc versions started using the off64_t in fopencookie seeker definition,
+dnl which is in transition to use the POSIX standard off_t on 32-bit (with large
+dnl file support enabled) and 64-bit.
+dnl
+AC_DEFUN([PHP_FOPENCOOKIE],
+[AC_CHECK_TYPE([cookie_io_functions_t], [AC_CHECK_FUNCS([fopencookie])],,
+  [#include <stdio.h>])
+dnl Check if glibc might use off64_t seeker definition.
+AS_VAR_IF([ac_cv_func_fopencookie], [yes],
+  [AC_CACHE_CHECK([whether fopencookie seeker uses off64_t],
+    [php_cv_type_cookie_off64_t],
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1357,48 +1341,35 @@ struct cookiedata {
 };
 
 ssize_t reader(void *cookie, char *buffer, size_t size)
-{ return size; }
+{ (void)cookie; (void)buffer; return size; }
 ssize_t writer(void *cookie, const char *buffer, size_t size)
-{ return size; }
+{ (void)cookie; (void)buffer; return size; }
 int closer(void *cookie)
-{ return 0; }
+{ (void)cookie; return 0; }
 int seeker(void *cookie, off64_t *position, int whence)
-{ ((struct cookiedata*)cookie)->pos = *position; return 0; }
+{ ((struct cookiedata*)cookie)->pos = *position; (void)whence; return 0; }
 
 cookie_io_functions_t funcs = {reader, writer, seeker, closer};
 
 int main(void) {
   struct cookiedata g = { 0 };
   FILE *fp = fopencookie(&g, "r", funcs);
-
-  if (fp && fseek(fp, 8192, SEEK_SET) == 0 && g.pos == 8192)
+  if (fp && fseek(fp, 8192, SEEK_SET) == 0 && g.pos == 8192) {
     return 0;
+  }
   return 1;
 }
-
-]])], [
-  cookie_io_functions_use_off64_t=yes
-], [
-  cookie_io_functions_use_off64_t=no
-], [
-  dnl Cross compilation.
-  case $host_alias in
-    *linux*)
-      cookie_io_functions_use_off64_t=yes
-      ;;
-    *)
-      cookie_io_functions_use_off64_t=no
-      ;;
-  esac
+])],
+  [php_cv_type_cookie_off64_t=yes],
+  [php_cv_type_cookie_off64_t=no],
+  [AS_CASE([$host_alias],
+    [*linux*], [php_cv_type_cookie_off64_t=yes],
+    [php_cv_type_cookie_off64_t=no])]
+  )])
+  AS_VAR_IF([php_cv_type_cookie_off64_t], [yes],
+    [AC_DEFINE([COOKIE_SEEKER_USES_OFF64_T], [1],
+      [Whether fopencookie seeker uses off64_t.])])
 ])
-
-      AC_DEFINE(HAVE_FOPENCOOKIE, 1, [ ])
-
-      if test "$cookie_io_functions_use_off64_t" = "yes" ; then
-        AC_DEFINE(COOKIE_SEEKER_USES_OFF64_T, 1, [ ])
-      fi
-    fi
-  fi
 ])
 
 dnl ----------------------------------------------------------------------------
@@ -1618,7 +1589,6 @@ dnl
 AC_DEFUN([PHP_PROG_SENDMAIL], [
   PHP_ALT_PATH=/usr/bin:/usr/sbin:/usr/etc:/etc:/usr/ucblib:/usr/lib
   AC_PATH_PROG(PROG_SENDMAIL, sendmail, /usr/sbin/sendmail, $PATH:$PHP_ALT_PATH)
-  PHP_SUBST(PROG_SENDMAIL)
 ])
 
 dnl
@@ -1824,7 +1794,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
 ])
 
 dnl
-dnl PHP_SETUP_OPENSSL(shared-add [, action-found [, action-not-found]])
+dnl PHP_SETUP_OPENSSL(shared-add [, action-found])
 dnl
 dnl Common setup macro for openssl.
 dnl
@@ -1837,7 +1807,6 @@ AC_DEFUN([PHP_SETUP_OPENSSL],[
     PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
     PHP_EVAL_INCLINE($OPENSSL_CFLAGS)
 ifelse([$2],[],:,[$2])
-ifelse([$3],[],,[else $3])
   fi
 ])
 
@@ -1948,6 +1917,18 @@ AC_DEFUN([PHP_SETUP_EXPAT], [
   AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
 ])
 
+dnl
+dnl PHP_SETUP_SQLITE([shared-add])
+dnl
+dnl Common setup macro for SQLite library.
+dnl
+AC_DEFUN([PHP_SETUP_SQLITE], [
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.7.7], [
+  PHP_EVAL_INCLINE([$SQLITE_CFLAGS])
+  PHP_EVAL_LIBLINE([$SQLITE_LIBS], [$1])
+])
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------
@@ -2047,8 +2028,8 @@ EOF
   echo '"[$]@"' >> $1
   chmod +x $1
   CONFIGURE_COMMAND="$CONFIGURE_COMMAND $CONFIGURE_OPTIONS"
-  PHP_SUBST_OLD(CONFIGURE_COMMAND)
-  PHP_SUBST_OLD(CONFIGURE_OPTIONS)
+  AC_SUBST([CONFIGURE_COMMAND])
+  AC_SUBST([CONFIGURE_OPTIONS])
 ])
 
 dnl

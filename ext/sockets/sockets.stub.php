@@ -208,6 +208,13 @@ const SO_DONTROUTE = UNKNOWN;
  * @cvalue SO_LINGER
  */
 const SO_LINGER = UNKNOWN;
+#ifdef SO_LINGER_SEC
+/**
+ * @var int
+ * @cvalue SO_LINGER_SEC
+ */
+const SO_LINGER_SEC = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_BROADCAST
@@ -1511,7 +1518,7 @@ const SOCKET_ENOMEDIUM = UNKNOWN;
 const SOCKET_EMEDIUMTYPE = UNKNOWN;
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 /**
  * @var int
  * @cvalue WSAESTALE
@@ -1664,7 +1671,7 @@ const AI_NUMERICSERV = UNKNOWN;
 const SOL_LOCAL = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVPKTINFO) && HAVE_IPV6)
+#if (defined(IPV6_RECVPKTINFO) && defined(HAVE_IPV6))
 /**
  * IPv6 ancillary data
  * @var int
@@ -1677,7 +1684,7 @@ const IPV6_RECVPKTINFO = UNKNOWN;
  */
 const IPV6_PKTINFO = UNKNOWN;
 #endif
-#if (defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6)
+#if (defined(IPV6_RECVHOPLIMIT) && defined(HAVE_IPV6))
 /**
  * @var int
  * @cvalue IPV6_RECVHOPLIMIT
@@ -1690,7 +1697,7 @@ const IPV6_RECVHOPLIMIT = UNKNOWN;
 const IPV6_HOPLIMIT = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVTCLASS) && HAVE_IPV6)
+#if (defined(IPV6_RECVTCLASS) && defined(HAVE_IPV6))
 /**
  * @var int
  * @cvalue IPV6_RECVTCLASS

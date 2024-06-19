@@ -42,7 +42,7 @@ class LocalSoapClient extends SoapClient {
     $this->server->addFunction("f");
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();

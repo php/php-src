@@ -25,6 +25,7 @@
 
 #include "php_dom.h"
 #include "dom_properties.h"
+#include "internal_helpers.h"
 
 /*
 * class DOMAttr extends DOMNode
@@ -106,6 +107,16 @@ zend_result dom_attr_specified_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp)
+{
+	if (attrp->atype == XML_ATTRIBUTE_ID) {
+		xmlRemoveID(attrp->doc, attrp);
+		attrp->atype = XML_ATTRIBUTE_ID;
+	}
+
+	dom_mark_ids_modified(obj->document);
+}
+
 /* {{{ value	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
@@ -121,6 +132,8 @@ zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
+
+	dom_attr_value_will_change(obj, attrp);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);

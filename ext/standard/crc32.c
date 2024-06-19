@@ -55,7 +55,7 @@ static inline int has_crc32_insn(void) {
 	if (sysctlbyname("hw.optional.armv8_crc32", &res, &reslen, NULL, 0) < 0)
 		res = 0;
 	return res;
-# elif defined(WIN32)
+# elif defined(_WIN32)
 	res = (int)IsProcessorFeaturePresent(PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE);
 	return res;
 # else
@@ -115,7 +115,7 @@ PHPAPI uint32_t php_crc32_bulk_update(uint32_t crc, const char *p, size_t nr)
 	}
 #endif
 
-#if ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE || ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER
+#if defined(ZEND_INTRIN_SSE4_2_PCLMUL_NATIVE) || defined(ZEND_INTRIN_SSE4_2_PCLMUL_RESOLVER)
 	size_t nr_simd = crc32_x86_simd_update(X86_CRC32B, &crc, (const unsigned char *)p, nr);
 	nr -= nr_simd;
 	p += nr_simd;

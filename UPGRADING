@@ -29,6 +29,8 @@ PHP 8.4 UPGRADE NOTES
 
 - Core:
   . The type of PHP_DEBUG and PHP_ZTS constants changed to bool.
+  . The name of uploaded files and files created by the tempnam() function are
+    now 13 bytes longer. Total length is platform-dependent.
 
 - DOM:
   . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
@@ -86,9 +88,11 @@ PHP 8.4 UPGRADE NOTES
     JIT, set the opcache.jit config value accordingly.
   . The maximum value of the opcache.interned_strings_buffer setting on 64bit
     architectures is now 32767 (it was previously 4095).
+  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
+    of JIT startup initialization issues.
 
 - PCRE:
-  . The bundled pcre2lib has been updated to version 10.43.
+  . The bundled pcre2lib has been updated to version 10.44.
     As a consequence, this means {,3} is now recognized as a quantifier instead
     of as text. Furthermore, the meaning of some character classes in UCP mode
     has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
@@ -145,6 +149,10 @@ PHP 8.4 UPGRADE NOTES
   . SoapClient::$typemap is now an array rather than a resource.
     Checks using is_resource() (i.e. is_resource($client->typemap)) should be
     replaced with checks for null (i.e. $client->typemap !== null).
+  . The SOAP extension gained an optional dependency on the session extension.
+    If you build PHP without the session extension and with --enable-rtld-now,
+    you will experience errors on startup if you also use the SOAP extension.
+    To solve this, either don't use rtld-now or load the session extension.
 
 - SPL:
   . Out of bounds accesses in SplFixedArray now throw an exception of type
@@ -192,6 +200,10 @@ PHP 8.4 UPGRADE NOTES
     it references, or null if the reference is no longer valid.
   . The output of Closure::__debugInfo() now includes the name, file, and line
     of the Closure.
+  . new expressions with constructor arguments are now dereferencable, meaning
+    they allow chaining method calls, property accesses, etc. without enclosing
+    the expression in parentheses.
+    RFC: https://wiki.php.net/rfc/new_without_parentheses
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
@@ -222,14 +234,49 @@ PHP 8.4 UPGRADE NOTES
   . NumberFormatter::ROUND_HALFODD added to complement existing
     NumberFormatter::ROUND_HALFEVEN functionality.
 
+- OpenSSL:
+  . Added support for Curve25519 + Curve448 based keys. Specifically x25519,
+    ed25519, x448 and ed448 fields are supported in openssl_pkey_new and
+    openssl_pkey_get_details as well as openssl_sign and openssl_verify were
+    extended to support those keys.
+
+- PDO:
+  . Added support for driver specific SQL parsers. The default parser supports:
+    - single and double quoted literals, with doubling as escaping mechanism.
+    - two-dashes and non-nested C-style comments.
+
+- PDO_MYSQL:
+  . Added custom parser supporting:
+    - single and double-quoted literals, with doubling and backslash as escaping
+      mechanism
+    - backtick literal identifiers and with doubling as escaping mechanism
+    - two dashes followed by at least 1 whitespace, non-nested C-style comments,
+      and hash-comments
+
+- PDO_PGSQL:
+  . Added custom parser supporting:
+    - single and double quoted literals, with doubling as escaping mechanism
+    - C-style "escape" string literals (E'string')
+    - dollar-quoted string literals
+    - two-dashes and C-style comments (non-nested)
+    - support for "??" as escape sequence for the "?" operator
+
+- PDO_SQLITE:
+  . Added custom parser supporting:
+    - single, double quoted, and backtick literals, with doubling as escaping mechanism
+    - square brackets quoting for identifiers
+    - two-dashes and C-style comments (non-nested)
+
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
 
 - PCRE:
-  . The bundled pcre2lib has been updated to version 10.43.
+  . The bundled pcre2lib has been updated to version 10.44.
     As a consequence, LoongArch JIT support has been added, spaces
     are now allowed between braces in Perl-compatible items, and
     variable-length lookbehind assertions are now supported.
+  . With pcre2lib version 10.44, the maximum length of named capture groups
+    has changed from 32 to 128.
   . Added support for the "r" (PCRE2_EXTRA_CASELESS_RESTRICT) modifier, as well
     as the (?r) mode modifier. When enabled along with the case-insensitive
     modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
@@ -244,22 +291,22 @@ PHP 8.4 UPGRADE NOTES
     or by invoking their constructor directly.
 
 - PDO_DBLIB:
-  . Added class PdoDbLib.
+  . Added class Pdo\DbLib.
 
 - PDO_FIREBIRD:
-  . Added class PdoFirebird.
+  . Added class Pdo\Firebird.
 
 - PDO_MYSQL:
-  . Added class PdoMysql.
+  . Added class Pdo\Mysql.
 
 - PDO_ODBC:
-  . Added class PdoOdbc.
+  . Added class Pdo\Odbc.
 
 - PDO_PGSQL:
-  . Added class PdoPgsql.
+  . Added class Pdo\Pgsql.
 
 - PDO_SQLITE:
-  . Added class PdoSqlite.
+  . Added class Pdo\Sqlite.
 
 - POSIX:
   . Added constant POSIX_SC_CHILD_MAX
@@ -275,6 +322,7 @@ PHP 8.4 UPGRADE NOTES
     now returns the attached doc comments.
   . ReflectionConstant was introduced.
   . ReflectionClassConstant::isDeprecated() was introduced.
+  . ReflectionGenerator::isClosed() was introduced.
 
 - Standard:
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
@@ -289,6 +337,7 @@ PHP 8.4 UPGRADE NOTES
   . Instances of DateTimeInterface that are passed to xsd:datetime or similar
     elements are now serialized as such instead of being serialized as an
     empty string.
+  . Session persistence now works with a shared session module.
 
 - XSL:
   . It is now possible to use parameters that contain both single and double
@@ -332,6 +381,11 @@ PHP 8.4 UPGRADE NOTES
   . Calling ldap_exop() with more than 4 arguments is deprecated. Use
     ldap_exop_sync() instead.
 
+- PDO_PGSQL:
+  . Using escaped question marks (??) inside dollar-quoted strings is deprecated.
+    Since PDO_PGSQL has its own SQL parser with dollar-quoted strings support, it
+    is no longer necessary to escape question marks inside them.
+
 - PgSQL:
   . Calling pgsql_fetch_result() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
@@ -352,6 +406,7 @@ PHP 8.4 UPGRADE NOTES
 - Standard:
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
+  . Raising zero to the power of negative number is deprecated.
 
 ========================================
 5. Changed Functions
@@ -364,6 +419,11 @@ PHP 8.4 UPGRADE NOTES
 - DOM:
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
+
+- GD:
+  . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
+    quality parameter value is passed. In addition, imageavif will throw an exception
+    if an invalid speed parameter value is passed.
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
@@ -383,6 +443,11 @@ PHP 8.4 UPGRADE NOTES
   . ResourceBundle::get() now has a tentative return type of:
     ResourceBundle|array|string|int|null
 
+- LibXML:
+  . libxml_set_streams_context() now immediately throws a TypeError when a
+    non-stream-context resource is passed to the function, instead of throwing
+    later when the stream context is used.
+
 - MBString:
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
     strings. (For valid UTF-8 and UTF-16 strings, there is no change.)
@@ -394,6 +459,9 @@ PHP 8.4 UPGRADE NOTES
     a single entry.
   . New serial_hex parameter added to openssl_csr_sign to allow setting serial
     number in the hexadecimal format.
+  . Parsing ASN.1 UTCTime by openssl_x509_parse fails if seconds are omitted
+    for OpenSSL version below 3.2 (-1 is returned for such fields). The
+    OpenSSL version 3.3+ does not load such certificates already.
 
 - ODBC:
   . Parameter $row of odbc_fetch_object(), odbc_fetch_array(), and
@@ -431,6 +499,10 @@ PHP 8.4 UPGRADE NOTES
 - POSIX:
   . posix_isatty now sets the error number when the file descriptor/stream argument
     is invalid.
+
+- Reflection:
+  . ReflectionGenerator::getFunction() may now be called after the generator
+    finished executing.
 
 - Sockets:
   . Parameter $backlog of socket_create_listen() now has a default value of SOMAXCONN.
@@ -500,10 +572,6 @@ PHP 8.4 UPGRADE NOTES
   . Added mb_ucfirst and mb_lcfirst functions.
     RFC: https://wiki.php.net/rfc/mb_ucfirst
 
-- Opcache:
-  . If JIT is enabled, PHP will now exit with a fatal error on startup in case
-    of JIT startup initialization issues.
-
 - PCNTL:
   . Added pcntl_setns allowing a process to be reassociated with a namespace in order
     to share resources with other processes within this context.
@@ -512,6 +580,21 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getcpu to get the cpu id from where the current process runs.
   . Added pcntl_getqos_class to get the QoS level (aka performance and related
     energy consumption) of the current process and pcntl_setqos_class to set it.
+
+- PDO_PGSQL:
+  . Added Pdo\Pgsql::setNoticeCallback() to allow a callback to be triggered on
+    every notice sent (e.g. RAISE NOTICE).
+
+- PGSQL:
+  . Added pg_change_password to alter a given user's password. It handles
+    transparently the password encryption from the database settings.
+  . Added pg_put_copy_data to send COPY commands and pg_put_copy_end to send
+    end-of-data to the server.
+  . Added pg_socket_poll to check if there is any read and/or write events
+    with an optional timeout.
+  . Added pg_jit to get informations on the server JIT support.
+  . Added pg_set_chunked_rows_size to allow to fetch results in chunk of
+    max N rows.
 
 - Sodium:
   . Added the sodium_crypto_aead_aegis128l_*() and sodium_crypto_aead_aegis256l_*()
@@ -528,6 +611,10 @@ PHP 8.4 UPGRADE NOTES
   . Added the http_get_last_response_headers() and
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
+  . Added function fpow() following rules of IEEE 754.
+  . Added functions array_find(), array_find_key(), array_all(), and
+    array_any().
+    RFC: https://wiki.php.net/rfc/array_find
 
 - XSL:
   . Added XSLTProcessor::registerPhpFunctionNS().
@@ -572,10 +659,19 @@ PHP 8.4 UPGRADE NOTES
 - Curl:
   . The Curl extension now requires at least libcurl 7.61.0.
 
-- Intl:
+- Date:
   . The class constants are typed now.
 
 - Intl:
+  . The class constants are typed now.
+  . The behaviour of Intl class has been normalized to always throw Error
+    exceptions when attempting to use a non-initialized object,
+    or when cloning fails.
+  . The idn_to_ascii() and idn_to_utf8() now always throw ValueErrors if the
+    $domain name is empty or too long, and if $variant is not
+    INTL_IDNA_VARIANT_UTS46.
+
+- OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.
 
 - PDO:
@@ -603,6 +699,7 @@ PHP 8.4 UPGRADE NOTES
 
 - Core:
   . PHP_OUTPUT_HANDLER_PROCESSED.
+  . PHP_SBINDIR.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
@@ -645,6 +742,7 @@ PHP 8.4 UPGRADE NOTES
   . TCP_SYNCNT (Linux only).
   . SO_EXCLBIND (Solaris/Illumos only).
   . SO_NOSIGPIPE (macOs and FreeBSD).
+  . SO_LINGER_SEC (macOs only).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES
@@ -713,6 +811,9 @@ PHP 8.4 UPGRADE NOTES
 
 - MySQLnd:
   . Improved the performance of MySQLnd quoting.
+
+- PCRE:
+  . Improved the performance of named capture groups.
 
 - SimpleXML:
   . Improved performance and reduce memory consumption of XML serialization.

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -189,6 +189,7 @@ static const unsigned char compile_error_texts[] =
   "\\K is not allowed in lookarounds (but see PCRE2_EXTRA_ALLOW_LOOKAROUND_BSK)\0"
   /* 100 */
   "branch too long in variable-length lookbehind assertion\0"
+  "compiled pattern would be longer than the limit set by the application\0"
   ;
 
 /* Match-time and UTF error texts are in the same format. */

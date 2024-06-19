@@ -36,17 +36,17 @@
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_SYS_TIME_H
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
 #include <signal.h>
 #include <locale.h>
 
-#if HAVE_DLFCN_H
+#ifdef HAVE_DLFCN_H
 #include <dlfcn.h>
 #endif
 
@@ -222,7 +222,7 @@ static const php_cli_server_http_response_status_code_pair template_map[] = {
 
 static int php_cli_server_log_level = 3;
 
-#if HAVE_UNISTD_H || defined(PHP_WIN32)
+#if defined(HAVE_UNISTD_H) || defined(PHP_WIN32)
 static int php_cli_output_is_tty = OUTPUT_NOT_CHECKED;
 #endif
 
@@ -487,7 +487,7 @@ static PHP_MINFO_FUNCTION(cli_server)
 	DISPLAY_INI_ENTRIES();
 }
 
-zend_module_entry cli_server_module_entry = {
+static zend_module_entry cli_server_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cli_server",
 	NULL,
@@ -1164,7 +1164,7 @@ static bool php_cli_server_content_sender_pull(php_cli_server_content_sender *se
 	return true;
 } /* }}} */
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 static int php_cli_is_output_tty(void) /* {{{ */
 {
 	if (php_cli_output_is_tty == OUTPUT_NOT_CHECKED) {
@@ -1199,7 +1199,7 @@ static void php_cli_server_log_response(php_cli_server_client *client, int statu
 		}
 	}
 
-#if HAVE_UNISTD_H || defined(PHP_WIN32)
+#if defined(HAVE_UNISTD_H) || defined(PHP_WIN32)
 	if (CLI_SERVER_G(color) && php_cli_is_output_tty() == OUTPUT_IS_TTY) {
 		if (effective_status >= 500) {
 			/* server error: red */
@@ -1302,7 +1302,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 		}
 
 		switch ((*p)->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 		case AF_INET6:
 			sa = pemalloc(sizeof(struct sockaddr_in6), 1);
 			*(struct sockaddr_in6 *)sa = *(struct sockaddr_in6 *)*p;
@@ -1348,7 +1348,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 				goto out;
 			}
 			switch (sa->sa_family) {
-#if HAVE_GETADDRINFO && HAVE_IPV6
+#if defined(HAVE_GETADDRINFO) && defined(HAVE_IPV6)
 			case AF_INET6:
 				*port = ntohs(((struct sockaddr_in6 *)sa)->sin6_port);
 				break;
@@ -2840,9 +2840,9 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	} else {
 		char *ret = NULL;
 
-#if HAVE_GETCWD
+#ifdef HAVE_GETCWD
 		ret = VCWD_GETCWD(document_root_buf, MAXPATHLEN);
-#elif HAVE_GETWD
+#elif defined(HAVE_GETWD)
 		ret = VCWD_GETWD(document_root_buf);
 #endif
 		document_root = ret ? document_root_buf: ".";

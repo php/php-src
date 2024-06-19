@@ -32,10 +32,11 @@ int setenv(char *name, char *value, int clobber) /* {{{ */
 		return 0;
 	}
 
-	if ((cp = malloc(strlen(name) + strlen(value) + 2)) == 0) {
+	size_t length = strlen(name) + strlen(value) + 2;
+	if ((cp = malloc(length)) == 0) {
 		return 1;
 	}
-	sprintf(cp, "%s=%s", name, value);
+	snprintf(cp, length, "%s=%s", name, value);
 	return putenv(cp);
 }
 /* }}} */

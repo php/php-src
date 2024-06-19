@@ -269,6 +269,16 @@ char *alloca();
 # define ZEND_ATTRIBUTE_UNUSED
 #endif
 
+#if ZEND_GCC_VERSION >= 3003 || __has_attribute(nonnull)
+/* All pointer arguments must be non-null */
+# define ZEND_ATTRIBUTE_NONNULL  __attribute__((nonnull))
+/* Specified arguments must be non-null (1-based) */
+# define ZEND_ATTRIBUTE_NONNULL_ARGS(...)  __attribute__((nonnull(__VA_ARGS__)))
+#else
+# define ZEND_ATTRIBUTE_NONNULL
+# define ZEND_ATTRIBUTE_NONNULL_ARGS(...)
+#endif
+
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_COLD __attribute__((cold))
 # ifdef __OPTIMIZE__
@@ -779,6 +789,26 @@ extern "C++" {
 # define ZEND_STATIC_ASSERT(c, m) _Static_assert((c), m)
 #else
 # define ZEND_STATIC_ASSERT(c, m)
+#endif
+
+#if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) /* C11 */ \
+  || (defined(__cplusplus) && __cplusplus >= 201103L) /* C++11 */
+typedef max_align_t zend_max_align_t;
+#else
+typedef union {
+	char c;
+	short s;
+	int i;
+	long l;
+#if SIZEOF_LONG_LONG
+	long long ll;
+#endif
+	float f;
+	double d;
+	long double ld;
+	void *p;
+	void (*fun)(void);
+} zend_max_align_t;
 #endif
 
 #endif /* ZEND_PORTABILITY_H */

@@ -21,7 +21,7 @@ extern "C" {
 /* default fontpath for netware systems */
 #define DEFAULT_FONTPATH "sys:/java/nwgfx/lib/x11/fonts/ttf;."
 #define PATHSEPARATOR ";"
-#elif defined(WIN32)
+#elif defined(_WIN32)
 /* default fontpath for windows systems */
 #define DEFAULT_FONTPATH "c:\\winnt\\fonts;c:\\windows\\fonts;."
 #define PATHSEPARATOR ";"

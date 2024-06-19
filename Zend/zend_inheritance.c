@@ -1239,7 +1239,7 @@ static void do_inherit_method(zend_string *key, zend_function *parent, zend_clas
 }
 /* }}} */
 
-inheritance_status property_types_compatible(
+static inheritance_status property_types_compatible(
 		const zend_property_info *parent_info, const zend_property_info *child_info) {
 	if (ZEND_TYPE_PURE_MASK(parent_info->type) == ZEND_TYPE_PURE_MASK(child_info->type)
 			&& ZEND_TYPE_NAME(parent_info->type) == ZEND_TYPE_NAME(child_info->type)) {
@@ -2021,12 +2021,14 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 	if (check_inheritance) {
 		/* Inherited members are overridden by members inserted by traits.
 		 * Check whether the trait method fulfills the inheritance requirements. */
+		uint32_t flags = ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY;
+		if (!(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+			flags |= ZEND_INHERITANCE_SET_CHILD_CHANGED |ZEND_INHERITANCE_SET_CHILD_PROTO |
+				ZEND_INHERITANCE_RESET_CHILD_OVERRIDE;
+		}
 		do_inheritance_check_on_method(
 			fn, fixup_trait_scope(fn, ce), existing_fn, fixup_trait_scope(existing_fn, ce),
-			ce, NULL,
-			ZEND_INHERITANCE_CHECK_PROTO | ZEND_INHERITANCE_CHECK_VISIBILITY |
-			ZEND_INHERITANCE_SET_CHILD_CHANGED| ZEND_INHERITANCE_SET_CHILD_PROTO |
-			ZEND_INHERITANCE_RESET_CHILD_OVERRIDE);
+			ce, NULL, flags);
 	}
 }
 /* }}} */

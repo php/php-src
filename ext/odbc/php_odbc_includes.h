@@ -220,7 +220,7 @@ typedef struct odbc_result {
 	odbc_result_value *values;
 	SQLSMALLINT numcols;
 	SQLSMALLINT numparams;
-# if HAVE_SQL_EXTENDED_FETCH
+# ifdef HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
 # endif
 	zend_long longreadlen;
@@ -233,9 +233,6 @@ typedef struct odbc_result {
 } odbc_result;
 
 ZEND_BEGIN_MODULE_GLOBALS(odbc)
-	char *defDB;
-	char *defUser;
-	char *defPW;
 	bool allow_persistent;
 	bool check_persistent;
 	zend_long max_persistent;

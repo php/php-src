@@ -1,7 +1,6 @@
-dnl
-dnl Check for arc4random on BSD systems
-dnl
-AC_CHECK_DECLS([arc4random_buf])
+AC_CHECK_DECL([arc4random_buf],
+  [AC_DEFINE([HAVE_ARC4RANDOM_BUF], [1],
+    [Define to 1 if you have the 'arc4random_buf' function.])])
 
 dnl
 dnl Check for CCRandomGenerateBytes
@@ -27,6 +26,7 @@ PHP_NEW_EXTENSION(random,
       engine_secure.c \
       engine_user.c \
       gammasection.c \
-      randomizer.c,
+      randomizer.c \
+      zend_utils.c,
       no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 PHP_INSTALL_HEADERS([ext/random], [php_random.h php_random_csprng.h php_random_uint128.h])

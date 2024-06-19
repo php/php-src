@@ -28,14 +28,12 @@
 #include "ext/standard/php_string.h"
 #include "ext/standard/php_mail.h"
 #include "ext/standard/exec.h"
-#include "ext/standard/url.h"
 #include "main/php_output.h"
 #include "ext/standard/info.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "libmbfl/mbfl/mbfilter_8bit.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
-#include "libmbfl/mbfl/mbfilter_wchar.h"
 #include "libmbfl/mbfl/eaw_table.h"
 #include "libmbfl/filters/mbfilter_base64.h"
 #include "libmbfl/filters/mbfilter_cjk.h"
@@ -43,13 +41,11 @@
 #include "libmbfl/filters/mbfilter_htmlent.h"
 #include "libmbfl/filters/mbfilter_uuencode.h"
 #include "libmbfl/filters/mbfilter_ucs4.h"
-#include "libmbfl/filters/mbfilter_utf8.h"
 #include "libmbfl/filters/mbfilter_utf16.h"
 #include "libmbfl/filters/mbfilter_singlebyte.h"
 #include "libmbfl/filters/translit_kana_jisx0201_jisx0208.h"
 #include "libmbfl/filters/unicode_prop.h"
 
-#include "php_variables.h"
 #include "php_globals.h"
 #include "rfc1867.h"
 #include "php_content_types.h"
@@ -68,6 +64,15 @@
 #include "mbstring_arginfo.h"
 
 #include "rare_cp_bitvec.h"
+
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+
+#ifdef __SSE3__
+#include <immintrin.h>
+#include <pmmintrin.h>
+#endif
 
 /* }}} */
 
@@ -4435,7 +4440,6 @@ PHP_FUNCTION(mb_send_mail)
 	zend_string *str_headers = NULL;
 	size_t i;
 	char *to_r = NULL;
-	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	bool suppress_content_type = false;
 	bool suppress_content_transfer_encoding = false;
 
@@ -4653,10 +4657,11 @@ PHP_FUNCTION(mb_send_mail)
 
 	str_headers = smart_str_extract(&str);
 
+	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
 	RETVAL_BOOL(php_mail(to_r, ZSTR_VAL(subject), message, ZSTR_VAL(str_headers), extra_cmd ? ZSTR_VAL(extra_cmd) : NULL));

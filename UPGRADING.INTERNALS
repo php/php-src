@@ -81,6 +81,13 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   got each a new parameter returning an observer which must be called, if the
   removal happened during observer execution.
 
+* zend_get_internal_function_extension_handle[s]() must now be used over
+  zend_get_op_array_extension_handle[s]() when registering run_time_cache slots
+  for internal functions. If you need a cache slot for both internal and user
+  functions, you may obtain a slot for each through the corresponding function.
+
+* zend_is_true now returns bool rather than int. Note that on PHP 8 this has
+  always returned 0 or 1, so conversion should be trivial.
 
 ========================
 2. Build system changes
@@ -123,6 +130,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
    - Symbol HAVE_MYSQL has been removed.
    - Symbol HAVE_PDO_SQLITELIB has been removed.
+   - Symbol HAVE_WAITPID has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -131,6 +139,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
      AX_CHECK_COMPILE_FLAG).
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
+   - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
+     directory anymore.
+   - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
@@ -145,6 +156,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Unused symbols CONFIGURATION_FILE_PATH, DISCARD_PATH, HAVE_ERRMSG_H,
      HAVE_REGCOMP, HAVE_RINT, NEED_ISBLANK, PHP_URL_FOPEN, REGEX, HSREGEX,
      USE_CONFIG_FILE have been removed.
+   - The HAVE_OPENSSL symbol has been removed.
+   - The HAVE_OPENSSL_EXT symbol is now consistently defined to value 1 whether
+     the openssl extension is available either as shared or built statically.
+   - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
 
 ========================
 3. Module changes
@@ -169,6 +184,17 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The macro RAND_RANGE_BADSCALING() has been removed. The implementation
      should either be inlined and undefined behavior fixed or it should be
      replaced by a non-biased scaler.
+   - The php_srand() and php_rand() functions have been removed. These were
+     slim wrappers around the corresponding php_mt_srand() and php_mt_rand()
+     function since PHP 7.1, but using zend_long instead of uint32_t as their
+     input/output types. This made their behavior incompatible between 32-bit
+     and 64-bit builds of PHP. Users of these functions are encouraged to
+     migrate to one of the more modern engines provided since PHP 8.2. If that
+     is not possible, due to backwards compatibility requirements, then the
+     php_mt_srand() and php_mt_rand() functions should be called directly and
+     the values appropriately casted.
+   - The PHP_RAND_MAX and RAND_MAX constants corresponding to the removed
+     php_rand() have also been removed.
    - The generate member of a php_random_algo is now expected to return
      the new php_random_result struct, replacing the last_generated_size
      member of the php_random_status struct and the generate_size member of
@@ -228,6 +254,20 @@ PHP 8.4 INTERNALS UPGRADE NOTES
  g. ext/standard
    - Added the php_base64_encode_ex() API with flag parameters, value can be
      PHP_BASE64_NO_PADDING to encode without the padding character '='.
+   - The php_escape_shell_cmd() now takes a zend_string* instead of a char*
+     Moreover, providing it with a binary safe string is the responsibility of
+     the caller now.
+   - The php_escape_shell_arg() now takes a zend_string* instead of a char*
+     Moreover, providing it with a binary safe string is the responsibility of
+     the caller now.
+
+ h. ext/session
+   - Added the php_get_session_status() API to get the session status, which is
+     equivalent to reading PS(session_status) but works with shared objects too.
+   - Added the php_get_session_var_str() API to set a session variable without
+     needing to create a zend_string.
+   - The ext/session/php_session.h doesn't transitively include the
+     ext/hash/php_hash.h header anymore.
 
 ========================
 4. OpCode changes

@@ -6,7 +6,7 @@ pdo_sqlite
 <?php
 
 // This test was copied from the pdo_sqlite test for sqliteCreateAggregate
-$db = new PdoSqlite('sqlite::memory:');
+$db = new Pdo\Sqlite('sqlite::memory:');
 
 $db->query('CREATE TABLE test_pdo_sqlite_createaggregate (id INT AUTO INCREMENT, name TEXT)');
 

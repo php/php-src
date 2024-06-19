@@ -208,9 +208,7 @@ PHP_METHOD(IntlIterator, current)
 	zval *data;
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	data = ii->iterator->funcs->get_current_data(ii->iterator);
@@ -223,9 +221,7 @@ PHP_METHOD(IntlIterator, key)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
@@ -240,9 +236,7 @@ PHP_METHOD(IntlIterator, next)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	ii->iterator->funcs->move_forward(ii->iterator);
@@ -255,9 +249,7 @@ PHP_METHOD(IntlIterator, rewind)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	if (ii->iterator->funcs->rewind) {
@@ -272,9 +264,7 @@ PHP_METHOD(IntlIterator, valid)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator) == SUCCESS);

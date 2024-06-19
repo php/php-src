@@ -2771,7 +2771,7 @@ static void ir_merge_to_unhandled(ir_live_interval **unhandled, ir_live_interval
 			ival = ival->next;
 		}
 	}
-#if IR_DEBUG
+#ifdef IR_DEBUG
 	ival = *unhandled;
 	pos = 0;
 

@@ -21,7 +21,6 @@
 #endif
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "main/php_output.h"
 #include "SAPI.h"
@@ -58,20 +57,20 @@
 
 #ifdef PHP_ICONV_IMPL
 #define PHP_ICONV_IMPL_VALUE PHP_ICONV_IMPL
-#elif HAVE_LIBICONV
+#elif defined(HAVE_LIBICONV)
 #define PHP_ICONV_IMPL_VALUE "libiconv"
 #else
 #define PHP_ICONV_IMPL_VALUE "unknown"
 #endif
 
-char *get_iconv_version(void) {
+static char *get_iconv_version(void) {
 	char *version = "unknown";
 
 #ifdef HAVE_LIBICONV
 	static char buf[16];
 	snprintf(buf, sizeof(buf), "%d.%d", _libiconv_version >> 8, _libiconv_version & 0xff);
 	version = buf;
-#elif HAVE_GLIBC_ICONV
+#elif defined(HAVE_GLIBC_ICONV)
 	version = (char *) gnu_get_libc_version();
 #endif
 

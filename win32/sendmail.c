@@ -691,8 +691,10 @@ static int SendText(char *RPath, const char *Subject, const char *mailTo, char *
 
 static int addToHeader(char **header_buffer, const char *specifier, const char *string)
 {
-	*header_buffer = erealloc(*header_buffer, strlen(*header_buffer) + strlen(specifier) + strlen(string) + 1);
-	sprintf(*header_buffer + strlen(*header_buffer), specifier, string);
+	size_t header_buffer_size = strlen(*header_buffer);
+	size_t total_size = header_buffer_size + strlen(specifier) + strlen(string) + 1;
+	*header_buffer = erealloc(*header_buffer, total_size);
+	snprintf(*header_buffer + header_buffer_size, total_size - header_buffer_size, specifier, string);
 	return 1;
 }
 

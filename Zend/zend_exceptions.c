@@ -501,8 +501,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 
 	ZVAL_DEREF(arg);
 
-	if (Z_TYPE_P(arg) <= IS_STRING) {
-		smart_str_append_scalar(str, arg, EG(exception_string_param_max_len));
+	if (smart_str_append_zval(str, arg, EG(exception_string_param_max_len)) == SUCCESS) {
 		smart_str_appends(str, ", ");
 	} else {
 		switch (Z_TYPE_P(arg)) {

@@ -28,7 +28,6 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_pcntl.h"
 #include "php_signal.h"
@@ -714,8 +713,7 @@ PHP_FUNCTION(pcntl_signal)
 	if (!PCNTL_G(spares)) {
 		/* since calling malloc() from within a signal handler is not portable,
 		 * pre-allocate a few records for recording signals */
-		int i;
-		for (i = 0; i < PCNTL_G(num_signals); i++) {
+		for (unsigned int i = 0; i < PCNTL_G(num_signals); i++) {
 			struct php_pcntl_pending_signal *psig;
 
 			psig = emalloc(sizeof(*psig));
@@ -903,7 +901,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 			RETURN_THROWS();
 		}
 
-		for (int signal_no = 1; signal_no < PCNTL_G(num_signals); ++signal_no) {
+		for (unsigned int signal_no = 1; signal_no < PCNTL_G(num_signals); ++signal_no) {
 			if (sigismember(&old_set, signal_no) != 1) {
 				continue;
 			}
@@ -1067,6 +1065,20 @@ static void pcntl_siginfo_to_zval(int signo, siginfo_t *siginfo, zval *user_sigi
 				add_assoc_long_ex(user_siginfo, "fd",   sizeof("fd")-1,   siginfo->si_fd);
 # endif
 				break;
+#endif
+
+#ifdef SIGTRAP
+			case SIGTRAP:
+# if defined(si_syscall) && defined(__FreeBSD__)
+				if (siginfo->si_code == TRAP_CAP) {
+					add_assoc_long_ex(user_siginfo, "syscall", sizeof("syscall")-1, (zend_long)siginfo->si_syscall);
+				} else {
+					add_assoc_long_ex(user_siginfo, "trapno", sizeof("trapno")-1, (zend_long)siginfo->si_trapno);
+				}
+
+# endif
+				break;
+
 #endif
 		}
 #if defined(SIGRTMIN) && defined(SIGRTMAX)
@@ -1642,7 +1654,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 
 	// 0 == getpid in this context, we're just saving a syscall
 	pid = pid_is_null ? 0 : pid;
-	zend_ulong maxcpus = (zend_ulong)sysconf(_SC_NPROCESSORS_CONF);
+	zend_long maxcpus = sysconf(_SC_NPROCESSORS_CONF);
 	PCNTL_CPU_ZERO(mask);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(hmask), ncpu) {

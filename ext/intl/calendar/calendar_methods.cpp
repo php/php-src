@@ -73,16 +73,17 @@ U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 {
 	zval		*zv_timezone	= NULL;
-	const char	*locale_str		= NULL;
-	size_t			dummy;
+	char	        *locale_str	= NULL;
+	size_t		locale_len      = 0;
 	TimeZone	*timeZone;
 	UErrorCode	status			= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zs!",
-			&zv_timezone, &locale_str, &dummy) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(zv_timezone)
+		Z_PARAM_STRING_OR_NULL(locale_str, locale_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	timeZone = timezone_process_timezone_argument(zv_timezone, NULL,
 		"intlcal_create_instance");
@@ -91,7 +92,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 	}
 
 	if (!locale_str) {
-		locale_str = intl_locale_get_default();
+		locale_str = (char *)intl_locale_get_default();
 	}
 
 	Calendar *cal = Calendar::createInstance(timeZone,
@@ -168,10 +169,11 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 	bool	commonly_used;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb",
-			&key, &key_len, &locale, &locale_len, &commonly_used) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(key, key_len)
+		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_BOOL(commonly_used)
+	ZEND_PARSE_PARAMETERS_END();
 
 	StringEnumeration *se = Calendar::getKeywordValuesForLocale(key,
 		Locale::createFromName(locale), (UBool)commonly_used,
@@ -189,9 +191,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_now)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_DOUBLE((double)Calendar::getNow());
 }
@@ -200,9 +200,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	int32_t count;
 	const Locale *availLocales = Calendar::getAvailableLocales(count);

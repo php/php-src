@@ -23,7 +23,6 @@
 #include "SAPI.h"
 
 #include "zend_variables.h"
-#include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 
@@ -1049,10 +1048,12 @@ PHP_FUNCTION(libxml_set_streams_context)
 		Z_PARAM_RESOURCE(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!Z_ISUNDEF(LIBXML(stream_context))) {
-		zval_ptr_dtor(&LIBXML(stream_context));
+	if (php_stream_context_from_zval(arg, true) != NULL) {
+		if (!Z_ISUNDEF(LIBXML(stream_context))) {
+			zval_ptr_dtor(&LIBXML(stream_context));
+		}
+		ZVAL_COPY(&LIBXML(stream_context), arg);
 	}
-	ZVAL_COPY(&LIBXML(stream_context), arg);
 }
 /* }}} */
 
@@ -1095,6 +1096,25 @@ PHP_FUNCTION(libxml_use_internal_errors)
 }
 /* }}} */
 
+static void php_libxml_create_error_object(zval *return_value, const xmlError *error)
+{
+	object_init_ex(return_value, libxmlerror_class_entry);
+	add_property_long(return_value, "level", error->level);
+	add_property_long(return_value, "code", error->code);
+	add_property_long(return_value, "column", error->int2);
+	if (error->message) {
+		add_property_string(return_value, "message", error->message);
+	} else {
+		add_property_str(return_value, "message", zend_empty_string);
+	}
+	if (error->file) {
+		add_property_string(return_value, "file", error->file);
+	} else {
+		add_property_str(return_value, "file", zend_empty_string);
+	}
+	add_property_long(return_value, "line", error->line);
+}
+
 /* {{{ Retrieve last error from libxml */
 PHP_FUNCTION(libxml_get_last_error)
 {
@@ -1103,21 +1123,7 @@ PHP_FUNCTION(libxml_get_last_error)
 	const xmlError *error = xmlGetLastError();
 
 	if (error) {
-		object_init_ex(return_value, libxmlerror_class_entry);
-		add_property_long(return_value, "level", error->level);
-		add_property_long(return_value, "code", error->code);
-		add_property_long(return_value, "column", error->int2);
-		if (error->message) {
-			add_property_string(return_value, "message", error->message);
-		} else {
-			add_property_stringl(return_value, "message", "", 0);
-		}
-		if (error->file) {
-			add_property_string(return_value, "file", error->file);
-		} else {
-			add_property_stringl(return_value, "file", "", 0);
-		}
-		add_property_long(return_value, "line", error->line);
+		php_libxml_create_error_object(return_value, error);
 	} else {
 		RETURN_FALSE;
 	}
@@ -1132,30 +1138,13 @@ PHP_FUNCTION(libxml_get_errors)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (LIBXML(error_list)) {
-
 		array_init(return_value);
 		error = zend_llist_get_first(LIBXML(error_list));
 
 		while (error != NULL) {
 			zval z_error;
-
-			object_init_ex(&z_error, libxmlerror_class_entry);
-			add_property_long_ex(&z_error, "level", sizeof("level") - 1, error->level);
-			add_property_long_ex(&z_error, "code", sizeof("code") - 1, error->code);
-			add_property_long_ex(&z_error, "column", sizeof("column") - 1, error->int2 );
-			if (error->message) {
-				add_property_string_ex(&z_error, "message", sizeof("message") - 1, error->message);
-			} else {
-				add_property_stringl_ex(&z_error, "message", sizeof("message") - 1, "", 0);
-			}
-			if (error->file) {
-				add_property_string_ex(&z_error, "file", sizeof("file") - 1, error->file);
-			} else {
-				add_property_stringl_ex(&z_error, "file", sizeof("file") - 1, "", 0);
-			}
-			add_property_long_ex(&z_error, "line", sizeof("line") - 1, error->line);
+			php_libxml_create_error_object(&z_error, error);
 			add_next_index_zval(return_value, &z_error);
-
 			error = zend_llist_get_next(LIBXML(error_list));
 		}
 	} else {

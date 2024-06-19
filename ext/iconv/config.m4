@@ -76,8 +76,8 @@ if test "$PHP_ICONV" != "no"; then
         ;;
     esac
 
-    AC_MSG_CHECKING([if iconv supports errno])
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    AC_CACHE_CHECK([if iconv supports errno], [php_cv_iconv_errno],
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <iconv.h>
 #include <errno.h>
 
@@ -94,14 +94,12 @@ int main(void) {
   iconv_close( cd );
   return 2;
 }
-    ]])],[
-      AC_MSG_RESULT(yes)
-    ],[
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR(iconv does not support errno)
-    ],[
-      AC_MSG_RESULT(yes, cross-compiling)
-    ])
+    ])],
+    [php_cv_iconv_errno=yes],
+    [php_cv_iconv_errno=no],
+    [php_cv_iconv_errno=yes])])
+    AS_VAR_IF([php_cv_iconv_errno], [yes],,
+      [AC_MSG_ERROR([iconv does not support errno])])
 
     AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
       [AC_RUN_IFELSE([AC_LANG_SOURCE([[

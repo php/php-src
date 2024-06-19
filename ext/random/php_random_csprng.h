@@ -20,27 +20,31 @@
 
 # include "php.h"
 
-PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
-PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes(void *bytes, size_t size, bool should_throw);
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_t size, char *errstr, size_t errstr_size);
 
-static inline zend_result php_random_bytes_throw(void *bytes, size_t size)
+ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_int(zend_long min, zend_long max, zend_long *result, bool should_throw);
+
+ZEND_ATTRIBUTE_NONNULL static inline zend_result php_random_bytes_throw(void *bytes, size_t size)
 {
 	return php_random_bytes(bytes, size, true);
 }
 
-static inline zend_result php_random_bytes_silent(void *bytes, size_t size)
+ZEND_ATTRIBUTE_NONNULL static inline zend_result php_random_bytes_silent(void *bytes, size_t size)
 {
 	return php_random_bytes(bytes, size, false);
 }
 
-static inline zend_result php_random_int_throw(zend_long min, zend_long max, zend_long *result)
+ZEND_ATTRIBUTE_NONNULL static inline zend_result php_random_int_throw(zend_long min, zend_long max, zend_long *result)
 {
 	return php_random_int(min, max, result, true);
 }
 
-static inline zend_result php_random_int_silent(zend_long min, zend_long max, zend_long *result)
+ZEND_ATTRIBUTE_NONNULL static inline zend_result php_random_int_silent(zend_long min, zend_long max, zend_long *result)
 {
 	return php_random_int(min, max, result, false);
 }
+
+PHPAPI void php_random_csprng_shutdown(void);
 
 #endif	/* PHP_RANDOM_CSPRNG_H */

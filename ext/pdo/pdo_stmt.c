@@ -2344,6 +2344,7 @@ static void row_dim_write(zend_object *object, zval *member, zval *value)
 	}
 }
 
+// todo: make row_prop_exists return bool as well
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
 	pdo_row_t *row = (pdo_row_t *)object;
@@ -2363,11 +2364,14 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 		return false;
 	}
 	ZEND_ASSERT(retval == &tmp_val);
-	int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+	bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
 	zval_ptr_dtor_nogc(retval);
+
 	return res;
 }
 
+
+// todo: make row_dim_exists return bool as well
 static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 {
 	if (Z_TYPE_P(offset) == IS_LONG) {
@@ -2386,7 +2390,7 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 			return false;
 		}
 		ZEND_ASSERT(retval == &tmp_val);
-		int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+		bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
 		zval_ptr_dtor_nogc(retval);
 		return res;
 	} else {

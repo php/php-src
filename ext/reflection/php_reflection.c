@@ -647,8 +647,8 @@ static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
 }
 
 static int format_default_value(smart_str *str, zval *value) {
-	if (Z_TYPE_P(value) <= IS_STRING) {
-		smart_str_append_scalar(str, value, SIZE_MAX);
+	if (smart_str_append_zval(str, value, SIZE_MAX) == SUCCESS) {
+		/* Nothing to do. */
 	} else if (Z_TYPE_P(value) == IS_ARRAY) {
 		zend_string *str_key;
 		zend_long num_key;
@@ -675,14 +675,6 @@ static int format_default_value(smart_str *str, zval *value) {
 			format_default_value(str, zv);
 		} ZEND_HASH_FOREACH_END();
 		smart_str_appendc(str, ']');
-	} else if (Z_TYPE_P(value) == IS_OBJECT) {
-		/* This branch may only be reached for default properties, which don't support arbitrary objects. */
-		zend_object *obj = Z_OBJ_P(value);
-		zend_class_entry *class = obj->ce;
-		ZEND_ASSERT(class->ce_flags & ZEND_ACC_ENUM);
-		smart_str_append(str, class->name);
-		smart_str_appends(str, "::");
-		smart_str_append(str, Z_STR_P(zend_enum_fetch_case_name(obj)));
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(value) == IS_CONSTANT_AST);
 		zend_string *ast_str = zend_ast_export("", Z_ASTVAL_P(value), "");
@@ -2251,18 +2243,11 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 {
 	zval *generator, *object;
 	reflection_object *intern;
-	zend_execute_data *ex;
 
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &generator, zend_ce_generator) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	ex = ((zend_generator *) Z_OBJ_P(generator))->execute_data;
-	if (!ex) {
-		_DO_THROW("Cannot create ReflectionGenerator based on a terminated Generator");
 		RETURN_THROWS();
 	}
 
@@ -2278,7 +2263,7 @@ ZEND_METHOD(ReflectionGenerator, __construct)
 
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
-		_DO_THROW("Cannot fetch information from a terminated Generator"); \
+		_DO_THROW("Cannot fetch information from a closed Generator"); \
 		RETURN_THROWS(); \
 	}
 
@@ -2354,22 +2339,20 @@ ZEND_METHOD(ReflectionGenerator, getExecutingFile)
 ZEND_METHOD(ReflectionGenerator, getFunction)
 {
 	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
-	zend_execute_data *ex = generator->execute_data;
+	zend_function *func = generator->func;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	REFLECTION_CHECK_VALID_GENERATOR(ex)
-
-	if (ex->func->common.fn_flags & ZEND_ACC_CLOSURE) {
+	if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 		zval closure;
-		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(ex->func));
-		reflection_function_factory(ex->func, &closure, return_value);
-	} else if (ex->func->op_array.scope) {
-		reflection_method_factory(ex->func->op_array.scope, ex->func, NULL, return_value);
+		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(func));
+		reflection_function_factory(func, &closure, return_value);
+	} else if (func->op_array.scope) {
+		reflection_method_factory(func->op_array.scope, func, NULL, return_value);
 	} else {
-		reflection_function_factory(ex->func, NULL, return_value);
+		reflection_function_factory(func, NULL, return_value);
 	}
 }
 /* }}} */
@@ -2411,6 +2394,18 @@ ZEND_METHOD(ReflectionGenerator, getExecutingGenerator)
 	RETURN_OBJ_COPY(&current->std);
 }
 /* }}} */
+
+ZEND_METHOD(ReflectionGenerator, isClosed)
+{
+	zend_generator *generator = (zend_generator *) Z_OBJ(Z_REFLECTION_P(ZEND_THIS)->obj);
+	zend_execute_data *ex = generator->execute_data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(ex == NULL);
+}
 
 /* {{{ Constructor. Throws an Exception in case the given method does not exist */
 ZEND_METHOD(ReflectionParameter, __construct)

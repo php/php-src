@@ -52,9 +52,9 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 	size_t	 str_id_len;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str_id, &str_id_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str_id, str_id_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	UErrorCode status = UErrorCode();
 	UnicodeString id = UnicodeString();
@@ -76,10 +76,9 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 	php_timezone_obj	*tzobj;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O",
-			&zv_timezone, php_date_get_timezone_ce()) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(zv_timezone, php_date_get_timezone_ce())
+	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 	if (!tzobj->initialized) {
@@ -102,9 +101,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_default)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	TimeZone *tz = TimeZone::createDefault();
 	timezone_object_construct(tz, return_value, 1);
@@ -114,9 +111,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_gmt)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	timezone_object_construct(TimeZone::getGMT(), return_value, 0);
 }
@@ -125,9 +120,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	timezone_object_construct(&TimeZone::getUnknown(), return_value, 0);
 }
@@ -140,9 +133,10 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 
 	/* double indirection to have the zend engine destroy the new zval that
 	 * results from separation */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (arg == NULL || Z_TYPE_P(arg) == IS_NULL) {
 		se = TimeZone::createEnumeration();
@@ -199,10 +193,9 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 	size_t	 str_id_len;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
-			&str_id, &str_id_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str_id, str_id_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	UErrorCode status = UErrorCode();
 	UnicodeString id = UnicodeString();
@@ -221,17 +214,19 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 	zend_long zoneType,
 			  offset_arg;
 	char	 *region		= NULL;
-	size_t	  region_len	= 0;
+	size_t    region_len = 0;
 	int32_t	  offset,
 			 *offsetp	= NULL;
 	bool arg3isnull = 1;
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l!",
-			&zoneType, &region, &region_len, &offset_arg, &arg3isnull) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_LONG(zoneType)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(region, region_len)
+		Z_PARAM_LONG_OR_NULL(offset_arg, arg3isnull)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (zoneType != UCAL_ZONE_TYPE_ANY && zoneType != UCAL_ZONE_TYPE_CANONICAL
 			&& zoneType != UCAL_ZONE_TYPE_CANONICAL_LOCATION) {
@@ -266,10 +261,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 	zval	*is_systemid = NULL;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z",
-			&str_id, &str_id_len, &is_systemid) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_id, str_id_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(is_systemid)
+	ZEND_PARSE_PARAMETERS_END();
 
 	UErrorCode status = UErrorCode();
 	UnicodeString id;
@@ -303,10 +299,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 	char	 outbuf[3];
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
-			&str_id, &str_id_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str_id, str_id_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	UErrorCode status = UErrorCode();
 	UnicodeString id;
@@ -326,9 +321,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 {
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	UErrorCode status = UErrorCode();
 	const char *res = TimeZone::getTZDataVersion(status);
@@ -344,9 +337,10 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	zend_long	index;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &str_id, &str_id_len, &index) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(str_id, str_id_len)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX)) {
 		RETURN_FALSE;
@@ -375,10 +369,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_iana_id)
 	size_t	 str_id_len;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
-			&str_id, &str_id_len) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str_id, str_id_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	UErrorCode status = UErrorCode();
 	UnicodeString id;
@@ -635,9 +628,9 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 	UnicodeString uID, uWinID;
 	UErrorCode error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &id) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(id)
+	ZEND_PARSE_PARAMETERS_END();
 
 	error = U_ZERO_ERROR;
 	if (intl_stringFromChar(uID, id->val, id->len, &error) == FAILURE) {
@@ -671,9 +664,11 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	UnicodeString uWinID, uID;
 	UErrorCode error;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &winID, &region) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(winID)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(region)
+	ZEND_PARSE_PARAMETERS_END();
 
 	error = U_ZERO_ERROR;
 	if (intl_stringFromChar(uWinID, winID->val, winID->len, &error) == FAILURE) {

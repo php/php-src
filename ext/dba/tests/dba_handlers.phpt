@@ -2,6 +2,8 @@
 DBA Handler Test
 --EXTENSIONS--
 dba
+--CONFLICTS--
+dba
 --SKIPIF--
 <?php
 $handler="flatfile";

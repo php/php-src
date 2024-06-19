@@ -30,7 +30,7 @@
 
 #include "php.h"
 #include "php_ini.h"
-#include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
 #ifdef PHP_WIN32
@@ -39,6 +39,8 @@
 #include "php_pgsql.h"
 #include "php_globals.h"
 #include "zend_exceptions.h"
+#include "zend_attributes.h"
+#include "php_network.h"
 
 #ifdef HAVE_PGSQL
 
@@ -108,20 +110,22 @@ char pgsql_libpq_version[16];
 		RETURN_THROWS(); \
 	}
 
-#ifndef HAVE_PQFREEMEM
-#define PQfreemem free
-#endif
-
-#if PG_VERSION_NUM < 120000
+#ifndef HAVE_PQERRORS_SQLSTATE
 #define PQERRORS_SQLSTATE 0
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(pgsql)
 static PHP_GINIT_FUNCTION(pgsql);
 
+static const zend_module_dep pgsql_module_deps[] = {
+	ZEND_MOD_REQUIRED("pcre")
+	ZEND_MOD_END
+};
+
 /* {{{ pgsql_module_entry */
 zend_module_entry pgsql_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	pgsql_module_deps,
 	"pgsql",
 	ext_functions,
 	PHP_MINIT(pgsql),
@@ -272,10 +276,6 @@ static void pgsql_lob_free_obj(zend_object *obj)
 
 /* Compatibility definitions */
 
-#ifndef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-#define pg_encoding_to_char(x) "SQL_ASCII"
-#endif
-
 static zend_string *_php_pgsql_trim_message(const char *message)
 {
 	size_t i = strlen(message);
@@ -401,6 +401,82 @@ static bool _php_pgsql_identifier_is_escaped(const char *identifier, size_t len)
 	return true;
 }
 
+#ifndef HAVE_PG_CHANGE_PASSWORD
+static PGresult *PQchangePassword(PGconn *conn, const char *user, const char *passwd)
+{
+	/**
+	 * It is more appropriate to let the configured password encryption algorithm
+	 * being picked up, so we pass NULL
+	 */
+	char *enc = PQencryptPasswordConn(conn, passwd, user, NULL);
+
+	if (!enc) {
+		return NULL;
+	}
+
+	char *fmtenc = PQescapeLiteral(conn, enc, strlen(enc));
+	PQfreemem(enc);
+
+	if (!fmtenc) {
+		return NULL;
+	}
+
+	char *fmtuser = PQescapeIdentifier(conn, user, strlen(user));
+
+	if (!fmtuser) {
+		PQfreemem(fmtenc);
+		return NULL;
+	}
+
+	char *query;
+
+	spprintf(&query, 0, "ALTER USER %s PASSWORD %s", fmtuser, fmtenc);
+
+	PGresult *pg_result = PQexec(conn, query);
+
+	efree(query);
+	PQfreemem(fmtuser);
+	PQfreemem(fmtenc);
+
+	return pg_result;
+}
+#endif
+
+#if !defined(HAVE_PG_SOCKET_POLL)
+static int PQsocketPoll(int socket, int read, int write, time_t timeout)
+{
+	if (!read && !write)
+		return 0;
+
+	php_pollfd fd;
+	int ts = -1;
+
+	fd.fd = socket;
+	fd.events = POLLERR;
+	fd.revents = 0;
+
+	if (read) {
+		fd.events |= POLLIN;
+	}
+
+	if (write) {
+		fd.events |= POLLOUT;
+	}
+
+	if (timeout != (time_t)ts) {
+		time_t cur = time(NULL);
+
+		if (timeout > cur) {
+			ts = (timeout - cur) * 1000;
+		} else {
+			ts = 0;
+		}
+	}
+
+	return php_poll2(&fd, 1, ts);
+}
+#endif
+
 /* {{{ PHP_INI */
 PHP_INI_BEGIN()
 STD_PHP_INI_BOOLEAN( "pgsql.allow_persistent",      "1",  PHP_INI_SYSTEM, OnUpdateBool, allow_persistent,      zend_pgsql_globals, pgsql_globals)
@@ -519,11 +595,7 @@ PHP_MINFO_FUNCTION(pgsql)
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PostgreSQL Support", "enabled");
 	php_info_print_table_row(2, "PostgreSQL (libpq) Version", pgsql_libpq_version);
-#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
 	php_info_print_table_row(2, "Multibyte character support", "enabled");
-#else
-	php_info_print_table_row(2, "Multibyte character support", "disabled");
-#endif
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_persistent));
 	php_info_print_table_row(2, "Active Persistent Links", buf);
 	snprintf(buf, sizeof(buf), ZEND_LONG_FMT, PGG(num_links));
@@ -790,6 +862,7 @@ PHP_FUNCTION(pg_close)
 #define PHP_PG_TTY 5
 #define PHP_PG_HOST 6
 #define PHP_PG_VERSION 7
+#define PHP_PG_JIT 8
 
 /* php_pgsql_get_link_info */
 static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
@@ -855,6 +928,25 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 			PHP_PQ_COPY_PARAM("application_name");
 			return;
 		}
+		case PHP_PG_JIT: {
+			PGresult *res;
+			array_init(return_value);
+			res = PQexec(pgsql, "SHOW jit_provider");
+			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+				add_assoc_null(return_value, "jit_provider");
+			} else {
+				add_assoc_string(return_value, "jit_provider", PQgetvalue(res, 0, 0));
+			}
+			PQclear(res);
+			res = PQexec(pgsql, "SHOW jit");
+			if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+				add_assoc_null(return_value, "jit");
+			} else {
+				add_assoc_string(return_value, "jit", PQgetvalue(res, 0, 0));
+			}
+			PQclear(res);
+			return;
+		}
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	if (result) {
@@ -904,6 +996,11 @@ PHP_FUNCTION(pg_host)
 PHP_FUNCTION(pg_version)
 {
 	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_VERSION);
+}
+
+PHP_FUNCTION(pg_jit)
+{
+	php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAM_PASSTHRU,PHP_PG_JIT);
 }
 
 /* Returns the value of a server parameter */
@@ -4247,7 +4344,7 @@ static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{
 				}
 
 				if (ret) {
-				*(php_socket_t *)ret = fd_number;
+					*(php_socket_t *)ret = fd_number;
 				}
 			}
 				return SUCCESS;
@@ -6048,4 +6145,130 @@ PHP_FUNCTION(pg_select)
 }
 /* }}} */
 
+PHP_FUNCTION(pg_change_password)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	PGresult *pg_result;
+	zend_string *user, *passwd;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_STR(user)
+		Z_PARAM_STR(passwd)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZSTR_LEN(user) == 0) {
+		zend_argument_value_error(2, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	/* it is technically possible, but better to disallow it */
+	if (ZSTR_LEN(passwd) == 0) {
+		zend_argument_value_error(3, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	pg_result = PQchangePassword(link->conn, ZSTR_VAL(user), ZSTR_VAL(passwd));
+	RETVAL_BOOL(PQresultStatus(pg_result) == PGRES_COMMAND_OK);
+	PQclear(pg_result);
+}
+
+#endif
+
+PHP_FUNCTION(pg_put_copy_data)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	zend_string *cmd;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_STR(cmd)
+	ZEND_PARSE_PARAMETERS_END();
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	// PQputCopyData accepts empty buffers as well
+
+	RETURN_LONG((zend_long)PQputCopyData(link->conn, ZSTR_VAL(cmd), ZSTR_LEN(cmd)));
+}
+
+PHP_FUNCTION(pg_put_copy_end)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	zend_string *error;
+	char *err = NULL;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_NULL(error)
+	ZEND_PARSE_PARAMETERS_END();
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	if (error != NULL && ZSTR_LEN(error) != 0) {
+		err = ZSTR_VAL(error);
+	}
+
+	RETURN_LONG((zend_long)PQputCopyEnd(link->conn, err));
+}
+
+PHP_FUNCTION(pg_socket_poll)
+{
+	zval *z_socket;
+	php_stream *stream;
+	php_socket_t socket;
+	zend_long read, write;
+	zend_long ts = -1;
+
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_RESOURCE(z_socket)
+		Z_PARAM_LONG(read)
+		Z_PARAM_LONG(write)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(ts)
+	ZEND_PARSE_PARAMETERS_END();
+
+	php_stream_from_zval(stream, z_socket);
+
+	if (php_stream_cast(stream, PHP_STREAM_AS_SOCKETD, (void **)&socket, 0)) {
+		zend_argument_type_error(1, "invalid resource socket");
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG((zend_long)PQsocketPoll(socket, (int)read, (int)write, (int)ts));
+}
+
+#if defined(HAVE_PG_SET_CHUNKED_ROWS_SIZE)
+PHP_FUNCTION(pg_set_chunked_rows_size)
+{
+	zval *pgsql_link;
+	pgsql_link_handle *link;
+	zend_long size;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(pgsql_link, pgsql_link_ce)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (size < 1 || size > INT_MAX) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	link = Z_PGSQL_LINK_P(pgsql_link);
+	CHECK_PGSQL_LINK(link);
+
+	/** can still fail if it is not allowed e.g. already fetched results **/
+
+	RETURN_BOOL(PQsetChunkedRowsMode(link->conn, (int)size) == 1);
+}
 #endif

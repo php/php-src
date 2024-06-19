@@ -691,7 +691,7 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 # pragma clang diagnostic pop
 #endif
 
-#if _WIN32
+#ifdef _WIN32
 # include <Windows.h>
 #else
 # include <sys/mman.h>
@@ -1817,7 +1817,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_assign_obj_op(&ctx, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, OP1_DATA_INFO(), OP1_DATA_RANGE(),
+								op1_info, op1_addr, OP1_DATA_INFO(), OP1_DATA_REG_ADDR(), OP1_DATA_RANGE(),
 								0, ce, ce_is_instanceof, on_this, 0, NULL, IS_UNKNOWN)) {
 							goto jit_failure;
 						}
@@ -1861,7 +1861,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							}
 						}
 						if (!zend_jit_assign_obj(&ctx, opline, op_array, ssa, ssa_op,
-								op1_info, op1_addr, OP1_DATA_INFO(),
+								op1_info, op1_addr, OP1_DATA_INFO(), OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
+								(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
 								0, ce, ce_is_instanceof, on_this, 0, NULL, IS_UNKNOWN,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
@@ -3245,7 +3246,7 @@ ZEND_EXT_API void zend_jit_unprotect(void)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old, new;
 #ifdef ZTS
@@ -3276,7 +3277,7 @@ ZEND_EXT_API void zend_jit_protect(void)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (!(JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP))) {
 		DWORD old;
 
@@ -3364,12 +3365,12 @@ ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
 		return FAILURE;
 	}
 
-	if (ZSTR_LEN(jit) == 0
-	 || zend_string_equals_literal_ci(jit, "disable")) {
+	if (zend_string_equals_literal_ci(jit, "disable")) {
 		JIT_G(enabled) = 0;
 		JIT_G(on) = 0;
 		return SUCCESS;
-	} else if (zend_string_equals_literal_ci(jit, "0")
+	} else if (ZSTR_LEN(jit) == 0
+			|| zend_string_equals_literal_ci(jit, "0")
 			|| zend_string_equals_literal_ci(jit, "off")
 			|| zend_string_equals_literal_ci(jit, "no")
 			|| zend_string_equals_literal_ci(jit, "false")) {
@@ -3519,7 +3520,7 @@ ZEND_EXT_API void zend_jit_startup(void *buf, size_t size, bool reattached)
 			fprintf(stderr, "mprotect() failed [%d] %s\n", errno, strerror(errno));
 		}
 	}
-#elif _WIN32
+#elif defined(_WIN32)
 	if (JIT_G(debug) & (ZEND_JIT_DEBUG_GDB|ZEND_JIT_DEBUG_PERF_DUMP)) {
 		DWORD old;
 

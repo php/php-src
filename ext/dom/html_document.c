@@ -1114,7 +1114,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 			xmlFree(converted);
 			lxml_doc->URL = new_buffer;
 		} else {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 			converted = php_dom_libxml_fix_file_path(converted);
 #endif
 			lxml_doc->URL = converted;

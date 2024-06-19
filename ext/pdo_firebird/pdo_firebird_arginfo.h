@@ -1,16 +1,16 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 037c073de9e3e3593c62cb7da8ee7202c38c2723 */
+ * Stub hash: 584b20b65c1ebccf82f894cb9e16ea76a2b1aa1e */
 
-static const zend_function_entry class_PdoFirebird_methods[] = {
+static const zend_function_entry class_Pdo_Firebird_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_PdoFirebird(zend_class_entry *class_entry_PDO)
+static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_entry_Pdo_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PdoFirebird", class_PdoFirebird_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
+	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Firebird", class_Pdo_Firebird_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Pdo_PDO);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval const_ATTR_DATE_FORMAT_value;

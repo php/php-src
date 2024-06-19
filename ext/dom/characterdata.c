@@ -135,7 +135,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 		RETURN_FALSE;
 	}
 
-	if (offset > length) {
+	if (offset > (unsigned int)length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}
@@ -230,7 +230,7 @@ static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 		RETURN_FALSE;
 	}
 
-	if (offset > length) {
+	if (offset > (unsigned int)length) {
 		php_dom_throw_error(INDEX_SIZE_ERR, dom_get_strict_error(intern->document));
 		RETURN_FALSE;
 	}

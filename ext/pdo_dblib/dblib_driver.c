@@ -22,8 +22,8 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
 #include "php_pdo_dblib_int.h"
 #include "zend_exceptions.h"
@@ -436,7 +436,8 @@ static const struct pdo_dbh_methods dblib_methods = {
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	NULL, /* in transaction, use PDO's internal tracking mechanism */
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 
 static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)

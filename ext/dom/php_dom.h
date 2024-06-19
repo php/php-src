@@ -66,7 +66,7 @@ extern zend_module_entry dom_module_entry;
 
 typedef struct _dom_xpath_object {
 	php_dom_xpath_callbacks xpath_callbacks;
-	int register_node_ns;
+	bool register_node_ns;
 	dom_object dom;
 } dom_xpath_object;
 
@@ -130,8 +130,8 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type);
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 bool dom_get_strict_error(php_libxml_ref_obj *document);
-void php_dom_throw_error(int error_code, bool strict_error);
-void php_dom_throw_error_with_message(int error_code, char *error_message, bool strict_error);
+void php_dom_throw_error(dom_exception_code error_code, bool strict_error);
+void php_dom_throw_error_with_message(dom_exception_code error_code, const char *error_message, bool strict_error);
 void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
@@ -174,6 +174,7 @@ xmlDocPtr php_dom_create_html_doc(void);
 xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
 void dom_set_xml_class(php_libxml_ref_obj *document);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
+void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp);
 
 typedef enum {
 	DOM_LOAD_STRING = 0,

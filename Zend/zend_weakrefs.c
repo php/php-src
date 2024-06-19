@@ -54,7 +54,7 @@ typedef struct _zend_weakmap_iterator {
 #define ZEND_WEAKREF_ENCODE(p, t) ((void *) (((uintptr_t) (p)) | (t)))
 
 zend_class_entry *zend_ce_weakref;
-zend_class_entry *zend_ce_weakmap;
+static zend_class_entry *zend_ce_weakmap;
 static zend_object_handlers zend_weakref_handlers;
 static zend_object_handlers zend_weakmap_handlers;
 
@@ -405,6 +405,7 @@ static void zend_weakmap_write_dimension(zend_object *object, zval *offset, zval
 	zend_hash_index_add_new(&wm->ht, obj_key, value);
 }
 
+// todo: make zend_weakmap_has_dimension return bool as well
 /* int return and check_empty due to Object Handler API */
 static int zend_weakmap_has_dimension(zend_object *object, zval *offset, int check_empty)
 {
@@ -693,12 +694,12 @@ ZEND_METHOD(WeakMap, offsetGet)
 	zval *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zval *zv = zend_weakmap_read_dimension(Z_OBJ_P(ZEND_THIS), key, BP_VAR_R, NULL);
 	if (!zv) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(return_value, zv);
@@ -709,7 +710,7 @@ ZEND_METHOD(WeakMap, offsetSet)
 	zval *key, *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &key, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_weakmap_write_dimension(Z_OBJ_P(ZEND_THIS), key, value);
@@ -720,7 +721,7 @@ ZEND_METHOD(WeakMap, offsetExists)
 	zval *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(zend_weakmap_has_dimension(Z_OBJ_P(ZEND_THIS), key, /* check_empty */ 0));
@@ -731,7 +732,7 @@ ZEND_METHOD(WeakMap, offsetUnset)
 	zval *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_weakmap_unset_dimension(Z_OBJ_P(ZEND_THIS), key);
@@ -740,7 +741,7 @@ ZEND_METHOD(WeakMap, offsetUnset)
 ZEND_METHOD(WeakMap, count)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_long count;
@@ -751,7 +752,7 @@ ZEND_METHOD(WeakMap, count)
 ZEND_METHOD(WeakMap, getIterator)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);

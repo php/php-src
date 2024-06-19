@@ -277,18 +277,19 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	php_random_algo_with_state engine = randomizer->engine;
 
 	zend_string *retval;
-	zend_long length;
+	zend_long user_length;
 	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG(user_length)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (length < 1) {
+	if (user_length < 1) {
 		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
+	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
 
 	while (total_size < length) {
@@ -385,13 +386,13 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 	php_random_randomizer *randomizer = Z_RANDOM_RANDOMIZER_P(ZEND_THIS);
 	php_random_algo_with_state engine = randomizer->engine;
 
-	zend_long length;
+	zend_long user_length;
 	zend_string *source, *retval;
 	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2);
 		Z_PARAM_STR(source)
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG(user_length)
 	ZEND_PARSE_PARAMETERS_END();
 
 	const size_t source_length = ZSTR_LEN(source);
@@ -402,11 +403,12 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		RETURN_THROWS();
 	}
 
-	if (length < 1) {
+	if (user_length < 1) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
+	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
 
 	if (max_offset > 0xff) {

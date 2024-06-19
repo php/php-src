@@ -68,11 +68,11 @@ if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
 
   AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#if HAVE_CRYPT_H
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
 
@@ -80,7 +80,7 @@ if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
 #include <string.h>
 
 int main(void) {
-#if HAVE_CRYPT
+#ifdef HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","rl");
 	return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
 #else
@@ -96,11 +96,11 @@ int main(void) {
 
   AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#if HAVE_CRYPT_H
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
 
@@ -108,7 +108,7 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#if HAVE_CRYPT
+#ifdef HAVE_CRYPT
 	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
 	return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
 #else
@@ -124,11 +124,11 @@ int main(void) {
 
   AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#if HAVE_CRYPT_H
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
 
@@ -136,7 +136,7 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#if HAVE_CRYPT
+#ifdef HAVE_CRYPT
 	char salt[15], answer[40];
 	char *encrypted;
 
@@ -162,11 +162,11 @@ int main(void) {
 
   AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#if HAVE_CRYPT_H
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
 
@@ -174,7 +174,7 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#if HAVE_CRYPT
+#ifdef HAVE_CRYPT
 	char salt[30], answer[70];
 	char *encrypted;
 
@@ -197,11 +197,11 @@ int main(void) {
 
   AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#if HAVE_CRYPT_H
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
 
@@ -209,7 +209,7 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#if HAVE_CRYPT
+#ifdef HAVE_CRYPT
 	char salt[21], answer[21+86];
 	char *encrypted;
 
@@ -231,11 +231,11 @@ int main(void) {
 
   AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
-#if HAVE_CRYPT_H
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
 #endif
 
@@ -243,7 +243,7 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#if HAVE_CRYPT
+#ifdef HAVE_CRYPT
 	char salt[21], answer[21+43];
 	char *encrypted;
 

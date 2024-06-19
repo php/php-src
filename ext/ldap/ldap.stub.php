@@ -203,7 +203,7 @@ namespace {
     const LDAP_OPT_X_SASL_USERNAME = UNKNOWN;
 #endif
 
-#ifdef ORALDAP
+#ifdef HAVE_ORALDAP
     /**
      * @var int
      * @cvalue GSLC_SSL_NO_AUTH

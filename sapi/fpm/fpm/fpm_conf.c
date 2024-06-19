@@ -721,7 +721,7 @@ int fpm_worker_pool_config_free(struct fpm_worker_pool_config_s *wpc) /* {{{ */
 	} while (0)
 #define FPM_WPC_STR_CP(_cfg, _scfg, _field) FPM_WPC_STR_CP_EX(_cfg, _scfg, _field, _field)
 
-void fpm_conf_apply_kv_array_to_kv_array(struct key_value_s *src, void *dest) {
+static void fpm_conf_apply_kv_array_to_kv_array(struct key_value_s *src, void *dest) {
 	struct key_value_s *kv;
 
 	for (kv = src; kv; kv = kv->next) {
@@ -763,6 +763,8 @@ static int fpm_worker_pool_shared_status_alloc(struct fpm_worker_pool_s *shared_
 	FPM_WPC_STR_CP(config, shared_config, user);
 	FPM_WPC_STR_CP(config, shared_config, group);
 	FPM_WPC_STR_CP(config, shared_config, pm_status_path);
+	FPM_WPC_STR_CP(config, shared_config, ping_path);
+	FPM_WPC_STR_CP(config, shared_config, ping_response);
 
 	fpm_conf_apply_kv_array_to_kv_array(shared_config->php_values, (char *)config + WPO(php_values));
 	fpm_conf_apply_kv_array_to_kv_array(shared_config->php_admin_values, (char *)config + WPO(php_admin_values));
@@ -1262,7 +1264,7 @@ int fpm_conf_write_pid(void)
 			return -1;
 		}
 
-		len = sprintf(buf, "%d", (int) fpm_globals.parent_pid);
+		len = snprintf(buf, sizeof(buf), "%d", (int) fpm_globals.parent_pid);
 
 		if (len != write(fd, buf, len)) {
 			zlog(ZLOG_SYSERROR, "Unable to write to the PID file.");

@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -808,7 +808,8 @@ enum { ERR0 = COMPILE_ERROR_BASE,
        ERR61, ERR62, ERR63, ERR64, ERR65, ERR66, ERR67, ERR68, ERR69, ERR70,
        ERR71, ERR72, ERR73, ERR74, ERR75, ERR76, ERR77, ERR78, ERR79, ERR80,
        ERR81, ERR82, ERR83, ERR84, ERR85, ERR86, ERR87, ERR88, ERR89, ERR90,
-       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100 };
+       ERR91, ERR92, ERR93, ERR94, ERR95, ERR96, ERR97, ERR98, ERR99, ERR100,
+       ERR101 };
 
 /* This is a table of start-of-pattern options such as (*UTF) and settings such
 as (*LIMIT_MATCH=nnnn) and (*CRLF). For completeness and backward
@@ -7549,7 +7550,8 @@ for (;; pptr++)
             if (lengthptr != NULL)
               {
               PCRE2_SIZE delta;
-              if (PRIV(ckd_smul)(&delta, repeat_min - 1, length_prevgroup) ||
+              if (PRIV(ckd_smul)(&delta, repeat_min - 1,
+                                 (int)length_prevgroup) ||
                   OFLOW_MAX - *lengthptr < delta)
                 {
                 *errorcodeptr = ERR20;
@@ -7599,7 +7601,7 @@ for (;; pptr++)
             {
             PCRE2_SIZE delta;
             if (PRIV(ckd_smul)(&delta, repeat_max,
-                               length_prevgroup + 1 + 2 + 2*LINK_SIZE) ||
+                               (int)length_prevgroup + 1 + 2 + 2*LINK_SIZE) ||
                 OFLOW_MAX + (2 + 2*LINK_SIZE) - *lengthptr < delta)
               {
               *errorcodeptr = ERR20;
@@ -9908,7 +9910,7 @@ do
   *bptr |= branchlength;  /* branchlength never more than 65535 */
   bptr = *pptrptr;
   }
-while (*bptr == META_ALT);
+while (META_CODE(*bptr) == META_ALT);
 
 /* If any branch is of variable length, the whole lookbehind is of variable
 length. If the maximum length of any branch exceeds the maximum for variable
@@ -10601,14 +10603,21 @@ if (length > MAX_PATTERN_SIZE)
   goto HAD_CB_ERROR;
   }
 
-/* Compute the size of, and then get and initialize, the data block for storing
-the compiled pattern and names table. Integer overflow should no longer be
-possible because nowadays we limit the maximum value of cb.names_found and
-cb.name_entry_size. */
+/* Compute the size of, then, if not too large, get and initialize the data
+block for storing the compiled pattern and names table. Integer overflow should
+no longer be possible because nowadays we limit the maximum value of
+cb.names_found and cb.name_entry_size. */
 
 re_blocksize = sizeof(pcre2_real_code) +
   CU2BYTES(length +
   (PCRE2_SIZE)cb.names_found * (PCRE2_SIZE)cb.name_entry_size);
+
+if (re_blocksize > ccontext->max_pattern_compiled_length)
+  {
+  errorcode = ERR101;
+  goto HAD_CB_ERROR;
+  }
+
 re = (pcre2_real_code *)
   ccontext->memctl.malloc(re_blocksize, ccontext->memctl.memory_data);
 if (re == NULL)

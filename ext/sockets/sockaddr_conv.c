@@ -16,7 +16,7 @@ extern zend_result php_string_to_if_index(const char *val, unsigned *out);
 int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
 {
 	struct in6_addr tmp;
-#if HAVE_GETADDRINFO
+#ifdef HAVE_GETADDRINFO
 	struct addrinfo hints;
 	struct addrinfo *addrinfo = NULL;
 #endif
@@ -25,7 +25,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 	if (inet_pton(AF_INET6, string, &tmp)) {
 		memcpy(&(sin6->sin6_addr.s6_addr), &(tmp.s6_addr), sizeof(struct in6_addr));
 	} else {
-#if HAVE_GETADDRINFO
+#ifdef HAVE_GETADDRINFO
 
 		memset(&hints, 0, sizeof(struct addrinfo));
 		hints.ai_family = AF_INET6;

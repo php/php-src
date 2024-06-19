@@ -18,7 +18,6 @@
 #define PHP_SESSION_H
 
 #include "ext/standard/php_var.h"
-#include "ext/hash/php_hash.h"
 #include "ext/random/php_random.h"
 
 #define PHP_SESSION_API 20161017
@@ -256,6 +255,7 @@ PHPAPI zend_result php_session_destroy(void);
 PHPAPI void php_add_session_var(zend_string *name);
 PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
 PHPAPI zval *php_get_session_var(zend_string *name);
+PHPAPI zval* php_get_session_var_str(const char *name, size_t name_len);
 
 PHPAPI zend_result php_session_register_module(const ps_module *);
 
@@ -265,6 +265,7 @@ PHPAPI zend_result php_session_register_serializer(const char *name,
 
 PHPAPI zend_result php_session_start(void);
 PHPAPI zend_result php_session_flush(int write);
+PHPAPI php_session_status php_get_session_status(void);
 
 PHPAPI const ps_module *_php_find_ps_module(const char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);

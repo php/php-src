@@ -32,7 +32,6 @@
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
-#include "php_globals.h"
 #include "basic_functions.h"
 #include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
@@ -3847,7 +3846,7 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 					case '\v': *target++ = 'v'; break;
 					case '\b': *target++ = 'b'; break;
 					case '\f': *target++ = 'f'; break;
-					default: target += sprintf(target, "%03o", (unsigned char) c);
+					default: target += snprintf(target, 4, "%03o", (unsigned char) c);
 				}
 				continue;
 			}

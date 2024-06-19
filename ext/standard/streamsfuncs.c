@@ -16,11 +16,8 @@
 */
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_filestat.h"
-#include "php_open_temporary_file.h"
 #include "ext/standard/basic_functions.h"
 #include "php_ini.h"
 #include "streamsfuncs.h"
@@ -1700,7 +1697,7 @@ PHP_FUNCTION(stream_isatty)
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
 	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
-#elif HAVE_UNISTD_H
+#elif defined(HAVE_UNISTD_H)
 	/* Check if the file descriptor identifier is a terminal */
 	RETVAL_BOOL(isatty(fileno));
 #else

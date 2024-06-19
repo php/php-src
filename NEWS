@@ -24,11 +24,13 @@ PHP                                                                        NEWS
   . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
   . Added fiber Sys-V loongarch64 support. (qiangxuhui)
   . Adjusted closure names to include the parent function's name. (timwolla)
+  . Improve randomness of uploaded file names and files created by tempnam().
+    (Arnaud)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
   . Bumped required libcurl version to 7.61.0. (Ayesh)
-  . Added feature_list key to the curl_version() return value (Ayesh)
+  . Added feature_list key to the curl_version() return value. (Ayesh)
 
 - Date:
   . Added DateTime[Immutable]::createFromTimestamp. (Marc Bennewitz)
@@ -45,6 +47,8 @@ PHP                                                                        NEWS
   . Implemented "Improve callbacks in ext/dom and ext/xsl" RFC. (nielsdos)
   . Added DOMXPath::quote() static method. (divinity76)
   . Implemented opt-in ext/dom spec compliance RFC. (nielsdos)
+  . Fixed bug #79701 (getElementById does not correctly work with duplicate
+    definitions). (nielsdos)
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)
@@ -59,6 +63,12 @@ PHP                                                                        NEWS
 - FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
+
+- GD:
+  . Fix parameter numbers and missing alpha check for imagecolorset().
+    (Giovanni Giacobbi)
+  . imagepng/imagejpeg/imagewep/imageavif now throw an exception on
+    invalid quality parameter. (David Carlier)
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions
@@ -98,6 +108,8 @@ PHP                                                                        NEWS
 
 - LibXML:
   . Added LIBXML_RECOVER constant. (nielsdos)
+  . libxml_set_streams_context() now throws immediately on an invalid context
+    instead of at the use-site. (nielsdos)
 
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
@@ -117,6 +129,8 @@ PHP                                                                        NEWS
     64bit archs. (Arnaud)
   . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
     zend_jit.c). (nielsdos)
+  . Fixed bug GH-14361 (Deep recursion in zend_cfg.c causes segfault).
+    (nielsdos)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
@@ -130,6 +144,9 @@ PHP                                                                        NEWS
   . Bumped minimum required OpenSSL version to 1.1.1. (Ayesh Karunaratne)
   . Added compile-time option --with-openssl-legacy-provider to enable legacy
     provider. (Adam Saponara)
+  . Added support for Curve25519 + Curve448 based keys. (Manuel Mausz)
+  . Fixed bug GH-13343 (openssl_x509_parse should not allow omitted seconds in
+    UTCTimes). (Jakub Zelenka)
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
@@ -144,41 +161,51 @@ PHP                                                                        NEWS
   . Added pcntl_getcpu for Linux/FreeBSD/Solaris/Illumos. (David Carlier)
   . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
   . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
+  . Added FreeBSD's SIGTRAP handling to pcntl_siginfo_to_zval. (David Carlier)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
   . Add "/r" modifier. (Ayesh)
+  . Upgrade bundled pcre2lib to version 10.44. (Ayesh)
 
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
+  . Added support for PDO driver-specific SQL parsers. (Matteo Beccati)
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoDbLib (danack, kocsismate)
+  . Added class Pdo\DbLib. (danack, kocsismate)
 
 - PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Feature: Add transaction isolation level and mode settings to pdo_firebird.
     (SakiTakamachi)
-  . Added class PdoFirebird. (danack, kocsismate)
+  . Added class Pdo\Firebird. (danack, kocsismate)
 
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoMysql. (danack, kocsismate)
+  . Added class Pdo\Mysql. (danack, kocsismate)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PDO_ODBC:
-  . Added class PdoOdbc. (danack, kocsismate)
+  . Added class Pdo\Odbc. (danack, kocsismate)
 
 - PDO_PGSQL:
   . Fixed GH-12423, DSN credentials being prioritized over the user/password
     PDO constructor arguments. (SakiTakamachi)
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
-  . Added class PdoPgsql. (danack, kocsismate)
+  . Added class Pdo\Pgsql. (danack, kocsismate)
   . Retrieve the memory usage of the query result resource. (KentarouTakeda)
+  . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
+    (outtersg)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PDO_SQLITE:
-  . Added class PdoSqlite. (danack, kocsismate)
+  . Added class Pdo\Sqlite. (danack, kocsismate)
+  . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
+    (nielsdos)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
@@ -186,6 +213,12 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added pg_result_memory_size to get the query result memory usage.
     (KentarouTakeda)
+  . Added pg_change_password to alter an user's password. (David Carlier)
+  . Added pg_put_copy_data/pg_put_copy_end to send COPY commands and signal
+    the end of the COPY. (David Carlier)
+  . Added pg_socket_poll to poll on the connection. (David Carlier)
+  . Added pg_jit to get infos on server JIT support. (David Carlier)
+  . Added pg_set_chunked_rows_size to fetch results per chunk. (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
@@ -202,6 +235,9 @@ PHP                                                                        NEWS
 - Reflection:
   . Implement GH-12908 (Show attribute name/class in ReflectionAttribute dump).
     (nielsdos)
+  . Make ReflectionGenerator::getFunction() legal after generator termination.
+    (timwolla)
+  . Added ReflectionGenerator::isClosed(). (timwolla)
 
 - SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
@@ -221,6 +257,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
     macOs and FreeBSD. (David Carlier)
+  . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
+    (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
@@ -232,6 +270,8 @@ PHP                                                                        NEWS
   . Fixed bug #49278 (SoapClient::__getLastResponseHeaders returns NULL if
     wsdl operation !has output). (nielsdos)
   . Fixed bug #44383 (PHP DateTime not converted to xsd:datetime). (nielsdos)
+  . Fixed bug GH-11941 (soap with session persistence will silently fail when
+    "session" built as a shared object). (nielsdos)
 
 - Sockets:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
@@ -239,8 +279,8 @@ PHP                                                                        NEWS
   . Added the SOCK_CONN_DGRAM/SOCK_DCCP netbsd constants. (David Carlier)
 
 - Sodium:
-  . Add support for AEGIS-128L and AEGIS-256 (jedisct1)
-  . Enable AES-GCM on aarch64 with the ARM crypto extensions (jedisct1)
+  . Add support for AEGIS-128L and AEGIS-256. (jedisct1)
+  . Enable AES-GCM on aarch64 with the ARM crypto extensions. (jedisct1)
 
 - SPL:
   . Implement SeekableIterator for SplObjectStorage. (nielsdos)
@@ -266,6 +306,8 @@ PHP                                                                        NEWS
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
   . Add php_base64_encode_ex() API. (Remi)
+  . Implemented "Raising zero to the power of negative number" RFC. (Jorg Sowa)
+  . Added array_find(), array_find_key(), array_all(), and array_any(). (josh)
 
 - XML:
   . Added XML_OPTION_PARSE_HUGE parser option. (nielsdos)

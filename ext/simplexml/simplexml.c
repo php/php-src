@@ -23,9 +23,8 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_SIMPLEXML)
 
-#include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_trim() */
 #include "php_simplexml.h"
 #include "php_simplexml_exports.h"
 #include "simplexml_arginfo.h"

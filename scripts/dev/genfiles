@@ -125,6 +125,21 @@ $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo builddir=ext/pdo top_
   -f ext/pdo/Makefile.frag \
   ext/pdo/pdo_sql_parser.c
 
+echo "genfiles: Generating PDO_mysql lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_mysql builddir=ext/pdo_mysql top_srcdir=. \
+  -f ext/pdo_mysql/Makefile.frag \
+  ext/pdo_mysql/mysql_sql_parser.c
+
+echo "genfiles: Generating PDO_pgsql lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_pgsql builddir=ext/pdo_pgsql top_srcdir=. \
+  -f ext/pdo_pgsql/Makefile.frag \
+  ext/pdo_pgsql/pgsql_sql_parser.c
+
+echo "genfiles: Generating PDO_sqlite lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_sqlite builddir=ext/pdo_sqlite top_srcdir=. \
+  -f ext/pdo_sqlite/Makefile.frag \
+  ext/pdo_sqlite/sqlite_sql_parser.c
+
 echo "genfiles: Generating standard extension lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/standard builddir=ext/standard top_srcdir=. \
   -f ext/standard/Makefile.frag \

@@ -20,10 +20,9 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_basename() */
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
 #include "zend_attributes.h"
@@ -949,11 +948,12 @@ static zval *php_zip_read_property(zend_object *object, zend_string *name, int t
 }
 /* }}} */
 
+// todo: make php_zip_has_property return bool as well
 static int php_zip_has_property(zend_object *object, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
 	ze_zip_object *obj;
 	zip_prop_handler *hnd = NULL;
-	int retval = 0;
+	bool retval = false;
 
 	obj = php_zip_fetch_object(object);
 
@@ -965,7 +965,7 @@ static int php_zip_has_property(zend_object *object, zend_string *name, int type
 		zval tmp, *prop;
 
 		if (type == 2) {
-			retval = 1;
+			retval = true;
 		} else if ((prop = php_zip_property_reader(obj, hnd, &tmp)) != NULL) {
 			if (type == 1) {
 				retval = zend_is_true(&tmp);
@@ -1145,9 +1145,15 @@ static PHP_MSHUTDOWN_FUNCTION(zip);
 static PHP_MINFO_FUNCTION(zip);
 /* }}} */
 
+static const zend_module_dep zip_deps[] = {
+	ZEND_MOD_REQUIRED("pcre")
+	ZEND_MOD_END
+};
+
 /* {{{ zip_module_entry */
 zend_module_entry zip_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX, NULL,
+	zip_deps,
 	"zip",
 	ext_functions,
 	PHP_MINIT(zip),
