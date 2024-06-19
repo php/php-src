@@ -269,6 +269,7 @@ PHP                                                                        NEWS
     macOs and FreeBSD. (David Carlier)
   . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
     (David Carlier)
+  . Add close-on-exec on socket created with socket_accept on unixes. (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
