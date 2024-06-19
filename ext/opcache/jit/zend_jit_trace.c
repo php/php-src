@@ -4979,6 +4979,29 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_data_info = OP1_DATA_INFO();
 						CHECK_OP1_DATA_TRACE_TYPE();
+#ifdef HAVE_FFI
+						if (op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
+							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+
+							if (field
+							 && !field->bits
+							 && ZEND_FFI_TYPE(field->type)->kind >= ZEND_FFI_TYPE_FLOAT
+							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM
+							 && (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE)) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_assign_obj_op(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, on_this, delayed_fetch_this, field,
+										op1_data_info, OP1_DATA_REG_ADDR(),
+										op1_ffi_type, ffi_info)) {
+									goto jit_failure;
+								}
+								goto done;
+							}
+						}
+#endif
 						if (!zend_jit_assign_obj_op(&ctx, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_RANGE(),
 								op1_indirect, ce, ce_is_instanceof, on_this, delayed_fetch_this, op1_ce,
@@ -5062,6 +5085,35 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_data_info = OP1_DATA_INFO();
 						CHECK_OP1_DATA_TRACE_TYPE();
+#ifdef HAVE_FFI
+						if (op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
+							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+
+							if (field
+							 && !field->bits
+							 && ZEND_FFI_TYPE(field->type)->kind >= ZEND_FFI_TYPE_FLOAT
+							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM
+							 && (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE)) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_assign_obj(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, on_this, delayed_fetch_this, field,
+										op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
+										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
+										op1_ffi_type, ffi_info)) {
+									goto jit_failure;
+								}
+								if ((opline+1)->op1_type == IS_CV
+								 && (ssa_op+1)->op1_def >= 0
+								 && ssa->vars[(ssa_op+1)->op1_def].alias == NO_ALIAS) {
+									ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
+								}
+								goto done;
+							}
+						}
+#endif
 						if (!zend_jit_assign_obj(&ctx, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
 								(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
@@ -5118,7 +5170,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
-						 && op2_info == MAY_BE_LONG) {
+						 && op2_info == MAY_BE_LONG
+						 && (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE)) {
 							if (!ffi_info) {
 								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 							}
@@ -6174,6 +6227,29 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								on_this = op_array->opcodes[op_array_ssa->vars[op_array_ssa->ops[opline-op_array->opcodes].op1_use].definition].opcode == ZEND_FETCH_THIS;
 							}
 						}
+#ifdef HAVE_FFI
+						if (opline->opcode == ZEND_FETCH_OBJ_R && op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
+							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+
+							if (field
+							 && !field->bits
+							 && ZEND_FFI_TYPE(field->type)->kind >= ZEND_FFI_TYPE_FLOAT
+							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, op1_indirect,
+										on_this, delayed_fetch_this, avoid_refcounting, field,
+										RES_REG_ADDR(),
+										op1_ffi_type, ffi_info)) {
+									goto jit_failure;
+								}
+								goto done;
+							}
+						}
+#endif
 						if (!zend_jit_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr, op1_indirect, ce, ce_is_instanceof,
 								on_this, delayed_fetch_this, avoid_refcounting, op1_ce,
