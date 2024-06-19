@@ -1785,7 +1785,7 @@ static void sdl_serialize_string(const char *str, smart_str *out)
 }
 
 // TODO: refactor it
-static void sdl_serialize_key(zend_string *key, smart_str *out)
+static void sdl_serialize_key(const zend_string *key, smart_str *out)
 {
 	if (key) {
 		WSDL_CACHE_PUT_INT(ZSTR_LEN(key), out);
@@ -1841,7 +1841,7 @@ static void sdl_serialize_attribute(sdlAttributePtr attr, HashTable *tmp_encoder
 	WSDL_CACHE_PUT_INT(i, out);
 	if (i > 0) {
 		sdlExtraAttributePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(attr->extraAttributes, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -1941,7 +1941,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 		WSDL_CACHE_PUT_INT(i, out);
 		if (i > 0) {
 			sdlRestrictionCharPtr tmp;
-			zend_string *key;
+			const zend_string *key;
 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
 				sdl_serialize_resriction_char(tmp, out);
@@ -1959,7 +1959,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 	WSDL_CACHE_PUT_INT(i, out);
 	if (i > 0) {
 		sdlTypePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 		zval zv;
 
 		tmp_elements = emalloc(sizeof(HashTable));
@@ -1982,7 +1982,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 	WSDL_CACHE_PUT_INT(i, out);
 	if (i > 0) {
 		sdlAttributePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(type->attributes, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2021,7 +2021,7 @@ static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, Has
 	WSDL_CACHE_PUT_INT(i, out);
 	if (i > 0) {
 		sdlParamPtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(ht, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2050,7 +2050,7 @@ static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTabl
 	WSDL_CACHE_PUT_INT(i, out);
 	if (i > 0) {
 		sdlSoapBindingFunctionHeaderPtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(body->headers, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2070,10 +2070,10 @@ static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTabl
 			WSDL_CACHE_PUT_INT(j, out);
 			if (j > 0) {
 				sdlSoapBindingFunctionHeaderPtr tmp2;
-				zend_string *key;
+				const zend_string *key_inner;
 
-				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(body->headers, key, tmp2) {
-					sdl_serialize_key(key, out);
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(body->headers, key_inner, tmp2) {
+					sdl_serialize_key(key_inner, out);
 					WSDL_CACHE_PUT_1(tmp2->use, out);
 					if (tmp2->use == SOAP_ENCODED) {
 						WSDL_CACHE_PUT_1(tmp2->encodingStyle, out);
@@ -2202,7 +2202,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 	if (sdl->groups) {
 		sdlTypePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->groups, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2212,7 +2212,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 	if (sdl->types) {
 		sdlTypePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->types, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2222,7 +2222,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 	if (sdl->elements) {
 		sdlTypePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->elements, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2232,7 +2232,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 	if (sdl->encoders) {
 		encodePtr tmp;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_FOREACH_STR_KEY_PTR(sdl->encoders, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2251,7 +2251,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlBindingPtr tmp;
 		int binding_num = 1;
 		zval zv;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->bindings, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2279,7 +2279,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 		sdlFunctionPtr tmp;
 		zval *binding_num, zv;
 		int function_num = 1;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&sdl->functions, key, tmp) {
 			sdl_serialize_key(key, out);
@@ -2309,12 +2309,12 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 
 			if (tmp->faults) {
 				sdlFaultPtr fault;
-				zend_string *key;
+				const zend_string *key_inner;
 
 				WSDL_CACHE_PUT_INT(zend_hash_num_elements(tmp->faults), out);
 
-				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(tmp->faults, key, fault) {
-					sdl_serialize_key(key, out);
+				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(tmp->faults, key_inner, fault) {
+					sdl_serialize_key(key_inner, out);
 					sdl_serialize_string(fault->name, out);
 					sdl_serialize_parameters(fault->details, &tmp_encoders, &tmp_types, out);
 					if (tmp->binding->bindingType == BINDING_SOAP && fault->bindingAttributes != NULL) {
@@ -2348,7 +2348,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	if (i > 0) {
 		sdlFunctionPtr tmp;
 		zval *function_num;
-		zend_string *key;
+		const zend_string *key;
 
 		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(sdl->requests, key, tmp) {
 			function_num = zend_hash_str_find(&tmp_functions, (char*)&tmp, sizeof(tmp));
