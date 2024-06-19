@@ -1795,10 +1795,10 @@ static void sdl_serialize_key(const zend_string *key, smart_str *out)
 	}
 }
 
-static void sdl_serialize_encoder_ref(encodePtr enc, HashTable *tmp_encoders, smart_str *out) {
+static void sdl_serialize_encoder_ref(const encodePtr enc, const HashTable *tmp_encoders, smart_str *out) {
 	if (enc) {
 		zval *encoder_num;
-		if ((encoder_num = zend_hash_str_find(tmp_encoders, (char*)&enc, sizeof(enc))) != 0) {
+		if ((encoder_num = zend_hash_str_find(tmp_encoders, (const char*)&enc, sizeof(enc))) != 0) {
 			WSDL_CACHE_PUT_INT(Z_LVAL_P(encoder_num), out);
 		} else {
 			WSDL_CACHE_PUT_INT(0, out);
@@ -1808,10 +1808,10 @@ static void sdl_serialize_encoder_ref(encodePtr enc, HashTable *tmp_encoders, sm
 	}
 }
 
-static void sdl_serialize_type_ref(sdlTypePtr type, HashTable *tmp_types, smart_str *out) {
+static void sdl_serialize_type_ref(const sdlTypePtr type, const HashTable *tmp_types, smart_str *out) {
 	if (type) {
 		zval *type_num;
-		if ((type_num = zend_hash_str_find(tmp_types, (char*)&type, sizeof(type))) != NULL) {
+		if ((type_num = zend_hash_str_find(tmp_types, (const char*)&type, sizeof(type))) != NULL) {
 			WSDL_CACHE_PUT_INT(Z_LVAL_P(type_num), out);
 		} else {
 			WSDL_CACHE_PUT_INT(0, out);
@@ -1821,7 +1821,7 @@ static void sdl_serialize_type_ref(sdlTypePtr type, HashTable *tmp_types, smart_
 	}
 }
 
-static void sdl_serialize_attribute(sdlAttributePtr attr, HashTable *tmp_encoders, smart_str *out)
+static void sdl_serialize_attribute(const sdlAttributePtr attr, const HashTable *tmp_encoders, smart_str *out)
 {
 	size_t i;
 
@@ -1851,7 +1851,7 @@ static void sdl_serialize_attribute(sdlAttributePtr attr, HashTable *tmp_encoder
 	}
 }
 
-static void sdl_serialize_model(sdlContentModelPtr model, HashTable *tmp_types, HashTable *tmp_elements, smart_str *out)
+static void sdl_serialize_model(const sdlContentModelPtr model, const HashTable *tmp_types, const HashTable *tmp_elements, smart_str *out)
 {
 	WSDL_CACHE_PUT_1(model->kind, out);
 	WSDL_CACHE_PUT_INT(model->min_occurs, out);
@@ -1883,7 +1883,7 @@ static void sdl_serialize_model(sdlContentModelPtr model, HashTable *tmp_types, 
 	}
 }
 
-static void sdl_serialize_resriction_int(sdlRestrictionIntPtr x, smart_str *out)
+static void sdl_serialize_resriction_int(const sdlRestrictionIntPtr x, smart_str *out)
 {
 	if (x) {
 		WSDL_CACHE_PUT_1(1, out);
@@ -1894,7 +1894,7 @@ static void sdl_serialize_resriction_int(sdlRestrictionIntPtr x, smart_str *out)
 	}
 }
 
-static void sdl_serialize_resriction_char(sdlRestrictionCharPtr x, smart_str *out)
+static void sdl_serialize_resriction_char(const sdlRestrictionCharPtr x, smart_str *out)
 {
 	if (x) {
 		WSDL_CACHE_PUT_1(1, out);
@@ -1905,7 +1905,7 @@ static void sdl_serialize_resriction_char(sdlRestrictionCharPtr x, smart_str *ou
 	}
 }
 
-static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
+static void sdl_serialize_type(const sdlTypePtr type, const HashTable *tmp_encoders, const HashTable *tmp_types, smart_str *out)
 {
 	size_t i;
 	HashTable *tmp_elements = NULL;
@@ -2001,7 +2001,7 @@ static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTab
 	}
 }
 
-static void sdl_serialize_encoder(encodePtr enc, HashTable *tmp_types, smart_str *out)
+static void sdl_serialize_encoder(const encodePtr enc, const HashTable *tmp_types, smart_str *out)
 {
 	WSDL_CACHE_PUT_INT(enc->details.type, out);
 	sdl_serialize_string(enc->details.type_str, out);
@@ -2009,7 +2009,7 @@ static void sdl_serialize_encoder(encodePtr enc, HashTable *tmp_types, smart_str
 	sdl_serialize_type_ref(enc->details.sdl_type, tmp_types, out);
 }
 
-static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
+static void sdl_serialize_parameters(const HashTable *ht, const HashTable *tmp_encoders, const HashTable *tmp_types, smart_str *out)
 {
 	size_t i;
 
@@ -2033,7 +2033,7 @@ static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, Has
 	}
 }
 
-static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
+static void sdl_serialize_soap_body(const sdlSoapBindingFunctionBodyPtr body, const HashTable *tmp_encoders, const HashTable *tmp_types, smart_str *out)
 {
 	size_t i, j;
 
