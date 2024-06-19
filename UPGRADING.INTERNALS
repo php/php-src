@@ -65,6 +65,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
          void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
          void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
 
+* Added gc and shutdown custom handlers, settable via
+  zend_mm_set_custom_handlers_ex()
+
 * __zend_malloc() has changed their signature from
   void(*)(size_t) to
   void(*)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)

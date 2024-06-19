@@ -26,6 +26,8 @@ PHP                                                                        NEWS
   . Adjusted closure names to include the parent function's name. (timwolla)
   . Improve randomness of uploaded file names and files created by tempnam().
     (Arnaud)
+  . Added gc and shutdown callbacks to zend_mm custom handlers.
+    (Florian Engelhardt).
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
