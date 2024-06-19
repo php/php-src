@@ -45,7 +45,7 @@
 #endif
 
 #ifdef HAVE_UNISTD_H
-# include "unistd.h"
+# include <unistd.h>
 #endif
 
 #include "zend_extensions.h"

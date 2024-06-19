@@ -37,8 +37,8 @@ extern zend_module_entry xsl_module_entry;
 #include <libexslt/exsltconfig.h>
 #endif
 
-#include "../dom/xml_common.h"
-#include "../dom/xpath_callbacks.h"
+#include "ext/dom/xml_common.h"
+#include "ext/dom/xpath_callbacks.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
