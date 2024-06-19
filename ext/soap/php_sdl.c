@@ -77,9 +77,9 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 		parse_namespace(type, &cptype, &ns);
 		nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns));
 		if (nsptr != NULL) {
-			int ns_len = xmlStrlen(nsptr->href);
-			int type_len = strlen(cptype);
-			int len = ns_len + type_len + 1;
+			size_t ns_len = xmlStrlen(nsptr->href);
+			size_t type_len = strlen(cptype);
+			size_t len = ns_len + type_len + 1;
 			char *nscat = emalloc(len + 1);
 
 			memcpy(nscat, nsptr->href, ns_len);
@@ -109,9 +109,9 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 {
 	encodePtr enc = NULL;
 	char *nscat;
-	int ns_len = ns ? strlen(ns) : 0;
-	int type_len = strlen(type);
-	int len = ns_len + type_len + 1;
+	size_t ns_len = ns ? strlen(ns) : 0;
+	size_t type_len = strlen(type);
+	size_t len = ns_len + type_len + 1;
 
 	nscat = emalloc(len + 1);
 	if (ns) {
@@ -129,8 +129,8 @@ encodePtr get_encoder(sdlPtr sdl, const char *ns, const char *type)
 	     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 	      memcmp(ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
 		char *enc_nscat;
-		int enc_ns_len;
-		int enc_len;
+		size_t enc_ns_len;
+		size_t enc_len;
 
 		enc_ns_len = sizeof(XSD_NAMESPACE)-1;
 		enc_len = enc_ns_len + type_len + 1;
@@ -702,7 +702,7 @@ static HashTable* wsdl_message(sdlCtx *ctx, xmlChar* message_name)
 static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 {
 	sdlCtx ctx;
-	int i,n;
+	size_t i,n;
 
 	memset(&ctx,0,sizeof(ctx));
 	ctx.sdl = emalloc(sizeof(sdl));
@@ -999,7 +999,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 						} else {
 */
 						{
-							int len = strlen(function->functionName);
+							size_t len = strlen(function->functionName);
 							function->responseName = emalloc(len + sizeof("Response"));
 							memcpy(function->responseName, function->functionName, len);
 							memcpy(function->responseName+len, "Response", sizeof("Response"));
@@ -1103,7 +1103,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 
 					{
 						char *tmp = estrdup(function->functionName);
-						int  len = strlen(tmp);
+						size_t len = strlen(tmp);
 
 						zend_str_tolower(tmp, len);
 						if (zend_hash_str_add_ptr(&ctx.sdl->functions, tmp, len, function) == NULL) {
@@ -1181,7 +1181,7 @@ static sdlPtr load_wsdl(zval *this_ptr, char *struri)
 static char* sdl_deserialize_string(char **in)
 {
 	char *s;
-	int len;
+	size_t len;
 
 	WSDL_CACHE_GET_INT(len, in);
 	if (len == WSDL_NO_STRING_MARKER) {
@@ -1196,7 +1196,7 @@ static char* sdl_deserialize_string(char **in)
 
 static void sdl_deserialize_key(HashTable* ht, void* data, char **in)
 {
-	int len;
+	size_t len;
 
 	WSDL_CACHE_GET_INT(len, in);
 	if (len == WSDL_NO_STRING_MARKER) {
@@ -1209,7 +1209,7 @@ static void sdl_deserialize_key(HashTable* ht, void* data, char **in)
 
 static void sdl_deserialize_attribute(sdlAttributePtr attr, encodePtr *encoders, char **in)
 {
-	int i;
+	size_t i;
 
 	attr->name = sdl_deserialize_string(in);
 	attr->namens = sdl_deserialize_string(in);
@@ -1264,7 +1264,7 @@ static sdlRestrictionCharPtr sdl_deserialize_resriction_char(char **in)
 
 static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *elements, char **in)
 {
-	int i;
+	size_t i;
 	sdlContentModelPtr model = emalloc(sizeof(sdlContentModel));
 
 	WSDL_CACHE_GET_1(model->kind, sdlContentKind, in);
@@ -1302,7 +1302,7 @@ static sdlContentModelPtr sdl_deserialize_model(sdlTypePtr *types, sdlTypePtr *e
 
 static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *encoders, char **in)
 {
-	int i;
+	size_t i;
 	sdlTypePtr *elements = NULL;
 
 	WSDL_CACHE_GET_1(type->kind, sdlTypeKind, in);
@@ -1390,7 +1390,7 @@ static void sdl_deserialize_type(sdlTypePtr type, sdlTypePtr *types, encodePtr *
 
 static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 {
-	int i;
+	size_t i;
 
 	WSDL_CACHE_GET_INT(enc->details.type, in);
 	enc->details.type_str = sdl_deserialize_string(in);
@@ -1404,16 +1404,16 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 	enc->to_zval = sdl_guess_convert_zval;
 
 	if (enc->details.sdl_type == NULL) {
-		int ns_len = strlen(enc->details.ns);
-		int type_len = strlen(enc->details.type_str);
+		size_t ns_len = strlen(enc->details.ns);
+		size_t type_len = strlen(enc->details.type_str);
 
 		if (((ns_len == sizeof(SOAP_1_1_ENC_NAMESPACE)-1 &&
 		      memcmp(enc->details.ns, SOAP_1_1_ENC_NAMESPACE, sizeof(SOAP_1_1_ENC_NAMESPACE)-1) == 0) ||
 		     (ns_len == sizeof(SOAP_1_2_ENC_NAMESPACE)-1 &&
 		      memcmp(enc->details.ns, SOAP_1_2_ENC_NAMESPACE, sizeof(SOAP_1_2_ENC_NAMESPACE)-1) == 0))) {
 			char *enc_nscat;
-			int enc_ns_len;
-			int enc_len;
+			size_t enc_ns_len;
+			size_t enc_len;
 			encodePtr real_enc;
 
 			enc_ns_len = sizeof(XSD_NAMESPACE)-1;
@@ -1436,7 +1436,7 @@ static void sdl_deserialize_encoder(encodePtr enc, sdlTypePtr *types, char **in)
 
 static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encodePtr *encoders, sdlTypePtr *types, char **in)
 {
-	int i, j, n;
+	size_t i, n;
 
 	WSDL_CACHE_GET_1(body->use, sdlEncodingUse, in);
 	if (body->use == SOAP_ENCODED) {
@@ -1466,6 +1466,8 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 			WSDL_CACHE_GET_INT(n, in);
 			tmp->element = types[n];
 			--i;
+
+			size_t j;
 			WSDL_CACHE_GET_INT(j, in);
 			if (j > 0) {
 				tmp->headerfaults = emalloc(sizeof(HashTable));
@@ -1482,6 +1484,7 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 					}
 					tmp2->name = sdl_deserialize_string(in);
 					tmp2->ns = sdl_deserialize_string(in);
+
 					WSDL_CACHE_GET_INT(n, in);
 					tmp2->encode = encoders[n];
 					WSDL_CACHE_GET_INT(n, in);
@@ -1495,7 +1498,7 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 
 static HashTable* sdl_deserialize_parameters(encodePtr *encoders, sdlTypePtr *types, char **in)
 {
-	int i, n;
+	size_t i, n;
 	HashTable *ht;
 
 	WSDL_CACHE_GET_INT(i, in);
@@ -1771,7 +1774,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, size_t uri_len
 static void sdl_serialize_string(const char *str, smart_str *out)
 {
 	if (str) {
-		int i = strlen(str);
+		size_t i = strlen(str);
 		WSDL_CACHE_PUT_INT(i, out);
 		if (i > 0) {
 			WSDL_CACHE_PUT_N(str, i, out);
@@ -1820,7 +1823,7 @@ static void sdl_serialize_type_ref(sdlTypePtr type, HashTable *tmp_types, smart_
 
 static void sdl_serialize_attribute(sdlAttributePtr attr, HashTable *tmp_encoders, smart_str *out)
 {
-	int i;
+	size_t i;
 
 	sdl_serialize_string(attr->name, out);
 	sdl_serialize_string(attr->namens, out);
@@ -1861,7 +1864,7 @@ static void sdl_serialize_model(sdlContentModelPtr model, HashTable *tmp_types, 
 		case XSD_CONTENT_ALL:
 		case XSD_CONTENT_CHOICE: {
 				sdlContentModelPtr tmp;
-				int i = zend_hash_num_elements(model->u.content);
+				size_t i = zend_hash_num_elements(model->u.content);
 
 				WSDL_CACHE_PUT_INT(i, out);
 				ZEND_HASH_FOREACH_PTR(model->u.content, tmp) {
@@ -1904,7 +1907,7 @@ static void sdl_serialize_resriction_char(sdlRestrictionCharPtr x, smart_str *ou
 
 static void sdl_serialize_type(sdlTypePtr type, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
 {
-	int i;
+	size_t i;
 	HashTable *tmp_elements = NULL;
 
 	WSDL_CACHE_PUT_1(type->kind, out);
@@ -2008,7 +2011,7 @@ static void sdl_serialize_encoder(encodePtr enc, HashTable *tmp_types, smart_str
 
 static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
 {
-	int i;
+	size_t i;
 
 	if (ht) {
 		i = zend_hash_num_elements(ht);
@@ -2032,7 +2035,7 @@ static void sdl_serialize_parameters(HashTable *ht, HashTable *tmp_encoders, Has
 
 static void sdl_serialize_soap_body(sdlSoapBindingFunctionBodyPtr body, HashTable *tmp_encoders, HashTable *tmp_types, smart_str *out)
 {
-	int i, j;
+	size_t i, j;
 
 	WSDL_CACHE_PUT_1(body->use, out);
 	if (body->use == SOAP_ENCODED) {
@@ -3195,10 +3198,10 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		char md5str[33];
 		PHP_MD5_CTX md5_context;
 		unsigned char digest[16];
-		int len = strlen(SOAP_GLOBAL(cache_dir));
+		size_t len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
 		char *user = php_get_current_user();
-		int user_len = user ? strlen(user) + 1 : 0;
+		size_t user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
 		PHP_MD5Init(&md5_context);
