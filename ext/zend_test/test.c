@@ -709,9 +709,7 @@ static PHP_INI_MH(OnUpdateZendTestObserveOplineInZendMM)
 			ZT_G(zend_test_heap),
 			zend_test_custom_malloc,
 			zend_test_custom_free,
-			zend_test_custom_realloc,
-			NULL,
-			NULL
+			zend_test_custom_realloc
 		);
 		ZT_G(zend_orig_heap) = zend_mm_get_heap();
 		zend_mm_set_heap(ZT_G(zend_test_heap));

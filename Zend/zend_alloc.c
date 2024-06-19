@@ -3149,6 +3149,16 @@ ZEND_API bool zend_mm_is_custom_heap(zend_mm_heap *new_heap)
 ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
                                           void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+{
+#if ZEND_MM_CUSTOM
+	zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
+#endif
+}
+
+ZEND_API void zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
+                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
                                           void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
                                           size_t (*_gc)(void),
                                           void   (*_shutdown)(bool, bool))
@@ -3170,11 +3180,21 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 }
 
 ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
-                                          void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          size_t (**_gc)(void),
-                                          void   (**_shutdown)(bool, bool))
+                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+{
+#if ZEND_MM_CUSTOM
+	zend_mm_get_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
+#endif
+}
+
+ZEND_API void zend_mm_get_custom_handlers_ex(zend_mm_heap *heap,
+                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             size_t (**_gc)(void),
+                                             void   (**_shutdown)(bool, bool))
 {
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
