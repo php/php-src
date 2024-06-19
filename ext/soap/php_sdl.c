@@ -3193,7 +3193,7 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	if ((cache_wsdl & WSDL_CACHE_DISK) && (uri_len < MAXPATHLEN)) {
 		time_t t = time(0);
 		char md5str[33];
-		PHP_MD5_CTX context;
+		PHP_MD5_CTX md5_context;
 		unsigned char digest[16];
 		int len = strlen(SOAP_GLOBAL(cache_dir));
 		time_t cached;
@@ -3201,9 +3201,9 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 		int user_len = user ? strlen(user) + 1 : 0;
 
 		md5str[0] = '\0';
-		PHP_MD5Init(&context);
-		PHP_MD5Update(&context, (unsigned char*)uri, uri_len);
-		PHP_MD5Final(digest, &context);
+		PHP_MD5Init(&md5_context);
+		PHP_MD5Update(&md5_context, (unsigned char*)uri, uri_len);
+		PHP_MD5Final(digest, &md5_context);
 		make_digest(md5str, digest);
 		key = emalloc(len+sizeof("/wsdl-")-1+user_len+2+sizeof(md5str));
 		memcpy(key,SOAP_GLOBAL(cache_dir),len);
