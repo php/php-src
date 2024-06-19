@@ -1471,7 +1471,7 @@ static void sdl_deserialize_soap_body(sdlSoapBindingFunctionBodyPtr body, encode
 			WSDL_CACHE_GET_INT(j, in);
 			if (j > 0) {
 				tmp->headerfaults = emalloc(sizeof(HashTable));
-				zend_hash_init(tmp->headerfaults, i, NULL, delete_header, 0);
+				zend_hash_init(tmp->headerfaults, j, NULL, delete_header, 0);
 				while (j > 0) {
 					sdlSoapBindingFunctionHeaderPtr tmp2 = emalloc(sizeof(sdlSoapBindingFunctionHeader));
 					memset(tmp2, 0, sizeof(sdlSoapBindingFunctionHeader));
