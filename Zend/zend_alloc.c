@@ -334,6 +334,8 @@ struct _zend_mm_heap {
 		void      *(*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 		void       (*_free)(void*  ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
 		void      *(*_realloc)(void*, size_t  ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
+		size_t     (*_gc)(void);
+		void       (*_shutdown)(bool full, bool silent);
 	} custom_heap;
 	HashTable *tracked_allocs;
 #endif
@@ -2119,6 +2121,10 @@ ZEND_API size_t zend_mm_gc(zend_mm_heap *heap)
 
 #if ZEND_MM_CUSTOM
 	if (heap->use_custom_heap) {
+		size_t (*gc)(void) = heap->custom_heap._gc;
+		if (gc) {
+			return gc();
+		}
 		return 0;
 	}
 #endif
@@ -2421,10 +2427,10 @@ static void zend_mm_check_leaks(zend_mm_heap *heap)
 
 #if ZEND_MM_CUSTOM
 static void *tracked_malloc(size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC);
-static void tracked_free_all(void);
+static void tracked_free_all(zend_mm_heap *heap);
 #endif
 
-void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
+ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 {
 	zend_mm_chunk *p;
 	zend_mm_huge_list *list;
@@ -2433,7 +2439,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 	if (heap->use_custom_heap) {
 		if (heap->custom_heap._malloc == tracked_malloc) {
 			if (silent) {
-				tracked_free_all();
+				tracked_free_all(heap);
 			}
 			zend_hash_clean(heap->tracked_allocs);
 			if (full) {
@@ -2445,9 +2451,16 @@ void zend_mm_shutdown(zend_mm_heap *heap, bool full, bool silent)
 			heap->size = 0;
 		}
 
+		void (*shutdown)(bool, bool) = heap->custom_heap._shutdown;
+
 		if (full) {
 			heap->custom_heap._free(heap ZEND_FILE_LINE_CC ZEND_FILE_LINE_EMPTY_CC);
 		}
+
+		if (shutdown) {
+			shutdown(full, silent);
+		}
+
 		return;
 	}
 #endif
@@ -3039,8 +3052,8 @@ static void *tracked_realloc(void *ptr, size_t new_size ZEND_FILE_LINE_DC ZEND_F
 	return ptr;
 }
 
-static void tracked_free_all(void) {
-	HashTable *tracked_allocs = AG(mm_heap)->tracked_allocs;
+static void tracked_free_all(zend_mm_heap *heap) {
+	HashTable *tracked_allocs = heap->tracked_allocs;
 	zend_ulong h;
 	ZEND_HASH_FOREACH_NUM_KEY(tracked_allocs, h) {
 		void *ptr = (void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2);
@@ -3139,6 +3152,18 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
                                           void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
 {
 #if ZEND_MM_CUSTOM
+	zend_mm_set_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
+#endif
+}
+
+ZEND_API void zend_mm_set_custom_handlers_ex(zend_mm_heap *heap,
+                                          void* (*_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void  (*_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          void* (*_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                          size_t (*_gc)(void),
+                                          void   (*_shutdown)(bool, bool))
+{
+#if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
 
 	if (!_malloc && !_free && !_realloc) {
@@ -3148,14 +3173,28 @@ ZEND_API void zend_mm_set_custom_handlers(zend_mm_heap *heap,
 		_heap->custom_heap._malloc = _malloc;
 		_heap->custom_heap._free = _free;
 		_heap->custom_heap._realloc = _realloc;
+		_heap->custom_heap._gc = _gc;
+		_heap->custom_heap._shutdown = _shutdown;
 	}
 #endif
 }
 
 ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
-                                          void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
-                                          void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
+{
+#if ZEND_MM_CUSTOM
+	zend_mm_get_custom_handlers_ex(heap, _malloc, _free, _realloc, NULL, NULL);
+#endif
+}
+
+ZEND_API void zend_mm_get_custom_handlers_ex(zend_mm_heap *heap,
+                                             void* (**_malloc)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
+                                             size_t (**_gc)(void),
+                                             void   (**_shutdown)(bool, bool))
 {
 #if ZEND_MM_CUSTOM
 	zend_mm_heap *_heap = (zend_mm_heap*)heap;
@@ -3164,15 +3203,29 @@ ZEND_API void zend_mm_get_custom_handlers(zend_mm_heap *heap,
 		*_malloc = _heap->custom_heap._malloc;
 		*_free = _heap->custom_heap._free;
 		*_realloc = _heap->custom_heap._realloc;
+		if (_gc != NULL) {
+			*_gc = _heap->custom_heap._gc;
+		}
+		if (_shutdown != NULL) {
+			*_shutdown = _heap->custom_heap._shutdown;
+		}
 	} else {
 		*_malloc = NULL;
 		*_free = NULL;
 		*_realloc = NULL;
+		if (_gc != NULL) {
+			*_gc = NULL;
+		}
+		if (_shutdown != NULL) {
+			*_shutdown = NULL;
+		}
 	}
 #else
 	*_malloc = NULL;
 	*_free = NULL;
 	*_realloc = NULL;
+	*_gc = NULL;
+	*_shutdown = NULL;
 #endif
 }
 
