@@ -48,7 +48,7 @@ const WNOWAIT = UNKNOWN;
 #endif
 
 /* First argument to waitid */
-#ifdef HAVE_P_ALL
+#ifdef HAVE_POSIX_IDTYPES
 /**
  * @var int
  * @cvalue LONG_CONST(P_ALL)
@@ -65,12 +65,31 @@ const P_PID = UNKNOWN;
  */
 const P_PGID = UNKNOWN;
 #endif
-#ifdef HAVE_P_PIDFD
+/* Linux specific idtype */
+#ifdef HAVE_LINUX_IDTYPES
 /**
  * @var int
  * @cvalue LONG_CONST(P_PIDFD)
  */
 const P_PIDFD = UNKNOWN;
+#endif
+/* FreeBSD specific idtypes */
+#ifdef HAVE_FREEBSD_IDTYPES
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_UID)
+ */
+const P_UID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_GID)
+ */
+const P_SID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_JAILID)
+ */
+const P_JAILID = UNKNOWN;
 #endif
 
 /* Signal Constants */

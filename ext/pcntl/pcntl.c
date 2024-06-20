@@ -129,10 +129,13 @@ static zend_class_entry *QosClass_ce;
 #include <linux/wait.h>
 #endif
 #if defined (P_ALL)
-#define HAVE_P_ALL 1
+#define HAVE_POSIX_IDTYPES 1
 #endif
 #if defined (P_PIDFD)
-#define HAVE_P_PIDFD 1
+#define HAVE_LINUX_IDTYPES 1
+#endif
+#if defined (P_JAILID)
+#define HAVE_FREEBSD_IDTYPES 1
 #endif
 
 #include "Zend/zend_enum.h"
