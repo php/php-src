@@ -47,6 +47,7 @@ const WSTOPPED = UNKNOWN;
 const WNOWAIT = UNKNOWN;
 #endif
 
+#ifdef HAVE_WAITID
 /* First argument to waitid */
 #ifdef HAVE_POSIX_IDTYPES
 /**
@@ -97,6 +98,7 @@ const P_SID = UNKNOWN;
  * @cvalue LONG_CONST(P_JAILID)
  */
 const P_JAILID = UNKNOWN;
+#endif
 #endif
 
 /* Signal Constants */

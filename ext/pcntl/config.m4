@@ -4,7 +4,7 @@ PHP_ARG_ENABLE([pcntl],
     [Enable pcntl support (CLI/CGI only)])])
 
 if test "$PHP_PCNTL" != "no"; then
-  for function in fork sigaction waitpid waitid; do
+  for function in fork sigaction waitpid; do
     AC_CHECK_FUNC([$function],,
       [AC_MSG_ERROR([ext/pcntl: required function $function() not found.])])
   done
@@ -24,6 +24,7 @@ if test "$PHP_PCNTL" != "no"; then
     unshare
     wait3
     wait4
+    waitid
   ]))
 
   AC_CHECK_HEADER([linux/wait.h],

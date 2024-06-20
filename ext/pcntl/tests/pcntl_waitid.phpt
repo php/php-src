@@ -3,6 +3,10 @@ pcntl_waitid()
 --EXTENSIONS--
 pcntl
 posix
+--SKIPIF--
+<?php
+    if (!function_exists('pcntl_waitid')) die('skip pcntl_waitid unavailable');
+?>
 --FILE--
 <?php
 $pid = pcntl_fork();

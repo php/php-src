@@ -125,6 +125,7 @@ static zend_class_entry *QosClass_ce;
 
 #define LONG_CONST(c) (zend_long) c
 
+#ifdef HAVE_WAITID
 #if defined(HAVE_LINUX_WAIT_H)
 #include <linux/wait.h>
 #endif
@@ -139,6 +140,7 @@ static zend_class_entry *QosClass_ce;
 #endif
 #if defined (P_JAILID)
 #define HAVE_FREEBSD_IDTYPES 1
+#endif
 #endif
 
 #include "Zend/zend_enum.h"
@@ -401,7 +403,7 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
-/* {{{ Waits on or returns the status of a forked child as defined by the waitid() system call */
+#ifdef HAVE_WAITID
 PHP_FUNCTION(pcntl_waitid)
 {
 	zend_long idtype = P_PID;
@@ -435,6 +437,7 @@ PHP_FUNCTION(pcntl_waitid)
 
 	RETURN_TRUE;
 }
+#endif
 /* }}} */
 
 /* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
