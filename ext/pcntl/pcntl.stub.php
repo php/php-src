@@ -63,11 +63,13 @@ const P_PID = UNKNOWN;
  * @cvalue LONG_CONST(P_PGID)
  */
 const P_PGID = UNKNOWN;
+#ifdef __linux__
 /**
  * @var int
  * @cvalue LONG_CONST(P_PIDFD)
  */
 const P_PIDFD = UNKNOWN;
+#endif
 
 /* Signal Constants */
 
