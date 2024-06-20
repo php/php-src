@@ -12834,11 +12834,11 @@ static int zend_jit_ffi_read(zend_jit_ctx       *jit,
 			res_type = IS_LONG;
 			break;
 		case ZEND_FFI_TYPE_UINT64:
-			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_U32(ptr));
+			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_U64(ptr));
 			res_type = IS_LONG;
 			break;
 		case ZEND_FFI_TYPE_SINT64:
-			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_I32(ptr));
+			jit_set_Z_LVAL(jit, res_addr, ir_LOAD_I64(ptr));
 			res_type = IS_LONG;
 			break;
 #else
