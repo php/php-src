@@ -48,6 +48,7 @@ const WNOWAIT = UNKNOWN;
 #endif
 
 /* First argument to waitid */
+#ifdef HAVE_P_ALL
 /**
  * @var int
  * @cvalue LONG_CONST(P_ALL)
@@ -63,7 +64,8 @@ const P_PID = UNKNOWN;
  * @cvalue LONG_CONST(P_PGID)
  */
 const P_PGID = UNKNOWN;
-#ifdef __linux__
+#endif
+#ifdef HAVE_P_PIDFD
 /**
  * @var int
  * @cvalue LONG_CONST(P_PIDFD)

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b029170da681cb9ff577c37cf134fe119f7605bc */
+ * Stub hash: fa1ef1aeb65c0c7b98c71453f1f7193befa5ad35 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -333,10 +333,16 @@ static void register_pcntl_symbols(int module_number)
 #if defined(WNOWAIT)
 	REGISTER_LONG_CONSTANT("WNOWAIT", LONG_CONST(WNOWAIT), CONST_PERSISTENT);
 #endif
+#if defined(HAVE_P_ALL)
 	REGISTER_LONG_CONSTANT("P_ALL", LONG_CONST(P_ALL), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_P_ALL)
 	REGISTER_LONG_CONSTANT("P_PID", LONG_CONST(P_PID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_P_ALL)
 	REGISTER_LONG_CONSTANT("P_PGID", LONG_CONST(P_PGID), CONST_PERSISTENT);
-#if defined(__linux__)
+#endif
+#if defined(HAVE_P_PIDFD)
 	REGISTER_LONG_CONSTANT("P_PIDFD", LONG_CONST(P_PIDFD), CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SIG_IGN", LONG_CONST(SIG_IGN), CONST_PERSISTENT);

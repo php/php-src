@@ -125,6 +125,16 @@ static zend_class_entry *QosClass_ce;
 
 #define LONG_CONST(c) (zend_long) c
 
+#if defined(__linux__)
+#include <linux/wait.h>
+#endif
+#if defined (P_ALL)
+#define HAVE_P_ALL 1
+#endif
+#if defined (P_PIDFD)
+#define HAVE_P_PIDFD 1
+#endif
+
 #include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"
 
@@ -403,7 +413,7 @@ PHP_FUNCTION(pcntl_waitid)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-#ifdef __linux__
+#ifdef P_PIDFD
 	if (idtype != P_ALL && idtype != P_PID && idtype != P_PGID && idtype != P_PIDFD) {
 		zend_argument_value_error(1, "must be one of P_ALL, P_PID, P_PGID, P_PIDFD");
 		RETURN_THROWS();
