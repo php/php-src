@@ -29,7 +29,7 @@ $queries = [
 foreach ($queries as $k => $query) {
     $stmt = $db->prepare($query);
     $stmt->execute();
-    var_dump($query, $stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
+    var_dump($query, $stmt->fetch(PDO::FETCH_NUM) == [0 => 1]);
 }
 
 // One parameter
@@ -43,7 +43,7 @@ $queries = [
 foreach ($queries as $k => $query) {
     $stmt = $db->prepare($query);
     $stmt->execute([1]);
-    var_dump($query, $stmt->fetch(PDO::FETCH_NUM) === [0 => 1]);
+    var_dump($query, $stmt->fetch(PDO::FETCH_NUM) == [0 => 1]);
 }
 
 $db->exec("DROP TABLE pdo_mysql_parser");
