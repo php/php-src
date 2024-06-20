@@ -125,7 +125,7 @@ static zend_class_entry *QosClass_ce;
 
 #define LONG_CONST(c) (zend_long) c
 
-#if defined(__linux__)
+#if defined(HAVE_LINUX_WAIT_H)
 #include <linux/wait.h>
 #endif
 #if defined (P_ALL)
