@@ -134,6 +134,9 @@ static zend_class_entry *QosClass_ce;
 #if defined (P_PIDFD)
 #define HAVE_LINUX_IDTYPES 1
 #endif
+#if defined (P_UID)
+#define HAVE_NETBSD_IDTYPES 1
+#endif
 #if defined (P_JAILID)
 #define HAVE_FREEBSD_IDTYPES 1
 #endif

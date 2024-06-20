@@ -74,7 +74,7 @@ const P_PGID = UNKNOWN;
 const P_PIDFD = UNKNOWN;
 #endif
 /* FreeBSD specific idtypes */
-#ifdef HAVE_FREEBSD_IDTYPES
+#ifdef HAVE_NETBSD_IDTYPES
 /**
  * @var int
  * @cvalue LONG_CONST(P_UID)
@@ -84,7 +84,14 @@ const P_UID = UNKNOWN;
  * @var int
  * @cvalue LONG_CONST(P_GID)
  */
+const P_GID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_SID)
+ */
 const P_SID = UNKNOWN;
+#endif
+#ifdef HAVE_FREEBSD_IDTYPES
 /**
  * @var int
  * @cvalue LONG_CONST(P_JAILID)
