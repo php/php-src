@@ -408,7 +408,6 @@ PHP_FUNCTION(pcntl_waitid)
 {
 	zend_long idtype = P_PID;
 	zend_long id = 0;
-	/* Optional by-ref array of ints */
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
 	int success;
@@ -438,7 +437,6 @@ PHP_FUNCTION(pcntl_waitid)
 	RETURN_TRUE;
 }
 #endif
-/* }}} */
 
 /* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
