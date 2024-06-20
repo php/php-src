@@ -74,7 +74,7 @@ const P_PGID = UNKNOWN;
  */
 const P_PIDFD = UNKNOWN;
 #endif
-/* FreeBSD specific idtypes */
+/* NetBSD specific idtypes */
 #ifdef HAVE_NETBSD_IDTYPES
 /**
  * @var int
@@ -92,6 +92,7 @@ const P_GID = UNKNOWN;
  */
 const P_SID = UNKNOWN;
 #endif
+/* FreeBSD specific idtype */
 #ifdef HAVE_FREEBSD_IDTYPES
 /**
  * @var int
