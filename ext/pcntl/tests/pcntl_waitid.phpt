@@ -14,7 +14,7 @@ if ($pid == -1) {
     die("failed");
 } else if ($pid) {
     // test invalid arguments
-    var_dump(@pcntl_waitid(6, $pid, $siginfo, WSTOPPED));
+    var_dump(@pcntl_waitid(-2, $pid, $siginfo, WSTOPPED));
     var_dump(@pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG));
 
     $result = pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED);
