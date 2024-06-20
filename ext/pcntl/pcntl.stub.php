@@ -25,23 +25,27 @@ const WUNTRACED = UNKNOWN;
  */
 const WCONTINUED = UNKNOWN;
 #endif
-
-/* Additoinal waitid constants: */
+#ifdef WEXITED
 /**
  * @var int
  * @cvalue LONG_CONST(WEXITED)
  */
 const WEXITED = UNKNOWN;
+#endif
+#ifdef WSTOPPED
 /**
  * @var int
  * @cvalue LONG_CONST(WSTOPPED)
  */
 const WSTOPPED = UNKNOWN;
+#endif
+#ifdef WNOWAIT
 /**
  * @var int
  * @cvalue LONG_CONST(WNOWAIT)
  */
 const WNOWAIT = UNKNOWN;
+#endif
 
 /* First argument to waitid */
 /**
