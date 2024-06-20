@@ -390,30 +390,49 @@ PHP_FUNCTION(pcntl_waitid)
 {
 	zend_long idtype = P_PID;
 	zend_long id = 0;
+	/* Optional by-ref array of ints */
+	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
-	pid_t child_id;
-	siginfo_t *infop = emalloc(sizeof(siginfo_t));
+	int success;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_LONG(idtype)
 		Z_PARAM_LONG(id)
 		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(user_siginfo)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// TODO check idtype is one of P_PID, P_PIDFD, P_PGID, P_ALL
-	// TODO check flags, minimum one of WEXITED, WSTOPPED, WCONTINUED,
-	//      additionally WNOHANG or WNOWAIT
-
-	child_id = waitid((idtype_t) idtype, (id_t) id, infop, (int) options);
-
-	// TODO parse infop into array and return it
-
-	if (child_id == -1) {
-		RETURN_LONG((zend_long) errno);
-	} else {
-		RETURN_LONG((zend_long) child_id);
+	// check idtype is one of P_PID, P_PIDFD, P_PGID, P_ALL
+	if (idtype != P_ALL && idtype != P_PID && idtype != P_PIDFD && idtype != P_PGID) {
+		php_error_docref(NULL, E_WARNING, "idtype must be one of P_PID, P_PIDFD, P_PGID, P_ALL");
+		RETURN_FALSE;
 	}
+
+	// check flags, minimum one of WEXITED, WSTOPPED, WCONTINUED,
+	// additionally WNOHANG or WNOWAIT can be set
+	if ((options & WEXITED) != WEXITED &&
+			(options & WSTOPPED) != WSTOPPED &&
+			(options & WCONTINUED) != WCONTINUED) {
+		php_error_docref(NULL, E_WARNING, "flags must include at least WEXITED, WSTOPPED or WCONTINUED");
+		RETURN_FALSE;
+	}
+
+	errno = 0;
+	siginfo_t siginfo;
+
+	success = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+
+	if (success == -1) {
+		PCNTL_G(last_error) = errno;
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		RETURN_FALSE;
+	}
+
+	// TODO verify that passing SIGCHLD does what we need
+	pcntl_siginfo_to_zval(SIGCHLD, &siginfo, user_siginfo);
+
+	RETURN_TRUE;
 }
 /* }}} */
 
