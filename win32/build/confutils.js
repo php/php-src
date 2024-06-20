@@ -3006,6 +3006,7 @@ function toolset_setup_project_tools()
 	}
 
 	var RE2C = PATH_PROG('re2c');
+	DEFINE('RE2C_FLAGS', '--no-generation-date');
 	if (RE2C) {
 		var RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);

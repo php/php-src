@@ -1690,10 +1690,11 @@ AC_DEFUN([PHP_PROG_BISON], [
 ])
 
 dnl
-dnl PHP_PROG_RE2C([MIN-VERSION])
+dnl PHP_PROG_RE2C([min-version], [options])
 dnl
 dnl Search for the re2c and optionally check if version is at least the minimum
-dnl required version MIN-VERSION.
+dnl required version "min-version". The whitespace separated "options" argument
+dnl are the re2c command-line flags added to all re2c command-line invocations.
 dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
@@ -1745,6 +1746,8 @@ AC_DEFUN([PHP_PROG_RE2C],[
   esac
 
   PHP_SUBST(RE2C)
+  AS_VAR_SET([RE2C_FLAGS], [m4_normalize([$2])])
+  PHP_SUBST([RE2C_FLAGS])
 ])
 
 AC_DEFUN([PHP_PROG_PHP],[
