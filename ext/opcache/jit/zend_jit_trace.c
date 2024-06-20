@@ -4751,6 +4751,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
+#if defined(IR_TARGET_X86)
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_UINT64
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_SINT64
+#endif
 						 && op2_info == MAY_BE_LONG) {
 							if (!ffi_info) {
 								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
@@ -4957,6 +4961,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							 && !field->bits
 							 && ZEND_FFI_TYPE(field->type)->kind >= ZEND_FFI_TYPE_FLOAT
 							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM
+#if defined(IR_TARGET_X86)
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_UINT64
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_SINT64
+#endif
 							 && (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE)) {
 								if (!ffi_info) {
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
@@ -5063,6 +5071,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							 && !field->bits
 							 && ZEND_FFI_TYPE(field->type)->kind >= ZEND_FFI_TYPE_FLOAT
 							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM
+#if defined(IR_TARGET_X86)
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_UINT64
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_SINT64
+#endif
 							 && (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE)) {
 								if (!ffi_info) {
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
@@ -5139,6 +5151,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
+#if defined(IR_TARGET_X86)
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_UINT64
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_SINT64
+#endif
 						 && op2_info == MAY_BE_LONG
 						 && (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE)) {
 							if (!ffi_info) {
@@ -5946,6 +5962,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind >= ZEND_FFI_TYPE_FLOAT
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind <= ZEND_FFI_TYPE_ENUM
+#if defined(IR_TARGET_X86)
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_UINT64
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_SINT64
+#endif
 						 && op2_info == MAY_BE_LONG) {
 							if (!ffi_info) {
 								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
@@ -6201,7 +6221,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (field
 							 && !field->bits
 							 && ZEND_FFI_TYPE(field->type)->kind >= ZEND_FFI_TYPE_FLOAT
-							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM) {
+							 && ZEND_FFI_TYPE(field->type)->kind <= ZEND_FFI_TYPE_ENUM
+#if defined(IR_TARGET_X86)
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_UINT64
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_SINT64
+#endif
+							) {
 								if (!ffi_info) {
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
