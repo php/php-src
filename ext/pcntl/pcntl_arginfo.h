@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 775838bf2abbf32933f5cec6e4a85e07e8cea247 */
+ * Stub hash: 9735a82c5881d5d89d7feabfafd63b7c59108cd9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -9,6 +9,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitpid, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(1, status)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitid, 0, 2, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, idtype, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, id, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_wait, 0, 1, IS_LONG, 0)
@@ -170,6 +176,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
+ZEND_FUNCTION(pcntl_waitid);
 ZEND_FUNCTION(pcntl_wait);
 ZEND_FUNCTION(pcntl_signal);
 ZEND_FUNCTION(pcntl_signal_get_handler);
@@ -234,6 +241,7 @@ ZEND_FUNCTION(pcntl_setqos_class);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
 	ZEND_FE(pcntl_waitpid, arginfo_pcntl_waitpid)
+	ZEND_FE(pcntl_waitid, arginfo_pcntl_waitid)
 	ZEND_FE(pcntl_wait, arginfo_pcntl_wait)
 	ZEND_FE(pcntl_signal, arginfo_pcntl_signal)
 	ZEND_FE(pcntl_signal_get_handler, arginfo_pcntl_signal_get_handler)

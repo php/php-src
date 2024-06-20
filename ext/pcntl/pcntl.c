@@ -385,6 +385,38 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
+/* {{{ Waits on or returns the status of a forked child as defined by the waitid() system call */
+PHP_FUNCTION(pcntl_waitid)
+{
+	zend_long idtype = P_PID;
+	zend_long id = 0;
+	zend_long options = WEXITED;
+	pid_t child_id;
+	siginfo_t *infop = emalloc(sizeof(siginfo_t));
+
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_LONG(idtype)
+		Z_PARAM_LONG(id)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// TODO check idtype is one of P_PID, P_PIDFD, P_PGID, P_ALL
+	// TODO check flags, minimum one of WEXITED, WSTOPPED, WCONTINUED,
+	//      additionally WNOHANG or WNOWAIT
+
+	child_id = waitid((idtype_t) idtype, (id_t) id, infop, (int) options);
+
+	// TODO parse infop into array and return it
+
+	if (child_id == -1) {
+		RETURN_LONG((zend_long) errno);
+	} else {
+		RETURN_LONG((zend_long) child_id);
+	}
+}
+/* }}} */
+
 /* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)
 {

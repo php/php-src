@@ -4,7 +4,7 @@ PHP_ARG_ENABLE([pcntl],
     [Enable pcntl support (CLI/CGI only)])])
 
 if test "$PHP_PCNTL" != "no"; then
-  for function in fork sigaction waitpid; do
+  for function in fork sigaction waitpid waitid; do
     AC_CHECK_FUNC([$function],,
       [AC_MSG_ERROR([ext/pcntl: required function $function() not found.])])
   done

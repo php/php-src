@@ -927,6 +927,8 @@ function pcntl_fork(): int {}
  */
 function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
 
+function pcntl_waitid(int $idtype, int $id, int $flags = 0): int {}
+
 /**
  * @param int $status
  * @param array $resource_usage
