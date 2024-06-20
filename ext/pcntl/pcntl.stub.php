@@ -26,6 +26,45 @@ const WUNTRACED = UNKNOWN;
 const WCONTINUED = UNKNOWN;
 #endif
 
+/* Additoinal waitid constants: */
+/**
+ * @var int
+ * @cvalue LONG_CONST(WEXITED)
+ */
+const WEXITED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(WSTOPPED)
+ */
+const WSTOPPED = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(WNOWAIT)
+ */
+const WNOWAIT = UNKNOWN;
+
+/* First argument to waitid */
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_ALL)
+ */
+const P_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_PID)
+ */
+const P_PID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_PGID)
+ */
+const P_PGID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_PIDFD)
+ */
+const P_PIDFD = UNKNOWN;
+
 /* Signal Constants */
 
 /**
