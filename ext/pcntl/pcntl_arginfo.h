@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 775838bf2abbf32933f5cec6e4a85e07e8cea247 */
+ * Stub hash: 71d0cbd8d2b1ae57d289ec421e9dcaa4040d857b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -10,6 +10,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitpid, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
 ZEND_END_ARG_INFO()
+
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitid, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, idtype, IS_LONG, 0, "P_ALL")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, id, IS_LONG, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "WEXITED")
+ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_wait, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(1, status)
@@ -170,6 +179,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+ZEND_FUNCTION(pcntl_waitid);
+#endif
 ZEND_FUNCTION(pcntl_wait);
 ZEND_FUNCTION(pcntl_signal);
 ZEND_FUNCTION(pcntl_signal_get_handler);
@@ -234,6 +246,9 @@ ZEND_FUNCTION(pcntl_setqos_class);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
 	ZEND_FE(pcntl_waitpid, arginfo_pcntl_waitpid)
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+	ZEND_FE(pcntl_waitid, arginfo_pcntl_waitid)
+#endif
 	ZEND_FE(pcntl_wait, arginfo_pcntl_wait)
 	ZEND_FE(pcntl_signal, arginfo_pcntl_signal)
 	ZEND_FE(pcntl_signal_get_handler, arginfo_pcntl_signal_get_handler)
@@ -314,6 +329,39 @@ static void register_pcntl_symbols(int module_number)
 #endif
 #if defined(HAVE_WCONTINUED)
 	REGISTER_LONG_CONSTANT("WCONTINUED", LONG_CONST(WCONTINUED), CONST_PERSISTENT);
+#endif
+#if defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+	REGISTER_LONG_CONSTANT("WEXITED", LONG_CONST(WEXITED), CONST_PERSISTENT);
+#endif
+#if defined (HAVE_DECL_WSTOPPED) && HAVE_DECL_WSTOPPED == 1
+	REGISTER_LONG_CONSTANT("WSTOPPED", LONG_CONST(WSTOPPED), CONST_PERSISTENT);
+#endif
+#if defined (HAVE_DECL_WNOWAIT) && HAVE_DECL_WNOWAIT== 1
+	REGISTER_LONG_CONSTANT("WNOWAIT", LONG_CONST(WNOWAIT), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_ALL", LONG_CONST(P_ALL), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_PID", LONG_CONST(P_PID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_PGID", LONG_CONST(P_PGID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_LINUX_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_PIDFD", LONG_CONST(P_PIDFD), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_UID", LONG_CONST(P_UID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_GID", LONG_CONST(P_GID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_NETBSD_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_SID", LONG_CONST(P_SID), CONST_PERSISTENT);
+#endif
+#if defined(HAVE_WAITID) && defined(HAVE_FREEBSD_IDTYPES)
+	REGISTER_LONG_CONSTANT("P_JAILID", LONG_CONST(P_JAILID), CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("SIG_IGN", LONG_CONST(SIG_IGN), CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SIG_DFL", LONG_CONST(SIG_DFL), CONST_PERSISTENT);

@@ -190,6 +190,7 @@ PHP                                                                        NEWS
   . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
   . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
   . Added FreeBSD's SIGTRAP handling to pcntl_siginfo_to_zval. (David Carlier)
+  . Added POSIX pcntl_waitid. (Vladimir Vrzić)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)

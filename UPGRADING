@@ -594,6 +594,8 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getcpu to get the cpu id from where the current process runs.
   . Added pcntl_getqos_class to get the QoS level (aka performance and related
     energy consumption) of the current process and pcntl_setqos_class to set it.
+  . Added pcntl_waitid to obtain status information pertaining to termination, stop,
+    and/or continue events in one of the caller's child processes.
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::setNoticeCallback() to allow a callback to be triggered on
@@ -780,7 +782,18 @@ PHP 8.4 UPGRADE NOTES
   . QosClass::Utility (macOs only).
   . SIGCKPT (DragonFlyBSD only).
   . SIGCKPTEXIT (DragonFlyBSD only).
-
+  . WEXITED.
+  . WSTOPPED.
+  . WNOWAIT.
+  . P_ALL.
+  . P_PID.
+  . P_PGID.
+  . P_PIDFD (Linux only).
+  . P_UID (NetBSD only).
+  . P_GID (NetBSD only).
+  . P_SID (NetBSD only).
+  . P_JAILID (FreeBSD only).
+  
 - Standard:
   . PHP_ROUND_CEILING.
   . PHP_ROUND_FLOOR.
