@@ -403,19 +403,17 @@ PHP_FUNCTION(pcntl_waitid)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	// check idtype is one of P_PID, P_PIDFD, P_PGID, P_ALL
 	if (idtype != P_ALL && idtype != P_PID && idtype != P_PIDFD && idtype != P_PGID) {
-		php_error_docref(NULL, E_WARNING, "idtype must be one of P_PID, P_PIDFD, P_PGID, P_ALL");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be one of P_ALL, P_PID, P_PGID, P_PIDFD");
+		RETURN_THROWS();
 	}
 
-	// check flags, minimum one of WEXITED, WSTOPPED, WCONTINUED,
-	// additionally WNOHANG or WNOWAIT can be set
 	if ((options & WEXITED) != WEXITED &&
 			(options & WSTOPPED) != WSTOPPED &&
 			(options & WCONTINUED) != WCONTINUED) {
-		php_error_docref(NULL, E_WARNING, "flags must include at least WEXITED, WSTOPPED or WCONTINUED");
-		RETURN_FALSE;
+		zend_argument_value_error(4, "must include at least WEXITED, WSTOPPED or WCONTINUED");
+		// additionally, WNOHANG or WNOWAIT can be set
+		RETURN_THROWS();
 	}
 
 	errno = 0;
