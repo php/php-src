@@ -19,6 +19,7 @@ setcookie('name', 'value', 0, '', '', FALSE, TRUE);
 
 setcookie('name', 'value', ['expires' => $tsp]);
 setcookie('name', 'value', ['expires' => $tsn, 'path' => '/path/', 'domain' => 'domain.tld', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+setcookie('name', 'value', ['secure' => true, 'partitioned' => true]);
 
 $expected = array(
     'Set-Cookie: name=deleted; expires='.date('D, d M Y H:i:s', 1).' GMT; Max-Age=0',
@@ -34,7 +35,8 @@ $expected = array(
     'Set-Cookie: name=value; secure',
     'Set-Cookie: name=value; HttpOnly',
     'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsp).' GMT; Max-Age=5',
-    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsn).' GMT; Max-Age=0; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict'
+    'Set-Cookie: name=value; expires='.date('D, d M Y H:i:s', $tsn).' GMT; Max-Age=0; path=/path/; domain=domain.tld; secure; HttpOnly; SameSite=Strict',
+    'Set-Cookie: name=value; secure; Partitioned'
 );
 
 $headers = headers_list();
