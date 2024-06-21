@@ -14,8 +14,8 @@ if ($pid == -1) {
     die("failed");
 } else if ($pid) {
     // test invalid arguments
-    var_dump(@pcntl_waitid(-2, $pid, $siginfo, WSTOPPED));
-    var_dump(@pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG));
+    var_dump(pcntl_waitid(-2, $pid, $siginfo, WSTOPPED));
+    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG));
 
     $result = pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED);
     var_dump($result);
@@ -32,8 +32,11 @@ if ($pid == -1) {
     exit(42);
 }
 ?>
---EXPECT--
+--EXPECTF--
+Warning: pcntl_waitid(): Invalid argument in %s on line 7
 bool(false)
+
+Warning: pcntl_waitid(): Invalid argument in %s on line 8
 bool(false)
 bool(true)
 bool(true)
