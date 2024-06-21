@@ -420,6 +420,11 @@ PHP_FUNCTION(pcntl_waitid)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (idtype < -1) {
+		zend_argument_value_error(1, "must be either one of P_ALL, P_PID, P_PGID (POSIX) or a platform-specific value");
+		RETURN_THROWS();
+	}
+
 	errno = 0;
 	siginfo_t siginfo;
 
