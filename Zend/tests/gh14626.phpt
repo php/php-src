@@ -1,5 +1,7 @@
 --TEST--
 GH-14626: is_zend_ptr() may crash for non-zend ptrs when huge blocks exist
+--EXTENSIONS--
+zend_test
 --FILE--
 <?php
 
