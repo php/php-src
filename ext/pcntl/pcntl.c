@@ -420,17 +420,16 @@ PHP_FUNCTION(pcntl_waitid)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (idtype < -1) {
-		zend_argument_value_error(1, "must be either one of P_ALL, P_PID, P_PGID (POSIX) or a platform-specific value");
-		RETURN_THROWS();
-	}
-
 	errno = 0;
 	siginfo_t siginfo;
 
 	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
 
 	if (status == -1) {
+		if (errno == EINVAL) {
+			zend_value_error("An invalid value was specified for options, or idtype and id specify an invalid set of processes");
+			RETURN_THROWS();
+		}
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;

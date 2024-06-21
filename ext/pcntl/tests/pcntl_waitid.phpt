@@ -15,16 +15,32 @@ if ($pid == -1) {
 } else if ($pid) {
     // invalid idtype
     try {
-        var_dump(pcntl_waitid(-42, $pid, $siginfo, WSTOPPED));
+        pcntl_waitid(-42, $pid, $siginfo, WSTOPPED);
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
-    var_dump(pcntl_waitid(PHP_INT_MAX, $pid, $siginfo, WSTOPPED));
+    try {
+        pcntl_waitid(PHP_INT_MAX, $pid, $siginfo, WSTOPPED);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     // invalid flags
-    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, -42));
-    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, PHP_INT_MAX));
+    try {
+        pcntl_waitid(P_PID, $pid, $siginfo, -42);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    try {
+        pcntl_waitid(P_PID, $pid, $siginfo, PHP_INT_MAX);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     // need at least one of WEXITED, WSTOPPED, WCONTINUED flagd
-    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG));
+    try {
+        pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 
     // with WNOHANG, call succeeds but there is no PID state change
     $result = pcntl_waitid(P_PID, $pid, $siginfo, WEXITED | WNOHANG);
@@ -47,19 +63,11 @@ if ($pid == -1) {
 }
 ?>
 --EXPECTF--
-pcntl_waitid(): Argument #1 ($idtype) must be either one of P_ALL, P_PID, P_PGID (POSIX) or a platform-specific value
-
-Warning: pcntl_waitid(): FOO Invalid argument FOO in /home/random/github/php-src/ext/pcntl/tests/pcntl_waitid.php on line 12
-bool(false)
-
-Warning: pcntl_waitid(): FOO Invalid argument FOO in /home/random/github/php-src/ext/pcntl/tests/pcntl_waitid.php on line 14
-bool(false)
-
-Warning: pcntl_waitid(): FOO Invalid argument FOO in /home/random/github/php-src/ext/pcntl/tests/pcntl_waitid.php on line 15
-bool(false)
-
-Warning: pcntl_waitid(): FOO Invalid argument FOO in /home/random/github/php-src/ext/pcntl/tests/pcntl_waitid.php on line 17
-bool(false)
+An invalid value was specified for options, or idtype and id specify an invalid set of processes
+An invalid value was specified for options, or idtype and id specify an invalid set of processes
+An invalid value was specified for options, or idtype and id specify an invalid set of processes
+An invalid value was specified for options, or idtype and id specify an invalid set of processes
+An invalid value was specified for options, or idtype and id specify an invalid set of processes
 bool(true)
 int(0)
 bool(true)
