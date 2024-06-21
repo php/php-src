@@ -1943,6 +1943,76 @@ PKG_CHECK_MODULES([ZLIB], [zlib >= 1.2.11], [dnl
   $2], [$3])dnl
 ])
 
+dnl
+dnl PHP_SETUP_PGSQL([shared-add [, action-found [, action-not-found [, pgsql-dir]]]])
+dnl
+dnl Common setup macro for PostgreSQL library (libpq). The optional "pgsql-dir"
+dnl is the PostgreSQL base install directory or the path to pg_config. Support
+dnl for pkg-config was introduced in PostgreSQL 9.3. If library can't be found
+dnl with pkg-config, check falls back to pg_config. If libpq is not found, error
+dnl is thrown, unless the "action-not-found" is given.
+dnl
+AC_DEFUN([PHP_SETUP_PGSQL], [dnl
+found_pgsql=no
+dnl Set PostgreSQL installation directory if given from the configure argument.
+AS_CASE([$4], [yes], [pgsql_dir=""], [pgsql_dir=$4])
+AS_VAR_IF([pgsql_dir],,
+  [PKG_CHECK_MODULES([PGSQL], [libpq >= 9.3],
+    [found_pgsql=yes],
+    [found_pgsql=no])])
+
+AS_VAR_IF([found_pgsql], [no], [dnl
+  AC_MSG_CHECKING([for pg_config])
+  for i in $pgsql_dir $pgsql_dir/bin /usr/local/pgsql/bin /usr/local/bin /usr/bin ""; do
+    AS_IF([test -x $i/pg_config], [PG_CONFIG="$i/pg_config"; break;])
+  done
+
+  AS_VAR_IF([PG_CONFIG],, [dnl
+    AC_MSG_RESULT([not found])
+    AS_VAR_IF([pgsql_dir],,
+      [pgsql_search_paths="/usr /usr/local /usr/local/pgsql"],
+      [pgsql_search_paths=$pgsql_dir])
+
+    for i in $pgsql_search_paths; do
+      for j in include include/pgsql include/postgres include/postgresql ""; do
+        AS_IF([test -r "$i/$j/libpq-fe.h"], [PGSQL_INCLUDE=$i/$j])
+      done
+
+      for j in $PHP_LIBDIR lib $PHP_LIBDIR/pgsql $PHP_LIBDIR/postgres $PHP_LIBDIR/postgresql ""; do
+        AS_IF([test -f "$i/$j/libpq.so" || test -f "$i/$j/libpq.a"],
+          [PGSQL_LIBDIR=$i/$j])
+      done
+    done
+  ], [dnl
+    AC_MSG_RESULT([$PG_CONFIG])
+    PGSQL_INCLUDE=$($PG_CONFIG --includedir)
+    PGSQL_LIBDIR=$($PG_CONFIG --libdir)
+  ])
+
+  AS_IF([test -n "$PGSQL_INCLUDE" && test -n "PGSQL_LIBDIR"], [
+    found_pgsql=yes
+    PGSQL_CFLAGS="-I$PGSQL_INCLUDE"
+    PGSQL_LIBS="-L$PGSQL_LIBDIR -lpq"
+  ])dnl
+])
+
+AS_VAR_IF([found_pgsql], [yes], [dnl
+  PHP_EVAL_INCLINE([$PGSQL_CFLAGS])
+  PHP_EVAL_LIBLINE([$PGSQL_LIBS], [$1])
+dnl PostgreSQL minimum version sanity check.
+  PHP_CHECK_LIBRARY([pq], [PQlibVersion],, [AC_MSG_ERROR([m4_normalize([
+    PostgreSQL check failed: libpq 9.1 or later is required, please see
+    config.log for details.
+  ])])],
+  [$PGSQL_LIBS])
+$2],
+[m4_default([$3], [AC_MSG_ERROR([m4_normalize([
+  Cannot find libpq-fe.h or pq library (libpq). Please specify the correct
+  PostgreSQL installation path with environment variables PGSQL_CFLAGS and
+  PGSQL_LIBS or provide the PostgreSQL installation directory.
+])])])])
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------
