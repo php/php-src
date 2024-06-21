@@ -51,6 +51,39 @@ typedef struct zend_jit_ffi_info {
 	zend_ffi_type *type;
 	uint32_t       info;
 } zend_jit_ffi_info;
+
+static bool zend_jit_ffi_supported_type(zend_ffi_type *type) {
+#if defined(IR_TARGET_X86)
+	if (ZEND_FFI_TYPE(type->kind == ZEND_FFI_TYPE_UINT64)
+	 ||	ZEND_FFI_TYPE(type->kind == ZEND_FFI_TYPE_SINT64)) {
+		return false;
+	}
+#endif
+	return true;
+}
+
+static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
+{
+	dst_type = ZEND_FFI_TYPE(dst_type);
+	if (!zend_jit_ffi_supported_type(dst_type)) {
+		return false;
+	} else if (src_info == MAY_BE_LONG || src_info == MAY_BE_DOUBLE) {
+		return dst_type->kind < ZEND_FFI_TYPE_POINTER && dst_type->kind != ZEND_FFI_TYPE_VOID;
+	} else if (src_info == MAY_BE_FALSE || src_info == MAY_BE_TRUE || src_info == (MAY_BE_FALSE|MAY_BE_TRUE)) {
+		return dst_type->kind == ZEND_FFI_TYPE_BOOL;
+	} else if (src_type) {
+		if (!zend_jit_ffi_supported_type(src_type)) {
+			return false;
+		}
+		if (src_type->kind >= ZEND_FFI_TYPE_POINTER) {
+			return false;
+		}
+		if (dst_type == src_type || zend_ffi_is_compatible_type(dst_type, src_type)) {
+			return true;
+		}
+	}
+	return false;
+}
 #endif
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
