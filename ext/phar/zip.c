@@ -770,7 +770,7 @@ foundit:
 				}
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len, mydata);
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata);
 			mydata->alias = pestrndup(alias, alias_len, mydata->is_persistent);
 			mydata->alias_len = alias_len;
 		} else {
