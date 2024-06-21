@@ -182,19 +182,19 @@ PHP_METHOD(Spoofchecker, setAllowedChars)
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	if (ZSTR_LEN(pattern) > INT32_MAX) {
-		zend_argument_value_error(1, "is larger than " ZEND_LONG_FMT, INT32_MAX);
+		zend_argument_value_error(1, "must be less than or equal to " ZEND_LONG_FMT " bytes", INT32_MAX);
 		RETURN_THROWS();
 	}
 
 	/* uset_applyPattern requires to start with a regex range char */
 	if (ZSTR_VAL(pattern)[0] != '[') {
-		zend_argument_value_error(1, "invalid pattern");
+		zend_argument_value_error(1, "is an invalid pattern");
 		RETURN_THROWS();
 	}
 
 	intl_convert_utf8_to_utf16(&upattern, &upattern_len, ZSTR_VAL(pattern), ZSTR_LEN(pattern), SPOOFCHECKER_ERROR_CODE_P(co));
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		zend_argument_value_error(1, "string conversion to utf-16 failed (%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		zend_argument_value_error(1, "string conversion to unicode encoding failed (%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		RETURN_THROWS();
 	}
 
@@ -208,9 +208,9 @@ PHP_METHOD(Spoofchecker, setAllowedChars)
 #endif
             pattern_option != (USET_IGNORE_SPACE|USET_CASE_INSENSITIVE) &&
             pattern_option != (USET_IGNORE_SPACE|USET_ADD_CASE_MAPPINGS)) {
-		zend_argument_value_error(2, "invalid pattern option, must be 0 or (IGNORE_SPACE|(<none> or USET_CASE_INSENSITIVE or USET_ADD_CASE_MAPPINGS"
+		zend_argument_value_error(2, "is an invalid pattern option, must be 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::USET_CASE_INSENSITIVE or SpoofChecker::USET_ADD_CASE_MAPPINGS"
 #if U_ICU_VERSION_MAJOR_NUM >= 73
-				" or USET_SIMPLE_CASE_INSENSITIVE"
+				" or SpoofChecker::USET_SIMPLE_CASE_INSENSITIVE"
 #endif
 				"))"
 		);
@@ -221,7 +221,7 @@ PHP_METHOD(Spoofchecker, setAllowedChars)
 
 	uset_applyPattern(set, upattern, upattern_len, (uint32_t)pattern_option, SPOOFCHECKER_ERROR_CODE_P(co));
 	if (U_FAILURE(SPOOFCHECKER_ERROR_CODE(co))) {
-		zend_argument_value_error(1, "invalid pattern (%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
+		zend_argument_value_error(1, "is an invalid pattern (%d) %s", SPOOFCHECKER_ERROR_CODE(co), u_errorName(SPOOFCHECKER_ERROR_CODE(co)));
 		uset_close(set);
 		efree(upattern);
 		RETURN_THROWS();

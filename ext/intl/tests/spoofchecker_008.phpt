@@ -33,5 +33,5 @@ try {
 bool(true)
 bool(false)
 bool(false)
-Spoofchecker::setAllowedChars(): Argument #2 ($pattern_options) invalid pattern option, must be 0 or (IGNORE_SPACE|(<none> or USET_CASE_INSENSITIVE%s))
-Spoofchecker::setAllowedChars(): Argument #1 ($pattern) invalid pattern
+Spoofchecker::setAllowedChars(): Argument #2 ($patternOptions) is an invalid pattern option, must be 0 or (SpoofChecker::IGNORE_SPACE|(<none> or SpoofChecker::USET_CASE_INSENSITIVE%s))
+Spoofchecker::setAllowedChars(): Argument #1 ($pattern) is an invalid pattern

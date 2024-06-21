@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 70af069e3a791013bea8c05fbdd2c57c8b93a26b */
+ * Stub hash: 4834be57a3f0cb74dbc4422e609846139f09f6cb */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -31,7 +31,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Spoofchecker_setAllowedChars, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern_options, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, patternOptions, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_METHOD(Spoofchecker, __construct);

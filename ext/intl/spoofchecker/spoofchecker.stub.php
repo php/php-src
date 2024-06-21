@@ -75,5 +75,5 @@ class Spoofchecker
     /** @tentative-return-type */
     public function setRestrictionLevel(int $level): void {}
 #endif
-    public function setAllowedChars(string $pattern, int $pattern_options = 0): void {}
+    public function setAllowedChars(string $pattern, int $patternOptions = 0): void {}
 }
