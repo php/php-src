@@ -1920,7 +1920,7 @@ consult the installation file that came with this distribution, or visit \n\
 <a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
 			} zend_catch {
 			} zend_end_try();
-#if defined(ZTS) && !defined(PHP_DEBUG)
+#if defined(ZTS) && !PHP_DEBUG
 			/* XXX we're crashing here in msvc6 debug builds at
 			 * php_message_handler_for_zend:839 because
 			 * SG(request_info).path_translated is an invalid pointer.
