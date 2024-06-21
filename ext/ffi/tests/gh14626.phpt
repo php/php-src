@@ -1,5 +1,5 @@
 --TEST--
-FFI::free()
+GH-14626: FFI::free() may crash in is_zend_ptr() when at least one huge block exists and the ptr is non-zend
 --FILE--
 <?php
 
