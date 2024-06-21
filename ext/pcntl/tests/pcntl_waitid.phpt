@@ -14,7 +14,11 @@ if ($pid == -1) {
     die("failed");
 } else if ($pid) {
     // invalid idtype
-    var_dump(pcntl_waitid(-42, $pid, $siginfo, WSTOPPED));
+    try {
+        var_dump(pcntl_waitid(-42, $pid, $siginfo, WSTOPPED));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     // invalid flags
     var_dump(pcntl_waitid(P_PID, $pid, $siginfo, -42));
     // need at least one of WEXITED, WSTOPPED, WCONTINUED flagd
@@ -41,13 +45,12 @@ if ($pid == -1) {
 }
 ?>
 --EXPECTF--
-Warning: pcntl_waitid(): Invalid argument in %s on line 7
+pcntl_waitid(): Argument #1 ($idtype) must be either one of P_ALL, P_PID, P_PGID (POSIX) or a platform-specific value
+
+Warning: pcntl_waitid(): FOO Invalid argument FOO in /home/random/github/php-src/ext/pcntl/tests/pcntl_waitid.php on line 13
 bool(false)
 
-Warning: pcntl_waitid(): Invalid argument in %s on line 9
-bool(false)
-
-Warning: pcntl_waitid(): Invalid argument in %s on line 11
+Warning: pcntl_waitid(): FOO Invalid argument FOO in /home/random/github/php-src/ext/pcntl/tests/pcntl_waitid.php on line 15
 bool(false)
 bool(true)
 int(0)
