@@ -55,6 +55,7 @@ extern "C" {
 #endif
 
 #include "lsapidef.h"
+#include "zend_portability.h"
 
 #include <stddef.h>
 #include <sys/time.h>
@@ -417,12 +418,7 @@ int LSAPI_Postfork_Parent(LSAPI_Request * pReq);
 
 #define LSAPI_LOG_PID            (0x10000)
 
-void LSAPI_Log(int flag, const char * fmt, ...)
-#ifdef __GNUC__
-        __attribute__((format(printf, 2, 3)))
-#endif
-;
-
+void LSAPI_Log(int flag, const char * fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 #if defined (c_plusplus) || defined (__cplusplus)
 }
