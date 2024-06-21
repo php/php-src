@@ -20,8 +20,6 @@
 
 #ifdef HAVE_PGSQL
 
-#define PHP_PGSQL_API_VERSION 20140217
-
 extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
