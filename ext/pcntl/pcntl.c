@@ -410,7 +410,6 @@ PHP_FUNCTION(pcntl_waitid)
 	zend_long id = 0;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
-	int success;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_LONG(idtype)
@@ -423,9 +422,9 @@ PHP_FUNCTION(pcntl_waitid)
 	errno = 0;
 	siginfo_t siginfo;
 
-	success = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
 
-	if (success == -1) {
+	if (status == -1) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
@@ -1738,7 +1737,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
 			RETURN_THROWS();
 		}
-		       
+
 		if (!PCNTL_CPU_ISSET(cpu, mask)) {
 			PCNTL_CPU_SET(cpu, mask);
 		}
