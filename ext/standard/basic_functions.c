@@ -122,7 +122,7 @@ typedef struct _user_tick_function_entry {
 	bool calling;
 } user_tick_function_entry;
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 typedef struct {
 	char *putenv_string;
 	char *previous_value;

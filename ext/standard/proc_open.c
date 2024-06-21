@@ -232,7 +232,7 @@ static void _php_free_envp(php_process_env env)
 }
 /* }}} */
 
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 static pid_t waitpid_cached(php_process_handle *proc, int *wait_status, int options)
 {
 	if (proc->has_cached_exit_wait_status) {
@@ -544,7 +544,7 @@ static bool is_special_character_present(const zend_string *arg)
 	return false;
 }
 
-/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments and 
+/* See https://docs.microsoft.com/en-us/cpp/cpp/parsing-cpp-command-line-arguments and
  * https://learn.microsoft.com/en-us/archive/blogs/twistylittlepassagesallalike/everyone-quotes-command-line-arguments-the-wrong-way */
 static void append_win_escaped_arg(smart_str *str, zend_string *arg, bool is_cmd_argument)
 {
@@ -1352,7 +1352,7 @@ PHP_FUNCTION(proc_open)
 		php_error_docref(NULL, E_WARNING, "posix_spawn() failed: %s", strerror(r));
 		goto exit_fail;
 	}
-#elif HAVE_FORK
+#elif defined(HAVE_FORK)
 	/* the Unix way */
 	child = fork();
 
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(proc_open)
 	proc->childHandle = childHandle;
 #endif
 	proc->env = env;
-#if HAVE_SYS_WAIT_H
+#ifdef HAVE_SYS_WAIT_H
 	proc->has_cached_exit_wait_status = false;
 #endif
 
