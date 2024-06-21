@@ -648,6 +648,14 @@ PHP 8.4 UPGRADE NOTES
   . The IMAP extension has been unbundled and moved to PECL.
     RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
 
+- OCI8:
+  . The OCI8 extension has been unbundled and moved to PECL.
+    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
+
+- PDO_OCI:
+  . The PDO_OCI extension has been unbundled and moved to PECL.
+    RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
+
 - PSpell:
   . The pspell extension has been unbundled and moved to PECL.
     RFC: https://wiki.php.net/rfc/unbundle_imap_pspell_oci8
