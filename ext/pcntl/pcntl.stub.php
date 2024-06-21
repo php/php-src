@@ -1004,7 +1004,7 @@ function pcntl_fork(): int {}
 function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
 
 /** @param array $info */
-function pcntl_waitid(int $idtype, int $id, &$info = [], int $flags = 0): bool {}
+function pcntl_waitid(int $idtype, ?int $id = null, &$info = [], int $flags = 0): bool {}
 
 /**
  * @param int $status

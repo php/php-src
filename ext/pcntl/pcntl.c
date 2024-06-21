@@ -408,12 +408,13 @@ PHP_FUNCTION(pcntl_waitid)
 {
 	zend_long idtype = P_PID;
 	zend_long id = 0;
+	bool id_is_null = 1;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_LONG(idtype)
-		Z_PARAM_LONG(id)
+		Z_PARAM_LONG_OR_NULL(id, id_is_null)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(user_siginfo)
 		Z_PARAM_LONG(options)
