@@ -145,6 +145,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
    - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
+   - Added configure option --with-phar-ssl to explicitly enable SSL support
+     in phar when not building with openssl extension. When building with
+     openssl extension (shared or static), SSL support is enabled implicitly.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
