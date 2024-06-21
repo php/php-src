@@ -18119,7 +18119,8 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 				return 1;
 			}
 #ifdef HAVE_FFI
-			if (trace
+			if ((opline->opcode == ZEND_ASSIGN_DIM || opline->opcode == ZEND_ASSIGN_DIM_OP)
+			 && trace
 			 && (trace+1)->op == ZEND_JIT_TRACE_OP1_TYPE
 			 && (trace+2)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
 				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
@@ -18132,7 +18133,11 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_SINT64
 #endif
 				 && op2_info == MAY_BE_LONG) {
-					return 1;
+					uint32_t op1_data_info = OP1_DATA_INFO();
+
+					if (op1_data_info == MAY_BE_LONG || op1_data_info == MAY_BE_DOUBLE) {
+						return 1;
+					}
 				}
 			}
 #endif
