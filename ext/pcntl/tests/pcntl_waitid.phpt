@@ -24,6 +24,12 @@ if ($pid == -1) {
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
+    // invalid combination of idtype and id
+    try {
+        pcntl_waitid(P_PID, null, $siginfo, WSTOPPED);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
     // invalid flags
     try {
         pcntl_waitid(P_PID, $pid, $siginfo, -42);
@@ -63,6 +69,7 @@ if ($pid == -1) {
 }
 ?>
 --EXPECTF--
+An invalid value was specified for options, or idtype and id specify an invalid set of processes
 An invalid value was specified for options, or idtype and id specify an invalid set of processes
 An invalid value was specified for options, or idtype and id specify an invalid set of processes
 An invalid value was specified for options, or idtype and id specify an invalid set of processes
