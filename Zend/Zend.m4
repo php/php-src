@@ -148,8 +148,18 @@ _LT_AC_TRY_DLOPEN_SELF([
 ], [])
 ])
 
-dnl Checks for library functions.
-AC_CHECK_FUNCS(getpid kill pthread_getattr_np pthread_attr_get_np pthread_get_stackaddr_np pthread_attr_getstack pthread_stackseg_np gettid)
+dnl Check for library functions.
+AC_CHECK_FUNCS(m4_normalize([
+  getpid
+  gettid
+  kill
+  mremap
+  pthread_attr_get_np
+  pthread_attr_getstack
+  pthread_get_stackaddr_np
+  pthread_getattr_np
+  pthread_stackseg_np
+]))
 
 dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
 AC_CHECK_FUNCS([sigsetjmp],,
@@ -278,8 +288,6 @@ int main(void)
 ])
 
 AC_MSG_RESULT(done)
-
-AC_CHECK_FUNCS(mremap)
 
 AC_ARG_ENABLE([zend-signals],
   [AS_HELP_STRING([--disable-zend-signals],
