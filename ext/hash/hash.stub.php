@@ -102,4 +102,6 @@ final class HashContext
     public function __serialize(): array {}
 
     public function __unserialize(array $data): void {}
+
+    public function __debugInfo(): array {}
 }
