@@ -29,7 +29,6 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
-#include "php_pcntl.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_fibers.h"
@@ -40,6 +39,25 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef HAVE_WAITID
+#if defined(HAVE_LINUX_WAIT_H)
+#include <linux/wait.h>
+#endif
+#if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
+#define HAVE_POSIX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_PIDFD) && HAVE_DECL_P_PIDFD == 1
+#define HAVE_LINUX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_UID) && HAVE_DECL_P_UID == 1
+#define HAVE_NETBSD_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_JAILID) && HAVE_DECL_P_JAILID == 1
+#define HAVE_FREEBSD_IDTYPES 1
+#endif
+#endif
+
+#include "php_pcntl.h"
 #include <errno.h>
 #if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
@@ -117,24 +135,6 @@ static zend_class_entry *QosClass_ce;
 
 #ifdef HAVE_FORKX
 #include <sys/fork.h>
-#endif
-
-#ifdef HAVE_WAITID
-#if defined(HAVE_LINUX_WAIT_H)
-#include <linux/wait.h>
-#endif
-#if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
-#define HAVE_POSIX_IDTYPES 1
-#endif
-#if defined (HAVE_DECL_P_PIDFD) && HAVE_DECL_P_PIDFD == 1
-#define HAVE_LINUX_IDTYPES 1
-#endif
-#if defined (HAVE_DECL_P_UID) && HAVE_DECL_P_UID == 1
-#define HAVE_NETBSD_IDTYPES 1
-#endif
-#if defined (HAVE_DECL_P_JAILID) && HAVE_DECL_P_JAILID == 1
-#define HAVE_FREEBSD_IDTYPES 1
-#endif
 #endif
 
 #ifndef NSIG
