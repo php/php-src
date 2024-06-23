@@ -25,21 +25,21 @@ const WUNTRACED = UNKNOWN;
  */
 const WCONTINUED = UNKNOWN;
 #endif
-#ifdef WEXITED
+#if defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 /**
  * @var int
  * @cvalue LONG_CONST(WEXITED)
  */
 const WEXITED = UNKNOWN;
 #endif
-#ifdef WSTOPPED
+#if defined (HAVE_DECL_WSTOPPED) && HAVE_DECL_WSTOPPED == 1
 /**
  * @var int
  * @cvalue LONG_CONST(WSTOPPED)
  */
 const WSTOPPED = UNKNOWN;
 #endif
-#ifdef WNOWAIT
+#if defined (HAVE_DECL_WNOWAIT) && HAVE_DECL_WNOWAIT== 1
 /**
  * @var int
  * @cvalue LONG_CONST(WNOWAIT)

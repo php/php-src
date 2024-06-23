@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 697e1874dc5a6ce4763edeb50d9db7cc2513bcef */
+ * Stub hash: be81ffed1720914c3f9d17f263cbcc78272a9e15 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -324,13 +324,13 @@ static void register_pcntl_symbols(int module_number)
 #if defined(HAVE_WCONTINUED)
 	REGISTER_LONG_CONSTANT("WCONTINUED", LONG_CONST(WCONTINUED), CONST_PERSISTENT);
 #endif
-#if defined(WEXITED)
+#if defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 	REGISTER_LONG_CONSTANT("WEXITED", LONG_CONST(WEXITED), CONST_PERSISTENT);
 #endif
-#if defined(WSTOPPED)
+#if defined (HAVE_DECL_WSTOPPED) && HAVE_DECL_WSTOPPED == 1
 	REGISTER_LONG_CONSTANT("WSTOPPED", LONG_CONST(WSTOPPED), CONST_PERSISTENT);
 #endif
-#if defined(WNOWAIT)
+#if defined (HAVE_DECL_WNOWAIT) && HAVE_DECL_WNOWAIT== 1
 	REGISTER_LONG_CONSTANT("WNOWAIT", LONG_CONST(WNOWAIT), CONST_PERSISTENT);
 #endif
 #if defined(HAVE_WAITID) && defined(HAVE_POSIX_IDTYPES)

@@ -35,7 +35,8 @@ if test "$PHP_PCNTL" != "no"; then
       #include <sys/wait.h>
     ])])
 
-  AC_CHECK_DECLS([WCONTINUED, P_ALL, P_PIDFD, P_UID, P_JAILID], , ,
+  AC_CHECK_DECLS([WCONTINUED, WEXITED, WSTOPPED, WNOWAIT,
+                  P_ALL, P_PIDFD, P_UID, P_JAILID],,,
     [
       #include <sys/wait.h>
       #if defined(HAVE_LINUX_WAIT_H)
