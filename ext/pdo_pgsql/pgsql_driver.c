@@ -177,7 +177,7 @@ static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
 		zend_off_t *newoffset)
 {
 	struct pdo_pgsql_lob_self *self = (struct pdo_pgsql_lob_self*)stream->abstract;
-#if defined(HAVE_PG_LO64) && defined(ZEND_ENABLE_ZVAL_LONG64)
+#ifdef ZEND_ENABLE_ZVAL_LONG64
 	zend_off_t pos = lo_lseek64(self->conn, self->lfd, offset, whence);
 #else
 	zend_off_t pos = lo_lseek(self->conn, self->lfd, offset, whence);

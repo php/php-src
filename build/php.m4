@@ -1957,7 +1957,7 @@ found_pgsql=no
 dnl Set PostgreSQL installation directory if given from the configure argument.
 AS_CASE([$4], [yes], [pgsql_dir=""], [pgsql_dir=$4])
 AS_VAR_IF([pgsql_dir],,
-  [PKG_CHECK_MODULES([PGSQL], [libpq >= 9.3],
+  [PKG_CHECK_MODULES([PGSQL], [libpq >= 10.0],
     [found_pgsql=yes],
     [found_pgsql=no])])
 
@@ -2000,8 +2000,8 @@ AS_VAR_IF([found_pgsql], [yes], [dnl
   PHP_EVAL_INCLINE([$PGSQL_CFLAGS])
   PHP_EVAL_LIBLINE([$PGSQL_LIBS], [$1])
 dnl PostgreSQL minimum version sanity check.
-  PHP_CHECK_LIBRARY([pq], [PQlibVersion],, [AC_MSG_ERROR([m4_normalize([
-    PostgreSQL check failed: libpq 9.1 or later is required, please see
+  PHP_CHECK_LIBRARY([pq], [PQencryptPasswordConn],, [AC_MSG_ERROR([m4_normalize([
+    PostgreSQL check failed: libpq 10.0 or later is required, please see
     config.log for details.
   ])])],
   [$PGSQL_LIBS])

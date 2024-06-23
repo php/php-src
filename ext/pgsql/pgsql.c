@@ -2934,15 +2934,12 @@ PHP_FUNCTION(pg_lo_seek)
 	pgsql = Z_PGSQL_LOB_P(pgsql_id);
 	CHECK_PGSQL_LOB(pgsql);
 
-#ifdef HAVE_PG_LO64
 	if (PQserverVersion((PGconn *)pgsql->conn) >= 90300) {
 		result = lo_lseek64((PGconn *)pgsql->conn, pgsql->lofd, offset, (int)whence);
 	} else {
 		result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, (int)offset, (int)whence);
 	}
-#else
-	result = lo_lseek((PGconn *)pgsql->conn, pgsql->lofd, offset, whence);
-#endif
+
 	if (result > -1) {
 		RETURN_TRUE;
 	} else {
@@ -3046,7 +3043,6 @@ PHP_FUNCTION(pg_set_error_verbosity)
 }
 /* }}} */
 
-#ifdef HAVE_PG_CONTEXT_VISIBILITY
 PHP_FUNCTION(pg_set_error_context_visibility)
 {
 	zval *pgsql_link = NULL;
@@ -3071,7 +3067,6 @@ PHP_FUNCTION(pg_set_error_context_visibility)
 		RETURN_THROWS();
 	}
 }
-#endif
 
 #ifdef HAVE_PG_RESULT_MEMORY_SIZE
 PHP_FUNCTION(pg_result_memory_size)

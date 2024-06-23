@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8feb7d195444838a4c016910593d30dd76aafe89 */
+ * Stub hash: 84535fbc63b6fe9766088d884c89f5c4a4db0ddf */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_pg_connect, 0, 1, PgSql\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, connection_string, IS_STRING, 0)
@@ -454,12 +454,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pg_select, 0, 2, MAY_BE_ARRAY|MA
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PGSQL_ASSOC")
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_set_error_context_visibility, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, connection, PgSql\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, visibility, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 #if defined(HAVE_PG_RESULT_MEMORY_SIZE)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pg_result_memory_size, 0, 1, IS_LONG, 0)
@@ -589,9 +587,7 @@ ZEND_FUNCTION(pg_insert);
 ZEND_FUNCTION(pg_update);
 ZEND_FUNCTION(pg_delete);
 ZEND_FUNCTION(pg_select);
-#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 ZEND_FUNCTION(pg_set_error_context_visibility);
-#endif
 #if defined(HAVE_PG_RESULT_MEMORY_SIZE)
 ZEND_FUNCTION(pg_result_memory_size);
 #endif
@@ -719,9 +715,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pg_update, arginfo_pg_update)
 	ZEND_FE(pg_delete, arginfo_pg_delete)
 	ZEND_FE(pg_select, arginfo_pg_select)
-#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	ZEND_FE(pg_set_error_context_visibility, arginfo_pg_set_error_context_visibility)
-#endif
 #if defined(HAVE_PG_RESULT_MEMORY_SIZE)
 	ZEND_FE(pg_result_memory_size, arginfo_pg_result_memory_size)
 #endif
@@ -852,15 +846,9 @@ static void register_pgsql_symbols(int module_number)
 #if defined(PQTRACE_REGRESS_MODE)
 	REGISTER_LONG_CONSTANT("PGSQL_TRACE_REGRESS_MODE", PQTRACE_REGRESS_MODE, CONST_PERSISTENT);
 #endif
-#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_NEVER", PQSHOW_CONTEXT_NEVER, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ERRORS", PQSHOW_CONTEXT_ERRORS, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_PG_CONTEXT_VISIBILITY)
 	REGISTER_LONG_CONSTANT("PGSQL_SHOW_CONTEXT_ALWAYS", PQSHOW_CONTEXT_ALWAYS, CONST_PERSISTENT);
-#endif
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "pg_change_password", sizeof("pg_change_password") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
