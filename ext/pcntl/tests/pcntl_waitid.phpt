@@ -41,7 +41,7 @@ if ($pid == -1) {
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
-    // need at least one of WEXITED, WSTOPPED, WCONTINUED flagd
+    // need at least one of WEXITED, WSTOPPED, WCONTINUED flags
     try {
         pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG);
     } catch (\ValueError $e) {
