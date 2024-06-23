@@ -426,16 +426,10 @@ PHP_FUNCTION(pcntl_waitid)
 	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
 
 	if (status == -1) {
-		if (errno == EINVAL) {
-			zend_value_error("An invalid value was specified for options, or idtype and id specify an invalid set of processes");
-			RETURN_THROWS();
-		}
 		PCNTL_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
 
-	// TODO verify that passing SIGCHLD does what we need
 	pcntl_siginfo_to_zval(SIGCHLD, &siginfo, user_siginfo);
 
 	RETURN_TRUE;

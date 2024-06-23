@@ -14,27 +14,12 @@ if ($pid == -1) {
     die("failed");
 } else if ($pid) {
     // invalid flags
-    try {
-        pcntl_waitid(P_PID, $pid, $siginfo, -42);
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
+    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, 8192));
 
-    try {
-        pcntl_waitid(P_PID, $pid, $siginfo, PHP_INT_MAX);
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
-
-    $result = pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED);
-    var_dump($result);
-
+    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED));
     posix_kill($pid, SIGCONT);
-    $result = pcntl_waitid(P_PID, $pid, $siginfo, WCONTINUED);
-    var_dump($result);
-
-    $result = pcntl_waitid(P_PID, $pid, $siginfo, WEXITED);
-    var_dump($result);
+    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WCONTINUED));
+    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WEXITED));
     var_dump($siginfo["status"]);
 } else {
     posix_kill(posix_getpid(), SIGSTOP);
@@ -42,8 +27,7 @@ if ($pid == -1) {
 }
 ?>
 --EXPECTF--
-An invalid value was specified for options, or idtype and id specify an invalid set of processes
-An invalid value was specified for options, or idtype and id specify an invalid set of processes
+bool(false)
 bool(true)
 bool(true)
 bool(true)
