@@ -171,6 +171,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The HAVE_OPENSSL_EXT symbol is now consistently defined to value 1 whether
      the openssl extension is available either as shared or built statically.
    - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
+   - The win32/build/libs_version.txt file has been removed.
 
 ========================
 3. Module changes
