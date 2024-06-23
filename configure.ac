@@ -1195,11 +1195,6 @@ dnl ----------------------------------------------------------------------------
 PHP_HELP_SEPARATOR([PEAR:])
 PHP_CONFIGURE_PART(Configuring PEAR)
 
-dnl Compatibility
-if test -z "$with_pear" && test "$enable_pear" = "no"; then
-  with_pear=no
-fi
-
 dnl If CLI is disabled disable PEAR.
 if test "$PHP_CLI" = "no"; then
   with_pear=no
