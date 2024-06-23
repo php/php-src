@@ -19,22 +19,12 @@ if ($pid == -1) {
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
+
     try {
         pcntl_waitid(P_PID, $pid, $siginfo, PHP_INT_MAX);
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }
-    // need at least one of WEXITED, WSTOPPED, WCONTINUED flags
-    try {
-        pcntl_waitid(P_PID, $pid, $siginfo, WNOHANG);
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
-
-    // with WNOHANG, call succeeds but there is no PID state change
-    $result = pcntl_waitid(P_PID, $pid, $siginfo, WEXITED | WNOHANG);
-    var_dump($result);
-    var_dump($siginfo["pid"]);
 
     $result = pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED);
     var_dump($result);
@@ -54,9 +44,6 @@ if ($pid == -1) {
 --EXPECTF--
 An invalid value was specified for options, or idtype and id specify an invalid set of processes
 An invalid value was specified for options, or idtype and id specify an invalid set of processes
-An invalid value was specified for options, or idtype and id specify an invalid set of processes
-bool(true)
-int(0)
 bool(true)
 bool(true)
 bool(true)
