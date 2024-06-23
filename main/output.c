@@ -462,7 +462,6 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 	char *error = NULL;
 	php_output_handler *handler = NULL;
 	php_output_handler_alias_ctor_t alias = NULL;
-	php_output_handler_user_func_t *user = NULL;
 
 	switch (Z_TYPE_P(output_handler)) {
 		case IS_NULL:
@@ -474,8 +473,8 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				break;
 			}
 			ZEND_FALLTHROUGH;
-		default:
-			user = ecalloc(1, sizeof(php_output_handler_user_func_t));
+		default: {
+			php_output_handler_user_func_t *user = ecalloc(1, sizeof(php_output_handler_user_func_t));
 			if (SUCCESS == zend_fcall_info_init(output_handler, 0, &user->fci, &user->fcc, &handler_name, &error)) {
 				handler = php_output_handler_init(handler_name, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_USER);
 				ZVAL_COPY(&user->zoh, output_handler);
@@ -490,6 +489,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 			if (handler_name) {
 				zend_string_release_ex(handler_name, 0);
 			}
+		}
 	}
 
 	return handler;
@@ -1290,11 +1290,12 @@ static zend_result php_output_handler_devnull_func(void **handler_context, php_o
 /* {{{ Turn on Output Buffering (specifying an optional output handler). */
 PHP_FUNCTION(ob_start)
 {
-	zval *output_handler = NULL;
+	zend_fcall_info fci = {0};
+	zend_fcall_info_cache fcc = {0};
 	zend_long chunk_size = 0;
 	zend_long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zll", &output_handler, &chunk_size, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|f!ll", &fci, &fcc, &chunk_size, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -1302,10 +1303,27 @@ PHP_FUNCTION(ob_start)
 		chunk_size = 0;
 	}
 
-	if (php_output_start_user(output_handler, chunk_size, flags) == FAILURE) {
+	php_output_handler *handler;
+	if (ZEND_FCI_INITIALIZED(fci)) {
+		zend_string *handler_name = zend_get_callable_name(&fci.function_name);
+		php_output_handler_user_func_t *user = ecalloc(1, sizeof(php_output_handler_user_func_t));
+		memcpy(&user->fci, &fci, sizeof(fci));
+		memcpy(&user->fcc, &fcc, sizeof(fcc));
+
+		handler = php_output_handler_init(handler_name, chunk_size, PHP_OUTPUT_HANDLER_ABILITY_FLAGS(flags) | PHP_OUTPUT_HANDLER_USER);
+		ZVAL_COPY(&user->zoh, &fci.function_name);
+		handler->func.user = user;
+		zend_string_release_ex(handler_name, false);
+	} else {
+		/* When NULL is passed use default handler */
+		handler = php_output_handler_create_internal(ZEND_STRL(php_output_default_handler_name), php_output_handler_default_func, chunk_size, flags);
+	}
+
+	if (FAILURE == php_output_handler_start(handler)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to create buffer");
 		RETURN_FALSE;
 	}
+
 	RETURN_TRUE;
 }
 /* }}} */
