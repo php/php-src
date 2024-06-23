@@ -1280,6 +1280,14 @@ namespace Dom
         public function getIterator(): \Iterator {}
     }
 
+    enum AdjacentPosition : string
+    {
+        case BeforeBegin = "beforebegin";
+        case AfterBegin = "afterbegin";
+        case BeforeEnd = "beforeend";
+        case AfterEnd = "afterend";
+    }
+
     class Element extends Node implements ParentNode, ChildNode
     {
         /** @readonly */
@@ -1330,9 +1338,8 @@ namespace Dom
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
 
-        public function insertAdjacentElement(string $where, Element $element): ?Element {}
-        /** @implementation-alias DOMElement::insertAdjacentText */
-        public function insertAdjacentText(string $where, string $data): void {}
+        public function insertAdjacentElement(AdjacentPosition $where, Element $element): ?Element {}
+        public function insertAdjacentText(AdjacentPosition $where, string $data): void {}
 
         /** @readonly */
         public ?Element $firstElementChild;
