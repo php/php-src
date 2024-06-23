@@ -119,29 +119,29 @@ static zend_class_entry *QosClass_ce;
 #include <sys/fork.h>
 #endif
 
+#ifdef HAVE_WAITID
+#if defined(HAVE_LINUX_WAIT_H)
+#include <linux/wait.h>
+#endif
+#if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
+#define HAVE_POSIX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_PIDFD) && HAVE_DECL_P_PIDFD == 1
+#define HAVE_LINUX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_UID) && HAVE_DECL_P_UID == 1
+#define HAVE_NETBSD_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_JAILID) && HAVE_DECL_P_JAILID == 1
+#define HAVE_FREEBSD_IDTYPES 1
+#endif
+#endif
+
 #ifndef NSIG
 # define NSIG 32
 #endif
 
 #define LONG_CONST(c) (zend_long) c
-
-#ifdef HAVE_WAITID
-#if defined(HAVE_LINUX_WAIT_H)
-#include <linux/wait.h>
-#endif
-#if defined (P_ALL)
-#define HAVE_POSIX_IDTYPES 1
-#endif
-#if defined (P_PIDFD)
-#define HAVE_LINUX_IDTYPES 1
-#endif
-#if defined (P_UID)
-#define HAVE_NETBSD_IDTYPES 1
-#endif
-#if defined (P_JAILID)
-#define HAVE_FREEBSD_IDTYPES 1
-#endif
-#endif
 
 #include "Zend/zend_enum.h"
 #include "Zend/zend_max_execution_timer.h"

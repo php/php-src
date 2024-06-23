@@ -30,6 +30,15 @@ if test "$PHP_PCNTL" != "no"; then
   AC_CHECK_HEADER([linux/wait.h],
     [AC_DEFINE([HAVE_LINUX_WAIT_H], [1], [linux/wait.h found])])
 
+  AC_CHECK_DECLS([P_ALL, P_PIDFD, P_UID, P_JAILID], , ,
+    [
+      #include <sys/wait.h>
+      #if defined(HAVE_LINUX_WAIT_H)
+      # include <linux/wait.h>
+      #endif
+    ]
+  )
+
   dnl if unsupported, -1 means automatically ENOSYS in this context
   AC_CACHE_CHECK([if sched_getcpu is supported], [php_cv_func_sched_getcpu],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([
