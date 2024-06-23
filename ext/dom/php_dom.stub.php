@@ -1617,8 +1617,7 @@ namespace Dom
         /** @implementation-alias DOMDocument::validate */
         public function validate(): bool {}
 
-        /** @implementation-alias DOMDocument::xinclude */
-        public function xinclude(int $options = 0): int|false {}
+        public function xinclude(int $options = 0): int {}
 
         public function saveXml(?Node $node = null, int $options = 0): string|false {}
 

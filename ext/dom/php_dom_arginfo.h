@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 24c4a5ec91197ae35ccd6f344cd3a985286e2a16 */
+ * Stub hash: e75e734f710ab2c18322463f348b95dde4f937b2 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1042,7 +1042,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_XMLDocument_validate arginfo_class_Dom_Node_hasChildNodes
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_XMLDocument_xinclude, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_XMLDocument_xinclude, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -1288,6 +1288,7 @@ ZEND_METHOD(Dom_HTMLDocument, saveHtmlFile);
 ZEND_METHOD(Dom_XMLDocument, createEmpty);
 ZEND_METHOD(Dom_XMLDocument, createFromFile);
 ZEND_METHOD(Dom_XMLDocument, createFromString);
+ZEND_METHOD(Dom_XMLDocument, xinclude);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, __construct);
 #endif
@@ -1780,7 +1781,7 @@ static const zend_function_entry class_Dom_XMLDocument_methods[] = {
 	ZEND_ME(Dom_XMLDocument, createFromString, arginfo_class_Dom_XMLDocument_createFromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_RAW_FENTRY("createEntityReference", zim_DOMDocument_createEntityReference, arginfo_class_Dom_XMLDocument_createEntityReference, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("validate", zim_DOMDocument_validate, arginfo_class_Dom_XMLDocument_validate, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("xinclude", zim_DOMDocument_xinclude, arginfo_class_Dom_XMLDocument_xinclude, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Dom_XMLDocument, xinclude, arginfo_class_Dom_XMLDocument_xinclude, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_XMLDocument, saveXml, arginfo_class_Dom_XMLDocument_saveXml, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_XMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END

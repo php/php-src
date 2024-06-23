@@ -1706,17 +1706,36 @@ static void php_dom_remove_xinclude_nodes(xmlNodePtr cur) /* {{{ */
 }
 /* }}} */
 
-/* {{{ Substitutues xincludes in a DomDocument */
+/* {{{ Substitutes xincludes in a DomDocument */
+static int dom_perform_xinclude(xmlDocPtr docp, dom_object *intern, zend_long flags)
+{
+	PHP_LIBXML_SANITIZE_GLOBALS(xinclude);
+	int err = xmlXIncludeProcessFlags(docp, (int)flags);
+	PHP_LIBXML_RESTORE_GLOBALS(xinclude);
+
+	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
+	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document
+	but are not wanted in resulting document - must be done even if err as it could fail after
+	having processed some xincludes */
+	xmlNodePtr root = docp->children;
+	while (root && root->type != XML_ELEMENT_NODE && root->type != XML_XINCLUDE_START) {
+		root = root->next;
+	}
+	if (root) {
+		php_dom_remove_xinclude_nodes(root);
+	}
+
+	php_libxml_invalidate_node_list_cache(intern->document);
+
+	return err;
+}
+
 PHP_METHOD(DOMDocument, xinclude)
 {
-	zval *id;
 	xmlDoc *docp;
-	xmlNodePtr root;
 	zend_long flags = 0;
-	int err;
 	dom_object *intern;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -1726,30 +1745,40 @@ PHP_METHOD(DOMDocument, xinclude)
 		RETURN_FALSE;
 	}
 
-	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
 
-	PHP_LIBXML_SANITIZE_GLOBALS(xinclude);
-	err = xmlXIncludeProcessFlags(docp, (int)flags);
-	PHP_LIBXML_RESTORE_GLOBALS(xinclude);
-
-	/* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
-	are added via xmlXIncludeProcess to mark beginning and ending of xincluded document
-	but are not wanted in resulting document - must be done even if err as it could fail after
-	having processed some xincludes */
-	root = (xmlNodePtr) docp->children;
-	while(root && root->type != XML_ELEMENT_NODE && root->type != XML_XINCLUDE_START) {
-		root = root->next;
-	}
-	if (root) {
-		php_dom_remove_xinclude_nodes(root);
-	}
-
-	php_libxml_invalidate_node_list_cache(intern->document);
+	int err = dom_perform_xinclude(docp, intern, flags);
 
 	if (err) {
 		RETVAL_LONG(err);
 	} else {
 		RETVAL_FALSE;
+	}
+}
+
+PHP_METHOD(Dom_XMLDocument, xinclude)
+{
+	xmlDoc *docp;
+	zend_long flags = 0;
+	dom_object *intern;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZEND_LONG_EXCEEDS_INT(flags)) {
+		zend_argument_value_error(1, "is too large");
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(docp, ZEND_THIS, xmlDocPtr, intern);
+
+	int err = dom_perform_xinclude(docp, intern, flags);
+
+	if (err < 0) {
+		php_dom_throw_error(INVALID_MODIFICATION_ERR, /* strict */ true);
+	} else {
+		RETURN_LONG(err);
 	}
 }
 /* }}} */
