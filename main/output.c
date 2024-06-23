@@ -1300,7 +1300,8 @@ PHP_FUNCTION(ob_start)
 	}
 
 	if (chunk_size < 0) {
-		chunk_size = 0;
+		zend_argument_value_error(2, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	php_output_handler *handler;

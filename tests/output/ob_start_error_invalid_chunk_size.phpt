@@ -20,5 +20,5 @@ try {
 echo "done";
 ?>
 --EXPECT--
-bool(true)
+ValueError: ob_start(): Argument #2 ($chunk_size) must be greater than or equal to 0
 done
