@@ -45,11 +45,15 @@
 #if HAVE_FFI
 # include "ext/ffi/php_ffi.h"
 
-# define FFI_TYPE_GUARD (1<<0)
+# define FFI_TYPE_GUARD    (1<<0)
+# define FFI_SYMBOLS_GUARD (1<<1)
 
 typedef struct zend_jit_ffi_info {
-	zend_ffi_type *type;
-	uint32_t       info;
+	union {
+		zend_ffi_type *type;
+		HashTable     *symbols;
+	};
+	uint32_t           info;
 } zend_jit_ffi_info;
 
 static bool zend_jit_ffi_supported_type(zend_ffi_type *type) {

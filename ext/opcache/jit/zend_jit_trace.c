@@ -6270,10 +6270,14 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							 && ZEND_FFI_TYPE(sym->type)->kind < ZEND_FFI_TYPE_POINTER
 							 && ZEND_FFI_TYPE(sym->type)->kind != ZEND_FFI_TYPE_VOID
 							 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(sym->type))) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
 								if (!zend_jit_ffi_fetch_sym(&ctx, opline, op_array, ssa, ssa_op,
 										op1_info, op1_addr, op1_indirect,
 										on_this, delayed_fetch_this, avoid_refcounting, sym,
-										RES_REG_ADDR())) {
+										RES_REG_ADDR(),
+										op1_ffi_symbols, ffi_info)) {
 									goto jit_failure;
 								}
 								goto done;

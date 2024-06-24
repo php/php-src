@@ -12915,6 +12915,63 @@ static int zend_jit_ffi_guard(zend_jit_ctx       *jit,
 	return 1;
 }
 
+static int zend_jit_ffi_symbols_guard(zend_jit_ctx       *jit,
+                                      const zend_op      *opline,
+                                      zend_ssa           *ssa,
+                                      int                 use,
+                                      int                 def,
+                                      zend_jit_addr       addr,
+                                      HashTable          *ffi_symbols,
+                                      zend_jit_ffi_info  *ffi_info)
+{
+	ir_ref ref = IR_UNUSED;
+
+	if (ssa->var_info
+	 && use >= 0
+	 && ssa->var_info[use].ce != zend_ffi_ce) {
+		ref = jit_Z_PTR(jit, addr);
+		if (!zend_jit_class_guard(jit, opline, ref, zend_ffi_ce)) {
+			return 0;
+		}
+		ssa->var_info[use].type |= MAY_BE_CLASS_GUARD;
+		ssa->var_info[use].ce = zend_ffi_ce;
+		ssa->var_info[use].is_instanceof = 0;
+		if (def >= 0) {
+			ssa->var_info[def].type |= MAY_BE_CLASS_GUARD;
+			ssa->var_info[def].ce = zend_ffi_ce;
+			ssa->var_info[def].is_instanceof = 0;
+		}
+	}
+
+	if (ffi_info
+	 && use >= 0
+	 && (ffi_info[use].symbols != ffi_symbols
+	  || (ffi_info[use].info & FFI_SYMBOLS_GUARD))) {
+		if (!ref) {
+			ref = jit_Z_PTR(jit, addr);
+		}
+
+		int32_t exit_point = zend_jit_trace_get_exit_point(opline, 0);
+		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+		if (!exit_addr) {
+			return 0;
+		}
+
+		ir_GUARD(ir_EQ(ir_LOAD_A(ir_ADD_OFFSET(ref, offsetof(zend_ffi, symbols))), ir_CONST_ADDR(ffi_symbols)),
+			ir_CONST_ADDR(exit_addr));
+
+		ffi_info[use].info &= ~FFI_SYMBOLS_GUARD;
+		ffi_info[use].symbols = ffi_symbols;
+		if (def >= 0) {
+			ffi_info[def].info &= ~FFI_SYMBOLS_GUARD;
+			ffi_info[def].symbols = ffi_symbols;
+		}
+	}
+
+	return 1;
+}
+
 static ir_ref jit_FFI_CDATA_PTR(zend_jit_ctx *jit, ir_ref obj_ref)
 {
 	return ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
@@ -14749,17 +14806,16 @@ static int zend_jit_ffi_fetch_sym(zend_jit_ctx        *jit,
                                   bool                 delayed_fetch_this,
                                   bool                 op1_avoid_refcounting,
                                   zend_ffi_symbol     *sym,
-                                  zend_jit_addr        res_addr/*???,
-                                  zend_ffi_type       *op1_ffi_type,
-                                  zend_jit_ffi_info   *ffi_info*/)
+                                  zend_jit_addr        res_addr,
+                                  HashTable           *op1_ffi_symbols,
+                                  zend_jit_ffi_info   *ffi_info)
 {
 	uint32_t res_info = RES_INFO();
 	zend_ffi_type *sym_type = ZEND_FFI_TYPE(sym->type);
-//???	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
 
-//???	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op1_use, -1, obj_ref, op1_ffi_type, ffi_info)) {
-//???		return 0;
-//???	}
+	if (!zend_jit_ffi_symbols_guard(jit, opline, ssa, ssa_op->op1_use, -1, op1_addr, op1_ffi_symbols, ffi_info)) {
+		return 0;
+	}
 
 	ir_ref ptr = ir_CONST_ADDR(sym->addr);
 	if (!zend_jit_ffi_read(jit, sym_type, ptr, res_addr)) {
