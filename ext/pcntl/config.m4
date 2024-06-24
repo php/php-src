@@ -28,16 +28,14 @@ if test "$PHP_PCNTL" != "no"; then
   ]))
 
   AC_CHECK_FUNCS([WIFCONTINUED],,
-    [AC_CHECK_DECL([WIFCONTINUED], [AC_DEFINE([HAVE_WIFCONTINUED], [1])],, [
+    [AC_CHECK_DECL([WIFCONTINUED], [AC_DEFINE([HAVE_WIFCONTINUED], [1])],,[
       #include <sys/wait.h>
-    ])])
-
-  AC_CHECK_DECLS([WCONTINUED, WEXITED, WSTOPPED, WNOWAIT,
-                  P_ALL, P_PIDFD, P_UID, P_JAILID],,,
-    [
-      #include <sys/wait.h>
-    ]
+    ])]
   )
+
+  AC_CHECK_DECLS([WCONTINUED, WEXITED, WSTOPPED, WNOWAIT, P_ALL, P_PIDFD, P_UID, P_JAILID],,,[
+    #include <sys/wait.h>
+  ])
 
   dnl if unsupported, -1 means automatically ENOSYS in this context
   AC_CACHE_CHECK([if sched_getcpu is supported], [php_cv_func_sched_getcpu],
