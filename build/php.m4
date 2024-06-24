@@ -1693,9 +1693,9 @@ dnl
 dnl PHP_PROG_RE2C([min-version], [options])
 dnl
 dnl Search for the re2c and optionally check if version is at least the minimum
-dnl required version "min-version". The whitespace separated "options" argument
-dnl are the re2c command-line flags substituted into a Makefile variable
-dnl RE2C_FLAGS which can be added to all re2c invocations.
+dnl required version "min-version". The blank-or-newline-separated "options" are
+dnl the re2c command-line flags substituted into a Makefile variable RE2C_FLAGS
+dnl which can be added to all re2c invocations.
 dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG(RE2C, re2c, re2c)
