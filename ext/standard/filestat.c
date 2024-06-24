@@ -279,13 +279,25 @@ PHPAPI zend_result php_get_gid_by_name(const char *name, gid_t *gid)
 		struct group *retgrptr;
 		long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 		char *grbuf;
+		int err;
 
 		if (grbuflen < 1) {
-			return FAILURE;
+			grbuflen = 1024;
 		}
-
+# if ZEND_DEBUG
+		/* Test retry logic */
+		grbuflen = 1;
+# endif
 		grbuf = emalloc(grbuflen);
-		if (getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
+
+try_again:
+		err = getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr);
+		if (err != 0 || retgrptr == NULL) {
+			if (err == ERANGE) {
+				grbuflen *= 2;
+				grbuf = erealloc(grbuf, grbuflen);
+				goto try_again;
+			}
 			efree(grbuf);
 			return FAILURE;
 		}
@@ -405,13 +417,25 @@ PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 		struct passwd *retpwptr = NULL;
 		long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 		char *pwbuf;
+		int err;
 
 		if (pwbuflen < 1) {
-			return FAILURE;
+			pwbuflen = 1024;
 		}
-
+# if ZEND_DEBUG
+		/* Test retry logic */
+		pwbuflen = 1;
+# endif
 		pwbuf = emalloc(pwbuflen);
-		if (getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
+
+try_again:
+		err = getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr);
+		if (err != 0 || retpwptr == NULL) {
+			if (err == EAGAIN) {
+				pwbuflen *= 2;
+				pwbuf = erealloc(pwbuf, pwbuflen);
+				goto try_again;
+			}
 			efree(pwbuf);
 			return FAILURE;
 		}
