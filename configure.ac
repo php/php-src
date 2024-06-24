@@ -166,7 +166,7 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([1.0.3])
+PHP_PROG_RE2C([1.0.3], [--no-generation-date])
 PHP_PROG_PHP()
 
 PHP_ARG_ENABLE([re2c-cgoto],
@@ -176,9 +176,7 @@ PHP_ARG_ENABLE([re2c-cgoto],
   [no],
   [no])
 
-if test "$PHP_RE2C_CGOTO" = "no"; then
-  RE2C_FLAGS=""
-else
+AS_VAR_IF([PHP_RE2C_CGOTO], [no],, [
   AC_MSG_CHECKING([whether re2c -g works])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
 int main(int argc, const char **argv)
@@ -192,14 +190,12 @@ label2:
   return 0;
 }
   ]])],[
-    RE2C_FLAGS=""
     AC_MSG_RESULT([no])
   ],[
-    RE2C_FLAGS="-g"
+    AS_VAR_APPEND([RE2C_FLAGS], [" -g"])
     AC_MSG_RESULT([yes])
   ])
-fi
-PHP_SUBST(RE2C_FLAGS)
+])
 
 dnl Platform-specific compile settings.
 dnl ----------------------------------------------------------------------------

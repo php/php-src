@@ -142,6 +142,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      AC_CHECK_MEMBERS).
    - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
      AX_CHECK_COMPILE_FLAG).
+   - M4 macro PHP_PROG_RE2C got a new 2nd argument to define common default re2c
+     command-line options substituted to the Makefile RE2C_FLAGS variable.
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.

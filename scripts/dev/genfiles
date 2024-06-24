@@ -37,7 +37,7 @@ YACC=${YACC:-bison}
 YACC="$YACC -l"
 YFLAGS="-Wall"
 RE2C=${RE2C:-re2c}
-RE2C_FLAGS="-i"
+RE2C_FLAGS="--no-generation-date -i"
 SED=${SED:-sed}
 MAKE=${MAKE:-make}
 
@@ -70,7 +70,7 @@ else
 fi
 
 # Check required re2c version from the configure.ac file.
-required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\(.*\)\])/\1/p' configure.ac)
+required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\([0-9.]*\)\][^)]*)*/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_re2c_version; set +f; IFS=' '
 required_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
