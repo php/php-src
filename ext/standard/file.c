@@ -48,7 +48,7 @@
 # ifdef HAVE_SYS_PARAM_H
 #  include <sys/param.h>
 # endif
-# if HAVE_SYS_SELECT_H
+# ifdef HAVE_SYS_SELECT_H
 #  include <sys/select.h>
 # endif
 # include <sys/socket.h>

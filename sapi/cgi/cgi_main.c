@@ -595,23 +595,23 @@ static char *sapi_fcgi_getenv(const char *name, size_t name_len)
 
 static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 {
-#if !HAVE_SETENV || !HAVE_UNSETENV
+#if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)
 	size_t len;
 	char *buf;
 #endif
 
-#if HAVE_SETENV
+#ifdef HAVE_SETENV
 	if (value) {
 		setenv(name, value, 1);
 	}
 #endif
-#if HAVE_UNSETENV
+#ifdef HAVE_UNSETENV
 	if (!value) {
 		unsetenv(name);
 	}
 #endif
 
-#if !HAVE_SETENV || !HAVE_UNSETENV
+#if !defined(HAVE_SETENV) || !defined(HAVE_UNSETENV)
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment
 		this leaks, but it's only cgi anyway, we'll fix
@@ -623,13 +623,13 @@ static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
 		return getenv(name);
 	}
 #endif
-#if !HAVE_SETENV
+#if !defined(HAVE_SETENV)
 	if (value) {
 		len = slprintf(buf, len - 1, "%s=%s", name, value);
 		putenv(buf);
 	}
 #endif
-#if !HAVE_UNSETENV
+#if !defined(HAVE_UNSETENV)
 	if (!value) {
 		len = slprintf(buf, len - 1, "%s=", name);
 		putenv(buf);

@@ -110,7 +110,7 @@
 #define OUTPUT_IS_TTY 1
 #define OUTPUT_NOT_TTY 0
 
-#if HAVE_FORK
+#ifdef HAVE_FORK
 # include <sys/wait.h>
 static pid_t	 php_cli_server_master;
 static pid_t	*php_cli_server_workers;
@@ -2362,7 +2362,7 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 	if (server->router) {
 		pefree(server->router, 1);
 	}
-#if HAVE_FORK
+#ifdef HAVE_FORK
 	if (php_cli_server_workers_max > 1 &&
 		php_cli_server_workers &&
 		getpid() == php_cli_server_master) {
@@ -2484,7 +2484,7 @@ static void php_cli_server_startup_workers(void) {
 		return;
 	}
 
-#if HAVE_FORK
+#ifdef HAVE_FORK
 	php_cli_server_workers_max = ZEND_ATOL(workers);
 	if (php_cli_server_workers_max > 1) {
 		zend_long php_cli_server_worker;

@@ -560,7 +560,7 @@ static int _php_mcast_source_op(
 #endif
 }
 
-#if RFC3678_API
+#ifdef RFC3678_API
 static int _php_source_op_to_rfc3678_op(enum source_op sop)
 {
 	switch (sop) {

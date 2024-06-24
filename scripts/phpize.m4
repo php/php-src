@@ -100,7 +100,7 @@ old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
 AC_EGREP_CPP(php_zts_is_enabled,[
 #include <main/php_config.h>
-#if ZTS
+#ifdef ZTS
 php_zts_is_enabled
 #endif
 ],[
