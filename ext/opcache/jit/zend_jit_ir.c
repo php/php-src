@@ -14736,6 +14736,49 @@ static int zend_jit_ffi_fetch_obj(zend_jit_ctx        *jit,
 
 	return 1;
 }
+
+static int zend_jit_ffi_fetch_sym(zend_jit_ctx        *jit,
+                                  const zend_op       *opline,
+                                  const zend_op_array *op_array,
+                                  zend_ssa            *ssa,
+                                  const zend_ssa_op   *ssa_op,
+                                  uint32_t             op1_info,
+                                  zend_jit_addr        op1_addr,
+                                  bool                 op1_indirect,
+                                  bool                 on_this,
+                                  bool                 delayed_fetch_this,
+                                  bool                 op1_avoid_refcounting,
+                                  zend_ffi_symbol     *sym,
+                                  zend_jit_addr        res_addr/*???,
+                                  zend_ffi_type       *op1_ffi_type,
+                                  zend_jit_ffi_info   *ffi_info*/)
+{
+	uint32_t res_info = RES_INFO();
+	zend_ffi_type *sym_type = ZEND_FFI_TYPE(sym->type);
+//???	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+
+//???	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op1_use, -1, obj_ref, op1_ffi_type, ffi_info)) {
+//???		return 0;
+//???	}
+
+	ir_ref ptr = ir_CONST_ADDR(sym->addr);
+	if (!zend_jit_ffi_read(jit, sym_type, ptr, res_addr)) {
+		return 0;
+	}
+
+	if (res_info & MAY_BE_GUARD) {
+		// TODO: ???
+		ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+	}
+
+	if (!op1_avoid_refcounting) {
+		if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+			jit_FREE_OP(jit,  opline->op1_type, opline->op1, op1_info, opline);
+		}
+	}
+
+	return 1;
+}
 #endif
 
 static int zend_jit_fetch_obj(zend_jit_ctx         *jit,

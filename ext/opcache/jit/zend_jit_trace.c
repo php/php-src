@@ -4400,6 +4400,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			zend_ffi_type *op1_ffi_type = NULL;
 			zend_ffi_type *op2_ffi_type = NULL;
 			zend_ffi_type *op3_ffi_type = NULL;
+			HashTable *op1_ffi_symbols = NULL;
 			(void)op2_ffi_type;
 #endif
 			bool gen_handler = false;
@@ -4425,6 +4426,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifdef HAVE_FFI
 			if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
 				op1_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				p++;
+			} else if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_SYMBOLS) {
+				op1_ffi_symbols = (HashTable*)(p+1)->ptr;
 				p++;
 			}
 #endif
@@ -6258,6 +6262,22 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 								goto done;
 							}
+						} else if (opline->opcode == ZEND_FETCH_OBJ_R && op1_ffi_symbols) {
+							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+							if (sym
+							 && (sym->kind == ZEND_FFI_SYM_VAR || sym->kind == ZEND_FFI_SYM_CONST)
+							 && ZEND_FFI_TYPE(sym->type)->kind < ZEND_FFI_TYPE_POINTER
+							 && ZEND_FFI_TYPE(sym->type)->kind != ZEND_FFI_TYPE_VOID
+							 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(sym->type))) {
+								if (!zend_jit_ffi_fetch_sym(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, op1_indirect,
+										on_this, delayed_fetch_this, avoid_refcounting, sym,
+										RES_REG_ADDR())) {
+									goto jit_failure;
+								}
+								goto done;
+							}
 						}
 #endif
 						if (!zend_jit_fetch_obj(&ctx, opline, op_array, ssa, ssa_op,
@@ -8014,6 +8034,10 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 #ifdef HAVE_FFI
 						if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
 							fprintf(stderr, " op1(%sobject of class %s: ffi_type)", ref,
+								ZSTR_VAL(p->ce->name));
+							p++;
+						} else if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_SYMBOLS) {
+							fprintf(stderr, " op1(%sobject of class %s: ffi_symbols)", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
 						} else

@@ -616,6 +616,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 	zend_class_entry *ce1, *ce2, *ce3;
 #ifdef HAVE_FFI
 	zend_ffi_type *op1_ffi_type, *op2_ffi_type, *op3_ffi_type;
+	HashTable *op1_ffi_symbols;
 #endif
 	const zend_op *link_to_enter_opline = NULL;
 	int backtrack_link_to_enter = -1;
@@ -689,6 +690,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 		ce1 = ce2 = ce3 = NULL;
 #ifdef HAVE_FFI
 		op1_ffi_type = op2_ffi_type = op3_ffi_type = NULL;
+		op1_ffi_symbols = NULL;
 #endif
 		op1_type = op2_type = op3_type = IS_UNKNOWN;
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
@@ -721,6 +723,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 						if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
 							op1_ffi_type = ffi_type;
 						}
+					}
+				} else if (ce1 == zend_ffi_ce) {
+					zend_ffi *ffi = (zend_ffi*)Z_OBJ_P(zv);
+					if (ffi->persistent && ffi->symbols) {
+						op1_ffi_symbols = ffi->symbols;
 					}
 				}
 #endif
@@ -835,6 +842,8 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #ifdef HAVE_FFI
 			if (op1_ffi_type) {
 				TRACE_RECORD(ZEND_JIT_TRACE_OP1_FFI_TYPE, 0, op1_ffi_type);
+			} else if (op1_ffi_symbols) {
+				TRACE_RECORD(ZEND_JIT_TRACE_OP1_FFI_SYMBOLS, 0, op1_ffi_symbols);
 			}
 #endif
 		}
