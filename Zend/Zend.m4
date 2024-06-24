@@ -293,7 +293,8 @@ AC_ARG_ENABLE([zend-signals],
   [AS_HELP_STRING([--disable-zend-signals],
     [whether to enable zend signal handling])],
   [ZEND_SIGNALS=$enableval],
-  [ZEND_SIGNALS=yes])
+  dnl Disable Zend Signals for ZTS builds by default because it is broken https://externals.io/message/118859
+  AS_IF(test "$ZEND_ZTS" = "yes", [ZEND_SIGNALS=no], [ZEND_SIGNALS=yes]))
 
 AC_CHECK_FUNCS([sigaction], [], [
   ZEND_SIGNALS=no
