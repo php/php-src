@@ -408,6 +408,7 @@ extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
 
 /* FFI/OPCache interopability API */
+extern ZEND_API zend_class_entry *zend_ffi_ce;
 extern ZEND_API zend_class_entry *zend_ffi_cdata_ce;
 
 typedef struct _zend_ffi_dcl zend_ffi_dcl;
