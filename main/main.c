@@ -1471,12 +1471,25 @@ PHPAPI char *php_get_current_user(void)
 		struct passwd *retpwptr = NULL;
 		int pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 		char *pwbuf;
+		int err;
 
 		if (pwbuflen < 1) {
-			return "";
+			pwbuflen = 1024;
 		}
+# if ZEND_DEBUG
+		/* Test retry logic */
+		pwbuflen = 1;
+# endif
 		pwbuf = emalloc(pwbuflen);
-		if (getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr) != 0) {
+
+try_again:
+		err = getpwuid_r(pstat->st_uid, &_pw, pwbuf, pwbuflen, &retpwptr);
+		if (err != 0) {
+			if (err == ERANGE) {
+				pwbuflen *= 2;
+				pwbuf = erealloc(pwbuf, pwbuflen);
+				goto try_again;
+			}
 			efree(pwbuf);
 			return "";
 		}
