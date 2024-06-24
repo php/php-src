@@ -5004,6 +5004,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 
 							if (field
+							 && !field->is_const
 							 && !field->bits
 							 && zend_jit_ffi_compatible(field->type, op1_data_info, op3_ffi_type)) {
 								if (!ffi_info) {
@@ -5108,6 +5109,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 
 							if (field
+							 && !field->is_const
 							 && !field->bits
 							 && zend_jit_ffi_compatible(field->type, op1_data_info, op3_ffi_type)) {
 								if (!ffi_info) {
