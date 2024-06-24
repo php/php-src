@@ -14,7 +14,8 @@ if ($pid == -1) {
     die("failed");
 } else if ($pid) {
     // invalid flags
-    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, 8192));
+    var_dump(pcntl_waitid(P_PID, $pid, $siginfo, 0));
+    var_dump(pcntl_get_last_error() == PCNTL_EINVAL);
 
     var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED));
     posix_kill($pid, SIGCONT);
@@ -28,6 +29,7 @@ if ($pid == -1) {
 ?>
 --EXPECTF--
 bool(false)
+bool(true)
 bool(true)
 bool(true)
 bool(true)
