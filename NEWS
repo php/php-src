@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     calls destructor). (Girgias)
   . Fixed bug GH-14549 (Incompatible function pointer type for fclose).
     (Ryan Carsten Schmidt)
+  . Fixed bug GH-13922 (Fixed support for systems with
+    sysconf(_SC_GETPW_R_SIZE_MAX) == -1). (Arnaud)
 
 - BCMatch:
   . Fixed bug (bcpowmod() with mod = -1 returns 1 when it must be 0). (Girgias)
