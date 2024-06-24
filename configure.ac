@@ -137,13 +137,11 @@ AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
 
-if test "$cross_compiling" = yes ; then
-  AC_MSG_CHECKING(for native build C compiler)
-  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
-  AC_MSG_RESULT($BUILD_CC)
-else
-  BUILD_CC=$CC
-fi
+AS_VAR_IF([cross_compiling], [yes],
+  [AC_CHECK_PROGS([BUILD_CC], [gcc clang c99 c89 cc cl], [none])
+    AC_MSG_CHECKING([for native build C compiler])
+    AC_MSG_RESULT([$BUILD_CC])],
+  [BUILD_CC=$CC])
 
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
