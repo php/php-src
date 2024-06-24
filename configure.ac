@@ -266,12 +266,10 @@ else
   AC_MSG_RESULT(no)
 fi
 
-dnl The effect of _GNU_SOURCE defined in config.h depeds on includes order
-if test "$ac_cv_safe_to_define___extensions__" = yes ; then
-  AC_MSG_CHECKING(whether to use -D_GNU_SOURCE cflag)
-  CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
-  AC_MSG_RESULT(yes)
-fi
+dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
+dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which
+dnl require extensions to C and POSIX.
+AS_VAR_APPEND([CPPFLAGS], [" -D_GNU_SOURCE"])
 
 dnl Include Zend configurations.
 dnl ----------------------------------------------------------------------------
