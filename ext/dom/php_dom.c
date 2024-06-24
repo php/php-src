@@ -600,7 +600,9 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
-			clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+			if (ns_mapper != NULL) {
+				clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+			}
 		}
 	}
 
