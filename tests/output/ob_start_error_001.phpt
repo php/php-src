@@ -25,4 +25,4 @@ try {
 ?>
 --EXPECT--
 Arg 1 wrong type
-TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, no array or string given
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, function "1.5" not found or invalid function name

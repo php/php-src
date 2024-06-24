@@ -1294,7 +1294,25 @@ PHP_FUNCTION(ob_start)
 	zend_fcall_info_cache fcc = {0};
 	zend_long chunk_size = 0;
 	zend_long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
+	zend_string *handler_alias = NULL;
 
+	/* First check for aliases, this a really dumb hack that we need to do because of ext/zlib */
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "S|ll", &handler_alias, &chunk_size, &flags) == FAILURE) {
+		goto proper_zpp_check;
+	}
+
+	ZEND_ASSERT(handler_alias != NULL);
+	php_output_handler *handler;
+	if (ZSTR_LEN(handler_alias) > 0) {
+		const php_output_handler_alias_ctor_t alias = php_output_handler_alias(ZSTR_VAL(handler_alias), ZSTR_LEN(handler_alias));
+		if (alias == NULL) {
+			goto proper_zpp_check;
+		}
+		handler = alias(ZSTR_VAL(handler_alias), ZSTR_LEN(handler_alias), chunk_size, flags);
+		goto start_handler;
+	}
+
+	proper_zpp_check:
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|f!ll", &fci, &fcc, &chunk_size, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -1304,7 +1322,6 @@ PHP_FUNCTION(ob_start)
 		RETURN_THROWS();
 	}
 
-	php_output_handler *handler;
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		zend_string *handler_name = zend_get_callable_name(&fci.function_name);
 		php_output_handler_user_func_t *user = ecalloc(1, sizeof(php_output_handler_user_func_t));
@@ -1320,6 +1337,7 @@ PHP_FUNCTION(ob_start)
 		handler = php_output_handler_create_internal(ZEND_STRL(php_output_default_handler_name), php_output_handler_default_func, chunk_size, flags);
 	}
 
+	start_handler:
 	if (FAILURE == php_output_handler_start(handler)) {
 		php_error_docref("ref.outcontrol", E_NOTICE, "Failed to create buffer");
 		RETURN_FALSE;

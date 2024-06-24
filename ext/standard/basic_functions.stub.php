@@ -1533,7 +1533,7 @@ function header_register_callback(callable $callback): bool {}
 
 /* main/output.c */
 
-function ob_start(callable|null $callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
+function ob_start(callable|string|null $callback = null, int $chunk_size = 0, int $flags = PHP_OUTPUT_HANDLER_STDFLAGS): bool {}
 
 function ob_flush(): bool {}
 
