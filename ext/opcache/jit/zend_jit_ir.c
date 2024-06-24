@@ -15393,6 +15393,40 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
 
 	return 1;
 }
+
+static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
+                                   const zend_op       *opline,
+                                   const zend_op_array *op_array,
+                                   zend_ssa            *ssa,
+                                   const zend_ssa_op   *ssa_op,
+                                   uint32_t             op1_info,
+                                   zend_jit_addr        op1_addr,
+                                   bool                 on_this,
+                                   bool                 delayed_fetch_this,
+                                   zend_ffi_symbol     *sym,
+                                   uint32_t             val_info,
+                                   zend_jit_addr        val_addr,
+                                   zend_jit_addr        val_def_addr,
+                                   zend_jit_addr        res_addr,
+                                   HashTable           *op1_ffi_symbols,
+                                   zend_ffi_type       *val_ffi_type,
+                                   zend_jit_ffi_info   *ffi_info)
+{
+	zend_ffi_type *sym_type = ZEND_FFI_TYPE(sym->type);
+
+	if (!zend_jit_ffi_symbols_guard(jit, opline, ssa, ssa_op->op1_use, ssa_op->op1_def, op1_addr, op1_ffi_symbols, ffi_info)) {
+		return 0;
+	}
+
+	ir_ref ptr = ir_CONST_ADDR(sym->addr);
+	if (!zend_jit_ffi_write(jit, sym_type, ptr, val_info, val_addr, val_ffi_type)) {
+		return 0;
+	}
+
+	ZEND_ASSERT(!res_addr);
+
+	return 1;
+}
 #endif
 
 static int zend_jit_assign_obj(zend_jit_ctx         *jit,
@@ -15782,6 +15816,36 @@ static int zend_jit_ffi_assign_obj_op(zend_jit_ctx        *jit,
 
 	if (!zend_jit_ffi_assign_op_helper(jit, opline, opline->extended_value,
 			field_type, ptr, val_info, val_addr)) {
+		return 0;
+	}
+
+	return 1;
+}
+
+static int zend_jit_ffi_assign_sym_op(zend_jit_ctx        *jit,
+                                      const zend_op       *opline,
+                                      const zend_op_array *op_array,
+                                      zend_ssa            *ssa,
+                                      const zend_ssa_op   *ssa_op,
+                                      uint32_t             op1_info,
+                                      zend_jit_addr        op1_addr,
+                                      bool                 on_this,
+                                      bool                 delayed_fetch_this,
+                                      zend_ffi_symbol     *sym,
+                                      uint32_t             val_info,
+                                      zend_jit_addr        val_addr,
+                                      HashTable           *op1_ffi_symbols,
+                                      zend_jit_ffi_info   *ffi_info)
+{
+	zend_ffi_type *sym_type = ZEND_FFI_TYPE(sym->type);
+
+	if (!zend_jit_ffi_symbols_guard(jit, opline, ssa, ssa_op->op1_use, ssa_op->op1_def, op1_addr, op1_ffi_symbols, ffi_info)) {
+		return 0;
+	}
+
+	ir_ref ptr = ir_CONST_ADDR(sym->addr);
+	if (!zend_jit_ffi_assign_op_helper(jit, opline, opline->extended_value,
+			sym_type, ptr, val_info, val_addr)) {
 		return 0;
 	}
 

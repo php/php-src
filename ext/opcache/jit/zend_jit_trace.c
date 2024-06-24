@@ -5015,6 +5015,23 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 								goto done;
 							}
+						} else if (op1_ffi_symbols) {
+							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+							if (sym
+							 && sym->kind == ZEND_FFI_SYM_VAR
+							 && zend_jit_ffi_compatible(sym->type, op1_data_info, op3_ffi_type)) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_assign_sym_op(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, on_this, delayed_fetch_this, sym,
+										op1_data_info, OP1_DATA_REG_ADDR(),
+										op1_ffi_symbols, ffi_info)) {
+									goto jit_failure;
+								}
+								goto done;
+							}
 						}
 #endif
 						if (!zend_jit_assign_obj_op(&ctx, opline, op_array, ssa, ssa_op,
@@ -5117,6 +5134,29 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 										op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
 										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
 										op1_ffi_type, op3_ffi_type, ffi_info)) {
+									goto jit_failure;
+								}
+								if ((opline+1)->op1_type == IS_CV
+								 && (ssa_op+1)->op1_def >= 0
+								 && ssa->vars[(ssa_op+1)->op1_def].alias == NO_ALIAS) {
+									ssa->var_info[(ssa_op+1)->op1_def].guarded_reference = ssa->var_info[(ssa_op+1)->op1_use].guarded_reference;
+								}
+								goto done;
+							}
+						} else if (op1_ffi_symbols) {
+							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+							if (sym
+							 && sym->kind == ZEND_FFI_SYM_VAR
+							 && zend_jit_ffi_compatible(sym->type, op1_data_info, op3_ffi_type)) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_assign_sym(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, on_this, delayed_fetch_this, sym,
+										op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
+										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
+										op1_ffi_symbols, op3_ffi_type, ffi_info)) {
 									goto jit_failure;
 								}
 								if ((opline+1)->op1_type == IS_CV
