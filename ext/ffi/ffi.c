@@ -64,14 +64,6 @@ static const char *zend_ffi_tag_kind_name[3] = {"enum", "struct", "union"};
 
 #include "ffi_arginfo.h"
 
-typedef struct _zend_ffi {
-	zend_object            std;
-	DL_HANDLE              lib;
-	HashTable             *symbols;
-	HashTable             *tags;
-	bool                   persistent;
-} zend_ffi;
-
 #define ZEND_FFI_TYPE_MAKE_OWNED(t) \
 	((zend_ffi_type*)(((uintptr_t)(t)) | ZEND_FFI_TYPE_OWNED))
 
@@ -80,7 +72,6 @@ typedef struct _zend_ffi {
 
 static zend_class_entry *zend_ffi_exception_ce;
 static zend_class_entry *zend_ffi_parser_exception_ce;
-static zend_class_entry *zend_ffi_ce;
 static zend_class_entry *zend_ffi_ctype_ce;
 
 static zend_object_handlers zend_ffi_handlers;

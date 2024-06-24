@@ -394,6 +394,14 @@ typedef struct _zend_ffi_scope {
 	HashTable             *tags;
 } zend_ffi_scope;
 
+typedef struct _zend_ffi {
+	zend_object            std;
+	DL_HANDLE              lib;
+	HashTable             *symbols;
+	HashTable             *tags;
+	bool                   persistent;
+} zend_ffi;
+
 #define ZEND_FFI_TYPE_OWNED        (1<<0)
 
 #define ZEND_FFI_TYPE(t) \
