@@ -192,7 +192,7 @@ label2:
   ]])],[
     AC_MSG_RESULT([no])
   ],[
-    RE2C_FLAGS="$RE2C_FLAGS -g"
+    AS_VAR_APPEND([RE2C_FLAGS], [" -g"])
     AC_MSG_RESULT([yes])
   ])
 ])
