@@ -625,7 +625,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #ifdef ZTS
 					"ZTS"
@@ -643,6 +643,12 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 #ifdef HAVE_GCOV
 					" GCOV"
+#endif
+					,
+#ifdef PHP_BUILD_PROVIDER
+					"This build by " PHP_BUILD_PROVIDER "\n"
+#else
+					""
 #endif
 					,
 					get_zend_version()
