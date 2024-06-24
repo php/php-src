@@ -27,7 +27,9 @@ PHP                                                                        NEWS
   . Improve randomness of uploaded file names and files created by tempnam().
     (Arnaud)
   . Added gc and shutdown callbacks to zend_mm custom handlers.
-    (Florian Engelhardt).
+    (Florian Engelhardt)
+  . Fixed bug GH-14650 (Compute the size of pages before allocating memory).
+    (Julien Voisin)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
