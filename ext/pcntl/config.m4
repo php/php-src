@@ -27,9 +27,6 @@ if test "$PHP_PCNTL" != "no"; then
     waitid
   ]))
 
-  AC_CHECK_HEADER([linux/wait.h],
-    [AC_DEFINE([HAVE_LINUX_WAIT_H], [1], [linux/wait.h found])])
-
   AC_CHECK_FUNCS([WIFCONTINUED],,
     [AC_CHECK_DECL([WIFCONTINUED], [AC_DEFINE([HAVE_WIFCONTINUED], [1])],, [
       #include <sys/wait.h>
@@ -39,9 +36,6 @@ if test "$PHP_PCNTL" != "no"; then
                   P_ALL, P_PIDFD, P_UID, P_JAILID],,,
     [
       #include <sys/wait.h>
-      #if defined(HAVE_LINUX_WAIT_H)
-      # include <linux/wait.h>
-      #endif
     ]
   )
 

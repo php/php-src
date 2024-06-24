@@ -40,9 +40,6 @@
 #endif
 
 #ifdef HAVE_WAITID
-#if defined(HAVE_LINUX_WAIT_H)
-#include <linux/wait.h>
-#endif
 #if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
 #define HAVE_POSIX_IDTYPES 1
 #endif
