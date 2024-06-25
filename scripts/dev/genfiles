@@ -95,7 +95,7 @@ else
 fi
 
 # Check if make exists.
-if ! test -x "$(command -v $MAKE)"; then
+if test ! -x "$(command -v $MAKE)"; then
   echo "genfiles: make not found. Please install make to generate files." >&2
   exit 1
 fi

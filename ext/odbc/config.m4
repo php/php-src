@@ -1,8 +1,6 @@
-AC_DEFUN([PHP_ODBC_CHECK_HEADER],[
-if ! test -f "$ODBC_INCDIR/$1"; then
-  AC_MSG_ERROR([ODBC header file '$ODBC_INCDIR/$1' not found!])
-fi
-])
+AC_DEFUN([PHP_ODBC_CHECK_HEADER],
+[AS_IF([test ! -f "$ODBC_INCDIR/$1"],
+  [AC_MSG_ERROR([ODBC header file '$ODBC_INCDIR/$1' not found!])])])
 
 dnl
 dnl Figure out which library file to link with for the Solid support.
