@@ -685,6 +685,12 @@ PHP 8.4 UPGRADE NOTES
 - PDO:
   . The class constants are typed now.
 
+- pdo_pgsql:
+  . The pdo_pgsql extension now requires at least libpq 10.0.
+
+- pgsql:
+  . The pgsql extension now requires at least libpq 10.0.
+
 - Reflection:
   . The class constants are typed now.
 

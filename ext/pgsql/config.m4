@@ -12,12 +12,6 @@ if test "$PHP_PGSQL" != "no"; then
 
   AC_DEFINE(HAVE_PGSQL,1,[Whether to build PostgreSQL support or not])
 
-  PHP_CHECK_LIBRARY([pq], [lo_truncate64],
-    [AC_DEFINE([HAVE_PG_LO64], [1], [PostgreSQL 9.3 or later])],,
-    [$PGSQL_LIBS])
-  PHP_CHECK_LIBRARY([pq], [PQsetErrorContextVisibility],
-    [AC_DEFINE([HAVE_PG_CONTEXT_VISIBILITY], [1], [PostgreSQL 9.6 or later])],,
-    [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
     [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
     [$PGSQL_LIBS])
