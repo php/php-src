@@ -170,31 +170,30 @@ PHP_PROG_RE2C([1.0.3], [--no-generation-date])
 PHP_PROG_PHP()
 
 PHP_ARG_ENABLE([re2c-cgoto],
-  [whether to enable computed goto gcc extension with re2c],
+  [whether to enable computed goto extension with re2c],
   [AS_HELP_STRING([--enable-re2c-cgoto],
-    [Enable -g flag to re2c to use computed goto gcc extension])],
+    [Enable re2c -g flag to optimize conditional jumps using computed goto
+    extension, if supported by the compiler])],
   [no],
   [no])
 
-AS_VAR_IF([PHP_RE2C_CGOTO], [no],, [
-  AC_MSG_CHECKING([whether re2c -g works])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
-int main(int argc, const char **argv)
+AS_VAR_IF([PHP_RE2C_CGOTO], [no],,
+[AC_CACHE_CHECK([whether re2c -g works], [php_cv_have_re2c_cgoto],
+  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+int main(void)
 {
-  argc = argc;
-  argv = argv;
 label1:
+  ;
 label2:
-  static void *adr[] = { &&label1, &&label2};
+  ;
+  static void *adr[] = { &&label1, &&label2 };
   goto *adr[0];
   return 0;
-}
-  ]])],[
-    AC_MSG_RESULT([no])
-  ],[
-    AS_VAR_APPEND([RE2C_FLAGS], [" -g"])
-    AC_MSG_RESULT([yes])
-  ])
+}]])],
+  [php_cv_have_re2c_cgoto=yes],
+  [php_cv_have_re2c_cgoto=no])])
+AS_VAR_IF([php_cv_have_re2c_cgoto], [yes],
+  [AS_VAR_APPEND([RE2C_FLAGS], [" -g"])])
 ])
 
 dnl Platform-specific compile settings.
