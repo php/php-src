@@ -56,13 +56,14 @@ typedef struct zend_jit_ffi_info {
 	uint32_t           info;
 } zend_jit_ffi_info;
 
-static bool zend_jit_ffi_supported_type(zend_ffi_type *type) {
-#if defined(IR_TARGET_X86)
-	if (ZEND_FFI_TYPE(type->kind == ZEND_FFI_TYPE_UINT64)
-	 ||	ZEND_FFI_TYPE(type->kind == ZEND_FFI_TYPE_SINT64)) {
-		return false;
+static bool zend_jit_ffi_supported_type(zend_ffi_type *type)
+{
+	if (sizeof(void*) == 4) {
+		if (ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_UINT64
+		 ||	ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_SINT64) {
+			return false;
+		}
 	}
-#endif
 	return true;
 }
 
