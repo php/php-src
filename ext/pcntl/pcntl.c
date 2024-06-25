@@ -400,7 +400,7 @@ PHP_FUNCTION(pcntl_waitpid)
 }
 /* }}} */
 
-#ifdef HAVE_WAITID
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 PHP_FUNCTION(pcntl_waitid)
 {
 	zend_long idtype = P_ALL;

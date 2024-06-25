@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 07bcc89fe7b83e396c483e0b9f27d8e4aa4935f0 */
+ * Stub hash: 71d0cbd8d2b1ae57d289ec421e9dcaa4040d857b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -11,12 +11,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitpid, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, resource_usage, "[]")
 ZEND_END_ARG_INFO()
 
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_waitid, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, idtype, IS_LONG, 0, "P_ALL")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, id, IS_LONG, 1, "null")
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "WEXITED")
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_wait, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(1, status)
@@ -177,7 +179,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(pcntl_fork);
 ZEND_FUNCTION(pcntl_waitpid);
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 ZEND_FUNCTION(pcntl_waitid);
+#endif
 ZEND_FUNCTION(pcntl_wait);
 ZEND_FUNCTION(pcntl_signal);
 ZEND_FUNCTION(pcntl_signal_get_handler);
@@ -242,7 +246,9 @@ ZEND_FUNCTION(pcntl_setqos_class);
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(pcntl_fork, arginfo_pcntl_fork)
 	ZEND_FE(pcntl_waitpid, arginfo_pcntl_waitpid)
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
 	ZEND_FE(pcntl_waitid, arginfo_pcntl_waitid)
+#endif
 	ZEND_FE(pcntl_wait, arginfo_pcntl_wait)
 	ZEND_FE(pcntl_signal, arginfo_pcntl_signal)
 	ZEND_FE(pcntl_signal_get_handler, arginfo_pcntl_signal_get_handler)
