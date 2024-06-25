@@ -3,9 +3,6 @@ inputs:
   configurationParameters:
     default: ''
     required: false
-  configureArtifacts:
-    default: null
-    required: false
 runs:
   using: composite
   steps:
@@ -77,9 +74,3 @@ runs:
           ${{ inputs.skipSlow == 'false' && '--with-pdo-dblib' || '' }} \
           --enable-werror \
           ${{ inputs.configurationParameters }}
-    - uses: actions/upload-artifact@v4
-      if: always() && inputs.configureArtifacts != null
-      with:
-        name: ${{ github.job }}_CONFIGURE_${{ inputs.configureArtifacts }}
-        path: ${{ github.workspace }}/config.log
-        retention-days: 5
