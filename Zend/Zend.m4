@@ -6,11 +6,10 @@ dnl
 dnl x87 floating point internal precision control checks
 dnl See: http://wiki.php.net/rfc/rounding
 dnl
-AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
-  AC_MSG_CHECKING([for usable _FPU_SETCW])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    #include <fpu_control.h>
-  ]],[[
+AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION], [dnl
+AC_CACHE_CHECK([for usable _FPU_SETCW],
+  [php_cv_have__fpu_setcw],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <fpu_control.h>], [dnl
     fpu_control_t fpu_oldcw, fpu_cw;
     volatile double result;
     double a = 2877.0;
@@ -22,18 +21,16 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     result = a / b;
     _FPU_SETCW(fpu_oldcw);
     (void)result;
-  ]])],[ac_cfp_have__fpu_setcw=yes],[ac_cfp_have__fpu_setcw=no])
-  if test "$ac_cfp_have__fpu_setcw" = "yes" ; then
-    AC_DEFINE(HAVE__FPU_SETCW, 1, [whether _FPU_SETCW is present and usable])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
+  ])],
+  [php_cv_have__fpu_setcw=yes],
+  [php_cv_have__fpu_setcw=no])])
+AS_VAR_IF([php_cv_have__fpu_setcw], [yes],
+  [AC_DEFINE([HAVE__FPU_SETCW], [1],
+    [Define to 1 if _FPU_SETCW is present and usable.])])
 
-  AC_MSG_CHECKING([for usable fpsetprec])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    #include <machine/ieeefp.h>
-  ]],[[
+AC_CACHE_CHECK([for usable fpsetprec],
+  [php_cv_have_fpsetprec],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <machine/ieeefp.h>], [dnl
     fp_prec_t fpu_oldprec;
     volatile double result;
     double a = 2877.0;
@@ -44,18 +41,16 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     result = a / b;
     fpsetprec(fpu_oldprec);
     (void)result;
-  ]])], [ac_cfp_have_fpsetprec=yes], [ac_cfp_have_fpsetprec=no])
-  if test "$ac_cfp_have_fpsetprec" = "yes" ; then
-    AC_DEFINE(HAVE_FPSETPREC, 1, [whether fpsetprec is present and usable])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
+  ])],
+  [php_cv_have_fpsetprec=yes],
+  [php_cv_have_fpsetprec=no])])
+AS_VAR_IF([php_cv_have_fpsetprec], [yes],
+  [AC_DEFINE([HAVE_FPSETPREC], [1],
+    [Define to 1 if fpsetprec is present and usable.])])
 
-  AC_MSG_CHECKING([for usable _controlfp])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    #include <float.h>
-  ]],[[
+AC_CACHE_CHECK([for usable _controlfp],
+  [php_cv_have__controlfp],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <float.h>], [dnl
     unsigned int fpu_oldcw;
     volatile double result;
     double a = 2877.0;
@@ -66,18 +61,16 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     result = a / b;
     _controlfp(fpu_oldcw, _MCW_PC);
     (void)result;
-  ]])], [ac_cfp_have__controlfp=yes], [ac_cfp_have__controlfp=no])
-  if test "$ac_cfp_have__controlfp" = "yes" ; then
-    AC_DEFINE(HAVE__CONTROLFP, 1, [whether _controlfp is present usable])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
+  ])],
+  [php_cv_have__controlfp=yes],
+  [php_cv_have__controlfp=no])])
+AS_VAR_IF([php_cv_have__controlfp], [yes],
+  [AC_DEFINE([HAVE__CONTROLFP], [1],
+    [Define to 1 if _controlfp is present usable.])])
 
-  AC_MSG_CHECKING([for usable _controlfp_s])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-   #include <float.h>
-  ]],[[
+AC_CACHE_CHECK([for usable _controlfp_s],
+  [php_cv_have__controlfp_s],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <float.h>], [dnl
     unsigned int fpu_oldcw, fpu_cw;
     volatile double result;
     double a = 2877.0;
@@ -89,18 +82,16 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     result = a / b;
     _controlfp_s(&fpu_cw, fpu_oldcw, _MCW_PC);
     (void)result;
-  ]])], [ac_cfp_have__controlfp_s=yes], [ac_cfp_have__controlfp_s=no])
-  if test "$ac_cfp_have__controlfp_s" = "yes" ; then
-    AC_DEFINE(HAVE__CONTROLFP_S, 1, [whether _controlfp_s is present and usable])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
+  ])],
+  [php_cv_have__controlfp_s=yes],
+  [php_cv_have__controlfp_s=no])])
+AS_VAR_IF([php_cv_have__controlfp_s], [yes],
+  [AC_DEFINE([HAVE__CONTROLFP_S], [1],
+    [Define to 1 if _controlfp_s is present and usable.])])
 
-  AC_MSG_CHECKING([whether FPU control word can be manipulated by inline assembler])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-    /* nothing */
-  ]],[[
+AC_CACHE_CHECK([whether FPU control word can be manipulated by inline assembler],
+  [php_cv_have_fpu_inline_asm_x86],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [dnl
     unsigned int oldcw, cw;
     volatile double result;
     double a = 2877.0;
@@ -112,13 +103,12 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
     result = a / b;
     __asm__ __volatile__ ("fldcw %0" : : "m" (*&oldcw));
     (void)result;
-  ]])], [ac_cfp_have_fpu_inline_asm_x86=yes], [ac_cfp_have_fpu_inline_asm_x86=no])
-  if test "$ac_cfp_have_fpu_inline_asm_x86" = "yes" ; then
-    AC_DEFINE(HAVE_FPU_INLINE_ASM_X86, 1, [whether FPU control word can be manipulated by inline assembler])
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-  fi
+  ])],
+  [php_cv_have_fpu_inline_asm_x86=yes],
+  [php_cv_have_fpu_inline_asm_x86=no])])
+AS_VAR_IF([php_cv_have_fpu_inline_asm_x86], [yes],
+  [AC_DEFINE([HAVE_FPU_INLINE_ASM_X86], [1],
+    [Define to 1 if FPU control word can be manipulated by inline assembler.])])
 ])
 
 dnl
