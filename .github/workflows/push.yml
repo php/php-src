@@ -197,9 +197,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - debug: false
-            zts: false
-            asan: false
           - debug: true
             zts: true
             asan: true
@@ -249,7 +246,6 @@ jobs:
       - name: make install
         uses: ./.github/actions/install-alpine
       - name: Test
-        if: matrix.asan == false
         uses: ./.github/actions/test-alpine
         with:
           testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
