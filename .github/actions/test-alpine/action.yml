@@ -19,12 +19,10 @@ runs:
         export STACK_LIMIT_DEFAULTS_CHECK=1
         sapi/cli/php run-tests.php -P -q ${{ inputs.runTestsParameters }} \
           -d opcache.jit=${{ inputs.jitType }} \
-          -d opcache.protect_memory=1 \
           -d opcache.jit_buffer_size=64M \
           -j$(($(nproc) - 1)) \
           -g FAIL,BORK,LEAK,XLEAK \
           --no-progress \
-          --offline \
           --show-diff \
           --show-slow 1000 \
           --set-timeout 120
