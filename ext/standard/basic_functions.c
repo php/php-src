@@ -1582,12 +1582,9 @@ static void fci_release(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache)
 void user_shutdown_function_dtor(zval *zv) /* {{{ */
 {
 	php_shutdown_function_entry *shutdown_function_entry = Z_PTR_P(zv);
-	zend_fcall_info *fci = &shutdown_function_entry->fci;
 
-	if (fci) {
-		zend_fcall_info_args_clear(fci, true);
-		fci_release(fci, &shutdown_function_entry->fci_cache);
-	}
+	zend_fcall_info_args_clear(&shutdown_function_entry->fci, true);
+	fci_release(&shutdown_function_entry->fci, &shutdown_function_entry->fci_cache);
 	efree(shutdown_function_entry);
 }
 /* }}} */
