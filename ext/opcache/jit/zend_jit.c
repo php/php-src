@@ -83,7 +83,10 @@ static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, 
 		if (src_type->kind >= ZEND_FFI_TYPE_POINTER) {
 			return false;
 		}
-		if (dst_type == src_type || zend_ffi_is_compatible_type(dst_type, src_type)) {
+		if (dst_type == src_type
+// TODO: calls between shared extensions doesn't work on Windows
+//		 || zend_ffi_is_compatible_type(dst_type, src_type)
+		) {
 			return true;
 		}
 	}
