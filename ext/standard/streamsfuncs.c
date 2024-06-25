@@ -841,6 +841,13 @@ PHP_FUNCTION(stream_select) {
 	}
 #endif
 
+	/* Cap file descriptor limit at 131072 unless FD_SETSIZE is greater */
+	if (FD_SETSIZE > 131072) {
+		max_fds = FD_SETSIZE;
+	} else if (max_fds > 131072) {
+		max_fds = 131072;
+	}
+
     FD_BIGSET_ZERO(&rfds, max_fds);
     FD_BIGSET_ZERO(&wfds, max_fds);
     FD_BIGSET_ZERO(&efds, max_fds);
@@ -850,7 +857,7 @@ PHP_FUNCTION(stream_select) {
 		if (set_count > max_set_count) {
 			max_set_count = set_count;
 		}
-		sets += set_count;    
+		sets += set_count;
 	}
 
     if (w_array != NULL) {
@@ -929,13 +936,13 @@ PHP_FUNCTION(stream_select) {
             RETURN_LONG(retval);
         }
     }
-
+	
 	#ifdef __USE_XOPEN
 		retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
 	#else
 		retval = php_select(max_fd + 1, (fd_set *)rfds.__fds_bits, (fd_set *)wfds.__fds_bits, (fd_set *)efds.__fds_bits, tv_p);
 	#endif
-	
+
     if (retval == -1) {
         php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
             errno, strerror(errno), max_fd);
