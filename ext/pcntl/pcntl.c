@@ -403,16 +403,16 @@ PHP_FUNCTION(pcntl_waitpid)
 #ifdef HAVE_WAITID
 PHP_FUNCTION(pcntl_waitid)
 {
-	zend_long idtype = P_PID;
-	zend_long id = 0;
+	zend_long idtype = P_ALL;
+	zend_long id = NULL;
 	bool id_is_null = 1;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
 
-	ZEND_PARSE_PARAMETERS_START(2, 4)
+	ZEND_PARSE_PARAMETERS_START(0, 4)
+		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(idtype)
 		Z_PARAM_LONG_OR_NULL(id, id_is_null)
-		Z_PARAM_OPTIONAL
 		Z_PARAM_ZVAL(user_siginfo)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
