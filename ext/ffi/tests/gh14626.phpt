@@ -2,6 +2,10 @@
 GH-14626: FFI::free() may crash in is_zend_ptr() when at least one huge block exists and the ptr is non-zend
 --EXTENSIONS--
 ffi
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) == 'WIN') die("skip no malloc() on windows");
+?>
 --INI--
 ffi.enable=1
 --FILE--
