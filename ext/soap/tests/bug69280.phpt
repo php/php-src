@@ -25,7 +25,7 @@ class TestWS extends \SoapClient {
 		);
 	}
 
-	public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): ?string {
+	public function __doRequest(string $request, string $location, string $action, int $version, bool $oneWay = false): never {
 		die($request);
 	}
 }

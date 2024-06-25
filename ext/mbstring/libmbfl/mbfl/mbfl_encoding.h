@@ -164,7 +164,7 @@ static inline void mb_convert_buf_init(mb_convert_buf *buf, size_t initsize, uin
 
 #define MB_CONVERT_BUF_ENSURE(buf, out, limit, needed) \
 	ZEND_ASSERT(out <= limit); \
-	if ((limit - out) < (needed)) { \
+	if ((size_t)(limit - out) < (needed)) { \
 		size_t oldsize = limit - (unsigned char*)ZSTR_VAL((buf)->str); \
 		size_t newsize = oldsize + MAX(oldsize >> 1, needed); \
 		zend_string *newstr = erealloc((buf)->str, _ZSTR_STRUCT_SIZE(newsize)); \

@@ -1,5 +1,5 @@
 --TEST--
-pgsqlSetNoticeCallback catches Postgres "raise notice".
+Pdo\Pgsql::setNoticeCallback catches Postgres "raise notice".
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
@@ -13,7 +13,7 @@ function disp($message) { echo trim($message)."\n"; }
 function dispRe($message) { echo "Re".trim($message)."\n"; }
 function attach($db, $prefix = '')
 {
-    $db->pgsqlSetNoticeCallback('disp'.$prefix);
+    $db->setNoticeCallback('disp'.$prefix);
 }
 require dirname(__FILE__) . '/issue78621.inc';
 ?>

@@ -131,7 +131,7 @@ static void pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *i
 }
 /* }}} */
 
-static void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H) /* {{{ */
+void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H) /* {{{ */
 {
 	if (H->notice_callback) {
 		zend_fcc_dtor(H->notice_callback);
@@ -1241,8 +1241,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlGetPid)
 }
 /* }}} */
 
-/* {{{ proto void PDO::pgsqlSetNoticeCallback(mixed callback)
-   Sets a callback to receive DB notices (after client_min_messages has been set) */
+/* {{{ Sets a callback to receive DB notices (after client_min_messages has been set) */
 PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 {
 	zend_fcall_info fci = empty_fcall_info;
@@ -1252,7 +1251,7 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 	}
 
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
-	PDO_CONSTRUCT_CHECK;
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup);
 
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
@@ -1262,6 +1261,14 @@ PHP_METHOD(PDO_PGSql_Ext, pgsqlSetNoticeCallback)
 		H->notice_callback = emalloc(sizeof(zend_fcall_info_cache));
 		zend_fcc_dup(H->notice_callback, &fcc);
 	}
+
+	return;
+
+cleanup:
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		zend_fcc_dtor(&fcc);
+	}
+	RETURN_THROWS();
 }
 /* }}} */
 
@@ -1314,7 +1321,8 @@ static const struct pdo_dbh_methods pgsql_methods = {
 	pdo_pgsql_get_driver_methods,  /* get_driver_methods */
 	NULL,
 	pgsql_handle_in_transaction,
-	NULL /* get_gc */
+	NULL, /* get_gc */
+	pdo_pgsql_scanner
 };
 
 static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ */

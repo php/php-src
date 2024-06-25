@@ -24,6 +24,7 @@ typedef struct _pdo_dbh_t 		 pdo_dbh_t;
 typedef struct _pdo_dbh_object_t pdo_dbh_object_t;
 typedef struct _pdo_stmt_t		 pdo_stmt_t;
 typedef struct _pdo_row_t		 pdo_row_t;
+typedef	struct _pdo_scanner_t	 pdo_scanner_t;
 struct pdo_bound_param_data;
 
 #ifndef TRUE
@@ -33,7 +34,7 @@ struct pdo_bound_param_data;
 # define FALSE 0
 #endif
 
-#define PDO_DRIVER_API	20170320
+#define PDO_DRIVER_API	20240423
 
 /* Doctrine hardcodes these constants, avoid changing their values. */
 enum pdo_param_type {
@@ -275,6 +276,9 @@ typedef void (*pdo_dbh_request_shutdown)(pdo_dbh_t *dbh);
  * with any zvals in the driver_data that would be freed if the handle is destroyed. */
 typedef void (*pdo_dbh_get_gc_func)(pdo_dbh_t *dbh, zend_get_gc_buffer *buffer);
 
+/* driver specific re2s sql parser, overrides the default one if present */
+typedef int (*pdo_dbh_sql_scanner)(pdo_scanner_t *s);
+
 /* for adding methods to the dbh or stmt objects
 pointer to a list of driver specific functions. The convention is
 to prefix the function names using the PDO driver name; this will
@@ -307,6 +311,7 @@ struct pdo_dbh_methods {
 	/* if defined to NULL, PDO will use its internal transaction tracking state */
 	pdo_dbh_txn_func		in_transaction;
 	pdo_dbh_get_gc_func		get_gc;
+	pdo_dbh_sql_scanner		scanner;
 };
 
 /* }}} */
@@ -645,6 +650,10 @@ static inline pdo_stmt_t *php_pdo_stmt_fetch_object(zend_object *obj) {
 struct _pdo_row_t {
 	zend_object std;
 	pdo_stmt_t *stmt;
+};
+
+struct _pdo_scanner_t {
+	const char *ptr, *cur, *tok, *end;
 };
 
 /* Call this in MINIT to register the PDO driver.

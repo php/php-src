@@ -20,9 +20,7 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/html.h"
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include "php_json_encoder.h"

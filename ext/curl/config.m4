@@ -11,29 +11,26 @@ if test "$PHP_CURL" != "no"; then
   PHP_EVAL_INCLINE($CURL_CFLAGS)
 
   AC_MSG_CHECKING([for SSL support in libcurl])
-  case "$CURL_FEATURES" in
-    *SSL*)
+  AS_CASE([$CURL_FEATURES],
+    [*SSL*], [
       CURL_SSL=yes
       AC_MSG_RESULT([yes])
-      ;;
-    *)
+    ], [
       CURL_SSL=no
       AC_MSG_RESULT([no])
-      ;;
-  esac
+    ])
 
-  if test "$CURL_SSL" = yes; then
+  AS_IF([test "$PHP_THREAD_SAFETY" = yes && test "$CURL_SSL" = yes], [
     save_LDFLAGS="$LDFLAGS"
     LDFLAGS="$LDFLAGS $CURL_LIBS"
 
-    AC_MSG_CHECKING([for libcurl linked against old openssl])
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    AC_CACHE_CHECK([for libcurl linked against old OpenSSL < 1.1],
+      [php_cv_lib_curl_ssl],
+      [AC_RUN_IFELSE([AC_LANG_PROGRAM([
 #include <stdio.h>
 #include <strings.h>
 #include <curl/curl.h>
-
-int main(int argc, char *argv[])
-{
+      ], [
   curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
 
   if (data && data->ssl_version && *data->ssl_version) {
@@ -62,21 +59,19 @@ int main(int argc, char *argv[])
   }
   /* No SSL support */
   return 1;
-}
-    ]])],[
-      AC_MSG_RESULT([yes])
+])],
+    [php_cv_lib_curl_ssl=yes],
+    [php_cv_lib_curl_ssl=no],
+    [php_cv_lib_curl_ssl=no])])
+
+    AS_VAR_IF([php_cv_lib_curl_ssl], [yes], [
       AC_DEFINE([HAVE_CURL_OLD_OPENSSL], [1], [Have cURL with old OpenSSL])
-      PHP_SETUP_OPENSSL(CURL_SHARED_LIBADD,[AC_CHECK_HEADERS([openssl/crypto.h])],[])
-    ], [
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([no])
+      PHP_SETUP_OPENSSL([CURL_SHARED_LIBADD],
+        [AC_CHECK_HEADERS([openssl/crypto.h])])
     ])
 
     LDFLAGS="$save_LDFLAGS"
-  else
-    AC_MSG_RESULT([no])
-  fi
+  ])
 
   PHP_CHECK_LIBRARY(curl,curl_easy_perform,
   [

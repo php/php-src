@@ -34,7 +34,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_fopen_wrappers.h"
-#include "ext/standard/md5.h"
+#include "ext/standard/md5.h" /* For make_digest_ex() */
 #include "ext/standard/base64.h"
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
@@ -760,7 +760,7 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 		return (time_t)-1;
 	}
 
-	if (timestr_len < 13 && timestr_len != 11) {
+	if (timestr_len < 13) {
 		php_error_docref(NULL, E_WARNING, "Unable to parse time string %s correctly", timestr->data);
 		return (time_t)-1;
 	}
@@ -778,13 +778,9 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 
 	thestr = strbuf + timestr_len - 3;
 
-	if (timestr_len == 11) {
-		thetime.tm_sec = 0;
-	} else {
-		thetime.tm_sec = atoi(thestr);
-		*thestr = '\0';
-		thestr -= 2;
-	}
+	thetime.tm_sec = atoi(thestr);
+	*thestr = '\0';
+	thestr -= 2;
 	thetime.tm_min = atoi(thestr);
 	*thestr = '\0';
 	thestr -= 2;
@@ -1645,9 +1641,7 @@ PHP_FUNCTION(openssl_spki_new)
 		goto cleanup;
 	}
 
-	s = zend_string_alloc(strlen(spkac) + strlen(spkstr), 0);
-	sprintf(ZSTR_VAL(s), "%s%s", spkac, spkstr);
-	ZSTR_LEN(s) = strlen(ZSTR_VAL(s));
+	s = zend_string_concat2(spkac, strlen(spkac), spkstr, strlen(spkstr));
 	OPENSSL_free(spkstr);
 
 	RETVAL_STR(s);

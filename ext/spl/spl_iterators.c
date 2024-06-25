@@ -19,19 +19,13 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "ext/pcre/php_pcre.h"
 
-#include "php_spl.h"
-#include "spl_functions.h"
-#include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_iterators_arginfo.h"
-#include "spl_directory.h"
-#include "spl_array.h"
+#include "spl_array.h" /* For spl_ce_ArrayIterator */
 #include "spl_exceptions.h"
 #include "zend_smart_str.h"
 
@@ -541,7 +535,6 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 	switch (rit_type) {
 		case RIT_RecursiveTreeIterator: {
-			zval caching_it_flags;
 			zend_long user_caching_it_flags = CIT_CATCH_GET_CHILD;
 			mode = RIT_SELF_FIRST;
 			flags = RTIT_BYPASS_KEY;
@@ -560,10 +553,15 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				Z_ADDREF_P(iterator);
 			}
 
-			ZVAL_LONG(&caching_it_flags, user_caching_it_flags);
-			spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, iterator, &caching_it_flags);
-			zval_ptr_dtor(&caching_it_flags);
-			zval_ptr_dtor(iterator);
+			zval params[2];
+			ZVAL_COPY_VALUE(&params[0], iterator);
+			ZVAL_LONG(&params[1], user_caching_it_flags);
+			zend_result is_initialized = object_init_with_constructor(&caching_it, spl_ce_RecursiveCachingIterator, 2, params, NULL);
+			zval_ptr_dtor(&params[0]);
+			if (is_initialized == FAILURE) {
+				RETURN_THROWS();
+			}
+
 			iterator = &caching_it;
 			break;
 		}
@@ -1676,37 +1674,48 @@ PHP_METHOD(RecursiveFilterIterator, hasChildren)
 PHP_METHOD(RecursiveFilterIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
-	zval                  retval;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &retval);
-	if (!EG(exception) && Z_TYPE(retval) != IS_UNDEF) {
-		spl_instantiate_arg_ex1(Z_OBJCE_P(ZEND_THIS), return_value, &retval);
+	zval childrens;
+	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &childrens);
+	if (Z_TYPE(childrens) == IS_UNDEF) {
+		RETURN_THROWS();
 	}
-	zval_ptr_dtor(&retval);
+
+	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 1, &childrens, NULL);
+	zval_ptr_dtor(&childrens);
+	if (is_initialized == FAILURE) {
+		RETURN_THROWS();
+	}
 } /* }}} */
 
 /* {{{ Return the inner iterator's children contained in a RecursiveCallbackFilterIterator */
 PHP_METHOD(RecursiveCallbackFilterIterator, getChildren)
 {
-	spl_dual_it_object   *intern;
-	zval                  retval;
+	spl_dual_it_object *intern;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &retval);
-	if (!EG(exception) && Z_TYPE(retval) != IS_UNDEF) {
-		zval callable;
-		zend_get_callable_zval_from_fcc(&intern->u.callback_filter, &callable);
-		spl_instantiate_arg_ex2(Z_OBJCE_P(ZEND_THIS), return_value, &retval, &callable);
-		zval_ptr_dtor(&callable);
+	zval params[2];
+	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &params[0]);
+	if (Z_TYPE(params[0]) == IS_UNDEF) {
+		RETURN_THROWS();
 	}
-	zval_ptr_dtor(&retval);
+
+	/* Get callable to pass to the constructor */
+	zend_get_callable_zval_from_fcc(&intern->u.callback_filter, &params[1]);
+
+	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 2, params, NULL);
+	zval_ptr_dtor(&params[0]);
+	zval_ptr_dtor(&params[1]);
+	if (is_initialized == FAILURE) {
+		RETURN_THROWS();
+	}
 } /* }}} */
 /* {{{ Create a ParentIterator from a RecursiveIterator */
 PHP_METHOD(ParentIterator, __construct)
@@ -1963,21 +1972,25 @@ PHP_METHOD(RecursiveRegexIterator, getChildren)
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
 	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &retval);
-	if (!EG(exception)) {
-		zval args[5];
-
-		ZVAL_COPY(&args[0], &retval);
-		ZVAL_STR_COPY(&args[1], intern->u.regex.regex);
-		ZVAL_LONG(&args[2], intern->u.regex.mode);
-		ZVAL_LONG(&args[3], intern->u.regex.flags);
-		ZVAL_LONG(&args[4], intern->u.regex.preg_flags);
-
-		spl_instantiate_arg_n(Z_OBJCE_P(ZEND_THIS), return_value, 5, args);
-
-		zval_ptr_dtor(&args[0]);
-		zval_ptr_dtor(&args[1]);
+	if (EG(exception)) {
+		zval_ptr_dtor(&retval);
+		RETURN_THROWS();
 	}
-	zval_ptr_dtor(&retval);
+
+	zval args[5];
+	ZVAL_COPY_VALUE(&args[0], &retval);
+	ZVAL_STR_COPY(&args[1], intern->u.regex.regex);
+	ZVAL_LONG(&args[2], intern->u.regex.mode);
+	ZVAL_LONG(&args[3], intern->u.regex.flags);
+	ZVAL_LONG(&args[4], intern->u.regex.preg_flags);
+
+	zend_result is_initialized = object_init_with_constructor(return_value, Z_OBJCE_P(ZEND_THIS), 5, args, NULL);
+
+	zval_ptr_dtor(&args[0]);
+	zval_ptr_dtor_str(&args[1]);
+	if (is_initialized == FAILURE) {
+		RETURN_THROWS();
+	}
 } /* }}} */
 
 PHP_METHOD(RecursiveRegexIterator, accept)
@@ -2248,7 +2261,7 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 		}
 		/* Recursion ? */
 		if (intern->dit_type == DIT_RecursiveCachingIterator) {
-			zval retval, zchildren, zflags;
+			zval retval;
 			zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "haschildren", &retval);
 			if (EG(exception)) {
 				zval_ptr_dtor(&retval);
@@ -2258,28 +2271,39 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 					return;
 				}
 			} else {
-				if (zend_is_true(&retval)) {
-					zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &zchildren);
+				bool has_children = zend_is_true(&retval);
+				zval_ptr_dtor(&retval);
+
+				if (has_children) {
+					zval args[2];
+
+					/* Store the children in the first constructor argument */
+					zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "getchildren", &args[0]);
 					if (EG(exception)) {
-						zval_ptr_dtor(&zchildren);
+						zval_ptr_dtor(&args[0]);
 						if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
 							zend_clear_exception();
 						} else {
-							zval_ptr_dtor(&retval);
 							return;
 						}
 					} else {
-						ZVAL_LONG(&zflags, intern->u.caching.flags & CIT_PUBLIC);
-						spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &intern->u.caching.zchildren, &zchildren, &zflags);
-						zval_ptr_dtor(&zchildren);
-					}
-				}
-				zval_ptr_dtor(&retval);
-				if (EG(exception)) {
-					if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
-						zend_clear_exception();
-					} else {
-						return;
+						ZVAL_LONG(&args[1], intern->u.caching.flags & CIT_PUBLIC);
+
+						zend_result is_initialized = object_init_with_constructor(
+							&intern->u.caching.zchildren,
+							spl_ce_RecursiveCachingIterator,
+							2,
+							args,
+							NULL
+						);
+						zval_ptr_dtor(&args[0]);
+						if (is_initialized == FAILURE) {
+							if (intern->u.caching.flags & CIT_CATCH_GET_CHILD) {
+								zend_clear_exception();
+							} else {
+								return;
+							}
+						}
 					}
 				}
 			}

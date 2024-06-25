@@ -203,7 +203,7 @@ mysqlnd_fill_stats_hash(const MYSQLND_STATS * const stats, const MYSQLND_STRING 
 	for (i = 0; i < stats->count; i++) {
 		char tmp[25];
 
-		sprintf((char *)&tmp, "%" PRIu64, stats->values[i]);
+		snprintf(tmp, sizeof(tmp), "%" PRIu64, stats->values[i]);
 		add_assoc_string_ex(return_value, names[i].s, names[i].l, tmp);
 	}
 }

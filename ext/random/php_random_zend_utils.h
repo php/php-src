@@ -10,36 +10,26 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Marcus Boerger <helly@php.net>                              |
+   | Authors: Arnaud Le Blanc <arnaud.lb@gmail.com>                       |
+   |          Tim Düsterhus <timwolla@php.net>                            |
    +----------------------------------------------------------------------+
- */
+*/
 
-#ifndef SPL_ENGINE_H
-#define SPL_ENGINE_H
+#ifndef PHP_RANDOM_ZEND_UTILS_H
+# define PHP_RANDOM_ZEND_UTILS_H
 
-#include "php.h"
-#include "php_spl.h"
-#include "zend_interfaces.h"
+# include "php.h"
+# include "php_random.h"
+# include "zend.h"
 
-static inline void spl_instantiate_arg_ex1(zend_class_entry *pce, zval *retval, zval *arg1)
-{
-	object_init_ex(retval, pce);
-	zend_call_known_instance_method_with_1_params(pce->constructor, Z_OBJ_P(retval), NULL, arg1);
-}
+typedef struct _php_random_bytes_insecure_state_for_zend {
+	bool initialized;
+	php_random_status_state_xoshiro256starstar xoshiro256starstar_state;
+} php_random_bytes_insecure_state_for_zend;
 
-static inline void spl_instantiate_arg_ex2(
-		zend_class_entry *pce, zval *retval, zval *arg1, zval *arg2)
-{
-	object_init_ex(retval, pce);
-	zend_call_known_instance_method_with_2_params(
-		pce->constructor, Z_OBJ_P(retval), NULL, arg1, arg2);
-}
+ZEND_STATIC_ASSERT(sizeof(zend_random_bytes_insecure_state) >= sizeof(php_random_bytes_insecure_state_for_zend), "");
 
-static inline void spl_instantiate_arg_n(
-		zend_class_entry *pce, zval *retval, uint32_t argc, zval *argv)
-{
-	object_init_ex(retval, pce);
-	zend_call_known_instance_method(pce->constructor, Z_OBJ_P(retval), NULL, argc, argv);
-}
+ZEND_ATTRIBUTE_NONNULL PHPAPI void php_random_bytes_insecure_for_zend(
+		zend_random_bytes_insecure_state *state, void *bytes, size_t size);
 
-#endif /* SPL_ENGINE_H */
+#endif /* PHP_RANDOM_ZEND_UTILS_H */

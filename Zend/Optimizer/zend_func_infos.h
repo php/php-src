@@ -333,6 +333,7 @@ static const func_info_t func_infos[] = {
 	F1("pg_tty", MAY_BE_STRING),
 	F1("pg_host", MAY_BE_STRING),
 	F1("pg_version", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_LONG|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
+	F1("pg_jit", MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_STRING|MAY_BE_ARRAY_OF_STRING|MAY_BE_ARRAY_OF_NULL),
 	F1("pg_parameter_status", MAY_BE_STRING|MAY_BE_FALSE),
 	F1("pg_query", MAY_BE_OBJECT|MAY_BE_FALSE),
 	F1("pg_query_params", MAY_BE_OBJECT|MAY_BE_FALSE),

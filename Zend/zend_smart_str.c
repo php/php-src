@@ -17,6 +17,7 @@
 #include <zend.h>
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
+#include "zend_enum.h"
 
 #define SMART_STR_OVERHEAD   (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE + 1)
 #define SMART_STR_START_SIZE 256
@@ -220,4 +221,18 @@ ZEND_API void ZEND_FASTCALL smart_str_append_scalar(smart_str *dest, const zval 
 
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
+}
+
+ZEND_API zend_result ZEND_FASTCALL smart_str_append_zval(smart_str *dest, const zval *value, size_t truncate)
+{
+	if (Z_TYPE_P(value) <= IS_STRING) {
+		smart_str_append_scalar(dest, value, truncate);
+	} else if (Z_TYPE_P(value) == IS_OBJECT && (Z_OBJCE_P(value)->ce_flags & ZEND_ACC_ENUM)) {
+		smart_str_append(dest, Z_OBJCE_P(value)->name);
+		smart_str_appends(dest, "::");
+		smart_str_append(dest, Z_STR_P(zend_enum_fetch_case_name(Z_OBJ_P(value))));
+	} else {
+		return FAILURE;
+	}
+	return SUCCESS;
 }

@@ -24,6 +24,12 @@ PHP                                                                        NEWS
   . Fixed GH-13581 no space available for TLS on NetBSD. (Paul Ripke)
   . Added fiber Sys-V loongarch64 support. (qiangxuhui)
   . Adjusted closure names to include the parent function's name. (timwolla)
+  . Improve randomness of uploaded file names and files created by tempnam().
+    (Arnaud)
+  . Added gc and shutdown callbacks to zend_mm custom handlers.
+    (Florian Engelhardt)
+  . Fixed bug GH-14650 (Compute the size of pages before allocating memory).
+    (Julien Voisin)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -61,6 +67,12 @@ PHP                                                                        NEWS
 - FTP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)
   . Fixed bug #63937 (Upload speed 10 times slower with PHP). (nielsdos)
+
+- GD:
+  . Fix parameter numbers and missing alpha check for imagecolorset().
+    (Giovanni Giacobbi)
+  . imagepng/imagejpeg/imagewep/imageavif now throw an exception on
+    invalid quality parameter. (David Carlier)
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions
@@ -121,6 +133,8 @@ PHP                                                                        NEWS
     64bit archs. (Arnaud)
   . Fixed bug GH-13834 (Applying non-zero offset 36 to null pointer in
     zend_jit.c). (nielsdos)
+  . Fixed bug GH-14361 (Deep recursion in zend_cfg.c causes segfault).
+    (nielsdos)
 
 - OpenSSL:
   . Fixed bug #80269 (OpenSSL sets Subject wrong with extraattribs parameter).
@@ -135,6 +149,8 @@ PHP                                                                        NEWS
   . Added compile-time option --with-openssl-legacy-provider to enable legacy
     provider. (Adam Saponara)
   . Added support for Curve25519 + Curve448 based keys. (Manuel Mausz)
+  . Fixed bug GH-13343 (openssl_x509_parse should not allow omitted seconds in
+    UTCTimes). (Jakub Zelenka)
 
 - Output:
   . Clear output handler status flags during handler initialization. (haszi)
@@ -154,41 +170,46 @@ PHP                                                                        NEWS
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)
   . Add "/r" modifier. (Ayesh)
+  . Upgrade bundled pcre2lib to version 10.44. (Ayesh)
 
 - PDO:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Implemented PDO driver-specific subclasses RFC. (danack, kocsismate)
+  . Added support for PDO driver-specific SQL parsers. (Matteo Beccati)
 
 - PDO_DBLIB:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoDbLib. (danack, kocsismate)
+  . Added class Pdo\DbLib. (danack, kocsismate)
 
 - PDO_FIREBIRD:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
   . Feature: Add transaction isolation level and mode settings to pdo_firebird.
     (SakiTakamachi)
-  . Added class PdoFirebird. (danack, kocsismate)
+  . Added class Pdo\Firebird. (danack, kocsismate)
 
 - PDO_MYSQL:
   . Fixed setAttribute and getAttribute. (SakiTakamachi)
-  . Added class PdoMysql. (danack, kocsismate)
+  . Added class Pdo\Mysql. (danack, kocsismate)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PDO_ODBC:
-  . Added class PdoOdbc. (danack, kocsismate)
+  . Added class Pdo\Odbc. (danack, kocsismate)
 
 - PDO_PGSQL:
   . Fixed GH-12423, DSN credentials being prioritized over the user/password
     PDO constructor arguments. (SakiTakamachi)
   . Fixed native float support with pdo_pgsql query results. (Yurunsoft)
-  . Added class PdoPgsql. (danack, kocsismate)
+  . Added class Pdo\Pgsql. (danack, kocsismate)
   . Retrieve the memory usage of the query result resource. (KentarouTakeda)
-  . Added PDO::pgsqlSetNoticeCallBack method to receive DB notices.
-    (outtersg) 
+  . Added Pdo\Pgsql::setNoticeCallBack method to receive DB notices.
+    (outtersg)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PDO_SQLITE:
-  . Added class PdoSqlite. (danack, kocsismate)
+  . Added class Pdo\Sqlite. (danack, kocsismate)
   . Fixed bug #81227 (PDO::inTransaction reports false when in transaction).
     (nielsdos)
+  . Added custom SQL parser. (Matteo Beccati)
 
 - PGSQL:
   . Added the possibility to have no conditions for pg_select. (OmarEmaraDev)
@@ -200,6 +221,8 @@ PHP                                                                        NEWS
   . Added pg_put_copy_data/pg_put_copy_end to send COPY commands and signal
     the end of the COPY. (David Carlier)
   . Added pg_socket_poll to poll on the connection. (David Carlier)
+  . Added pg_jit to get infos on server JIT support. (David Carlier)
+  . Added pg_set_chunked_rows_size to fetch results per chunk. (David Carlier)
 
 - Phar:
   . Fixed bug GH-12532 (PharData created from zip has incorrect timestamp).
@@ -238,6 +261,8 @@ PHP                                                                        NEWS
     (David Carlier)
   . Added the SO_NOSIGPIPE constant to control the generation of SIGPIPE for
     macOs and FreeBSD. (David Carlier)
+  . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
+    (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

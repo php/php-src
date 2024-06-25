@@ -78,11 +78,7 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 		return;
 	}
 
-	qualified_name = xmlStrdup(name);
-
-	parser->h_start_element(parser->user, (const XML_Char *) qualified_name, (const XML_Char **) attributes);
-
-	xmlFree(qualified_name);
+	parser->h_start_element(parser->user, name, (const XML_Char **) attributes);
 }
 
 static void

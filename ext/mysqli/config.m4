@@ -66,4 +66,5 @@ if test "$PHP_MYSQLI" != "no"; then
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_INSTALL_HEADERS([ext/mysqli], [php_mysqli_structs.h mysqli_mysqlnd.h])
   PHP_ADD_EXTENSION_DEP(mysqli, mysqlnd)
+  PHP_ADD_EXTENSION_DEP(mysqli, spl)
 fi

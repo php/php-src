@@ -727,6 +727,7 @@ static int pgsql_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 #endif
 
 		default:
+			(void)S;
 			return 0;
 	}
 }

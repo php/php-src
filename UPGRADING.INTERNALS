@@ -65,6 +65,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
          void  (**_free)(void* ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC),
          void* (**_realloc)(void*, size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC))
 
+* Added gc and shutdown custom handlers, settable via
+  zend_mm_set_custom_handlers_ex()
+
 * __zend_malloc() has changed their signature from
   void(*)(size_t) to
   void(*)(size_t ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
@@ -130,6 +133,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
    - Symbol HAVE_MYSQL has been removed.
    - Symbol HAVE_PDO_SQLITELIB has been removed.
+   - Symbol HAVE_WAITPID has been removed.
+   - Symbol HAVE_LIBPQ has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -137,9 +142,19 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      AC_CHECK_MEMBERS).
    - M4 macro PHP_CHECK_GCC_ARG has been removed since PHP 8.0 (use
      AX_CHECK_COMPILE_FLAG).
+   - M4 macro PHP_PROG_RE2C got a new 2nd argument to define common default re2c
+     command-line options substituted to the Makefile RE2C_FLAGS variable.
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
+   - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
+   - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
+     extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
+     PGSQL_LIBS environment variables. When a directory argument is provided to
+     configure options (--with-pgsql=DIR or --with-pdo-pgsql=DIR), it will be
+     used instead of the pkg-config search.
+   - Removed BC enable_pear variable check due to --enable-pear configure option
+     once used (use with_pear variable name).
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
@@ -154,6 +169,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Unused symbols CONFIGURATION_FILE_PATH, DISCARD_PATH, HAVE_ERRMSG_H,
      HAVE_REGCOMP, HAVE_RINT, NEED_ISBLANK, PHP_URL_FOPEN, REGEX, HSREGEX,
      USE_CONFIG_FILE have been removed.
+   - The HAVE_OPENSSL symbol has been removed.
+   - The HAVE_OPENSSL_EXT symbol is now consistently defined to value 1 whether
+     the openssl extension is available either as shared or built statically.
+   - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
+   - The win32/build/libs_version.txt file has been removed.
 
 ========================
 3. Module changes

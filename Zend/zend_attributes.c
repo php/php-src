@@ -214,18 +214,9 @@ ZEND_API zend_result zend_get_attribute_value(zval *ret, zend_attribute *attr, u
 	return SUCCESS;
 }
 
-static zend_result call_attribute_constructor(
-	zend_attribute *attr, zend_class_entry *ce, zend_object *obj,
-	zval *args, uint32_t argc, HashTable *named_params, zend_string *filename)
+ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename)
 {
-	zend_function *ctor = ce->constructor;
 	zend_execute_data *call = NULL;
-	ZEND_ASSERT(ctor != NULL);
-
-	if (!(ctor->common.fn_flags & ZEND_ACC_PUBLIC)) {
-		zend_throw_error(NULL, "Attribute constructor of class %s must be public", ZSTR_VAL(ce->name));
-		return FAILURE;
-	}
 
 	if (filename) {
 		/* Set up dummy call frame that makes it look like the attribute was invoked
@@ -244,7 +235,7 @@ static zend_result call_attribute_constructor(
 		opline = (zend_op*)(call + 1);
 		memset(opline, 0, sizeof(zend_op));
 		opline->opcode = ZEND_DO_FCALL;
-		opline->lineno = attr->lineno;
+		opline->lineno = attribute_data->lineno;
 
 		call->opline = opline;
 		call->call = NULL;
@@ -255,57 +246,17 @@ static zend_result call_attribute_constructor(
 		memset(call->func, 0, sizeof(zend_function));
 		call->func->type = ZEND_USER_FUNCTION;
 		call->func->op_array.fn_flags =
-			attr->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
+			attribute_data->flags & ZEND_ATTRIBUTE_STRICT_TYPES ? ZEND_ACC_STRICT_TYPES : 0;
 		call->func->op_array.fn_flags |= ZEND_ACC_CALL_VIA_TRAMPOLINE;
 		call->func->op_array.filename = filename;
 
 		EG(current_execute_data) = call;
 	}
 
-	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
-
-	if (filename) {
-		EG(current_execute_data) = call->prev_execute_data;
-		zend_vm_stack_free_call_frame(call);
-	}
-
-	if (EG(exception)) {
-		zend_object_store_ctor_failed(obj);
-		return FAILURE;
-	}
-
-	return SUCCESS;
-}
-
-static void attribute_ctor_cleanup(zval *obj, zval *args, uint32_t argc, HashTable *named_params)
-{
-	if (obj) {
-		zval_ptr_dtor(obj);
-	}
-
-	if (args) {
-		uint32_t i;
-
-		for (i = 0; i < argc; i++) {
-			zval_ptr_dtor(&args[i]);
-		}
-
-		efree(args);
-	}
-
-	if (named_params) {
-		zend_array_destroy(named_params);
-	}
-}
-
-ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attribute_ce, zend_attribute *attribute_data, zend_class_entry *scope, zend_string *filename)
-{
 	zval *args = NULL;
 	HashTable *named_params = NULL;
 
-	if (SUCCESS != object_init_ex(obj, attribute_ce)) {
-		return FAILURE;
-	}
+	zend_result result = FAILURE;
 
 	uint32_t argc = 0;
 	if (attribute_data->argc) {
@@ -314,8 +265,8 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 		for (uint32_t i = 0; i < attribute_data->argc; i++) {
 			zval val;
 			if (FAILURE == zend_get_attribute_value(&val, attribute_data, i, scope)) {
-				attribute_ctor_cleanup(obj, args, argc, named_params);
-				return FAILURE;
+				result = FAILURE;
+				goto out;
 			}
 			if (attribute_data->args[i].name) {
 				if (!named_params) {
@@ -329,20 +280,25 @@ ZEND_API zend_result zend_get_attribute_object(zval *obj, zend_class_entry *attr
 		}
 	}
 
-	if (attribute_ce->constructor) {
-		if (FAILURE == call_attribute_constructor(attribute_data, attribute_ce, Z_OBJ_P(obj), args, argc, named_params, filename)) {
-			attribute_ctor_cleanup(obj, args, argc, named_params);
-			return FAILURE;
-		}
-	} else if (argc || named_params) {
-		attribute_ctor_cleanup(obj, args, argc, named_params);
-		zend_throw_error(NULL, "Attribute class %s does not have a constructor, cannot pass arguments", ZSTR_VAL(attribute_ce->name));
-		return FAILURE;
+	result = object_init_with_constructor(obj, attribute_ce, argc, args, named_params);
+
+ out:
+	for (uint32_t i = 0; i < argc; i++) {
+		zval_ptr_dtor(&args[i]);
 	}
 
-	attribute_ctor_cleanup(NULL, args, argc, named_params);
+	efree(args);
 
-	return SUCCESS;
+	if (named_params) {
+		zend_array_destroy(named_params);
+	}
+
+	if (filename) {
+		EG(current_execute_data) = call->prev_execute_data;
+		zend_vm_stack_free_call_frame(call);
+	}
+
+	return result;
 }
 
 static const char *target_names[] = {

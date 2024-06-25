@@ -275,17 +275,9 @@ else
   PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
 fi
 
-if test "$cross_compiling" = yes ; then
-  case $host_alias in
-    *linux*)
-      AC_DEFINE([HAVE_FNMATCH], 1,
-		     [Define to 1 if your system has a working POSIX `fnmatch'
-		      function.])
-      ;;
-  esac
-else
-  AC_FUNC_FNMATCH
-fi
+AS_VAR_IF([cross_compiling], [no], [AC_FUNC_FNMATCH],
+  [AS_CASE([$host_alias], [*linux*],
+    [AC_DEFINE([HAVE_FNMATCH], [1])])])
 
 dnl
 dnl Check if there is a support means of creating a new process and defining

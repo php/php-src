@@ -25,27 +25,20 @@
 #define rl_completion_matches completion_matches
 #endif
 
-#include "php_globals.h"
-#include "php_variables.h"
 #include "zend_hash.h"
-#include "zend_modules.h"
 
 #include "SAPI.h"
 #include <locale.h>
 #include "zend.h"
-#include "zend_extensions.h"
 #include "php_ini.h"
-#include "php_globals.h"
-#include "php_main.h"
-#include "fopen_wrappers.h"
-#include "ext/standard/php_standard.h"
+#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 
 #ifdef __riscos__
 #include <unixlib/local.h>
 #endif
 
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 #include <editline/readline.h>
 #else
 #include <readline/readline.h>
@@ -694,7 +687,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		if (history_lines_to_write) {
-#if HAVE_LIBEDIT
+#ifdef HAVE_LIBEDIT
 			write_history(history_file);
 #else
 			append_history(history_lines_to_write, history_file);

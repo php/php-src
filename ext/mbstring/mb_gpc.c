@@ -17,14 +17,12 @@
 
 /* {{{ includes */
 #include "php.h"
-#include "php_ini.h"
 #include "php_variables.h"
 #include "libmbfl/mbfl/mbfilter_pass.h"
 #include "mbstring.h"
 #include "ext/standard/url.h"
 
 #include "php_globals.h"
-#include "SAPI.h"
 #include "TSRM.h"
 
 #include "mb_gpc.h"

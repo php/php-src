@@ -20,8 +20,6 @@
 
 #ifdef HAVE_PGSQL
 
-#define PHP_PGSQL_API_VERSION 20140217
-
 extern zend_module_entry pgsql_module_entry;
 #define pgsql_module_ptr &pgsql_module_entry
 
@@ -46,10 +44,6 @@ extern zend_module_entry pgsql_module_entry;
 # else
 #  define PHP_PGSQL_API
 # endif
-#endif
-
-#ifdef HAVE_PGSQL_WITH_MULTIBYTE_SUPPORT
-const char * pg_encoding_to_char(int encoding);
 #endif
 
 PHP_MINIT_FUNCTION(pgsql);

@@ -41,7 +41,7 @@
 
 #define DASM_M_FREE(ctx, p, sz) ir_mem_free(p)
 
-#if IR_DEBUG
+#ifdef IR_DEBUG
 # define DASM_CHECKS
 #endif
 

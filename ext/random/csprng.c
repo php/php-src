@@ -31,7 +31,7 @@
 #include "php_random.h"
 #include "php_random_csprng.h"
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
 
@@ -45,15 +45,15 @@
 # include <sys/syscall.h>
 #endif
 
-#if HAVE_SYS_PARAM_H
+#ifdef HAVE_SYS_PARAM_H
 # include <sys/param.h>
-# if (__FreeBSD__ && __FreeBSD_version > 1200000) || (__DragonFly__ && __DragonFly_version >= 500700) || \
+# if (defined(__FreeBSD__) && __FreeBSD_version > 1200000) || (defined(__DragonFly__) && __DragonFly_version >= 500700) || \
      defined(__sun) || (defined(__NetBSD__) && __NetBSD_Version__ >= 1000000000) || defined(__midipix__)
 #  include <sys/random.h>
 # endif
 #endif
 
-#if HAVE_COMMONCRYPTO_COMMONRANDOM_H
+#ifdef HAVE_COMMONCRYPTO_COMMONRANDOM_H
 # include <CommonCrypto/CommonCryptoError.h>
 # include <CommonCrypto/CommonRandom.h>
 #endif
@@ -74,7 +74,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_
 		snprintf(errstr, errstr_size, "Failed to retrieve randomness from the operating system (BCryptGenRandom)");
 		return FAILURE;
 	}
-#elif HAVE_COMMONCRYPTO_COMMONRANDOM_H
+#elif defined(HAVE_COMMONCRYPTO_COMMONRANDOM_H)
 	/*
 	 * Purposely prioritized upon arc4random_buf for modern macOs releases
 	 * arc4random api on this platform uses `ccrng_generate` which returns
@@ -85,7 +85,7 @@ ZEND_ATTRIBUTE_NONNULL PHPAPI zend_result php_random_bytes_ex(void *bytes, size_
 		snprintf(errstr, errstr_size, "Failed to retrieve randomness from the operating system (CCRandomGenerateBytes)");
 		return FAILURE;
 	}
-#elif HAVE_DECL_ARC4RANDOM_BUF && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
+#elif defined(HAVE_ARC4RANDOM_BUF) && ((defined(__OpenBSD__) && OpenBSD >= 201405) || (defined(__NetBSD__) && __NetBSD_Version__ >= 700000001 && __NetBSD_Version__ < 1000000000) || \
   defined(__APPLE__))
 	/*
 	 * OpenBSD until there is a valid equivalent

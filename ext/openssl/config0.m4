@@ -20,14 +20,14 @@ PHP_ARG_WITH([openssl-legacy-provider],
 if test "$PHP_OPENSSL" != "no"; then
   PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
   PHP_SUBST(OPENSSL_SHARED_LIBADD)
-  PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
-  [
-    AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
-  ], [
-    AC_MSG_ERROR([OpenSSL check failed. Please check config.log for more information.])
-  ])
+  PHP_SETUP_OPENSSL([OPENSSL_SHARED_LIBADD],
+    [AC_DEFINE([HAVE_OPENSSL_EXT], [1],
+      [Define to 1 if the openssl extension is available.])])
 
-  AC_CHECK_FUNCS([RAND_egd])
+  PHP_CHECK_LIBRARY([crypto], [RAND_egd],
+    [AC_DEFINE([HAVE_RAND_EGD], [1],
+      [Define to 1 if OpenSSL crypto library has the 'RAND_egd' function.])],,
+    [$OPENSSL_LIBS])
 
   if test "$PHP_SYSTEM_CIPHERS" != "no"; then
     AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])

@@ -37,7 +37,7 @@ YACC=${YACC:-bison}
 YACC="$YACC -l"
 YFLAGS="-Wall"
 RE2C=${RE2C:-re2c}
-RE2C_FLAGS="-i"
+RE2C_FLAGS="--no-generation-date -i"
 SED=${SED:-sed}
 MAKE=${MAKE:-make}
 
@@ -70,7 +70,7 @@ else
 fi
 
 # Check required re2c version from the configure.ac file.
-required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\(.*\)\])/\1/p' configure.ac)
+required_re2c_version=$($SED -n 's/PHP_PROG_RE2C(\[\([0-9.]*\)\][^)]*)*/\1/p' configure.ac)
 set -f; IFS='.'; set -- $required_re2c_version; set +f; IFS=' '
 required_re2c_num="$(expr ${1:-0} \* 10000 + ${2:-0} \* 100 + ${3:-0})"
 
@@ -124,6 +124,21 @@ echo "genfiles: Generating PDO lexer file"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo builddir=ext/pdo top_srcdir=. \
   -f ext/pdo/Makefile.frag \
   ext/pdo/pdo_sql_parser.c
+
+echo "genfiles: Generating PDO_mysql lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_mysql builddir=ext/pdo_mysql top_srcdir=. \
+  -f ext/pdo_mysql/Makefile.frag \
+  ext/pdo_mysql/mysql_sql_parser.c
+
+echo "genfiles: Generating PDO_pgsql lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_pgsql builddir=ext/pdo_pgsql top_srcdir=. \
+  -f ext/pdo_pgsql/Makefile.frag \
+  ext/pdo_pgsql/pgsql_sql_parser.c
+
+echo "genfiles: Generating PDO_sqlite lexer file"
+$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo_sqlite builddir=ext/pdo_sqlite top_srcdir=. \
+  -f ext/pdo_sqlite/Makefile.frag \
+  ext/pdo_sqlite/sqlite_sql_parser.c
 
 echo "genfiles: Generating standard extension lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/standard builddir=ext/standard top_srcdir=. \

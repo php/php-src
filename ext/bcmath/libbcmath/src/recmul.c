@@ -33,28 +33,34 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
-#include "private.h" /* For _bc_rm_leading_zeros() */
+#include "private.h"
 #include "zend_alloc.h"
 
 
 #if SIZEOF_SIZE_T >= 8
-#  define BC_MUL_UINT_DIGITS 8
-#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 100000000
+#  define BC_VECTOR_SIZE 8
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 #else
-#  define BC_MUL_UINT_DIGITS 4
-#  define BC_MUL_UINT_OVERFLOW (BC_UINT_T) 10000
+#  define BC_VECTOR_SIZE 4
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
-#define BC_MUL_MAX_ADD_COUNT (~((BC_UINT_T) 0) / (BC_MUL_UINT_OVERFLOW * BC_MUL_UINT_OVERFLOW))
+/*
+ * Adding more than this many times may cause uint32_t/uint64_t to overflow.
+ * Typically this is 1844 for 64bit and 42 for 32bit.
+ */
+#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
 /* Multiply utility routines */
 
-static inline void bc_digits_adjustment(BC_UINT_T *prod_uint, size_t prod_arr_size)
+static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_size)
 {
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
-		prod_uint[i + 1] += prod_uint[i] / BC_MUL_UINT_OVERFLOW;
-		prod_uint[i] %= BC_MUL_UINT_OVERFLOW;
+		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
+		prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
 	}
 }
 
@@ -66,16 +72,16 @@ static inline void bc_digits_adjustment(BC_UINT_T *prod_uint, size_t prod_arr_si
  * due to its divide-and-conquer nature.
  */
 #if SIZEOF_SIZE_T == 4
-static uint32_t bc_parse_chunk_chars(const char *str)
+static BC_VECTOR bc_parse_chunk_chars(const char *str)
 {
-	uint32_t tmp;
+	BC_VECTOR tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
 	tmp = BC_BSWAP(tmp);
 #endif
 
-	uint32_t lower_digits = (tmp & 0x0f000f00) >> 8;
-	uint32_t upper_digits = (tmp & 0x000f000f) * 10;
+	BC_VECTOR lower_digits = (tmp & 0x0f000f00) >> 8;
+	BC_VECTOR upper_digits = (tmp & 0x000f000f) * 10;
 
 	tmp = lower_digits + upper_digits;
 
@@ -85,16 +91,16 @@ static uint32_t bc_parse_chunk_chars(const char *str)
 	return lower_digits + upper_digits;
 }
 #elif SIZEOF_SIZE_T == 8
-static uint64_t bc_parse_chunk_chars(const char *str)
+static BC_VECTOR bc_parse_chunk_chars(const char *str)
 {
-	uint64_t tmp;
+	BC_VECTOR tmp;
 	memcpy(&tmp, str, sizeof(tmp));
 #if !BC_LITTLE_ENDIAN
 	tmp = BC_BSWAP(tmp);
 #endif
 
-	uint64_t lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
-	uint64_t upper_digits = (tmp & 0x000f000f000f000f) * 10;
+	BC_VECTOR lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
+	BC_VECTOR upper_digits = (tmp & 0x000f000f000f000f) * 10;
 
 	tmp = lower_digits + upper_digits;
 
@@ -111,17 +117,17 @@ static uint64_t bc_parse_chunk_chars(const char *str)
 #endif
 
 /*
- * Converts BCD to uint, going backwards from pointer n by the number of
+ * Converts bc_num to BC_VECTOR, going backwards from pointer n by the number of
  * characters specified by len.
  */
-static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
+static inline BC_VECTOR bc_partial_convert_to_vector(const char *n, size_t len)
 {
-	if (len == BC_MUL_UINT_DIGITS) {
-		return bc_parse_chunk_chars(n - BC_MUL_UINT_DIGITS + 1);
+	if (len == BC_VECTOR_SIZE) {
+		return bc_parse_chunk_chars(n - BC_VECTOR_SIZE + 1);
 	}
 
-	BC_UINT_T num = 0;
-	BC_UINT_T base = 1;
+	BC_VECTOR num = 0;
+	BC_VECTOR base = 1;
 
 	for (size_t i = 0; i < len; i++) {
 		num += *n * base;
@@ -132,12 +138,12 @@ static inline BC_UINT_T bc_partial_convert_to_uint(const char *n, size_t len)
 	return num;
 }
 
-static inline void bc_convert_to_uint(BC_UINT_T *n_uint, const char *nend, size_t nlen)
+static inline void bc_convert_to_vector(BC_VECTOR *n_vector, const char *nend, size_t nlen)
 {
 	size_t i = 0;
 	while (nlen > 0) {
-		size_t len = MIN(BC_MUL_UINT_DIGITS, nlen);
-		n_uint[i] = bc_partial_convert_to_uint(nend, len);
+		size_t len = MIN(BC_VECTOR_SIZE, nlen);
+		n_vector[i] = bc_partial_convert_to_vector(nend, len);
 		nend -= len;
 		nlen -= len;
 		i++;
@@ -153,9 +159,9 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	const char *n1end = n1->n_value + n1len - 1;
 	const char *n2end = n2->n_value + n2len - 1;
 
-	BC_UINT_T n1_uint = bc_partial_convert_to_uint(n1end, n1len);
-	BC_UINT_T n2_uint = bc_partial_convert_to_uint(n2end, n2len);
-	BC_UINT_T prod_uint = n1_uint * n2_uint;
+	BC_VECTOR n1_vector = bc_partial_convert_to_vector(n1end, n1len);
+	BC_VECTOR n2_vector = bc_partial_convert_to_vector(n2end, n2len);
+	BC_VECTOR prod_vector = n1_vector * n2_vector;
 
 	size_t prodlen = n1len + n2len;
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -163,8 +169,8 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	char *pend = pptr + prodlen - 1;
 
 	while (pend >= pptr) {
-		*pend-- = prod_uint % BASE;
-		prod_uint /= BASE;
+		*pend-- = prod_vector % BASE;
+		prod_vector /= BASE;
 	}
 }
 
@@ -215,7 +221,7 @@ static void bc_write_bcd_representation(uint32_t value, char *str)
 }
 
 /*
- * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_UINT_Ts.
+ * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
  * The array is generated starting with the smaller digits.
  * e.g. 12345678901234567890 => {34567890, 56789012, 1234}
  *
@@ -229,28 +235,28 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	const char *n2end = n2->n_value + n2len - 1;
 	size_t prodlen = n1len + n2len;
 
-	size_t n1_arr_size = (n1len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
-	size_t n2_arr_size = (n2len + BC_MUL_UINT_DIGITS - 1) / BC_MUL_UINT_DIGITS;
-	size_t prod_arr_size = n1_arr_size + n2_arr_size - 1;
+	size_t n1_arr_size = (n1len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t n2_arr_size = (n2len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t prod_arr_size = (prodlen + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 
 	/*
-	 * let's say that N is the max of n1len and n2len (and a multiple of BC_MUL_UINT_DIGITS for simplicity),
-	 * then this sum is <= N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS + N/BC_MUL_UINT_DIGITS - 1
-	 * which is equal to N - 1 if BC_MUL_UINT_DIGITS is 4, and N/2 - 1 if BC_MUL_UINT_DIGITS is 8.
+	 * let's say that N is the max of n1len and n2len (and a multiple of BC_VECTOR_SIZE for simplicity),
+	 * then this sum is <= N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE + N/BC_VECTOR_SIZE - 1
+	 * which is equal to N - 1 if BC_VECTOR_SIZE is 4, and N/2 - 1 if BC_VECTOR_SIZE is 8.
 	 */
-	BC_UINT_T *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_UINT_T), 0);
+	BC_VECTOR *buf = safe_emalloc(n1_arr_size + n2_arr_size + prod_arr_size, sizeof(BC_VECTOR), 0);
 
-	BC_UINT_T *n1_uint = buf;
-	BC_UINT_T *n2_uint = buf + n1_arr_size;
-	BC_UINT_T *prod_uint = n2_uint + n2_arr_size;
+	BC_VECTOR *n1_vector = buf;
+	BC_VECTOR *n2_vector = buf + n1_arr_size;
+	BC_VECTOR *prod_vector = n2_vector + n2_arr_size;
 
 	for (i = 0; i < prod_arr_size; i++) {
-		prod_uint[i] = 0;
+		prod_vector[i] = 0;
 	}
 
-	/* Convert to uint[] */
-	bc_convert_to_uint(n1_uint, n1end, n1len);
-	bc_convert_to_uint(n2_uint, n2end, n2len);
+	/* Convert to BC_VECTOR[] */
+	bc_convert_to_vector(n1_vector, n1end, n1len);
+	bc_convert_to_vector(n2_vector, n2end, n2len);
 
 	/* Multiplication and addition */
 	size_t count = 0;
@@ -260,13 +266,13 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		 * When multiplying large numbers of digits, there is a possibility of
 		 * overflow, so digit adjustment is performed beforehand.
 		 */
-		if (UNEXPECTED(count >= BC_MUL_MAX_ADD_COUNT)) {
-			bc_digits_adjustment(prod_uint, prod_arr_size);
+		if (UNEXPECTED(count >= BC_VECTOR_NO_OVERFLOW_ADD_COUNT)) {
+			bc_mul_carry_calc(prod_vector, prod_arr_size);
 			count = 0;
 		}
 		count++;
 		for (size_t j = 0; j < n2_arr_size; j++) {
-			prod_uint[i + j] += n1_uint[i] * n2_uint[j];
+			prod_vector[i + j] += n1_vector[i] * n2_vector[j];
 		}
 	}
 
@@ -274,7 +280,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
 	 */
-	bc_digits_adjustment(prod_uint, prod_arr_size);
+	bc_mul_carry_calc(prod_vector, prod_arr_size);
 
 	/* Convert to bc_num */
 	*prod = bc_new_num_nonzeroed(prodlen, 0);
@@ -282,12 +288,12 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	char *pend = pptr + prodlen - 1;
 	i = 0;
 	while (i < prod_arr_size - 1) {
-#if BC_MUL_UINT_DIGITS == 4
-		bc_write_bcd_representation(prod_uint[i], pend - 3);
+#if BC_VECTOR_SIZE == 4
+		bc_write_bcd_representation(prod_vector[i], pend - 3);
 		pend -= 4;
 #else
-		bc_write_bcd_representation(prod_uint[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_uint[i] % 10000, pend - 3);
+		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
 		pend -= 8;
 #endif
 		i++;
@@ -298,8 +304,8 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 	 * Also need to fill it to the end with zeros, so loop until the end of the string.
 	 */
 	while (pend >= pptr) {
-		*pend-- = prod_uint[i] % BASE;
-		prod_uint[i] /= BASE;
+		*pend-- = prod_vector[i] % BASE;
+		prod_vector[i] /= BASE;
 	}
 
 	efree(buf);
@@ -320,7 +326,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale)
 	size_t prod_scale = MIN(full_scale, MAX(scale, MAX(n1->n_scale, n2->n_scale)));
 
 	/* Do the multiply */
-	if (len1 <= BC_MUL_UINT_DIGITS && len2 <= BC_MUL_UINT_DIGITS) {
+	if (len1 <= BC_VECTOR_SIZE && len2 <= BC_VECTOR_SIZE) {
 		bc_fast_mul(n1, len1, n2, len2, &prod);
 	} else {
 		bc_standard_mul(n1, len1, n2, len2, &prod);

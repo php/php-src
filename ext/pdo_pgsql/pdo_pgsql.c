@@ -145,6 +145,36 @@ PHP_METHOD(Pdo_Pgsql, getPid)
 	pgsqlGetPid_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
+/* Sets a callback to receive DB notices (after client_min_messages has been set */
+PHP_METHOD(Pdo_Pgsql, setNoticeCallback)
+{
+	zend_fcall_info fci = empty_fcall_info;
+	zend_fcall_info_cache fcc = empty_fcall_info_cache;
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "F!", &fci, &fcc)) {
+		RETURN_THROWS();
+	}
+
+	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
+	PDO_CONSTRUCT_CHECK_WITH_CLEANUP(cleanup);
+
+	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
+
+	pdo_pgsql_cleanup_notice_callback(H);
+
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		H->notice_callback = emalloc(sizeof(zend_fcall_info_cache));
+		zend_fcc_dup(H->notice_callback, &fcc);
+	}
+
+	return;
+
+cleanup:
+	if (ZEND_FCC_INITIALIZED(fcc)) {
+		zend_fcc_dtor(&fcc);
+	}
+	RETURN_THROWS();
+}
+
 /* true global environment */
 
 /* {{{ PHP_MINIT_FUNCTION */

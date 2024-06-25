@@ -19,8 +19,6 @@
    This file is generated using tokenizer_data_gen.php
 */
 
-#include "php.h"
-#include "zend.h"
 #include <zend_language_parser.h>
 
 char *get_token_type_name(int token_type)

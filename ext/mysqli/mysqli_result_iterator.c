@@ -23,7 +23,6 @@
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 #include "zend_interfaces.h"

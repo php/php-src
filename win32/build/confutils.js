@@ -455,7 +455,8 @@ can be built that way. \
 
 	var snapshot_build_exclusions = new Array(
 		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
-		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer'
+		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer',
+		'phpdbg-debug'
 	);
 	var force;
 
@@ -3005,6 +3006,7 @@ function toolset_setup_project_tools()
 	}
 
 	var RE2C = PATH_PROG('re2c');
+	DEFINE('RE2C_FLAGS', '--no-generation-date');
 	if (RE2C) {
 		var RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);

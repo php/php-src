@@ -354,7 +354,8 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     ])
   fi
   if test -n "$THIS_LIBS"; then
-    AC_DEFINE(DBA_DB$1, 1, [ ])
+    AC_DEFINE_UNQUOTED([DBA_DB$1], [1],
+      [Define to 1 if Berkeley DB is compatible with version $1.])
     if test -n "$THIS_INCLUDE"; then
       AC_DEFINE_UNQUOTED(DB$1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
     fi
@@ -553,7 +554,8 @@ if test "$PHP_DB1" != "no"; then
         DB * dbp = dbopen("", 0, 0, DB_HASH, 0);
       ]])],[
         AC_DEFINE_UNQUOTED(DB1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_DB1, 1, [ ])
+        AC_DEFINE([DBA_DB1], [1],
+          [Define to 1 if Berkeley DB is compatible with version 1.])
         THIS_RESULT=yes
       ],[
         THIS_RESULT=no

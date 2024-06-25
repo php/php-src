@@ -8,7 +8,7 @@ and semantics are as close as possible to those of the Perl 5 language.
                        Written by Philip Hazel
                     This module by Zoltan Herczeg
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2021 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -288,7 +288,7 @@ typedef struct bracket_backtrack {
     /* For OP_ONCE. Less than 0 if not needed. */
     int framesize;
     /* For brackets with >3 alternatives. */
-    struct sljit_put_label *matching_put_label;
+    struct sljit_jump *matching_mov_addr;
   } u;
   /* Points to our private memory word on the stack. */
   int private_data_ptr;
@@ -5891,7 +5891,7 @@ while (TRUE)
               chr++;
               }
             while (byte != 0);
-            chr = (chr + 7) & ~7;
+            chr = (chr + 7) & (sljit_u32)(~7);
             }
           }
         while (chars->count != 255 && bytes < bytes_end);
@@ -5951,7 +5951,10 @@ while (TRUE)
       chr = *cc;
 #ifdef SUPPORT_UNICODE
       if (common->ucp && chr > 127)
-        othercase[0] = UCD_OTHERCASE(chr);
+        {
+        chr = UCD_OTHERCASE(chr);
+        othercase[0] = (chr == (PCRE2_UCHAR)chr) ? chr : *cc;
+        }
       else
 #endif
         othercase[0] = TABLE_GET(chr, common->fcc, chr);
@@ -6183,25 +6186,34 @@ if (max < 1)
 /* Convert last_count to priority. */
 for (i = 0; i < max; i++)
   {
-  SLJIT_ASSERT(chars[i].count > 0 && chars[i].last_count <= chars[i].count);
+  SLJIT_ASSERT(chars[i].last_count <= chars[i].count);
 
-  if (chars[i].count == 1)
+  switch (chars[i].count)
     {
+    case 0:
+    chars[i].count = 255;
+    chars[i].last_count = 0;
+    break;
+
+    case 1:
     chars[i].last_count = (chars[i].last_count == 1) ? 7 : 5;
     /* Simplifies algorithms later. */
     chars[i].chars[1] = chars[i].chars[0];
-    }
-  else if (chars[i].count == 2)
-    {
+    break;
+
+    case 2:
     SLJIT_ASSERT(chars[i].chars[0] != chars[i].chars[1]);
 
     if (is_powerof2(chars[i].chars[0] ^ chars[i].chars[1]))
       chars[i].last_count = (chars[i].last_count == 2) ? 6 : 4;
     else
       chars[i].last_count = (chars[i].last_count == 2) ? 3 : 2;
-    }
-  else
+    break;
+
+    default:
     chars[i].last_count = (chars[i].count == 255) ? 0 : 1;
+    break;
+    }
   }
 
 #ifdef JIT_HAS_FAST_FORWARD_CHAR_PAIR_SIMD
@@ -6941,7 +6953,7 @@ int i, byte, length = 0;
 
 bit = bits[0] & 0x1;
 /* All bits will be zero or one (since bit is zero or one). */
-all = -bit;
+all = (sljit_u8)-bit;
 
 for (i = 0; i < 256; )
   {
@@ -6958,7 +6970,7 @@ for (i = 0; i < 256; )
       ranges[length] = i;
       length++;
       bit = cbit;
-      all = -cbit;
+      all = (sljit_u8)-cbit; /* sign extend bit into byte */
       }
     i++;
     }
@@ -7102,7 +7114,7 @@ for (i = 0; i < 32; i++)
   byte = bits[i];
 
   if (nclass)
-    byte = ~byte;
+    byte = (sljit_u8)~byte;
 
   j = 0;
   while (byte != 0)
@@ -8003,7 +8015,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
           if (cc[-1] == XCL_NOTPROP)
             invertcmp ^= 0x1;
 
-          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_boolprop_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
+          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_boolprop_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)(1u << (cc[1] & 0x1f)));
           add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
           }
         cc += 2;
@@ -8114,7 +8126,7 @@ if (unicode_status & XCLASS_NEEDS_UCD)
             invertcmp ^= 0x1;
             }
 
-          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)1 << (cc[1] & 0x1f));
+          OP2U(SLJIT_AND32 | SLJIT_SET_Z, SLJIT_MEM1(TMP1), (sljit_sw)(PRIV(ucd_script_sets) + (cc[1] >> 5)), SLJIT_IMM, (sljit_sw)(1u << (cc[1] & 0x1f)));
           add_jump(compiler, compares > 0 ? list : backtracks, JUMP(SLJIT_NOT_ZERO ^ invertcmp));
 
           if (jump != NULL)
@@ -8685,6 +8697,10 @@ return cc;
 
 #if PCRE2_CODE_UNIT_WIDTH != 32
 
+/* The code in this function copies the logic of the interpreter function that
+is defined in the pcre2_extuni.c source. If that code is updated, this
+function, and those below it, must be kept in step (note by PH, June 2024). */
+
 static PCRE2_SPTR SLJIT_FUNC do_extuni_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
@@ -8692,6 +8708,7 @@ PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
 PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
+BOOL was_ep_ZWJ = FALSE;
 uint32_t c;
 
 prevcc = cc;
@@ -8710,6 +8727,12 @@ do
     }
 
   if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0)
+    break;
+
+  /* ZWJ followed by Extended Pictographic is allowed only if the ZWJ was
+  preceded by Extended Pictographic. */
+
+  if (lgb == ucp_gbZWJ && rgb == ucp_gbExtended_Pictographic && !was_ep_ZWJ)
     break;
 
   /* Not breaking between Regional Indicators is allowed only if there
@@ -8736,11 +8759,15 @@ do
     if ((ricount & 1) != 0) break;  /* Grapheme break required */
     }
 
-  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
-  allows any number of them before a following Extended_Pictographic. */
+  /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
+  between; see next statement). */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
-       lgb != ucp_gbExtended_Pictographic)
+  was_ep_ZWJ = (lgb == ucp_gbExtended_Pictographic && rgb == ucp_gbZWJ);
+
+  /* If Extend follows Extended_Pictographic, do not update lgb; this allows
+  any number of them before a following ZWJ. */
+
+  if (rgb != ucp_gbExtend || lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
   prevcc = endcc;
@@ -8753,6 +8780,10 @@ return endcc;
 
 #endif /* PCRE2_CODE_UNIT_WIDTH != 32 */
 
+/* The code in this function copies the logic of the interpreter function that
+is defined in the pcre2_extuni.c source. If that code is updated, this
+function, and the one below it, must be kept in step (note by PH, June 2024). */
+
 static PCRE2_SPTR SLJIT_FUNC do_extuni_utf_invalid(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
@@ -8760,6 +8791,7 @@ PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
 PCRE2_SPTR prevcc, endcc, bptr;
 BOOL first = TRUE;
+BOOL was_ep_ZWJ = FALSE;
 uint32_t c;
 
 prevcc = cc;
@@ -8778,6 +8810,12 @@ do
     }
 
   if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0)
+    break;
+
+  /* ZWJ followed by Extended Pictographic is allowed only if the ZWJ was
+  preceded by Extended Pictographic. */
+
+  if (lgb == ucp_gbZWJ && rgb == ucp_gbExtended_Pictographic && !was_ep_ZWJ)
     break;
 
   /* Not breaking between Regional Indicators is allowed only if there
@@ -8803,11 +8841,15 @@ do
       break;  /* Grapheme break required */
     }
 
-  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
-  allows any number of them before a following Extended_Pictographic. */
+  /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
+  between; see next statement). */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
-       lgb != ucp_gbExtended_Pictographic)
+  was_ep_ZWJ = (lgb == ucp_gbExtended_Pictographic && rgb == ucp_gbZWJ);
+
+  /* If Extend follows Extended_Pictographic, do not update lgb; this allows
+  any number of them before a following ZWJ. */
+
+  if (rgb != ucp_gbExtend || lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
   prevcc = endcc;
@@ -8818,6 +8860,10 @@ while (cc < end_subject);
 return endcc;
 }
 
+/* The code in this function copies the logic of the interpreter function that
+is defined in the pcre2_extuni.c source. If that code is updated, this
+function must be kept in step (note by PH, June 2024). */
+
 static PCRE2_SPTR SLJIT_FUNC do_extuni_no_utf(jit_arguments *args, PCRE2_SPTR cc)
 {
 PCRE2_SPTR start_subject = args->begin;
@@ -8825,6 +8871,7 @@ PCRE2_SPTR end_subject = args->end;
 int lgb, rgb, ricount;
 PCRE2_SPTR bptr;
 uint32_t c;
+BOOL was_ep_ZWJ = FALSE;
 
 /* Patch by PH */
 /* GETCHARINC(c, cc); */
@@ -8846,6 +8893,12 @@ while (cc < end_subject)
   rgb = UCD_GRAPHBREAK(c);
 
   if ((PRIV(ucp_gbtable)[lgb] & (1 << rgb)) == 0)
+    break;
+
+  /* ZWJ followed by Extended Pictographic is allowed only if the ZWJ was
+  preceded by Extended Pictographic. */
+
+  if (lgb == ucp_gbZWJ && rgb == ucp_gbExtended_Pictographic && !was_ep_ZWJ)
     break;
 
   /* Not breaking between Regional Indicators is allowed only if there
@@ -8875,11 +8928,15 @@ while (cc < end_subject)
       break;  /* Grapheme break required */
     }
 
-  /* If Extend or ZWJ follows Extended_Pictographic, do not update lgb; this
-  allows any number of them before a following Extended_Pictographic. */
+  /* Set a flag when ZWJ follows Extended Pictographic (with optional Extend in
+  between; see next statement). */
 
-  if ((rgb != ucp_gbExtend && rgb != ucp_gbZWJ) ||
-       lgb != ucp_gbExtended_Pictographic)
+  was_ep_ZWJ = (lgb == ucp_gbExtended_Pictographic && rgb == ucp_gbZWJ);
+
+  /* If Extend follows Extended_Pictographic, do not update lgb; this allows
+  any number of them before a following ZWJ. */
+
+  if (rgb != ucp_gbExtend || lgb != ucp_gbExtended_Pictographic)
     lgb = rgb;
 
   cc++;
@@ -9836,7 +9893,7 @@ BACKTRACK_AS(recurse_backtrack)->matchingpath = LABEL();
 return cc + 1 + LINK_SIZE;
 }
 
-static sljit_s32 SLJIT_FUNC SLJIT_FUNC_ATTRIBUTE do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
+static sljit_s32 SLJIT_FUNC do_callout_jit(struct jit_arguments *arguments, pcre2_callout_block *callout_block, PCRE2_SPTR *jit_ovector)
 {
 PCRE2_SPTR begin;
 PCRE2_SIZE *ovector;
@@ -11227,7 +11284,7 @@ if (has_alternatives)
     if (i <= 3)
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, 0);
     else
-      BACKTRACK_AS(bracket_backtrack)->u.matching_put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+      BACKTRACK_AS(bracket_backtrack)->u.matching_mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
     }
   if (ket != OP_KETRMAX)
     BACKTRACK_AS(bracket_backtrack)->alternative_matchingpath = LABEL();
@@ -11314,17 +11371,22 @@ if (bra == OP_BRAMINZERO)
   /* Continue to the normal backtrack. */
   }
 
-if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO)
+if ((ket != OP_KET && bra != OP_BRAMINZERO) || bra == OP_BRAZERO || (has_alternatives && repeat_type != OP_EXACT))
   count_match(common);
 
 cc += 1 + LINK_SIZE;
 
 if (opcode == OP_ONCE)
   {
+  int data;
+  int framesize = BACKTRACK_AS(bracket_backtrack)->u.framesize;
+
+  SLJIT_ASSERT(SHRT_MIN <= framesize && framesize < SHRT_MAX/2);
   /* We temporarily encode the needs_control_head in the lowest bit.
-     Note: on the target architectures of SLJIT the ((x << 1) >> 1) returns
-     the same value for small signed numbers (including negative numbers). */
-  BACKTRACK_AS(bracket_backtrack)->u.framesize = (int)((unsigned)BACKTRACK_AS(bracket_backtrack)->u.framesize << 1) | (needs_control_head ? 1 : 0);
+     The real value should be short enough for this operation to work
+     without triggering Undefined Behaviour. */
+  data = (int)((short)((unsigned short)framesize << 1) | (needs_control_head ? 1 : 0));
+  BACKTRACK_AS(bracket_backtrack)->u.framesize = data;
   }
 return cc + repeat_length;
 }
@@ -13005,7 +13067,7 @@ struct sljit_jump *once = NULL;
 struct sljit_jump *cond = NULL;
 struct sljit_label *rmin_label = NULL;
 struct sljit_label *exact_label = NULL;
-struct sljit_put_label *put_label = NULL;
+struct sljit_jump *mov_addr = NULL;
 
 if (*cc == OP_BRAZERO || *cc == OP_BRAMINZERO)
   {
@@ -13166,8 +13228,8 @@ else if (has_alternatives)
     {
     sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
 
-    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->u.matching_put_label);
-    sljit_set_put_label(CURRENT_AS(bracket_backtrack)->u.matching_put_label, LABEL());
+    SLJIT_ASSERT(CURRENT_AS(bracket_backtrack)->u.matching_mov_addr);
+    sljit_set_label(CURRENT_AS(bracket_backtrack)->u.matching_mov_addr, LABEL());
     sljit_emit_op0(compiler, SLJIT_ENDBR);
     }
   else
@@ -13320,7 +13382,7 @@ if (has_alternatives)
       if (alt_max <= 3)
         OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(stacksize), SLJIT_IMM, alt_count);
       else
-        put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
+        mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(stacksize));
       }
 
     if (offset != 0 && ket == OP_KETRMAX && common->optimized_cbracket[offset >> 1] != 0)
@@ -13346,7 +13408,7 @@ if (has_alternatives)
         }
       else
         {
-        sljit_set_put_label(put_label, LABEL());
+        sljit_set_label(mov_addr, LABEL());
         sljit_emit_op0(compiler, SLJIT_ENDBR);
         }
       }
@@ -13878,7 +13940,7 @@ jump_list *match = NULL;
 struct sljit_jump *next_alt = NULL;
 struct sljit_jump *accept_exit = NULL;
 struct sljit_label *quit;
-struct sljit_put_label *put_label = NULL;
+struct sljit_jump *mov_addr = NULL;
 
 /* Recurse captures then. */
 common->then_trap = NULL;
@@ -13941,7 +14003,7 @@ while (1)
   if (alt_max > 1 || (recurse_flags & recurse_flag_accept_found))
     {
     if (alt_max > 3)
-      put_label = sljit_emit_put_label(compiler, SLJIT_MEM1(STACK_TOP), STACK(1));
+      mov_addr = sljit_emit_mov_addr(compiler, SLJIT_MEM1(STACK_TOP), STACK(1));
     else
       OP1(SLJIT_MOV, SLJIT_MEM1(STACK_TOP), STACK(1), SLJIT_IMM, alt_count);
     }
@@ -13974,7 +14036,7 @@ while (1)
       if (alt_max > 3)
         {
         sljit_emit_ijump(compiler, SLJIT_JUMP, TMP1, 0);
-        sljit_set_put_label(put_label, LABEL());
+        sljit_set_label(mov_addr, LABEL());
         sljit_emit_op0(compiler, SLJIT_ENDBR);
         }
       else
@@ -13985,7 +14047,7 @@ while (1)
     }
   else if (alt_max > 3)
     {
-    sljit_set_put_label(put_label, LABEL());
+    sljit_set_label(mov_addr, LABEL());
     sljit_emit_op0(compiler, SLJIT_ENDBR);
     }
   else
@@ -14303,7 +14365,7 @@ if (common->has_then)
   set_then_offsets(common, common->start, NULL);
   }
 
-compiler = sljit_create_compiler(allocator_data, NULL);
+compiler = sljit_create_compiler(allocator_data);
 if (!compiler)
   {
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
@@ -14718,7 +14780,7 @@ if (common->getucdtype != NULL)
 SLJIT_FREE(common->optimized_cbracket, allocator_data);
 SLJIT_FREE(common->private_data_ptrs, allocator_data);
 
-executable_func = sljit_generate_code(compiler);
+executable_func = sljit_generate_code(compiler, 0, NULL);
 executable_size = sljit_get_generated_code_size(compiler);
 sljit_free_compiler(compiler);
 

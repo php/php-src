@@ -45,16 +45,16 @@
 # include "win32/fnmatch.h"
 # include "win32/ioutil.h"
 #else
-# if HAVE_SYS_PARAM_H
+# ifdef HAVE_SYS_PARAM_H
 #  include <sys/param.h>
 # endif
-# if HAVE_SYS_SELECT_H
+# ifdef HAVE_SYS_SELECT_H
 #  include <sys/select.h>
 # endif
 # include <sys/socket.h>
 # include <netinet/in.h>
 # include <netdb.h>
-# if HAVE_ARPA_INET_H
+# ifdef HAVE_ARPA_INET_H
 #  include <arpa/inet.h>
 # endif
 #endif

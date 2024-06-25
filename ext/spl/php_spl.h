@@ -18,7 +18,6 @@
 #define PHP_SPL_H
 
 #include "php.h"
-#include <stdarg.h>
 
 #define PHP_SPL_VERSION PHP_VERSION
 

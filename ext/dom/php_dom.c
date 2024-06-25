@@ -22,6 +22,7 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "zend_enum.h"
 #include "php_dom.h"
 #include "nodelist.h"
 #include "html_collection.h"
@@ -84,6 +85,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_xpath_class_entry;
 #endif
 PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_adjacent_position_class_entry;
 /* }}} */
 
 static zend_object_handlers dom_object_handlers;
@@ -598,7 +600,9 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
-			clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+			if (ns_mapper != NULL) {
+				clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+			}
 		}
 	}
 
@@ -728,6 +732,8 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_namespace_node_handlers.clone_obj = dom_object_namespace_node_clone_obj;
 
 	zend_hash_init(&classes, 0, NULL, NULL, true);
+
+	dom_adjacent_position_class_entry = register_class_Dom_AdjacentPosition();
 
 	dom_domexception_class_entry = register_class_DOMException(zend_ce_exception);
 

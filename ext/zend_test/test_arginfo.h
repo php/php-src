@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 53027610adee7e1c675b1c1b38886100ce4e63ef */
+ * Stub hash: b7e8a9c27def16e8691883bea7837def1f717ab8 */
 
 ZEND_STATIC_ASSERT(PHP_VERSION_ID >= 80000, "test_arginfo.h only supports PHP version ID 80000 or newer, "
 	"but it is included on an older PHP version");
@@ -90,6 +90,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_parameter_with_attribu
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_zend_test_attribute_with_named_argument arginfo_zend_test_void_return
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_get_current_func_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -98,6 +100,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_call_method, 0, 2, IS_MIXED
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, arg1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, arg2, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_object_init_with_constructor, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
+	ZEND_ARG_VARIADIC_TYPE_INFO(0, args, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_ini_parse_quantity, 0, 1, IS_LONG, 0)
@@ -153,6 +160,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_set_fmode, 0, 1, IS_VO
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_cast_fread, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
 #define arginfo_ZendTestNS2_namespaced_func arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_ZendTestNS2_namespaced_deprecated_func arginfo_zend_test_void_return
@@ -198,6 +209,10 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ZendAttributeTest_testMethod arginfo_zend_test_is_pcre_bundled
 
 #define arginfo_class__ZendTestTrait_testMethod arginfo_zend_test_is_pcre_bundled
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestAttributeWithArguments___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, arg, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZendTestParameterAttribute___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, parameter, IS_STRING, 0)
@@ -253,8 +268,10 @@ static ZEND_FUNCTION(zend_weakmap_remove);
 static ZEND_FUNCTION(zend_weakmap_dump);
 static ZEND_FUNCTION(zend_get_unit_enum);
 static ZEND_FUNCTION(zend_test_parameter_with_attribute);
+static ZEND_FUNCTION(zend_test_attribute_with_named_argument);
 static ZEND_FUNCTION(zend_get_current_func_name);
 static ZEND_FUNCTION(zend_call_method);
+static ZEND_FUNCTION(zend_object_init_with_constructor);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_quantity);
 static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
@@ -277,6 +294,7 @@ static ZEND_FUNCTION(zend_test_is_pcre_bundled);
 #if defined(PHP_WIN32)
 static ZEND_FUNCTION(zend_test_set_fmode);
 #endif
+static ZEND_FUNCTION(zend_test_cast_fread);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_func);
 static ZEND_FUNCTION(ZendTestNS2_namespaced_deprecated_func);
 static ZEND_FUNCTION(ZendTestNS2_ZendSubNS_namespaced_func);
@@ -291,6 +309,7 @@ static ZEND_METHOD(_ZendTestMagicCall, __call);
 static ZEND_METHOD(_ZendTestChildClass, returnsThrowable);
 static ZEND_METHOD(ZendAttributeTest, testMethod);
 static ZEND_METHOD(_ZendTestTrait, testMethod);
+static ZEND_METHOD(ZendTestAttributeWithArguments, __construct);
 static ZEND_METHOD(ZendTestParameterAttribute, __construct);
 static ZEND_METHOD(ZendTestPropertyAttribute, __construct);
 static ZEND_METHOD(ZendTestClassWithMethodWithParameterAttribute, no_override);
@@ -348,8 +367,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_weakmap_dump, arginfo_zend_weakmap_dump)
 	ZEND_FE(zend_get_unit_enum, arginfo_zend_get_unit_enum)
 	ZEND_FE(zend_test_parameter_with_attribute, arginfo_zend_test_parameter_with_attribute)
+	ZEND_FE(zend_test_attribute_with_named_argument, arginfo_zend_test_attribute_with_named_argument)
 	ZEND_FE(zend_get_current_func_name, arginfo_zend_get_current_func_name)
 	ZEND_FE(zend_call_method, arginfo_zend_call_method)
+	ZEND_FE(zend_object_init_with_constructor, arginfo_zend_object_init_with_constructor)
 	ZEND_FE(zend_test_zend_ini_parse_quantity, arginfo_zend_test_zend_ini_parse_quantity)
 	ZEND_FE(zend_test_zend_ini_parse_uquantity, arginfo_zend_test_zend_ini_parse_uquantity)
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
@@ -372,6 +393,7 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_WIN32)
 	ZEND_FE(zend_test_set_fmode, arginfo_zend_test_set_fmode)
 #endif
+	ZEND_FE(zend_test_cast_fread, arginfo_zend_test_cast_fread)
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY(ZEND_NS_NAME("ZendTestNS2", "namespaced_func"), zif_ZendTestNS2_namespaced_func, arginfo_ZendTestNS2_namespaced_func, 0, NULL, NULL)
 #else
@@ -450,6 +472,11 @@ static const zend_function_entry class__ZendTestTrait_methods[] = {
 };
 
 static const zend_function_entry class_ZendTestAttribute_methods[] = {
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_ZendTestAttributeWithArguments_methods[] = {
+	ZEND_ME(ZendTestAttributeWithArguments, __construct, arginfo_class_ZendTestAttributeWithArguments___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -540,6 +567,15 @@ static void register_test_symbols(int module_number)
 	zend_string *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0_str = zend_string_init("value1", strlen("value1"), 1);
 	ZVAL_STR(&attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0, attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0->args[0].value, &attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0_arg0);
+
+	zend_string *attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_string_init_interned("ZendTestAttributeWithArguments", sizeof("ZendTestAttributeWithArguments") - 1, 1);
+	zend_attribute *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_attribute_with_named_argument", sizeof("zend_test_attribute_with_named_argument") - 1), attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0, 1);
+	zend_string_release(attribute_name_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0);
+	zval attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0;
+	zend_string *attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str = zend_string_init("foo", strlen("foo"), 1);
+	ZVAL_STR(&attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0, attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].value, &attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0_arg0);
+	attribute_ZendTestAttributeWithArguments_func_zend_test_attribute_with_named_argument_0->args[0].name = zend_string_init_interned("arg", sizeof("arg") - 1, 1);
 }
 
 static zend_class_entry *register_class__ZendTestInterface(void)
@@ -785,6 +821,34 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	zval attribute_Attribute_class_ZendTestAttribute_0_arg0;
 	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttribute_0_arg0, ZEND_ATTRIBUTE_TARGET_ALL);
 	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttribute_0->args[0].value, &attribute_Attribute_class_ZendTestAttribute_0_arg0);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ZendTestAttributeWithArguments(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ZendTestAttributeWithArguments", class_ZendTestAttributeWithArguments_methods);
+	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
+
+	zval property_arg_default_value;
+	ZVAL_UNDEF(&property_arg_default_value);
+	zend_string *property_arg_name = zend_string_init("arg", sizeof("arg") - 1, 1);
+#if (PHP_VERSION_ID >= 80100)
+	zend_declare_typed_property(class_entry, property_arg_name, &property_arg_default_value, ZEND_ACC_PUBLIC|ZEND_ACC_READONLY, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+#elif (PHP_VERSION_ID >= 80000)
+	zend_declare_typed_property(class_entry, property_arg_name, &property_arg_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_ANY));
+#endif
+	zend_string_release(property_arg_name);
+
+	zend_string *attribute_name_Attribute_class_ZendTestAttributeWithArguments_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
+	zend_attribute *attribute_Attribute_class_ZendTestAttributeWithArguments_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ZendTestAttributeWithArguments_0, 1);
+	zend_string_release(attribute_name_Attribute_class_ZendTestAttributeWithArguments_0);
+	zval attribute_Attribute_class_ZendTestAttributeWithArguments_0_arg0;
+	ZVAL_LONG(&attribute_Attribute_class_ZendTestAttributeWithArguments_0_arg0, ZEND_ATTRIBUTE_TARGET_ALL);
+	ZVAL_COPY_VALUE(&attribute_Attribute_class_ZendTestAttributeWithArguments_0->args[0].value, &attribute_Attribute_class_ZendTestAttributeWithArguments_0_arg0);
 
 	return class_entry;
 }

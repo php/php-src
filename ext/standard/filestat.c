@@ -63,7 +63,7 @@
 # endif
 #endif
 
-#if HAVE_GRP_H
+#ifdef HAVE_GRP_H
 # include <grp.h>
 #endif
 
@@ -105,7 +105,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 /* }}} */
 
 static zend_result php_disk_total_space(char *path, double *space) /* {{{ */
-#if defined(WINDOWS) /* {{{ */
+#if defined(PHP_WIN32) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
@@ -128,7 +128,7 @@ static zend_result php_disk_total_space(char *path, double *space) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-#else /* {{{ if !defined(WINDOWS) */
+#else /* {{{ if !defined(PHP_WIN32) */
 {
 	double bytestotal = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -190,7 +190,7 @@ PHP_FUNCTION(disk_total_space)
 /* }}} */
 
 static zend_result php_disk_free_space(char *path, double *space) /* {{{ */
-#if defined(WINDOWS) /* {{{ */
+#if defined(PHP_WIN32) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
@@ -211,7 +211,7 @@ static zend_result php_disk_free_space(char *path, double *space) /* {{{ */
 
 	return SUCCESS;
 }
-#else /* {{{ if !defined(WINDOWS) */
+#else /* {{{ if !defined(PHP_WIN32) */
 {
 	double bytesfree = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -279,13 +279,25 @@ PHPAPI zend_result php_get_gid_by_name(const char *name, gid_t *gid)
 		struct group *retgrptr;
 		long grbuflen = sysconf(_SC_GETGR_R_SIZE_MAX);
 		char *grbuf;
+		int err;
 
 		if (grbuflen < 1) {
-			return FAILURE;
+			grbuflen = 1024;
 		}
-
+# if ZEND_DEBUG
+		/* Test retry logic */
+		grbuflen = 1;
+# endif
 		grbuf = emalloc(grbuflen);
-		if (getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr) != 0 || retgrptr == NULL) {
+
+try_again:
+		err = getgrnam_r(name, &gr, grbuf, grbuflen, &retgrptr);
+		if (err != 0 || retgrptr == NULL) {
+			if (err == ERANGE) {
+				grbuflen *= 2;
+				grbuf = erealloc(grbuf, grbuflen);
+				goto try_again;
+			}
 			efree(grbuf);
 			return FAILURE;
 		}
@@ -309,7 +321,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	size_t filename_len;
 	zend_string *group_str;
 	zend_long group_long;
-#if !defined(WINDOWS)
+#if !defined(PHP_WIN32)
 	gid_t gid;
 	int ret;
 #endif
@@ -339,7 +351,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				RETURN_FALSE;
 			}
 		} else {
-#ifndef WINDOWS
+#ifndef PHP_WIN32
 /* On Windows, we expect regular chgrp to fail silently by default */
 			php_error_docref(NULL, E_WARNING, "Cannot call chgrp() for a non-standard stream");
 #endif
@@ -347,7 +359,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		}
 	}
 
-#ifdef WINDOWS
+#ifdef PHP_WIN32
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
@@ -405,13 +417,25 @@ PHPAPI zend_result php_get_uid_by_name(const char *name, uid_t *uid)
 		struct passwd *retpwptr = NULL;
 		long pwbuflen = sysconf(_SC_GETPW_R_SIZE_MAX);
 		char *pwbuf;
+		int err;
 
 		if (pwbuflen < 1) {
-			return FAILURE;
+			pwbuflen = 1024;
 		}
-
+# if ZEND_DEBUG
+		/* Test retry logic */
+		pwbuflen = 1;
+# endif
 		pwbuf = emalloc(pwbuflen);
-		if (getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr) != 0 || retpwptr == NULL) {
+
+try_again:
+		err = getpwnam_r(name, &pw, pwbuf, pwbuflen, &retpwptr);
+		if (err != 0 || retpwptr == NULL) {
+			if (err == EAGAIN) {
+				pwbuflen *= 2;
+				pwbuf = erealloc(pwbuf, pwbuflen);
+				goto try_again;
+			}
 			efree(pwbuf);
 			return FAILURE;
 		}
@@ -435,7 +459,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	size_t filename_len;
 	zend_string *user_str;
 	zend_long user_long;
-#if !defined(WINDOWS)
+#if !defined(PHP_WIN32)
 	uid_t uid;
 	int ret;
 #endif
@@ -465,7 +489,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				RETURN_FALSE;
 			}
 		} else {
-#ifndef WINDOWS
+#ifndef PHP_WIN32
 /* On Windows, we expect regular chown to fail silently by default */
 			php_error_docref(NULL, E_WARNING, "Cannot call chown() for a non-standard stream");
 #endif
@@ -473,7 +497,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		}
 	}
 
-#ifdef WINDOWS
+#ifdef PHP_WIN32
 	/* We have no native chown on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else

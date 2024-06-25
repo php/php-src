@@ -65,13 +65,6 @@ dnl
 dnl Checks for the configure options
 dnl
 
-dnl zlib is always required
-AC_DEFUN([PHP_GD_ZLIB],[
-  PKG_CHECK_MODULES([ZLIB], [zlib])
-  PHP_EVAL_LIBLINE($ZLIB_LIBS, GD_SHARED_LIBADD)
-  PHP_EVAL_INCLINE($ZLIB_CFLAGS)
-])
-
 dnl libpng is always required
 AC_DEFUN([PHP_GD_PNG],[
   PKG_CHECK_MODULES([PNG], [libpng])
@@ -224,7 +217,7 @@ dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_TGA,              1, [ ])
 
 dnl Various checks for GD features
-    PHP_GD_ZLIB
+    PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG
     PHP_GD_AVIF
     PHP_GD_WEBP

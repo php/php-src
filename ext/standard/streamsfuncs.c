@@ -1786,7 +1786,7 @@ PHP_FUNCTION(stream_isatty)
 #ifdef PHP_WIN32
 	/* Check if the Windows standard handle is redirected to file */
 	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
-#elif HAVE_UNISTD_H
+#elif defined(HAVE_UNISTD_H)
 	/* Check if the file descriptor identifier is a terminal */
 	RETVAL_BOOL(isatty(fileno));
 #else

@@ -55,11 +55,6 @@ rewritten to comply with these rules.
     the source. Although the `PHP_*` macros are mostly aliased to the `ZEND_*`
     macros it gives a better understanding on what kind of macro you're calling.
 
-1. When commenting out code using a `#if` statement, do NOT use `0` only.
-    Instead, use `"<git username here>_0"`. For example, `#if FOO_0`,
-    where `FOO` is your git user `foo`. This allows easier tracking of why
-    code was commented out, especially in bundled libraries.
-
 1. Do not define functions that are not available. For instance, if a library is
     missing a function, do not define the PHP version of the function, and do
     not raise a run-time error about the function not existing. End users should

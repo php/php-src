@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 24c4a5ec91197ae35ccd6f344cd3a985286e2a16 */
+ * Stub hash: c93643bad9675fddf31ca52f82f843218f208a5d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -797,11 +797,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_getElementsByTa
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_Element_insertAdjacentElement, 0, 2, Dom\\Element, 1)
-	ZEND_ARG_TYPE_INFO(0, where, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, where, Dom\\AdjacentPosition, 0)
 	ZEND_ARG_OBJ_INFO(0, element, Dom\\Element, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Dom_Element_insertAdjacentText arginfo_class_DOMElement_insertAdjacentText
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Element_insertAdjacentText, 0, 2, IS_VOID, 0)
+	ZEND_ARG_OBJ_INFO(0, where, Dom\\AdjacentPosition, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Element_setIdAttribute, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
@@ -1042,7 +1045,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Dom_XMLDocument_validate arginfo_class_Dom_Node_hasChildNodes
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_XMLDocument_xinclude, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_XMLDocument_xinclude, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -1267,6 +1270,7 @@ ZEND_METHOD(Dom_Element, removeAttributeNode);
 ZEND_METHOD(Dom_Element, getElementsByTagName);
 ZEND_METHOD(Dom_Element, getElementsByTagNameNS);
 ZEND_METHOD(Dom_Element, insertAdjacentElement);
+ZEND_METHOD(Dom_Element, insertAdjacentText);
 ZEND_METHOD(Dom_Element, setIdAttributeNode);
 ZEND_METHOD(Dom_CharacterData, appendData);
 ZEND_METHOD(Dom_CharacterData, insertData);
@@ -1288,6 +1292,7 @@ ZEND_METHOD(Dom_HTMLDocument, saveHtmlFile);
 ZEND_METHOD(Dom_XMLDocument, createEmpty);
 ZEND_METHOD(Dom_XMLDocument, createFromFile);
 ZEND_METHOD(Dom_XMLDocument, createFromString);
+ZEND_METHOD(Dom_XMLDocument, xinclude);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, __construct);
 #endif
@@ -1631,6 +1636,10 @@ static const zend_function_entry class_Dom_HTMLCollection_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_Dom_AdjacentPosition_methods[] = {
+	ZEND_FE_END
+};
+
 static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_RAW_FENTRY("hasAttributes", zim_DOMNode_hasAttributes, arginfo_class_Dom_Element_hasAttributes, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getAttributeNames", zim_DOMElement_getAttributeNames, arginfo_class_Dom_Element_getAttributeNames, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1651,7 +1660,7 @@ static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_ME(Dom_Element, getElementsByTagName, arginfo_class_Dom_Element_getElementsByTagName, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, getElementsByTagNameNS, arginfo_class_Dom_Element_getElementsByTagNameNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_Element, insertAdjacentElement, arginfo_class_Dom_Element_insertAdjacentElement, ZEND_ACC_PUBLIC)
-	ZEND_RAW_FENTRY("insertAdjacentText", zim_DOMElement_insertAdjacentText, arginfo_class_Dom_Element_insertAdjacentText, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Dom_Element, insertAdjacentText, arginfo_class_Dom_Element_insertAdjacentText, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("setIdAttribute", zim_DOMElement_setIdAttribute, arginfo_class_Dom_Element_setIdAttribute, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("setIdAttributeNS", zim_DOMElement_setIdAttributeNS, arginfo_class_Dom_Element_setIdAttributeNS, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Dom_Element, setIdAttributeNode, arginfo_class_Dom_Element_setIdAttributeNode, ZEND_ACC_PUBLIC)
@@ -1780,7 +1789,7 @@ static const zend_function_entry class_Dom_XMLDocument_methods[] = {
 	ZEND_ME(Dom_XMLDocument, createFromString, arginfo_class_Dom_XMLDocument_createFromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_RAW_FENTRY("createEntityReference", zim_DOMDocument_createEntityReference, arginfo_class_Dom_XMLDocument_createEntityReference, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("validate", zim_DOMDocument_validate, arginfo_class_Dom_XMLDocument_validate, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("xinclude", zim_DOMDocument_xinclude, arginfo_class_Dom_XMLDocument_xinclude, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_ME(Dom_XMLDocument, xinclude, arginfo_class_Dom_XMLDocument_xinclude, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_XMLDocument, saveXml, arginfo_class_Dom_XMLDocument_saveXml, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_XMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_FE_END
@@ -2952,6 +2961,33 @@ static zend_class_entry *register_class_Dom_HTMLCollection(zend_class_entry *cla
 	zend_string *property_length_name = zend_string_init("length", sizeof("length") - 1, 1);
 	zend_declare_typed_property(class_entry, property_length_name, &property_length_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(property_length_name);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Dom_AdjacentPosition(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("Dom\\AdjacentPosition", IS_STRING, class_Dom_AdjacentPosition_methods);
+
+	zval enum_case_BeforeBegin_value;
+	zend_string *enum_case_BeforeBegin_value_str = zend_string_init("beforebegin", strlen("beforebegin"), 1);
+	ZVAL_STR(&enum_case_BeforeBegin_value, enum_case_BeforeBegin_value_str);
+	zend_enum_add_case_cstr(class_entry, "BeforeBegin", &enum_case_BeforeBegin_value);
+
+	zval enum_case_AfterBegin_value;
+	zend_string *enum_case_AfterBegin_value_str = zend_string_init("afterbegin", strlen("afterbegin"), 1);
+	ZVAL_STR(&enum_case_AfterBegin_value, enum_case_AfterBegin_value_str);
+	zend_enum_add_case_cstr(class_entry, "AfterBegin", &enum_case_AfterBegin_value);
+
+	zval enum_case_BeforeEnd_value;
+	zend_string *enum_case_BeforeEnd_value_str = zend_string_init("beforeend", strlen("beforeend"), 1);
+	ZVAL_STR(&enum_case_BeforeEnd_value, enum_case_BeforeEnd_value_str);
+	zend_enum_add_case_cstr(class_entry, "BeforeEnd", &enum_case_BeforeEnd_value);
+
+	zval enum_case_AfterEnd_value;
+	zend_string *enum_case_AfterEnd_value_str = zend_string_init("afterend", strlen("afterend"), 1);
+	ZVAL_STR(&enum_case_AfterEnd_value, enum_case_AfterEnd_value_str);
+	zend_enum_add_case_cstr(class_entry, "AfterEnd", &enum_case_AfterEnd_value);
 
 	return class_entry;
 }

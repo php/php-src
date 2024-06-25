@@ -20,12 +20,11 @@
 #endif
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "ext/standard/html.h"
 #include "zend_smart_str.h"
 #include "php_json.h"
 #include "php_json_encoder.h"
+#include "zend_portability.h"
 #include <zend_exceptions.h>
 #include "zend_enum.h"
 
@@ -112,7 +111,7 @@ static inline void php_json_encode_double(smart_str *buf, double d, int options)
 
 static zend_result php_json_encode_array(smart_str *buf, zval *val, int options, php_json_encoder *encoder) /* {{{ */
 {
-	int i, r, need_comma = 0;
+	int r, need_comma = 0;
 	HashTable *myht, *prop_ht;
 
 	if (Z_TYPE_P(val) == IS_ARRAY) {
@@ -127,7 +126,6 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 		zend_class_entry *ce = obj->ce;
 		zend_property_info *prop_info;
 		zval *prop;
-		int i;
 
 		if (GC_IS_RECURSIVE(obj)) {
 			encoder->error_code = PHP_JSON_ERROR_RECURSION;
@@ -141,7 +139,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 		++encoder->depth;
 
-		for (i = 0; i < ce->default_properties_count; i++) {
+		for (int i = 0; i < ce->default_properties_count; i++) {
 			prop_info = ce->properties_info_table[i];
 			if (!prop_info) {
 				continue;
@@ -219,7 +217,7 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 
 	++encoder->depth;
 
-	i = myht ? zend_hash_num_elements(myht) : 0;
+	uint32_t i = myht ? zend_hash_num_elements(myht) : 0;
 
 	if (i > 0) {
 		zend_string *key;

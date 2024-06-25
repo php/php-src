@@ -683,7 +683,7 @@ __forceinline static char *php_win32_ioutil_realpath(const char *path, char *res
 }/*}}}*/
 
 #include <sys/stat.h>
-#if _WIN64
+#ifdef _WIN64
 typedef unsigned __int64 php_win32_ioutil_dev_t;
 typedef unsigned __int64 php_win32_ioutil_ino_t;
 typedef __time64_t php_win32_ioutil_time_t;

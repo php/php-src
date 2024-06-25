@@ -43,7 +43,7 @@
 #include "exif_arginfo.h"
 #include <math.h>
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* for php_basename() */
 #include "ext/standard/php_image.h"
 #include "ext/standard/info.h"
 
@@ -220,7 +220,7 @@ ZEND_GET_MODULE(exif)
  * is read or until there is no more data available to read. */
 static ssize_t exif_read_from_stream_file_looped(php_stream *stream, char *buf, size_t count)
 {
-	ssize_t total_read = 0;
+	size_t total_read = 0;
 	while (total_read < count) {
 		ssize_t ret = php_stream_read(stream, buf + total_read, count - total_read);
 		if (ret == -1) {
@@ -2185,16 +2185,12 @@ static image_info_data *exif_alloc_image_info_data(image_info_list *info_list) {
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
-static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, int length, void* value, size_t value_len, int motorola_intel)
+static void exif_iif_add_value(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len, int motorola_intel)
 {
 	size_t idex;
 	void *vptr, *vptr_end;
 	image_info_value *info_value;
 	image_info_data  *info_data;
-
-	if (length < 0) {
-		return;
-	}
 
 	info_data = exif_alloc_image_info_data(&image_info->info_list[section_index]);
 	memset(info_data, 0, sizeof(image_info_data));
@@ -2211,7 +2207,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 				value = NULL;
 			}
 			if (value) {
-				length = (int)zend_strnlen(value, length);
+				length = zend_strnlen(value, length);
 				info_value->s = estrndup(value, length);
 				info_data->length = length;
 			} else {
@@ -2242,7 +2238,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			}
 			if (value) {
 				if (tag == TAG_MAKER_NOTE) {
-					length = (int) zend_strnlen(value, length);
+					length = zend_strnlen(value, length);
 				}
 
 				/* do not recompute length here */
@@ -2264,14 +2260,14 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 		case TAG_FMT_DOUBLE:
 			if (length==0) {
 				break;
-			} else
+			}
 			if (length>1) {
 				info_value->list = safe_emalloc(length, sizeof(image_info_value), 0);
 			} else {
 				info_value = &info_data->value;
 			}
 			vptr_end = (char *) value + value_len;
-			for (idex=0,vptr=value; idex<(size_t)length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
+			for (idex=0,vptr=value; idex<length; idex++,vptr=(char *) vptr + php_tiff_bytes_per_format[format]) {
 				if ((char *) vptr_end - (char *) vptr < php_tiff_bytes_per_format[format]) {
 					exif_error_docref("exif_iif_add_value" EXIFERR_CC, image_info, E_WARNING, "Value too short");
 					break;
@@ -2330,7 +2326,7 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 */
 static void exif_iif_add_tag(image_info_type *image_info, int section_index, char *name, int tag, int format, size_t length, void* value, size_t value_len)
 {
-	exif_iif_add_value(image_info, section_index, name, tag, format, (int)length, value, value_len, image_info->motorola_intel);
+	exif_iif_add_value(image_info, section_index, name, tag, format, length, value, value_len, image_info->motorola_intel);
 }
 /* }}} */
 

@@ -2859,7 +2859,7 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 #elif defined(MB_CUR_MAX)
 	/* Check if current locale uses variable width encoding */
 	if (MB_CUR_MAX > 1) {
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 		const char *charmap = nl_langinfo(CODESET);
 #else
 		char buf[16];

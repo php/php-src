@@ -166,7 +166,7 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([1.0.3])
+PHP_PROG_RE2C([1.0.3], [--no-generation-date])
 PHP_PROG_PHP()
 
 PHP_ARG_ENABLE([re2c-cgoto],
@@ -176,9 +176,7 @@ PHP_ARG_ENABLE([re2c-cgoto],
   [no],
   [no])
 
-if test "$PHP_RE2C_CGOTO" = "no"; then
-  RE2C_FLAGS=""
-else
+AS_VAR_IF([PHP_RE2C_CGOTO], [no],, [
   AC_MSG_CHECKING([whether re2c -g works])
   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
 int main(int argc, const char **argv)
@@ -192,14 +190,12 @@ label2:
   return 0;
 }
   ]])],[
-    RE2C_FLAGS=""
     AC_MSG_RESULT([no])
   ],[
-    RE2C_FLAGS="-g"
+    AS_VAR_APPEND([RE2C_FLAGS], [" -g"])
     AC_MSG_RESULT([yes])
   ])
-fi
-PHP_SUBST(RE2C_FLAGS)
+])
 
 dnl Platform-specific compile settings.
 dnl ----------------------------------------------------------------------------
@@ -1195,11 +1191,6 @@ dnl ----------------------------------------------------------------------------
 PHP_HELP_SEPARATOR([PEAR:])
 PHP_CONFIGURE_PART(Configuring PEAR)
 
-dnl Compatibility
-if test -z "$with_pear" && test "$enable_pear" = "no"; then
-  with_pear=no
-fi
-
 dnl If CLI is disabled disable PEAR.
 if test "$PHP_CLI" = "no"; then
   with_pear=no
@@ -1322,9 +1313,9 @@ else
   fiber_asm="no"
 fi
 
-dnl Check whether syscall to create shadow stack exists, should be a better way, but...
-AC_CACHE_CHECK([whether syscall to create shadow stack exists], ac_cv_syscall_shadow_stack_exists,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([whether syscall to create shadow stack exists],
+[php_cv_have_shadow_stack_syscall],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <unistd.h>
 #include <sys/mman.h>
 int main(void) {
@@ -1334,18 +1325,19 @@ int main(void) {
     munmap(base, 0x20000);
     return 0;
   }
-  else
-    return 1;
+  return 1;
 }
-  ]])], [ac_cv_syscall_shadow_stack_exists=yes], [ac_cv_syscall_shadow_stack_exists=no], [ac_cv_syscall_shadow_stack_exists=no])
+])],
+  [php_cv_have_shadow_stack_syscall=yes],
+  [php_cv_have_shadow_stack_syscall=no],
+  [php_cv_have_shadow_stack_syscall=no])
 ])
-if test "$ac_cv_syscall_shadow_stack_exists" = yes; then
-  AC_DEFINE([SHADOW_STACK_SYSCALL], 1, [ ])
-  # asm file can't see macro from AC_DEFINE, workaround this via cflag
-  fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=1"
-  # if the syscall doesn't exist, we may block the final ELF from __PROPERTY_SHSTK
-  # via redefine macro as "-D__CET__=1"
-fi
+dnl The asm files can't see macro from AC_DEFINE, workaround this via cflag. If
+dnl the syscall doesn't exist, we may block the final ELF from __PROPERTY_SHSTK
+dnl via redefine macro as "-D__CET__=1".
+AS_VAR_IF([php_cv_have_shadow_stack_syscall], [yes],
+  [fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=1"],
+  [fiber_asm_cflag="-DSHADOW_STACK_SYSCALL=0"])
 
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
@@ -1776,7 +1768,7 @@ PHP_ADD_SOURCES(Zend, \
 	Optimizer/escape_analysis.c \
 	Optimizer/compact_vars.c \
 	Optimizer/zend_dump.c \
-    , -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+    , [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
