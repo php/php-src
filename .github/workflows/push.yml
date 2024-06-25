@@ -192,7 +192,7 @@ jobs:
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
   ALPINE:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -233,6 +233,7 @@ jobs:
           # job id, not the job name)
           key: "ALPINE_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
