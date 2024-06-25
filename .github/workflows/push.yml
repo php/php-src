@@ -238,12 +238,11 @@ jobs:
       - name: ./configure
         uses: ./.github/actions/configure-alpine
         with:
-          # -Wno-error=address: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=114609
           # -Wno-error=stringop-overread: main/getopt.c: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=114622
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang-17 CXX=clang++-17' || 'CFLAGS="-Wno-error=address -Wno-error=stringop-overread"' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=function -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=function" CC=clang-17 CXX=clang++-17' || 'CFLAGS="-Wno-error=stringop-overread"' }}
           skipSlow: ${{ matrix.asan }}
           configureArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: make
