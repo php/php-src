@@ -18,7 +18,7 @@
 #include "fuzzer.h"
 
 #include "Zend/zend.h"
-#include "main/php_config.h"
+#include <main/php_config.h>
 #include "main/php_main.h"
 
 #include <stdio.h>

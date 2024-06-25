@@ -2,7 +2,7 @@
 #define incl_PHP_GMP_INT_H
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
