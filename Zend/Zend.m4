@@ -66,7 +66,7 @@ AC_CACHE_CHECK([for usable _controlfp],
   [php_cv_have__controlfp=no])])
 AS_VAR_IF([php_cv_have__controlfp], [yes],
   [AC_DEFINE([HAVE__CONTROLFP], [1],
-    [Define to 1 if _controlfp is present usable.])])
+    [Define to 1 if _controlfp is present and usable.])])
 
 AC_CACHE_CHECK([for usable _controlfp_s],
   [php_cv_have__controlfp_s],
