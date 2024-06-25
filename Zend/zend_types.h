@@ -142,24 +142,24 @@ typedef struct {
 	zend_type types[1];
 } zend_type_list;
 
-#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25
-#define _ZEND_TYPE_MASK ((1u << 25) - 1)
+#define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 25u
+#define _ZEND_TYPE_MASK ((1u << 25u) - 1)
 /* Only one of these bits may be set. */
-#define _ZEND_TYPE_NAME_BIT (1u << 24)
+#define _ZEND_TYPE_NAME_BIT (1u << 24u)
 // Used to signify that type.ptr is not a `zend_string*` but a `const char*`,
-#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23)
-#define _ZEND_TYPE_LIST_BIT (1u << 22)
+#define _ZEND_TYPE_LITERAL_NAME_BIT (1u << 23u)
+#define _ZEND_TYPE_LIST_BIT (1u << 22u)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_NAME_BIT|_ZEND_TYPE_LITERAL_NAME_BIT)
 /* For BC behaviour with iterable type */
-#define _ZEND_TYPE_ITERABLE_BIT (1u << 21)
+#define _ZEND_TYPE_ITERABLE_BIT (1u << 21u)
 /* Whether the type list is arena allocated */
-#define _ZEND_TYPE_ARENA_BIT (1u << 20)
+#define _ZEND_TYPE_ARENA_BIT (1u << 20u)
 /* Whether the type list is an intersection type */
-#define _ZEND_TYPE_INTERSECTION_BIT (1u << 19)
+#define _ZEND_TYPE_INTERSECTION_BIT (1u << 19u)
 /* Whether the type is a union type */
-#define _ZEND_TYPE_UNION_BIT (1u << 18)
+#define _ZEND_TYPE_UNION_BIT (1u << 18u)
 /* Type mask excluding the flags above. */
-#define _ZEND_TYPE_MAY_BE_MASK ((1u << 18) - 1)
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 18u) - 1u)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2u
 
@@ -284,7 +284,7 @@ typedef struct {
 	_ZEND_TYPE_PREFIX { NULL, (_type_mask) }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code))))) \
+	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ( (code) == IS_ITERABLE ? _ZEND_TYPE_ITERABLE_BIT : ((code) == IS_MIXED ? MAY_BE_ANY : (1u << (code))))) \
 		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
@@ -596,47 +596,47 @@ struct _zend_ast_ref {
 };
 
 /* Regular data types: Must be in sync with zend_variables.c. */
-#define IS_UNDEF					0
-#define IS_NULL						1
-#define IS_FALSE					2
-#define IS_TRUE						3
-#define IS_LONG						4
-#define IS_DOUBLE					5
-#define IS_STRING					6
-#define IS_ARRAY					7
-#define IS_OBJECT					8
-#define IS_RESOURCE					9
-#define IS_REFERENCE				10
-#define IS_CONSTANT_AST				11 /* Constant expressions */
+#define IS_UNDEF					0u
+#define IS_NULL						1u
+#define IS_FALSE					2u
+#define IS_TRUE						3u
+#define IS_LONG						4u
+#define IS_DOUBLE					5u
+#define IS_STRING					6u
+#define IS_ARRAY					7u
+#define IS_OBJECT					8u
+#define IS_RESOURCE					9u
+#define IS_REFERENCE				10u
+#define IS_CONSTANT_AST				11u /* Constant expressions */
 
 /* Fake types used only for type hinting.
  * These are allowed to overlap with the types below. */
-#define IS_CALLABLE					12
-#define IS_ITERABLE					13
-#define IS_VOID						14
-#define IS_STATIC					15
-#define IS_MIXED					16
-#define IS_NEVER					17
+#define IS_CALLABLE					12u
+#define IS_ITERABLE					13u
+#define IS_VOID						14u
+#define IS_STATIC					15u
+#define IS_MIXED					16u
+#define IS_NEVER					17u
 
 /* internal types */
-#define IS_INDIRECT             	12
-#define IS_PTR						13
-#define IS_ALIAS_PTR				14
-#define _IS_ERROR					15
+#define IS_INDIRECT             	12u
+#define IS_PTR						13u
+#define IS_ALIAS_PTR				14u
+#define _IS_ERROR					15u
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					18u
+#define _IS_NUMBER					19u
 
 /* guard flags */
-#define ZEND_GUARD_PROPERTY_GET		(1<<0)
-#define ZEND_GUARD_PROPERTY_SET		(1<<1)
-#define ZEND_GUARD_PROPERTY_UNSET	(1<<2)
-#define ZEND_GUARD_PROPERTY_ISSET	(1<<3)
-#define ZEND_GUARD_PROPERTY_MASK	15
-#define ZEND_GUARD_RECURSION_DEBUG	(1<<4)
-#define ZEND_GUARD_RECURSION_EXPORT	(1<<5)
-#define ZEND_GUARD_RECURSION_JSON	(1<<6)
+#define ZEND_GUARD_PROPERTY_GET		(1u << 0u)
+#define ZEND_GUARD_PROPERTY_SET		(1u << 1u)
+#define ZEND_GUARD_PROPERTY_UNSET	(1u << 2u)
+#define ZEND_GUARD_PROPERTY_ISSET	(1u << 3u)
+#define ZEND_GUARD_PROPERTY_MASK	15u
+#define ZEND_GUARD_RECURSION_DEBUG	(1u << 4u)
+#define ZEND_GUARD_RECURSION_EXPORT	(1u << 5u)
+#define ZEND_GUARD_RECURSION_JSON	(1u << 6u)
 
 #define ZEND_GUARD_RECURSION_TYPE(t) ZEND_GUARD_RECURSION_ ## t
 
@@ -699,8 +699,8 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define Z_TYPE_MASK					0xff
 #define Z_TYPE_FLAGS_MASK			0xff00
 
-#define Z_TYPE_FLAGS_SHIFT			8
-#define Z_TYPE_INFO_EXTRA_SHIFT		16
+#define Z_TYPE_FLAGS_SHIFT			8u
+#define Z_TYPE_INFO_EXTRA_SHIFT		16u
 
 #define GC_REFCOUNT(p)				zend_gc_refcount(&(p)->gc)
 #define GC_SET_REFCOUNT(p, rc)		zend_gc_set_refcount(&(p)->gc, rc)
@@ -734,8 +734,8 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
 #define GC_INFO_MASK				0xfffffc00
-#define GC_FLAGS_SHIFT				0
-#define GC_INFO_SHIFT				10
+#define GC_FLAGS_SHIFT				0u
+#define GC_INFO_SHIFT				10u
 
 static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
@@ -773,11 +773,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
 /* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
-#define GC_NOT_COLLECTABLE			(1<<4)
-#define GC_PROTECTED                (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
-#define GC_PERSISTENT               (1<<7) /* allocated using malloc */
-#define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
+#define GC_NOT_COLLECTABLE			(1u << 4u)
+#define GC_PROTECTED                (1u << 5u) /* used for recursion detection */
+#define GC_IMMUTABLE                (1u << 6u) /* can't be changed in place */
+#define GC_PERSISTENT               (1u << 7u) /* allocated using malloc */
+#define GC_PERSISTENT_LOCAL         (1u << 8u) /* persistent, but thread-local */
 
 #define GC_NULL						(IS_NULL         | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_STRING					(IS_STRING       | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
@@ -788,13 +788,13 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define GC_CONSTANT_AST				(IS_CONSTANT_AST | (GC_NOT_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
-#define IS_TYPE_REFCOUNTED			(1<<0)
-#define IS_TYPE_COLLECTABLE			(1<<1)
+#define IS_TYPE_REFCOUNTED			(1u << 0u)
+#define IS_TYPE_COLLECTABLE			(1u << 1u)
 /* Used for static variables to check if they have been initialized. We can't use IS_UNDEF because
  * we can't store IS_UNDEF zvals in the static_variables HashTable. This needs to live in type_info
  * so that the ZEND_ASSIGN overrides it but is moved to extra to avoid breaking the Z_REFCOUNTED()
  * optimization that only checks for Z_TYPE_FLAGS() without `& (IS_TYPE_COLLECTABLE|IS_TYPE_REFCOUNTED)`. */
-#define IS_STATIC_VAR_UNINITIALIZED		(1<<0)
+#define IS_STATIC_VAR_UNINITIALIZED		(1u << 0u)
 
 #if 1
 /* This optimized version assumes that we have a single "type_flag" */
@@ -819,8 +819,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_STR_CLASS_NAME_MAP_PTR   GC_PROTECTED  /* refcount is a map_ptr offset of class_entry */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
-#define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
-#define IS_STR_VALID_UTF8           (1<<9)        /* valid UTF-8 according to PCRE */
+#define IS_STR_PERMANENT            (1u << 8u)    /* relives request boundary */
+#define IS_STR_VALID_UTF8           (1u << 9u)    /* valid UTF-8 according to PCRE */
 
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
@@ -828,8 +828,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 /* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_WEAKLY_REFERENCED	GC_PERSISTENT
-#define IS_OBJ_DESTRUCTOR_CALLED	(1<<8)
-#define IS_OBJ_FREE_CALLED			(1<<9)
+#define IS_OBJ_DESTRUCTOR_CALLED	(1u << 8u)
+#define IS_OBJ_FREE_CALLED			(1u << 9u)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
@@ -1558,8 +1558,8 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
  * (both use IS_UNDEF type) in the Z_EXTRA space. As such we also need to copy
  * the Z_EXTRA space when copying property default values etc. We define separate
  * macros for this purpose, so this workaround is easier to remove in the future. */
-#define IS_PROP_UNINIT (1<<0)
-#define IS_PROP_REINITABLE (1<<1)  /* It has impact only on readonly properties */
+#define IS_PROP_UNINIT (1u << 0u)
+#define IS_PROP_REINITABLE (1u << 1u)  /* It has impact only on readonly properties */
 #define Z_PROP_FLAG_P(z) Z_EXTRA_P(z)
 #define ZVAL_COPY_VALUE_PROP(z, v) \
 	do { *(z) = *(v); } while (0)

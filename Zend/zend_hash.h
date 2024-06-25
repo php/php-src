@@ -30,22 +30,22 @@
 #define HASH_KEY_IS_LONG 2
 #define HASH_KEY_NON_EXISTENT 3
 
-#define HASH_UPDATE 			(1<<0)
-#define HASH_ADD				(1<<1)
-#define HASH_UPDATE_INDIRECT	(1<<2)
-#define HASH_ADD_NEW			(1<<3)
-#define HASH_ADD_NEXT			(1<<4)
-#define HASH_LOOKUP				(1<<5)
+#define HASH_UPDATE 			(1u << 0u)
+#define HASH_ADD				(1u << 1u)
+#define HASH_UPDATE_INDIRECT	(1u << 2u)
+#define HASH_ADD_NEW			(1u << 3u)
+#define HASH_ADD_NEXT			(1u << 4u)
+#define HASH_LOOKUP				(1u << 5u)
 
-#define HASH_FLAG_CONSISTENCY      ((1<<0) | (1<<1))
-#define HASH_FLAG_PACKED           (1<<2)
-#define HASH_FLAG_UNINITIALIZED    (1<<3)
-#define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
-#define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
-#define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
+#define HASH_FLAG_CONSISTENCY      ((1u << 0u) | (1u << 1u))
+#define HASH_FLAG_PACKED           (1u << 2u)
+#define HASH_FLAG_UNINITIALIZED    (1u << 3u)
+#define HASH_FLAG_STATIC_KEYS      (1u << 4u) /* long and interned strings */
+#define HASH_FLAG_HAS_EMPTY_IND    (1u << 5u)
+#define HASH_FLAG_ALLOW_COW_VIOLATION (1u << 6u)
 
 /* Only the low byte are real flags */
-#define HASH_FLAG_MASK 0xff
+#define HASH_FLAG_MASK 0xffu
 
 #define HT_FLAGS(ht) (ht)->u.flags
 
