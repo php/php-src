@@ -646,7 +646,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #endif
 					,
 #ifdef PHP_BUILD_PROVIDER
-					"This build by " PHP_BUILD_PROVIDER "\n"
+					"Built by " PHP_BUILD_PROVIDER "\n"
 #else
 					""
 #endif
