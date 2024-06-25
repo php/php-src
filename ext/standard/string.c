@@ -5010,10 +5010,13 @@ PHP_FUNCTION(parse_str)
 	zval *arrayArg = NULL;
 	char *res = NULL;
 	size_t arglen;
+	bool mergeParams = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(arg, arglen)
 		Z_PARAM_ZVAL(arrayArg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(mergeParams)
 	ZEND_PARSE_PARAMETERS_END();
 
 	arrayArg = zend_try_array_init(arrayArg);
