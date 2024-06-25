@@ -782,6 +782,17 @@ static ZEND_FUNCTION(zend_test_cast_fread)
 	}
 }
 
+static ZEND_FUNCTION(zend_test_is_zend_ptr)
+{
+	zend_long addr;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(addr);
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(is_zend_ptr((void*)addr));
+}
+
 static zend_object *zend_test_class_new(zend_class_entry *class_type)
 {
 	zend_object *obj = zend_objects_new(class_type);

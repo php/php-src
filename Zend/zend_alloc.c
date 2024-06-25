@@ -2469,17 +2469,15 @@ ZEND_API bool is_zend_ptr(const void *ptr)
 		} while (chunk != AG(mm_heap)->main_chunk);
 	}
 
-	if (AG(mm_heap)->huge_list) {
-		zend_mm_huge_list *block = AG(mm_heap)->huge_list;
-
-		do {
-			if (ptr >= (void*)block
-			 && ptr < (void*)((char*)block + block->size)) {
-				return 1;
-			}
-			block = block->next;
-		} while (block != AG(mm_heap)->huge_list);
+	zend_mm_huge_list *block = AG(mm_heap)->huge_list;
+	while (block) {
+		if (ptr >= (void*)block
+				&& ptr < (void*)((char*)block + block->size)) {
+			return 1;
+		}
+		block = block->next;
 	}
+
 	return 0;
 }
 
