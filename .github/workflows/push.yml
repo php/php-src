@@ -206,7 +206,7 @@ jobs:
     name: "ALPINE_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
     runs-on: ubuntu-22.04
     container:
-      image: 'alpine:3.19.1'
+      image: 'alpine:3.20.1'
     steps:
       - name: git checkout
         uses: actions/checkout@v4
