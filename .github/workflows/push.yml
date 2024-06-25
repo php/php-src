@@ -214,7 +214,8 @@ jobs:
         uses: ./.github/actions/apk
       - name: LLVM 17 (ASAN-only)
         if: ${{ matrix.asan }}
-        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17
+        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
+        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
         run: |
           apk add clang17 compiler-rt
       - name: System info
