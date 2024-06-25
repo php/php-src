@@ -189,6 +189,8 @@ function zend_test_override_libxml_global_state(): void {}
 
     /** @param resource $stream */
     function zend_test_cast_fread($stream): void {}
+
+    function zend_test_is_zend_ptr(int $addr): bool {}
 }
 
 namespace ZendTestNS {
