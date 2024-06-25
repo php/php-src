@@ -404,7 +404,7 @@ PHP_FUNCTION(pcntl_waitpid)
 PHP_FUNCTION(pcntl_waitid)
 {
 	zend_long idtype = P_ALL;
-	zend_long id = NULL;
+	zend_long id = 0;
 	bool id_is_null = 1;
 	zval *user_siginfo = NULL;
 	zend_long options = WEXITED;
