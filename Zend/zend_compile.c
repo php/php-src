@@ -4744,7 +4744,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	char *p;
 	char *end;
 	uint32_t placeholder_count;
-	
+
 	placeholder_count = 0;
 	p = Z_STRVAL_P(format_string);
 	end = p + Z_STRLEN_P(format_string);
@@ -4955,7 +4955,7 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 	} else if (zend_string_equals_literal(lcname, "array_key_exists")) {
 		return zend_compile_func_array_key_exists(result, args);
 	} else if (zend_string_equals_literal(lcname, "sprintf")) {
-		return zend_compile_func_sprintf(result, args);	
+		return zend_compile_func_sprintf(result, args);
 	} else {
 		return FAILURE;
 	}
