@@ -23,20 +23,20 @@ var_dump($test, $val);
 
 ?>
 --EXPECT--
-object(Test)#1 (1) {
+object(Test)#1 (2) {
   ["prop"]=>
   string(2) "42"
   ["val"]=>
   uninitialized(int)
 }
 int(42)
-object(Test)#1 (1) {
+object(Test)#1 (2) {
   ["prop"]=>
   &int(42)
   ["val"]=>
   uninitialized(int)
 }
-object(Test)#1 (1) {
+object(Test)#1 (2) {
   ["prop"]=>
   &string(1) "x"
   ["val"]=>

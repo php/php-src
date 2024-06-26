@@ -19,7 +19,7 @@ $test->dump();
 
 ?>
 --EXPECTF--
-object(Test)#1 (0) {
+object(Test)#1 (3) {
   ["public"]=>
   uninitialized(bool)
   ["protected":protected]=>
@@ -27,7 +27,7 @@ object(Test)#1 (0) {
   ["private":"Test":private]=>
   uninitialized(string)
 }
-object(Test)#1 (0) refcount(%d){
+object(Test)#1 (3) refcount(%d){
   ["public"]=>
   uninitialized(bool)
   ["protected":protected]=>

@@ -130,7 +130,7 @@ static const struct {
 };
 
 /* {{{ get_debug_info handler for Calendar */
-static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
+static HashTable *Calendar_get_debug_info(zend_object *object, bool *is_temp)
 {
 	zval			zv,
 					zfields;
@@ -138,7 +138,7 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 	const Calendar	*cal;
 	HashTable		*debug_info;
 
-	*is_temp = 1;
+	*is_temp = true;
 
 	debug_info = zend_new_array(8);
 
@@ -156,10 +156,10 @@ static HashTable *Calendar_get_debug_info(zend_object *object, int *is_temp)
 	ZVAL_STRING(&zv, const_cast<char*>(cal->getType()));
 	zend_hash_str_update(debug_info, "type", sizeof("type") - 1, &zv);
 	{
-		zval		   ztz,
-					   ztz_debug;
-		int			   is_tmp;
-		HashTable	   *debug_info_tz;
+		zval       ztz,
+			       ztz_debug;
+		bool       is_tmp;
+		HashTable *debug_info_tz;
 
 		timezone_object_construct(&cal->getTimeZone(), &ztz , 0);
 		debug_info_tz = Z_OBJ_HANDLER(ztz, get_debug_info)(Z_OBJ(ztz), &is_tmp);

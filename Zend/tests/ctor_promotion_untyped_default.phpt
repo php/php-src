@@ -21,7 +21,7 @@ var_dump(new B);
 
 ?>
 --EXPECT--
-object(B)#1 (1) {
+object(B)#1 (2) {
   ["untyped"]=>
   NULL
   ["typed"]=>

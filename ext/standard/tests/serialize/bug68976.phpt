@@ -28,7 +28,9 @@ var_dump($data);
 --EXPECT--
 array(2) {
   [0]=>
-  object(evilClass)#1 (0) {
+  object(evilClass)#1 (1) {
+    ["name"]=>
+    unset
   }
   [1]=>
   int(1)

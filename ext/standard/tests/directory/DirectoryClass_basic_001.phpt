@@ -64,7 +64,7 @@ Class [ <internal%s> class Directory ] {
   }
 }
 Cannot instantiate a valid Directory directly:
-object(Directory)#%d (0) {
+object(Directory)#%d (2) {
   ["path"]=>
   uninitialized(string)
   ["handle"]=>
