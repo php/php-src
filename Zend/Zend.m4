@@ -122,21 +122,11 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
 ])
 
 dnl
-dnl LIBZEND_BASIC_CHECKS
-dnl
-dnl Basic checks specific for the Zend engine library.
-dnl
-AC_DEFUN([LIBZEND_BASIC_CHECKS],[
-AC_REQUIRE([AC_PROG_CC])
-
-AC_CHECK_HEADERS([cpuid.h])
-
-dnl
-dnl LIBZEND_DLSYM_CHECK
+dnl ZEND_DLSYM_CHECK
 dnl
 dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
 dnl
-AC_DEFUN([LIBZEND_DLSYM_CHECK],[
+AC_DEFUN([ZEND_DLSYM_CHECK], [dnl
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
 _LT_AC_TRY_DLOPEN_SELF([
   AC_MSG_RESULT(no)
@@ -147,6 +137,16 @@ _LT_AC_TRY_DLOPEN_SELF([
   AC_MSG_RESULT(no)
 ], [])
 ])
+
+dnl
+dnl ZEND_INIT
+dnl
+dnl Configure checks and initialization specific for the Zend engine library.
+dnl
+AC_DEFUN([ZEND_INIT], [dnl
+AC_REQUIRE([AC_PROG_CC])
+
+AC_CHECK_HEADERS([cpuid.h])
 
 dnl Check for library functions.
 AC_CHECK_FUNCS(m4_normalize([
@@ -195,12 +195,7 @@ AS_VAR_IF([php_cv_have_stack_limit], [yes],
     [Define to 1 if checking the stack limit is supported.])])
 
 ZEND_CHECK_FLOAT_PRECISION
-])
-
-dnl
-dnl LIBZEND_OTHER_CHECKS
-dnl
-AC_DEFUN([LIBZEND_OTHER_CHECKS],[
+ZEND_DLSYM_CHECK
 
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_ZTS)
