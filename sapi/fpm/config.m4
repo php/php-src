@@ -5,7 +5,7 @@ PHP_ARG_ENABLE([fpm],,
   [no])
 
 dnl Configure checks.
-AC_DEFUN([AC_FPM_CLOCK],
+AC_DEFUN([PHP_FPM_CLOCK],
 [AC_CHECK_FUNCS([clock_gettime],,
   [AC_SEARCH_LIBS([clock_gettime], [rt],
     [ac_cv_func_clock_gettime=yes
@@ -43,7 +43,7 @@ AS_VAR_IF([ac_cv_func_clock_gettime], [no],
       [Define to 1 if you have the 'clock_get_time' function.])])
 ])])
 
-AC_DEFUN([AC_FPM_TRACE],
+AC_DEFUN([PHP_FPM_TRACE],
 [
   have_ptrace=no
   have_broken_ptrace=no
@@ -237,7 +237,7 @@ AC_DEFUN([AC_FPM_TRACE],
 
 ])
 
-AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
+AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
 [
   AC_MSG_CHECKING([if gcc supports __sync_bool_compare_and_swap])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
@@ -252,7 +252,7 @@ AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
   ])
 ])
 
-AC_DEFUN([AC_FPM_LQ],
+AC_DEFUN([PHP_FPM_LQ],
 [
   have_lq=no
 
@@ -313,7 +313,7 @@ AC_DEFUN([AC_FPM_LQ],
   fi
 ])
 
-AC_DEFUN([AC_FPM_KQUEUE],
+AC_DEFUN([PHP_FPM_KQUEUE],
 [
 	AC_MSG_CHECKING([for kqueue])
 
@@ -335,7 +335,7 @@ AC_DEFUN([AC_FPM_KQUEUE],
 	])
 ])
 
-AC_DEFUN([AC_FPM_DEVPOLL],
+AC_DEFUN([PHP_FPM_DEVPOLL],
 [
 	AC_MSG_CHECKING([for /dev/poll])
 
@@ -358,7 +358,7 @@ AC_DEFUN([AC_FPM_DEVPOLL],
 	])
 ])
 
-AC_DEFUN([AC_FPM_EPOLL],
+AC_DEFUN([PHP_FPM_EPOLL],
 [
 	AC_MSG_CHECKING([for epoll])
 
@@ -392,7 +392,7 @@ AC_DEFUN([AC_FPM_EPOLL],
 	])
 ])
 
-AC_DEFUN([AC_FPM_SELECT],
+AC_DEFUN([PHP_FPM_SELECT],
 [
 	AC_MSG_CHECKING([for select])
 
@@ -425,14 +425,14 @@ AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
-  AC_FPM_CLOCK
-  AC_FPM_TRACE
-  AC_FPM_BUILTIN_ATOMIC
-  AC_FPM_LQ
-  AC_FPM_KQUEUE
-  AC_FPM_DEVPOLL
-  AC_FPM_EPOLL
-  AC_FPM_SELECT
+  PHP_FPM_CLOCK
+  PHP_FPM_TRACE
+  PHP_FPM_BUILTIN_ATOMIC
+  PHP_FPM_LQ
+  PHP_FPM_KQUEUE
+  PHP_FPM_DEVPOLL
+  PHP_FPM_EPOLL
+  PHP_FPM_SELECT
 
   AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
 
