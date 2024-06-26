@@ -2,6 +2,10 @@
 registerPHPFunctionNS() function - legit cases
 --EXTENSIONS--
 xsl
+--SKIPIF--
+<?php
+require __DIR__.'/skip_upstream_issue113.inc';
+?>
 --FILE--
 <?php
 
