@@ -639,6 +639,8 @@ PHP 8.4 UPGRADE NOTES
     equivalents to the old DOM classes in the global namespaces.
     The new classes follow the DOM living spec.
     RFC: https://wiki.php.net/rfc/opt_in_dom_spec_compliance
+  . Implemented "New ext-dom features in PHP 8.4" RFC.
+    RFC: https://wiki.php.net/rfc/dom_additions_84
 
 ========================================
 8. Removed Extensions and SAPIs

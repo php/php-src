@@ -55,6 +55,7 @@ PHP                                                                        NEWS
   . Implemented opt-in ext/dom spec compliance RFC. (nielsdos)
   . Fixed bug #79701 (getElementById does not correctly work with duplicate
     definitions). (nielsdos)
+  . Implemented "New ext-dom features in PHP 8.4" RFC. (nielsdos)
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)
