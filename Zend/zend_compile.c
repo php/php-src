@@ -4616,6 +4616,7 @@ static const zend_frameless_function_info *find_frameless_function_info(zend_ast
 
 static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *args, zend_function *fbc, const zend_frameless_function_info *frameless_function_info, uint32_t type)
 {
+	int lineno = CG(zend_lineno);
 	uint32_t num_args = frameless_function_info->num_args;
 	uint32_t offset = find_frameless_function_offset(num_args, frameless_function_info->handler);
 	znode arg_zvs[3];
@@ -4634,6 +4635,7 @@ static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *ar
 	uint32_t opnum = get_next_op_number();
 	zend_op *opline = zend_emit_op_tmp(result, opcode, NULL, NULL);
 	opline->extended_value = offset;
+	opline->lineno = lineno;
 	if (num_args >= 1) {
 		SET_NODE(opline->op1, &arg_zvs[0]);
 	}
@@ -4695,6 +4697,8 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 
 	/* Compile frameless call. */
 	if (frameless_function_info) {
+		CG(zend_lineno) = lineno;
+
 		uint32_t jmp_end_opnum = zend_emit_jump(0);
 		uint32_t jmp_fl_target = get_next_op_number();
 
