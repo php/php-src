@@ -19,7 +19,7 @@ var_dump(
   json_validate('{ "": { "foo": "" } }'),
   json_validate('{ "": { "": "" } }'),
   json_validate('{ "test": {"foo": "bar"}, "test2": {"foo" : "bar" }, "test2": {"foo" : "bar" } }'),
-  json_validate('{ "test": {"foo": "bar"}, "test2": {"foo" : "bar" }, "test3": {"foo" : "bar" } }'),
+  json_validate('{ "test": {"foo": "bar"}, "test2": {"foo" : "bar" }, "test3": {"foo" : "bar" } }')
 );
 
 ?>

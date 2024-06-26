@@ -96,15 +96,23 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 	s->cursor = (php_json_ctype *) str;
 	s->limit = (php_json_ctype *) str + str_len;
 	s->options = options;
+	s->character_count = 0;
 	PHP_JSON_CONDITION_SET(JS);
 }
 
 int php_json_scan(php_json_scanner *s)
 {
 	ZVAL_NULL(&s->value);
+	static unsigned long int token_total_length = 0;
 
 std:
 	s->token = s->cursor;
+
+	if (token_total_length == 0) {
+		token_total_length = strlen((const char*) s->token);
+	} else {
+		s->character_count = token_total_length + (-1 * strlen((const char*) s->token));
+	}
 
 /*!re2c
 	re2c:indent:top = 1;

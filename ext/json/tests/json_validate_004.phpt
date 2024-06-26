@@ -19,20 +19,20 @@ json_validate_trycatchdump("\"\x61\xf0\x80\x80\x41\"", 512, JSON_INVALID_UTF8_IG
 json_validate_trycatchdump("[\"\xc1\xc1\",\"a\"]", 512, JSON_INVALID_UTF8_IGNORE);
 
 ?>
---EXPECT--
+--EXPECTF--
 Testing Invalid UTF-8
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(114) "Malformed UTF-8 characters, possibly incorrectly encoded - error: syntax error, at character 0 near content: %s"
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(116) "Malformed UTF-8 characters, possibly incorrectly encoded - error: syntax error, at character -1 near content: %s"
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(117) "Malformed UTF-8 characters, possibly incorrectly encoded - error: syntax error, at character -2 near content: %s"
 bool(false)
 int(5)
-string(56) "Malformed UTF-8 characters, possibly incorrectly encoded"
+string(119) "Malformed UTF-8 characters, possibly incorrectly encoded - error: syntax error, at character -4 near content: %s"
 bool(true)
 int(0)
 string(8) "No error"

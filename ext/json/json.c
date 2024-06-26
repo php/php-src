@@ -70,6 +70,17 @@ static PHP_GINIT_FUNCTION(json)
 static PHP_RINIT_FUNCTION(json)
 {
 	JSON_G(error_code) = 0;
+	JSON_G(error_msg) = NULL;
+
+	return SUCCESS;
+}
+
+static PHP_RSHUTDOWN_FUNCTION(json)
+{
+	if (JSON_G(error_msg)) {
+		efree(JSON_G(error_msg));
+	}
+
 	return SUCCESS;
 }
 
@@ -209,6 +220,8 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
 		JSON_G(error_code) = error_code;
+		php_json_ctype* error_msg = php_json_parser_error_msg(&parser);
+		JSON_G(error_msg) = error_msg;
 		return false;
 	}
 
@@ -359,11 +372,26 @@ PHP_FUNCTION(json_last_error)
 }
 /* }}} */
 
-/* {{{ Returns the error string of the last json_encode() or json_decode() call. */
+/* {{{ Returns the error string of the last json_validate(), json_encode() or json_decode() call. */
 PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+	const char* msg = php_json_get_error_msg(JSON_G(error_code));
+
+	if (JSON_G(error_code) == PHP_JSON_ERROR_NONE) {
+		RETURN_STRING(msg);
+	}
+	
+	char* msg_combined;
+
+	if (JSON_G(error_msg) && strlen((const char*) JSON_G(error_msg)) > 0) {
+		spprintf(&msg_combined, 0, "%s - %s", msg, (const char*) JSON_G(error_msg));
+		RETVAL_STRING(msg_combined);
+		efree(msg_combined);
+		return;
+	} else {
+		RETURN_STRING(msg);
+	}
 }
 /* }}} */

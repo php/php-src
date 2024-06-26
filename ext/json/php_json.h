@@ -90,6 +90,7 @@ ZEND_BEGIN_MODULE_GLOBALS(json)
 	int encoder_depth;
 	int encode_max_depth;
 	php_json_error_code error_code;
+	unsigned char *error_msg;
 ZEND_END_MODULE_GLOBALS(json)
 
 PHP_JSON_API ZEND_EXTERN_MODULE_GLOBALS(json)
