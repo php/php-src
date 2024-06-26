@@ -123,6 +123,7 @@ PHP                                                                        NEWS
 - MBString:
   . Added mb_trim, mb_ltrim and mb_rtrim. (Yuya Hamada)
   . Added mb_ucfirst and mb_lcfirst. (Yuya Hamada)
+  . Updated Unicode data tables to Unicode 15.1. (Ayesh Karunaratne)
 
 - MySQLnd:
   . Fixed bug GH-13440 (PDO quote bottleneck). (nielsdos)

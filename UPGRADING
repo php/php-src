@@ -684,6 +684,9 @@ PHP 8.4 UPGRADE NOTES
     $domain name is empty or too long, and if $variant is not
     INTL_IDNA_VARIANT_UTS46.
 
+- MBString:
+  . Unicode data tables have been updated to Unicode 15.1.
+
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.
 
