@@ -326,6 +326,7 @@ AC_DEFUN([PHP_FPM_KQUEUE],
     kfd = kqueue();
     /* 0 -> STDIN_FILENO */
     EV_SET(&k, 0, EVFILT_READ , EV_ADD | EV_CLEAR, 0, 0, NULL);
+    (void)kfd;
   ])],
   [php_cv_have_kqueue=yes],
   [php_cv_have_kqueue=no])])
@@ -347,7 +348,8 @@ AC_DEFUN([PHP_FPM_DEVPOLL],
     dvp.dp_fds = NULL;
     dvp.dp_nfds = 0;
     dvp.dp_timeout = 0;
-    n = ioctl(dp, DP_POLL, &dvp)
+    n = ioctl(dp, DP_POLL, &dvp);
+    (void)n;
   ])],
   [php_cv_have_devpoll=yes],
   [php_cv_have_devpoll=no])])
