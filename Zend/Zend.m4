@@ -196,6 +196,7 @@ AS_VAR_IF([php_cv_have_stack_limit], [yes],
 
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
+ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
 
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_ZTS)
@@ -322,18 +323,24 @@ fi
 
 AC_MSG_CHECKING(whether to enable zend max execution timers)
 AC_MSG_RESULT($ZEND_MAX_EXECUTION_TIMERS)
-
 ])
 
+dnl
+dnl ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
+dnl
+dnl Check whether to enable global register variables if supported.
+dnl
+AC_DEFUN([ZEND_CHECK_GLOBAL_REGISTER_VARIABLES], [dnl
 AC_ARG_ENABLE([gcc-global-regs],
   [AS_HELP_STRING([--disable-gcc-global-regs],
-    [whether to enable GCC global register variables])],
+    [Disable GCC global register variables])],
   [ZEND_GCC_GLOBAL_REGS=$enableval],
   [ZEND_GCC_GLOBAL_REGS=yes])
 
-AC_MSG_CHECKING(for global register variables support)
-if test "$ZEND_GCC_GLOBAL_REGS" != "no"; then
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+AS_VAR_IF([ZEND_GCC_GLOBAL_REGS], [no],,
+  [AC_CACHE_CHECK([whether system supports global register variables],
+    [php_cv_have_global_register_vars],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 #if defined(__GNUC__)
 # define ZEND_GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
 #else
@@ -364,25 +371,25 @@ typedef int (*opcode_handler_t)(void);
 register void *FP  __asm__(ZEND_VM_FP_GLOBAL_REG);
 register const opcode_handler_t *IP __asm__(ZEND_VM_IP_GLOBAL_REG);
 int emu(const opcode_handler_t *ip, void *fp) {
-	const opcode_handler_t *orig_ip = IP;
-	void *orig_fp = FP;
-	IP = ip;
-	FP = fp;
-	while ((*ip)());
-	FP = orig_fp;
-	IP = orig_ip;
-}
-  ]], [[
-  ]])], [
-    ZEND_GCC_GLOBAL_REGS=yes
-  ], [
-    ZEND_GCC_GLOBAL_REGS=no
-  ])
-fi
-if test "$ZEND_GCC_GLOBAL_REGS" = "yes"; then
-  AC_DEFINE([HAVE_GCC_GLOBAL_REGS], 1, [Define if the target system has support for global register variables])
-fi
-AC_MSG_RESULT($ZEND_GCC_GLOBAL_REGS)
+  const opcode_handler_t *orig_ip = IP;
+  void *orig_fp = FP;
+  IP = ip;
+  FP = fp;
+  while ((*ip)());
+  FP = orig_fp;
+  IP = orig_ip;
+}], [])],
+  [php_cv_have_global_register_vars=yes],
+  [php_cv_have_global_register_vars=no])
+])
+AS_VAR_IF([php_cv_have_global_register_vars], [yes],
+  [AC_DEFINE([HAVE_GCC_GLOBAL_REGS], [1],
+    [Define to 1 if the target system has support for global register variables.])],
+  [ZEND_GCC_GLOBAL_REGS=no])
+])
+AC_MSG_CHECKING([whether to enable global register variables support])
+AC_MSG_RESULT([$ZEND_GCC_GLOBAL_REGS])
+])
 
 dnl Check whether __cpuid_count is available.
 AC_CACHE_CHECK(whether __cpuid_count is available, ac_cv_cpuid_count_available, [
