@@ -197,6 +197,7 @@ AS_VAR_IF([php_cv_have_stack_limit], [yes],
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
+ZEND_CHECK_CPUID_COUNT
 
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_ZTS)
@@ -391,18 +392,21 @@ AC_MSG_CHECKING([whether to enable global register variables support])
 AC_MSG_RESULT([$ZEND_GCC_GLOBAL_REGS])
 ])
 
+dnl
+dnl ZEND_CHECK_CPUID_COUNT
+dnl
 dnl Check whether __cpuid_count is available.
-AC_CACHE_CHECK(whether __cpuid_count is available, ac_cv_cpuid_count_available, [
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-  #include <cpuid.h>
-]], [[
-  unsigned eax, ebx, ecx, edx;
-  __cpuid_count(0, 0, eax, ebx, ecx, edx);
-]])], [
-  ac_cv_cpuid_count_available=yes
-], [
-  ac_cv_cpuid_count_available=no
-])])
-if test "$ac_cv_cpuid_count_available" = "yes"; then
-  AC_DEFINE([HAVE_CPUID_COUNT], 1, [whether __cpuid_count is available])
-fi
+dnl
+AC_DEFUN([ZEND_CHECK_CPUID_COUNT],
+[AC_CACHE_CHECK([whether __cpuid_count is available],
+  [php_cv_have___cpuid_count],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <cpuid.h>], [dnl
+    unsigned eax, ebx, ecx, edx;
+    __cpuid_count(0, 0, eax, ebx, ecx, edx);
+  ])],
+  [php_cv_have___cpuid_count=yes],
+  [php_cv_have___cpuid_count=no])])
+AS_VAR_IF([php_cv_have___cpuid_count], [yes],
+  [AC_DEFINE([HAVE_CPUID_COUNT], [1],
+    [Define to 1 if '__cpuid_count' is available.])])
+])
