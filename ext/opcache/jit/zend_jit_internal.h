@@ -381,6 +381,12 @@ typedef enum _zend_jit_trace_op {
 #define ZEND_JIT_TRACE_FAKE_INFO(level) \
 	(((level) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT) | ZEND_JIT_TRACE_FAKE_INIT_CALL)
 
+#define ZEND_JIT_TRACE_NUM_ARGS_INFO(count) \
+	((count) << ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
+#define ZEND_JIT_TRACE_NUM_ARGS(info) \
+	(((info) & ZEND_JIT_TRACE_FAKE_LEVEL_MASK) >> ZEND_JIT_TRACE_FAKE_LEVEL_SHIFT)
+
 #define ZEND_JIT_TRACE_SET_FIRST_SSA_VAR(_info, var) do { \
 		_info |= (var << ZEND_JIT_TRACE_SSA_VAR_SHIFT); \
 	} while (0)
@@ -564,6 +570,8 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_MASK_CLOSURE_CALL         0x00000200
 #define TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS  0x00000400
 
+#define TRACE_FRAME_MASK_FFI                  0x00000800
+
 
 #define TRACE_FRAME_INIT(frame, _func, _flags, num_args) do { \
 		zend_jit_trace_stack_frame *_frame = (frame); \
@@ -602,6 +610,8 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_CLOSURE_CALL)
 #define TRACE_FRAME_ALWAYS_RELEASE_THIS(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_ALWAYS_RELEASE_THIS)
+#define TRACE_FRAME_FFI(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_FFI)
 
 #define TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(frame) do { \
 		(frame)->_info |= (0xffffu << TRACE_FRAME_SHIFT_NUM_ARGS); \
