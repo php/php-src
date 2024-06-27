@@ -155,6 +155,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      used instead of the pkg-config search.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
+   - Symbol DLSYM_NEEDS_UNDERSCORE for using dlsym() with an underscore prefix
+     in symbol names has been removed (obsolete on current systems).
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have

@@ -167,11 +167,7 @@
 #  define DL_LOAD(libname)			dlopen(libname, PHP_RTLD_MODE | RTLD_GLOBAL)
 # endif
 # define DL_UNLOAD					dlclose
-# if defined(DLSYM_NEEDS_UNDERSCORE)
-#  define DL_FETCH_SYMBOL(h,s)		dlsym((h), "_" s)
-# else
-#  define DL_FETCH_SYMBOL			dlsym
-# endif
+# define DL_FETCH_SYMBOL			dlsym
 # define DL_ERROR					dlerror
 # define DL_HANDLE					void *
 # define ZEND_EXTENSIONS_SUPPORT	1

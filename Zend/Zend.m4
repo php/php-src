@@ -122,23 +122,6 @@ AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION],[
 ])
 
 dnl
-dnl ZEND_DLSYM_CHECK
-dnl
-dnl Ugly hack to check if dlsym() requires a leading underscore in symbol name.
-dnl
-AC_DEFUN([ZEND_DLSYM_CHECK], [dnl
-AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
-_LT_AC_TRY_DLOPEN_SELF([
-  AC_MSG_RESULT(no)
-], [
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(DLSYM_NEEDS_UNDERSCORE, 1, [Define if dlsym() requires a leading underscore in symbol names. ])
-], [
-  AC_MSG_RESULT(no)
-], [])
-])
-
-dnl
 dnl ZEND_INIT
 dnl
 dnl Configure checks and initialization specific for the Zend engine library.
@@ -195,7 +178,6 @@ AS_VAR_IF([php_cv_have_stack_limit], [yes],
     [Define to 1 if checking the stack limit is supported.])])
 
 ZEND_CHECK_FLOAT_PRECISION
-ZEND_DLSYM_CHECK
 
 AC_MSG_CHECKING(whether to enable thread-safety)
 AC_MSG_RESULT($ZEND_ZTS)
