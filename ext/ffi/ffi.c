@@ -6667,6 +6667,7 @@ void zend_ffi_declare(const char *name, size_t name_len, zend_ffi_dcl *dcl) /* {
 					zend_ffi_type *type = pemalloc(sizeof(zend_ffi_type), FFI_G(persistent));
 
 					memcpy(type, ZEND_FFI_TYPE(dcl->type), sizeof(zend_ffi_type));
+					type->attr &= ~ZEND_FFI_ATTR_PERSISTENT;
 					type->attr |= FFI_G(default_type_attr);
 					type->align = dcl->align;
 					dcl->type = ZEND_FFI_TYPE_MAKE_OWNED(type);
