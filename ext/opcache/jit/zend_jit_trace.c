@@ -7314,10 +7314,12 @@ done:
 
 			call = top;
 			TRACE_FRAME_INIT(call, p->func, frame_flags, num_args);
+#ifdef HAVE_FFI
 			if (TRACE_FRAME_FFI(call)) {
 				ZEND_ASSERT(frame_ffi_sym != NULL);
 				call->call_opline = (const zend_op*)(void*)frame_ffi_sym;
 			}
+#endif
 			call->prev = frame->call;
 			if (!(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
