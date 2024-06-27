@@ -303,19 +303,29 @@ fi
 AC_MSG_CHECKING(whether to enable zend signal handling)
 AC_MSG_RESULT($ZEND_SIGNALS)
 
+
+dnl Enable Zend Max Execution Timers by default on macOS
+AS_CASE(["$host_alias"], [*darwin*], [ZEND_MAX_EXECUTION_TIMERS="yes"], [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
+
 dnl Don't enable Zend Max Execution Timers by default until PHP 8.3 to not break the ABI
 AC_ARG_ENABLE([zend-max-execution-timers],
   [AS_HELP_STRING([--enable-zend-max-execution-timers],
     [whether to enable zend max execution timers])],
     [ZEND_MAX_EXECUTION_TIMERS=$enableval],
-    [ZEND_MAX_EXECUTION_TIMERS=$ZEND_ZTS])
+    [])
 
-AS_CASE(["$host_alias"], [*linux*|*freebsd*], [], [ZEND_MAX_EXECUTION_TIMERS='no'])
+AS_CASE(
+  ["$host_alias"],
+  [*linux*|*freebsd*], [
+    AC_SEARCH_LIBS([timer_create], [rt],, [ZEND_MAX_EXECUTION_TIMERS='no'])
+  ],
+  [*darwin*], [],
+  [ZEND_MAX_EXECUTION_TIMERS='no']
+)
 
-PHP_CHECK_FUNC(timer_create, rt)
-if test "$ac_cv_func_timer_create" != "yes"; then
-  ZEND_MAX_EXECUTION_TIMERS='no'
-fi
+AS_CASE(["$host_alias"], [*darwin*], [], [
+  AC_SEARCH_LIBS([timer_create], [rt],, [ZEND_MAX_EXECUTION_TIMERS='no'])
+])
 
 if test "$ZEND_MAX_EXECUTION_TIMERS" = "yes"; then
   AC_DEFINE(ZEND_MAX_EXECUTION_TIMERS, 1, [Use zend max execution timers])

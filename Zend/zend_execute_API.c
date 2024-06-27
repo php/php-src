@@ -1407,20 +1407,25 @@ ZEND_API ZEND_NORETURN void ZEND_FASTCALL zend_timeout(void) /* {{{ */
 
 #ifndef ZEND_WIN32
 # ifdef ZEND_MAX_EXECUTION_TIMERS
+#  if defined(__APPLE__) && !defined(ZTS)
+void zend_timeout_handler(void) /* {{{ */
+#  else
 static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
+#  endif
 {
-#ifdef ZTS
+#  ifdef ZTS
 	if (!tsrm_is_managed_thread()) {
 		fprintf(stderr, "zend_timeout_handler() called in a thread not managed by PHP. The expected signal handler will not be called. This is probably a bug.\n");
 
 		return;
 	}
-#endif
+#  endif
 
+#  ifndef __APPLE__
 	if (si->si_value.sival_ptr != &EG(max_execution_timer_timer)) {
-#ifdef MAX_EXECUTION_TIMERS_DEBUG
+#   ifdef MAX_EXECUTION_TIMERS_DEBUG
 		fprintf(stderr, "Executing previous handler (if set) for unexpected signal SIGRTMIN received on thread %d\n", (pid_t) syscall(SYS_gettid));
-#endif
+#   endif
 
 		if (EG(oldact).sa_sigaction) {
 			EG(oldact).sa_sigaction(dummy, si, uc);
@@ -1431,6 +1436,7 @@ static void zend_timeout_handler(int dummy, siginfo_t *si, void *uc) /* {{{ */
 
 		return;
 	}
+#  endif /* ifndef __APPLE__ */
 # else
 static void zend_timeout_handler(int dummy) /* {{{ */
 {
@@ -1543,6 +1549,7 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 #elif defined(ZEND_MAX_EXECUTION_TIMERS)
 	zend_max_execution_timer_settime(seconds);
 
+# if !defined(__APPLE__) || defined(ZTS)
 	if (reset_signals) {
 		sigset_t sigset;
 		struct sigaction act;
@@ -1550,11 +1557,13 @@ static void zend_set_timeout_ex(zend_long seconds, bool reset_signals) /* {{{ */
 		act.sa_sigaction = zend_timeout_handler;
 		sigemptyset(&act.sa_mask);
 		act.sa_flags = SA_ONSTACK | SA_SIGINFO;
-		sigaction(SIGRTMIN, &act, NULL);
+		sigaction(ZEND_MAX_EXECUTION_TIMERS_SIGNAL, &act, NULL);
+
 		sigemptyset(&sigset);
-		sigaddset(&sigset, SIGRTMIN);
+		sigaddset(&sigset, ZEND_MAX_EXECUTION_TIMERS_SIGNAL);
 		sigprocmask(SIG_UNBLOCK, &sigset, NULL);
 	}
+# endif
 #elif defined(HAVE_SETITIMER)
 	{
 		struct itimerval t_r;		/* timeout requested */
