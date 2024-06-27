@@ -78,7 +78,7 @@ static PHP_RINIT_FUNCTION(json)
 static PHP_RSHUTDOWN_FUNCTION(json)
 {
 	if (JSON_G(error_msg)) {
-		efree(JSON_G(error_msg));
+		free(JSON_G(error_msg));
 	}
 
 	return SUCCESS;
@@ -92,7 +92,7 @@ zend_module_entry json_module_entry = {
 	PHP_MINIT(json),
 	NULL,
 	PHP_RINIT(json),
-	NULL,
+	PHP_RSHUTDOWN(json),
 	PHP_MINFO(json),
 	PHP_JSON_VERSION,
 	PHP_MODULE_GLOBALS(json),
