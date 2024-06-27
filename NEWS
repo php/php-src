@@ -78,6 +78,7 @@ PHP                                                                        NEWS
 
 - Hash:
   . Changed return type of hash_update() to true. (nielsdos)
+  . Added HashContext::__debugInfo(). (timwolla)
 
 - IMAP:
   . Moved to PECL. (Derick Rethans)
