@@ -372,13 +372,11 @@ PHP_FUNCTION(json_last_error_msg)
 		RETURN_STRING(msg);
 	}
 	
-	char* msg_combined;
+	char msg_combined[256];
 
-	if (JSON_G(error_msg) && strlen((const char*) JSON_G(error_msg)) > 0) {
-		spprintf(&msg_combined, 0, "%s - %s", msg, (const char*) JSON_G(error_msg));
+	if (strlen(JSON_G(error_msg)) > 0) {
+		snprintf(msg_combined, sizeof(msg_combined), "%s - %s", msg, JSON_G(error_msg));
 		RETVAL_STRING(msg_combined);
-		efree(msg_combined);
-		return;
 	} else {
 		RETURN_STRING(msg);
 	}
