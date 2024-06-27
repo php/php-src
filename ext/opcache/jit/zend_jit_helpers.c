@@ -3362,3 +3362,37 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	*target = '\0';
 	return ret;
 }
+
+#ifdef HAVE_FFI
+static void ZEND_FASTCALL zend_jit_zval_string(zval *zv, const char *str)
+{
+	if (str) {
+		ZVAL_STRING(zv, str);
+	} else {
+		ZVAL_NULL(zv);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_zval_ffi_ptr(zval *zv, zend_ffi_type *type, void *ptr)
+{
+	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_POINTER);
+	if (ptr) {
+		zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
+
+		// inlined zend_ffi_object_init()
+		GC_SET_REFCOUNT(&cdata->std, 1);
+		GC_TYPE_INFO(&cdata->std) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
+		cdata->std.ce = zend_ffi_cdata_ce;
+		cdata->std.handlers = zend_ffi_cdata_ce->default_object_handlers; /* zend_ffi_cdata_handlers */
+		cdata->std.properties = NULL;
+		zend_objects_store_put(&cdata->std);
+		cdata->type = type;
+		cdata->flags = 0;
+		cdata->ptr = (void*)&cdata->ptr_holder;
+		cdata->ptr_holder = ptr;
+		ZVAL_OBJ(zv, &cdata->std);
+	} else {
+		ZVAL_NULL(zv);
+	}
+}
+#endif

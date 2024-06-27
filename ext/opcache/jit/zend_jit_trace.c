@@ -3916,6 +3916,9 @@ static bool zend_jit_trace_next_is_send_result(const zend_op              *oplin
 	  || ((opline+1)->opcode == ZEND_SEND_VAL_EX
 	   && frame
 	   && frame->call
+#ifdef HAVE_FFI
+	   && !TRACE_FRAME_FFI(frame->call)
+#endif
 	   && frame->call->func
 	   && !ARG_MUST_BE_SENT_BY_REF(frame->call->func, (opline+1)->op2.num)))
 	 && (opline+1)->op1_type == IS_TMP_VAR
@@ -4123,6 +4126,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	uint32_t frame_flags = 0;
 #ifdef HAVE_FFI
 	zend_jit_ffi_info *ffi_info = NULL;
+	zend_ffi_symbol *frame_ffi_sym = NULL;
 #endif
 
 	JIT_G(current_trace) = trace_buffer;
@@ -4458,6 +4462,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 			frame_flags = 0;
+#ifdef HAVE_FFI
+			frame_ffi_sym = NULL;
+#endif
 
 			switch (opline->opcode) {
 				case ZEND_INIT_FCALL:
@@ -5446,6 +5453,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
+#ifdef HAVE_FFI
+						if (JIT_G(current_frame)
+						 && JIT_G(current_frame)->call
+						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							if (!zend_jit_ffi_send_val(&ctx, opline, op_array, ssa, ssa_op,
+									op1_info, OP1_REG_ADDR(), 0, op1_ffi_type)) {
+								goto jit_failure;
+							}
+							goto done;
+						}
+#endif
 						if (!zend_jit_send_val(&ctx, opline,
 								op1_info, OP1_REG_ADDR())) {
 							goto jit_failure;
@@ -5498,6 +5516,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_info = OP1_INFO();
 						CHECK_OP1_TRACE_TYPE();
+#ifdef HAVE_FFI
+						if (JIT_G(current_frame)
+						 && JIT_G(current_frame)->call
+						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							if (!zend_jit_ffi_send_val(&ctx, opline, op_array, ssa, ssa_op,
+									op1_info, op1_addr, op1_def_addr, op1_ffi_type)) {
+								goto jit_failure;
+							}
+							goto done;
+						}
+#endif
 						if (!zend_jit_send_var(&ctx, opline, op_array,
 								op1_info, op1_addr, op1_def_addr)) {
 							goto jit_failure;
@@ -5548,6 +5577,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							TRACE_FRAME_SET_LAST_SEND_UNKNOWN(JIT_G(current_frame)->call);
 							break;
 						}
+#ifdef HAVE_FFI
+						if (TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							/* FFI arguments alwyas sent by value ??? */
+							goto done;
+						}
+#endif
 						if (!zend_jit_check_func_arg(&ctx, opline)) {
 							goto jit_failure;
 						}
@@ -5565,6 +5600,16 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
+#ifdef HAVE_FFI
+						if (JIT_G(current_frame)
+						 && JIT_G(current_frame)->call
+						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							if (!zend_jit_ffi_do_call_sym(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
+								goto jit_failure;
+							}
+							goto done;
+						}
+#endif
 						if (!zend_jit_do_fcall(&ctx, opline, op_array, op_array_ssa, frame->call_level, -1, p + 1)) {
 							goto jit_failure;
 						}
@@ -6281,7 +6326,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 #ifdef HAVE_FFI
-						if (opline->opcode == ZEND_FETCH_OBJ_R && op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
+						if ((opline->opcode == ZEND_FETCH_OBJ_R
+						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG)
+						 && op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
 							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 
@@ -6302,11 +6349,13 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								}
 								goto done;
 							}
-						} else if (opline->opcode == ZEND_FETCH_OBJ_R && op1_ffi_symbols) {
+						} else if ((opline->opcode == ZEND_FETCH_OBJ_R
+						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG)
+						 && op1_ffi_symbols) {
 							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 							if (sym
-							 && (sym->kind == ZEND_FFI_SYM_VAR || sym->kind == ZEND_FFI_SYM_CONST)
+							 && sym->kind == ZEND_FFI_SYM_VAR
 							 && ZEND_FFI_TYPE(sym->type)->kind < ZEND_FFI_TYPE_POINTER
 							 && ZEND_FFI_TYPE(sym->type)->kind != ZEND_FFI_TYPE_VOID
 							 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(sym->type))) {
@@ -6614,6 +6663,28 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								on_this = op_array->opcodes[op_array_ssa->vars[op_array_ssa->ops[opline-op_array->opcodes].op1_use].definition].opcode == ZEND_FETCH_THIS;
 							}
 						}
+#ifdef HAVE_FFI
+						if (op1_ffi_symbols) {
+							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+							if (sym
+							 && sym->kind == ZEND_FFI_SYM_FUNC
+							 && zend_jit_ffi_supported_func(ZEND_FFI_TYPE(sym->type))) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_init_call_sym(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr,
+										on_this, delayed_fetch_this, sym,
+										op1_ffi_symbols, ffi_info)) {
+									goto jit_failure;
+								}
+								frame_flags = TRACE_FRAME_MASK_FFI;
+								frame_ffi_sym = sym;
+								goto done;
+							}
+						}
+#endif
 						frame_flags = TRACE_FRAME_MASK_NESTED;
 						if (!zend_jit_init_method_call(&ctx, opline,
 								op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1,
@@ -6656,6 +6727,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_SEND_UNPACK:
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call) {
+#ifdef HAVE_FFI
+							if (TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+								goto jit_failure;
+							}
+#endif
 							TRACE_FRAME_SET_UNKNOWN_NUM_ARGS(JIT_G(current_frame)->call);
 						}
 						break;
@@ -7238,6 +7314,10 @@ done:
 
 			call = top;
 			TRACE_FRAME_INIT(call, p->func, frame_flags, num_args);
+			if (TRACE_FRAME_FFI(call)) {
+				ZEND_ASSERT(frame_ffi_sym != NULL);
+				call->call_opline = (const zend_op*)(void*)frame_ffi_sym;
+			}
 			call->prev = frame->call;
 			if (!(p->info & ZEND_JIT_TRACE_FAKE_INIT_CALL)) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
@@ -8220,7 +8300,7 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 					level, ' ',
 					(p->func && p->func->common.scope) ? ZSTR_VAL(p->func->common.scope->name) : "",
 					(p->func && p->func->common.scope) ? "::" : "",
-					(p->func  && p->func->common.function_name) ? ZSTR_VAL(p->func->common.function_name) : "???");
+					(p->func && p->func->common.function_name) ? ZSTR_VAL(p->func->common.function_name) : "???");
 			} else {
 				fprintf(stderr, "    %*c>skip\n",
 					level, ' ');

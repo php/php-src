@@ -67,6 +67,36 @@ static bool zend_jit_ffi_supported_type(zend_ffi_type *type)
 	return true;
 }
 
+static bool zend_jit_ffi_supported_func(zend_ffi_type *type)
+{
+	zend_ffi_type *t;
+
+	type = ZEND_FFI_TYPE(type);
+
+	if (type->func.abi != ZEND_FFI_ABI_CDECL
+	 && type->func.abi != ZEND_FFI_ABI_FASTCALL) {
+		return false;
+	}
+
+	t = ZEND_FFI_TYPE(type->func.ret_type);
+	if (t->kind == ZEND_FFI_TYPE_STRUCT
+	 || !zend_jit_ffi_supported_type(t)) {
+		return false;
+	}
+
+	if (type->func.args) {
+		ZEND_HASH_PACKED_FOREACH_PTR(type->func.args, t) {
+			t = ZEND_FFI_TYPE(t);
+			if (t->kind == ZEND_FFI_TYPE_STRUCT
+			 || !zend_jit_ffi_supported_type(t)) {
+				return false;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return true;
+}
+
 static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
 {
 	dst_type = ZEND_FFI_TYPE(dst_type);
