@@ -4986,14 +4986,6 @@ function generateArgInfoCode(
     $code = "/* This is a generated file, edit the .stub.php file instead.\n"
           . " * Stub hash: $stubHash */\n";
 
-    $minimumPhpVersionIdCompatibility = $fileInfo->getMinimumPhpVersionIdCompatibility();
-    if ($minimumPhpVersionIdCompatibility !== null) {
-        $code .= "\nZEND_STATIC_ASSERT(PHP_VERSION_ID >= $minimumPhpVersionIdCompatibility, ";
-        $code .= "\"{$stubFilenameWithoutExtension}_arginfo.h only supports ";
-        $code .= "PHP version ID $minimumPhpVersionIdCompatibility or newer, \"\n";
-        $code .= "\t\"but it is included on an older PHP version\");\n";
-    }
-
     $generatedFuncInfos = [];
 
     $argInfoCode = generateCodeWithConditions(
