@@ -30,6 +30,7 @@
 #include "phpdbg_arginfo.h"
 #include "zend_vm.h"
 #include "php_ini_builder.h"
+#include "php_main.h"
 
 #include "ext/standard/basic_functions.h"
 
