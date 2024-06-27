@@ -815,7 +815,7 @@ static bool xmlreader_valid_encoding(const char *encoding)
 }
 
 /* {{{ Sets the URI that the XMLReader will parse. */
-PHP_METHOD(XMLReader, open)
+static void xml_reader_from_uri(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *instance_ce, bool use_exceptions)
 {
 	zval *id;
 	size_t source_len = 0, encoding_len = 0;
@@ -856,12 +856,20 @@ PHP_METHOD(XMLReader, open)
 	}
 
 	if (reader == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to open source data");
-		RETURN_FALSE;
+		if (use_exceptions) {
+			zend_throw_error(NULL, "Unable to open source data");
+			RETURN_THROWS();
+		} else {
+			php_error_docref(NULL, E_WARNING, "Unable to open source data");
+			RETURN_FALSE;
+		}
 	}
 
 	if (id == NULL) {
-		object_init_ex(return_value, xmlreader_class_entry);
+		if (UNEXPECTED(object_init_with_constructor(return_value, instance_ce, 0, NULL, NULL) != SUCCESS)) {
+			xmlFreeTextReader(reader);
+			RETURN_THROWS();
+		}
 		intern = Z_XMLREADER_P(return_value);
 		intern->ptr = reader;
 		return;
@@ -871,6 +879,16 @@ PHP_METHOD(XMLReader, open)
 
 	RETURN_TRUE;
 
+}
+
+PHP_METHOD(XMLReader, open)
+{
+	xml_reader_from_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlreader_class_entry, false);
+}
+
+PHP_METHOD(XMLReader, fromUri)
+{
+	xml_reader_from_uri(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_CE_P(ZEND_THIS), true);
 }
 /* }}} */
 
@@ -1068,7 +1086,7 @@ XMLPUBFUN int XMLCALL
 */
 
 /* {{{ Sets the string that the XMLReader will parse. */
-PHP_METHOD(XMLReader, XML)
+static void xml_reader_from_string(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *instance_ce, bool throw)
 {
 	zval *id;
 	size_t source_len = 0, encoding_len = 0;
@@ -1125,7 +1143,12 @@ PHP_METHOD(XMLReader, XML)
 			ret = xmlTextReaderSetup(reader, NULL, uri, encoding, options);
 			if (ret == 0) {
 				if (id == NULL) {
-					object_init_ex(return_value, xmlreader_class_entry);
+					if (UNEXPECTED(object_init_with_constructor(return_value, instance_ce, 0, NULL, NULL) != SUCCESS)) {
+						xmlFree(uri);
+						xmlFreeParserInputBuffer(inputbfr);
+						xmlFreeTextReader(reader);
+						RETURN_THROWS();
+					}
 					intern = Z_XMLREADER_P(return_value);
 				} else {
 					RETVAL_TRUE;
@@ -1151,10 +1174,26 @@ PHP_METHOD(XMLReader, XML)
 	if (inputbfr) {
 		xmlFreeParserInputBuffer(inputbfr);
 	}
-	php_error_docref(NULL, E_WARNING, "Unable to load source data");
-	RETURN_FALSE;
+
+	if (throw) {
+		zend_throw_error(NULL, "Unable to load source data");
+		RETURN_THROWS();
+	} else {
+		php_error_docref(NULL, E_WARNING, "Unable to load source data");
+		RETURN_FALSE;
+	}
 }
 /* }}} */
+
+PHP_METHOD(XMLReader, XML)
+{
+	xml_reader_from_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, xmlreader_class_entry, false);
+}
+
+PHP_METHOD(XMLReader, fromString)
+{
+	xml_reader_from_string(INTERNAL_FUNCTION_PARAM_PASSTHRU, Z_CE_P(ZEND_THIS), true);
+}
 
 /* {{{ Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(XMLReader, expand)

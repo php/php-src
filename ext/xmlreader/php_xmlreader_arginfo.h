@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 08ea43f5bbfa20407a6c1913fe3a51e99ba79fd8 */
+ * Stub hash: 551324d130f9755c4c61cebb5084953fb6f539c4 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
@@ -59,6 +59,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_fromUri, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_fromStream, 0, 1, IS_STATIC, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
@@ -94,6 +100,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLReader_XML, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLReader_fromString, 0, 1, IS_STATIC, 0)
+	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_XMLReader_expand, 0, 0, DOMNode, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, baseNode, DOMNode, 1, "null")
 ZEND_END_ARG_INFO()
@@ -114,6 +126,7 @@ ZEND_METHOD(XMLReader, moveToNextAttribute);
 ZEND_METHOD(XMLReader, read);
 ZEND_METHOD(XMLReader, next);
 ZEND_METHOD(XMLReader, open);
+ZEND_METHOD(XMLReader, fromUri);
 ZEND_METHOD(XMLReader, fromStream);
 ZEND_METHOD(XMLReader, readInnerXml);
 ZEND_METHOD(XMLReader, readOuterXml);
@@ -123,6 +136,7 @@ ZEND_METHOD(XMLReader, setParserProperty);
 ZEND_METHOD(XMLReader, setRelaxNGSchema);
 ZEND_METHOD(XMLReader, setRelaxNGSchemaSource);
 ZEND_METHOD(XMLReader, XML);
+ZEND_METHOD(XMLReader, fromString);
 ZEND_METHOD(XMLReader, expand);
 
 static const zend_function_entry class_XMLReader_methods[] = {
@@ -142,6 +156,7 @@ static const zend_function_entry class_XMLReader_methods[] = {
 	ZEND_ME(XMLReader, read, arginfo_class_XMLReader_read, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, next, arginfo_class_XMLReader_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, open, arginfo_class_XMLReader_open, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(XMLReader, fromUri, arginfo_class_XMLReader_fromUri, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(XMLReader, fromStream, arginfo_class_XMLReader_fromStream, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(XMLReader, readInnerXml, arginfo_class_XMLReader_readInnerXml, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, readOuterXml, arginfo_class_XMLReader_readOuterXml, ZEND_ACC_PUBLIC)
@@ -151,6 +166,7 @@ static const zend_function_entry class_XMLReader_methods[] = {
 	ZEND_ME(XMLReader, setRelaxNGSchema, arginfo_class_XMLReader_setRelaxNGSchema, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, setRelaxNGSchemaSource, arginfo_class_XMLReader_setRelaxNGSchemaSource, ZEND_ACC_PUBLIC)
 	ZEND_ME(XMLReader, XML, arginfo_class_XMLReader_XML, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(XMLReader, fromString, arginfo_class_XMLReader_fromString, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(XMLReader, expand, arginfo_class_XMLReader_expand, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

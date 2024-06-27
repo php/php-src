@@ -629,7 +629,7 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/array_find
 
 - XMLReader:
-  . Added XMLReader::fromStream().
+  . Added XMLReader::fromStream(), XMLReader::fromUri(), XMLReader::fromString().
     RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
 
 - XMLWriter:
