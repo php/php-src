@@ -17,9 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
 #include "zend_llist.h"
+#include "zend_alloc.h"
 #include "zend_sort.h"
+#include <string.h>
 
 ZEND_API void zend_llist_init(zend_llist *l, size_t size, llist_dtor_func_t dtor, unsigned char persistent)
 {

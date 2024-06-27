@@ -34,7 +34,6 @@
 #include "zend_llist.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
-#include "zend_modules.h"
 #include "zend_float.h"
 #include "zend_multibyte.h"
 #include "zend_multiply.h"
@@ -42,6 +41,8 @@
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
 #include "zend_strtod.h"
+#include "zend_compile.h"
+#include "zend_ini.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -64,13 +65,10 @@ END_EXTERN_C()
 # define ZEND_MAX_ALLOWED_STACK_SIZE_DETECT     0
 #endif
 
-#include "zend_compile.h"
-
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
 typedef struct _zend_vm_stack *zend_vm_stack;
-typedef struct _zend_ini_entry zend_ini_entry;
 typedef struct _zend_fiber_context zend_fiber_context;
 typedef struct _zend_fiber zend_fiber;
 

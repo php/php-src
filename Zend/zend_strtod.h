@@ -20,7 +20,8 @@
  * can be found in zend_strtod.c */
 #ifndef ZEND_STRTOD_H
 #define ZEND_STRTOD_H
-#include <zend.h>
+
+#include "zend_portability.h"
 
 BEGIN_EXTERN_C()
 #define ZEND_STRTOD_K_MAX 7

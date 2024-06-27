@@ -20,6 +20,7 @@
 #ifndef ZEND_PTR_STACK_H
 #define ZEND_PTR_STACK_H
 
+#include "zend_portability.h"
 #include "zend_alloc.h"
 
 typedef struct _zend_ptr_stack {

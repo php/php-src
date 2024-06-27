@@ -21,8 +21,8 @@
 #ifndef ZEND_OBSERVER_H
 #define ZEND_OBSERVER_H
 
-#include "zend.h"
-#include "zend_compile.h"
+#include "zend_portability.h" /* For ZEND_FASTCALL */
+#include "zend_types.h"
 #include "zend_fibers.h"
 
 BEGIN_EXTERN_C()

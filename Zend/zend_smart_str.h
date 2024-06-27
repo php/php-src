@@ -17,9 +17,11 @@
 #ifndef ZEND_SMART_STR_H
 #define ZEND_SMART_STR_H
 
-#include <zend.h>
-#include "zend_globals.h"
 #include "zend_smart_str_public.h"
+#include "zend_portability.h"
+#include "zend_long.h"
+#include "zend_string.h"
+#include "zend_operators.h"
 
 BEGIN_EXTERN_C()
 
