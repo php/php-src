@@ -306,7 +306,7 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 	snprintf(
 		parser->scanner.error_msg,
 		sizeof(parser->scanner.error_msg),
-		"error: %s, at character %ld near content: %s",
+		"error: %s, at character %zu near content: %s",
 		msg,
 		parser->scanner.character_count,
 		(const char*) parser->scanner.token

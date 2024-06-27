@@ -39,6 +39,7 @@ typedef struct _php_json_scanner {
 	int utf8_invalid;               /* whether utf8 is invalid */
 	int utf8_invalid_count;         /* number of extra character for invalid utf8 */
 	size_t character_count;         /* counts the number of characters scanned (not tokens) */
+	size_t character_max_count;
 } php_json_scanner;
 
 
