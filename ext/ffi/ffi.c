@@ -5615,25 +5615,25 @@ ZEND_MINFO_FUNCTION(ffi)
 }
 /* }}} */
 
-static const zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1};
-static const zend_ffi_type zend_ffi_type_char = {.kind=ZEND_FFI_TYPE_CHAR, .size=1, .align=_Alignof(char)};
-static const zend_ffi_type zend_ffi_type_bool = {.kind=ZEND_FFI_TYPE_BOOL, .size=1, .align=_Alignof(uint8_t)};
-static const zend_ffi_type zend_ffi_type_sint8 = {.kind=ZEND_FFI_TYPE_SINT8, .size=1, .align=_Alignof(int8_t)};
-static const zend_ffi_type zend_ffi_type_uint8 = {.kind=ZEND_FFI_TYPE_UINT8, .size=1, .align=_Alignof(uint8_t)};
-static const zend_ffi_type zend_ffi_type_sint16 = {.kind=ZEND_FFI_TYPE_SINT16, .size=2, .align=_Alignof(int16_t)};
-static const zend_ffi_type zend_ffi_type_uint16 = {.kind=ZEND_FFI_TYPE_UINT16, .size=2, .align=_Alignof(uint16_t)};
-static const zend_ffi_type zend_ffi_type_sint32 = {.kind=ZEND_FFI_TYPE_SINT32, .size=4, .align=_Alignof(int32_t)};
-static const zend_ffi_type zend_ffi_type_uint32 = {.kind=ZEND_FFI_TYPE_UINT32, .size=4, .align=_Alignof(uint32_t)};
-static const zend_ffi_type zend_ffi_type_sint64 = {.kind=ZEND_FFI_TYPE_SINT64, .size=8, .align=_Alignof(int64_t)};
-static const zend_ffi_type zend_ffi_type_uint64 = {.kind=ZEND_FFI_TYPE_UINT64, .size=8, .align=_Alignof(uint64_t)};
-static const zend_ffi_type zend_ffi_type_float = {.kind=ZEND_FFI_TYPE_FLOAT, .size=sizeof(float), .align=_Alignof(float)};
-static const zend_ffi_type zend_ffi_type_double = {.kind=ZEND_FFI_TYPE_DOUBLE, .size=sizeof(double), .align=_Alignof(double)};
+static const zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1, .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_char = {.kind=ZEND_FFI_TYPE_CHAR, .size=1, .align=_Alignof(char), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_bool = {.kind=ZEND_FFI_TYPE_BOOL, .size=1, .align=_Alignof(uint8_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_sint8 = {.kind=ZEND_FFI_TYPE_SINT8, .size=1, .align=_Alignof(int8_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_uint8 = {.kind=ZEND_FFI_TYPE_UINT8, .size=1, .align=_Alignof(uint8_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_sint16 = {.kind=ZEND_FFI_TYPE_SINT16, .size=2, .align=_Alignof(int16_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_uint16 = {.kind=ZEND_FFI_TYPE_UINT16, .size=2, .align=_Alignof(uint16_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_sint32 = {.kind=ZEND_FFI_TYPE_SINT32, .size=4, .align=_Alignof(int32_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_uint32 = {.kind=ZEND_FFI_TYPE_UINT32, .size=4, .align=_Alignof(uint32_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_sint64 = {.kind=ZEND_FFI_TYPE_SINT64, .size=8, .align=_Alignof(int64_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_uint64 = {.kind=ZEND_FFI_TYPE_UINT64, .size=8, .align=_Alignof(uint64_t), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_float = {.kind=ZEND_FFI_TYPE_FLOAT, .size=sizeof(float), .align=_Alignof(float), .attr=ZEND_FFI_ATTR_PERSISTENT};
+static const zend_ffi_type zend_ffi_type_double = {.kind=ZEND_FFI_TYPE_DOUBLE, .size=sizeof(double), .align=_Alignof(double), .attr=ZEND_FFI_ATTR_PERSISTENT};
 
 #ifdef HAVE_LONG_DOUBLE
-static const zend_ffi_type zend_ffi_type_long_double = {.kind=ZEND_FFI_TYPE_LONGDOUBLE, .size=sizeof(long double), .align=_Alignof(long double)};
+static const zend_ffi_type zend_ffi_type_long_double = {.kind=ZEND_FFI_TYPE_LONGDOUBLE, .size=sizeof(long double), .align=_Alignof(long double), .attr=ZEND_FFI_ATTR_PERSISTENT};
 #endif
 
-static const zend_ffi_type zend_ffi_type_ptr = {.kind=ZEND_FFI_TYPE_POINTER, .size=sizeof(void*), .align=_Alignof(void*), .pointer.type = (zend_ffi_type*)&zend_ffi_type_void};
+static const zend_ffi_type zend_ffi_type_ptr = {.kind=ZEND_FFI_TYPE_POINTER, .size=sizeof(void*), .align=_Alignof(void*), .attr=ZEND_FFI_ATTR_PERSISTENT, .pointer.type = (zend_ffi_type*)&zend_ffi_type_void};
 
 static const struct {
 	const char *name;
