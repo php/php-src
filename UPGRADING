@@ -633,7 +633,7 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
 
 - XMLWriter:
-  . Added XMLWriter::toStream().
+  . Added XMLWriter::toStream(), XMLWriter::toUri(), XMLWriter::toMemory().
     RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
 
 - XSL:

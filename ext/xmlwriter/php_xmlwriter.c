@@ -179,6 +179,18 @@ static char *_xmlwriter_get_valid_file_path(char *source, char *resolved_path, i
 }
 /* }}} */
 
+static void xml_writer_create_static(INTERNAL_FUNCTION_PARAMETERS, xmlTextWriterPtr writer, xmlBufferPtr output)
+{
+	if (object_init_with_constructor(return_value, Z_CE_P(ZEND_THIS), 0, NULL, NULL) == SUCCESS) {
+		ze_xmlwriter_object *intern = Z_XMLWRITER_P(return_value);
+		intern->ptr = writer;
+		intern->output = output;
+	} else {
+		xmlBufferFree(output);
+		xmlFreeTextWriter(writer);
+	}
+}
+
 static const zend_module_dep xmlwriter_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_END
@@ -836,6 +848,36 @@ PHP_FUNCTION(xmlwriter_open_uri)
 }
 /* }}} */
 
+PHP_METHOD(XMLWriter, toUri)
+{
+	char *source;
+	size_t source_len;
+	char resolved_path[MAXPATHLEN + 1];
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(source, source_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (source_len == 0) {
+		zend_argument_value_error(1, "cannot be empty");
+		RETURN_THROWS();
+	}
+
+	const char *valid_file = _xmlwriter_get_valid_file_path(source, resolved_path, MAXPATHLEN);
+	if (!valid_file) {
+		zend_argument_value_error(1, "must resolve to a valid file path");
+		RETURN_THROWS();
+	}
+
+	xmlTextWriterPtr writer = xmlNewTextWriterFilename(valid_file, 0);
+	if (!writer) {
+		zend_throw_error(NULL, "Could not construct libxml writer");
+		RETURN_THROWS();
+	}
+
+	xml_writer_create_static(INTERNAL_FUNCTION_PARAM_PASSTHRU, writer, NULL);
+}
+
 /* {{{ Create new xmlwriter using memory for string output */
 PHP_FUNCTION(xmlwriter_open_memory)
 {
@@ -880,6 +922,23 @@ PHP_FUNCTION(xmlwriter_open_memory)
 
 }
 /* }}} */
+
+PHP_METHOD(XMLWriter, toMemory)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	xmlBufferPtr buffer = xmlBufferCreate();
+	xmlTextWriterPtr writer = xmlNewTextWriterMemory(buffer, 0);
+
+	/* No need for an explicit buffer check as this will fail on a NULL buffer. */
+	if (!writer) {
+		xmlBufferFree(buffer);
+		zend_throw_error(NULL, "Could not construct libxml writer");
+		RETURN_THROWS();
+	}
+
+	xml_writer_create_static(INTERNAL_FUNCTION_PARAM_PASSTHRU, writer, buffer);
+}
 
 static int xml_writer_stream_write(void *context, const char *buffer, int len)
 {
@@ -927,14 +986,8 @@ PHP_METHOD(XMLWriter, toStream)
 		RETURN_THROWS();
 	}
 
-	if (object_init_with_constructor(return_value, Z_CE_P(ZEND_THIS), 0, NULL, NULL) == SUCCESS) {
-		ze_xmlwriter_object *intern = Z_XMLWRITER_P(return_value);
-		intern->ptr = writer;
-		/* output_buffer is owned by writer, and so writer will clean that up for us. */
-		intern->output = NULL;
-	} else {
-		xmlFreeTextWriter(writer);
-	}
+	/* output_buffer is owned by writer, and so writer will clean that up for us. */
+	xml_writer_create_static(INTERNAL_FUNCTION_PARAM_PASSTHRU, writer, NULL);
 }
 
 /* {{{ php_xmlwriter_flush */
