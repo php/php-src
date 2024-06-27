@@ -189,7 +189,7 @@ static int fpm_php_trace_dump(struct fpm_child_s *child, FILE *slowlog) /* {{{ *
 
 void fpm_php_trace(struct fpm_child_s *child) /* {{{ */
 {
-	fpm_scoreboard_update(0, 0, 0, 0, 0, 0, 1, FPM_SCOREBOARD_ACTION_INC, child->wp->scoreboard);
+	fpm_scoreboard_update(0, 0, 0, 0, 0, 0, 1, 0, FPM_SCOREBOARD_ACTION_INC, child->wp->scoreboard);
 	FILE *slowlog;
 
 	zlog(ZLOG_NOTICE, "about to trace %d", (int) child->pid);
