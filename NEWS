@@ -324,7 +324,7 @@ PHP                                                                        NEWS
 
 - XMLReader:
   . Declares class constant types. (Ayesh)
-  . Add XMLReader::fromStream(). (nielsdos)
+  . Add XMLReader::fromStream(), XMLReader::fromUri(), XMLReader::fromString(). (nielsdos)
 
 - XMLWriter:
   . Add XMLWriter::toStream(), XMLWriter::toUri(), XMLWriter::toMemory(). (nielsdos)
