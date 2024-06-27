@@ -24,7 +24,7 @@ if ($pid == -1) {
     var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WEXITED));
     var_dump($siginfo["status"]);
 } else {
-    pcntl_signal(SIGUSR1, function (int $signo, $_siginfo) { exit(42); });
+    pcntl_signal(SIGUSR1, function ($_signo, $_siginfo) { exit(42); });
     posix_kill(posix_getpid(), SIGSTOP);
     pcntl_signal_dispatch();
     sleep(42);
