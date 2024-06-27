@@ -230,6 +230,9 @@ PHP 8.4 UPGRADE NOTES
 - FPM:
   . Flushing headers without a body will now succeed. See GH-12785.
 
+- Hash:
+  . Added HashContext::__debugInfo().
+
 - Intl:
   . NumberFormatter::ROUND_HALFODD added to complement existing
     NumberFormatter::ROUND_HALFEVEN functionality.
