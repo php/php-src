@@ -70,17 +70,6 @@ static PHP_GINIT_FUNCTION(json)
 static PHP_RINIT_FUNCTION(json)
 {
 	JSON_G(error_code) = 0;
-	JSON_G(error_msg) = NULL;
-
-	return SUCCESS;
-}
-
-static PHP_RSHUTDOWN_FUNCTION(json)
-{
-	if (JSON_G(error_msg)) {
-		free(JSON_G(error_msg));
-	}
-
 	return SUCCESS;
 }
 
@@ -92,7 +81,7 @@ zend_module_entry json_module_entry = {
 	PHP_MINIT(json),
 	NULL,
 	PHP_RINIT(json),
-	PHP_RSHUTDOWN(json),
+	NULL,
 	PHP_MINFO(json),
 	PHP_JSON_VERSION,
 	PHP_MODULE_GLOBALS(json),
@@ -216,12 +205,12 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 	zval tmp;
 	const php_json_parser_methods* parser_validate_methods = php_json_get_validate_methods();
 	php_json_parser_init_ex(&parser, &tmp, str, str_len, (int)options, (int)depth, parser_validate_methods);
-
+	
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
 		JSON_G(error_code) = error_code;
-		php_json_ctype* error_msg = php_json_parser_error_msg(&parser);
-		JSON_G(error_msg) = error_msg;
+		strcpy(JSON_G(error_msg), parser.scanner.error_msg);
+
 		return false;
 	}
 

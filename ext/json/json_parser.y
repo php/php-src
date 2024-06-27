@@ -303,33 +303,18 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
 	}
 
-	char error_message[256];
-	snprintf(
-		error_message,
-		sizeof(error_message),
+	sprintf(
+		parser->scanner.error_msg,
 		"error: %s, at character %ld near content: %s",
 		msg,
 		parser->scanner.character_count,
-		parser->scanner.token
+		(const char*) parser->scanner.token
 	);
-	
-	if (parser->scanner.error_msg) {
-		free(parser->scanner.error_msg);
-	}
-
-	parser->scanner.error_msg = (php_json_ctype *) malloc(strlen(error_message) + 1);
-
-	memcpy(parser->scanner.error_msg, error_message, strlen(error_message) + 1);
 }
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)
 {
 	return parser->scanner.errcode;
-}
-
-PHP_JSON_API php_json_ctype* php_json_parser_error_msg(const php_json_parser *parser)
-{
-	return parser->scanner.error_msg;
 }
 
 static const php_json_parser_methods default_parser_methods =
