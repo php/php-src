@@ -4985,7 +4985,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
 								if (!zend_jit_ffi_assign_obj_op(&ctx, opline, op_array, ssa, ssa_op,
-										op1_info, op1_addr, on_this, delayed_fetch_this, field,
+										op1_info, op1_addr, op1_indirect, on_this, delayed_fetch_this, field,
 										op1_data_info, OP1_DATA_REG_ADDR(),
 										op1_ffi_type, ffi_info)) {
 									goto jit_failure;
@@ -5002,7 +5002,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
 								if (!zend_jit_ffi_assign_sym_op(&ctx, opline, op_array, ssa, ssa_op,
-										op1_info, op1_addr, on_this, delayed_fetch_this, sym,
+										op1_info, op1_addr, op1_indirect, on_this, delayed_fetch_this, sym,
 										op1_data_info, OP1_DATA_REG_ADDR(),
 										op1_ffi_symbols, ffi_info)) {
 									goto jit_failure;
@@ -5107,7 +5107,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
 								if (!zend_jit_ffi_assign_obj(&ctx, opline, op_array, ssa, ssa_op,
-										op1_info, op1_addr, on_this, delayed_fetch_this, field,
+										op1_info, op1_addr, op1_indirect, on_this, delayed_fetch_this, field,
 										op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
 										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
 										op1_ffi_type, op3_ffi_type, ffi_info)) {
@@ -5130,7 +5130,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
 								if (!zend_jit_ffi_assign_sym(&ctx, opline, op_array, ssa, ssa_op,
-										op1_info, op1_addr, on_this, delayed_fetch_this, sym,
+										op1_info, op1_addr, op1_indirect, on_this, delayed_fetch_this, sym,
 										op1_data_info, OP1_DATA_REG_ADDR(), OP1_DATA_DEF_REG_ADDR(),
 										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
 										op1_ffi_symbols, op3_ffi_type, ffi_info)) {
