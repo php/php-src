@@ -411,19 +411,72 @@ fi
 dnl
 dnl Setup extension sources
 dnl
-PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
-                            datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
-                            flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
-                            info.c iptc.c link.c mail.c math.c md5.c metaphone.c \
-                            microtime.c pack.c pageinfo.c quot_print.c \
-                            soundex.c string.c scanf.c syslog.c type.c uniqid.c url.c \
-                            var.c versioning.c assert.c strnatcmp.c levenshtein.c \
-                            incomplete_class.c url_scanner_ex.c ftp_fopen_wrapper.c \
-                            http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
-                            var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
-                            filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            net.c hrtime.c crc32_x86.c libavifinfo/avifinfo.c,,,
-			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+PHP_NEW_EXTENSION([standard], [m4_normalize([
+  array.c
+  assert.c
+  base64.c
+  basic_functions.c
+  browscap.c
+  crc32_x86.c
+  crc32.c
+  credits.c
+  crypt.c
+  css.c
+  datetime.c
+  dir.c
+  dl.c
+  dns.c
+  exec.c
+  file.c
+  filestat.c
+  filters.c
+  flock_compat.c
+  formatted_print.c
+  fsock.c
+  ftok.c
+  ftp_fopen_wrapper.c
+  head.c
+  hrtime.c
+  html.c
+  http_fopen_wrapper.c
+  http.c
+  image.c
+  incomplete_class.c
+  info.c
+  iptc.c
+  levenshtein.c
+  libavifinfo/avifinfo.c
+  link.c
+  mail.c
+  math.c
+  md5.c
+  metaphone.c
+  microtime.c
+  net.c
+  pack.c
+  pageinfo.c
+  password.c
+  php_fopen_wrapper.c
+  proc_open.c
+  quot_print.c
+  scanf.c
+  sha1.c
+  soundex.c
+  streamsfuncs.c
+  string.c
+  strnatcmp.c
+  syslog.c
+  type.c
+  uniqid.c
+  url_scanner_ex.c
+  url.c
+  user_filters.c
+  uuencode.c
+  var_unserializer.c
+  var.c
+  versioning.c
+])],,,
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
 
