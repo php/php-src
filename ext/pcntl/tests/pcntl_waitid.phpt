@@ -20,11 +20,16 @@ if ($pid == -1) {
     var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WSTOPPED));
     posix_kill($pid, SIGCONT);
     var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WCONTINUED));
+    posix_kill($pid, SIGUSR1);
     var_dump(pcntl_waitid(P_PID, $pid, $siginfo, WEXITED));
     var_dump($siginfo["status"]);
 } else {
+    pcntl_signal(SIGUSR1, function (int $signo, $_siginfo) { exit(42); });
     posix_kill(posix_getpid(), SIGSTOP);
-    exit(42);
+    pcntl_signal_dispatch();
+    sleep(42);
+    pcntl_signal_dispatch();
+    exit(6);
 }
 ?>
 --EXPECTF--
