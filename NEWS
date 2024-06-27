@@ -326,7 +326,7 @@ PHP                                                                        NEWS
   . Add XMLReader::fromStream(). (nielsdos)
 
 - XMLWriter:
-  . Add XMLWriter::toStream(). (nielsdos)
+  . Add XMLWriter::toStream(), XMLWriter::toUri(), XMLWriter::toMemory(). (nielsdos)
 
 - XSL:
   . Implement request #64137 (XSLTProcessor::setParameter() should allow both
