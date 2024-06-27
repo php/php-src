@@ -278,29 +278,6 @@ AS_VAR_IF([php_cv_have_kqueue], [yes],
     [Define to 1 if system has a working 'kqueue' function.])])
 ])
 
-AC_DEFUN([PHP_FPM_DEVPOLL],
-[AC_CACHE_CHECK([for /dev/poll],
-  [php_cv_have_devpoll],
-  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
-    #include <stdio.h>
-    #include <sys/devpoll.h>
-  ], [dnl
-    int n, dp;
-    struct dvpoll dvp;
-    dp = 0;
-    dvp.dp_fds = NULL;
-    dvp.dp_nfds = 0;
-    dvp.dp_timeout = 0;
-    n = ioctl(dp, DP_POLL, &dvp);
-    (void)n;
-  ])],
-  [php_cv_have_devpoll=yes],
-  [php_cv_have_devpoll=no])])
-AS_VAR_IF([php_cv_have_devpoll], [yes],
-  [AC_DEFINE([HAVE_DEVPOLL], [1],
-    [Define to 1 if system has a working '/dev/poll'.])])
-])
-
 AC_DEFUN([PHP_FPM_EPOLL],
 [AC_CACHE_CHECK([for epoll],
   [php_cv_have_epoll],
@@ -563,7 +540,6 @@ if test "$PHP_FPM" != "no"; then
     fpm/events/poll.c \
     fpm/events/epoll.c \
     fpm/events/kqueue.c \
-    fpm/events/devpoll.c \
     fpm/events/port.c \
   "
 

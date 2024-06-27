@@ -374,6 +374,9 @@ PHP 8.4 UPGRADE NOTES
   . Support for EOL Apache 2.0 and 2.2 has been removed. Minimum required Apache
     version is now 2.4.
 
+- FPM:
+  . /dev/poll events.mechanism setting for Solaris/Illumos had been retired.
+
 ========================================
 4. Deprecated Functionality
 ========================================
