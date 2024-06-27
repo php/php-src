@@ -1124,7 +1124,7 @@ AC_DEFUN([PHP_DOES_PWRITE_WORK],[
 #include <stdlib.h>
 $1
     int main(void) {
-    int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
+    int fd = open("conftest_pwrite", O_WRONLY|O_CREAT, 0600);
 
     if (fd < 0) return 1;
     if (pwrite(fd, "text", 4, 0) != 4) return 1;
@@ -1148,7 +1148,7 @@ dnl
 dnl Internal.
 dnl
 AC_DEFUN([PHP_DOES_PREAD_WORK],[
-  echo test > conftest_in
+  echo test > conftest_pread
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1159,7 +1159,7 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 $1
     int main(void) {
     char buf[3];
-    int fd = open("conftest_in", O_RDONLY);
+    int fd = open("conftest_pread", O_RDONLY);
     if (fd < 0) return 1;
     if (pread(fd, buf, 2, 0) != 2) return 1;
     /* Linux glibc breakage until 2.2.5 */
@@ -1173,7 +1173,6 @@ $1
   ],[
     ac_cv_pread=no
   ])
-  rm -f conftest_in
 ])
 
 dnl
