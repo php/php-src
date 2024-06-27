@@ -286,22 +286,7 @@ int main(void)
 
 AC_MSG_RESULT(done)
 
-AC_ARG_ENABLE([zend-signals],
-  [AS_HELP_STRING([--disable-zend-signals],
-    [whether to enable zend signal handling])],
-  [ZEND_SIGNALS=$enableval],
-  [ZEND_SIGNALS=yes])
-
-AC_CHECK_FUNCS([sigaction], [], [
-  ZEND_SIGNALS=no
-])
-if test "$ZEND_SIGNALS" = "yes"; then
-	AC_DEFINE(ZEND_SIGNALS, 1, [Use zend signal handling])
-	CFLAGS="$CFLAGS -DZEND_SIGNALS"
-fi
-
-AC_MSG_CHECKING(whether to enable zend signal handling)
-AC_MSG_RESULT($ZEND_SIGNALS)
+ZEND_CHECK_SIGNALS
 
 dnl Don't enable Zend Max Execution Timers by default until PHP 8.3 to not break the ABI
 AC_ARG_ENABLE([zend-max-execution-timers],
@@ -409,4 +394,26 @@ AC_DEFUN([ZEND_CHECK_CPUID_COUNT],
 AS_VAR_IF([php_cv_have___cpuid_count], [yes],
   [AC_DEFINE([HAVE_CPUID_COUNT], [1],
     [Define to 1 if '__cpuid_count' is available.])])
+])
+
+dnl
+dnl ZEND_CHECK_SIGNALS
+dnl
+dnl Check whether to enable Zend signal handling if supported by the system.
+dnl
+AC_DEFUN([ZEND_CHECK_SIGNALS], [dnl
+AC_ARG_ENABLE([zend-signals],
+  [AS_HELP_STRING([--disable-zend-signals],
+    [Disable Zend signal handling])],
+  [ZEND_SIGNALS=$enableval],
+  [ZEND_SIGNALS=yes])
+
+AC_CHECK_FUNCS([sigaction],, [ZEND_SIGNALS=no])
+AS_VAR_IF([ZEND_SIGNALS], [yes],
+  [AC_DEFINE([ZEND_SIGNALS], [1],
+    [Define to 1 if Zend signal handling is supported and enabled.])
+  AS_VAR_APPEND([CFLAGS], [" -DZEND_SIGNALS"])])
+
+AC_MSG_CHECKING([whether to enable Zend signal handling])
+AC_MSG_RESULT([$ZEND_SIGNALS])
 ])
