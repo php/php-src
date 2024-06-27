@@ -13,6 +13,10 @@ tar="${tar:-$(which tar)}"
 md5sum="$(which md5sum)"
 md5sum="${md5sum:-$(which md5)}"
 
+# GNU touch is preferred since it handles local TZ in timestamps
+touch="$(which gtouch)"
+touch="${touch:-$(which touch)}"
+
 if [[ $($tar --version) == *"bsdtar"* ]]; then
   echo "Found bsdtar at $tar, but this script needs GNU tar."
   exit 1
@@ -173,8 +177,8 @@ fi
 # Reset the modification and access times of all files to be packaged.
 commitDate="$(git log -1 --format=%cI $treeish)"
 echo "makedist: Resetting the modification and access times of package files to $commitDate"
-touch -c -d"$commitDate" NEWS
-find . -exec touch -r NEWS -c {} \;
+"$touch" -c -d"$commitDate" NEWS
+find . -exec "$touch" -r NEWS -c {} \;
 
 cd ..
 
