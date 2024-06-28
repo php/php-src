@@ -167,33 +167,7 @@ AC_CHECK_FUNCS([sigsetjmp],,
     [AC_DEFINE([HAVE_SIGSETJMP], [1])],,
     [#include <setjmp.h>])])
 
-dnl Test whether the stack grows downwards
-dnl Assumes contiguous stack
-AC_CACHE_CHECK([whether the stack grows downwards], [php_cv_have_stack_limit],
-[AC_RUN_IFELSE([AC_LANG_SOURCE([
-#include <stdint.h>
-
-int (*volatile f)(uintptr_t);
-
-int stack_grows_downwards(uintptr_t arg) {
-    int local;
-    return (uintptr_t)&local < arg;
-}
-
-int main(void) {
-    int local;
-
-    f = stack_grows_downwards;
-    return f((uintptr_t)&local) ? 0 : 1;
-}
-])],
-[php_cv_have_stack_limit=yes],
-[php_cv_have_stack_limit=no],
-[php_cv_have_stack_limit=no])])
-AS_VAR_IF([php_cv_have_stack_limit], [yes],
-  [AC_DEFINE([ZEND_CHECK_STACK_LIMIT], [1],
-    [Define to 1 if checking the stack limit is supported.])])
-
+ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
@@ -324,6 +298,38 @@ fi
 
 AC_MSG_CHECKING(whether to enable zend max execution timers)
 AC_MSG_RESULT($ZEND_MAX_EXECUTION_TIMERS)
+])
+
+dnl
+dnl ZEND_CHECK_STACK_DIRECTION
+dnl
+dnl Check whether the stack grows downwards, assumes contiguous stack.
+dnl
+AC_DEFUN([ZEND_CHECK_STACK_DIRECTION],
+[AC_CACHE_CHECK([whether the stack grows downwards],
+  [php_cv_have_stack_limit],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([dnl
+#include <stdint.h>
+
+int (*volatile f)(uintptr_t);
+
+int stack_grows_downwards(uintptr_t arg) {
+  int local;
+  return (uintptr_t)&local < arg;
+}
+
+int main(void) {
+  int local;
+
+  f = stack_grows_downwards;
+  return f((uintptr_t)&local) ? 0 : 1;
+}])],
+  [php_cv_have_stack_limit=yes],
+  [php_cv_have_stack_limit=no],
+  [php_cv_have_stack_limit=no])])
+AS_VAR_IF([php_cv_have_stack_limit], [yes],
+  [AC_DEFINE([ZEND_CHECK_STACK_LIMIT], [1],
+    [Define to 1 if checking the stack limit is supported.])])
 ])
 
 dnl
