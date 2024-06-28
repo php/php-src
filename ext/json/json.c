@@ -209,7 +209,10 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
 		JSON_G(error_code) = error_code;
-		strcpy(JSON_G(error_msg), parser.scanner.error_msg);
+
+		if (strlen(parser.scanner.error_msg) > 5) {
+			strcpy(JSON_G(error_msg), parser.scanner.error_msg);
+		}
 
 		return false;
 	}
@@ -374,7 +377,7 @@ PHP_FUNCTION(json_last_error_msg)
 	
 	char msg_combined[256];
 
-	if (strlen(JSON_G(error_msg)) > 0) {
+	if (strlen(JSON_G(error_msg)) > 5) {
 		snprintf(msg_combined, sizeof(msg_combined), "%s - %s", msg, JSON_G(error_msg));
 		RETVAL_STRING(msg_combined);
 	} else {
