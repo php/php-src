@@ -1706,9 +1706,41 @@ static void php_dom_remove_xinclude_nodes(xmlNodePtr cur) /* {{{ */
 }
 /* }}} */
 
-/* {{{ Substitutes xincludes in a DomDocument */
+static void dom_xinclude_strip_references(xmlNodePtr basep)
+{
+	php_libxml_node_free_resource(basep);
+
+	xmlNodePtr current = basep->children;
+
+	while (current) {
+		php_libxml_node_free_resource(current);
+		current = php_dom_next_in_tree_order(current, basep);
+	}
+}
+
+/* See GH-14702.
+ * We have to remove userland references to xinclude fallback nodes because libxml2 will make clones of these
+ * and remove the original nodes. If the originals are removed while there are still userland references
+ * this will cause memory corruption. */
+static void dom_xinclude_strip_fallback_references(const xmlNode *basep)
+{
+	xmlNodePtr current = basep->children;
+
+	while (current) {
+		if (current->type == XML_ELEMENT_NODE && current->ns != NULL && current->_private != NULL
+			&& xmlStrEqual(current->name, XINCLUDE_FALLBACK)
+			&& (xmlStrEqual(current->ns->href, XINCLUDE_NS) || xmlStrEqual(current->ns->href, XINCLUDE_OLD_NS))) {
+			dom_xinclude_strip_references(current);
+		}
+
+		current = php_dom_next_in_tree_order(current, basep);
+	}
+}
+
 static int dom_perform_xinclude(xmlDocPtr docp, dom_object *intern, zend_long flags)
 {
+	dom_xinclude_strip_fallback_references((const xmlNode *) docp);
+
 	PHP_LIBXML_SANITIZE_GLOBALS(xinclude);
 	int err = xmlXIncludeProcessFlags(docp, (int)flags);
 	PHP_LIBXML_RESTORE_GLOBALS(xinclude);
@@ -1730,6 +1762,7 @@ static int dom_perform_xinclude(xmlDocPtr docp, dom_object *intern, zend_long fl
 	return err;
 }
 
+/* {{{ Substitutues xincludes in a DomDocument */
 PHP_METHOD(DOMDocument, xinclude)
 {
 	xmlDoc *docp;
