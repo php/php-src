@@ -111,7 +111,18 @@ if test "$PHP_LDAP" != "no"; then
 
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have ldap_parse_reference()
   dnl nor ldap_start_tls_s()
-  AC_CHECK_FUNCS([ldap_parse_result ldap_parse_reference ldap_start_tls_s ldap_control_find ldap_parse_extended_result ldap_extended_operation ldap_extended_operation_s ldap_passwd ldap_whoami_s ldap_refresh_s])
+  AC_CHECK_FUNCS(m4_normalize([
+    ldap_control_find
+    ldap_extended_operation
+    ldap_extended_operation_s
+    ldap_parse_extended_result
+    ldap_parse_reference
+    ldap_parse_result
+    ldap_passwd
+    ldap_refresh_s
+    ldap_start_tls_s
+    ldap_whoami_s
+  ]))
 
   dnl SASL check
   if test "$PHP_LDAP_SASL" != "no"; then

@@ -4,7 +4,7 @@ PHP_ARG_ENABLE([cli],,
   [yes],
   [no])
 
-AC_CHECK_FUNCS(setproctitle)
+AC_CHECK_FUNCS([setproctitle])
 
 AC_CHECK_HEADERS([sys/pstat.h])
 
