@@ -1625,6 +1625,58 @@ static void php_dom_remove_xinclude_nodes(xmlNodePtr cur) /* {{{ */
 }
 /* }}} */
 
+/* Backported from master branch xml_common.h */
+static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *nodep, const xmlNode *basep)
+{
+	if (nodep->type == XML_ELEMENT_NODE && nodep->children) {
+		return nodep->children;
+	}
+
+	if (nodep->next) {
+		return nodep->next;
+	} else {
+		/* Go upwards, until we find a parent node with a next sibling, or until we hit the base. */
+		do {
+			nodep = nodep->parent;
+			if (nodep == basep) {
+				return NULL;
+			}
+		} while (nodep->next == NULL);
+		return nodep->next;
+	}
+}
+
+static void dom_xinclude_strip_references(xmlNodePtr basep)
+{
+	php_libxml_node_free_resource(basep);
+
+	xmlNodePtr current = basep->children;
+
+	while (current) {
+		php_libxml_node_free_resource(current);
+		current = php_dom_next_in_tree_order(current, basep);
+	}
+}
+
+/* See GH-14702.
+ * We have to remove userland references to xinclude fallback nodes because libxml2 will make clones of these
+ * and remove the original nodes. If the originals are removed while there are still userland references
+ * this will cause memory corruption. */
+static void dom_xinclude_strip_fallback_references(const xmlNode *basep)
+{
+	xmlNodePtr current = basep->children;
+
+	while (current) {
+		if (current->type == XML_ELEMENT_NODE && current->ns != NULL && current->_private != NULL
+			&& xmlStrEqual(current->name, XINCLUDE_FALLBACK)
+			&& (xmlStrEqual(current->ns->href, XINCLUDE_NS) || xmlStrEqual(current->ns->href, XINCLUDE_OLD_NS))) {
+			dom_xinclude_strip_references(current);
+		}
+
+		current = php_dom_next_in_tree_order(current, basep);
+	}
+}
+
 /* {{{ Substitutues xincludes in a DomDocument */
 PHP_METHOD(DOMDocument, xinclude)
 {
@@ -1646,6 +1698,8 @@ PHP_METHOD(DOMDocument, xinclude)
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
+
+	dom_xinclude_strip_fallback_references((const xmlNode *) docp);
 
 	PHP_LIBXML_SANITIZE_GLOBALS(xinclude);
 	err = xmlXIncludeProcessFlags(docp, (int)flags);
