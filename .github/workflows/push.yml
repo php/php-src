@@ -245,10 +245,6 @@ jobs:
         run: make -j$(/usr/bin/nproc) >/dev/null
       - name: make install
         uses: ./.github/actions/install-alpine
-      - name: Test
-        uses: ./.github/actions/test-alpine
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-alpine
         with:
