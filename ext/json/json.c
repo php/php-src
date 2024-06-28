@@ -70,6 +70,13 @@ static PHP_GINIT_FUNCTION(json)
 static PHP_RINIT_FUNCTION(json)
 {
 	JSON_G(error_code) = 0;
+	JSON_G(error_msg)[0] = '\0';
+	return SUCCESS;
+}
+
+static PHP_RSHUTDOWN_FUNCTION(json)
+{
+	JSON_G(error_msg)[0] = '\0';
 	return SUCCESS;
 }
 
@@ -81,7 +88,7 @@ zend_module_entry json_module_entry = {
 	PHP_MINIT(json),
 	NULL,
 	PHP_RINIT(json),
-	NULL,
+	PHP_RSHUTDOWN(json),
 	PHP_MINFO(json),
 	PHP_JSON_VERSION,
 	PHP_MODULE_GLOBALS(json),
@@ -210,8 +217,11 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
 		JSON_G(error_code) = error_code;
 
-		if (strlen(parser.scanner.error_msg) > 5) {
-			strcpy(JSON_G(error_msg), parser.scanner.error_msg);
+		JSON_G(error_msg)[0] = '\0';
+
+		if (parser.scanner.error_msg[0] != '\0') {
+			strncpy(JSON_G(error_msg), parser.scanner.error_msg, sizeof(JSON_G(error_msg)) - 1);
+			JSON_G(error_msg)[sizeof(JSON_G(error_msg)) - 1] = '\0';
 		}
 
 		return false;
@@ -328,6 +338,7 @@ PHP_FUNCTION(json_validate)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
+	JSON_G(error_msg)[0] = '\0';
 
 	if ((options != 0) && (options != PHP_JSON_INVALID_UTF8_IGNORE)) {
 		zend_argument_value_error(3, "must be a valid flag (allowed flags: JSON_INVALID_UTF8_IGNORE)");
@@ -377,7 +388,7 @@ PHP_FUNCTION(json_last_error_msg)
 	
 	char msg_combined[256];
 
-	if (strlen(JSON_G(error_msg)) > 5) {
+	if (JSON_G(error_msg)[0] != '\0') {
 		snprintf(msg_combined, sizeof(msg_combined), "%s - %s", msg, JSON_G(error_msg));
 		RETVAL_STRING(msg_combined);
 	} else {

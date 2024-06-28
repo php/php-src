@@ -26,7 +26,7 @@ int(4)
 string(66) "Syntax error - error: syntax error, at character 0 near content: -"
 bool(false)
 int(4)
-string(66) "Syntax error - error: syntax error, at character 0 near content: -"
+string(12) "Syntax error"
 bool(false)
 int(1)
 string(28) "Maximum stack depth exceeded"
