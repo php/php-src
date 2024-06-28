@@ -709,6 +709,7 @@ TSRM_API int shmget(key_t key, size_t size, int flags)
 			CloseHandle(shm->segment);
 		}
 		UnmapViewOfFile(shm->descriptor);
+		shm->descriptor = NULL;
 		return -1;
 	}
 
@@ -744,8 +745,8 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
 
-	ret = 1;
-	if (!ret  && shm->descriptor->shm_nattch <= 0) {
+	ret = 0;
+	if (shm->descriptor->shm_nattch <= 0) {
 		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
 		shm->descriptor = NULL;
 	}
