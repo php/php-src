@@ -1828,10 +1828,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     dnl Reset LIBS temporarily as it may have already been included -liconv in.
     LIBS_save="$LIBS"
     LIBS=
-    AC_CHECK_FUNC(iconv, [
+    AC_CHECK_FUNC([iconv], [
       found_iconv=yes
     ],[
-      AC_CHECK_FUNC(libiconv,[
+      AC_CHECK_FUNC([libiconv], [
         AC_DEFINE(HAVE_LIBICONV, 1, [ ])
         found_iconv=yes
       ])
