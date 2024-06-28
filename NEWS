@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-13922 (Fixed support for systems with
     sysconf(_SC_GETPW_R_SIZE_MAX) == -1). (Arnaud)
   . Fixed bug GH-14626 (Fix is_zend_ptr() for huge blocks). (Arnaud)
+  . Fixed bug GH-14590 (Memory leak in FPM test gh13563-conf-bool-env.phpt.
+    (nielsdos)
 
 - Phar:
   . Fixed bug GH-14603 (null string from zip entry).
