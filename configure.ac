@@ -12,6 +12,7 @@ m4_include([build/php.m4])
 m4_include([build/pkg.m4])
 m4_include([TSRM/threads.m4])
 m4_include([TSRM/tsrm.m4])
+m4_include([Zend/Zend.m4])
 
 dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
@@ -263,13 +264,6 @@ dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
 dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which
 dnl require extensions to C and POSIX.
 AS_VAR_APPEND([CPPFLAGS], [" -D_GNU_SOURCE"])
-
-dnl Include Zend configurations.
-dnl ----------------------------------------------------------------------------
-
-sinclude(Zend/Zend.m4)
-
-dnl ----------------------------------------------------------------------------
 
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
