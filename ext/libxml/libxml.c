@@ -329,9 +329,13 @@ PHP_LIBXML_API void php_libxml_node_free_list(xmlNodePtr node)
 					/* This ensures that namespace references in this subtree are defined within this subtree,
 					 * otherwise a use-after-free would be possible when the original namespace holder gets freed. */
 					php_libxml_node_ptr *ptr = curnode->_private;
-					php_libxml_node_object *obj = ptr->_private;
-					if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
-						xmlReconciliateNs(curnode->doc, curnode);
+
+					/* Checking in case it runs out of reference */
+					if (ptr->_private) {
+						php_libxml_node_object *obj = ptr->_private;
+						if (!obj->document || obj->document->class_type < PHP_LIBXML_CLASS_MODERN) {
+							xmlReconciliateNs(curnode->doc, curnode);
+						}
 					}
 				}
 				/* Skip freeing */

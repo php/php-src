@@ -56,6 +56,7 @@ PHP                                                                        NEWS
   . Fixed bug #79701 (getElementById does not correctly work with duplicate
     definitions). (nielsdos)
   . Implemented "New ext-dom features in PHP 8.4" RFC. (nielsdos)
+  . Fixed GH-14698 (segfault on DOM node dereference). (David Carlier)
 
 - Fileinfo:
   . Update to libmagic 5.45. (nielsdos)
