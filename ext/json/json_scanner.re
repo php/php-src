@@ -98,7 +98,6 @@ void php_json_scanner_init(php_json_scanner *s, const char *str, size_t str_len,
 	s->options = options;
 	s->character_count = 0;
 	s->character_max_count = 0;
-	s->error_msg[0] = '\0';
 	PHP_JSON_CONDITION_SET(JS);
 }
 
@@ -111,7 +110,6 @@ std:
 
 	if (s->character_max_count == 0) {
 		s->character_max_count = strlen((const char*) s->token);
-		s->error_msg[0] = '\0';
 	} else {
 		s->character_count = s->character_max_count + (-1 * strlen((const char*) s->token));
 	}

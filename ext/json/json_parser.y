@@ -302,15 +302,6 @@ static void php_json_yyerror(php_json_parser *parser, char const *msg)
 	if (!parser->scanner.errcode) {
 		parser->scanner.errcode = PHP_JSON_ERROR_SYNTAX;
 	}
-
-	snprintf(
-		parser->scanner.error_msg,
-		sizeof(parser->scanner.error_msg),
-		"error: %s, at character %zu near content: %s",
-		msg,
-		parser->scanner.character_count,
-		(const char*) parser->scanner.token
-	);
 }
 
 PHP_JSON_API php_json_error_code php_json_parser_error_code(const php_json_parser *parser)

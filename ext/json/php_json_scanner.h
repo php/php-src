@@ -30,7 +30,6 @@ typedef struct _php_json_scanner {
 	php_json_ctype *ctxmarker;      /* marker position for context backtracking */
 	php_json_ctype *str_start;      /* start position of the string */
 	php_json_ctype *pstr;           /* string pointer for escapes conversion */
-	char error_msg[256];            /* error message if there is an error */
 	zval value;                     /* value */
 	int str_esc;                    /* number of extra characters for escaping */
 	int state;                      /* condition state */

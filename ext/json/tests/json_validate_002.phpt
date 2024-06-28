@@ -23,7 +23,7 @@ int(4)
 string(12) "Syntax error"
 bool(false)
 int(4)
-string(66) "Syntax error - error: syntax error, at character 0 near content: -"
+string(12) "Syntax error"
 bool(false)
 int(4)
 string(12) "Syntax error"
@@ -44,7 +44,7 @@ int(0)
 string(8) "No error"
 bool(false)
 int(4)
-string(66) "Syntax error - error: syntax error, at character 0 near content: -"
+string(12) "Syntax error"
 bool(true)
 int(0)
 string(8) "No error"
