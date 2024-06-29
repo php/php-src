@@ -197,59 +197,7 @@ if test "$ZEND_ZTS" = "yes"; then
   CFLAGS="$CFLAGS -DZTS"
 fi
 
-dnl Test and set the alignment define for ZEND_MM. This also does the
-dnl logarithmic test for ZEND_MM.
-AC_MSG_CHECKING(for MM alignment and log values)
-
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
-#include <stdio.h>
-#include <stdlib.h>
-
-typedef union _mm_align_test {
-  void *ptr;
-  double dbl;
-  long lng;
-} mm_align_test;
-
-#if (defined (__GNUC__) && __GNUC__ >= 2)
-#define ZEND_MM_ALIGNMENT (__alignof__ (mm_align_test))
-#else
-#define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
-#endif
-
-int main(void)
-{
-  size_t i = ZEND_MM_ALIGNMENT;
-  int zeros = 0;
-  FILE *fp;
-
-  while (i & ~0x1) {
-    zeros++;
-    i = i >> 1;
-  }
-
-  fp = fopen("conftest.zend", "w");
-  fprintf(fp, "(size_t)%zu (size_t)%d %d\n", ZEND_MM_ALIGNMENT, zeros, ZEND_MM_ALIGNMENT < 4);
-  fclose(fp);
-
-  return 0;
-}
-]])], [
-  LIBZEND_MM_ALIGN=`cat conftest.zend | cut -d ' ' -f 1`
-  LIBZEND_MM_ALIGN_LOG2=`cat conftest.zend | cut -d ' ' -f 2`
-  LIBZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT=`cat conftest.zend | cut -d ' ' -f 3`
-  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT, $LIBZEND_MM_ALIGN, [ ])
-  AC_DEFINE_UNQUOTED(ZEND_MM_ALIGNMENT_LOG2, $LIBZEND_MM_ALIGN_LOG2, [ ])
-  AC_DEFINE_UNQUOTED(ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT, $LIBZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT, [ ])
-], [], [
-  dnl Cross compilation needs something here.
-  AC_DEFINE(ZEND_MM_ALIGNMENT, 8, [ ])
-  AC_DEFINE(ZEND_MM_ALIGNMENT_LOG2, 3, [ ])
-  AC_DEFINE(ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT, 0, [ ])
-])
-
-AC_MSG_RESULT(done)
-
+ZEND_CHECK_ALIGNMENT
 ZEND_CHECK_SIGNALS
 
 dnl Don't enable Zend Max Execution Timers by default until PHP 8.3 to not break the ABI
@@ -390,6 +338,70 @@ AC_DEFUN([ZEND_CHECK_CPUID_COUNT],
 AS_VAR_IF([php_cv_have___cpuid_count], [yes],
   [AC_DEFINE([HAVE_CPUID_COUNT], [1],
     [Define to 1 if '__cpuid_count' is available.])])
+])
+
+dnl
+dnl ZEND_CHECK_ALIGNMENT
+dnl
+dnl Test and set the alignment defines for the Zend memory manager (ZEND_MM).
+dnl This also does the logarithmic test.
+dnl
+AC_DEFUN([ZEND_CHECK_ALIGNMENT],
+[AC_CACHE_CHECK([for Zend memory manager alignment and log values],
+[php_cv_align_mm],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef union _mm_align_test {
+  void *ptr;
+  double dbl;
+  long lng;
+} mm_align_test;
+
+#if (defined (__GNUC__) && __GNUC__ >= 2)
+#define ZEND_MM_ALIGNMENT (__alignof__ (mm_align_test))
+#else
+#define ZEND_MM_ALIGNMENT (sizeof(mm_align_test))
+#endif
+
+int main(void)
+{
+  size_t i = ZEND_MM_ALIGNMENT;
+  int zeros = 0;
+  FILE *fp;
+
+  while (i & ~0x1) {
+    zeros++;
+    i = i >> 1;
+  }
+
+  fp = fopen("conftest.zend", "w");
+  fprintf(fp, "(size_t)%zu (size_t)%d %d\n",
+    ZEND_MM_ALIGNMENT, zeros, ZEND_MM_ALIGNMENT < 4);
+  fclose(fp);
+
+  return 0;
+}
+])],
+  [php_cv_align_mm=$(cat conftest.zend)],
+  [php_cv_align_mm=failed],
+  [php_cv_align_mm="(size_t)8 (size_t)3 0"])])
+AS_VAR_IF([php_cv_align_mm], [failed],
+  [AC_MSG_ERROR([ZEND_MM alignment defines failed. Please, check config.log])],
+  [zend_mm_alignment=$(echo $php_cv_align_mm | cut -d ' ' -f 1)
+  zend_mm_alignment_log2=$(echo $php_cv_align_mm | cut -d ' ' -f 2)
+  zend_mm_8byte_realign=$(echo $php_cv_align_mm | cut -d ' ' -f 3)
+  AC_DEFINE_UNQUOTED([ZEND_MM_ALIGNMENT],
+    [$zend_mm_alignment],
+    [Number of bytes for the ZEND_MM alignment.])
+  AC_DEFINE_UNQUOTED([ZEND_MM_ALIGNMENT_LOG2],
+    [$zend_mm_alignment_log2],
+    [Number of bytes for the logarithmic ZEND_MM alignment.])
+  AC_DEFINE_UNQUOTED([ZEND_MM_NEED_EIGHT_BYTE_REALIGNMENT],
+    [$zend_mm_8byte_realign],
+    [Define to 1 if ZEND_MM needs 8-byte realignment, and to 0 if not.])
+])
 ])
 
 dnl
