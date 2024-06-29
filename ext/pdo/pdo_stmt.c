@@ -2450,6 +2450,16 @@ static zend_function *row_get_ctor(zend_object *object)
 	return NULL;
 }
 
+static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	ZEND_IGNORE_VALUE(object);
+	ZEND_IGNORE_VALUE(name);
+	ZEND_IGNORE_VALUE(type);
+	ZEND_IGNORE_VALUE(cache_slot);
+
+	return NULL;
+}
+
 void pdo_row_free_storage(zend_object *std)
 {
 	pdo_row_t *row = (pdo_row_t *)std;
@@ -2490,7 +2500,7 @@ void pdo_stmt_init(void)
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
 	pdo_row_object_handlers.clone_obj = NULL;
-	pdo_row_object_handlers.get_property_ptr_ptr = NULL;
+	pdo_row_object_handlers.get_property_ptr_ptr = pdo_row_get_property_ptr_ptr;
 	pdo_row_object_handlers.read_property = row_prop_read;
 	pdo_row_object_handlers.write_property = row_prop_write;
 	pdo_row_object_handlers.has_property = row_prop_exists;

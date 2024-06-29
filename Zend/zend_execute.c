@@ -3234,6 +3234,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		}
 	}
 
+	/* Pointer on property callback is required */
+	ZEND_ASSERT(zobj->handlers->get_property_ptr_ptr != NULL);
+
 	if (prop_op_type == IS_CONST) {
 		name = Z_STR_P(prop_ptr);
 	} else {
