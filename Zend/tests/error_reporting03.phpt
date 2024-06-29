@@ -31,5 +31,5 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Warning: Undefined variable $undef2 in %s on line %d
-int(32767)
+int(30719)
 Done
