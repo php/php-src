@@ -355,12 +355,16 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 /* Default session id char validation function allowed by ps_modules.
  * If you change the logic here, please also update the error message in
  * ps_modules appropriately */
-PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
+PHPAPI zend_result php_session_valid_key(zend_string *string) /* {{{ */
 {
+	const char *key = ZSTR_VAL(string);
 	size_t len;
 	const char *p;
 	char c;
-	zend_result ret = SUCCESS;
+
+	if(memchr(ZSTR_VAL(string), '\0', ZSTR_LEN(string)) != NULL) {
+		return FAILURE;
+	}
 
 	for (p = key; (c = *p); p++) {
 		/* valid characters are a..z,A..Z,0..9 */
@@ -369,8 +373,7 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 				|| (c >= '0' && c <= '9')
 				|| c == ','
 				|| c == '-')) {
-			ret = FAILURE;
-			break;
+			return FAILURE;
 		}
 	}
 
@@ -378,11 +381,11 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
-	if (len == 0 || len > PS_MAX_SID_LENGTH) {
-		ret = FAILURE;
+	if (len > PS_MAX_SID_LENGTH) {
+		return FAILURE;
 	}
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2256,7 +2259,7 @@ PHP_FUNCTION(session_id)
 /* {{{ Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
-	bool del_ses = 0;
+	bool del_ses = true;
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
@@ -2379,7 +2382,7 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
-		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
+		if (php_session_valid_key(prefix) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			RETURN_FALSE;
