@@ -61,7 +61,7 @@ PHP_ARG_WITH([external-libcrypt],
 if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
   PHP_CHECK_FUNC(crypt, crypt)
   PHP_CHECK_FUNC(crypt_r, crypt)
-  AC_CHECK_HEADERS(crypt.h)
+  AC_CHECK_HEADERS([crypt.h])
   if test "$ac_cv_func_crypt_r" = "yes"; then
     PHP_CRYPT_R_STYLE
   fi
@@ -384,8 +384,7 @@ dnl
 dnl Check net/if.h for net_get_interfaces. Darwin and BSD-like systems need
 dnl sys/socket.h to be included with net/if.h.
 dnl
-AC_CHECK_HEADERS([net/if.h],[], [],
-[
+AC_CHECK_HEADERS([net/if.h],,, [dnl
   #ifdef HAVE_SYS_SOCKET_H
   #include <sys/socket.h>
   #endif

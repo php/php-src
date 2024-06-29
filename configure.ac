@@ -373,55 +373,55 @@ dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
-AC_CHECK_HEADERS([ \
-dirent.h \
-sys/param.h \
-sys/types.h \
-sys/time.h \
-netinet/in.h \
-alloca.h \
-arpa/inet.h \
-arpa/nameser.h \
-dns.h \
-fcntl.h \
-grp.h \
-ieeefp.h \
-langinfo.h \
-linux/sock_diag.h \
-poll.h \
-pty.h \
-pwd.h \
-resolv.h \
-strings.h \
-syslog.h \
-sysexits.h \
-sys/ioctl.h \
-sys/file.h \
-sys/mman.h \
-sys/mount.h \
-sys/poll.h \
-sys/resource.h \
-sys/select.h \
-sys/socket.h \
-sys/stat.h \
-sys/statfs.h \
-sys/statvfs.h \
-sys/vfs.h \
-sys/sysexits.h \
-sys/uio.h \
-sys/wait.h \
-sys/loadavg.h \
-unistd.h \
-unix.h \
-utime.h \
-sys/utsname.h \
-sys/ipc.h \
-dlfcn.h \
-tmmintrin.h \
-nmmintrin.h \
-wmmintrin.h \
-immintrin.h
-],[],[],[
+AC_CHECK_HEADERS(m4_normalize([
+  dirent.h
+  sys/param.h
+  sys/types.h
+  sys/time.h
+  netinet/in.h
+  alloca.h
+  arpa/inet.h
+  arpa/nameser.h
+  dns.h
+  fcntl.h
+  grp.h
+  ieeefp.h
+  langinfo.h
+  linux/sock_diag.h
+  poll.h
+  pty.h
+  pwd.h
+  resolv.h
+  strings.h
+  syslog.h
+  sysexits.h
+  sys/ioctl.h
+  sys/file.h
+  sys/mman.h
+  sys/mount.h
+  sys/poll.h
+  sys/resource.h
+  sys/select.h
+  sys/socket.h
+  sys/stat.h
+  sys/statfs.h
+  sys/statvfs.h
+  sys/vfs.h
+  sys/sysexits.h
+  sys/uio.h
+  sys/wait.h
+  sys/loadavg.h
+  unistd.h
+  unix.h
+  utime.h
+  sys/utsname.h
+  sys/ipc.h
+  dlfcn.h
+  tmmintrin.h
+  nmmintrin.h
+  wmmintrin.h
+  immintrin.h
+]),,, [dnl
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -1336,11 +1336,9 @@ else
   if test "$fiber_os" = 'mac'; then
     AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
   fi
-  AC_CHECK_HEADER(ucontext.h, [
-    AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
-  ], [
-       AC_MSG_ERROR([fibers not available on this platform])
-  ])
+  AC_CHECK_HEADER([ucontext.h],
+    [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1], [ ])],
+    [AC_MSG_ERROR([fibers not available on this platform])])
 fi
 
 ZEND_INIT

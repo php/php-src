@@ -6,11 +6,10 @@ dnl
 dnl Check for CCRandomGenerateBytes
 dnl header absent in previous macOs releases
 dnl
-AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h], [], [],
-[
-	#include <sys/types.h>
-	#include <Availability.h>
-	#include <CommonCrypto/CommonCryptoError.h>
+AC_CHECK_HEADERS([CommonCrypto/CommonRandom.h],,, [dnl
+  #include <sys/types.h>
+  #include <Availability.h>
+  #include <CommonCrypto/CommonCryptoError.h>
 ])
 
 dnl
