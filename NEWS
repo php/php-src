@@ -15,6 +15,10 @@ PHP                                                                        NEWS
 - LibXML:
   . Fixed bug GH-14563 (Build failure with libxml2 v2.13.0). (nielsdos)
 
+- PDO:
+  . Fixed bug GH-14712 (Crash with PDORow access to null property).
+    (David Carlier)
+
 - Phar:
   . Fixed bug GH-14603 (null string from zip entry).
     (David Carlier)
