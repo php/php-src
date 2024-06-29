@@ -270,7 +270,7 @@ PHPAPI php_session_status php_get_session_status(void);
 PHPAPI const ps_module *_php_find_ps_module(const char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(const char *name);
 
-PHPAPI zend_result php_session_valid_key(const char *key);
+PHPAPI zend_result php_session_valid_key(zend_string *string);
 PHPAPI zend_result php_session_reset_id(void);
 
 #define PS_ADD_VARL(name) do {										\
