@@ -87,6 +87,7 @@ char *get_token_type_name(int token_type)
 		case T_INSTEADOF: return "T_INSTEADOF";
 		case T_GLOBAL: return "T_GLOBAL";
 		case T_STATIC: return "T_STATIC";
+		case T_NAMEOF: return "T_NAMEOF";
 		case T_ABSTRACT: return "T_ABSTRACT";
 		case T_FINAL: return "T_FINAL";
 		case T_PRIVATE: return "T_PRIVATE";
