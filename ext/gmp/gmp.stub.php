@@ -59,11 +59,25 @@ const GMP_NATIVE_ENDIAN = UNKNOWN;
 
 class GMP
 {
-    public function __construct(int|string $num = 0, int $base = 0) {}
+    public function __construct(int|string|GMP $num = 0, int $base = 0) {}
 
     public function __serialize(): array {}
 
     public function __unserialize(array $data): void {}
+
+    protected function add(GMP|int|string $left, GMP|int|string $right): GMP {}
+
+    protected function multiply(GMP|int|string $left, GMP|int|string $right): GMP {}
+
+    protected function subtract(GMP|int|string $left, GMP|int|string $right): GMP {}
+
+    protected function divide(GMP|int|string $left, GMP|int|string $right): GMP {}
+
+    protected function mod(GMP|int|string $left, GMP|int|string $right): GMP {}
+
+    protected function pow(GMP|int|string $base, GMP|int|string $exp): GMP {}
+
+    protected function comparable(GMP|int|string $op1, GMP|int|string $op2): bool {}
 }
 
 function gmp_init(int|string $num, int $base = 0): GMP {}
