@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Dom:
   . Fixed bug GH-14702 (DOMDocument::xinclude() crash). (nielsdos)
 
+- LibXML:
+  . Fixed bug GH-14563 (Build failure with libxml2 v2.13.0). (nielsdos)
+
 - Phar:
   . Fixed bug GH-14603 (null string from zip entry).
     (David Carlier)
