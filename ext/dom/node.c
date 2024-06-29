@@ -1229,22 +1229,18 @@ static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry
 
 	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
-	if (!dom_node_children_valid(nodep)) {
-		RETURN_FALSE;
-	}
-
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	bool stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+	if (!nodep->children || child->parent != nodep) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
-	if (!nodep->children || child->parent != nodep) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	if (dom_node_is_read_only(nodep) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
