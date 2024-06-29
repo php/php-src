@@ -355,14 +355,13 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 /* Default session id char validation function allowed by ps_modules.
  * If you change the logic here, please also update the error message in
  * ps_modules appropriately */
-PHPAPI zend_result php_session_valid_key(zend_string *string) /* {{{ */
+PHPAPI zend_result php_session_valid_key(const zend_string *str) /* {{{ */
 {
-	const char *key = ZSTR_VAL(string);
-	size_t len;
+	const char *key = ZSTR_VAL(str);
 	const char *p;
 	char c;
 
-	if(memchr(ZSTR_VAL(string), '\0', ZSTR_LEN(string)) != NULL) {
+	if(zend_str_has_nul_byte(str)) {
 		return FAILURE;
 	}
 
