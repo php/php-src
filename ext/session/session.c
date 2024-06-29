@@ -360,17 +360,15 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 	size_t len;
 	const char *p;
 	char c;
-	zend_result ret = SUCCESS;
 
 	for (p = key; (c = *p); p++) {
-		/* valid characters are a..z,A..Z,0..9 */
+		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
 		if (!((c >= 'a' && c <= 'z')
 				|| (c >= 'A' && c <= 'Z')
 				|| (c >= '0' && c <= '9')
 				|| c == ','
 				|| c == '-')) {
-			ret = FAILURE;
-			break;
+			return FAILURE;
 		}
 	}
 
@@ -379,10 +377,10 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
 	if (len == 0 || len > PS_MAX_SID_LENGTH) {
-		ret = FAILURE;
+		return FAILURE;
 	}
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2374,7 +2372,7 @@ PHP_FUNCTION(session_create_id)
 	zend_string *prefix = NULL, *new_id;
 	smart_str id = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P", &prefix) == FAILURE) {
 		RETURN_THROWS();
 	}
 
