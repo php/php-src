@@ -12,8 +12,15 @@ $interval = new DateInterval('P1M');
 try {
 	new DatePeriod($start, $interval, PHP_INT_MAX);
 } catch (Exception $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+try {
+	new DatePeriod($start, $interval, 2147483647, DatePeriod::EXCLUDE_START_DATE | DatePeriod::INCLUDE_END_DATE);
+} catch (Exception $e) {
 	echo $e->getMessage();
 }
 ?>
 --EXPECTF--
 DatePeriod::__construct(): Recurrence count must be between 1 and %d
+DatePeriod::__construct(): Recurrence count must be between 1 and %d (including options)

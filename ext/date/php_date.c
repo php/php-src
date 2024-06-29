@@ -4809,8 +4809,17 @@ PHP_METHOD(DatePeriod, __construct)
 	dpobj->include_start_date = !(options & PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 	dpobj->include_end_date = options & PHP_DATE_PERIOD_INCLUDE_END_DATE;
 
+	recurrences += dpobj->include_start_date + dpobj->include_end_date;
+
+	if (UNEXPECTED(ZEND_LONG_INT_OVFL(recurrences))) {
+		zend_string *func = get_active_function_or_method_name();
+		zend_throw_exception_ex(NULL, 0, "%s(): Recurrence count must be between 1 and %d (including options)", ZSTR_VAL(func), INT_MAX);
+		zend_string_release(func);
+		RETURN_THROWS();
+	}
+
 	/* recurrences */
-	dpobj->recurrences = recurrences + dpobj->include_start_date + dpobj->include_end_date;
+	dpobj->recurrences = (int)recurrences;
 
 	dpobj->initialized = 1;
 
