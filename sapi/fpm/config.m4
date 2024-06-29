@@ -522,9 +522,8 @@ if test "$PHP_FPM" != "no"; then
       PHP_EVAL_LIBLINE([$APPARMOR_LIBS])
       PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])
     ],
-      [AC_CHECK_LIB([apparmor], [aa_change_profile],
-        [PHP_ADD_LIBRARY([apparmor])],
-        [AC_MSG_ERROR([libapparmor required but not found.])])])
+      [AC_SEARCH_LIBS([aa_change_profile], [apparmor],,
+        [AC_MSG_ERROR([Required libapparmor not found.])])])
 
     dnl Sanity check.
     CFLAGS_save="$CFLAGS"
@@ -540,8 +539,7 @@ if test "$PHP_FPM" != "no"; then
       PHP_EVAL_LIBLINE([$SELINUX_LIBS])
       PHP_EVAL_INCLINE([$SELINUX_CFLAGS])
     ],
-      [AC_CHECK_LIB([selinux], [security_setenforce],
-        [PHP_ADD_LIBRARY([selinux])],
+      [AC_SEARCH_LIBS([security_setenforce], [selinux],,
         [AC_MSG_ERROR([Required SELinux library not found.])])])
 
     dnl Sanity check.
