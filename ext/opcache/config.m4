@@ -52,9 +52,9 @@ if test "$PHP_OPCACHE" != "no"; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
     AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
-		jit/ir/ir_cfg.c	jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
-		jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
-		jit/ir/ir_patch.c jit/ir/ir_emit.c"
+      jit/ir/ir_cfg.c jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
+      jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
+      jit/ir/ir_patch.c jit/ir/ir_emit.c"
 
     dnl Find out which ABI we are using.
     case $host_alias in
@@ -323,21 +323,21 @@ int main(void) {
   LIBS="$LIBS_save"
 
   PHP_NEW_EXTENSION(opcache,
-	ZendAccelerator.c \
-	zend_accelerator_blacklist.c \
-	zend_accelerator_debug.c \
-	zend_accelerator_hash.c \
-	zend_accelerator_module.c \
-	zend_persist.c \
-	zend_persist_calc.c \
-	zend_file_cache.c \
-	zend_shared_alloc.c \
-	zend_accelerator_util_funcs.c \
-	shared_alloc_shm.c \
-	shared_alloc_mmap.c \
-	shared_alloc_posix.c \
-	$ZEND_JIT_SRC,
-	shared,,"-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
+    ZendAccelerator.c \
+    zend_accelerator_blacklist.c \
+    zend_accelerator_debug.c \
+    zend_accelerator_hash.c \
+    zend_accelerator_module.c \
+    zend_persist.c \
+    zend_persist_calc.c \
+    zend_file_cache.c \
+    zend_shared_alloc.c \
+    zend_accelerator_util_funcs.c \
+    shared_alloc_shm.c \
+    shared_alloc_mmap.c \
+    shared_alloc_posix.c \
+    $ZEND_JIT_SRC,
+    shared,,"-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 

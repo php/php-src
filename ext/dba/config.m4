@@ -233,25 +233,25 @@ dnl TCADB
 if test "$PHP_TCADB" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_TCADB /usr/local /usr; do
-	if test -f "$i/include/tcadb.h"; then
-	  THIS_PREFIX=$i
-	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
-	  THIS_INCLUDE=$i/include/tcadb.h
-	  break
-	fi
+  if test -f "$i/include/tcadb.h"; then
+    THIS_PREFIX=$i
+    PHP_ADD_INCLUDE($THIS_PREFIX/include)
+    THIS_INCLUDE=$i/include/tcadb.h
+    break
+  fi
   done
 
   if test -n "$THIS_INCLUDE"; then
-	for LIB in tokyocabinet; do
-	  PHP_CHECK_LIBRARY($LIB, tcadbopen, [
-		AC_DEFINE_UNQUOTED(TCADB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-		AC_DEFINE(DBA_TCADB, 1, [ ])
-		THIS_LIBS=$LIB
-	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-	  if test -n "$THIS_LIBS"; then
-		break
-	  fi
-	done
+    for LIB in tokyocabinet; do
+      PHP_CHECK_LIBRARY($LIB, tcadbopen, [
+        AC_DEFINE_UNQUOTED(TCADB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+        AC_DEFINE(DBA_TCADB, 1, [ ])
+        THIS_LIBS=$LIB
+      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+      if test -n "$THIS_LIBS"; then
+        break
+      fi
+    done
   fi
 
   PHP_DBA_STD_ASSIGN
@@ -264,25 +264,25 @@ dnl LMDB
 if test "$PHP_LMDB" != "no"; then
   PHP_DBA_STD_BEGIN
   for i in $PHP_LMDB /usr/local /usr; do
-	if test -f "$i/include/lmdb.h"; then
-	  THIS_PREFIX=$i
-	  PHP_ADD_INCLUDE($THIS_PREFIX/include)
-	  THIS_INCLUDE=$i/include/lmdb.h
-	  break
-	fi
+    if test -f "$i/include/lmdb.h"; then
+      THIS_PREFIX=$i
+      PHP_ADD_INCLUDE($THIS_PREFIX/include)
+      THIS_INCLUDE=$i/include/lmdb.h
+      break
+    fi
   done
 
   if test -n "$THIS_INCLUDE"; then
-	for LIB in lmdb; do
-	  PHP_CHECK_LIBRARY($LIB, mdb_env_open, [
-		AC_DEFINE_UNQUOTED(LMDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-		AC_DEFINE(DBA_LMDB, 1, [ ])
-		THIS_LIBS=$LIB
-	  ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
-	  if test -n "$THIS_LIBS"; then
-		break
-	  fi
-	done
+    for LIB in lmdb; do
+      PHP_CHECK_LIBRARY($LIB, mdb_env_open, [
+        AC_DEFINE_UNQUOTED(LMDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+        AC_DEFINE(DBA_LMDB, 1, [ ])
+        THIS_LIBS=$LIB
+      ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
+      if test -n "$THIS_LIBS"; then
+        break
+      fi
+    done
   fi
 
   PHP_DBA_STD_ASSIGN

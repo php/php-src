@@ -600,7 +600,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_conf.c \
     fpm/fpm_env.c \
     fpm/fpm_events.c \
-		fpm/fpm_log.c \
+    fpm/fpm_log.c \
     fpm/fpm_main.c \
     fpm/fpm_php.c \
     fpm/fpm_php_trace.c \
@@ -615,12 +615,12 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_unix.c \
     fpm/fpm_worker_pool.c \
     fpm/zlog.c \
-		fpm/events/select.c \
-		fpm/events/poll.c \
-		fpm/events/epoll.c \
-		fpm/events/kqueue.c \
-		fpm/events/devpoll.c \
-		fpm/events/port.c \
+    fpm/events/select.c \
+    fpm/events/poll.c \
+    fpm/events/epoll.c \
+    fpm/events/kqueue.c \
+    fpm/events/devpoll.c \
+    fpm/events/port.c \
   "
 
   PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')

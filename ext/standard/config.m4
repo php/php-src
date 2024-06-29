@@ -12,33 +12,33 @@ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 
 int main(int argc, char **argv)
 {
-	char *filename = tmpnam(NULL);
-	char buffer[64];
-	int result = 0;
+  char *filename = tmpnam(NULL);
+  char buffer[64];
+  int result = 0;
 
-	FILE *fp = fopen(filename, "wb");
-	if (NULL == fp)
-		return 0;
-	fputs("line 1\n", fp);
-	fputs("line 2\n", fp);
-	fclose(fp);
+  FILE *fp = fopen(filename, "wb");
+  if (NULL == fp)
+    return 0;
+  fputs("line 1\n", fp);
+  fputs("line 2\n", fp);
+  fclose(fp);
 
-	fp = fopen(filename, "rb+");
-	if (NULL == fp)
-		return 0;
-	fgets(buffer, sizeof(buffer), fp);
-	fputs("line 3\n", fp);
-	rewind(fp);
-	fgets(buffer, sizeof(buffer), fp);
-	if (0 != strcmp(buffer, "line 1\n"))
-		result = 1;
-	fgets(buffer, sizeof(buffer), fp);
-	if (0 != strcmp(buffer, "line 3\n"))
-		result = 1;
-	fclose(fp);
-	unlink(filename);
+  fp = fopen(filename, "rb+");
+  if (NULL == fp)
+    return 0;
+  fgets(buffer, sizeof(buffer), fp);
+  fputs("line 3\n", fp);
+  rewind(fp);
+  fgets(buffer, sizeof(buffer), fp);
+  if (0 != strcmp(buffer, "line 1\n"))
+    result = 1;
+  fgets(buffer, sizeof(buffer), fp);
+  if (0 != strcmp(buffer, "line 3\n"))
+    result = 1;
+  fclose(fp);
+  unlink(filename);
 
-	exit(result);
+  exit(result);
 }
 ]])],[
   ac_cv_flush_io=no
@@ -81,10 +81,10 @@ if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
 
 int main(void) {
 #ifdef HAVE_CRYPT
-	char *encrypted = crypt("rasmuslerdorf","rl");
-	return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
+  char *encrypted = crypt("rasmuslerdorf","rl");
+  return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
 #else
-	return 1;
+  return 1;
 #endif
 }]])],[
   ac_cv_crypt_des=yes
@@ -109,10 +109,10 @@ int main(void) {
 
 int main(void) {
 #ifdef HAVE_CRYPT
-	char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
-	return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
+  char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
+  return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
 #else
-	return 1;
+  return 1;
 #endif
 }]])],[
     ac_cv_crypt_ext_des=yes
@@ -137,20 +137,20 @@ int main(void) {
 
 int main(void) {
 #ifdef HAVE_CRYPT
-	char salt[15], answer[40];
-	char *encrypted;
+  char salt[15], answer[40];
+  char *encrypted;
 
-	salt[0]='$'; salt[1]='1'; salt[2]='$';
-	salt[3]='r'; salt[4]='a'; salt[5]='s';
-	salt[6]='m'; salt[7]='u'; salt[8]='s';
-	salt[9]='l'; salt[10]='e'; salt[11]='$';
-	salt[12]='\0';
-	strcpy(answer,salt);
-	strcat(answer,"rISCgZzpwk3UhDidwXvin0");
-	encrypted = crypt("rasmuslerdorf",salt);
-	return !encrypted || strcmp(encrypted,answer);
+  salt[0]='$'; salt[1]='1'; salt[2]='$';
+  salt[3]='r'; salt[4]='a'; salt[5]='s';
+  salt[6]='m'; salt[7]='u'; salt[8]='s';
+  salt[9]='l'; salt[10]='e'; salt[11]='$';
+  salt[12]='\0';
+  strcpy(answer,salt);
+  strcat(answer,"rISCgZzpwk3UhDidwXvin0");
+  encrypted = crypt("rasmuslerdorf",salt);
+  return !encrypted || strcmp(encrypted,answer);
 #else
-	return 1;
+  return 1;
 #endif
 }]])],[
     ac_cv_crypt_md5=yes
@@ -175,17 +175,17 @@ int main(void) {
 
 int main(void) {
 #ifdef HAVE_CRYPT
-	char salt[30], answer[70];
-	char *encrypted;
+  char salt[30], answer[70];
+  char *encrypted;
 
-	salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
-	strcat(salt,"rasmuslerd............");
-	strcpy(answer,salt);
-	strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
-	encrypted = crypt("rasmuslerdorf",salt);
-	return !encrypted || strcmp(encrypted,answer);
+  salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
+  strcat(salt,"rasmuslerd............");
+  strcpy(answer,salt);
+  strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
+  encrypted = crypt("rasmuslerdorf",salt);
+  return !encrypted || strcmp(encrypted,answer);
 #else
-	return 1;
+  return 1;
 #endif
 }]])],[
     ac_cv_crypt_blowfish=yes
@@ -210,16 +210,16 @@ int main(void) {
 
 int main(void) {
 #ifdef HAVE_CRYPT
-	char salt[21], answer[21+86];
-	char *encrypted;
+  char salt[21], answer[21+86];
+  char *encrypted;
 
-	strcpy(salt,"\$6\$rasmuslerdorf\$");
-	strcpy(answer, salt);
-	strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
-	encrypted = crypt("rasmuslerdorf",salt);
-	return !encrypted || strcmp(encrypted,answer);
+  strcpy(salt,"\$6\$rasmuslerdorf\$");
+  strcpy(answer, salt);
+  strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
+  encrypted = crypt("rasmuslerdorf",salt);
+  return !encrypted || strcmp(encrypted,answer);
 #else
-	return 1;
+  return 1;
 #endif
   }]])],[
     ac_cv_crypt_sha512=yes
@@ -244,16 +244,16 @@ int main(void) {
 
 int main(void) {
 #ifdef HAVE_CRYPT
-	char salt[21], answer[21+43];
-	char *encrypted;
+  char salt[21], answer[21+43];
+  char *encrypted;
 
-	strcpy(salt,"\$5\$rasmuslerdorf\$");
-	strcpy(answer, salt);
-	strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
-	encrypted = crypt("rasmuslerdorf",salt);
-	return !encrypted || strcmp(encrypted,answer);
+  strcpy(salt,"\$5\$rasmuslerdorf\$");
+  strcpy(answer, salt);
+  strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
+  encrypted = crypt("rasmuslerdorf",salt);
+  return !encrypted || strcmp(encrypted,answer);
 #else
-	return 1;
+  return 1;
 #endif
 }]])],[
     ac_cv_crypt_sha256=yes

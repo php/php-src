@@ -120,7 +120,7 @@ function get_vars($txt)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
+// if ($GLOBALS['current_function'] == 'for_debugging') { print_r($m);print_r($ret); }
     return $ret;
 }
 
@@ -180,7 +180,7 @@ function get_params($vars, $str)
         }
     }
 
-//	if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
+// if ($GLOBALS['current_function'] == 'for_debugging') { var_dump($m); var_dump($ret); }
     return $ret;
 }
 

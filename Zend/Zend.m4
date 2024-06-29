@@ -173,7 +173,7 @@ if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])
   echo " $CFLAGS" | grep ' -g' >/dev/null || DEBUG_CFLAGS="-g"
   if test "$CFLAGS" = "-g -O2"; then
-  	CFLAGS=-g
+    CFLAGS=-g
   fi
 else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
