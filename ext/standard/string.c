@@ -5023,6 +5023,7 @@ PHP_FUNCTION(parse_str)
 	if (!arrayArg) {
 		RETURN_THROWS();
 	}
+	Z_EXTRA_P(arrayArg) = (uint16_t)mergeParams;
 
 	res = estrndup(arg, arglen);
 	sapi_module.treat_data(PARSE_STRING, res, arrayArg);

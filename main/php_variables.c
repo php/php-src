@@ -114,6 +114,7 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 	size_t var_len, index_len;
 	zval gpc_element, *gpc_element_p;
 	bool is_array = 0;
+	bool merge_params = 0;
 	HashTable *symtable1 = NULL;
 	ALLOCA_FLAG(use_heap)
 
@@ -121,6 +122,10 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 
 	if (track_vars_array && Z_TYPE_P(track_vars_array) == IS_ARRAY) {
 		symtable1 = Z_ARRVAL_P(track_vars_array);
+	}
+
+	if (track_vars_array && Z_EXTRA_P(track_vars_array) == 1) {
+		merge_params = 1;
 	}
 
 	if (!symtable1) {
@@ -274,8 +279,12 @@ PHPAPI void php_register_variable_ex(const char *var_name, zval *val, zval *trac
 						gpc_element_p = Z_INDIRECT_P(gpc_element_p);
 					}
 					if (Z_TYPE_P(gpc_element_p) != IS_ARRAY) {
-						zval_ptr_dtor_nogc(gpc_element_p);
-						array_init(gpc_element_p);
+						if (!merge_params) {
+							zval_ptr_dtor_nogc(gpc_element_p);
+							array_init(gpc_element_p);
+						} else {
+							goto plain_var;
+						}
 					} else {
 						SEPARATE_ARRAY(gpc_element_p);
 					}
@@ -321,6 +330,30 @@ plain_var:
 				zval_ptr_dtor_nogc(val);
 			} else if (ZEND_HANDLE_NUMERIC_STR(index, index_len, idx)) {
 				zend_hash_index_update(symtable1, idx, val);
+			} else if (merge_params && zend_symtable_str_exists(symtable1, index, index_len)) {
+				zval *tmp1 = zend_symtable_str_find(symtable1, index, index_len);
+
+				if (Z_TYPE_P(tmp1) == IS_INDIRECT) {
+					tmp1 = Z_INDIRECT_P(tmp1);
+				}
+				if (Z_TYPE_P(tmp1) != IS_ARRAY) {
+					zval tmp;
+					ZVAL_COPY(&tmp, tmp1);
+					zval_ptr_dtor_nogc(tmp1);
+					array_init(tmp1);
+					symtable1 = Z_ARRVAL_P(tmp1);
+
+					if (zend_hash_next_index_insert(symtable1, &tmp) == NULL) {
+						zval_ptr_dtor_nogc(&tmp);
+					}
+				}
+
+				SEPARATE_ARRAY(tmp1);
+				symtable1 = Z_ARRVAL_P(tmp1);
+
+				if (zend_hash_next_index_insert(symtable1, val) == NULL) {
+					zval_ptr_dtor_nogc(val);
+				}
 			} else {
 				php_register_variable_quick(index, index_len, val, symtable1);
 			}
@@ -491,6 +524,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			break;
 		default:
 			ZVAL_COPY_VALUE(&array, destArray);
+			array.u2.extra = destArray->u2.extra;
 			break;
 	}
 
