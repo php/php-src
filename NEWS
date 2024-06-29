@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-17106 (ZEND_MATCH_ERROR misoptimization). (ilutov)
 
+- Date:
+  . Fixed bug GH-14709 DatePeriod::__construct() overflow on recurrences.
+    (David Carlier)
+
 - DBA:
   . Skip test if inifile is disabled. (orlitzky)
 
