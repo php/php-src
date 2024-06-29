@@ -2250,7 +2250,7 @@ PHP_FUNCTION(session_id)
 /* {{{ Update the current session id with a newly generated one. If delete_old_session is set to true, remove the old session. */
 PHP_FUNCTION(session_regenerate_id)
 {
-	bool del_ses = true;
+	bool del_ses = 0;
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
