@@ -18,6 +18,9 @@ class HasDestructor {
 }
 $s = new SplObjectStorage();
 $s[$phar] = new HasDestructor();
+register_shutdown_function(function() {
+	global $s;
+});
 --EXPECT--
 object(SplObjectStorage)#2 (1) {
   ["storage":"SplObjectStorage":private]=>
