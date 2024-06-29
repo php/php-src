@@ -358,20 +358,14 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 PHPAPI zend_result php_session_valid_key(const zend_string *str) /* {{{ */
 {
 	const char *key = ZSTR_VAL(str);
-	const char *p;
-	char c;
 
-	if(zend_str_has_nul_byte(str)) {
-		return FAILURE;
-	}
-
-	for (p = key; (c = *p); p++) {
+	for (size_t i = 0; i < str->len; i++) {
 		/* valid characters are a..z,A..Z,0..9 */
-		if (!((c >= 'a' && c <= 'z')
-				|| (c >= 'A' && c <= 'Z')
-				|| (c >= '0' && c <= '9')
-				|| c == ','
-				|| c == '-')) {
+		if (!((key[i] >= 'a' && key[i] <= 'z')
+				|| (key[i] >= 'A' && key[i] <= 'Z')
+				|| (key[i] >= '0' && key[i] <= '9')
+				|| key[i] == ','
+				|| key[i] == '-')) {
 			return FAILURE;
 		}
 	}
