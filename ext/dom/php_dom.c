@@ -525,7 +525,7 @@ static void dom_import_simplexml_common(INTERNAL_FUNCTION_PARAMETERS, php_libxml
 				zend_argument_type_error(1, "must not be already imported as a DOMNode");
 			} else {
 				zend_argument_type_error(1, "must not be already imported as a Dom\\Node");
-			}			
+			}
 			RETURN_THROWS();
 		}
 
@@ -1882,7 +1882,7 @@ void php_dom_normalize_modern(xmlNodePtr this)
 
 			/* 3. Let data be the concatenation of the data of node’s contiguous exclusive Text nodes (excluding itself), in tree order.
 			 * 4. Replace data with node node, offset length, count 0, and data data.
-			 * 7. Remove node’s contiguous exclusive Text nodes (excluding itself), in tree order. 
+			 * 7. Remove node’s contiguous exclusive Text nodes (excluding itself), in tree order.
 			 *    => In other words: Concat every contiguous text node into node and delete the merged nodes. */
 			dom_merge_adjacent_exclusive_text_nodes(node);
 

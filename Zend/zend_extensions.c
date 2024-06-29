@@ -272,7 +272,7 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
  *
  * The extension slot has been available since PHP 7.4 on user functions and
  * has been available since PHP 8.2 on internal functions.
- * 
+ *
  * # Safety
  * The extension slot made available by calling this function is initialized on
  * the first call made to the function in that request. If you need to
@@ -280,13 +280,13 @@ ZEND_API int zend_get_resource_handle(const char *module_name)
  *
  * The function cache slots are not available if the function is a trampoline,
  * which can be checked with something like:
- * 
+ *
  *     if (fbc->type == ZEND_USER_FUNCTION
  *         && !(fbc->op_array.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
  *     ) {
  *         // Use ZEND_OP_ARRAY_EXTENSION somehow
  *     }
- */  
+ */
 ZEND_API int zend_get_op_array_extension_handle(const char *module_name)
 {
 	int handle = zend_op_array_extension_handles++;

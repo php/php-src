@@ -166,7 +166,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 			if(char_pos < offset_pos) {
 				/* last one is beyond our start offset */
 				char_pos = USEARCH_DONE;
-			}			
+			}
 		} else {
 			/* searching backwards is broken, so we search forwards, albeit it's less efficient */
 			int32_t prev_pos = USEARCH_DONE;

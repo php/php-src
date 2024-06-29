@@ -520,12 +520,12 @@ PHP_FUNCTION(mysqli_execute_query)
 
 	if (FAIL == mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-		
+
 		close_stmt_and_copy_errors(stmt, mysql);
 		RETURN_FALSE;
 	}
 
-	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */ 
+	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */
 	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
 	/* Get performance boost if reporting is switched off */
 	if (query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {

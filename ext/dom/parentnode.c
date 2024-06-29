@@ -130,7 +130,7 @@ static xmlDocPtr dom_doc_from_context_node(xmlNodePtr contextNode)
 	}
 }
 
-/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild): 
+/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild):
  * "Add a new node to @parent, at the end of the child (or property) list merging adjacent TEXT nodes (in which case @cur is freed)".
  * So we must use a custom way of adding that does not merge. */
 static void dom_add_child_without_merging(xmlNodePtr parent, xmlNodePtr child)
