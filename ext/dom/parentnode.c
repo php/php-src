@@ -35,13 +35,10 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	xmlNodePtr first = NULL;
-	if (dom_node_children_valid(nodep)) {
-		first = nodep->children;
+	xmlNodePtr first = nodep->children;
 
-		while (first && first->type != XML_ELEMENT_NODE) {
-			first = first->next;
-		}
+	while (first && first->type != XML_ELEMENT_NODE) {
+		first = first->next;
 	}
 
 	if (!first) {
@@ -62,13 +59,10 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	xmlNodePtr last = NULL;
-	if (dom_node_children_valid(nodep)) {
-		last = nodep->last;
+	xmlNodePtr last = nodep->last;
 
-		while (last && last->type != XML_ELEMENT_NODE) {
-			last = last->prev;
-		}
+	while (last && last->type != XML_ELEMENT_NODE) {
+		last = last->prev;
 	}
 
 	if (!last) {
@@ -90,16 +84,14 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	zend_long count = 0;
-	if (dom_node_children_valid(nodep)) {
-		xmlNodePtr first = nodep->children;
+	xmlNodePtr first = nodep->children;
 
-		while (first != NULL) {
-			if (first->type == XML_ELEMENT_NODE) {
-				count++;
-			}
-
-			first = first->next;
+	while (first != NULL) {
+		if (first->type == XML_ELEMENT_NODE) {
+			count++;
 		}
+
+		first = first->next;
 	}
 
 	ZVAL_LONG(retval, count);
@@ -701,10 +693,6 @@ static zend_result dom_child_removal_preconditions(const xmlNode *child, int str
 
 	if (!child->parent) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return FAILURE;
-	}
-
-	if (!dom_node_children_valid(child->parent)) {
 		return FAILURE;
 	}
 
