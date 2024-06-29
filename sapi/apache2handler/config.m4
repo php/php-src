@@ -35,6 +35,11 @@ if test "$PHP_APXS2" != "no"; then
 
   APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
+  AS_IF([test ! -x "$APXS_HTTPD"], [
+    AC_MSG_RESULT([$APXS_HTTPD executable not found])
+    AC_MSG_ERROR([Please install Apache HTTP Server command-line utility.])
+  ])
+
   APXS_CFLAGS=`$APXS -q CFLAGS`
   APU_BINDIR=`$APXS -q APU_BINDIR`
   APR_BINDIR=`$APXS -q APR_BINDIR`
@@ -58,9 +63,10 @@ if test "$PHP_APXS2" != "no"; then
 
   dnl Test that we're trying to configure with apache 2.x
   PHP_AP_EXTRACT_VERSION($APXS_HTTPD)
-  if test "$APACHE_VERSION" -lt 2000044; then
+  AS_VERSION_COMPARE([$APACHE_VERSION], [2000044], [
+    AC_MSG_RESULT([aborting])
     AC_MSG_ERROR([Please note that Apache version >= 2.0.44 is required])
-  fi
+  ])
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
   if test -z `$APXS -q SYSCONFDIR`; then
@@ -107,17 +113,18 @@ if test "$PHP_APXS2" != "no"; then
     ;;
   esac
 
-  if test "$APACHE_VERSION" -lt 2004001; then
+  AS_VERSION_COMPARE([$APACHE_VERSION], [2004001], [apx_has_mpm_name_query=yes])
+  AS_VAR_IF([apx_has_mpm_name_query], [yes], [
     APXS_MPM=`$APXS -q MPM_NAME`
     if test "$APXS_MPM" != "prefork" && test "$APXS_MPM" != "peruser" && test "$APXS_MPM" != "itk"; then
       PHP_BUILD_THREAD_SAFE
     fi
-  else
+  ], [
     APACHE_THREADED_MPM=`$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes'`
     if test -n "$APACHE_THREADED_MPM"; then
       PHP_BUILD_THREAD_SAFE
     fi
-  fi
+  ])
   AC_MSG_RESULT(yes)
   PHP_SUBST(APXS)
 else
