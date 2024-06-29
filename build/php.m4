@@ -2283,7 +2283,10 @@ int main(void)
 dnl
 dnl PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
 dnl
-AC_DEFUN([PHP_INIT_DTRACE],[
+AC_DEFUN([PHP_INIT_DTRACE],
+[AC_CHECK_HEADER([sys/sdt.h],,
+  [AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support.])])
+
 dnl Set paths properly when called from extension.
   case "$4" in
     ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir;;
@@ -2388,6 +2391,9 @@ $ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
 EOF
     ;;
   esac
+
+AC_DEFINE([HAVE_DTRACE], [1], [Define to 1 if DTrace support is enabled.])
+PHP_SUBST([PHP_DTRACE_OBJS])
 ])
 
 dnl
