@@ -704,6 +704,10 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . Unicode data tables have been updated to Unicode 15.1.
 
+- mysqli:
+  . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
+    has been removed.
+
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.
 

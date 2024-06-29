@@ -436,11 +436,6 @@ const MYSQLI_TYPE_BIT = UNKNOWN;
  * @cvalue MYSQL_SET_CHARSET_NAME
  */
 const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
-/**
- * @var int
- * @cvalue MYSQL_SET_CHARSET_DIR
- */
-const MYSQLI_SET_CHARSET_DIR = UNKNOWN;
 
 /* bind support */
 /**
