@@ -1022,10 +1022,10 @@ $3
 
 int main(void)
 {
-	FILE *fp = fopen("conftestval", "w");
-	if (!fp) return(1);
-	fprintf(fp, "%d\n", sizeof($1));
-	return(0);
+  FILE *fp = fopen("conftestval", "w");
+  if (!fp) return(1);
+  fprintf(fp, "%d\n", sizeof($1));
+  return(0);
 }
   ]])], [
     eval $php_cache_value=`cat conftestval`
