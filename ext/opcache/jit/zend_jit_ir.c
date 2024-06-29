@@ -4570,7 +4570,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 		ir_ref tmp = ir_LOAD_U8(ir_ADD_OFFSET(func_ref, offsetof(zend_function, type)));
 		ir_ref if_internal_func = ir_IF(ir_AND_U8(tmp, ir_CONST_U8(ZEND_INTERNAL_FUNCTION)));
 		ir_IF_TRUE(if_internal_func);
-		
+
 		ir_ref observer_handler_internal = ir_ADD_OFFSET(run_time_cache, zend_observer_fcall_internal_function_extension * sizeof(void *));
 
 		ir_ref if_internal_func_end = ir_END();
@@ -17103,7 +17103,7 @@ static ir_ref jit_frameless_observer(zend_jit_ctx *jit, const zend_op *opline) {
 	// Not need for runtime cache or generator checks here, we just need if_unobserved
 	ir_ref if_unobserved = jit_observer_fcall_is_unobserved_start(jit, fbc, &observer_handler, IR_UNUSED, IR_UNUSED).if_unobserved;
 
-	// Call zend_frameless_observed_call for the main logic. 
+	// Call zend_frameless_observed_call for the main logic.
 	ir_CALL_1(IR_VOID, ir_CONST_ADDR((size_t)zend_frameless_observed_call), jit_FP(jit));
 
 	ir_ref skip = ir_END();

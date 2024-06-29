@@ -335,7 +335,7 @@ PHP_FUNCTION(json_validate)
 	}
 
 	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
-	
+
 	if (depth <= 0) {
 		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
