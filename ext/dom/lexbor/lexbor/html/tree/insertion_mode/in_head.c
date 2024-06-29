@@ -175,7 +175,7 @@ lxb_html_tree_insertion_mode_in_head_open(lxb_html_tree_t *tree,
          * We can create function for this, but...
          *
          * The "in head noscript" insertion mode use this
-         * is you change this code, please, change it in in head noscript" mode
+         * is you change this code, please, change it in head noscript" mode
          */
         case LXB_TAG__TEXT: {
             lxb_html_token_t ws_token = {0};

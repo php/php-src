@@ -62,6 +62,16 @@ lxb_css_parser_init(lxb_css_parser_t *parser, lxb_css_syntax_tokenizer_t *tkz)
     parser->rules_end = parser->rules_begin + lxb_rules_length;
     parser->rules = parser->rules_begin;
 
+    /*
+     * Zero those parameters that can be used (passed to the function).
+     * The parser->rules->phase parameter will be assigned at the end of the
+     * parsing.
+     *
+     * The point is that parser->rules[0] is used as a stub before exiting
+     * parsing.
+     */
+    parser->rules->context = NULL;
+
     /* Temp */
     parser->pos = NULL;
     parser->str.length = 0;
