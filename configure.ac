@@ -1847,8 +1847,7 @@ if test -n "\$REDO_ALL"; then
   AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
 
     if test "$PHP_SAPI" = "apache2handler"; then
-      if test "$APACHE_VERSION" -ge 2004001; then
-        if test -z "$APACHE_THREADED_MPM"; then
+      if test -z "$APACHE_THREADED_MPM"; then
 cat <<X
 +--------------------------------------------------------------------+
 |                        *** WARNING ***                             |
@@ -1857,10 +1856,8 @@ cat <<X
 | If you change Apache to use a threaded MPM you must reconfigure    |
 | PHP with --enable-zts                                              |
 X
-        fi
       fi
     fi
-
 fi
 ])
 AC_OUTPUT

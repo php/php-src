@@ -29,7 +29,6 @@
 #include "php_ini.h"
 #include "SAPI.h"
 
-#define CORE_PRIVATE
 #include "apr_strings.h"
 #include "apr_time.h"
 #include "ap_config.h"
@@ -141,9 +140,6 @@ PHP_FUNCTION(apache_lookup_uri)
 		ADD_STRING(method);
 		ADD_TIME(mtime);
 		ADD_LONG(clength);
-#if MODULE_MAGIC_NUMBER < 20020506
-		ADD_STRING(boundary);
-#endif
 		ADD_STRING(range);
 		ADD_LONG(chunked);
 		ADD_STRING(content_type);
@@ -319,11 +315,7 @@ PHP_FUNCTION(apache_getenv)
 
 static char *php_apache_get_version(void)
 {
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20060905
 	return (char *) ap_get_server_banner();
-#else
-	return (char *) ap_get_server_version();
-#endif
 }
 
 /* {{{ Fetch Apache version */
@@ -367,11 +359,7 @@ PHP_MINFO_FUNCTION(apache)
 	char *p;
 	server_rec *serv = ((php_struct *) SG(server_context))->r->server;
 #ifndef PHP_WIN32
-# if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	AP_DECLARE_DATA extern unixd_config_rec ap_unixd_config;
-# else
-	AP_DECLARE_DATA extern unixd_config_rec unixd_config;
-# endif
 #endif
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
@@ -395,7 +383,7 @@ PHP_MINFO_FUNCTION(apache)
 	if (apv && *apv) {
 		php_info_print_table_row(2, "Apache Version", apv);
 	}
-	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER);
+	snprintf(tmp, sizeof(tmp), "%d", MODULE_MAGIC_NUMBER_MAJOR);
 	php_info_print_table_row(2, "Apache API Version", tmp);
 
 	if (serv->server_admin && *(serv->server_admin)) {
@@ -406,11 +394,7 @@ PHP_MINFO_FUNCTION(apache)
 	php_info_print_table_row(2, "Hostname:Port", tmp);
 
 #ifndef PHP_WIN32
-#if MODULE_MAGIC_NUMBER_MAJOR >= 20081201
 	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", ap_unixd_config.user_name, ap_unixd_config.user_id, ap_unixd_config.group_id);
-#else
-	snprintf(tmp, sizeof(tmp), "%s(%d)/%d", unixd_config.user_name, unixd_config.user_id, unixd_config.group_id);
-#endif
 	php_info_print_table_row(2, "User/Group", tmp);
 #endif
 

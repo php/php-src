@@ -365,6 +365,10 @@ PHP 8.4 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- apache2handler
+  . Support for EOL Apache 2.0 and 2.2 has been removed. Minimum required Apache
+    version is now 2.4.
+
 ========================================
 4. Deprecated Functionality
 ========================================
