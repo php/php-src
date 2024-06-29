@@ -9329,6 +9329,10 @@ static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 
 	if (value_ast) {
 		if (returns_by_ref && zend_is_variable(value_ast)) {
+			if (zend_ast_is_short_circuited(value_ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
+			}
+
 			zend_compile_var(&value_node, value_ast, BP_VAR_W, 1);
 		} else {
 			zend_compile_expr(&value_node, value_ast);
