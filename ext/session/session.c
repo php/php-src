@@ -358,8 +358,9 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 PHPAPI zend_result php_session_valid_key(const zend_string *str) /* {{{ */
 {
 	const char *key = ZSTR_VAL(str);
+	size_t len = ZSTR_LEN(str);
 
-	for (size_t i = 0; i < str->len; i++) {
+	for (size_t i = 0; i < len; i++) {
 		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
 		if (!((key[i] >= 'a' && key[i] <= 'z')
 				|| (key[i] >= 'A' && key[i] <= 'Z')
@@ -372,7 +373,7 @@ PHPAPI zend_result php_session_valid_key(const zend_string *str) /* {{{ */
 
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
-	if (str->len > PS_MAX_SID_LENGTH) {
+	if (len > PS_MAX_SID_LENGTH) {
 		return FAILURE;
 	}
 
