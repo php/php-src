@@ -369,6 +369,10 @@ AC_SEARCH_LIBS([Pgrab], [proc])
 dnl Haiku does not have network api in libc.
 AC_SEARCH_LIBS([setsockopt], [network])
 
+dnl Check for openpty. It may require linking against libutil or libbsd.
+AC_CHECK_FUNCS([openpty],,
+  [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
+
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
@@ -786,10 +790,6 @@ if test "$PHP_VALGRIND" != "no"; then
     fi
   fi
 fi
-
-dnl Check for openpty. It may require linking against libutil or libbsd.
-AC_CHECK_FUNCS([openpty],,
-  [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
