@@ -360,7 +360,7 @@ PHPAPI zend_result php_session_valid_key(const zend_string *str) /* {{{ */
 	const char *key = ZSTR_VAL(str);
 
 	for (size_t i = 0; i < str->len; i++) {
-		/* valid characters are a..z,A..Z,0..9 */
+		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
 		if (!((key[i] >= 'a' && key[i] <= 'z')
 				|| (key[i] >= 'A' && key[i] <= 'Z')
 				|| (key[i] >= '0' && key[i] <= '9')
@@ -2372,7 +2372,7 @@ PHP_FUNCTION(session_create_id)
 		RETURN_THROWS();
 	}
 
-	if (prefix && ZSTR_LEN(prefix)) {
+	if (prefix) {
 		if (php_session_valid_key(prefix) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
