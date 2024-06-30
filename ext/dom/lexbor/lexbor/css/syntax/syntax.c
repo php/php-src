@@ -152,7 +152,6 @@ lxb_css_syntax_ident_serialize(const lxb_char_t *data, size_t length,
 
     static const lexbor_str_t str_s = lexbor_str("\\");
 
-    p = data;
     end = data + length;
     hex_map = lexbor_str_res_char_to_two_hex_value_lowercase;
 

@@ -42,7 +42,6 @@ lxb_css_log_init(lxb_css_log_t *log, lexbor_mraw_t *mraw)
     status = lexbor_array_obj_init(&log->messages, 64,
                                    sizeof(lxb_css_log_message_t));
     if (status != LXB_STATUS_OK) {
-        memset(&log->mraw, 0, sizeof(lexbor_mraw_t));
         return status;
     }
 
