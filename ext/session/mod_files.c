@@ -165,7 +165,7 @@ static void ps_files_open(ps_files *data, /* const */ zend_string *key)
 
 		ps_files_close(data);
 
-		if (ZSTR_LEN(key) > 0 || php_session_valid_key(key) == FAILURE) {
+		if (php_session_valid_key(key) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			return;
 		}
