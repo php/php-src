@@ -745,7 +745,7 @@ try_again:
 					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 					PHP_MD5Update(&md5ctx, (unsigned char*)cnonce, 8);
 					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
-					/* TODO: Support for qop="auth-int" */
+					/* TODO: Support for qop=auth-int */
 					PHP_MD5Update(&md5ctx, (unsigned char*)"auth", sizeof("auth")-1);
 					PHP_MD5Update(&md5ctx, (unsigned char*)":", 1);
 				}
@@ -781,11 +781,11 @@ try_again:
 				}
 				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(digest), "qop", sizeof("qop")-1)) != NULL &&
 					Z_TYPE_P(tmp) == IS_STRING) {
-				/* TODO: Support for qop="auth-int" */
-					smart_str_append_const(&soap_headers, "\", qop=\"auth");
-					smart_str_append_const(&soap_headers, "\", nc=\"");
+					/* TODO: Support for qop=auth-int */
+					smart_str_append_const(&soap_headers, "\", qop=auth");
+					smart_str_append_const(&soap_headers, ", nc=");
 					smart_str_appendl(&soap_headers, nc, 8);
-					smart_str_append_const(&soap_headers, "\", cnonce=\"");
+					smart_str_append_const(&soap_headers, ", cnonce=\"");
 					smart_str_appendl(&soap_headers, cnonce, 8);
 				}
 				smart_str_append_const(&soap_headers, "\", response=\"");
