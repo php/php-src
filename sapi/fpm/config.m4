@@ -554,7 +554,6 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   AC_SUBST([php_fpm_systemd])
-  AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
@@ -576,9 +575,6 @@ if test "$PHP_FPM" != "no"; then
   AC_SUBST([php_fpm_localstatedir])
   php_fpm_prefix=`eval echo $prefix`
   AC_SUBST([php_fpm_prefix])
-
-  AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
-  AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
 
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
