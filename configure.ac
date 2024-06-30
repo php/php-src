@@ -766,26 +766,19 @@ if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE([HAVE_ASM_GOTO], [1], [Define if asm goto support is available.])
 fi
 
-dnl Check valgrind support.
+dnl Check Valgrind support.
 PHP_ARG_WITH([valgrind],
-  [whether to enable valgrind support],
+  [whether to enable Valgrind support],
   [AS_HELP_STRING([--with-valgrind],
-    [Enable valgrind support])],
+    [Enable Valgrind support])],
   [no],
   [no])
 
-if test "$PHP_VALGRIND" != "no"; then
-  PKG_CHECK_MODULES([VALGRIND], [valgrind], [have_valgrind="yes"], [have_valgrind="no"])
-
-  if test "$have_valgrind" = "yes"; then
-    PHP_EVAL_INCLINE($VALGRIND_CFLAGS)
-    AC_DEFINE(HAVE_VALGRIND, 1, [ ])
-  else
-    if test "$with_valgrind" = "yes"; then
-      AC_MSG_ERROR([Valgrind not found. Please install Valgrind.])
-    fi
-  fi
-fi
+AS_VAR_IF([PHP_VALGRIND], [no],,
+  [PKG_CHECK_MODULES([VALGRIND], [valgrind],
+    [PHP_EVAL_INCLINE([$VALGRIND_CFLAGS])
+      AC_DEFINE([HAVE_VALGRIND], [1],
+        [Define to 1 if Valgrind is enabled and supported.])])])
 
 dnl Check for openpty. It may require linking against libutil or libbsd.
 AC_CHECK_FUNCS([openpty],,
