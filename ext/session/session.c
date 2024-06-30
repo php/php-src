@@ -2373,7 +2373,7 @@ PHP_FUNCTION(session_create_id)
 		RETURN_THROWS();
 	}
 
-	if (prefix) {
+	if (prefix && ZSTR_LEN(prefix)) {
 		if (php_session_valid_key(prefix) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
