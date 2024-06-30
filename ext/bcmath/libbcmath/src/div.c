@@ -111,14 +111,14 @@ static inline void bc_standard_div(
 	 * n2_low uses the maximum value.
 	 * n2_low = B^k - 1
 	 * MAX_E = n2_high * B * n2_low / n2_high * (n2_high * B^k + n2_low)
-	 * MAX_E = n2_high * B * (B^k - 1) / n2_high * (n2_high * B^k + (B^k - 1))
+	 * MAX_E = n2_high * B * (B^k - 1) / n2_high * (n2_high * B^k + B^k - 1)
 	 *
 	 * n2_high uses the minimum value, but want to see how the number of digits affects the error, so represen
 	 * the minimum value as:
 	 * n2_high = 10^x
 	 * Since B = 10^b, the formula becomes:
-	 * MAX_E = n2_high * B * (B^k - 1) / n2_high * (n2_high * B^k + (B^k - 1))
-	 * MAX_E = 10^x * 10^b * ((10^b)^k - 1) / 10^x * (10^x * (10^b)^k + ((10^b)^k - 1))
+	 * MAX_E = n2_high * B * (B^k - 1) / n2_high * (n2_high * B^k + B^k - 1)
+	 * MAX_E = 10^x * 10^b * ((10^b)^k - 1) / 10^x * (10^x * (10^b)^k + (10^b)^k - 1)
 	 * MAX_E = 10^(x + b) * (10^(k * b) - 1) / 10^(2x + k * b) + 10^(x + k * b) + 10^x
 	 * MAX_E = 10^(x + b) * (10^(k * b) - 1) / 10^(x + k * b) * (10^x + 1) + 10^x
 	 *
