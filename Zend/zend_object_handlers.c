@@ -627,7 +627,7 @@ ZEND_COLD static void zend_typed_property_uninitialized_access(const zend_proper
 static ZEND_FUNCTION(zend_parent_hook_get_trampoline);
 static ZEND_FUNCTION(zend_parent_hook_set_trampoline);
 
-static bool is_in_hook(const zend_property_info *prop_info)
+static bool zend_is_in_hook(const zend_property_info *prop_info)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	if (!execute_data || !EX(func) || !EX(func)->common.prop_info) {
@@ -639,6 +639,12 @@ static bool is_in_hook(const zend_property_info *prop_info)
 	return prop_info->prototype == parent_info->prototype;
 }
 
+static bool zend_should_call_hook(const zend_property_info *prop_info, const zend_object *obj)
+{
+	return !zend_is_in_hook(prop_info)
+		/* execute_data and This are guaranteed to be set if zend_is_in_hook() returns true. */
+		|| Z_OBJ(EG(current_execute_data)->This) != obj;
+}
 
 static ZEND_COLD void zend_throw_no_prop_backing_value_access(zend_string *class_name, zend_string *prop_name, bool is_read)
 {
@@ -647,31 +653,18 @@ static ZEND_COLD void zend_throw_no_prop_backing_value_access(zend_string *class
 		ZSTR_VAL(class_name), ZSTR_VAL(prop_name));
 }
 
-static ZEND_COLD void zend_throw_forbidden_prop_backing_value_access(zend_string *class_name, zend_string *prop_name)
-{
-	zend_throw_error(NULL, "Must not access backing value of property %s::$%s outside its corresponding hooks",
-		ZSTR_VAL(class_name), ZSTR_VAL(prop_name));
-}
-
 static bool zend_call_get_hook(
 	const zend_property_info *prop_info, zend_string *prop_name,
 	zend_function *get, zend_object *zobj, zval *rv)
 {
-	uint32_t *guard = zend_get_property_guard(zobj, prop_name);
-	if (UNEXPECTED((*guard) & IN_HOOK)) {
-		if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+	if (!zend_should_call_hook(prop_info, zobj)) {
+		if (UNEXPECTED(prop_info->flags & ZEND_ACC_VIRTUAL)) {
 			zend_throw_no_prop_backing_value_access(zobj->ce->name, prop_name, /* is_read */ true);
-		} else if (UNEXPECTED(!is_in_hook(prop_info))) {
-			zend_throw_forbidden_prop_backing_value_access(zobj->ce->name, prop_name);
 		}
 		return false;
 	}
 
-	GC_ADDREF(zobj);
-	*guard |= IN_HOOK;
 	zend_call_known_instance_method_with_0_params(get, zobj, rv);
-	*guard &= ~IN_HOOK;
-	OBJ_RELEASE(zobj);
 
 	return true;
 }
@@ -803,6 +796,15 @@ try_again:
 				prop_info = NULL;
 			}
 			goto try_again;
+		}
+
+		if (EXPECTED(cache_slot
+		 && zend_execute_ex == execute_ex
+		 && zobj->ce->default_object_handlers->read_property == zend_std_read_property
+		 && !zobj->ce->create_object
+		 && !zend_is_in_hook(prop_info)
+		 && !(prop_info->hooks[ZEND_PROPERTY_HOOK_GET]->common.fn_flags & ZEND_ACC_RETURN_REFERENCE))) {
+			ZEND_SET_PROPERTY_HOOK_SIMPLE_GET(cache_slot);
 		}
 
 		if (Z_TYPE_P(rv) != IS_UNDEF) {
@@ -1045,14 +1047,9 @@ found:;
 			goto try_again;
 		}
 
-		uint32_t *guard = zend_get_property_guard(zobj, name);
-		if (UNEXPECTED((*guard) & IN_HOOK)) {
+		if (!zend_should_call_hook(prop_info, zobj)) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
 				zend_throw_no_prop_backing_value_access(zobj->ce->name, name, /* is_read */ false);
-				variable_ptr = &EG(error_zval);
-				goto exit;
-			} else if (UNEXPECTED(!is_in_hook(prop_info))) {
-				zend_throw_forbidden_prop_backing_value_access(zobj->ce->name, name);
 				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
@@ -1070,9 +1067,7 @@ found:;
 			goto try_again;
 		}
 		GC_ADDREF(zobj);
-		(*guard) |= IN_HOOK;
 		zend_call_known_instance_method_with_1_params(set, zobj, NULL, value);
-		(*guard) &= ~IN_HOOK;
 		OBJ_RELEASE(zobj);
 
 		variable_ptr = value;
@@ -1574,10 +1569,6 @@ static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
 		goto clean;
 	}
 
-	uint32_t *guard = zend_get_property_guard(obj, prop_name);
-	uint32_t guard_backup = *guard;
-	*guard |= IN_HOOK;
-
 	zval rv;
 	zval *retval = obj->handlers->read_property(obj, prop_name, BP_VAR_R, NULL, &rv);
 	if (retval == &rv) {
@@ -1586,9 +1577,8 @@ static ZEND_FUNCTION(zend_parent_hook_get_trampoline)
 		RETVAL_COPY(retval);
 	}
 
-	*guard = guard_backup;
-
 clean:
+	zend_string_release(EX(func)->common.function_name);
 	zend_free_trampoline(EX(func));
 	EX(func) = NULL;
 }
@@ -1604,16 +1594,10 @@ static ZEND_FUNCTION(zend_parent_hook_set_trampoline)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END_EX(goto clean);
 
-	uint32_t *guard = zend_get_property_guard(obj, prop_name);
-	uint32_t guard_backup = *guard;
-	*guard |= IN_HOOK;
-
-	zval *retval = obj->handlers->write_property(obj, prop_name, value, NULL);
-	RETVAL_COPY(retval);
-
-	*guard = guard_backup;
+	RETVAL_COPY(obj->handlers->write_property(obj, prop_name, value, NULL));
 
 clean:
+	zend_string_release(EX(func)->common.function_name);
 	zend_free_trampoline(EX(func));
 	EX(func) = NULL;
 }
@@ -1622,6 +1606,7 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	const zend_property_info *prop_info,
 	zend_property_hook_kind kind, zend_string *prop_name)
 {
+	static const zend_arg_info arg_info[1] = {{0}};
 	zend_function *func;
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);
@@ -1633,15 +1618,17 @@ ZEND_API zend_function *zend_get_property_hook_trampoline(
 	func->common.arg_flags[1] = 0;
 	func->common.arg_flags[2] = 0;
 	func->common.fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE;
-	func->common.function_name = kind == ZEND_PROPERTY_HOOK_GET ? ZSTR_KNOWN(ZEND_STR_GET) : ZSTR_KNOWN(ZEND_STR_SET);
+	func->common.function_name = zend_string_concat3(
+		"$", 1, ZSTR_VAL(prop_name), ZSTR_LEN(prop_name),
+		kind == ZEND_PROPERTY_HOOK_GET ? "::get" : "::set", 5);
 	/* set to 0 to avoid arg_info[] allocation, because all values are passed by value anyway */
 	uint32_t args = kind == ZEND_PROPERTY_HOOK_GET ? 0 : 1;
 	func->common.num_args = args;
 	func->common.required_num_args = args;
-	func->common.scope = NULL;
+	func->common.scope = prop_info->ce;
 	func->common.prototype = NULL;
 	func->common.prop_info = prop_info;
-	func->common.arg_info = NULL;
+	func->common.arg_info = (zend_arg_info *) arg_info;
 	func->internal_function.handler = kind == ZEND_PROPERTY_HOOK_GET
 		? ZEND_FN(zend_parent_hook_get_trampoline)
 		: ZEND_FN(zend_parent_hook_set_trampoline);

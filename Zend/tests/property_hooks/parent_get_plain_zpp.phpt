@@ -24,4 +24,4 @@ try {
 
 ?>
 --EXPECT--
-get() expects exactly 0 arguments, 1 given
+A::$prop::get() expects exactly 0 arguments, 1 given

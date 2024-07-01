@@ -5851,38 +5851,21 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 		RETURN_THROWS();
 	}
 
-	uint32_t *guard = NULL;
-	uint32_t guard_backup;
-	zend_internal_function func_copy;
-	zend_function *func_backup = NULL;
-	if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_USE_GUARDS) {
-		guard = zend_get_property_guard(Z_OBJ_P(object), ref->unmangled_name);
-		guard_backup = *guard;
-		*guard |= ZEND_GUARD_PROPERTY_HOOK;
+	if (!ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+		zval rv;
+		zval *member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
 
-		func_backup = EX(func);
-		func_copy = EX(func)->internal_function;
-		func_copy.prop_info = ref->prop;
-		EX(func) = (zend_function *) &func_copy;
-	}
-
-	zval rv;
-	zval *member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
-
-	if (guard) {
-		*guard = guard_backup;
-	}
-	if (func_backup) {
-		EX(func) = func_backup;
-	}
-
-	if (member_p != &rv) {
-		RETURN_COPY_DEREF(member_p);
-	} else {
-		if (Z_ISREF_P(member_p)) {
-			zend_unwrap_reference(member_p);
+		if (member_p != &rv) {
+			RETURN_COPY_DEREF(member_p);
+		} else {
+			if (Z_ISREF_P(member_p)) {
+				zend_unwrap_reference(member_p);
+			}
+			RETURN_COPY_VALUE(member_p);
 		}
-		RETURN_COPY_VALUE(member_p);
+	} else {
+		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_GET, ref->unmangled_name);
+		zend_call_known_instance_method_with_0_params(func, Z_OBJ_P(object), return_value);
 	}
 }
 
@@ -5904,28 +5887,11 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 		RETURN_THROWS();
 	}
 
-	uint32_t *guard = NULL;
-	uint32_t guard_backup;
-	zend_internal_function func_copy;
-	zend_function *func_backup = NULL;
-	if (Z_OBJCE_P(object)->ce_flags & ZEND_ACC_USE_GUARDS) {
-		guard = zend_get_property_guard(Z_OBJ_P(object), ref->unmangled_name);
-		guard_backup = *guard;
-		*guard |= ZEND_GUARD_PROPERTY_HOOK;
-
-		func_backup = EX(func);
-		func_copy = EX(func)->internal_function;
-		func_copy.prop_info = ref->prop;
-		EX(func) = (zend_function *) &func_copy;
-	}
-
-	zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
-
-	if (guard) {
-		*guard = guard_backup;
-	}
-	if (func_backup) {
-		EX(func) = func_backup;
+	if (!ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
+	} else {
+		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
+		zend_call_known_instance_method_with_1_params(func, Z_OBJ_P(object), NULL, value);
 	}
 }
 

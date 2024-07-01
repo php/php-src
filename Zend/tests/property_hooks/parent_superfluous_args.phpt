@@ -47,5 +47,5 @@ try {
 --EXPECT--
 int(42)
 NULL
-set() expects exactly 1 argument, 2 given
-get() expects exactly 0 arguments, 1 given
+A::$backed::set() expects exactly 1 argument, 2 given
+A::$backed::get() expects exactly 0 arguments, 1 given

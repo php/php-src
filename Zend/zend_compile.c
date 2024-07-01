@@ -8516,7 +8516,6 @@ static void zend_compile_property_hooks(
 		}
 	}
 
-	ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	ce->num_hooked_props++;
 
 	if (!ce->get_iterator) {

@@ -1,5 +1,12 @@
 --TEST--
 Attempted read/write of virtual property backing value throws
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) die('skip ASAN reports stack-overflow');
+?>
+--INI--
+; The test may use a large amount of memory on systems with a large stack limit
+memory_limit=2G
 --FILE--
 <?php
 
@@ -35,6 +42,6 @@ try {
 }
 
 ?>
---EXPECT--
-Must not write to virtual property Test::$prop
-Must not read from virtual property Test::$prop
+--EXPECTF--
+Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?
+Maximum call stack size of %d bytes (zend.max_allowed_stack_size - zend.reserved_stack_size) reached. Infinite recursion?

@@ -32,18 +32,21 @@ struct _zend_property_info;
 
 #define ZEND_DYNAMIC_PROPERTY_OFFSET               ((uintptr_t)(intptr_t)(-1))
 
-#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) >= 8)
+#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) >= 16)
 #define IS_WRONG_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) == 0)
 #define IS_HOOKED_PROPERTY_OFFSET(offset) \
-	((intptr_t)(offset) > 0 && (intptr_t)(offset) < 8)
+	((intptr_t)(offset) > 0 && (intptr_t)(offset) < 16)
 #define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((intptr_t)(offset) < 0)
 
 #define ZEND_PROPERTY_HOOK_SIMPLE_READ_BIT 2u
 #define ZEND_PROPERTY_HOOK_SIMPLE_WRITE_BIT 4u
+#define ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT 8u
 #define ZEND_IS_PROPERTY_HOOK_SIMPLE_READ(offset) \
 	(((offset) & ZEND_PROPERTY_HOOK_SIMPLE_READ_BIT) != 0)
 #define ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(offset) \
 	(((offset) & ZEND_PROPERTY_HOOK_SIMPLE_WRITE_BIT) != 0)
+#define ZEND_IS_PROPERTY_HOOK_SIMPLE_GET(offset) \
+	(((offset) & ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT) != 0)
 #define ZEND_SET_PROPERTY_HOOK_SIMPLE_READ(cache_slot) \
 	do { \
 		void **__cache_slot = (cache_slot); \
@@ -58,10 +61,17 @@ struct _zend_property_info;
 			CACHE_PTR_EX(__cache_slot + 1, (void*)((uintptr_t)CACHED_PTR_EX(__cache_slot + 1) | ZEND_PROPERTY_HOOK_SIMPLE_WRITE_BIT)); \
 		} \
 	} while (0)
+#define ZEND_SET_PROPERTY_HOOK_SIMPLE_GET(cache_slot) \
+	do { \
+		void **__cache_slot = (cache_slot); \
+		if (__cache_slot) { \
+			CACHE_PTR_EX(__cache_slot + 1, (void*)((uintptr_t)CACHED_PTR_EX(__cache_slot + 1) | ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT)); \
+		} \
+	} while (0)
 
 #define IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(offset) (offset == ZEND_DYNAMIC_PROPERTY_OFFSET)
-#define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-(intptr_t)(offset) - 8))
-#define ZEND_ENCODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-((intptr_t)(offset) + 8)))
+#define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-(intptr_t)(offset) - 16))
+#define ZEND_ENCODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-((intptr_t)(offset) + 16)))
 
 
 /* Used to fetch property from the object, read-only */

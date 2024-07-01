@@ -24,4 +24,4 @@ try {
 
 ?>
 --EXPECT--
-set() expects exactly 1 argument, 2 given
+A::$prop::set() expects exactly 1 argument, 2 given
