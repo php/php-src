@@ -633,8 +633,8 @@ if test "$PHP_FPM" != "no"; then
       ;;
   esac
 
-  PHP_SUBST(SAPI_FPM_PATH)
-  PHP_SUBST(BUILD_FPM)
+  PHP_SUBST([SAPI_FPM_PATH])
+  PHP_SUBST([BUILD_FPM])
 
 else
   AC_MSG_RESULT(no)
