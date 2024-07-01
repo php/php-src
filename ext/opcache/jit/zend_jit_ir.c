@@ -4773,7 +4773,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		}
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
-			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+			if (opline->opcode == ZEND_PRE_INC) {
 				if (Z_MODE(res_addr) == IS_REG) {
 					jit_set_Z_DVAL(jit, res_addr, ir_CONST_DOUBLE((double)ZEND_LONG_MAX + 1.0));
 				} else {
