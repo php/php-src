@@ -12144,8 +12144,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 			int32_t exit_point;
 
-			if (opline->opcode != ZEND_FETCH_LIST_R
-			 && (opline->op1_type & (IS_VAR|IS_TMP_VAR))
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && !op1_avoid_refcounting) {
 				flags |= ZEND_JIT_EXIT_FREE_OP1;
 			}
