@@ -673,7 +673,7 @@ void fd_bigset_double_size(fd_bigset *set) {
 }
 /* }}} */
 
-int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *max_fd, long max_fds) {
+int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *max_fd) {
     zval *elem;
     php_stream *stream;
     int cnt = 0;
@@ -710,7 +710,7 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
     return cnt ? 1 : 0;
 }
 
-static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds, long max_fds) {
+static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds) {
     zval *elem, *dest_elem;
     HashTable *ht;
     php_stream *stream;
@@ -851,7 +851,7 @@ PHP_FUNCTION(stream_select) {
     FD_BIGSET_ZERO(&efds, max_fds);
 
     if (r_array != NULL) {
-        set_count = stream_array_to_fd_bigset(r_array, &rfds, &max_fd, max_fds);
+        set_count = stream_array_to_fd_bigset(r_array, &rfds, &max_fd);
 		if (set_count > max_set_count) {
 			max_set_count = set_count;
 		}
@@ -859,7 +859,7 @@ PHP_FUNCTION(stream_select) {
 	}
 
     if (w_array != NULL) {
-        set_count = stream_array_to_fd_bigset(w_array, &wfds, &max_fd, max_fds);
+        set_count = stream_array_to_fd_bigset(w_array, &wfds, &max_fd);
 		if (set_count > max_set_count) {
 			max_set_count = set_count;
 		}
@@ -867,7 +867,7 @@ PHP_FUNCTION(stream_select) {
 	}
 
     if (e_array != NULL) {
-        set_count = stream_array_to_fd_bigset(e_array, &efds, &max_fd, max_fds);
+        set_count = stream_array_to_fd_bigset(e_array, &efds, &max_fd);
 		if (set_count > max_set_count) {
 			max_set_count = set_count;
 		}
@@ -955,9 +955,9 @@ PHP_FUNCTION(stream_select) {
         RETURN_FALSE;
     }
 
-    if (r_array != NULL) stream_array_from_fd_bigset(r_array, &rfds, max_fds);
-    if (w_array != NULL) stream_array_from_fd_bigset(w_array, &wfds, max_fds);
-    if (e_array != NULL) stream_array_from_fd_bigset(e_array, &efds, max_fds);
+    if (r_array != NULL) stream_array_from_fd_bigset(r_array, &rfds);
+    if (w_array != NULL) stream_array_from_fd_bigset(w_array, &wfds);
+    if (e_array != NULL) stream_array_from_fd_bigset(e_array, &efds);
 
     FD_BIGSET_FREE(&rfds);
     FD_BIGSET_FREE(&wfds);
