@@ -213,6 +213,8 @@ PHP 8.4 UPGRADE NOTES
     they allow chaining method calls, property accesses, etc. without enclosing
     the expression in parentheses.
     RFC: https://wiki.php.net/rfc/new_without_parentheses
+  . Added the #[\Deprecated] attribute.
+    RFC: https://wiki.php.net/rfc/deprecated_attribute
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
