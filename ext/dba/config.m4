@@ -705,7 +705,7 @@ if test "$HAVE_DBA" = "1"; then
   PHP_ADD_BUILD_DIR($ext_builddir/libinifile)
   PHP_ADD_BUILD_DIR($ext_builddir/libcdb)
   PHP_ADD_BUILD_DIR($ext_builddir/libflatfile)
-  PHP_SUBST(DBA_SHARED_LIBADD)
+  PHP_SUBST([DBA_SHARED_LIBADD])
 else
   AC_MSG_RESULT(no)
 fi

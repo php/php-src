@@ -10,6 +10,6 @@ if test "$PHP_XMLREADER" != "no"; then
     PHP_NEW_EXTENSION(xmlreader, php_xmlreader.c, $ext_shared)
     PHP_ADD_EXTENSION_DEP(xmlreader, dom, true)
     PHP_ADD_EXTENSION_DEP(xmlreader, libxml)
-    PHP_SUBST(XMLREADER_SHARED_LIBADD)
+    PHP_SUBST([XMLREADER_SHARED_LIBADD])
   ])
 fi

@@ -23,5 +23,5 @@ if test "$PHP_SODIUM" != "no"; then
 
   PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared, , $SODIUM_COMPILER_FLAGS)
   PHP_INSTALL_HEADERS([ext/sodium], [php_libsodium.h])
-  PHP_SUBST(SODIUM_SHARED_LIBADD)
+  PHP_SUBST([SODIUM_SHARED_LIBADD])
 fi

@@ -65,5 +65,5 @@ if test "$PHP_ZIP" != "no"; then
   PHP_NEW_EXTENSION(zip, $PHP_ZIP_SOURCES, $ext_shared)
   PHP_ADD_EXTENSION_DEP(zip, pcre)
 
-  PHP_SUBST(ZIP_SHARED_LIBADD)
+  PHP_SUBST([ZIP_SHARED_LIBADD])
 fi

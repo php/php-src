@@ -85,7 +85,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl   -L$%EXTNAMECAPS%_DIR/$PHP_LIBDIR -lm
   dnl ])
   dnl
-  dnl PHP_SUBST(%EXTNAMECAPS%_SHARED_LIBADD)
+  dnl PHP_SUBST([%EXTNAMECAPS%_SHARED_LIBADD])
 
   dnl In case of no dependencies
   AC_DEFINE(HAVE_%EXTNAMECAPS%, 1, [ Have %EXTNAME% support ])

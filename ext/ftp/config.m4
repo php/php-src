@@ -21,7 +21,7 @@ if test "$PHP_FTP" = "yes"; then
 
   if test "$PHP_OPENSSL" != "no" || test "$PHP_FTP_SSL" != "no"; then
     PHP_SETUP_OPENSSL(FTP_SHARED_LIBADD)
-    PHP_SUBST(FTP_SHARED_LIBADD)
+    PHP_SUBST([FTP_SHARED_LIBADD])
     AC_DEFINE(HAVE_FTP_SSL,1,[Whether FTP over SSL is supported])
   fi
 fi

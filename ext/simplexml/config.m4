@@ -11,6 +11,6 @@ if test "$PHP_SIMPLEXML" != "no"; then
     PHP_ADD_EXTENSION_DEP(simplexml, libxml)
     PHP_ADD_EXTENSION_DEP(simplexml, spl)
     PHP_INSTALL_HEADERS([ext/simplexml], [php_simplexml.h php_simplexml_exports.h])
-    PHP_SUBST(SIMPLEXML_SHARED_LIBADD)
+    PHP_SUBST([SIMPLEXML_SHARED_LIBADD])
   ])
 fi

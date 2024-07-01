@@ -92,7 +92,7 @@ if test "$PHP_LDAP" != "no"; then
   fi
 
   PHP_ADD_INCLUDE($LDAP_INCDIR)
-  PHP_SUBST(LDAP_SHARED_LIBADD)
+  PHP_SUBST([LDAP_SHARED_LIBADD])
   AC_DEFINE(HAVE_LDAP,1,[ ])
 
   dnl Save original values
