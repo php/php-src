@@ -1304,13 +1304,6 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 			return;
 		}
 
-		if (UNEXPECTED(!tmp)) {
-			if (result) {
-				ZVAL_UNDEF(result);
-			}
-			return;
-		}
-
 		string_len = ZSTR_LEN(tmp);
 		c = (uint8_t)ZSTR_VAL(tmp)[0];
 		zend_string_release(tmp);
