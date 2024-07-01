@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -508,7 +508,7 @@ static int dom_xml_common_text_serialization(xmlOutputBufferPtr out, const char 
 				TRY(xmlOutputBufferWriteLit(out, "&quot;"));
 				break;
 			}
-			
+
 			/* The following three are added to address https://github.com/w3c/DOM-Parsing/issues/59 */
 
 			case '\t': {
@@ -1050,7 +1050,7 @@ static int dom_xml_serializing_a_document_fragment_node(
 	int indent
 )
 {
-	/* 1. Let markup the empty string. 
+	/* 1. Let markup the empty string.
 	 *    => We use the output buffer instead. */
 
 	/* 2. For each child child of node, in tree order, run the XML serialization algorithm on the child ... */

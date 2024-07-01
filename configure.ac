@@ -12,6 +12,7 @@ m4_include([build/php.m4])
 m4_include([build/pkg.m4])
 m4_include([TSRM/threads.m4])
 m4_include([TSRM/tsrm.m4])
+m4_include([Zend/Zend.m4])
 
 dnl Basic autoconf initialization, generation of config.nice.
 dnl ----------------------------------------------------------------------------
@@ -137,13 +138,11 @@ AC_PROG_CPP
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_LN_S
 
-if test "$cross_compiling" = yes ; then
-  AC_MSG_CHECKING(for native build C compiler)
-  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
-  AC_MSG_RESULT($BUILD_CC)
-else
-  BUILD_CC=$CC
-fi
+AS_VAR_IF([cross_compiling], [yes],
+  [AC_CHECK_PROGS([BUILD_CC], [gcc clang c99 c89 cc cl], [none])
+    AC_MSG_CHECKING([for native build C compiler])
+    AC_MSG_RESULT([$BUILD_CC])],
+  [BUILD_CC=$CC])
 
 dnl Support systems with system libraries in e.g. /usr/lib64.
 PHP_ARG_WITH([libdir],
@@ -170,31 +169,30 @@ PHP_PROG_RE2C([1.0.3], [--no-generation-date])
 PHP_PROG_PHP()
 
 PHP_ARG_ENABLE([re2c-cgoto],
-  [whether to enable computed goto gcc extension with re2c],
+  [whether to enable computed goto extension with re2c],
   [AS_HELP_STRING([--enable-re2c-cgoto],
-    [Enable -g flag to re2c to use computed goto gcc extension])],
+    [Enable re2c -g flag to optimize conditional jumps using computed goto
+    extension, if supported by the compiler])],
   [no],
   [no])
 
-AS_VAR_IF([PHP_RE2C_CGOTO], [no],, [
-  AC_MSG_CHECKING([whether re2c -g works])
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [[
-int main(int argc, const char **argv)
+AS_VAR_IF([PHP_RE2C_CGOTO], [no],,
+[AC_CACHE_CHECK([whether re2c -g works], [php_cv_have_re2c_cgoto],
+  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+int main(void)
 {
-  argc = argc;
-  argv = argv;
 label1:
+  ;
 label2:
-  static void *adr[] = { &&label1, &&label2};
+  ;
+  static void *adr[] = { &&label1, &&label2 };
   goto *adr[0];
   return 0;
-}
-  ]])],[
-    AC_MSG_RESULT([no])
-  ],[
-    AS_VAR_APPEND([RE2C_FLAGS], [" -g"])
-    AC_MSG_RESULT([yes])
-  ])
+}]])],
+  [php_cv_have_re2c_cgoto=yes],
+  [php_cv_have_re2c_cgoto=no])])
+AS_VAR_IF([php_cv_have_re2c_cgoto], [yes],
+  [AS_VAR_APPEND([RE2C_FLAGS], [" -g"])])
 ])
 
 dnl Platform-specific compile settings.
@@ -262,19 +260,10 @@ else
   AC_MSG_RESULT(no)
 fi
 
-dnl The effect of _GNU_SOURCE defined in config.h depeds on includes order
-if test "$ac_cv_safe_to_define___extensions__" = yes ; then
-  AC_MSG_CHECKING(whether to use -D_GNU_SOURCE cflag)
-  CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
-  AC_MSG_RESULT(yes)
-fi
-
-dnl Include Zend configurations.
-dnl ----------------------------------------------------------------------------
-
-sinclude(Zend/Zend.m4)
-
-dnl ----------------------------------------------------------------------------
+dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions
+dnl by AC_USE_SYSTEM_EXTENSIONS might be included after the system headers which
+dnl require extensions to C and POSIX.
+AS_VAR_APPEND([CPPFLAGS], [" -D_GNU_SOURCE"])
 
 PTHREADS_CHECK
 PHP_HELP_SEPARATOR([SAPI modules:])
@@ -384,55 +373,55 @@ dnl Then headers.
 dnl ----------------------------------------------------------------------------
 
 dnl QNX requires unix.h to allow functions in libunix to work properly.
-AC_CHECK_HEADERS([ \
-dirent.h \
-sys/param.h \
-sys/types.h \
-sys/time.h \
-netinet/in.h \
-alloca.h \
-arpa/inet.h \
-arpa/nameser.h \
-dns.h \
-fcntl.h \
-grp.h \
-ieeefp.h \
-langinfo.h \
-linux/sock_diag.h \
-poll.h \
-pty.h \
-pwd.h \
-resolv.h \
-strings.h \
-syslog.h \
-sysexits.h \
-sys/ioctl.h \
-sys/file.h \
-sys/mman.h \
-sys/mount.h \
-sys/poll.h \
-sys/resource.h \
-sys/select.h \
-sys/socket.h \
-sys/stat.h \
-sys/statfs.h \
-sys/statvfs.h \
-sys/vfs.h \
-sys/sysexits.h \
-sys/uio.h \
-sys/wait.h \
-sys/loadavg.h \
-unistd.h \
-unix.h \
-utime.h \
-sys/utsname.h \
-sys/ipc.h \
-dlfcn.h \
-tmmintrin.h \
-nmmintrin.h \
-wmmintrin.h \
-immintrin.h
-],[],[],[
+AC_CHECK_HEADERS(m4_normalize([
+  dirent.h
+  sys/param.h
+  sys/types.h
+  sys/time.h
+  netinet/in.h
+  alloca.h
+  arpa/inet.h
+  arpa/nameser.h
+  dns.h
+  fcntl.h
+  grp.h
+  ieeefp.h
+  langinfo.h
+  linux/sock_diag.h
+  poll.h
+  pty.h
+  pwd.h
+  resolv.h
+  strings.h
+  syslog.h
+  sysexits.h
+  sys/ioctl.h
+  sys/file.h
+  sys/mman.h
+  sys/mount.h
+  sys/poll.h
+  sys/resource.h
+  sys/select.h
+  sys/socket.h
+  sys/stat.h
+  sys/statfs.h
+  sys/statvfs.h
+  sys/vfs.h
+  sys/sysexits.h
+  sys/uio.h
+  sys/wait.h
+  sys/loadavg.h
+  unistd.h
+  unix.h
+  utime.h
+  sys/utsname.h
+  sys/ipc.h
+  dlfcn.h
+  tmmintrin.h
+  nmmintrin.h
+  wmmintrin.h
+  immintrin.h
+]),,, [dnl
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -587,67 +576,67 @@ AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 dnl Checks for library functions.
 dnl ----------------------------------------------------------------------------
 
-AC_CHECK_FUNCS(
-alphasort \
-asctime_r \
-chroot \
-ctime_r \
-explicit_memset \
-fdatasync \
-flock \
-ftok \
-funopen \
-gai_strerror \
-getcwd \
-gethostname \
-getloadavg \
-getlogin \
-getprotobyname \
-getprotobynumber \
-getservbyname \
-getservbyport \
-getrusage \
-gettimeofday \
-gmtime_r \
-getpwnam_r \
-getgrnam_r \
-getpwuid_r \
-getwd \
-glob \
-localtime_r \
-lchown \
-memcntl \
-memfd_create \
-mkstemp \
-mmap \
-nice \
-nl_langinfo \
-poll \
-pthread_jit_write_protect_np \
-putenv \
-scandir \
-setitimer \
-setenv \
-shutdown \
-sigprocmask \
-statfs \
-statvfs \
-std_syslog \
-strcasecmp \
-strnlen \
-strptime \
-strtok_r \
-symlink \
-tzset \
-unsetenv \
-usleep \
-utime \
-vasprintf \
-asprintf \
-memmem \
-memrchr \
-mempcpy \
-)
+AC_CHECK_FUNCS(m4_normalize([
+  alphasort
+  asctime_r
+  asprintf
+  chroot
+  ctime_r
+  explicit_memset
+  fdatasync
+  flock
+  ftok
+  funopen
+  gai_strerror
+  getcwd
+  getgrnam_r
+  gethostname
+  getloadavg
+  getlogin
+  getprotobyname
+  getprotobynumber
+  getpwnam_r
+  getpwuid_r
+  getrusage
+  getservbyname
+  getservbyport
+  gettimeofday
+  getwd
+  glob
+  gmtime_r
+  lchown
+  localtime_r
+  memcntl
+  memfd_create
+  memmem
+  mempcpy
+  memrchr
+  mkstemp
+  mmap
+  nice
+  nl_langinfo
+  poll
+  pthread_jit_write_protect_np
+  putenv
+  scandir
+  setenv
+  setitimer
+  shutdown
+  sigprocmask
+  statfs
+  statvfs
+  std_syslog
+  strcasecmp
+  strnlen
+  strptime
+  strtok_r
+  symlink
+  tzset
+  unsetenv
+  usleep
+  utime
+  vasprintf
+]))
 
 AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
 AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
@@ -777,26 +766,19 @@ if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE([HAVE_ASM_GOTO], [1], [Define if asm goto support is available.])
 fi
 
-dnl Check valgrind support.
+dnl Check Valgrind support.
 PHP_ARG_WITH([valgrind],
-  [whether to enable valgrind support],
+  [whether to enable Valgrind support],
   [AS_HELP_STRING([--with-valgrind],
-    [Enable valgrind support])],
+    [Enable Valgrind support])],
   [no],
   [no])
 
-if test "$PHP_VALGRIND" != "no"; then
-  PKG_CHECK_MODULES([VALGRIND], [valgrind], [have_valgrind="yes"], [have_valgrind="no"])
-
-  if test "$have_valgrind" = "yes"; then
-    PHP_EVAL_INCLINE($VALGRIND_CFLAGS)
-    AC_DEFINE(HAVE_VALGRIND, 1, [ ])
-  else
-    if test "$with_valgrind" = "yes"; then
-      AC_MSG_ERROR([Valgrind not found. Please install Valgrind.])
-    fi
-  fi
-fi
+AS_VAR_IF([PHP_VALGRIND], [no],,
+  [PKG_CHECK_MODULES([VALGRIND], [valgrind],
+    [PHP_EVAL_INCLINE([$VALGRIND_CFLAGS])
+      AC_DEFINE([HAVE_VALGRIND], [1],
+        [Define to 1 if Valgrind is enabled and supported.])])])
 
 dnl Check for openpty. It may require linking against libutil or libbsd.
 AC_CHECK_FUNCS([openpty],,
@@ -1042,17 +1024,12 @@ PHP_ARG_ENABLE([dtrace],
   [no],
   [no])
 
-if test "$PHP_DTRACE" = "yes"; then
-  AC_CHECK_HEADER([sys/sdt.h], [
-    PHP_INIT_DTRACE([Zend/zend_dtrace.d],[Zend/zend_dtrace_gen.h],[main/main.c Zend/zend_API.c \
+AS_VAR_IF([PHP_DTRACE], [yes],
+  [PHP_INIT_DTRACE([Zend/zend_dtrace.d],
+    [Zend/zend_dtrace_gen.h],
+    [main/main.c Zend/zend_API.c \
       Zend/zend_execute.c Zend/zend_exceptions.c \
-      Zend/zend_dtrace.c Zend/zend.c])
-    AC_DEFINE(HAVE_DTRACE, 1, [Whether to enable DTrace support])
-    PHP_SUBST(PHP_DTRACE_OBJS)
-  ], [
-    AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support])
-  ])
-fi
+      Zend/zend_dtrace.c Zend/zend.c])])
 
 AC_MSG_CHECKING([how big to make fd sets])
 PHP_ARG_ENABLE([fd-setsize],,
@@ -1347,24 +1324,21 @@ else
   if test "$fiber_os" = 'mac'; then
     AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
   fi
-  AC_CHECK_HEADER(ucontext.h, [
-    AC_DEFINE([ZEND_FIBER_UCONTEXT], 1, [ ])
-  ], [
-       AC_MSG_ERROR([fibers not available on this platform])
-  ])
+  AC_CHECK_HEADER([ucontext.h],
+    [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1], [ ])],
+    [AC_MSG_ERROR([fibers not available on this platform])])
 fi
 
-LIBZEND_BASIC_CHECKS
-LIBZEND_DLSYM_CHECK
-LIBZEND_OTHER_CHECKS
+ZEND_INIT
 
-INCLUDES="$INCLUDES -I\$(top_builddir)/TSRM"
-INCLUDES="$INCLUDES -I\$(top_builddir)/Zend"
-
-if test "$abs_srcdir" != "$abs_builddir"; then
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/main -I\$(top_srcdir)/Zend"
-  INCLUDES="$INCLUDES -I\$(top_srcdir)/TSRM -I\$(top_builddir)/"
-fi
+PHP_ADD_INCLUDE([$abs_srcdir], [1])
+PHP_ADD_INCLUDE([$abs_srcdir/main], [1])
+PHP_ADD_INCLUDE([$abs_builddir], [1])
+PHP_ADD_INCLUDE([$abs_builddir/main], [1])
+PHP_ADD_INCLUDE([$abs_builddir/TSRM])
+PHP_ADD_INCLUDE([$abs_builddir/Zend])
+PHP_ADD_INCLUDE([$abs_srcdir/Zend])
+PHP_ADD_INCLUDE([$abs_srcdir/TSRM])
 
 ZEND_EXTRA_LIBS="$LIBS"
 unset LIBS
@@ -1730,45 +1704,89 @@ PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
 PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
 PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
 
-PHP_ADD_SOURCES(Zend, \
-    zend_language_parser.c zend_language_scanner.c \
-    zend_ini_parser.c zend_ini_scanner.c \
-    zend_alloc.c zend_call_stack.c zend_compile.c zend_constants.c zend_dtrace.c \
-    zend_execute_API.c zend_highlight.c zend_llist.c \
-    zend_vm_opcodes.c zend_opcode.c zend_operators.c zend_ptr_stack.c zend_stack.c \
-    zend_variables.c zend.c zend_API.c zend_extensions.c zend_hash.c \
-    zend_list.c zend_builtin_functions.c zend_attributes.c zend_execute.c \
-    zend_ini.c zend_sort.c zend_multibyte.c zend_stream.c \
-    zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
-    zend_closures.c zend_weakrefs.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
-    zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c zend_gdb.c \
-    zend_observer.c zend_system_id.c zend_enum.c zend_fibers.c zend_atomic.c \
-    zend_max_execution_timer.c \
-    zend_hrtime.c \
-    zend_frameless_function.c \
-	Optimizer/zend_optimizer.c \
-	Optimizer/pass1.c \
-	Optimizer/pass3.c \
-	Optimizer/optimize_func_calls.c \
-	Optimizer/block_pass.c \
-	Optimizer/optimize_temp_vars_5.c \
-	Optimizer/nop_removal.c \
-	Optimizer/compact_literals.c \
-	Optimizer/zend_cfg.c \
-	Optimizer/zend_dfg.c \
-	Optimizer/dfa_pass.c \
-	Optimizer/zend_ssa.c \
-	Optimizer/zend_inference.c \
-	Optimizer/zend_func_info.c \
-	Optimizer/zend_call_graph.c \
-	Optimizer/sccp.c \
-	Optimizer/scdf.c \
-	Optimizer/dce.c \
-	Optimizer/escape_analysis.c \
-	Optimizer/compact_vars.c \
-	Optimizer/zend_dump.c \
-    , [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
+PHP_ADD_SOURCES([Zend], [m4_normalize([
+  Optimizer/block_pass.c
+  Optimizer/compact_literals.c
+  Optimizer/compact_vars.c
+  Optimizer/dce.c
+  Optimizer/dfa_pass.c
+  Optimizer/escape_analysis.c
+  Optimizer/nop_removal.c
+  Optimizer/optimize_func_calls.c
+  Optimizer/optimize_temp_vars_5.c
+  Optimizer/pass1.c
+  Optimizer/pass3.c
+  Optimizer/sccp.c
+  Optimizer/scdf.c
+  Optimizer/zend_call_graph.c
+  Optimizer/zend_cfg.c
+  Optimizer/zend_dfg.c
+  Optimizer/zend_dump.c
+  Optimizer/zend_func_info.c
+  Optimizer/zend_inference.c
+  Optimizer/zend_optimizer.c
+  Optimizer/zend_ssa.c
+  zend_alloc.c
+  zend_API.c
+  zend_ast.c
+  zend_atomic.c
+  zend_attributes.c
+  zend_builtin_functions.c
+  zend_call_stack.c
+  zend_closures.c
+  zend_compile.c
+  zend_constants.c
+  zend_cpuinfo.c
+  zend_default_classes.c
+  zend_dtrace.c
+  zend_enum.c
+  zend_exceptions.c
+  zend_execute_API.c
+  zend_execute.c
+  zend_extensions.c
+  zend_fibers.c
+  zend_float.c
+  zend_frameless_function.c
+  zend_gc.c
+  zend_gdb.c
+  zend_generators.c
+  zend_hash.c
+  zend_highlight.c
+  zend_hrtime.c
+  zend_inheritance.c
+  zend_ini_parser.c
+  zend_ini_scanner.c
+  zend_ini.c
+  zend_interfaces.c
+  zend_iterators.c
+  zend_language_parser.c
+  zend_language_scanner.c
+  zend_list.c
+  zend_llist.c
+  zend_max_execution_timer.c
+  zend_multibyte.c
+  zend_object_handlers.c
+  zend_objects_API.c
+  zend_objects.c
+  zend_observer.c
+  zend_opcode.c
+  zend_operators.c
+  zend_ptr_stack.c
+  zend_signal.c
+  zend_smart_str.c
+  zend_sort.c
+  zend_stack.c
+  zend_stream.c
+  zend_string.c
+  zend_strtod.c
+  zend_system_id.c
+  zend_variables.c
+  zend_virtual_cwd.c
+  zend_vm_opcodes.c
+  zend_weakrefs.c
+  zend.c
+])],
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
 PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)

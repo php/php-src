@@ -5,7 +5,7 @@ PHP_ARG_ENABLE([fpm],,
   [no])
 
 dnl Configure checks.
-AC_DEFUN([AC_FPM_CLOCK],
+AC_DEFUN([PHP_FPM_CLOCK],
 [AC_CHECK_FUNCS([clock_gettime],,
   [AC_SEARCH_LIBS([clock_gettime], [rt],
     [ac_cv_func_clock_gettime=yes
@@ -43,7 +43,7 @@ AS_VAR_IF([ac_cv_func_clock_gettime], [no],
       [Define to 1 if you have the 'clock_get_time' function.])])
 ])])
 
-AC_DEFUN([AC_FPM_TRACE],
+AC_DEFUN([PHP_FPM_TRACE],
 [
   have_ptrace=no
   have_broken_ptrace=no
@@ -237,7 +237,7 @@ AC_DEFUN([AC_FPM_TRACE],
 
 ])
 
-AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
+AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
 [
   AC_MSG_CHECKING([if gcc supports __sync_bool_compare_and_swap])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
@@ -252,7 +252,7 @@ AC_DEFUN([AC_FPM_BUILTIN_ATOMIC],
   ])
 ])
 
-AC_DEFUN([AC_FPM_LQ],
+AC_DEFUN([PHP_FPM_LQ],
 [
   have_lq=no
 
@@ -313,126 +313,121 @@ AC_DEFUN([AC_FPM_LQ],
   fi
 ])
 
-AC_DEFUN([AC_FPM_KQUEUE],
-[
-	AC_MSG_CHECKING([for kqueue])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <sys/types.h>
-		#include <sys/event.h>
-		#include <sys/time.h>
-	]], [[
-		int kfd;
-		struct kevent k;
-		kfd = kqueue();
-		/* 0 -> STDIN_FILENO */
-		EV_SET(&k, 0, EVFILT_READ , EV_ADD | EV_CLEAR, 0, 0, NULL);
-	]])], [
-		AC_DEFINE([HAVE_KQUEUE], 1, [do we have kqueue?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+AC_DEFUN([PHP_FPM_KQUEUE],
+[AC_CACHE_CHECK([for kqueue],
+  [php_cv_have_kqueue],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
+    #include <sys/types.h>
+    #include <sys/event.h>
+    #include <sys/time.h>
+  ], [dnl
+    int kfd;
+    struct kevent k;
+    kfd = kqueue();
+    /* 0 -> STDIN_FILENO */
+    EV_SET(&k, 0, EVFILT_READ , EV_ADD | EV_CLEAR, 0, 0, NULL);
+    (void)kfd;
+  ])],
+  [php_cv_have_kqueue=yes],
+  [php_cv_have_kqueue=no])])
+AS_VAR_IF([php_cv_have_kqueue], [yes],
+  [AC_DEFINE([HAVE_KQUEUE], [1],
+    [Define to 1 if system has a working 'kqueue' function.])])
 ])
 
-AC_DEFUN([AC_FPM_DEVPOLL],
-[
-	AC_MSG_CHECKING([for /dev/poll])
-
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <stdio.h>
-		#include <sys/devpoll.h>
-	]], [[
-		int n, dp;
-		struct dvpoll dvp;
-		dp = 0;
-		dvp.dp_fds = NULL;
-		dvp.dp_nfds = 0;
-		dvp.dp_timeout = 0;
-		n = ioctl(dp, DP_POLL, &dvp)
-	]])], [
-		AC_DEFINE([HAVE_DEVPOLL], 1, [do we have /dev/poll?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+AC_DEFUN([PHP_FPM_DEVPOLL],
+[AC_CACHE_CHECK([for /dev/poll],
+  [php_cv_have_devpoll],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
+    #include <stdio.h>
+    #include <sys/devpoll.h>
+  ], [dnl
+    int n, dp;
+    struct dvpoll dvp;
+    dp = 0;
+    dvp.dp_fds = NULL;
+    dvp.dp_nfds = 0;
+    dvp.dp_timeout = 0;
+    n = ioctl(dp, DP_POLL, &dvp);
+    (void)n;
+  ])],
+  [php_cv_have_devpoll=yes],
+  [php_cv_have_devpoll=no])])
+AS_VAR_IF([php_cv_have_devpoll], [yes],
+  [AC_DEFINE([HAVE_DEVPOLL], [1],
+    [Define to 1 if system has a working '/dev/poll'.])])
 ])
 
-AC_DEFUN([AC_FPM_EPOLL],
-[
-	AC_MSG_CHECKING([for epoll])
+AC_DEFUN([PHP_FPM_EPOLL],
+[AC_CACHE_CHECK([for epoll],
+  [php_cv_have_epoll],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/epoll.h>], [dnl
+    int epollfd;
+    struct epoll_event e;
 
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		#include <sys/epoll.h>
-	]], [[
-		int epollfd;
-		struct epoll_event e;
+    epollfd = epoll_create(1);
+    if (epollfd < 0) {
+      return 1;
+    }
 
-		epollfd = epoll_create(1);
-		if (epollfd < 0) {
-			return 1;
-		}
+    e.events = EPOLLIN | EPOLLET;
+    e.data.fd = 0;
 
-		e.events = EPOLLIN | EPOLLET;
-		e.data.fd = 0;
+    if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &e) == -1) {
+      return 1;
+    }
 
-		if (epoll_ctl(epollfd, EPOLL_CTL_ADD, 0, &e) == -1) {
-			return 1;
-		}
-
-		e.events = 0;
-		if (epoll_wait(epollfd, &e, 1, 1) < 0) {
-			return 1;
-		}
-	]])], [
-		AC_DEFINE([HAVE_EPOLL], 1, [do we have epoll?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+    e.events = 0;
+    if (epoll_wait(epollfd, &e, 1, 1) < 0) {
+      return 1;
+    }
+  ])],
+  [php_cv_have_epoll=yes],
+  [php_cv_have_epoll=no])])
+AS_VAR_IF([php_cv_have_epoll], [yes],
+  [AC_DEFINE([HAVE_EPOLL], [1], [Define to 1 if system has a working epoll.])])
 ])
 
-AC_DEFUN([AC_FPM_SELECT],
-[
-	AC_MSG_CHECKING([for select])
+AC_DEFUN([PHP_FPM_SELECT],
+[AC_CACHE_CHECK([for select],
+  [php_cv_have_select],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([dnl
+    /* According to POSIX.1-2001 */
+    #include <sys/select.h>
 
-	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-		/* According to POSIX.1-2001 */
-		#include <sys/select.h>
-
-		/* According to earlier standards */
-		#include <sys/time.h>
-		#include <sys/types.h>
-		#include <unistd.h>
-	]], [[
-		fd_set fds;
-		struct timeval t;
-		t.tv_sec = 0;
-		t.tv_usec = 42;
-		FD_ZERO(&fds);
-		/* 0 -> STDIN_FILENO */
-		FD_SET(0, &fds);
-		select(FD_SETSIZE, &fds, NULL, NULL, &t);
-	]])], [
-		AC_DEFINE([HAVE_SELECT], 1, [do we have select?])
-		AC_MSG_RESULT([yes])
-	], [
-		AC_MSG_RESULT([no])
-	])
+    /* According to earlier standards */
+    #include <sys/time.h>
+    #include <sys/types.h>
+    #include <unistd.h>
+  ], [dnl
+    fd_set fds;
+    struct timeval t;
+    t.tv_sec = 0;
+    t.tv_usec = 42;
+    FD_ZERO(&fds);
+    /* 0 -> STDIN_FILENO */
+    FD_SET(0, &fds);
+    select(FD_SETSIZE, &fds, NULL, NULL, &t);
+  ])],
+  [php_cv_have_select=yes],
+  [php_cv_have_select=no])])
+AS_VAR_IF([php_cv_have_select], [yes],
+  [AC_DEFINE([HAVE_SELECT], [1],
+    [Define to 1 if system has a working 'select' function.])])
 ])
 
 AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
   AC_MSG_RESULT($PHP_FPM)
 
-  AC_FPM_CLOCK
-  AC_FPM_TRACE
-  AC_FPM_BUILTIN_ATOMIC
-  AC_FPM_LQ
-  AC_FPM_KQUEUE
-  AC_FPM_DEVPOLL
-  AC_FPM_EPOLL
-  AC_FPM_SELECT
+  PHP_FPM_CLOCK
+  PHP_FPM_TRACE
+  PHP_FPM_BUILTIN_ATOMIC
+  PHP_FPM_LQ
+  PHP_FPM_KQUEUE
+  PHP_FPM_DEVPOLL
+  PHP_FPM_EPOLL
+  PHP_FPM_SELECT
 
   AC_CHECK_FUNCS([clearenv setproctitle setproctitle_fast])
 
@@ -605,7 +600,7 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_conf.c \
     fpm/fpm_env.c \
     fpm/fpm_events.c \
-		fpm/fpm_log.c \
+    fpm/fpm_log.c \
     fpm/fpm_main.c \
     fpm/fpm_php.c \
     fpm/fpm_php_trace.c \
@@ -620,12 +615,12 @@ if test "$PHP_FPM" != "no"; then
     fpm/fpm_unix.c \
     fpm/fpm_worker_pool.c \
     fpm/zlog.c \
-		fpm/events/select.c \
-		fpm/events/poll.c \
-		fpm/events/epoll.c \
-		fpm/events/kqueue.c \
-		fpm/events/devpoll.c \
-		fpm/events/port.c \
+    fpm/events/select.c \
+    fpm/events/poll.c \
+    fpm/events/epoll.c \
+    fpm/events/kqueue.c \
+    fpm/events/devpoll.c \
+    fpm/events/port.c \
   "
 
   PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')

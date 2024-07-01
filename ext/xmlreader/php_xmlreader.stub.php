@@ -175,6 +175,11 @@ class XMLReader
     /** @return bool|XMLReader */
     public static function open(string $uri, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
 
+    public static function fromUri(string $uri, ?string $encoding = null, int $flags = 0): static {}
+
+    /** @param resource $stream */
+    public static function fromStream($stream, ?string $encoding = null, int $flags = 0, ?string $documentUri = null): static {}
+
     /** @tentative-return-type */
     public function readInnerXml(): string {}
 
@@ -198,6 +203,8 @@ class XMLReader
 
     /** @return bool|XMLReader */
     public static function XML(string $source, ?string $encoding = null, int $flags = 0) {} // TODO Return type shouldn't be dependent on the call scope
+
+    public static function fromString(string $source, ?string $encoding = null, int $flags = 0): static {}
 
     /** @tentative-return-type */
     public function expand(?DOMNode $baseNode = null): DOMNode|false {}

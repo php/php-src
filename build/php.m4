@@ -1022,10 +1022,10 @@ $3
 
 int main(void)
 {
-	FILE *fp = fopen("conftestval", "w");
-	if (!fp) return(1);
-	fprintf(fp, "%d\n", sizeof($1));
-	return(0);
+  FILE *fp = fopen("conftestval", "w");
+  if (!fp) return(1);
+  fprintf(fp, "%d\n", sizeof($1));
+  return(0);
 }
   ]])], [
     eval $php_cache_value=`cat conftestval`
@@ -1124,7 +1124,7 @@ AC_DEFUN([PHP_DOES_PWRITE_WORK],[
 #include <stdlib.h>
 $1
     int main(void) {
-    int fd = open("conftest_in", O_WRONLY|O_CREAT, 0600);
+    int fd = open("conftest_pwrite", O_WRONLY|O_CREAT, 0600);
 
     if (fd < 0) return 1;
     if (pwrite(fd, "text", 4, 0) != 4) return 1;
@@ -1148,7 +1148,7 @@ dnl
 dnl Internal.
 dnl
 AC_DEFUN([PHP_DOES_PREAD_WORK],[
-  echo test > conftest_in
+  echo test > conftest_pread
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1159,7 +1159,7 @@ AC_DEFUN([PHP_DOES_PREAD_WORK],[
 $1
     int main(void) {
     char buf[3];
-    int fd = open("conftest_in", O_RDONLY);
+    int fd = open("conftest_pread", O_RDONLY);
     if (fd < 0) return 1;
     if (pread(fd, buf, 2, 0) != 2) return 1;
     /* Linux glibc breakage until 2.2.5 */
@@ -1173,7 +1173,6 @@ $1
   ],[
     ac_cv_pread=no
   ])
-  rm -f conftest_in
 ])
 
 dnl
@@ -1828,10 +1827,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     dnl Reset LIBS temporarily as it may have already been included -liconv in.
     LIBS_save="$LIBS"
     LIBS=
-    AC_CHECK_FUNC(iconv, [
+    AC_CHECK_FUNC([iconv], [
       found_iconv=yes
     ],[
-      AC_CHECK_FUNC(libiconv,[
+      AC_CHECK_FUNC([libiconv], [
         AC_DEFINE(HAVE_LIBICONV, 1, [ ])
         found_iconv=yes
       ])
@@ -1961,7 +1960,7 @@ found_pgsql=no
 dnl Set PostgreSQL installation directory if given from the configure argument.
 AS_CASE([$4], [yes], [pgsql_dir=""], [pgsql_dir=$4])
 AS_VAR_IF([pgsql_dir],,
-  [PKG_CHECK_MODULES([PGSQL], [libpq >= 9.3],
+  [PKG_CHECK_MODULES([PGSQL], [libpq >= 10.0],
     [found_pgsql=yes],
     [found_pgsql=no])])
 
@@ -2004,8 +2003,8 @@ AS_VAR_IF([found_pgsql], [yes], [dnl
   PHP_EVAL_INCLINE([$PGSQL_CFLAGS])
   PHP_EVAL_LIBLINE([$PGSQL_LIBS], [$1])
 dnl PostgreSQL minimum version sanity check.
-  PHP_CHECK_LIBRARY([pq], [PQlibVersion],, [AC_MSG_ERROR([m4_normalize([
-    PostgreSQL check failed: libpq 9.1 or later is required, please see
+  PHP_CHECK_LIBRARY([pq], [PQencryptPasswordConn],, [AC_MSG_ERROR([m4_normalize([
+    PostgreSQL check failed: libpq 10.0 or later is required, please see
     config.log for details.
   ])])],
   [$PGSQL_LIBS])
@@ -2284,7 +2283,10 @@ int main(void)
 dnl
 dnl PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
 dnl
-AC_DEFUN([PHP_INIT_DTRACE],[
+AC_DEFUN([PHP_INIT_DTRACE],
+[AC_CHECK_HEADER([sys/sdt.h],,
+  [AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support.])])
+
 dnl Set paths properly when called from extension.
   case "$4" in
     ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir;;
@@ -2389,6 +2391,9 @@ $ac_bdir[$]ac_provsrc.o: \$(PHP_DTRACE_OBJS)
 EOF
     ;;
   esac
+
+AC_DEFINE([HAVE_DTRACE], [1], [Define to 1 if DTrace support is enabled.])
+PHP_SUBST([PHP_DTRACE_OBJS])
 ])
 
 dnl

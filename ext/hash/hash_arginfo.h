@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9c0f01839a287d394b78b0dfd37b278a59d1b366 */
+ * Stub hash: df078e28c10c9af51b6c4e98c4ad4827e1f32bed */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -133,6 +133,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_HashContext___unserialize,
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_HashContext___debugInfo arginfo_hash_algos
+
 ZEND_FUNCTION(hash);
 ZEND_FUNCTION(hash_file);
 ZEND_FUNCTION(hash_hmac);
@@ -166,6 +168,7 @@ ZEND_FUNCTION(mhash);
 ZEND_METHOD(HashContext, __construct);
 ZEND_METHOD(HashContext, __serialize);
 ZEND_METHOD(HashContext, __unserialize);
+ZEND_METHOD(HashContext, __debugInfo);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash, arginfo_hash)
@@ -205,6 +208,7 @@ static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(HashContext, __serialize, arginfo_class_HashContext___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(HashContext, __unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, __debugInfo, arginfo_class_HashContext___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

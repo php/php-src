@@ -1,7 +1,7 @@
-From 24b52ec63eb55adb1c039e58dd3e1156f01083b2 Mon Sep 17 00:00:00 2001
+From 01aad1074657586677f05ac1998da2158c57ee74 Mon Sep 17 00:00:00 2001
 From: Niels Dossche <7771979+nielsdos@users.noreply.github.com>
 Date: Wed, 29 Nov 2023 21:26:47 +0100
-Subject: [PATCH 1/2] Remove unused upper case tag static data
+Subject: [PATCH 4/6] Remove unused upper case tag static data
 
 ---
  source/lexbor/tag/res.h | 2 ++
@@ -29,7 +29,7 @@ index c7190c5..4ad1f37 100644
  static const lexbor_shs_entry_t lxb_tag_res_shs_data_default[] = 
  {
 diff --git a/source/lexbor/tag/tag.c b/source/lexbor/tag/tag.c
-index f8fcdf0..0571957 100755
+index f8fcdf0..0571957 100644
 --- a/source/lexbor/tag/tag.c
 +++ b/source/lexbor/tag/tag.c
 @@ -92,6 +92,7 @@ lxb_tag_data_by_name(lexbor_hash_t *hash, const lxb_char_t *name, size_t len)
@@ -49,5 +49,5 @@ index f8fcdf0..0571957 100755
  /*
   * No inline functions for ABI.
 -- 
-2.43.0
+2.44.0
 

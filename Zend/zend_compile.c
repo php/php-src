@@ -2460,6 +2460,13 @@ static bool zend_ast_is_short_circuited(const zend_ast *ast)
 	}
 }
 
+static void zend_assert_not_short_circuited(const zend_ast *ast)
+{
+	if (zend_ast_is_short_circuited(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
+	}
+}
+
 /* Mark nodes that are an inner part of a short-circuiting chain.
  * We should not perform a "commit" on them, as it will be performed by the outer-most node.
  * We do this to avoid passing down an argument in various compile functions. */
@@ -3463,9 +3470,8 @@ static void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 				if (!zend_is_variable_or_call(expr_ast)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot assign reference to non referenceable value");
-				} else if (zend_ast_is_short_circuited(expr_ast)) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-						"Cannot take reference of a nullsafe chain");
+				} else {
+					zend_assert_not_short_circuited(expr_ast);
 				}
 
 				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
@@ -3507,9 +3513,7 @@ static void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 	}
 	zend_ensure_writable_variable(target_ast);
-	if (zend_ast_is_short_circuited(source_ast)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
-	}
+	zend_assert_not_short_circuited(source_ast);
 	if (is_globals_fetch(source_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot acquire reference to $GLOBALS");
 	}
@@ -4616,6 +4620,7 @@ static const zend_frameless_function_info *find_frameless_function_info(zend_ast
 
 static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *args, zend_function *fbc, const zend_frameless_function_info *frameless_function_info, uint32_t type)
 {
+	int lineno = CG(zend_lineno);
 	uint32_t num_args = frameless_function_info->num_args;
 	uint32_t offset = find_frameless_function_offset(num_args, frameless_function_info->handler);
 	znode arg_zvs[3];
@@ -4634,6 +4639,7 @@ static uint32_t zend_compile_frameless_icall_ex(znode *result, zend_ast_list *ar
 	uint32_t opnum = get_next_op_number();
 	zend_op *opline = zend_emit_op_tmp(result, opcode, NULL, NULL);
 	opline->extended_value = offset;
+	opline->lineno = lineno;
 	if (num_args >= 1) {
 		SET_NODE(opline->op1, &arg_zvs[0]);
 	}
@@ -4695,6 +4701,8 @@ static void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args
 
 	/* Compile frameless call. */
 	if (frameless_function_info) {
+		CG(zend_lineno) = lineno;
+
 		uint32_t jmp_end_opnum = zend_emit_jump(0);
 		uint32_t jmp_fl_target = get_next_op_number();
 
@@ -4740,7 +4748,7 @@ static zend_result zend_compile_func_sprintf(znode *result, zend_ast_list *args)
 	char *p;
 	char *end;
 	uint32_t placeholder_count;
-	
+
 	placeholder_count = 0;
 	p = Z_STRVAL_P(format_string);
 	end = p + Z_STRLEN_P(format_string);
@@ -4951,7 +4959,7 @@ static zend_result zend_try_compile_special_func_ex(znode *result, zend_string *
 	} else if (zend_string_equals_literal(lcname, "array_key_exists")) {
 		return zend_compile_func_array_key_exists(result, args);
 	} else if (zend_string_equals_literal(lcname, "sprintf")) {
-		return zend_compile_func_sprintf(result, args);	
+		return zend_compile_func_sprintf(result, args);
 	} else {
 		return FAILURE;
 	}
@@ -5539,10 +5547,7 @@ static void zend_compile_return(zend_ast *ast) /* {{{ */
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
 	} else if (by_ref && zend_is_variable(expr_ast)) {
-		if (zend_ast_is_short_circuited(expr_ast)) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Cannot take reference of a nullsafe chain");
-		}
-
+		zend_assert_not_short_circuited(expr_ast);
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
@@ -9932,6 +9937,7 @@ static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 
 	if (value_ast) {
 		if (returns_by_ref && zend_is_variable(value_ast)) {
+			zend_assert_not_short_circuited(value_ast);
 			zend_compile_var(&value_node, value_ast, BP_VAR_W, 1);
 		} else {
 			zend_compile_expr(&value_node, value_ast);

@@ -1,6 +1,6 @@
 # The mysqli extension tests
 
-To run the tests, a test database must be created in the MySQL command-line:  
+To run the tests, a test database must be created in the MySQL command-line:
 ```sql
 CREATE DATABASE test;
 ```

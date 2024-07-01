@@ -135,6 +135,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_PDO_SQLITELIB has been removed.
    - Symbol HAVE_WAITPID has been removed.
    - Symbol HAVE_LIBPQ has been removed.
+   - Symbols HAVE_LIBRT and HAVE_TIMER_CREATE removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -246,6 +247,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Removed the "properties" HashTable field from php_libxml_node_object.
    - Added a way to attached private data to a php_libxml_ref_obj.
    - Added a way to fix a class type onto php_libxml_ref_obj.
+   - Added a way to record quirks mode in php_libxml_ref_obj.
    - Added php_libxml_uses_internal_errors().
    - Added a way to override document handlers (e.g. serialization) with
      php_libxml_document_handlers.

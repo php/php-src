@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -18,14 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-#include "php_dom.h"
-#include "internal_helpers.h"
-#include "dom_properties.h"
+#include "../php_dom.h"
+#include "../internal_helpers.h"
+#include "../dom_properties.h"
 
 /* {{{ firstElementChild DomParentNode
 readonly=yes
@@ -35,13 +33,10 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	xmlNodePtr first = NULL;
-	if (dom_node_children_valid(nodep)) {
-		first = nodep->children;
+	xmlNodePtr first = nodep->children;
 
-		while (first && first->type != XML_ELEMENT_NODE) {
-			first = first->next;
-		}
+	while (first && first->type != XML_ELEMENT_NODE) {
+		first = first->next;
 	}
 
 	if (!first) {
@@ -62,13 +57,10 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	xmlNodePtr last = NULL;
-	if (dom_node_children_valid(nodep)) {
-		last = nodep->last;
+	xmlNodePtr last = nodep->last;
 
-		while (last && last->type != XML_ELEMENT_NODE) {
-			last = last->prev;
-		}
+	while (last && last->type != XML_ELEMENT_NODE) {
+		last = last->prev;
 	}
 
 	if (!last) {
@@ -90,16 +82,14 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	zend_long count = 0;
-	if (dom_node_children_valid(nodep)) {
-		xmlNodePtr first = nodep->children;
+	xmlNodePtr first = nodep->children;
 
-		while (first != NULL) {
-			if (first->type == XML_ELEMENT_NODE) {
-				count++;
-			}
-
-			first = first->next;
+	while (first != NULL) {
+		if (first->type == XML_ELEMENT_NODE) {
+			count++;
 		}
+
+		first = first->next;
 	}
 
 	ZVAL_LONG(retval, count);
@@ -130,7 +120,7 @@ static xmlDocPtr dom_doc_from_context_node(xmlNodePtr contextNode)
 	}
 }
 
-/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild): 
+/* Citing from the docs (https://gnome.pages.gitlab.gnome.org/libxml2/devhelp/libxml2-tree.html#xmlAddChild):
  * "Add a new node to @parent, at the end of the child (or property) list merging adjacent TEXT nodes (in which case @cur is freed)".
  * So we must use a custom way of adding that does not merge. */
 static void dom_add_child_without_merging(xmlNodePtr parent, xmlNodePtr child)
@@ -701,10 +691,6 @@ static zend_result dom_child_removal_preconditions(const xmlNode *child, int str
 
 	if (!child->parent) {
 		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return FAILURE;
-	}
-
-	if (!dom_node_children_valid(child->parent)) {
 		return FAILURE;
 	}
 

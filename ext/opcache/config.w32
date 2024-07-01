@@ -18,6 +18,9 @@ if (PHP_OPCACHE != "no") {
 		zend_shared_alloc.c \
 		shared_alloc_win32.c", true, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
+	ADD_EXTENSION_DEP('opcache', 'hash');
+	ADD_EXTENSION_DEP('opcache', 'pcre');
+
 	if (PHP_OPCACHE_JIT == "yes") {
 		if (CHECK_HEADER_ADD_INCLUDE("ir/ir.h", "CFLAGS_OPCACHE", PHP_OPCACHE + ";ext\\opcache\\jit")) {
 			var dasm_flags = (X64 ? "-D X64=1" : "") + (X64 ? " -D X64WIN=1" : "") + " -D WIN=1";

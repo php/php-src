@@ -408,7 +408,7 @@ namespace
         public function compareDocumentPosition(DOMNode $other): int {}
 
         public function __sleep(): array {}
-    
+
         public function __wakeup(): void {}
     }
 
@@ -446,7 +446,7 @@ namespace
 
         /** @implementation-alias DOMNode::__sleep */
         public function __sleep(): array {}
-    
+
         /** @implementation-alias DOMNode::__wakeup */
         public function __wakeup(): void {}
     }
@@ -1106,6 +1106,9 @@ namespace Dom
         public function append(Node|string ...$nodes): void;
         public function prepend(Node|string ...$nodes): void;
         public function replaceChildren(Node|string ...$nodes): void;
+
+        public function querySelector(string $selectors): ?Element;
+        public function querySelectorAll(string $selectors): NodeList;
     }
 
     interface ChildNode
@@ -1372,6 +1375,15 @@ namespace Dom
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        public function querySelector(string $selectors): ?Element {}
+        public function querySelectorAll(string $selectors): NodeList {}
+        public function closest(string $selectors): ?Element {}
+        public function matches(string $selectors): bool {}
+    }
+
+    class HTMLElement extends Element
+    {
     }
 
     class Attr extends Node
@@ -1488,6 +1500,11 @@ namespace Dom
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        /** @implementation-alias Dom\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+        /** @implementation-alias Dom\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
     }
 
     class Entity extends Node
@@ -1580,6 +1597,16 @@ namespace Dom
         public function replaceChildren(Node|string ...$nodes): void {}
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
+
+        /** @implementation-alias Dom\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+        /** @implementation-alias Dom\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
+
+        public ?HTMLElement $body;
+        /** @readonly */
+        public ?HTMLElement $head;
+        public string $title;
     }
 
     final class HTMLDocument extends Document

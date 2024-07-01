@@ -33,11 +33,11 @@ if test "$PHP_PHPDBG" != "no"; then
   AC_MSG_CHECKING([for phpdbg and readline integration])
   if test "$PHP_PHPDBG_READLINE" = "yes"; then
     if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
-  	  AC_DEFINE(HAVE_PHPDBG_READLINE, 1, [ ])
-  	  PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
-  	  AC_MSG_RESULT([ok])
-  	else
-  	  AC_MSG_RESULT([readline is not available])
+      AC_DEFINE(HAVE_PHPDBG_READLINE, 1, [ ])
+      PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
+      AC_MSG_RESULT([ok])
+    else
+      AC_MSG_RESULT([readline is not available])
     fi
   else
     AC_MSG_RESULT([disabled])
@@ -52,10 +52,10 @@ if test "$PHP_PHPDBG" != "no"; then
       AC_MSG_CHECKING([working pthreads]);
 
       if test "$pthreads_working" = "yes"; then
-      	AC_MSG_RESULT([$ac_cv_pthreads_cflags -l$ac_cv_pthreads_lib]);
-      	PHP_PHPDBG_CFLAGS="$PHP_PHPDBG_CFLAGS $ac_cv_pthreads_cflags"
-      	PHPDBG_EXTRA_LIBS="$PHPDBG_EXTRA_LIBS -l$ac_cv_pthreads_lib"
-      	AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
+        AC_MSG_RESULT([$ac_cv_pthreads_cflags -l$ac_cv_pthreads_lib]);
+        PHP_PHPDBG_CFLAGS="$PHP_PHPDBG_CFLAGS $ac_cv_pthreads_cflags"
+        PHPDBG_EXTRA_LIBS="$PHPDBG_EXTRA_LIBS -l$ac_cv_pthreads_lib"
+        AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
       else
         AC_MSG_WARN([pthreads not available])
       fi

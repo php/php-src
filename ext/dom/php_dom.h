@@ -130,8 +130,6 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type);
 zend_object *dom_xpath_objects_new(zend_class_entry *class_type);
 #endif
 bool dom_get_strict_error(php_libxml_ref_obj *document);
-void php_dom_throw_error(dom_exception_code error_code, bool strict_error);
-void php_dom_throw_error_with_message(dom_exception_code error_code, const char *error_message, bool strict_error);
 void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
@@ -199,6 +197,10 @@ bool php_dom_fragment_insertion_hierarchy_check_replace(xmlNodePtr parent, xmlNo
 void php_dom_node_append(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent);
 bool php_dom_pre_insert(php_libxml_ref_obj *document, xmlNodePtr node, xmlNodePtr parent, xmlNodePtr insertion_point);
 bool php_dom_pre_insert_is_parent_invalid(xmlNodePtr parent);
+void dom_parent_node_query_selector(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
+void dom_parent_node_query_selector_all(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
+void dom_element_matches(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
+void dom_element_closest(xmlNodePtr thisp, dom_object *intern, zval *return_value, const zend_string *selectors_str);
 
 /* nodemap and nodelist APIs */
 xmlNodePtr php_dom_named_node_map_get_named_item(dom_nnodemap_object *objmap, const zend_string *named, bool may_transform);

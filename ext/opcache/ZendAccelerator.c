@@ -48,7 +48,10 @@
 #include "zend_file_cache.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/md5.h"
-#include "ext/hash/php_hash.h"
+
+#ifdef ZEND_WIN32
+# include "ext/hash/php_hash.h"
+#endif
 
 #ifdef HAVE_JIT
 # include "jit/zend_jit.h"

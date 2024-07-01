@@ -5,10 +5,10 @@ dom
 --FILE--
 <?php
 
-class MyElement extends Dom\Element {}
+class MyElement extends Dom\HTMLElement {}
 
 $dom = Dom\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
-$dom->registerNodeClass("Dom\\Element", "MyElement");
+$dom->registerNodeClass("Dom\\HTMLElement", "MyElement");
 $child = $dom->documentElement->appendChild($dom->createElement('html'));
 
 // Destroy reference to the DOM
@@ -23,7 +23,7 @@ var_dump(get_class($dom->getElementsByTagName("p")->item(0)));
 
 ?>
 --EXPECT--
-object(Dom\HTMLDocument)#1 (25) {
+object(Dom\HTMLDocument)#1 (28) {
   ["implementation"]=>
   string(22) "(object value omitted)"
   ["URL"]=>
@@ -46,6 +46,12 @@ object(Dom\HTMLDocument)#1 (25) {
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(1)
+  ["body"]=>
+  string(22) "(object value omitted)"
+  ["head"]=>
+  string(22) "(object value omitted)"
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(13)
   ["nodeName"]=>

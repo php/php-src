@@ -95,14 +95,13 @@ else
     AC_MSG_RESULT([no])
   fi
 
+  dnl Enable pcre Valgrind support only in DEBUG build (it affects performance).
+  AS_VAR_IF([PHP_VALGRIND], [no],,
+    [AS_VAR_IF([ZEND_DEBUG], [yes],
+      [AC_DEFINE([HAVE_PCRE_VALGRIND_SUPPORT], [1],
+        [Define to 1 if pcre has Valgrind support enabled.])])])
+
   PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
   PHP_ADD_BUILD_DIR($ext_builddir/pcre2lib)
   PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcre2lib/])
-
-  if test "$PHP_VALGRIND" != "no" && test "$have_valgrind" = "yes"; then
-      dnl Enable pcre valgrind support only in DEBUG build (it affects performance)
-      if test "$ZEND_DEBUG" = "yes"; then
-        AC_DEFINE(HAVE_PCRE_VALGRIND_SUPPORT, 1, [ ])
-      fi
-  fi
 fi

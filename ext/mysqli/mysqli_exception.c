@@ -15,7 +15,7 @@
 
 */
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
@@ -72,6 +72,6 @@ PHP_METHOD(mysqli_sql_exception, getSqlState)
 	prop = zend_read_property(mysqli_exception_class_entry, Z_OBJ_P(ZEND_THIS), "sqlstate", sizeof("sqlstate")-1, 1, &rv);
 	ZVAL_DEREF(prop);
 	zend_string *str = zval_get_string(prop);
-	
+
 	RETURN_STR(str);
 }

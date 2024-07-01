@@ -345,7 +345,6 @@ xmlElemDump
 xmlEncodeEntities
 xmlEncodeEntitiesReentrant
 xmlEncodeSpecialChars
-xmlErrMemory
 xmlFileClose
 xmlFileMatch
 xmlFileOpen

@@ -24,7 +24,7 @@
 #endif
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -1685,7 +1685,7 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 			zend_argument_value_error(2, "cpu id must be between 0 and " ZEND_ULONG_FMT " (" ZEND_LONG_FMT ")", maxcpus, cpu);
 			RETURN_THROWS();
 		}
-		       
+
 		if (!PCNTL_CPU_ISSET(cpu, mask)) {
 			PCNTL_CPU_SET(cpu, mask);
 		}
