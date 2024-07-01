@@ -1793,7 +1793,6 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	zval obj;
 	ZVAL_UNDEF(&obj);
 	zval *z;
-	zend_string *property = zend_empty_string;
 
 	/* Construct the Deprecated object to correctly handle parameter processing. */
 	if (FAILURE == zend_get_attribute_object(&obj, zend_ce_deprecated, deprecated, scope, NULL)) {
@@ -1801,9 +1800,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	}
 
 	/* Extract the $message property. */
-	zend_string_release(property);
-	property = ZSTR_KNOWN(ZEND_STR_MESSAGE);
-	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), property, false, NULL)) == NULL) {
+	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL)) == NULL) {
 		goto out;
 	}
 	if (Z_TYPE_P(z) == IS_STRING) {
@@ -1811,9 +1808,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	}
 
 	/* Extract the $since property. */
-	zend_string_release(property);
-	property = ZSTR_INIT_LITERAL("since", 0);
-	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), property, false, NULL)) == NULL) {
+	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_SINCE), false, NULL)) == NULL) {
 		goto out;
 	}
 	if (Z_TYPE_P(z) == IS_STRING) {
@@ -1837,7 +1832,6 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	zend_string_release(since);
 	zend_string_release(message);
 	zval_ptr_dtor(&obj);
-	zend_string_release(property);
 
 	return result;
 }
