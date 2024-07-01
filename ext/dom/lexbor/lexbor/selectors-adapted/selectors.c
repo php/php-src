@@ -14,9 +14,9 @@
 #include <php.h>
 
 #include "lexbor/selectors-adapted/selectors.h"
-#include "ext/dom/namespace_compat.h"
-#include "ext/dom/domexception.h"
-#include "ext/dom/php_dom.h"
+#include "namespace_compat.h"
+#include "domexception.h"
+#include "php_dom.h"
 
 #include <math.h>
 
