@@ -3385,15 +3385,22 @@ static zend_never_inline bool ZEND_FASTCALL zend_isset_dim_slow(zval *container,
 				ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_IS));
 
 				ZVAL_DEREF(offset);
-				bool exists = obj->ce->dimension_handlers->has_dimension(obj, offset);
+
+				/* Object handler can modify the value of the object via globals; thus take a copy */
+				zval copy;
+				ZVAL_COPY(&copy, container);
+				const zend_class_entry *ce = obj->ce;
+				bool exists = ce->dimension_handlers->has_dimension(Z_OBJ(copy), offset);
 				if (!exists) {
+					zval_ptr_dtor(&copy);
 					return false;
 				}
 
 				zval *retval;
 				zval slot;
-				retval = obj->ce->dimension_handlers->read_dimension(obj, offset, &slot);
+				retval = ce->dimension_handlers->read_dimension(Z_OBJ(copy), offset, &slot);
 
+				zval_ptr_dtor(&copy);
 				if (UNEXPECTED(!retval)) {
 					ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
 					return true;
@@ -3452,15 +3459,22 @@ static zend_never_inline bool ZEND_FASTCALL zend_isempty_dim_slow(zval *containe
 				ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_IS));
 
 				ZVAL_DEREF(offset);
-				bool exists = obj->ce->dimension_handlers->has_dimension(obj, offset);
+
+				/* Object handler can modify the value of the object via globals; thus take a copy */
+				zval copy;
+				ZVAL_COPY(&copy, container);
+				const zend_class_entry *ce = obj->ce;
+				bool exists = ce->dimension_handlers->has_dimension(Z_OBJ(copy), offset);
 				if (!exists) {
+					zval_ptr_dtor(&copy);
 					return true;
 				}
 
 				zval *retval;
-                zval slot;
-				retval = obj->ce->dimension_handlers->read_dimension(obj, offset, &slot);
+				zval slot;
+				retval = ce->dimension_handlers->read_dimension(Z_OBJ(copy), offset, &slot);
 
+				zval_ptr_dtor(&copy);
 				if (UNEXPECTED(!retval)) {
 					ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
 					return true;
