@@ -33,7 +33,6 @@ if (PHP_OPCACHE != "no") {
 			DEFINE("DASM_ARCH", "x86");
 
 			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
-			AC_DEFINE('ZEND_JIT_IR', 1, 'Use JIT IR framework');
 
 			ADD_FLAG("CFLAGS_OPCACHE", "/I \"ext\\opcache\\jit\\ir\" /D "+ir_target+" /D IR_PHP");
 			if (PHP_DEBUG == "yes") {
