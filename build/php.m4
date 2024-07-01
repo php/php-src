@@ -822,7 +822,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   else
     PHP_MODULES="$PHP_MODULES \$(phplibdir)/$1.$suffix"
   fi
-  PHP_SUBST($2)
+  PHP_SUBST([$2])
   cat >>Makefile.objects<<EOF
 \$(phplibdir)/$1.$suffix: $3/$1.$suffix
 	\$(LIBTOOL) --tag=ifelse($4,,CC,CXX) --mode=install cp $3/$1.$suffix \$(phplibdir)
@@ -959,7 +959,7 @@ dnl Set for phpize builds only.
 dnl ---------------------------
   if test "$ext_builddir" = "."; then
     PHP_PECL_EXTENSION=$1
-    PHP_SUBST(PHP_PECL_EXTENSION)
+    PHP_SUBST([PHP_PECL_EXTENSION])
   fi
 ])
 
@@ -1616,7 +1616,7 @@ AC_DEFUN([PHP_PROG_AWK], [
       fi
       ;;
   esac
-  PHP_SUBST(AWK)
+  PHP_SUBST([AWK])
 ])
 
 dnl
@@ -1685,7 +1685,7 @@ AC_DEFUN([PHP_PROG_BISON], [
       ;;
   esac
 
-  PHP_SUBST(YACC)
+  PHP_SUBST([YACC])
 ])
 
 dnl
@@ -1745,7 +1745,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
       ;;
   esac
 
-  PHP_SUBST(RE2C)
+  PHP_SUBST([RE2C])
   AS_VAR_SET([RE2C_FLAGS], [m4_normalize([$2])])
   PHP_SUBST([RE2C_FLAGS])
 ])
@@ -1771,7 +1771,7 @@ AC_DEFUN([PHP_PROG_PHP],[
       AC_MSG_RESULT([$php_version (ok)])
     fi
   fi
-  PHP_SUBST(PHP)
+  PHP_SUBST([PHP])
 ])
 
 dnl ----------------------------------------------------------------------------
