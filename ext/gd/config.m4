@@ -226,9 +226,10 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
 
-    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
-    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
+    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, [$GD_CFLAGS])
+    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
+
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 
     PHP_TEST_BUILD(foobar, [], [
@@ -250,8 +251,5 @@ dnl Various checks for GD features
     ], [ $GD_SHARED_LIBADD ])
   fi
 
-  PHP_SUBST(GD_CFLAGS)
-  PHP_SUBST(GDLIB_CFLAGS)
-  PHP_SUBST(GDLIB_LIBS)
-  PHP_SUBST(GD_SHARED_LIBADD)
+  PHP_SUBST([GD_SHARED_LIBADD])
 fi
