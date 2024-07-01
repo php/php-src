@@ -13894,8 +13894,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 
 				if (opline->opcode != ZEND_FETCH_OBJ_IS) {
-					if (((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info)
-							|| Z_MODE(res_addr) == IS_REG) {
+					if (Z_MODE(res_addr) == IS_REG) {
 						ir_ref val_addr = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_obj_r_dynamic_ex),
 							obj_ref, offset_ref);
 						ir_END_PHI_list(end_values, val_addr);
@@ -13905,8 +13904,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 						ir_END_list(end_inputs);
 					}
 				} else {
-					if (((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info)
-							|| Z_MODE(res_addr) == IS_REG) {
+					if (Z_MODE(res_addr) == IS_REG) {
 						ir_ref val_addr = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_obj_is_dynamic_ex),
 							obj_ref, offset_ref);
 						ir_END_PHI_list(end_values, val_addr);
