@@ -2,6 +2,7 @@
 GH-14698 crash on DOM node dereference
 --EXTENSIONS--
 dom
+simplexml
 --CREDITS--
 YuanchengJiang
 --FILE--
