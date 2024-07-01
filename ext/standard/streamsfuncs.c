@@ -618,19 +618,19 @@ PHP_FUNCTION(stream_get_wrappers)
 
 /* {{{ fd_bigset related macros and typedefs to remove FD_SETSIZE limitation in stream_select */
 typedef struct {
-#ifdef __USE_XOPEN
     char *fds_bits;
-#else
-    char *__fds_bits;
-#endif
     size_t size;
 } fd_bigset;
-#ifdef __USE_XOPEN
+#define FD_BIGSET_ENSURE_CAPACITY(fd, set) \
+    if (((fd) / 8 >= (set)->size)) { \
+        fd_bigset_double_size(set); \
+    }
 #define FD_BIGSET_ZERO(set, num_fds) do { \
     (set)->size = (num_fds + 7) / 8; \
     (set)->fds_bits = (char *)ecalloc((set)->size, sizeof(char)); \
 } while (0)
 #define FD_BIGSET_SET(fd, set) do { \
+	FD_BIGSET_ENSURE_CAPACITY(fd, set) \
     if ((fd) / 8 < (set)->size) { \
         (set)->fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
     } \
@@ -648,31 +648,30 @@ typedef struct {
     } \
     (set)->size = 0; \
 } while (0)
-#else
-#define FD_BIGSET_ZERO(set, num_fds) do { \
-    (set)->size = (num_fds + 7) / 8; \
-    (set)->__fds_bits = (char *)ecalloc((set)->size, sizeof(char)); \
-} while (0)
-#define FD_BIGSET_SET(fd, set) do { \
-    if ((fd) / 8 < (set)->size) { \
-        (set)->__fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
-    } \
-} while (0)
-#define FD_BIGSET_ISSET(fd, set) (((fd) / 8 < (set)->size) ? ((set)->__fds_bits[(fd) / 8] & (1 << ((fd) % 8))) : 0)
-#define FD_BIGSET_CLR(fd, set) do { \
-    if ((fd) / 8 < (set)->size) { \
-        (set)->__fds_bits[(fd) / 8] &= ~(1 << ((fd) % 8)); \
-    } \
-} while (0)
-#define FD_BIGSET_FREE(set) do { \
-    if ((set)->__fds_bits) { \
-        efree((set)->__fds_bits); \
-        (set)->__fds_bits = NULL; \
-    } \
-    (set)->size = 0; \
-} while (0)
-#endif
 
+/* {{{ Function to double the size of an fd_bigset */
+void fd_bigset_double_size(fd_bigset *set) {
+    if (!set || !set->fds_bits) {
+        return;
+    }
+
+    size_t old_size = set->size;
+    size_t new_size = old_size * 2;
+
+    /* Allocate new memory block twice the size of the original */
+    char *new_bits = (char *)ecalloc(new_size, sizeof(char));
+
+    /* Copy old bits to new memory block */
+    memcpy(new_bits, set->fds_bits, old_size);
+
+    /* Free the old memory block */
+    efree(set->fds_bits);
+
+    /* Update the structure */
+    set->fds_bits = new_bits;
+    set->size = new_size;
+}
+/* }}} */
 
 int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *max_fd, long max_fds) {
     zval *elem;
@@ -710,6 +709,7 @@ int stream_array_to_fd_bigset(zval *stream_array, fd_bigset *set, php_socket_t *
 
     return cnt ? 1 : 0;
 }
+
 static int stream_array_from_fd_bigset(zval *stream_array, fd_bigset *fds, long max_fds) {
     zval *elem, *dest_elem;
     HashTable *ht;
@@ -841,10 +841,8 @@ PHP_FUNCTION(stream_select) {
 	}
 #endif
 
-	/* Cap file descriptor limit at 131072 unless FD_SETSIZE is greater */
-	if (FD_SETSIZE > 131072) {
-		max_fds = FD_SETSIZE;
-	} else if (max_fds > 131072) {
+	/* Cap file descriptor limit at 131072; the fd_bigset will be dynamically resized if needed. */
+	if (max_fds > 131072) {
 		max_fds = 131072;
 	}
 
@@ -936,12 +934,17 @@ PHP_FUNCTION(stream_select) {
             RETURN_LONG(retval);
         }
     }
-	
-	#ifdef __USE_XOPEN
-		retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
-	#else
-		retval = php_select(max_fd + 1, (fd_set *)rfds.__fds_bits, (fd_set *)wfds.__fds_bits, (fd_set *)efds.__fds_bits, tv_p);
-	#endif
+
+
+    /* Ensure all bitmaps are the same size (one or more may have been dynamically resized) */
+    size_t largest = rfds.size;
+    if (largest < wfds.size) largest = wfds.size;
+    if (largest < efds.size) largest = efds.size;
+    while (largest > rfds.size) fd_bigset_double_size(&rfds);
+    while (largest > wfds.size) fd_bigset_double_size(&wfds);
+    while (largest > efds.size) fd_bigset_double_size(&efds);
+
+	retval = php_select(max_fd + 1, (fd_set *)rfds.fds_bits, (fd_set *)wfds.fds_bits, (fd_set *)efds.fds_bits, tv_p);
 
     if (retval == -1) {
         php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
