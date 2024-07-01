@@ -3103,12 +3103,17 @@ class AttributeInfo {
     /** @param array<string, ConstInfo> $allConstInfos */
     public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
         $php82MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
+        $php84MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_84_VERSION_ID;
         /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
         $knowns = [
             "message" => "ZEND_STR_MESSAGE",
         ];
         if ($php82MinimumCompatibility) {
             $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
+        }
+        if ($php84MinimumCompatibility) {
+            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED";
+            $knowns["since"] = "ZEND_STR_SINCE";
         }
 
         $code = "\n";
