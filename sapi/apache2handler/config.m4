@@ -77,7 +77,7 @@ if test "$PHP_APXS2" != "no"; then
   fi
 
   LIBPHP_CFLAGS="-shared"
-  PHP_SUBST(LIBPHP_CFLAGS)
+  PHP_SUBST([LIBPHP_CFLAGS])
 
   case $host_alias in
   *aix*)
@@ -96,7 +96,7 @@ if test "$PHP_APXS2" != "no"; then
         MH_BUNDLE_FLAGS="`$APU_CONFIG --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
-    PHP_SUBST(MH_BUNDLE_FLAGS)
+    PHP_SUBST([MH_BUNDLE_FLAGS])
     PHP_SELECT_SAPI(apache2handler, bundle, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
     SAPI_SHARED=libs/libphp.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
@@ -119,7 +119,6 @@ if test "$PHP_APXS2" != "no"; then
     fi
   fi
   AC_MSG_RESULT(yes)
-  PHP_SUBST(APXS)
 else
   AC_MSG_RESULT(no)
 fi

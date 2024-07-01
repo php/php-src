@@ -48,11 +48,10 @@ if test "$PHP_CLI" != "no"; then
 
   dnl Set executable for tests.
   PHP_EXECUTABLE="\$(top_builddir)/\$(SAPI_CLI_PATH)"
-  PHP_SUBST(PHP_EXECUTABLE)
 
-  dnl Expose to Makefile.
-  PHP_SUBST(SAPI_CLI_PATH)
-  PHP_SUBST(BUILD_CLI)
+  PHP_SUBST([PHP_EXECUTABLE])
+  PHP_SUBST([SAPI_CLI_PATH])
+  PHP_SUBST([BUILD_CLI])
 
   PHP_OUTPUT(sapi/cli/php.1)
 
