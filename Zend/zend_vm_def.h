@@ -8024,7 +8024,7 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 
 	/* Exception was thrown before executing any op */
 	if (UNEXPECTED(!throw_op)) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, -1, 0, 0);
+		ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, -1, op_num, 0);
 	}
 
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
