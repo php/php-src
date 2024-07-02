@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<enumsynopsis>
+    <enumname>Random\IntervalBoundary</enumname>
+    <modifier role="enum_backing_type">int</modifier>
+
+    <oointerface>
+     <modifier>implements</modifier>
+     <interfacename>BackedEnum</interfacename>
+    </oointerface>
+
+    <synopsisinfo role="comment">&Constants;</synopsisinfo>
+    <fieldsynopsis>
+     <modifier>const</modifier>
+     <type>int</type>
+     <varname linkend="random-intervalboundary.constants.closedc">Random\IntervalBoundary::ClosedC</varname>
+     <initializer>2</initializer>
+    </fieldsynopsis>
+
+    <synopsisinfo role="comment">&EnumCases;</synopsisinfo>
+    <enumitem>
+     <enumidentifier>ClosedOpen</enumidentifier>
+     <enumvalue><initializer>1</initializer></enumvalue>
+    </enumitem>
+    <enumitem>
+     <enumidentifier>ClosedClosed</enumidentifier>
+     <enumvalue><initializer>2</initializer></enumvalue>
+    </enumitem>
+    <enumitem>
+     <enumidentifier>OpenClosed</enumidentifier>
+     <enumvalue><initializer>3</initializer></enumvalue>
+    </enumitem>
+    <enumitem>
+     <enumidentifier>OpenOpen</enumidentifier>
+     <enumvalue><initializer>4</initializer></enumvalue>
+    </enumitem>
+
+    <synopsisinfo role="comment">&InheritedMethods;</synopsisinfo>
+    <xi:include xpointer="xmlns(db=http://docbook.org/ns/docbook) xpointer(id('class.unitenum')/db:refentry/db:refsect1[@role='description']/descendant::db:methodsynopsis[@role='UnitEnum'])">
+     <xi:fallback/>
+    </xi:include>
+   </enumsynopsis>

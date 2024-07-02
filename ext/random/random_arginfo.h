@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35cb16abb3392bd257a43cc675cad4f5af5549c1 */
+ * Stub hash: e676dc318d339a4ae6539c494e642bfceae90738 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -338,15 +338,29 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 
 static zend_class_entry *register_class_Random_IntervalBoundary(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, class_Random_IntervalBoundary_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_LONG, class_Random_IntervalBoundary_methods);
 
-	zend_enum_add_case_cstr(class_entry, "ClosedOpen", NULL);
+	zval const_ClosedC_value;
+	ZVAL_LONG(&const_ClosedC_value, 2);
+	zend_string *const_ClosedC_name = zend_string_init_interned("ClosedC", sizeof("ClosedC") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ClosedC_name, &const_ClosedC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ClosedC_name);
 
-	zend_enum_add_case_cstr(class_entry, "ClosedClosed", NULL);
+	zval enum_case_ClosedOpen_value;
+	ZVAL_LONG(&enum_case_ClosedOpen_value, 1);
+	zend_enum_add_case_cstr(class_entry, "ClosedOpen", &enum_case_ClosedOpen_value);
 
-	zend_enum_add_case_cstr(class_entry, "OpenClosed", NULL);
+	zval enum_case_ClosedClosed_value;
+	ZVAL_LONG(&enum_case_ClosedClosed_value, 2);
+	zend_enum_add_case_cstr(class_entry, "ClosedClosed", &enum_case_ClosedClosed_value);
 
-	zend_enum_add_case_cstr(class_entry, "OpenOpen", NULL);
+	zval enum_case_OpenClosed_value;
+	ZVAL_LONG(&enum_case_OpenClosed_value, 3);
+	zend_enum_add_case_cstr(class_entry, "OpenClosed", &enum_case_OpenClosed_value);
+
+	zval enum_case_OpenOpen_value;
+	ZVAL_LONG(&enum_case_OpenOpen_value, 4);
+	zend_enum_add_case_cstr(class_entry, "OpenOpen", &enum_case_OpenOpen_value);
 
 	return class_entry;
 }
