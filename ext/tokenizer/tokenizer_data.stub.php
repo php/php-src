@@ -454,6 +454,11 @@ const T_METHOD_C = UNKNOWN;
 const T_FUNC_C = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_PROPERTY_C
+ */
+const T_PROPERTY_C = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_NS_C
  */
 const T_NS_C = UNKNOWN;

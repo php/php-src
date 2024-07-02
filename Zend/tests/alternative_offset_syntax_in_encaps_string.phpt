@@ -3,4 +3,4 @@ Alternative offset syntax should emit only E_COMPILE_ERROR in string interpolati
 --FILE--
 <?php "{$g{'h'}}"; ?>
 --EXPECTF--
-Fatal error: Array and string offset access syntax with curly braces is no longer supported in %s on line 1
+Parse error: syntax error, unexpected token "{", expecting "->" or "?->" or "[" in %s on line %d

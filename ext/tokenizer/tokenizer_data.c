@@ -115,6 +115,7 @@ char *get_token_type_name(int token_type)
 		case T_TRAIT_C: return "T_TRAIT_C";
 		case T_METHOD_C: return "T_METHOD_C";
 		case T_FUNC_C: return "T_FUNC_C";
+		case T_PROPERTY_C: return "T_PROPERTY_C";
 		case T_NS_C: return "T_NS_C";
 		case T_ATTRIBUTE: return "T_ATTRIBUTE";
 		case T_PLUS_EQUAL: return "T_PLUS_EQUAL";
