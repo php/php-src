@@ -147,6 +147,7 @@ typedef struct _php_cgi_globals_struct {
 	bool discard_path;
 	bool fcgi_logging;
 	bool fcgi_logging_request_started;
+	bool fcgi_auto_close_conn;
 	char *redirect_status_env;
 	HashTable user_config_cache;
 	char *error_header;
@@ -1428,6 +1429,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("cgi.fix_pathinfo",        "1",  PHP_INI_SYSTEM, OnUpdateBool,   fix_pathinfo, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("cgi.discard_path",        "0",  PHP_INI_SYSTEM, OnUpdateBool,   discard_path, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_BOOLEAN("fastcgi.logging",         "1",  PHP_INI_SYSTEM, OnUpdateBool,   fcgi_logging, php_cgi_globals_struct, php_cgi_globals)
+	STD_PHP_INI_BOOLEAN("fastcgi.auto_close_connection", "1", PHP_INI_SYSTEM, OnUpdateBool, fcgi_auto_close_conn, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("fastcgi.error_header",    NULL, PHP_INI_SYSTEM, OnUpdateString, error_header, php_cgi_globals_struct, php_cgi_globals)
 	STD_PHP_INI_ENTRY("fpm.config",    NULL, PHP_INI_SYSTEM, OnUpdateString, fpm_config, php_cgi_globals_struct, php_cgi_globals)
 PHP_INI_END()
@@ -1443,6 +1445,7 @@ static void php_cgi_globals_ctor(php_cgi_globals_struct *php_cgi_globals)
 	php_cgi_globals->discard_path = 0;
 	php_cgi_globals->fcgi_logging = 1;
 	php_cgi_globals->fcgi_logging_request_started = false;
+	php_cgi_globals->fcgi_auto_close_conn = true;
 	zend_hash_init(&php_cgi_globals->user_config_cache, 0, NULL, user_config_cache_entry_dtor, 1);
 	php_cgi_globals->error_header = NULL;
 	php_cgi_globals->fpm_config = NULL;
@@ -1485,18 +1488,23 @@ static PHP_MINFO_FUNCTION(cgi)
 
 PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 {
+	bool close_conn = CGIG(fcgi_auto_close_conn);
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(close_conn)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!fcgi_is_closed(request)) {
 		php_output_end_all();
 		php_header();
 
+		if (close_conn) {
+			fcgi_request_set_keep(request, 0);
+		}
 		fcgi_end(request);
-		fcgi_close(request, 0, 0);
+		fcgi_close(request, 0, close_conn);
 		RETURN_TRUE;
 	}
 
