@@ -9,17 +9,16 @@ AC_CHECK_FUNCS([setproctitle])
 
 AC_CHECK_HEADERS([sys/pstat.h])
 
-AC_CACHE_CHECK([for PS_STRINGS], [cli_cv_var_PS_STRINGS],
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <machine/vmparam.h>
+AC_CACHE_CHECK([for PS_STRINGS], [php_cv_var_PS_STRINGS],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <machine/vmparam.h>
 #include <sys/exec.h>
-]],
-[[PS_STRINGS->ps_nargvstr = 1;
-PS_STRINGS->ps_argvstr = "foo";]])],
-[cli_cv_var_PS_STRINGS=yes],
-[cli_cv_var_PS_STRINGS=no])])
-if test "$cli_cv_var_PS_STRINGS" = yes ; then
-  AC_DEFINE([HAVE_PS_STRINGS], [], [Define to 1 if the PS_STRINGS thing exists.])
-fi
+],
+[PS_STRINGS->ps_nargvstr = 1;
+PS_STRINGS->ps_argvstr = "foo";])],
+[php_cv_var_PS_STRINGS=yes],
+[php_cv_var_PS_STRINGS=no])])
+AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
+  [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
 
 if test "$PHP_CLI" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
