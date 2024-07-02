@@ -295,7 +295,7 @@ static void bc_do_div(char *n1, size_t n1_readable_len, size_t n1_bottom_extensi
 	efree(n1_vector);
 }
 
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
+bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale)
 {
 	/* divide by zero */
 	if (bc_is_zero(n2)) {

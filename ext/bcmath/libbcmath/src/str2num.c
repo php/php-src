@@ -171,6 +171,8 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 			fractional_end -= str_scale - scale;
 			str_scale = scale;
 		}
+	} else {
+		*full_scale = 0;
 	}
 
 after_fractional:

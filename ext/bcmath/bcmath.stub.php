@@ -48,21 +48,21 @@ namespace BcMath {
 
         public function __construct(string|int $num) {}
 
-        public function add(Number|string|int $num, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function add(Number|string|int $num, ?int $scale = null): Number {}
 
-        public function sub(Number|string|int $num, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function sub(Number|string|int $num, ?int $scale = null): Number {}
 
-        public function mul(Number|string|int $num, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function mul(Number|string|int $num, ?int $scale = null): Number {}
 
-        public function div(Number|string|int $num, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function div(Number|string|int $num, ?int $scale = null): Number {}
 
-        public function mod(Number|string|int $num, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function mod(Number|string|int $num, ?int $scale = null): Number {}
 
-        public function powmod(Number|string|int $exponent, Number|string|int $modulus, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function powmod(Number|string|int $exponent, Number|string|int $modulus, ?int $scale = null): Number {}
 
-        public function pow(Number|string|int $exponent, ?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function pow(Number|string|int $exponent, ?int $scale = null): Number {}
 
-        public function sqrt(?int $scale = null, int $roundingMode = PHP_ROUND_HALF_UP): Number {}
+        public function sqrt(?int $scale = null): Number {}
 
         public function floor(): Number {}
 

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 71387f572f18e75b5fc3fa3dfcf73851cf2af2cd */
+ * Stub hash: 24e7e1d0cbdb207143c95165e8b1e66ce48253f4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -62,7 +62,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_add, 0, 1, BcMath\\\116umber, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, num, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, roundingMode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_BcMath_Number_sub arginfo_class_BcMath_Number_add
@@ -77,18 +76,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_powmod, 0, 2,
 	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_OBJ_TYPE_MASK(0, modulus, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, roundingMode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_pow, 0, 1, BcMath\\\116umber, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, exponent, BcMath\\\116umber, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, roundingMode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_sqrt, 0, 0, BcMath\\\116umber, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, scale, IS_LONG, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, roundingMode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_BcMath_Number_floor, 0, 0, BcMath\\\116umber, 0)
