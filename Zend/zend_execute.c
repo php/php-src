@@ -1800,17 +1800,15 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 	}
 
 	/* Extract the $message property. */
-	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL)) == NULL) {
-		goto out;
-	}
+	z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_MESSAGE), false, NULL);
+	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
 		message = zend_string_copy(Z_STR_P(z));
 	}
 
 	/* Extract the $since property. */
-	if ((z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_SINCE), false, NULL)) == NULL) {
-		goto out;
-	}
+	z = zend_read_property_ex(zend_ce_deprecated, Z_OBJ_P(&obj), ZSTR_KNOWN(ZEND_STR_SINCE), false, NULL);
+	ZEND_ASSERT(z != &EG(uninitialized_zval));
 	if (Z_TYPE_P(z) == IS_STRING) {
 		since = zend_string_copy(Z_STR_P(z));
 	}
