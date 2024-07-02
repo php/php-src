@@ -622,7 +622,7 @@ typedef struct {
     size_t size;
 } fd_bigset;
 #define FD_BIGSET_ENSURE_CAPACITY(fd, set) \
-    if (((fd) / 8 >= (set)->size)) { \
+    if (UNEXPECTED(((fd) / 8 >= (set)->size))) { \
         fd_bigset_double_size(set); \
     }
 #define FD_BIGSET_ZERO(set, num_fds) do { \
@@ -631,9 +631,7 @@ typedef struct {
 } while (0)
 #define FD_BIGSET_SET(fd, set) do { \
 	FD_BIGSET_ENSURE_CAPACITY(fd, set) \
-    if ((fd) / 8 < (set)->size) { \
-        (set)->fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
-    } \
+	(set)->fds_bits[(fd) / 8] |= (1 << ((fd) % 8)); \
 } while (0)
 #define FD_BIGSET_ISSET(fd, set) (((fd) / 8 < (set)->size) ? ((set)->fds_bits[(fd) / 8] & (1 << ((fd) % 8))) : 0)
 #define FD_BIGSET_CLR(fd, set) do { \
@@ -650,25 +648,19 @@ typedef struct {
 } while (0)
 
 /* {{{ Function to double the size of an fd_bigset */
-void fd_bigset_double_size(fd_bigset *set) {
-    if (!set || !set->fds_bits) {
-        return;
-    }
+static void fd_bigset_double_size(fd_bigset *set) {
+	ZEND_ASSERT(set && set->fds_bits);
 
     size_t old_size = set->size;
     size_t new_size = old_size * 2;
 
-    /* Allocate new memory block twice the size of the original */
-    char *new_bits = (char *)ecalloc(new_size, sizeof(char));
+	/* Reallocate memory block with twice the size of the original */
+	set->fds_bits = erealloc(set->fds_bits, new_size);
 
-    /* Copy old bits to new memory block */
-    memcpy(new_bits, set->fds_bits, old_size);
-
-    /* Free the old memory block */
-    efree(set->fds_bits);
+	/* Zero out the extra capacity */
+	memset(set->fds_bits + old_size, 0, new_size - old_size);
 
     /* Update the structure */
-    set->fds_bits = new_bits;
     set->size = new_size;
 }
 /* }}} */
@@ -831,13 +823,13 @@ PHP_FUNCTION(stream_select) {
     ZEND_PARSE_PARAMETERS_END();
 
 #ifdef PHP_WIN32
-	/* Check if the Windows standard handle is redirected to file */
+	/* For Windows use FD_SETSIZE */
 	long max_fds = FD_SETSIZE;
 #else
-	/* Check if the file descriptor identifier is a terminal */
+	/* Get max possible descriptor count */
 	long max_fds = sysconf(_SC_OPEN_MAX);
 	if (max_fds == -1) {
-		max_fds = FD_SETSIZE;
+		max_fds = 131072;
 	}
 #endif
 
