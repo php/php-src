@@ -1,4 +1,5 @@
-PHP_ARG_ENABLE([fpm],,
+PHP_ARG_ENABLE([fpm],
+  [for FPM build],
   [AS_HELP_STRING([--enable-fpm],
     [Enable building of the fpm SAPI executable])],
   [no],
@@ -416,10 +417,7 @@ AS_VAR_IF([php_cv_have_select], [yes],
     [Define to 1 if system has a working 'select' function.])])
 ])
 
-AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
-  AC_MSG_RESULT($PHP_FPM)
-
   PHP_FPM_CLOCK
   PHP_FPM_TRACE
   PHP_FPM_BUILTIN_ATOMIC
@@ -554,7 +552,6 @@ if test "$PHP_FPM" != "no"; then
   fi
 
   AC_SUBST([php_fpm_systemd])
-  AC_DEFINE_UNQUOTED(PHP_FPM_SYSTEMD, "$php_fpm_systemd", [fpm systemd service type])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
@@ -576,9 +573,6 @@ if test "$PHP_FPM" != "no"; then
   AC_SUBST([php_fpm_localstatedir])
   php_fpm_prefix=`eval echo $prefix`
   AC_SUBST([php_fpm_prefix])
-
-  AC_DEFINE_UNQUOTED(PHP_FPM_USER, "$php_fpm_user", [fpm user name])
-  AC_DEFINE_UNQUOTED(PHP_FPM_GROUP, "$php_fpm_group", [fpm group name])
 
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
   PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
@@ -637,9 +631,6 @@ if test "$PHP_FPM" != "no"; then
       ;;
   esac
 
-  PHP_SUBST(SAPI_FPM_PATH)
-  PHP_SUBST(BUILD_FPM)
-
-else
-  AC_MSG_RESULT(no)
+  PHP_SUBST([SAPI_FPM_PATH])
+  PHP_SUBST([BUILD_FPM])
 fi

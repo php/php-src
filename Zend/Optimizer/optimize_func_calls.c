@@ -78,7 +78,7 @@ static void zend_delete_call_instructions(zend_op_array *op_array, zend_op *opli
 static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_op *opline, zend_function *func)
 {
 	if (func->type == ZEND_USER_FUNCTION
-	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS))
+	 && !(func->op_array.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_DEPRECATED))
 		/* TODO: function copied from trait may be inconsistent ??? */
 	 && !(func->op_array.fn_flags & (ZEND_ACC_TRAIT_CLONE))
 	 && fcall->extended_value >= func->op_array.required_num_args

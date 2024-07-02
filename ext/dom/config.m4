@@ -32,10 +32,11 @@ if test "$PHP_DOM" != "no"; then
                             parentnode/tree.c parentnode/css_selectors.c \
                             processinginstruction.c cdatasection.c \
                             documentfragment.c domimplementation.c \
-                            element.c node.c characterdata.c \
+                            element.c node.c characterdata.c inner_html_mixin.c \
                             documenttype.c entity.c \
                             nodelist.c html_collection.c text.c comment.c \
                             entityreference.c \
+                            token_list.c \
                             notation.c xpath.c dom_iterators.c \
                             namednodemap.c xpath_callbacks.c \
                             $LEXBOR_SOURCES],
@@ -54,7 +55,7 @@ if test "$PHP_DOM" != "no"; then
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/selectors-adapted)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ns)
     PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/tag)
-    PHP_SUBST(DOM_SHARED_LIBADD)
+    PHP_SUBST([DOM_SHARED_LIBADD])
     PHP_INSTALL_HEADERS([ext/dom], [xml_common.h xpath_callbacks.h namespace_compat.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
   ])

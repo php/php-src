@@ -98,7 +98,7 @@ static ZEND_COLD void ZEND_FASTCALL zend_jit_invalid_method_call(zval *object)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline = EX(opline);
-	zval *function_name = function_name = RT_CONSTANT(opline, opline->op2);;
+	zval *function_name = RT_CONSTANT(opline, opline->op2);
 
 	if (Z_TYPE_P(object) == IS_UNDEF && opline->op1_type == IS_CV) {
 		zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(opline->op1.var)];
@@ -1297,13 +1297,6 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 			}
 			return;
 		}
-		if (UNEXPECTED(!tmp)) {
-			if (result) {
-				ZVAL_UNDEF(result);
-			}
-			return;
-		}
-
 		if (UNEXPECTED(!tmp)) {
 			if (result) {
 				ZVAL_UNDEF(result);

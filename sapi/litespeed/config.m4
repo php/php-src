@@ -1,6 +1,5 @@
-AC_MSG_CHECKING(for LiteSpeed support)
-
-PHP_ARG_ENABLE([litespeed],,
+PHP_ARG_ENABLE([litespeed],
+  [for LiteSpeed support],
   [AS_HELP_STRING([--enable-litespeed],
     [Build PHP as litespeed module])],
   [no])
@@ -22,8 +21,6 @@ if test "$PHP_LITESPEED" != "no"; then
     ;;
   esac
 
-  PHP_SUBST(SAPI_LITESPEED_PATH)
-  PHP_SUBST(BUILD_LITESPEED)
+  PHP_SUBST([SAPI_LITESPEED_PATH])
+  PHP_SUBST([BUILD_LITESPEED])
 fi
-
-AC_MSG_RESULT($PHP_LITESPEED)

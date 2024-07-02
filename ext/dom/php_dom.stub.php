@@ -1304,6 +1304,8 @@ namespace Dom
 
         public string $id;
         public string $className;
+        /** @readonly */
+        public TokenList $classList;
 
         /** @implementation-alias DOMNode::hasAttributes */
         public function hasAttributes(): bool {}
@@ -1380,6 +1382,8 @@ namespace Dom
         public function querySelectorAll(string $selectors): NodeList {}
         public function closest(string $selectors): ?Element {}
         public function matches(string $selectors): bool {}
+
+        public string $innerHTML;
     }
 
     class HTMLElement extends Element
@@ -1657,6 +1661,31 @@ namespace Dom
 
         /** @implementation-alias DOMDocument::save */
         public function saveXmlFile(string $filename, int $options = 0): int|false {}
+    }
+
+    /**
+     * @not-serializable
+     * @strict-properties
+     */
+    final class TokenList implements IteratorAggregate, Countable
+    {
+        /** @implementation-alias Dom\Node::__construct */
+        private function __construct() {}
+
+        /** @readonly */
+        public int $length;
+        public function item(int $index): ?string {}
+        public function contains(string $token): bool {}
+        public function add(string ...$tokens): void {}
+        public function remove(string ...$tokens): void {}
+        public function toggle(string $token, ?bool $force = null): bool {}
+        public function replace(string $token, string $newToken): bool {}
+        public function supports(string $token): bool {}
+        public string $value;
+
+        public function count(): int {}
+
+        public function getIterator(): \Iterator {}
     }
 
 #ifdef LIBXML_XPATH_ENABLED

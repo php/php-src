@@ -71,7 +71,7 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
  * So in principle we could just ignore them outright.
  * However, step 10 in https://html.spec.whatwg.org/multipage/parsing.html#create-an-element-for-the-token (Date 2023-12-15)
  * requires us to have the declaration as an attribute available */
-static void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc)
+void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc)
 {
 	xmlNodePtr node = doc->children;
 	while (node != NULL) {
@@ -175,7 +175,7 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (UNEXPECTED(lxml_doc == NULL || lxml_doc == DOM_DOCUMENT_MALFORMED)) {
 		if (!EG(exception)) {
 			if (lxml_doc == DOM_DOCUMENT_MALFORMED) {
-				zend_throw_exception_ex(NULL, 0, "XML document is malformed");
+				php_dom_throw_error_with_message(SYNTAX_ERR, "XML fragment is not well-formed", true);
 			} else {
 				if (mode == DOM_LOAD_FILE) {
 					zend_throw_exception_ex(NULL, 0, "Cannot open file '%s'", source);
@@ -262,7 +262,7 @@ static zend_string *php_new_dom_dump_node_to_str_ex(xmlNodePtr node, int options
 		xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
 		xmlOutputBufferPtr out = xmlOutputBufferCreateIO(php_new_dom_write_smart_str, NULL, &str, handler);
 		if (EXPECTED(out != NULL)) {
-			status = dom_xml_serialize(ctxt, out, node, format);
+			status = dom_xml_serialize(ctxt, out, node, format, false);
 			status |= xmlOutputBufferFlush(out);
 			status |= xmlOutputBufferClose(out);
 		} else {
@@ -303,7 +303,7 @@ zend_long php_new_dom_dump_node_to_file(const char *filename, xmlDocPtr doc, xml
 	int status = -1;
 	xmlSaveCtxtPtr ctxt = xmlSaveToIO(out->writecallback, NULL, stream, encoding, XML_SAVE_AS_XML);
 	if (EXPECTED(ctxt != NULL)) {
-		status = dom_xml_serialize(ctxt, out, node, format);
+		status = dom_xml_serialize(ctxt, out, node, format, false);
 		status |= xmlOutputBufferFlush(out);
 		(void) xmlSaveClose(ctxt);
 	}

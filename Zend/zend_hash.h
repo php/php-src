@@ -245,6 +245,7 @@ static zend_always_inline bool zend_hash_index_exists(const HashTable *ht, zend_
 }
 
 /* traversing */
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos_ex(const HashTable *ht, HashPosition pos);
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
 
 ZEND_API zend_result   ZEND_FASTCALL zend_hash_move_forward_ex(HashTable *ht, HashPosition *pos);

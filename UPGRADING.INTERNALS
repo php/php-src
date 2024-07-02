@@ -92,6 +92,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * zend_is_true now returns bool rather than int. Note that on PHP 8 this has
   always returned 0 or 1, so conversion should be trivial.
 
+* Added zend_hash_get_current_pos_ex() variant of zend_hash_get_current_pos().
+
 ========================
 2. Build system changes
 ========================
@@ -136,6 +138,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_WAITPID has been removed.
    - Symbol HAVE_LIBPQ has been removed.
    - Symbols HAVE_LIBRT and HAVE_TIMER_CREATE removed.
+   - Symbols PHP_FPM_SYSTEMD, PHP_FPM_USER, and PHP_FPM_GROUP removed.
+   - Symbol PTHREADS has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).

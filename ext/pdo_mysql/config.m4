@@ -94,5 +94,5 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
   fi
 
-  PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
+  PHP_SUBST([PDO_MYSQL_SHARED_LIBADD])
 fi

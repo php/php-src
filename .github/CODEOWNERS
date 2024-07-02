@@ -22,7 +22,7 @@
 /ext/intl @devnexen
 /ext/json @bukka
 /ext/libxml @nielsdos
-/ext/mbstring @alexdowad
+/ext/mbstring @alexdowad @youkidearitai
 /ext/mysqlnd @SakiTakamachi
 /ext/odbc @NattyNarwhal
 /ext/opcache @dstogov @iluuu1994

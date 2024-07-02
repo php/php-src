@@ -3883,7 +3883,11 @@ ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /*
 			}
 		} else if (!(CG(compiler_options) & ZEND_COMPILE_IGNORE_USER_FUNCTIONS)){
 			if (zend_execute_ex == execute_ex) {
-				return ZEND_DO_UCALL;
+				if (!(fbc->common.fn_flags & ZEND_ACC_DEPRECATED)) {
+					return ZEND_DO_UCALL;
+				} else {
+					return ZEND_DO_FCALL_BY_NAME;
+				}
 			}
 		}
 	} else if (zend_execute_ex == execute_ex &&
@@ -8047,6 +8051,16 @@ static void zend_compile_func_decl(znode *result, zend_ast *ast, bool toplevel) 
 		if (override_attribute) {
 			op_array->fn_flags |= ZEND_ACC_OVERRIDE;
 		}
+
+		zend_attribute *deprecated_attribute = zend_get_attribute_str(
+			op_array->attributes,
+			"deprecated",
+			sizeof("deprecated")-1
+		);
+
+		if (deprecated_attribute) {
+			op_array->fn_flags |= ZEND_ACC_DEPRECATED;
+		}
 	}
 
 	/* Do not leak the class scope into free standing functions, even if they are dynamically
@@ -8304,6 +8318,12 @@ static void zend_compile_class_const_decl(zend_ast *ast, uint32_t flags, zend_as
 
 		if (attr_ast) {
 			zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
+
+			zend_attribute *deprecated = zend_get_attribute_str(c->attributes, "deprecated", sizeof("deprecated")-1);
+
+			if (deprecated) {
+				ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+			}
 		}
 	}
 }
@@ -8733,6 +8753,12 @@ static void zend_compile_enum_case(zend_ast *ast)
 	zend_ast *attr_ast = ast->child[3];
 	if (attr_ast) {
 		zend_compile_attributes(&c->attributes, attr_ast, 0, ZEND_ATTRIBUTE_TARGET_CLASS_CONST, 0);
+
+		zend_attribute *deprecated = zend_get_attribute_str(c->attributes, "deprecated", sizeof("deprecated")-1);
+
+		if (deprecated) {
+			ZEND_CLASS_CONST_FLAGS(c) |= ZEND_ACC_DEPRECATED;
+		}
 	}
 }
 

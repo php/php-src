@@ -4773,7 +4773,7 @@ static int zend_jit_inc_dec(zend_jit_ctx *jit, const zend_op *opline, uint32_t o
 		}
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
 		    opline->result_type != IS_UNUSED) {
-			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
+			if (opline->opcode == ZEND_PRE_INC) {
 				if (Z_MODE(res_addr) == IS_REG) {
 					jit_set_Z_DVAL(jit, res_addr, ir_CONST_DOUBLE((double)ZEND_LONG_MAX + 1.0));
 				} else {
@@ -9750,7 +9750,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 	jit_SET_EX_OPLINE(jit, opline);
 
-	if (opline->opcode == ZEND_DO_FCALL) {
+	if (opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		if (!func) {
 			if (trace) {
 				uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
@@ -9787,7 +9787,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		}
 	}
 
-	if (opline->opcode == ZEND_DO_FCALL) {
+	if (opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		if (!func) {
 			if (!trace) {
 				ir_ref if_deprecated, ret;
@@ -10139,48 +10139,6 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	 && (opline->opcode != ZEND_DO_UCALL)) {
 		if (!func && (opline->opcode != ZEND_DO_ICALL)) {
 			ir_IF_FALSE(if_user);
-		}
-		if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-			if (!func) {
-				if (trace) {
-					uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-
-					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-					if (!exit_addr) {
-						return 0;
-					}
-					ZEND_ASSERT(func_ref);
-					ir_GUARD_NOT(
-						ir_AND_U32(
-							ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-							ir_CONST_U32(ZEND_ACC_DEPRECATED)),
-						ir_CONST_ADDR(exit_addr));
-				} else {
-					ir_ref if_deprecated, ret;
-
-					if_deprecated = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)));
-					ir_IF_TRUE_cold(if_deprecated);
-
-					if (GCC_GLOBAL_REGS) {
-						ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper));
-					} else {
-						ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper), rx);
-					}
-					ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
-					ir_MERGE_WITH_EMPTY_FALSE(if_deprecated);
-				}
-			} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
-				ir_ref ret;
-
-				if (GCC_GLOBAL_REGS) {
-					ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper));
-				} else {
-					ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper), rx);
-				}
-				ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
-			}
 		}
 
 		// JIT: EG(current_execute_data) = execute_data;
@@ -12186,8 +12144,7 @@ static int zend_jit_fetch_dim_read(zend_jit_ctx       *jit,
 			zend_jit_trace_stack *stack = JIT_G(current_frame)->stack;
 			int32_t exit_point;
 
-			if (opline->opcode != ZEND_FETCH_LIST_R
-			 && (opline->op1_type & (IS_VAR|IS_TMP_VAR))
+			if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))
 			 && !op1_avoid_refcounting) {
 				flags |= ZEND_JIT_EXIT_FREE_OP1;
 			}
@@ -13937,8 +13894,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				jit_SET_EX_OPLINE(jit, opline);
 
 				if (opline->opcode != ZEND_FETCH_OBJ_IS) {
-					if (((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info)
-							|| Z_MODE(res_addr) == IS_REG) {
+					if (Z_MODE(res_addr) == IS_REG) {
 						ir_ref val_addr = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_obj_r_dynamic_ex),
 							obj_ref, offset_ref);
 						ir_END_PHI_list(end_values, val_addr);
@@ -13948,8 +13904,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 						ir_END_list(end_inputs);
 					}
 				} else {
-					if (((res_info & MAY_BE_GUARD) && JIT_G(current_frame) && prop_info)
-							|| Z_MODE(res_addr) == IS_REG) {
+					if (Z_MODE(res_addr) == IS_REG) {
 						ir_ref val_addr = ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_jit_fetch_obj_is_dynamic_ex),
 							obj_ref, offset_ref);
 						ir_END_PHI_list(end_values, val_addr);

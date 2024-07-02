@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0alpha1
+?? ??? ????, PHP 8.4.0alpha2
+
+
+04 Jul 2024, PHP 8.4.0alpha1
 
 - BCMath:
   . [RFC] Add bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
@@ -32,6 +35,8 @@ PHP                                                                        NEWS
     (Julien Voisin)
   . Fixed bug GH-11928 (The --enable-re2c-cgoto doesn't add the -g flag).
     (Peter Kokot)
+  . Added the #[\Deprecated] attribute. (beberlei, timwolla)
+  . Fixed GH-11389 (Allow suspending fibers in destructors). (Arnaud, trowski)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
@@ -269,6 +274,7 @@ PHP                                                                        NEWS
     macOs and FreeBSD. (David Carlier)
   . Added SO_LINGER_SEC for macOs, true equivalent of SO_LINGER in other platforms.
     (David Carlier)
+  . Add close-on-exec on socket created with socket_accept on unixes. (David Carlier)
 
 - SNMP:
   . Removed the deprecated inet_ntoa call support. (David Carlier)

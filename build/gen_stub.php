@@ -1583,6 +1583,13 @@ class FuncInfo {
             $flags[] = "ZEND_ACC_DEPRECATED";
         }
 
+        foreach ($this->attributes as $attr) {
+            if ($attr->class === "Deprecated") {
+                $flags[] = "ZEND_ACC_DEPRECATED";
+                break;
+            }
+        }
+
         $php82AndAboveFlags = $flags;
         if ($this->isMethod() === false && $this->supportsCompileTimeEval) {
             $php82AndAboveFlags[] = "ZEND_ACC_COMPILE_TIME_EVAL";
@@ -2865,6 +2872,13 @@ class ConstInfo extends VariableLike
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
         }
 
+        foreach ($this->attributes as $attr) {
+            if ($attr->class === "Deprecated") {
+                $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_DEPRECATED", PHP_80_VERSION_ID);
+                break;
+            }
+        }
+
         if ($this->flags & Modifiers::FINAL) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_FINAL", PHP_81_VERSION_ID);
         }
@@ -3103,10 +3117,17 @@ class AttributeInfo {
     /** @param array<string, ConstInfo> $allConstInfos */
     public function generateCode(string $invocation, string $nameSuffix, array $allConstInfos, ?int $phpVersionIdMinimumCompatibility): string {
         $php82MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_82_VERSION_ID;
+        $php84MinimumCompatibility = $phpVersionIdMinimumCompatibility === null || $phpVersionIdMinimumCompatibility >= PHP_84_VERSION_ID;
         /* see ZEND_KNOWN_STRINGS in Zend/strings.h */
-        $knowns = [];
+        $knowns = [
+            "message" => "ZEND_STR_MESSAGE",
+        ];
         if ($php82MinimumCompatibility) {
             $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
+        }
+        if ($php84MinimumCompatibility) {
+            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED";
+            $knowns["since"] = "ZEND_STR_SINCE";
         }
 
         $code = "\n";
@@ -3124,7 +3145,11 @@ class AttributeInfo {
             $code .= $value->initializeZval($zvalName);
             $code .= "\tZVAL_COPY_VALUE(&attribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].value, &$zvalName);\n";
             if ($arg->name) {
-                $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+                if (isset($knowns[$arg->name->name])) {
+                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = ZSTR_KNOWN({$knowns[$arg->name->name]});\n";
+                } else {
+                    $code .= "\tattribute_{$escapedAttributeName}_{$nameSuffix}->args[$i].name = zend_string_init_interned(\"{$arg->name->name}\", sizeof(\"{$arg->name->name}\") - 1, 1);\n";
+                }
             }
         }
         return $code;

@@ -50,7 +50,6 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-    AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
       jit/ir/ir_cfg.c jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
       jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
@@ -93,9 +92,9 @@ if test "$PHP_OPCACHE" != "no"; then
       ])
     ])
 
-    PHP_SUBST(IR_TARGET)
-    PHP_SUBST(DASM_FLAGS)
-    PHP_SUBST(DASM_ARCH)
+    PHP_SUBST([IR_TARGET])
+    PHP_SUBST([DASM_FLAGS])
+    PHP_SUBST([DASM_ARCH])
 
     JIT_CFLAGS="-I@ext_builddir@/jit/ir -D${IR_TARGET} -DIR_PHP"
     if test "$ZEND_DEBUG" = "yes"; then
@@ -350,5 +349,5 @@ int main(void) {
     PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
     PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
   fi
-  PHP_SUBST(OPCACHE_SHARED_LIBADD)
+  PHP_SUBST([OPCACHE_SHARED_LIBADD])
 fi

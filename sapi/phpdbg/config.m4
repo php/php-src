@@ -67,8 +67,6 @@ if test "$PHP_PHPDBG" != "no"; then
     fi
   ],,[#include <linux/userfaultfd.h>])
 
-  PHP_SUBST(PHPDBG_EXTRA_LIBS)
-
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag], [$abs_srcdir/sapi/phpdbg], [$abs_builddir/sapi/phpdbg])
   PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
 
@@ -94,13 +92,13 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
-                \-DPHPDBG_SHARED \
          -o \$(BUILD_SHARED)"
 
-  PHP_SUBST(BUILD_BINARY)
-  PHP_SUBST(BUILD_SHARED)
-  PHP_SUBST(BUILD_PHPDBG)
-  PHP_SUBST(BUILD_PHPDBG_SHARED)
+  PHP_SUBST([PHPDBG_EXTRA_LIBS])
+  PHP_SUBST([BUILD_BINARY])
+  PHP_SUBST([BUILD_SHARED])
+  PHP_SUBST([BUILD_PHPDBG])
+  PHP_SUBST([BUILD_PHPDBG_SHARED])
 
   PHP_OUTPUT(sapi/phpdbg/phpdbg.1)
 fi

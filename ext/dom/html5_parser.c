@@ -99,6 +99,7 @@ static zend_always_inline xmlNodePtr lexbor_libxml2_bridge_new_text_node_fast(xm
 static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     lxb_dom_node_t *start_node,
     xmlDocPtr lxml_doc,
+    xmlNodePtr root,
     bool compact_text_nodes,
     bool create_default_ns,
     php_dom_libxml_ns_mapper *ns_mapper
@@ -114,7 +115,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     lexbor_array_obj_init(&work_list, WORK_LIST_INIT_SIZE, sizeof(work_list_item));
 
     for (lxb_dom_node_t *node = start_node; node != NULL; node = node->prev) {
-        lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, (xmlNodePtr) lxml_doc, NULL);
+        lexbor_libxml2_bridge_work_list_item_push(&work_list, node, LXB_NS__UNDEF, root, NULL);
     }
 
     work_list_item *current_stack_item;
@@ -316,6 +317,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
         lxb_dom_interface_node(document)->last_child,
         lxml_doc,
+        (xmlNodePtr) lxml_doc,
         compact_text_nodes,
         create_default_ns,
         ns_mapper
@@ -325,6 +327,35 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
         return status;
     }
     *doc_out = lxml_doc;
+    return LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
+}
+
+lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
+    lxb_dom_node_t *start_node,
+    xmlDocPtr lxml_doc,
+    xmlNodePtr *fragment_out,
+    bool compact_text_nodes,
+    bool create_default_ns,
+    php_dom_libxml_ns_mapper *ns_mapper
+)
+{
+    xmlNodePtr fragment = xmlNewDocFragment(lxml_doc);
+    if (UNEXPECTED(fragment == NULL)) {
+        return LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+    }
+    lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert(
+        start_node,
+        lxml_doc,
+        fragment,
+        compact_text_nodes,
+        create_default_ns,
+        ns_mapper
+    );
+    if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
+        xmlFreeNode(fragment);
+        return status;
+    }
+    *fragment_out = fragment;
     return LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
 }
 
@@ -376,12 +407,22 @@ void lexbor_libxml2_bridge_report_errors(
     *error_index_offset_tree = index;
 }
 
+static php_libxml_quirks_mode dom_translate_quirks_mode(lxb_dom_document_cmode_t quirks_mode)
+{
+	switch (quirks_mode) {
+		case LXB_DOM_DOCUMENT_CMODE_NO_QUIRKS: return PHP_LIBXML_NO_QUIRKS;
+		case LXB_DOM_DOCUMENT_CMODE_LIMITED_QUIRKS: return PHP_LIBXML_LIMITED_QUIRKS;
+		case LXB_DOM_DOCUMENT_CMODE_QUIRKS: return PHP_LIBXML_QUIRKS;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 void lexbor_libxml2_bridge_copy_observations(lxb_html_tree_t *tree, lexbor_libxml2_bridge_extracted_observations *observations)
 {
     observations->has_explicit_html_tag = tree->has_explicit_html_tag;
     observations->has_explicit_head_tag = tree->has_explicit_head_tag;
     observations->has_explicit_body_tag = tree->has_explicit_body_tag;
-    observations->quirks_mode = lxb_dom_interface_document(tree->document)->compat_mode == LXB_DOM_DOCUMENT_CMODE_QUIRKS;
+    observations->quirks_mode = dom_translate_quirks_mode(lxb_dom_interface_document(tree->document)->compat_mode);
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

@@ -72,10 +72,10 @@ PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTR
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
 
 dnl Allow version values to be used in Makefile.
-PHP_SUBST(PHP_MAJOR_VERSION)
-PHP_SUBST(PHP_MINOR_VERSION)
-PHP_SUBST(PHP_RELEASE_VERSION)
-PHP_SUBST(PHP_EXTRA_VERSION)
+PHP_SUBST([PHP_MAJOR_VERSION])
+PHP_SUBST([PHP_MINOR_VERSION])
+PHP_SUBST([PHP_RELEASE_VERSION])
+PHP_SUBST([PHP_EXTRA_VERSION])
 
 dnl Define where extension directories are located in the configure context.
 AC_DEFUN([PHP_EXT_BUILDDIR],[$config_m4_dir])dnl
@@ -368,6 +368,10 @@ AC_SEARCH_LIBS([Pgrab], [proc])
 
 dnl Haiku does not have network api in libc.
 AC_SEARCH_LIBS([setsockopt], [network])
+
+dnl Check for openpty. It may require linking against libutil or libbsd.
+AC_CHECK_FUNCS([openpty],,
+  [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
 
 dnl Then headers.
 dnl ----------------------------------------------------------------------------
@@ -780,10 +784,6 @@ AS_VAR_IF([PHP_VALGRIND], [no],,
       AC_DEFINE([HAVE_VALGRIND], [1],
         [Define to 1 if Valgrind is enabled and supported.])])])
 
-dnl Check for openpty. It may require linking against libutil or libbsd.
-AC_CHECK_FUNCS([openpty],,
-  [AC_SEARCH_LIBS([openpty], [util bsd], [AC_DEFINE([HAVE_OPENPTY], [1])])])
-
 dnl General settings.
 dnl ----------------------------------------------------------------------------
 PHP_CONFIGURE_PART(General settings)
@@ -1169,9 +1169,7 @@ PHP_HELP_SEPARATOR([PEAR:])
 PHP_CONFIGURE_PART(Configuring PEAR)
 
 dnl If CLI is disabled disable PEAR.
-if test "$PHP_CLI" = "no"; then
-  with_pear=no
-fi
+AS_VAR_IF([PHP_CLI], [no], [with_pear=no])
 
 PHP_ARG_WITH([pear],
   [whether to install PEAR],
@@ -1180,34 +1178,29 @@ PHP_ARG_WITH([pear],
   [no],
   [yes])
 
-if test "$PHP_PEAR" != "no"; then
-
-  dnl PEAR dependencies.
-  if test "$PHP_XML" = "no"; then
-    pear_error_msg="$pear_error_msg
-                    PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
-  fi
-
-  if test "$pear_error_msg"; then
-    AC_MSG_ERROR([$pear_error_msg])
-  fi
-
+AS_VAR_IF([PHP_PEAR], [no],, [
   AC_MSG_WARN([The --with-pear option is deprecated])
 
-  install_pear="install-pear"
-  PEAR_INSTALLDIR=$PHP_PEAR
+  dnl PEAR dependencies.
+  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR([m4_normalize([
+    PEAR requires XML to be enabled. Add '--enable-xml' to the configure line,
+    or disable PEAR (--without-pear).
+  ])])])
 
-  if test "$PHP_PEAR" = "yes"; then
-    case $PHP_LAYOUT in
-      GNU) PEAR_INSTALLDIR=$datadir/pear;;
-      *)   PEAR_INSTALLDIR=$libdir/php;;
-    esac
-  fi
+  install_pear=install-pear
+
+  AS_VAR_IF([PHP_PEAR], [yes],
+    [AS_CASE([$PHP_LAYOUT],
+      [GNU], [PEAR_INSTALLDIR=$datadir/pear],
+      [PEAR_INSTALLDIR=$libdir/php])],
+    [PEAR_INSTALLDIR=$PHP_PEAR])
 
   PHP_SUBST([PEAR_INSTALLDIR])
   PHP_ADD_BUILD_DIR([pear])
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
-fi
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/pear/Makefile.frag],
+    [$abs_srcdir/pear],
+    [pear])
+])
 
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
@@ -1438,21 +1431,24 @@ exec_prefix=$old_exec_prefix
 libdir=$old_libdir
 datadir=$old_datadir
 
-AC_SUBST(INCLUDE_PATH)
-AC_SUBST(EXPANDED_PEAR_INSTALLDIR)
-AC_SUBST(EXPANDED_EXTENSION_DIR)
-AC_SUBST(EXPANDED_BINDIR)
-AC_SUBST(EXPANDED_SBINDIR)
-AC_SUBST(EXPANDED_MANDIR)
-AC_SUBST(EXPANDED_LIBDIR)
-AC_SUBST(EXPANDED_DATADIR)
-AC_SUBST(EXPANDED_SYSCONFDIR)
-AC_SUBST(EXPANDED_LOCALSTATEDIR)
-AC_SUBST(EXPANDED_PHP_CONFIG_FILE_PATH)
-AC_SUBST(EXPANDED_PHP_CONFIG_FILE_SCAN_DIR)
+AC_SUBST([INCLUDE_PATH])
+AC_SUBST([EXPANDED_PEAR_INSTALLDIR])
+AC_SUBST([EXPANDED_EXTENSION_DIR])
+AC_SUBST([EXPANDED_BINDIR])
+AC_SUBST([EXPANDED_SBINDIR])
+AC_SUBST([EXPANDED_MANDIR])
+AC_SUBST([EXPANDED_LIBDIR])
+AC_SUBST([EXPANDED_DATADIR])
+AC_SUBST([EXPANDED_SYSCONFDIR])
+AC_SUBST([EXPANDED_LOCALSTATEDIR])
+AC_SUBST([EXPANDED_PHP_CONFIG_FILE_PATH])
+AC_SUBST([EXPANDED_PHP_CONFIG_FILE_SCAN_DIR])
 AC_SUBST([PHP_INSTALLED_SAPIS])
 AC_SUBST([SAPI_LIBNAME_SHARED])
 AC_SUBST([SAPI_LIBNAME_STATIC])
+AC_SUBST([PHP_VERSION])
+AC_SUBST([PHP_VERSION_ID])
+AC_SUBST([PHP_LDFLAGS])
 
 PHP_UTILIZE_RPATHS
 
@@ -1479,66 +1475,56 @@ if test -n "${PHP_BUILD_ARCH}"; then
   AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
 fi
 
-PHP_SUBST(PHP_FASTCGI_OBJS)
-PHP_SUBST(PHP_SAPI_OBJS)
-PHP_SUBST(PHP_BINARY_OBJS)
-PHP_SUBST(PHP_GLOBAL_OBJS)
-
-PHP_SUBST(PHP_BINARIES)
-PHP_SUBST(PHP_MODULES)
-PHP_SUBST(PHP_ZEND_EX)
-
-PHP_SUBST_OLD(abs_builddir)
-PHP_SUBST_OLD(abs_srcdir)
-
-PHP_SUBST(bindir)
-PHP_SUBST(sbindir)
-PHP_SUBST(exec_prefix)
-PHP_SUBST_OLD(program_prefix)
-PHP_SUBST_OLD(program_suffix)
-PHP_SUBST(includedir)
-PHP_SUBST_OLD(orig_libdir)
-PHP_SUBST(libdir)
-PHP_SUBST(mandir)
-PHP_SUBST(phptempdir)
-PHP_SUBST(prefix)
-PHP_SUBST(localstatedir)
-PHP_SUBST(datadir)
-PHP_SUBST(datarootdir)
-PHP_SUBST(sysconfdir)
-
-PHP_SUBST(EXEEXT)
-PHP_SUBST(CC)
-PHP_SUBST(BUILD_CC)
-PHP_SUBST(CFLAGS)
-PHP_SUBST(CFLAGS_CLEAN)
-PHP_SUBST(CPP)
-PHP_SUBST(CPPFLAGS)
-PHP_SUBST(CXX)
-PHP_SUBST(CXXFLAGS)
-PHP_SUBST(CXXFLAGS_CLEAN)
-PHP_SUBST_OLD(DEBUG_CFLAGS)
-PHP_SUBST_OLD(EXTENSION_DIR)
-PHP_SUBST_OLD(EXTRA_LDFLAGS)
-PHP_SUBST_OLD(EXTRA_LDFLAGS_PROGRAM)
-PHP_SUBST_OLD(EXTRA_LIBS)
-PHP_SUBST_OLD(ZEND_EXTRA_LIBS)
-PHP_SUBST_OLD(INCLUDES)
-PHP_SUBST_OLD(EXTRA_INCLUDES)
-PHP_SUBST_OLD(INSTALL_IT)
-PHP_SUBST(LIBTOOL)
-PHP_SUBST(LN_S)
-PHP_SUBST_OLD(NATIVE_RPATHS)
-PHP_SUBST_OLD(PHP_LDFLAGS)
-PHP_SUBST(OVERALL_TARGET)
-PHP_SUBST(PHP_RPATHS)
-PHP_SUBST(PHP_SAPI)
-PHP_SUBST_OLD(PHP_VERSION)
-PHP_SUBST_OLD(PHP_VERSION_ID)
-PHP_SUBST(SHELL)
-PHP_SUBST(PHP_FRAMEWORKS)
-PHP_SUBST(PHP_FRAMEWORKPATH)
-PHP_SUBST(INSTALL_HEADERS)
+PHP_SUBST([PHP_FASTCGI_OBJS])
+PHP_SUBST([PHP_SAPI_OBJS])
+PHP_SUBST([PHP_BINARY_OBJS])
+PHP_SUBST([PHP_GLOBAL_OBJS])
+PHP_SUBST([PHP_BINARIES])
+PHP_SUBST([PHP_MODULES])
+PHP_SUBST([PHP_ZEND_EX])
+PHP_SUBST([bindir])
+PHP_SUBST([sbindir])
+PHP_SUBST([exec_prefix])
+PHP_SUBST_OLD([program_prefix])
+PHP_SUBST_OLD([program_suffix])
+PHP_SUBST([includedir])
+PHP_SUBST_OLD([orig_libdir])
+PHP_SUBST([libdir])
+PHP_SUBST([mandir])
+PHP_SUBST([phptempdir])
+PHP_SUBST([prefix])
+PHP_SUBST([localstatedir])
+PHP_SUBST([datadir])
+PHP_SUBST([datarootdir])
+PHP_SUBST([sysconfdir])
+PHP_SUBST([EXEEXT])
+PHP_SUBST([CC])
+PHP_SUBST([BUILD_CC])
+PHP_SUBST([CFLAGS])
+PHP_SUBST([CFLAGS_CLEAN])
+PHP_SUBST([CPP])
+PHP_SUBST([CPPFLAGS])
+PHP_SUBST([CXX])
+PHP_SUBST([CXXFLAGS])
+PHP_SUBST([CXXFLAGS_CLEAN])
+PHP_SUBST_OLD([EXTENSION_DIR])
+PHP_SUBST([EXTRA_LDFLAGS])
+PHP_SUBST([EXTRA_LDFLAGS_PROGRAM])
+PHP_SUBST_OLD([EXTRA_LIBS])
+PHP_SUBST([ZEND_EXTRA_LIBS])
+PHP_SUBST([INCLUDES])
+PHP_SUBST([EXTRA_INCLUDES])
+PHP_SUBST([INSTALL_IT])
+PHP_SUBST([LIBTOOL])
+PHP_SUBST([LN_S])
+PHP_SUBST([NATIVE_RPATHS])
+PHP_SUBST([OVERALL_TARGET])
+PHP_SUBST([PHP_RPATHS])
+PHP_SUBST([PHP_SAPI])
+PHP_SUBST([SHELL])
+PHP_SUBST([PHP_FRAMEWORKS])
+PHP_SUBST([PHP_FRAMEWORKPATH])
+PHP_SUBST([INSTALL_HEADERS])
 
 old_CC=$CC
 
@@ -1620,7 +1606,7 @@ PHP_CONFIGURE_PART(Configuring libtool)
 
 dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
 dnl See https://github.com/php/php-src/pull/3017
-AC_SUBST(AR_FLAGS, [cr])
+AC_SUBST([AR_FLAGS], [cr])
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
 dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
@@ -1658,9 +1644,9 @@ fi;
 all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
 install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
 
-PHP_SUBST(all_targets)
-PHP_SUBST(install_targets)
-PHP_SUBST(install_binary_targets)
+PHP_SUBST([all_targets])
+PHP_SUBST([install_targets])
+PHP_SUBST([install_binary_targets])
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ main/ main/streams/])
 PHP_INSTALL_HEADERS([Zend/Optimizer], [ \

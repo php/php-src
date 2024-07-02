@@ -133,7 +133,7 @@ int main(void) {
     CFLAGS="$save_CFLAGS"
 
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
-    PHP_SUBST(ICONV_SHARED_LIBADD)
+    PHP_SUBST([ICONV_SHARED_LIBADD])
     PHP_INSTALL_HEADERS([ext/iconv], [php_iconv.h])
   else
     AC_MSG_ERROR(Please reinstall the iconv library.)

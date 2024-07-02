@@ -30,6 +30,7 @@
 #include "internal_helpers.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
+#include "token_list.h"
 #include "zend_interfaces.h"
 #include "lexbor/lexbor/core/types.h"
 #include "lexbor/lexbor/core/lexbor.h"
@@ -81,6 +82,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_modern_entityreference_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_processinginstruction_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_processinginstruction_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_abstract_base_document_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_token_list_class_entry;
 #ifdef LIBXML_XPATH_ENABLED
 PHP_DOM_EXPORT zend_class_entry *dom_xpath_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_modern_xpath_class_entry;
@@ -97,6 +99,7 @@ static zend_object_handlers dom_modern_nodelist_object_handlers;
 static zend_object_handlers dom_html_collection_object_handlers;
 static zend_object_handlers dom_object_namespace_node_handlers;
 static zend_object_handlers dom_modern_domimplementation_object_handlers;
+static zend_object_handlers dom_token_list_object_handlers;
 #ifdef LIBXML_XPATH_ENABLED
 zend_object_handlers dom_xpath_object_handlers;
 #endif
@@ -132,6 +135,7 @@ static HashTable dom_modern_entity_prop_handlers;
 static HashTable dom_processinginstruction_prop_handlers;
 static HashTable dom_modern_processinginstruction_prop_handlers;
 static HashTable dom_namespace_node_prop_handlers;
+static HashTable dom_token_list_prop_handlers;
 #ifdef LIBXML_XPATH_ENABLED
 static HashTable dom_xpath_prop_handlers;
 #endif
@@ -633,6 +637,18 @@ static zend_object *dom_object_namespace_node_clone_obj(zend_object *zobject)
 	return clone;
 }
 
+static zend_object *dom_token_list_new(zend_class_entry *class_type)
+{
+	dom_token_list_object *intern = zend_object_alloc(sizeof(*intern), class_type);
+
+	intern->dom.prop_handler = &dom_token_list_prop_handlers;
+
+	zend_object_std_init(&intern->dom.std, class_type);
+	object_properties_init(&intern->dom.std, class_type);
+
+	return &intern->dom.std;
+}
+
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_CONFLICTS("domxml")
@@ -658,7 +674,6 @@ zend_module_entry dom_module_entry = { /* {{{ */
 ZEND_GET_MODULE(dom)
 #endif
 
-void dom_objects_free_storage(zend_object *object);
 void dom_nnodemap_objects_free_storage(zend_object *object);
 static zval *dom_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
 static int dom_nodelist_has_dimension(zend_object *object, zval *member, int check_empty);
@@ -731,6 +746,16 @@ PHP_MINIT_FUNCTION(dom)
 	dom_object_namespace_node_handlers.offset = XtOffsetOf(dom_object_namespace_node, dom.std);
 	dom_object_namespace_node_handlers.free_obj = dom_object_namespace_node_free_storage;
 	dom_object_namespace_node_handlers.clone_obj = dom_object_namespace_node_clone_obj;
+
+	memcpy(&dom_token_list_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
+	dom_token_list_object_handlers.offset = XtOffsetOf(dom_token_list_object, dom.std);
+	dom_token_list_object_handlers.free_obj = dom_token_list_free_obj;
+	/* The Web IDL (Web Interface Description Language - https://webidl.spec.whatwg.org) has the [SameObject] constraint
+	 * for this object, which is incompatible with cloning because it imposes that there is only one instance
+	 * per parent object. */
+	dom_token_list_object_handlers.clone_obj = NULL;
+	dom_token_list_object_handlers.read_dimension = dom_token_list_read_dimension;
+	dom_token_list_object_handlers.has_dimension = dom_token_list_has_dimension;
 
 	zend_hash_init(&classes, 0, NULL, NULL, true);
 
@@ -1033,12 +1058,14 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "tagName", dom_element_tag_name_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "id", dom_element_id_read, dom_element_id_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "className", dom_element_class_name_read, dom_element_class_name_write);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "classList", dom_element_class_list_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "attributes", dom_node_attributes_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "firstElementChild", dom_parent_node_first_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "lastElementChild", dom_parent_node_last_element_child_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "previousElementSibling", dom_node_previous_element_sibling_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "nextElementSibling", dom_node_next_element_sibling_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "innerHTML", dom_element_inner_html_read, dom_element_inner_html_write);
 	zend_hash_merge(&dom_modern_element_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_element_prop_handlers, "textContent", dom_node_text_content_read, dom_node_text_content_write);
 	zend_hash_add_new_ptr(&classes, dom_modern_element_class_entry->name, &dom_modern_element_prop_handlers);
@@ -1226,6 +1253,16 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_new_ptr(&classes, dom_modern_xpath_class_entry->name, &dom_xpath_prop_handlers);
 #endif
 
+	dom_token_list_class_entry = register_class_Dom_TokenList(zend_ce_aggregate, zend_ce_countable);
+	dom_token_list_class_entry->create_object = dom_token_list_new;
+	dom_token_list_class_entry->default_object_handlers = &dom_token_list_object_handlers;
+	dom_token_list_class_entry->get_iterator = dom_token_list_get_iterator;
+
+	zend_hash_init(&dom_token_list_prop_handlers, 0, NULL, NULL, true);
+	DOM_REGISTER_PROP_HANDLER(&dom_token_list_prop_handlers, "length", dom_token_list_length_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_token_list_prop_handlers, "value", dom_token_list_value_read, dom_token_list_value_write);
+	zend_hash_add_new_ptr(&classes, dom_token_list_class_entry->name, &dom_token_list_prop_handlers);
+
 	register_php_dom_symbols(module_number);
 
 	php_libxml_register_export(dom_node_class_entry, php_dom_export_node);
@@ -1291,6 +1328,7 @@ PHP_MSHUTDOWN_FUNCTION(dom) /* {{{ */
 	zend_hash_destroy(&dom_modern_entity_prop_handlers);
 	zend_hash_destroy(&dom_processinginstruction_prop_handlers);
 	zend_hash_destroy(&dom_modern_processinginstruction_prop_handlers);
+	zend_hash_destroy(&dom_token_list_prop_handlers);
 #ifdef LIBXML_XPATH_ENABLED
 	zend_hash_destroy(&dom_xpath_prop_handlers);
 #endif
