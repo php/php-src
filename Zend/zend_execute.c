@@ -3122,11 +3122,13 @@ fetch_from_array:
 				/* We need to seperate objects returned by reference */
 				SEPARATE_ZVAL(result);
 			}
-		} else if (UNEXPECTED(Z_TYPE_P(result) != IS_INDIRECT && Z_TYPE_P(result) != IS_OBJECT)) {
-			/* BC Layer for ArrayAccess */
-			/* "Create" a ref to the value even if it is not to have BC behaviour */
-			ZVAL_MAKE_REF(result);
 		}
+		//???Do we need to make a ref for ArrayAccess non-sense values?
+		//???else if (UNEXPECTED(Z_TYPE_P(result) != IS_INDIRECT && Z_TYPE_P(result) != IS_OBJECT)) {
+		//???	/* BC Layer for ArrayAccess */
+		//???	/* "Create" a ref to the value even if it is not to have BC behaviour */
+		//???	ZVAL_MAKE_REF(result);
+		//???}
 		if (UNEXPECTED(EG(exception))) {
 			ZVAL_UNDEF(result);
 		}
