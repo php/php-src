@@ -22,7 +22,7 @@ fi
 
 AC_MSG_CHECKING(for CLI build)
 if test "$PHP_CLI" != "no"; then
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cli/Makefile.frag])
 
   dnl Set filename.
   SAPI_CLI_PATH=sapi/cli/php

@@ -160,13 +160,16 @@ EOF
 ])
 
 dnl
-dnl PHP_ADD_MAKEFILE_FRAGMENT([srcfile [, ext_srcdir [, ext_builddir]]])
+dnl PHP_ADD_MAKEFILE_FRAGMENT([makefile [, srcdir [, builddir]]])
 dnl
 dnl Processes a file called Makefile.frag in the source directory of the most
 dnl recently added extension. $(srcdir) and $(builddir) are substituted with the
 dnl proper paths. Can be used to supply custom rules and/or additional targets.
+dnl For extensions, call this macro after the PHP_NEW_EXTENSION to get these
+dnl variables substituted automatically, elsewhere pass the Makefile path
+dnl "makefile" and optionally adjust "srcdir" and "builddir".
 dnl
-AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT],[
+AC_DEFUN([PHP_ADD_MAKEFILE_FRAGMENT], [dnl
   ifelse($1,,src=$ext_srcdir/Makefile.frag,src=$1)
   ifelse($2,,ac_srcdir=$ext_srcdir,ac_srcdir=$2)
   ifelse($3,,ac_builddir=$ext_builddir,ac_builddir=$3)
