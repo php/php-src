@@ -750,8 +750,9 @@ PHP_MINIT_FUNCTION(dom)
 	memcpy(&dom_token_list_object_handlers, &dom_object_handlers, sizeof(zend_object_handlers));
 	dom_token_list_object_handlers.offset = XtOffsetOf(dom_token_list_object, dom.std);
 	dom_token_list_object_handlers.free_obj = dom_token_list_free_obj;
-	/* The IDL has the [SameObject] constraint, which is incompatible with cloning because it imposes that there is only
-	 * one instance per parent object. */
+	/* The Web IDL (Web Interface Description Language - https://webidl.spec.whatwg.org) has the [SameObject] constraint
+	 * for this object, which is incompatible with cloning because it imposes that there is only one instance
+	 * per parent object. */
 	dom_token_list_object_handlers.clone_obj = NULL;
 	dom_token_list_object_handlers.read_dimension = dom_token_list_read_dimension;
 	dom_token_list_object_handlers.has_dimension = dom_token_list_has_dimension;

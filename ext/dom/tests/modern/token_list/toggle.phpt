@@ -45,6 +45,8 @@ var_dump($list->toggle("C"));
 
 echo $dom->saveXML(), "\n";
 
+echo "--- Toggle E ---\n";
+
 $list->value = 'E';
 $list->toggle('E');
 
@@ -76,5 +78,6 @@ bool(true)
 bool(false)
 <?xml version="1.0" encoding="UTF-8"?>
 <root class="D"/>
+--- Toggle E ---
 <?xml version="1.0" encoding="UTF-8"?>
 <root class=""/>

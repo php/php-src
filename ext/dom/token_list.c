@@ -257,7 +257,20 @@ static void dom_token_list_item_read(dom_token_list_object *token_list, zval *re
 		ZVAL_STR_COPY(retval, str_index);
 	} else {
 		/* Not an out of bounds ValueError, but NULL, as according to spec.
-		 * This was a design choice to allow for constructs like `item(x) ?? ...` */
+		 * This design choice allows for constructs like `item(x) ?? ...`
+		 *
+		 * In particular:
+		 * https://dom.spec.whatwg.org/#interface-domtokenlist states DOMTokenList implements iterable<DOMString>.
+		 * From https://webidl.spec.whatwg.org/#idl-iterable:
+		 *   If a single type parameter is given,
+		 *   then the interface has a value iterator and provides values of the specified type.
+		 * This applies, and reading the definition of value iterator means we should support indexed properties.
+		 * From https://webidl.spec.whatwg.org/#dfn-support-indexed-properties:
+		 *   An interface that defines an indexed property getter is said to support indexed properties.
+		 * And indexed property getter is defined here: https://webidl.spec.whatwg.org/#dfn-indexed-property-getter
+		 * Down below in their note they give an example of how an out-of-bounds access evaluates to undefined,
+		 * which would map to NULL for us.
+		 * This would also be consistent with how out-of-bounds array accesses in PHP result in NULL. */
 		ZVAL_NULL(retval);
 	}
 }
