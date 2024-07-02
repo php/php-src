@@ -19,7 +19,7 @@ if (\$input) {
 TMPFILE
 );
 
-$command = sprintf("%s -n %s", getenv('TEST_PHP_EXECUTABLE_ESCAPED'), escapeshellarg($file));
+$command = [getenv('TEST_PHP_EXECUTABLE'), '-n', $file];
 
 $process = proc_open(
     $command,

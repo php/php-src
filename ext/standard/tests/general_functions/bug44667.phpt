@@ -12,7 +12,7 @@ $descriptor_spec = array(
     1 => array('pipe', 'wb'),
 );
 
-$proc = proc_open('cat', $descriptor_spec, $pipes);
+$proc = proc_open(['cat'], $descriptor_spec, $pipes);
 
 fwrite($pipes[0], 'Hello', 5);
 fflush($pipes[0]);

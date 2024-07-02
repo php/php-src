@@ -14,7 +14,7 @@ foreach ( $descriptor_spec as $fd => &$d )
     // don't do anything, just the fact that we used "&$d" will sink the ship!
 }
 
-$proc = proc_open(PHP_BINARY, $descriptor_spec, $pipes);
+$proc = proc_open([PHP_BINARY], $descriptor_spec, $pipes);
 echo $proc === false ? "FAILED\n" : "SUCCEEDED\n";
 
 ?>
