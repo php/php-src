@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-11928 (The --enable-re2c-cgoto doesn't add the -g flag).
     (Peter Kokot)
   . Added the #[\Deprecated] attribute. (beberlei, timwolla)
+  . Fixed GH-11389 (Allow suspending fibers in destructors). (Arnaud, trowski)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)

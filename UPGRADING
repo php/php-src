@@ -827,6 +827,19 @@ PHP 8.4 UPGRADE NOTES
   environment variable to 0, or pass the --online flag to run-tests.php to
   execute them.
 
+* Fiber switching during destructor execution is now allowed. It was previously
+  blocked due to conflicts with garbage collection.
+
+  Destructors may now be executed in a separate Fiber:
+
+  When garbage collection is triggered in a Fiber, destructors called by the GC
+  are executed in a separate Fiber: the gc_destructor_fiber. If this Fiber
+  suspends, a new one is created to execute the remaining destructors. The
+  previous gc_destructor_fiber is not referenced anymore by the GC and may be
+  collected if it's not referenced anywhere else. Objects whose destructor is
+  suspended will not be collected until the destructor returns or the Fiber is
+  collected.
+
 ========================================
 14. Performance Improvements
 ========================================
