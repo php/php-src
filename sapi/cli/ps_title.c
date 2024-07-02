@@ -28,6 +28,7 @@
  * The following code is adopted from the PostgreSQL's ps_status(.h/.c).
  */
 
+#include <php.h>
 #ifdef PHP_WIN32
 #include "config.w32.h"
 #include <windows.h>
@@ -342,9 +343,8 @@ int set_ps_title(const char* title)
     if (rc != PS_TITLE_SUCCESS)
         return rc;
 
-    strncpy(ps_buffer, title, ps_buffer_size);
-    ps_buffer[ps_buffer_size - 1] = '\0';
-    ps_buffer_cur_len = strlen(ps_buffer);
+    size_t title_len = strlcpy(ps_buffer, title, ps_buffer_size);
+    ps_buffer_cur_len = (title_len >= ps_buffer_size) ? ps_buffer_size - 1 : title_len;
 
 #ifdef PS_USE_SETPROCTITLE
     setproctitle("%s", ps_buffer);
