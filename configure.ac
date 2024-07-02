@@ -1392,6 +1392,8 @@ AC_SUBST([SAPI_LIBNAME_STATIC])
 AC_SUBST([PHP_VERSION])
 AC_SUBST([PHP_VERSION_ID])
 AC_SUBST([PHP_LDFLAGS])
+AC_SUBST([PHP_THREAD_SAFETY])
+AC_SUBST([ZEND_DEBUG])
 
 PHP_UTILIZE_RPATHS
 
@@ -1467,7 +1469,7 @@ PHP_SUBST_OLD([EXTENSION_DIR])
 PHP_SUBST([EXTRA_LDFLAGS])
 PHP_SUBST([EXTRA_LDFLAGS_PROGRAM])
 PHP_SUBST_OLD([EXTRA_LIBS])
-PHP_SUBST([ZEND_EXTRA_LIBS])
+PHP_SUBST_OLD([ZEND_EXTRA_LIBS])
 PHP_SUBST([INCLUDES])
 PHP_SUBST([EXTRA_INCLUDES])
 PHP_SUBST([INSTALL_IT])
@@ -1604,7 +1606,7 @@ else
 fi;
 
 all_targets="\$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) $pharcmd"
-install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install"
+install_targets="$install_sapi $install_modules $install_binaries install-build install-headers install-programs $install_pear $pharcmd_install $install_embed"
 
 PHP_SUBST([all_targets])
 PHP_SUBST([install_targets])
@@ -1804,6 +1806,7 @@ AC_CONFIG_FILES([
   scripts/man1/php-config.1
   scripts/man1/phpize.1
   scripts/php-config
+  scripts/php.pc
   scripts/phpize
 ])
 

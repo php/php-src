@@ -1,0 +1,36 @@
+# The .pc file for the pkg-config command-line utility.
+# https://en.wikipedia.org/wiki/Pkg-config
+#
+# Usage:
+#   pkg-config --cflags php-embed
+#   pkg-config --cflags-only-I php-embed
+#   pkg-config --libs php-embed
+#   pkg-config --mod-version php-embed
+#   pkg-config --print-variables php-embed
+#   pkg-config --variable=php_vernum php-embed
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@/php
+libdir=@exec_prefix@/lib
+# The extension_dir PHP INI directive absolute path.
+extensiondir=@EXPANDED_EXTENSION_DIR@
+# PHP version as integer.
+php_vernum=@PHP_VERSION_ID@
+# The path where to scan for additional INI configuration files.
+php_inidir=@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@
+# The path in which to look for php.ini.
+php_inipath=@EXPANDED_PHP_CONFIG_FILE_PATH@
+# Whether PHP is built in debug mode (yes) or not (no).
+php_debug=@ZEND_DEBUG@
+# Whether PHP is built with thread safety (yes) or not (no).
+php_zts=@PHP_THREAD_SAFETY@
+
+Name: PHP Embed SAPI
+Description: A lightweight SAPI to embed PHP into application using C bindings
+URL: https://www.php.net
+License: PHP
+Version: @PHP_VERSION@
+Cflags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
+Libs.private: @EXTRA_LIBS@ @ZEND_EXTRA_LIBS@
+Libs: -L${libdir} -lphp

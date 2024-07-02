@@ -112,6 +112,7 @@ config.h.in
 # SAPIs specific ignores
 # ------------------------------------------------------------------------------
 /sapi/apache2handler/libphp.module
+/sapi/embed/php-embed.pc
 /sapi/fpm/fpm/php-cgi
 /sapi/fpm/init.d.php-fpm
 /sapi/fpm/php-fpm.conf
@@ -129,6 +130,7 @@ config.h.in
 /sapi/fpm/php-fpm
 /sapi/phpdbg/phpdbg
 /scripts/php-config
+/scripts/php.pc
 /scripts/phpize
 php
 
