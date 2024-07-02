@@ -12801,7 +12801,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			} else {
 				arg2 = jit_ZVAL_ADDR(jit, op2_addr);
 			}
-			ref = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zend_jit_isset_dim_helper), arg1, arg2);
+			ref = ir_CALL_2(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_isset_dim_helper), arg1, arg2);
 			if_true = ir_IF(ref);
 			ir_IF_TRUE(if_true);
 			ir_refs_add(true_inputs, ir_END());
