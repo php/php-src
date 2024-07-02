@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: df078e28c10c9af51b6c4e98c4ad4827e1f32bed */
+ * Stub hash: 8879c355810d211645dd6de31998ad39acf257bc */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -230,6 +230,26 @@ static void register_hash_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_equals", sizeof("hash_equals") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_hkdf", sizeof("hash_hkdf") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(PHP_MHASH_BC)
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_block_size", sizeof("mhash_get_block_size") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_hash_name", sizeof("mhash_get_hash_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_keygen_s2k", sizeof("mhash_keygen_s2k") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_count", sizeof("mhash_count") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash", sizeof("mhash") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
 }
 
 static zend_class_entry *register_class_HashContext(void)

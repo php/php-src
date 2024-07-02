@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95564c667a51a548f5d43025c90546b991970ddd */
+ * Stub hash: 1649cc6f892951dca6dd0a85b01b39532063fab8 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -497,6 +497,30 @@ static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_FE_END
 };
 
+static void register_php_zip_symbols(int module_number)
+{
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_open", sizeof("zip_open") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_close", sizeof("zip_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_read", sizeof("zip_read") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_open", sizeof("zip_entry_open") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_close", sizeof("zip_entry_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_read", sizeof("zip_entry_read") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_name", sizeof("zip_entry_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressedsize", sizeof("zip_entry_compressedsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_filesize", sizeof("zip_entry_filesize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressionmethod", sizeof("zip_entry_compressionmethod") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+}
+
 static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry_Countable)
 {
 	zend_class_entry ce, *class_entry;
@@ -565,7 +589,7 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zval const_FL_RECOMPRESS_value;
 	ZVAL_LONG(&const_FL_RECOMPRESS_value, ZIP_FL_RECOMPRESS);
 	zend_string *const_FL_RECOMPRESS_name = zend_string_init_interned("FL_RECOMPRESS", sizeof("FL_RECOMPRESS") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_FL_RECOMPRESS_name, &const_FL_RECOMPRESS_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_FL_RECOMPRESS = zend_declare_typed_class_constant(class_entry, const_FL_RECOMPRESS_name, &const_FL_RECOMPRESS_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_FL_RECOMPRESS_name);
 #endif
 
@@ -1277,6 +1301,11 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_string *property_comment_name = zend_string_init("comment", sizeof("comment") - 1, 1);
 	zend_declare_typed_property(class_entry, property_comment_name, &property_comment_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_STRING));
 	zend_string_release(property_comment_name);
+
+#if defined(ZIP_FL_RECOMPRESS)
+
+	zend_add_class_constant_attribute(class_entry, const_FL_RECOMPRESS, ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "setpassword", sizeof("setpassword") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);

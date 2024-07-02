@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3f8b9961bc62392c50e3871c88ea4d0934d62c6a */
+ * Stub hash: 79398fd5abd2d1f5176388b67423d937d0e25da4 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
@@ -589,8 +589,16 @@ static zend_class_entry *register_class_NumberFormatter(void)
 	zval const_TYPE_CURRENCY_value;
 	ZVAL_LONG(&const_TYPE_CURRENCY_value, FORMAT_TYPE_CURRENCY);
 	zend_string *const_TYPE_CURRENCY_name = zend_string_init_interned("TYPE_CURRENCY", sizeof("TYPE_CURRENCY") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_TYPE_CURRENCY_name, &const_TYPE_CURRENCY_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_class_constant *const_TYPE_CURRENCY = zend_declare_typed_class_constant(class_entry, const_TYPE_CURRENCY_name, &const_TYPE_CURRENCY_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_TYPE_CURRENCY_name);
+
+
+	zend_attribute *attribute_Deprecated_const_TYPE_CURRENCY_0 = zend_add_class_constant_attribute(class_entry, const_TYPE_CURRENCY, ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_const_TYPE_CURRENCY_0_arg0;
+	zend_string *attribute_Deprecated_const_TYPE_CURRENCY_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_TYPE_CURRENCY_0_arg0, attribute_Deprecated_const_TYPE_CURRENCY_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_TYPE_CURRENCY_0->args[0].value, &attribute_Deprecated_const_TYPE_CURRENCY_0_arg0);
+	attribute_Deprecated_const_TYPE_CURRENCY_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	return class_entry;
 }

@@ -24,6 +24,7 @@
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
 #include "ext/standard/php_string.h"
+#include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 

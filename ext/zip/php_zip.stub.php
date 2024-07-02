@@ -4,64 +4,64 @@
 
 /**
  * @return resource|int|false
- * @deprecated
  */
+#[\Deprecated]
 function zip_open(string $filename) {}
 
 /**
  * @param resource $zip
- * @deprecated
  */
+#[\Deprecated]
 function zip_close($zip): void {}
 
 /**
  * @param resource $zip
  * @return resource|false
- * @deprecated
  */
+#[\Deprecated]
 function zip_read($zip) {}
 
 /**
  * @param resource $zip_dp
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_open($zip_dp, $zip_entry, string $mode = "rb"): bool {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_close($zip_entry): bool {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_read($zip_entry, int $len = 1024): string|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_name($zip_entry): string|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_compressedsize($zip_entry): int|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_filesize($zip_entry): int|false {}
 
 /**
  * @param resource $zip_entry
- * @deprecated
  */
+#[\Deprecated]
 function zip_entry_compressionmethod($zip_entry): string|false {}
 
 class ZipArchive implements Countable
@@ -109,8 +109,8 @@ class ZipArchive implements Countable
 #ifdef ZIP_FL_RECOMPRESS
     /**
      * @cvalue ZIP_FL_RECOMPRESS
-     * @deprecated
      */
+    #[\Deprecated]
     public const int FL_RECOMPRESS = UNKNOWN;
 #endif
     /**

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8a84ebfe7bfd3107a5b4c3add5a2ab7116e951c0 */
+ * Stub hash: 6602bfd43942cfa82b1bf13196ccce31e1e25409 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtotime, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, datetime, IS_STRING, 0)
@@ -847,6 +847,15 @@ static void register_php_date_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_TIMESTAMP", SUNFUNCS_RET_TIMESTAMP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_STRING", SUNFUNCS_RET_STRING, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SUNFUNCS_RET_DOUBLE", SUNFUNCS_RET_DOUBLE, CONST_PERSISTENT);
+
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strftime", sizeof("strftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "gmstrftime", sizeof("gmstrftime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunrise", sizeof("date_sunrise") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "date_sunset", sizeof("date_sunset") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
 }
 
 static zend_class_entry *register_class_DateTimeInterface(void)

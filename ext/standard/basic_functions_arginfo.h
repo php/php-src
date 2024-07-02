@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d588414e84ed62088cd5b1c668b29c0e51d406f */
+ * Stub hash: 27c735a49e2718f27f056d6133bf40096a680a46 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -4122,6 +4122,21 @@ static void register_basic_functions_symbols(int module_number)
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "crypt", sizeof("crypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(HAVE_STRPTIME)
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strptime", sizeof("strptime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+#endif
+
+	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_assert_options_0_arg0;
+	zend_string *attribute_Deprecated_func_assert_options_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_assert_options_0_arg0, attribute_Deprecated_func_assert_options_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_assert_options_0->args[0].value, &attribute_Deprecated_func_assert_options_0_arg0);
+	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_decode", sizeof("utf8_decode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 

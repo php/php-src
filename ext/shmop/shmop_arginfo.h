@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6055f4edb68a7caed517dbb80f4d5265865dd91d */
+ * Stub hash: d3c550e7b40aa3bb801d7dae4967bca90ab24879 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shmop_open, 0, 4, Shmop, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -52,6 +52,12 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_Shmop_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_shmop_symbols(int module_number)
+{
+
+	zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "shmop_close", sizeof("shmop_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 0);
+}
 
 static zend_class_entry *register_class_Shmop(void)
 {
