@@ -163,6 +163,8 @@ function json_last_error(): int {}
 /** @refcount 1 */
 function json_last_error_msg(): string {}
 
+function json_last_error_info(): array {}
+
 interface JsonSerializable
 {
     /** @tentative-return-type */

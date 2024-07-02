@@ -19,7 +19,7 @@ json_validate_trycatchdump("\"\x61\xf0\x80\x80\x41\"", 512, JSON_INVALID_UTF8_IG
 json_validate_trycatchdump("[\"\xc1\xc1\",\"a\"]", 512, JSON_INVALID_UTF8_IGNORE);
 
 ?>
---EXPECT--
+--EXPECTF--
 Testing Invalid UTF-8
 bool(false)
 int(5)
