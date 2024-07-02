@@ -692,7 +692,8 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 {
 	if (opline->opcode == ZEND_INIT_FCALL
 	 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
-	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+	 || opline->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL) {
 		return 0;
 	} else if (opline->opcode == ZEND_INIT_METHOD_CALL
      || opline->opcode == ZEND_INIT_DYNAMIC_CALL) {

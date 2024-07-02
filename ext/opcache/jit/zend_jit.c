@@ -266,6 +266,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 					case ZEND_INIT_DYNAMIC_CALL:
@@ -350,6 +351,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_INIT_FCALL:
 				case ZEND_INIT_METHOD_CALL:
 				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				case ZEND_INIT_FCALL_BY_NAME:
 				case ZEND_INIT_NS_FCALL_BY_NAME:
 				case ZEND_INIT_DYNAMIC_CALL:
@@ -1466,6 +1468,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_INIT_METHOD_CALL:
 				case ZEND_INIT_DYNAMIC_CALL:
 				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				case ZEND_INIT_USER_CALL:
 				case ZEND_NEW:
 					call_level++;

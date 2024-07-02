@@ -1080,7 +1080,8 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 				 || p->opline->opcode == ZEND_INIT_USER_CALL
 				 || p->opline->opcode == ZEND_NEW
 				 || p->opline->opcode == ZEND_INIT_METHOD_CALL
-				 || p->opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+				 || p->opline->opcode == ZEND_INIT_STATIC_METHOD_CALL
+				 || p->opline->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL) {
 					return p->opline;
 				}
 				return NULL;
@@ -1118,6 +1119,7 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_DYNAMIC_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 					case ZEND_INIT_USER_CALL:
 					case ZEND_NEW:
 						if (call_level == 0) {
@@ -2547,6 +2549,7 @@ propagate_arg:
 						case ZEND_INIT_METHOD_CALL:
 						case ZEND_INIT_DYNAMIC_CALL:
 						//case ZEND_INIT_STATIC_METHOD_CALL:
+						//case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 						//case ZEND_INIT_USER_CALL:
 						//case ZEND_NEW:
 							frame->used_stack = zend_vm_calc_used_stack(opline->extended_value, (zend_function*)p->func);
@@ -4344,6 +4347,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				case ZEND_INIT_METHOD_CALL:
 				case ZEND_INIT_DYNAMIC_CALL:
 				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				case ZEND_INIT_USER_CALL:
 				case ZEND_NEW:
 					frame->call_level++;
@@ -7011,6 +7015,7 @@ done:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_DYNAMIC_CALL:
 					//case ZEND_INIT_STATIC_METHOD_CALL:
+					//case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 					//case ZEND_INIT_USER_CALL:
 					//case ZEND_NEW:
 						checked_stack += call->used_stack;
