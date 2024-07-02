@@ -87,6 +87,7 @@ PHP_DOM_EXPORT zend_class_entry *dom_modern_xpath_class_entry;
 #endif
 PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
 PHP_DOM_EXPORT zend_class_entry *dom_adjacent_position_class_entry;
+PHP_DOM_EXPORT zend_class_entry *dom_namespace_info_class_entry;
 /* }}} */
 
 static zend_object_handlers dom_object_handlers;
@@ -815,6 +816,8 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_namespace_node_prop_handlers, "parentElement", dom_node_parent_element_read, NULL);
 	zend_hash_add_new_ptr(&classes, dom_namespace_node_class_entry->name, &dom_namespace_node_prop_handlers);
 
+	dom_namespace_info_class_entry = register_class_Dom_NamespaceInfo();
+
 	dom_documentfragment_class_entry = register_class_DOMDocumentFragment(dom_node_class_entry, dom_parentnode_class_entry);
 	dom_documentfragment_class_entry->create_object = dom_objects_new;
 	dom_documentfragment_class_entry->default_object_handlers = &dom_object_handlers;
@@ -1039,6 +1042,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "childElementCount", dom_parent_node_child_element_count, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "previousElementSibling", dom_node_previous_element_sibling_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "nextElementSibling", dom_node_next_element_sibling_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_modern_element_prop_handlers, "substitutedNodeValue", dom_modern_element_substituted_node_value_read, dom_modern_element_substituted_node_value_write);
 	zend_hash_merge(&dom_modern_element_prop_handlers, &dom_modern_node_prop_handlers, NULL, false);
 	DOM_OVERWRITE_PROP_HANDLER(&dom_modern_element_prop_handlers, "textContent", dom_node_text_content_read, dom_node_text_content_write);
 	zend_hash_add_new_ptr(&classes, dom_modern_element_class_entry->name, &dom_modern_element_prop_handlers);

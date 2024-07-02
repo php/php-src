@@ -1380,6 +1380,16 @@ namespace Dom
         public function querySelectorAll(string $selectors): NodeList {}
         public function closest(string $selectors): ?Element {}
         public function matches(string $selectors): bool {}
+
+        public string $substitutedNodeValue;
+
+        /** @return list<NamespaceInfo> */
+        public function getInScopeNamespaces(): array {}
+
+        /** @return list<NamespaceInfo> */
+        public function getDescendantNamespaces(): array {}
+
+        public function rename(?string $namespaceURI, string $qualifiedName): void {}
     }
 
     class HTMLElement extends Element
@@ -1406,6 +1416,9 @@ namespace Dom
 
         /** @implementation-alias DOMAttr::isId */
         public function isId(): bool {}
+
+        /** @implementation-alias Dom\Element::rename */
+        public function rename(?string $namespaceURI, string $qualifiedName): void {}
     }
 
     class CharacterData extends Node implements ChildNode
@@ -1657,6 +1670,20 @@ namespace Dom
 
         /** @implementation-alias DOMDocument::save */
         public function saveXmlFile(string $filename, int $options = 0): int|false {}
+    }
+
+    /**
+     * @not-serializable
+     * @strict-properties
+     */
+    final class NamespaceInfo
+    {
+        public readonly ?string $prefix;
+        public readonly ?string $namespaceURI;
+        public readonly Element $element;
+
+        /** @implementation-alias Dom\Node::__construct */
+        private function __construct() {}
     }
 
 #ifdef LIBXML_XPATH_ENABLED

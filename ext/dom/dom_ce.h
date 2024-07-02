@@ -68,5 +68,6 @@ extern PHP_DOM_EXPORT zend_class_entry *dom_modern_xpath_class_entry;
 #endif
 extern PHP_DOM_EXPORT zend_class_entry *dom_namespace_node_class_entry;
 extern PHP_DOM_EXPORT zend_class_entry *dom_adjacent_position_class_entry;
+extern PHP_DOM_EXPORT zend_class_entry *dom_namespace_info_class_entry;
 
 #endif /* DOM_CE_H */

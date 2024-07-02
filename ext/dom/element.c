@@ -1814,4 +1814,219 @@ PHP_METHOD(Dom_Element, closest)
 	dom_element_closest(thisp, intern, return_value, selectors_str);
 }
 
+zend_result dom_modern_element_substituted_node_value_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	xmlChar *content = xmlNodeGetContent(nodep);
+
+	if (UNEXPECTED(content == NULL)) {
+		php_dom_throw_error(INVALID_STATE_ERR, true);
+		return FAILURE;
+	} else {
+		ZVAL_STRING(retval, (const char *) content);
+		xmlFree(content);
+	}
+
+	return SUCCESS;
+}
+
+zend_result dom_modern_element_substituted_node_value_write(dom_object *obj, zval *newval)
+{
+	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
+
+	php_libxml_invalidate_node_list_cache(obj->document);
+	dom_remove_all_children(nodep);
+	xmlNodeSetContentLen(nodep, (xmlChar *) Z_STRVAL_P(newval), Z_STRLEN_P(newval));
+
+	return SUCCESS;
+}
+
+static void dom_element_get_in_scope_namespace_info(php_dom_libxml_ns_mapper *ns_mapper, HashTable *result, xmlNodePtr nodep, dom_object *intern)
+{
+	HashTable prefix_to_ns_table;
+	zend_hash_init(&prefix_to_ns_table, 0, NULL, NULL, false);
+	zend_hash_real_init_mixed(&prefix_to_ns_table);
+
+	/* https://www.w3.org/TR/1999/REC-xpath-19991116/#namespace-nodes */
+	for (const xmlNode *cur = nodep; cur != NULL; cur = cur->parent) {
+		if (cur->type == XML_ELEMENT_NODE) {
+			/* Find the last attribute */
+			const xmlAttr *last = NULL;
+			for (const xmlAttr *attr = cur->properties; attr != NULL; attr = attr->next) {
+				last = attr;
+			}
+
+			/* Reversed loop because the parent traversal is reversed as well,
+			 * this will keep the ordering consistent. */
+			for (const xmlAttr *attr = last; attr != NULL; attr = attr->prev) {
+				if (attr->ns != NULL && php_dom_ns_is_fast_ex(attr->ns, php_dom_ns_is_xmlns_magic_token)
+					&& attr->children != NULL && attr->children->content != NULL) {
+					const char *prefix = attr->ns->prefix == NULL ? NULL : (const char *) attr->name;
+					const char *key = prefix == NULL ? "" : prefix;
+					xmlNsPtr ns = php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(ns_mapper, prefix, (const char *) attr->children->content);
+					/* NULL is a valid value for the sentinel */
+					zval zv;
+					ZVAL_PTR(&zv, ns);
+					zend_hash_str_add(&prefix_to_ns_table, key, strlen(key), &zv);
+				}
+			}
+		}
+	}
+
+	xmlNsPtr ns;
+	zend_string *prefix;
+	ZEND_HASH_MAP_REVERSE_FOREACH_STR_KEY_PTR(&prefix_to_ns_table, prefix, ns) {
+		if (ZSTR_LEN(prefix) == 0 && (ns == NULL || ns->href == NULL || *ns->href == '\0')) {
+			/* Exception: "the value of the xmlns attribute for the nearest such element is non-empty" */
+			continue;
+		}
+
+		zval zv;
+		object_init_ex(&zv, dom_namespace_info_class_entry);
+		zend_object *obj = Z_OBJ(zv);
+
+		if (ZSTR_LEN(prefix) != 0) {
+			ZVAL_STR_COPY(OBJ_PROP_NUM(obj, 0), prefix);
+		} else {
+			ZVAL_NULL(OBJ_PROP_NUM(obj, 0));
+		}
+
+		if (ns != NULL && ns->href != NULL && *ns->href != '\0') {
+			ZVAL_STRING(OBJ_PROP_NUM(obj, 1), (const char *) ns->href);
+		} else {
+			ZVAL_NULL(OBJ_PROP_NUM(obj, 1));
+		}
+
+		php_dom_create_object(nodep, OBJ_PROP_NUM(obj, 2), intern);
+
+		zend_hash_next_index_insert_new(result, &zv);
+	} ZEND_HASH_FOREACH_END();
+
+	zend_hash_destroy(&prefix_to_ns_table);
+}
+
+PHP_METHOD(Dom_Element, getInScopeNamespaces)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+
+	array_init(return_value);
+	HashTable *result = Z_ARRVAL_P(return_value);
+
+	dom_element_get_in_scope_namespace_info(ns_mapper, result, nodep, intern);
+}
+
+PHP_METHOD(Dom_Element, getDescendantNamespaces)
+{
+	zval *id;
+	xmlNode *nodep;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+
+	array_init(return_value);
+	HashTable *result = Z_ARRVAL_P(return_value);
+
+	dom_element_get_in_scope_namespace_info(ns_mapper, result, nodep, intern);
+
+	xmlNodePtr cur = nodep->children;
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE) {
+			/* TODO: this could be more optimized by updating the same HashTable repeatedly
+			 * instead of recreating it on every node. */
+			dom_element_get_in_scope_namespace_info(ns_mapper, result, cur, intern);
+		}
+
+		cur = php_dom_next_in_tree_order(cur, nodep);
+	}
+}
+
+PHP_METHOD(Dom_Element, rename)
+{
+	zend_string *namespace_uri, *qualified_name;
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR_OR_NULL(namespace_uri)
+		Z_PARAM_STR(qualified_name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval *id;
+	dom_object *intern;
+	xmlNodePtr nodep;
+	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
+
+	xmlChar *localname = NULL, *prefix = NULL;
+	int errorcode = dom_validate_and_extract(namespace_uri, qualified_name, &localname, &prefix);
+	if (UNEXPECTED(errorcode != 0)) {
+		php_dom_throw_error(errorcode, /* strict */ true);
+		goto cleanup;
+	}
+
+	if (nodep->type == XML_ATTRIBUTE_NODE) {
+		/* Check for duplicate attributes. */
+		xmlAttrPtr existing = xmlHasNsProp(nodep->parent, localname, namespace_uri && ZSTR_VAL(namespace_uri)[0] != '\0' ? BAD_CAST ZSTR_VAL(namespace_uri) : NULL);
+		if (existing != NULL && existing != (xmlAttrPtr) nodep) {
+			php_dom_throw_error_with_message(INVALID_MODIFICATION_ERR, "An attribute with the given name in the given namespace already exists", /* strict */ true);
+			goto cleanup;
+		}
+	} else {
+		ZEND_ASSERT(nodep->type == XML_ELEMENT_NODE);
+
+		/* Check for moving to or away from the HTML namespace. */
+		bool is_currently_html_ns = php_dom_ns_is_fast(nodep, php_dom_ns_is_html_magic_token);
+		bool will_be_html_ns = namespace_uri != NULL && zend_string_equals_literal(namespace_uri, DOM_XHTML_NS_URI);
+		if (is_currently_html_ns != will_be_html_ns) {
+			if (is_currently_html_ns) {
+				php_dom_throw_error_with_message(
+					INVALID_MODIFICATION_ERR,
+					"It is not possible to move an element out of the HTML namespace because the HTML namespace is tied to the HTMLElement class",
+					/* strict */ true
+				);
+			} else {
+				php_dom_throw_error_with_message(
+					INVALID_MODIFICATION_ERR,
+					"It is not possible to move an element into the HTML namespace because the HTML namespace is tied to the HTMLElement class",
+					/* strict */ true
+				);
+			}
+			goto cleanup;
+		}
+	}
+
+	php_libxml_invalidate_node_list_cache(intern->document);
+
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(intern);
+
+	/* Update namespace uri + prefix by querying the namespace mapper */
+	/* prefix can be NULL here, but that is taken care of by the called APIs. */
+	nodep->ns = php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(ns_mapper, prefix, xmlStrlen(prefix), namespace_uri);
+
+	/* Change the local name */
+	if (xmlDictOwns(nodep->doc->dict, nodep->name) != 1) {
+		xmlFree((xmlChar *) nodep->name);
+	}
+	const xmlChar *copy = xmlDictLookup(nodep->doc->dict, localname, -1);
+	if (copy != NULL) {
+		nodep->name = copy;
+	} else {
+		nodep->name = localname;
+		localname = NULL;
+	}
+
+cleanup:
+	xmlFree(localname);
+	xmlFree(prefix);
+}
+
 #endif
