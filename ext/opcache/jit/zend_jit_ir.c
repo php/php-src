@@ -9750,7 +9750,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 	jit_SET_EX_OPLINE(jit, opline);
 
-	if (opline->opcode == ZEND_DO_FCALL) {
+	if (opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		if (!func) {
 			if (trace) {
 				uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
@@ -9787,7 +9787,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		}
 	}
 
-	if (opline->opcode == ZEND_DO_FCALL) {
+	if (opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		if (!func) {
 			if (!trace) {
 				ir_ref if_deprecated, ret;
@@ -10139,48 +10139,6 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 	 && (opline->opcode != ZEND_DO_UCALL)) {
 		if (!func && (opline->opcode != ZEND_DO_ICALL)) {
 			ir_IF_FALSE(if_user);
-		}
-		if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
-			if (!func) {
-				if (trace) {
-					uint32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-
-					exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-					if (!exit_addr) {
-						return 0;
-					}
-					ZEND_ASSERT(func_ref);
-					ir_GUARD_NOT(
-						ir_AND_U32(
-							ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-							ir_CONST_U32(ZEND_ACC_DEPRECATED)),
-						ir_CONST_ADDR(exit_addr));
-				} else {
-					ir_ref if_deprecated, ret;
-
-					if_deprecated = ir_IF(ir_AND_U32(
-						ir_LOAD_U32(ir_ADD_OFFSET(func_ref, offsetof(zend_op_array, fn_flags))),
-						ir_CONST_U32(ZEND_ACC_DEPRECATED)));
-					ir_IF_TRUE_cold(if_deprecated);
-
-					if (GCC_GLOBAL_REGS) {
-						ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper));
-					} else {
-						ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper), rx);
-					}
-					ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
-					ir_MERGE_WITH_EMPTY_FALSE(if_deprecated);
-				}
-			} else if (func->common.fn_flags & ZEND_ACC_DEPRECATED) {
-				ir_ref ret;
-
-				if (GCC_GLOBAL_REGS) {
-					ret = ir_CALL(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper));
-				} else {
-					ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_deprecated_helper), rx);
-				}
-				ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler));
-			}
 		}
 
 		// JIT: EG(current_execute_data) = execute_data;

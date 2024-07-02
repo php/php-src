@@ -43,6 +43,9 @@ namespace {
          */
         public const int ZEND_TEST_DEPRECATED = 42;
 
+        #[\Deprecated(message: "custom message")]
+        public const int ZEND_TEST_DEPRECATED_ATTR = 42;
+
         /** @var mixed */
         public static $_StaticProp;
         public static int $staticIntProp = 123;
@@ -205,6 +208,9 @@ namespace {
 
     /** @deprecated */
     function zend_test_deprecated(mixed $arg = null): void {}
+
+    #[\Deprecated(message: "custom message")]
+    function zend_test_deprecated_attr(): void {}
 
     /** @alias zend_test_void_return */
     function zend_test_aliased(): void {}

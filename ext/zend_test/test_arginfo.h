@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6b49c60e3b86415a0e0d95cd915419fac39de531 */
+ * Stub hash: 470b6d507911cf05279de3557df03831858dd8c1 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_array_return, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -19,6 +19,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_deprecated, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, arg, IS_MIXED, 0, "null")
 ZEND_END_ARG_INFO()
+
+#define arginfo_zend_test_deprecated_attr arginfo_zend_test_void_return
 
 #define arginfo_zend_test_aliased arginfo_zend_test_void_return
 
@@ -253,6 +255,7 @@ static ZEND_FUNCTION(zend_test_nullable_array_return);
 static ZEND_FUNCTION(zend_test_void_return);
 static ZEND_FUNCTION(zend_test_compile_string);
 static ZEND_FUNCTION(zend_test_deprecated);
+static ZEND_FUNCTION(zend_test_deprecated_attr);
 static ZEND_FUNCTION(zend_create_unterminated_string);
 static ZEND_FUNCTION(zend_terminate_string);
 static ZEND_FUNCTION(zend_leak_variable);
@@ -342,6 +345,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("zend_test_deprecated", zif_zend_test_deprecated, arginfo_zend_test_deprecated, ZEND_ACC_DEPRECATED, NULL, NULL)
 #else
 	ZEND_RAW_FENTRY("zend_test_deprecated", zif_zend_test_deprecated, arginfo_zend_test_deprecated, ZEND_ACC_DEPRECATED)
+#endif
+#if (PHP_VERSION_ID >= 80400)
+	ZEND_RAW_FENTRY("zend_test_deprecated_attr", zif_zend_test_deprecated_attr, arginfo_zend_test_deprecated_attr, ZEND_ACC_DEPRECATED, NULL, NULL)
+#else
+	ZEND_RAW_FENTRY("zend_test_deprecated_attr", zif_zend_test_deprecated_attr, arginfo_zend_test_deprecated_attr, ZEND_ACC_DEPRECATED)
 #endif
 #if (PHP_VERSION_ID >= 80400)
 	ZEND_RAW_FENTRY("zend_test_aliased", zif_zend_test_void_return, arginfo_zend_test_aliased, 0, NULL, NULL)
@@ -563,6 +571,15 @@ static void register_test_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("ZendTestNS2\\ZendSubNS\\ZEND_CONSTANT_A", "namespaced", CONST_PERSISTENT);
 
 
+	zend_string *attribute_name_Deprecated_func_zend_test_deprecated_attr_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
+	zend_attribute *attribute_Deprecated_func_zend_test_deprecated_attr_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_deprecated_attr", sizeof("zend_test_deprecated_attr") - 1), attribute_name_Deprecated_func_zend_test_deprecated_attr_0, 1);
+	zend_string_release(attribute_name_Deprecated_func_zend_test_deprecated_attr_0);
+	zval attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0;
+	zend_string *attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0, attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].value, &attribute_Deprecated_func_zend_test_deprecated_attr_0_arg0);
+	attribute_Deprecated_func_zend_test_deprecated_attr_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_string *attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_string_init_interned("ZendTestParameterAttribute", sizeof("ZendTestParameterAttribute") - 1, 1);
 	zend_attribute *attribute_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0 = zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "zend_test_parameter_with_attribute", sizeof("zend_test_parameter_with_attribute") - 1), 0, attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0, 1);
 	zend_string_release(attribute_name_ZendTestParameterAttribute_func_zend_test_parameter_with_attribute_arg0_0);
@@ -647,6 +664,16 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 #endif
 	zend_string_release(const_ZEND_TEST_DEPRECATED_name);
 
+	zval const_ZEND_TEST_DEPRECATED_ATTR_value;
+	ZVAL_LONG(&const_ZEND_TEST_DEPRECATED_ATTR_value, 42);
+	zend_string *const_ZEND_TEST_DEPRECATED_ATTR_name = zend_string_init_interned("ZEND_TEST_DEPRECATED_ATTR", sizeof("ZEND_TEST_DEPRECATED_ATTR") - 1, 1);
+#if (PHP_VERSION_ID >= 80300)
+	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_typed_class_constant(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+#else
+	zend_class_constant *const_ZEND_TEST_DEPRECATED_ATTR = zend_declare_class_constant_ex(class_entry, const_ZEND_TEST_DEPRECATED_ATTR_name, &const_ZEND_TEST_DEPRECATED_ATTR_value, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL);
+#endif
+	zend_string_release(const_ZEND_TEST_DEPRECATED_ATTR_name);
+
 	zval property__StaticProp_default_value;
 	ZVAL_NULL(&property__StaticProp_default_value);
 	zend_string *property__StaticProp_name = zend_string_init("_StaticProp", sizeof("_StaticProp") - 1, 1);
@@ -707,6 +734,16 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	zend_declare_typed_property(class_entry, property_readonlyProp_name, &property_readonlyProp_default_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 #endif
 	zend_string_release(property_readonlyProp_name);
+
+
+	zend_string *attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0 = zend_string_init_interned("Deprecated", sizeof("Deprecated") - 1, 1);
+	zend_attribute *attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0 = zend_add_class_constant_attribute(class_entry, const_ZEND_TEST_DEPRECATED_ATTR, attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0, 1);
+	zend_string_release(attribute_name_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0);
+	zval attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0;
+	zend_string *attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0_str = zend_string_init("custom message", strlen("custom message"), 1);
+	ZVAL_STR(&attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0, attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0->args[0].value, &attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0_arg0);
+	attribute_Deprecated_const_ZEND_TEST_DEPRECATED_ATTR_0->args[0].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }
