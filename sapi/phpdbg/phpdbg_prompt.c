@@ -454,6 +454,8 @@ PHPDBG_COMMAND(exec) /* {{{ */
 	return SUCCESS;
 } /* }}} */
 
+int phpdbg_compile_stdin_ex(zend_string *code, zend_compile_position position);
+
 PHPDBG_COMMAND(stdin)
 {
 	smart_str code = {0};
@@ -461,8 +463,6 @@ PHPDBG_COMMAND(stdin)
 	char *sep = param->str;
 	int seplen = param->len;
 	int bytes = 0;
-
-	smart_str_appends(&code, "?>");
 
 	do {
 		PHPDBG_G(input_buflen) += bytes;
@@ -507,7 +507,7 @@ PHPDBG_COMMAND(stdin)
 exec_code:
 	smart_str_0(&code);
 
-	if (phpdbg_compile_stdin(code.s) == FAILURE) {
+	if (phpdbg_compile_stdin_ex(code.s ? code.s : ZSTR_EMPTY_ALLOC(), ZEND_COMPILE_POSITION_AT_OPEN_TAG) == FAILURE) {
 		zend_exception_error(EG(exception), E_ERROR);
 		zend_bailout();
 	}
@@ -515,8 +515,9 @@ exec_code:
 	return SUCCESS;
 } /* }}} */
 
-int phpdbg_compile_stdin(zend_string *code) {
-	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code", ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
+int phpdbg_compile_stdin_ex(zend_string *code, zend_compile_position position)
+{
+	PHPDBG_G(ops) = zend_compile_string(code, "Standard input code", position);
 	zend_string_release(code);
 
 	if (EG(exception)) {
@@ -550,6 +551,11 @@ int phpdbg_compile_stdin(zend_string *code) {
 	phpdbg_notice("Successful compilation of stdin input");
 
 	return SUCCESS;
+}
+
+int phpdbg_compile_stdin(zend_string *code)
+{
+	return phpdbg_compile_stdin_ex(code, ZEND_COMPILE_POSITION_AFTER_OPEN_TAG);
 }
 
 int phpdbg_compile(void) /* {{{ */
