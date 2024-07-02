@@ -1535,22 +1535,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_deprecated_function(fbc);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			UNDEF_RESULT();
+			if (!0) {
+				ret = &retval;
+				ZVAL_UNDEF(ret);
+			}
+			goto fcall_by_name_end;
+		}
+	}
+
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		ret = NULL;
 		if (0) {
 			ret = EX_VAR(opline->result.var);
-		}
-
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_deprecated_function(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				if (!0) {
-					ret = &retval;
-					ZVAL_UNDEF(ret);
-				}
-				goto fcall_by_name_end;
-			}
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1564,18 +1564,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 		if (0) {
 			ret = NULL;
-		}
-
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_deprecated_function(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				if (!0) {
-					ret = &retval;
-					ZVAL_UNDEF(ret);
-				}
-				goto fcall_by_name_end;
-			}
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1647,22 +1635,22 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_deprecated_function(fbc);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			UNDEF_RESULT();
+			if (!1) {
+				ret = &retval;
+				ZVAL_UNDEF(ret);
+			}
+			goto fcall_by_name_end;
+		}
+	}
+
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		ret = NULL;
 		if (1) {
 			ret = EX_VAR(opline->result.var);
-		}
-
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_deprecated_function(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				if (!1) {
-					ret = &retval;
-					ZVAL_UNDEF(ret);
-				}
-				goto fcall_by_name_end;
-			}
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1676,18 +1664,6 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 		if (0) {
 			ret = NULL;
-		}
-
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_deprecated_function(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				if (!1) {
-					ret = &retval;
-					ZVAL_UNDEF(ret);
-				}
-				goto fcall_by_name_end;
-			}
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1759,22 +1735,22 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 	SAVE_OPLINE();
 	EX(call) = call->prev_execute_data;
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+		zend_deprecated_function(fbc);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			UNDEF_RESULT();
+			if (!RETURN_VALUE_USED(opline)) {
+				ret = &retval;
+				ZVAL_UNDEF(ret);
+			}
+			goto fcall_by_name_end;
+		}
+	}
+
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
 		ret = NULL;
 		if (RETURN_VALUE_USED(opline)) {
 			ret = EX_VAR(opline->result.var);
-		}
-
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_deprecated_function(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				if (!RETURN_VALUE_USED(opline)) {
-					ret = &retval;
-					ZVAL_UNDEF(ret);
-				}
-				goto fcall_by_name_end;
-			}
 		}
 
 		call->prev_execute_data = execute_data;
@@ -1789,18 +1765,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 		if (1) {
 			ret = NULL;
-		}
-
-		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_deprecated_function(fbc);
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				UNDEF_RESULT();
-				if (!RETURN_VALUE_USED(opline)) {
-					ret = &retval;
-					ZVAL_UNDEF(ret);
-				}
-				goto fcall_by_name_end;
-			}
 		}
 
 		call->prev_execute_data = execute_data;
