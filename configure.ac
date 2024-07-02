@@ -1169,9 +1169,7 @@ PHP_HELP_SEPARATOR([PEAR:])
 PHP_CONFIGURE_PART(Configuring PEAR)
 
 dnl If CLI is disabled disable PEAR.
-if test "$PHP_CLI" = "no"; then
-  with_pear=no
-fi
+AS_VAR_IF([PHP_CLI], [no], [with_pear=no])
 
 PHP_ARG_WITH([pear],
   [whether to install PEAR],
@@ -1180,34 +1178,29 @@ PHP_ARG_WITH([pear],
   [no],
   [yes])
 
-if test "$PHP_PEAR" != "no"; then
-
-  dnl PEAR dependencies.
-  if test "$PHP_XML" = "no"; then
-    pear_error_msg="$pear_error_msg
-                    PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
-  fi
-
-  if test "$pear_error_msg"; then
-    AC_MSG_ERROR([$pear_error_msg])
-  fi
-
+AS_VAR_IF([PHP_PEAR], [no],, [
   AC_MSG_WARN([The --with-pear option is deprecated])
 
-  install_pear="install-pear"
-  PEAR_INSTALLDIR=$PHP_PEAR
+  dnl PEAR dependencies.
+  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR([m4_normalize([
+    PEAR requires XML to be enabled. Add '--enable-xml' to the configure line,
+    or disable PEAR (--without-pear).
+  ])])])
 
-  if test "$PHP_PEAR" = "yes"; then
-    case $PHP_LAYOUT in
-      GNU) PEAR_INSTALLDIR=$datadir/pear;;
-      *)   PEAR_INSTALLDIR=$libdir/php;;
-    esac
-  fi
+  install_pear=install-pear
+
+  AS_VAR_IF([PHP_PEAR], [yes],
+    [AS_CASE([$PHP_LAYOUT],
+      [GNU], [PEAR_INSTALLDIR=$datadir/pear],
+      [PEAR_INSTALLDIR=$libdir/php])],
+    [PEAR_INSTALLDIR=$PHP_PEAR])
 
   PHP_SUBST([PEAR_INSTALLDIR])
   PHP_ADD_BUILD_DIR([pear])
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/pear/Makefile.frag,$abs_srcdir/pear,pear)
-fi
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/pear/Makefile.frag],
+    [$abs_srcdir/pear],
+    [pear])
+])
 
 dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
