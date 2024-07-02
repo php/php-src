@@ -21,7 +21,7 @@ AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
   [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
 
 if test "$PHP_CLI" != "no"; then
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cli/Makefile.frag])
 
   dnl Set filename.
   SAPI_CLI_PATH=sapi/cli/php

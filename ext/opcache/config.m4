@@ -347,7 +347,7 @@ int main(void) {
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
     PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
-    PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
+    PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
   fi
   PHP_SUBST([OPCACHE_SHARED_LIBADD])
 fi

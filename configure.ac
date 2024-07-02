@@ -814,7 +814,7 @@ if test "$PHP_GCOV" = "yes"; then
   fi
 
   AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/build/Makefile.gcov, $abs_srcdir)
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/build/Makefile.gcov], [$abs_srcdir])
 
   dnl Remove all optimization flags from CFLAGS.
   changequote({,})
@@ -1774,8 +1774,12 @@ PHP_ADD_SOURCES([Zend], [m4_normalize([
 ])],
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
-PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/scripts/Makefile.frag,$abs_srcdir/scripts,scripts)
-PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/Zend/Makefile.frag,$abs_srcdir/Zend,Zend)
+PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/scripts/Makefile.frag],
+  [$abs_srcdir/scripts],
+  [scripts])
+PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/Zend/Makefile.frag],
+  [$abs_srcdir/Zend],
+  [Zend])
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
