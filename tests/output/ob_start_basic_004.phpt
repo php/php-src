@@ -15,7 +15,7 @@ function callback($string) {
     return "f[call:$callback_invocations; len:$len]$string\n";
 }
 
-for ($cs=-1; $cs<10; $cs++) {
+for ($cs=0; $cs<10; $cs++) {
   echo "\n----( chunk_size: $cs, output append size: 1 )----\n";
   $callback_invocations=0;
   ob_start('callback', $cs);
@@ -23,7 +23,7 @@ for ($cs=-1; $cs<10; $cs++) {
   ob_end_flush();
 }
 
-for ($cs=-1; $cs<10; $cs++) {
+for ($cs=0; $cs<10; $cs++) {
   echo "\n----( chunk_size: $cs, output append size: 4 )----\n";
   $callback_invocations=0;
   ob_start('callback', $cs);
@@ -33,9 +33,6 @@ for ($cs=-1; $cs<10; $cs++) {
 
 ?>
 --EXPECT--
-----( chunk_size: -1, output append size: 1 )----
-f[call:1; len:8]12345678
-
 ----( chunk_size: 0, output append size: 1 )----
 f[call:1; len:8]12345678
 
@@ -84,9 +81,6 @@ f[call:1; len:8]12345678
 f[call:2; len:0]
 
 ----( chunk_size: 9, output append size: 1 )----
-f[call:1; len:8]12345678
-
-----( chunk_size: -1, output append size: 4 )----
 f[call:1; len:8]12345678
 
 ----( chunk_size: 0, output append size: 4 )----

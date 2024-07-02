@@ -13,21 +13,21 @@ Class C {
 }
 
 function checkAndClean() {
-  print_r(ob_list_handlers());
+  var_dump(ob_list_handlers());
   while (ob_get_level()>0) {
     ob_end_flush();
   }
 }
 
-var_dump(ob_start('C::h'));
+try {
+    var_dump(ob_start('C::h'));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
 ?>
---EXPECTF--
-Warning: ob_start(): non-static method C::h() cannot be called statically in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
+--EXPECT--
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, non-static method C::h() cannot be called statically
+array(0) {
+}

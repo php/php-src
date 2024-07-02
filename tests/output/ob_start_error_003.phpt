@@ -10,12 +10,13 @@ Class C {
 }
 
 $c = new C;
-var_dump(ob_start(array($c)));
+try {
+    var_dump(ob_start(array($c)));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 echo "done"
 ?>
---EXPECTF--
-Warning: ob_start(): array callback must have exactly two members in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
+--EXPECT--
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
 done

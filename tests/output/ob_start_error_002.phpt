@@ -12,30 +12,31 @@ Class C {
     }
 }
 
-var_dump(ob_start(array("nonExistent","f")));
-var_dump(ob_start(array("C","nonExistent")));
-var_dump(ob_start("C::no"));
-var_dump(ob_start("no"));
+try {
+    var_dump(ob_start(array("nonExistent","f")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+try {
+    var_dump(ob_start(array("C","nonExistent")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+try {
+    var_dump(ob_start("C::no"));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
+try {
+    var_dump(ob_start("no"));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 echo "done"
 ?>
---EXPECTF--
-Warning: ob_start(): class "nonExistent" not found in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-
-Warning: ob_start(): class C does not have a method "nonExistent" in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line 13
-bool(false)
-
-Warning: ob_start(): class C does not have a method "no" in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line 14
-bool(false)
-
-Warning: ob_start(): function "no" not found or invalid function name in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line 15
-bool(false)
+--EXPECT--
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, class "nonExistent" not found
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, class C does not have a method "nonExistent"
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, class C does not have a method "no"
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, function "no" not found or invalid function name
 done

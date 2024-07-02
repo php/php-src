@@ -10,12 +10,13 @@ Class C {
 }
 
 $c = new C;
-var_dump(ob_start(array($c, 'f')));
+try {
+    var_dump(ob_start(array($c, 'f')));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 echo "done"
 ?>
---EXPECTF--
-Warning: ob_start(): class C does not have a method "f" in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
+--EXPECT--
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, class C does not have a method "f"
 done
