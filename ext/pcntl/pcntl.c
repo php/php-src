@@ -599,6 +599,11 @@ PHP_FUNCTION(pcntl_exec)
 		Z_PARAM_ARRAY(envs)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (php_check_open_basedir_ex(path, 0)) {
+		zend_argument_value_error(1, "open_basedir restriction in effect.");
+		RETURN_THROWS();
+	}
+
 	if (ZEND_NUM_ARGS() > 1) {
 		/* Build argument list */
 		SEPARATE_ARRAY(args);
