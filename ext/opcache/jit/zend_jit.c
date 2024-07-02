@@ -42,6 +42,88 @@
 
 #include "jit/zend_jit_internal.h"
 
+#if HAVE_FFI
+# include "ext/ffi/php_ffi.h"
+
+# define FFI_TYPE_GUARD    (1<<0)
+# define FFI_SYMBOLS_GUARD (1<<1)
+
+typedef struct zend_jit_ffi_info {
+	union {
+		zend_ffi_type *type;
+		HashTable     *symbols;
+	};
+	uint32_t           info;
+} zend_jit_ffi_info;
+
+static bool zend_jit_ffi_supported_type(zend_ffi_type *type)
+{
+	if (sizeof(void*) == 4) {
+		if (ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_UINT64
+		 ||	ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_SINT64) {
+			return false;
+		}
+	}
+	return true;
+}
+
+static bool zend_jit_ffi_supported_func(zend_ffi_type *type)
+{
+	zend_ffi_type *t;
+
+	type = ZEND_FFI_TYPE(type);
+
+	if (type->func.abi != ZEND_FFI_ABI_CDECL
+	 && type->func.abi != ZEND_FFI_ABI_FASTCALL) {
+		return false;
+	}
+
+	t = ZEND_FFI_TYPE(type->func.ret_type);
+	if (t->kind == ZEND_FFI_TYPE_STRUCT
+	 || !zend_jit_ffi_supported_type(t)) {
+		return false;
+	}
+
+	if (type->func.args) {
+		ZEND_HASH_PACKED_FOREACH_PTR(type->func.args, t) {
+			t = ZEND_FFI_TYPE(t);
+			if (t->kind == ZEND_FFI_TYPE_STRUCT
+			 || !zend_jit_ffi_supported_type(t)) {
+				return false;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	return true;
+}
+
+static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
+{
+	dst_type = ZEND_FFI_TYPE(dst_type);
+	if (!zend_jit_ffi_supported_type(dst_type)) {
+		return false;
+	} else if (src_info == MAY_BE_LONG || src_info == MAY_BE_DOUBLE) {
+		return dst_type->kind < ZEND_FFI_TYPE_POINTER && dst_type->kind != ZEND_FFI_TYPE_VOID;
+	} else if (src_info == MAY_BE_FALSE || src_info == MAY_BE_TRUE || src_info == (MAY_BE_FALSE|MAY_BE_TRUE)) {
+		return dst_type->kind == ZEND_FFI_TYPE_BOOL;
+	} else if (src_type) {
+		if (!zend_jit_ffi_supported_type(src_type)) {
+			return false;
+		}
+		if (src_type->kind >= ZEND_FFI_TYPE_POINTER) {
+			return false;
+		}
+		if (dst_type == src_type
+// TODO: calls between shared extensions doesn't work on Windows
+//		 || zend_ffi_is_compatible_type(dst_type, src_type)
+		) {
+			return true;
+		}
+	}
+	return false;
+}
+#endif
+
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
 #include <pthread.h>
 #endif
