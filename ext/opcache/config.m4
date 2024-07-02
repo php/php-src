@@ -50,7 +50,6 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-    AC_DEFINE(ZEND_JIT_IR, 1, [Use JIT IR framework])
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
       jit/ir/ir_cfg.c jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
       jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
