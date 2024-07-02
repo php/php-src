@@ -176,7 +176,7 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 {
 	FILE *f;
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	uintptr_t start, end, prev_end = 0;
 	size_t max_size;
 	bool found = false;
@@ -610,7 +610,7 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 	struct kinfo_vmentry *entry;
 	size_t len, max_size;
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	int mib[5] = { CTL_VM, VM_PROC, VM_PROC_MAP, getpid(), sizeof(struct kinfo_vmentry) };
 	bool found = false;
 	struct rlimit rlim;
@@ -691,7 +691,7 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	bool found = false, r = false;
 	struct ps_prochandle *proc;
 	prmap_t *map, *orig;

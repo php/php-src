@@ -216,15 +216,26 @@ AC_DEFUN([ZEND_CHECK_STACK_DIRECTION],
 int (*volatile f)(uintptr_t);
 
 int stack_grows_downwards(uintptr_t arg) {
+#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
+  uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
+#else
   int local;
-  return (uintptr_t)&local < arg;
+  uintptr_t addr = (uintptr_t)&local;
+#endif
+
+  return addr < arg;
 }
 
 int main(void) {
+#if defined(__has_builtin) && __has_builtin(__builtin_frame_address)
+  uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
+#else
   int local;
+  uintptr_t addr = (uintptr_t)&local;
+#endif
 
   f = stack_grows_downwards;
-  return f((uintptr_t)&local) ? 0 : 1;
+  return f(addr) ? 0 : 1;
 }])],
   [php_cv_have_stack_limit=yes],
   [php_cv_have_stack_limit=no],

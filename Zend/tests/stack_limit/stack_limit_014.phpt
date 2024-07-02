@@ -20,4 +20,4 @@ try {
 
 ?>
 --EXPECTF--
-%S%rMaximum call stack size of [0-9]+ bytes reached|Allowed memory size of [0-9]+ bytes exhausted%r%s
+%S%rMaximum call stack size of [0-9]+ bytes \(zend\.max_allowed_stack_size - zend\.reserved_stack_size\) reached|Allowed memory size of [0-9]+ bytes exhausted%r%s
