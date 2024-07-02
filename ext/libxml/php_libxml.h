@@ -58,6 +58,9 @@ typedef struct _libxml_doc_props {
 	bool recover;
 } libxml_doc_props;
 
+/* Modification tracking: when the object changes, we increment its counter.
+ * When this counter no longer matches the counter at the time of caching,
+ * we know that the object has changed and we have to update the cache. */
 typedef struct {
 	size_t modification_nr;
 } php_libxml_cache_tag;
@@ -129,21 +132,37 @@ static inline php_libxml_node_object *php_libxml_node_fetch_object(zend_object *
 	return (php_libxml_node_object *)((char*)(obj) - obj->handlers->offset);
 }
 
-static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_ref_obj *doc_ptr)
+static zend_always_inline void php_libxml_invalidate_cache_tag(php_libxml_cache_tag *cache_tag)
 {
-	if (!doc_ptr) {
-		return;
-	}
 #if SIZEOF_SIZE_T == 8
 	/* If one operation happens every nanosecond, then it would still require 584 years to overflow
 	 * the counter. So we'll just assume this never happens. */
-	doc_ptr->cache_tag.modification_nr++;
+	cache_tag->modification_nr++;
 #else
-	size_t new_modification_nr = doc_ptr->cache_tag.modification_nr + 1;
+	size_t new_modification_nr = cache_tag->modification_nr + 1;
 	if (EXPECTED(new_modification_nr > 0)) { /* unsigned overflow; checking after addition results in one less instruction */
-		doc_ptr->cache_tag.modification_nr = new_modification_nr;
+		cache_tag->modification_nr = new_modification_nr;
 	}
 #endif
+}
+
+static zend_always_inline bool php_libxml_is_cache_tag_stale(const php_libxml_cache_tag *object_tag, const php_libxml_cache_tag *cache_tag)
+{
+	ZEND_ASSERT(object_tag != NULL);
+	ZEND_ASSERT(cache_tag != NULL);
+	/* See overflow comment in php_libxml_invalidate_node_list_cache(). */
+#if SIZEOF_SIZE_T == 8
+	return cache_tag->modification_nr != object_tag->modification_nr;
+#else
+	return cache_tag->modification_nr != object_tag->modification_nr || UNEXPECTED(object_tag->modification_nr == SIZE_MAX);
+#endif
+}
+
+static zend_always_inline void php_libxml_invalidate_node_list_cache(php_libxml_ref_obj *doc_ptr)
+{
+	if (doc_ptr) {
+		php_libxml_invalidate_cache_tag(&doc_ptr->cache_tag);
+	}
 }
 
 static zend_always_inline void php_libxml_invalidate_node_list_cache_from_doc(xmlDocPtr docp)
@@ -169,6 +188,7 @@ typedef enum {
 
 PHP_LIBXML_API int php_libxml_increment_node_ptr(php_libxml_node_object *object, xmlNodePtr node, void *private_data);
 PHP_LIBXML_API int php_libxml_decrement_node_ptr(php_libxml_node_object *object);
+PHP_LIBXML_API int php_libxml_decrement_node_ptr_ref(php_libxml_node_ptr *ptr);
 PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, xmlDocPtr docp);
 PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *document);
 PHP_LIBXML_API int php_libxml_decrement_doc_ref(php_libxml_node_object *object);
