@@ -92,7 +92,6 @@ if test "$PHP_PHPDBG" != "no"; then
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
-                \-DPHPDBG_SHARED \
          -o \$(BUILD_SHARED)"
 
   PHP_SUBST([PHPDBG_EXTRA_LIBS])
