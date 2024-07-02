@@ -25,6 +25,82 @@ const WUNTRACED = UNKNOWN;
  */
 const WCONTINUED = UNKNOWN;
 #endif
+#if defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+/**
+ * @var int
+ * @cvalue LONG_CONST(WEXITED)
+ */
+const WEXITED = UNKNOWN;
+#endif
+#if defined (HAVE_DECL_WSTOPPED) && HAVE_DECL_WSTOPPED == 1
+/**
+ * @var int
+ * @cvalue LONG_CONST(WSTOPPED)
+ */
+const WSTOPPED = UNKNOWN;
+#endif
+#if defined (HAVE_DECL_WNOWAIT) && HAVE_DECL_WNOWAIT== 1
+/**
+ * @var int
+ * @cvalue LONG_CONST(WNOWAIT)
+ */
+const WNOWAIT = UNKNOWN;
+#endif
+
+#ifdef HAVE_WAITID
+/* First argument to waitid */
+#ifdef HAVE_POSIX_IDTYPES
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_ALL)
+ */
+const P_ALL = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_PID)
+ */
+const P_PID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_PGID)
+ */
+const P_PGID = UNKNOWN;
+#endif
+/* Linux specific idtype */
+#ifdef HAVE_LINUX_IDTYPES
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_PIDFD)
+ */
+const P_PIDFD = UNKNOWN;
+#endif
+/* NetBSD specific idtypes */
+#ifdef HAVE_NETBSD_IDTYPES
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_UID)
+ */
+const P_UID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_GID)
+ */
+const P_GID = UNKNOWN;
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_SID)
+ */
+const P_SID = UNKNOWN;
+#endif
+/* FreeBSD specific idtype */
+#ifdef HAVE_FREEBSD_IDTYPES
+/**
+ * @var int
+ * @cvalue LONG_CONST(P_JAILID)
+ */
+const P_JAILID = UNKNOWN;
+#endif
+#endif
 
 /* Signal Constants */
 
@@ -926,6 +1002,11 @@ function pcntl_fork(): int {}
  * @param array $resource_usage
  */
 function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
+
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+/** @param array $info */
+function pcntl_waitid(int $idtype = P_ALL, ?int $id = null, &$info = [], int $flags = WEXITED): bool {}
+#endif
 
 /**
  * @param int $status

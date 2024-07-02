@@ -17,7 +17,7 @@
 #ifndef PHP_PCNTL_H
 #define PHP_PCNTL_H
 
-#if defined(WCONTINUED) && defined(WIFCONTINUED)
+#if defined(HAVE_DECL_WCONTINUED) && HAVE_DECL_WCONTINUED == 1 && defined(HAVE_WIFCONTINUED) && HAVE_WIFCONTINUED == 1
 #define HAVE_WCONTINUED 1
 #endif
 
