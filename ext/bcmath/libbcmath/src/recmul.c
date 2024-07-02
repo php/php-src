@@ -34,24 +34,8 @@
 #include <assert.h>
 #include <stdbool.h>
 #include "private.h"
+#include "convert.h"
 #include "zend_alloc.h"
-
-
-#if SIZEOF_SIZE_T >= 8
-#  define BC_VECTOR_SIZE 8
-/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
-#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
-#else
-#  define BC_VECTOR_SIZE 4
-/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
-#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
-#endif
-
-/*
- * Adding more than this many times may cause uint32_t/uint64_t to overflow.
- * Typically this is 1844 for 64bit and 42 for 32bit.
- */
-#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
 /* Multiply utility routines */
@@ -61,92 +45,6 @@ static inline void bc_mul_carry_calc(BC_VECTOR *prod_vector, size_t prod_arr_siz
 	for (size_t i = 0; i < prod_arr_size - 1; i++) {
 		prod_vector[i + 1] += prod_vector[i] / BC_VECTOR_BOUNDARY_NUM;
 		prod_vector[i] %= BC_VECTOR_BOUNDARY_NUM;
-	}
-}
-
-/* This is based on the technique described in https://kholdstare.github.io/technical/2020/05/26/faster-integer-parsing.html.
- * This function transforms AABBCCDD into 1000 * AA + 100 * BB + 10 * CC + DD,
- * with the caveat that all components must be in the interval [0, 25] to prevent overflow
- * due to the multiplication by power of 10 (10 * 25 = 250 is the largest number that fits in a byte).
- * The advantage of this method instead of using shifts + 3 multiplications is that this is cheaper
- * due to its divide-and-conquer nature.
- */
-#if SIZEOF_SIZE_T == 4
-static BC_VECTOR bc_parse_chunk_chars(const char *str)
-{
-	BC_VECTOR tmp;
-	memcpy(&tmp, str, sizeof(tmp));
-#if !BC_LITTLE_ENDIAN
-	tmp = BC_BSWAP(tmp);
-#endif
-
-	BC_VECTOR lower_digits = (tmp & 0x0f000f00) >> 8;
-	BC_VECTOR upper_digits = (tmp & 0x000f000f) * 10;
-
-	tmp = lower_digits + upper_digits;
-
-	lower_digits = (tmp & 0x00ff0000) >> 16;
-	upper_digits = (tmp & 0x000000ff) * 100;
-
-	return lower_digits + upper_digits;
-}
-#elif SIZEOF_SIZE_T == 8
-static BC_VECTOR bc_parse_chunk_chars(const char *str)
-{
-	BC_VECTOR tmp;
-	memcpy(&tmp, str, sizeof(tmp));
-#if !BC_LITTLE_ENDIAN
-	tmp = BC_BSWAP(tmp);
-#endif
-
-	BC_VECTOR lower_digits = (tmp & 0x0f000f000f000f00) >> 8;
-	BC_VECTOR upper_digits = (tmp & 0x000f000f000f000f) * 10;
-
-	tmp = lower_digits + upper_digits;
-
-	lower_digits = (tmp & 0x00ff000000ff0000) >> 16;
-	upper_digits = (tmp & 0x000000ff000000ff) * 100;
-
-	tmp = lower_digits + upper_digits;
-
-	lower_digits = (tmp & 0x0000ffff00000000) >> 32;
-	upper_digits = (tmp & 0x000000000000ffff) * 10000;
-
-	return lower_digits + upper_digits;
-}
-#endif
-
-/*
- * Converts bc_num to BC_VECTOR, going backwards from pointer n by the number of
- * characters specified by len.
- */
-static inline BC_VECTOR bc_partial_convert_to_vector(const char *n, size_t len)
-{
-	if (len == BC_VECTOR_SIZE) {
-		return bc_parse_chunk_chars(n - BC_VECTOR_SIZE + 1);
-	}
-
-	BC_VECTOR num = 0;
-	BC_VECTOR base = 1;
-
-	for (size_t i = 0; i < len; i++) {
-		num += *n * base;
-		base *= BASE;
-		n--;
-	}
-
-	return num;
-}
-
-static inline void bc_convert_to_vector(BC_VECTOR *n_vector, const char *nend, size_t nlen)
-{
-	size_t i = 0;
-	while (nlen > 0) {
-		size_t len = MIN(BC_VECTOR_SIZE, nlen);
-		n_vector[i] = bc_partial_convert_to_vector(nend, len);
-		nend -= len;
-		nlen -= len;
-		i++;
 	}
 }
 
@@ -172,52 +70,6 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 		*pend-- = prod_vector % BASE;
 		prod_vector /= BASE;
 	}
-}
-
-#if BC_LITTLE_ENDIAN
-# define BC_ENCODE_LUT(A, B) ((A) | (B) << 4)
-#else
-# define BC_ENCODE_LUT(A, B) ((B) | (A) << 4)
-#endif
-
-#define LUT_ITERATE(_, A) \
-	_(A, 0), _(A, 1), _(A, 2), _(A, 3), _(A, 4), _(A, 5), _(A, 6), _(A, 7), _(A, 8), _(A, 9)
-
-/* This LUT encodes the decimal representation of numbers 0-100
- * such that we can avoid taking modulos and divisions which would be slow. */
-static const unsigned char LUT[100] = {
-	LUT_ITERATE(BC_ENCODE_LUT, 0),
-	LUT_ITERATE(BC_ENCODE_LUT, 1),
-	LUT_ITERATE(BC_ENCODE_LUT, 2),
-	LUT_ITERATE(BC_ENCODE_LUT, 3),
-	LUT_ITERATE(BC_ENCODE_LUT, 4),
-	LUT_ITERATE(BC_ENCODE_LUT, 5),
-	LUT_ITERATE(BC_ENCODE_LUT, 6),
-	LUT_ITERATE(BC_ENCODE_LUT, 7),
-	LUT_ITERATE(BC_ENCODE_LUT, 8),
-	LUT_ITERATE(BC_ENCODE_LUT, 9),
-};
-
-static inline unsigned short bc_expand_lut(unsigned char c)
-{
-	return (c & 0x0f) | (c & 0xf0) << 4;
-}
-
-/* Writes the character representation of the number encoded in value.
- * E.g. if value = 1234, then the string "1234" will be written to str. */
-static void bc_write_bcd_representation(uint32_t value, char *str)
-{
-	uint32_t upper = value / 100; /* e.g. 12 */
-	uint32_t lower = value % 100; /* e.g. 34 */
-
-#if BC_LITTLE_ENDIAN
-	/* Note: little endian, so `lower` comes before `upper`! */
-	uint32_t digits = bc_expand_lut(LUT[lower]) << 16 | bc_expand_lut(LUT[upper]);
-#else
-	/* Note: big endian, so `upper` comes before `lower`! */
-	uint32_t digits = bc_expand_lut(LUT[upper]) << 16 | bc_expand_lut(LUT[lower]);
-#endif
-	memcpy(str, &digits, sizeof(digits));
 }
 
 /*

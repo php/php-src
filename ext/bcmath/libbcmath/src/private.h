@@ -84,9 +84,15 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 #if SIZEOF_SIZE_T >= 8
 #  define BC_BSWAP(u) BC_BSWAP64(u)
    typedef uint64_t BC_VECTOR;
+#  define BC_VECTOR_SIZE 8
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 #else
 #  define BC_BSWAP(u) BC_BSWAP32(u)
    typedef uint32_t BC_VECTOR;
+#  define BC_VECTOR_SIZE 4
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
 #ifdef WORDS_BIGENDIAN
@@ -94,6 +100,12 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 #else
 #  define BC_LITTLE_ENDIAN 1
 #endif
+
+/*
+ * Adding more than this many times may cause uint32_t/uint64_t to overflow.
+ * Typically this is 1844 for 64bit and 42 for 32bit.
+ */
+#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
 
 
 /* routines */
