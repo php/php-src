@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d52f82c7084a8122fe07c91eb6d4ab6030daa27d */
+ * Stub hash: 40d41bc0aeae5ca465329151c134d546e178d4e4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -185,7 +185,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_binomial, 0, 2, GMP, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_GMP___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, "0")
+	ZEND_ARG_OBJ_TYPE_MASK(0, num, GMP, MAY_BE_LONG|MAY_BE_STRING, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, base, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
@@ -194,6 +194,29 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_GMP___unserialize, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_GMP_add, 0, 2, GMP, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, left, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, right, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_GMP_multiply arginfo_class_GMP_add
+
+#define arginfo_class_GMP_subtract arginfo_class_GMP_add
+
+#define arginfo_class_GMP_divide arginfo_class_GMP_add
+
+#define arginfo_class_GMP_mod arginfo_class_GMP_add
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_GMP_pow, 0, 2, GMP, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, base, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, exp, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_GMP_comparable, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_TYPE_MASK(0, op1, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
+	ZEND_ARG_OBJ_TYPE_MASK(0, op2, GMP, MAY_BE_LONG|MAY_BE_STRING, NULL)
 ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(gmp_init);
@@ -249,6 +272,13 @@ ZEND_FUNCTION(gmp_binomial);
 ZEND_METHOD(GMP, __construct);
 ZEND_METHOD(GMP, __serialize);
 ZEND_METHOD(GMP, __unserialize);
+ZEND_METHOD(GMP, add);
+ZEND_METHOD(GMP, multiply);
+ZEND_METHOD(GMP, subtract);
+ZEND_METHOD(GMP, divide);
+ZEND_METHOD(GMP, mod);
+ZEND_METHOD(GMP, pow);
+ZEND_METHOD(GMP, comparable);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gmp_init, arginfo_gmp_init)
@@ -309,6 +339,13 @@ static const zend_function_entry class_GMP_methods[] = {
 	ZEND_ME(GMP, __construct, arginfo_class_GMP___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(GMP, __serialize, arginfo_class_GMP___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(GMP, __unserialize, arginfo_class_GMP___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(GMP, add, arginfo_class_GMP_add, ZEND_ACC_PROTECTED)
+	ZEND_ME(GMP, multiply, arginfo_class_GMP_multiply, ZEND_ACC_PROTECTED)
+	ZEND_ME(GMP, subtract, arginfo_class_GMP_subtract, ZEND_ACC_PROTECTED)
+	ZEND_ME(GMP, divide, arginfo_class_GMP_divide, ZEND_ACC_PROTECTED)
+	ZEND_ME(GMP, mod, arginfo_class_GMP_mod, ZEND_ACC_PROTECTED)
+	ZEND_ME(GMP, pow, arginfo_class_GMP_pow, ZEND_ACC_PROTECTED)
+	ZEND_ME(GMP, comparable, arginfo_class_GMP_comparable, ZEND_ACC_PROTECTED)
 	ZEND_FE_END
 };
 
@@ -334,6 +371,7 @@ static zend_class_entry *register_class_GMP(void)
 
 	INIT_CLASS_ENTRY(ce, "GMP", class_GMP_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_READONLY_CLASS;
 
 	return class_entry;
 }

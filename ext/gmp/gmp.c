@@ -98,6 +98,9 @@ typedef struct _gmp_temp {
 #define IS_GMP(zval) \
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce))
 
+#define IS_GMP_BASE(zval) \
+	(IS_GMP(zval) && Z_OBJCE_P(zval) == gmp_ce)
+
 #define GET_GMP_OBJECT_FROM_OBJ(obj) \
 	php_gmp_object_from_zend_object(obj)
 #define GET_GMP_OBJECT_FROM_ZVAL(zv) \
@@ -370,21 +373,93 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	}                                   \
 	return SUCCESS;
 
+#define CALL_PARENT_OP(method, on, result)        \
+	zval method_name;       \
+	ZVAL_STRING(&method_name, method); \
+	zval params[2];                      \
+	ZVAL_COPY(&params[0], op1);          \
+	ZVAL_COPY(&params[1], op2);          \
+	int success = call_user_function(NULL, on, &method_name, result, 2, params); \
+	zval_ptr_dtor(&method_name); \
+	zval_ptr_dtor(&params[0]); \
+	zval_ptr_dtor(&params[1]);
+
 static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	switch (opcode) {
 	case ZEND_ADD:
+		// is op1 a base gmp object?
+		if(IS_GMP_BASE(op1) && IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+			CALL_PARENT_OP("add", op2, result)
+			return success;
+		}
+
+		if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+			CALL_PARENT_OP("add", op1, result);
+			return success;
+		}
+
 		DO_BINARY_UI_OP(mpz_add);
 	case ZEND_SUB:
+		if(IS_GMP_BASE(op1) && IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+			CALL_PARENT_OP("subtract", op2, result);
+			return success;
+		}
+
+		if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+			CALL_PARENT_OP("subtract", op1, result);
+			return success;
+		}
+
 		DO_BINARY_UI_OP(mpz_sub);
 	case ZEND_MUL:
+		if(IS_GMP_BASE(op1) && IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+			CALL_PARENT_OP("multiply", op2, result);
+			return success;
+		}
+
+		if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+			CALL_PARENT_OP("multiply", op1, result);
+			return success;
+		}
+
 		DO_BINARY_UI_OP(mpz_mul);
 	case ZEND_POW:
+		if(IS_GMP_BASE(op1) && IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+			CALL_PARENT_OP("pow", op2, result);
+			return success;
+		}
+
+		if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+			CALL_PARENT_OP("pow", op1, result);
+			return success;
+		}
+
 		shift_operator_helper(mpz_pow_ui, result, op1, op2, opcode);
 		return SUCCESS;
 	case ZEND_DIV:
+		if(IS_GMP_BASE(op1) && IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+			CALL_PARENT_OP("divide", op2, result);
+			return success;
+		}
+
+		if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+			CALL_PARENT_OP("divide", op1, result);
+			return success;
+		}
+
 		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
+		if(IS_GMP_BASE(op1) && IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+			CALL_PARENT_OP("mod", op2, result);
+			return success;
+		}
+
+		if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+			CALL_PARENT_OP("mod", op1, result);
+			return success;
+		}
+
 		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
 	case ZEND_SL:
 		shift_operator_helper(mpz_mul_2exp, result, op1, op2, opcode);
@@ -406,6 +481,101 @@ static zend_result gmp_do_operation_ex(uint8_t opcode, zval *result, zval *op1, 
 	}
 }
 /* }}} */
+
+#define CHECK_OVERRIDE_ARGS(op1, op2) \
+	if (!(Z_TYPE_P(op1) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op1), gmp_ce)) && \
+		Z_TYPE_P(op1) != IS_LONG && Z_TYPE_P(op1) != IS_STRING) { \
+		zend_throw_error(NULL, "Parameter 1 must be of type GMP|int|string"); \
+		return; \
+	} \
+	if (!(Z_TYPE_P(op2) == IS_OBJECT && instanceof_function(Z_OBJCE_P(op2), gmp_ce)) && \
+		Z_TYPE_P(op2) != IS_LONG && Z_TYPE_P(op2) != IS_STRING) { \
+		zend_throw_error(NULL, "Parameter 2 must be of type GMP|int|string"); \
+		return; \
+	}
+
+PHP_METHOD(GMP, add)
+{
+	zval *op1, *op2;
+	zval result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &op1, &op2) == FAILURE) {
+		return;
+	}
+	CHECK_OVERRIDE_ARGS(op1, op2)
+
+	gmp_zval_binary_ui_op(&result, op1, op2, mpz_add, mpz_add_ui, 0, /* is_operator */ true);
+	RETURN_ZVAL(&result, 0, 1);
+}
+
+PHP_METHOD(GMP, multiply)
+{
+	zval *op1, *op2;
+	zval result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &op1, &op2) == FAILURE) {
+		return;
+	}
+	CHECK_OVERRIDE_ARGS(op1, op2);
+	gmp_zval_binary_ui_op(&result, op1, op2, mpz_mul, mpz_mul_ui, 0, /* is_operator */ true);
+	RETURN_ZVAL(&result, 0, 1);
+}
+
+PHP_METHOD(GMP, subtract)
+{
+	zval *op1, *op2;
+	zval result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &op1, &op2) == FAILURE) {
+		return;
+	}
+	CHECK_OVERRIDE_ARGS(op1, op2);
+	gmp_zval_binary_ui_op(&result, op1, op2, mpz_sub, mpz_sub_ui, 0, /* is_operator */ true);
+	RETURN_ZVAL(&result, 0, 1);
+}
+
+PHP_METHOD(GMP, divide) {
+	zval *op1, *op2;
+	zval result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &op1, &op2) == FAILURE) {
+		return;
+	}
+	CHECK_OVERRIDE_ARGS(op1, op2);
+	gmp_zval_binary_ui_op(&result, op1, op2, mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1, /* is_operator */ true);
+	RETURN_ZVAL(&result, 0, 1);
+}
+
+PHP_METHOD(GMP, mod)
+{
+	zval *op1, *op2;
+	zval result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &op1, &op2) == FAILURE) {
+		return;
+	}
+	CHECK_OVERRIDE_ARGS(op1, op2);
+	gmp_zval_binary_ui_op(&result, op1, op2, mpz_mod, gmp_mpz_mod_ui, 1, /* is_operator */ true);
+	RETURN_ZVAL(&result, 0, 1);
+}
+
+PHP_METHOD(GMP, pow)
+{
+	zval *op1, *op2;
+	zval result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &op1, &op2) == FAILURE) {
+		return;
+	}
+	CHECK_OVERRIDE_ARGS(op1, op2);
+	shift_operator_helper(mpz_pow_ui, &result, op1, op2, ZEND_POW);
+	RETURN_ZVAL(&result, 0, 1);
+}
+
+PHP_METHOD(GMP, comparable)
+{
+	RETURN_TRUE;
+}
 
 static zend_result gmp_do_operation(uint8_t opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
@@ -430,6 +600,26 @@ static zend_result gmp_do_operation(uint8_t opcode, zval *result, zval *op1, zva
 static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 {
 	zval result;
+
+	if(IS_GMP(op1) && !IS_GMP_BASE(op1)) {
+		CALL_PARENT_OP("comparable", op1, &result);
+
+		if(Z_TYPE(result) == IS_FALSE) {
+			printf("throwing error");
+			zend_throw_exception(zend_ce_arithmetic_error, "Can't compare incompatible types", 0);
+			return 1;
+		}
+	}
+
+	if(IS_GMP(op2) && !IS_GMP_BASE(op2)) {
+		CALL_PARENT_OP("comparable", op2, &result);
+
+		if(Z_TYPE(result) == IS_FALSE) {
+			printf("throwing error");
+			zend_throw_exception(zend_ce_arithmetic_error, "Can't compare incompatible types", 0);
+			return 1;
+		}
+	}
 
 	gmp_cmp(&result, op1, op2, /* is_operator */ true);
 
@@ -2056,11 +2246,12 @@ ZEND_METHOD(GMP, __construct)
 	zend_string *arg_str = NULL;
 	zend_long arg_l = 0;
 	zend_long base = 0;
+	zval *arg_1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_LONG(arg_str, arg_l)
-		Z_PARAM_LONG(base)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_ZVAL(arg_1)
+			Z_PARAM_LONG(base)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!gmp_verify_base(base, 2)) {
@@ -2069,6 +2260,19 @@ ZEND_METHOD(GMP, __construct)
 
 	return_value = ZEND_THIS;
 	mpz_ptr gmp_number = GET_GMP_FROM_ZVAL(ZEND_THIS);
+
+	if (IS_GMP(arg_1)) {
+		mpz_set(gmp_number, GET_GMP_FROM_ZVAL(arg_1));
+		return;
+	}
+
+	if(Z_TYPE_P(arg_1) == IS_STRING) {
+		arg_str = Z_STR_P(arg_1);
+	}
+
+	if(Z_TYPE_P(arg_1) == IS_LONG) {
+		arg_l = Z_LVAL_P(arg_1);
+	}
 
 	if (gmp_initialize_number(gmp_number, arg_str, arg_l, base) == FAILURE) {
 		RETURN_THROWS();
