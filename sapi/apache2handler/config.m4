@@ -1,11 +1,10 @@
-PHP_ARG_WITH([apxs2],,
+PHP_ARG_WITH([apxs2],
+  [whether to build Apache 2 handler module support via DSO through APXS],
   [AS_HELP_STRING([[--with-apxs2[=FILE]]],
     [Build shared Apache 2 handler module. FILE is the optional pathname to
     the Apache apxs tool [apxs]])],
   [no],
   [no])
-
-AC_MSG_CHECKING([for Apache 2 handler module support via DSO through APXS])
 
 if test "$PHP_APXS2" != "no"; then
   if test "$PHP_APXS2" = "yes"; then
@@ -118,7 +117,4 @@ if test "$PHP_APXS2" != "no"; then
       PHP_BUILD_THREAD_SAFE
     fi
   fi
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
 fi

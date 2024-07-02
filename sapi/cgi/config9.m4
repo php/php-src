@@ -1,14 +1,11 @@
-PHP_ARG_ENABLE([cgi],,
+PHP_ARG_ENABLE([cgi],
+  [for CGI build],
   [AS_HELP_STRING([--disable-cgi],
     [Disable building CGI version of PHP])],
   [yes],
   [no])
 
-dnl CGI setup.
-AC_MSG_CHECKING(for CGI build)
 if test "$PHP_CGI" != "no"; then
-    AC_MSG_RESULT(yes)
-
     dnl BSD systems.
     AC_CHECK_MEMBERS([struct sockaddr_un.sun_len],,,[#include <sys/un.h>])
 
@@ -59,6 +56,4 @@ if test "$PHP_CGI" != "no"; then
     PHP_SUBST([BUILD_CGI])
 
     PHP_OUTPUT(sapi/cgi/php-cgi.1)
-else
-  AC_MSG_RESULT(no)
 fi

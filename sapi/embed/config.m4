@@ -31,5 +31,5 @@ if test "$PHP_EMBED" != "no"; then
   AC_MSG_RESULT([$PHP_EMBED_TYPE])
   AC_SUBST([PHP_EMBED_TYPE])
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi

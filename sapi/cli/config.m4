@@ -1,4 +1,5 @@
-PHP_ARG_ENABLE([cli],,
+PHP_ARG_ENABLE([cli],
+  [for CLI build],
   [AS_HELP_STRING([--disable-cli],
     [Disable building CLI version of PHP (this forces --without-pear)])],
   [yes],
@@ -20,7 +21,6 @@ if test "$cli_cv_var_PS_STRINGS" = yes ; then
   AC_DEFINE([HAVE_PS_STRINGS], [], [Define to 1 if the PS_STRINGS thing exists.])
 fi
 
-AC_MSG_CHECKING(for CLI build)
 if test "$PHP_CLI" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cli/Makefile.frag)
 
@@ -57,4 +57,3 @@ if test "$PHP_CLI" != "no"; then
 
   PHP_INSTALL_HEADERS([sapi/cli], [cli.h])
 fi
-AC_MSG_RESULT($PHP_CLI)
