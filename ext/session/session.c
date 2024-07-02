@@ -355,34 +355,29 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 /* Default session id char validation function allowed by ps_modules.
  * If you change the logic here, please also update the error message in
  * ps_modules appropriately */
-PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
+PHPAPI zend_result php_session_valid_key(const zend_string *str) /* {{{ */
 {
-	size_t len;
-	const char *p;
-	char c;
-	zend_result ret = SUCCESS;
+	const char *key = ZSTR_VAL(str);
+	size_t len = ZSTR_LEN(str);
 
-	for (p = key; (c = *p); p++) {
-		/* valid characters are a..z,A..Z,0..9 */
-		if (!((c >= 'a' && c <= 'z')
-				|| (c >= 'A' && c <= 'Z')
-				|| (c >= '0' && c <= '9')
-				|| c == ','
-				|| c == '-')) {
-			ret = FAILURE;
-			break;
+	for (size_t i = 0; i < len; i++) {
+		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
+		if (!((key[i] >= 'a' && key[i] <= 'z')
+				|| (key[i] >= 'A' && key[i] <= 'Z')
+				|| (key[i] >= '0' && key[i] <= '9')
+				|| key[i] == ','
+				|| key[i] == '-')) {
+			return FAILURE;
 		}
 	}
-
-	len = p - key;
 
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
 	if (len == 0 || len > PS_MAX_SID_LENGTH) {
-		ret = FAILURE;
+		return FAILURE;
 	}
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -2379,7 +2374,7 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
-		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
+		if (php_session_valid_key(prefix) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			RETURN_FALSE;
