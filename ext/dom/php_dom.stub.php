@@ -1380,6 +1380,8 @@ namespace Dom
         public function querySelectorAll(string $selectors): NodeList {}
         public function closest(string $selectors): ?Element {}
         public function matches(string $selectors): bool {}
+
+        public string $innerHTML;
     }
 
     class HTMLElement extends Element

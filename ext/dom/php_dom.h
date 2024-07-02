@@ -171,6 +171,8 @@ dom_object *php_dom_instantiate_object_helper(zval *return_value, zend_class_ent
 xmlDocPtr php_dom_create_html_doc(void);
 xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
 void dom_set_xml_class(php_libxml_ref_obj *document);
+const char *dom_locate_a_namespace(const xmlNode *node, const zend_string *prefix);
+void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp);
 

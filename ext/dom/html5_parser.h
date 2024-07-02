@@ -47,7 +47,7 @@ typedef struct _lexbor_libxml2_bridge_extracted_observations {
     bool has_explicit_html_tag;
     bool has_explicit_head_tag;
     bool has_explicit_body_tag;
-    bool quirks_mode;
+    php_libxml_quirks_mode quirks_mode;
 } lexbor_libxml2_bridge_extracted_observations;
 
 typedef struct _lexbor_libxml2_bridge_parse_context {
@@ -69,6 +69,14 @@ void lexbor_libxml2_bridge_parse_set_error_callbacks(
 lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     lxb_html_document_t *document,
     xmlDocPtr *doc_out,
+    bool compact_text_nodes,
+    bool create_default_ns,
+    php_dom_libxml_ns_mapper *ns_mapper
+);
+lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
+    lxb_dom_node_t *start_node,
+    xmlDocPtr lxml_doc,
+    xmlNodePtr *fragment_out,
     bool compact_text_nodes,
     bool create_default_ns,
     php_dom_libxml_ns_mapper *ns_mapper

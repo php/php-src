@@ -32,7 +32,7 @@ if test "$PHP_DOM" != "no"; then
                             parentnode/tree.c parentnode/css_selectors.c \
                             processinginstruction.c cdatasection.c \
                             documentfragment.c domimplementation.c \
-                            element.c node.c characterdata.c \
+                            element.c node.c characterdata.c inner_html_mixin.c \
                             documenttype.c entity.c \
                             nodelist.c html_collection.c text.c comment.c \
                             entityreference.c \

@@ -11,7 +11,7 @@ fclose($memory);
 --EXPECTF--
 Warning: Dom\XMLDocument::createFromFile(): Document is empty in php://memory, line: 1 in %s on line %d
 
-Fatal error: Uncaught Exception: XML document is malformed in %s:%d
+Fatal error: Uncaught DOMException: XML fragment is not well-formed in %s:%d
 Stack trace:
 #0 %s(%d): Dom\XMLDocument::createFromFile('php://memory')
 #1 {main}

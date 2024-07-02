@@ -95,6 +95,12 @@ typedef enum _php_libxml_class_type {
 	PHP_LIBXML_CLASS_MODERN = 2,
 } php_libxml_class_type;
 
+typedef enum php_libxml_quirks_mode {
+	PHP_LIBXML_NO_QUIRKS = 0,
+	PHP_LIBXML_QUIRKS,
+	PHP_LIBXML_LIMITED_QUIRKS,
+} php_libxml_quirks_mode;
+
 typedef struct _php_libxml_ref_obj {
 	void *ptr;
 	libxml_doc_props *doc_props;
@@ -103,7 +109,7 @@ typedef struct _php_libxml_ref_obj {
 	const php_libxml_document_handlers *handlers;
 	int refcount;
 	php_libxml_class_type class_type : 8;
-	bool quirks_mode;
+	php_libxml_quirks_mode quirks_mode : 8;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {

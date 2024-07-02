@@ -1350,7 +1350,7 @@ PHP_LIBXML_API int php_libxml_increment_doc_ref(php_libxml_node_object *object, 
 		object->document->private_data = NULL;
 		object->document->class_type = PHP_LIBXML_CLASS_UNSET;
 		object->document->handlers = &php_libxml_default_document_handlers;
-		object->document->quirks_mode = false;
+		object->document->quirks_mode = PHP_LIBXML_NO_QUIRKS;
 	}
 
 	return ret_refcount;

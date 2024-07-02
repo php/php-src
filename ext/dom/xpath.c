@@ -287,7 +287,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 	if (register_node_ns && nodep != NULL) {
 		if (modern) {
 			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(&intern->dom);
-			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep);
+			in_scope_ns = php_dom_get_in_scope_ns(ns_mapper, nodep, false);
 		} else {
 			in_scope_ns = php_dom_get_in_scope_ns_legacy(nodep);
 		}

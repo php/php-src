@@ -447,7 +447,7 @@ PHP_DOM_EXPORT void php_dom_libxml_reconcile_modern(php_dom_libxml_ns_mapper *ns
 	zend_hash_destroy(&ctx.old_ns_to_new_ns_ptr);
 }
 
-PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_mapper *ns_mapper, const xmlNode *node)
+PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_mapper *ns_mapper, const xmlNode *node, bool ignore_elements)
 {
 	ZEND_ASSERT(node != NULL);
 
@@ -464,7 +464,7 @@ PHP_DOM_EXPORT php_dom_in_scope_ns php_dom_get_in_scope_ns(php_dom_libxml_ns_map
 	for (const xmlNode *cur = node; cur != NULL; cur = cur->parent) {
 		if (cur->type == XML_ELEMENT_NODE) {
 			/* Register namespace of element */
-			if (cur->ns != NULL && cur->ns->prefix != NULL) {
+			if (!ignore_elements && cur->ns != NULL && cur->ns->prefix != NULL) {
 				const char *prefix = (const char *) cur->ns->prefix;
 				zend_hash_str_add_ptr(&tmp_prefix_to_ns_table, prefix, strlen(prefix), cur->ns);
 			}

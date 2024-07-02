@@ -22,6 +22,6 @@
 #include <libxml/xmlsave.h>
 #include <libxml/xmlIO.h>
 
-int dom_xml_serialize(xmlSaveCtxtPtr ctx, xmlOutputBufferPtr out, xmlNodePtr node, bool format);
+int dom_xml_serialize(xmlSaveCtxtPtr ctx, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed);
 
 #endif

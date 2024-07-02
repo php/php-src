@@ -1881,7 +1881,7 @@ PHP_METHOD(Dom_Node, lookupPrefix)
 /* }}} end dom_node_lookup_prefix */
 
 /* https://dom.spec.whatwg.org/#locate-a-namespace */
-static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *prefix)
+const char *dom_locate_a_namespace(const xmlNode *node, const zend_string *prefix)
 {
 	/* switch on the interface node implements: */
 	if (node->type == XML_ELEMENT_NODE) {
