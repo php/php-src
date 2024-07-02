@@ -2579,7 +2579,7 @@ function strip_tags(string $string, array|string|null $allowed_tags = null): str
 function setlocale(int $category, $locales, ...$rest): string|false {}
 
 /** @param array $result */
-function parse_str(string $string, &$result): void {}
+function parse_str(string $string, &$result, bool $merge_params = false): void {}
 
 /**
  * @return array<int, string|null>
