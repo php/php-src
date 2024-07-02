@@ -30,6 +30,11 @@ if test "$PHP_EMBED" != "no"; then
   fi
   AC_MSG_RESULT([$PHP_EMBED_TYPE])
   AC_SUBST([PHP_EMBED_TYPE])
+
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/embed/Makefile.frag], [$abs_srcdir/sapi/embed], [$abs_builddir/sapi/embed])
+  PHP_OUTPUT([sapi/embed/php-embed.pc])
+
+  install_embed=install-embed
 else
   AC_MSG_RESULT([no])
 fi

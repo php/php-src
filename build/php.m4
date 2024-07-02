@@ -2536,3 +2536,16 @@ AS_VAR_IF([php_var], [yes],
     [Define to 1 if the compiler supports the '$1' variable attribute.])])
 AS_VAR_POPDEF([php_var])
 ])
+
+dnl
+dnl PHP_SET_LIBS_PRIVATE
+dnl
+dnl Get a list of all external libraries that were linked to PHP. For using in
+dnl templates, such as php.pc.in.
+dnl
+AC_DEFUN([PHP_SET_LIBS_PRIVATE],
+[PHP_LIBS_PRIVATE=$EXTRA_LIBS
+AS_VAR_SET_IF([ZEND_EXTRA_LIBS],
+  [AS_VAR_APPEND([PHP_LIBS_PRIVATE], [" $ZEND_EXTRA_LIBS"])])
+AC_SUBST([PHP_LIBS_PRIVATE])
+])
