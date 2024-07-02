@@ -1769,7 +1769,7 @@ ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void)
 
 ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute(HashTable *attributes, zend_class_entry* scope, zend_string **message_suffix)
 {
-	*message_suffix = zend_empty_string;
+	*message_suffix = ZSTR_EMPTY_ALLOC();
 
 	if (!attributes) {
 		return SUCCESS;
@@ -1787,8 +1787,8 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 
 	zend_result result = FAILURE;
 
-	zend_string *message = zend_empty_string;
-	zend_string *since = zend_empty_string;
+	zend_string *message = ZSTR_EMPTY_ALLOC();
+	zend_string *since = ZSTR_EMPTY_ALLOC();
 
 	zval obj;
 	ZVAL_UNDEF(&obj);
@@ -1838,7 +1838,7 @@ ZEND_COLD static zend_result ZEND_FASTCALL get_deprecation_suffix_from_attribute
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
 {
-	zend_string *message_suffix = zend_empty_string;
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
 	if (get_deprecation_suffix_from_attribute(fbc->common.attributes, fbc->common.scope, &message_suffix) == FAILURE) {
 		return;
@@ -1864,7 +1864,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_functi
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name)
 {
-	zend_string *message_suffix = zend_empty_string;
+	zend_string *message_suffix = ZSTR_EMPTY_ALLOC();
 
 	if (get_deprecation_suffix_from_attribute(c->attributes, c->ce, &message_suffix) == FAILURE) {
 		return;
