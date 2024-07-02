@@ -132,6 +132,6 @@ functions required for PDO support.
   ], $PDO_ODBC_LDFLAGS)
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,, $PDO_ODBC_INCLUDE)
-  PHP_SUBST(PDO_ODBC_SHARED_LIBADD)
+  PHP_SUBST([PDO_ODBC_SHARED_LIBADD])
   PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
 fi

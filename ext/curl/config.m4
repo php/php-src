@@ -84,5 +84,5 @@ if test "$PHP_CURL" != "no"; then
 
   PHP_NEW_EXTENSION(curl, interface.c multi.c share.c curl_file.c, $ext_shared)
   PHP_INSTALL_HEADERS([ext/curl], [php_curl.h])
-  PHP_SUBST(CURL_SHARED_LIBADD)
+  PHP_SUBST([CURL_SHARED_LIBADD])
 fi

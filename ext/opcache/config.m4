@@ -93,9 +93,9 @@ if test "$PHP_OPCACHE" != "no"; then
       ])
     ])
 
-    PHP_SUBST(IR_TARGET)
-    PHP_SUBST(DASM_FLAGS)
-    PHP_SUBST(DASM_ARCH)
+    PHP_SUBST([IR_TARGET])
+    PHP_SUBST([DASM_FLAGS])
+    PHP_SUBST([DASM_ARCH])
 
     JIT_CFLAGS="-I@ext_builddir@/jit/ir -D${IR_TARGET} -DIR_PHP"
     if test "$ZEND_DEBUG" = "yes"; then
@@ -350,5 +350,5 @@ int main(void) {
     PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
     PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
   fi
-  PHP_SUBST(OPCACHE_SHARED_LIBADD)
+  PHP_SUBST([OPCACHE_SHARED_LIBADD])
 fi

@@ -34,5 +34,5 @@ if test "$PHP_BZ2" != "no"; then
   ])
 
   PHP_NEW_EXTENSION(bz2, bz2.c bz2_filter.c, $ext_shared)
-  PHP_SUBST(BZ2_SHARED_LIBADD)
+  PHP_SUBST([BZ2_SHARED_LIBADD])
 fi
