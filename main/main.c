@@ -108,6 +108,38 @@ PHPAPI unsigned int php_version_id(void)
 	return PHP_VERSION_ID;
 }
 
+PHPAPI void php_print_version(sapi_module_struct *sapi_module)
+{
+	php_printf("PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
+		PHP_VERSION, sapi_module->name, __DATE__, __TIME__,
+#ifdef ZTS
+		"ZTS"
+#else
+		"NTS"
+#endif
+#ifdef PHP_BUILD_COMPILER
+		" " PHP_BUILD_COMPILER
+#endif
+#ifdef PHP_BUILD_ARCH
+		" " PHP_BUILD_ARCH
+#endif
+#if ZEND_DEBUG
+		" DEBUG"
+#endif
+#ifdef HAVE_GCOV
+		" GCOV"
+#endif
+		,
+#ifdef PHP_BUILD_PROVIDER
+		"Built by " PHP_BUILD_PROVIDER "\n"
+#else
+					""
+#endif
+		,
+		get_zend_version()
+	);
+}
+
 /* {{{ PHP_INI_MH */
 static PHP_INI_MH(OnSetFacility)
 {
