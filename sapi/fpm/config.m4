@@ -1,4 +1,5 @@
-PHP_ARG_ENABLE([fpm],,
+PHP_ARG_ENABLE([fpm],
+  [for FPM build],
   [AS_HELP_STRING([--enable-fpm],
     [Enable building of the fpm SAPI executable])],
   [no],
@@ -416,10 +417,7 @@ AS_VAR_IF([php_cv_have_select], [yes],
     [Define to 1 if system has a working 'select' function.])])
 ])
 
-AC_MSG_CHECKING(for FPM build)
 if test "$PHP_FPM" != "no"; then
-  AC_MSG_RESULT($PHP_FPM)
-
   PHP_FPM_CLOCK
   PHP_FPM_TRACE
   PHP_FPM_BUILTIN_ATOMIC
@@ -635,7 +633,4 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_SUBST([SAPI_FPM_PATH])
   PHP_SUBST([BUILD_FPM])
-
-else
-  AC_MSG_RESULT(no)
 fi
