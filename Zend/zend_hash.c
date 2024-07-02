@@ -514,6 +514,11 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *h
 	return _zend_hash_get_current_pos(ht);
 }
 
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos_ex(const HashTable *ht, HashPosition pos)
+{
+	return _zend_hash_get_valid_pos(ht, pos);
+}
+
 static void zend_hash_remove_iterator_copies(uint32_t idx) {
 	HashTableIterator *iterators = EG(ht_iterators);
 
