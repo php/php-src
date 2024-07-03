@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ba1562ca8fe2fe48c40bc52d10545aa989afd86c */
+ * Stub hash: 53cd20dcbbc630997ed07c00c52d79676d562438 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Throwable_getMessage, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -171,6 +171,14 @@ static const zend_function_entry class_DivisionByZeroError_methods[] = {
 };
 
 static const zend_function_entry class_UnhandledMatchError_methods[] = {
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_AccessError_methods[] = {
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_OpenbasedirAccessError_methods[] = {
 	ZEND_FE_END
 };
 
@@ -389,6 +397,26 @@ static zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *cl
 
 	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", class_UnhandledMatchError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_AccessError(zend_class_entry *class_entry_Error)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "AccessError", class_AccessError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_OpenbasedirAccessError(zend_class_entry *class_entry_AccessError)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "OpenbasedirAccessError", class_OpenbasedirAccessError_methods);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_AccessError);
 
 	return class_entry;
 }

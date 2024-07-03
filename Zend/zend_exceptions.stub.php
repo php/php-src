@@ -171,6 +171,14 @@ class UnhandledMatchError extends Error
 {
 }
 
+class AccessError extends Error
+{
+}
+
+class OpenbasedirAccessError extends AccessError
+{
+}
+
 class RequestParseBodyException extends Exception
 {
 }

@@ -32,6 +32,7 @@
 #include "php_pcntl.h"
 #include "php_signal.h"
 #include "php_ticks.h"
+#include "zend_exceptions.h"
 #include "zend_fibers.h"
 
 #if defined(HAVE_GETPRIORITY) || defined(HAVE_SETPRIORITY) || defined(HAVE_WAIT3)
@@ -600,7 +601,8 @@ PHP_FUNCTION(pcntl_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir_ex(path, 0)) {
-		zend_argument_value_error(1, "open_basedir restriction in effect.");
+		// TODO we may generalise the following with a new handy specialised call
+		zend_argument_error(zend_ce_openbasedir_access_error, 1, "open_basedir restriction in effect for the path `%s`.", path);
 		RETURN_THROWS();
 	}
 
