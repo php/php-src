@@ -1136,115 +1136,6 @@ exit:
 }
 /* }}} */
 
-static ZEND_COLD zend_never_inline void zend_bad_array_access(zend_class_entry *ce) /* {{{ */
-{
-	zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
-}
-/* }}} */
-
-ZEND_API zval *zend_std_read_dimension(zend_object *object, zval *offset, int type, zval *rv) /* {{{ */
-{
-	zend_class_entry *ce = object->ce;
-	zval tmp_offset;
-
-	/* arrayaccess_funcs_ptr is set if (and only if) the class implements zend_ce_arrayaccess */
-	zend_class_arrayaccess_funcs *funcs = ce->arrayaccess_funcs_ptr;
-	if (EXPECTED(funcs)) {
-		if (offset == NULL) {
-			/* [] construct */
-			ZVAL_NULL(&tmp_offset);
-		} else {
-			ZVAL_COPY_DEREF(&tmp_offset, offset);
-		}
-
-		GC_ADDREF(object);
-		if (type == BP_VAR_IS) {
-			zend_call_known_instance_method_with_1_params(funcs->zf_offsetexists, object, rv, &tmp_offset);
-			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
-				OBJ_RELEASE(object);
-				zval_ptr_dtor(&tmp_offset);
-				return NULL;
-			}
-			if (!i_zend_is_true(rv)) {
-				OBJ_RELEASE(object);
-				zval_ptr_dtor(&tmp_offset);
-				zval_ptr_dtor(rv);
-				return &EG(uninitialized_zval);
-			}
-			zval_ptr_dtor(rv);
-		}
-
-		zend_call_known_instance_method_with_1_params(funcs->zf_offsetget, object, rv, &tmp_offset);
-
-		OBJ_RELEASE(object);
-		zval_ptr_dtor(&tmp_offset);
-
-		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
-			if (UNEXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Undefined offset for object of type %s used as array", ZSTR_VAL(ce->name));
-			}
-			return NULL;
-		}
-		return rv;
-	} else {
-	    zend_bad_array_access(ce);
-		return NULL;
-	}
-}
-/* }}} */
-
-ZEND_API void zend_std_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
-{
-	zend_class_entry *ce = object->ce;
-	zval tmp_offset;
-
-	zend_class_arrayaccess_funcs *funcs = ce->arrayaccess_funcs_ptr;
-	if (EXPECTED(funcs)) {
-		if (!offset) {
-			ZVAL_NULL(&tmp_offset);
-		} else {
-			ZVAL_COPY_DEREF(&tmp_offset, offset);
-		}
-		GC_ADDREF(object);
-		zend_call_known_instance_method_with_2_params(funcs->zf_offsetset, object, NULL, &tmp_offset, value);
-		OBJ_RELEASE(object);
-		zval_ptr_dtor(&tmp_offset);
-	} else {
-	    zend_bad_array_access(ce);
-	}
-}
-/* }}} */
-
-// todo: make zend_std_has_dimension return bool as well
-ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check_empty) /* {{{ */
-{
-	zend_class_entry *ce = object->ce;
-	zval retval, tmp_offset;
-	bool result;
-
-	zend_class_arrayaccess_funcs *funcs = ce->arrayaccess_funcs_ptr;
-	if (EXPECTED(funcs)) {
-		ZVAL_COPY_DEREF(&tmp_offset, offset);
-		GC_ADDREF(object);
-		zend_call_known_instance_method_with_1_params(funcs->zf_offsetexists, object, &retval, &tmp_offset);
-		result = i_zend_is_true(&retval);
-		zval_ptr_dtor(&retval);
-		if (check_empty && result && EXPECTED(!EG(exception))) {
-			zend_call_known_instance_method_with_1_params(funcs->zf_offsetget, object, &retval, &tmp_offset);
-			result = i_zend_is_true(&retval);
-			zval_ptr_dtor(&retval);
-		}
-		OBJ_RELEASE(object);
-		zval_ptr_dtor(&tmp_offset);
-	} else {
-	    zend_bad_array_access(ce);
-		return 0;
-	}
-
-	return result;
-}
-/* }}} */
-
 ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *name, int type, void **cache_slot) /* {{{ */
 {
 	zval *retval = NULL;
@@ -1406,24 +1297,6 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		} else {
 			/* Nothing to do: The property already does not exist. */
 		}
-	}
-}
-/* }}} */
-
-ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset) /* {{{ */
-{
-	zend_class_entry *ce = object->ce;
-	zval tmp_offset;
-
-	zend_class_arrayaccess_funcs *funcs = ce->arrayaccess_funcs_ptr;
-	if (EXPECTED(funcs)) {
-		ZVAL_COPY_DEREF(&tmp_offset, offset);
-		GC_ADDREF(object);
-		zend_call_known_instance_method_with_1_params(funcs->zf_offsetunset, object, NULL, &tmp_offset);
-		OBJ_RELEASE(object);
-		zval_ptr_dtor(&tmp_offset);
-	} else {
-	    zend_bad_array_access(ce);
 	}
 }
 /* }}} */
@@ -2292,13 +2165,9 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 
 	zend_std_read_property,					/* read_property */
 	zend_std_write_property,				/* write_property */
-	zend_std_read_dimension,				/* read_dimension */
-	zend_std_write_dimension,				/* write_dimension */
 	zend_std_get_property_ptr_ptr,			/* get_property_ptr_ptr */
 	zend_std_has_property,					/* has_property */
 	zend_std_unset_property,				/* unset_property */
-	zend_std_has_dimension,					/* has_dimension */
-	zend_std_unset_dimension,				/* unset_dimension */
 	zend_std_get_properties,				/* get_properties */
 	zend_std_get_method,					/* get_method */
 	zend_std_get_constructor,				/* get_constructor */

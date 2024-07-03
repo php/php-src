@@ -252,33 +252,12 @@ static void dimension_common_helper(zend_object *object, zval *offset, int prop_
 	}
 }
 
-static zval* dimension_handlers_no_ArrayAccess_read_dimension(zend_object *object, zval *offset, int type, zval *rv) {
-	dimension_common_helper(object, offset, 0);
-	/* ReadType */
-	ZVAL_LONG(OBJ_PROP_NUM(object, 4), type);
-
-	/* Normal logic */
-	ZVAL_BOOL(rv, true);
-	return rv;
-}
-
 static zval* dimension_handlers_no_ArrayAccess_ce_handler_read_dimension(zend_object *object, zval *offset, zval *rv) {
 	dimension_common_helper(object, offset, 0);
-	/* ReadType */
-	//ZVAL_LONG(OBJ_PROP_NUM(object, 4), );
 
 	/* Normal logic */
 	ZVAL_BOOL(rv, true);
 	return rv;
-}
-
-static int dimension_handlers_no_ArrayAccess_has_dimension(zend_object *object, zval *offset, int check_empty) {
-	/* checkEmpty */
-	ZVAL_LONG(OBJ_PROP_NUM(object, 6), check_empty);
-	dimension_common_helper(object, offset, 2);
-
-	/* Normal logic */
-	return 1;
 }
 
 static bool dimension_handlers_no_ArrayAccess_ce_handler_has_dimension(zend_object *object, zval *offset) {
@@ -364,10 +343,6 @@ void zend_test_object_handlers_init(void)
 	dimension_handlers_no_ArrayAccess_ce = register_class_DimensionHandlersNoArrayAccess();
 	dimension_handlers_no_ArrayAccess_ce->create_object = dimension_handlers_no_ArrayAccess_object_create;
 	memcpy(&dimension_handlers_no_ArrayAccess_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
-	dimension_handlers_no_ArrayAccess_object_handlers.read_dimension = dimension_handlers_no_ArrayAccess_read_dimension;
-	dimension_handlers_no_ArrayAccess_object_handlers.write_dimension = dimension_handlers_no_ArrayAccess_write_dimension;
-	dimension_handlers_no_ArrayAccess_object_handlers.has_dimension = dimension_handlers_no_ArrayAccess_has_dimension;
-	dimension_handlers_no_ArrayAccess_object_handlers.unset_dimension = dimension_handlers_no_ArrayAccess_unset_dimension;
 
 	dimension_handlers_no_ArrayAccess_ce->dimension_handlers = &dimension_handlers_no_ArrayAccess_dimension_functions;
 }
