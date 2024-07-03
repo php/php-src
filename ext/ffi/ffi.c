@@ -3748,7 +3748,7 @@ ZEND_METHOD(FFI, new) /* {{{ */
 		FFI_G(default_type_attr) = 0;
 
 		if (zend_ffi_cache_type_get
-		 && (cached_dcl = zend_ffi_cache_type_get(type_def))) {
+		 && (cached_dcl = zend_ffi_cache_type_get(type_def, FFI_G(symbols)))) {
 			memcpy(&dcl, cached_dcl, sizeof(zend_ffi_dcl));
 		} else if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
@@ -3767,16 +3767,9 @@ ZEND_METHOD(FFI, new) /* {{{ */
 			if (clean_tags && FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
-			if (clean_symbols && FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
-			FFI_G(symbols) = NULL;
-			FFI_G(tags) = NULL;
 
 			if (zend_ffi_cache_type_add) {
-				cached_dcl = zend_ffi_cache_type_add(type_def, &dcl);
+				cached_dcl = zend_ffi_cache_type_add(type_def, &dcl, FFI_G(symbols));
 				if (cached_dcl) {
 					if (ZEND_FFI_TYPE_IS_OWNED(dcl.type)) {
 						_zend_ffi_type_dtor(dcl.type);
@@ -3784,6 +3777,14 @@ ZEND_METHOD(FFI, new) /* {{{ */
 					memcpy(&dcl, cached_dcl, sizeof(zend_ffi_dcl));
 				}
 			}
+
+			if (clean_symbols && FFI_G(symbols)) {
+				zend_hash_destroy(FFI_G(symbols));
+				efree(FFI_G(symbols));
+				FFI_G(symbols) = NULL;
+			}
+			FFI_G(symbols) = NULL;
+			FFI_G(tags) = NULL;
 		}
 
 		type = ZEND_FFI_TYPE(dcl.type);
@@ -3912,7 +3913,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 		FFI_G(default_type_attr) = 0;
 
 		if (zend_ffi_cache_type_get
-		 && (cached_dcl = zend_ffi_cache_type_get(type_def))) {
+		 && (cached_dcl = zend_ffi_cache_type_get(type_def, FFI_G(symbols)))) {
 			memcpy(&dcl, cached_dcl, sizeof(zend_ffi_dcl));
 		} else if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 			zend_ffi_type_dtor(dcl.type);
@@ -3931,16 +3932,9 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 			if (clean_tags && FFI_G(tags)) {
 				zend_ffi_tags_cleanup(&dcl);
 			}
-			if (clean_symbols && FFI_G(symbols)) {
-				zend_hash_destroy(FFI_G(symbols));
-				efree(FFI_G(symbols));
-				FFI_G(symbols) = NULL;
-			}
-			FFI_G(symbols) = NULL;
-			FFI_G(tags) = NULL;
 
 			if (zend_ffi_cache_type_add) {
-				cached_dcl = zend_ffi_cache_type_add(type_def, &dcl);
+				cached_dcl = zend_ffi_cache_type_add(type_def, &dcl, FFI_G(symbols));
 				if (cached_dcl) {
 					if (ZEND_FFI_TYPE_IS_OWNED(dcl.type)) {
 						_zend_ffi_type_dtor(dcl.type);
@@ -3948,6 +3942,14 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 					memcpy(&dcl, cached_dcl, sizeof(zend_ffi_dcl));
 				}
 			}
+
+			if (clean_symbols && FFI_G(symbols)) {
+				zend_hash_destroy(FFI_G(symbols));
+				efree(FFI_G(symbols));
+				FFI_G(symbols) = NULL;
+			}
+			FFI_G(symbols) = NULL;
+			FFI_G(tags) = NULL;
 		}
 
 		type = ZEND_FFI_TYPE(dcl.type);
@@ -4098,7 +4100,7 @@ ZEND_METHOD(FFI, type) /* {{{ */
 	FFI_G(default_type_attr) = 0;
 
 	if (zend_ffi_cache_type_get
-	 && (cached_dcl = zend_ffi_cache_type_get(type_def))) {
+	 && (cached_dcl = zend_ffi_cache_type_get(type_def, FFI_G(symbols)))) {
 		memcpy(&dcl, cached_dcl, sizeof(zend_ffi_dcl));
 	} else if (zend_ffi_parse_type(ZSTR_VAL(type_def), ZSTR_LEN(type_def), &dcl) == FAILURE) {
 		zend_ffi_type_dtor(dcl.type);
@@ -4117,15 +4119,9 @@ ZEND_METHOD(FFI, type) /* {{{ */
 		if (clean_tags && FFI_G(tags)) {
 			zend_ffi_tags_cleanup(&dcl);
 		}
-		if (clean_symbols && FFI_G(symbols)) {
-			zend_hash_destroy(FFI_G(symbols));
-			efree(FFI_G(symbols));
-			FFI_G(symbols) = NULL;
-		}
-		FFI_G(symbols) = NULL;
-		FFI_G(tags) = NULL;
+
 		if (zend_ffi_cache_type_add) {
-			cached_dcl = zend_ffi_cache_type_add(type_def, &dcl);
+			cached_dcl = zend_ffi_cache_type_add(type_def, &dcl, FFI_G(symbols));
 			if (cached_dcl) {
 				if (ZEND_FFI_TYPE_IS_OWNED(dcl.type)) {
 					_zend_ffi_type_dtor(dcl.type);
@@ -4133,6 +4129,14 @@ ZEND_METHOD(FFI, type) /* {{{ */
 				memcpy(&dcl, cached_dcl, sizeof(zend_ffi_dcl));
 			}
 		}
+
+		if (clean_symbols && FFI_G(symbols)) {
+			zend_hash_destroy(FFI_G(symbols));
+			efree(FFI_G(symbols));
+			FFI_G(symbols) = NULL;
+		}
+		FFI_G(symbols) = NULL;
+		FFI_G(tags) = NULL;
 	}
 
 	ctype = (zend_ffi_ctype*)zend_ffi_ctype_new(zend_ffi_ctype_ce);
