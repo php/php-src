@@ -18,8 +18,8 @@ $serverCode = <<<'CODE'
 
     $client = @stream_socket_accept($server);
     if ($client) {
-        fwrite($client, "xx");
         phpt_wait();
+        fwrite($client, "xx");
         fclose($client);
         phpt_notify();
     }
