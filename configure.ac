@@ -519,19 +519,17 @@ dnl Check AVX512 VBMI
 PHP_CHECK_AVX512_VBMI_SUPPORTS
 
 dnl Check for __alignof__ support in the compiler
-AC_CACHE_CHECK(whether the compiler supports __alignof__, ac_cv_alignof_exists,[
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-]],[[
+AC_CACHE_CHECK([whether the compiler supports __alignof__],
+[php_cv_have_alignof],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [
   int align = __alignof__(int);
   (void)align;
-]])],[
-  ac_cv_alignof_exists=yes
-],[
-  ac_cv_alignof_exists=no
-])])
-if test "$ac_cv_alignof_exists" = "yes"; then
-  AC_DEFINE([HAVE_ALIGNOF], 1, [whether the compiler supports __alignof__])
-fi
+])],
+[php_cv_have_alignof=yes],
+[php_cv_have_alignof=no])])
+AS_VAR_IF([php_cv_have_alignof], [yes],
+  [AC_DEFINE([HAVE_ALIGNOF], [1],
+    [Define to 1 if the compiler supports '__alignof__'.])])
 
 dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
@@ -718,8 +716,8 @@ fi
 
 dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
 dnl until the problem is fixed properly, copy_file_range() is used only on Linux
-AC_CACHE_CHECK([for copy_file_range], ac_cv_copy_file_range,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for copy_file_range], [php_cv_func_copy_file_range],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
 #ifdef __linux__
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -738,37 +736,43 @@ return 0;
 #else
 #error "unsupported platform"
 #endif
-]])], [ac_cv_copy_file_range=yes], [ac_cv_copy_file_range=no], [ac_cv_copy_file_range=no])
+])],
+[php_cv_func_copy_file_range=yes],
+[php_cv_func_copy_file_range=no],
+[php_cv_func_copy_file_range=no])
 ])
-
-if test "$ac_cv_copy_file_range" = yes; then
-  AC_DEFINE(HAVE_COPY_FILE_RANGE,1,[Define if copy_file_range support])
-fi
+AS_VAR_IF([php_cv_func_copy_file_range], [yes],
+  [AC_DEFINE([HAVE_COPY_FILE_RANGE], [1],
+    [Define to 1 if you have the 'copy_file_range' function.])])
 
 AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 
-AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
-if test "$ac_cv_func___crc32d" = "yes"; then
-  AC_DEFINE([HAVE_AARCH64_CRC32], [1], [Define when aarch64 CRC32 API is available.])
-fi
+AC_CACHE_CHECK([for aarch64 CRC32 API], [php_cv_func___crc32d],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <arm_acle.h>], [__crc32d(0, 0);])],
+[php_cv_func___crc32d=yes],
+[php_cv_func___crc32d=no])])
+AS_VAR_IF([php_cv_func___crc32d], [yes],
+  [AC_DEFINE([HAVE_AARCH64_CRC32], [1],
+    [Define to 1 when aarch64 CRC32 API is available.])])
 
 dnl Check for asm goto support.
-AC_CACHE_CHECK([for asm goto], [ac_cv__asm_goto],
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+AC_CACHE_CHECK([for asm goto], [php_cv__asm_goto],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([], [
 #if defined(__x86_64__) || defined(__i386__)
-    __asm__ goto("jmp %l0\n" :::: end);
+  __asm__ goto("jmp %l0\n" :::: end);
 #elif defined(__aarch64__)
-    __asm__ goto("b %l0\n" :::: end);
+  __asm__ goto("b %l0\n" :::: end);
 #endif
 end:
-    return 0;
-]])], [ac_cv__asm_goto=yes], [ac_cv__asm_goto=no])])
-if test "$ac_cv__asm_goto" = yes; then
-  AC_DEFINE([HAVE_ASM_GOTO], [1], [Define if asm goto support is available.])
-fi
+  return 0;
+])],
+[php_cv__asm_goto=yes],
+[php_cv__asm_goto=no])])
+AS_VAR_IF([php_cv__asm_goto], [yes],
+  [AC_DEFINE([HAVE_ASM_GOTO], [1],
+    [Define to 1 if asm goto support is available.])])
 
 dnl Check Valgrind support.
 PHP_ARG_WITH([valgrind],

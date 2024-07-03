@@ -102,12 +102,15 @@ if test "$PHP_LDAP" != "no"; then
   LIBS="$LIBS $LDAP_SHARED_LIBADD"
 
   dnl Check for 3 arg ldap_set_rebind_proc
-  AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc], ac_cv_3arg_setrebindproc,
-  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <ldap.h>]], [[ldap_set_rebind_proc(0,0,0)]])],
-  [ac_cv_3arg_setrebindproc=yes], [ac_cv_3arg_setrebindproc=no])])
-  if test "$ac_cv_3arg_setrebindproc" = yes; then
-    AC_DEFINE(HAVE_3ARG_SETREBINDPROC,1,[Whether 3 arg set_rebind_proc()])
-  fi
+  AC_CACHE_CHECK([for 3 arg ldap_set_rebind_proc],
+    [php_cv_have_3arg_setrebindproc],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <ldap.h>],
+    [ldap_set_rebind_proc(0,0,0)])],
+    [php_cv_have_3arg_setrebindproc=yes],
+    [php_cv_have_3arg_setrebindproc=no])])
+  AS_VAR_IF([php_cv_have_3arg_setrebindproc], [yes],
+    [AC_DEFINE([HAVE_3ARG_SETREBINDPROC], [1],
+      [Define to 1 if 'ldap_set_rebind_proc' has 3 arguments.])])
 
   dnl Solaris 2.8 claims to be 2004 API, but doesn't have ldap_parse_reference()
   dnl nor ldap_start_tls_s()
