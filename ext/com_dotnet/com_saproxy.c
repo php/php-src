@@ -81,7 +81,7 @@ static zval *saproxy_property_write(zend_object *object, zend_string *member, zv
 	return value;
 }
 
-static zval *saproxy_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+static zval *saproxy_read_dimension(zend_object *object, zval *offset, zval *rv)
 {
 	php_com_saproxy *proxy = (php_com_saproxy*) object;
 	UINT dims, i;
@@ -280,16 +280,16 @@ static void saproxy_write_dimension(zend_object *object, zval *offset, zval *val
 	}
 }
 
-static int saproxy_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
-{
-	/* no properties */
-	return 0;
-}
-
-static int saproxy_dimension_exists(zend_object *object, zval *member, int check_empty)
+static bool saproxy_dimension_exists(zend_object *object, zval *member)
 {
 	/* TODO Add support */
 	zend_throw_error(NULL, "Cannot check dimension on a COM object");
+	return false;
+}
+
+static int saproxy_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
+{
+	/* no properties */
 	return 0;
 }
 
@@ -394,25 +394,28 @@ zend_object_handlers php_com_saproxy_handlers = {
 	saproxy_clone,
 	saproxy_property_read,
 	saproxy_property_write,
-	saproxy_read_dimension,
-	saproxy_write_dimension,
 	NULL,
 	saproxy_property_exists,
 	saproxy_property_delete,
-	saproxy_dimension_exists,
-	saproxy_dimension_delete,
 	saproxy_properties_get,
 	saproxy_method_get,
 	saproxy_constructor_get,
 	saproxy_class_name_get,
 	saproxy_object_cast,
 	saproxy_count_elements,
-	NULL,									/* get_debug_info */
-	NULL,									/* get_closure */
-	NULL,									/* get_gc */
-	NULL,									/* do_operation */
-	saproxy_objects_compare,				/* compare */
-	NULL,									/* get_properties_for */
+	NULL,					 /* get_debug_info */
+	NULL,					 /* get_closure */
+	NULL,					 /* get_gc */
+	NULL,					 /* do_operation */
+	saproxy_objects_compare, /* compare */
+	NULL,					 /* get_properties_for */
+};
+
+/* const */ zend_class_dimensions_functions php_com_saproxy_dimensions_functions = {
+	.read_dimension = saproxy_read_dimension,
+	.has_dimension   = saproxy_dimension_exists,
+	.fetch_dimension = saproxy_read_dimension,
+	.write_dimension = saproxy_write_dimension,
 };
 
 void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index)

@@ -24,6 +24,7 @@
 #include <unknwn.h>
 #include <dispex.h>
 #include "win32/winutil.h"
+#include "Zend/zend_interfaces_dimension.h"
 
 typedef struct _php_com_dotnet_object {
 	zend_object zo;
@@ -73,12 +74,14 @@ zend_object* php_com_object_new(zend_class_entry *ce);
 zend_object* php_com_object_clone(zend_object *object);
 void php_com_object_free_storage(zend_object *object);
 extern zend_object_handlers php_com_object_handlers;
+extern /* const */ zend_class_dimensions_functions php_com_dimensions_functions;
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, bool enable);
 
 /* com_saproxy.c */
 zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *object, int by_ref);
 void php_com_saproxy_create(zend_object *com_object, zval *proxy_out, zval *index);
 extern zend_object_handlers php_com_saproxy_handlers;
+extern /* const */ zend_class_dimensions_functions php_com_saproxy_dimensions_functions;
 
 /* com_olechar.c */
 PHP_COM_DOTNET_API zend_string *php_com_olestring_to_string(OLECHAR *olestring, int codepage);

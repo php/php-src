@@ -1517,6 +1517,10 @@ static zend_never_inline ZEND_COLD bool zend_check_dimension_interfaces_implemen
 	if (zend_string_equals_literal_ci(object->ce->name, "FFI\\CData")) {
 		return true;
 	}
+	/* ext/com com class is currently weird */
+	if (zend_string_equals_literal_ci(object->ce->name, "com")) {
+		return true;
+	}
 	/* ext/zend_test class is used for debugging and checking behaviour */
 	if (zend_string_equals_literal_ci(object->ce->name, "DimensionHandlersNoArrayAccess")) {
 		return true;
