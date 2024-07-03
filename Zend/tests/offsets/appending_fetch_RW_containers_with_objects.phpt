@@ -1,5 +1,7 @@
 --TEST--
 Appending containers via a binary RW op $c[] .= $v; fetch is an object
+--EXTENSIONS--
+gmp
 --FILE--
 <?php
 
