@@ -2478,6 +2478,14 @@ static zend_class_entry* zend_accel_inheritance_cache_add(zend_class_entry *ce, 
 #if HAVE_FFI
 #include "ext/ffi/php_ffi.h"
 
+typedef struct _accel_ffi_cache_type_entry accel_ffi_cache_type_entry;
+
+struct _accel_ffi_cache_type_entry {
+	accel_ffi_cache_type_entry *next;
+	void                       *context;
+	zend_ffi_dcl                dcl;
+};
+
 static ssize_t accel_ffi_persist_type_calc(zend_ffi_type *type)
 {
 	HashTable *ht;
@@ -2669,9 +2677,10 @@ static zend_ffi_type* accel_ffi_persist_type_copy(void** ptr, zend_ffi_type *typ
 	return new_type;
 }
 
-static zend_ffi_dcl* accel_ffi_persist_type(zend_ffi_dcl *dcl)
+static accel_ffi_cache_type_entry* accel_ffi_persist_type(zend_ffi_dcl *dcl, void *context)
 {
 	void *ptr;
+	accel_ffi_cache_type_entry *entry;
 	zend_ffi_dcl *new_dcl;
 	ssize_t size;
 
@@ -2682,59 +2691,68 @@ static zend_ffi_dcl* accel_ffi_persist_type(zend_ffi_dcl *dcl)
 	if (size == -1) {
 		return NULL;
 	}
-	ptr = zend_shared_alloc(sizeof(zend_ffi_dcl) + size);
-	if (!ptr) {
+	entry = zend_shared_alloc(sizeof(accel_ffi_cache_type_entry) + size);
+	if (!entry) {
 		return NULL;
 	}
 
 	zend_shared_alloc_init_xlat_table();
 
-	new_dcl = (zend_ffi_dcl*)ptr;
-	ptr = (void*)((char*)ptr + sizeof(zend_ffi_dcl));
+	entry->next = NULL;
+	entry->context = context;
+	new_dcl = &entry->dcl;
 	memcpy(new_dcl, dcl, sizeof(zend_ffi_dcl));
+	ptr = entry + 1;
 	new_dcl->type = accel_ffi_persist_type_copy(&ptr, new_dcl->type);
 
 	zend_shared_alloc_destroy_xlat_table();
 
-	return new_dcl;
+	return entry;
 }
 
-static zend_ffi_dcl* accel_ffi_cache_type_get(zend_string *str)
+static zend_ffi_dcl* accel_ffi_cache_type_get(zend_string *str, void *context)
 {
 	str = accel_find_interned_string(str);
 	if (str && (str->gc.u.type_info & IS_STR_FFI_TYPE)) {
 		// TODO: ???
-		zend_ffi_dcl *ptr = (zend_ffi_dcl*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
-		return ptr;
+		accel_ffi_cache_type_entry *ptr =
+			(accel_ffi_cache_type_entry*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
+		while (ptr && ptr->context != context) {
+			ptr = ptr->next;
+		}
+		if (ptr) {
+			return &ptr->dcl;
+		}
 	}
 	return NULL;
 }
 
-static zend_ffi_dcl* accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dcl)
+static zend_ffi_dcl* accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dcl, void *context)
 {
 	zend_ffi_dcl *new_dcl = NULL;
-
-	if (!ZEND_FFI_TYPE_IS_OWNED(dcl->type)
-	 && (dcl->type->attr & ZEND_FFI_ATTR_PERSISTENT)) {
-		return NULL;
-	}
 
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
-	new_dcl = accel_ffi_cache_type_get(str);
+	new_dcl = accel_ffi_cache_type_get(str, context);
 	if (!new_dcl) {
 		str = accel_new_interned_string(zend_string_copy(str));
 		if (IS_ACCEL_INTERNED(str)) {
-			new_dcl = accel_ffi_persist_type(dcl);
-			if (new_dcl) {
+			accel_ffi_cache_type_entry *ptr = accel_ffi_persist_type(dcl, context);
+			if (ptr) {
 				// TODO: ???
-				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_TYPE|IS_STR_FFI_SCOPE)));
-				ZEND_ASSERT((char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p > 0 &&
+				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_SCOPE)));
+				ZEND_ASSERT((char*)ptr - (char*)ZSMMG(shared_segments)[0]->p > 0 &&
 					(char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p < 0x7fffffff);
-				str->gc.u.type_info |= IS_STR_FFI_TYPE;
+				if (str->gc.u.type_info & IS_STR_FFI_TYPE) {
+					ptr->next = (accel_ffi_cache_type_entry*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
+				} else {
+					ptr->next = NULL;
+					str->gc.u.type_info |= IS_STR_FFI_TYPE;
+				}
 				// TODO: ???
-				str->gc.refcount = (char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p;
+				str->gc.refcount = (char*)ptr - (char*)ZSMMG(shared_segments)[0]->p;
+				new_dcl = &ptr->dcl;
 			}
 		}
 	}
