@@ -758,7 +758,7 @@ AS_VAR_IF([php_cv_func___crc32d], [yes],
     [Define to 1 when aarch64 CRC32 API is available.])])
 
 dnl Check for asm goto support.
-AC_CACHE_CHECK([for asm goto], [php_cv__asm_goto],
+AC_CACHE_CHECK([for asm goto], [php_cv_have__asm_goto],
 [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [
 #if defined(__x86_64__) || defined(__i386__)
   __asm__ goto("jmp %l0\n" :::: end);
@@ -768,9 +768,9 @@ AC_CACHE_CHECK([for asm goto], [php_cv__asm_goto],
 end:
   return 0;
 ])],
-[php_cv__asm_goto=yes],
-[php_cv__asm_goto=no])])
-AS_VAR_IF([php_cv__asm_goto], [yes],
+[php_cv_have__asm_goto=yes],
+[php_cv_have__asm_goto=no])])
+AS_VAR_IF([php_cv_have__asm_goto], [yes],
   [AC_DEFINE([HAVE_ASM_GOTO], [1],
     [Define to 1 if asm goto support is available.])])
 
