@@ -563,20 +563,6 @@ AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true]
 dnl Check for __attribute__ ((__aligned__)) support in the compiler.
 PHP_CHECK_VARIABLE_ATTRIBUTE([aligned])
 
-dnl Check for IPv6 support.
-AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>]], [[
-  struct sockaddr_in6 s;
-  struct in6_addr t = in6addr_any;
-  int i = AF_INET6;
-  (void)s;
-  t.s6_addr[0] = 0;
-  (void)i;
-]])],
-  [ac_cv_ipv6_support=yes], [ac_cv_ipv6_support=no])])
-
 dnl Checks for library functions.
 dnl ----------------------------------------------------------------------------
 
@@ -1012,9 +998,26 @@ PHP_ARG_ENABLE([ipv6],
   [yes],
   [no])
 
-if test "$PHP_IPV6" != "no" && test "$ac_cv_ipv6_support" = yes; then
-  AC_DEFINE(HAVE_IPV6, 1, [Whether to enable IPv6 support])
-fi
+AS_VAR_IF([PHP_IPV6], [yes],
+  [AC_CACHE_CHECK([for IPv6 support], [php_cv_have_ipv6],
+    [AC_LINK_IFELSE([AC_LANG_PROGRAM([
+      #include <sys/types.h>
+      #include <sys/socket.h>
+      #include <netinet/in.h>
+    ], [[
+      struct sockaddr_in6 s;
+      struct in6_addr t = in6addr_any;
+      int i = AF_INET6;
+      (void)s;
+      t.s6_addr[0] = 0;
+      (void)i;
+    ]])],
+    [php_cv_have_ipv6=yes],
+    [php_cv_have_ipv6=no])])
+])
+AS_VAR_IF([php_cv_have_ipv6], [yes],
+  [AC_DEFINE([HAVE_IPV6], [1],
+    [Define to 1 if IPv6 is enabled and supported.])])
 
 dnl DTRACE checks. Note: this has to be done after SAPI configuration.
 PHP_ARG_ENABLE([dtrace],
