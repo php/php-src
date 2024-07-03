@@ -35,19 +35,17 @@ $xpath->__construct($dom, true);
 echo "=== Second run ===\n";
 
 $xpath->registerNamespace('foo', 'urn:foo');
-$xpath->query('//*[foo:test()]');
+// Note: since libxml2 commit aca16fb3d45e0b2c45364ffc1cea8eb4abaca87d this only outputs 1 warning. This seems intentional.
+// Easiest workaround is silencing the warnings
+@$xpath->query('//*[foo:test()]');
 $xpath->registerPhpFunctionNS('urn:foo', 'test', [new Test, 'test']);
 $xpath->query('//*[foo:test()]');
 
 ?>
---EXPECTF--
+--EXPECT--
 === First run ===
 === Reconstruct ===
 destruct
 === Second run ===
-
-Warning: DOMXPath::query(): xmlXPathCompOpEval: function test not found in %s on line %d
-
-Warning: DOMXPath::query(): Unregistered function in %s on line %d
 test
 destruct

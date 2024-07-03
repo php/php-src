@@ -9,7 +9,7 @@ Dom\XMLDocument::createFromFile("\\0");
 
 ?>
 --EXPECTF--
-Warning: Dom\XMLDocument::createFromFile(): I/O warning : failed to load external entity "%s" in %s on line %d
+Warning: Dom\XMLDocument::createFromFile(): I/O %s : failed to load %s
 
 Fatal error: Uncaught Exception: Cannot open file '\0' in %s:%d
 Stack trace:

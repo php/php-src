@@ -7,7 +7,7 @@ dom
 $ref = new DOMEntityReference("amp");
 var_dump($ref);
 ?>
---EXPECT--
+--EXPECTF--
 object(DOMEntityReference)#1 (17) {
   ["nodeName"]=>
   string(3) "amp"
@@ -42,5 +42,5 @@ object(DOMEntityReference)#1 (17) {
   ["baseURI"]=>
   NULL
   ["textContent"]=>
-  string(0) ""
+  string(%d) "%S"
 }
