@@ -2710,13 +2710,25 @@ static accel_ffi_cache_type_entry* accel_ffi_persist_type(zend_ffi_dcl *dcl, voi
 	return entry;
 }
 
+static uint32_t accel_ffi_cache_ptr_to_offset(const void *ptr)
+{
+	ZEND_ASSERT(((uintptr_t)ptr & 0x7) == 0); /* should be 8 byte aligned */
+	ZEND_ASSERT(((uintptr_t)ZSMMG(shared_segments)[0]->p & 0x7) == 0);
+	ZEND_ASSERT((uint64_t*)ptr - (uint64_t*)ZSMMG(shared_segments)[0]->p > 0 &&
+				(uint64_t*)ptr - (uint64_t*)ZSMMG(shared_segments)[0]->p < 0x7fffffff);
+	return (uint64_t*)ptr - (uint64_t*)ZSMMG(shared_segments)[0]->p;
+}
+
+static void* accel_ffi_cache_offset_to_ptr(uint32_t offset)
+{
+	return (uint64_t*)ZSMMG(shared_segments)[0]->p + offset;
+}
+
 static zend_ffi_dcl* accel_ffi_cache_type_get(zend_string *str, void *context)
 {
 	str = accel_find_interned_string(str);
 	if (str && (str->gc.u.type_info & IS_STR_FFI_TYPE)) {
-		// TODO: ???
-		accel_ffi_cache_type_entry *ptr =
-			(accel_ffi_cache_type_entry*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
+		accel_ffi_cache_type_entry *ptr = accel_ffi_cache_offset_to_ptr(str->gc.refcount);
 		while (ptr && ptr->context != context) {
 			ptr = ptr->next;
 		}
@@ -2740,18 +2752,14 @@ static zend_ffi_dcl* accel_ffi_cache_type_add(zend_string *str, zend_ffi_dcl *dc
 		if (IS_ACCEL_INTERNED(str)) {
 			accel_ffi_cache_type_entry *ptr = accel_ffi_persist_type(dcl, context);
 			if (ptr) {
-				// TODO: ???
 				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_SCOPE)));
-				ZEND_ASSERT((char*)ptr - (char*)ZSMMG(shared_segments)[0]->p > 0 &&
-					(char*)new_dcl - (char*)ZSMMG(shared_segments)[0]->p < 0x7fffffff);
 				if (str->gc.u.type_info & IS_STR_FFI_TYPE) {
-					ptr->next = (accel_ffi_cache_type_entry*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
+					ptr->next = accel_ffi_cache_offset_to_ptr(str->gc.refcount);
 				} else {
 					ptr->next = NULL;
 					str->gc.u.type_info |= IS_STR_FFI_TYPE;
 				}
-				// TODO: ???
-				str->gc.refcount = (char*)ptr - (char*)ZSMMG(shared_segments)[0]->p;
+				str->gc.refcount = accel_ffi_cache_ptr_to_offset(ptr);
 				new_dcl = &ptr->dcl;
 			}
 		}
@@ -2930,8 +2938,7 @@ static zend_ffi_scope* accel_ffi_cache_scope_get(zend_string *str)
 {
 	str = accel_find_interned_string(str);
 	if (str && (str->gc.u.type_info & IS_STR_FFI_SCOPE)) {
-		// TODO: ???
-		zend_ffi_scope *ptr = (zend_ffi_scope*)((char*)ZSMMG(shared_segments)[0]->p + str->gc.refcount);
+		zend_ffi_scope *ptr = (zend_ffi_scope*)accel_ffi_cache_offset_to_ptr(str->gc.refcount);
 		return ptr;
 	}
 	return NULL;
@@ -2950,13 +2957,9 @@ static zend_ffi_scope* accel_ffi_cache_scope_add(zend_string *str, zend_ffi_scop
 		if (IS_ACCEL_INTERNED(str)) {
 			new_scope = accel_ffi_persist_scope(scope);
 			if (new_scope) {
-				// TODO: ???
 				ZEND_ASSERT(!(str->gc.u.type_info & (IS_STR_CLASS_NAME_MAP_PTR|IS_STR_FFI_TYPE|IS_STR_FFI_SCOPE)));
-				ZEND_ASSERT((char*)new_scope - (char*)ZSMMG(shared_segments)[0]->p > 0 &&
-					(char*)new_scope - (char*)ZSMMG(shared_segments)[0]->p < 0x7fffffff);
 				str->gc.u.type_info |= IS_STR_FFI_SCOPE;
-				// TODO: ???
-				str->gc.refcount = (char*)new_scope - (char*)ZSMMG(shared_segments)[0]->p;
+				str->gc.refcount = accel_ffi_cache_ptr_to_offset(new_scope);
 			}
 		}
 	}
