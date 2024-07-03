@@ -21,7 +21,7 @@ if test "$PHP_CGI" != "no"; then
       ;;
     esac
 
-    PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
+    PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cgi/Makefile.frag])
 
     dnl Set filename.
     case $host_alias in

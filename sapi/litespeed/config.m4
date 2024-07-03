@@ -5,7 +5,9 @@ PHP_ARG_ENABLE([litespeed],
   [no])
 
 if test "$PHP_LITESPEED" != "no"; then
-  PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/litespeed/Makefile.frag,$abs_srcdir/sapi/litespeed,sapi/litespeed)
+  PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/litespeed/Makefile.frag],
+    [$abs_srcdir/sapi/litespeed],
+    [sapi/litespeed])
   SAPI_LITESPEED_PATH=sapi/litespeed/php
   PHP_SELECT_SAPI(litespeed, program, lsapi_main.c lsapilib.c, "", '$(SAPI_LITESPEED_PATH)')
   case $host_alias in
