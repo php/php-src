@@ -1,8 +1,9 @@
 dnl
 dnl Check if flush should be called explicitly after buffered io
 dnl
-AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io], ac_cv_flush_io,[
-AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io],
+[php_cv_have_flush_io],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef HAVE_UNISTD_H
@@ -40,16 +41,13 @@ int main(int argc, char **argv)
 
   exit(result);
 }
-]])],[
-  ac_cv_flush_io=no
-],[
-  ac_cv_flush_io=yes
-],[
-  ac_cv_flush_io=no
-])])
-if test "$ac_cv_flush_io" = "yes"; then
-  AC_DEFINE(HAVE_FLUSHIO, 1, [Define if flush should be called explicitly after a buffered io.])
-fi
+]])],
+[php_cv_have_flush_io=no],
+[php_cv_have_flush_io=yes],
+[php_cv_have_flush_io=no])])
+AS_VAR_IF([php_cv_have_flush_io], [yes],
+  [AC_DEFINE([HAVE_FLUSHIO], [1],
+    [Define to 1 if flush should be called explicitly after a buffered io.])])
 
 PHP_ARG_WITH([external-libcrypt],
   [for external libcrypt or libxcrypt],
