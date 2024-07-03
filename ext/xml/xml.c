@@ -271,6 +271,8 @@ static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_le
 
 	/* libxml2 specific options */
 #ifdef LIBXML_EXPAT_COMPAT
+	/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations")
 	/* See xmlInitSAXParserCtxt() and xmlCtxtUseOptions() */
 	if (parser->parsehuge) {
 		parser->parser->parser->options |= XML_PARSE_HUGE;
@@ -279,6 +281,7 @@ static int xml_parse_helper(xml_parser *parser, const char *data, size_t data_le
 		parser->parser->parser->options &= ~XML_PARSE_HUGE;
 		xmlDictSetLimit(parser->parser->parser->dict, XML_MAX_DICTIONARY_LIMIT);
 	}
+	ZEND_DIAGNOSTIC_IGNORED_END
 #endif
 
 	parser->isparsing = 1;
