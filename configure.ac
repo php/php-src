@@ -660,9 +660,10 @@ AC_CHECK_FUNCS([nanosleep],,
 
 dnl Check for getaddrinfo, should be a better way, but... Also check for working
 dnl getaddrinfo.
-AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <netdb.h>]],
-  [[struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);]])],[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for getaddrinfo], [php_cv_func_getaddrinfo],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <netdb.h>],
+  [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);])],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <netdb.h>
 #include <sys/types.h>
 #include <string.h>
@@ -700,21 +701,16 @@ int main(void) {
   freeaddrinfo(ai);
   return 0;
 }
-  ]])],[ac_cv_func_getaddrinfo=yes], [ac_cv_func_getaddrinfo=no], [
-    dnl Cross compilation.
-    case $host_alias in
-      *linux*|*midipix)
-        ac_cv_func_getaddrinfo=yes
-        ;;
-      *)
-        ac_cv_func_getaddrinfo=no
-        ;;
-    esac
   ])],
-[ac_cv_func_getaddrinfo=no])])
-if test "$ac_cv_func_getaddrinfo" = yes; then
-  AC_DEFINE(HAVE_GETADDRINFO,1,[Define if you have the getaddrinfo function])
-fi
+  [php_cv_func_getaddrinfo=yes],
+  [php_cv_func_getaddrinfo=no],
+  [AS_CASE([$host_alias],
+    [*linux*|*midipix], [php_cv_func_getaddrinfo=yes],
+    [php_cv_func_getaddrinfo=no])])],
+[php_cv_func_getaddrinfo=no])])
+AS_VAR_IF([php_cv_func_getaddrinfo], [yes],
+  [AC_DEFINE([HAVE_GETADDRINFO], [1],
+    [Define to 1 if you have the 'getaddrinfo' function.])])
 
 dnl on FreeBSD, copy_file_range() works only with the undocumented flag 0x01000000;
 dnl until the problem is fixed properly, copy_file_range() is used only on Linux
