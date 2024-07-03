@@ -2887,6 +2887,10 @@ PHP_FUNCTION(range)
 			step = Z_LVAL_P(user_step);
 			/* We only want positive step values. */
 			if (step < 0) {
+				if (UNEXPECTED(step == ZEND_LONG_MIN)) {
+					zend_argument_value_error(3, "must be greater than " ZEND_LONG_FMT, step);
+					RETURN_THROWS();
+				}
 				is_step_negative = true;
 				step *= -1;
 			}
