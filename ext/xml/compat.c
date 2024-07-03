@@ -714,8 +714,7 @@ XML_GetCurrentByteCount(XML_Parser parser)
 {
 	/* WARNING: this is identical to ByteIndex; it should probably
 	 * be different */
-	return parser->parser->input->consumed +
-			(parser->parser->input->cur - parser->parser->input->base);
+	return XML_GetCurrentByteIndex(parser);
 }
 
 PHP_XML_API const XML_Char *XML_ExpatVersion(void)
