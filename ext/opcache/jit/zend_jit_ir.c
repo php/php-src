@@ -10622,6 +10622,15 @@ static ir_ref jit_FFI_CDATA_PTR(zend_jit_ctx *jit, ir_ref obj_ref)
 	return ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 }
 
+static int zend_jit_ffi_symbols_guard(zend_jit_ctx       *jit,
+                                      const zend_op      *opline,
+                                      zend_ssa           *ssa,
+                                      int                 use,
+                                      int                 def,
+                                      zend_jit_addr       addr,
+                                      HashTable          *ffi_symbols,
+                                      zend_jit_ffi_info  *ffi_info);
+
 static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
                                       const zend_op        *opline,
                                       const zend_op_array  *op_array,
@@ -10635,6 +10644,10 @@ static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
                                       HashTable            *op1_ffi_symbols,
                                       zend_jit_ffi_info    *ffi_info)
 {
+	if (!zend_jit_ffi_symbols_guard(jit, opline, ssa, ssa_op->op1_use, -1, op1_addr, op1_ffi_symbols, ffi_info)) {
+		return 0;
+	}
+
 	return 1;
 }
 
