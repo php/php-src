@@ -258,6 +258,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
  * Generally faster because no locking is involved, and this has the advantage that it sets the options to a known good value. */
 static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserCtxtPtr ctxt)
 {
+	ZEND_DIAGNOSTIC_IGNORED_START("-Wdeprecated-declarations") \
 	ctxt->loadsubset = 0;
 	ctxt->validate = 0;
 	ctxt->pedantic = 0;
@@ -265,6 +266,7 @@ static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserC
 	ctxt->linenumbers = 0;
 	ctxt->keepBlanks = 1;
 	ctxt->options = 0;
+	ZEND_DIAGNOSTIC_IGNORED_END
 }
 
 #else /* HAVE_LIBXML */
