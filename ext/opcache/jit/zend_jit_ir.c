@@ -3103,6 +3103,7 @@ static void zend_jit_setup_disasm(void)
 #ifdef HAVE_FFI
 	REGISTER_HELPER(zend_jit_zval_string);
 	REGISTER_HELPER(zend_jit_zval_ffi_ptr);
+	REGISTER_HELPER(zend_jit_zval_ffi_obj);
 #endif
 
 #ifndef ZTS
@@ -13258,6 +13259,23 @@ static int zend_jit_ffi_read(zend_jit_ctx       *jit,
 				ir_ADD_A(ir_CONST_ADDR(zend_one_char_string),
 					ir_MUL_L(ir_ZEXT_L(ir_LOAD_U8(ptr)), ir_CONST_LONG(sizeof(void*))))));
 			res_type = IS_STRING;
+			break;
+		case ZEND_FFI_TYPE_ARRAY:
+		case ZEND_FFI_TYPE_STRUCT:
+			ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_ffi_obj),
+				jit_ZVAL_ADDR(jit, res_addr), ir_CONST_ADDR(ffi_type), ptr);
+			return 1;
+		case ZEND_FFI_TYPE_POINTER:
+			 if ((ffi_type->attr & ZEND_FFI_ATTR_CONST)
+			  && ZEND_FFI_TYPE(ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
+				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_string), jit_ZVAL_ADDR(jit, res_addr), ptr);
+				return 1;
+			 } else {
+				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_ffi_ptr),
+					jit_ZVAL_ADDR(jit, res_addr), ir_CONST_ADDR(ffi_type), ir_LOAD_A(ptr));
+				return 1;
+			 }
+			 break;
 			break;
 		default:
 			ZEND_UNREACHABLE();

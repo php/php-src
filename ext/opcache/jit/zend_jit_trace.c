@@ -6076,7 +6076,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (op1_ffi_type
 						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
 						 && op2_info == MAY_BE_LONG
-						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind < ZEND_FFI_TYPE_POINTER
 						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
 						 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
 							if (!ffi_info) {
@@ -6334,7 +6333,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 							if (field
 							 && !field->bits
-							 && ZEND_FFI_TYPE(field->type)->kind < ZEND_FFI_TYPE_POINTER
 							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_VOID
 							 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(field->type))) {
 								if (!ffi_info) {
@@ -6356,7 +6354,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 							if (sym
 							 && sym->kind == ZEND_FFI_SYM_VAR
-							 && ZEND_FFI_TYPE(sym->type)->kind < ZEND_FFI_TYPE_POINTER
 							 && ZEND_FFI_TYPE(sym->type)->kind != ZEND_FFI_TYPE_VOID
 							 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(sym->type))) {
 								if (!ffi_info) {
