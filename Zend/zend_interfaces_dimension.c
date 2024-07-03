@@ -233,20 +233,34 @@ static void zend_user_class_unset_dimension(zend_object *object, zval *offset)
 	zval_ptr_dtor(&tmp_offset);
 }
 
-// TODO Internal classes must define this?
+/* Internal classes must define their own handlers if they overload the dimension access */
 #define ALLOC_HANDLERS_IF_MISSING(dimension_handlers_funcs_ptr, class_ce) \
 	if (!class_ce->dimension_handlers) { \
-		dimension_handlers_funcs_ptr = class_ce->type == ZEND_INTERNAL_CLASS \
-			? pecalloc(1, sizeof(zend_class_dimensions_functions), true) \
-			: zend_arena_calloc(&CG(arena), 1, sizeof(zend_class_dimensions_functions)); \
+		ZEND_ASSERT(class_ce->type == ZEND_USER_CLASS); \
+		dimension_handlers_funcs_ptr = zend_arena_calloc(&CG(arena), 1, sizeof(zend_class_dimensions_functions)); \
 		class_type->dimension_handlers = dimension_handlers_funcs_ptr; \
 	} else { \
 		dimension_handlers_funcs_ptr = class_ce->dimension_handlers; \
 	}
 
+static /* const */ zend_class_dimensions_functions zend_default_array_access_dimensions_functions = {
+	.read_dimension  = zend_user_class_read_dimension,
+	.has_dimension   = zend_user_class_has_dimension,
+	.fetch_dimension = zend_legacy_ArrayAccess_fetch_dimension,
+	.write_dimension = zend_user_class_write_dimension,
+	.unset_dimension = zend_user_class_unset_dimension,
+	.append          = zend_legacy_ArrayAccess_append,
+	.fetch_append    = zend_legacy_ArrayAccess_fetch_append,
+};
+
 // TODO Have a nested/fetch handler? To handle nested/fetch dimension reads
 static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		class_type->dimension_handlers = &zend_default_array_access_dimensions_functions;
+		return SUCCESS;
+	}
+
 	ZEND_ASSERT(!class_type->arrayaccess_funcs_ptr && "ArrayAccess funcs already set?");
 	zend_class_arrayaccess_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
 		? pemalloc(sizeof(zend_class_arrayaccess_funcs), 1)

@@ -518,9 +518,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			if (ce->arrayaccess_funcs_ptr) {
 				free(ce->arrayaccess_funcs_ptr);
-				// TODO This is a temporary solution
-				ZEND_ASSERT(ce->dimension_handlers);
-				free(ce->dimension_handlers);
 			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
