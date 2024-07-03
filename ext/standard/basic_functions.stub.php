@@ -2191,7 +2191,7 @@ function getmxrr(string $hostname, &$hosts, &$weights = null): bool {}
 
 /* net.c */
 
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 function net_get_interfaces(): array|false {}
 #endif
 

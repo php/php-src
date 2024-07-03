@@ -390,22 +390,21 @@ AC_CHECK_HEADERS([net/if.h],,, [dnl
   #endif
 ])
 
-AC_MSG_CHECKING([for usable getifaddrs])
-AC_LINK_IFELSE([AC_LANG_PROGRAM([[
+AC_CACHE_CHECK([for usable getifaddrs], [php_cv_func_getifaddrs],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([
   #include <sys/types.h>
   #include <ifaddrs.h>
-]],[[
+], [
   struct ifaddrs *interfaces;
   if (!getifaddrs(&interfaces)) {
-      freeifaddrs(interfaces);
+    freeifaddrs(interfaces);
   }
-]])], [ac_have_getifaddrs=yes], [ac_have_getifaddrs=no])
-if test "$ac_have_getifaddrs" = "yes" ; then
-  AC_DEFINE(HAVE_GETIFADDRS, 1, [whether getifaddrs is present and usable])
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
+])],
+[php_cv_func_getifaddrs=yes],
+[php_cv_func_getifaddrs=no])])
+AS_VAR_IF([php_cv_func_getifaddrs], [yes],
+  [AC_DEFINE([HAVE_GETIFADDRS], [1],
+    [Define to 1 if you have the 'getifaddrs' function.])])
 
 dnl
 dnl Setup extension sources
