@@ -34,4 +34,5 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
   PHP_ADD_EXTENSION_DEP(pdo_sqlite, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_SETUP_RE2C
 fi

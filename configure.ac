@@ -165,35 +165,8 @@ PHP_RUNPATH_SWITCH
 dnl Checks for some support/generator progs.
 PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
-PHP_PROG_RE2C([1.0.3], [--no-generation-date])
+PHP_SETUP_RE2C
 PHP_PROG_PHP()
-
-PHP_ARG_ENABLE([re2c-cgoto],
-  [whether to enable computed goto extension with re2c],
-  [AS_HELP_STRING([--enable-re2c-cgoto],
-    [Enable re2c -g flag to optimize conditional jumps using computed goto
-    extension, if supported by the compiler])],
-  [no],
-  [no])
-
-AS_VAR_IF([PHP_RE2C_CGOTO], [no],,
-[AC_CACHE_CHECK([whether re2c -g works], [php_cv_have_re2c_cgoto],
-  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
-int main(void)
-{
-label1:
-  ;
-label2:
-  ;
-  static void *adr[] = { &&label1, &&label2 };
-  goto *adr[0];
-  return 0;
-}]])],
-  [php_cv_have_re2c_cgoto=yes],
-  [php_cv_have_re2c_cgoto=no])])
-AS_VAR_IF([php_cv_have_re2c_cgoto], [yes],
-  [AS_VAR_APPEND([RE2C_FLAGS], [" -g"])])
-])
 
 dnl Platform-specific compile settings.
 dnl ----------------------------------------------------------------------------

@@ -480,4 +480,5 @@ PHP_NEW_EXTENSION([standard], [m4_normalize([
 PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
 
 PHP_ADD_MAKEFILE_FRAGMENT
+PHP_SETUP_RE2C
 PHP_INSTALL_HEADERS([ext/standard/])

@@ -25,4 +25,5 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c pgsql_sql_parser.c, $ext_shared)
   PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_SETUP_RE2C
 fi
