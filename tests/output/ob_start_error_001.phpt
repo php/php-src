@@ -16,13 +16,13 @@ $arg_3 = false;
 $extra_arg = 1;
 
 echo "\nArg 1 wrong type\n";
-var_dump(ob_start(1.5));
+try {
+    var_dump(ob_start(1.5));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 Arg 1 wrong type
-
-Warning: ob_start(): no array or string given in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, function "1.5" not found or invalid function name

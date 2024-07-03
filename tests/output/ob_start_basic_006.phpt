@@ -36,99 +36,101 @@ Class C {
 }
 
 function checkAndClean() {
-  print_r(ob_list_handlers());
+  var_dump(ob_list_handlers());
   while (ob_get_level()>0) {
     ob_end_flush();
   }
 }
 
 echo "\n ---> Test arrays:\n";
-var_dump(ob_start(array("f")));
+try {
+    var_dump(ob_start(array("f")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
-var_dump(ob_start(array("f", "f")));
+try {
+    var_dump(ob_start(array("f", "f")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
-var_dump(ob_start(array("f", "C::g", "f", "C::g")));
+try {
+    var_dump(ob_start(array("f", "C::g", "f", "C::g")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
-var_dump(ob_start(array("f", "non_existent", "f")));
+try {
+    var_dump(ob_start(array("f", "non_existent", "f")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
-var_dump(ob_start(array("f", "non_existent", "f", "f")));
+try {
+    var_dump(ob_start(array("f", "non_existent", "f", "f")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
 $c = new c('originalID');
-var_dump(ob_start(array($c, "h")));
+try {
+    var_dump(ob_start(array($c, "h")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 
-var_dump(ob_start(array($c, "h")));
+try {
+    var_dump(ob_start(array($c, "h")));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 $c->id = 'changedID';
 checkAndClean();
 
 $c->id = 'changedIDagain';
-var_dump(ob_start(array('f', 'C::g', array(array($c, "g"), array($c, "h")))));
+try {
+    var_dump(ob_start(array('f', 'C::g', array(array($c, "g"), array($c, "h")))));
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 checkAndClean();
 ?>
---EXPECTF--
+--EXPECT--
 ---> Test arrays:
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+array(0) {
+}
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, class "f" not found
+array(0) {
+}
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+array(0) {
+}
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+array(0) {
+}
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+array(0) {
+}
+C::h[call:1; len:51; id:originalID] - bool(true)
+array(1) {
+  [0]=>
+  string(4) "C::h"
+}
 
-Warning: ob_start(): array callback must have exactly two members in %s on line %d
+C::h[call:2; len:51; id:changedID] - bool(true)
+array(1) {
+  [0]=>
+  string(4) "C::h"
+}
 
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
-
-Warning: ob_start(): class "f" not found in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
-
-Warning: ob_start(): array callback must have exactly two members in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
-
-Warning: ob_start(): array callback must have exactly two members in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
-
-Warning: ob_start(): array callback must have exactly two members in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
-C::h[call:1; len:37; id:originalID] - bool(true)
-Array
-(
-    [0] => C::h
-)
-
-C::h[call:2; len:37; id:changedID] - bool(true)
-Array
-(
-    [0] => C::h
-)
-
-
-Warning: ob_start(): array callback must have exactly two members in %s on line %d
-
-Notice: ob_start(): Failed to create buffer in %s on line %d
-bool(false)
-Array
-(
-)
+TypeError: ob_start(): Argument #1 ($callback) must be a valid callback or null, array callback must have exactly two members
+array(0) {
+}
