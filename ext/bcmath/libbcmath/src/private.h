@@ -97,7 +97,7 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 
 
 /* routines */
-bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, bool use_sign);
+bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, size_t scale, bool use_sign);
 bc_num _bc_do_add (bc_num n1, bc_num n2);
 bc_num _bc_do_sub (bc_num n1, bc_num n2);
 void _bc_rm_leading_zeros (bc_num num);

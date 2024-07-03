@@ -638,7 +638,7 @@ PHP_FUNCTION(bccomp)
 		goto cleanup;
 	}
 
-	RETVAL_LONG(bc_compare(first, second));
+	RETVAL_LONG(bc_compare(first, second, scale));
 
 	cleanup: {
 		bc_free_num(&first);
