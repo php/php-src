@@ -29,7 +29,11 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - Shmop:
-   . Fixed bug GH-14537 (shmop Windows 11 crashes the process). (nielsdos)
+  . Fixed bug GH-14537 (shmop Windows 11 crashes the process). (nielsdos)
+
+- Standard:
+  . Fixed bug GH-14775 (range function overflow with negative step argument).
+    (David Carlier)
 
 20 Jun 2024, PHP 8.3.9
 
