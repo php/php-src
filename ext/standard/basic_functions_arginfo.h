@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7d588414e84ed62088cd5b1c668b29c0e51d406f */
+ * Stub hash: 3a942ebd5d1011a6419217f9aa229b18c2ac0f83 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -674,7 +674,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_net_get_interfaces, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 #endif
@@ -2516,7 +2516,7 @@ ZEND_FUNCTION(dns_get_record);
 #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_FUNCTION(dns_get_mx);
 #endif
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 ZEND_FUNCTION(net_get_interfaces);
 #endif
 #if defined(HAVE_FTOK)
@@ -3154,7 +3154,7 @@ static const zend_function_entry ext_functions[] = {
 #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_RAW_FENTRY("getmxrr", zif_dns_get_mx, arginfo_getmxrr, 0, NULL, NULL)
 #endif
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 	ZEND_FE(net_get_interfaces, arginfo_net_get_interfaces)
 #endif
 #if defined(HAVE_FTOK)

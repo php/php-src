@@ -261,7 +261,7 @@ PHP_FUNCTION(net_get_interfaces) {
 	FREE(pAddresses);
 #undef MALLOC
 #undef FREE
-#elif HAVE_GETIFADDRS || defined(__PASE__) /* !PHP_WIN32 */
+#elif defined(HAVE_GETIFADDRS) || defined(__PASE__) /* !PHP_WIN32 */
 	struct ifaddrs *addrs = NULL, *p;
 
 	ZEND_PARSE_PARAMETERS_NONE();
