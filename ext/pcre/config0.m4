@@ -6,53 +6,44 @@ PHP_ARG_WITH([external-pcre],,
   [no],
   [no])
 
-PHP_ARG_WITH([pcre-jit],,
+PHP_ARG_WITH([pcre-jit],
+  [whether to enable PCRE JIT functionality],
   [AS_HELP_STRING([--without-pcre-jit],
     [Disable PCRE JIT functionality])],
   [yes],
   [no])
 
-if test "$PHP_EXTERNAL_PCRE" != "no"; then
+AH_TEMPLATE([HAVE_PCRE_JIT_SUPPORT],
+  [Define to 1 if PCRE JIT is enabled and supported.])
 
+if test "$PHP_EXTERNAL_PCRE" != "no"; then
   PKG_CHECK_MODULES([PCRE2], [libpcre2-8 >= 10.30])
 
   PHP_EVAL_INCLINE($PCRE2_CFLAGS)
   PHP_EVAL_LIBLINE($PCRE2_LIBS)
   AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
 
-  if test "$PHP_PCRE_JIT" != "no"; then
-    AC_CACHE_CHECK([for JIT support in PCRE2], ac_cv_have_pcre2_jit, [
-      AC_RUN_IFELSE([
-          AC_LANG_SOURCE([[
-              #include <pcre2.h>
-              #include <stdlib.h>
-              int main(void) {
-                uint32_t have_jit;
-                pcre2_config_8(PCRE2_CONFIG_JIT, &have_jit);
-                return !have_jit;
-              }
-          ]])], [
-          ac_cv_have_pcre2_jit=yes
-        ],
-        [
-          ac_cv_have_pcre2_jit=no
-        ],
-        [
-          AC_CANONICAL_HOST
-          case $host_cpu in
-          arm*|i[[34567]]86|x86_64|mips*|powerpc*|sparc)
-            ac_cv_have_pcre2_jit=yes
-            ;;
-          *)
-            ac_cv_have_pcre2_jit=no
-            ;;
-          esac
-        ])
-      ])
-      if test $ac_cv_have_pcre2_jit = yes; then
-        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [])
-      fi
-  fi
+  AS_VAR_IF([PHP_PCRE_JIT], [no],,
+    [AC_CACHE_CHECK([whether external PCRE2 library has JIT supported],
+      [php_cv_have_pcre2_jit],
+      [AC_RUN_IFELSE([AC_LANG_SOURCE([
+          #include <pcre2.h>
+          #include <stdlib.h>
+          int main(void) {
+            uint32_t have_jit;
+            pcre2_config_8(PCRE2_CONFIG_JIT, &have_jit);
+            return !have_jit;
+          }
+        ])],
+        [php_cv_have_pcre2_jit=yes],
+        [php_cv_have_pcre2_jit=no],
+        [AS_CASE([$host_cpu],
+          [arm*|i[[34567]]86|x86_64|mips*|powerpc*|sparc],
+            [php_cv_have_pcre2_jit=yes],
+          [php_cv_have_pcre2_jit=no])])])
+    AS_VAR_IF([php_cv_have_pcre2_jit], [yes],
+      [AC_DEFINE([HAVE_PCRE_JIT_SUPPORT], [1])])
+  ])
 
   PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
@@ -70,30 +61,21 @@ else
   AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
   AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
 
-  AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
-  if test "$PHP_PCRE_JIT" != "no"; then
-    AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-    AC_MSG_RESULT([yes])
-
-    AC_CACHE_CHECK([whether Intel CET is enabled], ac_cv_have_pcre2_intel_cet, [
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
+  AS_VAR_IF([PHP_PCRE_JIT], [no],,
+    [AC_DEFINE([HAVE_PCRE_JIT_SUPPORT], [1])
+    AC_CACHE_CHECK([whether Intel CET is enabled],
+      [php_cv_have_pcre2_intel_cet],
+      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
           #ifndef __CET__
           # error CET is not enabled
           #endif
-        ]])], [
-          ac_cv_have_pcre2_intel_cet=yes
-        ], [
-          ac_cv_have_pcre2_intel_cet=no
-        ])
+        ])],
+        [php_cv_have_pcre2_intel_cet=yes],
+        [php_cv_have_pcre2_intel_cet=no])
     ])
-    if test "$ac_cv_have_pcre2_intel_cet" = yes; then
-      PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"
-    fi
-
-  else
-    AC_MSG_RESULT([no])
-  fi
+    AS_VAR_IF([php_cv_have_pcre2_intel_cet], [yes],
+      [PHP_PCRE_CFLAGS="-mshstk $PHP_PCRE_CFLAGS"])
+  ])
 
   dnl Enable pcre Valgrind support only in DEBUG build (it affects performance).
   AS_VAR_IF([PHP_VALGRIND], [no],,
