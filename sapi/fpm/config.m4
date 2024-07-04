@@ -254,64 +254,43 @@ AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
 ])
 
 AC_DEFUN([PHP_FPM_LQ],
-[
-  have_lq=no
-
-  AC_MSG_CHECKING([for TCP_INFO])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[
+[AC_CACHE_CHECK([for TCP_INFO], [php_cv_have_TCP_INFO],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <netinet/tcp.h>], [
     struct tcp_info ti;
     int x = TCP_INFO;
     (void)ti;
     (void)x;
-  ]])], [
-    have_lq=tcp_info
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
+  ])],
+  [php_cv_have_TCP_INFO=yes],
+  [php_cv_have_TCP_INFO=no])])
+AS_VAR_IF([php_cv_have_TCP_INFO], [yes],
+  [AC_DEFINE([HAVE_LQ_TCP_INFO], [1], [Define to 1 if you have 'TCP_INFO'.])])
 
-  if test "$have_lq" = "tcp_info"; then
-    AC_DEFINE([HAVE_LQ_TCP_INFO], 1, [do we have TCP_INFO?])
-  fi
-
-  AC_MSG_CHECKING([for TCP_CONNECTION_INFO])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <netinet/tcp.h>]], [[
+AC_CACHE_CHECK([for TCP_CONNECTION_INFO], [php_cv_have_TCP_CONNECTION_INFO]
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <netinet/tcp.h>], [
     struct tcp_connection_info ti;
     int x = TCP_CONNECTION_INFO;
     (void)ti;
     (void)x;
-  ]])], [
-    have_lq=tcp_connection_info
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
+  ])],
+  [php_cv_have_TCP_CONNECTION_INFO=yes],
+  [php_cv_have_TCP_CONNECTION_INFO=no])])
+AS_VAR_IF([php_cv_have_TCP_CONNECTION_INFO], [yes],
+  [AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], [1],
+    [Define to 1 if you have 'TCP_CONNECTION_INFO'.])])
 
-  if test "$have_lq" = "tcp_connection_info"; then
-    AC_DEFINE([HAVE_LQ_TCP_CONNECTION_INFO], 1, [do we have TCP_CONNECTION_INFO?])
-  fi
-
-  if test "$have_lq" = "no" ; then
-    AC_MSG_CHECKING([for SO_LISTENQLEN])
-
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>]], [[
-      int x = SO_LISTENQLIMIT;
-      int y = SO_LISTENQLEN;
-      (void)x;
-      (void)y;
-    ]])], [
-      have_lq=so_listenq
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ])
-
-    if test "$have_lq" = "so_listenq"; then
-      AC_DEFINE([HAVE_LQ_SO_LISTENQ], 1, [do we have SO_LISTENQ?])
-    fi
-  fi
+AC_CACHE_CHECK([for SO_LISTENQLEN], [php_cv_have_SO_LISTENQLEN],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/socket.h>], [
+    int x = SO_LISTENQLIMIT;
+    int y = SO_LISTENQLEN;
+    (void)x;
+    (void)y;
+  ])],
+  [php_cv_have_SO_LISTENQLEN=yes],
+  [php_cv_have_SO_LISTENQLEN=no])])
+AS_VAR_IF([php_cv_have_SO_LISTENQLEN], [yes],
+  [AC_DEFINE([HAVE_LQ_SO_LISTENQ], [1],
+    [Define to 1 if you have 'SO_LISTENQ*'.])])
 ])
 
 AC_DEFUN([PHP_FPM_KQUEUE],
