@@ -2185,63 +2185,61 @@ dnl Detect the style of crypt_r() if any is available.
 dnl See APR_CHECK_CRYPT_R_STYLE() for original version.
 dnl
 AC_DEFUN([PHP_CRYPT_R_STYLE],
-[
-  AC_CACHE_CHECK([which data struct is used by crypt_r], php_cv_crypt_r_style,[
-    php_cv_crypt_r_style=none
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+[AC_CACHE_CHECK([which data struct is used by crypt_r], [php_cv_crypt_r_style],
+[php_cv_crypt_r_style=none
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 #define _REENTRANT 1
 #include <crypt.h>
-]], [[
+], [
 CRYPTD buffer;
 crypt_r("passwd", "hash", &buffer);
-]])],[php_cv_crypt_r_style=cryptd],[])
+])], [php_cv_crypt_r_style=cryptd], [])
 
-    if test "$php_cv_crypt_r_style" = "none"; then
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+AS_VAR_IF([php_cv_crypt_r_style], [none],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 #define _REENTRANT 1
 #include <crypt.h>
-]],[[
+],[
 struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
-]])],[php_cv_crypt_r_style=struct_crypt_data],[])
-    fi
+])], [php_cv_crypt_r_style=struct_crypt_data], [])])
 
-    if test "$php_cv_crypt_r_style" = "none"; then
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+AS_VAR_IF([php_cv_crypt_r_style], [none],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 #define _REENTRANT 1
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
 #include <crypt.h>
-]],[[
+],[
 struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
-]])],[php_cv_crypt_r_style=struct_crypt_data_gnu_source],[])
-    fi
+])], [php_cv_crypt_r_style=struct_crypt_data_gnu_source], [])])
 
-    if test "$php_cv_crypt_r_style" = "none"; then
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+AS_VAR_IF([php_cv_crypt_r_style], [none],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
 #include <stdlib.h>
 #include <unistd.h>
-]],[[
+],[
 struct crypt_data buffer;
 crypt_r("passwd", "hash", &buffer);
-]])],[php_cv_crypt_r_style=struct_crypt_data],[])
-    fi
-    ])
+])], [php_cv_crypt_r_style=struct_crypt_data], [])])
+])
 
-  if test "$php_cv_crypt_r_style" = "cryptd"; then
-    AC_DEFINE(CRYPT_R_CRYPTD, 1, [Define if crypt_r has uses CRYPTD])
-  fi
-  if test "$php_cv_crypt_r_style" = "struct_crypt_data" || test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
-    AC_DEFINE(CRYPT_R_STRUCT_CRYPT_DATA, 1, [Define if crypt_r uses struct crypt_data])
-  fi
-  if test "$php_cv_crypt_r_style" = "struct_crypt_data_gnu_source"; then
-    AC_DEFINE(CRYPT_R_GNU_SOURCE, 1, [Define if struct crypt_data requires _GNU_SOURCE])
-  fi
-  if test "$php_cv_crypt_r_style" = "none"; then
-    AC_MSG_ERROR([Unable to detect data struct used by crypt_r])
-  fi
+AS_VAR_IF([php_cv_crypt_r_style], [cryptd],
+  [AC_DEFINE([CRYPT_R_CRYPTD], [1], [Define to 1 if crypt_r uses CRYPTD.])])
+
+AS_CASE([$php_cv_crypt_r_style],
+  [struct_crypt_data|struct_crypt_data_gnu_source],
+    [AC_DEFINE([CRYPT_R_STRUCT_CRYPT_DATA], [1],
+      [Define to 1 if crypt_r uses struct crypt_data.])])
+
+AS_VAR_IF([php_cv_crypt_r_style], [struct_crypt_data_gnu_source],
+  [AC_DEFINE([CRYPT_R_GNU_SOURCE], [1],
+    [Define to 1 if struct crypt_data requires _GNU_SOURCE.])])
+
+AS_VAR_IF([php_cv_crypt_r_style], [none],
+  [AC_MSG_ERROR([Unable to detect data struct used by crypt_r.])])
 ])
 
 dnl
