@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::saveHTMLFile() should dump the internal document into a file using HTML formatting
+DOMDocument::saveHTMLFile() should format output on demand
 --CREDITS--
 Knut Urdalen <knut@php.net>
 #PHPTestFest2009 Norway 2009-06-09 \o/
@@ -7,12 +7,13 @@ Knut Urdalen <knut@php.net>
 dom
 --SKIPIF--
 <?php
-if (LIBXML_VERSION >= 21300) die("skip see https://gitlab.gnome.org/GNOME/libxml2/-/issues/756");
+if (LIBXML_VERSION < 21300) die("skip see https://gitlab.gnome.org/GNOME/libxml2/-/issues/756");
 ?>
 --FILE--
 <?php
-$filename = __DIR__."/DOMDocument_saveHTMLFile_basic.html";
+$filename = __DIR__."/DOMDocument_saveHTMLFile_formatOutput_gte_2_13.html";
 $doc = new DOMDocument('1.0');
+$doc->formatOutput = true;
 $root = $doc->createElement('html');
 $root = $doc->appendChild($root);
 $head = $doc->createElement('head');
@@ -27,5 +28,5 @@ echo file_get_contents($filename);
 unlink($filename);
 ?>
 --EXPECT--
-int(126)
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>This is the title</title></head></html>
+int(59)
+<html><head><title>This is the title</title></head></html>
