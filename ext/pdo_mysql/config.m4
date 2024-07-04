@@ -89,6 +89,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_SETUP_RE2C
 
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)

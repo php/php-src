@@ -19,4 +19,5 @@ if test "$PHP_PDO" != "no"; then
     php_pdo.h
   ]))
   PHP_ADD_MAKEFILE_FRAGMENT
+  PHP_SETUP_RE2C
 fi

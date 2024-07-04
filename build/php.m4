@@ -2019,6 +2019,46 @@ $2],
 ])])])])
 ])
 
+dnl
+dnl PHP_SETUP_RE2C
+dnl
+dnl Common setup macro for using re2c across the php-src build system and in
+dnl "phpized" extensions. Defined as one-shot macro (it is called only once).
+dnl Macro also adds a configure option --enable-re2c-cgoto which can append the
+dnl re2c's --computed-gotos (-g) option to optimize conditional jumps in lexer
+dnl files.
+dnl
+AC_DEFUN_ONCE([PHP_SETUP_RE2C], [dnl
+PHP_PROG_RE2C([1.0.3], [--no-generation-date])
+
+PHP_ARG_ENABLE([re2c-cgoto],
+  [whether to enable computed goto extension with re2c],
+  [AS_HELP_STRING([--enable-re2c-cgoto],
+    [Enable re2c -g flag to optimize conditional jumps using computed goto
+    extension, if supported by the compiler])],
+  [no],
+  [no])
+
+AS_VAR_IF([PHP_RE2C_CGOTO], [yes],
+[AC_CACHE_CHECK([whether re2c -g works], [php_cv_have_re2c_cgoto],
+  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+int main(void)
+{
+label1:
+  ;
+label2:
+  ;
+  static void *adr[] = { &&label1, &&label2 };
+  goto *adr[0];
+  return 0;
+}]])],
+  [php_cv_have_re2c_cgoto=yes],
+  [php_cv_have_re2c_cgoto=no])])
+AS_VAR_IF([php_cv_have_re2c_cgoto], [yes],
+  [AS_VAR_APPEND([RE2C_FLAGS], [" -g"])])
+])
+])
+
 dnl ----------------------------------------------------------------------------
 dnl Misc. macros
 dnl ----------------------------------------------------------------------------
