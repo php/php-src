@@ -184,7 +184,6 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 static void
 _end_element_handler(void *user, const xmlChar *name)
 {
-	xmlChar    *qualified_name;
 	XML_Parser  parser = (XML_Parser) user;
 
 	if (parser->h_end_element == NULL) {
@@ -198,11 +197,7 @@ _end_element_handler(void *user, const xmlChar *name)
 		return;
 	}
 
-	qualified_name = xmlStrdup(name);
-
-	parser->h_end_element(parser->user, (const XML_Char *) qualified_name);
-
-	xmlFree(qualified_name);
+	parser->h_end_element(parser->user, (const XML_Char *) name);
 }
 
 static void
