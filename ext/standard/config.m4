@@ -343,24 +343,21 @@ AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np])
 dnl
 dnl Check for strptime()
 dnl
-AC_CACHE_CHECK(whether strptime() declaration fails, ac_cv_strptime_decl_fails,[
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <time.h>
-]],[[
+AC_CACHE_CHECK([whether strptime is declared],
+[php_cv_have_decl_strptime],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <time.h>], [
 #ifndef HAVE_STRPTIME
 #error no strptime() on this platform
 #else
 /* use invalid strptime() declaration to see if it fails to compile */
 int strptime(const char *s, const char *format, struct tm *tm);
 #endif
-]])],[
-  ac_cv_strptime_decl_fails=no
-],[
-  ac_cv_strptime_decl_fails=yes
-])])
-if test "$ac_cv_strptime_decl_fails" = "yes"; then
-  AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], 1, [whether strptime() declaration fails])
-fi
+])],
+[php_cv_have_decl_strptime=no],
+[php_cv_have_decl_strptime=yes])])
+AS_VAR_IF([php_cv_have_decl_strptime], [yes],
+  [AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], [1],
+    [Define to 1 if 'strptime' has declaration.])])
 
 dnl
 dnl Check for argon2
