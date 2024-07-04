@@ -10607,8 +10607,6 @@ static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
                                       const zend_ssa_op    *ssa_op,
                                       uint32_t              op1_info,
                                       zend_jit_addr         op1_addr,
-                                      bool                  on_this,
-                                      bool                  delayed_fetch_this,
                                       zend_ffi_symbol      *sym,
                                       HashTable            *op1_ffi_symbols,
                                       zend_jit_ffi_info    *ffi_info)
@@ -15141,8 +15139,6 @@ static int zend_jit_ffi_fetch_obj(zend_jit_ctx        *jit,
                                   uint32_t             op1_info,
                                   zend_jit_addr        op1_addr,
                                   bool                 op1_indirect,
-                                  bool                 on_this,
-                                  bool                 delayed_fetch_this,
                                   bool                 op1_avoid_refcounting,
                                   zend_ffi_field      *field,
                                   zend_jit_addr        res_addr,
@@ -15186,8 +15182,6 @@ static int zend_jit_ffi_fetch_sym(zend_jit_ctx        *jit,
                                   uint32_t             op1_info,
                                   zend_jit_addr        op1_addr,
                                   bool                 op1_indirect,
-                                  bool                 on_this,
-                                  bool                 delayed_fetch_this,
                                   bool                 op1_avoid_refcounting,
                                   zend_ffi_symbol     *sym,
                                   zend_jit_addr        res_addr,
@@ -15749,8 +15743,6 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
                                    uint32_t             op1_info,
                                    zend_jit_addr        op1_addr,
                                    bool                 op1_indirect,
-                                   bool                 on_this,
-                                   bool                 delayed_fetch_this,
                                    zend_ffi_field      *field,
                                    uint32_t             val_info,
                                    zend_jit_addr        val_addr,
@@ -15785,7 +15777,7 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
 
 	ZEND_ASSERT(!res_addr);
 
-	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
+	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 	}
 
@@ -15800,8 +15792,6 @@ static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
                                    uint32_t             op1_info,
                                    zend_jit_addr        op1_addr,
                                    bool                 op1_indirect,
-                                   bool                 on_this,
-                                   bool                 delayed_fetch_this,
                                    zend_ffi_symbol     *sym,
                                    uint32_t             val_info,
                                    zend_jit_addr        val_addr,
@@ -15833,7 +15823,7 @@ static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
 
 	ZEND_ASSERT(!res_addr);
 
-	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
+	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 	}
 
@@ -16209,8 +16199,6 @@ static int zend_jit_ffi_assign_obj_op(zend_jit_ctx        *jit,
                                       uint32_t             op1_info,
                                       zend_jit_addr        op1_addr,
                                       bool                 op1_indirect,
-                                      bool                 on_this,
-                                      bool                 delayed_fetch_this,
                                       zend_ffi_field      *field,
                                       uint32_t             val_info,
                                       zend_jit_addr        val_addr,
@@ -16232,7 +16220,7 @@ static int zend_jit_ffi_assign_obj_op(zend_jit_ctx        *jit,
 		return 0;
 	}
 
-	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
+	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 	}
 
@@ -16247,8 +16235,6 @@ static int zend_jit_ffi_assign_sym_op(zend_jit_ctx        *jit,
                                       uint32_t             op1_info,
                                       zend_jit_addr        op1_addr,
                                       bool                 op1_indirect,
-                                      bool                 on_this,
-                                      bool                 delayed_fetch_this,
                                       zend_ffi_symbol     *sym,
                                       uint32_t             val_info,
                                       zend_jit_addr        val_addr,
@@ -16267,7 +16253,7 @@ static int zend_jit_ffi_assign_sym_op(zend_jit_ctx        *jit,
 		return 0;
 	}
 
-	if (opline->op1_type != IS_UNUSED && !delayed_fetch_this && !op1_indirect) {
+	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 	}
 
