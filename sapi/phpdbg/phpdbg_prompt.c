@@ -1728,7 +1728,9 @@ ex_is_caught:
 			zend_ulong address = (zend_ulong) execute_data->opline;
 
 			if (PHPDBG_G(seek_ex) != execute_data) {
-				if (PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
+				if (PHPDBG_G(seek_ex)->prev_execute_data &&
+				    phpdbg_user_execute_data(PHPDBG_G(seek_ex)->prev_execute_data) == execute_data &&
+				    PHPDBG_G(flags) & PHPDBG_IS_STEPPING) {
 					goto stepping;
 				}
 				goto next;
