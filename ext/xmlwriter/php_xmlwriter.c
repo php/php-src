@@ -900,7 +900,8 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 	}
 	output_bytes = xmlTextWriterFlush(ptr);
 	if (buffer) {
-		RETVAL_STRING((char *) buffer->content);
+		const xmlChar *content = xmlBufferContent(buffer);
+		RETVAL_STRING((const char *) content);
 		if (empty) {
 			xmlBufferEmpty(buffer);
 		}

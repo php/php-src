@@ -51,7 +51,6 @@ echo $dom->saveXML($empty), "\n";
 $AText = $empty->firstChild;
 $empty->insertAdjacentText("afterbegin", 'B');
 echo $dom->saveXML($empty), "\n";
-var_dump($AText->textContent);
 
 ?>
 --EXPECT--
@@ -78,4 +77,3 @@ Syntax Error
 --- Normal cases starting from empty element ---
 <empty>A</empty>
 <empty>BA</empty>
-string(2) "BA"

@@ -92,13 +92,16 @@ xmlDocPtr soap_xmlParseFile(const char *filename)
 		bool old;
 
 		php_libxml_sanitize_parse_ctxt_options(ctxt);
+		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
+		PHP_LIBXML_IGNORE_DEPRECATIONS_START
 		ctxt->keepBlanks = 0;
+		ctxt->options |= XML_PARSE_HUGE;
+		PHP_LIBXML_IGNORE_DEPRECATIONS_END
 		ctxt->sax->ignorableWhitespace = soap_ignorableWhitespace;
 		ctxt->sax->comment = soap_Comment;
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
-		ctxt->options |= XML_PARSE_HUGE;
 		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);
@@ -146,7 +149,10 @@ xmlDocPtr soap_xmlParseMemory(const void *buf, size_t buf_size)
 		ctxt->sax->warning = NULL;
 		ctxt->sax->error = NULL;
 		/*ctxt->sax->fatalError = NULL;*/
+		/* TODO: In libxml2 2.14.0 change this to the new options API so we don't rely on deprecated APIs. */
+		PHP_LIBXML_IGNORE_DEPRECATIONS_START
 		ctxt->options |= XML_PARSE_HUGE;
+		PHP_LIBXML_IGNORE_DEPRECATIONS_END
 		old = php_libxml_disable_entity_loader(1);
 		xmlParseDocument(ctxt);
 		php_libxml_disable_entity_loader(old);
