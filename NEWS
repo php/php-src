@@ -31,6 +31,7 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-14596 (crashes with ASAN and ZEND_RC_DEBUG=1).
     (David Carlier)
+  . Fixed bug GH-14553 (echo output trimmed at NULL byte). (nielsdos)
 
 - Shmop:
    . Fixed bug GH-14537 (shmop Windows 11 crashes the process). (nielsdos)
