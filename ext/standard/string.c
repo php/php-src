@@ -3445,7 +3445,7 @@ static void php_strtr_array(zval *return_value, zend_string *str, HashTable *fro
 							/* case_sensitive */ true,
 							NULL));
 			} else {
-				zend_long dummy;
+				zend_long dummy = 0;
 				RETVAL_STR(php_str_to_str_ex(str,
 							ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 							ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
