@@ -2247,9 +2247,9 @@ crypt_r("passwd", "hash", &buffer);
 dnl
 dnl PHP_TEST_WRITE_STDOUT
 dnl
-AC_DEFUN([PHP_TEST_WRITE_STDOUT],[
-  AC_CACHE_CHECK(whether writing to stdout works,ac_cv_write_stdout,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_DEFUN([PHP_TEST_WRITE_STDOUT],
+[AC_CACHE_CHECK([whether writing to stdout works], [php_cv_have_write_stdout],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -2263,24 +2263,14 @@ int main(void)
   n = write(1, TEXT, sizeof(TEXT)-1);
   return (!(n == sizeof(TEXT)-1));
 }
-    ]])],[
-      ac_cv_write_stdout=yes
-    ],[
-      ac_cv_write_stdout=no
-    ],[
-      case $host_alias in
-        *linux*|*midipix)
-          ac_cv_write_stdout=yes
-          ;;
-        *)
-          ac_cv_write_stdout=no
-          ;;
-      esac
-    ])
-  ])
-  if test "$ac_cv_write_stdout" = "yes"; then
-    AC_DEFINE(PHP_WRITE_STDOUT, 1, [whether write(2) works])
-  fi
+    ])],
+    [php_cv_have_write_stdout=yes],
+    [php_cv_have_write_stdout=no],
+    [AS_CASE([$host_alias],
+      [*linux*|*midipix], [php_cv_have_write_stdout=yes],
+      [php_cv_have_write_stdout=no])])])
+AS_VAR_IF([php_cv_have_write_stdout], [yes],
+  [AC_DEFINE([PHP_WRITE_STDOUT], [1], [Define to 1 if 'write(2)' works.])])
 ])
 
 dnl
