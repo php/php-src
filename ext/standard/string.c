@@ -3224,7 +3224,7 @@ PHP_FUNCTION(strtr)
 								/* case_sensitive */ true,
 								NULL));
 				} else {
-					zend_long dummy;
+					zend_long dummy = 0;
 					RETVAL_STR(php_str_to_str_ex(str,
 								ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 								ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
