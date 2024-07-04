@@ -14662,6 +14662,17 @@ static int zend_jit_ffi_assign_op_helper(zend_jit_ctx   *jit,
 			}
 			break;
 #endif
+		case ZEND_FFI_TYPE_POINTER:
+			ZEND_ASSERT(opcode == ZEND_ADD || opcode == ZEND_SUB);
+			ZEND_ASSERT(ZEND_FFI_TYPE(el_type->pointer.type)->size != 0);
+			type = IR_ADDR;
+			if (op2_info == MAY_BE_LONG) {
+				op2 = ir_MUL_A(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(ZEND_FFI_TYPE(el_type->pointer.type)->size));
+			} else {
+				ZEND_UNREACHABLE();
+				return 0;
+			}
+			break;
 		default:
 			ZEND_UNREACHABLE();
 			return 0;

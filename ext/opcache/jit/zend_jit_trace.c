@@ -4802,7 +4802,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (op1_ffi_type
 						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
 						 && op2_info == MAY_BE_LONG
-						 && zend_jit_ffi_compatible(op1_ffi_type->array.type, op1_data_info, op3_ffi_type)) {
+						 && (zend_jit_ffi_compatible(op1_ffi_type->array.type, op1_data_info, op3_ffi_type)
+						  || zend_jit_ffi_compatible_addr_op(op1_ffi_type->array.type, op1_data_info, op3_ffi_type, opline->extended_value))) {
 							if (!ffi_info) {
 								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 							}
@@ -5010,7 +5011,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (field
 							 && !field->is_const
 							 && !field->bits
-							 && zend_jit_ffi_compatible(field->type, op1_data_info, op3_ffi_type)) {
+							 && (zend_jit_ffi_compatible(field->type, op1_data_info, op3_ffi_type)
+							  || zend_jit_ffi_compatible_addr_op(field->type, op1_data_info, op3_ffi_type, opline->extended_value))) {
 								if (!ffi_info) {
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
@@ -5027,7 +5029,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 							if (sym
 							 && sym->kind == ZEND_FFI_SYM_VAR
-							 && zend_jit_ffi_compatible(sym->type, op1_data_info, op3_ffi_type)) {
+							 && (zend_jit_ffi_compatible(sym->type, op1_data_info, op3_ffi_type)
+							  || zend_jit_ffi_compatible_addr_op(sym->type, op1_data_info, op3_ffi_type, opline->extended_value))) {
 								if (!ffi_info) {
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}

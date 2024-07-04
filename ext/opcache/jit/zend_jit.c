@@ -122,6 +122,17 @@ static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, 
 	}
 	return false;
 }
+
+static bool zend_jit_ffi_compatible_addr_op(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type, uint8_t opcode)
+{
+	if (dst_type->kind == ZEND_FFI_TYPE_POINTER
+	 && ZEND_FFI_TYPE(dst_type->pointer.type)->size != 0
+	 && src_info == MAY_BE_LONG
+	 && (opcode == ZEND_ADD || opcode == ZEND_SUB)) {
+		return true;
+	}
+	return false;
+}
 #endif
 
 #ifdef HAVE_PTHREAD_JIT_WRITE_PROTECT_NP
