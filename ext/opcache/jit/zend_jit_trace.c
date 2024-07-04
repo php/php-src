@@ -6087,8 +6087,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (!ffi_info) {
 								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 							}
-							if (!zend_jit_ffi_fetch_dim_read(&ctx, opline, ssa, ssa_op,
-									op1_info, op1_addr, avoid_refcounting,
+							if (!zend_jit_ffi_fetch_dim(&ctx, opline, ssa, ssa_op,
+									op1_info, op1_addr, 0, avoid_refcounting,
 									op2_info, OP2_REG_ADDR(), OP2_RANGE(),
 									res_info, RES_REG_ADDR(),
 									op1_ffi_type, ffi_info)) {
@@ -6117,9 +6117,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_info = OP1_INFO();
 						op1_addr = OP1_REG_ADDR();
+						op1_indirect = 0;
 						if (opline->op1_type == IS_VAR) {
 							if (orig_op1_type != IS_UNKNOWN
 							 && (orig_op1_type & IS_TRACE_INDIRECT)) {
+								op1_indirect = 1;
 								if (!zend_jit_fetch_indirect_var(&ctx, opline, orig_op1_type,
 										&op1_info, &op1_addr, !ssa->var_info[ssa_op->op1_use].indirect_reference)) {
 									goto jit_failure;
@@ -6144,6 +6146,24 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						op1_def_info = OP1_DEF_INFO();
+#ifdef HAVE_FFI
+						if (op1_ffi_type
+						 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+						 && op2_info == MAY_BE_LONG
+						 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
+						 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
+							if (!ffi_info) {
+								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+							}
+							if (!zend_jit_ffi_fetch_dim(&ctx, opline, ssa, ssa_op,
+									op1_info, op1_addr, op1_indirect, avoid_refcounting,
+									op2_info, OP2_REG_ADDR(), OP2_RANGE(),
+									res_info, RES_REG_ADDR(),
+									op1_ffi_type, ffi_info)) {
+								goto jit_failure;
+							}
+						} else
+#endif
 						if (!zend_jit_fetch_dim(&ctx, opline,
 								op1_info, op1_addr,
 								op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
@@ -6332,7 +6352,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 #ifdef HAVE_FFI
 						if ((opline->opcode == ZEND_FETCH_OBJ_R
-						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG)
+						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
+						  || opline->opcode == ZEND_FETCH_OBJ_W)
 						 && op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
 							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
@@ -6354,7 +6375,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto done;
 							}
 						} else if ((opline->opcode == ZEND_FETCH_OBJ_R
-						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG)
+						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
+						  || opline->opcode == ZEND_FETCH_OBJ_W)
 						 && op1_ffi_symbols) {
 							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));

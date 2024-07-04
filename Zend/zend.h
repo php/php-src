@@ -411,9 +411,12 @@ extern ZEND_API zend_utility_values zend_uv;
 extern ZEND_API zend_class_entry *zend_ffi_ce;
 extern ZEND_API zend_class_entry *zend_ffi_cdata_ce;
 
-typedef struct _zend_ffi_dcl zend_ffi_dcl;
+typedef struct _zend_ffi_dcl   zend_ffi_dcl;
 typedef struct _zend_ffi_scope zend_ffi_scope;
+typedef struct _zend_ffi_cdata zend_ffi_cdata;
+typedef struct _zend_ffi_type  zend_ffi_type;
 
+ZEND_API extern zend_ffi_cdata* (*zend_ffi_cdata_create)(void *ptr, zend_ffi_type *type);
 ZEND_API extern zend_ffi_dcl*   (*zend_ffi_cache_type_get)(zend_string *str, void *context);
 ZEND_API extern zend_ffi_dcl*   (*zend_ffi_cache_type_add)(zend_string *str, zend_ffi_dcl *dcl, void *context);
 ZEND_API extern zend_ffi_scope* (*zend_ffi_cache_scope_get)(zend_string *str);
