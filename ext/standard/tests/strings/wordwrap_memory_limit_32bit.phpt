@@ -16,4 +16,4 @@ wordwrap($str, 1, $str2);
 
 ?>
 --EXPECTF--
-Fatal error: Possible integer overflow in memory allocation (4294901777 + %d) in %s on line %d
+Fatal error: %rAllowed memory size of %d bytes exhausted%s\(tried to allocate %d bytes\)|Possible integer overflow in memory allocation \(4294901777 \+ %d\)%r in %s on line %d
