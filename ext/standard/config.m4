@@ -341,23 +341,14 @@ PHP_CHECK_FUNC(res_search, resolv, socket)
 AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np])
 
 dnl
-dnl Check for strptime()
+dnl Obsolete check for strptime() declaration. The strptime, where available,
+dnl needs the _GNU_SOURCE defined or compiler flag -std=gnuXX appended to be
+dnl declared in time.h. PHP's strptime is also deprecated as of PHP 8.1.
 dnl
-AC_CACHE_CHECK([whether strptime is declared],
-[php_cv_have_decl_strptime],
-[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <time.h>], [
-#ifndef HAVE_STRPTIME
-#error no strptime() on this platform
-#else
-/* use invalid strptime() declaration to see if it fails to compile */
-int strptime(const char *s, const char *format, struct tm *tm);
-#endif
-])],
-[php_cv_have_decl_strptime=no],
-[php_cv_have_decl_strptime=yes])])
-AS_VAR_IF([php_cv_have_decl_strptime], [yes],
-  [AC_DEFINE([HAVE_STRPTIME_DECL_FAILS], [1],
-    [Define to 1 if 'strptime' has declaration.])])
+AC_CHECK_DECL([strptime],
+  [AC_DEFINE([HAVE_DECL_STRPTIME], [1],
+    [Define to 1 if you have the declaration of 'strptime'.])],,
+  [#include <time.h>])
 
 dnl
 dnl Check for argon2
