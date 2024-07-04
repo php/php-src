@@ -14254,6 +14254,15 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx      *jit,
 		return 0;
 	}
 
+	if (val_addr != val_def_addr && val_def_addr) {
+		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
+			return 0;
+		}
+		if (Z_MODE(val_def_addr) == IS_REG && Z_MODE(val_addr) != IS_REG) {
+			val_addr = val_def_addr;
+		}
+	}
+
 	if (!zend_jit_ffi_abc(jit, opline, op1_ffi_type, op2_info, op2_addr, op2_range)) {
 		return 0;
 	}
@@ -15791,6 +15800,15 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
 		return 0;
 	}
 
+	if (val_addr != val_def_addr && val_def_addr) {
+		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
+			return 0;
+		}
+		if (Z_MODE(val_def_addr) == IS_REG && Z_MODE(val_addr) != IS_REG) {
+			val_addr = val_def_addr;
+		}
+	}
+
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_CONST_LONG(field->offset));
 
@@ -15830,6 +15848,15 @@ static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
 
 	if (!zend_jit_ffi_symbols_guard(jit, opline, ssa, ssa_op->op1_use, ssa_op->op1_def, op1_addr, op1_ffi_symbols, ffi_info)) {
 		return 0;
+	}
+
+	if (val_addr != val_def_addr && val_def_addr) {
+		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
+			return 0;
+		}
+		if (Z_MODE(val_def_addr) == IS_REG && Z_MODE(val_addr) != IS_REG) {
+			val_addr = val_def_addr;
+		}
 	}
 
 	ir_ref ptr = ir_CONST_ADDR(sym->addr);
