@@ -14109,118 +14109,211 @@ static int zend_jit_ffi_write(zend_jit_ctx  *jit,
                               ir_ref         ptr,
                               uint32_t       val_info,
                               zend_jit_addr  val_addr,
-                              zend_ffi_type *val_ffi_type)
+                              zend_ffi_type *val_ffi_type,
+                              zend_jit_addr  res_addr)
 {
+	ir_ref ref = IR_UNUSED;
+
 	switch (ffi_type->kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_INT2F(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_INT2F(jit_Z_LVAL(jit, val_addr));
 			} else if (val_info == MAY_BE_DOUBLE) {
-				ir_STORE(ptr, ir_D2F(jit_Z_DVAL(jit, val_addr)));
+				ref = ir_D2F(jit_Z_DVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_F(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_F(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_F2D(ref);
+				jit_set_Z_DVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_DOUBLE);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_DOUBLE:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_INT2D(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_INT2D(jit_Z_LVAL(jit, val_addr));
 			} else if (val_info == MAY_BE_DOUBLE) {
-				ir_STORE(ptr, jit_Z_DVAL(jit, val_addr));
+				ref = jit_Z_DVAL(jit, val_addr);
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_D(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_D(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				jit_set_Z_DVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_DOUBLE);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_BOOL:
 			if (val_info == MAY_BE_FALSE) {
 				ir_STORE(ptr, IR_FALSE);
+				if (res_addr) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_FALSE);
+				}
 				return 1;
 			} else if (val_info == MAY_BE_TRUE) {
 				ir_STORE(ptr, IR_TRUE);
+				if (res_addr) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_TRUE);
+				}
 				return 1;
 			} else  if (val_info == (MAY_BE_FALSE|MAY_BE_TRUE)) {
-				ir_STORE(ptr, ir_SUB_U8(jit_Z_TYPE(jit, val_addr), ir_CONST_U8(IS_FALSE)));
+				if (res_addr) {
+					ref = jit_Z_TYPE_INFO(jit, val_addr);
+					jit_set_Z_TYPE_INFO_ex(jit, res_addr, ref);
+					ref = ir_TRUNC_U8(ref);
+				} else {
+					ref = jit_Z_TYPE(jit, val_addr);
+				}
+				ir_STORE(ptr, ir_SUB_U8(ref, ir_CONST_U8(IS_FALSE)));
 				return 1;
 			}
 			ZEND_FALLTHROUGH;
 		case ZEND_FFI_TYPE_UINT8:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_TRUNC_U8(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_TRUNC_U8(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_U8(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_U8(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_ZEXT_L(ref);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_SINT8:
 		case ZEND_FFI_TYPE_CHAR:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_TRUNC_I8(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_TRUNC_I8(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_I8(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_I8(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_SEXT_L(ref);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_UINT16:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_TRUNC_U16(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_TRUNC_U16(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_U16(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_U16(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_ZEXT_L(ref);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_SINT16:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_TRUNC_I16(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_TRUNC_I16(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_I16(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_I16(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_SEXT_L(ref);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 		case ZEND_FFI_TYPE_UINT32:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_TRUNC_U32(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_TRUNC_U32(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_U32(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_U32(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_ZEXT_L(ref);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_SINT32:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, ir_TRUNC_I32(jit_Z_LVAL(jit, val_addr)));
+				ref = ir_TRUNC_I32(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_I32(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_I32(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ref = ir_SEXT_L(ref);
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 		case ZEND_FFI_TYPE_UINT64:
 		case ZEND_FFI_TYPE_SINT64:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, jit_Z_LVAL(jit, val_addr));
+				ref = jit_Z_LVAL(jit, val_addr);
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_I64(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_I64(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 #else
 		case ZEND_FFI_TYPE_UINT32:
 		case ZEND_FFI_TYPE_SINT32:
 			if (val_info == MAY_BE_LONG) {
-				ir_STORE(ptr, jit_Z_LVAL(jit, val_addr));
+				ref = jit_Z_LVAL(jit, val_addr);
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
-				ir_STORE(ptr, ir_LOAD_I32(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr))));
+				ref = ir_LOAD_I32(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
 			} else {
 				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				jit_set_Z_LVAL(jit, res_addr, ref);
+				if (Z_MODE(res_addr) != IS_REG) {
+					jit_set_Z_TYPE_INFO(jit, res_addr, IS_LONG);
+				}
 			}
 			break;
 #endif
@@ -14276,11 +14369,11 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx      *jit,
 
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_MUL_L(jit_Z_LVAL(jit, op2_addr), ir_CONST_LONG(el_type->size)));
 
-	if (!zend_jit_ffi_write(jit, el_type, ptr, val_info, val_addr, val_ffi_type)) {
+	ZEND_ASSERT(!res_addr || RETURN_VALUE_USED(opline));
+
+	if (!zend_jit_ffi_write(jit, el_type, ptr, val_info, val_addr, val_ffi_type, res_addr)) {
 		return 0;
 	}
-
-	ZEND_ASSERT(!res_addr);
 
 	return 1;
 }
@@ -15818,11 +15911,11 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
 	ir_ref cdata_ref = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_CONST_LONG(field->offset));
 
-	if (!zend_jit_ffi_write(jit, field_type, ptr, val_info, val_addr, val_ffi_type)) {
+	ZEND_ASSERT(!res_addr || RETURN_VALUE_USED(opline));
+
+	if (!zend_jit_ffi_write(jit, field_type, ptr, val_info, val_addr, val_ffi_type, res_addr)) {
 		return 0;
 	}
-
-	ZEND_ASSERT(!res_addr);
 
 	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
@@ -15863,12 +15956,12 @@ static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
 		}
 	}
 
+	ZEND_ASSERT(!res_addr || RETURN_VALUE_USED(opline));
+
 	ir_ref ptr = ir_CONST_ADDR(sym->addr);
-	if (!zend_jit_ffi_write(jit, sym_type, ptr, val_info, val_addr, val_ffi_type)) {
+	if (!zend_jit_ffi_write(jit, sym_type, ptr, val_info, val_addr, val_ffi_type, res_addr)) {
 		return 0;
 	}
-
-	ZEND_ASSERT(!res_addr);
 
 	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
