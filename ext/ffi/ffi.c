@@ -355,6 +355,22 @@ again:
 }
 /* }}} */
 
+static zend_ffi_cdata* _zend_ffi_cdata_create(void *ptr, zend_ffi_type *type) /* {{{ */
+{
+	zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
+
+	zend_ffi_object_init(&cdata->std, zend_ffi_cdata_ce);
+	cdata->std.handlers =
+		(type->kind < ZEND_FFI_TYPE_POINTER) ?
+		&zend_ffi_cdata_value_handlers :
+		&zend_ffi_cdata_handlers;
+	cdata->type = type;
+	cdata->flags = 0;
+	cdata->ptr = ptr;
+	return cdata;
+}
+/* }}} */
+
 static zend_never_inline zend_ffi_cdata *zend_ffi_cdata_to_zval_slow(void *ptr, zend_ffi_type *type, zend_ffi_flags flags) /* {{{ */
 {
 	zend_ffi_cdata *cdata = emalloc(sizeof(zend_ffi_cdata));
@@ -5579,6 +5595,8 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.get_closure          = NULL;
 	zend_ffi_ctype_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_ctype_handlers.get_gc               = zend_fake_get_gc;
+
+	zend_ffi_cdata_create = _zend_ffi_cdata_create;
 
 	if (FFI_G(preload)) {
 		return zend_ffi_preload(FFI_G(preload));
