@@ -41,19 +41,19 @@ var_dump($client->__getLastResponseHeaders());
 --EXPECTF--
 string(0) ""
 string(0) ""
-string(177) "POST / HTTP/1.1
+string(%d) "POST / HTTP/1.1
 Host: %s
 Connection: Keep-Alive
-User-Agent: PHP-SOAP/8.4.0-dev
+User-Agent: PHP-SOAP/%s
 Content-Type: text/xml; charset=utf-8
 SOAPAction: "Add"
 Content-Length: %d
 
 "
-string(165) "HTTP/1.1 200 OK
+string(%s) "HTTP/1.1 200 OK
 Host: %s
 Date: %s
 Connection: close
-X-Powered-By: PHP/8.4.0-dev
+X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8
 "
