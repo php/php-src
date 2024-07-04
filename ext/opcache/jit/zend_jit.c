@@ -123,6 +123,26 @@ static bool zend_jit_ffi_compatible(zend_ffi_type *dst_type, uint32_t src_info, 
 	return false;
 }
 
+static bool zend_jit_ffi_compatible_addr(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type)
+{
+	if (dst_type->kind == ZEND_FFI_TYPE_POINTER) {
+		if (src_info == MAY_BE_NULL) {
+			return true;
+		} else if (src_type
+		 && src_type->kind == ZEND_FFI_TYPE_POINTER
+		 && (dst_type == src_type
+		  || ZEND_FFI_TYPE(dst_type->pointer.type) == ZEND_FFI_TYPE(src_type->pointer.type)
+		  || ZEND_FFI_TYPE(dst_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID
+		  || ZEND_FFI_TYPE(src_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID
+// TODO: calls between shared extensions doesn't work on Windows
+//		  || zend_ffi_is_compatible_type(dst_type, src_type)
+		)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 static bool zend_jit_ffi_compatible_addr_op(zend_ffi_type *dst_type, uint32_t src_info, zend_ffi_type *src_type, uint8_t opcode)
 {
 	if (dst_type->kind == ZEND_FFI_TYPE_POINTER
