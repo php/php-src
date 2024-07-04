@@ -360,7 +360,11 @@ PHPAPI int php_output_get_level(void)
 PHPAPI int php_output_get_contents(zval *p)
 {
 	if (OG(active)) {
-		ZVAL_STRINGL(p, OG(active)->buffer.data, OG(active)->buffer.used);
+		if (OG(active)->buffer.used) {
+			ZVAL_STRINGL(p, OG(active)->buffer.data, OG(active)->buffer.used);
+		} else {
+			ZVAL_EMPTY_STRING(p);
+		}
 		return SUCCESS;
 	} else {
 		ZVAL_NULL(p);
