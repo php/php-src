@@ -14314,6 +14314,25 @@ static int zend_jit_ffi_write(zend_jit_ctx  *jit,
 			}
 			break;
 #endif
+		case ZEND_FFI_TYPE_POINTER:
+			if (val_info == MAY_BE_NULL) {
+				ref = IR_NULL;
+			} else if (val_ffi_type
+			 && val_ffi_type->kind == ZEND_FFI_TYPE_POINTER
+			 && (val_ffi_type == ffi_type
+			  || ZEND_FFI_TYPE(val_ffi_type->pointer.type) == ZEND_FFI_TYPE(ffi_type->pointer.type)
+			  || ZEND_FFI_TYPE(val_ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID
+			  || ZEND_FFI_TYPE(ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_VOID)) {
+				ref = ir_LOAD_A(jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, val_addr)));
+			} else {
+				ZEND_UNREACHABLE();
+			}
+			ir_STORE(ptr, ref);
+			if (res_addr) {
+				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_zval_ffi_ptr),
+					jit_ZVAL_ADDR(jit, res_addr), ir_CONST_ADDR(ffi_type), ref);
+			}
+			break;
 		default:
 			ZEND_UNREACHABLE();
 	}
@@ -14371,6 +14390,8 @@ static int zend_jit_ffi_assign_dim(zend_jit_ctx      *jit,
 	if (!zend_jit_ffi_write(jit, el_type, ptr, val_info, val_addr, val_ffi_type, res_addr)) {
 		return 0;
 	}
+
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
 
 	return 1;
 }
@@ -14812,6 +14833,8 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx      *jit,
 			el_type, ptr, op1_data_info, op3_addr)) {
 		return 0;
 	}
+
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, opline);
 
 	return 1;
 }
@@ -15914,6 +15937,8 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
 		return 0;
 	}
 
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
+
 	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 	}
@@ -15959,6 +15984,8 @@ static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
 	if (!zend_jit_ffi_write(jit, sym_type, ptr, val_info, val_addr, val_ffi_type, res_addr)) {
 		return 0;
 	}
+
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
 
 	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
@@ -16357,6 +16384,8 @@ static int zend_jit_ffi_assign_obj_op(zend_jit_ctx        *jit,
 		return 0;
 	}
 
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
+
 	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
 	}
@@ -16389,6 +16418,8 @@ static int zend_jit_ffi_assign_sym_op(zend_jit_ctx        *jit,
 			sym_type, ptr, val_info, val_addr)) {
 		return 0;
 	}
+
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
 
 	if (!op1_indirect) {
 		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
