@@ -845,7 +845,7 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array) /* {{{ */
 
 static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length) /* {{{ */
 {
-	return phpdbg_script(P_STDOUT, "%.*s", (int) length, message);
+	return phpdbg_process_print(PHPDBG_G(io)[PHPDBG_STDOUT].fd, P_STDOUT, message, (int) length);
 } /* }}} */
 
 /* beginning of struct, see main/streams/plain_wrapper.c line 111 */
