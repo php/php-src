@@ -239,18 +239,18 @@ AC_DEFUN([PHP_FPM_TRACE],
 ])
 
 AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
-[
-  AC_MSG_CHECKING([if gcc supports __sync_bool_compare_and_swap])
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
+[AC_CACHE_CHECK([if compiler supports __sync_bool_compare_and_swap],
+  [php_cv_have___sync_bool_compare_and_swap],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [
     int variable = 1;
     return (__sync_bool_compare_and_swap(&variable, 1, 2)
            && __sync_add_and_fetch(&variable, 1)) ? 1 : 0;
-  ]])], [
-    AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_BUILTIN_ATOMIC, 1, [Define to 1 if gcc supports __sync_bool_compare_and_swap() a.o.])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
+  ])],
+  [php_cv_have___sync_bool_compare_and_swap=yes],
+  [php_cv_have___sync_bool_compare_and_swap=no])])
+AS_VAR_IF([php_cv_have___sync_bool_compare_and_swap], [yes],
+  [AC_DEFINE([HAVE_BUILTIN_ATOMIC], [1],
+    [Define to 1 if compiler supports __sync_bool_compare_and_swap() a.o.])])
 ])
 
 AC_DEFUN([PHP_FPM_LQ],
