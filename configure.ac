@@ -1555,12 +1555,18 @@ if test "$PHP_MEMORY_SANITIZER" = "yes"; then
   ], [AC_MSG_ERROR([MemorySanitizer is not available])])
 fi
 
-if test "$PHP_ADDRESS_SANITIZER" = "yes"; then
+AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
+  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR([m4_normalize([
+    Valgrind and address sanitizer are not compatible. Either disable Valgrind
+    (remove --with-valgrind) or disable address sanitizer (remove
+    --enable-address-sanitizer).
+  ])])])
+
   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
     CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
     CXXFLAGS="$CXXFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
   ], [AC_MSG_ERROR([AddressSanitizer is not available])])
-fi
+])
 
 if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
   AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
