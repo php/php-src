@@ -19,18 +19,7 @@
 #include "expat_compat.h"
 #include "ext/libxml/php_libxml.h"
 
-typedef struct _php_xml_ns {
-	xmlNsPtr nsptr;
-	int ref_count;
-	void *next;
-	void *prev;
-} php_xml_ns;
-
 #ifdef LIBXML_EXPAT_COMPAT
-
-#define IS_NS_DECL(__ns) \
-	((__ns) != NULL && strlen(__ns) == 5 && *(__ns) == 'x' && *((__ns)+1) == 'm' && \
-	 *((__ns)+2) == 'l' && *((__ns)+3) == 'n' && *((__ns)+4) == 's')
 
 static void
 _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
