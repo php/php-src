@@ -268,9 +268,6 @@ static zend_always_inline void php_libxml_sanitize_parse_ctxt_options(xmlParserC
 	ctxt->options = 0;
 	ZEND_DIAGNOSTIC_IGNORED_END
 }
-
-#else /* HAVE_LIBXML */
-#define libxml_module_ptr NULL
 #endif
 
 #define phpext_libxml_ptr libxml_module_ptr
