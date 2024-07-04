@@ -214,7 +214,7 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 	zend_ulong min = 32*1024;
 #endif
 
-#ifdef __SANITIZE_ADDRESS__
+#if defined(__SANITIZE_ADDRESS__) || __has_feature(memory_sanitizer)
 	/* AddressSanitizer and MemorySanitizer use more stack due to
 	 * instrumentation */
 	min *= 10;
