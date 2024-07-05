@@ -14817,6 +14817,7 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx      *jit,
                                       uint32_t           op1_info,
                                       uint32_t           op1_def_info,
                                       zend_jit_addr      op1_addr,
+                                      bool               op1_indirect,
                                       uint32_t           op2_info,
                                       zend_jit_addr      op2_addr,
                                       zend_ssa_range    *op2_range,
@@ -14851,6 +14852,10 @@ static int zend_jit_ffi_assign_dim_op(zend_jit_ctx      *jit,
 	}
 
 	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, op1_data_info, opline);
+
+	if (!op1_indirect) {
+		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
+	}
 
 	return 1;
 }
