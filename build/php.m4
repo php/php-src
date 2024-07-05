@@ -2750,56 +2750,51 @@ AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
 dnl
 dnl PHP_CHECK_AVX512_SUPPORTS
 dnl
-AC_DEFUN([PHP_CHECK_AVX512_SUPPORTS], [
-  AC_MSG_CHECKING([for avx512 supports in compiler])
-  save_CFLAGS="$CFLAGS"
-  CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw $CFLAGS"
-
-  AC_LINK_IFELSE([AC_LANG_SOURCE([[
-    #include <immintrin.h>
-      int main(void) {
-        __m512i mask = _mm512_set1_epi32(0x1);
-        char out[32];
-        _mm512_storeu_si512(out, _mm512_shuffle_epi8(mask, mask));
-        return 0;
-    }]])], [
-    have_avx512_supports=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_avx512_supports=0
-    AC_MSG_RESULT([no])
-  ])
-
-  CFLAGS="$save_CFLAGS"
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_AVX512_SUPPORTS],
-   [$have_avx512_supports], [Whether the compiler supports AVX512])
+AC_DEFUN([PHP_CHECK_AVX512_SUPPORTS],
+[AC_CACHE_CHECK([whether compiler supports AVX-512],
+[php_cv_have_avx512],
+[save_CFLAGS="$CFLAGS"
+CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw $CFLAGS"
+AC_LINK_IFELSE([AC_LANG_SOURCE([[
+  #include <immintrin.h>
+  int main(void) {
+    __m512i mask = _mm512_set1_epi32(0x1);
+    char out[32];
+    _mm512_storeu_si512(out, _mm512_shuffle_epi8(mask, mask));
+    return 0;
+  }]])],
+  [php_cv_have_avx512=yes],
+  [php_cv_have_avx512=no])
+CFLAGS="$save_CFLAGS"
+])
+AS_VAR_IF([php_cv_have_avx512], [yes],
+  [AC_DEFINE([PHP_HAVE_AVX512_SUPPORTS], [1],
+    [Define to 1 if the compiler supports AVX-512.])])
 ])
 
 dnl
 dnl PHP_CHECK_AVX512_VBMI_SUPPORTS
 dnl
-AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS], [
-  AC_MSG_CHECKING([for avx512 vbmi supports in compiler])
-  save_CFLAGS="$CFLAGS"
-  CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mavx512vbmi $CFLAGS"
-  AC_LINK_IFELSE([AC_LANG_SOURCE([[
-    #include <immintrin.h>
-      int main(void) {
-        __m512i mask = _mm512_set1_epi32(0x1);
-        char out[32];
-        _mm512_storeu_si512(out, _mm512_permutexvar_epi8(mask, mask));
-        return 0;
-    }]])], [
-    have_avx512_vbmi_supports=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_avx512_vbmi_supports=0
-    AC_MSG_RESULT([no])
-  ])
-  CFLAGS="$save_CFLAGS"
-  AC_DEFINE_UNQUOTED([PHP_HAVE_AVX512_VBMI_SUPPORTS],
-   [$have_avx512_vbmi_supports], [Whether the compiler supports AVX512 VBMI])
+AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS],
+[AC_CACHE_CHECK([whether compiler supports AVX-512 VBMI],
+[php_cv_have_avx512vbmi],
+[save_CFLAGS="$CFLAGS"
+CFLAGS="-mavx512f -mavx512cd -mavx512vl -mavx512dq -mavx512bw -mavx512vbmi $CFLAGS"
+AC_LINK_IFELSE([AC_LANG_SOURCE([[
+  #include <immintrin.h>
+  int main(void) {
+    __m512i mask = _mm512_set1_epi32(0x1);
+    char out[32];
+    _mm512_storeu_si512(out, _mm512_permutexvar_epi8(mask, mask));
+    return 0;
+  }]])],
+  [php_cv_have_avx512vbmi=yes],
+  [php_cv_have_avx512vbmi=no])
+CFLAGS="$save_CFLAGS"
+])
+AS_VAR_IF([php_cv_have_avx512vbmi], [yes],
+  [AC_DEFINE([PHP_HAVE_AVX512_VBMI_SUPPORTS], [1],
+    [Define to 1 if the compiler supports AVX-512 VBMI.])])
 ])
 
 dnl

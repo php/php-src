@@ -180,7 +180,7 @@ static inline int zend_cpu_supports_avx2(void) {
 	return __builtin_cpu_supports("avx2");
 }
 
-#if PHP_HAVE_AVX512_SUPPORTS
+#ifdef PHP_HAVE_AVX512_SUPPORTS
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_avx512(void) {
 #if PHP_HAVE_BUILTIN_CPU_INIT
@@ -192,7 +192,7 @@ static inline int zend_cpu_supports_avx512(void) {
 }
 #endif
 
-#if PHP_HAVE_AVX512_VBMI_SUPPORTS
+#ifdef PHP_HAVE_AVX512_VBMI_SUPPORTS
 ZEND_NO_SANITIZE_ADDRESS
 static inline int zend_cpu_supports_avx512_vbmi(void) {
 #if PHP_HAVE_BUILTIN_CPU_INIT
