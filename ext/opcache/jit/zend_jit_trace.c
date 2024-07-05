@@ -4907,6 +4907,53 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								on_this = op_array->opcodes[op_array_ssa->vars[op_array_ssa->ops[opline-op_array->opcodes].op1_use].definition].opcode == ZEND_FETCH_THIS;
 							}
 						}
+#ifdef HAVE_FFI
+						if (op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
+							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+
+							if (field
+							 && !field->is_const
+							 && !field->bits
+							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_VOID
+							 && zend_jit_ffi_supported_type(field->type)
+							 && (ZEND_FFI_TYPE(field->type)->kind < ZEND_FFI_TYPE_POINTER
+							  || (ZEND_FFI_TYPE(field->type)->kind == ZEND_FFI_TYPE_POINTER
+							   && ZEND_FFI_TYPE(ZEND_FFI_TYPE(field->type)->pointer.type)->size != 0))) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_incdec_obj(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, op1_indirect, field,
+										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
+										op1_ffi_type, ffi_info)) {
+									goto jit_failure;
+								}
+								goto done;
+							}
+						} else if (op1_ffi_symbols) {
+							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
+								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
+							if (sym
+							 && sym->kind == ZEND_FFI_SYM_VAR
+							 && ZEND_FFI_TYPE(sym->type)->kind != ZEND_FFI_TYPE_VOID
+							 && zend_jit_ffi_supported_type(sym->type)
+							 && (ZEND_FFI_TYPE(sym->type)->kind < ZEND_FFI_TYPE_POINTER
+							  || (ZEND_FFI_TYPE(sym->type)->kind == ZEND_FFI_TYPE_POINTER
+							   && ZEND_FFI_TYPE(ZEND_FFI_TYPE(sym->type)->pointer.type)->size != 0))) {
+								if (!ffi_info) {
+									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+								}
+								if (!zend_jit_ffi_incdec_sym(&ctx, opline, op_array, ssa, ssa_op,
+										op1_info, op1_addr, op1_indirect, sym,
+										(opline->result_type != IS_UNUSED) ? RES_REG_ADDR() : 0,
+										op1_ffi_symbols, ffi_info)) {
+									goto jit_failure;
+								}
+								goto done;
+							}
+						}
+#endif
 						if (!zend_jit_incdec_obj(&ctx, opline, op_array, ssa, ssa_op,
 								op1_info, op1_addr,
 								op1_indirect, ce, ce_is_instanceof, on_this, delayed_fetch_this, op1_ce,
