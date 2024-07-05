@@ -13409,7 +13409,7 @@ static int zend_jit_ffi_fetch_dim(zend_jit_ctx       *jit,
 
 	if (opline->opcode == ZEND_FETCH_DIM_W || opline->opcode == ZEND_FETCH_DIM_RW) {
 		jit_set_Z_PTR(jit, res_addr,
-			ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_ffi_cdata_create),
+			ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_ffi_cdata_create),
 				ptr, ir_CONST_ADDR(el_type)));
 		jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
 	} else {
@@ -15310,7 +15310,7 @@ static int zend_jit_ffi_fetch_obj(zend_jit_ctx        *jit,
 
 	if (opline->opcode == ZEND_FETCH_OBJ_W) {
 		jit_set_Z_PTR(jit, res_addr,
-			ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_ffi_cdata_create),
+			ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_ffi_cdata_create),
 				ptr, ir_CONST_ADDR(field_type)));
 		jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
 	} else {
@@ -15358,7 +15358,7 @@ static int zend_jit_ffi_fetch_sym(zend_jit_ctx        *jit,
 
 	if (opline->opcode == ZEND_FETCH_OBJ_W) {
 		jit_set_Z_PTR(jit, res_addr,
-			ir_CALL_2(IR_ADDR, ir_CONST_FC_FUNC(zend_ffi_cdata_create),
+			ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_ffi_cdata_create),
 				ptr, ir_CONST_ADDR(sym_type)));
 		jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
 	} else {
