@@ -471,9 +471,8 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	}
 
 	php_libxml_sanitize_parse_ctxt_options(parser->parser);
-	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX);
+	xmlCtxtUseOptions(parser->parser, XML_PARSE_OLDSAX | XML_PARSE_NOENT);
 
-	parser->parser->replaceEntities = 1;
 	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
 		/* Note: sax2 flag will be set due to the magic number in `initialized` in php_xml_compat_handlers */
