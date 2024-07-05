@@ -476,8 +476,9 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 	parser->parser->replaceEntities = 1;
 	parser->parser->wellFormed = 0;
 	if (sep != NULL) {
+		/* Note: sax2 flag will be set due to the magic number in `initialized` in php_xml_compat_handlers */
+		ZEND_ASSERT(parser->parser->sax->initialized == XML_SAX2_MAGIC);
 		parser->use_namespace = 1;
-		parser->parser->sax2 = 1;
 		parser->_ns_separator = xmlStrdup(sep);
 	} else {
 		/* Reset flag as XML_SAX2_MAGIC is needed for xmlCreatePushParserCtxt
