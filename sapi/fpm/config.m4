@@ -145,26 +145,25 @@ AC_DEFUN([PHP_FPM_TRACE],
     AC_DEFINE([HAVE_PTRACE], 1, [do we have ptrace?])
   fi
 
-  have_mach_vm_read=no
+  AS_VAR_IF([have_broken_ptrace], [yes],
+    [AC_CACHE_CHECK([for mach_vm_read], [php_cv_have_mach_vm_read],
+      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <mach/mach.h>
+        #include <mach/mach_vm.h>
+      ], [
+        mach_vm_read(
+          (vm_map_t)0,
+          (mach_vm_address_t)0,
+          (mach_vm_size_t)0,
+          (vm_offset_t *)0,
+          (mach_msg_type_number_t*)0);
+      ])],
+      [php_cv_have_mach_vm_read=yes],
+      [php_cv_have_mach_vm_read=no])])
+  ])
 
-  if test "$have_broken_ptrace" = "yes"; then
-    AC_MSG_CHECKING([for mach_vm_read])
-
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <mach/mach.h>
-      #include <mach/mach_vm.h>
-    ]], [[
-      mach_vm_read((vm_map_t)0, (mach_vm_address_t)0, (mach_vm_size_t)0, (vm_offset_t *)0, (mach_msg_type_number_t*)0);
-    ]])], [
-      have_mach_vm_read=yes
-      AC_MSG_RESULT([yes])
-    ], [
-      AC_MSG_RESULT([no])
-    ])
-  fi
-
-  if test "$have_mach_vm_read" = "yes"; then
-    AC_DEFINE([HAVE_MACH_VM_READ], 1, [do we have mach_vm_read?])
-  fi
+  AS_VAR_IF([php_cv_have_mach_vm_read], [yes],
+    [AC_DEFINE([HAVE_MACH_VM_READ], [1],
+      [Define to 1 if you have the 'mach_vm_read'.])])
 
   proc_mem_file=""
 
@@ -229,7 +228,7 @@ AC_DEFUN([PHP_FPM_TRACE],
   elif test -n "$proc_mem_file"; then
     fpm_trace_type=pread
 
-  elif test "$have_mach_vm_read" = "yes" ; then
+  elif test "$php_cv_have_mach_vm_read" = "yes" ; then
     fpm_trace_type=mach
 
   else
