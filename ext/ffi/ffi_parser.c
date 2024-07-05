@@ -2166,6 +2166,7 @@ static int parse_declaration_specifiers(int sym, zend_ffi_dcl *dcl) {
 			case YY_ENUM:
 			case YY_ID:
 				sym = parse_type_specifier(sym, dcl);
+				if (((dcl->flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STORAGE_CLASS)) == ZEND_FFI_DCL_ENUM)) zend_ffi_cleanup_dcl(dcl);
 				break;
 			default:
 				yy_error_sym("unexpected", sym);

@@ -137,6 +137,7 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 		|	attributes(dcl)
 		|	type_qualifier(dcl)
 		|	type_specifier(dcl)
+			{if (((dcl->flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STORAGE_CLASS)) == ZEND_FFI_DCL_ENUM)) zend_ffi_cleanup_dcl(dcl);}
 		)
 	)+
 ;
