@@ -2750,6 +2750,10 @@ AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
 dnl
 dnl PHP_CHECK_AVX512_SUPPORTS
 dnl
+dnl Check whether the compiler supports the AVX-512 extensions and define
+dnl PHP_HAVE_AVX512_SUPPORTS to 1 if found. Note that this is a compiler check,
+dnl not a runtime check where additional adjustments are done in the C code.
+dnl
 AC_DEFUN([PHP_CHECK_AVX512_SUPPORTS],
 [AC_CACHE_CHECK([whether compiler supports AVX-512],
 [php_cv_have_avx512],
@@ -2774,6 +2778,11 @@ AS_VAR_IF([php_cv_have_avx512], [yes],
 
 dnl
 dnl PHP_CHECK_AVX512_VBMI_SUPPORTS
+dnl
+dnl Check whether the compiler supports the AVX-512 extensions with the VBMI
+dnl instruction set and define PHP_HAVE_AVX512_VBMI_SUPPORTS to 1 if found. Note
+dnl that this is a compiler check, not a runtime check where additional
+dnl adjustments are done in the C code.
 dnl
 AC_DEFUN([PHP_CHECK_AVX512_VBMI_SUPPORTS],
 [AC_CACHE_CHECK([whether compiler supports AVX-512 VBMI],
