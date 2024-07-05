@@ -60,9 +60,9 @@ if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
   PHP_CHECK_FUNC(crypt, crypt)
   PHP_CHECK_FUNC(crypt_r, crypt)
   AC_CHECK_HEADERS([crypt.h])
-  if test "$ac_cv_func_crypt_r" = "yes"; then
-    PHP_CRYPT_R_STYLE
-  fi
+  AS_VAR_IF([ac_cv_func_crypt_r], [yes],
+    [PHP_CRYPT_R_STYLE],
+    [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
 
   AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -262,7 +262,7 @@ int main(void) {
   ])])
 
 
-  if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no" || test "$ac_cv_func_crypt_r" != "yes"; then
+  if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
     AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
   fi
 
