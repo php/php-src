@@ -5241,7 +5241,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 							}
 							if (!zend_jit_ffi_assign_dim(&ctx, opline, ssa, ssa_op,
-									op1_info, op1_addr,
+									op1_info, op1_addr, op1_indirect,
 									op2_info, (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 									(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 									op1_data_info, OP1_DATA_REG_ADDR(),
