@@ -1284,9 +1284,10 @@ dnl
 dnl Early releases of GCC 8 shipped with a strlen() optimization bug, so they
 dnl didn't properly handle the `char val[1]` struct hack. See bug #76510.
 dnl
-AC_DEFUN([PHP_BROKEN_GCC_STRLEN_OPT], [
-  AC_CACHE_CHECK([for broken gcc optimize-strlen],ac_cv_have_broken_gcc_strlen_opt,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_DEFUN([PHP_BROKEN_GCC_STRLEN_OPT],
+[AC_CACHE_CHECK([for broken gcc optimize-strlen],
+  [php_cv_have_broken_gcc_strlen_opt],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -1302,16 +1303,12 @@ int main(void)
   strcpy(s->c, "foo");
   return strlen(s->c+1) == 2;
 }
-]])],[
-  ac_cv_have_broken_gcc_strlen_opt=yes
-],[
-  ac_cv_have_broken_gcc_strlen_opt=no
-],[
-  ac_cv_have_broken_gcc_strlen_opt=no
-])])
-  if test "$ac_cv_have_broken_gcc_strlen_opt" = "yes"; then
-    CFLAGS="$CFLAGS -fno-optimize-strlen"
-  fi
+]])],
+  [php_cv_have_broken_gcc_strlen_opt=yes],
+  [php_cv_have_broken_gcc_strlen_opt=no],
+  [php_cv_have_broken_gcc_strlen_opt=no])])
+AS_VAR_IF([php_cv_have_broken_gcc_strlen_opt], [yes],
+  [AS_VAR_APPEND([CFLAGS], [" -fno-optimize-strlen"])])
 ])
 
 dnl

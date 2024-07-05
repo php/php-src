@@ -445,9 +445,7 @@ AC_CHECK_HEADERS(m4_normalize([
 
 PHP_FOPENCOOKIE
 PHP_BROKEN_GETCWD
-if test "$GCC" = "yes"; then
-  PHP_BROKEN_GCC_STRLEN_OPT
-fi
+AS_VAR_IF([GCC], [yes], [PHP_BROKEN_GCC_STRLEN_OPT])
 
 dnl Detect the headers required to use makedev, major, and minor.
 dnl Autoconf <= 2.69 didn't check glibc 2.25 deprecated macros in sys/types.h.
