@@ -6158,7 +6158,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (!zend_jit_ffi_fetch_dim(&ctx, opline, ssa, ssa_op,
 									op1_info, op1_addr, op1_indirect, avoid_refcounting,
 									op2_info, OP2_REG_ADDR(), OP2_RANGE(),
-									res_info, RES_REG_ADDR(),
+									RES_INFO(), RES_REG_ADDR(),
 									op1_ffi_type, ffi_info)) {
 								goto jit_failure;
 							}
