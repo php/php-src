@@ -1833,7 +1833,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							break;
 						}
 						if (!zend_jit_assign_dim(&ctx, opline,
-								OP1_INFO(), OP1_REG_ADDR(),
+								OP1_INFO(), OP1_REG_ADDR(), 0,
 								OP2_INFO(), (opline->op2_type != IS_UNUSED) ? OP2_REG_ADDR() : 0,
 								(opline->op2_type != IS_UNUSED) ? OP2_RANGE() : NULL,
 								OP1_DATA_INFO(), OP1_DATA_REG_ADDR(),
