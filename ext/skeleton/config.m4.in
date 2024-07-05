@@ -90,5 +90,8 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl In case of no dependencies
   AC_DEFINE(HAVE_%EXTNAMECAPS%, 1, [ Have %EXTNAME% support ])
 
-  PHP_NEW_EXTENSION(%EXTNAME%, %EXTNAME%.c, $ext_shared)
+  PHP_NEW_EXTENSION([%EXTNAME%],
+    [%EXTNAME%.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 fi
