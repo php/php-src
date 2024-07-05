@@ -97,7 +97,10 @@ declarations:
 				initializer?
 				{zend_ffi_declare(name, name_len, &dcl);}
 			)*
-		)?
+		|
+			/* empty */
+			{if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);}
+		)
 		";"
 	)*
 ;
