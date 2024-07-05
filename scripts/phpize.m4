@@ -26,7 +26,7 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
   test "[$]$1" = "no" && $1=yes
 ])dnl
 
-test -z "$CFLAGS" && auto_cflags=1
+AS_VAR_SET_IF([CFLAGS],, [auto_cflags=1])
 
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
@@ -62,9 +62,8 @@ INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
 EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
 PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
 
-if test -z "$prefix"; then
-  AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
-fi
+AS_VAR_SET_IF([prefix],,
+  [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
 
 php_shtool=$srcdir/build/shtool
 PHP_INIT_BUILD_SYSTEM
@@ -167,16 +166,14 @@ CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 CFLAGS_CLEAN='$(CFLAGS) -D_GNU_SOURCE'
 CXXFLAGS_CLEAN='$(CXXFLAGS)'
 
-test "$prefix" = "NONE" && prefix="/usr/local"
-test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+AS_VAR_IF([prefix], [NONE], [prefix=/usr/local])
+AS_VAR_IF([exec_prefix], [NONE], [exec_prefix='$(prefix)'])
 
-if test "$cross_compiling" = yes ; then
-  AC_MSG_CHECKING(for native build C compiler)
-  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
-  AC_MSG_RESULT($BUILD_CC)
-else
-  BUILD_CC=$CC
-fi
+AS_VAR_IF([cross_compiling], [yes],
+  [AC_CHECK_PROGS([BUILD_CC], [gcc clang c99 c89 cc cl], [none])
+    AC_MSG_CHECKING([for native build C compiler])
+    AC_MSG_RESULT([$BUILD_CC])],
+  [BUILD_CC=$CC])
 
 PHP_SUBST([PHP_MODULES])
 PHP_SUBST([PHP_ZEND_EX])
