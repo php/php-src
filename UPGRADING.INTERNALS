@@ -141,6 +141,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbols PHP_FPM_SYSTEMD, PHP_FPM_USER, and PHP_FPM_GROUP removed.
    - Symbol PTHREADS has been removed.
    - Symbol HAVE_STRPTIME_DECL_FAILS has been removed (use HAVE_DECL_STRPTIME).
+   - Symbols PHP_HAVE_AVX512_SUPPORTS and PHP_HAVE_AVX512_VBMI_SUPPORTS are now
+     either defined to 1 or undefined.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
