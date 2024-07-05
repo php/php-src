@@ -21,6 +21,10 @@ php_vernum=@PHP_VERSION_ID@
 php_inidir=@PHP_CONFIG_FILE_SCAN_DIR@
 # The path in which to look for php.ini.
 php_inipath=@PHP_CONFIG_FILE_PATH@
+# Whether PHP is built in debug mode (yes) or not (no).
+php_debug=@ZEND_DEBUG@
+# Whether PHP is built with thread safety (yes) or not (no).
+php_zts=@ZEND_ZTS@
 
 Name: PHP
 Description: Build extension for a PHP general-purpose scripting language
