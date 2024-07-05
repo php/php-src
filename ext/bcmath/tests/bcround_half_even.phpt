@@ -1,11 +1,11 @@
 --TEST--
-bcround() function PHP_ROUND_HALF_EVEN
+bcround() function HalfEven
 --EXTENSIONS--
 bcmath
 --FILE--
 <?php
 require_once __DIR__ . '/bcround_test_helper.inc';
-run_round_test(PHP_ROUND_HALF_EVEN);
+run_round_test(RoundingMode::HalfEven);
 ?>
 --EXPECT--
 ========== non-boundary value ==========

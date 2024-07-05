@@ -25,4 +25,4 @@ try {
 --EXPECT--
 bcround(): Argument #1 ($num) is not well-formed
 bcround(): Argument #1 ($num) is not well-formed
-bcround(): Argument #3 ($mode) must be a valid rounding mode (PHP_ROUND_*)
+bcround(): Argument #3 ($mode) must be of type RoundingMode, int given

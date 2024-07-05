@@ -1,11 +1,11 @@
 --TEST--
-bcround() function PHP_ROUND_AWAY_FROM_ZERO
+bcround() function AwayFromZero
 --EXTENSIONS--
 bcmath
 --FILE--
 <?php
 require_once __DIR__ . '/bcround_test_helper.inc';
-run_round_test(PHP_ROUND_AWAY_FROM_ZERO);
+run_round_test(RoundingMode::AwayFromZero);
 ?>
 --EXPECT--
 ========== non-boundary value ==========

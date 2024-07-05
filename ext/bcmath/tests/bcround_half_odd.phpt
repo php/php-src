@@ -1,11 +1,11 @@
 --TEST--
-bcround() function PHP_ROUND_HALF_ODD
+bcround() function HalfOdd
 --EXTENSIONS--
 bcmath
 --FILE--
 <?php
 require_once __DIR__ . '/bcround_test_helper.inc';
-run_round_test(PHP_ROUND_HALF_ODD);
+run_round_test(RoundingMode::HalfOdd);
 ?>
 --EXPECT--
 ========== non-boundary value ==========

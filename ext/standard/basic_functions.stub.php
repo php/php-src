@@ -3145,8 +3145,19 @@ function ceil(int|float $num): float {}
 /** @compile-time-eval */
 function floor(int|float $num): float {}
 
+enum RoundingMode {
+    case HalfAwayFromZero;
+    case HalfTowardsZero;
+    case HalfEven;
+    case HalfOdd;
+    case TowardsZero;
+    case AwayFromZero;
+    case NegativeInfinity;
+    case PositiveInfinity;
+}
+
 /** @compile-time-eval */
-function round(int|float $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
+function round(int|float $num, int $precision = 0, int|RoundingMode $mode = RoundingMode::HalfAwayFromZero): float {}
 
 /** @compile-time-eval */
 function sin(float $num): float {}

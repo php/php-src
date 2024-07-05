@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3a942ebd5d1011a6419217f9aa229b18c2ac0f83 */
+ * Stub hash: 81bc648d8b806c38aab6f3609deaed696c70ef84 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1627,7 +1627,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_round, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
+	ZEND_ARG_OBJ_TYPE_MASK(0, mode, RoundingMode, MAY_BE_LONG, "RoundingMode::HalfAwayFromZero")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sin, 0, 1, IS_DOUBLE, 0)
@@ -3615,6 +3615,10 @@ static const zend_function_entry class_AssertionError_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_RoundingMode_methods[] = {
+	ZEND_FE_END
+};
+
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", PHP_EXTR_OVERWRITE, CONST_PERSISTENT);
@@ -4149,6 +4153,29 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_RoundingMode(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("RoundingMode", IS_UNDEF, class_RoundingMode_methods);
+
+	zend_enum_add_case_cstr(class_entry, "HalfAwayFromZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "HalfTowardsZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "HalfEven", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "HalfOdd", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "TowardsZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "AwayFromZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "NegativeInfinity", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "PositiveInfinity", NULL);
 
 	return class_entry;
 }
