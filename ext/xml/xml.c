@@ -523,7 +523,7 @@ static zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XML_Cha
 			c = '?';
 		}
 
-		ZSTR_VAL(str)[ZSTR_LEN(str)++] = (unsigned int)decoder(c);
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = decoder(c);
 	}
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
 	if (ZSTR_LEN(str) < len) {
