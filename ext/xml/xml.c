@@ -29,7 +29,6 @@
 #ifdef HAVE_XML
 
 #include "php_xml.h"
-# include "ext/standard/head.h"
 #ifdef LIBXML_EXPAT_COMPAT
 #include "ext/libxml/php_libxml.h"
 #endif
