@@ -2395,8 +2395,7 @@ dnl
 dnl PHP_CHECK_BUILTIN(builtin)
 dnl
 dnl Check GNU C builtin "builtin" and define the CPP macro
-dnl PHP_HAVE_<BUILTIN_WITHOUT_LEADING_UNDERSCORES> to 1 if found, and to 0 if
-dnl not.
+dnl PHP_HAVE_<BUILTIN_WITHOUT_LEADING_UNDERSCORES> to 1 if found.
 dnl
 AC_DEFUN([PHP_CHECK_BUILTIN],
 [AS_VAR_PUSHDEF([php_var], [php_cv_have_$1])
