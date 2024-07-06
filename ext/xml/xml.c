@@ -1507,18 +1507,19 @@ PHP_FUNCTION(xml_parser_set_option)
 			parser->parsehuge = zend_is_true(value);
 			break;
 		/* Integer option */
-		case PHP_XML_OPTION_SKIP_TAGSTART:
+		case PHP_XML_OPTION_SKIP_TAGSTART: {
 			/* The tag start offset is stored in an int */
 			/* TODO Improve handling of values? */
-			parser->toffset = zval_get_long(value);
-			if (parser->toffset < 0) {
+			zend_long value_long = zval_get_long(value);
+			if (value_long < 0 || value_long > INT_MAX) {
 				/* TODO Promote to ValueError in PHP 9.0 */
 				php_error_docref(NULL, E_WARNING, "Argument #3 ($value) must be between 0 and %d"
-					" for option XML_OPTION_SKIP_TAGSTART", INT_MAX);
-				parser->toffset = 0;
+												  " for option XML_OPTION_SKIP_TAGSTART", INT_MAX);
 				RETURN_FALSE;
 			}
+			parser->toffset = (int) value_long;
 			break;
+		}
 		/* String option */
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
