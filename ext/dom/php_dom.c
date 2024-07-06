@@ -149,7 +149,7 @@ static xmlNodePtr php_dom_create_fake_namespace_decl_node_ptr(xmlNodePtr nodep, 
 typedef zend_result (*dom_read_t)(dom_object *obj, zval *retval);
 typedef zend_result (*dom_write_t)(dom_object *obj, zval *newval);
 
-typedef struct _dom_prop_handler {
+typedef struct dom_prop_handler {
 	dom_read_t read_func;
 	dom_write_t write_func;
 } dom_prop_handler;
