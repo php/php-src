@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0alpha2
 
+- Core:
+  . Fixed bug GH-14801 (Fix build for armv7). (andypost)
+
 - LibXML:
   . Added LIBXML_NO_XXE constant. (nielsdos)
 
