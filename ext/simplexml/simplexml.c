@@ -717,7 +717,7 @@ static int sxe_prop_dim_exists(zend_object *object, zval *member, int check_empt
 			}
 			if (exists && check_empty == 1 &&
 				(!attr->children || !attr->children->content || !attr->children->content[0] || xmlStrEqual(attr->children->content, (const xmlChar *) "0")) ) {
-				/* Attribute with no content in it's text node */
+				/* Attribute with no content in its text node */
 				exists = 0;
 			}
 		}
