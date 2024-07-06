@@ -919,10 +919,10 @@ void xml_notationDeclHandler(void *userData, const XML_Char *notationName,
 /* }}} */
 
 /* {{{ xml_externalEntityRefHandler() */
-int xml_externalEntityRefHandler(XML_Parser parserPtr, const XML_Char *openEntityNames,
+int xml_externalEntityRefHandler(XML_Parser userData, const XML_Char *openEntityNames,
 	const XML_Char *base, const XML_Char *systemId, const XML_Char *publicId)
 {
-	xml_parser *parser = XML_GetUserData(parserPtr);
+	xml_parser *parser = XML_GetUserData(userData);
 
 	if (!parser || !ZEND_FCC_INITIALIZED(parser->externalEntityRefHandler)) {
 		return 0;
@@ -1296,7 +1296,7 @@ XML_SET_HANDLER_PHP_FUNCTION(xml_set_processing_instruction_handler, processingI
 XML_SET_HANDLER_PHP_FUNCTION(xml_set_default_handler, defaultHandler, XML_SetDefaultHandler, xml_defaultHandler);
 XML_SET_HANDLER_PHP_FUNCTION(xml_set_unparsed_entity_decl_handler, unparsedEntityDeclHandler, XML_SetUnparsedEntityDeclHandler, xml_unparsedEntityDeclHandler);
 XML_SET_HANDLER_PHP_FUNCTION(xml_set_notation_decl_handler, notationDeclHandler, XML_SetNotationDeclHandler, xml_notationDeclHandler);
-XML_SET_HANDLER_PHP_FUNCTION(xml_set_external_entity_ref_handler, externalEntityRefHandler, XML_SetExternalEntityRefHandler, (void *) xml_externalEntityRefHandler);
+XML_SET_HANDLER_PHP_FUNCTION(xml_set_external_entity_ref_handler, externalEntityRefHandler, XML_SetExternalEntityRefHandler, xml_externalEntityRefHandler);
 XML_SET_HANDLER_PHP_FUNCTION(xml_set_start_namespace_decl_handler, startNamespaceDeclHandler, XML_SetStartNamespaceDeclHandler, xml_startNamespaceDeclHandler);
 XML_SET_HANDLER_PHP_FUNCTION(xml_set_end_namespace_decl_handler, endNamespaceDeclHandler, XML_SetEndNamespaceDeclHandler, xml_endNamespaceDeclHandler);
 
