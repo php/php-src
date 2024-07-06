@@ -47,6 +47,8 @@
 
 typedef xmlChar XML_Char;
 
+typedef struct XML_Parser_Struct *XML_Parser;
+
 typedef void (*XML_StartElementHandler)(void *, const XML_Char *, const XML_Char **);
 typedef void (*XML_EndElementHandler)(void *, const XML_Char *);
 typedef void (*XML_CharacterDataHandler)(void *, const XML_Char *, int);
@@ -55,7 +57,7 @@ typedef void (*XML_CommentHandler)(void *, const XML_Char *);
 typedef void (*XML_DefaultHandler)(void *, const XML_Char *, int);
 typedef void (*XML_UnparsedEntityDeclHandler)(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 typedef void (*XML_NotationDeclHandler)(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
-typedef int  (*XML_ExternalEntityRefHandler)(void *, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
+typedef int  (*XML_ExternalEntityRefHandler)(XML_Parser, const XML_Char *, const XML_Char *, const XML_Char *, const XML_Char *);
 typedef void (*XML_StartNamespaceDeclHandler)(void *, const XML_Char *, const XML_Char *);
 typedef void (*XML_EndNamespaceDeclHandler)(void *, const XML_Char *);
 
@@ -65,7 +67,7 @@ typedef struct XML_Memory_Handling_Suite {
   void (*free_fcn)(void *ptr);
 } XML_Memory_Handling_Suite;
 
-typedef struct XML_Parser_Struct {
+struct XML_Parser_Struct {
 	int use_namespace;
 
 	xmlChar *_ns_separator;
@@ -84,7 +86,7 @@ typedef struct XML_Parser_Struct {
 	XML_ExternalEntityRefHandler     h_external_entity_ref;
 	XML_StartNamespaceDeclHandler    h_start_ns;
 	XML_EndNamespaceDeclHandler      h_end_ns;
-} *XML_Parser;
+};
 
 enum XML_Error {
 	XML_ERROR_NONE,
