@@ -29,6 +29,9 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 {
 	const zend_long VALID_OPTIONS = XML_PARSE_RECOVER
 								  | XML_PARSE_NOENT
+#if LIBXML_VERSION >= 21300
+								  | XML_PARSE_NO_XXE
+#endif
 								  | XML_PARSE_DTDLOAD
 								  | XML_PARSE_DTDATTR
 								  | XML_PARSE_DTDVALID
@@ -47,6 +50,9 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 		zend_argument_value_error(arg_num, "contains invalid flags (allowed flags: "
 										   "LIBXML_RECOVER, "
 										   "LIBXML_NOENT, "
+#if LIBXML_VERSION >= 21300
+										   "LIBXML_NO_XXE, "
+#endif
 										   "LIBXML_DTDLOAD, "
 										   "LIBXML_DTDATTR, "
 										   "LIBXML_DTDVALID, "
