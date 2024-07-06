@@ -10877,21 +10877,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		return_value_used = -1;
 	}
 
-	if (ZEND_OBSERVER_ENABLED) {
-		if (Z_MODE(op1_addr) == IS_REG) {
-			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
-
-			if (!zend_jit_spill_store(Dst, op1_addr, dst, op1_info, 1)) {
-				return 0;
-			}
-			op1_addr = dst;
-		}
-		|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
-		|	mov FCARG1x, FP
-		|	SET_EX_OPLINE opline, REG0
-		|	EXT_CALL zend_observer_fcall_end, REG0
-	}
-
 	// if (!EX(return_value))
 	if (Z_MODE(op1_addr) == IS_REG && Z_REG(op1_addr) == ZREG_REG1) {
 		if (return_value_used != 0) {
@@ -10951,11 +10936,8 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	if (return_value_used == 0) {
-		|9:
-		return 1;
-	}
-
-	if (opline->op1_type == IS_CONST) {
+		/* pass */
+	} else if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		|	ZVAL_COPY_CONST ret_addr, MAY_BE_ANY, MAY_BE_ANY, zv, ZREG_REG0, ZREG_TMP1, ZREG_FPR0
 		if (Z_REFCOUNTED_P(zv)) {
@@ -11021,6 +11003,20 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	}
 
 	|9:
+	if (ZEND_OBSERVER_ENABLED) {
+		if (Z_MODE(op1_addr) == IS_REG) {
+			zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->op1.var);
+
+			if (!zend_jit_spill_store(Dst, op1_addr, dst, op1_info, 1)) {
+				return 0;
+			}
+			op1_addr = dst;
+		}
+		|	LOAD_ZVAL_ADDR FCARG2x, op1_addr
+		|	mov FCARG1x, FP
+		|	SET_EX_OPLINE opline, REG0
+		|	EXT_CALL zend_observer_fcall_end, REG0
+	}
 	return 1;
 }
 
