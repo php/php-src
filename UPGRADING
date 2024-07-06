@@ -763,6 +763,10 @@ PHP 8.4 UPGRADE NOTES
 
 - LibXML:
   . LIBXML_RECOVER.
+  . LIBXML_NO_XXE.
+    This is used together with LIBXML_NOENT for when you want to perform entity
+    substitution, but want to disallow external entity loading.
+    This constant is available as of libxml2 2.13.
 
 - OpenSSL:
   . X509_PURPOSE_OCSP_HELPER.
