@@ -22,7 +22,7 @@
 #ifdef LIBXML_EXPAT_COMPAT
 
 static void
-_qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
+qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, xmlChar **qualified)
 {
 	if (URI) {
 			/* Use libxml functions otherwise its memory deallocation is screwed up */
@@ -35,7 +35,7 @@ _qualify_namespace(XML_Parser parser, const xmlChar *name, const xmlChar *URI, x
 }
 
 static void
-_start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
+start_element_handler(void *user, const xmlChar *name, const xmlChar **attributes)
 {
 	XML_Parser  parser = (XML_Parser) user;
 	xmlChar    *qualified_name = NULL;
@@ -71,7 +71,7 @@ _start_element_handler(void *user, const xmlChar *name, const xmlChar **attribut
 }
 
 static void
-_start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar ** namespaces, int nb_attributes, int nb_defaulted, const xmlChar ** attributes)
+start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix, const xmlChar *URI, int nb_namespaces, const xmlChar ** namespaces, int nb_attributes, int nb_defaulted, const xmlChar ** attributes)
 {
 	XML_Parser  parser = (XML_Parser) user;
 	xmlChar    *qualified_name = NULL;
@@ -150,7 +150,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 		}
 		return;
 	}
-	_qualify_namespace(parser, name, URI, &qualified_name);
+	qualify_namespace(parser, name, URI, &qualified_name);
 
 	if (attributes != NULL) {
 		xmlChar    *qualified_name_attr = NULL;
@@ -159,7 +159,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 		for (i = 0; i < nb_attributes; i += 1) {
 
 			if (attributes[y+1] != NULL) {
-				_qualify_namespace(parser, attributes[y] , attributes[y + 2], &qualified_name_attr);
+				qualify_namespace(parser, attributes[y] , attributes[y + 2], &qualified_name_attr);
 			} else {
 				qualified_name_attr = xmlStrdup(attributes[y]);
 			}
@@ -182,7 +182,7 @@ _start_element_handler_ns(void *user, const xmlChar *name, const xmlChar *prefix
 }
 
 static void
-_end_element_handler(void *user, const xmlChar *name)
+end_element_handler(void *user, const xmlChar *name)
 {
 	XML_Parser  parser = (XML_Parser) user;
 
@@ -201,7 +201,7 @@ _end_element_handler(void *user, const xmlChar *name)
 }
 
 static void
-_end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix, const xmlChar *URI)
+end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix, const xmlChar *URI)
 {
 	xmlChar    *qualified_name;
 	XML_Parser  parser = (XML_Parser) user;
@@ -222,7 +222,7 @@ _end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix,
 		return;
 	}
 
-	_qualify_namespace(parser, name, URI,  &qualified_name);
+	qualify_namespace(parser, name, URI,  &qualified_name);
 
 	parser->h_end_element(parser->user, (const XML_Char *) qualified_name);
 
@@ -230,7 +230,7 @@ _end_element_handler_ns(void *user, const xmlChar *name, const xmlChar * prefix,
 }
 
 static void
-_cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
+cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -245,7 +245,7 @@ _cdata_handler(void *user, const xmlChar *cdata, int cdata_len)
 }
 
 static void
-_pi_handler(void *user, const xmlChar *target, const xmlChar *data)
+pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -263,7 +263,7 @@ _pi_handler(void *user, const xmlChar *target, const xmlChar *data)
 }
 
 static void
-_unparsed_entity_decl_handler(void *user,
+unparsed_entity_decl_handler(void *user,
                               const xmlChar *name,
                               const xmlChar *pub_id,
                               const xmlChar *sys_id,
@@ -279,7 +279,7 @@ _unparsed_entity_decl_handler(void *user,
 }
 
 static void
-_notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_id, const xmlChar *sys_id)
+notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_id, const xmlChar *sys_id)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -291,7 +291,7 @@ _notation_decl_handler(void *user, const xmlChar *notation, const xmlChar *pub_i
 }
 
 static void
-_build_comment(const xmlChar *data, size_t data_len, xmlChar **comment, size_t *comment_len)
+build_comment(const xmlChar *data, size_t data_len, xmlChar **comment, size_t *comment_len)
 {
 	*comment_len = data_len + 7;
 
@@ -304,7 +304,7 @@ _build_comment(const xmlChar *data, size_t data_len, xmlChar **comment, size_t *
 }
 
 static void
-_comment_handler(void *user, const xmlChar *comment)
+comment_handler(void *user, const xmlChar *comment)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -312,14 +312,14 @@ _comment_handler(void *user, const xmlChar *comment)
 		xmlChar *d_comment;
 		size_t   d_comment_len;
 
-		_build_comment(comment, (size_t) xmlStrlen(comment), &d_comment, &d_comment_len);
+		build_comment(comment, (size_t) xmlStrlen(comment), &d_comment, &d_comment_len);
 		parser->h_default(parser->user, d_comment, d_comment_len);
 		xmlFree(d_comment);
 	}
 }
 
 static void
-_build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_len)
+build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_len)
 {
 	*entity_len = len + 2;
 	*entity = xmlMalloc(*entity_len + 1);
@@ -330,7 +330,7 @@ _build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_
 }
 
 static void
-_external_entity_ref_handler(void *user, const xmlChar *names, const xmlChar *sys_id, const xmlChar *pub_id)
+external_entity_ref_handler(void *user, const xmlChar *names, const xmlChar *sys_id, const xmlChar *pub_id)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -345,7 +345,7 @@ _external_entity_ref_handler(void *user, const xmlChar *names, const xmlChar *sy
 }
 
 static xmlEntityPtr
-_get_entity(void *user, const xmlChar *name)
+get_entity(void *user, const xmlChar *name)
 {
 	XML_Parser parser = (XML_Parser) user;
 	xmlEntityPtr ret = NULL;
@@ -362,7 +362,7 @@ _get_entity(void *user, const xmlChar *name)
 					xmlChar *entity;
 					size_t   len;
 
-					_build_entity(name, (size_t) xmlStrlen(name), &entity, &len);
+					build_entity(name, (size_t) xmlStrlen(name), &entity, &len);
 					parser->h_default(parser->user, (const xmlChar *) entity, len);
 					xmlFree(entity);
 				} else {
@@ -374,7 +374,7 @@ _get_entity(void *user, const xmlChar *name)
 				}
 			} else {
 				if (ret->etype == XML_EXTERNAL_GENERAL_PARSED_ENTITY) {
-					_external_entity_ref_handler(user, ret->name, ret->SystemID, ret->ExternalID);
+					external_entity_ref_handler(user, ret->name, ret->SystemID, ret->ExternalID);
 				}
 			}
 		}
@@ -390,32 +390,32 @@ php_xml_compat_handlers = {
 	NULL, /* hasInternalSubset */
 	NULL, /* hasExternalSubset */
 	NULL, /* resolveEntity */
-	_get_entity, /* getEntity */
+	get_entity, /* getEntity */
 	NULL, /* entityDecl */
-	_notation_decl_handler,
+	notation_decl_handler,
 	NULL, /* attributeDecl */
 	NULL, /* elementDecl */
-	_unparsed_entity_decl_handler, /* unparsedEntity */
+	unparsed_entity_decl_handler, /* unparsedEntity */
 	NULL, /* setDocumentLocator */
 	NULL, /* startDocument */
 	NULL, /* endDocument */
-	_start_element_handler, /* startElement */
-	_end_element_handler, /* endElement */
+	start_element_handler, /* startElement */
+	end_element_handler, /* endElement */
 	NULL, /* reference */
-	_cdata_handler,
+	cdata_handler,
 	NULL, /* ignorableWhitespace */
-	_pi_handler,
-	_comment_handler, /* comment */
+	pi_handler,
+	comment_handler, /* comment */
 	NULL, /* warning */
 	NULL, /* error */
 	NULL,  /* fatalError */
 	NULL,  /* getParameterEntity */
-	_cdata_handler, /* cdataBlock */
+	cdata_handler, /* cdataBlock */
 	NULL, /* externalSubset */
 	XML_SAX2_MAGIC,
 	NULL,
-	_start_element_handler_ns,
-	_end_element_handler_ns,
+	start_element_handler_ns,
+	end_element_handler_ns,
 	NULL
 };
 
@@ -439,8 +439,8 @@ XML_ParserCreate_MM(const XML_Char *encoding, const XML_Memory_Handling_Suite *m
 {
 	XML_Parser parser;
 
-	parser = (XML_Parser) emalloc(sizeof(struct _XML_Parser));
-	memset(parser, 0, sizeof(struct _XML_Parser));
+	parser = emalloc(sizeof(struct XML_Parser_Struct));
+	memset(parser, 0, sizeof(struct XML_Parser_Struct));
 	parser->use_namespace = 0;
 	parser->_ns_separator = NULL;
 

@@ -59,13 +59,13 @@ typedef int  (*XML_ExternalEntityRefHandler)(void *, const XML_Char *, const XML
 typedef void (*XML_StartNamespaceDeclHandler)(void *, const XML_Char *, const XML_Char *);
 typedef void (*XML_EndNamespaceDeclHandler)(void *, const XML_Char *);
 
-typedef struct _XML_Memory_Handling_Suite {
+typedef struct XML_Memory_Handling_Suite {
   void *(*malloc_fcn)(size_t size);
   void *(*realloc_fcn)(void *ptr, size_t size);
   void (*free_fcn)(void *ptr);
 } XML_Memory_Handling_Suite;
 
-typedef struct _XML_Parser {
+typedef struct XML_Parser_Struct {
 	int use_namespace;
 
 	xmlChar *_ns_separator;
