@@ -26,8 +26,6 @@
 #include <config.h>
 #endif
 
-#define SMART_STR_PREALLOC 512
-
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
