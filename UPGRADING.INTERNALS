@@ -152,9 +152,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      AX_CHECK_COMPILE_FLAG).
    - M4 macro PHP_PROG_RE2C got a new 2nd argument to define common default re2c
      command-line options substituted to the Makefile RE2C_FLAGS variable.
-   - M4 macros PHP_CHECK_BUILTIN_* are deprecated in favor of PHP_CHECK_BUILTIN
-     and all PHP_HAVE_BUILTIN_* symbols are now changed to be either undefined
-     or defined to 1 whether compiler supports the given builtin.
+   - M4 macros PHP_CHECK_BUILTIN_* have been removed in favor of
+     PHP_CHECK_BUILTIN and all PHP_HAVE_BUILTIN_* symbols changed to be either
+     undefined or defined to 1 whether compiler supports the builtin.
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
