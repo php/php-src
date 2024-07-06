@@ -18,8 +18,8 @@
 #define DOM_INTERNAL_HELPERS
 
 /* We're using the type flags of the zval to store an extra flag. */
-#define DOM_Z_OWNED(z, v)   ZVAL_PTR(z, (void *) v)
-#define DOM_Z_UNOWNED(z, v) ZVAL_INDIRECT(z, (void *) v)
+#define DOM_Z_OWNED(z, v)   ZVAL_PTR(z, (void *) (v))
+#define DOM_Z_UNOWNED(z, v) ZVAL_INDIRECT(z, (void *) (v))
 #define DOM_Z_IS_OWNED(z)   (Z_TYPE_P(z) == IS_PTR)
 
 #ifdef DOM_CE_H
