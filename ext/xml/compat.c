@@ -686,7 +686,7 @@ XML_GetCurrentColumnNumber(XML_Parser parser)
 	return parser->parser->input->col;
 }
 
-PHP_XML_API int
+PHP_XML_API long
 XML_GetCurrentByteIndex(XML_Parser parser)
 {
 	/* We have to temporarily disable the encoder to satisfy the note from the manual:
@@ -702,16 +702,15 @@ XML_GetCurrentByteIndex(XML_Parser parser)
 	if (encoder) {
 		input->buf->encoder = encoder;
 	}
-	/* TODO: at one point this should return long probably to make sure that files greater than 2 GiB are handled correctly. */
-	return (int) result;
+	return result;
 }
 
 PHP_XML_API int
 XML_GetCurrentByteCount(XML_Parser parser)
 {
-	/* WARNING: this is identical to ByteIndex; it should probably
+	/* TODO: this is identical to ByteIndex; it should probably
 	 * be different */
-	return XML_GetCurrentByteIndex(parser);
+	return (int) XML_GetCurrentByteIndex(parser);
 }
 
 PHP_XML_API const XML_Char *XML_ExpatVersion(void)
