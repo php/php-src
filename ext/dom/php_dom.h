@@ -235,7 +235,7 @@ static zend_always_inline bool php_dom_is_cache_tag_stale_from_doc_ptr(const php
 	return php_libxml_is_cache_tag_stale(cache_tag, &doc_ptr->cache_tag);
 }
 
-static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
+static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_libxml_cache_tag *cache_tag, const xmlNode *node)
 {
 	ZEND_ASSERT(node != NULL);
 	php_libxml_node_ptr *_private = node->_private;
@@ -249,7 +249,7 @@ static zend_always_inline bool php_dom_is_cache_tag_stale_from_node(const php_li
 	return php_dom_is_cache_tag_stale_from_doc_ptr(cache_tag, object_private->document);
 }
 
-static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_libxml_cache_tag *cache_tag, const xmlNodePtr node)
+static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_libxml_cache_tag *cache_tag, const xmlNode *node)
 {
 	ZEND_ASSERT(cache_tag != NULL);
 	php_libxml_node_ptr *_private = node->_private;
@@ -261,7 +261,7 @@ static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_node(php_l
 	}
 }
 
-static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_doc_ref(php_libxml_cache_tag *cache_tag, php_libxml_ref_obj *document)
+static zend_always_inline void php_dom_mark_cache_tag_up_to_date_from_doc_ref(php_libxml_cache_tag *cache_tag, const php_libxml_ref_obj *document)
 {
 	ZEND_ASSERT(cache_tag != NULL);
 	ZEND_ASSERT(document != NULL);
