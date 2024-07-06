@@ -4,7 +4,7 @@ dnl
 dnl ZEND_CHECK_FLOAT_PRECISION
 dnl
 dnl x87 floating point internal precision control checks
-dnl See: http://wiki.php.net/rfc/rounding
+dnl See: https://wiki.php.net/rfc/rounding
 dnl
 AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION], [dnl
 AC_CACHE_CHECK([for usable _FPU_SETCW],
