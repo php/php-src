@@ -16,6 +16,10 @@ PHP                                                                        NEWS
 - LibXML:
   . Fixed bug GH-14563 (Build failure with libxml2 v2.13.0). (nielsdos)
 
+- Opcache:
+  . Fixed bug GH-14550 (No warning message when Zend DTrace is enabled that
+    opcache.jit is implictly disabled). (nielsdos)
+
 - Output:
   . Fixed bug GH-14808 (Unexpected null pointer in Zend/zend_string.h with
     empty output buffer). (nielsdos)
