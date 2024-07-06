@@ -2,6 +2,11 @@
 GH-14834 (Error installing PHP when --with-pear is used)
 --EXTENSIONS--
 xml
+--SKIPIF--
+<?php
+require __DIR__ . '/libxml_expat_skipif.inc';
+skipif(want_expat: false);
+?>
 --FILE--
 <?php
 $xml = <<<XML
