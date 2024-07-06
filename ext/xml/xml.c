@@ -1257,7 +1257,7 @@ static void php_xml_set_handler_parse_callable(
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!", &pind, xml_parser_ce, &handler_fci, &handler_fcc) == SUCCESS) {
 		*parser = Z_XMLPARSER_P(pind);
 		if (!ZEND_FCI_INITIALIZED(handler_fci)) {
-			/* Free handler, so just return and a uninitialized FCC communicates this */
+			/* Free handler, so just return and an uninitialized FCC communicates this */
 			return;
 		}
 		memcpy(parser_handler_fcc, &handler_fcc, sizeof(zend_fcall_info_cache));
