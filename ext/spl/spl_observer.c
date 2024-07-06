@@ -118,9 +118,11 @@ static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_hash
 static void spl_object_storage_dtor(zval *element) /* {{{ */
 {
 	spl_SplObjectStorageElement *el = Z_PTR_P(element);
-	zend_object_release(el->obj);
-	zval_ptr_dtor(&el->inf);
-	efree(el);
+	if (el) {
+		zend_object_release(el->obj);
+		zval_ptr_dtor(&el->inf);
+		efree(el);
+	}
 } /* }}} */
 
 static spl_SplObjectStorageElement* spl_object_storage_get(spl_SplObjectStorage *intern, zend_hash_key *key) /* {{{ */
@@ -168,8 +170,10 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 		return pelement;
 	}
 
+	/* NULL initialization necessary because `spl_object_storage_create_element` could bail out due to OOM. */
+	ZVAL_PTR(entry_zv, NULL);
 	pelement = spl_object_storage_create_element(obj, inf);
-	ZVAL_PTR(entry_zv, pelement);
+	Z_PTR_P(entry_zv) = pelement;
 	return pelement;
 } /* }}} */
 
