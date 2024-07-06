@@ -44,6 +44,9 @@ PHP                                                                        NEWS
 - Treewide:
   . Fix compatibility with libxml2 2.13.2. (nielsdos)
 
+- XML:
+  . Move away from to-be-deprecated libxml fields. (nielsdos)
+
 20 Jun 2024, PHP 8.3.9
 
 - Core:
