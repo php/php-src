@@ -36,6 +36,10 @@ PHP                                                                        NEWS
 - Shmop:
   . Fixed bug GH-14537 (shmop Windows 11 crashes the process). (nielsdos)
 
+- SPL:
+  . Fixed bug GH-14639 (Member access within null pointer in
+    ext/spl/spl_observer.c). (nielsdos)
+
 - Standard:
   . Fixed bug GH-14775 (range function overflow with negative step argument).
     (David Carlier)
