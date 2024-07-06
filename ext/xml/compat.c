@@ -330,7 +330,7 @@ _build_entity(const xmlChar *name, size_t len, xmlChar **entity, size_t *entity_
 }
 
 static void
-_external_entity_ref_handler(void *user, const xmlChar *names, int type, const xmlChar *sys_id, const xmlChar *pub_id, xmlChar *content)
+_external_entity_ref_handler(void *user, const xmlChar *names, const xmlChar *sys_id, const xmlChar *pub_id)
 {
 	XML_Parser parser = (XML_Parser) user;
 
@@ -374,7 +374,7 @@ _get_entity(void *user, const xmlChar *name)
 				}
 			} else {
 				if (ret->etype == XML_EXTERNAL_GENERAL_PARSED_ENTITY) {
-					_external_entity_ref_handler(user, ret->name, ret->etype, ret->SystemID, ret->ExternalID, NULL);
+					_external_entity_ref_handler(user, ret->name, ret->SystemID, ret->ExternalID);
 				}
 			}
 		}
