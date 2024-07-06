@@ -53,8 +53,6 @@
 #endif /* ZTS && HAVE_CURL_OLD_OPENSSL */
 /* }}} */
 
-#define SMART_STR_PREALLOC 4096
-
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
