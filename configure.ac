@@ -112,7 +112,7 @@ T_ME=`$php_shtool echo -n -e %b`
 PHP_INIT_BUILD_SYSTEM
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
-test -z "$CFLAGS" && auto_cflags=1
+AS_VAR_SET_IF([CFLAGS],, [auto_cflags=1])
 
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
@@ -1349,10 +1349,10 @@ unset LIBS LDFLAGS
 
 AC_ARG_PROGRAM
 
-test "$prefix" = "NONE" && prefix=/usr/local
-test "$exec_prefix" = "NONE" && exec_prefix='${prefix}'
-test "$program_prefix" = "NONE" && program_prefix=
-test "$program_suffix" = "NONE" && program_suffix=
+AS_VAR_IF([prefix], [NONE], [prefix=/usr/local])
+AS_VAR_IF([exec_prefix], [NONE], [exec_prefix='${prefix}'])
+AS_VAR_IF([program_prefix], [NONE], [program_prefix=])
+AS_VAR_IF([program_suffix], [NONE], [program_suffix=])
 
 orig_libdir=$libdir
 case $libdir in
