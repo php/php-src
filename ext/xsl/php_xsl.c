@@ -133,14 +133,14 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 		zend_string *prop_name = ZSTR_INIT_LITERAL(php_name, false); \
 		const zend_property_info *prop_info = zend_get_property_info(xsl_xsltprocessor_class_entry, prop_name, 0); \
 		zend_string_release_ex(prop_name, false); \
-		ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == prop_index); \
-		return OBJ_PROP_NUM(object, prop_index); \
+		ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == (prop_index)); \
+		return OBJ_PROP_NUM(object, (prop_index)); \
 	}
 #else
 # define XSL_DEFINE_PROP_ACCESSOR(c_name, php_name, prop_index) \
 	zval *xsl_prop_##c_name(zend_object *object) \
 	{ \
-		return OBJ_PROP_NUM(object, prop_index); \
+		return OBJ_PROP_NUM(object, (prop_index)); \
 	}
 #endif
 
