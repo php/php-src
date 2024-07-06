@@ -722,7 +722,7 @@ PHP_FUNCTION(bcround)
 			break;
 		default:
 			/* This is currently unreachable, but might become reachable when new modes are added. */
-			zend_argument_value_error(3, " is a rounding mode that is not supported");
+			zend_argument_value_error(3, "is an unsupported rounding mode");
 			return;
 	}
 
