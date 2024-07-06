@@ -25,7 +25,7 @@
 #include "html_collection.h"
 #include "namespace_compat.h"
 
-typedef struct _dom_named_item {
+typedef struct dom_named_item {
 	dom_object *context_intern;
 	xmlNodePtr node;
 } dom_named_item;

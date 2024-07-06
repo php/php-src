@@ -30,7 +30,7 @@ PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xlink_magic_token = (
 PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token = (const php_dom_ns_magic_token *) DOM_XML_NS_URI;
 PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token = (const php_dom_ns_magic_token *) DOM_XMLNS_NS_URI;
 
-struct _php_dom_libxml_ns_mapper {
+struct php_dom_libxml_ns_mapper {
 	php_libxml_private_data_header header;
 	/* This is used almost all the time for HTML documents, so it makes sense to cache this. */
 	xmlNsPtr html_ns;
