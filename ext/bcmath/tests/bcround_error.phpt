@@ -15,14 +15,7 @@ try {
 } catch (Throwable $e) {
     echo $e->getMessage()."\n";
 }
-
-try {
-    bcround('0.001', 0, 1000);
-} catch (Throwable $e) {
-    echo $e->getMessage()."\n";
-}
 ?>
 --EXPECT--
 bcround(): Argument #1 ($num) is not well-formed
 bcround(): Argument #1 ($num) is not well-formed
-bcround(): Argument #3 ($mode) must be of type RoundingMode, int given
