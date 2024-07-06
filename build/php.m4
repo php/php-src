@@ -2545,10 +2545,9 @@ AC_CACHE_CHECK([for $1], [php_var],
 [AS_VAR_SET([php_var], [yes])],
 [AS_VAR_SET([php_var], [no])])
 ])
-AS_VAR_IF([php_var], [yes], [php_result=1], [php_result=0])
-AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_]m4_bpatsubst([$1], [^_*], [])),
-  [$php_result],
-  [Define to 1 if compiler supports '$1', and to 0 if not.])
+AS_VAR_IF([php_var], [yes],
+  [AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_]m4_bpatsubst([$1], [^_*], [])), [1],
+    [Define to 1 if compiler supports '$1'.])])
 AS_VAR_POPDEF([php_var])
 ])
 
