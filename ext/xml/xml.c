@@ -1090,9 +1090,7 @@ static bool php_xml_check_string_method_arg(
 	}
 
 	zend_class_entry *ce = object->ce;
-	zend_string *lc_name = zend_string_tolower(method_name);
-	zend_function *method_ptr = zend_hash_find_ptr(&ce->function_table, lc_name);
-	zend_string_release_ex(lc_name, 0);
+	zend_function *method_ptr = zend_hash_find_ptr_lc(&ce->function_table, method_name);
 	if (!method_ptr) {
 		if (arg_num) {
 			zend_argument_value_error(arg_num, "method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(method_name));
