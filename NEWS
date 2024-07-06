@@ -46,6 +46,8 @@ PHP                                                                        NEWS
 
 - XML:
   . Move away from to-be-deprecated libxml fields. (nielsdos)
+  . Fixed bug GH-14834 (Error installing PHP when --with-pear is used).
+    (nielsdos)
 
 20 Jun 2024, PHP 8.3.9
 
