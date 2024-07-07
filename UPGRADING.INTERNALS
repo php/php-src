@@ -156,6 +156,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
    - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
+   - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
      PGSQL_LIBS environment variables. When a directory argument is provided to
