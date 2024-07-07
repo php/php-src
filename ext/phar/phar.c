@@ -706,7 +706,7 @@ void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker
 
 /**
  * Size of fixed fields in the manifest.
- * See: http://php.net/manual/en/phar.fileformat.phar.php
+ * See: https://www.php.net/manual/en/phar.fileformat.phar.php
  */
 #define MANIFEST_FIXED_LEN	18
 

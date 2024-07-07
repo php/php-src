@@ -1913,11 +1913,11 @@ int main(int argc, char *argv[])
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
-<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"http://php.net/security.cgi-bin\">\
+<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"https://www.php.net/security.cgi-bin\">\
 manual page for CGI security</a>.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
-<a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
+<a href=\"https://www.php.net/install.windows\">the manual page</a>.</p>\n");
 			} zend_catch {
 			} zend_end_try();
 #if defined(ZTS) && !PHP_DEBUG
