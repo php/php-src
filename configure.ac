@@ -11,7 +11,6 @@ m4_include([build/php_cxx_compile_stdcxx.m4])
 m4_include([build/php.m4])
 m4_include([build/pkg.m4])
 m4_include([TSRM/threads.m4])
-m4_include([TSRM/tsrm.m4])
 m4_include([Zend/Zend.m4])
 
 dnl Basic autoconf initialization, generation of config.nice.
@@ -871,6 +870,17 @@ else
   PHP_THREAD_SAFETY=no
 fi
 
+AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
+  AS_VAR_IF([pthreads_working], [yes], [],
+    [AC_MSG_ERROR([m4_normalize([
+      Unable to verify system support for POSIX Threads, which are required for
+      PHP thread safety (ZTS) build.
+    ])])])
+
+  AC_MSG_CHECKING([for POSIX threads])
+  AC_MSG_RESULT([yes])
+])
+
 PHP_ARG_ENABLE([rtld-now],
   [whether to dlopen extensions with RTLD_NOW instead of RTLD_LAZY],
   [AS_HELP_STRING([--enable-rtld-now],
@@ -1336,11 +1346,6 @@ PHP_ADD_INCLUDE([$abs_srcdir/TSRM])
 
 ZEND_EXTRA_LIBS="$LIBS"
 unset LIBS
-
-PHP_CONFIGURE_PART(Configuring TSRM)
-if test "$PHP_THREAD_SAFETY" = "yes"; then
-  TSRM_CHECK_PTHREADS
-fi
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
