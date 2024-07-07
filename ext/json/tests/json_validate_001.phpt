@@ -7,7 +7,6 @@ var_dump(
   json_validate('{"key":"'.str_repeat('x', 1000).'"foobar}'),
   json_last_error_msg(),
   json_last_error_info(),
-
   json_validate(""),
   json_last_error_msg(),
   json_last_error_info(),
@@ -59,6 +58,20 @@ var_dump(
 ?>
 --EXPECT--
 bool(false)
+string(53) "Syntax error, at character 1009 near content: foobar}"
+array(5) {
+  ["error_code"]=>
+  int(4)
+  ["error_msg"]=>
+  string(12) "Syntax error"
+  ["error_position"]=>
+  int(1009)
+  ["total_input_length"]=>
+  int(1016)
+  ["at_content"]=>
+  string(7) "foobar}"
+}
+bool(false)
 string(12) "Syntax error"
 array(5) {
   ["error_code"]=>
@@ -73,7 +86,7 @@ array(5) {
   string(0) ""
 }
 bool(false)
-string(12) "Syntax error"
+string(44) "Syntax error, at character 0 near content: ."
 array(5) {
   ["error_code"]=>
   int(4)
@@ -87,7 +100,7 @@ array(5) {
   string(1) "."
 }
 bool(false)
-string(12) "Syntax error"
+string(46) "Syntax error, at character 0 near content: <?>"
 array(5) {
   ["error_code"]=>
   int(4)
@@ -101,7 +114,7 @@ array(5) {
   string(3) "<?>"
 }
 bool(false)
-string(12) "Syntax error"
+string(44) "Syntax error, at character 0 near content: ;"
 array(5) {
   ["error_code"]=>
   int(4)
@@ -115,7 +128,7 @@ array(5) {
   string(1) ";"
 }
 bool(false)
-string(12) "Syntax error"
+string(55) "Syntax error, at character 0 near content: руссиш"
 array(5) {
   ["error_code"]=>
   int(4)
@@ -129,7 +142,7 @@ array(5) {
   string(12) "руссиш"
 }
 bool(false)
-string(12) "Syntax error"
+string(47) "Syntax error, at character 0 near content: blah"
 array(5) {
   ["error_code"]=>
   int(4)
@@ -143,7 +156,7 @@ array(5) {
   string(4) "blah"
 }
 bool(false)
-string(12) "Syntax error"
+string(51) "Syntax error, at character 8 near content: : "" } }"
 array(5) {
   ["error_code"]=>
   int(4)
@@ -171,7 +184,7 @@ array(5) {
   string(0) ""
 }
 bool(false)
-string(12) "Syntax error"
+string(75) "Syntax error, at character 13 near content: "foo": "bar" }, "test2": {"foo""
 array(5) {
   ["error_code"]=>
   int(4)
@@ -182,7 +195,7 @@ array(5) {
   ["total_input_length"]=>
   int(83)
   ["at_content"]=>
-  string(70) ""foo": "bar" }, "test2": {"foo" : "bar" }, "test2": {"foo" : "bar" } }"
+  string(31) ""foo": "bar" }, "test2": {"foo""
 }
 bool(true)
 string(8) "No error"

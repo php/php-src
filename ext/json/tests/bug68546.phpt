@@ -16,5 +16,5 @@ NULL
 bool(true)
 NULL
 bool(true)
-string(36) "The decoded property name is invalid"
+string(71) "The decoded property name is invalid, at character 23 near content: 1}]"
 Done

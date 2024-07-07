@@ -24,13 +24,13 @@ int(0)
 string(8) "No error"
 NULL
 int(1)
-string(28) "Maximum stack depth exceeded"
+string(63) "Maximum stack depth exceeded, at character 1 near content: [1]]"
 NULL
 int(2)
-string(42) "State mismatch (invalid or malformed JSON)"
+string(74) "State mismatch (invalid or malformed JSON), at character 2 near content: }"
 NULL
 int(3)
-string(53) "Control character error, possibly incorrectly encoded"
+string(85) "Control character error, possibly incorrectly encoded, at character 1 near content: ""
 NULL
 int(4)
 string(12) "Syntax error"
