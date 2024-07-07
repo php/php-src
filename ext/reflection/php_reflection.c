@@ -5019,6 +5019,12 @@ ZEND_METHOD(ReflectionClass, isReadOnly)
 	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY_CLASS);
 }
 
+/* Returns whether this class is static */
+ZEND_METHOD(ReflectionClass, isStatic)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
+}
+
 /* {{{ Returns whether this class is abstract */
 ZEND_METHOD(ReflectionClass, isAbstract)
 {
