@@ -36,26 +36,23 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
-php_json_scanner parser_scanner_temporal;
+json_error_info_type json_error_info_data = {
+	NULL,
+	0,
+	0,
+	0
+};
 
-void reset_global_parser_scanner_fields(void)
+void reset_json_error_info(json_error_info_type* data)
 {
-	parser_scanner_temporal.cursor = NULL;
-	parser_scanner_temporal.token = NULL;
-	parser_scanner_temporal.limit = NULL;
-	parser_scanner_temporal.marker = NULL;
-	parser_scanner_temporal.ctxmarker = NULL;
-	parser_scanner_temporal.str_start = NULL;
-	parser_scanner_temporal.pstr = NULL;
-	//ZVAL_NULL(scanner->value)
-	parser_scanner_temporal.str_esc = 0;
-	parser_scanner_temporal.state = 0;
-	parser_scanner_temporal.options = 0;
-	parser_scanner_temporal.errcode = 0;
-	parser_scanner_temporal.utf8_invalid = 0;
-	parser_scanner_temporal.utf8_invalid_count = 0;
-	parser_scanner_temporal.character_count = 0;
-	parser_scanner_temporal.character_max_count = 0;
+	if (data->token) {
+		efree(data->token);
+	}
+
+	data->token = NULL;
+	data->errcode = 0;
+	data->character_count = 0;
+	data->character_max_count = 0;
 }
 
 static int php_json_implement_json_serializable(zend_class_entry *interface, zend_class_entry *class_type)
@@ -96,6 +93,14 @@ static PHP_RINIT_FUNCTION(json)
 	return SUCCESS;
 }
 
+static PHP_RSHUTDOWN_FUNCTION(json)
+{
+	if (json_error_info_data.token) {
+		efree(json_error_info_data.token);
+	}
+	return SUCCESS;
+}
+
 /* {{{ json_module_entry */
 zend_module_entry json_module_entry = {
 	STANDARD_MODULE_HEADER,
@@ -104,7 +109,7 @@ zend_module_entry json_module_entry = {
 	PHP_MINIT(json),
 	NULL,
 	PHP_RINIT(json),
-	NULL,
+	PHP_RSHUTDOWN(json),
 	PHP_MINFO(json),
 	PHP_JSON_VERSION,
 	PHP_MODULE_GLOBALS(json),
@@ -235,7 +240,28 @@ PHP_JSON_API bool php_json_validate_ex(const char *str, size_t str_len, zend_lon
 	if (php_json_yyparse(&parser)) {
 		php_json_error_code error_code = php_json_parser_error_code(&parser);
 		JSON_G(error_code) = error_code;
-		parser_scanner_temporal = parser.scanner;
+		json_error_info_data.errcode = parser.scanner.errcode;
+		json_error_info_data.character_count = parser.scanner.character_count;
+		json_error_info_data.character_max_count = parser.scanner.character_max_count;
+		
+		if (json_error_info_data.token) {
+			efree(json_error_info_data.token);
+		}
+
+		char token[32];
+		snprintf(
+			token,
+			sizeof(token),
+			"%s",
+			parser.scanner.token
+		);
+
+		if (json_error_info_data.token) {
+			efree(json_error_info_data.token);
+		}
+
+		json_error_info_data.token = (php_json_ctype*) emalloc(strlen(token) + 1);
+		memcpy(json_error_info_data.token, token, strlen(token) + 1);
 		return false;
 	}
 
@@ -355,7 +381,7 @@ PHP_FUNCTION(json_validate)
 		RETURN_THROWS();
 	}
 
-	reset_global_parser_scanner_fields();
+	reset_json_error_info(&json_error_info_data);
 
 	if (!str_len) {
 		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
@@ -392,7 +418,23 @@ PHP_FUNCTION(json_last_error_msg)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
+	const char* msg = php_json_get_error_msg(JSON_G(error_code));
+
+	if (JSON_G(error_code) == PHP_JSON_ERROR_NONE || !json_error_info_data.token || strlen((const char*)json_error_info_data.token) == 0 || json_error_info_data.character_count < 0) {
+		RETURN_STRING(msg);
+	}
+
+	char msg2[128];
+	snprintf(
+		msg2,
+		sizeof(msg2),
+		"%s, at character %zu near content: %s",
+		msg,
+		json_error_info_data.character_count,
+		json_error_info_data.token
+	);
+
+	RETURN_STRING(msg2);
 }
 /* }}} */
 
@@ -405,13 +447,13 @@ PHP_FUNCTION(json_last_error_info)
 
 	array_init(return_value);
 
-	add_assoc_long(return_value, "error_code", parser_scanner_temporal.errcode);
+	add_assoc_long(return_value, "error_code", json_error_info_data.errcode);
 	add_assoc_string(return_value, "error_msg", msg);
-	add_assoc_long(return_value, "error_position", parser_scanner_temporal.character_count);
-	add_assoc_long(return_value, "total_input_length", parser_scanner_temporal.character_max_count);
+	add_assoc_long(return_value, "error_position", json_error_info_data.character_count);
+	add_assoc_long(return_value, "total_input_length", json_error_info_data.character_max_count);
 
-	if (parser_scanner_temporal.token) {
-		add_assoc_string(return_value, "at_content", (char *) parser_scanner_temporal.token);
+	if (json_error_info_data.token) {
+		add_assoc_string(return_value, "at_content", (char *) json_error_info_data.token);
 	} else {
 		add_assoc_string(return_value, "at_content", "");
 	}

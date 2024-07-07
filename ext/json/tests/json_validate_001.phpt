@@ -4,6 +4,10 @@ json_validate() - General usage
 <?php
 
 var_dump(
+  json_validate('{"key":"'.str_repeat('x', 1000).'"foobar}'),
+  json_last_error_msg(),
+  json_last_error_info(),
+
   json_validate(""),
   json_last_error_msg(),
   json_last_error_info(),

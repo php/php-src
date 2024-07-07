@@ -21,6 +21,7 @@
 #include "php_json_scanner.h"
 
 typedef struct _php_json_parser php_json_parser;
+typedef struct _json_error_info_type json_error_info_type;
 
 typedef int (*php_json_parser_func_array_create_t)(
 		php_json_parser *parser, zval *array);
@@ -56,6 +57,13 @@ struct _php_json_parser {
 	int depth;
 	int max_depth;
 	php_json_parser_methods methods;
+};
+
+struct _json_error_info_type {
+	php_json_ctype* token;
+	php_json_error_code errcode;
+	size_t character_count;
+	size_t character_max_count;
 };
 
 PHP_JSON_API void php_json_parser_init_ex(
