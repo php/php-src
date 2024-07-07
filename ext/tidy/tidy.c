@@ -304,7 +304,12 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 	}
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(data))) {
-		zend_argument_value_error(1, "is too long");
+		if (is_file) {
+			zend_string_release_ex(data, false);
+			zend_argument_value_error(1, "Input string is too long");
+		} else {
+			zend_argument_value_error(1, "is too long");
+		}
 		RETURN_THROWS();
 	}
 
