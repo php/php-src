@@ -47,6 +47,12 @@ try {
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
+
+try {
+    tidy_repair_file($path);
+} catch (\Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 ?>
 --CLEAN--
 <?php
@@ -58,3 +64,4 @@ int(0)
 ValueError: Input string is too long
 ValueError: Input string is too long
 ValueError: Input string is too long
+ValueError: tidy_repair_file(): Argument #1 ($filename) Input string is too long
