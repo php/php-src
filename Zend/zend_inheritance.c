@@ -1508,6 +1508,13 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		);
 	}
 
+	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_STATIC) != (parent_ce->ce_flags & ZEND_ACC_STATIC))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "%s class %s cannot extend %s class %s",
+			ce->ce_flags & ZEND_ACC_STATIC ? "Static" : "Non-static", ZSTR_VAL(ce->name),
+			parent_ce->ce_flags & ZEND_ACC_STATIC ? "static" : "non-static", ZSTR_VAL(parent_ce->name)
+		);
+	}
+
 	if (ce->parent_name) {
 		zend_string_release_ex(ce->parent_name, 0);
 	}
@@ -1999,6 +2006,14 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		} else {
 			check_inheritance = true;
 		}
+	}
+
+	if ((ce->ce_flags & ZEND_ACC_STATIC) && !(fn->common.fn_flags & ZEND_ACC_STATIC)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Static class %s cannot use trait with a non-static method %s::%s",
+			ZSTR_VAL(ce->name),
+			ZSTR_VAL(fn->common.scope->name), ZSTR_VAL(fn->common.function_name)
+		);
 	}
 
 	if (UNEXPECTED(fn->type == ZEND_INTERNAL_FUNCTION)) {
@@ -2549,6 +2564,14 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					ZSTR_VAL(ce->name),
 					ZSTR_VAL(property_info->ce->name),
 					ZSTR_VAL(prop_name)
+				);
+			}
+
+			if ((ce->ce_flags & ZEND_ACC_STATIC) && !(property_info->flags & ZEND_ACC_STATIC)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Static class %s cannot use trait with a non-static property %s::$%s",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(property_info->ce->name), ZSTR_VAL(prop_name)
 				);
 			}
 
