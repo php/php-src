@@ -989,15 +989,12 @@ PHP_ARG_ENABLE([dmalloc],
   [no],
   [no])
 
-if test "$PHP_DMALLOC" = "yes"; then
-  AC_CHECK_LIB(dmalloc, dmalloc_error, [
-    PHP_ADD_LIBRARY(dmalloc)
-    AC_DEFINE(HAVE_DMALLOC,1,[Whether you have dmalloc])
-    CPPFLAGS="$CPPFLAGS -DDMALLOC_FUNC_CHECK"
-  ], [
-    AC_MSG_ERROR([Problem with enabling dmalloc. Please check config.log for details.])
-  ])
-fi
+AS_VAR_IF([PHP_DMALLOC], [yes],
+  [AC_CHECK_LIB([dmalloc], [dmalloc_error],
+    [PHP_ADD_LIBRARY([dmalloc])
+      AC_DEFINE([HAVE_DMALLOC], [1], [Define to 1 if you have dmalloc.])
+      AS_VAR_APPEND([CPPFLAGS], [" -DDMALLOC_FUNC_CHECK"])],
+    [AC_MSG_ERROR([Problem with enabling dmalloc. Please, check config.log for details.])])])
 
 PHP_ARG_ENABLE([ipv6],
   [whether to enable IPv6 support],
