@@ -75,6 +75,11 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
+  AC_CHECK_DECL([rl_erase_empty_line],
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1],
+      [Define to 1 if readline library has rl_erase_empty_line variable.])],,
+    [#include <readline/readline.h>])
+
   AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
@@ -132,6 +137,11 @@ elif test "$PHP_LIBEDIT" != "no"; then
   ],[],[
     $READLINE_SHARED_LIBADD
   ])
+
+  AC_CHECK_DECL([rl_erase_empty_line],
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1],
+      [Define to 1 if edit library has rl_erase_empty_line variable.])],,
+    [#include <editline/readline.h>])
 
   AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
 fi
