@@ -56,10 +56,20 @@ PHP_ARG_WITH([external-libcrypt],
   [no],
   [no])
 
-if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
+AH_TEMPLATE([PHP_USE_PHP_CRYPT_R],
+  [Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt
+  library.])
+
+AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
+  AC_DEFINE([PHP_USE_PHP_CRYPT_R], [1])
+  PHP_ADD_SOURCES([PHP_EXT_DIR([standard])],
+    [crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c])
+], [
   PHP_CHECK_FUNC(crypt, crypt)
   PHP_CHECK_FUNC(crypt_r, crypt)
   AC_CHECK_HEADERS([crypt.h])
+  AS_VAR_IF([ac_cv_func_crypt], [yes],,
+    [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
   AS_VAR_IF([ac_cv_func_crypt_r], [yes],
     [PHP_CRYPT_R_STYLE],
     [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
@@ -78,12 +88,8 @@ if test "$PHP_EXTERNAL_LIBCRYPT" != "no"; then
 #include <string.h>
 
 int main(void) {
-#ifdef HAVE_CRYPT
   char *encrypted = crypt("rasmuslerdorf","rl");
   return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
-#else
-  return 1;
-#endif
 }]])],[
   ac_cv_crypt_des=yes
 ],[
@@ -106,12 +112,8 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#ifdef HAVE_CRYPT
   char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
   return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
-#else
-  return 1;
-#endif
 }]])],[
     ac_cv_crypt_ext_des=yes
   ],[
@@ -134,7 +136,6 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#ifdef HAVE_CRYPT
   char salt[15], answer[40];
   char *encrypted;
 
@@ -147,9 +148,6 @@ int main(void) {
   strcat(answer,"rISCgZzpwk3UhDidwXvin0");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-#else
-  return 1;
-#endif
 }]])],[
     ac_cv_crypt_md5=yes
   ],[
@@ -172,7 +170,6 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#ifdef HAVE_CRYPT
   char salt[30], answer[70];
   char *encrypted;
 
@@ -182,9 +179,6 @@ int main(void) {
   strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-#else
-  return 1;
-#endif
 }]])],[
     ac_cv_crypt_blowfish=yes
   ],[
@@ -207,7 +201,6 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#ifdef HAVE_CRYPT
   char salt[21], answer[21+86];
   char *encrypted;
 
@@ -216,9 +209,6 @@ int main(void) {
   strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-#else
-  return 1;
-#endif
   }]])],[
     ac_cv_crypt_sha512=yes
   ],[
@@ -241,7 +231,6 @@ int main(void) {
 #include <string.h>
 
 int main(void) {
-#ifdef HAVE_CRYPT
   char salt[21], answer[21+43];
   char *encrypted;
 
@@ -250,9 +239,6 @@ int main(void) {
   strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-#else
-  return 1;
-#endif
 }]])],[
     ac_cv_crypt_sha256=yes
   ],[
@@ -266,12 +252,8 @@ int main(void) {
     AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
   fi
 
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 0, [Whether PHP has to use its own crypt_r])
-else
-  AC_DEFINE_UNQUOTED(PHP_USE_PHP_CRYPT_R, 1, [Whether PHP has to use its own crypt_r])
-
-  PHP_ADD_SOURCES(PHP_EXT_DIR(standard), crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c)
-fi
+  AC_DEFINE([PHP_USE_PHP_CRYPT_R], [0])
+])
 
 AS_VAR_IF([cross_compiling], [no], [AC_FUNC_FNMATCH],
   [AS_CASE([$host_alias], [*linux*],
