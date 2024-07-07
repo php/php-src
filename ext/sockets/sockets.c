@@ -1693,6 +1693,9 @@ PHP_FUNCTION(socket_get_option)
 
 	if (level == SOL_SOCKET) {
 		switch (optname) {
+#ifdef SO_LINGER_SEC
+			case SO_LINGER_SEC:
+#endif
 			case SO_LINGER:
 				optlen = sizeof(linger_val);
 
@@ -1901,6 +1904,9 @@ PHP_FUNCTION(socket_set_option)
 	}
 
 	switch (optname) {
+#ifdef SO_LINGER_SEC
+		case SO_LINGER_SEC:
+#endif
 		case SO_LINGER: {
 			const char l_onoff_key[] = "l_onoff";
 			const char l_linger_key[] = "l_linger";
