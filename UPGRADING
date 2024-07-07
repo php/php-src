@@ -789,9 +789,9 @@ PHP 8.4 UPGRADE NOTES
   . P_PID.
   . P_PGID.
   . P_PIDFD (Linux only).
-  . P_UID (NetBSD only).
-  . P_GID (NetBSD only).
-  . P_SID (NetBSD only).
+  . P_UID (NetBSD/FreeBSD only).
+  . P_GID (NetBSD/FreeBSD only).
+  . P_SID (NetBSD/FreeBSD only).
   . P_JAILID (FreeBSD only).
   
 - Standard:
