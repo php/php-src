@@ -4337,6 +4337,21 @@ PHP_FUNCTION(imageresolution)
 }
 /* }}} */
 
+PHP_FUNCTION(imagecompare)
+{
+	zval *IM1, *IM2;
+	gdImagePtr im1, im2;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_OBJECT_OF_CLASS(IM1, gd_image_ce)
+		Z_PARAM_OBJECT_OF_CLASS(IM2, gd_image_ce)
+	ZEND_PARSE_PARAMETERS_END();
+
+	im1 = php_gd_libgdimageptr_from_zval_p(IM1);
+	im2 = php_gd_libgdimageptr_from_zval_p(IM2);
+
+	RETURN_LONG((zend_long)gdImageCompare(im1, im2));
+}
 
 /*********************************************************
  *
