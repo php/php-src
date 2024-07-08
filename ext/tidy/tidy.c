@@ -306,7 +306,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(data))) {
 		if (is_file) {
 			zend_string_release_ex(data, false);
-			zend_argument_value_error(1, "Input string is too long");
+			zend_argument_value_error(1, "File content is too long");
 		} else {
 			zend_argument_value_error(1, "is too long");
 		}
@@ -973,7 +973,7 @@ static zend_result php_tidy_output_handler(void **nothing, php_output_context *o
 			tidyOptSetBool(doc, TidyMark, no);
 
 			if (ZEND_SIZE_T_UINT_OVFL(output_context->in.used)) {
-				php_error_docref(NULL, E_WARNING, "Input string is too long");
+				php_error_docref(NULL, E_WARNING, "File content is too long");
 				return status;
 			}
 
@@ -1086,7 +1086,7 @@ PHP_FUNCTION(tidy_parse_file)
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 		zend_string_release_ex(contents, 0);
-		zend_value_error("Input string is too long");
+		zend_value_error("File content is too long");
 		RETURN_THROWS();
 	}
 
@@ -1384,7 +1384,7 @@ PHP_METHOD(tidy, __construct)
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 			zend_string_release_ex(contents, 0);
-			zend_value_error("Input string is too long");
+			zend_value_error("File content is too long");
 			RETURN_THROWS();
 		}
 
@@ -1423,7 +1423,7 @@ PHP_METHOD(tidy, parseFile)
 
 	if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
 		zend_string_release_ex(contents, 0);
-		zend_value_error("Input string is too long");
+		zend_value_error("File content is too long");
 		RETURN_THROWS();
 	}
 
