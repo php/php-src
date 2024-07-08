@@ -338,7 +338,14 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type, bool modern) 
 
 					if (node->type == XML_NAMESPACE_DECL) {
 						if (modern) {
-							continue;
+							if (!EG(exception)) {
+								php_dom_throw_error_with_message(NOT_SUPPORTED_ERR,
+									"The namespace axis is not well-defined in the living DOM specification. "
+									"Use Dom\\Element::getInScopeNamespaces() or Dom\\Element::getDescendantNamespaces() instead.",
+									/* strict */ true
+								);
+							}
+							break;
 						}
 
 						xmlNodePtr nsparent = node->_private;
