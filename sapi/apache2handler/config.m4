@@ -112,4 +112,17 @@ if test "$PHP_APXS2" != "no"; then
 
   APACHE_THREADED_MPM=$($APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes')
   AS_VAR_IF([APACHE_THREADED_MPM],,, [PHP_BUILD_THREAD_SAFE])
+
+AC_CONFIG_COMMANDS([apache2handler], [AS_VAR_IF([enable_zts], [yes],,
+  [AS_VAR_IF([APACHE_THREADED_MPM],,
+    [AC_MSG_WARN([
++--------------------------------------------------------------------+
+|                        *** WARNING ***                             |
+|                                                                    |
+| You have built PHP for Apache's current non-threaded MPM.          |
+| If you change Apache to use a threaded MPM you must reconfigure    |
+| PHP with --enable-zts                                              |
++--------------------------------------------------------------------+
+  ])])])],
+  [APACHE_THREADED_MPM=$APACHE_THREADED_MPM; enable_zts=$enable_zts])
 fi
