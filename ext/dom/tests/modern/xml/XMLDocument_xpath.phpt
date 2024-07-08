@@ -43,7 +43,11 @@ foreach ($result as $item) {
 echo "--- Get a namespace node ---\n";
 
 // Namespace nodes don't exist in modern day DOM.
-var_dump($xpath->evaluate("//*/namespace::*"));
+try {
+    var_dump($xpath->evaluate("//*/namespace::*"));
+} catch (DOMException $e) {
+    echo $e->getCode(), ": ", $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--
@@ -67,7 +71,4 @@ string(4) "data"
 string(11) "Dom\Comment"
 string(9) " comment "
 --- Get a namespace node ---
-object(Dom\NodeList)#5 (1) {
-  ["length"]=>
-  int(0)
-}
+9: The namespace axis is not well-defined in the living DOM specification. Use Dom\Element::getInScopeNamespaces() or Dom\Element::getDescendantNamespaces() instead.
