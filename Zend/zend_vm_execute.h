@@ -3738,10 +3738,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		HANDLE_EXCEPTION();
@@ -3753,8 +3753,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_HANDLER
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
-		function(result, arg1, arg2);
+		function(&tmp_result, arg1, arg2);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -3772,10 +3775,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_OBSERVE
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		HANDLE_EXCEPTION();
@@ -3787,8 +3790,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_2_SPEC_OBSERVE
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
-		function(result, arg1, arg2);
+		function(&tmp_result, arg1, arg2);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -3806,11 +3812,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	zval *arg3 = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -3823,8 +3829,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_HANDLER
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-		function(result, arg1, arg2, arg3);
+		function(&tmp_result, arg1, arg2, arg3);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -3846,11 +3855,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	zval *arg2 = get_zval_ptr_deref(opline->op2_type, opline->op2, BP_VAR_R);
 	zval *arg3 = get_op_data_zval_ptr_deref_r((opline+1)->op1_type, (opline+1)->op1);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		FREE_OP(opline->op2_type, opline->op2.var);
 		FREE_OP((opline+1)->op1_type, (opline+1)->op1.var);
@@ -3863,8 +3872,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_3_SPEC_OBSERVE
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-		function(result, arg1, arg2, arg3);
+		function(&tmp_result, arg1, arg2, arg3);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 
 	FREE_OP(opline->op1_type, opline->op1.var);
@@ -4275,9 +4287,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED_
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		HANDLE_EXCEPTION();
 	}
@@ -4288,8 +4300,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_UNUSED_
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
-		function(result, arg1);
+		function(&tmp_result, arg1);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -4301,9 +4316,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_OBSERVE
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = get_zval_ptr_deref(opline->op1_type, opline->op1, BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP(opline->op1_type, opline->op1.var);
 		HANDLE_EXCEPTION();
 	}
@@ -4314,8 +4329,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FRAMELESS_ICALL_1_SPEC_OBSERVE
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
-		function(result, arg1);
+		function(&tmp_result, arg1);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 	FREE_OP(opline->op1_type, opline->op1.var);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

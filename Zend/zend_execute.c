@@ -1552,6 +1552,8 @@ ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
 	uint8_t num_args = ZEND_FLF_NUM_ARGS(opline->opcode);
 	zend_function *fbc = ZEND_FLF_FUNC(opline);
 	zval *result = EX_VAR(opline->result.var);
+	zval tmp_result;
+	ZVAL_NULL(&tmp_result);
 
 	zend_execute_data *call = zend_vm_stack_push_call_frame_ex(zend_vm_calc_used_stack(num_args, fbc), ZEND_CALL_NESTED_FUNCTION, fbc, num_args, NULL);
 	call->prev_execute_data = execute_data;
@@ -1565,7 +1567,8 @@ ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data)
 	EG(current_execute_data) = call;
 
 	zend_observer_fcall_begin_prechecked(call, ZEND_OBSERVER_DATA(fbc));
-	fbc->internal_function.handler(call, result);
+	fbc->internal_function.handler(call, &tmp_result);
+	ZVAL_COPY_VALUE(result, &tmp_result);
 	zend_observer_fcall_end(call, result);
 
 	EG(current_execute_data) = execute_data;

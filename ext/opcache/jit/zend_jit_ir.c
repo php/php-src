@@ -17103,12 +17103,20 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 	zend_jit_addr op1_addr = OP1_ADDR();
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
-	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+	ir_ref tmp_result_ref = IR_UNUSED, result_ref;
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
 		zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
 	}
 	if (op1_info & MAY_BE_REF) {
 		op1_ref = jit_ZVAL_DEREF_ref(jit, op1_ref);
+	}
+	if (op1_addr == res_addr) {
+		tmp_result_ref = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
+		jit_set_Z_TYPE_INFO(jit, ZEND_ADDR_REF_ZVAL(tmp_result_ref), IS_NULL);
+		result_ref = tmp_result_ref;
+	} else {
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+		result_ref = res_ref;
 	}
 
 	ir_ref skip_observer = IR_UNUSED;
@@ -17116,7 +17124,12 @@ static void jit_frameless_icall1(zend_jit_ctx *jit, const zend_op *opline, uint3
 		skip_observer = jit_frameless_observer(jit, opline);
 	}
 
-	ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref);
+	ir_CALL_2(IR_VOID, ir_CONST_ADDR((size_t)function), result_ref, op1_ref);
+
+	if (op1_addr == res_addr) {
+		jit_ZVAL_COPY(jit, res_addr, MAY_BE_ANY, ZEND_ADDR_REF_ZVAL(tmp_result_ref), MAY_BE_ANY, 0);
+		ir_AFREE(ir_CONST_ADDR(sizeof(zval)));
+	}
 
 	if (skip_observer != IR_UNUSED) {
 		ir_MERGE_WITH(skip_observer);
@@ -17145,7 +17158,7 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	ir_ref res_ref = jit_ZVAL_ADDR(jit, res_addr);
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);
-	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+	ir_ref tmp_result_ref = IR_UNUSED, result_ref;
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
 		zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
 	}
@@ -17158,13 +17171,26 @@ static void jit_frameless_icall2(zend_jit_ctx *jit, const zend_op *opline, uint3
 	if (op2_info & MAY_BE_REF) {
 		op2_ref = jit_ZVAL_DEREF_ref(jit, op2_ref);
 	}
+	if (op1_addr == res_addr || op2_addr == res_addr) {
+		tmp_result_ref = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
+		jit_set_Z_TYPE_INFO(jit, ZEND_ADDR_REF_ZVAL(tmp_result_ref), IS_NULL);
+		result_ref = tmp_result_ref;
+	} else {
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+		result_ref = res_ref;
+	}
 
 	ir_ref skip_observer = IR_UNUSED;
 	if (ZEND_OBSERVER_ENABLED) {
 		skip_observer = jit_frameless_observer(jit, opline);
 	}
 
-	ir_CALL_3(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref);
+	ir_CALL_3(IR_VOID, ir_CONST_ADDR((size_t)function), result_ref, op1_ref, op2_ref);
+
+	if (op1_addr == res_addr || op2_addr == res_addr) {
+		jit_ZVAL_COPY(jit, res_addr, MAY_BE_ANY, ZEND_ADDR_REF_ZVAL(tmp_result_ref), MAY_BE_ANY, 0);
+		ir_AFREE(ir_CONST_ADDR(sizeof(zval)));
+	}
 
 	if (skip_observer != IR_UNUSED) {
 		ir_MERGE_WITH(skip_observer);
@@ -17204,7 +17230,7 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	ir_ref op1_ref = jit_ZVAL_ADDR(jit, op1_addr);
 	ir_ref op2_ref = jit_ZVAL_ADDR(jit, op2_addr);
 	ir_ref op3_ref = jit_ZVAL_ADDR(jit, op3_addr);
-	jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+	ir_ref tmp_result_ref = IR_UNUSED, result_ref;
 	if (opline->op1_type == IS_CV && (op1_info & MAY_BE_UNDEF)) {
 		zend_jit_zval_check_undef(jit, op1_ref, opline->op1.var, opline, 1);
 	}
@@ -17223,13 +17249,26 @@ static void jit_frameless_icall3(zend_jit_ctx *jit, const zend_op *opline, uint3
 	if (op1_data_info & MAY_BE_REF) {
 		op3_ref = jit_ZVAL_DEREF_ref(jit, op3_ref);
 	}
+	if (op1_addr == res_addr || op2_addr == res_addr || op3_addr == res_addr) {
+		tmp_result_ref = ir_ALLOCA(ir_CONST_ADDR(sizeof(zval)));
+		jit_set_Z_TYPE_INFO(jit, ZEND_ADDR_REF_ZVAL(tmp_result_ref), IS_NULL);
+		result_ref = tmp_result_ref;
+	} else {
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_NULL);
+		result_ref = res_ref;
+	}
 
 	ir_ref skip_observer = IR_UNUSED;
 	if (ZEND_OBSERVER_ENABLED) {
 		skip_observer = jit_frameless_observer(jit, opline);
 	}
 
-	ir_CALL_4(IR_VOID, ir_CONST_ADDR((size_t)function), res_ref, op1_ref, op2_ref, op3_ref);
+	ir_CALL_4(IR_VOID, ir_CONST_ADDR((size_t)function), result_ref, op1_ref, op2_ref, op3_ref);
+
+	if (op1_addr == res_addr || op2_addr == res_addr || op3_addr == res_addr) {
+		jit_ZVAL_COPY(jit, res_addr, MAY_BE_ANY, ZEND_ADDR_REF_ZVAL(tmp_result_ref), MAY_BE_ANY, 0);
+		ir_AFREE(ir_CONST_ADDR(sizeof(zval)));
+	}
 
 	if (skip_observer != IR_UNUSED) {
 		ir_MERGE_WITH(skip_observer);

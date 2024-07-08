@@ -9638,9 +9638,9 @@ ZEND_VM_HANDLER(205, ZEND_FRAMELESS_ICALL_1, ANY, UNUSED, SPEC(OBSERVER))
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP1();
 		HANDLE_EXCEPTION();
 	}
@@ -9651,8 +9651,11 @@ ZEND_VM_HANDLER(205, ZEND_FRAMELESS_ICALL_1, ANY, UNUSED, SPEC(OBSERVER))
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_1 function = (zend_frameless_function_1)ZEND_FLF_HANDLER(opline);
-		function(result, arg1);
+		function(&tmp_result, arg1);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -9664,10 +9667,10 @@ ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY, SPEC(OBSERVER))
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP1();
 		FREE_OP2();
 		HANDLE_EXCEPTION();
@@ -9679,8 +9682,11 @@ ZEND_VM_HANDLER(206, ZEND_FRAMELESS_ICALL_2, ANY, ANY, SPEC(OBSERVER))
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_2 function = (zend_frameless_function_2)ZEND_FLF_HANDLER(opline);
-		function(result, arg1, arg2);
+		function(&tmp_result, arg1, arg2);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 
 	FREE_OP1();
@@ -9698,11 +9704,11 @@ ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY, SPEC(OBSERVER))
 	SAVE_OPLINE();
 
 	zval *result = EX_VAR(opline->result.var);
-	ZVAL_NULL(result);
 	zval *arg1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	zval *arg3 = GET_OP_DATA_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (EG(exception)) {
+		ZVAL_NULL(result);
 		FREE_OP1();
 		FREE_OP2();
 		FREE_OP_DATA();
@@ -9715,8 +9721,11 @@ ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY, SPEC(OBSERVER))
 	} else
 #endif
 	{
+		zval tmp_result;
+		ZVAL_NULL(&tmp_result);
 		zend_frameless_function_3 function = (zend_frameless_function_3)ZEND_FLF_HANDLER(opline);
-		function(result, arg1, arg2, arg3);
+		function(&tmp_result, arg1, arg2, arg3);
+		ZVAL_COPY_VALUE(result, &tmp_result);
 	}
 
 	FREE_OP1();
