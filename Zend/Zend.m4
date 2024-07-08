@@ -190,7 +190,7 @@ AX_CHECK_COMPILE_FLAG([-Wformat-truncation], CFLAGS="-Wformat-truncation $CFLAGS
 AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes], CFLAGS="-Wstrict-prototypes $CFLAGS", , [-Werror])
 AX_CHECK_COMPILE_FLAG([-fno-common], CFLAGS="-fno-common $CFLAGS", , [-Werror])
 
-test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
+AS_VAR_IF([DEBUG_CFLAGS],,, [AS_VAR_APPEND([CFLAGS], [" $DEBUG_CFLAGS"])])
 
 if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])
