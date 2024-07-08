@@ -2538,12 +2538,13 @@ AS_VAR_POPDEF([php_var])
 ])
 
 dnl
-dnl PHP_SET_LIBS_PRIVATE
+dnl PHP_PKG_CONFIG
 dnl
-dnl Get a list of all external libraries that were linked to PHP. For using in
-dnl templates, such as php.pc.in.
+dnl Prepare and substitute variables needed in pkg-config .pc files, such as
+dnl php.pc.in. For example, a list of all external libraries that were linked to
+dnl PHP.
 dnl
-AC_DEFUN([PHP_SET_LIBS_PRIVATE],
+AC_DEFUN([PHP_PKG_CONFIG],
 [PHP_LIBS_PRIVATE=$EXTRA_LIBS
 AS_VAR_SET_IF([ZEND_EXTRA_LIBS],
   [AS_VAR_APPEND([PHP_LIBS_PRIVATE], [" $ZEND_EXTRA_LIBS"])])
