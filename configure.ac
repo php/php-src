@@ -1159,13 +1159,6 @@ case $php_sapi_module in
 esac
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
-
-dnl This has to be here to prevent the openssl crypt() from overriding the
-dnl system provided crypt().
-if test "$ac_cv_lib_crypt_crypt" = "yes"; then
-  EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
-fi
-
 unset LIBS
 
 dnl PEAR
