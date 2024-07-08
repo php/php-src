@@ -92,7 +92,7 @@
 #elif defined(__clang__) && __has_builtin(__builtin_assume)
 # pragma clang diagnostic ignored "-Wassume"
 # define ZEND_ASSUME(c)	__builtin_assume(c)
-#elif PHP_HAVE_BUILTIN_UNREACHABLE && PHP_HAVE_BUILTIN_EXPECT
+#elif defined(PHP_HAVE_BUILTIN_UNREACHABLE) && defined(PHP_HAVE_BUILTIN_EXPECT)
 # define ZEND_ASSUME(c)	do { \
 		if (__builtin_expect(!(c), 0)) __builtin_unreachable(); \
 	} while (0)

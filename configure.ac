@@ -476,40 +476,25 @@ PHP_CHECK_SIZEOF(ptrdiff_t, 8)
 dnl Check stdint types (must be after header check).
 PHP_CHECK_STDINT_TYPES
 
-dnl Check __builtin_expect
-PHP_CHECK_BUILTIN_EXPECT
-dnl Check __builtin_unreachable
-PHP_CHECK_BUILTIN_UNREACHABLE
-dnl Check __builtin_clz
-PHP_CHECK_BUILTIN_CLZ
-dnl Check __builtin_clzl
-PHP_CHECK_BUILTIN_CLZL
-dnl Check __builtin_clzll
-PHP_CHECK_BUILTIN_CLZLL
-dnl Check __builtin_ctzl
-PHP_CHECK_BUILTIN_CTZL
-dnl Check __builtin_ctzll
-PHP_CHECK_BUILTIN_CTZLL
-dnl Check __builtin_smull_overflow
-PHP_CHECK_BUILTIN_SMULL_OVERFLOW
-dnl Check __builtin_smulll_overflow
-PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
-dnl Check __builtin_saddl_overflow
-PHP_CHECK_BUILTIN_SADDL_OVERFLOW
-dnl Check __builtin_saddll_overflow
-PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
-dnl Check __builtin_usub_overflow
-PHP_CHECK_BUILTIN_USUB_OVERFLOW
-dnl Check __builtin_ssubl_overflow
-PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
-dnl Check __builtin_ssubll_overflow
-PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
-dnl Check __builtin_cpu_init
-PHP_CHECK_BUILTIN_CPU_INIT
-dnl Check __builtin_cpu_supports
-PHP_CHECK_BUILTIN_CPU_SUPPORTS
-dnl Check __builtin_frame_address
-PHP_CHECK_BUILTIN_FRAME_ADDRESS
+dnl Check GNU C builtins.
+PHP_CHECK_BUILTIN([__builtin_clz])
+PHP_CHECK_BUILTIN([__builtin_clzl])
+PHP_CHECK_BUILTIN([__builtin_clzll])
+PHP_CHECK_BUILTIN([__builtin_cpu_init])
+PHP_CHECK_BUILTIN([__builtin_cpu_supports])
+PHP_CHECK_BUILTIN([__builtin_ctzl])
+PHP_CHECK_BUILTIN([__builtin_ctzll])
+PHP_CHECK_BUILTIN([__builtin_expect])
+PHP_CHECK_BUILTIN([__builtin_frame_address])
+PHP_CHECK_BUILTIN([__builtin_saddl_overflow])
+PHP_CHECK_BUILTIN([__builtin_saddll_overflow])
+PHP_CHECK_BUILTIN([__builtin_smull_overflow])
+PHP_CHECK_BUILTIN([__builtin_smulll_overflow])
+PHP_CHECK_BUILTIN([__builtin_ssubl_overflow])
+PHP_CHECK_BUILTIN([__builtin_ssubll_overflow])
+PHP_CHECK_BUILTIN([__builtin_unreachable])
+PHP_CHECK_BUILTIN([__builtin_usub_overflow])
+
 dnl Check AVX512
 PHP_CHECK_AVX512_SUPPORTS
 dnl Check AVX512 VBMI

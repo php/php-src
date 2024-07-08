@@ -2389,343 +2389,43 @@ AC_DEFUN([PHP_CHECK_STDINT_TYPES], [
 ])
 
 dnl
-dnl PHP_CHECK_BUILTIN_EXPECT
+dnl PHP_CHECK_BUILTIN(builtin)
 dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_EXPECT], [
-  AC_MSG_CHECKING([for __builtin_expect])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_expect(1,1) ? 1 : 0;
-  ]])], [
-    have_builtin_expect=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_expect=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_EXPECT], [$have_builtin_expect], [Whether the compiler supports __builtin_expect])
+dnl Check GNU C builtin "builtin" and define the CPP macro
+dnl PHP_HAVE_<BUILTIN_WITHOUT_LEADING_UNDERSCORES> to 1 if found.
+dnl
+AC_DEFUN([PHP_CHECK_BUILTIN],
+[AS_VAR_PUSHDEF([php_var], [php_cv_have_$1])
+AC_CACHE_CHECK([for $1], [php_var],
+[AC_LINK_IFELSE([AC_LANG_SOURCE([int main(void) { m4_case([$1],
+  [__builtin_clz], [return $1(1) ? 1 : 0;],
+  [__builtin_clzl], [return $1(1) ? 1 : 0;],
+  [__builtin_clzll], [return $1(1) ? 1 : 0;],
+  [__builtin_cpu_init], [$1();],
+  [__builtin_cpu_supports], [return $1("sse")? 1 : 0;],
+  [__builtin_ctzl], [return $1(2L) ? 1 : 0;],
+  [__builtin_ctzll], [return $1(2LL) ? 1 : 0;],
+  [__builtin_expect], [return $1(1,1) ? 1 : 0;],
+  [__builtin_frame_address], [return $1(0) != (void*)0;],
+  [__builtin_saddl_overflow], [long tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_saddll_overflow], [long long tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_smull_overflow], [long tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_smulll_overflow], [long long tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_ssubl_overflow], [long tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_ssubll_overflow], [long long tmpvar; return $1(3, 7, &tmpvar);],
+  [__builtin_unreachable], [$1();],
+  [__builtin_usub_overflow], [unsigned int tmpvar; return $1(3, 7, &tmpvar);],
+  [
+    m4_warn([syntax], [Unsupported builtin '$1', the test may fail.])
+    $1();
+  ]) return 0; }])],
+[AS_VAR_SET([php_var], [yes])],
+[AS_VAR_SET([php_var], [no])])
 ])
-
-dnl
-dnl PHP_CHECK_BUILTIN_UNREACHABLE
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_UNREACHABLE], [
-  AC_MSG_CHECKING([for __builtin_unreachable])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    __builtin_unreachable();
-  ]])], [
-    have_builtin_unreachable=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_unreachable=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_UNREACHABLE], [$have_builtin_unreachable], [Whether the compiler supports __builtin_unreachable])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CLZ
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CLZ], [
-  AC_MSG_CHECKING([for __builtin_clz])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_clz(1) ? 1 : 0;
-  ]])], [
-    have_builtin_clz=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_clz=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZ], [$have_builtin_clz], [Whether the compiler supports __builtin_clz])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CLZL
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CLZL], [
-  AC_MSG_CHECKING([for __builtin_clzl])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_clzl(1) ? 1 : 0;
-  ]])], [
-    have_builtin_clzl=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_clzl=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZL], [$have_builtin_clzl], [Whether the compiler supports __builtin_clzl])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CLZLL
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CLZLL], [
-  AC_MSG_CHECKING([for __builtin_clzll])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_clzll(1) ? 1 : 0;
-  ]])], [
-    have_builtin_clzll=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_clzll=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CLZLL], [$have_builtin_clzll], [Whether the compiler supports __builtin_clzll])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CTZL
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CTZL], [
-  AC_MSG_CHECKING([for __builtin_ctzl])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_ctzl(2L) ? 1 : 0;
-  ]])], [
-    have_builtin_ctzl=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_ctzl=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZL], [$have_builtin_ctzl], [Whether the compiler supports __builtin_ctzl])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CTZLL
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CTZLL], [
-  AC_MSG_CHECKING([for __builtin_ctzll])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_ctzll(2LL) ? 1 : 0;
-  ]])], [
-    have_builtin_ctzll=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_ctzll=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CTZLL], [$have_builtin_ctzll], [Whether the compiler supports __builtin_ctzll])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_SMULL_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_SMULL_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_smull_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    long tmpvar;
-    return __builtin_smull_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_smull_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_smull_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SMULL_OVERFLOW],
-   [$have_builtin_smull_overflow], [Whether the compiler supports __builtin_smull_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_SMULLL_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_smulll_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    long long tmpvar;
-    return __builtin_smulll_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_smulll_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_smulll_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SMULLL_OVERFLOW],
-   [$have_builtin_smulll_overflow], [Whether the compiler supports __builtin_smulll_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_SADDL_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_SADDL_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_saddl_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    long tmpvar;
-    return __builtin_saddl_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_saddl_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_saddl_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SADDL_OVERFLOW],
-   [$have_builtin_saddl_overflow], [Whether the compiler supports __builtin_saddl_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_SADDLL_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_saddll_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    long long tmpvar;
-    return __builtin_saddll_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_saddll_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_saddll_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SADDLL_OVERFLOW],
-   [$have_builtin_saddll_overflow], [Whether the compiler supports __builtin_saddll_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_USUB_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_USUB_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_usub_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    unsigned int tmpvar;
-    return __builtin_usub_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_usub_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_usub_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_USUB_OVERFLOW],
-   [$have_builtin_usub_overflow], [Whether the compiler supports __builtin_usub_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_SSUBL_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_ssubl_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    long tmpvar;
-    return __builtin_ssubl_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_ssubl_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_ssubl_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SSUBL_OVERFLOW],
-   [$have_builtin_ssubl_overflow], [Whether the compiler supports __builtin_ssubl_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
-  AC_MSG_CHECKING([for __builtin_ssubll_overflow])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    long long tmpvar;
-    return __builtin_ssubll_overflow(3, 7, &tmpvar);
-  ]])], [
-    have_builtin_ssubll_overflow=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_ssubll_overflow=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW],
-   [$have_builtin_ssubll_overflow], [Whether the compiler supports __builtin_ssubll_overflow])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CPU_INIT
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CPU_INIT], [
-  AC_MSG_CHECKING([for __builtin_cpu_init])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    __builtin_cpu_init();
-  ]])], [
-    have_builtin_cpu_init=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_cpu_init=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_INIT],
-   [$have_builtin_cpu_init], [Whether the compiler supports __builtin_cpu_init])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_CPU_SUPPORTS
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
-  AC_MSG_CHECKING([for __builtin_cpu_supports])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_cpu_supports("sse")? 1 : 0;
-  ]])], [
-    have_builtin_cpu_supports=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_cpu_supports=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_SUPPORTS],
-   [$have_builtin_cpu_supports], [Whether the compiler supports __builtin_cpu_supports])
-])
-
-dnl
-dnl PHP_CHECK_BUILTIN_FRAME_ADDRESS
-dnl
-AC_DEFUN([PHP_CHECK_BUILTIN_FRAME_ADDRESS], [
-  AC_MSG_CHECKING([for __builtin_frame_address])
-
-  AC_LINK_IFELSE([AC_LANG_PROGRAM([], [[
-    return __builtin_frame_address(0) != (void*)0;
-  ]])], [
-    have_builtin_frame_address=1
-    AC_MSG_RESULT([yes])
-  ], [
-    have_builtin_frame_address=0
-    AC_MSG_RESULT([no])
-  ])
-
-  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_FRAME_ADDRESS],
-   [$have_builtin_frame_address], [Whether the compiler supports __builtin_frame_address])
+AS_VAR_IF([php_var], [yes],
+  [AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_]m4_bpatsubst([$1], [^_*], [])), [1],
+    [Define to 1 if compiler supports '$1'.])])
+AS_VAR_POPDEF([php_var])
 ])
 
 dnl
