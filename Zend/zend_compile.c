@@ -944,15 +944,9 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Cannot use the final modifier on an abstract class", 0);
 		return 0;
 	}
-	if (new_flags & ZEND_ACC_STATIC) {
-		if (new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
-			zend_throw_exception(zend_ce_compile_error, "Cannot use the static modifier on an abstract class", 0);
-			return 0;
-		}
-		if (new_flags & ZEND_ACC_READONLY_CLASS) {
-			zend_throw_exception(zend_ce_compile_error, "Cannot use the static modifier on a readonly class", 0);
-			return 0;
-		}
+	if ((new_flags & ZEND_ACC_STATIC) && (new_flags & ZEND_ACC_READONLY_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Cannot use the static modifier on a readonly class", 0);
+		return 0;
 	}
     if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
 		zend_throw_exception(zend_ce_compile_error,

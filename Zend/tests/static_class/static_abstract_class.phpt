@@ -1,9 +1,19 @@
 --TEST--
-Tests that a static class cannot be marked abstract
+Tests that a static class can be marked abstract
 --FILE--
 <?php
 
-abstract static class C {}
+abstract static class C {
+    abstract static function F();
+}
+
+static class C2 extends C {
+    static function F() {
+        echo 'OK';
+    }
+}
+
+C2::F();
 ?>
---EXPECTF--
-Fatal error: Cannot use the static modifier on an abstract class in %s on line %d
+--EXPECT--
+OK
