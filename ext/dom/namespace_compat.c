@@ -20,6 +20,7 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "php_dom.h"
 #include "namespace_compat.h"
 #include "internal_helpers.h"
 

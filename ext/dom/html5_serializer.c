@@ -20,6 +20,7 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "php_dom.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
 #include "serialize_common.h"
