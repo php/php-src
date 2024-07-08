@@ -43,14 +43,14 @@ typedef void (*lexbor_libxml2_bridge_tree_error_reporter)(
     size_t len
 );
 
-typedef struct lexbor_libxml2_bridge_extracted_observations {
+typedef struct _lexbor_libxml2_bridge_extracted_observations {
     bool has_explicit_html_tag;
     bool has_explicit_head_tag;
     bool has_explicit_body_tag;
     php_libxml_quirks_mode quirks_mode;
 } lexbor_libxml2_bridge_extracted_observations;
 
-typedef struct lexbor_libxml2_bridge_parse_context {
+typedef struct _lexbor_libxml2_bridge_parse_context {
     /* Private fields */
     lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter;
     lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter;

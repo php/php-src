@@ -30,8 +30,8 @@
 struct php_dom_ns_magic_token;
 typedef struct php_dom_ns_magic_token php_dom_ns_magic_token;
 
-struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
+struct _php_dom_libxml_ns_mapper;
+typedef struct _php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_html_magic_token;
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_mathml_magic_token;
@@ -40,8 +40,8 @@ PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_xlink_magic_to
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token;
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token;
 
-typedef struct php_libxml_private_data_header php_libxml_private_data_header;
-struct php_libxml_private_data_header;
+typedef struct _php_libxml_private_data_header php_libxml_private_data_header;
+struct _php_libxml_private_data_header;
 
 /* These functions make it possible to make a namespace declaration also visible as an attribute by
  * creating an equivalent attribute node. */
@@ -64,7 +64,7 @@ PHP_DOM_EXPORT bool php_dom_ns_is_fast(const xmlNode *nodep, const php_dom_ns_ma
 PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_token *magic_token);
 PHP_DOM_EXPORT bool php_dom_ns_is_html_and_document_is_html(const xmlNode *nodep);
 
-typedef struct php_dom_in_scope_ns {
+typedef struct _php_dom_in_scope_ns {
    xmlNsPtr *list;
    size_t count;
    bool origin_is_ns_compat;

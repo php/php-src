@@ -65,8 +65,8 @@ typedef struct {
 	size_t modification_nr;
 } php_libxml_cache_tag;
 
-typedef struct php_libxml_private_data_header {
-	void (*dtor)(struct php_libxml_private_data_header *);
+typedef struct _php_libxml_private_data_header {
+	void (*dtor)(struct _php_libxml_private_data_header *);
 	/* extra fields */
 } php_libxml_private_data_header;
 

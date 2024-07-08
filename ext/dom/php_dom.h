@@ -64,7 +64,7 @@ extern zend_module_entry dom_module_entry;
 /* Define a custom type for iterating using an unused nodetype */
 #define DOM_NODESET XML_XINCLUDE_START
 
-typedef struct dom_xpath_object {
+typedef struct _dom_xpath_object {
 	php_dom_xpath_callbacks xpath_callbacks;
 	bool register_node_ns;
 	dom_object dom;
@@ -77,7 +77,7 @@ static inline dom_xpath_object *php_xpath_obj_from_obj(zend_object *obj) {
 
 #define Z_XPATHOBJ_P(zv)  php_xpath_obj_from_obj(Z_OBJ_P((zv)))
 
-typedef struct dom_nnodemap_object {
+typedef struct _dom_nnodemap_object {
 	dom_object *baseobj;
 	zval baseobj_zv;
 	int nodetype;
@@ -107,7 +107,7 @@ typedef struct {
 	dom_object dom;
 } dom_object_namespace_node;
 
-typedef enum dom_iterator_type {
+typedef enum _dom_iterator_type {
 	DOM_NODELIST,
 	DOM_NAMEDNODEMAP,
 	DOM_DTD_NAMEDNODEMAP,

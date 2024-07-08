@@ -80,8 +80,8 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	__id = ZEND_THIS; \
 	DOM_GET_OBJ(__ptr, __id, __prtype, __intern);
 
-struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
+struct _php_dom_libxml_ns_mapper;
+typedef struct _php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 static zend_always_inline php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *intern)
 {
