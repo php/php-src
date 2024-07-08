@@ -42,29 +42,26 @@ if test "$PHP_PHPDBG" != "no"; then
     AC_MSG_RESULT([disabled])
   fi
 
-  AC_CHECK_DECL([UFFDIO_WRITEPROTECT_MODE_WP], [
-    if test "$enable_zts" != "yes"; then
-      CFLAGS_SAVE="$CFLAGS"
-      LIBS_SAVE="$LIBS"
+  AH_TEMPLATE([HAVE_USERFAULTFD_WRITEFAULT],
+    [Define to 1 if faulting on write-protected memory support can be compiled
+    for userfaultfd.])
 
-      PTHREADS_CHECK
-      AC_MSG_CHECKING([working pthreads]);
-
-      if test "$pthreads_working" = "yes"; then
-        AC_MSG_RESULT([$ac_cv_pthreads_cflags -l$ac_cv_pthreads_lib]);
-        PHP_PHPDBG_CFLAGS="$PHP_PHPDBG_CFLAGS $ac_cv_pthreads_cflags"
-        PHPDBG_EXTRA_LIBS="$PHPDBG_EXTRA_LIBS -l$ac_cv_pthreads_lib"
-        AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
-      else
-        AC_MSG_WARN([pthreads not available])
-      fi
-
-      CFLAGS="$CFLAGS_SAVE"
-      LIBS="$LIBS_SAVE"
-    else
-      AC_DEFINE(HAVE_USERFAULTFD_WRITEFAULT, 1, [Whether faulting on write-protected memory support can be compiled for userfaultfd])
-    fi
-  ],,[#include <linux/userfaultfd.h>])
+  AC_CHECK_DECL([UFFDIO_WRITEPROTECT_MODE_WP],
+    [AS_VAR_IF([enable_zts], [yes],
+      [AC_DEFINE([HAVE_USERFAULTFD_WRITEFAULT], [1])],
+      [AC_MSG_CHECKING([working pthreads])
+        AS_VAR_IF([pthreads_working], [yes], [
+          AC_MSG_RESULT([$ac_cv_pthreads_cflags -l$ac_cv_pthreads_lib])
+          AS_VAR_APPEND([PHP_PHPDBG_CFLAGS], [" $ac_cv_pthreads_cflags"])
+          AS_VAR_APPEND([PHPDBG_EXTRA_LIBS], [" -l$ac_cv_pthreads_lib"])
+          AC_DEFINE([HAVE_USERFAULTFD_WRITEFAULT], [1])
+        ], [
+          AC_MSG_RESULT([no])
+          AC_MSG_WARN([pthreads not available])
+        ])
+      ])
+    ],,
+    [#include <linux/userfaultfd.h>])
 
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag],
     [$abs_srcdir/sapi/phpdbg],
