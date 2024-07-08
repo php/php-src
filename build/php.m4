@@ -2040,6 +2040,7 @@ dnl
 dnl This macro is used to get a comparable version for Apache.
 dnl
 AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
+AS_IF([test -x "$1"], [
   ac_output=`$1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//'`
   ac_IFS=$IFS
 IFS="- /.
@@ -2048,6 +2049,7 @@ IFS="- /.
   IFS=$ac_IFS
 
   APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
+])
 ])
 
 dnl
