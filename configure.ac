@@ -938,8 +938,6 @@ if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
 fi
 AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
 
-test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
-
 PHP_ARG_ENABLE([sigchild],
   [whether to enable PHP's own SIGCHLD handler],
   [AS_HELP_STRING([--enable-sigchild],
