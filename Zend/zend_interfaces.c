@@ -667,6 +667,7 @@ ZEND_API void zend_register_interfaces(void)
 
 	memcpy(&zend_internal_iterator_handlers, zend_get_std_object_handlers(),
 		sizeof(zend_object_handlers));
+	zend_internal_iterator_handlers.clone_obj = NULL;
 	zend_internal_iterator_handlers.free_obj = zend_internal_iterator_free;
 }
 /* }}} */
