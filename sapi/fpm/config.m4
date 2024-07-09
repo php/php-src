@@ -430,7 +430,8 @@ if test "$PHP_FPM" != "no"; then
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-acl],,
+  PHP_ARG_WITH([fpm-acl],
+    [whether to use Access Control Lists (ACL) in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-acl],
       [Use POSIX Access Control Lists])],
     [no],
@@ -467,14 +468,15 @@ if test "$PHP_FPM" != "no"; then
     php_fpm_systemd=simple
   fi
 
-  if test "$PHP_FPM_ACL" != "no" ; then
+  AS_VAR_IF([PHP_FPM_ACL], [no],, [
     AC_CHECK_HEADERS([sys/acl.h])
 
     dnl *BSD has acl_* built into libc, macOS doesn't have user/group support.
-    LIBS_save="$LIBS"
-    AC_SEARCH_LIBS([acl_free], [acl], [
-      AC_MSG_CHECKING([for acl user/group permissions support])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
+    LIBS_save=$LIBS
+    AC_SEARCH_LIBS([acl_free], [acl],
+    [AC_CACHE_CHECK([for ACL user/group permissions support],
+      [php_cv_lib_acl_user_group],
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
         acl_t acl;
         acl_entry_t user, group;
         acl = acl_init(1);
@@ -483,15 +485,18 @@ if test "$PHP_FPM" != "no"; then
         acl_create_entry(&acl, &group);
         acl_set_tag_type(user, ACL_GROUP);
         acl_free(acl);
-      ])], [
-        AC_MSG_RESULT([yes])
-        AC_DEFINE([HAVE_FPM_ACL], [1], [Whether FPM has acl support])
-      ], [
-        AC_MSG_RESULT([no])
-        LIBS="$LIBS_save"
+      ])],
+      [php_cv_lib_acl_user_group=yes],
+      [php_cv_lib_acl_user_group=no])])
+      AS_VAR_IF([php_cv_lib_acl_user_group], [yes], [
+        AC_DEFINE([HAVE_FPM_ACL], [1],
+          [Define to 1 if PHP-FPM has ACL support.])
+        AS_VAR_IF([ac_cv_search_acl_free], ["none required"],,
+          [AS_VAR_APPEND([FPM_EXTRA_LIBS], [" $ac_cv_search_acl_free"])])
       ])
     ])
-  fi
+    LIBS=$LIBS_save
+  ])
 
   if test "x$PHP_FPM_APPARMOR" != "xno" ; then
     PKG_CHECK_MODULES([APPARMOR], [libapparmor], [
@@ -611,4 +616,5 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_SUBST([SAPI_FPM_PATH])
   PHP_SUBST([BUILD_FPM])
+  PHP_SUBST([FPM_EXTRA_LIBS])
 fi
