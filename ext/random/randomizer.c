@@ -270,6 +270,43 @@ PHP_METHOD(Random_Randomizer, getInt)
 }
 /* }}} */
 
+static zend_always_inline char *bulk_convert_generated_result_to_char_32(char *ptr, uint64_t result, size_t *to_read)
+{
+	if (*to_read >= sizeof(uint32_t)) {
+		uint32_t tmp = (uint32_t) result;
+#ifdef WORDS_BIGENDIAN
+		tmp = RANDOM_BSWAP32(tmp);
+#endif
+		memcpy(ptr, &tmp, sizeof(uint32_t));
+		ptr += sizeof(uint32_t);
+		*to_read -= sizeof(uint32_t);
+	} else {
+		while (*to_read > 0) {
+			*ptr++ = result & 0xff;
+			result >>= 8;
+			*to_read -= 1;
+		}
+	}
+
+	return ptr;
+}
+
+static zend_always_inline char *bulk_convert_generated_result_to_char_64(char *ptr, uint64_t result, size_t *to_read)
+{
+	if (*to_read >= sizeof(uint64_t)) {
+#ifdef WORDS_BIGENDIAN
+		result = RANDOM_BSWAP64(result);
+#endif
+		memcpy(ptr, &result, sizeof(uint64_t));
+		ptr += sizeof(uint64_t);
+		*to_read -= sizeof(uint64_t);
+	} else {
+		ptr = bulk_convert_generated_result_to_char_32(ptr, result, to_read);
+	}
+
+	return ptr;
+}
+
 /* {{{ Generate random bytes string in ordered length */
 PHP_METHOD(Random_Randomizer, getBytes)
 {
@@ -278,7 +315,6 @@ PHP_METHOD(Random_Randomizer, getBytes)
 
 	zend_string *retval;
 	zend_long user_length;
-	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(user_length)
@@ -291,17 +327,28 @@ PHP_METHOD(Random_Randomizer, getBytes)
 
 	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
+	char *rptr = ZSTR_VAL(retval);
 
-	while (total_size < length) {
+	size_t to_read = length;
+	while (to_read > 0) {
 		php_random_result result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
-		for (size_t i = 0; i < result.size; i++) {
-			ZSTR_VAL(retval)[total_size++] = (result.result >> (i * 8)) & 0xff;
-			if (total_size >= length) {
-				break;
+		if (EXPECTED(result.size == sizeof(uint64_t))) {
+			rptr = bulk_convert_generated_result_to_char_64(rptr, result.result, &to_read);
+		} else if (EXPECTED(result.size == sizeof(uint32_t))){
+			rptr = bulk_convert_generated_result_to_char_32(rptr, result.result, &to_read);
+		} else {
+			uint64_t tmp_ret = result.result;
+			for (size_t i = 0; i < result.size; i++) {
+				*rptr++ = tmp_ret & 0xff;
+				tmp_ret >>= 8;
+				to_read--;
+				if (to_read == 0) {
+					break;
+				}
 			}
 		}
 	}
