@@ -11,11 +11,12 @@ echo $rc;
 --EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Stringable, Reflector ] {
 
-  - Constants [4] {
-    Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
+  - Constants [5] {
+    Constant [ public int IS_IMPLICIT_ABSTRACT ] { 1073741824 }
     Constant [ public int IS_EXPLICIT_ABSTRACT ] { 64 }
     Constant [ public int IS_FINAL ] { 32 }
     Constant [ public int IS_READONLY ] { 65536 }
+    Constant [ public int IS_STATIC ] { 16 }
   }
 
   - Static properties [0] {
@@ -28,7 +29,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     Property [ public string $name ]
   }
 
-  - Methods [56] {
+  - Methods [57] {
     Method [ <internal:Reflection> private method __clone ] {
 
       - Parameters [0] {
@@ -286,6 +287,13 @@ Class [ <internal:Reflection> class ReflectionClass implements Stringable, Refle
     }
 
     Method [ <internal:Reflection> public method isReadOnly ] {
+
+      - Parameters [0] {
+      }
+      - Return [ bool ]
+    }
+
+    Method [ <internal:Reflection> public method isStatic ] {
 
       - Parameters [0] {
       }

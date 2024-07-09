@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 53cb11e3aaa2215f8dbb39778dfbc1bd28f629af */
+ * Stub hash: 6136bfed70be470535fd533213fef7c8c808ae17 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -269,6 +269,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_isFinal arginfo_class_ReflectionFunctionAbstract_inNamespace
 
 #define arginfo_class_ReflectionClass_isReadOnly arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
+#define arginfo_class_ReflectionClass_isStatic arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionClass_getModifiers arginfo_class_ReflectionFunctionAbstract_getNumberOfParameters
 
@@ -733,6 +735,7 @@ ZEND_METHOD(ReflectionClass, isEnum);
 ZEND_METHOD(ReflectionClass, isAbstract);
 ZEND_METHOD(ReflectionClass, isFinal);
 ZEND_METHOD(ReflectionClass, isReadOnly);
+ZEND_METHOD(ReflectionClass, isStatic);
 ZEND_METHOD(ReflectionClass, getModifiers);
 ZEND_METHOD(ReflectionClass, isInstance);
 ZEND_METHOD(ReflectionClass, newInstance);
@@ -1005,6 +1008,7 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 	ZEND_ME(ReflectionClass, isAbstract, arginfo_class_ReflectionClass_isAbstract, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isFinal, arginfo_class_ReflectionClass_isFinal, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isReadOnly, arginfo_class_ReflectionClass_isReadOnly, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionClass, isStatic, arginfo_class_ReflectionClass_isStatic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, getModifiers, arginfo_class_ReflectionClass_getModifiers, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, isInstance, arginfo_class_ReflectionClass_isInstance, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionClass, newInstance, arginfo_class_ReflectionClass_newInstance, ZEND_ACC_PUBLIC)
@@ -1385,6 +1389,12 @@ static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_
 	zend_string *const_IS_READONLY_name = zend_string_init_interned("IS_READONLY", sizeof("IS_READONLY") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_IS_READONLY_name, &const_IS_READONLY_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_IS_READONLY_name);
+
+	zval const_IS_STATIC_value;
+	ZVAL_LONG(&const_IS_STATIC_value, ZEND_ACC_STATIC);
+	zend_string *const_IS_STATIC_name = zend_string_init_interned("IS_STATIC", sizeof("IS_STATIC") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_IS_STATIC_name, &const_IS_STATIC_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_IS_STATIC_name);
 
 	zval property_name_default_value;
 	ZVAL_UNDEF(&property_name_default_value);

@@ -1,12 +1,9 @@
 --TEST--
-Traits cannot be readonly
+Tests that a trait cannot be declared static
 --FILE--
 <?php
 
-readonly trait Foo
-{
-}
-
+static trait T {}
 ?>
 --EXPECTF--
 Parse error: syntax error, unexpected token "trait" in %s on line %d

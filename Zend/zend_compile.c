@@ -944,6 +944,16 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Cannot use the final modifier on an abstract class", 0);
 		return 0;
 	}
+	if ((new_flags & ZEND_ACC_STATIC) && (new_flags & ZEND_ACC_READONLY_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Cannot use the static modifier on a readonly class", 0);
+		return 0;
+	}
+    if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
+		zend_throw_exception(zend_ce_compile_error,
+			"Multiple static modifiers are not allowed", 0);
+		return 0;
+	}
+
 	return new_flags;
 }
 /* }}} */
@@ -958,6 +968,10 @@ uint32_t zend_add_anonymous_class_modifier(uint32_t flags, uint32_t new_flag)
 	}
 	if (new_flag & ZEND_ACC_FINAL) {
 		zend_throw_exception(zend_ce_compile_error, "Cannot use the final modifier on an anonymous class", 0);
+		return 0;
+	}
+	if (new_flag & ZEND_ACC_STATIC) {
+		zend_throw_exception(zend_ce_compile_error, "Cannot use the static modifier on an anonymous class", 0);
 		return 0;
 	}
 	if ((flags & ZEND_ACC_READONLY_CLASS) && (new_flag & ZEND_ACC_READONLY_CLASS)) {
@@ -7836,6 +7850,11 @@ static zend_string *zend_begin_method_decl(zend_op_array *op_array, zend_string 
 
 	if ((fn_flags & ZEND_ACC_PRIVATE) && (fn_flags & ZEND_ACC_FINAL) && !zend_is_constructor(name)) {
 		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
+	}
+
+	if ((ce->ce_flags & ZEND_ACC_STATIC) && !(fn_flags & ZEND_ACC_STATIC)) {
+		zend_error(E_COMPILE_ERROR, "Class method %s::%s() must be declared static in a static class",
+			ZSTR_VAL(ce->name), ZSTR_VAL(name));
 	}
 
 	if (in_interface) {

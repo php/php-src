@@ -1,12 +1,9 @@
 --TEST--
-Interfaces cannot be readonly
+Tests that an interface cannot be declared static
 --FILE--
 <?php
 
-readonly interface Foo
-{
-}
-
+static interface I {}
 ?>
 --EXPECTF--
 Parse error: syntax error, unexpected token "interface" in %s on line %d

@@ -1837,6 +1837,9 @@ tail_call:
 				if (decl->flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
 					smart_str_appends(str, "abstract ");
 				}
+				if (decl->flags & ZEND_ACC_STATIC) {
+					smart_str_appends(str, "static ");
+				}
 				if (decl->flags & ZEND_ACC_FINAL) {
 					smart_str_appends(str, "final ");
 				}
