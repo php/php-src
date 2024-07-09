@@ -122,7 +122,7 @@ PHP_METHOD(Dom_XMLDocument, createEmpty)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
+	intern->document->private_data = php_dom_libxml_private_data_header(php_dom_private_data_create());
 	return;
 
 oom:
@@ -236,8 +236,9 @@ static void load_from_helper(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 void dom_document_convert_to_modern(php_libxml_ref_obj *document, xmlDocPtr lxml_doc)
 {
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
-	document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
+	document->private_data = php_dom_libxml_private_data_header(private_data);
 	dom_mark_namespaces_as_attributes_too(ns_mapper, lxml_doc);
 }
 

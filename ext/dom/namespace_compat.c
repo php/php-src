@@ -32,13 +32,17 @@ PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token = (co
 PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token = (const php_dom_ns_magic_token *) DOM_XMLNS_NS_URI;
 
 struct php_dom_libxml_ns_mapper {
-	php_libxml_private_data_header header;
 	/* This is used almost all the time for HTML documents, so it makes sense to cache this. */
 	xmlNsPtr html_ns;
 	/* Used for every prefixless namespace declaration in XML, so also very common. */
 	xmlNsPtr prefixless_xmlns_ns;
 	HashTable uri_to_prefix_map;
 };
+
+typedef struct php_dom_private_data {
+	php_libxml_private_data_header header;
+	struct php_dom_libxml_ns_mapper ns_mapper;
+} php_dom_private_data;
 
 static void php_dom_libxml_ns_mapper_prefix_map_element_dtor(zval *zv)
 {
@@ -69,25 +73,25 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 	return prefix_map;
 }
 
-static void php_dom_libxml_ns_mapper_header_destroy(php_libxml_private_data_header *header)
+static void php_dom_libxml_private_data_destroy(php_libxml_private_data_header *header)
 {
-	php_dom_libxml_ns_mapper_destroy((php_dom_libxml_ns_mapper *) header);
+	php_dom_private_data_destroy((php_dom_private_data *) header);
 }
 
-PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_libxml_ns_mapper_create(void)
+PHP_DOM_EXPORT php_dom_private_data *php_dom_private_data_create(void)
 {
-	php_dom_libxml_ns_mapper *mapper = emalloc(sizeof(*mapper));
-	mapper->header.dtor = php_dom_libxml_ns_mapper_header_destroy;
-	mapper->html_ns = NULL;
-	mapper->prefixless_xmlns_ns = NULL;
-	zend_hash_init(&mapper->uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
+	php_dom_private_data *mapper = emalloc(sizeof(*mapper));
+	mapper->header.dtor = php_dom_libxml_private_data_destroy;
+	mapper->ns_mapper.html_ns = NULL;
+	mapper->ns_mapper.prefixless_xmlns_ns = NULL;
+	zend_hash_init(&mapper->ns_mapper.uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
 	return mapper;
 }
 
-void php_dom_libxml_ns_mapper_destroy(php_dom_libxml_ns_mapper *mapper)
+void php_dom_private_data_destroy(php_dom_private_data *data)
 {
-	zend_hash_destroy(&mapper->uri_to_prefix_map);
-	efree(mapper);
+	zend_hash_destroy(&data->ns_mapper.uri_to_prefix_map);
+	efree(data);
 }
 
 static xmlNsPtr php_dom_libxml_ns_mapper_ensure_cached_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr *ptr, const char *uri, size_t length, const php_dom_ns_magic_token *token)
@@ -229,9 +233,19 @@ static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_l
 	return ns;
 }
 
-PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper *mapper)
+PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_private_data_header(php_dom_private_data *private_data)
 {
-	return mapper == NULL ? NULL : &mapper->header;
+	return private_data == NULL ? NULL : &private_data->header;
+}
+
+PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_ns_mapper_from_private(php_dom_private_data *private_data)
+{
+	return private_data == NULL ? NULL : &private_data->ns_mapper;
+}
+
+PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *object)
+{
+	return &php_dom_get_private_data(object)->ns_mapper;
 }
 
 typedef struct {
