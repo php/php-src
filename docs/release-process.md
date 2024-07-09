@@ -918,7 +918,7 @@ feature development that cannot go into the new version.
    All the changes that are already present in the previous version NEWS should be
    removed. It means all bug fixes that went to the previous version as well should
    have their entries removed. It is possible to use `grep` to compare the changes.
-   For exampe if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
+   For example if `82/NEWS` is NEWS for PHP 8.2 and `83/NEWS` is NEWS file for PHP 8.3,
    then following command will show changes present in both files:
 
    ```sh
@@ -984,7 +984,7 @@ volunteers to begin the selection process for the next release managers.
 
    Provide the following information in a single email:
 
-   - Prefered Unix username (will also become part of location to download RCs,
+   - Preferred Unix username (will also become part of location to download RCs,
      such as `https://downloads.php.net/~derick/`).
    - An SSH public key, preferably a new unique one for PHP systems and
      projects.
