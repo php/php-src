@@ -524,6 +524,8 @@ PHP 8.4 UPGRADE NOTES
   . The content that is built changes depending on the value of FB_API_VER in
     ibase.h, so added static method Pdo\Firebird::getApiVersion() to obtain that
     value. This value can also be referenced from phpinfo.
+  . Five new data types are now available: INT128, DEC16, DEC34, TIMESTAMP_TZ, TIME_TZ.
+    These are available starting with Firebird 4.0.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.

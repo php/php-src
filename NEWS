@@ -35,6 +35,7 @@ PHP                                                                        NEWS
   . Added Pdo\Firebird::ATTR_API_VERSION. (SakiTakamachi)
   . Added getApiVersion() and removed from getAttribute().
     (SakiTakamachi)
+  . Supported Firebird 4.0 datatypes. (sim1984)
 
 - PGSQL:
   . pg_convert/pg_insert/pg_update/pg_delete ; regexes are now cached.
