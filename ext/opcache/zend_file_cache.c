@@ -900,6 +900,16 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetunset);
 		SERIALIZE_PTR(ce->arrayaccess_funcs_ptr);
 	}
+	if (ce->dimension_handlers) {
+		SERIALIZE_PTR(ce->dimension_handlers->read_dimension);
+		SERIALIZE_PTR(ce->dimension_handlers->has_dimension);
+		SERIALIZE_PTR(ce->dimension_handlers->fetch_dimension);
+		SERIALIZE_PTR(ce->dimension_handlers->write_dimension);
+		SERIALIZE_PTR(ce->dimension_handlers->append);
+		SERIALIZE_PTR(ce->dimension_handlers->fetch_append);
+		SERIALIZE_PTR(ce->dimension_handlers->unset_dimension);
+		SERIALIZE_PTR(ce->dimension_handlers);
+	}
 
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
 	ZEND_MAP_PTR_INIT(ce->mutable_data, NULL);
@@ -1742,6 +1752,16 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetexists);
 		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetset);
 		UNSERIALIZE_PTR(ce->arrayaccess_funcs_ptr->zf_offsetunset);
+	}
+	if (ce->dimension_handlers) {
+		UNSERIALIZE_PTR(ce->dimension_handlers);
+		UNSERIALIZE_PTR(ce->dimension_handlers->read_dimension);
+		UNSERIALIZE_PTR(ce->dimension_handlers->has_dimension);
+		UNSERIALIZE_PTR(ce->dimension_handlers->fetch_dimension);
+		UNSERIALIZE_PTR(ce->dimension_handlers->write_dimension);
+		UNSERIALIZE_PTR(ce->dimension_handlers->append);
+		UNSERIALIZE_PTR(ce->dimension_handlers->fetch_append);
+		UNSERIALIZE_PTR(ce->dimension_handlers->unset_dimension);
 	}
 
 	if (!(script->corrupted)) {
