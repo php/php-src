@@ -261,21 +261,6 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 		return SUCCESS;
 	}
 
-	ZEND_ASSERT(!class_type->arrayaccess_funcs_ptr && "ArrayAccess funcs already set?");
-	zend_class_arrayaccess_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
-		? pemalloc(sizeof(zend_class_arrayaccess_funcs), 1)
-		: zend_arena_alloc(&CG(arena), sizeof(zend_class_arrayaccess_funcs));
-	class_type->arrayaccess_funcs_ptr = funcs_ptr;
-
-	funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
-	funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
-	funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
-	funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
-
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 

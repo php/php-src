@@ -516,9 +516,6 @@ ZEND_API void destroy_zend_class(zval *zv)
 			if (ce->iterator_funcs_ptr) {
 				free(ce->iterator_funcs_ptr);
 			}
-			if (ce->arrayaccess_funcs_ptr) {
-				free(ce->arrayaccess_funcs_ptr);
-			}
 			if (ce->num_interfaces > 0) {
 				free(ce->interfaces);
 			}

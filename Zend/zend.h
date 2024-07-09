@@ -188,8 +188,6 @@ struct _zend_class_entry {
 
 	/* allocated only if class implements Iterator or IteratorAggregate interface */
 	zend_class_iterator_funcs *iterator_funcs_ptr;
-	/* allocated only if class implements ArrayAccess interface */
-	zend_class_arrayaccess_funcs *arrayaccess_funcs_ptr;
 
 	/* handlers */
 	union {

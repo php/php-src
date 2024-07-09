@@ -36,11 +36,4 @@ typedef struct _zend_class_dimensions_functions {
 	void  (*/* const */ unset_dimension)(zend_object *object, zval *offset);
 } zend_class_dimensions_functions;
 
-typedef struct _zend_class_arrayaccess_funcs {
-	zend_function *zf_offsetget;
-	zend_function *zf_offsetexists;
-	zend_function *zf_offsetset;
-	zend_function *zf_offsetunset;
-} zend_class_arrayaccess_funcs;
-
 #endif /* ZEND_DIMENSION_HANDLERS_H */
