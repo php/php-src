@@ -593,21 +593,21 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry) || instanceof_function(intern->std.ce, dom_modern_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
-			php_dom_libxml_ns_mapper *ns_mapper = NULL;
+			php_dom_private_data *private_data = NULL;
 			if (php_dom_follow_spec_intern(intern)) {
 				if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
-					ns_mapper = php_dom_libxml_ns_mapper_create();
+					private_data = php_dom_private_data_create();
 				} else {
-					ns_mapper = php_dom_get_ns_mapper(intern);
+					private_data = php_dom_get_private_data(intern);
 				}
 			}
 
-			xmlNodePtr cloned_node = dom_clone_node(ns_mapper, node, node->doc, true);
+			xmlNodePtr cloned_node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), node, node->doc, true);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
-			if (ns_mapper != NULL) {
-				clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+			if (private_data != NULL) {
+				clone->document->private_data = php_dom_libxml_private_data_header(private_data);
 			}
 		}
 	}

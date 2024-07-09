@@ -757,7 +757,7 @@ PHP_METHOD(Dom_HTMLDocument, createEmpty)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
+	intern->document->private_data = php_dom_libxml_private_data_header(php_dom_private_data_create());
 	return;
 
 oom:
@@ -878,7 +878,8 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		goto fail_oom;
 	}
 
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
 
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
@@ -890,7 +891,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		php_dom_private_data_destroy(private_data);
 		php_libxml_ctx_error(
 			NULL,
 			"%s in %s",
@@ -918,7 +919,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 	);
 	dom_set_xml_class(intern->document);
 	intern->document->quirks_mode = ctx.observations.quirks_mode;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	return;
 
 fail_oom:
@@ -930,7 +931,7 @@ fail_oom:
 PHP_METHOD(Dom_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
-	php_dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_private_data *private_data = NULL;
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
@@ -1069,7 +1070,8 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		goto fail_oom;
 	}
 
-	ns_mapper = php_dom_libxml_ns_mapper_create();
+	private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
 
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
@@ -1139,14 +1141,14 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 	);
 	dom_set_xml_class(intern->document);
 	intern->document->quirks_mode = ctx.observations.quirks_mode;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	return;
 
 fail_oom:
 	php_dom_throw_error(INVALID_STATE_ERR, true);
 fail_general:
-	if (ns_mapper != NULL) {
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+	if (private_data != NULL) {
+		php_dom_private_data_destroy(private_data);
 	}
 	lxb_html_document_destroy(document);
 	php_stream_close(stream);

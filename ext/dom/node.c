@@ -1444,21 +1444,21 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	php_dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_private_data *private_data = NULL;
 	bool clone_document = n->type == XML_DOCUMENT_NODE || n->type == XML_HTML_DOCUMENT_NODE;
 	if (php_dom_follow_spec_intern(intern)) {
 		if (clone_document) {
-			ns_mapper = php_dom_libxml_ns_mapper_create();
+			private_data = php_dom_private_data_create();
 		} else {
-			ns_mapper = php_dom_get_ns_mapper(intern);
+			private_data = php_dom_get_private_data(intern);
 		}
 	}
 
-	node = dom_clone_node(ns_mapper, n, n->doc, recursive);
+	node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), n, n->doc, recursive);
 
 	if (!node) {
-		if (clone_document && ns_mapper != NULL) {
-			php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		if (clone_document && private_data != NULL) {
+			php_dom_private_data_destroy(private_data);
 		}
 		RETURN_FALSE;
 	}
@@ -1466,7 +1466,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	/* If document cloned we want a new document proxy */
 	if (clone_document) {
 		dom_object *new_intern;
-		if (ns_mapper) {
+		if (private_data) {
 			/* We have the issue here that we can't create a modern node without an intern.
 			 * Fortunately, it's impossible to have a custom document class for the modern DOM (final base class),
 			 * so we can solve this by invoking the instantiation helper directly. */
@@ -1478,7 +1478,7 @@ PHP_METHOD(DOMNode, cloneNode)
 		}
 		php_dom_update_document_after_clone(intern, n, new_intern, node);
 		ZEND_ASSERT(new_intern->document->private_data == NULL);
-		new_intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+		new_intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	} else {
 		if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
 			/* Let reconciliation deal with this. The lifetime of the namespace poses no problem
