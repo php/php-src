@@ -783,11 +783,11 @@ PHP 8.4 UPGRADE NOTES
   . X509_PURPOSE_TIMESTAMP_SIGN.
 
 - PCNTL:
-  . QosClass::Background (macOs only).
-  . QosClass::Default (macOs only).
-  . QosClass::UserInteractive (macOs only).
-  . QosClass::UserInitiated (macOs only).
-  . QosClass::Utility (macOs only).
+  . Pcntl\QosClass::Background (macOs only).
+  . Pcntl\QosClass::Default (macOs only).
+  . Pctnl\QosClass::UserInteractive (macOs only).
+  . Pcntl\QosClass::UserInitiated (macOs only).
+  . Pcntl\QosClass::Utility (macOs only).
   . SIGCKPT (DragonFlyBSD only).
   . SIGCKPTEXIT (DragonFlyBSD only).
   . WEXITED.
