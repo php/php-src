@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 71d0cbd8d2b1ae57d289ec421e9dcaa4040d857b */
+ * Stub hash: 897062ad1dfe06326e561429509360174820379e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_fork, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -167,13 +167,13 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_pcntl_getqos_class, 0, 0, QosClass, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_pcntl_getqos_class, 0, 0, Pcntl\\QosClass, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setqos_class, 0, 0, IS_VOID, 0)
-	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, qos_class, QosClass, 0, "QosClass::Default")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, qos_class, Pcntl\\QosClass, 0, "Pcntl\\QosClass::Default")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -313,11 +313,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-static const zend_function_entry class_QosClass_methods[] = {
+static const zend_function_entry class_Pcntl_QosClass_methods[] = {
 	ZEND_FE_END
 };
-#endif
 
 static void register_pcntl_symbols(int module_number)
 {
@@ -712,10 +710,9 @@ static void register_pcntl_symbols(int module_number)
 #endif
 }
 
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-static zend_class_entry *register_class_QosClass(void)
+static zend_class_entry *register_class_Pcntl_QosClass(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("QosClass", IS_UNDEF, class_QosClass_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Pcntl\\QosClass", IS_UNDEF, class_Pcntl_QosClass_methods);
 
 	zend_enum_add_case_cstr(class_entry, "UserInteractive", NULL);
 
@@ -729,4 +726,3 @@ static zend_class_entry *register_class_QosClass(void)
 
 	return class_entry;
 }
-#endif

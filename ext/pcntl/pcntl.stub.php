@@ -4,6 +4,8 @@
 
 /* Wait Constants */
 
+namespace
+{
 #ifdef WNOHANG
 /**
  * @var int
@@ -995,120 +997,123 @@ const PCNTL_EUSERS = UNKNOWN;
 const PCNTL_ECAPMODE = UNKNOWN;
 #endif
 
-function pcntl_fork(): int {}
+    function pcntl_fork(): int {}
 
-/**
- * @param int $status
- * @param array $resource_usage
- */
-function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
+    /**
+    * @param int $status
+    * @param array $resource_usage
+    */
+    function pcntl_waitpid(int $process_id, &$status, int $flags = 0, &$resource_usage = []): int {}
 
 #if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
-/** @param array $info */
-function pcntl_waitid(int $idtype = P_ALL, ?int $id = null, &$info = [], int $flags = WEXITED): bool {}
+    /** @param array $info */
+    function pcntl_waitid(int $idtype = P_ALL, ?int $id = null, &$info = [], int $flags = WEXITED): bool {}
 #endif
 
-/**
- * @param int $status
- * @param array $resource_usage
- */
-function pcntl_wait(&$status, int $flags = 0, &$resource_usage = []): int {}
+    /**
+    * @param int $status
+    * @param array $resource_usage
+    */
+    function pcntl_wait(&$status, int $flags = 0, &$resource_usage = []): int {}
 
-/** @param callable|int $handler */
-function pcntl_signal(int $signal, $handler, bool $restart_syscalls = true): bool {}
+    /** @param callable|int $handler */
+    function pcntl_signal(int $signal, $handler, bool $restart_syscalls = true): bool {}
 
-/** @return callable|int */
-function pcntl_signal_get_handler(int $signal) {}
+    /** @return callable|int */
+    function pcntl_signal_get_handler(int $signal) {}
 
-function pcntl_signal_dispatch(): bool {}
+    function pcntl_signal_dispatch(): bool {}
 
 #ifdef HAVE_SIGPROCMASK
 /** @param array $old_signals */
-function pcntl_sigprocmask(int $mode, array $signals, &$old_signals = null): bool {}
+    function pcntl_sigprocmask(int $mode, array $signals, &$old_signals = null): bool {}
 #endif
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 #if (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
-/** @param array $info */
-function pcntl_sigwaitinfo(array $signals, &$info = []): int|false {}
+    /** @param array $info */
+    function pcntl_sigwaitinfo(array $signals, &$info = []): int|false {}
 
-/** @param array $info */
-function pcntl_sigtimedwait(array $signals, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
+    /** @param array $info */
+    function pcntl_sigtimedwait(array $signals, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
 #endif
 #endif
 
-function pcntl_wifexited(int $status): bool {}
+    function pcntl_wifexited(int $status): bool {}
 
-function pcntl_wifstopped(int $status): bool {}
+    function pcntl_wifstopped(int $status): bool {}
 
 #ifdef HAVE_WCONTINUED
 function pcntl_wifcontinued(int $status): bool {}
 #endif
 
-function pcntl_wifsignaled(int $status): bool {}
+    function pcntl_wifsignaled(int $status): bool {}
 
-function pcntl_wexitstatus(int $status): int|false {}
+    function pcntl_wexitstatus(int $status): int|false {}
 
-function pcntl_wtermsig(int $status): int|false {}
+    function pcntl_wtermsig(int $status): int|false {}
 
-function pcntl_wstopsig(int $status): int|false {}
+    function pcntl_wstopsig(int $status): int|false {}
 
-function pcntl_exec(string $path, array $args = [], array $env_vars = []): bool {}
+    function pcntl_exec(string $path, array $args = [], array $env_vars = []): bool {}
 
-function pcntl_alarm(int $seconds): int {}
+    function pcntl_alarm(int $seconds): int {}
 
-function pcntl_get_last_error(): int {}
+    function pcntl_get_last_error(): int {}
 
-/** @alias pcntl_get_last_error */
-function pcntl_errno(): int {}
+    /** @alias pcntl_get_last_error */
+    function pcntl_errno(): int {}
 
 #ifdef HAVE_GETPRIORITY
-function pcntl_getpriority(?int $process_id = null, int $mode = PRIO_PROCESS): int|false {}
+    function pcntl_getpriority(?int $process_id = null, int $mode = PRIO_PROCESS): int|false {}
 #endif
 
 #ifdef HAVE_SETPRIORITY
-function pcntl_setpriority(int $priority, ?int $process_id = null, int $mode = PRIO_PROCESS): bool{}
+    function pcntl_setpriority(int $priority, ?int $process_id = null, int $mode = PRIO_PROCESS): bool{}
 #endif
 
-function pcntl_strerror(int $error_code): string {}
+    function pcntl_strerror(int $error_code): string {}
 
-function pcntl_async_signals(?bool $enable = null): bool {}
+    function pcntl_async_signals(?bool $enable = null): bool {}
 
 #ifdef HAVE_UNSHARE
-function pcntl_unshare(int $flags): bool {}
+    function pcntl_unshare(int $flags): bool {}
 #endif
 
 #ifdef HAVE_RFORK
-function pcntl_rfork(int $flags, int $signal = 0): int{}
+    function pcntl_rfork(int $flags, int $signal = 0): int{}
 #endif
 
 #ifdef HAVE_FORKX
-function pcntl_forkx(int $flags): int{}
+    function pcntl_forkx(int $flags): int{}
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
-function pcntl_setns(?int $process_id = null, int $nstype = CLONE_NEWNET): bool {}
+    function pcntl_setns(?int $process_id = null, int $nstype = CLONE_NEWNET): bool {}
 #endif
 
 #ifdef HAVE_SCHED_SETAFFINITY
-function pcntl_getcpuaffinity(?int $process_id = null): array|false {}
-function pcntl_setcpuaffinity(?int $process_id = null, array $cpu_ids = []): bool {}
+    function pcntl_getcpuaffinity(?int $process_id = null): array|false {}
+    function pcntl_setcpuaffinity(?int $process_id = null, array $cpu_ids = []): bool {}
 #endif
 
 #ifdef HAVE_SCHED_GETCPU
-function pcntl_getcpu(): int {}
+    function pcntl_getcpu(): int {}
 #endif
-
 #ifdef HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP
-enum QosClass
+    function pcntl_getqos_class(): Pcntl\QosClass {}
+    function pcntl_setqos_class(Pcntl\QosClass $qos_class = Pcntl\QosClass::Default): void {}
+#endif
+}
+
+namespace Pcntl
 {
+    enum QosClass
+    {
 	case UserInteractive;
 	case UserInitiated;
 	case Default;
 	case Utility;
 	case Background;
+    }
 }
-
-function pcntl_getqos_class(): QosClass {}
-function pcntl_setqos_class(QosClass $qos_class = QosClass::Default): void {}
-#endif

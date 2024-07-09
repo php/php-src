@@ -123,7 +123,6 @@ typedef psetid_t cpu_set_t;
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 #include <pthread/qos.h>
-static zend_class_entry *QosClass_ce;
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
@@ -144,6 +143,7 @@ static zend_class_entry *QosClass_ce;
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
+static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -212,9 +212,7 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-	QosClass_ce = register_class_QosClass();
-#endif
+	QosClass_ce = register_class_Pcntl_QosClass();
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
