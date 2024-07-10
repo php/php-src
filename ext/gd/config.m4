@@ -184,7 +184,7 @@ int main(void) {
   [AS_VAR_SET([php_var], [no])])])
 AS_VAR_IF([php_var], [yes],
   [AC_DEFINE_UNQUOTED([$2], [1],
-    [Define to 1 if GD library has the 'gdImageCreateFrom$1' function.])])
+    [Define to 1 if GD library has a working 'gdImageCreateFrom$1' function.])])
 AC_LANG_POP([C])
 CFLAGS=$old_CFLAGS
 LIBS=$old_LIBS
