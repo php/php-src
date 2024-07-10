@@ -335,7 +335,7 @@ static bool opline_supports_assign_contraction(
 			ZEND_FALLTHROUGH;
 		case ZEND_FRAMELESS_ICALL_1:
 			if (opline->op1_type == IS_CV && opline->op1.var == cv_var) return 0;
-			break;
+			return 1;
 	}
 
 	if (opline->opcode == ZEND_DO_ICALL || opline->opcode == ZEND_DO_UCALL
