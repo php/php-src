@@ -10049,6 +10049,35 @@ static void zend_compile_include_or_eval(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static void zend_compile_nameof(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *var_ast = ast->child[0];
+	zend_ast *name_ast;
+
+	// todo: proper error handling and better error messages
+
+	switch (var_ast->kind) {
+		case ZEND_AST_VAR:
+		case ZEND_AST_CALL:
+			name_ast = var_ast->child[0];
+			ZVAL_COPY(&result->u.constant, zend_ast_get_zval(name_ast));
+			result->op_type = IS_CONST;
+			break;
+		case ZEND_AST_PROP:
+		case ZEND_AST_NULLSAFE_PROP:
+		case ZEND_AST_STATIC_PROP:
+		case ZEND_AST_CLASS_CONST:
+			name_ast = var_ast->child[1];
+			ZVAL_COPY(&result->u.constant, zend_ast_get_zval(name_ast));
+			result->op_type = IS_CONST;
+			break;
+		default:
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use nameof() on the result of an expression or something with an ambiguous name");
+	}
+}
+/* }}} */
+
 static void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *var_ast = ast->child[0];
@@ -11038,6 +11067,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_ISSET:
 		case ZEND_AST_EMPTY:
 			zend_compile_isset_or_empty(result, ast);
+			return;
+		case ZEND_AST_NAMEOF:
+			zend_compile_nameof(result, ast);
 			return;
 		case ZEND_AST_SILENCE:
 			zend_compile_silence(result, ast);
