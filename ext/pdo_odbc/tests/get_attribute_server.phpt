@@ -4,13 +4,13 @@ PDO ODBC getAttribute SERVER_INFO and SERVER_VERSION
 pdo_odbc
 --SKIPIF--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-PDOTest::skip();
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+ODBCPDOTest::skip();
 ?>
 --FILE--
 <?php
-require 'ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
+require_once __DIR__ . '/inc/odbc_pdo_test.inc';
+$db = ODBCPDOTest::factory();
 // Obviously, we can't assume what driver is being used, so just check strings
 // Example driver output (MariaDB ODBC):
 // PDO::ATTR_SERVER_INFO: MariaDB
