@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 95564c667a51a548f5d43025c90546b991970ddd */
+ * Stub hash: 4aae5b13ccac47ac028567125b31206c9a5365ad */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zip_open, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -43,6 +43,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_ZipArchive_open, 0, 1, MAY_BE_BOOL|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_openBuffer, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_setPassword, 0, 1, _IS_BOOL, 0)
@@ -327,6 +331,7 @@ ZEND_FUNCTION(zip_entry_compressedsize);
 ZEND_FUNCTION(zip_entry_filesize);
 ZEND_FUNCTION(zip_entry_compressionmethod);
 ZEND_METHOD(ZipArchive, open);
+ZEND_METHOD(ZipArchive, openBuffer);
 ZEND_METHOD(ZipArchive, setPassword);
 ZEND_METHOD(ZipArchive, close);
 ZEND_METHOD(ZipArchive, count);
@@ -419,6 +424,7 @@ static const zend_function_entry ext_functions[] = {
 
 static const zend_function_entry class_ZipArchive_methods[] = {
 	ZEND_ME(ZipArchive, open, arginfo_class_ZipArchive_open, ZEND_ACC_PUBLIC)
+	ZEND_ME(ZipArchive, openBuffer, arginfo_class_ZipArchive_openBuffer, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, setPassword, arginfo_class_ZipArchive_setPassword, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, close, arginfo_class_ZipArchive_close, ZEND_ACC_PUBLIC)
 	ZEND_ME(ZipArchive, count, arginfo_class_ZipArchive_count, ZEND_ACC_PUBLIC)
