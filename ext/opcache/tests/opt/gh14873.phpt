@@ -66,37 +66,37 @@ $_main:
 0004 SEND_VAR V0 1
 0005 DO_ICALL
 0006 INIT_FCALL 1 %d string("var_dump")
-0007 INIT_FCALL 1 112 string("testmin2first")
+0007 INIT_FCALL 1 %d string("testmin2first")
 0008 SEND_VAL int(5) 1
 0009 V0 = DO_UCALL
 0010 SEND_VAR V0 1
 0011 DO_ICALL
 0012 INIT_FCALL 1 %d string("var_dump")
-0013 INIT_FCALL 1 112 string("testmin2second")
+0013 INIT_FCALL 1 %d string("testmin2second")
 0014 SEND_VAL int(5) 1
 0015 V0 = DO_UCALL
 0016 SEND_VAR V0 1
 0017 DO_ICALL
 0018 INIT_FCALL 1 %d string("var_dump")
-0019 INIT_FCALL 1 112 string("testmin2_tmp")
+0019 INIT_FCALL 1 %d string("testmin2_tmp")
 0020 SEND_VAL int(5) 1
 0021 V0 = DO_UCALL
 0022 SEND_VAR V0 1
 0023 DO_ICALL
-0024 INIT_FCALL 1 96 string("var_dump")
-0025 INIT_FCALL 1 112 string("teststrstr3first")
+0024 INIT_FCALL 1 %d string("var_dump")
+0025 INIT_FCALL 1 %d string("teststrstr3first")
 0026 SEND_VAL string("needles") 1
 0027 V0 = DO_UCALL
 0028 SEND_VAR V0 1
 0029 DO_ICALL
-0030 INIT_FCALL 1 96 string("var_dump")
-0031 INIT_FCALL 1 112 string("teststrstr3second")
+0030 INIT_FCALL 1 %d string("var_dump")
+0031 INIT_FCALL 1 %d string("teststrstr3second")
 0032 SEND_VAL string("needle") 1
 0033 V0 = DO_UCALL
 0034 SEND_VAR V0 1
 0035 DO_ICALL
-0036 INIT_FCALL 1 96 string("var_dump")
-0037 INIT_FCALL 1 112 string("teststrstr3third")
+0036 INIT_FCALL 1 %d string("var_dump")
+0037 INIT_FCALL 1 %d string("teststrstr3third")
 0038 SEND_VAL bool(false) 1
 0039 V0 = DO_UCALL
 0040 SEND_VAR V0 1
