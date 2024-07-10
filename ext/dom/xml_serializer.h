@@ -22,6 +22,9 @@
 #include <libxml/xmlsave.h>
 #include <libxml/xmlIO.h>
 
-int dom_xml_serialize(xmlSaveCtxtPtr ctx, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed);
+struct php_dom_private_data;
+typedef struct php_dom_private_data php_dom_private_data;
+
+int dom_xml_serialize(xmlSaveCtxtPtr ctx, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed, php_dom_private_data *private_data);
 
 #endif

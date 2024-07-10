@@ -22,12 +22,13 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "html5_parser.h"
+#include "private_data.h"
 #include <lexbor/html/parser.h>
 #include <lexbor/html/interfaces/element.h>
+#include <lexbor/html/interfaces/template_element.h>
 #include <lexbor/dom/dom.h>
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLtree.h>
-#include <Zend/zend.h>
 
 #define WORK_LIST_INIT_SIZE 128
 /* libxml2 reserves 2 pointer-sized words for interned strings */
@@ -102,11 +103,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
     xmlNodePtr root,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+    php_dom_private_data *private_data
 )
 {
     lexbor_libxml2_bridge_status retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OK;
 
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
     xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
     xmlNsPtr xlink_ns = NULL;
     xmlNsPtr prefixed_xmlns_ns = NULL;
@@ -158,12 +160,32 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
             /* Instead of xmlSetNs() because we know the arguments are valid. Prevents overhead. */
             lxml_element->ns = current_lxml_ns;
 
-            for (lxb_dom_node_t *child_node = element->node.last_child; child_node != NULL; child_node = child_node->prev) {
+			/* Handle template element by creating a fragment node to contain its children.
+			 * Other types of nodes contain their children directly. */
+			xmlNodePtr lxml_child_parent = lxml_element;
+			lxb_dom_node_t *child_node = element->node.last_child;
+			if (lxb_html_tree_node_is(&element->node, LXB_TAG_TEMPLATE)) {
+				lxml_child_parent = xmlNewDocFragment(lxml_doc);
+				if (UNEXPECTED(lxml_child_parent == NULL)) {
+					retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+					break;
+				}
+
+				lxml_child_parent->parent = lxml_element;
+				php_dom_add_templated_content(private_data, lxml_element, lxml_child_parent);
+
+				lxb_html_template_element_t *template = lxb_html_interface_template(&element->node);
+				if (template->content != NULL) {
+					child_node = template->content->node.last_child;
+				}
+			}
+
+            for (; child_node != NULL; child_node = child_node->prev) {
                 lexbor_libxml2_bridge_work_list_item_push(
                     &work_list,
                     child_node,
                     entering_namespace,
-                    lxml_element,
+                    lxml_child_parent,
                     current_lxml_ns
                 );
             }
@@ -307,7 +329,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+	php_dom_private_data *private_data
 )
 {
     xmlDocPtr lxml_doc = php_dom_create_html_doc();
@@ -320,7 +342,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
         (xmlNodePtr) lxml_doc,
         compact_text_nodes,
         create_default_ns,
-        ns_mapper
+        private_data
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
         xmlFreeDoc(lxml_doc);
@@ -336,7 +358,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     xmlNodePtr *fragment_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+	php_dom_private_data *private_data
 )
 {
     xmlNodePtr fragment = xmlNewDocFragment(lxml_doc);
@@ -349,7 +371,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
         fragment,
         compact_text_nodes,
         create_default_ns,
-        ns_mapper
+        private_data
     );
     if (status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK) {
         xmlFreeNode(fragment);

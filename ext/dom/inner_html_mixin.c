@@ -68,6 +68,7 @@ zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
 	if (context_document->type == XML_HTML_DOCUMENT_NODE) {
 		smart_str output = {0};
 		dom_html5_serialize_context ctx;
+		ctx.private_data = php_dom_get_private_data(obj);
 		ctx.application_data = &output;
 		ctx.write_string = dom_inner_html_write_string;
 		ctx.write_string_len = dom_inner_html_write_string_len;
@@ -86,11 +87,12 @@ zend_result dom_element_inner_html_read(dom_object *obj, zval *retval)
 			xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler("UTF-8");
 			xmlOutputBufferPtr out = xmlOutputBufferCreateIO(dom_write_smart_str, NULL, &str, handler);
 			if (EXPECTED(out != NULL)) {
+				php_dom_private_data *private_data = php_dom_get_private_data(obj);
 				/* Note: the innerHTML mixin sets the well-formed flag to true. */
 				xmlNodePtr child = node->children;
 				status = 0;
 				while (child != NULL && status == 0) {
-					status = dom_xml_serialize(ctxt, out, child, false, true);
+					status = dom_xml_serialize(ctxt, out, child, false, true, private_data);
 					child = child->next;
 				}
 				status |= xmlOutputBufferFlush(out);
@@ -205,7 +207,7 @@ static xmlNodePtr dom_html_fragment_parsing_algorithm(dom_object *obj, xmlNodePt
 	xmlNodePtr fragment = NULL;
 	if (node != NULL) {
 		/* node->last_child could be NULL, but that is allowed. */
-		lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert_fragment(node->last_child, context_node->doc, &fragment, true, true, php_dom_get_ns_mapper(obj));
+		lexbor_libxml2_bridge_status status = lexbor_libxml2_bridge_convert_fragment(node->last_child, context_node->doc, &fragment, true, true, php_dom_get_private_data(obj));
 		if (UNEXPECTED(status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
 			php_dom_throw_error(INVALID_STATE_ERR, true);
 		}
@@ -347,6 +349,11 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 
 	if (fragment == NULL) {
 		return FAILURE;
+	}
+
+	xmlNodePtr template_content = php_dom_retrieve_templated_content(php_dom_get_private_data(obj), context_node);
+	if (template_content != NULL) {
+		context_node = template_content;
 	}
 
 	/* We skip the steps involving the template element as context node since we don't do special handling for that. */

@@ -21,6 +21,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "xml_serializer.h"
+#include "private_data.h"
 #include "namespace_compat.h"
 #include "serialize_common.h"
 #include "internal_helpers.h"
@@ -69,6 +70,7 @@ typedef struct {
 typedef struct dom_xml_serialize_ctx {
 	xmlSaveCtxtPtr ctxt;
 	xmlOutputBufferPtr out;
+	php_dom_private_data *private_data;
 } dom_xml_serialize_ctx;
 
 static int dom_xml_serialization_algorithm(
@@ -1128,16 +1130,26 @@ static int dom_xml_serialize_element_node(
 
 	/* 17. If the value of skip end tag is true, then return the value of markup and skip the remaining steps. */
 	if (!skip_end_tag) {
-		/* Step 18 deals with template elements which we don't support. */
-
 		if (should_format) {
 			indent++;
 		} else {
 			indent = -1;
 		}
 
+		/* 18. If ns is the HTML namespace, and the node's localName matches the string "template",
+		 *     then this is a template element.
+		 *     Append to markup the result of XML serializing a DocumentFragment node. */
+		xmlNodePtr child = NULL;
+		if (php_dom_ns_is_fast(element, php_dom_ns_is_html_magic_token) && xmlStrEqual(element->name, BAD_CAST "template")) {
+			if (ctx->private_data != NULL) {
+				child = php_dom_retrieve_templated_content(ctx->private_data, element);
+			}
+		} else {
+			child = element->children;
+		}
+
 		/* 19. Otherwise, append to markup the result of running the XML serialization algorithm on each of node's children. */
-		for (xmlNodePtr child = element->children; child != NULL; child = child->next) {
+		for (; child != NULL; child = child->next) {
 			if (should_format) {
 				TRY_OR_CLEANUP(dom_xml_output_indents(ctx->out, indent));
 			}
@@ -1281,7 +1293,7 @@ static int dom_xml_serialization_algorithm(
 }
 
 /* https://w3c.github.io/DOM-Parsing/#dfn-xml-serialization */
-int dom_xml_serialize(xmlSaveCtxtPtr ctxt, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed)
+int dom_xml_serialize(xmlSaveCtxtPtr ctxt, xmlOutputBufferPtr out, xmlNodePtr node, bool format, bool require_well_formed, php_dom_private_data *private_data)
 {
 	/* 1. Let namespace be a context namespace with value null. */
 	const xmlChar *namespace = NULL;
@@ -1300,6 +1312,7 @@ int dom_xml_serialize(xmlSaveCtxtPtr ctxt, xmlOutputBufferPtr out, xmlNodePtr no
 	dom_xml_serialize_ctx ctx;
 	ctx.out = out;
 	ctx.ctxt = ctxt;
+	ctx.private_data = private_data;
 	int indent = format ? 0 : -1;
 	int result = dom_xml_serialization_algorithm(&ctx, &namespace_prefix_map, node, namespace, &prefix_index, indent, require_well_formed);
 

@@ -27,7 +27,7 @@ if test "$PHP_DOM" != "no"; then
       $LEXBOR_DIR/ns/ns.c \
       $LEXBOR_DIR/tag/tag.c"
     PHP_NEW_EXTENSION(dom, [php_dom.c attr.c document.c infra.c \
-                            xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c \
+                            xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c private_data.c \
                             domexception.c \
                             parentnode/tree.c parentnode/css_selectors.c \
                             processinginstruction.c cdatasection.c \

@@ -1368,6 +1368,9 @@ PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *doc
 {
 	int ret_refcount = --document->refcount;
 	if (ret_refcount == 0) {
+		if (document->private_data != NULL) {
+			document->private_data->dtor(document->private_data);
+		}
 		if (document->ptr != NULL) {
 			xmlFreeDoc((xmlDoc *) document->ptr);
 		}
@@ -1377,9 +1380,6 @@ PHP_LIBXML_API int php_libxml_decrement_doc_ref_directly(php_libxml_ref_obj *doc
 				FREE_HASHTABLE(document->doc_props->classmap);
 			}
 			efree(document->doc_props);
-		}
-		if (document->private_data != NULL) {
-			document->private_data->dtor(document->private_data);
 		}
 		efree(document);
 	}
