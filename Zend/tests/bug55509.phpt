@@ -12,49 +12,10 @@ if ($zend_mm_enabled === "0") {
 }
 
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
-// check the available memory
-if (PHP_OS == 'Linux') {
-  $lines = file('/proc/meminfo');
-  $infos = array();
-  foreach ($lines as $line) {
-    $tmp = explode(":", $line);
-    $index = strtolower($tmp[0]);
-    $value = (int)ltrim($tmp[1], " ")*1024;
-    $infos[$index] = $value;
-  }
-  $freeMemory = $infos['memfree']+$infos['buffers']+$infos['cached'];
-  if ($freeMemory < 2100*1024*1024) {
-    die('skip Not enough memory.');
-  }
-}
-elseif (PHP_OS == 'FreeBSD') {
-  $lines = explode("\n",`sysctl -a`);
-  $infos = array();
-  foreach ($lines as $line) {
-    if (!$line){
-      continue;
-    }
-    $tmp = explode(":", $line);
-    if (count($tmp) < 2) {
-      continue;
-    }
-    $index = strtolower($tmp[0]);
-    $value = trim($tmp[1], " ");
-    $infos[$index] = $value;
-  }
-  $freeMemory = ($infos['vm.stats.vm.v_inactive_count']*$infos['hw.pagesize'])
-                +($infos['vm.stats.vm.v_cache_count']*$infos['hw.pagesize'])
-                +($infos['vm.stats.vm.v_free_count']*$infos['hw.pagesize']);
-  if ($freeMemory < 2100*1024*1024) {
-    die('skip Not enough memory.');
-  }
-} elseif (PHP_OS == "WINNT") {
-  $s = trim(shell_exec("wmic OS get FreeVirtualMemory /Value 2>nul"));
-  $freeMemory = explode('=', $s)[1]*1;
 
-  if ($freeMemory < 2.1*1024*1024) {
-    die('skip Not enough memory.');
-  }
+include(__DIR__.'/../../tests/utils.php');
+if (!has_enough_memory(2.1 * 1024 * 1024 * 1024)) {
+    die('skip Reason: Insufficient RAM (should be 2.1GB)');
 }
 ?>
 --INI--

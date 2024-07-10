@@ -9,26 +9,9 @@ if (PHP_INT_SIZE < 5) {
 if (getenv('SKIP_SLOW_TESTS')) {
     die('skip slow test');
 }
-function get_system_memory(): int|float|false
-{
-    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-        // Windows-based memory check
-        @exec('wmic OS get FreePhysicalMemory', $output);
-        if (isset($output[1])) {
-            return ((int)trim($output[1])) * 1024;
-        }
-    } else {
-        // Unix/Linux-based memory check
-        $memInfo = @file_get_contents("/proc/meminfo");
-        if ($memInfo) {
-            preg_match('/MemFree:\s+(\d+) kB/', $memInfo, $matches);
-            return $matches[1] * 1024; // Convert to bytes
-        }
-    }
-    return false;
-}
-if (get_system_memory() < 10 * 1024 * 1024 * 1024) {
-    die('skip Reason: Insufficient RAM (less than 10GB)');
+include(__DIR__.'/../../../../tests/utils.php');
+if(!has_enough_memory(10 * 1024 * 1024 * 1024)) { // 10GB
+    die('skip Reason: Insufficient RAM (should be 10GB)');
 }
 $tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "file_get_contents_file_put_contents_5gb.bin";
 $tmpfileh = fopen($tmpfile, "wb");
