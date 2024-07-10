@@ -1696,6 +1696,16 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 }
 /* }}} */
 
+#ifdef HAVE_VALGRIND
+static inline void callgrind_dump_stats(void)
+{
+	char *tmp = getenv("BENCHMARK_DUMP_SEPARATE_PROFILES");
+	if (tmp && ZEND_ATOL(tmp)) {
+		CALLGRIND_DUMP_STATS;
+	}
+}
+#endif
+
 static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cgi-fcgi",
@@ -2244,13 +2254,6 @@ parent_loop_end:
 						if (comma) {
 							warmup_repeats = atoi(php_optarg);
 							repeats = atoi(comma + 1);
-#ifdef HAVE_VALGRIND
-							if (warmup_repeats > 0) {
-								CALLGRIND_STOP_INSTRUMENTATION;
-								/* We're not interested in measuring startup */
-								CALLGRIND_ZERO_STATS;
-							}
-#endif
 						} else {
 							repeats = atoi(php_optarg);
 						}
@@ -2292,6 +2295,13 @@ parent_loop_end:
 		}
 #endif
 		while (!fastcgi || fcgi_accept_request(request) >= 0) {
+#ifdef HAVE_VALGRIND
+			if (benchmark) {
+				/* measure startup and each benchmark run separately */
+				callgrind_dump_stats();
+			}
+#endif
+
 			SG(server_context) = fastcgi ? (void *)request : (void *) 1;
 			init_request_info(request);
 
@@ -2458,12 +2468,6 @@ do_repeat:
 				}
 			} /* end !cgi && !fastcgi */
 
-#ifdef HAVE_VALGRIND
-			if (warmup_repeats == 0) {
-				CALLGRIND_START_INSTRUMENTATION;
-			}
-#endif
-
 			/* request startup only after we've done all we can to
 			 * get path_translated */
 			if (php_request_startup() == FAILURE) {
@@ -2582,11 +2586,6 @@ fastcgi_request_done:
 				SG(request_info).query_string = NULL;
 			}
 
-#ifdef HAVE_VALGRIND
-			/* We're not interested in measuring shutdown */
-			CALLGRIND_STOP_INSTRUMENTATION;
-#endif
-
 			if (!fastcgi) {
 				if (benchmark) {
 					if (warmup_repeats) {
@@ -2614,6 +2613,12 @@ fastcgi_request_done:
 					script_file = NULL;
 					goto do_repeat;
 				}
+
+#ifdef HAVE_VALGRIND
+				/* measure shutdown separately */
+				callgrind_dump_stats();
+#endif
+
 				break;
 			}
 

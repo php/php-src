@@ -278,12 +278,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install \
             bison \
-            libgmp-dev \
             libonig-dev \
             libsqlite3-dev \
             openssl \
             re2c \
-            valgrind
+            valgrind \
+            debuginfod
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -303,7 +303,6 @@ jobs:
             --enable-werror \
             --prefix=/usr \
             --with-config-file-scan-dir=/etc/php.d \
-            --with-gmp \
             --with-mysqli=mysqlnd \
             --with-openssl \
             --with-pdo-sqlite \
@@ -335,7 +334,9 @@ jobs:
           ssh-key: ${{ secrets.BENCHMARKING_DATA_DEPLOY_KEY }}
           path: benchmark/repos/data
       - name: Benchmark
-        run: php benchmark/benchmark.php true
+        run: |
+          export DEBUGINFOD_URLS="https://debuginfod.ubuntu.com"
+          php benchmark/benchmark.php true
       - name: Store result
         if: github.event_name == 'push'
         run: |
