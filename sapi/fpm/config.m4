@@ -45,25 +45,13 @@ AS_VAR_IF([ac_cv_func_clock_gettime], [no],
 ])])
 
 AC_DEFUN([PHP_FPM_TRACE],
-[
-  have_ptrace=no
-  have_broken_ptrace=no
-
-  AC_MSG_CHECKING([for ptrace])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+[AC_CACHE_CHECK([for ptrace], [php_cv_func_ptrace],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
     #include <sys/types.h>
-    #include <sys/ptrace.h> ]], [[ptrace(0, 0, (void *) 0, 0);]])], [
-    have_ptrace=yes
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_ptrace" = "yes"; then
-    AC_MSG_CHECKING([whether ptrace works])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    #include <sys/ptrace.h>
+  ],
+  [ptrace(0, 0, (void *) 0, 0);])],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
       #include <unistd.h>
       #include <signal.h>
       #include <sys/wait.h>
@@ -85,7 +73,8 @@ AC_DEFUN([PHP_FPM_TRACE],
 
       int main(void)
       {
-        long v1 = (unsigned int) -1; /* copy will fail if sizeof(long) == 8 and we've got "int ptrace()" */
+        /* copy will fail if sizeof(long) == 8 and we've got "int ptrace()" */
+        long v1 = (unsigned int) -1;
         long v2;
         pid_t child;
         int status;
@@ -130,40 +119,33 @@ AC_DEFUN([PHP_FPM_TRACE],
           return 0;
         }
       }
-    ]])], [
-      AC_MSG_RESULT([yes])
+    ])],
+    [php_cv_func_ptrace=yes],
+    [php_cv_func_ptrace=no],
+    [php_cv_func_ptrace=yes])],
+  [php_cv_func_ptrace=no])])
+
+AS_VAR_IF([php_cv_func_ptrace], [yes],
+  [AC_DEFINE([HAVE_PTRACE], [1],
+    [Define to 1 if you have the 'ptrace' function.])],
+  [AC_CACHE_CHECK([for mach_vm_read], [php_cv_func_mach_vm_read],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <mach/mach.h>
+      #include <mach/mach_vm.h>
     ], [
-      have_ptrace=no
-      have_broken_ptrace=yes
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([skipped (cross-compiling)])
-    ])
-  fi
+      mach_vm_read(
+        (vm_map_t)0,
+        (mach_vm_address_t)0,
+        (mach_vm_size_t)0,
+        (vm_offset_t *)0,
+        (mach_msg_type_number_t*)0);
+    ])],
+    [php_cv_func_mach_vm_read=yes],
+    [php_cv_func_mach_vm_read=no])])
+])
 
-  if test "$have_ptrace" = "yes"; then
-    AC_DEFINE([HAVE_PTRACE], 1, [do we have ptrace?])
-  fi
-
-  AS_VAR_IF([have_broken_ptrace], [yes],
-    [AC_CACHE_CHECK([for mach_vm_read], [php_cv_have_mach_vm_read],
-      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <mach/mach.h>
-        #include <mach/mach_vm.h>
-      ], [
-        mach_vm_read(
-          (vm_map_t)0,
-          (mach_vm_address_t)0,
-          (mach_vm_size_t)0,
-          (vm_offset_t *)0,
-          (mach_msg_type_number_t*)0);
-      ])],
-      [php_cv_have_mach_vm_read=yes],
-      [php_cv_have_mach_vm_read=no])])
-  ])
-
-  AS_VAR_IF([php_cv_have_mach_vm_read], [yes],
-    [AC_DEFINE([HAVE_MACH_VM_READ], [1],
-      [Define to 1 if you have the 'mach_vm_read'.])])
+AS_VAR_IF([php_cv_func_mach_vm_read], [yes],
+  [AC_DEFINE([HAVE_MACH_VM_READ], [1],
+    [Define to 1 if you have the 'mach_vm_read' function.])])
 
   proc_mem_file=""
 
@@ -222,13 +204,13 @@ AC_DEFUN([PHP_FPM_TRACE],
 
   fpm_trace_type=""
 
-  if test "$have_ptrace" = "yes"; then
+  if test "$php_cv_func_ptrace" = "yes"; then
     fpm_trace_type=ptrace
 
   elif test -n "$proc_mem_file"; then
     fpm_trace_type=pread
 
-  elif test "$php_cv_have_mach_vm_read" = "yes" ; then
+  elif test "$php_cv_func_mach_vm_read" = "yes" ; then
     fpm_trace_type=mach
 
   else
