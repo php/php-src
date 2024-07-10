@@ -104,11 +104,10 @@ fi
 dnl Settings we want to make before the checks.
 dnl ----------------------------------------------------------------------------
 
-php_shtool=$srcdir/build/shtool
+PHP_INIT_BUILD_SYSTEM
+
 T_MD=`$php_shtool echo -n -e %B`
 T_ME=`$php_shtool echo -n -e %b`
-
-PHP_INIT_BUILD_SYSTEM
 
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 AS_VAR_IF([CFLAGS],, [auto_cflags=1])

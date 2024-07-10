@@ -124,8 +124,9 @@ dnl PHP_INIT_BUILD_SYSTEM
 dnl
 dnl Creates build directories and Makefile placeholders.
 dnl
-AC_DEFUN([PHP_INIT_BUILD_SYSTEM],[
-AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+AC_DEFUN([PHP_INIT_BUILD_SYSTEM],
+[AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+php_shtool=$srcdir/build/shtool
 > Makefile.objects
 > Makefile.fragments
 dnl Run at the end of the configuration, before creating the config.status.
