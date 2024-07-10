@@ -270,43 +270,6 @@ PHP_METHOD(Random_Randomizer, getInt)
 }
 /* }}} */
 
-static zend_always_inline char *bulk_convert_generated_result_to_char_32(char *ptr, uint64_t result, size_t *to_read)
-{
-	if (*to_read >= sizeof(uint32_t)) {
-		uint32_t tmp = (uint32_t) result;
-#ifdef WORDS_BIGENDIAN
-		tmp = RANDOM_BSWAP32(tmp);
-#endif
-		memcpy(ptr, &tmp, sizeof(uint32_t));
-		ptr += sizeof(uint32_t);
-		*to_read -= sizeof(uint32_t);
-	} else {
-		while (*to_read > 0) {
-			*ptr++ = result & 0xff;
-			result >>= 8;
-			*to_read -= 1;
-		}
-	}
-
-	return ptr;
-}
-
-static zend_always_inline char *bulk_convert_generated_result_to_char_64(char *ptr, uint64_t result, size_t *to_read)
-{
-	if (*to_read >= sizeof(uint64_t)) {
-#ifdef WORDS_BIGENDIAN
-		result = RANDOM_BSWAP64(result);
-#endif
-		memcpy(ptr, &result, sizeof(uint64_t));
-		ptr += sizeof(uint64_t);
-		*to_read -= sizeof(uint64_t);
-	} else {
-		ptr = bulk_convert_generated_result_to_char_32(ptr, result, to_read);
-	}
-
-	return ptr;
-}
-
 /* {{{ Generate random bytes string in ordered length */
 PHP_METHOD(Random_Randomizer, getBytes)
 {
@@ -336,12 +299,16 @@ PHP_METHOD(Random_Randomizer, getBytes)
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
-		if (EXPECTED(result.size == sizeof(uint64_t))) {
-			rptr = bulk_convert_generated_result_to_char_64(rptr, result.result, &to_read);
-		} else if (EXPECTED(result.size == sizeof(uint32_t))){
-			rptr = bulk_convert_generated_result_to_char_32(rptr, result.result, &to_read);
+
+		uint64_t tmp_ret = result.result;
+		if (to_read >= result.size && result.size == sizeof(uint64_t)) {
+#ifdef WORDS_BIGENDIAN
+			tmp_ret = RANDOM_BSWAP64(tmp_ret);
+#endif
+			memcpy(rptr, &tmp_ret, sizeof(uint64_t));
+			to_read -= sizeof(uint64_t);
+			rptr += sizeof(uint64_t);
 		} else {
-			uint64_t tmp_ret = result.result;
 			for (size_t i = 0; i < result.size; i++) {
 				*rptr++ = tmp_ret & 0xff;
 				tmp_ret >>= 8;
