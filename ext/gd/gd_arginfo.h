@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: f46f454200e4dc01949b48e243c5e64459d5bdf8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -459,6 +459,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecopyresized arginfo_imagecopyresampled
 
+#define arginfo_imagematch arginfo_imagecolormatch
+
 #define arginfo_imagesx arginfo_imagecolorstotal
 
 #define arginfo_imagesy arginfo_imagecolorstotal
@@ -690,6 +692,7 @@ ZEND_FUNCTION(imagecopy);
 ZEND_FUNCTION(imagecopymerge);
 ZEND_FUNCTION(imagecopymergegray);
 ZEND_FUNCTION(imagecopyresized);
+ZEND_FUNCTION(imagematch);
 ZEND_FUNCTION(imagesx);
 ZEND_FUNCTION(imagesy);
 ZEND_FUNCTION(imagesetclip);
@@ -830,6 +833,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecopymerge, arginfo_imagecopymerge)
 	ZEND_FE(imagecopymergegray, arginfo_imagecopymergegray)
 	ZEND_FE(imagecopyresized, arginfo_imagecopyresized)
+	ZEND_FE(imagematch, arginfo_imagematch)
 	ZEND_FE(imagesx, arginfo_imagesx)
 	ZEND_FE(imagesy, arginfo_imagesy)
 	ZEND_FE(imagesetclip, arginfo_imagesetclip)
