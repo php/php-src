@@ -325,6 +325,11 @@ static bool opline_supports_assign_contraction(
 		return 0;
 	}
 
+	if (opline->opcode >= ZEND_FRAMELESS_ICALL_1 && opline->opcode <= ZEND_FRAMELESS_ICALL_3) {
+		/* Frameless calls override the return value, but the return value may overlap with the arguments. */
+		return opline->op1_type != IS_CV || opline->op1.var != cv_var;
+	}
+
 	if (opline->opcode == ZEND_DO_ICALL || opline->opcode == ZEND_DO_UCALL
 			|| opline->opcode == ZEND_DO_FCALL || opline->opcode == ZEND_DO_FCALL_BY_NAME) {
 		/* Function calls may dtor the return value after it has already been written -- allow
