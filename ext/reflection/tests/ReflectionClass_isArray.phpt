@@ -14,14 +14,14 @@ foreach ($reflection->getParameters() as $parameter) {
 }
 ?>
 --EXPECTF--
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(true)
 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(true)
 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)
 
-Deprecated: Method ReflectionParameter::isArray() is deprecated in %s on line %d
+Deprecated: Method ReflectionParameter::isArray() is deprecated since 8.0, use ReflectionParameter::getType() instead in %s on line %d
 bool(false)

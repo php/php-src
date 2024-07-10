@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6212994df4935f42c99080b928b8b5b08bdbe19d */
+ * Stub hash: 3ed3a9f6609e1b8fa642f1e4cfaa1de40e3cc11e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFileInfo___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -490,6 +490,14 @@ static zend_class_entry *register_class_SplFileInfo(zend_class_entry *class_entr
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
+
+
+	zend_attribute *attribute_Deprecated_func__bad_state_ex_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "_bad_state_ex", sizeof("_bad_state_ex") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func__bad_state_ex_0_arg0;
+	zend_string *attribute_Deprecated_func__bad_state_ex_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func__bad_state_ex_0_arg0, attribute_Deprecated_func__bad_state_ex_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func__bad_state_ex_0->args[0].value, &attribute_Deprecated_func__bad_state_ex_0_arg0);
+	attribute_Deprecated_func__bad_state_ex_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
 	return class_entry;
 }

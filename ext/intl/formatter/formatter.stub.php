@@ -180,9 +180,9 @@ class NumberFormatter
     /** @cvalue FORMAT_TYPE_DOUBLE */
     public const int TYPE_DOUBLE = UNKNOWN;
     /**
-     * @deprecated
      * @cvalue FORMAT_TYPE_CURRENCY
      */
+    #[\Deprecated(since: '8.3')]
     public const int TYPE_CURRENCY = UNKNOWN;
 
     public function __construct(string $locale, int $style, ?string $pattern = null) {}

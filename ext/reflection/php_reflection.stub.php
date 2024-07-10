@@ -127,8 +127,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     /**
      * @tentative-return-type
-     * @deprecated ReflectionFunction can no longer be constructed for disabled functions
      */
+    #[\Deprecated(since: '8.0', message: "as ReflectionFunction can no longer be constructed for disabled functions")]
     public function isDisabled(): bool {}
 
     /** @tentative-return-type */
@@ -593,8 +593,8 @@ class ReflectionParameter implements Reflector
 
     /**
      * @tentative-return-type
-     * @deprecated Use ReflectionParameter::getType() instead
      */
+    #[\Deprecated(since: '8.0', message: "use ReflectionParameter::getType() instead")]
     public function getClass(): ?ReflectionClass {}
 
     /** @tentative-return-type */
@@ -605,14 +605,14 @@ class ReflectionParameter implements Reflector
 
     /**
      * @tentative-return-type
-     * @deprecated Use ReflectionParameter::getType() instead
      */
+    #[\Deprecated(since: '8.0', message: "use ReflectionParameter::getType() instead")]
     public function isArray(): bool {}
 
     /**
      * @tentative-return-type
-     * @deprecated Use ReflectionParameter::getType() instead
      */
+    #[\Deprecated(since: '8.0', message: "use ReflectionParameter::getType() instead")]
     public function isCallable(): bool {}
 
     /** @tentative-return-type */
