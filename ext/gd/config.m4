@@ -162,17 +162,21 @@ AC_CACHE_CHECK([for working gdImageCreateFrom$1 in libgd], [php_var],
 
 /* A custom gdErrorMethod */
 void exit1(int priority, const char *format, va_list args) {
+  (void)priority;
+  (void)format;
+  (void)args;
   _exit(1);
 }
 
 /* Override the default gd_error_method with one that
    actually causes the program to return an error. */
-int main(int argc, char** argv) {
+int main(void) {
   m4_if([$1],[Xpm],
   [char* f = "test.xpm"],
   [FILE* f = NULL]);
   gdSetErrorMethod(exit1);
   gdImagePtr p = gdImageCreateFrom$1(f);
+  (void)p;
   return 0;
 }])],
   [AS_VAR_SET([php_var], [yes])],
