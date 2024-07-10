@@ -22,6 +22,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "xml_serializer.h"
 #include <libxml/xmlsave.h>
 
@@ -259,6 +260,12 @@ static int php_new_dom_write_smart_str(void *context, const char *buffer, int le
 	return len;
 }
 
+static php_dom_private_data *get_private_data_from_node(xmlNodePtr node)
+{
+	dom_object *intern = php_dom_object_get_data(node);
+	return intern != NULL ? php_dom_get_private_data(intern) : NULL;
+}
+
 static zend_string *php_new_dom_dump_node_to_str_ex(xmlNodePtr node, int options, bool format, const char *encoding)
 {
 	smart_str str = {0};
@@ -269,7 +276,7 @@ static zend_string *php_new_dom_dump_node_to_str_ex(xmlNodePtr node, int options
 		xmlCharEncodingHandlerPtr handler = xmlFindCharEncodingHandler(encoding);
 		xmlOutputBufferPtr out = xmlOutputBufferCreateIO(php_new_dom_write_smart_str, NULL, &str, handler);
 		if (EXPECTED(out != NULL)) {
-			status = dom_xml_serialize(ctxt, out, node, format, false);
+			status = dom_xml_serialize(ctxt, out, node, format, false, get_private_data_from_node(node));
 			status |= xmlOutputBufferFlush(out);
 			status |= xmlOutputBufferClose(out);
 		} else {
@@ -310,7 +317,7 @@ zend_long php_new_dom_dump_node_to_file(const char *filename, xmlDocPtr doc, xml
 	int status = -1;
 	xmlSaveCtxtPtr ctxt = xmlSaveToIO(out->writecallback, NULL, stream, encoding, XML_SAVE_AS_XML);
 	if (EXPECTED(ctxt != NULL)) {
-		status = dom_xml_serialize(ctxt, out, node, format, false);
+		status = dom_xml_serialize(ctxt, out, node, format, false, get_private_data_from_node(node));
 		status |= xmlOutputBufferFlush(out);
 		(void) xmlSaveClose(ctxt);
 	}

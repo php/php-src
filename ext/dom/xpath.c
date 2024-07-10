@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1

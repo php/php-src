@@ -27,6 +27,7 @@
 #include "nodelist.h"
 #include "html_collection.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
@@ -1389,8 +1390,11 @@ void dom_objects_free_storage(zend_object *object)
 
 	zend_object_std_dtor(&intern->std);
 
-	if (intern->ptr != NULL && ((php_libxml_node_ptr *)intern->ptr)->node != NULL) {
-		if (((xmlNodePtr) ((php_libxml_node_ptr *)intern->ptr)->node)->type != XML_DOCUMENT_NODE && ((xmlNodePtr) ((php_libxml_node_ptr *)intern->ptr)->node)->type != XML_HTML_DOCUMENT_NODE) {
+	php_libxml_node_ptr *ptr = intern->ptr;
+	if (ptr != NULL && ptr->node != NULL) {
+		xmlNodePtr node = ptr->node;
+
+		if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
 			php_libxml_node_decrement_resource((php_libxml_node_object *) intern);
 		} else {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
