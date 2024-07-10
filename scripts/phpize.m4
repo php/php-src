@@ -65,7 +65,6 @@ PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
 AS_VAR_IF([prefix],,
   [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
 
-php_shtool=$srcdir/build/shtool
 PHP_INIT_BUILD_SYSTEM
 
 AC_MSG_CHECKING([for PHP prefix])
