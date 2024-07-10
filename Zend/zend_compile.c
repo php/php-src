@@ -5614,10 +5614,8 @@ static void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 	znode expr_node;
 	zend_compile_expr(&expr_node, expr_ast);
 
-	zend_op *opline = zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
+	zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
 	if (result) {
-		/* Mark this as an "expression throw" for opcache. */
-		opline->extended_value = ZEND_THROW_IS_EXPR;
 		result->op_type = IS_CONST;
 		ZVAL_TRUE(&result->u.constant);
 	}
@@ -6379,10 +6377,6 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		zend_op *opline = zend_emit_op(NULL, ZEND_MATCH_ERROR, &expr_node, NULL);
 		if (opline->op1_type == IS_CONST) {
 			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
-		}
-		if (arms->children == 0) {
-			/* Mark this as an "expression throw" for opcache. */
-			opline->extended_value = ZEND_THROW_IS_EXPR;
 		}
 	}
 
@@ -9939,10 +9933,8 @@ static void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
 		expr_node.op_type = IS_UNUSED;
 	}
 
-	zend_op *opline = zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
+	zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
 	if (result) {
-		/* Mark this as an "expression throw" for opcache. */
-		opline->extended_value = ZEND_THROW_IS_EXPR;
 		result->op_type = IS_CONST;
 		ZVAL_TRUE(&result->u.constant);
 	}

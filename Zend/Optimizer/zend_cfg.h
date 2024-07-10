@@ -29,7 +29,6 @@
 #define ZEND_BB_CATCH            (1<<6)  /* start of catch block   */
 #define ZEND_BB_FINALLY          (1<<7)  /* start of finally block */
 #define ZEND_BB_FINALLY_END      (1<<8)  /* end of finally block   */
-#define ZEND_BB_UNREACHABLE_FREE (1<<11) /* unreachable loop free  */
 #define ZEND_BB_RECV_ENTRY       (1<<12) /* RECV entry             */
 
 #define ZEND_BB_LOOP_HEADER      (1<<16)
@@ -37,7 +36,7 @@
 
 #define ZEND_BB_REACHABLE        (1U<<31)
 
-#define ZEND_BB_PROTECTED        (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY|ZEND_BB_TRY|ZEND_BB_CATCH|ZEND_BB_FINALLY|ZEND_BB_FINALLY_END|ZEND_BB_UNREACHABLE_FREE)
+#define ZEND_BB_PROTECTED        (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY|ZEND_BB_TRY|ZEND_BB_CATCH|ZEND_BB_FINALLY|ZEND_BB_FINALLY_END)
 
 typedef struct _zend_basic_block {
 	int              *successors;         /* successor block indices     */
