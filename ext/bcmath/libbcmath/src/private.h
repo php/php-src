@@ -33,6 +33,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "zend_portability.h"
 
 /* This will be 0x01010101 for 32-bit and 0x0101010101010101 for 64-bit */
 #define SWAR_ONES (~((size_t) 0) / 0xFF)
@@ -40,52 +41,11 @@
  * Example: SWAR_REPEAT(0xAB) will be 0xABABABAB for 32-bit and 0xABABABABABABABAB for 64-bit. */
 #define SWAR_REPEAT(x) (SWAR_ONES * (x))
 
-/* Bytes swap */
-#ifdef _MSC_VER
-#  include <stdlib.h>
-#  define BC_BSWAP32(u) _byteswap_ulong(u)
-#  define BC_BSWAP64(u) _byteswap_uint64(u)
-#else
-#  ifdef __GNUC__
-#    define BC_BSWAP32(u) __builtin_bswap32(u)
-#    define BC_BSWAP64(u) __builtin_bswap64(u)
-#  elif defined(__has_builtin)
-#    if __has_builtin(__builtin_bswap32)
-#      define BC_BSWAP32(u) __builtin_bswap32(u)
-#    endif // __has_builtin(__builtin_bswap32)
-#    if __has_builtin(__builtin_bswap64)
-#      define BC_BSWAP64(u) __builtin_bswap64(u)
-#    endif // __has_builtin(__builtin_bswap64)
-#  endif // __GNUC__
-#endif // _MSC_VER
-#ifndef BC_BSWAP32
-static inline uint32_t BC_BSWAP32(uint32_t u)
-{
-  return (((u & 0xff000000) >> 24)
-          | ((u & 0x00ff0000) >>  8)
-          | ((u & 0x0000ff00) <<  8)
-          | ((u & 0x000000ff) << 24));
-}
-#endif
-#ifndef BC_BSWAP64
-static inline uint64_t BC_BSWAP64(uint64_t u)
-{
-   return (((u & 0xff00000000000000ULL) >> 56)
-          | ((u & 0x00ff000000000000ULL) >> 40)
-          | ((u & 0x0000ff0000000000ULL) >> 24)
-          | ((u & 0x000000ff00000000ULL) >>  8)
-          | ((u & 0x00000000ff000000ULL) <<  8)
-          | ((u & 0x0000000000ff0000ULL) << 24)
-          | ((u & 0x000000000000ff00ULL) << 40)
-          | ((u & 0x00000000000000ffULL) << 56));
-}
-#endif
-
 #if SIZEOF_SIZE_T >= 8
-#  define BC_BSWAP(u) BC_BSWAP64(u)
+#  define BC_BSWAP(u) ZEND_BYTES_SWAP64(u)
    typedef uint64_t BC_VECTOR;
 #else
-#  define BC_BSWAP(u) BC_BSWAP32(u)
+#  define BC_BSWAP(u) ZEND_BYTES_SWAP32(u)
    typedef uint32_t BC_VECTOR;
 #endif
 
