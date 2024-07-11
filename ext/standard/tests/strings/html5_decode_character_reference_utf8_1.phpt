@@ -1,5 +1,5 @@
 --TEST--
-html5_decode_charact_reference_utf8: Basic Decoding Tests
+html5_decode_character_reference_utf8: Basic Decoding Tests
 --FILE--
 <?php
 
@@ -40,7 +40,7 @@ $test_cases = array(
     array("&amp&&amp/&", HTML5_TEXT_NODE, 6),
 );
 
-foreach ($test_cases as $test_cases) {
+foreach ($test_cases as $test_case) {
     list($string, $context, $at) = $test_case;
 
     $match = html5_decode_character_reference_utf8($context, $string, $at, $match_length);
