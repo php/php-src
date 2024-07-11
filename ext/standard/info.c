@@ -834,7 +834,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 #ifdef PHP_BUILD_ARCH
 		php_info_print_table_row(2, "Architecture", PHP_BUILD_ARCH);
 #endif
-#ifdef CONFIGURE_COMMAND
+#if defined(CONFIGURE_COMMAND) && defined(PHP_SHOW_CONFIGURE_COMMAND)
 		php_info_print_table_row(2, "Configure Command", CONFIGURE_COMMAND );
 #endif
 
