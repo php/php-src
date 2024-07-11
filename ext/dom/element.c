@@ -24,7 +24,6 @@
 #include "zend_enum.h"
 #include "php_dom.h"
 #include "namespace_compat.h"
-#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 #include "token_list.h"
@@ -2034,7 +2033,12 @@ PHP_METHOD(Dom_Element, rename)
 
 		/* If we currently have a template but the new element type won't be a template, then throw away the templated content. */
 		if (is_currently_html_ns && xmlStrEqual(nodep->name, BAD_CAST "template") && !xmlStrEqual(localname, BAD_CAST "template")) {
-			php_dom_remove_templated_content(php_dom_get_private_data(intern), nodep);
+			php_dom_throw_error_with_message(
+				INVALID_MODIFICATION_ERR,
+				"It is not possible to rename the template element because it hosts a document fragment",
+				/* strict */ true
+			);
+			goto cleanup;
 		}
 	}
 
