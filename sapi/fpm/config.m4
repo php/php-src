@@ -406,7 +406,8 @@ if test "$PHP_FPM" != "no"; then
     [nobody],
     [no])
 
-  PHP_ARG_WITH([fpm-systemd],,
+  PHP_ARG_WITH([fpm-systemd],
+    [whether to enable systemd integration in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-systemd],
       [Activate systemd integration])],
     [no],
@@ -431,24 +432,26 @@ if test "$PHP_FPM" != "no"; then
     [no],
     [no])
 
-  if test "$PHP_FPM_SYSTEMD" != "no" ; then
+  AS_VAR_IF([PHP_FPM_SYSTEMD], [no], [php_fpm_systemd=simple], [
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
-    AC_DEFINE([HAVE_SYSTEMD], [1], [Whether FPM has systemd integration])
+    AC_DEFINE([HAVE_SYSTEMD], [1],
+      [Define to 1 if FPM has systemd integration.])
     PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS])
+    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS], [FPM_EXTRA_LIBS], [yes])
     PHP_EVAL_INCLINE([$SYSTEMD_CFLAGS])
+
     php_fpm_systemd=notify
 
     dnl Sanity check.
-    CFLAGS_save="$CFLAGS"
+    CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([systemd/sd-daemon.h],,
       [AC_MSG_ERROR([Required systemd/sd-daemon.h not found.])])
-    CFLAGS="$CFLAGS_save"
-  else
-    php_fpm_systemd=simple
-  fi
+    CFLAGS=$CFLAGS_save
+  ])
+
+  AC_SUBST([php_fpm_systemd])
 
   AS_VAR_IF([PHP_FPM_ACL], [no],, [
     AC_CHECK_HEADERS([sys/acl.h])
@@ -515,8 +518,6 @@ if test "$PHP_FPM" != "no"; then
       [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
     CFLAGS="$CFLAGS_save"
   fi
-
-  AC_SUBST([php_fpm_systemd])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
