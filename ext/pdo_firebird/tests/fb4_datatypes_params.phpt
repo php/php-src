@@ -12,14 +12,14 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 require 'testdb.inc';
 
 $sql = <<<'SQL'
-    SELECT 
-      CAST(? AS INT128) AS i128,
-      CAST(? AS NUMERIC(38,2)) AS N2,
-      CAST(? AS TIMESTAMP WITH TIME ZONE)  AS TS_TZ,
-      CAST(? AS TIME WITH TIME ZONE) AS T_TZ,
-      CAST(? AS DECFLOAT(16)) AS df16,
-      CAST(? AS DECFLOAT(34)) AS df34
-    FROM RDB$DATABASE
+	SELECT 
+		CAST(? AS INT128) AS i128,
+		CAST(? AS NUMERIC(38,2)) AS N2,
+		CAST(? AS TIMESTAMP WITH TIME ZONE)  AS TS_TZ,
+		CAST(? AS TIME WITH TIME ZONE) AS T_TZ,
+		CAST(? AS DECFLOAT(16)) AS df16,
+		CAST(? AS DECFLOAT(34)) AS df34
+	FROM RDB$DATABASE
 SQL;
 
 $dbh = getDbConnection();

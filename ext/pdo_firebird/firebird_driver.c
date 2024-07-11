@@ -464,7 +464,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 /* set coercing a data type */
 static void set_coercing_data_type(XSQLDA* sqlda)
 {
-    /* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */ 
+	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */ 
 	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)), */
 	/* TIMESTAMP WITH TIME ZONE, and TIME WITH TIME ZONE. In any case, at least the first three data types */
 	/* can only be mapped to strings. The last two too, but for them it is potentially possible to set */
@@ -475,30 +475,30 @@ static void set_coercing_data_type(XSQLDA* sqlda)
 	short nullable;
 	XSQLVAR* var;
 	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
-        dtype = (var->sqltype & ~1); /* drop flag bit  */
+		dtype = (var->sqltype & ~1); /* drop flag bit  */
 		nullable = (var->sqltype & 1); 
 		switch(dtype) {
 			case SQL_INT128:
-			    var->sqltype = SQL_VARYING + nullable;
+				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 46;
 				var->sqlscale = 0;
-			    break;
+				break;
 			case SQL_DEC16:
 			    var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 24;
-			    break;
+				break;
 			case SQL_DEC34:
 			    var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 43;
-			    break;
+				break;
 			case SQL_TIMESTAMP_TZ:
-			    var->sqltype = SQL_VARYING + nullable;
+				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 58;
-			    break;
+				break;
 			case SQL_TIME_TZ:
-			    var->sqltype = SQL_VARYING + nullable;
+				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 46;
-			    break;														
+				break;
 		}
 	}	
 }
@@ -651,7 +651,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 		}
 
 #if FB_API_VER >= 40
-        /* set coercing a data type */
+		/* set coercing a data type */
 		set_coercing_data_type(&S->out_sqlda);
 #endif
 
@@ -671,8 +671,8 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 #if FB_API_VER >= 40
 			/* set coercing a data type */
-		    set_coercing_data_type(S->in_sqlda);
-#endif			
+			set_coercing_data_type(S->in_sqlda);
+#endif
 		}
 
 		stmt->driver_data = S;
