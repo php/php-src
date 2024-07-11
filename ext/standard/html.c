@@ -972,7 +972,7 @@ static inline char html5_find_short_reference_name(const char *input, size_t off
     const char *pair_string = &input[offset];
     uint16_t pair = ((uint16_t *)pair_string)[0];
 
-    bool right_pair = pair == 0x5447 | pair == 0x544c | pair == 0x7467 | pair == 0x746c;
+    bool right_pair = (pair == 0x5447) | (pair == 0x544c) | (pair == 0x7467) | (pair == 0x746c);
 
     if (right_pair) {
         /*
