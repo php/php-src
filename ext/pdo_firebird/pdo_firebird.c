@@ -94,11 +94,15 @@ PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
 PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 {
 	char version[64];
+	char api_version[8];
 	isc_get_client_version(version);
+
+	snprintf(api_version, 7, "%d", FB_API_VER);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDO Driver for Firebird", "enabled");
 	php_info_print_table_row(2, "Client Library Version", version);
+	php_info_print_table_row(2, "Firebird API version", api_version);
 	php_info_print_table_end();
 }
 /* }}} */
