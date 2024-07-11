@@ -298,8 +298,10 @@ PHP_METHOD(Random_Randomizer, getBytes)
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
+		uint64_t tmp_ret = result.result;
 		for (size_t i = 0; i < result.size; i++) {
-			ZSTR_VAL(retval)[total_size++] = (result.result >> (i * 8)) & 0xff;
+			ZSTR_VAL(retval)[total_size++] = tmp_ret & 0xff;
+			tmp_ret >>= 8;
 			if (total_size >= length) {
 				break;
 			}
