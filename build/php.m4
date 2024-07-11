@@ -1238,22 +1238,18 @@ AC_CHECK_DECL([strtok_r],,
 dnl
 dnl PHP_EBCDIC
 dnl
-AC_DEFUN([PHP_EBCDIC], [
-  AC_CACHE_CHECK([whether system uses EBCDIC],ac_cv_ebcdic,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_DEFUN([PHP_EBCDIC],
+[AC_CACHE_CHECK([whether system uses EBCDIC], [ac_cv_ebcdic],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
 int main(void) {
   return (unsigned char)'A' != (unsigned char)0xC1;
 }
-]])],[
-  ac_cv_ebcdic=yes
-],[
-  ac_cv_ebcdic=no
-],[
-  ac_cv_ebcdic=no
-])])
-  if test "$ac_cv_ebcdic" = "yes"; then
-    AC_MSG_ERROR([PHP does not support EBCDIC targets])
-  fi
+])],
+  [ac_cv_ebcdic=yes],
+  [ac_cv_ebcdic=no],
+  [ac_cv_ebcdic=no])])
+AS_VAR_IF([ac_cv_ebcdic], [yes],
+  [AC_MSG_ERROR([PHP does not support EBCDIC targets.])])
 ])
 
 dnl
@@ -1546,26 +1542,26 @@ dnl
 dnl Replacement macro for AC_C_BIGENDIAN.
 dnl
 AC_DEFUN([PHP_C_BIGENDIAN],
-[AC_CACHE_CHECK([whether byte ordering is bigendian], ac_cv_c_bigendian_php,
- [
-  ac_cv_c_bigendian_php=unknown
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+[AC_CACHE_CHECK([whether byte ordering is bigendian], [ac_cv_c_bigendian_php],
+[AC_RUN_IFELSE([AC_LANG_SOURCE([
 int main(void)
 {
   short one = 1;
   char *cp = (char *)&one;
 
   if (*cp == 0) {
-    return(0);
-  } else {
-    return(1);
+    return 0;
   }
+
+  return 1;
 }
-  ]])], [ac_cv_c_bigendian_php=yes], [ac_cv_c_bigendian_php=no], [ac_cv_c_bigendian_php=unknown])
- ])
- if test $ac_cv_c_bigendian_php = yes; then
-   AC_DEFINE(WORDS_BIGENDIAN, [], [Define if processor uses big-endian word])
- fi
+])],
+  [ac_cv_c_bigendian_php=yes],
+  [ac_cv_c_bigendian_php=no],
+  [ac_cv_c_bigendian_php=unknown])])
+AS_VAR_IF([ac_cv_c_bigendian_php], [yes],
+  [AC_DEFINE([WORDS_BIGENDIAN], [],
+    [Define if processor uses big-endian word.])])
 ])
 
 dnl ----------------------------------------------------------------------------
