@@ -124,5 +124,5 @@ AC_CONFIG_COMMANDS([apache2handler], [AS_VAR_IF([enable_zts], [yes],,
 | PHP with --enable-zts                                              |
 +--------------------------------------------------------------------+
   ])])])],
-  [APACHE_THREADED_MPM=$APACHE_THREADED_MPM; enable_zts=$enable_zts])
+  [APACHE_THREADED_MPM="$APACHE_THREADED_MPM"; enable_zts="$enable_zts"])
 fi
