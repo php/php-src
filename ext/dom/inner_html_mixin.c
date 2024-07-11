@@ -351,9 +351,12 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	xmlNodePtr template_content = php_dom_retrieve_templated_content(php_dom_get_private_data(obj), context_node);
-	if (template_content != NULL) {
-		context_node = template_content;
+	if (php_dom_ns_is_fast(context_node, php_dom_ns_is_html_magic_token) && xmlStrEqual(context_node->name, BAD_CAST "template")) {
+		context_node = php_dom_ensure_templated_content(php_dom_get_private_data(obj), context_node);
+		if (context_node == NULL) {
+			xmlFreeNode(fragment);
+			return FAILURE;
+		}
 	}
 
 	/* We skip the steps involving the template element as context node since we don't do special handling for that. */

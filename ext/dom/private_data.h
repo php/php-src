@@ -42,6 +42,7 @@ PHP_DOM_EXPORT php_dom_private_data *php_dom_private_data_create(void);
 void php_dom_private_data_destroy(php_dom_private_data *data);
 void php_dom_add_templated_content(php_dom_private_data *private_data, const xmlNode *template_node, xmlNodePtr fragment);
 xmlNodePtr php_dom_retrieve_templated_content(php_dom_private_data *private_data, const xmlNode *template_node);
+xmlNodePtr php_dom_ensure_templated_content(php_dom_private_data *private_data, xmlNodePtr template_node);
 void php_dom_remove_templated_content(php_dom_private_data *private_data, const xmlNode *template_node);
 
 #endif

@@ -107,6 +107,19 @@ xmlNodePtr php_dom_retrieve_templated_content(php_dom_private_data *private_data
 	return zend_hash_index_find_ptr(private_data->template_fragments, dom_mangle_pointer_for_key(template_node));
 }
 
+xmlNodePtr php_dom_ensure_templated_content(php_dom_private_data *private_data, xmlNodePtr template_node)
+{
+	xmlNodePtr result = php_dom_retrieve_templated_content(private_data, template_node);
+	if (result == NULL) {
+		result = xmlNewDocFragment(template_node->doc);
+		if (EXPECTED(result != NULL)) {
+			result->parent = template_node;
+			php_dom_add_templated_content(private_data, template_node, result);
+		}
+	}
+	return result;
+}
+
 void php_dom_remove_templated_content(php_dom_private_data *private_data, const xmlNode *template_node)
 {
 	if (private_data->template_fragments != NULL) {
