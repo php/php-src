@@ -45,7 +45,7 @@ foreach ($test_cases as $test_case) {
 
     $match = html5_decode_character_reference_utf8($context, $string, $at, $match_length);
     if (isset($match)) {
-        echo "{$match_length}: {$match}\n";
+        echo "{$match_length}:{$match}\n";
     } else {
         echo "(no match)\n";
     }
