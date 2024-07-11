@@ -278,7 +278,6 @@ PHP_METHOD(Random_Randomizer, getBytes)
 
 	zend_string *retval;
 	zend_long user_length;
-	size_t total_size = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(user_length)
@@ -293,32 +292,34 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	retval = zend_string_alloc(length, 0);
 	char *rptr = ZSTR_VAL(retval);
 
-	while (total_size < length) {
+	size_t to_read = length;
+	while (to_read > 0) {
 		php_random_result result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
 		uint64_t tmp_ret = result.result;
-		if (length - total_size >= sizeof(uint64_t) && result.size == sizeof(uint64_t)) {
+		if (to_read >= sizeof(uint64_t) && result.size == sizeof(uint64_t)) {
 #ifdef WORDS_BIGENDIAN
 			tmp_ret = RANDOM_BSWAP64(tmp_ret);
 #endif
 			memcpy(rptr, &tmp_ret, sizeof(uint64_t));
-			total_size += sizeof(uint64_t);
+			to_read -= sizeof(uint64_t);
 			rptr += sizeof(uint64_t);
 		} else {
 			for (size_t i = 0; i < result.size; i++) {
-				rptr[total_size++] = tmp_ret & 0xff;
+				*rptr++ = tmp_ret & 0xff;
 				tmp_ret >>= 8;
-				if (total_size >= length) {
+				to_read--;
+				if (to_read == 0) {
 					break;
 				}
 			}
 		}
 	}
 
-	rptr[length] = '\0';
+	*rptr = '\0';
 	RETURN_STR(retval);
 }
 /* }}} */
