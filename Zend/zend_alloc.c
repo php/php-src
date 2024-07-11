@@ -217,43 +217,11 @@ typedef zend_mm_bitset zend_mm_page_map[ZEND_MM_PAGE_MAP_LEN];     /* 64B */
 
 #define ZEND_MM_BINS 30
 
-#if defined(_MSC_VER)
-# if UINTPTR_MAX == UINT64_MAX
-#  define BSWAPPTR(u) _byteswap_uint64(u)
-# else
-#  define BSWAPPTR(u) _byteswap_ulong(u)
-# endif
+#if UINTPTR_MAX == UINT64_MAX
+#  define BSWAPPTR(u) ZEND_BYTES_SWAP64(u)
 #else
-# if UINTPTR_MAX == UINT64_MAX
-#  if __has_builtin(__builtin_bswap64)
-#   define BSWAPPTR(u) __builtin_bswap64(u)
-#  else
-static zend_always_inline uintptr_t BSWAPPTR(uintptr_t u)
-{
-   return (((u & 0xff00000000000000ULL) >> 56)
-          | ((u & 0x00ff000000000000ULL) >> 40)
-          | ((u & 0x0000ff0000000000ULL) >> 24)
-          | ((u & 0x000000ff00000000ULL) >>  8)
-          | ((u & 0x00000000ff000000ULL) <<  8)
-          | ((u & 0x0000000000ff0000ULL) << 24)
-          | ((u & 0x000000000000ff00ULL) << 40)
-          | ((u & 0x00000000000000ffULL) << 56));
-}
-#  endif /* __has_builtin(__builtin_bswap64) */
-# else /* UINTPTR_MAX == UINT64_MAX */
-#  if __has_builtin(__builtin_bswap32)
-#   define BSWAPPTR(u) __builtin_bswap32(u)
-#  else
-static zend_always_inline uintptr_t BSWAPPTR(uintptr_t u)
-{
-  return (((u & 0xff000000) >> 24)
-          | ((u & 0x00ff0000) >>  8)
-          | ((u & 0x0000ff00) <<  8)
-          | ((u & 0x000000ff) << 24));
-}
-#  endif /* __has_builtin(__builtin_bswap32) */
-# endif /* UINTPTR_MAX == UINT64_MAX */
-#endif /* defined(_MSC_VER) */
+#  define BSWAPPTR(u) ZEND_BYTES_SWAP32(u)
+#endif
 
 typedef struct  _zend_mm_page      zend_mm_page;
 typedef struct  _zend_mm_bin       zend_mm_bin;
