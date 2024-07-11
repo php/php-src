@@ -341,12 +341,21 @@ AC_DEFUN([PHP_REMOVE_USR_LIB],[
 ])
 
 dnl
-dnl PHP_EVAL_LIBLINE(libline, SHARED-LIBADD)
+dnl PHP_EVAL_LIBLINE(libline, [libs-variable], [not-extension])
 dnl
-dnl Use this macro, if you need to add libraries and or library search paths to
-dnl the PHP build system which are only given in compiler notation.
+dnl Use this macro to add libraries and/or library search paths to the PHP build
+dnl system when specified in compiler notation. Libraries (-l) are appended
+dnl either to the global Autoconf LIBS variable or to the specified
+dnl "libs-variable" (e.g., *_SHARED_LIBADD) when the extension is shared
+dnl (ext_shared=yes). If "not-extension" is set to a non-blank value, the
+dnl libraries are appended to "libs-variable" unconditionally. This is
+dnl particularly useful when working with SAPIs. The -L flags are appended to
+dnl the LDFLAGS.
 dnl
-AC_DEFUN([PHP_EVAL_LIBLINE],[
+AC_DEFUN([PHP_EVAL_LIBLINE],
+[m4_ifnblank([$3], [m4_ifblank([$2],
+  [m4_warn([syntax], [Missing 2nd argument when skipping extension check])],
+  [_php_ext_shared_saved=$ext_shared; ext_shared=yes])])
   for ac_i in $1; do
     case $ac_i in
     -pthread[)]
@@ -368,6 +377,7 @@ AC_DEFUN([PHP_EVAL_LIBLINE],[
     ;;
     esac
   done
+m4_ifnblank([$3], [m4_ifnblank([$2], [ext_shared=$_php_ext_shared_saved])])dnl
 ])
 
 dnl
