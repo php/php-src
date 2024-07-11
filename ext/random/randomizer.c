@@ -291,6 +291,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 
 	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
+	char *rptr = ZSTR_VAL(retval);
 
 	while (total_size < length) {
 		php_random_result result = engine.algo->generate(engine.state);
@@ -299,16 +300,25 @@ PHP_METHOD(Random_Randomizer, getBytes)
 			RETURN_THROWS();
 		}
 		uint64_t tmp_ret = result.result;
-		for (size_t i = 0; i < result.size; i++) {
-			ZSTR_VAL(retval)[total_size++] = tmp_ret & 0xff;
-			tmp_ret >>= 8;
-			if (total_size >= length) {
-				break;
+		if (length - total_size >= sizeof(uint64_t) && result.size == sizeof(uint64_t)) {
+#ifdef WORDS_BIGENDIAN
+			tmp_ret = RANDOM_BSWAP64(tmp_ret);
+#endif
+			memcpy(rptr, &tmp_ret, sizeof(uint64_t));
+			total_size += sizeof(uint64_t);
+			rptr += sizeof(uint64_t);
+		} else {
+			for (size_t i = 0; i < result.size; i++) {
+				rptr[total_size++] = tmp_ret & 0xff;
+				tmp_ret >>= 8;
+				if (total_size >= length) {
+					break;
+				}
 			}
 		}
 	}
 
-	ZSTR_VAL(retval)[length] = '\0';
+	rptr[length] = '\0';
 	RETURN_STR(retval);
 }
 /* }}} */
