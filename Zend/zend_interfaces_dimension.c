@@ -281,6 +281,14 @@ static int zend_implement_dimension_read(zend_class_entry *interface, zend_class
 		return SUCCESS;
 	}
 
+	zend_function *read_fn = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", strlen("offsetget"));
+	ZEND_ASSERT(read_fn);
+	if (read_fn->common.fn_flags & ZEND_ACC_RETURN_REFERENCE && !instanceof_function(class_type, zend_ce_arrayaccess)) {
+		zend_error_noreturn(E_ERROR, "DimensionReadable::offsetGet method must not return by reference, implement DimensionFetchable::offsetFetch instead");
+		//zend_throw_error(NULL, "DimensionReadable::offsetGet method must not return by reference, implement DimensionFetchable::offsetFetch instead");
+		return FAILURE;
+	}
+
 	zend_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
