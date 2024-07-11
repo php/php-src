@@ -25,17 +25,8 @@ function zend_test_var_export($value) {
     if (is_resource($value)) {
         return "STDERR";
     }
-    if ($value instanceof stdClass) {
-        return "new stdClass()";
-    }
-    if ($value instanceof B) {
-        return "new B()";
-    }
-    if ($value instanceof A) {
-        return "new A()";
-    }
-    if ($value instanceof ArrayObject) {
-        return "new ArrayObject()";
+    if (is_object($value)) {
+        return 'new '. $value::class .'()';
     }
     return var_export($value, true);
 }
@@ -235,6 +226,8 @@ $newApiContainers = [
     new DimensionFetchAppend(),
     new DimensionUnset(),
 ];
+
+$allContainers = [...$containers, ...$newApiContainers];
 
 $offsets = [
     null,
