@@ -313,15 +313,15 @@ PHP_FUNCTION(apache_getenv)
 }
 /* }}} */
 
-static char *php_apache_get_version(void)
+static const char *php_apache_get_version(void)
 {
-	return (char *) ap_get_server_banner();
+	return ap_get_server_banner();
 }
 
 /* {{{ Fetch Apache version */
 PHP_FUNCTION(apache_get_version)
 {
-	char *apv = php_apache_get_version();
+	const char *apv = php_apache_get_version();
 
 	if (apv && *apv) {
 		RETURN_STRING(apv);
@@ -340,7 +340,7 @@ PHP_FUNCTION(apache_get_modules)
 	array_init(return_value);
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		char *s = (char *) ap_loaded_modules[n]->name;
+		const char *s = ap_loaded_modules[n]->name;
 		if ((p = strchr(s, '.'))) {
 			add_next_index_stringl(return_value, s, (p - s));
 		} else {
@@ -352,7 +352,7 @@ PHP_FUNCTION(apache_get_modules)
 
 PHP_MINFO_FUNCTION(apache)
 {
-	char *apv = php_apache_get_version();
+	const char *apv = php_apache_get_version();
 	smart_str tmp1 = {0};
 	char tmp[1024];
 	int n, max_requests;
@@ -363,21 +363,20 @@ PHP_MINFO_FUNCTION(apache)
 #endif
 
 	for (n = 0; ap_loaded_modules[n]; ++n) {
-		char *s = (char *) ap_loaded_modules[n]->name;
+		const char *s = ap_loaded_modules[n]->name;
+		if (n > 0) {
+			smart_str_appendc(&tmp1, ' ');
+		}
 		if ((p = strchr(s, '.'))) {
 			smart_str_appendl(&tmp1, s, (p - s));
 		} else {
 			smart_str_appends(&tmp1, s);
 		}
-		smart_str_appendc(&tmp1, ' ');
 	}
-	if (tmp1.s) {
-		if (tmp1.s->len > 0) {
-			tmp1.s->val[tmp1.s->len - 1] = '\0';
-		} else {
-			tmp1.s->val[0] = '\0';
-		}
+	if (!tmp1.s) {
+		smart_str_appendc(&tmp1, '/');
 	}
+	smart_str_0(&tmp1);
 
 	php_info_print_table_start();
 	if (apv && *apv) {
@@ -409,7 +408,7 @@ PHP_MINFO_FUNCTION(apache)
 
 	php_info_print_table_row(2, "Virtual Server", (serv->is_virtual ? "Yes" : "No"));
 	php_info_print_table_row(2, "Server Root", ap_server_root);
-	php_info_print_table_row(2, "Loaded Modules", tmp1.s->val);
+	php_info_print_table_row(2, "Loaded Modules", ZSTR_VAL(tmp1.s));
 
 	smart_str_free(&tmp1);
 	php_info_print_table_end();
