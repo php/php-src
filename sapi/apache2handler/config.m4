@@ -110,7 +110,7 @@ if test "$PHP_APXS2" != "no"; then
     ;;
   esac
 
-  AS_IF([$APXS_HTTPD -V 2>/dev/null | grep -q 'threaded:.*yes'], [
+  AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
     APACHE_THREADED_MPM=yes
     PHP_BUILD_THREAD_SAFE
   ], [APACHE_THREADED_MPM=no])
