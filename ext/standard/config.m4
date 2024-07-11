@@ -74,8 +74,8 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
     [PHP_CRYPT_R_STYLE],
     [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
 
-  AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for standard DES crypt], [ac_cv_crypt_des],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -90,16 +90,13 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
 int main(void) {
   char *encrypted = crypt("rasmuslerdorf","rl");
   return !encrypted || strcmp(encrypted,"rl.3StKT.4T8M");
-}]])],[
-  ac_cv_crypt_des=yes
-],[
-  ac_cv_crypt_des=no
-],[
-  ac_cv_crypt_des=yes
-])])
+}])],
+  [ac_cv_crypt_des=yes],
+  [ac_cv_crypt_des=no],
+  [ac_cv_crypt_des=yes])])
 
-  AC_CACHE_CHECK(for extended DES crypt, ac_cv_crypt_ext_des,[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for extended DES crypt], [ac_cv_crypt_ext_des],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE(
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -114,16 +111,13 @@ int main(void) {
 int main(void) {
   char *encrypted = crypt("rasmuslerdorf","_J9..rasm");
   return !encrypted || strcmp(encrypted,"_J9..rasmBYk8r9AiWNc");
-}]])],[
-    ac_cv_crypt_ext_des=yes
-  ],[
-    ac_cv_crypt_ext_des=no
-  ],[
-    ac_cv_crypt_ext_des=no
-  ])])
+})],
+  [ac_cv_crypt_ext_des=yes],
+  [ac_cv_crypt_ext_des=no],
+  [ac_cv_crypt_ext_des=no])])
 
-  AC_CACHE_CHECK(for MD5 crypt, ac_cv_crypt_md5,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for MD5 crypt], [ac_cv_crypt_md5],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -148,16 +142,13 @@ int main(void) {
   strcat(answer,"rISCgZzpwk3UhDidwXvin0");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-}]])],[
-    ac_cv_crypt_md5=yes
-  ],[
-    ac_cv_crypt_md5=no
-  ],[
-    ac_cv_crypt_md5=no
-  ])])
+}]])],
+  [ac_cv_crypt_md5=yes],
+  [ac_cv_crypt_md5=no],
+  [ac_cv_crypt_md5=no])])
 
-  AC_CACHE_CHECK(for Blowfish crypt, ac_cv_crypt_blowfish,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for Blowfish crypt], [ac_cv_crypt_blowfish],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -173,22 +164,20 @@ int main(void) {
   char salt[30], answer[70];
   char *encrypted;
 
-  salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$'; salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
+  salt[0]='$'; salt[1]='2'; salt[2]='a'; salt[3]='$';
+  salt[4]='0'; salt[5]='7'; salt[6]='$'; salt[7]='\0';
   strcat(salt,"rasmuslerd............");
   strcpy(answer,salt);
   strcpy(&answer[29],"nIdrcHdxcUxWomQX9j6kvERCFjTg7Ra");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-}]])],[
-    ac_cv_crypt_blowfish=yes
-  ],[
-    ac_cv_crypt_blowfish=no
-  ],[
-    ac_cv_crypt_blowfish=no
-  ])])
+}]])],
+  [ac_cv_crypt_blowfish=yes],
+  [ac_cv_crypt_blowfish=no],
+  [ac_cv_crypt_blowfish=no])])
 
-  AC_CACHE_CHECK(for SHA512 crypt, ac_cv_crypt_sha512,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for SHA512 crypt], [ac_cv_crypt_sha512],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -209,16 +198,13 @@ int main(void) {
   strcat(answer, "EeHCRjm0bljalWuALHSTs1NB9ipEiLEXLhYeXdOpx22gmlmVejnVXFhd84cEKbYxCo.XuUTrW.RLraeEnsvWs/");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-  }]])],[
-    ac_cv_crypt_sha512=yes
-  ],[
-    ac_cv_crypt_sha512=no
-  ],[
-    ac_cv_crypt_sha512=no
-  ])])
+}]])],
+  [ac_cv_crypt_sha512=yes],
+  [ac_cv_crypt_sha512=no],
+  [ac_cv_crypt_sha512=no])])
 
-  AC_CACHE_CHECK(for SHA256 crypt, ac_cv_crypt_sha256,[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_CACHE_CHECK([for SHA256 crypt], [ac_cv_crypt_sha256],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -239,18 +225,23 @@ int main(void) {
   strcat(answer, "cFAm2puLCujQ9t.0CxiFIIvFi4JyQx5UncCt/xRIX23");
   encrypted = crypt("rasmuslerdorf",salt);
   return !encrypted || strcmp(encrypted,answer);
-}]])],[
-    ac_cv_crypt_sha256=yes
-  ],[
-    ac_cv_crypt_sha256=no
-  ],[
-    ac_cv_crypt_sha256=no
-  ])])
+}]])],
+  [ac_cv_crypt_sha256=yes],
+  [ac_cv_crypt_sha256=no],
+  [ac_cv_crypt_sha256=no])])
 
-
-  if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
-    AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
-  fi
+AC_CACHE_VAL([php_cv_lib_crypt_algos],
+[AS_IF([test "x$ac_cv_crypt_des" = xno || \
+  test "x$ac_cv_crypt_ext_des" = xno || \
+  test "x$ac_cv_crypt_md5" = xno || \
+  test "x$ac_cv_crypt_blowfish" = xno || \
+  test "x$ac_cv_crypt_sha512" = xno || \
+  test "x$ac_cv_crypt_sha256" = xno \
+],
+  [php_cv_lib_crypt_algos=no],
+  [php_cv_lib_crypt_algos=yes])])
+AS_VAR_IF([php_cv_lib_crypt_algos], [no],
+  [AC_MSG_ERROR([Cannot use external libcrypt as some algorithms are missing.])])
 
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [0])
 ])
