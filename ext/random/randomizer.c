@@ -444,7 +444,8 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 
 			uint64_t offsets = result.result & mask_repeat;
 			for (size_t i = 0; i < result.size; i++) {
-				uint64_t offset = offsets >> (i * 8) & 0xff;
+				uint64_t offset = offsets & 0xff;
+				offsets >>= 8;
 
 				if (offset > max_offset) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {
