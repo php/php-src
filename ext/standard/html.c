@@ -968,6 +968,303 @@ static entity_table_opt determine_entity_table(int all, int doctype)
 }
 /* }}} */
 
+static inline char html5_find_short_reference_name(const char *input, size_t offset) {
+    const char *pair_string = &input[offset];
+    uint16_t pair = ((uint16_t *)pair_string)[0];
+
+    bool right_pair = pair == 0x5447 | pair == 0x544c | pair == 0x7467 | pair == 0x746c;
+
+    if (right_pair) {
+        /*
+         * The last bit of the first byte indicates whether it's a greater than
+         * or less than sign, because the lower nibble is the same whether upper
+         * or lower case. Since 'G'/'g' and 'L'/'l' then don't overlap, use this
+         * shortcut to decode the response.
+         *
+         * 0x07 = 0b0111
+         * 0x0C = 0b1100
+         */
+        return (char)("<>"[pair & 0x1]);
+    }
+
+    return '\0';
+}
+
+static inline size_t html5_find_large_reference_name_group(const char *input, size_t offset, bool *did_find_group) {
+    char letter1 = '\0';
+    char letter2 = '\0';
+    char group1 = input[offset];
+    char group2 = input[offset + 1];
+    bool found_group = 0;
+    size_t i;
+    size_t end = html5_named_character_references_lookup.groups_length;
+
+    for (i = 0; i < end && letter1 <= group1; i += 2) {
+        letter1 = html5_named_character_references_lookup.groups[i];
+        letter2 = html5_named_character_references_lookup.groups[i + 1];
+
+        found_group = letter1 == group1 && letter2 == group2;
+        if (found_group) {
+            break;
+        }
+    }
+
+    *did_find_group = found_group;
+    return i >> 1;
+}
+
+static inline const char *html5_find_large_reference_name(const char *input, size_t input_start, size_t input_end, size_t group_number, long *match_length, uint8_t *replacement_length) {
+    size_t end = html5_named_character_references_lookup.groups_length;
+
+    uint16_t start_at = html5_named_character_references_lookup.group_offsets[group_number];
+    uint16_t end_at = (group_number + 1) < end
+                      ? html5_named_character_references_lookup.group_offsets[group_number + 1]
+                      : html5_named_character_references_lookup.large_words_length;
+
+    const char* search = html5_named_character_references_lookup.large_words;
+
+    size_t i = start_at;
+
+    uint8_t token_length;
+    uint8_t value_length;
+    while (i < end_at) {
+        token_length = search[i];
+        value_length = search[i + 1 + token_length];
+        size_t j;
+
+        bool found_match = 1;
+        for (j = 0; j < token_length; j++ ) {
+            found_match &= input[3 + j] == search[i + 1 + j];
+        }
+
+        if (found_match) {
+            *match_length = 2 + token_length;
+            *replacement_length = value_length;
+            return &search[i + 2 + token_length];
+        }
+
+        i += 2 + token_length + value_length;
+    }
+
+    return NULL;
+}
+
+static inline bool html5_character_reference_is_ambiguous(const char *end_of_match) {
+    static bool ambiguous_followers[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+    return ';' != end_of_match[0] && ambiguous_followers[(size_t)end_of_match[1]];
+}
+
+static inline zend_string *html5_code_point_to_utf8_bytes(uint32_t code_point) {
+    char decoded[] = "\0\0\0\0";
+
+    if (code_point <= 0x7F) {
+        decoded[0] = code_point;
+        return zend_string_init(decoded, 1, 0);
+    }
+
+    if (code_point <= 0x7FF) {
+        decoded[0] = (code_point >> 6) | 0xC0;
+        decoded[1] = (code_point & 0x3F) | 0x80;
+        return zend_string_init(decoded, 2, 0);
+    }
+
+    if (code_point <= 0xFFFF) {
+        decoded[0] = (code_point >> 12) | 0xE0;
+        decoded[1] = ((code_point >> 6) & 0x3F) | 0x80;
+        decoded[2] = (code_point & 0x3F) | 0x80;
+        return zend_string_init(decoded, 3, 0);
+    }
+
+    decoded[0] = (code_point >> 18) | 0xF0;
+    decoded[1] = ((code_point >> 12) & 0x3F) | 0x80;
+    decoded[2] = ((code_point >> 6) & 0x3F) | 0x80;
+    decoded[3] = (code_point & 0x3F) | 0x80;
+    return zend_string_init(decoded, 4, 0);
+}
+
+PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length) {
+    static uint8_t hex_digits[] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+    static uint8_t dec_digits[] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+    static uint32_t cp1252_replacements[] = {
+        0x20AC, // 0x80 -> EURO SIGN (€).
+        0x81,   // 0x81 -> (no change).
+        0x201A, // 0x82 -> SINGLE LOW-9 QUOTATION MARK (‚).
+        0x0192, // 0x83 -> LATIN SMALL LETTER F WITH HOOK (ƒ).
+        0x201E, // 0x84 -> DOUBLE LOW-9 QUOTATION MARK („).
+        0x2026, // 0x85 -> HORIZONTAL ELLIPSIS (…).
+        0x2020, // 0x86 -> DAGGER (†).
+        0x2021, // 0x87 -> DOUBLE DAGGER (‡).
+        0x02C6, // 0x88 -> MODIFIER LETTER CIRCUMFLEX ACCENT (ˆ).
+        0x2030, // 0x89 -> PER MILLE SIGN (‰).
+        0x0160, // 0x8A -> LATIN CAPITAL LETTER S WITH CARON (Š).
+        0x2039, // 0x8B -> SINGLE LEFT-POINTING ANGLE QUOTATION MARK (‹).
+        0x0152, // 0x8C -> LATIN CAPITAL LIGATURE OE (Œ).
+        0x8D,   // 0x8D -> (no change).
+        0x017D, // 0x8E -> LATIN CAPITAL LETTER Z WITH CARON (Ž).
+        0x8F,   // 0x8F -> (no change).
+        0x90,   // 0x90 -> (no change).
+        0x2018, // 0x91 -> LEFT SINGLE QUOTATION MARK (‘).
+        0x2019, // 0x92 -> RIGHT SINGLE QUOTATION MARK (’).
+        0x201C, // 0x93 -> LEFT DOUBLE QUOTATION MARK (“).
+        0x201D, // 0x94 -> RIGHT DOUBLE QUOTATION MARK (”).
+        0x2022, // 0x95 -> BULLET (•).
+        0x2013, // 0x96 -> EN DASH (–).
+        0x2014, // 0x97 -> EM DASH (—).
+        0x02DC, // 0x98 -> SMALL TILDE (˜).
+        0x2122, // 0x99 -> TRADE MARK SIGN (™).
+        0x0161, // 0x9A -> LATIN SMALL LETTER S WITH CARON (š).
+        0x203A, // 0x9B -> SINGLE RIGHT-POINTING ANGLE QUOTATION MARK (›).
+        0x0153, // 0x9C -> LATIN SMALL LIGATURE OE (œ).
+        0x9D,   // 0x9D -> (no change).
+        0x017E, // 0x9E -> LATIN SMALL LETTER Z WITH CARON (ž).
+        0x0178, // 0x9F -> LATIN CAPITAL LETTER Y WITH DIAERESIS (Ÿ).
+    };
+    const char *input = &ZSTR_VAL(html)[offset];
+    size_t end = ZSTR_LEN(html);
+    size_t at = offset;
+
+    if (end - offset < 3 || '&' != input[at] || '#' != input[at + 1]) {
+        return NULL;
+    }
+    at += 2;
+
+    size_t base = ('x' == input[at] || 'X' == input[at]) ? 16 : 10;
+    if (base == 16) {
+        at++;
+    }
+
+    size_t zeros_at = at;
+    while (at < end) {
+        if ('0' != input[at]) {
+            break;
+        }
+        at++;
+    }
+    size_t zero_count = at - zeros_at;
+
+    size_t digits_at = at;
+    if (base == 16) {
+        while (at < end) {
+            uint8_t value = hex_digits[(size_t)input[at]];
+            if (0xFF == value) {
+                break;
+            }
+            at++;
+        }
+    } else {
+        while (at < end) {
+            uint8_t value = dec_digits[(size_t)input[at]];
+            if (0xFF == value) {
+                break;
+            }
+            at++;
+        }
+    }
+    size_t digit_count = at - digits_at;
+
+    bool has_trailing_semicolon = (at < end) ? ';' == input[at] : false;
+    *matched_byte_length = at - offset + (has_trailing_semicolon ? 1 : 0);
+
+    if (zero_count == 0 && digit_count == 0) {
+        return NULL;
+    }
+
+    if (digit_count == 0) {
+        return zend_string_init("\uFFFD", 2, 0);
+    }
+
+    if (digit_count > (base == 16 ? 6 : 7)) {
+        return zend_string_init("\uFFFD", 2, 0);
+    }
+
+    uint32_t code_point = 0;
+    at = digits_at;
+    if (base == 16) {
+        for (size_t i = 0; i < digit_count; i++) {
+            code_point <<= 4;
+            code_point += hex_digits[(size_t)input[at++]];
+        }
+    } else {
+        for (size_t i = 0; i < digit_count; i++) {
+            code_point *= 10;
+            code_point += dec_digits[(size_t)input[at++]];
+        }
+    }
+
+    if (code_point >= 0x80 && code_point <= 0x9F) {
+        code_point = cp1252_replacements[(size_t)(code_point - 0x80)];
+    }
+
+    if (code_point >= 0xD800 && code_point <= 0xDFFF) {
+        return zend_string_init("\uFFFD", 2, 0);
+    }
+
+    return html5_code_point_to_utf8_bytes(code_point);
+}
+
+/* {{{ php_decode_html5_character_reference_utf8
+ * The parameter "context" should be one of HTML5_ATTRIBUTE or HTML5_TEXT_NODE,
+ * depending on whether the text being decoded is found inside an attribute or not.
+ */
+PHPAPI zend_string *php_decode_html5_character_reference_utf8(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length)
+{
+    const char *input = &ZSTR_VAL(html)[offset];
+    size_t input_length = ZSTR_LEN(html);
+
+    if (input_length - offset < 3 || '&' != input[offset]) {
+        return NULL;
+    }
+
+    if (input[offset + 1] == '#') {
+        return php_decode_html5_numeric_character_reference(context, html, offset, matched_byte_length);
+    }
+
+    if ( input_length - offset <= 3 ) {
+        char match = html5_find_short_reference_name(input, 1);
+
+        if (match) {
+            *matched_byte_length = 3;
+            return zend_string_init(&match, 1, 0);
+        } else {
+            return NULL;
+        }
+    }
+
+    bool found_group = 0;
+    size_t i = html5_find_large_reference_name_group(input, 1, &found_group);
+
+    if (found_group) {
+        uint8_t replacement_length;
+        const char *replacement = NULL;
+        replacement = html5_find_large_reference_name(input, 1, input_length, i, matched_byte_length, &replacement_length);
+
+        // Even if a large word isn't found, there could be a small word match.
+        if (replacement != NULL) {
+            if (HTML5_ATTRIBUTE == context && offset + *matched_byte_length + 1 < input_length && html5_character_reference_is_ambiguous(&input[offset + *matched_byte_length])) {
+                return NULL;
+            }
+
+            (*matched_byte_length)++;
+            return zend_string_init(replacement, replacement_length, 0);
+        }
+    }
+
+    // Try a small word.
+    char match = html5_find_short_reference_name(input, 1);
+    if (!match) {
+        return NULL;
+    }
+
+    if (HTML5_ATTRIBUTE == context && offset + 3 < input_length && html5_character_reference_is_ambiguous(&input[offset + 2])) {
+        return NULL;
+    }
+
+    *matched_byte_length = 3;
+    return zend_string_init(&match, 1, 0);
+}
+/* }}} */
+
 /* {{{ php_unescape_html_entities
  * The parameter "all" should be true to decode all possible entities, false to decode
  * only the basic ones, i.e., those in basic_entities_ex + the numeric entities
@@ -1353,6 +1650,35 @@ PHP_FUNCTION(htmlspecialchars_decode)
 
 	replaced = php_unescape_html_entities(str, 0 /*!all*/, (int)quote_style, NULL);
 	RETURN_STR(replaced);
+}
+/* }}} */
+
+/* {{{ Find the next character reference in a UTF-8 HTML document */
+PHP_FUNCTION(html5_decode_character_reference_utf8)
+{
+    zend_long context;
+    zend_string *html;
+    zend_long offset;
+    bool offset_is_null;
+    zval *matched_byte_length;
+    zend_string *decoded;
+    long byte_length = 0;
+
+    ZEND_PARSE_PARAMETERS_START(2, 4)
+        Z_PARAM_LONG(context)
+        Z_PARAM_STR(html)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
+        Z_PARAM_ZVAL_EX2(matched_byte_length, 0, 1, 0)
+    ZEND_PARSE_PARAMETERS_END();
+
+    decoded = php_decode_html5_character_reference_utf8((int)context, html, offset, &byte_length);
+    if (NULL == decoded) {
+        RETURN_NULL();
+    } else {
+        ZVAL_LONG(matched_byte_length, byte_length);
+        RETURN_STR(decoded);
+    }
 }
 /* }}} */
 

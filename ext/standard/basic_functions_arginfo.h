@@ -788,6 +788,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_htmlspecialchars_decode, 0, 1, I
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_html5_decode_character_reference_utf8, 0, 2, IS_STRING, 1)
+    ZEND_ARG_TYPE_INFO(0, context, IS_LONG, 0)
+    ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
+    ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, 0)
+    ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(1, matched_byte_length, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_html_entity_decode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401")
@@ -2553,6 +2560,7 @@ ZEND_FUNCTION(headers_sent);
 ZEND_FUNCTION(headers_list);
 ZEND_FUNCTION(htmlspecialchars);
 ZEND_FUNCTION(htmlspecialchars_decode);
+ZEND_FUNCTION(html5_decode_character_reference_utf8);
 ZEND_FUNCTION(html_entity_decode);
 ZEND_FUNCTION(htmlentities);
 ZEND_FUNCTION(get_html_translation_table);
@@ -3191,6 +3199,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(headers_list, arginfo_headers_list)
 	ZEND_FE(htmlspecialchars, arginfo_htmlspecialchars)
 	ZEND_FE(htmlspecialchars_decode, arginfo_htmlspecialchars_decode)
+    ZEND_FE(html5_decode_character_reference_utf8, arginfo_html5_decode_character_reference_utf8)
 	ZEND_FE(html_entity_decode, arginfo_html_entity_decode)
 	ZEND_FE(htmlentities, arginfo_htmlentities)
 	ZEND_FE(get_html_translation_table, arginfo_get_html_translation_table)
@@ -3772,6 +3781,8 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("ENT_XML1", ENT_XML1, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ENT_XHTML", ENT_XHTML, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ENT_HTML5", ENT_HTML5, CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTML5_ATTRIBUTE", HTML5_ATTRIBUTE, CONST_PERSISTENT);
+    REGISTER_LONG_CONSTANT("HTML5_TEXT_NODE", HTML5_TEXT_NODE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_GIF", IMAGE_FILETYPE_GIF, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG", IMAGE_FILETYPE_JPEG, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_PNG", IMAGE_FILETYPE_PNG, CONST_PERSISTENT);

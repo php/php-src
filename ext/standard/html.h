@@ -44,9 +44,13 @@
 #define ENT_HTML5		(16|32)
 #define ENT_DISALLOWED	128
 
+#define HTML5_ATTRIBUTE 1
+#define HTML5_TEXT_NODE 2
+
 PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset);
 PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet);
 PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, const char *hint_charset);
 PHPAPI unsigned int php_next_utf8_char(const unsigned char *str, size_t str_len, size_t *cursor, zend_result *status);
+PHPAPI zend_string *php_decode_html5_character_reference_utf8(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length);
 
 #endif /* HTML_H */
