@@ -64,14 +64,20 @@ static unsigned short sanitize_line_nr(size_t line)
     return (unsigned short) line;
 }
 
-static const php_dom_ns_magic_token *get_libxml_namespace_href(uintptr_t lexbor_namespace)
+struct lxml_ns {
+	const php_dom_ns_magic_token *token;
+	const char *href;
+	size_t href_len;
+};
+
+static struct lxml_ns get_libxml_namespace_href(uintptr_t lexbor_namespace)
 {
     if (lexbor_namespace == LXB_NS_SVG) {
-        return php_dom_ns_is_svg_magic_token;
+        return (struct lxml_ns) { php_dom_ns_is_svg_magic_token, ZEND_STRL(DOM_SVG_NS_URI) };
     } else if (lexbor_namespace == LXB_NS_MATH) {
-        return php_dom_ns_is_mathml_magic_token;
+        return (struct lxml_ns) { php_dom_ns_is_mathml_magic_token, ZEND_STRL(DOM_MATHML_NS_URI) };
     } else {
-        return php_dom_ns_is_html_magic_token;
+        return (struct lxml_ns) { php_dom_ns_is_html_magic_token, ZEND_STRL(DOM_XHTML_NS_URI) };
     }
 }
 
@@ -148,12 +154,12 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
                 if (entering_namespace == LXB_NS_HTML) {
                     current_lxml_ns = html_ns;
                 } else {
-                    const php_dom_ns_magic_token *magic_token = get_libxml_namespace_href(entering_namespace);
-                    zend_string *uri = zend_string_init((char *) magic_token, strlen((char *) magic_token), false);
+					struct lxml_ns ns = get_libxml_namespace_href(entering_namespace);
+                    zend_string *uri = zend_string_init(ns.href, ns.href_len, false);
                     current_lxml_ns = php_dom_libxml_ns_mapper_get_ns(ns_mapper, NULL, uri);
                     zend_string_release_ex(uri, false);
                     if (EXPECTED(current_lxml_ns != NULL)) {
-                        current_lxml_ns->_private = (void *) magic_token;
+                        current_lxml_ns->_private = (void *) ns.token;
                     }
                 }
             }
@@ -172,6 +178,7 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 				}
 
 				lxml_child_parent->parent = lxml_element;
+				dom_add_element_ns_hook(private_data, lxml_element);
 				php_dom_add_templated_content(private_data, lxml_element, lxml_child_parent);
 
 				lxb_html_template_element_t *template = lxb_html_interface_template(&element->node);

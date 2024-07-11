@@ -1395,15 +1395,6 @@ void dom_objects_free_storage(zend_object *object)
 		xmlNodePtr node = ptr->node;
 
 		if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
-			/* Destroy associated template content. */
-			php_dom_private_data *private_data;
-			if (node->type == XML_ELEMENT_NODE
-				&& ptr->refcount == 1
-				&& intern->document != NULL
-				&& (private_data = php_dom_get_private_data(intern))) {
-				php_dom_remove_templated_content(private_data, node);
-			}
-
 			php_libxml_node_decrement_resource((php_libxml_node_object *) intern);
 		} else {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);

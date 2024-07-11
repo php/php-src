@@ -1644,4 +1644,19 @@ zend_result dom_html_document_title_write(dom_object *obj, zval *newval)
 	return SUCCESS;
 }
 
+#if ZEND_DEBUG
+PHP_METHOD(Dom_HTMLDocument, debugGetTemplateCount)
+{
+	xmlDocPtr doc;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_OBJ(doc, ZEND_THIS, xmlDocPtr, intern);
+	ZEND_IGNORE_VALUE(doc);
+
+	RETURN_LONG(php_dom_get_template_count((const php_dom_private_data *) intern->document->private_data));
+}
+#endif
+
 #endif  /* HAVE_LIBXML && HAVE_DOM */

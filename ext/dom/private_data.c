@@ -24,42 +24,46 @@
 #include "private_data.h"
 #include "internal_helpers.h"
 
-typedef struct php_dom_private_data {
-	php_libxml_private_data_header header;
-	struct php_dom_libxml_ns_mapper ns_mapper;
-	HashTable *template_fragments;
-} php_dom_private_data;
-
 static void php_dom_libxml_private_data_destroy(php_libxml_private_data_header *header)
 {
 	php_dom_private_data_destroy((php_dom_private_data *) header);
 }
 
-PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_private_data_header(php_dom_private_data *private_data)
+static void php_dom_libxml_private_data_ns_hook(php_libxml_private_data_header *header, xmlNodePtr node)
+{
+	php_dom_remove_templated_content((php_dom_private_data *) header, node);
+}
+
+php_libxml_private_data_header *php_dom_libxml_private_data_header(php_dom_private_data *private_data)
 {
 	return private_data == NULL ? NULL : &private_data->header;
 }
 
-PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_ns_mapper_from_private(php_dom_private_data *private_data)
+php_dom_libxml_ns_mapper *php_dom_ns_mapper_from_private(php_dom_private_data *private_data)
 {
 	return private_data == NULL ? NULL : &private_data->ns_mapper;
 }
 
-PHP_DOM_EXPORT php_dom_private_data *php_dom_private_data_create(void)
+php_dom_private_data *php_dom_private_data_create(void)
 {
-	php_dom_private_data *mapper = emalloc(sizeof(*mapper));
-	mapper->header.dtor = php_dom_libxml_private_data_destroy;
-	mapper->ns_mapper.html_ns = NULL;
-	mapper->ns_mapper.prefixless_xmlns_ns = NULL;
-	zend_hash_init(&mapper->ns_mapper.uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
-	mapper->template_fragments = NULL;
-	return mapper;
+	php_dom_private_data *private_data = emalloc(sizeof(*private_data));
+	private_data->header.dtor = php_dom_libxml_private_data_destroy;
+	private_data->header.ns_hook = php_dom_libxml_private_data_ns_hook;
+	private_data->ns_mapper.html_ns = NULL;
+	private_data->ns_mapper.prefixless_xmlns_ns = NULL;
+	zend_hash_init(&private_data->ns_mapper.uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
+	private_data->template_fragments = NULL;
+	return private_data;
 }
 
 void php_dom_private_data_destroy(php_dom_private_data *data)
 {
 	zend_hash_destroy(&data->ns_mapper.uri_to_prefix_map);
 	if (data->template_fragments != NULL) {
+		xmlNodePtr node;
+		ZEND_HASH_MAP_FOREACH_PTR(data->template_fragments, node) {
+			xmlFreeNode(node);
+		} ZEND_HASH_FOREACH_END();
 		zend_hash_destroy(data->template_fragments);
 		FREE_HASHTABLE(data->template_fragments);
 	}
@@ -114,6 +118,7 @@ xmlNodePtr php_dom_ensure_templated_content(php_dom_private_data *private_data, 
 		result = xmlNewDocFragment(template_node->doc);
 		if (EXPECTED(result != NULL)) {
 			result->parent = template_node;
+			dom_add_element_ns_hook(private_data, template_node);
 			php_dom_add_templated_content(private_data, template_node, result);
 		}
 	}
@@ -135,6 +140,30 @@ void php_dom_remove_templated_content(php_dom_private_data *private_data, const 
 			php_dom_free_templated_content(private_data, node);
 		}
 	}
+}
+
+zend_long php_dom_get_template_count(const php_dom_private_data *private_data)
+{
+	if (private_data->template_fragments != NULL) {
+		return zend_hash_num_elements(private_data->template_fragments);
+	} else {
+		return 0;
+	}
+}
+
+void dom_add_element_ns_hook(php_dom_private_data *private_data, xmlNodePtr element)
+{
+	xmlNsPtr ns = pemalloc(sizeof(*ns), true);
+
+	/* The private data is a tagged data structure where only tag 1 is defined by ext/libxml to register a hook. */
+	memset(ns, 0, sizeof(*ns));
+	ns->prefix = xmlStrdup(element->ns->prefix);
+	ns->href = xmlStrdup(element->ns->href);
+	ns->type = XML_LOCAL_NAMESPACE;
+	ns->_private = (void *) ((uintptr_t) private_data | LIBXML_NS_TAG_HOOK);
+	element->ns = ns;
+
+	php_libxml_set_old_ns(element->doc, ns);
 }
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

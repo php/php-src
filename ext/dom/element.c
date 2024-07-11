@@ -24,6 +24,7 @@
 #include "zend_enum.h"
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 #include "token_list.h"

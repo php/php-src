@@ -275,7 +275,12 @@ static void php_libxml_node_free(xmlNodePtr node)
 			xmlFreeDtd(dtd);
 			break;
 		}
-		case XML_ELEMENT_NODE:
+		case XML_ELEMENT_NODE: {
+			if (node->ns && (((uintptr_t) node->ns->_private) & 1) == LIBXML_NS_TAG_HOOK) {
+				/* Special destruction routine hook should be called because it belongs to a "special" namespace. */
+				php_libxml_private_data_header *header = (php_libxml_private_data_header *) (((uintptr_t) node->ns->_private) & ~1);
+				header->ns_hook(header, node);
+			}
 			if (node->nsDef && node->doc) {
 				/* Make the namespace declaration survive the destruction of the holding element.
 				 * This prevents a use-after-free on the namespace declaration.
@@ -307,6 +312,7 @@ static void php_libxml_node_free(xmlNodePtr node)
 			}
 			xmlFreeNode(node);
 			break;
+		}
 		default:
 			xmlFreeNode(node);
 			break;
