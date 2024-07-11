@@ -369,9 +369,6 @@ static int zend_implement_dimension_fetch_append(zend_class_entry *interface, ze
 
 ZEND_API void zend_register_dimension_interfaces(void)
 {
-	zend_ce_arrayaccess = register_class_ArrayAccess();
-	zend_ce_arrayaccess->interface_gets_implemented = zend_implement_arrayaccess;
-
 	zend_ce_dimension_read = register_class_DimensionReadable();
 	zend_ce_dimension_read->interface_gets_implemented = zend_implement_dimension_read;
 
@@ -389,4 +386,7 @@ ZEND_API void zend_register_dimension_interfaces(void)
 
 	zend_ce_dimension_fetch_append = register_class_FetchAppendable(zend_ce_appendable);
 	zend_ce_dimension_fetch_append->interface_gets_implemented = zend_implement_dimension_fetch_append;
+
+	zend_ce_arrayaccess = register_class_ArrayAccess(zend_ce_dimension_read, zend_ce_dimension_write, zend_ce_dimension_unset);
+	zend_ce_arrayaccess->interface_gets_implemented = zend_implement_arrayaccess;
 }

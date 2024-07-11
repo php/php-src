@@ -1,22 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d7d4f8d25eb799a52424c69fa7277729dfc76883 */
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetGet, 0, 1, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetSet, 0, 2, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetUnset, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
+ * Stub hash: 13678e0beb23fdf1dee9c68729f567d808aa1c2e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DimensionReadable_offsetGet, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
@@ -46,14 +29,23 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FetchAppendable_fetchAppend, 1, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
 
-static const zend_function_entry class_ArrayAccess_methods[] = {
-	ZEND_RAW_FENTRY("offsetExists", NULL, arginfo_class_ArrayAccess_offsetExists, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("offsetGet", NULL, arginfo_class_ArrayAccess_offsetGet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("offsetSet", NULL, arginfo_class_ArrayAccess_offsetSet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("offsetUnset", NULL, arginfo_class_ArrayAccess_offsetUnset, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_FE_END
-};
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetSet, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 
 static const zend_function_entry class_DimensionReadable_methods[] = {
 	ZEND_RAW_FENTRY("offsetGet", NULL, arginfo_class_DimensionReadable_offsetGet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
@@ -86,15 +78,13 @@ static const zend_function_entry class_FetchAppendable_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_ArrayAccess(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
-	class_entry = zend_register_internal_interface(&ce);
-
-	return class_entry;
-}
+static const zend_function_entry class_ArrayAccess_methods[] = {
+	ZEND_RAW_FENTRY("offsetExists", NULL, arginfo_class_ArrayAccess_offsetExists, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetGet", NULL, arginfo_class_ArrayAccess_offsetGet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetSet", NULL, arginfo_class_ArrayAccess_offsetSet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_RAW_FENTRY("offsetUnset", NULL, arginfo_class_ArrayAccess_offsetUnset, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_FE_END
+};
 
 static zend_class_entry *register_class_DimensionReadable(void)
 {
@@ -154,6 +144,17 @@ static zend_class_entry *register_class_FetchAppendable(zend_class_entry *class_
 	INIT_CLASS_ENTRY(ce, "FetchAppendable", class_FetchAppendable_methods);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Appendable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_ArrayAccess(zend_class_entry *class_entry_DimensionReadable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_DimensionUnsetable)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
+	class_entry = zend_register_internal_interface(&ce);
+	zend_class_implements(class_entry, 3, class_entry_DimensionReadable, class_entry_DimensionWritable, class_entry_DimensionUnsetable);
 
 	return class_entry;
 }
