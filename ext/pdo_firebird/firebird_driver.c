@@ -483,26 +483,31 @@ static void set_coercing_data_type(XSQLDA* sqlda)
 				var->sqllen = 46;
 				var->sqlscale = 0;
 				break;
+
 			case SQL_DEC16:
 			    var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 24;
 				break;
+
 			case SQL_DEC34:
 			    var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 43;
 				break;
+
 			case SQL_TIMESTAMP_TZ:
 				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 58;
 				break;
+
 			case SQL_TIME_TZ:
 				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 46;
 				break;
+
+			EMPTY_SWITCH_DEFAULT_CASE()	
 		}
 	}	
 }
-/* }}} */
 #endif
 
 /* map driver specific error message to PDO error */
