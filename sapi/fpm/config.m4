@@ -427,7 +427,8 @@ if test "$PHP_FPM" != "no"; then
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-selinux],,
+  PHP_ARG_WITH([fpm-selinux],
+    [whether to enable SELinux support in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-selinux],
       [Support SELinux policy library])],
     [no],
@@ -502,23 +503,23 @@ if test "$PHP_FPM" != "no"; then
     CFLAGS=$CFLAGS_save
   ])
 
-  if test "x$PHP_FPM_SELINUX" != "xno" ; then
-    PKG_CHECK_MODULES([SELINUX], [libselinux], [
-      PHP_EVAL_LIBLINE([$SELINUX_LIBS])
-      PHP_EVAL_INCLINE([$SELINUX_CFLAGS])
-    ],
+  AS_VAR_IF([PHP_FPM_SELINUX], [no],, [
+    PKG_CHECK_MODULES([SELINUX], [libselinux],
+      [PHP_EVAL_INCLINE([$SELINUX_CFLAGS])],
       [AC_CHECK_LIB([selinux], [security_setenforce],
-        [PHP_ADD_LIBRARY([selinux])],
+        [SELINUX_LIBS=-lselinux],
         [AC_MSG_ERROR([Required SELinux library not found.])])])
+    PHP_EVAL_LIBLINE([$SELINUX_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
-    CFLAGS_save="$CFLAGS"
+    CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([selinux/selinux.h],
-      [AC_DEFINE([HAVE_SELINUX], [1], [Whether SELinux is available.])],
+      [AC_DEFINE([HAVE_SELINUX], [1],
+        [Define to 1 if SELinux is available in PHP-FPM.])],
       [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
-    CFLAGS="$CFLAGS_save"
-  fi
+    CFLAGS=$CFLAGS_save
+  ])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
