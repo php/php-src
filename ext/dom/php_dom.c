@@ -2567,7 +2567,9 @@ xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, 
 
 	if (ns_mapper != NULL) {
 		xmlNodePtr clone = dom_clone_helper(ns_mapper, node, doc, recursive);
-		if (EXPECTED(clone != NULL)) {
+		if (EXPECTED(clone != NULL) && doc != node->doc) {
+			/* We only need to reconcile the namespace when the document changes because the namespaces have to be
+			 * put into their respective namespace mapper. */
 			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
 				for (xmlNodePtr child = clone->children; child != NULL; child = child->next) {
 					php_dom_libxml_reconcile_modern(ns_mapper, child);
