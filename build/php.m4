@@ -348,8 +348,8 @@ dnl system when specified in compiler notation. Libraries (-l) are appended
 dnl either to the global Autoconf LIBS variable or to the specified
 dnl "libs-variable" (e.g., *_SHARED_LIBADD) when the extension is shared
 dnl (ext_shared=yes). If "not-extension" is set to a non-blank value, the
-dnl libraries are appended to "libs-variable" unconditionally. This is
-dnl particularly useful when working with SAPIs. The -L flags are appended to
+dnl libraries are appended to "libs-variable" unconditionally (this is
+dnl particularly useful when working with SAPIs). The -L flags are appended to
 dnl the LDFLAGS.
 dnl
 AC_DEFUN([PHP_EVAL_LIBLINE],
