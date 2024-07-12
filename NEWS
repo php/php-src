@@ -58,6 +58,10 @@ PHP                                                                        NEWS
   . Fix 32-bit wordwrap test failures. (orlitzky)
   . Fixed bug GH-14774 (time_sleep_until overflow). (David Carlier)
 
+- Streams:
+  . Fixed bug GH-14930 (Custom stream wrapper dir_readdir output truncated to
+    255 characters in PHP 8.3). (Joe Cai)
+
 - Tidy:
   . Fix memory leak in tidy_repair_file(). (nielsdos)
 
