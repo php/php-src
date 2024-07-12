@@ -57,10 +57,10 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
 
     AC_CACHE_CHECK([if oniguruma has an invalid entry for KOI8 encoding],
       [php_cv_lib_onig_invalid_koi8],
-      [save_old_LDFLAGS=$LDFLAGS
+      [save_old_LIBS=$LIBS
+        LIBS="$LIBS $MBSTRING_SHARED_LIBADD"
         save_old_CFLAGS=$CFLAGS
         CFLAGS="$CFLAGS $ONIG_CFLAGS"
-        PHP_EVAL_LIBLINE([$MBSTRING_SHARED_LIBADD], [LDFLAGS])
         AC_LINK_IFELSE([AC_LANG_PROGRAM([
           #include <stdint.h>
           #include <oniguruma.h>
@@ -68,7 +68,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
         [return (intptr_t)(ONIG_ENCODING_KOI8 + 1);])],
         [php_cv_lib_onig_invalid_koi8=no],
         [php_cv_lib_onig_invalid_koi8=yes])
-        LDFLAGS=$save_old_LDFLAGS
+        LIBS=$save_old_LIBS
         CFLAGS=$save_old_CFLAGS])
     AS_VAR_IF([php_cv_lib_onig_invalid_koi8], [yes],
       [AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1],
