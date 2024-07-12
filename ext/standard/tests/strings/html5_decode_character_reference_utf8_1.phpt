@@ -31,13 +31,13 @@ $test_cases = array(
 
     array("&#x1f170;", HTML5_TEXT_NODE, 0),
 
-    array("&amp&&amp&&", HTML5_TEXT_NODE, 6),
-    array("&amp&&amp;&&", HTML5_TEXT_NODE, 6),
-    array("&amp&&amp&&", HTML5_ATTRIBUTE, 6),
-    array("&amp&&amp;&&", HTML5_ATTRIBUTE, 6),
-    array("&amp&&amp=&", HTML5_TEXT_NODE, 6),
-    array("&amp&&amp=&", HTML5_TEXT_NODE, 6),
-    array("&amp&&amp/&", HTML5_TEXT_NODE, 6),
+    array("&amp&&amp&&", HTML5_TEXT_NODE, 5),
+    array("&amp&&amp;&&", HTML5_TEXT_NODE, 5),
+    array("&amp&&amp&&", HTML5_ATTRIBUTE, 5),
+    array("&amp&&amp;&&", HTML5_ATTRIBUTE, 5),
+    array("&amp&&amp=&", HTML5_TEXT_NODE, 5),
+    array("&amp&&amp=&", HTML5_TEXT_NODE, 5),
+    array("&amp&&amp/&", HTML5_TEXT_NODE, 5),
 );
 
 foreach ($test_cases as $test_case) {
