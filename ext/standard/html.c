@@ -1171,11 +1171,11 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
     }
 
     if (digit_count == 0) {
-        return zend_string_init("\xEF\xBF\xBD", 2, 0);
+        return zend_string_init("\xEF\xBF\xBD", 3, 0);
     }
 
     if (digit_count > (base == 16 ? 6 : 7)) {
-        return zend_string_init("\xEF\xBF\xBD", 2, 0);
+        return zend_string_init("\xEF\xBF\xBD", 3, 0);
     }
 
     uint32_t code_point = 0;
@@ -1197,7 +1197,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
     }
 
     if (code_point >= 0xD800 && code_point <= 0xDFFF) {
-        return zend_string_init("\xEF\xBF\xBD", 2, 0);
+        return zend_string_init("\xEF\xBF\xBD", 3, 0);
     }
 
     return html5_code_point_to_utf8_bytes(code_point);
