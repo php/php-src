@@ -30,6 +30,32 @@ dnl Build system helper macros.
 dnl ----------------------------------------------------------------------------
 
 dnl
+dnl PHP_PUSH([namespace])
+dnl
+dnl Save a state of the common compilation and linker flag variables (CFLAGS,
+dnl CPPFLAGS, LIBS and LDFLAGS) to temporary variables. Optional "namespace" is
+dnl a prefix for temporary variable names.
+dnl
+AC_DEFUN([PHP_PUSH],
+[AS_VAR_COPY([$1_php_save_CFLAGS],   [CFLAGS])
+AS_VAR_COPY([$1_php_save_CPPFLAGS],  [CPPFLAGS])
+AS_VAR_COPY([$1_php_save_LDFLAGS],   [LDFLAGS])
+AS_VAR_COPY([$1_php_save_LIBS],      [LIBS])])
+
+dnl
+dnl PHP_POP([namespace])
+dnl
+dnl Restore the state of the common compilation and linker flag variables to the
+dnl last pushed state using PHP_PUSH. When using "namespace" it will restore the
+dnl variables of the last PHP_PUSH([namespace]) call.
+dnl
+AC_DEFUN([PHP_POP],
+[AS_VAR_COPY([CFLAGS],    [$1_php_save_CFLAGS])
+AS_VAR_COPY([CPPFLAGS], [$1_php_save_CPPFLAGS])
+AS_VAR_COPY([LDFLAGS],   [$1_php_save_LDFLAGS])
+AS_VAR_COPY([LIBS],      [$1_php_save_LIBS])])
+
+dnl
 dnl PHP_DEF_HAVE(what)
 dnl
 dnl Generates 'AC_DEFINE(HAVE_WHAT, 1, [ ])'.
