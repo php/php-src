@@ -2683,6 +2683,11 @@ try_again:
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
+		case IS_INDIRECT:
+			op1 = Z_INDIRECT_P(op1);
+			ZEND_ASSERT(Z_TYPE_P(op1) != IS_INDIRECT && "I am still indirect");
+			return FAILURE;
+			goto try_again;
 		case IS_OBJECT: {
 			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
 				zval op2;

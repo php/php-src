@@ -3002,19 +3002,31 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_FETCH));
 
 			ZVAL_DEREF(offset);
+
+			bool offset_exists = false;
 			/* For null coalesce we first check if the offset exist,
 			 * if it does we call the fetch_dimension() handler,
 			 * otherwise just return an undef result */
 			if (UNEXPECTED(type == BP_VAR_IS)) {
-				ZEND_ASSERT(offset && "BP_VAR_IS with append operation is compile time failure");
 				ZEND_ASSERT(obj->ce->dimension_handlers->has_dimension);
 				/* The key does not exist */
 				if (!obj->ce->dimension_handlers->has_dimension(obj, offset)) {
 					ZVAL_UNDEF(result);
 					goto clean_up;
 				}
+			} else if (UNEXPECTED(type == BP_VAR_RW)) {
+				/* RW semantics dictate that the offset must actually exists, otherwise a warning is emitted */
+				offset_exists = obj->ce->dimension_handlers->has_dimension(obj, offset);
 			}
 			retval = obj->ce->dimension_handlers->fetch_dimension(obj, offset, result);
+			if (UNEXPECTED(type == BP_VAR_RW && !offset_exists && !EG(exception))) {
+				// TODO Better warning?
+				zend_error(E_WARNING, "Undefined offset");
+				if (UNEXPECTED(EG(exception))) {
+					ZVAL_UNDEF(result);
+					goto clean_up;
+				}
+			}
 		} else if (!offset && obj->ce->dimension_handlers->fetch_append) {
 			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ false, BP_VAR_FETCH));
 			ZEND_ASSERT(type != BP_VAR_IS);

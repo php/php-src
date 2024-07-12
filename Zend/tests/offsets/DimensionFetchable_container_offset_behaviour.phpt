@@ -59,6 +59,8 @@ string(27) "DimensionFetch::offsetFetch"
 VAR_DUMP_OF_OFFSET
 Cannot write to offset of object of type DimensionFetch
 Nested Read-Write:
+string(27) "DimensionRead::offsetExists"
+VAR_DUMP_OF_OFFSET
 string(27) "DimensionFetch::offsetFetch"
 VAR_DUMP_OF_OFFSET
 Cannot read-write offset of object of type DimensionFetch

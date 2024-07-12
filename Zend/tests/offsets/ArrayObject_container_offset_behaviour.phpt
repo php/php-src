@@ -111,6 +111,8 @@ Nested Read-Write:
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Nested isset():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
@@ -246,6 +248,8 @@ Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 81
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 81
 Nested Read-Write:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
 

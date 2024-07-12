@@ -11,7 +11,7 @@ class Peoples implements ArrayAccess {
     }
 
     function offsetExists($index): bool {
-        return array_key_exists($this->person, $index);
+        return array_key_exists($index, $this->person);
     }
 
     function offsetGet($index): mixed {

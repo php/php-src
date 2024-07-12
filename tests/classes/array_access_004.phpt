@@ -48,6 +48,7 @@ ObjectOne::offsetGet(1)
 string(6) "fooBar"
 ObjectOne::offsetGet(2)
 int(1)
+ObjectOne::offsetExists(2)
 ObjectOne::offsetGet(2)
 
 Notice: Indirect modification of overloaded element of ObjectOne has no effect in %sarray_access_004.php on line 39

@@ -245,7 +245,7 @@ DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: fal
 nested write: appending then write
 DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested read-write
-DimensionHandlersNoArrayAccess, read: true, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
+DimensionHandlersNoArrayAccess, read: true, write: true, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested read-write: appending then write
 DimensionHandlersNoArrayAccess, read: true, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested isset

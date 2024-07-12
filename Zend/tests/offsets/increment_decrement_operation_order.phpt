@@ -64,29 +64,43 @@ new stdClass()[0]
 Error: Cannot use object of type stdClass as array
 Error: Cannot use object of type stdClass as array
 new ArrayObject()[0]
+
+Warning: Undefined offset in %s on line %d
 NULL
 int(1)
 new A()[0]
+string(15) "A::offsetExists"
+int(0)
 string(12) "A::offsetGet"
 int(0)
 
 Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
 int(5)
+string(15) "A::offsetExists"
+int(0)
 string(12) "A::offsetGet"
 int(0)
 
 Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
 int(5)
 new B()[0]
+string(15) "B::offsetExists"
+int(0)
 NULL
+string(15) "B::offsetExists"
+int(0)
 int(1)
 new DimensionRead()[0]
 Error: Cannot fetch offset of object of type DimensionRead
 Error: Cannot fetch offset of object of type DimensionRead
 new DimensionFetch()[0]
+string(27) "DimensionRead::offsetExists"
+int(0)
 string(27) "DimensionFetch::offsetFetch"
 int(0)
 TypeError: Cannot increment DimensionFetch
+string(27) "DimensionRead::offsetExists"
+int(0)
 string(27) "DimensionFetch::offsetFetch"
 int(0)
 TypeError: Cannot decrement DimensionFetch
