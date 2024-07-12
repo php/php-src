@@ -1873,7 +1873,7 @@ ENDCOMMENT
         /* Creation of <refsynopsisdiv> */
         $refsynopsisDiv = $doc->createElement('refsynopsisdiv');
         $deprecationEntity = $doc->createEntityReference(
-            'warn.deprecated.' . (isset($aliasMap[$this->name->__toString()]) ? 'alias' : 'function-') .
+            'warn.deprecated.' . (isset($aliasMap[$this->name->__toString()]) ? 'alias' : 'function') . '-' .
             str_replace(".", "-", $this->deprecatedSince) . "-0"
         );
         $refsynopsisDiv->appendChild(new DOMText("\n  "));
