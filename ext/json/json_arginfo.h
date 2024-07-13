@@ -26,9 +26,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_json_last_error_msg, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_json_last_error_info, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_JsonSerializable_jsonSerialize, 0, 0, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
@@ -37,7 +34,6 @@ ZEND_FUNCTION(json_decode);
 ZEND_FUNCTION(json_validate);
 ZEND_FUNCTION(json_last_error);
 ZEND_FUNCTION(json_last_error_msg);
-ZEND_FUNCTION(json_last_error_info);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(json_encode, arginfo_json_encode)
@@ -45,7 +41,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(json_validate, arginfo_json_validate)
 	ZEND_FE(json_last_error, arginfo_json_last_error)
 	ZEND_FE(json_last_error_msg, arginfo_json_last_error_msg)
-	ZEND_FE(json_last_error_info, arginfo_json_last_error_info)
 	ZEND_FE_END
 };
 

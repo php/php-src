@@ -37,10 +37,10 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
 json_error_info_type json_error_info_data = {
-	NULL,
-	0,
-	0,
-	0
+	NULL, // Parse token
+	0, // Error ode
+	0, // Character count
+	0 // Total number of characters to parse
 };
 
 void update_json_error_info_data(php_json_parser *parser) {
@@ -440,27 +440,5 @@ PHP_FUNCTION(json_last_error_msg)
 	);
 
 	RETURN_STRING(msg2);
-}
-/* }}} */
-
-/* {{{ Returns an array with parser-scanner information of the last error of the last json_validate(), json_encode() or json_decode() call. */
-PHP_FUNCTION(json_last_error_info)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	const char* msg = php_json_get_error_msg(JSON_G(error_code));
-
-	array_init(return_value);
-
-	add_assoc_long(return_value, "error_code", json_error_info_data.errcode);
-	add_assoc_string(return_value, "error_msg", msg);
-	add_assoc_long(return_value, "error_position", json_error_info_data.character_count);
-	add_assoc_long(return_value, "total_input_length", json_error_info_data.character_max_count);
-
-	if (json_error_info_data.token) {
-		add_assoc_string(return_value, "at_content", (char *) json_error_info_data.token);
-	} else {
-		add_assoc_string(return_value, "at_content", "");
-	}
 }
 /* }}} */

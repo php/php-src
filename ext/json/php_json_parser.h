@@ -60,10 +60,10 @@ struct _php_json_parser {
 };
 
 struct _json_error_info_type {
-	php_json_ctype* token;
-	php_json_error_code errcode;
-	size_t character_count;
-	size_t character_max_count;
+	php_json_ctype* token;			// Parse token
+	php_json_error_code errcode;	// Error ode
+	size_t character_count;			// Character count
+	size_t character_max_count;		// Total number of characters to parse
 };
 
 PHP_JSON_API void php_json_parser_init_ex(
