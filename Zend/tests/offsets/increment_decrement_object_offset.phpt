@@ -65,28 +65,8 @@ foreach ([new Legacy(), new Container()] as $container) {
 ?>
 --EXPECTF--
 new Legacy()[0]
-string(20) "Legacy::offsetExists"
-string(17) "Legacy::offsetGet"
-
-Notice: Indirect modification of overloaded element of Legacy has no effect in %s on line %d
-int(15)
-string(17) "Legacy::offsetGet"
-int(15)
-string(20) "Legacy::offsetExists"
-string(17) "Legacy::offsetGet"
-
-Notice: Indirect modification of overloaded element of Legacy has no effect in %s on line %d
-int(15)
-string(17) "Legacy::offsetGet"
-int(15)
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new Container()[0]
-string(23) "Container::offsetExists"
-string(22) "Container::offsetFetch"
-int(15)
-string(20) "Container::offsetGet"
-int(16)
-string(23) "Container::offsetExists"
-string(22) "Container::offsetFetch"
-int(16)
-string(20) "Container::offsetGet"
-int(15)
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets

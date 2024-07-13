@@ -61,61 +61,35 @@ STDERR[0]
 Error: Cannot use a scalar value as an array
 Error: Cannot use a scalar value as an array
 new stdClass()[0]
-Error: Cannot use object of type stdClass as array
-Error: Cannot use object of type stdClass as array
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new ArrayObject()[0]
-
-Warning: Undefined offset in %s on line %d
-NULL
-int(1)
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new A()[0]
-string(15) "A::offsetExists"
-int(0)
-string(12) "A::offsetGet"
-int(0)
-
-Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
-int(5)
-string(15) "A::offsetExists"
-int(0)
-string(12) "A::offsetGet"
-int(0)
-
-Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
-int(5)
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new B()[0]
-string(15) "B::offsetExists"
-int(0)
-NULL
-string(15) "B::offsetExists"
-int(0)
-int(1)
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionRead()[0]
-Error: Cannot fetch offset of object of type DimensionRead
-Error: Cannot fetch offset of object of type DimensionRead
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionFetch()[0]
-string(27) "DimensionRead::offsetExists"
-int(0)
-string(27) "DimensionFetch::offsetFetch"
-int(0)
-TypeError: Cannot increment DimensionFetch
-string(27) "DimensionRead::offsetExists"
-int(0)
-string(27) "DimensionFetch::offsetFetch"
-int(0)
-TypeError: Cannot decrement DimensionFetch
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionWrite()[0]
-Error: Cannot fetch offset of object of type DimensionWrite
-Error: Cannot fetch offset of object of type DimensionWrite
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionReadWrite()[0]
-Error: Cannot fetch offset of object of type DimensionReadWrite
-Error: Cannot fetch offset of object of type DimensionReadWrite
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionAppend()[0]
-Error: Cannot fetch offset of object of type DimensionAppend
-Error: Cannot fetch offset of object of type DimensionAppend
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionFetchAppend()[0]
-Error: Cannot fetch offset of object of type DimensionFetchAppend
-Error: Cannot fetch offset of object of type DimensionFetchAppend
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
 new DimensionUnset()[0]
-Error: Cannot fetch offset of object of type DimensionUnset
-Error: Cannot fetch offset of object of type DimensionUnset
+Error: Cannot increment/decrement object offsets
+Error: Cannot increment/decrement object offsets
