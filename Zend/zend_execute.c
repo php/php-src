@@ -3050,6 +3050,7 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			 * $ao[] = &$var;
 			 * cases */
 			&& Z_TYPE_P(retval) != IS_INDIRECT
+			/* IS_OBJECT is to support ArrayAccess without by-ref returns */
 			&& Z_TYPE_P(retval) != IS_OBJECT
 		) {
 			zend_class_entry *ce = obj->ce;
@@ -3062,6 +3063,19 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 				ZSTR_VAL(ce->name), offset ? "offsetFetch" : "fetchAppend");
 			ZVAL_UNDEF(result);
 			goto clean_up;
+		}
+		/* Check if we need to auto-vivify a possible null return */
+		if (Z_ISREF_P(result) && Z_ISNULL_P(Z_REFVAL_P(result))) {
+			const zend_op *next_opline = execute_data->opline + 1;
+			if (UNEXPECTED(
+				next_opline->opcode == ZEND_ASSIGN_DIM
+				|| next_opline->opcode == ZEND_ASSIGN_DIM_OP
+				|| next_opline->opcode == ZEND_FETCH_DIM_W
+				|| next_opline->opcode == ZEND_FETCH_DIM_RW
+			)) {
+				// TODO THIS IS A VERY CRUDE PROTOTYPE
+				object_init_ex(Z_REFVAL_P(result), obj->ce);
+			}
 		}
 		if (result != retval) {
 			ZVAL_INDIRECT(result, retval);
