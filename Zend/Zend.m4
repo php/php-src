@@ -151,11 +151,16 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_stackseg_np
 ]))
 
-dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
-AC_CHECK_FUNCS([sigsetjmp],,
-  [AC_CHECK_DECL([sigsetjmp],
-    [AC_DEFINE([HAVE_SIGSETJMP], [1])],,
-    [#include <setjmp.h>])])
+dnl
+dnl ZEND_CHECK_SIGSETJMP
+dnl
+dnl Check for sigsetjmp. If sigsetjmp is defined as a macro, use AC_CHECK_DECL
+dnl as a fallback since AC_CHECK_FUNC cannot detect macros.
+dnl
+AC_CHECK_FUNC([sigsetjmp],,
+  [AC_CHECK_DECL([sigsetjmp],,
+    [AC_MSG_ERROR([Required sigsetjmp not found. Please, check config.log])],
+    [#include <setjmp.h>])]) 
 
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
