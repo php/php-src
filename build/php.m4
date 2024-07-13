@@ -962,7 +962,7 @@ dnl ---------------------------------------------- CLI static module
     esac
     EXT_CLI_STATIC="$EXT_CLI_STATIC $1;$ext_dir"
   fi
-  PHP_ADD_BUILD_DIR($ext_builddir)
+  PHP_ADD_BUILD_DIR([$ext_builddir])
 
 dnl Set for phpize builds only.
 dnl ---------------------------

@@ -41,20 +41,22 @@ if test "$PHP_DOM" != "no"; then
                             namednodemap.c xpath_callbacks.c \
                             $LEXBOR_SOURCES],
                             $ext_shared,,$PHP_LEXBOR_CFLAGS)
-    PHP_ADD_BUILD_DIR($ext_builddir/parentnode)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/core)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/dom/interfaces)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/html/tree/insertion_mode)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/html/tokenizer)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/html/interfaces)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/encoding)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/css/selectors)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/css/tokenizer)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/css/syntax/tokenizer)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/selectors-adapted)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/ns)
-    PHP_ADD_BUILD_DIR($ext_builddir/$LEXBOR_DIR/tag)
+    PHP_ADD_BUILD_DIR([m4_normalize([
+      $ext_builddir/parentnode
+      $ext_builddir/$LEXBOR_DIR/core
+      $ext_builddir/$LEXBOR_DIR/css/selectors
+      $ext_builddir/$LEXBOR_DIR/css/syntax/tokenizer
+      $ext_builddir/$LEXBOR_DIR/css/tokenizer
+      $ext_builddir/$LEXBOR_DIR/dom/interfaces
+      $ext_builddir/$LEXBOR_DIR/encoding
+      $ext_builddir/$LEXBOR_DIR/html/interfaces
+      $ext_builddir/$LEXBOR_DIR/html/tokenizer
+      $ext_builddir/$LEXBOR_DIR/html/tree/insertion_mode
+      $ext_builddir/$LEXBOR_DIR/ns
+      $ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core
+      $ext_builddir/$LEXBOR_DIR/selectors-adapted
+      $ext_builddir/$LEXBOR_DIR/tag
+    ])])
     PHP_SUBST([DOM_SHARED_LIBADD])
     PHP_INSTALL_HEADERS([ext/dom], [xml_common.h xpath_callbacks.h namespace_compat.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
