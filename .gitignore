@@ -167,6 +167,7 @@ php
 # ------------------------------------------------------------------------------
 
 # Miscellaneous extensions files
+/ext/fileinfo/libmagic.orig/
 /ext/opcache/jit/zend_jit_x86.c
 /ext/opcache/jit/zend_jit_arm64.c
 /ext/opcache/minilua
