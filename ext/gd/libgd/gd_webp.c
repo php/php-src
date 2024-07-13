@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+#include "gd_errors.h"
 #include "gdhelpers.h"
 
 #ifdef HAVE_LIBWEBP
@@ -56,7 +57,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 			if (filedata) {
 				gdFree(filedata);
 			}
-			zend_error(E_ERROR, "WebP decode: realloc failed");
+			gd_error("WebP decode: realloc failed");
 			return NULL;
 		}
 
@@ -67,7 +68,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	} while (n>0 && n!=EOF);
 
 	if (WebPGetInfo(filedata,size, &width, &height) == 0) {
-		zend_error(E_ERROR, "gd-webp cannot get webp info");
+		gd_error("gd-webp cannot get webp info");
 		gdFree(filedata);
 		return NULL;
 	}
@@ -79,7 +80,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	}
 	argb = WebPDecodeARGB(filedata, size, &width, &height);
 	if (!argb) {
-		zend_error(E_ERROR, "gd-webp cannot allocate temporary buffer");
+		gd_error("gd-webp cannot allocate temporary buffer");
 		gdFree(filedata);
 		gdImageDestroy(im);
 		return NULL;
@@ -113,7 +114,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
 
 	if (!gdImageTrueColor(im)) {
-		zend_error(E_ERROR, "Palette image not supported by webp");
+		gd_error("Palette image not supported by webp");
 		return;
 	}
 
@@ -159,7 +160,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quality)
 	}
 
 	if (out_size == 0) {
-		zend_error(E_ERROR, "gd-webp encoding failed");
+		gd_error("gd-webp encoding failed");
 		goto freeargb;
 	}
 	gdPutBuf(out, out_size, outfile);

@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 
 - Gd:
   . ext/gd/tests/gh10614.phpt: skip if no PNG support. (orlitzky)
+  . restored warning instead of fata error. (dryabov)
 
 - LibXML:
   . Fixed bug GH-14563 (Build failure with libxml2 v2.13.0). (nielsdos)
