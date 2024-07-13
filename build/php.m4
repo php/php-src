@@ -893,11 +893,7 @@ dnl When "create" is given, the provided "dirs" are created immediately upon
 dnl macro invocation, instead of deferring it to the PHP_GEN_BUILD_DIRS.
 dnl
 AC_DEFUN([PHP_ADD_BUILD_DIR],[
-  ifelse($2,,[
-    BUILD_DIR="$BUILD_DIR $1"
-  ], [
-    $php_shtool mkdir -p $1
-  ])
+  ifelse($2,,[BUILD_DIR="$BUILD_DIR $1"], [$php_shtool mkdir -p $1])
 ])
 
 dnl
