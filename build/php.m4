@@ -1740,7 +1740,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   esac
 
   PHP_SUBST([RE2C])
-  AS_VAR_SET([RE2C_FLAGS], [m4_normalize([$2])])
+  AS_VAR_SET([RE2C_FLAGS], [m4_normalize(["$2"])])
   PHP_SUBST([RE2C_FLAGS])
 ])
 
