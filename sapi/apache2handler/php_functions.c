@@ -243,13 +243,13 @@ PHP_FUNCTION(apache_note)
 
 /* {{{ Set an Apache subprocess_env variable */
 /*
- * XXX this doesn't look right. shouldn't it be the parent ?*/
+ */
 PHP_FUNCTION(apache_setenv)
 {
 	php_struct *ctx;
 	char *variable=NULL, *string_val=NULL;
 	size_t variable_len, string_val_len;
-	bool walk_to_top = 0;
+	bool walk_to_top = false;
 	int arg_count = ZEND_NUM_ARGS();
 	request_rec *r;
 
@@ -262,8 +262,8 @@ PHP_FUNCTION(apache_setenv)
 	r = ctx->r;
 	if (arg_count == 3) {
 		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
+			if (r->main) {
+				r = r->main;
 			}
 		}
 	}
@@ -276,14 +276,13 @@ PHP_FUNCTION(apache_setenv)
 
 /* {{{ Get an Apache subprocess_env variable */
 /*
- * XXX: shouldn't this be the parent not the 'prev'
  */
 PHP_FUNCTION(apache_getenv)
 {
 	php_struct *ctx;
 	char *variable;
 	size_t variable_len;
-	bool walk_to_top = 0;
+	bool walk_to_top = false;
 	int arg_count = ZEND_NUM_ARGS();
 	char *env_val=NULL;
 	request_rec *r;
@@ -297,8 +296,8 @@ PHP_FUNCTION(apache_getenv)
 	r = ctx->r;
 	if (arg_count == 2) {
 		if (walk_to_top) {
-			while(r->prev) {
-				r = r->prev;
+			if (r->main) {
+				r = r->main;
 			}
 		}
 	}
