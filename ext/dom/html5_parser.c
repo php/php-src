@@ -171,15 +171,17 @@ static lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert(
 			xmlNodePtr lxml_child_parent = lxml_element;
 			lxb_dom_node_t *child_node = element->node.last_child;
 			if (lxb_html_tree_node_is(&element->node, LXB_TAG_TEMPLATE)) {
-				lxml_child_parent = xmlNewDocFragment(lxml_doc);
-				if (UNEXPECTED(lxml_child_parent == NULL)) {
-					retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
-					break;
-				}
+				if (create_default_ns) {
+					lxml_child_parent = xmlNewDocFragment(lxml_doc);
+					if (UNEXPECTED(lxml_child_parent == NULL)) {
+						retval = LEXBOR_LIBXML2_BRIDGE_STATUS_OOM;
+						break;
+					}
 
-				lxml_child_parent->parent = lxml_element;
-				dom_add_element_ns_hook(private_data, lxml_element);
-				php_dom_add_templated_content(private_data, lxml_element, lxml_child_parent);
+					lxml_child_parent->parent = lxml_element;
+					dom_add_element_ns_hook(private_data, lxml_element);
+					php_dom_add_templated_content(private_data, lxml_element, lxml_child_parent);
+				}
 
 				lxb_html_template_element_t *template = lxb_html_interface_template(&element->node);
 				if (template->content != NULL) {
