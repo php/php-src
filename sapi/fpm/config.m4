@@ -147,20 +147,13 @@ AS_VAR_IF([php_cv_func_mach_vm_read], [yes],
   [AC_DEFINE([HAVE_MACH_VM_READ], [1],
     [Define to 1 if you have the 'mach_vm_read' function.])])
 
-  proc_mem_file=""
+AC_CACHE_CHECK([for proc mem file], [php_cv_file_proc_mem],
+[AS_IF([test -r /proc/$$/mem], [proc_mem_file=mem],
+  [test -r /proc/$$/as], [proc_mem_file=as],
+  [proc_mem_file=])
 
-  if test -r /proc/$$/mem ; then
-    proc_mem_file="mem"
-  else
-    if test -r /proc/$$/as ; then
-      proc_mem_file="as"
-    fi
-  fi
-
-  if test -n "$proc_mem_file" ; then
-    AC_MSG_CHECKING([for proc mem file])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AS_VAR_IF([proc_mem_file],,,
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
       #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
       #endif
@@ -188,35 +181,24 @@ AS_VAR_IF([php_cv_func_mach_vm_read], [yes],
         close(fd);
         return v1 != v2;
       }
-    ]])], [
-      AC_MSG_RESULT([$proc_mem_file])
-    ], [
-      proc_mem_file=""
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([skipped (cross-compiling)])
-    ])
-  fi
+    ]])],
+    [php_cv_file_proc_mem=$proc_mem_file],
+    [php_cv_file_proc_mem=],
+    [php_cv_file_proc_mem=$proc_mem_file])
+  ])
+])
 
-  if test -n "$proc_mem_file"; then
-    AC_DEFINE_UNQUOTED([PROC_MEM_FILE], "$proc_mem_file", [/proc/pid/mem interface])
-  fi
+AS_VAR_IF([php_cv_file_proc_mem],,,
+  [AC_DEFINE_UNQUOTED([PROC_MEM_FILE], ["$php_cv_file_proc_mem"],
+    [Define to the /proc/pid/mem interface filename value.])])
 
-  fpm_trace_type=""
+AS_IF([test "x$php_cv_func_ptrace" = xyes], [fpm_trace_type=ptrace],
+  [test -n "$php_cv_file_proc_mem"], [fpm_trace_type=pread],
+  [test "x$php_cv_func_mach_vm_read" = xyes], [fpm_trace_type=mach],
+  [fpm_trace_type=])
 
-  if test "$php_cv_func_ptrace" = "yes"; then
-    fpm_trace_type=ptrace
-
-  elif test -n "$proc_mem_file"; then
-    fpm_trace_type=pread
-
-  elif test "$php_cv_func_mach_vm_read" = "yes" ; then
-    fpm_trace_type=mach
-
-  else
-    AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])
-  fi
-
+AS_VAR_IF([fpm_trace_type],,
+  [AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])])
 ])
 
 AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
@@ -549,9 +531,9 @@ if test "$PHP_FPM" != "no"; then
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
 
-  if test "$fpm_trace_type" && test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"; then
-    PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
-  fi
+  AS_VAR_IF([fpm_trace_type],,,
+    [AS_IF([test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"],
+      [PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"])])
 
   PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
