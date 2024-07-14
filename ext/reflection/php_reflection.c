@@ -18,6 +18,8 @@
    +----------------------------------------------------------------------+
 */
 
+#include "zend_compile.h"
+#include "zend_type_info.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -98,6 +100,7 @@ PHPAPI zend_class_entry *reflection_enum_unit_case_ptr;
 PHPAPI zend_class_entry *reflection_enum_backed_case_ptr;
 PHPAPI zend_class_entry *reflection_fiber_ptr;
 PHPAPI zend_class_entry *reflection_constant_ptr;
+PHPAPI zend_class_entry *reflection_property_hook_type_ptr;
 
 /* Exception throwing macro */
 #define _DO_THROW(msg) \
@@ -908,6 +911,8 @@ static zval *property_get_default(zend_property_info *prop_info) {
 		zval *prop = &ce->default_static_members_table[prop_info->offset];
 		ZVAL_DEINDIRECT(prop);
 		return prop;
+	} else if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+		return NULL;
 	} else {
 		return &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 	}
@@ -954,7 +959,7 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		smart_str_append_printf(str, "$%s", prop_name);
 
 		zval *default_value = property_get_default(prop);
-		if (!Z_ISUNDEF_P(default_value)) {
+		if (default_value && !Z_ISUNDEF_P(default_value)) {
 			smart_str_appends(str, " = ");
 			if (format_default_value(str, default_value) == FAILURE) {
 				return;
@@ -4145,7 +4150,7 @@ static void add_class_vars(zend_class_entry *ce, bool statics, zval *return_valu
 		}
 
 		prop = property_get_default(prop_info);
-		if (Z_ISUNDEF_P(prop)) {
+		if (!prop || Z_ISUNDEF_P(prop)) {
 			continue;
 		}
 
@@ -5686,6 +5691,16 @@ ZEND_METHOD(ReflectionProperty, isReadOnly)
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_READONLY);
 }
 
+ZEND_METHOD(ReflectionProperty, isAbstract)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_ABSTRACT);
+}
+
+ZEND_METHOD(ReflectionProperty, isVirtual)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VIRTUAL);
+}
+
 /* {{{ Returns whether this property is default (declared at compilation time). */
 ZEND_METHOD(ReflectionProperty, isDefault)
 {
@@ -5712,7 +5727,7 @@ ZEND_METHOD(ReflectionProperty, getModifiers)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY;
+	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_READONLY | ZEND_ACC_ABSTRACT | ZEND_ACC_VIRTUAL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -5813,6 +5828,72 @@ ZEND_METHOD(ReflectionProperty, setValue)
 	}
 }
 /* }}} */
+
+ZEND_METHOD(ReflectionProperty, getRawValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zval *object;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
+		_DO_THROW("May not use getRawValue on static properties");
+		RETURN_THROWS();
+	}
+
+	if (!instanceof_function(Z_OBJCE_P(object), intern->ce)) {
+		_DO_THROW("Given object is not an instance of the class this property was declared in");
+		RETURN_THROWS();
+	}
+
+	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+		zval rv;
+		zval *member_p = zend_read_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, 0, &rv);
+
+		if (member_p != &rv) {
+			RETURN_COPY_DEREF(member_p);
+		} else {
+			if (Z_ISREF_P(member_p)) {
+				zend_unwrap_reference(member_p);
+			}
+			RETURN_COPY_VALUE(member_p);
+		}
+	} else {
+		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_GET, ref->unmangled_name);
+		zend_call_known_instance_method_with_0_params(func, Z_OBJ_P(object), return_value);
+	}
+}
+
+ZEND_METHOD(ReflectionProperty, setRawValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zval *object;
+	zval *value;
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
+		_DO_THROW("May not use setRawValue on static properties");
+		RETURN_THROWS();
+	}
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "oz", &object, &value) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
+	} else {
+		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
+		zend_call_known_instance_method_with_1_params(func, Z_OBJ_P(object), NULL, value);
+	}
+}
 
 /* {{{ Returns true if property was initialized */
 ZEND_METHOD(ReflectionProperty, isInitialized)
@@ -5942,6 +6023,47 @@ ZEND_METHOD(ReflectionProperty, getType)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, getSettableType)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_property_info *prop = ref->prop;
+	/* Dynamic property is untyped. */
+	if (!ref->prop) {
+		RETURN_NULL();
+	}
+
+	/* Get-only virtual property can never be written to. */
+	if ((prop->flags & ZEND_ACC_VIRTUAL) && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zend_type never_type = ZEND_TYPE_INIT_CODE(IS_NEVER, 0, 0);
+		reflection_type_factory(never_type, return_value, 0);
+		return;
+	}
+
+	/* Extract set $value parameter type. */
+	if (prop->hooks && prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zend_arg_info *arg_info = &prop->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0];
+		if (!ZEND_TYPE_IS_SET(arg_info->type)) {
+			RETURN_NULL();
+		}
+		reflection_type_factory(arg_info->type, return_value, 0);
+		return;
+	}
+
+	/* Fall back to property type */
+	if (!ZEND_TYPE_IS_SET(ref->prop->type)) {
+		RETURN_NULL();
+	}
+	reflection_type_factory(ref->prop->type, return_value, 0);
+}
+
 /* {{{ Returns whether property has a type */
 ZEND_METHOD(ReflectionProperty, hasType)
 {
@@ -5979,7 +6101,7 @@ ZEND_METHOD(ReflectionProperty, hasDefaultValue)
 	}
 
 	prop = property_get_default(prop_info);
-	RETURN_BOOL(!Z_ISUNDEF_P(prop));
+	RETURN_BOOL(prop && !Z_ISUNDEF_P(prop));
 }
 /* }}} */
 
@@ -6004,7 +6126,7 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 	}
 
 	prop = property_get_default(prop_info);
-	if (Z_ISUNDEF_P(prop)) {
+	if (!prop || Z_ISUNDEF_P(prop)) {
 		return;
 	}
 
@@ -6021,6 +6143,60 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 	}
 }
 /* }}} */
+
+ZEND_METHOD(ReflectionProperty, getHooks)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	if (!ref->prop->hooks) {
+		RETURN_EMPTY_ARRAY();
+	}
+
+	array_init(return_value);
+	if (ref->prop->hooks[ZEND_PROPERTY_HOOK_GET]) {
+		zval hook_obj;
+		zend_function *hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_GET];
+		reflection_method_factory(hook->common.scope, hook, NULL, &hook_obj);
+		zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_GET), &hook_obj);
+	}
+	if (ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zval hook_obj;
+		zend_function *hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_SET];
+		reflection_method_factory(hook->common.scope, hook, NULL, &hook_obj);
+		zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_SET), &hook_obj);
+	}
+}
+
+ZEND_METHOD(ReflectionProperty, getHook)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_object *type;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS(type, reflection_property_hook_type_ptr)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_function *hook;
+	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
+		hook = ref->prop->hooks ? ref->prop->hooks[ZEND_PROPERTY_HOOK_GET] : NULL;
+	} else {
+		hook = ref->prop->hooks ? ref->prop->hooks[ZEND_PROPERTY_HOOK_SET] : NULL;
+	}
+
+	if (!hook) {
+		RETURN_NULL();
+	}
+
+	reflection_method_factory(hook->common.scope, hook, NULL, return_value);
+}
 
 /* {{{ Constructor. Throws an Exception in case the given extension does not exist */
 ZEND_METHOD(ReflectionExtension, __construct)
@@ -7354,6 +7530,8 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_constant_ptr = register_class_ReflectionConstant(reflector_ptr);
 	reflection_constant_ptr->create_object = reflection_objects_new;
 	reflection_constant_ptr->default_object_handlers = &reflection_object_handlers;
+
+	reflection_property_hook_type_ptr = register_class_PropertyHookType();
 
 	REFLECTION_G(key_initialized) = 0;
 

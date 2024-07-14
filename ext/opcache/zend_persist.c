@@ -703,9 +703,8 @@ static void zend_persist_op_array(zval *zv)
 	}
 }
 
-static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
+static zend_op_array *zend_persist_class_method(zend_op_array *op_array, zend_class_entry *ce)
 {
-	zend_op_array *op_array = Z_PTR_P(zv);
 	zend_op_array *old_op_array;
 
 	if (op_array->type != ZEND_USER_FUNCTION) {
@@ -713,9 +712,9 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 		if (op_array->fn_flags & ZEND_ACC_ARENA_ALLOCATED) {
 			old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 			if (old_op_array) {
-				Z_PTR_P(zv) = old_op_array;
+				return old_op_array;
 			} else {
-				op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_internal_function));
+				op_array = zend_shared_memdup_put(op_array, sizeof(zend_internal_function));
 				if (op_array->scope) {
 					void *persist_ptr;
 
@@ -735,19 +734,18 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 				}
 			}
 		}
-		return;
+		return op_array;
 	}
 
 	if ((op_array->fn_flags & ZEND_ACC_IMMUTABLE)
 	 && !ZCG(current_persistent_script)->corrupted
 	 && zend_accel_in_shm(op_array)) {
 		zend_shared_alloc_register_xlat_entry(op_array, op_array);
-		return;
+		return op_array;
 	}
 
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (old_op_array) {
-		Z_PTR_P(zv) = old_op_array;
 		if (op_array->refcount && --(*op_array->refcount) == 0) {
 			efree(op_array->refcount);
 		}
@@ -759,9 +757,10 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 		if (old_function_name) {
 			zend_string_release_ex(old_function_name, 0);
 		}
-		return;
+		return old_op_array;
 	}
-	op_array = Z_PTR_P(zv) = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
+
+	op_array = zend_shared_memdup_put(op_array, sizeof(zend_op_array));
 	zend_persist_op_array_ex(op_array, NULL);
 	if (ce->ce_flags & ZEND_ACC_IMMUTABLE) {
 		op_array->fn_flags |= ZEND_ACC_IMMUTABLE;
@@ -775,6 +774,7 @@ static void zend_persist_class_method(zval *zv, zend_class_entry *ce)
 			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, NULL);
 		}
 	}
+	return op_array;
 }
 
 static zend_property_info *zend_persist_property_info(zend_property_info *prop)
@@ -799,6 +799,32 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 	}
 	if (prop->attributes) {
 		prop->attributes = zend_persist_attributes(prop->attributes);
+	}
+	if (prop->prototype) {
+		zend_property_info *new_prototype = (zend_property_info *) zend_shared_alloc_get_xlat_entry(prop->prototype);
+		if (new_prototype) {
+			prop->prototype = new_prototype;
+		}
+	}
+	if (prop->hooks) {
+		prop->hooks = zend_shared_memdup_put(prop->hooks, ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			if (prop->hooks[i]) {
+				zend_op_array *hook = zend_persist_class_method(&prop->hooks[i]->op_array, ce);
+#ifdef HAVE_JIT
+				if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+					if (hook->scope == ce && !(hook->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
+						zend_jit_op_array(hook, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
+					}
+				}
+#endif
+				zend_property_info *new_prop_info = (zend_property_info *) zend_shared_alloc_get_xlat_entry(hook->prop_info);
+				if (new_prop_info) {
+					hook->prop_info = new_prop_info;
+				}
+				prop->hooks[i] = (zend_function *) hook;
+			}
+		}
 	}
 	zend_persist_type(&prop->type);
 	return prop;
@@ -893,7 +919,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			zend_accel_store_interned_string(p->key);
-			zend_persist_class_method(&p->val, ce);
+			Z_PTR(p->val) = zend_persist_class_method(Z_PTR(p->val), ce);
 		} ZEND_HASH_FOREACH_END();
 		HT_FLAGS(&ce->function_table) &= (HASH_FLAG_UNINITIALIZED | HASH_FLAG_STATIC_KEYS);
 		if (ce->default_properties_table) {

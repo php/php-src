@@ -974,6 +974,28 @@ zend_function *zend_optimizer_get_called_func(
 				}
 			}
 			break;
+		case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL: {
+			zend_class_entry *scope = op_array->scope;
+			ZEND_ASSERT(scope != NULL);
+			if ((scope->ce_flags & ZEND_ACC_LINKED) && scope->parent) {
+				zend_class_entry *parent_scope = scope->parent;
+				zend_string *prop_name = Z_STR_P(CRT_CONSTANT(opline->op1));
+				zend_property_hook_kind hook_kind = opline->op2.num;
+				zend_property_info *prop_info = zend_get_property_info(parent_scope, prop_name, /* silent */ true);
+
+				if (prop_info
+					&& prop_info != ZEND_WRONG_PROPERTY_INFO
+					&& !(prop_info->flags & ZEND_ACC_PRIVATE)
+					&& prop_info->hooks) {
+					zend_function *fbc = prop_info->hooks[hook_kind];
+					if (fbc) {
+						*is_prototype = false;
+						return fbc;
+					}
+				}
+			}
+			break;
+		}
 		case ZEND_NEW:
 		{
 			zend_class_entry *ce = zend_optimizer_get_class_entry_from_op1(
@@ -1529,6 +1551,19 @@ void zend_foreach_op_array(zend_script *script, zend_op_array_func_t func, void 
 					&& !(op_array->fn_flags & ZEND_ACC_ABSTRACT)
 					&& !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 				zend_foreach_op_array_helper(op_array, func, context);
+			}
+		} ZEND_HASH_FOREACH_END();
+
+		zend_property_info *property;
+		ZEND_HASH_MAP_FOREACH_PTR(&ce->properties_info, property) {
+			zend_function **hooks = property->hooks;
+			if (property->ce == ce && property->hooks) {
+				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+					zend_function *hook = hooks[i];
+					if (hook && hook->common.scope == ce) {
+						zend_foreach_op_array_helper(&hooks[i]->op_array, func, context);
+					}
+				}
 			}
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();

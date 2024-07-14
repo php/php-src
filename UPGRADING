@@ -215,6 +215,8 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/new_without_parentheses
   . Added the #[\Deprecated] attribute.
     RFC: https://wiki.php.net/rfc/deprecated_attribute
+  . Implemented property hooks.
+    RFC: https://wiki.php.net/rfc/property-hooks
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an

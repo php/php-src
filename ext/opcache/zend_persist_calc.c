@@ -329,9 +329,8 @@ static void zend_persist_op_array_calc(zval *zv)
 	}
 }
 
-static void zend_persist_class_method_calc(zval *zv)
+static void zend_persist_class_method_calc(zend_op_array *op_array)
 {
-	zend_op_array *op_array = Z_PTR_P(zv);
 	zend_op_array *old_op_array;
 
 	if (op_array->type != ZEND_USER_FUNCTION) {
@@ -340,7 +339,7 @@ static void zend_persist_class_method_calc(zval *zv)
 			old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 			if (!old_op_array) {
 				ADD_SIZE(sizeof(zend_internal_function));
-				zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+				zend_shared_alloc_register_xlat_entry(op_array, op_array);
 			}
 		}
 		return;
@@ -356,8 +355,8 @@ static void zend_persist_class_method_calc(zval *zv)
 	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (!old_op_array) {
 		ADD_SIZE(sizeof(zend_op_array));
-		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
-		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
+		zend_persist_op_array_calc_ex(op_array);
+		zend_shared_alloc_register_xlat_entry(op_array, op_array);
 	} else {
 		/* If op_array is shared, the function name refcount is still incremented for each use,
 		 * so we need to release it here. We remembered the original function name in xlat. */
@@ -379,6 +378,14 @@ static void zend_persist_property_info_calc(zend_property_info *prop)
 	}
 	if (prop->attributes) {
 		zend_persist_attributes_calc(prop->attributes);
+	}
+	if (prop->hooks) {
+		ADD_SIZE(ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
+			if (prop->hooks[i]) {
+				zend_persist_class_method_calc(&prop->hooks[i]->op_array);
+			}
+		}
 	}
 }
 
@@ -433,7 +440,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 		ZEND_HASH_MAP_FOREACH_BUCKET(&ce->function_table, p) {
 			ZEND_ASSERT(p->key != NULL);
 			ADD_INTERNED_STRING(p->key);
-			zend_persist_class_method_calc(&p->val);
+			zend_persist_class_method_calc(Z_PTR(p->val));
 		} ZEND_HASH_FOREACH_END();
 		if (ce->default_properties_table) {
 		    int i;
