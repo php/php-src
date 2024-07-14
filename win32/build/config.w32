@@ -60,7 +60,7 @@ if (PHP_PREFIX == '') {
 }
 DEFINE('PHP_PREFIX', PHP_PREFIX);
 
-DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
+DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM ");
 
 toolset_setup_common_cflags();
 

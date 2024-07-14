@@ -1312,14 +1312,21 @@ fi
 
 ZEND_INIT
 
+dnl Prepend global include flags. The order of these flags is flexible, provided
+dnl each build directory precedes its corresponding source directory. This
+dnl enables developing in php-src using simultaneous in-source and out-of-source
+dnl builds together with angled brackets inclusion style of generated headers.
+dnl Note: The main is appended in front because of the <../main/php_config.h> in
+dnl 'zend_config.h'. This ensures the correct 'php_config.h' is included,
+dnl avoiding the inclusion of an unrelated 'build-dir/../main/php_config.h'.
+PHP_ADD_INCLUDE([$abs_srcdir/Zend], [1])
+PHP_ADD_INCLUDE([$abs_builddir/Zend], [1])
+PHP_ADD_INCLUDE([$abs_srcdir/TSRM], [1])
+PHP_ADD_INCLUDE([$abs_builddir/TSRM], [1])
 PHP_ADD_INCLUDE([$abs_srcdir], [1])
-PHP_ADD_INCLUDE([$abs_srcdir/main], [1])
 PHP_ADD_INCLUDE([$abs_builddir], [1])
+PHP_ADD_INCLUDE([$abs_srcdir/main], [1])
 PHP_ADD_INCLUDE([$abs_builddir/main], [1])
-PHP_ADD_INCLUDE([$abs_builddir/TSRM])
-PHP_ADD_INCLUDE([$abs_builddir/Zend])
-PHP_ADD_INCLUDE([$abs_srcdir/Zend])
-PHP_ADD_INCLUDE([$abs_srcdir/TSRM])
 
 ZEND_EXTRA_LIBS="$LIBS"
 unset LIBS
