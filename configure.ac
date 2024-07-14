@@ -745,11 +745,16 @@ PHP_ARG_WITH([valgrind],
   [no],
   [no])
 
-AS_VAR_IF([PHP_VALGRIND], [no],,
-  [PKG_CHECK_MODULES([VALGRIND], [valgrind],
-    [PHP_EVAL_INCLINE([$VALGRIND_CFLAGS])
-      AC_DEFINE([HAVE_VALGRIND], [1],
-        [Define to 1 if Valgrind is enabled and supported.])])])
+AS_VAR_IF([PHP_VALGRIND], [no],, [
+  PKG_CHECK_MODULES([VALGRIND], [valgrind],
+     [PHP_EVAL_INCLINE([$VALGRIND_CFLAGS])
+       AC_DEFINE([HAVE_VALGRIND], [1],
+        [Define to 1 if Valgrind is enabled and supported.])])
+  save_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $VALGRIND_CFLAGS"
+  AC_CHECK_HEADERS([valgrind/cachegrind.h])
+  CFLAGS=$save_CFLAGS
+])
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------

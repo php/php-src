@@ -93,6 +93,9 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 
 #ifdef HAVE_VALGRIND
 # include "valgrind/callgrind.h"
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+#  include "valgrind/cachegrind.h"
+# endif
 #endif
 
 #ifndef PHP_WIN32
@@ -2249,6 +2252,10 @@ parent_loop_end:
 								CALLGRIND_STOP_INSTRUMENTATION;
 								/* We're not interested in measuring startup */
 								CALLGRIND_ZERO_STATS;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+								CACHEGRIND_STOP_INSTRUMENTATION;
+								/* Zeroing stats is not supported for cachegrind. */
+# endif
 							}
 #endif
 						} else {
@@ -2461,6 +2468,9 @@ do_repeat:
 #ifdef HAVE_VALGRIND
 			if (warmup_repeats == 0) {
 				CALLGRIND_START_INSTRUMENTATION;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+				CACHEGRIND_START_INSTRUMENTATION;
+# endif
 			}
 #endif
 
@@ -2585,6 +2595,9 @@ fastcgi_request_done:
 #ifdef HAVE_VALGRIND
 			/* We're not interested in measuring shutdown */
 			CALLGRIND_STOP_INSTRUMENTATION;
+# ifdef HAVE_VALGRIND_CACHEGRIND_H
+			CACHEGRIND_STOP_INSTRUMENTATION;
+# endif
 #endif
 
 			if (!fastcgi) {
