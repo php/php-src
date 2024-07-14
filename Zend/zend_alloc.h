@@ -21,9 +21,7 @@
 #ifndef ZEND_ALLOC_H
 #define ZEND_ALLOC_H
 
-#include <stdio.h>
-
-#include "zend_types.h"
+#include "zend_portability.h"
 #include "../TSRM/TSRM.h"
 
 #ifndef ZEND_MM_ALIGNMENT
@@ -215,7 +213,7 @@ ZEND_API ZEND_ATTRIBUTE_MALLOC char * __zend_strdup(const char *s);
 #define perealloc2_recoverable_rel(ptr, size, copy_size, persistent) ((persistent)?realloc((ptr), (size)):erealloc2_recoverable_rel((ptr), (size), (copy_size)))
 #define pestrdup_rel(s, persistent) ((persistent)?strdup(s):estrdup_rel(s))
 
-ZEND_API zend_result zend_set_memory_limit(size_t memory_limit);
+ZEND_API bool zend_set_memory_limit(size_t memory_limit);
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void);
 
 ZEND_API void start_memory_manager(void);
