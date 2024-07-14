@@ -57,7 +57,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 			if (filedata) {
 				gdFree(filedata);
 			}
-			gd_error("WebP decode: realloc failed");
+			zend_error(E_ERROR, "WebP decode: realloc failed");
 			return NULL;
 		}
 
@@ -80,7 +80,7 @@ gdImagePtr gdImageCreateFromWebpCtx (gdIOCtx * infile)
 	}
 	argb = WebPDecodeARGB(filedata, size, &width, &height);
 	if (!argb) {
-		gd_error("gd-webp cannot allocate temporary buffer");
+		zend_error(E_ERROR, "gd-webp cannot allocate temporary buffer");
 		gdFree(filedata);
 		gdImageDestroy(im);
 		return NULL;
