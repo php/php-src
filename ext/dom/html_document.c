@@ -1655,7 +1655,7 @@ PHP_METHOD(Dom_HTMLDocument, debugGetTemplateCount)
 	DOM_GET_OBJ(doc, ZEND_THIS, xmlDocPtr, intern);
 	ZEND_IGNORE_VALUE(doc);
 
-	RETURN_LONG(php_dom_get_template_count((const php_dom_private_data *) intern->document->private_data));
+	RETURN_LONG((zend_long) php_dom_get_template_count((const php_dom_private_data *) intern->document->private_data));
 }
 #endif
 

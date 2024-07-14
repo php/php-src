@@ -27,11 +27,6 @@ struct php_dom_libxml_ns_mapper {
 	HashTable uri_to_prefix_map;
 };
 
-struct dom_ns_hook_token {
-	int tag;
-	struct php_dom_private_data *private_data;
-};
-
 typedef struct php_dom_private_data {
 	php_libxml_private_data_header header;
 	struct php_dom_libxml_ns_mapper ns_mapper;
@@ -55,7 +50,7 @@ void php_dom_add_templated_content(php_dom_private_data *private_data, const xml
 xmlNodePtr php_dom_retrieve_templated_content(php_dom_private_data *private_data, const xmlNode *template_node);
 xmlNodePtr php_dom_ensure_templated_content(php_dom_private_data *private_data, xmlNodePtr template_node);
 void php_dom_remove_templated_content(php_dom_private_data *private_data, const xmlNode *template_node);
-zend_long php_dom_get_template_count(const php_dom_private_data *private_data);
+uint32_t php_dom_get_template_count(const php_dom_private_data *private_data);
 void dom_add_element_ns_hook(php_dom_private_data *private_data, xmlNodePtr element);
 
 #endif

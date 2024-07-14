@@ -142,7 +142,7 @@ void php_dom_remove_templated_content(php_dom_private_data *private_data, const 
 	}
 }
 
-zend_long php_dom_get_template_count(const php_dom_private_data *private_data)
+uint32_t php_dom_get_template_count(const php_dom_private_data *private_data)
 {
 	if (private_data->template_fragments != NULL) {
 		return zend_hash_num_elements(private_data->template_fragments);
