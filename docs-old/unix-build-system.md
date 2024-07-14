@@ -72,7 +72,7 @@ Now, you need to tell the build system that you want to build files in a
 directory called `$ext_builddir/lib`:
 
 ```m4
-PHP_ADD_BUILD_DIR($ext_builddir/lib)
+PHP_ADD_BUILD_DIR([$ext_builddir/lib])
 ```
 
 Make sure to call this after `PHP_NEW_EXTENSION`, because `$ext_builddir` is

@@ -100,21 +100,23 @@ if test "$PHP_INTL" != "no"; then
     PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS, shared_objects_intl, yes)
   fi
 
-  PHP_ADD_BUILD_DIR($ext_builddir/collator)
-  PHP_ADD_BUILD_DIR($ext_builddir/converter)
-  PHP_ADD_BUILD_DIR($ext_builddir/common)
-  PHP_ADD_BUILD_DIR($ext_builddir/formatter)
-  PHP_ADD_BUILD_DIR($ext_builddir/normalizer)
-  PHP_ADD_BUILD_DIR($ext_builddir/dateformat)
-  PHP_ADD_BUILD_DIR($ext_builddir/locale)
-  PHP_ADD_BUILD_DIR($ext_builddir/msgformat)
-  PHP_ADD_BUILD_DIR($ext_builddir/grapheme)
-  PHP_ADD_BUILD_DIR($ext_builddir/resourcebundle)
-  PHP_ADD_BUILD_DIR($ext_builddir/transliterator)
-  PHP_ADD_BUILD_DIR($ext_builddir/timezone)
-  PHP_ADD_BUILD_DIR($ext_builddir/calendar)
-  PHP_ADD_BUILD_DIR($ext_builddir/idn)
-  PHP_ADD_BUILD_DIR($ext_builddir/spoofchecker)
-  PHP_ADD_BUILD_DIR($ext_builddir/breakiterator)
-  PHP_ADD_BUILD_DIR($ext_builddir/uchar)
+  PHP_ADD_BUILD_DIR([m4_normalize([
+    $ext_builddir/breakiterator
+    $ext_builddir/calendar
+    $ext_builddir/collator
+    $ext_builddir/common
+    $ext_builddir/converter
+    $ext_builddir/dateformat
+    $ext_builddir/formatter
+    $ext_builddir/grapheme
+    $ext_builddir/idn
+    $ext_builddir/locale
+    $ext_builddir/msgformat
+    $ext_builddir/normalizer
+    $ext_builddir/resourcebundle
+    $ext_builddir/spoofchecker
+    $ext_builddir/timezone
+    $ext_builddir/transliterator
+    $ext_builddir/uchar
+  ])])
 fi

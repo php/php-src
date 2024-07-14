@@ -27,7 +27,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   PHP_SUBST([MBSTRING_SHARED_LIBADD])
 
   for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
-    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], 1)
+    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], [1])
   done
 
   for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
