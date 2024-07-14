@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0alpha2
 
-- Core:
-  . Fixed bug GH-14801 (Fix build for armv7). (andypost)
-
 - GD:
   . Check overflow/underflow for imagescale/imagefilter. (David Carlier)
 
@@ -57,6 +54,7 @@ PHP                                                                        NEWS
     (Peter Kokot)
   . Added the #[\Deprecated] attribute. (beberlei, timwolla)
   . Fixed GH-11389 (Allow suspending fibers in destructors). (Arnaud, trowski)
+  . Fixed bug GH-14801 (Fix build for armv7). (andypost)
 
 - Curl:
   . Deprecated the CURLOPT_BINARYTRANSFER constant. (divinity76)
