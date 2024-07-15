@@ -108,9 +108,10 @@ PHPAPI unsigned int php_version_id(void)
 	return PHP_VERSION_ID;
 }
 
-PHPAPI void php_print_version(sapi_module_struct *sapi_module)
+PHPAPI char *php_get_version(sapi_module_struct *sapi_module)
 {
-	php_printf("PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
+	char *version_info;
+	int size = spprintf(&version_info, 0, "PHP %s (%s) (built: %s %s) (%s)\nCopyright (c) The PHP Group\n%s%s",
 		PHP_VERSION, sapi_module->name, __DATE__, __TIME__,
 #ifdef ZTS
 		"ZTS"
@@ -138,6 +139,14 @@ PHPAPI void php_print_version(sapi_module_struct *sapi_module)
 		,
 		get_zend_version()
 	);
+	return version_info;
+}
+
+PHPAPI void php_print_version(sapi_module_struct *sapi_module)
+{
+	char *version_info = php_get_version(sapi_module);
+	php_printf("%s", version_info);
+	efree(version_info);
 }
 
 /* {{{ PHP_INI_MH */
