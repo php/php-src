@@ -71,7 +71,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
         ;;
   esac
 
-  if test ! -z "$pdo_odbc_pkgconfig_module"; then
+  if test -n "$pdo_odbc_pkgconfig_module"; then
     AC_MSG_RESULT([$pdo_odbc_flavour using pkg-config])
     PKG_CHECK_MODULES([PDO_ODBC], [$pdo_odbc_pkgconfig_module])
   else
@@ -115,7 +115,7 @@ functions required for PDO support.
   PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
   PHP_EVAL_LIBLINE([$PDO_ODBC_LIBS], [PDO_ODBC_SHARED_LIBADD])
 
-  OLD_CPPFLAGS="$CPPFLAGS"
+  OLD_CPPFLAGS=$CPPFLAGS
   CPPFLAGS="$CPPFLAGS $PDO_ODBC_CFLAGS"
   PHP_PDO_ODBC_CHECK_HEADER([cli0cli.h])
   PHP_PDO_ODBC_CHECK_HEADER([cli0core.h])
@@ -134,7 +134,7 @@ functions required for PDO support.
   PHP_PDO_ODBC_CHECK_HEADER([sqlucode.h])
   PHP_PDO_ODBC_CHECK_HEADER([sqlunix.h])
   PHP_PDO_ODBC_CHECK_HEADER([udbcext.h])
-  CPPFLAGS="$OLD_CPPFLAGS"
+  CPPFLAGS=$OLD_CPPFLAGS
 
   AS_VAR_IF([php_pdo_odbc_have_header], [yes],,
     [AC_MSG_ERROR([Cannot find header file(s) for pdo_odbc.])])
