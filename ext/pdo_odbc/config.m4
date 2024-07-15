@@ -73,8 +73,6 @@ if test "$PHP_PDO_ODBC" != "no"; then
   if test ! -z "$pdo_odbc_pkgconfig_module"; then
     AC_MSG_RESULT([$pdo_odbc_flavour using pkg-config])
     PKG_CHECK_MODULES([PDO_ODBC], [$pdo_odbc_pkgconfig_module])
-    PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
-    PHP_EVAL_LIBLINE([$PDO_ODBC_LIBS], [PDO_ODBC_SHARED_LIBADD])
   else
     if test -n "$pdo_odbc_dir"; then
       PDO_ODBC_INCDIR="$pdo_odbc_dir/include"
@@ -93,10 +91,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
     fi
 
     PDO_ODBC_CFLAGS="$pdo_odbc_def_cflags -I$PDO_ODBC_INCDIR"
-    PDO_ODBC_LDFLAGS="$pdo_odbc_def_ldflags -L$PDO_ODBC_LIBDIR -l$pdo_odbc_def_lib"
-
-    PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
-    PHP_EVAL_LIBLINE([$PDO_ODBC_LDFLAGS], [PDO_ODBC_SHARED_LIBADD])
+    PDO_ODBC_LIBS="$pdo_odbc_def_ldflags -L$PDO_ODBC_LIBDIR -l$pdo_odbc_def_lib"
 
     dnl Check first for an ODBC 1.0 function to assert that the libraries work
     PHP_CHECK_LIBRARY($pdo_odbc_def_lib, SQLBindCol,
@@ -110,11 +105,14 @@ Your ODBC library does not appear to be ODBC 3 compatible.
 You should consider using iODBC or unixODBC instead, and loading your
 libraries as a driver in that environment; it will emulate the
 functions required for PDO support.
-])], $PDO_ODBC_LDFLAGS)
+])], $PDO_ODBC_LIBS)
     ],[
       AC_MSG_ERROR([Your ODBC library does not exist or there was an error. Check config.log for more information])
-    ], $PDO_ODBC_LDFLAGS)
+    ], $PDO_ODBC_LIBS)
   fi
+
+  PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
+  PHP_EVAL_LIBLINE([$PDO_ODBC_LIBS], [PDO_ODBC_SHARED_LIBADD])
 
   OLD_CPPFLAGS="$CPPFLAGS"
   CPPFLAGS="$CPPFLAGS $PDO_ODBC_CFLAGS"
