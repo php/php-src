@@ -961,6 +961,7 @@ try_again:
 					goto exit;
 				}
 
+typed_property:
 				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
 				GC_ADDREF(zobj);
@@ -977,7 +978,7 @@ try_again:
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-				Z_PROP_FLAG_P(variable_ptr) &= ~IS_PROP_REINITABLE;
+				Z_PROP_FLAG_P(variable_ptr) &= ~(IS_PROP_UNINIT|IS_PROP_REINITABLE);
 				value = &tmp;
 			}
 
@@ -1105,25 +1106,7 @@ write_std_property:
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
-
-				ZVAL_COPY_VALUE(&tmp, value);
-				// Increase refcount to prevent object from being released in __toString()
-				GC_ADDREF(zobj);
-				bool type_matched = zend_verify_property_type(prop_info, &tmp, property_uses_strict_types());
-				if (UNEXPECTED(GC_DELREF(zobj) == 0)) {
-					zend_object_released_while_assigning_to_property_error(prop_info);
-					zend_objects_store_del(zobj);
-					zval_ptr_dtor(&tmp);
-					variable_ptr = &EG(error_zval);
-					goto exit;
-				}
-				if (UNEXPECTED(!type_matched)) {
-					zval_ptr_dtor(value);
-					goto exit;
-				}
-				value = &tmp;
-				Z_PROP_FLAG_P(variable_ptr) = 0;
-				goto found; /* might have been updated via e.g. __toString() */
+				goto typed_property;
 			}
 
 			ZVAL_COPY_VALUE(variable_ptr, value);
