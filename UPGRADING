@@ -566,6 +566,7 @@ PHP 8.4 UPGRADE NOTES
   . output_add_rewrite_var() now uses url_rewriter.hosts instead of
     session.trans_sid_hosts for selecting hosts that will be rewritten.
   . highlight_string() now has a return type of string|true instead of string|bool.
+  . print_r() now has a return type of string|true instead of string|bool.
 
 ========================================
 6. New Functions

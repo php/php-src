@@ -2050,7 +2050,7 @@ function set_include_path(string $include_path): string|false {}
 function get_include_path(): string|false {}
 
 /** @refcount 1 */
-function print_r(mixed $value, bool $return = false): string|bool {}
+function print_r(mixed $value, bool $return = false): string|true {}
 
 function connection_aborted(): int {}
 
