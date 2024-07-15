@@ -26,6 +26,10 @@ PHP                                                                        NEWS
 - Standard:
   . Change highlight_string() and print_r() return type to string|true. (Ayesh)
 
+- Windows:
+  . Update the icon of the Windows executables, e.g. php.exe. (Ayesh,
+    Nurudin Imširović)
+
 - XML:
   . Fixed bug #81481 (xml_get_current_byte_index limited to 32-bit numbers on
     64-bit builds). (nielsdos)
