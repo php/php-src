@@ -170,6 +170,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      PGSQL_LIBS environment variables. When a directory argument is provided to
      configure options (--with-pgsql=DIR or --with-pdo-pgsql=DIR), it will be
      used instead of the pkg-config search.
+   - Added pkg-config support to find unixODBC and iODBC for the pdo_odbc
+     extension.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
 
