@@ -17,14 +17,13 @@ PHP_ARG_WITH([pdo-odbc],
     [PDO: Support for 'flavour' ODBC driver.]PDO_ODBC_HELP_TEXT)])
 
 AC_DEFUN([PHP_PDO_ODBC_CHECK_HEADER],
-[AC_MSG_CHECKING([for $1 in $PDO_ODBC_INCDIR])
-  AS_IF([test -f "$PDO_ODBC_INCDIR/$1"], [
+[AC_MSG_CHECKING([for $1])
+  AC_PREPROC_IFELSE([AC_LANG_PROGRAM([#include <$1>], [])], [
     php_pdo_odbc_have_header=yes
     AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
       [Define to 1 if you have the <$1> header file.])
-    AC_MSG_RESULT([yes])
-  ],
-  [AC_MSG_RESULT([no])])
+      AC_MSG_RESULT([yes])
+  ], [AC_MSG_RESULT([no])])
 ])
 
 if test "$PHP_PDO_ODBC" != "no"; then
@@ -74,9 +73,6 @@ if test "$PHP_PDO_ODBC" != "no"; then
   if test ! -z "$pdo_odbc_pkgconfig_module"; then
     AC_MSG_RESULT([$pdo_odbc_flavour using pkg-config])
     PKG_CHECK_MODULES([PDO_ODBC], [$pdo_odbc_pkgconfig_module])
-    dnl PHP_ODBC_INCDIR is only used by PHP_PDO_ODBC_CHECK_HEADER
-    dnl when using pkg-config, so snarf the includedir from it.
-    PDO_ODBC_INCDIR=$($PKG_CONFIG --variable=includedir $pdo_odbc_pkgconfig_module)
     PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
     PHP_EVAL_LIBLINE([$PDO_ODBC_LIBS], [PDO_ODBC_SHARED_LIBADD])
     PDO_ODBC_INCLUDE="$PDO_ODBC_CFLAGS -DPDO_ODBC_TYPE=\\\"$pdo_odbc_flavour\\\""
@@ -120,6 +116,8 @@ functions required for PDO support.
     ], $PDO_ODBC_LDFLAGS)
   fi
 
+  OLD_CPPFLAGS="$CPPFLAGS"
+  CPPFLAGS="$CPPFLAGS $PDO_ODBC_INCLUDE"
   PHP_PDO_ODBC_CHECK_HEADER([cli0cli.h])
   PHP_PDO_ODBC_CHECK_HEADER([cli0core.h])
   PHP_PDO_ODBC_CHECK_HEADER([cli0defs.h])
@@ -137,6 +135,7 @@ functions required for PDO support.
   PHP_PDO_ODBC_CHECK_HEADER([sqlucode.h])
   PHP_PDO_ODBC_CHECK_HEADER([sqlunix.h])
   PHP_PDO_ODBC_CHECK_HEADER([udbcext.h])
+  CPPFLAGS="$OLD_CPPFLAGS"
 
   AS_VAR_IF([php_pdo_odbc_have_header], [yes],,
     [AC_MSG_ERROR([Cannot find header file(s) for pdo_odbc.])])
