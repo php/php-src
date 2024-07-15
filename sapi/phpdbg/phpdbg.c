@@ -1373,7 +1373,7 @@ phpdbg_main:
 				char *version_info = php_get_version(&phpdbg_sapi_module);
 				/* we also want to include phpdbg version */
 				char *prepended_version_info;
-				int pvi_size = spprintf(&prepended_version_info, 0,
+				spprintf(&prepended_version_info, 0,
 						"phpdbg %s, %s", PHPDBG_VERSION, version_info);
 				phpdbg_out(prepended_version_info);
 				efree(prepended_version_info);
