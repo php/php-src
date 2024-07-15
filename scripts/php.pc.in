@@ -24,7 +24,7 @@ php_inipath=@EXPANDED_PHP_CONFIG_FILE_PATH@
 # Whether PHP is built in debug mode (yes) or not (no).
 php_debug=@ZEND_DEBUG@
 # Whether PHP is built with thread safety (yes) or not (no).
-php_zts=@ZEND_ZTS@
+php_zts=@PHP_THREAD_SAFETY@
 
 Name: PHP
 Description: Build extension for a PHP general-purpose scripting language
@@ -32,5 +32,5 @@ URL: https://www.php.net
 License: PHP
 Version: @PHP_VERSION@
 CFlags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
-Libs.private: @PHP_LIBS_PRIVATE@
+Libs.private: @EXTRA_LIBS@ @ZEND_EXTRA_LIBS@
 Libs:
