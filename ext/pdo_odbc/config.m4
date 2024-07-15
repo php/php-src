@@ -97,9 +97,6 @@ if test "$PHP_PDO_ODBC" != "no"; then
       AC_MSG_WARN([library dir $PDO_ODBC_LIBDIR does not exist])
     fi
 
-    AS_VAR_IF([php_pdo_odbc_have_header], [yes],,
-      [AC_MSG_ERROR([Cannot find header file(s) for pdo_odbc.])])
-
     PDO_ODBC_INCLUDE="$pdo_odbc_def_cflags -I$PDO_ODBC_INCDIR -DPDO_ODBC_TYPE=\\\"$pdo_odbc_flavour\\\""
     PDO_ODBC_LDFLAGS="$pdo_odbc_def_ldflags -L$PDO_ODBC_LIBDIR -l$pdo_odbc_def_lib"
 
@@ -140,6 +137,9 @@ functions required for PDO support.
   PHP_PDO_ODBC_CHECK_HEADER([sqlucode.h])
   PHP_PDO_ODBC_CHECK_HEADER([sqlunix.h])
   PHP_PDO_ODBC_CHECK_HEADER([udbcext.h])
+
+  AS_VAR_IF([php_pdo_odbc_have_header], [yes],,
+    [AC_MSG_ERROR([Cannot find header file(s) for pdo_odbc.])])
 
   PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,, $PDO_ODBC_INCLUDE)
   PHP_SUBST([PDO_ODBC_SHARED_LIBADD])
