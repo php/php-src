@@ -75,7 +75,6 @@ if test "$PHP_PDO_ODBC" != "no"; then
     PKG_CHECK_MODULES([PDO_ODBC], [$pdo_odbc_pkgconfig_module])
     PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
     PHP_EVAL_LIBLINE([$PDO_ODBC_LIBS], [PDO_ODBC_SHARED_LIBADD])
-    PDO_ODBC_INCLUDE="$PDO_ODBC_CFLAGS -DPDO_ODBC_TYPE=\\\"$pdo_odbc_flavour\\\""
   else
     if test -n "$pdo_odbc_dir"; then
       PDO_ODBC_INCDIR="$pdo_odbc_dir/include"
@@ -93,9 +92,10 @@ if test "$PHP_PDO_ODBC" != "no"; then
       AC_MSG_WARN([library dir $PDO_ODBC_LIBDIR does not exist])
     fi
 
-    PDO_ODBC_INCLUDE="$pdo_odbc_def_cflags -I$PDO_ODBC_INCDIR -DPDO_ODBC_TYPE=\\\"$pdo_odbc_flavour\\\""
+    PDO_ODBC_CFLAGS="$pdo_odbc_def_cflags -I$PDO_ODBC_INCDIR"
     PDO_ODBC_LDFLAGS="$pdo_odbc_def_ldflags -L$PDO_ODBC_LIBDIR -l$pdo_odbc_def_lib"
 
+    PHP_EVAL_INCLINE([$PDO_ODBC_CFLAGS])
     PHP_EVAL_LIBLINE([$PDO_ODBC_LDFLAGS], [PDO_ODBC_SHARED_LIBADD])
 
     dnl Check first for an ODBC 1.0 function to assert that the libraries work
@@ -117,7 +117,7 @@ functions required for PDO support.
   fi
 
   OLD_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS $PDO_ODBC_INCLUDE"
+  CPPFLAGS="$CPPFLAGS $PDO_ODBC_CFLAGS"
   PHP_PDO_ODBC_CHECK_HEADER([cli0cli.h])
   PHP_PDO_ODBC_CHECK_HEADER([cli0core.h])
   PHP_PDO_ODBC_CHECK_HEADER([cli0defs.h])
@@ -140,7 +140,10 @@ functions required for PDO support.
   AS_VAR_IF([php_pdo_odbc_have_header], [yes],,
     [AC_MSG_ERROR([Cannot find header file(s) for pdo_odbc.])])
 
-  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared,, $PDO_ODBC_INCLUDE)
+  AC_DEFINE_UNQUOTED([PDO_ODBC_TYPE], ["$pdo_odbc_flavour"],
+    [Define to the ODBC driver or driver manager value.])
+
+  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared)
   PHP_SUBST([PDO_ODBC_SHARED_LIBADD])
   PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
 fi
