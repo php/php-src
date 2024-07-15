@@ -2024,7 +2024,7 @@ function show_source(string $filename, bool $return = false): string|bool {}
 function php_strip_whitespace(string $filename): string {}
 
 /** @refcount 1 */
-function highlight_string(string $string, bool $return = false): string|bool {}
+function highlight_string(string $string, bool $return = false): string|true {}
 
 function ini_get(string $option): string|false {}
 
@@ -2050,7 +2050,7 @@ function set_include_path(string $include_path): string|false {}
 function get_include_path(): string|false {}
 
 /** @refcount 1 */
-function print_r(mixed $value, bool $return = false): string|bool {}
+function print_r(mixed $value, bool $return = false): string|true {}
 
 function connection_aborted(): int {}
 
