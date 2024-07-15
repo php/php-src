@@ -102,14 +102,28 @@ function run_standard_tests_ex(string $handler, string $name, LockFlag $lock, bo
     echo 'Try to remove key 1 again', \PHP_EOL;
     var_dump(dba_delete("key1", $db_writer));
 
-    // Fetch data
+    // Fetch and sort data. We sort to guarantee that the output is
+    // always the same across architectures. GDBM in particular does
+    // not guarantee that the insert order is the same as the
+    // iteration order with firstkey() and nextkey(). There is a
+    // Github report (issue 14786) of this actually happening. GDBM's
+    // own test suite sorts its output, suggesting that this is a
+    // reasonable workaround for the issue.
+    $output = [];
+
     $key = dba_firstkey($db_writer);
     $total_keys = 0;
     while ($key) {
-        echo $key, ': ', dba_fetch($key, $db_writer), \PHP_EOL;
+        $output[] = $key . ': ' . dba_fetch($key, $db_writer) . \PHP_EOL;
         $key = dba_nextkey($db_writer);
         $total_keys++;
     }
+
+    sort($output, SORT_STRING);
+    foreach ($output as $line) {
+        echo $line;
+    }
+
     echo 'Total keys: ', $total_keys, \PHP_EOL;
     for ($i = 1; $i < 6; $i++) {
         echo "Key $i exists? ", dba_exists("key$i", $db_writer) ? 'Y' : 'N', \PHP_EOL;
