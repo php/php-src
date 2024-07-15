@@ -316,12 +316,20 @@ static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
 		ZSTR_VAL(ce->name), ZSTR_VAL(member));
 }
 
+static zend_always_inline zend_class_entry *get_fake_or_executed_scope(void)
+{
+	if (UNEXPECTED(EG(fake_scope))) {
+		return EG(fake_scope);
+	} else {
+		return zend_get_executed_scope();
+	}
+}
+
 static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, const zend_property_info **info_ptr) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info;
 	uint32_t flags;
-	zend_class_entry *scope;
 	uintptr_t offset;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
@@ -349,11 +357,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		if (UNEXPECTED(EG(fake_scope))) {
-			scope = EG(fake_scope);
-		} else {
-			scope = zend_get_executed_scope();
-		}
+		zend_class_entry *scope = get_fake_or_executed_scope();
 
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
@@ -436,7 +440,6 @@ ZEND_API zend_property_info *zend_get_property_info(const zend_class_entry *ce, 
 	zval *zv;
 	zend_property_info *property_info;
 	uint32_t flags;
-	zend_class_entry *scope;
 
 	if (UNEXPECTED(zend_hash_num_elements(&ce->properties_info) == 0)
 	 || EXPECTED((zv = zend_hash_find(&ce->properties_info, member)) == NULL)) {
@@ -454,11 +457,7 @@ dynamic:
 	flags = property_info->flags;
 
 	if (flags & (ZEND_ACC_CHANGED|ZEND_ACC_PRIVATE|ZEND_ACC_PROTECTED)) {
-		if (UNEXPECTED(EG(fake_scope))) {
-			scope = EG(fake_scope);
-		} else {
-			scope = zend_get_executed_scope();
-		}
+		zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (flags & ZEND_ACC_CHANGED) {
 				zend_property_info *p = zend_get_parent_private_property(scope, ce, member);
@@ -917,12 +916,7 @@ static zend_always_inline bool property_uses_strict_types(void) {
 static bool verify_readonly_initialization_access(
 		const zend_property_info *prop_info, const zend_class_entry *ce,
 		zend_string *name, const char *operation) {
-	zend_class_entry *scope;
-	if (UNEXPECTED(EG(fake_scope))) {
-		scope = EG(fake_scope);
-	} else {
-		scope = zend_get_executed_scope();
-	}
+	zend_class_entry *scope = get_fake_or_executed_scope();
 	if (prop_info->ce == scope) {
 		return true;
 	}
@@ -1839,7 +1833,6 @@ ZEND_API void zend_class_init_statics(zend_class_entry *class_type) /* {{{ */
 ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend_string *property_name, int type, zend_property_info **property_info_ptr) /* {{{ */
 {
 	zval *ret;
-	zend_class_entry *scope;
 	zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property_name);
 	*property_info_ptr = property_info;
 
@@ -1848,11 +1841,7 @@ ZEND_API zval *zend_std_get_static_property_with_info(zend_class_entry *ce, zend
 	}
 
 	if (!(property_info->flags & ZEND_ACC_PUBLIC)) {
-		if (UNEXPECTED(EG(fake_scope))) {
-			scope = EG(fake_scope);
-		} else {
-			scope = zend_get_executed_scope();
-		}
+		zend_class_entry *scope = get_fake_or_executed_scope();
 		if (property_info->ce != scope) {
 			if (UNEXPECTED(property_info->flags & ZEND_ACC_PRIVATE)
 			 || UNEXPECTED(!is_protected_compatible_scope(property_info->ce, scope))) {
@@ -1933,15 +1922,10 @@ static ZEND_COLD zend_never_inline void zend_bad_constructor_call(zend_function 
 ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 {
 	zend_function *constructor = zobj->ce->constructor;
-	zend_class_entry *scope;
 
 	if (constructor) {
 		if (UNEXPECTED(!(constructor->op_array.fn_flags & ZEND_ACC_PUBLIC))) {
-			if (UNEXPECTED(EG(fake_scope))) {
-				scope = EG(fake_scope);
-			} else {
-				scope = zend_get_executed_scope();
-			}
+			zend_class_entry *scope = get_fake_or_executed_scope();
 			if (UNEXPECTED(constructor->common.scope != scope)) {
 				if (UNEXPECTED(constructor->op_array.fn_flags & ZEND_ACC_PRIVATE)
 				 || UNEXPECTED(!zend_check_protected(zend_get_function_root_class(constructor), scope))) {
