@@ -23,7 +23,8 @@ AC_DEFUN([PHP_PDO_ODBC_CHECK_HEADER],
     AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
       [Define to 1 if you have the <$1> header file.])
       AC_MSG_RESULT([yes])
-  ], [AC_MSG_RESULT([no])])
+  ],
+  [AC_MSG_RESULT([no])])
 ])
 
 if test "$PHP_PDO_ODBC" != "no"; then
