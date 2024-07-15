@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-14792 (Compilation failure on pdo_* extensions).
     (Peter Kokot)
 
+- Standard:
+  . Change highlight_string() and print_r() return type to string|true. (Ayesh)
+
 - XML:
   . Fixed bug #81481 (xml_get_current_byte_index limited to 32-bit numbers on
     64-bit builds). (nielsdos)
