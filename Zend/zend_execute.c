@@ -3070,17 +3070,13 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 			goto clean_up;
 		}
 		/* Check if we need to auto-vivify a possible null return */
-		if (Z_ISREF_P(result) && Z_ISNULL_P(Z_REFVAL_P(result))) {
-			const zend_op *next_opline = execute_data->opline + 1;
-			if (UNEXPECTED(
-				next_opline->opcode == ZEND_ASSIGN_DIM
-				|| next_opline->opcode == ZEND_ASSIGN_DIM_OP
-				|| next_opline->opcode == ZEND_FETCH_DIM_W
-				|| next_opline->opcode == ZEND_FETCH_DIM_RW
-			)) {
-				// TODO THIS IS A VERY CRUDE PROTOTYPE
-				object_init_ex(Z_REFVAL_P(result), obj->ce);
-			}
+		if (UNEXPECTED(
+			opline->extended_value == ZEND_FETCH_DIM_DIM
+			&& Z_ISREF_P(result)
+			&& Z_ISNULL_P(Z_REFVAL_P(result))
+		)) {
+			// TODO THIS IS A VERY CRUDE PROTOTYPE
+			object_init_ex(Z_REFVAL_P(result), obj->ce);
 		}
 		if (result != retval) {
 			ZVAL_INDIRECT(result, retval);
