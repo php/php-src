@@ -1090,11 +1090,10 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_TENTATIVE_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce. Set in zend_compile.c for ZEND_AST_DIM nested within ZEND_AST_COALESCE. */
-#define ZEND_DIM_ALTERNATIVE_SYNTAX	(1 << 1) /* deprecated curly brace usage */
 
 /* Attributes for ${} encaps var in strings (ZEND_AST_DIM or ZEND_AST_VAR node) */
 /* ZEND_AST_VAR nodes can have any of the ZEND_ENCAPS_VAR_* flags */
-/* ZEND_AST_DIM flags can have ZEND_DIM_ALTERNATIVE_SYNTAX or ZEND_ENCAPS_VAR_DOLLAR_CURLY during the parse phase (ZEND_DIM_ALTERNATIVE_SYNTAX is a thrown fatal error). */
+/* ZEND_AST_DIM flags can have ZEND_ENCAPS_VAR_DOLLAR_CURLY during the parse phase. */
 #define ZEND_ENCAPS_VAR_DOLLAR_CURLY (1 << 0)
 #define ZEND_ENCAPS_VAR_DOLLAR_CURLY_VAR_VAR (1 << 1)
 
