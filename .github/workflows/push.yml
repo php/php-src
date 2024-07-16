@@ -222,7 +222,7 @@ jobs:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: master
+      PHP_BUILD_SDK_BRANCH: 2.3.0
       PHP_BUILD_CRT: vs16
       PLATFORM: x64
       THREAD_SAFE: "1"
