@@ -925,7 +925,7 @@ static zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, z
 	return &iterator->intern;
 }
 
-static /* const */ zend_class_dimensions_functions spl_fixed_array_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions spl_fixed_array_dimensions_functions = {
 	.read_dimension  = spl_fixedarray_object_read_dimension,
 	.has_dimension   = spl_fixedarray_object_has_dimension,
 	.fetch_dimension = spl_fixedarray_object_fetch_dimension,

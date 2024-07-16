@@ -768,7 +768,7 @@ ZEND_METHOD(WeakMap, getIterator)
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-static /* const */ zend_class_dimensions_functions zend_weakmap_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions zend_weakmap_dimensions_functions = {
 	.read_dimension  = zend_weakmap_read_dimension,
 	.has_dimension   = zend_weakmap_has_dimension,
 	.fetch_dimension = zend_weakmap_fetch_dimension,

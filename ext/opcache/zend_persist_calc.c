@@ -489,7 +489,7 @@ void zend_persist_class_entry_calc(zend_class_entry *ce)
 			ADD_SIZE(sizeof(zend_class_iterator_funcs));
 		}
 		if (ce->dimension_handlers) {
-			ADD_SIZE(sizeof(zend_class_dimensions_functions));
+			ADD_SIZE(sizeof(zend_internal_class_dimensions_functions));
 		}
 
 		if (ce->ce_flags & ZEND_ACC_CACHED) {

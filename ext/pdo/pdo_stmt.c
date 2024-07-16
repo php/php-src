@@ -2502,7 +2502,7 @@ PHP_METHOD(PDORow, offsetExists)
 	}
 }
 
-static /* const */ zend_class_dimensions_functions pdo_row_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions pdo_row_dimensions_functions = {
 	.read_dimension = row_dim_read,
 	.has_dimension  = row_dim_exists,
 };

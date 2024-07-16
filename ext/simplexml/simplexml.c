@@ -2724,7 +2724,7 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 ZEND_GET_MODULE(simplexml)
 #endif
 
-static /* const */ zend_class_dimensions_functions sxe_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions sxe_dimensions_functions = {
 	.read_dimension  = sxe_dimension_read,
 	.has_dimension   = sxe_dimension_exists,
 	.fetch_dimension = sxe_dimension_fetch,

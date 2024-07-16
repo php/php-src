@@ -214,7 +214,7 @@ static zval *zend_ffi_cdata_read_dim(zend_object *obj, zval *offset, zval *rv);
 static zval *zend_ffi_cdata_fetch_dim(zend_object *obj, zval *offset, zval *rv);
 static bool zend_ffi_cdata_has_dim(zend_object *obj, zval *offset);
 static void zend_ffi_cdata_write_dim(zend_object *obj, zval *offset, zval *value);
-static const zend_class_dimensions_functions zend_ffi_cdata_dimensions_functions = {
+static const zend_internal_class_dimensions_functions zend_ffi_cdata_dimensions_functions = {
 	.read_dimension = zend_ffi_cdata_read_dim,
 	.has_dimension = zend_ffi_cdata_has_dim,
 	.fetch_dimension = zend_ffi_cdata_fetch_dim,
@@ -5430,7 +5430,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_ce = register_class_FFI_CData();
 	zend_ffi_cdata_ce->create_object = zend_ffi_cdata_new;
 	zend_ffi_cdata_ce->default_object_handlers = &zend_ffi_cdata_handlers;
-	zend_ffi_cdata_ce->dimension_handlers = (zend_class_dimensions_functions*)&zend_ffi_cdata_dimensions_functions;
+	zend_ffi_cdata_ce->dimension_handlers = (zend_internal_class_dimensions_functions*)&zend_ffi_cdata_dimensions_functions;
 	zend_ffi_cdata_ce->get_iterator = zend_ffi_cdata_get_iterator;
 
 	memcpy(&zend_ffi_cdata_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));

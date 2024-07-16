@@ -1347,7 +1347,7 @@ PHP_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
-static /* const */ zend_class_dimensions_functions spl_object_storage_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions spl_object_storage_dimensions_functions = {
 	.read_dimension  = spl_object_storage_read_dimension,
 	.has_dimension   = spl_object_storage_has_dimension,
 	// TODO Support fetching?

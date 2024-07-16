@@ -201,8 +201,11 @@ struct _zend_class_entry {
 	int (*serialize)(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data);
 	int (*unserialize)(zval *object, zend_class_entry *ce, const unsigned char *buf, size_t buf_len, zend_unserialize_data *data);
 
-	/* dimension handler callbacks */
-	zend_class_dimensions_functions *dimension_handlers;
+	/* C dimension handler callbacks for internal classes, and zend_function* pointers for userland classes */
+	union {
+		zend_user_class_dimensions_functions *dimension_functions;
+		zend_internal_class_dimensions_functions *dimension_handlers;
+	};
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;

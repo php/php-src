@@ -1002,7 +1002,7 @@ zend_class_entry *zend_persist_class_entry(zend_class_entry *orig_ce)
 			ce->iterator_funcs_ptr = zend_shared_memdup(ce->iterator_funcs_ptr, sizeof(zend_class_iterator_funcs));
 		}
 		if (ce->dimension_handlers) {
-			ce->dimension_handlers = zend_shared_memdup(ce->dimension_handlers, sizeof(zend_class_dimensions_functions));
+			ce->dimension_handlers = zend_shared_memdup(ce->dimension_handlers, sizeof(zend_internal_class_dimensions_functions));
 		}
 
 		if (ce->ce_flags & ZEND_ACC_CACHED) {

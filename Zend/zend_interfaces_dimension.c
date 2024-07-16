@@ -34,6 +34,229 @@ ZEND_API zend_class_entry *zend_ce_dimension_unset;
 ZEND_API zend_class_entry *zend_ce_appendable;
 ZEND_API zend_class_entry *zend_ce_dimension_fetch_append;
 
+ZEND_API zval* zend_class_read_dimension(zend_object *object, zval *offset, zval *rv) {
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_function *zf = object->ce->dimension_functions->read_dimension;
+		ZEND_ASSERT(zf);
+		zval tmp_offset;
+		ZVAL_COPY_DEREF(&tmp_offset, offset);
+
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_1_params(
+			//object->ce->dimension_functions->read_dimension,
+			zf,
+			object, rv, offset);
+		OBJ_RELEASE(object);
+		zval_ptr_dtor(&tmp_offset);
+
+		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
+			ZEND_ASSERT(EG(exception));
+			return NULL;
+		}
+		return rv;
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		return object->ce->dimension_handlers->read_dimension(object, offset, rv);
+	}
+}
+
+ZEND_API bool zend_class_has_dimension(zend_object *object, zval *offset)
+{
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_class_entry *ce = object->ce;
+		zval tmp_offset;
+		zval isset_method_rv;
+		bool is_set = false;
+
+		zend_function *zf_has = ce->dimension_functions->has_dimension;
+		ZEND_ASSERT(zf_has);
+		ZEND_ASSERT(offset);
+
+		ZVAL_COPY_DEREF(&tmp_offset, offset);
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_1_params(zf_has, object, &isset_method_rv, &tmp_offset);
+
+		if (UNEXPECTED(Z_TYPE(isset_method_rv) == IS_UNDEF)) {
+			ZEND_ASSERT(EG(exception));
+		} else {
+			// Use i_zend_is_true(isset_method_rv)?
+			is_set = Z_TYPE(isset_method_rv) == IS_TRUE;
+		}
+
+		zval_ptr_dtor(&isset_method_rv);
+		zval_ptr_dtor(&tmp_offset);
+		OBJ_RELEASE(object);
+		return is_set;
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		return object->ce->dimension_handlers->has_dimension(object, offset);
+	}
+}
+
+ZEND_API bool zend_class_isset_empty_dimension(zend_object *object, zval *offset, bool is_empty)
+{
+	bool result = is_empty;
+	bool exists = zend_class_has_dimension(object, offset);
+	if (!exists) {
+		return result;
+	}
+
+	zval slot;
+	zval *retval = zend_class_read_dimension(object, offset, &slot);
+	if (UNEXPECTED(!retval)) {
+		ZEND_ASSERT(EG(exception) && "zend_class_read_dimension() returned NULL without exception");
+		return result;
+	}
+	ZEND_ASSERT(Z_TYPE_P(retval) != IS_UNDEF);
+	/* Check if value is empty, which it is when it is falsy, i.e. not truthy */
+	if (is_empty) {
+		result = !i_zend_is_true(retval);
+	} else {
+		/* Check if value is null, if it is we consider it to not be set */
+		result = Z_TYPE_P(retval) != IS_NULL;
+	}
+	zval_ptr_dtor(retval);
+	return result;
+}
+
+ZEND_API zval* zend_class_fetch_dimension(zend_object *object, zval *offset, zval *rv)
+{
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_class_entry *ce = object->ce;
+		zend_function *zf = ce->dimension_functions->fetch_dimension;
+
+		ZEND_ASSERT(zf);
+		ZEND_ASSERT(offset);
+
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_1_params(zf, object, rv, offset);
+		OBJ_RELEASE(object);
+
+		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
+			ZEND_ASSERT(EG(exception));
+			return NULL;
+		}
+
+		/* For legacy ArrayAccess calls */
+		if (zf == ce->dimension_functions->read_dimension) {
+			/* Warn about not returning by-ref */
+			if (!Z_ISREF_P(rv) && Z_TYPE_P(rv) != IS_OBJECT) {
+				zend_class_entry *ce = object->ce;
+				// TODO Make this an E_WARNING
+				zend_error(E_NOTICE, "Indirect modification of overloaded element of %s has no effect", ZSTR_VAL(ce->name));
+				if (UNEXPECTED(EG(exception))) {
+					zval_ptr_dtor(rv);
+					ZVAL_UNDEF(rv);
+					return NULL;
+				}
+			}
+			return rv;
+		}
+		ZEND_ASSERT(Z_ISREF_P(rv));
+		return rv;
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		return object->ce->dimension_handlers->fetch_dimension(object, offset, rv);
+	}
+}
+
+ZEND_API void zend_class_write_dimension(zend_object *object, zval *offset, zval *value) {
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_class_entry *ce = object->ce;
+		zend_function *zf = ce->dimension_functions->write_dimension;
+
+		ZEND_ASSERT(zf);
+		ZEND_ASSERT(offset);
+		ZEND_ASSERT(value);
+
+		zval tmp_offset;
+		ZVAL_COPY_DEREF(&tmp_offset, offset);
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_2_params(zf, object, /* retval */ NULL, &tmp_offset, value);
+		OBJ_RELEASE(object);
+		zval_ptr_dtor(&tmp_offset);
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		object->ce->dimension_handlers->write_dimension(object, offset, value);
+	}
+}
+
+ZEND_API void zend_class_append(zend_object *object, zval *value)
+{
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_class_entry *ce = object->ce;
+		zend_function *zf = ce->dimension_functions->append;
+
+		ZEND_ASSERT(zf);
+		ZEND_ASSERT(value);
+
+		GC_ADDREF(object);
+		if (zf == ce->dimension_functions->write_dimension) {
+			/* ArrayAccess */
+			zval tmp_offset;
+			ZVAL_NULL(&tmp_offset);
+			zend_call_known_instance_method_with_2_params(zf, object, /* retval */ NULL, &tmp_offset, value);
+		} else {
+			zend_call_known_instance_method_with_1_params(zf, object, /* retval */ NULL, value);
+		}
+		OBJ_RELEASE(object);
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		object->ce->dimension_handlers->append(object, value);
+	}
+}
+
+ZEND_API zval *zend_class_fetch_append(zend_object *object, zval *rv)
+{
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_class_entry *ce = object->ce;
+		zend_function *zf = ce->dimension_functions->fetch_append;
+
+		ZEND_ASSERT(zf);
+
+		if (zf == ce->dimension_functions->read_dimension) {
+			/* ArrayAccess */
+			zval tmp_offset;
+			ZVAL_NULL(&tmp_offset);
+			return zend_class_fetch_dimension(object, &tmp_offset, rv);
+		}
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_0_params(zf, object, rv);
+		OBJ_RELEASE(object);
+
+		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
+			ZEND_ASSERT(EG(exception));
+			return NULL;
+		}
+		ZEND_ASSERT(Z_ISREF_P(rv));
+		return rv;
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		return object->ce->dimension_handlers->fetch_append(object, rv);
+	}
+}
+
+ZEND_API void zend_class_unset_dimension(zend_object *object, zval *offset)
+{
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_class_entry *ce = object->ce;
+		zval tmp_offset;
+
+		zend_function *zf = ce->dimension_functions->unset_dimension;
+		ZEND_ASSERT(zf);
+		ZEND_ASSERT(offset);
+
+		ZVAL_COPY_DEREF(&tmp_offset, offset);
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_1_params(zf, object, /* retval */ NULL, &tmp_offset);
+		OBJ_RELEASE(object);
+		zval_ptr_dtor(&tmp_offset);
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		object->ce->dimension_handlers->unset_dimension(object, offset);
+	}
+}
+
 /* rv is a slot provided by the callee that is returned */
 static zval *zend_user_class_read_dimension(zend_object *object, zval *offset, zval *rv)
 {
@@ -55,28 +278,6 @@ static zval *zend_user_class_read_dimension(zend_object *object, zval *offset, z
 		ZEND_ASSERT(EG(exception));
 		return NULL;
 	}
-	return rv;
-}
-
-/* rv is a slot provided by the callee that is returned */
-static zval *zend_user_class_fetch_dimension(zend_object *object, zval *offset, zval *rv)
-{
-	zend_class_entry *ce = object->ce;
-	zend_function *zf = zend_hash_str_find_ptr(&ce->function_table, "offsetfetch", strlen("offsetfetch"));
-
-	ZEND_ASSERT(zf);
-	ZEND_ASSERT(offset);
-
-	GC_ADDREF(object);
-	zend_call_known_instance_method_with_1_params(zf, object, rv, offset);
-	OBJ_RELEASE(object);
-
-	if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
-		ZEND_ASSERT(EG(exception));
-		return NULL;
-	}
-
-	ZEND_ASSERT(Z_ISREF_P(rv));
 	return rv;
 }
 
@@ -168,20 +369,6 @@ static void zend_user_class_write_dimension(zend_object *object, zval *offset, z
 	zval_ptr_dtor(&tmp_offset);
 }
 
-static void zend_user_class_append(zend_object *object, zval *value)
-{
-	zend_class_entry *ce = object->ce;
-	zend_function *zf = zend_hash_str_find_ptr(&ce->function_table, "append", strlen("append"));
-
-	ZEND_ASSERT(zf);
-	ZEND_ASSERT(value);
-
-	//Z_TRY_ADDREF_P(value);
-	GC_ADDREF(object);
-	zend_call_known_instance_method_with_1_params(zf, object, /* retval */ NULL, value);
-	OBJ_RELEASE(object);
-}
-
 static void zend_legacy_ArrayAccess_append(zend_object *object, zval *value)
 {
 	zval tmp_offset;
@@ -196,25 +383,6 @@ static void zend_legacy_ArrayAccess_append(zend_object *object, zval *value)
 	zend_call_known_instance_method_with_2_params(zf, object, /* retval */ NULL, &tmp_offset, value);
 	OBJ_RELEASE(object);
 	zval_ptr_dtor(&tmp_offset);
-}
-
-static zval *zend_user_class_fetch_append(zend_object *object, zval *rv)
-{
-	zend_class_entry *ce = object->ce;
-	zend_function *zf = zend_hash_str_find_ptr(&ce->function_table, "fetchappend", strlen("fetchappend"));
-
-	ZEND_ASSERT(zf);
-
-	GC_ADDREF(object);
-	zend_call_known_instance_method_with_0_params(zf, object, rv);
-	OBJ_RELEASE(object);
-
-	if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
-		ZEND_ASSERT(EG(exception));
-		return NULL;
-	}
-	ZEND_ASSERT(Z_ISREF_P(rv));
-	return rv;
 }
 
 static void zend_user_class_unset_dimension(zend_object *object, zval *offset)
@@ -235,15 +403,15 @@ static void zend_user_class_unset_dimension(zend_object *object, zval *offset)
 
 /* Internal classes must define their own handlers if they overload the dimension access */
 #define ALLOC_HANDLERS_IF_MISSING(dimension_handlers_funcs_ptr, class_ce) \
-	if (!class_ce->dimension_handlers) { \
+	if (!class_ce->dimension_functions) { \
 		ZEND_ASSERT(class_ce->type == ZEND_USER_CLASS); \
-		dimension_handlers_funcs_ptr = zend_arena_calloc(&CG(arena), 1, sizeof(zend_class_dimensions_functions)); \
-		class_type->dimension_handlers = dimension_handlers_funcs_ptr; \
+		dimension_handlers_funcs_ptr = zend_arena_calloc(&CG(arena), 1, sizeof(zend_user_class_dimensions_functions)); \
+		class_type->dimension_functions = dimension_handlers_funcs_ptr; \
 	} else { \
-		dimension_handlers_funcs_ptr = class_ce->dimension_handlers; \
+		dimension_handlers_funcs_ptr = class_ce->dimension_functions; \
 	}
 
-static /* const */ zend_class_dimensions_functions zend_default_array_access_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions zend_default_array_access_dimensions_functions = {
 	.read_dimension  = zend_user_class_read_dimension,
 	.has_dimension   = zend_user_class_has_dimension,
 	.fetch_dimension = zend_legacy_ArrayAccess_fetch_dimension,
@@ -261,16 +429,27 @@ static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_en
 		return SUCCESS;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	funcs->read_dimension = zend_user_class_read_dimension;
-	funcs->has_dimension = zend_user_class_has_dimension;
-	funcs->fetch_dimension = zend_legacy_ArrayAccess_fetch_dimension;
-	funcs->write_dimension = zend_user_class_write_dimension;
-	funcs->unset_dimension = zend_user_class_unset_dimension;
-	funcs->append = zend_legacy_ArrayAccess_append;
-	funcs->fetch_append = zend_legacy_ArrayAccess_fetch_append;
+	zend_function *zf_read = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", strlen("offsetget"));
+	zend_function *zf_write = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", strlen("offsetset"));
+	zend_function *zf_has = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", strlen("offsetexists"));
+	zend_function *zf_unset = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset", strlen("offsetunset"));
+
+	funcs->read_dimension = zf_read;
+	funcs->has_dimension = zf_has;
+	funcs->write_dimension = zf_write;
+	funcs->unset_dimension = zf_unset;
+	if (funcs->fetch_dimension == NULL) {
+		funcs->fetch_dimension = zf_read;
+	}
+	if (funcs->append == NULL) {
+		funcs->append = zf_write;
+	}
+	if (funcs->fetch_append == NULL) {
+		funcs->fetch_append = zf_read;
+	}
 
 	return SUCCESS;
 }
@@ -289,14 +468,14 @@ static int zend_implement_dimension_read(zend_class_entry *interface, zend_class
 		return FAILURE;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	// TODO: Check if the class that interface implements this relies on the parent handler or not?
-	if (!funcs->read_dimension) {
-		funcs->read_dimension = zend_user_class_read_dimension;
-		funcs->has_dimension = zend_user_class_has_dimension;
-	}
+	funcs->read_dimension = read_fn;
+	funcs->has_dimension = zend_hash_str_find_ptr(&class_type->function_table, "offsetexists", strlen("offsetexists"));;
+
+	ZEND_ASSERT(funcs->has_dimension);
+
 	return SUCCESS;
 }
 
@@ -306,12 +485,11 @@ static int zend_implement_dimension_write(zend_class_entry *interface, zend_clas
 		return SUCCESS;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (!funcs->write_dimension) {
-		funcs->write_dimension = zend_user_class_write_dimension;
-	}
+	funcs->write_dimension = zend_hash_str_find_ptr(&class_type->function_table, "offsetset", strlen("offsetset"));
+
 	return SUCCESS;
 }
 
@@ -321,12 +499,11 @@ static int zend_implement_dimension_unset(zend_class_entry *interface, zend_clas
 		return SUCCESS;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (!funcs->unset_dimension) {
-		funcs->unset_dimension = zend_user_class_unset_dimension;
-	}
+	funcs->unset_dimension = zend_hash_str_find_ptr(&class_type->function_table, "offsetunset", strlen("offsetunset"));
+
 	return SUCCESS;
 }
 
@@ -336,12 +513,11 @@ static int zend_implement_appendable(zend_class_entry *interface, zend_class_ent
 		return SUCCESS;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (!funcs->append) {
-		funcs->append = zend_user_class_append;
-	}
+	funcs->append = zend_hash_str_find_ptr(&class_type->function_table, "append", strlen("append"));
+
 	return SUCCESS;
 }
 
@@ -351,12 +527,10 @@ static int zend_implement_dimension_fetch(zend_class_entry *interface, zend_clas
 		return SUCCESS;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (!funcs->fetch_dimension) {
-		funcs->fetch_dimension = zend_user_class_fetch_dimension;
-	}
+	funcs->fetch_dimension = zend_hash_str_find_ptr(&class_type->function_table, "offsetfetch", strlen("offsetfetch"));
 	return SUCCESS;
 }
 
@@ -366,12 +540,10 @@ static int zend_implement_dimension_fetch_append(zend_class_entry *interface, ze
 		return SUCCESS;
 	}
 
-	zend_class_dimensions_functions *funcs = NULL;
+	zend_user_class_dimensions_functions *funcs = NULL;
 	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
 
-	if (!funcs->fetch_append) {
-		funcs->fetch_append = zend_user_class_fetch_append;
-	}
+	funcs->fetch_append = zend_hash_str_find_ptr(&class_type->function_table, "fetchappend", strlen("fetchappend"));
 	return SUCCESS;
 }
 

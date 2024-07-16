@@ -708,42 +708,42 @@ static void dom_free(void *ptr) {
 	efree(ptr);
 }
 
-static /* const */ zend_class_dimensions_functions dom_legacy_nodelist_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions dom_legacy_nodelist_dimensions_functions = {
 	.read_dimension  = dom_node_list_read_dimension,
 	.has_dimension   = dom_node_list_has_dimension,
 	/* As we return objects the fetch and read dimension implementation is identical */
 	.fetch_dimension = dom_node_list_read_dimension,
 };
 
-static /* const */ zend_class_dimensions_functions dom_modern_nodelist_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions dom_modern_nodelist_dimensions_functions = {
 	.read_dimension  = dom_modern_nodelist_read_dimension,
 	.has_dimension   = dom_modern_nodelist_has_dimension,
 	/* As we return objects the fetch and read dimension implementation is identical */
 	.fetch_dimension = dom_modern_nodelist_read_dimension,
 };
 
-static /* const */ zend_class_dimensions_functions dom_legacy_named_nodemap_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions dom_legacy_named_nodemap_dimensions_functions = {
 	.read_dimension  = dom_node_named_map_read_dimension,
 	.has_dimension   = dom_node_named_map_has_dimension,
 	/* As we return objects the fetch and read dimension implementation is identical */
 	.fetch_dimension = dom_node_named_map_read_dimension,
 };
 
-static /* const */ zend_class_dimensions_functions dom_modern_nodemap_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions dom_modern_nodemap_dimensions_functions = {
 	.read_dimension  = dom_modern_nodemap_read_dimension,
 	.has_dimension   = dom_modern_nodemap_has_dimension,
 	/* As we return objects the fetch and read dimension implementation is identical */
 	.fetch_dimension = dom_modern_nodemap_read_dimension,
 };
 
-static /* const */ zend_class_dimensions_functions dom_html_collection_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions dom_html_collection_dimensions_functions = {
 	.read_dimension  = dom_html_collection_read_dimension,
 	.has_dimension   = dom_html_collection_has_dimension,
 	/* As we return objects the fetch and read dimension implementation is identical */
 	.fetch_dimension = dom_html_collection_read_dimension,
 };
 
-static /* const */ zend_class_dimensions_functions dom_token_list_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions dom_token_list_dimensions_functions = {
 	.read_dimension  = dom_token_list_read_dimension,
 	.has_dimension   = dom_token_list_has_dimension,
 	/* As we return objects the fetch and read dimension implementation is identical */

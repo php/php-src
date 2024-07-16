@@ -1874,7 +1874,7 @@ PHP_METHOD(RecursiveArrayIterator, getChildren)
 }
 /* }}} */
 
-static /* const */ zend_class_dimensions_functions spl_array_object_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions spl_array_object_dimensions_functions = {
 	.read_dimension  = spl_array_read_dimension,
 	.has_dimension   = spl_array_has_dimension,
 	.fetch_dimension = spl_array_object_fetch_dimension,
@@ -1883,7 +1883,7 @@ static /* const */ zend_class_dimensions_functions spl_array_object_dimensions_f
 	.fetch_append    = spl_array_object_fetch_append,
 	.unset_dimension = spl_array_unset_dimension
 };
-static /* const */ zend_class_dimensions_functions spl_array_iterator_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions spl_array_iterator_dimensions_functions = {
 	.read_dimension  = spl_array_read_dimension,
 	.has_dimension   = spl_array_has_dimension,
 	.fetch_dimension = spl_array_fetch_dimension,

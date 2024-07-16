@@ -472,7 +472,7 @@ PHP_METHOD(ResourceBundle, getIterator) {
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }
 
-static /* const */ zend_class_dimensions_functions resourcebundle_dimensions_functions = {
+static /* const */ zend_internal_class_dimensions_functions resourcebundle_dimensions_functions = {
 	.read_dimension  = resourcebundle_array_get,
 	.has_dimension   = resource_bundle_array_has,
 };

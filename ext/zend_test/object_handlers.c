@@ -306,7 +306,7 @@ static zval *dimension_handlers_no_ArrayAccess_fetch_append(zend_object *object,
 	return rv;
 }
 
-static /* const */ zend_class_dimensions_functions dimension_handlers_no_ArrayAccess_dimension_functions = {
+static /* const */ zend_internal_class_dimensions_functions dimension_handlers_no_ArrayAccess_dimension_functions = {
 	.read_dimension  = dimension_handlers_no_ArrayAccess_ce_handler_read_dimension,
 	.has_dimension   = dimension_handlers_no_ArrayAccess_ce_handler_has_dimension,
 	.fetch_dimension = dimension_handlers_no_ArrayAccess_fetch_dimension,
