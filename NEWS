@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0alpha3
 
+- Core:
+  . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
 
