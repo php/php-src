@@ -1956,22 +1956,7 @@ ZEND_VM_HANDLER(87, ZEND_FETCH_DIM_RW, VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 
 	SAVE_OPLINE();
 	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);
-	if (UNEXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
-		const zend_op *next_opline = OPLINE + 1;
-		if (UNEXPECTED(
-			next_opline->opcode == ZEND_PRE_INC
-			|| next_opline->opcode == ZEND_PRE_DEC
-			|| next_opline->opcode == ZEND_POST_INC
-			|| next_opline->opcode == ZEND_POST_DEC
-		)) {
-			zend_throw_error(NULL, "Cannot increment/decrement object offsets");
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-		} else {
-			zend_fetch_dimension_address_RW(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
-		}
-	} else {
-		zend_fetch_dimension_address_RW(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
-	}
+	zend_fetch_dimension_address_RW(container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE OPLINE_CC EXECUTE_DATA_CC);
 
 	FREE_OP2();
 	if (OP1_TYPE == IS_VAR) {

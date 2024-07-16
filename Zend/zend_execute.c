@@ -2997,6 +2997,11 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 		offset++;
 	}
 
+	if (UNEXPECTED(opline->extended_value == ZEND_FETCH_DIM_INCDEC)) {
+		zend_throw_error(NULL, "Cannot increment/decrement object offsets");
+		ZVAL_UNDEF(result);
+		goto clean_up;
+	}
 	if (EXPECTED(obj->ce->dimension_handlers)) {
 		if (EXPECTED(offset && obj->ce->dimension_handlers->fetch_dimension)) {
 			ZEND_ASSERT(zend_check_dimension_interfaces_implemented(obj, /* has_offset */ true, BP_VAR_FETCH));
