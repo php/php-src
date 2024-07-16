@@ -25,6 +25,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Change highlight_string() and print_r() return type to string|true. (Ayesh)
+  . Fix references in request_parse_body() options array. (nielsdos)
 
 - Windows:
   . Update the icon of the Windows executables, e.g. php.exe. (Ayesh,
