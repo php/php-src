@@ -11,7 +11,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 require("testdb.inc");
 $dbh = getDbConnection();
-echo $dbh->getAttribute(PDO::FB_ATTR_API_VERSION) . "\n";
+echo $dbh->getAttribute(Pdo\Firebird::ATTR_API_VERSION) . "\n";
 echo 'done!';
 ?>
 --EXPECTF--
