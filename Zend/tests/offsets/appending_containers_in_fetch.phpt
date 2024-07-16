@@ -77,13 +77,17 @@ NULL
 Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
 Error: Cannot use a scalar value as an array
 new B() container:
+string(12) "B::offsetSet"
+int(5)
+string(5) "value"
 object(B)#4 (1) {
   ["storage":"ArrayObject":private]=>
   array(1) {
     [0]=>
-    array(1) {
-      [5]=>
-      string(5) "value"
+    object(B)#17 (1) {
+      ["storage":"ArrayObject":private]=>
+      array(0) {
+      }
     }
   }
 }
