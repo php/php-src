@@ -1,6 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0alpha2
+?? ??? ????, PHP 8.4.0alpha3
+
+- Standard:
+  . Fix references in request_parse_body() options array. (nielsdos)
+
+18 Jul 2024, PHP 8.4.0alpha2
 
 - Core:
   . Fixed bug GH-14801 (Fix build for armv7). (andypost)
@@ -25,7 +30,6 @@ PHP                                                                        NEWS
 
 - Standard:
   . Change highlight_string() and print_r() return type to string|true. (Ayesh)
-  . Fix references in request_parse_body() options array. (nielsdos)
 
 - Windows:
   . Update the icon of the Windows executables, e.g. php.exe. (Ayesh,
