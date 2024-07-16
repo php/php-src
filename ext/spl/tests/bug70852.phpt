@@ -5,11 +5,10 @@ Bug #70852 Segfault getting NULL offset of an ArrayObject
 $y = new ArrayObject();
 
 var_dump($y[NULL]);
-var_dump($y[NULL]++);
+$ref =& $y[NULL];
+var_dump($ref);
 ?>
 --EXPECTF--
 Warning: Undefined array key "" in %s on line %d
 NULL
-
-Warning: Undefined offset in %s on line %d
 NULL

@@ -1,5 +1,5 @@
 --TEST--
-SPL: FixedArray: Trying to access inexistent item
+SPL: FixedArray: Trying to access nonexistent item
 --FILE--
 <?php
 
@@ -12,4 +12,4 @@ try {
 
 ?>
 --EXPECT--
-OutOfBoundsException: Index invalid or out of range
+Error: Cannot increment/decrement object offsets

@@ -32,5 +32,5 @@ try {
 }
 ?>
 --EXPECT--
-Cannot increment array
-Cannot decrement array
+Cannot increment/decrement object offsets
+Cannot increment/decrement object offsets

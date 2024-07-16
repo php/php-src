@@ -53,7 +53,11 @@ echo "\nIndirect modification:\n";
 $map[$obj] = [];
 $map[$obj][] = 42;
 $map[$obj2] = 41;
-$map[$obj2]++;
+try {
+    $map[$obj2]++;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($map);
 
 echo "\nMethods:\n";
@@ -143,6 +147,7 @@ bool(false)
 Object stdClass#2 not contained in WeakMap
 
 Indirect modification:
+Cannot increment/decrement object offsets
 object(WeakMap)#1 (2) {
   [0]=>
   array(2) {
@@ -165,7 +170,7 @@ object(WeakMap)#1 (2) {
       int(2)
     }
     ["value"]=>
-    &int(42)
+    int(41)
   }
 }
 

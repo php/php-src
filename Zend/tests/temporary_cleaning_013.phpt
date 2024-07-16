@@ -300,11 +300,7 @@ caught Exception 13
 
 Deprecated: Creation of dynamic property class@anonymous::$foo is deprecated in %s on line %d
 caught Exception 14
-
-Notice: Indirect modification of overloaded element of ArrayAccess@anonymous has no effect in %s on line %d
 caught Exception 15
-
-Notice: Indirect modification of overloaded element of ArrayAccess@anonymous has no effect in %s on line %d
 caught Exception 16
 caught Exception 17
 caught Exception 18
