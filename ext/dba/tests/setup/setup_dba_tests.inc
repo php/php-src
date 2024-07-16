@@ -103,12 +103,13 @@ function run_standard_tests_ex(string $handler, string $name, LockFlag $lock, bo
     var_dump(dba_delete("key1", $db_writer));
 
     // Fetch and sort data. We sort to guarantee that the output is
-    // always the same across architectures. GDBM in particular does
-    // not guarantee that the insert order is the same as the
-    // iteration order with firstkey() and nextkey(). There is a
-    // Github report (issue 14786) of this actually happening. GDBM's
-    // own test suite sorts its output, suggesting that this is a
-    // reasonable workaround for the issue.
+    // consistent across invocations and architectures. When iterating
+    // with firstkey() and nextkey(), several engines (GDBM, LMDB,
+    // QDBM) make no promise about the iteration order. Others (TCADB,
+    // DBM) explicitly state that the order is arbitrary. With GDBM at
+    // least, the order appears platform-dependent -- we have a report
+    // in Github issue 14786. GDBM's own test suite sorts this output,
+    // suggesting that sorting is a reasonable workaround for the issue.
     $output = [];
 
     $key = dba_firstkey($db_writer);
