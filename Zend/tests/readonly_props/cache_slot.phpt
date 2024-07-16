@@ -108,7 +108,7 @@ object(stdClass)#%d (1) {
 }
 
 Cannot indirectly modify readonly property Test::$prop2
-Cannot modify readonly property Test::$prop2
+Cannot indirectly modify readonly property Test::$prop2
 array(0) {
 }
 

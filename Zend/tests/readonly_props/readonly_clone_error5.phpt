@@ -73,4 +73,4 @@ object(TestSetOnce)#%d (1) {
   }
 }
 Cannot indirectly modify readonly property TestSetTwice::$prop
-Cannot modify readonly property TestSetTwice::$prop
+Cannot indirectly modify readonly property TestSetTwice::$prop
