@@ -846,7 +846,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 					goto exit;
 				}
 				if (UNEXPECTED(!type_matched)) {
-					Z_TRY_DELREF_P(value);
+					zval_ptr_dtor(&tmp);
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
@@ -949,7 +949,7 @@ write_std_property:
 					goto exit;
 				}
 				if (UNEXPECTED(!type_matched)) {
-					zval_ptr_dtor(value);
+					zval_ptr_dtor(&tmp);
 					goto exit;
 				}
 				value = &tmp;
