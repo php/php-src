@@ -244,6 +244,7 @@ static zend_result cache_request_parse_body_option(HashTable *options, zval *opt
 {
 	if (option) {
 		zend_long result;
+		ZVAL_DEREF(option);
 		if (Z_TYPE_P(option) == IS_STRING) {
 			zend_string *errstr;
 			result = zend_ini_parse_quantity(Z_STR_P(option), &errstr);
