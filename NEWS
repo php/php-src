@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.22
+18 Jul 2024, PHP 8.2.22RC1
 
 - Core:
   . Fixed bug GH-13922 (Fixed support for systems with
