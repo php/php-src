@@ -392,7 +392,7 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 
 	if (hnd) {
 		if (!hnd->write_func) {
-			zend_throw_error(NULL, "Cannot modify readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 			return &EG(error_zval);
 		}
 
