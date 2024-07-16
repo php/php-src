@@ -147,43 +147,48 @@ dnl that gd defines "junk" versions of each gdImageCreateFromFoo function
 dnl even when it does not support the Foo format. Those junk functions
 dnl display a warning but eventually return normally, making a simple link
 dnl or run test insufficient.
-AC_DEFUN([PHP_GD_CHECK_FORMAT],[
-  old_LIBS="${LIBS}"
-  LIBS="${LIBS} ${GD_SHARED_LIBADD}"
-  old_CFLAGS="${CFLAGS}"
-  CFLAGS="${CFLAGS} ${GDLIB_CFLAGS}"
-  AC_MSG_CHECKING([for working gdImageCreateFrom$1 in libgd])
-  AC_LANG_PUSH([C])
-  AC_RUN_IFELSE([AC_LANG_SOURCE([
+AC_DEFUN([PHP_GD_CHECK_FORMAT],
+[AS_VAR_PUSHDEF([php_var], [php_cv_lib_gd_gdImageCreateFrom$1])
+old_LIBS=$LIBS
+LIBS="$LIBS $GD_SHARED_LIBADD"
+old_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS $GDLIB_CFLAGS"
+AC_LANG_PUSH([C])
+AC_CACHE_CHECK([for working gdImageCreateFrom$1 in libgd], [php_var],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <stdio.h>
 #include <unistd.h>
 #include <gd.h>
 
 /* A custom gdErrorMethod */
 void exit1(int priority, const char *format, va_list args) {
+  (void)priority;
+  (void)format;
+  (void)args;
   _exit(1);
 }
 
 /* Override the default gd_error_method with one that
    actually causes the program to return an error. */
-int main(int argc, char** argv) {
+int main(void) {
   m4_if([$1],[Xpm],
   [char* f = "test.xpm"],
   [FILE* f = NULL]);
   gdSetErrorMethod(exit1);
   gdImagePtr p = gdImageCreateFrom$1(f);
+  (void)p;
   return 0;
-}])],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE($2, 1, [Does gdImageCreateFrom$1 work?])
-  ],[
-    AC_MSG_RESULT([no])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-  AC_LANG_POP([C])
-  CFLAGS="${old_CFLAGS}"
-  LIBS="${old_LIBS}"
+}])],
+  [AS_VAR_SET([php_var], [yes])],
+  [AS_VAR_SET([php_var], [no])],
+  [AS_VAR_SET([php_var], [no])])])
+AS_VAR_IF([php_var], [yes],
+  [AC_DEFINE_UNQUOTED([$2], [1],
+    [Define to 1 if GD library has a working 'gdImageCreateFrom$1' function.])])
+AC_LANG_POP([C])
+CFLAGS=$old_CFLAGS
+LIBS=$old_LIBS
+AS_VAR_POPDEF([php_var])
 ])
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
