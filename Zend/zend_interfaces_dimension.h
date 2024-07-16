@@ -32,6 +32,7 @@ extern ZEND_API zend_class_entry *zend_ce_dimension_write;
 extern ZEND_API zend_class_entry *zend_ce_dimension_unset;
 extern ZEND_API zend_class_entry *zend_ce_appendable;
 extern ZEND_API zend_class_entry *zend_ce_dimension_fetch_append;
+extern ZEND_API zend_class_entry *zend_ce_autovivificapable;
 
 ZEND_API void zend_register_dimension_interfaces(void);
 

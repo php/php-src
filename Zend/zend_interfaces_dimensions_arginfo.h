@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 13678e0beb23fdf1dee9c68729f567d808aa1c2e */
+ * Stub hash: 1f043e1d207bbb07fcd4e69f35bd6171c4715311 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DimensionReadable_offsetGet, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
@@ -27,6 +27,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Appendable_append, 0, 1, I
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_FetchAppendable_fetchAppend, 1, 0, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Autovivificapable_autovivify, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(1, ref, IS_NULL, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 1, _IS_BOOL, 0)
@@ -75,6 +79,11 @@ static const zend_function_entry class_Appendable_methods[] = {
 
 static const zend_function_entry class_FetchAppendable_methods[] = {
 	ZEND_RAW_FENTRY("fetchAppend", NULL, arginfo_class_FetchAppendable_fetchAppend, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
+	ZEND_FE_END
+};
+
+static const zend_function_entry class_Autovivificapable_methods[] = {
+	ZEND_RAW_FENTRY("autovivify", NULL, arginfo_class_Autovivificapable_autovivify, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -144,6 +153,16 @@ static zend_class_entry *register_class_FetchAppendable(zend_class_entry *class_
 	INIT_CLASS_ENTRY(ce, "FetchAppendable", class_FetchAppendable_methods);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Appendable);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_Autovivificapable(void)
+{
+	zend_class_entry ce, *class_entry;
+
+	INIT_CLASS_ENTRY(ce, "Autovivificapable", class_Autovivificapable_methods);
+	class_entry = zend_register_internal_interface(&ce);
 
 	return class_entry;
 }

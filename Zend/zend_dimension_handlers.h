@@ -34,6 +34,7 @@ typedef struct _zend_internal_class_dimensions_functions {
 	void  (*/* const */ append)(zend_object *object, zval *value);
 	zval *(*/* const */ fetch_append)(zend_object *object, zval *rv);
 	void  (*/* const */ unset_dimension)(zend_object *object, zval *offset);
+	void  (*/* const */ autovivify)(zend_object *object, zval *reference);
 } zend_internal_class_dimensions_functions;
 
 typedef struct _zend_user_class_dimensions_functions {
@@ -44,6 +45,7 @@ typedef struct _zend_user_class_dimensions_functions {
 	zend_function *append;
 	zend_function *fetch_append;
 	zend_function *unset_dimension;
+	zend_function *autovivify;
 } zend_user_class_dimensions_functions;
 
 ZEND_API zval* zend_class_read_dimension(zend_object *object, zval *offset, zval *rv);
@@ -53,6 +55,7 @@ ZEND_API void  zend_class_write_dimension(zend_object *object, zval *offset, zva
 ZEND_API void  zend_class_append(zend_object *object, zval *value);
 ZEND_API zval *zend_class_fetch_append(zend_object *object, zval *rv);
 ZEND_API void  zend_class_unset_dimension(zend_object *object, zval *offset);
+ZEND_API void  zend_class_autovivify(zend_object *object, zval *reference);
 
 /* VM and JIT Helper */
 ZEND_API bool zend_class_isset_empty_dimension(zend_object *object, zval *offset, bool is_empty);

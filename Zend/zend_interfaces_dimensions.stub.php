@@ -34,6 +34,11 @@ interface FetchAppendable extends Appendable
     public function &fetchAppend(): mixed;
 }
 
+interface Autovivificapable
+{
+    public function autovivify(null &$ref): void;
+}
+
 interface ArrayAccess extends DimensionReadable, DimensionWritable, DimensionUnsetable
 {
     /** @tentative-return-type */

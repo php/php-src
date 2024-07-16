@@ -3071,11 +3071,11 @@ static zend_never_inline void zend_fetch_object_dimension_address(zval *result, 
 		/* Check if we need to auto-vivify a possible null return */
 		if (UNEXPECTED(
 			opline->extended_value == ZEND_FETCH_DIM_DIM
-			&& Z_ISREF_P(result)
-			&& Z_ISNULL_P(Z_REFVAL_P(result))
+			&& obj->ce->dimension_handlers->autovivify
+			&& Z_ISREF_P(retval)
+			&& Z_ISNULL_P(Z_REFVAL_P(retval))
 		)) {
-			// TODO THIS IS A VERY CRUDE PROTOTYPE
-			object_init_ex(Z_REFVAL_P(result), obj->ce);
+			zend_class_autovivify(obj, retval);
 		}
 		if (result != retval) {
 			ZVAL_INDIRECT(result, retval);

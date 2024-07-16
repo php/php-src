@@ -33,6 +33,7 @@ ZEND_API zend_class_entry *zend_ce_dimension_write;
 ZEND_API zend_class_entry *zend_ce_dimension_unset;
 ZEND_API zend_class_entry *zend_ce_appendable;
 ZEND_API zend_class_entry *zend_ce_dimension_fetch_append;
+ZEND_API zend_class_entry *zend_ce_autovivificapable;
 
 ZEND_API zval* zend_class_read_dimension(zend_object *object, zval *offset, zval *rv) {
 	if (object->ce->type == ZEND_USER_CLASS) {
@@ -254,6 +255,20 @@ ZEND_API void zend_class_unset_dimension(zend_object *object, zval *offset)
 	} else {
 		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
 		object->ce->dimension_handlers->unset_dimension(object, offset);
+	}
+}
+
+ZEND_API void zend_class_autovivify(zend_object *object, zval *reference)
+{
+	if (object->ce->type == ZEND_USER_CLASS) {
+		zend_function *zf = object->ce->dimension_functions->autovivify;
+		ZEND_ASSERT(zf);
+		GC_ADDREF(object);
+		zend_call_known_instance_method_with_1_params(zf, object, /* retval */ NULL, reference);
+		OBJ_RELEASE(object);
+	} else {
+		ZEND_ASSERT(object->ce->type == ZEND_INTERNAL_CLASS);
+		object->ce->dimension_handlers->autovivify(object, reference);
 	}
 }
 
@@ -547,6 +562,19 @@ static int zend_implement_dimension_fetch_append(zend_class_entry *interface, ze
 	return SUCCESS;
 }
 
+static int zend_implement_autovivificapable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	if (class_type->type == ZEND_INTERNAL_CLASS) {
+		return SUCCESS;
+	}
+
+	zend_user_class_dimensions_functions *funcs = NULL;
+	ALLOC_HANDLERS_IF_MISSING(funcs, class_type);
+
+	funcs->autovivify = zend_hash_str_find_ptr(&class_type->function_table, "autovivify", strlen("autovivify"));
+	return SUCCESS;
+}
+
 ZEND_API void zend_register_dimension_interfaces(void)
 {
 	zend_ce_dimension_read = register_class_DimensionReadable();
@@ -569,4 +597,7 @@ ZEND_API void zend_register_dimension_interfaces(void)
 
 	zend_ce_arrayaccess = register_class_ArrayAccess(zend_ce_dimension_read, zend_ce_dimension_write, zend_ce_dimension_unset);
 	zend_ce_arrayaccess->interface_gets_implemented = zend_implement_arrayaccess;
+
+	zend_ce_autovivificapable = register_class_Autovivificapable();
+	zend_ce_autovivificapable->interface_gets_implemented = zend_implement_autovivificapable;
 }

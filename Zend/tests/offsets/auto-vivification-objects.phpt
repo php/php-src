@@ -3,7 +3,7 @@ Auto-vivification for objects
 --FILE--
 <?php
 
-class Vector implements DimensionFetchable, DimensionWritable, FetchAppendable {
+class Vector implements DimensionFetchable, DimensionWritable, FetchAppendable, Autovivificapable {
     private array $a = [];
 
     private function dumpCall($method): void {
@@ -35,6 +35,10 @@ class Vector implements DimensionFetchable, DimensionWritable, FetchAppendable {
         $ref =& $this->a[];
         return $ref;
     }
+    public function autovivify(null &$ref): void {
+        $this->dumpCall(__METHOD__);
+        $ref = new self();
+    }
 }
 
 $obj = new Vector();
@@ -54,8 +58,10 @@ var_dump($obj[2]);
 Object ID #1 called Vector::offsetFetch
 NULL
 Object ID #1 called Vector::offsetFetch
+Object ID #1 called Vector::autovivify
 Object ID #2 called Vector::append
 Object ID #1 called Vector::offsetFetch
+Object ID #1 called Vector::autovivify
 Object ID #3 called Vector::offsetSet
 Check results
 Object ID #1 called Vector::offsetGet
