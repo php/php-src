@@ -974,7 +974,7 @@ typed_property:
 					goto exit;
 				}
 				if (UNEXPECTED(!type_matched)) {
-					Z_TRY_DELREF_P(value);
+					zval_ptr_dtor(&tmp);
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
