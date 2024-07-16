@@ -47,7 +47,12 @@ if (PHP_DOM == "yes") {
 				WARNING("dom support can't be enabled, libxml is not found")
 			}
 		}
-		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h xpath_callbacks.h namespace_compat.h");
+		PHP_INSTALL_HEADERS("ext/dom",
+			"dom_ce.h " +
+			"namespace_compat.h " +
+			"xml_common.h " +
+			"xpath_callbacks.h "
+		);
 	} else {
 		WARNING("dom support can't be enabled, libxml is not enabled")
 		PHP_DOM = "no"

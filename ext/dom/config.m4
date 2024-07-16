@@ -58,7 +58,12 @@ if test "$PHP_DOM" != "no"; then
       $ext_builddir/$LEXBOR_DIR/tag
     ])])
     PHP_SUBST([DOM_SHARED_LIBADD])
-    PHP_INSTALL_HEADERS([ext/dom], [xml_common.h xpath_callbacks.h namespace_compat.h])
+    PHP_INSTALL_HEADERS([ext/dom], [m4_normalize([
+      dom_ce.h
+      namespace_compat.h
+      xml_common.h
+      xpath_callbacks.h
+    ])])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
   ])
 fi
