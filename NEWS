@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
 
+- OpenSSL:
+  . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
 
