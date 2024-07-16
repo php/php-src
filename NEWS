@@ -36,6 +36,9 @@ PHP                                                                        NEWS
   . [RFC] Add bcfloor, bcceil and bcround to BCMath. (Saki Takamachi)
   . Improve performance. (Saki Takamachi, nielsdos)
 
+- apache2handler:
+  . Added the apache_connection_stream() function for CGI WebSockets. (Richard Tyler Miles)
+
 - Core:
   . Added zend_call_stack_get implementation for NetBSD, DragonFlyBSD,
     Solaris and Haiku. (David Carlier)
