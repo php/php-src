@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed OSS-Fuzz #69765. (nielsdos)
   . Fixed bug GH-14741 (Segmentation fault in Zend/zend_types.h). (nielsdos)
+  . Fixed bug GH-14969 (Use-after-free in property coercion with __toString()).
+    (ilutov)
 
 - Dom:
   . Fixed bug GH-14702 (DOMDocument::xinclude() crash). (nielsdos)

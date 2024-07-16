@@ -819,7 +819,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, property_uses_strict_types()))) {
-					Z_TRY_DELREF_P(value);
+					zval_ptr_dtor(&tmp);
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
@@ -890,7 +890,7 @@ write_std_property:
 
 				ZVAL_COPY_VALUE(&tmp, value);
 				if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, property_uses_strict_types()))) {
-					zval_ptr_dtor(value);
+					zval_ptr_dtor(&tmp);
 					goto exit;
 				}
 				value = &tmp;
