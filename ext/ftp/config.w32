@@ -8,7 +8,7 @@ if (PHP_FTP != "no") {
 
 	var ret = SETUP_OPENSSL("ftp", PHP_FTP);
 
-	if (ret > 0) {
+	if (ret >= 2) {
 		MESSAGE("Enabling SSL support for ext\\ftp");
 		AC_DEFINE('HAVE_FTP_SSL', 1, 'Have FTP over SSL support');
 	}
