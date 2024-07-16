@@ -57,7 +57,7 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	if (key == NULL) { /* numeric key */
 		php_printf("%*c[" ZEND_LONG_FMT "]=>\n", level + 1, ' ', index);
 	} else { /* string key */
-		int unmangle = zend_unmangle_property_name(key, &class_name, &prop_name);
+		zend_result unmangle = zend_unmangle_property_name(key, &class_name, &prop_name);
 		php_printf("%*c[", level + 1, ' ');
 
 		if (class_name && unmangle == SUCCESS) {
@@ -75,11 +75,13 @@ static void php_object_property_dump(zend_property_info *prop_info, zval *zv, ze
 	}
 
 	if (Z_TYPE_P(zv) == IS_UNDEF) {
-		ZEND_ASSERT(ZEND_TYPE_IS_SET(prop_info->type));
-		zend_string *type_str = zend_type_to_string(prop_info->type);
-		php_printf("%*cuninitialized(%s)\n",
-			level + 1, ' ', ZSTR_VAL(type_str));
-		zend_string_release(type_str);
+		if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
+			zend_string *type_str = zend_type_to_string(prop_info->type);
+			php_printf("%*cuninitialized(%s)\n", level + 1, ' ', ZSTR_VAL(type_str));
+			zend_string_release(type_str);
+		} else {
+			php_printf("%*cunset\n", level + 1, ' ');
+		}
 	} else {
 		php_var_dump(zv, level + 2);
 	}
@@ -162,31 +164,33 @@ again:
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
+			if (myht == NULL) {
+				/* An exception has occured */
+				return;
+			}
+
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
+			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), zend_hash_num_elements(myht));
 			zend_string_release_ex(class_name, 0);
 
-			if (myht) {
-				zend_ulong num;
-				zend_string *key;
-				zval *val;
+			zend_ulong num;
+			zend_string *key;
+			zval *val;
 
-				ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
-					zend_property_info *prop_info = NULL;
+			ZEND_HASH_FOREACH_KEY_VAL(myht, num, key, val) {
+				zend_property_info *prop_info = NULL;
 
-					if (Z_TYPE_P(val) == IS_INDIRECT) {
-						val = Z_INDIRECT_P(val);
-						if (key) {
-							prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
-						}
+				if (Z_TYPE_P(val) == IS_INDIRECT) {
+					val = Z_INDIRECT_P(val);
+					if (key) {
+						prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
 					}
+				}
 
-					if (!Z_ISUNDEF_P(val) || prop_info) {
-						php_object_property_dump(prop_info, val, num, key, level);
-					}
-				} ZEND_HASH_FOREACH_END();
-				zend_release_properties(myht);
-			}
+				php_object_property_dump(prop_info, val, num, key, level);
+			} ZEND_HASH_FOREACH_END();
+			zend_release_properties(myht);
+
 			if (level > 1) {
 				php_printf("%*c", level-1, ' ');
 			}
@@ -217,15 +221,14 @@ again:
 /* {{{ Dumps a string representation of variable to output */
 PHP_FUNCTION(var_dump)
 {
-	zval *args;
-	int argc;
-	int	i;
+	zval *args = NULL;
+	uint32_t argc = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		php_var_dump(&args[i], 1);
 	}
 }
@@ -359,26 +362,31 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 		ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, DEBUG, zobj);
 
 		myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_DEBUG);
-		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
-		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
-		zend_string_release_ex(class_name, 0);
-		if (myht) {
-			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
-				zend_property_info *prop_info = NULL;
-
-				if (Z_TYPE_P(val) == IS_INDIRECT) {
-					val = Z_INDIRECT_P(val);
-					if (key) {
-						prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
-					}
-				}
-
-				if (!Z_ISUNDEF_P(val) || prop_info) {
-					zval_object_property_dump(prop_info, val, index, key, level);
-				}
-			} ZEND_HASH_FOREACH_END();
-			zend_release_properties(myht);
+		if (myht == NULL) {
+			/* An exception has occured */
+			return;
 		}
+
+		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
+		php_printf("object(%s)#%d (%d) refcount(%u){\n", ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), zend_hash_num_elements(myht), Z_REFCOUNT_P(struc));
+		zend_string_release_ex(class_name, 0);
+
+		ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
+			zend_property_info *prop_info = NULL;
+
+			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				val = Z_INDIRECT_P(val);
+				if (key) {
+					prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
+				}
+			}
+
+			if (!Z_ISUNDEF_P(val) || prop_info) {
+				zval_object_property_dump(prop_info, val, index, key, level);
+			}
+		} ZEND_HASH_FOREACH_END();
+		zend_release_properties(myht);
+
 		if (level > 1) {
 			php_printf("%*c", level - 1, ' ');
 		}
@@ -409,15 +417,14 @@ PHPAPI void php_debug_zval_dump(zval *struc, int level) /* {{{ */
 /* {{{ Dumps a string representation of an internal zend value to output. */
 PHP_FUNCTION(debug_zval_dump)
 {
-	zval *args;
-	int argc;
-	int	i;
+	zval *args = NULL;
+	uint32_t argc = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	for (i = 0; i < argc; i++) {
+	for (uint32_t i = 0; i < argc; i++) {
 		php_debug_zval_dump(&args[i], 1);
 	}
 }

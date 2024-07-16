@@ -47,7 +47,11 @@ var_dump($c);
 echo "\nUnset a private property, and attempt to recreate at global scope (expecting failure):\n";
 $c = new C;
 $c->unsetPrivate();
-$c->p = 'this will fail';
+try {
+    $c->p = 'this will fail';
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 var_dump($c);
 ?>
 ===DONE===
@@ -59,13 +63,17 @@ object(D)#%d (1) {
 }
 
 Unset superclass's private property, and recreate it as public in subclass:
-object(D)#%d (1) {
+object(D)#%d (2) {
+  ["p":"C":private]=>
+  unset
   ["p"]=>
   string(12) "changed in D"
 }
 
 Unset superclass's private property, and recreate it as public at global scope:
-object(D)#%d (1) {
+object(D)#%d (2) {
+  ["p":"C":private]=>
+  unset
   ["p"]=>
   string(34) "this will create a public property"
 }
@@ -78,8 +86,9 @@ object(C)#%d (1) {
 }
 
 Unset a private property, and attempt to recreate at global scope (expecting failure):
-
-Fatal error: Uncaught Error: Cannot access private property C::$p in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Error: Cannot access private property C::$p
+object(C)#%d (1) {
+  ["p":"C":private]=>
+  unset
+}
+===DONE===

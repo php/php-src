@@ -48,11 +48,13 @@ string(10) "Original a"
 string(10) "Original b"
 string(10) "Original d"
 string(10) "Original e"
-object(C)#%d (4) {
+object(C)#%d (5) {
   ["a"]=>
   string(10) "Original a"
   ["b"]=>
   string(10) "Original b"
+  ["c"]=>
+  unset
   ["d"]=>
   string(10) "Original d"
   ["e"]=>
@@ -65,7 +67,9 @@ string(10) "Original b"
 string(10) "Original c"
 string(10) "Original d"
 string(10) "Original e"
-object(C)#%d (4) {
+object(C)#%d (5) {
+  ["a"]=>
+  unset
   ["b"]=>
   string(10) "Original b"
   ["c"]=>

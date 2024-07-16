@@ -180,7 +180,9 @@ object(UsesMagic)#2 (2) {
 
 --> Unset existent, non-existent and dynamic:
   Original wrapped object:
-object(C)#1 (3) {
+object(C)#1 (4) {
+  ["a"]=>
+  unset
   ["b"]=>
   int(2)
   ["c"]=>
@@ -193,7 +195,9 @@ object(UsesMagic)#2 (2) {
   ["b"]=>
   string(35) "This should never appear in storage"
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (3) {
+  object(C)#1 (4) {
+    ["a"]=>
+    unset
     ["b"]=>
     int(2)
     ["c"]=>

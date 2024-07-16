@@ -577,7 +577,7 @@ static zend_result zend_closure_get_closure(zend_object *obj, zend_class_entry *
 /* }}} */
 
 /* *is_temp is int due to Object Handler API */
-static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+static HashTable *zend_closure_get_debug_info(zend_object *object, bool *is_temp) /* {{{ */
 {
 	zend_closure *closure = (zend_closure *)object;
 	zval val;
@@ -585,7 +585,7 @@ static HashTable *zend_closure_get_debug_info(zend_object *object, int *is_temp)
 	HashTable *debug_info;
 	bool zstr_args = (closure->func.type == ZEND_USER_FUNCTION) || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO);
 
-	*is_temp = 1;
+	*is_temp = true;
 
 	debug_info = zend_new_array(8);
 
