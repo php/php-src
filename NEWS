@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.3.10
+18 Jul 2024, PHP 8.3.10RC1
 
 - Core:
   . Fixed bug GH-13922 (Fixed support for systems with
