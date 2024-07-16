@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-14741 (Segmentation fault in Zend/zend_types.h). (nielsdos)
   . Fixed bug GH-14969 (Use-after-free in property coercion with __toString()).
     (ilutov)
+  . Fixed bug GH-14961 (Comment between -> and keyword results in parse error).
+    (ilutov)
 
 - Dom:
   . Fixed bug GH-14702 (DOMDocument::xinclude() crash). (nielsdos)
