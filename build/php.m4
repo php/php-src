@@ -1103,9 +1103,9 @@ int main(void) {
   [php_cv_time_r_type=POSIX])],
   [php_cv_time_r_type=POSIX])
 ])
-AS_CASE([php_cv_time_r_type],
+AS_CASE([$php_cv_time_r_type],
   [hpux], [AC_DEFINE([PHP_HPUX_TIME_R], [1],
-    [Define to 1 if you have HP-UX 10.x.-style reentrant time functions.])]
+    [Define to 1 if you have HP-UX 10.x.-style reentrant time functions.])],
   [irix], [AC_DEFINE([PHP_IRIX_TIME_R], [1],
     [Define to 1 you have IRIX-style reentrant time functions.])])
 ])
