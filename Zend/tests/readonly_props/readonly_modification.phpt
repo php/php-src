@@ -73,10 +73,10 @@ Cannot modify readonly property Test::$prop
 Cannot modify readonly property Test::$prop
 Cannot modify readonly property Test::$prop
 Cannot modify readonly property Test::$prop
-Cannot modify readonly property Test::$prop
-Cannot modify readonly property Test::$prop
-Cannot modify readonly property Test::$prop
+Cannot indirectly modify readonly property Test::$prop
+Cannot indirectly modify readonly property Test::$prop
+Cannot indirectly modify readonly property Test::$prop
 array(0) {
 }
-Cannot modify readonly property Test::$prop2
-Cannot modify readonly property Test::$prop2
+Cannot indirectly modify readonly property Test::$prop2
+Cannot indirectly modify readonly property Test::$prop2

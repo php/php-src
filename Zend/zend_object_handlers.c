@@ -697,7 +697,7 @@ try_again:
 				} else if (Z_PROP_FLAG_P(retval) & IS_PROP_REINITABLE) {
 					Z_PROP_FLAG_P(retval) &= ~IS_PROP_REINITABLE;
 				} else {
-					zend_readonly_property_modification_error(prop_info);
+					zend_readonly_property_indirect_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);
 				}
 			}
