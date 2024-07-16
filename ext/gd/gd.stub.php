@@ -794,3 +794,7 @@ function imagesetinterpolation(GdImage $image, int $method = IMG_BILINEAR_FIXED)
  * @refcount 1
  */
 function imageresolution(GdImage $image, ?int $resolution_x = null, ?int $resolution_y = null): array|bool {}
+
+#ifdef HAVE_GD_IMAGECLONE
+function imageclone(GdImage $image): GdImage|false {}
+#endif
