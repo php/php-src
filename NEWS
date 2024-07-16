@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.3.11
 
 
-18 Jul 2024, PHP 8.3.10RC1
+01 Aug 2024, PHP 8.3.10
 
 - Core:
   . Fixed bug GH-13922 (Fixed support for systems with
