@@ -6483,6 +6483,7 @@ PHP_FUNCTION(array_reduce)
 		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			ZVAL_COPY_VALUE(return_value, &retval);
@@ -6490,6 +6491,7 @@ PHP_FUNCTION(array_reduce)
 				zend_unwrap_reference(return_value);
 			}
 		} else {
+			zval_ptr_dtor(&args[2]);
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
 			RETURN_NULL();
