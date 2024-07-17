@@ -68,7 +68,7 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 {
 	DOM_PROP_NODE(xmlNodePtr, node, obj);
 
-	xmlChar *wholetext = NULL;
+	smart_str str = {0};
 
 	/* Find starting text node */
 	while (node->prev && ((node->prev->type == XML_TEXT_NODE) || (node->prev->type == XML_CDATA_SECTION_NODE))) {
@@ -77,16 +77,11 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 
 	/* concatenate all adjacent text and cdata nodes */
 	while (node && ((node->type == XML_TEXT_NODE) || (node->type == XML_CDATA_SECTION_NODE))) {
-		wholetext = xmlStrcat(wholetext, node->content);
+		smart_str_appends(&str, (const char *) node->content);
 		node = node->next;
 	}
 
-	if (wholetext != NULL) {
-		ZVAL_STRING(retval, (char *) wholetext);
-		xmlFree(wholetext);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
+	ZVAL_STR(retval, smart_str_extract(&str));
 
 	return SUCCESS;
 }
