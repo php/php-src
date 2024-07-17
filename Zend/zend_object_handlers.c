@@ -565,6 +565,12 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	zval *zv;
 	uint32_t *ptr;
 
+	if (EXPECTED(EG(guard_context) == 0)) {
+		member = zend_string_copy(member);
+	} else {
+		member = zend_string_init(ZSTR_VAL(member), ZSTR_LEN(member), false);
+		ZSTR_H(member) = zend_string_hash_val(member) + EG(guard_context);
+	}
 
 	ZEND_ASSERT(zobj->ce->ce_flags & ZEND_ACC_USE_GUARDS);
 	zv = zend_get_guard_value(zobj);
@@ -572,11 +578,14 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		zend_string *str = Z_STR_P(zv);
 		if (EXPECTED(str == member) ||
 		    /* str and member don't necessarily have a pre-calculated hash value here */
-		    EXPECTED(zend_string_equal_content(str, member))) {
+		    (EXPECTED(zend_string_equal_content(str, member))
+		        && (EG(guard_context) == 0 || ZSTR_HASH(str) == ZSTR_HASH(member)))) {
+			zend_string_release(member);
 			return &Z_GUARD_P(zv);
 		} else if (EXPECTED(Z_GUARD_P(zv) == 0)) {
 			zval_ptr_dtor_str(zv);
-			ZVAL_STR_COPY(zv, member);
+			/* Transfer ownership. */
+			ZVAL_STR(zv, member);
 			return &Z_GUARD_P(zv);
 		} else {
 			ALLOC_HASHTABLE(guards);
@@ -592,18 +601,22 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		ZEND_ASSERT(guards != NULL);
 		zv = zend_hash_find(guards, member);
 		if (zv != NULL) {
+			zend_string_release(member);
 			return (uint32_t*)(((uintptr_t)Z_PTR_P(zv)) & ~1);
 		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
 		ZVAL_STR_COPY(zv, member);
 		Z_GUARD_P(zv) &= ~ZEND_GUARD_PROPERTY_MASK;
+		zend_string_release(member);
 		return &Z_GUARD_P(zv);
 	}
 	/* we have to allocate uint32_t separately because ht->arData may be reallocated */
 	ptr = (uint32_t*)emalloc(sizeof(uint32_t));
 	*ptr = 0;
-	return (uint32_t*)zend_hash_add_new_ptr(guards, member, ptr);
+	uint32_t *result = (uint32_t*)zend_hash_add_new_ptr(guards, member, ptr);
+	zend_string_release(member);
+	return result;
 }
 /* }}} */
 

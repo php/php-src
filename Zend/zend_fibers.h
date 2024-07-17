@@ -95,6 +95,8 @@ struct _zend_fiber_context {
 	/* Observer state */
 	zend_execute_data *top_observed_frame;
 
+	uint32_t guard_context;
+
 	/* Reserved for extensions */
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

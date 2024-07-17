@@ -295,6 +295,13 @@ struct _zend_executor_globals {
 	zend_string *filename_override;
 	zend_long lineno_override;
 
+	/* Guards are context dependent. I.e. if __get() is being called for an object
+	 * within a fiber, the guard will _not_ skip __get() in the main context. To
+	 * achieve this, we offset the guard string has by the guard context.
+	 * Additionally, shutdown will discard the current guards in the same way. */
+	uint32_t guard_context;
+	uint32_t guard_context_counter;
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 	zend_call_stack call_stack;
 	zend_long max_allowed_stack_size;
