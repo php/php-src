@@ -15,7 +15,7 @@ namespace Pdo {
      * @strict-properties
      * @not-serializable
      */
-    class Odbc extends PDO
+    class Odbc extends \PDO
     {
         /** @cvalue PDO_ODBC_ATTR_USE_CURSOR_LIBRARY */
         public const int ATTR_USE_CURSOR_LIBRARY = UNKNOWN;

@@ -8,7 +8,7 @@ namespace Pdo;
  * @strict-properties
  * @not-serializable
  */
-class Mysql extends PDO
+class Mysql extends \PDO
 {
     /** @cvalue PDO_MYSQL_ATTR_USE_BUFFERED_QUERY */
     public const int ATTR_USE_BUFFERED_QUERY = UNKNOWN;

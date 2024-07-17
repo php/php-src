@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 89e215924e6e1041d1ddfca6717e4ad2219d0199 */
+ * Stub hash: 4b89b32b7fa966fa1c3f481bc2b322f5b8d03129 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
@@ -53,12 +53,12 @@ static const zend_function_entry class_Pdo_Sqlite_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry_Pdo_PDO)
+static zend_class_entry *register_class_Pdo_Sqlite(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Sqlite", class_Pdo_Sqlite_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Pdo_PDO);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 #if defined(SQLITE_DETERMINISTIC)
 

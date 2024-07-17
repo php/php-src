@@ -8,7 +8,7 @@ namespace Pdo;
  * @strict-properties
  * @not-serializable
  */
-class Sqlite extends PDO
+class Sqlite extends \PDO
 {
 #ifdef SQLITE_DETERMINISTIC
     /** @cvalue SQLITE_DETERMINISTIC */
