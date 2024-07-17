@@ -86,7 +86,7 @@ static inline void bc_standard_div(
 	 * it will be 2. In this case, 2 is the temporary quotient. Here, the error E is 1.
 	 * Also note that for example 2400000 / 120, there will be 5 divisions.
 	 *
-	 * Another example: Calculating 99900000000 / 10009999 with radix 10000.
+	 * Another example: Calculating 99900000000 / 10009999 with base 10000.
 	 * The actual quotient is 9980, but if calculate it using only the high-order digits:
 	 * 999 / 1000 = 0, Numbers that are not divisible are carried forward to the next division.
 	 * 9990000 / 1000 = 9990 (Here, the temporary quotient is 9990 and the error E is 10.)
@@ -100,17 +100,25 @@ static inline void bc_standard_div(
 	 *   filled in from the next array element.
 	 * - Add digits to n1 in the same way as the number of digits adjusted by n2.
 	 *
-	 * e.g. n1 = 123456780000, n2 = 123456789, radix = 10000
-	 * n1_arr = [0, 5678, 1234], n2_arr = [6789, 2345, 1]
-	 * n1_top = 1234, n2_top = 1
-	 * n2_top_tmp = 12345 (+4 digits), n1_top_tmp = 12345678 (+4 digits)
-	 * tmp_quot = n1_top_tmp / n2_top_tmp = 1000, tmp_rem = -9000
+	 * e.g.
+	 * n1 = 123456780000
+	 * n2 = 123456789
+	 * base = 10000
+	 * n1_arr = [0, 5678, 1234]
+	 * n2_arr = [6789, 2345, 1]
+	 * n1_top = 1234
+	 * n2_top = 1
+	 * n2_top_tmp = 12345 (+4 digits)
+	 * n1_top_tmp = 12345678 (+4 digits)
+	 * tmp_quot = n1_top_tmp / n2_top_tmp = 1000
+	 * tmp_rem = -9000
 	 * tmp_quot is too large, so tmp_quot--, tmp_rem += n2 (restoring)
-	 * quot = 999, rem = 123447789
+	 * quot = 999
+	 * rem = 123447789
 	 *
 	 * Details:
 	 * Suppose that when calculating the temporary quotient, only the high-order elements of the BC_VECTOR array are used.
-	 * At this time, n1 and n2 can be considered to be decomposed as follows. (Here, B = 10^b, any b ∈ ℕ)
+	 * At this time, n1 and n2 can be considered to be decomposed as follows. (Here, B = 10^b, any b ∈ ℕ, any k ∈ ℕ)
 	 * n1 = n1_high * B^k + n1_low
 	 * n2 = n2_high * B^k + n2_low
 	 *
@@ -125,7 +133,7 @@ static inline void bc_standard_div(
 	 * First, n1_high, which only exists in the numerator, uses its maximum value. Considering carry-back,
 	 * n1_high can be expressed as follows.
 	 * n1_high = n2_high * B
-	 * And n1_low is also present only in the numerator, but since it is a negative number, use the largest possible value, i.e. 0.
+	 * Also, n1_low is only present in the numerator, but since this is a subtraction, use the smallest possible value here, 0.
 	 * n1_low = 0
 	 *
 	 * MAX_E = (n1_high * n2_low - n2_high * n1_low) / (n2_high * (n2_high * B^k + n2_low))
@@ -152,7 +160,7 @@ static inline void bc_standard_div(
 	 * MAX_E < 10^b / 10^x
 	 * MAX_E < 10^(b - x)
 	 *
-	 * Therefore, found that if the number of digits in radix B and n2_high are equal, the error will be less
+	 * Therefore, found that if the number of digits in base B and n2_high are equal, the error will be less
 	 * than 1 regardless of the number of digits in the value of k.
 	 *
 	 * Here, B is BC_VECTOR_BOUNDARY_NUM, so adjust the number of digits in divider to be BC_VECTOR_SIZE + 1.
