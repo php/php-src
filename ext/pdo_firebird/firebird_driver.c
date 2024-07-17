@@ -1080,8 +1080,8 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 						 */
 						H->txn_isolation_level = lval;
 					} else {
-						zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
-							"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+						zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+							"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
 						return false;
 					}
 				}
@@ -1318,8 +1318,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	) {
 		H->txn_isolation_level = txn_isolation_level;
 	} else {
-		zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
-			"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+		zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+			"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
 		ret = 0;
 	}
 
