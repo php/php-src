@@ -1515,9 +1515,8 @@ static void initialize_date_period_properties(php_period_obj *period_obj)
 {
 	zval zv;
 
-	if (UNEXPECTED(!period_obj->std.properties)) {
-		rebuild_object_properties(&period_obj->std);
-	}
+	/* rebuild properties */
+	zend_std_get_properties_ex(&period_obj->std);
 
 	create_date_period_datetime(period_obj->start, period_obj->start_ce, &zv);
 	write_date_period_property(&period_obj->std, "start", sizeof("start") - 1, &zv);
@@ -1652,9 +1651,8 @@ static void date_period_it_move_forward(zend_object_iterator *iter)
 
 	date_period_advance(it_time, object->interval);
 
-	if (UNEXPECTED(!object->std.properties)) {
-		rebuild_object_properties(&object->std);
-	}
+	/* rebuild properties */
+	zend_std_get_properties_ex(&object->std);
 
 	create_date_period_datetime(object->current, object->start_ce, &current_zv);
 	zend_string *property_name = ZSTR_INIT_LITERAL("current", 0);

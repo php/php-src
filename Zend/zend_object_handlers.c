@@ -62,7 +62,7 @@
   called, we cal __call handler.
 */
 
-ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
+ZEND_API void rebuild_object_properties_internal(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {
 		zend_property_info *prop_info;
@@ -130,7 +130,7 @@ ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj) /*
 ZEND_API HashTable *zend_std_get_properties(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {
-		rebuild_object_properties(zobj);
+		rebuild_object_properties_internal(zobj);
 	}
 	return zobj->properties;
 }
@@ -1124,10 +1124,7 @@ write_std_property:
 			}
 
 			Z_TRY_ADDREF_P(value);
-			if (!zobj->properties) {
-				rebuild_object_properties(zobj);
-			}
-			variable_ptr = zend_hash_add_new(zobj->properties, name, value);
+			variable_ptr = zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 		}
 	}
 
@@ -1312,7 +1309,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				}
 			}
 			if (UNEXPECTED(!zobj->properties)) {
-				rebuild_object_properties(zobj);
+				rebuild_object_properties_internal(zobj);
 			}
 			if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
@@ -2028,13 +2025,9 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		Z_UNPROTECT_RECURSION_P(o1);
 		return 0;
 	} else {
-		if (!zobj1->properties) {
-			rebuild_object_properties(zobj1);
-		}
-		if (!zobj2->properties) {
-			rebuild_object_properties(zobj2);
-		}
-		return zend_compare_symbol_tables(zobj1->properties, zobj2->properties);
+		return zend_compare_symbol_tables(
+				zend_std_get_properties_ex(zobj1),
+				zend_std_get_properties_ex(zobj2));
 	}
 }
 /* }}} */

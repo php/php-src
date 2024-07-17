@@ -94,6 +94,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
 * Added zend_hash_get_current_pos_ex() variant of zend_hash_get_current_pos().
 
+* Renamed rebuild_object_properties() to rebuild_object_properties_internal().
+  This function should not be used outside of zend_std_get_properties_ex() and
+  zend_std_get_properties(). Use zend_std_get_properties_ex() or
+  zend_std_get_properties() instead.
+
 ========================
 2. Build system changes
 ========================
