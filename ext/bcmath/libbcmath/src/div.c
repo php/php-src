@@ -76,7 +76,7 @@ static void _one_mult(unsigned char *num, size_t size, int digit, unsigned char 
    true if the division is ok and the result is in QUOT.  The number of
    digits after the decimal point is SCALE. It returns false if division
    by zero is tried. The algorithm is found in Knuth Vol 2. p237. */
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
+bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale)
 {
 	bc_num qval;
 	unsigned char *num1, *num2;

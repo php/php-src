@@ -106,7 +106,7 @@ static inline const char *bc_skip_zero_reverse(const char *scanner, const char *
 }
 
 /* Assumes `num` points to NULL, i.e. does yet not hold a number. */
-bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale)
+bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale)
 {
 	size_t str_scale = 0;
 	const char *ptr = str;
@@ -153,6 +153,10 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 			goto fail;
 		}
 
+		if (full_scale) {
+			*full_scale = fractional_end - fractional_ptr;
+		}
+
 		/* Exclude trailing zeros. */
 		fractional_end = bc_skip_zero_reverse(fractional_end, fractional_ptr);
 
@@ -166,6 +170,10 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 		if (str_scale > scale && !auto_scale) {
 			fractional_end -= str_scale - scale;
 			str_scale = scale;
+		}
+	} else {
+		if (full_scale) {
+			*full_scale = 0;
 		}
 	}
 
