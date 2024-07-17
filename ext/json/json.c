@@ -37,10 +37,10 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
 json_error_info_type json_error_info_data = {
-	NULL, // Parse token
-	0, // Error ode
-	0, // Character count
-	0 // Total number of characters to parse
+	NULL,	// Parsed token
+	0,		// Error code
+	0,		// Character count
+	0		// Total number of characters to parse
 };
 
 void update_json_error_info_data(php_json_parser *parser) {
