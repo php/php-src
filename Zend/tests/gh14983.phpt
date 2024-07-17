@@ -14,7 +14,8 @@ class A {
         if ($loop) {
             while (true) {}
         }
-        return $name;
+        echo __METHOD__, "\n";
+        return $this->{$name};
     }
 }
 
@@ -35,4 +36,7 @@ $a->foo;
 ?>
 --EXPECTF--
 Fatal error: Maximum execution time of 1 second exceeded in %s on line %d
-string(3) "foo"
+A::__get
+
+Warning: Undefined property: A::$foo in %s on line %d
+NULL
