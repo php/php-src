@@ -130,8 +130,8 @@ static inline void bc_standard_div(
 	 * E = (n1_high * n2_low - n2_high * n1_low) / (n2_high * (n2_high * B^k + n2_low))
 	 *
 	 * Find the error MAX_E when the error E is maximum.
-	 * First, n1_high, which only exists in the numerator, uses its maximum value. Considering carry-back,
-	 * n1_high can be expressed as follows.
+	 * First, n1_high, which only exists in the numerator, uses its maximum value.
+	 * Considering carry-back, n1_high can be expressed as follows.
 	 * n1_high = n2_high * B
 	 * Also, n1_low is only present in the numerator, but since this is a subtraction, use the smallest possible value here, 0.
 	 * n1_low = 0
