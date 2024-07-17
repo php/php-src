@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 87494cb9126aefff143d4f55db9e282d8a30f4a2 */
+ * Stub hash: 666e83d562c50bb8ee917653009ee1c9a3802a22 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -1671,7 +1671,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_is_infinite arginfo_is_finite
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pow, 0, 2, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_OBJECT)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pow, 0, 2, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, num, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, exponent, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
