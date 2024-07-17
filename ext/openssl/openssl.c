@@ -755,7 +755,7 @@ static time_t php_openssl_asn1_time_to_time_t(ASN1_UTCTIME * timestr) /* {{{ */
 
 	timestr_len = (size_t)ASN1_STRING_length(timestr);
 
-	if (timestr_len != strlen((const char *)ASN1_STRING_get0_data(timestr))) {
+	if (timestr_len != zend_strnlen((const char *)ASN1_STRING_get0_data(timestr), timestr_len)) {
 		php_error_docref(NULL, E_WARNING, "Illegal length in timestamp");
 		return (time_t)-1;
 	}
