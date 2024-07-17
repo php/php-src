@@ -94,8 +94,8 @@ static inline void bc_standard_div(
 	 * If calculate the temporary quotient using only one array of n1 and n2, the error E can be larger than 1.
 	 * In other words, in the restoring division, the count of additions for restore increases significantly.
 	 *
-	 * Therefore, in order to keep the error within 1 and to limit the number of additions required for restoration to one
-	 * at most, adjust the number of high-order digits used to calculate the temporary quotient as follows.
+	 * Therefore, in order to keep the error within 1 and to limit the number of additions required for restoration to
+	 * at most one, adjust the number of high-order digits used to calculate the temporary quotient as follows.
 	 * - Adjust the number of digits of n2 used in the calculation to BC_VECTOR_SIZE + 1 digit. The missing digits are
 	 *   filled in from the next array element.
 	 * - Add digits to n1 in the same way as the number of digits adjusted by n2.
