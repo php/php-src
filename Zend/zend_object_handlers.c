@@ -1985,7 +1985,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		 */
 		/* use bitwise OR to make only one conditional jump */
 		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1))) {
-			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+			zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+			return ZEND_UNCOMPARABLE;
 		}
 		Z_PROTECT_RECURSION_P(o1);
 
