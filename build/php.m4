@@ -377,7 +377,7 @@ AC_DEFUN([PHP_EVAL_LIBLINE],
     ;;
     esac
   done
-m4_ifnblank([$3], [m4_ifnblank([$2], [ext_shared=$_php_ext_shared_saved])])dnl
+m4_ifnblank([$3], [m4_ifnblank([$2], [ext_shared=$_php_ext_shared_saved])])[]dnl
 ])
 
 dnl
