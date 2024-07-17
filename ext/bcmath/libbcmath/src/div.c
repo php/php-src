@@ -164,7 +164,7 @@ static inline void bc_standard_div(
 	 * Therefore, found that if the number of digits in base B and divisor_high are equal, the error will be less
 	 * than 1 regardless of the number of digits in the value of k.
 	 *
-	 * Here, B is BC_VECTOR_BOUNDARY_NUM, so adjust the number of digits in divider to be BC_VECTOR_SIZE + 1.
+	 * Here, B is BC_VECTOR_BOUNDARY_NUM, so adjust the number of digits in high part of divisor to be BC_VECTOR_SIZE + 1.
 	 */
 	size_t divisor_top_digits = divisor_len % BC_VECTOR_SIZE;
 	if (divisor_top_digits == 0) {
@@ -172,12 +172,12 @@ static inline void bc_standard_div(
 	}
 	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
 	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
-	BC_VECTOR divider = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
+	BC_VECTOR tmp_divisor = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
 	for (i = 0; i < quot_arr_size; i++) {
-		BC_VECTOR divided = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
+		BC_VECTOR tmp_numerator = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
 
 		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
-		if (div_carry == 0 && divided < divider) {
+		if (div_carry == 0 && tmp_numerator < tmp_divisor) {
 			quot_vector[quot_top_index - i] = 0;
 			div_carry = numerator_vector[numerator_top_index - i];
 			numerator_vector[numerator_top_index - i] = 0;
@@ -186,13 +186,13 @@ static inline void bc_standard_div(
 
 		/*
 		 * Determine the temporary quotient.
-		 * "divided" is numerator_high in the previous example. The maximum value of numerator_high is divisor_high * B,
-		 * so here it is divider * BC_VECTOR_BOUNDARY_NUM.
-		 * The number of digits in divider is BC_VECTOR_SIZE + 1, so even if divider is at its maximum value,
+		 * "tmp_numerator" is numerator_high in the previous example. The maximum value of numerator_high is divisor_high * B,
+		 * so here it is tmp_divisor * BC_VECTOR_BOUNDARY_NUM.
+		 * The number of digits in tmp_divisor is BC_VECTOR_SIZE + 1, so even if tmp_divisor is at its maximum value,
 		 * it will never overflow here.
 		 */
-		divided += div_carry * BC_VECTOR_BOUNDARY_NUM * high_part_shift;
-		BC_VECTOR quot_guess = divided / divider;
+		tmp_numerator += div_carry * BC_VECTOR_BOUNDARY_NUM * high_part_shift;
+		BC_VECTOR quot_guess = tmp_numerator / tmp_divisor;
 
 		/* For sub, add the remainder to the high-order digit */
 		numerator_vector[numerator_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
