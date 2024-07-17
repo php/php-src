@@ -294,6 +294,11 @@ static zend_always_inline xmlNodePtr php_dom_first_child_of_container_node(xmlNo
 	}
 }
 
+static zend_always_inline const xmlChar *php_dom_get_content_or_empty(const xmlNode *node)
+{
+	return node->content ? node->content : BAD_CAST "";
+}
+
 PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);
 PHP_MINFO_FUNCTION(dom);

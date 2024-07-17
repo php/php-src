@@ -104,7 +104,6 @@ Since:
 PHP_METHOD(DOMCharacterData, substringData)
 {
 	zval *id;
-	xmlChar *cur;
 	xmlChar *substring;
 	xmlNodePtr node;
 	zend_long offset_input, count_input;
@@ -119,11 +118,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 	if (ZEND_LONG_INT_OVFL(offset_input) || ZEND_LONG_INT_OVFL(count_input)) {
@@ -197,7 +192,7 @@ Since:
 static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
-	xmlChar		*cur, *first, *second;
+	xmlChar		*first, *second;
 	xmlNodePtr  node;
 	char		*arg;
 	zend_long        offset_input;
@@ -213,11 +208,7 @@ static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 
@@ -268,7 +259,7 @@ Since:
 static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
-	xmlChar    *cur, *substring, *second;
+	xmlChar    *substring, *second;
 	xmlNodePtr  node;
 	zend_long        offset, count_input;
 	unsigned int count;
@@ -282,11 +273,7 @@ static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 
@@ -340,7 +327,7 @@ Since:
 static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
-	xmlChar		*cur, *substring, *second = NULL;
+	xmlChar		*substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
 	zend_long        offset, count_input;
@@ -356,11 +343,7 @@ static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool r
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 
