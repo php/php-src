@@ -509,6 +509,9 @@ PHP 8.4 UPGRADE NOTES
     PDO::FB_WRITABLE_TRANSACTION) have been added.
   . When using persistent connections, there is now a liveness check in the
     constructor.
+  . The content that is built changes depending on the value of FB_API_VER in
+    ibase.h, so added the attribute value Pdo\Firebird::ATTR_API_VERSION to
+    obtain that value. This value can also be referenced from phpinfo.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
@@ -805,7 +808,7 @@ PHP 8.4 UPGRADE NOTES
   . P_GID (NetBSD/FreeBSD only).
   . P_SID (NetBSD/FreeBSD only).
   . P_JAILID (FreeBSD only).
-  
+
 - Standard:
   . PHP_ROUND_CEILING.
   . PHP_ROUND_FLOOR.

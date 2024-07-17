@@ -8,6 +8,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
 
+- PDO_FIREBIRD:
+  . Added Pdo\Firebird::ATTR_API_VERSION. (SakiTakamachi)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
 

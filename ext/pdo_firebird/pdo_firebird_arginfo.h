@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 584b20b65c1ebccf82f894cb9e16ea76a2b1aa1e */
+ * Stub hash: 84acb963a6d147625c986e66ec313a0927314af2 */
 
 static const zend_function_entry class_Pdo_Firebird_methods[] = {
 	ZEND_FE_END
@@ -30,6 +30,12 @@ static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_ent
 	zend_string *const_ATTR_TIMESTAMP_FORMAT_name = zend_string_init_interned("ATTR_TIMESTAMP_FORMAT", sizeof("ATTR_TIMESTAMP_FORMAT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_TIMESTAMP_FORMAT_name, &const_ATTR_TIMESTAMP_FORMAT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_TIMESTAMP_FORMAT_name);
+
+	zval const_ATTR_API_VERSION_value;
+	ZVAL_LONG(&const_ATTR_API_VERSION_value, PDO_FB_ATTR_API_VERSION);
+	zend_string *const_ATTR_API_VERSION_name = zend_string_init_interned("ATTR_API_VERSION", sizeof("ATTR_API_VERSION") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_ATTR_API_VERSION_name, &const_ATTR_API_VERSION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_ATTR_API_VERSION_name);
 
 	zval const_TRANSACTION_ISOLATION_LEVEL_value;
 	ZVAL_LONG(&const_TRANSACTION_ISOLATION_LEVEL_value, PDO_FB_TRANSACTION_ISOLATION_LEVEL);
