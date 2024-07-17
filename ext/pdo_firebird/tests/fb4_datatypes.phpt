@@ -12,7 +12,7 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 require 'testdb.inc';
 
 $sql = <<<'SQL'
-	SELECT 
+	SELECT
 		CAST(15 AS BIGINT) AS i64,
 		CAST(15 AS INT128) AS i128,
 		123.97 AS N,
@@ -27,6 +27,10 @@ $sql = <<<'SQL'
 SQL;
 
 $dbh = getDbConnection();
+
+if ($dbh->getAttribute(Pdo\Firebird::ATTR_API_VERSION) < 40) {
+	die('skip: Firebird API version must be greater than or equal to 40');
+}
 
 $stmt = $dbh->prepare($sql);
 $stmt->execute();

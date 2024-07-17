@@ -503,8 +503,8 @@ static void set_coercing_data_type(XSQLDA* sqlda)
 				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 46;
 				break;
-
-			EMPTY_SWITCH_DEFAULT_CASE()	
+			default:
+			    break;
 		}
 	}	
 }
