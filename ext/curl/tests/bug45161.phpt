@@ -4,6 +4,7 @@ Bug #45161 (Reusing a curl handle leaks memory)
 curl
 --FILE--
 <?php
+$t0 = hrtime(true);
 include 'server.inc';
 $host = curl_cli_server_start();
 
@@ -35,6 +36,8 @@ if ($start < memory_get_usage()) {
 echo "\n";
 fclose($fp);
 unset($fp);
+$t1 = hrtime(true);
+var_dump(($t1 - $t0) / 1e9);
 ?>
 --EXPECT--
 PASS
