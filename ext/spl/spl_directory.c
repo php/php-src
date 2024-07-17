@@ -601,12 +601,8 @@ static inline HashTable *spl_filesystem_object_get_debug_info(zend_object *objec
 	HashTable *debug_info;
 	zend_string *path_name;
 
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
-
 	// TODO Do zend_new_array() + zend_hash_copy() trick?
-	debug_info = zend_array_dup(intern->std.properties);
+	debug_info = zend_array_dup(zend_std_get_properties_ex(&intern->std));
 
 	path_name = spl_filesystem_object_get_pathname(intern);
 	if (path_name) {

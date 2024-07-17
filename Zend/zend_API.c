@@ -31,6 +31,7 @@
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"
+#include "zend_object_handlers.h"
 #include "zend_observer.h"
 
 #include <stdarg.h>
@@ -1764,10 +1765,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 				}
 
-				if (!object->properties) {
-					rebuild_object_properties(object);
-				}
-				prop = zend_hash_update(object->properties, key, prop);
+				prop = zend_hash_update(zend_std_get_properties_ex(object), key, prop);
 				zval_add_ref(prop);
 			}
 		} else {
@@ -1779,10 +1777,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 					ZSTR_VAL(object->ce->name), h);
 			}
 
-			if (!object->properties) {
-				rebuild_object_properties(object);
-			}
-			prop = zend_hash_index_update(object->properties, h, prop);
+			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();

@@ -427,14 +427,11 @@ static inline HashTable* spl_dllist_object_get_debug_info(zend_object *obj) /* {
 	spl_ptr_llist_element *current = intern->llist->head;
 	zval tmp, dllist_array;
 	HashTable *debug_info;
-
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
+	HashTable *properties = zend_std_get_properties_ex(&intern->std);
 
 	/* +2 As we are adding 2 additional key-entries */
-	debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 2);
-	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+	debug_info = zend_new_array(zend_hash_num_elements(properties) + 2);
+	zend_hash_copy(debug_info, properties, (copy_ctor_func_t) zval_add_ref);
 
 	ZVAL_LONG(&tmp, intern->flags);
 	spl_set_private_debug_info_property(spl_ce_SplDoublyLinkedList, "flags", strlen("flags"), debug_info, &tmp);

@@ -24072,9 +24072,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -24098,8 +24095,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -24219,9 +24216,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -24245,8 +24239,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -24366,9 +24360,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -24392,8 +24383,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -24513,9 +24504,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -24539,8 +24527,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -27050,9 +27038,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -27076,8 +27061,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -27197,9 +27182,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -27223,8 +27205,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -27344,9 +27326,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -27370,8 +27349,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -27491,9 +27470,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -27517,8 +27493,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -31394,9 +31370,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -31420,8 +31393,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -31541,9 +31514,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -31567,8 +31537,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -31688,9 +31658,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -31714,8 +31681,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -31835,9 +31802,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -31861,8 +31825,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -34128,9 +34092,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -34154,8 +34115,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -34275,9 +34236,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -34301,8 +34259,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -34422,9 +34380,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -34448,8 +34403,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -34569,9 +34524,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -34595,8 +34547,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -36283,9 +36235,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -36309,8 +36258,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -36430,9 +36379,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -36456,8 +36402,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -36577,9 +36523,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -36603,8 +36546,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -36724,9 +36667,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -36750,8 +36690,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -38920,9 +38860,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -38946,8 +38883,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -39067,9 +39004,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -39093,8 +39027,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -39214,9 +39148,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -39240,8 +39171,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -39361,9 +39292,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -39387,8 +39315,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -43296,9 +43224,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -43322,8 +43247,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -43443,9 +43368,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -43469,8 +43391,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -43590,9 +43512,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -43616,8 +43535,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -43737,9 +43656,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -43763,8 +43679,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -47236,9 +47152,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -47262,8 +47175,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -47383,9 +47296,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -47409,8 +47319,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -47530,9 +47440,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -47556,8 +47463,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -47677,9 +47584,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -47703,8 +47607,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -52727,9 +52631,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CONST == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -52753,8 +52654,8 @@ fast_assign_obj:
 						} else if (IS_CONST == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -52874,9 +52775,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_TMP_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -52900,8 +52798,8 @@ fast_assign_obj:
 						} else if (IS_TMP_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -53021,9 +52919,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_VAR == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -53047,8 +52942,8 @@ fast_assign_obj:
 						} else if (IS_VAR == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
@@ -53168,9 +53063,6 @@ fast_assign_obj:
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (IS_CV == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -53194,8 +53086,8 @@ fast_assign_obj:
 						} else if (IS_CV == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
