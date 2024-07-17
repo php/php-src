@@ -20,6 +20,7 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_versioning.h"
 #include "php_date.h"
+#include "zend_attributes.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "lib/timelib.h"
@@ -5945,7 +5946,7 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 {
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
 		if (date_period_is_internal_property(name)) {
-			zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
+			zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 			return &EG(uninitialized_zval);
 		}
 	}
@@ -5957,7 +5958,7 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	if (date_period_is_internal_property(name)) {
-		zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
+		zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 		return value;
 	}
 
@@ -5967,7 +5968,7 @@ static zval *date_period_write_property(zend_object *object, zend_string *name, 
 static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	if (date_period_is_internal_property(name)) {
-		zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
+		zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 		return &EG(error_zval);
 	}
 

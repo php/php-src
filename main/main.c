@@ -2073,7 +2073,7 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	zend_module_entry *module;
 
 #ifdef PHP_WIN32
-	WORD wVersionRequested = MAKEWORD(2, 0);
+	WORD wVersionRequested = MAKEWORD(2, 2);
 	WSADATA wsaData;
 
 	old_invalid_parameter_handler =
@@ -2160,6 +2160,12 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* start up winsock services */
 	if (WSAStartup(wVersionRequested, &wsaData) != 0) {
 		fprintf(stderr, "\nwinsock.dll unusable. %d\n", WSAGetLastError());
+		return FAILURE;
+	}
+
+	if (UNEXPECTED(HIBYTE(wsaData.wVersion) != 2)) {
+		fprintf(stderr, "\nversion not found in winsock.dll. %d\n", WSAGetLastError());
+		WSACleanup();
 		return FAILURE;
 	}
 	php_win32_signal_ctrl_handler_init();

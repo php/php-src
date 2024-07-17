@@ -27,7 +27,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   PHP_SUBST([MBSTRING_SHARED_LIBADD])
 
   for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
-    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], 1)
+    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], [1])
   done
 
   for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
@@ -55,20 +55,24 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
     PHP_EVAL_LIBLINE($ONIG_LIBS, MBSTRING_SHARED_LIBADD)
     PHP_EVAL_INCLINE($ONIG_CFLAGS)
 
-    save_old_LDFLAGS=$LDFLAGS
-    PHP_EVAL_LIBLINE([$MBSTRING_SHARED_LIBADD], LDFLAGS)
-    AC_MSG_CHECKING([if oniguruma has an invalid entry for KOI8 encoding])
-    AC_LINK_IFELSE([AC_LANG_PROGRAM([[
-#include <oniguruma.h>
-    ]], [[
-return (int)(ONIG_ENCODING_KOI8 + 1);
-    ]])], [
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1], [define to 1 if oniguruma has an invalid entry for KOI8 encoding])
-    ])
-    LDFLAGS=$save_old_LDFLAGS
+    AC_CACHE_CHECK([if oniguruma has an invalid entry for KOI8 encoding],
+      [php_cv_lib_onig_invalid_koi8],
+      [save_old_LIBS=$LIBS
+        LIBS="$LIBS $MBSTRING_SHARED_LIBADD"
+        save_old_CFLAGS=$CFLAGS
+        CFLAGS="$CFLAGS $ONIG_CFLAGS"
+        AC_LINK_IFELSE([AC_LANG_PROGRAM([
+          #include <stdint.h>
+          #include <oniguruma.h>
+        ],
+        [return (intptr_t)(ONIG_ENCODING_KOI8 + 1);])],
+        [php_cv_lib_onig_invalid_koi8=no],
+        [php_cv_lib_onig_invalid_koi8=yes])
+        LIBS=$save_old_LIBS
+        CFLAGS=$save_old_CFLAGS])
+    AS_VAR_IF([php_cv_lib_onig_invalid_koi8], [yes],
+      [AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1],
+        [Define to 1 if oniguruma has an invalid entry for KOI8 encoding.])])
 
     PHP_MBSTRING_ADD_CFLAG([-DONIG_ESCAPE_UCHAR_COLLISION=1])
     PHP_MBSTRING_ADD_CFLAG([-DUChar=OnigUChar])

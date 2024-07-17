@@ -104,14 +104,13 @@ fi
 dnl Settings we want to make before the checks.
 dnl ----------------------------------------------------------------------------
 
-php_shtool=$srcdir/build/shtool
+PHP_INIT_BUILD_SYSTEM
+
 T_MD=`$php_shtool echo -n -e %B`
 T_ME=`$php_shtool echo -n -e %b`
 
-PHP_INIT_BUILD_SYSTEM
-
 dnl We want this one before the checks, so the checks can modify CFLAGS.
-AS_VAR_SET_IF([CFLAGS],, [auto_cflags=1])
+AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
@@ -476,40 +475,25 @@ PHP_CHECK_SIZEOF(ptrdiff_t, 8)
 dnl Check stdint types (must be after header check).
 PHP_CHECK_STDINT_TYPES
 
-dnl Check __builtin_expect
-PHP_CHECK_BUILTIN_EXPECT
-dnl Check __builtin_unreachable
-PHP_CHECK_BUILTIN_UNREACHABLE
-dnl Check __builtin_clz
-PHP_CHECK_BUILTIN_CLZ
-dnl Check __builtin_clzl
-PHP_CHECK_BUILTIN_CLZL
-dnl Check __builtin_clzll
-PHP_CHECK_BUILTIN_CLZLL
-dnl Check __builtin_ctzl
-PHP_CHECK_BUILTIN_CTZL
-dnl Check __builtin_ctzll
-PHP_CHECK_BUILTIN_CTZLL
-dnl Check __builtin_smull_overflow
-PHP_CHECK_BUILTIN_SMULL_OVERFLOW
-dnl Check __builtin_smulll_overflow
-PHP_CHECK_BUILTIN_SMULLL_OVERFLOW
-dnl Check __builtin_saddl_overflow
-PHP_CHECK_BUILTIN_SADDL_OVERFLOW
-dnl Check __builtin_saddll_overflow
-PHP_CHECK_BUILTIN_SADDLL_OVERFLOW
-dnl Check __builtin_usub_overflow
-PHP_CHECK_BUILTIN_USUB_OVERFLOW
-dnl Check __builtin_ssubl_overflow
-PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
-dnl Check __builtin_ssubll_overflow
-PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
-dnl Check __builtin_cpu_init
-PHP_CHECK_BUILTIN_CPU_INIT
-dnl Check __builtin_cpu_supports
-PHP_CHECK_BUILTIN_CPU_SUPPORTS
-dnl Check __builtin_frame_address
-PHP_CHECK_BUILTIN_FRAME_ADDRESS
+dnl Check GNU C builtins.
+PHP_CHECK_BUILTIN([__builtin_clz])
+PHP_CHECK_BUILTIN([__builtin_clzl])
+PHP_CHECK_BUILTIN([__builtin_clzll])
+PHP_CHECK_BUILTIN([__builtin_cpu_init])
+PHP_CHECK_BUILTIN([__builtin_cpu_supports])
+PHP_CHECK_BUILTIN([__builtin_ctzl])
+PHP_CHECK_BUILTIN([__builtin_ctzll])
+PHP_CHECK_BUILTIN([__builtin_expect])
+PHP_CHECK_BUILTIN([__builtin_frame_address])
+PHP_CHECK_BUILTIN([__builtin_saddl_overflow])
+PHP_CHECK_BUILTIN([__builtin_saddll_overflow])
+PHP_CHECK_BUILTIN([__builtin_smull_overflow])
+PHP_CHECK_BUILTIN([__builtin_smulll_overflow])
+PHP_CHECK_BUILTIN([__builtin_ssubl_overflow])
+PHP_CHECK_BUILTIN([__builtin_ssubll_overflow])
+PHP_CHECK_BUILTIN([__builtin_unreachable])
+PHP_CHECK_BUILTIN([__builtin_usub_overflow])
+
 dnl Check AVX512
 PHP_CHECK_AVX512_SUPPORTS
 dnl Check AVX512 VBMI
@@ -761,11 +745,16 @@ PHP_ARG_WITH([valgrind],
   [no],
   [no])
 
-AS_VAR_IF([PHP_VALGRIND], [no],,
-  [PKG_CHECK_MODULES([VALGRIND], [valgrind],
-    [PHP_EVAL_INCLINE([$VALGRIND_CFLAGS])
-      AC_DEFINE([HAVE_VALGRIND], [1],
-        [Define to 1 if Valgrind is enabled and supported.])])])
+AS_VAR_IF([PHP_VALGRIND], [no],, [
+  PKG_CHECK_MODULES([VALGRIND], [valgrind],
+     [PHP_EVAL_INCLINE([$VALGRIND_CFLAGS])
+       AC_DEFINE([HAVE_VALGRIND], [1],
+        [Define to 1 if Valgrind is enabled and supported.])])
+  save_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $VALGRIND_CFLAGS"
+  AC_CHECK_HEADERS([valgrind/cachegrind.h])
+  CFLAGS=$save_CFLAGS
+])
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
@@ -937,8 +926,6 @@ if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
   PHP_CONFIG_FILE_SCAN_DIR=
 fi
 AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
-
-test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 PHP_ARG_ENABLE([sigchild],
   [whether to enable PHP's own SIGCHLD handler],
@@ -1161,13 +1148,6 @@ case $php_sapi_module in
 esac
 
 EXTRA_LIBS="$EXTRA_LIBS $DLIBS $LIBS"
-
-dnl This has to be here to prevent the openssl crypt() from overriding the
-dnl system provided crypt().
-if test "$ac_cv_lib_crypt_crypt" = "yes"; then
-  EXTRA_LIBS="-lcrypt $EXTRA_LIBS -lcrypt"
-fi
-
 unset LIBS
 
 dnl PEAR
@@ -1332,6 +1312,9 @@ fi
 
 ZEND_INIT
 
+ZEND_EXTRA_LIBS=$LIBS
+unset LIBS
+
 PHP_ADD_INCLUDE([$abs_srcdir], [1])
 PHP_ADD_INCLUDE([$abs_srcdir/main], [1])
 PHP_ADD_INCLUDE([$abs_builddir], [1])
@@ -1341,13 +1324,9 @@ PHP_ADD_INCLUDE([$abs_builddir/Zend])
 PHP_ADD_INCLUDE([$abs_srcdir/Zend])
 PHP_ADD_INCLUDE([$abs_srcdir/TSRM])
 
-ZEND_EXTRA_LIBS="$LIBS"
-unset LIBS
-
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
-EXTRA_LIBS="$EXTRA_LIBS $LIBS"
-unset LIBS LDFLAGS
+unset LDFLAGS
 
 AC_ARG_PROGRAM
 
@@ -1766,6 +1745,7 @@ PHP_ADD_SOURCES([Zend], [m4_normalize([
   zend_observer.c
   zend_opcode.c
   zend_operators.c
+  zend_property_hooks.c
   zend_ptr_stack.c
   zend_signal.c
   zend_smart_str.c
@@ -1847,19 +1827,6 @@ if test -n "\$REDO_ALL"; then
 
   echo "creating main/internal_functions_cli.c"
   AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
-
-    if test "$PHP_SAPI" = "apache2handler"; then
-      if test -z "$APACHE_THREADED_MPM"; then
-cat <<X
-+--------------------------------------------------------------------+
-|                        *** WARNING ***                             |
-|                                                                    |
-| You have built PHP for Apache's current non-threaded MPM.          |
-| If you change Apache to use a threaded MPM you must reconfigure    |
-| PHP with --enable-zts                                              |
-X
-      fi
-    fi
 fi
 ])
 AC_OUTPUT

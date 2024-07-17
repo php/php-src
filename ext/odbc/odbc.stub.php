@@ -368,7 +368,7 @@ namespace {
 
     function odbc_result(Odbc\Result $statement, string|int $field): string|bool|null {}
 
-    /** @deprecated */
+    #[\Deprecated(since: '8.1')]
     function odbc_result_all(Odbc\Result $statement, string $format = ""): int|false {}
 
     function odbc_free_result(Odbc\Result $statement): true {}

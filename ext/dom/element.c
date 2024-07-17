@@ -24,6 +24,7 @@
 #include "zend_enum.h"
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 #include "token_list.h"
@@ -476,7 +477,7 @@ PHP_METHOD(DOMElement, setAttribute)
 }
 /* }}} end dom_element_set_attribute */
 
-typedef struct _dom_deep_ns_redef_item {
+typedef struct dom_deep_ns_redef_item {
 	xmlNodePtr current_node;
 	xmlNsPtr defined_ns;
 } dom_deep_ns_redef_item;
@@ -1452,9 +1453,9 @@ PHP_METHOD(DOMElement, after)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1467,9 +1468,9 @@ PHP_METHOD(DOMElement, before)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1485,9 +1486,9 @@ PHP_METHOD(DOMElement, append)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1504,9 +1505,9 @@ PHP_METHOD(DOMElement, prepend)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1523,9 +1524,9 @@ PHP_METHOD(DOMElement, replaceWith)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -1542,9 +1543,9 @@ PHP_METHOD(DOMElement, replaceChildren)
 	zval *args;
 	dom_object *intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('*', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_INTERN(intern);
 
@@ -2028,6 +2029,16 @@ PHP_METHOD(Dom_Element, rename)
 					/* strict */ true
 				);
 			}
+			goto cleanup;
+		}
+
+		/* If we currently have a template but the new element type won't be a template, then throw away the templated content. */
+		if (is_currently_html_ns && xmlStrEqual(nodep->name, BAD_CAST "template") && !xmlStrEqual(localname, BAD_CAST "template")) {
+			php_dom_throw_error_with_message(
+				INVALID_MODIFICATION_ERR,
+				"It is not possible to rename the template element because it hosts a document fragment",
+				/* strict */ true
+			);
 			goto cleanup;
 		}
 	}

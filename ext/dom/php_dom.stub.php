@@ -1643,6 +1643,10 @@ namespace Dom
         public function saveHtml(?Node $node = null): string {}
 
         public function saveHtmlFile(string $filename): int|false {}
+
+#if ZEND_DEBUG
+        public function debugGetTemplateCount(): int {}
+#endif
     }
 
     final class XMLDocument extends Document

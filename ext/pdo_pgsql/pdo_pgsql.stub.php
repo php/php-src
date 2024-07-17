@@ -8,7 +8,7 @@ namespace Pdo;
  * @strict-properties
  * @not-serializable
  */
-class Pgsql extends PDO
+class Pgsql extends \PDO
 {
     /** @cvalue PDO_PGSQL_ATTR_DISABLE_PREPARES */
     public const int ATTR_DISABLE_PREPARES = UNKNOWN;

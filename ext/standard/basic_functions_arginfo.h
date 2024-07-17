@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3a942ebd5d1011a6419217f9aa229b18c2ac0f83 */
+ * Stub hash: e3a7bf1e9f0df3e38f6280f91af70e54ce492a60 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -489,7 +489,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_php_strip_whitespace, 0, 1, IS_S
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_highlight_string, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_highlight_string, 0, 1, MAY_BE_STRING|MAY_BE_TRUE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
@@ -524,7 +524,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_include_path arginfo_ob_get_flush
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY_BE_TRUE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
@@ -4122,6 +4122,51 @@ static void register_basic_functions_symbols(int module_number)
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "crypt", sizeof("crypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(HAVE_STRPTIME)
+
+	zend_attribute *attribute_Deprecated_func_strptime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strptime", sizeof("strptime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_strptime_0_arg0;
+	zend_string *attribute_Deprecated_func_strptime_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg0, attribute_Deprecated_func_strptime_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[0].value, &attribute_Deprecated_func_strptime_0_arg0);
+	attribute_Deprecated_func_strptime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_strptime_0_arg1;
+	zend_string *attribute_Deprecated_func_strptime_0_arg1_str = zend_string_init("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead", strlen("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg1, attribute_Deprecated_func_strptime_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[1].value, &attribute_Deprecated_func_strptime_0_arg1);
+	attribute_Deprecated_func_strptime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+#endif
+
+	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_assert_options_0_arg0;
+	zend_string *attribute_Deprecated_func_assert_options_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_assert_options_0_arg0, attribute_Deprecated_func_assert_options_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_assert_options_0->args[0].value, &attribute_Deprecated_func_assert_options_0_arg0);
+	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_utf8_encode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_utf8_encode_0_arg0;
+	zend_string *attribute_Deprecated_func_utf8_encode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg0, attribute_Deprecated_func_utf8_encode_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[0].value, &attribute_Deprecated_func_utf8_encode_0_arg0);
+	attribute_Deprecated_func_utf8_encode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_utf8_encode_0_arg1;
+	zend_string *attribute_Deprecated_func_utf8_encode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg1, attribute_Deprecated_func_utf8_encode_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[1].value, &attribute_Deprecated_func_utf8_encode_0_arg1);
+	attribute_Deprecated_func_utf8_encode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_utf8_decode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_decode", sizeof("utf8_decode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_utf8_decode_0_arg0;
+	zend_string *attribute_Deprecated_func_utf8_decode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg0, attribute_Deprecated_func_utf8_decode_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[0].value, &attribute_Deprecated_func_utf8_decode_0_arg0);
+	attribute_Deprecated_func_utf8_decode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_utf8_decode_0_arg1;
+	zend_string *attribute_Deprecated_func_utf8_decode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg1, attribute_Deprecated_func_utf8_decode_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[1].value, &attribute_Deprecated_func_utf8_decode_0_arg1);
+	attribute_Deprecated_func_utf8_decode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 

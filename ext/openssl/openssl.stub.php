@@ -443,7 +443,7 @@ function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $
 
 function openssl_x509_read(OpenSSLCertificate|string $certificate): OpenSSLCertificate|false {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLCertificate objects are freed automatically')]
 function openssl_x509_free(OpenSSLCertificate $certificate): void {}
 
 /**
@@ -507,15 +507,13 @@ function openssl_pkey_get_public($public_key): OpenSSLAsymmetricKey|false {}
  */
 function openssl_get_publickey($public_key): OpenSSLAsymmetricKey|false {}
 
-/**
- * @deprecated
- */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLAsymmetricKey objects are freed automatically')]
 function openssl_pkey_free(OpenSSLAsymmetricKey $key): void {}
 
 /**
  * @alias openssl_pkey_free
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLAsymmetricKey objects are freed automatically')]
 function openssl_free_key(OpenSSLAsymmetricKey $key): void {}
 
 /**

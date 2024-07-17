@@ -57,20 +57,20 @@ try {
 }
 
 ?>
---EXPECT--
-object(TestSetOnce)#2 (1) {
+--EXPECTF--
+object(TestSetOnce)#%d (1) {
   ["prop"]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
-object(TestSetOnce)#1 (1) {
+object(TestSetOnce)#%d (1) {
   ["prop"]=>
   array(1) {
     [0]=>
     int(1)
   }
 }
-Cannot modify readonly property TestSetTwice::$prop
-Cannot modify readonly property TestSetTwice::$prop
+Cannot indirectly modify readonly property TestSetTwice::$prop
+Cannot indirectly modify readonly property TestSetTwice::$prop

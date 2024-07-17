@@ -39,6 +39,8 @@ extern zend_module_entry libxml_module_entry;
 
 #define LIBXML_SAVE_NOEMPTYTAG 1<<2
 
+#define LIBXML_NS_TAG_HOOK 1
+
 ZEND_BEGIN_MODULE_GLOBALS(libxml)
 	zval stream_context;
 	smart_str error_buffer;
@@ -65,8 +67,9 @@ typedef struct {
 	size_t modification_nr;
 } php_libxml_cache_tag;
 
-typedef struct _php_libxml_private_data_header {
-	void (*dtor)(struct _php_libxml_private_data_header *);
+typedef struct php_libxml_private_data_header {
+	void (*dtor)(struct php_libxml_private_data_header *);
+	void (*ns_hook)(struct php_libxml_private_data_header *, xmlNodePtr);
 	/* extra fields */
 } php_libxml_private_data_header;
 

@@ -118,9 +118,9 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
 static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS);
 
 /* End Section filters declarations */
-static gdImagePtr _php_image_create_from_string(zend_string *Data, char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn);
+static gdImagePtr _php_image_create_from_string(zend_string *Data, const char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr));
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn);
 static gdIOCtx *create_stream_context(php_stream *stream, int close_stream);
 static gdIOCtx *create_output_context(zval *to_zval, uint32_t arg_num);
 static int _php_image_type(zend_string *data);
@@ -1424,7 +1424,7 @@ static int _php_image_type(zend_string *data)
 /* }}} */
 
 /* {{{ _php_image_create_from_string */
-gdImagePtr _php_image_create_from_string(zend_string *data, char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr))
+gdImagePtr _php_image_create_from_string(zend_string *data, const char *tn, gdImagePtr (*ioctx_func_p)(gdIOCtxPtr))
 {
 	gdImagePtr im;
 	gdIOCtx *io_ctx;
@@ -1529,7 +1529,7 @@ PHP_FUNCTION(imagecreatefromstring)
 /* }}} */
 
 /* {{{ _php_image_create_from */
-static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr))
+static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn, gdImagePtr (*func_p)(FILE *), gdImagePtr (*ioctx_func_p)(gdIOCtxPtr))
 {
 	char *file;
 	size_t file_len;
@@ -1759,7 +1759,7 @@ PHP_FUNCTION(imagecreatefromtga)
 #endif
 
 /* {{{ _php_image_output */
-static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn)
+static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, const char *tn)
 {
 	zval *imgind;
 	char *file = NULL;
@@ -3001,8 +3001,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zval *IM;
 	zend_long X, Y, COL;
-	char *C;
-	size_t C_len;
+	zend_string *C;
 	gdImagePtr im;
 	int ch = 0, col, x, y, i, l = 0;
 	unsigned char *str = NULL;
@@ -3014,7 +3013,7 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		Z_PARAM_OBJ_OF_CLASS_OR_LONG(font_obj, gd_font_ce, font_int)
 		Z_PARAM_LONG(X)
 		Z_PARAM_LONG(Y)
-		Z_PARAM_STRING(C, C_len)
+		Z_PARAM_STR(C)
 		Z_PARAM_LONG(COL)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3023,9 +3022,9 @@ static void php_imagechar(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	col = COL;
 
 	if (mode < 2) {
-		ch = (int)((unsigned char)*C);
+		ch = (int)((unsigned char)*ZSTR_VAL(C));
 	} else {
-		str = (unsigned char *) estrndup(C, C_len);
+		str = (unsigned char *) estrndup(ZSTR_VAL(C), ZSTR_LEN(C));
 		l = strlen((char *)str);
 	}
 
@@ -3407,6 +3406,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	PHP_GD_CHECK_OPEN_BASEDIR(fontname, "Invalid font filename");
 
+	// libgd note: Those should return const char * ideally, but backward compatibility ..
 	if (EXT) {
 		error = gdImageStringFTEx(im, brect, col, fontname, ptsize, angle, x, y, str, &strex);
 	} else {
@@ -3644,6 +3644,16 @@ static void php_image_filter_scatter(INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(hash_colors)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (scatter_sub < 0 || ZEND_SIZE_T_INT_OVFL(scatter_sub)) {
+		zend_argument_value_error(3, "must be between 0 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
+	if (scatter_plus < 0 || ZEND_SIZE_T_INT_OVFL(scatter_plus)) {
+		zend_argument_value_error(4, "must be between 0 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
@@ -3939,6 +3949,12 @@ PHP_FUNCTION(imagescale)
 		Z_PARAM_LONG(tmp_h)
 		Z_PARAM_LONG(tmp_m)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (tmp_m < GD_DEFAULT || tmp_m >= GD_METHOD_COUNT) {
+		zend_argument_value_error(4, "must be one of the GD_* constants");
+		RETURN_THROWS();
+	}
+
 	method = tmp_m;
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
@@ -3958,9 +3974,16 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_h <= 0 || tmp_h > INT_MAX || tmp_w <= 0 || tmp_w > INT_MAX) {
-		RETURN_FALSE;
+	if (tmp_w <= 0 || ZEND_SIZE_T_INT_OVFL(tmp_w)) {
+		zend_argument_value_error(2, "must be between 1 and %d", INT_MAX);
+		RETURN_THROWS();
 	}
+
+	if (tmp_h <= 0 || ZEND_SIZE_T_INT_OVFL(tmp_h)) {
+		zend_argument_value_error(3, "must be between 1 and %d", INT_MAX);
+		RETURN_THROWS();
+	}
+
 
 	new_width = tmp_w;
 	new_height = tmp_h;

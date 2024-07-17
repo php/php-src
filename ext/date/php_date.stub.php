@@ -120,14 +120,14 @@ function checkdate(int $month, int $day, int $year): bool {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use IntlDateFormatter::format() instead')]
 function strftime(string $format, ?int $timestamp = null): string|false {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use IntlDateFormatter::format() instead')]
 function gmstrftime(string $format, ?int $timestamp = null): string|false {}
 
 function time(): int {}
@@ -260,8 +260,8 @@ function date_default_timezone_get(): string {}
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use date_sun_info() instead')]
 function date_sunrise(
     int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,
@@ -269,8 +269,8 @@ function date_sunrise(
 
 /**
  * @refcount 1
- * @deprecated
  */
+#[\Deprecated(since: '8.1', message: 'use date_sun_info() instead')]
 function date_sunset(
     int $timestamp, int $returnFormat = SUNFUNCS_RET_STRING,
     ?float $latitude = null, ?float $longitude = null, ?float $zenith = null,

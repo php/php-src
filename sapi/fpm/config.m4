@@ -45,25 +45,13 @@ AS_VAR_IF([ac_cv_func_clock_gettime], [no],
 ])])
 
 AC_DEFUN([PHP_FPM_TRACE],
-[
-  have_ptrace=no
-  have_broken_ptrace=no
-
-  AC_MSG_CHECKING([for ptrace])
-
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+[AC_CACHE_CHECK([for ptrace], [php_cv_func_ptrace],
+  [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
     #include <sys/types.h>
-    #include <sys/ptrace.h> ]], [[ptrace(0, 0, (void *) 0, 0);]])], [
-    have_ptrace=yes
-    AC_MSG_RESULT([yes])
-  ], [
-    AC_MSG_RESULT([no])
-  ])
-
-  if test "$have_ptrace" = "yes"; then
-    AC_MSG_CHECKING([whether ptrace works])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    #include <sys/ptrace.h>
+  ],
+  [ptrace(0, 0, (void *) 0, 0);])],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
       #include <unistd.h>
       #include <signal.h>
       #include <sys/wait.h>
@@ -85,7 +73,8 @@ AC_DEFUN([PHP_FPM_TRACE],
 
       int main(void)
       {
-        long v1 = (unsigned int) -1; /* copy will fail if sizeof(long) == 8 and we've got "int ptrace()" */
+        /* copy will fail if sizeof(long) == 8 and we've got "int ptrace()" */
+        long v1 = (unsigned int) -1;
         long v2;
         pid_t child;
         int status;
@@ -130,55 +119,41 @@ AC_DEFUN([PHP_FPM_TRACE],
           return 0;
         }
       }
-    ]])], [
-      AC_MSG_RESULT([yes])
+    ])],
+    [php_cv_func_ptrace=yes],
+    [php_cv_func_ptrace=no],
+    [php_cv_func_ptrace=yes])],
+  [php_cv_func_ptrace=no])])
+
+AS_VAR_IF([php_cv_func_ptrace], [yes],
+  [AC_DEFINE([HAVE_PTRACE], [1],
+    [Define to 1 if you have the 'ptrace' function.])],
+  [AC_CACHE_CHECK([for mach_vm_read], [php_cv_func_mach_vm_read],
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <mach/mach.h>
+      #include <mach/mach_vm.h>
     ], [
-      have_ptrace=no
-      have_broken_ptrace=yes
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([skipped (cross-compiling)])
-    ])
-  fi
+      mach_vm_read(
+        (vm_map_t)0,
+        (mach_vm_address_t)0,
+        (mach_vm_size_t)0,
+        (vm_offset_t *)0,
+        (mach_msg_type_number_t*)0);
+    ])],
+    [php_cv_func_mach_vm_read=yes],
+    [php_cv_func_mach_vm_read=no])])
+])
 
-  if test "$have_ptrace" = "yes"; then
-    AC_DEFINE([HAVE_PTRACE], 1, [do we have ptrace?])
-  fi
+AS_VAR_IF([php_cv_func_mach_vm_read], [yes],
+  [AC_DEFINE([HAVE_MACH_VM_READ], [1],
+    [Define to 1 if you have the 'mach_vm_read' function.])])
 
-  AS_VAR_IF([have_broken_ptrace], [yes],
-    [AC_CACHE_CHECK([for mach_vm_read], [php_cv_have_mach_vm_read],
-      [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <mach/mach.h>
-        #include <mach/mach_vm.h>
-      ], [
-        mach_vm_read(
-          (vm_map_t)0,
-          (mach_vm_address_t)0,
-          (mach_vm_size_t)0,
-          (vm_offset_t *)0,
-          (mach_msg_type_number_t*)0);
-      ])],
-      [php_cv_have_mach_vm_read=yes],
-      [php_cv_have_mach_vm_read=no])])
-  ])
+AC_CACHE_CHECK([for proc mem file], [php_cv_file_proc_mem],
+[AS_IF([test -r /proc/$$/mem], [proc_mem_file=mem],
+  [test -r /proc/$$/as], [proc_mem_file=as],
+  [proc_mem_file=])
 
-  AS_VAR_IF([php_cv_have_mach_vm_read], [yes],
-    [AC_DEFINE([HAVE_MACH_VM_READ], [1],
-      [Define to 1 if you have the 'mach_vm_read'.])])
-
-  proc_mem_file=""
-
-  if test -r /proc/$$/mem ; then
-    proc_mem_file="mem"
-  else
-    if test -r /proc/$$/as ; then
-      proc_mem_file="as"
-    fi
-  fi
-
-  if test -n "$proc_mem_file" ; then
-    AC_MSG_CHECKING([for proc mem file])
-
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AS_VAR_IF([proc_mem_file],,,
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([[
       #ifndef _GNU_SOURCE
       #define _GNU_SOURCE
       #endif
@@ -206,35 +181,24 @@ AC_DEFUN([PHP_FPM_TRACE],
         close(fd);
         return v1 != v2;
       }
-    ]])], [
-      AC_MSG_RESULT([$proc_mem_file])
-    ], [
-      proc_mem_file=""
-      AC_MSG_RESULT([no])
-    ], [
-      AC_MSG_RESULT([skipped (cross-compiling)])
-    ])
-  fi
+    ]])],
+    [php_cv_file_proc_mem=$proc_mem_file],
+    [php_cv_file_proc_mem=],
+    [php_cv_file_proc_mem=$proc_mem_file])
+  ])
+])
 
-  if test -n "$proc_mem_file"; then
-    AC_DEFINE_UNQUOTED([PROC_MEM_FILE], "$proc_mem_file", [/proc/pid/mem interface])
-  fi
+AS_VAR_IF([php_cv_file_proc_mem],,,
+  [AC_DEFINE_UNQUOTED([PROC_MEM_FILE], ["$php_cv_file_proc_mem"],
+    [Define to the /proc/pid/mem interface filename value.])])
 
-  fpm_trace_type=""
+AS_IF([test "x$php_cv_func_ptrace" = xyes], [fpm_trace_type=ptrace],
+  [test -n "$php_cv_file_proc_mem"], [fpm_trace_type=pread],
+  [test "x$php_cv_func_mach_vm_read" = xyes], [fpm_trace_type=mach],
+  [fpm_trace_type=])
 
-  if test "$have_ptrace" = "yes"; then
-    fpm_trace_type=ptrace
-
-  elif test -n "$proc_mem_file"; then
-    fpm_trace_type=pread
-
-  elif test "$php_cv_have_mach_vm_read" = "yes" ; then
-    fpm_trace_type=mach
-
-  else
-    AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])
-  fi
-
+AS_VAR_IF([fpm_trace_type],,
+  [AC_MSG_WARN([FPM Trace - ptrace, pread, or mach: could not be found])])
 ])
 
 AC_DEFUN([PHP_FPM_BUILTIN_ATOMIC],
@@ -424,57 +388,64 @@ if test "$PHP_FPM" != "no"; then
     [nobody],
     [no])
 
-  PHP_ARG_WITH([fpm-systemd],,
+  PHP_ARG_WITH([fpm-systemd],
+    [whether to enable systemd integration in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-systemd],
       [Activate systemd integration])],
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-acl],,
+  PHP_ARG_WITH([fpm-acl],
+    [whether to use Access Control Lists (ACL) in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-acl],
       [Use POSIX Access Control Lists])],
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-apparmor],,
+  PHP_ARG_WITH([fpm-apparmor],
+    [whether to enable AppArmor confinement in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-apparmor],
       [Support AppArmor confinement through libapparmor])],
     [no],
     [no])
 
-  PHP_ARG_WITH([fpm-selinux],,
+  PHP_ARG_WITH([fpm-selinux],
+    [whether to enable SELinux support in PHP-FPM],
     [AS_HELP_STRING([--with-fpm-selinux],
       [Support SELinux policy library])],
     [no],
     [no])
 
-  if test "$PHP_FPM_SYSTEMD" != "no" ; then
+  AS_VAR_IF([PHP_FPM_SYSTEMD], [no], [php_fpm_systemd=simple], [
     PKG_CHECK_MODULES([SYSTEMD], [libsystemd >= 209])
 
-    AC_DEFINE([HAVE_SYSTEMD], [1], [Whether FPM has systemd integration])
+    AC_DEFINE([HAVE_SYSTEMD], [1],
+      [Define to 1 if FPM has systemd integration.])
     PHP_FPM_SD_FILES="fpm/fpm_systemd.c"
-    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS])
+    PHP_EVAL_LIBLINE([$SYSTEMD_LIBS], [FPM_EXTRA_LIBS], [yes])
     PHP_EVAL_INCLINE([$SYSTEMD_CFLAGS])
+
     php_fpm_systemd=notify
 
     dnl Sanity check.
-    CFLAGS_save="$CFLAGS"
+    CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([systemd/sd-daemon.h],,
       [AC_MSG_ERROR([Required systemd/sd-daemon.h not found.])])
-    CFLAGS="$CFLAGS_save"
-  else
-    php_fpm_systemd=simple
-  fi
+    CFLAGS=$CFLAGS_save
+  ])
 
-  if test "$PHP_FPM_ACL" != "no" ; then
+  AC_SUBST([php_fpm_systemd])
+
+  AS_VAR_IF([PHP_FPM_ACL], [no],, [
     AC_CHECK_HEADERS([sys/acl.h])
 
     dnl *BSD has acl_* built into libc, macOS doesn't have user/group support.
-    LIBS_save="$LIBS"
-    AC_SEARCH_LIBS([acl_free], [acl], [
-      AC_MSG_CHECKING([for acl user/group permissions support])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
+    LIBS_save=$LIBS
+    AC_SEARCH_LIBS([acl_free], [acl],
+    [AC_CACHE_CHECK([for ACL user/group permissions support],
+      [php_cv_lib_acl_user_group],
+      [AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/acl.h>], [
         acl_t acl;
         acl_entry_t user, group;
         acl = acl_init(1);
@@ -483,53 +454,54 @@ if test "$PHP_FPM" != "no"; then
         acl_create_entry(&acl, &group);
         acl_set_tag_type(user, ACL_GROUP);
         acl_free(acl);
-      ])], [
-        AC_MSG_RESULT([yes])
-        AC_DEFINE([HAVE_FPM_ACL], [1], [Whether FPM has acl support])
-      ], [
-        AC_MSG_RESULT([no])
-        LIBS="$LIBS_save"
+      ])],
+      [php_cv_lib_acl_user_group=yes],
+      [php_cv_lib_acl_user_group=no])])
+      AS_VAR_IF([php_cv_lib_acl_user_group], [yes], [
+        AC_DEFINE([HAVE_FPM_ACL], [1],
+          [Define to 1 if PHP-FPM has ACL support.])
+        AS_VAR_IF([ac_cv_search_acl_free], ["none required"],,
+          [AS_VAR_APPEND([FPM_EXTRA_LIBS], [" $ac_cv_search_acl_free"])])
       ])
     ])
-  fi
+    LIBS=$LIBS_save
+  ])
 
-  if test "x$PHP_FPM_APPARMOR" != "xno" ; then
-    PKG_CHECK_MODULES([APPARMOR], [libapparmor], [
-      PHP_EVAL_LIBLINE([$APPARMOR_LIBS])
-      PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])
-    ],
+  AS_VAR_IF([PHP_FPM_APPARMOR], [no],, [
+    PKG_CHECK_MODULES([APPARMOR], [libapparmor],
+      [PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])],
       [AC_CHECK_LIB([apparmor], [aa_change_profile],
-        [PHP_ADD_LIBRARY([apparmor])],
+        [APPARMOR_LIBS=-lapparmor],
         [AC_MSG_ERROR([libapparmor required but not found.])])])
+    PHP_EVAL_LIBLINE([$APPARMOR_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
-    CFLAGS_save="$CFLAGS"
+    CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([sys/apparmor.h],
-      [AC_DEFINE([HAVE_APPARMOR], [1], [AppArmor confinement available])],
+      [AC_DEFINE([HAVE_APPARMOR], [1],
+        [Define to 1 if AppArmor confinement is available for PHP-FPM.])],
       [AC_MSG_ERROR([Required sys/apparmor.h not found.])])
-    CFLAGS="$CFLAGS_save"
-  fi
+    CFLAGS=$CFLAGS_save
+  ])
 
-  if test "x$PHP_FPM_SELINUX" != "xno" ; then
-    PKG_CHECK_MODULES([SELINUX], [libselinux], [
-      PHP_EVAL_LIBLINE([$SELINUX_LIBS])
-      PHP_EVAL_INCLINE([$SELINUX_CFLAGS])
-    ],
+  AS_VAR_IF([PHP_FPM_SELINUX], [no],, [
+    PKG_CHECK_MODULES([SELINUX], [libselinux],
+      [PHP_EVAL_INCLINE([$SELINUX_CFLAGS])],
       [AC_CHECK_LIB([selinux], [security_setenforce],
-        [PHP_ADD_LIBRARY([selinux])],
+        [SELINUX_LIBS=-lselinux],
         [AC_MSG_ERROR([Required SELinux library not found.])])])
+    PHP_EVAL_LIBLINE([$SELINUX_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
-    CFLAGS_save="$CFLAGS"
+    CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([selinux/selinux.h],
-      [AC_DEFINE([HAVE_SELINUX], [1], [Whether SELinux is available.])],
+      [AC_DEFINE([HAVE_SELINUX], [1],
+        [Define to 1 if SELinux is available in PHP-FPM.])],
       [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
-    CFLAGS="$CFLAGS_save"
-  fi
-
-  AC_SUBST([php_fpm_systemd])
+    CFLAGS=$CFLAGS_save
+  ])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
     php_fpm_user="nobody"
@@ -552,16 +524,16 @@ if test "$PHP_FPM" != "no"; then
   php_fpm_prefix=`eval echo $prefix`
   AC_SUBST([php_fpm_prefix])
 
-  PHP_ADD_BUILD_DIR(sapi/fpm/fpm)
-  PHP_ADD_BUILD_DIR(sapi/fpm/fpm/events)
+  PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
+  PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
   PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
 
-  if test "$fpm_trace_type" && test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"; then
-    PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"
-  fi
+  AS_VAR_IF([fpm_trace_type],,,
+    [AS_IF([test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"],
+      [PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"])])
 
   PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 
@@ -611,4 +583,5 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_SUBST([SAPI_FPM_PATH])
   PHP_SUBST([BUILD_FPM])
+  PHP_SUBST([FPM_EXTRA_LIBS])
 fi

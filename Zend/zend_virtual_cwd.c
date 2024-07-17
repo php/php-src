@@ -713,7 +713,7 @@ retry_reparse_tag_cloud:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				memcpy(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename || substitutename_len >= MAXPATHLEN) {
@@ -748,7 +748,7 @@ retry_reparse_tag_cloud:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-				memmove(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
+				memcpy(tmpsubstname, reparsetarget + pbuffer->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR), pbuffer->MountPointReparseBuffer.SubstituteNameLength);
 				tmpsubstname[substitutename_len] = L'\0';
 				substitutename = php_win32_cp_conv_w_to_any(tmpsubstname, substitutename_len, &substitutename_len);
 				if (!substitutename || substitutename_len >= MAXPATHLEN) {

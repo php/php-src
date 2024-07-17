@@ -5,14 +5,9 @@ PHP_ARG_WITH([iconv],
   [yes])
 
 if test "$PHP_ICONV" != "no"; then
+  PHP_SETUP_ICONV([ICONV_SHARED_LIBADD],,
+    [AC_MSG_ERROR([The iconv not found. Please, check config.log for details.])])
 
-  PHP_SETUP_ICONV(ICONV_SHARED_LIBADD, [
-    iconv_avail="yes";
-  ],[
-    iconv_avail="no";
-  ])
-
-  if test "$iconv_avail" != "no"; then
     save_LDFLAGS="$LDFLAGS"
     save_CFLAGS="$CFLAGS"
     LDFLAGS="$ICONV_SHARED_LIBADD $LDFLAGS"
@@ -135,7 +130,4 @@ int main(void) {
     PHP_NEW_EXTENSION(iconv, iconv.c, $ext_shared,, [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_SUBST([ICONV_SHARED_LIBADD])
     PHP_INSTALL_HEADERS([ext/iconv], [php_iconv.h])
-  else
-    AC_MSG_ERROR(Please reinstall the iconv library.)
-  fi
 fi

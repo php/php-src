@@ -201,7 +201,7 @@ function intlcal_after(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
 function intlcal_before(IntlCalendar $calendar, IntlCalendar $other): bool {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.4', message: 'use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead')]
 function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, int $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): true {}
 
 /** @param int|bool $value */
@@ -278,8 +278,8 @@ function intlcal_get_error_message(IntlCalendar $calendar): string|false {}
  * @param int $hour
  * @param int $minute
  * @param int $second
- * @deprecated
  */
+#[\Deprecated(since: '8.4', message: 'use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead')]
 function intlgregcal_create_instance($timezoneOrYear = UNKNOWN, $localeOrMonth = UNKNOWN, $day = UNKNOWN, $hour = UNKNOWN, $minute = UNKNOWN, $second = UNKNOWN): ?IntlGregorianCalendar {}
 
 function intlgregcal_set_gregorian_change(IntlGregorianCalendar $calendar, float $timestamp): bool {}

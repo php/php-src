@@ -444,7 +444,7 @@ PHP_NEW_EXTENSION([standard], [m4_normalize([
 ])],,,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
+PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])

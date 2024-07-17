@@ -1237,6 +1237,10 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			}
 			return 1;
 
+		case PDO_FB_ATTR_API_VERSION:
+			ZVAL_LONG(val, FB_API_VER);
+			return 1;
+
 		case PDO_ATTR_SERVER_VERSION:
 		case PDO_ATTR_SERVER_INFO:
 			*tmp = 0;

@@ -228,7 +228,7 @@ int main(void) {
 ]])],
 [php_cv_shm_mmap_anon=yes],
 [php_cv_shm_mmap_anon=no],
-[AS_CASE([host_alias],
+[AS_CASE([$host_alias],
   [*linux*|*midipix], [php_cv_shm_mmap_anon=yes],
   [php_cv_shm_mmap_anon=no])])])
 AS_VAR_IF([php_cv_shm_mmap_anon], [yes],
@@ -345,8 +345,8 @@ int main(void) {
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
-    PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
-    PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], 1)
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit], [1])
+    PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir], [1])
     PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
   fi
   PHP_SUBST([OPCACHE_SHARED_LIBADD])

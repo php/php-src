@@ -432,7 +432,7 @@ PHP_FUNCTION(debug_zval_dump)
 		efree(tmp_spaces); \
 	} while(0);
 
-static void php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
+static zend_result php_array_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
 	if (key == NULL) { /* numeric key */
 		buffer_append_spaces(buf, level+1);
@@ -453,14 +453,16 @@ static void php_array_element_export(zval *zv, zend_ulong index, zend_string *ke
 		zend_string_free(ckey);
 		zend_string_free(tmp_str);
 	}
-	php_var_export_ex(zv, level + 2, buf);
+	zend_result result = php_var_export_ex(zv, level + 2, buf);
 
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
+
+	return result;
 }
 /* }}} */
 
-static void php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
+static zend_result php_object_element_export(zval *zv, zend_ulong index, zend_string *key, int level, smart_str *buf) /* {{{ */
 {
 	buffer_append_spaces(buf, level + 2);
 	if (key != NULL) {
@@ -479,13 +481,15 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		smart_str_append_long(buf, (zend_long) index);
 	}
 	smart_str_appendl(buf, " => ", 4);
-	php_var_export_ex(zv, level + 2, buf);
+	zend_result result = php_var_export_ex(zv, level + 2, buf);
 	smart_str_appendc(buf, ',');
 	smart_str_appendc(buf, '\n');
+
+	return result;
 }
 /* }}} */
 
-PHPAPI void php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
+PHPAPI zend_result php_var_export_ex(zval *struc, int level, smart_str *buf) /* {{{ */
 {
 	HashTable *myht;
 	zend_string *ztmp, *ztmp2;
@@ -535,7 +539,7 @@ again:
 				if (GC_IS_RECURSIVE(myht)) {
 					smart_str_appendl(buf, "NULL", 4);
 					zend_error(E_WARNING, "var_export does not handle circular references");
-					return;
+					return SUCCESS;
 				}
 				GC_ADDREF(myht);
 				GC_PROTECT_RECURSION(myht);
@@ -546,7 +550,13 @@ again:
 			}
 			smart_str_appendl(buf, "array (\n", 8);
 			ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) {
-				php_array_element_export(val, index, key, level, buf);
+				if (php_array_element_export(val, index, key, level, buf) == FAILURE) {
+					if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+						GC_UNPROTECT_RECURSION(myht);
+						GC_DELREF(myht);
+					}
+					return FAILURE;
+				}
 			} ZEND_HASH_FOREACH_END();
 			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
@@ -569,7 +579,7 @@ again:
 			if (ZEND_GUARD_OR_GC_IS_RECURSIVE(guard, EXPORT, zobj)) {
 				smart_str_appendl(buf, "NULL", 4);
 				zend_error(E_WARNING, "var_export does not handle circular references");
-				return;
+				return SUCCESS;
 			}
 			ZEND_GUARD_OR_GC_PROTECT_RECURSION(guard, EXPORT, zobj);
 			myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_VAR_EXPORT);
@@ -600,7 +610,27 @@ again:
 			if (myht) {
 				if (!is_enum) {
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
+						/* data is IS_PTR for properties with hooks. */
+						zval tmp;
+						if (UNEXPECTED(Z_TYPE_P(val) == IS_PTR)) {
+							zend_property_info *prop_info = Z_PTR_P(val);
+							if ((prop_info->flags & ZEND_ACC_VIRTUAL) && !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]) {
+								continue;
+							}
+							const char *unmangled_name_cstr = zend_get_unmangled_property_name(prop_info->name);
+							zend_string *unmangled_name = zend_string_init(unmangled_name_cstr, strlen(unmangled_name_cstr), false);
+							val = zend_read_property_ex(prop_info->ce, zobj, unmangled_name, /* silent */ true, &tmp);
+							zend_string_release_ex(unmangled_name, false);
+							if (EG(exception)) {
+								ZEND_GUARD_OR_GC_UNPROTECT_RECURSION(guard, EXPORT, zobj);
+								zend_release_properties(myht);
+								return FAILURE;
+							}
+						}
 						php_object_element_export(val, index, key, level, buf);
+						if (val == &tmp) {
+							zval_ptr_dtor(val);
+						}
 					} ZEND_HASH_FOREACH_END();
 				}
 				zend_release_properties(myht);
@@ -625,6 +655,8 @@ again:
 			smart_str_appendl(buf, "NULL", 4);
 			break;
 	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -632,9 +664,11 @@ again:
 PHPAPI void php_var_export(zval *struc, int level) /* {{{ */
 {
 	smart_str buf = {0};
-	php_var_export_ex(struc, level, &buf);
+	zend_result result = php_var_export_ex(struc, level, &buf);
 	smart_str_0(&buf);
-	PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
+	if (result == SUCCESS) {
+		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
+	}
 	smart_str_free(&buf);
 }
 /* }}} */
@@ -652,10 +686,12 @@ PHP_FUNCTION(var_export)
 		Z_PARAM_BOOL(return_output)
 	ZEND_PARSE_PARAMETERS_END();
 
-	php_var_export_ex(var, 1, &buf);
+	zend_result result = php_var_export_ex(var, 1, &buf);
 	smart_str_0 (&buf);
 
-	if (return_output) {
+	if (result == FAILURE) {
+		smart_str_free(&buf);
+	} else if (return_output) {
 		RETURN_STR(smart_str_extract(&buf));
 	} else {
 		PHPWRITE(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));

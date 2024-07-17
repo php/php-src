@@ -215,6 +215,8 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/new_without_parentheses
   . Added the #[\Deprecated] attribute.
     RFC: https://wiki.php.net/rfc/deprecated_attribute
+  . Implemented property hooks.
+    RFC: https://wiki.php.net/rfc/property-hooks
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
@@ -442,6 +444,10 @@ PHP 8.4 UPGRADE NOTES
   . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
     quality parameter value is passed. In addition, imageavif will throw an exception
     if an invalid speed parameter value is passed.
+  . imagescale throws an exception if the width/height argument underflows/overflows or
+    if the mode argument is invalid.
+    imagefilter with IMG_FILTER_SCATTER throws an exception if the sub/plus arguments
+    underflows/overflows.
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
@@ -503,6 +509,9 @@ PHP 8.4 UPGRADE NOTES
     PDO::FB_WRITABLE_TRANSACTION) have been added.
   . When using persistent connections, there is now a liveness check in the
     constructor.
+  . The content that is built changes depending on the value of FB_API_VER in
+    ibase.h, so added the attribute value Pdo\Firebird::ATTR_API_VERSION to
+    obtain that value. This value can also be referenced from phpinfo.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
@@ -559,6 +568,8 @@ PHP 8.4 UPGRADE NOTES
     one digit.
   . output_add_rewrite_var() now uses url_rewriter.hosts instead of
     session.trans_sid_hosts for selecting hosts that will be rewritten.
+  . highlight_string() now has a return type of string|true instead of string|bool.
+  . print_r() now has a return type of string|true instead of string|bool.
 
 ========================================
 6. New Functions
@@ -779,11 +790,11 @@ PHP 8.4 UPGRADE NOTES
   . X509_PURPOSE_TIMESTAMP_SIGN.
 
 - PCNTL:
-  . QosClass::Background (macOs only).
-  . QosClass::Default (macOs only).
-  . QosClass::UserInteractive (macOs only).
-  . QosClass::UserInitiated (macOs only).
-  . QosClass::Utility (macOs only).
+  . Pcntl\QosClass::Background (macOs only).
+  . Pcntl\QosClass::Default (macOs only).
+  . Pctnl\QosClass::UserInteractive (macOs only).
+  . Pcntl\QosClass::UserInitiated (macOs only).
+  . Pcntl\QosClass::Utility (macOs only).
   . SIGCKPT (DragonFlyBSD only).
   . SIGCKPTEXIT (DragonFlyBSD only).
   . WEXITED.
@@ -797,7 +808,7 @@ PHP 8.4 UPGRADE NOTES
   . P_GID (NetBSD/FreeBSD only).
   . P_SID (NetBSD/FreeBSD only).
   . P_JAILID (FreeBSD only).
-  
+
 - Standard:
   . PHP_ROUND_CEILING.
   . PHP_ROUND_FLOOR.
