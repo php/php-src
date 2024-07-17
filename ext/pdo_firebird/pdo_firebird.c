@@ -100,3 +100,12 @@ PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_METHOD(Pdo_Firebird, getApiVersion)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(FB_API_VER);
+}

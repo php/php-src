@@ -10,6 +10,8 @@ PHP                                                                        NEWS
 
 - PDO_FIREBIRD:
   . Added Pdo\Firebird::ATTR_API_VERSION. (SakiTakamachi)
+  . Added getApiVersion() and removed from getAttribute().
+    (SakiTakamachi)
 
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
