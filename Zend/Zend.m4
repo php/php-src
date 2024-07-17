@@ -152,8 +152,6 @@ AC_CHECK_FUNCS(m4_normalize([
 ]))
 
 dnl
-dnl ZEND_CHECK_SIGSETJMP
-dnl
 dnl Check for sigsetjmp. If sigsetjmp is defined as a macro, use AC_CHECK_DECL
 dnl as a fallback since AC_CHECK_FUNC cannot detect macros.
 dnl
