@@ -359,7 +359,6 @@ zend_result dom_element_inner_html_write(dom_object *obj, zval *newval)
 		}
 	}
 
-	/* We skip the steps involving the template element as context node since we don't do special handling for that. */
 	dom_remove_all_children(context_node);
 	return php_dom_pre_insert(obj->document, fragment, context_node, NULL) ? SUCCESS : FAILURE;
 }
