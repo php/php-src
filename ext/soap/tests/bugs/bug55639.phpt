@@ -6,14 +6,14 @@ soap.wsdl_cache_enabled=0
 soap
 --SKIPIF--
 <?php
-if (!file_exists(__DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc")) {
+if (!file_exists(__DIR__ . "/../../../../sapi/cli/tests/php_cli_server.inc")) {
     echo "skip sapi/cli/tests/php_cli_server.inc required but not found";
 }
 ?>
 --FILE--
 <?php
 
-include __DIR__ . "/../../../sapi/cli/tests/php_cli_server.inc";
+include __DIR__ . "/../../../../sapi/cli/tests/php_cli_server.inc";
 
 $args = ["-d", "extension_dir=" . ini_get("extension_dir"), "-d", "extension=" . (substr(PHP_OS, 0, 3) == "WIN" ? "php_" : "") . "soap." . PHP_SHLIB_SUFFIX];
 if (php_ini_loaded_file()) {
