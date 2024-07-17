@@ -42,40 +42,41 @@ static const BC_VECTOR POW_10_LUT[9] = {
 };
 
 /*
- * Use this function when the number of array elements in n2 is 1, that is, when n2 is not divided into multiple array elements.
- * The algorithm can be simplified if n2 is not divided, and this function is an optimization of bc_standard_div.
+ * Use this function when the number of array elements in divisor is 1, that is, when divisor is not divided into multiple array elements.
+ * The algorithm can be simplified if divisor is not divided, and this function is an optimization of bc_standard_div.
  */
-static inline void bc_fast_div(BC_VECTOR *n1_vector, size_t n1_arr_size, BC_VECTOR n2_vector, BC_VECTOR *quot_vector, size_t quot_arr_size)
+static inline void bc_fast_div(
+	BC_VECTOR *numerator_vector, size_t numerator_arr_size, BC_VECTOR divisor_vector, BC_VECTOR *quot_vector, size_t quot_arr_size)
 {
-	size_t n1_top_index = n1_arr_size - 1;
+	size_t numerator_top_index = numerator_arr_size - 1;
 	size_t quot_top_index = quot_arr_size - 1;
 	for (size_t i = 0; i < quot_arr_size - 1; i++) {
-		if (n1_vector[n1_top_index - i] < n2_vector) {
+		if (numerator_vector[numerator_top_index - i] < divisor_vector) {
 			quot_vector[quot_top_index - i] = 0;
-			/* n1_vector[n1_top_index - i] is always a smaller number than n2_vector. Therefore, there will be no overflow. */
-			n1_vector[n1_top_index - i - 1] += n1_vector[n1_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
+			/* numerator_vector[numerator_top_index - i] is always a smaller number than divisor_vector. Therefore, there will be no overflow. */
+			numerator_vector[numerator_top_index - i - 1] += numerator_vector[numerator_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
 			continue;
 		}
-		quot_vector[quot_top_index - i] = n1_vector[n1_top_index - i] / n2_vector;
-		n1_vector[n1_top_index - i] -= n2_vector * quot_vector[quot_top_index - i];
-		n1_vector[n1_top_index - i - 1] += n1_vector[n1_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
-		n1_vector[n1_top_index - i] = 0;
+		quot_vector[quot_top_index - i] = numerator_vector[numerator_top_index - i] / divisor_vector;
+		numerator_vector[numerator_top_index - i] -= divisor_vector * quot_vector[quot_top_index - i];
+		numerator_vector[numerator_top_index - i - 1] += numerator_vector[numerator_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
+		numerator_vector[numerator_top_index - i] = 0;
 	}
 	/* last */
-	quot_vector[0] = n1_vector[0] / n2_vector;
+	quot_vector[0] = numerator_vector[0] / divisor_vector;
 }
 
 /*
- * Used when the number of elements in the n2 vector is 2 or more.
+ * Used when the number of elements in the divisor vector is 2 or more.
  */
 static inline void bc_standard_div(
-	BC_VECTOR *n1_vector, size_t n1_arr_size,
-	BC_VECTOR *n2_vector, size_t n2_arr_size, size_t n2_len,
+	BC_VECTOR *numerator_vector, size_t numerator_arr_size,
+	BC_VECTOR *divisor_vector, size_t divisor_arr_size, size_t divisor_len,
 	BC_VECTOR *quot_vector, size_t quot_arr_size
 ) {
 	size_t i, j;
-	size_t n1_top_index = n1_arr_size - 1;
-	size_t n2_top_index = n2_arr_size - 1;
+	size_t numerator_top_index = numerator_arr_size - 1;
+	size_t divisor_top_index = divisor_arr_size - 1;
 	size_t quot_top_index = quot_arr_size - 1;
 
 	BC_VECTOR div_carry = 0;
@@ -91,64 +92,64 @@ static inline void bc_standard_div(
 	 * 999 / 1000 = 0, Numbers that are not divisible are carried forward to the next division.
 	 * 9990000 / 1000 = 9990 (Here, the temporary quotient is 9990 and the error E is 10.)
 	 *
-	 * If calculate the temporary quotient using only one array of n1 and n2, the error E can be larger than 1.
+	 * If calculate the temporary quotient using only one array of numerator and divisor, the error E can be larger than 1.
 	 * In other words, in the restoring division, the count of additions for restore increases significantly.
 	 *
 	 * Therefore, in order to keep the error within 1 and to limit the number of additions required for restoration to
 	 * at most one, adjust the number of high-order digits used to calculate the temporary quotient as follows.
-	 * - Adjust the number of digits of n2 used in the calculation to BC_VECTOR_SIZE + 1 digit. The missing digits are
+	 * - Adjust the number of digits of divisor used in the calculation to BC_VECTOR_SIZE + 1 digit. The missing digits are
 	 *   filled in from the next array element.
-	 * - Add digits to n1 in the same way as the number of digits adjusted by n2.
+	 * - Add digits to numerator in the same way as the number of digits adjusted by divisor.
 	 *
 	 * e.g.
-	 * n1 = 123456780000
-	 * n2 = 123456789
+	 * numerator = 123456780000
+	 * divisor = 123456789
 	 * base = 10000
-	 * n1_arr = [0, 5678, 1234]
-	 * n2_arr = [6789, 2345, 1]
-	 * n1_top = 1234
-	 * n2_top = 1
-	 * n2_top_tmp = 12345 (+4 digits)
-	 * n1_top_tmp = 12345678 (+4 digits)
-	 * tmp_quot = n1_top_tmp / n2_top_tmp = 1000
+	 * numerator_arr = [0, 5678, 1234]
+	 * divisor_arr = [6789, 2345, 1]
+	 * numerator_top = 1234
+	 * divisor_top = 1
+	 * divisor_top_tmp = 12345 (+4 digits)
+	 * numerator_top_tmp = 12345678 (+4 digits)
+	 * tmp_quot = numerator_top_tmp / divisor_top_tmp = 1000
 	 * tmp_rem = -9000
-	 * tmp_quot is too large, so tmp_quot--, tmp_rem += n2 (restoring)
+	 * tmp_quot is too large, so tmp_quot--, tmp_rem += divisor (restoring)
 	 * quot = 999
 	 * rem = 123447789
 	 *
 	 * Details:
 	 * Suppose that when calculating the temporary quotient, only the high-order elements of the BC_VECTOR array are used.
-	 * At this time, n1 and n2 can be considered to be decomposed as follows. (Here, B = 10^b, any b ∈ ℕ, any k ∈ ℕ)
-	 * n1 = n1_high * B^k + n1_low
-	 * n2 = n2_high * B^k + n2_low
+	 * At this time, numerator and divisor can be considered to be decomposed as follows. (Here, B = 10^b, any b ∈ ℕ, any k ∈ ℕ)
+	 * numerator = numerator_high * B^k + numerator_low
+	 * divisor = divisor_high * B^k + divisor_low
 	 *
 	 * The error E can be expressed by the following formula.
 	 *
-	 * E = (n1_high * B^k) / (n2_high * B^k) - (n1_high * B^k + n1_low) / (n2_high * B^k + n2_low)
-	 * E = n1_high / n2_high - (n1_high * B^k + n1_low) / (n2_high * B^k + n2_low)
-	 * E = (n1_high * (n2_high * B^k + n2_low) - (n1_high * B^k + n1_low) * n2_high) / (n2_high * (n2_high * B^k + n2_low))
-	 * E = (n1_high * n2_low - n2_high * n1_low) / (n2_high * (n2_high * B^k + n2_low))
+	 * E = (numerator_high * B^k) / (divisor_high * B^k) - (numerator_high * B^k + numerator_low) / (divisor_high * B^k + divisor_low)
+	 * E = numerator_high / divisor_high - (numerator_high * B^k + numerator_low) / (divisor_high * B^k + divisor_low)
+	 * E = (numerator_high * (divisor_high * B^k + divisor_low) - (numerator_high * B^k + numerator_low) * divisor_high) / (divisor_high * (divisor_high * B^k + divisor_low))
+	 * E = (numerator_high * divisor_low - divisor_high * numerator_low) / (divisor_high * (divisor_high * B^k + divisor_low))
 	 *
 	 * Find the error MAX_E when the error E is maximum.
-	 * First, n1_high, which only exists in the numerator, uses its maximum value.
-	 * Considering carry-back, n1_high can be expressed as follows.
-	 * n1_high = n2_high * B
-	 * Also, n1_low is only present in the numerator, but since this is a subtraction, use the smallest possible value here, 0.
-	 * n1_low = 0
+	 * First, numerator_high, which only exists in the numerator, uses its maximum value.
+	 * Considering carry-back, numerator_high can be expressed as follows.
+	 * numerator_high = divisor_high * B
+	 * Also, numerator_low is only present in the numerator, but since this is a subtraction, use the smallest possible value here, 0.
+	 * numerator_low = 0
 	 *
-	 * MAX_E = (n1_high * n2_low - n2_high * n1_low) / (n2_high * (n2_high * B^k + n2_low))
-	 * MAX_E = (n2_high * B * n2_low) / (n2_high * (n2_high * B^k + n2_low))
+	 * MAX_E = (numerator_high * divisor_low - divisor_high * numerator_low) / (divisor_high * (divisor_high * B^k + divisor_low))
+	 * MAX_E = (divisor_high * B * divisor_low) / (divisor_high * (divisor_high * B^k + divisor_low))
 	 *
-	 * n2_low uses the maximum value.
-	 * n2_low = B^k - 1
-	 * MAX_E = (n2_high * B * n2_low) / (n2_high * (n2_high * B^k + n2_low))
-	 * MAX_E = (n2_high * B * (B^k - 1)) / (n2_high * (n2_high * B^k + B^k - 1))
+	 * divisor_low uses the maximum value.
+	 * divisor_low = B^k - 1
+	 * MAX_E = (divisor_high * B * divisor_low) / (divisor_high * (divisor_high * B^k + divisor_low))
+	 * MAX_E = (divisor_high * B * (B^k - 1)) / (divisor_high * (divisor_high * B^k + B^k - 1))
 	 *
-	 * n2_high uses the minimum value, but want to see how the number of digits affects the error, so represent
+	 * divisor_high uses the minimum value, but want to see how the number of digits affects the error, so represent
 	 * the minimum value as:
-	 * n2_high = 10^x (any x ∈ ℕ)
+	 * divisor_high = 10^x (any x ∈ ℕ)
 	 * Since B = 10^b, the formula becomes:
-	 * MAX_E = (n2_high * B * (B^k - 1)) / (n2_high * (n2_high * B^k + B^k - 1))
+	 * MAX_E = (divisor_high * B * (B^k - 1)) / (divisor_high * (divisor_high * B^k + B^k - 1))
 	 * MAX_E = (10^x * 10^b * ((10^b)^k - 1)) / (10^x * (10^x * (10^b)^k + (10^b)^k - 1))
 	 *
 	 * Now let's make an approximation. Remove -1 from the numerator. Approximate the numerator to be
@@ -160,32 +161,32 @@ static inline void bc_standard_div(
 	 * MAX_E < 10^b / 10^x
 	 * MAX_E < 10^(b - x)
 	 *
-	 * Therefore, found that if the number of digits in base B and n2_high are equal, the error will be less
+	 * Therefore, found that if the number of digits in base B and divisor_high are equal, the error will be less
 	 * than 1 regardless of the number of digits in the value of k.
 	 *
 	 * Here, B is BC_VECTOR_BOUNDARY_NUM, so adjust the number of digits in divider to be BC_VECTOR_SIZE + 1.
 	 */
-	size_t n2_top_digits = n2_len % BC_VECTOR_SIZE;
-	if (n2_top_digits == 0) {
-		n2_top_digits = BC_VECTOR_SIZE;
+	size_t divisor_top_digits = divisor_len % BC_VECTOR_SIZE;
+	if (divisor_top_digits == 0) {
+		divisor_top_digits = BC_VECTOR_SIZE;
 	}
-	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - n2_top_digits + 1];
-	size_t low_part_shift = POW_10_LUT[n2_top_digits - 1];
-	BC_VECTOR divider = n2_vector[n2_top_index] * high_part_shift + n2_vector[n2_top_index - 1] / low_part_shift;
+	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
+	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
+	BC_VECTOR divider = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
 	for (i = 0; i < quot_arr_size; i++) {
-		BC_VECTOR divided = n1_vector[n1_top_index - i] * high_part_shift + n1_vector[n1_top_index - i - 1] / low_part_shift;
+		BC_VECTOR divided = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
 
-		/* If it is clear that n2 is greater in this loop, then the quotient is 0. */
+		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
 		if (div_carry == 0 && divided < divider) {
 			quot_vector[quot_top_index - i] = 0;
-			div_carry = n1_vector[n1_top_index - i];
-			n1_vector[n1_top_index - i] = 0;
+			div_carry = numerator_vector[numerator_top_index - i];
+			numerator_vector[numerator_top_index - i] = 0;
 			continue;
 		}
 
 		/*
 		 * Determine the temporary quotient.
-		 * "divided" is n1_high in the previous example. The maximum value of n1_high is n2_high * B,
+		 * "divided" is numerator_high in the previous example. The maximum value of numerator_high is divisor_high * B,
 		 * so here it is divider * BC_VECTOR_BOUNDARY_NUM.
 		 * The number of digits in divider is BC_VECTOR_SIZE + 1, so even if divider is at its maximum value,
 		 * it will never overflow here.
@@ -194,7 +195,7 @@ static inline void bc_standard_div(
 		BC_VECTOR quot_guess = divided / divider;
 
 		/* For sub, add the remainder to the high-order digit */
-		n1_vector[n1_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
+		numerator_vector[numerator_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
 
 		/*
 		 * The temporary quotient can only have errors in the "too large" direction.
@@ -202,48 +203,48 @@ static inline void bc_standard_div(
 		 */
 		if (quot_guess == 0) {
 			quot_vector[quot_top_index - i] = 0;
-			div_carry = n1_vector[n1_top_index - i];
-			n1_vector[n1_top_index - i] = 0;
+			div_carry = numerator_vector[numerator_top_index - i];
+			numerator_vector[numerator_top_index - i] = 0;
 			continue;
 		}
 
 		/* sub */
 		BC_VECTOR sub;
 		BC_VECTOR borrow = 0;
-		BC_VECTOR *n1_calc_bottom = n1_vector + n1_arr_size - n2_arr_size - i;
-		for (j = 0; j < n2_arr_size - 1; j++) {
-			sub = n2_vector[j] * quot_guess + borrow;
+		BC_VECTOR *numerator_calc_bottom = numerator_vector + numerator_arr_size - divisor_arr_size - i;
+		for (j = 0; j < divisor_arr_size - 1; j++) {
+			sub = divisor_vector[j] * quot_guess + borrow;
 			BC_VECTOR sub_low = sub % BC_VECTOR_BOUNDARY_NUM;
 			borrow = sub / BC_VECTOR_BOUNDARY_NUM;
 
-			if (n1_calc_bottom[j] >= sub_low) {
-				n1_calc_bottom[j] -= sub_low;
+			if (numerator_calc_bottom[j] >= sub_low) {
+				numerator_calc_bottom[j] -= sub_low;
 			} else {
-				n1_calc_bottom[j] += BC_VECTOR_BOUNDARY_NUM - sub_low;
+				numerator_calc_bottom[j] += BC_VECTOR_BOUNDARY_NUM - sub_low;
 				borrow++;
 			}
 		}
 		/* last digit sub */
-		sub = n2_vector[j] * quot_guess + borrow;
-		bool neg_remainder = n1_calc_bottom[j] < sub;
-		n1_calc_bottom[j] -= sub;
+		sub = divisor_vector[j] * quot_guess + borrow;
+		bool neg_remainder = numerator_calc_bottom[j] < sub;
+		numerator_calc_bottom[j] -= sub;
 
-		/* If the temporary quotient is too large, add back n2 */
+		/* If the temporary quotient is too large, add back divisor */
 		BC_VECTOR carry = 0;
 		if (neg_remainder) {
 			quot_guess--;
-			for (j = 0; j < n2_arr_size - 1; j++) {
-				n1_calc_bottom[j] += n2_vector[j] + carry;
-				carry = n1_calc_bottom[j] / BC_VECTOR_BOUNDARY_NUM;
-				n1_calc_bottom[j] %= BC_VECTOR_BOUNDARY_NUM;
+			for (j = 0; j < divisor_arr_size - 1; j++) {
+				numerator_calc_bottom[j] += divisor_vector[j] + carry;
+				carry = numerator_calc_bottom[j] / BC_VECTOR_BOUNDARY_NUM;
+				numerator_calc_bottom[j] %= BC_VECTOR_BOUNDARY_NUM;
 			}
 			/* last add */
-			n1_calc_bottom[j] += n2_vector[j] + carry;
+			numerator_calc_bottom[j] += divisor_vector[j] + carry;
 		}
 
 		quot_vector[quot_top_index - i] = quot_guess;
-		div_carry = n1_vector[n1_top_index - i];
-		n1_vector[n1_top_index - i] = 0;
+		div_carry = numerator_vector[numerator_top_index - i];
+		numerator_vector[numerator_top_index - i] = 0;
 	}
 }
 
