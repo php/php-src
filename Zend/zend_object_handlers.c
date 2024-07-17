@@ -578,8 +578,8 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		zend_string *str = Z_STR_P(zv);
 		if (EXPECTED(str == member) ||
 		    /* str and member don't necessarily have a pre-calculated hash value here */
-		    (EXPECTED(zend_string_equal_content(str, member))
-		        && (EG(guard_context) == 0 || ZSTR_HASH(str) == ZSTR_HASH(member)))) {
+		    (EXPECTED(ZSTR_HASH(str) == ZSTR_HASH(member)
+		        && zend_string_equal_content(str, member)))) {
 			zend_string_release(member);
 			return &Z_GUARD_P(zv);
 		} else if (EXPECTED(Z_GUARD_P(zv) == 0)) {

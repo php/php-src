@@ -1858,7 +1858,6 @@ void php_request_shutdown(void *dummy)
 	 * inside zend_executor callback functions.
 	 */
 	EG(current_execute_data) = NULL;
-	EG(guard_context) = (uint32_t)-1;
 
 	php_deactivate_ticks();
 
