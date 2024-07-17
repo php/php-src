@@ -1,69 +1,26 @@
 PHP_ARG_WITH([tidy],
   [for TIDY support],
-  [AS_HELP_STRING([[--with-tidy[=DIR]]],
+  [AS_HELP_STRING([--with-tidy],
     [Include TIDY support])])
 
 if test "$PHP_TIDY" != "no"; then
+  PKG_CHECK_MODULES([TIDY], [tidy])
 
-  if test "$PHP_TIDY" != "yes"; then
-    TIDY_SEARCH_DIRS=$PHP_TIDY
-  else
-    TIDY_SEARCH_DIRS="/usr/local /usr"
-  fi
+  PHP_EVAL_LIBLINE([$TIDY_LIBS], [TIDY_SHARED_LIBADD])
+  PHP_EVAL_INCLINE([$TIDY_CFLAGS])
 
-  for i in $TIDY_SEARCH_DIRS; do
-    for j in tidy tidyp; do
-        if test -f $i/include/$j/$j.h; then
-            TIDY_DIR=$i
-            TIDY_INCDIR=$i/include/$j
-            TIDY_LIB_NAME=$j
-        break
-        elif test -f $i/include/$j.h; then
-            TIDY_DIR=$i
-            TIDY_INCDIR=$i/include
-            TIDY_LIB_NAME=$j
-        break
-        fi
-    done
-  done
+  dnl We used to check for tidybuffio, but it seems almost everyone has moved
+  dnl to using the html5 tidy fork which uses that name.
+  dnl This also means the library name is 'tidy'.
 
-  if test -z "$TIDY_DIR"; then
-    AC_MSG_ERROR(Cannot find libtidy)
-  else
-    dnl Check for tidybuffio.h (as opposed to simply buffio.h) which indicates
-    dnl that we are building against tidy-html5 and not the legacy htmltidy. The
-    dnl two are compatible, except for with regard to this header file.
-    if test -f "$TIDY_INCDIR/tidybuffio.h"; then
-      AC_DEFINE(HAVE_TIDYBUFFIO_H,1,[defined if tidybuffio.h exists])
-    fi
-  fi
-
-  TIDY_LIBDIR=$TIDY_DIR/$PHP_LIBDIR
-  if test "$TIDY_LIB_NAME" == 'tidyp'; then
-    AC_DEFINE(HAVE_TIDYP_H,1,[defined if tidyp.h exists])
-  else
-    AC_DEFINE(HAVE_TIDY_H,1,[defined if tidy.h exists])
-  fi
-
-
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyOptGetDoc,
+  PHP_CHECK_LIBRARY(tidy,tidyOptGetDoc,
   [
     AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
-  ],[
-    PHP_CHECK_LIBRARY(tidy5,tidyOptGetDoc,
-    [
-      TIDY_LIB_NAME=tidy5
-      AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
-    ], [], [])
-  ],[])
-
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyReleaseDate,
+  ], [], [])
+  PHP_CHECK_LIBRARY(tidy, tidyReleaseDate,
   [
     AC_DEFINE(HAVE_TIDYRELEASEDATE,1,[ ])
   ], [], [])
-
-  PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
-  PHP_ADD_INCLUDE($TIDY_INCDIR)
 
   dnl Add -Wno-ignored-qualifiers as this is an issue upstream
   TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
