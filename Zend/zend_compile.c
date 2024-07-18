@@ -8323,7 +8323,7 @@ static zend_op_array *zend_compile_func_decl_ex(
 	if (is_method) {
 		CG(zend_lineno) = decl->start_lineno;
 		zend_check_magic_method_implementation(
-			CG(active_class_entry), (zend_function *) op_array, lcname, E_COMPILE_ERROR);
+			CG(active_class_entry), (zend_function_common *) op_array, lcname, E_COMPILE_ERROR);
 	} else if (toplevel) {
 		/* Only register the function after a successful compile */
 		if (UNEXPECTED(zend_hash_add_ptr(CG(function_table), lcname, op_array) == NULL)) {

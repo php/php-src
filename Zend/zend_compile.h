@@ -559,27 +559,35 @@ typedef struct _zend_internal_function {
 
 #define ZEND_FN_SCOPE_NAME(function)  ((function) && (function)->common.scope ? ZSTR_VAL((function)->common.scope->name) : "")
 
+struct _zend_function_common {
+	// this unnamed union is so that QUICK_ARG_* macros work on this struct
+	union {
+		uint32_t quick_arg_flags;
+		struct {
+			uint8_t type;  /* never used */
+			uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
+		};
+	};
+	uint32_t fn_flags;
+	zend_string *function_name;
+	zend_class_entry *scope;
+	zend_function *prototype;
+	uint32_t num_args;
+	uint32_t required_num_args;
+	zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
+	HashTable   *attributes;
+	ZEND_MAP_PTR_DEF(void **, run_time_cache);
+	zend_string *doc_comment;
+	uint32_t T;         /* number of temporary variables */
+	const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
+};
+typedef struct _zend_function_common zend_function_common;
+
 union _zend_function {
 	uint8_t type;	/* MUST be the first element of this struct! */
 	uint32_t   quick_arg_flags;
 
-	struct {
-		uint8_t type;  /* never used */
-		uint8_t arg_flags[3]; /* bitset of arg_info.pass_by_reference */
-		uint32_t fn_flags;
-		zend_string *function_name;
-		zend_class_entry *scope;
-		zend_function *prototype;
-		uint32_t num_args;
-		uint32_t required_num_args;
-		zend_arg_info *arg_info;  /* index -1 represents the return value info, if any */
-		HashTable   *attributes;
-		ZEND_MAP_PTR_DEF(void **, run_time_cache);
-		zend_string *doc_comment;
-		uint32_t T;         /* number of temporary variables */
-		const zend_property_info *prop_info; /* The corresponding prop_info if this is a hook. */
-	} common;
-
+	zend_function_common common;
 	zend_op_array op_array;
 	zend_internal_function internal_function;
 };
