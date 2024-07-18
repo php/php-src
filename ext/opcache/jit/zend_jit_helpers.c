@@ -1218,7 +1218,7 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_r_helper(zval *container, zval 
 	if (EXPECTED(obj->ce->dimension_handlers)) {
 		if (EXPECTED(obj->ce->dimension_handlers->read_dimension)) {
 			ZVAL_DEREF(dim);
-			retval = obj->ce->dimension_handlers->read_dimension(obj, dim, result);
+			retval = zend_class_read_dimension(obj, dim, result);
 
 			ZEND_ASSERT(result != NULL);
 			if (EXPECTED(retval)) {
@@ -1259,11 +1259,11 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 	if (EXPECTED(obj->ce->dimension_handlers)) {
 		if (EXPECTED(obj->ce->dimension_handlers->read_dimension)) {
 			ZVAL_DEREF(dim);
-			if (UNEXPECTED(!obj->ce->dimension_handlers->has_dimension(obj, dim))) {
+			if (UNEXPECTED(!zend_class_has_dimension(obj, dim))) {
 				ZVAL_NULL(result);
 				goto end;
 			}
-			retval = obj->ce->dimension_handlers->read_dimension(obj, dim, result);
+			retval = zend_class_read_dimension(obj, dim, result);
 
 			ZEND_ASSERT(result != NULL);
 			if (EXPECTED(retval)) {
@@ -1442,29 +1442,47 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 		zend_object *obj = Z_OBJ_P(object_ptr);
 
 		GC_ADDREF(obj);
+		const zend_op *opline = EG(current_execute_data)->opline;
 		if (dim && UNEXPECTED(Z_ISUNDEF_P(dim))) {
-			const zend_op *opline = EG(current_execute_data)->opline;
 			zend_jit_undefined_op_helper(opline->op2.var);
 			dim = &EG(uninitialized_zval);
 		}
 
+		if (UNEXPECTED(opline->extended_value == ZEND_FETCH_DIM_INCDEC)) {
+			zend_throw_error(NULL, "Cannot increment/decrement object offsets");
+			ZVAL_UNDEF(result);
+			goto clean_up;
+		}
 		if (EXPECTED(obj->ce->dimension_handlers)) {
 			if (EXPECTED(dim && obj->ce->dimension_handlers->fetch_dimension)) {
 				ZVAL_DEREF(dim);
+
+				bool offset_exists = false;
 				/* For null coalesce we first check if the offset exist,
 				 * if it does we call the fetch_dimension() handler,
 				 * otherwise just return an undef result */
 				if (UNEXPECTED(type == BP_VAR_IS)) {
 					ZEND_ASSERT(obj->ce->dimension_handlers->has_dimension);
 					/* The key does not exist */
-					if (!obj->ce->dimension_handlers->has_dimension(obj, dim)) {
+					if (!zend_class_has_dimension(obj, dim)) {
+						ZVAL_UNDEF(result);
+						goto clean_up;
+					}
+				} else if (UNEXPECTED(type == BP_VAR_RW)) {
+					/* RW semantics dictate that the offset must actually exists, otherwise a warning is emitted */
+					offset_exists = zend_class_has_dimension(obj, dim);
+				}
+				retval = zend_class_fetch_dimension(obj, dim, result);
+				if (UNEXPECTED(type == BP_VAR_RW && !offset_exists && !EG(exception))) {
+					// TODO Better warning?
+					zend_error(E_WARNING, "Undefined offset");
+					if (UNEXPECTED(EG(exception))) {
 						ZVAL_UNDEF(result);
 						goto clean_up;
 					}
 				}
-				retval = obj->ce->dimension_handlers->fetch_dimension(obj, dim, result);
 			} else if (!dim && obj->ce->dimension_handlers->fetch_append) {
-				retval = obj->ce->dimension_handlers->fetch_append(obj, result);
+				retval = zend_class_fetch_append(obj, result);
 			} else {
 				zend_jit_invalid_use_of_object_as_array(obj, /* has_offset */ dim, BP_VAR_FETCH);
 				ZVAL_UNDEF(result);
@@ -1496,6 +1514,15 @@ static zend_always_inline void ZEND_FASTCALL zend_jit_fetch_dim_obj_helper(zval 
 					ZSTR_VAL(ce->name), dim ? "offsetFetch" : "fetchAppend");
 				ZVAL_UNDEF(result);
 				goto clean_up;
+			}
+			/* Check if we need to auto-vivify a possible null return */
+			if (UNEXPECTED(
+				opline->extended_value == ZEND_FETCH_DIM_DIM
+				&& obj->ce->dimension_handlers->autovivify
+				&& Z_ISREF_P(retval)
+				&& Z_ISNULL_P(Z_REFVAL_P(retval))
+			)) {
+				zend_class_autovivify(obj, retval);
 			}
 			if (result != retval) {
 				ZVAL_INDIRECT(result, retval);
@@ -1599,12 +1626,12 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 				&& obj->ce->dimension_handlers->write_dimension
 			) {
 				ZVAL_DEREF(dim);
-				obj->ce->dimension_handlers->write_dimension(obj, dim, value);
+				zend_class_write_dimension(obj, dim, value);
 			} else if (
 				!dim
 				&& obj->ce->dimension_handlers->append
 			) {
-				obj->ce->dimension_handlers->append(obj, value);
+				zend_class_append(obj, value);
 			} else {
 				zend_jit_invalid_use_of_object_as_array(obj, /* has_offset */ dim, BP_VAR_W);
 			}
@@ -1702,7 +1729,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 				zval *z;
 				zval rv, res;
 
-				z = obj->ce->dimension_handlers->read_dimension(obj, dim, &rv);
+				z = zend_class_read_dimension(obj, dim, &rv);
 				if (UNEXPECTED(z == NULL)) {
 					ZEND_ASSERT(EG(exception) && "returned NULL without exception");
 					/* Exception is thrown in this case */
@@ -1710,7 +1737,7 @@ static void ZEND_FASTCALL zend_jit_assign_dim_op_helper(zval *container, zval *d
 					return;
 				} else {
 					if (binary_op(&res, Z_ISREF_P(z) ? Z_REFVAL_P(z) : z, value) == SUCCESS) {
-						obj->ce->dimension_handlers->write_dimension(obj, dim, &res);
+						zend_class_write_dimension(obj, dim, &res);
 					}
 				}
 
@@ -1876,29 +1903,9 @@ static bool ZEND_FASTCALL zend_jit_isset_dim_helper(zval *container, zval *offse
 			if (EXPECTED(obj->ce->dimension_handlers->has_dimension)) {
 				ZVAL_DEREF(offset);
 
-				/* Object handler can modify the value of the object via globals; thus take a copy */
-				zval copy;
-				ZVAL_COPY(&copy, container);
-				const zend_class_entry *ce = obj->ce;
-				bool exists = ce->dimension_handlers->has_dimension(Z_OBJ(copy), offset);
-				if (!exists) {
-					zval_ptr_dtor(&copy);
-					return false;
-				}
-
-				zval *retval;
-				zval slot;
-				retval = ce->dimension_handlers->read_dimension(Z_OBJ(copy), offset, &slot);
-
-				zval_ptr_dtor(&copy);
-				if (UNEXPECTED(!retval)) {
-					ZEND_ASSERT(EG(exception) && "read_dimension() returned NULL without exception");
-					return true;
-				}
-				ZEND_ASSERT(Z_TYPE_P(retval) != IS_UNDEF);
-				/* Check if value is null, if it is we consider it to not be set */
-				bool result = Z_TYPE_P(retval) != IS_NULL;
-				zval_ptr_dtor(retval);
+				GC_ADDREF(obj);
+				bool result = zend_class_isset_empty_dimension(obj, offset, /* is_empty */ false);
+				GC_DELREF(obj);
 				return result;
 			} else {
 				zend_jit_invalid_use_of_object_as_array(obj, /* has_offset */ true, BP_VAR_IS);
