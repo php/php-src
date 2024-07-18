@@ -47,33 +47,33 @@ static const BC_VECTOR POW_10_LUT[9] = {
  * This function is therefore an optimized version of bc_standard_div().
  */
 static inline void bc_fast_div(
-	BC_VECTOR *numerator_vector, size_t numerator_arr_size, BC_VECTOR divisor_vector, BC_VECTOR *quot_vector, size_t quot_arr_size)
+	BC_VECTOR *numerator_vectors, size_t numerator_arr_size, BC_VECTOR divisor_vector, BC_VECTOR *quot_vectors, size_t quot_arr_size)
 {
 	size_t numerator_top_index = numerator_arr_size - 1;
 	size_t quot_top_index = quot_arr_size - 1;
 	for (size_t i = 0; i < quot_arr_size - 1; i++) {
-		if (numerator_vector[numerator_top_index - i] < divisor_vector) {
-			quot_vector[quot_top_index - i] = 0;
-			/* numerator_vector[numerator_top_index - i] < divisor_vector, so there will be no overflow. */
-			numerator_vector[numerator_top_index - i - 1] += numerator_vector[numerator_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
+		if (numerator_vectors[numerator_top_index - i] < divisor_vector) {
+			quot_vectors[quot_top_index - i] = 0;
+			/* numerator_vectors[numerator_top_index - i] < divisor_vector, so there will be no overflow. */
+			numerator_vectors[numerator_top_index - i - 1] += numerator_vectors[numerator_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
 			continue;
 		}
-		quot_vector[quot_top_index - i] = numerator_vector[numerator_top_index - i] / divisor_vector;
-		numerator_vector[numerator_top_index - i] -= divisor_vector * quot_vector[quot_top_index - i];
-		numerator_vector[numerator_top_index - i - 1] += numerator_vector[numerator_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
-		numerator_vector[numerator_top_index - i] = 0;
+		quot_vectors[quot_top_index - i] = numerator_vectors[numerator_top_index - i] / divisor_vector;
+		numerator_vectors[numerator_top_index - i] -= divisor_vector * quot_vectors[quot_top_index - i];
+		numerator_vectors[numerator_top_index - i - 1] += numerator_vectors[numerator_top_index - i] * BC_VECTOR_BOUNDARY_NUM;
+		numerator_vectors[numerator_top_index - i] = 0;
 	}
 	/* last */
-	quot_vector[0] = numerator_vector[0] / divisor_vector;
+	quot_vectors[0] = numerator_vectors[0] / divisor_vector;
 }
 
 /*
  * Used when the divisor is split into 2 or more chunks.
  */
 static inline void bc_standard_div(
-	BC_VECTOR *numerator_vector, size_t numerator_arr_size,
-	BC_VECTOR *divisor_vector, size_t divisor_arr_size, size_t divisor_len,
-	BC_VECTOR *quot_vector, size_t quot_arr_size
+	BC_VECTOR *numerator_vectors, size_t numerator_arr_size,
+	BC_VECTOR *divisor_vectors, size_t divisor_arr_size, size_t divisor_len,
+	BC_VECTOR *quot_vectors, size_t quot_arr_size
 ) {
 	size_t numerator_top_index = numerator_arr_size - 1;
 	size_t divisor_top_index = divisor_arr_size - 1;
@@ -175,15 +175,15 @@ static inline void bc_standard_div(
 	}
 	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
 	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
-	BC_VECTOR divisor_high_part = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
+	BC_VECTOR divisor_high_part = divisor_vectors[divisor_top_index] * high_part_shift + divisor_vectors[divisor_top_index - 1] / low_part_shift;
 	for (size_t i = 0; i < quot_arr_size; i++) {
-		BC_VECTOR numerator_high_part = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
+		BC_VECTOR numerator_high_part = numerator_vectors[numerator_top_index - i] * high_part_shift + numerator_vectors[numerator_top_index - i - 1] / low_part_shift;
 
 		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
 		if (div_carry == 0 && numerator_high_part < divisor_high_part) {
-			quot_vector[quot_top_index - i] = 0;
-			div_carry = numerator_vector[numerator_top_index - i];
-			numerator_vector[numerator_top_index - i] = 0;
+			quot_vectors[quot_top_index - i] = 0;
+			div_carry = numerator_vectors[numerator_top_index - i];
+			numerator_vectors[numerator_top_index - i] = 0;
 			continue;
 		}
 
@@ -198,26 +198,26 @@ static inline void bc_standard_div(
 		BC_VECTOR quot_guess = numerator_high_part / divisor_high_part;
 
 		/* For sub, add the remainder to the high-order digit */
-		numerator_vector[numerator_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
+		numerator_vectors[numerator_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
 
 		/*
 		 * The temporary quotient can only have errors in the "too large" direction.
 		 * So if the temporary quotient is 0 here, the quotient is 0.
 		 */
 		if (quot_guess == 0) {
-			quot_vector[quot_top_index - i] = 0;
-			div_carry = numerator_vector[numerator_top_index - i];
-			numerator_vector[numerator_top_index - i] = 0;
+			quot_vectors[quot_top_index - i] = 0;
+			div_carry = numerator_vectors[numerator_top_index - i];
+			numerator_vectors[numerator_top_index - i] = 0;
 			continue;
 		}
 
 		/* sub */
 		BC_VECTOR sub;
 		BC_VECTOR borrow = 0;
-		BC_VECTOR *numerator_calc_bottom = numerator_vector + numerator_arr_size - divisor_arr_size - i;
+		BC_VECTOR *numerator_calc_bottom = numerator_vectors + numerator_arr_size - divisor_arr_size - i;
 		size_t j;
 		for (j = 0; j < divisor_arr_size - 1; j++) {
-			sub = divisor_vector[j] * quot_guess + borrow;
+			sub = divisor_vectors[j] * quot_guess + borrow;
 			BC_VECTOR sub_low = sub % BC_VECTOR_BOUNDARY_NUM;
 			borrow = sub / BC_VECTOR_BOUNDARY_NUM;
 
@@ -229,7 +229,7 @@ static inline void bc_standard_div(
 			}
 		}
 		/* last digit sub */
-		sub = divisor_vector[j] * quot_guess + borrow;
+		sub = divisor_vectors[j] * quot_guess + borrow;
 		bool neg_remainder = numerator_calc_bottom[j] < sub;
 		numerator_calc_bottom[j] -= sub;
 
@@ -238,17 +238,17 @@ static inline void bc_standard_div(
 		if (neg_remainder) {
 			quot_guess--;
 			for (j = 0; j < divisor_arr_size - 1; j++) {
-				numerator_calc_bottom[j] += divisor_vector[j] + carry;
+				numerator_calc_bottom[j] += divisor_vectors[j] + carry;
 				carry = numerator_calc_bottom[j] / BC_VECTOR_BOUNDARY_NUM;
 				numerator_calc_bottom[j] %= BC_VECTOR_BOUNDARY_NUM;
 			}
 			/* last add */
-			numerator_calc_bottom[j] += divisor_vector[j] + carry;
+			numerator_calc_bottom[j] += divisor_vectors[j] + carry;
 		}
 
-		quot_vector[quot_top_index - i] = quot_guess;
-		div_carry = numerator_vector[numerator_top_index - i];
-		numerator_vector[numerator_top_index - i] = 0;
+		quot_vectors[quot_top_index - i] = quot_guess;
+		div_carry = numerator_vectors[numerator_top_index - i];
+		numerator_vectors[numerator_top_index - i] = 0;
 	}
 }
 
