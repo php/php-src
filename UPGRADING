@@ -344,6 +344,9 @@ PHP 8.4 UPGRADE NOTES
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
     StreamBucket instance instead of an stdClass instance.
     RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
+  . Added a new RoundingMode enum with clearer naming and improved discoverability
+    compared to the PHP_ROUND_* constants.
+    RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
 
 - SOAP:
   . Added support for clark notation for namespaces in class map.
@@ -553,8 +556,12 @@ PHP 8.4 UPGRADE NOTES
     has been increased from '10' to '12'.
 
     RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
-  . Four new modes have been added to the round() function: PHP_ROUND_CEILING,
-    PHP_ROUND_FLOOR, PHP_ROUND_TOWARD_ZERO, PHP_ROUND_AWAY_FROM_ZERO.
+  . The $mode parameter of the round() function has been widened to RoundingMode|int,
+    accepting instances of a new RoundingMode enum.
+
+    RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
+  . Four new modes have been added to the round() function: RoundingMode::PositiveInfinity,
+    RoundingMode::NegativeInfinity, RoundingMode::TowardsZero, RoundingMode::AwayFromZero.
 
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
   . debug_zval_dump() now indicates whether an array is packed.
@@ -808,12 +815,6 @@ PHP 8.4 UPGRADE NOTES
   . P_GID (NetBSD/FreeBSD only).
   . P_SID (NetBSD/FreeBSD only).
   . P_JAILID (FreeBSD only).
-
-- Standard:
-  . PHP_ROUND_CEILING.
-  . PHP_ROUND_FLOOR.
-  . PHP_ROUND_TOWARD_ZERO.
-  . PHP_ROUND_AWAY_FROM_ZERO.
 
 - Sockets:
   . SO_EXCLUSIVEADDRUSE (Windows only).

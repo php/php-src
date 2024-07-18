@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
 
+- BCMath:
+  . Adjust bcround()'s $mode parameter to only accept the RoundingMode
+    enum. (timwolla, saki)
+
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
 
@@ -15,6 +19,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
+  . Add RoundingMode enum. (timwolla, saki)
 
 18 Jul 2024, PHP 8.4.0alpha2
 
