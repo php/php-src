@@ -88,7 +88,6 @@ static inline void bc_standard_div(
 	 * We refer to this value of 2 as the temporary quotient.
 	 * We also define E to be error between the true quotient and the temporary quotient,
 	 * which in this case, is 1.
-	 * Also note that for example 2400000 / 120, there will be 5 divisions.
 	 *
 	 * Another example: Calculating 999_0000_0000 / 1000_9999 with base 10000.
 	 * The true quotient is 9980, but if it is calculated using only the high-order digits (999 / 1000), we would get 0
