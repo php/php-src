@@ -377,7 +377,7 @@ AS_VAR_IF([php_cv_func_getifaddrs], [yes],
 dnl
 dnl Setup extension sources
 dnl
-PHP_NEW_EXTENSION([standard], [m4_normalize([
+PHP_NEW_EXTENSION([standard], m4_normalize([
   array.c
   assert.c
   base64.c
@@ -441,7 +441,7 @@ PHP_NEW_EXTENSION([standard], [m4_normalize([
   var_unserializer.c
   var.c
   versioning.c
-])],,,
+]),,,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])

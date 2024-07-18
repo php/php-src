@@ -861,10 +861,10 @@ fi
 
 AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AS_VAR_IF([pthreads_working], [yes], [],
-    [AC_MSG_ERROR([m4_normalize([
+    [AC_MSG_ERROR(m4_normalize([
       Unable to verify system support for POSIX Threads, which are required for
       PHP thread safety (ZTS) build.
-    ])])])
+    ]))])
 
   AC_MSG_CHECKING([for POSIX threads])
   AC_MSG_RESULT([yes])
@@ -1170,10 +1170,10 @@ AS_VAR_IF([PHP_PEAR], [no],, [
   AC_MSG_WARN([The --with-pear option is deprecated])
 
   dnl PEAR dependencies.
-  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR([m4_normalize([
+  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR(m4_normalize([
     PEAR requires XML to be enabled. Add '--enable-xml' to the configure line,
     or disable PEAR (--without-pear).
-  ])])])
+  ]))])
 
   install_pear=install-pear
 
@@ -1535,11 +1535,11 @@ if test "$PHP_MEMORY_SANITIZER" = "yes"; then
 fi
 
 AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
-  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR([m4_normalize([
+  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR(m4_normalize([
     Valgrind and address sanitizer are not compatible. Either disable Valgrind
     (remove --with-valgrind) or disable address sanitizer (remove
     --enable-address-sanitizer).
-  ])])])
+  ]))])
 
   AX_CHECK_COMPILE_FLAG([-fsanitize=address], [
     CFLAGS="$CFLAGS -fsanitize=address -DZEND_TRACK_ARENA_ALLOC"
@@ -1678,7 +1678,7 @@ PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
 PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
 PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
 
-PHP_ADD_SOURCES([Zend], [m4_normalize([
+PHP_ADD_SOURCES([Zend], m4_normalize([
   Optimizer/block_pass.c
   Optimizer/compact_literals.c
   Optimizer/compact_vars.c
@@ -1760,7 +1760,7 @@ PHP_ADD_SOURCES([Zend], [m4_normalize([
   zend_vm_opcodes.c
   zend_weakrefs.c
   zend.c
-])],
+]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
 PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/scripts/Makefile.frag],
@@ -1772,7 +1772,7 @@ PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/Zend/Makefile.frag],
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
 
-PHP_ADD_BUILD_DIR([m4_normalize([
+PHP_ADD_BUILD_DIR(m4_normalize([
   main
   main/streams
   scripts
@@ -1781,7 +1781,7 @@ PHP_ADD_BUILD_DIR([m4_normalize([
   Zend
   Zend/asm
   Zend/Optimizer
-])])
+]))
 
 ALL_OUTPUT_FILES="main/build-defs.h \
 scripts/phpize scripts/man1/phpize.1 \

@@ -1741,7 +1741,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
   esac
 
   PHP_SUBST([RE2C])
-  AS_VAR_SET([RE2C_FLAGS], [m4_normalize(["$2"])])
+  AS_VAR_SET([RE2C_FLAGS], m4_normalize(["$2"]))
   PHP_SUBST([RE2C_FLAGS])
 ])
 
@@ -1998,17 +1998,17 @@ AS_VAR_IF([found_pgsql], [yes], [dnl
   PHP_EVAL_INCLINE([$PGSQL_CFLAGS])
   PHP_EVAL_LIBLINE([$PGSQL_LIBS], [$1])
 dnl PostgreSQL minimum version sanity check.
-  PHP_CHECK_LIBRARY([pq], [PQencryptPasswordConn],, [AC_MSG_ERROR([m4_normalize([
+  PHP_CHECK_LIBRARY([pq], [PQencryptPasswordConn],, [AC_MSG_ERROR(m4_normalize([
     PostgreSQL check failed: libpq 10.0 or later is required, please see
     config.log for details.
-  ])])],
+  ]))],
   [$PGSQL_LIBS])
 $2],
-[m4_default([$3], [AC_MSG_ERROR([m4_normalize([
+[m4_default([$3], [AC_MSG_ERROR(m4_normalize([
   Cannot find libpq-fe.h or pq library (libpq). Please specify the correct
   PostgreSQL installation path with environment variables PGSQL_CFLAGS and
   PGSQL_LIBS or provide the PostgreSQL installation directory.
-])])])])
+]))])])
 ])
 
 dnl ----------------------------------------------------------------------------

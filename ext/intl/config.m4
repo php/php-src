@@ -100,7 +100,7 @@ if test "$PHP_INTL" != "no"; then
     PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS, shared_objects_intl, yes)
   fi
 
-  PHP_ADD_BUILD_DIR([m4_normalize([
+  PHP_ADD_BUILD_DIR(m4_normalize([
     $ext_builddir/breakiterator
     $ext_builddir/calendar
     $ext_builddir/collator
@@ -118,5 +118,5 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/timezone
     $ext_builddir/transliterator
     $ext_builddir/uchar
-  ])])
+  ]))
 fi

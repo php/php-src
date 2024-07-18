@@ -4,7 +4,7 @@ PHP_ARG_ENABLE([bcmath],
     [Enable bc style precision math functions])])
 
 if test "$PHP_BCMATH" != "no"; then
-  PHP_NEW_EXTENSION([bcmath], [m4_normalize([
+  PHP_NEW_EXTENSION([bcmath], m4_normalize([
     bcmath.c
     libbcmath/src/add.c
     libbcmath/src/compare.c
@@ -28,7 +28,7 @@ if test "$PHP_BCMATH" != "no"; then
     libbcmath/src/str2num.c
     libbcmath/src/sub.c
     libbcmath/src/zero.c
-  ])],
+  ]),
   [$ext_shared],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_ADD_BUILD_DIR([$ext_builddir/libbcmath/src])
