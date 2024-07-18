@@ -304,12 +304,7 @@ zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 		first = nodep->children;
 	}
 
-	if (!first) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(first, retval, obj);
+	php_dom_create_nullable_object(first, retval, obj);
 	return SUCCESS;
 }
 
@@ -329,12 +324,7 @@ zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 		last = nodep->last;
 	}
 
-	if (!last) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(last, retval, obj);
+	php_dom_create_nullable_object(last, retval, obj);
 	return SUCCESS;
 }
 
@@ -350,12 +340,8 @@ zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr prevsib = nodep->prev;
-	if (!prevsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(prevsib, retval, obj);
+	php_dom_create_nullable_object(prevsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -371,12 +357,8 @@ zend_result dom_node_next_sibling_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nextsib = nodep->next;
-	if (!nextsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(nextsib, retval, obj);
+	php_dom_create_nullable_object(nextsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -397,12 +379,7 @@ zend_result dom_node_previous_element_sibling_read(dom_object *obj, zval *retval
 		prevsib = prevsib->prev;
 	}
 
-	if (!prevsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(prevsib, retval, obj);
+	php_dom_create_nullable_object(prevsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -423,12 +400,7 @@ zend_result dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
 		nextsib = nextsib->next;
 	}
 
-	if (!nextsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(nextsib, retval, obj);
+	php_dom_create_nullable_object(nextsib, retval, obj);
 	return SUCCESS;
 }
 

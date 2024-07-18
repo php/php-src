@@ -1386,11 +1386,7 @@ zend_result dom_html_document_element_read_helper(dom_object *obj, zval *retval,
 	DOM_PROP_NODE(const xmlDoc *, docp, obj);
 
 	const xmlNode *element = dom_html_document_element_read_raw(docp, accept);
-	if (element == NULL) {
-		ZVAL_NULL(retval);
-	} else {
-		php_dom_create_object((xmlNodePtr) element, retval, obj);
-	}
+	php_dom_create_nullable_object((xmlNodePtr) element, retval, obj);
 
 	return SUCCESS;
 }

@@ -179,6 +179,7 @@ const char *dom_locate_a_namespace(const xmlNode *node, const zend_string *prefi
 void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp);
+bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_object *domobj);
 
 typedef enum {
 	DOM_LOAD_STRING = 0,

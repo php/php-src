@@ -39,12 +39,7 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 		first = first->next;
 	}
 
-	if (!first) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(first, retval, obj);
+	php_dom_create_nullable_object(first, retval, obj);
 	return SUCCESS;
 }
 /* }}} */
@@ -63,12 +58,7 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 		last = last->prev;
 	}
 
-	if (!last) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(last, retval, obj);
+	php_dom_create_nullable_object(last, retval, obj);
 	return SUCCESS;
 }
 /* }}} */
