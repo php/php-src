@@ -125,11 +125,11 @@ static inline void bc_standard_div(
 	 * The error E can be expressed by the following formula.
 	 *
 	 * E = (numerator_high * B^k) / (divisor_high * B^k) - (numerator_high * B^k + numerator_low) / (divisor_high * B^k + divisor_low)
-	 * E = numerator_high / divisor_high - (numerator_high * B^k + numerator_low) / (divisor_high * B^k + divisor_low)
-	 * E = (numerator_high * (divisor_high * B^k + divisor_low) - (numerator_high * B^k + numerator_low) * divisor_high) / (divisor_high * (divisor_high * B^k + divisor_low))
-	 * E = (numerator_high * divisor_low - divisor_high * numerator_low) / (divisor_high * (divisor_high * B^k + divisor_low))
+	 *   = numerator_high / divisor_high - (numerator_high * B^k + numerator_low) / (divisor_high * B^k + divisor_low)
+	 *   = (numerator_high * (divisor_high * B^k + divisor_low) - (numerator_high * B^k + numerator_low) * divisor_high) / (divisor_high * (divisor_high * B^k + divisor_low))
+	 *   = (numerator_high * divisor_low - divisor_high * numerator_low) / (divisor_high * (divisor_high * B^k + divisor_low))
 	 *
-	 * Find the error MAX_E when the error E is maximum.
+	 * Find the error MAX_E when the error E is maximum (0 <= E <= MAX_E).
 	 * First, numerator_high, which only exists in the numerator, uses its maximum value.
 	 * Considering carry-back, numerator_high can be expressed as follows.
 	 * numerator_high = divisor_high * B
@@ -137,19 +137,19 @@ static inline void bc_standard_div(
 	 * numerator_low = 0
 	 *
 	 * MAX_E = (numerator_high * divisor_low - divisor_high * numerator_low) / (divisor_high * (divisor_high * B^k + divisor_low))
-	 * MAX_E = (divisor_high * B * divisor_low) / (divisor_high * (divisor_high * B^k + divisor_low))
+	 *       = (divisor_high * B * divisor_low) / (divisor_high * (divisor_high * B^k + divisor_low))
 	 *
 	 * divisor_low uses the maximum value.
 	 * divisor_low = B^k - 1
 	 * MAX_E = (divisor_high * B * divisor_low) / (divisor_high * (divisor_high * B^k + divisor_low))
-	 * MAX_E = (divisor_high * B * (B^k - 1)) / (divisor_high * (divisor_high * B^k + B^k - 1))
+	 *       = (divisor_high * B * (B^k - 1)) / (divisor_high * (divisor_high * B^k + B^k - 1))
 	 *
 	 * divisor_high uses the minimum value, but want to see how the number of digits affects the error, so represent
 	 * the minimum value as:
 	 * divisor_high = 10^x (any x ∈ ℕ)
 	 * Since B = 10^b, the formula becomes:
 	 * MAX_E = (divisor_high * B * (B^k - 1)) / (divisor_high * (divisor_high * B^k + B^k - 1))
-	 * MAX_E = (10^x * 10^b * ((10^b)^k - 1)) / (10^x * (10^x * (10^b)^k + (10^b)^k - 1))
+	 *       = (10^x * 10^b * ((10^b)^k - 1)) / (10^x * (10^x * (10^b)^k + (10^b)^k - 1))
 	 *
 	 * Now let's make an approximation. Remove -1 from the numerator. Approximate the numerator to be
 	 * large and the denominator to be small, such that MAX_E is less than this expression.
@@ -157,8 +157,8 @@ static inline void bc_standard_div(
 	 *
 	 * MAX_E = (10^x * 10^b * ((10^b)^k - 1)) / (10^x * (10^x * (10^b)^k + (10^b)^k - 1))
 	 * MAX_E < (10^x * 10^b * (10^b)^k) / (10^x * 10^x * (10^b)^k)
-	 * MAX_E < 10^b / 10^x
-	 * MAX_E < 10^(b - x)
+	 *       < 10^b / 10^x
+	 *       < 10^(b - x)
 	 *
 	 * Therefore, found that if the number of digits in base B and divisor_high are equal, the error will be less
 	 * than 1 regardless of the number of digits in the value of k.
