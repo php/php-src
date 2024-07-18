@@ -1,12 +1,14 @@
-# The following volunteers have self-identified as subject matter experts or
-# interested parties in a particular area of the php-src source code. While
-# requesting a review from someone does not obligate that person to review a
-# pull request, these reviewers might have valuable knowledge of the problem
-# area and could aid in deciding whether a pull request is ready for merging.
+# The following volunteers have self-identified as subject matter experts
+# or interested parties over a particular area of the php-src source code.
+# While requesting a review from someone does not obligate that person to
+# review a pull request, these reviewers might have valuable knowledge of
+# the problem area and could aid in deciding whether a pull request is ready
+# for merging.
 #
 # When changing this file, please make sure to commit the changes to the
 # earliest supported PHP branch (PHP-X.Y) and not only to the master branch.
 # GitHub reads the CODEOWNERS file from the pull request's targeted branch.
+# Commit changes here like bug fixes.
 #
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
