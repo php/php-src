@@ -317,10 +317,10 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 
 	if (intern->profiling) {
-		if (php_check_open_basedir(intern->profiling)) {
+		if (php_check_open_basedir(ZSTR_VAL(intern->profiling))) {
 			f = NULL;
 		} else {
-			f = VCWD_FOPEN(intern->profiling, "w");
+			f = VCWD_FOPEN(ZSTR_VAL(intern->profiling), "w");
 		}
 	} else {
 		f = NULL;
@@ -730,19 +730,18 @@ PHP_METHOD(XSLTProcessor, setProfiling)
 {
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
-	char *filename = NULL;
-	size_t filename_len;
+	zend_string *filename = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P!", &filename) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_XSL_P(id);
 	if (intern->profiling) {
-		efree(intern->profiling);
+		zend_string_release(intern->profiling);
 	}
 	if (filename != NULL) {
-		intern->profiling = estrndup(filename, filename_len);
+		intern->profiling = zend_string_copy(filename);
 	} else {
 		intern->profiling = NULL;
 	}
