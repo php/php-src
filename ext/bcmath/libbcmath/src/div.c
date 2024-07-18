@@ -178,14 +178,6 @@ static inline void bc_standard_div(
 	for (size_t i = 0; i < quot_arr_size; i++) {
 		BC_VECTOR numerator_high_part = numerator_vectors[numerator_top_index - i] * high_part_shift + numerator_vectors[numerator_top_index - i - 1] / low_part_shift;
 
-		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
-		if (div_carry == 0 && numerator_high_part < divisor_high_part) {
-			quot_vectors[quot_top_index - i] = 0;
-			div_carry = numerator_vectors[numerator_top_index - i];
-			numerator_vectors[numerator_top_index - i] = 0;
-			continue;
-		}
-
 		/*
 		 * Determine the temporary quotient.
 		 * The maximum value of numerator_high is divisor_high * B in the previous example, so here numerator_high_part is
@@ -194,6 +186,15 @@ static inline void bc_standard_div(
 		 * it will never overflow here.
 		 */
 		numerator_high_part += div_carry * BC_VECTOR_BOUNDARY_NUM * high_part_shift;
+
+		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
+		if (numerator_high_part < divisor_high_part) {
+			quot_vectors[quot_top_index - i] = 0;
+			div_carry = numerator_vectors[numerator_top_index - i];
+			numerator_vectors[numerator_top_index - i] = 0;
+			continue;
+		}
+
 		BC_VECTOR quot_guess = numerator_high_part / divisor_high_part;
 
 		/* For sub, add the remainder to the high-order digit */
