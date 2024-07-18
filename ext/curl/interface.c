@@ -53,8 +53,6 @@
 #endif /* ZTS && HAVE_CURL_OLD_OPENSSL */
 /* }}} */
 
-#define SMART_STR_PREALLOC 4096
-
 #include "zend_smart_str.h"
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
@@ -2628,7 +2626,11 @@ PHP_FUNCTION(curl_error)
 
 	if (ch->err.no) {
 		ch->err.str[CURL_ERROR_SIZE] = 0;
-		RETURN_STRING(ch->err.str);
+		if (strlen(ch->err.str) > 0) {
+			RETURN_STRING(ch->err.str);
+		} else {
+			RETURN_STRING(curl_easy_strerror(ch->err.no));
+		}
 	} else {
 		RETURN_EMPTY_STRING();
 	}

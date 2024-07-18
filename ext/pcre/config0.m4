@@ -84,6 +84,6 @@ else
         [Define to 1 if pcre has Valgrind support enabled.])])])
 
   PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
-  PHP_ADD_BUILD_DIR($ext_builddir/pcre2lib)
+  PHP_ADD_BUILD_DIR([$ext_builddir/pcre2lib])
   PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcre2lib/])
 fi

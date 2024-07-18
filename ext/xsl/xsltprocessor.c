@@ -295,7 +295,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zend_string *member;
 	FILE *f;
 	int secPrefsError = 0;
-	int secPrefsValue;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp);
@@ -362,7 +361,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ZEND_ASSERT(Z_TYPE_P(max_template_vars) == IS_LONG);
 	ctxt->maxTemplateVars = Z_LVAL_P(max_template_vars);
 
-	secPrefsValue = intern->securityPrefs;
+	zend_long secPrefsValue = intern->securityPrefs;
 
 	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
 	if (secPrefsValue != XSL_SECPREF_NONE) {

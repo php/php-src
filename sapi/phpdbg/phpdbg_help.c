@@ -332,7 +332,7 @@ const phpdbg_help_text_t phpdbg_help_text[] = {
 
 /******************************** General Help Topics ********************************/
 {"overview!", CR
-"**phpdbg** is a lightweight, powerful and easy to use debugging platform for PHP5.4+" CR
+"**phpdbg** is a lightweight, powerful and easy to use debugging platform for PHP" CR
 "It supports the following commands:" CR CR
 
 "**Information**" CR

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 6055f4edb68a7caed517dbb80f4d5265865dd91d */
+ * Stub hash: e7f250077b6721539caee96afe4ed392396018f9 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_shmop_open, 0, 4, Shmop, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
@@ -52,6 +52,22 @@ static const zend_function_entry ext_functions[] = {
 static const zend_function_entry class_Shmop_methods[] = {
 	ZEND_FE_END
 };
+
+static void register_shmop_symbols(int module_number)
+{
+
+	zend_attribute *attribute_Deprecated_func_shmop_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "shmop_close", sizeof("shmop_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_shmop_close_0_arg0;
+	zend_string *attribute_Deprecated_func_shmop_close_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_shmop_close_0_arg0, attribute_Deprecated_func_shmop_close_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_shmop_close_0->args[0].value, &attribute_Deprecated_func_shmop_close_0_arg0);
+	attribute_Deprecated_func_shmop_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_shmop_close_0_arg1;
+	zend_string *attribute_Deprecated_func_shmop_close_0_arg1_str = zend_string_init("as Shmop objects are freed automatically", strlen("as Shmop objects are freed automatically"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_shmop_close_0_arg1, attribute_Deprecated_func_shmop_close_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_shmop_close_0->args[1].value, &attribute_Deprecated_func_shmop_close_0_arg1);
+	attribute_Deprecated_func_shmop_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+}
 
 static zend_class_entry *register_class_Shmop(void)
 {

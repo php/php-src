@@ -266,6 +266,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_STATIC_METHOD_CALL:
+					case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 					case ZEND_INIT_FCALL_BY_NAME:
 					case ZEND_INIT_NS_FCALL_BY_NAME:
 					case ZEND_INIT_DYNAMIC_CALL:
@@ -350,6 +351,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 				case ZEND_INIT_FCALL:
 				case ZEND_INIT_METHOD_CALL:
 				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				case ZEND_INIT_FCALL_BY_NAME:
 				case ZEND_INIT_NS_FCALL_BY_NAME:
 				case ZEND_INIT_DYNAMIC_CALL:
@@ -594,10 +596,12 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 		}
 	}
 
+	// TODO: Treat property hooks more precisely.
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
 	if (info == NULL ||
 	    !IS_VALID_PROPERTY_OFFSET(info->offset) ||
-	    (info->flags & ZEND_ACC_STATIC)) {
+	    (info->flags & ZEND_ACC_STATIC) ||
+	    info->hooks) {
 		return NULL;
 	}
 
@@ -634,10 +638,12 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 		}
 	}
 
+	// TODO: Treat property hooks more precisely.
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
 	if (info == NULL ||
 	    !IS_VALID_PROPERTY_OFFSET(info->offset) ||
-	    (info->flags & ZEND_ACC_STATIC)) {
+	    (info->flags & ZEND_ACC_STATIC) ||
+	    info->hooks) {
 		return 1;
 	}
 
@@ -1462,6 +1468,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_INIT_METHOD_CALL:
 				case ZEND_INIT_DYNAMIC_CALL:
 				case ZEND_INIT_STATIC_METHOD_CALL:
+				case ZEND_INIT_PARENT_PROPERTY_HOOK_CALL:
 				case ZEND_INIT_USER_CALL:
 				case ZEND_NEW:
 					call_level++;
@@ -3448,7 +3455,9 @@ ZEND_EXT_API int zend_jit_check_support(void)
 	}
 
 	if (zend_execute_ex != execute_ex) {
-		if (strcmp(sapi_module.name, "phpdbg") != 0) {
+		if (zend_dtrace_enabled) {
+			zend_error(E_WARNING, "JIT is incompatible with DTrace. JIT disabled.");
+		} else if (strcmp(sapi_module.name, "phpdbg") != 0) {
 			zend_error(E_WARNING, "JIT is incompatible with third party extensions that override zend_execute_ex(). JIT disabled.");
 		}
 		JIT_G(enabled) = 0;

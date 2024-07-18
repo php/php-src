@@ -1,5 +1,7 @@
 --TEST--
 GH-14808 (Unexpected null pointer in Zend/zend_string.h with empty output buffer)
+--EXTENSIONS--
+iconv
 --FILE--
 <?php
 var_dump($args);

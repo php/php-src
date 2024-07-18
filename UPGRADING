@@ -215,6 +215,8 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/new_without_parentheses
   . Added the #[\Deprecated] attribute.
     RFC: https://wiki.php.net/rfc/deprecated_attribute
+  . Implemented property hooks.
+    RFC: https://wiki.php.net/rfc/property-hooks
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
@@ -365,6 +367,10 @@ PHP 8.4 UPGRADE NOTES
 3. Changes in SAPI modules
 ========================================
 
+- apache2handler
+  . Support for EOL Apache 2.0 and 2.2 has been removed. Minimum required Apache
+    version is now 2.4.
+
 ========================================
 4. Deprecated Functionality
 ========================================
@@ -438,6 +444,10 @@ PHP 8.4 UPGRADE NOTES
   . imagejpeg/imagewebp/imagepng/imageavif throws an exception if an invalid
     quality parameter value is passed. In addition, imageavif will throw an exception
     if an invalid speed parameter value is passed.
+  . imagescale throws an exception if the width/height argument underflows/overflows or
+    if the mode argument is invalid.
+    imagefilter with IMG_FILTER_SCATTER throws an exception if the sub/plus arguments
+    underflows/overflows.
 
 - Gettext:
   . bind_textdomain_codeset, textdomain and d(*)gettext functions now throw an exception
@@ -494,11 +504,14 @@ PHP 8.4 UPGRADE NOTES
   . getAttribute, enabled to get values of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
     FB_ATTR_TIMESTAMP_FORMAT.
   . Added new attributes to specify transaction isolation level and access mode.
-    Along with these, five constants (PDO::FB_TRANSACTION_ISOLATION_LEVEL,
-    PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, PDO::FB_SERIALIZABLE,
-    PDO::FB_WRITABLE_TRANSACTION) have been added.
+    Along with these, five constants (Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL,
+    Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ,
+    Pdo\Firebird::SERIALIZABLE, Pdo\Firebird::WRITABLE_TRANSACTION) have been added.
   . When using persistent connections, there is now a liveness check in the
     constructor.
+  . The content that is built changes depending on the value of FB_API_VER in
+    ibase.h, so added static method Pdo\Firebird::getApiVersion() to obtain that
+    value. This value can also be referenced from phpinfo.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
@@ -555,6 +568,8 @@ PHP 8.4 UPGRADE NOTES
     one digit.
   . output_add_rewrite_var() now uses url_rewriter.hosts instead of
     session.trans_sid_hosts for selecting hosts that will be rewritten.
+  . highlight_string() now has a return type of string|true instead of string|bool.
+  . print_r() now has a return type of string|true instead of string|bool.
 
 ========================================
 6. New Functions
@@ -594,6 +609,8 @@ PHP 8.4 UPGRADE NOTES
   . Added pcntl_getcpu to get the cpu id from where the current process runs.
   . Added pcntl_getqos_class to get the QoS level (aka performance and related
     energy consumption) of the current process and pcntl_setqos_class to set it.
+  . Added pcntl_waitid to obtain status information pertaining to termination, stop,
+    and/or continue events in one of the caller's child processes.
 
 - PDO_PGSQL:
   . Added Pdo\Pgsql::setNoticeCallback() to allow a callback to be triggered on
@@ -763,19 +780,34 @@ PHP 8.4 UPGRADE NOTES
 
 - LibXML:
   . LIBXML_RECOVER.
+  . LIBXML_NO_XXE.
+    This is used together with LIBXML_NOENT for when you want to perform entity
+    substitution, but want to disallow external entity loading.
+    This constant is available as of libxml2 2.13.
 
 - OpenSSL:
   . X509_PURPOSE_OCSP_HELPER.
   . X509_PURPOSE_TIMESTAMP_SIGN.
 
 - PCNTL:
-  . QosClass::Background (macOs only).
-  . QosClass::Default (macOs only).
-  . QosClass::UserInteractive (macOs only).
-  . QosClass::UserInitiated (macOs only).
-  . QosClass::Utility (macOs only).
+  . Pcntl\QosClass::Background (macOs only).
+  . Pcntl\QosClass::Default (macOs only).
+  . Pctnl\QosClass::UserInteractive (macOs only).
+  . Pcntl\QosClass::UserInitiated (macOs only).
+  . Pcntl\QosClass::Utility (macOs only).
   . SIGCKPT (DragonFlyBSD only).
   . SIGCKPTEXIT (DragonFlyBSD only).
+  . WEXITED.
+  . WSTOPPED.
+  . WNOWAIT.
+  . P_ALL.
+  . P_PID.
+  . P_PGID.
+  . P_PIDFD (Linux only).
+  . P_UID (NetBSD/FreeBSD only).
+  . P_GID (NetBSD/FreeBSD only).
+  . P_SID (NetBSD/FreeBSD only).
+  . P_JAILID (FreeBSD only).
 
 - Standard:
   . PHP_ROUND_CEILING.

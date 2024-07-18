@@ -164,8 +164,8 @@ zend_result dom_xpath_register_node_ns_write(dom_object *obj, zval *newval);
 #endif
 
 #define DOM_PROP_NODE(type, name, obj) \
-	type name = (type) dom_object_get_node(obj); \
-	if (UNEXPECTED(name == NULL)) { \
+	type (name) = (type) dom_object_get_node(obj); \
+	if (UNEXPECTED((name) == NULL)) { \
 		php_dom_throw_error(INVALID_STATE_ERR, true); \
 		return FAILURE; \
 	}

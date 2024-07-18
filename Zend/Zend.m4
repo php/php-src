@@ -4,7 +4,7 @@ dnl
 dnl ZEND_CHECK_FLOAT_PRECISION
 dnl
 dnl x87 floating point internal precision control checks
-dnl See: http://wiki.php.net/rfc/rounding
+dnl See: https://wiki.php.net/rfc/rounding
 dnl
 AC_DEFUN([ZEND_CHECK_FLOAT_PRECISION], [dnl
 AC_CACHE_CHECK([for usable _FPU_SETCW],
@@ -151,11 +151,14 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_stackseg_np
 ]))
 
-dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
-AC_CHECK_FUNCS([sigsetjmp],,
-  [AC_CHECK_DECL([sigsetjmp],
-    [AC_DEFINE([HAVE_SIGSETJMP], [1])],,
-    [#include <setjmp.h>])])
+dnl
+dnl Check for sigsetjmp. If sigsetjmp is defined as a macro, use AC_CHECK_DECL
+dnl as a fallback since AC_CHECK_FUNC cannot detect macros.
+dnl
+AC_CHECK_FUNC([sigsetjmp],,
+  [AC_CHECK_DECL([sigsetjmp],,
+    [AC_MSG_ERROR([Required sigsetjmp not found. Please, check config.log])],
+    [#include <setjmp.h>])]) 
 
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
@@ -190,7 +193,7 @@ AX_CHECK_COMPILE_FLAG([-Wformat-truncation], CFLAGS="-Wformat-truncation $CFLAGS
 AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes], CFLAGS="-Wstrict-prototypes $CFLAGS", , [-Werror])
 AX_CHECK_COMPILE_FLAG([-fno-common], CFLAGS="-fno-common $CFLAGS", , [-Werror])
 
-test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
+AS_VAR_IF([DEBUG_CFLAGS],,, [AS_VAR_APPEND([CFLAGS], [" $DEBUG_CFLAGS"])])
 
 if test "$ZEND_ZTS" = "yes"; then
   AC_DEFINE(ZTS,1,[ ])

@@ -52,7 +52,7 @@ extern zend_module_entry xsl_module_entry;
 /* Default == disable all write access */
 #define XSL_SECPREF_DEFAULT (XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE)
 
-typedef struct _xsl_object {
+typedef struct xsl_object {
 	void *ptr;
 	HashTable *parameter;
 	bool hasKeys;

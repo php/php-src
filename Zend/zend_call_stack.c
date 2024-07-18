@@ -71,6 +71,10 @@ typedef int boolean_t;
 #include <thread.h>
 #endif
 
+#ifdef HAVE_VALGRIND
+# include <valgrind/valgrind.h>
+#endif
+
 #ifdef ZEND_CHECK_STACK_LIMIT
 
 /* Called once per process or thread */
@@ -237,6 +241,13 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	}
 
 	max_size = rlim.rlim_cur;
+
+#ifdef HAVE_VALGRIND
+	/* Under Valgrind, the last page is not useable */
+	if (RUNNING_ON_VALGRIND) {
+		max_size -= zend_get_page_size();
+	}
+#endif
 
 	/* Previous mapping may prevent the stack from growing */
 	if (end - max_size < prev_end) {

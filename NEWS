@@ -1,10 +1,54 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0alpha2
+?? ??? ????, PHP 8.4.0alpha3
 
-- PDO
+- Core:
+  . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
+
+- OpenSSL:
+  . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
+
+- PDO_FIREBIRD:
+  . Added Pdo\Firebird::ATTR_API_VERSION. (SakiTakamachi)
+  . Added getApiVersion() and removed from getAttribute().
+    (SakiTakamachi)
+
+- Standard:
+  . Fix references in request_parse_body() options array. (nielsdos)
+
+18 Jul 2024, PHP 8.4.0alpha2
+
+- Core:
+  . Fixed bug GH-14801 (Fix build for armv7). (andypost)
+  . Implemented property hooks RFC. (ilutov)
+
+- DOM:
+  . Improve support for template elements. (nielsdos)
+
+- GD:
+  . Check overflow/underflow for imagescale/imagefilter. (David Carlier)
+
+- LibXML:
+  . Added LIBXML_NO_XXE constant. (nielsdos)
+
+- Opcache:
+  . Fixed bug GH-14873 (PHP 8.4 min function fails on typed integer).
+    (nielsdos)
+
+- PDO:
   . Fixed bug GH-14792 (Compilation failure on pdo_* extensions).
     (Peter Kokot)
+
+- Standard:
+  . Change highlight_string() and print_r() return type to string|true. (Ayesh)
+
+- Windows:
+  . Update the icon of the Windows executables, e.g. php.exe. (Ayesh,
+    Nurudin Imširović)
+
+- XML:
+  . Fixed bug #81481 (xml_get_current_byte_index limited to 32-bit numbers on
+    64-bit builds). (nielsdos)
 
 04 Jul 2024, PHP 8.4.0alpha1
 
@@ -180,6 +224,7 @@ PHP                                                                        NEWS
   . Added pcntl_getqos_class/pcntl_setqos_class for macOs. (David Carlier)
   . Added SIGCKPT/SIGCKPTEXIT constants for DragonFlyBSD. (David Carlier)
   . Added FreeBSD's SIGTRAP handling to pcntl_siginfo_to_zval. (David Carlier)
+  . Added POSIX pcntl_waitid. (Vladimir Vrzić)
 
 - PCRE:
   . Upgrade bundled pcre2lib to version 10.43. (nielsdos)

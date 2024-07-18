@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1af73c3b63ebeb5e59948990892dcf6b627a1671 */
+ * Stub hash: 9a1e6842b2c5b891e11087d40aa8c9f56a2269a3 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -1059,6 +1059,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_Dom_HTMLDocument_saveHtmlF
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#if ZEND_DEBUG
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_HTMLDocument_debugGetTemplateCount, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_XMLDocument_createEmpty, 0, 0, Dom\\XMLDocument, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, version, IS_STRING, 0, "\"1.0\"")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_STRING, 0, "\"UTF-8\"")
@@ -1367,6 +1372,9 @@ ZEND_METHOD(Dom_HTMLDocument, createFromString);
 ZEND_METHOD(Dom_XMLDocument, saveXml);
 ZEND_METHOD(Dom_HTMLDocument, saveHtml);
 ZEND_METHOD(Dom_HTMLDocument, saveHtmlFile);
+#if ZEND_DEBUG
+ZEND_METHOD(Dom_HTMLDocument, debugGetTemplateCount);
+#endif
 ZEND_METHOD(Dom_XMLDocument, createEmpty);
 ZEND_METHOD(Dom_XMLDocument, createFromFile);
 ZEND_METHOD(Dom_XMLDocument, createFromString);
@@ -1885,6 +1893,9 @@ static const zend_function_entry class_Dom_HTMLDocument_methods[] = {
 	ZEND_RAW_FENTRY("saveXmlFile", zim_DOMDocument_save, arginfo_class_Dom_HTMLDocument_saveXmlFile, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(Dom_HTMLDocument, saveHtml, arginfo_class_Dom_HTMLDocument_saveHtml, ZEND_ACC_PUBLIC)
 	ZEND_ME(Dom_HTMLDocument, saveHtmlFile, arginfo_class_Dom_HTMLDocument_saveHtmlFile, ZEND_ACC_PUBLIC)
+#if ZEND_DEBUG
+	ZEND_ME(Dom_HTMLDocument, debugGetTemplateCount, arginfo_class_Dom_HTMLDocument_debugGetTemplateCount, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_FE_END
 };
 

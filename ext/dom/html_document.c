@@ -25,6 +25,7 @@
 #include "html5_parser.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "dom_properties.h"
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
@@ -757,7 +758,7 @@ PHP_METHOD(Dom_HTMLDocument, createEmpty)
 		NULL
 	);
 	dom_set_xml_class(intern->document);
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
+	intern->document->private_data = php_dom_libxml_private_data_header(php_dom_private_data_create());
 	return;
 
 oom:
@@ -878,7 +879,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		goto fail_oom;
 	}
 
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
 
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
@@ -886,11 +887,11 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
 		!(options & DOM_HTML_NO_DEFAULT_NS),
-		ns_mapper
+		private_data
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		php_dom_private_data_destroy(private_data);
 		php_libxml_ctx_error(
 			NULL,
 			"%s in %s",
@@ -918,7 +919,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromString)
 	);
 	dom_set_xml_class(intern->document);
 	intern->document->quirks_mode = ctx.observations.quirks_mode;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	return;
 
 fail_oom:
@@ -930,7 +931,7 @@ fail_oom:
 PHP_METHOD(Dom_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
-	php_dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_private_data *private_data = NULL;
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
@@ -1069,7 +1070,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		goto fail_oom;
 	}
 
-	ns_mapper = php_dom_libxml_ns_mapper_create();
+	private_data = php_dom_private_data_create();
 
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
@@ -1077,7 +1078,7 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
 		!(options & DOM_HTML_NO_DEFAULT_NS),
-		ns_mapper
+		private_data
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
@@ -1139,14 +1140,14 @@ PHP_METHOD(Dom_HTMLDocument, createFromFile)
 	);
 	dom_set_xml_class(intern->document);
 	intern->document->quirks_mode = ctx.observations.quirks_mode;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	return;
 
 fail_oom:
 	php_dom_throw_error(INVALID_STATE_ERR, true);
 fail_general:
-	if (ns_mapper != NULL) {
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+	if (private_data != NULL) {
+		php_dom_private_data_destroy(private_data);
 	}
 	lxb_html_document_destroy(document);
 	php_stream_close(stream);
@@ -1204,7 +1205,7 @@ static zend_result dom_saveHTML_write_string(void *application_data, const char 
 	return dom_saveHTML_write_string_len(application_data, buf, strlen(buf));
 }
 
-static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *docp, const xmlNode *node)
+static zend_result dom_common_save(dom_output_ctx *output_ctx, dom_object *intern, const xmlDoc *docp, const xmlNode *node)
 {
 	/* Initialize everything related to encoding & decoding */
 	const lxb_encoding_data_t *decoding_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
@@ -1237,6 +1238,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	ctx.write_string_len = dom_saveHTML_write_string_len;
 	ctx.write_string = dom_saveHTML_write_string;
 	ctx.application_data = output_ctx;
+	ctx.private_data = php_dom_get_private_data(intern);
 	if (UNEXPECTED(dom_html5_serialize_outer(&ctx, node) != SUCCESS)) {
 		return FAILURE;
 	}
@@ -1295,7 +1297,7 @@ PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 	dom_output_ctx output_ctx;
 	output_ctx.output_data = stream;
 	output_ctx.write_output = dom_write_output_stream;
-	if (UNEXPECTED(dom_common_save(&output_ctx, docp, (const xmlNode *) docp) != SUCCESS)) {
+	if (UNEXPECTED(dom_common_save(&output_ctx, intern, docp, (const xmlNode *) docp) != SUCCESS)) {
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
@@ -1334,7 +1336,7 @@ PHP_METHOD(Dom_HTMLDocument, saveHtml)
 	output_ctx.output_data = &buf;
 	output_ctx.write_output = dom_write_output_smart_str;
 	/* Can't fail because dom_write_output_smart_str() can't fail. */
-	zend_result result = dom_common_save(&output_ctx, docp, node);
+	zend_result result = dom_common_save(&output_ctx, intern, docp, node);
 	ZEND_ASSERT(result == SUCCESS);
 
 	RETURN_STR(smart_str_extract(&buf));
@@ -1641,5 +1643,20 @@ zend_result dom_html_document_title_write(dom_object *obj, zval *newval)
 
 	return SUCCESS;
 }
+
+#if ZEND_DEBUG
+PHP_METHOD(Dom_HTMLDocument, debugGetTemplateCount)
+{
+	xmlDocPtr doc;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_OBJ(doc, ZEND_THIS, xmlDocPtr, intern);
+	ZEND_IGNORE_VALUE(doc);
+
+	RETURN_LONG((zend_long) php_dom_get_template_count((const php_dom_private_data *) intern->document->private_data));
+}
+#endif
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

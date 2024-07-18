@@ -29,7 +29,6 @@
 
 #include "php.h"
 #include "ext/standard/info.h"
-#include "php_pcntl.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 #include "zend_fibers.h"
@@ -40,6 +39,22 @@
 #include <sys/resource.h>
 #endif
 
+#ifdef HAVE_WAITID
+#if defined (HAVE_DECL_P_ALL) && HAVE_DECL_P_ALL == 1
+#define HAVE_POSIX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_PIDFD) && HAVE_DECL_P_PIDFD == 1
+#define HAVE_LINUX_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_UID) && HAVE_DECL_P_UID == 1
+#define HAVE_NETBSD_IDTYPES 1
+#endif
+#if defined (HAVE_DECL_P_JAILID) && HAVE_DECL_P_JAILID == 1
+#define HAVE_FREEBSD_IDTYPES 1
+#endif
+#endif
+
+#include "php_pcntl.h"
 #include <errno.h>
 #if defined(HAVE_UNSHARE) || defined(HAVE_SCHED_SETAFFINITY) || defined(HAVE_SCHED_GETCPU)
 #include <sched.h>
@@ -108,7 +123,6 @@ typedef psetid_t cpu_set_t;
 
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 #include <pthread/qos.h>
-static zend_class_entry *QosClass_ce;
 #endif
 
 #ifdef HAVE_PIDFD_OPEN
@@ -129,6 +143,7 @@ static zend_class_entry *QosClass_ce;
 #include "Zend/zend_max_execution_timer.h"
 
 #include "pcntl_arginfo.h"
+static zend_class_entry *QosClass_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
@@ -197,9 +212,7 @@ PHP_RINIT_FUNCTION(pcntl)
 
 PHP_MINIT_FUNCTION(pcntl)
 {
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
-	QosClass_ce = register_class_QosClass();
-#endif
+	QosClass_ce = register_class_Pcntl_QosClass();
 	register_pcntl_symbols(module_number);
 	orig_interrupt_function = zend_interrupt_function;
 	zend_interrupt_function = pcntl_interrupt_function;
@@ -384,6 +397,39 @@ PHP_FUNCTION(pcntl_waitpid)
 	RETURN_LONG((zend_long) child_id);
 }
 /* }}} */
+
+#if defined (HAVE_WAITID) && defined (HAVE_POSIX_IDTYPES) && defined (HAVE_DECL_WEXITED) && HAVE_DECL_WEXITED == 1
+PHP_FUNCTION(pcntl_waitid)
+{
+	zend_long idtype = P_ALL;
+	zend_long id = 0;
+	bool id_is_null = 1;
+	zval *user_siginfo = NULL;
+	zend_long options = WEXITED;
+
+	ZEND_PARSE_PARAMETERS_START(0, 4)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(idtype)
+		Z_PARAM_LONG_OR_NULL(id, id_is_null)
+		Z_PARAM_ZVAL(user_siginfo)
+		Z_PARAM_LONG(options)
+	ZEND_PARSE_PARAMETERS_END();
+
+	errno = 0;
+	siginfo_t siginfo;
+
+	int status = waitid((idtype_t) idtype, (id_t) id, &siginfo, (int) options);
+
+	if (status == -1) {
+		PCNTL_G(last_error) = errno;
+		RETURN_FALSE;
+	}
+
+	pcntl_siginfo_to_zval(SIGCHLD, &siginfo, user_siginfo);
+
+	RETURN_TRUE;
+}
+#endif
 
 /* {{{ Waits on or returns the status of a forked child as defined by the waitpid() system call */
 PHP_FUNCTION(pcntl_wait)

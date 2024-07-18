@@ -24,13 +24,13 @@ var_dump(readline_info('attempted_completion_over'));
 
 ?>
 --EXPECTF--
-array(6) {
+array(%d) {
   ["line_buffer"]=>
   string(0) ""
   ["point"]=>
   int(0)
   ["end"]=>
-  int(0)
+  int(0)%A
   ["library_version"]=>
   string(%d) "%s"
   ["readline_name"]=>

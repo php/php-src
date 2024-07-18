@@ -22,23 +22,25 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_html_magic_token = (const php_dom_ns_magic_token *) DOM_XHTML_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_mathml_magic_token = (const php_dom_ns_magic_token *) DOM_MATHML_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_svg_magic_token = (const php_dom_ns_magic_token *) DOM_SVG_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xlink_magic_token = (const php_dom_ns_magic_token *) DOM_XLINK_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token = (const php_dom_ns_magic_token *) DOM_XML_NS_URI;
-PHP_DOM_EXPORT const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token = (const php_dom_ns_magic_token *) DOM_XMLNS_NS_URI;
-
-struct _php_dom_libxml_ns_mapper {
-	php_libxml_private_data_header header;
-	/* This is used almost all the time for HTML documents, so it makes sense to cache this. */
-	xmlNsPtr html_ns;
-	/* Used for every prefixless namespace declaration in XML, so also very common. */
-	xmlNsPtr prefixless_xmlns_ns;
-	HashTable uri_to_prefix_map;
-};
+/* The actual value of these doesn't matter as long as they serve as a unique ID.
+ * They need to be pointers because the `_private` field is a pointer, however we can choose the contents ourselves.
+ * We need keep these at least 4-byte aligned because the pointer may be tagged (although for now 2 byte alignment works too).
+ * We use a trick: we declare a struct with a double member to force the alignment. */
+#define DECLARE_NS_TOKEN(name, uri)			\
+	static const struct {                   \
+		char val[sizeof(uri)];				\
+		double align;						\
+	} decl_##name = { uri, 0.0 };			\
+	PHP_DOM_EXPORT const php_dom_ns_magic_token *(name) = (const php_dom_ns_magic_token *) &decl_##name;
+DECLARE_NS_TOKEN(php_dom_ns_is_html_magic_token, DOM_XHTML_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_mathml_magic_token, DOM_MATHML_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_svg_magic_token, DOM_SVG_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_xlink_magic_token, DOM_XLINK_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_xml_magic_token, DOM_XML_NS_URI);
+DECLARE_NS_TOKEN(php_dom_ns_is_xmlns_magic_token, DOM_XMLNS_NS_URI);
 
 static void php_dom_libxml_ns_mapper_prefix_map_element_dtor(zval *zv)
 {
@@ -67,27 +69,6 @@ static HashTable *php_dom_libxml_ns_mapper_ensure_prefix_map(php_dom_libxml_ns_m
 		prefix_map = Z_ARRVAL_P(zv);
 	}
 	return prefix_map;
-}
-
-static void php_dom_libxml_ns_mapper_header_destroy(php_libxml_private_data_header *header)
-{
-	php_dom_libxml_ns_mapper_destroy((php_dom_libxml_ns_mapper *) header);
-}
-
-PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_libxml_ns_mapper_create(void)
-{
-	php_dom_libxml_ns_mapper *mapper = emalloc(sizeof(*mapper));
-	mapper->header.dtor = php_dom_libxml_ns_mapper_header_destroy;
-	mapper->html_ns = NULL;
-	mapper->prefixless_xmlns_ns = NULL;
-	zend_hash_init(&mapper->uri_to_prefix_map, 0, NULL, ZVAL_PTR_DTOR, false);
-	return mapper;
-}
-
-void php_dom_libxml_ns_mapper_destroy(php_dom_libxml_ns_mapper *mapper)
-{
-	zend_hash_destroy(&mapper->uri_to_prefix_map);
-	efree(mapper);
 }
 
 static xmlNsPtr php_dom_libxml_ns_mapper_ensure_cached_ns(php_dom_libxml_ns_mapper *mapper, xmlNsPtr *ptr, const char *uri, size_t length, const php_dom_ns_magic_token *token)
@@ -229,11 +210,6 @@ static xmlNsPtr php_dom_libxml_ns_mapper_store_and_normalize_parsed_ns(php_dom_l
 	return ns;
 }
 
-PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper *mapper)
-{
-	return mapper == NULL ? NULL : &mapper->header;
-}
-
 typedef struct {
 	/* Fast lookup for created mappings. */
 	HashTable old_ns_to_new_ns_ptr;
@@ -242,6 +218,11 @@ typedef struct {
 	xmlNsPtr last_mapped_src, last_mapped_dst;
 	php_dom_libxml_ns_mapper *ns_mapper;
 } dom_libxml_reconcile_ctx;
+
+PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *object)
+{
+	return &php_dom_get_private_data(object)->ns_mapper;
+}
 
 PHP_DOM_EXPORT xmlAttrPtr php_dom_ns_compat_mark_attribute(php_dom_libxml_ns_mapper *mapper, xmlNodePtr node, xmlNsPtr ns)
 {
@@ -302,13 +283,16 @@ PHP_DOM_EXPORT bool php_dom_ns_is_fast_ex(xmlNsPtr ns, const php_dom_ns_magic_to
 	/* cached for fast checking */
 	if (ns->_private == magic_token) {
 		return true;
-	} else if (ns->_private != NULL) {
+	} else if (ns->_private != NULL && ((uintptr_t) ns->_private & 1) == 0) {
 		/* Other token stored */
 		return false;
 	}
 	/* Slow path */
 	if (xmlStrEqual(ns->href, BAD_CAST magic_token)) {
-		ns->_private = (void *) magic_token;
+		if (ns->_private == NULL) {
+			/* Only overwrite the private data if there is no other token stored. */
+			ns->_private = (void *) magic_token;
+		}
 		return true;
 	}
 	return false;
@@ -350,14 +334,6 @@ PHP_DOM_EXPORT void php_dom_reconcile_attribute_namespace_after_insertion(xmlAtt
 			}
 		}
 	}
-}
-
-static zend_always_inline zend_long dom_mangle_pointer_for_key(void *ptr)
-{
-	zend_ulong value = (zend_ulong) (uintptr_t) ptr;
-	/* Rotate 3/4 bits for better hash distribution because the low 3/4 bits are normally 0. */
-	const size_t rol_amount = (SIZEOF_ZEND_LONG == 8) ? 4 : 3;
-	return (value >> rol_amount) | (value << (sizeof(value) * 8 - rol_amount));
 }
 
 static zend_always_inline void php_dom_libxml_reconcile_modern_single_node(dom_libxml_reconcile_ctx *ctx, xmlNodePtr node)

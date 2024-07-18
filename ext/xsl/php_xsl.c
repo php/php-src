@@ -133,14 +133,14 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 		zend_string *prop_name = ZSTR_INIT_LITERAL(php_name, false); \
 		const zend_property_info *prop_info = zend_get_property_info(xsl_xsltprocessor_class_entry, prop_name, 0); \
 		zend_string_release_ex(prop_name, false); \
-		ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == prop_index); \
-		return OBJ_PROP_NUM(object, prop_index); \
+		ZEND_ASSERT(OBJ_PROP_TO_NUM(prop_info->offset) == (prop_index)); \
+		return OBJ_PROP_NUM(object, (prop_index)); \
 	}
 #else
 # define XSL_DEFINE_PROP_ACCESSOR(c_name, php_name, prop_index) \
 	zval *xsl_prop_##c_name(zend_object *object) \
 	{ \
-		return OBJ_PROP_NUM(object, prop_index); \
+		return OBJ_PROP_NUM(object, (prop_index)); \
 	}
 #endif
 
@@ -221,7 +221,6 @@ static void xsl_objects_unset_property(zend_object *object, zend_string *member,
 static bool xsl_try_output_replaced_error_message(
 	void *ctx,
 	const char *msg,
-	va_list args,
 	const char *search,
 	size_t search_len,
 	const char *replace
@@ -237,8 +236,8 @@ static bool xsl_try_output_replaced_error_message(
 
 /* Helper macro so the string length doesn't need to be passed separately.
  * Only allows literal strings for `search` and `replace`. */
-#define XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg, args, search, replace) \
-	xsl_try_output_replaced_error_message(ctx, msg, args, "" search, sizeof("" search) - 1, "" replace)
+#define XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg, search, replace) \
+	xsl_try_output_replaced_error_message(ctx, msg, "" search, sizeof("" search) - 1, "" replace)
 
 /* We want to output PHP-tailored error messages for some libxslt error messages, such that
  * the errors refer to PHP properties instead of libxslt-specific fields. */
@@ -250,8 +249,8 @@ static void xsl_libxslt_error_handler(void *ctx, const char *msg, ...)
 	if (strcmp(msg, "%s") == 0) {
 		/* Adjust error message to be more descriptive */
 		const char *msg_arg = va_arg(args, const char *);
-		bool output = XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg_arg, args, "xsltMaxDepth (--maxdepth)", "$maxTemplateDepth")
-				   || XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg_arg, args, "maxTemplateVars (--maxvars)", "$maxTemplateVars");
+		bool output = XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg_arg, "xsltMaxDepth (--maxdepth)", "$maxTemplateDepth")
+				   || XSL_TRY_OUTPUT_REPLACED_ERROR_MESSAGE(ctx, msg_arg, "maxTemplateVars (--maxvars)", "$maxTemplateVars");
 
 		if (!output) {
 			php_libxml_ctx_error(ctx, "%s", msg_arg);

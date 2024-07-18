@@ -1,5 +1,5 @@
 --TEST--
-Bug #72714 (_xml_startElementHandler() segmentation fault)
+Bug #72714 (xml_startElementHandler() segmentation fault)
 --EXTENSIONS--
 xml
 --SKIPIF--

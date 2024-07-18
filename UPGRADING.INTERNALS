@@ -118,6 +118,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      ext/ftp and ext/mysqlnd is enabled implicitly, when building with
      ext/openssl (--with-openssl), or explicitly by using new configure options
      --with-ftp-ssl and --with-mysqlnd-ssl.
+   - New configure option --with-openssl-legacy-provider to enable OpenSSL
+     legacy provider.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
@@ -141,6 +143,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbols PHP_FPM_SYSTEMD, PHP_FPM_USER, and PHP_FPM_GROUP removed.
    - Symbol PTHREADS has been removed.
    - Symbol HAVE_STRPTIME_DECL_FAILS has been removed (use HAVE_DECL_STRPTIME).
+   - Symbol HAVE_PHPDBG has been removed.
+   - Symbols PHP_HAVE_AVX512_SUPPORTS and PHP_HAVE_AVX512_VBMI_SUPPORTS are now
+     either defined to 1 or undefined.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -150,21 +155,31 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      AX_CHECK_COMPILE_FLAG).
    - M4 macro PHP_PROG_RE2C got a new 2nd argument to define common default re2c
      command-line options substituted to the Makefile RE2C_FLAGS variable.
+   - M4 macros PHP_CHECK_BUILTIN_* have been removed in favor of
+     PHP_CHECK_BUILTIN and all PHP_HAVE_BUILTIN_* symbols changed to be either
+     undefined or defined to 1 whether compiler supports the builtin.
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
    - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
+   - M4 macro PHP_EVAL_LIBLINE got a new 3rd argument to override the ext_shared
+     checks.
+   - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
      PGSQL_LIBS environment variables. When a directory argument is provided to
      configure options (--with-pgsql=DIR or --with-pdo-pgsql=DIR), it will be
      used instead of the pkg-config search.
+   - Added pkg-config support to find unixODBC and iODBC for the pdo_odbc
+     extension.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
 
  c. Windows build system changes
-   - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19 have
-     been removed.
+   - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,
+     --enable-apache2-2handler have been removed.
+   - The configure option --enable-apache2-4handler is now an alias for the
+     preferred --enable-apache2handler.
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
      system.
    - HAVE_WIN32_NATIVE_THREAD, USE_WIN32_NATIVE_THREAD, ENABLE_THREADS symbols
@@ -289,6 +304,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      needing to create a zend_string.
    - The ext/session/php_session.h doesn't transitively include the
      ext/hash/php_hash.h header anymore.
+
+ i. ext/xml
+   - Made the expat compatibility wrapper XML_GetCurrentByteIndex return a long
+     instead of an int. This corresponds to the XML_Index type when
+     XML_LARGE_SIZE is not used in expat.
 
 ========================
 4. OpCode changes

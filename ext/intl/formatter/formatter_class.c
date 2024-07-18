@@ -18,10 +18,12 @@
 #include "php_intl.h"
 #include "formatter_data.h"
 #include "formatter_format.h"
-#include "formatter_arginfo.h"
 
 #include <zend_exceptions.h>
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_interfaces.h"
+
+#include "formatter_arginfo.h"
 
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;

@@ -14,6 +14,9 @@ else
   php_with_readline=no
 fi
 
+AH_TEMPLATE([HAVE_ERASE_EMPTY_LINE],
+  [Define to 1 if edit/readline library has 'rl_erase_empty_line' variable.])
+
 if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   for i in $PHP_READLINE /usr/local /usr; do
     test -f $i/include/readline/readline.h && READLINE_DIR=$i && break
@@ -75,6 +78,10 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
+  AC_CHECK_DECL([rl_erase_empty_line],
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
+    [#include <readline/readline.h>])
+
   AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
 
@@ -132,6 +139,10 @@ elif test "$PHP_LIBEDIT" != "no"; then
   ],[],[
     $READLINE_SHARED_LIBADD
   ])
+
+  AC_CHECK_DECL([rl_erase_empty_line],
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
+    [#include <editline/readline.h>])
 
   AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
 fi
