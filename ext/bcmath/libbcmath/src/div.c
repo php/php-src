@@ -172,12 +172,12 @@ static inline void bc_standard_div(
 	}
 	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
 	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
-	BC_VECTOR tmp_divisor = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
+	BC_VECTOR divisor_high_part = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
 	for (size_t i = 0; i < quot_arr_size; i++) {
-		BC_VECTOR tmp_numerator = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
+		BC_VECTOR numerator_high_part = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
 
 		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
-		if (div_carry == 0 && tmp_numerator < tmp_divisor) {
+		if (div_carry == 0 && numerator_high_part < divisor_high_part) {
 			quot_vector[quot_top_index - i] = 0;
 			div_carry = numerator_vector[numerator_top_index - i];
 			numerator_vector[numerator_top_index - i] = 0;
@@ -186,13 +186,13 @@ static inline void bc_standard_div(
 
 		/*
 		 * Determine the temporary quotient.
-		 * "tmp_numerator" is numerator_high in the previous example. The maximum value of numerator_high is divisor_high * B,
-		 * so here it is tmp_divisor * BC_VECTOR_BOUNDARY_NUM.
-		 * The number of digits in tmp_divisor is BC_VECTOR_SIZE + 1, so even if tmp_divisor is at its maximum value,
+		 * The maximum value of numerator_high is divisor_high * B in the previous example, so here numerator_high_part is
+		 * divisor_high_part * BC_VECTOR_BOUNDARY_NUM.
+		 * The number of digits in divisor_high_part is BC_VECTOR_SIZE + 1, so even if divisor_high_part is at its maximum value,
 		 * it will never overflow here.
 		 */
-		tmp_numerator += div_carry * BC_VECTOR_BOUNDARY_NUM * high_part_shift;
-		BC_VECTOR quot_guess = tmp_numerator / tmp_divisor;
+		numerator_high_part += div_carry * BC_VECTOR_BOUNDARY_NUM * high_part_shift;
+		BC_VECTOR quot_guess = numerator_high_part / divisor_high_part;
 
 		/* For sub, add the remainder to the high-order digit */
 		numerator_vector[numerator_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
