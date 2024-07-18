@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 0f8a22bff1d123313f37da400500e573baace837 */
+ * Stub hash: a9f57da0ffc7088aa327413768b5c9eb062adb4d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -181,10 +181,17 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecreatefromwbmp arginfo_imagecreatefromgif
 
-#define arginfo_imagecreatefromgd arginfo_imagecreatefromgif
+#if defined(HAVE_GD_GD)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgd, 0, 1, GdImage, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
 
-#define arginfo_imagecreatefromgd2 arginfo_imagecreatefromgif
+#if defined(HAVE_GD_GD)
+#define arginfo_imagecreatefromgd2 arginfo_imagecreatefromgd
+#endif
 
+#if defined(HAVE_GD_GD)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgd2part, 0, 5, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_LONG, 0)
@@ -192,6 +199,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgd2part, 0, 5
 	ZEND_ARG_TYPE_INFO(0, width, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, height, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 #if defined(HAVE_GD_BMP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefrombmp, 0, 1, GdImage, MAY_BE_FALSE)
@@ -256,17 +264,21 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagewbmp, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, foreground_color, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_GD_GD)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_GD_GD)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagegd2, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, image, GdImage, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, chunk_size, IS_LONG, 0, "128")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "IMG_GD2_RAW")
 ZEND_END_ARG_INFO()
+#endif
 
 #if defined(HAVE_GD_BMP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagebmp, 0, 1, _IS_BOOL, 0)
@@ -624,9 +636,15 @@ ZEND_FUNCTION(imagecreatefromxbm);
 ZEND_FUNCTION(imagecreatefromxpm);
 #endif
 ZEND_FUNCTION(imagecreatefromwbmp);
+#if defined(HAVE_GD_GD)
 ZEND_FUNCTION(imagecreatefromgd);
+#endif
+#if defined(HAVE_GD_GD)
 ZEND_FUNCTION(imagecreatefromgd2);
+#endif
+#if defined(HAVE_GD_GD)
 ZEND_FUNCTION(imagecreatefromgd2part);
+#endif
 #if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagecreatefrombmp);
 #endif
@@ -648,8 +666,12 @@ ZEND_FUNCTION(imagewebp);
 ZEND_FUNCTION(imagejpeg);
 #endif
 ZEND_FUNCTION(imagewbmp);
+#if defined(HAVE_GD_GD)
 ZEND_FUNCTION(imagegd);
+#endif
+#if defined(HAVE_GD_GD)
 ZEND_FUNCTION(imagegd2);
+#endif
 #if defined(HAVE_GD_BMP)
 ZEND_FUNCTION(imagebmp);
 #endif
@@ -764,9 +786,15 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagecreatefromxpm, arginfo_imagecreatefromxpm)
 #endif
 	ZEND_FE(imagecreatefromwbmp, arginfo_imagecreatefromwbmp)
+#if defined(HAVE_GD_GD)
 	ZEND_FE(imagecreatefromgd, arginfo_imagecreatefromgd)
+#endif
+#if defined(HAVE_GD_GD)
 	ZEND_FE(imagecreatefromgd2, arginfo_imagecreatefromgd2)
+#endif
+#if defined(HAVE_GD_GD)
 	ZEND_FE(imagecreatefromgd2part, arginfo_imagecreatefromgd2part)
+#endif
 #if defined(HAVE_GD_BMP)
 	ZEND_FE(imagecreatefrombmp, arginfo_imagecreatefrombmp)
 #endif
@@ -788,8 +816,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(imagejpeg, arginfo_imagejpeg)
 #endif
 	ZEND_FE(imagewbmp, arginfo_imagewbmp)
+#if defined(HAVE_GD_GD)
 	ZEND_FE(imagegd, arginfo_imagegd)
+#endif
+#if defined(HAVE_GD_GD)
 	ZEND_FE(imagegd2, arginfo_imagegd2)
+#endif
 #if defined(HAVE_GD_BMP)
 	ZEND_FE(imagebmp, arginfo_imagebmp)
 #endif
