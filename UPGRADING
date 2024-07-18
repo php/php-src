@@ -552,10 +552,6 @@ PHP 8.4 UPGRADE NOTES
     would have resulted in 1.0 instead of the correct result 0.0. Additional
     inputs might also be affected and result in different outputs compared to
     earlier PHP versions.
-  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
-    has been increased from '10' to '12'.
-
-    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
   . The $mode parameter of the round() function has been widened to RoundingMode|int,
     accepting instances of a new RoundingMode enum.
 
@@ -564,15 +560,19 @@ PHP 8.4 UPGRADE NOTES
     RoundingMode::NegativeInfinity, RoundingMode::TowardsZero, RoundingMode::AwayFromZero.
 
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
-  . debug_zval_dump() now indicates whether an array is packed.
   . Fixed a bug caused by "pre-rounding" of the round() function. Previously, using
     "pre-rounding" to treat a value like 0.285 (actually 0.28499999999999998) as a
     decimal number and round it to 0.29. However, "pre-rounding" incorrectly rounds
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
     are compared, so that the values are correctly rounded as decimal numbers.
-  . long2ip() now returns string instead of string|false.
   . The maximum precision that can be handled by round() has been extended by
     one digit.
+  . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
+    has been increased from '10' to '12'.
+
+    RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
+  . debug_zval_dump() now indicates whether an array is packed.
+  . long2ip() now returns string instead of string|false.
   . output_add_rewrite_var() now uses url_rewriter.hosts instead of
     session.trans_sid_hosts for selecting hosts that will be rewritten.
   . highlight_string() now has a return type of string|true instead of string|bool.
