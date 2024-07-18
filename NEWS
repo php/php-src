@@ -11,6 +11,8 @@ PHP                                                                        NEWS
 
 - DOM:
   . Fix trampoline leak in xpath callables. (nielsdos)
+  . Throw instead of silently failing when creating a too long text node in
+    (DOM)ParentNode and (DOM)ChildNode. (nielsdos)
 
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
