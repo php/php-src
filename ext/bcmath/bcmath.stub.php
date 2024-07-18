@@ -37,4 +37,4 @@ function bcfloor(string $num): string {}
 function bcceil(string $num): string {}
 
 /** @refcount 1 */
-function bcround(string $num, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): string {}
+function bcround(string $num, int $precision = 0, RoundingMode $mode = RoundingMode::HalfAwayFromZero): string {}

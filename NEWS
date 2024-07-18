@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
 
+- BCMath:
+  . Adjust bcround()'s $mode parameter to only accept the RoundingMode
+    enum. (timwolla, saki)
+
 - DOM:
   . Fix trampoline leak in xpath callables. (nielsdos)
 
@@ -18,6 +22,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
+  . Add RoundingMode enum. (timwolla, saki)
 
 - XSL:
   . Fix trampoline leak in xpath callables. (nielsdos)

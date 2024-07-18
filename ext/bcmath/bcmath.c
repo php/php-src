@@ -696,14 +696,19 @@ PHP_FUNCTION(bcround)
 	zend_string *numstr;
 	zend_long precision = 0;
 	zend_long mode = PHP_ROUND_HALF_UP;
+	zend_object *mode_object = NULL;
 	bc_num num = NULL, result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_STR(numstr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
-		Z_PARAM_LONG(mode)
+		Z_PARAM_OBJ_OF_CLASS(mode_object, rounding_mode_ce)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (mode_object != NULL) {
+		mode = php_math_round_mode_from_enum(mode_object);
+	}
 
 	switch (mode) {
 		case PHP_ROUND_HALF_UP:
@@ -716,7 +721,8 @@ PHP_FUNCTION(bcround)
 		case PHP_ROUND_AWAY_FROM_ZERO:
 			break;
 		default:
-			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
+			/* This is currently unreachable, but might become reachable when new modes are added. */
+			zend_argument_value_error(3, "is an unsupported rounding mode");
 			return;
 	}
 

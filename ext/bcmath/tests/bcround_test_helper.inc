@@ -1,6 +1,6 @@
 <?php
 
-function printResult (array $cases, int $mode)
+function printResult (array $cases, RoundingMode $mode)
 {
     foreach ($cases as [$num, $precision]) {
         echo str_pad("[{$num}, {$precision}]", 17, ' ', STR_PAD_LEFT), " => ", bcround($num, $precision, $mode), "\n";
@@ -8,7 +8,7 @@ function printResult (array $cases, int $mode)
     echo "\n";
 }
 
-function run_round_test(int $mode)
+function run_round_test(RoundingMode $mode)
 {
     $non_boundary_value_cases = [
         ['1.1', 0],

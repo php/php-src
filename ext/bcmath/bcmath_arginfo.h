@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: cd3d182e13cb0ca22b27c13a8d0a86c20fde5b76 */
+ * Stub hash: 7439a5fca649b8c4df317b0da1416c8fe59faf72 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcadd, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num1, IS_STRING, 0)
@@ -52,7 +52,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_bcround, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, num, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, mode, RoundingMode, 0, "RoundingMode::HalfAwayFromZero")
 ZEND_END_ARG_INFO()
 
 ZEND_FUNCTION(bcadd);

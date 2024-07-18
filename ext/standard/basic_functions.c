@@ -34,6 +34,7 @@
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
+#include "zend_enum.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
@@ -303,6 +304,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_incomplete_class_handlers();
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
+
+	rounding_mode_ce = register_class_RoundingMode();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)

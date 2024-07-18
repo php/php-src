@@ -4,15 +4,6 @@ bcround() function with early return
 bcmath
 --FILE--
 <?php
-$otherModes = [
-    'PHP_ROUND_HALF_DOWN',
-    'PHP_ROUND_HALF_EVEN',
-    'PHP_ROUND_HALF_ODD',
-    'PHP_ROUND_FLOOR',
-    'PHP_ROUND_CEILING',
-    'PHP_ROUND_AWAY_FROM_ZERO',
-    'PHP_ROUND_TOWARD_ZERO',
-];
 
 $early_return_cases = [
     ['123', -4],
@@ -38,33 +29,27 @@ $early_return_cases = [
 ];
 
 $results = [
-    'PHP_ROUND_HALF_UP' => [],
-    'PHP_ROUND_HALF_DOWN' => [],
-    'PHP_ROUND_HALF_EVEN' => [],
-    'PHP_ROUND_HALF_ODD' => [],
-    'PHP_ROUND_FLOOR' => [],
-    'PHP_ROUND_CEIL' => [],
-    'PHP_ROUND_AWAY_FROM_ZERO' => [],
-    'PHP_ROUND_TOWARD_ZERO' => [],
+    RoundingMode::HalfAwayFromZero->name => [],
 ];
 foreach ($early_return_cases as [$num, $precision]) {
-    $result = str_pad("[{$num}, {$precision}]", 33, ' ', STR_PAD_LEFT) . ' => ' . bcround($num, $precision, PHP_ROUND_HALF_UP) . "\n";
+    $result = str_pad("[{$num}, {$precision}]", 33, ' ', STR_PAD_LEFT) . ' => ' . bcround($num, $precision, RoundingMode::HalfAwayFromZero) . "\n";
     echo $result;
-    $results['PHP_ROUND_HALF_UP'][] = $result;
+    $results[RoundingMode::HalfAwayFromZero->name][] = $result;
 }
 
 echo "\n";
 
-foreach ($otherModes as $mode) {
+foreach (RoundingMode::cases() as $mode) {
+    $results[$mode->name] = [];
     foreach ($early_return_cases as [$num, $precision]) {
-        $result = str_pad("[{$num}, {$precision}]", 33, ' ', STR_PAD_LEFT) . ' => ' . bcround($num, $precision, constant($mode)) . "\n";
-        $results[$mode][] = $result;
+        $result = str_pad("[{$num}, {$precision}]", 33, ' ', STR_PAD_LEFT) . ' => ' . bcround($num, $precision, $mode) . "\n";
+        $results[$mode->name][] = $result;
     }
 
-    if ($results['PHP_ROUND_HALF_UP'] === $results[$mode]) {
-        echo str_pad($mode, 24, ' ', STR_PAD_LEFT) . ": result is same to PHP_ROUND_HALF_UP\n";
+    if ($results[RoundingMode::HalfAwayFromZero->name] === $results[$mode->name]) {
+        echo str_pad($mode->name, 24, ' ', STR_PAD_LEFT) . ": result is same to HalfAwayFromZero\n";
     } else {
-        echo str_pad($mode, 24, ' ', STR_PAD_LEFT) . ": result is not same to PHP_ROUND_HALF_UP, failed\n";
+        echo str_pad($mode->name, 24, ' ', STR_PAD_LEFT) . ": result is not same to HalfAwayFromZero, failed\n";
     }
 }
 ?>
@@ -90,10 +75,11 @@ foreach ($otherModes as $mode) {
                         [-0.0, 0] => 0
                      [-0.0000, 0] => 0
 
-     PHP_ROUND_HALF_DOWN: result is same to PHP_ROUND_HALF_UP
-     PHP_ROUND_HALF_EVEN: result is same to PHP_ROUND_HALF_UP
-      PHP_ROUND_HALF_ODD: result is same to PHP_ROUND_HALF_UP
-         PHP_ROUND_FLOOR: result is same to PHP_ROUND_HALF_UP
-       PHP_ROUND_CEILING: result is same to PHP_ROUND_HALF_UP
-PHP_ROUND_AWAY_FROM_ZERO: result is same to PHP_ROUND_HALF_UP
-   PHP_ROUND_TOWARD_ZERO: result is same to PHP_ROUND_HALF_UP
+        HalfAwayFromZero: result is same to HalfAwayFromZero
+         HalfTowardsZero: result is same to HalfAwayFromZero
+                HalfEven: result is same to HalfAwayFromZero
+                 HalfOdd: result is same to HalfAwayFromZero
+             TowardsZero: result is same to HalfAwayFromZero
+            AwayFromZero: result is same to HalfAwayFromZero
+        NegativeInfinity: result is same to HalfAwayFromZero
+        PositiveInfinity: result is same to HalfAwayFromZero

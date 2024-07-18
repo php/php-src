@@ -1,11 +1,11 @@
 --TEST--
-bcround() function PHP_ROUND_FLOOR
+bcround() function NegativeInfinity
 --EXTENSIONS--
 bcmath
 --FILE--
 <?php
 require_once __DIR__ . '/bcround_test_helper.inc';
-run_round_test(PHP_ROUND_FLOOR);
+run_round_test(RoundingMode::NegativeInfinity);
 ?>
 --EXPECT--
 ========== non-boundary value ==========
