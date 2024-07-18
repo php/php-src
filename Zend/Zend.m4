@@ -158,7 +158,7 @@ dnl
 AC_CHECK_FUNC([sigsetjmp],,
   [AC_CHECK_DECL([sigsetjmp],,
     [AC_MSG_ERROR([Required sigsetjmp not found. Please, check config.log])],
-    [#include <setjmp.h>])]) 
+    [#include <setjmp.h>])])
 
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
