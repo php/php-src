@@ -99,7 +99,7 @@ void xsl_objects_free_storage(zend_object *object)
 	}
 
 	if (intern->profiling) {
-		efree(intern->profiling);
+		zend_string_release(intern->profiling);
 	}
 }
 /* }}} */

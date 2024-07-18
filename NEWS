@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
     enum. (timwolla, saki)
 
+- DOM:
+  . Fix trampoline leak in xpath callables. (nielsdos)
+
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
 
@@ -20,6 +23,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)
+
+- XSL:
+  . Fix trampoline leak in xpath callables. (nielsdos)
 
 18 Jul 2024, PHP 8.4.0alpha2
 

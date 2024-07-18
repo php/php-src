@@ -60,7 +60,7 @@ typedef struct xsl_object {
 	zend_long securityPrefs;
 	php_dom_xpath_callbacks xpath_callbacks;
 	php_libxml_node_object *doc;
-	char *profiling;
+	zend_string *profiling;
 	zend_object std;
 } xsl_object;
 
