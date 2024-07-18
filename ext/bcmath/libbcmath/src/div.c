@@ -83,8 +83,11 @@ static inline void bc_standard_div(
 
 	/*
 	 * Errors might occur between the true quotient and the temporary quotient calculated using only the high order digits.
-	 * For example, the quotient of 240 / 121 is 1, but if calculate the quotient only using the high-order digits (24 / 12),
-	 * it will be 2. In this case, 2 is the temporary quotient. Here, the error E is 1.
+	 * For example, the true quotient of 240 / 121 is 1.
+	 * However, if it is calculated using only the high-order digits (24 / 12), we would get 2.
+	 * We refer to this value of 2 as the temporary quotient.
+	 * We also define E to be error between the true quotient and the temporary quotient,
+	 * which in this case, is 1.
 	 * Also note that for example 2400000 / 120, there will be 5 divisions.
 	 *
 	 * Another example: Calculating 99900000000 / 10009999 with base 10000.
