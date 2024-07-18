@@ -43,7 +43,8 @@ static const BC_VECTOR POW_10_LUT[9] = {
 
 /*
  * This function should be used when the divisor is not split into multiple chunks, i.e. when the size of the array is one.
- * The algorithm can be simplified if divisor is not divided, and this function is an optimization of bc_standard_div.
+ * This is because the algorithm can be simplified.
+ * This function is therefore an optimized version of bc_standard_div().
  */
 static inline void bc_fast_div(
 	BC_VECTOR *numerator_vector, size_t numerator_arr_size, BC_VECTOR divisor_vector, BC_VECTOR *quot_vector, size_t quot_arr_size)
