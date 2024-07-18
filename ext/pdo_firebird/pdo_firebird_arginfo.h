@@ -1,7 +1,13 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: bc0f434e238c1087e292be0d4a7a04aa4718a6bc */
+ * Stub hash: d36b2055abc48ae91c3442dda68fa2a28eb6d25b */
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Firebird_getApiVersion, 0, 0, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_METHOD(Pdo_Firebird, getApiVersion);
 
 static const zend_function_entry class_Pdo_Firebird_methods[] = {
+	ZEND_ME(Pdo_Firebird, getApiVersion, arginfo_class_Pdo_Firebird_getApiVersion, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
@@ -30,12 +36,6 @@ static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_ent
 	zend_string *const_ATTR_TIMESTAMP_FORMAT_name = zend_string_init_interned("ATTR_TIMESTAMP_FORMAT", sizeof("ATTR_TIMESTAMP_FORMAT") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_ATTR_TIMESTAMP_FORMAT_name, &const_ATTR_TIMESTAMP_FORMAT_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_ATTR_TIMESTAMP_FORMAT_name);
-
-	zval const_ATTR_API_VERSION_value;
-	ZVAL_LONG(&const_ATTR_API_VERSION_value, PDO_FB_ATTR_API_VERSION);
-	zend_string *const_ATTR_API_VERSION_name = zend_string_init_interned("ATTR_API_VERSION", sizeof("ATTR_API_VERSION") - 1, 1);
-	zend_declare_typed_class_constant(class_entry, const_ATTR_API_VERSION_name, &const_ATTR_API_VERSION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
-	zend_string_release(const_ATTR_API_VERSION_name);
 
 	zval const_TRANSACTION_ISOLATION_LEVEL_value;
 	ZVAL_LONG(&const_TRANSACTION_ISOLATION_LEVEL_value, PDO_FB_TRANSACTION_ISOLATION_LEVEL);
