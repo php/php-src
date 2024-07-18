@@ -193,22 +193,12 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMAttr, isId)
 {
-	zval *id;
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
-
-	if (attrp->atype == XML_ATTRIBUTE_ID) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(attrp, ZEND_THIS, xmlAttrPtr, intern);
+	RETURN_BOOL(attrp->atype == XML_ATTRIBUTE_ID);
 }
 /* }}} end dom_attr_is_id */
 
