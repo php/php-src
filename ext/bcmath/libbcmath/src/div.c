@@ -248,7 +248,7 @@ static inline void bc_standard_div(
 	}
 }
 
-static void bc_do_div(char *n1, size_t n1_readable_len, size_t n1_bottom_extension, char *n2, size_t n2_len, bc_num *quot, size_t quot_len)
+static void bc_do_div(const char *n1, size_t n1_readable_len, size_t n1_bottom_extension, const char *n2, size_t n2_len, bc_num *quot, size_t quot_len)
 {
 	size_t n2_arr_size = (n2_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t n1_arr_size = (n1_readable_len + n1_bottom_extension + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
