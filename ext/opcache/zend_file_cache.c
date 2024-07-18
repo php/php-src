@@ -892,15 +892,15 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		SERIALIZE_PTR(ce->iterator_funcs_ptr->zf_next);
 		SERIALIZE_PTR(ce->iterator_funcs_ptr);
 	}
-	if (ce->dimension_handlers) {
-		SERIALIZE_PTR(ce->dimension_handlers->read_dimension);
-		SERIALIZE_PTR(ce->dimension_handlers->has_dimension);
-		SERIALIZE_PTR(ce->dimension_handlers->fetch_dimension);
-		SERIALIZE_PTR(ce->dimension_handlers->write_dimension);
-		SERIALIZE_PTR(ce->dimension_handlers->append);
-		SERIALIZE_PTR(ce->dimension_handlers->fetch_append);
-		SERIALIZE_PTR(ce->dimension_handlers->unset_dimension);
-		SERIALIZE_PTR(ce->dimension_handlers);
+	if (ce->dimension_functions) {
+		SERIALIZE_PTR(ce->dimension_functions->read_dimension);
+		SERIALIZE_PTR(ce->dimension_functions->has_dimension);
+		SERIALIZE_PTR(ce->dimension_functions->fetch_dimension);
+		SERIALIZE_PTR(ce->dimension_functions->write_dimension);
+		SERIALIZE_PTR(ce->dimension_functions->append);
+		SERIALIZE_PTR(ce->dimension_functions->fetch_append);
+		SERIALIZE_PTR(ce->dimension_functions->unset_dimension);
+		SERIALIZE_PTR(ce->dimension_functions);
 	}
 
 	ZEND_MAP_PTR_INIT(ce->static_members_table, NULL);
@@ -1738,15 +1738,15 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_current);
 		UNSERIALIZE_PTR(ce->iterator_funcs_ptr->zf_next);
 	}
-	if (ce->dimension_handlers) {
-		UNSERIALIZE_PTR(ce->dimension_handlers);
-		UNSERIALIZE_PTR(ce->dimension_handlers->read_dimension);
-		UNSERIALIZE_PTR(ce->dimension_handlers->has_dimension);
-		UNSERIALIZE_PTR(ce->dimension_handlers->fetch_dimension);
-		UNSERIALIZE_PTR(ce->dimension_handlers->write_dimension);
-		UNSERIALIZE_PTR(ce->dimension_handlers->append);
-		UNSERIALIZE_PTR(ce->dimension_handlers->fetch_append);
-		UNSERIALIZE_PTR(ce->dimension_handlers->unset_dimension);
+	if (ce->dimension_functions) {
+		UNSERIALIZE_PTR(ce->dimension_functions);
+		UNSERIALIZE_PTR(ce->dimension_functions->read_dimension);
+		UNSERIALIZE_PTR(ce->dimension_functions->has_dimension);
+		UNSERIALIZE_PTR(ce->dimension_functions->fetch_dimension);
+		UNSERIALIZE_PTR(ce->dimension_functions->write_dimension);
+		UNSERIALIZE_PTR(ce->dimension_functions->append);
+		UNSERIALIZE_PTR(ce->dimension_functions->fetch_append);
+		UNSERIALIZE_PTR(ce->dimension_functions->unset_dimension);
 	}
 
 	if (!(script->corrupted)) {
