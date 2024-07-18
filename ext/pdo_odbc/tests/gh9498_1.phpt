@@ -13,34 +13,75 @@ require 'ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 $db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-$select_test = "SELECT
-    CAST(0x72006f017e016f007600fd00 AS nvarchar(6)) AS pink_in_czech_binary_encoded_utf16le
-  , CAST(0x6b26 AS nvarchar(1)) AS beamed_eighth_notes_binary_encoded_utf16le
-  , NCHAR(0x266b) AS beamed_eighth_notes_nchar
-  , N'♫' AS \"beamed_eighth_notes_u+266b_constant\"
-  , N'růžový' AS pink_in_czech_unicode_string_constant
-  , NCHAR(0xfb01) AS ligature_fi_nchar
-  , N'𝄋' AS \"segno_u+1d10b_constant\"
-;";
-var_dump($db->query($select_test, \PDO::FETCH_ASSOC)->fetchAll());
+$tests = [
+    [
+        "name" => "beamed_eighth_notes_binary_encoded_utf16le",
+        "expr" => "CAST(0x6b26 AS nvarchar(1))",
+        "expected_answer" => "♫",
+    ],
+    [
+        "name" => "beamed_eighth_notes_nchar",
+        "expr" => "NCHAR(0x266b)",
+        "expected_answer" => "♫",
+    ],
+    [
+        "name" => "beamed_eighth_notes_u+266b_constant",
+        "expr" => "N'♫'",
+        "expected_answer" => "♫",
+    ],
+    [
+        "name" => "ligature_fi_nchar",
+        "expr" => "NCHAR(0xfb01)",
+        "expected_answer" => "ﬁ",
+    ],
+    [
+        "name" => "php_ascii_string_constant",
+        "expr" => "'php'",
+        "expected_answer" => "php",
+    ],
+    [
+        "name" => "php_unicode_string_constant",
+        "expr" => "N'php'",
+        "expected_answer" => "php",
+    ],
+    [
+        "name" => "pink_in_czech_binary_encoded_utf16le",
+        "expr" => "CAST(0x72006f017e016f007600fd00 AS nvarchar(6))",
+        "expected_answer" => "růžový",
+    ],
+    [
+        "name" => "pink_in_czech_unicode_string_constant",
+        "expr" => "N'růžový'",
+        "expected_answer" => "růžový",
+    ],
+    [
+        "name" => "segno_u+1d10b_constant",
+        "expr" => "N'𝄋'",
+        "expected_answer" => "𝄋",
+    ],
+];
+
+foreach ($tests as $t) {
+    print $t["name"] . ": ";
+    $sql = "SELECT " . $t["expr"] . ' AS "' . $t["name"] . '";';
+    $results = $db->query($sql, \PDO::FETCH_NUM)->fetch();
+    if ( $results[0] == $t["expected_answer"] ) {
+        print "PASS";
+    } else {
+        print "FAIL!";
+        print "\tresult: '" . $results[0] . "'";
+        print "\texpected: '" . $t["expected_answer"] . "'";
+    }
+    print "\n";
+}
 ?>
 --EXPECT--
-array(1) {
-  [0]=>
-  array(7) {
-    ["pink_in_czech_binary_encoded_utf16le"]=>
-    string(9) "růžový"
-    ["beamed_eighth_notes_binary_encoded_utf16le"]=>
-    string(3) "♫"
-    ["beamed_eighth_notes_nchar"]=>
-    string(3) "♫"
-    ["beamed_eighth_notes_u+266b_constant"]=>
-    string(3) "♫"
-    ["pink_in_czech_unicode_string_constant"]=>
-    string(9) "růžový"
-    ["ligature_fi_nchar"]=>
-    string(3) "ﬁ"
-    ["segno_u+1d10b_constant"]=>
-    string(4) "𝄋"
-  }
-}
+beamed_eighth_notes_binary_encoded_utf16le: PASS
+beamed_eighth_notes_nchar: PASS
+beamed_eighth_notes_u+266b_constant: PASS
+ligature_fi_nchar: PASS
+php_ascii_string_constant: PASS
+php_unicode_string_constant: PASS
+pink_in_czech_binary_encoded_utf16le: PASS
+pink_in_czech_unicode_string_constant: PASS
+segno_u+1d10b_constant: PASS
