@@ -67,9 +67,7 @@ static inline void bc_fast_div(
 	quot_vectors[0] = numerator_vectors[0] / divisor_vector;
 }
 
-/*
- * Used when the divisor is split into 2 or more chunks.
- */
+/* Used when the divisor is split into 2 or more chunks. */
 static inline void bc_standard_div(
 	BC_VECTOR *numerator_vectors, size_t numerator_arr_size,
 	BC_VECTOR *divisor_vectors, size_t divisor_arr_size, size_t divisor_len,
