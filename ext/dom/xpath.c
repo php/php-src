@@ -462,11 +462,12 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
+		zend_release_fcall_info_cache(&fcc);
 		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved by PHP");
 		RETURN_THROWS();
 	}
 
-	php_dom_xpath_callbacks_update_single_method_handler(
+	if (php_dom_xpath_callbacks_update_single_method_handler(
 		&intern->xpath_callbacks,
 		intern->dom.ptr,
 		namespace,
@@ -474,7 +475,9 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 		&fcc,
 		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 		dom_xpath_register_func_in_ctx
-	);
+	) != SUCCESS) {
+		zend_release_fcall_info_cache(&fcc);
+	}
 }
 
 /* {{{ */
