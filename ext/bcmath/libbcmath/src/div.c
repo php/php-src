@@ -74,7 +74,6 @@ static inline void bc_standard_div(
 	BC_VECTOR *divisor_vector, size_t divisor_arr_size, size_t divisor_len,
 	BC_VECTOR *quot_vector, size_t quot_arr_size
 ) {
-	size_t i, j;
 	size_t numerator_top_index = numerator_arr_size - 1;
 	size_t divisor_top_index = divisor_arr_size - 1;
 	size_t quot_top_index = quot_arr_size - 1;
@@ -173,7 +172,7 @@ static inline void bc_standard_div(
 	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
 	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
 	BC_VECTOR tmp_divisor = divisor_vector[divisor_top_index] * high_part_shift + divisor_vector[divisor_top_index - 1] / low_part_shift;
-	for (i = 0; i < quot_arr_size; i++) {
+	for (size_t i = 0; i < quot_arr_size; i++) {
 		BC_VECTOR tmp_numerator = numerator_vector[numerator_top_index - i] * high_part_shift + numerator_vector[numerator_top_index - i - 1] / low_part_shift;
 
 		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
@@ -212,6 +211,7 @@ static inline void bc_standard_div(
 		BC_VECTOR sub;
 		BC_VECTOR borrow = 0;
 		BC_VECTOR *numerator_calc_bottom = numerator_vector + numerator_arr_size - divisor_arr_size - i;
+		size_t j;
 		for (j = 0; j < divisor_arr_size - 1; j++) {
 			sub = divisor_vector[j] * quot_guess + borrow;
 			BC_VECTOR sub_low = sub % BC_VECTOR_BOUNDARY_NUM;
@@ -250,8 +250,6 @@ static inline void bc_standard_div(
 
 static void bc_do_div(char *n1, size_t n1_readable_len, size_t n1_bottom_extension, char *n2, size_t n2_len, bc_num *quot, size_t quot_len)
 {
-	size_t i;
-
 	size_t n2_arr_size = (n2_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t n1_arr_size = (n1_readable_len + n1_bottom_extension + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
 	size_t quot_arr_size = n1_arr_size - n2_arr_size + 1;
@@ -277,7 +275,7 @@ static void bc_do_div(char *n1, size_t n1_readable_len, size_t n1_bottom_extensi
 		n1_read = MIN(n1_bottom_read_len, n1_readable_len);
 		base = POW_10_LUT[n1_bottom_extension];
 		n1_vector[n1_vector_count] = 0;
-		for (i = 0; i < n1_read; i++) {
+		for (size_t i = 0; i < n1_read; i++) {
 			n1_vector[n1_vector_count] += *n1 * base;
 			base *= BASE;
 			n1--;
@@ -302,6 +300,7 @@ static void bc_do_div(char *n1, size_t n1_readable_len, size_t n1_bottom_extensi
 	char *qptr = (*quot)->n_value;
 	char *qend = qptr + quot_len - 1;
 
+	size_t i;
 	for (i = 0; i < quot_real_arr_size - 1; i++) {
 #if BC_VECTOR_SIZE == 4
 		bc_write_bcd_representation(quot_vector[i], qend - 3);
