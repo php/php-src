@@ -3,7 +3,11 @@ PDO_Firebird: Supported Firebird 4.0 datatypes (parameters)
 --EXTENSIONS--
 pdo_firebird
 --SKIPIF--
-<?php require('skipif.inc'); ?>
+<?php require('skipif.inc'); 
+if (Pdo\Firebird::getApiVersion() < 40) {
+	die('skip: Firebird API version must be greater than or equal to 40');
+}
+?>
 --XLEAK--
 A bug in firebird causes a memory leak when calling `isc_attach_database()`.
 See https://github.com/FirebirdSQL/firebird/issues/7849
@@ -24,10 +28,6 @@ $sql = <<<'SQL'
 SQL;
 
 $dbh = getDbConnection();
-
-if ($dbh->getAttribute(Pdo\Firebird::ATTR_API_VERSION) < 40) {
-	die('skip: Firebird API version must be greater than or equal to 40');
-}
 
 $stmt = $dbh->prepare($sql);
 $stmt->execute([12, 12.34, 12.34, '2024-05-04 12:59:34.239 Europe/Moscow', '12:59 Europe/Moscow', 12.34, 12.34]);
