@@ -1,5 +1,5 @@
 --TEST--
-PDO_Firebird: get api version
+PDO_Firebird: getApiVersion()
 --EXTENSIONS--
 pdo_firebird
 --SKIPIF--
@@ -9,9 +9,7 @@ A bug in firebird causes a memory leak when calling `isc_attach_database()`.
 See https://github.com/FirebirdSQL/firebird/issues/7849
 --FILE--
 <?php
-require("testdb.inc");
-$dbh = getDbConnection();
-echo $dbh->getAttribute(Pdo\Firebird::ATTR_API_VERSION) . "\n";
+echo Pdo\Firebird::getApiVersion() . "\n";
 echo 'done!';
 ?>
 --EXPECTF--

@@ -19,9 +19,6 @@ class Firebird extends \PDO
     /** @cvalue PDO_FB_ATTR_TIMESTAMP_FORMAT */
     public const int ATTR_TIMESTAMP_FORMAT = UNKNOWN;
 
-    /** @cvalue PDO_FB_ATTR_API_VERSION */
-    public const int ATTR_API_VERSION = UNKNOWN;
-
     /** @cvalue PDO_FB_TRANSACTION_ISOLATION_LEVEL */
     public const int TRANSACTION_ISOLATION_LEVEL = UNKNOWN;
 
@@ -36,4 +33,6 @@ class Firebird extends \PDO
 
     /** @cvalue PDO_FB_WRITABLE_TRANSACTION */
     public const int WRITABLE_TRANSACTION = UNKNOWN;
+
+    public static function getApiVersion(): int {}
 }

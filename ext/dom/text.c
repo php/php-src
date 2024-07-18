@@ -100,7 +100,6 @@ Since:
 PHP_METHOD(DOMText, splitText)
 {
 	zval       *id;
-	xmlChar    *cur;
 	xmlChar    *first;
 	xmlChar    *second;
 	xmlNodePtr  node;
@@ -120,11 +119,7 @@ PHP_METHOD(DOMText, splitText)
 		RETURN_THROWS();
 	}
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 	length = xmlUTF8Strlen(cur);
 
 	if (ZEND_LONG_INT_OVFL(offset) || (int)offset > length) {

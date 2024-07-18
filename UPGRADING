@@ -504,14 +504,14 @@ PHP 8.4 UPGRADE NOTES
   . getAttribute, enabled to get values of FB_ATTR_DATE_FORMAT, FB_ATTR_TIME_FORMAT,
     FB_ATTR_TIMESTAMP_FORMAT.
   . Added new attributes to specify transaction isolation level and access mode.
-    Along with these, five constants (PDO::FB_TRANSACTION_ISOLATION_LEVEL,
-    PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, PDO::FB_SERIALIZABLE,
-    PDO::FB_WRITABLE_TRANSACTION) have been added.
+    Along with these, five constants (Pdo\Firebird::TRANSACTION_ISOLATION_LEVEL,
+    Pdo\Firebird::READ_COMMITTED, Pdo\Firebird::REPEATABLE_READ,
+    Pdo\Firebird::SERIALIZABLE, Pdo\Firebird::WRITABLE_TRANSACTION) have been added.
   . When using persistent connections, there is now a liveness check in the
     constructor.
   . The content that is built changes depending on the value of FB_API_VER in
-    ibase.h, so added the attribute value Pdo\Firebird::ATTR_API_VERSION to
-    obtain that value. This value can also be referenced from phpinfo.
+    ibase.h, so added static method Pdo\Firebird::getApiVersion() to obtain that
+    value. This value can also be referenced from phpinfo.
 
 - PDO_MYSQL:
   . getAttribute, enabled to get the value of ATTR_FETCH_TABLE_NAMES.
