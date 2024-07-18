@@ -90,10 +90,10 @@ static inline void bc_standard_div(
 	 * which in this case, is 1.
 	 * Also note that for example 2400000 / 120, there will be 5 divisions.
 	 *
-	 * Another example: Calculating 99900000000 / 10009999 with base 10000.
-	 * The actual quotient is 9980, but if calculate it using only the high-order digits:
-	 * 999 / 1000 = 0, Numbers that are not divisible are carried forward to the next division.
-	 * 9990000 / 1000 = 9990 (Here, the temporary quotient is 9990 and the error E is 10.)
+	 * Another example: Calculating 999_0000_0000 / 1000_9999 with base 10000.
+	 * The true quotient is 9980, but if it is calculated using only the high-order digits (999 / 1000), we would get 0
+	 * If the temporary quotient is 0, we need to carry the digits to the next division, which is 999_0000 / 1000.
+	 * The new temporary quotient we get is 9990, with error E = 10.
 	 *
 	 * If calculate the temporary quotient using only one array of numerator and divisor, the error E can be larger than 1.
 	 * In other words, in the restoring division, the count of additions for restore increases significantly.
