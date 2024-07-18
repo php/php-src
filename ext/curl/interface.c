@@ -2869,7 +2869,11 @@ PHP_FUNCTION(curl_error)
 
 	if (ch->err.no) {
 		ch->err.str[CURL_ERROR_SIZE] = 0;
-		RETURN_STRING(ch->err.str);
+		if (strlen(ch->err.str) > 0) {
+			RETURN_STRING(ch->err.str);
+		} else {
+			RETURN_STRING(curl_easy_strerror(ch->err.no));
+		}
 	} else {
 		RETURN_EMPTY_STRING();
 	}
