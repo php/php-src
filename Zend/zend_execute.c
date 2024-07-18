@@ -2988,6 +2988,7 @@ static zend_never_inline zval* ZEND_FASTCALL zend_fetch_dimension_address_inner_
 static zend_never_inline void zend_fetch_object_dimension_address(zval *result, zend_object *obj, zval *offset, int offset_type, int type EXECUTE_DATA_DC)
 {
 	zval *retval;
+	const zend_op *opline = execute_data->opline;
 
 	GC_ADDREF(obj);
 	if (ZEND_CONST_COND(offset_type == IS_CV, offset != NULL) && UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
