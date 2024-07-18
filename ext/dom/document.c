@@ -50,12 +50,8 @@ zend_result dom_document_doctype_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
 	xmlDtdPtr dtdptr = xmlGetIntSubset(docp);
-	if (!dtdptr) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object((xmlNodePtr) dtdptr, retval, obj);
+	php_dom_create_nullable_object((xmlNodePtr) dtdptr, retval, obj);
 	return SUCCESS;
 }
 
@@ -83,12 +79,8 @@ zend_result dom_document_document_element_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
 	xmlNodePtr root = xmlDocGetRootElement(docp);
-	if (!root) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(root, retval, obj);
+	php_dom_create_nullable_object(root, retval, obj);
 	return SUCCESS;
 }
 

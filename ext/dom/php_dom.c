@@ -1606,6 +1606,16 @@ static zend_always_inline zend_class_entry *dom_get_element_ce(const xmlNode *no
 	}
 }
 
+bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
+{
+	if (!obj) {
+		ZVAL_NULL(return_value);
+		return false;
+	}
+
+	return php_dom_create_object(obj, return_value, domobj);
+}
+
 /* {{{ php_dom_create_object */
 PHP_DOM_EXPORT bool php_dom_create_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
 {

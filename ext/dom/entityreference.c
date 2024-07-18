@@ -85,12 +85,8 @@ zend_result dom_entity_reference_child_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlEntityPtr entity = dom_entity_reference_fetch_and_sync_declaration(nodep);
-	if (entity == NULL) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object((xmlNodePtr) entity, retval, obj);
+	php_dom_create_nullable_object((xmlNodePtr) entity, retval, obj);
 	return SUCCESS;
 }
 
