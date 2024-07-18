@@ -68,7 +68,7 @@ static inline void bc_fast_div(
 }
 
 /*
- * Used when the number of elements in the divisor vector is 2 or more.
+ * Used when the divisor is split into 2 or more chunks.
  */
 static inline void bc_standard_div(
 	BC_VECTOR *numerator_vector, size_t numerator_arr_size,
