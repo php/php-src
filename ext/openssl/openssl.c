@@ -270,7 +270,7 @@ static void php_openssl_pkey_free_obj(zend_object *object)
 	zend_object_std_dtor(&key_object->std);
 }
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 static const zend_module_dep openssl_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
 	ZEND_MOD_END
@@ -278,7 +278,7 @@ static const zend_module_dep openssl_deps[] = {
 #endif
 /* {{{ openssl_module_entry */
 zend_module_entry openssl_module_entry = {
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 	STANDARD_MODULE_HEADER_EX, NULL,
 	openssl_deps,
 #else
@@ -1341,7 +1341,7 @@ PHP_MINIT_FUNCTION(openssl)
 
 	REGISTER_INI_ENTRIES();
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 	if (FAILURE == PHP_MINIT(openssl_pwhash)(INIT_FUNC_ARGS_PASSTHRU)) {
 		return FAILURE;
 	}

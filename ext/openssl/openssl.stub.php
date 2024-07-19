@@ -679,7 +679,7 @@ function openssl_spki_export_challenge(string $spki): string|false {}
  */
 function openssl_get_cert_locations(): array {}
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 function openssl_password_hash(string $algo, #[\SensitiveParameter] string $password, array $options = []): string {}
 function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
 #endif

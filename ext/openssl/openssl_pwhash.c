@@ -22,7 +22,7 @@
 #include "ext/standard/php_password.h"
 #include "php_openssl.h"
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 #include "Zend/zend_attributes.h"
 #include "openssl_pwhash_arginfo.h"
 #include <ext/standard/base64.h>
@@ -398,4 +398,4 @@ PHP_MINIT_FUNCTION(openssl_pwhash)
 
 	return SUCCESS;
 }
-#endif /* PHP_OPENSSL_API_VERSION >= 0x30200 */
+#endif /* HAVE_OPENSSL_ARGON2 */
