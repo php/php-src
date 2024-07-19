@@ -64,17 +64,6 @@
 
 #include "snmp_arginfo.h"
 
-/* For net-snmp prior to 5.4 */
-#ifndef HAVE_SHUTDOWN_SNMP_LOGGING
-extern netsnmp_log_handler *logh_head;
-#define shutdown_snmp_logging() \
-	{ \
-		snmp_disable_log(); \
-		while(NULL != logh_head) \
-			netsnmp_remove_loghandler( logh_head ); \
-	}
-#endif
-
 typedef struct snmp_session php_snmp_session;
 
 #define PHP_SNMP_ADD_PROPERTIES(a, b) \
@@ -930,31 +919,21 @@ static bool netsnmp_session_set_auth_protocol(struct snmp_session *s, zend_strin
 		return true;
 	}
 
-#ifdef HAVE_SNMP_SHA256
 	if (zend_string_equals_literal_ci(prot, "SHA256")) {
 		s->securityAuthProto = usmHMAC192SHA256AuthProtocol;
 		s->securityAuthProtoLen = sizeof(usmHMAC192SHA256AuthProtocol) / sizeof(oid);
 		return true;
 	}
-#endif
 
-#ifdef HAVE_SNMP_SHA512
 	if (zend_string_equals_literal_ci(prot, "SHA512")) {
 		s->securityAuthProto = usmHMAC384SHA512AuthProtocol;
 		s->securityAuthProtoLen = sizeof(usmHMAC384SHA512AuthProtocol) / sizeof(oid);
 		return true;
 	}
-#endif
 
 	smart_string err = {0};
 
-	smart_string_appends(&err, "Authentication protocol must be \"SHA\"");
-#ifdef HAVE_SNMP_SHA256
-	smart_string_appends(&err, " or \"SHA256\"");
-#endif
-#ifdef HAVE_SNMP_SHA512
-	smart_string_appends(&err, " or \"SHA512\"");
-#endif
+	smart_string_appends(&err, "Authentication protocol must be \"SHA\", \"SHA256\", or \"SHA512\"");
 #ifndef DISABLE_MD5
 	smart_string_appends(&err, " or \"MD5\"");
 #endif
