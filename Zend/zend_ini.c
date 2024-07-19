@@ -243,6 +243,7 @@ ZEND_API zend_result zend_register_ini_entries_ex(const zend_ini_entry_def *ini_
 			if (p->name) {
 				zend_string_release_ex(p->name, 1);
 			}
+			pefree(p, true);
 			zend_unregister_ini_entries_ex(module_number, module_type);
 			return FAILURE;
 		}

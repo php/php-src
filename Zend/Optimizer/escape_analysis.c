@@ -414,6 +414,7 @@ zend_result zend_ssa_escape_analysis(const zend_script *script, zend_op_array *o
 	}
 
 	if (zend_build_equi_escape_sets(ees, op_array, ssa) == FAILURE) {
+		free_alloca(ees, use_heap);
 		return FAILURE;
 	}
 
