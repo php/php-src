@@ -6,8 +6,8 @@ PHP_ARG_WITH([zip],
 if test "$PHP_ZIP" != "no"; then
   PKG_CHECK_MODULES([LIBZIP], [libzip >= 0.11 libzip != 1.3.1 libzip != 1.7.0])
 
-  PHP_EVAL_INCLINE($LIBZIP_CFLAGS)
-  PHP_EVAL_LIBLINE($LIBZIP_LIBS, ZIP_SHARED_LIBADD)
+  PHP_EVAL_INCLINE([$LIBZIP_CFLAGS])
+  PHP_EVAL_LIBLINE([$LIBZIP_LIBS], [ZIP_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY(zip, zip_file_set_mtime,
   [

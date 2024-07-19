@@ -8,8 +8,8 @@ if test "$PHP_ENCHANT" != "no"; then
 
   if test "$found_enchant_2" = "yes"; then
 
-    PHP_EVAL_INCLINE($ENCHANT2_CFLAGS)
-    PHP_EVAL_LIBLINE($ENCHANT2_LIBS, ENCHANT_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$ENCHANT2_CFLAGS])
+    PHP_EVAL_LIBLINE([$ENCHANT2_LIBS], [ENCHANT_SHARED_LIBADD])
 
     AC_DEFINE(HAVE_ENCHANT_GET_VERSION, 1, [ enchant_get_version since 1.6.0 ])
 
@@ -17,8 +17,8 @@ if test "$PHP_ENCHANT" != "no"; then
     AC_MSG_WARN([libenchant-2 not found trying with old libenchant])
     PKG_CHECK_MODULES([ENCHANT], [enchant >= 1.4.2])
 
-    PHP_EVAL_INCLINE($ENCHANT_CFLAGS)
-    PHP_EVAL_LIBLINE($ENCHANT_LIBS, ENCHANT_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$ENCHANT_CFLAGS])
+    PHP_EVAL_LIBLINE([$ENCHANT_LIBS], [ENCHANT_SHARED_LIBADD])
 
     PHP_CHECK_LIBRARY(enchant, enchant_get_version,
     [

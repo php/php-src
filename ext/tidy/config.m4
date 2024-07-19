@@ -63,7 +63,7 @@ if test "$PHP_TIDY" != "no"; then
   ], [], [])
 
   PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
-  PHP_ADD_INCLUDE($TIDY_INCDIR)
+  PHP_ADD_INCLUDE([$TIDY_INCDIR])
 
   dnl Add -Wno-ignored-qualifiers as this is an issue upstream
   TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"

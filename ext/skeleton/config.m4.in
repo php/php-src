@@ -23,8 +23,8 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
 
   dnl Remove this code block if the library does not support pkg-config.
   dnl PKG_CHECK_MODULES([LIBFOO], [foo])
-  dnl PHP_EVAL_INCLINE($LIBFOO_CFLAGS)
-  dnl PHP_EVAL_LIBLINE($LIBFOO_LIBS, %EXTNAMECAPS%_SHARED_LIBADD)
+  dnl PHP_EVAL_INCLINE([$LIBFOO_CFLAGS])
+  dnl PHP_EVAL_LIBLINE([$LIBFOO_LIBS], [%EXTNAMECAPS%_SHARED_LIBADD])
 
   dnl If you need to check for a particular library version using PKG_CHECK_MODULES,
   dnl you can use comparison operators. For example:
@@ -55,7 +55,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
 
   dnl Remove this code block if the library supports pkg-config.
   dnl --with-%EXTNAME% -> add include path
-  dnl PHP_ADD_INCLUDE($%EXTNAMECAPS%_DIR/include)
+  dnl PHP_ADD_INCLUDE([$%EXTNAMECAPS%_DIR/include])
 
   dnl Remove this code block if the library supports pkg-config.
   dnl --with-%EXTNAME% -> check for lib and symbol presence

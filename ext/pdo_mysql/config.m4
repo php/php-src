@@ -67,15 +67,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         AC_MSG_ERROR([Unable to find your mysql installation])
       fi
 
-      PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
+      PHP_ADD_INCLUDE([$PDO_MYSQL_INC_DIR])
       PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
     else
       AC_MSG_RESULT([not found])
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
-    PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
-    PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$PDO_MYSQL_INCLUDE])
+    PHP_EVAL_LIBLINE([$PDO_MYSQL_LIBS], [PDO_MYSQL_SHARED_LIBADD])
   fi
 
   PHP_CHECK_PDO_INCLUDES

@@ -26,7 +26,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     AC_MSG_ERROR(Please reinstall readline - I cannot find readline.h)
   fi
 
-  PHP_ADD_INCLUDE($READLINE_DIR/include)
+  PHP_ADD_INCLUDE([$READLINE_DIR/include])
 
   PHP_READLINE_LIBS=""
   AC_CHECK_LIB(ncurses, tgetent,
@@ -91,8 +91,8 @@ elif test "$PHP_LIBEDIT" != "no"; then
   fi
 
   PKG_CHECK_MODULES([EDIT], [libedit])
-  PHP_EVAL_LIBLINE($EDIT_LIBS, READLINE_SHARED_LIBADD)
-  PHP_EVAL_INCLINE($EDIT_CFLAGS)
+  PHP_EVAL_LIBLINE([$EDIT_LIBS], [READLINE_SHARED_LIBADD])
+  PHP_EVAL_INCLINE([$EDIT_CFLAGS])
 
   AC_CHECK_LIB(ncurses, tgetent,
   [

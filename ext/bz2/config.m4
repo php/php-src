@@ -24,7 +24,7 @@ if test "$PHP_BZ2" != "no"; then
 
   PHP_CHECK_LIBRARY(bz2, BZ2_bzerror,
   [
-    PHP_ADD_INCLUDE($BZIP_DIR/include)
+    PHP_ADD_INCLUDE([$BZIP_DIR/include])
     PHP_ADD_LIBRARY_WITH_PATH(bz2, $BZIP_DIR/$PHP_LIBDIR, BZ2_SHARED_LIBADD)
     AC_DEFINE(HAVE_BZ2,1,[ ])
   ], [

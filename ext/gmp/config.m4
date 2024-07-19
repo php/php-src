@@ -24,7 +24,7 @@ if test "$PHP_GMP" != "no"; then
     ])
 
     PHP_ADD_LIBRARY_WITH_PATH(gmp, $PHP_GMP/$PHP_LIBDIR, GMP_SHARED_LIBADD)
-    PHP_ADD_INCLUDE($PHP_GMP/include)
+    PHP_ADD_INCLUDE([$PHP_GMP/include])
   fi
 
   PHP_INSTALL_HEADERS([ext/gmp], [php_gmp_int.h])

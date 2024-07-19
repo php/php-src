@@ -52,8 +52,8 @@ EOF
 AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
   if test "$PHP_MBREGEX" = "yes"; then
     PKG_CHECK_MODULES([ONIG], [oniguruma])
-    PHP_EVAL_LIBLINE($ONIG_LIBS, MBSTRING_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($ONIG_CFLAGS)
+    PHP_EVAL_LIBLINE([$ONIG_LIBS], [MBSTRING_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$ONIG_CFLAGS])
 
     AC_CACHE_CHECK([if oniguruma has an invalid entry for KOI8 encoding],
       [php_cv_lib_onig_invalid_koi8],

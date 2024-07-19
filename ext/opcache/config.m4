@@ -84,8 +84,8 @@ if test "$PHP_OPCACHE" != "no"; then
     AS_IF([test x"$with_capstone" = "xyes"],[
       PKG_CHECK_MODULES([CAPSTONE],[capstone >= 3.0.0],[
         AC_DEFINE([HAVE_CAPSTONE], [1], [Capstone is available])
-        PHP_EVAL_LIBLINE($CAPSTONE_LIBS, OPCACHE_SHARED_LIBADD)
-        PHP_EVAL_INCLINE($CAPSTONE_CFLAGS)
+        PHP_EVAL_LIBLINE([$CAPSTONE_LIBS], [OPCACHE_SHARED_LIBADD])
+        PHP_EVAL_INCLINE([$CAPSTONE_CFLAGS])
         ZEND_JIT_SRC="$ZEND_JIT_SRC jit/ir/ir_disasm.c"
       ],[
         AC_MSG_ERROR([capstone >= 3.0 required but not found])
