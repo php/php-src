@@ -59,8 +59,10 @@ const SOCK_RDM = UNKNOWN;
  * @cvalue SOCK_CONN_DGRAM
  */
 const SOCK_CONN_DGRAM = UNKNOWN;
+#endif
+#ifdef SOCK_DCCP
 /**
- * is an alias of SOCK_CONN_DGRAM
+ * is an alias of SOCK_CONN_DGRAM on some platforms
  * @var int
  * @cvalue SOCK_DCCP
  */
