@@ -4442,7 +4442,7 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 	char *src, *tmp_name, *tmp_name2 = NULL;
 	char *escaped;
 	smart_str querystr = {0};
-	size_t new_len;
+	size_t new_len, len;
 	int i, num_rows;
 	zval elem;
 
@@ -4480,16 +4480,18 @@ PHP_PGSQL_API zend_result php_pgsql_meta_data(PGconn *pg_link, const zend_string
 						  " JOIN pg_namespace n ON (c.relnamespace = n.oid) "
 						  "WHERE a.attnum > 0 AND c.relname = '");
 	}
-	escaped = (char *)safe_emalloc(strlen(tmp_name2), 2, 1);
-	new_len = PQescapeStringConn(pg_link, escaped, tmp_name2, strlen(tmp_name2), NULL);
+	len = strlen(tmp_name2);
+	escaped = (char *)safe_emalloc(len, 2, 1);
+	new_len = PQescapeStringConn(pg_link, escaped, tmp_name2, len, NULL);
 	if (new_len) {
 		smart_str_appendl(&querystr, escaped, new_len);
 	}
 	efree(escaped);
 
 	smart_str_appends(&querystr, "' AND n.nspname = '");
-	escaped = (char *)safe_emalloc(strlen(tmp_name), 2, 1);
-	new_len = PQescapeStringConn(pg_link, escaped, tmp_name, strlen(tmp_name), NULL);
+	len = strlen(tmp_name);
+	escaped = (char *)safe_emalloc(len, 2, 1);
+	new_len = PQescapeStringConn(pg_link, escaped, tmp_name, len, NULL);
 	if (new_len) {
 		smart_str_appendl(&querystr, escaped, new_len);
 	}
