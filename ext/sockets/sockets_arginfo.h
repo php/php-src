@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3a3ee52b0773e96ead463517e6d9a68c2b385b92 */
+ * Stub hash: e43c00bcb6af1c0a20a92162457883e3a33b4a53 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
@@ -350,7 +350,7 @@ static void register_sockets_symbols(int module_number)
 #if defined(SOCK_CONN_DGRAM)
 	REGISTER_LONG_CONSTANT("SOCK_CONN_DGRAM", SOCK_CONN_DGRAM, CONST_PERSISTENT);
 #endif
-#if defined(SOCK_CONN_DGRAM)
+#if defined(SOCK_DCCP)
 	REGISTER_LONG_CONSTANT("SOCK_DCCP", SOCK_DCCP, CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("MSG_OOB", MSG_OOB, CONST_PERSISTENT);
