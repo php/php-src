@@ -185,7 +185,7 @@ static inline void bc_standard_div(
 		 */
 		numerator_high_part += div_carry * BC_VECTOR_BOUNDARY_NUM * high_part_shift;
 
-		/* If it is clear that divisor is greater in this loop, then the quotient is 0. */
+		/* numerator_high_part < divisor_high_part => quotient == 0 */
 		if (numerator_high_part < divisor_high_part) {
 			quot_vectors[quot_top_index - i] = 0;
 			div_carry = numerator_vectors[numerator_top_index - i];
