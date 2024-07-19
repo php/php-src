@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.23
 
+- Core:
+  . Fixed bug GH-15020 (Memory leak in Zend/Optimizer/escape_analysis.c).
+    (nielsdos)
+
 - Curl:
   . Fixed case when curl_error returns an empty string.
     (David Carlier)
