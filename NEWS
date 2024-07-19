@@ -2,12 +2,20 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.3.11
 
+- Core:
+  . Fixed bug GH-15020 (Memory leak in Zend/Optimizer/escape_analysis.c).
+    (nielsdos)
+  . Fixed bug GH-15023 (Memory leak in Zend/zend_ini.c). (nielsdos)
+
 - Curl:
   . Fixed case when curl_error returns an empty string.
     (David Carlier)
 
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
+
+- Streams:
+  . Fixed bug GH-15028 (Memory leak in ext/phar/stream.c). (nielsdos)
 
 01 Aug 2024, PHP 8.3.10
 
