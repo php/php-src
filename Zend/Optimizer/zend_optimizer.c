@@ -802,6 +802,7 @@ zend_class_entry *zend_optimizer_get_class_entry(
 	ce = zend_hash_find_ptr(CG(class_table), lcname);
 	if (ce
 	 && (ce->type == ZEND_INTERNAL_CLASS
+	  || (ce->ce_flags & ZEND_ACC_PRELOADED)
 	  || (op_array && ce->info.user.filename == op_array->filename))) {
 		return ce;
 	}
@@ -846,11 +847,9 @@ const zend_class_constant *zend_fetch_class_const_info(
 			} else {
 				zend_class_entry *tmp = zend_hash_find_ptr(EG(class_table), Z_STR_P(op1 + 1));
 				if (tmp != NULL) {
-					if (tmp->type == ZEND_INTERNAL_CLASS) {
-						ce = tmp;
-					} else if (tmp->type == ZEND_USER_CLASS
-						&& tmp->info.user.filename
-						&& tmp->info.user.filename == op_array->filename) {
+					if (tmp->type == ZEND_INTERNAL_CLASS
+					 || (tmp->ce_flags & ZEND_ACC_PRELOADED)
+					 || (tmp->info.user.filename && tmp->info.user.filename == op_array->filename)) {
 						ce = tmp;
 					}
 				}
@@ -902,9 +901,9 @@ zend_function *zend_optimizer_get_called_func(
 			} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
 				if (func->type == ZEND_INTERNAL_FUNCTION) {
 					return func;
-				} else if (func->type == ZEND_USER_FUNCTION &&
-				           func->op_array.filename &&
-				           func->op_array.filename == op_array->filename) {
+				} else if (func->type == ZEND_USER_FUNCTION
+				 && ((func->op_array.fn_flags & ZEND_ACC_PRELOADED)
+				  || (func->op_array.filename && func->op_array.filename == op_array->filename))) {
 					return func;
 				}
 			}
@@ -920,9 +919,9 @@ zend_function *zend_optimizer_get_called_func(
 				} else if ((func = zend_hash_find_ptr(EG(function_table), Z_STR_P(function_name))) != NULL) {
 					if (func->type == ZEND_INTERNAL_FUNCTION) {
 						return func;
-					} else if (func->type == ZEND_USER_FUNCTION &&
-					           func->op_array.filename &&
-					           func->op_array.filename == op_array->filename) {
+					} else if (func->type == ZEND_USER_FUNCTION
+					 && ((func->op_array.fn_flags & ZEND_ACC_PRELOADED)
+					  || (func->op_array.filename && func->op_array.filename == op_array->filename))) {
 						return func;
 					}
 				}
