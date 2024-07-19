@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 /**
  * @var string
  */

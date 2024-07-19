@@ -158,7 +158,7 @@ static inline php_openssl_certificate_object *php_openssl_certificate_from_obj(z
 
 #define Z_OPENSSL_CERTIFICATE_P(zv) php_openssl_certificate_from_obj(Z_OBJ_P(zv))
 
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 
 /**
  * MEMLIMIT is normalized to KB even though sodium uses Bytes in order to
@@ -189,7 +189,7 @@ PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
 PHP_GINIT_FUNCTION(openssl);
 PHP_GSHUTDOWN_FUNCTION(openssl);
-#if PHP_OPENSSL_API_VERSION >= 0x30200
+#if defined(HAVE_OPENSSL_ARGON2)
 PHP_MINIT_FUNCTION(openssl_pwhash);
 #endif
 
