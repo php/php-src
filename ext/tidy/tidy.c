@@ -26,17 +26,8 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
-#ifdef HAVE_TIDY_H
 #include "tidy.h"
-#elif defined(HAVE_TIDYP_H)
-#include "tidyp.h"
-#endif
-
-#ifdef HAVE_TIDYBUFFIO_H
 #include "tidybuffio.h"
-#else
-#include "buffio.h"
-#endif
 
 #include "tidy_arginfo.h"
 
