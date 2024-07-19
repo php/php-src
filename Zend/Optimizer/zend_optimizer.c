@@ -792,6 +792,26 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 	}
 }
 
+static bool zend_optimizer_ignore_class(zend_class_entry *ce, zend_string *filename)
+{
+	return ce->type == ZEND_USER_CLASS
+		&& !(ce->ce_flags & ZEND_ACC_PRELOADED)
+		&& (!ce->info.user.filename || ce->info.user.filename != filename);
+}
+
+static bool zend_optimizer_ignore_function(zend_function *fbc, zend_string *filename)
+{
+	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
+		return false;
+	} else if (fbc->type == ZEND_USER_FUNCTION) {
+		return !(fbc->op_array.fn_flags & ZEND_ACC_PRELOADED)
+			&& (!fbc->op_array.filename && fbc->op_array.filename != filename);
+	} else {
+		ZEND_ASSERT(fbc->type == ZEND_EVAL_CODE);
+		return true;
+	}
+}
+
 zend_class_entry *zend_optimizer_get_class_entry(
 		const zend_script *script, const zend_op_array *op_array, zend_string *lcname) {
 	zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
@@ -800,10 +820,7 @@ zend_class_entry *zend_optimizer_get_class_entry(
 	}
 
 	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce
-	 && (ce->type == ZEND_INTERNAL_CLASS
-	  || (ce->ce_flags & ZEND_ACC_PRELOADED)
-	  || (op_array && ce->info.user.filename == op_array->filename))) {
+	if (ce && !zend_optimizer_ignore_class(ce, op_array ? op_array->filename : NULL)) {
 		return ce;
 	}
 
@@ -846,12 +863,8 @@ const zend_class_constant *zend_fetch_class_const_info(
 				ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
 			} else {
 				zend_class_entry *tmp = zend_hash_find_ptr(EG(class_table), Z_STR_P(op1 + 1));
-				if (tmp != NULL) {
-					if (tmp->type == ZEND_INTERNAL_CLASS
-					 || (tmp->ce_flags & ZEND_ACC_PRELOADED)
-					 || (tmp->info.user.filename && tmp->info.user.filename == op_array->filename)) {
-						ce = tmp;
-					}
+				if (tmp != NULL && !zend_optimizer_ignore_class(tmp, op_array->filename)) {
+					ce = tmp;
 				}
 			}
 		}
@@ -899,11 +912,7 @@ zend_function *zend_optimizer_get_called_func(
 			if (script && (func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
 				return func;
 			} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
-				if (func->type == ZEND_INTERNAL_FUNCTION) {
-					return func;
-				} else if (func->type == ZEND_USER_FUNCTION
-				 && ((func->op_array.fn_flags & ZEND_ACC_PRELOADED)
-				  || (func->op_array.filename && func->op_array.filename == op_array->filename))) {
+				if (!zend_optimizer_ignore_function(func, op_array->filename)) {
 					return func;
 				}
 			}
@@ -917,11 +926,7 @@ zend_function *zend_optimizer_get_called_func(
 				if (script && (func = zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name)))) {
 					return func;
 				} else if ((func = zend_hash_find_ptr(EG(function_table), Z_STR_P(function_name))) != NULL) {
-					if (func->type == ZEND_INTERNAL_FUNCTION) {
-						return func;
-					} else if (func->type == ZEND_USER_FUNCTION
-					 && ((func->op_array.fn_flags & ZEND_ACC_PRELOADED)
-					  || (func->op_array.filename && func->op_array.filename == op_array->filename))) {
+					if (!zend_optimizer_ignore_function(func, op_array->filename)) {
 						return func;
 					}
 				}
