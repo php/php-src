@@ -242,6 +242,7 @@ ZEND_API void zend_memory_reset_peak_usage(void);
 
 /* Heap functions */
 typedef struct _zend_mm_heap zend_mm_heap;
+typedef struct _zend_mm_ro_heap zend_mm_ro_heap;
 
 ZEND_API zend_mm_heap *zend_mm_startup(void);
 ZEND_API void zend_mm_shutdown(zend_mm_heap *heap, bool full_shutdown, bool silent);
