@@ -742,6 +742,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_real_base = base;
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(base);
 		memset(base, 0, compiler_globals->map_ptr_last * sizeof(void*));
+		zend_init_internal_run_time_cache();
 	}
 }
 /* }}} */
@@ -784,6 +785,9 @@ static void compiler_globals_dtor(zend_compiler_globals *compiler_globals) /* {{
 		compiler_globals->map_ptr_real_base = NULL;
 		compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 		compiler_globals->map_ptr_size = 0;
+	}
+	if (compiler_globals->internal_run_time_cache) {
+		pefree(compiler_globals->internal_run_time_cache, 1);
 	}
 }
 /* }}} */
@@ -1083,6 +1087,7 @@ zend_result zend_post_startup(void) /* {{{ */
 
 	zend_compiler_globals *compiler_globals = ts_resource(compiler_globals_id);
 	zend_executor_globals *executor_globals = ts_resource(executor_globals_id);
+	global_map_ptr_last = compiler_globals->map_ptr_last;
 #endif
 
 	startup_done = true;
@@ -1112,6 +1117,9 @@ zend_result zend_post_startup(void) /* {{{ */
 	compiler_globals->class_table = NULL;
 	if (compiler_globals->map_ptr_real_base) {
 		free(compiler_globals->map_ptr_real_base);
+	}
+	if (compiler_globals->internal_run_time_cache) {
+		pefree(compiler_globals->internal_run_time_cache, 1);
 	}
 	compiler_globals->map_ptr_real_base = NULL;
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
@@ -1198,6 +1206,9 @@ void zend_shutdown(void) /* {{{ */
 		CG(script_encoding_list_size) = 0;
 	}
 #endif
+	zend_map_ptr_static_last = 0;
+	zend_map_ptr_static_size = 0;
+
 	zend_destroy_rsrc_list_dtors();
 
 	zend_unload_modules();
@@ -1297,9 +1308,9 @@ ZEND_API void zend_activate(void) /* {{{ */
 	init_executor();
 	startup_scanner();
 	if (CG(map_ptr_last)) {
-		memset(CG(map_ptr_real_base), 0, CG(map_ptr_last) * sizeof(void*));
+		memset((char *)CG(map_ptr_real_base) + zend_map_ptr_static_size * sizeof(void*), 0, (CG(map_ptr_last) - zend_map_ptr_static_size) * sizeof(void*));
 	}
-	zend_init_internal_run_time_cache();
+	zend_reset_internal_run_time_cache();
 	zend_observer_activate();
 }
 /* }}} */
@@ -1984,6 +1995,9 @@ void free_estring(char **str_p) /* {{{ */
 }
 /* }}} */
 
+ZEND_API size_t zend_map_ptr_static_size;
+ZEND_API size_t zend_map_ptr_static_last;
+
 ZEND_API void zend_map_ptr_reset(void)
 {
 	CG(map_ptr_last) = global_map_ptr_last;
@@ -2002,6 +2016,25 @@ ZEND_API void *zend_map_ptr_new(void)
 	ptr = (void**)CG(map_ptr_real_base) + CG(map_ptr_last);
 	*ptr = NULL;
 	CG(map_ptr_last)++;
+	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
+}
+
+ZEND_API void *zend_map_ptr_new_static(void)
+{
+	void **ptr;
+
+	if (zend_map_ptr_static_last >= zend_map_ptr_static_size) {
+		CG(map_ptr_last) += 4096;
+		zend_map_ptr_static_size += 4096;
+		/* Grow map_ptr table */
+		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last), 4096);
+		/* Note: there are no used non-static map_ptrs yet, hence we don't need to move the whole thing */
+		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
+		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
+	}
+	ptr = (void**)CG(map_ptr_real_base) + zend_map_ptr_static_last;
+	*ptr = NULL;
+	zend_map_ptr_static_last++;
 	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
 }
 
