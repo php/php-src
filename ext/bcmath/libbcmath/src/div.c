@@ -175,7 +175,7 @@ static inline void bc_standard_div(
 	if (divisor_top_digits == 0) {
 		divisor_top_digits = BC_VECTOR_SIZE;
 	}
-	
+
 	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
 	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
 	BC_VECTOR divisor_high_part = divisor_vectors[divisor_top_index] * high_part_shift + divisor_vectors[divisor_top_index - 1] / low_part_shift;
@@ -256,52 +256,54 @@ static inline void bc_standard_div(
 	}
 }
 
-static void bc_do_div(const char *n1, size_t n1_readable_len, size_t n1_bottom_extension, const char *n2, size_t n2_len, bc_num *quot, size_t quot_len)
-{
-	size_t n2_arr_size = (n2_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t n1_arr_size = (n1_readable_len + n1_bottom_extension + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
-	size_t quot_arr_size = n1_arr_size - n2_arr_size + 1;
+static void bc_do_div(
+	const char *numerator, size_t numerator_readable_len, size_t numerator_bottom_extension,
+	const char *divisor, size_t divisor_len, bc_num *quot, size_t quot_len
+) {
+	size_t divisor_arr_size = (divisor_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t numerator_arr_size = (numerator_readable_len + numerator_bottom_extension + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE;
+	size_t quot_arr_size = numerator_arr_size - divisor_arr_size + 1;
 	size_t quot_real_arr_size = MIN(quot_arr_size, (quot_len + BC_VECTOR_SIZE - 1) / BC_VECTOR_SIZE);
 
-	BC_VECTOR *n1_vector = safe_emalloc(n1_arr_size + n2_arr_size + quot_arr_size, sizeof(BC_VECTOR), 0);
-	BC_VECTOR *n2_vector = n1_vector + n1_arr_size;
-	BC_VECTOR *quot_vector = n2_vector + n2_arr_size;
+	BC_VECTOR *numerator_vectors = safe_emalloc(numerator_arr_size + divisor_arr_size + quot_arr_size, sizeof(BC_VECTOR), 0);
+	BC_VECTOR *divisor_vectors = numerator_vectors + numerator_arr_size;
+	BC_VECTOR *quot_vectors = divisor_vectors + divisor_arr_size;
 
 	/* Fill with zeros and convert as many vector elements as needed */
-	size_t n1_vector_count = 0;
-	while (n1_bottom_extension >= BC_VECTOR_SIZE) {
-		n1_vector[n1_vector_count] = 0;
-		n1_bottom_extension -= BC_VECTOR_SIZE;
-		n1_vector_count++;
+	size_t numerator_vector_count = 0;
+	while (numerator_bottom_extension >= BC_VECTOR_SIZE) {
+		numerator_vectors[numerator_vector_count] = 0;
+		numerator_bottom_extension -= BC_VECTOR_SIZE;
+		numerator_vector_count++;
 	}
 
-	size_t n1_bottom_read_len = BC_VECTOR_SIZE - n1_bottom_extension;
+	size_t numerator_bottom_read_len = BC_VECTOR_SIZE - numerator_bottom_extension;
 
 	size_t base;
-	size_t n1_read = 0;
-	if (n1_bottom_read_len < BC_VECTOR_SIZE) {
-		n1_read = MIN(n1_bottom_read_len, n1_readable_len);
-		base = POW_10_LUT[n1_bottom_extension];
-		n1_vector[n1_vector_count] = 0;
-		for (size_t i = 0; i < n1_read; i++) {
-			n1_vector[n1_vector_count] += *n1 * base;
+	size_t numerator_read = 0;
+	if (numerator_bottom_read_len < BC_VECTOR_SIZE) {
+		numerator_read = MIN(numerator_bottom_read_len, numerator_readable_len);
+		base = POW_10_LUT[numerator_bottom_extension];
+		numerator_vectors[numerator_vector_count] = 0;
+		for (size_t i = 0; i < numerator_read; i++) {
+			numerator_vectors[numerator_vector_count] += *numerator * base;
 			base *= BASE;
-			n1--;
+			numerator--;
 		}
-		n1_vector_count++;
+		numerator_vector_count++;
 	}
 
-	/* Bulk convert n1 and n2 to vectors */
-	if (n1_readable_len > n1_read) {
-		bc_convert_to_vector(n1_vector + n1_vector_count, n1, n1_readable_len - n1_read);
+	/* Bulk convert numerator and divisor to vectors */
+	if (numerator_readable_len > numerator_read) {
+		bc_convert_to_vector(numerator_vectors + numerator_vector_count, numerator, numerator_readable_len - numerator_read);
 	}
-	bc_convert_to_vector(n2_vector, n2, n2_len);
+	bc_convert_to_vector(divisor_vectors, divisor, divisor_len);
 
 	/* Do the divide */
-	if (n2_arr_size == 1) {
-		bc_fast_div(n1_vector, n1_arr_size, n2_vector[0], quot_vector, quot_arr_size);
+	if (divisor_arr_size == 1) {
+		bc_fast_div(numerator_vectors, numerator_arr_size, divisor_vectors[0], quot_vectors, quot_arr_size);
 	} else {
-		bc_standard_div(n1_vector, n1_arr_size, n2_vector, n2_arr_size, n2_len, quot_vector, quot_arr_size);
+		bc_standard_div(numerator_vectors, numerator_arr_size, divisor_vectors, divisor_arr_size, divisor_len, quot_vectors, quot_arr_size);
 	}
 
 	/* Convert to bc_num */
@@ -311,21 +313,21 @@ static void bc_do_div(const char *n1, size_t n1_readable_len, size_t n1_bottom_e
 	size_t i;
 	for (i = 0; i < quot_real_arr_size - 1; i++) {
 #if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(quot_vector[i], qend - 3);
+		bc_write_bcd_representation(quot_vectors[i], qend - 3);
 		qend -= 4;
 #else
-		bc_write_bcd_representation(quot_vector[i] / 10000, qend - 7);
-		bc_write_bcd_representation(quot_vector[i] % 10000, qend - 3);
+		bc_write_bcd_representation(quot_vectors[i] / 10000, qend - 7);
+		bc_write_bcd_representation(quot_vectors[i] % 10000, qend - 3);
 		qend -= 8;
 #endif
 	}
 
 	while (qend >= qptr) {
-		*qend-- = quot_vector[i] % BASE;
-		quot_vector[i] /= BASE;
+		*qend-- = quot_vectors[i] % BASE;
+		quot_vectors[i] /= BASE;
 	}
 
-	efree(n1_vector);
+	efree(numerator_vectors);
 }
 
 bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale)
