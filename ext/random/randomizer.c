@@ -431,9 +431,9 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		mask |= mask >> 1;
 		mask |= mask >> 2;
 		mask |= mask >> 4;
+		// Expand the lowest byte into all bytes.
+		mask *= 0x0101010101010101;
 
-		/* Example: if mask is 0xAB, will be 0xABABABABABABABAB */
-		uint64_t mask_repeat = (~((uint64_t) 0) / 0xff) * mask;
 		int failures = 0;
 		while (total_size < length) {
 			php_random_result result = engine.algo->generate(engine.state);
@@ -442,7 +442,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 				RETURN_THROWS();
 			}
 
-			uint64_t offsets = result.result & mask_repeat;
+			uint64_t offsets = result.result & mask;
 			for (size_t i = 0; i < result.size; i++) {
 				uint64_t offset = offsets & 0xff;
 				offsets >>= 8;
