@@ -170,6 +170,7 @@ static inline void bc_standard_div(
 	 *
 	 * Here, B is BC_VECTOR_BOUNDARY_NUM, so adjust the number of digits in high part of divisor to be BC_VECTOR_SIZE + 1.
 	 */
+	/* the number of usable digits, thus divisor_len % BC_VECTOR_SIZE == 0 implies we have BC_VECTOR_SIZE usable digits */
 	size_t divisor_top_digits = divisor_len % BC_VECTOR_SIZE;
 	if (divisor_top_digits == 0) {
 		divisor_top_digits = BC_VECTOR_SIZE;
