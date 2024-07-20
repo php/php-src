@@ -203,8 +203,8 @@ static inline void bc_standard_div(
 		numerator_vectors[numerator_top_index - i] += div_carry * BC_VECTOR_BOUNDARY_NUM;
 
 		/*
-		 * The temporary quotient can only have errors in the "too large" direction.
-		 * So if the temporary quotient is 0 here, the quotient is 0.
+		 * It is impossible for the temporary quotient to underestimate the true quotient.
+		 * Therefore a temporary quotient of 0 implies the true quotient it also 0.
 		 */
 		if (quot_guess == 0) {
 			quot_vectors[quot_top_index - i] = 0;
