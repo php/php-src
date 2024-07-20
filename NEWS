@@ -20,6 +20,10 @@ PHP                                                                        NEWS
   . Added getApiVersion() and removed from getAttribute().
     (SakiTakamachi)
 
+- PGSQL:
+  . pg_convert/pg_insert/pg_update/pg_delete ; regexes are now cached.
+    (David Carlier)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)
