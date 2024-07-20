@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-15028 (Memory leak in ext/phar/stream.c). (nielsdos)
 
+- Tidy:
+  . Fix memory leaks in ext/tidy basedir restriction code. (nielsdos)
+
 01 Aug 2024, PHP 8.2.22
 
 - Core:
