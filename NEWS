@@ -28,6 +28,10 @@ PHP                                                                        NEWS
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)
 
+- Tidy:
+  . Add tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
+    (nielsdos)
+
 - XSL:
   . Fix trampoline leak in xpath callables. (nielsdos)
 

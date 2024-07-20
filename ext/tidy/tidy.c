@@ -1603,18 +1603,34 @@ PHP_METHOD(tidyNode, isPhp)
 /* {{{ Returns the parent node if available or NULL */
 PHP_METHOD(tidyNode, getParent)
 {
-	TidyNode	parent_node;
 	TIDY_FETCH_ONLY_OBJECT;
 
-	parent_node = tidyGetParent(obj->node);
-	if(parent_node) {
+	TidyNode parent_node = tidyGetParent(obj->node);
+	if (parent_node) {
 		tidy_create_node_object(return_value, obj->ptdoc, parent_node);
-	} else {
-		ZVAL_NULL(return_value);
 	}
 }
 /* }}} */
 
+PHP_METHOD(tidyNode, getPreviousSibling)
+{
+	TIDY_FETCH_ONLY_OBJECT;
+
+	TidyNode previous_node = tidyGetPrev(obj->node);
+	if (previous_node) {
+		tidy_create_node_object(return_value, obj->ptdoc, previous_node);
+	}
+}
+
+PHP_METHOD(tidyNode, getNextSibling)
+{
+	TIDY_FETCH_ONLY_OBJECT;
+
+	TidyNode next_node = tidyGetNext(obj->node);
+	if (next_node) {
+		tidy_create_node_object(return_value, obj->ptdoc, next_node);
+	}
+}
 
 /* {{{ __constructor for tidyNode. */
 PHP_METHOD(tidyNode, __construct)

@@ -654,6 +654,9 @@ PHP 8.4 UPGRADE NOTES
     array_any().
     RFC: https://wiki.php.net/rfc/array_find
 
+- Tidy:
+  . Added tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
+
 - XMLReader:
   . Added XMLReader::fromStream(), XMLReader::fromUri(), XMLReader::fromString().
     RFC: https://wiki.php.net/rfc/xmlreader_writer_streams
