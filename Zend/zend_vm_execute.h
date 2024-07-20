@@ -45325,23 +45325,12 @@ try_instanceof:
 	if (Z_TYPE_P(expr) == IS_OBJECT) {
 		zend_class_entry *ce;
 
-		if (IS_CONST == IS_CONST) {
-			ce = CACHED_PTR(opline->extended_value);
-			if (UNEXPECTED(ce == NULL)) {
-				ce = zend_lookup_class_ex(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
-				if (EXPECTED(ce)) {
-					CACHE_PTR(opline->extended_value, ce);
-				}
+		ce = CACHED_PTR(opline->extended_value);
+		if (UNEXPECTED(ce == NULL)) {
+			ce = zend_lookup_class_ex(Z_STR_P(RT_CONSTANT(opline, opline->op2)), Z_STR_P(RT_CONSTANT(opline, opline->op2) + 1), ZEND_FETCH_CLASS_NO_AUTOLOAD);
+			if (EXPECTED(ce)) {
+				CACHE_PTR(opline->extended_value, ce);
 			}
-		} else if (IS_CONST == IS_UNUSED) {
-			ce = zend_fetch_class(NULL, opline->op2.num);
-			if (UNEXPECTED(ce == NULL)) {
-
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-		} else {
-			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
 		result = ce && instanceof_function(Z_OBJCE_P(expr), ce);
 	} else if ((IS_CV & (IS_VAR|IS_CV)) && Z_TYPE_P(expr) == IS_REFERENCE) {
