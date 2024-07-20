@@ -114,9 +114,9 @@ const T_PRINT = UNKNOWN;
 const T_YIELD = UNKNOWN;
 /**
  * @var int
- * @cvalue T_YIELD_FROM
+ * @cvalue T_FROM
  */
-const T_YIELD_FROM = UNKNOWN;
+const T_FROM = UNKNOWN;
 /**
  * @var int
  * @cvalue T_INSTANCEOF
