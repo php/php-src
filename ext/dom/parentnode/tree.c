@@ -671,16 +671,16 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	php_dom_pre_insert(context->document, fragment, parentNode, viable_previous_sibling);
 }
 
-static zend_result dom_child_removal_preconditions(const xmlNode *child, int stricterror)
+static zend_result dom_child_removal_preconditions(const xmlNode *child, const dom_object *context)
 {
 	if (dom_node_is_read_only(child) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}
 
 	if (!child->parent) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}
 
@@ -690,9 +690,8 @@ static zend_result dom_child_removal_preconditions(const xmlNode *child, int str
 void dom_child_node_remove(dom_object *context)
 {
 	xmlNode *child = dom_object_get_node(context);
-	bool stricterror = dom_get_strict_error(context->document);
 
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, context) != SUCCESS)) {
 		return;
 	}
 
@@ -724,8 +723,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		viable_next_sibling = viable_next_sibling->next;
 	}
 
-	bool stricterror = dom_get_strict_error(context->document);
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, context) != SUCCESS)) {
 		return;
 	}
 
