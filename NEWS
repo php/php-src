@@ -53,6 +53,8 @@ PHP                                                                        NEWS
 - Tidy:
   . Failures in the constructor now throw exceptions rather than emitting
     warnings and having a broken object. (nielsdos)
+  . Add tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
+    (nielsdos)
 
 - XSL:
   . Fix trampoline leak in xpath callables. (nielsdos)
