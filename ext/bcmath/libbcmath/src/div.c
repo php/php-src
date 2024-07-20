@@ -174,6 +174,7 @@ static inline void bc_standard_div(
 	if (divisor_top_digits == 0) {
 		divisor_top_digits = BC_VECTOR_SIZE;
 	}
+	
 	size_t high_part_shift = POW_10_LUT[BC_VECTOR_SIZE - divisor_top_digits + 1];
 	size_t low_part_shift = POW_10_LUT[divisor_top_digits - 1];
 	BC_VECTOR divisor_high_part = divisor_vectors[divisor_top_index] * high_part_shift + divisor_vectors[divisor_top_index - 1] / low_part_shift;
