@@ -684,12 +684,6 @@ static zend_result dom_child_removal_preconditions(const xmlNode *child, int str
 		return FAILURE;
 	}
 
-	xmlNodePtr children = child->parent->children;
-	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return FAILURE;
-	}
-
 	return SUCCESS;
 }
 
