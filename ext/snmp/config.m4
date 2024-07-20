@@ -23,8 +23,8 @@ if test "$PHP_SNMP" != "no"; then
     SNMP_VERSION=`expr [$]1 \* 1000 + [$]2`
     if test "$SNMP_VERSION" -ge "5003"; then
       if test -n "$SNMP_LIBS" && test -n "$SNMP_PREFIX"; then
-        PHP_ADD_INCLUDE(${SNMP_PREFIX}/include)
-        PHP_EVAL_LIBLINE($SNMP_LIBS, SNMP_SHARED_LIBADD)
+        PHP_ADD_INCLUDE([${SNMP_PREFIX}/include])
+        PHP_EVAL_LIBLINE([$SNMP_LIBS], [SNMP_SHARED_LIBADD])
         SNMP_LIBNAME=netsnmp
       else
         AC_MSG_ERROR([Could not find the required paths. Please check your net-snmp installation.])

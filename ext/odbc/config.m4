@@ -106,7 +106,7 @@ PHP_ARG_WITH([adabas],,
     if test "$PHP_ADABAS" = "yes"; then
       PHP_ADABAS=/usr/local
     fi
-    PHP_ADD_INCLUDE($PHP_ADABAS/incl)
+    PHP_ADD_INCLUDE([$PHP_ADABAS/incl])
     PHP_ADD_LIBPATH($PHP_ADABAS/$PHP_LIBDIR)
     ODBC_OBJS="$PHP_ADABAS/$PHP_LIBDIR/odbclib.a"
     ODBC_LIB="$abs_builddir/ext/odbc/libodbc_adabas.a"
@@ -136,7 +136,7 @@ PHP_ARG_WITH([sapdb],,
     if test "$PHP_SAPDB" = "yes"; then
       PHP_SAPDB=/usr/local
     fi
-    PHP_ADD_INCLUDE($PHP_SAPDB/incl)
+    PHP_ADD_INCLUDE([$PHP_SAPDB/incl])
     PHP_ADD_LIBPATH($PHP_SAPDB/$PHP_LIBDIR)
     PHP_ADD_LIBRARY(sqlod)
     ODBC_TYPE=sapdb
@@ -320,7 +320,7 @@ PHP_ARG_WITH([iodbc],,
   if test "$PHP_IODBC" != "no"; then
     AC_MSG_RESULT(yes)
     PKG_CHECK_MODULES([ODBC], [libiodbc])
-    PHP_EVAL_INCLINE($ODBC_CFLAGS)
+    PHP_EVAL_INCLINE([$ODBC_CFLAGS])
     ODBC_TYPE=iodbc
     AC_DEFINE(HAVE_IODBC,1,[ ])
   else
@@ -361,7 +361,7 @@ PHP_ARG_WITH([unixODBC],,
     if test "$PHP_UNIXODBC" = "yes"; then
       AC_MSG_RESULT(yes from pkgconfig)
       PKG_CHECK_MODULES([ODBC], [odbc])
-      PHP_EVAL_INCLINE($ODBC_CFLAGS)
+      PHP_EVAL_INCLINE([$ODBC_CFLAGS])
     else
       dnl keep old DIR way for old version without libodbc.pc
       ODBC_INCDIR=$PHP_UNIXODBC/include
@@ -423,7 +423,7 @@ PHP_ARG_WITH([dbmaker],,
     else
       AC_MSG_RESULT([yes (static)])
       PHP_ADD_LIBRARY_WITH_PATH(dmapic, $ODBC_LIBDIR)
-      PHP_ADD_INCLUDE($ODBC_INCDIR)
+      PHP_ADD_INCLUDE([$ODBC_INCDIR])
       ODBC_STATIC="libphpext_odbc.la"
     fi
   else

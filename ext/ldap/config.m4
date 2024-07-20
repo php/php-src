@@ -91,7 +91,7 @@ if test "$PHP_LDAP" != "no"; then
     AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)
   fi
 
-  PHP_ADD_INCLUDE($LDAP_INCDIR)
+  PHP_ADD_INCLUDE([$LDAP_INCDIR])
   PHP_SUBST([LDAP_SHARED_LIBADD])
   AC_DEFINE(HAVE_LDAP,1,[ ])
 
@@ -131,8 +131,8 @@ if test "$PHP_LDAP" != "no"; then
   if test "$PHP_LDAP_SASL" != "no"; then
     PKG_CHECK_MODULES([SASL], [libsasl2])
 
-    PHP_EVAL_INCLINE($SASL_CFLAGS)
-    PHP_EVAL_LIBLINE($SASL_LIBS, LDAP_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$SASL_CFLAGS])
+    PHP_EVAL_LIBLINE([$SASL_LIBS], [LDAP_SHARED_LIBADD])
 
     AC_DEFINE(HAVE_LDAP_SASL, 1, [LDAP SASL support])
   fi

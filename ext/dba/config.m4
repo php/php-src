@@ -235,7 +235,7 @@ if test "$PHP_TCADB" != "no"; then
   for i in $PHP_TCADB /usr/local /usr; do
   if test -f "$i/include/tcadb.h"; then
     THIS_PREFIX=$i
-    PHP_ADD_INCLUDE($THIS_PREFIX/include)
+    PHP_ADD_INCLUDE([$THIS_PREFIX/include])
     THIS_INCLUDE=$i/include/tcadb.h
     break
   fi
@@ -266,7 +266,7 @@ if test "$PHP_LMDB" != "no"; then
   for i in $PHP_LMDB /usr/local /usr; do
     if test -f "$i/include/lmdb.h"; then
       THIS_PREFIX=$i
-      PHP_ADD_INCLUDE($THIS_PREFIX/include)
+      PHP_ADD_INCLUDE([$THIS_PREFIX/include])
       THIS_INCLUDE=$i/include/lmdb.h
       break
     fi
