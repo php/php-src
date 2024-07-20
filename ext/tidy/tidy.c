@@ -269,6 +269,17 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 	return FAILURE;
 }
 
+static void tidy_create_node_object(zval *zv, PHPTidyDoc *ptdoc, TidyNode node)
+{
+	tidy_instantiate(tidy_ce_node, zv);
+	PHPTidyObj *newobj = Z_TIDY_P(zv);
+	newobj->node = node;
+	newobj->type = is_node;
+	newobj->ptdoc = ptdoc;
+	newobj->ptdoc->ref_count++;
+	tidy_add_node_default_properties(newobj);
+}
+
 static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 {
 	char *enc = NULL;
@@ -576,7 +587,6 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	TidyAttr	tempattr;
 	TidyNode	tempnode;
 	zval attribute, children, temp;
-	PHPTidyObj *newobj;
 	char *name;
 
 	tidyBufInit(&buf);
@@ -694,16 +704,8 @@ static void tidy_add_node_default_properties(PHPTidyObj *obj)
 	if (tempnode) {
 		array_init(&children);
 		do {
-			tidy_instantiate(tidy_ce_node, &temp);
-			newobj = Z_TIDY_P(&temp);
-			newobj->node = tempnode;
-			newobj->type = is_node;
-			newobj->ptdoc = obj->ptdoc;
-			newobj->ptdoc->ref_count++;
-
-			tidy_add_node_default_properties(newobj);
+			tidy_create_node_object(&temp, obj->ptdoc, tempnode);
 			add_next_index_zval(&children, &temp);
-
 		} while((tempnode = tidyGetNext(tempnode)));
 
 	} else {
@@ -751,7 +753,6 @@ static void *php_tidy_get_opt_val(PHPTidyDoc *ptdoc, TidyOption opt, TidyOptionT
 
 static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetypes node_type)
 {
-	PHPTidyObj *newobj;
 	TidyNode node;
 	TIDY_FETCH_OBJECT;
 
@@ -779,14 +780,7 @@ static void php_tidy_create_node(INTERNAL_FUNCTION_PARAMETERS, tidy_base_nodetyp
 		RETURN_NULL();
 	}
 
-	tidy_instantiate(tidy_ce_node, return_value);
-	newobj = Z_TIDY_P(return_value);
-	newobj->type  = is_node;
-	newobj->ptdoc = obj->ptdoc;
-	newobj->node  = node;
-	newobj->ptdoc->ref_count++;
-
-	tidy_add_node_default_properties(newobj);
+	tidy_create_node_object(return_value, obj->ptdoc, node);
 }
 
 static int _php_tidy_apply_config_array(TidyDoc doc, HashTable *ht_options)
@@ -1610,18 +1604,11 @@ PHP_METHOD(tidyNode, isPhp)
 PHP_METHOD(tidyNode, getParent)
 {
 	TidyNode	parent_node;
-	PHPTidyObj *newobj;
 	TIDY_FETCH_ONLY_OBJECT;
 
 	parent_node = tidyGetParent(obj->node);
 	if(parent_node) {
-		tidy_instantiate(tidy_ce_node, return_value);
-		newobj = Z_TIDY_P(return_value);
-		newobj->node = parent_node;
-		newobj->type = is_node;
-		newobj->ptdoc = obj->ptdoc;
-		newobj->ptdoc->ref_count++;
-		tidy_add_node_default_properties(newobj);
+		tidy_create_node_object(return_value, obj->ptdoc, parent_node);
 	} else {
 		ZVAL_NULL(return_value);
 	}
