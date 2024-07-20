@@ -9,7 +9,7 @@ if test "$PHP_GETTEXT" != "no"; then
   done
 
   if test -z "$GETTEXT_DIR"; then
-    AC_MSG_ERROR(Cannot locate header file libintl.h)
+    AC_MSG_ERROR([Cannot locate header file libintl.h])
   fi
 
   GETTEXT_LIBDIR=$GETTEXT_DIR/$PHP_LIBDIR
@@ -26,7 +26,7 @@ if test "$PHP_GETTEXT" != "no"; then
       GETTEXT_LIBS=
       GETTEXT_CHECK_IN_LIB=c
     ],[
-      AC_MSG_ERROR(Unable to find required gettext library)
+      AC_MSG_ERROR([Unable to find required gettext library])
     ])
   ]
   )

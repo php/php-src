@@ -17,7 +17,7 @@ if test "$PHP_FILEINFO" != "no"; then
   AC_CHECK_HEADERS([sys/sysmacros.h])
 
   AC_CHECK_FUNCS([strcasestr],,[
-    AC_MSG_NOTICE(using libmagic strcasestr implementation)
+    AC_MSG_NOTICE([using libmagic strcasestr implementation])
     libmagic_sources="$libmagic_sources libmagic/strcasestr.c"
   ])
 

@@ -238,13 +238,13 @@ case $host_alias in
   i?86-*-linux*|i?86-*-freebsd*)
     if test "${with_pic+set}" != "set" || test "$with_pic" = "no"; then
       with_pic=no
-      AC_MSG_RESULT(yes)
+      AC_MSG_RESULT([yes])
     else
-      AC_MSG_RESULT(no)
+      AC_MSG_RESULT([no])
     fi
     ;;
   *)
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
     ;;
 esac
 
@@ -252,10 +252,10 @@ dnl Detect musl libc
 AC_MSG_CHECKING([whether we are using musl libc])
 if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
 then
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT([yes])
   AC_DEFINE([__MUSL__], [1], [Define when using musl libc])
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi
 
 dnl Add _GNU_SOURCE compile definition because the php_config.h with definitions

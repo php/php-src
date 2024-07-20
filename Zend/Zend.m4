@@ -119,12 +119,12 @@ dnl
 AC_DEFUN([ZEND_DLSYM_CHECK], [dnl
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
 _LT_AC_TRY_DLOPEN_SELF([
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 ], [
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT([yes])
   AC_DEFINE(DLSYM_NEEDS_UNDERSCORE, 1, [Define if dlsym() requires a leading underscore in symbol names. ])
 ], [
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 ], [])
 ])
 
@@ -166,11 +166,11 @@ ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
 ZEND_CHECK_CPUID_COUNT
 
-AC_MSG_CHECKING(whether to enable thread-safety)
-AC_MSG_RESULT($ZEND_ZTS)
+AC_MSG_CHECKING([whether to enable thread-safety])
+AC_MSG_RESULT([$ZEND_ZTS])
 
-AC_MSG_CHECKING(whether to enable Zend debugging)
-AC_MSG_RESULT($ZEND_DEBUG)
+AC_MSG_CHECKING([whether to enable Zend debugging])
+AC_MSG_RESULT([$ZEND_DEBUG])
 
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])

@@ -37,7 +37,7 @@ if test "$PHP_FUZZER" != "no"; then
       CFLAGS="$CFLAGS -fsanitize=fuzzer-no-link"
       CXXFLAGS="$CXXFLAGS -fsanitize=fuzzer-no-link"
     ],[
-      AC_MSG_ERROR(Compiler doesn't support -fsanitize=fuzzer-no-link)
+      AC_MSG_ERROR([Compiler doesn't support -fsanitize=fuzzer-no-link])
     ])
   else
     FUZZING_LIB="$LIB_FUZZING_ENGINE"

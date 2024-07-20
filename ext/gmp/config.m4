@@ -13,7 +13,7 @@ if test "$PHP_GMP" != "no"; then
     PHP_ADD_LIBRARY(gmp,,GMP_SHARED_LIBADD)
   else
     if test ! -f $PHP_GMP/include/gmp.h; then
-      AC_MSG_ERROR(Unable to locate gmp.h)
+      AC_MSG_ERROR([Unable to locate gmp.h])
     fi
 
     PHP_CHECK_LIBRARY(gmp, __gmpz_rootrem,

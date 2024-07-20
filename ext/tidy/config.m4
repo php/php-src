@@ -28,7 +28,7 @@ if test "$PHP_TIDY" != "no"; then
   done
 
   if test -z "$TIDY_DIR"; then
-    AC_MSG_ERROR(Cannot find libtidy)
+    AC_MSG_ERROR([Cannot find libtidy])
   else
     dnl Check for tidybuffio.h (as opposed to simply buffio.h) which indicates
     dnl that we are building against tidy-html5 and not the legacy htmltidy. The

@@ -13,11 +13,11 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
   AC_PATH_PROG(FB_CONFIG, fb_config, no)
 
   if test -x "$FB_CONFIG" && test "$PHP_PDO_FIREBIRD" = "yes"; then
-    AC_MSG_CHECKING(for libfbconfig)
+    AC_MSG_CHECKING([for libfbconfig])
     FB_CFLAGS=`$FB_CONFIG --cflags`
     FB_LIBDIR=`$FB_CONFIG --libs`
     FB_VERSION=`$FB_CONFIG --version`
-    AC_MSG_RESULT(version $FB_VERSION)
+    AC_MSG_RESULT([version $FB_VERSION])
     PHP_EVAL_LIBLINE([$FB_LIBDIR], [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$FB_CFLAGS])
 
