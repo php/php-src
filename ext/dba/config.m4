@@ -48,14 +48,14 @@ AC_DEFUN([PHP_DBA_STD_RESULT],[
   fi
   AC_MSG_CHECKING([for $THIS_FULL_NAME support])
   if test -n "$3"; then
-    AC_MSG_ERROR($3)
+    AC_MSG_ERROR([$3])
   fi
   if test "$THIS_RESULT" = "yes" || test "$THIS_RESULT" = "builtin"; then
     HAVE_DBA=1
     eval HAVE_$THIS_NAME=1
     AC_MSG_RESULT([$THIS_RESULT])
   else
-    AC_MSG_RESULT(no)
+    AC_MSG_RESULT([no])
   fi
   unset THIS_RESULT THIS_NAME THIS_FULL_NAME
 ])
@@ -335,7 +335,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
       yes
 #endif
     ],[
-      AC_MSG_RESULT(ok)
+      AC_MSG_RESULT([ok])
     ],[
       AC_MSG_ERROR([Version 4.1 requires patch level 25])
     ])
@@ -348,7 +348,7 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
       yes
 #endif
     ],[
-      AC_MSG_RESULT(yes)
+      AC_MSG_RESULT([yes])
     ],[
       AC_MSG_ERROR([At least version 3.3 is required])
     ])
@@ -589,14 +589,14 @@ if test "$PHP_DBM" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     for LIB in dbm c gdbm; do
       PHP_CHECK_LIBRARY($LIB, dbminit, [
-        AC_MSG_CHECKING(for DBM using GDBM)
+        AC_MSG_CHECKING([for DBM using GDBM])
         AC_DEFINE_UNQUOTED(DBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
         if test "$LIB" = "gdbm"; then
           AC_DEFINE_UNQUOTED(DBM_VERSION, "GDBM", [ ])
-          AC_MSG_RESULT(yes)
+          AC_MSG_RESULT([yes])
         else
           AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
-          AC_MSG_RESULT(no)
+          AC_MSG_RESULT([no])
         fi
         AC_DEFINE(DBA_DBM, 1, [ ])
         THIS_LIBS=$LIB
@@ -707,5 +707,5 @@ if test "$HAVE_DBA" = "1"; then
   PHP_ADD_BUILD_DIR([$ext_builddir/libinifile])
   PHP_SUBST([DBA_SHARED_LIBADD])
 else
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 fi

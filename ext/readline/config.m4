@@ -23,7 +23,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   done
 
   if test -z "$READLINE_DIR"; then
-    AC_MSG_ERROR(Please reinstall readline - I cannot find readline.h)
+    AC_MSG_ERROR([Please reinstall readline - I cannot find readline.h])
   fi
 
   PHP_ADD_INCLUDE([$READLINE_DIR/include])
@@ -45,7 +45,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   [
     PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)
   ], [
-    AC_MSG_ERROR(readline library not found)
+    AC_MSG_ERROR([readline library not found])
   ], [
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
@@ -107,7 +107,7 @@ elif test "$PHP_LIBEDIT" != "no"; then
   PHP_CHECK_LIBRARY(edit, readline,
   [
   ], [
-    AC_MSG_ERROR(edit library required by readline not found)
+    AC_MSG_ERROR([edit library required by readline not found])
   ], [
     $READLINE_SHARED_LIBADD
   ])

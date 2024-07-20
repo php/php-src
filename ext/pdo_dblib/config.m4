@@ -26,7 +26,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
       PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include/freetds
     else
-      AC_MSG_ERROR(Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory)
+      AC_MSG_ERROR([Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory])
     fi
 
     if test "x$PHP_LIBDIR" = "x" ; then
@@ -34,7 +34,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     fi
 
     if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.so"; then
-       AC_MSG_ERROR(Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so])
+       AC_MSG_ERROR([[Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so]]])
     fi
 
     PHP_ADD_INCLUDE([$PDO_FREETDS_INCLUDE_DIR])

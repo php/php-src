@@ -43,7 +43,7 @@ if test "$PHP_%EXTNAMECAPS%" != "no"; then
   dnl   for i in $SEARCH_PATH ; do
   dnl     if test -r $i/$SEARCH_FOR; then
   dnl       %EXTNAMECAPS%_DIR=$i
-  dnl       AC_MSG_RESULT(found in $i)
+  dnl       AC_MSG_RESULT([found in $i])
   dnl     fi
   dnl   done
   dnl fi

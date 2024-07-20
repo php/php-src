@@ -15,39 +15,39 @@ if test "$PHP_ICONV" != "no"; then
 
     AC_MSG_CHECKING([if iconv is glibc's])
     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <gnu/libc-version.h>]], [[gnu_get_libc_version();]])],[
-      AC_MSG_RESULT(yes)
+      AC_MSG_RESULT([yes])
       iconv_impl_name="glibc"
     ],[
-      AC_MSG_RESULT(no)
+      AC_MSG_RESULT([no])
     ])
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if using GNU libiconv])
       AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <iconv.h>], [(void) _libiconv_version])],[
-        AC_MSG_RESULT(yes)
+        AC_MSG_RESULT([yes])
         iconv_impl_name="gnu_libiconv"
       ],[
-        AC_MSG_RESULT(no)
+        AC_MSG_RESULT([no])
       ])
     fi
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if iconv is Konstantin Chuguev's])
       AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]], [[iconv_ccs_init(NULL, NULL);]])],[
-        AC_MSG_RESULT(yes)
+        AC_MSG_RESULT([yes])
         iconv_impl_name="bsd"
       ],[
-        AC_MSG_RESULT(no)
+        AC_MSG_RESULT([no])
       ])
     fi
 
     if test -z "$iconv_impl_name"; then
       AC_MSG_CHECKING([if using IBM iconv])
       AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <iconv.h>]], [[cstoccsid("");]])],[
-        AC_MSG_RESULT(yes)
+        AC_MSG_RESULT([yes])
         iconv_impl_name="ibm"
       ],[
-        AC_MSG_RESULT(no)
+        AC_MSG_RESULT([no])
       ])
     fi
 

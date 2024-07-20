@@ -28,12 +28,12 @@ if test "$PHP_MM" != "no"; then
   done
 
   if test -z "$MM_DIR" ; then
-    AC_MSG_ERROR(cannot find mm library)
+    AC_MSG_ERROR([cannot find mm library])
   fi
 
   if test "$PHP_THREAD_SAFETY" = "yes"; then
     dnl The mm library is not thread-safe, and mod_mm.c refuses to compile.
-    AC_MSG_ERROR(--with-mm cannot be combined with --enable-zts)
+    AC_MSG_ERROR([--with-mm cannot be combined with --enable-zts])
   fi
 
   PHP_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/$PHP_LIBDIR, SESSION_SHARED_LIBADD)

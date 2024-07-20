@@ -13,7 +13,7 @@ if test "$PHP_ZIP" != "no"; then
   [
     AC_DEFINE(HAVE_SET_MTIME, 1, [Libzip >= 1.0.0 with zip_file_set_mtime])
   ], [
-    AC_MSG_WARN(Libzip >= 1.0.0 needed for setting mtime)
+    AC_MSG_WARN([Libzip >= 1.0.0 needed for setting mtime])
   ], [
     $LIBZIP_LIBS
   ])
@@ -22,7 +22,7 @@ if test "$PHP_ZIP" != "no"; then
   [
     AC_DEFINE(HAVE_ENCRYPTION, 1, [Libzip >= 1.2.0 with encryption support])
   ], [
-    AC_MSG_WARN(Libzip >= 1.2.0 needed for encryption support)
+    AC_MSG_WARN([Libzip >= 1.2.0 needed for encryption support])
   ], [
     $LIBZIP_LIBS
   ])

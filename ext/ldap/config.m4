@@ -62,7 +62,7 @@ if test "$PHP_LDAP" != "no"; then
   fi
 
   if test -z "$LDAP_DIR"; then
-    AC_MSG_ERROR(Cannot find ldap.h)
+    AC_MSG_ERROR([Cannot find ldap.h])
   fi
 
   dnl -pc removal is a hack for clang
@@ -88,7 +88,7 @@ if test "$PHP_LDAP" != "no"; then
      AC_DEFINE(HAVE_ORALDAP,1,[ ])
 
   else
-    AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)
+    AC_MSG_ERROR([Cannot find ldap libraries in $LDAP_LIBDIR.])
   fi
 
   PHP_ADD_INCLUDE([$LDAP_INCDIR])
