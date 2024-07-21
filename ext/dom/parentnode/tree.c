@@ -377,8 +377,7 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 				xmlUnlinkNode(newNode);
 			}
 
-			newNodeObj->document = document;
-			xmlSetTreeDoc(newNode, documentNode);
+			ZEND_ASSERT(newNodeObj->document == document);
 
 			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
 				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
