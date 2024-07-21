@@ -39,6 +39,16 @@ class Spoofchecker
     /** @cvalue USPOOF_HIDDEN_OVERLAY */
     public const int HIDDEN_OVERLAY = UNKNOWN;
 #endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    /** @cvalue UBIDI_LTR */
+    public const int UBIDI_LTR = UNKNOWN;
+    /** @cvalue UBIDI_RTL */
+    public const int UBIDI_RTL = UNKNOWN;
+    /** @cvalue UBIDI_MIXED */
+    public const int UBIDI_MIXED = UNKNOWN;
+    /** @cvalue UBIDI_NEUTRAL */
+    public const int UBIDI_NEUTRAL = UNKNOWN;
+#endif
 
     public function __construct() {}
 
@@ -63,5 +73,11 @@ class Spoofchecker
 #if U_ICU_VERSION_MAJOR_NUM >= 58
     /** @tentative-return-type */
     public function setRestrictionLevel(int $level): void {}
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 74
+    /**
+     * @param int $errorCode
+     */
+    public function areBidiConfusable(int $direction, string $string1, string $string2, &$errorCode = null): bool {}
 #endif
 }
