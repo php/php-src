@@ -167,6 +167,10 @@ PHP 8.4 UPGRADE NOTES
   . strcspn() with empty $characters now returns the length of the string instead
     of incorrectly stopping at the first NUL character. See GH-12592.
 
+- Tidy:
+  . Failures in the constructor now throw exceptions rather than emitting
+    warnings and having a broken object.
+
 - XML:
   . The xml_set_*_handler() functions now declare and check for an effective
     signature of callable|string|null for the $handler parameters.

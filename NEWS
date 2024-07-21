@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)
 
+- Tidy:
+  . Failures in the constructor now throw exceptions rather than emitting
+    warnings and having a broken object. (nielsdos)
+
 - XSL:
   . Fix trampoline leak in xpath callables. (nielsdos)
 
