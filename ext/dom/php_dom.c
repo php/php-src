@@ -1488,9 +1488,7 @@ static void dom_object_namespace_node_free_storage(zend_object *object)
 {
 	dom_object_namespace_node *intern = php_dom_namespace_node_obj_from_obj(object);
 	if (intern->parent_intern != NULL) {
-		zval tmp;
-		ZVAL_OBJ(&tmp, &intern->parent_intern->std);
-		zval_ptr_dtor(&tmp);
+		OBJ_RELEASE(&intern->parent_intern->std);
 	}
 	dom_objects_free_storage(object);
 }
