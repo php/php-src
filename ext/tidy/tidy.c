@@ -40,6 +40,8 @@
 
 #include "tidy_arginfo.h"
 
+#include "Zend/zend_exceptions.h"
+
 /* compatibility with older versions of libtidy */
 #ifndef TIDY_CALL
 #define TIDY_CALL
@@ -1371,8 +1373,8 @@ PHP_METHOD(tidy, __construct)
 
 	if (inputfile) {
 		if (!(contents = php_tidy_file_to_mem(ZSTR_VAL(inputfile), use_include_path))) {
-			php_error_docref(NULL, E_WARNING, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
-			return;
+			zend_throw_error(zend_ce_exception, "Cannot load \"%s\" into memory%s", ZSTR_VAL(inputfile), (use_include_path) ? " (using include path)" : "");
+			RETURN_THROWS();
 		}
 
 		if (ZEND_SIZE_T_UINT_OVFL(ZSTR_LEN(contents))) {
@@ -1381,11 +1383,14 @@ PHP_METHOD(tidy, __construct)
 			RETURN_THROWS();
 		}
 
+		zend_error_handling error_handling;
+		zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 		if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS) {
-			/* TODO: this is the constructor, we should throw probably... */
+			zend_restore_error_handling(&error_handling);
 			zend_string_release_ex(contents, 0);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
+		zend_restore_error_handling(&error_handling);
 
 		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc);
 

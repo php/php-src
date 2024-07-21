@@ -17,7 +17,11 @@ echo "=== tidy_parse_file ===\n";
 tidy_parse_file(__DIR__.'/open_basedir/test.html', 'my_config_file.ini');
 
 echo "=== __construct ===\n";
-$tidy = new tidy(__DIR__.'/open_basedir/test.html', 'my_config_file.ini');
+try {
+    $tidy = new tidy(__DIR__.'/open_basedir/test.html', 'my_config_file.ini');
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "=== parseFile ===\n";
 $tidy = new tidy;
@@ -38,8 +42,7 @@ Warning: tidy_parse_string(): open_basedir restriction in effect. File(my_config
 
 Warning: tidy_parse_file(): open_basedir restriction in effect. File(my_config_file.ini) is not within the allowed path(s): (%sopen_basedir) in %s on line %d
 === __construct ===
-
-Warning: tidy::__construct(): open_basedir restriction in effect. File(my_config_file.ini) is not within the allowed path(s): (%sopen_basedir) in %s on line %d
+tidy::__construct(): open_basedir restriction in effect. File(my_config_file.ini) is not within the allowed path(s): (%sopen_basedir)
 === parseFile ===
 
 Warning: tidy::parseFile(): open_basedir restriction in effect. File(my_config_file.ini) is not within the allowed path(s): (%sopen_basedir) in %s on line %d
