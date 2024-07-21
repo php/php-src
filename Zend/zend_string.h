@@ -341,28 +341,19 @@ static zend_always_inline void zend_string_efree(zend_string *s)
 	efree(s);
 }
 
-static zend_always_inline void zend_string_release(zend_string *s)
-{
-	if (!ZSTR_IS_INTERNED(s)) {
-		if (GC_DELREF(s) == 0) {
-			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
-		}
-	}
-}
-
 static zend_always_inline void zend_string_release_ex(zend_string *s, bool persistent)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (GC_DELREF(s) == 0) {
-			if (persistent) {
-				ZEND_ASSERT(GC_FLAGS(s) & IS_STR_PERSISTENT);
-				free(s);
-			} else {
-				ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
-				efree(s);
-			}
+			ZEND_ASSERT(persistent ? GC_FLAGS(s) & IS_STR_PERSISTENT : !(GC_FLAGS(s) & IS_STR_PERSISTENT));
+			zend_string_free(s);
 		}
 	}
+}
+
+static zend_always_inline void zend_string_release(zend_string *s)
+{
+	zend_string_release_ex(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 }
 
 static zend_always_inline bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length)
