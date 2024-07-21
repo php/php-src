@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Throw instead of silently failing when creating a too long text node in
     (DOM)ParentNode and (DOM)ChildNode. (nielsdos)
 
+- FPM:
+  . /dev/poll events.mechanism for Solaris/Illumos setting had been retired.
+    (David Carlier)
+
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
 
