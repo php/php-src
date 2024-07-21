@@ -1420,7 +1420,7 @@ ZEND_FUNCTION(gmp_root)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
-	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
+	if ((nth & (nth - 1)) == 0 && mpz_sgn(gmpnum_a) < 0) {
 		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
 		FREE_GMP_TEMP(temp_a);
 		RETURN_THROWS();
@@ -1452,7 +1452,7 @@ ZEND_FUNCTION(gmp_rootrem)
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a, 1);
 
-	if (nth % 2 == 0 && mpz_sgn(gmpnum_a) < 0) {
+	if ((nth & (nth - 1)) == 0 && mpz_sgn(gmpnum_a) < 0) {
 		zend_argument_value_error(2, "must be odd if argument #1 ($a) is negative");
 		FREE_GMP_TEMP(temp_a);
 		RETURN_THROWS();
