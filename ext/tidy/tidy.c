@@ -74,19 +74,6 @@
 	}	\
 	obj = Z_TIDY_P(object);	\
 
-#define TIDY_APPLY_CONFIG(_doc, _val_str, _val_ht) \
-	if (_val_ht) { \
-		_php_tidy_apply_config_array(_doc, _val_ht); \
-	} else if (_val_str) { \
-		TIDY_OPEN_BASE_DIR_CHECK(ZSTR_VAL(_val_str)); \
-		php_tidy_load_config(_doc, ZSTR_VAL(_val_str)); \
-	}
-
-#define TIDY_OPEN_BASE_DIR_CHECK(filename) \
-if (php_check_open_basedir(filename)) { \
-	RETURN_FALSE; \
-} \
-
 #define TIDY_SET_DEFAULT_CONFIG(_doc) \
 	if (TG(default_config) && TG(default_config)[0]) { \
 		php_tidy_load_config(_doc, TG(default_config)); \
@@ -221,6 +208,19 @@ static void php_tidy_load_config(TidyDoc doc, const char *path)
 	}
 }
 
+static zend_result php_tidy_apply_config(TidyDoc doc, zend_string *str_string, HashTable *ht_options)
+{
+	if (ht_options) {
+		return _php_tidy_apply_config_array(doc, ht_options);
+	} else if (str_string) {
+		if (php_check_open_basedir(ZSTR_VAL(str_string))) {
+			return FAILURE;
+		}
+		php_tidy_load_config(doc, ZSTR_VAL(str_string));
+	}
+	return SUCCESS;
+}
+
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 {
 	TidyOption opt = tidyGetOptionByName(doc, optname);
@@ -329,9 +329,9 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, bool is_file)
 
 	TIDY_SET_DEFAULT_CONFIG(doc);
 
-	TIDY_APPLY_CONFIG(doc, config_str, config_ht);
-
-	if(enc_len) {
+	if (php_tidy_apply_config(doc, config_str, config_ht) != SUCCESS) {
+		RETVAL_FALSE;
+	} else if (enc_len) {
 		if (tidySetCharEncoding(doc, enc) < 0) {
 			php_error_docref(NULL, E_WARNING, "Could not set encoding \"%s\"", enc);
 			RETVAL_FALSE;
@@ -1024,9 +1024,8 @@ PHP_FUNCTION(tidy_parse_string)
 	tidy_instantiate(tidy_ce_doc, return_value);
 	obj = Z_TIDY_P(return_value);
 
-	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
-
-	if (php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == FAILURE) {
+	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
+	 || php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -1093,9 +1092,8 @@ PHP_FUNCTION(tidy_parse_file)
 	tidy_instantiate(tidy_ce_doc, return_value);
 	obj = Z_TIDY_P(return_value);
 
-	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
-
-	if (php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == FAILURE) {
+	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
+	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == FAILURE) {
 		zval_ptr_dtor(return_value);
 		RETVAL_FALSE;
 	}
@@ -1388,7 +1386,11 @@ PHP_METHOD(tidy, __construct)
 			RETURN_THROWS();
 		}
 
-		TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
+		if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS) {
+			/* TODO: this is the constructor, we should throw probably... */
+			zend_string_release_ex(contents, 0);
+			RETURN_FALSE;
+		}
 
 		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc);
 
@@ -1427,9 +1429,8 @@ PHP_METHOD(tidy, parseFile)
 		RETURN_THROWS();
 	}
 
-	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
-
-	if (php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == FAILURE) {
+	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
+	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == FAILURE) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
@@ -1461,9 +1462,8 @@ PHP_METHOD(tidy, parseString)
 	TIDY_SET_CONTEXT;
 	obj = Z_TIDY_P(object);
 
-	TIDY_APPLY_CONFIG(obj->ptdoc->doc, options_str, options_ht);
-
-	if(php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == SUCCESS) {
+	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) == SUCCESS
+	 && php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == SUCCESS) {
 		RETURN_TRUE;
 	}
 
