@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Alexander Borisov
+ * Copyright (C) 2019-2024 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -389,14 +389,6 @@ lxb_encoding_encode_iso_2022_jp(lxb_encoding_encode_t *ctx, const lxb_codepoint_
                         case 0x007E:
                             break;
 
-                        case 0x00A5:
-                            LXB_ENCODING_ENCODE_APPEND(ctx, 0x5C);
-                            continue;
-
-                        case 0x203E:
-                            LXB_ENCODING_ENCODE_APPEND(ctx, 0x7E);
-                            continue;
-
                         default:
                             LXB_ENCODING_ENCODE_APPEND(ctx, cp);
                             continue;
@@ -416,6 +408,14 @@ lxb_encoding_encode_iso_2022_jp(lxb_encoding_encode_t *ctx, const lxb_codepoint_
                     ctx->buffer_used += 3;
 
                     ctx->buffer_out[ ctx->buffer_used++ ] = (lxb_char_t) cp;
+                    continue;
+                }
+                else if (cp == 0x00A5) {
+                    LXB_ENCODING_ENCODE_APPEND(ctx, 0x5C);
+                    continue;
+                }
+                else if (cp == 0x203E) {
+                    LXB_ENCODING_ENCODE_APPEND(ctx, 0x7E);
                     continue;
                 }
 
@@ -1332,14 +1332,6 @@ begin:
                     case 0x007E:
                         break;
 
-                    case 0x00A5:
-                        *(*data)++ = 0x5C;
-                        return size + 1;
-
-                    case 0x203E:
-                        *(*data)++ = 0x7E;
-                        return size + 1;
-
                     default:
                         *(*data)++ = (lxb_char_t) cp;
                         return size + 1;
@@ -1361,6 +1353,14 @@ begin:
                 *(*data)++ = (lxb_char_t) cp;
 
                 return size + 4;
+            }
+            else if (cp == 0x00A5) {
+                *(*data)++ = 0x5C;
+                return size + 1;
+            }
+            else if (cp == 0x203E) {
+                *(*data)++ = 0x7E;
+                return size + 1;
             }
 
             break;
