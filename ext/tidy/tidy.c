@@ -1424,12 +1424,8 @@ PHP_METHOD(tidy, parseFile)
 		RETURN_THROWS();
 	}
 
-	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
-	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) != SUCCESS) {
-		RETVAL_FALSE;
-	} else {
-		RETVAL_TRUE;
-	}
+	RETVAL_BOOL(php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) == SUCCESS
+				&& php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == SUCCESS);
 
 	zend_string_release_ex(contents, 0);
 }
@@ -1457,12 +1453,8 @@ PHP_METHOD(tidy, parseString)
 	TIDY_SET_CONTEXT;
 	obj = Z_TIDY_P(object);
 
-	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) == SUCCESS
-	 && php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == SUCCESS) {
-		RETURN_TRUE;
-	}
-
-	RETURN_FALSE;
+	RETURN_BOOL(php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) == SUCCESS
+				&& php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == SUCCESS);
 }
 
 
