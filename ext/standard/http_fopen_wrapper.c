@@ -795,11 +795,12 @@ finish:
 				const char *ptr = http_header_value;
 				/* must contain only digits, no + or - symbols */
 				if (*ptr >= '0' && *ptr <= '9') {
-					char* endptr = NULL;
+					char *endptr = NULL;
 					size_t parsed = ZEND_STRTOUL(ptr, &endptr, 10);
 					/* check whether there was no garbage in the header value and the conversion was successful */
 					if (endptr && !*endptr) {
-						file_size = parsed;
+						/* truncate for 32-bit such that no negative file sizes occur */
+						file_size = MIN(parsed, ZEND_LONG_MAX);
 						php_stream_notify_file_size(context, file_size, http_header_line, 0);
 					}
 				}
