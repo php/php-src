@@ -1223,8 +1223,6 @@ PHP_FUNCTION(tidy_get_config)
 				break;
 		}
 	}
-
-	return;
 }
 /* }}} */
 
