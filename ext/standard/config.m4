@@ -11,35 +11,52 @@ AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io],
 #endif
 #include <string.h>
 
-int main(int argc, char **argv)
+int main(void)
 {
   char *filename = tmpnam(NULL);
   char buffer[64];
   int result = 0;
 
   FILE *fp = fopen(filename, "wb");
-  if (NULL == fp)
+  if (NULL == fp) {
     return 0;
+  }
+
   fputs("line 1\n", fp);
   fputs("line 2\n", fp);
   fclose(fp);
 
   fp = fopen(filename, "rb+");
-  if (NULL == fp)
+  if (NULL == fp) {
     return 0;
-  fgets(buffer, sizeof(buffer), fp);
+  }
+
+  if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    return 0;
+  }
+
   fputs("line 3\n", fp);
   rewind(fp);
-  fgets(buffer, sizeof(buffer), fp);
-  if (0 != strcmp(buffer, "line 1\n"))
+  if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    return 0;
+  }
+
+  if (0 != strcmp(buffer, "line 1\n")) {
     result = 1;
-  fgets(buffer, sizeof(buffer), fp);
-  if (0 != strcmp(buffer, "line 3\n"))
+  }
+
+  if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    return 0;
+  }
+
+  if (0 != strcmp(buffer, "line 3\n")) {
     result = 1;
+  }
+
   fclose(fp);
   unlink(filename);
 
-  exit(result);
+  return result;
 }
 ]])],
 [php_cv_have_flush_io=no],
