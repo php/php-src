@@ -346,7 +346,7 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 	if (!ZSTR_IS_INTERNED(s)) {
 		if (GC_DELREF(s) == 0) {
 			ZEND_ASSERT(persistent ? GC_FLAGS(s) & IS_STR_PERSISTENT : !(GC_FLAGS(s) & IS_STR_PERSISTENT));
-			zend_string_free(s);
+			pefree(s, persistent);
 		}
 	}
 }
