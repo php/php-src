@@ -54,7 +54,7 @@
 #define TIDY_FETCH_OBJECT	\
 	PHPTidyObj *obj;	\
 	zval *object; \
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, tidy_ce_doc) == FAILURE) {	\
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, tidy_ce_doc) != SUCCESS) {	\
 		RETURN_THROWS();	\
 	}	\
 	obj = Z_TIDY_P(object);	\
@@ -69,7 +69,7 @@
 #define TIDY_FETCH_ONLY_OBJECT	\
 	PHPTidyObj *obj;	\
 	TIDY_SET_CONTEXT; \
-	if (zend_parse_parameters_none() == FAILURE) {	\
+	if (zend_parse_parameters_none() != SUCCESS) {	\
 		RETURN_THROWS();	\
 	}	\
 	obj = Z_TIDY_P(object);	\
@@ -1019,7 +1019,7 @@ PHP_FUNCTION(tidy_parse_string)
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
-	 || php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) == FAILURE) {
+	 || php_tidy_parse_string(obj, ZSTR_VAL(input), (uint32_t)ZSTR_LEN(input), enc) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETURN_FALSE;
 	}
@@ -1087,7 +1087,7 @@ PHP_FUNCTION(tidy_parse_file)
 	obj = Z_TIDY_P(return_value);
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
-	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == FAILURE) {
+	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) != SUCCESS) {
 		zval_ptr_dtor(return_value);
 		RETVAL_FALSE;
 	}
@@ -1141,7 +1141,7 @@ PHP_FUNCTION(tidy_diagnose)
 /* {{{ Get release date (version) for Tidy library */
 PHP_FUNCTION(tidy_get_release)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
+	if (zend_parse_parameters_none() != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1165,7 +1165,7 @@ PHP_FUNCTION(tidy_get_opt_doc)
 	TidyOption opt;
 	zval *object;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1309,7 +1309,7 @@ PHP_FUNCTION(tidy_getopt)
 	TidyOptionType optt;
 	zval *object;
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) != SUCCESS) {
 		RETURN_THROWS();
 	}
 
@@ -1425,7 +1425,7 @@ PHP_METHOD(tidy, parseFile)
 	}
 
 	if (php_tidy_apply_config(obj->ptdoc->doc, options_str, options_ht) != SUCCESS
-	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) == FAILURE) {
+	 || php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc) != SUCCESS) {
 		RETVAL_FALSE;
 	} else {
 		RETVAL_TRUE;
