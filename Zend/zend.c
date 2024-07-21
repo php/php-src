@@ -735,6 +735,7 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->map_ptr_base = ZEND_MAP_PTR_BIASED_BASE(NULL);
 	compiler_globals->map_ptr_size = 0;
 	compiler_globals->map_ptr_last = global_map_ptr_last;
+	compiler_globals->internal_run_time_cache = 0;
 	if (compiler_globals->map_ptr_last) {
 		/* Allocate map_ptr table */
 		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, 4096);
@@ -2028,11 +2029,11 @@ ZEND_API void *zend_map_ptr_new_static(void)
 		zend_map_ptr_static_size += 4096;
 		/* Grow map_ptr table */
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last), 4096);
-		/* Note: there are no used non-static map_ptrs yet, hence we don't need to move the whole thing */
 		CG(map_ptr_real_base) = perealloc(CG(map_ptr_real_base), CG(map_ptr_size) * sizeof(void*), 1);
+		memmove((char*)CG(map_ptr_real_base) + 4096 * sizeof(void *), CG(map_ptr_real_base), (CG(map_ptr_last) - 4096) * sizeof(void *));
 		CG(map_ptr_base) = ZEND_MAP_PTR_BIASED_BASE(CG(map_ptr_real_base));
 	}
-	ptr = (void**)CG(map_ptr_real_base) + zend_map_ptr_static_last;
+	ptr = (void**)CG(map_ptr_real_base) + (zend_map_ptr_static_last & 4095);
 	*ptr = NULL;
 	zend_map_ptr_static_last++;
 	return ZEND_MAP_PTR_PTR2OFFSET(ptr);
