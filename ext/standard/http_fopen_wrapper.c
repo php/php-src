@@ -792,8 +792,19 @@ finish:
 			} else if (!strncasecmp(http_header_line, "Content-Type:", sizeof("Content-Type:")-1)) {
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_value, 0);
 			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length:")-1)) {
-				file_size = atoi(http_header_value);
-				php_stream_notify_file_size(context, file_size, http_header_line, 0);
+				/* https://www.rfc-editor.org/rfc/rfc9110.html#name-content-length */
+				const char *ptr = http_header_value;
+				/* must contain only digits, no + or - symbols */
+				if (*ptr >= '0' && *ptr <= '9') {
+					char *endptr = NULL;
+					size_t parsed = ZEND_STRTOUL(ptr, &endptr, 10);
+					/* check whether there was no garbage in the header value and the conversion was successful */
+					if (endptr && !*endptr) {
+						/* truncate for 32-bit such that no negative file sizes occur */
+						file_size = MIN(parsed, ZEND_LONG_MAX);
+						php_stream_notify_file_size(context, file_size, http_header_line, 0);
+					}
+				}
 			} else if (
 				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding:")-1)
 				&& !strncasecmp(http_header_value, "Chunked", sizeof("Chunked")-1)
