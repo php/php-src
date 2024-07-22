@@ -85,14 +85,18 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
   PHP_ADD_SOURCES([PHP_EXT_DIR([standard])],
     [crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c])
 ], [
-  PHP_CHECK_FUNC(crypt, crypt)
-  PHP_CHECK_FUNC(crypt_r, crypt)
-  AC_CHECK_HEADERS([crypt.h])
-  AS_VAR_IF([ac_cv_func_crypt], [yes],,
-    [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
-  AS_VAR_IF([ac_cv_func_crypt_r], [yes],
-    [PHP_CRYPT_R_STYLE],
-    [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+AC_SEARCH_LIBS([crypt], [crypt],
+  [AC_DEFINE([HAVE_CRYPT], [1],
+    [Define to 1 if you have the 'crypt' function.])],
+  [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
+
+AC_SEARCH_LIBS([crypt_r], [crypt],
+  [AC_DEFINE([HAVE_CRYPT_R], [1],
+    [Define to 1 if you have the 'crypt_r' function.])],
+  [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+
+PHP_CRYPT_R_STYLE
+AC_CHECK_HEADERS([crypt.h])
 
   AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
