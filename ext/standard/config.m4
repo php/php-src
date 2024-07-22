@@ -32,12 +32,14 @@ int main(void)
   }
 
   if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    fclose(fp);
     return 0;
   }
 
   fputs("line 3\n", fp);
   rewind(fp);
   if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    fclose(fp);
     return 0;
   }
 
@@ -46,6 +48,7 @@ int main(void)
   }
 
   if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    fclose(fp);
     return 0;
   }
 
