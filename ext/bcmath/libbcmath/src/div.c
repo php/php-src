@@ -96,8 +96,7 @@ static inline void bc_standard_div(
 	 * If the temporary quotient is 0, we need to carry the digits to the next division, which is 999_0000 / 1000.
 	 * The new temporary quotient we get is 9990, with error E = 10.
 	 *
-	 * If calculate the temporary quotient using only one array of numerator and divisor, the error E can be larger than 1.
-	 * In other words, in the restoring division, the count of additions for restore increases significantly.
+	 * Because we use the restoring division we need to perform E restorations, which can be significant if E is large.
 	 *
 	 * Therefore, in order to keep the error within 1 and to limit the number of additions required for restoration to
 	 * at most one, adjust the number of high-order digits used to calculate the temporary quotient as follows.
