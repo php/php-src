@@ -60,7 +60,7 @@ namespace {
      */
     const LDAP_MODIFY_BATCH_VALUES = UNKNOWN;
 
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
     /**
      * @var int
      * @cvalue LDAP_OPT_DEREF
@@ -201,24 +201,6 @@ namespace {
      * @cvalue LDAP_OPT_X_SASL_USERNAME
      */
     const LDAP_OPT_X_SASL_USERNAME = UNKNOWN;
-#endif
-
-#ifdef HAVE_ORALDAP
-    /**
-     * @var int
-     * @cvalue GSLC_SSL_NO_AUTH
-     */
-    const GSLC_SSL_NO_AUTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue GSLC_SSL_ONEWAY_AUTH
-     */
-    const GSLC_SSL_ONEWAY_AUTH = UNKNOWN;
-    /**
-     * @var int
-     * @cvalue GSLC_SSL_TWOWAY_AUTH
-     */
-    const GSLC_SSL_TWOWAY_AUTH = UNKNOWN;
 #endif
 
 #if (LDAP_API_VERSION > 2000)
@@ -623,14 +605,7 @@ namespace {
     const LDAP_CONTROL_VLVRESPONSE = UNKNOWN;
 #endif
 
-#ifdef HAVE_ORALDAP
-    function ldap_connect(?string $uri = null, int $port = 389, string $wallet = UNKNOWN, #[\SensitiveParameter] string $password = UNKNOWN, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
-#ifdef LDAP_API_FEATURE_X_OPENLDAP
-    function ldap_connect_wallet(?string $uri = null, string $wallet, #[\SensitiveParameter] string $password, int $auth_mode = GSLC_SSL_NO_AUTH): LDAP\Connection|false {}
-#endif
-#else
     function ldap_connect(?string $uri = null, int $port = 389): LDAP\Connection|false {}
-#endif
 
     function ldap_unbind(LDAP\Connection $ldap): bool {}
 
@@ -734,7 +709,7 @@ namespace {
 
     function ldap_compare(LDAP\Connection $ldap, string $dn, string $attribute, string $value, ?array $controls = null): bool|int {}
 
-    #if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+    #if LDAP_API_VERSION > 2000
     function ldap_rename(LDAP\Connection $ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): bool {}
 
     function ldap_rename_ext(LDAP\Connection $ldap, string $dn, string $new_rdn, string $new_parent, bool $delete_old_rdn, ?array $controls = null): LDAP\Result|false {}

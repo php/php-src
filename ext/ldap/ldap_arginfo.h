@@ -1,31 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 7415695a7ae90e6abd45617baf8a9ecf9232b801 */
+ * Stub hash: 6e88a67f86cd0a445e6d1534740304e18f891d5e */
 
-#if defined(HAVE_ORALDAP)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "389")
-	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_mode, IS_LONG, 0, "GSLC_SSL_NO_AUTH")
-ZEND_END_ARG_INFO()
-#endif
-
-#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect_wallet, 0, 3, LDAP\\Connection, MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
-	ZEND_ARG_TYPE_INFO(0, wallet, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, auth_mode, IS_LONG, 0, "GSLC_SSL_NO_AUTH")
-ZEND_END_ARG_INFO()
-#endif
-
-#if !(defined(HAVE_ORALDAP))
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_connect, 0, 0, LDAP\\Connection, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, uri, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, port, IS_LONG, 0, "389")
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_unbind, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
@@ -197,7 +176,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_compare, 0, 4, MAY_BE_BOOL|
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, controls, IS_ARRAY, 1, "null")
 ZEND_END_ARG_INFO()
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_rename, 0, 5, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
@@ -208,7 +187,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_rename, 0, 5, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_rename_ext, 0, 5, LDAP\\Result, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
@@ -219,7 +198,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_rename_ext, 0, 5, LDAP\
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_get_option, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
@@ -227,7 +206,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_get_option, 0, 2, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_option, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 1)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
@@ -235,28 +214,28 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_set_option, 0, 3, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_count_references, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_first_reference, 0, 2, LDAP\\ResultEntry, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_ldap_next_reference, 0, 2, LDAP\\ResultEntry, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, entry, LDAP\\ResultEntry, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
+#if LDAP_API_VERSION > 2000 && defined(HAVE_LDAP_PARSE_REFERENCE)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_reference, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, entry, LDAP\\ResultEntry, 0)
@@ -264,7 +243,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_reference, 0, 3, _IS_
 ZEND_END_ARG_INFO()
 #endif
 
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_RESULT)
+#if LDAP_API_VERSION > 2000 && defined(HAVE_LDAP_PARSE_RESULT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_result, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, ldap, LDAP\\Connection, 0)
 	ZEND_ARG_OBJ_INFO(0, result, LDAP\\Result, 0)
@@ -360,15 +339,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_parse_exop, 0, 2, _IS_BOOL,
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(HAVE_ORALDAP)
 ZEND_FUNCTION(ldap_connect);
-#endif
-#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
-ZEND_FUNCTION(ldap_connect_wallet);
-#endif
-#if !(defined(HAVE_ORALDAP))
-ZEND_FUNCTION(ldap_connect);
-#endif
 ZEND_FUNCTION(ldap_unbind);
 ZEND_FUNCTION(ldap_bind);
 ZEND_FUNCTION(ldap_bind_ext);
@@ -405,31 +376,31 @@ ZEND_FUNCTION(ldap_errno);
 ZEND_FUNCTION(ldap_error);
 ZEND_FUNCTION(ldap_err2str);
 ZEND_FUNCTION(ldap_compare);
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_rename);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_rename_ext);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_get_option);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_set_option);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_count_references);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_first_reference);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 ZEND_FUNCTION(ldap_next_reference);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
+#if LDAP_API_VERSION > 2000 && defined(HAVE_LDAP_PARSE_REFERENCE)
 ZEND_FUNCTION(ldap_parse_reference);
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_RESULT)
+#if LDAP_API_VERSION > 2000 && defined(HAVE_LDAP_PARSE_RESULT)
 ZEND_FUNCTION(ldap_parse_result);
 #endif
 #if (defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC))
@@ -465,15 +436,7 @@ ZEND_FUNCTION(ldap_parse_exop);
 #endif
 
 static const zend_function_entry ext_functions[] = {
-#if defined(HAVE_ORALDAP)
 	ZEND_FE(ldap_connect, arginfo_ldap_connect)
-#endif
-#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
-	ZEND_FE(ldap_connect_wallet, arginfo_ldap_connect_wallet)
-#endif
-#if !(defined(HAVE_ORALDAP))
-	ZEND_FE(ldap_connect, arginfo_ldap_connect)
-#endif
 	ZEND_FE(ldap_unbind, arginfo_ldap_unbind)
 	ZEND_RAW_FENTRY("ldap_close", zif_ldap_unbind, arginfo_ldap_close, 0, NULL, NULL)
 	ZEND_FE(ldap_bind, arginfo_ldap_bind)
@@ -513,31 +476,31 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(ldap_error, arginfo_ldap_error)
 	ZEND_FE(ldap_err2str, arginfo_ldap_err2str)
 	ZEND_FE(ldap_compare, arginfo_ldap_compare)
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_rename, arginfo_ldap_rename)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_rename_ext, arginfo_ldap_rename_ext)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_get_option, arginfo_ldap_get_option)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_set_option, arginfo_ldap_set_option)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_count_references, arginfo_ldap_count_references)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_first_reference, arginfo_ldap_first_reference)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
+#if LDAP_API_VERSION > 2000
 	ZEND_FE(ldap_next_reference, arginfo_ldap_next_reference)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_REFERENCE)
+#if LDAP_API_VERSION > 2000 && defined(HAVE_LDAP_PARSE_REFERENCE)
 	ZEND_FE(ldap_parse_reference, arginfo_ldap_parse_reference)
 #endif
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) && defined(HAVE_LDAP_PARSE_RESULT)
+#if LDAP_API_VERSION > 2000 && defined(HAVE_LDAP_PARSE_RESULT)
 	ZEND_FE(ldap_parse_result, arginfo_ldap_parse_result)
 #endif
 #if (defined(LDAP_API_FEATURE_X_OPENLDAP) && defined(HAVE_3ARG_SETREBINDPROC))
@@ -599,49 +562,49 @@ static void register_ldap_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_ATTRIB", LDAP_MODIFY_BATCH_ATTRIB, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_MODTYPE", LDAP_MODIFY_BATCH_MODTYPE, CONST_PERSISTENT);
 	REGISTER_STRING_CONSTANT("LDAP_MODIFY_BATCH_VALUES", LDAP_MODIFY_BATCH_VALUES, CONST_PERSISTENT);
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_DEREF", LDAP_OPT_DEREF, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_SIZELIMIT", LDAP_OPT_SIZELIMIT, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_TIMELIMIT", LDAP_OPT_TIMELIMIT, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_NETWORK_TIMEOUT)
+#if LDAP_API_VERSION > 2000 && defined(LDAP_OPT_NETWORK_TIMEOUT)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_NETWORK_TIMEOUT", LDAP_OPT_NETWORK_TIMEOUT, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && (!defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_X_OPT_CONNECT_TIMEOUT))
+#if LDAP_API_VERSION > 2000 && (!defined(LDAP_OPT_NETWORK_TIMEOUT) && defined(LDAP_X_OPT_CONNECT_TIMEOUT))
 	REGISTER_LONG_CONSTANT("LDAP_OPT_NETWORK_TIMEOUT", LDAP_X_OPT_CONNECT_TIMEOUT, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_TIMEOUT)
+#if LDAP_API_VERSION > 2000 && defined(LDAP_OPT_TIMEOUT)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_TIMEOUT", LDAP_OPT_TIMEOUT, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_PROTOCOL_VERSION", LDAP_OPT_PROTOCOL_VERSION, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_ERROR_NUMBER", LDAP_OPT_ERROR_NUMBER, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_REFERRALS", LDAP_OPT_REFERRALS, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_RESTART)
+#if LDAP_API_VERSION > 2000 && defined(LDAP_OPT_RESTART)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_RESTART", LDAP_OPT_RESTART, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_HOST_NAME)
+#if LDAP_API_VERSION > 2000 && defined(LDAP_OPT_HOST_NAME)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_HOST_NAME", LDAP_OPT_HOST_NAME, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_ERROR_STRING", LDAP_OPT_ERROR_STRING, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)) && defined(LDAP_OPT_MATCHED_DN)
+#if LDAP_API_VERSION > 2000 && defined(LDAP_OPT_MATCHED_DN)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_MATCHED_DN", LDAP_OPT_MATCHED_DN, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_SERVER_CONTROLS", LDAP_OPT_SERVER_CONTROLS, CONST_PERSISTENT);
 #endif
-#if ((LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP))
+#if LDAP_API_VERSION > 2000
 	REGISTER_LONG_CONSTANT("LDAP_OPT_CLIENT_CONTROLS", LDAP_OPT_CLIENT_CONTROLS, CONST_PERSISTENT);
 #endif
 #if defined(LDAP_OPT_DEBUG_LEVEL)
@@ -667,15 +630,6 @@ static void register_ldap_symbols(int module_number)
 #endif
 #if defined(LDAP_OPT_X_SASL_USERNAME)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_SASL_USERNAME", LDAP_OPT_X_SASL_USERNAME, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_NO_AUTH", GSLC_SSL_NO_AUTH, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_ONEWAY_AUTH", GSLC_SSL_ONEWAY_AUTH, CONST_PERSISTENT);
-#endif
-#if defined(HAVE_ORALDAP)
-	REGISTER_LONG_CONSTANT("GSLC_SSL_TWOWAY_AUTH", GSLC_SSL_TWOWAY_AUTH, CONST_PERSISTENT);
 #endif
 #if (LDAP_API_VERSION > 2000)
 	REGISTER_LONG_CONSTANT("LDAP_OPT_X_TLS_REQUIRE_CERT", LDAP_OPT_X_TLS_REQUIRE_CERT, CONST_PERSISTENT);
@@ -863,14 +817,6 @@ static void register_ldap_symbols(int module_number)
 	REGISTER_STRING_CONSTANT("LDAP_CONTROL_VLVRESPONSE", LDAP_CONTROL_VLVRESPONSE, CONST_PERSISTENT);
 #endif
 
-#if defined(HAVE_ORALDAP)
-
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect", sizeof("ldap_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
-#endif
-#if defined(HAVE_ORALDAP) && defined(LDAP_API_FEATURE_X_OPENLDAP)
-
-	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_connect_wallet", sizeof("ldap_connect_wallet") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
-#endif
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "ldap_bind", sizeof("ldap_bind") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
