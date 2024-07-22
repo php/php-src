@@ -3582,7 +3582,7 @@ ZEND_METHOD(FFI, scope) /* {{{ */
 }
 /* }}} */
 
-static void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl) /* {{{ */
+void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl) /* {{{ */
 {
 	if (dcl) {
 		zend_ffi_type_dtor(dcl->type);

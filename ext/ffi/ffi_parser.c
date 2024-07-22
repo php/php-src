@@ -2115,6 +2115,10 @@ static int parse_declarations(int sym) {
 				}
 				zend_ffi_declare(name, name_len, &dcl);
 			}
+		} else if (sym == YY__SEMICOLON) {
+			if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);
+		} else {
+			yy_error_sym("unexpected", sym);
 		}
 		if (sym != YY__SEMICOLON) {
 			yy_error_sym("';' expected, got", sym);
