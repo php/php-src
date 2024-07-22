@@ -255,7 +255,7 @@ size_t yy_escape(char *buf, unsigned char ch)
 		case '\"': buf[0] = '\\'; buf[1] = '\"'; return 2;
 		case '\a': buf[0] = '\\'; buf[1] = '\a'; return 2;
 		case '\b': buf[0] = '\\'; buf[1] = '\b'; return 2;
-		case 27:   buf[0] = '\\'; buf[1] = '\e'; return 2;
+		case 27:   buf[0] = '\\'; buf[1] = 27; return 2;
 		case '\f': buf[0] = '\\'; buf[1] = '\f'; return 2;
 		case '\n': buf[0] = '\\'; buf[1] = '\n'; return 2;
 		case '\r': buf[0] = '\\'; buf[1] = '\r'; return 2;
