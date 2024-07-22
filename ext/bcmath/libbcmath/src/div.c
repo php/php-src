@@ -328,146 +328,146 @@ static void bc_do_div(
 	efree(numerator_vectors);
 }
 
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale)
+bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 {
 	/* divide by zero */
-	if (bc_is_zero(n2)) {
+	if (bc_is_zero(divisor)) {
 		return false;
 	}
 
 	bc_free_num(quot);
 
-	/* If n1 is zero, the quotient is always zero. */
-	if (bc_is_zero(n1)) {
+	/* If numerator is zero, the quotient is always zero. */
+	if (bc_is_zero(numerator)) {
 		*quot = bc_copy_num(BCG(_zero_));
 		return true;
 	}
 
-	char *n1ptr = n1->n_value;
-	char *n1end = n1ptr + n1->n_len + n1->n_scale - 1;
-	size_t n1_len = n1->n_len;
-	size_t n1_scale = n1->n_scale;
+	char *numeratorptr = numerator->n_value;
+	char *numeratorend = numeratorptr + numerator->n_len + numerator->n_scale - 1;
+	size_t numerator_len = numerator->n_len;
+	size_t numerator_scale = numerator->n_scale;
 
-	char *n2ptr = n2->n_value;
-	char *n2end = n2ptr + n2->n_len + n2->n_scale - 1;
-	size_t n2_len = n2->n_len;
-	size_t n2_scale = n2->n_scale;
-	size_t n2_int_right_zeros = 0;
+	char *divisorptr = divisor->n_value;
+	char *divisorend = divisorptr + divisor->n_len + divisor->n_scale - 1;
+	size_t divisor_len = divisor->n_len;
+	size_t divisor_scale = divisor->n_scale;
+	size_t divisor_int_right_zeros = 0;
 
-	/* remove n2 trailing zeros */
-	while (*n2end == 0 && n2_scale > 0) {
-		n2end--;
-		n2_scale--;
+	/* remove divisor trailing zeros */
+	while (*divisorend == 0 && divisor_scale > 0) {
+		divisorend--;
+		divisor_scale--;
 	}
-	while (*n2end == 0) {
-		n2end--;
-		n2_int_right_zeros++;
-	}
-
-	if (*n1ptr == 0 && n1_len == 1) {
-		n1ptr++;
-		n1_len = 0;
+	while (*divisorend == 0) {
+		divisorend--;
+		divisor_int_right_zeros++;
 	}
 
-	size_t n1_top_extension = 0;
-	size_t n1_bottom_extension = 0;
-	if (n2_scale > 0) {
+	if (*numeratorptr == 0 && numerator_len == 1) {
+		numeratorptr++;
+		numerator_len = 0;
+	}
+
+	size_t numerator_top_extension = 0;
+	size_t numerator_bottom_extension = 0;
+	if (divisor_scale > 0) {
 		/*
-		 * e.g. n2_scale = 4
-		 * n2 = .0002, to be 2 or n2 = 200.001, to be 200001
-		 * n1 = .03, to be 300 or n1 = .000003, to be .03
-		 * n1 may become longer than the original data length due to the addition of
+		 * e.g. divisor_scale = 4
+		 * divisor = .0002, to be 2 or divisor = 200.001, to be 200001
+		 * numerator = .03, to be 300 or numerator = .000003, to be .03
+		 * numerator may become longer than the original data length due to the addition of
 		 * trailing zeros in the integer part.
 		 */
-		n1_len += n2_scale;
-		n1_bottom_extension = n1_scale < n2_scale ? n2_scale - n1_scale : 0;
-		n1_scale = n1_scale > n2_scale ? n1_scale - n2_scale : 0;
-		n2_len += n2_scale;
-		n2_scale = 0;
-	} else if (n2_int_right_zeros > 0) {
+		numerator_len += divisor_scale;
+		numerator_bottom_extension = numerator_scale < divisor_scale ? divisor_scale - numerator_scale : 0;
+		numerator_scale = numerator_scale > divisor_scale ? numerator_scale - divisor_scale : 0;
+		divisor_len += divisor_scale;
+		divisor_scale = 0;
+	} else if (divisor_int_right_zeros > 0) {
 		/*
-		 * e.g. n2_int_right_zeros = 4
-		 * n2 = 2000, to be 2
-		 * n1 = 30, to be .03 or n1 = 30000, to be 30
-		 * Also, n1 may become longer than the original data length due to the addition of
+		 * e.g. divisor_int_right_zeros = 4
+		 * divisor = 2000, to be 2
+		 * numerator = 30, to be .03 or numerator = 30000, to be 30
+		 * Also, numerator may become longer than the original data length due to the addition of
 		 * leading zeros in the fractional part.
 		 */
-		n1_top_extension = n1_len < n2_int_right_zeros ? n2_int_right_zeros - n1_len : 0;
-		n1_len = n1_len > n2_int_right_zeros ? n1_len - n2_int_right_zeros : 0;
-		n1_scale += n2_int_right_zeros;
-		n2_len -= n2_int_right_zeros;
-		n2_scale = 0;
+		numerator_top_extension = numerator_len < divisor_int_right_zeros ? divisor_int_right_zeros - numerator_len : 0;
+		numerator_len = numerator_len > divisor_int_right_zeros ? numerator_len - divisor_int_right_zeros : 0;
+		numerator_scale += divisor_int_right_zeros;
+		divisor_len -= divisor_int_right_zeros;
+		divisor_scale = 0;
 	}
 
-	/* remove n1 leading zeros */
-	while (*n1ptr == 0 && n1_len > 0) {
-		n1ptr++;
-		n1_len--;
+	/* remove numerator leading zeros */
+	while (*numeratorptr == 0 && numerator_len > 0) {
+		numeratorptr++;
+		numerator_len--;
 	}
-	/* remove n2 leading zeros */
-	while (*n2ptr == 0) {
-		n2ptr++;
-		n2_len--;
+	/* remove divisor leading zeros */
+	while (*divisorptr == 0) {
+		divisorptr++;
+		divisor_len--;
 	}
 
 	/* Considering the scale specification, the quotient is always 0 if this condition is met */
-	if (n2_len > n1_len + scale) {
+	if (divisor_len > numerator_len + scale) {
 		*quot = bc_copy_num(BCG(_zero_));
 		return true;
 	}
 
-	/* set scale to n1 */
-	if (n1_scale > scale) {
-		size_t scale_diff = n1_scale - scale;
-		if (n1_bottom_extension > scale_diff) {
-			n1_bottom_extension -= scale_diff;
+	/* set scale to numerator */
+	if (numerator_scale > scale) {
+		size_t scale_diff = numerator_scale - scale;
+		if (numerator_bottom_extension > scale_diff) {
+			numerator_bottom_extension -= scale_diff;
 		} else {
-			n1_bottom_extension = 0;
-			n1end -= scale_diff - n1_bottom_extension;
+			numerator_bottom_extension = 0;
+			numeratorend -= scale_diff - numerator_bottom_extension;
 		}
 	} else {
-		n1_bottom_extension += scale - n1_scale;
+		numerator_bottom_extension += scale - numerator_scale;
 	}
-	n1_scale = scale;
+	numerator_scale = scale;
 
-	/* Length of n1 data that can be read */
-	size_t n1_readable_len = n1end - n1ptr + 1;
+	/* Length of numerator data that can be read */
+	size_t numerator_readable_len = numeratorend - numeratorptr + 1;
 
-	/* If n2 is 1 here, return the result of adjusting the decimal point position of n1. */
-	if (n2_len == 1 && *n2ptr == 1) {
-		if (n1_len == 0) {
-			n1_len = 1;
-			n1_top_extension++;
+	/* If divisor is 1 here, return the result of adjusting the decimal point position of numerator. */
+	if (divisor_len == 1 && *divisorptr == 1) {
+		if (numerator_len == 0) {
+			numerator_len = 1;
+			numerator_top_extension++;
 		}
-		size_t quot_scale = n1_scale > n1_bottom_extension ? n1_scale - n1_bottom_extension : 0;
-		n1_bottom_extension = n1_scale < n1_bottom_extension ? n1_bottom_extension - n1_scale : 0;
+		size_t quot_scale = numerator_scale > numerator_bottom_extension ? numerator_scale - numerator_bottom_extension : 0;
+		numerator_bottom_extension = numerator_scale < numerator_bottom_extension ? numerator_bottom_extension - numerator_scale : 0;
 
-		*quot = bc_new_num_nonzeroed(n1_len, quot_scale);
+		*quot = bc_new_num_nonzeroed(numerator_len, quot_scale);
 		char *qptr = (*quot)->n_value;
-		for (size_t i = 0; i < n1_top_extension; i++) {
+		for (size_t i = 0; i < numerator_top_extension; i++) {
 			*qptr++ = 0;
 		}
-		memcpy(qptr, n1ptr, n1_readable_len);
-		qptr += n1_readable_len;
-		for (size_t i = 0; i < n1_bottom_extension; i++) {
+		memcpy(qptr, numeratorptr, numerator_readable_len);
+		qptr += numerator_readable_len;
+		for (size_t i = 0; i < numerator_bottom_extension; i++) {
 			*qptr++ = 0;
 		}
-		(*quot)->n_sign = n1->n_sign == n2->n_sign ? PLUS : MINUS;
+		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 		return true;
 	}
 
 	size_t quot_full_len;
-	if (n2_len > n1_len) {
+	if (divisor_len > numerator_len) {
 		*quot = bc_new_num_nonzeroed(1, scale);
 		quot_full_len = 1 + scale;
 	} else {
-		*quot = bc_new_num_nonzeroed(n1_len - n2_len + 1, scale);
-		quot_full_len = n1_len - n2_len + 1 + scale;
+		*quot = bc_new_num_nonzeroed(numerator_len - divisor_len + 1, scale);
+		quot_full_len = numerator_len - divisor_len + 1 + scale;
 	}
 
 	/* do divide */
-	bc_do_div(n1end, n1_readable_len, n1_bottom_extension, n2end, n2_len, quot, quot_full_len);
-	(*quot)->n_sign = n1->n_sign == n2->n_sign ? PLUS : MINUS;
+	bc_do_div(numeratorend, numerator_readable_len, numerator_bottom_extension, divisorend, divisor_len, quot, quot_full_len);
+	(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
 	_bc_rm_leading_zeros(*quot);
 
 	return true;
