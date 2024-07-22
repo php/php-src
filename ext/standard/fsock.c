@@ -82,7 +82,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			efree(hashkey);
 		}
 
-		zend_argument_value_error(6, "must be -1 or between 0 and " ZEND_ULONG_FMT, (PHP_TIMEOUT_ULL_MAX / 1000000.0));
+		zend_argument_value_error(6, "must be -1 or between 0 and " ZEND_ULONG_FMT, ((double) PHP_TIMEOUT_ULL_MAX / 1000000.0));
 		RETURN_THROWS();
 	} else {
 #ifndef PHP_WIN32
