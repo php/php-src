@@ -298,7 +298,7 @@ static void bc_do_div(
 	}
 	bc_convert_to_vector(divisor_vectors, divisor, divisor_len);
 
-	/* Do the divide */
+	/* Do the division */
 	if (divisor_arr_size == 1) {
 		bc_fast_div(numerator_vectors, numerator_arr_size, divisor_vectors[0], quot_vectors, quot_arr_size);
 	} else {
