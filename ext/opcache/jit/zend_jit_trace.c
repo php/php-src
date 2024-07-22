@@ -7656,6 +7656,23 @@ static void zend_jit_blacklist_root_trace(const zend_op *opline, size_t offset)
 	zend_shared_alloc_unlock();
 }
 
+ZEND_EXT_API void zend_jit_blacklist_function(zend_op_array *op_array) {
+	zend_jit_op_array_trace_extension *jit_extension = (zend_jit_op_array_trace_extension *)ZEND_FUNC_INFO(op_array);
+	if (!jit_extension) {
+		return;
+	}
+
+	// First not-skipped op
+	zend_op *opline = op_array->opcodes;
+	if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+			opline++;
+		}
+	}
+
+	zend_jit_blacklist_root_trace(opline, jit_extension->offset);
+}
+
 static bool zend_jit_trace_is_bad_root(const zend_op *opline, zend_jit_trace_stop stop, size_t offset)
 {
 	const zend_op **cache_opline = JIT_G(bad_root_cache_opline);
