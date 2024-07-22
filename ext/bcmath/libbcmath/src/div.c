@@ -205,7 +205,7 @@ static inline void bc_standard_div(
 
 		/*
 		 * It is impossible for the temporary quotient to underestimate the true quotient.
-		 * Therefore a temporary quotient of 0 implies the true quotient it also 0.
+		 * Therefore a temporary quotient of 0 implies the true quotient is also 0.
 		 */
 		if (quot_guess == 0) {
 			quot_vectors[quot_top_index - i] = 0;
