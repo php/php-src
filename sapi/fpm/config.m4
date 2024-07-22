@@ -6,11 +6,17 @@ PHP_ARG_ENABLE([fpm],
   [no])
 
 dnl Configure checks.
-AC_DEFUN([PHP_FPM_CLOCK],
-[AC_CHECK_FUNCS([clock_gettime],,
-  [AC_SEARCH_LIBS([clock_gettime], [rt],
-    [ac_cv_func_clock_gettime=yes
-    AC_DEFINE([HAVE_CLOCK_GETTIME], [1])])])
+AC_DEFUN([PHP_FPM_CLOCK], [
+AC_CHECK_FUNCS([clock_gettime],, [
+  LIBS_save=$LIBS
+  AC_SEARCH_LIBS([clock_gettime], [rt], [
+    ac_cv_func_clock_gettime=yes
+    AC_DEFINE([HAVE_CLOCK_GETTIME], [1])
+    AS_VAR_IF([ac_cv_search_clock_gettime], ["none required"],,
+      [AS_VAR_APPEND([FPM_EXTRA_LIBS], [" $ac_cv_search_clock_gettime"])])
+  ])
+  LIBS=$LIBS_save
+])
 
 AS_VAR_IF([ac_cv_func_clock_gettime], [no],
   [AC_CACHE_CHECK([for clock_get_time], [php_cv_func_clock_get_time],
