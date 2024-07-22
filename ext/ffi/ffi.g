@@ -70,7 +70,6 @@ static void yy_error_sym(const char *msg, int sym);
 declarations:
 	(
 		{zend_ffi_dcl common_dcl = ZEND_FFI_ATTR_INIT;}
-		{bool has_name = false;}
 		"__extension__"?
 		declaration_specifiers(&common_dcl)
 		(
@@ -87,7 +86,6 @@ declarations:
 				/*TODO*/
 				")"
 			)?
-			{has_name = true;}
 			attributes(&dcl)?
 			initializer?
 			{zend_ffi_declare(name, name_len, &dcl);}
@@ -98,8 +96,10 @@ declarations:
 				initializer?
 				{zend_ffi_declare(name, name_len, &dcl);}
 			)*
-		)?
-		{if (!has_name && ((common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STORAGE_CLASS)) == ZEND_FFI_DCL_ENUM)) zend_ffi_cleanup_dcl(&common_dcl);}
+		|
+			/* empty */
+			{if (common_dcl.flags & ZEND_FFI_DCL_ENUM) zend_ffi_cleanup_dcl(&common_dcl);}
+		)
 		";"
 	)*
 ;

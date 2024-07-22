@@ -30,17 +30,6 @@ var_dump($ffi->TEST_THREE);
 var_dump($ffi->TEST_FOUR);
 var_dump($ffi->TEST_FIVE);
 var_dump($ffi->TEST_SIX);
-
-try {
-    $ffi = FFI::cdef("
-        enum {
-            TEST_ONE=1,
-            TEST_TWO=2,
-        } x;
-    ");
-} catch (Throwable $e) {
-    echo $e->getMessage(), "\n";
-}
 ?>
 --EXPECT--
 int(1)
@@ -49,4 +38,3 @@ int(3)
 int(4)
 int(5)
 int(6)
-Failed resolving C variable 'x'

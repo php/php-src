@@ -2012,7 +2012,6 @@ static int synpred_6(int sym) {
 static int parse_declarations(int sym) {
 	while (YY_IN_SET(sym, (YY___EXTENSION__,YY_TYPEDEF,YY_EXTERN,YY_STATIC,YY_AUTO,YY_REGISTER,YY_INLINE,YY___INLINE,YY___INLINE__,YY__NORETURN,YY__ALIGNAS,YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL,YY_CONST,YY___CONST,YY___CONST__,YY_RESTRICT,YY___RESTRICT,YY___RESTRICT__,YY_VOLATILE,YY___VOLATILE,YY___VOLATILE__,YY__ATOMIC,YY_VOID,YY_CHAR,YY_SHORT,YY_INT,YY_LONG,YY_FLOAT,YY_DOUBLE,YY_SIGNED,YY_UNSIGNED,YY__BOOL,YY__COMPLEX,YY_COMPLEX,YY___COMPLEX,YY___COMPLEX__,YY_STRUCT,YY_UNION,YY_ENUM,YY_ID), "\202\377\377\377\377\107\360\017\000\000\000\002\000")) {
 		zend_ffi_dcl common_dcl = ZEND_FFI_ATTR_INIT;
-		bool has_name = false;
 		if (sym == YY___EXTENSION__) {
 			sym = get_sym();
 		}
@@ -2038,7 +2037,6 @@ static int parse_declarations(int sym) {
 				}
 				sym = get_sym();
 			}
-			has_name = true;
 			if (YY_IN_SET(sym, (YY___ATTRIBUTE,YY___ATTRIBUTE__,YY___DECLSPEC,YY___CDECL,YY___STDCALL,YY___FASTCALL,YY___THISCALL,YY___VECTORCALL), "\000\000\000\000\000\000\360\017\000\000\000\000\000")) {
 				sym = parse_attributes(sym, &dcl);
 			}
@@ -2058,8 +2056,11 @@ static int parse_declarations(int sym) {
 				}
 				zend_ffi_declare(name, name_len, &dcl);
 			}
+		} else if (sym == YY__SEMICOLON) {
+			if (common_dcl.flags & ZEND_FFI_DCL_ENUM) zend_ffi_cleanup_dcl(&common_dcl);
+		} else {
+			yy_error_sym("unexpected", sym);
 		}
-		if (!has_name && ((common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STORAGE_CLASS)) == ZEND_FFI_DCL_ENUM)) zend_ffi_cleanup_dcl(&common_dcl);
 		if (sym != YY__SEMICOLON) {
 			yy_error_sym("';' expected, got", sym);
 		}
