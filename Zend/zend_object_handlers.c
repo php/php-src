@@ -62,7 +62,7 @@
   called, we cal __call handler.
 */
 
-ZEND_API void rebuild_object_properties_internal(zend_object *zobj) /* {{{ */
+ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {
 		zend_property_info *prop_info;
@@ -88,6 +88,8 @@ ZEND_API void rebuild_object_properties_internal(zend_object *zobj) /* {{{ */
 			}
 		}
 	}
+
+	return zobj->properties;
 }
 /* }}} */
 
@@ -130,7 +132,7 @@ ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj) /*
 ZEND_API HashTable *zend_std_get_properties(zend_object *zobj) /* {{{ */
 {
 	if (!zobj->properties) {
-		rebuild_object_properties_internal(zobj);
+		return rebuild_object_properties_internal(zobj);
 	}
 	return zobj->properties;
 }
