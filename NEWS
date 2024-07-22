@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13817 (Segmentation fault for enabled observers after pass 4).
     (Bob)
 
+- PDO_Firebird:
+  . Fix bogus fallthrough path in firebird_handle_get_attribute(). (nielsdos)
+
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
 
