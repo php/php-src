@@ -30,13 +30,11 @@
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 typedef unsigned long long php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
 #else
 #include "win32/select.h"
 #include "win32/sockets.h"
 #include "win32/console.h"
 typedef unsigned __int64 php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
 #endif
 
 #define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
