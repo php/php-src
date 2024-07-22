@@ -26,6 +26,7 @@
 
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
+#include "zend_portability.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
 	if (engine_object->ce->type == ZEND_INTERNAL_CLASS) {
@@ -302,7 +303,7 @@ PHP_METHOD(Random_Randomizer, getBytes)
 		uint64_t tmp_ret = result.result;
 		if (to_read >= sizeof(uint64_t) && result.size == sizeof(uint64_t)) {
 #ifdef WORDS_BIGENDIAN
-			tmp_ret = RANDOM_BSWAP64(tmp_ret);
+			tmp_ret = ZEND_BYTES_SWAP64(tmp_ret);
 #endif
 			memcpy(rptr, &tmp_ret, sizeof(uint64_t));
 			to_read -= sizeof(uint64_t);

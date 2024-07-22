@@ -214,31 +214,4 @@ PHPAPI ZEND_EXTERN_MODULE_GLOBALS(random)
 
 # define RANDOM_G(v)	ZEND_MODULE_GLOBALS_ACCESSOR(random, v)
 
-/* Bytes swap */
-#ifdef _MSC_VER
-#  include <stdlib.h>
-#  define RANDOM_BSWAP64(u) _byteswap_uint64(u)
-#else
-#  ifdef __GNUC__
-#    define RANDOM_BSWAP64(u) __builtin_bswap64(u)
-#  elif defined(__has_builtin)
-#    if __has_builtin(__builtin_bswap64)
-#      define RANDOM_BSWAP64(u) __builtin_bswap64(u)
-#    endif // __has_builtin(__builtin_bswap64)
-#  endif // __GNUC__
-#endif // _MSC_VER
-#ifndef RANDOM_BSWAP64
-static inline uint64_t RANDOM_BSWAP64(uint64_t u)
-{
-   return (((u & 0xff00000000000000ULL) >> 56)
-          | ((u & 0x00ff000000000000ULL) >> 40)
-          | ((u & 0x0000ff0000000000ULL) >> 24)
-          | ((u & 0x000000ff00000000ULL) >>  8)
-          | ((u & 0x00000000ff000000ULL) <<  8)
-          | ((u & 0x0000000000ff0000ULL) << 24)
-          | ((u & 0x000000000000ff00ULL) << 40)
-          | ((u & 0x00000000000000ffULL) << 56));
-}
-#endif
-
 #endif	/* PHP_RANDOM_H */
