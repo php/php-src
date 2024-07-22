@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
 
+- Standard:
+  . Fix passing non-finite timeout values in stream functions. (nielsdos)
+
 - Streams:
   . Fixed bug GH-15028 (Memory leak in ext/phar/stream.c). (nielsdos)
   . Fixed bug GH-15034 (Integer overflow on stream_notification_callback

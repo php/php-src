@@ -127,6 +127,9 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(4, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -279,6 +282,9 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(2, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);
