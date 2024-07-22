@@ -300,6 +300,10 @@ int main(void) {
   fi
   AC_MSG_RESULT([$have_shm_mmap_posix])
 
+  AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
+    [PHP_OPCACHE_CFLAGS="$PHP_OPCACHE_CFLAGS -Wno-implicit-fallthrough"],,
+    [-Werror])
+
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
 	zend_accelerator_blacklist.c \
@@ -315,7 +319,7 @@ int main(void) {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	$ZEND_JIT_SRC,
-	shared,,"-Wno-implicit-fallthrough -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1",,yes)
+	shared,,"$PHP_OPCACHE_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1",,yes)
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
