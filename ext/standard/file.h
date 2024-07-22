@@ -60,6 +60,12 @@ PHPAPI ssize_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, cha
 #define PHP_FILE_APPEND (1 << 3)
 #define PHP_FILE_NO_DEFAULT_CONTEXT (1 << 4)
 
+#ifndef _WIN32
+#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
+#else
+#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
+#endif
+
 typedef enum _php_meta_tags_token {
 	TOK_EOF = 0,
 	TOK_OPENTAG,
