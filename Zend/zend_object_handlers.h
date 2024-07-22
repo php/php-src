@@ -268,12 +268,12 @@ ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
 /* Use zend_std_get_properties_ex() */
-ZEND_API void rebuild_object_properties_internal(zend_object *zobj);
+ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
 
-static inline HashTable *zend_std_get_properties_ex(zend_object *object)
+static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
 	if (!object->properties) {
-		rebuild_object_properties_internal(object);
+		return rebuild_object_properties_internal(object);
 	}
 	return object->properties;
 }
