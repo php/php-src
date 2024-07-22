@@ -20,7 +20,9 @@ else
     SHA3_DIR="sha3/generic32lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-inplace32BI.c"
     dnl Add -Wno-implicit-fallthrough flag as it happens on 32 bit builds
-    PHP_HASH_CFLAGS="-Wno-implicit-fallthrough"
+    AX_CHECK_COMPILE_FLAG([-Wno-implicit-fallthrough],
+      [PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -Wno-implicit-fallthrough"],,
+      [-Werror])
   ],[
     AC_MSG_RESULT([yes])
     SHA3_DIR="sha3/generic64lc"
