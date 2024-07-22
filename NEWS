@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-13817 (Segmentation fault for enabled observers after pass 4).
     (Bob)
+  . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
+    (Arnaud)
 
 - PDO_Firebird:
   . Fix bogus fallthrough path in firebird_handle_get_attribute(). (nielsdos)
