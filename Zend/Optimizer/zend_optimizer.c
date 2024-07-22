@@ -792,20 +792,36 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 	}
 }
 
-static bool zend_optimizer_ignore_class(zend_class_entry *ce, zend_string *filename)
+static bool zend_optimizer_ignore_class(zval *ce_zv, zend_string *filename)
 {
+	zend_class_entry *ce = Z_PTR_P(ce_zv);
+
+	if (ce->ce_flags & ZEND_ACC_PRELOADED) {
+		Bucket *ce_bucket = (Bucket*)((uintptr_t)ce_zv - XtOffsetOf(Bucket, val));
+		size_t offset = ce_bucket - EG(class_table)->arData;
+		if (offset < EG(persistent_classes_count)) {
+			return false;
+		}
+	}
 	return ce->type == ZEND_USER_CLASS
-		&& !(ce->ce_flags & ZEND_ACC_PRELOADED)
 		&& (!ce->info.user.filename || ce->info.user.filename != filename);
 }
 
-static bool zend_optimizer_ignore_function(zend_function *fbc, zend_string *filename)
+static bool zend_optimizer_ignore_function(zval *fbc_zv, zend_string *filename)
 {
+	zend_function *fbc = Z_PTR_P(fbc_zv);
+
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
 		return false;
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
-		return !(fbc->op_array.fn_flags & ZEND_ACC_PRELOADED)
-			&& (!fbc->op_array.filename && fbc->op_array.filename != filename);
+		if (fbc->op_array.fn_flags & ZEND_ACC_PRELOADED) {
+			Bucket *fbc_bucket = (Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));
+			size_t offset = fbc_bucket - EG(function_table)->arData;
+			if (offset < EG(persistent_functions_count)) {
+				return false;
+			}
+		}
+		return !fbc->op_array.filename || fbc->op_array.filename != filename;
 	} else {
 		ZEND_ASSERT(fbc->type == ZEND_EVAL_CODE);
 		return true;
@@ -819,9 +835,9 @@ zend_class_entry *zend_optimizer_get_class_entry(
 		return ce;
 	}
 
-	ce = zend_hash_find_ptr(CG(class_table), lcname);
-	if (ce && !zend_optimizer_ignore_class(ce, op_array ? op_array->filename : NULL)) {
-		return ce;
+	zval *ce_zv = zend_hash_find(CG(class_table), lcname);
+	if (ce_zv && !zend_optimizer_ignore_class(ce_zv, op_array ? op_array->filename : NULL)) {
+		return Z_PTR_P(ce_zv);
 	}
 
 	if (op_array && op_array->scope && zend_string_equals_ci(op_array->scope->name, lcname)) {
@@ -862,9 +878,9 @@ const zend_class_constant *zend_fetch_class_const_info(
 			if (script) {
 				ce = zend_optimizer_get_class_entry(script, op_array, Z_STR_P(op1 + 1));
 			} else {
-				zend_class_entry *tmp = zend_hash_find_ptr(EG(class_table), Z_STR_P(op1 + 1));
-				if (tmp != NULL && !zend_optimizer_ignore_class(tmp, op_array->filename)) {
-					ce = tmp;
+				zval *ce_zv = zend_hash_find(EG(class_table), Z_STR_P(op1 + 1));
+				if (ce_zv && !zend_optimizer_ignore_class(ce_zv, op_array->filename)) {
+					ce = Z_PTR_P(ce_zv);
 				}
 			}
 		}
@@ -909,11 +925,12 @@ zend_function *zend_optimizer_get_called_func(
 		{
 			zend_string *function_name = Z_STR_P(CRT_CONSTANT(opline->op2));
 			zend_function *func;
+			zval *func_zv;
 			if (script && (func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
 				return func;
-			} else if ((func = zend_hash_find_ptr(EG(function_table), function_name)) != NULL) {
-				if (!zend_optimizer_ignore_function(func, op_array->filename)) {
-					return func;
+			} else if ((func_zv = zend_hash_find(EG(function_table), function_name)) != NULL) {
+				if (!zend_optimizer_ignore_function(func_zv, op_array->filename)) {
+					return Z_PTR_P(func_zv);
 				}
 			}
 			break;
@@ -923,11 +940,12 @@ zend_function *zend_optimizer_get_called_func(
 			if (opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING) {
 				zval *function_name = CRT_CONSTANT(opline->op2) + 1;
 				zend_function *func;
+				zval *func_zv;
 				if (script && (func = zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name)))) {
 					return func;
-				} else if ((func = zend_hash_find_ptr(EG(function_table), Z_STR_P(function_name))) != NULL) {
-					if (!zend_optimizer_ignore_function(func, op_array->filename)) {
-						return func;
+				} else if ((func_zv = zend_hash_find(EG(function_table), Z_STR_P(function_name))) != NULL) {
+					if (!zend_optimizer_ignore_function(func_zv, op_array->filename)) {
+						return Z_PTR_P(func_zv);
 					}
 				}
 			}
