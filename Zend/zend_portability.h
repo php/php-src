@@ -811,4 +811,52 @@ typedef union {
 } zend_max_align_t;
 #endif
 
+/* Bytes swap */
+#ifdef _MSC_VER
+#  include <stdlib.h>
+#  define ZEND_BYTES_SWAP32(u) _byteswap_ulong(u)
+#  define ZEND_BYTES_SWAP64(u) _byteswap_uint64(u)
+#elif defined(HAVE_BYTESWAP_H)
+#  include <byteswap.h>
+#  define ZEND_BYTES_SWAP32(u) bswap_32(u)
+#  define ZEND_BYTES_SWAP64(u) bswap_64(u)
+#elif defined(HAVE_SYS_BSWAP_H)
+#  include <sys/bswap.h>
+#  define ZEND_BYTES_SWAP32(u) bswap32(u)
+#  define ZEND_BYTES_SWAP64(u) bswap64(u)
+#elif defined(__GNUC__)
+#  define ZEND_BYTES_SWAP32(u) __builtin_bswap32(u)
+#  define ZEND_BYTES_SWAP64(u) __builtin_bswap64(u)
+#elif defined(__has_builtin)
+#  if __has_builtin(__builtin_bswap32)
+#    define ZEND_BYTES_SWAP32(u) __builtin_bswap32(u)
+#  endif
+#  if __has_builtin(__builtin_bswap64)
+#    define ZEND_BYTES_SWAP64(u) __builtin_bswap64(u)
+#  endif
+#endif
+
+#ifndef ZEND_BYTES_SWAP32
+static zend_always_inline uint32_t ZEND_BYTES_SWAP32(uint32_t u)
+{
+  return (((u & 0xff000000) >> 24)
+          | ((u & 0x00ff0000) >>  8)
+          | ((u & 0x0000ff00) <<  8)
+          | ((u & 0x000000ff) << 24));
+}
+#endif
+#ifndef ZEND_BYTES_SWAP64
+static zend_always_inline uint64_t ZEND_BYTES_SWAP64(uint64_t u)
+{
+   return (((u & 0xff00000000000000ULL) >> 56)
+          | ((u & 0x00ff000000000000ULL) >> 40)
+          | ((u & 0x0000ff0000000000ULL) >> 24)
+          | ((u & 0x000000ff00000000ULL) >>  8)
+          | ((u & 0x00000000ff000000ULL) <<  8)
+          | ((u & 0x0000000000ff0000ULL) << 24)
+          | ((u & 0x000000000000ff00ULL) << 40)
+          | ((u & 0x00000000000000ffULL) << 56));
+}
+#endif
+
 #endif /* ZEND_PORTABILITY_H */
