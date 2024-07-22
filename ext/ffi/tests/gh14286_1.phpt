@@ -23,6 +23,12 @@ $ffi = FFI::cdef("
         } test2;
     };
     typedef enum { TEST_SIX=6 } TestEnum3;
+    struct {
+        int x;
+    };
+    union {
+        int x;
+    };
 ");
 var_dump($ffi->TEST_ONE);
 var_dump($ffi->TEST_TWO);

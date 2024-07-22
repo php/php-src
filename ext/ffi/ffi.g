@@ -98,7 +98,7 @@ declarations:
 			)*
 		|
 			/* empty */
-			{if (common_dcl.flags & ZEND_FFI_DCL_ENUM) zend_ffi_cleanup_dcl(&common_dcl);}
+			{if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);}
 		)
 		";"
 	)*
