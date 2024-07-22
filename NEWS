@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15023 (Memory leak in Zend/zend_ini.c). (nielsdos)
   . Fixed bug GH-13330 (Append -Wno-implicit-fallthrough flag conditionally).
     (Peter Kokot)
+  . Fix uninitialized memory in network.c. (nielsdos)
 
 - Curl:
   . Fixed case when curl_error returns an empty string.

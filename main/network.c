@@ -861,7 +861,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 #if HAVE_IPV6 && HAVE_INET_PTON
 				struct sockaddr_in6 in6;
 #endif
-			} local_address;
+			} local_address = {0};
 			int local_address_len = 0;
 
 			if (sa->sa_family == AF_INET) {
@@ -873,7 +873,6 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 					local_address_len = sizeof(struct sockaddr_in);
 					local_address.in4.sin_family = sa->sa_family;
 					local_address.in4.sin_port = htons(bindport);
-					memset(&(local_address.in4.sin_zero), 0, sizeof(local_address.in4.sin_zero));
 				}
 			}
 #if HAVE_IPV6 && HAVE_INET_PTON
