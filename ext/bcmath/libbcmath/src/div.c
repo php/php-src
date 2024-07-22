@@ -98,11 +98,10 @@ static inline void bc_standard_div(
 	 *
 	 * Because we use the restoring division we need to perform E restorations, which can be significant if E is large.
 	 *
-	 * Therefore, in order to keep the error within 1 and to limit the number of additions required for restoration to
-	 * at most one, adjust the number of high-order digits used to calculate the temporary quotient as follows.
-	 * - Adjust the number of digits of divisor used in the calculation to BC_VECTOR_SIZE + 1 digit. The missing digits are
-	 *   filled in from the next array element.
-	 * - Add digits to numerator in the same way as the number of digits adjusted by divisor.
+	 * Therefore, for the error E to be at most 1 we adjust the number of high-order digits used to calculate the temporary quotient as follows:
+	 * - Include BC_VECTOR_SIZE + 1 digits of the divisor used in the calculation of the temporary quotient.
+	      The missing digits are filled in from the next array element.
+	 * - Adjust the number of digits in the numerator similarly to what was done for the divisor.
 	 *
 	 * e.g.
 	 * numerator = 123456780000
