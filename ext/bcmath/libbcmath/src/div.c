@@ -343,6 +343,17 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		return true;
 	}
 
+	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
+	if (_bc_do_compare(divisor, BCG(_one_), scale, false) == BCMATH_EQUAL) {
+		size_t quot_scale = MIN(numerator->n_scale, scale);
+		*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
+		char *qptr = (*quot)->n_value;
+		memcpy(qptr, numerator->n_value, numerator->n_len + quot_scale);
+		(*quot)->n_sign = numerator->n_sign == divisor->n_sign ? PLUS : MINUS;
+		_bc_rm_leading_zeros(*quot);
+		return true;
+	}
+
 	char *numeratorptr = numerator->n_value;
 	char *numeratorend = numeratorptr + numerator->n_len + numerator->n_scale - 1;
 	size_t numerator_len = numerator->n_len;
