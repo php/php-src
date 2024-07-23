@@ -2649,57 +2649,57 @@ ZEND_API zend_module_entry* zend_register_internal_module(zend_module_entry *mod
 /* }}} */
 
 static void zend_check_magic_method_args(
-		uint32_t num_args, const zend_class_entry *ce, const zend_function *fptr, int error_type)
+		uint32_t num_args, const zend_class_entry *ce, const zend_function_common *fptr, int error_type)
 {
-	if (fptr->common.num_args != num_args) {
+	if (fptr->num_args != num_args) {
 		if (num_args == 0) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 		} else if (num_args == 1) {
 			zend_error(error_type, "Method %s::%s() must take exactly 1 argument",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 		} else {
 			zend_error(error_type, "Method %s::%s() must take exactly %" PRIu32 " arguments",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name), num_args);
+				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name), num_args);
 		}
 		return;
 	}
 	for (uint32_t i = 0; i < num_args; i++) {
 		if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, i + 1)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 			return;
 		}
 	}
 }
 
-static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_entry *ce, const zend_function *fptr, int error_type, int arg_type)
+static void zend_check_magic_method_arg_type(uint32_t arg_num, const zend_class_entry *ce, const zend_function_common *fptr, int error_type, int arg_type)
 {
-		if (
-			ZEND_TYPE_IS_SET(fptr->common.arg_info[arg_num].type)
-			 && !(ZEND_TYPE_FULL_MASK(fptr->common.arg_info[arg_num].type) & arg_type)
-		) {
-			zend_error(error_type, "%s::%s(): Parameter #%d ($%s) must be of type %s when declared",
-				ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
-				arg_num + 1, ZSTR_VAL(fptr->common.arg_info[arg_num].name),
-				ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(arg_type))));
-		}
+	if (
+		ZEND_TYPE_IS_SET(fptr->arg_info[arg_num].type)
+		 && !(ZEND_TYPE_FULL_MASK(fptr->arg_info[arg_num].type) & arg_type)
+	) {
+		zend_error(error_type, "%s::%s(): Parameter #%d ($%s) must be of type %s when declared",
+			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name),
+			arg_num + 1, ZSTR_VAL(fptr->arg_info[arg_num].name),
+			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(arg_type))));
+	}
 }
 
-static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function *fptr, int error_type, int return_type)
+static void zend_check_magic_method_return_type(const zend_class_entry *ce, const zend_function_common *fptr, int error_type, int return_type)
 {
-	if (!(fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
+	if (!(fptr->fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 		/* For backwards compatibility reasons, do not enforce the return type if it is not set. */
 		return;
 	}
 
-	if (ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & MAY_BE_NEVER) {
+	if (ZEND_TYPE_PURE_MASK(fptr->arg_info[-1].type) & MAY_BE_NEVER) {
 		/* It is always legal to specify the never type. */
 		return;
 	}
 
-	bool is_complex_type = ZEND_TYPE_IS_COMPLEX(fptr->common.arg_info[-1].type);
-	uint32_t extra_types = ZEND_TYPE_PURE_MASK(fptr->common.arg_info[-1].type) & ~return_type;
+	bool is_complex_type = ZEND_TYPE_IS_COMPLEX(fptr->arg_info[-1].type);
+	uint32_t extra_types = ZEND_TYPE_PURE_MASK(fptr->arg_info[-1].type) & ~return_type;
 	if (extra_types & MAY_BE_STATIC) {
 		extra_types &= ~MAY_BE_STATIC;
 		is_complex_type = true;
@@ -2707,52 +2707,52 @@ static void zend_check_magic_method_return_type(const zend_class_entry *ce, cons
 
 	if (extra_types || (is_complex_type && return_type != MAY_BE_OBJECT)) {
 		zend_error(error_type, "%s::%s(): Return type must be %s when declared",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name),
+			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name),
 			ZSTR_VAL(zend_type_to_string((zend_type) ZEND_TYPE_INIT_MASK(return_type))));
 	}
 }
 
 static void zend_check_magic_method_non_static(
-		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+		const zend_class_entry *ce, const zend_function_common *fptr, int error_type)
 {
-	if (fptr->common.fn_flags & ZEND_ACC_STATIC) {
+	if (fptr->fn_flags & ZEND_ACC_STATIC) {
 		zend_error(error_type, "Method %s::%s() cannot be static",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 	}
 }
 
 static void zend_check_magic_method_static(
-		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+		const zend_class_entry *ce, const zend_function_common *fptr, int error_type)
 {
-	if (!(fptr->common.fn_flags & ZEND_ACC_STATIC)) {
+	if (!(fptr->fn_flags & ZEND_ACC_STATIC)) {
 		zend_error(error_type, "Method %s::%s() must be static",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 	}
 }
 
 static void zend_check_magic_method_public(
-		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+		const zend_class_entry *ce, const zend_function_common *fptr, int error_type)
 {
 	// TODO: Remove this warning after adding proper visibility handling.
-	if (!(fptr->common.fn_flags & ZEND_ACC_PUBLIC)) {
+	if (!(fptr->fn_flags & ZEND_ACC_PUBLIC)) {
 		zend_error(E_WARNING, "The magic method %s::%s() must have public visibility",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 	}
 }
 
 static void zend_check_magic_method_no_return_type(
-		const zend_class_entry *ce, const zend_function *fptr, int error_type)
+		const zend_class_entry *ce, const zend_function_common *fptr, int error_type)
 {
-	if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+	if (fptr->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 		zend_error_noreturn(error_type, "Method %s::%s() cannot declare a return type",
-			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->common.function_name));
+			ZSTR_VAL(ce->name), ZSTR_VAL(fptr->function_name));
 	}
 }
 
-ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
+ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function_common *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
-	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
-	 || ZSTR_VAL(fptr->common.function_name)[1] != '_') {
+	zend_string *function_name = fptr->function_name;
+	if (ZSTR_VAL(function_name)[0] != '_' || ZSTR_VAL(function_name)[1] != '_') {
 		return;
 	}
 
@@ -3175,7 +3175,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 
 		if (scope) {
 			zend_check_magic_method_implementation(
-				scope, (zend_function *)reg_function, lowercase_name, E_CORE_ERROR);
+				scope, (zend_function_common *)reg_function, lowercase_name, E_CORE_ERROR);
 			zend_add_magic_method(scope, (zend_function *)reg_function, lowercase_name);
 		}
 		ptr++;
