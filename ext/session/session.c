@@ -56,8 +56,8 @@
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps)
 
-static int php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra);
-static int (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_data, void **extra);
+static zend_result php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra);
+static zend_result (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_data, void **extra);
 static void php_session_track_init(void);
 
 /* SessionHandler class */
@@ -97,8 +97,8 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
-static int php_session_send_cookie(void);
-static int php_session_abort(void);
+static zend_result php_session_send_cookie(void);
+static zend_result php_session_abort(void);
 
 /* Initialized in MINIT, readonly otherwise. */
 static int my_module_number = 0;
@@ -122,7 +122,7 @@ static inline void php_rinit_session_globals(void) /* {{{ */
 /* }}} */
 
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
-static inline void php_rshutdown_session_globals(void) /* {{{ */
+static void php_rshutdown_session_globals(void) /* {{{ */
 {
 	/* Do NOT destroy PS(mod_user_names) here! */
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
