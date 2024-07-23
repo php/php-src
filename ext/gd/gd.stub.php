@@ -52,6 +52,11 @@ const IMG_BMP = UNKNOWN;
  * @cvalue PHP_IMG_TGA
  */
 const IMG_TGA = UNKNOWN;
+/**
+ * @var int
+ * @cvalue PHP_IMG_GD
+ */
+const IMG_GD = UNKNOWN;
 
 /* constant for webp encoding */
 

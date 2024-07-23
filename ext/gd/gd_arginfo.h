@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a9f57da0ffc7088aa327413768b5c9eb062adb4d */
+ * Stub hash: 4a55dca759d440e63bd41085b70bcae61ee22de4 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gd_info, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -914,6 +914,7 @@ static void register_gd_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IMG_WEBP", PHP_IMG_WEBP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_BMP", PHP_IMG_BMP, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMG_TGA", PHP_IMG_TGA, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_GD", PHP_IMG_GD, CONST_PERSISTENT);
 #if defined(gdWebpLossless)
 	REGISTER_LONG_CONSTANT("IMG_WEBP_LOSSLESS", gdWebpLossless, CONST_PERSISTENT);
 #endif
