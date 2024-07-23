@@ -200,15 +200,48 @@ dnl
 if test "$PHP_GD" != "no"; then
 
   if test "$PHP_EXTERNAL_GD" = "no"; then
-    extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
-                  libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c libgd/gd_avif.c \
-                  libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
-                  libgd/gdfontmb.c libgd/gdfontl.c libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c \
-                  libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
-                  libgd/gd_topal.c libgd/gd_gif_in.c libgd/gd_xbm.c libgd/gd_gif_out.c libgd/gd_security.c \
-                  libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_rotate.c libgd/gd_color_match.c \
-                  libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c \
-                  libgd/gd_bmp.c libgd/gd_tga.c"
+    extra_sources=m4_normalize(["
+      libgd/gd_avif.c
+      libgd/gd_bmp.c
+      libgd/gd_color_match.c
+      libgd/gd_crop.c
+      libgd/gd_filter.c
+      libgd/gd_gd.c
+      libgd/gd_gd2.c
+      libgd/gd_gif_in.c
+      libgd/gd_gif_out.c
+      libgd/gd_interpolation.c
+      libgd/gd_io_dp.c
+      libgd/gd_io_file.c
+      libgd/gd_io_ss.c
+      libgd/gd_io.c
+      libgd/gd_jpeg.c
+      libgd/gd_matrix.c
+      libgd/gd_pixelate.c
+      libgd/gd_png.c
+      libgd/gd_rotate.c
+      libgd/gd_security.c
+      libgd/gd_ss.c
+      libgd/gd_tga.c
+      libgd/gd_topal.c
+      libgd/gd_transform.c
+      libgd/gd_wbmp.c
+      libgd/gd_webp.c
+      libgd/gd_xbm.c
+      libgd/gd.c
+      libgd/gdcache.c
+      libgd/gdfontg.c
+      libgd/gdfontl.c
+      libgd/gdfontmb.c
+      libgd/gdfonts.c
+      libgd/gdfontt.c
+      libgd/gdft.c
+      libgd/gdhelpers.c
+      libgd/gdkanji.c
+      libgd/gdtables.c
+      libgd/gdxpm.c
+      libgd/wbmp.c
+    "])
 
 dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
@@ -227,7 +260,7 @@ dnl Various checks for GD features
     PHP_GD_JISX0208
 
     GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
-    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, [$GD_CFLAGS])
+    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared],, [$GD_CFLAGS])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
 
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
@@ -244,7 +277,7 @@ dnl Various checks for GD features
     AC_DEFINE(HAVE_LIBGD, 1, [ ])
     PHP_GD_CHECK_VERSION
 
-    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared)
+    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared])
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h])
     PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
       AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
