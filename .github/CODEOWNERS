@@ -8,7 +8,8 @@
 # When changing this file, please make sure to commit the changes to the
 # earliest supported PHP branch (PHP-X.Y) and not only to the master branch.
 # GitHub reads the CODEOWNERS file from the pull request's targeted branch.
-# Commit changes here like bug fixes.
+# Commit changes here similar to bug fixes:
+# https://github.com/php/php-src/blob/master/CONTRIBUTING.md#pull-requests
 #
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
