@@ -50,10 +50,23 @@ if test "$PHP_OPCACHE" != "no"; then
 
   if test "$PHP_OPCACHE_JIT" = "yes" ; then
     AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
-    ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c jit/ir/ir.c jit/ir/ir_strtab.c \
-      jit/ir/ir_cfg.c jit/ir/ir_sccp.c jit/ir/ir_gcm.c jit/ir/ir_ra.c jit/ir/ir_save.c \
-      jit/ir/ir_dump.c jit/ir/ir_gdb.c jit/ir/ir_perf.c jit/ir/ir_check.c \
-      jit/ir/ir_patch.c jit/ir/ir_emit.c"
+    ZEND_JIT_SRC=m4_normalize(["
+      jit/ir/ir_cfg.c
+      jit/ir/ir_check.c
+      jit/ir/ir_dump.c
+      jit/ir/ir_emit.c
+      jit/ir/ir_gcm.c
+      jit/ir/ir_gdb.c
+      jit/ir/ir_patch.c
+      jit/ir/ir_perf.c
+      jit/ir/ir_ra.c
+      jit/ir/ir_save.c
+      jit/ir/ir_sccp.c
+      jit/ir/ir_strtab.c
+      jit/ir/ir.c
+      jit/zend_jit_vm_helpers.c
+      jit/zend_jit.c
+    "])
 
     dnl Find out which ABI we are using.
     case $host_alias in
@@ -96,10 +109,8 @@ if test "$PHP_OPCACHE" != "no"; then
     PHP_SUBST([DASM_FLAGS])
     PHP_SUBST([DASM_ARCH])
 
-    JIT_CFLAGS="-I@ext_builddir@/jit/ir -D${IR_TARGET} -DIR_PHP"
-    if test "$ZEND_DEBUG" = "yes"; then
-      JIT_CFLAGS="${JIT_CFLAGS} -DIR_DEBUG"
-    fi
+    JIT_CFLAGS="-I@ext_builddir@/jit/ir -D$IR_TARGET -DIR_PHP"
+    AS_VAR_IF([ZEND_DEBUG], [yes], [JIT_CFLAGS="$JIT_CFLAGS -DIR_DEBUG"])
   fi
 
   AC_CHECK_FUNCS([mprotect shm_create_largepage])
@@ -321,22 +332,25 @@ int main(void) {
   ])
   LIBS="$LIBS_save"
 
-  PHP_NEW_EXTENSION(opcache,
-    ZendAccelerator.c \
-    zend_accelerator_blacklist.c \
-    zend_accelerator_debug.c \
-    zend_accelerator_hash.c \
-    zend_accelerator_module.c \
-    zend_persist.c \
-    zend_persist_calc.c \
-    zend_file_cache.c \
-    zend_shared_alloc.c \
-    zend_accelerator_util_funcs.c \
-    shared_alloc_shm.c \
-    shared_alloc_mmap.c \
-    shared_alloc_posix.c \
-    $ZEND_JIT_SRC,
-    shared,,"-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 ${JIT_CFLAGS}",,yes)
+  PHP_NEW_EXTENSION([opcache], m4_normalize([
+      shared_alloc_mmap.c
+      shared_alloc_posix.c
+      shared_alloc_shm.c
+      zend_accelerator_blacklist.c
+      zend_accelerator_debug.c
+      zend_accelerator_hash.c
+      zend_accelerator_module.c
+      zend_accelerator_util_funcs.c
+      zend_file_cache.c
+      zend_persist_calc.c
+      zend_persist.c
+      zend_shared_alloc.c
+      ZendAccelerator.c
+      $ZEND_JIT_SRC
+    ]),
+    [shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
+    [yes])
 
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
