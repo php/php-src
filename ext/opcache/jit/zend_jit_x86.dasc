@@ -11656,6 +11656,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 		if (Z_REFCOUNTED_P(zv)) {
 			|	ADDREF_CONST zv, r0
 		}
+		op1_addr = ret_addr;
 	} else if (opline->op1_type == IS_TMP_VAR) {
 		|	ZVAL_COPY_VALUE ret_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R0, ZREG_R2
 	} else if (opline->op1_type == IS_CV) {
