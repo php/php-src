@@ -756,6 +756,8 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 
 static const zend_module_dep spl_deps[] = {
 	ZEND_MOD_REQUIRED("json")
+	ZEND_MOD_REQUIRED("pcre")
+	ZEND_MOD_REQUIRED("standard")
 	ZEND_MOD_END
 };
 
