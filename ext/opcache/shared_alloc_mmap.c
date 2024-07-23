@@ -20,7 +20,9 @@
 */
 
 #include "zend_shared_alloc.h"
-#include "jit/zend_jit.h"
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
 
 #ifdef USE_MMAP
 
