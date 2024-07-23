@@ -48,7 +48,7 @@ typedef struct _zend_string zend_string;
 
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 # define ZEND_MAP_PTR_NEW_OFFSET() \
-	((uint32_t)(intptr_t)zend_map_ptr_new())
+	((uint32_t)(uintptr_t)zend_map_ptr_new())
 # define ZEND_MAP_PTR_IS_OFFSET(ptr) \
 	(((uintptr_t)ZEND_MAP_PTR(ptr)) & 1L)
 # define ZEND_MAP_PTR_GET(ptr) \

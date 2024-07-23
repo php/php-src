@@ -421,7 +421,11 @@ static void zend_enum_register_func(zend_class_entry *ce, zend_known_string_id n
     if (EG(active)) { // at run-time
 		ZEND_MAP_PTR_INIT(zif->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 	} else {
+#if ZTS
 		ZEND_MAP_PTR_NEW_STATIC(zif->run_time_cache);
+#else
+		ZEND_MAP_PTR_INIT(zif->run_time_cache, NULL);
+#endif
 	}
 
 	if (!zend_hash_add_ptr(&ce->function_table, name, zif)) {
