@@ -220,7 +220,7 @@ static ZEND_FUNCTION(accel_chdir)
 	ZCG(cwd_check) = true;
 }
 
-static inline zend_string* accel_getcwd(void)
+static zend_string* accel_getcwd(void)
 {
 	if (ZCG(cwd)) {
 		return ZCG(cwd);
@@ -598,7 +598,7 @@ static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong 
 static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char *str, size_t size, bool permanent)
 {
 	if (ZCG(counted)) {
-	    zend_ulong h = zend_inline_hash_func(str, size);
+		zend_ulong h = zend_inline_hash_func(str, size);
 		zend_string *ret = accel_find_interned_string_ex(h, str, size);
 
 		if (!ret) {
@@ -1102,7 +1102,7 @@ accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_
 	return statbuf.st_mtime;
 }
 
-static inline int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+static int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
 	zend_file_handle ps_handle;
 	zend_string *full_path_ptr = NULL;

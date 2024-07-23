@@ -484,7 +484,7 @@ PHP_METHOD(PDOStatement, execute)
 }
 /* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
+static void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
 {
 	if (colno < 0) {
 		zend_value_error("Column index must be greater than or equal to 0");

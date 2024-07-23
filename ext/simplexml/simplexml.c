@@ -894,7 +894,7 @@ static void sxe_dimension_delete(zend_object *object, zval *offset)
 }
 /* }}} */
 
-static inline zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine) /* {{{ */
+static zend_string *sxe_xmlNodeListGetString(xmlDocPtr doc, xmlNodePtr list, int inLine) /* {{{ */
 {
 	xmlChar *tmp = xmlNodeListGetString(doc, list, inLine);
 	zend_string *res;
@@ -1389,7 +1389,7 @@ PHP_METHOD(SimpleXMLElement, asXML)
 
 #define SXE_NS_PREFIX(ns) (ns->prefix ? (char*)ns->prefix : "")
 
-static inline void sxe_add_namespace_name_raw(zval *return_value, const char *prefix, const char *href)
+static void sxe_add_namespace_name_raw(zval *return_value, const char *prefix, const char *href)
 {
 	zend_string *key = zend_string_init(prefix, strlen(prefix), 0);
 	zval zv;

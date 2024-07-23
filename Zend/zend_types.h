@@ -1317,17 +1317,17 @@ BEGIN_EXTERN_C()
 ZEND_API zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
 	return p->refcount;
 }
-END_EXTERN_C()
 
-static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
+ZEND_API zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
 	p->refcount = rc;
 	return p->refcount;
 }
 
-static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
+ZEND_API zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 	ZEND_RC_MOD_CHECK(p);
 	return ++(p->refcount);
 }
+END_EXTERN_C()
 
 static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
 	if (!(p->u.type_info & GC_IMMUTABLE)) {

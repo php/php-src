@@ -2049,8 +2049,9 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 }
 
 
-ZEND_API extern inline uint32_t zend_gc_refcount(const zend_refcounted_h *p);
 ZEND_API extern inline uint32_t zend_gc_delref(zend_refcounted_h *p);
-ZEND_API extern zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info);
-ZEND_API extern zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info);
-ZEND_API extern zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info);
+ZEND_API extern inline uint32_t zval_gc_flags(uint32_t gc_type_info);
+ZEND_API extern inline uint32_t zval_gc_info(uint32_t gc_type_info);
+ZEND_API extern inline uint32_t zend_gc_refcount(const zend_refcounted_h *p);
+ZEND_API extern inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc);
+ZEND_API extern inline uint8_t zval_gc_type(uint32_t gc_type_info);

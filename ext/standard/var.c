@@ -783,7 +783,7 @@ static inline void php_var_serialize_string(smart_str *buf, char *str, size_t le
 }
 /* }}} */
 
-static inline bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
+static bool php_var_serialize_class_name(smart_str *buf, zval *struc) /* {{{ */
 {
 	char b[32];
 	PHP_CLASS_ATTRIBUTES;

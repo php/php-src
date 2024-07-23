@@ -32,7 +32,7 @@ static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_symbol(zend_function*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_method(zend_op_array*);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opline(phpdbg_opline_ptr_t);
 static inline phpdbg_breakbase_t *phpdbg_find_breakpoint_opcode(uint8_t);
-static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
+static phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data); /* }}} */
 
 /*
 * Note:
@@ -823,7 +823,7 @@ PHPDBG_API void phpdbg_set_breakpoint_opline_ex(phpdbg_opline_ptr_t opline) /* {
 	}
 } /* }}} */
 
-static inline void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, const phpdbg_param_t *param, const char *expr, size_t expr_len, zend_ulong hash) /* {{{ */
+static void phpdbg_create_conditional_break(phpdbg_breakcond_t *brake, const phpdbg_param_t *param, const char *expr, size_t expr_len, zend_ulong hash) /* {{{ */
 {
 	phpdbg_breakcond_t new_break;
 	uint32_t cops = CG(compiler_options);
@@ -1092,7 +1092,7 @@ static inline bool phpdbg_find_breakpoint_param(phpdbg_param_t *param, zend_exec
 	return 0;
 } /* }}} */
 
-static inline phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data) /* {{{ */
+static phpdbg_breakbase_t *phpdbg_find_conditional_breakpoint(zend_execute_data *execute_data) /* {{{ */
 {
 	phpdbg_breakcond_t *bp;
 	int breakpoint = FAILURE;
