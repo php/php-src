@@ -57,6 +57,11 @@ ZEND_API void zend_interned_strings_set_request_storage_handlers(
 	zend_string_init_existing_interned_func_t init_existing_handler);
 ZEND_API void zend_interned_strings_switch_storage(bool request);
 
+ZEND_API void zend_string_free_outline(zend_string *s);
+ZEND_API void zend_string_efree_outline(zend_string *s);
+ZEND_API void zend_string_release_outline(zend_string *s);
+ZEND_API void zend_string_release_ex_outline(zend_string *s, bool persistent);
+
 ZEND_API extern zend_string  *zend_empty_string;
 ZEND_API extern zend_string  *zend_one_char_string[256];
 ZEND_API extern zend_string **zend_known_strings;

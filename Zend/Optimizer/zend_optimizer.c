@@ -247,7 +247,7 @@ static inline int zend_optimizer_add_literal_string(zend_op_array *op_array, zen
 	return zend_optimizer_add_literal(op_array, &zv);
 }
 
-static inline void drop_leading_backslash(zval *val) {
+static void drop_leading_backslash(zval *val) {
 	if (Z_STRVAL_P(val)[0] == '\\') {
 		zend_string *str = zend_string_init(Z_STRVAL_P(val) + 1, Z_STRLEN_P(val) - 1, 0);
 		zval_ptr_dtor_nogc(val);

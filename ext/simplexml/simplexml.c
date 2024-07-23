@@ -507,7 +507,7 @@ long_dim:
 				if (node->type == XML_ATTRIBUTE_NODE) {
 					zend_throw_error(NULL, "Cannot create duplicate attribute");
 					if (value_str) {
-						zend_string_release(value_str);
+						zend_string_release_outline(value_str);
 					}
 					return &EG(error_zval);
 				}

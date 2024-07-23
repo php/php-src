@@ -58,7 +58,7 @@ static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{
 
 	new_str = php_escape_html_entities((const unsigned char *) str, len, 0, ENT_QUOTES, "utf-8");
 	written = php_output_write(ZSTR_VAL(new_str), ZSTR_LEN(new_str));
-	zend_string_free(new_str);
+	zend_string_free_outline(new_str);
 	return written;
 }
 /* }}} */
@@ -207,7 +207,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 					php_info_print("<pre>");
 					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
-					zend_string_release_ex(str, 0);
+					zend_string_release_ex_outline(str, 0);
 				} else {
 					zend_print_zval_r(tmp, 0);
 				}
@@ -225,7 +225,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 					php_info_print(ZSTR_VAL(str));
 				}
 
-				zend_tmp_string_release(tmp2);
+				zend_tmp_string_release_outline(tmp2);
 			}
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -234,7 +234,7 @@ static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-	zend_string_efree(key);
+	zend_string_efree_outline(key);
 }
 /* }}} */
 
@@ -939,7 +939,7 @@ PHPAPI ZEND_COLD void php_print_info(int flag)
 			zend_html_puts(zend_version, strlen(zend_version));
 		}
 		php_info_print_box_end();
-		zend_string_free(php_uname);
+		zend_string_free_outline(php_uname);
 	}
 
 	zend_ini_sort_entries();

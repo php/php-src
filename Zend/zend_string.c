@@ -528,3 +528,23 @@ size_t strlcat (char *__restrict dest, const char *restrict src, size_t n)
 	return result;
 }
 #endif
+
+ZEND_API void zend_string_free_outline(zend_string *s)
+{
+	zend_string_free(s);
+}
+
+ZEND_API void zend_string_efree_outline(zend_string *s)
+{
+	zend_string_efree(s);
+}
+
+ZEND_API void zend_string_release_outline(zend_string *s)
+{
+	zend_string_release(s);
+}
+
+ZEND_API void zend_string_release_ex_outline(zend_string *s, bool persistent)
+{
+	zend_string_release_ex(s, persistent);
+}
