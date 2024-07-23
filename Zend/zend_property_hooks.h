@@ -23,19 +23,21 @@
 
 BEGIN_EXTERN_C()
 
-typedef struct _zend_array zend_array;
-typedef struct _zend_class_entry zend_class_entry;
-typedef struct _zend_object zend_object;
-typedef struct _zend_object_iterator zend_object_iterator;
-typedef struct _zval_struct zval;
+/* Intentionally avoid typedef because of C99 redeclaration errors. */
+struct _zend_array;
+struct _zend_class_entry;
+struct _zend_object;
+struct _zend_object_iterator;
+struct _zval_struct;
 
 typedef enum {
 	ZEND_PROPERTY_HOOK_GET = 0,
 	ZEND_PROPERTY_HOOK_SET = 1,
 } zend_property_hook_kind;
 
-ZEND_API zend_object_iterator *zend_hooked_object_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
-ZEND_API zend_array *zend_hooked_object_build_properties(zend_object *zobj);
+ZEND_API struct _zend_object_iterator *zend_hooked_object_get_iterator(
+	struct _zend_class_entry *ce, struct _zval_struct *object, int by_ref);
+ZEND_API struct _zend_array *zend_hooked_object_build_properties(struct _zend_object *zobj);
 
 END_EXTERN_C()
 
