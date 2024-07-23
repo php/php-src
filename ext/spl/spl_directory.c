@@ -217,7 +217,7 @@ PHPAPI zend_string *spl_filesystem_object_get_path(const spl_filesystem_object *
 	return zend_string_copy(intern->path);
 } /* }}} */
 
-static inline zend_result spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
+static zend_result spl_filesystem_object_get_file_name(spl_filesystem_object *intern) /* {{{ */
 {
 	if (intern->file_name) {
 		/* already known */
