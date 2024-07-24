@@ -477,7 +477,7 @@ typedef struct _ir_insn {
 } ir_insn;
 
 /* IR Hash Tables API (private) */
-typedef struct _ir_hashtab ir_hashtab;
+struct _ir_hashtab;
 
 /* IR String Tables API (implementation in ir_strtab.c) */
 typedef struct _ir_strtab {
@@ -580,7 +580,7 @@ struct _ir_ctx {
 	int32_t            status;                  /* non-zero error code (see IR_ERROR_... macros), app may use negative codes */
 	ir_ref             fold_cse_limit;          /* CSE finds identical insns backward from "insn_count" to "fold_cse_limit" */
 	ir_insn            fold_insn;               /* temporary storage for folding engine */
-	ir_hashtab        *binding;
+	struct _ir_hashtab *binding;
 	ir_use_list       *use_lists;               /* def->use lists for each instruction */
 	ir_ref            *use_edges;               /* the actual uses: use = ctx->use_edges[ctx->use_lists[def].refs + n] */
 	ir_ref             use_edges_count;         /* number of elements in use_edges[] array */
