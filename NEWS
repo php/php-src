@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-14286 (ffi enum type (when enum has no name) make memory
     leak). (nielsdos, dstogov)
 
+- Intl:
+  . Fixed bug GH-15087 (IntlChar::foldCase()'s $option is not optional). (cmb)
+
 - Opcache:
   . Fixed bug GH-13817 (Segmentation fault for enabled observers after pass 4).
     (Bob)
