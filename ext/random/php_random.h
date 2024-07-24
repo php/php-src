@@ -37,10 +37,10 @@
 
 PHPAPI double php_combined_lcg(void);
 
-typedef struct _php_random_fallback_seed_state php_random_fallback_seed_state;
+struct _php_random_fallback_seed_state;
 
 PHPAPI uint64_t php_random_generate_fallback_seed(void);
-PHPAPI uint64_t php_random_generate_fallback_seed_ex(php_random_fallback_seed_state *state);
+PHPAPI uint64_t php_random_generate_fallback_seed_ex(struct _php_random_fallback_seed_state *state);
 
 static inline zend_long GENERATE_SEED(void)
 {
