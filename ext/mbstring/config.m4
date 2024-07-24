@@ -18,10 +18,6 @@ AC_DEFUN([PHP_MBSTRING_ADD_CFLAG], [
   PHP_MBSTRING_CFLAGS="$PHP_MBSTRING_CFLAGS $1"
 ])
 
-AC_DEFUN([PHP_MBSTRING_ADD_INSTALL_HEADERS], [
-  PHP_MBSTRING_INSTALL_HEADERS="$PHP_MBSTRING_INSTALL_HEADERS $1"
-])
-
 AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   PHP_NEW_EXTENSION(mbstring, $PHP_MBSTRING_BASE_SOURCES $PHP_MBSTRING_SOURCES, $ext_shared,, $PHP_MBSTRING_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST([MBSTRING_SHARED_LIBADD])
@@ -45,8 +41,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
 #include "$out"
 EOF
 
-  PHP_MBSTRING_ADD_INSTALL_HEADERS([mbstring.h])
-  PHP_INSTALL_HEADERS([ext/mbstring], [$PHP_MBSTRING_INSTALL_HEADERS])
+  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h])
 ])
 
 AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
@@ -80,7 +75,7 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
     AC_DEFINE([HAVE_MBREGEX], 1, [whether to have multibyte regex support])
 
     PHP_MBSTRING_ADD_BASE_SOURCES([php_mbregex.c])
-    PHP_MBSTRING_ADD_INSTALL_HEADERS([php_mbregex.h php_onig_compat.h])
+    PHP_INSTALL_HEADERS([ext/mbstring], [php_mbregex.h php_onig_compat.h])
   fi
 ])
 
@@ -133,7 +128,23 @@ AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
     libmbfl/nls/nls_tr.c
     libmbfl/nls/nls_ua.c
   ])
-  PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
+
+  PHP_INSTALL_HEADERS([ext/mbstring], m4_normalize([
+    libmbfl/config.h
+    libmbfl/mbfl/eaw_table.h
+    libmbfl/mbfl/mbfilter_8bit.h
+    libmbfl/mbfl/mbfilter_pass.h
+    libmbfl/mbfl/mbfilter_wchar.h
+    libmbfl/mbfl/mbfilter.h
+    libmbfl/mbfl/mbfl_consts.h
+    libmbfl/mbfl/mbfl_convert.h
+    libmbfl/mbfl/mbfl_defs.h
+    libmbfl/mbfl/mbfl_encoding.h
+    libmbfl/mbfl/mbfl_filter_output.h
+    libmbfl/mbfl/mbfl_language.h
+    libmbfl/mbfl/mbfl_memory_device.h
+    libmbfl/mbfl/mbfl_string.h
+  ]))
 ])
 
 dnl
