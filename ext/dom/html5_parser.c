@@ -30,6 +30,8 @@
 #include <libxml/parserInternals.h>
 #include <libxml/HTMLtree.h>
 
+typedef struct php_dom_ns_magic_token php_dom_ns_magic_token;
+
 #define WORK_LIST_INIT_SIZE 128
 /* libxml2 reserves 2 pointer-sized words for interned strings */
 #define LXML_INTERNED_STRINGS_SIZE (sizeof(void *) * 2)

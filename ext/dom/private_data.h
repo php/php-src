@@ -19,30 +19,23 @@
 
 #include "xml_common.h"
 
-struct php_dom_libxml_ns_mapper {
+struct php_libxml_private_data_header;
+
+typedef struct php_dom_libxml_ns_mapper {
 	/* This is used almost all the time for HTML documents, so it makes sense to cache this. */
 	xmlNsPtr html_ns;
 	/* Used for every prefixless namespace declaration in XML, so also very common. */
 	xmlNsPtr prefixless_xmlns_ns;
 	HashTable uri_to_prefix_map;
-};
+} php_dom_libxml_ns_mapper;
 
 typedef struct php_dom_private_data {
-	php_libxml_private_data_header header;
+	struct php_libxml_private_data_header header;
 	struct php_dom_libxml_ns_mapper ns_mapper;
 	HashTable *template_fragments;
 } php_dom_private_data;
 
-typedef struct php_libxml_private_data_header php_libxml_private_data_header;
-struct php_libxml_private_data_header;
-
-struct php_dom_private_data;
-typedef struct php_dom_private_data php_dom_private_data;
-
-struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
-
-php_libxml_private_data_header *php_dom_libxml_private_data_header(php_dom_private_data *private_data);
+struct php_libxml_private_data_header *php_dom_libxml_private_data_header(php_dom_private_data *private_data);
 php_dom_libxml_ns_mapper *php_dom_ns_mapper_from_private(php_dom_private_data *private_data);
 php_dom_private_data *php_dom_private_data_create(void);
 void php_dom_private_data_destroy(php_dom_private_data *data);
