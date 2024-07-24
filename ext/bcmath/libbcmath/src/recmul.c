@@ -33,7 +33,6 @@
 #include <stddef.h>
 #include <assert.h>
 #include <stdbool.h>
-#include "private.h"
 #include "convert.h"
 #include "zend_alloc.h"
 
