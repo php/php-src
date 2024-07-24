@@ -2635,8 +2635,8 @@ static void zend_check_magic_method_no_return_type(
 
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
-	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
-	 || ZSTR_VAL(fptr->common.function_name)[1] != '_') {
+	if (ZSTR_VAL(lcname)[0] != '_'
+	 || ZSTR_VAL(lcname)[1] != '_') {
 		return;
 	}
 
