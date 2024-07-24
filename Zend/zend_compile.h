@@ -189,7 +189,7 @@ typedef struct _zend_live_range {
 	uint32_t end;
 } zend_live_range;
 
-typedef struct _zend_property_info zend_property_info;
+struct _zend_property_info;
 
 /* Compilation context that is different for each op array. */
 typedef struct _zend_oparray_context {
@@ -204,7 +204,7 @@ typedef struct _zend_oparray_context {
 	int        last_brk_cont;
 	zend_brk_cont_element *brk_cont_array;
 	HashTable *labels;
-	const zend_property_info *active_property_info;
+	const struct _zend_property_info *active_property_info;
 	zend_property_hook_kind active_property_hook_kind;
 	bool       in_jmp_frameless_branch;
 } zend_oparray_context;
@@ -426,7 +426,7 @@ typedef struct _zend_property_info {
 	HashTable *attributes;
 	zend_class_entry *ce;
 	zend_type type;
-	const zend_property_info *prototype;
+	const struct _zend_property_info *prototype;
 	zend_function **hooks;
 } zend_property_info;
 

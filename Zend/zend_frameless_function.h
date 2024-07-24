@@ -103,19 +103,18 @@
 
 BEGIN_EXTERN_C()
 
-typedef struct _zval_struct zval;
-typedef struct _zend_op zend_op;
-typedef union _zend_function zend_function;
+struct _zval_struct;
+union _zend_function;
 
-typedef void (*zend_frameless_function_0)(zval *return_value);
-typedef void (*zend_frameless_function_1)(zval *return_value, zval *op1);
-typedef void (*zend_frameless_function_2)(zval *return_value, zval *op1, zval *op2);
-typedef void (*zend_frameless_function_3)(zval *return_value, zval *op1, zval *op2, zval *op3);
+typedef void (*zend_frameless_function_0)(struct _zval_struct *return_value);
+typedef void (*zend_frameless_function_1)(struct _zval_struct *return_value, struct _zval_struct *op1);
+typedef void (*zend_frameless_function_2)(struct _zval_struct *return_value, struct _zval_struct *op1, struct _zval_struct *op2);
+typedef void (*zend_frameless_function_3)(struct _zval_struct *return_value, struct _zval_struct *op1, struct _zval_struct *op2, struct _zval_struct *op3);
 
 extern size_t zend_flf_count;
 extern size_t zend_flf_capacity;
 ZEND_API extern void **zend_flf_handlers;
-ZEND_API extern zend_function **zend_flf_functions;
+ZEND_API extern union _zend_function **zend_flf_functions;
 
 typedef struct {
 	void *handler;

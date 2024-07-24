@@ -19,11 +19,11 @@
 
 #include <stddef.h>
 
-typedef struct _zend_string zend_string;
+struct _zend_string;
 
 typedef struct {
 	/** See smart_str_extract() */
-	zend_string *s;
+	struct _zend_string *s;
 	size_t a;
 } smart_str;
 
