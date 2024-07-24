@@ -781,7 +781,7 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	!defined(__HAIKU__)
 	size_t ret;
 
-	asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
+	__asm__ ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
           : "=r" (ret));
 	return ret;
 #elif defined(__i386__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
@@ -789,7 +789,7 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	!defined(__HAIKU__)
 	size_t ret;
 
-	asm ("leal _tsrm_ls_cache@ntpoff,%0"
+	__asm__ ("leal _tsrm_ls_cache@ntpoff,%0"
           : "=r" (ret));
 	return ret;
 #elif defined(__aarch64__)
