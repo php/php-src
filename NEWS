@@ -42,6 +42,10 @@ PHP                                                                        NEWS
   . pg_convert/pg_insert/pg_update/pg_delete ; regexes are now cached.
     (David Carlier)
 
+- Random:
+  . Fixed bug GH-15094 (php_random_default_engine() is not C++ conforming).
+    (cmb)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)

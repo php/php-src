@@ -167,10 +167,10 @@ PHPAPI void *php_random_default_status(void);
 
 static inline php_random_algo_with_state php_random_default_engine(void)
 {
-	return (php_random_algo_with_state){
-		.algo = php_random_default_algo(),
-		.state = php_random_default_status(),
-	};
+	php_random_algo_with_state raws;
+	raws.algo = php_random_default_algo();
+	raws.state = php_random_default_status();
+	return raws;
 }
 
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);
