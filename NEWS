@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
   . Throw Error exception when encountering recursion during comparison, rather
     than fatal error. (ilutov)
+  . Added missing cstddef include for C++ builds. (cmb)
 
 - BCMath:
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
