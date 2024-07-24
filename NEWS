@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Intl:
   . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
     (David Carlier)
+  . Fixed bug GH-15087 (IntlChar::foldCase()'s $option is not optional). (cmb)
 
 - Opcache:
   . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
