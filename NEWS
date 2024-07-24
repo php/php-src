@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta1
 
+- PHPDBG:
+  . array out of bounds, stack overflow handled for segfault handler on windows.
+    (David Carlier)
+
 
 01 Aug 2024, PHP 8.4.0alpha4
 
