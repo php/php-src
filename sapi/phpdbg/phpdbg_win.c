@@ -28,11 +28,15 @@ int phpdbg_exception_handler_win32(EXCEPTION_POINTERS *xp) {
 	EXCEPTION_RECORD *xr = xp->ExceptionRecord;
 	CONTEXT *xc = xp->ContextRecord;
 
-	if(xr->ExceptionCode == EXCEPTION_ACCESS_VIOLATION) {
-
-		if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1]) == SUCCESS) {
-			return EXCEPTION_CONTINUE_EXECUTION;
-		}
+	switch (xr->ExceptionCode) {
+		case EXCEPTION_ACCESS_VIOLATION:
+		case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
+		case EXCEPTION_STACK_OVERFLOW:
+			if (phpdbg_watchpoint_segfault_handler((void *)xr->ExceptionInformation[1]) == SUCCESS) {
+				return EXCEPTION_CONTINUE_EXECUTION;
+			}
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	return EXCEPTION_CONTINUE_SEARCH;
