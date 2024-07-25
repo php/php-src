@@ -56,8 +56,8 @@
 
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(ps)
 
-static zend_result php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra);
-static zend_result (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_data, void **extra);
+static int php_session_rfc1867_callback(unsigned int event, void *event_data, void **extra);
+static int (*php_session_rfc1867_orig_callback)(unsigned int event, void *event_data, void **extra);
 static void php_session_track_init(void);
 
 /* SessionHandler class */
