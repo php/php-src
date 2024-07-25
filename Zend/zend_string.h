@@ -351,10 +351,11 @@ static zend_always_inline void zend_string_release_ex(zend_string *s, bool persi
 		if (GC_DELREF(s) == 0) {
 			if (persistent) {
 				ZEND_ASSERT(GC_FLAGS(s) & IS_STR_PERSISTENT);
+				free(s);
 			} else {
 				ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+				efree(s);
 			}
-			pefree(s, persistent);
 		}
 	}
 }
