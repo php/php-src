@@ -915,6 +915,10 @@ static bool zend_jit_may_be_modified(const zend_function *func, const zend_op_ar
 
 #include "jit/zend_jit_ir.c"
 
+#if HAVE_FFI
+# include "jit/zend_jit_ir_ffi.c"
+#endif
+
 #if defined(__clang__)
 # pragma clang diagnostic pop
 #endif
