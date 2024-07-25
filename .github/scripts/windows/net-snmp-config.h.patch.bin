@@ -1,0 +1,14 @@
+--- net-snmp-config.h	2019-07-01 13:04:57.401354900 +0200
++++ net-snmp-config.h	2022-05-04 11:52:42.229867900 +0200
+@@ -1365,9 +1365,9 @@
+ # define HAVE_SSIZE_T
+ #elif defined(_MSC_VER)
+ # ifdef _M_X64
+-typedef __int64 ssize_t;
++// prevent redefine warning typedef __int64 ssize_t;
+ # else
+-typedef __int32 ssize_t;
++// prevent redefine warning typedef __int32 ssize_t;
+ # endif
+ #endif
+ 
