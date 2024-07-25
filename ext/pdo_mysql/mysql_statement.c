@@ -793,14 +793,44 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 	if (IS_PRI_KEY(F->flags)) {
 		add_next_index_string(&flags, "primary_key");
 	}
-	if (F->flags & MULTIPLE_KEY_FLAG) {
+	if (IS_MULTIPLE_KEY(F->flags)) {
 		add_next_index_string(&flags, "multiple_key");
 	}
-	if (F->flags & UNIQUE_KEY_FLAG) {
+	if (IS_UNIQUE_KEY(F->flags)) {
 		add_next_index_string(&flags, "unique_key");
 	}
 	if (IS_BLOB(F->flags)) {
 		add_next_index_string(&flags, "blob");
+	}
+	if (IS_UNSIGNED(F->flags)) {
+		add_next_index_string(&flags, "unsigned");
+	}
+	if (IS_ZEROFILL(F->flags)) {
+		add_next_index_string(&flags, "zerofill");
+	}
+	if (IS_BINARY(F->flags)) {
+		add_next_index_string(&flags, "binary");
+	}
+	if (IS_ENUM(F->flags)) {
+		add_next_index_string(&flags, "enum");
+	}
+	if (IS_AUTO_INCREMENT(F->flags)) {
+		add_next_index_string(&flags, "auto_increment");
+	}
+	if (IS_TIMESTAMP(F->flags)) {
+		add_next_index_string(&flags, "timestamp");
+	}
+	if (IS_SET(F->flags)) {
+		add_next_index_string(&flags, "set");
+	}
+	if (IS_NO_DEFAULT_VALUE(F->flags)) {
+		add_next_index_string(&flags, "no_default_value");
+	}
+	if (IS_ON_UPDATE_NOW(F->flags)) {
+		add_next_index_string(&flags, "on_update_now");
+	}
+	if (IS_NUM(F->flags)) {
+		add_next_index_string(&flags, "num");
 	}
 	str = type_to_name_native(F->type);
 	if (str) {
