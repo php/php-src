@@ -24,7 +24,7 @@ var_dump($obj);
 var_dump($obj->a);
 var_dump($obj);
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
@@ -48,7 +48,7 @@ object(C)#%d (1) {
   ["a"]=>
   int(1)
 }
-# Virtual:
+# Proxy:
 lazy proxy object(C)#%d (0) {
   ["a"]=>
   uninitialized(int)

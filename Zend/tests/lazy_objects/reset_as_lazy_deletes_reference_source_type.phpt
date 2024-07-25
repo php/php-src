@@ -32,7 +32,7 @@ var_dump($obj);
 var_dump($obj->a);
 var_dump($obj);
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = new C();
 $ref = &$obj->a;
@@ -65,7 +65,7 @@ object(C)#%d (1) {
   ["a"]=>
   int(1)
 }
-# Virtual:
+# Proxy:
 TypeError: Cannot assign string to reference held by property C::$a of type int
 lazy proxy object(C)#%d (0) {
   ["a"]=>

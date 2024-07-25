@@ -16,7 +16,7 @@ $obj = $reflector->newLazyGhost(function ($obj) {
 });
 var_dump($obj);
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
@@ -28,6 +28,6 @@ var_dump($obj);
 # Ghost:
 object(C)#%d (0) {
 }
-# Virtual:
+# Proxy:
 object(C)#%d (0) {
 }

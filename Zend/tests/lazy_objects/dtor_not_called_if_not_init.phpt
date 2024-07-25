@@ -23,7 +23,7 @@ print "After newLazyGhost\n";
 // Does not call destructor
 $obj = null;
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 print "In newLazyProxy\n";
 $obj = $reflector->newLazyProxy(function () {
@@ -38,6 +38,6 @@ $obj = null;
 # Ghost:
 In newLazyGhost
 After newLazyGhost
-# Virtual:
+# Proxy:
 In newLazyProxy
 After newLazyGhost

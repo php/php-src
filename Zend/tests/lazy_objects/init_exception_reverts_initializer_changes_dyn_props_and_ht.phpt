@@ -52,8 +52,8 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     throw new Exception('initializer exception');
 });
 
-// Initializer effects on the virtual proxy are not reverted
-test('Virtual', $obj);
+// Initializer effects on the proxy are not reverted
+test('Proxy', $obj);
 
 --EXPECTF--
 # Ghost:
@@ -68,7 +68,7 @@ lazy ghost object(C)#%d (1) {
   int(0)
 }
 Is lazy: 1
-# Virtual:
+# Proxy:
 array(0) {
 }
 string(11) "initializer"

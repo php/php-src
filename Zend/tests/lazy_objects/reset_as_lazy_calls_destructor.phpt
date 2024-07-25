@@ -30,7 +30,7 @@ print "After makeLazy\n";
 var_dump($obj->a);
 $obj = null;
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = new C();
 print "In makeLazy\n";
@@ -52,7 +52,7 @@ After makeLazy
 string(11) "initializer"
 int(1)
 string(13) "C::__destruct"
-# Virtual:
+# Proxy:
 In makeLazy
 string(13) "C::__destruct"
 After makeLazy

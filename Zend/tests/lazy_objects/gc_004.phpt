@@ -31,8 +31,8 @@ function ghost() {
     gc_collect_cycles();
 }
 
-function virtual() {
-    printf("# Virtual:\n");
+function proxy() {
+    printf("# Proxy:\n");
 
     $canary = new Canary();
 
@@ -51,7 +51,7 @@ function virtual() {
 }
 
 ghost();
-virtual();
+proxy();
 
 ?>
 ==DONE==
@@ -60,7 +60,7 @@ virtual();
 object(C)#%d (0) {
 }
 string(10) "__destruct"
-# Virtual:
+# Proxy:
 object(C)#%d (0) {
 }
 string(10) "__destruct"

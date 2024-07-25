@@ -55,8 +55,8 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     throw new Exception('initializer exception');
 });
 
-// Initializer effects on the virtual proxy are not reverted
-test('Virtual', $obj);
+// Initializer effects on the proxy are not reverted
+test('Proxy', $obj);
 
 --EXPECTF--
 # Ghost:
@@ -76,7 +76,7 @@ Is lazy: 1
 
 Warning: Undefined variable $table in %s on line %d
 NULL
-# Virtual:
+# Proxy:
 array(1) {
   ["c"]=>
   int(0)

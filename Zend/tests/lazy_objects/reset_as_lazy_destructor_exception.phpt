@@ -32,7 +32,7 @@ try {
 // Object was not made lazy
 var_dump(!$reflector->isUninitializedLazyObject($obj));
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = new C();
 try {
@@ -52,6 +52,6 @@ var_dump(!(new ReflectionClass($obj))->isUninitializedLazyObject($obj));
 # Ghost:
 Exception: C::__destruct
 bool(true)
-# Virtual:
+# Proxy:
 Exception: C::__destruct
 bool(true)

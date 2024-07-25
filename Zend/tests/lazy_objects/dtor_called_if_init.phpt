@@ -25,10 +25,10 @@ function ghost() {
     var_dump($obj->a);
 }
 
-function virtual() {
+function proxy() {
     $reflector = new ReflectionClass(C::class);
 
-    print "# Virtual:\n";
+    print "# Proxy:\n";
 
     print "In makeLazy\n";
     $obj = $reflector->newLazyProxy(function () {
@@ -41,7 +41,7 @@ function virtual() {
 }
 
 ghost();
-virtual();
+proxy();
 
 --EXPECTF--
 # Ghost:
@@ -54,7 +54,7 @@ object(C)#%d (1) {
   ["a"]=>
   int(1)
 }
-# Virtual:
+# Proxy:
 In makeLazy
 After makeLazy
 string(11) "initializer"
