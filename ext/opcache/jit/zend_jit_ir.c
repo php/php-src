@@ -7335,6 +7335,9 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 				}
 				op2_addr = real_addr;
 			}
+			if (may_throw) {
+				jit_SET_EX_OPLINE(jit, opline);
+			}
 
 			ref = ir_CALL_2(IR_BOOL, ir_CONST_FC_FUNC(zend_is_identical),
 				jit_ZVAL_ADDR(jit, op1_addr),
