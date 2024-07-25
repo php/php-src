@@ -843,6 +843,10 @@ static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *memb
 
 #include "jit/zend_jit_ir.c"
 
+#if HAVE_FFI
+# include "jit/zend_jit_ir_ffi.c"
+#endif
+
 #if defined(__clang__)
 # pragma clang diagnostic pop
 #endif
