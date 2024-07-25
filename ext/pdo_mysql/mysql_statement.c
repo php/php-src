@@ -857,6 +857,7 @@ static int pdo_mysql_stmt_col_meta(pdo_stmt_t *stmt, zend_long colno, zval *retu
 	add_assoc_long(return_value, "pdo_type", param_type);
 
 	add_assoc_zval(return_value, "flags", &flags);
+	add_assoc_long(return_value, "native_flags", F->flags);
 	add_assoc_string(return_value, "table", (char *) (F->table?F->table : ""));
 
 	PDO_DBG_RETURN(SUCCESS);
