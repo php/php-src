@@ -31,14 +31,14 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     return new C();
 });
 
-test('Virtual', $obj);
+test('Proxy', $obj);
 
 --EXPECT--
 # Ghost:
 string(11) "initializer"
 string(14) "C::__construct"
 string(24) "O:1:"C":1:{s:1:"a";i:1;}"
-# Virtual:
+# Proxy:
 string(11) "initializer"
 string(14) "C::__construct"
 string(24) "O:1:"C":1:{s:1:"a";i:1;}"

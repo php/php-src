@@ -42,7 +42,7 @@ try {
 }
 var_dump($obj);
 
-print "# Virtual initializer must return an instance of a compatible class:\n";
+print "# Proxy initializer must return an instance of a compatible class:\n";
 print "## Valid cases:\n";
 
 $tests = [
@@ -111,7 +111,7 @@ lazy ghost object(C)#%d (0) {
   ["b"]=>
   uninitialized(int)
 }
-# Virtual initializer must return an instance of a compatible class:
+# Proxy initializer must return an instance of a compatible class:
 ## Valid cases:
 ## C vs C
 string(11) "initializer"

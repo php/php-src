@@ -22,7 +22,7 @@ $obj = $reflector->newLazyGhost(function ($obj) {
 
 var_dump(json_encode($obj));
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
@@ -36,7 +36,7 @@ var_dump(json_encode($obj));
 string(11) "initializer"
 string(14) "C::__construct"
 string(7) "{"a":1}"
-# Virtual:
+# Proxy:
 string(11) "initializer"
 string(14) "C::__construct"
 string(7) "{"a":1}"

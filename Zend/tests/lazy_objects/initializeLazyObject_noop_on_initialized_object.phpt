@@ -37,7 +37,7 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     return $c;
 });
 
-test('Virtual', $obj);
+test('Proxy', $obj);
 
 --EXPECTF--
 # Ghost:
@@ -49,7 +49,7 @@ object(C)#%d (1) {
   int(1)
 }
 bool(true)
-# Virtual:
+# Proxy:
 string(11) "initializer"
 int(1)
 bool(true)

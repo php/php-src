@@ -16,7 +16,7 @@ try {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 try {
     $obj = $reflector->newLazyProxy(function ($obj) {
@@ -30,5 +30,5 @@ try {
 --EXPECTF--
 # Ghost:
 Error: Cannot make instance of internal class lazy: DateTime is internal
-# Virtual:
+# Proxy:
 Error: Cannot make instance of internal class lazy: DateTime is internal

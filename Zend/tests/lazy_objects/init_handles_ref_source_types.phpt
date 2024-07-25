@@ -29,7 +29,7 @@ function test(string $name, object $obj) {
     var_dump($obj);
 
     try {
-        // $refA retained its reference source type (except for the virtual
+        // $refA retained its reference source type (except for the proxy
         // case: its the responsibility of the initializer to propagate
         // pre-initialized properties to the instance)
         $refA = 1;
@@ -58,7 +58,7 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     return new C(null);
 });
 
-test('Virtual', $obj);
+test('Proxy', $obj);
 --EXPECTF--
 # Ghost:
 lazy ghost object(C)#%d (2) {
@@ -78,7 +78,7 @@ object(C)#%d (3) {
   NULL
 }
 TypeError: Cannot assign int to reference held by property C::$a of type ?C
-# Virtual:
+# Proxy:
 lazy proxy object(C)#%d (2) {
   ["a"]=>
   &NULL

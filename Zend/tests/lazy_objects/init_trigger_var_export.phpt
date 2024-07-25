@@ -23,7 +23,7 @@ $obj = $reflector->newLazyGhost(function ($obj) {
 var_export($obj);
 print "\n";
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
@@ -39,7 +39,7 @@ string(14) "C::__construct"
 \C::__set_state(array(
    'a' => 1,
 ))
-# Virtual:
+# Proxy:
 string(11) "initializer"
 string(14) "C::__construct"
 \C::__set_state(array(

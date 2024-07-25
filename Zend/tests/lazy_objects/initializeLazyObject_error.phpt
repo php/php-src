@@ -36,7 +36,7 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     throw new \Exception('initializer exception');
 });
 
-test('Virtual', $obj);
+test('Proxy', $obj);
 
 --EXPECT--
 # Ghost:
@@ -44,7 +44,7 @@ bool(false)
 string(11) "initializer"
 initializer exception
 bool(false)
-# Virtual:
+# Proxy:
 bool(false)
 string(11) "initializer"
 initializer exception

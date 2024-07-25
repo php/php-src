@@ -25,7 +25,7 @@ var_dump((array)$obj);
 $obj->a = 2;
 var_dump((array)$obj);
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
@@ -47,7 +47,7 @@ array(1) {
   ["a"]=>
   int(2)
 }
-# Virtual:
+# Proxy:
 array(0) {
 }
 string(11) "initializer"

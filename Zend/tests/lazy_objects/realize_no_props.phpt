@@ -53,7 +53,7 @@ $obj3 = (new ReflectionClass(C::class))->newLazyGhost(function () {
     var_dump("initializer");
 });
 
-test('Virtual', $obj, $obj2, $obj3);
+test('Proxy', $obj, $obj2, $obj3);
 
 --EXPECTF--
 # Ghost:
@@ -66,7 +66,7 @@ object(D)#%d (0) {
 bool(false)
 object(C)#%d (0) {
 }
-# Virtual:
+# Proxy:
 bool(false)
 object(C)#%d (0) {
 }

@@ -47,14 +47,14 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     throw new Exception('initializer exception');
 });
 
-test('Virtual', $obj);
+test('Proxy', $obj);
 
 --EXPECT--
 # Ghost:
 string(11) "initializer"
 initializer exception
 Is lazy: 1
-# Virtual:
+# Proxy:
 string(11) "initializer"
 initializer exception
 Is lazy: 1

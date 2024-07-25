@@ -34,12 +34,12 @@ $obj = $reflector->newLazyProxy(function ($obj) {
     return new C();
 });
 
-test('Virtual', $obj);
+test('Proxy', $obj);
 
 --EXPECT--
 # Ghost
 Initialized:
 bool(false)
-# Virtual
+# Proxy
 Initialized:
 bool(false)

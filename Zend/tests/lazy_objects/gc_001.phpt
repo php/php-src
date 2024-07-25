@@ -26,8 +26,8 @@ function ghost() {
     gc_collect_cycles();
 }
 
-function virtual() {
-    printf("# Virtual:\n");
+function proxy() {
+    printf("# Proxy:\n");
     $canary = new Canary();
 
     $obj = (new ReflectionClass(C::class))->newInstanceWithoutConstructor();
@@ -42,13 +42,13 @@ function virtual() {
 }
 
 ghost();
-virtual();
+proxy();
 
 ?>
 ==DONE==
 --EXPECT--
 # Ghost:
 string(10) "__destruct"
-# Virtual:
+# Proxy:
 string(10) "__destruct"
 ==DONE==

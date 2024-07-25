@@ -149,7 +149,7 @@ $factory = function () use ($reflector) {
     });
 };
 
-test('Virtual', $factory);
+test('Proxy', $factory);
 
 ?>
 --EXPECT--
@@ -250,7 +250,7 @@ ReflectionException:
 
 setRawValueWithoutLazyInitialization():
 ReflectionException: 
-# Virtual:
+# Proxy:
 
 ## Property [ private $priv = 'privB' ]
 

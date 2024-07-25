@@ -21,7 +21,7 @@ try {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
 
-printf("# Virtual:\n");
+printf("# Proxy:\n");
 
 $obj = new C();
 $reflector->resetAsLazyProxy($obj, function () {});
@@ -51,6 +51,6 @@ try {
 --EXPECT--
 # Ghost:
 ReflectionException: Object is already lazy
-# Virtual:
+# Proxy:
 ReflectionException: Object is already lazy
 ==DONE==

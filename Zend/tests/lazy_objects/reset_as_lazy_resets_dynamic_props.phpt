@@ -31,7 +31,7 @@ var_dump($obj);
 var_dump($obj->a);
 var_dump($obj);
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = new C();
 $reflector->resetAsLazyProxy($obj, function ($obj) {
@@ -59,7 +59,7 @@ object(C)#%d (2) {
   object(Canary)#%d (0) {
   }
 }
-# Virtual:
+# Proxy:
 string(18) "Canary::__destruct"
 string(18) "Canary::__destruct"
 lazy proxy object(C)#%d (0) {

@@ -24,7 +24,7 @@ foreach ($obj as $prop => $value) {
     var_dump($prop, $value);
 }
 
-print "# Virtual:\n";
+print "# Proxy:\n";
 
 $obj = $reflector->newLazyProxy(function ($obj) {
     var_dump("initializer");
@@ -41,7 +41,7 @@ string(11) "initializer"
 string(14) "C::__construct"
 string(1) "a"
 int(1)
-# Virtual:
+# Proxy:
 string(11) "initializer"
 string(14) "C::__construct"
 string(1) "a"
