@@ -6398,10 +6398,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							}
 						}
 #ifdef HAVE_FFI
-						if ((opline->opcode == ZEND_FETCH_OBJ_R
-						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
-						  || opline->opcode == ZEND_FETCH_OBJ_W)
-						 && op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
+						if (op1_ffi_type && op1_ffi_type->kind == ZEND_FFI_TYPE_STRUCT) {
 							zend_ffi_field *field = zend_hash_find_ptr(&op1_ffi_type->record.fields,
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 
