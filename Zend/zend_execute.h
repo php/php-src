@@ -542,7 +542,7 @@ ZEND_COLD void zend_match_unhandled_error(const zval *value);
 /* Call this to handle the timeout or the interrupt function. It will not clear
  * the EG(vm_interrupt).
  */
-ZEND_COLD void zend_interrupt_or_timeout(zend_execute_data *call);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_interrupt_or_timeout(zend_execute_data *call);
 
 static zend_always_inline void zend_interrupt_or_timeout_check(zend_execute_data *call)
 {

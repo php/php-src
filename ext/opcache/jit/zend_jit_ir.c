@@ -3075,6 +3075,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_pre_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_post_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_rope_end);
+	REGISTER_HELPER(zend_interrupt_or_timeout);
 
 #ifndef ZTS
 	REGISTER_DATA(EG(current_execute_data));
@@ -10191,6 +10192,12 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			jit_observer_fcall_end(jit, rx, res_ref);
 		}
 
+		// JIT: if (EG(vm_interrupt)) zend_interrupt_or_timeout(execute_data);
+		ir_ref if_interrupt = ir_IF(ir_LOAD_U8(jit_EG(vm_interrupt)));
+		ir_IF_TRUE_cold(if_interrupt);
+		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_interrupt_or_timeout), rx);
+		ir_MERGE_WITH_EMPTY_FALSE(if_interrupt);
+
 		// JIT: EG(current_execute_data) = execute_data;
 		ir_STORE(jit_EG(current_execute_data), jit_FP(jit));
 
@@ -10290,20 +10297,6 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		// JIT: if (UNEXPECTED(EG(exception) != NULL)) {
 		ir_GUARD_NOT(ir_LOAD_A(jit_EG_exception(jit)),
 			jit_STUB_ADDR(jit, jit_stub_icall_throw));
-
-		// TODO: Can we avoid checking for interrupts after each call ???
-		if (trace && jit->last_valid_opline != opline) {
-			int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, ZEND_JIT_EXIT_TO_VM);
-
-			exit_addr = zend_jit_trace_get_exit_addr(exit_point);
-			if (!exit_addr) {
-				return 0;
-			}
-		} else {
-			exit_addr = NULL;
-		}
-
-		zend_jit_check_timeout(jit, opline + 1, exit_addr);
 
 		if ((!trace || !func) && opline->opcode != ZEND_DO_ICALL) {
 			jit_LOAD_IP_ADDR(jit, opline + 1);
