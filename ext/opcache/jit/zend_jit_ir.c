@@ -10342,7 +10342,7 @@ static int zend_jit_constructor(zend_jit_ctx *jit, const zend_op *opline, const 
 		}
 	}
 
-    /* override predecessors of the next block */
+	/* override predecessors of the next block */
 	ZEND_ASSERT(jit->ssa->cfg.blocks[next_block].predecessors_count == 1);
 	if (!jit->ctx.control) {
 		ZEND_ASSERT(jit->bb_edges[jit->bb_predecessors[next_block]]);
