@@ -1857,7 +1857,7 @@ static void jit_OBJ_RELEASE(zend_jit_ctx  *jit, ir_ref ref)
 	ir_MERGE_list(end_inputs);
 }
 
-static int zend_jit_check_timeout(zend_jit_ctx *jit, const zend_op *opline, const void *exit_addr)
+static void zend_jit_check_timeout(zend_jit_ctx *jit, const zend_op *opline, const void *exit_addr)
 {
 	ir_ref ref = ir_LOAD_U8(jit_EG(vm_interrupt));
 
@@ -1873,7 +1873,6 @@ static int zend_jit_check_timeout(zend_jit_ctx *jit, const zend_op *opline, cons
 		ir_IJMP(jit_STUB_ADDR(jit, jit_stub_interrupt_handler));
 		ir_IF_FALSE(if_timeout);
 	}
-	return 1;
 }
 
 /* stubs */
@@ -2451,9 +2450,7 @@ static int zend_jit_trace_exit_stub(zend_jit_ctx *jit)
 	}
 
 	// check for interrupt (try to avoid this ???)
-	if (!zend_jit_check_timeout(jit, NULL, NULL)) {
-		return 0;
-	}
+	zend_jit_check_timeout(jit, NULL, NULL);
 
 	addr = zend_jit_orig_opline_handler(jit);
 	if (GCC_GLOBAL_REGS) {
@@ -10306,9 +10303,7 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			exit_addr = NULL;
 		}
 
-		if (!zend_jit_check_timeout(jit, opline + 1, exit_addr)) {
-			return 0;
-		}
+		zend_jit_check_timeout(jit, opline + 1, exit_addr);
 
 		if ((!trace || !func) && opline->opcode != ZEND_DO_ICALL) {
 			jit_LOAD_IP_ADDR(jit, opline + 1);
