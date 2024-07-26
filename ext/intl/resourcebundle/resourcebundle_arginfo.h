@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e302e5ca1abcb9b52e3c14abbd38b9e8f1461390 */
+ * Stub hash: 123046c3d095458d652a6b7f77ce88752579dbca */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ResourceBundle___construct, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
@@ -16,6 +16,14 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ResourceBundle_get, 0, 1, ResourceBundle, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL)
 	ZEND_ARG_TYPE_MASK(0, index, MAY_BE_STRING|MAY_BE_LONG, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, fallback, _IS_BOOL, 0, "true")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_ResourceBundle_offsetGet, 0, 1, ResourceBundle, MAY_BE_ARRAY|MAY_BE_STRING|MAY_BE_LONG|MAY_BE_NULL)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ResourceBundle_offsetExists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ResourceBundle_count, 0, 0, IS_LONG, 0)
@@ -36,6 +44,8 @@ ZEND_END_ARG_INFO()
 ZEND_METHOD(ResourceBundle, __construct);
 ZEND_FUNCTION(resourcebundle_create);
 ZEND_METHOD(ResourceBundle, get);
+ZEND_METHOD(ResourceBundle, offsetGet);
+ZEND_METHOD(ResourceBundle, offsetExists);
 ZEND_FUNCTION(resourcebundle_count);
 ZEND_FUNCTION(resourcebundle_locales);
 ZEND_FUNCTION(resourcebundle_get_error_code);
@@ -46,6 +56,8 @@ static const zend_function_entry class_ResourceBundle_methods[] = {
 	ZEND_ME(ResourceBundle, __construct, arginfo_class_ResourceBundle___construct, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("create", zif_resourcebundle_create, arginfo_class_ResourceBundle_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_ME(ResourceBundle, get, arginfo_class_ResourceBundle_get, ZEND_ACC_PUBLIC)
+	ZEND_ME(ResourceBundle, offsetGet, arginfo_class_ResourceBundle_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(ResourceBundle, offsetExists, arginfo_class_ResourceBundle_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("count", zif_resourcebundle_count, arginfo_class_ResourceBundle_count, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getLocales", zif_resourcebundle_locales, arginfo_class_ResourceBundle_getLocales, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getErrorCode", zif_resourcebundle_get_error_code, arginfo_class_ResourceBundle_getErrorCode, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -54,14 +66,14 @@ static const zend_function_entry class_ResourceBundle_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable)
+static zend_class_entry *register_class_ResourceBundle(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_DimensionReadable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ResourceBundle", class_ResourceBundle_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
-	zend_class_implements(class_entry, 2, class_entry_IteratorAggregate, class_entry_Countable);
+	zend_class_implements(class_entry, 3, class_entry_IteratorAggregate, class_entry_Countable, class_entry_DimensionReadable);
 
 	return class_entry;
 }

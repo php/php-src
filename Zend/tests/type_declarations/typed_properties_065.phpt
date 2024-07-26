@@ -21,10 +21,15 @@ var_dump($a->foo);
 $a[0] .= "e50";
 var_dump($a->foo);
 
-$a[0]--;
+try {
+    $a[0]--;
+} catch (Error $e) { echo $e->getMessage(), "\n"; }
 var_dump($a->foo);
 
---$a[0];
+try {
+    --$a[0];
+} catch (Error $e) { echo $e->getMessage(), "\n"; }
+
 var_dump($a->foo);
 
 $a->foo = PHP_INT_MIN;
@@ -59,13 +64,15 @@ offsetSet(11)
 int(1)
 offsetSet(1e50)
 int(1)
-int(0)
-int(-1)
-Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
+Cannot increment/decrement object offsets
+int(1)
+Cannot increment/decrement object offsets
+int(1)
+Cannot increment/decrement object offsets
 integer
-Cannot decrement a reference held by property ArrayAccess@anonymous::$foo of type int past its minimal value
+Cannot increment/decrement object offsets
 integer
-Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
+Cannot increment/decrement object offsets
 integer
-Cannot increment a reference held by property ArrayAccess@anonymous::$foo of type int past its maximal value
+Cannot increment/decrement object offsets
 integer

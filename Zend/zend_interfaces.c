@@ -22,11 +22,11 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces_arginfo.h"
 #include "zend_property_hooks.h"
+#include "zend_interfaces_dimension.h"
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
-ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
 ZEND_API zend_class_entry *zend_ce_countable;
 ZEND_API zend_class_entry *zend_ce_stringable;
@@ -380,28 +380,6 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 }
 /* }}} */
 
-/* {{{ zend_implement_arrayaccess */
-static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	ZEND_ASSERT(!class_type->arrayaccess_funcs_ptr && "ArrayAccess funcs already set?");
-	zend_class_arrayaccess_funcs *funcs_ptr = class_type->type == ZEND_INTERNAL_CLASS
-		? pemalloc(sizeof(zend_class_arrayaccess_funcs), 1)
-		: zend_arena_alloc(&CG(arena), sizeof(zend_class_arrayaccess_funcs));
-	class_type->arrayaccess_funcs_ptr = funcs_ptr;
-
-	funcs_ptr->zf_offsetget = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
-	funcs_ptr->zf_offsetexists = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetexists", sizeof("offsetexists") - 1);
-	funcs_ptr->zf_offsetset = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetset", sizeof("offsetset") - 1);
-	funcs_ptr->zf_offsetunset = zend_hash_str_find_ptr(
-		&class_type->function_table, "offsetunset", sizeof("offsetunset") - 1);
-
-	return SUCCESS;
-}
-/* }}} */
-
 /* {{{ zend_user_serialize */
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
@@ -658,8 +636,7 @@ ZEND_API void zend_register_interfaces(void)
 	zend_ce_serializable = register_class_Serializable();
 	zend_ce_serializable->interface_gets_implemented = zend_implement_serializable;
 
-	zend_ce_arrayaccess = register_class_ArrayAccess();
-	zend_ce_arrayaccess->interface_gets_implemented = zend_implement_arrayaccess;
+	zend_register_dimension_interfaces();
 
 	zend_ce_countable = register_class_Countable();
 

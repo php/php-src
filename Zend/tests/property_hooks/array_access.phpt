@@ -45,5 +45,6 @@ bool(true)
 Collection::offsetSet
 string(3) "foo"
 Collection::offsetExists
+Collection::offsetGet
 bool(true)
 Collection::offsetUnset

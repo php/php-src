@@ -316,7 +316,7 @@ typedef struct _zend_fcall_info_cache {
 		class_container.interfaces = NULL;						\
 		class_container.get_iterator = NULL;					\
 		class_container.iterator_funcs_ptr = NULL;				\
-		class_container.arrayaccess_funcs_ptr = NULL;			\
+		class_container.dimension_handlers = NULL;				\
 		class_container.info.internal.module = NULL;			\
 		class_container.info.internal.builtin_functions = functions;	\
 	}

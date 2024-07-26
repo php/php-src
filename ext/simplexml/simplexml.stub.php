@@ -9,7 +9,7 @@ function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElem
 function simplexml_import_dom(object $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
 /** @not-serializable */
-class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
+class SimpleXMLElement implements Stringable, Countable, RecursiveIterator, DimensionFetchable, DimensionWritable, FetchAppendable, DimensionUnsetable
 {
     /** @tentative-return-type */
     public function xpath(string $expression): array|null|false {}
@@ -74,6 +74,20 @@ class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 
     /** @tentative-return-type */
     public function getChildren(): ?SimpleXMLElement {}
+
+    public function offsetGet(mixed $offset): mixed {}
+
+    public function &offsetFetch(mixed $offset): mixed {}
+
+    public function offsetExists(mixed $offset): bool {}
+
+    public function offsetSet(mixed $offset, mixed $value): void {}
+
+    public function append(mixed $value): void{}
+
+    public function &fetchAppend(): mixed {}
+
+    public function offsetUnset(mixed $offset): void {}
 }
 
 class SimpleXMLIterator extends SimpleXMLElement

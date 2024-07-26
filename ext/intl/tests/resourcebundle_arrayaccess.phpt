@@ -4,34 +4,39 @@ Test ResourceBundle array access and count - existing/missing keys
 intl
 --FILE--
 <?php
-    include "resourcebundle.inc";
+include "resourcebundle.inc";
 
-    // fall back
-    $r = new ResourceBundle( 'en_US', BUNDLE );
+// fall back
+$r = new ResourceBundle( 'en_US', BUNDLE );
 
-    printf( "length: %d\n", count($r) );
-    printf( "teststring: %s\n", $r['teststring'] );
-    printf( "testint: %d\n", $r['testint'] );
+var_dump(isset($r['non-existent']));
+var_dump($r['non-existent'] ?? "default");
 
-    print_r( $r['testvector'] );
+printf( "length: %d\n", count($r) );
+printf( "teststring: %s\n", $r['teststring'] );
+printf( "testint: %d\n", $r['testint'] );
 
-    printf( "testbin: %s\n", bin2hex($r['testbin']) );
+print_r( $r['testvector'] );
 
-    $r2 = $r['testtable'];
-    printf( "testtable: %d\n", $r2['major'] );
+printf( "testbin: %s\n", bin2hex($r['testbin']) );
 
-    $r2 = $r['testarray'];
-    printf( "testarray: %s\n", $r2[2] );
+$r2 = $r['testtable'];
+printf( "testtable: %d\n", $r2['major'] );
 
-    echo "Using a reference as an offset:\n";
-    $offset = 'teststring';
-    $ref = &$offset;
-    var_dump($r[$ref]);
+$r2 = $r['testarray'];
+printf( "testarray: %s\n", $r2[2] );
 
-    $t = $r['nonexisting'];
-    echo debug( $t );
+echo "Using a reference as an offset:\n";
+$offset = 'teststring';
+$ref = &$offset;
+var_dump($r[$ref]);
+
+$t = $r['nonexisting'];
+echo debug( $t );
 ?>
 --EXPECT--
+bool(false)
+string(7) "default"
 length: 6
 teststring: Hello World!
 testint: 2

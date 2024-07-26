@@ -37,8 +37,8 @@ static inline dom_token_list_object *php_dom_token_list_from_dom_obj(dom_object 
 
 void dom_token_list_ctor(dom_token_list_object *intern, dom_object *element_obj);
 void dom_token_list_free_obj(zend_object *object);
-zval *dom_token_list_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
-int dom_token_list_has_dimension(zend_object *object, zval *offset, int check_empty);
+zval *dom_token_list_read_dimension(zend_object *object, zval *offset, zval *rv);
+bool dom_token_list_has_dimension(zend_object *object, zval *offset);
 zend_object_iterator *dom_token_list_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
 #endif

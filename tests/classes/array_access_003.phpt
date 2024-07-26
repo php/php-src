@@ -41,7 +41,8 @@ $obj = new ObjectOne;
 
 var_dump($obj[1]);
 var_dump($obj[2]);
-$obj[2]++;
+$ref =& $obj[2];
+$ref++;
 var_dump($obj[2]);
 
 ?>

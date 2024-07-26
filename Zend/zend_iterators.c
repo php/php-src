@@ -33,13 +33,9 @@ static const zend_object_handlers iterator_object_handlers = {
 	NULL, /* clone_obj */
 	NULL, /* prop read */
 	NULL, /* prop write */
-	NULL, /* read dim */
-	NULL, /* write dim */
 	NULL, /* get_property_ptr_ptr */
 	NULL, /* has prop */
 	NULL, /* unset prop */
-	NULL, /* has dim */
-	NULL, /* unset dim */
 	NULL, /* props get */
 	NULL, /* method get */
 	NULL, /* get ctor */

@@ -17,7 +17,7 @@
 #ifndef PHP_HTML_COLLECTION_H
 #define PHP_HTML_COLLECTION_H
 
-zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int type, zval *rv);
-int dom_html_collection_has_dimension(zend_object *object, zval *member, int check_empty);
+zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, zval *rv);
+bool dom_html_collection_has_dimension(zend_object *object, zval *member);
 
 #endif

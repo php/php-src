@@ -54,4 +54,4 @@ Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
-Cannot append to Dom\TokenList
+Cannot fetch append object of type Dom\TokenList

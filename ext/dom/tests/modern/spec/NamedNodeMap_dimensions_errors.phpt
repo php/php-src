@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot append to Dom\NamedNodeMap
+Cannot fetch append object of type Dom\NamedNodeMap

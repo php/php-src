@@ -25,17 +25,8 @@ function zend_test_var_export($value) {
     if (is_resource($value)) {
         return "STDERR";
     }
-    if ($value instanceof stdClass) {
-        return "new stdClass()";
-    }
-    if ($value instanceof B) {
-        return "new B()";
-    }
-    if ($value instanceof A) {
-        return "new A()";
-    }
-    if ($value instanceof ArrayObject) {
-        return "new ArrayObject()";
+    if (is_object($value)) {
+        return 'new '. $value::class .'()';
     }
     return var_export($value, true);
 }
@@ -139,6 +130,76 @@ class B extends ArrayObject {
     }
 }
 
+class DimensionRead implements DimensionReadable {
+    public function offsetGet(mixed $offset): mixed {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return 5;
+    }
+
+    public function offsetExists(mixed $offset): bool {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return true;
+    }
+}
+
+class DimensionFetch extends DimensionRead implements DimensionFetchable {
+    public function &offsetFetch(mixed $offset): mixed {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return $this;
+    }
+}
+
+class DimensionWrite implements DimensionWritable {
+    public function offsetSet(mixed $offset, mixed $value): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        var_dump($value);
+    }
+}
+
+class DimensionReadWrite implements DimensionReadable, DimensionWritable {
+    public function offsetGet(mixed $offset): mixed {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return 5;
+    }
+
+    public function offsetExists(mixed $offset): bool {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        return true;
+    }
+    public function offsetSet(mixed $offset, mixed $value): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+        var_dump($value);
+    }
+}
+
+class DimensionAppend implements Appendable {
+    public function append(mixed $value): void {
+        var_dump(__METHOD__);
+        var_dump($value);
+    }
+}
+
+class DimensionFetchAppend extends DimensionAppend implements FetchAppendable {
+    public function &fetchAppend(): mixed {
+        var_dump(__METHOD__);
+        return $this;
+    }
+}
+
+class DimensionUnset implements DimensionUnsetable {
+    public function offsetUnset($offset): void {
+        var_dump(__METHOD__);
+        var_dump($offset);
+    }
+}
+
 $containers = [
     null,
     false,
@@ -155,6 +216,18 @@ $containers = [
     new A(),
     new B(),
 ];
+
+$newApiContainers = [
+    new DimensionRead(),
+    new DimensionFetch(),
+    new DimensionWrite(),
+    new DimensionReadWrite(),
+    new DimensionAppend(),
+    new DimensionFetchAppend(),
+    new DimensionUnset(),
+];
+
+$allContainers = [...$containers, ...$newApiContainers];
 
 $offsets = [
     null,

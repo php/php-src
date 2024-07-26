@@ -41,6 +41,7 @@ bool(false)
 Nested null coalesce:
 int(30)
 Nested unset():
+
 OUTPUT;
 
 $EXPECTED_OUTPUT_VALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_VALID_OFFSETS) . '$/s';
@@ -58,8 +59,10 @@ Deprecated: Implicit conversion from float %F to int loses precision in %s on li
 Read:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
-int(15)
+int(5)
 Read-Write:
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 isset():
@@ -69,16 +72,20 @@ bool(true)
 empty():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
 null coalesce:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
-int(35)
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+int(25)
 Reference to dimension:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Value of reference:
-int(35)
+int(25)
 Value of container dimension after write to reference (should be int(100) if successful):
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
@@ -90,9 +97,9 @@ Nested read:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
-Warning: Undefined array key 0 in %s on line %d
+Warning: Undefined array key %s in %s on line %d
 
-Warning: Trying to access array offset on null in %s on line %d
+Warning: Trying to access array offset on null in %s on line 74
 NULL
 Nested write:
 
@@ -104,7 +111,11 @@ Nested Read-Write:
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 Nested isset():
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
@@ -115,13 +126,17 @@ Nested empty():
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 bool(false)
 Nested null coalesce:
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
-int(25)
+
+Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
+int(30)
 Nested unset():
 
 Deprecated: Implicit conversion from float %F to int loses precision in %s on line %d
@@ -164,56 +179,11 @@ Cannot access offset of type %s in isset or empty
 Nested null coalesce:
 Cannot access offset of type %s in isset or empty
 Nested unset():
-
-Notice: Indirect modification of overloaded element of ArrayObject has no effect in %s on line %d
-Cannot unset offset of type %s on ArrayObject
+Cannot access offset of type %s on ArrayObject
 
 OUTPUT;
 
 $EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX = '/^' . expectf_to_regex(EXPECTED_OUTPUT_INVALID_OFFSETS) . '$/s';
-
-const EXPECTED_OUTPUT_NULL_OFFSET = <<<OUTPUT
-Read before write:
-
-Warning: Undefined array key "" in %s on line 8
-NULL
-Write:
-Read:
-
-Warning: Undefined array key "" in %s on line 22
-NULL
-Read-Write:
-
-Warning: Undefined array key "" in %s on line 29
-isset():
-bool(false)
-empty():
-bool(true)
-null coalesce:
-string(7) "default"
-Reference to dimension:
-Value of reference:
-NULL
-Value of container dimension after write to reference (should be int(100) if successful):
-int(100)
-unset():
-Nested read:
-
-Warning: Undefined array key "" in %s on line 74
-
-Warning: Trying to access array offset on null in %s on line 74
-NULL
-Nested write:
-Nested Read-Write:
-Nested isset():
-bool(true)
-Nested empty():
-bool(false)
-Nested null coalesce:
-int(30)
-Nested unset():
-
-OUTPUT;
 
 const EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS = <<<OUTPUT
 Read before write:
@@ -237,12 +207,18 @@ Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 29
 isset():
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 36
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 36
 bool(true)
 empty():
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 42
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 42
 bool(false)
 null coalesce:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 48
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 48
 int(25)
@@ -276,7 +252,11 @@ Nested Read-Write:
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 88
 Nested isset():
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 95
 
@@ -287,8 +267,12 @@ Nested empty():
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 101
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 101
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 101
 bool(false)
 Nested null coalesce:
+
+Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 107
 
 Warning: Resource ID#3 used as offset, casting to integer (3) in %s on line 107
 
@@ -323,7 +307,6 @@ foreach ($offsets as $dimension) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
-        && $varOutput !== EXPECTED_OUTPUT_NULL_OFFSET
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_ArrayObject_container_{$failuresNb}.txt", $varOutput);
@@ -354,7 +337,6 @@ foreach ($offsets as $offset) {
         !preg_match($EXPECTED_OUTPUT_VALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_INVALID_OFFSETS_REGEX, $varOutput)
         && !preg_match($EXPECTED_OUTPUT_FLOAT_OFFSETS_REGEX, $varOutput)
-        && $varOutput !== EXPECTED_OUTPUT_NULL_OFFSET
         && $varOutput !== EXPECTED_OUTPUT_RESOURCE_STDERR_OFFSETS
     ) {
         file_put_contents(__DIR__ . DIRECTORY_SEPARATOR . "debug_ArrayObject_container_{$failuresNb}.txt", $varOutput);

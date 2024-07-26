@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d91889851d9732d41e43fffddb6235d033c67534 */
+ * Stub hash: 0bab94f80eb791bcdb02d5fd76b5728bb88f466f */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_WeakReference___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -13,6 +13,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_WeakMap_offsetGet, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_INFO(0, object)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_WeakMap_offsetFetch, 1, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_WeakMap_offsetSet, 0, 2, IS_VOID, 0)
@@ -38,6 +42,7 @@ ZEND_METHOD(WeakReference, __construct);
 ZEND_METHOD(WeakReference, create);
 ZEND_METHOD(WeakReference, get);
 ZEND_METHOD(WeakMap, offsetGet);
+ZEND_METHOD(WeakMap, offsetFetch);
 ZEND_METHOD(WeakMap, offsetSet);
 ZEND_METHOD(WeakMap, offsetExists);
 ZEND_METHOD(WeakMap, offsetUnset);
@@ -53,6 +58,7 @@ static const zend_function_entry class_WeakReference_methods[] = {
 
 static const zend_function_entry class_WeakMap_methods[] = {
 	ZEND_ME(WeakMap, offsetGet, arginfo_class_WeakMap_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(WeakMap, offsetFetch, arginfo_class_WeakMap_offsetFetch, ZEND_ACC_PUBLIC)
 	ZEND_ME(WeakMap, offsetSet, arginfo_class_WeakMap_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(WeakMap, offsetExists, arginfo_class_WeakMap_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_ME(WeakMap, offsetUnset, arginfo_class_WeakMap_offsetUnset, ZEND_ACC_PUBLIC)
@@ -72,14 +78,14 @@ static zend_class_entry *register_class_WeakReference(void)
 	return class_entry;
 }
 
-static zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_IteratorAggregate)
+static zend_class_entry *register_class_WeakMap(zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_DimensionFetchable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_DimensionUnsetable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
-	zend_class_implements(class_entry, 3, class_entry_ArrayAccess, class_entry_Countable, class_entry_IteratorAggregate);
+	zend_class_implements(class_entry, 5, class_entry_Countable, class_entry_IteratorAggregate, class_entry_DimensionFetchable, class_entry_DimensionWritable, class_entry_DimensionUnsetable);
 
 	return class_entry;
 }

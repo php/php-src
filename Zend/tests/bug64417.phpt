@@ -32,7 +32,8 @@ class obj implements ArrayAccess {
 
 $o = new obj;
 $o['x'] = 1;
-++$o['x'];
+$ref = &$o['x'];
+$ref++;
 echo $o['x'], "\n";
 ?>
 --EXPECT--

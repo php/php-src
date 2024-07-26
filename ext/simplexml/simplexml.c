@@ -30,6 +30,7 @@
 #include "simplexml_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "ext/spl/spl_iterators.h"
 
 PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
@@ -334,9 +335,16 @@ static zval *sxe_property_read(zend_object *object, zend_string *name, int type,
 /* }}} */
 
 /* {{{ sxe_dimension_read() */
-static zval *sxe_dimension_read(zend_object *object, zval *offset, int type, zval *rv)
+static zval *sxe_dimension_read(zend_object *object, zval *offset, zval *rv)
 {
-	return sxe_prop_dim_read(object, offset, 0, 1, type, rv);
+	return sxe_prop_dim_read(object, offset, 0, 1, BP_VAR_R, rv);
+}
+/* }}} */
+
+/* {{{ sxe_dimension_fetch() */
+static zval *sxe_dimension_fetch(zend_object *object, zval *offset, zval *rv)
+{
+	return sxe_prop_dim_read(object, offset, 0, 1, BP_VAR_W, rv);
 }
 /* }}} */
 
@@ -607,6 +615,20 @@ static void sxe_dimension_write(zend_object *object, zval *offset, zval *value)
 }
 /* }}} */
 
+/* {{{ sxe_dimension_append() */
+static void sxe_dimension_append(zend_object *object, zval *value)
+{
+	sxe_prop_dim_write(object, NULL, value, 0, 1, NULL);
+}
+/* }}} */
+
+/* {{{ sxe_dimension_append() */
+static zval *sxe_dimension_fetch_append(zend_object *object, zval *rv)
+{
+	return sxe_prop_dim_read(object, NULL, 0, 1, BP_VAR_W, rv);
+}
+/* }}} */
+
 static zval *sxe_property_get_adr(zend_object *object, zend_string *zname, int fetch_type, void **cache_slot) /* {{{ */
 {
 	php_sxe_object *sxe;
@@ -760,9 +782,9 @@ static int sxe_property_exists(zend_object *object, zend_string *name, int check
 /* }}} */
 
 /* {{{ sxe_dimension_exists() */
-static int sxe_dimension_exists(zend_object *object, zval *member, int check_empty)
+static bool sxe_dimension_exists(zend_object *object, zval *offset)
 {
-	return sxe_prop_dim_exists(object, member, check_empty, 0, 1);
+	return sxe_prop_dim_exists(object, offset, /* check_empty */ false, 0, 1);
 }
 /* }}} */
 
@@ -2336,6 +2358,76 @@ PHP_METHOD(SimpleXMLElement, __construct)
 }
 /* }}} */
 
+PHP_METHOD(SimpleXMLElement, offsetGet)
+{
+	zval *offset = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &offset) == FAILURE) {
+		RETURN_THROWS();
+    }
+
+	sxe_dimension_read(Z_OBJ_P(ZEND_THIS), offset, return_value);
+}
+
+PHP_METHOD(SimpleXMLElement, offsetFetch)
+{
+	zval *offset = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &offset) == FAILURE) {
+		RETURN_THROWS();
+    }
+
+	sxe_dimension_fetch(Z_OBJ_P(ZEND_THIS), offset, return_value);
+}
+
+PHP_METHOD(SimpleXMLElement, offsetExists)
+{
+	zval *offset = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &offset) == FAILURE) {
+		RETURN_THROWS();
+    }
+
+	RETURN_BOOL(sxe_dimension_exists(Z_OBJ_P(ZEND_THIS), offset));
+}
+
+PHP_METHOD(SimpleXMLElement, offsetSet)
+{
+	zval *offset = NULL;
+	zval *value = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &offset, &value) == FAILURE) {
+		RETURN_THROWS();
+    }
+
+	sxe_dimension_write(Z_OBJ_P(ZEND_THIS), offset, value);
+}
+
+PHP_METHOD(SimpleXMLElement, append)
+{
+	zval *value = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
+		RETURN_THROWS();
+    }
+
+	sxe_dimension_append(Z_OBJ_P(ZEND_THIS), value);
+}
+
+PHP_METHOD(SimpleXMLElement, fetchAppend)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	sxe_dimension_fetch_append(Z_OBJ_P(ZEND_THIS), return_value);
+}
+
+PHP_METHOD(SimpleXMLElement, offsetUnset)
+{
+	zval *offset = NULL;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &offset) == FAILURE) {
+		RETURN_THROWS();
+    }
+
+	sxe_dimension_delete(Z_OBJ_P(ZEND_THIS), offset);
+}
+
 static const zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_dtor,
 	php_sxe_iterator_valid,
@@ -2632,13 +2724,32 @@ zend_module_entry simplexml_module_entry = { /* {{{ */
 ZEND_GET_MODULE(simplexml)
 #endif
 
+static /* const */ zend_internal_class_dimensions_functions sxe_dimensions_functions = {
+	.read_dimension  = sxe_dimension_read,
+	.has_dimension   = sxe_dimension_exists,
+	.fetch_dimension = sxe_dimension_fetch,
+	.write_dimension = sxe_dimension_write,
+	.append          = sxe_dimension_append,
+	.fetch_append    = sxe_dimension_fetch_append,
+	.unset_dimension = sxe_dimension_delete
+};
+
 /* {{{ PHP_MINIT_FUNCTION(simplexml) */
 PHP_MINIT_FUNCTION(simplexml)
 {
-	ce_SimpleXMLElement = register_class_SimpleXMLElement(zend_ce_stringable, zend_ce_countable, spl_ce_RecursiveIterator);
+	ce_SimpleXMLElement = register_class_SimpleXMLElement(
+		zend_ce_stringable,
+		zend_ce_countable,
+		spl_ce_RecursiveIterator,
+		zend_ce_dimension_fetch,
+		zend_ce_dimension_write,
+		zend_ce_dimension_fetch_append,
+		zend_ce_dimension_unset
+	);
 	ce_SimpleXMLElement->create_object = sxe_object_new;
 	ce_SimpleXMLElement->default_object_handlers = &sxe_object_handlers;
 	ce_SimpleXMLElement->get_iterator = php_sxe_get_iterator;
+	ce_SimpleXMLElement->dimension_handlers = &sxe_dimensions_functions;
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
@@ -2646,13 +2757,9 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.clone_obj = sxe_object_clone;
 	sxe_object_handlers.read_property = sxe_property_read;
 	sxe_object_handlers.write_property = sxe_property_write;
-	sxe_object_handlers.read_dimension = sxe_dimension_read;
-	sxe_object_handlers.write_dimension = sxe_dimension_write;
 	sxe_object_handlers.get_property_ptr_ptr = sxe_property_get_adr;
 	sxe_object_handlers.has_property = sxe_property_exists;
 	sxe_object_handlers.unset_property = sxe_property_delete;
-	sxe_object_handlers.has_dimension = sxe_dimension_exists;
-	sxe_object_handlers.unset_dimension = sxe_dimension_delete;
 	sxe_object_handlers.get_properties = sxe_get_properties;
 	sxe_object_handlers.compare = sxe_objects_compare;
 	sxe_object_handlers.cast_object = sxe_object_cast;

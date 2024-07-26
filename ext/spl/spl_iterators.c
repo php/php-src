@@ -21,6 +21,7 @@
 #include "php.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "ext/pcre/php_pcre.h"
 
 #include "spl_iterators.h"

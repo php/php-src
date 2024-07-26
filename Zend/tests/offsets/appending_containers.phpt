@@ -65,8 +65,7 @@ string(5) "value"
 object(A)#3 (0) {
 }
 new B() container:
-string(12) "B::offsetSet"
-NULL
+string(9) "B::append"
 string(5) "value"
 object(B)#4 (1) {
   ["storage":"ArrayObject":private]=>

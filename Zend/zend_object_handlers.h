@@ -81,18 +81,10 @@ struct _zend_property_info;
 /* Used to fetch property from the object, read-only */
 typedef zval *(*zend_object_read_property_t)(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv);
 
-/* Used to fetch dimension from the object, read-only */
-typedef zval *(*zend_object_read_dimension_t)(zend_object *object, zval *offset, int type, zval *rv);
-
-
 /* Used to set property of the object
    You must return the final value of the assigned property.
 */
 typedef zval *(*zend_object_write_property_t)(zend_object *object, zend_string *member, zval *value, void **cache_slot);
-
-/* Used to set dimension of the object */
-typedef void (*zend_object_write_dimension_t)(zend_object *object, zval *offset, zval *value);
-
 
 /* Used to create pointer to the property of the object, for future direct r/w access.
  * May return one of:
@@ -111,14 +103,8 @@ typedef zval *(*zend_object_get_property_ptr_ptr_t)(zend_object *object, zend_st
  */
 typedef int (*zend_object_has_property_t)(zend_object *object, zend_string *member, int has_set_exists, void **cache_slot);
 
-/* Used to check if a dimension of the object exists */
-typedef int (*zend_object_has_dimension_t)(zend_object *object, zval *member, int check_empty);
-
 /* Used to remove a property of the object */
 typedef void (*zend_object_unset_property_t)(zend_object *object, zend_string *member, void **cache_slot);
-
-/* Used to remove a dimension of the object */
-typedef void (*zend_object_unset_dimension_t)(zend_object *object, zval *offset);
 
 /* Used to get hash of the properties of the object, as hash of zval's */
 typedef HashTable *(*zend_object_get_properties_t)(zend_object *object);
@@ -209,13 +195,9 @@ struct _zend_object_handlers {
 	zend_object_clone_obj_t					clone_obj;            /* optional */
 	zend_object_read_property_t				read_property;        /* required */
 	zend_object_write_property_t			write_property;       /* required */
-	zend_object_read_dimension_t			read_dimension;       /* required */
-	zend_object_write_dimension_t			write_dimension;      /* required */
 	zend_object_get_property_ptr_ptr_t		get_property_ptr_ptr; /* required */
 	zend_object_has_property_t				has_property;         /* required */
 	zend_object_unset_property_t			unset_property;       /* required */
-	zend_object_has_dimension_t				has_dimension;        /* required */
-	zend_object_unset_dimension_t			unset_dimension;      /* required */
 	zend_object_get_properties_t			get_properties;       /* required */
 	zend_object_get_method_t				get_method;           /* required */
 	zend_object_get_constructor_t			get_constructor;      /* required */

@@ -60,11 +60,14 @@ Error: Cannot use a scalar value as an array
 new stdClass() container:
 Error: Cannot use object of type stdClass as array
 new ArrayObject() container:
-
-Notice: Indirect modification of overloaded element of ArrayObject has no effect in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  array(0) {
+  array(1) {
+    [0]=>
+    array(1) {
+      [5]=>
+      string(5) "value"
+    }
   }
 }
 new A() container:
@@ -74,6 +77,13 @@ NULL
 Notice: Indirect modification of overloaded element of A has no effect in %s on line %d
 Error: Cannot use a scalar value as an array
 new B() container:
-
-Notice: Indirect modification of overloaded element of B has no effect in %s on line %d
-ArgumentCountError: B::offsetGet(): Argument #1 ($offset) not passed
+object(B)#4 (1) {
+  ["storage":"ArrayObject":private]=>
+  array(1) {
+    [0]=>
+    array(1) {
+      [5]=>
+      string(5) "value"
+    }
+  }
+}

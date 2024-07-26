@@ -26072,7 +26072,7 @@ num_index_dim:
 			if (IS_CONST == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
 				offset++;
 			}
-			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+			zend_unset_object_dim(Z_OBJ_P(container), offset);
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
@@ -26839,6 +26839,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_TMPVAR_H
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 	zend_fetch_dimension_address_RW(container, _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC);
+
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
@@ -28562,7 +28563,7 @@ num_index_dim:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
 				offset++;
 			}
-			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+			zend_unset_object_dim(Z_OBJ_P(container), offset);
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
@@ -32990,7 +32991,7 @@ num_index_dim:
 			if (IS_CV == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
 				offset++;
 			}
-			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+			zend_unset_object_dim(Z_OBJ_P(container), offset);
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
@@ -45092,7 +45093,7 @@ num_index_dim:
 			if (IS_CONST == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
 				offset++;
 			}
-			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+			zend_unset_object_dim(Z_OBJ_P(container), offset);
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
@@ -46674,6 +46675,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_CV_TMPVAR_HA
 	SAVE_OPLINE();
 	container = EX_VAR(opline->op1.var);
 	zend_fetch_dimension_address_RW(container, _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC);
+
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(opline->op1.var);
@@ -48821,7 +48823,7 @@ num_index_dim:
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
 				offset++;
 			}
-			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+			zend_unset_object_dim(Z_OBJ_P(container), offset);
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {
@@ -54396,7 +54398,7 @@ num_index_dim:
 			if (IS_CV == IS_CONST && Z_EXTRA_P(offset) == ZEND_EXTRA_VALUE) {
 				offset++;
 			}
-			Z_OBJ_HT_P(container)->unset_dimension(Z_OBJ_P(container), offset);
+			zend_unset_object_dim(Z_OBJ_P(container), offset);
 		} else if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 			zend_throw_error(NULL, "Cannot unset string offsets");
 		} else if (UNEXPECTED(Z_TYPE_P(container) > IS_FALSE)) {

@@ -7,11 +7,11 @@ com_dotnet
 foreach ([new com('WScript.Shell'), new variant([])] as $var) {
     try {
         $var[] = 42;
-    } catch (com_exception $ex) {
-        var_dump($ex->getMessage());
+    } catch (Throwable $e) {
+        echo $e::class, ': ', $e->getMessage(), PHP_EOL;
     }
 }
 ?>
 --EXPECT--
-string(38) "appending to variants is not supported"
-string(38) "appending to variants is not supported"
+Error: Cannot append to object of type com
+Error: Cannot append to object of type variant

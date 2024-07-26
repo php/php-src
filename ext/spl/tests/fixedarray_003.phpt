@@ -195,9 +195,13 @@ bool(true)
 bool(true)
 
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 bool(true)
 Cannot access offset of type array on SplFixedArray
 Cannot access offset of type stdClass on SplFixedArray
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(true)
@@ -210,9 +214,13 @@ bool(false)
 bool(false)
 
 Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
+
+Deprecated: Implicit conversion from float 2.5 to int loses precision in %s on line %d
 bool(false)
 Cannot access offset of type array on SplFixedArray
 Cannot access offset of type stdClass on SplFixedArray
+
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(false)

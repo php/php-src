@@ -28,24 +28,6 @@ interface Iterator extends Traversable
     public function rewind(): void;
 }
 
-interface ArrayAccess
-{
-    /** @tentative-return-type */
-    public function offsetExists(mixed $offset): bool;
-
-    /**
-     * Actually this should be return by ref but atm cannot be.
-     * @tentative-return-type
-     */
-    public function offsetGet(mixed $offset): mixed;
-
-    /** @tentative-return-type */
-    public function offsetSet(mixed $offset, mixed $value): void;
-
-    /** @tentative-return-type */
-    public function offsetUnset(mixed $offset): void;
-}
-
 interface Serializable
 {
     /** @return string|null */

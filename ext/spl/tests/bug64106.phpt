@@ -8,10 +8,12 @@ class MyFixedArray extends SplFixedArray {
 }
 
 $array = new MyFixedArray(10);
-$array[][1] = 10;
+try {
+    $array[][1] = 10;
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
+}
 
 ?>
---EXPECTF--
-NULL
-
-Notice: Indirect modification of overloaded element of MyFixedArray has no effect in %s on line %d
+--EXPECT--
+Error: Cannot fetch append object of type MyFixedArray

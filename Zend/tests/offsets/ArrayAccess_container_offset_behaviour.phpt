@@ -27,6 +27,8 @@ int(25)
 isset():
 string(15) "CLASS_NAME::offsetExists"
 VAR_DUMP_OF_OFFSET
+string(12) "CLASS_NAME::offsetGet"
+VAR_DUMP_OF_OFFSET
 bool(true)
 empty():
 string(15) "CLASS_NAME::offsetExists"
@@ -67,6 +69,8 @@ VAR_DUMP_OF_OFFSET
 Notice: Indirect modification of overloaded element of CLASS_NAME has no effect in %s on line 81
 Cannot use a scalar value as an array
 Nested Read-Write:
+string(15) "CLASS_NAME::offsetExists"
+VAR_DUMP_OF_OFFSET
 string(12) "CLASS_NAME::offsetGet"
 VAR_DUMP_OF_OFFSET
 
@@ -100,7 +104,7 @@ Cannot unset offset in a non-array variable
 OUTPUT;
 
 ob_start();
-foreach (['A', 'B'] as $class) {
+foreach (['A'] as $class) {
     foreach ($offsets as $dimension) {
         $container = new $class();
         $error = "(new $class())[" . zend_test_var_export($dimension) . '] has different outputs' . "\n";

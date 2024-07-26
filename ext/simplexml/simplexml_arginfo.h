@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 36eac2dee86bcc386c24e2cc14caa7bd3d709e82 */
+ * Stub hash: 1f47dd95cea7a21b478238ba3f4039b78e66ee11 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -100,6 +100,34 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_SimpleXMLElement_getChildren, 0, 0, SimpleXMLElement, 1)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_offsetGet, 0, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_offsetFetch, 1, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_offsetExists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_offsetSet, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_append, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_fetchAppend, 1, 0, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_offsetUnset, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_FUNCTION(simplexml_load_file);
 ZEND_FUNCTION(simplexml_load_string);
 ZEND_FUNCTION(simplexml_import_dom);
@@ -123,6 +151,13 @@ ZEND_METHOD(SimpleXMLElement, key);
 ZEND_METHOD(SimpleXMLElement, next);
 ZEND_METHOD(SimpleXMLElement, hasChildren);
 ZEND_METHOD(SimpleXMLElement, getChildren);
+ZEND_METHOD(SimpleXMLElement, offsetGet);
+ZEND_METHOD(SimpleXMLElement, offsetFetch);
+ZEND_METHOD(SimpleXMLElement, offsetExists);
+ZEND_METHOD(SimpleXMLElement, offsetSet);
+ZEND_METHOD(SimpleXMLElement, append);
+ZEND_METHOD(SimpleXMLElement, fetchAppend);
+ZEND_METHOD(SimpleXMLElement, offsetUnset);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(simplexml_load_file, arginfo_simplexml_load_file)
@@ -153,6 +188,13 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, next, arginfo_class_SimpleXMLElement_next, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, hasChildren, arginfo_class_SimpleXMLElement_hasChildren, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, getChildren, arginfo_class_SimpleXMLElement_getChildren, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, offsetGet, arginfo_class_SimpleXMLElement_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, offsetFetch, arginfo_class_SimpleXMLElement_offsetFetch, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, offsetExists, arginfo_class_SimpleXMLElement_offsetExists, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, offsetSet, arginfo_class_SimpleXMLElement_offsetSet, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, append, arginfo_class_SimpleXMLElement_append, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, fetchAppend, arginfo_class_SimpleXMLElement_fetchAppend, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, offsetUnset, arginfo_class_SimpleXMLElement_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -160,14 +202,14 @@ static const zend_function_entry class_SimpleXMLIterator_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_SimpleXMLElement(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_RecursiveIterator)
+static zend_class_entry *register_class_SimpleXMLElement(zend_class_entry *class_entry_Stringable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_RecursiveIterator, zend_class_entry *class_entry_DimensionFetchable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_FetchAppendable, zend_class_entry *class_entry_DimensionUnsetable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SimpleXMLElement", class_SimpleXMLElement_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
-	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_RecursiveIterator);
+	zend_class_implements(class_entry, 7, class_entry_Stringable, class_entry_Countable, class_entry_RecursiveIterator, class_entry_DimensionFetchable, class_entry_DimensionWritable, class_entry_FetchAppendable, class_entry_DimensionUnsetable);
 
 	return class_entry;
 }

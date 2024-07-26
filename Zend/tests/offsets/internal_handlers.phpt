@@ -221,76 +221,48 @@ exportObject($o);
 ?>
 --EXPECTF--
 read op
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 write op
 DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 read-write op
-DimensionHandlersNoArrayAccess, read: true, write: true, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 isset op
-DimensionHandlersNoArrayAccess, read: false, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: 0, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 empty op
-DimensionHandlersNoArrayAccess, read: false, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: 1, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 null coalescing op
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_IS, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 appending op
-DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
 unset op
 DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: true, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested read
 
 Warning: Trying to access array offset on true in %s on line %d
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_R, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested write
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested write: appending then write
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
+DimensionHandlersNoArrayAccess, read: false, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested read-write
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_RW, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: true, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested read-write: appending then write
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_RW, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
+DimensionHandlersNoArrayAccess, read: true, write: true, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 nested isset
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_IS, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested empty
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_IS, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested null coalescing
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_IS, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: true, write: false, has: true, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested appending
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: 'foo'
 nested appending: appending then append
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
 nested unset
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot unset offset in a non-array variable
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_UNSET, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: true, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 reference fetching
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
 nested reference fetching
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-Error: Cannot use a scalar value as an array
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: true, checkEmpty: uninitialized, offset: 'foo'
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: true, checkEmpty: uninitialized, offset: 'bar'
 reference fetch-append
-
-Notice: Indirect modification of overloaded element of DimensionHandlersNoArrayAccess has no effect in %s on line %d
-DimensionHandlersNoArrayAccess, read: true, write: false, has: false, unset: false, readType: BP_VAR_W, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized
+DimensionHandlersNoArrayAccess, read: false, write: false, has: false, unset: false, readType: uninitialized, hasOffset: false, checkEmpty: uninitialized, offset: uninitialized

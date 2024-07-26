@@ -68,7 +68,13 @@ class PDOStatement implements IteratorAggregate
 }
 
 /** @not-serializable */
-final class PDORow
+final class PDORow implements DimensionReadable
 {
     public string $queryString;
+
+    /** @param string|int $offset */
+    public function offsetGet(mixed $offset): mixed {}
+
+    /** @param string|int $offset */
+    public function offsetExists(mixed $offset): bool {}
 }

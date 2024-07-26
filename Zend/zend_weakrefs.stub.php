@@ -19,10 +19,13 @@ final class WeakReference
  * @strict-properties
  * @not-serializable
  */
-final class WeakMap implements ArrayAccess, Countable, IteratorAggregate
+final class WeakMap implements Countable, IteratorAggregate, DimensionFetchable, DimensionWritable, DimensionUnsetable
 {
     /** @param object $object */
     public function offsetGet($object): mixed {}
+
+    /** @param object $object */
+    public function &offsetFetch(mixed $offset): mixed;
 
     /** @param object $object */
     public function offsetSet($object, mixed $value): void {}

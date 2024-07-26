@@ -98,16 +98,11 @@ PHP_METHOD(Dom_HTMLCollection, namedItem)
 	dom_html_collection_named_item_into_zval(return_value, key, Z_OBJ_P(ZEND_THIS));
 }
 
-zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, zval *rv)
 {
-	if (UNEXPECTED(!offset)) {
-		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
-		return NULL;
-	}
-
 	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(offset);
 	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL)) {
-		zend_illegal_container_offset(object->ce->name, offset, type);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
 		return NULL;
 	}
 
@@ -121,14 +116,11 @@ zval *dom_html_collection_read_dimension(zend_object *object, zval *offset, int 
 	return rv;
 }
 
-int dom_html_collection_has_dimension(zend_object *object, zval *member, int check_empty)
+bool dom_html_collection_has_dimension(zend_object *object, zval *offset)
 {
-	/* If it exists, it cannot be empty because nodes aren't empty. */
-	ZEND_IGNORE_VALUE(check_empty);
-
-	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(member);
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(offset);
 	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL)) {
-		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
 		return 0;
 	}
 

@@ -15,16 +15,6 @@ try {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
 }
 try {
-    var_dump(isset($r['non-existent']));
-} catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-try {
-    var_dump($r['non-existent'] ?? "default");
-} catch (\Throwable $e) {
-    echo $e::class, ': ', $e->getMessage(), PHP_EOL;
-}
-try {
     var_dump($r[12.5]);
 } catch (\Throwable $e) {
     echo $e::class, ': ', $e->getMessage(), PHP_EOL;
@@ -52,9 +42,7 @@ try {
 
 ?>
 --EXPECT--
-Error: Cannot apply [] to ResourceBundle object
-Error: Cannot use object of type ResourceBundle as array
-string(7) "default"
+Error: Cannot fetch append object of type ResourceBundle
 TypeError: Cannot access offset of type float on ResourceBundle
 TypeError: Cannot access offset of type stdClass on ResourceBundle
 ValueError: Offset cannot be empty

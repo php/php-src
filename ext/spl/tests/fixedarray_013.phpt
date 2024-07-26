@@ -18,4 +18,4 @@ try {
 
 ?>
 --EXPECT--
-[] operator not supported for SplFixedArray
+Cannot fetch append object of type SplFixedArray

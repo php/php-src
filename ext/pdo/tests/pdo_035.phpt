@@ -106,7 +106,7 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 const TABLE_NAME = 'test_pdo_35_pdo_row';
 $db->exec("DROP TABLE " . TABLE_NAME);
 ?>
---EXPECTF--
+--EXPECT--
 object(PDORow)#3 (3) {
   ["queryString"]=>
   string(40) "SELECT id, name FROM test_pdo_35_pdo_row"
@@ -252,11 +252,10 @@ Read:
 string(1) "0"
 string(1) "0"
 Errors:
-Cannot write to PDORow offset
-Cannot append to PDORow offset
-
-Notice: Indirect modification of overloaded element of PDORow has no effect in %s on line %d
-Cannot append to PDORow offset
-Cannot unset PDORow offset
+Cannot write to offset of object of type PDORow
+Cannot append to object of type PDORow
+Cannot fetch offset of object of type PDORow
+Cannot fetch append object of type PDORow
+Cannot unset offset of object of type PDORow
 Cannot write to PDORow property
 Cannot unset PDORow property

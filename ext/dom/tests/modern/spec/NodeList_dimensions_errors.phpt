@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot append to Dom\NodeList
+Cannot fetch append object of type Dom\NodeList

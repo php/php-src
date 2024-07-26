@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a9c915c11e5989d8c7cf2d704ada09ca765670c3 */
+ * Stub hash: c5085f77dab1779100b0f845a23806c71f0f1d74 */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_INFO_EX(arginfo_class_IteratorAggregate_getIterator, 0, 0, Traversable, 0)
 ZEND_END_ARG_INFO()
@@ -16,23 +16,6 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Iterator_valid, 
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Iterator_rewind arginfo_class_Iterator_next
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetExists, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetGet, 0, 1, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetSet, 0, 2, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_ArrayAccess_offsetUnset, 0, 1, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_MIXED, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Serializable_serialize, 0, 0, 0)
 ZEND_END_ARG_INFO()
@@ -84,14 +67,6 @@ static const zend_function_entry class_Iterator_methods[] = {
 	ZEND_RAW_FENTRY("key", NULL, arginfo_class_Iterator_key, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("valid", NULL, arginfo_class_Iterator_valid, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_RAW_FENTRY("rewind", NULL, arginfo_class_Iterator_rewind, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_ArrayAccess_methods[] = {
-	ZEND_RAW_FENTRY("offsetExists", NULL, arginfo_class_ArrayAccess_offsetExists, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("offsetGet", NULL, arginfo_class_ArrayAccess_offsetGet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("offsetSet", NULL, arginfo_class_ArrayAccess_offsetSet, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
-	ZEND_RAW_FENTRY("offsetUnset", NULL, arginfo_class_ArrayAccess_offsetUnset, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -149,16 +124,6 @@ static zend_class_entry *register_class_Iterator(zend_class_entry *class_entry_T
 	INIT_CLASS_ENTRY(ce, "Iterator", class_Iterator_methods);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Traversable);
-
-	return class_entry;
-}
-
-static zend_class_entry *register_class_ArrayAccess(void)
-{
-	zend_class_entry ce, *class_entry;
-
-	INIT_CLASS_ENTRY(ce, "ArrayAccess", class_ArrayAccess_methods);
-	class_entry = zend_register_internal_interface(&ce);
 
 	return class_entry;
 }

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35a9585a433b9e3d57263c07ccafd1b6edd2f10b */
+ * Stub hash: e55e574f53b9f222fe6637166436bd8965af6ce5 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -40,6 +40,10 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_of
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_offsetFetch, 1, 1, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, index, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_SplFixedArray_offsetSet, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
@@ -65,6 +69,7 @@ ZEND_METHOD(SplFixedArray, getSize);
 ZEND_METHOD(SplFixedArray, setSize);
 ZEND_METHOD(SplFixedArray, offsetExists);
 ZEND_METHOD(SplFixedArray, offsetGet);
+ZEND_METHOD(SplFixedArray, offsetFetch);
 ZEND_METHOD(SplFixedArray, offsetSet);
 ZEND_METHOD(SplFixedArray, offsetUnset);
 ZEND_METHOD(SplFixedArray, getIterator);
@@ -82,6 +87,7 @@ static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_ME(SplFixedArray, setSize, arginfo_class_SplFixedArray_setSize, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetExists, arginfo_class_SplFixedArray_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetGet, arginfo_class_SplFixedArray_offsetGet, ZEND_ACC_PUBLIC)
+	ZEND_ME(SplFixedArray, offsetFetch, arginfo_class_SplFixedArray_offsetFetch, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetSet, arginfo_class_SplFixedArray_offsetSet, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, offsetUnset, arginfo_class_SplFixedArray_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_ME(SplFixedArray, getIterator, arginfo_class_SplFixedArray_getIterator, ZEND_ACC_PUBLIC)
@@ -89,13 +95,13 @@ static const zend_function_entry class_SplFixedArray_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_JsonSerializable)
+static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_entry_IteratorAggregate, zend_class_entry *class_entry_DimensionFetchable, zend_class_entry *class_entry_DimensionWritable, zend_class_entry *class_entry_DimensionUnsetable, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_JsonSerializable)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplFixedArray", class_SplFixedArray_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Countable, class_entry_JsonSerializable);
+	zend_class_implements(class_entry, 6, class_entry_IteratorAggregate, class_entry_DimensionFetchable, class_entry_DimensionWritable, class_entry_DimensionUnsetable, class_entry_Countable, class_entry_JsonSerializable);
 
 	return class_entry;
 }

@@ -24,6 +24,7 @@
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "zend_interfaces.h"
+#include "zend_interfaces_dimension.h"
 #include "zend_exceptions.h"
 
 #include "php_spl.h" /* For php_spl_object_hash() */
@@ -40,10 +41,9 @@ PHPAPI zend_class_entry     *spl_ce_MultipleIterator;
 
 static zend_object_handlers spl_handler_SplObjectStorage;
 
-/* Bit flags for marking internal functionality overridden by SplObjectStorage subclasses. */
-#define SOS_OVERRIDDEN_READ_DIMENSION  1
-#define SOS_OVERRIDDEN_WRITE_DIMENSION 2
-#define SOS_OVERRIDDEN_UNSET_DIMENSION 4
+/* Stubs for dimension handler to be able to compare them */
+static void spl_object_storage_write_dimension(zend_object *object, zval *offset, zval *inf);
+static void spl_object_storage_unset_dimension(zend_object *object, zval *offset);
 
 typedef struct _spl_SplObjectStorage { /* {{{ */
 	HashTable         storage;
@@ -150,7 +150,6 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 	uint32_t handle = obj->handle;
 	zval *entry_zv = zend_hash_index_lookup(&intern->storage, handle);
 	spl_SplObjectStorageElement *pelement;
-	ZEND_ASSERT(!(intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION));
 
 	if (Z_TYPE_P(entry_zv) != IS_NULL) {
 		zval zv_inf;
@@ -176,7 +175,11 @@ static spl_SplObjectStorageElement *spl_object_storage_attach_handle(spl_SplObje
 
 static spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStorage *intern, zend_object *obj, zval *inf) /* {{{ */
 {
-	if (EXPECTED(!(intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
+	if (EXPECTED(
+		!intern->fptr_get_hash
+		&& obj->ce->dimension_handlers
+		&& obj->ce->dimension_handlers->write_dimension == spl_object_storage_write_dimension
+	)) {
 		return spl_object_storage_attach_handle(intern, obj, inf);
 	}
 	/* getHash or offsetSet is overridden. */
@@ -221,9 +224,14 @@ static spl_SplObjectStorageElement *spl_object_storage_attach(spl_SplObjectStora
 
 static zend_result spl_object_storage_detach(spl_SplObjectStorage *intern, zend_object *obj) /* {{{ */
 {
-	if (EXPECTED(!(intern->flags & SOS_OVERRIDDEN_UNSET_DIMENSION))) {
+	if (EXPECTED(
+		!intern->fptr_get_hash
+		&& obj->ce->dimension_handlers
+		&& obj->ce->dimension_handlers->unset_dimension == spl_object_storage_unset_dimension
+	)) {
 		return zend_hash_index_del(&intern->storage, obj->handle);
 	}
+	/* getHash or offsetUnset is overridden. */
 	zend_result ret = FAILURE;
 	zend_hash_key key;
 	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
@@ -249,9 +257,6 @@ static void spl_object_storage_addall(spl_SplObjectStorage *intern, spl_SplObjec
 	intern->index = 0;
 } /* }}} */
 
-#define SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zstr_method) \
-	(class_type->arrayaccess_funcs_ptr && class_type->arrayaccess_funcs_ptr->zstr_method)
-
 static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend_object *orig) /* {{{ */
 {
 	spl_SplObjectStorage *intern;
@@ -274,21 +279,6 @@ static zend_object *spl_object_storage_new_ex(zend_class_entry *class_type, zend
 				zend_function *get_hash = zend_hash_str_find_ptr(&class_type->function_table, "gethash", sizeof("gethash") - 1);
 				if (get_hash->common.scope != spl_ce_SplObjectStorage) {
 					intern->fptr_get_hash = get_hash;
-				}
-				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetget) ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetexists)) {
-					intern->flags |= SOS_OVERRIDDEN_READ_DIMENSION;
-				}
-
-				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetset)) {
-					intern->flags |= SOS_OVERRIDDEN_WRITE_DIMENSION;
-				}
-
-				if (intern->fptr_get_hash != NULL ||
-					SPL_OBJECT_STORAGE_CLASS_HAS_OVERRIDE(class_type, zf_offsetunset)) {
-					intern->flags |= SOS_OVERRIDDEN_UNSET_DIMENSION;
 				}
 			}
 			break;
@@ -437,39 +427,33 @@ PHP_METHOD(SplObjectStorage, attach)
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
 
-// todo: make spl_object_storage_has_dimension return bool as well
-static int spl_object_storage_has_dimension(zend_object *object, zval *offset, int check_empty)
+static bool spl_object_storage_has_dimension(zend_object *object, /* const */ zval *offset)
 {
-	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
-	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_READ_DIMENSION))) {
-		/* Can't optimize empty()/isset() check if getHash, offsetExists, or offsetGet is overridden */
-		return zend_std_has_dimension(object, offset, check_empty);
-	}
-	spl_SplObjectStorageElement *element = zend_hash_index_find_ptr(&intern->storage, Z_OBJ_HANDLE_P(offset));
-	if (!element) {
-		return 0;
+	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
+		return false;
 	}
 
-	if (check_empty) {
-		return i_zend_is_true(&element->inf);
+	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
+	spl_SplObjectStorageElement *element = zend_hash_index_find_ptr(&intern->storage, Z_OBJ_HANDLE_P(offset));
+	if (!element) {
+		return false;
 	}
-	/* NOTE: SplObjectStorage->offsetExists() is an alias of SplObjectStorage->contains(), so this returns true even if the value is null. */
-	return 1;
+
+	return true;
 }
 
-static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+static zval *spl_object_storage_read_dimension(zend_object *object, /* const */ zval *offset, zval *rv)
 {
-	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
-	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_READ_DIMENSION))) {
-		/* Can't optimize it if getHash, offsetExists, or offsetGet is overridden */
-		return zend_std_read_dimension(object, offset, type, rv);
+	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
+		return NULL;
 	}
+
+	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	spl_SplObjectStorageElement *element = zend_hash_index_find_ptr(&intern->storage, Z_OBJ_HANDLE_P(offset));
 
 	if (!element) {
-		if (type == BP_VAR_IS) {
-			return &EG(uninitialized_zval);
-		}
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Object not found");
 		return NULL;
 	} else {
@@ -482,21 +466,23 @@ static zval *spl_object_storage_read_dimension(zend_object *object, zval *offset
 
 static void spl_object_storage_write_dimension(zend_object *object, zval *offset, zval *inf)
 {
-	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
-	if (UNEXPECTED(offset == NULL || Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_WRITE_DIMENSION))) {
-		zend_std_write_dimension(object, offset, inf);
+	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_W);
 		return;
 	}
+
+	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	spl_object_storage_attach_handle(intern, Z_OBJ_P(offset), inf);
 }
 
-static void spl_object_storage_unset_dimension(zend_object *object, zval *offset)
+static void spl_object_storage_unset_dimension(zend_object *object, /* const */ zval *offset)
 {
-	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
-	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT || (intern->flags & SOS_OVERRIDDEN_UNSET_DIMENSION))) {
-		zend_std_unset_dimension(object, offset);
+	if (UNEXPECTED(Z_TYPE_P(offset) != IS_OBJECT)) {
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
 		return;
 	}
+
+	spl_SplObjectStorage *intern = spl_object_storage_from_obj(object);
 	zend_hash_index_del(&intern->storage, Z_OBJ_HANDLE_P(offset));
 }
 
@@ -1361,15 +1347,32 @@ PHP_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
+static /* const */ zend_internal_class_dimensions_functions spl_object_storage_dimensions_functions = {
+	.read_dimension  = spl_object_storage_read_dimension,
+	.has_dimension   = spl_object_storage_has_dimension,
+	// TODO Support fetching?
+	//.fetch_dimension = spl_object_storage_fetch_dimension,
+	.write_dimension = spl_object_storage_write_dimension,
+	.unset_dimension = spl_object_storage_unset_dimension
+};
+
 /* {{{ PHP_MINIT_FUNCTION(spl_observer) */
 PHP_MINIT_FUNCTION(spl_observer)
 {
 	spl_ce_SplObserver = register_class_SplObserver();
 	spl_ce_SplSubject = register_class_SplSubject();
 
-	spl_ce_SplObjectStorage = register_class_SplObjectStorage(zend_ce_countable, spl_ce_SeekableIterator, zend_ce_serializable, zend_ce_arrayaccess);
+	spl_ce_SplObjectStorage = register_class_SplObjectStorage(
+		zend_ce_countable,
+		spl_ce_SeekableIterator,
+		zend_ce_serializable,
+		zend_ce_dimension_read,
+		zend_ce_dimension_write,
+		zend_ce_dimension_unset
+	);
 	spl_ce_SplObjectStorage->create_object = spl_SplObjectStorage_new;
 	spl_ce_SplObjectStorage->default_object_handlers = &spl_handler_SplObjectStorage;
+	spl_ce_SplObjectStorage->dimension_handlers = &spl_object_storage_dimensions_functions;
 
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
@@ -1378,10 +1381,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
 	spl_handler_SplObjectStorage.free_obj        = spl_SplObjectStorage_free_storage;
-	spl_handler_SplObjectStorage.read_dimension  = spl_object_storage_read_dimension;
-	spl_handler_SplObjectStorage.write_dimension = spl_object_storage_write_dimension;
-	spl_handler_SplObjectStorage.has_dimension   = spl_object_storage_has_dimension;
-	spl_handler_SplObjectStorage.unset_dimension = spl_object_storage_unset_dimension;
 
 	spl_ce_MultipleIterator = register_class_MultipleIterator(zend_ce_iterator);
 	spl_ce_MultipleIterator->create_object = spl_SplObjectStorage_new;

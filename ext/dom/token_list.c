@@ -300,9 +300,6 @@ static zend_long dom_token_list_offset_convert_to_long(zval *offset, bool *faile
 				return 0;
 			case IS_TRUE:
 				return 1;
-			case IS_REFERENCE:
-				offset = Z_REFVAL_P(offset);
-				break;
 			case IS_RESOURCE:
 				zend_use_resource_as_offset(offset);
 				return Z_RES_HANDLE_P(offset);
@@ -310,17 +307,12 @@ static zend_long dom_token_list_offset_convert_to_long(zval *offset, bool *faile
 	}
 }
 
-zval *dom_token_list_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+zval *dom_token_list_read_dimension(zend_object *object, zval *offset, zval *rv)
 {
-	if (!offset) {
-		zend_throw_error(NULL, "Cannot append to Dom\\TokenList");
-		return NULL;
-	}
-
 	bool failed;
 	zend_long index = dom_token_list_offset_convert_to_long(offset, &failed);
 	if (UNEXPECTED(failed)) {
-		zend_illegal_container_offset(object->ce->name, offset, type);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
 		return NULL;
 	} else {
 		dom_token_list_item_read(php_dom_token_list_from_obj(object), rv, index);
@@ -328,26 +320,48 @@ zval *dom_token_list_read_dimension(zend_object *object, zval *offset, int type,
 	}
 }
 
-int dom_token_list_has_dimension(zend_object *object, zval *offset, int check_empty)
+bool dom_token_list_has_dimension(zend_object *object, zval *offset)
 {
 	bool failed;
 	zend_long index = dom_token_list_offset_convert_to_long(offset, &failed);
 	if (UNEXPECTED(failed)) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_IS);
-		return 0;
+		return false;
 	} else {
 		dom_token_list_object *token_list = php_dom_token_list_from_obj(object);
-		if (check_empty) {
-			/* Need to perform an actual read to have the correct empty() semantics. */
-			zval rv;
-			dom_token_list_item_read(token_list, &rv, index);
-			int is_true = zend_is_true(&rv);
-			zval_ptr_dtor_nogc(&rv);
-			return is_true;
-		} else {
-			return dom_token_list_item_exists(token_list, index);
-		}
+		return dom_token_list_item_exists(token_list, index);
 	}
+}
+
+PHP_METHOD(Dom_TokenList, offsetGet)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dom_token_list_item_read(php_dom_token_list_from_obj(Z_OBJ_P(ZEND_THIS)), return_value, index);
+}
+
+PHP_METHOD(Dom_TokenList, offsetFetch)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dom_token_list_item_read(php_dom_token_list_from_obj(Z_OBJ_P(ZEND_THIS)), return_value, index);
+}
+
+PHP_METHOD(Dom_TokenList, offsetExists)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	dom_token_list_object *token_list = php_dom_token_list_from_obj(Z_OBJ_P(ZEND_THIS));
+	RETURN_BOOL(dom_token_list_item_exists(token_list, index));
 }
 
 /* https://dom.spec.whatwg.org/#dom-domtokenlist-length */

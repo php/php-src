@@ -1,5 +1,5 @@
 --TEST--
-SPL: Bug #66834
+SPL: Bug #66834 empty() does not work on classes that extend ArrayObject
 --FILE--
 <?php
 
@@ -82,6 +82,7 @@ var_dump($object->offsetExists('foo'), $object->offsetExists('sbb'), isset($obje
 ==== class with offsetExists() and offsetGet() ====
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(37) "Called: ArrayObjectBoth::offsetExists"
+string(34) "Called: ArrayObjectBoth::offsetGet"
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(34) "Called: ArrayObjectBoth::offsetGet"
 bool(true)
@@ -89,13 +90,15 @@ bool(true)
 bool(true)
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(37) "Called: ArrayObjectBoth::offsetExists"
+string(34) "Called: ArrayObjectBoth::offsetGet"
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(34) "Called: ArrayObjectBoth::offsetGet"
 bool(true)
-bool(true)
+bool(false)
 bool(true)
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(37) "Called: ArrayObjectBoth::offsetExists"
+string(34) "Called: ArrayObjectBoth::offsetGet"
 string(37) "Called: ArrayObjectBoth::offsetExists"
 string(34) "Called: ArrayObjectBoth::offsetGet"
 bool(true)
@@ -118,7 +121,7 @@ string(39) "Called: ArrayObjectExists::offsetExists"
 string(39) "Called: ArrayObjectExists::offsetExists"
 string(39) "Called: ArrayObjectExists::offsetExists"
 bool(true)
-bool(true)
+bool(false)
 bool(true)
 string(39) "Called: ArrayObjectExists::offsetExists"
 string(39) "Called: ArrayObjectExists::offsetExists"
@@ -134,13 +137,16 @@ bool(false)
 bool(true)
 ==== class with offsetGet() ====
 string(33) "Called: ArrayObjectGet::offsetGet"
+string(33) "Called: ArrayObjectGet::offsetGet"
 bool(true)
 bool(true)
 bool(true)
 string(33) "Called: ArrayObjectGet::offsetGet"
+string(33) "Called: ArrayObjectGet::offsetGet"
 bool(true)
 bool(false)
 bool(true)
+string(33) "Called: ArrayObjectGet::offsetGet"
 string(33) "Called: ArrayObjectGet::offsetGet"
 bool(true)
 bool(true)
@@ -151,8 +157,10 @@ bool(true)
 ==== class with offsetGet() and offsetSet() ====
 
 Warning: Undefined array key "foo" in %s on line %d
+
+Warning: Undefined array key "foo" in %s on line %d
 bool(false)
 bool(true)
 bool(false)
-bool(true)
+bool(false)
 bool(true)

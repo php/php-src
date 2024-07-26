@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSerializable
+class SplFixedArray implements IteratorAggregate, DimensionFetchable, DimensionWritable, DimensionUnsetable, Countable, JsonSerializable
 {
     public function __construct(int $size = 0) {}
 
@@ -39,6 +39,9 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
      * @tentative-return-type
      */
     public function offsetGet($index): mixed {}
+
+    /** @param int $index */
+    public function &offsetFetch(mixed $index): mixed {}
 
     /**
      * @param int $index

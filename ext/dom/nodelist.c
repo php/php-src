@@ -278,7 +278,7 @@ dom_nodelist_dimension_index dom_modern_nodelist_get_index(const zval *offset)
 	return ret;
 }
 
-zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, zval *rv)
 {
 	if (UNEXPECTED(!offset)) {
 		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
@@ -287,7 +287,7 @@ zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int 
 
 	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(offset);
 	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
-		zend_illegal_container_offset(object->ce->name, offset, type);
+		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_R);
 		return NULL;
 	}
 
@@ -295,11 +295,8 @@ zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int 
 	return rv;
 }
 
-int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
+bool dom_modern_nodelist_has_dimension(zend_object *object, zval *member)
 {
-	/* If it exists, it cannot be empty because nodes aren't empty. */
-	ZEND_IGNORE_VALUE(check_empty);
-
 	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(member);
 	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
 		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
@@ -307,6 +304,66 @@ int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int che
 	}
 
 	return index.lval >= 0 && index.lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
+}
+
+PHP_METHOD(DOMNodeList, offsetGet)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (index < 0) {
+		// TODO Check standard wording
+		zend_argument_value_error(1, "must be greater or equal than 0");
+		RETURN_THROWS();
+	}
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	dom_nnodemap_object *objmap = intern->ptr;
+	php_dom_nodelist_get_item_into_zval(objmap, index, return_value);
+}
+
+PHP_METHOD(DOMNodeList, offsetFetch)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (index < 0) {
+		// TODO Check standard wording
+		zend_argument_value_error(1, "must be greater or equal than 0");
+		RETURN_THROWS();
+	}
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	dom_nnodemap_object *objmap = intern->ptr;
+	php_dom_nodelist_get_item_into_zval(objmap, index, return_value);
+	if (Z_TYPE_P(return_value) == IS_NULL) {
+		ZVAL_MAKE_REF(return_value);
+	}
+}
+
+PHP_METHOD(DOMNodeList, offsetExists)
+{
+	zend_long index;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(index)
+	ZEND_PARSE_PARAMETERS_END();
+
+	// TODO Still check for valid offset greater than or equal to 0?
+	if (index < 0) {
+		// TODO Check standard wording
+		zend_argument_value_error(1, "must be greater or equal than 0");
+		RETURN_THROWS();
+	}
+
+	zval *id = ZEND_THIS;
+	dom_object *intern = Z_DOMOBJ_P(id);
+	RETURN_BOOL(index < php_dom_get_nodelist_length(intern) );
 }
 
 #endif

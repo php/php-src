@@ -24,6 +24,12 @@ class Collection extends ArrayObject
         echo __METHOD__ . "(" . (is_null($index) ? "NULL" : $index) . ",$value)\n";
         parent::offsetSet($index, $value);
     }
+
+    function append($value): void
+    {
+        echo __METHOD__ . "($value)\n";
+        parent::append($value);
+    }
 }
 
 echo "\n\nInitiate Obj\n";
@@ -49,10 +55,10 @@ var_dump(count($arrayObj));
 --EXPECT--
 Initiate Obj
 Assign values
-Collection::offsetSet(NULL,foo)
+Collection::append(foo)
 Collection::offsetGet(0)
 string(3) "foo"
-Collection::offsetSet(NULL,bar)
+Collection::append(bar)
 Collection::offsetGet(0)
 string(3) "foo"
 Collection::offsetGet(1)

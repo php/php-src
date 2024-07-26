@@ -24,6 +24,7 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
+#include "Zend/zend_interfaces_dimension.h"
 
 static zval *com_property_read(zend_object *object, zend_string *member, int type, void **cache_slot, zval *rv)
 {
@@ -77,7 +78,7 @@ static zval *com_property_write(zend_object *object, zend_string *member, zval *
 	return value;
 }
 
-static zval *com_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+static zval *com_read_dimension(zend_object *object, zval *offset, zval *rv)
 {
 	php_com_dotnet_object *obj;
 	VARIANT v;
@@ -121,11 +122,6 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	HRESULT res;
 
 	obj = (php_com_dotnet_object*) object;
-
-	if (offset == NULL) {
-		php_com_throw_exception(DISP_E_BADINDEX, "appending to variants is not supported");
-		return;
-	}
 
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		ZVAL_COPY_VALUE(&args[0], offset);
@@ -201,21 +197,23 @@ static int com_property_exists(zend_object *object, zend_string *member, int che
 	return 0;
 }
 
-static int com_dimension_exists(zend_object *object, zval *member, int check_empty)
+static bool com_dimension_exists(zend_object *object, zval *member)
 {
 	/* TODO Add support */
 	zend_throw_error(NULL, "Cannot check dimension on a COM object");
-	return 0;
+	return false;
 }
+
+/* const */ zend_class_dimensions_functions php_com_dimensions_functions = {
+	.read_dimension = com_read_dimension,
+	.has_dimension   = com_dimension_exists,
+	.fetch_dimension = com_read_dimension,
+	.write_dimension = com_write_dimension,
+};
 
 static void com_property_delete(zend_object *object, zend_string *member, void **cache_slot)
 {
 	zend_throw_error(NULL, "Cannot delete properties from a COM object");
-}
-
-static void com_dimension_delete(zend_object *object, zval *offset)
-{
-	zend_throw_error(NULL, "Cannot delete dimension from a COM object");
 }
 
 static HashTable *com_properties_get(zend_object *object)
@@ -517,13 +515,9 @@ zend_object_handlers php_com_object_handlers = {
 	php_com_object_clone,
 	com_property_read,
 	com_property_write,
-	com_read_dimension,
-	com_write_dimension,
 	com_get_property_ptr_ptr,
 	com_property_exists,
 	com_property_delete,
-	com_dimension_exists,
-	com_dimension_delete,
 	com_properties_get,
 	com_method_get,
 	zend_std_get_constructor,

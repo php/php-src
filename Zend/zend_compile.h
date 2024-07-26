@@ -1025,6 +1025,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define BP_VAR_IS			3
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
+#define BP_VAR_FETCH		6
 
 #define ZEND_INTERNAL_FUNCTION		1
 #define ZEND_USER_FUNCTION			2

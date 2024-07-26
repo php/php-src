@@ -107,5 +107,8 @@ offsetGet
 offsetGet
 offsetGet
 offsetExists
+offsetGet
 offsetExists
+offsetGet
 offsetExists
+offsetGet

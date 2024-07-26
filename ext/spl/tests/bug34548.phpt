@@ -7,13 +7,20 @@ class Collection extends ArrayObject
 {
     public function add($dataArray)
     {
-        foreach($dataArray as $value) $this->append($value);
+        foreach($dataArray as $value) {
+            $this->append($value);
+        }
     }
 
     public function offsetSet($index, $value): void
     {
         parent::offsetSet($index, $value);
     }
+    // TODO This should work even with old version
+    //public function append($value): void
+    //{
+    //    parent::append($value);
+    //}
 }
 
 $data1=array('one', 'two', 'three');

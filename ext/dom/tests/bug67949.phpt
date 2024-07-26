@@ -87,7 +87,7 @@ Warning: Attempt to read property "textContent" on null in %s on line %d
 bool(false)
 NULL
 --- testing read_dimension with null offset ---
-Cannot access DOMNodeList without offset
+Cannot fetch append object of type DOMNodeList
 --- testing attribute access ---
 string(4) "href"
 ==DONE==
