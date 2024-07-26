@@ -188,6 +188,7 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 				 && op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER
 				 && ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->pointer.type)) {
 					ref = jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, op1_addr));
+					ref = ir_LOAD_A(ref); // TODO: is this always necessary ???
 				} else if (op1_ffi_type
 				 && op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY
 				 && ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->array.type)) {
