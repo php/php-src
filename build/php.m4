@@ -2268,6 +2268,11 @@ AS_VAR_IF([php_cv_have_write_stdout], [yes],
 dnl
 dnl PHP_INIT_DTRACE(providerdesc, header-file, sources [, module])
 dnl
+dnl Initialize the DTrace support using the DTrace "providerdesc" file and
+dnl generate "header-file". The "sources" is a blank-or-newline-separated list
+dnl of files. The optional "module" is PHP extension name or path when used in
+dnl extensions.
+dnl
 AC_DEFUN([PHP_INIT_DTRACE],
 [AC_CHECK_HEADER([sys/sdt.h],,
   [AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support.])])
@@ -2306,7 +2311,7 @@ dnl Add providerdesc.o or .lo into global objects when needed.
 
 dnl DTrace objects.
   old_IFS=[$]IFS
-  for ac_src in $3; do
+  for ac_src in m4_normalize([$3]); do
     IFS=.
     set $ac_src
     ac_obj=[$]1
