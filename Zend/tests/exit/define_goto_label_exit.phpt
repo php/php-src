@@ -10,7 +10,5 @@ exit:
 echo "After\n";
 
 ?>
---EXPECT--
-Before
-In between
-After
+--EXPECTF--
+Parse error: syntax error, unexpected token ":" in %s on line %d

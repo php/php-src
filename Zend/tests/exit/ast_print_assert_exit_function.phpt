@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-AssertionError: assert(0 && exit())
+AssertionError: assert(0 && \exit())

@@ -11,4 +11,4 @@ var_dump(exit);
 
 ?>
 --EXPECTF--
-Fatal error: Cannot define constant with name exit in %s on line %d
+Parse error: syntax error, unexpected token "exit", expecting identifier in %s on line %d
