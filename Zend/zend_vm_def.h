@@ -4074,14 +4074,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 	}
 #endif
 	ZEND_OBSERVER_FCALL_END(call, EG(exception) ? NULL : ret);
-
-	if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-			zend_timeout();
-		} else if (zend_interrupt_function) {
-			zend_interrupt_function(execute_data);
-		}
-	}
+	zend_interrupt_or_timeout_check(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -4204,14 +4197,7 @@ ZEND_VM_HOT_HANDLER(131, ZEND_DO_FCALL_BY_NAME, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		}
 #endif
 		ZEND_OBSERVER_FCALL_END(call, EG(exception) ? NULL : ret);
-
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -4333,14 +4319,7 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		}
 #endif
 		ZEND_OBSERVER_FCALL_END(call, EG(exception) ? NULL : ret);
-
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 

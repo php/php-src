@@ -1299,13 +1299,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 #endif
 
-	if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-			zend_timeout();
-		} else if (zend_interrupt_function) {
-			zend_interrupt_function(execute_data);
-		}
-	}
+	zend_interrupt_or_timeout_check(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -1370,13 +1364,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 #endif
 
-	if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-			zend_timeout();
-		} else if (zend_interrupt_function) {
-			zend_interrupt_function(execute_data);
-		}
-	}
+	zend_interrupt_or_timeout_check(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -1442,14 +1430,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 	}
 #endif
 	zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
-
-	if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-		if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-			zend_timeout();
-		} else if (zend_interrupt_function) {
-			zend_interrupt_function(execute_data);
-		}
-	}
+	zend_interrupt_or_timeout_check(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -1618,13 +1599,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		}
 #endif
 
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -1727,13 +1702,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		}
 #endif
 
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -1838,14 +1807,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		}
 #endif
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
-
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -1966,13 +1928,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 #endif
 
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -2092,13 +2048,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 #endif
 
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -2219,14 +2169,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		}
 #endif
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
-
-		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) {
-			if (zend_atomic_bool_load_ex(&EG(timed_out))) {
-				zend_timeout();
-			} else if (zend_interrupt_function) {
-				zend_interrupt_function(execute_data);
-			}
-		}
+		zend_interrupt_or_timeout_check(call);
 
 		EG(current_execute_data) = execute_data;
 

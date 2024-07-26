@@ -539,6 +539,18 @@ ZEND_COLD void zend_magic_get_property_type_inconsistency_error(const zend_prope
 
 ZEND_COLD void zend_match_unhandled_error(const zval *value);
 
+/* Call this to handle the timeout or the interrupt function. It will not clear
+ * the EG(vm_interrupt).
+ */
+ZEND_COLD void zend_interrupt_or_timeout(zend_execute_data *call);
+
+static zend_always_inline void zend_interrupt_or_timeout_check(zend_execute_data *call)
+{
+	if (UNEXPECTED(zend_atomic_bool_exchange_ex(&EG(vm_interrupt), false))) {
+		zend_interrupt_or_timeout(call);
+	}
+}
+
 static zend_always_inline void *zend_get_bad_ptr(void)
 {
 	ZEND_UNREACHABLE();
