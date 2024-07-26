@@ -1404,7 +1404,7 @@ AC_DEFUN([PHP_CHECK_FRAMEWORK], [
   dnl Supplying "c" to AC_CHECK_LIB is technically cheating, but rewriting
   dnl AC_CHECK_LIB is overkill and this only affects the "checking.." output
   dnl anyway.
-  AC_CHECK_LIB(c,[$2],[
+  AC_CHECK_LIB([c],[$2],[
     LDFLAGS=$save_old_LDFLAGS
     $3
   ],[
