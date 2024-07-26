@@ -36,7 +36,9 @@ if test "$PHP_MM" != "no"; then
     AC_MSG_ERROR([--with-mm cannot be combined with --enable-zts])
   fi
 
-  PHP_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/$PHP_LIBDIR, SESSION_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH([mm],
+    [$MM_DIR/$PHP_LIBDIR],
+    [SESSION_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$MM_DIR/include])
   PHP_INSTALL_HEADERS([ext/session], [mod_mm.h])
   AC_DEFINE(HAVE_LIBMM, 1, [Whether you have libmm])

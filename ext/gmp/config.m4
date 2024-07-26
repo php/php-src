@@ -10,7 +10,7 @@ if test "$PHP_GMP" != "no"; then
       AC_MSG_ERROR([GNU MP Library version 4.2 or greater required.])
     ])
 
-    PHP_ADD_LIBRARY(gmp,,GMP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY([gmp],, [GMP_SHARED_LIBADD])
   else
     if test ! -f $PHP_GMP/include/gmp.h; then
       AC_MSG_ERROR([Unable to locate gmp.h])
@@ -23,7 +23,9 @@ if test "$PHP_GMP" != "no"; then
       -L$PHP_GMP/$PHP_LIBDIR
     ])
 
-    PHP_ADD_LIBRARY_WITH_PATH(gmp, $PHP_GMP/$PHP_LIBDIR, GMP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH([gmp],
+      [$PHP_GMP/$PHP_LIBDIR],
+      [GMP_SHARED_LIBADD])
     PHP_ADD_INCLUDE([$PHP_GMP/include])
   fi
 

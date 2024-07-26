@@ -31,24 +31,22 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   PHP_READLINE_LIBS=""
   AC_CHECK_LIB(ncurses, tgetent,
   [
-    PHP_ADD_LIBRARY(ncurses,,READLINE_SHARED_LIBADD)
+    PHP_ADD_LIBRARY([ncurses],, [READLINE_SHARED_LIBADD])
     PHP_READLINE_LIBS="$PHP_READLINE_LIBS -lncurses"
   ],[
     AC_CHECK_LIB(termcap, tgetent,
     [
-      PHP_ADD_LIBRARY(termcap,,READLINE_SHARED_LIBADD)
+      PHP_ADD_LIBRARY([termcap],, [READLINE_SHARED_LIBADD])
       PHP_READLINE_LIBS="$PHP_READLINE_LIBS -ltermcap"
     ])
   ])
 
   PHP_CHECK_LIBRARY(readline, readline,
-  [
-    PHP_ADD_LIBRARY_WITH_PATH(readline, $READLINE_DIR/$PHP_LIBDIR, READLINE_SHARED_LIBADD)
-  ], [
-    AC_MSG_ERROR([readline library not found])
-  ], [
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
+    [PHP_ADD_LIBRARY_WITH_PATH([readline],
+      [$READLINE_DIR/$PHP_LIBDIR],
+      [READLINE_SHARED_LIBADD])],
+    [AC_MSG_ERROR([readline library not found])],
+    [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   PHP_CHECK_LIBRARY(readline, rl_pending_input,
   [], [
@@ -95,14 +93,9 @@ elif test "$PHP_LIBEDIT" != "no"; then
   PHP_EVAL_INCLINE([$EDIT_CFLAGS])
 
   AC_CHECK_LIB(ncurses, tgetent,
-  [
-    PHP_ADD_LIBRARY(ncurses,,READLINE_SHARED_LIBADD)
-  ],[
-    AC_CHECK_LIB(termcap, tgetent,
-    [
-      PHP_ADD_LIBRARY(termcap,,READLINE_SHARED_LIBADD)
-    ])
-  ])
+    [PHP_ADD_LIBRARY([ncurses],, [READLINE_SHARED_LIBADD])],
+    [AC_CHECK_LIB(termcap, tgetent,
+      [PHP_ADD_LIBRARY([termcap],, [READLINE_SHARED_LIBADD])])])
 
   PHP_CHECK_LIBRARY(edit, readline,
   [

@@ -16,7 +16,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     [],[
       AC_MSG_ERROR([Cannot find FreeTDS in known installation directories])
     ])
-    PHP_ADD_LIBRARY(sybdb,,PDO_DBLIB_SHARED_LIBADD)
+    PHP_ADD_LIBRARY([sybdb],, [PDO_DBLIB_SHARED_LIBADD])
   elif test "$PHP_PDO_DBLIB" != "no"; then
 
     if test -f $PHP_PDO_DBLIB/include/sybdb.h; then
@@ -38,7 +38,9 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     fi
 
     PHP_ADD_INCLUDE([$PDO_FREETDS_INCLUDE_DIR])
-    PHP_ADD_LIBRARY_WITH_PATH(sybdb, $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR, PDO_DBLIB_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH([sybdb],
+      [$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR],
+      [PDO_DBLIB_SHARED_LIBADD])
   fi
 
   PHP_CHECK_PDO_INCLUDES

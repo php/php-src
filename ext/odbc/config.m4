@@ -107,15 +107,15 @@ PHP_ARG_WITH([adabas],,
       PHP_ADABAS=/usr/local
     fi
     PHP_ADD_INCLUDE([$PHP_ADABAS/incl])
-    PHP_ADD_LIBPATH($PHP_ADABAS/$PHP_LIBDIR)
+    PHP_ADD_LIBPATH([$PHP_ADABAS/$PHP_LIBDIR])
     ODBC_OBJS="$PHP_ADABAS/$PHP_LIBDIR/odbclib.a"
     ODBC_LIB="$abs_builddir/ext/odbc/libodbc_adabas.a"
     $srcdir/build/shtool mkdir -f -p ext/odbc
     rm -f "$ODBC_LIB"
     cp "$ODBC_OBJS" "$ODBC_LIB"
-    PHP_ADD_LIBRARY(sqlptc)
-    PHP_ADD_LIBRARY(sqlrte)
-    PHP_ADD_LIBRARY_WITH_PATH(odbc_adabas, $abs_builddir/ext/odbc)
+    PHP_ADD_LIBRARY([sqlptc])
+    PHP_ADD_LIBRARY([sqlrte])
+    PHP_ADD_LIBRARY_WITH_PATH([odbc_adabas], [$abs_builddir/ext/odbc])
     ODBC_TYPE=adabas
     ODBC_INCDIR=$PHP_ADABAS/incl
     PHP_ODBC_CHECK_HEADER(sqlext.h)
@@ -137,8 +137,8 @@ PHP_ARG_WITH([sapdb],,
       PHP_SAPDB=/usr/local
     fi
     PHP_ADD_INCLUDE([$PHP_SAPDB/incl])
-    PHP_ADD_LIBPATH($PHP_SAPDB/$PHP_LIBDIR)
-    PHP_ADD_LIBRARY(sqlod)
+    PHP_ADD_LIBPATH([$PHP_SAPDB/$PHP_LIBDIR])
+    PHP_ADD_LIBRARY([sqlod])
     ODBC_TYPE=sapdb
     AC_DEFINE(HAVE_SAPDB,1,[ ])
     AC_MSG_RESULT([$ext_output])
@@ -422,7 +422,7 @@ PHP_ARG_WITH([dbmaker],,
       ODBC_SHARED="odbc.la"
     else
       AC_MSG_RESULT([yes (static)])
-      PHP_ADD_LIBRARY_WITH_PATH(dmapic, $ODBC_LIBDIR)
+      PHP_ADD_LIBRARY_WITH_PATH([dmapic], [$ODBC_LIBDIR])
       PHP_ADD_INCLUDE([$ODBC_INCDIR])
       ODBC_STATIC="libphpext_odbc.la"
     fi
