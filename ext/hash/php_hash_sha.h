@@ -56,6 +56,16 @@ PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size
 void SHA256_Transform_sse2(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64], uint32_t W[PHP_STATIC_RESTRICT 64], uint32_t S[PHP_STATIC_RESTRICT 8]);
 #endif
 
+#if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IMMINTRIN_H)
+# if defined(__SSSE3__) && defined(__SHA__)
+#  define PHP_HASH_INTRIN_SHA_NATIVE 1
+# elif defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#  define PHP_HASH_INTRIN_SHA_RESOLVER 1
+# endif
+
+void SHA256_Transform_shani(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64]);
+#endif
+
 PHP_HASH_API void PHP_SHA256Final(unsigned char[32], PHP_SHA256_CTX *);
 
 /* SHA384 context */

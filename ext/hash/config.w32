@@ -9,7 +9,7 @@ if (PHP_MHASH != 'no') {
 
 PHP_HASH = 'yes';
 
-EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_sha_sse2.c hash_ripemd.c hash_haval.c ' +
+EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_sha_sse2.c hash_sha_ni.c hash_ripemd.c hash_haval.c ' +
 					'hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c ' +
 					'hash_adler32.c hash_crc32.c hash_joaat.c hash_fnv.c ' +
 					'hash_sha3.c hash_murmur.c hash_xxhash.c', false);
