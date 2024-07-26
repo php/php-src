@@ -113,6 +113,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_INSTANCEOF    "'instanceof'"
 %token <ident> T_NEW           "'new'"
 %token <ident> T_CLONE         "'clone'"
+%token <ident> T_EXIT          "'exit'"
 %token <ident> T_IF            "'if'"
 %token <ident> T_ELSEIF        "'elseif'"
 %token <ident> T_ELSE          "'else'"
@@ -299,7 +300,7 @@ start:
 
 reserved_non_modifiers:
 	  T_INCLUDE | T_INCLUDE_ONCE | T_EVAL | T_REQUIRE | T_REQUIRE_ONCE | T_LOGICAL_OR | T_LOGICAL_XOR | T_LOGICAL_AND
-	| T_INSTANCEOF | T_NEW | T_CLONE | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
+	| T_INSTANCEOF | T_NEW | T_CLONE | T_EXIT | T_IF | T_ELSEIF | T_ELSE | T_ENDIF | T_ECHO | T_DO | T_WHILE | T_ENDWHILE
 	| T_FOR | T_ENDFOR | T_FOREACH | T_ENDFOREACH | T_DECLARE | T_ENDDECLARE | T_AS | T_TRY | T_CATCH | T_FINALLY
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
@@ -1303,6 +1304,11 @@ expr:
 	|	T_OBJECT_CAST expr	{ $$ = zend_ast_create_cast(IS_OBJECT, $2); }
 	|	T_BOOL_CAST expr	{ $$ = zend_ast_create_cast(_IS_BOOL, $2); }
 	|	T_UNSET_CAST expr	{ $$ = zend_ast_create_cast(IS_NULL, $2); }
+	|	T_EXIT ctor_arguments {
+			zend_ast *name = zend_ast_create_zval_from_str(ZSTR_KNOWN(ZEND_STR_EXIT));
+			name->attr = ZEND_NAME_FQ;
+			$$ = zend_ast_create(ZEND_AST_CALL, name, $2);
+		}
 	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }

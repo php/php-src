@@ -132,7 +132,7 @@ TypeError: exit(): Argument #1 ($code) must be of type string|int, stdClass give
 Using NULL as value:
 Exit status is: 0
 Output is:
-Deprecated: die(): Passing null to parameter #1 ($code) of type string|int is deprecated in %s on line %d
+Deprecated: exit(): Passing null to parameter #1 ($code) of type string|int is deprecated in %s on line %d
 Using false as value:
 Exit status is: 0
 Output is:
@@ -168,16 +168,16 @@ Hello world
 Using [] as value:
 Exit status is: 0
 Output is:
-TypeError: die(): Argument #1 ($code) must be of type string|int, array given
+TypeError: exit(): Argument #1 ($code) must be of type string|int, array given
 Using STDERR as value:
 Exit status is: 0
 Output is:
-TypeError: die(): Argument #1 ($code) must be of type string|int, resource given
+TypeError: exit(): Argument #1 ($code) must be of type string|int, resource given
 Using new stdClass() as value:
 Exit status is: 0
 Output is:
-TypeError: die(): Argument #1 ($code) must be of type string|int, stdClass given
+TypeError: exit(): Argument #1 ($code) must be of type string|int, stdClass given
 As a statement:
 Exit status is: 0
 Output is:
-TypeError: die(): Argument #1 ($code) must be of type string|int, stdClass given
+TypeError: exit(): Argument #1 ($code) must be of type string|int, stdClass given

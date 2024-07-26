@@ -33,7 +33,7 @@ object(Closure)#1 (2) {
 }
 object(Closure)#2 (2) {
   ["function"]=>
-  string(3) "die"
+  string(4) "exit"
   ["parameter"]=>
   array(1) {
     ["$code"]=>

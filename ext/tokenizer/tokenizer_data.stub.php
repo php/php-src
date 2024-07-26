@@ -134,6 +134,11 @@ const T_NEW = UNKNOWN;
 const T_CLONE = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_EXIT
+ */
+const T_EXIT = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_IF
  */
 const T_IF = UNKNOWN;

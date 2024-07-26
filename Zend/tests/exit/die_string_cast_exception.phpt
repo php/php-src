@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-die(): Argument #1 ($code) must be of type string|int, stdClass given
+exit(): Argument #1 ($code) must be of type string|int, stdClass given

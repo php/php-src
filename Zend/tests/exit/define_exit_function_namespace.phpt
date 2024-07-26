@@ -9,4 +9,4 @@ function exit() { }
 
 ?>
 --EXPECTF--
-Fatal error: Defining a custom exit() function is not allowed, as the function has special semantics in %s on line %d
+Parse error: syntax error, unexpected token "exit", expecting "(" in %s on line %d
