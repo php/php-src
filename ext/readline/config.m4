@@ -76,9 +76,18 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
+  CFLAGS_SAVE=$CFLAGS
+  LDFLAGS_SAVE=$LDFLAGS
+  LIBS_SAVE=$LIBS
+  CFLAGS="$CFLAGS $INCLUDES"
+  LDFLAGS="$LDFLAGS -L$READLINE_DIR/$PHP_LIBDIR"
+  LIBS="$LIBS -lreadline"
   AC_CHECK_DECL([rl_erase_empty_line],
     [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
     [#include <readline/readline.h>])
+  CFLAGS=$CFLAGS_SAVE
+  LDFLAGS=$LDFLAGS_SAVE
+  LIBS=$LIBS_SAVE
 
   AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
@@ -133,9 +142,15 @@ elif test "$PHP_LIBEDIT" != "no"; then
     $READLINE_SHARED_LIBADD
   ])
 
+  CFLAGS_SAVE=$CFLAGS
+  LIBS_SAVE=$LIBS
+  CFLAGS="$CFLAGS $EDIT_CFLAGS"
+  LIBS="$LIBS $EDIT_LIBS"
   AC_CHECK_DECL([rl_erase_empty_line],
     [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
     [#include <editline/readline.h>])
+  CFLAGS=$CFLAGS_SAVE
+  LIBS=$LIBS_SAVE
 
   AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
 fi
