@@ -124,6 +124,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      ext/ftp and ext/mysqlnd is enabled implicitly, when building with
      ext/openssl (--with-openssl), or explicitly by using new configure options
      --with-ftp-ssl and --with-mysqlnd-ssl.
+   - The configure option --with-ldap doesn't accept the path to Oracle Instant
+     Client anymore in favor of optional OpenLDAP paths only.
    - New configure option --with-openssl-legacy-provider to enable OpenSSL
      legacy provider.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
