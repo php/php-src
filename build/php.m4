@@ -744,7 +744,7 @@ AC_DEFUN([PHP_REQUIRE_CXX],[
   if test -z "$php_cxx_done"; then
     AC_PROG_CXX
     AC_PROG_CXXCPP
-    PHP_ADD_LIBRARY(stdc++)
+    PHP_ADD_LIBRARY([stdc++])
     php_cxx_done=yes
   fi
 ])
@@ -1877,7 +1877,9 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   if test "$found_iconv" = "yes"; then
     AC_DEFINE(HAVE_ICONV,1,[ ])
     if test -n "$ICONV_DIR"; then
-      PHP_ADD_LIBRARY_WITH_PATH($iconv_lib_name, $ICONV_DIR/$PHP_LIBDIR, $1)
+      PHP_ADD_LIBRARY_WITH_PATH([$iconv_lib_name],
+        [$ICONV_DIR/$PHP_LIBDIR],
+        [$1])
       PHP_ADD_INCLUDE([$ICONV_INCLUDE_DIR])
     fi
     $2

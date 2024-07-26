@@ -337,7 +337,7 @@ if test -d /usr/pkg/include && test -d /usr/pkg/lib; then
    CPPFLAGS="$CPPFLAGS -I/usr/pkg/include"
    LDFLAGS="$LDFLAGS -L/usr/pkg/lib"
 fi
-test -d /usr/ucblib && PHP_ADD_LIBPATH(/usr/ucblib)
+test -d /usr/ucblib && PHP_ADD_LIBPATH([/usr/ucblib])
 
 dnl First, library checks.
 dnl ----------------------------------------------------------------------------
@@ -952,8 +952,8 @@ if test "$PHP_LIBGCC" = "yes"; then
   if test -z "$libgcc_libpath"; then
     AC_MSG_ERROR([Cannot locate libgcc. Make sure that gcc is in your path])
   fi
-  PHP_ADD_LIBPATH($libgcc_libpath)
-  PHP_ADD_LIBRARY(gcc, yes)
+  PHP_ADD_LIBPATH([$libgcc_libpath])
+  PHP_ADD_LIBRARY([gcc], [yes])
 fi
 
 PHP_ARG_ENABLE([short-tags],
