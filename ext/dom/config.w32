@@ -38,7 +38,7 @@ if (PHP_DOM == "yes") {
 		ADD_SOURCES("ext/dom/lexbor/lexbor/tag", "tag.c", "dom");
 		ADD_FLAG("CFLAGS_DOM", "/D LEXBOR_STATIC ");
 
-		AC_DEFINE("HAVE_DOM", 1, "DOM support");
+		AC_DEFINE("HAVE_DOM", 1, "Define to 1 if dom extension is available.");
 
 		if (!PHP_DOM_SHARED) {
 			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
