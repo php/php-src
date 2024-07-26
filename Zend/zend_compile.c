@@ -8160,9 +8160,7 @@ static zend_string *zend_begin_func_decl(znode *result, zend_op_array *op_array,
 			"__autoload() is no longer supported, use spl_autoload_register() instead");
 	}
 
-	if (
-		zend_string_equals_literal_ci(unqualified_name, "assert")
-	) {
+	if (zend_string_equals_literal_ci(unqualified_name, "assert")) {
 		zend_error(E_COMPILE_ERROR,
 			"Defining a custom assert() function is not allowed, "
 			"as the function has special semantics");
@@ -9370,6 +9368,11 @@ static void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 
 		value_node.op_type = IS_CONST;
 		zend_const_expr_to_zval(value_zv, value_ast_ptr, /* allow_dynamic */ true);
+
+		if (zend_get_special_const(ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name))) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot redeclare constant '%s'", ZSTR_VAL(unqualified_name));
+		}
 
 		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
