@@ -5587,8 +5587,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_CHECK_FUNC_ARG:
 						if (!JIT_G(current_frame)
-						 || !JIT_G(current_frame)->call
-						 || !JIT_G(current_frame)->call->func) {
+						 || !JIT_G(current_frame)->call) {
+							break;
+						}
+#ifdef HAVE_FFI
+						if (TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
+							/* FFI arguments alwyas sent by value ??? */
+							TRACE_FRAME_SET_LAST_SEND_BY_VAL(JIT_G(current_frame)->call);
+							goto done;
+						}
+#endif
+						if (!JIT_G(current_frame)->call->func) {
 							break;
 						}
 						if (opline->op2_type == IS_CONST
@@ -5597,12 +5606,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							TRACE_FRAME_SET_LAST_SEND_UNKNOWN(JIT_G(current_frame)->call);
 							break;
 						}
-#ifdef HAVE_FFI
-						if (TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
-							/* FFI arguments alwyas sent by value ??? */
-							goto done;
-						}
-#endif
 						if (!zend_jit_check_func_arg(&ctx, opline)) {
 							goto jit_failure;
 						}
@@ -6040,7 +6043,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_DIM_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
-						 || !JIT_G(current_frame)->call->func
+//???						 || !JIT_G(current_frame)->call->func
 						 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 							break;
 						}
@@ -6280,7 +6283,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 						if (!JIT_G(current_frame)
 						 || !JIT_G(current_frame)->call
-						 || !JIT_G(current_frame)->call->func
+//???						 || !JIT_G(current_frame)->call->func
 						 || !TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
 							break;
 						}
