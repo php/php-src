@@ -46,21 +46,21 @@ echo "\nDone.\n";
 temp stream \(close after\):
 About to rewind!
 (\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
-\* Closing connection( -?\d+)?
+\* Closing connection( #?-?\d+)?
 
 memory stream \(close after\):
 About to rewind!
 (\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
-\* Closing connection( -?\d+)?
+\* Closing connection( #?-?\d+)?
 
 temp stream \(leak\):
 About to rewind!
 (\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
-\* Closing connection( -?\d+)?
+\* Closing connection( #?-?\d+)?
 
 memory stream \(leak\):
 About to rewind!
 (\* processing: file:\/\/\/i_dont_exist\/\n)?\* Couldn't open file \/i_dont_exist\/
-\* Closing connection( -?\d+)?
+\* Closing connection( #?-?\d+)?
 
 Done\.
