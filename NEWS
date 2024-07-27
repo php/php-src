@@ -50,6 +50,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15094 (php_random_default_engine() is not C++ conforming).
     (cmb)
 
+- Readline:
+  . Fixed readline_info, rl_line_buffer_length/rl_len globals on update.
+    (David Carlier)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)
