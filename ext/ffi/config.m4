@@ -11,7 +11,7 @@ if test "$PHP_FFI" != "no"; then
 
   AC_DEFINE(HAVE_FFI, 1, [Have ffi support])
 
-  AC_CHECK_TYPES(long double)
+  AC_CHECK_TYPES([long double])
 
   AC_DEFUN([PHP_FFI_CHECK_DECL],
     [AC_CHECK_DECL([$1],

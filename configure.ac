@@ -458,7 +458,7 @@ AC_STRUCT_TIMEZONE
 PHP_MISSING_TIME_R_DECL
 
 AC_CHECK_TYPES([struct flock],,,[#include <fcntl.h>])
-AC_CHECK_TYPES(socklen_t, [], [], [
+AC_CHECK_TYPES([socklen_t], [], [], [
   #ifdef HAVE_SYS_TYPES_H
   # include <sys/types.h>
   #endif
@@ -708,7 +708,7 @@ AS_VAR_IF([php_cv_func_copy_file_range], [yes],
   [AC_DEFINE([HAVE_COPY_FILE_RANGE], [1],
     [Define to 1 if you have the 'copy_file_range' function.])])
 
-AC_REPLACE_FUNCS(strlcat strlcpy explicit_bzero getopt)
+AC_REPLACE_FUNCS([strlcat strlcpy explicit_bzero getopt])
 AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 
@@ -1071,7 +1071,7 @@ PHP_ARG_ENABLE([undefined-sanitizer],,
 dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
 
-PHP_HELP_SEPARATOR([Extensions:
+PHP_HELP_SEPARATOR([[Extensions:
 
   --with-EXTENSION=[shared[,PATH]]
 
@@ -1081,7 +1081,7 @@ PHP_HELP_SEPARATOR([Extensions:
 
       o Builds the foobar extension as shared extension.
       o foobar package install prefix is /usr/local/foobar/
-])
+]])
 
 PHP_CONFIGURE_PART(Configuring extensions)
 
