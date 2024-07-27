@@ -1453,8 +1453,10 @@ AC_DEFUN([PHP_CHECK_FUNC_LIB],[
 
   if test "$found" = "yes"; then
     PHP_ADD_LIBRARY($2)
-    PHP_DEF_HAVE($1)
-    PHP_DEF_HAVE(lib$2)
+    AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
+      [Define to 1 if you have the '$1' function.])
+    AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_LIB$2]), [1],
+      [Define to 1 if you have the '$2' library (-l$2).])
     ac_cv_func_$1=yes
   else
     PHP_CHECK_FUNC_LIB($1,phpshift(phpshift($@)))
@@ -1478,7 +1480,8 @@ AC_DEFUN([PHP_CHECK_FUNC],[
 
   case $found in
   yes[)]
-    PHP_DEF_HAVE($1)
+    AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
+      [Define to 1 if you have the '$1' function.])
     ac_cv_func_$1=yes
   ;;
   ifelse($#,1,,[
