@@ -6041,7 +6041,7 @@ ZEND_METHOD(ReflectionProperty, getSettableType)
 	}
 
 	/* Get-only virtual property can never be written to. */
-	if ((prop->flags & ZEND_ACC_VIRTUAL) && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+	if (prop->hooks && (prop->flags & ZEND_ACC_VIRTUAL) && !prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 		zend_type never_type = ZEND_TYPE_INIT_CODE(IS_NEVER, 0, 0);
 		reflection_type_factory(never_type, return_value, 0);
 		return;
