@@ -548,7 +548,10 @@ if test "$PHP_FPM" != "no"; then
     fpm/events/port.c \
   "
 
-  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
+  PHP_SELECT_SAPI([fpm],
+    [program],
+    [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
+    [$PHP_FPM_CFLAGS])
 
   case $host_alias in
       *aix*)
