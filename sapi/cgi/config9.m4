@@ -34,7 +34,10 @@ if test "$PHP_CGI" != "no"; then
     esac
 
     dnl Select SAPI.
-    PHP_SELECT_SAPI(cgi, program, cgi_main.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI([cgi],
+      [program],
+      [cgi_main.c],
+      [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
     case $host_alias in
       *aix*)

@@ -92,23 +92,6 @@ Make sure to prefix *all* relative paths correctly with either `$(builddir)` or
 anymore, we must use either absolute paths or relative ones to the top
 build-directory. Correct prefixing ensures that.
 
-### SAPI developers
-
-Instead of using `PHP_SAPI=foo/PHP_BUILD_XYZ`, you will need to type
-
-```m4
-PHP_SELECT_SAPI(name, type, sources.c)
-```
-
-I.e. specify the source-code files as above and also pass the information
-regarding how PHP is supposed to be built (shared module, program, etc).
-
-For example for APXS:
-
-```m4
-PHP_SELECT_SAPI(apache, shared, sapi_apache.c mod_php.c php_apache.c)
-```
-
 ## General info
 
 The foundation for the new system is the flexible handling of sources and their

@@ -46,7 +46,7 @@ if test "$PHP_FUZZER" != "no"; then
   PHP_SUBST([FUZZING_LIB])
   PHP_SUBST([FUZZING_CC])
 
-  dnl PHP_SELECT_SAPI(fuzzer-parser, program, $FUZZER_SOURCES, , '$(SAPI_FUZZER_PATH)')
+  dnl PHP_SELECT_SAPI([fuzzer-parser], [program], [$FUZZER_SOURCES])
 
   PHP_ADD_BUILD_DIR([sapi/fuzzer])
   PHP_FUZZER_BINARIES=""
