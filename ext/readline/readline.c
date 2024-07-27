@@ -183,11 +183,18 @@ PHP_FUNCTION(readline_info)
 		if (zend_string_equals_literal_ci(what,"line_buffer")) {
 			oldstr = rl_line_buffer;
 			if (value) {
-				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
+#ifndef PHP_WIN32
+				if (strlen(oldstr) < Z_STRLEN_P(value)) {
+					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
+				}
+				strcpy(rl_line_buffer, Z_STRVAL_P(value));
+				rl_end = Z_STRLEN_P(value);
+#else
 				rl_line_buffer = strdup(Z_STRVAL_P(value));
+#endif
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (zend_string_equals_literal_ci(what, "point")) {
