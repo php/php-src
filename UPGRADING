@@ -930,6 +930,9 @@ PHP 8.4 UPGRADE NOTES
 
 - Curl:
   . The Curl extension now requires at least libcurl 7.61.0.
+  . The CURLOPT_DNS_USE_GLOBAL_CACHE Curl option no longer has any
+    effect, and is silently ignored. This underlying feature was
+    deprecated in libcurl 7.11.1 and removed in 7.62.0.
 
 - Date:
   . The class constants are typed now.
