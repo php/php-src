@@ -2907,6 +2907,7 @@ class PropertyInfo extends VariableLike
     public ?Expr $defaultValue;
     public ?string $defaultValueString;
     public bool $isDocReadonly;
+    public bool $isVirtual;
 
     /**
      * @var AttributeInfo[] $attributes
@@ -2920,6 +2921,7 @@ class PropertyInfo extends VariableLike
         ?Expr $defaultValue,
         ?string $defaultValueString,
         bool $isDocReadonly,
+        bool $isVirtual,
         ?string $link,
         ?int $phpVersionIdMinimumCompatibility,
         array $attributes,
@@ -2930,6 +2932,7 @@ class PropertyInfo extends VariableLike
         $this->defaultValue = $defaultValue;
         $this->defaultValueString = $defaultValueString;
         $this->isDocReadonly = $isDocReadonly;
+        $this->isVirtual = $isVirtual;
         parent::__construct($flags, $type, $phpDocType, $link, $phpVersionIdMinimumCompatibility, $attributes, $exposedDocComment);
     }
 
@@ -3043,6 +3046,10 @@ class PropertyInfo extends VariableLike
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_81_VERSION_ID);
         } elseif ($this->classFlags & Modifiers::READONLY) {
             $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_READONLY", PHP_82_VERSION_ID);
+        }
+
+        if ($this->isVirtual) {
+            $flags = $this->addFlagForVersionsAbove($flags, "ZEND_ACC_VIRTUAL", PHP_84_VERSION_ID);
         }
 
         return $flags;
@@ -4424,6 +4431,7 @@ function parseProperty(
 ): PropertyInfo {
     $phpDocType = null;
     $isDocReadonly = false;
+    $isVirtual = false;
     $link = null;
 
     if ($comments) {
@@ -4435,6 +4443,8 @@ function parseProperty(
                 $isDocReadonly = true;
             } elseif ($tag->name === 'link') {
                 $link = $tag->value;
+            } elseif ($tag->name === 'virtual') {
+                $isVirtual = true;
             }
         }
     }
@@ -4463,6 +4473,7 @@ function parseProperty(
         $property->default,
         $property->default ? $prettyPrinter->prettyPrintExpr($property->default) : null,
         $isDocReadonly,
+        $isVirtual,
         $link,
         $phpVersionIdMinimumCompatibility,
         $attributes,
