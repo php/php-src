@@ -5,9 +5,10 @@ PHP_ARG_ENABLE([simplexml],
   [yes])
 
 if test "$PHP_SIMPLEXML" != "no"; then
-  PHP_SETUP_LIBXML(SIMPLEXML_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_SIMPLEXML,1,[ ])
-    PHP_NEW_EXTENSION(simplexml, simplexml.c, $ext_shared)
+  PHP_SETUP_LIBXML([SIMPLEXML_SHARED_LIBADD], [
+    AC_DEFINE([HAVE_SIMPLEXML], [1],
+      [Define to 1 if simplexml extension is available.])
+    PHP_NEW_EXTENSION([simplexml], [simplexml.c], [$ext_shared])
     PHP_ADD_EXTENSION_DEP(simplexml, libxml)
     PHP_ADD_EXTENSION_DEP(simplexml, spl)
     PHP_INSTALL_HEADERS([ext/simplexml], [php_simplexml.h php_simplexml_exports.h])

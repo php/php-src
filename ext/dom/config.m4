@@ -10,8 +10,8 @@ if test "$PHP_DOM" != "no"; then
     AC_MSG_ERROR([DOM extension requires LIBXML extension, add --with-libxml])
   fi
 
-  PHP_SETUP_LIBXML(DOM_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_DOM,1,[ ])
+  PHP_SETUP_LIBXML([DOM_SHARED_LIBADD], [
+    AC_DEFINE([HAVE_DOM], [1], [Define to 1 if dom extension is available.])
     PHP_LEXBOR_CFLAGS="-I@ext_srcdir@/lexbor -DLEXBOR_STATIC"
     LEXBOR_DIR="lexbor/lexbor"
     LEXBOR_SOURCES=m4_normalize(["

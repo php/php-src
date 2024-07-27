@@ -5,9 +5,10 @@ PHP_ARG_ENABLE([xmlreader],
   [yes])
 
 if test "$PHP_XMLREADER" != "no"; then
-  PHP_SETUP_LIBXML(XMLREADER_SHARED_LIBADD, [
-    AC_DEFINE(HAVE_XMLREADER,1,[ ])
-    PHP_NEW_EXTENSION(xmlreader, php_xmlreader.c, $ext_shared)
+  PHP_SETUP_LIBXML([XMLREADER_SHARED_LIBADD], [
+    AC_DEFINE([HAVE_XMLREADER], [1],
+      [Define to 1 if xmlreader extension is available.])
+    PHP_NEW_EXTENSION([xmlreader], [php_xmlreader.c], [$ext_shared])
     PHP_ADD_EXTENSION_DEP(xmlreader, dom, true)
     PHP_ADD_EXTENSION_DEP(xmlreader, libxml)
     PHP_SUBST([XMLREADER_SHARED_LIBADD])
