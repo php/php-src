@@ -29,13 +29,11 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   PHP_ADD_INCLUDE([$READLINE_DIR/include])
 
   PHP_READLINE_LIBS=""
-  AC_CHECK_LIB(ncurses, tgetent,
-  [
+  AC_CHECK_LIB([ncurses], [tgetent], [
     PHP_ADD_LIBRARY([ncurses],, [READLINE_SHARED_LIBADD])
     PHP_READLINE_LIBS="$PHP_READLINE_LIBS -lncurses"
-  ],[
-    AC_CHECK_LIB(termcap, tgetent,
-    [
+    ],
+    [AC_CHECK_LIB([termcap], [tgetent], [
       PHP_ADD_LIBRARY([termcap],, [READLINE_SHARED_LIBADD])
       PHP_READLINE_LIBS="$PHP_READLINE_LIBS -ltermcap"
     ])
@@ -101,9 +99,9 @@ elif test "$PHP_LIBEDIT" != "no"; then
   PHP_EVAL_LIBLINE([$EDIT_LIBS], [READLINE_SHARED_LIBADD])
   PHP_EVAL_INCLINE([$EDIT_CFLAGS])
 
-  AC_CHECK_LIB(ncurses, tgetent,
+  AC_CHECK_LIB([ncurses], [tgetent],
     [PHP_ADD_LIBRARY([ncurses],, [READLINE_SHARED_LIBADD])],
-    [AC_CHECK_LIB(termcap, tgetent,
+    [AC_CHECK_LIB([termcap], [tgetent],
       [PHP_ADD_LIBRARY([termcap],, [READLINE_SHARED_LIBADD])])])
 
   PHP_CHECK_LIBRARY(edit, readline,
