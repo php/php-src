@@ -508,7 +508,7 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
-  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
+  PHP_OUTPUT([sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html])
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm

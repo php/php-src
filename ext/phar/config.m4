@@ -23,5 +23,5 @@ if test "$PHP_PHAR" != "no"; then
 
   PHP_INSTALL_HEADERS([ext/phar], [php_phar.h])
 
-  PHP_OUTPUT(ext/phar/phar.1 ext/phar/phar.phar.1)
+  PHP_OUTPUT([ext/phar/phar.1 ext/phar/phar.phar.1])
 fi

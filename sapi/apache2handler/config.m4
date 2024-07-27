@@ -14,7 +14,7 @@ if test "$PHP_APXS2" != "no"; then
       APXS=/usr/sbin/apxs
     fi
   else
-    PHP_EXPAND_PATH($PHP_APXS2, APXS)
+    PHP_EXPAND_PATH([$PHP_APXS2], [APXS])
   fi
 
   $APXS -q CFLAGS >/dev/null 2>&1
