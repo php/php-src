@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . /dev/poll events.mechanism for Solaris/Illumos setting had been retired.
     (David Carlier)
 
+- GMP:
+  . The GMP class is now final and cannot be extended anymore.
+
 - Intl:
   . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
     (David Carlier)
