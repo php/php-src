@@ -57,6 +57,10 @@ PHP                                                                        NEWS
   . Add tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
     (nielsdos)
 
+- XMLReader:
+  . Fixed bug GH-15123 (var_dump doesn't actually work on XMLReader).
+    (nielsdos)
+
 - XSL:
   . Fix trampoline leak in xpath callables. (nielsdos)
 
