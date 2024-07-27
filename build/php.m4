@@ -659,7 +659,8 @@ no[)]
   ;;
 esac
 
-PHP_ALWAYS_SHARED([$1])
+dnl When using phpize, automatically enable and build extension as shared.
+m4_ifdef([PHP_ALWAYS_SHARED], [PHP_ALWAYS_SHARED([$1])])
 ])
 
 dnl

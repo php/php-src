@@ -76,8 +76,6 @@ PHP_SUBST([PHP_MINOR_VERSION])
 PHP_SUBST([PHP_RELEASE_VERSION])
 PHP_SUBST([PHP_EXTRA_VERSION])
 
-AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl
-
 dnl Setting up the PHP version based on the information above.
 dnl ----------------------------------------------------------------------------
 
