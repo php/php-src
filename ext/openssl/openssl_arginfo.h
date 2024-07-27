@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: b2af57dc7fedc4305cbae2664331376fe390873f */
+ * Stub hash: 62716ca2f10c7df42529a9140d80bd7cbc2dc481 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export_to_file, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_TYPE_MASK(0, certificate, OpenSSLCertificate, MAY_BE_STRING, NULL)
@@ -388,6 +388,22 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_cert_locations, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_OPENSSL_ARGON2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_hash, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_OPENSSL_ARGON2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_password_verify, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_FUNCTION(openssl_x509_export_to_file);
 ZEND_FUNCTION(openssl_x509_export);
 ZEND_FUNCTION(openssl_x509_fingerprint);
@@ -451,6 +467,12 @@ ZEND_FUNCTION(openssl_spki_verify);
 ZEND_FUNCTION(openssl_spki_export);
 ZEND_FUNCTION(openssl_spki_export_challenge);
 ZEND_FUNCTION(openssl_get_cert_locations);
+#if defined(HAVE_OPENSSL_ARGON2)
+ZEND_FUNCTION(openssl_password_hash);
+#endif
+#if defined(HAVE_OPENSSL_ARGON2)
+ZEND_FUNCTION(openssl_password_verify);
+#endif
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
@@ -519,6 +541,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_spki_export, arginfo_openssl_spki_export)
 	ZEND_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
 	ZEND_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
+#if defined(HAVE_OPENSSL_ARGON2)
+	ZEND_FE(openssl_password_hash, arginfo_openssl_password_hash)
+#endif
+#if defined(HAVE_OPENSSL_ARGON2)
+	ZEND_FE(openssl_password_verify, arginfo_openssl_password_verify)
+#endif
 	ZEND_FE_END
 };
 
@@ -759,6 +787,14 @@ static void register_openssl_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_pkey_derive", sizeof("openssl_pkey_derive") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_spki_new", sizeof("openssl_spki_new") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(HAVE_OPENSSL_ARGON2)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_hash", sizeof("openssl_password_hash") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
+#if defined(HAVE_OPENSSL_ARGON2)
+
+	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "openssl_password_verify", sizeof("openssl_password_verify") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#endif
 }
 
 static zend_class_entry *register_class_OpenSSLCertificate(void)

@@ -678,3 +678,8 @@ function openssl_spki_export_challenge(string $spki): string|false {}
  * @refcount 1
  */
 function openssl_get_cert_locations(): array {}
+
+#if defined(HAVE_OPENSSL_ARGON2)
+function openssl_password_hash(string $algo, #[\SensitiveParameter] string $password, array $options = []): string {}
+function openssl_password_verify(string $algo, #[\SensitiveParameter] string $password, string $hash): bool {}
+#endif
