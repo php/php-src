@@ -228,6 +228,8 @@ PHP 8.4 UPGRADE NOTES
   . curl_version() returns an additional feature_list value, which is an
     associative array of all known Curl features, and whether they are
     supported (true) or not (false).
+  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
+    CURLOPT_FTP_RESPONSE_TIMEOUT. Both constants hold the same value.
 
 - Date:
   . Added static methods
@@ -788,6 +790,9 @@ PHP 8.4 UPGRADE NOTES
 - Core:
   . PHP_OUTPUT_HANDLER_PROCESSED.
   . PHP_SBINDIR.
+
+- Curl:
+  . CURLOPT_SERVER_RESPONSE_TIMEOUT.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant

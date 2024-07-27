@@ -8,6 +8,10 @@ PHP                                                                        NEWS
     than fatal error. (ilutov)
   . Added missing cstddef include for C++ builds. (cmb)
 
+- Curl:
+  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
+    CURLOPT_FTP_RESPONSE_TIMEOUT. (Ayesh Karunaratne)
+
 - BCMath:
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
     enum. (timwolla, saki)
