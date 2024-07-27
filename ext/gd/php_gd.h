@@ -54,6 +54,7 @@
 #define PHP_IMG_BMP   64
 #define PHP_IMG_TGA  128
 #define PHP_IMG_AVIF 256
+#define PHP_IMG_GD   512
 
 /* Section Filters Declarations */
 /* IMPORTANT NOTE FOR NEW FILTER

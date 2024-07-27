@@ -127,9 +127,15 @@ static const func_info_t func_infos[] = {
 	F1("imagecreatefromxpm", MAY_BE_OBJECT|MAY_BE_FALSE),
 #endif
 	F1("imagecreatefromwbmp", MAY_BE_OBJECT|MAY_BE_FALSE),
+#if defined(HAVE_GD_GD)
 	F1("imagecreatefromgd", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_GD_GD)
 	F1("imagecreatefromgd2", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
+#if defined(HAVE_GD_GD)
 	F1("imagecreatefromgd2part", MAY_BE_OBJECT|MAY_BE_FALSE),
+#endif
 #if defined(HAVE_GD_BMP)
 	F1("imagecreatefrombmp", MAY_BE_OBJECT|MAY_BE_FALSE),
 #endif

@@ -455,6 +455,9 @@ PHP_MINFO_FUNCTION(gd)
 #ifdef HAVE_GD_TGA
 	php_info_print_table_row(2, "TGA Read Support", "enabled");
 #endif
+#ifdef HAVE_GD_GD
+	php_info_print_table_row(2, "GD/GD2 Support", "enabled");
+#endif
 	php_info_print_table_end();
 	DISPLAY_INI_ENTRIES();
 }
@@ -513,6 +516,11 @@ PHP_FUNCTION(gd_info)
 	add_assoc_bool(return_value, "TGA Read Support", 1);
 #else
 	add_assoc_bool(return_value, "TGA Read Support", 0);
+#endif
+#ifdef HAVE_GD_GD
+	add_assoc_bool(return_value, "GD/GD2 Support", 1);
+#else
+	add_assoc_bool(return_value, "GD/GD2 Support", 0);
 #endif
 #ifdef USE_GD_JISX0208
 	add_assoc_bool(return_value, "JIS-mapped Japanese Font Support", 1);
@@ -1346,6 +1354,9 @@ PHP_FUNCTION(imagetypes)
 #ifdef HAVE_GD_AVIF
 	ret |= PHP_IMG_AVIF;
 #endif
+#ifdef HAVE_GD_GD
+	ret |= PHP_IMG_GD;
+#endif
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1719,6 +1730,7 @@ PHP_FUNCTION(imagecreatefromwbmp)
 }
 /* }}} */
 
+#ifdef HAVE_GD_GD
 /* {{{ Create a new image from GD file or URL */
 PHP_FUNCTION(imagecreatefromgd)
 {
@@ -1739,6 +1751,7 @@ PHP_FUNCTION(imagecreatefromgd2part)
 	_php_image_create_from(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2PART, "GD2", NULL, NULL);
 }
 /* }}} */
+#endif /* HAVE_GD_GD */
 
 #ifdef HAVE_GD_BMP
 /* {{{ Create a new image from BMP file or URL */
@@ -2131,6 +2144,7 @@ PHP_FUNCTION(imagewbmp)
 }
 /* }}} */
 
+#ifdef HAVE_GD_GD
 /* {{{ Output GD image to browser or file */
 PHP_FUNCTION(imagegd)
 {
@@ -2144,6 +2158,7 @@ PHP_FUNCTION(imagegd2)
 	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_TYPE_GD2, "GD2");
 }
 /* }}} */
+#endif /* HAVE_GD_GD */
 
 #ifdef HAVE_GD_BMP
 /* {{{ Output BMP image to browser or file */

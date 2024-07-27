@@ -188,6 +188,7 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
   PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
   PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
+  PHP_GD_CHECK_FORMAT([Gd],   [HAVE_GD_GD])
   PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
   PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
@@ -248,6 +249,7 @@ dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_PNG,              1, [ ])
     AC_DEFINE(HAVE_GD_BMP,              1, [ ])
     AC_DEFINE(HAVE_GD_TGA,              1, [ ])
+    AC_DEFINE(HAVE_GD_GD,               1, [ ])
 
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])

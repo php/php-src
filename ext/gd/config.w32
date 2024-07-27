@@ -65,6 +65,7 @@ if (PHP_GD != "no") {
 		AC_DEFINE('HAVE_GD_JPG', 1, "JPEG support");
 		AC_DEFINE('HAVE_XPM', 1, "XPM support");
 		AC_DEFINE('HAVE_GD_XPM', 1, "XPM support");
+		AC_DEFINE('HAVE_GD_GD', 1, "GD/GD2 format support");
 		AC_DEFINE('HAVE_LIBFREETYPE', 1, "Freetype support");
 		AC_DEFINE('HAVE_GD_FREETYPE', 1, "Freetype support");
 		ADD_FLAG("CFLAGS_GD", " \
