@@ -292,6 +292,8 @@ PHP 8.4 UPGRADE NOTES
     supported (true) or not (false).
   . Added CURL_HTTP_VERSION_3 and CURL_HTTP_VERSION_3ONLY constants (available
     since libcurl 7.66 and 7.88) as available options for CURLOPT_HTTP_VERSION.
+  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
+    CURLOPT_FTP_RESPONSE_TIMEOUT. Both constants hold the same value.
 
 - Date:
   . Added static methods
@@ -996,6 +998,7 @@ PHP 8.4 UPGRADE NOTES
   . CURL_HTTP_VERSION_3.
   . CURL_HTTP_VERSION_3ONLY.
   . CURL_TCP_KEEPCNT
+  . CURLOPT_SERVER_RESPONSE_TIMEOUT.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
