@@ -847,7 +847,7 @@ dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags]])
 dnl
 dnl When developing PHP SAPI modules, this macro specifies the SAPI "name" by
 dnl its "type", how PHP is supposed to be built (static, shared, bundle, or
-dnl program). It optionially adds the source files "sources" and compilation
+dnl program). It optionally adds the source files "sources" and compilation
 dnl flags "extra-cflags" to build the SAPI-specific objects. For example:
 dnl   PHP_SELECT_SAPI([apache2handler],
 dnl     [shared],
