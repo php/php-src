@@ -190,10 +190,16 @@ PHP_FUNCTION(readline_info)
 				if (strlen(oldstr) < Z_STRLEN_P(value)) {
 					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
 				}
-				strcpy(rl_line_buffer, Z_STRVAL_P(value));
+				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
 				rl_end = Z_STRLEN_P(value);
 #else
-				rl_line_buffer = strdup(Z_STRVAL_P(value));
+				char *tmp = strdup(Z_STRVAL_P(value));
+				if (tmp) {
+					if (rl_line_buffer) {
+						free(rl_line_buffer);
+					}
+					rl_line_buffer = tmp;
+				}
 #endif
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
