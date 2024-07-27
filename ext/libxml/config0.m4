@@ -10,6 +10,8 @@ if test "$PHP_LIBXML" != "no"; then
   ext_shared=no
 
   PHP_SETUP_LIBXML([LIBXML_SHARED_LIBADD], [
+    AC_DEFINE([HAVE_LIBXML], [1],
+      [Define to 1 if libxml extension is available.])
     PHP_NEW_EXTENSION([libxml],
       [libxml.c mime_sniff.c],
       [$ext_shared],,

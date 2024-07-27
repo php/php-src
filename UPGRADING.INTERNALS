@@ -171,6 +171,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
    - M4 macro PHP_EVAL_LIBLINE got a new 3rd argument to override the ext_shared
      checks.
+   - M4 macro PHP_SETUP_LIBXML doesn't define the redundant HAVE_LIBXML symbol
+     anymore.
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
