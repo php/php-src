@@ -76,10 +76,6 @@ PHP_SUBST([PHP_MINOR_VERSION])
 PHP_SUBST([PHP_RELEASE_VERSION])
 PHP_SUBST([PHP_EXTRA_VERSION])
 
-dnl Define where extension directories are located in the configure context.
-AC_DEFUN([PHP_EXT_BUILDDIR],[$config_m4_dir])dnl
-AC_DEFUN([PHP_EXT_DIR],[$config_m4_dir])dnl
-AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir/$config_m4_dir])dnl
 AC_DEFUN([PHP_ALWAYS_SHARED],[])dnl
 
 dnl Setting up the PHP version based on the information above.
