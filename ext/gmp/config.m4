@@ -5,10 +5,9 @@ PHP_ARG_WITH([gmp],
 
 if test "$PHP_GMP" != "no"; then
   if test "$PHP_GMP" = "yes"; then
-    PHP_CHECK_LIBRARY(gmp, __gmpz_rootrem,
-    [],[
-      AC_MSG_ERROR([GNU MP Library version 4.2 or greater required.])
-    ])
+    PHP_CHECK_LIBRARY([gmp], [__gmpz_rootrem],
+      [],
+      [AC_MSG_ERROR([GNU MP Library version 4.2 or greater required.])])
 
     PHP_ADD_LIBRARY([gmp],, [GMP_SHARED_LIBADD])
   else
@@ -16,12 +15,10 @@ if test "$PHP_GMP" != "no"; then
       AC_MSG_ERROR([Unable to locate gmp.h])
     fi
 
-    PHP_CHECK_LIBRARY(gmp, __gmpz_rootrem,
-    [],[
-      AC_MSG_ERROR([GNU MP Library version 4.2 or greater required.])
-    ],[
-      -L$PHP_GMP/$PHP_LIBDIR
-    ])
+    PHP_CHECK_LIBRARY([gmp], [__gmpz_rootrem],
+      [],
+      [AC_MSG_ERROR([GNU MP Library version 4.2 or greater required.])],
+      [-L$PHP_GMP/$PHP_LIBDIR])
 
     PHP_ADD_LIBRARY_WITH_PATH([gmp],
       [$PHP_GMP/$PHP_LIBDIR],

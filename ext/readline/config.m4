@@ -39,40 +39,32 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     ])
   ])
 
-  PHP_CHECK_LIBRARY(readline, readline,
+  PHP_CHECK_LIBRARY([readline], [readline],
     [PHP_ADD_LIBRARY_WITH_PATH([readline],
       [$READLINE_DIR/$PHP_LIBDIR],
       [READLINE_SHARED_LIBADD])],
     [AC_MSG_ERROR([readline library not found])],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
-  PHP_CHECK_LIBRARY(readline, rl_pending_input,
-  [], [
-    AC_MSG_ERROR([invalid readline installation detected. Try --with-libedit instead.])
-  ], [
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
+  PHP_CHECK_LIBRARY([readline], [rl_pending_input],
+    [],
+    [AC_MSG_ERROR([invalid readline installation detected. Try --with-libedit instead.])],
+    [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
-  PHP_CHECK_LIBRARY(readline, rl_callback_read_char,
-  [
-    AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
-  ],[],[
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
+  PHP_CHECK_LIBRARY([readline], [rl_callback_read_char],
+    [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1], [ ])],
+    [],
+    [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
-  PHP_CHECK_LIBRARY(readline, rl_on_new_line,
-  [
-    AC_DEFINE(HAVE_RL_ON_NEW_LINE, 1, [ ])
-  ],[],[
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
+  PHP_CHECK_LIBRARY([readline], [rl_on_new_line],
+    [AC_DEFINE([HAVE_RL_ON_NEW_LINE], [1], [ ])],
+    [],
+    [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
-  PHP_CHECK_LIBRARY(readline, rl_completion_matches,
-  [
-    AC_DEFINE(HAVE_RL_COMPLETION_MATCHES, 1, [ ])
-  ],[],[
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
+  PHP_CHECK_LIBRARY([readline], [rl_completion_matches],
+    [AC_DEFINE([HAVE_RL_COMPLETION_MATCHES], [1], [ ])],
+    [],
+    [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   CFLAGS_SAVE=$CFLAGS
   LDFLAGS_SAVE=$LDFLAGS
@@ -104,41 +96,30 @@ elif test "$PHP_LIBEDIT" != "no"; then
     [AC_CHECK_LIB([termcap], [tgetent],
       [PHP_ADD_LIBRARY([termcap],, [READLINE_SHARED_LIBADD])])])
 
-  PHP_CHECK_LIBRARY(edit, readline,
-  [
-  ], [
-    AC_MSG_ERROR([edit library required by readline not found])
-  ], [
-    $READLINE_SHARED_LIBADD
-  ])
+  PHP_CHECK_LIBRARY([edit], [readline],
+    [],
+    [AC_MSG_ERROR([edit library required by readline not found])],
+    [$READLINE_SHARED_LIBADD])
 
-  PHP_CHECK_LIBRARY(edit, rl_callback_read_char,
-  [
-    AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
-  ],[],[
-    $READLINE_SHARED_LIBADD
-  ])
+  PHP_CHECK_LIBRARY([edit], [rl_callback_read_char],
+    [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1], [ ])],
+    [],
+    [$READLINE_SHARED_LIBADD])
 
-  PHP_CHECK_LIBRARY(edit, rl_on_new_line,
-  [
-    AC_DEFINE(HAVE_RL_ON_NEW_LINE, 1, [ ])
-  ],[],[
-    $READLINE_SHARED_LIBADD
-  ])
+  PHP_CHECK_LIBRARY([edit], [rl_on_new_line],
+    [AC_DEFINE([HAVE_RL_ON_NEW_LINE], [1], [ ])],
+    [],
+    [$READLINE_SHARED_LIBADD])
 
-  PHP_CHECK_LIBRARY(edit, rl_completion_matches,
-  [
-    AC_DEFINE(HAVE_RL_COMPLETION_MATCHES, 1, [ ])
-  ],[],[
-    $READLINE_SHARED_LIBADD
-  ])
+  PHP_CHECK_LIBRARY([edit], [rl_completion_matches],
+    [AC_DEFINE([HAVE_RL_COMPLETION_MATCHES], [1], [ ])],
+    [],
+    [$READLINE_SHARED_LIBADD])
 
-  PHP_CHECK_LIBRARY(edit, history_list,
-  [
-    AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
-  ],[],[
-    $READLINE_SHARED_LIBADD
-  ])
+  PHP_CHECK_LIBRARY([edit], [history_list],
+    [AC_DEFINE([HAVE_HISTORY_LIST], [1], [ ])],
+    [],
+    [$READLINE_SHARED_LIBADD])
 
   CFLAGS_SAVE=$CFLAGS
   LIBS_SAVE=$LIBS

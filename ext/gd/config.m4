@@ -188,9 +188,18 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
   PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
   PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
-  PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY([gd], [gdFontCacheShutdown],
+    [AC_DEFINE([HAVE_GD_FREETYPE], [1], [ ])],
+    [],
+    [$GD_SHARED_LIBADD])
+  PHP_CHECK_LIBRARY([gd], [gdVersionString],
+    [AC_DEFINE([HAVE_GD_LIBVERSION], [1], [ ])],
+    [],
+    [$GD_SHARED_LIBADD])
+  PHP_CHECK_LIBRARY([gd], [gdImageGetInterpolationMethod],
+    [AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1], [ ])],
+    [],
+    [$GD_SHARED_LIBADD])
 ])
 
 dnl
@@ -279,9 +288,10 @@ dnl Various checks for GD features
 
     PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared])
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h])
-    PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
-      AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ $GD_SHARED_LIBADD ])
+    PHP_CHECK_LIBRARY([gd], [gdImageCreate],
+      [],
+      [AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])],
+      [$GD_SHARED_LIBADD])
   fi
 
   PHP_SUBST([GD_SHARED_LIBADD])
