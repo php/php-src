@@ -53,7 +53,7 @@ if test "$PHP_FUZZER" != "no"; then
   PHP_BINARIES="$PHP_BINARIES fuzzer"
   PHP_INSTALLED_SAPIS="$PHP_INSTALLED_SAPIS fuzzer"
 
-  PHP_ADD_SOURCES_X([sapi/fuzzer], [fuzzer-sapi.c], [], FUZZER_COMMON_OBJS)
+  PHP_ADD_SOURCES_X([sapi/fuzzer], [fuzzer-sapi.c], [], [FUZZER_COMMON_OBJS])
 
   PHP_FUZZER_TARGET([parser], PHP_FUZZER_PARSER_OBJS)
   PHP_FUZZER_TARGET([execute], PHP_FUZZER_EXECUTE_OBJS)
