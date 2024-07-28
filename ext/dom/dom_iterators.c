@@ -295,7 +295,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 					if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
 						curnode = (xmlNodePtr) nodep->properties;
 					} else {
-						curnode = (xmlNodePtr) nodep->children;
+						curnode = dom_nodelist_iter_start_first_child(nodep);
 					}
 				} else {
 					if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
