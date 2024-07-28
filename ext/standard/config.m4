@@ -467,7 +467,8 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
     var.c
     versioning.c
     $php_ext_standard_sources
-  ]),,,
+  ]),
+  [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])
