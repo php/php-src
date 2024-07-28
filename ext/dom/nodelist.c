@@ -31,7 +31,7 @@
 * Since:
 */
 
-static xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep)
+xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep)
 {
 	if (nodep->type == XML_ENTITY_REF_NODE) {
 		/* See entityreference.c */

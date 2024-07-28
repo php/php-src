@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed case when curl_error returns an empty string.
     (David Carlier)
 
+- DOM:
+  . Fix UAF when removing doctype and using foreach iteration. (nielsdos)
+
 - FFI:
   . Fixed bug GH-14286 (ffi enum type (when enum has no name) make memory
     leak). (nielsdos, dstogov)
