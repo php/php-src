@@ -48,6 +48,10 @@ PHP 8.4 UPGRADE NOTES
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
 
+- GMP:
+  . The GMP class is now final and cannot be extended anymore.
+    RFC: https://wiki.php.net/rfc/gmp-final
+
 - Intl:
   . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
     ResourceBundle object now throw:
