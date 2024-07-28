@@ -7,55 +7,60 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU([INTL_SHARED_LIBADD])
   PHP_SUBST([INTL_SHARED_LIBADD])
   INTL_COMMON_FLAGS="$ICU_CFLAGS -Wno-write-strings -D__STDC_LIMIT_MACROS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  PHP_NEW_EXTENSION(intl, php_intl.c \
-    intl_error.c \
-    intl_convert.c \
-    collator/collator_class.c \
-    collator/collator_sort.c \
-    collator/collator_convert.c \
-    collator/collator_locale.c \
-    collator/collator_compare.c \
-    collator/collator_attr.c \
-    collator/collator_create.c \
-    collator/collator_is_numeric.c \
-    collator/collator_error.c \
-    common/common_error.c \
-    converter/converter.c \
-    formatter/formatter_main.c \
-    formatter/formatter_class.c \
-    formatter/formatter_attr.c \
-    formatter/formatter_data.c \
-    formatter/formatter_format.c \
-    formatter/formatter_parse.c \
-    normalizer/normalizer_class.c \
-    normalizer/normalizer_normalize.c \
-    locale/locale.c \
-    locale/locale_class.c \
-    locale/locale_methods.c \
-    dateformat/dateformat.c \
-    dateformat/dateformat_class.c \
-    dateformat/dateformat_attr.c \
-    dateformat/dateformat_data.c \
-    dateformat/dateformat_format.c \
-    dateformat/dateformat_parse.c \
-    msgformat/msgformat.c \
-    msgformat/msgformat_attr.c \
-    msgformat/msgformat_class.c \
-    msgformat/msgformat_data.c  \
-    msgformat/msgformat_format.c \
-    msgformat/msgformat_parse.c \
-    grapheme/grapheme_string.c \
-    grapheme/grapheme_util.c \
-    resourcebundle/resourcebundle.c \
-    resourcebundle/resourcebundle_class.c \
-    resourcebundle/resourcebundle_iterator.c \
-    transliterator/transliterator_class.c \
-    transliterator/transliterator_methods.c \
-    uchar/uchar.c \
-    idn/idn.c \
-    spoofchecker/spoofchecker_class.c \
-    spoofchecker/spoofchecker_create.c\
-    spoofchecker/spoofchecker_main.c, $ext_shared,,$INTL_COMMON_FLAGS,cxx)
+  PHP_NEW_EXTENSION([intl], m4_normalize([
+      collator/collator_attr.c
+      collator/collator_class.c
+      collator/collator_compare.c
+      collator/collator_convert.c
+      collator/collator_create.c
+      collator/collator_error.c
+      collator/collator_is_numeric.c
+      collator/collator_locale.c
+      collator/collator_sort.c
+      common/common_error.c
+      converter/converter.c
+      dateformat/dateformat_attr.c
+      dateformat/dateformat_class.c
+      dateformat/dateformat_data.c
+      dateformat/dateformat_format.c
+      dateformat/dateformat_parse.c
+      dateformat/dateformat.c
+      formatter/formatter_attr.c
+      formatter/formatter_class.c
+      formatter/formatter_data.c
+      formatter/formatter_format.c
+      formatter/formatter_main.c
+      formatter/formatter_parse.c
+      grapheme/grapheme_string.c
+      grapheme/grapheme_util.c
+      idn/idn.c
+      intl_convert.c
+      intl_error.c
+      locale/locale_class.c
+      locale/locale_methods.c
+      locale/locale.c
+      msgformat/msgformat_attr.c
+      msgformat/msgformat_class.c
+      msgformat/msgformat_data.c
+      msgformat/msgformat_format.c
+      msgformat/msgformat_parse.c
+      msgformat/msgformat.c
+      normalizer/normalizer_class.c
+      normalizer/normalizer_normalize.c
+      php_intl.c
+      resourcebundle/resourcebundle_class.c
+      resourcebundle/resourcebundle_iterator.c
+      resourcebundle/resourcebundle.c
+      spoofchecker/spoofchecker_class.c
+      spoofchecker/spoofchecker_create.c
+      spoofchecker/spoofchecker_main.c
+      transliterator/transliterator_class.c
+      transliterator/transliterator_methods.c
+      uchar/uchar.c
+    ]),
+    [$ext_shared],,
+    [$INTL_COMMON_FLAGS],
+    [cxx])
 
   PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
     common/common_enum.cpp \

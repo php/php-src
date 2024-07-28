@@ -455,7 +455,10 @@ if test -n "$ODBC_TYPE"; then
   AC_SUBST([ODBC_LFLAGS])
   AC_SUBST([ODBC_TYPE])
 
-  PHP_NEW_EXTENSION(odbc, php_odbc.c odbc_utils.c, $ext_shared,, [$ODBC_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+  PHP_NEW_EXTENSION([odbc],
+    [php_odbc.c odbc_utils.c],
+    [$ext_shared],,
+    [$ODBC_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 else
   AC_MSG_CHECKING([for any ODBC driver support])
   AC_MSG_RESULT([no])

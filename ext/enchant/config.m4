@@ -35,6 +35,6 @@ if test "$PHP_ENCHANT" != "no"; then
 
   AC_DEFINE(HAVE_ENCHANT, 1, [ ])
 
-  PHP_NEW_EXTENSION(enchant, enchant.c, $ext_shared)
+  PHP_NEW_EXTENSION([enchant], [enchant.c], [$ext_shared])
   PHP_SUBST([ENCHANT_SHARED_LIBADD])
 fi

@@ -14,7 +14,7 @@ PHP_ARG_WITH([ftp-ssl],
 
 if test "$PHP_FTP" = "yes"; then
   AC_DEFINE(HAVE_FTP,1,[Whether you want FTP support])
-  PHP_NEW_EXTENSION(ftp, php_ftp.c ftp.c, $ext_shared)
+  PHP_NEW_EXTENSION([ftp], [php_ftp.c ftp.c], [$ext_shared])
 
   dnl Empty variable means 'no' (for phpize builds).
   test -z "$PHP_OPENSSL" && PHP_OPENSSL=no

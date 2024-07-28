@@ -53,5 +53,9 @@ int main(void) {
 
   AC_CHECK_TYPE([siginfo_t],[PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"],,[#include <signal.h>])
 
-  PHP_NEW_EXTENSION(pcntl, pcntl.c php_signal.c, $ext_shared, cli, $PCNTL_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([pcntl],
+    [pcntl.c php_signal.c],
+    [$ext_shared],
+    [cli],
+    [$PCNTL_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 fi

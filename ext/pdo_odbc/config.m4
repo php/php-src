@@ -141,7 +141,9 @@ functions required for PDO support.
   AC_DEFINE_UNQUOTED([PDO_ODBC_TYPE], ["$pdo_odbc_flavour"],
     [Define to the ODBC driver or driver manager value.])
 
-  PHP_NEW_EXTENSION(pdo_odbc, pdo_odbc.c odbc_driver.c odbc_stmt.c, $ext_shared)
+  PHP_NEW_EXTENSION([pdo_odbc],
+    [pdo_odbc.c odbc_driver.c odbc_stmt.c],
+    [$ext_shared])
   PHP_SUBST([PDO_ODBC_SHARED_LIBADD])
   PHP_ADD_EXTENSION_DEP(pdo_odbc, pdo)
 fi
