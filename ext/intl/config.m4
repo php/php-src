@@ -91,14 +91,17 @@ if test "$PHP_INTL" != "no"; then
   ])
 
   PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $PHP_INTL_STDCXX $ICU_CXXFLAGS"
-  case $host_alias in
-  *cygwin*) PHP_INTL_CXX_FLAGS="$PHP_INTL_CXX_FLAGS -D_POSIX_C_SOURCE=200809L"
-  esac
-  if test "$ext_shared" = "no"; then
-    PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS)
-  else
-    PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS, shared_objects_intl, yes)
-  fi
+  AS_CASE([$host_alias], [*cygwin*],
+    [PHP_INTL_CXX_FLAGS="$PHP_INTL_CXX_FLAGS -D_POSIX_C_SOURCE=200809L"])
+  AS_VAR_IF([ext_shared], [no],
+    [PHP_ADD_SOURCES([$ext_dir],
+      [$PHP_INTL_CXX_SOURCES],
+      [$PHP_INTL_CXX_FLAGS])],
+    [PHP_ADD_SOURCES_X([$ext_dir],
+      [$PHP_INTL_CXX_SOURCES],
+      [$PHP_INTL_CXX_FLAGS],
+      [shared_objects_intl],
+      [yes])])
 
   PHP_ADD_BUILD_DIR(m4_normalize([
     $ext_builddir/breakiterator
