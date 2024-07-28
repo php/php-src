@@ -5,5 +5,5 @@ PHP_ARG_ENABLE([shmop],
 
 if test "$PHP_SHMOP" != "no"; then
   AC_DEFINE(HAVE_SHMOP, 1, [ ])
-  PHP_NEW_EXTENSION(shmop, shmop.c, $ext_shared)
+  PHP_NEW_EXTENSION([shmop], [shmop.c], [$ext_shared])
 fi

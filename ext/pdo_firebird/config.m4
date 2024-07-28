@@ -50,7 +50,9 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
 
   PHP_CHECK_PDO_INCLUDES
 
-  PHP_NEW_EXTENSION(pdo_firebird, pdo_firebird.c firebird_driver.c firebird_statement.c, $ext_shared)
+  PHP_NEW_EXTENSION([pdo_firebird],
+    [pdo_firebird.c firebird_driver.c firebird_statement.c],
+    [$ext_shared])
   PHP_SUBST([PDO_FIREBIRD_SHARED_LIBADD])
   PHP_ADD_EXTENSION_DEP(pdo_firebird, pdo)
 fi

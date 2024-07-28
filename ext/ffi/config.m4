@@ -27,6 +27,9 @@ if test "$PHP_FFI" != "no"; then
   PHP_FFI_CHECK_DECL([FFI_MS_CDECL])
   PHP_FFI_CHECK_DECL([FFI_SYSV])
 
-  PHP_NEW_EXTENSION(ffi, ffi.c ffi_parser.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([ffi],
+    [ffi.c ffi_parser.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_SUBST([FFI_SHARED_LIBADD])
 fi

@@ -14,7 +14,10 @@ PHP_ARG_WITH([mm],
 if test "$PHP_SESSION" != "no"; then
   PHP_PWRITE_TEST
   PHP_PREAD_TEST
-  PHP_NEW_EXTENSION(session, mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([session],
+    [mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   dnl https://bugs.php.net/53141
   PHP_ADD_EXTENSION_DEP(session, spl, true)
   PHP_SUBST([SESSION_SHARED_LIBADD])

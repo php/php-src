@@ -38,7 +38,7 @@ Makefile.ins are abandoned. The files which are to be compiled are specified in
 the `config.m4` now using the following macro:
 
 ```m4
-PHP_NEW_EXTENSION(foo, foo.c bar.c baz.cpp, $ext_shared)
+PHP_NEW_EXTENSION([foo], [foo.c bar.c baz.cpp], [$ext_shared])
 ```
 
 E.g. this enables the extension foo which consists of three source-code modules,
@@ -61,7 +61,7 @@ here as well. If you need to specify separate include directories, do it this
 way:
 
 ```m4
-PHP_NEW_EXTENSION(foo, foo.c mylib/bar.c mylib/gregor.c,,,-I@ext_srcdir@/lib)
+PHP_NEW_EXTENSION([foo], [foo.c mylib/bar.c mylib/gregor.c],,, [-I@ext_srcdir@/lib])
 ```
 
 E.g. this builds the three files which are located relative to the extension

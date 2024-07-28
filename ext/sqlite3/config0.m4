@@ -25,6 +25,9 @@ if test $PHP_SQLITE3 != "no"; then
       [have sqlite3 with extension support])],
     [$SQLITE3_SHARED_LIBADD])
 
-  PHP_NEW_EXTENSION(sqlite3, sqlite3.c, $ext_shared,,-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([sqlite3],
+    [sqlite3.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_SUBST([SQLITE3_SHARED_LIBADD])
 fi

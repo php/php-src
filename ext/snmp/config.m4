@@ -60,6 +60,6 @@ if test "$PHP_SNMP" != "no"; then
     [],
     [$SNMP_SHARED_LIBADD])
 
-  PHP_NEW_EXTENSION(snmp, snmp.c, $ext_shared)
+  PHP_NEW_EXTENSION([snmp], [snmp.c], [$ext_shared])
   PHP_SUBST([SNMP_SHARED_LIBADD])
 fi

@@ -28,7 +28,10 @@ if test "$PHP_GMP" != "no"; then
 
   PHP_INSTALL_HEADERS([ext/gmp], [php_gmp_int.h])
 
-  PHP_NEW_EXTENSION(gmp, gmp.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([gmp],
+    [gmp.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_SUBST([GMP_SHARED_LIBADD])
   AC_DEFINE(HAVE_GMP, 1, [ ])
 fi
