@@ -5,36 +5,53 @@
 # the problem area and could aid in deciding whether a pull request is ready
 # for merging.
 #
+# When changing this file, please make sure to commit the changes to the
+# earliest supported PHP branch (PHP-X.Y) and not only to the master branch.
+# GitHub reads the CODEOWNERS file from the pull request's targeted branch.
+# Commit changes here similar to bug fixes:
+# https://github.com/php/php-src/blob/master/CONTRIBUTING.md#pull-requests
+#
 # For more information, see the GitHub CODEOWNERS documentation:
 # https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
 
 /.github @iluuu1994 @TimWolla
 /build/gen_stub.php @kocsismate
-/ext/bcmath @Girgias
+/ext/bcmath @Girgias @nielsdos @SakiTakamachi
 /ext/curl @adoy
 /ext/date @derickr
 /ext/dba @Girgias
 /ext/dom @nielsdos
 /ext/ffi @dstogov
+/ext/gd @devnexen
 /ext/gettext @devnexen
 /ext/gmp @Girgias
 /ext/imap @Girgias
 /ext/intl @devnexen
 /ext/json @bukka
 /ext/libxml @nielsdos
-/ext/mbstring @alexdowad
+/ext/mbstring @alexdowad @youkidearitai
+/ext/mysqlnd @SakiTakamachi
 /ext/odbc @NattyNarwhal
 /ext/opcache @dstogov @iluuu1994
 /ext/openssl @bukka
-/ext/pdo_odbc @NattyNarwhal
-/ext/pdo_pgsql @devnexen
+/ext/pcntl @devnexen
+/ext/pdo @SakiTakamachi
+/ext/pdo_dblib @SakiTakamachi
+/ext/pdo_firebird @SakiTakamachi
+/ext/pdo_mysql @SakiTakamachi
+/ext/pdo_odbc @NattyNarwhal @SakiTakamachi
+/ext/pdo_pgsql @devnexen @SakiTakamachi
+/ext/pdo_sqlite @SakiTakamachi
 /ext/pgsql @devnexen
 /ext/random @TimWolla @zeriyoshi
 /ext/session @Girgias
+/ext/simplexml @nielsdos
 /ext/sockets @devnexen
 /ext/spl @Girgias
 /ext/standard @bukka
+/ext/xml @nielsdos
 /ext/xmlreader @nielsdos
+/ext/xmlwriter @nielsdos
 /ext/xsl @nielsdos
 /main @bukka
 /sapi/fpm @bukka
@@ -44,6 +61,8 @@
 /Zend/zend_API.* @dstogov @iluuu1994
 /Zend/zend_call_stack.* @arnaud-lb
 /Zend/zend_closures.* @dstogov
+/Zend/zend_compile.* @iluuu1994
+/Zend/zend_enum.* @iluuu1994
 /Zend/zend_execute.* @dstogov @iluuu1994
 /Zend/zend_execute_API.c @dstogov @iluuu1994
 /Zend/zend_gc.* @dstogov @arnaud-lb
