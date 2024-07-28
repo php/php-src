@@ -1868,19 +1868,17 @@ AC_DEFUN([PHP_SETUP_ICONV], [
        test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME ||
        test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.tbd
     then
-      PHP_CHECK_LIBRARY($iconv_lib_name, libiconv, [
+      PHP_CHECK_LIBRARY([$iconv_lib_name], [libiconv], [
         found_iconv=yes
-        AC_DEFINE(HAVE_LIBICONV,1,[ ])
-        AC_DEFINE([ICONV_ALIASED_LIBICONV],1,[iconv() is aliased to libiconv() in -liconv])
-      ], [
-        PHP_CHECK_LIBRARY($iconv_lib_name, iconv, [
-          found_iconv=yes
-        ], [], [
-          -L$ICONV_DIR/$PHP_LIBDIR
-        ])
-      ], [
-        -L$ICONV_DIR/$PHP_LIBDIR
-      ])
+        AC_DEFINE([HAVE_LIBICONV], [1], [ ])
+        AC_DEFINE([ICONV_ALIASED_LIBICONV], [1],
+          [iconv() is aliased to libiconv() in -liconv])
+        ],
+        [PHP_CHECK_LIBRARY([$iconv_lib_name], [iconv],
+          [found_iconv=yes],
+          [],
+          [-L$ICONV_DIR/$PHP_LIBDIR])],
+        [-L$ICONV_DIR/$PHP_LIBDIR])
     fi
   fi
 

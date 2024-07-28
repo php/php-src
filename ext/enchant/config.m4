@@ -20,19 +20,17 @@ if test "$PHP_ENCHANT" != "no"; then
     PHP_EVAL_INCLINE([$ENCHANT_CFLAGS])
     PHP_EVAL_LIBLINE([$ENCHANT_LIBS], [ENCHANT_SHARED_LIBADD])
 
-    PHP_CHECK_LIBRARY(enchant, enchant_get_version,
-    [
-      AC_DEFINE(HAVE_ENCHANT_GET_VERSION, 1, [ enchant_get_version since 1.6.0 ])
-    ], [ ], [
-      $ENCHANT_LIBS
-    ])
+    PHP_CHECK_LIBRARY([enchant], [enchant_get_version],
+      [AC_DEFINE([HAVE_ENCHANT_GET_VERSION], [1],
+        [enchant_get_version since 1.6.0 ])],
+      [],
+      [$ENCHANT_LIBS])
 
-    PHP_CHECK_LIBRARY(enchant, enchant_broker_set_param,
-    [
-      AC_DEFINE(HAVE_ENCHANT_BROKER_SET_PARAM, 1, [ enchant_broker_set_param since 1.5.0 and removed in 2.x ])
-    ], [ ], [
-      $ENCHANT_LIBS
-    ])
+    PHP_CHECK_LIBRARY([enchant], [enchant_broker_set_param],
+      [AC_DEFINE([HAVE_ENCHANT_BROKER_SET_PARAM], [1],
+        [enchant_broker_set_param since 1.5.0 and removed in 2.x])],
+      [],
+      [$ENCHANT_LIBS])
   fi
 
   AC_DEFINE(HAVE_ENCHANT, 1, [ ])

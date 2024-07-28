@@ -150,9 +150,9 @@ if test "$PHP_QDBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in qdbm; do
-      PHP_CHECK_LIBRARY($LIB, dpopen, [
-        AC_DEFINE_UNQUOTED(QDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_QDBM, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [dpopen], [
+        AC_DEFINE_UNQUOTED([QDBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+        AC_DEFINE([DBA_QDBM], [1], [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -182,9 +182,9 @@ if test "$PHP_GDBM" != "no"; then
   done
 
   if test -n "$THIS_INCLUDE"; then
-    PHP_CHECK_LIBRARY(gdbm, gdbm_open, [
-      AC_DEFINE_UNQUOTED(GDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-      AC_DEFINE(DBA_GDBM, 1, [ ])
+    PHP_CHECK_LIBRARY([gdbm], [gdbm_open], [
+      AC_DEFINE_UNQUOTED([GDBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+      AC_DEFINE([DBA_GDBM], [1], [ ])
       THIS_LIBS=gdbm
     ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
   fi
@@ -212,9 +212,9 @@ if test "$PHP_NDBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in ndbm db1 c; do
-      PHP_CHECK_LIBRARY($LIB, dbm_open, [
-        AC_DEFINE_UNQUOTED(NDBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_NDBM, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [dbm_open], [
+        AC_DEFINE_UNQUOTED([NDBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+        AC_DEFINE([DBA_NDBM], [1], [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -243,9 +243,9 @@ if test "$PHP_TCADB" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in tokyocabinet; do
-      PHP_CHECK_LIBRARY($LIB, tcadbopen, [
-        AC_DEFINE_UNQUOTED(TCADB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_TCADB, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [tcadbopen], [
+        AC_DEFINE_UNQUOTED([TCADB_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+        AC_DEFINE([DBA_TCADB], [1], [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -274,9 +274,9 @@ if test "$PHP_LMDB" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in lmdb; do
-      PHP_CHECK_LIBRARY($LIB, mdb_env_open, [
-        AC_DEFINE_UNQUOTED(LMDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_LMDB, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [mdb_env_open], [
+        AC_DEFINE_UNQUOTED([LMDB_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+        AC_DEFINE([DBA_LMDB], [1], [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -588,17 +588,17 @@ if test "$PHP_DBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in dbm c gdbm; do
-      PHP_CHECK_LIBRARY($LIB, dbminit, [
+      PHP_CHECK_LIBRARY([$LIB], [dbminit], [
         AC_MSG_CHECKING([for DBM using GDBM])
-        AC_DEFINE_UNQUOTED(DBM_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+        AC_DEFINE_UNQUOTED([DBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
         if test "$LIB" = "gdbm"; then
-          AC_DEFINE_UNQUOTED(DBM_VERSION, "GDBM", [ ])
+          AC_DEFINE_UNQUOTED([DBM_VERSION], ["GDBM"], [ ])
           AC_MSG_RESULT([yes])
         else
-          AC_DEFINE_UNQUOTED(DBM_VERSION, "DBM", [ ])
+          AC_DEFINE_UNQUOTED([DBM_VERSION], ["DBM"], [ ])
           AC_MSG_RESULT([no])
         fi
-        AC_DEFINE(DBA_DBM, 1, [ ])
+        AC_DEFINE([DBA_DBM], [1], [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -657,9 +657,9 @@ elif test "$PHP_CDB" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     for LIB in cdb c; do
-      PHP_CHECK_LIBRARY($LIB, cdb_read, [
-        AC_DEFINE_UNQUOTED(CDB_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
-        AC_DEFINE(DBA_CDB, 1, [ ])
+      PHP_CHECK_LIBRARY([$LIB], [cdb_read], [
+        AC_DEFINE_UNQUOTED([CDB_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+        AC_DEFINE([DBA_CDB], [1], [ ])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then

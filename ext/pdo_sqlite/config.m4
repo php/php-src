@@ -14,19 +14,22 @@ if test "$PHP_PDO_SQLITE" != "no"; then
 
   PHP_SETUP_SQLITE([PDO_SQLITE_SHARED_LIBADD])
 
-  PHP_CHECK_LIBRARY(sqlite3, sqlite3_close_v2, [
-    AC_DEFINE(HAVE_SQLITE3_CLOSE_V2, 1, [have sqlite3_close_v2])
-  ], [], [$PDO_SQLITE_SHARED_LIBADD])
-
-  PHP_CHECK_LIBRARY(sqlite3, sqlite3_column_table_name, [
-    AC_DEFINE(HAVE_SQLITE3_COLUMN_TABLE_NAME, 1, [have sqlite3_column_table_name])
-  ], [], [$PDO_SQLITE_SHARED_LIBADD])
-
-  PHP_CHECK_LIBRARY(sqlite3, sqlite3_load_extension,
+  PHP_CHECK_LIBRARY([sqlite3], [sqlite3_close_v2],
+    [AC_DEFINE([HAVE_SQLITE3_CLOSE_V2], [1], [have sqlite3_close_v2])],
     [],
-    [AC_DEFINE(PDO_SQLITE_OMIT_LOAD_EXTENSION, 1, [have sqlite3 with extension support])],
-    [$PDO_SQLITE_SHARED_LIBADD]
-  )
+    [$PDO_SQLITE_SHARED_LIBADD])
+
+  PHP_CHECK_LIBRARY([sqlite3], [sqlite3_column_table_name],
+    [AC_DEFINE([HAVE_SQLITE3_COLUMN_TABLE_NAME], [1],
+      [have sqlite3_column_table_name])],
+    [],
+    [$PDO_SQLITE_SHARED_LIBADD])
+
+  PHP_CHECK_LIBRARY([sqlite3], [sqlite3_load_extension],
+    [],
+    [AC_DEFINE([PDO_SQLITE_OMIT_LOAD_EXTENSION], [1],
+      [have sqlite3 with extension support])],
+    [$PDO_SQLITE_SHARED_LIBADD])
 
   PHP_SUBST([PDO_SQLITE_SHARED_LIBADD])
   PHP_NEW_EXTENSION(pdo_sqlite, pdo_sqlite.c sqlite_driver.c sqlite_statement.c sqlite_sql_parser.c,

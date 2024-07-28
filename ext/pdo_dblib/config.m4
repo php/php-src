@@ -12,10 +12,9 @@ if test "$PHP_PDO_DBLIB" != "no"; then
   if test "$PHP_PDO_DBLIB" = "yes"; then
     dnl FreeTDS must be on the default system include/library path.
     dnl Only perform a sanity check that this is really the case.
-    PHP_CHECK_LIBRARY(sybdb, dbsqlexec,
-    [],[
-      AC_MSG_ERROR([Cannot find FreeTDS in known installation directories])
-    ])
+    PHP_CHECK_LIBRARY([sybdb], [dbsqlexec],
+      [],
+      [AC_MSG_ERROR([Cannot find FreeTDS in known installation directories])])
     PHP_ADD_LIBRARY([sybdb],, [PDO_DBLIB_SHARED_LIBADD])
   elif test "$PHP_PDO_DBLIB" != "no"; then
 
