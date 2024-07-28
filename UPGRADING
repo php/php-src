@@ -50,6 +50,7 @@ PHP 8.4 UPGRADE NOTES
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore.
+    RFC: https://wiki.php.net/rfc/gmp-final
 
 - Intl:
   . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a
