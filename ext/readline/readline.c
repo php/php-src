@@ -186,12 +186,14 @@ PHP_FUNCTION(readline_info)
 				if (!try_convert_to_string(value)) {
 					RETURN_THROWS();
 				}
-#ifndef PHP_WIN32
-				if (strlen(oldstr) < Z_STRLEN_P(value)) {
+#if !defined(PHP_WIN32) && !HAVE_LIBEDIT
+				if (!rl_line_buffer) {
+					rl_line_buffer = malloc(Z_STRLEN_P(value) + 1);
+				} else if (strlen(oldstr) < Z_STRLEN_P(value)) {
 					rl_extend_line_buffer(Z_STRLEN_P(value) + 1);
+					oldstr = rl_line_buffer;
 				}
 				memcpy(rl_line_buffer, Z_STRVAL_P(value), Z_STRLEN_P(value) + 1);
-				rl_end = Z_STRLEN_P(value);
 #else
 				char *tmp = strdup(Z_STRVAL_P(value));
 				if (tmp) {
@@ -200,6 +202,9 @@ PHP_FUNCTION(readline_info)
 					}
 					rl_line_buffer = tmp;
 				}
+#endif
+#if !defined(PHP_WIN32)
+				rl_end = Z_STRLEN_P(value);
 #endif
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
