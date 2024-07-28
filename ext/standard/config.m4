@@ -80,10 +80,16 @@ AH_TEMPLATE([PHP_USE_PHP_CRYPT_R],
   [Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt
   library.])
 
+php_ext_standard_sources=
 AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [1])
-  PHP_ADD_SOURCES([PHP_EXT_DIR([standard])],
-    [crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c])
+  php_ext_standard_sources=m4_normalize(["
+    crypt_blowfish.c
+    crypt_freesec.c
+    crypt_sha256.c
+    crypt_sha512.c
+    php_crypt_r.c
+  "])
 ], [
 AC_SEARCH_LIBS([crypt], [crypt],
   [AC_DEFINE([HAVE_CRYPT], [1],
@@ -460,6 +466,7 @@ PHP_NEW_EXTENSION([standard], m4_normalize([
   var_unserializer.c
   var.c
   versioning.c
+  $php_ext_standard_sources
 ]),,,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
