@@ -370,7 +370,7 @@ PHPAPI zend_string *php_escape_shell_cmd(const zend_string *unescaped_cmd)
 
 	if (UNEXPECTED(y > cmd_max_len + 1)) {
 		zend_value_error("Escaped command exceeds the allowed length of %zu bytes", cmd_max_len);
-		zend_string_release_ex_outline(cmd, 0);
+		zend_string_release_ex_noinline(cmd, 0);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -460,7 +460,7 @@ PHPAPI zend_string *php_escape_shell_arg(const zend_string *unescaped_arg)
 
 	if (UNEXPECTED(y > cmd_max_len + 1)) {
 		zend_value_error("Escaped argument exceeds the allowed length of %zu bytes", cmd_max_len);
-		zend_string_release_ex_outline(cmd, 0);
+		zend_string_release_ex_noinline(cmd, 0);
 		return ZSTR_EMPTY_ALLOC();
 	}
 

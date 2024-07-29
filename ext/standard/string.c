@@ -1367,7 +1367,7 @@ PHP_FUNCTION(str_decrement)
 
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
-			zend_string_release_ex_outline(decremented, /* persistent */ false);
+			zend_string_release_ex_noinline(decremented, /* persistent */ false);
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
@@ -1554,7 +1554,7 @@ static void _zend_dirname(zval *return_value, zend_string *str, zend_long levels
 #endif
 	} else if (levels < 1) {
 		zend_argument_value_error(2, "must be greater than or equal to 1");
-		zend_string_efree_outline(ret);
+		zend_string_efree_noinline(ret);
 		RETURN_THROWS();
 	} else {
 		/* Some levels up */
@@ -2129,7 +2129,7 @@ PHP_FUNCTION(strripos)
 	haystack_dup = zend_string_tolower(haystack);
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			zend_string_release_ex_outline(haystack_dup, 0);
+			zend_string_release_ex_noinline(haystack_dup, 0);
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
@@ -2137,7 +2137,7 @@ PHP_FUNCTION(strripos)
 		e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			zend_string_release_ex_outline(haystack_dup, 0);
+			zend_string_release_ex_noinline(haystack_dup, 0);
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}

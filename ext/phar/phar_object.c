@@ -1636,7 +1636,7 @@ after_open_fp:
 		}
 
 		if (opened) {
-			zend_string_release_ex_outline(opened, 0);
+			zend_string_release_ex_noinline(opened, 0);
 		}
 
 		if (temp) {
@@ -2874,7 +2874,7 @@ PHP_METHOD(Phar, setStub)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "r|l", &zstub, &len) == SUCCESS) {
 		zend_string *method_name = get_active_function_or_method_name();
 		zend_error(E_DEPRECATED, "Calling %s(resource $stub, int $length) is deprecated", ZSTR_VAL(method_name));
-		zend_string_release_outline(method_name);
+		zend_string_release_noinline(method_name);
 		if (UNEXPECTED(EG(exception))) {
 			RETURN_THROWS();
 		}
@@ -2973,7 +2973,7 @@ PHP_METHOD(Phar, setDefaultStub)
 			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "%s", error);
 			efree(error);
 			if (stub) {
-				zend_string_free_outline(stub);
+				zend_string_free_noinline(stub);
 			}
 			RETURN_THROWS();
 		}
@@ -3951,7 +3951,7 @@ carry_on:
 		}
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"Unable to read stub");
-		zend_string_release_ex_outline(buf, 0);
+		zend_string_release_ex_noinline(buf, 0);
 		RETURN_THROWS();
 	}
 
@@ -4020,13 +4020,13 @@ static int serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persi
 	phar_metadata_tracker_free(tracker, persistent);
 	if (UNEXPECTED(EG(exception))) {
 		/* Destructor can throw. */
-		zend_string_release_outline(main_metadata_str.s);
+		zend_string_release_noinline(main_metadata_str.s);
 		return FAILURE;
 	}
 
 	if (UNEXPECTED(tracker->str)) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "Metadata unexpectedly changed during setMetadata()");
-		zend_string_release_outline(main_metadata_str.s);
+		zend_string_release_noinline(main_metadata_str.s);
 		return FAILURE;
 	}
 	ZVAL_COPY(&tracker->val, metadata);

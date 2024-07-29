@@ -519,7 +519,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL, E_WARNING, "Read returned less bytes than requested");
 		}
-		zend_string_release_ex_outline (*val, 0);
+		zend_string_release_ex_noinline(*val, 0);
 		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}

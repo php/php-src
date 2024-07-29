@@ -1193,10 +1193,10 @@ tail_call:
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
 		if (decl->name) {
-		    zend_string_release_ex_outline(decl->name, 0);
+		    zend_string_release_ex_noinline(decl->name, 0);
 		}
 		if (decl->doc_comment) {
-			zend_string_release_ex_outline(decl->doc_comment, 0);
+			zend_string_release_ex_noinline(decl->doc_comment, 0);
 		}
 		zend_ast_destroy(decl->child[0]);
 		zend_ast_destroy(decl->child[1]);

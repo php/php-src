@@ -1599,7 +1599,7 @@ PHPAPI zend_result php_session_start(void) /* {{{ */
 				Z_STRLEN_P(data) != 0 &&
 				strstr(Z_STRVAL_P(data), PS(extern_referer_chk)) == NULL
 			) {
-				zend_string_release_ex_outline(PS(id), 0);
+				zend_string_release_ex_noinline(PS(id), 0);
 				PS(id) = NULL;
 			}
 		}
@@ -2152,7 +2152,7 @@ PHP_FUNCTION(session_set_save_handler)
 
 	/* If a custom session handler is already set, release relevant info */
 	if (PS(mod_user_class_name)) {
-		zend_string_release_outline(PS(mod_user_class_name));
+		zend_string_release_noinline(PS(mod_user_class_name));
 		PS(mod_user_class_name) = NULL;
 	}
 
@@ -2410,7 +2410,7 @@ PHP_FUNCTION(session_create_id)
 		smart_str_append(&id, new_id);
 		zend_string_release_ex(new_id, 0);
 	} else {
-		smart_str_free_outline(&id);
+		smart_str_free_noinline(&id);
 		php_error_docref(NULL, E_WARNING, "Failed to create new ID");
 		RETURN_FALSE;
 	}
@@ -2975,7 +2975,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 	if (save_handlers.s) {
 		smart_str_0(&save_handlers);
 		php_info_print_table_row(2, "Registered save handlers", ZSTR_VAL(save_handlers.s));
-		smart_str_free_outline(&save_handlers);
+		smart_str_free_noinline(&save_handlers);
 	} else {
 		php_info_print_table_row(2, "Registered save handlers", "none");
 	}
@@ -2983,7 +2983,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 	if (ser_handlers.s) {
 		smart_str_0(&ser_handlers);
 		php_info_print_table_row(2, "Registered serializer handlers", ZSTR_VAL(ser_handlers.s));
-		smart_str_free_outline(&ser_handlers);
+		smart_str_free_noinline(&ser_handlers);
 	} else {
 		php_info_print_table_row(2, "Registered serializer handlers", "none");
 	}

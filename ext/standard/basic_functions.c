@@ -1889,7 +1889,7 @@ PHP_FUNCTION(ini_parse_quantity)
 
 	if (UNEXPECTED(errstr)) {
 		zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
-		zend_string_release_outline(errstr);
+		zend_string_release_noinline(errstr);
 	}
 }
 /* }}} */

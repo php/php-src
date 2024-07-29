@@ -1573,7 +1573,7 @@ static ZEND_COLD void zend_error_va_list(
 {
 	zend_string *message = zend_vstrpprintf(0, format, args);
 	zend_error_zstr_at(orig_type, error_filename, error_lineno, message);
-	zend_string_release_outline(message);
+	zend_string_release_noinline(message);
 }
 
 static ZEND_COLD void get_filename_lineno(int type, zend_string **filename, uint32_t *lineno) {

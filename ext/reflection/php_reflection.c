@@ -2474,7 +2474,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 					if (UNEXPECTED((ce = zend_lookup_class(name)) == NULL)) {
 						zend_throw_exception_ex(reflection_exception_ptr, 0,
 								"Class \"%s\" does not exist", ZSTR_VAL(name));
-						zend_string_release_outline(name);
+						zend_string_release_noinline(name);
 						RETURN_THROWS();
 					}
 					zend_string_release(name);
@@ -2494,8 +2494,8 @@ ZEND_METHOD(ReflectionParameter, __construct)
 				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, lcname)) == NULL) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-					zend_string_release_outline(name);
-					zend_string_release_outline(lcname);
+					zend_string_release_noinline(name);
+					zend_string_release_noinline(lcname);
 					RETURN_THROWS();
 				}
 				zend_string_release(name);
@@ -2590,7 +2590,7 @@ ZEND_METHOD(ReflectionParameter, __construct)
 
 failure:
 	if (UNEXPECTED(fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
-		zend_string_release_ex_outline(fptr->common.function_name, 0);
+		zend_string_release_ex_noinline(fptr->common.function_name, 0);
 		zend_free_trampoline(fptr);
 	}
 	if (is_closure) {
@@ -5804,7 +5804,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 			if (Z_TYPE_P(tmp) != IS_NULL && Z_TYPE_P(tmp) != IS_OBJECT) {
 				zend_string *method_name = get_active_function_or_method_name();
 				zend_error(E_DEPRECATED, "Calling %s() with a 1st argument which is not null or an object is deprecated", ZSTR_VAL(method_name));
-				zend_string_release_outline(method_name);
+				zend_string_release_noinline(method_name);
 				if (UNEXPECTED(EG(exception))) {
 					RETURN_THROWS();
 				}
@@ -5812,7 +5812,7 @@ ZEND_METHOD(ReflectionProperty, setValue)
 		} else {
 			zend_string *method_name = get_active_function_or_method_name();
 			zend_error(E_DEPRECATED, "Calling %s() with a single argument is deprecated", ZSTR_VAL(method_name));
-			zend_string_release_outline(method_name);
+			zend_string_release_noinline(method_name);
 			if (UNEXPECTED(EG(exception))) {
 				RETURN_THROWS();
 			}
@@ -6937,8 +6937,8 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 				ZSTR_VAL(attr->data->name), ZSTR_VAL(location), ZSTR_VAL(allowed)
 			);
 
-			zend_string_release_outline(location);
-			zend_string_release_outline(allowed);
+			zend_string_release_noinline(location);
+			zend_string_release_noinline(allowed);
 
 			RETURN_THROWS();
 		}

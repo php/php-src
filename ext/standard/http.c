@@ -250,7 +250,7 @@ static zend_result cache_request_parse_body_option(HashTable *options, zval *opt
 			result = zend_ini_parse_quantity(Z_STR_P(option), &errstr);
 			if (UNEXPECTED(errstr)) {
 				zend_error(E_WARNING, "%s", ZSTR_VAL(errstr));
-				zend_string_release_outline(errstr);
+				zend_string_release_noinline(errstr);
 			}
 		} else if (Z_TYPE_P(option) == IS_LONG) {
 			result = Z_LVAL_P(option);

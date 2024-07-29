@@ -1235,7 +1235,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
 						if (str == cwd_str) {
-							zend_string_release_ex_outline(str, 0);
+							zend_string_release_ex_noinline(str, 0);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
@@ -1279,7 +1279,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
 						if (str == ZCG(include_path)) {
-							zend_string_release_outline(str);
+							zend_string_release_noinline(str);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
@@ -4018,7 +4018,7 @@ static void preload_link(void)
 					"Can't preload unlinked class %s: %s",
 					ZSTR_VAL(ce->name), ZSTR_VAL(error->message));
 			}
-			zend_string_release_outline(lcname);
+			zend_string_release_noinline(lcname);
 		}
 	} ZEND_HASH_FOREACH_END();
 

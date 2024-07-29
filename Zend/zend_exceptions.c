@@ -849,7 +849,7 @@ ZEND_API ZEND_COLD zend_object *zend_throw_exception(zend_class_entry *exception
 	zend_string *msg_str = message ? zend_string_init(message, strlen(message), 0) : NULL;
 	zend_object *ex = zend_throw_exception_zstr(exception_ce, msg_str, code);
 	if (msg_str) {
-		zend_string_release_outline(msg_str);
+		zend_string_release_noinline(msg_str);
 	}
 	return ex;
 }
@@ -889,7 +889,7 @@ static void zend_error_va(int type, zend_string *file, uint32_t lineno, const ch
 	zend_string *message = zend_vstrpprintf(0, format, args);
 	zend_observer_error_notify(type, file, lineno, message);
 	zend_error_cb(type, file, lineno, message);
-	zend_string_release_outline(message);
+	zend_string_release_noinline(message);
 	va_end(args);
 }
 /* }}} */
@@ -913,8 +913,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 		zend_observer_error_notify(type, file, line, message);
 		zend_error_cb(type, file, line, message);
 
-		zend_string_release_ex_outline(file, 0);
-		zend_string_release_ex_outline(message, 0);
+		zend_string_release_ex_noinline(file, 0);
+		zend_string_release_ex_noinline(message, 0);
 	} else if (instanceof_function(ce_exception, zend_ce_throwable)) {
 		zval tmp;
 		zend_string *str, *file = NULL;
@@ -945,7 +945,7 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
 
 			if (file) {
-				zend_string_release_ex_outline(file, 0);
+				zend_string_release_ex_noinline(file, 0);
 			}
 		}
 
@@ -957,8 +957,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 			(file && ZSTR_LEN(file) > 0) ? file : NULL, line,
 			"Uncaught %S\n  thrown", str);
 
-		zend_string_release_ex_outline(str, 0);
-		zend_string_release_ex_outline(file, 0);
+		zend_string_release_ex_noinline(str, 0);
+		zend_string_release_ex_noinline(file, 0);
 	} else if (ce_exception == &zend_ce_unwind_exit || ce_exception == &zend_ce_graceful_exit) {
 		/* We successfully unwound, nothing more to do.
 		 * We still return FAILURE in this case, as further execution should still be aborted. */
