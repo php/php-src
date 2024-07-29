@@ -173,6 +173,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      checks.
    - M4 macro PHP_SETUP_LIBXML doesn't define the redundant HAVE_LIBXML symbol
      anymore.
+   - M4 macro PHP_SETUP_ICONV doesn't define the HAVE_ICONV symbol anymore.
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and

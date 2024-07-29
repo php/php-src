@@ -1883,7 +1883,6 @@ AC_DEFUN([PHP_SETUP_ICONV], [
   fi
 
   if test "$found_iconv" = "yes"; then
-    AC_DEFINE(HAVE_ICONV,1,[ ])
     if test -n "$ICONV_DIR"; then
       PHP_ADD_LIBRARY_WITH_PATH([$iconv_lib_name],
         [$ICONV_DIR/$PHP_LIBDIR],
