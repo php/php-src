@@ -403,9 +403,9 @@ ZEND_METHOD(ErrorException, __construct)
 #define GET_PROPERTY_SILENT(object, id) \
 	zend_read_property_ex(i_get_exception_base(Z_OBJ_P(object)), Z_OBJ_P(object), ZSTR_KNOWN(id), 1, &rv)
 
-#define GET_PROPERTY_OUTLINE(object, id) \
+#define GET_PROPERTY_NOINLINE(object, id) \
 	zend_read_property_ex(zend_get_exception_base(Z_OBJ_P(object)), Z_OBJ_P(object), ZSTR_KNOWN(id), 0, &rv)
-#define GET_PROPERTY_SILENT_OUTLINE(object, id) \
+#define GET_PROPERTY_SILENT_NOINLINE(object, id) \
 	zend_read_property_ex(zend_get_exception_base(Z_OBJ_P(object)), Z_OBJ_P(object), ZSTR_KNOWN(id), 1, &rv)
 
 /* {{{ Get the file in which the exception occurred */
@@ -905,9 +905,9 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 	ce_exception = ex->ce;
 	EG(exception) = NULL;
 	if (ce_exception == zend_ce_parse_error || ce_exception == zend_ce_compile_error) {
-		zend_string *message = zval_get_string(GET_PROPERTY_OUTLINE(&exception, ZEND_STR_MESSAGE));
-		zend_string *file = zval_get_string(GET_PROPERTY_SILENT_OUTLINE(&exception, ZEND_STR_FILE));
-		zend_long line = zval_get_long(GET_PROPERTY_SILENT_OUTLINE(&exception, ZEND_STR_LINE));
+		zend_string *message = zval_get_string(GET_PROPERTY_NOINLINE(&exception, ZEND_STR_MESSAGE));
+		zend_string *file = zval_get_string(GET_PROPERTY_SILENT_NOINLINE(&exception, ZEND_STR_FILE));
+		zend_long line = zval_get_long(GET_PROPERTY_SILENT_NOINLINE(&exception, ZEND_STR_LINE));
 		int type = (ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL;
 
 		zend_observer_error_notify(type, file, line, message);
@@ -936,8 +936,8 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 			ZVAL_OBJ(&zv, EG(exception));
 			/* do the best we can to inform about the inner exception */
 			if (instanceof_function(ce_exception, zend_ce_exception) || instanceof_function(ce_exception, zend_ce_error)) {
-				file = zval_get_string(GET_PROPERTY_SILENT_OUTLINE(&zv, ZEND_STR_FILE));
-				line = zval_get_long(GET_PROPERTY_SILENT_OUTLINE(&zv, ZEND_STR_LINE));
+				file = zval_get_string(GET_PROPERTY_SILENT_NOINLINE(&zv, ZEND_STR_FILE));
+				line = zval_get_long(GET_PROPERTY_SILENT_NOINLINE(&zv, ZEND_STR_LINE));
 			}
 
 			zend_error_va(E_WARNING, (file && ZSTR_LEN(file) > 0) ? file : NULL, line,
@@ -949,9 +949,9 @@ ZEND_API ZEND_COLD zend_result zend_exception_error(zend_object *ex, int severit
 			}
 		}
 
-		str = zval_get_string(GET_PROPERTY_SILENT_OUTLINE(&exception, ZEND_STR_STRING));
-		file = zval_get_string(GET_PROPERTY_SILENT_OUTLINE(&exception, ZEND_STR_FILE));
-		line = zval_get_long(GET_PROPERTY_SILENT_OUTLINE(&exception, ZEND_STR_LINE));
+		str = zval_get_string(GET_PROPERTY_SILENT_NOINLINE(&exception, ZEND_STR_STRING));
+		file = zval_get_string(GET_PROPERTY_SILENT_NOINLINE(&exception, ZEND_STR_FILE));
+		line = zval_get_long(GET_PROPERTY_SILENT_NOINLINE(&exception, ZEND_STR_LINE));
 
 		zend_error_va(severity | E_DONT_BAIL,
 			(file && ZSTR_LEN(file) > 0) ? file : NULL, line,
