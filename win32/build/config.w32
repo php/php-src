@@ -393,7 +393,7 @@ ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
 		be excluded from the test.ini", "no");
 
 ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
-	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2, avx512. \
 	SSE and SSE2 are enabled by default. The best instruction set specified will \
 	automatically enable all the older instruction sets. Note, that the produced binary \
 	might not work properly, if the chosen instruction sets are not available on the target \
