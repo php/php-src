@@ -1296,7 +1296,9 @@ AS_VAR_IF([php_cv_have_shadow_stack_syscall], [yes],
 
 if test "$fiber_asm" = 'yes'; then
   AC_MSG_CHECKING([for fiber switching context])
-  PHP_ADD_SOURCES(Zend/asm, make_${fiber_asm_file}.S jump_${fiber_asm_file}.S, "$fiber_asm_cflag")
+  PHP_ADD_SOURCES([Zend/asm],
+    [make_${fiber_asm_file}.S jump_${fiber_asm_file}.S],
+    [$fiber_asm_cflag])
   AC_MSG_RESULT([$fiber_asm_file])
 else
   if test "$fiber_os" = 'mac'; then
@@ -1646,18 +1648,37 @@ PHP_INSTALL_HEADERS([Zend/Optimizer], m4_normalize([
   zend_worklist.h
 ]))
 
-PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+PHP_ADD_SOURCES([TSRM], [TSRM.c], [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
-       fopen_wrappers.c php_scandir.c \
-       php_ini_builder.c \
-       php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
-       network.c php_open_temporary_file.c php_odbc_utils.c safe_bcmp.c \
-       output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+PHP_ADD_SOURCES([main], m4_normalize([
+    explicit_bzero.c
+    fopen_wrappers.c
+    getopt.c
+    main.c
+    network.c
+    output.c
+    php_content_types.c
+    php_ini_builder.c
+    php_ini.c
+    php_odbc_utils.c
+    php_open_temporary_file.c
+    php_scandir.c
+    php_syslog.c
+    php_ticks.c
+    php_variables.c
+    reentrancy.c
+    rfc1867.c
+    safe_bcmp.c
+    SAPI.c
+    snprintf.c
+    spprintf.c
+    strlcat.c
+    strlcpy.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 if printf "#if __ELF__\nelf\n#endif\n" | $CC -E - | grep elf > /dev/null; then
-  PHP_ADD_SOURCES(main, debug_gdb_scripts.c)
+  PHP_ADD_SOURCES([main], [debug_gdb_scripts.c])
 
   cat >> Makefile.objects <<EOF
 $abs_srcdir/main/debug_gdb_scripts.c: $abs_srcdir/scripts/gdb/debug_gdb_scripts_gen.php $abs_srcdir/scripts/gdb/php_gdb.py $abs_srcdir/.gdbinit
@@ -1667,98 +1688,118 @@ $abs_srcdir/main/debug_gdb_scripts.c: $abs_srcdir/scripts/gdb/debug_gdb_scripts_
 EOF
 fi
 
-PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
+PHP_ADD_SOURCES_X([main],
+  [fastcgi.c],
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+  [PHP_FASTCGI_OBJS],
+  [no])
 
-PHP_ADD_SOURCES(main/streams, streams.c cast.c memory.c filter.c \
-       plain_wrapper.c userspace.c transports.c xp_socket.c mmap.c \
-       glob_wrapper.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+PHP_ADD_SOURCES([main/streams], m4_normalize([
+    cast.c
+    filter.c
+    glob_wrapper.c
+    memory.c
+    mmap.c
+    plain_wrapper.c
+    streams.c
+    transports.c
+    userspace.c
+    xp_socket.c
+  ]),
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-PHP_ADD_SOURCES(/main, internal_functions.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, sapi)
-PHP_ADD_SOURCES_X(/main, internal_functions_cli.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_BINARY_OBJS)
+PHP_ADD_SOURCES([/main],
+  [internal_functions.c],
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+  [sapi])
+PHP_ADD_SOURCES_X([/main],
+  [internal_functions_cli.c],
+  [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1],
+  [PHP_BINARY_OBJS])
 
 PHP_ADD_SOURCES([Zend], m4_normalize([
-  Optimizer/block_pass.c
-  Optimizer/compact_literals.c
-  Optimizer/compact_vars.c
-  Optimizer/dce.c
-  Optimizer/dfa_pass.c
-  Optimizer/escape_analysis.c
-  Optimizer/nop_removal.c
-  Optimizer/optimize_func_calls.c
-  Optimizer/optimize_temp_vars_5.c
-  Optimizer/pass1.c
-  Optimizer/pass3.c
-  Optimizer/sccp.c
-  Optimizer/scdf.c
-  Optimizer/zend_call_graph.c
-  Optimizer/zend_cfg.c
-  Optimizer/zend_dfg.c
-  Optimizer/zend_dump.c
-  Optimizer/zend_func_info.c
-  Optimizer/zend_inference.c
-  Optimizer/zend_optimizer.c
-  Optimizer/zend_ssa.c
-  zend_alloc.c
-  zend_API.c
-  zend_ast.c
-  zend_atomic.c
-  zend_attributes.c
-  zend_builtin_functions.c
-  zend_call_stack.c
-  zend_closures.c
-  zend_compile.c
-  zend_constants.c
-  zend_cpuinfo.c
-  zend_default_classes.c
-  zend_dtrace.c
-  zend_enum.c
-  zend_exceptions.c
-  zend_execute_API.c
-  zend_execute.c
-  zend_extensions.c
-  zend_fibers.c
-  zend_float.c
-  zend_frameless_function.c
-  zend_gc.c
-  zend_gdb.c
-  zend_generators.c
-  zend_hash.c
-  zend_highlight.c
-  zend_hrtime.c
-  zend_inheritance.c
-  zend_ini_parser.c
-  zend_ini_scanner.c
-  zend_ini.c
-  zend_interfaces.c
-  zend_iterators.c
-  zend_language_parser.c
-  zend_language_scanner.c
-  zend_list.c
-  zend_llist.c
-  zend_max_execution_timer.c
-  zend_multibyte.c
-  zend_object_handlers.c
-  zend_objects_API.c
-  zend_objects.c
-  zend_observer.c
-  zend_opcode.c
-  zend_operators.c
-  zend_property_hooks.c
-  zend_ptr_stack.c
-  zend_signal.c
-  zend_smart_str.c
-  zend_sort.c
-  zend_stack.c
-  zend_stream.c
-  zend_string.c
-  zend_strtod.c
-  zend_system_id.c
-  zend_variables.c
-  zend_virtual_cwd.c
-  zend_vm_opcodes.c
-  zend_weakrefs.c
-  zend.c
-]),
+    Optimizer/block_pass.c
+    Optimizer/compact_literals.c
+    Optimizer/compact_vars.c
+    Optimizer/dce.c
+    Optimizer/dfa_pass.c
+    Optimizer/escape_analysis.c
+    Optimizer/nop_removal.c
+    Optimizer/optimize_func_calls.c
+    Optimizer/optimize_temp_vars_5.c
+    Optimizer/pass1.c
+    Optimizer/pass3.c
+    Optimizer/sccp.c
+    Optimizer/scdf.c
+    Optimizer/zend_call_graph.c
+    Optimizer/zend_cfg.c
+    Optimizer/zend_dfg.c
+    Optimizer/zend_dump.c
+    Optimizer/zend_func_info.c
+    Optimizer/zend_inference.c
+    Optimizer/zend_optimizer.c
+    Optimizer/zend_ssa.c
+    zend_alloc.c
+    zend_API.c
+    zend_ast.c
+    zend_atomic.c
+    zend_attributes.c
+    zend_builtin_functions.c
+    zend_call_stack.c
+    zend_closures.c
+    zend_compile.c
+    zend_constants.c
+    zend_cpuinfo.c
+    zend_default_classes.c
+    zend_dtrace.c
+    zend_enum.c
+    zend_exceptions.c
+    zend_execute_API.c
+    zend_execute.c
+    zend_extensions.c
+    zend_fibers.c
+    zend_float.c
+    zend_frameless_function.c
+    zend_gc.c
+    zend_gdb.c
+    zend_generators.c
+    zend_hash.c
+    zend_highlight.c
+    zend_hrtime.c
+    zend_inheritance.c
+    zend_ini_parser.c
+    zend_ini_scanner.c
+    zend_ini.c
+    zend_interfaces.c
+    zend_iterators.c
+    zend_language_parser.c
+    zend_language_scanner.c
+    zend_list.c
+    zend_llist.c
+    zend_max_execution_timer.c
+    zend_multibyte.c
+    zend_object_handlers.c
+    zend_objects_API.c
+    zend_objects.c
+    zend_observer.c
+    zend_opcode.c
+    zend_operators.c
+    zend_property_hooks.c
+    zend_ptr_stack.c
+    zend_signal.c
+    zend_smart_str.c
+    zend_sort.c
+    zend_stack.c
+    zend_stream.c
+    zend_string.c
+    zend_strtod.c
+    zend_system_id.c
+    zend_variables.c
+    zend_virtual_cwd.c
+    zend_vm_opcodes.c
+    zend_weakrefs.c
+    zend.c
+  ]),
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $fiber_asm_cflag])
 
 PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/scripts/Makefile.frag],
