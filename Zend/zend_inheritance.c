@@ -1284,18 +1284,26 @@ static void emit_incompatible_property_error(
 		ZSTR_VAL(parent->ce->name));
 }
 
+static bool property_has_operation(zend_property_info *prop_info, zend_property_hook_kind kind)
+{
+	return (!(prop_info->flags & ZEND_ACC_VIRTUAL)
+			&& (kind == ZEND_PROPERTY_HOOK_GET || !(prop_info->flags & ZEND_ACC_READONLY)))
+		|| (prop_info->hooks && prop_info->hooks[kind]);
+}
+
 static void inherit_property_hook(
 	zend_class_entry *ce,
-	zend_property_info *parent_info, zend_function **parent_ptr,
-	zend_property_info *child_info, zend_function **child_ptr
+	zend_property_info *parent_info,
+	zend_property_info *child_info,
+	zend_property_hook_kind kind
 ) {
-	zend_function *parent = *parent_ptr;
-	zend_function *child = *child_ptr;
+	zend_function *parent = parent_info->hooks ? parent_info->hooks[kind] : NULL;
+	zend_function *child = child_info->hooks ? child_info->hooks[kind] : NULL;
 
-	if (child && (child->common.fn_flags & ZEND_ACC_OVERRIDE)) {
-		if (!(parent_info->flags & ZEND_ACC_VIRTUAL) || parent) {
-			child->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
-		}
+	if (child
+	 && (child->common.fn_flags & ZEND_ACC_OVERRIDE)
+	 && property_has_operation(parent_info, kind)) {
+		child->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
 	}
 
 	if (!parent) {
@@ -1304,10 +1312,18 @@ static void inherit_property_hook(
 
 	if (!child) {
 		if (parent->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			/* Backed properties are considered to always implement get, and set when they are not readonly. */
+			if (property_has_operation(child_info, kind)) {
+				return;
+			}
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
 		}
-
-		*child_ptr = zend_duplicate_function(parent, ce);
+		if (!child_info->hooks) {
+			ce->num_hooked_props++;
+			child_info->hooks = zend_arena_alloc(&CG(arena), ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+			memset(child_info->hooks, 0, ZEND_PROPERTY_HOOK_STRUCT_SIZE);
+		}
+		child_info->hooks[kind] = zend_duplicate_function(parent, ce);
 		return;
 	}
 
@@ -1375,17 +1391,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 					(child_info->flags & ZEND_ACC_STATIC) ? "static " : "non static ", ZSTR_VAL(ce->name), ZSTR_VAL(key));
 			}
 			if (UNEXPECTED((child_info->flags & ZEND_ACC_READONLY) != (parent_info->flags & ZEND_ACC_READONLY))) {
-				/* If the parent property is abstract, the child may be readonly if the parent only requires read. */
-				if (parent_info->flags & ZEND_ACC_ABSTRACT) {
-					ZEND_ASSERT(!(parent_info->flags & ZEND_ACC_READONLY));
-					ZEND_ASSERT(parent_info->hooks);
-					if (UNEXPECTED(parent_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Readonly property %s::$%s does not satisfy abstract read-write property %s::$%s",
-							ZSTR_VAL(ce->name), ZSTR_VAL(key),
-							ZSTR_VAL(parent_info->ce->name), ZSTR_VAL(key));
-					}
-				} else {
+				if (!(parent_info->flags & ZEND_ACC_ABSTRACT)) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot redeclare %s property %s::$%s as %s %s::$%s",
 						parent_info->flags & ZEND_ACC_READONLY ? "readonly" : "non-readonly",
@@ -1413,18 +1419,10 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				child_info->flags &= ~ZEND_ACC_VIRTUAL;
 			}
 
-			zend_function **parent_hooks = parent_info->hooks;
-			zend_function **child_hooks = child_info->hooks;
-			if (child_hooks) {
+			if (parent_info->hooks || child_info->hooks) {
 				for (uint32_t i = 0; i < ZEND_PROPERTY_HOOK_COUNT; i++) {
-					if (parent_hooks) {
-						inherit_property_hook(ce, parent_info, &parent_hooks[i], child_info, &child_hooks[i]);
-					} else if (child_hooks[i]) {
-						child_hooks[i]->common.fn_flags &= ~ZEND_ACC_OVERRIDE;
-					}
+					inherit_property_hook(ce, parent_info, child_info, i);
 				}
-			} else if (parent_hooks) {
-				ce->num_hooked_props++;
 			}
 
 			prop_variance variance = prop_get_variance(parent_info);
