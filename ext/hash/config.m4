@@ -34,7 +34,7 @@ else
   PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
 fi
 
-EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
+EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_sha_sse2.c hash_ripemd.c hash_haval.c \
   hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
   hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES
   murmur/PMurHash.c murmur/PMurHash128.c hash_murmur.c hash_xxhash.c"
