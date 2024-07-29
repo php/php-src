@@ -12,6 +12,7 @@ if test $ac_cv_c_bigendian_php = yes; then
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"
   AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define if hash3 algo is available])
   AC_MSG_WARN([Using SHA3 slow implementation on bigendian])
+  SHA3_DIR=
 else
   AC_CHECK_SIZEOF([long])
   AC_MSG_CHECKING([if we're at 64-bit platform])
@@ -30,11 +31,7 @@ else
   ])
   EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c hash_sha3.c"
   PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-
-  PHP_ADD_BUILD_DIR([ext/hash/$SHA3_DIR], [1])
 fi
-
-PHP_ADD_BUILD_DIR([ext/hash/murmur], [1])
 
 EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
   hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
@@ -47,4 +44,6 @@ EXT_HASH_HEADERS="php_hash.h php_hash_md.h php_hash_sha.h php_hash_ripemd.h \
   php_hash_xxhash.h xxhash/xxhash.h"
 
 PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
+PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
+AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], [$EXT_HASH_HEADERS])
