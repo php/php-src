@@ -1242,7 +1242,7 @@ static void do_inherit_method(zend_string *key, zend_function *parent, zend_clas
 }
 /* }}} */
 
-static inheritance_status property_types_compatible(
+static inheritance_status full_property_types_compatible(
 		const zend_property_info *parent_info, const zend_property_info *child_info,
 		prop_variance variance) {
 	if (ZEND_TYPE_PURE_MASK(parent_info->type) == ZEND_TYPE_PURE_MASK(child_info->type)
@@ -1271,7 +1271,7 @@ static inheritance_status property_types_compatible(
 	return INHERITANCE_UNRESOLVED;
 }
 
-static void emit_incompatible_property_error(
+static ZEND_COLD void emit_incompatible_property_error(
 		const zend_property_info *child, const zend_property_info *parent, prop_variance variance) {
 	zend_string *type_str = zend_type_to_string_resolved(parent->type, parent->ce);
 	zend_error_noreturn(E_COMPILE_ERROR,
@@ -1282,6 +1282,48 @@ static void emit_incompatible_property_error(
 		variance == PROP_COVARIANT ? "subtype of " : "supertype of ",
 		ZSTR_VAL(type_str),
 		ZSTR_VAL(parent->ce->name));
+}
+
+static ZEND_COLD void emit_set_hook_type_error(const zend_property_info *child, const zend_property_info *parent)
+{
+	zend_type set_type = parent->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
+	zend_string *type_str = zend_type_to_string_resolved(set_type, parent->ce);
+	zend_error_noreturn(E_COMPILE_ERROR,
+		"Set type of %s::$%s must be supertype of %s (as in %s %s)",
+		ZSTR_VAL(child->ce->name),
+		zend_get_unmangled_property_name(child->name),
+		ZSTR_VAL(type_str),
+		zend_get_object_type_case(parent->ce, false),
+		ZSTR_VAL(parent->ce->name));
+}
+
+static inheritance_status verify_property_type_compatibility(
+	const zend_property_info *parent_info,
+	const zend_property_info *child_info,
+	prop_variance variance,
+	bool throw_on_error,
+	bool throw_on_unresolved
+) {
+	inheritance_status result = full_property_types_compatible(parent_info, child_info, variance);
+	if ((result == INHERITANCE_ERROR && throw_on_error) || (result == INHERITANCE_UNRESOLVED && throw_on_unresolved)) {
+		emit_incompatible_property_error(child_info, parent_info, variance);
+	}
+	if (result != INHERITANCE_SUCCESS) {
+		return result;
+	}
+	if (parent_info->flags & ZEND_ACC_ABSTRACT) {
+		ZEND_ASSERT(parent_info->hooks);
+		if (parent_info->hooks[ZEND_PROPERTY_HOOK_SET]
+		 && (!child_info->hooks || !child_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
+			zend_type set_type = parent_info->hooks[ZEND_PROPERTY_HOOK_SET]->common.arg_info[0].type;
+			inheritance_status result = zend_perform_covariant_type_check(
+				parent_info->ce, set_type, child_info->ce, child_info->type);
+			if ((result == INHERITANCE_ERROR && throw_on_error) || (result == INHERITANCE_UNRESOLVED && throw_on_unresolved)) {
+				emit_set_hook_type_error(child_info, parent_info);
+			}
+		}
+	}
+	return INHERITANCE_SUCCESS;
 }
 
 static bool property_has_operation(zend_property_info *prop_info, zend_property_hook_kind kind)
@@ -1427,11 +1469,8 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 
 			prop_variance variance = prop_get_variance(parent_info);
 			if (ZEND_TYPE_IS_SET(parent_info->type)) {
-				inheritance_status status = property_types_compatible(
-					parent_info, child_info, variance);
-				if (status == INHERITANCE_ERROR) {
-					emit_incompatible_property_error(child_info, parent_info, variance);
-				}
+				inheritance_status status = verify_property_type_compatibility(
+					parent_info, child_info, variance, true, false);
 				if (status == INHERITANCE_UNRESOLVED) {
 					add_property_compatibility_obligation(ce, child_info, parent_info, variance);
 				}
@@ -2747,7 +2786,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 					}
 
 					if ((colliding_prop->flags & flags_mask) == (flags & flags_mask) &&
-						property_types_compatible(property_info, colliding_prop, PROP_INVARIANT) == INHERITANCE_SUCCESS
+						verify_property_type_compatibility(property_info, colliding_prop, PROP_INVARIANT, false, false) == INHERITANCE_SUCCESS
 					) {
 						/* the flags are identical, thus, the properties may be compatible */
 						zval *op1, *op2;
@@ -3099,11 +3138,7 @@ static void check_variance_obligation(variance_obligation *obligation) {
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
 	} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
-		inheritance_status status =
-			property_types_compatible(obligation->parent_prop, obligation->child_prop, obligation->variance);
-		if (status != INHERITANCE_SUCCESS) {
-			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop, obligation->variance);
-		}
+		verify_property_type_compatibility(obligation->parent_prop, obligation->child_prop, obligation->variance, true, true);
 	} else if (obligation->type == OBLIGATION_CLASS_CONSTANT_COMPATIBILITY) {
 		inheritance_status status =
 		class_constant_types_compatible(obligation->parent_const, obligation->child_const);
@@ -3645,8 +3680,7 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 		if (zv) {
 			zend_property_info *child_info = Z_PTR_P(zv);
 			if (ZEND_TYPE_IS_SET(child_info->type)) {
-				inheritance_status status = property_types_compatible(parent_info, child_info, prop_get_variance(parent_info));
-				ZEND_ASSERT(status != INHERITANCE_WARNING);
+				inheritance_status status = verify_property_type_compatibility(parent_info, child_info, prop_get_variance(parent_info), false, false);
 				if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 					return status;
 				}
