@@ -562,6 +562,9 @@ ZEND_API extern inline bool zend_string_equals_cstr(const zend_string *s1, const
 ZEND_API extern inline void zend_string_forget_hash_val(zend_string *s);
 ZEND_API extern inline zend_ulong zend_string_hash_val(zend_string *s);
 ZEND_API extern inline zend_string *zend_string_init(const char *str, size_t len, bool persistent);
+ZEND_API extern inline zend_string *zend_string_init_fast(const char *str, size_t len);
 ZEND_API extern inline zend_string *zend_string_realloc(zend_string *s, size_t len, bool persistent);
 ZEND_API extern inline uint32_t zend_string_refcount(const zend_string *s);
+ZEND_API extern inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent);
+ZEND_API extern inline zend_string *zend_string_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, bool persistent);
 ZEND_API extern inline zend_string *zend_string_separate(zend_string *s, bool persistent);
