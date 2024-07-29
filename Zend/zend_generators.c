@@ -19,6 +19,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_hash.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_generators.h"
@@ -216,19 +217,68 @@ static zend_always_inline void clear_link_to_root(zend_generator *generator) {
 	}
 }
 
+/* In the context of zend_generator_dtor_storage during shutdown, check if
+ * the intermediate node 'generator' is running in a fiber */
+static inline bool check_node_running_in_fiber(zend_generator *generator) {
+	ZEND_ASSERT(EG(flags) & EG_FLAGS_IN_SHUTDOWN);
+	ZEND_ASSERT(generator->execute_data);
+
+	if (generator->flags & ZEND_GENERATOR_IN_FIBER) {
+		return true;
+	}
+
+	if (generator->node.children == 0) {
+		return false;
+	}
+
+	if (generator->flags & ZEND_GENERATOR_VISITED) {
+		return false;
+	}
+	generator->flags |= ZEND_GENERATOR_VISITED;
+
+	if (generator->node.children == 1) {
+		if (check_node_running_in_fiber(generator->node.child.single)) {
+			goto in_fiber;
+		}
+		return false;
+	}
+
+	zend_generator *child;
+	ZEND_HASH_FOREACH_PTR(generator->node.child.ht, child) {
+		if (check_node_running_in_fiber(child)) {
+			goto in_fiber;
+		}
+	} ZEND_HASH_FOREACH_END();
+	return false;
+
+in_fiber:
+	generator->flags |= ZEND_GENERATOR_IN_FIBER;
+	return true;
+}
+
 static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*) object;
+	zend_generator *current_generator = zend_generator_get_current(generator);
 	zend_execute_data *ex = generator->execute_data;
 	uint32_t op_num, try_catch_offset;
 	int i;
 
-	/* Generator is running in a suspended fiber.
-	 * Will be dtor during fiber dtor */
-	if (zend_generator_get_current(generator)->flags & ZEND_GENERATOR_IN_FIBER) {
-		/* Prevent finally blocks from yielding */
-		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
-		return;
+	/* If current_generator is running in a fiber, there are 2 cases to consider:
+	 *  - If generator is also marked with ZEND_GENERATOR_IN_FIBER, then the
+	 *    entire path from current_generator to generator is executing in a
+	 *    fiber. Do not dtor now: These will be dtor when terminating the fiber.
+	 *  - If generator is not marked with ZEND_GENERATOR_IN_FIBER, and has a
+	 *    child marked with ZEND_GENERATOR_IN_FIBER, then this an intermediate
+	 *    node of case 1. Otherwise generator is not executing in a fiber and we
+	 *    can dtor.
+	 */
+	if (current_generator->flags & ZEND_GENERATOR_IN_FIBER) {
+		if (check_node_running_in_fiber(generator)) {
+			/* Prevent finally blocks from yielding */
+			generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+			return;
+		}
 	}
 
 	/* leave yield from mode to properly allow finally execution */
@@ -722,6 +772,13 @@ try_again:
 		return;
 	}
 
+	if (EG(active_fiber)) {
+		orig_generator->flags |= ZEND_GENERATOR_IN_FIBER;
+		if (generator != orig_generator) {
+			generator->flags |= ZEND_GENERATOR_IN_FIBER;
+		}
+	}
+
 	/* Drop the AT_FIRST_YIELD flag */
 	orig_generator->flags &= ~ZEND_GENERATOR_AT_FIRST_YIELD;
 
@@ -752,7 +809,10 @@ try_again:
 			EG(current_execute_data) = original_execute_data;
 			EG(jit_trace_num) = original_jit_trace_num;
 
-			orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
+			orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
+			if (generator != orig_generator) {
+				generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
+			}
 			return;
 		}
 		/* If there are no more delegated values, resume the generator
@@ -765,8 +825,7 @@ try_again:
 	}
 
 	/* Resume execution */
-	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING
-						| (EG(active_fiber) ? ZEND_GENERATOR_IN_FIBER : 0);
+	generator->flags |= ZEND_GENERATOR_CURRENTLY_RUNNING;
 	if (!ZEND_OBSERVER_ENABLED) {
 		zend_execute_ex(generator->execute_data);
 	} else {
@@ -817,7 +876,7 @@ try_again:
 		goto try_again;
 	}
 
-	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
+	orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
 }
 /* }}} */
 
