@@ -127,6 +127,9 @@ int main(void) {
     LDFLAGS="$save_LDFLAGS"
     CFLAGS="$save_CFLAGS"
 
+    AC_DEFINE([HAVE_ICONV], [1],
+      [Define to 1 if PHP extension 'iconv' is available.])
+
     PHP_NEW_EXTENSION([iconv],
       [iconv.c],
       [$ext_shared],,

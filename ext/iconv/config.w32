@@ -9,7 +9,7 @@ if (PHP_ICONV != "no") {
 
 		EXTENSION("iconv", "iconv.c", PHP_ICONV_SHARED, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
-		AC_DEFINE("HAVE_ICONV", 1, "Define if iconv extension is enabled");
+		AC_DEFINE("HAVE_ICONV", 1, "Define to 1 if PHP extension 'iconv' is available.");
 		AC_DEFINE("HAVE_LIBICONV", 1, "Define if libiconv is available");
 		AC_DEFINE("ICONV_ALIASED_LIBICONV", 1, "The iconv function is called iconv() in libiconv");
 		AC_DEFINE("PHP_ICONV_IMPL", "\"libiconv\"", "Which iconv implementation to use");
