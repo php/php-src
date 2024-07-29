@@ -13,14 +13,14 @@ require_once __DIR__ . '/inc/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 
 $db->exec("
-    CREATE TABLE gh_15093 (
+    CREATE TABLE `gh_15093` (
         `id` INT NOT NULL AUTO_INCREMENT,
-        `uuid` BINARY(16) DEFAULT random_bytes(16),
+        `uuid` BINARY(16),
         `blob` BLOB,
         `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `set` SET('one', 'two'),
         `enum` ENUM('a', 'b', 'c'),
-        'num' INT(11) UNSIGNED ZEROFILL DEFAULT 0,
+        `num` INT(11) UNSIGNED ZEROFILL DEFAULT 0,
         PRIMARY KEY(`id`),
         UNIQUE KEY `UUID` (`uuid`)
     )
