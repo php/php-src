@@ -8180,6 +8180,8 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 	if (!smart_branch_opcode || exit_addr) {
 		if (end_inputs) {
 			ir_MERGE_list(end_inputs);
+		} else if (exit_addr && !jit->ctx.control) {
+			ir_BEGIN(IR_UNUSED); /* unreachable block */
 		}
 	} else {
 		_zend_jit_merge_smart_branch_inputs(jit, true_label, false_label, true_inputs, false_inputs);
