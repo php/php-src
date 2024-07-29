@@ -10,7 +10,7 @@ dnl   [for %EXTNAME% support],
 dnl   [AS_HELP_STRING([--with-%EXTNAME%],
 dnl     [Include %EXTNAME% support])])
 
-dnl Otherwise use '--enable-%EXTNAME%' configure option:
+dnl Otherwise use the '--enable-%EXTNAME%' configure option:
 PHP_ARG_ENABLE([%EXTNAME%],
   [whether to enable %EXTNAME% support],
   [AS_HELP_STRING([--enable-%EXTNAME%],
@@ -18,7 +18,8 @@ PHP_ARG_ENABLE([%EXTNAME%],
   [no])
 
 AS_VAR_IF([PHP_%EXTNAMECAPS%], [no],, [
-  dnl This is executed when extension is enabled. Adjust and add tests here.
+  dnl This section is executed when extension is enabled with one of the above
+  dnl configure options. Adjust and add tests here.
 
   dnl
   dnl Use and adjust this code block if extension depends on external library
@@ -95,8 +96,8 @@ AS_VAR_IF([PHP_%EXTNAMECAPS%], [no],, [
   dnl Add linked libraries flags for shared extension to the generated Makefile.
   dnl PHP_SUBST([%EXTNAMECAPS%_SHARED_LIBADD])
 
-  dnl Define CPP macro to indicate that extension is available either as a
-  dnl shared module or statically built into PHP.
+  dnl Define a preprocessor macro to indicate that this PHP extension can
+  dnl be dynamically loaded as a shared module or is statically built into PHP.
   AC_DEFINE([HAVE_%EXTNAMECAPS%], [1],
     [Define to 1 if PHP extension '%EXTNAME%' is available.])
 
