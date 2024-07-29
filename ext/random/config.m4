@@ -30,4 +30,8 @@ PHP_NEW_EXTENSION([random], m4_normalize([
   ]),
   [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
-PHP_INSTALL_HEADERS([ext/random], [php_random.h php_random_csprng.h php_random_uint128.h])
+PHP_INSTALL_HEADERS([ext/random], m4_normalize([
+  php_random_csprng.h
+  php_random_uint128.h
+  php_random.h
+]))

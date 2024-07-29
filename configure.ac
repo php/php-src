@@ -1634,16 +1634,17 @@ PHP_SUBST([install_targets])
 PHP_SUBST([install_binary_targets])
 
 PHP_INSTALL_HEADERS([Zend/ TSRM/ main/ main/streams/])
-PHP_INSTALL_HEADERS([Zend/Optimizer], [ \
-    zend_call_graph.h \
-    zend_cfg.h \
-    zend_dfg.h \
-    zend_dump.h \
-    zend_func_info.h \
-    zend_inference.h \
-    zend_optimizer.h \
-    zend_ssa.h \
-    zend_worklist.h])
+PHP_INSTALL_HEADERS([Zend/Optimizer], m4_normalize([
+  zend_call_graph.h
+  zend_cfg.h
+  zend_dfg.h
+  zend_dump.h
+  zend_func_info.h
+  zend_inference.h
+  zend_optimizer.h
+  zend_ssa.h
+  zend_worklist.h
+]))
 
 PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
