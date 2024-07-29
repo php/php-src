@@ -22,7 +22,7 @@ PHP                                                                        NEWS
     (David Carlier)
 
 - GMP:
-  . The GMP class is now final and cannot be extended anymore.
+  . The GMP class is now final and cannot be extended anymore. (Girgias)
 
 - Intl:
   . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
