@@ -581,9 +581,8 @@ PHP 8.4 UPGRADE NOTES
     certain numbers, so this fix removes "pre-rounding" and changes the way numbers
     are compared, so that the values are correctly rounded as decimal numbers.
   . The maximum precision that can be handled by round() has been extended by one
-    digit. For example, if rounded 4503599627370495.5 with precision -1, would expect
-    it to result in 4503599627370496, but previously this was not the case and no
-    rounding was done.
+    digit. For example, `round(4503599627370495.5)` returned in `4503599627370495.5`,
+    but now returns `4503599627370496`.
   . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
     has been increased from '10' to '12'.
 
