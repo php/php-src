@@ -38,7 +38,7 @@ EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
   hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES
   murmur/PMurHash.c murmur/PMurHash128.c hash_murmur.c hash_xxhash.c"
 
-PHP_NEW_EXTENSION(hash, $EXT_HASH_SOURCES, 0,,$PHP_HASH_CFLAGS)
+PHP_NEW_EXTENSION([hash], [$EXT_HASH_SOURCES], [no],, [$PHP_HASH_CFLAGS])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([
