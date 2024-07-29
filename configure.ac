@@ -1013,15 +1013,17 @@ PHP_ARG_ENABLE([dtrace],
   [no],
   [no])
 
-AS_VAR_IF([PHP_DTRACE], [yes],
-  [PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h], [
+AS_VAR_IF([PHP_DTRACE], [yes], [
+  PHP_INIT_DTRACE([Zend/zend_dtrace.d], [Zend/zend_dtrace_gen.h], [
     main/main.c
     Zend/zend_API.c
     Zend/zend_dtrace.c
     Zend/zend_exceptions.c
     Zend/zend_execute.c
     Zend/zend.c
-  ])])
+  ])
+  AC_DEFINE([HAVE_DTRACE], [1], [Define to 1 if DTrace support is enabled.])
+])
 
 AC_MSG_CHECKING([how big to make fd sets])
 PHP_ARG_ENABLE([fd-setsize],,
