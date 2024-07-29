@@ -15,7 +15,7 @@ $db = MySQLPDOTest::factory();
 $db->exec("
     CREATE TABLE `gh_15093` (
         `id` INT NOT NULL AUTO_INCREMENT,
-        `uuid` BINARY(16),
+        `uuid` BINARY(16) DEFAULT (uuid_to_bin(uuid())),
         `blob` BLOB,
         `ts` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         `set` SET('one', 'two'),
