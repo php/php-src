@@ -28,6 +28,7 @@ PHP                                                                        NEWS
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore. (Girgias)
+  . RFC: Change GMP bool cast behavior (Saki Takamachi)
 
 - Intl:
   . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
