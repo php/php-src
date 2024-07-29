@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
 
+- Streams:
+  . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
+    being filtered). (Quentin Dreyer)
+
 01 Aug 2024, PHP 8.4.0alpha4
 
 - GMP:
