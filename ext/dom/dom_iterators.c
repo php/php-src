@@ -149,7 +149,7 @@ static xmlNodePtr dom_fetch_first_iteration_item(dom_nnodemap_object *objmap)
 		if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
 			return (xmlNodePtr) basep->properties;
 		} else {
-			return basep->children;
+			return dom_nodelist_iter_start_first_child(basep);
 		}
 	} else {
 		int curindex = 0;
