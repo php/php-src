@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-13330 (Append -Wno-implicit-fallthrough flag conditionally).
     (Peter Kokot)
   . Fix uninitialized memory in network.c. (nielsdos)
+  . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
+    (Arnaud)
 
 - Curl:
   . Fixed case when curl_error returns an empty string.
@@ -25,7 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-13817 (Segmentation fault for enabled observers after pass 4).
     (Bob)
   . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
-    (Arnaud)
+    (Arnaud, nielsdos)
 
 - PDO_Firebird:
   . Fix bogus fallthrough path in firebird_handle_get_attribute(). (nielsdos)
