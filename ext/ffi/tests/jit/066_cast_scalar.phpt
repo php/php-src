@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 066: FFI::cast() (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

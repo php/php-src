@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 016: Read Struct (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing
