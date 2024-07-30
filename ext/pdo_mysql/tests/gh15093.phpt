@@ -5,7 +5,7 @@ pdo_mysql
 --SKIPIF--
 <?php
 require_once __DIR__ . '/inc/mysql_pdo_test.inc';
-MySQLPDOTest::skip();
+MySQLPDOTest::skipNotMySQLnd();
 ?>
 --FILE--
 <?php
