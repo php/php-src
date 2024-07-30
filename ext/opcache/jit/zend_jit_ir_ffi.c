@@ -819,8 +819,27 @@ static int zend_jit_ffi_write(zend_jit_ctx  *jit,
 				}
 			}
 			break;
-		case ZEND_FFI_TYPE_SINT8:
 		case ZEND_FFI_TYPE_CHAR:
+			if ((val_info & (MAY_BE_GUARD|MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING) {
+				ir_ref str = jit_Z_PTR(jit, val_addr);
+
+				// TODO: ZSTR_LEN() == 1 ???
+				ref = ir_LOAD_C(ir_ADD_OFFSET(str, offsetof(zend_string, val)));
+				ir_STORE(ptr, ref);
+				if (res_addr) {
+					ir_ref type_info = jit_Z_TYPE_INFO(jit, val_addr);
+					ir_ref if_refcounted = ir_IF(ir_AND_U32(type_info, ir_CONST_U32(0xff00)));
+
+					ir_IF_TRUE(if_refcounted);
+					jit_GC_ADDREF(jit, str);
+					ir_MERGE_WITH_EMPTY_FALSE(if_refcounted);
+					jit_set_Z_PTR(jit, res_addr, str);
+					jit_set_Z_TYPE_INFO_ex(jit, res_addr, type_info);
+				}
+				return 1;
+			}
+			ZEND_FALLTHROUGH;
+		case ZEND_FFI_TYPE_SINT8:
 			if (val_info == MAY_BE_LONG) {
 				ref = ir_TRUNC_I8(jit_Z_LVAL(jit, val_addr));
 			} else if (val_ffi_type && val_ffi_type->kind == ffi_type->kind) {
@@ -1311,6 +1330,53 @@ static int zend_jit_ffi_fetch_obj(zend_jit_ctx        *jit,
 	return 1;
 }
 
+static int zend_jit_ffi_fetch_val(zend_jit_ctx        *jit,
+                                  const zend_op       *opline,
+                                  const zend_op_array *op_array,
+                                  zend_ssa            *ssa,
+                                  const zend_ssa_op   *ssa_op,
+                                  uint32_t             op1_info,
+                                  zend_jit_addr        op1_addr,
+                                  bool                 op1_indirect,
+                                  bool                 op1_avoid_refcounting,
+                                  zend_jit_addr        res_addr,
+                                  zend_ffi_type       *op1_ffi_type,
+                                  zend_jit_ffi_info   *ffi_info)
+{
+	uint32_t res_info = RES_INFO();
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+
+	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op1_use, -1, obj_ref, op1_ffi_type, ffi_info)) {
+		return 0;
+	}
+
+	ir_ref ptr = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	if (opline->opcode == ZEND_FETCH_OBJ_W) {
+		jit_set_Z_PTR(jit, res_addr,
+			ir_CALL_2(IR_ADDR, ir_CONST_FUNC(zend_ffi_cdata_create),
+				ptr, ir_CONST_ADDR(op1_ffi_type)));
+		jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+	} else {
+		if (!zend_jit_ffi_read(jit, op1_ffi_type, ptr, res_addr)) {
+			return 0;
+		}
+	}
+
+	if (res_info & MAY_BE_GUARD) {
+		// TODO: ???
+		ssa->var_info[ssa_op->result_def].type &= ~MAY_BE_GUARD;
+	}
+
+	if (!op1_avoid_refcounting && !op1_indirect) {
+		if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+			jit_FREE_OP(jit,  opline->op1_type, opline->op1, op1_info, opline);
+		}
+	}
+
+	return 1;
+}
+
 static int zend_jit_ffi_fetch_sym(zend_jit_ctx        *jit,
                                   const zend_op       *opline,
                                   const zend_op_array *op_array,
@@ -1410,6 +1476,54 @@ static int zend_jit_ffi_assign_obj(zend_jit_ctx        *jit,
 	return 1;
 }
 
+static int zend_jit_ffi_assign_val(zend_jit_ctx        *jit,
+                                   const zend_op       *opline,
+                                   const zend_op_array *op_array,
+                                   zend_ssa            *ssa,
+                                   const zend_ssa_op   *ssa_op,
+                                   uint32_t             op1_info,
+                                   zend_jit_addr        op1_addr,
+                                   bool                 op1_indirect,
+                                   uint32_t             val_info,
+                                   zend_jit_addr        val_addr,
+                                   zend_jit_addr        val_def_addr,
+                                   zend_jit_addr        res_addr,
+                                   zend_ffi_type       *op1_ffi_type,
+                                   zend_ffi_type       *val_ffi_type,
+                                   zend_jit_ffi_info   *ffi_info)
+{
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+
+	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op1_use, ssa_op->op1_def, obj_ref, op1_ffi_type, ffi_info)) {
+		return 0;
+	}
+
+	if (val_addr != val_def_addr && val_def_addr) {
+		if (!zend_jit_update_regs(jit, (opline+1)->op1.var, val_addr, val_def_addr, val_info)) {
+			return 0;
+		}
+		if (Z_MODE(val_def_addr) == IS_REG && Z_MODE(val_addr) != IS_REG) {
+			val_addr = val_def_addr;
+		}
+	}
+
+	ir_ref ptr = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	ZEND_ASSERT(!res_addr || RETURN_VALUE_USED(opline));
+
+	if (!zend_jit_ffi_write(jit, op1_ffi_type, ptr, val_info, val_addr, val_ffi_type, res_addr)) {
+		return 0;
+	}
+
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
+
+	if (!op1_indirect) {
+		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
+	}
+
+	return 1;
+}
+
 static int zend_jit_ffi_assign_sym(zend_jit_ctx        *jit,
                                    const zend_op       *opline,
                                    const zend_op_array *op_array,
@@ -1484,6 +1598,41 @@ static int zend_jit_ffi_assign_obj_op(zend_jit_ctx        *jit,
 
 	if (!zend_jit_ffi_assign_op_helper(jit, opline, opline->extended_value,
 			field_type, ptr, val_info, val_addr)) {
+		return 0;
+	}
+
+	jit_FREE_OP(jit, (opline+1)->op1_type, (opline+1)->op1, val_info, opline);
+
+	if (!op1_indirect) {
+		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
+	}
+
+	return 1;
+}
+
+static int zend_jit_ffi_assign_val_op(zend_jit_ctx        *jit,
+                                      const zend_op       *opline,
+                                      const zend_op_array *op_array,
+                                      zend_ssa            *ssa,
+                                      const zend_ssa_op   *ssa_op,
+                                      uint32_t             op1_info,
+                                      zend_jit_addr        op1_addr,
+                                      bool                 op1_indirect,
+                                      uint32_t             val_info,
+                                      zend_jit_addr        val_addr,
+                                      zend_ffi_type       *op1_ffi_type,
+                                      zend_jit_ffi_info   *ffi_info)
+{
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+
+	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op1_use, ssa_op->op1_def, obj_ref, op1_ffi_type, ffi_info)) {
+		return 0;
+	}
+
+	ir_ref ptr = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	if (!zend_jit_ffi_assign_op_helper(jit, opline, opline->extended_value,
+			op1_ffi_type, ptr, val_info, val_addr)) {
 		return 0;
 	}
 
@@ -1757,6 +1906,37 @@ static int zend_jit_ffi_incdec_obj(zend_jit_ctx        *jit,
 	ir_ref ptr = ir_ADD_A(cdata_ref, ir_CONST_LONG(field->offset));
 
 	if (!zend_jit_ffi_incdec_helper(jit, opline, opline->opcode, field_type, ptr, res_addr)) {
+		return 0;
+	}
+
+	if (!op1_indirect) {
+		jit_FREE_OP(jit, opline->op1_type, opline->op1, op1_info, opline);
+	}
+
+	return 1;
+}
+
+static int zend_jit_ffi_incdec_val(zend_jit_ctx        *jit,
+                                   const zend_op       *opline,
+                                   const zend_op_array *op_array,
+                                   zend_ssa            *ssa,
+                                   const zend_ssa_op   *ssa_op,
+                                   uint32_t             op1_info,
+                                   zend_jit_addr        op1_addr,
+                                   bool                 op1_indirect,
+                                   zend_jit_addr        res_addr,
+                                   zend_ffi_type       *op1_ffi_type,
+                                   zend_jit_ffi_info   *ffi_info)
+{
+	ir_ref obj_ref = jit_Z_PTR(jit, op1_addr);
+
+	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op1_use, ssa_op->op1_def, obj_ref, op1_ffi_type, ffi_info)) {
+		return 0;
+	}
+
+	ir_ref ptr = ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
+
+	if (!zend_jit_ffi_incdec_helper(jit, opline, opline->opcode, op1_ffi_type, ptr, res_addr)) {
 		return 0;
 	}
 
