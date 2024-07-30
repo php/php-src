@@ -2387,7 +2387,6 @@ EOF
     ;;
   esac
 
-AC_DEFINE([HAVE_DTRACE], [1], [Define to 1 if DTrace support is enabled.])
 PHP_SUBST([PHP_DTRACE_OBJS])
 ])
 
