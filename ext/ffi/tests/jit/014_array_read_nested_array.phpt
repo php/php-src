@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 014: Read Array (nested array)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

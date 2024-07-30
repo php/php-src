@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 069: Function call with FFI::addr()
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 001: Read Variable (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

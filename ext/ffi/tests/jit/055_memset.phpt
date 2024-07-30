@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 055: FFI::memset()
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing
