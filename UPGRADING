@@ -51,6 +51,9 @@ PHP 8.4 UPGRADE NOTES
 - GMP:
   . The GMP class is now final and cannot be extended anymore.
     RFC: https://wiki.php.net/rfc/gmp-final
+  . Casting a GMP object to bool changed so that 0 becomes false and everything else
+    becomes true.
+    RFC: https://wiki.php.net/rfc/fix_up_bcmath_number_class
 
 - Intl:
   . resourcebundle_get(), ResourceBundle::get(), and accessing offsets on a

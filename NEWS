@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta1
 
+- GMP:
+  . RFC: Change GMP bool cast behavior. (Saki Takamachi)
 
 01 Aug 2024, PHP 8.4.0alpha3
 

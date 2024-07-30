@@ -298,6 +298,10 @@ static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int typ
 			ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
 		}
 		return SUCCESS;
+	case _IS_BOOL:
+		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
+		ZVAL_BOOL(writeobj, mpz_sgn(gmpnum) != 0);
+		return SUCCESS;
 	default:
 		return FAILURE;
 	}
