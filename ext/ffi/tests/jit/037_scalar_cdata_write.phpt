@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 037: Scalar CData Write
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

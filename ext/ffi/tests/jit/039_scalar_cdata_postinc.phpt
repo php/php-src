@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 039: Scalar CData post increment
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

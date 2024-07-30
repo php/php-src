@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 004: Read Variable (struct ptr)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

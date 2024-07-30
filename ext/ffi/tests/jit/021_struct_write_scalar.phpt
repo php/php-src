@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 021: Write Struct (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

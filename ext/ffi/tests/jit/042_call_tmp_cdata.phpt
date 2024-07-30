@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 042: Function call (tmp CData arg)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

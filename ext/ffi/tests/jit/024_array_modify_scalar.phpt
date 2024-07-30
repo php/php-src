@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 024: Array Modification (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

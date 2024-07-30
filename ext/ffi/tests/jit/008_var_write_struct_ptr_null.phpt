@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 008: Write Variable (struct ptr null)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 013: Read Array (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing
