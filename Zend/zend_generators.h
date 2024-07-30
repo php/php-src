@@ -95,6 +95,7 @@ static const uint8_t ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const uint8_t ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const uint8_t ZEND_GENERATOR_DO_INIT           = 0x8;
 static const uint8_t ZEND_GENERATOR_IN_FIBER          = 0x10;
+static const uint8_t ZEND_GENERATOR_DTOR_VISITED      = 0x20;
 
 void zend_register_generator_ce(void);
 ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution);
