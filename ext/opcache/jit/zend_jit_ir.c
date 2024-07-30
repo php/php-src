@@ -3666,34 +3666,22 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 		pred = jit->ssa->cfg.predecessors[bb->predecessor_offset];
 		ref = jit->bb_edges[jit->bb_predecessors[b]];
 		if (ref == IR_UNUSED) {
-			if (!jit->ctx.control) {
-				ir_BEGIN(IR_UNUSED); /* unreachable block */
-			}
+			ir_BEGIN(IR_UNUSED); /* unreachable block */
 		} else {
 			ir_op op = jit->ctx.ir_base[ref].op;
 
 			if (op == IR_IF) {
-				if (!jit->ctx.control) {
-					jit_IF_TRUE_FALSE_ex(jit, ref, b);
-				} else {
-					ir_ref entry_path = ir_END();
-					jit_IF_TRUE_FALSE_ex(jit, ref, b);
-					ir_MERGE_WITH(entry_path);
-				}
+				jit_IF_TRUE_FALSE_ex(jit, ref, b);
 			} else if (op == IR_SWITCH) {
 				zend_jit_case_start(jit, pred, b, ref);
 			} else {
-				if (!jit->ctx.control) {
-					ZEND_ASSERT(op == IR_END || op == IR_UNREACHABLE || op == IR_RETURN);
-					if ((jit->ssa->cfg.blocks[b].flags & ZEND_BB_RECV_ENTRY)
-					 && (jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)) {
-						/* prvent END/BEGIN merging */
-						jit->ctx.control = ir_emit1(&jit->ctx, IR_BEGIN, ref);
-					} else {
-						ir_BEGIN(ref);
-					}
+				ZEND_ASSERT(op == IR_END || op == IR_UNREACHABLE || op == IR_RETURN);
+				if ((jit->ssa->cfg.blocks[b].flags & ZEND_BB_RECV_ENTRY)
+				 && (jit->ssa->cfg.flags & ZEND_FUNC_RECURSIVE_DIRECTLY)) {
+					/* prvent END/BEGIN merging */
+					jit->ctx.control = ir_emit1(&jit->ctx, IR_BEGIN, ref);
 				} else {
-					ir_MERGE_WITH(ref);
+					ir_BEGIN(ref);
 				}
 			}
 		}
@@ -3706,9 +3694,6 @@ static int zend_jit_bb_start(zend_jit_ctx *jit, int b)
 		ALLOCA_FLAG(use_heap);
 
 		ZEND_ASSERT(!jit->ctx.control);
-		if (jit->ctx.control) {
-			entry_path = ir_END();
-		}
 		pred_refs = (ir_ref *)do_alloca(sizeof(ir_ref) * n, use_heap);
 		for (i = 0, p = jit->ssa->cfg.predecessors + bb->predecessor_offset; i < n; p++, i++) {
 			pred = *p;
@@ -5865,12 +5850,8 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 			ZEND_ASSERT(res_inputs->count == 2);
 			jit->delay_var = -1;
 			jit->delay_refs = NULL;
-			if (res_inputs->count == 1) {
-				zend_jit_def_reg(jit, res_addr, res_inputs->refs[0]);
-			} else {
-				ir_ref phi = ir_PHI_N(IR_LONG, res_inputs->count, res_inputs->refs);
-				zend_jit_def_reg(jit, res_addr, phi);
-			}
+			ir_ref phi = ir_PHI_N(IR_LONG, res_inputs->count, res_inputs->refs);
+			zend_jit_def_reg(jit, res_addr, phi);
 		}
 	}
 
