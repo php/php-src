@@ -6457,6 +6457,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 
 							if (field
+							 && (!field->is_const || opline->opcode != ZEND_FETCH_OBJ_W)
 							 && !field->bits
 							 && ZEND_FFI_TYPE(field->type)->kind != ZEND_FFI_TYPE_VOID
 							 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(field->type))) {
@@ -6488,10 +6489,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								goto jit_failure;
 							}
 							goto done;
-						} else if ((opline->opcode == ZEND_FETCH_OBJ_R
-						  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG
-						  || opline->opcode == ZEND_FETCH_OBJ_W)
-						 && op1_ffi_symbols) {
+						} else if (op1_ffi_symbols) {
 							zend_ffi_symbol *sym = zend_hash_find_ptr(op1_ffi_symbols,
 								Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 							if (sym
