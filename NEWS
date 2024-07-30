@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Throw Error exception when encountering recursion during comparison, rather
     than fatal error. (ilutov)
   . Added missing cstddef include for C++ builds. (cmb)
+  . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
+    (Arnaud)
 
 - BCMath:
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
@@ -31,7 +33,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
-    (Arnaud)
+    (Arnaud, nielsdos)
 
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
