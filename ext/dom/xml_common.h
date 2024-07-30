@@ -81,12 +81,11 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 	DOM_GET_OBJ(__ptr, __id, __prtype, __intern);
 
 struct php_dom_private_data;
-typedef struct php_dom_private_data php_dom_private_data;
 
-static zend_always_inline php_dom_private_data *php_dom_get_private_data(dom_object *intern)
+static zend_always_inline struct php_dom_private_data *php_dom_get_private_data(dom_object *intern)
 {
 	ZEND_ASSERT(intern->document != NULL);
-	return (php_dom_private_data *) intern->document->private_data;
+	return (struct php_dom_private_data *) intern->document->private_data;
 }
 
 static zend_always_inline xmlNodePtr php_dom_next_in_tree_order(const xmlNode *nodep, const xmlNode *basep)

@@ -17,6 +17,7 @@
 #include <stddef.h>
 
 #include "zend_frameless_function.h"
+#include "zend_types.h"
 
 size_t zend_flf_count = 0;
 size_t zend_flf_capacity = 0;

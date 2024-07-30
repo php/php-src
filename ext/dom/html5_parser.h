@@ -66,12 +66,15 @@ void lexbor_libxml2_bridge_parse_set_error_callbacks(
     lexbor_libxml2_bridge_tokenizer_error_reporter tokenizer_error_reporter,
     lexbor_libxml2_bridge_tree_error_reporter tree_error_reporter
 );
+
+struct php_dom_private_data;
+
 lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     lxb_html_document_t *document,
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_private_data *private_data
+    struct php_dom_private_data *private_data
 );
 lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     lxb_dom_node_t *start_node,
@@ -79,7 +82,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     xmlNodePtr *fragment_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_private_data *private_data
+    struct php_dom_private_data *private_data
 );
 void lexbor_libxml2_bridge_report_errors(
     const lexbor_libxml2_bridge_parse_context *ctx,

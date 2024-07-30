@@ -3279,7 +3279,7 @@ static void zend_jit_setup(void)
 	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
-		asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
+		__asm__ ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
 			: "=r" (ret));
 		tsrm_ls_cache_tcb_offset = ret;
 #elif defined(__MUSL__)
@@ -3315,7 +3315,7 @@ static void zend_jit_setup(void)
 #if !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__)
 		size_t ret;
 
-		asm ("leal _tsrm_ls_cache@ntpoff,%0\n"
+		__asm__ ("leal _tsrm_ls_cache@ntpoff,%0\n"
 			: "=a" (ret));
 		tsrm_ls_cache_tcb_offset = ret;
 #else

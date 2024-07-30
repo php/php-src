@@ -115,7 +115,6 @@ typedef enum dom_iterator_type {
 } dom_iterator_type;
 
 struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
 	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
@@ -176,7 +175,7 @@ xmlDocPtr php_dom_create_html_doc(void);
 xmlEntityPtr dom_entity_reference_fetch_and_sync_declaration(xmlNodePtr reference);
 void dom_set_xml_class(php_libxml_ref_obj *document);
 const char *dom_locate_a_namespace(const xmlNode *node, const zend_string *prefix);
-void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc);
+void dom_mark_namespaces_as_attributes_too(struct php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp);
 bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_object *domobj);
@@ -216,7 +215,7 @@ xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_lon
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
 int php_dom_get_namednodemap_length(dom_object *obj);
 
-xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
+xmlNodePtr dom_clone_node(struct php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
 
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \

@@ -25,6 +25,8 @@
 #include "private_data.h"
 #include "internal_helpers.h"
 
+typedef struct php_dom_ns_magic_token php_dom_ns_magic_token;
+
 /* The actual value of these doesn't matter as long as they serve as a unique ID.
  * They need to be pointers because the `_private` field is a pointer, however we can choose the contents ourselves.
  * We need keep these at least 4-byte aligned because the pointer may be tagged (although for now 2 byte alignment works too).

@@ -25,6 +25,7 @@
 #include "ext/libxml/php_libxml.h"
 #include "ext/dom/namespace_compat.h"
 
+typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
 
 static zend_result php_xsl_xslt_apply_params(xsltTransformContextPtr ctxt, HashTable *params)
 {

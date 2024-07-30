@@ -21,7 +21,7 @@
 
 #include "zend_portability.h"
 
-typedef struct _zend_string zend_string;
+struct _zend_string;
 
 #define ZEND_MAP_PTR_KIND_PTR           0
 #define ZEND_MAP_PTR_KIND_PTR_OR_OFFSET 1
@@ -76,7 +76,7 @@ BEGIN_EXTERN_C()
 ZEND_API void  zend_map_ptr_reset(void);
 ZEND_API void *zend_map_ptr_new(void);
 ZEND_API void  zend_map_ptr_extend(size_t last);
-ZEND_API void zend_alloc_ce_cache(zend_string *type_name);
+ZEND_API void zend_alloc_ce_cache(struct _zend_string *type_name);
 
 END_EXTERN_C()
 
