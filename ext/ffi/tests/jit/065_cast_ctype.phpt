@@ -1,0 +1,35 @@
+--TEST--
+FFI/JIT 065: FFI::cast() (CType)
+--INI--
+ffi.enable=1
+;opcache.jit=tracing
+opcache.jit_hot_loop=1
+opcache.jit_hot_func=0
+opcache.jit_hot_return=0
+opcache.jit_hot_side_exit=0
+;opcache.jit_debug=0x180005
+--FILE--
+<?php 
+function test() {
+  $ffi = FFI::cdef();
+  $x = $ffi->new("unsigned int[4]");
+  $x[1] = 42;
+  $type = $ffi->type("int[4]");
+  for ($i = 0; $i < 5; $i++) {
+  	$ret = $ffi->cast($type, $x);
+  }
+  var_dump($ret);
+}
+test();
+?>
+--EXPECTF--
+object(FFI\CData:int32_t[4])#%d (4) {
+  [0]=>
+  int(0)
+  [1]=>
+  int(42)
+  [2]=>
+  int(0)
+  [3]=>
+  int(0)
+}
