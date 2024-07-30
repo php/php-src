@@ -13,7 +13,7 @@ opcache.jit_hot_side_exit=0
 --SKIPIF--
 <?php
 try {
-    $libc = FFI::cdef("void printf(void);");
+    $libc = FFI::cdef("void printf(void);", 'libc.so.6');
 } catch (Throwable $_) {
     die('skip libc.so.6 not available');
 }
