@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta1
 
+- GMP:
+  . RFC: Change GMP bool cast behavior. (Saki Takamachi)
 
 01 Aug 2024, PHP 8.4.0alpha3
 
@@ -28,7 +30,6 @@ PHP                                                                        NEWS
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore. (Girgias)
-  . RFC: Change GMP bool cast behavior (Saki Takamachi)
 
 - Intl:
   . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
