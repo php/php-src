@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 033: POSTDEC Struct (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

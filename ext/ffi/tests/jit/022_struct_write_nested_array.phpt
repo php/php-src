@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 022: Write Struct (nested array)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

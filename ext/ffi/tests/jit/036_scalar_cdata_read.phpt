@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 036: Scalar CData Read
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

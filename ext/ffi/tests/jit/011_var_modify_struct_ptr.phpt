@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 011: Modify Variable (struct ptr)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

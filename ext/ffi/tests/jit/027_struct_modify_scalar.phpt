@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 027: Modify Struct (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

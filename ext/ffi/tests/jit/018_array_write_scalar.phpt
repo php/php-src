@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 018: Array Write (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing
