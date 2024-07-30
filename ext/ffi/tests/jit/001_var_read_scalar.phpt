@@ -8,6 +8,14 @@ opcache.jit_hot_func=0
 opcache.jit_hot_return=0
 opcache.jit_hot_side_exit=0
 ;opcache.jit_debug=0x180005
+--SKIPIF--
+<?php
+try {
+    $libc = FFI::cdef("extern intptr_t stdout;");
+} catch (Throwable $_) {
+    die('skip libc.so.6 not available');
+}
+?>
 --FILE--
 <?php 
 function test() {
