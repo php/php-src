@@ -231,10 +231,10 @@ static inline bool check_node_running_in_fiber(zend_generator *generator) {
 		return false;
 	}
 
-	if (generator->flags & ZEND_GENERATOR_VISITED) {
+	if (generator->flags & ZEND_GENERATOR_DTOR_VISITED) {
 		return false;
 	}
-	generator->flags |= ZEND_GENERATOR_VISITED;
+	generator->flags |= ZEND_GENERATOR_DTOR_VISITED;
 
 	if (generator->node.children == 1) {
 		if (check_node_running_in_fiber(generator->node.child.single)) {
@@ -774,9 +774,7 @@ try_again:
 
 	if (EG(active_fiber)) {
 		orig_generator->flags |= ZEND_GENERATOR_IN_FIBER;
-		if (generator != orig_generator) {
-			generator->flags |= ZEND_GENERATOR_IN_FIBER;
-		}
+		generator->flags |= ZEND_GENERATOR_IN_FIBER;
 	}
 
 	/* Drop the AT_FIRST_YIELD flag */
@@ -810,9 +808,7 @@ try_again:
 			EG(jit_trace_num) = original_jit_trace_num;
 
 			orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
-			if (generator != orig_generator) {
-				generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
-			}
+			generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 			return;
 		}
 		/* If there are no more delegated values, resume the generator
