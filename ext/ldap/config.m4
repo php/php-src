@@ -96,7 +96,8 @@ if test "$PHP_LDAP" != "no"; then
 
   PHP_ADD_INCLUDE([$LDAP_INCDIR])
   PHP_SUBST([LDAP_SHARED_LIBADD])
-  AC_DEFINE(HAVE_LDAP,1,[ ])
+  AC_DEFINE([HAVE_LDAP], [1],
+    [Define to 1 if PHP extension 'ldap' is available.])
 
   dnl Save original values
   _SAVE_CPPFLAGS=$CPPFLAGS

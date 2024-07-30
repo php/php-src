@@ -448,7 +448,8 @@ if test -n "$ODBC_TYPE"; then
     fi
   fi
 
-  AC_DEFINE(HAVE_UODBC,1,[ ])
+  AC_DEFINE([HAVE_UODBC], [1],
+    [Define to 1 if PHP extension 'odbc' is available.])
   PHP_SUBST([ODBC_SHARED_LIBADD])
   AC_SUBST([ODBC_CFLAGS])
   AC_SUBST([ODBC_LIBS])

@@ -5,7 +5,8 @@ PHP_ARG_ENABLE([soap],
 
 if test "$PHP_SOAP" != "no"; then
   PHP_SETUP_LIBXML([SOAP_SHARED_LIBADD], [
-    AC_DEFINE([HAVE_SOAP], [1], [Define to 1 if soap extension is available.])
+    AC_DEFINE([HAVE_SOAP], [1],
+      [Define to 1 if PHP extension 'soap' is available.])
     PHP_NEW_EXTENSION([soap], m4_normalize([
         php_encoding.c
         php_http.c

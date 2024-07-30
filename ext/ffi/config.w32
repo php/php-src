@@ -3,7 +3,7 @@ ARG_WITH('ffi', 'ffi support', 'no');
 if (PHP_FFI != 'no') {
 	if (CHECK_HEADER_ADD_INCLUDE("ffi.h", "CFLAGS_FFI", PHP_FFI+ ";" + PHP_PHP_BUILD + "\\include") &&
 		CHECK_LIB("libffi.lib", "ffi", PHP_FFI)) {
-		AC_DEFINE('HAVE_FFI', 1, 'ffi support enabled');
+		AC_DEFINE('HAVE_FFI', 1, "Define to 1 if PHP extension 'ffi' is available.");
 
 		if (!X64) {
 		    AC_DEFINE('HAVE_FFI_FASTCALL', 1 ,'libffi supports fastcall calling convention');

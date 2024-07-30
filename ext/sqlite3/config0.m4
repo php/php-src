@@ -6,7 +6,8 @@ PHP_ARG_WITH([sqlite3],
 
 if test $PHP_SQLITE3 != "no"; then
   PHP_SETUP_SQLITE([SQLITE3_SHARED_LIBADD])
-  AC_DEFINE(HAVE_SQLITE3, 1, [Define to 1 if you have the sqlite3 extension enabled.])
+  AC_DEFINE([HAVE_SQLITE3], [1],
+    [Define to 1 if PHP extension 'sqlite3' is available.])
 
   PHP_CHECK_LIBRARY([sqlite3], [sqlite3_errstr],
     [AC_DEFINE([HAVE_SQLITE3_ERRSTR], [1], [have sqlite3_errstr function])],

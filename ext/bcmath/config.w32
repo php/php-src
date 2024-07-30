@@ -10,5 +10,5 @@ if (PHP_BCMATH == "yes") {
 		floor_or_ceil.c nearzero.c num2str.c raise.c rmzero.c str2num.c \
 		round.c convert.c", "bcmath");
 
-	AC_DEFINE('HAVE_BCMATH', 1, 'Have BCMATH library');
+	AC_DEFINE('HAVE_BCMATH', 1, "Define to 1 if PHP extension 'bcmath' is available.");
 }

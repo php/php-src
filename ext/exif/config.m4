@@ -4,7 +4,8 @@ PHP_ARG_ENABLE([exif],
     [Enable EXIF (metadata from images) support])])
 
 if test "$PHP_EXIF" != "no"; then
-  AC_DEFINE(HAVE_EXIF, 1, [Whether you want EXIF (metadata from images) support])
+  AC_DEFINE([HAVE_EXIF], [1],
+    [Define to 1 if PHP extension 'exif' is available.])
   PHP_NEW_EXTENSION([exif],
     [exif.c],
     [$ext_shared],,

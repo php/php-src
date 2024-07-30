@@ -33,7 +33,8 @@ if test "$PHP_ENCHANT" != "no"; then
       [$ENCHANT_LIBS])
   ])
 
-  AC_DEFINE(HAVE_ENCHANT, 1, [ ])
+  AC_DEFINE([HAVE_ENCHANT], [1],
+    [Define to 1 if PHP extension 'enchant' is available.])
 
   PHP_NEW_EXTENSION([enchant], [enchant.c], [$ext_shared])
   PHP_SUBST([ENCHANT_SHARED_LIBADD])
