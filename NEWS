@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0alpha3
+?? ??? ????, PHP 8.4.0beta1
+
+
+01 Aug 2024, PHP 8.4.0alpha3
 
 - Core:
   . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
