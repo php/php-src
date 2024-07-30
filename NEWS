@@ -58,6 +58,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
+  . Enables crc32 auxiliary detection on OpenBSD. (David Carlier)
 
 - Streams:
   . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
