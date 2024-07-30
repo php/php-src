@@ -32,7 +32,7 @@ if (PHP_XSL != "no") {
 				}
 			}
 			EXTENSION("xsl", "php_xsl.c xsltprocessor.c", PHP_XSL_SHARED);
-			AC_DEFINE("HAVE_XSL", 1, "Define to 1 if PHP extension 'xml' is available.");
+			AC_DEFINE("HAVE_XSL", 1, "Define to 1 if PHP extension 'xsl' is available.");
 			if (! PHP_XSL_SHARED) {
 				ADD_FLAG("CFLAGS_XSL", "/D DOM_EXPORTS /D LIBXML_STATIC");
 			} else {
