@@ -1,8 +1,5 @@
 name: Test
 inputs:
-  testArtifacts:
-    default: null
-    required: false
   runTestsParameters:
     default: ''
     required: false

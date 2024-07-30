@@ -3,6 +3,9 @@ inputs:
   configurationParameters:
     default: ''
     required: false
+  skipSlow:
+    default: false
+    required: false
 runs:
   using: composite
   steps:
