@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 058: FFI::memcmp() (CData + string)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

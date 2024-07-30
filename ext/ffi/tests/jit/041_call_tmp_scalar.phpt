@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 041: Function call (tmp scalar arg)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

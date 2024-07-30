@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 030: Increment Variable (scalar)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 051: FFI::string()
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

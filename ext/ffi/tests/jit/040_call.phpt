@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 040: Function call
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

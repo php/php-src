@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 057: FFI::memcpy() (CData)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

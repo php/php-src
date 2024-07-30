@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 034: POSTINC Struct (ptr)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 002: Read Variable (array)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

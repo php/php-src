@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 029: Modify Struct (nested array)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

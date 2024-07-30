@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 031: Decrement Variable (ptr)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 015: Read Array (nested struct)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

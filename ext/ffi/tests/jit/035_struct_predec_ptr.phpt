@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 035: PREDEC Struct (ptr)
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing

@@ -1,5 +1,7 @@
 --TEST--
 FFI/JIT 038: Scalar CData Modification
+--EXTENSIONS--
+ffi
 --INI--
 ffi.enable=1
 ;opcache.jit=tracing
