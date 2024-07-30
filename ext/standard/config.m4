@@ -345,7 +345,7 @@ dnl
 
 PHP_CHECK_FUNC(res_search, resolv, socket)
 
-AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np])
+AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np elf_aux_info])
 
 dnl
 dnl Obsolete check for strptime() declaration. The strptime, where available,
