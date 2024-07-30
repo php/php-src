@@ -30,13 +30,11 @@ function test() {
   for ($i = 0; $i < 5; $i++) {
   	$ffi->stdout--;
   }
-  var_dump($ffi->cast('intptr_t', $ffi->stdout));
+  $out = $ffi->cast('intptr_t', $ffi->stdout)->cdata;
   $ffi->stdout = $old;
+  var_dump($out);
 }
 test();
 ?>
---EXPECTF--
-object(FFI\CData:int%d_t)#%d (1) {
-  ["cdata"]=>
-  int(22)
-}
+--EXPECT--
+int(22)

@@ -30,9 +30,10 @@ function test() {
   for ($i = 0; $i < 5; $i++) {
   	$ffi->stdout = $x;
   }
-  var_dump($ffi->stdout);
-  var_dump($ffi->cast('intptr_t', $ffi->stdout));
+  $out1 = $ffi->stdout;
+  $out2 = $ffi->cast('intptr_t', $ffi->stdout)->cdata;
   $ffi->stdout = $old;
+  var_dump($out1, $out2);
 }
 test();
 ?>
@@ -47,7 +48,4 @@ object(FFI\CData:struct _IO_FILE*)#%d (1) {
   object(FFI\CData:struct _IO_FILE)#%d (0) {
   }
 }
-object(FFI\CData:int%d_t)#%d (1) {
-  ["cdata"]=>
-  int(42)
-}
+int(42)

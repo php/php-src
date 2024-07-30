@@ -29,8 +29,9 @@ function test() {
   for ($i = 0; $i < 5; $i++) {
   	$ffi->stdout = $x;
   }
-  var_dump($ffi->stdout);
+  $out = $ffi->stdout;
   $ffi->stdout = $old;
+  var_dump($out);
 }
 test();
 ?>
