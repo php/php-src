@@ -305,7 +305,7 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 					if (objmap->nodetype == XML_ATTRIBUTE_NODE) {
 						curnode = (xmlNodePtr) basep->properties;
 					} else {
-						curnode = (xmlNodePtr) basep->children;
+						curnode = dom_nodelist_iter_start_first_child(basep);
 					}
 				} else {
 					xmlNodePtr nodep = basep;
