@@ -248,7 +248,6 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-alpine
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
