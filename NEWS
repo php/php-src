@@ -8,6 +8,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15240 (Infinite recursion in trait hook). (ilutov)
   . Fixed bug GH-15140 (Missing variance check for abstract set with asymmetric
     type). (ilutov)
+  . Fixed bug GH-15181 (Disabled output handler is flushed again). (cmb)
 
 - Date:
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
