@@ -101,5 +101,5 @@ if test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST([BUILD_PHPDBG])
   PHP_SUBST([BUILD_PHPDBG_SHARED])
 
-  PHP_OUTPUT([sapi/phpdbg/phpdbg.1])
+  AC_CONFIG_FILES([sapi/phpdbg/phpdbg.1])
 fi
