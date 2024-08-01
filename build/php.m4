@@ -1838,6 +1838,8 @@ dnl
 AC_DEFUN([PHP_SETUP_ICONV], [
   found_iconv=no
   unset ICONV_DIR
+  AH_TEMPLATE([HAVE_LIBICONV],
+    [Define to 1 if you have the 'libiconv' function.])
 
   dnl Check libc first if no path is provided in --with-iconv.
   if test "$PHP_ICONV" = "yes"; then
@@ -1848,7 +1850,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       found_iconv=yes
     ],[
       AC_CHECK_FUNC([libiconv], [
-        AC_DEFINE(HAVE_LIBICONV, 1, [ ])
+        AC_DEFINE([HAVE_LIBICONV], [1])
         found_iconv=yes
       ])
     ])
@@ -1882,9 +1884,9 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     then
       PHP_CHECK_LIBRARY([$iconv_lib_name], [libiconv], [
         found_iconv=yes
-        AC_DEFINE([HAVE_LIBICONV], [1], [ ])
+        AC_DEFINE([HAVE_LIBICONV], [1])
         AC_DEFINE([ICONV_ALIASED_LIBICONV], [1],
-          [iconv() is aliased to libiconv() in -liconv])
+          [Define to 1 if 'iconv()' is aliased to 'libiconv()'.])
         ],
         [PHP_CHECK_LIBRARY([$iconv_lib_name], [iconv],
           [found_iconv=yes],
