@@ -946,7 +946,8 @@ dnl ---------------------------------------------- Shared module
       [PHP_]translit($1,a-z_-,A-Z__)[_SHARED]=yes
       PHP_ADD_SOURCES_X($ext_dir,$2,$ac_extra -DZEND_COMPILE_DL_EXT=1,shared_objects_$1,yes)
       PHP_SHARED_MODULE($1,shared_objects_$1, $ext_builddir, $6, $7)
-      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), 1, Whether to build $1 as dynamic module)
+      AC_DEFINE_UNQUOTED([COMPILE_DL_]translit($1,a-z_-,A-Z__), [1],
+        [Define to 1 if the PHP extension '$1' is built as a dynamic module.])
     fi
   fi
 
@@ -1060,8 +1061,10 @@ dnl
 AC_DEFUN([PHP_CHECK_SIZEOF], [
   AC_MSG_CHECKING([size of $1])
   _PHP_CHECK_SIZEOF($1, $2, $3, [
-    AC_DEFINE_UNQUOTED([SIZEOF_]translit($1,a-z,A-Z_), [$]php_cv_sizeof_[]$1, [Size of $1])
-    AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), 1, [Whether $1 is available])
+    AC_DEFINE_UNQUOTED([SIZEOF_]translit($1,a-z,A-Z_), [$]php_cv_sizeof_[]$1,
+      [The size of '$1', as computed by sizeof.])
+    AC_DEFINE_UNQUOTED([HAVE_]translit($1,a-z,A-Z_), [1],
+      [Define to 1 if the system has the type '$1'.])
   ])
   AC_MSG_RESULT([[$][php_cv_sizeof_]translit($1, ,_)])
 ])
@@ -1197,9 +1200,11 @@ AC_DEFUN([PHP_PWRITE_TEST],[
   ])
 
   if test "$ac_cv_pwrite" != "no"; then
-    AC_DEFINE(HAVE_PWRITE, 1, [ ])
+    AC_DEFINE([HAVE_PWRITE], [1],
+      [Define to 1 if you have the 'pwrite' function.])
     if test "$ac_cv_pwrite" = "64"; then
-      AC_DEFINE(PHP_PWRITE_64, 1, [whether pwrite64 is default])
+      AC_DEFINE([PHP_PWRITE_64], [1],
+        [Define to 1 if 'pwrite' declaration with 'off64_t' is missing.])
     fi
   fi
 ])
@@ -1219,9 +1224,11 @@ AC_DEFUN([PHP_PREAD_TEST],[
   ])
 
   if test "$ac_cv_pread" != "no"; then
-    AC_DEFINE(HAVE_PREAD, 1, [ ])
+    AC_DEFINE([HAVE_PREAD], [1],
+      [Define to 1 if you have the 'pread' function.])
     if test "$ac_cv_pread" = "64"; then
-      AC_DEFINE(PHP_PREAD_64, 1, [whether pread64 is default])
+      AC_DEFINE([PHP_PREAD_64], [1],
+        [Define to 1 if 'pread' declaration with 'off64_t' is missing.])
     fi
   fi
 ])
@@ -1231,19 +1238,24 @@ dnl PHP_MISSING_TIME_R_DECL
 dnl
 AC_DEFUN([PHP_MISSING_TIME_R_DECL],[
 AC_CHECK_DECL([localtime_r],,
-  [AC_DEFINE([MISSING_LOCALTIME_R_DECL], [1], [Whether localtime_r is declared])],
+  [AC_DEFINE([MISSING_LOCALTIME_R_DECL], [1],
+    [Define to 1 if 'localtime_r' declaration is missing.])],
   [#include <time.h>])
 AC_CHECK_DECL([gmtime_r],,
-  [AC_DEFINE([MISSING_GMTIME_R_DECL], [1], [Whether gmtime_r is declared])],
+  [AC_DEFINE([MISSING_GMTIME_R_DECL], [1],
+    [Define to 1 if 'gmtime_r' declaration is missing.])],
   [#include <time.h>])
 AC_CHECK_DECL([asctime_r],,
-  [AC_DEFINE([MISSING_ASCTIME_R_DECL], [1], [Whether asctime_r is declared])],
+  [AC_DEFINE([MISSING_ASCTIME_R_DECL], [1],
+    [Define to 1 if 'asctime_r' declaration is missing.])],
   [#include <time.h>])
 AC_CHECK_DECL([ctime_r],,
-  [AC_DEFINE([MISSING_CTIME_R_DECL], [1], [Whether ctime_r is declared])],
+  [AC_DEFINE([MISSING_CTIME_R_DECL], [1],
+    [Define to 1 if 'ctime_r' declaration is missing.])],
   [#include <time.h>])
 AC_CHECK_DECL([strtok_r],,
-  [AC_DEFINE([MISSING_STRTOK_R_DECL], [1], [Whether strtok_r is declared])],
+  [AC_DEFINE([MISSING_STRTOK_R_DECL], [1],
+    [Define to 1 if 'strtok_r' declaration is missing.])],
   [#include <string.h>])
 ])
 
@@ -1275,7 +1287,8 @@ AC_DEFUN([PHP_BROKEN_GETCWD],[
   os=`uname -sr 2>/dev/null`
   case $os in
     SunOS*[)]
-      AC_DEFINE(HAVE_BROKEN_GETCWD,1, [Define if system has broken getcwd])
+      AC_DEFINE([HAVE_BROKEN_GETCWD], [1],
+        [Define to 1 if system has a broken 'getcwd'.])
       AC_MSG_RESULT([yes]);;
     *[)]
       AC_MSG_RESULT([no]);;
@@ -1367,7 +1380,7 @@ int main(void) {
   )])
   AS_VAR_IF([php_cv_type_cookie_off64_t], [yes],
     [AC_DEFINE([COOKIE_SEEKER_USES_OFF64_T], [1],
-      [Whether fopencookie seeker uses off64_t.])])
+      [Define to 1 if fopencookie seeker uses off64_t.])])
 ])
 ])
 
@@ -1912,11 +1925,10 @@ dnl Common setup macro for expat.
 dnl
 AC_DEFUN([PHP_SETUP_EXPAT], [
   PKG_CHECK_MODULES([EXPAT], [expat])
-
   PHP_EVAL_INCLINE([$EXPAT_CFLAGS])
   PHP_EVAL_LIBLINE([$EXPAT_LIBS], [$1])
-
-  AC_DEFINE(HAVE_LIBEXPAT, 1, [ ])
+  AC_DEFINE([HAVE_LIBEXPAT], [1],
+    [Define to 1 if the system has the Expat XML parser library.])
 ])
 
 dnl
@@ -2436,7 +2448,7 @@ AC_CACHE_CHECK([for $1], [php_var],
 ])
 AS_VAR_IF([php_var], [yes],
   [AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_]m4_bpatsubst([$1], [^_*], [])), [1],
-    [Define to 1 if compiler supports '$1'.])])
+    [Define to 1 if the compiler supports '$1'.])])
 AS_VAR_POPDEF([php_var])
 ])
 
