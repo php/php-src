@@ -10192,11 +10192,18 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 			jit_observer_fcall_end(jit, rx, res_ref);
 		}
 
-		// JIT: if (EG(vm_interrupt)) zend_jit_fcall_interrupt(execute_data);
-		ir_ref if_interrupt = ir_IF(ir_LOAD_U8(jit_EG(vm_interrupt)));
-		ir_IF_TRUE_cold(if_interrupt);
-		ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_fcall_interrupt), rx);
-		ir_MERGE_WITH_EMPTY_FALSE(if_interrupt);
+		/* When zend_interrupt_function is set, it gets called while
+		 * the frame is still on top. This is less efficient than
+		 * doing it later once it's popped off. There is code further
+		 * down that handles when there isn't an interrupt function.
+		 */
+		if (zend_interrupt_function) {
+			// JIT: if (EG(vm_interrupt)) zend_jit_fcall_interrupt(execute_data);
+			ir_ref if_interrupt = ir_IF(ir_LOAD_U8(jit_EG(vm_interrupt)));
+			ir_IF_TRUE_cold(if_interrupt);
+			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_fcall_interrupt), rx);
+			ir_MERGE_WITH_EMPTY_FALSE(if_interrupt);
+		}
 
 		// JIT: EG(current_execute_data) = execute_data;
 		ir_STORE(jit_EG(current_execute_data), jit_FP(jit));
@@ -10297,6 +10304,25 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		// JIT: if (UNEXPECTED(EG(exception) != NULL)) {
 		ir_GUARD_NOT(ir_LOAD_A(jit_EG_exception(jit)),
 			jit_STUB_ADDR(jit, jit_stub_icall_throw));
+
+		/* If there isn't a zend_interrupt_function, the timeout is
+		 * handled here because it's more efficient.
+		 */
+		if (!zend_interrupt_function) {
+			// TODO: Can we avoid checking for interrupts after each call ???
+			if (trace && jit->last_valid_opline != opline) {
+				int32_t exit_point = zend_jit_trace_get_exit_point(opline + 1, ZEND_JIT_EXIT_TO_VM);
+
+				exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+				if (!exit_addr) {
+					return 0;
+				}
+			} else {
+				exit_addr = NULL;
+			}
+
+			zend_jit_check_timeout(jit, opline + 1, exit_addr);
+		}
 
 		if ((!trace || !func) && opline->opcode != ZEND_DO_ICALL) {
 			jit_LOAD_IP_ADDR(jit, opline + 1);
