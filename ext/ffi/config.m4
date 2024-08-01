@@ -16,9 +16,11 @@ if test "$PHP_FFI" != "no"; then
   AC_DEFUN([PHP_FFI_CHECK_DECL],
     [AC_CHECK_DECL([$1],
       [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
-        [Whether libffi supports the '$1' calling convention.])],,
+        [Define to 1 if libffi supports the '$1' calling convention.])],,
       [#include <ffi.h>])])
 
+  CFLAGS_SAVE=$CFLAGS
+  CFLAGS="$CFLAGS $FFI_CFLAGS"
   PHP_FFI_CHECK_DECL([FFI_FASTCALL])
   PHP_FFI_CHECK_DECL([FFI_THISCALL])
   PHP_FFI_CHECK_DECL([FFI_STDCALL])
@@ -26,6 +28,7 @@ if test "$PHP_FFI" != "no"; then
   PHP_FFI_CHECK_DECL([FFI_REGISTER])
   PHP_FFI_CHECK_DECL([FFI_MS_CDECL])
   PHP_FFI_CHECK_DECL([FFI_SYSV])
+  CFLAGS=$CFLAGS_SAVE
 
   PHP_NEW_EXTENSION([ffi],
     [ffi.c ffi_parser.c],
