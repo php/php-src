@@ -13,11 +13,15 @@ if test "$PHP_FFI" != "no"; then
 
   AC_CHECK_TYPES([long double])
 
-  AC_DEFUN([PHP_FFI_CHECK_DECL],
-    [AC_CHECK_DECL([$1],
+  AC_DEFUN([PHP_FFI_CHECK_DECL], [
+    CFLAGS_SAVE=$CFLAGS
+    CFLAGS="$CFLAGS $FFI_CFLAGS"
+    AC_CHECK_DECL([$1],
       [AC_DEFINE_UNQUOTED(AS_TR_CPP([HAVE_$1]), [1],
-        [Whether libffi supports the '$1' calling convention.])],,
-      [#include <ffi.h>])])
+        [Define to 1 if libffi supports the '$1' calling convention.])],,
+      [#include <ffi.h>])
+    CFLAGS=$CFLAGS_SAVE
+  ])
 
   PHP_FFI_CHECK_DECL([FFI_FASTCALL])
   PHP_FFI_CHECK_DECL([FFI_THISCALL])
