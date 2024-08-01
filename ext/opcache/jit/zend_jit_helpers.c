@@ -3273,8 +3273,8 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	return ret;
 }
 
-ZEND_COLD static void ZEND_FASTCALL zend_jit_interrupt_or_timeout(zend_execute_data *call)
+ZEND_COLD static void ZEND_FASTCALL zend_jit_fcall_interrupt(zend_execute_data *call)
 {
 	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
-	zend_interrupt_or_timeout(call);
+	zend_fcall_interrupt(call);
 }

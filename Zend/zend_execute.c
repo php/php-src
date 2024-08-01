@@ -4056,7 +4056,7 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void zend_interrupt_or_timeout(zend_execute_data *call)
+ZEND_API ZEND_COLD void zend_fcall_interrupt(zend_execute_data *call)
 {
 	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
 		zend_timeout();
@@ -4074,6 +4074,12 @@ ZEND_API ZEND_COLD void zend_interrupt_or_timeout(zend_execute_data *call)
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
 			ZEND_VM_LOOP_INTERRUPT(); \
+		} \
+	} while (0)
+
+#define ZEND_VM_FCALL_INTERRUPT_CHECK(call) do { \
+		if (UNEXPECTED(zend_atomic_bool_exchange_ex(&EG(vm_interrupt), false))) { \
+			zend_fcall_interrupt(call); \
 		} \
 	} while (0)
 

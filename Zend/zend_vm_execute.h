@@ -1299,7 +1299,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 #endif
 
-	zend_interrupt_or_timeout_check(call);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -1364,7 +1364,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 	}
 #endif
 
-	zend_interrupt_or_timeout_check(call);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -1430,7 +1430,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 	}
 #endif
 	zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
-	zend_interrupt_or_timeout_check(call);
+	ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 	EG(current_execute_data) = execute_data;
 	zend_vm_stack_free_args(call);
@@ -1599,7 +1599,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		}
 #endif
 
-		zend_interrupt_or_timeout_check(call);
+		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -1702,7 +1702,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		}
 #endif
 
-		zend_interrupt_or_timeout_check(call);
+		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -1807,7 +1807,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_
 		}
 #endif
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
-		zend_interrupt_or_timeout_check(call);
+		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -1928,7 +1928,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 #endif
 
-		zend_interrupt_or_timeout_check(call);
+		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -2048,7 +2048,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 		}
 #endif
 
-		zend_interrupt_or_timeout_check(call);
+		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 		EG(current_execute_data) = execute_data;
 
@@ -2169,7 +2169,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_OBS
 		}
 #endif
 		zend_observer_fcall_end(call, EG(exception) ? NULL : ret);
-		zend_interrupt_or_timeout_check(call);
+		ZEND_VM_FCALL_INTERRUPT_CHECK(call);
 
 		EG(current_execute_data) = execute_data;
 
