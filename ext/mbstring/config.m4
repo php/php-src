@@ -167,7 +167,8 @@ PHP_ARG_ENABLE([mbregex],
   [no])
 
 if test "$PHP_MBSTRING" != "no"; then
-  AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
+  AC_DEFINE([HAVE_MBSTRING], [1],
+    [Define to 1 if the PHP extension 'mbstring' is available.])
 
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
 

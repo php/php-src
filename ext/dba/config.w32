@@ -10,7 +10,7 @@ if (PHP_DBA != "no") {
 	ADD_SOURCES("ext/dba/libcdb", "cdb.c cdb_make.c uint32.c", "dba");
 	ADD_SOURCES("ext/dba/libflatfile", "flatfile.c", "dba");
 	ADD_SOURCES("ext/dba/libinifile", "inifile.c", "dba");
-	AC_DEFINE('HAVE_DBA', 1, 'DBA support');
+	AC_DEFINE('HAVE_DBA', 1, "Define to 1 if the PHP extension 'dba' is available.");
 	ADD_FLAG("CFLAGS_DBA", "/D DBA_FLATFILE=1 /D DBA_CDB=1 /D DBA_CDB_BUILTIN=1 /D DBA_INIFILE=1");
 
 	if (PHP_DB != "no") {

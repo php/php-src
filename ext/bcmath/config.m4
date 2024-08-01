@@ -32,5 +32,6 @@ if test "$PHP_BCMATH" != "no"; then
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_ADD_BUILD_DIR([$ext_builddir/libbcmath/src])
-  AC_DEFINE(HAVE_BCMATH, 1, [Whether you have bcmath])
+  AC_DEFINE([HAVE_BCMATH], [1],
+    [Define to 1 if the PHP extension 'bcmath' is available.])
 fi

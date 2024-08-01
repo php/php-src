@@ -22,7 +22,7 @@ if test "$PHP_OPENSSL" != "no"; then
   PHP_SUBST([OPENSSL_SHARED_LIBADD])
   PHP_SETUP_OPENSSL([OPENSSL_SHARED_LIBADD],
     [AC_DEFINE([HAVE_OPENSSL_EXT], [1],
-      [Define to 1 if the openssl extension is available.])])
+      [Define to 1 if the PHP extension 'openssl' is available.])])
 
   PHP_CHECK_LIBRARY([crypto], [RAND_egd],
     [AC_DEFINE([HAVE_RAND_EGD], [1],

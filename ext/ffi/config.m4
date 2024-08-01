@@ -9,7 +9,8 @@ if test "$PHP_FFI" != "no"; then
   PHP_EVAL_INCLINE([$FFI_CFLAGS])
   PHP_EVAL_LIBLINE([$FFI_LIBS], [FFI_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_FFI, 1, [Have ffi support])
+  AC_DEFINE([HAVE_FFI], [1],
+    [Define to 1 if the PHP extension 'ffi' is available.])
 
   AC_CHECK_TYPES([long double])
 

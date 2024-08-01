@@ -28,5 +28,6 @@ if test "$PHP_XML" != "no"; then
 
   PHP_SUBST([XML_SHARED_LIBADD])
   PHP_INSTALL_HEADERS([ext/xml], [expat_compat.h php_xml.h])
-  AC_DEFINE([HAVE_XML], [1], [Define to 1 if xml extension is available.])
+  AC_DEFINE([HAVE_XML], [1],
+    [Define to 1 if the PHP extension 'xml' is available.])
 fi
