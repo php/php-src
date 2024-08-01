@@ -128,7 +128,7 @@ int main(void) {
     CFLAGS="$save_CFLAGS"
 
     AC_DEFINE([HAVE_ICONV], [1],
-      [Define to 1 if PHP extension 'iconv' is available.])
+      [Define to 1 if the PHP extension 'iconv' is available.])
 
     PHP_NEW_EXTENSION([iconv],
       [iconv.c],

@@ -5,6 +5,6 @@ PHP_ARG_ENABLE([sysvshm],
 
 if test "$PHP_SYSVSHM" != "no"; then
   AC_DEFINE([HAVE_SYSVSHM], [1],
-    [Define to 1 if PHP extension 'sysvshm' is available.])
+    [Define to 1 if the PHP extension 'sysvshm' is available.])
   PHP_NEW_EXTENSION([sysvshm], [sysvshm.c], [$ext_shared])
 fi

@@ -5,6 +5,6 @@ PHP_ARG_ENABLE([shmop],
 
 if test "$PHP_SHMOP" != "no"; then
   AC_DEFINE([HAVE_SHMOP], [1],
-    [Define to 1 if PHP extension 'shmop' is available.])
+    [Define to 1 if the PHP extension 'shmop' is available.])
   PHP_NEW_EXTENSION([shmop], [shmop.c], [$ext_shared])
 fi

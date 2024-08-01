@@ -33,5 +33,6 @@ if test "$PHP_GMP" != "no"; then
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_SUBST([GMP_SHARED_LIBADD])
-  AC_DEFINE([HAVE_GMP], [1], [Define to 1 if PHP extension 'gmp' is available.])
+  AC_DEFINE([HAVE_GMP], [1],
+    [Define to 1 if the PHP extension 'gmp' is available.])
 fi

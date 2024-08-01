@@ -701,7 +701,7 @@ if test "$HAVE_DBA" = "1"; then
     AC_MSG_RESULT([yes])
   fi
   AC_DEFINE([HAVE_DBA], [1],
-    [Define to 1 if PHP extension 'dba' is available.])
+    [Define to 1 if the PHP extension 'dba' is available.])
   PHP_NEW_EXTENSION([dba], m4_normalize([
       dba_cdb.c
       dba_db1.c

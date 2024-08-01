@@ -99,7 +99,7 @@ AS_VAR_IF([PHP_%EXTNAMECAPS%], [no],, [
   dnl Define a preprocessor macro to indicate that this PHP extension can
   dnl be dynamically loaded as a shared module or is statically built into PHP.
   AC_DEFINE([HAVE_%EXTNAMECAPS%], [1],
-    [Define to 1 if PHP extension '%EXTNAME%' is available.])
+    [Define to 1 if the PHP extension '%EXTNAME%' is available.])
 
   dnl Configure extension sources and compilation flags.
   PHP_NEW_EXTENSION([%EXTNAME%],

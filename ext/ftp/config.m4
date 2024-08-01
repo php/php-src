@@ -13,7 +13,8 @@ PHP_ARG_WITH([ftp-ssl],
   [no])
 
 if test "$PHP_FTP" = "yes"; then
-  AC_DEFINE([HAVE_FTP], [1], [Define to 1 if PHP extension 'ftp' is available.])
+  AC_DEFINE([HAVE_FTP], [1],
+    [Define to 1 if the PHP extension 'ftp' is available.])
   PHP_NEW_EXTENSION([ftp], [php_ftp.c ftp.c], [$ext_shared])
 
   dnl Empty variable means 'no' (for phpize builds).

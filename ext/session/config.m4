@@ -23,7 +23,7 @@ if test "$PHP_SESSION" != "no"; then
   PHP_SUBST([SESSION_SHARED_LIBADD])
   PHP_INSTALL_HEADERS([ext/session], [php_session.h mod_files.h mod_user.h])
   AC_DEFINE([HAVE_PHP_SESSION], [1],
-    [Define to 1 if PHP extension 'session' is available.])
+    [Define to 1 if the PHP extension 'session' is available.])
 fi
 
 if test "$PHP_MM" != "no"; then

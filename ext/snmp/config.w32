@@ -7,7 +7,7 @@ if (PHP_SNMP != "no") {
 		SETUP_OPENSSL("snmp", PHP_SNMP) >= 2) {
 		if (CHECK_LIB("netsnmp.lib", "snmp", PHP_SNMP)) {
 			EXTENSION('snmp', 'snmp.c');
-			AC_DEFINE('HAVE_SNMP', 1, "Define to 1 if PHP extension 'snmp' is available.");
+			AC_DEFINE('HAVE_SNMP', 1, "Define to 1 if the PHP extension 'snmp' is available.");
 		} else {
 			WARNING("snmp not enabled; libraries and headers not found");
 		}

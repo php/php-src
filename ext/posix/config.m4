@@ -6,7 +6,7 @@ PHP_ARG_ENABLE([posix],
 
 if test "$PHP_POSIX" = "yes"; then
   AC_DEFINE([HAVE_POSIX], [1],
-    [Define to 1 if PHP extension 'posix' is available.])
+    [Define to 1 if the PHP extension 'posix' is available.])
   PHP_NEW_EXTENSION([posix],
     [posix.c],
     [$ext_shared],,

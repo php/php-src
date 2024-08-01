@@ -11,7 +11,7 @@ if test "$PHP_PGSQL" != "no"; then
   PHP_SUBST([PGSQL_SHARED_LIBADD])
 
   AC_DEFINE([HAVE_PGSQL], [1],
-    [Define to 1 if PHP extension 'pgsql' is available.])
+    [Define to 1 if the PHP extension 'pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
     [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
