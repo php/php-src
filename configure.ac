@@ -247,7 +247,7 @@ AC_MSG_CHECKING([whether we are using musl libc])
 if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
 then
   AC_MSG_RESULT([yes])
-  AC_DEFINE([__MUSL__], [1], [Define when using musl libc])
+  AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])
 else
   AC_MSG_RESULT([no])
 fi
@@ -345,7 +345,8 @@ AC_CHECK_FUNCS([socketpair],,
 AC_SEARCH_LIBS([gethostbyaddr], [nsl network])
 
 AC_SEARCH_LIBS([dlopen], [dl],
-  [AC_DEFINE([HAVE_LIBDL], [1], [Define to 1 if the dl library is available.])])
+  [AC_DEFINE([HAVE_LIBDL], [1],
+    [Define to 1 if you have the 'dl' library (-ldl).])])
 
 AC_SEARCH_LIBS([sin], [m])
 
@@ -779,7 +780,7 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
 
-  AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
+  AC_DEFINE([HAVE_GCOV], [1], [Define to 1 if GCOV code coverage is enabled.])
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/build/Makefile.gcov], [$abs_srcdir])
 
   dnl Remove all optimization flags from CFLAGS.
@@ -871,9 +872,10 @@ PHP_ARG_ENABLE([rtld-now],
   [no],
   [no])
 
-if test "$PHP_RTLD_NOW" = "yes"; then
-  AC_DEFINE(PHP_USE_RTLD_NOW, 1, [ Use dlopen with RTLD_NOW instead of RTLD_LAZY ])
-fi
+AS_VAR_IF([PHP_RTLD_NOW], [yes],
+  [AC_DEFINE([PHP_USE_RTLD_NOW], [1],
+    [Define to 1 if 'dlopen()' uses the 'RTLD_NOW' mode flag instead of
+    'RTLD_LAZY'.])])
 
 PHP_ARG_WITH([layout],
   [layout of installed files],
@@ -928,11 +930,11 @@ PHP_ARG_ENABLE([sigchild],
   [no],
   [no])
 
-if test "$PHP_SIGCHILD" = "yes"; then
-  AC_DEFINE(PHP_SIGCHILD, 1, [ ])
-else
-  AC_DEFINE(PHP_SIGCHILD, 0, [ ])
-fi
+AH_TEMPLATE([PHP_SIGCHILD],
+  [Define to 1 if PHP uses its own SIGCHLD handler, and to 0 if not.])
+AS_VAR_IF([PHP_SIGCHILD], [yes],
+  [AC_DEFINE([PHP_SIGCHILD], [1])],
+  [AC_DEFINE([PHP_SIGCHILD], [0])])
 
 PHP_ARG_ENABLE([libgcc],
   [whether to explicitly link against libgcc],
@@ -957,11 +959,12 @@ PHP_ARG_ENABLE([short-tags],
   [yes],
   [no])
 
-if test "$PHP_SHORT_TAGS" = "yes"; then
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "1", [ ])
-else
-  AC_DEFINE(DEFAULT_SHORT_OPEN_TAG, "0", [ ])
-fi
+AH_TEMPLATE([DEFAULT_SHORT_OPEN_TAG],
+  [Define to string "1" if PHP short open tags '<?' are enabled by default, and
+  to string "0" if they are not.])
+AS_VAR_IF([PHP_SHORT_TAGS], [yes],
+  [AC_DEFINE([DEFAULT_SHORT_OPEN_TAG], ["1"])],
+  [AC_DEFINE([DEFAULT_SHORT_OPEN_TAG], ["0"])])
 
 PHP_ARG_ENABLE([dmalloc],
   [whether to enable dmalloc],
@@ -1307,7 +1310,8 @@ else
     AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
   fi
   AC_CHECK_HEADER([ucontext.h],
-    [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1], [ ])],
+    [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1],
+      [Define to 1 if Zend fiber uses ucontext instead of boost context.])],
     [AC_MSG_ERROR([fibers not available on this platform])])
 fi
 
@@ -1811,7 +1815,8 @@ PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/Zend/Makefile.frag],
   [$abs_srcdir/Zend],
   [Zend])
 
-AC_DEFINE([HAVE_BUILD_DEFS_H], 1, [ ])
+AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
+  [Define to 1 if PHP has the <main/build_defs.h> header file.])
 
 PHP_ADD_BUILD_DIR(m4_normalize([
   main
