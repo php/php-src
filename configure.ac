@@ -1816,7 +1816,7 @@ PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/Zend/Makefile.frag],
   [Zend])
 
 AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
-  [Define to 1 if PHP has the <main/build_defs.h> header file.])
+  [Define to 1 if PHP has the <main/build-defs.h> header file.])
 
 PHP_ADD_BUILD_DIR(m4_normalize([
   main
