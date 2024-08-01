@@ -44,7 +44,7 @@ runs:
           libxml2-dev \
           libxslt1-dev \
           libpq-dev \
-          libreadline-dev \
+          libedit-dev \
           libldap2-dev \
           libsodium-dev \
           libargon2-0-dev \
