@@ -1,0 +1,19 @@
+{
+  "name": "php-dev (for Local)",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "maelvalais.autoconf",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  },
+  "dockerComposeFile": "./../compose.yaml",
+  "service": "shell",
+  "mounts": [
+    {"type": "bind", "source": "./../", "target": "/work"}
+  ],
+  "workspaceFolder": "/work"
+}
