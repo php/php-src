@@ -83,6 +83,8 @@ PHP_DOM_EXPORT xmlNodePtr dom_object_get_node(dom_object *obj);
 struct php_dom_private_data;
 typedef struct php_dom_private_data php_dom_private_data;
 
+typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
+
 static zend_always_inline php_dom_private_data *php_dom_get_private_data(dom_object *intern)
 {
 	ZEND_ASSERT(intern->document != NULL);
