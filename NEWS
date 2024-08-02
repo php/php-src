@@ -35,6 +35,10 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fix bogus fallthrough path in firebird_handle_get_attribute(). (nielsdos)
 
+- PHPDBG:
+  . Fixed bug GH-13199 (EOF emits redundant prompt in phpdbg local console mode
+    with libedit/readline). (Peter Kokot)
+
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
 
