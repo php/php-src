@@ -29,12 +29,12 @@ bool(true)
 bool(true)
 Try to remove key 1 again
 bool(false)
+[key10]name10: Content String 10
+[key30]name30: Content String 30
 key2: Content String 2
 key4: Another Content String
 key5: The last content string
 name9: Content String 9
-[key10]name10: Content String 10
-[key30]name30: Content String 30
 Total keys: 6
 Key 1 exists? N
 Key 2 exists? Y

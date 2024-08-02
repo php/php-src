@@ -5,7 +5,19 @@ PHP_ARG_ENABLE([phar],
   [yes])
 
 if test "$PHP_PHAR" != "no"; then
-  PHP_NEW_EXTENSION(phar, util.c tar.c zip.c stream.c func_interceptors.c dirstream.c phar.c phar_object.c phar_path_check.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([phar], m4_normalize([
+      dirstream.c
+      func_interceptors.c
+      phar_object.c
+      phar_path_check.c
+      phar.c
+      stream.c
+      tar.c
+      util.c
+      zip.c
+    ]),
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   AC_MSG_CHECKING([for phar openssl support])
   if test "$PHP_OPENSSL_SHARED" = "yes"; then
     AC_MSG_RESULT([no (shared openssl)])
@@ -23,5 +35,5 @@ if test "$PHP_PHAR" != "no"; then
 
   PHP_INSTALL_HEADERS([ext/phar], [php_phar.h])
 
-  PHP_OUTPUT(ext/phar/phar.1 ext/phar/phar.phar.1)
+  PHP_OUTPUT([ext/phar/phar.1 ext/phar/phar.phar.1])
 fi

@@ -10,7 +10,8 @@ if test "$PHP_PGSQL" != "no"; then
   PHP_SETUP_PGSQL([PGSQL_SHARED_LIBADD],,, [$PHP_PGSQL])
   PHP_SUBST([PGSQL_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_PGSQL,1,[Whether to build PostgreSQL support or not])
+  AC_DEFINE([HAVE_PGSQL], [1],
+    [Define to 1 if the PHP extension 'pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
     [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
@@ -41,6 +42,9 @@ if test "$PHP_PGSQL" != "no"; then
 
   CFLAGS=$old_CFLAGS
 
-  PHP_NEW_EXTENSION(pgsql, pgsql.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([pgsql],
+    [pgsql.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_ADD_EXTENSION_DEP(pgsql, pcre)
 fi

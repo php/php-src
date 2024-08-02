@@ -14,12 +14,16 @@ PHP_ARG_WITH([mm],
 if test "$PHP_SESSION" != "no"; then
   PHP_PWRITE_TEST
   PHP_PREAD_TEST
-  PHP_NEW_EXTENSION(session, mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([session],
+    [mod_user_class.c session.c mod_files.c mod_mm.c mod_user.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   dnl https://bugs.php.net/53141
   PHP_ADD_EXTENSION_DEP(session, spl, true)
   PHP_SUBST([SESSION_SHARED_LIBADD])
   PHP_INSTALL_HEADERS([ext/session], [php_session.h mod_files.h mod_user.h])
-  AC_DEFINE(HAVE_PHP_SESSION,1,[ ])
+  AC_DEFINE([HAVE_PHP_SESSION], [1],
+    [Define to 1 if the PHP extension 'session' is available.])
 fi
 
 if test "$PHP_MM" != "no"; then
@@ -36,7 +40,9 @@ if test "$PHP_MM" != "no"; then
     AC_MSG_ERROR([--with-mm cannot be combined with --enable-zts])
   fi
 
-  PHP_ADD_LIBRARY_WITH_PATH(mm, $MM_DIR/$PHP_LIBDIR, SESSION_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH([mm],
+    [$MM_DIR/$PHP_LIBDIR],
+    [SESSION_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$MM_DIR/include])
   PHP_INSTALL_HEADERS([ext/session], [mod_mm.h])
   AC_DEFINE(HAVE_LIBMM, 1, [Whether you have libmm])

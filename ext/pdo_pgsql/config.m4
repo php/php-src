@@ -14,7 +14,8 @@ if test "$PHP_PDO_PGSQL" != "no"; then
   PHP_SETUP_PGSQL([PDO_PGSQL_SHARED_LIBADD],,, [$PHP_PDO_PGSQL])
   PHP_SUBST([PDO_PGSQL_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_PDO_PGSQL,1,[Whether to build PostgreSQL for PDO support or not])
+  AC_DEFINE([HAVE_PDO_PGSQL], [1],
+    [Define to 1 if the PHP extension 'pdo_pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
     [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
@@ -22,7 +23,9 @@ if test "$PHP_PDO_PGSQL" != "no"; then
 
   PHP_CHECK_PDO_INCLUDES
 
-  PHP_NEW_EXTENSION(pdo_pgsql, pdo_pgsql.c pgsql_driver.c pgsql_statement.c pgsql_sql_parser.c, $ext_shared)
+  PHP_NEW_EXTENSION([pdo_pgsql],
+    [pdo_pgsql.c pgsql_driver.c pgsql_statement.c pgsql_sql_parser.c],
+    [$ext_shared])
   PHP_ADD_EXTENSION_DEP(pdo_pgsql, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT
 fi

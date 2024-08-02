@@ -46,28 +46,24 @@ if test "$PHP_TIDY" != "no"; then
   fi
 
 
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyOptGetDoc,
-  [
-    AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
-  ],[
-    PHP_CHECK_LIBRARY(tidy5,tidyOptGetDoc,
-    [
-      TIDY_LIB_NAME=tidy5
-      AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
-    ], [], [])
-  ],[])
+  PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyOptGetDoc],
+    [AC_DEFINE([HAVE_TIDYOPTGETDOC], [1], [ ])],
+    [PHP_CHECK_LIBRARY([tidy5], [tidyOptGetDoc],
+      [TIDY_LIB_NAME=tidy5
+      AC_DEFINE([HAVE_TIDYOPTGETDOC], [1], [ ])])])
 
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyReleaseDate,
-  [
-    AC_DEFINE(HAVE_TIDYRELEASEDATE,1,[ ])
-  ], [], [])
+  PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyReleaseDate],
+    [AC_DEFINE([HAVE_TIDYRELEASEDATE], [1], [ ])])
 
-  PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH([$TIDY_LIB_NAME],
+    [$TIDY_LIBDIR],
+    [TIDY_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$TIDY_INCDIR])
 
   dnl Add -Wno-ignored-qualifiers as this is an issue upstream
   TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared,, $TIDY_COMPILER_FLAGS)
+  PHP_NEW_EXTENSION([tidy], [tidy.c], [$ext_shared],, [$TIDY_COMPILER_FLAGS])
   PHP_SUBST([TIDY_SHARED_LIBADD])
-  AC_DEFINE(HAVE_TIDY,1,[ ])
+  AC_DEFINE([HAVE_TIDY], [1],
+    [Define to 1 if the PHP extension 'tidy' is available.])
 fi

@@ -77,7 +77,9 @@ zend_result dom_text_whole_text_read(dom_object *obj, zval *retval)
 
 	/* concatenate all adjacent text and cdata nodes */
 	while (node && ((node->type == XML_TEXT_NODE) || (node->type == XML_CDATA_SECTION_NODE))) {
-		smart_str_appends(&str, (const char *) node->content);
+		if (node->content) {
+			smart_str_appends(&str, (const char *) node->content);
+		}
 		node = node->next;
 	}
 

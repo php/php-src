@@ -7,6 +7,6 @@ if (PHP_OPENSSL != "no") {
 
 	if (ret >= 2) {
 		EXTENSION("openssl", "openssl.c xp_ssl.c");
-		AC_DEFINE("HAVE_OPENSSL_EXT", 1, "Define to 1 if the openssl extension is available.");
+		AC_DEFINE("HAVE_OPENSSL_EXT", 1, "Define to 1 if the PHP extension 'openssl' is available.");
 	}
 }

@@ -508,7 +508,14 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
-  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
+  PHP_OUTPUT([
+    sapi/fpm/init.d.php-fpm
+    sapi/fpm/php-fpm.8
+    sapi/fpm/php-fpm.conf
+    sapi/fpm/php-fpm.service
+    sapi/fpm/status.html
+    sapi/fpm/www.conf
+  ])
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
@@ -548,7 +555,10 @@ if test "$PHP_FPM" != "no"; then
     fpm/events/port.c \
   "
 
-  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
+  PHP_SELECT_SAPI([fpm],
+    [program],
+    [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
+    [$PHP_FPM_CFLAGS])
 
   case $host_alias in
       *aix*)

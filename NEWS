@@ -1,11 +1,26 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0alpha3
+?? ??? ????, PHP 8.4.0beta1
+
+- PHPDBG:
+  . array out of bounds, stack overflow handled for segfault handler on windows.
+    (David Carlier)
+
+
+01 Aug 2024, PHP 8.4.0alpha4
+
+- GMP:
+  . RFC: Change GMP bool cast behavior. (Saki Takamachi)
+
+01 Aug 2024, PHP 8.4.0alpha3
 
 - Core:
   . Fix GH-14978 (The xmlreader extension phpize build). (Peter Kokot)
   . Throw Error exception when encountering recursion during comparison, rather
     than fatal error. (ilutov)
+  . Added missing cstddef include for C++ builds. (cmb)
+  . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
+    (Arnaud)
 
 - BCMath:
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
@@ -20,13 +35,17 @@ PHP                                                                        NEWS
   . /dev/poll events.mechanism for Solaris/Illumos setting had been retired.
     (David Carlier)
 
+- GMP:
+  . The GMP class is now final and cannot be extended anymore. (Girgias)
+
 - Intl:
   . Added SpoofChecker::setAllowedChars to set unicode chars ranges.
     (David Carlier)
+  . Fixed bug GH-15087 (IntlChar::foldCase()'s $option is not optional). (cmb)
 
 - Opcache:
   . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
-    (Arnaud)
+    (Arnaud, nielsdos)
 
 - OpenSSL:
   . Bumped minimum required OpenSSL version to 1.1.0. (cmb)
@@ -41,6 +60,14 @@ PHP                                                                        NEWS
   . pg_convert/pg_insert/pg_update/pg_delete ; regexes are now cached.
     (David Carlier)
 
+- Random:
+  . Fixed bug GH-15094 (php_random_default_engine() is not C++ conforming).
+    (cmb)
+
+- Readline:
+  . Fixed readline_info, rl_line_buffer_length/rl_len globals on update.
+    (David Carlier)
+
 - Standard:
   . Fix references in request_parse_body() options array. (nielsdos)
   . Add RoundingMode enum. (timwolla, saki)
@@ -48,6 +75,12 @@ PHP                                                                        NEWS
 - Tidy:
   . Failures in the constructor now throw exceptions rather than emitting
     warnings and having a broken object. (nielsdos)
+  . Add tidyNode::getNextSibling() and tidyNode::getPreviousSibling().
+    (nielsdos)
+
+- XMLReader:
+  . Fixed bug GH-15123 (var_dump doesn't actually work on XMLReader).
+    (nielsdos)
 
 - XSL:
   . Fix trampoline leak in xpath callables. (nielsdos)

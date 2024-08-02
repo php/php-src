@@ -18,11 +18,11 @@ PHP_ARG_WITH([openssl-legacy-provider],
   [no])
 
 if test "$PHP_OPENSSL" != "no"; then
-  PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
+  PHP_NEW_EXTENSION([openssl], [openssl.c xp_ssl.c], [$ext_shared])
   PHP_SUBST([OPENSSL_SHARED_LIBADD])
   PHP_SETUP_OPENSSL([OPENSSL_SHARED_LIBADD],
     [AC_DEFINE([HAVE_OPENSSL_EXT], [1],
-      [Define to 1 if the openssl extension is available.])])
+      [Define to 1 if the PHP extension 'openssl' is available.])])
 
   PHP_CHECK_LIBRARY([crypto], [RAND_egd],
     [AC_DEFINE([HAVE_RAND_EGD], [1],

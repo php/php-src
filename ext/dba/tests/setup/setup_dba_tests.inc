@@ -102,14 +102,29 @@ function run_standard_tests_ex(string $handler, string $name, LockFlag $lock, bo
     echo 'Try to remove key 1 again', \PHP_EOL;
     var_dump(dba_delete("key1", $db_writer));
 
-    // Fetch data
+    // Fetch and sort data. We sort to guarantee that the output is
+    // consistent across invocations and architectures. When iterating
+    // with firstkey() and nextkey(), several engines (GDBM, LMDB,
+    // QDBM) make no promise about the iteration order. Others (TCADB,
+    // DBM) explicitly state that the order is arbitrary. With GDBM at
+    // least, the order appears platform-dependent -- we have a report
+    // in Github issue 14786. GDBM's own test suite sorts this output,
+    // suggesting that sorting is a reasonable workaround for the issue.
+    $output = [];
+
     $key = dba_firstkey($db_writer);
     $total_keys = 0;
     while ($key) {
-        echo $key, ': ', dba_fetch($key, $db_writer), \PHP_EOL;
+        $output[] = $key . ': ' . dba_fetch($key, $db_writer) . \PHP_EOL;
         $key = dba_nextkey($db_writer);
         $total_keys++;
     }
+
+    sort($output, SORT_STRING);
+    foreach ($output as $line) {
+        echo $line;
+    }
+
     echo 'Total keys: ', $total_keys, \PHP_EOL;
     for ($i = 1; $i < 6; $i++) {
         echo "Key $i exists? ", dba_exists("key$i", $db_writer) ? 'Y' : 'N', \PHP_EOL;

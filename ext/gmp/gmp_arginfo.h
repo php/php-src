@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d52f82c7084a8122fe07c91eb6d4ab6030daa27d */
+ * Stub hash: 3aabd5a5d2db0df15b249a425465ae718c13ab6b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_gmp_init, 0, 1, GMP, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_STRING, NULL)
@@ -334,6 +334,7 @@ static zend_class_entry *register_class_GMP(void)
 
 	INIT_CLASS_ENTRY(ce, "GMP", class_GMP_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 
 	return class_entry;
 }
