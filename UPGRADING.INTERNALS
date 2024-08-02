@@ -224,6 +224,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the openssl extension is available either as shared or built statically.
    - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
    - The win32/build/libs_version.txt file has been removed.
+   - MSVC builds now use the new preprocessor (/Zc:preprocessor).
 
 ========================
 3. Module changes
