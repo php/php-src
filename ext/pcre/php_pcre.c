@@ -92,7 +92,7 @@ static MUTEX_T pcre_mt = NULL;
 
 ZEND_TLS HashTable char_tables;
 
-static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats, bool persistent);
+static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats);
 
 static void php_pcre_free_char_table(zval *data)
 {/*{{{*/
@@ -168,22 +168,10 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	if (pce->subpats_table) {
-		free_subpats_table(pce->subpats_table, pce->capture_count + 1, true);
+		free_subpats_table(pce->subpats_table, pce->capture_count + 1);
 	}
 	pcre2_code_free(pce->re);
 	free(pce);
-}
-/* }}} */
-
-static void php_efree_pcre_cache(zval *data) /* {{{ */
-{
-	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
-	if (!pce) return;
-	if (pce->subpats_table) {
-		free_subpats_table(pce->subpats_table, pce->capture_count + 1, false);
-	}
-	pcre2_code_free(pce->re);
-	efree(pce);
 }
 /* }}} */
 
@@ -303,12 +291,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
 	php_pcre_mutex_alloc();
 
-	/* If we're on the CLI SAPI, there will only be one request, so we don't need the
-	 * cache to survive after RSHUTDOWN. */
-	pcre_globals->per_request_cache = strcmp(sapi_module.name, "cli") == 0;
-	if (!pcre_globals->per_request_cache) {
-		zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
-	}
+	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
@@ -326,9 +309,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 
 static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
-	if (!pcre_globals->per_request_cache) {
-		zend_hash_destroy(&pcre_globals->pcre_cache);
-	}
+	zend_hash_destroy(&pcre_globals->pcre_cache);
 
 	php_pcre_shutdown_pcre2();
 	zend_hash_destroy(&char_tables);
@@ -491,10 +472,6 @@ static PHP_RINIT_FUNCTION(pcre)
 		return FAILURE;
 	}
 
-	if (PCRE_G(per_request_cache)) {
-		zend_hash_init(&PCRE_G(pcre_cache), 0, NULL, php_efree_pcre_cache, 0);
-	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -503,10 +480,6 @@ static PHP_RSHUTDOWN_FUNCTION(pcre)
 {
 	pcre2_general_context_free(PCRE_G(gctx_zmm));
 	PCRE_G(gctx_zmm) = NULL;
-
-	if (PCRE_G(per_request_cache)) {
-		zend_hash_destroy(&PCRE_G(pcre_cache));
-	}
 
 	zval_ptr_dtor(&PCRE_G(unmatched_null_pair));
 	zval_ptr_dtor(&PCRE_G(unmatched_empty_pair));
@@ -530,18 +503,18 @@ static int pcre_clean_cache(zval *data, void *arg)
 }
 /* }}} */
 
-static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats, bool persistent) {
+static void free_subpats_table(zend_string **subpat_names, uint32_t num_subpats) {
 	uint32_t i;
 	for (i = 0; i < num_subpats; i++) {
 		if (subpat_names[i]) {
-			zend_string_release_ex(subpat_names[i], persistent);
+			zend_string_release_ex(subpat_names[i], true);
 		}
 	}
-	pefree(subpat_names, persistent);
+	pefree(subpat_names, true);
 }
 
 /* {{{ static make_subpats_table */
-static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce, bool persistent)
+static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce)
 {
 	uint32_t num_subpats = pce->capture_count + 1;
 	uint32_t name_size, ni = 0;
@@ -556,7 +529,7 @@ static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce
 		return NULL;
 	}
 
-	subpat_names = pecalloc(num_subpats, sizeof(zend_string *), persistent);
+	subpat_names = pecalloc(num_subpats, sizeof(zend_string *), true);
 	while (ni++ < name_cnt) {
 		unsigned short name_idx = 0x100 * (unsigned char)name_table[0] + (unsigned char)name_table[1];
 		const char *name = name_table + 2;
@@ -566,10 +539,8 @@ static zend_string **make_subpats_table(uint32_t name_cnt, pcre_cache_entry *pce
 		 * Although we will be storing them in user-exposed arrays, they cannot cause problems
 		 * because they only live in this thread and the last reference is deleted on shutdown
 		 * instead of by user code. */
-		subpat_names[name_idx] = zend_string_init(name, strlen(name), persistent);
-		if (persistent) {
-			GC_MAKE_PERSISTENT_LOCAL(subpat_names[name_idx]);
-		}
+		subpat_names[name_idx] = zend_string_init(name, strlen(name), true);
+		GC_MAKE_PERSISTENT_LOCAL(subpat_names[name_idx]);
 		name_table += name_size;
 	}
 	return subpat_names;
@@ -871,7 +842,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 
 	/* Compute and cache the subpattern table to avoid computing it again over and over. */
 	if (name_count > 0) {
-		new_entry.subpats_table = make_subpats_table(name_count, &new_entry, !PCRE_G(per_request_cache));
+		new_entry.subpats_table = make_subpats_table(name_count, &new_entry);
 		if (!new_entry.subpats_table) {
 			if (key != regex) {
 				zend_string_release_ex(key, false);
@@ -892,7 +863,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!(GC_FLAGS(key) & IS_STR_PERMANENT) && !PCRE_G(per_request_cache)) {
+	if (!(GC_FLAGS(key) & IS_STR_PERMANENT)) {
 		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
 		GC_MAKE_PERSISTENT_LOCAL(str);
 
