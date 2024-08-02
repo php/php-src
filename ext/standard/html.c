@@ -1645,7 +1645,7 @@ PHP_FUNCTION(decode_html)
     zend_string *html;
     zend_long offset;
     bool offset_is_null = 1;
-    zval *matched_byte_length;
+    zval *matched_byte_length = NULL;
     zend_string *decoded;
     long byte_length = 0;
 
@@ -1654,7 +1654,7 @@ PHP_FUNCTION(decode_html)
         Z_PARAM_STR(html)
         Z_PARAM_OPTIONAL
         Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
-        Z_PARAM_ZVAL_EX2(matched_byte_length, 0, 1, 0)
+        Z_PARAM_ZVAL_EX2(matched_byte_length, 1, 1, 0)
     ZEND_PARSE_PARAMETERS_END();
 
     if (offset_is_null) {
