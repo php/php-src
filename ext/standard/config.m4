@@ -324,9 +324,9 @@ case "$PHP_SAPI" in
   ;;
 esac
 
-if test "$PHP_ENABLE_CHROOT_FUNC" = "yes"; then
-  AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
-fi
+AS_VAR_IF([PHP_ENABLE_CHROOT_FUNC], [yes],
+  [AC_DEFINE([ENABLE_CHROOT_FUNC], [1],
+    [Define to 1 to enable the 'chroot' function.])])
 
 dnl
 dnl Detect library functions needed by php dns_xxx functions
@@ -370,7 +370,8 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PHP_EVAL_INCLINE([$ARGON2_CFLAGS])
   PHP_EVAL_LIBLINE([$ARGON2_LIBS])
 
-  AC_DEFINE(HAVE_ARGON2LIB, 1, [ ])
+  AC_DEFINE([HAVE_ARGON2LIB], [1],
+    [Define to 1 if the system has the 'libargon2' library.])
 fi
 
 dnl

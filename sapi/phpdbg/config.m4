@@ -32,7 +32,8 @@ if test "$PHP_PHPDBG" != "no"; then
   AC_MSG_CHECKING([for phpdbg and readline integration])
   if test "$PHP_PHPDBG_READLINE" = "yes"; then
     if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
-      AC_DEFINE(HAVE_PHPDBG_READLINE, 1, [ ])
+      AC_DEFINE([HAVE_PHPDBG_READLINE], [1],
+        [Define to 1 if the phpdbg SAPI has libedit/readline integration.])
       PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
       AC_MSG_RESULT([ok])
     else
