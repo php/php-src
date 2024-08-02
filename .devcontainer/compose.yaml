@@ -1,0 +1,19 @@
+services:
+  shell:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+    privileged: true
+    tty: true
+    depends_on:
+      - pgsql
+  pgsql:
+    image: postgres
+    environment:
+      POSTGRES_DB: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
