@@ -44,8 +44,8 @@
 #define ENT_HTML5		(16|32)
 #define ENT_DISALLOWED	128
 
-#define HTML5_ATTRIBUTE 1
-#define HTML5_TEXT_NODE 2
+#define HTML_ATTRIBUTE 1
+#define HTML_TEXT_NODE 2
 
 PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset);
 PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet);

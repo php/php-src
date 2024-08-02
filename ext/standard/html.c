@@ -1185,7 +1185,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long
 }
 
 /* {{{ php_decode_html
- * The parameter "context" should be one of HTML5_ATTRIBUTE or HTML5_TEXT_NODE,
+ * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT_NODE,
  * depending on whether the text being decoded is found inside an attribute or not.
  */
 PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const long offset, long *matched_byte_length)
@@ -1217,7 +1217,7 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
             size_t last_of_match = offset + *matched_byte_length;
             bool is_ambiguous = last_of_match < input_length && html5_character_reference_is_ambiguous(&input[last_of_match]);
 
-            if (HTML5_ATTRIBUTE == context && is_ambiguous) {
+            if (HTML_ATTRIBUTE == context && is_ambiguous) {
                 goto html5_find_short_reference;
             }
 
@@ -1234,7 +1234,7 @@ html5_find_short_reference:
         return NULL;
     }
 
-    if (HTML5_ATTRIBUTE == context && offset + 3 < input_length && html5_character_reference_is_ambiguous(&input[offset + 2])) {
+    if (HTML_ATTRIBUTE == context && offset + 3 < input_length && html5_character_reference_is_ambiguous(&input[offset + 2])) {
         return NULL;
     }
 
