@@ -1014,10 +1014,10 @@ static inline size_t html5_find_large_reference_name_group(const char *input, si
 }
 
 static inline const char *html5_find_large_reference_name(const char *input, size_t input_start, size_t input_end, size_t group_number, long *match_length, uint8_t *replacement_length) {
-    size_t end = html5_named_character_references_lookup.groups_length;
+    size_t group_count = html5_named_character_references_lookup.groups_length >> 1;
 
     uint16_t start_at = html5_named_character_references_lookup.group_offsets[group_number];
-    uint16_t end_at = (group_number + 1) < end
+    uint16_t end_at = (group_number + 1) < group_count
                       ? html5_named_character_references_lookup.group_offsets[group_number + 1]
                       : html5_named_character_references_lookup.large_words_length;
 
@@ -1050,7 +1050,7 @@ static inline const char *html5_find_large_reference_name(const char *input, siz
 }
 
 static inline bool html5_character_reference_is_ambiguous(const char *end_of_match) {
-    static bool ambiguous_followers[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    static bool ambiguous_followers[256] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
     return ';' != end_of_match[0] && ambiguous_followers[(size_t)end_of_match[1]];
 }
@@ -1197,7 +1197,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
  */
 PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length)
 {
-    const char *input = &ZSTR_VAL(html)[offset];
+    const char *input = ZSTR_VAL(html);
     size_t input_length = ZSTR_LEN(html);
 
     if (input_length - offset < 3 || '&' != input[offset]) {
@@ -1208,29 +1208,24 @@ PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_l
         return php_decode_html5_numeric_character_reference(context, html, offset, matched_byte_length);
     }
 
-    if ( input_length - offset <= 3 ) {
-        char match = html5_find_short_reference_name(input, 1);
-
-        if (match) {
-            *matched_byte_length = 3;
-            return zend_string_init(&match, 1, 0);
-        } else {
-            return NULL;
-        }
+    if (input_length - offset <= 3) {
+        goto html5_find_short_reference;
     }
 
     bool found_group = 0;
-    size_t i = html5_find_large_reference_name_group(input, 1, &found_group);
+    size_t group_number = html5_find_large_reference_name_group(input, 1, &found_group);
 
     if (found_group) {
         uint8_t replacement_length;
         const char *replacement = NULL;
-        replacement = html5_find_large_reference_name(input, 1, input_length, i, matched_byte_length, &replacement_length);
+        replacement = html5_find_large_reference_name(input, 1, input_length, group_number, matched_byte_length, &replacement_length);
 
-        // Even if a large word isn't found, there could be a small word match.
         if (replacement != NULL) {
-            if (HTML5_ATTRIBUTE == context && offset + *matched_byte_length + 1 < input_length && html5_character_reference_is_ambiguous(&input[offset + *matched_byte_length])) {
-                return NULL;
+            size_t after_name = offset + *matched_byte_length;
+            bool is_ambiguous = after_name < input_length && html5_character_reference_is_ambiguous(&input[after_name]);
+
+            if (HTML5_ATTRIBUTE == context && is_ambiguous) {
+                goto html5_find_short_reference;
             }
 
             (*matched_byte_length)++;
@@ -1239,7 +1234,9 @@ PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_l
     }
 
     // Try a small word.
-    char match = html5_find_short_reference_name(input, 1);
+    char match;
+html5_find_short_reference:
+    match = html5_find_short_reference_name(input, 1);
     if (!match) {
         return NULL;
     }
