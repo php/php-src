@@ -4,51 +4,51 @@ decode_html: Basic Decoding Tests
 <?php
 
 $test_cases = array(
-    array("&AElig;", HTML_TEXT_NODE, 0),
+    array("&AElig;", HTML_TEXT, 0),
 
     array("&lt", HTML_ATTRIBUTE, 0),
     array("&lt;", HTML_ATTRIBUTE, 0),
     array("&lt,", HTML_ATTRIBUTE, 0),
-    array("&lt,", HTML_TEXT_NODE, 0),
+    array("&lt,", HTML_TEXT, 0),
 
     array("&rightleftarrows", HTML_ATTRIBUTE, 0),
     array("&rightleftarrows;", HTML_ATTRIBUTE, 0),
     array("&rightleftarrows,", HTML_ATTRIBUTE, 0),
-    array("&rightleftarrows,", HTML_TEXT_NODE, 0),
+    array("&rightleftarrows,", HTML_TEXT, 0),
 
-    array("&#", HTML_TEXT_NODE, 0),
-    array("&#;", HTML_TEXT_NODE, 0),
-    array("&#x;", HTML_TEXT_NODE, 0),
-    array("&#X;", HTML_TEXT_NODE, 0),
-    array("&#X", HTML_TEXT_NODE, 0),
+    array("&#", HTML_TEXT, 0),
+    array("&#;", HTML_TEXT, 0),
+    array("&#x;", HTML_TEXT, 0),
+    array("&#X;", HTML_TEXT, 0),
+    array("&#X", HTML_TEXT, 0),
 
-    array("&#11141114111;", HTML_TEXT_NODE, 0),
-    array("&#x10FFFF0000;", HTML_TEXT_NODE, 0),
+    array("&#11141114111;", HTML_TEXT, 0),
+    array("&#x10FFFF0000;", HTML_TEXT, 0),
 
-    array("&#x80;", HTML_TEXT_NODE, 0),
-    array("&#x8d;", HTML_TEXT_NODE, 0),
+    array("&#x80;", HTML_TEXT, 0),
+    array("&#x8d;", HTML_TEXT, 0),
 
-    array("&#xD800;", HTML_TEXT_NODE, 0),
-    array("&#xDD70;", HTML_TEXT_NODE, 0),
+    array("&#xD800;", HTML_TEXT, 0),
+    array("&#xDD70;", HTML_TEXT, 0),
 
-    array("&#x1f170;", HTML_TEXT_NODE, 0),
+    array("&#x1f170;", HTML_TEXT, 0),
 
     array("&amp;=", HTML_ATTRIBUTE, 0),
     array("&amp=", HTML_ATTRIBUTE, 0),
-    array("&amp=", HTML_TEXT_NODE, 0),
+    array("&amp=", HTML_TEXT, 0),
 
     // &cent is allowed in unambiguous contexts without the ; but
     // it's also a substring of &centerdot; which requires the ;.
     array("&centerdot", HTML_ATTRIBUTE, 0),
-    array("&centerdot", HTML_TEXT_NODE, 0),
+    array("&centerdot", HTML_TEXT, 0),
 
-    array("&amp&&amp&&", HTML_TEXT_NODE, 5),
-    array("&amp&&amp;&&", HTML_TEXT_NODE, 5),
+    array("&amp&&amp&&", HTML_TEXT, 5),
+    array("&amp&&amp;&&", HTML_TEXT, 5),
     array("&amp&&amp&&", HTML_ATTRIBUTE, 5),
     array("&amp&&amp;&&", HTML_ATTRIBUTE, 5),
-    array("&amp&&amp=&", HTML_TEXT_NODE, 5),
-    array("&amp&&amp=&", HTML_TEXT_NODE, 5),
-    array("&amp&&amp/&", HTML_TEXT_NODE, 5),
+    array("&amp&&amp=&", HTML_TEXT, 5),
+    array("&amp&&amp=&", HTML_TEXT, 5),
+    array("&amp&&amp/&", HTML_TEXT, 5),
 );
 
 foreach ($test_cases as $test_case) {
