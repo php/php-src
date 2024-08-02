@@ -969,25 +969,10 @@ static entity_table_opt determine_entity_table(int all, int doctype)
 /* }}} */
 
 static inline char html5_find_short_reference_name(const char *input, size_t offset) {
-    const char *pair_string = &input[offset];
-    uint16_t pair = ((uint16_t *)pair_string)[0];
+    const uint8_t letter1 = input[offset] & 0xDF;
+    const uint8_t letter2 = input[offset + 1] & 0xDF;
 
-    bool right_pair = (pair == 0x5447) | (pair == 0x544c) | (pair == 0x7467) | (pair == 0x746c);
-
-    if (right_pair) {
-        /*
-         * The last bit of the first byte indicates whether it's a greater than
-         * or less than sign, because the lower nibble is the same whether upper
-         * or lower case. Since 'G'/'g' and 'L'/'l' then don't overlap, use this
-         * shortcut to decode the response.
-         *
-         * 0x07 = 0b0111
-         * 0x0C = 0b1100
-         */
-        return (char)("<>"[pair & 0x1]);
-    }
-
-    return '\0';
+    return (char)("\0<>\0\0\0\0\0"[letter1 == 'L' + ((letter1 == 'G') << 1) + ((letter2 != 'T') << 2)]);
 }
 
 static inline size_t html5_find_large_reference_name_group(const char *input, const size_t offset, bool *did_find_group) {
