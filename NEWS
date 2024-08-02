@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta1
 
+- Core:
+  . Updated build system scripts config.guess to 2024-07-27 and config.sub to
+    2024-05-27. (Peter Kokot)
+
 - DOM:
   . Fixed bug GH-15192 (Segmentation fault in dom extension
     (html5_serializer)). (nielsdos)
@@ -11,10 +15,6 @@ PHP                                                                        NEWS
     (David Carlier)
 
 01 Aug 2024, PHP 8.4.0alpha4
-
-- Core:
-  . Updated build system scripts config.guess to 2024-07-27 and config.sub to
-    2024-05-27. (Peter Kokot)
 
 - GMP:
   . RFC: Change GMP bool cast behavior. (Saki Takamachi)
