@@ -3313,6 +3313,10 @@ function toolset_setup_common_cflags()
 			ADD_FLAG("CFLAGS", "/d2FuncCache1");
 		}
 
+		if (VCVERS >= 1930) {
+			ADD_FLAG("CFLAGS", "/Zc:preprocessor");
+		}
+
 		ADD_FLAG("CFLAGS", "/Zc:wchar_t");
 	} else if (CLANG_TOOLSET) {
 		if (TARGET_ARCH == 'x86') {
