@@ -30,9 +30,6 @@
 struct php_dom_ns_magic_token;
 typedef struct php_dom_ns_magic_token php_dom_ns_magic_token;
 
-struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
-
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_html_magic_token;
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_mathml_magic_token;
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_svg_magic_token;

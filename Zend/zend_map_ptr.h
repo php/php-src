@@ -20,8 +20,7 @@
 #define ZEND_MAP_PTR_H
 
 #include "zend_portability.h"
-
-typedef struct _zend_string zend_string;
+#include "zend_types_defs.h"
 
 #define ZEND_MAP_PTR_KIND_PTR           0
 #define ZEND_MAP_PTR_KIND_PTR_OR_OFFSET 1

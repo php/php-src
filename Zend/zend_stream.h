@@ -50,7 +50,7 @@ typedef struct _zend_stream {
 	zend_stream_closer_t   closer;
 } zend_stream;
 
-typedef struct _zend_file_handle {
+struct _zend_file_handle {
 	union {
 		FILE          *fp;
 		zend_stream   stream;
@@ -62,7 +62,7 @@ typedef struct _zend_file_handle {
 	bool              in_list; /* added into CG(open_file) */
 	char              *buf;
 	size_t            len;
-} zend_file_handle;
+};
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_stream_init_fp(zend_file_handle *handle, FILE *fp, const char *filename);

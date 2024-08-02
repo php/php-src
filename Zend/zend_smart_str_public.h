@@ -18,8 +18,7 @@
 #define ZEND_SMART_STR_PUBLIC_H
 
 #include <stddef.h>
-
-typedef struct _zend_string zend_string;
+#include "zend_types_defs.h"
 
 typedef struct {
 	/** See smart_str_extract() */

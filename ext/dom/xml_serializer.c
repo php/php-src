@@ -20,6 +20,7 @@
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
+#include "php_dom.h"
 #include "xml_serializer.h"
 #include "private_data.h"
 #include "namespace_compat.h"

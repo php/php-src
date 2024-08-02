@@ -29,8 +29,6 @@
  * with similar names.
  * */
 
-typedef struct _zend_object_iterator zend_object_iterator;
-
 typedef struct _zend_object_iterator_funcs {
 	/* release all resources associated with this iterator instance */
 	void (*dtor)(zend_object_iterator *iter);

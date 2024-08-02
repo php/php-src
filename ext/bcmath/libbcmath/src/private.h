@@ -31,6 +31,9 @@
 
 /* "Private" routines to bcmath. */
 
+#ifndef _BCMATH_PRIVATE_H_
+#define _BCMATH_PRIVATE_H_
+
 #include <stdbool.h>
 #include <stddef.h>
 #include "zend_portability.h"
@@ -73,3 +76,5 @@ bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, size_t scale, bool u
 bc_num _bc_do_add (bc_num n1, bc_num n2);
 bc_num _bc_do_sub (bc_num n1, bc_num n2);
 void _bc_rm_leading_zeros (bc_num num);
+
+#endif

@@ -27,20 +27,11 @@ struct php_dom_libxml_ns_mapper {
 	HashTable uri_to_prefix_map;
 };
 
-typedef struct php_dom_private_data {
+struct php_dom_private_data {
 	php_libxml_private_data_header header;
 	struct php_dom_libxml_ns_mapper ns_mapper;
 	HashTable *template_fragments;
-} php_dom_private_data;
-
-typedef struct php_libxml_private_data_header php_libxml_private_data_header;
-struct php_libxml_private_data_header;
-
-struct php_dom_private_data;
-typedef struct php_dom_private_data php_dom_private_data;
-
-struct php_dom_libxml_ns_mapper;
-typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
+};
 
 php_libxml_private_data_header *php_dom_libxml_private_data_header(php_dom_private_data *private_data);
 php_dom_libxml_ns_mapper *php_dom_ns_mapper_from_private(php_dom_private_data *private_data);
