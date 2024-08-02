@@ -1661,6 +1661,7 @@ PHP_FUNCTION(decode_html)
         offset = 0;
     }
 
+    ZVAL_LONG(matched_byte_length, 0);
     decoded = php_decode_html((int)context, html, offset, &byte_length);
     if (NULL == decoded) {
         RETURN_NULL();
