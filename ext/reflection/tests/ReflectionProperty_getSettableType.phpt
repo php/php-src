@@ -35,6 +35,10 @@ class Test {
         get => $this->backedTyped;
         set(int|string $value) => (int) $value;
     }
+
+    public int $backedTypedGetOnly {
+        get => $this->backedTypedGetOnly;
+    }
 }
 
 $reflectionClass = new ReflectionClass(Test::class);
@@ -53,3 +57,4 @@ string|int
 NULL
 int
 string|int
+int
