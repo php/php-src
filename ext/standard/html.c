@@ -1084,9 +1084,8 @@ static inline zend_string *html5_code_point_to_utf8_bytes(uint32_t code_point) {
 }
 
 PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length) {
-    static uint8_t hex_digits[] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
-    static uint8_t dec_digits[] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
-    static uint32_t cp1252_replacements[] = {
+    static uint8_t hex_digits[256] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
+    static uint32_t cp1252_replacements[32] = {
         0x20AC, // 0x80 -> EURO SIGN (€).
         0x81,   // 0x81 -> (no change).
         0x201A, // 0x82 -> SINGLE LOW-9 QUOTATION MARK (‚).
@@ -1120,7 +1119,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
         0x017E, // 0x9E -> LATIN SMALL LETTER Z WITH CARON (ž).
         0x0178, // 0x9F -> LATIN CAPITAL LETTER Y WITH DIAERESIS (Ÿ).
     };
-    const char *input = &ZSTR_VAL(html)[offset];
+    const char *input = ZSTR_VAL(html);
     size_t end = ZSTR_LEN(html);
     size_t at = offset;
 
@@ -1129,51 +1128,40 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
     }
     at += 2;
 
-    size_t base = ('x' == input[at] || 'X' == input[at]) ? 16 : 10;
+    size_t base = ('X' == (input[at] & 0xDF)) ? 16 : 10;
     if (base == 16) {
         at++;
     }
 
     size_t zeros_at = at;
-    while (at < end) {
-        if ('0' != input[at]) {
-            break;
-        }
-        at++;
-    }
+
+    // Skip past all the zeros: in most cases there will be none.
+    while ('0' == input[at] && ++at < end) {}
     size_t zero_count = at - zeros_at;
 
     size_t digits_at = at;
     if (base == 16) {
-        while (at < end) {
-            uint8_t value = hex_digits[(size_t)input[at]];
-            if (0xFF == value) {
-                break;
-            }
-            at++;
-        }
+        while (hex_digits[(size_t)input[at]] <= 0xF && ++at < end) {}
     } else {
-        while (at < end) {
-            uint8_t value = dec_digits[(size_t)input[at]];
-            if (0xFF == value) {
-                break;
-            }
-            at++;
-        }
+        while (hex_digits[(size_t)input[at]] <= 0x9 && ++at < end) {}
     }
     size_t digit_count = at - digits_at;
+    size_t after_digits = at;
+    bool has_trailing_semicolon = (after_digits < end) && ';' == input[at];
+    size_t end_of_span = has_trailing_semicolon ? after_digits + 1 : after_digits;
+    *matched_byte_length = end_of_span - offset;
 
-    bool has_trailing_semicolon = (at < end) ? ';' == input[at] : false;
-    *matched_byte_length = at - offset + (has_trailing_semicolon ? 1 : 0);
-
+    // `&#` or `&#x` without digits returns into plaintext.
     if (zero_count == 0 && digit_count == 0) {
         return NULL;
     }
 
+    // Whereas `&#` and only zeros is invalid.
     if (digit_count == 0) {
         return zend_string_init("\xEF\xBF\xBD", 3, 0);
     }
 
+    // If there are too many digits then it's not worth parsing. It's invalid.
     if (digit_count > (base == 16 ? 6 : 7)) {
         return zend_string_init("\xEF\xBF\xBD", 3, 0);
     }
@@ -1188,7 +1176,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
     } else {
         for (size_t i = 0; i < digit_count; i++) {
             code_point *= 10;
-            code_point += dec_digits[(size_t)input[at++]];
+            code_point += hex_digits[(size_t)input[at++]];
         }
     }
 
@@ -1203,11 +1191,11 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
     return html5_code_point_to_utf8_bytes(code_point);
 }
 
-/* {{{ php_decode_html5_character_reference_utf8
+/* {{{ php_decode_html
  * The parameter "context" should be one of HTML5_ATTRIBUTE or HTML5_TEXT_NODE,
  * depending on whether the text being decoded is found inside an attribute or not.
  */
-PHPAPI zend_string *php_decode_html5_character_reference_utf8(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length)
+PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length)
 {
     const char *input = &ZSTR_VAL(html)[offset];
     size_t input_length = ZSTR_LEN(html);
@@ -1654,7 +1642,7 @@ PHP_FUNCTION(htmlspecialchars_decode)
 /* }}} */
 
 /* {{{ Find the next character reference in a UTF-8 HTML document */
-PHP_FUNCTION(html5_decode_character_reference_utf8)
+PHP_FUNCTION(decode_html)
 {
     zend_long context;
     zend_string *html;
@@ -1672,7 +1660,7 @@ PHP_FUNCTION(html5_decode_character_reference_utf8)
         Z_PARAM_ZVAL_EX2(matched_byte_length, 0, 1, 0)
     ZEND_PARSE_PARAMETERS_END();
 
-    decoded = php_decode_html5_character_reference_utf8((int)context, html, offset, &byte_length);
+    decoded = php_decode_html((int)context, html, offset, &byte_length);
     if (NULL == decoded) {
         RETURN_NULL();
     } else {

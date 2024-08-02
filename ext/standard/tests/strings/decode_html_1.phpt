@@ -1,5 +1,5 @@
 --TEST--
-html5_decode_character_reference_utf8: Basic Decoding Tests
+decode_html: Basic Decoding Tests
 --FILE--
 <?php
 
@@ -43,7 +43,7 @@ $test_cases = array(
 foreach ($test_cases as $test_case) {
     list($string, $context, $at) = $test_case;
 
-    $match = html5_decode_character_reference_utf8($context, $string, $at, $match_length);
+    $match = decode_html($context, $string, $at, $match_length);
     if (isset($match)) {
         echo "{$match_length}:{$match}\n";
     } else {
