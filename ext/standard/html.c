@@ -990,7 +990,7 @@ static inline char html5_find_short_reference_name(const char *input, size_t off
     return '\0';
 }
 
-static inline size_t html5_find_large_reference_name_group(const char *input, size_t offset, bool *did_find_group) {
+static inline size_t html5_find_large_reference_name_group(const char *input, const size_t offset, bool *did_find_group) {
     char letter1 = '\0';
     char letter2 = '\0';
     char group1 = input[offset];
@@ -1013,7 +1013,7 @@ static inline size_t html5_find_large_reference_name_group(const char *input, si
     return i >> 1;
 }
 
-static inline const char *html5_find_large_reference_name(const char *input, size_t input_start, size_t input_end, size_t group_number, long *match_length, uint8_t *replacement_length) {
+static inline const char *html5_find_large_reference_name(const char *input, const size_t input_start, const size_t input_end, const size_t group_number, long *match_length, uint8_t *replacement_length) {
     size_t group_count = html5_named_character_references_lookup.groups_length >> 1;
 
     uint16_t start_at = html5_named_character_references_lookup.group_offsets[group_number];
@@ -1034,7 +1034,7 @@ static inline const char *html5_find_large_reference_name(const char *input, siz
 
         bool found_match = 1;
         for (j = 0; j < token_length; j++ ) {
-            found_match &= input[3 + j] == search[i + 1 + j];
+            found_match &= input[input_start + 2 + j] == search[i + 1 + j];
         }
 
         if (found_match) {
@@ -1083,7 +1083,7 @@ static inline zend_string *html5_code_point_to_utf8_bytes(uint32_t code_point) {
     return zend_string_init(decoded, 4, 0);
 }
 
-PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length) {
+PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long context, const zend_string *html, const zend_long offset, long *matched_byte_length) {
     static uint8_t hex_digits[256] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
     static uint32_t cp1252_replacements[32] = {
         0x20AC, // 0x80 -> EURO SIGN (€).
@@ -1195,7 +1195,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(zend_long conte
  * The parameter "context" should be one of HTML5_ATTRIBUTE or HTML5_TEXT_NODE,
  * depending on whether the text being decoded is found inside an attribute or not.
  */
-PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_long offset, long *matched_byte_length)
+PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const long offset, long *matched_byte_length)
 {
     const char *input = ZSTR_VAL(html);
     size_t input_length = ZSTR_LEN(html);
@@ -1213,16 +1213,16 @@ PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_l
     }
 
     bool found_group = 0;
-    size_t group_number = html5_find_large_reference_name_group(input, 1, &found_group);
+    size_t group_number = html5_find_large_reference_name_group(input, offset + 1, &found_group);
 
     if (found_group) {
         uint8_t replacement_length;
         const char *replacement = NULL;
-        replacement = html5_find_large_reference_name(input, 1, input_length, group_number, matched_byte_length, &replacement_length);
+        replacement = html5_find_large_reference_name(input, offset + 1, input_length, group_number, matched_byte_length, &replacement_length);
 
         if (replacement != NULL) {
-            size_t after_name = offset + *matched_byte_length;
-            bool is_ambiguous = after_name < input_length && html5_character_reference_is_ambiguous(&input[after_name]);
+            size_t last_of_match = offset + *matched_byte_length;
+            bool is_ambiguous = last_of_match < input_length && html5_character_reference_is_ambiguous(&input[last_of_match]);
 
             if (HTML5_ATTRIBUTE == context && is_ambiguous) {
                 goto html5_find_short_reference;
@@ -1236,7 +1236,7 @@ PHPAPI zend_string *php_decode_html(zend_long context, zend_string *html, zend_l
     // Try a small word.
     char match;
 html5_find_short_reference:
-    match = html5_find_short_reference_name(input, 1);
+    match = html5_find_short_reference_name(input, offset + 1);
     if (!match) {
         return NULL;
     }
@@ -1644,7 +1644,7 @@ PHP_FUNCTION(decode_html)
     zend_long context;
     zend_string *html;
     zend_long offset;
-    bool offset_is_null;
+    bool offset_is_null = 1;
     zval *matched_byte_length;
     zend_string *decoded;
     long byte_length = 0;
@@ -1656,6 +1656,10 @@ PHP_FUNCTION(decode_html)
         Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
         Z_PARAM_ZVAL_EX2(matched_byte_length, 0, 1, 0)
     ZEND_PARSE_PARAMETERS_END();
+
+    if (offset_is_null) {
+        offset = 0;
+    }
 
     decoded = php_decode_html((int)context, html, offset, &byte_length);
     if (NULL == decoded) {
