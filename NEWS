@@ -9,6 +9,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
 
+- PCRE:
+  . Fix UAF issues with PCRE after request shutdown. (nielsdos)
+
 - SOAP:
   . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
     headers in array form). (nielsdos)

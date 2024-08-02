@@ -358,6 +358,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - pcre_get_compiled_regex_cache_ex() now provides an option to collect extra
      options (from modifiers used in the expression, for example), and calls
      pcre2_set_compile_extra_options() with those options.
+   - Removed per-request cache, the cache is now always per process or
+     per thread depending on whether you use NTS or ZTS.
+     This was removed due to fundamental ordering issues between destructors.
 
  g. ext/standard
    - Added the php_base64_encode_ex() API with flag parameters, value can be
