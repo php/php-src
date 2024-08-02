@@ -971,8 +971,9 @@ static entity_table_opt determine_entity_table(int all, int doctype)
 static inline char html5_find_short_reference_name(const char *input, size_t offset) {
     const uint8_t letter1 = input[offset] & 0xDF;
     const uint8_t letter2 = input[offset + 1] & 0xDF;
+    static const char replacements[6] = {0, '<', '>', 0, 0, 0};
 
-    return (char)("\0<>\0\0\0\0\0"[letter1 == 'L' + ((letter1 == 'G') << 1) + ((letter2 != 'T') << 2)]);
+    return replacements[letter1 == 'L' + ((letter1 == 'G') << 1) + ((letter2 != 'T') << 2)];
 }
 
 static inline size_t html5_find_large_reference_name_group(const char *input, const size_t offset, bool *did_find_group) {
