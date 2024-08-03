@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
     (Arnaud)
 
+- Curl:
+  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
+    CURLOPT_FTP_RESPONSE_TIMEOUT. (Ayesh Karunaratne)
+
 - BCMath:
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
     enum. (timwolla, saki)
