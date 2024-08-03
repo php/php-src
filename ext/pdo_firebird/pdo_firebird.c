@@ -60,11 +60,6 @@ PHP_MINIT_FUNCTION(pdo_firebird) /* {{{ */
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_DATE_FORMAT", (zend_long) PDO_FB_ATTR_DATE_FORMAT);
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIME_FORMAT", (zend_long) PDO_FB_ATTR_TIME_FORMAT);
 	REGISTER_PDO_CLASS_CONST_LONG("FB_ATTR_TIMESTAMP_FORMAT", (zend_long) PDO_FB_ATTR_TIMESTAMP_FORMAT);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_TRANSACTION_ISOLATION_LEVEL", (zend_long) PDO_FB_TRANSACTION_ISOLATION_LEVEL);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_READ_COMMITTED", (zend_long) PDO_FB_READ_COMMITTED);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_REPEATABLE_READ", (zend_long) PDO_FB_REPEATABLE_READ);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_SERIALIZABLE", (zend_long) PDO_FB_SERIALIZABLE);
-	REGISTER_PDO_CLASS_CONST_LONG("FB_WRITABLE_TRANSACTION", (zend_long) PDO_FB_WRITABLE_TRANSACTION);
 
 	if (FAILURE == php_pdo_register_driver(&pdo_firebird_driver)) {
 		return FAILURE;
@@ -93,11 +88,24 @@ PHP_MSHUTDOWN_FUNCTION(pdo_firebird) /* {{{ */
 PHP_MINFO_FUNCTION(pdo_firebird) /* {{{ */
 {
 	char version[64];
+	char api_version[8];
 	isc_get_client_version(version);
+
+	snprintf(api_version, 7, "%d", FB_API_VER);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PDO Driver for Firebird", "enabled");
 	php_info_print_table_row(2, "Client Library Version", version);
+	php_info_print_table_row(2, "Firebird API version", api_version);
 	php_info_print_table_end();
 }
 /* }}} */
+
+PHP_METHOD(Pdo_Firebird, getApiVersion)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_LONG(FB_API_VER);
+}

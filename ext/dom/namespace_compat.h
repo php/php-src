@@ -40,21 +40,16 @@ PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_xlink_magic_to
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_xml_magic_token;
 PHP_DOM_EXPORT extern const php_dom_ns_magic_token *php_dom_ns_is_xmlns_magic_token;
 
-typedef struct php_libxml_private_data_header php_libxml_private_data_header;
-struct php_libxml_private_data_header;
-
 /* These functions make it possible to make a namespace declaration also visible as an attribute by
  * creating an equivalent attribute node. */
 
-PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_libxml_ns_mapper_create(void);
-PHP_DOM_EXPORT void php_dom_libxml_ns_mapper_destroy(php_dom_libxml_ns_mapper *mapper);
 PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_ensure_html_ns(php_dom_libxml_ns_mapper *mapper);
 PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_ensure_prefixless_xmlns_ns(php_dom_libxml_ns_mapper *mapper);
 PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns(php_dom_libxml_ns_mapper *mapper, zend_string *prefix, zend_string *uri);
 PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_prefix_string(php_dom_libxml_ns_mapper *mapper, const xmlChar *prefix, size_t prefix_len, zend_string *uri);
 PHP_DOM_EXPORT xmlNsPtr php_dom_libxml_ns_mapper_get_ns_raw_strings_nullsafe(php_dom_libxml_ns_mapper *mapper, const char *prefix, const char *uri);
 
-PHP_DOM_EXPORT php_libxml_private_data_header *php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper *mapper);
+PHP_DOM_EXPORT php_dom_libxml_ns_mapper *php_dom_get_ns_mapper(dom_object *object);
 PHP_DOM_EXPORT void php_dom_ns_compat_mark_attribute_list(php_dom_libxml_ns_mapper *mapper, xmlNodePtr node);
 PHP_DOM_EXPORT void php_dom_libxml_reconcile_modern(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node);
 PHP_DOM_EXPORT void php_dom_reconcile_attribute_namespace_after_insertion(xmlAttrPtr attrp);

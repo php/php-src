@@ -35,10 +35,12 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
   test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
 
   if test "$PHP_OPENSSL" != "no" || test "$PHP_MYSQLND_SSL" != "no"; then
-    PHP_SETUP_OPENSSL(MYSQLND_SHARED_LIBADD, [AC_DEFINE(MYSQLND_HAVE_SSL,1,[Enable mysqlnd code that uses OpenSSL directly])])
+    PHP_SETUP_OPENSSL([MYSQLND_SHARED_LIBADD],
+      [AC_DEFINE([MYSQLND_HAVE_SSL], [1],
+        [Define to 1 if mysqlnd has extended SSL support through OpenSSL.])])
   fi
 
-  PHP_NEW_EXTENSION([mysqlnd], [m4_normalize([
+  PHP_NEW_EXTENSION([mysqlnd], m4_normalize([
     mysqlnd_alloc.c
     mysqlnd_auth.c
     mysqlnd_block_alloc.c
@@ -61,7 +63,7 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
     mysqlnd_vio.c
     mysqlnd_wireprotocol.c
     php_mysqlnd.c
-  ])],
+  ]),
   [$ext_shared],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 

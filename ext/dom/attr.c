@@ -163,12 +163,8 @@ zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nodeparent = nodep->parent;
-	if (!nodeparent) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(nodeparent, retval, obj);
+	php_dom_create_nullable_object(nodeparent, retval, obj);
 	return SUCCESS;
 }
 
@@ -193,22 +189,12 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMAttr, isId)
 {
-	zval *id;
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
-
-	if (attrp->atype == XML_ATTRIBUTE_ID) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(attrp, ZEND_THIS, xmlAttrPtr, intern);
+	RETURN_BOOL(attrp->atype == XML_ATTRIBUTE_ID);
 }
 /* }}} end dom_attr_is_id */
 

@@ -41,7 +41,7 @@ if (PHP_OPCACHE != "no") {
 
 			if (CHECK_HEADER_ADD_INCLUDE("capstone\\capstone.h", "CFLAGS_OPCACHE", PHP_OPCACHE+ ";" + PHP_PHP_BUILD + "\\include") &&
 				CHECK_LIB("capstone.lib", "opcache", PHP_OPCACHE)) {
-				AC_DEFINE('HAVE_CAPSTONE', 1, 'capstone support enabled');
+				AC_DEFINE('HAVE_CAPSTONE', 1, 'Define to 1 if Capstone is available.');
 				ir_src += " ir_disasm.c";
 			}
 

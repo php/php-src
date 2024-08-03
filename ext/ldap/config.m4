@@ -51,7 +51,10 @@ PHP_ARG_WITH([ldap-sasl],
 
 if test "$PHP_LDAP" != "no"; then
 
-  PHP_NEW_EXTENSION(ldap, ldap.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([ldap],
+    [ldap.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   if test "$PHP_LDAP" = "yes"; then
     for i in /usr/local /usr; do
@@ -62,38 +65,39 @@ if test "$PHP_LDAP" != "no"; then
   fi
 
   if test -z "$LDAP_DIR"; then
-    AC_MSG_ERROR(Cannot find ldap.h)
+    AC_MSG_ERROR([Cannot find ldap.h])
   fi
 
   dnl -pc removal is a hack for clang
   MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')
 
   if test -f $LDAP_LIBDIR/liblber.a || test -f $LDAP_LIBDIR/liblber.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.a || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/liblber.$SHLIB_SUFFIX_NAME; then
-    PHP_ADD_LIBRARY_WITH_PATH(lber, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
-    PHP_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH([lber], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
+    PHP_ADD_LIBRARY_WITH_PATH([ldap], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
 
   elif test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libldap.$SHLIB_SUFFIX_NAME.3 || test -f $LDAP_LIBDIR/libldap.3.dylib; then
-    PHP_ADD_LIBRARY_WITH_PATH(ldap, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH([ldap], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
 
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.12.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.12.1; then
-    PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME.11.1 || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME.11.1; then
-    PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+    PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
     AC_DEFINE(HAVE_ORALDAP,1,[ ])
 
   elif test -f $LDAP_LIBDIR/libclntsh.$SHLIB_SUFFIX_NAME || test -f $LDAP_LIBDIR/$MACHINE_INCLUDES/libclntsh.$SHLIB_SUFFIX_NAME; then
-     PHP_ADD_LIBRARY_WITH_PATH(clntsh, $LDAP_LIBDIR, LDAP_SHARED_LIBADD)
+     PHP_ADD_LIBRARY_WITH_PATH([clntsh], [$LDAP_LIBDIR], [LDAP_SHARED_LIBADD])
      AC_DEFINE(HAVE_ORALDAP,1,[ ])
 
   else
-    AC_MSG_ERROR(Cannot find ldap libraries in $LDAP_LIBDIR.)
+    AC_MSG_ERROR([Cannot find ldap libraries in $LDAP_LIBDIR.])
   fi
 
-  PHP_ADD_INCLUDE($LDAP_INCDIR)
+  PHP_ADD_INCLUDE([$LDAP_INCDIR])
   PHP_SUBST([LDAP_SHARED_LIBADD])
-  AC_DEFINE(HAVE_LDAP,1,[ ])
+  AC_DEFINE([HAVE_LDAP], [1],
+    [Define to 1 if the PHP extension 'ldap' is available.])
 
   dnl Save original values
   _SAVE_CPPFLAGS=$CPPFLAGS
@@ -131,8 +135,8 @@ if test "$PHP_LDAP" != "no"; then
   if test "$PHP_LDAP_SASL" != "no"; then
     PKG_CHECK_MODULES([SASL], [libsasl2])
 
-    PHP_EVAL_INCLINE($SASL_CFLAGS)
-    PHP_EVAL_LIBLINE($SASL_LIBS, LDAP_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$SASL_CFLAGS])
+    PHP_EVAL_LIBLINE([$SASL_LIBS], [LDAP_SHARED_LIBADD])
 
     AC_DEFINE(HAVE_LDAP_SASL, 1, [LDAP SASL support])
   fi

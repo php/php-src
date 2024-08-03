@@ -431,6 +431,8 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 		mask |= mask >> 1;
 		mask |= mask >> 2;
 		mask |= mask >> 4;
+		// Expand the lowest byte into all bytes.
+		mask *= 0x0101010101010101;
 
 		int failures = 0;
 		while (total_size < length) {
@@ -440,8 +442,10 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 				RETURN_THROWS();
 			}
 
+			uint64_t offsets = result.result & mask;
 			for (size_t i = 0; i < result.size; i++) {
-				uint64_t offset = (result.result >> (i * 8)) & mask;
+				uint64_t offset = offsets & 0xff;
+				offsets >>= 8;
 
 				if (offset > max_offset) {
 					if (++failures > PHP_RANDOM_RANGE_ATTEMPTS) {

@@ -1856,7 +1856,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj)
 
 static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr_t prop_offset)
 {
-	if (zobj->properties) {
+	if (zobj->properties && !IS_HOOKED_PROPERTY_OFFSET(prop_offset)) {
 		zval *retval;
 		zend_execute_data *execute_data = EG(current_execute_data);
 		const zend_op *opline = EX(opline);
@@ -1912,7 +1912,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj)
 
 static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intptr_t prop_offset)
 {
-	if (zobj->properties) {
+	if (zobj->properties && !IS_HOOKED_PROPERTY_OFFSET(prop_offset)) {
 		zval *retval;
 		zend_execute_data *execute_data = EG(current_execute_data);
 		const zend_op *opline = EX(opline);
@@ -1967,7 +1967,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_obj_r_slow_ex(zend_object *zobj)
 
 static zval* ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic_ex(zend_object *zobj, intptr_t prop_offset)
 {
-	if (zobj->properties) {
+	if (zobj->properties && !IS_HOOKED_PROPERTY_OFFSET(prop_offset)) {
 		zval *retval;
 		zend_execute_data *execute_data = EG(current_execute_data);
 		const zend_op *opline = EX(opline);
@@ -2019,7 +2019,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_obj_is_slow_ex(zend_object *zobj)
 
 static zval* ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic_ex(zend_object *zobj, intptr_t prop_offset)
 {
-	if (zobj->properties) {
+	if (zobj->properties && !IS_HOOKED_PROPERTY_OFFSET(prop_offset)) {
 		zval *retval;
 		zend_execute_data *execute_data = EG(current_execute_data);
 		const zend_op *opline = EX(opline);
@@ -2135,9 +2135,10 @@ static zend_never_inline bool zend_handle_fetch_obj_flags(
 					}
 					ZVAL_NULL(ptr);
 				}
-
-				ZVAL_NEW_REF(ptr, ptr);
-				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
+				if (ZEND_TYPE_IS_SET(prop_info->type)) {
+					ZVAL_NEW_REF(ptr, ptr);
+					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
+				}
 			}
 			break;
 		EMPTY_SWITCH_DEFAULT_CASE()

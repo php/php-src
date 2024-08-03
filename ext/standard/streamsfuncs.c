@@ -30,13 +30,11 @@
 #ifndef PHP_WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 typedef unsigned long long php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX ULLONG_MAX
 #else
 #include "win32/select.h"
 #include "win32/sockets.h"
 #include "win32/console.h"
 typedef unsigned __int64 php_timeout_ull;
-#define PHP_TIMEOUT_ULL_MAX UINT64_MAX
 #endif
 
 #define GET_CTX_OPT(stream, wrapper, name, val) (PHP_STREAM_CONTEXT(stream) && NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), wrapper, name)))
@@ -124,6 +122,9 @@ PHP_FUNCTION(stream_socket_client)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(4, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -276,6 +277,9 @@ PHP_FUNCTION(stream_socket_accept)
 
 	if (timeout_is_null) {
 		timeout = (double)FG(default_socket_timeout);
+	} else if (!zend_finite(timeout)) {
+		zend_argument_value_error(2, "must be a finite value");
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);

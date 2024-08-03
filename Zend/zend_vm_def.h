@@ -2075,6 +2075,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+ZEND_VM_C_LABEL(fetch_obj_r_simple):
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -2085,7 +2086,47 @@ ZEND_VM_C_LABEL(fetch_obj_r_fast_copy):
 							ZEND_VM_NEXT_OPCODE();
 						}
 					}
+				} else if (UNEXPECTED(IS_HOOKED_PROPERTY_OFFSET(prop_offset))) {
+					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+					if (ZEND_IS_PROPERTY_HOOK_SIMPLE_READ(prop_offset)) {
+						prop_offset = prop_info->offset;
+						ZEND_VM_C_GOTO(fetch_obj_r_simple);
+					} else if (EXPECTED(ZEND_IS_PROPERTY_HOOK_SIMPLE_GET(prop_offset))) {
+						zend_function *hook = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
+						ZEND_ASSERT(hook->type == ZEND_USER_FUNCTION);
+						ZEND_ASSERT(RUN_TIME_CACHE(&hook->op_array));
+
+						uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
+						if (OP1_TYPE & IS_CV) {
+							GC_ADDREF(zobj);
+						}
+						if (OP1_TYPE & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+							call_info |= ZEND_CALL_RELEASE_THIS;
+						}
+						zend_execute_data *call = zend_vm_stack_push_call_frame(call_info, hook, 0, zobj);
+						call->prev_execute_data = execute_data;
+						call->call = NULL;
+						call->return_value = EX_VAR(opline->result.var);
+						call->run_time_cache = RUN_TIME_CACHE(&hook->op_array);
+
+						execute_data = call;
+						EG(current_execute_data) = execute_data;
+						zend_init_cvs(0, hook->op_array.last_var EXECUTE_DATA_CC);
+
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+						opline = hook->op_array.opcodes;
+#else
+						EX(opline) = hook->op_array.opcodes;
+#endif
+						LOAD_OPLINE_EX();
+						ZEND_OBSERVER_SAVE_OPLINE();
+						ZEND_OBSERVER_FCALL_BEGIN(execute_data);
+
+						ZEND_VM_ENTER_EX();
+					}
+					/* Fall through to read_property for hooks. */
 				} else if (EXPECTED(zobj->properties != NULL)) {
+					ZEND_ASSERT(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset));
 					name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
 					if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
 						uintptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
@@ -2240,6 +2281,7 @@ ZEND_VM_COLD_CONST_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|THIS|CV, C
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
+ZEND_VM_C_LABEL(fetch_obj_is_simple):
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 						if (!ZEND_VM_SPEC || (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) != 0) {
@@ -2250,7 +2292,15 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 							ZEND_VM_NEXT_OPCODE();
 						}
 					}
+				} else if (UNEXPECTED(IS_HOOKED_PROPERTY_OFFSET(prop_offset))) {
+					if (ZEND_IS_PROPERTY_HOOK_SIMPLE_READ(prop_offset)) {
+						zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+						prop_offset = prop_info->offset;
+						ZEND_VM_C_GOTO(fetch_obj_is_simple);
+					}
+					/* Fall through to read_property for hooks. */
 				} else if (EXPECTED(zobj->properties != NULL)) {
+					ZEND_ASSERT(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset));
 					name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
 					if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
 						uintptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
@@ -2429,7 +2479,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						ZEND_VM_C_GOTO(exit_assign_obj);
 					}
 				}
-			} else {
+			} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(prop_offset))) {
 				name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
 				if (EXPECTED(zobj->properties != NULL)) {
 					if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
@@ -2445,9 +2495,6 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 				}
 
 				if (!zobj->ce->__set && (zobj->ce->ce_flags & ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES)) {
-					if (EXPECTED(zobj->properties == NULL)) {
-						rebuild_object_properties(zobj);
-					}
 					if (OP_DATA_TYPE == IS_CONST) {
 						if (UNEXPECTED(Z_OPT_REFCOUNTED_P(value))) {
 							Z_ADDREF_P(value);
@@ -2471,13 +2518,26 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 						} else if (OP_DATA_TYPE == IS_CV) {
 							Z_TRY_ADDREF_P(value);
 						}
-						}
-					zend_hash_add_new(zobj->properties, name, value);
+					}
+					zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
 					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 						ZVAL_COPY(EX_VAR(opline->result.var), value);
 					}
 					ZEND_VM_C_GOTO(exit_assign_obj);
 				}
+			} else {
+				ZEND_ASSERT(IS_HOOKED_PROPERTY_OFFSET(prop_offset));
+				if (ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(prop_offset)) {
+					zend_property_info *prop_info = CACHED_PTR_EX(cache_slot + 2);
+					property_val = OBJ_PROP(zobj, prop_info->offset);
+					if (ZEND_TYPE_IS_SET(prop_info->type)) {
+						value = zend_assign_to_typed_prop(prop_info, property_val, value, &garbage EXECUTE_DATA_CC);
+						ZEND_VM_C_GOTO(free_and_exit_assign_obj);
+					} else {
+						ZEND_VM_C_GOTO(fast_assign_obj);
+					}
+				}
+				/* Fall through to write_property for hooks. */
 			}
 		}
 		name = Z_STR_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
@@ -9730,6 +9790,62 @@ ZEND_VM_HANDLER(207, ZEND_FRAMELESS_ICALL_3, ANY, ANY, SPEC(OBSERVER))
 	}
 	FREE_OP_DATA();
 	ZEND_VM_NEXT_OPCODE_EX(1, 2);
+}
+
+ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_class_entry *ce = EX(func)->common.scope;
+	ZEND_ASSERT(ce);
+
+	zend_class_entry *parent_ce = ce->parent;
+	if (!parent_ce) {
+		zend_throw_error(NULL, "Cannot use \"parent\" when current class scope has no parent");
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	zend_string *property_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	zend_property_hook_kind hook_kind = opline->op2.num;
+
+	zend_property_info *prop_info = zend_hash_find_ptr(&parent_ce->properties_info, property_name);
+	if (!prop_info) {
+		zend_throw_error(NULL, "Undefined property %s::$%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+	if (prop_info->flags & ZEND_ACC_PRIVATE) {
+		zend_throw_error(NULL, "Cannot access private property %s::$%s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(property_name));
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	zend_function **hooks = prop_info->hooks;
+	zend_function *hook = hooks ? hooks[hook_kind] : NULL;
+
+	zend_execute_data *call;
+	if (hook) {
+		call = zend_vm_stack_push_call_frame(
+			ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS,
+			hook, opline->extended_value, Z_OBJ_P(ZEND_THIS));
+		if (EXPECTED(hook->type == ZEND_USER_FUNCTION)) {
+			if (UNEXPECTED(!RUN_TIME_CACHE(&hook->op_array))) {
+				init_func_run_time_cache(&hook->op_array);
+			}
+			call->run_time_cache = RUN_TIME_CACHE(&hook->op_array);
+		}
+	} else {
+		zend_function *fbc = zend_get_property_hook_trampoline(prop_info, hook_kind, property_name);
+		call = zend_vm_stack_push_call_frame(
+			ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS,
+			fbc, opline->extended_value, Z_OBJ_P(ZEND_THIS));
+	}
+
+	call->prev_execute_data = EX(call);
+	EX(call) = call;
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)

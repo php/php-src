@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 92d66416beab5094d0ca70565e691eacc3049d9c */
+ * Stub hash: 225cbb077d441f93b7c6bdb9826ab3e8f634b79d */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Pgsql_escapeIdentifier, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
@@ -81,12 +81,12 @@ static const zend_function_entry class_Pdo_Pgsql_methods[] = {
 	ZEND_FE_END
 };
 
-static zend_class_entry *register_class_Pdo_Pgsql(zend_class_entry *class_entry_Pdo_PDO)
+static zend_class_entry *register_class_Pdo_Pgsql(zend_class_entry *class_entry_PDO)
 {
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Pgsql", class_Pdo_Pgsql_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Pdo_PDO);
+	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
 	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
 
 	zval const_ATTR_DISABLE_PREPARES_value;

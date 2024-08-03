@@ -4998,8 +4998,6 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 
 	switch (opline->opcode) {
 		case ZEND_NOP:
-		case ZEND_IS_IDENTICAL:
-		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_QM_ASSIGN:
 		case ZEND_JMP:
 		case ZEND_CHECK_VAR:
@@ -5021,10 +5019,14 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_COPY_TMP:
-		case ZEND_CASE_STRICT:
 		case ZEND_JMP_NULL:
 		case ZEND_JMP_FRAMELESS:
 			return 0;
+		case ZEND_IS_IDENTICAL:
+		case ZEND_IS_NOT_IDENTICAL:
+		case ZEND_CASE_STRICT:
+			/* Array to array comparison may lead to recursion. */
+			return (t1 & t2) & MAY_BE_ARRAY_OF_ARRAY;
 		case ZEND_SEND_VAR:
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_REF:

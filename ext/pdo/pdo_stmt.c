@@ -2426,10 +2426,7 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 		return zend_std_get_properties_for(object, purpose);
 	}
 
-	if (!stmt->std.properties) {
-		rebuild_object_properties(&stmt->std);
-	}
-	props = zend_array_dup(stmt->std.properties);
+	props = zend_array_dup(zend_std_get_properties_ex(&stmt->std));
 	for (i = 0; i < stmt->column_count; i++) {
 		if (zend_string_equals_literal(stmt->columns[i].name, "queryString")) {
 			continue;

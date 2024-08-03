@@ -33,6 +33,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "zend_portability.h"
 
 /* This will be 0x01010101 for 32-bit and 0x0101010101010101 for 64-bit */
 #define SWAR_ONES (~((size_t) 0) / 0xFF)
@@ -40,53 +41,18 @@
  * Example: SWAR_REPEAT(0xAB) will be 0xABABABAB for 32-bit and 0xABABABABABABABAB for 64-bit. */
 #define SWAR_REPEAT(x) (SWAR_ONES * (x))
 
-/* Bytes swap */
-#ifdef _MSC_VER
-#  include <stdlib.h>
-#  define BC_BSWAP32(u) _byteswap_ulong(u)
-#  define BC_BSWAP64(u) _byteswap_uint64(u)
-#else
-#  ifdef __GNUC__
-#    define BC_BSWAP32(u) __builtin_bswap32(u)
-#    define BC_BSWAP64(u) __builtin_bswap64(u)
-#  elif defined(__has_builtin)
-#    if __has_builtin(__builtin_bswap32)
-#      define BC_BSWAP32(u) __builtin_bswap32(u)
-#    endif // __has_builtin(__builtin_bswap32)
-#    if __has_builtin(__builtin_bswap64)
-#      define BC_BSWAP64(u) __builtin_bswap64(u)
-#    endif // __has_builtin(__builtin_bswap64)
-#  endif // __GNUC__
-#endif // _MSC_VER
-#ifndef BC_BSWAP32
-static inline uint32_t BC_BSWAP32(uint32_t u)
-{
-  return (((u & 0xff000000) >> 24)
-          | ((u & 0x00ff0000) >>  8)
-          | ((u & 0x0000ff00) <<  8)
-          | ((u & 0x000000ff) << 24));
-}
-#endif
-#ifndef BC_BSWAP64
-static inline uint64_t BC_BSWAP64(uint64_t u)
-{
-   return (((u & 0xff00000000000000ULL) >> 56)
-          | ((u & 0x00ff000000000000ULL) >> 40)
-          | ((u & 0x0000ff0000000000ULL) >> 24)
-          | ((u & 0x000000ff00000000ULL) >>  8)
-          | ((u & 0x00000000ff000000ULL) <<  8)
-          | ((u & 0x0000000000ff0000ULL) << 24)
-          | ((u & 0x000000000000ff00ULL) << 40)
-          | ((u & 0x00000000000000ffULL) << 56));
-}
-#endif
-
 #if SIZEOF_SIZE_T >= 8
-#  define BC_BSWAP(u) BC_BSWAP64(u)
+#  define BC_BSWAP(u) ZEND_BYTES_SWAP64(u)
    typedef uint64_t BC_VECTOR;
+#  define BC_VECTOR_SIZE 8
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 100000000
 #else
-#  define BC_BSWAP(u) BC_BSWAP32(u)
+#  define BC_BSWAP(u) ZEND_BYTES_SWAP32(u)
    typedef uint32_t BC_VECTOR;
+#  define BC_VECTOR_SIZE 4
+/* The boundary number is computed from BASE ** BC_VECTOR_SIZE */
+#  define BC_VECTOR_BOUNDARY_NUM (BC_VECTOR) 10000
 #endif
 
 #ifdef WORDS_BIGENDIAN
@@ -95,9 +61,15 @@ static inline uint64_t BC_BSWAP64(uint64_t u)
 #  define BC_LITTLE_ENDIAN 1
 #endif
 
+/*
+ * Adding more than this many times may cause uint32_t/uint64_t to overflow.
+ * Typically this is 1844 for 64bit and 42 for 32bit.
+ */
+#define BC_VECTOR_NO_OVERFLOW_ADD_COUNT (~((BC_VECTOR) 0) / (BC_VECTOR_BOUNDARY_NUM * BC_VECTOR_BOUNDARY_NUM))
+
 
 /* routines */
-bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, bool use_sign);
+bcmath_compare_result _bc_do_compare (bc_num n1, bc_num n2, size_t scale, bool use_sign);
 bc_num _bc_do_add (bc_num n1, bc_num n2);
 bc_num _bc_do_sub (bc_num n1, bc_num n2);
 void _bc_rm_leading_zeros (bc_num num);

@@ -119,12 +119,12 @@ dnl
 AC_DEFUN([ZEND_DLSYM_CHECK], [dnl
 AC_MSG_CHECKING([whether dlsym() requires a leading underscore in symbol names])
 _LT_AC_TRY_DLOPEN_SELF([
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 ], [
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT([yes])
   AC_DEFINE(DLSYM_NEEDS_UNDERSCORE, 1, [Define if dlsym() requires a leading underscore in symbol names. ])
 ], [
-  AC_MSG_RESULT(no)
+  AC_MSG_RESULT([no])
 ], [])
 ])
 
@@ -151,10 +151,13 @@ AC_CHECK_FUNCS(m4_normalize([
   pthread_stackseg_np
 ]))
 
-dnl Check for sigsetjmp. If it's defined as a macro, AC_CHECK_FUNCS won't work.
-AC_CHECK_FUNCS([sigsetjmp],,
-  [AC_CHECK_DECL([sigsetjmp],
-    [AC_DEFINE([HAVE_SIGSETJMP], [1])],,
+dnl
+dnl Check for sigsetjmp. If sigsetjmp is defined as a macro, use AC_CHECK_DECL
+dnl as a fallback since AC_CHECK_FUNC cannot detect macros.
+dnl
+AC_CHECK_FUNC([sigsetjmp],,
+  [AC_CHECK_DECL([sigsetjmp],,
+    [AC_MSG_ERROR([Required sigsetjmp not found. Please, check config.log])],
     [#include <setjmp.h>])])
 
 ZEND_CHECK_STACK_DIRECTION
@@ -163,11 +166,11 @@ ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
 ZEND_CHECK_CPUID_COUNT
 
-AC_MSG_CHECKING(whether to enable thread-safety)
-AC_MSG_RESULT($ZEND_ZTS)
+AC_MSG_CHECKING([whether to enable thread-safety])
+AC_MSG_RESULT([$ZEND_ZTS])
 
-AC_MSG_CHECKING(whether to enable Zend debugging)
-AC_MSG_RESULT($ZEND_DEBUG)
+AC_MSG_CHECKING([whether to enable Zend debugging])
+AC_MSG_RESULT([$ZEND_DEBUG])
 
 if test "$ZEND_DEBUG" = "yes"; then
   AC_DEFINE(ZEND_DEBUG,1,[ ])

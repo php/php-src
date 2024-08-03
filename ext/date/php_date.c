@@ -1515,9 +1515,8 @@ static void initialize_date_period_properties(php_period_obj *period_obj)
 {
 	zval zv;
 
-	if (UNEXPECTED(!period_obj->std.properties)) {
-		rebuild_object_properties(&period_obj->std);
-	}
+	/* rebuild properties */
+	zend_std_get_properties_ex(&period_obj->std);
 
 	create_date_period_datetime(period_obj->start, period_obj->start_ce, &zv);
 	write_date_period_property(&period_obj->std, "start", sizeof("start") - 1, &zv);
@@ -1652,9 +1651,8 @@ static void date_period_it_move_forward(zend_object_iterator *iter)
 
 	date_period_advance(it_time, object->interval);
 
-	if (UNEXPECTED(!object->std.properties)) {
-		rebuild_object_properties(&object->std);
-	}
+	/* rebuild properties */
+	zend_std_get_properties_ex(&object->std);
 
 	create_date_period_datetime(object->current, object->start_ce, &current_zv);
 	zend_string *property_name = ZSTR_INIT_LITERAL("current", 0);
@@ -5946,7 +5944,7 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 {
 	if (type != BP_VAR_IS && type != BP_VAR_R) {
 		if (date_period_is_internal_property(name)) {
-			zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
+			zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 			return &EG(uninitialized_zval);
 		}
 	}
@@ -5958,7 +5956,7 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 static zval *date_period_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	if (date_period_is_internal_property(name)) {
-		zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
+		zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 		return value;
 	}
 
@@ -5968,7 +5966,7 @@ static zval *date_period_write_property(zend_object *object, zend_string *name, 
 static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
 	if (date_period_is_internal_property(name)) {
-		zend_throw_error(NULL, "Cannot modify readonly property DatePeriod::$%s", ZSTR_VAL(name));
+		zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
 		return &EG(error_zval);
 	}
 

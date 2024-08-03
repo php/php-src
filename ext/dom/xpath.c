@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -461,11 +462,12 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xpath")) {
+		zend_release_fcall_info_cache(&fcc);
 		zend_argument_value_error(1, "must not be \"http://php.net/xpath\" because it is reserved by PHP");
 		RETURN_THROWS();
 	}
 
-	php_dom_xpath_callbacks_update_single_method_handler(
+	if (php_dom_xpath_callbacks_update_single_method_handler(
 		&intern->xpath_callbacks,
 		intern->dom.ptr,
 		namespace,
@@ -473,7 +475,9 @@ PHP_METHOD(DOMXPath, registerPhpFunctionNS)
 		&fcc,
 		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 		dom_xpath_register_func_in_ctx
-	);
+	) != SUCCESS) {
+		zend_release_fcall_info_cache(&fcc);
+	}
 }
 
 /* {{{ */
@@ -485,22 +489,22 @@ PHP_METHOD(DOMXPath, quote) {
 	}
 	if (memchr(input, '\'', input_len) == NULL) {
 		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
-		output->val[0] = '\'';
-		memcpy(output->val + 1, input, input_len);
-		output->val[input_len + 1] = '\'';
-		output->val[input_len + 2] = '\0';
+		ZSTR_VAL(output)[0] = '\'';
+		memcpy(ZSTR_VAL(output) + 1, input, input_len);
+		ZSTR_VAL(output)[input_len + 1] = '\'';
+		ZSTR_VAL(output)[input_len + 2] = '\0';
 		RETURN_STR(output);
 	} else if (memchr(input, '"', input_len) == NULL) {
 		zend_string *const output = zend_string_safe_alloc(1, input_len, 2, false);
-		output->val[0] = '"';
-		memcpy(output->val + 1, input, input_len);
-		output->val[input_len + 1] = '"';
-		output->val[input_len + 2] = '\0';
+		ZSTR_VAL(output)[0] = '"';
+		memcpy(ZSTR_VAL(output) + 1, input, input_len);
+		ZSTR_VAL(output)[input_len + 1] = '"';
+		ZSTR_VAL(output)[input_len + 2] = '\0';
 		RETURN_STR(output);
 	} else {
 		smart_str output = {0};
 		// need to use the concat() trick published by Robert Rossney at https://stackoverflow.com/a/1352556/1067003
-		smart_str_appendl(&output, "concat(", 7);
+		smart_str_appendl(&output, ZEND_STRL("concat("));
 		const char *ptr = input;
 		const char *const end = input + input_len;
 		while (ptr < end) {
@@ -517,7 +521,7 @@ PHP_METHOD(DOMXPath, quote) {
 			smart_str_appendc(&output, ',');
 		}
 		ZEND_ASSERT(ptr == end);
-		output.s->val[output.s->len - 1] = ')';
+		ZSTR_VAL(output.s)[output.s->len - 1] = ')';
 		RETURN_STR(smart_str_extract(&output));
 	}
 }

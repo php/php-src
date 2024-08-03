@@ -27,6 +27,7 @@
 #include "nodelist.h"
 #include "html_collection.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
@@ -391,7 +392,7 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 
 	if (hnd) {
 		if (!hnd->write_func) {
-			zend_throw_error(NULL, "Cannot modify readonly property %s::$%s", ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
+			zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 			return &EG(error_zval);
 		}
 
@@ -593,21 +594,21 @@ static zend_object *dom_objects_store_clone_obj(zend_object *zobject) /* {{{ */
 	if (instanceof_function(intern->std.ce, dom_node_class_entry) || instanceof_function(intern->std.ce, dom_modern_node_class_entry)) {
 		xmlNodePtr node = (xmlNodePtr)dom_object_get_node(intern);
 		if (node != NULL) {
-			php_dom_libxml_ns_mapper *ns_mapper = NULL;
+			php_dom_private_data *private_data = NULL;
 			if (php_dom_follow_spec_intern(intern)) {
 				if (node->type == XML_DOCUMENT_NODE || node->type == XML_HTML_DOCUMENT_NODE) {
-					ns_mapper = php_dom_libxml_ns_mapper_create();
+					private_data = php_dom_private_data_create();
 				} else {
-					ns_mapper = php_dom_get_ns_mapper(intern);
+					private_data = php_dom_get_private_data(intern);
 				}
 			}
 
-			xmlNodePtr cloned_node = dom_clone_node(ns_mapper, node, node->doc, true);
+			xmlNodePtr cloned_node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), node, node->doc, true);
 			if (cloned_node != NULL) {
 				dom_update_refcount_after_clone(intern, node, clone, cloned_node);
 			}
-			if (ns_mapper != NULL) {
-				clone->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+			if (private_data != NULL) {
+				clone->document->private_data = php_dom_libxml_private_data_header(private_data);
 			}
 		}
 	}
@@ -1389,8 +1390,11 @@ void dom_objects_free_storage(zend_object *object)
 
 	zend_object_std_dtor(&intern->std);
 
-	if (intern->ptr != NULL && ((php_libxml_node_ptr *)intern->ptr)->node != NULL) {
-		if (((xmlNodePtr) ((php_libxml_node_ptr *)intern->ptr)->node)->type != XML_DOCUMENT_NODE && ((xmlNodePtr) ((php_libxml_node_ptr *)intern->ptr)->node)->type != XML_HTML_DOCUMENT_NODE) {
+	php_libxml_node_ptr *ptr = intern->ptr;
+	if (ptr != NULL && ptr->node != NULL) {
+		xmlNodePtr node = ptr->node;
+
+		if (node->type != XML_DOCUMENT_NODE && node->type != XML_HTML_DOCUMENT_NODE) {
 			php_libxml_node_decrement_resource((php_libxml_node_object *) intern);
 		} else {
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
@@ -1484,9 +1488,7 @@ static void dom_object_namespace_node_free_storage(zend_object *object)
 {
 	dom_object_namespace_node *intern = php_dom_namespace_node_obj_from_obj(object);
 	if (intern->parent_intern != NULL) {
-		zval tmp;
-		ZVAL_OBJ(&tmp, &intern->parent_intern->std);
-		zval_ptr_dtor(&tmp);
+		OBJ_RELEASE(&intern->parent_intern->std);
 	}
 	dom_objects_free_storage(object);
 }
@@ -1600,6 +1602,16 @@ static zend_always_inline zend_class_entry *dom_get_element_ce(const xmlNode *no
 	} else {
 		return dom_element_class_entry;
 	}
+}
+
+bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_object *domobj)
+{
+	if (!obj) {
+		ZVAL_NULL(return_value);
+		return false;
+	}
+
+	return php_dom_create_object(obj, return_value, domobj);
 }
 
 /* {{{ php_dom_create_object */
@@ -2567,7 +2579,12 @@ xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, 
 
 	if (ns_mapper != NULL) {
 		xmlNodePtr clone = dom_clone_helper(ns_mapper, node, doc, recursive);
-		if (EXPECTED(clone != NULL)) {
+		/* Defensively set doc to NULL because we should not be using it after this point.
+		 * When cloning a document the new document will be clone->doc, not doc. */
+		doc = NULL;
+		if (EXPECTED(clone != NULL) && clone->doc != node->doc) {
+			/* We only need to reconcile the namespace when the document changes because the namespaces have to be
+			 * put into their respective namespace mapper. */
 			if (clone->type == XML_DOCUMENT_NODE || clone->type == XML_HTML_DOCUMENT_NODE || clone->type == XML_DOCUMENT_FRAG_NODE) {
 				for (xmlNodePtr child = clone->children; child != NULL; child = child->next) {
 					php_dom_libxml_reconcile_modern(ns_mapper, child);

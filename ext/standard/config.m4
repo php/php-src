@@ -11,35 +11,55 @@ AC_CACHE_CHECK([whether flush should be called explicitly after a buffered io],
 #endif
 #include <string.h>
 
-int main(int argc, char **argv)
+int main(void)
 {
   char *filename = tmpnam(NULL);
   char buffer[64];
   int result = 0;
 
   FILE *fp = fopen(filename, "wb");
-  if (NULL == fp)
+  if (NULL == fp) {
     return 0;
+  }
+
   fputs("line 1\n", fp);
   fputs("line 2\n", fp);
   fclose(fp);
 
   fp = fopen(filename, "rb+");
-  if (NULL == fp)
+  if (NULL == fp) {
     return 0;
-  fgets(buffer, sizeof(buffer), fp);
+  }
+
+  if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    fclose(fp);
+    return 0;
+  }
+
   fputs("line 3\n", fp);
   rewind(fp);
-  fgets(buffer, sizeof(buffer), fp);
-  if (0 != strcmp(buffer, "line 1\n"))
+  if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    fclose(fp);
+    return 0;
+  }
+
+  if (0 != strcmp(buffer, "line 1\n")) {
     result = 1;
-  fgets(buffer, sizeof(buffer), fp);
-  if (0 != strcmp(buffer, "line 3\n"))
+  }
+
+  if (fgets(buffer, sizeof(buffer), fp) == NULL) {
+    fclose(fp);
+    return 0;
+  }
+
+  if (0 != strcmp(buffer, "line 3\n")) {
     result = 1;
+  }
+
   fclose(fp);
   unlink(filename);
 
-  exit(result);
+  return result;
 }
 ]])],
 [php_cv_have_flush_io=no],
@@ -60,19 +80,29 @@ AH_TEMPLATE([PHP_USE_PHP_CRYPT_R],
   [Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt
   library.])
 
+php_ext_standard_sources=
 AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [1])
-  PHP_ADD_SOURCES([PHP_EXT_DIR([standard])],
-    [crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c])
+  php_ext_standard_sources=m4_normalize(["
+    crypt_blowfish.c
+    crypt_freesec.c
+    crypt_sha256.c
+    crypt_sha512.c
+    php_crypt_r.c
+  "])
 ], [
-  PHP_CHECK_FUNC(crypt, crypt)
-  PHP_CHECK_FUNC(crypt_r, crypt)
-  AC_CHECK_HEADERS([crypt.h])
-  AS_VAR_IF([ac_cv_func_crypt], [yes],,
-    [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
-  AS_VAR_IF([ac_cv_func_crypt_r], [yes],
-    [PHP_CRYPT_R_STYLE],
-    [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+AC_SEARCH_LIBS([crypt], [crypt],
+  [AC_DEFINE([HAVE_CRYPT], [1],
+    [Define to 1 if you have the 'crypt' function.])],
+  [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
+
+AC_SEARCH_LIBS([crypt_r], [crypt],
+  [AC_DEFINE([HAVE_CRYPT_R], [1],
+    [Define to 1 if you have the 'crypt_r' function.])],
+  [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+
+PHP_CRYPT_R_STYLE
+AC_CHECK_HEADERS([crypt.h])
 
   AC_CACHE_CHECK(for standard DES crypt, ac_cv_crypt_des,[
     AC_RUN_IFELSE([AC_LANG_SOURCE([[
@@ -263,19 +293,14 @@ dnl
 dnl Check if there is a support means of creating a new process and defining
 dnl which handles it receives
 dnl
-AC_CHECK_FUNCS([fork CreateProcess], [
-  php_can_support_proc_open=yes
-  break
-],[
-  php_can_support_proc_open=no
-])
+AC_CHECK_FUNCS([fork CreateProcess],
+  [php_can_support_proc_open=yes; break;],
+  [php_can_support_proc_open=no])
 AC_MSG_CHECKING([if your OS can spawn processes with inherited handles])
-if test "$php_can_support_proc_open" = "yes"; then
-  AC_MSG_RESULT(yes)
-  AC_DEFINE(PHP_CAN_SUPPORT_PROC_OPEN,1, [Define if your system has fork/vfork/CreateProcess])
-else
-  AC_MSG_RESULT(no)
-fi
+AS_VAR_IF([php_can_support_proc_open], [yes],
+  [AC_DEFINE([PHP_CAN_SUPPORT_PROC_OPEN], [1],
+    [Define to 1 if your system has fork/vfork/CreateProcess.])])
+AC_MSG_RESULT([$php_can_support_proc_open])
 
 PHP_ENABLE_CHROOT_FUNC=no
 case "$PHP_SAPI" in
@@ -342,8 +367,8 @@ PHP_ARG_WITH([password-argon2],
 
 if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PKG_CHECK_MODULES([ARGON2], [libargon2])
-  PHP_EVAL_INCLINE($ARGON2_CFLAGS)
-  PHP_EVAL_LIBLINE($ARGON2_LIBS)
+  PHP_EVAL_INCLINE([$ARGON2_CFLAGS])
+  PHP_EVAL_LIBLINE([$ARGON2_LIBS])
 
   AC_DEFINE(HAVE_ARGON2LIB, 1, [ ])
 fi
@@ -377,74 +402,76 @@ AS_VAR_IF([php_cv_func_getifaddrs], [yes],
 dnl
 dnl Setup extension sources
 dnl
-PHP_NEW_EXTENSION([standard], [m4_normalize([
-  array.c
-  assert.c
-  base64.c
-  basic_functions.c
-  browscap.c
-  crc32_x86.c
-  crc32.c
-  credits.c
-  crypt.c
-  css.c
-  datetime.c
-  dir.c
-  dl.c
-  dns.c
-  exec.c
-  file.c
-  filestat.c
-  filters.c
-  flock_compat.c
-  formatted_print.c
-  fsock.c
-  ftok.c
-  ftp_fopen_wrapper.c
-  head.c
-  hrtime.c
-  html.c
-  http_fopen_wrapper.c
-  http.c
-  image.c
-  incomplete_class.c
-  info.c
-  iptc.c
-  levenshtein.c
-  libavifinfo/avifinfo.c
-  link.c
-  mail.c
-  math.c
-  md5.c
-  metaphone.c
-  microtime.c
-  net.c
-  pack.c
-  pageinfo.c
-  password.c
-  php_fopen_wrapper.c
-  proc_open.c
-  quot_print.c
-  scanf.c
-  sha1.c
-  soundex.c
-  streamsfuncs.c
-  string.c
-  strnatcmp.c
-  syslog.c
-  type.c
-  uniqid.c
-  url_scanner_ex.c
-  url.c
-  user_filters.c
-  uuencode.c
-  var_unserializer.c
-  var.c
-  versioning.c
-])],,,
+PHP_NEW_EXTENSION([standard], m4_normalize([
+    array.c
+    assert.c
+    base64.c
+    basic_functions.c
+    browscap.c
+    crc32_x86.c
+    crc32.c
+    credits.c
+    crypt.c
+    css.c
+    datetime.c
+    dir.c
+    dl.c
+    dns.c
+    exec.c
+    file.c
+    filestat.c
+    filters.c
+    flock_compat.c
+    formatted_print.c
+    fsock.c
+    ftok.c
+    ftp_fopen_wrapper.c
+    head.c
+    hrtime.c
+    html.c
+    http_fopen_wrapper.c
+    http.c
+    image.c
+    incomplete_class.c
+    info.c
+    iptc.c
+    levenshtein.c
+    libavifinfo/avifinfo.c
+    link.c
+    mail.c
+    math.c
+    md5.c
+    metaphone.c
+    microtime.c
+    net.c
+    pack.c
+    pageinfo.c
+    password.c
+    php_fopen_wrapper.c
+    proc_open.c
+    quot_print.c
+    scanf.c
+    sha1.c
+    soundex.c
+    streamsfuncs.c
+    string.c
+    strnatcmp.c
+    syslog.c
+    type.c
+    uniqid.c
+    url_scanner_ex.c
+    url.c
+    user_filters.c
+    uuencode.c
+    var_unserializer.c
+    var.c
+    versioning.c
+    $php_ext_standard_sources
+  ]),
+  [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-PHP_ADD_BUILD_DIR($ext_builddir/libavifinfo)
+PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])
 
 PHP_ADD_MAKEFILE_FRAGMENT
 PHP_INSTALL_HEADERS([ext/standard/])

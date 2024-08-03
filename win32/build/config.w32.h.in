@@ -48,7 +48,6 @@
 
 #define HAVE_GETCWD 1
 #undef HAVE_SETITIMER
-#undef HAVE_SIGSETJMP
 #undef HAVE_IODBC
 #define HAVE_LIBDL 1
 #define HAVE_GETTIMEOFDAY 1

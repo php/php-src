@@ -104,7 +104,6 @@ Since:
 PHP_METHOD(DOMCharacterData, substringData)
 {
 	zval *id;
-	xmlChar *cur;
 	xmlChar *substring;
 	xmlNodePtr node;
 	zend_long offset_input, count_input;
@@ -119,11 +118,7 @@ PHP_METHOD(DOMCharacterData, substringData)
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 	if (ZEND_LONG_INT_OVFL(offset_input) || ZEND_LONG_INT_OVFL(count_input)) {
@@ -159,34 +154,30 @@ PHP_METHOD(DOMCharacterData, substringData)
 Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-appenddata
 Since:
 */
-static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
+static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
 	char *arg;
 	size_t arg_len;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 	xmlTextConcat(nodep, BAD_CAST arg, arg_len);
-	if (return_true) {
-		RETURN_TRUE;
-	}
 }
 
 PHP_METHOD(DOMCharacterData, appendData)
 {
-	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	RETURN_TRUE;
 }
 
 PHP_METHOD(Dom_CharacterData, appendData)
 {
-	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} end dom_characterdata_append_data */
 
@@ -197,7 +188,7 @@ Since:
 static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
-	xmlChar		*cur, *first, *second;
+	xmlChar		*first, *second;
 	xmlNodePtr  node;
 	char		*arg;
 	zend_long        offset_input;
@@ -213,11 +204,7 @@ static void dom_character_data_insert_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 
@@ -268,7 +255,7 @@ Since:
 static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
-	xmlChar    *cur, *substring, *second;
+	xmlChar    *substring, *second;
 	xmlNodePtr  node;
 	zend_long        offset, count_input;
 	unsigned int count;
@@ -282,11 +269,7 @@ static void dom_character_data_delete_data(INTERNAL_FUNCTION_PARAMETERS, bool re
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 
@@ -340,7 +323,7 @@ Since:
 static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
 {
 	zval *id;
-	xmlChar		*cur, *substring, *second = NULL;
+	xmlChar		*substring, *second = NULL;
 	xmlNodePtr  node;
 	char		*arg;
 	zend_long        offset, count_input;
@@ -356,11 +339,7 @@ static void dom_character_data_replace_data(INTERNAL_FUNCTION_PARAMETERS, bool r
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
-	cur = node->content;
-	if (cur == NULL) {
-		/* TODO: is this even possible? */
-		cur = BAD_CAST "";
-	}
+	const xmlChar *cur = php_dom_get_content_or_empty(node);
 
 	length = xmlUTF8Strlen(cur);
 

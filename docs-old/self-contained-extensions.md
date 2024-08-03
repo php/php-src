@@ -84,7 +84,7 @@ PHP_ARG_ENABLE([foobar],
     [Enable foobar])])
 
 if test "$PHP_FOOBAR" != "no"; then
-  PHP_NEW_EXTENSION(foobar, foo.c bar.c, $ext_shared)
+  PHP_NEW_EXTENSION([foobar], [foo.c bar.c], [$ext_shared])
 fi
 ```
 
@@ -145,7 +145,7 @@ an existing module called `foo`.
    automatically be able to use `--with-foo=shared[,..]` or
    `--enable-foo=shared[,..]`.
 
-2. In `config.m4`, use `PHP_NEW_EXTENSION(foo,.., $ext_shared)` to enable
+2. In `config.m4`, use `PHP_NEW_EXTENSION([foo],.., [$ext_shared])` to enable
    building the extension.
 
 3. Add the following lines to your C source file:

@@ -39,12 +39,7 @@ zend_result dom_parent_node_first_element_child_read(dom_object *obj, zval *retv
 		first = first->next;
 	}
 
-	if (!first) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(first, retval, obj);
+	php_dom_create_nullable_object(first, retval, obj);
 	return SUCCESS;
 }
 /* }}} */
@@ -63,12 +58,7 @@ zend_result dom_parent_node_last_element_child_read(dom_object *obj, zval *retva
 		last = last->prev;
 	}
 
-	if (!last) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(last, retval, obj);
+	php_dom_create_nullable_object(last, retval, obj);
 	return SUCCESS;
 }
 /* }}} */
@@ -97,6 +87,11 @@ zend_result dom_parent_node_child_element_count(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 /* }}} */
+
+static ZEND_COLD void dom_cannot_create_temp_nodes(void)
+{
+	php_dom_throw_error_with_message(INVALID_MODIFICATION_ERR, "Unable to allocate temporary nodes", /* strict */ true);
+}
 
 static bool dom_is_node_in_list(const zval *nodes, uint32_t nodesc, const xmlNode *node_to_find)
 {
@@ -363,12 +358,17 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 			return dom_object_get_node(Z_DOMOBJ_P(nodes));
 		} else {
 			ZEND_ASSERT(Z_TYPE_P(nodes) == IS_STRING);
-			return xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL_P(nodes), Z_STRLEN_P(nodes));
+			node = xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL_P(nodes), Z_STRLEN_P(nodes));
+			if (UNEXPECTED(node == NULL)) {
+				dom_cannot_create_temp_nodes();
+			}
+			return node;
 		}
 	}
 
 	node = xmlNewDocFragment(documentNode);
 	if (UNEXPECTED(!node)) {
+		dom_cannot_create_temp_nodes();
 		return NULL;
 	}
 
@@ -387,8 +387,7 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 				xmlUnlinkNode(newNode);
 			}
 
-			newNodeObj->document = document;
-			xmlSetTreeDoc(newNode, documentNode);
+			ZEND_ASSERT(newNodeObj->document == document);
 
 			if (newNode->type == XML_DOCUMENT_FRAG_NODE) {
 				/* Unpack document fragment nodes, the behaviour differs for different libxml2 versions. */
@@ -408,6 +407,10 @@ xmlNode* dom_zvals_to_single_node(php_libxml_ref_obj *document, xmlNode *context
 
 			/* Text nodes can't violate the hierarchy at this point. */
 			newNode = xmlNewDocTextLen(documentNode, BAD_CAST Z_STRVAL(nodes[i]), Z_STRLEN(nodes[i]));
+			if (UNEXPECTED(newNode == NULL)) {
+				dom_cannot_create_temp_nodes();
+				goto err;
+			}
 			dom_add_child_without_merging(node, newNode);
 		}
 	}
@@ -434,7 +437,12 @@ static zend_result dom_sanity_check_node_list_types(zval *nodes, uint32_t nodesc
 				zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
 				return FAILURE;
 			}
-		} else if (type != IS_STRING) {
+		} else if (type == IS_STRING) {
+			if (Z_STRLEN(nodes[i]) > INT_MAX) {
+				zend_argument_value_error(i + 1, "must be less than or equal to %d bytes long", INT_MAX);
+				return FAILURE;
+			}
+		} else {
 			zend_argument_type_error(i + 1, "must be of type %s|string, %s given", ZSTR_VAL(node_ce->name), zend_zval_type_name(&nodes[i]));
 			return FAILURE;
 		}
@@ -681,22 +689,16 @@ void dom_parent_node_before(dom_object *context, zval *nodes, uint32_t nodesc)
 	php_dom_pre_insert(context->document, fragment, parentNode, viable_previous_sibling);
 }
 
-static zend_result dom_child_removal_preconditions(const xmlNode *child, int stricterror)
+static zend_result dom_child_removal_preconditions(const xmlNode *child, const dom_object *context)
 {
 	if (dom_node_is_read_only(child) == SUCCESS ||
 		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}
 
 	if (!child->parent) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
-		return FAILURE;
-	}
-
-	xmlNodePtr children = child->parent->children;
-	if (!children) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		php_dom_throw_error(NOT_FOUND_ERR, dom_get_strict_error(context->document));
 		return FAILURE;
 	}
 
@@ -706,9 +708,8 @@ static zend_result dom_child_removal_preconditions(const xmlNode *child, int str
 void dom_child_node_remove(dom_object *context)
 {
 	xmlNode *child = dom_object_get_node(context);
-	bool stricterror = dom_get_strict_error(context->document);
 
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, context) != SUCCESS)) {
 		return;
 	}
 
@@ -740,8 +741,7 @@ void dom_child_replace_with(dom_object *context, zval *nodes, uint32_t nodesc)
 		viable_next_sibling = viable_next_sibling->next;
 	}
 
-	bool stricterror = dom_get_strict_error(context->document);
-	if (UNEXPECTED(dom_child_removal_preconditions(child, stricterror) != SUCCESS)) {
+	if (UNEXPECTED(dom_child_removal_preconditions(child, context) != SUCCESS)) {
 		return;
 	}
 

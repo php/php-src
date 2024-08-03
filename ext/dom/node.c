@@ -23,6 +23,7 @@
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 
@@ -303,12 +304,7 @@ zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 		first = nodep->children;
 	}
 
-	if (!first) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(first, retval, obj);
+	php_dom_create_nullable_object(first, retval, obj);
 	return SUCCESS;
 }
 
@@ -328,12 +324,7 @@ zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 		last = nodep->last;
 	}
 
-	if (!last) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(last, retval, obj);
+	php_dom_create_nullable_object(last, retval, obj);
 	return SUCCESS;
 }
 
@@ -349,12 +340,8 @@ zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr prevsib = nodep->prev;
-	if (!prevsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(prevsib, retval, obj);
+	php_dom_create_nullable_object(prevsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -370,12 +357,8 @@ zend_result dom_node_next_sibling_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nextsib = nodep->next;
-	if (!nextsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(nextsib, retval, obj);
+	php_dom_create_nullable_object(nextsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -396,12 +379,7 @@ zend_result dom_node_previous_element_sibling_read(dom_object *obj, zval *retval
 		prevsib = prevsib->prev;
 	}
 
-	if (!prevsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(prevsib, retval, obj);
+	php_dom_create_nullable_object(prevsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -422,12 +400,7 @@ zend_result dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
 		nextsib = nextsib->next;
 	}
 
-	if (!nextsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(nextsib, retval, obj);
+	php_dom_create_nullable_object(nextsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -1444,21 +1417,21 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	php_dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_private_data *private_data = NULL;
 	bool clone_document = n->type == XML_DOCUMENT_NODE || n->type == XML_HTML_DOCUMENT_NODE;
 	if (php_dom_follow_spec_intern(intern)) {
 		if (clone_document) {
-			ns_mapper = php_dom_libxml_ns_mapper_create();
+			private_data = php_dom_private_data_create();
 		} else {
-			ns_mapper = php_dom_get_ns_mapper(intern);
+			private_data = php_dom_get_private_data(intern);
 		}
 	}
 
-	node = dom_clone_node(ns_mapper, n, n->doc, recursive);
+	node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), n, n->doc, recursive);
 
 	if (!node) {
-		if (clone_document && ns_mapper != NULL) {
-			php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		if (clone_document && private_data != NULL) {
+			php_dom_private_data_destroy(private_data);
 		}
 		RETURN_FALSE;
 	}
@@ -1466,7 +1439,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	/* If document cloned we want a new document proxy */
 	if (clone_document) {
 		dom_object *new_intern;
-		if (ns_mapper) {
+		if (private_data) {
 			/* We have the issue here that we can't create a modern node without an intern.
 			 * Fortunately, it's impossible to have a custom document class for the modern DOM (final base class),
 			 * so we can solve this by invoking the instantiation helper directly. */
@@ -1478,7 +1451,7 @@ PHP_METHOD(DOMNode, cloneNode)
 		}
 		php_dom_update_document_after_clone(intern, n, new_intern, node);
 		ZEND_ASSERT(new_intern->document->private_data == NULL);
-		new_intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+		new_intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	} else {
 		if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
 			/* Let reconciliation deal with this. The lifetime of the namespace poses no problem
@@ -1502,9 +1475,7 @@ PHP_METHOD(DOMNode, normalize)
 	dom_object *intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -1570,9 +1541,9 @@ static void dom_node_is_same_node(INTERNAL_FUNCTION_PARAMETERS, zval *node)
 PHP_METHOD(DOMNode, isSameNode)
 {
 	zval *node;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, dom_node_class_entry)
+	ZEND_PARSE_PARAMETERS_END();
 
 	dom_node_is_same_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, node);
 }
@@ -1580,9 +1551,9 @@ PHP_METHOD(DOMNode, isSameNode)
 PHP_METHOD(Dom_Node, isSameNode)
 {
 	zval *node;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_modern_node_class_entry) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(node, dom_modern_node_class_entry)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (node == NULL) {
 		RETURN_FALSE;
@@ -1749,9 +1720,9 @@ static void dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAMETERS, bool mod
 	dom_object *intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_get_node_ce(modern)) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(node, dom_get_node_ce(modern))
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (node == NULL) {
 		RETURN_FALSE;
@@ -1963,9 +1934,9 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 	size_t uri_len = 0;
 	char *uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uri, &uri_len) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(uri, uri_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -1994,9 +1965,9 @@ PHP_METHOD(Dom_Node, isDefaultNamespace)
 	size_t uri_len = 0;
 	char *uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &uri, &uri_len) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING_OR_NULL(uri, uri_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2021,9 +1992,9 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 	zend_string *prefix;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!", &prefix) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_NULL(prefix)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2263,9 +2234,7 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 	dom_object *intern;
 	char *value;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2302,9 +2271,7 @@ PHP_METHOD(DOMNode, getLineNo)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2384,9 +2351,10 @@ PHP_METHOD(DOMNode, getRootNode)
 	/* Unused now because we don't support the shadow DOM nodes. Options only influence shadow DOM nodes. */
 	zval *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &options) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_NULL(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
@@ -2415,9 +2383,9 @@ static void dom_node_compare_document_position(INTERNAL_FUNCTION_PARAMETERS, zen
 	xmlNodePtr other, this;
 	dom_object *this_intern, *other_intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, node_ce) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node_zval, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(this, id, xmlNodePtr, this_intern);
 	DOM_GET_OBJ(other, node_zval, xmlNodePtr, other_intern);
@@ -2590,9 +2558,7 @@ PHP_METHOD(Dom_Node, __construct)
 
 PHP_METHOD(DOMNode, __sleep)
 {
-	if (zend_parse_parameters_none() != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed, unless serialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 	RETURN_THROWS();
@@ -2600,9 +2566,7 @@ PHP_METHOD(DOMNode, __sleep)
 
 PHP_METHOD(DOMNode, __wakeup)
 {
-	if (zend_parse_parameters_none() != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless unserialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 	RETURN_THROWS();

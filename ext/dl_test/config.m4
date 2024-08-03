@@ -4,5 +4,8 @@ PHP_ARG_ENABLE([dl-test],
     [Enable dl_test extension])])
 
 if test "$PHP_DL_TEST" != "no"; then
-  PHP_NEW_EXTENSION(dl_test, dl_test.c, [shared],, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([dl_test],
+    [dl_test.c],
+    [shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 fi

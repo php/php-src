@@ -71,7 +71,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_document(
     xmlDocPtr *doc_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+    php_dom_private_data *private_data
 );
 lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     lxb_dom_node_t *start_node,
@@ -79,7 +79,7 @@ lexbor_libxml2_bridge_status lexbor_libxml2_bridge_convert_fragment(
     xmlNodePtr *fragment_out,
     bool compact_text_nodes,
     bool create_default_ns,
-    php_dom_libxml_ns_mapper *ns_mapper
+    php_dom_private_data *private_data
 );
 void lexbor_libxml2_bridge_report_errors(
     const lexbor_libxml2_bridge_parse_context *ctx,

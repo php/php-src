@@ -20,6 +20,9 @@
 */
 
 #include "zend_shared_alloc.h"
+#ifdef HAVE_JIT
+# include "jit/zend_jit.h"
+#endif
 
 #ifdef USE_MMAP
 
@@ -48,7 +51,7 @@
 # define MAP_HUGETLB MAP_ALIGNED_SUPER
 #endif
 
-#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
+#if defined(HAVE_JIT) && (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
 static void *find_prefered_mmap_base(size_t requested_size)
 {
 	size_t huge_page_size = 2 * 1024 * 1024;
@@ -197,8 +200,17 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 #ifdef PROT_MAX
 	flags |= PROT_MAX(PROT_READ | PROT_WRITE | PROT_EXEC);
 #endif
-#if (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
-	void *hint = find_prefered_mmap_base(requested_size);
+#if defined(HAVE_JIT) && (defined(__linux__) || defined(__FreeBSD__)) && (defined(__x86_64__) || defined (__aarch64__)) && !defined(__SANITIZE_ADDRESS__)
+	void *hint;
+	if (JIT_G(enabled) && JIT_G(buffer_size)
+			&& zend_jit_check_support() == SUCCESS) {
+		hint = find_prefered_mmap_base(requested_size);
+	} else {
+		/* Do not use a hint if JIT is not enabled, as this profits only JIT and
+		 * this is potentially unsafe when the only suitable candidate is just
+		 * after the heap (e.g. in non-PIE builds) (GH-13775). */
+		hint = MAP_FAILED;
+	}
 	if (hint != MAP_FAILED) {
 # ifdef MAP_HUGETLB
 		size_t huge_page_size = 2 * 1024 * 1024;

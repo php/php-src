@@ -3180,7 +3180,8 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	 * false recursion detection.
 	 */
 	if (UNEXPECTED(GC_IS_RECURSIVE(ht1))) {
-		zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+		zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+		return ZEND_UNCOMPARABLE;
 	}
 
 	GC_TRY_PROTECT_RECURSION(ht1);

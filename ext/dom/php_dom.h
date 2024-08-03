@@ -114,6 +114,9 @@ typedef enum dom_iterator_type {
 	DOM_HTMLCOLLECTION,
 } dom_iterator_type;
 
+struct php_dom_libxml_ns_mapper;
+typedef struct php_dom_libxml_ns_mapper php_dom_libxml_ns_mapper;
+
 static inline dom_object_namespace_node *php_dom_namespace_node_obj_from_obj(zend_object *obj) {
 	return (dom_object_namespace_node*)((char*)(obj) - XtOffsetOf(dom_object_namespace_node, dom.std));
 }
@@ -176,6 +179,8 @@ const char *dom_locate_a_namespace(const xmlNode *node, const zend_string *prefi
 void dom_mark_namespaces_as_attributes_too(php_dom_libxml_ns_mapper *ns_mapper, xmlDocPtr doc);
 bool dom_compare_value(const xmlAttr *attr, const xmlChar *value);
 void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp);
+bool php_dom_create_nullable_object(xmlNodePtr obj, zval *return_value, dom_object *domobj);
+xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
 
 typedef enum {
 	DOM_LOAD_STRING = 0,
@@ -211,8 +216,7 @@ void php_dom_named_node_map_get_named_item_into_zval(dom_nnodemap_object *objmap
 xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_long index);
 void php_dom_named_node_map_get_item_into_zval(dom_nnodemap_object *objmap, zend_long index, zval *return_value);
 int php_dom_get_namednodemap_length(dom_object *obj);
-
-xmlNodePtr dom_clone_node(php_dom_libxml_ns_mapper *ns_mapper, xmlNodePtr node, xmlDocPtr doc, bool recursive);
+xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep);
 
 #define DOM_GET_INTERN(__id, __intern) { \
 	__intern = Z_DOMOBJ_P(__id); \
@@ -289,6 +293,11 @@ static zend_always_inline xmlNodePtr php_dom_first_child_of_container_node(xmlNo
 	} else {
 		return parent->children;
 	}
+}
+
+static zend_always_inline const xmlChar *php_dom_get_content_or_empty(const xmlNode *node)
+{
+	return node->content ? node->content : BAD_CAST "";
 }
 
 PHP_MINIT_FUNCTION(dom);

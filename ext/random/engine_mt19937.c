@@ -388,10 +388,7 @@ PHP_METHOD(Random_Engine_Mt19937, __debugInfo)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (!engine->std.properties) {
-		rebuild_object_properties(&engine->std);
-	}
-	ZVAL_ARR(return_value, zend_array_dup(engine->std.properties));
+	ZVAL_ARR(return_value, zend_array_dup(zend_std_get_properties_ex(&engine->std)));
 
 	if (engine->engine.algo->serialize) {
 		array_init(&t);

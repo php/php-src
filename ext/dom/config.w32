@@ -8,7 +8,7 @@ if (PHP_DOM == "yes") {
 		CHECK_HEADER_ADD_INCLUDE("libxml/parser.h", "CFLAGS_DOM", PHP_PHP_BUILD + "\\include\\libxml2")
 	) {
 		EXTENSION("dom", "php_dom.c attr.c document.c infra.c \
-			xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c \
+			xml_document.c html_document.c xml_serializer.c html5_serializer.c html5_parser.c namespace_compat.c private_data.c \
 			domexception.c processinginstruction.c \
 			cdatasection.c documentfragment.c domimplementation.c element.c  inner_html_mixin.c \
 			node.c characterdata.c documenttype.c \
@@ -38,7 +38,7 @@ if (PHP_DOM == "yes") {
 		ADD_SOURCES("ext/dom/lexbor/lexbor/tag", "tag.c", "dom");
 		ADD_FLAG("CFLAGS_DOM", "/D LEXBOR_STATIC ");
 
-		AC_DEFINE("HAVE_DOM", 1, "DOM support");
+		AC_DEFINE("HAVE_DOM", 1, "Define to 1 if the PHP extension 'dom' is available.");
 
 		if (!PHP_DOM_SHARED) {
 			ADD_FLAG("CFLAGS_DOM", "/D LIBXML_STATIC ");
@@ -47,7 +47,12 @@ if (PHP_DOM == "yes") {
 				WARNING("dom support can't be enabled, libxml is not found")
 			}
 		}
-		PHP_INSTALL_HEADERS("ext/dom", "xml_common.h xpath_callbacks.h namespace_compat.h");
+		PHP_INSTALL_HEADERS("ext/dom",
+			"dom_ce.h " +
+			"namespace_compat.h " +
+			"xml_common.h " +
+			"xpath_callbacks.h "
+		);
 	} else {
 		WARNING("dom support can't be enabled, libxml is not enabled")
 		PHP_DOM = "no"

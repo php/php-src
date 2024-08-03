@@ -112,7 +112,7 @@ typedef enum {
 	BCMATH_RIGHT_GREATER = -1
 } bcmath_compare_result;
 
-bcmath_compare_result bc_compare(bc_num n1, bc_num n2);
+bcmath_compare_result bc_compare(bc_num n1, bc_num n2, size_t scale);
 
 bool bc_is_zero(bc_num num);
 

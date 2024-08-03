@@ -94,6 +94,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
 * Added zend_hash_get_current_pos_ex() variant of zend_hash_get_current_pos().
 
+* Renamed rebuild_object_properties() to rebuild_object_properties_internal().
+  This function should not be used outside of zend_std_get_properties_ex() and
+  zend_std_get_properties(). Use zend_std_get_properties_ex() or
+  zend_std_get_properties() instead.
+
 ========================
 2. Build system changes
 ========================
@@ -107,6 +112,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol DBA_CDB_MAKE removed in ext/dba.
    - Symbol HAVE_LIBM has been removed.
    - Symbol HAVE_INET_ATON has been removed.
+   - Symbol HAVE_SIGSETJMP has been removed.
    - The Zend/zend_istdiostream.h header has been removed.
 
  b. Unix build system changes
@@ -118,6 +124,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      ext/ftp and ext/mysqlnd is enabled implicitly, when building with
      ext/openssl (--with-openssl), or explicitly by using new configure options
      --with-ftp-ssl and --with-mysqlnd-ssl.
+   - New configure option --with-openssl-legacy-provider to enable OpenSSL
+     legacy provider.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
@@ -144,6 +152,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_PHPDBG has been removed.
    - Symbols PHP_HAVE_AVX512_SUPPORTS and PHP_HAVE_AVX512_VBMI_SUPPORTS are now
      either defined to 1 or undefined.
+   - Symbol HAVE_LIBCRYPT has been removed.
    - M4 macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and config.h).
    - M4 macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
    - M4 macro PHP_STRUCT_FLOCK has been removed (use AC_CHECK_TYPES).
@@ -160,14 +169,33 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
      directory anymore.
    - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
+   - M4 macro PHP_EVAL_LIBLINE got a new 3rd argument to override the ext_shared
+     checks.
+   - M4 macro PHP_SETUP_LIBXML doesn't define the redundant HAVE_LIBXML symbol
+     anymore.
+   - M4 macro PHP_SETUP_ICONV doesn't define the HAVE_ICONV symbol anymore.
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
      PGSQL_LIBS environment variables. When a directory argument is provided to
      configure options (--with-pgsql=DIR or --with-pdo-pgsql=DIR), it will be
      used instead of the pkg-config search.
+   - Added pkg-config support to find unixODBC and iODBC for the pdo_odbc
+     extension.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
+   - Cache variables synced to php_cv_* naming scheme. If you use them for
+     advanced cross-compilation, these were renamed:
+       - ac_cv_copy_file_range             -> php_cv_func_copy_file_range
+       - ac_cv_flush_io                    -> php_cv_have_flush_io
+       - ac_cv_func_getaddrinfo            -> php_cv_func_getaddrinfo
+       - ac_cv_have_broken_gcc_strlen_opt  -> php_cv_have_broken_gcc_strlen_opt
+       - ac_cv_have_pcre2_jit              -> php_cv_have_pcre2_jit
+       - ac_cv_syscall_shadow_stack_exists -> php_cv_have_shadow_stack_syscall
+       - ac_cv_time_r_type                 -> php_cv_time_r_type
+       - ac_cv_write_stdout                -> php_cv_have_write_stdout
+     and all other checks wrapped with their belonging cache variables (see *.m4
+     source files for details).
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,

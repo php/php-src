@@ -7335,6 +7335,9 @@ static int zend_jit_identical(zend_jit_ctx   *jit,
 				}
 				op2_addr = real_addr;
 			}
+			if (may_throw) {
+				jit_SET_EX_OPLINE(jit, opline);
+			}
 
 			ref = ir_CALL_2(IR_BOOL, ir_CONST_FC_FUNC(zend_is_identical),
 				jit_ZVAL_ADDR(jit, op1_addr),
@@ -8177,6 +8180,8 @@ static int zend_jit_type_check(zend_jit_ctx *jit, const zend_op *opline, uint32_
 	if (!smart_branch_opcode || exit_addr) {
 		if (end_inputs) {
 			ir_MERGE_list(end_inputs);
+		} else if (exit_addr && !jit->ctx.control) {
+			ir_BEGIN(IR_UNUSED); /* unreachable block */
 		}
 	} else {
 		_zend_jit_merge_smart_branch_inputs(jit, true_label, false_label, true_inputs, false_inputs);
@@ -13885,7 +13890,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (may_be_dynamic) {
-			ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, IR_NULL));
+			ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 			if (opline->opcode == ZEND_FETCH_OBJ_W) {
 				ir_IF_TRUE_cold(if_dynamic);
 				ir_END_list(slow_inputs);
@@ -13959,7 +13964,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_IF_FALSE(if_reinitable);
 
 			jit_SET_EX_OPLINE(jit, opline);
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_modification_error), prop_info_ref);
+			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_indirect_modification_error), prop_info_ref);
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
 			ir_END_list(end_inputs);
 
@@ -14033,7 +14038,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 			ir_IF_FALSE(if_reinitable);
 			jit_SET_EX_OPLINE(jit, opline);
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_modification_error), ir_CONST_ADDR(prop_info));
+			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_indirect_modification_error), ir_CONST_ADDR(prop_info));
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
 			ir_END_list(end_inputs);
 
@@ -14365,7 +14370,7 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		ir_ref offset_ref = ir_LOAD_A(
 			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
 
-		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, IR_NULL));
+		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 		ir_IF_TRUE_cold(if_dynamic);
 		ir_END_list(slow_inputs);
 
@@ -14723,7 +14728,7 @@ static int zend_jit_assign_obj_op(zend_jit_ctx         *jit,
 		ir_ref offset_ref = ir_LOAD_A(
 			ir_ADD_OFFSET(run_time_cache, ((opline+1)->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
 
-		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, IR_NULL));
+		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 		ir_IF_TRUE_cold(if_dynamic);
 		ir_END_list(slow_inputs);
 
@@ -15146,7 +15151,7 @@ static int zend_jit_incdec_obj(zend_jit_ctx         *jit,
 		ir_ref offset_ref = ir_LOAD_A(
 			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
 
-		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, IR_NULL));
+		ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 		ir_IF_TRUE_cold(if_dynamic);
 		ir_END_list(slow_inputs);
 

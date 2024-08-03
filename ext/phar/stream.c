@@ -782,6 +782,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	}
 	if (PHAR_G(readonly) && (!pto || !pto->is_data)) {
 		php_url_free(resource_from);
+		php_url_free(resource_to);
 		php_error_docref(NULL, E_WARNING, "phar error: Write operations disabled by the php.ini setting phar.readonly");
 		return 0;
 	}

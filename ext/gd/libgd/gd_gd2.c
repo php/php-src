@@ -137,7 +137,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	GD2_DBG(gd_error("%d Chunks vertically", *ncy));
 
 	if (gd2_compressed(*fmt)) {
-		if (*ncx <= 0 || *ncy <= 0 || *ncx > INT_MAX / *ncy) {
+		if (overflow2(*ncx, *ncy)) {
 			GD2_DBG(printf ("Illegal chunk counts: %d * %d\n", *ncx, *ncy));
 			goto fail1;
 		}

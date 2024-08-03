@@ -494,7 +494,7 @@ IR_ALWAYS_INLINE void ir_sparse_set_init(ir_sparse_set *set, uint32_t size)
 	set->size = size;
 	set->len = 0;
 	set->data = (uint32_t*)ir_mem_malloc(sizeof(uint32_t) * 2 * size) + size;
-#if IR_DEBUG
+#ifdef IR_DEBUG
 	/* initialize sparse part to avoid valgrind warnings */
 	memset(&IR_SPARSE_SET_SPARSE(set, size - 1), 0, size * sizeof(uint32_t));
 #endif

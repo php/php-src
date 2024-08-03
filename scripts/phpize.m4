@@ -15,7 +15,7 @@ AC_CONFIG_SRCDIR([config.m4])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
-PHP_CONFIG_NICE(config.nice)
+PHP_CONFIG_NICE([config.nice])
 
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
@@ -65,7 +65,6 @@ PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
 AS_VAR_IF([prefix],,
   [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
 
-php_shtool=$srcdir/build/shtool
 PHP_INIT_BUILD_SYSTEM
 
 AC_MSG_CHECKING([for PHP prefix])

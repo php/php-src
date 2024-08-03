@@ -14,7 +14,7 @@ if test "$PHP_APXS2" != "no"; then
       APXS=/usr/sbin/apxs
     fi
   else
-    PHP_EXPAND_PATH($PHP_APXS2, APXS)
+    PHP_EXPAND_PATH([$PHP_APXS2], [APXS])
   fi
 
   $APXS -q CFLAGS >/dev/null 2>&1
@@ -34,10 +34,10 @@ if test "$PHP_APXS2" != "no"; then
 
   APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
-  AS_IF([test ! -x "$APXS_HTTPD"], [AC_MSG_ERROR([m4_normalize([
+  AS_IF([test ! -x "$APXS_HTTPD"], [AC_MSG_ERROR(m4_normalize([
     $APXS_HTTPD executable not found. Please, install Apache HTTP Server
     command-line utility.
-  ])])])
+  ]))])
 
   APXS_CFLAGS=`$APXS -q CFLAGS`
   APU_BINDIR=`$APXS -q APU_BINDIR`
@@ -85,7 +85,10 @@ if test "$PHP_APXS2" != "no"; then
   case $host_alias in
   *aix*)
     EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI([apache2handler],
+      [shared],
+      [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+      [$APACHE_CFLAGS])
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   *darwin*)
@@ -100,21 +103,29 @@ if test "$PHP_APXS2" != "no"; then
     fi
     MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
     PHP_SUBST([MH_BUNDLE_FLAGS])
-    PHP_SELECT_SAPI(apache2handler, bundle, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI([apache2handler],
+      [bundle],
+      [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+      [$APACHE_CFLAGS])
     SAPI_SHARED=libs/libphp.so
     INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ;;
   *)
-    PHP_SELECT_SAPI(apache2handler, shared, mod_php.c sapi_apache2.c apache_config.c php_functions.c, $APACHE_CFLAGS)
+    PHP_SELECT_SAPI([apache2handler],
+      [shared],
+      [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+      [$APACHE_CFLAGS])
     INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ;;
   esac
 
-  APACHE_THREADED_MPM=$($APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes')
-  AS_VAR_IF([APACHE_THREADED_MPM],,, [PHP_BUILD_THREAD_SAFE])
+  AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
+    APACHE_THREADED_MPM=yes
+    PHP_BUILD_THREAD_SAFE
+  ], [APACHE_THREADED_MPM=no])
 
 AC_CONFIG_COMMANDS([apache2handler], [AS_VAR_IF([enable_zts], [yes],,
-  [AS_VAR_IF([APACHE_THREADED_MPM],,
+  [AS_VAR_IF([APACHE_THREADED_MPM], [no],
     [AC_MSG_WARN([
 +--------------------------------------------------------------------+
 |                        *** WARNING ***                             |
@@ -124,5 +135,5 @@ AC_CONFIG_COMMANDS([apache2handler], [AS_VAR_IF([enable_zts], [yes],,
 | PHP with --enable-zts                                              |
 +--------------------------------------------------------------------+
   ])])])],
-  [APACHE_THREADED_MPM=$APACHE_THREADED_MPM; enable_zts=$enable_zts])
+  [APACHE_THREADED_MPM="$APACHE_THREADED_MPM"; enable_zts="$enable_zts"])
 fi

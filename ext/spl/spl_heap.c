@@ -503,18 +503,15 @@ static zend_result spl_heap_object_count_elements(zend_object *object, zend_long
 }
 /* }}} */
 
-static inline HashTable* spl_heap_object_get_debug_info(const zend_class_entry *ce, zend_object *obj) { /* {{{ */
+static HashTable* spl_heap_object_get_debug_info(const zend_class_entry *ce, zend_object *obj) { /* {{{ */
 	spl_heap_object *intern = spl_heap_from_obj(obj);
 	zval tmp, heap_array;
 	HashTable *debug_info;
-
-	if (!intern->std.properties) {
-		rebuild_object_properties(&intern->std);
-	}
+	HashTable *properties = zend_std_get_properties_ex(&intern->std);
 
 	/* +3 As we are adding 3 additional key-entries */
-	debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 3);
-	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
+	debug_info = zend_new_array(zend_hash_num_elements(properties) + 3);
+	zend_hash_copy(debug_info, properties, (copy_ctor_func_t) zval_add_ref);
 
 	ZVAL_LONG(&tmp, intern->flags);
 	spl_set_private_debug_info_property(ce, "flags", strlen("flags"), debug_info, &tmp);

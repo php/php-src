@@ -22,7 +22,7 @@ extern "C" {
 
 #ifdef _WIN32
 /* TODO Handle ARM, too. */
-# if defined(_M_X64)
+# if defined(_M_X64) || defined(_M_ARM64)
 #  define __SIZEOF_SIZE_T__ 8
 # elif defined(_M_IX86)
 #  define __SIZEOF_SIZE_T__ 4

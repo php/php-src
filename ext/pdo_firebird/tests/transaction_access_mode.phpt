@@ -29,11 +29,11 @@ foreach ($values as $value) {
         PDO_FIREBIRD_TEST_USER,
         PDO_FIREBIRD_TEST_PASS,
         [
-            PDO::FB_WRITABLE_TRANSACTION => $value['val'],
+            Pdo\Firebird::WRITABLE_TRANSACTION => $value['val'],
         ],
     );
 
-    if ($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION) === $value['val']) {
+    if ($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION) === $value['val']) {
         echo "OK: {$value['label']}\n";
     } else {
         echo "NG: {$value['label']}\n";
@@ -54,8 +54,8 @@ $dbh = new PDO(
 $dbh->query("CREATE TABLE {$table} (val INT)");
 
 echo "writable\n";
-var_dump($dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, true));
-if ($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION) === true) {
+var_dump($dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, true));
+if ($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION) === true) {
     echo "OK: writable\n";
 } else {
     echo "NG: writable\n";
@@ -67,8 +67,8 @@ var_dump($r->fetchAll());
 echo "\n";
 
 echo "readonly\n";
-var_dump($dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, false));
-if ($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION) === false) {
+var_dump($dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, false));
+if ($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION) === false) {
     echo "OK: readonly\n";
 } else {
     echo "NG: readonly\n";
@@ -84,47 +84,47 @@ var_dump($r->fetchAll());
 echo "\n";
 echo "========== Set attr in setAttribute while transaction ==========\n";
 
-$dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, true);
+$dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, true);
 $dbh->beginTransaction();
 
 echo "writable to writable\n";
 try {
-    $dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, true);
+    $dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, true);
 } catch (PDOException $e) {
     echo $e->getMessage()."\n";
 }
-var_dump($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION));
+var_dump($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION));
 echo "\n";
 
 echo "writable to readonly\n";
 try {
-    $dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, false);
+    $dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, false);
 } catch (PDOException $e) {
     echo $e->getMessage()."\n";
 }
-var_dump($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION));
+var_dump($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION));
 echo "\n";
 
 $dbh->commit();
-$dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, false);
+$dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, false);
 $dbh->beginTransaction();
 
 echo "readonly to writable\n";
 try {
-    $dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, true);
+    $dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, true);
 } catch (PDOException $e) {
     echo $e->getMessage()."\n";
 }
-var_dump($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION));
+var_dump($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION));
 echo "\n";
 
 echo "readonly to readonly\n";
 try {
-    $dbh->setAttribute(PDO::FB_WRITABLE_TRANSACTION, false);
+    $dbh->setAttribute(Pdo\Firebird::WRITABLE_TRANSACTION, false);
 } catch (PDOException $e) {
     echo $e->getMessage()."\n";
 }
-var_dump($dbh->getAttribute(PDO::FB_WRITABLE_TRANSACTION));
+var_dump($dbh->getAttribute(Pdo\Firebird::WRITABLE_TRANSACTION));
 
 unset($dbh);
 ?>
