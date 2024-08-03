@@ -1226,6 +1226,7 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
         decoded_length += ZSTR_LEN(replacement);
 
         // Advance the cursor to the next section of text.
+        zend_string_release(replacement);
         at += matched_bytes;
         was_at = at;
     }
