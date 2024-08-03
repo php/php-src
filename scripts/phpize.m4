@@ -91,19 +91,17 @@ php_debug_is_enabled
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_DEBUG])
 
-AC_MSG_CHECKING([if zts is enabled])
+AC_MSG_CHECKING([if PHP is built with thread safety (ZTS)])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
-AC_EGREP_CPP(php_zts_is_enabled,[
+AC_EGREP_CPP([php_zts_is_enabled], [
 #include <main/php_config.h>
 #ifdef ZTS
 php_zts_is_enabled
 #endif
-],[
-  PHP_THREAD_SAFETY=yes
-],[
-  PHP_THREAD_SAFETY=no
-])
+],
+  [PHP_THREAD_SAFETY=yes],
+  [PHP_THREAD_SAFETY=no])
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_THREAD_SAFETY])
 

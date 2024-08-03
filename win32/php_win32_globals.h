@@ -17,7 +17,7 @@
 #ifndef PHP_WIN32_GLOBALS_H
 #define PHP_WIN32_GLOBALS_H
 
-/* misc globals for thread-safety under win32 */
+/* misc globals for thread safety under win32 */
 
 #include "win32/sendmail.h"
 

@@ -295,9 +295,10 @@ if test -z "$PHP_INSTALLED_SAPIS"; then
   AC_MSG_ERROR([Nothing to build.])
 fi
 
-dnl Force ZTS.
-if test "$enable_zts" = "yes"; then
-  dnl Add pthreads linker and compiler flags.
+dnl Add POSIX threads compilation and linker flags when thread safety is enabled
+dnl with either the '--enable-zts' configure option or automatically enabled by
+dnl PHP SAPIs. For example, Apache SAPI.
+AS_VAR_IF([enable_zts], [yes], [
   if test -n "$ac_cv_pthreads_lib"; then
     LIBS="$LIBS -l$ac_cv_pthreads_lib"
   fi
@@ -306,7 +307,7 @@ if test "$enable_zts" = "yes"; then
   fi
 
   PTHREADS_FLAGS
-fi
+])
 
 dnl Starting system checks.
 dnl ----------------------------------------------------------------------------
@@ -847,12 +848,7 @@ AC_ARG_ENABLE([zts],
   [ZEND_ZTS=$enableval],
   [ZEND_ZTS=no])
 
-if test "$ZEND_ZTS" = "yes"; then
-  AC_DEFINE(ZTS, 1,[ ])
-  PHP_THREAD_SAFETY=yes
-else
-  PHP_THREAD_SAFETY=no
-fi
+AS_VAR_IF([ZEND_ZTS], [yes], [PHP_THREAD_SAFETY=yes], [PHP_THREAD_SAFETY=no])
 
 AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AS_VAR_IF([pthreads_working], [yes], [],
@@ -1368,17 +1364,11 @@ if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO
   if test "$oldstyleextdir" = "yes"; then
     AS_VAR_IF([PHP_DEBUG], [1], [part1=debug], [part1=no-debug])
-    if test "$enable_zts" = "yes"; then
-      part2=zts
-    else
-      part2=non-zts
-    fi
+    AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [part2=zts], [part2=non-zts])
     extbasedir=$part1-$part2-$extbasedir
     EXTENSION_DIR=$libdir/extensions/$extbasedir
   else
-    if test "$enable_zts" = "yes"; then
-      extbasedir=$extbasedir-zts
-    fi
+    AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [extbasedir=$extbasedir-zts])
     AS_VAR_IF([PHP_DEBUG], [1], [extbasedir=$extbasedir-debug])
     EXTENSION_DIR=$libdir/$extbasedir
   fi
