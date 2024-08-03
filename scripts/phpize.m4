@@ -77,19 +77,17 @@ AC_MSG_CHECKING([for PHP installed headers prefix])
 AC_MSG_RESULT([$phpincludedir])
 
 dnl Checks for PHP_DEBUG / ZEND_DEBUG / ZTS.
-AC_MSG_CHECKING([if debug is enabled])
+AC_MSG_CHECKING([if debugging is enabled])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
-AC_EGREP_CPP(php_debug_is_enabled,[
+AC_EGREP_CPP([php_debug_is_enabled], [
 #include <main/php_config.h>
 #if ZEND_DEBUG
 php_debug_is_enabled
 #endif
-],[
-  PHP_DEBUG=yes
-],[
-  PHP_DEBUG=no
-])
+],
+  [PHP_DEBUG=yes],
+  [PHP_DEBUG=no])
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_DEBUG])
 
@@ -110,7 +108,7 @@ CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_THREAD_SAFETY])
 
 dnl Discard optimization flags when debugging is enabled.
-if test "$PHP_DEBUG" = "yes"; then
+AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
@@ -132,10 +130,10 @@ if test "$PHP_DEBUG" = "yes"; then
       CXXFLAGS="$CFLAGS -g"
     fi
   fi
-else
+], [
   PHP_DEBUG=0
   ZEND_DEBUG=no
-fi
+])
 
 dnl Always shared.
 PHP_BUILD_SHARED
