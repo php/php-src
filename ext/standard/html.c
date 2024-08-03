@@ -1236,11 +1236,11 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
 }
 /* }}} */
 
-/* {{{ php_decode_html_step
+/* {{{ php_decode_html_ref
  * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT,
  * depending on whether the text being decoded is found inside an attribute or not.
  */
-PHPAPI zend_string *php_decode_html_step(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length)
+PHPAPI zend_string *php_decode_html_ref(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length)
 {
     const char *input = ZSTR_VAL(html);
     size_t input_length = ZSTR_LEN(html);
@@ -1721,7 +1721,7 @@ PHP_FUNCTION(decode_html)
 /* }}} */
 
 /* {{{ Find the next character reference in a UTF-8 HTML document */
-PHP_FUNCTION(decode_html_step)
+PHP_FUNCTION(decode_html_ref)
 {
     zend_long context;
     zend_string *html;
@@ -1743,7 +1743,7 @@ PHP_FUNCTION(decode_html_step)
         offset = 0;
     }
 
-    decoded = php_decode_html_step((int)context, html, offset, &byte_length);
+    decoded = php_decode_html_ref((int)context, html, offset, &byte_length);
     if (NULL == decoded) {
         RETURN_NULL();
     } else {

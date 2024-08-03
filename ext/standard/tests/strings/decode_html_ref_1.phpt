@@ -1,5 +1,5 @@
 --TEST--
-decode_html_step: Basic Decoding Tests
+decode_html_ref: Basic Decoding Tests
 --FILE--
 <?php
 
@@ -54,7 +54,7 @@ $test_cases = array(
 foreach ($test_cases as $test_case) {
     list($string, $context, $at) = $test_case;
 
-    $match = decode_html_step($context, $string, $at, $match_length);
+    $match = decode_html_ref($context, $string, $at, $match_length);
     $c = HTML_ATTRIBUTE === $context ? 'A' : 'T';
     if (isset($match)) {
         echo "{$c}(@{$at} {$string}) {$match_length}:{$match}\n";

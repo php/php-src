@@ -1,5 +1,5 @@
 --TEST--
-decode_html_step: Basic Decoding Tests
+decode_html: Basic Decoding Tests
 --FILE--
 <?php
 
