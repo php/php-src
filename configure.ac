@@ -602,8 +602,8 @@ AC_CHECK_FUNCS(m4_normalize([
   vasprintf
 ]))
 
-AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
-AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
+AC_CHECK_FUNC([inet_ntop],, [AC_MSG_FAILURE([Required inet_ntop not found.])])
+AC_CHECK_FUNC([inet_pton],, [AC_MSG_FAILURE([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
@@ -856,7 +856,7 @@ fi
 
 AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AS_VAR_IF([pthreads_working], [yes], [],
-    [AC_MSG_ERROR(m4_normalize([
+    [AC_MSG_FAILURE(m4_normalize([
       Unable to verify system support for POSIX Threads, which are required for
       PHP thread safety (ZTS) build.
     ]))])
@@ -978,7 +978,7 @@ AS_VAR_IF([PHP_DMALLOC], [yes],
     [PHP_ADD_LIBRARY([dmalloc])
       AC_DEFINE([HAVE_DMALLOC], [1], [Define to 1 if you have dmalloc.])
       AS_VAR_APPEND([CPPFLAGS], [" -DDMALLOC_FUNC_CHECK"])],
-    [AC_MSG_ERROR([Problem with enabling dmalloc. Please, check config.log for details.])])])
+    [AC_MSG_FAILURE([The dmalloc check failed. Cannot enable dmalloc.])])])
 
 PHP_ARG_ENABLE([ipv6],
   [whether to enable IPv6 support],
@@ -1312,7 +1312,7 @@ else
   AC_CHECK_HEADER([ucontext.h],
     [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1],
       [Define to 1 if Zend fiber uses ucontext instead of boost context.])],
-    [AC_MSG_ERROR([fibers not available on this platform])])
+    [AC_MSG_FAILURE([fibers not available on this platform])])
 fi
 
 ZEND_INIT

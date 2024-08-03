@@ -157,7 +157,7 @@ dnl as a fallback since AC_CHECK_FUNC cannot detect macros.
 dnl
 AC_CHECK_FUNC([sigsetjmp],,
   [AC_CHECK_DECL([sigsetjmp],,
-    [AC_MSG_ERROR([Required sigsetjmp not found. Please, check config.log])],
+    [AC_MSG_FAILURE([Required sigsetjmp not found.])],
     [#include <setjmp.h>])])
 
 ZEND_CHECK_STACK_DIRECTION
@@ -381,7 +381,7 @@ int main(void)
   [php_cv_align_mm=failed],
   [php_cv_align_mm="(size_t)8 (size_t)3 0"])])
 AS_VAR_IF([php_cv_align_mm], [failed],
-  [AC_MSG_ERROR([ZEND_MM alignment defines failed. Please, check config.log])],
+  [AC_MSG_FAILURE([ZEND_MM alignment defines failed.])],
   [zend_mm_alignment=$(echo $php_cv_align_mm | cut -d ' ' -f 1)
   zend_mm_alignment_log2=$(echo $php_cv_align_mm | cut -d ' ' -f 2)
   zend_mm_8byte_realign=$(echo $php_cv_align_mm | cut -d ' ' -f 3)
