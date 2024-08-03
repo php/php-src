@@ -1192,13 +1192,13 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
 {
     const char *input = ZSTR_VAL(html);
     const size_t input_length = ZSTR_LEN(html);
-    const char *end = &input[input_length];
+    const char *end = &input[offset] + length;
     const char *decoded = emalloc(input_length);
     size_t decoded_length = 0;
     char *at = (char *)&input[offset];
+    char *was_at = at;
 
     while (at < end) {
-        char *was_at = at;
         at = memchr(at, '&', end - at);
         if (NULL == at) {
             // Copy the remaining plaintext.
@@ -1213,6 +1213,7 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
         int matched_bytes;
         const zend_string *replacement = php_decode_html_step(context, html, at - input, &matched_bytes);
         if (NULL == replacement) {
+            at++;
             continue;
         }
 
@@ -1226,6 +1227,7 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
 
         // Advance the cursor to the next section of text.
         at += matched_bytes;
+        was_at = at;
     }
 
     zend_string *extracted_decoded = zend_string_init(decoded, decoded_length, 0);
