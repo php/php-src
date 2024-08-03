@@ -560,6 +560,16 @@ const ENT_XHTML = UNKNOWN;
 * @cvalue ENT_HTML5
 */
 const ENT_HTML5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue HTML_ATTRIBUTE
+ */
+const HTML_ATTRIBUTE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue HTML_TEXT
+ */
+const HTML_TEXT = UNKNOWN;
 
 /* image.c */
 

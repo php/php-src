@@ -1006,7 +1006,7 @@ static inline size_t html5_find_large_reference_name_group(const char *input, co
     return i >> 1;
 }
 
-static inline const char *html5_find_large_reference_name(const char *input, const size_t input_start, const size_t input_end, const size_t group_number, long *match_length, uint8_t *replacement_length) {
+static inline const char *html5_find_large_reference_name(const char *input, const size_t input_start, const size_t input_end, const size_t group_number, int *match_length, uint8_t *replacement_length) {
     size_t group_count = html5_named_character_references_lookup.groups_length >> 1;
 
     uint16_t start_at = html5_named_character_references_lookup.group_offsets[group_number];
@@ -1076,7 +1076,7 @@ static inline zend_string *html5_code_point_to_utf8_bytes(uint32_t code_point) {
     return zend_string_init(decoded, 4, 0);
 }
 
-PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long context, const zend_string *html, const zend_long offset, long *matched_byte_length) {
+PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length) {
     static uint8_t hex_digits[256] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
     static uint32_t cp1252_replacements[32] = {
         0x20AC, // 0x80 -> EURO SIGN (€).
@@ -1188,7 +1188,7 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long
  * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT,
  * depending on whether the text being decoded is found inside an attribute or not.
  */
-PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const long offset, long *matched_byte_length)
+PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length)
 {
     const char *input = ZSTR_VAL(html);
     size_t input_length = ZSTR_LEN(html);
@@ -1638,28 +1638,29 @@ PHP_FUNCTION(decode_html)
     zend_string *html;
     zend_long offset;
     bool offset_is_null = 1;
-    zval *matched_byte_length = NULL;
+    zval *matched_byte_length;
     zend_string *decoded;
-    long byte_length = 0;
+    int byte_length = 0;
 
     ZEND_PARSE_PARAMETERS_START(2, 4)
         Z_PARAM_LONG(context)
         Z_PARAM_STR(html)
         Z_PARAM_OPTIONAL
         Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
-        Z_PARAM_ZVAL_EX2(matched_byte_length, 0, 1, 0)
+        Z_PARAM_ZVAL(matched_byte_length)
     ZEND_PARSE_PARAMETERS_END();
 
     if (offset_is_null) {
         offset = 0;
     }
 
-    ZVAL_LONG(matched_byte_length, 0);
     decoded = php_decode_html((int)context, html, offset, &byte_length);
     if (NULL == decoded) {
         RETURN_NULL();
     } else {
-        ZVAL_LONG(matched_byte_length, byte_length);
+        if (matched_byte_length) {
+            ZEND_TRY_ASSIGN_REF_LONG(matched_byte_length, byte_length);
+        }
         RETURN_STR(decoded);
     }
 }
