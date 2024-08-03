@@ -32,6 +32,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13775 (Memory leak possibly related to opcache SHM placement).
     (Arnaud, nielsdos)
 
+- Output:
+  . Fixed bug GH-15179 (Segmentation fault (null pointer dereference) in
+    ext/standard/url_scanner_ex.re). (nielsdos)
+
 - PDO_Firebird:
   . Fix bogus fallthrough path in firebird_handle_get_attribute(). (nielsdos)
 
