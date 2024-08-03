@@ -1638,7 +1638,7 @@ PHP_FUNCTION(decode_html)
     zend_string *html;
     zend_long offset;
     bool offset_is_null = 1;
-    zval *matched_byte_length;
+    zval *matched_byte_length = NULL;
     zend_string *decoded;
     int byte_length = 0;
 
