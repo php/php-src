@@ -325,7 +325,7 @@ int main(void) {
       AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
         [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
       AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
-        [Define if you have POSIX mmap() SHM support])
+        [Define to 1 if you have the POSIX mmap() SHM support.])
     fi
   ])
   LIBS="$LIBS_save"
