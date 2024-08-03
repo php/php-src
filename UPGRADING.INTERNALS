@@ -276,6 +276,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      implementation has been improved to generate better seeds, however any
      users should use the opportunity to verify that seeding is first
      attempted using the CSPRNG for better output size flexibility.
+   - The standalone combined_lcg engine has been removed, as the lcg_value()
+     userland function is deprecated and as the engine is unable to return
+     unbiased integer values. The internal php_combined_lcg() function remains
+     available for now.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used
