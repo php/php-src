@@ -1188,7 +1188,57 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long
  * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT,
  * depending on whether the text being decoded is found inside an attribute or not.
  */
-PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length)
+PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const zend_long offset, const zend_long length)
+{
+    const char *input = ZSTR_VAL(html);
+    const size_t input_length = ZSTR_LEN(html);
+    const char *end = &input[input_length];
+    const char *decoded = emalloc(input_length);
+    size_t decoded_length = 0;
+    char *at = (char *)&input[offset];
+
+    while (at < end) {
+        char *was_at = at;
+        at = memchr(at, '&', end - at);
+        if (NULL == at) {
+            // Copy the remaining plaintext.
+            memcpy((void *)&decoded[decoded_length], was_at, end - was_at);
+            decoded_length += end - was_at;
+            break;
+        }
+
+        size_t plaintext_span = at - was_at;
+
+        // Is there a character reference?
+        int matched_bytes;
+        const zend_string *replacement = php_decode_html_step(context, html, at - input, &matched_bytes);
+        if (NULL == replacement) {
+            continue;
+        }
+
+        // Copy the span up to the next "&" into the destination.
+        memcpy((void *)&decoded[decoded_length], was_at, plaintext_span);
+        decoded_length += plaintext_span;
+
+        // Copy the decoded character(s) into the destination.
+        memcpy((void *)&decoded[decoded_length], ZSTR_VAL(replacement), ZSTR_LEN(replacement));
+        decoded_length += ZSTR_LEN(replacement);
+
+        // Advance the cursor to the next section of text.
+        at += matched_bytes;
+    }
+
+    zend_string *extracted_decoded = zend_string_init(decoded, decoded_length, 0);
+    efree((void *)decoded);
+    return extracted_decoded;
+}
+/* }}} */
+
+/* {{{ php_decode_html_step
+ * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT,
+ * depending on whether the text being decoded is found inside an attribute or not.
+ */
+PHPAPI zend_string *php_decode_html_step(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length)
 {
     const char *input = ZSTR_VAL(html);
     size_t input_length = ZSTR_LEN(html);
@@ -1631,8 +1681,45 @@ PHP_FUNCTION(htmlspecialchars_decode)
 }
 /* }}} */
 
-/* {{{ Find the next character reference in a UTF-8 HTML document */
+/* {{{ Decode a UTF-8 HTML text span. */
 PHP_FUNCTION(decode_html)
+{
+    zend_long context;
+    zend_string *html;
+    zend_long offset;
+    bool offset_is_null = 1;
+    zend_long length;
+    bool length_is_null = 1;
+
+    zend_string *decoded;
+
+    ZEND_PARSE_PARAMETERS_START(2, 4)
+        Z_PARAM_LONG(context)
+        Z_PARAM_STR(html)
+        Z_PARAM_OPTIONAL
+        Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
+        Z_PARAM_LONG_OR_NULL(length, length_is_null)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (offset_is_null) {
+        offset = 0;
+    }
+
+    if (length_is_null) {
+        length = ZSTR_LEN(html) - offset;
+    }
+
+    decoded = php_decode_html(context, html, offset, length);
+    if (NULL == decoded) {
+        RETURN_NULL();
+    } else {
+        RETURN_STR(decoded);
+    }
+}
+/* }}} */
+
+/* {{{ Find the next character reference in a UTF-8 HTML document */
+PHP_FUNCTION(decode_html_step)
 {
     zend_long context;
     zend_string *html;
@@ -1654,7 +1741,7 @@ PHP_FUNCTION(decode_html)
         offset = 0;
     }
 
-    decoded = php_decode_html((int)context, html, offset, &byte_length);
+    decoded = php_decode_html_step((int)context, html, offset, &byte_length);
     if (NULL == decoded) {
         RETURN_NULL();
     } else {

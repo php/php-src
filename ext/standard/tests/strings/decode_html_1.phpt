@@ -1,101 +1,28 @@
 --TEST--
-decode_html: Basic Decoding Tests
+decode_html_step: Basic Decoding Tests
 --FILE--
 <?php
 
 $test_cases = array(
-    array("&AElig;", HTML_TEXT, 0),
-
-    array("&lt", HTML_ATTRIBUTE, 0),
-    array("&lt;", HTML_ATTRIBUTE, 0),
-    array("&lt,", HTML_ATTRIBUTE, 0),
-    array("&lt,", HTML_TEXT, 0),
-
-    array("&rightleftarrows", HTML_ATTRIBUTE, 0),
-    array("&rightleftarrows;", HTML_ATTRIBUTE, 0),
-    array("&rightleftarrows,", HTML_ATTRIBUTE, 0),
-    array("&rightleftarrows,", HTML_TEXT, 0),
-
-    array("&#", HTML_TEXT, 0),
-    array("&#;", HTML_TEXT, 0),
-    array("&#x;", HTML_TEXT, 0),
-    array("&#X;", HTML_TEXT, 0),
-    array("&#X", HTML_TEXT, 0),
-
-    array("&#11141114111;", HTML_TEXT, 0),
-    array("&#x10FFFF0000;", HTML_TEXT, 0),
-
-    array("&#x80;", HTML_TEXT, 0),
-    array("&#x8d;", HTML_TEXT, 0),
-
-    array("&#xD800;", HTML_TEXT, 0),
-    array("&#xDD70;", HTML_TEXT, 0),
-
-    array("&#x1f170;", HTML_TEXT, 0),
-
-    array("&amp;=", HTML_ATTRIBUTE, 0),
-    array("&amp=", HTML_ATTRIBUTE, 0),
-    array("&amp=", HTML_TEXT, 0),
-
-    // &cent is allowed in unambiguous contexts without the ; but
-    // it's also a substring of &centerdot; which requires the ;.
-    array("&centerdot", HTML_ATTRIBUTE, 0),
-    array("&centerdot", HTML_TEXT, 0),
-
-    array("&amp&&amp&&", HTML_TEXT, 5),
-    array("&amp&&amp;&&", HTML_TEXT, 5),
-    array("&amp&&amp&&", HTML_ATTRIBUTE, 5),
-    array("&amp&&amp;&&", HTML_ATTRIBUTE, 5),
-    array("&amp&&amp=&", HTML_TEXT, 5),
-    array("&amp&&amp=&", HTML_TEXT, 5),
-    array("&amp&&amp/&", HTML_TEXT, 5),
+    array("Cats &amp; Dogs", HTML_TEXT, 0, null),
+    array('<abbr title="&lt;tags&gt;">', HTML_ATTRIBUTE, 13, 12),
+    array('&notinyourcode', HTML_TEXT, 0, null),
+    array('&notinyourcode', HTML_ATTRIBUTE, 0, null),
 );
 
 foreach ($test_cases as $test_case) {
-    list($string, $context, $at) = $test_case;
+    list($string, $context, $at, $length) = $test_case;
 
-    $match = decode_html($context, $string, $at, $match_length);
+    $decoded = decode_html($context, $string, $at, $length);
     $c = HTML_ATTRIBUTE === $context ? 'A' : 'T';
-    if (isset($match)) {
-        echo "{$c}(@{$at} {$string}) {$match_length}:{$match}\n";
-    } else {
-        echo "{$c}(@{$at} {$string}) (no match)\n";
-    }
+    $s = substr($string, $at, $length);
+    echo "{$c}: '{$s}' -> '{$decoded}'\n";
 }
 echo "(done)\n";
 
 --EXPECT--
-T(@0 &AElig;) 7:Æ
-A(@0 &lt) 3:<
-A(@0 &lt;) 4:<
-A(@0 &lt,) 3:<
-T(@0 &lt,) 3:<
-A(@0 &rightleftarrows) (no match)
-A(@0 &rightleftarrows;) 17:⇄
-A(@0 &rightleftarrows,) (no match)
-T(@0 &rightleftarrows,) (no match)
-T(@0 &#) (no match)
-T(@0 &#;) (no match)
-T(@0 &#x;) (no match)
-T(@0 &#X;) (no match)
-T(@0 &#X) (no match)
-T(@0 &#11141114111;) 14:�
-T(@0 &#x10FFFF0000;) 14:�
-T(@0 &#x80;) 6:€
-T(@0 &#x8d;) 6:
-T(@0 &#xD800;) 8:�
-T(@0 &#xDD70;) 8:�
-T(@0 &#x1f170;) 9:🅰
-A(@0 &amp;=) 5:&
-A(@0 &amp=) (no match)
-T(@0 &amp=) 4:&
-A(@0 &centerdot) (no match)
-T(@0 &centerdot) 5:¢
-T(@5 &amp&&amp&&) 4:&
-T(@5 &amp&&amp;&&) 5:&
-A(@5 &amp&&amp&&) 4:&
-A(@5 &amp&&amp;&&) 5:&
-T(@5 &amp&&amp=&) 4:&
-T(@5 &amp&&amp=&) 4:&
-T(@5 &amp&&amp/&) 4:&
+T: 'Cats &amp; Dogs' -> 'Cats & Dogs'
+A: '&lt;tags&gt;' -> '<tags>'
+T: '&notinyourcode' -> '¬inyourcode'
+A: '&notinyourcode' -> '&notinyourcode'
 (done)

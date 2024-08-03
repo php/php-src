@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: ef33880171ad23b8c553f9f5bb4a38f6ac461536 */
+ * Stub hash: aeb4fb5df68c3492887058e8336d4173578ee695 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -789,6 +789,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_htmlspecialchars_decode, 0, 1, I
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_decode_html, 0, 2, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, context, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_decode_html_step, 0, 2, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, context, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
@@ -2561,6 +2568,7 @@ ZEND_FUNCTION(headers_list);
 ZEND_FUNCTION(htmlspecialchars);
 ZEND_FUNCTION(htmlspecialchars_decode);
 ZEND_FUNCTION(decode_html);
+ZEND_FUNCTION(decode_html_step);
 ZEND_FUNCTION(html_entity_decode);
 ZEND_FUNCTION(htmlentities);
 ZEND_FUNCTION(get_html_translation_table);
@@ -3200,6 +3208,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(htmlspecialchars, arginfo_htmlspecialchars)
 	ZEND_FE(htmlspecialchars_decode, arginfo_htmlspecialchars_decode)
 	ZEND_FE(decode_html, arginfo_decode_html)
+	ZEND_FE(decode_html_step, arginfo_decode_html_step)
 	ZEND_FE(html_entity_decode, arginfo_html_entity_decode)
 	ZEND_FE(htmlentities, arginfo_htmlentities)
 	ZEND_FE(get_html_translation_table, arginfo_get_html_translation_table)
