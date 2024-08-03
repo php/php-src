@@ -508,7 +508,7 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
-  PHP_OUTPUT([
+  AC_CONFIG_FILES([
     sapi/fpm/init.d.php-fpm
     sapi/fpm/php-fpm.8
     sapi/fpm/php-fpm.conf
