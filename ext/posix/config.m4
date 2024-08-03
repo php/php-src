@@ -58,7 +58,7 @@ dnl (first argument is not validated and has different error).
       [php_cv_func_ttyname_r=yes], [php_cv_func_ttyname_r=no])])])
   AS_VAR_IF([php_cv_func_ttyname_r], [yes],
     [AC_DEFINE([HAVE_TTYNAME_R], [1],
-      [Define to 1 if you have a working ttyname_r.])],
+      [Define to 1 if you have a working 'ttyname_r' function.])],
     [AC_MSG_NOTICE([posix_ttyname() will be thread-unsafe])])
 
   AC_CHECK_MEMBERS([struct utsname.domainname],,,[

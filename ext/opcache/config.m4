@@ -30,9 +30,9 @@ if test "$PHP_OPCACHE" != "no"; then
   dnl Always build as shared extension
   ext_shared=yes
 
-  if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
-    AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
-  fi
+  AS_VAR_IF([PHP_HUGE_CODE_PAGES], [yes],
+    [AC_DEFINE([HAVE_HUGE_CODE_PAGES], [1],
+      [Define to 1 to enable copying PHP CODE pages into HUGE PAGES.])])
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
@@ -50,7 +50,7 @@ if test "$PHP_OPCACHE" != "no"; then
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes" ; then
-    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
+    AC_DEFINE([HAVE_JIT], [1], [Define to 1 to enable JIT.])
     ZEND_JIT_SRC=m4_normalize(["
       jit/ir/ir_cfg.c
       jit/ir/ir_check.c

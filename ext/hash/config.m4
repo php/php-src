@@ -5,12 +5,13 @@ PHP_ARG_WITH([mhash],
 
 if test "$PHP_MHASH" != "no"; then
   AC_MSG_WARN([The --with-mhash option and mhash* functions are deprecated as of PHP 8.1.0])
-  AC_DEFINE(PHP_MHASH_BC, 1, [ ])
+  AC_DEFINE([PHP_MHASH_BC], [1], [Define to 1 if mhash support is enabled.])
 fi
 
 if test $ac_cv_c_bigendian_php = yes; then
   EXT_HASH_SHA3_SOURCES="hash_sha3.c"
-  AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define if hash3 algo is available])
+  AC_DEFINE([HAVE_SLOW_HASH3], [1],
+    [Define to 1 if the PHP hash extension uses the slow SHA3 algorithm.])
   AC_MSG_WARN([Using SHA3 slow implementation on bigendian])
   SHA3_DIR=
 else

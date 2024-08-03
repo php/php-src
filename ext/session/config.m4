@@ -45,5 +45,5 @@ if test "$PHP_MM" != "no"; then
     [SESSION_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$MM_DIR/include])
   PHP_INSTALL_HEADERS([ext/session], [mod_mm.h])
-  AC_DEFINE(HAVE_LIBMM, 1, [Whether you have libmm])
+  AC_DEFINE([HAVE_LIBMM], [1], [Define to 1 if the system has the 'mm' library.])
 fi
