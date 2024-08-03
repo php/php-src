@@ -2284,6 +2284,9 @@ function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITU
 
 function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401): string {}
 
+/** @param int $matched_byte_length */
+function decode_html(int $context, string $html, int $offset = 0, &$matched_byte_length = null): ?string {}
+
 function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null): string {}
 
 /** @refcount 1 */
