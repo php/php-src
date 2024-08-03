@@ -1211,7 +1211,7 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
 
         // Is there a character reference?
         int matched_bytes;
-        const zend_string *replacement = php_decode_html_ref(context, html, at - input, &matched_bytes);
+        zend_string *replacement = php_decode_html_ref(context, html, at - input, &matched_bytes);
         if (NULL == replacement) {
             at++;
             continue;
