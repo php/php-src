@@ -23,8 +23,9 @@ $clonedOuterArrayObject['new.coAO'] = 'new element added to $clonedOuterArrayObj
 
 var_dump($wrappedObject, $innerArrayObject, $outerArrayObject, $clonedOuterArrayObject);
 ?>
---EXPECT--
-object(C)#1 (5) {
+--EXPECTF--
+Deprecated: Creation of dynamic property ArrayObject::$new.oAO is deprecated in %s on line %d
+object(C)#1 (4) {
   ["p"]=>
   string(9) "C::p.orig"
   ["dynamic1"]=>
@@ -33,12 +34,12 @@ object(C)#1 (5) {
   string(44) "new prop added to $wrappedObject after clone"
   ["new.iAO"]=>
   string(35) "new element added $innerArrayObject"
+}
+object(ArrayObject)#2 (2) {
   ["new.oAO"]=>
   string(38) "new element added to $outerArrayObject"
-}
-object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (5) {
+  object(C)#1 (4) {
     ["p"]=>
     string(9) "C::p.orig"
     ["dynamic1"]=>
@@ -47,15 +48,15 @@ object(ArrayObject)#2 (1) {
     string(44) "new prop added to $wrappedObject after clone"
     ["new.iAO"]=>
     string(35) "new element added $innerArrayObject"
-    ["new.oAO"]=>
-    string(38) "new element added to $outerArrayObject"
   }
 }
 object(ArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
-  object(ArrayObject)#2 (1) {
+  object(ArrayObject)#2 (2) {
+    ["new.oAO"]=>
+    string(38) "new element added to $outerArrayObject"
     ["storage":"ArrayObject":private]=>
-    object(C)#1 (5) {
+    object(C)#1 (4) {
       ["p"]=>
       string(9) "C::p.orig"
       ["dynamic1"]=>
@@ -64,8 +65,6 @@ object(ArrayObject)#3 (1) {
       string(44) "new prop added to $wrappedObject after clone"
       ["new.iAO"]=>
       string(35) "new element added $innerArrayObject"
-      ["new.oAO"]=>
-      string(38) "new element added to $outerArrayObject"
     }
   }
 }
