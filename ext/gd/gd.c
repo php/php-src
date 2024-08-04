@@ -575,7 +575,17 @@ PHP_FUNCTION(imageloadfont)
 	body_size_check = php_stream_tell(stream) - hdr_size;
 	php_stream_seek(stream, i, SEEK_SET);
 
-	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
+	/* Typically a font should only contain 256 characters.  If the total
+	 * characters exceeds a two bytes value, assume opposite endianness. */
+	if ((font->nchars < 0) || (font->nchars > 0xffff)) {
+		font->nchars = FLIPWORD(font->nchars);
+		font->offset = FLIPWORD(font->offset);
+		font->w = FLIPWORD(font->w);
+		font->h = FLIPWORD(font->h);
+	}
+
+	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w) ||
+			(font->offset < 0) || (font->offset > 0xff)) {
 		php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
 		efree(font);
 		php_stream_close(stream);
@@ -583,18 +593,6 @@ PHP_FUNCTION(imageloadfont)
 	}
 
 	body_size = font->w * font->h * font->nchars;
-	if (body_size != body_size_check) {
-		font->w = FLIPWORD(font->w);
-		font->h = FLIPWORD(font->h);
-		font->nchars = FLIPWORD(font->nchars);
-		if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w )) {
-			php_error_docref(NULL, E_WARNING, "Error reading font, invalid font header");
-			efree(font);
-			php_stream_close(stream);
-			RETURN_FALSE;
-		}
-		body_size = font->w * font->h * font->nchars;
-	}
 
 	if (body_size != body_size_check) {
 		php_error_docref(NULL, E_WARNING, "Error reading font");

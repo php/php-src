@@ -10,6 +10,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15192 (Segmentation fault in dom extension
     (html5_serializer)). (nielsdos)
 
+- GD:
+  . Fixed imageloadfont() when loading font files for the opposite endianness,
+    including those with non-zero offset field. (Giovanni Giacobbi)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
