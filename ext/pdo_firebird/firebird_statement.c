@@ -59,6 +59,13 @@ static zend_always_inline ISC_TIMESTAMP php_get_isc_timestamp_from_sqldata(const
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
 }
 
+static zend_always_inline ISC_QUAD php_get_isc_quad_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_QUAD, sqldata);
+}
+
+#if FB_API_VER >= 40
+
 static zend_always_inline ISC_TIME_TZ php_get_isc_time_tz_from_sqldata(const ISC_SCHAR *sqldata)
 {
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIME_TZ, sqldata);
@@ -68,13 +75,6 @@ static zend_always_inline ISC_TIMESTAMP_TZ php_get_isc_timestamp_tz_from_sqldata
 {
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP_TZ, sqldata);
 }
-
-static zend_always_inline ISC_QUAD php_get_isc_quad_from_sqldata(const ISC_SCHAR *sqldata)
-{
-	READ_AND_RETURN_USING_MEMCPY(ISC_QUAD, sqldata);
-}
-
-#if FB_API_VER >= 40
 
 static void fb_copyStatus(struct fb_Status* status, ISC_STATUS* to, size_t maxLength)
 {
