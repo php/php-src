@@ -174,11 +174,14 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			func_init_seed(&ctx->s, (XXH64_hash_t)Z_LVAL_P(_seed));
 			return;
 		} else if (_secret) {
-			if (!try_convert_to_string(_secret)) {
+			zend_string *secret_string = zval_try_get_string(_secret);
+			if (UNEXPECTED(!secret_string)) {
+				ZEND_ASSERT(EG(exception));
 				return;
 			}
-			size_t len = Z_STRLEN_P(_secret);
+			size_t len = ZSTR_LEN(secret_string);
 			if (len < PHP_XXH3_SECRET_SIZE_MIN) {
+				zend_string_release(secret_string);
 				zend_throw_error(NULL, "%s: Secret length must be >= %u bytes, %zu bytes passed", algo_name, XXH3_SECRET_SIZE_MIN, len);
 				return;
 			}
@@ -186,7 +189,8 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 				len = sizeof(ctx->secret);
 				php_error_docref(NULL, E_WARNING, "%s: Secret content exceeding %zu bytes discarded", algo_name, sizeof(ctx->secret));
 			}
-			memcpy((unsigned char *)ctx->secret, Z_STRVAL_P(_secret), len);
+			memcpy((unsigned char *)ctx->secret, ZSTR_VAL(secret_string), len);
+			zend_string_release(secret_string);
 			func_init_secret(&ctx->s, ctx->secret, len);
 			return;
 		}
