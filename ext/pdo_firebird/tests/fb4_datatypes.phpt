@@ -31,7 +31,6 @@ $sql = <<<'SQL'
 SQL;
 
 $dbh = getDbConnection();
-$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
