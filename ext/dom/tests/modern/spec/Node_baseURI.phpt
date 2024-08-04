@@ -5,14 +5,14 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $html = $dom->appendChild($dom->createElement('html'));
 var_dump($html->baseURI);
 
-$dom = DOM\HTMLDocument::createFromFile(__DIR__ . "/../../empty.html", LIBXML_NOERROR);
+$dom = Dom\HTMLDocument::createFromFile(__DIR__ . "/../../empty.html", LIBXML_NOERROR);
 var_dump($dom->documentElement->baseURI);
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
     <head>

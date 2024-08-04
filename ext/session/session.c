@@ -16,7 +16,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -32,7 +32,6 @@
 #include <fcntl.h>
 
 #include "php_ini.h"
-#include "SAPI.h"
 #include "rfc1867.h"
 #include "php_variables.h"
 #include "php_session.h"
@@ -133,7 +132,7 @@ static inline void php_session_cleanup_filename(void) /* {{{ */
 /* }}} */
 
 /* Dispatched by RSHUTDOWN and by php_session_destroy */
-static inline void php_rshutdown_session_globals(void) /* {{{ */
+static void php_rshutdown_session_globals(void) /* {{{ */
 {
 	/* Do NOT destroy PS(mod_user_names) here! */
 	if (!Z_ISUNDEF(PS(http_session_vars))) {
@@ -225,6 +224,14 @@ PHPAPI zval* php_get_session_var(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+PHPAPI zval* php_get_session_var_str(const char *name, size_t name_len)
+{
+	IF_SESSION_VARS() {
+		return zend_hash_str_find(Z_ARRVAL_P(Z_REFVAL(PS(http_session_vars))), name, name_len);
+	}
+	return NULL;
+}
+
 static void php_session_track_init(void) /* {{{ */
 {
 	zval session_vars;
@@ -247,10 +254,7 @@ static void php_session_track_init(void) /* {{{ */
 static zend_string *php_session_encode(void) /* {{{ */
 {
 	IF_SESSION_VARS() {
-		if (!PS(serializer)) {
-			php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to encode session object");
-			return NULL;
-		}
+        ZEND_ASSERT(PS(serializer));
 		return PS(serializer)->encode();
 	} else {
 		php_error_docref(NULL, E_WARNING, "Cannot encode non-existent session");
@@ -268,20 +272,18 @@ static ZEND_COLD void php_session_cancel_decode(void)
 
 static zend_result php_session_decode(zend_string *data) /* {{{ */
 {
-	if (!PS(serializer)) {
-		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
-		return FAILURE;
-	}
+    ZEND_ASSERT(PS(serializer));
+	zend_result result = SUCCESS;
 	zend_try {
 		if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
 			php_session_cancel_decode();
-			return FAILURE;
+			result = FAILURE;
 		}
 	} zend_catch {
 		php_session_cancel_decode();
 		zend_bailout();
 	} zend_end_try();
-	return SUCCESS;
+	return result;
 }
 /* }}} */
 
@@ -358,17 +360,15 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 	size_t len;
 	const char *p;
 	char c;
-	zend_result ret = SUCCESS;
 
 	for (p = key; (c = *p); p++) {
-		/* valid characters are a..z,A..Z,0..9 */
+		/* valid characters are [a-z], [A-Z], [0-9], - (hyphen) and , (comma) */
 		if (!((c >= 'a' && c <= 'z')
 				|| (c >= 'A' && c <= 'Z')
 				|| (c >= '0' && c <= '9')
 				|| c == ','
 				|| c == '-')) {
-			ret = FAILURE;
-			break;
+			return FAILURE;
 		}
 	}
 
@@ -377,10 +377,10 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
 	if (len == 0 || len > PS_MAX_SID_LENGTH) {
-		ret = FAILURE;
+		return FAILURE;
 	}
 
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -751,6 +751,9 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (val != 32) {
+		zend_error(E_DEPRECATED, "session.sid_length INI setting is deprecated");
+	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
 		/* Numeric value */
@@ -771,6 +774,9 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (val != 4) {
+		zend_error(E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
+	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 4 && val <=6) {
 		/* Numeric value */
@@ -1637,6 +1643,11 @@ PHPAPI zend_result php_session_flush(int write) /* {{{ */
 }
 /* }}} */
 
+PHPAPI php_session_status php_get_session_status(void)
+{
+	return PS(session_status);
+}
+
 static zend_result php_session_abort(void) /* {{{ */
 {
 	if (PS(session_status) == php_session_active) {
@@ -2367,7 +2378,7 @@ PHP_FUNCTION(session_create_id)
 	zend_string *prefix = NULL, *new_id;
 	smart_str id = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &prefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P", &prefix) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2878,7 +2889,10 @@ static PHP_GINIT_FUNCTION(ps) /* {{{ */
 	};
 	php_random_uint128_t seed;
 	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = php_random_uint128_constant(GENERATE_SEED(), GENERATE_SEED());
+		seed = php_random_uint128_constant(
+			php_random_generate_fallback_seed(),
+			php_random_generate_fallback_seed()
+		);
 	}
 	php_random_pcgoneseq128xslrr64_seed128(ps_globals->random.state, seed);
 }
@@ -2987,8 +3001,7 @@ static PHP_MINFO_FUNCTION(session) /* {{{ */
 /* }}} */
 
 static const zend_module_dep session_deps[] = { /* {{{ */
-	ZEND_MOD_OPTIONAL("hash")
-	ZEND_MOD_REQUIRED("spl")
+	ZEND_MOD_OPTIONAL("spl")
 	ZEND_MOD_END
 };
 /* }}} */

@@ -5,18 +5,18 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $foo = $dom->appendChild($dom->createElement("foo"));
 try {
-    $foo->insertAdjacentText("beforebegin", "bar");
+    $foo->insertAdjacentText(Dom\AdjacentPosition::BeforeBegin, "bar");
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
 }
 
-$foo->insertAdjacentText("afterbegin", "bar");
-$foo->insertAdjacentText("beforeend", "baz");
+$foo->insertAdjacentText(Dom\AdjacentPosition::AfterBegin, "bar");
+$foo->insertAdjacentText(Dom\AdjacentPosition::BeforeEnd, "baz");
 
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 var_dump($foo->firstChild->textContent);
 var_dump($foo->firstChild->nextSibling->textContent);

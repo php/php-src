@@ -15,31 +15,32 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "infra.h"
 #include "html5_parser.h"
 #include "html5_serializer.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "dom_properties.h"
 #include <Zend/zend_smart_string.h>
 #include <lexbor/html/encoding.h>
 #include <lexbor/encoding/encoding.h>
 
 /* Implementation defined, but as HTML5 defaults in all other cases to UTF-8, we'll do the same. */
-#define DOM_FALLBACK_ENCODING_NAME "UTF-8"
 #define DOM_FALLBACK_ENCODING_ID LXB_ENCODING_UTF_8
 
-typedef struct _dom_line_column_cache {
+typedef struct dom_line_column_cache {
 	size_t last_line;
 	size_t last_column;
 	size_t last_offset;
 } dom_line_column_cache;
 
-typedef struct _dom_lexbor_libxml2_bridge_application_data {
+typedef struct dom_lexbor_libxml2_bridge_application_data {
 	const char *input_name;
 	const lxb_codepoint_t *current_input_codepoints;
 	const char *current_input_characters;
@@ -49,14 +50,14 @@ typedef struct _dom_lexbor_libxml2_bridge_application_data {
 	bool html_no_implied;
 } dom_lexbor_libxml2_bridge_application_data;
 
-typedef struct _dom_character_encoding_data {
+typedef struct dom_character_encoding_data {
 	const lxb_encoding_data_t *encoding_data;
 	size_t bom_shift;
 } dom_character_encoding_data;
 
 typedef zend_result (*dom_write_output)(void*, const char *, size_t);
 
-typedef struct _dom_output_ctx {
+typedef struct dom_output_ctx {
 	const lxb_encoding_data_t *encoding_data;
 	const lxb_encoding_data_t *decoding_data;
 	lxb_encoding_encode_t *encode;
@@ -67,7 +68,7 @@ typedef struct _dom_output_ctx {
 	dom_write_output write_output;
 } dom_output_ctx;
 
-typedef struct _dom_decoding_encoding_ctx {
+typedef struct dom_decoding_encoding_ctx {
 	/* We can skip some conversion if the input and output encoding are both UTF-8,
 	 * we only have to validate and substitute replacement characters */
 	bool fast_path; /* Put first, near the encode & decode structures, for cache locality */
@@ -245,35 +246,43 @@ static void dom_find_line_and_column_using_cache(
 		offset = application_data->current_input_length;
 	}
 
+	size_t last_column = cache->last_column;
+	size_t last_line = cache->last_line;
+	size_t last_offset = cache->last_offset;
+
 	/* Either unicode or UTF-8 data */
 	if (application_data->current_input_codepoints != NULL) {
-		while (cache->last_offset < offset) {
-			if (application_data->current_input_codepoints[cache->last_offset] == 0x000A /* Unicode codepoint for line feed */) {
-				cache->last_line++;
-				cache->last_column = 1;
+		while (last_offset < offset) {
+			if (application_data->current_input_codepoints[last_offset] == 0x000A /* Unicode codepoint for line feed */) {
+				last_line++;
+				last_column = 1;
 			} else {
-				cache->last_column++;
+				last_column++;
 			}
-			cache->last_offset++;
+			last_offset++;
 		}
 	} else {
-		while (cache->last_offset < offset) {
-			const lxb_char_t current = application_data->current_input_characters[cache->last_offset];
+		while (last_offset < offset) {
+			const lxb_char_t current = application_data->current_input_characters[last_offset];
 			if (current == '\n') {
-				cache->last_line++;
-				cache->last_column = 1;
-				cache->last_offset++;
+				last_line++;
+				last_column = 1;
+				last_offset++;
 			} else {
 				/* See Lexbor tokenizer patch
 				 * Note for future self: branchlessly computing the length and jumping by the length would be nice,
 				 * however it takes so many instructions to do so that it is slower than this naive method. */
 				if ((current & 0b11000000) != 0b10000000) {
-					cache->last_column++;
+					last_column++;
 				}
-				cache->last_offset++;
+				last_offset++;
 			}
 		}
 	}
+
+	cache->last_column = last_column;
+	cache->last_line = last_line;
+	cache->last_offset = last_offset;
 }
 
 static void dom_lexbor_libxml2_bridge_tokenizer_error_reporter(
@@ -517,8 +526,16 @@ static bool dom_decode_encode_fast_path(
 	const lxb_char_t *buf_ref = *buf_ref_ref;
 	const lxb_char_t *last_output = buf_ref;
 	while (buf_ref != buf_end) {
-		const lxb_char_t *buf_ref_backup = buf_ref;
 		/* Fast path converts non-validated UTF-8 -> validated UTF-8 */
+		if (decoding_encoding_ctx->decode.u.utf_8.need == 0 && *buf_ref < 0x80) {
+			/* Fast path within the fast path: try to skip non-mb bytes in bulk if we are not in a state where we
+			 * need more UTF-8 bytes to complete a sequence.
+			 * It might be tempting to use SIMD here, but it turns out that this is less efficient because
+			 * we need to process the same byte multiple times sometimes when mixing ASCII with multibyte. */
+			buf_ref++;
+			continue;
+		}
+		const lxb_char_t *buf_ref_backup = buf_ref;
 		lxb_codepoint_t codepoint = lxb_encoding_decode_utf_8_single(&decoding_encoding_ctx->decode, &buf_ref, buf_end);
 		if (UNEXPECTED(codepoint > LXB_ENCODING_MAX_CODEPOINT)) {
 			size_t skip = buf_ref - buf_ref_backup; /* Skip invalid data, it's replaced by the UTF-8 replacement bytes */
@@ -706,13 +723,13 @@ static bool check_options_validity(uint32_t arg_num, zend_long options)
 										   "LIBXML_NOERROR, "
 										   "LIBXML_COMPACT, "
 										   "LIBXML_HTML_NOIMPLIED, "
-										   "DOM\\NO_DEFAULT_NS)");
+										   "Dom\\NO_DEFAULT_NS)");
 		return false;
 	}
 	return true;
 }
 
-PHP_METHOD(DOM_HTMLDocument, createEmpty)
+PHP_METHOD(Dom_HTMLDocument, createEmpty)
 {
 	const char *encoding = "UTF-8";
 	size_t encoding_len = strlen("UTF-8");
@@ -740,8 +757,8 @@ PHP_METHOD(DOM_HTMLDocument, createEmpty)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(php_dom_libxml_ns_mapper_create());
+	dom_set_xml_class(intern->document);
+	intern->document->private_data = php_dom_libxml_private_data_header(php_dom_private_data_create());
 	return;
 
 oom:
@@ -749,7 +766,17 @@ oom:
 	RETURN_THROWS();
 }
 
-PHP_METHOD(DOM_HTMLDocument, createFromString)
+/* Only bother to register error handling when the error reports can become observable. */
+static bool dom_should_register_error_handlers(zend_long options)
+{
+	if (options & XML_PARSE_NOERROR) {
+		return false;
+	}
+
+	return php_libxml_uses_internal_errors() || ((EG(error_reporting) | EG(user_error_handler_error_reporting)) & E_WARNING);
+}
+
+PHP_METHOD(Dom_HTMLDocument, createFromString)
 {
 	const char *source, *override_encoding = NULL;
 	size_t source_len, override_encoding_len;
@@ -777,7 +804,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
-	if (!(options & XML_PARSE_NOERROR)) {
+	if (dom_should_register_error_handlers(options)) {
 		lexbor_libxml2_bridge_parse_set_error_callbacks(
 			&ctx,
 			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
@@ -852,7 +879,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		goto fail_oom;
 	}
 
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
 
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
@@ -860,11 +887,11 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
 		!(options & DOM_HTML_NO_DEFAULT_NS),
-		ns_mapper
+		private_data
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		php_dom_private_data_destroy(private_data);
 		php_libxml_ctx_error(
 			NULL,
 			"%s in %s",
@@ -890,8 +917,9 @@ PHP_METHOD(DOM_HTMLDocument, createFromString)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	dom_set_xml_class(intern->document);
+	intern->document->quirks_mode = ctx.observations.quirks_mode;
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	return;
 
 fail_oom:
@@ -900,10 +928,10 @@ fail_oom:
 	RETURN_THROWS();
 }
 
-PHP_METHOD(DOM_HTMLDocument, createFromFile)
+PHP_METHOD(Dom_HTMLDocument, createFromFile)
 {
 	const char *filename, *override_encoding = NULL;
-	php_dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_private_data *private_data = NULL;
 	size_t filename_len, override_encoding_len;
 	zend_long options = 0;
 	php_stream *stream = NULL;
@@ -936,7 +964,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 	dom_reset_line_column_cache(&application_data.cache_tokenizer);
 	lexbor_libxml2_bridge_parse_context ctx;
 	lexbor_libxml2_bridge_parse_context_init(&ctx);
-	if (!(options & XML_PARSE_NOERROR)) {
+	if (dom_should_register_error_handlers(options)) {
 		lexbor_libxml2_bridge_parse_set_error_callbacks(
 			&ctx,
 			dom_lexbor_libxml2_bridge_tokenizer_error_reporter,
@@ -1042,7 +1070,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		goto fail_oom;
 	}
 
-	ns_mapper = php_dom_libxml_ns_mapper_create();
+	private_data = php_dom_private_data_create();
 
 	xmlDocPtr lxml_doc;
 	lexbor_libxml2_bridge_status bridge_status = lexbor_libxml2_bridge_convert_document(
@@ -1050,7 +1078,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		&lxml_doc,
 		options & XML_PARSE_COMPACT,
 		!(options & DOM_HTML_NO_DEFAULT_NS),
-		ns_mapper
+		private_data
 	);
 	lexbor_libxml2_bridge_copy_observations(parser->tree, &ctx.observations);
 	if (UNEXPECTED(bridge_status != LEXBOR_LIBXML2_BRIDGE_STATUS_OK)) {
@@ -1089,7 +1117,7 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 			xmlFree(converted);
 			lxml_doc->URL = new_buffer;
 		} else {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 			converted = php_dom_libxml_fix_file_path(converted);
 #endif
 			lxml_doc->URL = converted;
@@ -1110,15 +1138,16 @@ PHP_METHOD(DOM_HTMLDocument, createFromFile)
 		(xmlNodePtr) lxml_doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	dom_set_xml_class(intern->document);
+	intern->document->quirks_mode = ctx.observations.quirks_mode;
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	return;
 
 fail_oom:
 	php_dom_throw_error(INVALID_STATE_ERR, true);
 fail_general:
-	if (ns_mapper != NULL) {
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+	if (private_data != NULL) {
+		php_dom_private_data_destroy(private_data);
 	}
 	lxb_html_document_destroy(document);
 	php_stream_close(stream);
@@ -1176,7 +1205,7 @@ static zend_result dom_saveHTML_write_string(void *application_data, const char 
 	return dom_saveHTML_write_string_len(application_data, buf, strlen(buf));
 }
 
-static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *docp, const xmlNode *node)
+static zend_result dom_common_save(dom_output_ctx *output_ctx, dom_object *intern, const xmlDoc *docp, const xmlNode *node)
 {
 	/* Initialize everything related to encoding & decoding */
 	const lxb_encoding_data_t *decoding_data = lxb_encoding_data(LXB_ENCODING_UTF_8);
@@ -1209,6 +1238,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	ctx.write_string_len = dom_saveHTML_write_string_len;
 	ctx.write_string = dom_saveHTML_write_string;
 	ctx.application_data = output_ctx;
+	ctx.private_data = php_dom_get_private_data(intern);
 	if (UNEXPECTED(dom_html5_serialize_outer(&ctx, node) != SUCCESS)) {
 		return FAILURE;
 	}
@@ -1239,7 +1269,7 @@ static zend_result dom_common_save(dom_output_ctx *output_ctx, const xmlDoc *doc
 	return SUCCESS;
 }
 
-PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
+PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 {
 	zval *id;
 	xmlDoc *docp;
@@ -1267,7 +1297,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
 	dom_output_ctx output_ctx;
 	output_ctx.output_data = stream;
 	output_ctx.write_output = dom_write_output_stream;
-	if (UNEXPECTED(dom_common_save(&output_ctx, docp, (const xmlNode *) docp) != SUCCESS)) {
+	if (UNEXPECTED(dom_common_save(&output_ctx, intern, docp, (const xmlNode *) docp) != SUCCESS)) {
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
@@ -1278,7 +1308,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTMLFile)
 	RETURN_LONG(bytes);
 }
 
-PHP_METHOD(DOM_HTMLDocument, saveHTML)
+PHP_METHOD(Dom_HTMLDocument, saveHtml)
 {
 	zval *nodep = NULL;
 	const xmlDoc *docp;
@@ -1294,8 +1324,8 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	if (nodep != NULL) {
 		DOM_GET_OBJ(node, nodep, xmlNodePtr, nodeobj);
 		if (node->doc != docp) {
-			php_dom_throw_error(WRONG_DOCUMENT_ERR, dom_get_strict_error(intern->document));
-			RETURN_FALSE;
+			php_dom_throw_error(WRONG_DOCUMENT_ERR, true);
+			RETURN_THROWS();
 		}
 	} else {
 		node = (const xmlNode *) docp;
@@ -1306,7 +1336,7 @@ PHP_METHOD(DOM_HTMLDocument, saveHTML)
 	output_ctx.output_data = &buf;
 	output_ctx.write_output = dom_write_output_smart_str;
 	/* Can't fail because dom_write_output_smart_str() can't fail. */
-	zend_result result = dom_common_save(&output_ctx, docp, node);
+	zend_result result = dom_common_save(&output_ctx, intern, docp, node);
 	ZEND_ASSERT(result == SUCCESS);
 
 	RETURN_STR(smart_str_extract(&buf));
@@ -1316,12 +1346,8 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	/* Typed property, can only be IS_STRING or IS_NULL. */
-	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING || Z_TYPE_P(newval) == IS_NULL);
-
-	if (Z_TYPE_P(newval) == IS_NULL) {
-		goto invalid_encoding;
-	}
+	/* Typed property, can only be IS_STRING. */
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
 
 	zend_string *str = Z_STR_P(newval);
 	const lxb_encoding_data_t *encoding_data = lxb_encoding_data_by_name((const lxb_char_t *) ZSTR_VAL(str), ZSTR_LEN(str));
@@ -1330,14 +1356,303 @@ zend_result dom_html_document_encoding_write(dom_object *obj, zval *newval)
 		xmlFree(BAD_CAST docp->encoding);
 		docp->encoding = xmlStrdup((const xmlChar *) encoding_data->name);
 	} else {
-		goto invalid_encoding;
+		zend_value_error("Invalid document encoding");
+		return FAILURE;
 	}
 
 	return SUCCESS;
+}
 
-invalid_encoding:
-	zend_value_error("Invalid document encoding");
+static xmlNodePtr dom_html_document_element_read_raw(const xmlDoc *docp, bool (*accept)(const xmlChar *))
+{
+	const xmlNode *root = xmlDocGetRootElement(docp);
+	if (root == NULL || !(php_dom_ns_is_fast(root, php_dom_ns_is_html_magic_token) && xmlStrEqual(root->name, BAD_CAST "html"))) {
+		return NULL;
+	}
+
+	xmlNodePtr cur = root->children;
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(cur, php_dom_ns_is_html_magic_token) && accept(cur->name)) {
+			return cur;
+		}
+		cur = cur->next;
+	}
+
+	return NULL;
+}
+
+zend_result dom_html_document_element_read_helper(dom_object *obj, zval *retval, bool (*accept)(const xmlChar *))
+{
+	DOM_PROP_NODE(const xmlDoc *, docp, obj);
+
+	const xmlNode *element = dom_html_document_element_read_raw(docp, accept);
+	php_dom_create_nullable_object((xmlNodePtr) element, retval, obj);
+
+	return SUCCESS;
+}
+
+static bool dom_accept_body_name(const xmlChar *name)
+{
+	return xmlStrEqual(name, BAD_CAST "body") || xmlStrEqual(name, BAD_CAST "frameset");
+}
+
+static bool dom_accept_head_name(const xmlChar *name)
+{
+	return xmlStrEqual(name, BAD_CAST "head");
+}
+
+/* https://html.spec.whatwg.org/#dom-document-body */
+zend_result dom_html_document_body_read(dom_object *obj, zval *retval)
+{
+	return dom_html_document_element_read_helper(obj, retval, dom_accept_body_name);
+}
+
+/* https://html.spec.whatwg.org/#dom-document-head */
+zend_result dom_html_document_head_read(dom_object *obj, zval *retval)
+{
+	return dom_html_document_element_read_helper(obj, retval, dom_accept_head_name);
+}
+
+/* https://html.spec.whatwg.org/#dom-document-body */
+zend_result dom_html_document_body_write(dom_object *obj, zval *newval)
+{
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
+
+	/* 1. If the new value is not a body or frameset element, then throw a "HierarchyRequestError" DOMException. */
+	if (Z_TYPE_P(newval) != IS_NULL) {
+		dom_object *newval_intern = Z_DOMOBJ_P(newval);
+		if (newval_intern->ptr != NULL) {
+			xmlNodePtr newval_node = ((php_libxml_node_ptr *) newval_intern->ptr)->node;
+			/* Note: because this property has type HTMLElement, we know the namespace is correct. */
+			if (dom_accept_body_name(newval_node->name)) {
+				/* 2. If the new value is the same as the body element, return. */
+				const xmlNode *current_body_element = dom_html_document_element_read_raw(docp, dom_accept_body_name);
+				if (current_body_element == newval_node) {
+					return SUCCESS;
+				}
+
+				/* 3. If the body element is not null, then replace the body element with the new value within the body element's parent and return. */
+				if (current_body_element != NULL) {
+					php_dom_adopt_node(newval_node, obj, docp);
+					xmlNodePtr old = xmlReplaceNode((xmlNodePtr) current_body_element, newval_node);
+					if (old != NULL && old->_private == NULL) {
+						php_libxml_node_free_resource(old);
+					}
+					return SUCCESS;
+				}
+
+				/* 4. If there is no document element, throw a "HierarchyRequestError" DOMException. */
+				xmlNodePtr root = xmlDocGetRootElement(docp);
+				if (root == NULL) {
+					php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "A body can only be set if there is a document element", true);
+					return FAILURE;
+				}
+
+				/* 5. Append the new value to the document element. */
+				php_dom_adopt_node(newval_node, obj, docp);
+				xmlAddChild(root, newval_node);
+				return SUCCESS;
+			}
+		}
+	}
+
+	php_dom_throw_error_with_message(HIERARCHY_REQUEST_ERR, "The new body must either be a body or a frameset tag", true);
 	return FAILURE;
 }
+
+/* https://dom.spec.whatwg.org/#concept-child-text-content */
+static zend_string *dom_get_child_text_content(const xmlNode *node)
+{
+	smart_str content = {0};
+
+	const xmlNode *text = node->children;
+	while (text != NULL) {
+		if (text->type == XML_TEXT_NODE || text->type == XML_CDATA_SECTION_NODE) {
+			smart_str_appends(&content, (const char *) text->content);
+		}
+		text = text->next;
+	}
+
+	return smart_str_extract(&content);
+}
+
+/* https://html.spec.whatwg.org/#the-title-element-2 */
+static xmlNodePtr dom_get_title_element(const xmlDoc *doc)
+{
+	xmlNodePtr node = doc->children;
+
+	while (node != NULL) {
+		if (node->type == XML_ELEMENT_NODE) {
+			if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token) && xmlStrEqual(node->name, BAD_CAST "title")) {
+				break;
+			}
+		}
+
+		node = php_dom_next_in_tree_order(node, NULL);
+	}
+
+	return node;
+}
+
+/* The subtle difference is that this is about the direct title descendant of the svg element,
+ * whereas the html variant of this function is about the first in-tree title element. */
+static xmlNodePtr dom_get_svg_title_element(xmlNodePtr svg)
+{
+	xmlNodePtr cur = svg->children;
+
+	while (cur != NULL) {
+		if (cur->type == XML_ELEMENT_NODE
+			&& php_dom_ns_is_fast(cur, php_dom_ns_is_svg_magic_token) && xmlStrEqual(cur->name, BAD_CAST "title")) {
+			break;
+		}
+		cur = cur->next;
+	}
+
+	return cur;
+}
+
+/* https://html.spec.whatwg.org/#document.title */
+zend_result dom_html_document_title_read(dom_object *obj, zval *retval)
+{
+	DOM_PROP_NODE(const xmlDoc *, docp, obj);
+	xmlNodePtr root = xmlDocGetRootElement(docp);
+
+	if (root == NULL) {
+		ZVAL_EMPTY_STRING(retval);
+		return SUCCESS;
+	}
+
+	zend_string *value = zend_empty_string;
+
+	/* 1. If the document element is an SVG svg element,
+	 *    then let value be the child text content of the first SVG title element that is a child of the document element. */
+	if (php_dom_ns_is_fast(root, php_dom_ns_is_svg_magic_token) && xmlStrEqual(root->name, BAD_CAST "svg")) {
+		const xmlNode *title = dom_get_svg_title_element(root);
+		if (title != NULL) {
+			value = dom_get_child_text_content(title);
+		}
+	} else {
+		/* 2. Otherwise, let value be the child text content of the title element,
+		 *    or the empty string if the title element is null. */
+		const xmlNode *title = dom_get_title_element(docp);
+		if (title != NULL) {
+			value = dom_get_child_text_content(title);
+		}
+	}
+
+	/* 3. Strip and collapse ASCII whitespace in value. */
+	value = dom_strip_and_collapse_ascii_whitespace(value);
+
+	/* 4. Return value. */
+	ZVAL_STR(retval, value);
+
+	return SUCCESS;
+}
+
+static void dom_string_replace_all(xmlDocPtr docp, xmlNodePtr element, zval *zv)
+{
+	dom_remove_all_children(element);
+	xmlNode *text = xmlNewDocText(docp, BAD_CAST Z_STRVAL_P(zv));
+	xmlAddChild(element, text);
+}
+
+/* https://html.spec.whatwg.org/#document.title */
+zend_result dom_html_document_title_write(dom_object *obj, zval *newval)
+{
+	DOM_PROP_NODE(xmlDocPtr, docp, obj);
+	xmlNodePtr root = xmlDocGetRootElement(docp);
+
+	if (root == NULL) {
+		return SUCCESS;
+	}
+
+	/* If the document element is an SVG svg element */
+	if (php_dom_ns_is_fast(root, php_dom_ns_is_svg_magic_token) && xmlStrEqual(root->name, BAD_CAST "svg")) {
+		/* 1. If there is an SVG title element that is a child of the document element, let element be the first such element. */
+		xmlNodePtr element = dom_get_svg_title_element(root);
+
+		/* 2. Otherwise: */
+		if (element == NULL) {
+			/* 2.1. Let element be the result of creating an element given the document element's node document,
+			 *      title, and the SVG namespace. */
+
+			/* Annoyingly, we must create it in the svg namespace _without_ prefix... */
+			xmlNsPtr ns = root->ns;
+			if (ns->prefix != NULL) {
+				/* Slow path... */
+				php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(obj);
+				zend_string *href = ZSTR_INIT_LITERAL(DOM_SVG_NS_URI, false);
+				ns = php_dom_libxml_ns_mapper_get_ns(ns_mapper, zend_empty_string, href);
+				zend_string_release_ex(href, false);
+			}
+
+			element = xmlNewDocNode(docp, ns, BAD_CAST "title", NULL);
+			if (UNEXPECTED(element == NULL)) {
+				php_dom_throw_error(INVALID_STATE_ERR, true);
+				return FAILURE;
+			}
+
+			/* 2.2. Insert element as the first child of the document element. */
+			if (root->children == NULL) {
+				root->last = element;
+			} else {
+				element->next = root->children;
+				root->children->prev = element;
+			}
+			root->children = element;
+			element->parent = root;
+		}
+
+		/* 3. String replace all with the given value within element. */
+		dom_string_replace_all(docp, element, newval);
+	}
+	/* If the document element is in the HTML namespace */
+	else if (php_dom_ns_is_fast(root, php_dom_ns_is_html_magic_token)) {
+		/* 1. If the title element is null and the head element is null, then return. */
+		xmlNodePtr title = dom_get_title_element(docp);
+		xmlNodePtr head = dom_html_document_element_read_raw(docp, dom_accept_head_name);
+		if (title == NULL && head == NULL) {
+			return SUCCESS;
+		}
+
+		/* 2. If the title element is non-null, let element be the title element. */
+		xmlNodePtr element = title;
+
+		/* 3. Otherwise: */
+		if (element == NULL) {
+			/* 3.1. Let element be the result of creating an element given the document element's node document, title,
+			 *      and the HTML namespace. */
+			php_dom_libxml_ns_mapper *ns_mapper = php_dom_get_ns_mapper(obj);
+			element = xmlNewDocNode(docp, php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper), BAD_CAST "title", NULL);
+			if (UNEXPECTED(element == NULL)) {
+				php_dom_throw_error(INVALID_STATE_ERR, true);
+				return FAILURE;
+			}
+
+			/* 3.2. Append element to the head element. */
+			xmlAddChild(head, element);
+		}
+
+		/* 4. String replace all with the given value within element. */
+		dom_string_replace_all(docp, element, newval);
+	}
+
+	return SUCCESS;
+}
+
+#if ZEND_DEBUG
+PHP_METHOD(Dom_HTMLDocument, debugGetTemplateCount)
+{
+	xmlDocPtr doc;
+	dom_object *intern;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	DOM_GET_OBJ(doc, ZEND_THIS, xmlDocPtr, intern);
+	ZEND_IGNORE_VALUE(doc);
+
+	RETURN_LONG((zend_long) php_dom_get_template_count((const php_dom_private_data *) intern->document->private_data));
+}
+#endif
 
 #endif  /* HAVE_LIBXML && HAVE_DOM */

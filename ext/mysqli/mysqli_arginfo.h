@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a54ef005e9535458e886b7845a25a1c742a114ac */
+ * Stub hash: 69e41b1b2ec5f46193a9defb75e401ac69588d95 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -440,7 +440,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_character_set_name, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_close, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_close, 0, 0, IS_TRUE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_commit arginfo_class_mysqli_begin_transaction
@@ -457,7 +457,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_dump_debug_info, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_debug, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -479,7 +479,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_mysqli_get_warnings, 0, 0, mysqli_warning, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_mysqli_init arginfo_class_mysqli_close
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_init, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_kill, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, process_id, IS_LONG, 0)
@@ -556,7 +557,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_set_opt arginfo_class_mysqli_options
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 5, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, certificate, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, ca_certificate, IS_STRING, 1)
@@ -699,7 +700,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_stmt_get_result arginfo_class_mysqli_use_result
 
-#define arginfo_class_mysqli_warning___construct arginfo_class_mysqli_close
+#define arginfo_class_mysqli_warning___construct arginfo_class_mysqli_init
 
 #define arginfo_class_mysqli_warning_next arginfo_mysqli_thread_safe
 
@@ -1126,7 +1127,6 @@ static void register_mysqli_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_NEWDECIMAL", FIELD_TYPE_NEWDECIMAL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_TYPE_BIT", FIELD_TYPE_BIT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_SET_CHARSET_NAME", MYSQL_SET_CHARSET_NAME, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("MYSQLI_SET_CHARSET_DIR", MYSQL_SET_CHARSET_DIR, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_NO_DATA", MYSQL_NO_DATA, CONST_PERSISTENT | CONST_DEPRECATED);
 #if defined(MYSQL_DATA_TRUNCATED)
 	REGISTER_LONG_CONSTANT("MYSQLI_DATA_TRUNCATED", MYSQL_DATA_TRUNCATED, CONST_PERSISTENT | CONST_DEPRECATED);
@@ -1330,6 +1330,30 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "change_user", sizeof("change_user") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "connect", sizeof("connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_get_client_info_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "get_client_info", sizeof("get_client_info") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_get_client_info_0_arg0;
+	zend_string *attribute_Deprecated_func_get_client_info_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_get_client_info_0_arg0, attribute_Deprecated_func_get_client_info_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_get_client_info_0->args[0].value, &attribute_Deprecated_func_get_client_info_0_arg0);
+	attribute_Deprecated_func_get_client_info_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_get_client_info_0_arg1;
+	zend_string *attribute_Deprecated_func_get_client_info_0_arg1_str = zend_string_init("use mysqli_get_client_info() instead", strlen("use mysqli_get_client_info() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_get_client_info_0_arg1, attribute_Deprecated_func_get_client_info_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_get_client_info_0->args[1].value, &attribute_Deprecated_func_get_client_info_0_arg1);
+	attribute_Deprecated_func_get_client_info_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_init_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "init", sizeof("init") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_init_0_arg0;
+	zend_string *attribute_Deprecated_func_init_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_init_0_arg0, attribute_Deprecated_func_init_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_init_0->args[0].value, &attribute_Deprecated_func_init_0_arg0);
+	attribute_Deprecated_func_init_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_init_0_arg1;
+	zend_string *attribute_Deprecated_func_init_0_arg1_str = zend_string_init("replace calls to parent::init() with parent::__construct()", strlen("replace calls to parent::init() with parent::__construct()"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_init_0_arg1, attribute_Deprecated_func_init_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_init_0->args[1].value, &attribute_Deprecated_func_init_0_arg1);
+	attribute_Deprecated_func_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 

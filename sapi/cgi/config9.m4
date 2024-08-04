@@ -1,14 +1,11 @@
-PHP_ARG_ENABLE([cgi],,
+PHP_ARG_ENABLE([cgi],
+  [for CGI build],
   [AS_HELP_STRING([--disable-cgi],
     [Disable building CGI version of PHP])],
   [yes],
   [no])
 
-dnl CGI setup.
-AC_MSG_CHECKING(for CGI build)
 if test "$PHP_CGI" != "no"; then
-    AC_MSG_RESULT(yes)
-
     dnl BSD systems.
     AC_CHECK_MEMBERS([struct sockaddr_un.sun_len],,,[#include <sys/un.h>])
 
@@ -17,14 +14,14 @@ if test "$PHP_CGI" != "no"; then
       SunOS\ 5.*)
         AC_MSG_RESULT([yes])
         AC_DEFINE([USE_LOCKING], [1],
-          [Define if cross-process locking is required by accept()])
+          [Define to 1 if cross-process locking is required by 'accept()'.])
       ;;
       *)
         AC_MSG_RESULT([no])
       ;;
     esac
 
-    PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
+    PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cgi/Makefile.frag])
 
     dnl Set filename.
     case $host_alias in
@@ -37,7 +34,10 @@ if test "$PHP_CGI" != "no"; then
     esac
 
     dnl Select SAPI.
-    PHP_SELECT_SAPI(cgi, program, cgi_main.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CGI_PATH)')
+    PHP_SELECT_SAPI([cgi],
+      [program],
+      [cgi_main.c],
+      [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
     case $host_alias in
       *aix*)
@@ -55,11 +55,8 @@ if test "$PHP_CGI" != "no"; then
       ;;
     esac
 
-    dnl Expose to Makefile.
-    PHP_SUBST(SAPI_CGI_PATH)
-    PHP_SUBST(BUILD_CGI)
+    PHP_SUBST([SAPI_CGI_PATH])
+    PHP_SUBST([BUILD_CGI])
 
-    PHP_OUTPUT(sapi/cgi/php-cgi.1)
-else
-  AC_MSG_RESULT(no)
+    AC_CONFIG_FILES([sapi/cgi/php-cgi.1])
 fi

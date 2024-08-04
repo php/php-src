@@ -93,9 +93,6 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm_log.h"
 #include "zlog.h"
 
-/* XXX this will need to change later when threaded fastcgi is implemented.  shane */
-struct sigaction act, old_term, old_quit, old_int;
-
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
 /* these globals used for forking children on unix systems */
@@ -606,7 +603,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array) /* {{{ */
  *
  * Ignore level, we want to send all messages through fastcgi
  */
-void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
+static void sapi_cgi_log_fastcgi(int level, char *message, size_t len)
 {
 
 	fcgi_request *request = (fcgi_request*) SG(server_context);

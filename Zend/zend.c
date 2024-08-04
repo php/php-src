@@ -94,6 +94,8 @@ ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
 ZEND_API zend_result (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
+ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(void *bytes, size_t size, char *errstr, size_t errstr_size) = NULL;
+ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(zend_random_bytes_insecure_state *state, void *bytes, size_t size) = NULL;
 
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);
@@ -210,6 +212,12 @@ static ZEND_INI_MH(OnUpdateReservedStackSize) /* {{{ */
 	zend_ulong min = ZEND_ALLOCA_MAX_SIZE + 16*1024;
 #else
 	zend_ulong min = 32*1024;
+#endif
+
+#if defined(__SANITIZE_ADDRESS__) || __has_feature(memory_sanitizer)
+	/* AddressSanitizer and MemorySanitizer use more stack due to
+	 * instrumentation */
+	min *= 10;
 #endif
 
 	if (size == 0) {
@@ -823,6 +831,10 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->pid = 0;
 	executor_globals->oldact = (struct sigaction){0};
 #endif
+	memset(executor_globals->strtod_state.freelist, 0,
+			sizeof(executor_globals->strtod_state.freelist));
+	executor_globals->strtod_state.p5s = NULL;
+	executor_globals->strtod_state.result = NULL;
 }
 /* }}} */
 
@@ -908,6 +920,11 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	php_win32_cp_set_by_id(65001);
 #endif
 
+	/* Set up early utility functions. zend_mm depends on
+	 * zend_random_bytes_insecure */
+	zend_random_bytes = utility_functions->random_bytes_function;
+	zend_random_bytes_insecure = utility_functions->random_bytes_insecure_function;
+
 	start_memory_manager();
 
 	virtual_cwd_startup(); /* Could use shutdown to free the main cwd but it would just slow it down for CGI */
@@ -918,7 +935,6 @@ void zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 
 	zend_startup_hrtime();
-	zend_startup_strtod();
 	zend_startup_extensions_mechanism();
 
 	/* Set up utility functions and values */
@@ -1118,6 +1134,7 @@ zend_result zend_post_startup(void) /* {{{ */
 #ifdef ZEND_CHECK_STACK_LIMIT
 	zend_call_stack_init();
 #endif
+	gc_init();
 
 	return SUCCESS;
 }
@@ -1859,7 +1876,9 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 	old_exception = EG(exception);
 	EG(exception) = NULL;
 	ZVAL_OBJ(&params[0], old_exception);
+
 	ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
+	zend_stack_push(&EG(user_exception_handlers), &orig_user_exception_handler);
 	ZVAL_UNDEF(&EG(user_exception_handler));
 
 	if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
@@ -1873,7 +1892,13 @@ ZEND_API ZEND_COLD void zend_user_exception_handler(void) /* {{{ */
 		EG(exception) = old_exception;
 	}
 
-	zval_ptr_dtor(&orig_user_exception_handler);
+	if (Z_TYPE(EG(user_exception_handler)) == IS_UNDEF) {
+		zval *tmp = zend_stack_top(&EG(user_exception_handlers));
+		if (tmp) {
+			ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
+			zend_stack_del_top(&EG(user_exception_handlers));
+		}
+	}
 } /* }}} */
 
 ZEND_API zend_result zend_execute_script(int type, zval *retval, zend_file_handle *file_handle)

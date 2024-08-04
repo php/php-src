@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::lookupPrefix()
+Dom\Node::lookupPrefix()
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:x="test">

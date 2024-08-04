@@ -1,10 +1,10 @@
 --TEST--
-PdoSqlite load extension
+Pdo\Sqlite load extension
 --EXTENSIONS--
 pdo_sqlite
 --SKIPIF--
 <?php
-if (!method_exists(PdoSqlite::class, "loadExtension")) {
+if (!method_exists(Pdo\Sqlite::class, "loadExtension")) {
     die("skip loading sqlite extensions is not supported");
 }
 
@@ -24,15 +24,11 @@ if ($location === null) {
 require __DIR__ . "/config.inc";
 
 $db = Pdo::connect('sqlite::memory:');
-if (!$db instanceof PdoSqlite) {
-    echo "Wrong class type. Should be PdoSqlite but is " . get_class($db) . "\n";
+if (!$db instanceof Pdo\Sqlite) {
+    echo "Wrong class type. Should be Pdo\Sqlite but is " . get_class($db) . "\n";
 }
 
-$result = $db->loadExtension(getSpatialiteExtensionLocation(););
-if ($result !== true) {
-    echo "Failed to load extension mod_spatialite.so";
-    exit(-1);
-}
+$db->loadExtension(getSpatialiteExtensionLocation());
 
 $result = $db->query('SELECT AsText(Buffer(GeomFromText("LINESTRING(0 0, 1 0)"), 0.2)) as geometry_data;');
 

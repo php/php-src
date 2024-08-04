@@ -22,6 +22,8 @@
 
 #include <stdint.h>
 
+#include "zend_compile.h"
+
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_generator;
@@ -86,6 +88,10 @@ struct _zend_generator {
 	/* Fake execute_data for stacktraces */
 	zend_execute_data execute_fake;
 
+	/* The underlying function, equivalent to execute_data->func while
+	 * the generator is alive. */
+	zend_function *func;
+
 	/* ZEND_GENERATOR_* flags */
 	uint8_t flags;
 };
@@ -95,6 +101,7 @@ static const uint8_t ZEND_GENERATOR_FORCED_CLOSE      = 0x2;
 static const uint8_t ZEND_GENERATOR_AT_FIRST_YIELD    = 0x4;
 static const uint8_t ZEND_GENERATOR_DO_INIT           = 0x8;
 static const uint8_t ZEND_GENERATOR_IN_FIBER          = 0x10;
+static const uint8_t ZEND_GENERATOR_DTOR_VISITED      = 0x20;
 
 void zend_register_generator_ce(void);
 ZEND_API void zend_generator_close(zend_generator *generator, bool finished_execution);

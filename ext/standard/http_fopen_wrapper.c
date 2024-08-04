@@ -136,7 +136,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 	zend_string *transport_string;
 	zend_string *errstr = NULL;
 	int have_header = 0;
-	bool request_fulluri = 0, ignore_errors = 0;
+	bool request_fulluri = false, ignore_errors = false;
 	struct timeval timeout;
 	char *user_headers = NULL;
 	int header_init = ((flags & HTTP_WRAPPER_HEADER_INIT) != 0);
@@ -171,7 +171,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 			return php_stream_open_wrapper_ex(path, mode, REPORT_ERRORS, NULL, context);
 		}
 		/* Called from a non-http wrapper with http proxying requested (i.e. ftp) */
-		request_fulluri = 1;
+		request_fulluri = true;
 		use_ssl = 0;
 		use_proxy = 1;
 		transport_string = zend_string_copy(Z_STR_P(tmpzval));
@@ -792,8 +792,19 @@ finish:
 			} else if (!strncasecmp(http_header_line, "Content-Type:", sizeof("Content-Type:")-1)) {
 				php_stream_notify_info(context, PHP_STREAM_NOTIFY_MIME_TYPE_IS, http_header_value, 0);
 			} else if (!strncasecmp(http_header_line, "Content-Length:", sizeof("Content-Length:")-1)) {
-				file_size = atoi(http_header_value);
-				php_stream_notify_file_size(context, file_size, http_header_line, 0);
+				/* https://www.rfc-editor.org/rfc/rfc9110.html#name-content-length */
+				const char *ptr = http_header_value;
+				/* must contain only digits, no + or - symbols */
+				if (*ptr >= '0' && *ptr <= '9') {
+					char *endptr = NULL;
+					size_t parsed = ZEND_STRTOUL(ptr, &endptr, 10);
+					/* check whether there was no garbage in the header value and the conversion was successful */
+					if (endptr && !*endptr) {
+						/* truncate for 32-bit such that no negative file sizes occur */
+						file_size = MIN(parsed, ZEND_LONG_MAX);
+						php_stream_notify_file_size(context, file_size, http_header_line, 0);
+					}
+				}
 			} else if (
 				!strncasecmp(http_header_line, "Transfer-Encoding:", sizeof("Transfer-Encoding:")-1)
 				&& !strncasecmp(http_header_value, "Chunked", sizeof("Chunked")-1)
@@ -801,7 +812,7 @@ finish:
 
 				/* create filter to decode response body */
 				if (!(options & STREAM_ONLY_GET_HEADERS)) {
-					zend_long decode = 1;
+					bool decode = true;
 
 					if (context && (tmpzval = php_stream_context_get_option(context, "http", "auto_decode")) != NULL) {
 						decode = zend_is_true(tmpzval);

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 1dd42ee5b5b818c5bd131b5c4bbb13c153d99499 */
+ * Stub hash: b7a13b3b242bd535f62a7d819eb0df751efb54ed */
 
 static void register_tokenizer_data_symbols(int module_number)
 {
@@ -93,6 +93,7 @@ static void register_tokenizer_data_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("T_TRAIT_C", T_TRAIT_C, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_METHOD_C", T_METHOD_C, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_FUNC_C", T_FUNC_C, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("T_PROPERTY_C", T_PROPERTY_C, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_NS_C", T_NS_C, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_ATTRIBUTE", T_ATTRIBUTE, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("T_PLUS_EQUAL", T_PLUS_EQUAL, CONST_PERSISTENT);

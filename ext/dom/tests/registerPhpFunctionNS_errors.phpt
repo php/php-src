@@ -5,6 +5,11 @@ dom
 --FILE--
 <?php
 
+class TrampolineClass {
+    public function __call($name, $args) {
+    }
+}
+
 $doc = new DOMDocument();
 $doc->loadHTML('<a href="https://PHP.net">hello</a>');
 
@@ -12,6 +17,18 @@ $xpath = new DOMXPath($doc);
 
 try {
     $xpath->registerPhpFunctionNS('http://php.net/xpath', 'strtolower', strtolower(...));
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    $xpath->registerPhpFunctionNS('http://php.net/xpath', 'test', [new TrampolineClass, 'test']);
+} catch (ValueError $e) {
+    echo $e->getMessage(), "\n";
+}
+
+try {
+    $xpath->registerPhpFunctionNS('urn:foo', '$$$', [new TrampolineClass, 'test']);
 } catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -37,6 +54,8 @@ try {
 ?>
 --EXPECT--
 DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xpath" because it is reserved by PHP
+DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not be "http://php.net/xpath" because it is reserved by PHP
+DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must be a valid callback name
 DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must be a valid callback name
 DOMXPath::registerPhpFunctionNS(): Argument #2 ($name) must not contain any null bytes
 DOMXPath::registerPhpFunctionNS(): Argument #1 ($namespaceURI) must not contain any null bytes

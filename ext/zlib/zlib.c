@@ -19,14 +19,13 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
 
@@ -131,7 +130,7 @@ static void php_zlib_free(voidpf opaque, voidpf address)
 /* }}} */
 
 /* {{{ php_zlib_output_conflict_check() */
-static int php_zlib_output_conflict_check(const char *handler_name, size_t handler_name_len)
+static zend_result php_zlib_output_conflict_check(const char *handler_name, size_t handler_name_len)
 {
 	if (php_output_get_level() > 0) {
 		if (php_output_handler_conflict(handler_name, handler_name_len, ZEND_STRL(PHP_ZLIB_OUTPUT_HANDLER_NAME))
@@ -166,7 +165,7 @@ static int php_zlib_output_encoding(void)
 /* }}} */
 
 /* {{{ php_zlib_output_handler_ex() */
-static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
+static zend_result php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context *output_context)
 {
 	int flags = Z_SYNC_FLUSH;
 
@@ -252,7 +251,7 @@ static int php_zlib_output_handler_ex(php_zlib_context *ctx, php_output_context 
 /* }}} */
 
 /* {{{ php_zlib_output_handler() */
-static int php_zlib_output_handler(void **handler_context, php_output_context *output_context)
+static zend_result php_zlib_output_handler(void **handler_context, php_output_context *output_context)
 {
 	php_zlib_context *ctx = *(php_zlib_context **) handler_context;
 
@@ -526,7 +525,7 @@ PHP_FUNCTION(ob_gzhandler)
 	size_t in_len;
 	zend_long flags = 0;
 	php_output_context ctx = {0};
-	int encoding, rv;
+	int encoding;
 
 	/*
 	 * NOTE that the real ob_gzhandler is an alias to "zlib output compression".
@@ -564,7 +563,7 @@ PHP_FUNCTION(ob_gzhandler)
 	ctx.in.data = in_str;
 	ctx.in.used = in_len;
 
-	rv = php_zlib_output_handler_ex(ZLIBG(ob_gzhandler), &ctx);
+	zend_result rv = php_zlib_output_handler_ex(ZLIBG(ob_gzhandler), &ctx);
 
 	if (SUCCESS != rv) {
 		if (ctx.out.data && ctx.out.free) {

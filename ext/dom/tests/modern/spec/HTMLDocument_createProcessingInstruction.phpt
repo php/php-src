@@ -1,10 +1,10 @@
 --TEST--
-DOM\HTMLDocument::createProcessingInstruction()
+Dom\HTMLDocument::createProcessingInstruction()
 --EXTENSIONS--
 dom
 --FILE--
 <?php
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->createProcessingInstruction("?>", "");
 } catch (DOMException $e) {
@@ -25,7 +25,7 @@ try {
 }
 $dom->appendChild($dom->createProcessingInstruction("foo", ""));
 $dom->appendChild($dom->createProcessingInstruction("foo", "bar"));
-echo $dom->saveHTML();
+echo $dom->saveHtml();
 ?>
 --EXPECT--
 int(5)

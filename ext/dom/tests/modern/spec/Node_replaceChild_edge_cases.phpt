@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::replaceChild() edge cases
+Dom\Node::replaceChild() edge cases
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString("<!DOCTYPE html><html></html>");
+$dom = Dom\HTMLDocument::createFromString("<!DOCTYPE html><html></html>");
 $dom->documentElement->remove();
 $parent = $dom->createElement("parent");
 $child = $dom->createElement("child");
@@ -46,7 +46,7 @@ try {
 echo "--- Invalid child to replace with ---\n";
 
 try {
-    $entityReference = $dom->importNode(DOM\XMLDocument::createEmpty()->createEntityReference("foo"));
+    $entityReference = $dom->importNode(Dom\XMLDocument::createEmpty()->createEntityReference("foo"));
     $parent->replaceChild($entityReference, $child);
 } catch (DOMException $e) {
     echo $e->getMessage(), "\n";
@@ -108,14 +108,14 @@ try {
 echo "--- Replace parent with itself ---\n";
 
 $dom->replaceChild($parent, $parent);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 echo "--- Replace parent with single-child fragment ---\n";
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createElement("new-child"));
 $dom->replaceChild($fragment, $parent);
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

@@ -34,6 +34,7 @@
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
 #include "zend_attributes.h"
+#include "zend_enum.h"
 #include "zend_ini.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
@@ -122,7 +123,7 @@ typedef struct _user_tick_function_entry {
 	bool calling;
 } user_tick_function_entry;
 
-#if HAVE_PUTENV
+#ifdef HAVE_PUTENV
 typedef struct {
 	char *putenv_string;
 	char *previous_value;
@@ -303,6 +304,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_incomplete_class_handlers();
 
 	assertion_error_ce = register_class_AssertionError(zend_ce_error);
+
+	rounding_mode_ce = register_class_RoundingMode();
 
 	BASIC_MINIT_SUBMODULE(var)
 	BASIC_MINIT_SUBMODULE(file)
@@ -1195,6 +1198,7 @@ PHP_FUNCTION(time_sleep_until)
 	struct timespec php_req, php_rem;
 	uint64_t current_ns, target_ns, diff_ns;
 	const uint64_t ns_per_sec = 1000000000;
+	const double top_target_sec = (double)(UINT64_MAX / ns_per_sec);
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(target_secs)
@@ -1202,6 +1206,11 @@ PHP_FUNCTION(time_sleep_until)
 
 	if (gettimeofday((struct timeval *) &tm, NULL) != 0) {
 		RETURN_FALSE;
+	}
+
+	if (UNEXPECTED(!(target_secs >= 0 && target_secs <= top_target_sec))) {
+		zend_argument_value_error(1, "must be between 0 and %" PRIu64, (uint64_t)top_target_sec);
+		RETURN_THROWS();
 	}
 
 	target_ns = (uint64_t) (target_secs * ns_per_sec);

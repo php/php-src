@@ -37,8 +37,8 @@ extern zend_module_entry xsl_module_entry;
 #include <libexslt/exsltconfig.h>
 #endif
 
-#include "../dom/xml_common.h"
-#include "../dom/xpath_callbacks.h"
+#include "ext/dom/xml_common.h"
+#include "ext/dom/xpath_callbacks.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>
@@ -52,7 +52,7 @@ extern zend_module_entry xsl_module_entry;
 /* Default == disable all write access */
 #define XSL_SECPREF_DEFAULT (XSL_SECPREF_WRITE_NETWORK | XSL_SECPREF_CREATE_DIRECTORY | XSL_SECPREF_WRITE_FILE)
 
-typedef struct _xsl_object {
+typedef struct xsl_object {
 	void *ptr;
 	HashTable *parameter;
 	bool hasKeys;
@@ -60,7 +60,7 @@ typedef struct _xsl_object {
 	zend_long securityPrefs;
 	php_dom_xpath_callbacks xpath_callbacks;
 	php_libxml_node_object *doc;
-	char *profiling;
+	zend_string *profiling;
 	zend_object std;
 } xsl_object;
 
@@ -76,6 +76,9 @@ void xsl_objects_free_storage(zend_object *object);
 
 void xsl_ext_function_string_php(xmlXPathParserContextPtr ctxt, int nargs);
 void xsl_ext_function_object_php(xmlXPathParserContextPtr ctxt, int nargs);
+
+zval *xsl_prop_max_template_depth(zend_object *object);
+zval *xsl_prop_max_template_vars(zend_object *object);
 
 PHP_MINIT_FUNCTION(xsl);
 PHP_MSHUTDOWN_FUNCTION(xsl);

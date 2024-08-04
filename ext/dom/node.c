@@ -16,13 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 #include "internal_helpers.h"
 #include "dom_properties.h"
 
@@ -179,14 +180,13 @@ zend_result dom_node_node_value_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
-	zend_string *str = zval_try_get_string(newval);
-	if (UNEXPECTED(!str)) {
-		return FAILURE;
-	}
+	/* Cannot fail because the type is either null or a string. */
+	zend_string *str = zval_get_string(newval);
 
 	/* Access to Element node is implemented as a convenience method */
 	switch (nodep->type) {
 		case XML_ATTRIBUTE_NODE:
+			dom_attr_value_will_change(obj, (xmlAttrPtr) nodep);
 			if (php_dom_follow_spec_intern(obj)) {
 				dom_remove_all_children(nodep);
 				xmlAddChild(nodep, xmlNewTextLen(BAD_CAST ZSTR_VAL(str), ZSTR_LEN(str)));
@@ -304,12 +304,7 @@ zend_result dom_node_first_child_read(dom_object *obj, zval *retval)
 		first = nodep->children;
 	}
 
-	if (!first) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(first, retval, obj);
+	php_dom_create_nullable_object(first, retval, obj);
 	return SUCCESS;
 }
 
@@ -329,12 +324,7 @@ zend_result dom_node_last_child_read(dom_object *obj, zval *retval)
 		last = nodep->last;
 	}
 
-	if (!last) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(last, retval, obj);
+	php_dom_create_nullable_object(last, retval, obj);
 	return SUCCESS;
 }
 
@@ -350,12 +340,8 @@ zend_result dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr prevsib = nodep->prev;
-	if (!prevsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(prevsib, retval, obj);
+	php_dom_create_nullable_object(prevsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -371,12 +357,8 @@ zend_result dom_node_next_sibling_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nextsib = nodep->next;
-	if (!nextsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(nextsib, retval, obj);
+	php_dom_create_nullable_object(nextsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -397,12 +379,7 @@ zend_result dom_node_previous_element_sibling_read(dom_object *obj, zval *retval
 		prevsib = prevsib->prev;
 	}
 
-	if (!prevsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(prevsib, retval, obj);
+	php_dom_create_nullable_object(prevsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -423,12 +400,7 @@ zend_result dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
 		nextsib = nextsib->next;
 	}
 
-	if (!nextsib) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
-
-	php_dom_create_object(nextsib, retval, obj);
+	php_dom_create_nullable_object(nextsib, retval, obj);
 	return SUCCESS;
 }
 
@@ -770,7 +742,7 @@ zend_result dom_node_text_content_write(dom_object *obj, zval *newval)
 
 /* }}} */
 
-static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern) /* {{{ */
+static xmlNodePtr dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib, xmlNodePtr nextsib, xmlNodePtr fragment, dom_object *intern) /* {{{ */
 {
 	xmlNodePtr newchild, node;
 
@@ -910,7 +882,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr last = child->last;
-			new_child = _php_dom_insert_fragment(parentp, refp->prev, refp, child, intern);
+			new_child = dom_insert_fragment(parentp, refp->prev, refp, child, intern);
 			dom_reconcile_ns_list(parentp->doc, new_child, last);
 		} else {
 			new_child = xmlAddPrevSibling(refp, child);
@@ -960,7 +932,7 @@ static void dom_node_insert_before_legacy(zval *return_value, zval *ref, dom_obj
 			}
 		} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 			xmlNodePtr last = child->last;
-			new_child = _php_dom_insert_fragment(parentp, parentp->last, NULL, child, intern);
+			new_child = dom_insert_fragment(parentp, parentp->last, NULL, child, intern);
 			dom_reconcile_ns_list(parentp->doc, new_child, last);
 		} else {
 			new_child = xmlAddChild(parentp, child);
@@ -980,7 +952,7 @@ cannot_add:
 /* }}} end dom_node_insert_before */
 
 /* https://dom.spec.whatwg.org/#dom-node-insertbefore */
-static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, dom_object *childobj, xmlNodePtr parentp, xmlNodePtr child)
+static void dom_node_insert_before_modern(zval *return_value, zval *ref, dom_object *intern, xmlNodePtr parentp, xmlNodePtr child)
 {
 	xmlNodePtr refp = NULL;
 	dom_object *refobjp;
@@ -1012,7 +984,7 @@ static void dom_node_insert_before(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	if (modern) {
-		dom_node_insert_before_modern(return_value, ref, intern, childobj, parentp, child);
+		dom_node_insert_before_modern(return_value, ref, intern, parentp, child);
 	} else {
 		dom_node_insert_before_legacy(return_value, ref, intern, childobj, parentp, child);
 	}
@@ -1023,7 +995,7 @@ PHP_METHOD(DOMNode, insertBefore)
 	dom_node_insert_before(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, insertBefore)
+PHP_METHOD(Dom_Node, insertBefore)
 {
 	dom_node_insert_before(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1178,7 +1150,7 @@ static void dom_node_replace_child(INTERNAL_FUNCTION_PARAMETERS, bool modern)
 		xmlUnlinkNode(oldchild);
 
 		xmlNodePtr last = newchild->last;
-		newchild = _php_dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern);
+		newchild = dom_insert_fragment(nodep, prevsib, nextsib, newchild, intern);
 		if (newchild && !modern) {
 			dom_reconcile_ns_list(nodep->doc, newchild, last);
 		}
@@ -1209,7 +1181,7 @@ PHP_METHOD(DOMNode, replaceChild)
 	dom_node_replace_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, replaceChild)
+PHP_METHOD(Dom_Node, replaceChild)
 {
 	dom_node_replace_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1220,33 +1192,28 @@ Since:
 */
 static void dom_node_remove_child(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *node_ce)
 {
-	zval *id, *node;
+	zval *node;
 	xmlNodePtr child, nodep;
 	dom_object *intern, *childobj;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, node_ce) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
-
-	if (!dom_node_children_valid(nodep)) {
-		RETURN_FALSE;
-	}
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
 	DOM_GET_OBJ(child, node, xmlNodePtr, childobj);
 
 	bool stricterror = dom_get_strict_error(intern->document);
 
-	if (dom_node_is_read_only(nodep) == SUCCESS ||
-		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
-		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+	if (!nodep->children || child->parent != nodep) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
-	if (!nodep->children || child->parent != nodep) {
-		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	if (dom_node_is_read_only(nodep) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
 		RETURN_FALSE;
 	}
 
@@ -1260,7 +1227,7 @@ PHP_METHOD(DOMNode, removeChild)
 	dom_node_remove_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(DOM_Node, removeChild)
+PHP_METHOD(Dom_Node, removeChild)
 {
 	dom_node_remove_child(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
@@ -1346,7 +1313,7 @@ static void dom_node_append_child_legacy(zval *return_value, dom_object *intern,
 		php_dom_reconcile_attribute_namespace_after_insertion((xmlAttrPtr) new_child);
 	} else if (child->type == XML_DOCUMENT_FRAG_NODE) {
 		xmlNodePtr last = child->last;
-		new_child = _php_dom_insert_fragment(nodep, nodep->last, NULL, child, intern);
+		new_child = dom_insert_fragment(nodep, nodep->last, NULL, child, intern);
 		dom_reconcile_ns_list(nodep->doc, new_child, last);
 	} else if (child->type == XML_DTD_NODE) {
 		if (nodep->doc->intSubset != NULL) {
@@ -1392,7 +1359,7 @@ PHP_METHOD(DOMNode, appendChild)
 	dom_node_append_child_legacy(return_value, intern, childobj, nodep, child);
 }
 
-PHP_METHOD(DOM_Node, appendChild)
+PHP_METHOD(Dom_Node, appendChild)
 {
 	zval *node;
 	xmlNodePtr nodep, child;
@@ -1422,26 +1389,14 @@ Since:
 */
 PHP_METHOD(DOMNode, hasChildNodes)
 {
-	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
-	if (!dom_node_children_valid(nodep)) {
-		RETURN_FALSE;
-	}
-
-	if (nodep->children) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(dom_node_children_valid(nodep) && nodep->children != NULL);
 }
 /* }}} end dom_node_has_child_nodes */
 
@@ -1462,21 +1417,21 @@ PHP_METHOD(DOMNode, cloneNode)
 
 	DOM_GET_OBJ(n, id, xmlNodePtr, intern);
 
-	php_dom_libxml_ns_mapper *ns_mapper = NULL;
+	php_dom_private_data *private_data = NULL;
 	bool clone_document = n->type == XML_DOCUMENT_NODE || n->type == XML_HTML_DOCUMENT_NODE;
 	if (php_dom_follow_spec_intern(intern)) {
 		if (clone_document) {
-			ns_mapper = php_dom_libxml_ns_mapper_create();
+			private_data = php_dom_private_data_create();
 		} else {
-			ns_mapper = php_dom_get_ns_mapper(intern);
+			private_data = php_dom_get_private_data(intern);
 		}
 	}
 
-	node = dom_clone_node(ns_mapper, n, n->doc, recursive);
+	node = dom_clone_node(php_dom_ns_mapper_from_private(private_data), n, n->doc, recursive);
 
 	if (!node) {
-		if (clone_document && ns_mapper != NULL) {
-			php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		if (clone_document && private_data != NULL) {
+			php_dom_private_data_destroy(private_data);
 		}
 		RETURN_FALSE;
 	}
@@ -1484,7 +1439,7 @@ PHP_METHOD(DOMNode, cloneNode)
 	/* If document cloned we want a new document proxy */
 	if (clone_document) {
 		dom_object *new_intern;
-		if (ns_mapper) {
+		if (private_data) {
 			/* We have the issue here that we can't create a modern node without an intern.
 			 * Fortunately, it's impossible to have a custom document class for the modern DOM (final base class),
 			 * so we can solve this by invoking the instantiation helper directly. */
@@ -1496,7 +1451,7 @@ PHP_METHOD(DOMNode, cloneNode)
 		}
 		php_dom_update_document_after_clone(intern, n, new_intern, node);
 		ZEND_ASSERT(new_intern->document->private_data == NULL);
-		new_intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+		new_intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 	} else {
 		if (node->type == XML_ATTRIBUTE_NODE && n->ns != NULL && node->ns == NULL) {
 			/* Let reconciliation deal with this. The lifetime of the namespace poses no problem
@@ -1520,9 +1475,7 @@ PHP_METHOD(DOMNode, normalize)
 	dom_object *intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -1554,25 +1507,14 @@ Since: DOM Level 2
 */
 PHP_METHOD(DOMNode, hasAttributes)
 {
-	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 
-	if (nodep->type != XML_ELEMENT_NODE)
-		RETURN_FALSE;
-
-	if (nodep->properties) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(nodep->type == XML_ELEMENT_NODE && nodep->properties != NULL);
 }
 /* }}} end dom_node_has_attributes */
 
@@ -1599,19 +1541,19 @@ static void dom_node_is_same_node(INTERNAL_FUNCTION_PARAMETERS, zval *node)
 PHP_METHOD(DOMNode, isSameNode)
 {
 	zval *node;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node, dom_node_class_entry) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node, dom_node_class_entry)
+	ZEND_PARSE_PARAMETERS_END();
 
 	dom_node_is_same_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, node);
 }
 
-PHP_METHOD(DOM_Node, isSameNode)
+PHP_METHOD(Dom_Node, isSameNode)
 {
 	zval *node;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_modern_node_class_entry) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(node, dom_modern_node_class_entry)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (node == NULL) {
 		RETURN_FALSE;
@@ -1778,9 +1720,9 @@ static void dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAMETERS, bool mod
 	dom_object *intern;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O!", &node, dom_get_node_ce(modern)) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS_OR_NULL(node, dom_get_node_ce(modern))
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (node == NULL) {
 		RETURN_FALSE;
@@ -1806,7 +1748,7 @@ PHP_METHOD(DOMNode, isEqualNode)
 	dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, isEqualNode)
+PHP_METHOD(Dom_Node, isEqualNode)
 {
 	dom_node_is_equal_node_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -1903,14 +1845,14 @@ PHP_METHOD(DOMNode, lookupPrefix)
 	dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, lookupPrefix)
+PHP_METHOD(Dom_Node, lookupPrefix)
 {
 	dom_node_lookup_prefix(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} end dom_node_lookup_prefix */
 
 /* https://dom.spec.whatwg.org/#locate-a-namespace */
-static const char *dom_locate_a_namespace(xmlNodePtr node, const zend_string *prefix)
+const char *dom_locate_a_namespace(const xmlNode *node, const zend_string *prefix)
 {
 	/* switch on the interface node implements: */
 	if (node->type == XML_ELEMENT_NODE) {
@@ -1992,9 +1934,9 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 	size_t uri_len = 0;
 	char *uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &uri, &uri_len) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(uri, uri_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2015,7 +1957,7 @@ PHP_METHOD(DOMNode, isDefaultNamespace)
 	RETURN_FALSE;
 }
 
-PHP_METHOD(DOM_Node, isDefaultNamespace)
+PHP_METHOD(Dom_Node, isDefaultNamespace)
 {
 	zval *id;
 	xmlNodePtr nodep;
@@ -2023,9 +1965,9 @@ PHP_METHOD(DOM_Node, isDefaultNamespace)
 	size_t uri_len = 0;
 	char *uri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &uri, &uri_len) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING_OR_NULL(uri, uri_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2050,9 +1992,9 @@ PHP_METHOD(DOMNode, lookupNamespaceURI)
 	zend_string *prefix;
 
 	id = ZEND_THIS;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S!", &prefix) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR_OR_NULL(prefix)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2157,7 +2099,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		char *xquery;
 
 		/* Find "query" key */
-		tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_QUERY));
+		tmp = zend_hash_find_deref(ht, ZSTR_KNOWN(ZEND_STR_QUERY));
 		if (!tmp) {
 			/* if mode == 0 then $xpath arg is 3, if mode == 1 then $xpath is 4 */
 			zend_argument_value_error(3 + mode, "must have a \"query\" key");
@@ -2173,12 +2115,13 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		ctxp = xmlXPathNewContext(docp);
 		ctxp->node = nodep;
 
-		tmp = zend_hash_str_find(ht, "namespaces", sizeof("namespaces")-1);
+		tmp = zend_hash_str_find_deref(ht, "namespaces", sizeof("namespaces")-1);
 		if (tmp && Z_TYPE_P(tmp) == IS_ARRAY && !HT_IS_PACKED(Z_ARRVAL_P(tmp))) {
 			zval *tmpns;
 			zend_string *prefix;
 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(tmp), prefix, tmpns) {
+				ZVAL_DEREF(tmpns);
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					if (prefix) {
 						xmlXPathRegisterNs(ctxp, BAD_CAST ZSTR_VAL(prefix), BAD_CAST Z_STRVAL_P(tmpns));
@@ -2209,6 +2152,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 			inclusive_ns_prefixes = safe_emalloc(zend_hash_num_elements(Z_ARRVAL_P(ns_prefixes)) + 1,
 				sizeof(xmlChar *), 0);
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(ns_prefixes), tmpns) {
+				ZVAL_DEREF(tmpns);
 				if (Z_TYPE_P(tmpns) == IS_STRING) {
 					inclusive_ns_prefixes[nscount++] = BAD_CAST Z_STRVAL_P(tmpns);
 				}
@@ -2248,9 +2192,9 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 		RETVAL_FALSE;
 	} else {
 		if (mode == 0) {
-			ret = xmlOutputBufferGetSize(buf);
-			if (ret > 0) {
-				RETVAL_STRINGL((char *) xmlOutputBufferGetContent(buf), ret);
+			size_t size = xmlOutputBufferGetSize(buf);
+			if (size > 0) {
+				RETVAL_STRINGL((char *) xmlOutputBufferGetContent(buf), size);
 			} else {
 				RETVAL_EMPTY_STRING();
 			}
@@ -2290,9 +2234,7 @@ static void dom_node_get_node_path(INTERNAL_FUNCTION_PARAMETERS, bool throw)
 	dom_object *intern;
 	char *value;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2316,7 +2258,7 @@ PHP_METHOD(DOMNode, getNodePath)
 	dom_node_get_node_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
 }
 
-PHP_METHOD(DOM_Node, getNodePath)
+PHP_METHOD(Dom_Node, getNodePath)
 {
 	dom_node_get_node_path(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
@@ -2329,9 +2271,7 @@ PHP_METHOD(DOMNode, getLineNo)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
@@ -2379,7 +2319,7 @@ PHP_METHOD(DOMNode, contains)
 	RETURN_BOOL(dom_node_contains(thisp, otherp));
 }
 
-PHP_METHOD(DOM_Node, contains)
+PHP_METHOD(Dom_Node, contains)
 {
 	zval *other, *id;
 	xmlNodePtr otherp, thisp;
@@ -2411,9 +2351,10 @@ PHP_METHOD(DOMNode, getRootNode)
 	/* Unused now because we don't support the shadow DOM nodes. Options only influence shadow DOM nodes. */
 	zval *options;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a!", &options) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ARRAY_OR_NULL(options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(thisp, id, xmlNodePtr, intern);
 
@@ -2442,9 +2383,9 @@ static void dom_node_compare_document_position(INTERNAL_FUNCTION_PARAMETERS, zen
 	xmlNodePtr other, this;
 	dom_object *this_intern, *other_intern;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &node_zval, node_ce) != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJECT_OF_CLASS(node_zval, node_ce)
+	ZEND_PARSE_PARAMETERS_END();
 
 	DOM_GET_THIS_OBJ(this, id, xmlNodePtr, this_intern);
 	DOM_GET_OBJ(other, node_zval, xmlNodePtr, other_intern);
@@ -2595,7 +2536,7 @@ PHP_METHOD(DOMNode, compareDocumentPosition)
 	dom_node_compare_document_position(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_node_class_entry);
 }
 
-PHP_METHOD(DOM_Node, compareDocumentPosition)
+PHP_METHOD(Dom_Node, compareDocumentPosition)
 {
 	dom_node_compare_document_position(INTERNAL_FUNCTION_PARAM_PASSTHRU, dom_modern_node_class_entry);
 }
@@ -2610,16 +2551,14 @@ PHP_METHOD(DOM_Node, compareDocumentPosition)
  *   - If the user implements __sleep / __wakeup, then it's also not a problem because they will not enter the throwing methods.
  */
 
-PHP_METHOD(DOM_Node, __construct)
+PHP_METHOD(Dom_Node, __construct)
 {
 	ZEND_UNREACHABLE();
 }
 
 PHP_METHOD(DOMNode, __sleep)
 {
-	if (zend_parse_parameters_none() != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_exception_ex(NULL, 0, "Serialization of '%s' is not allowed, unless serialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 	RETURN_THROWS();
@@ -2627,9 +2566,7 @@ PHP_METHOD(DOMNode, __sleep)
 
 PHP_METHOD(DOMNode, __wakeup)
 {
-	if (zend_parse_parameters_none() != SUCCESS) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed, unless unserialization methods are implemented in a subclass", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
 	RETURN_THROWS();

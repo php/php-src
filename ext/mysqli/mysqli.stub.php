@@ -436,11 +436,6 @@ const MYSQLI_TYPE_BIT = UNKNOWN;
  * @cvalue MYSQL_SET_CHARSET_NAME
  */
 const MYSQLI_SET_CHARSET_NAME = UNKNOWN;
-/**
- * @var int
- * @cvalue MYSQL_SET_CHARSET_DIR
- */
-const MYSQLI_SET_CHARSET_DIR = UNKNOWN;
 
 /* bind support */
 /**
@@ -774,11 +769,10 @@ class mysqli
     public function character_set_name(): string {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_close
-     * @no-verify
      */
-    public function close() {} // TODO make return type void
+    public function close(): true {}
 
     /**
      * @tentative-return-type
@@ -807,11 +801,11 @@ class mysqli
     public function dump_debug_info(): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_debug
      * @no-verify Should really be a static method
      */
-    public function debug(string $options) {} // TODO make return type void
+    public function debug(string $options): true {}
 
     /**
      * @tentative-return-type
@@ -827,8 +821,8 @@ class mysqli
     /**
      * @tentative-return-type
      * @alias mysqli_get_client_info
-     * @deprecated 8.1.0
      */
+    #[\Deprecated(since: '8.1', message: 'use mysqli_get_client_info() instead')]
     public function get_client_info(): string {}
 
     /**
@@ -851,9 +845,9 @@ class mysqli
     public function get_warnings(): mysqli_warning|false {}
 
     /**
-     * @deprecated
      * @return bool|null
      * */
+    #[\Deprecated(since: '8.1', message: 'replace calls to parent::init() with parent::__construct()')]
     public function init() {}
 
     /**
@@ -987,9 +981,8 @@ class mysqli
     public function set_opt(int $option, $value): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_ssl_set
-     * @no-verify
      */
     public function ssl_set(
         ?string $key,
@@ -997,7 +990,7 @@ class mysqli
         ?string $ca_certificate,
         ?string $ca_path,
         ?string $cipher_algos
-    ) {} // TODO make return type void
+    ): true {}
 
     /**
      * @tentative-return-type
@@ -1144,7 +1137,7 @@ class mysqli_result implements IteratorAggregate
      * @tentative-return-type
      * @alias mysqli_field_seek
      */
-    public function field_seek(int $index): true {} // TODO make return type void
+    public function field_seek(int $index): true {}
 
     /**
      * @tentative-return-type
@@ -1240,11 +1233,10 @@ class mysqli_stmt
     public function bind_result(mixed &...$vars): bool {}
 
     /**
-     * @return true
+     * @tentative-return-type
      * @alias mysqli_stmt_close
-     * @no-verify
      */
-    public function close() {} // TODO make return type void
+    public function close(): true {}
 
     /**
      * @tentative-return-type
@@ -1363,7 +1355,7 @@ function mysqli_change_user(mysqli $mysql, string $username, #[\SensitiveParamet
 /** @refcount 1 */
 function mysqli_character_set_name(mysqli $mysql): string {}
 
-function mysqli_close(mysqli $mysql): true {} // TODO make return type void
+function mysqli_close(mysqli $mysql): true {}
 
 function mysqli_commit(mysqli $mysql, int $flags = 0, ?string $name = null): bool {}
 
@@ -1388,7 +1380,7 @@ function mysqli_data_seek(mysqli_result $result, int $offset): bool {}
 
 function mysqli_dump_debug_info(mysqli $mysql): bool {}
 
-function mysqli_debug(string $options): true {} // TODO make return type void
+function mysqli_debug(string $options): true {}
 
 function mysqli_errno(mysqli $mysql): int {}
 
@@ -1457,7 +1449,7 @@ function mysqli_fetch_column(mysqli_result $result, int $column = 0): null|int|f
 
 function mysqli_field_count(mysqli $mysql): int {}
 
-function mysqli_field_seek(mysqli_result $result, int $index): true {} // TODO make return type void
+function mysqli_field_seek(mysqli_result $result, int $index): true {}
 
 function mysqli_field_tell(mysqli_result $result): int {}
 
@@ -1655,7 +1647,7 @@ function mysqli_ssl_set(
     ?string $ca_certificate,
     ?string $ca_path,
     ?string $cipher_algos
-): true {} // TODO make return type void
+): true {}
 
 /** @refcount 1 */
 function mysqli_stat(mysqli $mysql): string|false {}

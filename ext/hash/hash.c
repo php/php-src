@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <math.h>
@@ -24,7 +24,6 @@
 #include "ext/standard/info.h"
 #include "ext/standard/file.h"
 #include "ext/standard/php_var.h"
-#include "ext/spl/spl_exceptions.h"
 
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
@@ -42,7 +41,7 @@
 # endif
 #endif
 
-HashTable php_hash_hashtable;
+static HashTable php_hash_hashtable;
 zend_class_entry *php_hashcontext_ce;
 static zend_object_handlers php_hashcontext_handlers;
 
@@ -1560,6 +1559,21 @@ PHP_METHOD(HashContext, __unserialize)
 	object_properties_load(&hash->std, Z_ARRVAL_P(members_zv));
 }
 /* }}} */
+
+ZEND_METHOD(HashContext, __debugInfo)
+{
+	zval *object = ZEND_THIS;
+	php_hashcontext_object *hash = php_hashcontext_from_object(Z_OBJ_P(object));
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zval tmp;
+
+	array_init(return_value);
+
+	ZVAL_STRING(&tmp, hash->ops->algo);
+	zend_hash_str_update(Z_ARR_P(return_value), "algo", strlen("algo"), &tmp);
+}
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(hash)

@@ -64,27 +64,23 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 /* {{{ IntlDateFormatter_object_clone */
 zend_object *IntlDateFormatter_object_clone(zend_object *object)
 {
-	IntlDateFormatter_object *dfo, *new_dfo;
-	zend_object *new_obj;
+	IntlDateFormatter_object     *dfo = php_intl_dateformatter_fetch_object(object);
+	zend_object              *new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
+	IntlDateFormatter_object *new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 
-	dfo = php_intl_dateformatter_fetch_object(object);
-	intl_error_reset(INTL_DATA_ERROR_P(dfo));
-
-	new_obj = IntlDateFormatter_ce_ptr->create_object(object->ce);
-	new_dfo = php_intl_dateformatter_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_dfo->zo, &dfo->zo);
+
 	/* clone formatter object */
-	if (dfo->datef_data.udatf != NULL) {
-		DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo),  &INTL_DATA_ERROR_CODE(dfo));
-		if (U_FAILURE(INTL_DATA_ERROR_CODE(dfo))) {
-			/* set up error in case error handler is interested */
-			intl_errors_set(INTL_DATA_ERROR_P(dfo), INTL_DATA_ERROR_CODE(dfo),
-					"Failed to clone IntlDateFormatter object", 0 );
-			zend_throw_exception(NULL, "Failed to clone IntlDateFormatter object", 0);
+	if (DATE_FORMAT_OBJECT(dfo) != NULL) {
+		UErrorCode error = U_ZERO_ERROR;
+		DATE_FORMAT_OBJECT(new_dfo) = udat_clone(DATE_FORMAT_OBJECT(dfo), &error);
+
+		if (U_FAILURE(error)) {
+			zend_throw_error(NULL, "Failed to clone IntlDateFormatter");
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed IntlDateFormatter", 0);
+		zend_throw_error(NULL, "Cannot clone uninitialized IntlDateFormatter");
 	}
 	return new_obj;
 }

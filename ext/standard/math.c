@@ -20,6 +20,7 @@
 #include "php.h"
 #include "php_math.h"
 #include "zend_bitset.h"
+#include "zend_enum.h"
 #include "zend_exceptions.h"
 #include "zend_multiply.h"
 #include "zend_portability.h"
@@ -29,6 +30,8 @@
 #include <stdlib.h>
 
 #include "basic_functions.h"
+
+PHPAPI zend_class_entry *rounding_mode_ce;
 
 /* {{{ php_intpow10
        Returns pow(10.0, (double)power), uses fast lookup table for exact powers */
@@ -301,6 +304,32 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
+PHPAPI int php_math_round_mode_from_enum(zend_object *mode)
+{
+	zval *case_name = zend_enum_fetch_case_name(mode);
+	zend_string *mode_name = Z_STR_P(case_name);
+
+	switch (ZSTR_VAL(mode_name)[0] + ZSTR_VAL(mode_name)[4]) {
+		case 'H' + 'A':
+			return PHP_ROUND_HALF_UP;
+		case 'H' + 'T':
+			return PHP_ROUND_HALF_DOWN;
+		case 'H' + 'E':
+			return PHP_ROUND_HALF_EVEN;
+		case 'H' + 'O':
+			return PHP_ROUND_HALF_ODD;
+		case 'T' + 'r':
+			return PHP_ROUND_TOWARD_ZERO;
+		case 'A' + 'F':
+			return PHP_ROUND_AWAY_FROM_ZERO;
+		case 'N' + 't':
+			return PHP_ROUND_FLOOR;
+		case 'P' + 't':
+			return PHP_ROUND_CEILING;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
+}
+
 /* {{{ Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
@@ -308,12 +337,13 @@ PHP_FUNCTION(round)
 	int places = 0;
 	zend_long precision = 0;
 	zend_long mode = PHP_ROUND_HALF_UP;
+	zend_object *mode_object = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
 		Z_PARAM_NUMBER(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
-		Z_PARAM_LONG(mode)
+		Z_PARAM_OBJ_OF_CLASS_OR_LONG(mode_object, rounding_mode_ce, mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() >= 2) {
@@ -322,6 +352,10 @@ PHP_FUNCTION(round)
 		} else {
 			places = ZEND_LONG_INT_UDFL(precision) ? INT_MIN : (int)precision;
 		}
+	}
+
+	if (mode_object != NULL) {
+		mode = php_math_round_mode_from_enum(mode_object);
 	}
 
 	switch (mode) {
@@ -335,7 +369,7 @@ PHP_FUNCTION(round)
 		case PHP_ROUND_FLOOR:
 			break;
 		default:
-			zend_argument_value_error(3, "must be a valid rounding mode (PHP_ROUND_*)");
+			zend_argument_value_error(3, "must be a valid rounding mode (RoundingMode::*)");
 			RETURN_THROWS();
 	}
 
@@ -1386,6 +1420,20 @@ PHP_FUNCTION(fdiv)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_DOUBLE(dividend / divisor);
+}
+/* }}} */
+
+/* {{{ Perform floating-point exponentiation with IEEE-754 semantics. */
+PHP_FUNCTION(fpow)
+{
+	double base, exponent;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(base)
+		Z_PARAM_DOUBLE(exponent)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_DOUBLE(pow(base, exponent));
 }
 /* }}} */
 

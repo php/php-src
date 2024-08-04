@@ -15,7 +15,7 @@ AC_CONFIG_SRCDIR([config.m4])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
-PHP_CONFIG_NICE(config.nice)
+PHP_CONFIG_NICE([config.nice])
 
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
@@ -26,7 +26,7 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
   test "[$]$1" = "no" && $1=yes
 ])dnl
 
-test -z "$CFLAGS" && auto_cflags=1
+AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
@@ -62,11 +62,9 @@ INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
 EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
 PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
 
-if test -z "$prefix"; then
-  AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
-fi
+AS_VAR_IF([prefix],,
+  [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
 
-php_shtool=$srcdir/build/shtool
 PHP_INIT_BUILD_SYSTEM
 
 AC_MSG_CHECKING([for PHP prefix])
@@ -100,7 +98,7 @@ old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
 AC_EGREP_CPP(php_zts_is_enabled,[
 #include <main/php_config.h>
-#if ZTS
+#ifdef ZTS
 php_zts_is_enabled
 #endif
 ],[
@@ -116,8 +114,9 @@ if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
+  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
   changequote([,])
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -162,58 +161,45 @@ AC_PROG_LIBTOOL
 
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
-phplibdir="`pwd`/modules"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
 CFLAGS_CLEAN='$(CFLAGS) -D_GNU_SOURCE'
 CXXFLAGS_CLEAN='$(CXXFLAGS)'
 
-test "$prefix" = "NONE" && prefix="/usr/local"
-test "$exec_prefix" = "NONE" && exec_prefix='$(prefix)'
+AS_VAR_IF([prefix], [NONE], [prefix=/usr/local])
+AS_VAR_IF([exec_prefix], [NONE], [exec_prefix='$(prefix)'])
 
-if test "$cross_compiling" = yes ; then
-  AC_MSG_CHECKING(for native build C compiler)
-  AC_CHECK_PROGS(BUILD_CC, [gcc clang c99 c89 cc cl],none)
-  AC_MSG_RESULT($BUILD_CC)
-else
-  BUILD_CC=$CC
-fi
+AS_VAR_IF([cross_compiling], [yes],
+  [AC_CHECK_PROGS([BUILD_CC], [gcc clang c99 c89 cc cl], [none])
+    AC_MSG_CHECKING([for native build C compiler])
+    AC_MSG_RESULT([$BUILD_CC])],
+  [BUILD_CC=$CC])
 
-PHP_SUBST(PHP_MODULES)
-PHP_SUBST(PHP_ZEND_EX)
-
-PHP_SUBST(all_targets)
-PHP_SUBST(install_targets)
-
-PHP_SUBST(prefix)
-PHP_SUBST(exec_prefix)
-PHP_SUBST(libdir)
-PHP_SUBST(prefix)
-PHP_SUBST(phplibdir)
-PHP_SUBST(phpincludedir)
-
-PHP_SUBST(CC)
-PHP_SUBST(CFLAGS)
-PHP_SUBST(CFLAGS_CLEAN)
-PHP_SUBST(CPP)
-PHP_SUBST(CPPFLAGS)
-PHP_SUBST(CXX)
-PHP_SUBST(CXXFLAGS)
-PHP_SUBST(CXXFLAGS_CLEAN)
-PHP_SUBST(EXTENSION_DIR)
-PHP_SUBST(PHP_EXECUTABLE)
-PHP_SUBST(EXTRA_LDFLAGS)
-PHP_SUBST(EXTRA_LIBS)
-PHP_SUBST(INCLUDES)
-PHP_SUBST(LDFLAGS)
-PHP_SUBST(LIBTOOL)
-PHP_SUBST(SHELL)
-PHP_SUBST(INSTALL_HEADERS)
-PHP_SUBST(BUILD_CC)
-
-PHP_GEN_BUILD_DIRS
-PHP_GEN_GLOBAL_MAKEFILE
-
-test -d modules || $php_shtool mkdir modules
+PHP_SUBST([PHP_MODULES])
+PHP_SUBST([PHP_ZEND_EX])
+PHP_SUBST([all_targets])
+PHP_SUBST([install_targets])
+PHP_SUBST([prefix])
+PHP_SUBST([exec_prefix])
+PHP_SUBST([libdir])
+PHP_SUBST([phpincludedir])
+PHP_SUBST([CC])
+PHP_SUBST([CFLAGS])
+PHP_SUBST([CFLAGS_CLEAN])
+PHP_SUBST([CPP])
+PHP_SUBST([CPPFLAGS])
+PHP_SUBST([CXX])
+PHP_SUBST([CXXFLAGS])
+PHP_SUBST([CXXFLAGS_CLEAN])
+PHP_SUBST([EXTENSION_DIR])
+PHP_SUBST([PHP_EXECUTABLE])
+PHP_SUBST([EXTRA_LDFLAGS])
+PHP_SUBST([EXTRA_LIBS])
+PHP_SUBST([INCLUDES])
+PHP_SUBST([LDFLAGS])
+PHP_SUBST([LIBTOOL])
+PHP_SUBST([SHELL])
+PHP_SUBST([INSTALL_HEADERS])
+PHP_SUBST([BUILD_CC])
 
 AC_CONFIG_HEADERS([config.h])
 

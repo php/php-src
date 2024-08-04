@@ -7,11 +7,11 @@ dom
 
 // Adapted from https://github.com/web-platform-tests/wpt/blob/master/domparsing/XMLSerializer-serializeToString.html
 
-$dom = DOM\XMLDocument::createFromString('<root xmlns=""><child xmlns=""/></root>');
-echo $dom->saveXML(), "\n";
+$dom = Dom\XMLDocument::createFromString('<root xmlns=""><child xmlns=""/></root>');
+echo $dom->saveXml(), "\n";
 
-$dom = DOM\XMLDocument::createFromString('<root xmlns="urn:u1"><child xmlns="urn:u1"/></root>');
-echo $dom->saveXML(), "\n";
+$dom = Dom\XMLDocument::createFromString('<root xmlns="urn:u1"><child xmlns="urn:u1"/></root>');
+echo $dom->saveXml(), "\n";
 
 ?>
 --EXPECT--

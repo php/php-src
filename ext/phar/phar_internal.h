@@ -18,7 +18,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <time.h>
@@ -52,7 +52,6 @@
 #include "Zend/zend_virtual_cwd.h"
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
-#include "ext/spl/spl_engine.h"
 #include "ext/spl/spl_exceptions.h"
 #include "ext/spl/spl_iterators.h"
 #include "php_phar.h"
@@ -137,19 +136,19 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	phar_entry_fp *cached_fp;
 	HashTable   phar_alias_map;
 	int         phar_SERVER_mung_list;
-	int         readonly;
 	char*       cache_list;
-	int         manifest_cached;
-	int         persist;
-	int         has_zlib;
-	int         has_bz2;
+	bool        readonly;
+	bool        manifest_cached;
+	bool        persist;
+	bool        has_zlib;
+	bool        has_bz2;
 	bool   readonly_orig;
 	bool   require_hash_orig;
 	bool   intercepted;
-	int         request_init;
-	int         require_hash;
-	int         request_done;
-	int         request_ends;
+	bool        request_init;
+	bool        require_hash;
+	bool        request_done;
+	bool        request_ends;
 	zif_handler orig_fopen;
 	zif_handler orig_file_get_contents;
 	zif_handler orig_is_file;
@@ -175,7 +174,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	uint32_t    cwd_len;
-	int         cwd_init;
+	bool        cwd_init;
 	char        *openssl_privatekey;
 	uint32_t    openssl_privatekey_len;
 	/* phar_get_archive cache */
@@ -285,7 +284,6 @@ struct _phar_archive_data {
 	char                     *alias;
 	uint32_t                      alias_len;
 	char                     version[12];
-	size_t                   internal_file_start;
 	size_t                   halt_offset;
 	HashTable                manifest;
 	/* hash of virtual directories, as in path/to/file.txt has path/to and path as virtual directories */
@@ -459,9 +457,6 @@ typedef struct _phar_entry_data {
 	zend_off_t                    position;
 	/* for copies of the phar fp, defines where 0 is */
 	zend_off_t                    zero;
-	uint32_t             for_write:1;
-	uint32_t             is_zip:1;
-	uint32_t             is_tar:1;
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
@@ -527,7 +522,6 @@ void phar_request_initialize(void);
 void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
-int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
 int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
 int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, uint32_t options, phar_archive_data** pphar, char **error);
 int phar_open_or_create_filename(char *fname, size_t fname_len, char *alias, size_t alias_len, bool is_data, uint32_t options, phar_archive_data** pphar, char **error);
@@ -558,8 +552,6 @@ void phar_metadata_tracker_copy(phar_metadata_tracker* dest, const phar_metadata
 void phar_metadata_tracker_clone(phar_metadata_tracker* tracker);
 void phar_metadata_tracker_try_ensure_has_serialized_data(phar_metadata_tracker* tracker, int persistent);
 int phar_metadata_tracker_unserialize_or_copy(phar_metadata_tracker* tracker, zval *value, int persistent, HashTable *unserialize_options, const char* method_name);
-void phar_release_entry_metadata(phar_entry_info *entry);
-void phar_release_archive_metadata(phar_archive_data *phar);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
@@ -591,7 +583,7 @@ extern HashTable cached_alias;
 #endif
 
 int phar_archive_delref(phar_archive_data *phar);
-int phar_entry_delref(phar_entry_data *idata);
+void phar_entry_delref(phar_entry_data *idata);
 
 phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security);
 phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security);

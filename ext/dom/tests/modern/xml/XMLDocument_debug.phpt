@@ -1,16 +1,16 @@
 --TEST--
-DOM\XMLDocument debug
+Dom\XMLDocument debug
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 var_dump($dom);
 
 ?>
 --EXPECT--
-object(DOM\XMLDocument)#1 (29) {
+object(Dom\XMLDocument)#1 (32) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -41,6 +41,12 @@ object(DOM\XMLDocument)#1 (29) {
   NULL
   ["childElementCount"]=>
   int(0)
+  ["body"]=>
+  NULL
+  ["head"]=>
+  NULL
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(9)
   ["nodeName"]=>

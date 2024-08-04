@@ -32,7 +32,6 @@
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
-#include "php_globals.h"
 #include "basic_functions.h"
 #include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
@@ -3446,7 +3445,7 @@ static void php_strtr_array(zval *return_value, zend_string *str, HashTable *fro
 							/* case_sensitive */ true,
 							NULL));
 			} else {
-				zend_long dummy;
+				zend_long dummy = 0;
 				RETVAL_STR(php_str_to_str_ex(str,
 							ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 							ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
@@ -3847,7 +3846,7 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 					case '\v': *target++ = 'v'; break;
 					case '\b': *target++ = 'b'; break;
 					case '\f': *target++ = 'f'; break;
-					default: target += sprintf(target, "%03o", (unsigned char) c);
+					default: target += snprintf(target, 4, "%03o", (unsigned char) c);
 				}
 				continue;
 			}

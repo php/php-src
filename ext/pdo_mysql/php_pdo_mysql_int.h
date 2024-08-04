@@ -147,6 +147,8 @@ typedef struct {
 
 extern const pdo_driver_t pdo_mysql_driver;
 
+extern int pdo_mysql_scanner(pdo_scanner_t *s);
+
 extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)
 #define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__)

@@ -150,7 +150,7 @@ static int phar_zip_process_extra(php_stream *fp, phar_entry_info *entry, uint16
   OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static time_t phar_zip_d2u_time(char *cdtime, char *cddate) /* {{{ */
+static time_t phar_zip_d2u_time(const char *cdtime, const char *cddate) /* {{{ */
 {
 	int dtime = PHAR_GET_16(cdtime), ddate = PHAR_GET_16(cddate);
 	struct tm *tm, tmbuf;
@@ -800,7 +800,7 @@ foundit:
 				}
 			}
 
-			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), actual_alias, mydata->alias_len, mydata);
+			zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata);
 			mydata->alias = pestrndup(alias, alias_len, mydata->is_persistent);
 			mydata->alias_len = alias_len;
 		} else {
@@ -842,7 +842,6 @@ int phar_open_or_create_zip(char *fname, size_t fname_len, char *alias, size_t a
 	}
 
 	if (phar->is_brandnew) {
-		phar->internal_file_start = 0;
 		phar->is_zip = 1;
 		phar->is_tar = 0;
 		return SUCCESS;
@@ -861,9 +860,9 @@ struct _phar_zip_pass {
 	php_stream *filefp;
 	php_stream *centralfp;
 	php_stream *old;
-	int free_fp;
-	int free_ufp;
 	char **error;
+	bool free_fp;
+	bool free_ufp;
 };
 /* perform final modification of zip contents for each file in the manifest before saving */
 static int phar_zip_changed_apply_int(phar_entry_info *entry, void *arg) /* {{{ */

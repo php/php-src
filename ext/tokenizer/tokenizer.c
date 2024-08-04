@@ -15,11 +15,10 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_tokenizer.h"
 
@@ -38,7 +37,7 @@
 #define zendcursor LANG_SCNG(yy_cursor)
 #define zendlimit  LANG_SCNG(yy_limit)
 
-zend_class_entry *php_token_ce;
+static zend_class_entry *php_token_ce;
 
 /* {{{ tokenizer_module_entry */
 zend_module_entry tokenizer_module_entry = {
@@ -410,7 +409,7 @@ static zval *extract_token_id_to_replace(zval *token_zv, const char *text, size_
 	return NULL;
 }
 
-void on_event(
+static void on_event(
 		zend_php_scanner_event event, int token, int line,
 		const char *text, size_t length, void *context)
 {

@@ -19,7 +19,7 @@
 /* The PDO Statement Handle Class */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -2344,6 +2344,7 @@ static void row_dim_write(zend_object *object, zval *member, zval *value)
 	}
 }
 
+// todo: make row_prop_exists return bool as well
 static int row_prop_exists(zend_object *object, zend_string *name, int check_empty, void **cache_slot)
 {
 	pdo_row_t *row = (pdo_row_t *)object;
@@ -2363,11 +2364,14 @@ static int row_prop_exists(zend_object *object, zend_string *name, int check_emp
 		return false;
 	}
 	ZEND_ASSERT(retval == &tmp_val);
-	int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+	bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
 	zval_ptr_dtor_nogc(retval);
+
 	return res;
 }
 
+
+// todo: make row_dim_exists return bool as well
 static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 {
 	if (Z_TYPE_P(offset) == IS_LONG) {
@@ -2386,7 +2390,7 @@ static int row_dim_exists(zend_object *object, zval *offset, int check_empty)
 			return false;
 		}
 		ZEND_ASSERT(retval == &tmp_val);
-		int res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
+		bool res = check_empty ? i_zend_is_true(retval) : Z_TYPE(tmp_val) != IS_NULL;
 		zval_ptr_dtor_nogc(retval);
 		return res;
 	} else {
@@ -2422,10 +2426,7 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 		return zend_std_get_properties_for(object, purpose);
 	}
 
-	if (!stmt->std.properties) {
-		rebuild_object_properties(&stmt->std);
-	}
-	props = zend_array_dup(stmt->std.properties);
+	props = zend_array_dup(zend_std_get_properties_ex(&stmt->std));
 	for (i = 0; i < stmt->column_count; i++) {
 		if (zend_string_equals_literal(stmt->columns[i].name, "queryString")) {
 			continue;
@@ -2442,6 +2443,16 @@ static HashTable *row_get_properties_for(zend_object *object, zend_prop_purpose 
 static zend_function *row_get_ctor(zend_object *object)
 {
 	zend_throw_exception_ex(php_pdo_get_exception(), 0, "You may not create a PDORow manually");
+	return NULL;
+}
+
+static zval *pdo_row_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
+{
+	ZEND_IGNORE_VALUE(object);
+	ZEND_IGNORE_VALUE(name);
+	ZEND_IGNORE_VALUE(type);
+	ZEND_IGNORE_VALUE(cache_slot);
+
 	return NULL;
 }
 
@@ -2485,7 +2496,7 @@ void pdo_stmt_init(void)
 	memcpy(&pdo_row_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	pdo_row_object_handlers.free_obj = pdo_row_free_storage;
 	pdo_row_object_handlers.clone_obj = NULL;
-	pdo_row_object_handlers.get_property_ptr_ptr = NULL;
+	pdo_row_object_handlers.get_property_ptr_ptr = pdo_row_get_property_ptr_ptr;
 	pdo_row_object_handlers.read_property = row_prop_read;
 	pdo_row_object_handlers.write_property = row_prop_write;
 	pdo_row_object_handlers.has_property = row_prop_exists;

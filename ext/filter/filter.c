@@ -18,10 +18,12 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_filter.h"
+#include "main/php_variables.h"
+#include "ext/standard/info.h"
 
 ZEND_DECLARE_MODULE_GLOBALS(filter)
 
@@ -69,10 +71,6 @@ static const filter_list_entry filter_list[] = {
 
 #ifndef PARSE_SERVER
 #define PARSE_SERVER 5
-#endif
-
-#ifndef PARSE_SESSION
-#define PARSE_SESSION 6
 #endif
 
 static unsigned int php_sapi_filter(int arg, const char *var, char **val, size_t val_len, size_t *new_val_len);
@@ -152,8 +150,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 	filter_globals->default_filter = FILTER_DEFAULT;
 }
 /* }}} */
-
-#define PARSE_REQUEST 99
 
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(filter)
@@ -690,29 +686,13 @@ PHP_FUNCTION(filter_input_array)
 	}
 
 	array_input = php_filter_get_storage(fetch_from);
+
 	if (EG(exception)) {
 		RETURN_THROWS();
 	}
 
 	if (!array_input) {
-		zend_long filter_flags = 0;
-		zval *option;
-		if (op_long) {
-			filter_flags = op_long;
-		} else if (op_ht && (option = zend_hash_str_find(op_ht, "flags", sizeof("flags") - 1)) != NULL) {
-			filter_flags = zval_get_long(option);
-		}
-
-		/* The FILTER_NULL_ON_FAILURE flag inverts the usual return values of
-		 * the function: normally when validation fails false is returned, and
-		 * when the input value doesn't exist NULL is returned. With the flag
-		 * set, NULL and false should be returned, respectively. Ergo, although
-		 * the code below looks incorrect, it's actually right. */
-		if (filter_flags & FILTER_NULL_ON_FAILURE) {
-			RETURN_FALSE;
-		} else {
-			RETURN_NULL();
-		}
+		RETURN_NULL();
 	}
 
 	php_filter_array_handler(array_input, op_ht, op_long, return_value, add_empty);

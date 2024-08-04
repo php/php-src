@@ -122,11 +122,11 @@ typedef int pid_t;
 #include <unix.h>
 #endif
 
-#if HAVE_ALLOCA_H
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 
-#if HAVE_BUILD_DEFS_H
+#ifdef HAVE_BUILD_DEFS_H
 #include <build-defs.h>
 #endif
 
@@ -209,7 +209,7 @@ typedef unsigned int socklen_t;
 
 #include <stdlib.h>
 #include <ctype.h>
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -220,7 +220,7 @@ typedef unsigned int socklen_t;
 #include "zend_stack.h"
 #include <string.h>
 
-#if HAVE_PWD_H
+#ifdef HAVE_PWD_H
 # ifdef PHP_WIN32
 #include "win32/param.h"
 # else

@@ -18,14 +18,12 @@
 
 #include <ctype.h>
 #include <sys/stat.h>
+#include <locale.h>
 
 #include "php.h"
 #include "SAPI.h"
 #include "php_variables.h"
 #include "php_ini.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/pageinfo.h"
-#include "ext/pcre/php_pcre.h"
 #ifdef ZTS
 #include "TSRM.h"
 #endif

@@ -7,7 +7,7 @@ dom
 
 require __DIR__ . '/create_element_util.inc';
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
 <head>

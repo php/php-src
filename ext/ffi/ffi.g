@@ -64,6 +64,7 @@ php llk.php ffi.g
 /* forward declarations */
 static void yy_error(const char *msg);
 static void yy_error_sym(const char *msg, int sym);
+static void yy_error_str(const char *msg, const char *str);
 
 %}
 
@@ -96,7 +97,10 @@ declarations:
 				initializer?
 				{zend_ffi_declare(name, name_len, &dcl);}
 			)*
-		)?
+		|
+			/* empty */
+			{if (common_dcl.flags & (ZEND_FFI_DCL_ENUM | ZEND_FFI_DCL_STRUCT | ZEND_FFI_DCL_UNION)) zend_ffi_cleanup_dcl(&common_dcl);}
+		)
 		";"
 	)*
 ;
@@ -917,4 +921,8 @@ static void yy_error(const char *msg) {
 
 static void yy_error_sym(const char *msg, int sym) {
 	zend_ffi_parser_error("%s '%s' at line %d", msg, sym_name[sym], yy_line);
+}
+
+static void yy_error_str(const char *msg, const char *str) {
+	zend_ffi_parser_error("%s '%s' at line %d\n", msg, str, yy_line);
 }

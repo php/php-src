@@ -25,6 +25,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "zend_types.h"
+
 /* Lightweight stream implementation for the ZE scanners.
  * These functions are private to the engine.
  * */

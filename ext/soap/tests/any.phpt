@@ -33,7 +33,7 @@ class TestSoapClient extends SoapClient {
     $this->server->addFunction('echoAnyElement');
   }
 
-  function __doRequest($request, $location, $action, $version, $one_way = 0): ?string {
+  function __doRequest($request, $location, $action, $version, $one_way = 0): string {
     ob_start();
     $this->server->handle($request);
     $response = ob_get_contents();
@@ -53,14 +53,14 @@ $ret = $client->echoAnyElement(
 var_dump($g);
 var_dump($ret);
 ?>
---EXPECT--
-object(stdClass)#5 (1) {
+--EXPECTF--
+object(stdClass)#%d (%d) {
   ["inputAny"]=>
-  object(stdClass)#6 (1) {
+  object(stdClass)#%d (%d) {
     ["any"]=>
     array(1) {
       ["SOAPComplexType"]=>
-      object(SOAPComplexType)#7 (3) {
+      object(SOAPComplexType)#%d (%d) {
         ["varString"]=>
         string(3) "arg"
         ["varInt"]=>
@@ -71,13 +71,13 @@ object(stdClass)#5 (1) {
     }
   }
 }
-object(stdClass)#8 (1) {
+object(stdClass)#%d (%d) {
   ["return"]=>
-  object(stdClass)#9 (1) {
+  object(stdClass)#%d (%d) {
     ["any"]=>
     array(1) {
       ["SOAPComplexType"]=>
-      object(SOAPComplexType)#10 (3) {
+      object(SOAPComplexType)#%d (%d) {
         ["varString"]=>
         string(3) "arg"
         ["varInt"]=>

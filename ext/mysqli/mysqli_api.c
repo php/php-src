@@ -17,21 +17,18 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
-#include "php_globals.h"
-#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 #include "ext/mysqlnd/mysql_float_to_double.h"
 
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 /* {{{ Get number of affected rows in previous MySQL operation */
 PHP_FUNCTION(mysqli_affected_rows)
@@ -157,7 +154,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_THROWS();
 	}
 
-	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, getThis() ? 1 : 2));
+	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, hasThis() ? 1 : 2));
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 }
 /* }}} */
@@ -523,12 +520,12 @@ PHP_FUNCTION(mysqli_execute_query)
 
 	if (FAIL == mysql_stmt_prepare(stmt->stmt, query, query_len)) {
 		MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
-		
+
 		close_stmt_and_copy_errors(stmt, mysql);
 		RETURN_FALSE;
 	}
 
-	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */ 
+	/* The bit below, which is copied from mysqli_prepare, is needed for bad index exceptions */
 	/* don't initialize stmt->query with NULL, we ecalloc()-ed the memory */
 	/* Get performance boost if reporting is switched off */
 	if (query_len && (MyG(report_mode) & MYSQLI_REPORT_INDEX)) {

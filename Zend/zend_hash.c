@@ -514,6 +514,11 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *h
 	return _zend_hash_get_current_pos(ht);
 }
 
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos_ex(const HashTable *ht, HashPosition pos)
+{
+	return _zend_hash_get_valid_pos(ht, pos);
+}
+
 static void zend_hash_remove_iterator_copies(uint32_t idx) {
 	HashTableIterator *iterators = EG(ht_iterators);
 
@@ -3175,7 +3180,8 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	 * false recursion detection.
 	 */
 	if (UNEXPECTED(GC_IS_RECURSIVE(ht1))) {
-		zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+		zend_throw_error(NULL, "Nesting level too deep - recursive dependency?");
+		return ZEND_UNCOMPARABLE;
 	}
 
 	GC_TRY_PROTECT_RECURSION(ht1);

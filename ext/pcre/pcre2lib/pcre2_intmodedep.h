@@ -7,7 +7,7 @@ and semantics are as close as possible to those of the Perl 5 language.
 
                        Written by Philip Hazel
      Original API code Copyright (c) 1997-2012 University of Cambridge
-          New API code Copyright (c) 2016-2023 University of Cambridge
+          New API code Copyright (c) 2016-2024 University of Cambridge
 
 -----------------------------------------------------------------------------
 Redistribution and use in source and binary forms, with or without
@@ -568,6 +568,7 @@ typedef struct pcre2_real_compile_context {
   void *stack_guard_data;
   const uint8_t *tables;
   PCRE2_SIZE max_pattern_length;
+  PCRE2_SIZE max_pattern_compiled_length;
   uint16_t bsr_convention;
   uint16_t newline_convention;
   uint32_t parens_nest_limit;

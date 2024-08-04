@@ -16,13 +16,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
 #include "namespace_compat.h"
+#include "private_data.h"
 
 /*
 * class DOMImplementation
@@ -100,14 +101,14 @@ PHP_METHOD(DOMImplementation, createDocumentType)
 	xmlFree(localname);
 
 	if (doctype == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create DocumentType");
-		RETURN_FALSE;
+		php_dom_throw_error(INVALID_STATE_ERR, /* strict */ true);
+		RETURN_THROWS();
 	}
 
 	DOM_RET_OBJ((xmlNodePtr) doctype, NULL);
 }
 
-PHP_METHOD(DOM_Implementation, createDocumentType)
+PHP_METHOD(Dom_Implementation, createDocumentType)
 {
 	size_t name_len, publicid_len = 0, systemid_len = 0;
 	const char *name, *publicid = NULL, *systemid = NULL;
@@ -249,7 +250,7 @@ PHP_METHOD(DOMImplementation, createDocument)
 	}
 }
 
-PHP_METHOD(DOM_Implementation, createDocument)
+PHP_METHOD(Dom_Implementation, createDocument)
 {
 	zval *dtd = NULL;
 	xmlDtdPtr doctype = NULL;
@@ -266,7 +267,8 @@ PHP_METHOD(DOM_Implementation, createDocument)
 
 	xmlDocPtr document = NULL;
 	xmlChar *localname = NULL, *prefix = NULL;
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
 
 	/* 1. Let document be a new XMLDocument. */
 	document = xmlNewDoc(BAD_CAST "1.0");
@@ -306,8 +308,8 @@ PHP_METHOD(DOM_Implementation, createDocument)
 		(xmlNodePtr) document,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	dom_set_xml_class(intern->document);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 
 	/* 4. If doctype is non-null, append doctype to document. */
 	if (doctype != NULL) {
@@ -337,13 +339,13 @@ error:
 	xmlFree(localname);
 	xmlFree(prefix);
 	xmlFreeDoc(document);
-	php_dom_libxml_ns_mapper_destroy(ns_mapper);
+	php_dom_private_data_destroy(private_data);
 	RETURN_THROWS();
 }
 /* }}} end dom_domimplementation_create_document */
 
 /* {{{ URL: https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument */
-PHP_METHOD(DOM_Implementation, createHTMLDocument)
+PHP_METHOD(Dom_Implementation, createHTMLDocument)
 {
 	const char *title = NULL;
 	size_t title_len = 0;
@@ -366,7 +368,8 @@ PHP_METHOD(DOM_Implementation, createHTMLDocument)
 	/* 3. Append a new doctype, with "html" as its name and with its node document set to doc, to doc. */
 	xmlDtdPtr dtd = xmlCreateIntSubset(doc, BAD_CAST "html", NULL, NULL);
 
-	php_dom_libxml_ns_mapper *ns_mapper = php_dom_libxml_ns_mapper_create();
+	php_dom_private_data *private_data = php_dom_private_data_create();
+	php_dom_libxml_ns_mapper *ns_mapper = php_dom_ns_mapper_from_private(private_data);
 	xmlNsPtr html_ns = php_dom_libxml_ns_mapper_ensure_html_ns(ns_mapper);
 
 	/* 4. Append the result of creating an element given doc, html, and the HTML namespace, to doc. */
@@ -396,7 +399,7 @@ PHP_METHOD(DOM_Implementation, createHTMLDocument)
 	if (UNEXPECTED(dtd == NULL || html_element == NULL || head_element == NULL || (title != NULL && title_element == NULL) || body_element == NULL)) {
 		php_dom_throw_error(INVALID_STATE_ERR, true);
 		xmlFreeDoc(doc);
-		php_dom_libxml_ns_mapper_destroy(ns_mapper);
+		php_dom_private_data_destroy(private_data);
 		RETURN_THROWS();
 	}
 
@@ -407,8 +410,8 @@ PHP_METHOD(DOM_Implementation, createHTMLDocument)
 		(xmlNodePtr) doc,
 		NULL
 	);
-	intern->document->class_type = PHP_LIBXML_CLASS_MODERN;
-	intern->document->private_data = php_dom_libxml_ns_mapper_header(ns_mapper);
+	dom_set_xml_class(intern->document);
+	intern->document->private_data = php_dom_libxml_private_data_header(private_data);
 }
 /* }}} */
 

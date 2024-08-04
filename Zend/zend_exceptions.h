@@ -22,6 +22,8 @@
 #ifndef ZEND_EXCEPTIONS_H
 #define ZEND_EXCEPTIONS_H
 
+#include "zend_types.h"
+
 BEGIN_EXTERN_C()
 
 extern ZEND_API zend_class_entry *zend_ce_throwable;

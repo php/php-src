@@ -28,8 +28,6 @@
 #else
 #include <sys/param.h>
 #endif
-#include "ext/standard/head.h"
-#include "php_string.h"
 #include "pack.h"
 #ifdef HAVE_PWD_H
 #ifdef PHP_WIN32

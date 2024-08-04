@@ -16,7 +16,7 @@ $old->loadXML(<<<XML
 </root>
 XML);
 
-$new = DOM\XMLDocument::createEmpty();
+$new = Dom\XMLDocument::createEmpty();
 $new->append($new->importLegacyNode($old->documentElement, true));
 
 unset($old);
@@ -33,11 +33,11 @@ foreach ($new->getElementsByTagName('child') as $child) {
     }
 }
 
-echo $new->saveXML(), "\n";
+echo $new->saveXml(), "\n";
 
 ?>
 --EXPECT--
-object(DOM\NamedNodeMap)#5 (1) {
+object(Dom\NamedNodeMap)#5 (1) {
   ["length"]=>
   int(2)
 }
@@ -47,7 +47,7 @@ namespaceURI: string(29) "http://www.w3.org/2000/xmlns/"
 name: string(1) "a"
 prefix: NULL
 namespaceURI: NULL
-object(DOM\NamedNodeMap)#3 (1) {
+object(Dom\NamedNodeMap)#3 (1) {
   ["length"]=>
   int(3)
 }

@@ -15,11 +15,10 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "php_gmp.h"
 #include "php_gmp_int.h"
 #include "ext/standard/info.h"
@@ -298,6 +297,10 @@ static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int typ
 		} else {
 			ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
 		}
+		return SUCCESS;
+	case _IS_BOOL:
+		gmpnum = GET_GMP_OBJECT_FROM_OBJ(readobj)->num;
+		ZVAL_BOOL(writeobj, mpz_sgn(gmpnum) != 0);
 		return SUCCESS;
 	default:
 		return FAILURE;
@@ -583,7 +586,13 @@ static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val,
 	const char *num_str = ZSTR_VAL(val);
 	bool skip_lead = false;
 
-	if (ZSTR_LEN(val) >= 2 && num_str[0] == '0') {
+	size_t num_len = ZSTR_LEN(val);
+	while (isspace(*num_str)) {
+		++num_str;
+		--num_len;
+	}
+
+	if (num_len >= 2 && num_str[0] == '0') {
 		if ((base == 0 || base == 16) && (num_str[1] == 'x' || num_str[1] == 'X')) {
 			base = 16;
 			skip_lead = true;
@@ -866,7 +875,7 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 static bool gmp_verify_base(zend_long base, uint32_t arg_num)
 {
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
-		zend_argument_value_error(arg_num, "must be between 2 and %d", GMP_MAX_BASE);
+		zend_argument_value_error(arg_num, "must be 0 or between 2 and %d", GMP_MAX_BASE);
 		return false;
 	}
 
@@ -1734,9 +1743,9 @@ static void gmp_init_random(void)
 		/* Initialize */
 		gmp_randinit_mt(GMPG(rand_state));
 		/* Seed */
-		zend_long seed = 0;
-		if (php_random_bytes_silent(&seed, sizeof(zend_long)) == FAILURE) {
-			seed = GENERATE_SEED();
+		unsigned long int seed = 0;
+		if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+			seed = (unsigned long int)php_random_generate_fallback_seed();
 		}
 		gmp_randseed_ui(GMPG(rand_state), seed);
 

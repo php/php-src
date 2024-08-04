@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -105,11 +105,11 @@ PHP_FUNCTION( transliterator_create )
 
 	(void) to; /* unused */
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
-		&str_id, &str_id_len, &direction ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_id, str_id_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(direction)
+	ZEND_PARSE_PARAMETERS_END();
 
 	object = return_value;
 	res = create_transliterator( str_id, str_id_len, direction, object );
@@ -134,11 +134,11 @@ PHP_FUNCTION( transliterator_create_from_rules )
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
 	TRANSLITERATOR_METHOD_INIT_VARS;
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
-		&str_rules, &str_rules_len, &direction ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str_rules, str_rules_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(direction)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
 	{
@@ -225,10 +225,7 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters_none() == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	en = utrans_openIDs( &status );
 	INTL_CHECK_STATUS( status,

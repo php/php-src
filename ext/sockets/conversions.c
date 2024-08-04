@@ -1243,7 +1243,7 @@ void to_zval_read_msghdr(const char *msghdr_c, zval *zv, res_context *ctx)
 	to_zval_read_aggregation(msghdr_c, zv, descriptors, ctx);
 }
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 /* CONVERSIONS for if_index */
 static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context *ctx)
 {
@@ -1261,7 +1261,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 
 		str = zval_get_tmp_string((zval *) zv, &tmp_str);
 
-#if HAVE_IF_NAMETOINDEX
+#ifdef HAVE_IF_NAMETOINDEX
 		ret = if_nametoindex(ZSTR_VAL(str));
 		if (ret == 0) {
 			do_from_zval_err(ctx, "no interface with name \"%s\" could be found", ZSTR_VAL(str));

@@ -16,12 +16,13 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "nodelist.h"
 #include "zend_interfaces.h"
 
 /*
@@ -49,7 +50,17 @@ static zend_always_inline void reset_objmap_cache(dom_nnodemap_object *objmap)
 	objmap->cached_length = -1;
 }
 
-int php_dom_get_nodelist_length(dom_object *obj)
+xmlNodePtr dom_nodelist_iter_start_first_child(xmlNodePtr nodep)
+{
+	if (nodep->type == XML_ENTITY_REF_NODE) {
+		/* See entityreference.c */
+		dom_entity_reference_fetch_and_sync_declaration(nodep);
+	}
+
+	return nodep->children;
+}
+
+zend_long php_dom_get_nodelist_length(dom_object *obj)
 {
 	dom_nnodemap_object *objmap = (dom_nnodemap_object *) obj->ptr;
 	if (!objmap) {
@@ -83,7 +94,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 
 	int count = 0;
 	if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
-		xmlNodePtr curnode = nodep->children;
+		xmlNodePtr curnode = dom_nodelist_iter_start_first_child(nodep);
 		if (curnode) {
 			count++;
 			while (curnode->next != NULL) {
@@ -93,11 +104,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 		}
 	} else {
 		xmlNodePtr basep = nodep;
-		if (nodep->type == XML_DOCUMENT_NODE || nodep->type == XML_HTML_DOCUMENT_NODE) {
-			nodep = xmlDocGetRootElement((xmlDoc *) nodep);
-		} else {
-			nodep = nodep->children;
-		}
+		nodep = php_dom_first_child_of_container_node(basep);
 		dom_get_elements_by_tag_name_ns_raw(
 			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, INT_MAX - 1 /* because of <= */);
 	}
@@ -117,20 +124,13 @@ zend_result dom_nodelist_length_read(dom_object *obj, zval *retval)
 	ZVAL_LONG(retval, php_dom_get_nodelist_length(obj));
 	return SUCCESS;
 }
-
+/* }}} */
 
 /* {{{ */
 PHP_METHOD(DOMNodeList, count)
 {
-	zval *id;
-	dom_object *intern;
-
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	intern = Z_DOMOBJ_P(id);
+	ZEND_PARSE_PARAMETERS_NONE();
+	dom_object *intern = Z_DOMOBJ_P(ZEND_THIS);
 	RETURN_LONG(php_dom_get_nodelist_length(intern));
 }
 /* }}} end dom_nodelist_count */
@@ -142,11 +142,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 	if (index >= 0) {
 		if (objmap != NULL) {
 			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-				}
+				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			} else {
 				if (objmap->nodetype == DOM_NODESET) {
 					HashTable *nodeht = HASH_OF(&objmap->baseobj_zv);
@@ -184,7 +180,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 						int count = 0;
 						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
 							if (restart) {
-								nodep = nodep->children;
+								nodep = dom_nodelist_iter_start_first_child(nodep);
 							}
 							while (count < relative_index && nodep != NULL) {
 								count++;
@@ -193,11 +189,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 							itemnode = nodep;
 						} else {
 							if (restart) {
-								if (basep->type == XML_DOCUMENT_NODE || basep->type == XML_HTML_DOCUMENT_NODE) {
-									nodep = xmlDocGetRootElement((xmlDoc*) basep);
-								} else {
-									nodep = basep->children;
-								}
+								nodep = php_dom_first_child_of_container_node(basep);
 							}
 							itemnode = dom_get_elements_by_tag_name_ns_raw(basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &count, relative_index);
 						}
@@ -254,11 +246,67 @@ PHP_METHOD(DOMNodeList, item)
 
 ZEND_METHOD(DOMNodeList, getIterator)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
+dom_nodelist_dimension_index dom_modern_nodelist_get_index(const zval *offset)
+{
+	dom_nodelist_dimension_index ret;
+
+	ZVAL_DEREF(offset);
+
+	if (Z_TYPE_P(offset) == IS_LONG) {
+		ret.type = DOM_NODELIST_DIM_LONG;
+		ret.lval = Z_LVAL_P(offset);
+	} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
+		ret.type = DOM_NODELIST_DIM_LONG;
+		ret.lval = zend_dval_to_lval_safe(Z_DVAL_P(offset));
+	} else if (Z_TYPE_P(offset) == IS_STRING) {
+		zend_ulong lval;
+		if (ZEND_HANDLE_NUMERIC(Z_STR_P(offset), lval)) {
+			ret.type = DOM_NODELIST_DIM_LONG;
+			ret.lval = (zend_long) lval;
+		} else {
+			ret.type = DOM_NODELIST_DIM_STRING;
+			ret.str = Z_STR_P(offset);
+		}
+	} else {
+		ret.type = DOM_NODELIST_DIM_ILLEGAL;
 	}
 
-	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+	return ret;
+}
+
+zval *dom_modern_nodelist_read_dimension(zend_object *object, zval *offset, int type, zval *rv)
+{
+	if (UNEXPECTED(!offset)) {
+		zend_throw_error(NULL, "Cannot append to %s", ZSTR_VAL(object->ce->name));
+		return NULL;
+	}
+
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(offset);
+	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
+		zend_illegal_container_offset(object->ce->name, offset, type);
+		return NULL;
+	}
+
+	php_dom_nodelist_get_item_into_zval(php_dom_obj_from_obj(object)->ptr, index.lval, rv);
+	return rv;
+}
+
+int dom_modern_nodelist_has_dimension(zend_object *object, zval *member, int check_empty)
+{
+	/* If it exists, it cannot be empty because nodes aren't empty. */
+	ZEND_IGNORE_VALUE(check_empty);
+
+	dom_nodelist_dimension_index index = dom_modern_nodelist_get_index(member);
+	if (UNEXPECTED(index.type == DOM_NODELIST_DIM_ILLEGAL || index.type == DOM_NODELIST_DIM_STRING)) {
+		zend_illegal_container_offset(object->ce->name, member, BP_VAR_IS);
+		return 0;
+	}
+
+	return index.lval >= 0 && index.lval < php_dom_get_nodelist_length(php_dom_obj_from_obj(object));
 }
 
 #endif

@@ -223,6 +223,6 @@ own allocator. Usually, such values are alive for the entire lifetime of the pro
 being freed at the end of the request. See the `Zend allocator <todo>`_ chapter for more
 information.
 
-The ``GC_PERSISTENT_LOCAL`` flag indicates that a ``CG_PERSISTENT`` value is only accessibly in one
+The ``GC_PERSISTENT_LOCAL`` flag indicates that a ``GC_PERSISTENT`` value is only accessible in one
 thread, and is thus still safe to modify. This flag is only used in debug builds to satisfy an
 ``assert``.

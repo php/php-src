@@ -107,17 +107,17 @@ static void init_ancillary_registry(void)
 	key.cmsg_type		= type; \
 	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key), (void*)&entry, sizeof(entry))
 
-#if defined(IPV6_PKTINFO) && HAVE_IPV6
+#if defined(IPV6_PKTINFO) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
 			to_zval_read_in6_pktinfo, IPPROTO_IPV6, IPV6_PKTINFO);
 #endif
 
-#if defined(IPV6_HOPLIMIT) && HAVE_IPV6
+#if defined(IPV6_HOPLIMIT) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_HOPLIMIT);
 #endif
 
-#if defined(IPV6_TCLASS) && HAVE_IPV6
+#if defined(IPV6_TCLASS) && defined(HAVE_IPV6)
 	PUT_ENTRY(sizeof(int), 0, 0, from_zval_write_int,
 			to_zval_read_int, IPPROTO_IPV6, IPV6_TCLASS);
 #endif

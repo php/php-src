@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,7 +18,7 @@ $dom = DOM\HTMLDocument::createFromString(<<<HTML
 HTML);
 
 echo "--- Namespaces ---\n";
-$xpath = new DOM\XPath($dom);
+$xpath = new Dom\XPath($dom);
 foreach ($xpath->query("//*[name()='body']//*") as $node) {
     echo $node->nodeName, " ", $node->namespaceURI ?? "(NONE)", "\n";
     echo "prefix: \"", $node->prefix, "\"\n";
@@ -28,9 +28,9 @@ foreach ($xpath->query("//*[name()='body']//*") as $node) {
 }
 
 echo "--- HTML serialization ---\n";
-echo $dom->saveHTML(), "\n";
+echo $dom->saveHtml(), "\n";
 echo "--- XML serialization ---\n";
-echo $dom->saveXML();
+echo $dom->saveXml();
 
 ?>
 --EXPECT--

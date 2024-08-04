@@ -19,7 +19,7 @@ CREDIT_LINE("cURL", "Sterling Hughes");
 CREDIT_LINE("Date/Time Support", "Derick Rethans");
 CREDIT_LINE("DB-LIB (MS SQL, Sybase)", "Wez Furlong, Frank M. Kromann, Adam Baratz");
 CREDIT_LINE("DBA", "Sascha Schumann, Marcus Boerger");
-CREDIT_LINE("DOM", "Christian Stocker, Rob Richards, Marcus Boerger");
+CREDIT_LINE("DOM", "Christian Stocker, Rob Richards, Marcus Boerger, Niels Dossche");
 CREDIT_LINE("enchant", "Pierre-Alain Joye, Ilia Alshanetsky");
 CREDIT_LINE("EXIF", "Rasmus Lerdorf, Marcus Boerger");
 CREDIT_LINE("FFI", "Dmitry Stogov");

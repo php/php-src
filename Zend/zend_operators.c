@@ -122,7 +122,7 @@ static _locale_t current_locale = NULL;
 
 #define BLOCKCONV_LOAD(input) \
 	int8x16_t blconv_operand = vld1q_s8((const int8_t*)(input)); \
-	uint8x16_t blconv_mask = vcltq_s8(vaddq_s8(blconv_operand, blconv_offset), blconv_threshold);
+	uint8x16_t blconv_mask = vcltq_s8(vreinterpretq_s8_u8(vaddq_u8(vreinterpretq_u8_s8(blconv_operand), vreinterpretq_u8_s8(blconv_offset))), blconv_threshold);
 
 #define BLOCKCONV_FOUND() vmaxvq_u8(blconv_mask)
 
@@ -1287,6 +1287,20 @@ ZEND_API zend_result ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *o
 }
 /* }}} */
 
+static void ZEND_COLD zend_power_base_0_exponent_lt_0_error(void)
+{
+	zend_error(E_DEPRECATED, "Power of base 0 and negative exponent is deprecated");
+}
+
+static double safe_pow(double base, double exponent)
+{
+	if (UNEXPECTED(base == 0.0 && exponent < 0.0)) {
+		zend_power_base_0_exponent_lt_0_error();
+	}
+
+	return pow(base, exponent);
+}
+
 static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	uint8_t type_pair = TYPE_PAIR(Z_TYPE_P(op1), Z_TYPE_P(op2));
@@ -1311,14 +1325,14 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 					--i;
 					ZEND_SIGNED_MULTIPLY_LONG(l1, l2, l1, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, dval * pow(l2, i));
+						ZVAL_DOUBLE(result, dval * safe_pow(l2, i));
 						return SUCCESS;
 					}
 				} else {
 					i /= 2;
 					ZEND_SIGNED_MULTIPLY_LONG(l2, l2, l2, dval, overflow);
 					if (overflow) {
-						ZVAL_DOUBLE(result, (double)l1 * pow(dval, i));
+						ZVAL_DOUBLE(result, (double)l1 * safe_pow(dval, i));
 						return SUCCESS;
 					}
 				}
@@ -1326,17 +1340,17 @@ static zend_result ZEND_FASTCALL pow_function_base(zval *result, zval *op1, zval
 			/* i == 0 */
 			ZVAL_LONG(result, l1);
 		} else {
-			ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
+			ZVAL_DOUBLE(result, safe_pow((double)Z_LVAL_P(op1), (double)Z_LVAL_P(op2)));
 		}
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_DOUBLE))) {
-		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
+		ZVAL_DOUBLE(result, safe_pow(Z_DVAL_P(op1), Z_DVAL_P(op2)));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_LONG, IS_DOUBLE))) {
-		ZVAL_DOUBLE(result, pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
+		ZVAL_DOUBLE(result, safe_pow((double)Z_LVAL_P(op1), Z_DVAL_P(op2)));
 		return SUCCESS;
 	} else if (EXPECTED(type_pair == TYPE_PAIR(IS_DOUBLE, IS_LONG))) {
-		ZVAL_DOUBLE(result, pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
+		ZVAL_DOUBLE(result, safe_pow(Z_DVAL_P(op1), (double)Z_LVAL_P(op2)));
 		return SUCCESS;
 	} else {
 		return FAILURE;
@@ -2804,9 +2818,9 @@ try_again:
 }
 /* }}} */
 
-ZEND_API int ZEND_FASTCALL zend_is_true(const zval *op) /* {{{ */
+ZEND_API bool ZEND_FASTCALL zend_is_true(const zval *op) /* {{{ */
 {
-	return (int) i_zend_is_true(op);
+	return i_zend_is_true(op);
 }
 /* }}} */
 
@@ -2845,7 +2859,7 @@ ZEND_API void zend_update_current_locale(void) /* {{{ */
 #elif defined(MB_CUR_MAX)
 	/* Check if current locale uses variable width encoding */
 	if (MB_CUR_MAX > 1) {
-#if HAVE_NL_LANGINFO
+#ifdef HAVE_NL_LANGINFO
 		const char *charmap = nl_langinfo(CODESET);
 #else
 		char buf[16];

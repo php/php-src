@@ -17,14 +17,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 #ifndef PDO_USE_MYSQLND
@@ -650,7 +650,8 @@ static const struct pdo_dbh_methods mysql_methods = {
 	NULL,
 	pdo_mysql_request_shutdown,
 	pdo_mysql_in_transaction,
-	NULL /* get_gc */
+	NULL, /* get_gc */
+    pdo_mysql_scanner
 };
 /* }}} */
 

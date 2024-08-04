@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php_intl.h"
@@ -316,9 +316,11 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 
 	intl_error_reset(NULL);
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &input, &input_length, &form) == FAILURE)) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(input, input_length)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(form)
+	ZEND_PARSE_PARAMETERS_END();
 
 	norm = intl_get_normalizer(form, &status);
 

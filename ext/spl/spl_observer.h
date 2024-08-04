@@ -18,7 +18,6 @@
 #define SPL_OBSERVER_H
 
 #include "php.h"
-#include "php_spl.h"
 
 typedef enum {
 	MIT_NEED_ANY     = 0,

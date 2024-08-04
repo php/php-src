@@ -95,13 +95,13 @@ foreach ([true, false] as $init) {
 Init: 1, scope: 1, op: r: 1
 Init: 1, scope: 1, op: w: Cannot modify readonly property Test::$prop
 Init: 1, scope: 1, op: rw: Cannot modify readonly property Test::$prop
-Init: 1, scope: 1, op: im: Cannot modify readonly property Test::$prop
+Init: 1, scope: 1, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 1, scope: 1, op: is: 1
 Init: 1, scope: 1, op: us: Cannot unset readonly property Test::$prop
 Init: 1, scope: 0, op: r: 1
 Init: 1, scope: 0, op: w: Cannot modify readonly property Test::$prop
 Init: 1, scope: 0, op: rw: Cannot modify readonly property Test::$prop
-Init: 1, scope: 0, op: im: Cannot modify readonly property Test::$prop
+Init: 1, scope: 0, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 1, scope: 0, op: is: 1
 Init: 1, scope: 0, op: us: Cannot unset readonly property Test::$prop
 Init: 0, scope: 1, op: r: Typed property Test::$prop must not be accessed before initialization

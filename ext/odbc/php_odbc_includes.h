@@ -191,9 +191,15 @@ typedef struct odbc_connection {
     ODBC_SQL_CONN_T hdbc;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	zend_resource *res;
-	int persistent;
+	HashTable results;
 } odbc_connection;
+
+typedef struct odbc_link {
+	odbc_connection *connection;
+	zend_string *hash;
+	bool persistent;
+	zend_object std;
+} odbc_link;
 
 typedef struct odbc_result_value {
 	char name[256];
@@ -214,20 +220,19 @@ typedef struct odbc_result {
 	odbc_result_value *values;
 	SQLSMALLINT numcols;
 	SQLSMALLINT numparams;
-# if HAVE_SQL_EXTENDED_FETCH
+# ifdef HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
 # endif
 	zend_long longreadlen;
 	int binmode;
 	int fetched;
-	odbc_param_info * param_info;
+	odbc_param_info *param_info;
 	odbc_connection *conn_ptr;
+	uint32_t index;
+	zend_object std;
 } odbc_result;
 
 ZEND_BEGIN_MODULE_GLOBALS(odbc)
-	char *defDB;
-	char *defUser;
-	char *defPW;
 	bool allow_persistent;
 	bool check_persistent;
 	zend_long max_persistent;
@@ -240,8 +245,13 @@ ZEND_BEGIN_MODULE_GLOBALS(odbc)
     zend_long default_cursortype;
     char laststate[6];
     char lasterrormsg[SQL_MAX_MESSAGE_LENGTH];
-	HashTable *resource_list;
-	HashTable *resource_plist;
+	/* Stores ODBC links throughout the duration of a request. The connection member may be either persistent or
+	 * non-persistent. In the former case, it is a pointer to an item in EG(persistent_list). This solution makes it
+	 * possible to properly free links during RSHUTDOWN (or when they are explicitly closed), while persistent
+	 * connections themselves are going to be freed later during the shutdown process (or when they are explicitly
+	 * closed).
+	 */
+	HashTable connections;
 ZEND_END_MODULE_GLOBALS(odbc)
 
 int odbc_add_result(HashTable *list, odbc_result *result);
@@ -250,7 +260,7 @@ void odbc_del_result(HashTable *list, int count);
 int odbc_add_conn(HashTable *list, HDBC conn);
 odbc_connection *odbc_get_conn(HashTable *list, int count);
 void odbc_del_conn(HashTable *list, int ind);
-int odbc_bindcols(odbc_result *result);
+void odbc_bindcols(odbc_result *result);
 
 #define ODBC_SQL_ERROR_PARAMS odbc_connection *conn_resource, ODBC_SQL_STMT_T stmt, char *func
 

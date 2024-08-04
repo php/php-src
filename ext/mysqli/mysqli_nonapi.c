@@ -17,18 +17,16 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
 
 #include "php.h"
-#include "php_ini.h"
-#include "ext/standard/info.h"
 #include "zend_smart_str.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 #define SAFE_STR(a) ((a)?a:"")
 

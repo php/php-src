@@ -3,7 +3,7 @@ Bug #72119 (Interface declaration compatibility regression with default values)
 --FILE--
 <?php
 interface Foo {
-    public function bar(array $baz = null);
+    public function bar(?array $baz = null);
 }
 
 class Hello implements Foo {

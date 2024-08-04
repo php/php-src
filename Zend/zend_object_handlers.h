@@ -22,6 +22,9 @@
 
 #include <stdint.h>
 
+#include "zend_types.h"
+#include "zend_property_hooks.h"
+
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
@@ -29,9 +32,46 @@ struct _zend_property_info;
 
 #define ZEND_DYNAMIC_PROPERTY_OFFSET               ((uintptr_t)(intptr_t)(-1))
 
-#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) > 0)
+/* The first 4 bits in the property offset are used within the cache slot for
+ * storing information about the property. This value may be bumped to
+ * offsetof(zend_object, properties_table) in the future. */
+#define ZEND_FIRST_PROPERTY_OFFSET (1 << 4)
+#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) >= ZEND_FIRST_PROPERTY_OFFSET)
 #define IS_WRONG_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) == 0)
+#define IS_HOOKED_PROPERTY_OFFSET(offset) \
+	((intptr_t)(offset) > 0 && (intptr_t)(offset) < 16)
 #define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((intptr_t)(offset) < 0)
+
+#define ZEND_PROPERTY_HOOK_SIMPLE_READ_BIT 2u
+#define ZEND_PROPERTY_HOOK_SIMPLE_WRITE_BIT 4u
+#define ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT 8u
+#define ZEND_IS_PROPERTY_HOOK_SIMPLE_READ(offset) \
+	(((offset) & ZEND_PROPERTY_HOOK_SIMPLE_READ_BIT) != 0)
+#define ZEND_IS_PROPERTY_HOOK_SIMPLE_WRITE(offset) \
+	(((offset) & ZEND_PROPERTY_HOOK_SIMPLE_WRITE_BIT) != 0)
+#define ZEND_IS_PROPERTY_HOOK_SIMPLE_GET(offset) \
+	(((offset) & ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT) != 0)
+#define ZEND_SET_PROPERTY_HOOK_SIMPLE_READ(cache_slot) \
+	do { \
+		void **__cache_slot = (cache_slot); \
+		if (__cache_slot) { \
+			CACHE_PTR_EX(__cache_slot + 1, (void*)((uintptr_t)CACHED_PTR_EX(__cache_slot + 1) | ZEND_PROPERTY_HOOK_SIMPLE_READ_BIT)); \
+		} \
+	} while (0)
+#define ZEND_SET_PROPERTY_HOOK_SIMPLE_WRITE(cache_slot) \
+	do { \
+		void **__cache_slot = (cache_slot); \
+		if (__cache_slot) { \
+			CACHE_PTR_EX(__cache_slot + 1, (void*)((uintptr_t)CACHED_PTR_EX(__cache_slot + 1) | ZEND_PROPERTY_HOOK_SIMPLE_WRITE_BIT)); \
+		} \
+	} while (0)
+#define ZEND_SET_PROPERTY_HOOK_SIMPLE_GET(cache_slot) \
+	do { \
+		void **__cache_slot = (cache_slot); \
+		if (__cache_slot) { \
+			CACHE_PTR_EX(__cache_slot + 1, (void*)((uintptr_t)CACHED_PTR_EX(__cache_slot + 1) | ZEND_PROPERTY_HOOK_SIMPLE_GET_BIT)); \
+		} \
+	} while (0)
 
 #define IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(offset) (offset == ZEND_DYNAMIC_PROPERTY_OFFSET)
 #define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-(intptr_t)(offset) - 2))
@@ -98,6 +138,8 @@ typedef enum _zend_prop_purpose {
 	ZEND_PROP_PURPOSE_VAR_EXPORT,
 	/* Used for json_encode(). */
 	ZEND_PROP_PURPOSE_JSON,
+	/* Used for get_object_vars(). */
+	ZEND_PROP_PURPOSE_GET_OBJECT_VARS,
 	/* Dummy member to ensure that "default" is specified. */
 	_ZEND_PROP_PURPOSE_NON_EXHAUSTIVE_ENUM
 } zend_prop_purpose;
@@ -225,7 +267,16 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
 ZEND_API zend_result zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, bool check_only);
-ZEND_API void rebuild_object_properties(zend_object *zobj);
+/* Use zend_std_get_properties_ex() */
+ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
+
+static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
+{
+	if (!object->properties) {
+		return rebuild_object_properties_internal(object);
+	}
+	return object->properties;
+}
 
 ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
 
@@ -252,6 +303,12 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 /* Will call get_properties_for handler or use default behavior. For use by
  * consumers of the get_properties_for API. */
 ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose);
+
+typedef struct _zend_property_info zend_property_info;
+
+ZEND_API zend_function *zend_get_property_hook_trampoline(
+	const zend_property_info *prop_info,
+	zend_property_hook_kind kind, zend_string *prop_name);
 
 #define zend_release_properties(ht) do { \
 	if ((ht) && !(GC_FLAGS(ht) & GC_IMMUTABLE) && !GC_DELREF(ht)) { \

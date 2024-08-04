@@ -28,13 +28,14 @@
  * The following code is adopted from the PostgreSQL's ps_status(.h/.c).
  */
 
+#include <php.h>
 #ifdef PHP_WIN32
 #include "config.w32.h"
 #include <windows.h>
 #include <process.h>
 #include "win32/codepage.h"
 #else
-#include "php_config.h"
+#include <php_config.h>
 extern char** environ;
 #endif
 
@@ -321,7 +322,7 @@ const char* ps_title_errno(int rc)
 
 #ifdef PS_USE_WIN32
     case PS_TITLE_WINDOWS_ERROR:
-        sprintf(windows_error_details, "Windows error code: %lu", GetLastError());
+        snprintf(windows_error_details, sizeof(windows_error_details), "Windows error code: %lu", GetLastError());
         return windows_error_details;
 #endif
     }
@@ -342,9 +343,8 @@ int set_ps_title(const char* title)
     if (rc != PS_TITLE_SUCCESS)
         return rc;
 
-    strncpy(ps_buffer, title, ps_buffer_size);
-    ps_buffer[ps_buffer_size - 1] = '\0';
-    ps_buffer_cur_len = strlen(ps_buffer);
+    size_t title_len = strlcpy(ps_buffer, title, ps_buffer_size);
+    ps_buffer_cur_len = (title_len >= ps_buffer_size) ? ps_buffer_size - 1 : title_len;
 
 #ifdef PS_USE_SETPROCTITLE
     setproctitle("%s", ps_buffer);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Alexander Borisov
+ * Copyright (C) 2018-2024 Alexander Borisov
  *
  * Author: Alexander Borisov <borisov@lexbor.com>
  */
@@ -12,9 +12,6 @@ extern "C" {
 #endif
 
 #include "lexbor/core/base.h"
-
-
-#ifdef LEXBOR_WITH_PERF
 
 
 LXB_API void *
@@ -35,8 +32,6 @@ lexbor_perf_end(void *perf);
 LXB_API double
 lexbor_perf_in_sec(void *perf);
 
-
-#endif /* LEXBOR_WITH_PERF */
 
 #ifdef __cplusplus
 } /* extern "C" */

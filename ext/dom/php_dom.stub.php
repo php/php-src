@@ -94,14 +94,6 @@ namespace
      * @cvalue XML_NAMESPACE_DECL
      */
     const XML_NAMESPACE_DECL_NODE = UNKNOWN;
-#ifdef XML_GLOBAL_NAMESPACE
-    /**
-     * @var int
-     * @cvalue XML_GLOBAL_NAMESPACE
-     */
-    const XML_GLOBAL_NAMESPACE = UNKNOWN;
-#endif
-
     /**
      * @var int
      * @cvalue XML_LOCAL_NAMESPACE
@@ -416,7 +408,7 @@ namespace
         public function compareDocumentPosition(DOMNode $other): int {}
 
         public function __sleep(): array {}
-    
+
         public function __wakeup(): void {}
     }
 
@@ -454,7 +446,7 @@ namespace
 
         /** @implementation-alias DOMNode::__sleep */
         public function __sleep(): array {}
-    
+
         /** @implementation-alias DOMNode::__wakeup */
         public function __wakeup(): void {}
     }
@@ -889,7 +881,7 @@ namespace
         public function replaceChildren(...$nodes): void {}
     }
 
-    /** @alias DOM\DOMException */
+    /** @alias Dom\DOMException */
     final class DOMException extends Exception
     {
         /**
@@ -1025,7 +1017,7 @@ namespace
     function dom_import_simplexml(object $node): DOMElement {}
 }
 
-namespace DOM
+namespace Dom
 {
     /**
      * @var int
@@ -1114,6 +1106,9 @@ namespace DOM
         public function append(Node|string ...$nodes): void;
         public function prepend(Node|string ...$nodes): void;
         public function replaceChildren(Node|string ...$nodes): void;
+
+        public function querySelector(string $selectors): ?Element;
+        public function querySelectorAll(string $selectors): NodeList;
     }
 
     interface ChildNode
@@ -1218,7 +1213,7 @@ namespace DOM
         public function __wakeup(): void {}
     }
 
-    class NodeList implements IteratorAggregate, Countable
+    class NodeList implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1233,7 +1228,7 @@ namespace DOM
         public function item(int $index): ?Node {}
     }
 
-    class NamedNodeMap implements IteratorAggregate, Countable
+    class NamedNodeMap implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1252,7 +1247,7 @@ namespace DOM
         public function getIterator(): \Iterator {}
     }
 
-    class DTDNamedNodeMap implements IteratorAggregate, Countable
+    class DtdNamedNodeMap implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1271,7 +1266,7 @@ namespace DOM
         public function getIterator(): \Iterator {}
     }
 
-    class HTMLCollection implements IteratorAggregate, Countable
+    class HTMLCollection implements \IteratorAggregate, \Countable
     {
         /** @readonly */
         public int $length;
@@ -1279,13 +1274,21 @@ namespace DOM
         /** @implementation-alias DOMNodeList::item */
         public function item(int $index): ?Element {}
 
-        /* TODO: implement namedItem */
+        public function namedItem(string $key): ?Element {}
 
         /** @implementation-alias DOMNodeList::count */
         public function count(): int {}
 
         /** @implementation-alias DOMNodeList::getIterator */
         public function getIterator(): \Iterator {}
+    }
+
+    enum AdjacentPosition : string
+    {
+        case BeforeBegin = "beforebegin";
+        case AfterBegin = "afterbegin";
+        case BeforeEnd = "beforeend";
+        case AfterEnd = "afterend";
     }
 
     class Element extends Node implements ParentNode, ChildNode
@@ -1301,6 +1304,8 @@ namespace DOM
 
         public string $id;
         public string $className;
+        /** @readonly */
+        public TokenList $classList;
 
         /** @implementation-alias DOMNode::hasAttributes */
         public function hasAttributes(): bool {}
@@ -1330,7 +1335,7 @@ namespace DOM
         public function getAttributeNode(string $qualifiedName): ?Attr {}
         /** @implementation-alias DOMElement::getAttributeNodeNS */
         public function getAttributeNodeNS(?string $namespace, string $localName): ?Attr {}
-        /** @implementation-alias DOM\Element::setAttributeNodeNS */
+        /** @implementation-alias Dom\Element::setAttributeNodeNS */
         public function setAttributeNode(Attr $attr) : ?Attr {}
         public function setAttributeNodeNS(Attr $attr) : ?Attr {}
         public function removeAttributeNode(Attr $attr) : Attr {}
@@ -1338,9 +1343,8 @@ namespace DOM
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
 
-        public function insertAdjacentElement(string $where, Element $element): ?Element {}
-        /** @implementation-alias DOMElement::insertAdjacentText */
-        public function insertAdjacentText(string $where, string $data): void {}
+        public function insertAdjacentElement(AdjacentPosition $where, Element $element): ?Element {}
+        public function insertAdjacentText(AdjacentPosition $where, string $data): void {}
 
         /** @readonly */
         public ?Element $firstElementChild;
@@ -1373,6 +1377,27 @@ namespace DOM
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        public function querySelector(string $selectors): ?Element {}
+        public function querySelectorAll(string $selectors): NodeList {}
+        public function closest(string $selectors): ?Element {}
+        public function matches(string $selectors): bool {}
+
+        public string $innerHTML;
+
+        public string $substitutedNodeValue;
+
+        /** @return list<NamespaceInfo> */
+        public function getInScopeNamespaces(): array {}
+
+        /** @return list<NamespaceInfo> */
+        public function getDescendantNamespaces(): array {}
+
+        public function rename(?string $namespaceURI, string $qualifiedName): void {}
+    }
+
+    class HTMLElement extends Element
+    {
     }
 
     class Attr extends Node
@@ -1395,6 +1420,9 @@ namespace DOM
 
         /** @implementation-alias DOMAttr::isId */
         public function isId(): bool {}
+
+        /** @implementation-alias Dom\Element::rename */
+        public function rename(?string $namespaceURI, string $qualifiedName): void {}
     }
 
     class CharacterData extends Node implements ChildNode
@@ -1452,9 +1480,9 @@ namespace DOM
         /** @readonly */
         public string $name;
         /** @readonly */
-        public DTDNamedNodeMap $entities;
+        public DtdNamedNodeMap $entities;
         /** @readonly */
-        public DTDNamedNodeMap $notations;
+        public DtdNamedNodeMap $notations;
         /** @readonly */
         public string $publicId;
         /** @readonly */
@@ -1482,13 +1510,18 @@ namespace DOM
         public int $childElementCount;
 
         /** @implementation-alias DOMDocumentFragment::appendXML */
-        public function appendXML(string $data): bool {}
+        public function appendXml(string $data): bool {}
         /** @implementation-alias DOMElement::append */
         public function append(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::prepend */
         public function prepend(Node|string ...$nodes): void {}
         /** @implementation-alias DOMElement::replaceChildren */
         public function replaceChildren(Node|string ...$nodes): void {}
+
+        /** @implementation-alias Dom\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+        /** @implementation-alias Dom\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
     }
 
     class Entity extends Node
@@ -1515,9 +1548,7 @@ namespace DOM
     {
         /** @readonly */
         public Implementation $implementation;
-        /** @readonly */
         public string $URL;
-        /** @readonly */
         public string $documentURI;
         public string $characterSet;
         public string $charset;
@@ -1527,9 +1558,9 @@ namespace DOM
         public ?DocumentType $doctype;
         /** @readonly */
         public ?Element $documentElement;
-        /** @implementation-alias DOM\Element::getElementsByTagName */
+        /** @implementation-alias Dom\Element::getElementsByTagName */
         public function getElementsByTagName(string $qualifiedName): HTMLCollection {}
-        /** @implementation-alias DOM\Element::getElementsByTagNameNS */
+        /** @implementation-alias Dom\Element::getElementsByTagNameNS */
         public function getElementsByTagNameNS(?string $namespace, string $localName): HTMLCollection {}
 
         public function createElement(string $localName): Element {}
@@ -1570,9 +1601,9 @@ namespace DOM
         /** @implementation-alias DOMDocument::schemaValidateSource */
         public function schemaValidateSource(string $source, int $flags = 0): bool {}
         /** @implementation-alias DOMDocument::relaxNGValidate */
-        public function relaxNGValidate(string $filename): bool {}
+        public function relaxNgValidate(string $filename): bool {}
         /** @implementation-alias DOMDocument::relaxNGValidateSource */
-        public function relaxNGValidateSource(string $source): bool {}
+        public function relaxNgValidateSource(string $source): bool {}
 #endif
 
         /** @implementation-alias DOMElement::append */
@@ -1583,6 +1614,16 @@ namespace DOM
         public function replaceChildren(Node|string ...$nodes): void {}
 
         public function importLegacyNode(\DOMNode $node, bool $deep = false): Node {}
+
+        /** @implementation-alias Dom\Element::querySelector */
+        public function querySelector(string $selectors): ?Element {}
+        /** @implementation-alias Dom\Element::querySelectorAll */
+        public function querySelectorAll(string $selectors): NodeList {}
+
+        public ?HTMLElement $body;
+        /** @readonly */
+        public ?HTMLElement $head;
+        public string $title;
     }
 
     final class HTMLDocument extends Document
@@ -1593,15 +1634,19 @@ namespace DOM
 
         public static function createFromString(string $source, int $options = 0, ?string $overrideEncoding = null): HTMLDocument {}
 
-        /** @implementation-alias DOM\XMLDocument::saveXML */
-        public function saveXML(?Node $node = null, int $options = 0): string|false {}
+        /** @implementation-alias Dom\XMLDocument::saveXml */
+        public function saveXml(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
-        public function saveXMLFile(string $filename, int $options = 0): int|false {}
+        public function saveXmlFile(string $filename, int $options = 0): int|false {}
 
-        public function saveHTML(?Node $node = null): string|false {}
+        public function saveHtml(?Node $node = null): string {}
 
-        public function saveHTMLFile(string $filename): int|false {}
+        public function saveHtmlFile(string $filename): int|false {}
+
+#if ZEND_DEBUG
+        public function debugGetTemplateCount(): int {}
+#endif
     }
 
     final class XMLDocument extends Document
@@ -1627,13 +1672,51 @@ namespace DOM
         /** @implementation-alias DOMDocument::validate */
         public function validate(): bool {}
 
-        /** @implementation-alias DOMDocument::xinclude */
-        public function xinclude(int $options = 0): int|false {}
+        public function xinclude(int $options = 0): int {}
 
-        public function saveXML(?Node $node = null, int $options = 0): string|false {}
+        public function saveXml(?Node $node = null, int $options = 0): string|false {}
 
         /** @implementation-alias DOMDocument::save */
-        public function saveXMLFile(string $filename, int $options = 0): int|false {}
+        public function saveXmlFile(string $filename, int $options = 0): int|false {}
+    }
+
+    /**
+     * @not-serializable
+     * @strict-properties
+     */
+    final class TokenList implements IteratorAggregate, Countable
+    {
+        /** @implementation-alias Dom\Node::__construct */
+        private function __construct() {}
+
+        /** @readonly */
+        public int $length;
+        public function item(int $index): ?string {}
+        public function contains(string $token): bool {}
+        public function add(string ...$tokens): void {}
+        public function remove(string ...$tokens): void {}
+        public function toggle(string $token, ?bool $force = null): bool {}
+        public function replace(string $token, string $newToken): bool {}
+        public function supports(string $token): bool {}
+        public string $value;
+
+        public function count(): int {}
+
+        public function getIterator(): \Iterator {}
+    }
+
+    /**
+     * @not-serializable
+     * @strict-properties
+     */
+    readonly final class NamespaceInfo
+    {
+        public ?string $prefix;
+        public ?string $namespaceURI;
+        public Element $element;
+
+        /** @implementation-alias Dom\Node::__construct */
+        private function __construct() {}
     }
 
 #ifdef LIBXML_XPATH_ENABLED

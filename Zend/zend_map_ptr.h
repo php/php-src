@@ -21,6 +21,8 @@
 
 #include "zend_portability.h"
 
+typedef struct _zend_string zend_string;
+
 #define ZEND_MAP_PTR_KIND_PTR           0
 #define ZEND_MAP_PTR_KIND_PTR_OR_OFFSET 1
 

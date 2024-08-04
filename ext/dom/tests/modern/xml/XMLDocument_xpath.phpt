@@ -1,11 +1,11 @@
 --TEST--
-DOM\XMLDocument interaction with XPath
+Dom\XMLDocument interaction with XPath
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString(<<<XML
+$dom = Dom\XMLDocument::createFromString(<<<XML
 <?xml version="1.0"?>
 <root>
     <p>hi</p>
@@ -16,7 +16,7 @@ $dom = DOM\XMLDocument::createFromString(<<<XML
 </root>
 XML);
 
-$xpath = new DOM\XPath($dom);
+$xpath = new Dom\XPath($dom);
 
 echo "--- Get data of the paragraph ---\n";
 
@@ -43,17 +43,21 @@ foreach ($result as $item) {
 echo "--- Get a namespace node ---\n";
 
 // Namespace nodes don't exist in modern day DOM.
-var_dump($xpath->evaluate("//*/namespace::*"));
+try {
+    var_dump($xpath->evaluate("//*/namespace::*"));
+} catch (DOMException $e) {
+    echo $e->getCode(), ": ", $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--
 --- Get data of the paragraph ---
-object(DOM\NodeList)#4 (1) {
+object(Dom\NodeList)#4 (1) {
   ["length"]=>
   int(1)
 }
 string(2) "hi"
-object(DOM\NodeList)#5 (1) {
+object(Dom\NodeList)#5 (1) {
   ["length"]=>
   int(1)
 }
@@ -62,12 +66,9 @@ string(2) "hi"
 float(2)
 bool(true)
 --- Get data of special nodes ---
-string(25) "DOM\ProcessingInstruction"
+string(25) "Dom\ProcessingInstruction"
 string(4) "data"
-string(11) "DOM\Comment"
+string(11) "Dom\Comment"
 string(9) " comment "
 --- Get a namespace node ---
-object(DOM\NodeList)#5 (1) {
-  ["length"]=>
-  int(0)
-}
+9: The namespace axis is not well-defined in the living DOM specification. Use Dom\Element::getInScopeNamespaces() or Dom\Element::getDescendantNamespaces() instead.

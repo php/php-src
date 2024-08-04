@@ -9,7 +9,7 @@ hello world
 is a very common test
 for all languages
 EOT;
-$dirname = 'gzfile_temp';
+$dirname = 'gzfile_temp2';
 $filename = $dirname.'/gzfile_basic2.txt';
 mkdir($dirname);
 $h = fopen($filename, 'w');

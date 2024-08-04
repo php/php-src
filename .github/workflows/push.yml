@@ -43,10 +43,10 @@ env:
   CXX: ccache g++
 jobs:
   LINUX_X64:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     services:
       mysql:
-        image: mysql:8
+        image: mysql:8.3
         ports:
           - 3306:3306
         env:
@@ -80,7 +80,9 @@ jobs:
             zts: true
             asan: true
     name: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-${{ !matrix.asan && '22' || '20' }}.04
+    container:
+      image: ${{ matrix.asan && 'ubuntu:23.04' || null }}
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -89,6 +91,7 @@ jobs:
       - name: LLVM 16 (ASAN-only)
         if: ${{ matrix.asan }}
         run: |
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y lsb-release wget software-properties-common gnupg
           wget https://apt.llvm.org/llvm.sh
           chmod u+x llvm.sh
           sudo ./llvm.sh 16
@@ -113,13 +116,14 @@ jobs:
           # job id, not the job name)
           key: "LINUX_X64_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-x64
         with:
           configurationParameters: >-
             --${{ matrix.debug && 'enable' || 'disable' }}-debug
             --${{ matrix.zts && 'enable' || 'disable' }}-zts
-            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address -fno-sanitize=pointer-overflow" CC=clang-16 CXX=clang++-16' || '' }}
+            ${{ matrix.asan && 'CFLAGS="-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC" LDFLAGS="-fsanitize=undefined,address" CC=clang-16 CXX=clang++-16' || '' }}
           skipSlow: ${{ matrix.asan }}
       - name: make
         run: make -j$(/usr/bin/nproc) >/dev/null
@@ -131,12 +135,9 @@ jobs:
       - name: Test
         if: matrix.asan == false
         uses: ./.github/actions/test-linux
-        with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}
       - name: Test Tracing JIT
         uses: ./.github/actions/test-linux
         with:
-          testArtifacts: ${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}${{ matrix.asan && '_ASAN' || '' }}_Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
@@ -145,8 +146,53 @@ jobs:
       - name: Verify generated files are up to date
         if: ${{ !matrix.asan }}
         uses: ./.github/actions/verify-generated-files
+  LINUX_X32:
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
+    name: LINUX_X32_DEBUG_ZTS
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
+    env:
+      MYSQL_TEST_HOST: mysql
+      PDO_MYSQL_TEST_DSN: mysql:host=mysql;dbname=test
+      PDO_MYSQL_TEST_HOST: mysql
+    services:
+      mysql:
+        image: mysql:8.3
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: test
+          MYSQL_ROOT_PASSWORD: root
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v3
+      - name: apt
+        uses: ./.github/actions/apt-x32
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
+          append-timestamp: false
+      - name: ./configure
+        uses: ./.github/actions/configure-x32
+        with:
+          configurationParameters: >-
+            --enable-debug
+            --enable-zts
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-linux-x32
+      - name: Test Tracing JIT
+        uses: ./.github/actions/test-linux
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
   MACOS_DEBUG_NTS:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -167,6 +213,7 @@ jobs:
         with:
           key: "${{github.job}}-${{matrix.os}}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         uses: ./.github/actions/configure-macos
         with:
@@ -180,7 +227,6 @@ jobs:
       - name: Test Tracing JIT
         uses: ./.github/actions/test-macos
         with:
-          testArtifacts: ${{ matrix.arch }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }} Tracing JIT
           jitType: tracing
           runTestsParameters: >-
             -d zend_extension=opcache.so
@@ -188,14 +234,14 @@ jobs:
       - name: Verify generated files are up to date
         uses: ./.github/actions/verify-generated-files
   WINDOWS:
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     name: WINDOWS_X64_ZTS
     runs-on: windows-2019
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
-      PHP_BUILD_SDK_BRANCH: php_downloads_server_migration_v1
+      PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
       PHP_BUILD_CRT: vs16
       PLATFORM: x64
       THREAD_SAFE: "1"
@@ -215,13 +261,17 @@ jobs:
         run: .github/scripts/windows/test.bat
   BENCHMARKING:
     name: BENCHMARKING
-    if: github.repository_owner == 'php' || github.event_name == 'pull_request'
+    if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
     runs-on: ubuntu-22.04
     steps:
       - name: git checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # ASLR can cause a lot of noise due to missed sse opportunities for memcpy
+      # and other operations, so we disable it during benchmarking.
+      - name: Disable ASLR
+        run: echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
       - name: apt
         run: |
           set -x
@@ -239,6 +289,7 @@ jobs:
         with:
           key: "${{github.job}}-${{hashFiles('main/php_version.h')}}"
           append-timestamp: false
+          save: ${{ github.event_name != 'pull_request' }}
       - name: ./configure
         run: |
           set -x

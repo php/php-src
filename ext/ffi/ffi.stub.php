@@ -6,10 +6,7 @@ namespace {
 	/** @not-serializable */
     final class FFI
     {
-        /**
-         * @cvalue __BIGGEST_ALIGNMENT__
-         * @link ffi-ffi.constants.biggest-alignment
-         */
+        /** @cvalue __BIGGEST_ALIGNMENT__ */
         public const int __BIGGEST_ALIGNMENT__ = UNKNOWN;
 
         public static function cdef(string $code = "", ?string $lib = null): FFI {}

@@ -50,7 +50,7 @@ set ODBC_TEST_DSN=Driver={ODBC Driver 17 for SQL Server};Server=^(local^)\SQLEXP
 set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
 rem setup Firebird related exts
-curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v3.0.9/Firebird-3.0.9.33560-0_x64.zip
+curl -sLo Firebird.zip https://github.com/FirebirdSQL/firebird/releases/download/v4.0.4/Firebird-4.0.4.3010-0-x64.zip
 7z x -oC:\Firebird Firebird.zip
 set PDO_FIREBIRD_TEST_DATABASE=C:\test.fdb
 set PDO_FIREBIRD_TEST_DSN=firebird:dbname=%PDO_FIREBIRD_TEST_DATABASE%
@@ -130,8 +130,6 @@ for %%i in (ldap) do (
 set TEST_PHPDBG_EXECUTABLE=%PHP_BUILD_DIR%\phpdbg.exe
 
 mkdir c:\tests_tmp
-
-set TEST_PHP_JUNIT=c:\junit.out.xml
 
 nmake test TESTS="%OPCACHE_OPTS% -g FAIL,BORK,LEAK,XLEAK --no-progress -q --offline --show-diff --show-slow 1000 --set-timeout 120 --temp-source c:\tests_tmp --temp-target c:\tests_tmp --bless %PARALLEL%"
 

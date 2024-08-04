@@ -62,6 +62,7 @@ extern ZEND_API const zend_internal_function zend_pass_function;
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_deprecated_class_constant(const zend_class_constant *c, const zend_string *constant_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_false_to_array_deprecated(void);
 ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim);
@@ -82,6 +83,7 @@ ZEND_API ZEND_COLD zval* ZEND_FASTCALL zend_undefined_index_write(HashTable *ht,
 ZEND_API ZEND_COLD void zend_wrong_string_offset_error(void);
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error(const zend_property_info *info);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_modification_error_ex(const char *class_name, const char *prop_name);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_readonly_property_indirect_modification_error(const zend_property_info *info);
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_invalid_class_constant_type_error(uint8_t type);
@@ -429,6 +431,8 @@ ZEND_API void zend_unfinished_calls_gc(zend_execute_data *execute_data, zend_exe
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer);
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield);
+
+ZEND_API void zend_frameless_observed_call(zend_execute_data *execute_data);
 
 zval * ZEND_FASTCALL zend_handle_named_arg(
 		zend_execute_data **call_ptr, zend_string *arg_name,

@@ -1,10 +1,10 @@
 --TEST--
-DOM\HTMLDocument::createCDATASection()
+Dom\HTMLDocument::createCDATASection()
 --EXTENSIONS--
 dom
 --FILE--
 <?php
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->createCDATASection("foo");
 } catch (DOMException $e) {
@@ -18,7 +18,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 try {
     $dom->createCDATASection("]]>");
 } catch (DOMException $e) {

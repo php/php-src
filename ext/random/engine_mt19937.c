@@ -228,7 +228,7 @@ static bool unserialize(void *state, HashTable *data)
 	return true;
 }
 
-const php_random_algo php_random_algo_mt19937 = {
+PHPAPI const php_random_algo php_random_algo_mt19937 = {
 	sizeof(php_random_status_state_mt19937),
 	generate,
 	range,
@@ -242,7 +242,7 @@ PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *sta
 	uint32_t seed = 0;
 
 	if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
-		seed = GENERATE_SEED();
+		seed = (uint32_t)php_random_generate_fallback_seed();
 	}
 
 	php_random_mt19937_seed32(state, seed);
@@ -388,10 +388,7 @@ PHP_METHOD(Random_Engine_Mt19937, __debugInfo)
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (!engine->std.properties) {
-		rebuild_object_properties(&engine->std);
-	}
-	ZVAL_ARR(return_value, zend_array_dup(engine->std.properties));
+	ZVAL_ARR(return_value, zend_array_dup(zend_std_get_properties_ex(&engine->std)));
 
 	if (engine->engine.algo->serialize) {
 		array_init(&t);

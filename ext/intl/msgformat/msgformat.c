@@ -13,7 +13,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <unicode/ustring.h>
@@ -27,7 +27,7 @@
 /* {{{ */
 static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
-	const char* locale;
+	char*       locale;
 	char*       pattern;
 	size_t      locale_len = 0, pattern_len = 0;
 	UChar*      spattern     = NULL;
@@ -38,12 +38,10 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	intl_error_reset( NULL );
 
 	object = return_value;
-	/* Parse parameters. */
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
-		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
-	{
-		return FAILURE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(locale, locale_len)
+		Z_PARAM_STRING(pattern, pattern_len)
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
 	if (error_handling != NULL) {
 		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
@@ -63,7 +61,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_
 	}
 
 	if(locale_len == 0) {
-		locale = intl_locale_get_default();
+		locale = (char *)intl_locale_get_default();
 	}
 
 #ifdef MSG_FORMAT_QUOTE_APOS

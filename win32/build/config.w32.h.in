@@ -12,6 +12,7 @@
 #define PHP_CONFIG_FILE_PATH ""
 #define PEAR_INSTALLDIR "@PREFIX@\\pear"
 #define PHP_BINDIR "@PREFIX@"
+#define PHP_SBINDIR "@PREFIX@"
 #define PHP_DATADIR "@PREFIX@"
 #define PHP_EXTENSION_DIR "@PREFIX@\\ext"
 #define PHP_INCLUDE_PATH	".;@PREFIX@\\pear"
@@ -47,7 +48,6 @@
 
 #define HAVE_GETCWD 1
 #undef HAVE_SETITIMER
-#undef HAVE_SIGSETJMP
 #undef HAVE_IODBC
 #define HAVE_LIBDL 1
 #define HAVE_GETTIMEOFDAY 1
@@ -65,7 +65,7 @@
 #define HAVE_UTIME 1
 #undef HAVE_DIRENT_H
 #define HAVE_FCNTL_H 1
-#define HAVE_GRP_H 0
+#undef HAVE_GRP_H
 #undef HAVE_PWD_H
 #undef HAVE_SYS_FILE_H
 #undef HAVE_SYS_SOCKET_H
@@ -95,7 +95,6 @@
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define PHP_SHLIB_EXT_PREFIX "php_"
-#define HAVE_SQLDATASOURCES
 
 /* Win32 supports socketpair by the emulation in win32/sockets.c */
 #define HAVE_SOCKETPAIR 1

@@ -39,13 +39,12 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
-    AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
+    AC_DEFINE([PDO_USE_MYSQLND], [1],
+      [Define to 1 if the pdo_mysql extension uses mysqlnd.])
   else
-    AC_DEFINE(HAVE_MYSQL, 1, [Whether you have MySQL])
-
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
-      AC_MSG_RESULT($PDO_MYSQL_CONFIG)
+      AC_MSG_RESULT([$PDO_MYSQL_CONFIG])
       PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
       PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     elif test -n "$PDO_MYSQL_DIR"; then
@@ -69,15 +68,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         AC_MSG_ERROR([Unable to find your mysql installation])
       fi
 
-      PHP_ADD_INCLUDE($PDO_MYSQL_INC_DIR)
+      PHP_ADD_INCLUDE([$PDO_MYSQL_INC_DIR])
       PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
     else
       AC_MSG_RESULT([not found])
       AC_MSG_ERROR([Unable to find your mysql installation])
     fi
 
-    PHP_EVAL_INCLINE($PDO_MYSQL_INCLUDE)
-    PHP_EVAL_LIBLINE($PDO_MYSQL_LIBS, PDO_MYSQL_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$PDO_MYSQL_INCLUDE])
+    PHP_EVAL_LIBLINE([$PDO_MYSQL_LIBS], [PDO_MYSQL_SHARED_LIBADD])
   fi
 
   PHP_CHECK_PDO_INCLUDES
@@ -87,13 +86,17 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
   fi
 
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c, $ext_shared,,-I$pdo_cv_inc_path -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([pdo_mysql],
+    [pdo_mysql.c mysql_driver.c mysql_statement.c mysql_sql_parser.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
+  PHP_ADD_MAKEFILE_FRAGMENT
 
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
   fi
 
-  PHP_SUBST(PDO_MYSQL_SHARED_LIBADD)
+  PHP_SUBST([PDO_MYSQL_SHARED_LIBADD])
 fi

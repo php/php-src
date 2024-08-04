@@ -74,22 +74,23 @@ static zend_object *ResourceBundle_object_create( zend_class_entry *ce )
 /* {{{ ResourceBundle_ctor */
 static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling *error_handling, bool *error_handling_replaced)
 {
-	const char *bundlename;
+	char           *bundlename;
 	size_t		bundlename_len = 0;
-	const char *locale;
+	char           *locale;
 	size_t		locale_len = 0;
-	bool	fallback = 1;
+	bool	fallback = true;
 
 	zval                  *object = return_value;
 	ResourceBundle_object *rb = Z_INTL_RESOURCEBUNDLE_P( object );
 
 	intl_error_reset( NULL );
 
-	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s!s!|b",
-		&locale, &locale_len, &bundlename, &bundlename_len, &fallback ) == FAILURE )
-	{
-		return FAILURE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STRING_OR_NULL(locale, locale_len)
+		Z_PARAM_STRING_OR_NULL(bundlename, bundlename_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(fallback)
+	ZEND_PARSE_PARAMETERS_END_EX(return FAILURE);
 
 	if (error_handling != NULL) {
 		zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, error_handling);
@@ -104,7 +105,7 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_error_handling
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
 
 	if (locale == NULL) {
-		locale = intl_locale_get_default();
+		locale = (char *)intl_locale_get_default();
 	}
 
 	if (bundlename_len >= MAXPATHLEN) {
@@ -344,10 +345,9 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	intl_errors_reset( NULL );
 
-	if( zend_parse_parameters(ZEND_NUM_ARGS(), "s", &bundlename, &bundlename_len ) == FAILURE )
-	{
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(bundlename, bundlename_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (bundlename_len >= MAXPATHLEN) {
 		zend_argument_value_error(1, "is too long");
@@ -409,9 +409,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 /* }}} */
 
 PHP_METHOD(ResourceBundle, getIterator) {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

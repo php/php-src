@@ -4,15 +4,15 @@ XMLDocument::createFromFile() - empty input
 dom
 --FILE--
 <?php
-$dom = DOM\XMLDocument::createFromFile("php://memory");
+$dom = Dom\XMLDocument::createFromFile("php://memory");
 var_dump($dom->documentURI);
 fclose($memory);
 ?>
 --EXPECTF--
-Warning: DOM\XMLDocument::createFromFile(): Document is empty in php://memory, line: 1 in %s on line %d
+Warning: Dom\XMLDocument::createFromFile(): Document is empty in php://memory, line: 1 in %s on line %d
 
-Fatal error: Uncaught Exception: XML document is malformed in %s:%d
+Fatal error: Uncaught DOMException: XML fragment is not well-formed in %s:%d
 Stack trace:
-#0 %s(%d): DOM\XMLDocument::createFromFile('php://memory')
+#0 %s(%d): Dom\XMLDocument::createFromFile('php://memory')
 #1 {main}
   thrown in %s on line %d

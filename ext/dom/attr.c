@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -25,6 +25,7 @@
 
 #include "php_dom.h"
 #include "dom_properties.h"
+#include "internal_helpers.h"
 
 /*
 * class DOMAttr extends DOMNode
@@ -106,6 +107,16 @@ zend_result dom_attr_specified_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+void dom_attr_value_will_change(dom_object *obj, xmlAttrPtr attrp)
+{
+	if (attrp->atype == XML_ATTRIBUTE_ID) {
+		xmlRemoveID(attrp->doc, attrp);
+		attrp->atype = XML_ATTRIBUTE_ID;
+	}
+
+	dom_mark_ids_modified(obj->document);
+}
+
 /* {{{ value	string
 readonly=no
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
@@ -113,24 +124,16 @@ Since:
 */
 zend_result dom_attr_value_read(dom_object *obj, zval *retval)
 {
-	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
-	xmlChar *content;
-
-	/* Can't avoid a content copy because it's an attribute node */
-	if ((content = xmlNodeGetContent((xmlNodePtr) attrp)) != NULL) {
-		ZVAL_STRING(retval, (char *) content);
-		xmlFree(content);
-	} else {
-		ZVAL_EMPTY_STRING(retval);
-	}
-
+	DOM_PROP_NODE(xmlNodePtr, attrp, obj);
+	php_dom_get_content_into_zval(attrp, retval, false);
 	return SUCCESS;
-
 }
 
 zend_result dom_attr_value_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlAttrPtr, attrp, obj);
+
+	dom_attr_value_will_change(obj, attrp);
 
 	/* Typed property, this is already a string */
 	ZEND_ASSERT(Z_TYPE_P(newval) == IS_STRING);
@@ -160,12 +163,8 @@ zend_result dom_attr_owner_element_read(dom_object *obj, zval *retval)
 	DOM_PROP_NODE(xmlNodePtr, nodep, obj);
 
 	xmlNodePtr nodeparent = nodep->parent;
-	if (!nodeparent) {
-		ZVAL_NULL(retval);
-		return SUCCESS;
-	}
 
-	php_dom_create_object(nodeparent, retval, obj);
+	php_dom_create_nullable_object(nodeparent, retval, obj);
 	return SUCCESS;
 }
 
@@ -190,23 +189,24 @@ Since: DOM Level 3
 */
 PHP_METHOD(DOMAttr, isId)
 {
-	zval *id;
 	dom_object *intern;
 	xmlAttrPtr attrp;
 
-	id = ZEND_THIS;
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);
-
-	if (attrp->atype == XML_ATTRIBUTE_ID) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	DOM_GET_OBJ(attrp, ZEND_THIS, xmlAttrPtr, intern);
+	RETURN_BOOL(attrp->atype == XML_ATTRIBUTE_ID);
 }
 /* }}} end dom_attr_is_id */
+
+bool dom_compare_value(const xmlAttr *attr, const xmlChar *value)
+{
+	bool free;
+	xmlChar *attr_value = php_libxml_attr_value(attr, &free);
+	bool result = xmlStrEqual(attr_value, value);
+	if (free) {
+		xmlFree(attr_value);
+	}
+	return result;
+}
 
 #endif

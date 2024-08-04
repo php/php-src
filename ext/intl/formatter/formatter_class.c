@@ -18,10 +18,12 @@
 #include "php_intl.h"
 #include "formatter_data.h"
 #include "formatter_format.h"
-#include "formatter_arginfo.h"
 
 #include <zend_exceptions.h>
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_interfaces.h"
+
+#include "formatter_arginfo.h"
 
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;
@@ -58,28 +60,22 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 /* {{{ NumberFormatter_object_clone */
 zend_object *NumberFormatter_object_clone(zend_object *object)
 {
-	NumberFormatter_object *nfo, *new_nfo;
-	zend_object *new_obj;
+	NumberFormatter_object     *nfo = php_intl_number_format_fetch_object(object);
+	zend_object            *new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
+	NumberFormatter_object *new_nfo = php_intl_number_format_fetch_object(new_obj);
 
-	nfo = php_intl_number_format_fetch_object(object);
-	intl_error_reset(INTL_DATA_ERROR_P(nfo));
-
-	new_obj = NumberFormatter_ce_ptr->create_object(object->ce);
-	new_nfo = php_intl_number_format_fetch_object(new_obj);
 	/* clone standard parts */
 	zend_objects_clone_members(&new_nfo->zo, &nfo->zo);
+
 	/* clone formatter object. It may fail, the destruction code must handle this case */
 	if (FORMATTER_OBJECT(nfo) != NULL) {
-		FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo),
-				&INTL_DATA_ERROR_CODE(nfo));
-		if (U_FAILURE(INTL_DATA_ERROR_CODE(nfo))) {
-			/* set up error in case error handler is interested */
-			intl_errors_set(INTL_DATA_ERROR_P(nfo), INTL_DATA_ERROR_CODE(nfo),
-					"Failed to clone NumberFormatter object", 0);
-			zend_throw_exception(NULL, "Failed to clone NumberFormatter object", 0);
+		UErrorCode error = U_ZERO_ERROR;
+		FORMATTER_OBJECT(new_nfo) = unum_clone(FORMATTER_OBJECT(nfo), &error);
+		if (U_FAILURE(error)) {
+			zend_throw_error(NULL, "Failed to clone NumberFormatter");
 		}
 	} else {
-		zend_throw_exception(NULL, "Cannot clone unconstructed NumberFormatter", 0);
+		zend_throw_error(NULL, "Cannot clone uninitialized NumberFormatter");
 	}
 	return new_obj;
 }

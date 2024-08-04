@@ -17,14 +17,14 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_mysql.h"
 #include "php_pdo_mysql_int.h"
 
@@ -581,7 +581,7 @@ static int pdo_mysql_stmt_fetch(pdo_stmt_t *stmt, enum pdo_fetch_orientation ori
 	}
 
 	if (!S->current_row) {
-		S->current_row = ecalloc(sizeof(zval), stmt->column_count);
+		S->current_row = ecalloc(stmt->column_count, sizeof(zval));
 	}
 	for (unsigned i = 0; i < stmt->column_count; i++) {
 		zval_ptr_dtor_nogc(&S->current_row[i]);

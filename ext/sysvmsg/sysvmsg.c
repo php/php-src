@@ -15,11 +15,10 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
-#include "php_globals.h"
 #include "ext/standard/info.h"
 #include "php_sysvmsg.h"
 #include "sysvmsg_arginfo.h"

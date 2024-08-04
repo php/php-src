@@ -53,6 +53,21 @@ const SOCK_SEQPACKET = UNKNOWN;
  */
 const SOCK_RDM = UNKNOWN;
 #endif
+#ifdef SOCK_CONN_DGRAM
+/**
+ * @var int
+ * @cvalue SOCK_CONN_DGRAM
+ */
+const SOCK_CONN_DGRAM = UNKNOWN;
+#endif
+#ifdef SOCK_DCCP
+/**
+ * is an alias of SOCK_CONN_DGRAM on some platforms
+ * @var int
+ * @cvalue SOCK_DCCP
+ */
+const SOCK_DCCP = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -195,6 +210,13 @@ const SO_DONTROUTE = UNKNOWN;
  * @cvalue SO_LINGER
  */
 const SO_LINGER = UNKNOWN;
+#ifdef SO_LINGER_SEC
+/**
+ * @var int
+ * @cvalue SO_LINGER_SEC
+ */
+const SO_LINGER_SEC = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue SO_BROADCAST
@@ -397,6 +419,13 @@ const SO_MEMINFO = UNKNOWN;
  */
 const SO_BPF_EXTENSIONS = UNKNOWN;
 #endif
+#ifdef SO_EXCLBIND
+/**
+ * @var int
+ * @cvalue SO_EXCLBIND
+ */
+const SO_EXCLBIND = UNKNOWN;
+#endif
 #ifdef SKF_AD_OFF
 /**
  * @var int
@@ -530,6 +559,13 @@ const SKF_AD_MAX = UNKNOWN;
  * @cvalue TCP_CONGESTION
  */
 const TCP_CONGESTION = UNKNOWN;
+#endif
+#ifdef TCP_SYNCNT
+/**
+ * @var int
+ * @cvalue TCP_SYNCNT
+ */
+const TCP_SYNCNT = UNKNOWN;
 #endif
 #ifdef SO_ZEROCOPY
 /**
@@ -1484,7 +1520,7 @@ const SOCKET_ENOMEDIUM = UNKNOWN;
 const SOCKET_EMEDIUMTYPE = UNKNOWN;
 #endif
 
-#ifdef WIN32
+#ifdef PHP_WIN32
 /**
  * @var int
  * @cvalue WSAESTALE
@@ -1637,7 +1673,7 @@ const AI_NUMERICSERV = UNKNOWN;
 const SOL_LOCAL = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVPKTINFO) && HAVE_IPV6)
+#if (defined(IPV6_RECVPKTINFO) && defined(HAVE_IPV6))
 /**
  * IPv6 ancillary data
  * @var int
@@ -1650,7 +1686,7 @@ const IPV6_RECVPKTINFO = UNKNOWN;
  */
 const IPV6_PKTINFO = UNKNOWN;
 #endif
-#if (defined(IPV6_RECVHOPLIMIT) && HAVE_IPV6)
+#if (defined(IPV6_RECVHOPLIMIT) && defined(HAVE_IPV6))
 /**
  * @var int
  * @cvalue IPV6_RECVHOPLIMIT
@@ -1663,7 +1699,7 @@ const IPV6_RECVHOPLIMIT = UNKNOWN;
 const IPV6_HOPLIMIT = UNKNOWN;
 #endif
 
-#if (defined(IPV6_RECVTCLASS) && HAVE_IPV6)
+#if (defined(IPV6_RECVTCLASS) && defined(HAVE_IPV6))
 /**
  * @var int
  * @cvalue IPV6_RECVTCLASS
@@ -1754,6 +1790,13 @@ const SO_DETACH_BPF = UNKNOWN;
  * @cvalue SO_EXCLUSIVEADDRUSE
  */
 const SO_EXCLUSIVEADDRUSE = UNKNOWN;
+#endif
+#if defined(SO_NOSIGPIPE)
+/**
+ * @var int
+ * @cvalue SO_NOSIGPIPE
+ */
+const SO_NOSIGPIPE = UNKNOWN;
 #endif
 #if defined(TCP_QUICKACK)
 /**
@@ -1858,7 +1901,7 @@ final class AddressInfo
 
 function socket_select(?array &$read, ?array &$write, ?array &$except, ?int $seconds, int $microseconds = 0): int|false {}
 
-function socket_create_listen(int $port, int $backlog = 128): Socket|false {}
+function socket_create_listen(int $port, int $backlog = SOMAXCONN): Socket|false {}
 
 function socket_accept(Socket $socket): Socket|false {}
 

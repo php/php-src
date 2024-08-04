@@ -51,13 +51,13 @@ if (is_object($broker)) {
 --EXPECTF--
 OK
 
-Deprecated: Function enchant_broker_set_dict_path() is deprecated in %s
+Deprecated: Function enchant_broker_set_dict_path() is deprecated since 8.0 in %s
 OK
 
-Deprecated: Function enchant_broker_set_dict_path() is deprecated in %s
+Deprecated: Function enchant_broker_set_dict_path() is deprecated since 8.0 in %s
 OK
 
-Deprecated: Function enchant_broker_get_dict_path() is deprecated in %s
+Deprecated: Function enchant_broker_get_dict_path() is deprecated since 8.0 in %s
 
-Deprecated: Function enchant_broker_get_dict_path() is deprecated in %s
+Deprecated: Function enchant_broker_get_dict_path() is deprecated since 8.0 in %s
 OK

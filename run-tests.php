@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | https://php.net/license/3_01.txt                                     |
+   | https://www.php.net/license/3_01.txt                                 |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -75,9 +75,11 @@ Options:
 
     -s <file>   Write output to <file>.
 
-    -x          Sets 'SKIP_SLOW_TESTS' environmental variable.
+    -x          Sets 'SKIP_SLOW_TESTS' environment variable.
 
-    --offline   Sets 'SKIP_ONLINE_TESTS' environmental variable.
+    --online    Prevents setting the 'SKIP_ONLINE_TESTS' environment variable.
+
+    --offline   Sets 'SKIP_ONLINE_TESTS' environment variable (default).
 
     --verbose
     -v          Verbose mode.
@@ -355,6 +357,7 @@ function main(): void
     $num_repeats = 1;
     $show_progress = true;
     $ignored_by_ext = [];
+    $online = null;
 
     $cfgtypes = ['show', 'keep'];
     $cfgfiles = ['skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem'];
@@ -553,8 +556,11 @@ function main(): void
                 case 'x':
                     $environment['SKIP_SLOW_TESTS'] = 1;
                     break;
+                case '--online':
+                    $online = true;
+                    break;
                 case '--offline':
-                    $environment['SKIP_ONLINE_TESTS'] = 1;
+                    $online = false;
                     break;
                 case '--shuffle':
                     $shuffle = true;
@@ -635,6 +641,13 @@ function main(): void
                 die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
             }
         }
+    }
+
+    if ($online === null && !isset($environment['SKIP_ONLINE_TESTS'])) {
+        $online = false;
+    }
+    if ($online !== null) {
+        $environment['SKIP_ONLINE_TESTS'] = $online ? '0' : '1';
     }
 
     if ($selected_tests && count($test_files) === 0) {

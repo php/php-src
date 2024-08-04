@@ -28,6 +28,13 @@ const LIBXML_RECOVER = UNKNOWN;
  * @cvalue XML_PARSE_NOENT
  */
 const LIBXML_NOENT = UNKNOWN;
+#if LIBXML_VERSION >= 21300
+/**
+ * @var int
+ * @cvalue XML_PARSE_NO_XXE
+ */
+const LIBXML_NO_XXE = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue XML_PARSE_DTDLOAD
@@ -172,7 +179,7 @@ function libxml_get_errors(): array {}
 
 function libxml_clear_errors(): void {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.0', message: 'as external entity loading is disabled by default')]
 function libxml_disable_entity_loader(bool $disable = true): bool {}
 
 function libxml_set_external_entity_loader(?callable $resolver_function): bool {}

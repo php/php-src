@@ -1,16 +1,16 @@
 --TEST--
-DOM\Element::setAttributeNode(NS) adopting from another document
+Dom\Element::setAttributeNode(NS) adopting from another document
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom1 = DOM\HTMLDocument::createEmpty();
+$dom1 = Dom\HTMLDocument::createEmpty();
 $container = $dom1->appendChild($dom1->createElement("container"));
 
 echo "--- Without namespace ---\n";
 
-$dom2 = DOM\HTMLDocument::createEmpty();
+$dom2 = Dom\HTMLDocument::createEmpty();
 $attr = $dom2->createAttribute("my-attribute");
 $attr->value = "1";
 
@@ -23,12 +23,12 @@ unset($attr);
 
 echo "--- With namespace ---\n";
 
-$dom2 = DOM\HTMLDocument::createEmpty();
+$dom2 = Dom\HTMLDocument::createEmpty();
 $attr2 = $dom2->createAttributeNS("urn:a", "a:my-attribute");
 $attr2->value = "2";
 $dom1->documentElement->setAttributeNode($attr2);
 
-$dom2 = DOM\HTMLDocument::createEmpty();
+$dom2 = Dom\HTMLDocument::createEmpty();
 $attr3 = $dom2->createAttributeNS("urn:b", "a:my-attribute");
 $attr3->value = "3";
 $dom1->documentElement->setAttributeNode($attr3);
@@ -38,7 +38,7 @@ var_dump($attr3->prefix, $attr3->namespaceURI, $attr3->localName);
 
 echo "--- Resulting document ---\n";
 
-echo $dom1->saveHTML(), "\n";
+echo $dom1->saveHtml(), "\n";
 
 ?>
 --EXPECT--

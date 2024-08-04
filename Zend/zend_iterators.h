@@ -17,6 +17,11 @@
    +----------------------------------------------------------------------+
 */
 
+#ifndef ZEND_ITERATORS_H
+#define ZEND_ITERATORS_H
+
+#include "zend_types.h"
+
 /* These iterators were designed to operate within the foreach()
  * structures provided by the engine, but could be extended for use
  * with other iterative engine opcodes.
@@ -89,3 +94,5 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter);
 
 ZEND_API void zend_register_iterator_wrapper(void);
 END_EXTERN_C()
+
+#endif /* ZEND_ITERATORS_H */

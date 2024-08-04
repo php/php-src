@@ -5,20 +5,20 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $element = $dom->createElement("div");
 $span = $dom->createElement("span");
 $span->textContent = "qux";
 $element->append("foo", "bar", "baz", $span, $dom->createCDATASection("a"), $dom->createCDATASection("b"));
 $dom->append($element);
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($element->firstChild->textContent);
 var_dump($element->firstChild->nextSibling->textContent);
 var_dump($element->firstChild->nextSibling->nextSibling->textContent);
 
 $dom->normalize();
-echo $dom->saveXML(), "\n";
+echo $dom->saveXml(), "\n";
 
 var_dump($element->firstChild->textContent);
 var_dump($element->firstChild->nextSibling->textContent);

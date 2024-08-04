@@ -455,7 +455,8 @@ can be built that way. \
 
 	var snapshot_build_exclusions = new Array(
 		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
-		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer'
+		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer',
+		'phpdbg-debug'
 	);
 	var force;
 
@@ -3005,6 +3006,7 @@ function toolset_setup_project_tools()
 	}
 
 	var RE2C = PATH_PROG('re2c');
+	DEFINE('RE2C_FLAGS', '--no-generation-date');
 	if (RE2C) {
 		var RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
@@ -3102,7 +3104,7 @@ function toolset_get_compiler_name(short)
 
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
-		if (version >= 1940) {
+		if (version >= 1950) {
 			return name;
 		} else if (version >= 1930) {
 			name = short ? "VS17" : "Visual C++ 2022";
@@ -3662,14 +3664,8 @@ function SETUP_OPENSSL(target, path_to_check, common_name, use_env, add_dir_part
 			CHECK_LIB("libssl.lib", target, path_to_check) &&
 			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
 			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
-		/* Openssl 1.1.x */
+		/* Openssl 1.1.x or later */
 		return 2;
-	} else if (CHECK_LIB("ssleay32.lib", target, path_to_check, common_name) &&
-			CHECK_LIB("libeay32.lib", target, path_to_check, common_name) &&
-			CHECK_LIB("crypt32.lib", target, path_to_check, common_name) &&
-			CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", cflags_var, path_to_check, use_env, add_dir_part, add_to_flag_only)) {
-		/* Openssl 1.0.x and lower */
-		return 1;
 	}
 
 	return ret;

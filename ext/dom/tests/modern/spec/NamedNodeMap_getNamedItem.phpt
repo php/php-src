@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createFromString(<<<HTML
+$dom = Dom\HTMLDocument::createFromString(<<<HTML
 <!DOCTYPE html>
 <html>
 <head>
@@ -36,7 +36,7 @@ var_dump($attributes["xmlns:foo"]->value);
 
 echo "--- On XML document ---\n";
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 $dom->appendChild($dom->importNode($body, true));
 
 $body = $dom->getElementsByTagName('body')->item(0);

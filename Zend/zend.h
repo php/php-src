@@ -204,6 +204,8 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
+	uint32_t num_hooked_props;
+	uint32_t num_hooked_prop_variance_checks;
 
 	/* class_entry or string(s) depending on ZEND_ACC_LINKED */
 	union {
@@ -234,6 +236,11 @@ struct _zend_class_entry {
 	} info;
 };
 
+typedef union {
+	zend_max_align_t align;
+	uint64_t opaque[5];
+} zend_random_bytes_insecure_state;
+
 typedef struct _zend_utility_functions {
 	void (*error_function)(int type, zend_string *error_filename, const uint32_t error_lineno, zend_string *message);
 	size_t (*printf_function)(const char *format, ...) ZEND_ATTRIBUTE_PTR_FORMAT(printf, 1, 2);
@@ -248,6 +255,8 @@ typedef struct _zend_utility_functions {
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(const char *name, size_t name_len);
 	zend_string *(*resolve_path_function)(zend_string *filename);
+	zend_result (*random_bytes_function)(void *bytes, size_t size, char *errstr, size_t errstr_size);
+	void (*random_bytes_insecure_function)(zend_random_bytes_insecure_state *state, void *bytes, size_t size);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -340,6 +349,14 @@ extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(const char *name, size_t name_len);
 extern ZEND_API zend_string *(*zend_resolve_path)(zend_string *filename);
+/* Generate 'size' random bytes into 'bytes' with the OS CSPRNG. */
+extern ZEND_ATTRIBUTE_NONNULL ZEND_API zend_result (*zend_random_bytes)(
+		void *bytes, size_t size, char *errstr, size_t errstr_size);
+/* Generate 'size' random bytes into 'bytes' with a general purpose PRNG (not
+ * crypto safe). 'state' must be zeroed before the first call and can be reused.
+ */
+extern ZEND_ATTRIBUTE_NONNULL ZEND_API void (*zend_random_bytes_insecure)(
+		zend_random_bytes_insecure_state *state, void *bytes, size_t size);
 
 /* These two callbacks are especially for opcache */
 extern ZEND_API zend_result (*zend_post_startup_cb)(void);

@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #ifndef _GNU_SOURCE
@@ -26,8 +26,8 @@
 #include "zend_exceptions.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "pdo/php_pdo.h"
-#include "pdo/php_pdo_driver.h"
+#include "ext/pdo/php_pdo.h"
+#include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
 
@@ -460,6 +460,56 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 	return 1;
 }
 
+#if FB_API_VER >= 40
+/* set coercing a data type */
+static void set_coercing_data_type(XSQLDA* sqlda)
+{
+	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */ 
+	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)), */
+	/* TIMESTAMP WITH TIME ZONE, and TIME WITH TIME ZONE. In any case, at least the first three data types */
+	/* can only be mapped to strings. The last two too, but for them it is potentially possible to set */
+	/* the display format, as is done for TIMESTAMP. This function allows you to ensure minimal performance */ 
+	/* of queries if they contain columns and parameters of the above types. */
+	unsigned int i;
+	short dtype;
+	short nullable;
+	XSQLVAR* var;
+	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
+		dtype = (var->sqltype & ~1); /* drop flag bit  */
+		nullable = (var->sqltype & 1); 
+		switch(dtype) {
+			case SQL_INT128:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 46;
+				var->sqlscale = 0;
+				break;
+
+			case SQL_DEC16:
+			    var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 24;
+				break;
+
+			case SQL_DEC34:
+			    var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 43;
+				break;
+
+			case SQL_TIMESTAMP_TZ:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 58;
+				break;
+
+			case SQL_TIME_TZ:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 46;
+				break;
+			default:
+			    break;
+		}
+	}	
+}
+#endif
+
 /* map driver specific error message to PDO error */
 void php_firebird_set_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *state, const size_t state_len,
 	const char *msg, const size_t msg_len) /* {{{ */
@@ -605,6 +655,11 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 			break;
 		}
 
+#if FB_API_VER >= 40
+		/* set coercing a data type */
+		set_coercing_data_type(&S->out_sqlda);
+#endif
+
 		/* allocate the input descriptors */
 		if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, &num_sqlda)) {
 			break;
@@ -618,6 +673,11 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 			if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 				break;
 			}
+
+#if FB_API_VER >= 40
+			/* set coercing a data type */
+			set_coercing_data_type(S->in_sqlda);
+#endif
 		}
 
 		stmt->driver_data = S;
@@ -780,7 +840,7 @@ static bool php_firebird_begin_transaction(pdo_dbh_t *dbh, bool is_auto_commit_t
 			/*
 			* firebird's `read committed` has the option to wait until other transactions
 			* commit or rollback if there is indeterminate data.
-			* Introducing too many configuration values ​​at once can cause confusion, so
+			* Introducing too many configuration values at once can cause confusion, so
 			* we don't support in PDO that feature yet.
 			*/
 			case PDO_FB_READ_COMMITTED:
@@ -1080,8 +1140,8 @@ static bool pdo_firebird_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val
 						 */
 						H->txn_isolation_level = lval;
 					} else {
-						zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
-							"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+						zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+							"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
 						return false;
 					}
 				}
@@ -1185,23 +1245,22 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
-			/* TODO Check this is correct? */
-			ZEND_FALLTHROUGH;
+			return -1;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);
 			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
-			ZVAL_STRING(val, H->date_format);
+			ZVAL_STRING(val, H->date_format ? H->date_format : PDO_FB_DEF_DATE_FMT);
 			return 1;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
-			ZVAL_STRING(val, H->time_format);
+			ZVAL_STRING(val, H->time_format ? H->time_format : PDO_FB_DEF_TIME_FMT);
 			return 1;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
-			ZVAL_STRING(val, H->timestamp_format);
+			ZVAL_STRING(val, H->timestamp_format ? H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT);
 			return 1;
 
 		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
@@ -1274,7 +1333,8 @@ static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	NULL, /* get driver methods */
 	NULL, /* request shutdown */
 	pdo_firebird_in_manually_transaction,
-	NULL /* get gc */
+	NULL, /* get gc */
+	NULL /* scanner */
 };
 /* }}} */
 
@@ -1313,8 +1373,8 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	) {
 		H->txn_isolation_level = txn_isolation_level;
 	} else {
-		zend_value_error("PDO::FB_TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
-			"(PDO::FB_READ_COMMITTED, PDO::FB_REPEATABLE_READ, or PDO::FB_SERIALIZABLE)");
+		zend_value_error("Pdo\\Firebird::TRANSACTION_ISOLATION_LEVEL must be a valid transaction isolation level "
+			"(Pdo\\Firebird::READ_COMMITTED, Pdo\\Firebird::REPEATABLE_READ, or Pdo\\Firebird::SERIALIZABLE)");
 		ret = 0;
 	}
 

@@ -116,13 +116,6 @@ void zend_register_standard_constants(void)
 	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);
 }
 
-
-void zend_shutdown_constants(void)
-{
-	zend_hash_destroy(EG(zend_constants));
-	free(EG(zend_constants));
-}
-
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
 	zend_constant c;
@@ -275,7 +268,7 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 	return NULL;
 }
 
-static zend_constant *zend_get_constant_impl(zend_string *name)
+ZEND_API zend_constant *zend_get_constant_ptr(zend_string *name)
 {
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
@@ -292,7 +285,7 @@ static zend_constant *zend_get_constant_impl(zend_string *name)
 
 ZEND_API zval *zend_get_constant(zend_string *name)
 {
-	zend_constant *c = zend_get_constant_impl(name);
+	zend_constant *c = zend_get_constant_ptr(name);
 	if (c) {
 		return &c->value;
 	}
@@ -361,7 +354,7 @@ ZEND_API zval *zend_get_class_constant_ex(zend_string *class_name, zend_string *
 
 			if (UNEXPECTED(ZEND_CLASS_CONST_FLAGS(c) & ZEND_ACC_DEPRECATED)) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_error(E_DEPRECATED, "Constant %s::%s is deprecated", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					zend_deprecated_class_constant(c, constant_name);
 					if (EG(exception)) {
 						goto failure;
 					}
@@ -521,7 +514,7 @@ failure:
 		}
 	} else {
 		if (cname) {
-			c = zend_get_constant_impl(cname);
+			c = zend_get_constant_ptr(cname);
 		} else {
 			c = zend_get_constant_str_impl(name, name_len);
 		}

@@ -1,5 +1,5 @@
 --TEST--
-DOM\HTMLDocument::createFromString() - normal document, no error
+Dom\HTMLDocument::createFromString() - normal document, no error
 --EXTENSIONS--
 dom
 --FILE--
@@ -21,8 +21,8 @@ $html = <<<HTML
     </body>
 </html>
 HTML;
-$dom = DOM\HTMLDocument::createFromString($html);
-echo $dom->saveHTML(), "\n";
+$dom = Dom\HTMLDocument::createFromString($html);
+echo $dom->saveHtml(), "\n";
 
 ?>
 --EXPECT--

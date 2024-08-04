@@ -41,7 +41,7 @@ runs:
           --enable-sysvshm \
           --enable-shmop \
           --enable-pcntl \
-          --with-readline \
+          --without-readline --with-libedit \
           --enable-mbstring \
           --with-curl \
           --with-gettext \
@@ -53,7 +53,6 @@ runs:
           --enable-calendar \
           --enable-ftp \
           ${{ inputs.skipSlow == 'false' && '--with-enchant=/usr' || '' }} \
-          --with-kerberos \
           --enable-sysvmsg \
           --with-ffi \
           --enable-zend-test \

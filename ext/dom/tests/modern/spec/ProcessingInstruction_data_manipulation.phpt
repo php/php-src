@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root><?pi value?></root>');
+$dom = Dom\XMLDocument::createFromString('<root><?pi value?></root>');
 
 $pi = $dom->documentElement->firstChild;
 

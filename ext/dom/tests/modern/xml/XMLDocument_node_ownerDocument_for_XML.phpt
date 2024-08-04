@@ -1,11 +1,11 @@
 --TEST--
-DOM\XMLDocument getting ownerDocument from a node in an XML document should yield a DOM\XMLDocument
+Dom\XMLDocument getting ownerDocument from a node in an XML document should yield a Dom\XMLDocument
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<?xml version="1.0"?><container/>');
+$dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><container/>');
 
 $element = $dom->documentElement;
 unset($dom);
@@ -13,7 +13,7 @@ var_dump($element->ownerDocument);
 
 ?>
 --EXPECTF--
-object(DOM\XMLDocument)#1 (29) {
+object(Dom\XMLDocument)#1 (32) {
   ["xmlEncoding"]=>
   string(5) "UTF-8"
   ["xmlStandalone"]=>
@@ -44,6 +44,12 @@ object(DOM\XMLDocument)#1 (29) {
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(1)
+  ["body"]=>
+  NULL
+  ["head"]=>
+  NULL
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(9)
   ["nodeName"]=>

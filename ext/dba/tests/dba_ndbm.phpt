@@ -26,22 +26,22 @@ cleanup_standard_db($db_name);
 --EXPECT--
 === RUNNING WITH FILE LOCK ===
 
-Notice: dba_open(): Handler ndbm does locking internally in /home/girgias/Dev/php-src/ext/dba/tests/setup/setup_dba_tests.inc on line 40
+Notice: dba_open(): Handler ndbm does locking internally in %s on line %d
 
-Notice: dba_open(): Handler ndbm does locking internally in /home/girgias/Dev/php-src/ext/dba/tests/setup/setup_dba_tests.inc on line 40
+Notice: dba_open(): Handler ndbm does locking internally in %s on line %d
 
-Notice: dba_open(): Handler ndbm does locking internally in /home/girgias/Dev/php-src/ext/dba/tests/setup/setup_dba_tests.inc on line 82
+Notice: dba_open(): Handler ndbm does locking internally in %s on line %d
 Remove key 1 and 3
 bool(true)
 bool(true)
 Try to remove key 1 again
 bool(false)
-key4: Another Content String
-key2: Content String 2
-key5: The last content string
 [key10]name10: Content String 10
-name9: Content String 9
 [key30]name30: Content String 30
+key2: Content String 2
+key4: Another Content String
+key5: The last content string
+name9: Content String 9
 Total keys: 6
 Key 1 exists? N
 Key 2 exists? Y
@@ -61,7 +61,7 @@ bool(true)
 Fetch "key2": Content 2 replaced 2nd time
 Fetch "key number 6": The 6th value
 
-Notice: dba_open(): Handler ndbm does locking internally in /home/girgias/Dev/php-src/ext/dba/tests/setup/setup_dba_tests.inc on line 149
+Notice: dba_open(): Handler ndbm does locking internally in %s on line %d
 array(6) {
   ["[key10]name10"]=>
   string(17) "Content String 10"
@@ -82,12 +82,12 @@ bool(true)
 bool(true)
 Try to remove key 1 again
 bool(false)
-key4: Another Content String
-key2: Content String 2
-key5: The last content string
 [key10]name10: Content String 10
-name9: Content String 9
 [key30]name30: Content String 30
+key2: Content String 2
+key4: Another Content String
+key5: The last content string
+name9: Content String 9
 Total keys: 6
 Key 1 exists? N
 Key 2 exists? Y
@@ -122,5 +122,5 @@ array(6) {
 }
 === RUNNING WITH NO LOCK ===
 
-Warning: dba_open(): Locking cannot be disabled for handler ndbm in /home/girgias/Dev/php-src/ext/dba/tests/setup/setup_dba_tests.inc on line 40
+Warning: dba_open(): Locking cannot be disabled for handler ndbm in %s on line %d
 Failed to create DB

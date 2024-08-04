@@ -913,7 +913,7 @@ typedef struct _zend_ffi_callback_data {
 	ffi_cif                cif;
 	uint32_t               arg_count;
 	ffi_type              *ret_type;
-	ffi_type              *arg_types[0] ZEND_ELEMENT_COUNT(arg_count);
+	ffi_type              *arg_types[] ZEND_ELEMENT_COUNT(arg_count);
 } zend_ffi_callback_data;
 
 static void zend_ffi_callback_hash_dtor(zval *zv) /* {{{ */
@@ -2159,7 +2159,7 @@ static zend_result zend_ffi_cdata_get_closure(zend_object *obj, zend_class_entry
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);
 	} else {
-		func = ecalloc(sizeof(zend_internal_function), 1);
+		func = ecalloc(1, sizeof(zend_internal_function));
 	}
 	func->type = ZEND_INTERNAL_FUNCTION;
 	func->common.arg_flags[0] = 0;
@@ -2912,7 +2912,7 @@ static zend_function *zend_ffi_get_func(zend_object **obj, zend_string *name, co
 	if (EXPECTED(EG(trampoline).common.function_name == NULL)) {
 		func = &EG(trampoline);
 	} else {
-		func = ecalloc(sizeof(zend_internal_function), 1);
+		func = ecalloc(1, sizeof(zend_internal_function));
 	}
 	func->common.type = ZEND_INTERNAL_FUNCTION;
 	func->common.arg_flags[0] = 0;
@@ -3283,7 +3283,11 @@ static zend_ffi *zend_ffi_load(const char *filename, bool preload) /* {{{ */
 
 	code_size = buf.st_size;
 	code = emalloc(code_size + 1);
-	fd = open(filename, O_RDONLY, 0);
+	int open_flags = O_RDONLY;
+#ifdef PHP_WIN32
+	open_flags |= _O_BINARY;
+#endif
+	fd = open(filename, open_flags, 0);
 	if (fd < 0 || read(fd, code, code_size) != code_size) {
 		if (preload) {
 			zend_error(E_WARNING, "FFI: Failed pre-loading '%s', cannot read_file", filename);
@@ -3579,7 +3583,7 @@ ZEND_METHOD(FFI, scope) /* {{{ */
 }
 /* }}} */
 
-static void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl) /* {{{ */
+void zend_ffi_cleanup_dcl(zend_ffi_dcl *dcl) /* {{{ */
 {
 	if (dcl) {
 		zend_ffi_type_dtor(dcl->type);

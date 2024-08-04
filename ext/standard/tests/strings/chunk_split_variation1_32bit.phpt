@@ -17,4 +17,4 @@ var_dump(chunk_split($a,$b,$c));
 --EXPECTF--
 *** Testing chunk_split() : unexpected large 'end' string argument variation 1 ***
 
-Fatal error: %rAllowed memory size of %d bytes exhausted%s\(tried to allocate %d bytes\)|Possible integer overflow in memory allocation \(4294901777 \+ 2097152\)%r in %s on line %d
+Fatal error: %rAllowed memory size of %d bytes exhausted%s\(tried to allocate %d bytes\)|Possible integer overflow in memory allocation \(4294901777 \+ %d\)%r in %s on line %d

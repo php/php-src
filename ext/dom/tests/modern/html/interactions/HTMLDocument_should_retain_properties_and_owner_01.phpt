@@ -1,21 +1,21 @@
 --TEST--
-DOM\HTMLDocument should retain properties and ownerDocument relation 01
+Dom\HTMLDocument should retain properties and ownerDocument relation 01
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-class MyElement extends DOM\Element {}
+class MyElement extends Dom\HTMLElement {}
 
-$dom = DOM\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
-$dom->registerNodeClass("DOM\\Element", "MyElement");
+$dom = Dom\HTMLDocument::createFromString("<p>foo</p>", LIBXML_NOERROR);
+$dom->registerNodeClass("Dom\\HTMLElement", "MyElement");
 
 // Destroy reference to the DOM
 $child = $dom->documentElement;
 unset($dom);
 
 // Regain reference using the ownerDocument property
-// Should be a DOM\HTMLDocument
+// Should be a Dom\HTMLDocument
 $dom = $child->ownerDocument;
 var_dump($dom);
 // Test if property is preserved (any random doc_props property will do)
@@ -23,7 +23,7 @@ var_dump(get_class($dom->getElementsByTagName("p")->item(0)));
 
 ?>
 --EXPECT--
-object(DOM\HTMLDocument)#1 (25) {
+object(Dom\HTMLDocument)#1 (28) {
   ["implementation"]=>
   string(22) "(object value omitted)"
   ["URL"]=>
@@ -46,6 +46,12 @@ object(DOM\HTMLDocument)#1 (25) {
   string(22) "(object value omitted)"
   ["childElementCount"]=>
   int(1)
+  ["body"]=>
+  string(22) "(object value omitted)"
+  ["head"]=>
+  string(22) "(object value omitted)"
+  ["title"]=>
+  string(0) ""
   ["nodeType"]=>
   int(13)
   ["nodeName"]=>

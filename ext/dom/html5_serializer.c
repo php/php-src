@@ -15,7 +15,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -196,13 +196,21 @@ static zend_result dom_html5_serialize_element_start(dom_html5_serialize_context
 				TRY(ctx->write_string(ctx->application_data, (const char *) attr->name));
 			}
 		}
+
 		TRY(ctx->write_string_len(ctx->application_data, "=\"", strlen("=\"")));
-		xmlChar *content = xmlNodeGetContent((const xmlNode *) attr);
-		if (content != NULL) {
-			zend_result result = dom_html5_escape_string(ctx, (const char *) content, true);
-			xmlFree(content);
-			TRY(result);
+
+		for (xmlNodePtr child = attr->children; child != NULL; child = child->next) {
+			if (child->type == XML_TEXT_NODE) {
+				if (child->content != NULL) {
+					TRY(dom_html5_escape_string(ctx, (const char *) child->content, true));
+				}
+			} else if (child->type == XML_ENTITY_REF_NODE) {
+				TRY(ctx->write_string_len(ctx->application_data, "&", strlen("&")));
+				TRY(dom_html5_escape_string(ctx, (const char *) child->name, true));
+				TRY(ctx->write_string_len(ctx->application_data, ";", strlen(";")));
+			}
 		}
+
 		TRY(ctx->write_string_len(ctx->application_data, "\"", strlen("\"")));
 	}
 
@@ -281,14 +289,26 @@ static zend_result dom_html5_serialize_node(dom_html5_serialize_context *ctx, co
 
 			case XML_ELEMENT_NODE: {
 				TRY(dom_html5_serialize_element_start(ctx, node));
-				if (node->children) {
+				const xmlNode *children = node->children;
+				if (php_dom_ns_is_fast(node, php_dom_ns_is_html_magic_token) && xmlStrEqual(node->name, BAD_CAST "template")) {
+					children = php_dom_retrieve_templated_content(ctx->private_data, node);
+				}
+				if (children) {
 					if (!dom_html5_serializes_as_void(node)) {
-						node = node->children;
+						node = children;
 						continue;
 					}
 				} else {
 					/* Not descended, so wouldn't put the closing tag as it's normally only done when going back upwards. */
 					TRY(dom_html5_serialize_element_end(ctx, node));
+				}
+				break;
+			}
+
+			case XML_DOCUMENT_FRAG_NODE: {
+				if (node->children) {
+					node = node->children;
+					continue;
 				}
 				break;
 			}
@@ -338,10 +358,15 @@ zend_result dom_html5_serialize(dom_html5_serialize_context *ctx, const xmlNode 
 	}
 
 	/* Step 2 not needed because we're not using a string to store the serialized data */
-	/* Step 3 not needed because we don't support template contents yet */
+
+	/* Step 3. If the node is a template element, then let the node instead be the template element's template contents (a DocumentFragment node). */
+	xmlNodePtr children = php_dom_retrieve_templated_content(ctx->private_data, node);
+	if (!children) {
+		children = node->children;
+	}
 
 	/* Step 4 */
-	return dom_html5_serialize_node(ctx, node->children, node);
+	return dom_html5_serialize_node(ctx, children, node);
 }
 
 /* Variant on the above that is equivalent to the "outer HTML". */

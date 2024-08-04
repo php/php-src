@@ -45,7 +45,11 @@ echo dba_fetch("key2", $db_file1), "\n";
 echo "Test 5 - close 2nd resource\n";
 dba_close($db_file2);
 var_dump($db_file1);
-var_dump($db_file2);
+try {
+    dba_exists("key1", $db_file2);
+} catch (Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 echo "Test 6 - query after closing 2nd resource\n";
 echo dba_fetch("key1", $db_file1), "\n";
@@ -69,8 +73,9 @@ Test 4 - fetch both rows from first resource
 This is a test insert 1
 This is a test insert 2
 Test 5 - close 2nd resource
-resource(%d) of type (dba persistent)
-resource(%d) of type (Unknown)
+object(Dba\Connection)#%d (%d) {
+}
+DBA connection has already been closed
 Test 6 - query after closing 2nd resource
 This is a test insert 1
 This is a test insert 2

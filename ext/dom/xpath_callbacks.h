@@ -17,8 +17,6 @@
 #ifndef PHP_DOM_XPATH_CALLBACKS_H
 #define PHP_DOM_XPATH_CALLBACKS_H
 
-#if defined(HAVE_LIBXML) && defined(HAVE_DOM)
-
 #include <libxml/xpathInternals.h>
 #include "xml_common.h"
 
@@ -64,5 +62,4 @@ PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_update_single_method_handler(
 PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_php_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory);
 PHP_DOM_EXPORT zend_result php_dom_xpath_callbacks_call_custom_ns(php_dom_xpath_callbacks *xpath_callbacks, xmlXPathParserContextPtr ctxt, int num_args, php_dom_xpath_nodeset_evaluation_mode evaluation_mode, dom_object *intern, php_dom_xpath_callbacks_proxy_factory proxy_factory);
 
-#endif
 #endif

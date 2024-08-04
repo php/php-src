@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 9c0f01839a287d394b78b0dfd37b278a59d1b366 */
+ * Stub hash: b0fe91da9b0469b44a9647b774b9b00498592e30 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hash, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_STRING, 0)
@@ -133,6 +133,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_HashContext___unserialize,
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_HashContext___debugInfo arginfo_hash_algos
+
 ZEND_FUNCTION(hash);
 ZEND_FUNCTION(hash_file);
 ZEND_FUNCTION(hash_hmac);
@@ -166,6 +168,7 @@ ZEND_FUNCTION(mhash);
 ZEND_METHOD(HashContext, __construct);
 ZEND_METHOD(HashContext, __serialize);
 ZEND_METHOD(HashContext, __unserialize);
+ZEND_METHOD(HashContext, __debugInfo);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash, arginfo_hash)
@@ -205,6 +208,7 @@ static const zend_function_entry class_HashContext_methods[] = {
 	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)
 	ZEND_ME(HashContext, __serialize, arginfo_class_HashContext___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(HashContext, __unserialize, arginfo_class_HashContext___unserialize, ZEND_ACC_PUBLIC)
+	ZEND_ME(HashContext, __debugInfo, arginfo_class_HashContext___debugInfo, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 
@@ -226,6 +230,51 @@ static void register_hash_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_equals", sizeof("hash_equals") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "hash_hkdf", sizeof("hash_hkdf") - 1), 1, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(PHP_MHASH_BC)
+
+	zend_attribute *attribute_Deprecated_func_mhash_get_block_size_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_block_size", sizeof("mhash_get_block_size") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_mhash_get_block_size_0_arg0;
+	zend_string *attribute_Deprecated_func_mhash_get_block_size_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_get_block_size_0_arg0, attribute_Deprecated_func_mhash_get_block_size_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_get_block_size_0->args[0].value, &attribute_Deprecated_func_mhash_get_block_size_0_arg0);
+	attribute_Deprecated_func_mhash_get_block_size_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_attribute *attribute_Deprecated_func_mhash_get_hash_name_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_hash_name", sizeof("mhash_get_hash_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_mhash_get_hash_name_0_arg0;
+	zend_string *attribute_Deprecated_func_mhash_get_hash_name_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_get_hash_name_0_arg0, attribute_Deprecated_func_mhash_get_hash_name_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_get_hash_name_0->args[0].value, &attribute_Deprecated_func_mhash_get_hash_name_0_arg0);
+	attribute_Deprecated_func_mhash_get_hash_name_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_attribute *attribute_Deprecated_func_mhash_keygen_s2k_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_keygen_s2k", sizeof("mhash_keygen_s2k") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_mhash_keygen_s2k_0_arg0;
+	zend_string *attribute_Deprecated_func_mhash_keygen_s2k_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_keygen_s2k_0_arg0, attribute_Deprecated_func_mhash_keygen_s2k_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].value, &attribute_Deprecated_func_mhash_keygen_s2k_0_arg0);
+	attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_attribute *attribute_Deprecated_func_mhash_count_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_count", sizeof("mhash_count") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_mhash_count_0_arg0;
+	zend_string *attribute_Deprecated_func_mhash_count_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_count_0_arg0, attribute_Deprecated_func_mhash_count_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_count_0->args[0].value, &attribute_Deprecated_func_mhash_count_0_arg0);
+	attribute_Deprecated_func_mhash_count_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+#endif
+#if defined(PHP_MHASH_BC)
+
+	zend_attribute *attribute_Deprecated_func_mhash_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash", sizeof("mhash") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_mhash_0_arg0;
+	zend_string *attribute_Deprecated_func_mhash_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mhash_0_arg0, attribute_Deprecated_func_mhash_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_0->args[0].value, &attribute_Deprecated_func_mhash_0_arg0);
+	attribute_Deprecated_func_mhash_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+#endif
 }
 
 static zend_class_entry *register_class_HashContext(void)

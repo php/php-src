@@ -777,14 +777,16 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
     // TODO: Implement support for fast JIT ZTS code ???
 	return 0;
 #elif defined(__x86_64__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
-	!defined(__OpenBSD__) && !defined(__MUSL__) && !defined(__HAIKU__)
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__) && \
+	!defined(__HAIKU__)
 	size_t ret;
 
 	asm ("movq _tsrm_ls_cache@gottpoff(%%rip),%0"
           : "=r" (ret));
 	return ret;
 #elif defined(__i386__) && defined(__GNUC__) && !defined(__FreeBSD__) && \
-	!defined(__OpenBSD__) && !defined(__MUSL__) && !defined(__HAIKU__)
+	!defined(__NetBSD__) && !defined(__OpenBSD__) && !defined(__MUSL__) && \
+	!defined(__HAIKU__)
 	size_t ret;
 
 	asm ("leal _tsrm_ls_cache@ntpoff,%0"
@@ -798,11 +800,20 @@ TSRM_API size_t tsrm_get_ls_cache_tcb_offset(void)
 	asm("adrp %0, #__tsrm_ls_cache@TLVPPAGE\n\t"
 	    "ldr %0, [%0, #__tsrm_ls_cache@TLVPPAGEOFF]"
 	     : "=r" (ret));
-# else
+# elif defined(TSRM_TLS_MODEL_DEFAULT)
+	/* Surplus Static TLS space isn't guaranteed. */
+	ret = 0;
+# elif defined(TSRM_TLS_MODEL_INITIAL_EXEC)
+	asm("adrp %0, :gottprel:_tsrm_ls_cache\n\t"
+		"ldr %0, [%0, #:gottprel_lo12:_tsrm_ls_cache]"
+		: "=r" (ret));
+# elif defined(TSRM_TLS_MODEL_LOCAL_EXEC)
 	asm("mov %0, xzr\n\t"
 	    "add %0, %0, #:tprel_hi12:_tsrm_ls_cache, lsl #12\n\t"
 	    "add %0, %0, #:tprel_lo12_nc:_tsrm_ls_cache"
 	     : "=r" (ret));
+# else
+#  error "TSRM TLS model not set"
 # endif
 	return ret;
 #else

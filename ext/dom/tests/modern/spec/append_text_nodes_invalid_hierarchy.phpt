@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 
 try {
     $dom->append("foo", "bar", "baz", $dom);
@@ -19,7 +19,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-var_dump($dom->saveHTML());
+var_dump($dom->saveHtml());
 
 ?>
 --EXPECT--

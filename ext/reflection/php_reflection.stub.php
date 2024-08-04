@@ -127,8 +127,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract
 
     /**
      * @tentative-return-type
-     * @deprecated ReflectionFunction can no longer be constructed for disabled functions
      */
+    #[\Deprecated(since: '8.0', message: "as ReflectionFunction can no longer be constructed for disabled functions")]
     public function isDisabled(): bool {}
 
     /** @tentative-return-type */
@@ -163,6 +163,8 @@ final class ReflectionGenerator
 
     /** @tentative-return-type */
     public function getExecutingGenerator(): Generator {}
+
+    public function isClosed(): bool {}
 }
 
 class ReflectionMethod extends ReflectionFunctionAbstract
@@ -421,6 +423,12 @@ class ReflectionObject extends ReflectionClass
     public function __construct(object $object) {}
 }
 
+enum PropertyHookType: string
+{
+    case Get = 'get';
+    case Set = 'set';
+}
+
 /** @not-serializable */
 class ReflectionProperty implements Reflector
 {
@@ -434,6 +442,8 @@ class ReflectionProperty implements Reflector
     public const int IS_PROTECTED = UNKNOWN;
     /** @cvalue ZEND_ACC_PRIVATE */
     public const int IS_PRIVATE = UNKNOWN;
+    /** @cvalue ZEND_ACC_ABSTRACT */
+    public const int IS_ABSTRACT = UNKNOWN;
 
     public string $name;
     public string $class;
@@ -453,6 +463,10 @@ class ReflectionProperty implements Reflector
 
     /** @tentative-return-type */
     public function setValue(mixed $objectOrValue, mixed $value = UNKNOWN): void {}
+
+    public function getRawValue(object $object): mixed {}
+
+    public function setRawValue(object $object, mixed $value): void {}
 
     /** @tentative-return-type */
     public function isInitialized(?object $object = null): bool {}
@@ -474,6 +488,10 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function isDefault(): bool {}
 
+    public function isAbstract(): bool {}
+
+    public function isVirtual(): bool {}
+
     public function isPromoted(): bool {}
 
     /** @tentative-return-type */
@@ -491,6 +509,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function getType(): ?ReflectionType {}
 
+    public function getSettableType(): ?ReflectionType {}
+
     /** @tentative-return-type */
     public function hasType(): bool {}
 
@@ -500,6 +520,11 @@ class ReflectionProperty implements Reflector
     public function getDefaultValue(): mixed {}
 
     public function getAttributes(?string $name = null, int $flags = 0): array {}
+
+    /** @return array<string, ReflectionMethod> */
+    public function getHooks(): array {}
+
+    public function getHook(PropertyHookType $type): ?ReflectionMethod {}
 }
 
 /** @not-serializable */
@@ -554,6 +579,8 @@ class ReflectionClassConstant implements Reflector
 
     public function isEnumCase(): bool {}
 
+    public function isDeprecated(): bool {}
+
     public function hasType(): bool {}
 
     public function getType(): ?ReflectionType {}
@@ -589,8 +616,8 @@ class ReflectionParameter implements Reflector
 
     /**
      * @tentative-return-type
-     * @deprecated Use ReflectionParameter::getType() instead
      */
+    #[\Deprecated(since: '8.0', message: "use ReflectionParameter::getType() instead")]
     public function getClass(): ?ReflectionClass {}
 
     /** @tentative-return-type */
@@ -601,14 +628,14 @@ class ReflectionParameter implements Reflector
 
     /**
      * @tentative-return-type
-     * @deprecated Use ReflectionParameter::getType() instead
      */
+    #[\Deprecated(since: '8.0', message: "use ReflectionParameter::getType() instead")]
     public function isArray(): bool {}
 
     /**
      * @tentative-return-type
-     * @deprecated Use ReflectionParameter::getType() instead
      */
+    #[\Deprecated(since: '8.0', message: "use ReflectionParameter::getType() instead")]
     public function isCallable(): bool {}
 
     /** @tentative-return-type */
@@ -800,10 +827,7 @@ class ReflectionEnumUnitCase extends ReflectionClassConstant
 
     public function getEnum(): ReflectionEnum {}
 
-    /**
-     * @implementation-alias ReflectionClassConstant::getValue
-     * @no-verify
-     */
+    /** @implementation-alias ReflectionClassConstant::getValue */
     public function getValue(): UnitEnum {}
 }
 
@@ -828,4 +852,27 @@ final class ReflectionFiber
     public function getCallable(): callable {}
 
     public function getTrace(int $options = DEBUG_BACKTRACE_PROVIDE_OBJECT): array {}
+}
+
+/**
+ * @strict-properties
+ * @not-serializable
+ */
+final class ReflectionConstant implements Reflector
+{
+    public string $name;
+
+    public function __construct(string $name) {}
+
+    public function getName(): string {}
+
+    public function getNamespaceName(): string {}
+
+    public function getShortName(): string {}
+
+    public function getValue(): mixed {}
+
+    public function isDeprecated(): bool {}
+
+    public function __toString(): string {}
 }

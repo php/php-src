@@ -26,7 +26,7 @@ ZEND_API char zend_system_id[32];
 static PHP_MD5_CTX context;
 static int finalized = 0;
 
-ZEND_API ZEND_RESULT_CODE zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
+ZEND_API zend_result zend_add_system_entropy(const char *module_name, const char *hook_name, const void *data, size_t size)
 {
 	if (finalized == 0) {
 		PHP_MD5Update(&context, module_name, strlen(module_name));

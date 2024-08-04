@@ -246,9 +246,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 
@@ -259,9 +257,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getRuleStatus)
 {
 	INTLITERATOR_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
 

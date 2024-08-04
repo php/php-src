@@ -33,7 +33,7 @@
 
 #include "ext/standard/basic_functions.h"
 
-#if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
+#if defined(PHP_WIN32) && defined(HAVE_OPENSSL_EXT)
 # include "openssl/applink.c"
 #endif
 
@@ -46,7 +46,7 @@ int phpdbg_startup_run = 0;
 
 static bool phpdbg_booted = 0;
 static bool phpdbg_fully_started = 0;
-bool use_mm_wrappers = 1;
+static bool use_mm_wrappers = 1;
 
 static void php_phpdbg_destroy_bp_file(zval *brake) /* {{{ */
 {
@@ -229,13 +229,13 @@ static PHP_RINIT_FUNCTION(phpdbg) /* {{{ */
 
 	if (zend_vm_kind() != ZEND_VM_KIND_HYBRID) {
 		/* phpdbg cannot work JIT-ed code */
-		zend_string *key = zend_string_init(ZEND_STRL("opcache.jit"), 1);
-		zend_string *value = zend_string_init(ZEND_STRL("off"), 1);
+		zend_string *key = zend_string_init(ZEND_STRL("opcache.jit"), false);
+		zend_string *value = zend_string_init(ZEND_STRL("off"), false);
 
-		zend_alter_ini_entry(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP);
+		zend_alter_ini_entry_ex(key, value, ZEND_INI_SYSTEM, ZEND_INI_STAGE_STARTUP, false);
 
-		zend_string_release(key);
-		zend_string_release(value);
+		zend_string_release_ex(key, false);
+		zend_string_release_ex(value, false);
 	}
 
 	return SUCCESS;
@@ -491,8 +491,8 @@ PHP_FUNCTION(phpdbg_get_executable)
 {
 	HashTable *options = NULL;
 	zval *option_buffer;
-	bool by_function = 0;
-	bool by_opcode = 0;
+	bool by_function = false;
+	bool by_opcode = false;
 	HashTable *insert_ht;
 
 	zend_function *func;
@@ -592,8 +592,8 @@ PHP_FUNCTION(phpdbg_end_oplog)
 
 	HashTable *options = NULL;
 	zval *option_buffer;
-	bool by_function = 0;
-	bool by_opcode = 0;
+	bool by_function = false;
+	bool by_opcode = false;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
 		RETURN_THROWS();
@@ -845,7 +845,7 @@ static void php_sapi_phpdbg_register_vars(zval *track_vars_array) /* {{{ */
 
 static inline size_t php_sapi_phpdbg_ub_write(const char *message, size_t length) /* {{{ */
 {
-	return phpdbg_script(P_STDOUT, "%.*s", (int) length, message);
+	return phpdbg_process_print(PHPDBG_G(io)[PHPDBG_STDOUT].fd, P_STDOUT, message, (int) length);
 } /* }}} */
 
 /* beginning of struct, see main/streams/plain_wrapper.c line 111 */
@@ -1046,7 +1046,7 @@ static inline void phpdbg_sigint_handler(int signo) /* {{{ */
 } /* }}} */
 
 #ifndef _WIN32
-void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
+static void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 {
 	int is_handled = FAILURE;
 
@@ -1066,7 +1066,7 @@ void phpdbg_signal_handler(int sig, siginfo_t *info, void *context) /* {{{ */
 } /* }}} */
 
 
-void phpdbg_sighup_handler(int sig) /* {{{ */
+static ZEND_NORETURN void phpdbg_sighup_handler(int sig) /* {{{ */
 {
 	exit(0);
 } /* }}} */
@@ -1154,9 +1154,9 @@ int main(int argc, char **argv) /* {{{ */
 
 #ifdef PHP_WIN32
 	_fmode = _O_BINARY;                 /* sets default for file streams to binary */
-	setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
-	setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
-	setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
+	_setmode(_fileno(stdin), O_BINARY);  /* make the stdio mode be binary */
+	_setmode(_fileno(stdout), O_BINARY); /* make the stdio mode be binary */
+	_setmode(_fileno(stderr), O_BINARY); /* make the stdio mode be binary */
 #else
 	struct sigaction signal_struct;
 	signal_struct.sa_sigaction = phpdbg_signal_handler;
@@ -1627,7 +1627,7 @@ phpdbg_main:
 
 #ifdef _WIN32
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
-		phpdbg_error("Access violation (Segmentation fault) encountered\ntrying to abort cleanly...");
+		phpdbg_error("Segmentation fault encountered\ntrying to abort cleanly...");
 	}
 #endif
 phpdbg_out:
@@ -1672,9 +1672,10 @@ phpdbg_out:
 
 		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
-			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
+			size_t size = data->len + 2;
+			backup_phpdbg_compile = zend_string_alloc(size, 1);
 			GC_MAKE_PERSISTENT_LOCAL(backup_phpdbg_compile);
-			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
+			snprintf(ZSTR_VAL(backup_phpdbg_compile), size + 1, "?>%.*s", (int) data->len, data->buf);
 		}
 
 		zend_try {

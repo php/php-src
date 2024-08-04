@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::appendChild() invalid parent
+Dom\Node::appendChild() invalid parent
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createEmpty();
+$dom = Dom\XMLDocument::createEmpty();
 
 $text = $dom->createTextNode('Hello World');
 $cdata = $dom->createCDATASection('Hello World');

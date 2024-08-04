@@ -42,9 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 /* The current PCRE version information. */
 
 #define PCRE2_MAJOR           10
-#define PCRE2_MINOR           43
+#define PCRE2_MINOR           44
 #define PCRE2_PRERELEASE      
-#define PCRE2_DATE            2024-02-16
+#define PCRE2_DATE            2024-06-07
 
 /* When an application links to a PCRE DLL in Windows, the symbols that are
 imported have to be identified as such. When building PCRE2, the appropriate
@@ -604,6 +604,8 @@ PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_max_pattern_length(pcre2_compile_context *, PCRE2_SIZE); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
+  pcre2_set_max_pattern_compiled_length(pcre2_compile_context *, PCRE2_SIZE); \
+PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_max_varlookbehind(pcre2_compile_context *, uint32_t); \
 PCRE2_EXP_DECL int PCRE2_CALL_CONVENTION \
   pcre2_set_newline(pcre2_compile_context *, uint32_t); \
@@ -901,6 +903,7 @@ pcre2_compile are called by application code. */
 #define pcre2_set_match_limit                 PCRE2_SUFFIX(pcre2_set_match_limit_)
 #define pcre2_set_max_varlookbehind           PCRE2_SUFFIX(pcre2_set_max_varlookbehind_)
 #define pcre2_set_max_pattern_length          PCRE2_SUFFIX(pcre2_set_max_pattern_length_)
+#define pcre2_set_max_pattern_compiled_length PCRE2_SUFFIX(pcre2_set_max_pattern_compiled_length_)
 #define pcre2_set_newline                     PCRE2_SUFFIX(pcre2_set_newline_)
 #define pcre2_set_parens_nest_limit           PCRE2_SUFFIX(pcre2_set_parens_nest_limit_)
 #define pcre2_set_offset_limit                PCRE2_SUFFIX(pcre2_set_offset_limit_)

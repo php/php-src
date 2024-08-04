@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 2094d8e51f7bfd0fd7b61060786a1e8ae182b0d3 */
+ * Stub hash: 504f4172ac1d64535719234888400063eb37361b */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -336,6 +336,20 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_filter, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_find, 0, 2, IS_MIXED, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_array_find_key arginfo_array_find
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_any, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_array_all arginfo_array_any
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_map, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
@@ -475,7 +489,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_php_strip_whitespace, 0, 1, IS_S
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_highlight_string, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_highlight_string, 0, 1, MAY_BE_STRING|MAY_BE_TRUE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
@@ -510,7 +524,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_include_path arginfo_ob_get_flush
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY_BE_TRUE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
@@ -660,7 +674,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_net_get_interfaces, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 #endif
@@ -1613,7 +1627,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_round, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_MASK(0, num, MAY_BE_LONG|MAY_BE_DOUBLE, NULL)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, precision, IS_LONG, 0, "0")
-	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "PHP_ROUND_HALF_UP")
+	ZEND_ARG_OBJ_TYPE_MASK(0, mode, RoundingMode, MAY_BE_LONG, "RoundingMode::HalfAwayFromZero")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sin, 0, 1, IS_DOUBLE, 0)
@@ -1731,6 +1745,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_fmod, 0, 2, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_fdiv arginfo_fmod
+
+#define arginfo_fpow arginfo_fmod
 
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_microtime, 0, 0, MAY_BE_STRING|MAY_BE_DOUBLE)
@@ -2104,18 +2120,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, context, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, StreamBucket, 1)
 	ZEND_ARG_INFO(0, brigade)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_prepend, 0, 2, IS_VOID, 0)
 	ZEND_ARG_INFO(0, brigade)
-	ZEND_ARG_TYPE_INFO(0, bucket, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_INFO(0, bucket, StreamBucket, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_stream_bucket_append arginfo_stream_bucket_prepend
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_new, 0, 2, IS_OBJECT, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_stream_bucket_new, 0, 2, StreamBucket, 0)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_TYPE_INFO(0, buffer, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -2403,6 +2419,10 @@ ZEND_FUNCTION(array_sum);
 ZEND_FUNCTION(array_product);
 ZEND_FUNCTION(array_reduce);
 ZEND_FUNCTION(array_filter);
+ZEND_FUNCTION(array_find);
+ZEND_FUNCTION(array_find_key);
+ZEND_FUNCTION(array_any);
+ZEND_FUNCTION(array_all);
 ZEND_FUNCTION(array_map);
 ZEND_FUNCTION(array_key_exists);
 ZEND_FUNCTION(array_chunk);
@@ -2496,7 +2516,7 @@ ZEND_FUNCTION(dns_get_record);
 #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 ZEND_FUNCTION(dns_get_mx);
 #endif
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 ZEND_FUNCTION(net_get_interfaces);
 #endif
 #if defined(HAVE_FTOK)
@@ -2789,6 +2809,7 @@ ZEND_FUNCTION(base_convert);
 ZEND_FUNCTION(number_format);
 ZEND_FUNCTION(fmod);
 ZEND_FUNCTION(fdiv);
+ZEND_FUNCTION(fpow);
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
 #endif
@@ -3027,6 +3048,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("array_product", zif_array_product, arginfo_array_product, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_FE(array_reduce, arginfo_array_reduce)
 	ZEND_FE(array_filter, arginfo_array_filter)
+	ZEND_FE(array_find, arginfo_array_find)
+	ZEND_FE(array_find_key, arginfo_array_find_key)
+	ZEND_FE(array_any, arginfo_array_any)
+	ZEND_FE(array_all, arginfo_array_all)
 	ZEND_FE(array_map, arginfo_array_map)
 	ZEND_RAW_FENTRY("array_key_exists", zif_array_key_exists, arginfo_array_key_exists, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("key_exists", zif_array_key_exists, arginfo_key_exists, 0, NULL, NULL)
@@ -3129,7 +3154,7 @@ static const zend_function_entry ext_functions[] = {
 #if (defined(PHP_WIN32) || defined(HAVE_DNS_SEARCH_FUNC))
 	ZEND_RAW_FENTRY("getmxrr", zif_dns_get_mx, arginfo_getmxrr, 0, NULL, NULL)
 #endif
-#if (defined(PHP_WIN32) || HAVE_GETIFADDRS || defined(__PASE__))
+#if (defined(PHP_WIN32) || defined(HAVE_GETIFADDRS) || defined(__PASE__))
 	ZEND_FE(net_get_interfaces, arginfo_net_get_interfaces)
 #endif
 #if defined(HAVE_FTOK)
@@ -3428,6 +3453,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_RAW_FENTRY("number_format", zif_number_format, arginfo_number_format, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fmod", zif_fmod, arginfo_fmod, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("fdiv", zif_fdiv, arginfo_fdiv, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("fpow", zif_fpow, arginfo_fpow, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(microtime, arginfo_microtime)
 #endif
@@ -3589,6 +3615,10 @@ static const zend_function_entry class_AssertionError_methods[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_RoundingMode_methods[] = {
+	ZEND_FE_END
+};
+
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", PHP_EXTR_OVERWRITE, CONST_PERSISTENT);
@@ -3678,10 +3708,6 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_DOWN", PHP_ROUND_HALF_DOWN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_EVEN", PHP_ROUND_HALF_EVEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PHP_ROUND_HALF_ODD", PHP_ROUND_HALF_ODD, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_CEILING", PHP_ROUND_CEILING, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_FLOOR", PHP_ROUND_FLOOR, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_TOWARD_ZERO", PHP_ROUND_TOWARD_ZERO, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("PHP_ROUND_AWAY_FROM_ZERO", PHP_ROUND_AWAY_FROM_ZERO, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_SALT_LENGTH", PHP_MAX_SALT_LEN, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_STD_DES", 1, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("CRYPT_EXT_DES", 1, CONST_PERSISTENT);
@@ -4096,6 +4122,51 @@ static void register_basic_functions_symbols(int module_number)
 
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "crypt", sizeof("crypt") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+#if defined(HAVE_STRPTIME)
+
+	zend_attribute *attribute_Deprecated_func_strptime_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "strptime", sizeof("strptime") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_strptime_0_arg0;
+	zend_string *attribute_Deprecated_func_strptime_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg0, attribute_Deprecated_func_strptime_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[0].value, &attribute_Deprecated_func_strptime_0_arg0);
+	attribute_Deprecated_func_strptime_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_strptime_0_arg1;
+	zend_string *attribute_Deprecated_func_strptime_0_arg1_str = zend_string_init("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead", strlen("use date_parse_from_format() (for locale-independent parsing), or IntlDateFormatter::parse() (for locale-dependent parsing) instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_strptime_0_arg1, attribute_Deprecated_func_strptime_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_strptime_0->args[1].value, &attribute_Deprecated_func_strptime_0_arg1);
+	attribute_Deprecated_func_strptime_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+#endif
+
+	zend_attribute *attribute_Deprecated_func_assert_options_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "assert_options", sizeof("assert_options") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zval attribute_Deprecated_func_assert_options_0_arg0;
+	zend_string *attribute_Deprecated_func_assert_options_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_assert_options_0_arg0, attribute_Deprecated_func_assert_options_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_assert_options_0->args[0].value, &attribute_Deprecated_func_assert_options_0_arg0);
+	attribute_Deprecated_func_assert_options_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+
+	zend_attribute *attribute_Deprecated_func_utf8_encode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_encode", sizeof("utf8_encode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_utf8_encode_0_arg0;
+	zend_string *attribute_Deprecated_func_utf8_encode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg0, attribute_Deprecated_func_utf8_encode_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[0].value, &attribute_Deprecated_func_utf8_encode_0_arg0);
+	attribute_Deprecated_func_utf8_encode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_utf8_encode_0_arg1;
+	zend_string *attribute_Deprecated_func_utf8_encode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_encode_0_arg1, attribute_Deprecated_func_utf8_encode_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_encode_0->args[1].value, &attribute_Deprecated_func_utf8_encode_0_arg1);
+	attribute_Deprecated_func_utf8_encode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_utf8_decode_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "utf8_decode", sizeof("utf8_decode") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_utf8_decode_0_arg0;
+	zend_string *attribute_Deprecated_func_utf8_decode_0_arg0_str = zend_string_init("8.2", strlen("8.2"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg0, attribute_Deprecated_func_utf8_decode_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[0].value, &attribute_Deprecated_func_utf8_decode_0_arg0);
+	attribute_Deprecated_func_utf8_decode_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_utf8_decode_0_arg1;
+	zend_string *attribute_Deprecated_func_utf8_decode_0_arg1_str = zend_string_init("visit the php.net documentation for various alternatives", strlen("visit the php.net documentation for various alternatives"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_utf8_decode_0_arg1, attribute_Deprecated_func_utf8_decode_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_utf8_decode_0->args[1].value, &attribute_Deprecated_func_utf8_decode_0_arg1);
+	attribute_Deprecated_func_utf8_decode_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
@@ -4123,6 +4194,29 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+
+	return class_entry;
+}
+
+static zend_class_entry *register_class_RoundingMode(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("RoundingMode", IS_UNDEF, class_RoundingMode_methods);
+
+	zend_enum_add_case_cstr(class_entry, "HalfAwayFromZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "HalfTowardsZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "HalfEven", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "HalfOdd", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "TowardsZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "AwayFromZero", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "NegativeInfinity", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "PositiveInfinity", NULL);
 
 	return class_entry;
 }

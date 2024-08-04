@@ -1500,7 +1500,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 			}
 			ZEND_FALLTHROUGH;
 		default:
-			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid value (must return a string)", ZSTR_VAL(ce->name));
+			zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid value (must return a string, a stream, or an SplFileInfo object)", ZSTR_VAL(ce->name));
 			return ZEND_HASH_APPLY_STOP;
 	}
 
@@ -3540,9 +3540,7 @@ PHP_METHOD(Phar, offsetGet)
 {
 	char *fname, *error;
 	size_t fname_len;
-	zval zfname;
 	phar_entry_info *entry;
-	zend_string *sfname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &fname, &fname_len) == FAILURE) {
 		RETURN_THROWS();
@@ -3574,10 +3572,16 @@ PHP_METHOD(Phar, offsetGet)
 			efree(entry);
 		}
 
-		sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, fname);
+		zend_string *sfname = strpprintf(0, "phar://%s/%s", phar_obj->archive->fname, fname);
+		zval zfname;
 		ZVAL_NEW_STR(&zfname, sfname);
-		spl_instantiate_arg_ex1(phar_obj->spl.info_class, return_value, &zfname);
+
+		/* Instantiate object and call constructor */
+		zend_result is_initialized = object_init_with_constructor(return_value, phar_obj->spl.info_class, 1, &zfname, NULL);
 		zval_ptr_dtor(&zfname);
+		if (is_initialized == FAILURE) {
+			RETURN_THROWS();
+		}
 	}
 }
 /* }}} */

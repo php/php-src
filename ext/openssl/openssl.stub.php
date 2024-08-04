@@ -331,6 +331,28 @@ const OPENSSL_KEYTYPE_DH = UNKNOWN;
  */
 const OPENSSL_KEYTYPE_EC = UNKNOWN;
 #endif
+#if PHP_OPENSSL_API_VERSION >= 0x30000
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_X25519
+ */
+const OPENSSL_KEYTYPE_X25519 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_ED25519
+ */
+const OPENSSL_KEYTYPE_ED25519 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_X448
+ */
+const OPENSSL_KEYTYPE_X448 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue OPENSSL_KEYTYPE_ED448
+ */
+const OPENSSL_KEYTYPE_ED448 = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -421,7 +443,7 @@ function openssl_x509_checkpurpose(OpenSSLCertificate|string $certificate, int $
 
 function openssl_x509_read(OpenSSLCertificate|string $certificate): OpenSSLCertificate|false {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLCertificate objects are freed automatically')]
 function openssl_x509_free(OpenSSLCertificate $certificate): void {}
 
 /**
@@ -485,15 +507,13 @@ function openssl_pkey_get_public($public_key): OpenSSLAsymmetricKey|false {}
  */
 function openssl_get_publickey($public_key): OpenSSLAsymmetricKey|false {}
 
-/**
- * @deprecated
- */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLAsymmetricKey objects are freed automatically')]
 function openssl_pkey_free(OpenSSLAsymmetricKey $key): void {}
 
 /**
  * @alias openssl_pkey_free
- * @deprecated
  */
+#[\Deprecated(since: '8.0', message: 'as OpenSSLAsymmetricKey objects are freed automatically')]
 function openssl_free_key(OpenSSLAsymmetricKey $key): void {}
 
 /**

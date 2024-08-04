@@ -77,9 +77,9 @@ typedef uintptr_t zend_jit_addr;
 		ZEND_ADDR_MEM_ZVAL(ZREG_FP, (opline)->op.var))
 #endif
 
-#define OP_REG_ADDR(opline, type, op, _ssa_op) \
-	((ctx.ra && ssa_op->_ssa_op >= 0 && ctx.ra[ssa_op->_ssa_op].ref) ? \
-		ZEND_ADDR_REG(ssa_op->_ssa_op) : \
+#define OP_REG_ADDR(opline, ssa_op, type, op, _ssa_op) \
+	((ctx.ra && (ssa_op)->_ssa_op >= 0 && ctx.ra[(ssa_op)->_ssa_op].ref) ? \
+		ZEND_ADDR_REG((ssa_op)->_ssa_op) : \
 		OP_ADDR(opline, type, op))
 
 #define OP1_ADDR() \
@@ -92,22 +92,22 @@ typedef uintptr_t zend_jit_addr;
 	OP_ADDR(opline + 1, op1_type, op1)
 
 #define OP1_REG_ADDR() \
-	OP_REG_ADDR(opline, op1_type, op1, op1_use)
+	OP_REG_ADDR(opline, ssa_op, op1_type, op1, op1_use)
 #define OP2_REG_ADDR() \
-	OP_REG_ADDR(opline, op2_type, op2, op2_use)
+	OP_REG_ADDR(opline, ssa_op, op2_type, op2, op2_use)
 #define RES_REG_ADDR() \
-	OP_REG_ADDR(opline, result_type, result, result_def)
+	OP_REG_ADDR(opline, ssa_op, result_type, result, result_def)
 #define OP1_DATA_REG_ADDR() \
-	OP_REG_ADDR(opline + 1, op1_type, op1, op1_use)
+	OP_REG_ADDR(opline + 1, ssa_op + 1, op1_type, op1, op1_use)
 
 #define OP1_DEF_REG_ADDR() \
-	OP_REG_ADDR(opline, op1_type, op1, op1_def)
+	OP_REG_ADDR(opline, ssa_op, op1_type, op1, op1_def)
 #define OP2_DEF_REG_ADDR() \
-	OP_REG_ADDR(opline, op2_type, op2, op2_def)
+	OP_REG_ADDR(opline, ssa_op, op2_type, op2, op2_def)
 #define RES_USE_REG_ADDR() \
-	OP_REG_ADDR(opline, result_type, result, result_use)
+	OP_REG_ADDR(opline, ssa_op, result_type, result, result_use)
 #define OP1_DATA_DEF_REG_ADDR() \
-	OP_REG_ADDR(opline + 1, op1_type, op1, op1_def)
+	OP_REG_ADDR(opline + 1, ssa_op + 1, op1_type, op1, op1_def)
 
 static zend_always_inline bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
 {
@@ -692,7 +692,8 @@ static zend_always_inline bool zend_jit_may_be_polymorphic_call(const zend_op *o
 {
 	if (opline->opcode == ZEND_INIT_FCALL
 	 || opline->opcode == ZEND_INIT_FCALL_BY_NAME
-	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+	 || opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+	 || opline->opcode == ZEND_INIT_PARENT_PROPERTY_HOOK_CALL) {
 		return 0;
 	} else if (opline->opcode == ZEND_INIT_METHOD_CALL
      || opline->opcode == ZEND_INIT_DYNAMIC_CALL) {

@@ -17,7 +17,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <signal.h>
@@ -25,7 +25,6 @@
 #include "php.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php_mysqli.h"
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
@@ -49,7 +48,7 @@ static PHP_GINIT_FUNCTION(mysqli);
 	} \
 }
 
-#define ERROR_ARG_POS(arg_num) (getThis() ? (arg_num-1) : (arg_num))
+#define ERROR_ARG_POS(arg_num) (hasThis() ? (arg_num-1) : (arg_num))
 
 static HashTable classes;
 static zend_object_handlers mysqli_object_handlers;
@@ -731,7 +730,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 	/* TODO: We don't have access to the connection object at this point, so we use low-level
 	 * mysqlnd APIs to access the error information. We should try to pass through the connection
 	 * object instead. */
-	if (MyG(report_mode) & MYSQLI_REPORT_ERROR) {
+	if (MyG(report_mode) & MYSQLI_REPORT_ERROR && result->conn) {
 		MYSQLND_CONN_DATA *conn = result->conn;
 		unsigned error_no = conn->m->get_error_no(conn);
 		if (error_no) {

@@ -1,10 +1,10 @@
 --TEST--
-DOM\Text:splitText() edge case
+Dom\Text:splitText() edge case
 --EXTENSIONS--
 dom
 --FILE--
 <?php
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $text = $dom->createTextNode('Hello World!');
 var_dump($text->splitText(5)->wholeText);
 try {
@@ -20,5 +20,5 @@ try {
 ?>
 --EXPECT--
 string(7) " World!"
-DOM\Text::splitText(): Argument #1 ($offset) must be greater than or equal to 0
+Dom\Text::splitText(): Argument #1 ($offset) must be greater than or equal to 0
 Index Size Error

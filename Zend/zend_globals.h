@@ -41,6 +41,7 @@
 #include "zend_arena.h"
 #include "zend_call_stack.h"
 #include "zend_max_execution_timer.h"
+#include "zend_strtod.h"
 
 /* Define ZTS if you want a thread-safe Zend */
 /*#undef ZTS*/
@@ -193,6 +194,8 @@ struct _zend_executor_globals {
 
 	uint32_t jit_trace_num; /* Used by tracing JIT to reference the currently running trace */
 
+	zend_execute_data *current_observed_frame;
+
 	int ticks_count;
 
 	zend_long precision;
@@ -303,6 +306,8 @@ struct _zend_executor_globals {
 	pid_t pid;
 	struct sigaction oldact;
 #endif
+
+	zend_strtod_state strtod_state;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };

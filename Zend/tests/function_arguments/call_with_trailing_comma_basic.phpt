@@ -58,7 +58,7 @@ $bar(
 unset($foo, $bar,);
 var_dump(isset($foo, $bar,));
 ?>
---EXPECT--
+--EXPECTF--
 foo
 array(2) {
   [0]=>
@@ -87,7 +87,7 @@ array(2) {
   [1]=>
   string(3) "bar"
 }
-{closure}
+{closure:%s:%d}
 array(2) {
   [0]=>
   string(7) "closure"

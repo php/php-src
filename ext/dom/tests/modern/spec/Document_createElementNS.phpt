@@ -10,7 +10,7 @@ require __DIR__ . "/create_element_util.inc";
 
 echo "--- Normal cases ---\n";
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $elements = [];
 
 $elements[] = createElementNS($dom, NULL, "qname", "&hello");

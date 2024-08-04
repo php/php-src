@@ -16,7 +16,7 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -139,11 +139,7 @@ xmlNodePtr php_dom_named_node_map_get_item(dom_nnodemap_object *objmap, zend_lon
 		if ((objmap->nodetype == XML_NOTATION_NODE) ||
 			objmap->nodetype == XML_ENTITY_NODE) {
 			if (objmap->ht) {
-				if (objmap->nodetype == XML_ENTITY_NODE) {
-					itemnode = php_dom_libxml_hash_iter(objmap->ht, index);
-				} else {
-					itemnode = php_dom_libxml_notation_iter(objmap->ht, index);
-				}
+				itemnode = php_dom_libxml_hash_iter(objmap, index);
 			}
 		} else {
 			xmlNodePtr nodep = dom_object_get_node(objmap->baseobj);

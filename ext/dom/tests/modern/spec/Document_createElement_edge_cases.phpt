@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 try {
     $dom->createElement('');
 } catch (DOMException $e) {

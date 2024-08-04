@@ -34,6 +34,6 @@ try {
 }
 ?>
 --EXPECTF--
-Exception: {closure}(): Argument #1 ($a) must be of type A, B given, called in %s on line %d
-Exception: {closure}(): Argument #1 ($a) must be of type A, B given
-Exception: {closure}(): Argument #1 ($a) must be of type A, B given
+Exception: {closure:%s:%d}(): Argument #1 ($a) must be of type A, B given, called in %s on line %d
+Exception: {closure:%s:%d}(): Argument #1 ($a) must be of type A, B given
+Exception: {closure:%s:%d}(): Argument #1 ($a) must be of type A, B given

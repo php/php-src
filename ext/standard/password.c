@@ -181,6 +181,11 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zval *zcost;
 	zend_long cost = PHP_PASSWORD_BCRYPT_COST;
 
+	if (memchr(ZSTR_VAL(password), '\0', ZSTR_LEN(password))) {
+		zend_value_error("Bcrypt password must not contain null character");
+		return NULL;
+	}
+
 	if (options && (zcost = zend_hash_str_find(options, "cost", sizeof("cost")-1)) != NULL) {
 		cost = zval_get_long(zcost);
 	}
@@ -196,9 +201,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	}
 	ZSTR_VAL(salt)[ZSTR_LEN(salt)] = 0;
 
-	hash = zend_string_alloc(ZSTR_LEN(salt) + hash_format_len, 0);
-	sprintf(ZSTR_VAL(hash), "%s%s", hash_format, ZSTR_VAL(salt));
-	ZSTR_VAL(hash)[hash_format_len + ZSTR_LEN(salt)] = 0;
+	hash = zend_string_concat2(hash_format, hash_format_len, ZSTR_VAL(salt), ZSTR_LEN(salt));
 
 	zend_string_release_ex(salt, 0);
 

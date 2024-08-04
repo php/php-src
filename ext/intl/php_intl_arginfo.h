@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: c1adcd8a928af82766ee8c0cd6b20c2f2e9afcc1 */
+ * Stub hash: 7a1b6eb454be08742ba45131de8ec57ec70a88c7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intlcal_create_instance, 0, 0, IntlCalendar, 1)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
@@ -226,7 +226,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_get_strength, 0, 1, IS_
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_set_strength, 0, 2, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_set_strength, 0, 2, IS_TRUE, 0)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_TYPE_INFO(0, strength, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -484,6 +484,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_grapheme_stristr arginfo_grapheme_strstr
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_str_split, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 0, "1")
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_grapheme_extract, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -503,7 +508,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_locale_get_default arginfo_intl_get_error_message
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_set_default, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_set_default, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -901,6 +906,7 @@ ZEND_FUNCTION(grapheme_strripos);
 ZEND_FUNCTION(grapheme_substr);
 ZEND_FUNCTION(grapheme_strstr);
 ZEND_FUNCTION(grapheme_stristr);
+ZEND_FUNCTION(grapheme_str_split);
 ZEND_FUNCTION(grapheme_extract);
 ZEND_FUNCTION(idn_to_ascii);
 ZEND_FUNCTION(idn_to_utf8);
@@ -1093,6 +1099,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(grapheme_substr, arginfo_grapheme_substr)
 	ZEND_FE(grapheme_strstr, arginfo_grapheme_strstr)
 	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
+	ZEND_FE(grapheme_str_split, arginfo_grapheme_str_split)
 	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
 	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
 	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
@@ -1211,6 +1218,31 @@ static void register_php_intl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_INVALID_ACE_LABEL", UIDNA_ERROR_INVALID_ACE_LABEL, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_BIDI", UIDNA_ERROR_BIDI, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_PERSISTENT);
+
+
+	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_intlcal_set_0_arg0;
+	zend_string *attribute_Deprecated_func_intlcal_set_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg0, attribute_Deprecated_func_intlcal_set_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[0].value, &attribute_Deprecated_func_intlcal_set_0_arg0);
+	attribute_Deprecated_func_intlcal_set_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_intlcal_set_0_arg1;
+	zend_string *attribute_Deprecated_func_intlcal_set_0_arg1_str = zend_string_init("use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead", strlen("use IntlCalendar::set(), IntlCalendar::setDate(), or IntlCalendar::setDateTime() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg1, attribute_Deprecated_func_intlcal_set_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[1].value, &attribute_Deprecated_func_intlcal_set_0_arg1);
+	attribute_Deprecated_func_intlcal_set_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg0;
+	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg0, attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].value, &attribute_Deprecated_func_intlgregcal_create_instance_0_arg0);
+	attribute_Deprecated_func_intlgregcal_create_instance_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg1;
+	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str = zend_string_init("use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead", strlen("use IntlGregorianCalendar::__construct(), IntlGregorianCalendar::createFromDate(), or IntlGregorianCalendar::createFromDateTime() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg1, attribute_Deprecated_func_intlgregcal_create_instance_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].value, &attribute_Deprecated_func_intlgregcal_create_instance_0_arg1);
+	attribute_Deprecated_func_intlgregcal_create_instance_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_IntlException(zend_class_entry *class_entry_Exception)

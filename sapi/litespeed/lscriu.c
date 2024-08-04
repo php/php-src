@@ -51,7 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdlib.h>
 
-#if HAVE_UNISTD_H
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 
@@ -60,10 +60,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/stat.h>
 
-#if HAVE_SYS_TYPES_H
-
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-
 #endif
 
 #include <sys/types.h>
@@ -498,7 +496,6 @@ static void LSCRIU_Wait_Dump_Finish_Or_Restored(int pid_parent)
 
 static void LSCRIU_try_checkpoint(int *forked_pid)
 {
-    int iRet;
     pid_t iPid;
     pid_t iPidDump = getpid();
 
@@ -525,7 +522,7 @@ static void LSCRIU_try_checkpoint(int *forked_pid)
         pid_t   iPidParent = getppid();
 
         setsid();
-        iRet = LSCRIU_Native_Dump(iPidDump,
+        (void)LSCRIU_Native_Dump(iPidDump,
                                   s_criu_image_path,
                                   s_fd_native);
         close(s_fd_native);

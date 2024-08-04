@@ -1,5 +1,5 @@
 --TEST--
-DOM\Node::getRootNode()
+Dom\Node::getRootNode()
 --EXTENSIONS--
 dom
 --FILE--
@@ -7,7 +7,7 @@ dom
 
 // Same as DOMNode_getRootNode.phpt but for modern DOM
 
-$dom = DOM\XMLDocument::createFromString('<?xml version="1.0"?><html><body/></html>');
+$dom = Dom\XMLDocument::createFromString('<?xml version="1.0"?><html><body/></html>');
 
 var_dump($dom->documentElement->firstElementChild->getRootNode() === $dom);
 $p = $dom->createElement('p');

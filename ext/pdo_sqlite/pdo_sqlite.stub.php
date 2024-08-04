@@ -2,11 +2,13 @@
 
 /** @generate-class-entries */
 
+namespace Pdo;
+
 /**
  * @strict-properties
  * @not-serializable
  */
-class PdoSqlite extends PDO
+class Sqlite extends \PDO
 {
 #ifdef SQLITE_DETERMINISTIC
     /** @cvalue SQLITE_DETERMINISTIC */
@@ -62,6 +64,6 @@ class PdoSqlite extends PDO
         string $column,
         int $rowid,
         ?string $dbname = "main",
-        int $flags = PdoSqlite::OPEN_READONLY
+        int $flags = \Pdo\Sqlite::OPEN_READONLY
     ) {}
 }

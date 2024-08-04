@@ -16,14 +16,13 @@
 */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
 #include "php_xsl.h"
 #include <libxslt/variables.h>
 #include "ext/libxml/php_libxml.h"
-#include "ext/dom/php_dom.h"
 #include "ext/dom/namespace_compat.h"
 
 
@@ -156,11 +155,6 @@ static void xsl_build_ns_map(xmlHashTablePtr table, xsltStylesheetPtr sheet, php
 					xsl_add_ns_to_map(table, sheet, cur, prefix, ns->href);
 				}
 			}
-
-			if (cur->children != NULL) {
-				cur = cur->children;
-				continue;
-			}
 		}
 
 		cur = php_dom_next_in_tree_order(cur, (const xmlNode *) doc);
@@ -198,7 +192,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	zval *id, *docp = NULL;
 	xmlDoc *doc = NULL, *newdoc = NULL;
 	xsltStylesheetPtr sheetp;
-	int clone_docu = 0;
+	bool clone_docu = false;
 	xmlNode *nodep = NULL;
 	zval *cloneDocu, rv;
 	zend_string *member;
@@ -258,7 +252,7 @@ PHP_METHOD(XSLTProcessor, importStylesheet)
 	cloneDocu = zend_std_read_property(Z_OBJ_P(id), member, BP_VAR_R, NULL, &rv);
 	clone_docu = zend_is_true(cloneDocu);
 	zend_string_release_ex(member, 0);
-	if (clone_docu == 0) {
+	if (!clone_docu) {
 		/* Check if the stylesheet is using xsl:key, if yes, we have to clone the document _always_ before a transformation.
 		 * xsl:key elements may only occur at the top level. Furthermore, all elements at the top level must be in a
 		 * namespace (if not, then the stylesheet is not well-formed and this function will have returned false earlier). */
@@ -301,7 +295,6 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	zend_string *member;
 	FILE *f;
 	int secPrefsError = 0;
-	int secPrefsValue;
 	xsltSecurityPrefsPtr secPrefs = NULL;
 
 	node = php_libxml_import_node(docp);
@@ -324,10 +317,10 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	}
 
 	if (intern->profiling) {
-		if (php_check_open_basedir(intern->profiling)) {
+		if (php_check_open_basedir(ZSTR_VAL(intern->profiling))) {
 			f = NULL;
 		} else {
-			f = VCWD_FOPEN(intern->profiling, "w");
+			f = VCWD_FOPEN(ZSTR_VAL(intern->profiling), "w");
 		}
 	} else {
 		f = NULL;
@@ -360,7 +353,15 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	ctxt->xinclude = zend_is_true(doXInclude);
 	zend_string_release_ex(member, 0);
 
-	secPrefsValue = intern->securityPrefs;
+	zval *max_template_depth = xsl_prop_max_template_depth(Z_OBJ_P(id));
+	ZEND_ASSERT(Z_TYPE_P(max_template_depth) == IS_LONG);
+	ctxt->maxTemplateDepth = Z_LVAL_P(max_template_depth);
+
+	zval *max_template_vars = xsl_prop_max_template_vars(Z_OBJ_P(id));
+	ZEND_ASSERT(Z_TYPE_P(max_template_vars) == IS_LONG);
+	ctxt->maxTemplateVars = Z_LVAL_P(max_template_vars);
+
+	zend_long secPrefsValue = intern->securityPrefs;
 
 	/* if securityPrefs is set to NONE, we don't have to do any checks, but otherwise... */
 	if (secPrefsValue != XSL_SECPREF_NONE) {
@@ -706,11 +707,12 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctionNS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_string_equals_literal(namespace, "http://php.net/xsl")) {
+		zend_release_fcall_info_cache(&fcc);
 		zend_argument_value_error(1, "must not be \"http://php.net/xsl\" because it is reserved by PHP");
 		RETURN_THROWS();
 	}
 
-	php_dom_xpath_callbacks_update_single_method_handler(
+	if (php_dom_xpath_callbacks_update_single_method_handler(
 		&intern->xpath_callbacks,
 		NULL,
 		namespace,
@@ -718,7 +720,9 @@ PHP_METHOD(XSLTProcessor, registerPHPFunctionNS)
 		&fcc,
 		PHP_DOM_XPATH_CALLBACK_NAME_VALIDATE_NCNAME,
 		NULL
-	);
+	) != SUCCESS) {
+		zend_release_fcall_info_cache(&fcc);
+	}
 }
 
 /* {{{ */
@@ -726,19 +730,18 @@ PHP_METHOD(XSLTProcessor, setProfiling)
 {
 	zval *id = ZEND_THIS;
 	xsl_object *intern;
-	char *filename = NULL;
-	size_t filename_len;
+	zend_string *filename = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &filename, &filename_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P!", &filename) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	intern = Z_XSL_P(id);
 	if (intern->profiling) {
-		efree(intern->profiling);
+		zend_string_release(intern->profiling);
 	}
 	if (filename != NULL) {
-		intern->profiling = estrndup(filename, filename_len);
+		intern->profiling = zend_string_copy(filename);
 	} else {
 		intern->profiling = NULL;
 	}

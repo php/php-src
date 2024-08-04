@@ -3,10 +3,14 @@ Auto-registration of namespaces in XSL stylesheet with new DOM
 --EXTENSIONS--
 dom
 xsl
+--SKIPIF--
+<?php
+require __DIR__.'/skip_upstream_issue113.inc';
+?>
 --FILE--
 <?php
 
-$sheet = DOM\XMLDocument::createFromString(<<<XML
+$sheet = Dom\XMLDocument::createFromString(<<<XML
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
     xmlns:php="http://php.net/xsl"
     xmlns:str="http://exslt.org/strings"
@@ -22,7 +26,7 @@ XML);
 // Make sure it will auto-register urn:test
 $sheet->documentElement->append($sheet->createElementNS('urn:test', 'test:dummy'));
 
-$input = DOM\XMLDocument::createFromString(<<<XML
+$input = Dom\XMLDocument::createFromString(<<<XML
 <root>
     <hello>World</hello>
 </root>

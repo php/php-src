@@ -23,7 +23,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "php.h"
@@ -38,7 +38,6 @@
 #ifdef PHP_WIN32
 #include <string.h>
 #include "config.w32.h"
-#undef WINDOWS
 #undef strcasecmp
 #undef strncasecmp
 #define WINSOCK 1
@@ -1892,12 +1891,12 @@ PHP_FUNCTION(ldap_get_entries)
 			add_index_string(&tmp1, num_attrib, attribute);
 
 			num_attrib++;
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 			ldap_memfree(attribute);
 #endif
 			attribute = ldap_next_attribute(ldap, ldap_result_entry, ber);
 		}
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		if (ber != NULL) {
 			ber_free(ber, 0);
 		}
@@ -1910,7 +1909,7 @@ PHP_FUNCTION(ldap_get_entries)
 		} else {
 			add_assoc_null(&tmp1, "dn");
 		}
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		ldap_memfree(dn);
 #else
 		free(dn);
@@ -1948,7 +1947,7 @@ PHP_FUNCTION(ldap_first_attribute)
 		RETURN_FALSE;
 	} else {
 		RETVAL_STRING(attribute);
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		ldap_memfree(attribute);
 #endif
 	}
@@ -1978,7 +1977,7 @@ PHP_FUNCTION(ldap_next_attribute)
 	}
 
 	if ((attribute = ldap_next_attribute(ld->link, resultentry->data, resultentry->ber)) == NULL) {
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		if (resultentry->ber != NULL) {
 			ber_free(resultentry->ber, 0);
 			resultentry->ber = NULL;
@@ -1987,7 +1986,7 @@ PHP_FUNCTION(ldap_next_attribute)
 		RETURN_FALSE;
 	} else {
 		RETVAL_STRING(attribute);
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		ldap_memfree(attribute);
 #endif
 	}
@@ -2034,12 +2033,12 @@ PHP_FUNCTION(ldap_get_attributes)
 		add_index_string(return_value, num_attrib, attribute);
 
 		num_attrib++;
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		ldap_memfree(attribute);
 #endif
 		attribute = ldap_next_attribute(ld->link, resultentry->data, ber);
 	}
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 	if (ber != NULL) {
 		ber_free(ber, 0);
 	}
@@ -2107,7 +2106,7 @@ PHP_FUNCTION(ldap_get_dn)
 	text = ldap_get_dn(ld->link, resultentry->data);
 	if (text != NULL) {
 		RETVAL_STRING(text);
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		ldap_memfree(text);
 #else
 		free(text);
@@ -2164,7 +2163,7 @@ PHP_FUNCTION(ldap_dn2ufn)
 
 	if (ufn != NULL) {
 		RETVAL_STRING(ufn);
-#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP) || WINDOWS
+#if (LDAP_API_VERSION > 2000) || defined(HAVE_ORALDAP)
 		ldap_memfree(ufn);
 #endif
 	} else {

@@ -65,26 +65,19 @@ dnl
 dnl Checks for the configure options
 dnl
 
-dnl zlib is always required
-AC_DEFUN([PHP_GD_ZLIB],[
-  PKG_CHECK_MODULES([ZLIB], [zlib])
-  PHP_EVAL_LIBLINE($ZLIB_LIBS, GD_SHARED_LIBADD)
-  PHP_EVAL_INCLINE($ZLIB_CFLAGS)
-])
-
 dnl libpng is always required
 AC_DEFUN([PHP_GD_PNG],[
   PKG_CHECK_MODULES([PNG], [libpng])
-  PHP_EVAL_LIBLINE($PNG_LIBS, GD_SHARED_LIBADD)
-  PHP_EVAL_INCLINE($PNG_CFLAGS)
+  PHP_EVAL_LIBLINE([$PNG_LIBS], [GD_SHARED_LIBADD])
+  PHP_EVAL_INCLINE([$PNG_CFLAGS])
   AC_DEFINE(HAVE_LIBPNG, 1, [ ])
 ])
 
 AC_DEFUN([PHP_GD_AVIF],[
   if test "$PHP_AVIF" != "no"; then
     PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
-    PHP_EVAL_LIBLINE($AVIF_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($AVIF_CFLAGS)
+    PHP_EVAL_LIBLINE([$AVIF_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$AVIF_CFLAGS])
     AC_DEFINE(HAVE_LIBAVIF, 1, [ ])
     AC_DEFINE(HAVE_GD_AVIF, 1, [ ])
   fi
@@ -93,8 +86,8 @@ AC_DEFUN([PHP_GD_AVIF],[
 AC_DEFUN([PHP_GD_WEBP],[
   if test "$PHP_WEBP" != "no"; then
     PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
-    PHP_EVAL_LIBLINE($WEBP_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($WEBP_CFLAGS)
+    PHP_EVAL_LIBLINE([$WEBP_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$WEBP_CFLAGS])
     AC_DEFINE(HAVE_LIBWEBP, 1, [ ])
     AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
   fi
@@ -103,8 +96,8 @@ AC_DEFUN([PHP_GD_WEBP],[
 AC_DEFUN([PHP_GD_JPEG],[
   if test "$PHP_JPEG" != "no"; then
     PKG_CHECK_MODULES([JPEG], [libjpeg])
-    PHP_EVAL_LIBLINE($JPEG_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($JPEG_CFLAGS)
+    PHP_EVAL_LIBLINE([$JPEG_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$JPEG_CFLAGS])
     AC_DEFINE(HAVE_LIBJPEG, 1, [ ])
     AC_DEFINE(HAVE_GD_JPG, 1, [ ])
   fi
@@ -113,8 +106,8 @@ AC_DEFUN([PHP_GD_JPEG],[
 AC_DEFUN([PHP_GD_XPM],[
   if test "$PHP_XPM" != "no"; then
     PKG_CHECK_MODULES([XPM], [xpm])
-    PHP_EVAL_LIBLINE($XPM_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($XPM_CFLAGS)
+    PHP_EVAL_LIBLINE([$XPM_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$XPM_CFLAGS])
     AC_DEFINE(HAVE_XPM, 1, [ ])
     AC_DEFINE(HAVE_GD_XPM, 1, [ ])
   fi
@@ -122,10 +115,10 @@ AC_DEFUN([PHP_GD_XPM],[
 
 AC_DEFUN([PHP_GD_FREETYPE2],[
   if test "$PHP_FREETYPE" != "no"; then
-    PKG_CHECK_MODULES([FREETYPE2], [freetype2], [FREETYPE2_FOUND=true])
+    PKG_CHECK_MODULES([FREETYPE2], [freetype2])
 
-    PHP_EVAL_INCLINE($FREETYPE2_CFLAGS)
-    PHP_EVAL_LIBLINE($FREETYPE2_LIBS, GD_SHARED_LIBADD)
+    PHP_EVAL_INCLINE([$FREETYPE2_CFLAGS])
+    PHP_EVAL_LIBLINE([$FREETYPE2_LIBS], [GD_SHARED_LIBADD])
     AC_DEFINE(HAVE_LIBFREETYPE, 1, [ ])
     AC_DEFINE(HAVE_GD_FREETYPE, 1, [ ])
   fi
@@ -147,12 +140,15 @@ dnl that gd defines "junk" versions of each gdImageCreateFromFoo function
 dnl even when it does not support the Foo format. Those junk functions
 dnl display a warning but eventually return normally, making a simple link
 dnl or run test insufficient.
-AC_DEFUN([PHP_GD_CHECK_FORMAT],[
-  old_LIBS="${LIBS}"
-  LIBS="${LIBS} ${GD_SHARED_LIBADD}"
-  AC_MSG_CHECKING([for working gdImageCreateFrom$1 in libgd])
-  AC_LANG_PUSH([C])
-  AC_RUN_IFELSE([AC_LANG_SOURCE([
+AC_DEFUN([PHP_GD_CHECK_FORMAT],
+[AS_VAR_PUSHDEF([php_var], [php_cv_lib_gd_gdImageCreateFrom$1])
+old_LIBS="${LIBS}"
+LIBS="${LIBS} ${GD_SHARED_LIBADD}"
+old_CFLAGS="${CFLAGS}"
+CFLAGS="${CFLAGS} ${GDLIB_CFLAGS}"
+AC_LANG_PUSH([C])
+AC_CACHE_CHECK([for working gdImageCreateFrom$1 in libgd], [php_var],
+  [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <stdio.h>
 #include <unistd.h>
 #include <gd.h>
@@ -171,16 +167,17 @@ int main(int argc, char** argv) {
   gdSetErrorMethod(exit1);
   gdImagePtr p = gdImageCreateFrom$1(f);
   return 0;
-}])],[
-    AC_MSG_RESULT([yes])
-    AC_DEFINE($2, 1, [Does gdImageCreateFrom$1 work?])
-  ],[
-    AC_MSG_RESULT([no])
-  ],[
-    AC_MSG_RESULT([no])
-  ])
-  AC_LANG_POP([C])
-  LIBS="${old_LIBS}"
+}])],
+  [AS_VAR_SET([php_var], [yes])],
+  [AS_VAR_SET([php_var], [no])],
+  [AS_VAR_SET([php_var], [no])])])
+AS_VAR_IF([php_var], [yes],
+  [AC_DEFINE_UNQUOTED([$2], [1],
+    [Define to 1 if GD library has 'gdImageCreateFrom$1'.])])
+AC_LANG_POP([C])
+CFLAGS="${old_CFLAGS}"
+LIBS="${old_LIBS}"
+AS_VAR_POPDEF([php_var])
 ])
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
@@ -191,9 +188,18 @@ AC_DEFUN([PHP_GD_CHECK_VERSION],[
   PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
   PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
   PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
-  PHP_CHECK_LIBRARY(gd, gdFontCacheShutdown,           [AC_DEFINE(HAVE_GD_FREETYPE,          1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdVersionString,               [AC_DEFINE(HAVE_GD_LIBVERSION,        1, [ ])], [], [ $GD_SHARED_LIBADD ])
-  PHP_CHECK_LIBRARY(gd, gdImageGetInterpolationMethod, [AC_DEFINE(HAVE_GD_GET_INTERPOLATION, 1, [ ])], [], [ $GD_SHARED_LIBADD ])
+  PHP_CHECK_LIBRARY([gd], [gdFontCacheShutdown],
+    [AC_DEFINE([HAVE_GD_FREETYPE], [1], [ ])],
+    [],
+    [$GD_SHARED_LIBADD])
+  PHP_CHECK_LIBRARY([gd], [gdVersionString],
+    [AC_DEFINE([HAVE_GD_LIBVERSION], [1], [ ])],
+    [],
+    [$GD_SHARED_LIBADD])
+  PHP_CHECK_LIBRARY([gd], [gdImageGetInterpolationMethod],
+    [AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1], [ ])],
+    [],
+    [$GD_SHARED_LIBADD])
 ])
 
 dnl
@@ -203,15 +209,48 @@ dnl
 if test "$PHP_GD" != "no"; then
 
   if test "$PHP_EXTERNAL_GD" = "no"; then
-    extra_sources="libgd/gd.c libgd/gd_gd.c libgd/gd_gd2.c libgd/gd_io.c libgd/gd_io_dp.c \
-                  libgd/gd_io_file.c libgd/gd_ss.c libgd/gd_io_ss.c libgd/gd_webp.c libgd/gd_avif.c \
-                  libgd/gd_png.c libgd/gd_jpeg.c libgd/gdxpm.c libgd/gdfontt.c libgd/gdfonts.c \
-                  libgd/gdfontmb.c libgd/gdfontl.c libgd/gdfontg.c libgd/gdtables.c libgd/gdft.c \
-                  libgd/gdcache.c libgd/gdkanji.c libgd/wbmp.c libgd/gd_wbmp.c libgd/gdhelpers.c \
-                  libgd/gd_topal.c libgd/gd_gif_in.c libgd/gd_xbm.c libgd/gd_gif_out.c libgd/gd_security.c \
-                  libgd/gd_filter.c libgd/gd_pixelate.c libgd/gd_rotate.c libgd/gd_color_match.c \
-                  libgd/gd_transform.c libgd/gd_crop.c libgd/gd_interpolation.c libgd/gd_matrix.c \
-                  libgd/gd_bmp.c libgd/gd_tga.c"
+    extra_sources=m4_normalize(["
+      libgd/gd_avif.c
+      libgd/gd_bmp.c
+      libgd/gd_color_match.c
+      libgd/gd_crop.c
+      libgd/gd_filter.c
+      libgd/gd_gd.c
+      libgd/gd_gd2.c
+      libgd/gd_gif_in.c
+      libgd/gd_gif_out.c
+      libgd/gd_interpolation.c
+      libgd/gd_io_dp.c
+      libgd/gd_io_file.c
+      libgd/gd_io_ss.c
+      libgd/gd_io.c
+      libgd/gd_jpeg.c
+      libgd/gd_matrix.c
+      libgd/gd_pixelate.c
+      libgd/gd_png.c
+      libgd/gd_rotate.c
+      libgd/gd_security.c
+      libgd/gd_ss.c
+      libgd/gd_tga.c
+      libgd/gd_topal.c
+      libgd/gd_transform.c
+      libgd/gd_wbmp.c
+      libgd/gd_webp.c
+      libgd/gd_xbm.c
+      libgd/gd.c
+      libgd/gdcache.c
+      libgd/gdfontg.c
+      libgd/gdfontl.c
+      libgd/gdfontmb.c
+      libgd/gdfonts.c
+      libgd/gdfontt.c
+      libgd/gdft.c
+      libgd/gdhelpers.c
+      libgd/gdkanji.c
+      libgd/gdtables.c
+      libgd/gdxpm.c
+      libgd/wbmp.c
+    "])
 
 dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
@@ -220,7 +259,7 @@ dnl These are always available with bundled library
     AC_DEFINE(HAVE_GD_TGA,              1, [ ])
 
 dnl Various checks for GD features
-    PHP_GD_ZLIB
+    PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
     PHP_GD_PNG
     PHP_GD_AVIF
     PHP_GD_WEBP
@@ -229,32 +268,32 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
 
-    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GD_CFLAGS))
-    PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
+    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared],, [$GD_CFLAGS])
+    PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
+
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 
-    PHP_TEST_BUILD(foobar, [], [
-      AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ $GD_SHARED_LIBADD ], [char foobar(void) { return '\0'; }])
-
+    PHP_TEST_BUILD([foobar],
+      [],
+      [AC_MSG_FAILURE([GD library build test failed.])],
+      [$GD_SHARED_LIBADD],
+      [char foobar(void) { return '\0'; }])
   else
     extra_sources="gd_compat.c"
     PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
-    PHP_EVAL_LIBLINE($GDLIB_LIBS, GD_SHARED_LIBADD)
-    PHP_EVAL_INCLINE($GDLIB_CFLAGS)
+    PHP_EVAL_LIBLINE([$GDLIB_LIBS], [GD_SHARED_LIBADD])
+    PHP_EVAL_INCLINE([$GDLIB_CFLAGS])
     AC_DEFINE(HAVE_LIBGD, 1, [ ])
     PHP_GD_CHECK_VERSION
 
-    PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared)
+    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared])
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h])
-    PHP_CHECK_LIBRARY(gd, gdImageCreate, [], [
-      AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ $GD_SHARED_LIBADD ])
+    PHP_CHECK_LIBRARY([gd], [gdImageCreate],
+      [],
+      [AC_MSG_FAILURE([GD library build test failed.])],
+      [$GD_SHARED_LIBADD])
   fi
 
-  PHP_SUBST(GD_CFLAGS)
-  PHP_SUBST(GDLIB_CFLAGS)
-  PHP_SUBST(GDLIB_LIBS)
-  PHP_SUBST(GD_SHARED_LIBADD)
+  PHP_SUBST([GD_SHARED_LIBADD])
 fi

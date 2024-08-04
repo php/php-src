@@ -39,7 +39,6 @@
 #include "php_syslog.h"
 #include "php_mail.h"
 #include "php_ini.h"
-#include "php_string.h"
 #include "exec.h"
 
 #ifdef PHP_WIN32
@@ -247,7 +246,6 @@ PHP_FUNCTION(mail)
 	HashTable *headers_ht = NULL;
 	size_t to_len, message_len;
 	size_t subject_len, i;
-	char *force_extra_parameters = INI_STR("mail.force_extra_parameters");
 	char *to_r, *subject_r;
 
 	ZEND_PARSE_PARAMETERS_START(3, 5)
@@ -312,10 +310,11 @@ PHP_FUNCTION(mail)
 		subject_r = subject;
 	}
 
+	zend_string *force_extra_parameters = zend_ini_str_ex("mail.force_extra_parameters", strlen("mail.force_extra_parameters"), false, NULL);
 	if (force_extra_parameters) {
 		extra_cmd = php_escape_shell_cmd(force_extra_parameters);
 	} else if (extra_cmd) {
-		extra_cmd = php_escape_shell_cmd(ZSTR_VAL(extra_cmd));
+		extra_cmd = php_escape_shell_cmd(extra_cmd);
 	}
 
 	if (php_mail(to_r, subject_r, message, headers_str && ZSTR_LEN(headers_str) ? ZSTR_VAL(headers_str) : NULL, extra_cmd ? ZSTR_VAL(extra_cmd) : NULL)) {
@@ -341,7 +340,7 @@ PHP_FUNCTION(mail)
 /* }}} */
 
 
-void php_mail_log_crlf_to_spaces(char *message) {
+static void php_mail_log_crlf_to_spaces(char *message) {
 	/* Find all instances of carriage returns or line feeds and
 	 * replace them with spaces. Thus, a log line is always one line
 	 * long
@@ -352,7 +351,7 @@ void php_mail_log_crlf_to_spaces(char *message) {
 	}
 }
 
-void php_mail_log_to_syslog(char *message) {
+static void php_mail_log_to_syslog(char *message) {
 	/* Write 'message' to syslog. */
 #ifdef HAVE_SYSLOG_H
 	php_syslog(LOG_NOTICE, "%s", message);
@@ -360,7 +359,7 @@ void php_mail_log_to_syslog(char *message) {
 }
 
 
-void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
+static void php_mail_log_to_file(char *filename, char *message, size_t message_size) {
 	/* Write 'message' to the given file. */
 	uint32_t flags = REPORT_ERRORS | STREAM_DISABLE_OPEN_BASEDIR;
 	php_stream *stream = php_stream_open_wrapper(filename, "a", flags, NULL);

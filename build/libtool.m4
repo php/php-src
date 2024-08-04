@@ -277,7 +277,7 @@ dnl This sometimes fails to find confdefs.h, for some reason.
 dnl [#]line __oline__ "[$]0"
 [#]line __oline__ "configure"
 #include "confdefs.h"
-int main() {
+int main(void) {
 ; return 0; }
 EOF
 if AC_TRY_EVAL(ac_link) && test -s conftest${ac_exeext}; then
@@ -978,8 +978,8 @@ else
 #  endif
 #endif
 
-void fnord() { int i=42;}
-int main ()
+void fnord(void) { int i=42;}
+int main (void)
 {
   void *self = dlopen (0, LT_DLGLOBAL|LT_DLLAZY_OR_NOW);
   int status = $lt_dlunknown;
@@ -2750,7 +2750,7 @@ _LT_AC_TAGVAR(objext, $1)=$objext
 lt_simple_compile_test_code="int some_variable = 0;"
 
 # Code to be used in simple link tests
-lt_simple_link_test_code='int main(){return(0);}'
+lt_simple_link_test_code='int main(void){return(0);}'
 
 _LT_AC_SYS_COMPILER
 
@@ -4636,11 +4636,11 @@ for ac_symprfx in "" "_"; do
 extern "C" {
 #endif
 char nm_test_var;
-void nm_test_func(){}
+void nm_test_func(void){}
 #ifdef __cplusplus
 }
 #endif
-int main(){nm_test_var='a';nm_test_func();return(0);}
+int main(void){nm_test_var='a';nm_test_func();return(0);}
 EOF
 
   if AC_TRY_EVAL(ac_compile); then

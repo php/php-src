@@ -5,7 +5,7 @@ dom
 --FILE--
 <?php
 
-$dom = DOM\XMLDocument::createFromString('<root a="b"/>');
+$dom = Dom\XMLDocument::createFromString('<root a="b"/>');
 try {
     $dom->documentElement->removeAttributeNode($dom->createAttribute('test'));
 } catch (DOMException $e) {

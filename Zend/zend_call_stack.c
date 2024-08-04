@@ -35,9 +35,9 @@
 #  include <sys/types.h>
 # endif
 #endif /* ZEND_WIN32 */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__) || \
-    defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || \
-    defined(__sun)
+#if (defined(HAVE_PTHREAD_GETATTR_NP) && defined(HAVE_PTHREAD_ATTR_GETSTACK)) || \
+    defined(__FreeBSD__) || defined(__APPLE__) || defined(__OpenBSD__) || \
+    defined(__NetBSD__) || defined(__DragonFly__) || defined(__sun)
 # include <pthread.h>
 #endif
 #if defined(__FreeBSD__) || defined(__DragonFly__)
@@ -69,6 +69,10 @@ typedef int boolean_t;
 #include <sys/procfs.h>
 #include <libproc.h>
 #include <thread.h>
+#endif
+
+#ifdef HAVE_VALGRIND
+# include <valgrind/valgrind.h>
 #endif
 
 #ifdef ZEND_CHECK_STACK_LIMIT
@@ -133,12 +137,13 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 	ZEND_ASSERT(!zend_call_stack_is_main_thread());
 
 	error = pthread_getattr_np(pthread_self(), &attr);
-	if (error) {
+	if (UNEXPECTED(error)) {
 		return false;
 	}
 
 	error = pthread_attr_getstack(&attr, &addr, &max_size);
-	if (error) {
+	if (UNEXPECTED(error)) {
+		pthread_attr_destroy(&attr);
 		return false;
 	}
 
@@ -147,7 +152,8 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 		size_t guard_size;
 		/* In glibc prior to 2.8, addr and size include the guard pages */
 		error = pthread_attr_getguardsize(&attr, &guard_size);
-		if (error) {
+		if (UNEXPECTED(error)) {
+			pthread_attr_destroy(&attr);
 			return false;
 		}
 
@@ -158,6 +164,8 @@ static bool zend_call_stack_get_linux_pthread(zend_call_stack *stack)
 
 	stack->base = (int8_t*)addr + max_size;
 	stack->max_size = max_size;
+
+	pthread_attr_destroy(&attr);
 
 	return true;
 }
@@ -172,7 +180,7 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 {
 	FILE *f;
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	uintptr_t start, end, prev_end = 0;
 	size_t max_size;
 	bool found = false;
@@ -233,6 +241,13 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	}
 
 	max_size = rlim.rlim_cur;
+
+#ifdef HAVE_VALGRIND
+	/* Under Valgrind, the last page is not useable */
+	if (RUNNING_ON_VALGRIND) {
+		max_size -= zend_get_page_size();
+	}
+#endif
 
 	/* Previous mapping may prevent the stack from growing */
 	if (end - max_size < prev_end) {
@@ -606,7 +621,7 @@ static bool zend_call_stack_get_netbsd_vm(zend_call_stack *stack, void **ptr)
 	struct kinfo_vmentry *entry;
 	size_t len, max_size;
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	int mib[5] = { CTL_VM, VM_PROC, VM_PROC_MAP, getpid(), sizeof(struct kinfo_vmentry) };
 	bool found = false;
 	struct rlimit rlim;
@@ -687,14 +702,14 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
 	char buffer[4096];
-	uintptr_t addr_on_stack = (uintptr_t)&buffer;
+	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	bool found = false, r = false;
 	struct ps_prochandle *proc;
 	prmap_t *map, *orig;
 	struct rlimit rlim;
 	char path[PATH_MAX];
 	size_t size;
-	ssize_t len;
+	ssize_t len = -1;
 	pid_t pid;
 	int error, fd;
 

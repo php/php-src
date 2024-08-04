@@ -31,6 +31,7 @@
 #include "zend_inheritance.h"
 #include "zend_ini.h"
 #include "zend_enum.h"
+#include "zend_object_handlers.h"
 #include "zend_observer.h"
 
 #include <stdarg.h>
@@ -437,6 +438,26 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 	va_end(va);
 }
 /* }}} */
+
+ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce)
+{
+	if (old_ce->type == ZEND_INTERNAL_CLASS) {
+		zend_error(type, "Cannot redeclare %s %s",
+			zend_get_object_type(old_ce),
+			ZSTR_VAL(new_name));
+	} else {
+		zend_error(type, "Cannot redeclare %s %s (previously declared in %s:%d)",
+			zend_get_object_type(old_ce),
+			ZSTR_VAL(new_name),
+			ZSTR_VAL(old_ce->info.user.filename),
+			old_ce->info.user.line_start);
+	}
+}
+
+ZEND_API ZEND_COLD void zend_class_redeclaration_error(int type, zend_class_entry *old_ce)
+{
+	zend_class_redeclaration_error_ex(type, old_ce->name, old_ce);
+}
 
 ZEND_API bool ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pce, uint32_t num, bool check_null) /* {{{ */
 {
@@ -1744,10 +1765,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 						ZSTR_VAL(object->ce->name), property_info != ZEND_WRONG_PROPERTY_INFO ? zend_get_unmangled_property_name(key): "");
 				}
 
-				if (!object->properties) {
-					rebuild_object_properties(object);
-				}
-				prop = zend_hash_update(object->properties, key, prop);
+				prop = zend_hash_update(zend_std_get_properties_ex(object), key, prop);
 				zval_add_ref(prop);
 			}
 		} else {
@@ -1759,10 +1777,7 @@ ZEND_API void object_properties_load(zend_object *object, HashTable *properties)
 					ZSTR_VAL(object->ce->name), h);
 			}
 
-			if (!object->properties) {
-				rebuild_object_properties(object);
-			}
-			prop = zend_hash_index_update(object->properties, h, prop);
+			prop = zend_hash_index_update(zend_std_get_properties_ex(object), h, prop);
 			zval_add_ref(prop);
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1823,6 +1838,74 @@ ZEND_API zend_result object_and_properties_init(zval *arg, zend_class_entry *cla
 ZEND_API zend_result object_init_ex(zval *arg, zend_class_entry *class_type) /* {{{ */
 {
 	return _object_and_properties_init(arg, class_type, NULL);
+}
+/* }}} */
+
+ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *class_type, uint32_t param_count, zval *params, HashTable *named_params) /* {{{ */
+{
+	zend_result status = _object_and_properties_init(arg, class_type, NULL);
+	if (UNEXPECTED(status == FAILURE)) {
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	}
+	zend_object *obj = Z_OBJ_P(arg);
+	zend_function *constructor = obj->handlers->get_constructor(obj);
+	if (constructor == NULL) {
+		/* The constructor can be NULL for 2 different reasons:
+		 * - It is not defined
+		 * - We are not allowed to call the constructor (e.g. private, or internal opaque class)
+		 *   and an exception has been thrown
+		 * in the former case, we are (mostly) done and the object is initialized,
+		 * in the latter we need to destroy the object as initialization failed
+		 */
+		if (UNEXPECTED(EG(exception))) {
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		}
+
+		/* Surprisingly, this is the only case where internal classes will allow to pass extra arguments
+		 * However, if there are named arguments (and it is not empty),
+		 * an Error must be thrown to be consistent with new ClassName() */
+		if (UNEXPECTED(named_params != NULL && zend_hash_num_elements(named_params) != 0)) {
+			/* Throw standard Error */
+			zend_string *arg_name = NULL;
+			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
+			ZEND_ASSERT(arg_name != NULL);
+			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
+			zend_string_release(arg_name);
+			/* Do not call destructor, free object, and set arg to IS_UNDEF */
+			zend_object_store_ctor_failed(obj);
+			zval_ptr_dtor(arg);
+			ZVAL_UNDEF(arg);
+			return FAILURE;
+		} else {
+			return SUCCESS;
+		}
+	}
+	/* A constructor should not return a value, however if an exception is thrown
+	 * zend_call_known_function() will set the retval to IS_UNDEF */
+	zval retval;
+	zend_call_known_function(
+		constructor,
+		obj,
+		class_type,
+		&retval,
+		param_count,
+		params,
+		named_params
+	);
+	if (Z_TYPE(retval) == IS_UNDEF) {
+		/* Do not call destructor, free object, and set arg to IS_UNDEF */
+		zend_object_store_ctor_failed(obj);
+		zval_ptr_dtor(arg);
+		ZVAL_UNDEF(arg);
+		return FAILURE;
+	} else {
+		/* Unlikely, but user constructors may return any value they want */
+		zval_ptr_dtor(&retval);
+		return SUCCESS;
+	}
 }
 /* }}} */
 
@@ -2668,8 +2751,8 @@ static void zend_check_magic_method_no_return_type(
 
 ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce, const zend_function *fptr, zend_string *lcname, int error_type) /* {{{ */
 {
-	if (ZSTR_VAL(fptr->common.function_name)[0] != '_'
-	 || ZSTR_VAL(fptr->common.function_name)[1] != '_') {
+	if (ZSTR_VAL(lcname)[0] != '_'
+	 || ZSTR_VAL(lcname)[1] != '_') {
 		return;
 	}
 
@@ -2863,6 +2946,7 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		internal_function->function_name = zend_string_init_interned(ptr->fname, fname_len, 1);
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
+		internal_function->prop_info = NULL;
 		internal_function->attributes = NULL;
 		internal_function->frameless_function_infos = ptr->frameless_function_infos;
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
@@ -3258,7 +3342,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 
 void module_registry_unload(const zend_module_entry *module)
 {
-#if HAVE_LIBDL
+#ifdef HAVE_LIBDL
 	if (!getenv("ZEND_DONT_UNLOAD_MODULES")) {
 		DL_UNLOAD(module->handle);
 	}
@@ -4421,6 +4505,16 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	if (!(access_type & ZEND_ACC_PPP_MASK)) {
 		access_type |= ZEND_ACC_PUBLIC;
 	}
+
+	/* Virtual properties have no backing storage, the offset should never be used. However, the
+	 * virtual flag cannot be definitively determined at compile time. Allow using default values
+	 * anyway, and assert after inheritance that the property is not actually virtual. */
+	if (access_type & ZEND_ACC_VIRTUAL) {
+		if (Z_TYPE_P(property) == IS_UNDEF) {
+			property_info->offset = (uint32_t)-1;
+			goto skip_property_storage;
+		}
+	}
 	if (access_type & ZEND_ACC_STATIC) {
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL) {
 			ZEND_ASSERT(property_info_ptr->flags & ZEND_ACC_STATIC);
@@ -4470,6 +4564,7 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 		ZVAL_COPY_VALUE(property_default_ptr, property);
 		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
+skip_property_storage:
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		/* Must be interned to avoid ZTS data races */
 		if (is_persistent_class(ce)) {
@@ -4494,6 +4589,8 @@ ZEND_API zend_property_info *zend_declare_typed_property(zend_class_entry *ce, z
 	property_info->flags = access_type;
 	property_info->doc_comment = doc_comment;
 	property_info->attributes = NULL;
+	property_info->prototype = property_info;
+	property_info->hooks = NULL;
 	property_info->ce = ce;
 	property_info->type = type;
 

@@ -97,7 +97,6 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 	if (n2->n_scale == 0 && n2->n_len == 1 && *n2->n_value == 1) {
 		qval = bc_new_num (n1->n_len, scale);
 		qval->n_sign = (n1->n_sign == n2->n_sign ? PLUS : MINUS);
-		memset(&qval->n_value[n1->n_len], 0, scale);
 		memcpy(qval->n_value, n1->n_value, n1->n_len + MIN(n1->n_scale, scale));
 		bc_free_num (quot);
 		*quot = qval;
@@ -146,7 +145,6 @@ bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale)
 
 	/* Allocate and zero the storage for the quotient. */
 	qval = bc_new_num (qdigits - scale, scale);
-	memset(qval->n_value, 0, qdigits);
 
 	/* Allocate storage for the temporary storage mval. */
 	mval = (unsigned char *) safe_emalloc(1, len2, 1);

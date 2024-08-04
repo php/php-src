@@ -75,7 +75,7 @@
    Care must be taken if it is increased, because it guards against integer
    overflow caused by enormously large patterns. */
 #ifndef MAX_NAME_SIZE
-#define MAX_NAME_SIZE 32
+#define MAX_NAME_SIZE 128
 #endif
 
 /* Defining NEVER_BACKSLASH_C locks out the use of \C in all patterns. */

@@ -1,11 +1,11 @@
 --TEST--
-DOM\Node::cloneNode() should copy the document properties
+Dom\Node::cloneNode() should copy the document properties
 --EXTENSIONS--
 dom
 --FILE--
 <?php
 
-$dom = DOM\HTMLDocument::createEmpty();
+$dom = Dom\HTMLDocument::createEmpty();
 $dom = $dom->cloneNode();
 
 $dom->appendChild($dom->createElement("foo"));
