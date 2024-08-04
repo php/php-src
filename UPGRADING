@@ -761,6 +761,10 @@ PHP 8.4 UPGRADE NOTES
 - Date:
   . The class constants are typed now.
 
+- DOM:
+  . Removed DOMImplementation::getFeature().
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version
+
 - Intl:
   . The class constants are typed now.
   . The behaviour of Intl class has been normalized to always throw Error

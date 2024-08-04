@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15192 (Segmentation fault in dom extension
     (html5_serializer)). (nielsdos)
   . Deprecated DOM_PHP_ERR constant. (nielsdos)
+  . Removed DOMImplementation::getFeature(). (nielsdos)
 
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.

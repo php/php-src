@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 09b3f1df4ce6b20e7d25214a522ea1e6e5faabf4 */
+ * Stub hash: 085c060d5a6f3d0c3db1cdbe5c5a3ec4ca261d5c */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_dom_import_simplexml, 0, 1, DOMElement, 0)
 	ZEND_ARG_TYPE_INFO(0, node, IS_OBJECT, 0)
@@ -130,11 +130,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DOMNameSpaceNode___sleep arginfo_class_DOMNode___sleep
 
 #define arginfo_class_DOMNameSpaceNode___wakeup arginfo_class_DOMChildNode_remove
-
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMImplementation_getFeature, 0, 2, IS_NEVER, 0)
-	ZEND_ARG_TYPE_INFO(0, feature, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 0)
-ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMImplementation_hasFeature arginfo_class_DOMNode_isSupported
 
@@ -1200,7 +1195,6 @@ ZEND_METHOD(DOMNode, getRootNode);
 ZEND_METHOD(DOMNode, compareDocumentPosition);
 ZEND_METHOD(DOMNode, __sleep);
 ZEND_METHOD(DOMNode, __wakeup);
-ZEND_METHOD(DOMImplementation, getFeature);
 ZEND_METHOD(DOMImplementation, hasFeature);
 ZEND_METHOD(DOMImplementation, createDocumentType);
 ZEND_METHOD(DOMImplementation, createDocument);
@@ -1467,7 +1461,6 @@ static const zend_function_entry class_DOMNameSpaceNode_methods[] = {
 };
 
 static const zend_function_entry class_DOMImplementation_methods[] = {
-	ZEND_ME(DOMImplementation, getFeature, arginfo_class_DOMImplementation_getFeature, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMImplementation, hasFeature, arginfo_class_DOMImplementation_hasFeature, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMImplementation, createDocumentType, arginfo_class_DOMImplementation_createDocumentType, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMImplementation, createDocument, arginfo_class_DOMImplementation_createDocument, ZEND_ACC_PUBLIC)
