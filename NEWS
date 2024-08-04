@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Updated build system scripts config.guess to 2024-07-27 and config.sub to
     2024-05-27. (Peter Kokot)
 
+- Date:
+  . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
+    are now deprecated. (Jorg Sowa)
+
 - DOM:
   . Fixed bug GH-15192 (Segmentation fault in dom extension
     (html5_serializer)). (nielsdos)
