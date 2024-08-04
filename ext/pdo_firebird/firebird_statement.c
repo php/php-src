@@ -59,10 +59,141 @@ static zend_always_inline ISC_TIMESTAMP php_get_isc_timestamp_from_sqldata(const
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP, sqldata);
 }
 
+static zend_always_inline ISC_TIME_TZ php_get_isc_time_tz_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_TIME_TZ, sqldata);
+}
+
+static zend_always_inline ISC_TIMESTAMP_TZ php_get_isc_timestamp_tz_from_sqldata(const ISC_SCHAR *sqldata)
+{
+	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP_TZ, sqldata);
+}
+
 static zend_always_inline ISC_QUAD php_get_isc_quad_from_sqldata(const ISC_SCHAR *sqldata)
 {
 	READ_AND_RETURN_USING_MEMCPY(ISC_QUAD, sqldata);
 }
+
+#if FB_API_VER >= 40
+
+static void fb_copyStatus(struct fb_Status* status, ISC_STATUS* to, size_t maxLength)
+{
+	const ISC_STATUS* from = (const ISC_STATUS*)status->vtable->getErrors(status);
+	for(size_t i=0; i < maxLength; ++i) {
+		memcpy(to + i, from + i, sizeof(ISC_STATUS));
+		if (from[i] == isc_arg_end) {
+			break;
+		}
+	}
+}
+
+static ISC_TIME fb_encode_time(unsigned hours, unsigned minutes, unsigned seconds, unsigned fractions)
+{
+	struct fb_Master* master = fb_get_master_interface();
+	struct fb_Util* util = master->vtable->getUtilInterface(master);
+	return util->vtable->encodeTime(util, hours, minutes, seconds, fractions);
+}
+
+static ISC_DATE fb_encode_date(unsigned year, unsigned month, unsigned day)
+{
+	struct fb_Master* master = fb_get_master_interface();
+	struct fb_Util* util = master->vtable->getUtilInterface(master);
+	return util->vtable->encodeDate(util, year, month, day);
+}
+
+static ISC_STATUS fb_decode_time_tz(ISC_STATUS* isc_status, const ISC_TIME_TZ* timeTz, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, 
+   unsigned timeZoneBufferLength, char* timeZoneBuffer)
+{
+	struct fb_Master* master = fb_get_master_interface();
+	struct fb_Status* status = master->vtable->getStatus(master);
+	struct fb_Util* util = master->vtable->getUtilInterface(master);
+	util->vtable->decodeTimeTz(util, status, timeTz, hours, minutes, seconds, fractions,
+								timeZoneBufferLength, timeZoneBuffer);
+	if (status->vtable->getState(status))  {
+		fb_copyStatus(status, isc_status, 20);
+	}
+	status->vtable->dispose(status);
+	return isc_status[1];
+}
+
+
+static ISC_STATUS fb_decode_timestamp_tz(ISC_STATUS* isc_status, const ISC_TIMESTAMP_TZ* timestampTz, 
+   unsigned* year, unsigned* month, unsigned* day,
+   unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, 
+   unsigned timeZoneBufferLength, char* timeZoneBuffer)
+{
+	struct fb_Master* master = fb_get_master_interface();
+	struct fb_Status* status = master->vtable->getStatus(master);
+	struct fb_Util* util = master->vtable->getUtilInterface(master);
+	util->vtable->decodeTimeStampTz(util, status, timestampTz, year, month, day,
+									hours, minutes, seconds, fractions,
+									timeZoneBufferLength, timeZoneBuffer);
+	if (status->vtable->getState(status))  {
+		fb_copyStatus(status, isc_status, 20);
+	}
+	status->vtable->dispose(status);
+	return isc_status[1];
+}
+
+/* fetch formatted time with time zone */
+static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zval *result)
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+    unsigned hours = 0, minutes = 0, seconds = 0, fractions = 0;
+	char timeZoneBuffer[40] = {0};
+	char *fmt;
+	struct tm t; 
+	ISC_TIME time;
+	char timeBuf[80] = {0};
+	char timeTzBuf[124] = {0};
+	if (fb_decode_time_tz(S->H->isc_status, timeTz, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
+		return 1;
+	}
+	time = fb_encode_time(hours, minutes, seconds, fractions);
+	isc_decode_sql_time(&time, &t);
+	fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
+	
+	size_t len = strftime(timeBuf, sizeof(timeBuf), fmt, &t);
+	if (len == 0) {
+		return 1;
+	}
+
+	size_t time_tz_len = sprintf(timeTzBuf, "%s %s", timeBuf, timeZoneBuffer);
+	ZVAL_STRINGL(result, timeTzBuf, time_tz_len);
+	return 0;
+}
+
+/* fetch formatted timestamp with time zone */
+static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* timestampTz, zval *result)
+{
+	pdo_firebird_stmt *S = (pdo_firebird_stmt*)stmt->driver_data;
+    unsigned year, month, day, hours, minutes, seconds, fractions;
+	char timeZoneBuffer[40] = {0};
+	char *fmt;
+	struct tm t; 
+	ISC_TIMESTAMP ts;
+	char timestampBuf[80] = {0};
+	char timestampTzBuf[124] = {0};
+	if (fb_decode_timestamp_tz(S->H->isc_status, timestampTz, &year, &month, &day, &hours, &minutes, &seconds, &fractions, sizeof(timeZoneBuffer), timeZoneBuffer)) {
+		return 1;
+	}
+	ts.timestamp_date = fb_encode_date(year, month, day);
+	ts.timestamp_time = fb_encode_time(hours, minutes, seconds, fractions);
+	isc_decode_timestamp(&ts, &t);
+
+	fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
+	
+	size_t len = strftime(timestampBuf, sizeof(timestampBuf), fmt, &t);
+	if (len == 0) {
+		return 1;
+	}
+
+	size_t timestamp_tz_len = sprintf(timestampTzBuf, "%s %s", timestampBuf, timeZoneBuffer);
+	ZVAL_STRINGL(result, timestampTzBuf, timestamp_tz_len);
+	return 0;
+}
+
+#endif
 
 /* free the allocated space for passing field values to the db and back */
 static void php_firebird_free_sqlda(XSQLDA const *sqlda) /* {{{ */
@@ -494,6 +625,16 @@ static int pdo_firebird_stmt_get_col(
 					size_t len = strftime(buf, sizeof(buf), fmt, &t);
 					ZVAL_STRINGL(result, buf, len);
 					break;
+#if FB_API_VER >= 40					
+				case SQL_TIME_TZ: {
+					ISC_TIME_TZ time = php_get_isc_time_tz_from_sqldata(var->sqldata);
+					return get_formatted_time_tz(stmt, &time, result);
+				}
+				case SQL_TIMESTAMP_TZ: {
+					ISC_TIMESTAMP_TZ ts = php_get_isc_timestamp_tz_from_sqldata(var->sqldata);
+					return get_formatted_timestamp_tz(stmt, &ts, result);
+				}
+#endif				
 				case SQL_BLOB: {
 					ISC_QUAD quad = php_get_isc_quad_from_sqldata(var->sqldata);
 					return php_firebird_fetch_blob(stmt, colno, result, &quad);

@@ -31,6 +31,7 @@ $sql = <<<'SQL'
 SQL;
 
 $dbh = getDbConnection();
+$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
@@ -47,9 +48,9 @@ echo "\ndone\n";
     "N": "123.97",
     "N2": "123.97",
     "TS": "2024-05-04 12:59:34",
-    "TS_TZ": "%s 12:59:34.2390 Europe\/Moscow",
+    "TS_TZ": "2024-05-04 12:59:34 Europe\/Moscow",
     "T": "12:59:34",
-    "T_TZ": "12:59:34.2390 Europe\/Moscow",
+    "T_TZ": "12:59:34 Europe\/Moscow",
     "DF16": "1.128",
     "DF34": "1.128"
 }

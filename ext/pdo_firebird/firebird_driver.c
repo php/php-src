@@ -462,14 +462,13 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 
 #if FB_API_VER >= 40
 /* set coercing a data type */
-static void set_coercing_data_type(XSQLDA* sqlda)
+static void set_coercing_input_data_types(XSQLDA* sqlda)
 {
 	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */ 
 	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)), */
-	/* TIMESTAMP WITH TIME ZONE, and TIME WITH TIME ZONE. In any case, at least the first three data types */
-	/* can only be mapped to strings. The last two too, but for them it is potentially possible to set */
-	/* the display format, as is done for TIMESTAMP. This function allows you to ensure minimal performance */ 
-	/* of queries if they contain columns and parameters of the above types. */
+	/* TIMESTAMP WITH TIME ZONE, and TIME WITH TIME ZONE. */
+	/* This function allows you to ensure minimal performance */ 
+	/* of queries if they contain parameters of the above types. */
 	unsigned int i;
 	short dtype;
 	short nullable;
@@ -485,7 +484,7 @@ static void set_coercing_data_type(XSQLDA* sqlda)
 				break;
 
 			case SQL_DEC16:
-			    var->sqltype = SQL_VARYING + nullable;
+				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 24;
 				break;
 
@@ -503,8 +502,45 @@ static void set_coercing_data_type(XSQLDA* sqlda)
 				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 46;
 				break;
+
 			default:
-			    break;
+				break;
+		}
+	}	
+}
+
+static void set_coercing_output_data_types(XSQLDA* sqlda)
+{
+	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */ 
+	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)). */
+	/* In any case, at this data types can only be mapped to strings. */
+	/* This function allows you to ensure minimal performance of queries if they contain columns of the above types. */
+	unsigned int i;
+	short dtype;
+	short nullable;
+	XSQLVAR* var;
+	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
+		dtype = (var->sqltype & ~1); /* drop flag bit  */
+		nullable = (var->sqltype & 1); 
+		switch(dtype) {
+			case SQL_INT128:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 46;
+				var->sqlscale = 0;
+				break;
+
+			case SQL_DEC16:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 24;
+				break;
+
+			case SQL_DEC34:
+				var->sqltype = SQL_VARYING + nullable;
+				var->sqllen = 43;
+				break;
+
+			default:
+				break;
 		}
 	}	
 }
@@ -657,7 +693,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 #if FB_API_VER >= 40
 		/* set coercing a data type */
-		set_coercing_data_type(&S->out_sqlda);
+		set_coercing_output_data_types(&S->out_sqlda);
 #endif
 
 		/* allocate the input descriptors */
@@ -676,7 +712,7 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 
 #if FB_API_VER >= 40
 			/* set coercing a data type */
-			set_coercing_data_type(S->in_sqlda);
+			set_coercing_input_data_types(S->in_sqlda);
 #endif
 		}
 
@@ -1245,22 +1281,23 @@ static int pdo_firebird_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				ZVAL_STRING(val, tmp);
 				return 1;
 			}
-			return -1;
+			/* TODO Check this is correct? */
+			ZEND_FALLTHROUGH;
 
 		case PDO_ATTR_FETCH_TABLE_NAMES:
 			ZVAL_BOOL(val, H->fetch_table_names);
 			return 1;
 
 		case PDO_FB_ATTR_DATE_FORMAT:
-			ZVAL_STRING(val, H->date_format ? H->date_format : PDO_FB_DEF_DATE_FMT);
+			ZVAL_STRING(val, H->date_format);
 			return 1;
 
 		case PDO_FB_ATTR_TIME_FORMAT:
-			ZVAL_STRING(val, H->time_format ? H->time_format : PDO_FB_DEF_TIME_FMT);
+			ZVAL_STRING(val, H->time_format);
 			return 1;
 
 		case PDO_FB_ATTR_TIMESTAMP_FORMAT:
-			ZVAL_STRING(val, H->timestamp_format ? H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT);
+			ZVAL_STRING(val, H->timestamp_format);
 			return 1;
 
 		case PDO_FB_TRANSACTION_ISOLATION_LEVEL:
