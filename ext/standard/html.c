@@ -984,26 +984,27 @@ static inline char html5_find_short_reference_name(const char *input, size_t off
 }
 
 static inline size_t html5_find_large_reference_name_group(const char *input, const size_t offset, bool *did_find_group) {
-    char letter1 = '\0';
-    char letter2 = '\0';
-    char group1 = input[offset];
-    char group2 = input[offset + 1];
-    bool found_group = 0;
-    size_t i;
+    zend_uchar group1 = input[offset];
+    zend_uchar group2 = input[offset + 1];
+    zend_uchar letter1 = group1;
+    zend_uchar letter2 = '\0';
+    size_t i = html5_named_character_references_lookup.group_starts[group1];
+    if (0 == i && 'A' != group1) {
+        return 0;
+    }
     size_t end = html5_named_character_references_lookup.groups_length;
 
-    for (i = 0; i < end && letter1 <= group1; i += 2) {
+    for (; i < end && letter1 == group1; i += 2) {
         letter1 = html5_named_character_references_lookup.groups[i];
         letter2 = html5_named_character_references_lookup.groups[i + 1];
 
-        found_group = letter1 == group1 && letter2 == group2;
-        if (found_group) {
-            break;
+        if (letter2 == group2) {
+            *did_find_group = 1;
+            return i >> 1;
         }
     }
 
-    *did_find_group = found_group;
-    return i >> 1;
+    return 0;
 }
 
 static inline const char *html5_find_large_reference_name(const char *input, const size_t input_start, const size_t input_end, const size_t group_number, int *match_length, uint8_t *replacement_length) {

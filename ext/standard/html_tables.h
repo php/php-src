@@ -6226,12 +6226,19 @@ static const entity_ht ent_ht_be_apos = {
 };
 
 static const struct {
+    const uint16_t *group_starts;
     const char *groups;
     size_t groups_length;
     const uint16_t *group_offsets;
     const char *large_words;
     size_t large_words_length;
 } html5_named_character_references_lookup = {
+    (uint16_t[128]) {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0x0, 0x20, 0x30, 0x4c, 0x62, 0x82, 0x8c, 0xa4, 0xb4, 0xd0, 0xda, 0xe8, 0xfe, 0x10e, 0x120, 0x13c, 0x14e, 0x156, 0x16e, 0x188, 0x19e, 0x1ba, 0x1cc, 0x1d6, 0x1de, 0x1f0, 0, 0, 0, 0, 0,
+        0, 0x200, 0x220, 0x240, 0x25e, 0x284, 0x2a8, 0x2c0, 0x2e2, 0x2f6, 0x314, 0x320, 0x330, 0x35e, 0x37a, 0x3aa, 0x3ce, 0x3e6, 0x3f2, 0x41c, 0x442, 0x45c, 0x480, 0x49e, 0x4ac, 0x4c8, 0x4d8, 0, 0, 0, 0, 0
+    },
     "AEAMAaAbAcAfAgAlAmAnAoApArAsAtAuBaBcBeBfBoBrBsBuCHCOCaCcCdCeCfChCiClCoCrCsCuDDDJDSDZDaDcDeDfDiDoDsENETEaEcEdEfEg" \
     "ElEmEoEpEqEsEtEuExFcFfFiFoFsGJGTGaGbGcGdGfGgGoGrGsGtHAHaHcHfHiHoHsHuIEIJIOIaIcIdIfIgImInIoIsItIuJcJfJoJsJuKHKJKa" \
     "KcKfKoKsLJLTLaLcLeLfLlLmLoLsLtMaMcMeMfMiMoMsMuNJNaNcNeNfNoNsNtNuOEOaOcOdOfOgOmOoOpOrOsOtOuOvPaPcPfPhPiPlPoPrPsQU" \
