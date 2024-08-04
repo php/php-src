@@ -1275,7 +1275,7 @@ int main(void) {
   [ac_cv_ebcdic=no],
   [ac_cv_ebcdic=no])])
 AS_VAR_IF([ac_cv_ebcdic], [yes],
-  [AC_MSG_ERROR([PHP does not support EBCDIC targets.])])
+  [AC_MSG_FAILURE([PHP does not support EBCDIC targets.])])
 ])
 
 dnl
@@ -2018,13 +2018,11 @@ AS_VAR_IF([found_pgsql], [yes], [dnl
   PHP_EVAL_INCLINE([$PGSQL_CFLAGS])
   PHP_EVAL_LIBLINE([$PGSQL_LIBS], [$1])
 dnl PostgreSQL minimum version sanity check.
-  PHP_CHECK_LIBRARY([pq], [PQencryptPasswordConn],, [AC_MSG_ERROR(m4_normalize([
-    PostgreSQL check failed: libpq 10.0 or later is required, please see
-    config.log for details.
-  ]))],
+  PHP_CHECK_LIBRARY([pq], [PQencryptPasswordConn],,
+    [AC_MSG_FAILURE([PostgreSQL check failed: libpq 10.0 or later is required.])],
   [$PGSQL_LIBS])
 $2],
-[m4_default([$3], [AC_MSG_ERROR(m4_normalize([
+[m4_default([$3], [AC_MSG_FAILURE(m4_normalize([
   Cannot find libpq-fe.h or pq library (libpq). Please specify the correct
   PostgreSQL installation path with environment variables PGSQL_CFLAGS and
   PGSQL_LIBS or provide the PostgreSQL installation directory.
@@ -2253,7 +2251,7 @@ AS_VAR_IF([php_cv_crypt_r_style], [struct_crypt_data_gnu_source],
     [Define to 1 if struct crypt_data requires _GNU_SOURCE.])])
 
 AS_VAR_IF([php_cv_crypt_r_style], [none],
-  [AC_MSG_ERROR([Unable to detect data struct used by crypt_r.])])
+  [AC_MSG_FAILURE([Unable to detect data struct used by crypt_r.])])
 ])
 
 dnl
@@ -2295,7 +2293,7 @@ dnl extensions.
 dnl
 AC_DEFUN([PHP_INIT_DTRACE],
 [AC_CHECK_HEADER([sys/sdt.h],,
-  [AC_MSG_ERROR([Cannot find sys/sdt.h which is required for DTrace support.])])
+  [AC_MSG_FAILURE([Cannot find required <sys/sdt.h> to enable DTrace support.])])
 
 dnl Set paths properly when called from extension.
   case "$4" in

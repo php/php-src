@@ -100,14 +100,14 @@ if test "$PHP_PDO_ODBC" != "no"; then
     PHP_CHECK_LIBRARY([$pdo_odbc_def_lib], [SQLBindCol],
       [PHP_CHECK_LIBRARY([$pdo_odbc_def_lib], [SQLAllocHandle],
         [],
-        [AC_MSG_ERROR([
+        [AC_MSG_FAILURE([
 Your ODBC library does not appear to be ODBC 3 compatible.
 You should consider using iODBC or unixODBC instead, and loading your
 libraries as a driver in that environment; it will emulate the
 functions required for PDO support.
 ])],
         [$PDO_ODBC_LIBS])],
-      [AC_MSG_ERROR([Your ODBC library does not exist or there was an error. Check config.log for more information])],
+      [AC_MSG_FAILURE([Your ODBC library does not exist or there was an error.])],
       [$PDO_ODBC_LIBS])
   fi
 

@@ -197,19 +197,18 @@ PHP_ARG_WITH([ibm-db2],,
     ODBC_TYPE=ibm-db2
     ODBC_LIBS=-ldb2
 
-    PHP_TEST_BUILD(SQLExecute, [
+    PHP_TEST_BUILD([SQLExecute], [
       AC_DEFINE(HAVE_IBMDB2,1,[ ])
       AC_MSG_RESULT([$ext_output])
     ], [
       AC_MSG_RESULT([no])
-      AC_MSG_ERROR([
-build test failed. Please check the config.log for details.
-You need to source your DB2 environment before running PHP configure:
+      AC_MSG_FAILURE([
+ODBC build test failed. You need to source your DB2 environment before running
+PHP configure:
 # . \$IBM_DB2/db2profile
 ])
-    ], [
-      $ODBC_LFLAGS $ODBC_LIBS
-    ])
+    ],
+    [$ODBC_LFLAGS $ODBC_LIBS])
   else
     AC_MSG_RESULT([no])
   fi
