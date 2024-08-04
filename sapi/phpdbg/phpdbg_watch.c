@@ -1168,8 +1168,9 @@ int phpdbg_print_changed_zvals(void) {
 
 	if (zend_hash_num_elements(PHPDBG_G(watchlist_mem)) > 0) {
 		/* we must not add elements to the hashtable while iterating over it (resize => read into freed memory) */
-		mem_list = PHPDBG_G(watchlist_mem);
-		PHPDBG_G(watchlist_mem) = PHPDBG_G(watchlist_mem_backup);
+		mem_list = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
+		zend_hash_init(mem_list, zend_hash_num_elements(PHPDBG_G(watchlist_mem)), NULL, NULL, false);
+		zend_hash_copy(mem_list, PHPDBG_G(watchlist_mem), (copy_ctor_func_t) zval_add_ref);
 
 		ZEND_HASH_MAP_FOREACH_NUM_KEY(mem_list, page) {
 			phpdbg_btree_position pos = phpdbg_btree_find_between(&PHPDBG_G(watchpoint_tree), page, page + phpdbg_pagesize);
@@ -1192,7 +1193,13 @@ int phpdbg_print_changed_zvals(void) {
 	phpdbg_reenable_memory_watches();
 
 	if (mem_list) {
-		PHPDBG_G(watchlist_mem) = mem_list;
+		zend_hash_destroy(PHPDBG_G(watchlist_mem));
+		free(PHPDBG_G(watchlist_mem));
+		PHPDBG_G(watchlist_mem) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
+		zend_hash_init(PHPDBG_G(watchlist_mem), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, true);
+		zend_hash_copy(PHPDBG_G(watchlist_mem), mem_list, (copy_ctor_func_t) zval_add_ref);
+		zend_hash_destroy(mem_list);
+		free(mem_list);
 		phpdbg_reenable_memory_watches();
 	}
 
