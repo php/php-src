@@ -38,8 +38,8 @@ if test "$PHP_SESSION" != "no"; then
     AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [AC_MSG_ERROR(m4_text_wrap([
       The configure option '--with-mm' cannot be combined with '--enable-zts'.
       The mm library is not thread-safe, and mod_mm.c refuses to compile. Either
-      remove the '--with-mm', or build without thread safety (remove the
-      '--enable-zts').
+      remove the '--with-mm' option, or build without thread safety (remove the
+      '--enable-zts' option).
     ]))])
 
     PHP_ADD_LIBRARY_WITH_PATH([mm],
