@@ -440,12 +440,13 @@ fi
 
 dnl Extension setup
 if test -n "$ODBC_TYPE"; then
-  if test "$ODBC_TYPE" != "dbmaker"; then
-    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    if test "$ODBC_TYPE" != "solid"; then
-      AC_DEFINE(HAVE_SQLDATASOURCES,1,[ ])
-    fi
-  fi
+  AS_VAR_IF([ODBC_TYPE], [dbmaker],, [
+    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], [ODBC_SHARED_LIBADD])
+    AS_VAR_IF([ODBC_TYPE], [solid],,
+      [AC_DEFINE([HAVE_SQLDATASOURCES], [1],
+        [Define to 1 if ODBC library has 'SQLDataSources', as a function or
+        macro.])])
+  ])
 
   AC_DEFINE([HAVE_UODBC], [1],
     [Define to 1 if the PHP extension 'odbc' is available.])
