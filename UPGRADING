@@ -410,7 +410,7 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
 - DOM:
-  . Deprecated DOM_PHP_ERR.
+  . Deprecated DOM_PHP_ERR constant.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
 
 - Intl:
