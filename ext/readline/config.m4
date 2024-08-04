@@ -80,7 +80,8 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   LIBS=$LIBS_SAVE
 
   AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
-  AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
+  AC_DEFINE([HAVE_LIBREADLINE], [1],
+    [Define to 1 if readline extension uses the 'readline' library.])
 
 elif test "$PHP_LIBEDIT" != "no"; then
   if test "$PHP_LIBEDIT" != "yes"; then
@@ -131,7 +132,8 @@ elif test "$PHP_LIBEDIT" != "no"; then
   CFLAGS=$CFLAGS_SAVE
   LIBS=$LIBS_SAVE
 
-  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
+  AC_DEFINE([HAVE_LIBEDIT], [1],
+    [Define to 1 if readline extension uses the 'libedit' library.])
 fi
 
 if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then

@@ -13,6 +13,8 @@ PHP_ARG_WITH([pcre-jit],
   [yes],
   [no])
 
+AH_TEMPLATE([PCRE2_CODE_UNIT_WIDTH],
+  [Number of bits in non-UTF mode for PCRE library.])
 AH_TEMPLATE([HAVE_PCRE_JIT_SUPPORT],
   [Define to 1 if PCRE JIT is enabled and supported.])
 
@@ -21,7 +23,7 @@ if test "$PHP_EXTERNAL_PCRE" != "no"; then
 
   PHP_EVAL_INCLINE([$PCRE2_CFLAGS])
   PHP_EVAL_LIBLINE([$PCRE2_LIBS])
-  AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
+  AC_DEFINE([PCRE2_CODE_UNIT_WIDTH], [8])
 
   AS_VAR_IF([PHP_PCRE_JIT], [no],,
     [AC_CACHE_CHECK([whether external PCRE2 library has JIT supported],
@@ -89,8 +91,9 @@ else
     [-Werror])
 
   PHP_PCRE_CFLAGS="$PHP_PCRE_CFLAGS -DHAVE_CONFIG_H -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
-  AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
+  AC_DEFINE([HAVE_BUNDLED_PCRE], [1],
+    [Define to 1 if PHP uses the bundled PCRE library.])
+  AC_DEFINE([PCRE2_CODE_UNIT_WIDTH], [8])
 
   AS_VAR_IF([PHP_PCRE_JIT], [no],,
     [AC_DEFINE([HAVE_PCRE_JIT_SUPPORT], [1])

@@ -39,7 +39,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
-    AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
+    AC_DEFINE([PDO_USE_MYSQLND], [1],
+      [Define to 1 if the pdo_mysql extension uses mysqlnd.])
   else
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
