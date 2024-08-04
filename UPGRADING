@@ -434,6 +434,11 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
+- Random:
+  . lcg_value() is deprecated, as the function is broken in multiple ways.
+    Use \Random\Randomizer::getFloat() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
 - Reflection:
   . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
     Use ReflectionMethod::createFromMethodName() instead.

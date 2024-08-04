@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
 
+- Random:
+  . lcg_value() is now deprecated. (timwolla)
+
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
 

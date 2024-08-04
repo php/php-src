@@ -27,6 +27,7 @@
 
 #include "php.h"
 
+#include "Zend/zend_attributes.h"
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
 
