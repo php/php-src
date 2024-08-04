@@ -285,9 +285,10 @@ int main(void) {
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [0])
 ])
 
-AS_VAR_IF([cross_compiling], [no], [AC_FUNC_FNMATCH],
+AS_VAR_IF([cross_compiling], [yes],
   [AS_CASE([$host_alias], [*linux*],
-    [AC_DEFINE([HAVE_FNMATCH], [1])])])
+    [AC_DEFINE([HAVE_FNMATCH], [1])])],
+  [AC_FUNC_FNMATCH])
 
 dnl
 dnl Check if there is a support means of creating a new process and defining
