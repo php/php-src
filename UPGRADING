@@ -446,6 +446,8 @@ PHP 8.4 UPGRADE NOTES
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
   . Raising zero to the power of negative number is deprecated.
+  . Unserializing strings using the uppercase 'S' tag is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
 ========================================
 5. Changed Functions
