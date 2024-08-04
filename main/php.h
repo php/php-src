@@ -201,12 +201,6 @@ typedef unsigned int socklen_t;
 #define SET_MUTEX(a)
 #define FREE_MUTEX(a)
 
-/*
- * Then the ODBC support can use both iodbc and Solid,
- * uncomment this.
- * #define HAVE_ODBC (HAVE_IODBC|HAVE_SOLID)
- */
-
 #include <stdlib.h>
 #include <ctype.h>
 #ifdef HAVE_UNISTD_H
