@@ -42,8 +42,13 @@ PHP_HASH_API void PHP_MURMUR3AInit(PHP_MURMUR3A_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			ctx->h = (uint32_t)Z_LVAL_P(seed);
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				ctx->h = (uint32_t) Z_LVAL_P(seed);
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+				ctx->h = 0;
+			}
 		} else {
 			ctx->h = 0;
 		}
@@ -99,12 +104,17 @@ PHP_HASH_API void PHP_MURMUR3CInit(PHP_MURMUR3C_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			uint32_t _seed = (uint32_t)Z_LVAL_P(seed);
-			ctx->h[0] = _seed;
-			ctx->h[1] = _seed;
-			ctx->h[2] = _seed;
-			ctx->h[3] = _seed;
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				uint32_t _seed = (uint32_t)Z_LVAL_P(seed);
+				ctx->h[0] = _seed;
+				ctx->h[1] = _seed;
+				ctx->h[2] = _seed;
+				ctx->h[3] = _seed;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+				memset(&ctx->h, 0, sizeof ctx->h);
+			}
 		} else {
 			memset(&ctx->h, 0, sizeof ctx->h);
 		}
@@ -173,10 +183,15 @@ PHP_HASH_API void PHP_MURMUR3FInit(PHP_MURMUR3F_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			uint64_t _seed = (uint64_t)Z_LVAL_P(seed);
-			ctx->h[0] = _seed;
-			ctx->h[1] = _seed;
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				uint64_t _seed = (uint64_t) Z_LVAL_P(seed);
+				ctx->h[0] = _seed;
+				ctx->h[1] = _seed;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+				memset(&ctx->h, 0, sizeof ctx->h);
+			}
 		} else {
 			memset(&ctx->h, 0, sizeof ctx->h);
 		}

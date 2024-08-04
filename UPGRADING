@@ -413,6 +413,10 @@ PHP 8.4 UPGRADE NOTES
   . Deprecated DOM_PHP_ERR constant.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
 
+- Hash:
+  . Deprecated passing incorrect data types for options to ext/hash functions.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
 - Intl:
   . Calling intlcal_set() as well as calling IntlCalendar::set() with
     more than 2 arguments is deprecated. Use either IntlCalendar::setDate()

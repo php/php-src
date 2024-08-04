@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Deprecated DOM_PHP_ERR constant. (nielsdos)
   . Removed DOMImplementation::getFeature(). (nielsdos)
 
+- Hash:
+  . Deprecated passing incorrect data types for options to ext/hash functions.
+    (nielsdos)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
