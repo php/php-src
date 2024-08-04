@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - Random:
   . lcg_value() is now deprecated. (timwolla)
 
+- Session:
+  . INI settings session.sid_length and session.sid_bits_per_character are now
+    deprecated. (timwolla)
+
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
 
