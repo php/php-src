@@ -43,12 +43,12 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     [PHP_ADD_LIBRARY_WITH_PATH([readline],
       [$READLINE_DIR/$PHP_LIBDIR],
       [READLINE_SHARED_LIBADD])],
-    [AC_MSG_ERROR([readline library not found])],
+    [AC_MSG_FAILURE([The readline library not found.])],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   PHP_CHECK_LIBRARY([readline], [rl_pending_input],
     [],
-    [AC_MSG_ERROR([invalid readline installation detected. Try --with-libedit instead.])],
+    [AC_MSG_FAILURE([Invalid readline installation detected. Try --with-libedit instead.])],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   PHP_CHECK_LIBRARY([readline], [rl_callback_read_char],
@@ -80,7 +80,8 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   LIBS=$LIBS_SAVE
 
   AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
-  AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])
+  AC_DEFINE([HAVE_LIBREADLINE], [1],
+    [Define to 1 if readline extension uses the 'readline' library.])
 
 elif test "$PHP_LIBEDIT" != "no"; then
   if test "$PHP_LIBEDIT" != "yes"; then
@@ -98,7 +99,7 @@ elif test "$PHP_LIBEDIT" != "no"; then
 
   PHP_CHECK_LIBRARY([edit], [readline],
     [],
-    [AC_MSG_ERROR([edit library required by readline not found])],
+    [AC_MSG_FAILURE([The edit library required by readline extension not found.])],
     [$READLINE_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY([edit], [rl_callback_read_char],
@@ -131,7 +132,8 @@ elif test "$PHP_LIBEDIT" != "no"; then
   CFLAGS=$CFLAGS_SAVE
   LIBS=$LIBS_SAVE
 
-  AC_DEFINE(HAVE_LIBEDIT, 1, [ ])
+  AC_DEFINE([HAVE_LIBEDIT], [1],
+    [Define to 1 if readline extension uses the 'libedit' library.])
 fi
 
 if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then

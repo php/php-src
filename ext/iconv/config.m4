@@ -6,7 +6,7 @@ PHP_ARG_WITH([iconv],
 
 if test "$PHP_ICONV" != "no"; then
   PHP_SETUP_ICONV([ICONV_SHARED_LIBADD],,
-    [AC_MSG_ERROR([The iconv not found. Please, check config.log for details.])])
+    [AC_MSG_FAILURE([The iconv not found.])])
 
     save_LDFLAGS="$LDFLAGS"
     save_CFLAGS="$CFLAGS"
@@ -93,7 +93,7 @@ int main(void) {
     [php_cv_iconv_errno=no],
     [php_cv_iconv_errno=yes])])
     AS_VAR_IF([php_cv_iconv_errno], [yes],,
-      [AC_MSG_ERROR([iconv does not support errno])])
+      [AC_MSG_FAILURE([The iconv check failed, 'errno' is missing.])])
 
     AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
       [AC_RUN_IFELSE([AC_LANG_SOURCE([[

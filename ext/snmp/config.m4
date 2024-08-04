@@ -40,7 +40,7 @@ if test "$PHP_SNMP" != "no"; then
   PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [init_snmp],
     [AC_DEFINE([HAVE_SNMP], [1],
       [Define to 1 if the PHP extension 'snmp' is available.])],
-    [AC_MSG_ERROR([SNMP sanity check failed. Please check config.log for more information.])],
+    [AC_MSG_FAILURE([SNMP sanity check failed.])],
     [$SNMP_SHARED_LIBADD])
 
   dnl Check whether shutdown_snmp_logging() exists.

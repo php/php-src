@@ -434,6 +434,11 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
+- Random:
+  . lcg_value() is deprecated, as the function is broken in multiple ways.
+    Use \Random\Randomizer::getFloat() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
 - Reflection:
   . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
     Use ReflectionMethod::createFromMethodName() instead.
@@ -450,6 +455,8 @@ PHP 8.4 UPGRADE NOTES
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
   . Raising zero to the power of negative number is deprecated.
+  . Unserializing strings using the uppercase 'S' tag is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
 ========================================
 5. Changed Functions

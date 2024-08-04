@@ -58,5 +58,5 @@ if test "$PHP_CGI" != "no"; then
     PHP_SUBST([SAPI_CGI_PATH])
     PHP_SUBST([BUILD_CGI])
 
-    PHP_OUTPUT([sapi/cgi/php-cgi.1])
+    AC_CONFIG_FILES([sapi/cgi/php-cgi.1])
 fi

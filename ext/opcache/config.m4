@@ -325,7 +325,7 @@ int main(void) {
       AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
         [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
       AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
-        [Define if you have POSIX mmap() SHM support])
+        [Define to 1 if you have the POSIX mmap() SHM support.])
     fi
   ])
   LIBS="$LIBS_save"
@@ -353,7 +353,7 @@ int main(void) {
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
   if test "$php_cv_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$php_cv_shm_mmap_anon" != "yes"; then
-    AC_MSG_ERROR([No supported shared memory caching support was found when configuring opcache. Check config.log for any errors or missing dependencies.])
+    AC_MSG_FAILURE([No supported shared memory caching support was found when configuring opcache.])
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then

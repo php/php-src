@@ -95,7 +95,6 @@
 #define HAVE_GLOB
 #define PHP_SHLIB_SUFFIX "dll"
 #define PHP_SHLIB_EXT_PREFIX "php_"
-#define HAVE_SQLDATASOURCES
 
 /* Win32 supports socketpair by the emulation in win32/sockets.c */
 #define HAVE_SOCKETPAIR 1

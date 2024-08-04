@@ -94,12 +94,12 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
 AC_SEARCH_LIBS([crypt], [crypt],
   [AC_DEFINE([HAVE_CRYPT], [1],
     [Define to 1 if you have the 'crypt' function.])],
-  [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
+  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt() is missing.])])
 
 AC_SEARCH_LIBS([crypt_r], [crypt],
   [AC_DEFINE([HAVE_CRYPT_R], [1],
     [Define to 1 if you have the 'crypt_r' function.])],
-  [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt_r() is missing.])])
 
 PHP_CRYPT_R_STYLE
 AC_CHECK_HEADERS([crypt.h])
@@ -279,7 +279,7 @@ int main(void) {
 
 
   if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
-    AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
+    AC_MSG_FAILURE([Cannot use external libcrypt as some algo are missing.])
   fi
 
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [0])

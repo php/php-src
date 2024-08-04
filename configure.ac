@@ -602,8 +602,8 @@ AC_CHECK_FUNCS(m4_normalize([
   vasprintf
 ]))
 
-AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
-AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
+AC_CHECK_FUNC([inet_ntop],, [AC_MSG_FAILURE([Required inet_ntop not found.])])
+AC_CHECK_FUNC([inet_pton],, [AC_MSG_FAILURE([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
@@ -856,7 +856,7 @@ fi
 
 AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AS_VAR_IF([pthreads_working], [yes], [],
-    [AC_MSG_ERROR(m4_normalize([
+    [AC_MSG_FAILURE(m4_normalize([
       Unable to verify system support for POSIX Threads, which are required for
       PHP thread safety (ZTS) build.
     ]))])
@@ -978,7 +978,7 @@ AS_VAR_IF([PHP_DMALLOC], [yes],
     [PHP_ADD_LIBRARY([dmalloc])
       AC_DEFINE([HAVE_DMALLOC], [1], [Define to 1 if you have dmalloc.])
       AS_VAR_APPEND([CPPFLAGS], [" -DDMALLOC_FUNC_CHECK"])],
-    [AC_MSG_ERROR([Problem with enabling dmalloc. Please, check config.log for details.])])])
+    [AC_MSG_FAILURE([The dmalloc check failed. Cannot enable dmalloc.])])])
 
 PHP_ARG_ENABLE([ipv6],
   [whether to enable IPv6 support],
@@ -1312,7 +1312,7 @@ else
   AC_CHECK_HEADER([ucontext.h],
     [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1],
       [Define to 1 if Zend fiber uses ucontext instead of boost context.])],
-    [AC_MSG_ERROR([fibers not available on this platform])])
+    [AC_MSG_FAILURE([fibers not available on this platform])])
 fi
 
 ZEND_INIT
@@ -1829,13 +1829,13 @@ PHP_ADD_BUILD_DIR(m4_normalize([
   Zend/Optimizer
 ]))
 
-ALL_OUTPUT_FILES="main/build-defs.h \
-scripts/phpize scripts/man1/phpize.1 \
-scripts/php-config scripts/man1/php-config.1 \
-$PHP_OUTPUT_FILES"
-
-dnl Generate build files.
-AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
+AC_CONFIG_FILES([
+  main/build-defs.h
+  scripts/man1/php-config.1
+  scripts/man1/phpize.1
+  scripts/php-config
+  scripts/phpize
+])
 
 AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([main/php_config.h.in])])
 
@@ -1855,24 +1855,16 @@ Thank you for using PHP.
 
 X
 ],[
-
-if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
-  REDO_ALL=yes
-fi
-
 dnl Create configuration headers.
 dnl ----------------------------------------------------------------------------
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
 FEO
 
-dnl Run this only when generating all the files.
-if test -n "\$REDO_ALL"; then
-  echo "creating main/internal_functions.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
+echo "creating main/internal_functions.c"
+AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
 
-  echo "creating main/internal_functions_cli.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
-fi
+echo "creating main/internal_functions_cli.c"
+AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
 ])
 AC_OUTPUT
