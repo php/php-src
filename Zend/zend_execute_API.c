@@ -200,6 +200,9 @@ void init_executor(void) /* {{{ */
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 
+	EG(guard_context) = 0;
+	EG(guard_context_counter) = 0;
+
 	zend_max_execution_timer_init();
 	zend_fiber_init();
 	zend_weakrefs_init();
