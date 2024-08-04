@@ -985,20 +985,18 @@ static inline char html5_find_short_reference_name(const char *input, size_t off
 
 static inline size_t html5_find_large_reference_name_group(const char *input, const size_t offset, bool *did_find_group) {
     zend_uchar group1 = input[offset];
-    zend_uchar group2 = input[offset + 1];
-    zend_uchar letter1 = group1;
-    zend_uchar letter2 = '\0';
+    uint16_t goal = *(uint16_t *)(&input[offset]);
     size_t i = html5_named_character_references_lookup.group_starts[group1];
     if (0 == i && 'A' != group1) {
         return 0;
     }
     size_t end = html5_named_character_references_lookup.groups_length;
+    uint16_t test = 0;
 
-    for (; i < end && letter1 == group1; i += 2) {
-        letter1 = html5_named_character_references_lookup.groups[i];
-        letter2 = html5_named_character_references_lookup.groups[i + 1];
+    for (; i < end && goal > test; i += 2) {
+        test = *(uint16_t *)(&html5_named_character_references_lookup.groups[i]);
 
-        if (letter2 == group2) {
+        if (goal == test) {
             *did_find_group = 1;
             return i >> 1;
         }
