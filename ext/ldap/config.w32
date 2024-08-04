@@ -16,7 +16,7 @@ if (PHP_LDAP != "no") {
 		AC_DEFINE('HAVE_LDAP_PARSE_REFERENCE', 1);
 		AC_DEFINE('HAVE_LDAP_START_TLS_S', 1);
 		AC_DEFINE('HAVE_LDAP', 1, "Define to 1 if the PHP extension 'ldap' is available.");
-		AC_DEFINE('HAVE_LDAP_SASL', 1);
+		AC_DEFINE('HAVE_LDAP_SASL', 1, 'Define to 1 if the ldap extension has SASL support enabled.');
 		AC_DEFINE('HAVE_LDAP_CONTROL_FIND', 1);
 		AC_DEFINE('HAVE_LDAP_PARSE_EXTENDED_RESULT', 1);
 		AC_DEFINE('HAVE_LDAP_EXTENDED_OPERATION_S', 1);

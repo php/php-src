@@ -197,19 +197,18 @@ PHP_ARG_WITH([ibm-db2],,
     ODBC_TYPE=ibm-db2
     ODBC_LIBS=-ldb2
 
-    PHP_TEST_BUILD(SQLExecute, [
+    PHP_TEST_BUILD([SQLExecute], [
       AC_DEFINE(HAVE_IBMDB2,1,[ ])
       AC_MSG_RESULT([$ext_output])
     ], [
       AC_MSG_RESULT([no])
-      AC_MSG_ERROR([
-build test failed. Please check the config.log for details.
-You need to source your DB2 environment before running PHP configure:
+      AC_MSG_FAILURE([
+ODBC build test failed. You need to source your DB2 environment before running
+PHP configure:
 # . \$IBM_DB2/db2profile
 ])
-    ], [
-      $ODBC_LFLAGS $ODBC_LIBS
-    ])
+    ],
+    [$ODBC_LFLAGS $ODBC_LIBS])
   else
     AC_MSG_RESULT([no])
   fi
@@ -441,12 +440,13 @@ fi
 
 dnl Extension setup
 if test -n "$ODBC_TYPE"; then
-  if test "$ODBC_TYPE" != "dbmaker"; then
-    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    if test "$ODBC_TYPE" != "solid"; then
-      AC_DEFINE(HAVE_SQLDATASOURCES,1,[ ])
-    fi
-  fi
+  AS_VAR_IF([ODBC_TYPE], [dbmaker],, [
+    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], [ODBC_SHARED_LIBADD])
+    AS_VAR_IF([ODBC_TYPE], [solid],,
+      [AC_DEFINE([HAVE_SQLDATASOURCES], [1],
+        [Define to 1 if ODBC library has 'SQLDataSources', as a function or
+        macro.])])
+  ])
 
   AC_DEFINE([HAVE_UODBC], [1],
     [Define to 1 if the PHP extension 'odbc' is available.])

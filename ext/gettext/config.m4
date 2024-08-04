@@ -25,7 +25,7 @@ if test "$PHP_GETTEXT" != "no"; then
       GETTEXT_LIBS=
       GETTEXT_CHECK_IN_LIB=c
       ],
-      [AC_MSG_ERROR([Unable to find required gettext library])])])
+      [AC_MSG_FAILURE([Unable to find required intl library for gettext.])])])
 
   AC_DEFINE([HAVE_LIBINTL], [1], [Define to 1 if you have the 'intl' library.])
   PHP_NEW_EXTENSION([gettext], [gettext.c], [$ext_shared])

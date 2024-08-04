@@ -274,10 +274,11 @@ dnl Various checks for GD features
 
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
 
-    PHP_TEST_BUILD(foobar, [], [
-      AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])
-    ], [ $GD_SHARED_LIBADD ], [char foobar(void) { return '\0'; }])
-
+    PHP_TEST_BUILD([foobar],
+      [],
+      [AC_MSG_FAILURE([GD library build test failed.])],
+      [$GD_SHARED_LIBADD],
+      [char foobar(void) { return '\0'; }])
   else
     extra_sources="gd_compat.c"
     PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
@@ -290,7 +291,7 @@ dnl Various checks for GD features
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h])
     PHP_CHECK_LIBRARY([gd], [gdImageCreate],
       [],
-      [AC_MSG_ERROR([GD build test failed. Please check the config.log for details.])],
+      [AC_MSG_FAILURE([GD library build test failed.])],
       [$GD_SHARED_LIBADD])
   fi
 

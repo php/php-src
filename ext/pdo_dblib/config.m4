@@ -14,7 +14,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     dnl Only perform a sanity check that this is really the case.
     PHP_CHECK_LIBRARY([sybdb], [dbsqlexec],
       [],
-      [AC_MSG_ERROR([Cannot find FreeTDS in known installation directories])])
+      [AC_MSG_FAILURE([Cannot find FreeTDS in known installation directories.])])
     PHP_ADD_LIBRARY([sybdb],, [PDO_DBLIB_SHARED_LIBADD])
   elif test "$PHP_PDO_DBLIB" != "no"; then
 

@@ -47,7 +47,7 @@ AS_VAR_IF([PHP_%EXTNAMECAPS%], [no],, [
   dnl PHP_CHECK_LIBRARY([$LIBNAME], [$LIBSYMBOL],
   dnl   [AC_DEFINE([HAVE_%EXTNAMECAPS%_FEATURE], [1],
   dnl     [Define to 1 if %EXTNAME% has the 'FEATURE'.])],
-  dnl   [AC_MSG_ERROR([FEATURE not supported by your %EXTNAME% library.])],
+  dnl   [AC_MSG_FAILURE([FEATURE not supported by your %EXTNAME% library.])],
   dnl   [$LIBFOO_LIBS])
   dnl
 
@@ -89,7 +89,7 @@ AS_VAR_IF([PHP_%EXTNAMECAPS%], [no],, [
   dnl     AC_DEFINE([HAVE_%EXTNAMECAPS%_FEATURE], [1],
   dnl       [Define to 1 if %EXTNAME% has the 'FEATURE'.])
   dnl   ],
-  dnl   [AC_MSG_ERROR([FEATURE not supported by your %EXTNAME% library.])],
+  dnl   [AC_MSG_FAILURE([FEATURE not supported by your %EXTNAME% library.])],
   dnl   [-L$%EXTNAMECAPS%_DIR/$PHP_LIBDIR -lm])
   dnl
 

@@ -17,6 +17,9 @@ PHP                                                                        NEWS
 - Random:
   . lcg_value() is now deprecated. (timwolla)
 
+- Standard:
+  . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
+
 01 Aug 2024, PHP 8.4.0alpha4
 
 - GMP:

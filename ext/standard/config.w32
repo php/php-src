@@ -17,7 +17,7 @@ if (PHP_PASSWORD_ARGON2 != "no") {
 ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", "");
 
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
-AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1);
+AC_DEFINE("PHP_USE_PHP_CRYPT_R", 1, "Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt library.");
 
 CHECK_HEADER_ADD_INCLUDE("timelib_config.h", "CFLAGS_STANDARD", "ext/date/lib");
 

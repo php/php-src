@@ -24,7 +24,7 @@ if test "$PHP_BZ2" != "no"; then
     AC_DEFINE([HAVE_BZ2], [1],
       [Define to 1 if the PHP extension 'bz2' is available.])
     ],
-    [AC_MSG_ERROR([bz2 module requires libbz2 >= 1.0.0])],
+    [AC_MSG_FAILURE([The bz2 extension requires libbz2 >= 1.0.0])],
     [-L$BZIP_DIR/$PHP_LIBDIR])
 
   PHP_NEW_EXTENSION([bz2], [bz2.c bz2_filter.c], [$ext_shared])
