@@ -396,14 +396,44 @@ PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest)
 /* {{{ php_combined_lcg */
 PHPAPI double php_combined_lcg(void)
 {
-	php_random_status_state_combinedlcg *state = &RANDOM_G(combined_lcg);
+	int32_t *state = RANDOM_G(combined_lcg);
 
 	if (!RANDOM_G(combined_lcg_seeded)) {
-		php_random_combinedlcg_seed_default(state);
+		uint64_t seed = 0;
+
+		if (php_random_bytes_silent(&seed, sizeof(seed)) == FAILURE) {
+			seed = php_random_generate_fallback_seed();
+		}
+
+		state[0] = seed & 0xffffffffU;
+		state[1] = seed >> 32;
 		RANDOM_G(combined_lcg_seeded) = true;
 	}
 
-	return php_random_algo_combinedlcg.generate(state).result * 4.656613e-10;
+	/*
+	 * combinedLCG() returns a pseudo random number in the range of (0, 1).
+	 * The function combines two CGs with periods of
+	 * 2^31 - 85 - 1 and 2^31 - 249 - 1. The period of this function
+	 * is equal to the product of the two underlying periods, divided
+	 * by factors shared by the underlying periods, i.e. 2.3 * 10^18.
+	 *
+	 * see: https://library.sciencemadness.org/lanl1_a/lib-www/numerica/f7-1.pdf
+	 */
+#define PHP_COMBINED_LCG_MODMULT(a, b, c, m, s) q = s / a; s = b * (s - a * q) - c * q; if (s < 0) s += m
+
+	int32_t q, z;
+
+	/* state[0] = (state[0] * 40014) % 2147483563; */
+	PHP_COMBINED_LCG_MODMULT(53668, 40014, 12211, 2147483563L, state[0]);
+	/* state[1] = (state[1] * 40692) % 2147483399; */
+	PHP_COMBINED_LCG_MODMULT(52774, 40692, 3791, 2147483399L, state[1]);
+
+	z = state[0] - state[1];
+	if (z < 1) {
+		z += 2147483562;
+	}
+
+	return ((uint64_t)z) * 4.656613e-10;
 }
 /* }}} */
 

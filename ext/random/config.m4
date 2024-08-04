@@ -17,7 +17,6 @@ dnl Setup extension
 dnl
 PHP_NEW_EXTENSION([random], m4_normalize([
     csprng.c
-    engine_combinedlcg.c
     engine_mt19937.c
     engine_pcgoneseq128xslrr64.c
     engine_secure.c
