@@ -802,7 +802,7 @@ PHP_ARG_ENABLE([debug],
   [no],
   [no])
 
-if test "$PHP_DEBUG" = "yes"; then
+AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
@@ -824,10 +824,10 @@ if test "$PHP_DEBUG" = "yes"; then
       CXXFLAGS="$CFLAGS -g"
     fi
   fi
-else
+], [
   PHP_DEBUG=0
   ZEND_DEBUG=no
-fi
+])
 
 PHP_ARG_ENABLE([debug-assertions],
   [whether to enable debug assertions in release mode],
@@ -836,10 +836,10 @@ PHP_ARG_ENABLE([debug-assertions],
   [no],
   [no])
 
-if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
+AS_VAR_IF([PHP_DEBUG_ASSERTIONS], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
-fi
+])
 
 AC_ARG_ENABLE([zts],
   [AS_HELP_STRING([--enable-zts],
@@ -1367,11 +1367,7 @@ ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modul
 if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO
   if test "$oldstyleextdir" = "yes"; then
-    if test "$PHP_DEBUG" = "1"; then
-      part1=debug
-    else
-      part1=no-debug
-    fi
+    AS_VAR_IF([PHP_DEBUG], [1], [part1=debug], [part1=no-debug])
     if test "$enable_zts" = "yes"; then
       part2=zts
     else
@@ -1383,10 +1379,7 @@ if test -z "$EXTENSION_DIR"; then
     if test "$enable_zts" = "yes"; then
       extbasedir=$extbasedir-zts
     fi
-
-    if test "$PHP_DEBUG" = "1"; then
-      extbasedir=$extbasedir-debug
-    fi
+    AS_VAR_IF([PHP_DEBUG], [1], [extbasedir=$extbasedir-debug])
     EXTENSION_DIR=$libdir/$extbasedir
   fi
 fi

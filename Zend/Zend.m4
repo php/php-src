@@ -168,16 +168,15 @@ AC_MSG_RESULT([$ZEND_ZTS])
 
 AC_MSG_CHECKING([whether to enable Zend debugging])
 AC_MSG_RESULT([$ZEND_DEBUG])
-
-if test "$ZEND_DEBUG" = "yes"; then
-  AC_DEFINE(ZEND_DEBUG,1,[ ])
+AH_TEMPLATE([ZEND_DEBUG],
+  [Define to 1 if debugging is enabled, and to 0 if not.])
+AS_VAR_IF([ZEND_DEBUG], [yes], [
+  AC_DEFINE([ZEND_DEBUG], [1])
   echo " $CFLAGS" | grep ' -g' >/dev/null || DEBUG_CFLAGS="-g"
   if test "$CFLAGS" = "-g -O2"; then
     CFLAGS=-g
   fi
-else
-  AC_DEFINE(ZEND_DEBUG,0,[ ])
-fi
+], [AC_DEFINE([ZEND_DEBUG], [0])])
 
 test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
 dnl Check if compiler supports -Wno-clobbered (only GCC)
