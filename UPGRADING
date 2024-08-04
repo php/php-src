@@ -409,6 +409,10 @@ PHP 8.4 UPGRADE NOTES
     the associated date_sunset() and date_sunrise() functions in PHP 8.1.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
+- DOM:
+  . Deprecated DOM_PHP_ERR constant.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
+
 - Intl:
   . Calling intlcal_set() as well as calling IntlCalendar::set() with
     more than 2 arguments is deprecated. Use either IntlCalendar::setDate()
