@@ -405,7 +405,7 @@ PHP 8.4 UPGRADE NOTES
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
     deprecated. Use DatePeriod::createFromISO8601String() instead.
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and
-    SUNFUNCS_RET_DOUBLE are not deprecated, following the deprecation of
+    SUNFUNCS_RET_DOUBLE are now deprecated, following the deprecation of
     the associated date_sunset() and date_sunrise() functions in PHP 8.1.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
