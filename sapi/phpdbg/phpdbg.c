@@ -1375,7 +1375,7 @@ phpdbg_main:
 				char *prepended_version_info;
 				spprintf(&prepended_version_info, 0,
 						"phpdbg %s, %s", PHPDBG_VERSION, version_info);
-				phpdbg_out(prepended_version_info);
+				phpdbg_out("%s", prepended_version_info);
 				efree(prepended_version_info);
 				efree(version_info);
 			}
