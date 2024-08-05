@@ -645,6 +645,13 @@ static void soap_fault_dtor_properties(zval *obj)
 	zval_ptr_dtor(Z_FAULT_DETAIL_P(obj));
 	zval_ptr_dtor(Z_FAULT_NAME_P(obj));
 	zval_ptr_dtor(Z_FAULT_HEADERFAULT_P(obj));
+	ZVAL_EMPTY_STRING(Z_FAULT_STRING_P(obj));
+	ZVAL_NULL(Z_FAULT_CODE_P(obj));
+	ZVAL_NULL(Z_FAULT_CODENS_P(obj));
+	ZVAL_NULL(Z_FAULT_ACTOR_P(obj));
+	ZVAL_NULL(Z_FAULT_DETAIL_P(obj));
+	ZVAL_NULL(Z_FAULT_NAME_P(obj));
+	ZVAL_NULL(Z_FAULT_HEADERFAULT_P(obj));
 }
 
 /* {{{ SoapFault constructor */
@@ -667,9 +674,6 @@ PHP_METHOD(SoapFault, __construct)
 		Z_PARAM_ZVAL_OR_NULL(headerfault)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Delete previously set properties */
-	soap_fault_dtor_properties(ZEND_THIS);
-
 	if (code_str) {
 		fault_code = ZSTR_VAL(code_str);
 		fault_code_len = ZSTR_LEN(code_str);
@@ -687,6 +691,9 @@ PHP_METHOD(SoapFault, __construct)
 		zend_argument_value_error(1, "is not a valid fault code");
 		RETURN_THROWS();
 	}
+
+	/* Delete previously set properties */
+	soap_fault_dtor_properties(ZEND_THIS);
 
 	if (name != NULL && ZSTR_LEN(name) == 0) {
 		name = NULL;
