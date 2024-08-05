@@ -68,7 +68,8 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   LDFLAGS="$LDFLAGS -L$READLINE_DIR/$PHP_LIBDIR"
   LIBS="$LIBS -lreadline"
 
-  dnl Sanity check if readline library has variable rl_pending_input.
+  dnl Sanity and minimum version check if readline library has variable
+  dnl rl_pending_input.
   AC_CHECK_DECL([rl_pending_input],, [AC_MSG_FAILURE([
       Invalid readline installation detected. Try --with-libedit instead.
     ])], [
