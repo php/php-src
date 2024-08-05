@@ -286,7 +286,7 @@ dnl Various checks for GD features
     PHP_EVAL_LIBLINE([$GDLIB_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$GDLIB_CFLAGS])
     AC_DEFINE([HAVE_LIBGD], [1],
-      [Define to if 1 gd extension uses external system GD library.])
+      [Define to 1 if gd extension uses external system GD library.])
     PHP_GD_CHECK_VERSION
 
     PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared])
