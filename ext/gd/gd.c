@@ -528,10 +528,10 @@ PHP_FUNCTION(gd_info)
 PHP_FUNCTION(imageloadfont)
 {
 	zend_string *file;
-	int hdr_size = sizeof(gdFont) - sizeof(char *);
 	int body_size, n = 0, b, i, body_size_check;
 	gdFontPtr font;
 	php_stream *stream;
+	uint32_t hdr_buf[4];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH_STR(file)
@@ -542,9 +542,7 @@ PHP_FUNCTION(imageloadfont)
 		RETURN_FALSE;
 	}
 
-	/* Only supports a architecture-dependent binary dump format
-	 * at the moment.
-	 * The file format is like this on machines with 32-byte integers:
+	/* The file format is like this on machines with 32-byte integers:
 	 *
 	 * byte 0-3:   (int) number of characters in the font
 	 * byte 4-7:   (int) value of first character in the font (often 32, space)
@@ -554,14 +552,7 @@ PHP_FUNCTION(imageloadfont)
 	 *                    in each character, for a total of
 	 *                    (nchars*width*height) bytes.
 	 */
-	font = (gdFontPtr) emalloc(sizeof(gdFont));
-	b = 0;
-	while (b < hdr_size && (n = php_stream_read(stream, (char*)&font[b], hdr_size - b)) > 0) {
-		b += n;
-	}
-
-	if (n <= 0) {
-		efree(font);
+	if (php_stream_read(stream, (char *) hdr_buf, sizeof(hdr_buf)) != sizeof(hdr_buf)) {
 		if (php_stream_eof(stream)) {
 			php_error_docref(NULL, E_WARNING, "End of file while reading header");
 		} else {
@@ -570,18 +561,22 @@ PHP_FUNCTION(imageloadfont)
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
-	i = php_stream_tell(stream);
-	php_stream_seek(stream, 0, SEEK_END);
-	body_size_check = php_stream_tell(stream) - hdr_size;
-	php_stream_seek(stream, i, SEEK_SET);
+
+	font = (gdFontPtr) emalloc(sizeof(gdFont));
 
 	/* Typically a font should only contain 256 characters.  If the total
 	 * characters exceeds a two bytes value, assume opposite endianness. */
-	if ((font->nchars < 0) || (font->nchars > 0xffff)) {
-		font->nchars = FLIPWORD(font->nchars);
-		font->offset = FLIPWORD(font->offset);
-		font->w = FLIPWORD(font->w);
-		font->h = FLIPWORD(font->h);
+	if (hdr_buf[0] > 0xffff) {
+		font->nchars = (int) FLIPWORD(hdr_buf[0]);
+		font->offset = (int) FLIPWORD(hdr_buf[1]);
+		font->w = (int) FLIPWORD(hdr_buf[2]);
+		font->h = (int) FLIPWORD(hdr_buf[3]);
+	}
+	else {
+		font->nchars = (int) hdr_buf[0];
+		font->offset = (int) hdr_buf[1];
+		font->w = (int) hdr_buf[2];
+		font->h = (int) hdr_buf[3];
 	}
 
 	if (overflow2(font->nchars, font->h) || overflow2(font->nchars * font->h, font->w) ||
@@ -591,6 +586,11 @@ PHP_FUNCTION(imageloadfont)
 		php_stream_close(stream);
 		RETURN_FALSE;
 	}
+
+	i = php_stream_tell(stream);
+	php_stream_seek(stream, 0, SEEK_END);
+	body_size_check = php_stream_tell(stream) - sizeof(hdr_buf);
+	php_stream_seek(stream, i, SEEK_SET);
 
 	body_size = font->w * font->h * font->nchars;
 
