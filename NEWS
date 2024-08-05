@@ -45,6 +45,7 @@ PHP                                                                        NEWS
 
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
+  . Fix SoapFault property destruction. (nielsdos)
 
 - Standard:
   . Fix passing non-finite timeout values in stream functions. (nielsdos)
