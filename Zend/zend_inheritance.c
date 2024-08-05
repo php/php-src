@@ -2833,6 +2833,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 						memcpy(new_fn, old_fn, sizeof(zend_op_array));
 						new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 						new_fn->common.fn_flags |= ZEND_ACC_TRAIT_CLONE;
+						new_fn->common.prop_info = new_prop;
 						function_add_ref(new_fn);
 
 						zend_fixup_trait_method(new_fn, ce);
