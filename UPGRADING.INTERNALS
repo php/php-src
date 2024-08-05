@@ -301,6 +301,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added php_libxml_uses_internal_errors().
    - Added a way to override document handlers (e.g. serialization) with
      php_libxml_document_handlers.
+   - Changed the refcount fields from int to unsigned int.
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.
