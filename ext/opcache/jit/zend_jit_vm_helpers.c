@@ -1186,14 +1186,31 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 				uint32_t info = 0;
 				zend_jit_op_array_trace_extension *jit_extension;
 
-				if ((EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)
+				if (EX(call)->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 #ifdef HAVE_FFI
-				 && op1_ffi_symbols == NULL
-#endif
-				) {
+					int i = idx;
+					const zend_op *last_opline = NULL;
+					while (i > 0) {
+						i--;
+						if (trace_buffer[i].op == ZEND_JIT_TRACE_VM) {
+							last_opline = trace_buffer[i].opline;
+							break;
+						}
+					}
+					if (last_opline && last_opline->opcode == ZEND_INIT_METHOD_CALL && op1_ffi_symbols) {
+						/* pass */
+					} else if (last_opline && last_opline->opcode == ZEND_INIT_DYNAMIC_CALL && op2_ffi_type) {
+						/* pass */
+					} else {
+						/* TODO: Can we continue recording ??? */
+						stop = ZEND_JIT_TRACE_STOP_TRAMPOLINE;
+						break;
+					}
+#else
 					/* TODO: Can we continue recording ??? */
 					stop = ZEND_JIT_TRACE_STOP_TRAMPOLINE;
 					break;
+#endif
 				} else if (EX(call)->func->common.fn_flags & ZEND_ACC_NEVER_CACHE) {
 					/* TODO: Can we continue recording ??? */
 					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
