@@ -377,6 +377,8 @@ static void zend_reset_import_tables(void) /* {{{ */
 		efree(FC(imports_const));
 		FC(imports_const) = NULL;
 	}
+
+	zend_hash_clean(&FC(seen_symbols));
 }
 /* }}} */
 

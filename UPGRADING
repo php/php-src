@@ -248,6 +248,10 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecated_attribute
   . Implemented property hooks.
     RFC: https://wiki.php.net/rfc/property-hooks
+  . Exiting a namespace now clears seen symbols. This allows using a symbol in a
+    namespace block, even if a previous namespace block declared a symbol with
+    the same name.
+    See Zend/tests/use_function/ns_end_resets_seen_symbols_1.phpt.
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
