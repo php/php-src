@@ -183,6 +183,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      used instead of the pkg-config search.
    - Added pkg-config support to find unixODBC and iODBC for the pdo_odbc
      extension.
+   - Added pkg-config support to find GNU MP library. As a fallback default
+     system paths are searched. When a directory argument is provided
+     (--with-gmp=DIR), it will be used instead of the pkg-config.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
    - Cache variables synced to php_cv_* naming scheme. If you use them for
