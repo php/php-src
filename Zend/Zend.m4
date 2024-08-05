@@ -163,8 +163,12 @@ ZEND_DLSYM_CHECK
 ZEND_CHECK_GLOBAL_REGISTER_VARIABLES
 ZEND_CHECK_CPUID_COUNT
 
-AC_MSG_CHECKING([whether to enable thread-safety])
+AC_MSG_CHECKING([whether to enable thread safety])
 AC_MSG_RESULT([$ZEND_ZTS])
+AS_VAR_IF([ZEND_ZTS], [yes], [
+  AC_DEFINE([ZTS], [1], [Define to 1 if thread safety (ZTS) is enabled.])
+  AS_VAR_APPEND([CFLAGS], [" -DZTS"])
+])
 
 AC_MSG_CHECKING([whether to enable Zend debugging])
 AC_MSG_RESULT([$ZEND_DEBUG])
@@ -190,11 +194,6 @@ AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes], CFLAGS="-Wstrict-prototypes $CFLAGS
 AX_CHECK_COMPILE_FLAG([-fno-common], CFLAGS="-fno-common $CFLAGS", , [-Werror])
 
 AS_VAR_IF([DEBUG_CFLAGS],,, [AS_VAR_APPEND([CFLAGS], [" $DEBUG_CFLAGS"])])
-
-if test "$ZEND_ZTS" = "yes"; then
-  AC_DEFINE(ZTS,1,[ ])
-  CFLAGS="$CFLAGS -DZTS"
-fi
 
 ZEND_CHECK_ALIGNMENT
 ZEND_CHECK_SIGNALS
