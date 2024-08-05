@@ -398,11 +398,38 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 }
 /* }}} */
 
+HashTable *zend_generator_frame_gc(zend_get_gc_buffer *gc_buffer, zend_generator *generator)
+{
+	zend_execute_data *execute_data = generator->execute_data;
+	zend_execute_data *call = NULL;
+
+	zend_get_gc_buffer_add_zval(gc_buffer, &generator->value);
+	zend_get_gc_buffer_add_zval(gc_buffer, &generator->key);
+	zend_get_gc_buffer_add_zval(gc_buffer, &generator->retval);
+	zend_get_gc_buffer_add_zval(gc_buffer, &generator->values);
+
+	if (UNEXPECTED(generator->frozen_call_stack)) {
+		/* The frozen stack is linked in reverse order */
+		call = zend_generator_revert_call_stack(generator->frozen_call_stack);
+	}
+
+	HashTable *ht = zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, true);
+
+	if (UNEXPECTED(generator->frozen_call_stack)) {
+		zend_generator_revert_call_stack(call);
+	}
+
+	if (generator->node.parent) {
+		zend_get_gc_buffer_add_obj(gc_buffer, &generator->node.parent->std);
+	}
+
+	return ht;
+}
+
 static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *n) /* {{{ */
 {
 	zend_generator *generator = (zend_generator*)object;
 	zend_execute_data *execute_data = generator->execute_data;
-	zend_execute_data *call = NULL;
 
 	if (!execute_data) {
 		/* If the generator has been closed, it can only hold on to three values: The value, key
@@ -422,34 +449,11 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 		return NULL;
 	}
 
-
 	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-	zend_get_gc_buffer_add_zval(gc_buffer, &generator->value);
-	zend_get_gc_buffer_add_zval(gc_buffer, &generator->key);
-	zend_get_gc_buffer_add_zval(gc_buffer, &generator->retval);
-	zend_get_gc_buffer_add_zval(gc_buffer, &generator->values);
-
-	if (UNEXPECTED(generator->frozen_call_stack)) {
-		/* The frozen stack is linked in reverse order */
-		call = zend_generator_revert_call_stack(generator->frozen_call_stack);
-	}
-
-	zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, true);
-
-	if (UNEXPECTED(generator->frozen_call_stack)) {
-		zend_generator_revert_call_stack(call);
-	}
-
-	if (generator->node.parent) {
-		zend_get_gc_buffer_add_obj(gc_buffer, &generator->node.parent->std);
-	}
-
+	HashTable *ht = zend_generator_frame_gc(gc_buffer, generator);
 	zend_get_gc_buffer_use(gc_buffer, table, n);
-	if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
-		return execute_data->symbol_table;
-	} else {
-		return NULL;
-	}
+
+	return ht;
 }
 /* }}} */
 
