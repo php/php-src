@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - Random:
   . lcg_value() is now deprecated. (timwolla)
 
+- Readline:
+  . Fixed bug #51558 (Shared readline build fails). (Peter Kokot)
+
 - Session:
   . INI settings session.sid_length and session.sid_bits_per_character are now
     deprecated. (timwolla)
