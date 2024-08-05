@@ -30,6 +30,15 @@ static int zend_jit_ffi_symbols_guard(zend_jit_ctx       *jit,
                                       HashTable          *ffi_symbols,
                                       zend_jit_ffi_info  *ffi_info);
 
+static int zend_jit_ffi_guard(zend_jit_ctx       *jit,
+                              const zend_op      *opline,
+                              zend_ssa           *ssa,
+                              int                 use,
+                              int                 def,
+                              ir_ref              ref,
+                              zend_ffi_type      *ffi_type,
+                              zend_jit_ffi_info  *ffi_info);
+
 static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
                                       const zend_op        *opline,
                                       const zend_op_array  *op_array,
@@ -39,10 +48,54 @@ static int zend_jit_ffi_init_call_sym(zend_jit_ctx         *jit,
                                       zend_jit_addr         op1_addr,
                                       zend_ffi_symbol      *sym,
                                       HashTable            *op1_ffi_symbols,
-                                      zend_jit_ffi_info    *ffi_info)
+                                      zend_jit_ffi_info    *ffi_info,
+                                      ir_ref               *ffi_func_ref)
 {
+	zend_ffi_type *type;
+
+	ZEND_ASSERT(sym->kind == ZEND_FFI_SYM_FUNC);
+	type = ZEND_FFI_TYPE(sym->type);
+	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
+
 	if (!zend_jit_ffi_symbols_guard(jit, opline, ssa, ssa_op->op1_use, -1, op1_addr, op1_ffi_symbols, ffi_info)) {
 		return 0;
+	}
+
+	if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
+		*ffi_func_ref = ir_CONST_FC_FUNC(sym->addr);
+	} else {
+		*ffi_func_ref = ir_CONST_FUNC(sym->addr);
+	}
+	return 1;
+}
+
+static int zend_jit_ffi_init_call_obj(zend_jit_ctx         *jit,
+                                      const zend_op        *opline,
+                                      const zend_op_array  *op_array,
+                                      zend_ssa             *ssa,
+                                      const zend_ssa_op    *ssa_op,
+                                      uint32_t              op1_info,
+                                      zend_jit_addr         op1_addr,
+                                      uint32_t              op2_info,
+                                      zend_jit_addr         op2_addr,
+                                      zend_ffi_type        *op2_ffi_type,
+                                      zend_jit_ffi_info    *ffi_info,
+                                      ir_ref               *ffi_func_ref)
+{
+	ir_ref obj_ref = jit_Z_PTR(jit, op2_addr);
+	zend_ffi_type *type;
+
+	ZEND_ASSERT(op2_ffi_type->kind == ZEND_FFI_TYPE_POINTER);
+	type = ZEND_FFI_TYPE(op2_ffi_type->pointer.type);
+	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
+
+	if (!zend_jit_ffi_guard(jit, opline, ssa, ssa_op->op2_use, -1, obj_ref, op2_ffi_type, ffi_info)) {
+		return 0;
+	}
+
+	*ffi_func_ref = ir_LOAD_A(jit_FFI_CDATA_PTR(jit, obj_ref));
+	if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
+		*ffi_func_ref = ir_CAST_FC_FUNC(*ffi_func_ref);
 	}
 
 	return 1;
@@ -60,12 +113,9 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 {
 	zend_jit_trace_stack_frame *call = JIT_G(current_frame)->call;
 	zend_jit_trace_stack *stack = call->stack;
-	zend_ffi_symbol *sym = (zend_ffi_symbol*)(void*)call->call_opline;
-	zend_ffi_type *type;
+	zend_ffi_type *type = (zend_ffi_type*)(void*)call->call_opline;
 	ir_ref ref = IR_UNUSED;
 
-	ZEND_ASSERT(sym->kind == ZEND_FFI_SYM_FUNC);
-	type = ZEND_FFI_TYPE(sym->type);
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 	if (type->attr & ZEND_FFI_ATTR_VARIADIC) {
 		ZEND_ASSERT(TRACE_FRAME_NUM_ARGS(call) >= zend_hash_num_elements(type->func.args));
@@ -225,22 +275,20 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	return 1;
 }
 
-static int zend_jit_ffi_do_call_sym(zend_jit_ctx         *jit,
-                                    const zend_op        *opline,
-                                    const zend_op_array  *op_array,
-                                    zend_ssa             *ssa,
-                                    const zend_ssa_op    *ssa_op,
-                                    zend_jit_addr         res_addr)
+static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
+                                const zend_op        *opline,
+                                const zend_op_array  *op_array,
+                                zend_ssa             *ssa,
+                                const zend_ssa_op    *ssa_op,
+                                zend_jit_addr         res_addr)
 {
 	zend_jit_trace_stack_frame *call = JIT_G(current_frame)->call;
-	zend_ffi_symbol *sym = (zend_ffi_symbol*)(void*)call->call_opline;
+	zend_ffi_type *type = (zend_ffi_type*)(void*)call->call_opline;
+	ir_ref func_ref = (intptr_t)(void*)call->ce;
 	uint32_t i, num_args;
-	zend_ffi_type *type;
 	ir_type ret_type = IR_VOID;
 	ir_ref ref = IR_UNUSED;
 
-	ZEND_ASSERT(sym->kind == ZEND_FFI_SYM_FUNC);
-	type = ZEND_FFI_TYPE(sym->type);
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 
 	switch (ZEND_FFI_TYPE(type->func.ret_type)->kind) {
@@ -300,18 +348,10 @@ static int zend_jit_ffi_do_call_sym(zend_jit_ctx         *jit,
 		for (i = 0; i < num_args; i++) {
 			args[i] = STACK_REF(stack, i);
 		}
-		if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
-			ref = ir_CALL_N(ret_type, ir_CONST_FC_FUNC(sym->addr), num_args, args);
-		} else {
-			ref = ir_CALL_N(ret_type, ir_CONST_FUNC(sym->addr), num_args, args);
-		}
+		ref = ir_CALL_N(ret_type, func_ref, num_args, args);
 	} else {
 		ZEND_ASSERT(!type->func.args);
-		if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
-			ref = ir_CALL(ret_type, ir_CONST_FC_FUNC(sym->addr));
-		} else {
-			ref = ir_CALL(ret_type, ir_CONST_FUNC(sym->addr));
-		}
+		ref = ir_CALL(ret_type, func_ref);
 	}
 
 	if (RETURN_VALUE_USED(opline)) {

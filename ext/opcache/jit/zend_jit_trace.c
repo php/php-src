@@ -4126,7 +4126,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	uint32_t frame_flags = 0;
 #ifdef HAVE_FFI
 	zend_jit_ffi_info *ffi_info = NULL;
-	zend_ffi_symbol *frame_ffi_sym = NULL;
+	zend_ffi_type *frame_ffi_func_type = NULL;
+	ir_ref frame_ffi_func_ref = IR_UNUSED;
 #endif
 
 	JIT_G(current_trace) = trace_buffer;
@@ -4463,7 +4464,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 			frame_flags = 0;
 #ifdef HAVE_FFI
-			frame_ffi_sym = NULL;
+			frame_ffi_func_type = NULL;
+			frame_ffi_func_ref = IR_UNUSED;
 #endif
 
 			switch (opline->opcode) {
@@ -5711,7 +5713,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (JIT_G(current_frame)
 						 && JIT_G(current_frame)->call
 						 && TRACE_FRAME_FFI(JIT_G(current_frame)->call)) {
-							if (!zend_jit_ffi_do_call_sym(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
+							if (!zend_jit_ffi_do_call(&ctx, opline, op_array, ssa, ssa_op, RES_REG_ADDR())) {
 								goto jit_failure;
 							}
 							goto done;
@@ -6807,17 +6809,20 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (sym
 							 && sym->kind == ZEND_FFI_SYM_FUNC
 							 && zend_jit_ffi_supported_func(ZEND_FFI_TYPE(sym->type))) {
+								ir_ref ffi_func_ref;
+
 								if (!ffi_info) {
 									ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
 								}
 								if (!zend_jit_ffi_init_call_sym(&ctx, opline, op_array, ssa, ssa_op,
 										op1_info, op1_addr,
 										sym,
-										op1_ffi_symbols, ffi_info)) {
+										op1_ffi_symbols, ffi_info, &ffi_func_ref)) {
 									goto jit_failure;
 								}
 								frame_flags = TRACE_FRAME_MASK_FFI;
-								frame_ffi_sym = sym;
+								frame_ffi_func_type = ZEND_FFI_TYPE(sym->type);
+								frame_ffi_func_ref = ffi_func_ref;
 								goto done;
 							}
 						}
@@ -6850,12 +6855,41 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_INIT_DYNAMIC_CALL:
+#ifdef HAVE_FFI
+						if (orig_op2_type != IS_OBJECT
+						 || (op2_ce != zend_ce_closure && !op2_ffi_type)) {
+							break;
+						}
+#else
 						if (orig_op2_type != IS_OBJECT || op2_ce != zend_ce_closure) {
 							break;
 						}
+#endif
 						op2_info = OP2_INFO();
 						CHECK_OP2_TRACE_TYPE();
 						frame_flags = TRACE_FRAME_MASK_NESTED;
+#ifdef HAVE_FFI
+						if (op2_ffi_type
+						 && op2_ffi_type->kind == ZEND_FFI_TYPE_POINTER
+						 && ZEND_FFI_TYPE(op2_ffi_type->pointer.type)->kind == ZEND_FFI_TYPE_FUNC
+						 && zend_jit_ffi_supported_func(ZEND_FFI_TYPE(op2_ffi_type->pointer.type))) {
+							ir_ref ffi_func_ref;
+
+							if (!ffi_info) {
+								ffi_info = zend_arena_calloc(&CG(arena), ssa->vars_count, sizeof(zend_jit_ffi_info));
+							}
+							if (!zend_jit_ffi_init_call_obj(&ctx, opline, op_array, ssa, ssa_op,
+									op1_info, op1_addr,
+									op2_info, OP2_REG_ADDR(),
+									op2_ffi_type, ffi_info, &ffi_func_ref)) {
+								goto jit_failure;
+							}
+							frame_flags = TRACE_FRAME_MASK_FFI;
+							frame_ffi_func_type = ZEND_FFI_TYPE(op2_ffi_type->pointer.type);
+							frame_ffi_func_ref = ffi_func_ref;
+							goto done;
+						}
+#endif
 						if (!zend_jit_init_closure_call(&ctx, opline, op_array_ssa->cfg.map ? op_array_ssa->cfg.map[opline - op_array->opcodes] : -1, op_array, ssa, ssa_op, frame->call_level, p + 1, peek_checked_stack - checked_stack)) {
 							goto jit_failure;
 						}
@@ -7453,8 +7487,9 @@ done:
 			TRACE_FRAME_INIT(call, p->func, frame_flags, num_args);
 #ifdef HAVE_FFI
 			if (TRACE_FRAME_FFI(call)) {
-				ZEND_ASSERT(frame_ffi_sym != NULL);
-				call->call_opline = (const zend_op*)(void*)frame_ffi_sym;
+				ZEND_ASSERT(frame_ffi_func_type != NULL);
+				call->call_opline = (const zend_op*)(void*)frame_ffi_func_type;
+				call->ce = (zend_class_entry*)(intptr_t)frame_ffi_func_ref;
 			}
 #endif
 			call->prev = frame->call;
