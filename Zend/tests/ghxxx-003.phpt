@@ -1,0 +1,51 @@
+--TEST--
+GH-xxx 003: Crash during GC of suspended generator delegate
+--FILE--
+<?php
+
+class It implements \IteratorAggregate
+{
+    public function getIterator(): \Generator
+    {
+        yield 'foo';
+        throw new \Exception();
+        var_dump("not executed");
+    }
+}
+
+function f() {
+    try {
+        var_dump(new stdClass, yield from new It());
+    } finally {
+        var_dump(__FUNCTION__);
+    }
+}
+
+function g() {
+    try {
+        var_dump(new stdClass, yield from f());
+    } finally {
+        var_dump(__FUNCTION__);
+    }
+}
+
+$gen = g();
+
+var_dump($gen->current());
+$gen->next();
+
+?>
+==DONE==
+--EXPECTF--
+string(3) "foo"
+string(1) "f"
+string(1) "g"
+
+Fatal error: Uncaught Exception in %s:%d
+Stack trace:
+#0 %s(%d): It->getIterator()
+#1 %s(%d): f()
+#2 [internal function]: g()
+#3 %s(%d): Generator->next()
+#4 {main}
+  thrown in %s on line %d
