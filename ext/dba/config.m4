@@ -571,7 +571,7 @@ if test "$PHP_DB1" != "no"; then
         AC_DEFINE_UNQUOTED([DB1_INCLUDE_FILE], ["$THIS_INCLUDE"],
           [The DB1 handler header file.])
         AC_DEFINE([DBA_DB1], [1],
-          [Define to 1 the dba extension uses the Berkeley DB version 1 (DB1)
+          [Define to 1 if the dba extension uses the Berkeley DB version 1 (DB1)
           handler.])
         THIS_RESULT=yes
       ],[
