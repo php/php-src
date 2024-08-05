@@ -253,7 +253,8 @@ if test "$PHP_GD" != "no"; then
     "])
 
 dnl These are always available with bundled library
-    AC_DEFINE(HAVE_GD_BUNDLED,          1, [ ])
+    AC_DEFINE([HAVE_GD_BUNDLED], [1],
+      [Define to 1 if gd extension uses GD library bundled in PHP.])
     AC_DEFINE(HAVE_GD_PNG,              1, [ ])
     AC_DEFINE(HAVE_GD_BMP,              1, [ ])
     AC_DEFINE(HAVE_GD_TGA,              1, [ ])
@@ -284,7 +285,8 @@ dnl Various checks for GD features
     PKG_CHECK_MODULES([GDLIB], [gdlib >= 2.1.0])
     PHP_EVAL_LIBLINE([$GDLIB_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$GDLIB_CFLAGS])
-    AC_DEFINE(HAVE_LIBGD, 1, [ ])
+    AC_DEFINE([HAVE_LIBGD], [1],
+      [Define to 1 gd extension uses external system GD library.])
     PHP_GD_CHECK_VERSION
 
     PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared])
