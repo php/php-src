@@ -71,12 +71,16 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   dnl Sanity check if readline library has variable rl_pending_input.
   AC_CHECK_DECL([rl_pending_input],, [AC_MSG_FAILURE([
       Invalid readline installation detected. Try --with-libedit instead.
-    ])],
-    [#include <readline/readline.h>])
+    ])], [
+      #include <stdio.h>
+      #include <readline/readline.h>
+    ])
 
   AC_CHECK_DECL([rl_erase_empty_line],
-    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
-    [#include <readline/readline.h>])
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],, [
+      #include <stdio.h>
+      #include <readline/readline.h>
+    ])
   CFLAGS=$CFLAGS_SAVE
   LDFLAGS=$LDFLAGS_SAVE
   LIBS=$LIBS_SAVE
