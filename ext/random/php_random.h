@@ -81,8 +81,8 @@ typedef struct _php_random_status_state_user {
 } php_random_status_state_user;
 
 typedef struct _php_random_result {
-	const uint64_t result;
-	const size_t size;
+	uint64_t result;
+	size_t size;
 } php_random_result;
 
 typedef struct _php_random_algo {
