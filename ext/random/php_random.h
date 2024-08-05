@@ -154,6 +154,8 @@ PHPAPI void php_random_status_free(void *status, const bool persistent);
 PHPAPI php_random_engine *php_random_engine_common_init(zend_class_entry *ce, zend_object_handlers *handlers, const php_random_algo *algo);
 PHPAPI void php_random_engine_common_free_object(zend_object *object);
 PHPAPI zend_object *php_random_engine_common_clone_object(zend_object *object);
+PHPAPI void *php_random_engine_common_init_cloneable_object_handlers(zend_object_handlers *handlers);
+PHPAPI void *php_random_engine_common_init_non_cloneable_object_handlers(zend_object_handlers *handlers);
 PHPAPI uint32_t php_random_range32(php_random_algo_with_state engine, uint32_t umax);
 PHPAPI uint64_t php_random_range64(php_random_algo_with_state engine, uint64_t umax);
 PHPAPI zend_long php_random_range(php_random_algo_with_state engine, zend_long min, zend_long max);
