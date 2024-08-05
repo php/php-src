@@ -126,8 +126,12 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	if (opline->op2.num - 1 < zend_hash_num_elements(type->func.args)) {
 		type = zend_hash_index_find_ptr(type->func.args, opline->op2.num - 1);
 		type = ZEND_FFI_TYPE(type);
+		zend_ffi_type_kind type_kind = type->kind;
 
-		switch (type->kind) {
+		if (type_kind == ZEND_FFI_TYPE_ENUM) {
+			type_kind = type->enumeration.kind;
+		}
+		switch (type_kind) {
 			case ZEND_FFI_TYPE_FLOAT:
 				if (op1_info == MAY_BE_LONG) {
 					ref = ir_INT2F((jit_Z_LVAL(jit, op1_addr)));
@@ -304,10 +308,15 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 	uint32_t i, num_args;
 	ir_type ret_type = IR_VOID;
 	ir_ref ref = IR_UNUSED;
+	zend_ffi_type_kind type_kind;
 
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 
-	switch (ZEND_FFI_TYPE(type->func.ret_type)->kind) {
+	type_kind = ZEND_FFI_TYPE(type->func.ret_type)->kind;
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = ZEND_FFI_TYPE(type->func.ret_type)->enumeration.kind;
+	}
+	switch (type_kind) {
 		case ZEND_FFI_TYPE_VOID:
 			ret_type = IR_VOID;
 			break;
@@ -392,7 +401,11 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 		zend_ffi_type *ret_type = ZEND_FFI_TYPE(type->func.ret_type);
 		uint32_t res_type = IS_UNDEF;
 
-		switch (ret_type->kind) {
+		type_kind = ret_type->kind;
+		if (type_kind == ZEND_FFI_TYPE_ENUM) {
+			type_kind = ret_type->enumeration.kind;
+		}
+		switch (type_kind) {
 			case ZEND_FFI_TYPE_VOID:
 				res_type = IS_NULL;
 				break;
@@ -589,8 +602,12 @@ static int zend_jit_ffi_read(zend_jit_ctx       *jit,
                              zend_jit_addr       res_addr)
 {
 	uint32_t res_type;
+	zend_ffi_type_kind type_kind = ffi_type->kind;
 
-	switch (ffi_type->kind) {
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = ffi_type->enumeration.kind;
+	}
+	switch (type_kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			jit_set_Z_DVAL(jit, res_addr, ir_F2D(ir_LOAD_F(ptr)));
 			res_type = IS_DOUBLE;
@@ -850,8 +867,12 @@ static int zend_jit_ffi_write(zend_jit_ctx  *jit,
                               zend_jit_addr  res_addr)
 {
 	ir_ref ref = IR_UNUSED;
+	zend_ffi_type_kind type_kind = ffi_type->kind;
 
-	switch (ffi_type->kind) {
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = ffi_type->enumeration.kind;
+	}
+	switch (type_kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			if (val_info == MAY_BE_LONG) {
 				ref = ir_INT2F(jit_Z_LVAL(jit, val_addr));
@@ -1208,7 +1229,12 @@ static int zend_jit_ffi_assign_op_helper(zend_jit_ctx   *jit,
 			return 0;
 	}
 
-	switch (el_type->kind) {
+	zend_ffi_type_kind type_kind = el_type->kind;
+
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = el_type->enumeration.kind;
+	}
+	switch (type_kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			ZEND_ASSERT(op == IR_ADD || op == IR_SUB || op == IR_MUL);
 			type = IR_FLOAT;
@@ -1818,7 +1844,12 @@ static int zend_jit_ffi_incdec_helper(zend_jit_ctx   *jit,
 			return 0;
 	}
 
-	switch (el_type->kind) {
+	zend_ffi_type_kind type_kind = el_type->kind;
+
+	if (type_kind == ZEND_FFI_TYPE_ENUM) {
+		type_kind = el_type->enumeration.kind;
+	}
+	switch (type_kind) {
 		case ZEND_FFI_TYPE_FLOAT:
 			type = IR_FLOAT;
 			op2 = ir_CONST_FLOAT(1.0);
