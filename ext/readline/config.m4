@@ -46,11 +46,6 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     [AC_MSG_FAILURE([The readline library not found.])],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
-  PHP_CHECK_LIBRARY([readline], [rl_pending_input],
-    [],
-    [AC_MSG_FAILURE([Invalid readline installation detected. Try --with-libedit instead.])],
-    [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
-
   PHP_CHECK_LIBRARY([readline], [rl_callback_read_char],
     [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1], [ ])],
     [],
@@ -72,9 +67,21 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   CFLAGS="$CFLAGS $INCLUDES"
   LDFLAGS="$LDFLAGS -L$READLINE_DIR/$PHP_LIBDIR"
   LIBS="$LIBS -lreadline"
+
+  dnl Sanity and minimum version check if readline library has variable
+  dnl rl_pending_input.
+  AC_CHECK_DECL([rl_pending_input],, [AC_MSG_FAILURE([
+      Invalid readline installation detected. Try --with-libedit instead.
+    ])], [
+      #include <stdio.h>
+      #include <readline/readline.h>
+    ])
+
   AC_CHECK_DECL([rl_erase_empty_line],
-    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
-    [#include <readline/readline.h>])
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],, [
+      #include <stdio.h>
+      #include <readline/readline.h>
+    ])
   CFLAGS=$CFLAGS_SAVE
   LDFLAGS=$LDFLAGS_SAVE
   LIBS=$LIBS_SAVE
