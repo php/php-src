@@ -129,6 +129,46 @@ static void observer_end(zend_execute_data *execute_data, zval *retval)
 	if (EG(exception)) {
 		php_printf("%*s<!-- Exception: %s -->\n", 2 * ZT_G(observer_nesting_depth), "", ZSTR_VAL(EG(exception)->ce->name));
 	}
+	
+	if(ZT_G(observer_observe_end_call_function_name) && strlen(ZT_G(observer_observe_end_call_function_name)) > 0) {
+		zend_fcall_info fci = empty_fcall_info;	
+		zend_fcall_info_cache fcc = empty_fcall_info_cache;
+		
+		zval function_name = {.u1.type_info = IS_UNDEF};
+		
+		// Initialize the zval with the zend_string value
+		ZVAL_STRING(&function_name, ZT_G(observer_observe_end_call_function_name));
+
+		char* error = 0;
+		if (zend_fcall_info_init(&function_name, 0, &fci, &fcc, NULL, &error) != SUCCESS) {
+
+			php_printf("<!-- Hook (%s) not found: %s-->\n", Z_STRVAL(function_name), error);
+			efree(error);
+		} else {
+
+			zval ret = {.u1.type_info = IS_UNDEF};
+			fci.param_count = 0;
+			fci.params = NULL;
+			fci.named_params = NULL;
+			fci.retval = &ret;
+
+			if (zend_call_function(&fci, &fcc) == SUCCESS) {
+				if (!Z_ISUNDEF(ret) &&
+					(fcc.function_handler->op_array.fn_flags &
+						ZEND_ACC_HAS_RETURN_TYPE) &&
+					!(ZEND_TYPE_PURE_MASK(
+							fcc.function_handler->common.arg_info[-1].type) &
+						MAY_BE_VOID)) {
+					if (execute_data->return_value) {
+						zval_ptr_dtor(execute_data->return_value);
+						ZVAL_COPY(execute_data->return_value, &ret);
+						ZVAL_UNDEF(&ret);
+					}
+				}
+			}
+		}
+		zval_ptr_dtor(&function_name);
+	}
 	observer_show_opcode(execute_data);
 	ZT_G(observer_nesting_depth)--;
 	if (execute_data->func && execute_data->func->common.function_name) {
@@ -346,6 +386,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_functions", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_functions, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.observe_declaring", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_observe_declaring, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_ENTRY("zend_test.observer.observe_function_names", "", PHP_INI_ALL, zend_test_observer_OnUpdateCommaList, observer_observe_function_names, zend_zend_test_globals, zend_test_globals)
+	STD_PHP_INI_ENTRY("zend_test.observer.observe_end_call_function_name", "", PHP_INI_ALL, OnUpdateString, observer_observe_end_call_function_name, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_type", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_type, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_return_value", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_return_value, zend_zend_test_globals, zend_test_globals)
 	STD_PHP_INI_BOOLEAN("zend_test.observer.show_init_backtrace", "0", PHP_INI_SYSTEM, OnUpdateBool, observer_show_init_backtrace, zend_zend_test_globals, zend_test_globals)
