@@ -13,7 +13,11 @@
   "dockerComposeFile": "./../compose.yaml",
   "service": "shell",
   "mounts": [
-    {"type": "bind", "source": "./../", "target": "/workspace/php-src"}
+    {
+      "type": "bind",
+      "source": "./../",
+      "target": "/workspace/php-src"
+    }
   ],
   "workspaceFolder": "/workspace/php-src"
 }
