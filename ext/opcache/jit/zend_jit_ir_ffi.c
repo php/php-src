@@ -93,10 +93,7 @@ static int zend_jit_ffi_init_call_obj(zend_jit_ctx         *jit,
 		return 0;
 	}
 
-	*ffi_func_ref = ir_LOAD_A(jit_FFI_CDATA_PTR(jit, obj_ref));
-	if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
-		*ffi_func_ref = ir_CAST_FC_FUNC(*ffi_func_ref);
-	}
+	*ffi_func_ref = obj_ref;
 
 	return 1;
 }
@@ -115,6 +112,8 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	zend_jit_trace_stack *stack = call->stack;
 	zend_ffi_type *type = (zend_ffi_type*)(void*)call->call_opline;
 	ir_ref ref = IR_UNUSED;
+	uint8_t arg_type = IS_UNDEF;
+	uint8_t arg_flags = 0;
 
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 	if (type->attr & ZEND_FFI_ATTR_VARIADIC) {
@@ -233,16 +232,28 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 			case ZEND_FFI_TYPE_POINTER:
 				if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING
 				 && ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_CHAR) {
-					ref = ir_ADD_OFFSET(jit_Z_PTR(jit, op1_addr), offsetof(zend_string, val));
+					arg_type = IS_STRING;
+					ref = jit_Z_PTR(jit, op1_addr);
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
 				} else if (op1_ffi_type
 				 && op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER
 				 && ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->pointer.type)) {
-					ref = jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, op1_addr));
-					ref = ir_LOAD_A(ref); // TODO: is this always necessary ???
+					arg_type = IS_OBJECT;
+					ref = jit_Z_PTR(jit, op1_addr);
+					arg_flags |= ZREG_FFI_PTR_LOAD;
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
 				} else if (op1_ffi_type
 				 && op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY
 				 && ZEND_FFI_TYPE(type->pointer.type) == ZEND_FFI_TYPE(op1_ffi_type->array.type)) {
-					ref = jit_FFI_CDATA_PTR(jit, jit_Z_PTR(jit, op1_addr));
+					arg_type = IS_OBJECT;
+					ref = jit_Z_PTR(jit, op1_addr);
+					if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+						arg_flags |= ZREG_FFI_ZVAL_DTOR;
+					}
 				} else {
 					ZEND_UNREACHABLE();
 				}
@@ -264,13 +275,18 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 		} else if (op1_info == MAY_BE_DOUBLE) {
 			ref = jit_Z_DVAL(jit, op1_addr);
 		} else if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_STRING) {
-			ref = ir_ADD_OFFSET(jit_Z_PTR(jit, op1_addr), offsetof(zend_string, val));
+			arg_type = IS_STRING;
+			ref = jit_Z_PTR(jit, op1_addr);
+			if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+				arg_flags |= ZREG_FFI_ZVAL_DTOR;
+			}
 		} else {
 			ZEND_UNREACHABLE();
 		}
 	}
 
-	SET_STACK_REF(stack, opline->op2.num - 1, ref);
+	SET_STACK_TYPE(stack, opline->op2.num - 1, arg_type, 0);
+	SET_STACK_REF_EX(stack, opline->op2.num - 1, ref, arg_flags);
 
 	return 1;
 }
@@ -340,13 +356,31 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 			ZEND_UNREACHABLE();
 	}
 
+	if (!IR_IS_CONST_REF(func_ref)) {
+		func_ref = ir_LOAD_A(jit_FFI_CDATA_PTR(jit, func_ref));
+		if (type->func.abi == ZEND_FFI_ABI_FASTCALL) {
+			func_ref = ir_CAST_FC_FUNC(func_ref);
+		}
+	}
+
 	num_args = TRACE_FRAME_NUM_ARGS(call);
 	if (num_args) {
 		ir_ref *args = alloca(sizeof(ir_ref) * num_args);
 		zend_jit_trace_stack *stack = call->stack;
 
 		for (i = 0; i < num_args; i++) {
-			args[i] = STACK_REF(stack, i);
+			uint8_t type = STACK_TYPE(stack, i);
+			ir_ref ref = STACK_REF(stack, i);
+
+			if (type == IS_STRING) {
+				ref = ir_ADD_OFFSET(ref, offsetof(zend_string, val));
+			} else if (type == IS_OBJECT) {
+				ref = jit_FFI_CDATA_PTR(jit, ref);
+				if (STACK_FLAGS(stack, i) & ZREG_FFI_PTR_LOAD) {
+					ref = ir_LOAD_A(ref);
+				}
+			}
+			args[i] = ref;
 		}
 		ref = ir_CALL_N(ret_type, func_ref, num_args, args);
 	} else {
@@ -441,6 +475,44 @@ static int zend_jit_ffi_do_call(zend_jit_ctx         *jit,
 		if (Z_MODE(res_addr) != IS_REG) {
 			jit_set_Z_TYPE_INFO(jit, res_addr, res_type);
 		}
+	}
+
+	if (num_args) {
+		zend_jit_trace_stack *stack = call->stack;
+
+		for (i = 0; i < num_args; i++) {
+			if (STACK_FLAGS(stack, i) & ZREG_FFI_ZVAL_DTOR) {
+				uint8_t type =  STACK_TYPE(stack, i);
+				ir_ref ref = STACK_REF(stack, i);
+
+				if (type == IS_STRING) {
+					ir_ref if_interned = ir_IF(ir_AND_U32(
+						ir_LOAD_U32(ir_ADD_OFFSET(ref, offsetof(zend_refcounted, gc.u.type_info))),
+						ir_CONST_U32(IS_STR_INTERNED)));
+					ir_IF_FALSE(if_interned);
+					ir_ref if_not_zero = ir_IF(jit_GC_DELREF(jit, ref));
+					ir_IF_FALSE(if_not_zero);
+					jit_ZVAL_DTOR(jit, ref, MAY_BE_STRING, opline);
+					ir_MERGE_WITH_EMPTY_TRUE(if_not_zero);
+					ir_MERGE_WITH_EMPTY_TRUE(if_interned);
+				} else if (type == IS_OBJECT) {
+					ir_ref if_not_zero = ir_IF(jit_GC_DELREF(jit, ref));
+					ir_IF_FALSE(if_not_zero);
+					jit_ZVAL_DTOR(jit, ref, MAY_BE_OBJECT, opline);
+					ir_MERGE_WITH_EMPTY_TRUE(if_not_zero); /* don't add to GC roots */
+				} else {
+					ZEND_ASSERT(0);
+				}
+			}
+		}
+	}
+
+	func_ref = (intptr_t)(void*)call->ce;
+	if (!IR_IS_CONST_REF(func_ref)) {
+		ir_ref if_not_zero = ir_IF(jit_GC_DELREF(jit, func_ref));
+		ir_IF_FALSE(if_not_zero);
+		jit_ZVAL_DTOR(jit, func_ref, MAY_BE_OBJECT, opline);
+		ir_MERGE_WITH_EMPTY_TRUE(if_not_zero); /* don't add to GC roots */
 	}
 
 	return 1;
