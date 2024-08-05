@@ -10678,7 +10678,6 @@ static void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 
 	bool is_fully_qualified;
 	zend_string *orig_name = zend_ast_get_str(name_ast);
-
 	zend_string *resolved_name = zend_resolve_const_name(orig_name, name_ast->attr, &is_fully_qualified);
 
 	if (zend_string_equals_literal(resolved_name, "__COMPILER_HALT_OFFSET__") || (name_ast->attr != ZEND_NAME_RELATIVE && zend_string_equals_literal(orig_name, "__COMPILER_HALT_OFFSET__"))) {

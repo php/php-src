@@ -82,7 +82,11 @@ ZEND_FUNCTION(exit)
 	if (str) {
 		size_t len = ZSTR_LEN(str);
 		if (len != 0) {
+			/* An exception might be emitted by an output handler */
 			zend_write(ZSTR_VAL(str), len);
+			if (EG(exception)) {
+				RETURN_THROWS();
+			}
 		}
 	} else {
 		EG(exit_status) = code;

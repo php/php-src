@@ -37,7 +37,7 @@ $values = [
     new stdClass(),
 ];
 
-const FILE_PATH = __DIR__ . '/exit_values.inc';
+const FILE_PATH = __DIR__ . '/exit_values_test.php';
 const FILE_CONTENT = <<<'TEMPLATE'
 <?php
 try {
@@ -73,7 +73,7 @@ foreach ([FILE_CONTENT, str_replace('exit', 'die', FILE_CONTENT)] as $code) {
 ?>
 --CLEAN--
 <?php
-const FILE_PATH = __DIR__ . '/exit_values.inc';
+const FILE_PATH = __DIR__ . '/exit_values_test.php';
 @unlink(FILE_PATH);
 ?>
 --EXPECTF--
