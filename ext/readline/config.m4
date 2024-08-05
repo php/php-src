@@ -47,13 +47,6 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
 
-  PHP_CHECK_LIBRARY(readline, rl_pending_input,
-  [], [
-    AC_MSG_ERROR([invalid readline installation detected. Try --with-libedit instead.])
-  ], [
-    -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
-  ])
-
   PHP_CHECK_LIBRARY(readline, rl_callback_read_char,
   [
     AC_DEFINE(HAVE_RL_CALLBACK_READ_CHAR, 1, [ ])
@@ -74,6 +67,26 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   ],[],[
     -L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS
   ])
+
+  CFLAGS_SAVE=$CFLAGS
+  LDFLAGS_SAVE=$LDFLAGS
+  LIBS_SAVE=$LIBS
+  CFLAGS="$CFLAGS $INCLUDES"
+  LDFLAGS="$LDFLAGS -L$READLINE_DIR/$PHP_LIBDIR"
+  LIBS="$LIBS -lreadline"
+
+  dnl Sanity and minimum version check if readline library has variable
+  dnl rl_pending_input.
+  AC_CHECK_DECL([rl_pending_input],, [AC_MSG_FAILURE([
+      Invalid readline installation detected. Try --with-libedit instead.
+    ])], [
+      #include <stdio.h>
+      #include <readline/readline.h>
+    ])
+
+  CFLAGS=$CFLAGS_SAVE
+  LDFLAGS=$LDFLAGS_SAVE
+  LIBS=$LIBS_SAVE
 
   AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
   AC_DEFINE(HAVE_LIBREADLINE, 1, [ ])

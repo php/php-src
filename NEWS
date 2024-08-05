@@ -27,6 +27,10 @@ PHP                                                                        NEWS
     return value check). (nielsdos, botovq)
   . Fix error return check of EVP_CIPHER_CTX_ctrl(). (nielsdos)
 
+- Readline:
+  . Fixed bug GH-19250 and bug #51360 (Invalid conftest for rl_pending_input).
+    (petk, nielsdos)
+
 - SOAP:
   . Fixed bug GH-18640 (heap-use-after-free ext/soap/php_encoding.c:299:32
     in soap_check_zval_ref). (nielsdos)
