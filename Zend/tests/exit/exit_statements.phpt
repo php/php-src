@@ -3,7 +3,7 @@ Using exit/die as a statement/constant
 --FILE--
 <?php
 
-const FILE_PATH = __DIR__ . '/exit_statements.inc';
+const FILE_PATH = __DIR__ . '/exit_statements.php';
 const FILE_CONTENT = <<<'TEMPLATE'
 <?php
 echo "Before FUNCTION";
@@ -32,7 +32,7 @@ foreach (['exit', 'die'] as $value) {
 ?>
 --CLEAN--
 <?php
-const FILE_PATH = __DIR__ . '/exit_statements.inc';
+const FILE_PATH = __DIR__ . '/exit_statements.php';
 @unlink(FILE_PATH);
 ?>
 --EXPECT--
