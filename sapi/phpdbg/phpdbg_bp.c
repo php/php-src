@@ -405,6 +405,11 @@ PHPDBG_API void phpdbg_set_breakpoint_symbol(const char *name, size_t name_len) 
 {
 	char *lcname;
 
+	if (!name_len) {
+		phpdbg_error("Empty symbol name");
+		return;
+	}
+
 	if (*name == '\\') {
 		name++;
 		name_len--;
@@ -439,10 +444,21 @@ PHPDBG_API void phpdbg_set_breakpoint_method(const char *class_name, const char 
 	size_t func_len = strlen(func_name);
 	char *func_lcname, *class_lcname;
 
+	if (!class_len) {
+		phpdbg_error("Empty class name");
+		return;
+	}
+
+	if (!func_len) {
+		phpdbg_error("Empty function name");
+		return;
+	}
+
 	if (*class_name == '\\') {
 		class_name++;
 		class_len--;
 	}
+
 
 	func_lcname = zend_str_tolower_dup(func_name, func_len);
 	class_lcname = zend_str_tolower_dup(class_name, class_len);
