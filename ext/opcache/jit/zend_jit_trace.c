@@ -8300,9 +8300,11 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 						p++;
 #ifdef HAVE_FFI
 						if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
-							fprintf(stderr, " op1(%sobject of class %s: ffi_type)", ref,
+							fprintf(stderr, " op1(%sobject of class %s: ", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
+							zend_ffi_type_print(stderr, p->ptr);
+							fprintf(stderr, ")");
 						} else if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_SYMBOLS) {
 							fprintf(stderr, " op1(%sobject of class %s: ffi_symbols)", ref,
 								ZSTR_VAL(p->ce->name));
@@ -8324,9 +8326,11 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 						p++;
 #ifdef HAVE_FFI
 						if ((p+1)->op == ZEND_JIT_TRACE_OP2_FFI_TYPE) {
-							fprintf(stderr, " op2(%sobject of class %s: ffi_type)", ref,
+							fprintf(stderr, " op2(%sobject of class %s: ", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
+							zend_ffi_type_print(stderr, p->ptr);
+							fprintf(stderr, ")");
 						} else
 #endif
 						fprintf(stderr, " op2(%sobject of class %s)", ref,
@@ -8344,9 +8348,11 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 						p++;
 #ifdef HAVE_FFI
 						if ((p+1)->op == ZEND_JIT_TRACE_OP3_FFI_TYPE) {
-							fprintf(stderr, " op3(%sobject of class %s: ffi_type)", ref,
+							fprintf(stderr, " op3(%sobject of class %s: ", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
+							zend_ffi_type_print(stderr, p->ptr);
+							fprintf(stderr, ")");
 						} else
 #endif
 						fprintf(stderr, " op3(%sobject of class %s)", ref,
