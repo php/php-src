@@ -45,19 +45,24 @@ if test "$PHP_SNMP" != "no"; then
 
   dnl Check whether shutdown_snmp_logging() exists.
   PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [shutdown_snmp_logging],
-    [AC_DEFINE([HAVE_SHUTDOWN_SNMP_LOGGING], [1], [ ])],
+    [AC_DEFINE([HAVE_SHUTDOWN_SNMP_LOGGING], [1],
+      [Define to 1 if SNMP library has the 'shutdown_snmp_logging' function.])],
     [],
     [$SNMP_SHARED_LIBADD])
 
   dnl Check whether usmHMAC192SHA256AuthProtocol exists.
   PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [usmHMAC192SHA256AuthProtocol],
-    [AC_DEFINE([HAVE_SNMP_SHA256], [1], [ ])],
+    [AC_DEFINE([HAVE_SNMP_SHA256], [1],
+      [Define to 1 if SNMP library has the 'usmHMAC192SHA256AuthProtocol'
+      array.])],
     [],
     [$SNMP_SHARED_LIBADD])
 
   dnl Check whether usmHMAC384SHA512AuthProtocol exists.
   PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [usmHMAC384SHA512AuthProtocol],
-    [AC_DEFINE([HAVE_SNMP_SHA512], [1], [ ])],
+    [AC_DEFINE([HAVE_SNMP_SHA512], [1],
+      [Define to 1 if SNMP library has the 'usmHMAC384SHA512AuthProtocol'
+      array.])],
     [],
     [$SNMP_SHARED_LIBADD])
 
