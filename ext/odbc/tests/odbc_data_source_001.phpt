@@ -17,7 +17,7 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 try {
-    var_dump(odbc_data_source($conn, NULL));
+    var_dump(odbc_data_source($conn, SQL_FETCH_FIRST + SQL_FETCH_NEXT));
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
