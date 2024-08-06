@@ -122,15 +122,16 @@ AC_DEFUN([PHP_CANONICAL_HOST_TARGET],[
 dnl
 dnl PHP_INIT_BUILD_SYSTEM
 dnl
-dnl Creates build directories and Makefile placeholders.
+dnl Initializes PHP build system configuration, creates build directories and
+dnl adds Makefile placeholders.
 dnl
 AC_DEFUN([PHP_INIT_BUILD_SYSTEM],
 [AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
 php_shtool=$srcdir/build/shtool
-> Makefile.objects
-> Makefile.fragments
 T_MD=$($php_shtool echo -n -e %B)
 T_ME=$($php_shtool echo -n -e %b)
+> Makefile.objects
+> Makefile.fragments
 dnl Run at the end of the configuration, before creating the config.status.
 AC_CONFIG_COMMANDS_PRE(
 [dnl Directory for storing shared objects of extensions.
