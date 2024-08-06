@@ -410,6 +410,9 @@ typedef struct _zend_ffi {
 #define ZEND_FFI_TYPE_IS_OWNED(t) \
 	(((uintptr_t)(t)) & ZEND_FFI_TYPE_OWNED)
 
+#define ZEND_FFI_TYPE_MAKE_OWNED(t) \
+	((zend_ffi_type*)(((uintptr_t)(t)) | ZEND_FFI_TYPE_OWNED))
+
 PHP_FFI_API bool zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *src_type);
 
 #endif	/* PHP_FFI_H */
