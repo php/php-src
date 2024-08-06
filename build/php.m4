@@ -9,10 +9,8 @@ dnl PHP_HELP_SEPARATOR(title)
 dnl
 dnl Adds separator title into the configure --help display.
 dnl
-AC_DEFUN([PHP_HELP_SEPARATOR],[
-AC_ARG_ENABLE([],[
-$1],[])
-])
+AC_DEFUN([PHP_HELP_SEPARATOR], [AC_ARG_ENABLE([], [
+$1], [])])
 
 dnl
 dnl PHP_CONFIGURE_PART(title)
