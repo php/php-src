@@ -5314,6 +5314,17 @@ static ZEND_INI_DISP(zend_ffi_enable_displayer_cb) /* {{{ */
 }
 /* }}} */
 
+static void _zend_ffi_type_print(FILE *f, const zend_ffi_type *type) /* {{{ */
+{
+	zend_ffi_ctype_name_buf buf;
+
+	buf.start = buf.end = buf.buf + ((MAX_TYPE_NAME_LEN * 3) / 4);
+	if (!zend_ffi_ctype_name(&buf, ZEND_FFI_TYPE(type))) {
+	} else {
+		fwrite(buf.start, buf.end - buf.start, 1, f);
+	}
+}
+
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY_EX("ffi.enable", "preload", ZEND_INI_SYSTEM, OnUpdateFFIEnable, zend_ffi_enable_displayer_cb)
 	STD_ZEND_INI_ENTRY("ffi.preload", NULL, ZEND_INI_SYSTEM, OnUpdateString, preload, zend_ffi_globals, ffi_globals)
@@ -5597,6 +5608,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.get_gc               = zend_fake_get_gc;
 
 	zend_ffi_cdata_create = _zend_ffi_cdata_create;
+	zend_ffi_type_print   = _zend_ffi_type_print;
 
 	if (FFI_G(preload)) {
 		return zend_ffi_preload(FFI_G(preload));

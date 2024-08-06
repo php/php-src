@@ -105,6 +105,7 @@ ZEND_API zend_ffi_dcl*   (*zend_ffi_cache_type_get)(zend_string *str, void *cont
 ZEND_API zend_ffi_dcl*   (*zend_ffi_cache_type_add)(zend_string *str, zend_ffi_dcl *dcl, void *context) = NULL;
 ZEND_API zend_ffi_scope* (*zend_ffi_cache_scope_get)(zend_string *str) = NULL;
 ZEND_API zend_ffi_scope* (*zend_ffi_cache_scope_add)(zend_string *str, zend_ffi_scope *scope) = NULL;
+ZEND_API void            (*zend_ffi_type_print)(FILE *f, const zend_ffi_type *type) = NULL;
 
 /* This callback must be signal handler safe! */
 void (*zend_on_timeout)(int seconds);

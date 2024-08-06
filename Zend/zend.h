@@ -421,7 +421,7 @@ ZEND_API extern zend_ffi_dcl*   (*zend_ffi_cache_type_get)(zend_string *str, voi
 ZEND_API extern zend_ffi_dcl*   (*zend_ffi_cache_type_add)(zend_string *str, zend_ffi_dcl *dcl, void *context);
 ZEND_API extern zend_ffi_scope* (*zend_ffi_cache_scope_get)(zend_string *str);
 ZEND_API extern zend_ffi_scope* (*zend_ffi_cache_scope_add)(zend_string *str, zend_ffi_scope *scope);
-
+ZEND_API extern void            (*zend_ffi_type_print)(FILE *f, const zend_ffi_type *type);
 
 /* If DTrace is available and enabled */
 extern ZEND_API bool zend_dtrace_enabled;
