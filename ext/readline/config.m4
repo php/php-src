@@ -133,7 +133,7 @@ elif test "$PHP_LIBEDIT" != "no"; then
   AC_CHECK_DECL([rl_erase_empty_line],
     [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1],
       [Define to 1 if edit/readline library has the 'rl_erase_empty_line'
-      variable.])],,
+      global variable.])],,
     [#include <editline/readline.h>])
   CFLAGS=$CFLAGS_SAVE
   LIBS=$LIBS_SAVE
