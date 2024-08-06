@@ -139,10 +139,16 @@ PHP_BUILD_SHARED
 dnl Required programs.
 PHP_PROG_AWK
 
+PHP_HELP_SEPARATOR([Extension:])
+PHP_CONFIGURE_PART([Configuring extension])
+
 sinclude(config.m4)
 
 enable_static=no
 enable_shared=yes
+
+PHP_HELP_SEPARATOR([Libtool:])
+PHP_CONFIGURE_PART([Configuring libtool])
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
 dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
@@ -196,6 +202,8 @@ PHP_SUBST([LIBTOOL])
 PHP_SUBST([SHELL])
 PHP_SUBST([INSTALL_HEADERS])
 PHP_SUBST([BUILD_CC])
+
+PHP_CONFIGURE_PART([Generating files])
 
 AC_CONFIG_HEADERS([config.h])
 
