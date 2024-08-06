@@ -718,10 +718,21 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #ifdef HAVE_FFI
 				if (ce1 == zend_ffi_cdata_ce) {
 					zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-					if (!ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
-						zend_ffi_type *ffi_type = ZEND_FFI_TYPE(cdata->type);
+					zend_ffi_type *ffi_type = cdata->type;
+					if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
 						if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
 							op1_ffi_type = ffi_type;
+						}
+					} else {
+						ffi_type = ZEND_FFI_TYPE(ffi_type);
+						if (ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+							ffi_type = ffi_type->pointer.type;
+							if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+								if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+									/* OWNED flag means POINTER TO */
+									op1_ffi_type = ZEND_FFI_TYPE_MAKE_OWNED(ffi_type);
+								}
+							}
 						}
 					}
 				} else if (ce1 == zend_ffi_ce) {
@@ -783,10 +794,21 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #ifdef HAVE_FFI
 				if (ce2 == zend_ffi_cdata_ce) {
 					zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-					if (!ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
-						zend_ffi_type *ffi_type = ZEND_FFI_TYPE(cdata->type);
+					zend_ffi_type *ffi_type = cdata->type;
+					if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
 						if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
 							op2_ffi_type = ffi_type;
+						}
+					} else {
+						ffi_type = ZEND_FFI_TYPE(ffi_type);
+						if (ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+							ffi_type = ffi_type->pointer.type;
+							if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+								if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+									/* OWNED flag means POINTER TO */
+									op2_ffi_type = ZEND_FFI_TYPE_MAKE_OWNED(ffi_type);
+								}
+							}
 						}
 					}
 				}
@@ -822,10 +844,21 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data  *ex,
 #ifdef HAVE_FFI
 					if (ce3 == zend_ffi_cdata_ce) {
 						zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(zv);
-						if (!ZEND_FFI_TYPE_IS_OWNED(cdata->type)) {
-							zend_ffi_type *ffi_type = ZEND_FFI_TYPE(cdata->type);
+						zend_ffi_type *ffi_type = cdata->type;
+						if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
 							if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
 								op3_ffi_type = ffi_type;
+							}
+						} else {
+							ffi_type = ZEND_FFI_TYPE(ffi_type);
+							if (ffi_type->kind == ZEND_FFI_TYPE_POINTER) {
+								ffi_type = ffi_type->pointer.type;
+								if (!ZEND_FFI_TYPE_IS_OWNED(ffi_type)) {
+									if (ffi_type->attr & ZEND_FFI_ATTR_PERSISTENT) {
+										/* OWNED flag means POINTER TO */
+										op3_ffi_type = ZEND_FFI_TYPE_MAKE_OWNED(ffi_type);
+									}
+								}
 							}
 						}
 					}

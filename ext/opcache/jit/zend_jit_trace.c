@@ -8334,7 +8334,12 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 							fprintf(stderr, " op1(%sobject of class %s: ", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
-							zend_ffi_type_print(stderr, p->ptr);
+							if (ZEND_FFI_TYPE_IS_OWNED(p->ptr)) {
+								zend_ffi_type holder;
+								zend_ffi_type_print(stderr, zend_jit_ffi_type_pointer_to(p->ptr, &holder));
+							} else {
+								zend_ffi_type_print(stderr, p->ptr);
+							}
 							fprintf(stderr, ")");
 						} else if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_SYMBOLS) {
 							fprintf(stderr, " op1(%sobject of class %s: ffi_symbols)", ref,
@@ -8360,7 +8365,12 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 							fprintf(stderr, " op2(%sobject of class %s: ", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
-							zend_ffi_type_print(stderr, p->ptr);
+							if (ZEND_FFI_TYPE_IS_OWNED(p->ptr)) {
+								zend_ffi_type holder;
+								zend_ffi_type_print(stderr, zend_jit_ffi_type_pointer_to(p->ptr, &holder));
+							} else {
+								zend_ffi_type_print(stderr, p->ptr);
+							}
 							fprintf(stderr, ")");
 						} else
 #endif
@@ -8382,7 +8392,12 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 							fprintf(stderr, " op3(%sobject of class %s: ", ref,
 								ZSTR_VAL(p->ce->name));
 							p++;
-							zend_ffi_type_print(stderr, p->ptr);
+							if (ZEND_FFI_TYPE_IS_OWNED(p->ptr)) {
+								zend_ffi_type holder;
+								zend_ffi_type_print(stderr, zend_jit_ffi_type_pointer_to(p->ptr, &holder));
+							} else {
+								zend_ffi_type_print(stderr, p->ptr);
+							}
 							fprintf(stderr, ")");
 						} else
 #endif

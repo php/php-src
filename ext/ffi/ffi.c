@@ -64,9 +64,6 @@ static const char *zend_ffi_tag_kind_name[3] = {"enum", "struct", "union"};
 
 #include "ffi_arginfo.h"
 
-#define ZEND_FFI_TYPE_MAKE_OWNED(t) \
-	((zend_ffi_type*)(((uintptr_t)(t)) | ZEND_FFI_TYPE_OWNED))
-
 #define ZEND_FFI_SIZEOF_ARG \
 	MAX(FFI_SIZEOF_ARG, sizeof(double))
 
