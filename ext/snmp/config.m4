@@ -58,21 +58,33 @@ if test "$PHP_SNMP" != "no"; then
     [],
     [$SNMP_SHARED_LIBADD])
 
-  dnl Check whether usmHMAC192SHA256AuthProtocol exists.
-  PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [usmHMAC192SHA256AuthProtocol],
+  CFLAGS_SAVE=$CFLAGS
+  LIBS_SAVE=$LIBS
+  CFLAGS="$CFLAGS $SNMP_CFLAGS"
+  LIBS="$LIBS $SNMP_LIBS"
+
+  AC_CHECK_DECL([usmHMAC192SHA256AuthProtocol],
     [AC_DEFINE([HAVE_SNMP_SHA256], [1],
       [Define to 1 if SNMP library has the 'usmHMAC192SHA256AuthProtocol'
       array.])],
     [],
-    [$SNMP_SHARED_LIBADD])
+    [
+      #include <net-snmp/net-snmp-config.h>
+      #include <net-snmp/net-snmp-includes.h>
+    ])
 
-  dnl Check whether usmHMAC384SHA512AuthProtocol exists.
-  PHP_CHECK_LIBRARY([$SNMP_LIBNAME], [usmHMAC384SHA512AuthProtocol],
+  AC_CHECK_DECL([usmHMAC384SHA512AuthProtocol],
     [AC_DEFINE([HAVE_SNMP_SHA512], [1],
       [Define to 1 if SNMP library has the 'usmHMAC384SHA512AuthProtocol'
       array.])],
     [],
-    [$SNMP_SHARED_LIBADD])
+    [
+      #include <net-snmp/net-snmp-config.h>
+      #include <net-snmp/net-snmp-includes.h>
+    ])
+
+  CFLAGS=$CFLAGS_SAVE
+  LIBS=$LIBS_SAVE
 
   PHP_NEW_EXTENSION([snmp], [snmp.c], [$ext_shared])
   PHP_SUBST([SNMP_SHARED_LIBADD])
