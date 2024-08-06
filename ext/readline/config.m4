@@ -14,9 +14,6 @@ else
   php_with_readline=no
 fi
 
-AH_TEMPLATE([HAVE_ERASE_EMPTY_LINE],
-  [Define to 1 if edit/readline library has 'rl_erase_empty_line' variable.])
-
 if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   for i in $PHP_READLINE /usr/local /usr; do
     test -f $i/include/readline/readline.h && READLINE_DIR=$i && break
@@ -47,17 +44,17 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   PHP_CHECK_LIBRARY([readline], [rl_callback_read_char],
-    [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1], [ ])],
+    [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1])],
     [],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   PHP_CHECK_LIBRARY([readline], [rl_on_new_line],
-    [AC_DEFINE([HAVE_RL_ON_NEW_LINE], [1], [ ])],
+    [AC_DEFINE([HAVE_RL_ON_NEW_LINE], [1])],
     [],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
   PHP_CHECK_LIBRARY([readline], [rl_completion_matches],
-    [AC_DEFINE([HAVE_RL_COMPLETION_MATCHES], [1], [ ])],
+    [AC_DEFINE([HAVE_RL_COMPLETION_MATCHES], [1])],
     [],
     [-L$READLINE_DIR/$PHP_LIBDIR $PHP_READLINE_LIBS])
 
@@ -86,7 +83,7 @@ if test "$PHP_READLINE" && test "$PHP_READLINE" != "no"; then
   LDFLAGS=$LDFLAGS_SAVE
   LIBS=$LIBS_SAVE
 
-  AC_DEFINE(HAVE_HISTORY_LIST, 1, [ ])
+  AC_DEFINE([HAVE_HISTORY_LIST], [1])
   AC_DEFINE([HAVE_LIBREADLINE], [1],
     [Define to 1 if readline extension uses the 'readline' library.])
 
@@ -110,22 +107,29 @@ elif test "$PHP_LIBEDIT" != "no"; then
     [$READLINE_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY([edit], [rl_callback_read_char],
-    [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1], [ ])],
+    [AC_DEFINE([HAVE_RL_CALLBACK_READ_CHAR], [1],
+      [Define to 1 if edit/readline library has the 'rl_callback_read_char'
+      function.])],
     [],
     [$READLINE_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY([edit], [rl_on_new_line],
-    [AC_DEFINE([HAVE_RL_ON_NEW_LINE], [1], [ ])],
+    [AC_DEFINE([HAVE_RL_ON_NEW_LINE], [1],
+      [Define to 1 if edit/readline library has the 'rl_on_new_line'
+      function.])],
     [],
     [$READLINE_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY([edit], [rl_completion_matches],
-    [AC_DEFINE([HAVE_RL_COMPLETION_MATCHES], [1], [ ])],
+    [AC_DEFINE([HAVE_RL_COMPLETION_MATCHES], [1],
+      [Define to 1 if edit/readline library has the 'rl_completion_matches'
+      function.])],
     [],
     [$READLINE_SHARED_LIBADD])
 
   PHP_CHECK_LIBRARY([edit], [history_list],
-    [AC_DEFINE([HAVE_HISTORY_LIST], [1], [ ])],
+    [AC_DEFINE([HAVE_HISTORY_LIST], [1],
+      [Define to 1 if edit/readline library has the 'history_list' function.])],
     [],
     [$READLINE_SHARED_LIBADD])
 
@@ -134,7 +138,9 @@ elif test "$PHP_LIBEDIT" != "no"; then
   CFLAGS="$CFLAGS $EDIT_CFLAGS"
   LIBS="$LIBS $EDIT_LIBS"
   AC_CHECK_DECL([rl_erase_empty_line],
-    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1])],,
+    [AC_DEFINE([HAVE_ERASE_EMPTY_LINE], [1],
+      [Define to 1 if edit/readline library has the 'rl_erase_empty_line'
+      global variable.])],,
     [#include <editline/readline.h>])
   CFLAGS=$CFLAGS_SAVE
   LIBS=$LIBS_SAVE
