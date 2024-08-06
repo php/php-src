@@ -391,9 +391,12 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 						S->param_lengths[param->paramno] = 1;
 						S->param_formats[param->paramno] = 0;
 					} else {
-						convert_to_string(parameter);
-						S->param_values[param->paramno] = Z_STRVAL_P(parameter);
-						S->param_lengths[param->paramno] = Z_STRLEN_P(parameter);
+						zend_string *param_value = zval_try_get_string(parameter);
+						if (UNEXPECTED(param_value == NULL)) {
+							return 0;
+						}
+						S->param_values[param->paramno] = ZSTR_VAL(param_value);
+						S->param_lengths[param->paramno] = ZSTR_LEN(param_value);
 						S->param_formats[param->paramno] = 0;
 					}
 
