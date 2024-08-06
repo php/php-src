@@ -17368,13 +17368,18 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 			 && (trace+1)->op == ZEND_JIT_TRACE_OP1_TYPE
 			 && (trace+2)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
 				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
-				if (op1_ffi_type
-				 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
-				 && op2_info == MAY_BE_LONG
-				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind < ZEND_FFI_TYPE_POINTER
-				 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
-				 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
-					return 1;
+				if (op1_ffi_type) {
+					zend_ffi_type holder;
+					if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
+						op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder);
+					}
+					if ((op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+					 && op2_info == MAY_BE_LONG
+					 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind < ZEND_FFI_TYPE_POINTER
+					 && ZEND_FFI_TYPE(op1_ffi_type->array.type)->kind != ZEND_FFI_TYPE_VOID
+					 && zend_jit_ffi_supported_type(ZEND_FFI_TYPE(op1_ffi_type->array.type))) {
+						return 1;
+					}
 				}
 			}
 #endif
@@ -17431,17 +17436,25 @@ static bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa
 				zend_ffi_type *op1_ffi_type = (zend_ffi_type*)(trace+2)->ptr;
 				zend_ffi_type *op3_ffi_type = NULL;
 				uint32_t op1_data_info = OP1_DATA_INFO();
+				zend_ffi_type holder, holder2;
 
 				if ((trace+3)->op == ZEND_JIT_TRACE_OP3_TYPE
 				 && (trace+4)->op == ZEND_JIT_TRACE_OP3_FFI_TYPE) {
 					op3_ffi_type = (zend_ffi_type*)(trace+4)->ptr;
+					if (ZEND_FFI_TYPE_IS_OWNED(op3_ffi_type)) {
+						op3_ffi_type = zend_jit_ffi_type_pointer_to(op3_ffi_type, &holder2);
+					}
 				}
 
-				if (op1_ffi_type
-				 && (op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
-				 && op2_info == MAY_BE_LONG
-				 && zend_jit_ffi_compatible(op1_ffi_type->array.type, op1_data_info, op3_ffi_type)) {
-					return 1;
+				if (op1_ffi_type) {
+					if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
+						op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder);
+					}
+					if ((op1_ffi_type->kind == ZEND_FFI_TYPE_ARRAY || op1_ffi_type->kind == ZEND_FFI_TYPE_POINTER)
+					 && op2_info == MAY_BE_LONG
+					 && zend_jit_ffi_compatible(op1_ffi_type->array.type, op1_data_info, op3_ffi_type)) {
+						return 1;
+					}
 				}
 			}
 #endif

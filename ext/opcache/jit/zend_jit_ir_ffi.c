@@ -16,17 +16,6 @@
  *  +----------------------------------------------------------------------+
  */
 
-
-static zend_ffi_type *zend_jit_ffi_type_pointer_to(const zend_ffi_type *type, zend_ffi_type *holder)
-{
-	holder->kind = ZEND_FFI_TYPE_POINTER;
-	holder->attr = 0;
-	holder->size = sizeof(void*);
-	holder->align = _Alignof(void*);
-	holder->pointer.type = ZEND_FFI_TYPE(type);
-	return holder;
-}
-
 static ir_ref jit_FFI_CDATA_PTR(zend_jit_ctx *jit, ir_ref obj_ref)
 {
 	return ir_LOAD_A(ir_ADD_OFFSET(obj_ref, offsetof(zend_ffi_cdata, ptr)));
@@ -125,12 +114,6 @@ static int zend_jit_ffi_send_val(zend_jit_ctx         *jit,
 	ir_ref ref = IR_UNUSED;
 	uint8_t arg_type = IS_UNDEF;
 	uint8_t arg_flags = 0;
-	zend_ffi_type type_holder;
-
-	if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
-		/* OWNED flag means POINTER TO */
-		op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &type_holder);
-	}
 
 	ZEND_ASSERT(type->kind == ZEND_FFI_TYPE_FUNC);
 	if (type->attr & ZEND_FFI_ATTR_VARIADIC) {

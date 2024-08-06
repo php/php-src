@@ -56,6 +56,16 @@ typedef struct zend_jit_ffi_info {
 	uint32_t           info;
 } zend_jit_ffi_info;
 
+static zend_ffi_type *zend_jit_ffi_type_pointer_to(const zend_ffi_type *type, zend_ffi_type *holder)
+{
+	holder->kind = ZEND_FFI_TYPE_POINTER;
+	holder->attr = 0;
+	holder->size = sizeof(void*);
+	holder->align = _Alignof(void*);
+	holder->pointer.type = ZEND_FFI_TYPE(type);
+	return holder;
+}
+
 static bool zend_jit_ffi_supported_type(zend_ffi_type *type)
 {
 	if (sizeof(void*) == 4) {

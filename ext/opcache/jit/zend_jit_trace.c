@@ -4405,6 +4405,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			zend_ffi_type *op1_ffi_type = NULL;
 			zend_ffi_type *op2_ffi_type = NULL;
 			zend_ffi_type *op3_ffi_type = NULL;
+			zend_ffi_type holder1, holder2, holder3;
 			HashTable *op1_ffi_symbols = NULL;
 			(void)op2_ffi_type;
 #endif
@@ -4431,6 +4432,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifdef HAVE_FFI
 			if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_TYPE) {
 				op1_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				if (ZEND_FFI_TYPE_IS_OWNED(op1_ffi_type)) {
+					op1_ffi_type = zend_jit_ffi_type_pointer_to(op1_ffi_type, &holder1);
+				}
 				p++;
 			} else if ((p+1)->op == ZEND_JIT_TRACE_OP1_FFI_SYMBOLS) {
 				op1_ffi_symbols = (HashTable*)(p+1)->ptr;
@@ -4444,6 +4448,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifdef HAVE_FFI
 			if ((p+1)->op == ZEND_JIT_TRACE_OP2_FFI_TYPE) {
 				op2_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				if (ZEND_FFI_TYPE_IS_OWNED(op2_ffi_type)) {
+					op2_ffi_type = zend_jit_ffi_type_pointer_to(op2_ffi_type, &holder2);
+				}
 				p++;
 			}
 #endif
@@ -4454,6 +4461,9 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #ifdef HAVE_FFI
 			if ((p+1)->op == ZEND_JIT_TRACE_OP3_FFI_TYPE) {
 				op3_ffi_type = (zend_ffi_type*)(p+1)->ptr;
+				if (ZEND_FFI_TYPE_IS_OWNED(op3_ffi_type)) {
+					op3_ffi_type = zend_jit_ffi_type_pointer_to(op3_ffi_type, &holder3);
+				}
 				p++;
 			}
 #endif
