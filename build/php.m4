@@ -11,8 +11,7 @@ dnl Adds separator title into the configure --help display.
 dnl
 AC_DEFUN([PHP_HELP_SEPARATOR],[
 AC_ARG_ENABLE([],[
-$1
-],[])
+$1],[])
 ])
 
 dnl
@@ -130,6 +129,8 @@ AC_DEFUN([PHP_INIT_BUILD_SYSTEM],
 php_shtool=$srcdir/build/shtool
 > Makefile.objects
 > Makefile.fragments
+T_MD=$($php_shtool echo -n -e %B)
+T_ME=$($php_shtool echo -n -e %b)
 dnl Run at the end of the configuration, before creating the config.status.
 AC_CONFIG_COMMANDS_PRE(
 [dnl Directory for storing shared objects of extensions.

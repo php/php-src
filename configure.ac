@@ -100,9 +100,6 @@ dnl ----------------------------------------------------------------------------
 
 PHP_INIT_BUILD_SYSTEM
 
-T_MD=`$php_shtool echo -n -e %B`
-T_ME=`$php_shtool echo -n -e %b`
-
 dnl We want this one before the checks, so the checks can modify CFLAGS.
 AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 
@@ -274,7 +271,7 @@ SAPI_SHARED=libs/$SAPI_LIBNAME_SHARED
 SAPI_STATIC=libs/$SAPI_LIBNAME_STATIC
 SAPI_LIBTOOL=libphp.la
 
-PHP_CONFIGURE_PART(Configuring SAPI modules)
+PHP_CONFIGURE_PART([Configuring SAPI modules])
 
 esyscmd(./build/config-stubs sapi)
 
@@ -312,7 +309,7 @@ AS_VAR_IF([enable_zts], [yes], [
 dnl Starting system checks.
 dnl ----------------------------------------------------------------------------
 
-PHP_CONFIGURE_PART(Running system checks)
+PHP_CONFIGURE_PART([Running system checks])
 
 dnl Find sendmail binary.
 PHP_PROG_SENDMAIL
@@ -754,7 +751,7 @@ AS_VAR_IF([PHP_VALGRIND], [no],, [
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
-PHP_CONFIGURE_PART(General settings)
+PHP_CONFIGURE_PART([General settings])
 
 PHP_HELP_SEPARATOR([General settings:])
 
@@ -1067,7 +1064,6 @@ dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
 
 PHP_HELP_SEPARATOR([[Extensions:
-
   --with-EXTENSION=[shared[,PATH]]
 
     NOTE: Not all extensions can be built as 'shared'.
@@ -1078,7 +1074,7 @@ PHP_HELP_SEPARATOR([[Extensions:
       o foobar package install prefix is /usr/local/foobar/
 ]])
 
-PHP_CONFIGURE_PART(Configuring extensions)
+PHP_CONFIGURE_PART([Configuring extensions])
 
 dnl Check if all enabled by default extensions should be disabled.
 AC_ARG_ENABLE([all],
@@ -1152,7 +1148,7 @@ dnl PEAR
 dnl ----------------------------------------------------------------------------
 
 PHP_HELP_SEPARATOR([PEAR:])
-PHP_CONFIGURE_PART(Configuring PEAR)
+PHP_CONFIGURE_PART([Configuring PEAR])
 
 dnl If CLI is disabled disable PEAR.
 AS_VAR_IF([PHP_CLI], [no], [with_pear=no])
@@ -1192,7 +1188,7 @@ dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
 PHP_HELP_SEPARATOR([Zend:])
-PHP_CONFIGURE_PART(Configuring Zend)
+PHP_CONFIGURE_PART([Configuring Zend])
 
 AC_ARG_ENABLE([fiber-asm],
   [AS_HELP_STRING([--disable-fiber-asm],
@@ -1578,7 +1574,7 @@ dnl Libtool creation.
 dnl
 
 PHP_HELP_SEPARATOR([Libtool:])
-PHP_CONFIGURE_PART(Configuring libtool)
+PHP_CONFIGURE_PART([Configuring libtool])
 
 dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
 dnl See https://github.com/php/php-src/pull/3017
@@ -1602,7 +1598,7 @@ PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
 CC=$old_CC
 
-PHP_CONFIGURE_PART(Generating files)
+PHP_CONFIGURE_PART([Generating files])
 
 CXXFLAGS_CLEAN=$CXXFLAGS
 CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
