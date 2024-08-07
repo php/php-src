@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 
+#include "zend_hash.h"
 #include "zend_types.h"
 #include "zend_property_hooks.h"
 #include "zend_lazy_objects.h"
@@ -275,9 +276,9 @@ ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
 	if (UNEXPECTED(zend_lazy_object_must_init(object))) {
-		zend_object *instance = zend_lazy_object_init(object);
-		if (EXPECTED(instance)) {
-			object = instance;
+		object = zend_lazy_object_init(object);
+		if (UNEXPECTED(!object)) {
+			return object->properties = (zend_array*) &zend_empty_array;
 		}
 	}
 	if (!object->properties) {

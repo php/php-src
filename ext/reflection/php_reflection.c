@@ -5327,7 +5327,7 @@ ZEND_METHOD(ReflectionClass, initializeLazyObject)
 	if (zend_lazy_object_initialized(object)) {
 		RETURN_OBJ_COPY(zend_lazy_object_get_instance(object));
 	} else {
-		ZEND_ASSERT(EG(exception));
+		RETURN_THROWS();
 	}
 }
 /* }}} */
