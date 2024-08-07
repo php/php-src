@@ -1380,11 +1380,16 @@ PHPAPI void php_unserialize_with_options(zval *return_value, const char *buf, co
 			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(classes), entry) {
 				ZVAL_DEREF(entry);
 				if (UNEXPECTED(Z_TYPE_P(entry) != IS_STRING && Z_TYPE_P(entry) != IS_OBJECT)) {
-					zend_type_error("%s(): Option \"allowed_classes\" must be an array of strings", function_name);
+					zend_type_error("%s(): Option \"allowed_classes\" must be an array of class names", function_name);
 					goto cleanup;
 				}
 				zend_string *name = zval_try_get_string(entry);
 				if (UNEXPECTED(name == NULL)) {
+					goto cleanup;
+				}
+				if (UNEXPECTED(!zend_is_valid_class_name(name))) {
+					zend_value_error("%s(): Option \"allowed_classes\" must be an array of class names, \"%s\" given", function_name, ZSTR_VAL(name));
+					zend_string_release_ex(name, false);
 					goto cleanup;
 				}
 				zend_string *lcname = zend_string_tolower(name);

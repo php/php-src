@@ -51,11 +51,11 @@ try {
 
 ?>
 --EXPECT--
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
-TypeError: unserialize(): Option "allowed_classes" must be an array of strings
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names
 Error: Object of class stdClass could not be converted to string
