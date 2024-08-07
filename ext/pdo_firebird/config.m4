@@ -10,7 +10,7 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-  AC_PATH_PROG(FB_CONFIG, fb_config, no)
+  AC_PATH_PROG([FB_CONFIG], [fb_config], [no])
 
   if test -x "$FB_CONFIG" && test "$PHP_PDO_FIREBIRD" = "yes"; then
     AC_MSG_CHECKING([for libfbconfig])
