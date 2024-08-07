@@ -45,6 +45,8 @@ PHP                                                                        NEWS
 - PHPDBG:
   . Fixed bug GH-13199 (EOF emits redundant prompt in phpdbg local console mode
     with libedit/readline). (Peter Kokot)
+  . Fixed bug GH-15268 (heap buffer overflow in phpdbg
+    (zend_hash_num_elements() Zend/zend_hash.h)). (nielsdos)
 
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
