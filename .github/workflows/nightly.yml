@@ -883,13 +883,13 @@ jobs:
       matrix:
         include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.windows-matrix-include) }}
     name: "${{ matrix.branch.name }}_WINDOWS_${{ matrix.x64 && 'X64' || 'X86' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
-    runs-on: windows-2022
+    runs-on: ${{ matrix.runner }}
     env:
       PHP_BUILD_CACHE_BASE_DIR: C:\build-cache
       PHP_BUILD_OBJ_DIR: C:\obj
       PHP_BUILD_CACHE_SDK_DIR: C:\build-cache\sdk
       PHP_BUILD_SDK_BRANCH: php-sdk-2.3.0
-      PHP_BUILD_CRT: vs17
+      PHP_BUILD_CRT: ${{ matrix.crt }}
       PLATFORM: ${{ matrix.x64 && 'x64' || 'x86' }}
       THREAD_SAFE: "${{ matrix.zts && '1' || '0' }}"
       INTRINSICS: "${{ matrix.zts && 'AVX2' || '' }}"

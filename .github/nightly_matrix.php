@@ -76,17 +76,23 @@ function get_matrix_include(array $branches) {
 function get_windows_matrix_include(array $branches) {
     $jobs = [];
     foreach ($branches as $branch) {
+        $crt = $branch['name'] === 'master' ? 'vs17' : 'vs16';
+        $runner = $crt === 'vs17' ? 'windows-2022' : 'windows-2019';
         $jobs[] = [
             'branch' => $branch,
             'x64' => true,
             'zts' => true,
             'opcache' => true,
+            'crt' => $crt,
+            'runner' => $runner,
         ];
         $jobs[] = [
             'branch' => $branch,
             'x64' => false,
             'zts' => false,
             'opcache' => false,
+            'crt' => $crt,
+            'runner' => $runner,
         ];
     }
     return $jobs;
