@@ -648,6 +648,11 @@ const IMAGETYPE_WEBP = UNKNOWN;
 const IMAGETYPE_AVIF = UNKNOWN;
 /**
  * @var int
+ * @cvalue IMAGE_FILETYPE_HEIF
+ */
+const IMAGETYPE_HEIF = UNKNOWN;
+/**
+ * @var int
  * @cvalue IMAGE_FILETYPE_UNKNOWN
  */
 const IMAGETYPE_UNKNOWN = UNKNOWN;
