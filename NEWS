@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
   . Fix SoapFault property destruction. (nielsdos)
+  . Fixed bug GH-15252 (SOAP XML broken since PHP 8.3.9 when using classmap
+    constructor option). (nielsdos)
 
 - Standard:
   . Fix passing non-finite timeout values in stream functions. (nielsdos)
