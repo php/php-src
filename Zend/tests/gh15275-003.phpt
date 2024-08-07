@@ -1,5 +1,5 @@
 --TEST--
-GH-xxx 003: Crash during GC of suspended generator delegate
+GH-15275 003: Crash during GC of suspended generator delegate
 --FILE--
 <?php
 
