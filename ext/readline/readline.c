@@ -115,6 +115,15 @@ PHP_MINFO_FUNCTION(readline)
 
 /* }}} */
 
+static void php_readline_fix_locale() {
+	/* Yes, this variable is process-wide, but so is the locale setting. */
+	static bool locale_fixed = false;
+	if (!locale_fixed) {
+		locale_fixed = true;
+		zend_reset_lc_ctype_locale();
+	}
+}
+
 /* {{{ Reads a line */
 PHP_FUNCTION(readline)
 {
@@ -125,6 +134,8 @@ PHP_FUNCTION(readline)
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &prompt, &prompt_len)) {
 		RETURN_THROWS();
 	}
+
+	php_readline_fix_locale();
 
 	result = readline(prompt);
 
