@@ -286,7 +286,7 @@ static ZEND_NAMED_FUNCTION(zend_enum_cases_func)
 	} ZEND_HASH_FOREACH_END();
 }
 
-ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try)
+ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_class_entry *ce, zend_long long_key, zend_string *string_key, bool try_from)
 {
 	if (ce->type == ZEND_USER_CLASS && !(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 		if (zend_update_class_constants(ce) == FAILURE) {
@@ -310,7 +310,7 @@ ZEND_API zend_result zend_enum_get_case_by_value(zend_object **result, zend_clas
 
 	if (case_name_zv == NULL) {
 not_found:
-		if (try) {
+		if (try_from) {
 			*result = NULL;
 			return SUCCESS;
 		}
@@ -340,7 +340,7 @@ not_found:
 	return SUCCESS;
 }
 
-static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
+static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try_from)
 {
 	zend_class_entry *ce = execute_data->func->common.scope;
 	bool release_string = false;
@@ -375,12 +375,12 @@ static void zend_enum_from_base(INTERNAL_FUNCTION_PARAMETERS, bool try)
 	}
 
 	zend_object *case_obj;
-	if (zend_enum_get_case_by_value(&case_obj, ce, long_key, string_key, try) == FAILURE) {
+	if (zend_enum_get_case_by_value(&case_obj, ce, long_key, string_key, try_from) == FAILURE) {
 		goto throw;
 	}
 
 	if (case_obj == NULL) {
-		ZEND_ASSERT(try);
+		ZEND_ASSERT(try_from);
 		goto return_null;
 	}
 
