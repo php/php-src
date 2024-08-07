@@ -30,6 +30,7 @@
 #include "phpdbg_arginfo.h"
 #include "zend_vm.h"
 #include "php_ini_builder.h"
+#include "php_main.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -1369,14 +1370,14 @@ phpdbg_main:
 			if (show_help) {
 				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
-				phpdbg_out(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) The PHP Group\n%s",
-					PHPDBG_VERSION,
-					__DATE__,
-					__TIME__,
-					PHP_VERSION,
-					get_zend_version()
-				);
+				char *version_info = php_get_version(&phpdbg_sapi_module);
+				/* we also want to include phpdbg version */
+				char *prepended_version_info;
+				spprintf(&prepended_version_info, 0,
+						"phpdbg %s, %s", PHPDBG_VERSION, version_info);
+				phpdbg_out("%s", prepended_version_info);
+				efree(prepended_version_info);
+				efree(version_info);
 			}
 			PHPDBG_G(flags) |= PHPDBG_IS_QUITTING;
 			php_module_shutdown();
