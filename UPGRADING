@@ -45,6 +45,9 @@ PHP 8.3 UPGRADE NOTES
     be removed during cycle collection if the key is not reachable except by
     iterating over the WeakMap (reachability via iteration is considered weak).
     Previously, such entries would never be automatically removed.
+  . In addition to whitespace characters, now comments are allowed between
+    `yield` and `from`. The whole "construct" (e.g. `yield /* comment */ from`)
+    is reported as a single `T_YIELD_FROM` token by the tokenizer.
 
 - DOM:
   . DOMChildNode::after(), DOMChildNode::before(), DOMChildNode::replaceWith()
