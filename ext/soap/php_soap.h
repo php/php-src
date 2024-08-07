@@ -98,7 +98,7 @@ struct _soapService {
 	char      *actor;
 	char      *uri;
 	xmlCharEncodingHandlerPtr encoding;
-	zval       class_map;
+	HashTable *class_map;
 	int        features;
 	struct _soapHeader **soap_headers_ptr;
 	int send_errors;

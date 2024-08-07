@@ -449,8 +449,11 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 			zend_string *type_name;
 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(SOAP_GLOBAL(class_map), type_name, tmp) {
-				if (ZSTR_LEN(ce->name) == Z_STRLEN_P(tmp) &&
-				    zend_binary_strncasecmp(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), Z_STRVAL_P(tmp), ZSTR_LEN(ce->name), ZSTR_LEN(ce->name)) == 0) {
+				ZVAL_DEREF(tmp);
+				if (Z_TYPE_P(tmp) == IS_STRING &&
+				    ZSTR_LEN(ce->name) == Z_STRLEN_P(tmp) &&
+				    zend_binary_strncasecmp(ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), Z_STRVAL_P(tmp), ZSTR_LEN(ce->name), ZSTR_LEN(ce->name)) == 0 &&
+				    type_name) {
 
 					/* TODO: namespace isn't stored */
 					encodePtr enc = NULL;
@@ -1379,6 +1382,7 @@ static zval *to_zval_object_ex(zval *ret, encodeTypePtr type, xmlNodePtr data, z
 		zend_class_entry  *tmp;
 
 		if ((classname = zend_hash_str_find_deref(SOAP_GLOBAL(class_map), type->type_str, strlen(type->type_str))) != NULL &&
+		    Z_TYPE_P(classname) == IS_STRING &&
 		    (tmp = zend_fetch_class(Z_STR_P(classname), ZEND_FETCH_CLASS_AUTO)) != NULL) {
 			ce = tmp;
 		}
@@ -3636,49 +3640,4 @@ void delete_encoder_persistent(zval *zv)
 	/* we should never have mapping in persistent encoder */
 	assert(t->details.map == NULL);
 	free(t);
-}
-
-/* Normalize leading backslash similarly to how the engine strips it away. */
-static inline zend_string *drop_leading_backslash(zend_string *str) {
-	if (ZSTR_VAL(str)[0] == '\\') {
-		return zend_string_init(ZSTR_VAL(str) + 1, ZSTR_LEN(str) - 1, false);
-	} else {
-		return zend_string_copy(str);
-	}
-}
-
-static HashTable *create_normalized_classmap_copy(HashTable *class_map)
-{
-	HashTable *normalized = zend_new_array(zend_hash_num_elements(class_map));
-
-	zend_string *key;
-	zval *value;
-	ZEND_HASH_FOREACH_STR_KEY_VAL(class_map, key, value) {
-		ZVAL_DEREF(value);
-
-		if (key != NULL && Z_TYPE_P(value) == IS_STRING) {
-			zval zv;
-			ZVAL_STR(&zv, drop_leading_backslash(Z_STR_P(value)));
-			zend_hash_add_new(normalized, key, &zv);
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	return normalized;
-}
-
-void create_normalized_classmap(zval *return_value, zval *class_map)
-{
-	/* Check if we need to make a copy. */
-	zend_string *key;
-	zval *value;
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARR_P(class_map), key, value) {
-		if (key == NULL || Z_TYPE_P(value) != IS_STRING || ZSTR_VAL(Z_STR_P(value))[0] == '\\') {
-			/* TODO: should probably throw in some of these cases to indicate programmer error,
-			 * e.g. in the case where a non-string (after dereferencing) is provided. */
-			RETURN_ARR(create_normalized_classmap_copy(Z_ARR_P(class_map)));
-		}
-	} ZEND_HASH_FOREACH_END();
-
-	/* We didn't have to make an actual copy, just increment the refcount. */
-	RETURN_COPY(class_map);
 }
