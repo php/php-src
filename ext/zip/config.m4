@@ -11,37 +11,45 @@ if test "$PHP_ZIP" != "no"; then
 
   PHP_CHECK_LIBRARY([zip], [zip_file_set_mtime],
     [AC_DEFINE([HAVE_SET_MTIME], [1],
-      [Libzip >= 1.0.0 with zip_file_set_mtime])],
+      [Define to 1 if libzip library has the 'zip_file_set_mtime' function
+      (available since 1.0.0).])],
     [AC_MSG_WARN([Libzip >= 1.0.0 needed for setting mtime])],
     [$LIBZIP_LIBS])
 
   PHP_CHECK_LIBRARY([zip], [zip_file_set_encryption],
     [AC_DEFINE([HAVE_ENCRYPTION], [1],
-      [Libzip >= 1.2.0 with encryption support])],
+      [Define to 1 if libzip library has encryption support (available since
+      1.2.0).])],
     [AC_MSG_WARN([Libzip >= 1.2.0 needed for encryption support])],
     [$LIBZIP_LIBS])
 
   PHP_CHECK_LIBRARY([zip], [zip_libzip_version],
     [AC_DEFINE([HAVE_LIBZIP_VERSION], [1],
-      [Libzip >= 1.3.1 with zip_libzip_version function])],
+      [Define to 1 if libzip library has the 'zip_libzip_version' function
+      (available since 1.3.1).])],
     [],
     [$LIBZIP_LIBS])
 
   PHP_CHECK_LIBRARY([zip], [zip_register_progress_callback_with_state],
     [AC_DEFINE([HAVE_PROGRESS_CALLBACK], [1],
-      [Libzip >= 1.3.0 with zip_register_progress_callback_with_state function])],
+      [Define to 1 if libzip library has the
+      'zip_register_progress_callback_with_state' function (available since
+      1.3.0).])],
     [],
     [$LIBZIP_LIBS])
 
   PHP_CHECK_LIBRARY([zip], [zip_register_cancel_callback_with_state],
     [AC_DEFINE([HAVE_CANCEL_CALLBACK], [1],
-      [Libzip >= 1.6.0 with zip_register_cancel_callback_with_state function])],
+      [Define to 1 if libzip library has the
+      'zip_register_cancel_callback_with_state' function (available since
+      1.6.0).])],
     [],
     [$LIBZIP_LIBS])
 
   PHP_CHECK_LIBRARY([zip], [zip_compression_method_supported],
     [AC_DEFINE([HAVE_METHOD_SUPPORTED], [1],
-      [Libzip >= 1.7.0 with zip_*_method_supported functions])],
+      [Define to 1 if libzip library has 'zip_*_method_supported' functions
+      (available since 1.7.0).])],
     [],
     [$LIBZIP_LIBS])
 
