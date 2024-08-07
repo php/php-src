@@ -1475,7 +1475,8 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 				if (!zobj) {
 					return;
 				}
-				return zend_std_unset_property(zobj, name, cache_slot);
+				zend_std_unset_property(zobj, name, cache_slot);
+				return;
 			}
 
 			/* Reset the IS_PROP_UNINIT flag, if it exists and bypass __unset(). */
@@ -1527,7 +1528,8 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		if (!zobj) {
 			return;
 		}
-		return zend_std_unset_property(zobj, name, cache_slot);
+		zend_std_unset_property(zobj, name, cache_slot);
+		return;
 	}
 }
 /* }}} */
