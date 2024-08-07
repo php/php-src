@@ -1,0 +1,55 @@
+--TEST--
+Test unserialize() with array allowed_classes and nonsensical values
+--FILE--
+<?php
+class foo {
+        public $x = "bar";
+}
+$z = array(new foo(), 2, "3");
+$s = serialize($z);
+
+try {
+    unserialize($s, ["allowed_classes" => [null]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [false]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [true]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [42]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [15.2]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [[]]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [STDERR]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+try {
+    unserialize($s, ["allowed_classes" => [new stdClass]]);
+} catch (Throwable $e) {
+    echo $e::class, ': ', $e->getMessage(), "\n";
+}
+
+?>
+--EXPECTF--
+Warning: Array to string conversion in %s on line %d
+Error: Object of class stdClass could not be converted to string
