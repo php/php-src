@@ -60,7 +60,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_PRINT
 %precedence T_YIELD
 %precedence T_DOUBLE_ARROW
-%precedence T_YIELD_FROM
+%precedence T_FROM
 %precedence '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL T_COALESCE_EQUAL
 %left '?' ':'
 %right T_COALESCE
@@ -109,7 +109,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_LOGICAL_AND   "'and'"
 %token <ident> T_PRINT         "'print'"
 %token <ident> T_YIELD         "'yield'"
-%token <ident> T_YIELD_FROM    "'yield from'"
+%token <ident> T_FROM          "'from'"
 %token <ident> T_INSTANCEOF    "'instanceof'"
 %token <ident> T_NEW           "'new'"
 %token <ident> T_CLONE         "'clone'"
@@ -1312,7 +1312,7 @@ expr:
 	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
+	|	T_YIELD T_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $3); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_THROW expr { $$ = zend_ast_create(ZEND_AST_THROW, $2); }
 	|	inline_function { $$ = $1; }
 	|	attributes inline_function { $$ = zend_ast_with_attributes($2, $1); }
