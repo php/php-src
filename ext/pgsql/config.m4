@@ -19,8 +19,9 @@ if test "$PHP_PGSQL" != "no"; then
       or later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQchangePassword],
-    [AC_DEFINE([HAVE_PG_CHANGE_PASSWORD], [1], [Define to 1 if libpq has the
-    'PQchangePassword' function (PostgreSQL 17 or later).])],,
+    [AC_DEFINE([HAVE_PG_CHANGE_PASSWORD], [1],
+      [Define to 1 if libpq has the 'PQchangePassword' function (PostgreSQL 17
+      or later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQsocketPoll],
     [AC_DEFINE([HAVE_PG_SOCKET_POLL], [1],
