@@ -14,16 +14,24 @@ if test "$PHP_PGSQL" != "no"; then
     [Define to 1 if the PHP extension 'pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
-    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
+    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1],
+      [Define to 1 if libpq has the 'PQresultMemorySize' function (PostgreSQL 12
+      or later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQchangePassword],
-    [AC_DEFINE([HAVE_PG_CHANGE_PASSWORD], [1], [PostgreSQL 17 or later])],,
+    [AC_DEFINE([HAVE_PG_CHANGE_PASSWORD], [1],
+      [Define to 1 if libpq has the 'PQchangePassword' function (PostgreSQL 17
+      or later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQsocketPoll],
-    [AC_DEFINE([HAVE_PG_SOCKET_POLL], [1], [PostgreSQL 17 or later])],,
+    [AC_DEFINE([HAVE_PG_SOCKET_POLL], [1],
+      [Define to 1 if libpq has the 'PQsocketPoll' function (PostgreSQL 17 or
+      later).])],,
     [$PGSQL_LIBS])
   PHP_CHECK_LIBRARY([pq], [PQsetChunkedRowsMode],
-    [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1], [PostgreSQL 17 or later])],,
+    [AC_DEFINE([HAVE_PG_SET_CHUNKED_ROWS_SIZE], [1],
+      [Define to 1 if libpq has the 'PQsetChunkedRowsMode' function (PostgreSQL
+      17 or later).])],,
     [$PGSQL_LIBS])
 
   old_CFLAGS=$CFLAGS
