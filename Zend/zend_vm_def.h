@@ -4609,7 +4609,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 		generator->execute_fake.prev_execute_data = NULL;
 		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 
-		gen_execute_data->opline = opline + 1;
+		gen_execute_data->opline = opline;
 		/* EX(return_value) keeps pointer to zend_object (not a real zval) */
 		gen_execute_data->return_value = (zval*)generator;
 		call_info = Z_TYPE_INFO(EX(This));
@@ -8416,10 +8416,6 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|CV|UNUSED
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -8521,10 +8517,6 @@ ZEND_VM_C_LABEL(yield_from_try_again):
 
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */

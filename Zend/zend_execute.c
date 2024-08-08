@@ -4711,19 +4711,7 @@ ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data,
 
 ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer)
 {
-	bool suspended_by_yield = false;
-
-	if (Z_TYPE_INFO(EX(This)) & ZEND_CALL_GENERATOR) {
-		ZEND_ASSERT(EX(return_value));
-
-		/* The generator object is stored in EX(return_value) */
-		zend_generator *generator = (zend_generator*) EX(return_value);
-		ZEND_ASSERT(execute_data == generator->execute_data);
-
-		suspended_by_yield = !(generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING);
-	}
-
-	return zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, suspended_by_yield);
+	return zend_unfinished_execution_gc_ex(execute_data, call, gc_buffer, false);
 }
 
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield)
@@ -4761,27 +4749,20 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 		zend_get_gc_buffer_add_zval(gc_buffer, &extra_named_params);
 	}
 
+	uint32_t op_num;
+	if (UNEXPECTED(execute_data->opline->opcode == ZEND_HANDLE_EXCEPTION)) {
+		op_num = EG(opline_before_exception) - op_array->opcodes;
+	} else {
+		op_num = execute_data->opline - op_array->opcodes;
+	}
+	ZEND_ASSERT(op_num < op_array->last);
+
 	if (call) {
-		uint32_t op_num;
-		if (UNEXPECTED(execute_data->opline->opcode == ZEND_HANDLE_EXCEPTION)) {
-			op_num = EG(opline_before_exception) - op_array->opcodes;
-		} else {
-			op_num = execute_data->opline - op_array->opcodes;
-		}
-		ZEND_ASSERT(op_num < op_array->last);
-		if (suspended_by_yield) {
-			/* When the execution was suspended by yield, EX(opline) points to
-			 * next opline to execute. Otherwise, it points to the opline that
-			 * suspended execution. */
-			op_num--;
-			ZEND_ASSERT(EX(func)->op_array.opcodes[op_num].opcode == ZEND_YIELD
-				|| EX(func)->op_array.opcodes[op_num].opcode == ZEND_YIELD_FROM);
-		}
 		zend_unfinished_calls_gc(execute_data, call, op_num, gc_buffer);
 	}
 
 	if (execute_data->opline != op_array->opcodes) {
-		uint32_t i, op_num = execute_data->opline - op_array->opcodes - 1;
+		uint32_t i;
 		for (i = 0; i < op_array->last_live_range; i++) {
 			const zend_live_range *range = &op_array->live_range[i];
 			if (range->start > op_num) {

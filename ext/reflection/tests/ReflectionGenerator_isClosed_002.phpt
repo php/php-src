@@ -30,11 +30,11 @@ foreach ($gens as $gen) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 bool(false)
-int(11)
+int(10)
 
 bool(false)
 bool(false)
