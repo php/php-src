@@ -18,7 +18,9 @@ if test "$PHP_PDO_PGSQL" != "no"; then
     [Define to 1 if the PHP extension 'pdo_pgsql' is available.])
 
   PHP_CHECK_LIBRARY([pq], [PQresultMemorySize],
-    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1], [PostgreSQL 12 or later])],,
+    [AC_DEFINE([HAVE_PG_RESULT_MEMORY_SIZE], [1],
+      [Define to 1 if libpq has the 'PQresultMemorySize' function (PostgreSQL 12
+      or later).])],,
     [$PGSQL_LIBS])
 
   PHP_CHECK_PDO_INCLUDES
