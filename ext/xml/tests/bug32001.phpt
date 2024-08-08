@@ -100,8 +100,7 @@ HERE;
 
         $parser = xml_parser_create(NULL);
         xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-        xml_set_object($parser, $this);
-        xml_set_element_handler($parser, "start_element", "end_element");
+        xml_set_element_handler($parser, $this->start_element(...), $this->end_element(...));
 
         if ($this->chunk_size == 0) {
             $success = @xml_parse($parser, $data, true);
@@ -166,10 +165,6 @@ foreach ($suite as $testcase) {
 ?>
 --EXPECTF--
 libxml2 Version => %s
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: present
 Chunk size: all data at once
@@ -182,10 +177,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: not present
 Chunk size: all data at once
@@ -198,10 +189,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: present
 Chunk size: all data at once
@@ -214,10 +201,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: not present
 Chunk size: all data at once
@@ -230,10 +213,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16BE
 XML Prologue: present
 Chunk size: all data at once
@@ -246,10 +225,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16BE
 XML Prologue: present
 Chunk size: all data at once
@@ -262,10 +237,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16BE
 XML Prologue: not present
 Chunk size: all data at once
@@ -278,10 +249,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16LE
 XML Prologue: present
 Chunk size: all data at once
@@ -294,10 +261,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16LE
 XML Prologue: present
 Chunk size: all data at once
@@ -310,10 +273,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16LE
 XML Prologue: not present
 Chunk size: all data at once
@@ -326,10 +285,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: present
 Chunk size: 1 byte(s)
@@ -342,10 +297,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: not present
 Chunk size: 1 byte(s)
@@ -358,10 +309,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: present
 Chunk size: 1 byte(s)
@@ -374,10 +321,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-8
 XML Prologue: not present
 Chunk size: 1 byte(s)
@@ -390,10 +333,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16BE
 XML Prologue: present
 Chunk size: 1 byte(s)
@@ -406,10 +345,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16BE
 XML Prologue: present
 Chunk size: 1 byte(s)
@@ -422,10 +357,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16BE
 XML Prologue: not present
 Chunk size: 1 byte(s)
@@ -438,10 +369,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16LE
 XML Prologue: present
 Chunk size: 1 byte(s)
@@ -454,10 +381,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16LE
 XML Prologue: present
 Chunk size: 1 byte(s)
@@ -470,10 +393,6 @@ array(3) {
   [2]=>
   string(42) "e38386e382b9e383883ae38386e382b9e3838833: "
 }
-
-Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
-
-Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Encoding: UTF-16LE
 XML Prologue: not present
 Chunk size: 1 byte(s)
