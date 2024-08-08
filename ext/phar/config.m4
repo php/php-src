@@ -4,6 +4,19 @@ PHP_ARG_ENABLE([phar],
     [Disable phar support])],
   [yes])
 
+dnl Empty variable means 'no' (for phpize builds).
+AS_VAR_IF([PHP_OPENSSL],, [PHP_OPENSSL=no])
+
+PHP_ARG_WITH([phar-ssl],
+  [whether to enable native OpenSSL support for phar],
+  [AS_HELP_STRING([--with-phar-ssl],
+    [Explicitly enable SSL support in phar extension through the OpenSSL library
+    when building without openssl extension or when using phpize. If the openssl
+    extension is enabled at the configure step (--with-openssl), SSL is enabled
+    implicitly regardless of this option.])],
+  [$PHP_OPENSSL],
+  [no])
+
 if test "$PHP_PHAR" != "no"; then
   PHP_NEW_EXTENSION([phar], m4_normalize([
       dirstream.c
@@ -18,17 +31,14 @@ if test "$PHP_PHAR" != "no"; then
     ]),
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
-  AC_MSG_CHECKING([for phar openssl support])
-  if test "$PHP_OPENSSL_SHARED" = "yes"; then
-    AC_MSG_RESULT([no (shared openssl)])
-  else
-    if test "$PHP_OPENSSL" = "yes"; then
-      AC_MSG_RESULT([yes])
-      AC_DEFINE(PHAR_HAVE_OPENSSL,1,[ ])
-    else
-      AC_MSG_RESULT([no])
-    fi
-  fi
+
+  AS_VAR_IF([PHP_PHAR_SSL], [no],, [
+    PHP_SETUP_OPENSSL([PHAR_SHARED_LIBADD],
+      [AC_DEFINE([PHAR_HAVE_OPENSSL], [1],
+        [Define to 1 if phar extension has native OpenSSL support.])])
+    PHP_SUBST([PHAR_SHARED_LIBADD])
+  ])
+
   PHP_ADD_EXTENSION_DEP(phar, hash)
   PHP_ADD_EXTENSION_DEP(phar, spl)
   PHP_ADD_MAKEFILE_FRAGMENT

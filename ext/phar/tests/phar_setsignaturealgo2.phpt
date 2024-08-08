@@ -1,6 +1,7 @@
 --TEST--
-Phar::setSupportedSignatures() with hash
+Phar::setSignatureAlgorithm() with hash
 --EXTENSIONS--
+openssl
 phar
 --SKIPIF--
 <?php
