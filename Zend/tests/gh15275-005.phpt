@@ -41,11 +41,11 @@ string(3) "foo"
 string(1) "f"
 string(1) "g"
 
-Fatal error: Uncaught Exception in %s:%d
+Fatal error: Uncaught Exception in %s:8
 Stack trace:
-#0 %s(%d): It->getIterator()
-#1 %s(%d): f()
+#0 %s(15): It->getIterator()
+#1 %s(23): f()
 #2 [internal function]: g()
-#3 %s(%d): Generator->next()
+#3 %s(32): Generator->next()
 #4 {main}
-  thrown in %s on line %d
+  thrown in %s on line 8

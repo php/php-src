@@ -1,5 +1,5 @@
 --TEST--
-GH-15275 004: Crash during GC of suspended generator delegate
+GH-15275 006: Crash during GC of suspended generator delegate
 --FILE--
 <?php
 
@@ -14,7 +14,7 @@ class It implements \IteratorAggregate
 
     public function __destruct()
     {
-        gc_collect_cycles();
+        throw new \Exception();
     }
 }
 
@@ -41,4 +41,11 @@ Stack trace:
 #1 [internal function]: f()
 #2 %s(25): Generator->next()
 #3 {main}
-  thrown in %s on line 9
+
+Next Exception in %s:14
+Stack trace:
+#0 %s(19): It->__destruct()
+#1 [internal function]: f()
+#2 %s(25): Generator->next()
+#3 {main}
+  thrown in %s on line 14
