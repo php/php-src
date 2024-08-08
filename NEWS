@@ -55,6 +55,11 @@ PHP                                                                        NEWS
   . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
     being filtered). (Quentin Dreyer)
 
+- XML:
+  . The xml_set_object() function has been deprecated. (Girgias)
+  . Passing non-callable strings to the xml_set_*_handler() functions is now
+    deprecated. (Girgias)
+
 01 Aug 2024, PHP 8.4.0alpha4
 
 - GMP:
