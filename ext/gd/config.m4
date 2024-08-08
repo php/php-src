@@ -138,7 +138,7 @@ AC_DEFUN([PHP_GD_JISX0208],[
     AC_DEFINE([USE_GD_JISX0208], [1],
       [Define to 1 if gd extension has JIS-mapped Japanese font support.])
     AC_DEFINE([JISX0208], [1],
-      [Define to 1 if libgd has JIS-mapped Japanese font support.])
+      [Define to 1 if GD library has JIS-mapped Japanese font support.])
   fi
 ])
 
