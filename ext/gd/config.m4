@@ -70,7 +70,7 @@ AC_DEFUN([PHP_GD_PNG],[
   PKG_CHECK_MODULES([PNG], [libpng])
   PHP_EVAL_LIBLINE([$PNG_LIBS], [GD_SHARED_LIBADD])
   PHP_EVAL_INCLINE([$PNG_CFLAGS])
-  AC_DEFINE(HAVE_LIBPNG, 1, [ ])
+  AC_DEFINE([HAVE_LIBPNG], [1], [Define to 1 if you have the libpng library.])
 ])
 
 AC_DEFUN([PHP_GD_AVIF],[
@@ -78,8 +78,10 @@ AC_DEFUN([PHP_GD_AVIF],[
     PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
     PHP_EVAL_LIBLINE([$AVIF_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$AVIF_CFLAGS])
-    AC_DEFINE(HAVE_LIBAVIF, 1, [ ])
-    AC_DEFINE(HAVE_GD_AVIF, 1, [ ])
+    AC_DEFINE([HAVE_LIBAVIF], [1],
+      [Define to 1 if you have the libavif library.])
+    AC_DEFINE([HAVE_GD_AVIF], [1],
+      [Define to 1 if gd extension has AVIF support.])
   fi
 ])
 
@@ -88,8 +90,10 @@ AC_DEFUN([PHP_GD_WEBP],[
     PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
     PHP_EVAL_LIBLINE([$WEBP_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$WEBP_CFLAGS])
-    AC_DEFINE(HAVE_LIBWEBP, 1, [ ])
-    AC_DEFINE(HAVE_GD_WEBP, 1, [ ])
+    AC_DEFINE([HAVE_LIBWEBP], [1],
+      [Define to 1 if you have the libwebp library.])
+    AC_DEFINE([HAVE_GD_WEBP], [1],
+      [Define to 1 if gd extension has WebP support.])
   fi
 ])
 
@@ -98,8 +102,10 @@ AC_DEFUN([PHP_GD_JPEG],[
     PKG_CHECK_MODULES([JPEG], [libjpeg])
     PHP_EVAL_LIBLINE([$JPEG_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$JPEG_CFLAGS])
-    AC_DEFINE(HAVE_LIBJPEG, 1, [ ])
-    AC_DEFINE(HAVE_GD_JPG, 1, [ ])
+    AC_DEFINE([HAVE_LIBJPEG], [1],
+      [Define to 1 if you have the libjpeg library.])
+    AC_DEFINE([HAVE_GD_JPG], [1],
+      [Define to 1 if gd extension has JPEG support.])
   fi
 ])
 
@@ -108,8 +114,9 @@ AC_DEFUN([PHP_GD_XPM],[
     PKG_CHECK_MODULES([XPM], [xpm])
     PHP_EVAL_LIBLINE([$XPM_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$XPM_CFLAGS])
-    AC_DEFINE(HAVE_XPM, 1, [ ])
-    AC_DEFINE(HAVE_GD_XPM, 1, [ ])
+    AC_DEFINE([HAVE_XPM], [1], [Define to 1 if you have the xpm library.])
+    AC_DEFINE([HAVE_GD_XPM], [1],
+      [Define to 1 if gd extension has XPM support.])
   fi
 ])
 
@@ -119,27 +126,34 @@ AC_DEFUN([PHP_GD_FREETYPE2],[
 
     PHP_EVAL_INCLINE([$FREETYPE2_CFLAGS])
     PHP_EVAL_LIBLINE([$FREETYPE2_LIBS], [GD_SHARED_LIBADD])
-    AC_DEFINE(HAVE_LIBFREETYPE, 1, [ ])
-    AC_DEFINE(HAVE_GD_FREETYPE, 1, [ ])
+    AC_DEFINE([HAVE_LIBFREETYPE], [1],
+      [Define to 1 if you have the FreeType library.])
+    AC_DEFINE([HAVE_GD_FREETYPE], [1],
+      [Define to 1 if gd extension has FreeType support.])
   fi
 ])
 
 AC_DEFUN([PHP_GD_JISX0208],[
   if test "$PHP_GD_JIS_CONV" = "yes"; then
-    AC_DEFINE(USE_GD_JISX0208, 1, [ ])
-    AC_DEFINE(JISX0208, 1, [ ])
+    AC_DEFINE([USE_GD_JISX0208], [1],
+      [Define to 1 if gd extension has JIS-mapped Japanese font support.])
+    AC_DEFINE([JISX0208], [1],
+      [Define to 1 if libgd has JIS-mapped Japanese font support.])
   fi
 ])
 
+dnl
+dnl PHP_GD_CHECK_FORMAT(format, [action-if-found])
+dnl
 dnl Build and run a program to determine if GD has support for the given
 dnl format. The first argument is the proper-noun-capitalized name of the
 dnl format -- basically the word Foo in gdImageCreateFromFoo -- such as
-dnl Png. If support for format Foo exists, the second argument (the name
-dnl of a constant) will be defined to 1. The reason for this charade is
-dnl that gd defines "junk" versions of each gdImageCreateFromFoo function
-dnl even when it does not support the Foo format. Those junk functions
-dnl display a warning but eventually return normally, making a simple link
-dnl or run test insufficient.
+dnl Png. If support for format Foo exists, the "action-if-found" is executed.
+dnl The reason for this charade is that gd defines "junk" versions of each
+dnl gdImageCreateFromFoo function even when it does not support the Foo format.
+dnl Those junk functions display a warning but eventually return normally,
+dnl making a simple link or run test insufficient.
+dnl
 AC_DEFUN([PHP_GD_CHECK_FORMAT],
 [AS_VAR_PUSHDEF([php_var], [php_cv_lib_gd_gdImageCreateFrom$1])
 old_LIBS="${LIBS}"
@@ -171,9 +185,7 @@ int main(int argc, char** argv) {
   [AS_VAR_SET([php_var], [yes])],
   [AS_VAR_SET([php_var], [no])],
   [AS_VAR_SET([php_var], [no])])])
-AS_VAR_IF([php_var], [yes],
-  [AC_DEFINE_UNQUOTED([$2], [1],
-    [Define to 1 if GD library has 'gdImageCreateFrom$1'.])])
+AS_VAR_IF([php_var], [yes], [$2])
 AC_LANG_POP([C])
 CFLAGS="${old_CFLAGS}"
 LIBS="${old_LIBS}"
@@ -181,23 +193,26 @@ AS_VAR_POPDEF([php_var])
 ])
 
 AC_DEFUN([PHP_GD_CHECK_VERSION],[
-  PHP_GD_CHECK_FORMAT([Png],  [HAVE_GD_PNG])
-  PHP_GD_CHECK_FORMAT([Avif], [HAVE_GD_AVIF])
-  PHP_GD_CHECK_FORMAT([Webp], [HAVE_GD_WEBP])
-  PHP_GD_CHECK_FORMAT([Jpeg], [HAVE_GD_JPG])
-  PHP_GD_CHECK_FORMAT([Xpm],  [HAVE_GD_XPM])
-  PHP_GD_CHECK_FORMAT([Bmp],  [HAVE_GD_BMP])
-  PHP_GD_CHECK_FORMAT([Tga],  [HAVE_GD_TGA])
+  PHP_GD_CHECK_FORMAT([Png],  [AC_DEFINE([HAVE_GD_PNG], [1])])
+  PHP_GD_CHECK_FORMAT([Avif], [AC_DEFINE([HAVE_GD_AVIF], [1])])
+  PHP_GD_CHECK_FORMAT([Webp], [AC_DEFINE([HAVE_GD_WEBP], [1])])
+  PHP_GD_CHECK_FORMAT([Jpeg], [AC_DEFINE([HAVE_GD_JPG], [1])])
+  PHP_GD_CHECK_FORMAT([Xpm],  [AC_DEFINE([HAVE_GD_XPM], [1])])
+  PHP_GD_CHECK_FORMAT([Bmp],  [AC_DEFINE([HAVE_GD_BMP], [1])])
+  PHP_GD_CHECK_FORMAT([Tga],  [AC_DEFINE([HAVE_GD_TGA], [1])])
   PHP_CHECK_LIBRARY([gd], [gdFontCacheShutdown],
-    [AC_DEFINE([HAVE_GD_FREETYPE], [1], [ ])],
+    [AC_DEFINE([HAVE_GD_FREETYPE], [1])],
     [],
     [$GD_SHARED_LIBADD])
   PHP_CHECK_LIBRARY([gd], [gdVersionString],
-    [AC_DEFINE([HAVE_GD_LIBVERSION], [1], [ ])],
+    [AC_DEFINE([HAVE_GD_LIBVERSION], [1],
+      [Define to 1 if GD library has the 'gdVersionString' function.])],
     [],
     [$GD_SHARED_LIBADD])
   PHP_CHECK_LIBRARY([gd], [gdImageGetInterpolationMethod],
-    [AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1], [ ])],
+    [AC_DEFINE([HAVE_GD_GET_INTERPOLATION], [1],
+      [Define to 1 if GD library has the 'gdImageGetInterpolationMethod'
+      function.])],
     [],
     [$GD_SHARED_LIBADD])
 ])
@@ -255,9 +270,12 @@ if test "$PHP_GD" != "no"; then
 dnl These are always available with bundled library
     AC_DEFINE([HAVE_GD_BUNDLED], [1],
       [Define to 1 if gd extension uses GD library bundled in PHP.])
-    AC_DEFINE(HAVE_GD_PNG,              1, [ ])
-    AC_DEFINE(HAVE_GD_BMP,              1, [ ])
-    AC_DEFINE(HAVE_GD_TGA,              1, [ ])
+    AC_DEFINE([HAVE_GD_PNG], [1],
+      [Define to 1 if gd extension has PNG support.])
+    AC_DEFINE([HAVE_GD_BMP], [1],
+      [Define to 1 if gd extension has BMP support.])
+    AC_DEFINE([HAVE_GD_TGA], [1],
+      [Define to 1 if gd extension has TGA support.])
 
 dnl Various checks for GD features
     PHP_SETUP_ZLIB([GD_SHARED_LIBADD])
