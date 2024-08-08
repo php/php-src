@@ -403,12 +403,15 @@ PHPDBG_INFO(classes) /* {{{ */
 		phpdbg_print_class_name(ce);
 
 		if (ce->parent) {
-			zend_class_entry *pce;
-			pce = ce->parent;
-			do {
-				phpdbg_out("|-------- ");
-				phpdbg_print_class_name(pce);
-			} while ((pce = pce->parent));
+			if (ce->ce_flags & ZEND_ACC_LINKED) {
+				zend_class_entry *pce = ce->parent;
+				do {
+					phpdbg_out("|-------- ");
+					phpdbg_print_class_name(pce);
+				} while ((pce = pce->parent));
+			} else {
+				phpdbg_writeln("|-------- User Class %s (not yet linked because declaration for parent was not encountered when declaring the class)", ZSTR_VAL(ce->parent_name));
+			}
 		}
 
 		if (ce->info.user.filename) {
