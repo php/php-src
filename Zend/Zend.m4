@@ -176,7 +176,7 @@ AH_TEMPLATE([ZEND_DEBUG],
   [Define to 1 if debugging is enabled, and to 0 if not.])
 AS_VAR_IF([ZEND_DEBUG], [yes], [
   AC_DEFINE([ZEND_DEBUG], [1])
-  echo " $CFLAGS" | grep ' -g' >/dev/null || DEBUG_CFLAGS="-g"
+  echo " $CFLAGS" | grep ' -g' >/dev/null || CFLAGS="$CFLAGS -g"
   if test "$CFLAGS" = "-g -O2"; then
     CFLAGS=-g
   fi
@@ -192,8 +192,6 @@ AX_CHECK_COMPILE_FLAG([-Wlogical-op], CFLAGS="-Wlogical-op $CFLAGS", , [-Werror]
 AX_CHECK_COMPILE_FLAG([-Wformat-truncation], CFLAGS="-Wformat-truncation $CFLAGS", , [-Werror])
 AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes], CFLAGS="-Wstrict-prototypes $CFLAGS", , [-Werror])
 AX_CHECK_COMPILE_FLAG([-fno-common], CFLAGS="-fno-common $CFLAGS", , [-Werror])
-
-AS_VAR_IF([DEBUG_CFLAGS],,, [AS_VAR_APPEND([CFLAGS], [" $DEBUG_CFLAGS"])])
 
 ZEND_CHECK_ALIGNMENT
 ZEND_CHECK_SIGNALS
