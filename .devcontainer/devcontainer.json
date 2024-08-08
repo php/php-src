@@ -1,5 +1,5 @@
 {
-  "name": "php-dev (for CodeSpaces)",
+  "name": "php-dev (for Codespaces)",
   "customizations": {
     "vscode": {
       "extensions": [
