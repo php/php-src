@@ -14005,9 +14005,6 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_IF_TRUE(if_def);
 		}
 		if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_READONLY)) {
-			if (!prop_type_ref) {
-				prop_type_ref = jit_Z_TYPE_INFO(jit, prop_addr);
-			}
 			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);
 			ir_IF_TRUE(if_prop_obj);
 			ir_ref ref = jit_Z_PTR(jit, prop_addr);
@@ -14023,6 +14020,28 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_END_list(end_inputs);
 
 			goto result_fetched;
+		} else if (opline->opcode == ZEND_FETCH_OBJ_W && (prop_info->flags & ZEND_ACC_PPP_SET_MASK)) {
+			/* Readonly properties (which are also asymmetric) are never mutable indirectly, which is
+			 * handled by the previous branch. */
+			ir_ref has_access = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_asymmetric_property_has_set_access), ir_CONST_ADDR(prop_info));
+
+			ir_ref if_access = ir_IF(has_access);
+			ir_IF_FALSE_cold(if_access);
+
+			ir_ref if_prop_obj = jit_if_Z_TYPE(jit, prop_addr, IS_OBJECT);
+			ir_IF_TRUE(if_prop_obj);
+			ir_ref ref = jit_Z_PTR(jit, prop_addr);
+			jit_GC_ADDREF(jit, ref);
+			jit_set_Z_PTR(jit, res_addr, ref);
+			jit_set_Z_TYPE_INFO(jit, res_addr, IS_OBJECT_EX);
+			ir_END_list(end_inputs);
+
+			ir_IF_FALSE_cold(if_prop_obj);
+			ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_asymmetric_visibility_property_modification_error),
+				ir_CONST_ADDR(prop_info), ir_CONST_ADDR("indirectly modify"));
+			ir_END_list(end_inputs);
+
+			ir_IF_TRUE(if_access);
 		}
 
 		if (opline->opcode == ZEND_FETCH_OBJ_W

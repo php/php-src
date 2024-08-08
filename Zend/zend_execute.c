@@ -3403,7 +3403,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 							if (prop_info->flags & ZEND_ACC_READONLY) {
 								zend_readonly_property_indirect_modification_error(prop_info);
 							} else {
-								zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
+								zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
 							}
 							ZVAL_ERROR(result);
 						}

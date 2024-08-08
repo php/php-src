@@ -541,7 +541,7 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 }
 /* }}} */
 
-ZEND_API bool zend_asymmetric_property_has_set_access(const zend_property_info *prop_info) {
+ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info) {
 	ZEND_ASSERT(prop_info->flags & ZEND_ACC_PPP_SET_MASK);
 	zend_class_entry *scope = get_fake_or_executed_scope();
 	if (prop_info->ce == scope) {
