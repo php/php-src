@@ -31,7 +31,7 @@ else
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])
   EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c hash_sha3.c"
-  PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+  PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded"
 fi
 
 EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_sha_sse2.c hash_sha_ni.c hash_ripemd.c hash_haval.c \
@@ -39,7 +39,7 @@ EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_sha_sse2.c hash_sha_ni.c hash
   hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES
   murmur/PMurHash.c murmur/PMurHash128.c hash_murmur.c hash_xxhash.c"
 
-PHP_NEW_EXTENSION([hash], [$EXT_HASH_SOURCES], [no],, [$PHP_HASH_CFLAGS])
+PHP_NEW_EXTENSION([hash], [$EXT_HASH_SOURCES], [no],, [$PHP_HASH_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([
