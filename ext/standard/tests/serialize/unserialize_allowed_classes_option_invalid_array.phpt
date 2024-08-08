@@ -51,11 +51,11 @@ try {
 
 ?>
 --EXPECT--
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
-TypeError: unserialize(): Option "allowed_classes" must be an array of class names
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, null given
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, false given
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, true given
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, int given
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, float given
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, array given
+TypeError: unserialize(): Option "allowed_classes" must be an array of class names, resource given
 Error: Object of class stdClass could not be converted to string
