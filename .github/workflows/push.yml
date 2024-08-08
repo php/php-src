@@ -166,7 +166,7 @@ jobs:
           MYSQL_ROOT_PASSWORD: root
     steps:
       - name: git checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: apt
         uses: ./.github/actions/apt-x32
       - name: ccache
