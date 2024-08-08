@@ -182,16 +182,33 @@ AS_VAR_IF([ZEND_DEBUG], [yes], [
   fi
 ], [AC_DEFINE([ZEND_DEBUG], [0])])
 
-test -n "$GCC" && CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare $CFLAGS"
-dnl Check if compiler supports -Wno-clobbered (only GCC)
-AX_CHECK_COMPILE_FLAG([-Wno-clobbered], CFLAGS="-Wno-clobbered $CFLAGS", , [-Werror])
-dnl Check for support for implicit fallthrough level 1, also add after previous CFLAGS as level 3 is enabled in -Wextra
-AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough=1], CFLAGS="$CFLAGS -Wimplicit-fallthrough=1", , [-Werror])
-AX_CHECK_COMPILE_FLAG([-Wduplicated-cond], CFLAGS="-Wduplicated-cond $CFLAGS", , [-Werror])
-AX_CHECK_COMPILE_FLAG([-Wlogical-op], CFLAGS="-Wlogical-op $CFLAGS", , [-Werror])
-AX_CHECK_COMPILE_FLAG([-Wformat-truncation], CFLAGS="-Wformat-truncation $CFLAGS", , [-Werror])
-AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes], CFLAGS="-Wstrict-prototypes $CFLAGS", , [-Werror])
-AX_CHECK_COMPILE_FLAG([-fno-common], CFLAGS="-fno-common $CFLAGS", , [-Werror])
+AS_VAR_IF([GCC], [yes],
+  [CFLAGS="-Wall -Wextra -Wno-unused-parameter -Wno-sign-compare $CFLAGS"])
+
+dnl Check if compiler supports -Wno-clobbered (only GCC).
+AX_CHECK_COMPILE_FLAG([-Wno-clobbered],
+  [CFLAGS="-Wno-clobbered $CFLAGS"],,
+  [-Werror])
+dnl Check for support for implicit fallthrough level 1, also add after previous
+dnl CFLAGS as level 3 is enabled in -Wextra.
+AX_CHECK_COMPILE_FLAG([-Wimplicit-fallthrough=1],
+  [CFLAGS="$CFLAGS -Wimplicit-fallthrough=1"],,
+  [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wduplicated-cond],
+  [CFLAGS="-Wduplicated-cond $CFLAGS"],,
+  [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wlogical-op],
+  [CFLAGS="-Wlogical-op $CFLAGS"],,
+  [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wformat-truncation],
+  [CFLAGS="-Wformat-truncation $CFLAGS"],,
+  [-Werror])
+AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes],
+  [CFLAGS="-Wstrict-prototypes $CFLAGS"],,
+  [-Werror])
+AX_CHECK_COMPILE_FLAG([-fno-common],
+  [CFLAGS="-fno-common $CFLAGS"],,
+  [-Werror])
 
 AS_VAR_IF([DEBUG_CFLAGS],,, [AS_VAR_APPEND([CFLAGS], [" $DEBUG_CFLAGS"])])
 
@@ -302,7 +319,8 @@ int emu(const opcode_handler_t *ip, void *fp) {
 ])
 AS_VAR_IF([php_cv_have_global_register_vars], [yes],
   [AC_DEFINE([HAVE_GCC_GLOBAL_REGS], [1],
-    [Define to 1 if the target system has support for global register variables.])],
+    [Define to 1 if the target system has support for global register
+    variables.])],
   [ZEND_GCC_GLOBAL_REGS=no])
 ])
 AC_MSG_CHECKING([whether to enable global register variables support])
