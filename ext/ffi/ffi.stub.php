@@ -65,6 +65,9 @@ namespace {
 
         /** @prefer-ref $ptr */
         public static function isNull(FFI\CData $ptr): bool {}
+
+        /** @prefer-ref $ptr */
+        public static function addrValue(FFI\CData $ptr): int {}
     }
 
 }
