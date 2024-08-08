@@ -540,6 +540,16 @@ const ENT_XHTML = UNKNOWN;
 * @cvalue ENT_HTML5
 */
 const ENT_HTML5 = UNKNOWN;
+/**
+ * @var int
+ * @cvalue HTML_ATTRIBUTE
+ */
+const HTML_ATTRIBUTE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue HTML_TEXT
+ */
+const HTML_TEXT = UNKNOWN;
 
 /* image.c */
 
@@ -2263,6 +2273,11 @@ function headers_list(): array {}
 function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
 function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401): string {}
+
+function decode_html(int $context, string $html, int $offset = 0, ?int $length = null): ?string {}
+
+/** @param int $matched_byte_length */
+function decode_html_ref(int $context, string $html, int $offset = 0, &$matched_byte_length = null): ?string {}
 
 function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null): string {}
 
