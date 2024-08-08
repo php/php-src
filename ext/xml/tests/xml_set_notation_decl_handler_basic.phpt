@@ -54,8 +54,14 @@ $p1 = new Xml_Parser();
 $p1->parse($xml);
 echo "Done\n";
 ?>
---EXPECT--
+--EXPECTF--
 Simple test of xml_set_notation_decl_handler(() function
+
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
+
+Deprecated: xml_set_notation_decl_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
+
+Deprecated: xml_set_unparsed_entity_decl_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 notation_decl_handler called
 ...Name=USDATE
 ...Base=
