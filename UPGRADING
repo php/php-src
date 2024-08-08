@@ -467,6 +467,10 @@ PHP 8.4 UPGRADE NOTES
     hexadecimal session IDs and stop changing these two INI settings.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
+- SPL:
+  . The SplFixedArray::__wakeup() method has been deprecated as it implements
+    __serialize() and __unserialize() which need to be overwritten instead.
+
 - Standard:
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.

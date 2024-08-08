@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 453f55b59c0b61f2c8a41b17694be74c3e0a6171 */
+ * Stub hash: a251ed19168eddf1d45a74d25104e92585669f5e */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -96,6 +96,19 @@ static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_en
 	INIT_CLASS_ENTRY(ce, "SplFixedArray", class_SplFixedArray_methods);
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
 	zend_class_implements(class_entry, 4, class_entry_IteratorAggregate, class_entry_ArrayAccess, class_entry_Countable, class_entry_JsonSerializable);
+
+
+	zend_attribute *attribute_Deprecated_func___wakeup_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "__wakeup", sizeof("__wakeup") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func___wakeup_0_arg0;
+	zend_string *attribute_Deprecated_func___wakeup_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0_arg0, attribute_Deprecated_func___wakeup_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func___wakeup_0->args[0].value, &attribute_Deprecated_func___wakeup_0_arg0);
+	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func___wakeup_0_arg1;
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("the __unserialize() method must be overloaded instead", strlen("the __unserialize() method must be overloaded instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func___wakeup_0_arg1, attribute_Deprecated_func___wakeup_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func___wakeup_0->args[1].value, &attribute_Deprecated_func___wakeup_0_arg1);
+	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }

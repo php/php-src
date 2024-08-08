@@ -41,6 +41,11 @@ PHP                                                                        NEWS
   . INI settings session.sid_length and session.sid_bits_per_character are now
     deprecated. (timwolla)
 
+- SPL:
+  . The SplFixedArray::__wakeup() method has been deprecated as it implements
+    __serialize() and __unserialize() which need to be overwritten instead.
+    (TysonAndre)
+
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
 
