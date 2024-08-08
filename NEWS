@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
     are now deprecated. (Jorg Sowa)
 
+- DBA:
+  . Passing null or false to dba_key_split() is deprecated. (Grigias)
+
 - DOM:
   . Fixed bug GH-15192 (Segmentation fault in dom extension
     (html5_serializer)). (nielsdos)

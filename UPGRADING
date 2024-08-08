@@ -409,6 +409,10 @@ PHP 8.4 UPGRADE NOTES
     the associated date_sunset() and date_sunrise() functions in PHP 8.1.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
+- DBA:
+  . Passing null or false to dba_key_split() is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_null_and_false_to_dba_key_split
+
 - DOM:
   . Deprecated DOM_PHP_ERR constant.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
