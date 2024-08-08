@@ -189,7 +189,7 @@ PHP 8.4 UPGRADE NOTES
     This means that xml_set_object() must now always be called prior to setting
     method names as callables.
     Passing an empty string to disable the handler is still allowed,
-    but not recommended.
+    but deprecated.
 
 - XMLReader:
   . Passing an invalid character encoding to XMLReader::open() or
@@ -473,6 +473,13 @@ PHP 8.4 UPGRADE NOTES
   . Raising zero to the power of negative number is deprecated.
   . Unserializing strings using the uppercase 'S' tag is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
+- XML:
+  . The xml_set_object() function has been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#xml_set_object_and_xml_set_handler_with_string_method_names
+  . Passing non-callable strings to the xml_set_*_handler() functions is now
+    deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#xml_set_object_and_xml_set_handler_with_string_method_names
 
 ========================================
 5. Changed Functions
