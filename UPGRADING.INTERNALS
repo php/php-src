@@ -102,6 +102,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * Removed IS_STATIC_VAR_UNINITIALIZED constant. Check for IS_NULL in the
   static_variables array instead.
 
+* Removed ZEND_DIM_ALTERNATIVE_SYNTAX constant. This syntax no longer has a
+  specialized error message.
+
 ========================
 2. Build system changes
 ========================
