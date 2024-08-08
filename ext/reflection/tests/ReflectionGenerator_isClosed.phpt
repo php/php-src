@@ -32,15 +32,15 @@ foreach ($gens as $gen) {
 }
 
 ?>
---EXPECTF--
-int(10)
+--EXPECT--
+int(9)
 bool(false)
-int(10)
+int(9)
 bool(true)
 Cannot fetch information from a closed Generator
 
-int(4)
+int(3)
 bool(false)
-int(4)
+int(3)
 bool(true)
 Cannot fetch information from a closed Generator

@@ -360,6 +360,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   that provide a frameless handler (search for usages of the
   ZEND_FRAMELESS_FUNCTION macro).
 
+* CREATE_GENERATOR now initializes the generator with opline pointing to the
+  CREATE_GENERATOR op (before, opline was set to the next op).
+
+* YIELD and YIELD_FROM do not increment the opline anymore.
+
 ========================
 5. SAPI changes
 ========================
