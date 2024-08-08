@@ -18,7 +18,8 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   done
 
   if test -n "$MYSQL_SOCK"; then
-    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_DEFINE_UNQUOTED([PHP_MYSQL_UNIX_SOCK_ADDR], ["$MYSQL_SOCK"],
+      [The MySQL Unix socket location.])
     AC_MSG_RESULT([$MYSQL_SOCK])
   else
     AC_MSG_RESULT([no])
@@ -52,7 +53,7 @@ if test "$PHP_MYSQLI" != "no"; then
   AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
     MYSQL_SOCK=$PHP_MYSQL_SOCK
-    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_DEFINE_UNQUOTED([PHP_MYSQL_UNIX_SOCK_ADDR], ["$MYSQL_SOCK"])
     AC_MSG_RESULT([$MYSQL_SOCK])
   elif test "$PHP_MYSQL_SOCK" = "yes"; then
     PHP_MYSQL_SOCKET_SEARCH
