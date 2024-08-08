@@ -26,6 +26,8 @@ PHP                                                                        NEWS
 - Hash:
   . Deprecated passing incorrect data types for options to ext/hash functions.
     (nielsdos)
+  . Added SSE2 and SHA-NI implementation of SHA-256. (timwolla, Colin Percival,
+    Graham Percival)
 
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.

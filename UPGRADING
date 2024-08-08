@@ -955,6 +955,10 @@ PHP 8.4 UPGRADE NOTES
   . Improved the performance of FTP uploads up to a factor of 10x for large
     uploads.
 
+- Hash:
+  . Added SSE2 and SHA-NI implementations of SHA-256. This improves the performance
+    on supported CPUs by ~1.3x (SSE2) and 3x - 5x (SHA-NI).
+
 - MBString:
   . The performance of strspn() and strcspn() is greatly improved.
     They now run in linear time instead of being bounded by quadratic time.
