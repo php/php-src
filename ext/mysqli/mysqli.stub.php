@@ -851,10 +851,10 @@ class mysqli
     public function init() {}
 
     /**
-     * @deprecated
      * @tentative-return-type
      * @alias mysqli_kill
      */
+    #[\Deprecated(since: '8.4', message: 'use KILL CONNECTION/QUERY SQL statement instead')]
     public function kill(int $process_id): bool {}
 
     /**
@@ -1506,7 +1506,7 @@ function mysqli_info(mysqli $mysql): ?string {}
 /** @refcount 1 */
 function mysqli_insert_id(mysqli $mysql): int|string {}
 
-/** @deprecated */
+#[\Deprecated(since: '8.4', message: 'use KILL CONNECTION/QUERY SQL statement instead')]
 function mysqli_kill(mysqli $mysql, int $process_id): bool {}
 
 function mysqli_more_results(mysqli $mysql): bool {}

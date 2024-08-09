@@ -315,7 +315,7 @@ Warning: mysqli_multi_query(): (%d/%d): You have an error in your SQL syntax; ch
 
 Warning: mysqli_query(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
-Deprecated: Function mysqli_kill() is deprecated in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
@@ -336,16 +336,16 @@ Warning: mysqli_store_result(): (%s/%d): You have an error in your SQL syntax; c
 
 Warning: mysqli_stmt_attr_set(): (%s/%d): Not implemented in %s on line %d
 
-Deprecated: Function mysqli_kill() is deprecated in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 
-Deprecated: Function mysqli_kill() is deprecated in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 
-Deprecated: Function mysqli_kill() is deprecated in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 
-Deprecated: Function mysqli_kill() is deprecated in %s
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 [013] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 [016] Access denied for user '%s'@'%s'%r( \(using password: \w+\)){0,1}%r
 done!
