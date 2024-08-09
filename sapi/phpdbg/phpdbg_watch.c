@@ -519,7 +519,9 @@ phpdbg_watch_element *phpdbg_add_watch_element(phpdbg_watchpoint_t *watch, phpdb
 		phpdbg_watch_element *old_element;
 		watch = res->ptr;
 		if ((old_element = zend_hash_find_ptr(&watch->elements, element->str))) {
-			phpdbg_free_watch_element(element);
+			if (element != old_element) {
+				phpdbg_free_watch_element(element);
+			}
 			return old_element;
 		}
 	}
@@ -1468,6 +1470,7 @@ void phpdbg_setup_watchpoints(void) {
 
 	/* put these on a separate page, to avoid conflicts with other memory */
 	PHPDBG_G(watchlist_mem) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
+	PHPDBG_G(original_watchlist_mem) = PHPDBG_G(watchlist_mem);
 	zend_hash_init(PHPDBG_G(watchlist_mem), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 	PHPDBG_G(watchlist_mem_backup) = malloc(phpdbg_pagesize > sizeof(HashTable) ? phpdbg_pagesize : sizeof(HashTable));
 	zend_hash_init(PHPDBG_G(watchlist_mem_backup), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
@@ -1521,8 +1524,8 @@ void phpdbg_destroy_watchpoints(void) {
 	zend_hash_destroy(&PHPDBG_G(watch_recreation));
 	zend_hash_destroy(&PHPDBG_G(watch_free));
 	zend_hash_destroy(&PHPDBG_G(watch_collisions));
-	zend_hash_destroy(PHPDBG_G(watchlist_mem));
-	free(PHPDBG_G(watchlist_mem));
+	zend_hash_destroy(PHPDBG_G(original_watchlist_mem));
+	free(PHPDBG_G(original_watchlist_mem));
 	zend_hash_destroy(PHPDBG_G(watchlist_mem_backup));
 	free(PHPDBG_G(watchlist_mem_backup));
 }
