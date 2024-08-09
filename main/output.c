@@ -52,7 +52,7 @@ static inline bool php_output_lock_error(int op);
 static inline void php_output_op(int op, const char *str, size_t len);
 
 static inline php_output_handler *php_output_handler_init(zend_string *name, size_t chunk_size, int flags);
-static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context);
+static php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context);
 static inline bool php_output_handler_append(php_output_handler *handler, const php_output_buffer *buf);
 static inline zval *php_output_handler_status(php_output_handler *handler, zval *entry);
 
@@ -898,7 +898,7 @@ static inline bool php_output_handler_append(php_output_handler *handler, const 
 
 /* {{{ static php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
  * Output handler operation dispatcher, applying context op to the php_output_handler handler */
-static inline php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
+static php_output_handler_status_t php_output_handler_op(php_output_handler *handler, php_output_context *context)
 {
 	php_output_handler_status_t status;
 	int original_op = context->op;

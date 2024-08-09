@@ -738,17 +738,19 @@ static zend_always_inline uint8_t zval_get_type(const zval* pz) {
 #define GC_FLAGS_SHIFT				0
 #define GC_INFO_SHIFT				10
 
-static zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
+BEGIN_EXTERN_C()
+ZEND_API zend_always_inline uint8_t zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
 }
 
-static zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info) {
+ZEND_API zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info) {
 	return (gc_type_info >> GC_FLAGS_SHIFT) & (GC_FLAGS_MASK >> GC_FLAGS_SHIFT);
 }
 
-static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
+ZEND_API zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 	return (gc_type_info >> GC_INFO_SHIFT);
 }
+END_EXTERN_C()
 
 #define GC_TYPE_INFO(p)				(p)->gc.u.type_info
 #define GC_TYPE(p)					zval_gc_type(GC_TYPE_INFO(p))
@@ -1306,19 +1308,21 @@ extern ZEND_API bool zend_rc_debug;
 	do { } while (0)
 #endif
 
-static zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
+BEGIN_EXTERN_C()
+ZEND_API zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
 	return p->refcount;
 }
 
-static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
+ZEND_API zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
 	p->refcount = rc;
 	return p->refcount;
 }
 
-static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
+ZEND_API zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
 	ZEND_RC_MOD_CHECK(p);
 	return ++(p->refcount);
 }
+END_EXTERN_C()
 
 static zend_always_inline void zend_gc_try_addref(zend_refcounted_h *p) {
 	if (!(p->u.type_info & GC_IMMUTABLE)) {
@@ -1334,11 +1338,13 @@ static zend_always_inline void zend_gc_try_delref(zend_refcounted_h *p) {
 	}
 }
 
-static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
+BEGIN_EXTERN_C()
+ZEND_API zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
 	ZEND_ASSERT(p->refcount > 0);
 	ZEND_RC_MOD_CHECK(p);
 	return --(p->refcount);
 }
+END_EXTERN_C()
 
 static zend_always_inline uint32_t zend_gc_addref_ex(zend_refcounted_h *p, uint32_t rc) {
 	ZEND_RC_MOD_CHECK(p);

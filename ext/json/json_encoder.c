@@ -80,7 +80,7 @@ bool php_json_is_valid_double(double d) /* {{{ */
 }
 /* }}} */
 
-static inline void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
+static void php_json_encode_double(smart_str *buf, double d, int options) /* {{{ */
 {
 	size_t len;
 	char num[ZEND_DOUBLE_MAX_LENGTH];

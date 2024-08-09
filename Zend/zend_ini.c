@@ -879,7 +879,7 @@ ZEND_API zend_long zend_ini_parse_quantity_warn(zend_string *value, zend_string 
 
 	if (errstr) {
 		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
-		zend_string_release(errstr);
+		zend_string_release_noinline(errstr);
 	}
 
 	return retval;
@@ -893,7 +893,7 @@ ZEND_API zend_ulong zend_ini_parse_uquantity_warn(zend_string *value, zend_strin
 
 	if (errstr) {
 		zend_error(E_WARNING, "Invalid \"%s\" setting. %s", ZSTR_VAL(setting), ZSTR_VAL(errstr));
-		zend_string_release(errstr);
+		zend_string_release_noinline(errstr);
 	}
 
 	return retval;

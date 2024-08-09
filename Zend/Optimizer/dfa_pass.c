@@ -265,7 +265,7 @@ static bool safe_instanceof(zend_class_entry *ce1, zend_class_entry *ce2) {
 	return instanceof_function(ce1, ce2);
 }
 
-static inline bool can_elide_list_type(
+static bool can_elide_list_type(
 	const zend_script *script, const zend_op_array *op_array,
 	const zend_ssa_var_info *use_info, zend_type type)
 {

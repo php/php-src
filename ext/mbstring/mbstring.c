@@ -410,12 +410,12 @@ static zend_result php_mb_parse_encoding_array(HashTable *target_hash, const mbf
 			}
 		} else {
 			const mbfl_encoding *encoding = mbfl_name2encoding(ZSTR_VAL(encoding_str));
-			if (encoding) {
+			if (EXPECTED(encoding)) {
 				*entry++ = encoding;
 				n++;
 			} else {
 				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
-				zend_string_release(encoding_str);
+				zend_string_release_noinline(encoding_str);
 				efree(ZEND_VOIDP(list));
 				return FAILURE;
 			}
@@ -917,7 +917,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	if (ZSTR_LEN(tmp) > 0) {
 		if (!(re = _php_mb_compile_regex(ZSTR_VAL(tmp)))) {
-			zend_string_release_ex(tmp, 0);
+			zend_string_release_ex_noinline(tmp, 0);
 			return FAILURE;
 		}
 	}
@@ -1221,7 +1221,7 @@ PHP_FUNCTION(mb_language)
 		zend_string *ini_name = ZSTR_INIT_LITERAL("mbstring.language", 0);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
 			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
-			zend_string_release_ex(ini_name, 0);
+			zend_string_release_ex_noinline(ini_name, 0);
 			RETURN_THROWS();
 		}
 		// TODO Make return void
@@ -2275,9 +2275,9 @@ PHP_FUNCTION(mb_substr_count)
 		needle_u8 = mb_fast_convert((unsigned char*)ZSTR_VAL(needle), ZSTR_LEN(needle), enc, &mbfl_encoding_utf8, 0, MBFL_OUTPUTFILTER_ILLEGAL_MODE_BADUTF8, &num_errors);
 		/* A string with >0 bytes may convert to 0 codepoints; for example, the contents
 		 * may be only escape sequences */
-		if (ZSTR_LEN(needle_u8) == 0) {
-			zend_string_free(haystack_u8);
-			zend_string_free(needle_u8);
+		if (UNEXPECTED(ZSTR_LEN(needle_u8) == 0)) {
+			zend_string_free_noinline(haystack_u8);
+			zend_string_free_noinline(needle_u8);
 			zend_argument_value_error(2, "must not be empty");
 			RETURN_THROWS();
 		}
@@ -2665,7 +2665,7 @@ PHP_FUNCTION(mb_strimwidth)
 		}
 	}
 
-	if (width < 0) {
+	if (UNEXPECTED(width < 0)) {
 		php_error_docref(NULL, E_DEPRECATED,
 			"passing a negative integer to argument #3 ($width) is deprecated");
 		width += mb_get_strwidth(str, enc);
@@ -2673,7 +2673,7 @@ PHP_FUNCTION(mb_strimwidth)
 		if (from > 0) {
 			zend_string *trimmed = mb_get_substr(str, 0, from, enc);
 			width -= mb_get_strwidth(trimmed, enc);
-			zend_string_free(trimmed);
+			zend_string_free_noinline(trimmed);
 		}
 
 		if (width < 0) {

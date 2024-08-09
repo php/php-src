@@ -308,7 +308,7 @@ static int php_openssl_handle_ssl_error(php_stream *stream, int nr_bytes, bool i
 							ebuf.s ? "OpenSSL Error messages:\n" : "",
 							ebuf.s ? ZSTR_VAL(ebuf.s) : "");
 					if (ebuf.s) {
-						smart_str_free(&ebuf);
+						smart_str_free_noinline(&ebuf);
 					}
 			}
 
@@ -1506,14 +1506,14 @@ static zend_result php_openssl_enable_server_sni(php_stream *stream, php_openssl
 			if (UNEXPECTED(!local_cert_str)) {
 				return FAILURE;
 			}
-			if (!php_openssl_check_path_str_ex(
+			if (UNEXPECTED(!php_openssl_check_path_str_ex(
 					local_cert_str, resolved_cert_path_buff, 0, false, false,
-					"SNI_server_certs local_cert in ssl stream context")) {
+					"SNI_server_certs local_cert in ssl stream context"))) {
 				php_error_docref(NULL, E_WARNING,
 					"Failed setting local cert chain file `%s'; could not open file",
 					ZSTR_VAL(local_cert_str)
 				);
-				zend_string_release(local_cert_str);
+				zend_string_release_noinline(local_cert_str);
 				return FAILURE;
 			}
 			zend_string_release(local_cert_str);
@@ -1530,14 +1530,14 @@ static zend_result php_openssl_enable_server_sni(php_stream *stream, php_openssl
 			if (UNEXPECTED(!local_pk_str)) {
 				return FAILURE;
 			}
-			if (!php_openssl_check_path_str_ex(
+			if (UNEXPECTED(!php_openssl_check_path_str_ex(
 					local_pk_str, resolved_pk_path_buff, 0, false, false,
-					"SNI_server_certs local_pk in ssl stream context")) {
+					"SNI_server_certs local_pk in ssl stream context"))) {
 				php_error_docref(NULL, E_WARNING,
 					"Failed setting local private key file `%s';  could not open file",
 					ZSTR_VAL(local_pk_str)
 				);
-				zend_string_release(local_pk_str);
+				zend_string_release_noinline(local_pk_str);
 				return FAILURE;
 			}
 			zend_string_release(local_pk_str);

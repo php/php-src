@@ -318,7 +318,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 	intern->type = SPL_FS_FILE;
 	php_stat(intern->file_name, FS_IS_DIR, &tmp);
 	if (Z_TYPE(tmp) == IS_TRUE) {
-		zend_string_release(intern->u.file.open_mode);
+		zend_string_release_noinline(intern->u.file.open_mode);
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Cannot use SplFileObject with directories");

@@ -236,3 +236,8 @@ ZEND_API zend_result ZEND_FASTCALL smart_str_append_zval(smart_str *dest, const 
 	}
 	return SUCCESS;
 }
+
+ZEND_API void smart_str_free_noinline(smart_str *str)
+{
+	smart_str_free(str);
+}

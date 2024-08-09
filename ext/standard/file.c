@@ -541,7 +541,7 @@ PHP_FUNCTION(file_put_contents)
 						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
 						if (bytes_written != ZSTR_LEN(str)) {
 							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
-							zend_tmp_string_release(t);
+							zend_tmp_string_release_noinline(t);
 							numbytes = -1;
 							break;
 						}

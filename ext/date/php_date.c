@@ -5068,19 +5068,19 @@ static bool date_period_init_iso8601_string(php_period_obj *dpobj, zend_class_en
 	if (dpobj->start == NULL) {
 		zend_string *func = get_active_function_or_method_name();
 		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain a start date, \"%s\" given", ZSTR_VAL(func), isostr);
-		zend_string_release(func);
+		zend_string_release_noinline(func);
 		return false;
 	}
 	if (dpobj->interval == NULL) {
 		zend_string *func = get_active_function_or_method_name();
 		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain an interval, \"%s\" given", ZSTR_VAL(func), isostr);
-		zend_string_release(func);
+		zend_string_release_noinline(func);
 		return false;
 	}
 	if (dpobj->end == NULL && recurrences == 0) {
 		zend_string *func = get_active_function_or_method_name();
 		zend_throw_exception_ex(date_ce_date_malformed_period_string_exception, 0, "%s(): ISO interval must contain an end date or a recurrence count, \"%s\" given", ZSTR_VAL(func), isostr);
-		zend_string_release(func);
+		zend_string_release_noinline(func);
 		return false;
 	}
 

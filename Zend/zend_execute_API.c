@@ -829,7 +829,7 @@ zend_result zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_
 				= zend_get_callable_name_ex(&fci->function_name, fci->object);
 			zend_throw_error(NULL, "Invalid callback %s, %s", ZSTR_VAL(callable_name), error);
 			efree(error);
-			zend_string_release_ex(callable_name, 0);
+			zend_string_release_ex_noinline(callable_name, 0);
 			return SUCCESS;
 		}
 
@@ -1228,7 +1228,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 
 	/* Verify class name before passing it to the autoloader. */
 	if (!key && !ZSTR_HAS_CE_CACHE(name) && !zend_is_valid_class_name(name)) {
-		zend_string_release_ex(lc_name, 0);
+		zend_string_release_ex_noinline(lc_name, 0);
 		return NULL;
 	}
 

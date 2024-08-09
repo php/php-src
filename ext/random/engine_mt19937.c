@@ -100,7 +100,7 @@ ZEND_STATIC_ASSERT(
 #define twist(m,u,v)  (m ^ (mixBits(u,v) >> 1) ^ ((uint32_t)(-(int32_t)(loBit(v))) & 0x9908b0dfU))
 #define twist_php(m,u,v)  (m ^ (mixBits(u,v) >> 1) ^ ((uint32_t)(-(int32_t)(loBit(u))) & 0x9908b0dfU))
 
-static inline void mt19937_reload(php_random_status_state_mt19937 *state)
+static void mt19937_reload(php_random_status_state_mt19937 *state)
 {
 	uint32_t *p = state->state;
 

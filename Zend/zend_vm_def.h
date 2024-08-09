@@ -3319,7 +3319,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMP
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -3331,7 +3331,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMP
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -3454,7 +3454,7 @@ ZEND_VM_HANDLER(56, ZEND_ROPE_END, TMP, CONST|TMPVAR|CV, NUM)
 			FREE_OP2();
 			if (UNEXPECTED(EG(exception))) {
 				for (i = 0; i <= opline->extended_value; i++) {
-					zend_string_release_ex(rope[i], 0);
+					zend_string_release_ex_noinline(rope[i], 0);
 				}
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -3878,7 +3878,7 @@ ZEND_VM_C_LABEL(try_function_name):
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-					zend_string_release_ex(call->func->common.function_name, 0);
+					zend_string_release_ex_noinline(call->func->common.function_name, 0);
 					zend_free_trampoline(call->func);
 				}
 				zend_vm_stack_free_call_frame(call);
@@ -5326,7 +5326,7 @@ ZEND_VM_C_LABEL(send_again):
 					have_named_params = 1;
 					top = zend_handle_named_arg(&EX(call), name, &arg_num, cache_slot);
 					if (UNEXPECTED(!top)) {
-						zend_string_release(name);
+						zend_string_release_noinline(name);
 						break;
 					}
 
@@ -5346,7 +5346,7 @@ ZEND_VM_C_LABEL(send_again):
 						ZVAL_COPY_VALUE(top, arg);
 					}
 
-					zend_string_release(name);
+					zend_string_release_noinline(name);
 				} else {
 					if (have_named_params) {
 						zend_throw_error(NULL,

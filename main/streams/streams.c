@@ -2222,7 +2222,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	if ((options & STREAM_USE_URL) && (!wrapper || !wrapper->is_url)) {
 		php_error_docref(NULL, E_WARNING, "This function may only be used against URLs");
 		if (resolved_path) {
-			zend_string_release_ex(resolved_path, 0);
+			zend_string_release_ex_noinline(resolved_path, 0);
 		}
 		return NULL;
 	}

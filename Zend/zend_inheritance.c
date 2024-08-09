@@ -867,7 +867,7 @@ static ZEND_COLD void zend_append_type_hint(
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, scope);
 		smart_str_append(str, type_str);
-		zend_string_release(type_str);
+		zend_string_release_noinline(type_str);
 		if (!return_hint) {
 			smart_str_appendc(str, ' ');
 		}
@@ -987,7 +987,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(
 							zend_string *tmp_zv_str;
 							zend_string *zv_str = zval_get_tmp_string(zv, &tmp_zv_str);
 							smart_str_append(&str, zv_str);
-							zend_tmp_string_release(tmp_zv_str);
+							zend_tmp_string_release_noinline(tmp_zv_str);
 						}
 					}
 				}
@@ -1060,8 +1060,8 @@ static void ZEND_COLD emit_incompatible_method_error(
 			"Declaration of %s must be compatible with %s",
 			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype));
 	}
-	zend_string_efree(child_prototype);
-	zend_string_efree(parent_prototype);
+	zend_string_efree_noinline(child_prototype);
+	zend_string_efree_noinline(parent_prototype);
 }
 
 static void perform_delayable_implementation_check(

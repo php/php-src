@@ -2815,7 +2815,7 @@ getvalue(struct magic_set *ms, struct magic *m, const char **p, int action)
 			pattern = convert_libmagic_pattern(m->value.s, strlen(m->value.s), options);
 
 			if ((pce = pcre_get_compiled_regex_cache(pattern)) == NULL) {
-				zend_string_release(pattern);
+				zend_string_release_noinline(pattern);
 				return -1;
 			}
 			zend_string_release(pattern);

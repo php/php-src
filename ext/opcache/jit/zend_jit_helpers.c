@@ -1328,7 +1328,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		GC_ADDREF(s);
 		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
 		if (UNEXPECTED(GC_DELREF(s) == 0)) {
-			zend_string_efree(s);
+			zend_string_efree_noinline(s);
 			if (result) {
 				ZVAL_NULL(result);
 			}
@@ -2089,7 +2089,7 @@ static zend_never_inline ZEND_COLD void zend_throw_auto_init_in_prop_error(zend_
 		ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
 		ZSTR_VAL(type_str)
 	);
-	zend_string_release(type_str);
+	zend_string_release_noinline(type_str);
 }
 
 static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_error(
@@ -2215,7 +2215,7 @@ static void ZEND_FASTCALL zend_jit_check_array_promotion(zval *val, zend_propert
 			ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name),
 			ZSTR_VAL(type_str)
 		);
-		zend_string_release(type_str);
+		zend_string_release_noinline(type_str);
 		ZVAL_ERROR(result);
 	} else {
 		ZVAL_INDIRECT(result, val);
@@ -2354,7 +2354,7 @@ static ZEND_COLD void zend_jit_throw_inc_ref_error(zend_reference *ref, zend_pro
 		ZSTR_VAL(error_prop->ce->name),
 		zend_get_unmangled_property_name(error_prop->name),
 		ZSTR_VAL(type_str));
-	zend_string_release(type_str);
+	zend_string_release_noinline(type_str);
 }
 
 static ZEND_COLD void zend_jit_throw_dec_ref_error(zend_reference *ref, zend_property_info *error_prop)
@@ -2366,7 +2366,7 @@ static ZEND_COLD void zend_jit_throw_dec_ref_error(zend_reference *ref, zend_pro
 		ZSTR_VAL(error_prop->ce->name),
 		zend_get_unmangled_property_name(error_prop->name),
 		ZSTR_VAL(type_str));
-	zend_string_release(type_str);
+	zend_string_release_noinline(type_str);
 }
 
 static void ZEND_FASTCALL zend_jit_pre_inc_typed_ref(zend_reference *ref, zval *ret)
@@ -2799,7 +2799,7 @@ static ZEND_COLD zend_long _zend_jit_throw_inc_prop_error(zend_property_info *pr
 		ZSTR_VAL(prop->ce->name),
 		zend_get_unmangled_property_name(prop->name),
 		ZSTR_VAL(type_str));
-	zend_string_release(type_str);
+	zend_string_release_noinline(type_str);
 	return ZEND_LONG_MAX;
 }
 
@@ -2810,7 +2810,7 @@ static ZEND_COLD zend_long _zend_jit_throw_dec_prop_error(zend_property_info *pr
 		ZSTR_VAL(prop->ce->name),
 		zend_get_unmangled_property_name(prop->name),
 		ZSTR_VAL(type_str));
-	zend_string_release(type_str);
+	zend_string_release_noinline(type_str);
 	return ZEND_LONG_MIN;
 }
 

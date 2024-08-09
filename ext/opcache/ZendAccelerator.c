@@ -220,7 +220,7 @@ static ZEND_FUNCTION(accel_chdir)
 	ZCG(cwd_check) = true;
 }
 
-static inline zend_string* accel_getcwd(void)
+static zend_string* accel_getcwd(void)
 {
 	if (ZCG(cwd)) {
 		return ZCG(cwd);
@@ -598,7 +598,7 @@ static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong 
 static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char *str, size_t size, bool permanent)
 {
 	if (ZCG(counted)) {
-	    zend_ulong h = zend_inline_hash_func(str, size);
+		zend_ulong h = zend_inline_hash_func(str, size);
 		zend_string *ret = accel_find_interned_string_ex(h, str, size);
 
 		if (!ret) {
@@ -1102,7 +1102,7 @@ accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_
 	return statbuf.st_mtime;
 }
 
-static inline int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
+static int do_validate_timestamps(zend_persistent_script *persistent_script, zend_file_handle *file_handle)
 {
 	zend_file_handle ps_handle;
 	zend_string *full_path_ptr = NULL;
@@ -1235,7 +1235,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(cwd_str));
 						if (str == cwd_str) {
-							zend_string_release_ex(str, 0);
+							zend_string_release_ex_noinline(str, 0);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
@@ -1279,7 +1279,7 @@ zend_string *accel_make_persistent_key(zend_string *str)
 						zend_shared_alloc_lock();
 						str = accel_new_interned_string(zend_string_copy(ZCG(include_path)));
 						if (str == ZCG(include_path)) {
-							zend_string_release(str);
+							zend_string_release_noinline(str);
 							str = NULL;
 						}
 						zend_shared_alloc_unlock();
@@ -4025,7 +4025,7 @@ static void preload_link(void)
 					"Can't preload unlinked class %s: %s",
 					ZSTR_VAL(ce->name), ZSTR_VAL(error->message));
 			}
-			zend_string_release(lcname);
+			zend_string_release_noinline(lcname);
 		}
 	} ZEND_HASH_FOREACH_END();
 
