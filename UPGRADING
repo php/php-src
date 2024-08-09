@@ -401,6 +401,8 @@ PHP 8.4 UPGRADE NOTES
 - Core:
   . Implicitly nullable parameter types are now deprecated.
     RFC: https://wiki.php.net/rfc/deprecate-implicitly-nullable-types
+  . Passing E_USER_ERROR to trigger_error() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_e_user_error_to_trigger_error
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.

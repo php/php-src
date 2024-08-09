@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15140 (Missing variance check for abstract set with asymmetric
     type). (ilutov)
   . Fixed bug GH-15181 (Disabled output handler is flushed again). (cmb)
+  . Passing E_USER_ERROR to trigger_error() is now deprecated. (Girgias)
 
 - Date:
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
