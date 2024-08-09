@@ -43,7 +43,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
  The default socket location is sometimes defined by configure.
  With libmysql `mysql_config --socket` will fill PDO_MYSQL_UNIX_ADDR
  and the user can use --with-mysql-sock=SOCKET which will fill
- PDO_MYSQL_UNIX_ADDR. If both aren't set we're using mysqlnd and use
+ PHP_MYSQL_UNIX_SOCK_ADDR. If both aren't set we're using mysqlnd and use
  /tmp/mysql.sock as default on *nix and NULL for Windows (default
  named pipe name is set in mysqlnd).
 */

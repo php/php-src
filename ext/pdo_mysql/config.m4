@@ -10,7 +10,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   AC_MSG_CHECKING([for MySQL UNIX socket location])
   if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
     MYSQL_SOCK=$PHP_MYSQL_SOCK
-    AC_DEFINE_UNQUOTED(PHP_MYSQL_UNIX_SOCK_ADDR, "$MYSQL_SOCK", [ ])
+    AC_DEFINE_UNQUOTED([PHP_MYSQL_UNIX_SOCK_ADDR], ["$MYSQL_SOCK"],
+      [The MySQL Unix socket location.])
     AC_MSG_RESULT([$MYSQL_SOCK])
   elif test "$PHP_MYSQL_SOCK" = "yes"; then
     PHP_MYSQL_SOCKET_SEARCH
@@ -83,7 +84,9 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
   if test -n "$PDO_MYSQL_CONFIG"; then
     PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket`
-    AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
+    AC_DEFINE_UNQUOTED([PDO_MYSQL_UNIX_ADDR], ["$PDO_MYSQL_SOCKET"],
+      [The MySQL Unix socket location as defined by 'mysql_config' for use with
+      the pdo_mysql extension.])
   fi
 
   PHP_NEW_EXTENSION([pdo_mysql],
