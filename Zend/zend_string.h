@@ -219,7 +219,7 @@ ZEND_API zend_always_inline zend_string *zend_string_init_fast(const char *str, 
 	}
 }
 
-ZEND_API inline zend_string *zend_string_copy(zend_string *s)
+ZEND_API zend_always_inline zend_string *zend_string_copy(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
 		GC_ADDREF(s);
