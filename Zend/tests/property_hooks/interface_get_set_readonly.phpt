@@ -1,5 +1,7 @@
 --TEST--
 readonly property does not satisfy get/set interface property
+--DESCRIPTION--
+The error message should be improved, the set access level comes from readonly.
 --FILE--
 <?php
 interface I {
@@ -10,4 +12,4 @@ class C implements I {
 }
 ?>
 --EXPECTF--
-Fatal error: Class C contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (I::$prop::set) in %s on line %d
+Fatal error: Set access level of C::$prop must be omitted (as in class I) in %s on line %d
