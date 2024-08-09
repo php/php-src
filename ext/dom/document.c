@@ -155,8 +155,8 @@ zend_result dom_document_standalone_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
 
-	zend_long standalone = zval_get_long(newval);
-	docp->standalone = ZEND_NORMALIZE_BOOL(standalone);
+	ZEND_ASSERT(Z_TYPE_P(newval) == IS_TRUE || Z_TYPE_P(newval) == IS_FALSE);
+	docp->standalone = Z_TYPE_P(newval) == IS_TRUE;
 
 	return SUCCESS;
 }
