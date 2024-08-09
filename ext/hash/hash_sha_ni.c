@@ -31,7 +31,7 @@
 
 # include <immintrin.h>
 
-# if PHP_HASH_INTRIN_SHA_RESOLVER
+# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 static __m128i be32dec_128(const uint8_t * src)  __attribute__((target("ssse3")));
 void SHA256_Transform_shani(uint32_t state[PHP_STATIC_RESTRICT 8], const uint8_t block[PHP_STATIC_RESTRICT 64])  __attribute__((target("ssse3,sha")));
 # endif
