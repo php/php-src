@@ -162,10 +162,6 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 					call_info->send_unpack = 1;
 				}
 				break;
-			case ZEND_EXIT:
-				/* In this case the DO_CALL opcode may have been dropped
-				 * and caller_call_opline will be NULL. */
-				break;
 		}
 		opline++;
 	}
