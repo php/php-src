@@ -1044,8 +1044,12 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row_c)(MYSQLND_RES * result)
 		for (unsigned i = 0; i < field_count; i++, field++) {
 			zval *data = &row_data[i];
 			if (Z_TYPE_P(data) != IS_NULL) {
-				convert_to_string(data);
-				ret[i] = Z_STRVAL_P(data);
+				zend_string *str_result = zval_try_get_string(data);
+				if (UNEXPECTED(str_result == NULL)) {
+					mnd_efree(ret);
+					DBG_RETURN(NULL);
+				}
+				ret[i] = ZSTR_VAL(str_result);
 			} else {
 				ret[i] = NULL;
 			}
