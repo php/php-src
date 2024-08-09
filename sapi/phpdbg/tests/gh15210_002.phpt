@@ -1,5 +1,11 @@
 --TEST--
 GH-15210 use after free after continue
+--SKIPIF--
+<?php
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --PHPDBG--
 b 4
 r
