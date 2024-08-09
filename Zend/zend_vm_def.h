@@ -6431,7 +6431,8 @@ ZEND_VM_COLD_CONST_HANDLER(51, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 					}
 				} else if (Z_OBJ_P(expr)->properties == NULL
 				 && Z_OBJ_HT_P(expr)->get_properties_for == NULL
-				 && Z_OBJ_HT_P(expr)->get_properties == zend_std_get_properties) {
+				 && Z_OBJ_HT_P(expr)->get_properties == zend_std_get_properties
+				 && (!zend_object_is_lazy_proxy(Z_OBJ_P(expr)) || !zend_lazy_object_initialized(Z_OBJ_P(expr)))) {
 					/* Optimized version without rebuilding properties HashTable */
 					ZVAL_ARR(result, zend_std_build_object_properties_array(Z_OBJ_P(expr)));
 				} else {

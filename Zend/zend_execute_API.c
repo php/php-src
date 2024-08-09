@@ -171,6 +171,7 @@ void init_executor(void) /* {{{ */
 	zend_stack_init(&EG(user_exception_handlers), sizeof(zval));
 
 	zend_objects_store_init(&EG(objects_store), 1024);
+	zend_lazy_objects_init(&EG(lazy_objects_store));
 
 	EG(full_tables_cleanup) = 0;
 	ZEND_ATOMIC_BOOL_INIT(&EG(vm_interrupt), false);
@@ -492,6 +493,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_stack_destroy(&EG(user_error_handlers_error_reporting));
 		zend_stack_destroy(&EG(user_error_handlers));
 		zend_stack_destroy(&EG(user_exception_handlers));
+		zend_lazy_objects_destroy(&EG(lazy_objects_store));
 		zend_objects_store_destroy(&EG(objects_store));
 		if (EG(in_autoload)) {
 			zend_hash_destroy(EG(in_autoload));
