@@ -19,6 +19,144 @@
 
 #include <ibase.h>
 
+#if FB_API_VER >= 40
+
+#ifndef CLOOP_EXTERN_C
+#ifdef __cplusplus
+#define CLOOP_EXTERN_C extern "C"
+#else
+#define CLOOP_EXTERN_C
+#endif
+#endif
+
+struct fb_Status;
+struct fb_Master;
+struct fb_Util;
+
+CLOOP_EXTERN_C struct fb_Master* ISC_EXPORT fb_get_master_interface(void);
+
+#define fb_Status_VERSION 3
+
+#define fb_Status_STATE_WARNINGS ((unsigned) (0x1))
+#define fb_Status_STATE_ERRORS ((unsigned) (0x2))
+#define fb_Status_RESULT_ERROR ((int) (-1))
+#define fb_Status_RESULT_OK ((int) (0))
+#define fb_Status_RESULT_NO_DATA ((int) (1))
+#define fb_Status_RESULT_SEGMENT ((int) (2))
+
+struct fb_StatusVTable
+{
+	void* cloopDummy[1];
+	uintptr_t version;
+	void (*dispose)(struct fb_Status* self);
+	void (*init)(struct fb_Status* self);
+	unsigned (*getState)(const struct fb_Status* self);
+	void (*setErrors2)(struct fb_Status* self, unsigned length, const intptr_t* value);
+	void (*setWarnings2)(struct fb_Status* self, unsigned length, const intptr_t* value);
+	void (*setErrors)(struct fb_Status* self, const intptr_t* value);
+	void (*setWarnings)(struct fb_Status* self, const intptr_t* value);
+	const intptr_t* (*getErrors)(const struct fb_Status* self);
+	const intptr_t* (*getWarnings)(const struct fb_Status* self);
+	struct fb_Status* (*clone)(const struct fb_Status* self);
+};
+
+struct fb_Status
+{
+	void* cloopDummy[1];
+	struct fb_StatusVTable* vtable;
+};
+
+#define fb_Master_VERSION 2
+
+struct fb_MasterVTable
+{
+	void* cloopDummy[1];
+	uintptr_t version;
+	struct fb_Status* (*getStatus)(struct fb_Master* self);
+	/* stubs */
+	void* getDispatcher;
+	void* getPluginManager;
+	void* getTimerControl;
+	void* getDtc;
+	void* registerAttachment;
+	void* registerTransaction;
+	void* getMetadataBuilder;
+	/*
+	struct fb_Status* (*getStatus)(struct fb_Master* self);
+	struct fb_Provider* (*getDispatcher)(struct fb_Master* self);
+	struct fb_PluginManager* (*getPluginManager)(struct fb_Master* self);
+	struct fb_TimerControl* (*getTimerControl)(struct fb_Master* self);
+	struct fb_Dtc* (*getDtc)(struct fb_Master* self);
+	struct fb_Attachment* (*registerAttachment)(struct fb_Master* self, struct fb_Provider* provider, struct fb_Attachment* attachment);
+	struct fb_Transaction* (*registerTransaction)(struct fb_Master* self, struct fb_Attachment* attachment, struct fb_Transaction* transaction);
+	struct fb_MetadataBuilder* (*getMetadataBuilder)(struct fb_Master* self, struct fb_Status* status, unsigned fieldCount);	
+	*/
+	int (*serverMode)(struct fb_Master* self, int mode);
+	struct fb_Util* (*getUtilInterface)(struct fb_Master* self);
+	void* getConfigManager; 
+	/* struct fb_ConfigManager* (*getConfigManager)(struct fb_Master* self); */
+	FB_BOOLEAN (*getProcessExiting)(struct fb_Master* self);
+};
+
+struct fb_Master
+{
+	void* cloopDummy[1];
+	struct fb_MasterVTable* vtable;
+};
+
+#define fb_Util_VERSION 4
+
+struct fb_UtilVTable
+{
+	void* cloopDummy[1];
+	uintptr_t version;
+	/* stubs */
+	void* getFbVersion;
+	void* loadBlob;
+	void* dumpBlob;
+	void* getPerfCounters;
+	void* executeCreateDatabase;
+	/*
+	void (*getFbVersion)(struct fb_Util* self, struct fb_Status* status, struct fb_Attachment* att, struct fb_VersionCallback* callback);
+	void (*loadBlob)(struct fb_Util* self, struct fb_Status* status, ISC_QUAD* blobId, struct fb_Attachment* att, struct fb_Transaction* tra, const char* file, FB_BOOLEAN txt);
+	void (*dumpBlob)(struct fb_Util* self, struct fb_Status* status, ISC_QUAD* blobId, struct fb_Attachment* att, struct fb_Transaction* tra, const char* file, FB_BOOLEAN txt);
+	void (*getPerfCounters)(struct fb_Util* self, struct fb_Status* status, struct fb_Attachment* att, const char* countersSet, ISC_INT64* counters);
+	struct fb_Attachment* (*executeCreateDatabase)(struct fb_Util* self, struct fb_Status* status, unsigned stmtLength, const char* creatDBstatement, unsigned dialect, FB_BOOLEAN* stmtIsCreateDb);
+	*/
+	void (*decodeDate)(struct fb_Util* self, ISC_DATE date, unsigned* year, unsigned* month, unsigned* day);
+	void (*decodeTime)(struct fb_Util* self, ISC_TIME time, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions);
+	ISC_DATE (*encodeDate)(struct fb_Util* self, unsigned year, unsigned month, unsigned day);
+	ISC_TIME (*encodeTime)(struct fb_Util* self, unsigned hours, unsigned minutes, unsigned seconds, unsigned fractions);
+	unsigned (*formatStatus)(struct fb_Util* self, char* buffer, unsigned bufferSize, struct fb_Status* status);
+	unsigned (*getClientVersion)(struct fb_Util* self);
+	/*
+	struct fb_XpbBuilder* (*getXpbBuilder)(struct fb_Util* self, struct fb_Status* status, unsigned kind, const unsigned char* buf, unsigned len);
+	unsigned (*setOffsets)(struct fb_Util* self, struct fb_Status* status, struct fb_MessageMetadata* metadata, struct fb_OffsetsCallback* callback);
+	struct fb_DecFloat16* (*getDecFloat16)(struct fb_Util* self, struct fb_Status* status);
+	struct fb_DecFloat34* (*getDecFloat34)(struct fb_Util* self, struct fb_Status* status);
+	*/
+	void* getXpbBuilder;
+	void* setOffsets;
+	void* getDecFloat16;
+	void* getDecFloat34;
+	void (*decodeTimeTz)(struct fb_Util* self, struct fb_Status* status, const ISC_TIME_TZ* timeTz, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, unsigned timeZoneBufferLength, char* timeZoneBuffer);
+	void (*decodeTimeStampTz)(struct fb_Util* self, struct fb_Status* status, const ISC_TIMESTAMP_TZ* timeStampTz, unsigned* year, unsigned* month, unsigned* day, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, unsigned timeZoneBufferLength, char* timeZoneBuffer);
+	void (*encodeTimeTz)(struct fb_Util* self, struct fb_Status* status, ISC_TIME_TZ* timeTz, unsigned hours, unsigned minutes, unsigned seconds, unsigned fractions, const char* timeZone);
+	void (*encodeTimeStampTz)(struct fb_Util* self, struct fb_Status* status, ISC_TIMESTAMP_TZ* timeStampTz, unsigned year, unsigned month, unsigned day, unsigned hours, unsigned minutes, unsigned seconds, unsigned fractions, const char* timeZone);
+	/* struct fb_Int128* (*getInt128)(struct fb_Util* self, struct fb_Status* status); */
+	void* getInt128;
+	void (*decodeTimeTzEx)(struct fb_Util* self, struct fb_Status* status, const ISC_TIME_TZ_EX* timeTz, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, unsigned timeZoneBufferLength, char* timeZoneBuffer);
+	void (*decodeTimeStampTzEx)(struct fb_Util* self, struct fb_Status* status, const ISC_TIMESTAMP_TZ_EX* timeStampTz, unsigned* year, unsigned* month, unsigned* day, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, unsigned timeZoneBufferLength, char* timeZoneBuffer);
+};
+
+struct fb_Util
+{
+	void* cloopDummy[1];
+	struct fb_UtilVTable* vtable;
+};
+
+#endif
+
 #ifdef SQLDA_VERSION
 #define PDO_FB_SQLDA_VERSION SQLDA_VERSION
 #else
