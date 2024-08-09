@@ -133,3 +133,5 @@ array(5) {
     }
   }
 }
+
+Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
