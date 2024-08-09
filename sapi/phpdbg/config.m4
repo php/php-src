@@ -21,25 +21,29 @@ PHP_ARG_ENABLE([phpdbg-readline],
   [no])
 
 if test "$PHP_PHPDBG" != "no"; then
+  AS_VAR_IF([PHP_PHPDBG_READLINE], [yes], [
+    AC_MSG_CHECKING([if readline can be enabled in phpdbg])
+    phpdbg_readline="no (readline extension is not enabled)"
+    AS_IF(m4_normalize([
+      (test -n "$with_readline" && test "x$with_readline" != xno) ||
+      (test -n "$with_libedit" && test "x$with_libedit" != xno)
+    ]), [phpdbg_readline=yes])
+    AS_CASE([$with_readline], [*shared*],
+      [phpdbg_readline="no (shared readline extension not supported)"])
+    AS_CASE([$with_libedit], [*shared*],
+      [phpdbg_readline="no (shared readline extension not supported)"])
+    AS_VAR_IF([phpdbg_readline], [yes], [
+      AC_DEFINE([HAVE_PHPDBG_READLINE], [1],
+        [Define to 1 if the phpdbg SAPI has libedit/readline integration.])
+    ])
+    AC_MSG_RESULT([$phpdbg_readline])
+  ])
+
   AC_HEADER_TIOCGWINSZ
 
   PHP_PHPDBG_CFLAGS="-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   AS_VAR_IF([PHP_PHPDBG_DEBUG], [no],,
     [AS_VAR_APPEND([PHP_PHPDBG_CFLAGS], [" -DPHPDBG_DEBUG=1"])])
-
-  AC_MSG_CHECKING([for phpdbg and readline integration])
-  if test "$PHP_PHPDBG_READLINE" = "yes"; then
-    if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
-      AC_DEFINE([HAVE_PHPDBG_READLINE], [1],
-        [Define to 1 if the phpdbg SAPI has libedit/readline integration.])
-      PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
-      AC_MSG_RESULT([ok])
-    else
-      AC_MSG_RESULT([readline is not available])
-    fi
-  else
-    AC_MSG_RESULT([disabled])
-  fi
 
   AH_TEMPLATE([HAVE_USERFAULTFD_WRITEFAULT],
     [Define to 1 if faulting on write-protected memory support can be compiled
