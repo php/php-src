@@ -93,7 +93,7 @@ zend_class_entry *php_session_update_timestamp_iface_entry;
 		return FAILURE;													\
 	}
 
-#define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014"
+#define SESSION_FORBIDDEN_CHARS "=,;.[ \t\r\n\013\014\0"
 
 #define APPLY_TRANS_SID (PS(use_trans_sid) && !PS(use_only_cookies))
 
@@ -1335,8 +1335,8 @@ static zend_result php_session_send_cookie(void) /* {{{ */
 	}
 
 	/* Prevent broken Set-Cookie header, because the session_name might be user supplied */
-	if (strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) != NULL) {   /* man isspace for \013 and \014 */
-		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,;.[ \\t\\r\\n\\013\\014'");
+	if (strpbrk(PS(session_name), SESSION_FORBIDDEN_CHARS) != NULL || memchr(PS(session_name), '\0', strlen(PS(session_name))) != NULL) {   /* man isspace for \013 and \014 */
+		php_error_docref(NULL, E_WARNING, "session.name cannot contain any of the following '=,;.[ \\t\\r\\n\\013\\014\\0'");
 		return FAILURE;
 	}
 
@@ -1875,13 +1875,13 @@ PHP_FUNCTION(session_get_cookie_params)
 }
 /* }}} */
 
-/* {{{ Return the current session name. If newname is given, the session name is replaced with newname */
+/* {{{ Return the current session name. If new name is given, the session name is replaced with new name */
 PHP_FUNCTION(session_name)
 {
 	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
