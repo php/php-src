@@ -34,40 +34,38 @@ if test "$PHP_TIDY" != "no"; then
     dnl that we are building against tidy-html5 and not the legacy htmltidy. The
     dnl two are compatible, except for with regard to this header file.
     if test -f "$TIDY_INCDIR/tidybuffio.h"; then
-      AC_DEFINE(HAVE_TIDYBUFFIO_H,1,[defined if tidybuffio.h exists])
+      AC_DEFINE([HAVE_TIDYBUFFIO_H], [1],
+        [Define to 1 if you have the <tidybuffio.h> header file.])
     fi
   fi
 
   TIDY_LIBDIR=$TIDY_DIR/$PHP_LIBDIR
-  if test "$TIDY_LIB_NAME" == 'tidyp'; then
-    AC_DEFINE(HAVE_TIDYP_H,1,[defined if tidyp.h exists])
-  else
-    AC_DEFINE(HAVE_TIDY_H,1,[defined if tidy.h exists])
-  fi
+  AS_VAR_IF([TIDY_LIB_NAME], [tidyp],
+    [AC_DEFINE([HAVE_TIDYP_H], [1],
+      [Define to 1 if you have the <tidyp.h> header file.])],
+    [AC_DEFINE([HAVE_TIDY_H], [1],
+      [Define to 1 if you have the <tidy.h> header file.])])
 
+  PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyOptGetDoc],
+    [AC_DEFINE([HAVE_TIDYOPTGETDOC], [1],
+      [Define to 1 if Tidy library has the 'tidyOptGetDoc' function.])],
+    [PHP_CHECK_LIBRARY([tidy5], [tidyOptGetDoc],
+      [TIDY_LIB_NAME=tidy5
+      AC_DEFINE([HAVE_TIDYOPTGETDOC], [1])])])
 
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyOptGetDoc,
-  [
-    AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
-  ],[
-    PHP_CHECK_LIBRARY(tidy5,tidyOptGetDoc,
-    [
-      TIDY_LIB_NAME=tidy5
-      AC_DEFINE(HAVE_TIDYOPTGETDOC,1,[ ])
-    ], [], [])
-  ],[])
+  PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyReleaseDate],
+    [AC_DEFINE([HAVE_TIDYRELEASEDATE], [1],
+      [Define to 1 if Tidy library has the 'tidyReleaseDate' function.])])
 
-  PHP_CHECK_LIBRARY($TIDY_LIB_NAME,tidyReleaseDate,
-  [
-    AC_DEFINE(HAVE_TIDYRELEASEDATE,1,[ ])
-  ], [], [])
-
-  PHP_ADD_LIBRARY_WITH_PATH($TIDY_LIB_NAME, $TIDY_LIBDIR, TIDY_SHARED_LIBADD)
+  PHP_ADD_LIBRARY_WITH_PATH([$TIDY_LIB_NAME],
+    [$TIDY_LIBDIR],
+    [TIDY_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$TIDY_INCDIR])
 
   dnl Add -Wno-ignored-qualifiers as this is an issue upstream
   TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  PHP_NEW_EXTENSION(tidy, tidy.c, $ext_shared,, $TIDY_COMPILER_FLAGS)
+  PHP_NEW_EXTENSION([tidy], [tidy.c], [$ext_shared],, [$TIDY_COMPILER_FLAGS])
   PHP_SUBST([TIDY_SHARED_LIBADD])
-  AC_DEFINE(HAVE_TIDY,1,[ ])
+  AC_DEFINE([HAVE_TIDY], [1],
+    [Define to 1 if the PHP extension 'tidy' is available.])
 fi

@@ -64,6 +64,7 @@ typedef enum _zend_cpu_feature {
 	ZEND_CPU_FEATURE_AVX512F		= (1<<16 | ZEND_CPU_EBX_MASK),
 	ZEND_CPU_FEATURE_AVX512DQ		= (1<<17 | ZEND_CPU_EBX_MASK),
 	ZEND_CPU_FEATURE_AVX512CD		= (1<<28 | ZEND_CPU_EBX_MASK),
+	ZEND_CPU_FEATURE_SHA			= (1<<29 | ZEND_CPU_EBX_MASK),
 	/* intentionally don't support		= (1<<30 | ZEND_CPU_EBX_MASK) */
 	/* intentionally don't support		= (1<<31 | ZEND_CPU_EBX_MASK) */
 

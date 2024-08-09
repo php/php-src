@@ -1627,7 +1627,7 @@ phpdbg_main:
 
 #ifdef _WIN32
 	} __except(phpdbg_exception_handler_win32(xp = GetExceptionInformation())) {
-		phpdbg_error("Access violation (Segmentation fault) encountered\ntrying to abort cleanly...");
+		phpdbg_error("Segmentation fault encountered\ntrying to abort cleanly...");
 	}
 #endif
 phpdbg_out:

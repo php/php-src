@@ -1412,6 +1412,13 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	rc = SQLFetch(result->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+		}
 		RETURN_FALSE;
 	}
 
@@ -1576,6 +1583,13 @@ PHP_FUNCTION(odbc_fetch_into)
 		rc = SQLFetch(result->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+		}
 		RETURN_FALSE;
 	}
 
@@ -1703,6 +1717,13 @@ PHP_FUNCTION(odbc_fetch_row)
 		rc = SQLFetch(result->stmt);
 
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+		odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+		}
 		RETURN_FALSE;
 	}
 
@@ -1792,6 +1813,13 @@ PHP_FUNCTION(odbc_result)
 			rc = SQLFetch(result->stmt);
 
 		if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+			if (rc == SQL_ERROR) {
+#ifdef HAVE_SQL_EXTENDED_FETCH
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLExtendedFetch");
+#else
+			odbc_sql_error(result->conn_ptr, result->stmt, "SQLFetch");
+#endif
+			}
 			RETURN_FALSE;
 		}
 

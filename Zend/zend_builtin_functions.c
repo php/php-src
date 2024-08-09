@@ -1214,6 +1214,11 @@ ZEND_FUNCTION(trigger_error)
 
 	switch (error_type) {
 		case E_USER_ERROR:
+			zend_error(E_DEPRECATED, "Passing E_USER_ERROR to trigger_error() is deprecated since 8.4,"
+				" throw an exception or call exit with a string message instead");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 		case E_USER_WARNING:
 		case E_USER_NOTICE:
 		case E_USER_DEPRECATED:

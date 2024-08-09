@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 5efa4f23774fac9610f05d895d8f8c6f481cc5a6 */
+ * Stub hash: 0e6561410a63658f76011c1ddcecdd1e68757f0a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
@@ -183,6 +183,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_tidyNode_getParent, 0, 0, tidyNode, 1)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_tidyNode_getPreviousSibling arginfo_class_tidyNode_getParent
+
+#define arginfo_class_tidyNode_getNextSibling arginfo_class_tidyNode_getParent
+
 ZEND_FUNCTION(tidy_parse_string);
 ZEND_FUNCTION(tidy_get_error_buffer);
 ZEND_FUNCTION(tidy_get_output);
@@ -222,6 +226,8 @@ ZEND_METHOD(tidyNode, isJste);
 ZEND_METHOD(tidyNode, isAsp);
 ZEND_METHOD(tidyNode, isPhp);
 ZEND_METHOD(tidyNode, getParent);
+ZEND_METHOD(tidyNode, getPreviousSibling);
+ZEND_METHOD(tidyNode, getNextSibling);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(tidy_parse_string, arginfo_tidy_parse_string)
@@ -289,6 +295,8 @@ static const zend_function_entry class_tidyNode_methods[] = {
 	ZEND_ME(tidyNode, isAsp, arginfo_class_tidyNode_isAsp, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidyNode, isPhp, arginfo_class_tidyNode_isPhp, ZEND_ACC_PUBLIC)
 	ZEND_ME(tidyNode, getParent, arginfo_class_tidyNode_getParent, ZEND_ACC_PUBLIC)
+	ZEND_ME(tidyNode, getPreviousSibling, arginfo_class_tidyNode_getPreviousSibling, ZEND_ACC_PUBLIC)
+	ZEND_ME(tidyNode, getNextSibling, arginfo_class_tidyNode_getNextSibling, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

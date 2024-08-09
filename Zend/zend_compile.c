@@ -5483,7 +5483,6 @@ static void zend_compile_static_var(zend_ast *ast) /* {{{ */
 		zend_op *opline;
 
 		zval *placeholder_ptr = zend_hash_update(CG(active_op_array)->static_variables, var_name, &EG(uninitialized_zval));
-		Z_TYPE_EXTRA_P(placeholder_ptr) |= IS_STATIC_VAR_UNINITIALIZED;
 		uint32_t placeholder_offset = (uint32_t)((char*)placeholder_ptr - (char*)CG(active_op_array)->static_variables->arData);
 
 		uint32_t static_def_jmp_opnum = get_next_op_number();

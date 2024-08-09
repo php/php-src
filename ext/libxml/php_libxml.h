@@ -113,14 +113,14 @@ typedef struct _php_libxml_ref_obj {
 	php_libxml_cache_tag cache_tag;
 	php_libxml_private_data_header *private_data;
 	const php_libxml_document_handlers *handlers;
-	int refcount;
+	unsigned int refcount;
 	php_libxml_class_type class_type : 8;
 	php_libxml_quirks_mode quirks_mode : 8;
 } php_libxml_ref_obj;
 
 typedef struct _php_libxml_node_ptr {
 	xmlNodePtr node;
-	int	refcount;
+	unsigned int refcount;
 	void *_private;
 } php_libxml_node_ptr;
 

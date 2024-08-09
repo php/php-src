@@ -81,7 +81,7 @@ static int xmlreader_property_reader(xmlreader_object *obj, xmlreader_prop_handl
 			if (hnd->read_int_func) {
 				retint = hnd->read_int_func(obj->ptr);
 				if (retint == -1) {
-					zend_throw_error(NULL, "Failed to read property due to libxml error");
+					zend_throw_error(NULL, "Failed to read property because no XML data has been read yet");
 					return FAILURE;
 				}
 			}
@@ -174,6 +174,28 @@ static zend_function *xmlreader_get_method(zend_object **obj, zend_string *name,
 	return method;
 }
 /* }}} */
+
+static HashTable* xmlreader_get_debug_info(zend_object *object, int *is_temp)
+{
+	*is_temp = 1;
+
+	xmlreader_object *obj = php_xmlreader_fetch_object(object);
+	HashTable *std_props = zend_std_get_properties(object);
+	HashTable *debug_info = zend_array_dup(std_props);
+
+	zend_string *string_key;
+	xmlreader_prop_handler *entry;
+	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&xmlreader_prop_handlers, string_key, entry) {
+		ZEND_ASSERT(string_key != NULL);
+
+		zval value;
+		if (xmlreader_property_reader(obj, entry, &value) == SUCCESS) {
+			zend_hash_update(debug_info, string_key, &value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return debug_info;
+}
 
 /* {{{ _xmlreader_get_valid_file_path */
 /* _xmlreader_get_valid_file_path and _xmlreader_get_relaxNG should be made a
@@ -1272,6 +1294,7 @@ PHP_MINIT_FUNCTION(xmlreader)
 	xmlreader_object_handlers.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;
 	xmlreader_object_handlers.get_method = xmlreader_get_method;
 	xmlreader_object_handlers.clone_obj = NULL;
+	xmlreader_object_handlers.get_debug_info = xmlreader_get_debug_info;
 
 	xmlreader_class_entry = register_class_XMLReader();
 	xmlreader_class_entry->create_object = xmlreader_objects_new;

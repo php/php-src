@@ -74,8 +74,8 @@ if test "$PHP_CURL" != "no"; then
   PHP_CHECK_LIBRARY([curl],
     [curl_easy_perform],
     [AC_DEFINE([HAVE_CURL], [1],
-      [Define to 1 if curl extension is available.])],
-    [AC_MSG_ERROR([The libcurl check failed. Please, check config.log for details.])],
+      [Define to 1 if the PHP extension 'curl' is available.])],
+    [AC_MSG_FAILURE([The libcurl check failed.])],
     [$CURL_LIBS])
 
   PHP_NEW_EXTENSION([curl],

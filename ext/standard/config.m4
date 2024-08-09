@@ -80,20 +80,26 @@ AH_TEMPLATE([PHP_USE_PHP_CRYPT_R],
   [Define to 1 if PHP uses its own crypt_r, and to 0 if using the external crypt
   library.])
 
+php_ext_standard_sources=
 AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [1])
-  PHP_ADD_SOURCES([PHP_EXT_DIR([standard])],
-    [crypt_freesec.c crypt_blowfish.c crypt_sha512.c crypt_sha256.c php_crypt_r.c])
+  php_ext_standard_sources=m4_normalize(["
+    crypt_blowfish.c
+    crypt_freesec.c
+    crypt_sha256.c
+    crypt_sha512.c
+    php_crypt_r.c
+  "])
 ], [
 AC_SEARCH_LIBS([crypt], [crypt],
   [AC_DEFINE([HAVE_CRYPT], [1],
     [Define to 1 if you have the 'crypt' function.])],
-  [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
+  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt() is missing.])])
 
 AC_SEARCH_LIBS([crypt_r], [crypt],
   [AC_DEFINE([HAVE_CRYPT_R], [1],
     [Define to 1 if you have the 'crypt_r' function.])],
-  [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt_r() is missing.])])
 
 PHP_CRYPT_R_STYLE
 AC_CHECK_HEADERS([crypt.h])
@@ -273,15 +279,16 @@ int main(void) {
 
 
   if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
-    AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
+    AC_MSG_FAILURE([Cannot use external libcrypt as some algo are missing.])
   fi
 
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [0])
 ])
 
-AS_VAR_IF([cross_compiling], [no], [AC_FUNC_FNMATCH],
+AS_VAR_IF([cross_compiling], [yes],
   [AS_CASE([$host_alias], [*linux*],
-    [AC_DEFINE([HAVE_FNMATCH], [1])])])
+    [AC_DEFINE([HAVE_FNMATCH], [1])])],
+  [AC_FUNC_FNMATCH])
 
 dnl
 dnl Check if there is a support means of creating a new process and defining
@@ -318,9 +325,9 @@ case "$PHP_SAPI" in
   ;;
 esac
 
-if test "$PHP_ENABLE_CHROOT_FUNC" = "yes"; then
-  AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
-fi
+AS_VAR_IF([PHP_ENABLE_CHROOT_FUNC], [yes],
+  [AC_DEFINE([ENABLE_CHROOT_FUNC], [1],
+    [Define to 1 to enable the 'chroot' function.])])
 
 dnl
 dnl Detect library functions needed by php dns_xxx functions
@@ -364,7 +371,8 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
   PHP_EVAL_INCLINE([$ARGON2_CFLAGS])
   PHP_EVAL_LIBLINE([$ARGON2_LIBS])
 
-  AC_DEFINE(HAVE_ARGON2LIB, 1, [ ])
+  AC_DEFINE([HAVE_ARGON2LIB], [1],
+    [Define to 1 if the system has the 'libargon2' library.])
 fi
 
 dnl
@@ -397,70 +405,72 @@ dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION([standard], m4_normalize([
-  array.c
-  assert.c
-  base64.c
-  basic_functions.c
-  browscap.c
-  crc32_x86.c
-  crc32.c
-  credits.c
-  crypt.c
-  css.c
-  datetime.c
-  dir.c
-  dl.c
-  dns.c
-  exec.c
-  file.c
-  filestat.c
-  filters.c
-  flock_compat.c
-  formatted_print.c
-  fsock.c
-  ftok.c
-  ftp_fopen_wrapper.c
-  head.c
-  hrtime.c
-  html.c
-  http_fopen_wrapper.c
-  http.c
-  image.c
-  incomplete_class.c
-  info.c
-  iptc.c
-  levenshtein.c
-  libavifinfo/avifinfo.c
-  link.c
-  mail.c
-  math.c
-  md5.c
-  metaphone.c
-  microtime.c
-  net.c
-  pack.c
-  pageinfo.c
-  password.c
-  php_fopen_wrapper.c
-  proc_open.c
-  quot_print.c
-  scanf.c
-  sha1.c
-  soundex.c
-  streamsfuncs.c
-  string.c
-  strnatcmp.c
-  syslog.c
-  type.c
-  uniqid.c
-  url_scanner_ex.c
-  url.c
-  user_filters.c
-  uuencode.c
-  var_unserializer.c
-  var.c
-  versioning.c
-]),,,
+    array.c
+    assert.c
+    base64.c
+    basic_functions.c
+    browscap.c
+    crc32_x86.c
+    crc32.c
+    credits.c
+    crypt.c
+    css.c
+    datetime.c
+    dir.c
+    dl.c
+    dns.c
+    exec.c
+    file.c
+    filestat.c
+    filters.c
+    flock_compat.c
+    formatted_print.c
+    fsock.c
+    ftok.c
+    ftp_fopen_wrapper.c
+    head.c
+    hrtime.c
+    html.c
+    http_fopen_wrapper.c
+    http.c
+    image.c
+    incomplete_class.c
+    info.c
+    iptc.c
+    levenshtein.c
+    libavifinfo/avifinfo.c
+    link.c
+    mail.c
+    math.c
+    md5.c
+    metaphone.c
+    microtime.c
+    net.c
+    pack.c
+    pageinfo.c
+    password.c
+    php_fopen_wrapper.c
+    proc_open.c
+    quot_print.c
+    scanf.c
+    sha1.c
+    soundex.c
+    streamsfuncs.c
+    string.c
+    strnatcmp.c
+    syslog.c
+    type.c
+    uniqid.c
+    url_scanner_ex.c
+    url.c
+    user_filters.c
+    uuencode.c
+    var_unserializer.c
+    var.c
+    versioning.c
+    $php_ext_standard_sources
+  ]),
+  [no],,
   [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
 PHP_ADD_BUILD_DIR([$ext_builddir/libavifinfo])

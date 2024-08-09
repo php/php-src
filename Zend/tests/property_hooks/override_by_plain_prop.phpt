@@ -1,5 +1,5 @@
 --TEST--
-Hooks must not be overridden by a plain property
+Hooks are inherited to plain property
 --FILE--
 <?php
 
@@ -27,4 +27,6 @@ var_dump($b->prop);
 A::$prop::set
 A::$prop::get
 int(42)
-int(43)
+A::$prop::set
+A::$prop::get
+int(42)

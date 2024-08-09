@@ -27,12 +27,11 @@ if test "$PHP_PHPDBG" != "no"; then
   AS_VAR_IF([PHP_PHPDBG_DEBUG], [no],,
     [AS_VAR_APPEND([PHP_PHPDBG_CFLAGS], [" -DPHPDBG_DEBUG=1"])])
 
-  PHP_PHPDBG_FILES="phpdbg.c phpdbg_parser.c phpdbg_lexer.c phpdbg_prompt.c phpdbg_help.c phpdbg_break.c phpdbg_print.c phpdbg_bp.c phpdbg_list.c phpdbg_utils.c phpdbg_info.c phpdbg_cmd.c phpdbg_set.c phpdbg_frame.c phpdbg_watch.c phpdbg_btree.c phpdbg_sigsafe.c phpdbg_io.c phpdbg_out.c"
-
   AC_MSG_CHECKING([for phpdbg and readline integration])
   if test "$PHP_PHPDBG_READLINE" = "yes"; then
     if test "$PHP_READLINE" != "no" || test "$PHP_LIBEDIT" != "no"; then
-      AC_DEFINE(HAVE_PHPDBG_READLINE, 1, [ ])
+      AC_DEFINE([HAVE_PHPDBG_READLINE], [1],
+        [Define to 1 if the phpdbg SAPI has libedit/readline integration.])
       PHPDBG_EXTRA_LIBS="$PHP_READLINE_LIBS"
       AC_MSG_RESULT([ok])
     else
@@ -66,7 +65,30 @@ if test "$PHP_PHPDBG" != "no"; then
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag],
     [$abs_srcdir/sapi/phpdbg],
     [$abs_builddir/sapi/phpdbg])
-  PHP_SELECT_SAPI(phpdbg, program, $PHP_PHPDBG_FILES, $PHP_PHPDBG_CFLAGS, [$(SAPI_PHPDBG_PATH)])
+  PHP_SELECT_SAPI([phpdbg],
+    [program],
+    m4_normalize([
+      phpdbg_bp.c
+      phpdbg_break.c
+      phpdbg_btree.c
+      phpdbg_cmd.c
+      phpdbg_frame.c
+      phpdbg_help.c
+      phpdbg_info.c
+      phpdbg_io.c
+      phpdbg_lexer.c
+      phpdbg_list.c
+      phpdbg_out.c
+      phpdbg_parser.c
+      phpdbg_print.c
+      phpdbg_prompt.c
+      phpdbg_set.c
+      phpdbg_sigsafe.c
+      phpdbg_utils.c
+      phpdbg_watch.c
+      phpdbg.c
+    ]),
+    [$PHP_PHPDBG_CFLAGS])
 
   BUILD_BINARY="sapi/phpdbg/phpdbg"
   BUILD_SHARED="sapi/phpdbg/libphpdbg.la"
@@ -98,5 +120,5 @@ if test "$PHP_PHPDBG" != "no"; then
   PHP_SUBST([BUILD_PHPDBG])
   PHP_SUBST([BUILD_PHPDBG_SHARED])
 
-  PHP_OUTPUT(sapi/phpdbg/phpdbg.1)
+  AC_CONFIG_FILES([sapi/phpdbg/phpdbg.1])
 fi

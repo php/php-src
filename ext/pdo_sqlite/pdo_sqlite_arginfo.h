@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4b89b32b7fa966fa1c3f481bc2b322f5b8d03129 */
+ * Stub hash: 7ceaf5fc8e9c92bf192e824084a706794395ce1a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Sqlite_createAggregate, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)

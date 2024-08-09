@@ -304,7 +304,7 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-int php_math_round_mode_from_enum(zend_object *mode)
+PHPAPI int php_math_round_mode_from_enum(zend_object *mode)
 {
 	zval *case_name = zend_enum_fetch_case_name(mode);
 	zend_string *mode_name = Z_STR_P(case_name);

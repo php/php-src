@@ -39,7 +39,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
     dnl enables build of mysqnd library
     PHP_MYSQLND_ENABLED=yes
-    AC_DEFINE([PDO_USE_MYSQLND], 1, [Whether pdo_mysql uses mysqlnd])
+    AC_DEFINE([PDO_USE_MYSQLND], [1],
+      [Define to 1 if the pdo_mysql extension uses mysqlnd.])
   else
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
@@ -85,7 +86,10 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_DEFINE_UNQUOTED(PDO_MYSQL_UNIX_ADDR, "$PDO_MYSQL_SOCKET", [ ])
   fi
 
-  PHP_NEW_EXTENSION(pdo_mysql, pdo_mysql.c mysql_driver.c mysql_statement.c mysql_sql_parser.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  PHP_NEW_EXTENSION([pdo_mysql],
+    [pdo_mysql.c mysql_driver.c mysql_statement.c mysql_sql_parser.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT

@@ -18,22 +18,24 @@ PHP_ARG_WITH([openssl-legacy-provider],
   [no])
 
 if test "$PHP_OPENSSL" != "no"; then
-  PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
+  PHP_NEW_EXTENSION([openssl], [openssl.c xp_ssl.c], [$ext_shared])
   PHP_SUBST([OPENSSL_SHARED_LIBADD])
   PHP_SETUP_OPENSSL([OPENSSL_SHARED_LIBADD],
     [AC_DEFINE([HAVE_OPENSSL_EXT], [1],
-      [Define to 1 if the openssl extension is available.])])
+      [Define to 1 if the PHP extension 'openssl' is available.])])
 
   PHP_CHECK_LIBRARY([crypto], [RAND_egd],
     [AC_DEFINE([HAVE_RAND_EGD], [1],
       [Define to 1 if OpenSSL crypto library has the 'RAND_egd' function.])],,
     [$OPENSSL_LIBS])
 
-  if test "$PHP_SYSTEM_CIPHERS" != "no"; then
-    AC_DEFINE(USE_OPENSSL_SYSTEM_CIPHERS,1,[ Use system default cipher list instead of hardcoded value ])
-  fi
+  AS_VAR_IF([PHP_SYSTEM_CIPHERS], [no],,
+    [AC_DEFINE([USE_OPENSSL_SYSTEM_CIPHERS], [1],
+      [Define to 1 to use system default cipher list instead of the hardcoded
+      value in OpenSSL.])])
 
-  if test "$PHP_OPENSSL_LEGACY_PROVIDER" != "no"; then
-    AC_DEFINE(LOAD_OPENSSL_LEGACY_PROVIDER,1,[ Load legacy algorithm provider in addition to default provider ])
-  fi
+  AS_VAR_IF([PHP_OPENSSL_LEGACY_PROVIDER], [no],,
+    [AC_DEFINE([LOAD_OPENSSL_LEGACY_PROVIDER], [1],
+      [Define to 1 to load the OpenSSL legacy algorithm provider in addition to
+      the default provider.])])
 fi

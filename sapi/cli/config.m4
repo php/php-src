@@ -27,7 +27,10 @@ if test "$PHP_CLI" != "no"; then
   SAPI_CLI_PATH=sapi/cli/php
 
   dnl Select SAPI.
-  PHP_SELECT_SAPI(cli, program, php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CLI_PATH)')
+  PHP_SELECT_SAPI([cli],
+    [program],
+    [php_cli.c php_http_parser.c php_cli_server.c ps_title.c php_cli_process_title.c],
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   case $host_alias in
   *aix*)
@@ -52,7 +55,7 @@ if test "$PHP_CLI" != "no"; then
   PHP_SUBST([SAPI_CLI_PATH])
   PHP_SUBST([BUILD_CLI])
 
-  PHP_OUTPUT(sapi/cli/php.1)
+  AC_CONFIG_FILES([sapi/cli/php.1])
 
   PHP_INSTALL_HEADERS([sapi/cli], [cli.h])
 fi

@@ -154,34 +154,30 @@ PHP_METHOD(DOMCharacterData, substringData)
 Modern spec URL: https://dom.spec.whatwg.org/#dom-characterdata-appenddata
 Since:
 */
-static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS, bool return_true)
+static void dom_character_data_append_data(INTERNAL_FUNCTION_PARAMETERS)
 {
-	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
 	char *arg;
 	size_t arg_len;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
+	DOM_GET_OBJ(nodep, ZEND_THIS, xmlNodePtr, intern);
 	xmlTextConcat(nodep, BAD_CAST arg, arg_len);
-	if (return_true) {
-		RETURN_TRUE;
-	}
 }
 
 PHP_METHOD(DOMCharacterData, appendData)
 {
-	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	RETURN_TRUE;
 }
 
 PHP_METHOD(Dom_CharacterData, appendData)
 {
-	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+	dom_character_data_append_data(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} end dom_characterdata_append_data */
 

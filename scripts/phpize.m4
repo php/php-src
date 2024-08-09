@@ -15,7 +15,7 @@ AC_CONFIG_SRCDIR([config.m4])
 AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
-PHP_CONFIG_NICE(config.nice)
+PHP_CONFIG_NICE([config.nice])
 
 AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
 AC_DEFUN([PHP_EXT_DIR],[""])dnl
@@ -77,40 +77,36 @@ AC_MSG_CHECKING([for PHP installed headers prefix])
 AC_MSG_RESULT([$phpincludedir])
 
 dnl Checks for PHP_DEBUG / ZEND_DEBUG / ZTS.
-AC_MSG_CHECKING([if debug is enabled])
+AC_MSG_CHECKING([if debugging is enabled])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
-AC_EGREP_CPP(php_debug_is_enabled,[
+AC_EGREP_CPP([php_debug_is_enabled], [
 #include <main/php_config.h>
 #if ZEND_DEBUG
 php_debug_is_enabled
 #endif
-],[
-  PHP_DEBUG=yes
-],[
-  PHP_DEBUG=no
-])
+],
+  [PHP_DEBUG=yes],
+  [PHP_DEBUG=no])
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_DEBUG])
 
-AC_MSG_CHECKING([if zts is enabled])
+AC_MSG_CHECKING([if PHP is built with thread safety (ZTS)])
 old_CPPFLAGS=$CPPFLAGS
 CPPFLAGS="-I$phpincludedir"
-AC_EGREP_CPP(php_zts_is_enabled,[
+AC_EGREP_CPP([php_zts_is_enabled], [
 #include <main/php_config.h>
 #ifdef ZTS
 php_zts_is_enabled
 #endif
-],[
-  PHP_THREAD_SAFETY=yes
-],[
-  PHP_THREAD_SAFETY=no
-])
+],
+  [PHP_THREAD_SAFETY=yes],
+  [PHP_THREAD_SAFETY=no])
 CPPFLAGS=$old_CPPFLAGS
 AC_MSG_RESULT([$PHP_THREAD_SAFETY])
 
 dnl Discard optimization flags when debugging is enabled.
-if test "$PHP_DEBUG" = "yes"; then
+AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
@@ -132,10 +128,10 @@ if test "$PHP_DEBUG" = "yes"; then
       CXXFLAGS="$CFLAGS -g"
     fi
   fi
-else
+], [
   PHP_DEBUG=0
   ZEND_DEBUG=no
-fi
+])
 
 dnl Always shared.
 PHP_BUILD_SHARED
@@ -143,10 +139,16 @@ PHP_BUILD_SHARED
 dnl Required programs.
 PHP_PROG_AWK
 
+PHP_HELP_SEPARATOR([Extension:])
+PHP_CONFIGURE_PART([Configuring extension])
+
 sinclude(config.m4)
 
 enable_static=no
 enable_shared=yes
+
+PHP_HELP_SEPARATOR([Libtool:])
+PHP_CONFIGURE_PART([Configuring libtool])
 
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by
 dnl PHP_REQUIRE_CXX). Otherwise AC_PROG_LIBTOOL fails if there is no working C++
@@ -200,6 +202,8 @@ PHP_SUBST([LIBTOOL])
 PHP_SUBST([SHELL])
 PHP_SUBST([INSTALL_HEADERS])
 PHP_SUBST([BUILD_CC])
+
+PHP_CONFIGURE_PART([Generating files])
 
 AC_CONFIG_HEADERS([config.h])
 

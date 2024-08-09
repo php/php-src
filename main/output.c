@@ -925,6 +925,10 @@ static php_output_handler_status_t php_output_handler_op(php_output_handler *han
 	);
 #endif
 
+	if (handler->flags & PHP_OUTPUT_HANDLER_DISABLED) {
+		return PHP_OUTPUT_HANDLER_FAILURE;
+	}
+
 	if (php_output_lock_error(context->op)) {
 		/* fatal error */
 		return PHP_OUTPUT_HANDLER_FAILURE;

@@ -413,7 +413,7 @@ if test "$PHP_FPM" != "no"; then
     CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([systemd/sd-daemon.h],,
-      [AC_MSG_ERROR([Required systemd/sd-daemon.h not found.])])
+      [AC_MSG_FAILURE([Required <systemd/sd-daemon.h> header file not found.])])
     CFLAGS=$CFLAGS_save
   ])
 
@@ -454,7 +454,7 @@ if test "$PHP_FPM" != "no"; then
       [PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])],
       [AC_CHECK_LIB([apparmor], [aa_change_profile],
         [APPARMOR_LIBS=-lapparmor],
-        [AC_MSG_ERROR([libapparmor required but not found.])])])
+        [AC_MSG_FAILURE([Required libapparmor library not found.])])])
     PHP_EVAL_LIBLINE([$APPARMOR_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
@@ -463,7 +463,7 @@ if test "$PHP_FPM" != "no"; then
     AC_CHECK_HEADER([sys/apparmor.h],
       [AC_DEFINE([HAVE_APPARMOR], [1],
         [Define to 1 if AppArmor confinement is available for PHP-FPM.])],
-      [AC_MSG_ERROR([Required sys/apparmor.h not found.])])
+      [AC_MSG_FAILURE([Required <sys/apparmor.h> header file not found.])])
     CFLAGS=$CFLAGS_save
   ])
 
@@ -472,7 +472,7 @@ if test "$PHP_FPM" != "no"; then
       [PHP_EVAL_INCLINE([$SELINUX_CFLAGS])],
       [AC_CHECK_LIB([selinux], [security_setenforce],
         [SELINUX_LIBS=-lselinux],
-        [AC_MSG_ERROR([Required SELinux library not found.])])])
+        [AC_MSG_FAILURE([Required SELinux library not found.])])])
     PHP_EVAL_LIBLINE([$SELINUX_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
@@ -481,7 +481,7 @@ if test "$PHP_FPM" != "no"; then
     AC_CHECK_HEADER([selinux/selinux.h],
       [AC_DEFINE([HAVE_SELINUX], [1],
         [Define to 1 if SELinux is available in PHP-FPM.])],
-      [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
+      [AC_MSG_FAILURE([Required <selinux/selinux.h> header file not found.])])
     CFLAGS=$CFLAGS_save
   ])
 
@@ -508,7 +508,14 @@ if test "$PHP_FPM" != "no"; then
 
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
-  PHP_OUTPUT(sapi/fpm/php-fpm.conf sapi/fpm/www.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html)
+  AC_CONFIG_FILES([
+    sapi/fpm/init.d.php-fpm
+    sapi/fpm/php-fpm.8
+    sapi/fpm/php-fpm.conf
+    sapi/fpm/php-fpm.service
+    sapi/fpm/status.html
+    sapi/fpm/www.conf
+  ])
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/fpm/Makefile.frag])
 
   SAPI_FPM_PATH=sapi/fpm/php-fpm
@@ -548,7 +555,10 @@ if test "$PHP_FPM" != "no"; then
     fpm/events/port.c \
   "
 
-  PHP_SELECT_SAPI(fpm, program, $PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES, $PHP_FPM_CFLAGS, '$(SAPI_FPM_PATH)')
+  PHP_SELECT_SAPI([fpm],
+    [program],
+    [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
+    [$PHP_FPM_CFLAGS])
 
   case $host_alias in
       *aix*)

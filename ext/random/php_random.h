@@ -61,10 +61,6 @@ PHPAPI uint32_t php_mt_rand(void);
 PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max);
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max);
 
-typedef struct _php_random_status_state_combinedlcg {
-	int32_t state[2];
-} php_random_status_state_combinedlcg;
-
 typedef struct _php_random_status_state_mt19937 {
 	uint32_t count;
 	enum php_random_mt19937_mode mode;
@@ -85,8 +81,8 @@ typedef struct _php_random_status_state_user {
 } php_random_status_state_user;
 
 typedef struct _php_random_result {
-	const uint64_t result;
-	const size_t size;
+	uint64_t result;
+	size_t size;
 } php_random_result;
 
 typedef struct _php_random_algo {
@@ -107,7 +103,6 @@ typedef struct _php_random_fallback_seed_state {
 	unsigned char seed[20];
 } php_random_fallback_seed_state;
 
-extern PHPAPI const php_random_algo php_random_algo_combinedlcg;
 extern PHPAPI const php_random_algo php_random_algo_mt19937;
 extern PHPAPI const php_random_algo php_random_algo_pcgoneseq128xslrr64;
 extern PHPAPI const php_random_algo php_random_algo_xoshiro256starstar;
@@ -167,17 +162,14 @@ PHPAPI void *php_random_default_status(void);
 
 static inline php_random_algo_with_state php_random_default_engine(void)
 {
-	return (php_random_algo_with_state){
-		.algo = php_random_default_algo(),
-		.state = php_random_default_status(),
-	};
+	php_random_algo_with_state raws;
+	raws.algo = php_random_default_algo();
+	raws.state = php_random_default_status();
+	return raws;
 }
 
 PHPAPI zend_string *php_random_bin2hex_le(const void *ptr, const size_t len);
 PHPAPI bool php_random_hex2bin_le(zend_string *hexstr, void *dest);
-
-PHPAPI void php_random_combinedlcg_seed64(php_random_status_state_combinedlcg *state, uint64_t seed);
-PHPAPI void php_random_combinedlcg_seed_default(php_random_status_state_combinedlcg *state);
 
 PHPAPI void php_random_mt19937_seed32(php_random_status_state_mt19937 *state, uint32_t seed);
 PHPAPI void php_random_mt19937_seed_default(php_random_status_state_mt19937 *state);
@@ -206,7 +198,7 @@ ZEND_BEGIN_MODULE_GLOBALS(random)
 	bool combined_lcg_seeded;
 	bool mt19937_seeded;
 	php_random_fallback_seed_state fallback_seed_state;
-	php_random_status_state_combinedlcg combined_lcg;
+	int32_t combined_lcg[2];
 	php_random_status_state_mt19937 mt19937;
 ZEND_END_MODULE_GLOBALS(random)
 

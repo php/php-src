@@ -9,7 +9,7 @@ set_error_handler(function ($errno, $errstr) {
     throw new \Exception($errstr);
 });
 register_shutdown_function(function () {
-    trigger_error('main', E_USER_ERROR);
+    trigger_error('main', E_USER_WARNING);
 });
 ?>
 --EXPECT--

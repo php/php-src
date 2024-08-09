@@ -23,6 +23,7 @@
 #include "php.h"
 
 #include "zend_variables.h"
+#include "zend_attributes.h"
 #include "ext/standard/info.h"
 #include "ext/standard/html.h" /* For php_next_utf8_char() */
 
@@ -1184,6 +1185,13 @@ PHP_FUNCTION(xml_set_element_handler)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OF!S", &pind, xml_parser_ce, &start_fci, &start_fcc, &end_method_name) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
 
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			zend_release_fcall_info_cache(&start_fcc);
+			zend_release_fcall_info_cache(&end_fcc);
+			RETURN_THROWS();
+		}
+
 		bool status = php_xml_check_string_method_arg(3, parser->object, end_method_name, &end_fcc);
 		if (status == false) {
 			zend_release_fcall_info_cache(&start_fcc);
@@ -1192,6 +1200,13 @@ PHP_FUNCTION(xml_set_element_handler)
 		}
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSF!", &pind, xml_parser_ce, &start_method_name, &end_fci, &end_fcc) == SUCCESS) {
 		parser = Z_XMLPARSER_P(pind);
+
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			zend_release_fcall_info_cache(&start_fcc);
+			zend_release_fcall_info_cache(&end_fcc);
+			RETURN_THROWS();
+		}
 
 		bool status = php_xml_check_string_method_arg(2, parser->object, start_method_name, &start_fcc);
 		if (status == false) {
@@ -1202,6 +1217,11 @@ PHP_FUNCTION(xml_set_element_handler)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OSS", &pind, xml_parser_ce, &start_method_name, &end_method_name) == SUCCESS) {
 		zend_release_fcall_info_cache(&start_fcc);
 		zend_release_fcall_info_cache(&end_fcc);
+
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 
 		parser = Z_XMLPARSER_P(pind);
 
@@ -1263,7 +1283,10 @@ static void php_xml_set_handler_parse_callable(
 		memcpy(parser_handler_fcc, &handler_fcc, sizeof(zend_fcall_info_cache));
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OS", &pind, xml_parser_ce, &method_name) == SUCCESS) {
 		*parser = Z_XMLPARSER_P(pind);
-
+		php_error_docref(NULL, E_DEPRECATED, "Passing non-callable strings is deprecated since 8.4");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
 		bool status = php_xml_check_string_method_arg(2, (*parser)->object, method_name, parser_handler_fcc);
 		if (status == false) {
 			RETURN_THROWS();

@@ -10,4 +10,4 @@ class C implements I {
 }
 ?>
 --EXPECTF--
-Fatal error: Readonly property C::$prop does not satisfy abstract read-write property I::$prop in %s on line %d
+Fatal error: Class C contains 1 abstract method and must therefore be declared abstract or implement the remaining methods (I::$prop::set) in %s on line %d

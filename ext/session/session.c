@@ -751,6 +751,9 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (val != 32) {
+		zend_error(E_DEPRECATED, "session.sid_length INI setting is deprecated");
+	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
 		/* Numeric value */
@@ -771,6 +774,9 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (val != 4) {
+		zend_error(E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
+	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 4 && val <=6) {
 		/* Numeric value */

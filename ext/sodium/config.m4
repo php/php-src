@@ -9,7 +9,8 @@ if test "$PHP_SODIUM" != "no"; then
   PHP_EVAL_INCLINE([$LIBSODIUM_CFLAGS])
   PHP_EVAL_LIBLINE([$LIBSODIUM_LIBS], [SODIUM_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [ ])
+  AC_DEFINE([HAVE_LIBSODIUMLIB], [1],
+    [Define to 1 if the PHP extension 'sodium' is available.])
 
   SODIUM_COMPILER_FLAGS="$LIBSODIUM_CFLAGS"
 
@@ -21,7 +22,10 @@ if test "$PHP_SODIUM" != "no"; then
       [SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op"],, [-Werror])
   ])
 
-  PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared, , $SODIUM_COMPILER_FLAGS)
+  PHP_NEW_EXTENSION([sodium],
+    [libsodium.c sodium_pwhash.c],
+    [$ext_shared],,
+    [$SODIUM_COMPILER_FLAGS])
   PHP_INSTALL_HEADERS([ext/sodium], [php_libsodium.h])
   PHP_SUBST([SODIUM_SHARED_LIBADD])
 fi

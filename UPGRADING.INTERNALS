@@ -99,6 +99,12 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   zend_std_get_properties(). Use zend_std_get_properties_ex() or
   zend_std_get_properties() instead.
 
+* Removed IS_STATIC_VAR_UNINITIALIZED constant. Check for IS_NULL in the
+  static_variables array instead.
+
+* Removed ZEND_DIM_ALTERNATIVE_SYNTAX constant. This syntax no longer has a
+  specialized error message.
+
 ========================
 2. Build system changes
 ========================
@@ -171,6 +177,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - M4 macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
    - M4 macro PHP_EVAL_LIBLINE got a new 3rd argument to override the ext_shared
      checks.
+   - M4 macro PHP_SETUP_LIBXML doesn't define the redundant HAVE_LIBXML symbol
+     anymore.
+   - M4 macro PHP_SETUP_ICONV doesn't define the HAVE_ICONV symbol anymore.
+   - M4 macro PHP_OUTPUT is obsolete (use AC_CONFIG_FILES).
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
@@ -179,6 +189,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      used instead of the pkg-config search.
    - Added pkg-config support to find unixODBC and iODBC for the pdo_odbc
      extension.
+   - Added pkg-config support to find GNU MP library. As a fallback default
+     system paths are searched. When a directory argument is provided
+     (--with-gmp=DIR), it will be used instead of the pkg-config.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
    - Cache variables synced to php_cv_* naming scheme. If you use them for
@@ -214,6 +227,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the openssl extension is available either as shared or built statically.
    - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
    - The win32/build/libs_version.txt file has been removed.
+   - MSVC builds now use the new preprocessor (/Zc:preprocessor).
 
 ========================
 3. Module changes
@@ -273,6 +287,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      implementation has been improved to generate better seeds, however any
      users should use the opportunity to verify that seeding is first
      attempted using the CSPRNG for better output size flexibility.
+   - The standalone combined_lcg engine has been removed, as the lcg_value()
+     userland function is deprecated and as the engine is unable to return
+     unbiased integer values. The internal php_combined_lcg() function remains
+     available for now.
 
  c. ext/xsl
    - The function php_xsl_create_object() was removed as it was not used
@@ -290,6 +308,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added php_libxml_uses_internal_errors().
    - Added a way to override document handlers (e.g. serialization) with
      php_libxml_document_handlers.
+   - Changed the refcount fields from int to unsigned int.
 
  e. ext/date
    - Added the php_format_date_ex() API to format instances of php_date_obj.

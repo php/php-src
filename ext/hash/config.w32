@@ -4,12 +4,12 @@ ARG_WITH('mhash', 'mhash support (BC via hash)', 'no');
 
 if (PHP_MHASH != 'no') {
 	WARNING("mhash* functions are deprecated as of PHP 8.1.0");
-	AC_DEFINE('PHP_MHASH_BC', 1);
+	AC_DEFINE('PHP_MHASH_BC', 1, 'Define to 1 if mhash support is enabled.');
 }
 
 PHP_HASH = 'yes';
 
-EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c ' +
+EXTENSION('hash',	'hash.c hash_md.c hash_sha.c hash_sha_sse2.c hash_sha_ni.c hash_ripemd.c hash_haval.c ' +
 					'hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c ' +
 					'hash_adler32.c hash_crc32.c hash_joaat.c hash_fnv.c ' +
 					'hash_sha3.c hash_murmur.c hash_xxhash.c', false);

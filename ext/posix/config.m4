@@ -5,8 +5,12 @@ PHP_ARG_ENABLE([posix],
   [yes])
 
 if test "$PHP_POSIX" = "yes"; then
-  AC_DEFINE(HAVE_POSIX, 1, [whether to include POSIX-like functions])
-  PHP_NEW_EXTENSION(posix, posix.c, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+  AC_DEFINE([HAVE_POSIX], [1],
+    [Define to 1 if the PHP extension 'posix' is available.])
+  PHP_NEW_EXTENSION([posix],
+    [posix.c],
+    [$ext_shared],,
+    [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AC_CHECK_FUNCS(m4_normalize([
     ctermid
@@ -54,7 +58,7 @@ dnl (first argument is not validated and has different error).
       [php_cv_func_ttyname_r=yes], [php_cv_func_ttyname_r=no])])])
   AS_VAR_IF([php_cv_func_ttyname_r], [yes],
     [AC_DEFINE([HAVE_TTYNAME_R], [1],
-      [Define to 1 if you have a working ttyname_r.])],
+      [Define to 1 if you have a working 'ttyname_r' function.])],
     [AC_MSG_NOTICE([posix_ttyname() will be thread-unsafe])])
 
   AC_CHECK_MEMBERS([struct utsname.domainname],,,[

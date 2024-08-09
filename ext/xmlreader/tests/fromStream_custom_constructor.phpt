@@ -18,7 +18,11 @@ fwrite($h, "<root/>");
 fseek($h, 0);
 
 $reader = CustomXMLReader::fromStream($h, encoding: "UTF-8");
-var_dump($reader);
+try {
+    var_dump($reader);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($reader->read());
 var_dump($reader->nodeType);
 
@@ -26,37 +30,36 @@ fclose($h);
 ?>
 --EXPECTF--
 hello world
-object(CustomXMLReader)#%d (1) {
-  ["attributeCount"]=>
-  uninitialized(int)
-  ["baseURI"]=>
-  uninitialized(string)
-  ["depth"]=>
-  uninitialized(int)
-  ["hasAttributes"]=>
-  uninitialized(bool)
-  ["hasValue"]=>
-  uninitialized(bool)
-  ["isDefault"]=>
-  uninitialized(bool)
-  ["isEmptyElement"]=>
-  uninitialized(bool)
-  ["localName"]=>
-  uninitialized(string)
-  ["name"]=>
-  uninitialized(string)
-  ["namespaceURI"]=>
-  uninitialized(string)
-  ["nodeType"]=>
-  uninitialized(int)
-  ["prefix"]=>
-  uninitialized(string)
-  ["value"]=>
-  uninitialized(string)
-  ["xmlLang"]=>
-  uninitialized(string)
+object(CustomXMLReader)#%d (14) {
   ["myField"]=>
   int(1234)
+  ["attributeCount"]=>
+  int(0)
+  ["baseURI"]=>
+  string(0) ""
+  ["depth"]=>
+  int(0)
+  ["hasAttributes"]=>
+  bool(false)
+  ["hasValue"]=>
+  bool(false)
+  ["isDefault"]=>
+  bool(false)
+  ["localName"]=>
+  string(0) ""
+  ["name"]=>
+  string(0) ""
+  ["namespaceURI"]=>
+  string(0) ""
+  ["nodeType"]=>
+  int(0)
+  ["prefix"]=>
+  string(0) ""
+  ["value"]=>
+  string(0) ""
+  ["xmlLang"]=>
+  string(0) ""
 }
+Failed to read property because no XML data has been read yet
 bool(true)
 int(1)
