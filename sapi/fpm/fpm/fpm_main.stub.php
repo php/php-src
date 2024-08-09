@@ -2,7 +2,7 @@
 
 /** @generate-class-entries */
 
-function fastcgi_finish_request(): bool {}
+function fastcgi_finish_request(bool $close_conn = true): bool {}
 
 function apache_request_headers(): array {}
 
