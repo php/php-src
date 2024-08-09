@@ -332,7 +332,7 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 	return ret;
 }
 
-/* These functions have noinline variants */
+/* These functions have noinline variants {{{ */
 static zend_always_inline void zend_string_free(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
