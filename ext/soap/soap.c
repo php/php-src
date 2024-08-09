@@ -1206,6 +1206,11 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
+			php_error_docref(NULL, E_DEPRECATED, "Enabling all functions via SOAP_FUNCTIONS_ALL is deprecated since 8.4, due to possible security concerns."
+				" If all PHP functions should be enabled, the flattened return value of get_defined_functions() can be used");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			if (service->soap_functions.ft != NULL) {
 				zend_hash_destroy(service->soap_functions.ft);
 				efree(service->soap_functions.ft);

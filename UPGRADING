@@ -473,6 +473,14 @@ PHP 8.4 UPGRADE NOTES
     hexadecimal session IDs and stop changing these two INI settings.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
+- SOAP:
+  . Passing an int to SoapServer::addFunction() is now deprecated.
+    If all PHP functions need to be provided flatten the array returned by
+    get_defined_functions().
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_soap_functions_all_constant_and_passing_it_to_soapserveraddfunction
+  . The SOAP_FUNCTIONS_ALL constant is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_soap_functions_all_constant_and_passing_it_to_soapserveraddfunction
+
 - SPL:
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
