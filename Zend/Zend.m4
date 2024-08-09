@@ -177,9 +177,6 @@ AH_TEMPLATE([ZEND_DEBUG],
 AS_VAR_IF([ZEND_DEBUG], [yes], [
   AC_DEFINE([ZEND_DEBUG], [1])
   echo " $CFLAGS" | grep ' -g' >/dev/null || CFLAGS="$CFLAGS -g"
-  if test "$CFLAGS" = "-g -O2"; then
-    CFLAGS=-g
-  fi
 ], [AC_DEFINE([ZEND_DEBUG], [0])])
 
 AS_VAR_IF([GCC], [yes],
