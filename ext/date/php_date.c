@@ -1578,11 +1578,15 @@ static zend_result date_period_it_has_more(zend_object_iterator *iter)
 	php_period_obj *object   = Z_PHPPERIOD_P(&iterator->intern.data);
 
 	if (object->end) {
-		if (object->include_end_date) {
-			return object->current->sse <= object->end->sse ? SUCCESS : FAILURE;
-		} else {
-			return object->current->sse < object->end->sse ? SUCCESS : FAILURE;
+		if (object->current->sse == object->end->sse) {
+			if (object->include_end_date) {
+				return object->current->us <= object->end->us ? SUCCESS : FAILURE;
+			} else {
+				return object->current->us < object->end->us ? SUCCESS : FAILURE;
+			}
 		}
+
+		return object->current->sse < object->end->sse ? SUCCESS : FAILURE;
 	} else {
 		return (iterator->current_index < object->recurrences) ? SUCCESS : FAILURE;
 	}
