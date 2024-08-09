@@ -15,8 +15,5 @@ var_dump(imageloadfont(__DIR__ . "/font.font"));
 @unlink(__DIR__ . "/font.font");
 ?>
 --EXPECTF--
-Warning: imageloadfont(): %croduct of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
- in %s on line %d
-
-Warning: imageloadfont(): Error reading font, invalid font header in %s on line %d
+Warning: imageloadfont(): Error reading font in %s on line %d
 bool(false)

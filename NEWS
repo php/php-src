@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Added SSE2 and SHA-NI implementation of SHA-256. (timwolla, Colin Percival,
     Graham Percival)
 
+- GD:
+  . Fixed imageloadfont() when loading font files for the opposite endianness,
+    including those with non-zero offset field. (Giovanni Giacobbi)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
