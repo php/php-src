@@ -33,6 +33,10 @@ PHP 8.4 UPGRADE NOTES
     now 13 bytes longer. Total length is platform-dependent.
   . Encountering recursion during comparison now results in a Error exception,
     rather than a fatal error.
+  . Indirect modification of readonly properties within __clone() is no longer
+    allowed, e.g. $ref = &$this->readonly. This was already forbidden for
+    readonly initialization, and was an oversight in the "readonly
+    reinitialization during cloning" implementation.
 
 - DOM:
   . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
