@@ -309,9 +309,9 @@ static bool inifile_truncate(inifile *dba, size_t size)
 /* {{{ inifile_find_group
  * if found pos_grp_start points to "[group_name]"
  */
-static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
+static bool inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
 {
-	int ret = FAILURE;
+	bool found_group = false;
 
 	php_stream_flush(dba->fp);
 	php_stream_seek(dba->fp, 0, SEEK_SET);
@@ -323,7 +323,7 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 
 		while (inifile_read(dba, &ln)) {
 			if (inifile_key_cmp(&ln.key, key) != DIFFERENT) {
-				ret = SUCCESS;
+				found_group = true;
 				break;
 			}
 			*pos_grp_start = php_stream_tell(dba->fp);
@@ -331,12 +331,12 @@ static int inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp
 		inifile_line_free(&ln);
 	} else {
 		*pos_grp_start = 0;
-		ret = SUCCESS;
+		found_group = true;
 	}
-	if (ret == FAILURE) {
+	if (!found_group) {
 		*pos_grp_start = php_stream_tell(dba->fp);
 	}
-	return ret;
+	return found_group;
 }
 /* }}} */
 
