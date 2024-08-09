@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 97775c6aba92e347f93a2d38cd41c4769eed738f */
+ * Stub hash: 31397bc497dfc1e3c1904d5c816eb601b378257e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -867,7 +867,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_init, arginfo_mysqli_init)
 	ZEND_FE(mysqli_info, arginfo_mysqli_info)
 	ZEND_FE(mysqli_insert_id, arginfo_mysqli_insert_id)
-	ZEND_FE(mysqli_kill, arginfo_mysqli_kill)
+	ZEND_RAW_FENTRY("mysqli_kill", zif_mysqli_kill, arginfo_mysqli_kill, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mysqli_more_results, arginfo_mysqli_more_results)
 	ZEND_FE(mysqli_multi_query, arginfo_mysqli_multi_query)
 	ZEND_FE(mysqli_next_result, arginfo_mysqli_next_result)
@@ -951,7 +951,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("get_server_info", zif_mysqli_get_server_info, arginfo_class_mysqli_get_server_info, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("get_warnings", zif_mysqli_get_warnings, arginfo_class_mysqli_get_warnings, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(mysqli, init, arginfo_class_mysqli_init, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
-	ZEND_RAW_FENTRY("kill", zif_mysqli_kill, arginfo_class_mysqli_kill, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("kill", zif_mysqli_kill, arginfo_class_mysqli_kill, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_RAW_FENTRY("multi_query", zif_mysqli_multi_query, arginfo_class_mysqli_multi_query, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("more_results", zif_mysqli_more_results, arginfo_class_mysqli_more_results, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("next_result", zif_mysqli_next_result, arginfo_class_mysqli_next_result, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1171,6 +1171,18 @@ static void register_mysqli_symbols(int module_number)
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
+	zend_attribute *attribute_Deprecated_func_mysqli_kill_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_kill", sizeof("mysqli_kill") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_mysqli_kill_0_arg0;
+	zend_string *attribute_Deprecated_func_mysqli_kill_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_kill_0_arg0, attribute_Deprecated_func_mysqli_kill_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mysqli_kill_0->args[0].value, &attribute_Deprecated_func_mysqli_kill_0_arg0);
+	attribute_Deprecated_func_mysqli_kill_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_mysqli_kill_0_arg1;
+	zend_string *attribute_Deprecated_func_mysqli_kill_0_arg1_str = zend_string_init("use KILL CONNECTION/QUERY SQL statement instead", strlen("use KILL CONNECTION/QUERY SQL statement instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_kill_0_arg1, attribute_Deprecated_func_mysqli_kill_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mysqli_kill_0->args[1].value, &attribute_Deprecated_func_mysqli_kill_0_arg1);
+	attribute_Deprecated_func_mysqli_kill_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
 	zend_attribute *attribute_Deprecated_func_mysqli_ping_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_ping", sizeof("mysqli_ping") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
 	zval attribute_Deprecated_func_mysqli_ping_0_arg0;
 	zend_string *attribute_Deprecated_func_mysqli_ping_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
@@ -1378,6 +1390,18 @@ static zend_class_entry *register_class_mysqli(void)
 	ZVAL_STR(&attribute_Deprecated_func_init_0_arg1, attribute_Deprecated_func_init_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_init_0->args[1].value, &attribute_Deprecated_func_init_0_arg1);
 	attribute_Deprecated_func_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
+
+	zend_attribute *attribute_Deprecated_func_kill_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "kill", sizeof("kill") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_kill_0_arg0;
+	zend_string *attribute_Deprecated_func_kill_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_kill_0_arg0, attribute_Deprecated_func_kill_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_kill_0->args[0].value, &attribute_Deprecated_func_kill_0_arg0);
+	attribute_Deprecated_func_kill_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_kill_0_arg1;
+	zend_string *attribute_Deprecated_func_kill_0_arg1_str = zend_string_init("use KILL CONNECTION/QUERY SQL statement instead", strlen("use KILL CONNECTION/QUERY SQL statement instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_kill_0_arg1, attribute_Deprecated_func_kill_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_kill_0->args[1].value, &attribute_Deprecated_func_kill_0_arg1);
+	attribute_Deprecated_func_kill_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_attribute *attribute_Deprecated_func_ping_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "ping", sizeof("ping") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
 	zval attribute_Deprecated_func_ping_0_arg0;
