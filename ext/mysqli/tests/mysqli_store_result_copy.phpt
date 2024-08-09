@@ -18,7 +18,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[004] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
@@ -48,7 +48,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[009] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
@@ -86,7 +86,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "SELECT CONCAT(id, id) AS _c, label FROM test ORDER BY id DESC LIMIT 2"))
         printf("[012] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[013] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
@@ -113,7 +113,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id DESC LIMIT 2"))
         printf("[015] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[016] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
@@ -124,7 +124,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id DESC LIMIT 2"))
         printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[018] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
@@ -137,7 +137,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 2"))
         printf("[020] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[021] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 
@@ -154,7 +154,7 @@ mysqlnd.fetch_data_copy=0
     if (!$res = mysqli_real_query($link, "INSERT INTO test(id, label) VALUES (100, 'z')"))
         printf("[023] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA);
+    mysqli_store_result($link);
 
     if (mysqli_get_server_version($link) > 50000) {
         // let's try to play with stored procedures
@@ -163,7 +163,7 @@ mysqlnd.fetch_data_copy=0
 END;')) {
             mysqli_multi_query($link, "CALL p(@version)");
             do {
-                if ($res = $link->store_result(MYSQLI_STORE_RESULT_COPY_DATA)) {
+                if ($res = $link->store_result()) {
                     printf("---\n");
                     var_dump($res->fetch_all());
                     $res->free();
@@ -174,7 +174,7 @@ END;')) {
                 }
             } while ($link->more_results() && $link->next_result());
             mysqli_real_query($link, 'SELECT @version AS p_version');
-            $res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA);
+            $res = mysqli_store_result($link);
 
             $tmp = mysqli_fetch_assoc($res);
             if (!is_array($tmp) || empty($tmp) || !isset($tmp['p_version']) || ('' == $tmp['p_version'])) {

@@ -1957,6 +1957,14 @@ PHP_FUNCTION(mysqli_store_result)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_link, mysqli_link_class_entry, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	if (hasThis() && ZEND_NUM_ARGS() == 1 || ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Passing the $mode parameter is deprecated since 8.4, as it has been ignored since 8.1");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	result = mysql_store_result(mysql->mysql);
 	if (!result) {
