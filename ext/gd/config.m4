@@ -148,10 +148,10 @@ dnl
 dnl Build and run a program to determine if GD has support for the given
 dnl format. The first argument is the proper-noun-capitalized name of the
 dnl format -- basically the word Foo in gdImageCreateFromFoo -- such as
-dnl Png. If support for format Foo exists, the "action-if-found" is executed.
-dnl The reason for this charade is that gd defines "junk" versions of each
+dnl Png. If support for "format" Foo exists, the "action-if-found" is executed.
+dnl The reason for this charade is that gd defines no-op versions of each
 dnl gdImageCreateFromFoo function even when it does not support the Foo format.
-dnl Those junk functions display a warning but eventually return normally,
+dnl Those no-op functions display a warning but eventually return normally,
 dnl making a simple link or run test insufficient.
 dnl
 AC_DEFUN([PHP_GD_CHECK_FORMAT],
