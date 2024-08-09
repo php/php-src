@@ -14435,7 +14435,13 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	} else {
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
-		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set || (prop_info->flags & ZEND_ACC_READONLY)) {
+		/* With the exception of __clone(), readonly assignment always happens on IS_UNDEF, doding
+		 * the fast path. Thus, the fast path is not useful. */
+		if (prop_info->flags & ZEND_ACC_READONLY) {
+			ZEND_ASSERT(slow_inputs == IR_UNUSED);
+			goto slow_path;
+		}
+		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set) {
 			// Undefined property with magic __get()/__set()
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
@@ -14527,6 +14533,8 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		ir_ref arg3, arg5;
 
 		ir_MERGE_list(slow_inputs);
+
+slow_path:
 		jit_SET_EX_OPLINE(jit, opline);
 
 		if (Z_MODE(val_addr) == IS_REG) {
