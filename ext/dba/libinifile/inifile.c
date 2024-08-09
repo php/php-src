@@ -444,6 +444,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	size_t pos_grp_start = 0, pos_grp_next;
 	inifile *ini_tmp = NULL;
 	php_stream *fp_tmp = NULL;
+	int ret = FAILURE;
 
 	/* 1) Search group start
 	 * 2) Search next group
@@ -490,8 +491,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 		}
 	}
 
-	int ret = SUCCESS;
-	bool is_ok = true;
+	ret = SUCCESS;
 	if (key->name && strlen(key->name)) {
 		/* 6 */
 		if (!is_append && ini_tmp) {
