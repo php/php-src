@@ -55,10 +55,11 @@ void zend_startup_system_id(void)
 	zend_system_id[0] = '\0';
 }
 
-#define ZEND_HOOK_AST_PROCESS      (1 << 0)
-#define ZEND_HOOK_COMPILE_FILE     (1 << 1)
-#define ZEND_HOOK_EXECUTE_EX       (1 << 2)
-#define ZEND_HOOK_EXECUTE_INTERNAL (1 << 3)
+#define ZEND_HOOK_AST_PROCESS        (1 << 0)
+#define ZEND_HOOK_COMPILE_FILE       (1 << 1)
+#define ZEND_HOOK_EXECUTE_EX         (1 << 2)
+#define ZEND_HOOK_EXECUTE_INTERNAL   (1 << 3)
+#define ZEND_HOOK_INTERRUPT_FUNCTION (1 << 4)
 
 void zend_finalize_system_id(void)
 {
@@ -76,6 +77,9 @@ void zend_finalize_system_id(void)
 	}
 	if (zend_execute_internal) {
 		hooks |= ZEND_HOOK_EXECUTE_INTERNAL;
+	}
+	if (zend_interrupt_function) {
+		hooks |= ZEND_HOOK_INTERRUPT_FUNCTION;
 	}
 	PHP_MD5Update(&context, &hooks, sizeof hooks);
 
