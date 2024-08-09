@@ -7,6 +7,7 @@ class SplFixedArray implements IteratorAggregate, ArrayAccess, Countable, JsonSe
     public function __construct(int $size = 0) {}
 
     /** @tentative-return-type */
+    #[\Deprecated(since: '8.4', message: 'this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()')]
     public function __wakeup(): void {}
 
     public function __serialize(): array {}

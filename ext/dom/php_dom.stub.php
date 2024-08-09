@@ -147,6 +147,7 @@ namespace
 
     /**
      * @var int
+     * @deprecated is no longer used since 8.4
      * @cvalue PHP_ERR
      */
     const DOM_PHP_ERR = UNKNOWN;
@@ -453,9 +454,6 @@ namespace
 
     class DOMImplementation
     {
-        /** @tentative-return-type */
-        public function getFeature(string $feature, string $version): never {}
-
         /** @tentative-return-type */
         public function hasFeature(string $feature, string $version): bool {}
 

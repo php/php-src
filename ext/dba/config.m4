@@ -151,8 +151,10 @@ if test "$PHP_QDBM" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     for LIB in qdbm; do
       PHP_CHECK_LIBRARY([$LIB], [dpopen], [
-        AC_DEFINE_UNQUOTED([QDBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
-        AC_DEFINE([DBA_QDBM], [1], [ ])
+        AC_DEFINE_UNQUOTED([QDBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The QDBM handler header file.])
+        AC_DEFINE([DBA_QDBM], [1],
+          [Define to 1 if the dba extension uses the QDBM handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -183,8 +185,10 @@ if test "$PHP_GDBM" != "no"; then
 
   if test -n "$THIS_INCLUDE"; then
     PHP_CHECK_LIBRARY([gdbm], [gdbm_open], [
-      AC_DEFINE_UNQUOTED([GDBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
-      AC_DEFINE([DBA_GDBM], [1], [ ])
+      AC_DEFINE_UNQUOTED([GDBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+        [The GDBM handler header file.])
+      AC_DEFINE([DBA_GDBM], [1],
+        [Define to 1 if the dba extension uses the GDBM handler.])
       THIS_LIBS=gdbm
     ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
   fi
@@ -213,8 +217,10 @@ if test "$PHP_NDBM" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     for LIB in ndbm db1 c; do
       PHP_CHECK_LIBRARY([$LIB], [dbm_open], [
-        AC_DEFINE_UNQUOTED([NDBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
-        AC_DEFINE([DBA_NDBM], [1], [ ])
+        AC_DEFINE_UNQUOTED([NDBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The NDBM handler header file.])
+        AC_DEFINE([DBA_NDBM], [1],
+          [Define to 1 if the dba extension uses the NDBM handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -244,8 +250,10 @@ if test "$PHP_TCADB" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     for LIB in tokyocabinet; do
       PHP_CHECK_LIBRARY([$LIB], [tcadbopen], [
-        AC_DEFINE_UNQUOTED([TCADB_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
-        AC_DEFINE([DBA_TCADB], [1], [ ])
+        AC_DEFINE_UNQUOTED([TCADB_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The Tokyo Cabinet handler header file.])
+        AC_DEFINE([DBA_TCADB], [1],
+          [Define to 1 if the dba extension uses the Tokyo Cabinet handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -275,8 +283,10 @@ if test "$PHP_LMDB" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     for LIB in lmdb; do
       PHP_CHECK_LIBRARY([$LIB], [mdb_env_open], [
-        AC_DEFINE_UNQUOTED([LMDB_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
-        AC_DEFINE([DBA_LMDB], [1], [ ])
+        AC_DEFINE_UNQUOTED([LMDB_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The LMDB handler header file.])
+        AC_DEFINE([DBA_LMDB], [1],
+          [Define to 1 if the dba extension uses the LMDB handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -355,9 +365,11 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
   fi
   if test -n "$THIS_LIBS"; then
     AC_DEFINE_UNQUOTED([DBA_DB$1], [1],
-      [Define to 1 if Berkeley DB is compatible with version $1.])
+      [Define to 1 if the dba extension uses the Berkeley DB version $1 (DB$1)
+      handler.])
     if test -n "$THIS_INCLUDE"; then
-      AC_DEFINE_UNQUOTED(DB$1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+      AC_DEFINE_UNQUOTED([DB$1_INCLUDE_FILE], ["$THIS_INCLUDE"],
+        [The DB$1 handler header file.])
     fi
   else
     AC_MSG_ERROR([DBA: Could not find necessary library.])
@@ -517,7 +529,9 @@ if test "$PHP_DB1" != "no"; then
     THIS_PREFIX=$DB2_PREFIX
   fi
   if test "$HAVE_DB4" = "1" || test "$HAVE_DB3" = "1" || test "$HAVE_DB2" = "1"; then
-    AC_DEFINE_UNQUOTED(DB1_VERSION, "Berkeley DB 1.85 emulation in DB$THIS_VERSION", [ ])
+    AC_DEFINE_UNQUOTED([DB1_VERSION],
+      ["Berkeley DB 1.85 emulation in DB$THIS_VERSION"],
+      [The DB1 handler version information.])
     for i in db$THIS_VERSION/db_185.h include/db$THIS_VERSION/db_185.h include/db/db_185.h; do
       if test -f "$THIS_PREFIX/$i"; then
         THIS_INCLUDE=$THIS_PREFIX/$i
@@ -525,7 +539,8 @@ if test "$PHP_DB1" != "no"; then
       fi
     done
   else
-    AC_DEFINE_UNQUOTED(DB1_VERSION, "Unknown DB1", [ ])
+    AC_DEFINE([DB1_VERSION], ["Unknown DB1"],
+      [The DB1 handler version information.])
     for i in $PHP_DB1 /usr/local /usr; do
       if test -f "$i/db1/db.h"; then
         THIS_PREFIX=$i
@@ -553,9 +568,11 @@ if test "$PHP_DB1" != "no"; then
       ]],[[
         DB * dbp = dbopen("", 0, 0, DB_HASH, 0);
       ]])],[
-        AC_DEFINE_UNQUOTED(DB1_INCLUDE_FILE, "$THIS_INCLUDE", [ ])
+        AC_DEFINE_UNQUOTED([DB1_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The DB1 handler header file.])
         AC_DEFINE([DBA_DB1], [1],
-          [Define to 1 if Berkeley DB is compatible with version 1.])
+          [Define to 1 if the dba extension uses the Berkeley DB version 1 (DB1)
+          handler.])
         THIS_RESULT=yes
       ],[
         THIS_RESULT=no
@@ -590,15 +607,19 @@ if test "$PHP_DBM" != "no"; then
     for LIB in dbm c gdbm; do
       PHP_CHECK_LIBRARY([$LIB], [dbminit], [
         AC_MSG_CHECKING([for DBM using GDBM])
-        AC_DEFINE_UNQUOTED([DBM_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
+        AC_DEFINE_UNQUOTED([DBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The DBM handler include file.])
         if test "$LIB" = "gdbm"; then
-          AC_DEFINE_UNQUOTED([DBM_VERSION], ["GDBM"], [ ])
+          AC_DEFINE([DBM_VERSION], ["GDBM"],
+            [The DBM handler version information.])
           AC_MSG_RESULT([yes])
         else
-          AC_DEFINE_UNQUOTED([DBM_VERSION], ["DBM"], [ ])
+          AC_DEFINE([DBM_VERSION], ["DBM"],
+            [The DBM handler version information.])
           AC_MSG_RESULT([no])
         fi
-        AC_DEFINE([DBA_DBM], [1], [ ])
+        AC_DEFINE([DBA_DBM], [1],
+          [Define to 1 if the dba extension uses the DBM handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -641,8 +662,10 @@ PHP_ARG_ENABLE([flatfile],,
 
 dnl CDB
 if test "$PHP_CDB" = "yes"; then
-  AC_DEFINE(DBA_CDB_BUILTIN, 1, [ ])
-  AC_DEFINE(DBA_CDB, 1, [ ])
+  AC_DEFINE([DBA_CDB_BUILTIN], [1],
+    [Define to 1 if the dba extension uses the PHP built-in cdb handler.])
+  AC_DEFINE([DBA_CDB], [1],
+    [Define to 1 if the dba extension uses the cdb handler.])
   cdb_sources="libcdb/cdb.c libcdb/cdb_make.c libcdb/uint32.c"
   THIS_RESULT="builtin"
 elif test "$PHP_CDB" != "no"; then
@@ -658,8 +681,10 @@ elif test "$PHP_CDB" != "no"; then
   if test -n "$THIS_INCLUDE"; then
     for LIB in cdb c; do
       PHP_CHECK_LIBRARY([$LIB], [cdb_read], [
-        AC_DEFINE_UNQUOTED([CDB_INCLUDE_FILE], ["$THIS_INCLUDE"], [ ])
-        AC_DEFINE([DBA_CDB], [1], [ ])
+        AC_DEFINE_UNQUOTED([CDB_INCLUDE_FILE], ["$THIS_INCLUDE"],
+          [The cdb handler header file.])
+        AC_DEFINE([DBA_CDB], [1],
+          [Define to 1 if the dba extension uses the cdb handler.])
         THIS_LIBS=$LIB
       ], [], [-L$THIS_PREFIX/$PHP_LIBDIR])
       if test -n "$THIS_LIBS"; then
@@ -676,7 +701,8 @@ PHP_DBA_STD_RESULT(cdb)
 
 dnl INIFILE
 if test "$PHP_INIFILE" != "no"; then
-  AC_DEFINE(DBA_INIFILE, 1, [ ])
+  AC_DEFINE([DBA_INIFILE], [1],
+    [Define to 1 if the dba extension uses the bundled inifile handler.])
   ini_sources="libinifile/inifile.c"
   THIS_RESULT="builtin"
 fi
@@ -684,7 +710,8 @@ PHP_DBA_STD_RESULT(inifile, [INI File])
 
 dnl FLATFILE
 if test "$PHP_FLATFILE" != "no"; then
-  AC_DEFINE(DBA_FLATFILE, 1, [ ])
+  AC_DEFINE([DBA_FLATFILE], [1],
+    [Define to 1 if the dba extension uses the bundled flatfile handler.])
   flat_sources="libflatfile/flatfile.c"
   THIS_RESULT="builtin"
 fi

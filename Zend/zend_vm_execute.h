@@ -41659,7 +41659,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_INIT_STATIC_OR_JMP_SPEC_C
 	ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	value = (zval*)((char*)ht->arData + opline->extended_value);
-	if (Z_TYPE_EXTRA_P(value) & IS_STATIC_VAR_UNINITIALIZED) {
+	if (Z_TYPE_P(value) == IS_NULL) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();

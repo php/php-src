@@ -30,9 +30,9 @@ if test "$PHP_OPCACHE" != "no"; then
   dnl Always build as shared extension
   ext_shared=yes
 
-  if test "$PHP_HUGE_CODE_PAGES" = "yes"; then
-    AC_DEFINE(HAVE_HUGE_CODE_PAGES, 1, [Define to enable copying PHP CODE pages into HUGE PAGES (experimental)])
-  fi
+  AS_VAR_IF([PHP_HUGE_CODE_PAGES], [yes],
+    [AC_DEFINE([HAVE_HUGE_CODE_PAGES], [1],
+      [Define to 1 to enable copying PHP CODE pages into HUGE PAGES.])])
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then
     case $host_cpu in
@@ -50,7 +50,7 @@ if test "$PHP_OPCACHE" != "no"; then
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes" ; then
-    AC_DEFINE(HAVE_JIT, 1, [Define to enable JIT])
+    AC_DEFINE([HAVE_JIT], [1], [Define to 1 to enable JIT.])
     ZEND_JIT_SRC=m4_normalize(["
       jit/ir/ir_cfg.c
       jit/ir/ir_check.c
@@ -325,7 +325,7 @@ int main(void) {
       AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
         [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
       AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
-        [Define if you have POSIX mmap() SHM support])
+        [Define to 1 if you have the POSIX mmap() SHM support.])
     fi
   ])
   LIBS="$LIBS_save"
@@ -353,7 +353,7 @@ int main(void) {
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
   if test "$php_cv_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$php_cv_shm_mmap_anon" != "yes"; then
-    AC_MSG_ERROR([No supported shared memory caching support was found when configuring opcache. Check config.log for any errors or missing dependencies.])
+    AC_MSG_FAILURE([No supported shared memory caching support was found when configuring opcache.])
   fi
 
   if test "$PHP_OPCACHE_JIT" = "yes"; then

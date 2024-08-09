@@ -33,6 +33,10 @@ PHP 8.4 UPGRADE NOTES
     now 13 bytes longer. Total length is platform-dependent.
   . Encountering recursion during comparison now results in a Error exception,
     rather than a fatal error.
+  . Indirect modification of readonly properties within __clone() is no longer
+    allowed, e.g. $ref = &$this->readonly. This was already forbidden for
+    readonly initialization, and was an oversight in the "readonly
+    reinitialization during cloning" implementation.
 
 - DOM:
   . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
@@ -189,7 +193,7 @@ PHP 8.4 UPGRADE NOTES
     This means that xml_set_object() must now always be called prior to setting
     method names as callables.
     Passing an empty string to disable the handler is still allowed,
-    but not recommended.
+    but deprecated.
 
 - XMLReader:
   . Passing an invalid character encoding to XMLReader::open() or
@@ -397,6 +401,8 @@ PHP 8.4 UPGRADE NOTES
 - Core:
   . Implicitly nullable parameter types are now deprecated.
     RFC: https://wiki.php.net/rfc/deprecate-implicitly-nullable-types
+  . Passing E_USER_ERROR to trigger_error() is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_e_user_error_to_trigger_error
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.
@@ -404,6 +410,22 @@ PHP 8.4 UPGRADE NOTES
 - Date:
   . Calling DatePeriod::__construct(string $isostr, int $options = 0) is
     deprecated. Use DatePeriod::createFromISO8601String() instead.
+  . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and
+    SUNFUNCS_RET_DOUBLE are now deprecated, following the deprecation of
+    the associated date_sunset() and date_sunrise() functions in PHP 8.1.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
+- DBA:
+  . Passing null or false to dba_key_split() is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_null_and_false_to_dba_key_split
+
+- DOM:
+  . Deprecated DOM_PHP_ERR constant.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_dom_php_err_constant
+
+- Hash:
+  . Deprecated passing incorrect data types for options to ext/hash functions.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
 - Intl:
   . Calling intlcal_set() as well as calling IntlCalendar::set() with
@@ -434,6 +456,11 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
+- Random:
+  . lcg_value() is deprecated, as the function is broken in multiple ways.
+    Use \Random\Randomizer::getFloat() instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
 - Reflection:
   . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
     Use ReflectionMethod::createFromMethodName() instead.
@@ -441,11 +468,28 @@ PHP 8.4 UPGRADE NOTES
 - Session:
   . Calling session_set_save_handler() with more than 2 arguments is
     deprecated. Use the 2-parameter signature instead.
+  . Changing the INI settings session.sid_length and session.sid_bits_per_character
+    is deprecated. Update the session storage backend to accept 32 character
+    hexadecimal session IDs and stop changing these two INI settings.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
+- SPL:
+  . The SplFixedArray::__wakeup() method has been deprecated as it implements
+    __serialize() and __unserialize() which need to be overwritten instead.
 
 - Standard:
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
   . Raising zero to the power of negative number is deprecated.
+  . Unserializing strings using the uppercase 'S' tag is deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+
+- XML:
+  . The xml_set_object() function has been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#xml_set_object_and_xml_set_handler_with_string_method_names
+  . Passing non-callable strings to the xml_set_*_handler() functions is now
+    deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#xml_set_object_and_xml_set_handler_with_string_method_names
 
 ========================================
 5. Changed Functions
@@ -742,6 +786,10 @@ PHP 8.4 UPGRADE NOTES
 - Date:
   . The class constants are typed now.
 
+- DOM:
+  . Removed DOMImplementation::getFeature().
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#remove_domimplementationgetfeature_feature_version
+
 - Intl:
   . The class constants are typed now.
   . The behaviour of Intl class has been normalized to always throw Error
@@ -919,6 +967,10 @@ PHP 8.4 UPGRADE NOTES
 - FTP:
   . Improved the performance of FTP uploads up to a factor of 10x for large
     uploads.
+
+- Hash:
+  . Added SSE2 and SHA-NI implementations of SHA-256. This improves the performance
+    on supported CPUs by ~1.3x (SSE2) and 3x - 5x (SHA-NI).
 
 - MBString:
   . The performance of strspn() and strcspn() is greatly improved.

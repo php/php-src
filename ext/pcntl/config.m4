@@ -6,7 +6,7 @@ PHP_ARG_ENABLE([pcntl],
 if test "$PHP_PCNTL" != "no"; then
   for function in fork sigaction waitpid; do
     AC_CHECK_FUNC([$function],,
-      [AC_MSG_ERROR([ext/pcntl: required function $function() not found.])])
+      [AC_MSG_FAILURE([ext/pcntl: required function $function() not found.])])
   done
 
   AC_CHECK_FUNCS(m4_normalize([
@@ -49,7 +49,8 @@ int main(void) {
   [php_cv_func_sched_getcpu=no],
   [php_cv_func_sched_getcpu=no])])
   AS_VAR_IF([php_cv_func_sched_getcpu], [yes],
-    [AC_DEFINE([HAVE_SCHED_GETCPU], [1], [Whether sched_getcpu is properly supported])])
+    [AC_DEFINE([HAVE_SCHED_GETCPU], [1],
+      [Define to 1 if the 'sched_getcpu' function is properly supported.])])
 
   AC_CHECK_TYPE([siginfo_t],[PCNTL_CFLAGS="-DHAVE_STRUCT_SIGINFO_T"],,[#include <signal.h>])
 

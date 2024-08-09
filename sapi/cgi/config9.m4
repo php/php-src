@@ -14,7 +14,7 @@ if test "$PHP_CGI" != "no"; then
       SunOS\ 5.*)
         AC_MSG_RESULT([yes])
         AC_DEFINE([USE_LOCKING], [1],
-          [Define if cross-process locking is required by accept()])
+          [Define to 1 if cross-process locking is required by 'accept()'.])
       ;;
       *)
         AC_MSG_RESULT([no])
@@ -58,5 +58,5 @@ if test "$PHP_CGI" != "no"; then
     PHP_SUBST([SAPI_CGI_PATH])
     PHP_SUBST([BUILD_CGI])
 
-    PHP_OUTPUT([sapi/cgi/php-cgi.1])
+    AC_CONFIG_FILES([sapi/cgi/php-cgi.1])
 fi

@@ -132,10 +132,10 @@ extension_module_ptrs = "";
 	var wmiservice = GetObject("winmgmts:{impersonationLevel=impersonate}!\\\\.\\root\\cimv2");
 	var oss = wmiservice.ExecQuery("Select * from Win32_OperatingSystem");
 	var os = oss.ItemIndex(0);
-	AC_DEFINE("PHP_BUILD_SYSTEM", os.Caption + " [" + os.Version + "]", "Windows build system version");
+	AC_DEFINE("PHP_BUILD_SYSTEM", os.Caption + " [" + os.Version + "]", "The system that PHP was built on.");
 	var build_provider = WshShell.Environment("Process").Item("PHP_BUILD_PROVIDER");
 	if (build_provider) {
-		AC_DEFINE("PHP_BUILD_PROVIDER", build_provider);
+		AC_DEFINE("PHP_BUILD_PROVIDER", build_provider, "The PHP build provider information.");
 	}
 }());
 
@@ -2945,25 +2945,25 @@ function toolset_setup_compiler()
 
 			WARNING("Using unknown MSVC version " + tmp);
 
-			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "The compiler used for the PHP build.");
 			DEFINE("PHP_COMPILER_SHORT", tmp);
 			AC_DEFINE('PHP_COMPILER_ID', tmp, "Compiler compatibility ID");
 		} else {
-			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+			AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "The compiler used for the PHP build.");
 			DEFINE("PHP_COMPILER_SHORT", COMPILER_NAME_SHORT.toLowerCase());
 			AC_DEFINE('PHP_COMPILER_ID', COMPILER_NAME_SHORT.toUpperCase(), "Compiler compatibility ID");
 		}
 	} else if (CLANG_TOOLSET) {
 		CLANGVERS = COMPILER_NUMERIC_VERSION;
 
-		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "The compiler used for the PHP build.");
 		DEFINE("PHP_COMPILER_SHORT", "clang");
 		AC_DEFINE('PHP_COMPILER_ID', "clang"); /* XXX something better were to write here */
 
 	} else if (ICC_TOOLSET) {
 		INTELVERS = COMPILER_NUMERIC_VERSION;
 
-		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "Detected compiler version");
+		AC_DEFINE('PHP_BUILD_COMPILER', COMPILER_NAME_LONG, "The compiler used for the PHP build.");
 		DEFINE("PHP_COMPILER_SHORT", "icc");
 		AC_DEFINE('PHP_COMPILER_ID', "icc"); /* XXX something better were to write here */
 	}
@@ -3185,7 +3185,7 @@ function toolset_target_arch()
 function toolset_setup_arch()
 {
 	STDOUT.WriteLine("  Detected " + TARGET_ARCH + " compiler" + (TARGET_ARCH == HOST_ARCH ? "" : " (cross compile from " + HOST_ARCH + ")"));
-	AC_DEFINE('PHP_BUILD_ARCH', TARGET_ARCH, "Detected compiler architecture");
+	AC_DEFINE('PHP_BUILD_ARCH', TARGET_ARCH, "The build architecture.");
 	DEFINE("PHP_ARCHITECTURE", TARGET_ARCH);
 }
 
@@ -3311,6 +3311,10 @@ function toolset_setup_common_cflags()
 
 		if (VCVERS >= 1914) {
 			ADD_FLAG("CFLAGS", "/d2FuncCache1");
+		}
+
+		if (VCVERS >= 1930) {
+			ADD_FLAG("CFLAGS", "/Zc:preprocessor");
 		}
 
 		ADD_FLAG("CFLAGS", "/Zc:wchar_t");

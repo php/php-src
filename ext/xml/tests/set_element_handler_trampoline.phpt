@@ -59,7 +59,7 @@ xml_parse($parser, $xml, true);
 xml_parser_free($parser);
 
 ?>
---EXPECT--
+--EXPECTF--
 Both handlers are trampolines:
 Trampoline for start_handler
 Tag: A
@@ -75,6 +75,10 @@ Trampoline for end_handler
 Tag: A
 
 Start handler is trampoline, end handler method string:
+
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
+
+Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Trampoline for start_handler
 Tag: A
 Trampoline for start_handler
@@ -86,6 +90,10 @@ Method end handler: C
 Method end handler: A
 
 End handler is trampoline, start handler method string:
+
+Deprecated: Function xml_set_object() is deprecated since 8.4, provide a proper method callable to xml_set_*_handler() functions in %s on line %d
+
+Deprecated: xml_set_element_handler(): Passing non-callable strings is deprecated since 8.4 in %s on line %d
 Method start handler: A
 Method start handler: B
 Trampoline for end_handler

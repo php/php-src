@@ -32,7 +32,7 @@ if (PHP_OPCACHE != "no") {
 			DEFINE("DASM_FLAGS", dasm_flags);
 			DEFINE("DASM_ARCH", "x86");
 
-			AC_DEFINE('HAVE_JIT', 1, 'Define to enable JIT');
+			AC_DEFINE('HAVE_JIT', 1, 'Define to 1 to enable JIT.');
 
 			ADD_FLAG("CFLAGS_OPCACHE", "/I \"ext\\opcache\\jit\\ir\" /D "+ir_target+" /D IR_PHP");
 			if (PHP_DEBUG == "yes") {

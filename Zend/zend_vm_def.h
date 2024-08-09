@@ -9116,7 +9116,7 @@ ZEND_VM_HANDLER(203, ZEND_BIND_INIT_STATIC_OR_JMP, CV, JMP_ADDR)
 	ZEND_ASSERT(GC_REFCOUNT(ht) == 1);
 
 	value = (zval*)((char*)ht->arData + opline->extended_value);
-	if (Z_TYPE_EXTRA_P(value) & IS_STATIC_VAR_UNINITIALIZED) {
+	if (Z_TYPE_P(value) == IS_NULL) {
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();

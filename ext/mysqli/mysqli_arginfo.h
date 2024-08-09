@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 69e41b1b2ec5f46193a9defb75e401ac69588d95 */
+ * Stub hash: c401ffa59fcdefc7e47cba88fd0a84495e39c6e7 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql, mysqli, 0)
@@ -925,7 +925,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mysqli_thread_safe, arginfo_mysqli_thread_safe)
 	ZEND_FE(mysqli_use_result, arginfo_mysqli_use_result)
 	ZEND_FE(mysqli_warning_count, arginfo_mysqli_warning_count)
-	ZEND_FE(mysqli_refresh, arginfo_mysqli_refresh)
+	ZEND_RAW_FENTRY("mysqli_refresh", zif_mysqli_refresh, arginfo_mysqli_refresh, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -977,7 +977,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_RAW_FENTRY("store_result", zif_mysqli_store_result, arginfo_class_mysqli_store_result, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("thread_safe", zif_mysqli_thread_safe, arginfo_class_mysqli_thread_safe, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("use_result", zif_mysqli_use_result, arginfo_class_mysqli_use_result, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_RAW_FENTRY("refresh", zif_mysqli_refresh, arginfo_class_mysqli_refresh, ZEND_ACC_PUBLIC, NULL, NULL)
+	ZEND_RAW_FENTRY("refresh", zif_mysqli_refresh, arginfo_class_mysqli_refresh, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE_END
 };
 
@@ -1172,6 +1172,18 @@ static void register_mysqli_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_connect", sizeof("mysqli_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_real_connect", sizeof("mysqli_real_connect") - 1), 3, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_mysqli_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mysqli_refresh", sizeof("mysqli_refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_mysqli_refresh_0_arg0;
+	zend_string *attribute_Deprecated_func_mysqli_refresh_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_refresh_0_arg0, attribute_Deprecated_func_mysqli_refresh_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mysqli_refresh_0->args[0].value, &attribute_Deprecated_func_mysqli_refresh_0_arg0);
+	attribute_Deprecated_func_mysqli_refresh_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_mysqli_refresh_0_arg1;
+	zend_string *attribute_Deprecated_func_mysqli_refresh_0_arg1_str = zend_string_init("use FLUSH SQL statement instead", strlen("use FLUSH SQL statement instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_mysqli_refresh_0_arg1, attribute_Deprecated_func_mysqli_refresh_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mysqli_refresh_0->args[1].value, &attribute_Deprecated_func_mysqli_refresh_0_arg1);
+	attribute_Deprecated_func_mysqli_refresh_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_mysqli_driver(void)
@@ -1356,6 +1368,18 @@ static zend_class_entry *register_class_mysqli(void)
 	attribute_Deprecated_func_init_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "real_connect", sizeof("real_connect") - 1), 2, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+
+	zend_attribute *attribute_Deprecated_func_refresh_0 = zend_add_function_attribute(zend_hash_str_find_ptr(&class_entry->function_table, "refresh", sizeof("refresh") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_refresh_0_arg0;
+	zend_string *attribute_Deprecated_func_refresh_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_refresh_0_arg0, attribute_Deprecated_func_refresh_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_refresh_0->args[0].value, &attribute_Deprecated_func_refresh_0_arg0);
+	attribute_Deprecated_func_refresh_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_refresh_0_arg1;
+	zend_string *attribute_Deprecated_func_refresh_0_arg1_str = zend_string_init("use FLUSH SQL statement instead", strlen("use FLUSH SQL statement instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_refresh_0_arg1, attribute_Deprecated_func_refresh_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_refresh_0->args[1].value, &attribute_Deprecated_func_refresh_0_arg1);
+	attribute_Deprecated_func_refresh_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
 	return class_entry;
 }

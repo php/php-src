@@ -2,10 +2,64 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta1
 
+- Core:
+  . Updated build system scripts config.guess to 2024-07-27 and config.sub to
+    2024-05-27. (Peter Kokot)
+  . Fixed bug GH-15240 (Infinite recursion in trait hook). (ilutov)
+  . Fixed bug GH-15140 (Missing variance check for abstract set with asymmetric
+    type). (ilutov)
+  . Fixed bug GH-15181 (Disabled output handler is flushed again). (cmb)
+  . Passing E_USER_ERROR to trigger_error() is now deprecated. (Girgias)
+
+- Date:
+  . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
+    are now deprecated. (Jorg Sowa)
+
+- DBA:
+  . Passing null or false to dba_key_split() is deprecated. (Grigias)
+
+- DOM:
+  . Fixed bug GH-15192 (Segmentation fault in dom extension
+    (html5_serializer)). (nielsdos)
+  . Deprecated DOM_PHP_ERR constant. (nielsdos)
+  . Removed DOMImplementation::getFeature(). (nielsdos)
+
+- Hash:
+  . Deprecated passing incorrect data types for options to ext/hash functions.
+    (nielsdos)
+  . Added SSE2 and SHA-NI implementation of SHA-256. (timwolla, Colin Percival,
+    Graham Percival)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
 
+- Random:
+  . lcg_value() is now deprecated. (timwolla)
+
+- Readline:
+  . Fixed bug #51558 (Shared readline build fails). (Peter Kokot)
+
+- Session:
+  . INI settings session.sid_length and session.sid_bits_per_character are now
+    deprecated. (timwolla)
+
+- SPL:
+  . The SplFixedArray::__wakeup() method has been deprecated as it implements
+    __serialize() and __unserialize() which need to be overwritten instead.
+    (TysonAndre)
+
+- Standard:
+  . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
+
+- Streams:
+  . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
+    being filtered). (Quentin Dreyer)
+
+- XML:
+  . The xml_set_object() function has been deprecated. (Girgias)
+  . Passing non-callable strings to the xml_set_*_handler() functions is now
+    deprecated. (Girgias)
 
 01 Aug 2024, PHP 8.4.0alpha4
 

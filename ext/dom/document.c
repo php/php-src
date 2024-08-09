@@ -1243,7 +1243,7 @@ PHP_METHOD(DOMDocument, __construct)
 	dom_object *intern;
 	char *encoding, *version = NULL;
 	size_t encoding_len = 0, version_len = 0;
-	int refcount;
+	unsigned int refcount;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
 		RETURN_THROWS();
@@ -1476,7 +1476,7 @@ static void php_dom_finish_loading_document(zval *this, zval *return_value, xmlD
 			php_libxml_decrement_node_ptr((php_libxml_node_object *) intern);
 			doc_prop = intern->document->doc_props;
 			intern->document->doc_props = NULL;
-			int refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
+			unsigned int refcount = php_libxml_decrement_doc_ref((php_libxml_node_object *)intern);
 			if (refcount != 0) {
 				docp->_private = NULL;
 			}

@@ -3364,8 +3364,6 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 						ZEND_ASSERT(type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET);
 						if (Z_TYPE_P(ptr) == IS_OBJECT) {
 							ZVAL_COPY(result, ptr);
-						} else if (Z_PROP_FLAG_P(ptr) & IS_PROP_REINITABLE) {
-							Z_PROP_FLAG_P(ptr) &= ~IS_PROP_REINITABLE;
 						} else {
 							zend_readonly_property_indirect_modification_error(prop_info);
 							ZVAL_ERROR(result);

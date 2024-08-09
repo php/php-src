@@ -4,7 +4,7 @@
 
 # shellcheck disable=SC2006,SC2268 # see below for rationale
 
-timestamp='2024-01-01'
+timestamp='2024-07-27'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -123,7 +123,7 @@ set_cc_for_build() {
     dummy=$tmp/dummy
     case ${CC_FOR_BUILD-},${HOST_CC-},${CC-} in
 	,,)    echo "int x;" > "$dummy.c"
-	       for driver in cc gcc c89 c99 ; do
+	       for driver in cc gcc c17 c99 c89 ; do
 		   if ($driver -c -o "$dummy.o" "$dummy.c") >/dev/null 2>&1 ; then
 		       CC_FOR_BUILD=$driver
 		       break
@@ -634,7 +634,8 @@ EOF
 		sed 's/^		//' << EOF > "$dummy.c"
 		#include <sys/systemcfg.h>
 
-		main()
+		int
+		main ()
 			{
 			if (!__power_pc())
 				exit(1);
@@ -718,7 +719,8 @@ EOF
 		#include <stdlib.h>
 		#include <unistd.h>
 
-		int main ()
+		int
+		main ()
 		{
 		#if defined(_SC_KERNEL_BITS)
 		    long bits = sysconf(_SC_KERNEL_BITS);
@@ -1621,6 +1623,7 @@ cat > "$dummy.c" <<EOF
 #endif
 #endif
 #endif
+int
 main ()
 {
 #if defined (sony)
