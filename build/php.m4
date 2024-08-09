@@ -1615,7 +1615,7 @@ dnl
 dnl Some vendors force mawk before gawk; mawk is broken so we don't like that.
 dnl
 AC_DEFUN([PHP_PROG_AWK], [
-  AC_CHECK_PROGS(AWK, gawk nawk awk mawk, bork, /usr/xpg4/bin/:$PATH)
+  AC_CHECK_PROGS([AWK], [gawk nawk awk mawk], [bork], [/usr/xpg4/bin/:$PATH])
   case "$AWK" in
     *mawk)
       AC_MSG_WARN([mawk is known to have problems on some systems. You should install GNU awk])
@@ -1646,7 +1646,7 @@ dnl required version MIN-VERSION and doesn't match any of the blank separated
 dnl list of excluded versions EXCLUDED-VERSION (for example "3.0 3.2").
 dnl
 AC_DEFUN([PHP_PROG_BISON], [
-  AC_CHECK_PROG(YACC, bison, bison)
+  AC_CHECK_PROG([YACC], [bison], [bison])
 
   ifelse($1,,php_bison_required_version='',php_bison_required_version="$1")
   ifelse($2,,php_bison_excluded_versions='none',php_bison_excluded_versions="$2")
@@ -1716,7 +1716,7 @@ dnl the re2c command-line flags substituted into a Makefile variable RE2C_FLAGS
 dnl which can be added to all re2c invocations.
 dnl
 AC_DEFUN([PHP_PROG_RE2C],[
-  AC_CHECK_PROG(RE2C, re2c, re2c)
+  AC_CHECK_PROG([RE2C], [re2c], [re2c])
 
   ifelse($1,,php_re2c_required_version='',php_re2c_required_version="$1")
 
@@ -1770,7 +1770,7 @@ AC_DEFUN([PHP_PROG_RE2C],[
 ])
 
 AC_DEFUN([PHP_PROG_PHP],[
-  AC_CHECK_PROG(PHP, php, php)
+  AC_CHECK_PROG([PHP], [php], [php])
 
   if test -n "$PHP"; then
     AC_MSG_CHECKING([for php version])
