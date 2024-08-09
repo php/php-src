@@ -1479,6 +1479,7 @@ void phpdbg_setup_watchpoints(void) {
 	zend_hash_init(PHPDBG_G(watchlist_mem_backup), phpdbg_pagesize / (sizeof(Bucket) + sizeof(uint32_t)), NULL, NULL, 1);
 
 	PHPDBG_G(watch_tmp) = NULL;
+	PHPDBG_G(watchpoint_hit) = false;
 
 #ifdef HAVE_USERFAULTFD_WRITEFAULT
 	PHPDBG_G(watch_userfaultfd) = syscall(SYS_userfaultfd, O_CLOEXEC);
