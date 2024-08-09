@@ -448,7 +448,7 @@ static int zend_jit_trace_recursive_ret_count(const zend_op_array *op_array, con
 	return count;
 }
 
-static int zend_jit_trace_has_recursive_ret(zend_execute_data *ex, const zend_op_array *orig_op_array, const zend_op *orig_opline, int ret_level)
+static bool zend_jit_trace_has_recursive_ret(zend_execute_data *ex, const zend_op_array *orig_op_array, const zend_op *orig_opline, int ret_level)
 {
 	while (ex != NULL && ex->func != NULL && ret_level < ZEND_JIT_TRACE_MAX_RET_DEPTH) {
 		if (&ex->func->op_array == orig_op_array && ex->opline + 1 == orig_opline) {

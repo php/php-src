@@ -343,7 +343,7 @@ static zval* ZEND_FASTCALL zend_jit_symtable_lookup_w(HashTable *ht, zend_string
 	return zend_hash_lookup(ht, str);
 }
 
-static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
+static bool ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 {
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
@@ -352,7 +352,7 @@ static int ZEND_FASTCALL zend_jit_undefined_op_helper(uint32_t var)
 	return EG(exception) == NULL;
 }
 
-static int ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint32_t var)
+static bool ZEND_FASTCALL zend_jit_undefined_op_helper_write(HashTable *ht, uint32_t var)
 {
 	const zend_execute_data *execute_data = EG(current_execute_data);
 	zend_string *cv = EX(func)->op_array.vars[EX_VAR_TO_NUM(var)];
@@ -656,7 +656,7 @@ num_undef:
 	ZVAL_NULL(result);
 }
 
-static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *dim)
+static bool ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *dim)
 {
 	zend_ulong hval;
 	zend_string *offset_key;
@@ -1724,7 +1724,7 @@ static void ZEND_FASTCALL zend_jit_fast_concat_tmp_helper(zval *result, zval *op
 	ZSTR_VAL(result_str)[result_len] = '\0';
 }
 
-static int ZEND_FASTCALL zend_jit_isset_dim_helper(zval *container, zval *offset)
+static bool ZEND_FASTCALL zend_jit_isset_dim_helper(zval *container, zval *offset)
 {
 	if (UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
 		zend_jit_undefined_op_helper(EG(current_execute_data)->opline->op2.var);

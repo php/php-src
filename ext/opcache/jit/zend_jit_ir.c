@@ -316,7 +316,7 @@ typedef struct _zend_jit_registers_buf {
 #define ZEND_JIT_EXIT_POINTS_PER_GROUP 32 // number of continuous exit points
 
 static uint32_t zend_jit_exit_point_by_addr(const void *addr);
-int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
+bool ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs);
 
 static int zend_jit_assign_to_variable(zend_jit_ctx   *jit,
                                        const zend_op  *opline,
@@ -1004,7 +1004,7 @@ static int zend_jit_save_call_chain(zend_jit_ctx *jit, uint32_t call_level)
 	return 1;
 }
 
-static int zend_jit_set_ip(zend_jit_ctx *jit, const zend_op *target)
+static bool zend_jit_set_ip(zend_jit_ctx *jit, const zend_op *target)
 {
 	ir_ref ref;
 	ir_ref addr = IR_UNUSED;
@@ -1047,7 +1047,7 @@ static int zend_jit_set_ip(zend_jit_ctx *jit, const zend_op *target)
 	return 1;
 }
 
-static int zend_jit_set_ip_ex(zend_jit_ctx *jit, const zend_op *target, bool set_ip_reg)
+static bool zend_jit_set_ip_ex(zend_jit_ctx *jit, const zend_op *target, bool set_ip_reg)
 {
 	if (!GCC_GLOBAL_REGS && set_ip_reg && !jit->last_valid_opline) {
 		/* Optimization to avoid duplicate constant load */
@@ -6177,7 +6177,7 @@ static int zend_jit_simple_assign(zend_jit_ctx   *jit,
 
 			ZEND_ASSERT(Z_MODE(val_addr) == IS_MEM_ZVAL);
 			// zend_error_unchecked(E_WARNING, "Undefined variable $%S", CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var)));
-			ret = ir_CALL_1(IR_I32, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(Z_OFFSET(val_addr)));
+			ret = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper), ir_CONST_U32(Z_OFFSET(val_addr)));
 
 			if (check_exception) {
 				ir_GUARD(ret, jit_STUB_ADDR(jit, jit_stub_exception_handler_undef));
@@ -9438,7 +9438,7 @@ static int zend_jit_send_var(zend_jit_ctx *jit, const zend_op *opline, const zen
 
 		// JIT: zend_jit_undefined_op_helper(opline->op1.var)
 		jit_SET_EX_OPLINE(jit, opline);
-		ref = ir_CALL_1(IR_I32, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper),
+		ref = ir_CALL_1(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_undefined_op_helper),
 			ir_CONST_U32(opline->op1.var));
 
 		// JIT: ZVAL_NULL(arg)
@@ -12002,7 +12002,7 @@ static int zend_jit_fetch_dimension_address_inner(zend_jit_ctx  *jit,
 				ir_END_list(*end_inputs);
 				break;
 			case BP_JIT_IS:
-				ref = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zend_jit_fetch_dim_isset_helper), ht_ref, ref);
+				ref = ir_CALL_2(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_fetch_dim_isset_helper), ht_ref, ref);
 				if (not_found_exit_addr) {
 					ir_GUARD(ref, ir_CONST_ADDR(not_found_exit_addr));
 					ir_refs_add(found_inputs, ir_END());
@@ -12806,7 +12806,7 @@ static int zend_jit_isset_isempty_dim(zend_jit_ctx   *jit,
 			} else {
 				arg2 = jit_ZVAL_ADDR(jit, op2_addr);
 			}
-			ref = ir_CALL_2(IR_I32, ir_CONST_FC_FUNC(zend_jit_isset_dim_helper), arg1, arg2);
+			ref = ir_CALL_2(IR_BOOL, ir_CONST_FC_FUNC(zend_jit_isset_dim_helper), arg1, arg2);
 			if_true = ir_IF(ref);
 			ir_IF_TRUE(if_true);
 			ir_refs_add(true_inputs, ir_END());

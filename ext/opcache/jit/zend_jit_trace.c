@@ -258,7 +258,7 @@ static zend_string *zend_jit_trace_name(const zend_op_array *op_array, uint32_t 
 	return buf.s;
 }
 
-static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline)
+static bool zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline)
 {
 	switch (opline->opcode) {
 		case ZEND_IS_IDENTICAL:
@@ -806,7 +806,7 @@ static bool zend_jit_trace_is_false_loop(const zend_op_array *op_array, const ze
 	}
 }
 
-static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static bool zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int var, use, def, src;
 	zend_ssa_op *op;
@@ -990,7 +990,7 @@ static void zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, con
 	}
 }
 
-static int zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static bool zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int def;
 	zend_ssa_op *op;
@@ -1141,7 +1141,7 @@ static const zend_op *zend_jit_trace_find_init_fcall_op(zend_jit_trace_rec *p, c
 	return NULL;
 }
 
-static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
+static bool is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
 {
 	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG
 	 && !(tssa->var_info[var].type & MAY_BE_REF)) {
@@ -3408,7 +3408,7 @@ static bool zend_jit_may_delay_fetch_this(const zend_op_array *op_array, zend_ss
 	return 1;
 }
 
-static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack, uint32_t stack_size)
+static bool zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack, uint32_t stack_size)
 {
 	uint32_t i;
 
@@ -3422,7 +3422,7 @@ static int zend_jit_trace_stack_needs_deoptimization(zend_jit_trace_stack *stack
 	return 0;
 }
 
-static int zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t exit_num)
+static bool zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t exit_num)
 {
 	const zend_op *opline = zend_jit_traces[trace_num].exit_info[exit_num].opline;
 	uint32_t flags = zend_jit_traces[trace_num].exit_info[exit_num].flags;
@@ -3438,7 +3438,7 @@ static int zend_jit_trace_exit_needs_deoptimization(uint32_t trace_num, uint32_t
 	return zend_jit_trace_stack_needs_deoptimization(stack, stack_size);
 }
 
-static int zend_jit_trace_deoptimization(
+static bool zend_jit_trace_deoptimization(
                                          zend_jit_ctx            *jit,
                                          uint32_t                 flags,
                                          const zend_op           *opline,
@@ -8456,7 +8456,7 @@ abort:
 	return ret;
 }
 
-int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
+bool ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
 {
 	uint32_t trace_num = EG(jit_trace_num);
 	zend_execute_data *execute_data = EG(current_execute_data);
@@ -8698,7 +8698,7 @@ static zend_always_inline uint8_t zend_jit_trace_supported(const zend_op *opline
 	}
 }
 
-static int zend_jit_restart_hot_trace_counters(zend_op_array *op_array)
+static void zend_jit_restart_hot_trace_counters(zend_op_array *op_array)
 {
 	zend_jit_op_array_trace_extension *jit_extension;
 	uint32_t i;
@@ -8715,10 +8715,9 @@ static int zend_jit_restart_hot_trace_counters(zend_op_array *op_array)
 			op_array->opcodes[i].handler = jit_extension->trace_info[i].orig_handler;
 		}
 	}
-	return SUCCESS;
 }
 
-static int zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
+static zend_result zend_jit_setup_hot_trace_counters(zend_op_array *op_array)
 {
 	zend_op *opline;
 	zend_jit_op_array_trace_extension *jit_extension;
