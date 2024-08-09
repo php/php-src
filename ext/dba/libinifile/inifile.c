@@ -14,14 +14,11 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
-#include "php.h"
-#include "php_globals.h"
+#include "inifile.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +27,10 @@
 #include <unistd.h>
 #endif
 
-#include "inifile.h"
+#include "zend_alloc.h"
+#include "php_streams.h"
+#include "spprintf.h"
+#include "php.h"
 
 /* ret = -1 means that database was opened for read-only
  * ret = 0  success
