@@ -29,7 +29,7 @@ echo "ok\n";
 --EXPECTF--
 Deprecated: Constant SOAP_FUNCTIONS_ALL is deprecated in %s on line %d
 
-Deprecated: SoapServer::addFunction(): Passing int is deprecated since 8.4, if all PHP functions need to be provided flatten the array returned by get_defined_functions() in %s on line %d
+Deprecated: SoapServer::addFunction(): Enabling all functions via SOAP_FUNCTIONS_ALL is deprecated since 8.4, due to possible security concerns. If all PHP functions should be enabled, the flattened return value of get_defined_functions() can be used in %s on line %d
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://testuri.org" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:strlenResponse><return xsi:type="xsd:int">11</return></ns1:strlenResponse></SOAP-ENV:Body></SOAP-ENV:Envelope>
 ok

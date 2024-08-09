@@ -1205,12 +1205,12 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_hash_update(service->soap_functions.ft, key, &function_copy);
 		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
-		php_error_docref(NULL, E_DEPRECATED, "Passing int is deprecated since 8.4,"
-			" if all PHP functions need to be provided flatten the array returned by get_defined_functions()");
-		if (UNEXPECTED(EG(exception))) {
-			RETURN_THROWS();
-		}
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
+			php_error_docref(NULL, E_DEPRECATED, "Enabling all functions via SOAP_FUNCTIONS_ALL is deprecated since 8.4, due to possible security concerns."
+				" If all PHP functions should be enabled, the flattened return value of get_defined_functions() can be used");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			if (service->soap_functions.ft != NULL) {
 				zend_hash_destroy(service->soap_functions.ft);
 				efree(service->soap_functions.ft);
