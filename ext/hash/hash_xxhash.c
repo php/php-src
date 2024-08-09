@@ -192,7 +192,7 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			}
 			size_t len = ZSTR_LEN(secret_string);
 			if (len < PHP_XXH3_SECRET_SIZE_MIN) {
-				zend_string_release(secret_string);
+				zend_string_release_noinline(secret_string);
 				zend_throw_error(NULL, "%s: Secret length must be >= %u bytes, %zu bytes passed", algo_name, XXH3_SECRET_SIZE_MIN, len);
 				return;
 			}
