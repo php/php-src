@@ -25,6 +25,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_utils.h"
 
 #include <time.h>
 
@@ -74,65 +75,6 @@ static zend_always_inline ISC_TIME_TZ php_get_isc_time_tz_from_sqldata(const ISC
 static zend_always_inline ISC_TIMESTAMP_TZ php_get_isc_timestamp_tz_from_sqldata(const ISC_SCHAR *sqldata)
 {
 	READ_AND_RETURN_USING_MEMCPY(ISC_TIMESTAMP_TZ, sqldata);
-}
-
-static void fb_copyStatus(struct fb_Status* status, ISC_STATUS* to, size_t maxLength)
-{
-	const ISC_STATUS* from = (const ISC_STATUS*)status->vtable->getErrors(status);
-	for(size_t i=0; i < maxLength; ++i) {
-		memcpy(to + i, from + i, sizeof(ISC_STATUS));
-		if (from[i] == isc_arg_end) {
-			break;
-		}
-	}
-}
-
-static ISC_TIME fb_encode_time(unsigned hours, unsigned minutes, unsigned seconds, unsigned fractions)
-{
-	struct fb_Master* master = fb_get_master_interface();
-	struct fb_Util* util = master->vtable->getUtilInterface(master);
-	return util->vtable->encodeTime(util, hours, minutes, seconds, fractions);
-}
-
-static ISC_DATE fb_encode_date(unsigned year, unsigned month, unsigned day)
-{
-	struct fb_Master* master = fb_get_master_interface();
-	struct fb_Util* util = master->vtable->getUtilInterface(master);
-	return util->vtable->encodeDate(util, year, month, day);
-}
-
-static ISC_STATUS fb_decode_time_tz(ISC_STATUS* isc_status, const ISC_TIME_TZ* timeTz, unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, 
-   unsigned timeZoneBufferLength, char* timeZoneBuffer)
-{
-	struct fb_Master* master = fb_get_master_interface();
-	struct fb_Status* status = master->vtable->getStatus(master);
-	struct fb_Util* util = master->vtable->getUtilInterface(master);
-	util->vtable->decodeTimeTz(util, status, timeTz, hours, minutes, seconds, fractions,
-								timeZoneBufferLength, timeZoneBuffer);
-	if (status->vtable->getState(status))  {
-		fb_copyStatus(status, isc_status, 20);
-	}
-	status->vtable->dispose(status);
-	return isc_status[1];
-}
-
-
-static ISC_STATUS fb_decode_timestamp_tz(ISC_STATUS* isc_status, const ISC_TIMESTAMP_TZ* timestampTz, 
-   unsigned* year, unsigned* month, unsigned* day,
-   unsigned* hours, unsigned* minutes, unsigned* seconds, unsigned* fractions, 
-   unsigned timeZoneBufferLength, char* timeZoneBuffer)
-{
-	struct fb_Master* master = fb_get_master_interface();
-	struct fb_Status* status = master->vtable->getStatus(master);
-	struct fb_Util* util = master->vtable->getUtilInterface(master);
-	util->vtable->decodeTimeStampTz(util, status, timestampTz, year, month, day,
-									hours, minutes, seconds, fractions,
-									timeZoneBufferLength, timeZoneBuffer);
-	if (status->vtable->getState(status))  {
-		fb_copyStatus(status, isc_status, 20);
-	}
-	status->vtable->dispose(status);
-	return isc_status[1];
 }
 
 /* fetch formatted time with time zone */

@@ -30,6 +30,7 @@
 #include "ext/pdo/php_pdo_driver.h"
 #include "php_pdo_firebird.h"
 #include "php_pdo_firebird_int.h"
+#include "pdo_firebird_utils.h"
 
 static int php_firebird_alloc_prepare_stmt(pdo_dbh_t*, const zend_string*, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
@@ -519,6 +520,8 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 	short dtype;
 	short nullable;
 	XSQLVAR* var;
+	unsigned fb_client_version = fb_get_client_version();
+	unsigned fb_client_major_version = (fb_client_version >> 8) & 0xFF;
 	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
 		dtype = (var->sqltype & ~1); /* drop flag bit  */
 		nullable = (var->sqltype & 1); 
@@ -537,6 +540,24 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 			case SQL_DEC34:
 				var->sqltype = SQL_VARYING + nullable;
 				var->sqllen = 43;
+				break;
+
+			case SQL_TIMESTAMP_TZ:
+			    if (fb_client_major_version < 4) {
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */ 
+					/* so we convert these types to a string. */
+					var->sqltype = SQL_VARYING + nullable;
+					var->sqllen = 58;
+				}
+				break;
+
+			case SQL_TIME_TZ:
+				if (fb_client_major_version < 4) {
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */ 
+					/* so we convert these types to a string. */					
+					var->sqltype = SQL_VARYING + nullable;
+					var->sqllen = 46;
+				}
 				break;
 
 			default:

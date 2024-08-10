@@ -50,9 +50,24 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
 
   PHP_CHECK_PDO_INCLUDES
 
+
+  PHP_PDO_FIREBIRD_COMMON_FLAGS=""
   PHP_NEW_EXTENSION([pdo_firebird],
     [pdo_firebird.c firebird_driver.c firebird_statement.c],
-    [$ext_shared])
+    [$ext_shared],,
+    [$PHP_PDO_FIREBIRD_COMMON_FLAGS],
+    [cxx])
   PHP_SUBST([PDO_FIREBIRD_SHARED_LIBADD])
   PHP_ADD_EXTENSION_DEP(pdo_firebird, pdo)
+
+  PHP_PDO_FIREBIRD_CXX_SOURCES="pdo_firebird_utils.cpp"
+
+  PHP_REQUIRE_CXX()
+  PHP_CXX_COMPILE_STDCXX(11, mandatory, PHP_PDO_FIREBIRD_STDCXX)
+  PHP_PDO_FIREBIRD_CXX_FLAGS="$PHP_PDO_FIREBIRD_COMMON_FLAGS $PHP_PDO_FIREBIRD_STDCXX"
+
+  PHP_ADD_SOURCES([$ext_dir],
+    [$PHP_PDO_FIREBIRD_CXX_SOURCES],
+    [$PHP_PDO_FIREBIRD_CXX_FLAGS])
+
 fi

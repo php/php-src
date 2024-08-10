@@ -10,7 +10,7 @@ if (PHP_PDO_FIREBIRD != "no") {
 				PHP_PHP_BUILD + "\\include\\interbase;" + PHP_PHP_BUILD + "\\interbase\\include;" + PHP_PDO_FIREBIRD)
 		) {
 
-		EXTENSION("pdo_firebird", "pdo_firebird.c firebird_driver.c firebird_statement.c");
+		EXTENSION("pdo_firebird", "pdo_firebird.c firebird_driver.c firebird_statement.c pdo_firebird_utils.cpp");
 	} else {
 		WARNING("pdo_firebird not enabled; libraries and headers not found");
 	}
