@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fix uninitialized memory in network.c. (nielsdos)
   . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
     (Arnaud)
+  . Fixed bug GH-15275 (Crash during GC of suspended generator delegate).
+    (Arnaud)
 
 - Curl:
   . Fixed case when curl_error returns an empty string.
