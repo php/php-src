@@ -16,8 +16,11 @@
 
 /* Infrastructure for working with persistent COM objects.
  * Implements: IStream* wrapper for PHP streams.
- * TODO: Magic __wakeup and __sleep handlers for serialization
- * (can wait till 5.1) */
+ * TODO:
+ *  - Magic __wakeup and __sleep handlers for serialization.
+ *  - Track the stream and dispatch instances in a global list to make sure
+ *    they are destroyed when a fatal error occurs.
+ */
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
