@@ -68,6 +68,20 @@ const SOCK_CONN_DGRAM = UNKNOWN;
  */
 const SOCK_DCCP = UNKNOWN;
 #endif
+#ifdef SOCK_CLOEXEC
+/**
+ * @var int
+ * @cvalue SOCK_CLOEXEC
+ */
+const SOCK_CLOEXEC = UNKNOWN;
+#endif
+#ifdef SOCK_NONBLOCK
+/**
+ * @var int
+ * @cvalue SOCK_NONBLOCK
+ */
+const SOCK_NONBLOCK = UNKNOWN;
+#endif
 
 /**
  * @var int
