@@ -76,6 +76,9 @@ PHP                                                                        NEWS
 - Sockets:
   . Added IP_PORTRANGE* constants for BSD systems to control ephemeral port
     ranges. (David Carlier)
+  . Added SOCK_NONBLOCK/SOCK_CLOEXEC constants for socket_create and
+    socket_create_pair to apply O_NONBLOCK/O_CLOEXEC flags to the
+    newly created sockets. (David Carlier)
 
 - SPL:
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
