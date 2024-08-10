@@ -24,6 +24,7 @@
 #ifdef PHP_WIN32
 # include <process.h>
 # include <io.h>
+# include "win32/console.h"
 # include "win32/time.h"
 # include "win32/signal.h"
 # include "win32/php_registry.h"
