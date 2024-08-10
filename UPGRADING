@@ -359,7 +359,7 @@ PHP 8.4 UPGRADE NOTES
 
 - Standard:
   . stream_bucket_make_writeable() and stream_bucket_new() will now return a
-    StreamBucket instance instead of an stdClass instance.
+    StreamBucket instance instead of an instance of stdClass.
     RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
   . Added a new RoundingMode enum with clearer naming and improved discoverability
     compared to the PHP_ROUND_* constants.
@@ -489,6 +489,7 @@ PHP 8.4 UPGRADE NOTES
   . Calling stream_context_set_option() with 2 arguments is deprecated.
     Use stream_context_set_options() instead.
   . Raising zero to the power of negative number is deprecated.
+    RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
   . Unserializing strings using the uppercase 'S' tag is deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4
 
@@ -669,6 +670,7 @@ PHP 8.4 UPGRADE NOTES
     the IANA identifier from a given timezone.
   . Added grapheme_str_split which allow to support emoji and Variation
     Selectors.
+    RFC: https://wiki.php.net/rfc/grapheme_str_split
   . Added IntlDateFormatter::parseToCalendar which behaves like
     IntlDateFormatter::parse except the time zone is updated.
   . Added SpoofChecker::setAllowedChars to limit the range of unicode
@@ -722,7 +724,9 @@ PHP 8.4 UPGRADE NOTES
   . Added the http_get_last_response_headers() and
     http_clear_last_response_headers() that allows retrieving the same content
     as the magic $http_response_header variable.
+    RFC: https://wiki.php.net/rfc/http-last-response-headers
   . Added function fpow() following rules of IEEE 754.
+    RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
   . Added functions array_find(), array_find_key(), array_all(), and
     array_any().
     RFC: https://wiki.php.net/rfc/array_find
@@ -745,6 +749,10 @@ PHP 8.4 UPGRADE NOTES
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Core:
+  . New RequestParseBodyException.
+    RFC: https://wiki.php.net/rfc/rfc1867-non-post
 
 - DOM:
   . Implemented DOM HTML5 parsing and serialization.
