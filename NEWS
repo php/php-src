@@ -83,6 +83,8 @@ PHP                                                                        NEWS
   . Added missing cstddef include for C++ builds. (cmb)
   . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
     (Arnaud)
+  . Fixed bug GH-15275 (Crash during GC of suspended generator delegate).
+    (Arnaud)
 
 - BCMath:
   . Adjust bcround()'s $mode parameter to only accept the RoundingMode
