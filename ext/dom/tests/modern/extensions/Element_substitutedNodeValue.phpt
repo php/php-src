@@ -23,7 +23,7 @@ var_dump($dom->documentElement->nodeValue); // Should always be NULL for element
 echo $dom->saveXML(), "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 string(1) "1"
 NULL
 <?xml version="1.0" encoding="UTF-8"?>
@@ -35,4 +35,4 @@ NULL
 string(0) ""
 NULL
 <?xml version="1.0" encoding="UTF-8"?>
-<root></root>
+%r(<root><\/root>|<root\/>)%r

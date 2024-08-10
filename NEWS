@@ -24,6 +24,7 @@ PHP                                                                        NEWS
     (html5_serializer)). (nielsdos)
   . Deprecated DOM_PHP_ERR constant. (nielsdos)
   . Removed DOMImplementation::getFeature(). (nielsdos)
+  . Fixed bug GH-15331 (Element::$substitutedNodeValue test failed). (nielsdos)
 
 - Hash:
   . Deprecated passing incorrect data types for options to ext/hash functions.
