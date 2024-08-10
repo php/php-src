@@ -26,6 +26,7 @@
 #include "zend_closures.h"
 #include "zend_generators_arginfo.h"
 #include "zend_observer.h"
+#include "zend_vm_opcodes.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
@@ -508,6 +509,8 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 	 * to pretend the exception happened during the YIELD opcode. */
 	EG(current_execute_data) = generator->execute_data;
 	generator->execute_data->opline--;
+	ZEND_ASSERT(generator->execute_data->opline->opcode == ZEND_YIELD
+			|| generator->execute_data->opline->opcode == ZEND_YIELD_FROM);
 	generator->execute_data->prev_execute_data = original_execute_data;
 
 	if (exception) {
@@ -516,13 +519,14 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 		zend_rethrow_exception(EG(current_execute_data));
 	}
 
+	generator->execute_data->opline++;
+
 	/* if we don't stop an array/iterator yield from, the exception will only reach the generator after the values were all iterated over */
 	if (UNEXPECTED(Z_TYPE(generator->values) != IS_UNDEF)) {
 		zval_ptr_dtor(&generator->values);
 		ZVAL_UNDEF(&generator->values);
 	}
 
-	generator->execute_data->opline++;
 	EG(current_execute_data) = original_execute_data;
 }
 
@@ -652,8 +656,6 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 
 static zend_result zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
 {
-	--generator->execute_data->opline;
-
 	zval *value;
 	if (Z_TYPE(generator->values) == IS_ARRAY) {
 		HashTable *ht = Z_ARR(generator->values);
@@ -735,14 +737,12 @@ static zend_result zend_generator_get_next_delegated_value(zend_generator *gener
 		}
 	}
 
-	++generator->execute_data->opline;
 	return SUCCESS;
 
 failure:
 	zval_ptr_dtor(&generator->values);
 	ZVAL_UNDEF(&generator->values);
 
-	++generator->execute_data->opline;
 	return FAILURE;
 }
 /* }}} */
@@ -806,6 +806,15 @@ try_again:
 			orig_generator->flags &= ~(ZEND_GENERATOR_DO_INIT | ZEND_GENERATOR_IN_FIBER);
 			generator->flags &= ~ZEND_GENERATOR_IN_FIBER;
 			return;
+		}
+		if (UNEXPECTED(EG(exception))) {
+			/* Decrementing opline_before_exception to pretend the exception
+			 * happened during the YIELD_FROM opcode. */
+			if (generator->execute_data) {
+				ZEND_ASSERT(generator->execute_data->opline == EG(exception_op));
+				ZEND_ASSERT((EG(opline_before_exception)-1)->opcode == ZEND_YIELD_FROM);
+				EG(opline_before_exception)--;
+			}
 		}
 		/* If there are no more delegated values, resume the generator
 		 * after the "yield from" expression. */

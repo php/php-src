@@ -4598,7 +4598,13 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 	}
 
 	if (call) {
-		uint32_t op_num = execute_data->opline - op_array->opcodes;
+		uint32_t op_num;
+		if (UNEXPECTED(execute_data->opline->opcode == ZEND_HANDLE_EXCEPTION)) {
+			op_num = EG(opline_before_exception) - op_array->opcodes;
+		} else {
+			op_num = execute_data->opline - op_array->opcodes;
+		}
+		ZEND_ASSERT(op_num < op_array->last);
 		if (suspended_by_yield) {
 			/* When the execution was suspended by yield, EX(opline) points to
 			 * next opline to execute. Otherwise, it points to the opline that
