@@ -42,26 +42,9 @@ typedef struct {
 	HashTable *name_to_dispid;	/* keep track of name -> dispid mappings */
 
 	GUID sinkid;	/* iid that we "implement" for event sinking */
-
-	zend_resource *res;
 } php_dispatchex;
 
-static int le_dispatch;
-
 static void disp_destructor(php_dispatchex *disp);
-
-static void dispatch_dtor(zend_resource *rsrc)
-{
-	php_dispatchex *disp = (php_dispatchex *)rsrc->ptr;
-	disp_destructor(disp);
-}
-
-int php_com_wrapper_minit(INIT_FUNC_ARGS)
-{
-	le_dispatch = zend_register_list_destructors_ex(dispatch_dtor,
-		NULL, "com_dotnet_dispatch_wrapper", module_number);
-	return le_dispatch;
-}
 
 
 /* {{{ trace */
@@ -129,8 +112,7 @@ static ULONG STDMETHODCALLTYPE disp_release(IDispatchEx *This)
 	trace("-- refcount now %d\n", ret);
 	if (ret == 0) {
 		/* destroy it */
-		if (disp->res)
-			zend_list_delete(disp->res);
+		disp_destructor(disp);
 	}
 	return ret;
 }
@@ -525,7 +507,6 @@ static void generate_dispids(php_dispatchex *disp)
 static php_dispatchex *disp_constructor(zval *object)
 {
 	php_dispatchex *disp = (php_dispatchex*)CoTaskMemAlloc(sizeof(php_dispatchex));
-	zval *tmp;
 
 	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, Z_OBJCE_P(object)->name);
 
@@ -545,26 +526,11 @@ static php_dispatchex *disp_constructor(zval *object)
 		ZVAL_UNDEF(&disp->object);
 	}
 
-	tmp = zend_list_insert(disp, le_dispatch);
-	disp->res = Z_RES_P(tmp);
-
 	return disp;
 }
 
 static void disp_destructor(php_dispatchex *disp)
 {
-	/* Object store not available during request shutdown */
-	if (COMG(rshutdown_started)) {
-		trace("destroying COM wrapper for PHP object %p (name:unknown)\n", Z_OBJ(disp->object));
-	} else {
-		trace("destroying COM wrapper for PHP object %p (name:%s)\n", Z_OBJ(disp->object), Z_OBJCE(disp->object)->name->val);
-	}
-
-	disp->res = NULL;
-
-	if (disp->refcount > 0)
-		CoDisconnectObject((IUnknown*)disp, 0);
-
 	zend_hash_destroy(disp->dispid_to_name);
 	zend_hash_destroy(disp->name_to_dispid);
 	FREE_HASHTABLE(disp->dispid_to_name);
