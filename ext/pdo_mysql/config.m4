@@ -7,17 +7,15 @@ PHP_ARG_WITH([pdo-mysql],
 if test "$PHP_PDO_MYSQL" != "no"; then
   dnl This depends on ext/mysqli/config.m4 providing the PHP_MYSQL_SOCKET_SEARCH
   dnl macro and --with-mysql-sock configure option.
-  AC_MSG_CHECKING([for MySQL UNIX socket location])
-  if test "$PHP_MYSQL_SOCK" != "no" && test "$PHP_MYSQL_SOCK" != "yes"; then
-    MYSQL_SOCK=$PHP_MYSQL_SOCK
-    AC_DEFINE_UNQUOTED([PHP_MYSQL_UNIX_SOCK_ADDR], ["$MYSQL_SOCK"],
-      [The MySQL Unix socket location.])
-    AC_MSG_RESULT([$MYSQL_SOCK])
-  elif test "$PHP_MYSQL_SOCK" = "yes"; then
-    PHP_MYSQL_SOCKET_SEARCH
-  else
-    AC_MSG_RESULT([no])
-  fi
+  AC_MSG_CHECKING([for MySQL Unix socket location])
+  AS_CASE([$PHP_MYSQL_SOCK],
+    [yes], [PHP_MYSQL_SOCKET_SEARCH],
+    [no], [AC_MSG_RESULT([no])],
+    [
+      AC_DEFINE_UNQUOTED([PHP_MYSQL_UNIX_SOCK_ADDR], ["$PHP_MYSQL_SOCK"],
+        [The MySQL Unix socket location.])
+      AC_MSG_RESULT([$PHP_MYSQL_SOCK])
+    ])
 
   if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
@@ -37,12 +35,12 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     fi
   fi
 
-  if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
-    dnl enables build of mysqnd library
+  dnl Whether to build with the mysqlnd extension or with the MySQL library.
+  AS_CASE([$PHP_PDO_MYSQL], [yes|mysqlnd], [
     PHP_MYSQLND_ENABLED=yes
     AC_DEFINE([PDO_USE_MYSQLND], [1],
       [Define to 1 if the pdo_mysql extension uses mysqlnd.])
-  else
+  ], [
     AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
       AC_MSG_RESULT([$PDO_MYSQL_CONFIG])
@@ -78,7 +76,7 @@ if test "$PHP_PDO_MYSQL" != "no"; then
 
     PHP_EVAL_INCLINE([$PDO_MYSQL_INCLUDE])
     PHP_EVAL_LIBLINE([$PDO_MYSQL_LIBS], [PDO_MYSQL_SHARED_LIBADD])
-  fi
+  ])
 
   PHP_CHECK_PDO_INCLUDES
 
@@ -97,9 +95,9 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   PHP_ADD_EXTENSION_DEP(pdo_mysql, pdo)
   PHP_ADD_MAKEFILE_FRAGMENT
 
-  if test "$PHP_PDO_MYSQL" = "yes" || test "$PHP_PDO_MYSQL" = "mysqlnd"; then
+  AS_CASE([$PHP_PDO_MYSQL], [yes|mysqlnd], [
     PHP_ADD_EXTENSION_DEP(pdo_mysql, mysqlnd)
-  fi
+  ])
 
   PHP_SUBST([PDO_MYSQL_SHARED_LIBADD])
 fi
