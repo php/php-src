@@ -904,6 +904,10 @@ PHP 8.4 UPGRADE NOTES
   . SO_EXCLBIND (Solaris/Illumos only).
   . SO_NOSIGPIPE (macOs and FreeBSD).
   . SO_LINGER_SEC (macOs only).
+  . IP_PORTRANGE (FreeBSD/NetBSD/OpenBSD only).
+  . IP_PORTRANGE_DEFAULT (FreeBSD/NetBSD/OpenBSD only).
+  . IP_PORTRANGE_HIGH (FreeBSD/NetBSD/OpenBSD only).
+  . IP_PORTRANGE_LOW (FreeBSD/NetBSD/OpenBSD only).
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES

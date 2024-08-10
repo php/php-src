@@ -711,6 +711,29 @@ const IPV6_MULTICAST_LOOP = UNKNOWN;
 const IPV6_V6ONLY = UNKNOWN;
 #endif
 
+#ifdef IP_PORTRANGE
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE
+ */
+const IP_PORTRANGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_DEFAULT
+ */
+const IP_PORTRANGE_DEFAULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_HIGH
+ */
+const IP_PORTRANGE_HIGH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_LOW
+ */
+const IP_PORTRANGE_LOW = UNKNOWN;
+#endif
+
 #ifdef EPERM
 /**
  * Operation not permitted

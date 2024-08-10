@@ -52,6 +52,10 @@ PHP                                                                        NEWS
     get_defined_functions(). (Girgias)
   . The SOAP_FUNCTIONS_ALL constant is now deprecated. (Girgias)
 
+- Sockets:
+  . Added IP_PORTRANGE* constants for BSD systems to control ephemeral port
+    ranges. (David Carlier)
+
 - SPL:
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
