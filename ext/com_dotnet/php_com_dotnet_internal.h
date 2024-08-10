@@ -66,7 +66,7 @@ static inline bool php_com_is_valid_object(zval *zv)
 } while(0)
 
 /* com_extension.c */
-zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
+extern zend_class_entry *php_com_variant_class_entry, *php_com_exception_class_entry, *php_com_saproxy_class_entry;
 
 /* com_handlers.c */
 zend_object* php_com_object_new(zend_class_entry *ce);
