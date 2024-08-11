@@ -38,6 +38,11 @@ PHP 8.4 UPGRADE NOTES
     readonly initialization, and was an oversight in the "readonly
     reinitialization during cloning" implementation.
 
+- DBA:
+  . dba_open() and dba_popen() will now return a Dba\Connection
+    object rather than a resource. Return value checks using is_resource()
+    should be replaced with checks for `false`.
+
 - DOM:
   . Added DOMNode::compareDocumentPosition() and DOMNode::DOCUMENT_POSITION_*
     constants.
