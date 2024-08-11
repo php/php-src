@@ -457,6 +457,10 @@ PHP 8.4 UPGRADE NOTES
   . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
     If this functionality is needed a SQL "FLUSH" command can be used instead.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_refresh
+  . Passing explicitly the $mode parameter to mysqli_store_result() has been
+    deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
+    conjunction with this function it has also been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_the_second_parameter_to_mysqli_store_result
 
 - PDO_PGSQL:
   . Using escaped question marks (??) inside dollar-quoted strings is deprecated.

@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
     If this functionality is needed a SQL "FLUSH" command can be used instead.
     (Kamil Tekiela)
+  . Passing explicitly the $mode parameter to mysqli_store_result() has been
+    deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
+    conjunction with this function it has also been deprecated. (Girgias)
 
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
