@@ -4,10 +4,6 @@ PHP_ARG_WITH([pdo-dblib],
     [PDO: DBLIB-DB support. DIR is the FreeTDS home directory])])
 
 if test "$PHP_PDO_DBLIB" != "no"; then
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   if test "$PHP_PDO_DBLIB" = "yes"; then
     dnl FreeTDS must be on the default system include/library path.
     dnl Only perform a sanity check that this is really the case.

@@ -7,10 +7,6 @@ PHP_ARG_WITH([pdo-pgsql],
     the libpq paths.])])
 
 if test "$PHP_PDO_PGSQL" != "no"; then
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   PHP_SETUP_PGSQL([PDO_PGSQL_SHARED_LIBADD],,, [$PHP_PDO_PGSQL])
   PHP_SUBST([PDO_PGSQL_SHARED_LIBADD])
 
