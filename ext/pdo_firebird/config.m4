@@ -5,7 +5,6 @@ PHP_ARG_WITH([pdo-firebird],
     [/opt/firebird]])])
 
 if test "$PHP_PDO_FIREBIRD" != "no"; then
-
   if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi

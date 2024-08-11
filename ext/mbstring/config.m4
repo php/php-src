@@ -173,9 +173,7 @@ if test "$PHP_MBSTRING" != "no"; then
 
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
 
-  if test "$PHP_MBREGEX" != "no"; then
-    PHP_MBSTRING_SETUP_MBREGEX
-  fi
+  AS_VAR_IF([PHP_MBREGEX], [no],, [PHP_MBSTRING_SETUP_MBREGEX])
 
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
