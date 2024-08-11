@@ -635,7 +635,7 @@ PHP_FUNCTION(mysqli_query)
 
 #include "php_network.h"
 /* {{{ mysqlnd_zval_array_to_mysqlnd_array functions */
-static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_array)
+static zend_result mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_array)
 {
 	zval *elem;
 	int i = 0, current = 0;

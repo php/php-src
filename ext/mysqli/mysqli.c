@@ -71,8 +71,8 @@ zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
 
-typedef int (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
-typedef int (*mysqli_write_t)(mysqli_object *obj, zval *newval);
+typedef zend_result (*mysqli_read_t)(mysqli_object *obj, zval *rv, bool quiet);
+typedef zend_result (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
 	zend_string *name;
@@ -227,7 +227,7 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* }}} */
 
 /* {{{ mysqli_read_na */
-static int mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (!quiet) {
 		zend_throw_error(NULL, "Cannot read property");
