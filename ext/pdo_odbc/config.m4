@@ -28,11 +28,6 @@ AC_DEFUN([PHP_PDO_ODBC_CHECK_HEADER],
 ])
 
 if test "$PHP_PDO_ODBC" != "no"; then
-
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   PHP_CHECK_PDO_INCLUDES
 
   AC_MSG_CHECKING([for selected PDO ODBC flavour])

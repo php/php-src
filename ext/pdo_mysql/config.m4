@@ -17,10 +17,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
       AC_MSG_RESULT([$PHP_MYSQL_SOCK])
     ])
 
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
   dnl Whether to build with the mysqlnd extension or with the MySQL library.
   AS_CASE([$PHP_PDO_MYSQL], [yes|mysqlnd], [
     PHP_MYSQLND_ENABLED=yes
