@@ -919,12 +919,12 @@ ZEND_FUNCTION(gmp_init)
 }
 /* }}} */
 
-int gmp_import_export_validate(zend_long size, zend_long options, int *order, int *endian)
+static bool gmp_import_export_validate(zend_long size, zend_long options, int *order, int *endian)
 {
 	if (size < 1) {
 		/* size argument is in second position */
 		zend_argument_value_error(2, "must be greater than or equal to 1");
-		return FAILURE;
+		return false;
 	}
 
 	switch (options & (GMP_LSW_FIRST | GMP_MSW_FIRST)) {
@@ -936,9 +936,9 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 			*order = 1;
 			break;
 		default:
-			/* options argument is in second position */
+			/* options argument is in third position */
 			zend_argument_value_error(3, "cannot use multiple word order options");
-			return FAILURE;
+			return false;
 	}
 
 	switch (options & (GMP_LITTLE_ENDIAN | GMP_BIG_ENDIAN | GMP_NATIVE_ENDIAN)) {
@@ -953,12 +953,12 @@ int gmp_import_export_validate(zend_long size, zend_long options, int *order, in
 			*endian = 0;
 			break;
 		default:
-			/* options argument is in second position */
+			/* options argument is in third position */
 			zend_argument_value_error(3, "cannot use multiple endian options");
-			return FAILURE;
+			return false;
 	}
 
-	return SUCCESS;
+	return true;
 }
 
 /* {{{ Imports a GMP number from a binary string */
@@ -975,7 +975,7 @@ ZEND_FUNCTION(gmp_import)
 		RETURN_THROWS();
 	}
 
-	if (gmp_import_export_validate(size, options, &order, &endian) == FAILURE) {
+	if (!gmp_import_export_validate(size, options, &order, &endian)) {
 		RETURN_THROWS();
 	}
 
@@ -1004,7 +1004,7 @@ ZEND_FUNCTION(gmp_export)
 		RETURN_THROWS();
 	}
 
-	if (gmp_import_export_validate(size, options, &order, &endian) == FAILURE) {
+	if (!gmp_import_export_validate(size, options, &order, &endian)) {
 		RETURN_THROWS();
 	}
 
