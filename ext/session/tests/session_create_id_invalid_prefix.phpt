@@ -22,13 +22,13 @@ try {
 ?>
 Done
 --EXPECTF--
-Warning: session_create_id(): Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
+Warning: session_create_id(): Prefix or name cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
 bool(false)
 
-Warning: session_create_id(): Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
+Warning: session_create_id(): Prefix or name cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
 bool(false)
 
-Warning: session_create_id(): Prefix cannot be larger than 256 characters in %s on line %d
+Warning: session_create_id(): Prefix or name cannot be larger than 256 characters in %s on line %d
 bool(false)
 session_create_id(): Argument #1 ($prefix) must not contain any null bytes
 Done
