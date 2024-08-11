@@ -145,7 +145,7 @@ PHP_METHOD(mysqli_warning, next)
 /* }}} */
 
 /* {{{ property mysqli_warning_message */
-static int mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
@@ -165,7 +165,7 @@ static int mysqli_warning_message(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property mysqli_warning_sqlstate */
-static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
@@ -185,7 +185,7 @@ static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, bool quiet)
 /* }}} */
 
 /* {{{ property mysqli_warning_error */
-static int mysqli_warning_errno(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_warning_errno(mysqli_object *obj, zval *retval, bool quiet)
 {
 	MYSQLI_WARNING *w;
 
