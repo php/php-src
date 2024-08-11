@@ -79,11 +79,7 @@ if test "$PHP_OPCACHE" != "no"; then
         DASM_FLAGS="-D X64=1"
         DASM_ARCH="x86"
       ],
-      [[i[34567]86*]], [
-        IR_TARGET=IR_TARGET_X86
-        DASM_ARCH="x86"
-      ],
-      [x86*], [
+      [[i[34567]86*|x86*]], [
         IR_TARGET=IR_TARGET_X86
         DASM_ARCH="x86"
       ],
