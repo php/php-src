@@ -640,9 +640,7 @@ static int mysqlnd_zval_array_to_mysqlnd_array(zval *in_array, MYSQLND ***out_ar
 	zval *elem;
 	int i = 0, current = 0;
 
-	if (Z_TYPE_P(in_array) != IS_ARRAY) {
-		return SUCCESS;
-	}
+	ZEND_ASSERT(Z_TYPE_P(in_array) == IS_ARRAY);
 	*out_array = ecalloc(zend_hash_num_elements(Z_ARRVAL_P(in_array)) + 1, sizeof(MYSQLND *));
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(in_array), elem) {
 		i++;
