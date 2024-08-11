@@ -18,6 +18,7 @@
 #include "config.h"
 #endif
 
+#include "php.h" /* Headers are un utter mess so this needs to be before */
 #include "inifile.h"
 
 #include <stdlib.h>
@@ -30,7 +31,6 @@
 #include "zend_alloc.h"
 #include "php_streams.h"
 #include "spprintf.h"
-#include "php.h"
 
 /* ret = -1 means that database was opened for read-only
  * ret = 0  success
@@ -150,8 +150,7 @@ static char *etrim(const char *str)
 }
 /* }}} */
 
-/* {{{ inifile_findkey */
-static int inifile_read(inifile *dba, line_type *ln) {
+static bool inifile_read(inifile *dba, line_type *ln) {
 	char *fline;
 	char *pos;
 
@@ -170,7 +169,7 @@ static int inifile_read(inifile *dba, line_type *ln) {
 					ln->key.name = estrdup("");
 					ln->pos = php_stream_tell(dba->fp);
 					efree(fline);
-					return 1;
+					return true;
 				} else {
 					efree(fline);
 					continue;
@@ -190,7 +189,7 @@ static int inifile_read(inifile *dba, line_type *ln) {
 					ln->val.value = etrim(pos+1);
 					ln->pos = php_stream_tell(dba->fp);
 					efree(fline);
-					return 1;
+					return true;
 				} else {
 					/* simply ignore lines without '='
 					 * those should be comments
@@ -202,9 +201,8 @@ static int inifile_read(inifile *dba, line_type *ln) {
 		}
 	}
 	inifile_line_free(ln);
-	return 0;
+	return false;
 }
-/* }}} */
 
 enum inifile_key_cmp_status {
 	EQUAL,
@@ -306,60 +304,50 @@ static bool inifile_truncate(inifile *dba, size_t size)
 	return true;
 }
 
-/* {{{ inifile_find_group
- * if found pos_grp_start points to "[group_name]"
- */
-static bool inifile_find_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
+/* Return position where which points to "[group_name]" */
+static size_t inifile_find_group(inifile *dba, const key_type *key)
 {
-	bool found_group = false;
-
+	/* Rewind to the beginning of the file and free currently hold lines */
 	php_stream_flush(dba->fp);
 	php_stream_seek(dba->fp, 0, SEEK_SET);
 	inifile_line_free(&dba->curr);
 	inifile_line_free(&dba->next);
 
-	if (key->group && strlen(key->group)) {
-		line_type ln = {{NULL,NULL},{NULL},0};
+	/* If key is not in a group return the position of the start of the file */
+	if (!key->group || strlen(key->group) == 0) {
+		return 0;
+	}
 
-		while (inifile_read(dba, &ln)) {
-			if (inifile_key_cmp(&ln.key, key) != DIFFERENT) {
-				found_group = true;
-				break;
-			}
-			*pos_grp_start = php_stream_tell(dba->fp);
+	size_t group_start_position = 0;
+	line_type ln = {{NULL,NULL},{NULL},0};
+	while (inifile_read(dba, &ln)) {
+		if (inifile_key_cmp(&ln.key, key) != DIFFERENT) {
+			break;
 		}
-		inifile_line_free(&ln);
-	} else {
-		*pos_grp_start = 0;
-		found_group = true;
+		group_start_position = php_stream_tell(dba->fp);
 	}
-	if (!found_group) {
-		*pos_grp_start = php_stream_tell(dba->fp);
-	}
-	return found_group;
+	inifile_line_free(&ln);
+	return group_start_position;
 }
-/* }}} */
 
-/* {{{ inifile_next_group
- * only valid after a call to inifile_find_group
+/* Must only be called after inifile_find_group()
+ *
  * if any next group is found pos_grp_start points to "[group_name]" or whitespace before that
  */
-static bool inifile_next_group(inifile *dba, const key_type *key, size_t *pos_grp_start)
+static size_t inifile_next_group(inifile *dba, const key_type *key)
 {
-	bool has_next_group = false;
 	line_type ln = {{NULL,NULL},{NULL},0};
 
-	*pos_grp_start = php_stream_tell(dba->fp);
+	size_t start_position = php_stream_tell(dba->fp);
 	ln.key.group = estrdup(key->group);
 	while (inifile_read(dba, &ln)) {
 		if (inifile_key_cmp(&ln.key, key) == DIFFERENT) {
-			has_next_group = true;
 			break;
 		}
-		*pos_grp_start = php_stream_tell(dba->fp);
+		start_position = php_stream_tell(dba->fp);
 	}
 	inifile_line_free(&ln);
-	return has_next_group;
+	return start_position;
 }
 /* }}} */
 
@@ -369,7 +357,7 @@ static bool inifile_copy_to(inifile *dba, size_t pos_start, size_t pos_end, inif
 
 	if (pos_start == pos_end) {
 		*ini_copy = NULL;
-		return false;
+		return true;
 	}
 	if ((fp = php_stream_temp_create(0, 64 * 1024)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Could not create temporary stream");
@@ -438,10 +426,9 @@ static int inifile_filter(inifile *dba, inifile *from, const key_type *key, bool
 }
 /* }}} */
 
-/* {{{ inifile_delete_replace_append */
+/* If value == NULL we are deleting the entry, if is_append is true then we are inserting a new entry */
 static int inifile_delete_replace_append(inifile *dba, const key_type *key, const val_type *value, bool is_append, bool *found)
 {
-	size_t pos_grp_start = 0, pos_grp_next;
 	inifile *ini_tmp = NULL;
 	php_stream *fp_tmp = NULL;
 	int ret = FAILURE;
@@ -457,11 +444,12 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 	 * 8) Append temporary stream
 	 */
 
-	assert(!is_append || (key->name && value)); /* missuse */
+	/* Check missuse of API */
+	assert(!is_append || (key->name && value));
 
 	/* 1 - 3 */
-	inifile_find_group(dba, key, &pos_grp_start);
-	inifile_next_group(dba, key, &pos_grp_next);
+	size_t pos_grp_start = inifile_find_group(dba, key);
+	size_t pos_grp_next = inifile_next_group(dba, key);
 	if (!is_append && !inifile_copy_to(dba, pos_grp_start, pos_grp_next, &ini_tmp)) {
 		goto end;
 	}
