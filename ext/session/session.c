@@ -1875,13 +1875,13 @@ PHP_FUNCTION(session_get_cookie_params)
 }
 /* }}} */
 
-/* {{{ Return the current session name. If newname is given, the session name is replaced with newname */
+/* {{{ Return the current session name. If new name is given, the session name is replaced with new name */
 PHP_FUNCTION(session_name)
 {
 	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
