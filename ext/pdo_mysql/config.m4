@@ -21,7 +21,13 @@ if test "$PHP_PDO_MYSQL" != "no"; then
     AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
   fi
 
-  if test "$PHP_PDO_MYSQL" != "yes" && test "$PHP_PDO_MYSQL" != "mysqlnd"; then
+  dnl Whether to build with the mysqlnd extension or with the MySQL library.
+  AS_CASE([$PHP_PDO_MYSQL], [yes|mysqlnd], [
+    PHP_MYSQLND_ENABLED=yes
+    AC_DEFINE([PDO_USE_MYSQLND], [1],
+      [Define to 1 if the pdo_mysql extension uses mysqlnd.])
+  ], [
+    AC_MSG_CHECKING([for mysql_config])
     if test -f $PHP_PDO_MYSQL && test -x $PHP_PDO_MYSQL ; then
       PDO_MYSQL_CONFIG=$PHP_PDO_MYSQL
     else
@@ -33,19 +39,15 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         fi
       fi
     fi
-  fi
 
-  dnl Whether to build with the mysqlnd extension or with the MySQL library.
-  AS_CASE([$PHP_PDO_MYSQL], [yes|mysqlnd], [
-    PHP_MYSQLND_ENABLED=yes
-    AC_DEFINE([PDO_USE_MYSQLND], [1],
-      [Define to 1 if the pdo_mysql extension uses mysqlnd.])
-  ], [
-    AC_MSG_CHECKING([for mysql_config])
     if test -n "$PDO_MYSQL_CONFIG"; then
       AC_MSG_RESULT([$PDO_MYSQL_CONFIG])
-      PDO_MYSQL_LIBS=`$PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g"`
-      PDO_MYSQL_INCLUDE=`$PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
+      PDO_MYSQL_LIBS=$($PDO_MYSQL_CONFIG --libs | $SED -e "s/'//g")
+      PDO_MYSQL_INCLUDE=$($PDO_MYSQL_CONFIG --cflags | $SED -e "s/'//g")
+      PDO_MYSQL_SOCKET=$($PDO_MYSQL_CONFIG --socket)
+      AC_DEFINE_UNQUOTED([PDO_MYSQL_UNIX_ADDR], ["$PDO_MYSQL_SOCKET"],
+        [The MySQL Unix socket location as defined by 'mysql_config' for use
+        with the pdo_mysql extension.])
     elif test -n "$PDO_MYSQL_DIR"; then
       AC_MSG_RESULT([not found])
       AC_MSG_CHECKING([for mysql install under $PDO_MYSQL_DIR])
@@ -79,13 +81,6 @@ if test "$PHP_PDO_MYSQL" != "no"; then
   ])
 
   PHP_CHECK_PDO_INCLUDES
-
-  if test -n "$PDO_MYSQL_CONFIG"; then
-    PDO_MYSQL_SOCKET=`$PDO_MYSQL_CONFIG --socket`
-    AC_DEFINE_UNQUOTED([PDO_MYSQL_UNIX_ADDR], ["$PDO_MYSQL_SOCKET"],
-      [The MySQL Unix socket location as defined by 'mysql_config' for use with
-      the pdo_mysql extension.])
-  fi
 
   PHP_NEW_EXTENSION([pdo_mysql],
     [pdo_mysql.c mysql_driver.c mysql_statement.c mysql_sql_parser.c],
