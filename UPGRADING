@@ -447,6 +447,17 @@ PHP 8.4 UPGRADE NOTES
   . Calling ldap_exop() with more than 4 arguments is deprecated. Use
     ldap_exop_sync() instead.
 
+- Mysqli:
+  . The mysqli_ping() function and mysqli::ping() method are now deprecated,
+    as the reconnect feature was removed in PHP 8.2.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#mysqli_ping_and_mysqliping
+  . The mysqli_kill() function and mysqli::kill() method are now deprecated.
+    If this functionality is needed a SQL "KILL" command can be used instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_kill
+  . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
+    If this functionality is needed a SQL "FLUSH" command can be used instead.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_refresh
+
 - PDO_PGSQL:
   . Using escaped question marks (??) inside dollar-quoted strings is deprecated.
     Since PDO_PGSQL has its own SQL parser with dollar-quoted strings support, it

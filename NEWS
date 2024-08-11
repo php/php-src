@@ -32,6 +32,16 @@ PHP                                                                        NEWS
   . Added SSE2 and SHA-NI implementation of SHA-256. (timwolla, Colin Percival,
     Graham Percival)
 
+- Mysqli:
+  . The mysqli_ping() function and mysqli::ping() method are now deprecated,
+    as the reconnect feature was removed in PHP 8.2. (Kamil Tekiela)
+  . The mysqli_kill() function and mysqli::kill() method are now deprecated.
+    If this functionality is needed a SQL "KILL" command can be used instead.
+    (Kamil Tekiela)
+  . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
+    If this functionality is needed a SQL "FLUSH" command can be used instead.
+    (Kamil Tekiela)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
