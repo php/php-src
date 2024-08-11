@@ -5,7 +5,6 @@ PHP_ARG_WITH([libxml],
   [yes])
 
 if test "$PHP_LIBXML" != "no"; then
-
   dnl This extension can not be build as shared
   ext_shared=no
 
