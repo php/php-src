@@ -12,7 +12,7 @@ check_skip('inifile');
 require_once __DIR__ . '/setup/setup_dba_tests.inc';
 $name = __DIR__ . '/inifile_group_keys_tests.db';
 
-$db = dba_open($name, 'c', 'inifile');
+$db = dba_open($name, 'c-', 'inifile');
 
 echo "Checks on an empty database:\n";
 var_dump(dba_delete(['group', 'name'], $db));
