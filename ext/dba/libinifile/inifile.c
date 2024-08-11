@@ -472,9 +472,8 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 
 	/* 5 */
 	if (!value || (key->name && strlen(key->name))) {
-		bool has_succeeded = inifile_truncate(dba, is_append ? pos_grp_next : pos_grp_start);
-		if (!has_succeeded) {
-			/* Warning is already emited by inifile_truncate() on failure */
+		if (!inifile_truncate(dba, is_append ? pos_grp_next : pos_grp_start)) {
+			/* Warning is already emitted by inifile_truncate() on failure */
 			goto end;
 		}
 	}
@@ -511,7 +510,7 @@ static int inifile_delete_replace_append(inifile *dba, const key_type *key, cons
 		}
 	}
 
-	end:
+end:
 	if (ini_tmp) {
 		php_stream_close(ini_tmp->fp);
 		inifile_free(ini_tmp, /* persistent */ false);
