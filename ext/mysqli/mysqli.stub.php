@@ -1537,7 +1537,7 @@ function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds
 /** @refcount 1 */
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
 
-function mysqli_report(int $flags): bool {}
+function mysqli_report(int $flags): true {}
 
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
