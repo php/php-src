@@ -227,7 +227,7 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* }}} */
 
 /* {{{ mysqli_read_na */
-static int mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
+static zend_result mysqli_read_na(mysqli_object *obj, zval *retval, bool quiet)
 {
 	if (!quiet) {
 		zend_throw_error(NULL, "Cannot read property");
