@@ -179,6 +179,7 @@ if (IS_GMP(zval)) {                                               \
 	gmp_create(return_value, &gmpnumber)
 
 static void gmp_strval(zval *result, mpz_t gmpnum, int base);
+static zend_result convert_zstr_to_gmp(mpz_t gmp_number, const zend_string *val, zend_long base, uint32_t arg_pos);
 static zend_result convert_to_gmp(mpz_t gmpnumber, zval *val, zend_long base, uint32_t arg_pos);
 static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg, bool is_operator);
 
@@ -493,7 +494,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	zv = var_tmp_var(&unserialize_data);
 	if (!php_var_unserialize(zv, &p, max, &unserialize_data)
 		|| Z_TYPE_P(zv) != IS_STRING
-		|| convert_to_gmp(gmpnum, zv, 10, 0) == FAILURE
+		|| convert_zstr_to_gmp(gmpnum, Z_STR_P(zv), 10, 0) == FAILURE
 	) {
 		zend_throw_exception(NULL, "Could not unserialize number", 0);
 		goto exit;
@@ -2108,7 +2109,7 @@ ZEND_METHOD(GMP, __unserialize)
 
 	zval *num = zend_hash_index_find(data, 0);
 	if (!num || Z_TYPE_P(num) != IS_STRING ||
-			convert_to_gmp(GET_GMP_FROM_ZVAL(ZEND_THIS), num, 16, 0) == FAILURE) {
+			convert_zstr_to_gmp(GET_GMP_FROM_ZVAL(ZEND_THIS), Z_STR_P(num), 16, /* arg_pos */ 0) == FAILURE) {
 		zend_throw_exception(NULL, "Could not unserialize number", 0);
 		RETURN_THROWS();
 	}
