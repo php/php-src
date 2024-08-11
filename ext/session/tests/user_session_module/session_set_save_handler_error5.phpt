@@ -10,10 +10,10 @@ try {
     session_set_save_handler(new \SessionHandler(), true);
     session_start();
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class . ': ' . $e->getMessage() . "\n";
 }
 echo "ok";
 ?>
 --EXPECT--
-Cannot call default session handler
+Error: Cannot call default session handler
 ok
