@@ -1958,7 +1958,7 @@ PHP_FUNCTION(mysqli_store_result)
 		RETURN_THROWS();
 	}
 
-	if (hasThis() && ZEND_NUM_ARGS() == 1 || ZEND_NUM_ARGS() == 2) {
+	if ((hasThis() && ZEND_NUM_ARGS() == 1) || ZEND_NUM_ARGS() == 2) {
 		zend_error(E_DEPRECATED, "Passing the $mode parameter is deprecated since 8.4, as it has been ignored since 8.1");
 		if (UNEXPECTED(EG(exception))) {
 			RETURN_THROWS();
