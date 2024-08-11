@@ -3102,6 +3102,11 @@ const CURL_VERSION_HTTP3 = UNKNOWN;
  * @cvalue CURLINFO_RETRY_AFTER
  */
 const CURLINFO_RETRY_AFTER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_HTTP_VERSION_3
+ */
+const CURL_HTTP_VERSION_3  = UNKNOWN;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
@@ -3545,6 +3550,14 @@ const CURLOPT_CA_CACHE_TIMEOUT = UNKNOWN;
  * @cvalue CURLOPT_QUICK_EXIT
  */
 const CURLOPT_QUICK_EXIT = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075800 /* Available since 7.88.0 */
+/**
+ * @var int
+ * @cvalue CURL_HTTP_VERSION_3ONLY
+ */
+const CURL_HTTP_VERSION_3ONLY  = UNKNOWN;
 #endif
 
 /**
