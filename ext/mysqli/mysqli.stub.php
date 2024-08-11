@@ -138,6 +138,7 @@ const MYSQLI_ASYNC = UNKNOWN;
 /**
  * @var int
  * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
+ * @deprecated
  */
 const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
 
