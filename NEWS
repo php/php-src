@@ -77,10 +77,20 @@ PHP                                                                        NEWS
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
     (TysonAndre)
+  . Passing a non-empty string for the $enclosure parameter of:
+    - SplFileObject::setCsvControl()
+    - SplFileObject::fputcsv()
+    - SplFileObject::fgetcsv()
+    is now deprecated. (Girgias)
 
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
   . Enables crc32 auxiliary detection on OpenBSD. (David Carlier)
+  . Passing a non-empty string for the $enclosure parameter of:
+    - fputcsv()
+    - fgetcsv()
+    - str_getcsv()
+    is now deprecated. (Girgias)
 
 - Streams:
   . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
