@@ -255,8 +255,8 @@ static void php_conv_base64_encode_dtor(php_conv_base64_encode *inst)
 static php_conv_err_t php_conv_base64_encode_flush(php_conv_base64_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
 {
 	volatile php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
-	register unsigned char *pd;
-	register size_t ocnt;
+	unsigned char *pd;
+	size_t ocnt;
 	unsigned int line_ccnt;
 
 	pd = (unsigned char *)(*out_pp);
@@ -328,9 +328,9 @@ out:
 static php_conv_err_t php_conv_base64_encode_convert(php_conv_base64_encode *inst, const char **in_pp, size_t *in_left_p, char **out_pp, size_t *out_left_p)
 {
 	volatile php_conv_err_t err = PHP_CONV_ERR_SUCCESS;
-	register size_t ocnt, icnt;
-	register unsigned char *ps, *pd;
-	register unsigned int line_ccnt;
+	size_t ocnt, icnt;
+	unsigned char *ps, *pd;
+	unsigned int line_ccnt;
 
 	if (in_pp == NULL || in_left_p == NULL) {
 		return php_conv_base64_encode_flush(inst, in_pp, in_left_p, out_pp, out_left_p);
