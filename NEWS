@@ -45,6 +45,10 @@ PHP                                                                        NEWS
     deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
     conjunction with this function it has also been deprecated. (Girgias)
 
+- GD:
+  . Fixed imageloadfont() when loading font files for the opposite endianness,
+    including those with non-zero offset field. (Giovanni Giacobbi)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
