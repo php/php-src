@@ -5,9 +5,9 @@ if /i "%GITHUB_ACTIONS%" neq "True" (
     exit /b 3
 )
 
-del /f /q C:\Windows\System32\libcrypto-1_1-x64.dll >NUL 2>NUL
+del /f /q C:\Windows\System32\libcrypto-1_1-x86.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
-del /f /q C:\Windows\System32\libssl-1_1-x64.dll >NUL 2>NUL
+del /f /q C:\Windows\System32\libssl-1_1-x86.dll >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 
 call %~dp0find-target-branch.bat
