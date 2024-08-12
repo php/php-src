@@ -51,7 +51,7 @@ PHPAPI extern char *php_ini_opened_path;
 PHPAPI extern char *php_ini_scanned_path;
 PHPAPI extern char *php_ini_scanned_files;
 
-static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{ */
+static ZEND_COLD size_t php_info_print_html_esc(const char *str, size_t len) /* {{{ */
 {
 	size_t written;
 	zend_string *new_str;
@@ -63,7 +63,7 @@ static ZEND_COLD int php_info_print_html_esc(const char *str, size_t len) /* {{{
 }
 /* }}} */
 
-static ZEND_COLD int php_info_printf(const char *fmt, ...) /* {{{ */
+static ZEND_COLD size_t php_info_printf(const char *fmt, ...) /* {{{ */
 {
 	char *buf;
 	size_t len, written;
@@ -79,7 +79,7 @@ static ZEND_COLD int php_info_printf(const char *fmt, ...) /* {{{ */
 }
 /* }}} */
 
-static zend_always_inline int php_info_print(const char *str) /* {{{ */
+static zend_always_inline size_t php_info_print(const char *str) /* {{{ */
 {
 	return php_output_write(str, strlen(str));
 }
@@ -164,7 +164,7 @@ PHPAPI ZEND_COLD void php_info_print_module(zend_module_entry *zend_module) /* {
 /* }}} */
 
 /* {{{ php_print_gpcse_array */
-static ZEND_COLD void php_print_gpcse_array(char *name, uint32_t name_length)
+static ZEND_COLD void php_print_gpcse_array(char *name, size_t name_length)
 {
 	zval *data, *tmp;
 	zend_string *string_key;
@@ -611,7 +611,7 @@ char* php_get_windows_name()
 /* }}}  */
 
 /* {{{  */
-void php_get_windows_cpu(char *buf, int bufsize)
+void php_get_windows_cpu(char *buf, size_t bufsize)
 {
 	SYSTEM_INFO SysInfo;
 	GetSystemInfo(&SysInfo);
