@@ -336,6 +336,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The php_escape_shell_arg() now takes a zend_string* instead of a char*
      Moreover, providing it with a binary safe string is the responsibility of
      the caller now.
+   - The php_info_html_esc() function has been removed, use
+     php_escape_html_entities() with ENT_QUOTES directly instead.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is
