@@ -109,14 +109,13 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 
 static bool php_mail_build_headers_check_field_name(const zend_string *key)
 {
-	size_t len = 0;
+	const char *end = ZSTR_VAL(key) + ZSTR_LEN(key);
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2 */
-	while (len < ZSTR_LEN(key)) {
-		if (*(ZSTR_VAL(key)+len) < 33 || *(ZSTR_VAL(key)+len) > 126 || *(ZSTR_VAL(key)+len) == ':') {
+	for (const char *ptr = ZSTR_VAL(key); ptr < end; ptr++) {
+		if (*ptr < 33 || *ptr > 126 || *ptr == ':') {
 			return false;
 		}
-		len++;
 	}
 	return true;
 }
