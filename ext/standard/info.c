@@ -255,7 +255,7 @@ static char* php_get_windows_name()
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
 	DWORD dwType;
-	char *major = NULL, *sub = NULL, *retval;
+	const char *major = NULL, *sub = NULL;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
 
@@ -296,19 +296,19 @@ static char* php_get_windows_name()
 		}
 	} else if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6) {
 		if (osvi.dwMajorVersion == 6) {
-			if( osvi.dwMinorVersion == 0 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION ) {
+			if (osvi.dwMinorVersion == 0) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
 					major = "Windows Vista";
 				} else {
 					major = "Windows Server 2008";
 				}
-			} else if ( osvi.dwMinorVersion == 1 ) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+			} else if (osvi.dwMinorVersion == 1) {
+				if (osvi.wProductType == VER_NT_WORKSTATION) {
 					major = "Windows 7";
 				} else {
 					major = "Windows Server 2008 R2";
 				}
-			} else if ( osvi.dwMinorVersion == 2 ) {
+			} else if (osvi.dwMinorVersion == 2) {
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
@@ -333,20 +333,20 @@ static char* php_get_windows_name()
 					VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR,
 					dwlConditionMask)) {
 					osvi.dwMinorVersion = 3; /* Windows 8.1/Windows Server 2012 R2 */
-					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					if (osvi.wProductType == VER_NT_WORKSTATION)  {
 						major = "Windows 8.1";
 					} else {
 						major = "Windows Server 2012 R2";
 					}
 				} else {
-					if( osvi.wProductType == VER_NT_WORKSTATION )  {
+					if (osvi.wProductType == VER_NT_WORKSTATION)  {
 						major = "Windows 8";
 					} else {
 						major = "Windows Server 2012";
 					}
 				}
 			} else if (osvi.dwMinorVersion == 3) {
-				if( osvi.wProductType == VER_NT_WORKSTATION )  {
+				if (osvi.wProductType == VER_NT_WORKSTATION)  {
 					major = "Windows 8.1";
 				} else {
 					major = "Windows Server 2012 R2";
@@ -602,9 +602,10 @@ static char* php_get_windows_name()
 			}
 		}
 	} else {
-		return NULL;
+		ZEND_UNREACHABLE();
 	}
 
+	char *retval;
 	spprintf(&retval, 0, "%s%s%s%s%s", major, sub?" ":"", sub?sub:"", osvi.szCSDVersion[0] != '\0'?" ":"", osvi.szCSDVersion);
 	return retval;
 }
