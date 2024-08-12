@@ -5037,7 +5037,7 @@ static zend_string *zend_copy_unmangled_prop_name(zend_string *prop_name)
 	}
 }
 
-static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast, uint32_t type)
 {
 	ZEND_ASSERT(ast->kind == ZEND_AST_STATIC_CALL);
 
