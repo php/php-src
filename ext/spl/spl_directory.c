@@ -2310,6 +2310,10 @@ PHP_METHOD(SplFileObject, fgetcsv)
 		if (esc_len == 0) {
 			escape = PHP_CSV_NO_ESCAPE;
 		} else {
+			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			escape = (unsigned char) esc[0];
 		}
 	}
@@ -2358,6 +2362,10 @@ PHP_METHOD(SplFileObject, fputcsv)
 		if (esc_len == 0) {
 			escape = PHP_CSV_NO_ESCAPE;
 		} else {
+			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			escape = (unsigned char) esc[0];
 		}
 	}
@@ -2405,6 +2413,10 @@ PHP_METHOD(SplFileObject, setCsvControl)
 		if (esc_len == 0) {
 			escape = PHP_CSV_NO_ESCAPE;
 		} else {
+			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			escape = (unsigned char) esc[0];
 		}
 	}

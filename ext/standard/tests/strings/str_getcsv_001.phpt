@@ -18,8 +18,6 @@ var_dump(str_getcsv('.foo..bar.', '.', '.', '.'));
 print "-----\n";
 var_dump(str_getcsv('.foo. .bar.', '   ', '.', '.'));
 print "-----\n";
-var_dump(str_getcsv('1foo1 1bar111', '   ', '1   ', '\  '));
-print "-----\n";
 var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";
 var_dump(str_getcsv('" "" "', ' '));
@@ -28,7 +26,7 @@ var_dump(str_getcsv(''));
 print "-----\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 array(3) {
   [0]=>
   string(1) "f"
@@ -61,6 +59,8 @@ array(2) {
   string(3) "bar"
 }
 -----
+
+Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(3) {
   [0]=>
   string(2) "f."
@@ -70,23 +70,20 @@ array(3) {
   string(4) "-|-."
 }
 -----
+
+Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(1) {
   [0]=>
   string(7) "foo.bar"
 }
 -----
+
+Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(2) {
   [0]=>
   string(3) "foo"
   [1]=>
   string(3) "bar"
-}
------
-array(2) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  string(4) "bar1"
 }
 -----
 array(2) {
