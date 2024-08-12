@@ -37,6 +37,7 @@ if "%PLATFORM%" == "x86" (
 ) else (
 	set CFLAGS=/W1 /WX
 )
+set CFLAGS=%CFLAGS% /DPHP_DEBUG=1 /DZEND_DEBUG=1
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
