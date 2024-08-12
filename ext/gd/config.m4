@@ -13,32 +13,26 @@ PHP_ARG_WITH([external-gd],
   [no],
   [no])
 
-if test -z "$PHP_AVIF"; then
-  PHP_ARG_WITH([avif],
-    [for libavif],
-    [AS_HELP_STRING([--with-avif],
-      [GD: Enable AVIF support (only for bundled libgd)])],
-    [no],
-    [no])
-fi
+PHP_ARG_WITH([avif],
+  [for libavif],
+  [AS_HELP_STRING([--with-avif],
+    [GD: Enable AVIF support (only for bundled libgd)])],
+  [no],
+  [no])
 
-if test -z "$PHP_WEBP"; then
-  PHP_ARG_WITH([webp],
-    [for libwebp],
-    [AS_HELP_STRING([--with-webp],
-      [GD: Enable WEBP support (only for bundled libgd)])],
-    [no],
-    [no])
-fi
+PHP_ARG_WITH([webp],
+  [for libwebp],
+  [AS_HELP_STRING([--with-webp],
+    [GD: Enable WEBP support (only for bundled libgd)])],
+  [no],
+  [no])
 
-if test -z "$PHP_JPEG"; then
-  PHP_ARG_WITH([jpeg],
-    [for libjpeg],
-    [AS_HELP_STRING([--with-jpeg],
-      [GD: Enable JPEG support (only for bundled libgd)])],
-    [no],
-    [no])
-fi
+PHP_ARG_WITH([jpeg],
+  [for libjpeg],
+  [AS_HELP_STRING([--with-jpeg],
+    [GD: Enable JPEG support (only for bundled libgd)])],
+  [no],
+  [no])
 
 PHP_ARG_WITH([xpm],
   [for libXpm],
@@ -73,8 +67,8 @@ AC_DEFUN([PHP_GD_PNG],[
   AC_DEFINE([HAVE_LIBPNG], [1], [Define to 1 if you have the libpng library.])
 ])
 
-AC_DEFUN([PHP_GD_AVIF],[
-  if test "$PHP_AVIF" != "no"; then
+AC_DEFUN([PHP_GD_AVIF], [
+  AS_VAR_IF([PHP_AVIF], [no],, [
     PKG_CHECK_MODULES([AVIF], [libavif >= 0.8.2])
     PHP_EVAL_LIBLINE([$AVIF_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$AVIF_CFLAGS])
@@ -82,11 +76,11 @@ AC_DEFUN([PHP_GD_AVIF],[
       [Define to 1 if you have the libavif library.])
     AC_DEFINE([HAVE_GD_AVIF], [1],
       [Define to 1 if gd extension has AVIF support.])
-  fi
+  ])
 ])
 
 AC_DEFUN([PHP_GD_WEBP],[
-  if test "$PHP_WEBP" != "no"; then
+  AS_VAR_IF([PHP_WEBP], [no],, [
     PKG_CHECK_MODULES([WEBP], [libwebp >= 0.2.0])
     PHP_EVAL_LIBLINE([$WEBP_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$WEBP_CFLAGS])
@@ -94,11 +88,11 @@ AC_DEFUN([PHP_GD_WEBP],[
       [Define to 1 if you have the libwebp library.])
     AC_DEFINE([HAVE_GD_WEBP], [1],
       [Define to 1 if gd extension has WebP support.])
-  fi
+  ])
 ])
 
 AC_DEFUN([PHP_GD_JPEG],[
-  if test "$PHP_JPEG" != "no"; then
+  AS_VAR_IF([PHP_JPEG], [no],, [
     PKG_CHECK_MODULES([JPEG], [libjpeg])
     PHP_EVAL_LIBLINE([$JPEG_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$JPEG_CFLAGS])
@@ -106,40 +100,39 @@ AC_DEFUN([PHP_GD_JPEG],[
       [Define to 1 if you have the libjpeg library.])
     AC_DEFINE([HAVE_GD_JPG], [1],
       [Define to 1 if gd extension has JPEG support.])
-  fi
+  ])
 ])
 
 AC_DEFUN([PHP_GD_XPM],[
-  if test "$PHP_XPM" != "no"; then
+  AS_VAR_IF([PHP_XPM], [no],, [
     PKG_CHECK_MODULES([XPM], [xpm])
     PHP_EVAL_LIBLINE([$XPM_LIBS], [GD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$XPM_CFLAGS])
     AC_DEFINE([HAVE_XPM], [1], [Define to 1 if you have the xpm library.])
     AC_DEFINE([HAVE_GD_XPM], [1],
       [Define to 1 if gd extension has XPM support.])
-  fi
+  ])
 ])
 
 AC_DEFUN([PHP_GD_FREETYPE2],[
-  if test "$PHP_FREETYPE" != "no"; then
+  AS_VAR_IF([PHP_FREETYPE], [no],, [
     PKG_CHECK_MODULES([FREETYPE2], [freetype2])
-
     PHP_EVAL_INCLINE([$FREETYPE2_CFLAGS])
     PHP_EVAL_LIBLINE([$FREETYPE2_LIBS], [GD_SHARED_LIBADD])
     AC_DEFINE([HAVE_LIBFREETYPE], [1],
       [Define to 1 if you have the FreeType library.])
     AC_DEFINE([HAVE_GD_FREETYPE], [1],
       [Define to 1 if gd extension has FreeType support.])
-  fi
+  ])
 ])
 
 AC_DEFUN([PHP_GD_JISX0208],[
-  if test "$PHP_GD_JIS_CONV" = "yes"; then
+  AS_VAR_IF([PHP_GD_JIS_CONV], [yes], [
     AC_DEFINE([USE_GD_JISX0208], [1],
       [Define to 1 if gd extension has JIS-mapped Japanese font support.])
     AC_DEFINE([JISX0208], [1],
       [Define to 1 if GD library has JIS-mapped Japanese font support.])
-  fi
+  ])
 ])
 
 dnl
@@ -222,7 +215,6 @@ dnl Main GD configure
 dnl
 
 if test "$PHP_GD" != "no"; then
-
   if test "$PHP_EXTERNAL_GD" = "no"; then
     extra_sources=m4_normalize(["
       libgd/gd_avif.c
