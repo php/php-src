@@ -21,19 +21,21 @@ $p->setSignatureAlgorithm(Phar::MD5);
 var_dump($p->getSignature());
 $p->setSignatureAlgorithm(Phar::SHA1);
 var_dump($p->getSignature());
+
 try {
-$p->setSignatureAlgorithm(Phar::SHA256);
-var_dump($p->getSignature());
+    $p->setSignatureAlgorithm(Phar::SHA256);
+    var_dump($p->getSignature());
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
+
 try {
-$p->setSignatureAlgorithm(Phar::SHA512);
-var_dump($p->getSignature());
+    $p->setSignatureAlgorithm(Phar::SHA512);
+    var_dump($p->getSignature());
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
-try {
+
 $pkey = '-----BEGIN PRIVATE KEY-----
 MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMDcANSIpkgSF6Rh
 KHM8JncsVuCsO5XjiMf3g50lB+poJAG9leoygbVtY55h9tzeI7SAdZbdIoHbtJ/V
@@ -50,10 +52,12 @@ gTKlAkEAnJc8DWidhpdzajG488Pf/NUmkBBNOiOnxn1Cv1P6Ql01X6HutAHfuCqO
 RcHLpdSl7lZmws1bCnDUmt5GzKBw9diHxuyfGEJ0c0clDTWVEMyO80u0jxrliMkT
 8h5bvpPaY8KIlkg=
 -----END PRIVATE KEY-----';
-$p->setSignatureAlgorithm(Phar::OPENSSL, $pkey);
-var_dump($p->getSignature());
+
+try {
+    $p->setSignatureAlgorithm(Phar::OPENSSL, $pkey);
+    var_dump($p->getSignature());
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
 ?>
 --CLEAN--
