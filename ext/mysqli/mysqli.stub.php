@@ -519,52 +519,62 @@ const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_GRANT
+ * @deprecated
  */
 const MYSQLI_REFRESH_GRANT = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_LOG
+ * @deprecated
  */
 const MYSQLI_REFRESH_LOG = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_TABLES
+ * @deprecated
  */
 const MYSQLI_REFRESH_TABLES = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_HOSTS
+ * @deprecated
  */
 const MYSQLI_REFRESH_HOSTS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_STATUS
+ * @deprecated
  */
 const MYSQLI_REFRESH_STATUS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_THREADS
+ * @deprecated
  */
 const MYSQLI_REFRESH_THREADS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
+ * @deprecated
  */
 const MYSQLI_REFRESH_REPLICA = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
+ * @deprecated
  */
 const MYSQLI_REFRESH_SLAVE = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_MASTER
+ * @deprecated
  */
 const MYSQLI_REFRESH_MASTER = UNKNOWN;
 #ifdef REFRESH_BACKUP_LOG
 /**
  * @var int
  * @cvalue REFRESH_BACKUP_LOG
+ * @deprecated
  */
 const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
 #endif
