@@ -12,4 +12,5 @@ runs:
         ext/tokenizer/tokenizer_data_gen.php
         build/gen_stub.php -f
         build/gen_stub.php --generate-optimizer-info
-        git add . -N && git diff --exit-code
+        # Use the -a flag for a bug in git 2.46.0, which doesn't consider changed -diff files.
+        git add . -N && git diff -a --exit-code
