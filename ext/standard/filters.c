@@ -469,7 +469,7 @@ static unsigned int b64_tbl_dec[256] = {
 	64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64, 64
 };
 
-static int php_conv_base64_decode_ctor(php_conv_base64_decode *inst)
+static void php_conv_base64_decode_ctor(php_conv_base64_decode *inst)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_base64_decode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_base64_decode_dtor;
@@ -478,7 +478,6 @@ static int php_conv_base64_decode_ctor(php_conv_base64_decode *inst)
 	inst->urem_nbits = 0;
 	inst->ustat = 0;
 	inst->eos = 0;
-	return SUCCESS;
 }
 
 static void php_conv_base64_decode_dtor(php_conv_base64_decode *inst)
@@ -1193,9 +1192,7 @@ static php_conv *php_conv_open(int conv_mode, const HashTable *options, int pers
 
 		case PHP_CONV_BASE64_DECODE:
 			retval = pemalloc(sizeof(php_conv_base64_decode), persistent);
-			if (php_conv_base64_decode_ctor((php_conv_base64_decode *)retval)) {
-				goto out_failure;
-			}
+			php_conv_base64_decode_ctor((php_conv_base64_decode *)retval);
 			break;
 
 		case PHP_CONV_QPRINT_ENCODE: {
