@@ -1279,7 +1279,7 @@ out_failure:
 #undef GET_UINT_PROP
 #undef GET_BOOL_PROP
 
-static int php_convert_filter_ctor(php_convert_filter *inst,
+static zend_result php_convert_filter_ctor(php_convert_filter *inst,
 	int conv_mode, HashTable *conv_opts,
 	const char *filtername, int persistent)
 {
@@ -1310,7 +1310,7 @@ static void php_convert_filter_dtor(php_convert_filter *inst)
 }
 
 /* {{{ strfilter_convert_append_bucket */
-static int strfilter_convert_append_bucket(
+static zend_result strfilter_convert_append_bucket(
 		php_convert_filter *inst,
 		php_stream *stream, php_stream_filter *filter,
 		php_stream_bucket_brigade *buckets_out,
