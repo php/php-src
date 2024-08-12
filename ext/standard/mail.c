@@ -181,6 +181,20 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 	} ZEND_HASH_FOREACH_END();
 }
 
+#define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \
+do { \
+	if (Z_TYPE_P(val) == IS_STRING) { \
+		php_mail_build_headers_elem(&s, key, val); \
+	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
+		if (zend_string_equals_literal_ci(key, target)) { \
+			zend_type_error("Header \"%s\" must be of type string, array given", target); \
+			break; \
+		} \
+		php_mail_build_headers_elems(&s, key, val); \
+	} else { \
+		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
+	} \
+} while(0)
 
 PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 {
@@ -219,7 +233,13 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 		} else if (zend_string_equals_literal_ci(key, "subject")) {
 			zend_value_error("The additional headers cannot contain the \"Subject\" header");
 		} else {
-			PHP_MAIL_BUILD_HEADER_DEFAULT(s, key, val);
+			if (Z_TYPE_P(val) == IS_STRING) {
+				php_mail_build_headers_elem(&s, key, val);
+			} else if (Z_TYPE_P(val) == IS_ARRAY) {
+				php_mail_build_headers_elems(&s, key, val);
+			} else {
+				zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+			}
 		}
 
 		if (EG(exception)) {
