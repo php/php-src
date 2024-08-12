@@ -39,32 +39,21 @@ if test "$PHP_PDO_ODBC" != "no"; then
     pdo_odbc_dir=
   fi
 
-  case $pdo_odbc_flavour in
-    ibm-db2)
+  AS_CASE([$pdo_odbc_flavour],
+    [ibm-db2], [
         pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
         pdo_odbc_def_incdir=/home/db2inst1/sqllib/include
         pdo_odbc_def_lib=db2
-        ;;
-
-    iODBC|iodbc)
-        pdo_odbc_pkgconfig_module=libiodbc
-        ;;
-
-    unixODBC|unixodbc)
-        pdo_odbc_pkgconfig_module=odbc
-        ;;
-
-    generic)
+    ],
+    [iODBC|iodbc], [pdo_odbc_pkgconfig_module=libiodbc],
+    [unixODBC|unixodbc], [pdo_odbc_pkgconfig_module=odbc],
+    [generic], [
         pdo_odbc_def_lib="`echo $PHP_PDO_ODBC | cut -d, -f3`"
         pdo_odbc_def_ldflags="`echo $PHP_PDO_ODBC | cut -d, -f4`"
         pdo_odbc_def_cflags="`echo $PHP_PDO_ODBC | cut -d, -f5`"
         pdo_odbc_flavour="generic-$pdo_odbc_def_lib"
-        ;;
-
-      *)
-        AC_MSG_ERROR([Unknown ODBC flavour $pdo_odbc_flavour]PDO_ODBC_HELP_TEXT)
-        ;;
-  esac
+    ],
+    [AC_MSG_ERROR([Unknown ODBC flavour $pdo_odbc_flavour]PDO_ODBC_HELP_TEXT)])
 
   if test -n "$pdo_odbc_pkgconfig_module"; then
     AC_MSG_RESULT([$pdo_odbc_flavour using pkg-config])
