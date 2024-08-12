@@ -342,8 +342,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 	bool failed = true;
 	zend_long shift = zval_try_get_long(op2, &failed);
 	if (failed) {
-		//char operator_sigil[2];
-		char *operator_sigil;
+		const char *operator_sigil;
 		if (opcode == ZEND_POW) {
 			operator_sigil = "**";
 		} else if (opcode == ZEND_SL) {
