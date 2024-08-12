@@ -56,6 +56,14 @@
 
 extern zend_long php_getuid(void);
 
+typedef enum {
+	NO_HEADER_ERROR,
+	CONTAINS_LF_ONLY,
+	CONTAINS_CR_ONLY,
+	CONTAINS_CRLF,
+	CONTAINS_NULL
+} php_mail_header_value_error_type;
+
 static php_mail_header_value_error_type php_mail_build_headers_check_field_value(zval *val)
 {
 	size_t len = 0;

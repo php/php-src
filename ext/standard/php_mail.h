@@ -22,12 +22,4 @@ PHP_MINFO_FUNCTION(mail);
 PHPAPI zend_string *php_mail_build_headers(HashTable *headers);
 PHPAPI extern bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd);
 
-typedef enum {
-	NO_HEADER_ERROR,
-	CONTAINS_LF_ONLY,
-	CONTAINS_CR_ONLY,
-	CONTAINS_CRLF,
-	CONTAINS_NULL
-} php_mail_header_value_error_type;
-
 #endif /* PHP_MAIL_H */
