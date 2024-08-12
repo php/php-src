@@ -105,6 +105,16 @@ zend_result dom_document_encoding_read(dom_object *obj, zval *retval)
 	return SUCCESS;
 }
 
+zend_result dom_document_actual_encoding_read(dom_object *obj, zval *retval)
+{
+	zend_error(E_DEPRECATED, "Property DOMDocument::$actualEncoding is deprecated");
+	if (UNEXPECTED(EG(exception))) {
+		return FAILURE;
+	}
+
+	return dom_document_encoding_read(obj, retval);
+}
+
 zend_result dom_document_encoding_write(dom_object *obj, zval *newval)
 {
 	DOM_PROP_NODE(xmlDocPtr, docp, obj);
@@ -409,6 +419,11 @@ Since: DOM Level 3
 */
 zend_result dom_document_config_read(dom_object *obj, zval *retval)
 {
+	zend_error(E_DEPRECATED, "Property DOMDocument::$config is deprecated");
+	if (UNEXPECTED(EG(exception))) {
+		return FAILURE;
+	}
+
 	ZVAL_NULL(retval);
 	return SUCCESS;
 }
