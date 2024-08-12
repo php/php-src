@@ -1844,24 +1844,20 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     [Define to 1 if you have the 'libiconv' function.])
 
   dnl Check libc first if no path is provided in --with-iconv.
-  if test "$PHP_ICONV" = "yes"; then
+  AS_VAR_IF([PHP_ICONV], [yes], [
     dnl Reset LIBS temporarily as it may have already been included -liconv in.
-    LIBS_save="$LIBS"
+    LIBS_save=$LIBS
     LIBS=
-    AC_CHECK_FUNC([iconv], [
-      found_iconv=yes
-    ],[
-      AC_CHECK_FUNC([libiconv], [
+    AC_CHECK_FUNC([iconv], [found_iconv=yes],
+      [AC_CHECK_FUNC([libiconv], [
         AC_DEFINE([HAVE_LIBICONV], [1])
         found_iconv=yes
-      ])
-    ])
-    LIBS="$LIBS_save"
-  fi
+      ])])
+    LIBS=$LIBS_save
+  ])
 
   dnl Check external libs for iconv funcs.
-  if test "$found_iconv" = "no"; then
-
+  AS_VAR_IF([found_iconv], [no], [
     for i in $PHP_ICONV /usr/local /usr; do
       if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
@@ -1876,9 +1872,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       fi
     done
 
-    if test -z "$ICONV_DIR"; then
-      AC_MSG_ERROR([Please specify the install prefix of iconv with --with-iconv=<DIR>])
-    fi
+    AS_VAR_IF([ICONV_DIR],,
+      [AC_MSG_ERROR(m4_text_wrap([
+        Please specify the install prefix of iconv with --with-iconv=<DIR>
+      ]))])
 
     if test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.a ||
        test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME ||
@@ -1896,7 +1893,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
           [-L$ICONV_DIR/$PHP_LIBDIR])],
         [-L$ICONV_DIR/$PHP_LIBDIR])
     fi
-  fi
+  ])
 
   if test "$found_iconv" = "yes"; then
     if test -n "$ICONV_DIR"; then
