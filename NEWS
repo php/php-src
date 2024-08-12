@@ -92,6 +92,10 @@ PHP                                                                        NEWS
     - fgetcsv()
     - str_getcsv()
     is now deprecated. (Girgias)
+  . The str_getcsv() function now throws ValueErrors when the $separator and
+    $enclosure arguments are not one byte long, or if the $escape is not one
+    byte long or the empty string. This aligns the behaviour to be identical
+    to that of fputcsv() and fgetcsv(). (Girgias)
 
 - Streams:
   . Implemented GH-15155 (Stream context is lost when custom stream wrapper is

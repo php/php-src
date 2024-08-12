@@ -16,8 +16,6 @@ var_dump(str_getcsv('|f.|.|bar|.|-|-.|', '.', '|', '-'));
 print "-----\n";
 var_dump(str_getcsv('.foo..bar.', '.', '.', '.'));
 print "-----\n";
-var_dump(str_getcsv('.foo. .bar.', '   ', '.', '.'));
-print "-----\n";
 var_dump(str_getcsv('.foo  . .  bar  .', ' ', '.', ''));
 print "-----\n";
 var_dump(str_getcsv('" "" "', ' '));
@@ -75,15 +73,6 @@ Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is
 array(1) {
   [0]=>
   string(7) "foo.bar"
-}
------
-
-Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
-array(2) {
-  [0]=>
-  string(3) "foo"
-  [1]=>
-  string(3) "bar"
 }
 -----
 array(2) {

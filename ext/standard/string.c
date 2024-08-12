@@ -5446,23 +5446,36 @@ finish:
 PHP_FUNCTION(str_getcsv)
 {
 	zend_string *str;
-	char delim = ',', enc = '"';
+	char delimiter = ',', enclosure = '"';
 	int escape = (unsigned char) '\\';
-	char *delim_str = NULL, *enc_str = NULL, *escape_str = NULL;
-	size_t delim_len = 0, enc_len = 0, escape_str_len = 0;
+	char *delimiter_str = NULL, *enclosure_str = NULL, *escape_str = NULL;
+	size_t delimiter_str_len = 0, enclosure_str_len = 0, escape_str_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STR(str)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(delim_str, delim_len)
-		Z_PARAM_STRING(enc_str, enc_len)
+		Z_PARAM_STRING(delimiter_str, delimiter_str_len)
+		Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 		Z_PARAM_STRING(escape_str, escape_str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	delim = delim_len ? delim_str[0] : delim;
-	enc = enc_len ? enc_str[0] : enc;
-
-	// TODO ValueError for delimiter and enclosure string being longer than 1 byte
+	if (delimiter_str != NULL) {
+		/* Make sure that there is at least one character in string */
+		if (delimiter_str_len != 1) {
+			zend_argument_value_error(2, "must be a single character");
+			RETURN_THROWS();
+		}
+		/* use first character from string */
+		delimiter = delimiter_str[0];
+	}
+	if (enclosure_str != NULL) {
+		if (enclosure_str_len != 1) {
+			zend_argument_value_error(3, "must be a single character");
+			RETURN_THROWS();
+		}
+		/* use first character from string */
+		enclosure = enclosure_str[0];
+	}
 	if (escape_str != NULL) {
 		if (escape_str_len > 1) {
 			zend_argument_value_error(4, "must be empty or a single character");
@@ -5480,7 +5493,7 @@ PHP_FUNCTION(str_getcsv)
 		}
 	}
 
-	HashTable *values = php_fgetcsv(NULL, delim, enc, escape, ZSTR_LEN(str), ZSTR_VAL(str));
+	HashTable *values = php_fgetcsv(NULL, delimiter, enclosure, escape, ZSTR_LEN(str), ZSTR_VAL(str));
 	if (values == NULL) {
 		values = php_bc_fgetcsv_empty_line();
 	}
