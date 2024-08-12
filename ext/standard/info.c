@@ -250,7 +250,7 @@ PHPAPI ZEND_COLD void ZEND_COLD php_info_print_style(void)
 #ifdef PHP_WIN32
 /* {{{  */
 
-char* php_get_windows_name()
+static char* php_get_windows_name()
 {
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
@@ -611,7 +611,7 @@ char* php_get_windows_name()
 /* }}}  */
 
 /* {{{  */
-void php_get_windows_cpu(char *buf, size_t bufsize)
+static void php_get_windows_cpu(char *buf, size_t bufsize)
 {
 	SYSTEM_INFO SysInfo;
 	GetSystemInfo(&SysInfo);
