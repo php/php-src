@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Passing E_USER_ERROR to trigger_error() is now deprecated. (Girgias)
   . Fixed bug GH-15292 (Dynamic AVX detection is broken for MSVC). (nielsdos)
 
+- Curl:
+  . Added constants CURL_HTTP_VERSION_3 (libcurl 7.66) and CURL_HTTP_VERSION_3ONLY
+    (libcurl 7.88) as options for CURLOPT_HTTP_VERSION (Ayesh Karunaratne)
+
 - Date:
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
     are now deprecated. (Jorg Sowa)
