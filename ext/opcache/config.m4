@@ -19,7 +19,7 @@ PHP_ARG_ENABLE([opcache-jit],
   [no])
 
 PHP_ARG_WITH([capstone],
-  [whether to support opcache JIT dissasembly through Capstone],
+  [whether to support opcache JIT disassembly through Capstone],
   [AS_HELP_STRING([--with-capstone],
     [Support opcache JIT disassembly through Capstone])],
   [no],
