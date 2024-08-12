@@ -200,7 +200,7 @@ typedef struct _php_conv_base64_encode {
 	unsigned int line_ccnt;
 	unsigned int line_len;
 	int lbchars_dup;
-	int persistent;
+	bool persistent;
 	unsigned char erem[3];
 } php_conv_base64_encode;
 
@@ -226,7 +226,7 @@ static const unsigned char b64_tbl_enc[256] = {
 	'w','x','y','z','0','1','2','3','4','5','6','7','8','9','+','/'
 };
 
-static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, int persistent)
+static php_conv_err_t php_conv_base64_encode_ctor(php_conv_base64_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, bool persistent)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_base64_encode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_base64_encode_dtor;
@@ -608,7 +608,7 @@ typedef struct _php_conv_qprint_encode {
 	unsigned int line_ccnt;
 	unsigned int line_len;
 	int lbchars_dup;
-	int persistent;
+	bool persistent;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
 } php_conv_qprint_encode;
@@ -825,7 +825,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 #undef NEXT_CHAR
 #undef CONSUME_CHAR
 
-static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, int opts, int persistent)
+static php_conv_err_t php_conv_qprint_encode_ctor(php_conv_qprint_encode *inst, unsigned int line_len, const char *lbchars, size_t lbchars_len, int lbchars_dup, int opts, bool persistent)
 {
 	if (line_len < 4 && lbchars != NULL) {
 		return PHP_CONV_ERR_TOO_BIG;
@@ -857,7 +857,7 @@ typedef struct _php_conv_qprint_decode {
 	int scan_stat;
 	unsigned int next_char;
 	int lbchars_dup;
-	int persistent;
+	bool persistent;
 	unsigned int lb_ptr;
 	unsigned int lb_cnt;
 } php_conv_qprint_decode;
@@ -1039,7 +1039,7 @@ out:
 
 	return err;
 }
-static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, const char *lbchars, size_t lbchars_len, int lbchars_dup, int persistent)
+static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, const char *lbchars, size_t lbchars_len, int lbchars_dup, bool persistent)
 {
 	inst->_super.convert_op = (php_conv_convert_func) php_conv_qprint_decode_convert;
 	inst->_super.dtor = (php_conv_dtor_func) php_conv_qprint_decode_dtor;
@@ -1061,7 +1061,7 @@ static php_conv_err_t php_conv_qprint_decode_ctor(php_conv_qprint_decode *inst, 
 
 typedef struct _php_convert_filter {
 	php_conv *cd;
-	int persistent;
+	bool persistent;
 	char *filtername;
 	char stub[128];
 	size_t stub_len;
@@ -1072,7 +1072,7 @@ typedef struct _php_convert_filter {
 #define PHP_CONV_QPRINT_ENCODE 3
 #define PHP_CONV_QPRINT_DECODE 4
 
-static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pretval, size_t *pretval_len, char *field_name, size_t field_name_len, int persistent)
+static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pretval, size_t *pretval_len, char *field_name, size_t field_name_len, bool persistent)
 {
 	zval *tmpval;
 
@@ -1149,7 +1149,7 @@ static php_conv_err_t php_conv_get_uint_prop_ex(const HashTable *ht, unsigned in
 #define GET_BOOL_PROP(ht, var, fldname) \
 	php_conv_get_bool_prop_ex(ht, &var, fldname, sizeof(fldname))
 
-static php_conv *php_conv_open(int conv_mode, const HashTable *options, int persistent)
+static php_conv *php_conv_open(int conv_mode, const HashTable *options, bool persistent)
 {
 	/* FIXME: I'll have to replace this ugly code by something neat
 	   (factories?) in the near future. */
@@ -1281,7 +1281,7 @@ out_failure:
 
 static zend_result php_convert_filter_ctor(php_convert_filter *inst,
 	int conv_mode, HashTable *conv_opts,
-	const char *filtername, int persistent)
+	const char *filtername, bool persistent)
 {
 	inst->persistent = persistent;
 	inst->filtername = pestrdup(filtername, persistent);
@@ -1315,7 +1315,7 @@ static zend_result strfilter_convert_append_bucket(
 		php_stream *stream, php_stream_filter *filter,
 		php_stream_bucket_brigade *buckets_out,
 		const char *ps, size_t buf_len, size_t *consumed,
-		int persistent)
+		bool persistent)
 {
 	php_conv_err_t err;
 	php_stream_bucket *new_bucket;
@@ -1607,7 +1607,7 @@ static const php_stream_filter_factory strfilter_convert_factory = {
 typedef struct _php_consumed_filter_data {
 	size_t consumed;
 	zend_off_t offset;
-	uint8_t persistent;
+	bool persistent;
 } php_consumed_filter_data;
 
 static php_stream_filter_status_t consumed_filter_filter(
@@ -1698,7 +1698,7 @@ typedef enum _php_chunked_filter_state {
 typedef struct _php_chunked_filter_data {
 	size_t chunk_size;
 	php_chunked_filter_state state;
-	int persistent;
+	bool persistent;
 } php_chunked_filter_data;
 
 static size_t php_dechunk(char *buf, size_t len, php_chunked_filter_data *data)
