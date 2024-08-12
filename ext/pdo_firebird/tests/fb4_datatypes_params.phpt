@@ -49,8 +49,8 @@ echo "\ndone\n";
     "I128": "12",
     "N1": "12.34",
     "N2": "12.34",
-    "TS_TZ": "%s 12:59:34.2390 Europe\/Moscow",
-    "T_TZ": "12:59:00.0000 Europe\/Moscow",
+    "TS_TZ": "2024-05-04 12:59:34 Europe\/Moscow",
+    "T_TZ": "12:59:00 Europe\/Moscow",
     "DF16": "12.34",
     "DF34": "12.34"
 }

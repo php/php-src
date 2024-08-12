@@ -50,6 +50,9 @@ PHP                                                                        NEWS
     deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
     conjunction with this function it has also been deprecated. (Girgias)
 
+- PDO_Firebird:
+  . Support proper formatting of time zone types. (sim1984)
+
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
     (David Carlier)
