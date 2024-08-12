@@ -410,6 +410,8 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecate-implicitly-nullable-types
   . Passing E_USER_ERROR to trigger_error() is now deprecated.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_e_user_error_to_trigger_error
+  . Using "_" as a class name is now deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_using_a_single_underscore_as_a_class_name
 
 - Curl:
   . The CURLOPT_BINARYTRANSFER constant is deprecated.

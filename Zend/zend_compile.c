@@ -243,6 +243,9 @@ void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(name));
 	}
+	if (zend_string_equals_literal(name, "_")) {
+		zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated since 8.4");
+	}
 }
 /* }}} */
 
