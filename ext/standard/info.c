@@ -660,8 +660,8 @@ static void php_get_windows_cpu(char *buf, size_t bufsize)
 PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
-	char tmp_uname[256];
 #ifdef PHP_WIN32
+	char tmp_uname[256];
 	DWORD dwBuild=0;
 	DWORD dwVersion = GetVersion();
 	DWORD dwWindowsMajorVersion =  (DWORD)(LOBYTE(LOWORD(dwVersion)));
@@ -674,21 +674,18 @@ PHPAPI zend_string *php_get_uname(char mode)
 	if (mode == 's') {
 		php_uname = "Windows NT";
 	} else if (mode == 'r') {
-		snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
-		php_uname = tmp_uname;
+		return strpprintf(0, "%d.%d", dwWindowsMajorVersion, dwWindowsMinorVersion);
 	} else if (mode == 'n') {
 		php_uname = ComputerName;
 	} else if (mode == 'v') {
 		char *winver = php_get_windows_name();
 		dwBuild = (DWORD)(HIWORD(dwVersion));
-		if(winver == NULL) {
-			snprintf(tmp_uname, sizeof(tmp_uname), "build %d", dwBuild);
+		if (winver == NULL) {
+			return strpprintf(0, "build %d", dwBuild);
 		} else {
-			snprintf(tmp_uname, sizeof(tmp_uname), "build %d (%s)", dwBuild, winver);
-		}
-		php_uname = tmp_uname;
-		if(winver) {
+			zend_string *build_with_version = strpprintf(0, "build %d (%s)", dwBuild, winver);
 			efree(winver);
+			return build_with_version;
 		}
 	} else if (mode == 'm') {
 		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
@@ -704,18 +701,16 @@ PHPAPI zend_string *php_get_uname(char mode)
 
 		/* Windows "version" 6.2 could be Windows 8/Windows Server 2012, but also Windows 8.1/Windows Server 2012 R2 */
 		if (dwWindowsMajorVersion == 6 && dwWindowsMinorVersion == 2) {
-			if (strncmp(winver, "Windows 8.1", 11) == 0 || strncmp(winver, "Windows Server 2012 R2", 22) == 0) {
+			if (strncmp(winver, "Windows 8.1", strlen("Windows 8.1")) == 0 || strncmp(winver, "Windows Server 2012 R2", strlen("Windows Server 2012 R2")) == 0) {
 				dwWindowsMinorVersion = 3;
 			}
 		}
 
-		snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d build %d (%s) %s",
-				 "Windows NT", ComputerName,
-				 dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild, winver?winver:"unknown", wincpu);
-		if(winver) {
-			efree(winver);
-		}
-		php_uname = tmp_uname;
+		zend_string *build_with_all_info = strpprintf(0, "%s %s %d.%d build %d (%s) %s",
+			"Windows NT", ComputerName, dwWindowsMajorVersion, dwWindowsMinorVersion, dwBuild,
+			winver ? winver: "unknown", wincpu);
+		efree(winver);
+		return build_with_all_info;
 	}
 #else
 #ifdef HAVE_SYS_UTSNAME_H
@@ -734,10 +729,7 @@ PHPAPI zend_string *php_get_uname(char mode)
 		} else if (mode == 'm') {
 			php_uname = buf.machine;
 		} else { /* assume mode == 'a' */
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %s %s %s",
-					 buf.sysname, buf.nodename, buf.release, buf.version,
-					 buf.machine);
-			php_uname = tmp_uname;
+			return strpprintf(0, "%s %s %s %s %s", buf.sysname, buf.nodename, buf.release, buf.version, buf.machine);
 		}
 	}
 #else
