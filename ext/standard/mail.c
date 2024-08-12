@@ -64,10 +64,9 @@ typedef enum {
 	CONTAINS_NULL
 } php_mail_header_value_error_type;
 
-static php_mail_header_value_error_type php_mail_build_headers_check_field_value(zval *val)
+static php_mail_header_value_error_type php_mail_build_headers_check_field_value(const zend_string *value)
 {
 	size_t len = 0;
-	zend_string *value = Z_STR_P(val);
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.1 */
 	/* https://tools.ietf.org/html/rfc2822#section-2.2.3 */
@@ -108,74 +107,55 @@ static php_mail_header_value_error_type php_mail_build_headers_check_field_value
 	return NO_HEADER_ERROR;
 }
 
-
-static bool php_mail_build_headers_check_field_name(zend_string *key)
+static bool php_mail_build_headers_check_field_name(const zend_string *key)
 {
 	size_t len = 0;
 
 	/* https://tools.ietf.org/html/rfc2822#section-2.2 */
-	while (len < key->len) {
-		if (*(key->val+len) < 33 || *(key->val+len) > 126 || *(key->val+len) == ':') {
-			return FAILURE;
+	while (len < ZSTR_LEN(key)) {
+		if (*(ZSTR_VAL(key)+len) < 33 || *(ZSTR_VAL(key)+len) > 126 || *(ZSTR_VAL(key)+len) == ':') {
+			return false;
 		}
 		len++;
 	}
-	return SUCCESS;
+	return true;
 }
 
-
-static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val);
-
-static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *val)
+static void php_mail_build_headers_elem(smart_str *s, const zend_string *key, const zend_string *val)
 {
-	switch(Z_TYPE_P(val)) {
-		case IS_STRING:
-			if (php_mail_build_headers_check_field_name(key) != SUCCESS) {
-				zend_value_error("Header name \"%s\" contains invalid characters", ZSTR_VAL(key));
-				return;
-			}
-
-			php_mail_header_value_error_type error_type = php_mail_build_headers_check_field_value(val);
-			switch (error_type) {
-				case NO_HEADER_ERROR:
-					break;
-				case CONTAINS_LF_ONLY:
-					zend_value_error("Header \"%s\" contains LF character that is not allowed in the header", ZSTR_VAL(key));
-					return;
-				case CONTAINS_CR_ONLY:
-					zend_value_error("Header \"%s\" contains CR character that is not allowed in the header", ZSTR_VAL(key));
-					return;
-				case CONTAINS_CRLF:
-					zend_value_error("Header \"%s\" contains CRLF characters that are used as a line separator and are not allowed in the header", ZSTR_VAL(key));
-					return;
-				case CONTAINS_NULL:
-					zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
-					return;
-				default:
-					// fallback
-					zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
-					return;
-			}
-			smart_str_append(s, key);
-			smart_str_appendl(s, ": ", 2);
-			smart_str_appends(s, Z_STRVAL_P(val));
-			smart_str_appendl(s, "\r\n", 2);
+	php_mail_header_value_error_type error_type = php_mail_build_headers_check_field_value(val);
+	switch (error_type) {
+		case NO_HEADER_ERROR:
 			break;
-		case IS_ARRAY:
-			php_mail_build_headers_elems(s, key, val);
-			break;
+		case CONTAINS_LF_ONLY:
+			zend_value_error("Header \"%s\" contains LF character that is not allowed in the header", ZSTR_VAL(key));
+			return;
+		case CONTAINS_CR_ONLY:
+			zend_value_error("Header \"%s\" contains CR character that is not allowed in the header", ZSTR_VAL(key));
+			return;
+		case CONTAINS_CRLF:
+			zend_value_error("Header \"%s\" contains CRLF characters that are used as a line separator and are not allowed in the header", ZSTR_VAL(key));
+			return;
+		case CONTAINS_NULL:
+			zend_value_error("Header \"%s\" contains NULL character that is not allowed in the header", ZSTR_VAL(key));
+			return;
 		default:
-			zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+			// fallback
+			zend_value_error("Header \"%s\" has invalid format, or contains invalid characters", ZSTR_VAL(key));
+			return;
 	}
+	smart_str_append(s, key);
+	smart_str_appendl(s, ": ", 2);
+	smart_str_append(s, val);
+	smart_str_appendl(s, "\r\n", 2);
 }
 
-
-static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *val)
+static void php_mail_build_headers_array(smart_str *s, const zend_string *key, const HashTable *val)
 {
 	zend_string *tmp_key;
 	zval *tmp_val;
 
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(val), tmp_key, tmp_val) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(val, tmp_key, tmp_val) {
 		if (tmp_key) {
 			zend_type_error("Header \"%s\" must only contain numeric keys, \"%s\" found", ZSTR_VAL(key), ZSTR_VAL(tmp_key));
 			break;
@@ -185,24 +165,10 @@ static void php_mail_build_headers_elems(smart_str *s, zend_string *key, zval *v
 			zend_type_error("Header \"%s\" must only contain values of type string, %s found", ZSTR_VAL(key), zend_zval_value_name(tmp_val));
 			break;
 		}
-		php_mail_build_headers_elem(s, key, tmp_val);
+		// TODO Should this actually pass tmp_key?
+		php_mail_build_headers_elem(s, key, Z_STR_P(tmp_val));
 	} ZEND_HASH_FOREACH_END();
 }
-
-#define PHP_MAIL_BUILD_HEADER_CHECK(target, s, key, val) \
-do { \
-	if (Z_TYPE_P(val) == IS_STRING) { \
-		php_mail_build_headers_elem(&s, key, val); \
-	} else if (Z_TYPE_P(val) == IS_ARRAY) { \
-		if (zend_string_equals_literal_ci(key, target)) { \
-			zend_type_error("Header \"%s\" must be of type string, array given", target); \
-			break; \
-		} \
-		php_mail_build_headers_elems(&s, key, val); \
-	} else { \
-		zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val)); \
-	} \
-} while(0)
 
 PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 {
@@ -214,39 +180,48 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 	ZEND_HASH_FOREACH_KEY_VAL(headers, idx, key, val) {
 		if (!key) {
 			zend_type_error("Header name cannot be numeric, " ZEND_LONG_FMT " given", idx);
-			break;
+			goto error;
+		}
+		if (!php_mail_build_headers_check_field_name(key)) {
+			zend_value_error("Header name \"%s\" contains invalid characters", ZSTR_VAL(key));
+			goto error;
 		}
 		ZVAL_DEREF(val);
+		if (UNEXPECTED(Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_ARRAY)) {
+			zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+			goto error;
+		}
+
 		/* https://tools.ietf.org/html/rfc2822#section-3.6 */
-		if (zend_string_equals_literal_ci(key, "orig-date")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("orig-date", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "from")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("from", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "sender")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("sender", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "reply-to")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("reply-to", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "to")) {
-			zend_value_error("The additional headers cannot contain the \"To\" header");
-		} else if (zend_string_equals_literal_ci(key, "cc")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("cc", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "bcc")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("bcc", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "message-id")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("message-id", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "references")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("references", s, key, val);
-		} else if (zend_string_equals_literal_ci(key, "in-reply-to")) {
-			PHP_MAIL_BUILD_HEADER_CHECK("in-reply-to", s, key, val);
+		if (
+			zend_string_equals_literal_ci(key, "orig-date")
+			|| zend_string_equals_literal_ci(key, "from")
+			|| zend_string_equals_literal_ci(key, "sender")
+			|| zend_string_equals_literal_ci(key, "reply-to")
+			|| zend_string_equals_literal_ci(key, "cc")
+			|| zend_string_equals_literal_ci(key, "bcc")
+			|| zend_string_equals_literal_ci(key, "message-id")
+			|| zend_string_equals_literal_ci(key, "references")
+			|| zend_string_equals_literal_ci(key, "in-reply-to")
+		) {
+			if (UNEXPECTED(Z_TYPE_P(val) == IS_ARRAY)) {
+				zend_type_error("Header \"%s\" must be of type string, array given", ZSTR_VAL(key));
+				goto error;
+			}
+			ZEND_ASSERT(Z_TYPE_P(val) == IS_STRING);
+			php_mail_build_headers_elem(&s, key, Z_STR_P(val));
 		} else if (zend_string_equals_literal_ci(key, "subject")) {
 			zend_value_error("The additional headers cannot contain the \"Subject\" header");
+			goto error;
+		} else if (zend_string_equals_literal_ci(key, "to")) {
+			zend_value_error("The additional headers cannot contain the \"To\" header");
+			goto error;
 		} else {
 			if (Z_TYPE_P(val) == IS_STRING) {
-				php_mail_build_headers_elem(&s, key, val);
-			} else if (Z_TYPE_P(val) == IS_ARRAY) {
-				php_mail_build_headers_elems(&s, key, val);
+				php_mail_build_headers_elem(&s, key, Z_STR_P(val));
 			} else {
-				zend_type_error("Header \"%s\" must be of type array|string, %s given", ZSTR_VAL(key), zend_zval_value_name(val));
+				ZEND_ASSERT(Z_TYPE_P(val) == IS_ARRAY);
+				php_mail_build_headers_array(&s, key, Z_ARRVAL_P(val));
 			}
 		}
 
@@ -261,6 +236,10 @@ PHPAPI zend_string *php_mail_build_headers(HashTable *headers)
 	smart_str_0(&s);
 
 	return s.s;
+
+error:
+	smart_str_free(&s);
+	return NULL;
 }
 
 
