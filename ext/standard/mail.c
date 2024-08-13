@@ -410,12 +410,7 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 /* {{{ php_mail */
 PHPAPI int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
-#ifdef PHP_WIN32
-	int tsm_err;
-	char *tsm_errmsg = NULL;
-#endif
 	FILE *sendmail;
-	int ret;
 	char *sendmail_path = INI_STR("sendmail_path");
 	char *sendmail_cmd = NULL;
 	char *mail_log = INI_STR("mail.log");
@@ -491,6 +486,9 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 
 	if (!sendmail_path) {
 #ifdef PHP_WIN32
+		int tsm_err;
+		char *tsm_errmsg = NULL;
+
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
@@ -556,7 +554,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			fprintf(sendmail, "%s%s", hdr, line_sep);
 		}
 		fprintf(sendmail, "%s%s%s", line_sep, message, line_sep);
-		ret = pclose(sendmail);
+		int ret = pclose(sendmail);
 
 #if PHP_SIGCHILD
 		if (sig_handler) {
