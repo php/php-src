@@ -39,6 +39,7 @@
 #include "zend_API.h"
 #include "zend_compile.h"
 #include "zend_execute.h"
+#include "zend_gc.h"
 #include "zend_hash.h"
 #include "zend_object_handlers.h"
 #include "zend_objects_API.h"
@@ -664,4 +665,40 @@ HashTable *zend_lazy_object_debug_info(zend_object *object, int *is_temp)
 
 	*is_temp = 0;
 	return zend_get_properties_no_init(object);
+}
+
+HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n)
+{
+	ZEND_ASSERT(zend_object_is_lazy(zobj));
+
+	zend_lazy_object_info *info = zend_lazy_object_get_info(zobj);
+	zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
+
+	if (zend_lazy_object_initialized(zobj)) {
+		ZEND_ASSERT(zend_object_is_lazy_proxy(zobj));
+		zend_get_gc_buffer_add_obj(gc_buffer, info->u.instance);
+		zend_get_gc_buffer_use(gc_buffer, table, n);
+		/* Initialized proxy object can not have properties */
+		return NULL;
+	}
+
+	zend_fcall_info_cache *fcc = &info->u.initializer.fcc;
+	if (fcc->object) {
+		zend_get_gc_buffer_add_obj(gc_buffer, fcc->object);
+	}
+	if (fcc->closure) {
+		zend_get_gc_buffer_add_obj(gc_buffer, fcc->closure);
+	}
+	zend_get_gc_buffer_add_zval(gc_buffer, &info->u.initializer.zv);
+
+	/* Uninitialized lazy objects can not have dynamic properties, so we can
+	 * ignore zobj->properties. */
+	zval *prop = zobj->properties_table;
+	zval *end = prop + zobj->ce->default_properties_count;
+	for ( ; prop < end; prop++) {
+		zend_get_gc_buffer_add_zval(gc_buffer, prop);
+	}
+
+	zend_get_gc_buffer_use(gc_buffer, table, n);
+	return NULL;
 }

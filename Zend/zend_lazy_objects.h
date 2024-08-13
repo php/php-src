@@ -74,6 +74,7 @@ zend_lazy_object_flags_t zend_lazy_object_get_flags(zend_object *obj);
 void zend_lazy_object_del_info(zend_object *obj);
 zend_object *zend_lazy_object_clone(zend_object *old_obj);
 HashTable *zend_lazy_object_debug_info(zend_object *object, int *is_temp);
+HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n);
 bool zend_lazy_object_decr_lazy_props(zend_object *obj);
 void zend_lazy_object_realize(zend_object *obj);
 

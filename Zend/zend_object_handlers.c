@@ -164,35 +164,7 @@ ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, int *n) /* 
 		return zobj->handlers->get_properties(zobj);
 	} else {
 		if (UNEXPECTED(zend_object_is_lazy(zobj))) {
-			zend_get_gc_buffer *gc_buffer = zend_get_gc_buffer_create();
-			if (zend_lazy_object_initialized(zobj)) {
-				ZEND_ASSERT(zend_object_is_lazy_proxy(zobj));
-				zend_object *instance = zend_lazy_object_get_instance(zobj);
-				zend_get_gc_buffer_add_obj(gc_buffer, instance);
-			} else {
-				zend_fcall_info_cache* initializer = zend_lazy_object_get_initializer_fcc(zobj);
-				if (initializer) {
-					// TODO: also expose _get_initializer_zv() to the GC
-					if (initializer->object) {
-						zend_get_gc_buffer_add_obj(gc_buffer, initializer->object);
-					}
-					if (initializer->closure) {
-						zend_get_gc_buffer_add_obj(gc_buffer, initializer->closure);
-					}
-				}
-			}
-			if (zobj->properties) {
-				zend_get_gc_buffer_use(gc_buffer, table, n);
-				return zobj->properties;
-			} else {
-				zval *prop = zobj->properties_table;
-				zval *end = prop + zobj->ce->default_properties_count;
-				for ( ; prop < end; prop++) {
-					zend_get_gc_buffer_add_zval(gc_buffer, prop);
-				}
-				zend_get_gc_buffer_use(gc_buffer, table, n);
-				return NULL;
-			}
+			return zend_lazy_object_get_gc(zobj, table, n);
 		} else if (zobj->properties) {
 			*table = NULL;
 			*n = 0;
