@@ -656,12 +656,16 @@ static void php_get_windows_cpu(char *buf, size_t bufsize)
 /* }}}  */
 #endif
 
+static inline bool php_is_valid_uname_mode(char mode) {
+	return mode == 'a' || mode == 'm' || mode == 'n' || mode == 'r' || mode == 's' || mode == 'v';
+}
+
 /* {{{ php_get_uname */
 PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
 
-	ZEND_ASSERT(mode == 'a' || mode == 'm' || mode == 'n' || mode == 'r' || mode == 's' || mode == 'v');
+	ZEND_ASSERT(php_is_valid_uname_mode(mode));
 #ifdef PHP_WIN32
 	char tmp_uname[256];
 	DWORD dwBuild=0;
@@ -1329,7 +1333,7 @@ PHP_FUNCTION(php_uname)
 	}
 
 	char mode = *mode_str;
-	if (mode != 'a' && mode != 'm' && mode != 'n' && mode != 'r' && mode != 's' && mode != 'v') {
+	if (!php_is_valid_uname_mode(mode)) {
 		zend_argument_value_error(1, "must be one of \"a\", \"m\", \"n\", \"r\", \"s\", or \"v\"");
 		RETURN_THROWS();
 	}
