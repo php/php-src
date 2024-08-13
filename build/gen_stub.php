@@ -83,8 +83,8 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             }
         }
 
-        /* As exit() and die() used to be proper token/keywords we need to hack-around for versions prior to PHP 8.4 */
-        $hasSpecialExitAsFunctionHandling = PHP_VERSION_ID < 804000 && str_ends_with($stubFile, 'zend_builtin_functions.stub.php');
+        /* As exit() and die() are proper token/keywords an need to hack-around */
+        $hasSpecialExitAsFunctionHandling = str_ends_with($stubFile, 'zend_builtin_functions.stub.php');
         if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
             initPhpParser();
             $stubContent = $stubCode ?? file_get_contents($stubFile);

@@ -13,7 +13,7 @@ $callbacks = [
     'eval',
     'isset',
     'list',
-    'print'
+    'print',
 ];
 
 foreach($callbacks as $callback)

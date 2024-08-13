@@ -9,7 +9,7 @@ class Foo
             if (!isset($arguments[0])) {
                 var_dump(['getSomeWhat']);
                 var_dump($arguments);
-                exit();
+                exit;
             }
         }
         echo "OK\n";
