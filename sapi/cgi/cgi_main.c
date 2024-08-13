@@ -2384,11 +2384,7 @@ parent_loop_end:
 							}
 							SG(headers_sent) = 1;
 							SG(request_info).no_headers = 1;
-#if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
-#endif
+							php_print_version(&cgi_sapi_module);
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
 							exit_status = 0;
