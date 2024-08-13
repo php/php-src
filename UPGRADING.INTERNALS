@@ -376,6 +376,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The deprecated php_uint32 and php_int32 typedefs have been removed from
      ext/standard/basic_functions.h. Use the standard uint32_t and int32_t
      types instead.
+   - The php_strtoupper(), php_string_toupper(), php_strtolower(), and
+     php_string_tolower() functions has been removed, use zend_str_toupper(),
+     zend_string_toupper(), zend_str_tolower(), and zend_string_tolower()
+     respectively instead.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is

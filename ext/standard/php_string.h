@@ -34,10 +34,6 @@ PHP_MINIT_FUNCTION(string_intrin);
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 1)
 PHPAPI int strnatcmp_ex(char const *a, size_t a_len, char const *b, size_t b_len, bool is_case_insensitive);
 PHPAPI struct lconv *localeconv_r(struct lconv *out);
-PHPAPI char *php_strtoupper(char *s, size_t len);
-PHPAPI char *php_strtolower(char *s, size_t len);
-PHPAPI zend_string *php_string_toupper(zend_string *s);
-PHPAPI zend_string *php_string_tolower(zend_string *s);
 PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen);
 PHPAPI zend_string *php_addslashes(zend_string *str);
 PHPAPI void php_stripslashes(zend_string *str);

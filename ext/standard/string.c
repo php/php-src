@@ -1211,21 +1211,6 @@ return_false:
 }
 /* }}} */
 
-/* {{{ php_strtoupper */
-PHPAPI char *php_strtoupper(char *s, size_t len)
-{
-	zend_str_toupper(s, len);
-	return s;
-}
-/* }}} */
-
-/* {{{ php_string_toupper */
-PHPAPI zend_string *php_string_toupper(zend_string *s)
-{
-	return zend_string_toupper(s);
-}
-/* }}} */
-
 /* {{{ Makes a string uppercase */
 PHP_FUNCTION(strtoupper)
 {
@@ -1236,21 +1221,6 @@ PHP_FUNCTION(strtoupper)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_STR(zend_string_toupper(arg));
-}
-/* }}} */
-
-/* {{{ php_strtolower */
-PHPAPI char *php_strtolower(char *s, size_t len)
-{
-	zend_str_tolower(s, len);
-	return s;
-}
-/* }}} */
-
-/* {{{ php_string_tolower */
-PHPAPI zend_string *php_string_tolower(zend_string *s)
-{
-	return zend_string_tolower(s);
 }
 /* }}} */
 
