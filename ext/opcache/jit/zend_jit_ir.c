@@ -14466,22 +14466,20 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 			ZEND_ASSERT(slow_inputs == IR_UNUSED);
 			goto slow_path;
 		}
-		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set) {
-			// Undefined property with magic __get()/__set()
-			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
-				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
-				const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+		// Undefined property with potential magic __get()/__set() or lazy object
+		if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 
-				if (!exit_addr) {
-					return 0;
-				}
-				ir_GUARD(jit_Z_TYPE_INFO(jit, prop_addr), ir_CONST_ADDR(exit_addr));
-			} else {
-				ir_ref if_def = ir_IF(jit_Z_TYPE_INFO(jit, prop_addr));
-				ir_IF_FALSE_cold(if_def);
-				ir_END_list(slow_inputs);
-				ir_IF_TRUE(if_def);
+			if (!exit_addr) {
+				return 0;
 			}
+			ir_GUARD(jit_Z_TYPE_INFO(jit, prop_addr), ir_CONST_ADDR(exit_addr));
+		} else {
+			ir_ref if_def = ir_IF(jit_Z_TYPE_INFO(jit, prop_addr));
+			ir_IF_FALSE_cold(if_def);
+			ir_END_list(slow_inputs);
+			ir_IF_TRUE(if_def);
 		}
 		if (ZEND_TYPE_IS_SET(prop_info->type)) {
 			ir_ref ref, arg3, arg4;
