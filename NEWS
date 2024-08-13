@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0beta1
+15 Aug 2024, PHP 8.4.0beta1
 
 - Core:
   . Updated build system scripts config.guess to 2024-07-27 and config.sub to
