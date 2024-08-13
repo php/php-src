@@ -469,7 +469,6 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 	/* unset() properties of the proxy. This ensures that all accesses are be
 	 * delegated to the backing instance from now on. */
-	// TODO: test that props are undef after initialization
 	zend_object_dtor_dynamic_properties(obj);
 	obj->properties = NULL;
 
