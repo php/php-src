@@ -408,7 +408,7 @@ static int php_mail_detect_multiple_crlf(const char *hdr) {
 
 
 /* {{{ php_mail */
-PHPAPI int php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
+PHPAPI bool php_mail(const char *to, const char *subject, const char *message, const char *headers, const char *extra_cmd)
 {
 	FILE *sendmail;
 	char *sendmail_path = INI_STR("sendmail_path");
@@ -459,7 +459,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 	}
 
 	if (EG(exception)) {
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
 	char *line_sep = PG(mail_mixed_lf_and_crlf) ? "\n" : "\r\n";
@@ -481,7 +481,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 
 	if (hdr && php_mail_detect_multiple_crlf(hdr)) {
 		php_error_docref(NULL, E_WARNING, "Multiple or malformed newlines found in additional_header");
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
 	if (!sendmail_path) {
@@ -497,11 +497,11 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			} else {
 				php_error_docref(NULL, E_WARNING, "%s", GetSMErrorText(tsm_err));
 			}
-			MAIL_RET(0);
+			MAIL_RET(false);
 		}
-		MAIL_RET(1);
+		MAIL_RET(true);
 #else
-		MAIL_RET(0);
+		MAIL_RET(false);
 #endif
 	}
 	if (extra_cmd != NULL) {
@@ -545,7 +545,7 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 				signal(SIGCHLD, sig_handler);
 			}
 #endif
-			MAIL_RET(0);
+			MAIL_RET(false);
 		}
 #endif
 		fprintf(sendmail, "To: %s%s", to, line_sep);
@@ -574,9 +574,9 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 #endif
 #endif
 		{
-			MAIL_RET(0);
+			MAIL_RET(false);
 		} else {
-			MAIL_RET(1);
+			MAIL_RET(true);
 		}
 	} else {
 		php_error_docref(NULL, E_WARNING, "Could not execute mail delivery program '%s'", sendmail_path);
@@ -585,10 +585,10 @@ PHPAPI int php_mail(const char *to, const char *subject, const char *message, co
 			signal(SIGCHLD, sig_handler);
 		}
 #endif
-		MAIL_RET(0);
+		MAIL_RET(false);
 	}
 
-	MAIL_RET(1); /* never reached */
+	MAIL_RET(true); /* never reached */
 }
 /* }}} */
 
