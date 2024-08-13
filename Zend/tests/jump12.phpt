@@ -7,7 +7,7 @@ goto c;
 declare (ticks=1) {
     b:
         print "ok!\n";
-        exit();
+        exit;
 }
 c:
     print "ok!\n";
