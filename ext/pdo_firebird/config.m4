@@ -9,23 +9,23 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
 
   if test -x "$FB_CONFIG" && test "$PHP_PDO_FIREBIRD" = "yes"; then
     AC_MSG_CHECKING([for libfbconfig])
-    FB_CFLAGS=`$FB_CONFIG --cflags`
-    FB_LIBDIR=`$FB_CONFIG --libs`
-    FB_VERSION=`$FB_CONFIG --version`
+    FB_CFLAGS=$($FB_CONFIG --cflags)
+    FB_LIBDIR=$($FB_CONFIG --libs)
+    FB_VERSION=$($FB_CONFIG --version)
     AC_MSG_RESULT([version $FB_VERSION])
     PHP_EVAL_LIBLINE([$FB_LIBDIR], [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$FB_CFLAGS])
 
   else
-    if test "$PHP_PDO_FIREBIRD" = "yes"; then
+    AS_VAR_IF([PHP_PDO_FIREBIRD], [yes], [
       FIREBIRD_INCDIR=
       FIREBIRD_LIBDIR=
       FIREBIRD_LIBDIR_FLAG=
-    else
+    ], [
       FIREBIRD_INCDIR=$PHP_PDO_FIREBIRD/include
       FIREBIRD_LIBDIR=$PHP_PDO_FIREBIRD/$PHP_LIBDIR
       FIREBIRD_LIBDIR_FLAG=-L$FIREBIRD_LIBDIR
-    fi
+    ])
 
     PHP_CHECK_LIBRARY([fbclient], [isc_detach_database],
       [FIREBIRD_LIBNAME=fbclient],
