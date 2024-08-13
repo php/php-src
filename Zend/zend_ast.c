@@ -290,7 +290,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_va(
 	return ast;
 }
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_n(unsigned kind, ...) {
+ZEND_API zend_ast * zend_ast_create_n(unsigned kind, ...) {
 	va_list va;
 	va_start(va, kind);
 	zend_ast *ast = zend_ast_create_va(kind, 0, &va);
@@ -298,7 +298,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_n(unsigned kind, ...) {
 	return ast;
 }
 
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_ex_n(
+ZEND_API zend_ast * zend_ast_create_ex_n(
 		zend_ast_kind kind, unsigned attr, ...) {
 	va_list va;
 	va_start(va, attr);

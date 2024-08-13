@@ -249,8 +249,8 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_5(zend_ast_kind kind, zend_ast
 
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_va(zend_ast_kind kind, zend_ast_attr attr, va_list *va);
 /* Need to use unsigned args to avoid va promotion UB. */
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_n(unsigned kind, ...);
-ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_ex_n(zend_ast_kind kind, unsigned attr, ...);
+ZEND_API zend_ast * zend_ast_create_n(unsigned kind, ...);
+ZEND_API zend_ast * zend_ast_create_ex_n(zend_ast_kind kind, unsigned attr, ...);
 
 static zend_always_inline zend_ast * zend_ast_create_ex_0(zend_ast_kind kind, zend_ast_attr attr) {
 	zend_ast *ast = zend_ast_create_0(kind);
