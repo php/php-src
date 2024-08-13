@@ -80,7 +80,4 @@ PHPAPI bool php_binary_string_shuffle(php_random_algo_with_state engine, char *s
 #define PHP_PATHINFO_FILENAME 	8
 #define PHP_PATHINFO_ALL	(PHP_PATHINFO_DIRNAME | PHP_PATHINFO_BASENAME | PHP_PATHINFO_EXTENSION | PHP_PATHINFO_FILENAME)
 
-#define PHP_STR_STRSPN			0
-#define PHP_STR_STRCSPN			1
-
 #endif /* PHP_STRING_H */
