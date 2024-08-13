@@ -10,9 +10,10 @@ class C {
 $reflector = new ReflectionClass(C::class);
 
 $obj = $reflector->newLazyGhost(function ($obj) {
-    trigger_error('Fatal', E_USER_ERROR);
+    // Trigger a fatal error to get an unclean shutdown
+    class bool {}
 });
 
 var_dump($obj->a);
 --EXPECTF--
-Fatal error: Fatal in %s on line %d
+Fatal error: Cannot use 'bool' as class name%s on line %d
