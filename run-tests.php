@@ -1177,7 +1177,7 @@ function system_with_timeout(
     // and on Windows quotes are discarded, this is a fix to honor the quotes and allow values containing
     // spaces like '"C:\Program Files\PHP\php.exe"' to be passed as 1 argument correctly
     if (IS_WINDOWS) {
-        $commandline = 'start "" /b /wait ' . $commandline;
+        $commandline = 'start "" /b /wait ' . $commandline . ' & exit';
     }
 
     $data = '';
