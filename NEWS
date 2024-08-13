@@ -54,6 +54,10 @@ PHP                                                                        NEWS
     (zend_hash_num_elements() Zend/zend_hash.h)). (nielsdos)
   . Fixed bug GH-15210 use-after-free on watchpoint allocations. (nielsdos)
 
+- Random:
+  . Fixed part of bug GH-15381, checking getrandom availability on solaris.
+    (David Carlier)
+
 - Soap:
   . Fixed bug #55639 (Digest autentication dont work). (nielsdos)
   . Fix SoapFault property destruction. (nielsdos)
