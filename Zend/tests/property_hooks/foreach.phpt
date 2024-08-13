@@ -17,6 +17,11 @@ class ByRef {
           $this->_virtualByRef = $value;
         }
     }
+    public $virtualSetOnly {
+        set {
+            echo __METHOD__, "\n";
+        }
+    }
     public function __construct() {
         $this->dynamic = 'dynamic';
     }
