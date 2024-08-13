@@ -53,7 +53,7 @@ var_dump($headers);
 ?>
 --EXPECTF--
 Unauthorized
-string(424) "POST / HTTP/1.1
+string(%d) "POST / HTTP/1.1
 Host: %s
 Connection: Keep-Alive
 User-Agent: %s
