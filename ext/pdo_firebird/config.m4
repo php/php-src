@@ -15,7 +15,6 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
     AC_MSG_RESULT([version $FB_VERSION])
     PHP_EVAL_LIBLINE([$FB_LIBDIR], [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$FB_CFLAGS])
-
   else
     if test "$PHP_PDO_FIREBIRD" = "yes"; then
       FIREBIRD_INCDIR=
@@ -45,24 +44,25 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
 
   PHP_CHECK_PDO_INCLUDES
 
-
-  PHP_PDO_FIREBIRD_COMMON_FLAGS=""
   PHP_NEW_EXTENSION([pdo_firebird],
     [pdo_firebird.c firebird_driver.c firebird_statement.c],
-    [$ext_shared],,
-    [$PHP_PDO_FIREBIRD_COMMON_FLAGS],
+    [$ext_shared],,,
     [cxx])
   PHP_SUBST([PDO_FIREBIRD_SHARED_LIBADD])
   PHP_ADD_EXTENSION_DEP(pdo_firebird, pdo)
 
+  PHP_REQUIRE_CXX()
+  PHP_CXX_COMPILE_STDCXX([11], [mandatory], [PHP_PDO_FIREBIRD_STDCXX])
+
   PHP_PDO_FIREBIRD_CXX_SOURCES="pdo_firebird_utils.cpp"
 
-  PHP_REQUIRE_CXX()
-  PHP_CXX_COMPILE_STDCXX(11, mandatory, PHP_PDO_FIREBIRD_STDCXX)
-  PHP_PDO_FIREBIRD_CXX_FLAGS="$PHP_PDO_FIREBIRD_COMMON_FLAGS $PHP_PDO_FIREBIRD_STDCXX"
-
-  PHP_ADD_SOURCES([$ext_dir],
-    [$PHP_PDO_FIREBIRD_CXX_SOURCES],
-    [$PHP_PDO_FIREBIRD_CXX_FLAGS])
-
+  AS_VAR_IF([ext_shared], [no],
+    [PHP_ADD_SOURCES([$ext_dir],
+      [$PHP_PDO_FIREBIRD_CXX_SOURCES],
+      [$PHP_PDO_FIREBIRD_STDCXX])],
+    [PHP_ADD_SOURCES_X([$ext_dir],
+      [$PHP_PDO_FIREBIRD_CXX_SOURCES],
+      [$PHP_PDO_FIREBIRD_STDCXX],
+      [shared_objects_pdo_firebird],
+      [yes])])
 fi
