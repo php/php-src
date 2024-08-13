@@ -473,6 +473,7 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_kill
   . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
     If this functionality is needed a SQL "FLUSH" command can be used instead.
+    All MYSQLI_REFRESH_* constants have been deprecated as well.
     RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_mysqli_refresh
   . Passing explicitly the $mode parameter to mysqli_store_result() has been
     deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
