@@ -56,6 +56,9 @@ PHP 8.4 UPGRADE NOTES
   . Previously, DOMXPath objects could be cloned, but resulted in an unusable
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
+  . DOMDocument::$actualEncoding, DOMDocument::config, DOMEntity::$actualEncoding,
+    DOMEntity::$encoding, DOMEntity::$version have been deprecated as part of the
+    https://wiki.php.net/rfc/deprecations_php_8_4 RFC.
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore.
