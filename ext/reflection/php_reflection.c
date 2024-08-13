@@ -5199,7 +5199,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 	zend_class_entry *ce;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
-	zend_long flags = 0;
+	zend_long options = 0;
 
 	ZEND_ASSERT(strategy == ZEND_LAZY_OBJECT_STRATEGY_GHOST
 			|| strategy == ZEND_LAZY_OBJECT_STRATEGY_PROXY);
@@ -5211,20 +5211,19 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 			Z_PARAM_OBJ_OF_CLASS(obj, ce)
 			Z_PARAM_FUNC(fci, fcc)
 			Z_PARAM_OPTIONAL
-			// TODO: check named param
-			Z_PARAM_LONG(flags)
+			Z_PARAM_LONG(options)
 		ZEND_PARSE_PARAMETERS_END();
 	} else {
 		ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_FUNC(fci, fcc)
 			Z_PARAM_OPTIONAL
-			Z_PARAM_LONG(flags)
+			Z_PARAM_LONG(options)
 		ZEND_PARSE_PARAMETERS_END();
 		obj = NULL;
 	}
 
-	if (flags & ~ZEND_LAZY_OBJECT_USER_FLAGS) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Invalid flags");
+	if (options & ~ZEND_LAZY_OBJECT_USER_FLAGS) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Invalid options");
 		RETURN_THROWS();
 	}
 
@@ -5245,7 +5244,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	obj = zend_object_make_lazy(obj, ce, &fci.function_name, &fcc,
-			strategy | flags);
+			strategy | options);
 
 	if (!obj) {
 		RETURN_THROWS();
