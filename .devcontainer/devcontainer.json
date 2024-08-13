@@ -1,15 +1,16 @@
 {
-  "name": "php-dev (for Codespaces)",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-vscode.cpptools",
-        "ms-vscode.cpptools-extension-pack",
-        "maelvalais.autoconf",
-        "ms-azuretools.vscode-docker"
-      ]
-    }
-  },
-  "dockerComposeFile": "compose.yaml",
-  "service": "shell"
+    "name": "php-dev (for Codespaces)",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "maelvalais.autoconf",
+                "ms-azuretools.vscode-docker",
+                "editorconfig.editorconfig"
+            ]
+        }
+    },
+    "dockerComposeFile": "compose.yaml",
+    "service": "shell"
 }
