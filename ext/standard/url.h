@@ -36,7 +36,6 @@ PHPAPI size_t php_url_decode(char *str, size_t len); /* return value: length of 
 PHPAPI size_t php_raw_url_decode(char *str, size_t len); /* return value: length of decoded string */
 PHPAPI zend_string *php_url_encode(char const *s, size_t len);
 PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len);
-PHPAPI char *php_replace_controlchars_ex(char *str, size_t len);
 
 #define PHP_URL_SCHEME 0
 #define PHP_URL_HOST 1

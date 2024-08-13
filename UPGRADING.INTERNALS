@@ -380,6 +380,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      php_string_tolower() functions has been removed, use zend_str_toupper(),
      zend_string_toupper(), zend_str_tolower(), and zend_string_tolower()
      respectively instead.
+   - The php_replace_controlchars_ex() function is no longer exposed.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is
