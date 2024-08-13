@@ -769,7 +769,10 @@ if test "$PHP_GCOV" = "yes"; then
   esac
 
   if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
-    AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
+    AC_MSG_ERROR(m4_text_wrap([
+      ccache must be disabled when --enable-gcov option is used. You can disable
+      ccache by setting environment variable CCACHE_DISABLE=1.
+    ]))
   fi
 
   AC_DEFINE([HAVE_GCOV], [1], [Define to 1 if GCOV code coverage is enabled.])
@@ -843,7 +846,7 @@ AS_VAR_IF([ZEND_ZTS], [yes], [PHP_THREAD_SAFETY=yes], [PHP_THREAD_SAFETY=no])
 
 AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AS_VAR_IF([pthreads_working], [yes], [],
-    [AC_MSG_FAILURE(m4_normalize([
+    [AC_MSG_FAILURE(m4_text_wrap([
       Unable to verify system support for POSIX Threads, which are required for
       PHP thread safety (ZTS) build.
     ]))])
@@ -1140,7 +1143,7 @@ AS_VAR_IF([PHP_PEAR], [no],, [
   AC_MSG_WARN([The --with-pear option is deprecated])
 
   dnl PEAR dependencies.
-  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR(m4_normalize([
+  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR(m4_text_wrap([
     PEAR requires XML to be enabled. Add '--enable-xml' to the configure line,
     or disable PEAR (--without-pear).
   ]))])
@@ -1494,7 +1497,7 @@ AS_VAR_IF([PHP_MEMORY_SANITIZER], [yes],
 ])
 
 AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
-  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR(m4_normalize([
+  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR(m4_text_wrap([
     Valgrind and address sanitizer are not compatible. Either disable Valgrind
     (remove --with-valgrind) or disable address sanitizer (remove
     --enable-address-sanitizer).
