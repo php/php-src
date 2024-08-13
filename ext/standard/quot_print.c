@@ -141,7 +141,7 @@ PHPAPI zend_string *php_quot_print_encode(const unsigned char *str, size_t lengt
 {
 	zend_ulong lp = 0;
 	unsigned char c, *d;
-	char *hex = "0123456789ABCDEF";
+	const char *hex = "0123456789ABCDEF";
 	zend_string *ret;
 
 	ret = zend_string_safe_alloc(3, (length + (((3 * length)/(PHP_QPRINT_MAXL-9)) + 1)), 0, 0);
