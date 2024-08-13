@@ -23,6 +23,7 @@ if test "$PHP_EMBED" != "no"; then
 
   AS_VAR_IF([PHP_EMBED_TYPE], [no],, [
     PHP_SUBST([LIBPHP_CFLAGS])
+    AC_SUBST([PHP_EMBED_TYPE])
     PHP_SELECT_SAPI([embed],
       [$PHP_EMBED_TYPE],
       [php_embed.c],
@@ -30,7 +31,6 @@ if test "$PHP_EMBED" != "no"; then
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   ])
   AC_MSG_RESULT([$PHP_EMBED_TYPE])
-  AC_SUBST([PHP_EMBED_TYPE])
 else
   AC_MSG_RESULT([no])
 fi
