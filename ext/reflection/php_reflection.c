@@ -5208,7 +5208,6 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 
 	if (is_reset) {
 		ZEND_PARSE_PARAMETERS_START(2, 3)
-			// TODO: check that obj->ce matches ce
 			Z_PARAM_OBJ_OF_CLASS(obj, ce)
 			Z_PARAM_FUNC(fci, fcc)
 			Z_PARAM_OPTIONAL
