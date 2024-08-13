@@ -660,6 +660,8 @@ static void php_get_windows_cpu(char *buf, size_t bufsize)
 PHPAPI zend_string *php_get_uname(char mode)
 {
 	char *php_uname;
+
+	ZEND_ASSERT(mode == 'a' || mode == 'm' || mode == 'n' || mode == 'r' || mode == 's' || mode == 'v');
 #ifdef PHP_WIN32
 	char tmp_uname[256];
 	DWORD dwBuild=0;
@@ -1313,15 +1315,26 @@ PHP_FUNCTION(php_sapi_name)
 /* {{{ Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
-	char *mode = "a";
+	char *mode_str = "a";
 	size_t modelen = sizeof("a")-1;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING(mode, modelen)
+		Z_PARAM_STRING(mode_str, modelen)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_STR(php_get_uname(*mode));
+	if (modelen != 1) {
+		zend_argument_value_error(1, "must be a single character");
+		RETURN_THROWS();
+	}
+
+	char mode = *mode_str;
+	if (mode != 'a' && mode != 'm' && mode != 'n' && mode != 'r' && mode != 's' && mode != 'v') {
+		zend_argument_value_error(1, "must be one of \"a\", \"m\", \"n\", \"r\", \"s\", or \"v\"");
+		RETURN_THROWS();
+	}
+
+	RETURN_STR(php_get_uname(mode));
 }
 
 /* }}} */

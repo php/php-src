@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - Core:
   . Exiting a namespace now clears seen symbols. (ilutov)
 
+- Standard:
+  . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
+
 15 Aug 2024, PHP 8.4.0beta1
 
 - Core:
