@@ -680,13 +680,12 @@ PHPAPI zend_string *php_get_uname(char mode)
 	} else if (mode == 'v') {
 		char *winver = php_get_windows_name();
 		dwBuild = (DWORD)(HIWORD(dwVersion));
-		if (winver == NULL) {
-			return strpprintf(0, "build %d", dwBuild);
-		} else {
-			zend_string *build_with_version = strpprintf(0, "build %d (%s)", dwBuild, winver);
-			efree(winver);
-			return build_with_version;
-		}
+
+		ZEND_ASSERT(winver != NULL);
+
+		zend_string *build_with_version = strpprintf(0, "build %d (%s)", dwBuild, winver);
+		efree(winver);
+		return build_with_version;
 	} else if (mode == 'm') {
 		php_get_windows_cpu(tmp_uname, sizeof(tmp_uname));
 		php_uname = tmp_uname;
