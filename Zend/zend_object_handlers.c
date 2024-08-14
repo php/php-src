@@ -31,7 +31,6 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_property_hooks.h"
-#include "ext/reflection/php_reflection.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
