@@ -627,7 +627,8 @@ class Tester
         string $uri = null,
         string $scriptFilename = null,
         string $scriptName = null,
-        ?string $stdin = null
+        ?string $stdin = null,
+	?string $httpAuthorization = null
     ): array {
         if (is_null($scriptFilename)) {
             $scriptFilename = $this->makeSourceFile();
@@ -657,7 +658,8 @@ class Tester
                 'SERVER_PROTOCOL'   => 'HTTP/1.1',
                 'DOCUMENT_ROOT'     => __DIR__,
                 'CONTENT_TYPE'      => '',
-                'CONTENT_LENGTH'    => strlen($stdin ?? "") // Default to 0
+                'CONTENT_LENGTH'    => strlen($stdin ?? ""), // Default to 0
+		'HTTP_AUTHORIZATION' => $httpAuthorization ? $httpAuthorization : ""
             ],
             $headers
         );
@@ -762,6 +764,7 @@ class Tester
         string|array $stdin = null,
         bool $expectError = false,
         int $readLimit = -1,
+	string $httpAuthorization = null,
     ): Response {
         if ($this->hasError()) {
             return $this->createResponse(expectInvalid: true);
@@ -771,7 +774,7 @@ class Tester
             $stdin = $this->parseStdin($stdin, $headers);
         }
 
-        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin);
+        $params = $this->getRequestParams($query, $headers, $uri, $scriptFilename, $scriptName, $stdin, $httpAuthorization);
         $this->trace('Request params', $params);
 
         try {
