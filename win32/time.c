@@ -23,7 +23,7 @@
 #include <errno.h>
 #include "php_win32_globals.h"
 
-static zend_always_inline int getfilesystemtime(struct timeval *tv)
+static zend_always_inline void getfilesystemtime(struct timeval *tv)
 {/*{{{*/
 	FILETIME ft;
 	unsigned __int64 ff = 0;
@@ -31,7 +31,7 @@ static zend_always_inline int getfilesystemtime(struct timeval *tv)
 
 	GetSystemTimePreciseAsFileTime(&ft);
 
-        /*
+	/*
 	 * Do not cast a pointer to a FILETIME structure to either a
 	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
 	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
@@ -45,8 +45,6 @@ static zend_always_inline int getfilesystemtime(struct timeval *tv)
 
 	tv->tv_sec = (long)(ff / 1000000Ui64);
 	tv->tv_usec = (long)(ff % 1000000Ui64);
-
-	return 0;
 }/*}}}*/
 
 PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)
