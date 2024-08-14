@@ -3056,7 +3056,6 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		ERROR(version);
 		if (version < 1920) {
 			ERROR("Building with MSC_VER " + version + " is no longer supported");
 		}
