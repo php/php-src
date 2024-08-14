@@ -23,8 +23,6 @@
 #include <errno.h>
 #include "php_win32_globals.h"
 
-typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
-
 static zend_always_inline int getfilesystemtime(struct timeval *tv)
 {/*{{{*/
 	FILETIME ft;
