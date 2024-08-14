@@ -3075,7 +3075,7 @@ static void zend_jit_setup_disasm(void)
 	REGISTER_HELPER(zend_jit_pre_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_post_dec_obj_helper);
 	REGISTER_HELPER(zend_jit_rope_end);
-	REGISTER_HELPER(zend_jit_fcall_interrupt);
+	REGISTER_HELPER(zend_fcall_interrupt);
 
 #ifndef ZTS
 	REGISTER_DATA(EG(current_execute_data));
@@ -10203,10 +10203,10 @@ static int zend_jit_do_fcall(zend_jit_ctx *jit, const zend_op *opline, const zen
 		 * down that handles when there isn't an interrupt function.
 		 */
 		if (zend_interrupt_function) {
-			// JIT: if (EG(vm_interrupt)) zend_jit_fcall_interrupt(execute_data);
+			// JIT: if (EG(vm_interrupt)) zend_fcall_interrupt(execute_data);
 			ir_ref if_interrupt = ir_IF(ir_LOAD_U8(jit_EG(vm_interrupt)));
 			ir_IF_TRUE_cold(if_interrupt);
-			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_jit_fcall_interrupt), rx);
+			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_fcall_interrupt), rx);
 			ir_MERGE_WITH_EMPTY_FALSE(if_interrupt);
 		}
 

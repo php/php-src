@@ -3272,9 +3272,3 @@ static zend_string* ZEND_FASTCALL zend_jit_rope_end(zend_string **rope, uint32_t
 	*target = '\0';
 	return ret;
 }
-
-ZEND_COLD static void ZEND_FASTCALL zend_jit_fcall_interrupt(zend_execute_data *call)
-{
-	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
-	zend_fcall_interrupt(call);
-}
