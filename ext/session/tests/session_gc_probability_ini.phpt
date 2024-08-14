@@ -1,5 +1,5 @@
 --TEST--
-Test session.gc_probability and session.gc_divisor settings for negative values - always run GC
+Test session.gc_probability and session.gc_divisor settings for invalid values
 --INI--
 session.gc_maxlifetime=1
 --EXTENSIONS--
@@ -7,7 +7,6 @@ session
 --SKIPIF--
 <?php
 include('skipif.inc');
-if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
 <?php
@@ -21,30 +20,46 @@ $gc_settings = [
         'gc_probability' => -1,
         'gc_divisor' => 1
     ],
+    [
+        'gc_probability' => 1,
+        'gc_divisor' => -1
+    ],
+    [
+        'gc_probability' => 1,
+        'gc_divisor' => 0
+    ],
 ];
 
 ob_start();
 foreach($gc_settings as $gc_setting) {
+try {
     session_start($gc_setting);
-    $_SESSION['test'] = 'test';
     session_write_close();
-
-    sleep(2);
-    session_start($gc_setting);
-    if(count($_SESSION) === 0) {
-        echo "\nERROR";
+    } catch (Throwable $e) {
+        echo $e::class, ': '. $e->getMessage(), "\n";
     }
-    session_write_close();
-    $_SESSION = [];
-
-    session_start($gc_setting);
-    if(count($_SESSION) !== 0) {
-        echo "\nERROR";
-    }
-    session_destroy();
 }
 ob_end_flush();
 ?>
 Done
 --EXPECTF--
+Warning: session_start(): session.gc_probability cannot be negative in %s on line %d
+
+Warning: session_start(): Setting option "gc_probability" failed in %s on line %d
+
+Warning: session_start(): session.gc_divisor must be greater than 0 in %s on line %d
+
+Warning: session_start(): Setting option "gc_divisor" failed in %s on line %d
+
+Warning: session_start(): session.gc_probability cannot be negative in %s on line %d
+
+Warning: session_start(): Setting option "gc_probability" failed in %s on line %d
+
+Warning: session_start(): session.gc_divisor must be greater than 0 in %s on line %d
+
+Warning: session_start(): Setting option "gc_divisor" failed in %s on line %d
+
+Warning: session_start(): session.gc_divisor must be greater than 0 in %s on line %d
+
+Warning: session_start(): Setting option "gc_divisor" failed in %s on line %d
 Done
