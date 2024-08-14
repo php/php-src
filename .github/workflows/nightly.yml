@@ -93,6 +93,11 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
 
   LINUX_X64:
     needs: GENERATE_MATRIX
