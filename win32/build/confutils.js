@@ -3064,7 +3064,9 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-
+		if (version < 1900) {
+			ERROR("Building with MSC_VER " + version + " is no longer supported");
+		}
 		return version;
 	} else if (CLANG_TOOLSET) {
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
@@ -3288,19 +3290,15 @@ function toolset_setup_common_cflags()
 					}
 				}
 			}
-			if (VCVERS >= 1900) {
-				if (PHP_SECURITY_FLAGS == "yes") {
-					ADD_FLAG('CFLAGS', "/guard:cf");
-				}
+			if (PHP_SECURITY_FLAGS == "yes") {
+				ADD_FLAG('CFLAGS', "/guard:cf");
 			}
-			if (VCVERS >= 1800) {
-				if (PHP_PGI != "yes" && PHP_PGO != "yes") {
-					ADD_FLAG('CFLAGS', "/Zc:inline");
-				}
-				/* We enable /opt:icf only with the debug pack, so /Gw only makes sense there, too. */
-				if (PHP_DEBUG_PACK == "yes") {
-					ADD_FLAG('CFLAGS', "/Gw");
-				}
+			if (PHP_PGI != "yes" && PHP_PGO != "yes") {
+				ADD_FLAG('CFLAGS', "/Zc:inline");
+			}
+			/* We enable /opt:icf only with the debug pack, so /Gw only makes sense there, too. */
+			if (PHP_DEBUG_PACK == "yes") {
+				ADD_FLAG('CFLAGS', "/Gw");
 			}
 		}
 
@@ -3436,10 +3434,8 @@ function toolset_setup_common_ldlags()
 	ADD_FLAG("PHP_LDFLAGS", "/nodefaultlib:libcmt");
 
 	if (VS_TOOLSET) {
-		if (VCVERS >= 1900) {
-			if (PHP_SECURITY_FLAGS == "yes") {
-				ADD_FLAG('LDFLAGS', "/GUARD:CF");
-			}
+		if (PHP_SECURITY_FLAGS == "yes") {
+			ADD_FLAG('LDFLAGS', "/GUARD:CF");
 		}
 		if (PHP_VS_LINK_COMPAT != "no") {
 			// Allow compatible IL versions, do not require an exact match.
@@ -3610,13 +3606,8 @@ function add_extra_dirs()
 		for (i = 0; i < path.length; i++) {
 			f = FSO.GetAbsolutePathName(path[i]);
 			if (FSO.FolderExists(f)) {
-				if (VS_TOOLSET && VCVERS <= 1200 && f.indexOf(" ") >= 0) {
-					ADD_FLAG("LDFLAGS", '/libpath:"\\"' + f + '\\"" ');
-					ADD_FLAG("ARFLAGS", '/libpath:"\\"' + f + '\\"" ');
-				} else {
-					ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
-					ADD_FLAG("ARFLAGS", '/libpath:"' + f + '" ');
-				}
+				ADD_FLAG("LDFLAGS", '/libpath:"' + f + '" ');
+				ADD_FLAG("ARFLAGS", '/libpath:"' + f + '" ');
 			}
 		}
 	}
