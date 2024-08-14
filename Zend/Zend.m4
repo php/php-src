@@ -1,5 +1,15 @@
 dnl This file contains Zend specific autoconf macros.
 
+AC_DEFUN([ZEND_CHECK_TYPEDEF_REDECL], [dnl
+AC_CACHE_CHECK([if compiler allows typedef redeclarations],
+  [php_cv_have_typedef_redecl],
+  [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [dnl
+    typedef int mytype;
+    typedef int mytype;
+  ])],
+  [],
+  [AC_MSG_FAILURE([Compiler does not support typedef redeclarations. Does it support C11?])])])])
+
 dnl
 dnl ZEND_CHECK_FLOAT_PRECISION
 dnl
@@ -157,6 +167,7 @@ AC_CHECK_FUNC([sigsetjmp],,
     [AC_MSG_FAILURE([Required sigsetjmp not found.])],
     [#include <setjmp.h>])])
 
+ZEND_CHECK_TYPEDEF_REDECL
 ZEND_CHECK_STACK_DIRECTION
 ZEND_CHECK_FLOAT_PRECISION
 ZEND_DLSYM_CHECK
