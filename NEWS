@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0beta2
+?? ??? ????, PHP 8.4.0beta3
+
+
+15 Aug 2024, PHP 8.4.0beta2
 
 - Core:
   . Exiting a namespace now clears seen symbols. (ilutov)
