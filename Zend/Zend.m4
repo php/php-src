@@ -15,6 +15,7 @@ AS_VAR_IF([php_cv_have_typedef_redecl], [no],
   [AC_MSG_FAILURE(m4_text_wrap([
     Compiler does not support typedef redeclarations. Does it support C11?
   ]))])
+])
 
 dnl
 dnl ZEND_CHECK_FLOAT_PRECISION
