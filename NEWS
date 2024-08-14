@@ -4,6 +4,12 @@ PHP                                                                        NEWS
 
 - Core:
   . Exiting a namespace now clears seen symbols. (ilutov)
+  . The exit (and die) language constructs now behave more like a function.
+    They can be passed liked callables, are affected by the strict_types
+    declare statement, and now perform the usual type coercions instead of
+    casting any non-integer value to a string.
+    As such, passing invalid types to exit/die may now result in a TypeError
+    being thrown. (Girgias)
 
 15 Aug 2024, PHP 8.4.0beta1
 

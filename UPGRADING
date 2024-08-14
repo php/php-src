@@ -37,6 +37,13 @@ PHP 8.4 UPGRADE NOTES
     allowed, e.g. $ref = &$this->readonly. This was already forbidden for
     readonly initialization, and was an oversight in the "readonly
     reinitialization during cloning" implementation.
+  . The exit (and die) language constructs now behave more like a function.
+    They can be passed liked callables, are affected by the strict_types
+    declare statement, and now perform the usual type coercions instead of
+    casting any non-integer value to a string.
+    As such, passing invalid types to exit/die may now result in a TypeError
+    being thrown.
+    RFC: https://wiki.php.net/rfc/exit-as-function
 
 - DBA:
   . dba_open() and dba_popen() will now return a Dba\Connection
