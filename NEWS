@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     As such, passing invalid types to exit/die may now result in a TypeError
     being thrown. (Girgias)
 
+- Standard:
+  . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
+
 15 Aug 2024, PHP 8.4.0beta1
 
 - Core:
