@@ -961,6 +961,9 @@ PHP 8.4 UPGRADE NOTES
   . P_SID (NetBSD/FreeBSD only).
   . P_JAILID (FreeBSD only).
 
+- PgSQL:
+  . PGSQL_TUPLES_CHUNK
+
 - Sockets:
   . SO_EXCLUSIVEADDRUSE (Windows only).
   . SOCK_CONN_DGRAM (NetBSD only).
