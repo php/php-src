@@ -802,6 +802,8 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->num_errors = 0;
 	executor_globals->errors = NULL;
 #ifdef ZEND_MAX_EXECUTION_TIMERS
+	memset(&executor_globals->max_execution_timer_timer, 0,
+		sizeof(executor_globals->max_execution_timer_timer));
 	executor_globals->pid = 0;
 	executor_globals->oldact = (struct sigaction){0};
 #endif
