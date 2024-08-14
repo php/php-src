@@ -126,6 +126,22 @@ PHP 8.4 UPGRADE NOTES
     has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
     for a full changelog.
 
+- PCNTL:
+  . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
+    pcntl_sigtimedwait() now throw:
+    - A ValueError if the $signals array is empty (except for
+      pcntl_sigprocmask() if the $mode is SIG_SETMASK).
+    - A TypeError if a value of the $signals array is not an integer
+    - A ValueError if a value of the $signals array is not a valid signal number
+    Moreover, those functions now always return false on failure.
+    In some case previously it could return the value -1.
+  . The function pcntl_sigprocmask() will also now throw:
+    - A ValueError if $mode is not one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK
+  . The function pcntl_sigtimedwait() will also now throw:
+    - A ValueError if $seconds is less than 0
+    - A ValueError if $nanoseconds is less than 0 or greater than 1e9
+    - A ValueError if both $seconds and $nanoseconds are 0
+
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
     have been changed to set value as a bool.
@@ -142,22 +158,6 @@ PHP 8.4 UPGRADE NOTES
 - PDO_PGSQL:
   . The DSN's credentials, when set, are given priority over their PDO
     constructor counterparts, being closer to the documentation states.
-
-- PCNTL:
-  . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
-    pcntl_sigtimedwait() now throw:
-    - A ValueError if the $signals array is empty (except for
-      pcntl_sigprocmask() if the $mode is SIG_SETMASK).
-    - A TypeError if a value of the $signals array is not an integer
-    - A ValueError if a value of the $signals array is not a valid signal number
-    Moreover, those functions now always return false on failure.
-    In some case previously it could return the value -1.
-  . The function pcntl_sigprocmask() will also now throw:
-    - A ValueError if $mode is not one of SIG_BLOCK, SIG_UNBLOCK, or SIG_SETMASK
-  . The function pcntl_sigtimedwait() will also now throw:
-    - A ValueError if $seconds is less than 0
-    - A ValueError if $nanoseconds is less than 0 or greater than 1e9
-    - A ValueError if both $seconds and $nanoseconds are 0
 
 - SimpleXML:
   . Get methods called, or casting to a string on a SimpleXMLElement will no
@@ -301,6 +301,18 @@ PHP 8.4 UPGRADE NOTES
     openssl_pkey_get_details as well as openssl_sign and openssl_verify were
     extended to support those keys.
 
+- PCRE:
+  . The bundled pcre2lib has been updated to version 10.44.
+    As a consequence, LoongArch JIT support has been added, spaces
+    are now allowed between braces in Perl-compatible items, and
+    variable-length lookbehind assertions are now supported.
+  . With pcre2lib version 10.44, the maximum length of named capture groups
+    has changed from 32 to 128.
+  . Added support for the "r" (PCRE2_EXTRA_CASELESS_RESTRICT) modifier, as well
+    as the (?r) mode modifier. When enabled along with the case-insensitive
+    modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
+    characters.
+
 - PDO:
   . Added support for driver-specific subclasses.
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_subclasses
@@ -352,18 +364,6 @@ PHP 8.4 UPGRADE NOTES
 
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
-
-- PCRE:
-  . The bundled pcre2lib has been updated to version 10.44.
-    As a consequence, LoongArch JIT support has been added, spaces
-    are now allowed between braces in Perl-compatible items, and
-    variable-length lookbehind assertions are now supported.
-  . With pcre2lib version 10.44, the maximum length of named capture groups
-    has changed from 32 to 128.
-  . Added support for the "r" (PCRE2_EXTRA_CASELESS_RESTRICT) modifier, as well
-    as the (?r) mode modifier. When enabled along with the case-insensitive
-    modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
-    characters.
 
 - POSIX:
   . Added constant POSIX_SC_CHILD_MAX
@@ -602,6 +602,12 @@ PHP 8.4 UPGRADE NOTES
   . The behavior of mb_strcut is more consistent now on invalid UTF-8 and UTF-16
     strings. (For valid UTF-8 and UTF-16 strings, there is no change.)
 
+- ODBC:
+  . Parameter $row of odbc_fetch_object(), odbc_fetch_array(), and
+    odbc_fetch_into() now has a default value of null, consistent with
+    odbc_fetch_row(). Previously, the default values were -1, -1, and 0,
+    respectively.
+
 - OpenSSL:
   . The extra_attributes parameter in openssl_csr_new sets CSR attributes
     instead of subject DN which was incorrectly done previously.
@@ -612,12 +618,6 @@ PHP 8.4 UPGRADE NOTES
   . Parsing ASN.1 UTCTime by openssl_x509_parse fails if seconds are omitted
     for OpenSSL version below 3.2 (-1 is returned for such fields). The
     OpenSSL version 3.3+ does not load such certificates already.
-
-- ODBC:
-  . Parameter $row of odbc_fetch_object(), odbc_fetch_array(), and
-    odbc_fetch_into() now has a default value of null, consistent with
-    odbc_fetch_row(). Previously, the default values were -1, -1, and 0,
-    respectively.
 
 - Output:
   . Output handler status flags passed to the flags parameter of ob_start
@@ -869,7 +869,7 @@ PHP 8.4 UPGRADE NOTES
 - MBString:
   . Unicode data tables have been updated to Unicode 15.1.
 
-- mysqli:
+- Mysqli:
   . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
     has been removed.
 
@@ -879,10 +879,10 @@ PHP 8.4 UPGRADE NOTES
 - PDO:
   . The class constants are typed now.
 
-- pdo_pgsql:
+- PDO_PGSQL:
   . The pdo_pgsql extension now requires at least libpq 10.0.
 
-- pgsql:
+- PgSQL:
   . The pgsql extension now requires at least libpq 10.0.
 
 - Reflection:
