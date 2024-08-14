@@ -365,6 +365,9 @@ PHP 8.4 UPGRADE NOTES
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
 
+- PgSQL:
+  . Added pg_result_memory_size to get the visibility the memory used by a query result.
+
 - POSIX:
   . Added constant POSIX_SC_CHILD_MAX
   . Added constant POSIX_SC_CLK_TCK
@@ -496,7 +499,6 @@ PHP 8.4 UPGRADE NOTES
     3-parameter signature with a null $row parameter instead.
   . Calling pg_field_is_null() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
-  . Added pg_result_memory_size to get the visibility the memory used by a query result.
 
 - Random:
   . lcg_value() is deprecated, as the function is broken in multiple ways.
