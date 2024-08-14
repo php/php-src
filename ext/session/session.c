@@ -368,7 +368,6 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 				|| (c >= '0' && c <= '9')
 				|| c == ','
 				|| c == '-')) {
-			php_error_docref(NULL, E_WARNING, "Prefix or name cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			return FAILURE;
 		}
 	}
@@ -378,7 +377,6 @@ PHPAPI zend_result php_session_valid_key(const char *key) /* {{{ */
 	/* Somewhat arbitrary length limit here, but should be way more than
 	   anyone needs and avoids file-level warnings later on if we exceed MAX_PATH */
 	if (len == 0 || len > PS_MAX_SID_LENGTH) {
-		php_error_docref(NULL, E_WARNING, "Prefix or name cannot be larger than 256 characters");
 		return FAILURE;
 	}
 
@@ -2385,8 +2383,13 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
+        if (ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH) {
+            zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
+            RETURN_THROWS();
+        }
 		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
 			/* E_ERROR raised for security reason. */
+			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
 			RETURN_FALSE;
 		} else {
 			smart_str_append(&id, prefix);

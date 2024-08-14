@@ -12,23 +12,20 @@ session
 
 var_dump(session_create_id('_'));
 var_dump(session_create_id('%'));
-var_dump(session_create_id('ABTgdPs68S3M4HMaqKwj33TzqLMv5PHpWQxJbfpeogEhrJRY7o9f33pKLCmhf0tXCtoBkIu0yxXYCSHfJhPd2miPUW4MIpd91dnEiOwWDfaBnfdJZOwgvgmYLSfDGaebqmnCAoyuzlcq2j59nNRhccgJIkr9ytY3RwFTTXszpcjpx6mlJuG9GksKAhPsnnaEwSEb0eFyqvn80gYI2roKSjaFSmJxg0xgXuCF4csMo8DxiSvovho5QTKx5u7h8VyQL'));
 try {
+    var_dump(session_create_id('ABTgdPs68S3M4HMaqKwj33TzqLMv5PHpWQxJbfpeogEhrJRY7o9f33pKLCmhf0tXCtoBkIu0yxXYCSHfJhPd2miPUW4MIpd91dnEiOwWDfaBnfdJZOwgvgmYLSfDGaebqmnCAoyuzlcq2j59nNRhccgJIkr9ytY3RwFTTXszpcjpx6mlJuG9GksKAhPsnnaEwSEb0eFyqvn80gYI2roKSjaFSmJxg0xgXuCF4csMo8DxiSvovho5QTKx5u7h8VyQL'));
     var_dump(session_create_id("AB\0CD"));
 } catch (Throwable $e) {
-    echo $e->getMessage() . "\n";
+    echo $e::class . ': ' . $e->getMessage() . "\n";
 }
 
 ?>
 Done
 --EXPECTF--
-Warning: session_create_id(): Prefix or name cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
+Warning: session_create_id(): Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
 bool(false)
 
-Warning: session_create_id(): Prefix or name cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
+Warning: session_create_id(): Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in %s on line %d
 bool(false)
-
-Warning: session_create_id(): Prefix or name cannot be larger than 256 characters in %s on line %d
-bool(false)
-session_create_id(): Argument #1 ($prefix) must not contain any null bytes
+ValueError: session_create_id(): Argument #1 ($prefix) cannot be longer than 256 characters
 Done
