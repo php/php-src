@@ -40,6 +40,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
     pdo_odbc_dir=
   fi
 
+  dnl TODO use PKG_CHECK_MODULES when possible
   case $pdo_odbc_flavour in
     ibm-db2)
         pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
@@ -51,6 +52,7 @@ if test "$PHP_PDO_ODBC" != "no"; then
         pdo_odbc_def_libdir=/usr/local/$PHP_LIBDIR
         pdo_odbc_def_incdir=/usr/local/include
         pdo_odbc_def_lib=iodbc
+        pdo_odbc_subdir=libiodbc
         ;;
 
     unixODBC|unixodbc)
@@ -83,6 +85,11 @@ if test "$PHP_PDO_ODBC" != "no"; then
   else
     PDO_ODBC_INCDIR="$pdo_odbc_def_incdir"
     PDO_ODBC_LIBDIR="$pdo_odbc_def_libdir"
+  fi
+
+  dnl handle installation in /usr/include/libiodbc
+  if test -n "$pdo_odbc_subdir" -a -d $PDO_ODBC_INCDIR/$pdo_odbc_subdir ; then
+    PDO_ODBC_LIBDIR=$PDO_ODBC_INCDIR/$pdo_odbc_subdir
   fi
 
   AC_MSG_RESULT([$pdo_odbc_flavour
