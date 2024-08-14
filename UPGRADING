@@ -64,8 +64,8 @@ PHP 8.4 UPGRADE NOTES
     object. This is no longer possible, and cloning a DOMXPath object now throws
     an error.
   . DOMDocument::$actualEncoding, DOMDocument::config, DOMEntity::$actualEncoding,
-    DOMEntity::$encoding, DOMEntity::$version have been deprecated as part of the
-    https://wiki.php.net/rfc/deprecations_php_8_4 RFC.
+    DOMEntity::$encoding, DOMEntity::$version have been deprecated.
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#formally_deprecate_soft-deprecated_domdocument_and_domentity_properties
 
 - GMP:
   . The GMP class is now final and cannot be extended anymore.
@@ -305,6 +305,7 @@ PHP 8.4 UPGRADE NOTES
   . Added support for driver specific SQL parsers. The default parser supports:
     - single and double quoted literals, with doubling as escaping mechanism.
     - two-dashes and non-nested C-style comments.
+    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
 - PDO_MYSQL:
   . Added custom parser supporting:
@@ -313,6 +314,7 @@ PHP 8.4 UPGRADE NOTES
     - backtick literal identifiers and with doubling as escaping mechanism
     - two dashes followed by at least 1 whitespace, non-nested C-style comments,
       and hash-comments
+    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
 - PDO_PGSQL:
   . Added custom parser supporting:
@@ -321,12 +323,14 @@ PHP 8.4 UPGRADE NOTES
     - dollar-quoted string literals
     - two-dashes and C-style comments (non-nested)
     - support for "??" as escape sequence for the "?" operator
+    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
 - PDO_SQLITE:
   . Added custom parser supporting:
     - single, double quoted, and backtick literals, with doubling as escaping mechanism
     - square brackets quoting for identifiers
     - two-dashes and C-style comments (non-nested)
+    RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
 - Phar:
   . Added support for the unix timestamp extension for zip archives.
@@ -443,7 +447,7 @@ PHP 8.4 UPGRADE NOTES
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and
     SUNFUNCS_RET_DOUBLE are now deprecated, following the deprecation of
     the associated date_sunset() and date_sunrise() functions in PHP 8.1.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#constants_sunfuncs_ret_string_sunfuncs_ret_double_sunfuncs_ret_timestamp
 
 - DBA:
   . Passing null or false to dba_key_split() is deprecated.
@@ -455,7 +459,7 @@ PHP 8.4 UPGRADE NOTES
 
 - Hash:
   . Deprecated passing incorrect data types for options to ext/hash functions.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_passing_incorrect_data_types_for_options_to_exthash_functions
 
 - Intl:
   . Calling intlcal_set() as well as calling IntlCalendar::set() with
@@ -505,7 +509,7 @@ PHP 8.4 UPGRADE NOTES
 - Random:
   . lcg_value() is deprecated, as the function is broken in multiple ways.
     Use \Random\Randomizer::getFloat() instead.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#deprecate_lcg_value
 
 - Reflection:
   . Calling ReflectionMethod::__construct() with 1 argument is deprecated.
@@ -517,7 +521,7 @@ PHP 8.4 UPGRADE NOTES
   . Changing the INI settings session.sid_length and session.sid_bits_per_character
     is deprecated. Update the session storage backend to accept 32 character
     hexadecimal session IDs and stop changing these two INI settings.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#sessionsid_length_and_sessionsid_bits_per_character
 
 - SOAP:
   . Passing an int to SoapServer::addFunction() is now deprecated.
@@ -543,7 +547,7 @@ PHP 8.4 UPGRADE NOTES
   . Raising zero to the power of negative number is deprecated.
     RFC: https://wiki.php.net/rfc/raising_zero_to_power_of_negative_number
   . Unserializing strings using the uppercase 'S' tag is deprecated.
-    RFC: https://wiki.php.net/rfc/deprecations_php_8_4
+    RFC: https://wiki.php.net/rfc/deprecations_php_8_4#unserialize_s_s_tag
   . Passing a non-empty string for the $enclosure parameter of:
     - fputcsv()
     - fgetcsv()
@@ -683,11 +687,9 @@ PHP 8.4 UPGRADE NOTES
     earlier PHP versions.
   . The $mode parameter of the round() function has been widened to RoundingMode|int,
     accepting instances of a new RoundingMode enum.
-
     RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
   . Four new modes have been added to the round() function: RoundingMode::PositiveInfinity,
     RoundingMode::NegativeInfinity, RoundingMode::TowardsZero, RoundingMode::AwayFromZero.
-
     RFC: https://wiki.php.net/rfc/new_rounding_modes_to_round_function
   . Fixed a bug caused by "pre-rounding" of the round() function. Previously, using
     "pre-rounding" to treat a value like 0.285 (actually 0.28499999999999998) as a
@@ -699,7 +701,6 @@ PHP 8.4 UPGRADE NOTES
     but now returns `4503599627370496`.
   . The default value of the 'cost' option for PASSWORD_BCRYPT for password_hash()
     has been increased from '10' to '12'.
-
     RFC: https://wiki.php.net/rfc/bcrypt_cost_2023
   . debug_zval_dump() now indicates whether an array is packed.
   . long2ip() now returns string instead of string|false.
