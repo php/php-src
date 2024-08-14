@@ -235,7 +235,7 @@ AC_DEFUN([PHP_FPM_LQ],
 AS_VAR_IF([php_cv_have_TCP_INFO], [yes],
   [AC_DEFINE([HAVE_LQ_TCP_INFO], [1], [Define to 1 if you have 'TCP_INFO'.])])
 
-AC_CACHE_CHECK([for TCP_CONNECTION_INFO], [php_cv_have_TCP_CONNECTION_INFO]
+AC_CACHE_CHECK([for TCP_CONNECTION_INFO], [php_cv_have_TCP_CONNECTION_INFO],
   [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <netinet/tcp.h>], [
     struct tcp_connection_info ti;
     int x = TCP_CONNECTION_INFO;
