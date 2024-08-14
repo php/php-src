@@ -6,6 +6,8 @@ AC_CACHE_CHECK([if compiler allows typedef redeclarations],
   [AC_LINK_IFELSE([AC_LANG_PROGRAM([], [dnl
     typedef int mytype;
     typedef int mytype;
+    mytype var;
+    (void)var;
   ])],
   [],
   [AC_MSG_FAILURE([Compiler does not support typedef redeclarations. Does it support C11?])])])])
