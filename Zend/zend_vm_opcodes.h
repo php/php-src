@@ -161,7 +161,6 @@ END_EXTERN_C()
 #define ZEND_UNSET_OBJ                       76
 #define ZEND_FE_RESET_R                      77
 #define ZEND_FE_FETCH_R                      78
-#define ZEND_EXIT                            79
 #define ZEND_FETCH_R                         80
 #define ZEND_FETCH_DIM_R                     81
 #define ZEND_FETCH_OBJ_R                     82

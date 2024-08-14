@@ -34,7 +34,7 @@ if test "$PHP_APXS2" != "no"; then
 
   APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
   APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
-  AS_IF([test ! -x "$APXS_HTTPD"], [AC_MSG_ERROR(m4_normalize([
+  AS_IF([test ! -x "$APXS_HTTPD"], [AC_MSG_ERROR(m4_text_wrap([
     $APXS_HTTPD executable not found. Please, install Apache HTTP Server
     command-line utility.
   ]))])

@@ -280,7 +280,7 @@ typedef struct _zend_accel_shared_globals {
 	const void **jit_exit_groups;
 
 	/* Interned Strings Support (must be the last element) */
-	zend_string_table interned_strings;
+	ZEND_SET_ALIGNED(ZEND_STRING_TABLE_POS_ALIGNMENT, zend_string_table interned_strings);
 } zend_accel_shared_globals;
 
 #ifdef ZEND_WIN32

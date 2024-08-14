@@ -17,7 +17,8 @@ $string = '"first #' . $utf_1 . $utf_2 . '";"second"';
 $fields = str_getcsv($string, ';', '"', "#");
 var_dump($fields);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: str_getcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(2) {
   [0]=>
   string(11) "first #с؀"

@@ -5,22 +5,25 @@ PHP_ARG_ENABLE([cli],
   [yes],
   [no])
 
-AC_CHECK_FUNCS([setproctitle])
-
-AC_CHECK_HEADERS([sys/pstat.h])
-
-AC_CACHE_CHECK([for PS_STRINGS], [php_cv_var_PS_STRINGS],
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <machine/vmparam.h>
-#include <sys/exec.h>
-],
-[PS_STRINGS->ps_nargvstr = 1;
-PS_STRINGS->ps_argvstr = "foo";])],
-[php_cv_var_PS_STRINGS=yes],
-[php_cv_var_PS_STRINGS=no])])
-AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
-  [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
-
 if test "$PHP_CLI" != "no"; then
+  AC_CHECK_FUNCS([setproctitle])
+
+  AC_CHECK_HEADERS([sys/pstat.h])
+
+  AC_CACHE_CHECK([for PS_STRINGS], [php_cv_var_PS_STRINGS],
+    [AC_LINK_IFELSE([AC_LANG_PROGRAM([
+      #include <machine/vmparam.h>
+      #include <sys/exec.h>
+    ],
+    [
+      PS_STRINGS->ps_nargvstr = 1;
+      PS_STRINGS->ps_argvstr = "foo";
+    ])],
+    [php_cv_var_PS_STRINGS=yes],
+    [php_cv_var_PS_STRINGS=no])])
+  AS_VAR_IF([php_cv_var_PS_STRINGS], [yes],
+    [AC_DEFINE([HAVE_PS_STRINGS], [], [Define if the PS_STRINGS exists.])])
+
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cli/Makefile.frag])
 
   dnl Set filename.

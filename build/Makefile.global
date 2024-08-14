@@ -132,7 +132,7 @@ distclean: clean
 	rm -f sapi/fpm/php-fpm.conf sapi/fpm/init.d.php-fpm sapi/fpm/php-fpm.service sapi/fpm/php-fpm.8 sapi/fpm/status.html
 	rm -f ext/phar/phar.phar ext/phar/phar.php
 	if test "$(srcdir)" != "$(builddir)"; then \
-	  rm -f ext/phar/phar/phar.inc; \
+		rm -f ext/phar/phar/phar.inc; \
 	fi
 
 prof-gen:

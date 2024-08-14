@@ -31,7 +31,7 @@ require_once 'skipifconnectfailure.inc';
     if (0 != ($tmp = mysqli_stmt_errno($stmt)))
         printf("[008] Expecting zero, got %s/%s\n", gettype($tmp), $tmp);
 
-    mysqli_kill($link, mysqli_thread_id($link));
+    $link->query('KILL '.mysqli_thread_id($link));
 
     if (true === ($tmp = mysqli_stmt_execute($stmt)))
         printf("[009] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);

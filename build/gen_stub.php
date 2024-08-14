@@ -83,9 +83,15 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             }
         }
 
+        /* Because exit() and die() are proper token/keywords we need to hack-around */
+        $hasSpecialExitAsFunctionHandling = str_ends_with($stubFile, 'zend_builtin_functions.stub.php');
         if (!$fileInfo = $context->parsedFiles[$stubFile] ?? null) {
             initPhpParser();
-            $fileInfo = parseStubFile($stubCode ?? file_get_contents($stubFile));
+            $stubContent = $stubCode ?? file_get_contents($stubFile);
+            if ($hasSpecialExitAsFunctionHandling) {
+                $stubContent = str_replace(['exit', 'die'], ['exit_dummy', 'die_dummy'], $stubContent);
+            }
+            $fileInfo = parseStubFile($stubContent);
             $context->parsedFiles[$stubFile] = $fileInfo;
 
             foreach ($fileInfo->dependencies as $dependency) {
@@ -118,6 +124,9 @@ function processStubFile(string $stubFile, Context $context, bool $includeOnly =
             $context->allConstInfos,
             $stubHash
         );
+        if ($hasSpecialExitAsFunctionHandling) {
+            $arginfoCode = str_replace(['exit_dummy', 'die_dummy'], ['exit', 'die'], $arginfoCode);
+        }
         if (($context->forceRegeneration || $stubHash !== $oldStubHash) && file_put_contents($arginfoFile, $arginfoCode)) {
             echo "Saved $arginfoFile\n";
         }

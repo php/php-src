@@ -13,7 +13,8 @@ var_dump($fo->fgetcsv(',', '"', '"'));
 <?php
 unlink('SplFileObject__fgetcsv6.csv');
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: SplFileObject::fgetcsv(): Passing a non-empty string to the $escape parameter is deprecated since 8.4 in %s on line %d
 array(3) {
   [0]=>
   string(3) "aaa"

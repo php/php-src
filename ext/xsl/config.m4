@@ -4,15 +4,6 @@ PHP_ARG_WITH([xsl],
     [Build with XSL support])])
 
 if test "$PHP_XSL" != "no"; then
-
-  if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([XSL extension requires LIBXML extension, add --with-libxml])
-  fi
-
-  if test "$PHP_DOM" = "no"; then
-    AC_MSG_ERROR([XSL extension requires DOM extension, add --enable-dom])
-  fi
-
   PKG_CHECK_MODULES([XSL], [libxslt >= 1.1.0])
 
   PHP_EVAL_INCLINE([$XSL_CFLAGS])

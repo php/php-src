@@ -116,7 +116,6 @@ Regular expression for input files to exclude.
 .B ...
 Directory to extract to (defaults to '.').
 
-
 .SH help command
 This help or help for a selected command.
 .P
@@ -164,7 +163,6 @@ Specifies a regular expression for input files.
 .PD
 .B -x \fIregex\fP
 Regular expression for input files to exclude.
-
 
 .SH meta-del command
 Delete meta information of a PHAR entry or a PHAR package.
@@ -397,7 +395,6 @@ present.
 .B \-s \fIstub\fP
 Select the \fIstub\fP file.
 
-
 .SH tree command
 Get a directory tree for a PHAR archive.
 .P
@@ -419,7 +416,6 @@ Regular expression for input files to exclude.
 
 .SH version command
 Get information about the PHAR environment and the tool version.
-
 
 .SH COMPRESSION
 Algorithms:

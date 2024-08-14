@@ -45,14 +45,14 @@ static void tag_dtor(zval *zv)
 	free(Z_PTR_P(zv));
 }
 
-static int php_ini_on_update_tags(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage, int type)
+static zend_result php_ini_on_update_tags(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage, bool is_session)
 {
 	url_adapt_state_ex_t *ctx;
 	char *key;
 	char *tmp;
 	char *lasts = NULL;
 
-	if (type) {
+	if (is_session) {
 		ctx = &BG(url_adapt_session_ex);
 	} else {
 		ctx = &BG(url_adapt_output_ex);
@@ -102,22 +102,22 @@ static int php_ini_on_update_tags(zend_ini_entry *entry, zend_string *new_value,
 
 static PHP_INI_MH(OnUpdateSessionTags)
 {
-	return php_ini_on_update_tags(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, 1);
+	return php_ini_on_update_tags(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ true);
 }
 
 static PHP_INI_MH(OnUpdateOutputTags)
 {
-	return php_ini_on_update_tags(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, 0);
+	return php_ini_on_update_tags(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ false);
 }
 
-static int php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage, int type)
+static zend_result php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *new_value, void *mh_arg1, void *mh_arg2, void *mh_arg3, int stage, bool is_session)
 {
 	HashTable *hosts;
 	char *key;
 	char *tmp;
 	char *lasts = NULL;
 
-	if (type) {
+	if (is_session) {
 		hosts = &BG(url_adapt_session_hosts_ht);
 	} else {
 		hosts = &BG(url_adapt_output_hosts_ht);
@@ -152,12 +152,12 @@ static int php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *new_value
 
 static PHP_INI_MH(OnUpdateSessionHosts)
 {
-	return php_ini_on_update_hosts(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, 1);
+	return php_ini_on_update_hosts(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ true);
 }
 
 static PHP_INI_MH(OnUpdateOutputHosts)
 {
-	return php_ini_on_update_hosts(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, 0);
+	return php_ini_on_update_hosts(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ false);
 }
 
 /* FIXME: OnUpdate*Hosts cannot set default to $_SERVER['HTTP_HOST'] at startup */
@@ -349,7 +349,7 @@ static inline void passthru(STD_PARA)
 }
 
 
-static int check_http_host(char *target)
+static zend_result check_http_host(char *target)
 {
 	zval *host, *tmp;
 	zend_string *host_tmp;
@@ -375,7 +375,7 @@ static int check_http_host(char *target)
 	return FAILURE;
 }
 
-static int check_host_whitelist(url_adapt_state_ex_t *ctx)
+static zend_result check_host_whitelist(url_adapt_state_ex_t *ctx)
 {
 	php_url *url_parts = NULL;
 	HashTable *allowed_hosts = ctx->type ? &BG(url_adapt_session_hosts_ht) : &BG(url_adapt_output_hosts_ht);
@@ -583,7 +583,7 @@ stop:
 }
 
 
-PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, int encode)
+PHPAPI char *php_url_scanner_adapt_single_url(const char *url, size_t urllen, const char *name, const char *value, size_t *newlen, bool encode)
 {
 	char *result;
 	smart_str surl = {0};
@@ -647,26 +647,24 @@ static char *url_adapt_ext(const char *src, size_t srclen, size_t *newlen, bool 
 	return retval;
 }
 
-static int php_url_scanner_ex_activate(int type)
+static void php_url_scanner_ex_activate(bool is_session)
 {
 	url_adapt_state_ex_t *ctx;
 
-	if (type) {
+	if (is_session) {
 		ctx = &BG(url_adapt_session_ex);
 	} else {
 		ctx = &BG(url_adapt_output_ex);
 	}
 
 	memset(ctx, 0, XtOffsetOf(url_adapt_state_ex_t, tags));
-
-	return SUCCESS;
 }
 
-static int php_url_scanner_ex_deactivate(int type)
+static void php_url_scanner_ex_deactivate(bool is_session)
 {
 	url_adapt_state_ex_t *ctx;
 
-	if (type) {
+	if (is_session) {
 		ctx = &BG(url_adapt_session_ex);
 	} else {
 		ctx = &BG(url_adapt_output_ex);
@@ -677,16 +675,14 @@ static int php_url_scanner_ex_deactivate(int type)
 	smart_str_free(&ctx->tag);
 	smart_str_free(&ctx->arg);
 	smart_str_free(&ctx->attr_val);
-
-	return SUCCESS;
 }
 
-static inline void php_url_scanner_session_handler_impl(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode, int type)
+static inline void php_url_scanner_session_handler_impl(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode, bool is_session)
 {
 	size_t len;
 	url_adapt_state_ex_t *url_state;
 
-	if (type) {
+	if (is_session) {
 		url_state = &BG(url_adapt_session_ex);
 	} else {
 		url_state = &BG(url_adapt_output_ex);
@@ -720,15 +716,15 @@ static inline void php_url_scanner_session_handler_impl(char *output, size_t out
 
 static void php_url_scanner_session_handler(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode)
 {
-	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, 1);
+	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, /* is_session */ true);
 }
 
 static void php_url_scanner_output_handler(char *output, size_t output_len, char **handled_output, size_t *handled_output_len, int mode)
 {
-	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, 0);
+	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, /* is_session */ false);
 }
 
-static int php_url_scanner_add_var_impl(const char *name, size_t name_len, const char *value, size_t value_len, int encode, int type)
+static void php_url_scanner_add_var_impl(const char *name, size_t name_len, const char *value, size_t value_len, bool encode, bool is_session)
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -739,7 +735,7 @@ static int php_url_scanner_add_var_impl(const char *name, size_t name_len, const
 	php_output_handler_func_t handler;
 	bool should_start = false;
 
-	if (type) {
+	if (is_session) {
 		url_state = &BG(url_adapt_session_ex);
 		handler = php_url_scanner_session_handler;
 	} else {
@@ -748,10 +744,10 @@ static int php_url_scanner_add_var_impl(const char *name, size_t name_len, const
 	}
 
 	if (!url_state->active) {
-		php_url_scanner_ex_activate(type);
+		php_url_scanner_ex_activate(is_session);
 		should_start = true;
 		url_state->active = 1;
-		url_state->type = type;
+		url_state->type = is_session;
 	}
 
 	if (url_state->url_app.s && ZSTR_LEN(url_state->url_app.s) != 0) {
@@ -792,27 +788,27 @@ static int php_url_scanner_add_var_impl(const char *name, size_t name_len, const
 	if (should_start) {
 		php_output_start_internal(ZEND_STRL("URL-Rewriter"), handler, 0, PHP_OUTPUT_HANDLER_STDFLAGS);
 	}
+}
 
+
+PHPAPI zend_result php_url_scanner_add_session_var(const char *name, size_t name_len, const char *value, size_t value_len, bool encode)
+{
+	php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, /* is_session */ true);
 	return SUCCESS;
 }
 
 
-PHPAPI int php_url_scanner_add_session_var(const char *name, size_t name_len, const char *value, size_t value_len, int encode)
+PHPAPI zend_result php_url_scanner_add_var(const char *name, size_t name_len, const char *value, size_t value_len, bool encode)
 {
-	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 1);
+	php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, /* is_session */ false);
+	return SUCCESS;
 }
 
 
-PHPAPI int php_url_scanner_add_var(const char *name, size_t name_len, const char *value, size_t value_len, int encode)
-{
-	return php_url_scanner_add_var_impl(name, name_len, value, value_len, encode, 0);
-}
-
-
-static inline void php_url_scanner_reset_vars_impl(int type) {
+static inline void php_url_scanner_reset_vars_impl(bool is_session) {
 	url_adapt_state_ex_t *url_state;
 
-	if (type) {
+	if (is_session) {
 		url_state = &BG(url_adapt_session_ex);
 	} else {
 		url_state = &BG(url_adapt_output_ex);
@@ -827,21 +823,21 @@ static inline void php_url_scanner_reset_vars_impl(int type) {
 }
 
 
-PHPAPI int php_url_scanner_reset_session_vars(void)
+PHPAPI zend_result php_url_scanner_reset_session_vars(void)
 {
-	php_url_scanner_reset_vars_impl(1);
+	php_url_scanner_reset_vars_impl(true);
 	return SUCCESS;
 }
 
 
-PHPAPI int php_url_scanner_reset_vars(void)
+PHPAPI zend_result php_url_scanner_reset_vars(void)
 {
-	php_url_scanner_reset_vars_impl(0);
+	php_url_scanner_reset_vars_impl(false);
 	return SUCCESS;
 }
 
 
-static int php_url_scanner_reset_var_impl(zend_string *name, int encode, int type)
+static zend_result php_url_scanner_reset_var_impl(zend_string *name, int encode, bool is_session)
 {
 	char *start, *end, *limit;
 	size_t separator_len;
@@ -854,7 +850,7 @@ static int php_url_scanner_reset_var_impl(zend_string *name, int encode, int typ
 	bool sep_removed = 0;
 	url_adapt_state_ex_t *url_state;
 
-	if (type) {
+	if (is_session) {
 		url_state = &BG(url_adapt_session_ex);
 	} else {
 		url_state = &BG(url_adapt_output_ex);
@@ -911,7 +907,7 @@ static int php_url_scanner_reset_var_impl(zend_string *name, int encode, int typ
 	}
 	/* Remove all when this is the only rewrite var */
 	if (ZSTR_LEN(url_state->url_app.s) == end - start) {
-		php_url_scanner_reset_vars_impl(type);
+		php_url_scanner_reset_vars_impl(is_session);
 		goto finish;
 	}
 	/* Check preceding separator */
@@ -933,7 +929,7 @@ static int php_url_scanner_reset_var_impl(zend_string *name, int encode, int typ
 	if (!start) {
 		/* Should not happen */
 		ret = FAILURE;
-		php_url_scanner_reset_vars_impl(type);
+		php_url_scanner_reset_vars_impl(is_session);
 		goto finish;
 	}
 	/* Get end of form var */
@@ -961,15 +957,15 @@ finish:
 }
 
 
-PHPAPI int php_url_scanner_reset_session_var(zend_string *name, int encode)
+PHPAPI zend_result php_url_scanner_reset_session_var(zend_string *name, int encode)
 {
-	return php_url_scanner_reset_var_impl(name, encode, 1);
+	return php_url_scanner_reset_var_impl(name, encode, /* is_session */ true);
 }
 
 
-PHPAPI int php_url_scanner_reset_var(zend_string *name, int encode)
+PHPAPI zend_result php_url_scanner_reset_var(zend_string *name, int encode)
 {
-	return php_url_scanner_reset_var_impl(name, encode, 0);
+	return php_url_scanner_reset_var_impl(name, encode, /* is_session */ false);
 }
 
 
@@ -1000,7 +996,7 @@ PHP_RINIT_FUNCTION(url_scanner)
 PHP_RSHUTDOWN_FUNCTION(url_scanner)
 {
 	if (BG(url_adapt_session_ex).active) {
-		php_url_scanner_ex_deactivate(1);
+		php_url_scanner_ex_deactivate(true);
 		BG(url_adapt_session_ex).active    = 0;
 		BG(url_adapt_session_ex).tag_type  = 0;
 		BG(url_adapt_session_ex).attr_type = 0;
@@ -1009,7 +1005,7 @@ PHP_RSHUTDOWN_FUNCTION(url_scanner)
 	smart_str_free(&BG(url_adapt_session_ex).url_app);
 
 	if (BG(url_adapt_output_ex).active) {
-		php_url_scanner_ex_deactivate(0);
+		php_url_scanner_ex_deactivate(false);
 		BG(url_adapt_output_ex).active    = 0;
 		BG(url_adapt_output_ex).tag_type  = 0;
 		BG(url_adapt_output_ex).attr_type = 0;

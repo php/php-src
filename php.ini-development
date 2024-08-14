@@ -139,16 +139,6 @@
 ;   Development Value: 1000
 ;   Production Value: 1000
 
-; session.sid_bits_per_character
-;   Default Value: 4
-;   Development Value: 5
-;   Production Value: 5
-
-; session.sid_length
-;   Default Value: 32
-;   Development Value: 26
-;   Production Value: 26
-
 ; short_open_tag
 ;   Default Value: On
 ;   Development Value: Off

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a251ed19168eddf1d45a74d25104e92585669f5e */
+ * Stub hash: c01c9337e58601ff9e6c85072a62f68cc7fec9ba */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplFixedArray___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, size, IS_LONG, 0, "0")
@@ -105,7 +105,7 @@ static zend_class_entry *register_class_SplFixedArray(zend_class_entry *class_en
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func___wakeup_0->args[0].value, &attribute_Deprecated_func___wakeup_0_arg0);
 	attribute_Deprecated_func___wakeup_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 	zval attribute_Deprecated_func___wakeup_0_arg1;
-	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("the __unserialize() method must be overloaded instead", strlen("the __unserialize() method must be overloaded instead"), 1);
+	zend_string *attribute_Deprecated_func___wakeup_0_arg1_str = zend_string_init("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()", strlen("this method is obsolete, as serialization hooks are provided by __unserialize() and __serialize()"), 1);
 	ZVAL_STR(&attribute_Deprecated_func___wakeup_0_arg1, attribute_Deprecated_func___wakeup_0_arg1_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func___wakeup_0->args[1].value, &attribute_Deprecated_func___wakeup_0_arg1);
 	attribute_Deprecated_func___wakeup_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);

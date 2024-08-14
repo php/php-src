@@ -23,6 +23,9 @@
 #include "SAPI.h"
 #include "main/php_network.h"
 #include "zend_smart_str.h"
+#ifdef PHP_WIN32
+# include "win32/sockets.h"
+#endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>

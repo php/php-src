@@ -64,7 +64,7 @@ if test "$PHP_PHPDBG" != "no"; then
 
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/phpdbg/Makefile.frag],
     [$abs_srcdir/sapi/phpdbg],
-    [$abs_builddir/sapi/phpdbg])
+    [sapi/phpdbg])
   PHP_SELECT_SAPI([phpdbg],
     [program],
     m4_normalize([

@@ -277,7 +277,6 @@ int main(void) {
     ac_cv_crypt_sha256=no
   ])])
 
-
   if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
     AC_MSG_FAILURE([Cannot use external libcrypt as some algo are missing.])
   fi
@@ -346,7 +345,7 @@ dnl
 
 PHP_CHECK_FUNC(res_search, resolv, socket)
 
-AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np])
+AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np elf_aux_info])
 
 dnl
 dnl Obsolete check for strptime() declaration. The strptime, where available,
@@ -366,14 +365,14 @@ PHP_ARG_WITH([password-argon2],
   [AS_HELP_STRING([[--with-password-argon2]],
     [Include Argon2 support in password_*])])
 
-if test "$PHP_PASSWORD_ARGON2" != "no"; then
+AS_VAR_IF([PHP_PASSWORD_ARGON2], [no],, [
   PKG_CHECK_MODULES([ARGON2], [libargon2])
   PHP_EVAL_INCLINE([$ARGON2_CFLAGS])
   PHP_EVAL_LIBLINE([$ARGON2_LIBS])
 
   AC_DEFINE([HAVE_ARGON2LIB], [1],
     [Define to 1 if the system has the 'libargon2' library.])
-fi
+])
 
 dnl
 dnl Check net/if.h for net_get_interfaces. Darwin and BSD-like systems need

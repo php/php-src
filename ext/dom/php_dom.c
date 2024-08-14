@@ -894,7 +894,7 @@ PHP_MINIT_FUNCTION(dom)
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "doctype", dom_document_doctype_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "implementation", dom_document_implementation_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "documentElement", dom_document_document_element_read, NULL);
-	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "actualEncoding", dom_document_encoding_read, NULL);
+	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "actualEncoding", dom_document_actual_encoding_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "encoding", dom_document_encoding_read, dom_document_encoding_write);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "xmlEncoding", dom_document_encoding_read, NULL);
 	DOM_REGISTER_PROP_HANDLER(&dom_document_prop_handlers, "standalone", dom_document_standalone_read, dom_document_standalone_write);

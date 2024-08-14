@@ -53,23 +53,18 @@ PHP_ARG_WITH([ldap-sasl],
   [no])
 
 if test "$PHP_LDAP" != "no"; then
-
   PHP_NEW_EXTENSION([ldap],
     [ldap.c],
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
-  if test "$PHP_LDAP" = "yes"; then
+  AS_VAR_IF([PHP_LDAP], [yes], [
     for i in /usr/local /usr; do
-      PHP_LDAP_CHECKS($i)
+      PHP_LDAP_CHECKS([$i])
     done
-  else
-    PHP_LDAP_CHECKS($PHP_LDAP)
-  fi
+  ], [PHP_LDAP_CHECKS([$PHP_LDAP])])
 
-  if test -z "$LDAP_DIR"; then
-    AC_MSG_ERROR([Cannot find ldap.h])
-  fi
+  AS_VAR_IF([LDAP_DIR],, [AC_MSG_ERROR([Cannot find ldap.h])])
 
   dnl -pc removal is a hack for clang
   MACHINE_INCLUDES=$($CC -dumpmachine | $SED 's/-pc//')

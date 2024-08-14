@@ -608,7 +608,6 @@ int phpdbg_skip_line_helper(void) /* {{{ */ {
 		 || opline->opcode == ZEND_RETURN
 		 || opline->opcode == ZEND_FAST_RET
 		 || opline->opcode == ZEND_GENERATOR_RETURN
-		 || opline->opcode == ZEND_EXIT
 		 || opline->opcode == ZEND_YIELD
 		 || opline->opcode == ZEND_YIELD_FROM
 		) {
@@ -652,7 +651,6 @@ static void phpdbg_seek_to_end(void) /* {{{ */ {
 			case ZEND_RETURN:
 			case ZEND_FAST_RET:
 			case ZEND_GENERATOR_RETURN:
-			case ZEND_EXIT:
 			case ZEND_YIELD:
 			case ZEND_YIELD_FROM:
 				zend_hash_index_update_ptr(&PHPDBG_G(seek), (zend_ulong) opline, (void *) opline);
@@ -1547,6 +1545,8 @@ int phpdbg_interactive(bool allow_async_unsafe, char *input) /* {{{ */
 				ret = phpdbg_stack_execute(&stack, allow_async_unsafe);
 			} zend_catch {
 				phpdbg_stack_free(&stack);
+				phpdbg_destroy_input(&input);
+				/* TODO: should use proper unwinding instead of bailing out */
 				zend_bailout();
 			} zend_end_try();
 

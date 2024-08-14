@@ -162,7 +162,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 	return result2;
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  TSendMail
 // Input:   1) host:    Name of the mail host where the SMTP server resides
 //                      max accepted length of name = 256
@@ -174,7 +174,7 @@ static zend_string *php_win32_mail_trim_header(const char *header)
 //                      SUCCESS otherwise.
 //
 //  See SendText() for additional args!
-//********************************************************************/
+//*********************************************************************
 PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 			  const char *headers, const char *Subject, const char *mailTo, const char *data,
 			  char *mailCc, char *mailBcc, char *mailRPath)
@@ -291,14 +291,14 @@ PHPAPI int TSendMail(const char *host, int *error, char **error_message,
 	}
 }
 
-//********************************************************************
+//*********************************************************************
 // Name:  TSendMail::~TSendMail
 // Input:
 // Output:
 // Description: DESTRUCTOR
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 PHPAPI void TSMClose(void)
 {
 	Post("QUIT\r\n");
@@ -313,14 +313,14 @@ PHPAPI void TSMClose(void)
 }
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  char *GetSMErrorText
 // Input:   Error index returned by the member functions
 // Output:  pointer to a string containing the error description
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//*******************************************************************/
+//*********************************************************************
 PHPAPI char *GetSMErrorText(int index)
 {
 	if (MIN_ERROR_INDEX <= index && index < MAX_ERROR_INDEX) {
@@ -364,7 +364,7 @@ static char *find_address(char *list, char **state)
 	return list;
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  SendText
 // Input:       1) RPath:   return path of the message
 //                                  Is used to fill the "Return-Path" and the
@@ -381,7 +381,7 @@ static char *find_address(char *list, char **state)
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//*******************************************************************/
+//*********************************************************************
 static int SendText(char *RPath, const char *Subject, const char *mailTo, char *mailCc, char *mailBcc, const char *data,
 			 const char *headers, char *headers_lc, char **error_message)
 {
@@ -698,7 +698,7 @@ static int addToHeader(char **header_buffer, const char *specifier, const char *
 	return 1;
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  PostHeader
 // Input:       1) return path
 //              2) Subject
@@ -708,7 +708,7 @@ static int addToHeader(char **header_buffer, const char *specifier, const char *
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int PostHeader(char *RPath, const char *Subject, const char *mailTo, char *xheaders)
 {
 	/* Print message header according to RFC 822 */
@@ -785,14 +785,14 @@ PostHeader_outofmem:
 
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  MailConnect
 // Input:   None
 // Output:  None
 // Description: Connect to the mail host and receive the welcome message.
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int MailConnect()
 {
 
@@ -881,14 +881,14 @@ return 0;
 }
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  Post
 // Input:
 // Output:
 // Description:
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int Post(LPCSTR msg)
 {
 	int len = (int)strlen(msg);
@@ -912,7 +912,7 @@ static int Post(LPCSTR msg)
 
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  Ack
 // Input:
 // Output:
@@ -921,7 +921,7 @@ static int Post(LPCSTR msg)
 // last command was successful.
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static int Ack(char **server_response)
 {
 	ZEND_TLS char buf[MAIL_BUFFER_SIZE];
@@ -974,7 +974,7 @@ again:
 }
 
 
-/*********************************************************************
+//*********************************************************************
 // Name:  unsigned long GetAddr (LPSTR szHost)
 // Input:
 // Output:
@@ -985,7 +985,7 @@ again:
 // WARNING: gethostbyname() is a blocking function
 // Author/Date:  jcar 20/9/96
 // History:
-//********************************************************************/
+//*********************************************************************
 static unsigned long GetAddr(LPSTR szHost)
 {
 	LPHOSTENT lpstHost;
@@ -1052,7 +1052,7 @@ static char *get_angle_addr(char *address)
 	return estrndup(p1, p2 - p1);
 }
 
-/*********************************************************************
+//*********************************************************************
 // Name:  int FormatEmailAddress
 // Input:
 // Output:
@@ -1064,7 +1064,7 @@ static char *get_angle_addr(char *address)
 //
 // Author/Date:  garretts 08/18/2009
 // History:
-//********************************************************************/
+//*********************************************************************
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString) {
 	char *tmpAddress;
 	int result;

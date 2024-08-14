@@ -1734,6 +1734,10 @@ PHP_FUNCTION(fputcsv)
 		if (escape_str_len < 1) {
 			escape_char = PHP_CSV_NO_ESCAPE;
 		} else {
+			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			/* use first character from string */
 			escape_char = (unsigned char) *escape_str;
 		}
@@ -1875,6 +1879,10 @@ PHP_FUNCTION(fgetcsv)
 			if (escape_str_len < 1) {
 				escape = PHP_CSV_NO_ESCAPE;
 			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
+				if (UNEXPECTED(EG(exception))) {
+					RETURN_THROWS();
+				}
 				escape = (unsigned char) escape_str[0];
 			}
 		}

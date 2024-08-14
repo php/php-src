@@ -1,6 +1,23 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0beta1
+?? ??? ????, PHP 8.4.0beta2
+
+- Core:
+  . Exiting a namespace now clears seen symbols. (ilutov)
+  . The exit (and die) language constructs now behave more like a function.
+    They can be passed liked callables, are affected by the strict_types
+    declare statement, and now perform the usual type coercions instead of
+    casting any non-integer value to a string.
+    As such, passing invalid types to exit/die may now result in a TypeError
+    being thrown. (Girgias)
+
+- Hash:
+  . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
+
+- Standard:
+  . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
+
+15 Aug 2024, PHP 8.4.0beta1
 
 - Core:
   . Updated build system scripts config.guess to 2024-07-27 and config.sub to
@@ -10,6 +27,12 @@ PHP                                                                        NEWS
     type). (ilutov)
   . Fixed bug GH-15181 (Disabled output handler is flushed again). (cmb)
   . Passing E_USER_ERROR to trigger_error() is now deprecated. (Girgias)
+  . Fixed bug GH-15292 (Dynamic AVX detection is broken for MSVC). (nielsdos)
+  . Using "_" as a class name is now deprecated. (Girgias)
+
+- Curl:
+  . Added constants CURL_HTTP_VERSION_3 (libcurl 7.66) and CURL_HTTP_VERSION_3ONLY
+    (libcurl 7.88) as options for CURLOPT_HTTP_VERSION (Ayesh Karunaratne)
 
 - Date:
   . Constants SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING, and SUNFUNCS_RET_DOUBLE
@@ -23,12 +46,29 @@ PHP                                                                        NEWS
     (html5_serializer)). (nielsdos)
   . Deprecated DOM_PHP_ERR constant. (nielsdos)
   . Removed DOMImplementation::getFeature(). (nielsdos)
+  . Fixed bug GH-15331 (Element::$substitutedNodeValue test failed). (nielsdos)
 
 - Hash:
   . Deprecated passing incorrect data types for options to ext/hash functions.
     (nielsdos)
   . Added SSE2 and SHA-NI implementation of SHA-256. (timwolla, Colin Percival,
     Graham Percival)
+
+- Mysqli:
+  . The mysqli_ping() function and mysqli::ping() method are now deprecated,
+    as the reconnect feature was removed in PHP 8.2. (Kamil Tekiela)
+  . The mysqli_kill() function and mysqli::kill() method are now deprecated.
+    If this functionality is needed a SQL "KILL" command can be used instead.
+    (Kamil Tekiela)
+  . The mysqli_refresh() function and mysqli::refresh() method are now deprecated.
+    If this functionality is needed a SQL "FLUSH" command can be used instead.
+    (Kamil Tekiela)
+  . Passing explicitly the $mode parameter to mysqli_store_result() has been
+    deprecated. As the MYSQLI_STORE_RESULT_COPY_DATA constant was only used in
+    conjunction with this function it has also been deprecated. (Girgias)
+
+- PDO_Firebird:
+  . Support proper formatting of time zone types. (sim1984)
 
 - PHPDBG:
   . array out of bounds, stack overflow handled for segfault handler on windows.
@@ -44,13 +84,41 @@ PHP                                                                        NEWS
   . INI settings session.sid_length and session.sid_bits_per_character are now
     deprecated. (timwolla)
 
+- SOAP:
+  . Passing an int to SoapServer::addFunction() is now deprecated.
+    If all PHP functions need to be provided flatten the array returned by
+    get_defined_functions(). (Girgias)
+  . The SOAP_FUNCTIONS_ALL constant is now deprecated. (Girgias)
+
+- Sockets:
+  . Added IP_PORTRANGE* constants for BSD systems to control ephemeral port
+    ranges. (David Carlier)
+  . Added SOCK_NONBLOCK/SOCK_CLOEXEC constants for socket_create and
+    socket_create_pair to apply O_NONBLOCK/O_CLOEXEC flags to the
+    newly created sockets. (David Carlier)
+
 - SPL:
   . The SplFixedArray::__wakeup() method has been deprecated as it implements
     __serialize() and __unserialize() which need to be overwritten instead.
     (TysonAndre)
+  . Passing a non-empty string for the $enclosure parameter of:
+    - SplFileObject::setCsvControl()
+    - SplFileObject::fputcsv()
+    - SplFileObject::fgetcsv()
+    is now deprecated. (Girgias)
 
 - Standard:
   . Unserializing the uppercase 'S' tag is now deprecated. (timwolla)
+  . Enables crc32 auxiliary detection on OpenBSD. (David Carlier)
+  . Passing a non-empty string for the $enclosure parameter of:
+    - fputcsv()
+    - fgetcsv()
+    - str_getcsv()
+    is now deprecated. (Girgias)
+  . The str_getcsv() function now throws ValueErrors when the $separator and
+    $enclosure arguments are not one byte long, or if the $escape is not one
+    byte long or the empty string. This aligns the behaviour to be identical
+    to that of fputcsv() and fgetcsv(). (Girgias)
 
 - Streams:
   . Implemented GH-15155 (Stream context is lost when custom stream wrapper is
@@ -74,6 +142,8 @@ PHP                                                                        NEWS
     than fatal error. (ilutov)
   . Added missing cstddef include for C++ builds. (cmb)
   . Fixed bug GH-15108 (Segfault when destroying generator during shutdown).
+    (Arnaud)
+  . Fixed bug GH-15275 (Crash during GC of suspended generator delegate).
     (Arnaud)
 
 - BCMath:
@@ -340,7 +410,7 @@ PHP                                                                        NEWS
 
 - PCNTL:
   . Added pcntl_setns for Linux. (David Carlier)
-  . Added pcntl_getaffinity/pcntl_setaffinity. (David Carlier)
+  . Added pcntl_getcpuaffinity/pcntl_setcpuaffinity. (David Carlier)
   . Updated pcntl_get_signal_handler signal id upper limit to be
     more in line with platforms limits. (David Carlier)
   . Added pcntl_getcpu for Linux/FreeBSD/Solaris/Illumos. (David Carlier)

@@ -27,7 +27,7 @@
 
 extern PHP_RINIT_FUNCTION(head);
 
-PHPAPI int php_header(void);
+PHPAPI bool php_header(void);
 PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t expires,
 	zend_string *path, zend_string *domain, bool secure, bool httponly,
 	zend_string *samesite, bool url_encode);

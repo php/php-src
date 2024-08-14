@@ -73,7 +73,7 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo
 }
 #endif
 
-#if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__) || defined(_M_X64) || defined(_M_IX86)
 /* Function based on compiler-rt implementation. */
 static unsigned get_xcr0_eax(void) {
 # if defined(__GNUC__) || defined(__clang__)

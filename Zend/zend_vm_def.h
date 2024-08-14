@@ -4609,7 +4609,7 @@ ZEND_VM_HANDLER(139, ZEND_GENERATOR_CREATE, ANY, ANY)
 		generator->execute_fake.prev_execute_data = NULL;
 		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 
-		gen_execute_data->opline = opline + 1;
+		gen_execute_data->opline = opline;
 		/* EX(return_value) keeps pointer to zend_object (not a real zval) */
 		gen_execute_data->return_value = (zval*)generator;
 		call_info = Z_TYPE_INFO(EX(This));
@@ -7610,38 +7610,6 @@ ZEND_VM_C_LABEL(array_key_exists_array):
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
-ZEND_VM_COLD_HANDLER(79, ZEND_EXIT, ANY, ANY)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	if (OP1_TYPE != IS_UNUSED) {
-		zval *ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-
-		do {
-			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
-			} else {
-				if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
-					ptr = Z_REFVAL_P(ptr);
-					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
-						break;
-					}
-				}
-				zend_print_zval(ptr, 0);
-			}
-		} while (0);
-		FREE_OP1();
-	}
-
-	if (!EG(exception)) {
-		zend_throw_unwind_exit();
-	}
-	HANDLE_EXCEPTION();
-}
-
 ZEND_VM_HANDLER(57, ZEND_BEGIN_SILENCE, ANY, ANY)
 {
 	USE_OPLINE
@@ -8416,10 +8384,6 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMPVAR|CV|UNUSED
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -8521,10 +8485,6 @@ ZEND_VM_C_LABEL(yield_from_try_again):
 
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */

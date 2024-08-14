@@ -28,7 +28,7 @@
 #  include <asm/hwcap.h>
 # elif defined(__APPLE__)
 #  include <sys/sysctl.h>
-# elif defined(__FreeBSD__)
+# elif defined(HAVE_ELF_AUX_INFO)
 #  include <sys/auxv.h>
 
 static unsigned long getauxval(unsigned long key) {

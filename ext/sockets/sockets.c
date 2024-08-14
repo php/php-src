@@ -1096,7 +1096,7 @@ PHP_FUNCTION(socket_getpeername)
 /* {{{ Creates an endpoint for communication in the domain specified by domain, of type specified by type */
 PHP_FUNCTION(socket_create)
 {
-	zend_long	domain, type, protocol;
+	zend_long	domain, type, checktype, protocol;
 	php_socket	*php_sock;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
@@ -1114,9 +1114,18 @@ PHP_FUNCTION(socket_create)
 		RETURN_THROWS();
 	}
 
-	if (type > 10) {
+	checktype = type;
+#ifdef SOCK_NONBLOCK
+	checktype &= ~(SOCK_CLOEXEC | SOCK_NONBLOCK);
+#endif
+
+	if (checktype > 10) {
 		zend_argument_value_error(2, "must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
-			" SOCK_RAW, or SOCK_RDM");
+			" SOCK_RAW, or SOCK_RDM"
+#ifdef SOCK_NONBLOCK
+			" optionally OR'ed with SOCK_CLOEXEC, SOCK_NONBLOCK"
+#endif
+		);
 		RETURN_THROWS();
 	}
 
@@ -2071,7 +2080,7 @@ PHP_FUNCTION(socket_create_pair)
 	zval		retval[2], *fds_array_zval;
 	php_socket	*php_sock[2];
 	PHP_SOCKET	fds_array[2];
-	zend_long		domain, type, protocol;
+	zend_long		domain, type, checktype, protocol;
 
 	ZEND_PARSE_PARAMETERS_START(4, 4)
 		Z_PARAM_LONG(domain)
@@ -2089,9 +2098,18 @@ PHP_FUNCTION(socket_create_pair)
 		RETURN_THROWS();
 	}
 
-	if (type > 10) {
+	checktype = type;
+#ifdef SOCK_NONBLOCK
+	checktype &= ~(SOCK_CLOEXEC | SOCK_NONBLOCK);
+#endif
+
+	if (checktype > 10) {
 		zend_argument_value_error(2, "must be one of SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET,"
-			" SOCK_RAW, or SOCK_RDM");
+			" SOCK_RAW, or SOCK_RDM"
+#ifdef SOCK_NONBLOCK
+			" optionally OR'ed with SOCK_CLOEXEC, SOCK_NONBLOCK"
+#endif
+		);
 		RETURN_THROWS();
 	}
 
