@@ -27,7 +27,7 @@
 #include "php_hash.h"
 #include "php_hash_sha.h"
 
-#if (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_IMMINTRIN_H)
+#if defined(PHP_HASH_INTRIN_SHA_NATIVE) || defined(PHP_HASH_INTRIN_SHA_RESOLVER)
 
 # include <immintrin.h>
 

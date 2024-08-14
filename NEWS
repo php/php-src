@@ -11,6 +11,9 @@ PHP                                                                        NEWS
     As such, passing invalid types to exit/die may now result in a TypeError
     being thrown. (Girgias)
 
+- Hash:
+  . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
+
 - Standard:
   . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
 
