@@ -19,9 +19,10 @@ if test "$PHP_EMBED" != "no"; then
       PHP_EMBED_TYPE=static
       INSTALL_IT="\$(mkinstalldirs) \$(INSTALL_ROOT)\$(orig_libdir); \$(INSTALL) -m 0644 $SAPI_STATIC \$(INSTALL_ROOT)\$(orig_libdir)"
     ],
-    [PHP_EMBED_TYPE=no])
+    [PHP_EMBED_TYPE=])
 
-  AS_VAR_IF([PHP_EMBED_TYPE], [no],, [
+  AS_VAR_IF([PHP_EMBED_TYPE],, [AC_MSG_RESULT([no])], [
+    AC_MSG_RESULT([$PHP_EMBED_TYPE])
     PHP_SUBST([LIBPHP_CFLAGS])
     AC_SUBST([PHP_EMBED_TYPE])
     PHP_SELECT_SAPI([embed],
@@ -30,7 +31,6 @@ if test "$PHP_EMBED" != "no"; then
       [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
     PHP_INSTALL_HEADERS([sapi/embed], [php_embed.h])
   ])
-  AC_MSG_RESULT([$PHP_EMBED_TYPE])
 else
   AC_MSG_RESULT([no])
 fi
