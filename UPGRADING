@@ -490,7 +490,7 @@ PHP 8.4 UPGRADE NOTES
     is no longer necessary to escape question marks inside them.
 
 - PgSQL:
-  . Calling pgsql_fetch_result() with 2 arguments is deprecated. Use the
+  . Calling pg_fetch_result() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
   . Calling pg_field_prtlen() with 2 arguments is deprecated. Use the
     3-parameter signature with a null $row parameter instead.
