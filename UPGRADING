@@ -302,12 +302,25 @@ PHP 8.4 UPGRADE NOTES
     extended to support those keys.
 
 - PDO:
+  . Added support for driver-specific subclasses.
+    RFC: https://wiki.php.net/rfc/pdo_driver_specific_subclasses
+    This RFC adds subclasses for PDO in order to better support
+    database-specific functionalities. The new classes are
+    instantiatable either via calling the PDO::connect() method
+    or by invoking their constructor directly.
   . Added support for driver specific SQL parsers. The default parser supports:
     - single and double quoted literals, with doubling as escaping mechanism.
     - two-dashes and non-nested C-style comments.
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
+- PDO_DBLIB:
+  . Added class Pdo\DbLib.
+
+- PDO_FIREBIRD:
+  . Added class Pdo\Firebird.
+
 - PDO_MYSQL:
+  . Added class Pdo\Mysql.
   . Added custom parser supporting:
     - single and double-quoted literals, with doubling and backslash as escaping
       mechanism
@@ -316,7 +329,11 @@ PHP 8.4 UPGRADE NOTES
       and hash-comments
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
+- PDO_ODBC:
+  . Added class Pdo\Odbc.
+
 - PDO_PGSQL:
+  . Added class Pdo\Pgsql.
   . Added custom parser supporting:
     - single and double quoted literals, with doubling as escaping mechanism
     - C-style "escape" string literals (E'string')
@@ -326,6 +343,7 @@ PHP 8.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
 - PDO_SQLITE:
+  . Added class Pdo\Sqlite.
   . Added custom parser supporting:
     - single, double quoted, and backtick literals, with doubling as escaping mechanism
     - square brackets quoting for identifiers
@@ -346,32 +364,6 @@ PHP 8.4 UPGRADE NOTES
     as the (?r) mode modifier. When enabled along with the case-insensitive
     modifier ("i"), the expression locks out mixing of ASCII and non-ASCII
     characters.
-
-- PDO:
-  . Added support for driver-specific subclasses.
-    RFC: https://wiki.php.net/rfc/pdo_driver_specific_subclasses
-    This RFC adds subclasses for PDO in order to better support
-    database-specific functionalities. The new classes are
-    instantiatable either via calling the PDO::connect() method
-    or by invoking their constructor directly.
-
-- PDO_DBLIB:
-  . Added class Pdo\DbLib.
-
-- PDO_FIREBIRD:
-  . Added class Pdo\Firebird.
-
-- PDO_MYSQL:
-  . Added class Pdo\Mysql.
-
-- PDO_ODBC:
-  . Added class Pdo\Odbc.
-
-- PDO_PGSQL:
-  . Added class Pdo\Pgsql.
-
-- PDO_SQLITE:
-  . Added class Pdo\Sqlite.
 
 - POSIX:
   . Added constant POSIX_SC_CHILD_MAX
