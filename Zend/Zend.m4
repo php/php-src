@@ -1,5 +1,11 @@
 dnl This file contains Zend specific autoconf macros.
 
+dnl
+dnl ZEND_CHECK_TYPEDEF_REDECL
+dnl
+dnl Check whether the compiler supports typedef redeclaractions. For example,
+dnl GCC 4.2 on Mac OS X 10.6 emits a redefinition of typedef error by default.
+dnl
 AC_DEFUN([ZEND_CHECK_TYPEDEF_REDECL], [dnl
 AC_CACHE_CHECK([if compiler allows typedef redeclarations],
   [php_cv_have_typedef_redecl],
