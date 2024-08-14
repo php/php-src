@@ -3064,7 +3064,7 @@ function toolset_get_compiler_version()
 
 	if (VS_TOOLSET) {
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
-		if (version < 1900) {
+		if (version < 1910) {
 			ERROR("Building with MSC_VER " + version + " is no longer supported");
 		}
 		return version;
@@ -3282,11 +3282,6 @@ function toolset_setup_common_cflags()
 					} else {
 						/* Undocumented. */
 						ADD_FLAG('CFLAGS', "/d2guardspecload");
-					}
-				} else if (1900 == VCVERS) {
-					var subver1900 = probe_binary(PHP_CL).substr(6);
-					if (subver1900 >= 24241) {
-						ADD_FLAG('CFLAGS', "/Qspectre");
 					}
 				}
 			}
