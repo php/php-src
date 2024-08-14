@@ -102,7 +102,7 @@ static const char *zend_vm_opcodes_names[210] = {
 	"ZEND_UNSET_OBJ",
 	"ZEND_FE_RESET_R",
 	"ZEND_FE_FETCH_R",
-	"ZEND_EXIT",
+	NULL,
 	"ZEND_FETCH_R",
 	"ZEND_FETCH_DIM_R",
 	"ZEND_FETCH_OBJ_R",

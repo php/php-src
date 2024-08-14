@@ -243,6 +243,9 @@ void zend_assert_valid_class_name(const zend_string *name) /* {{{ */
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(name));
 	}
+	if (zend_string_equals_literal(name, "_")) {
+		zend_error(E_DEPRECATED, "Using \"_\" as a class name is deprecated since 8.4");
+	}
 }
 /* }}} */
 
@@ -374,6 +377,8 @@ static void zend_reset_import_tables(void) /* {{{ */
 		efree(FC(imports_const));
 		FC(imports_const) = NULL;
 	}
+
+	zend_hash_clean(&FC(seen_symbols));
 }
 /* }}} */
 
@@ -5034,7 +5039,7 @@ static zend_string *zend_copy_unmangled_prop_name(zend_string *prop_name)
 	}
 }
 
-static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
+static bool zend_compile_parent_property_hook_call(znode *result, zend_ast *ast, uint32_t type)
 {
 	ZEND_ASSERT(ast->kind == ZEND_AST_STATIC_CALL);
 
@@ -10371,27 +10376,6 @@ static void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *expr_ast = ast->child[0];
-	znode expr_node;
-
-	if (expr_ast) {
-		zend_compile_expr(&expr_node, expr_ast);
-	} else {
-		expr_node.op_type = IS_UNUSED;
-	}
-
-	zend_op *opline = zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
-	if (result) {
-		/* Mark this as an "expression throw" for opcache. */
-		opline->extended_value = ZEND_THROW_IS_EXPR;
-		result->op_type = IS_CONST;
-		ZVAL_TRUE(&result->u.constant);
-	}
-}
-/* }}} */
-
 static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *value_ast = ast->child[0];
@@ -11361,7 +11345,6 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_halt_compiler(ast);
 			break;
 		case ZEND_AST_THROW:
-		case ZEND_AST_EXIT:
 			zend_compile_expr(NULL, ast);
 			break;
 		default:
@@ -11463,9 +11446,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_PRINT:
 			zend_compile_print(result, ast);
-			return;
-		case ZEND_AST_EXIT:
-			zend_compile_exit(result, ast);
 			return;
 		case ZEND_AST_YIELD:
 			zend_compile_yield(result, ast);

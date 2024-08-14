@@ -1697,7 +1697,10 @@ AC_DEFUN([PHP_PROG_BISON], [
   case $php_bison_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_parser.h" || test ! -f "$abs_srcdir/Zend/zend_language_parser.c"; then
-        AC_MSG_ERROR([bison $php_bison_required_version or newer is required to generate PHP parsers (excluded versions: $php_bison_excluded_versions).])
+        AC_MSG_ERROR(m4_text_wrap([
+          bison $php_bison_required_version or newer is required to generate PHP
+          parsers (excluded versions: $php_bison_excluded_versions).
+        ]))
       fi
 
       YACC="exit 0;"
@@ -1757,7 +1760,10 @@ AC_DEFUN([PHP_PROG_RE2C],[
   case $php_re2c_check in
     ""|invalid[)]
       if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
-        AC_MSG_ERROR([re2c $php_re2c_required_version or newer is required to generate PHP lexers.])
+        AC_MSG_ERROR(m4_text_wrap([
+          re2c $php_re2c_required_version or newer is required to generate PHP
+          lexers.
+        ]))
       fi
 
       RE2C="exit 0;"
@@ -1844,24 +1850,20 @@ AC_DEFUN([PHP_SETUP_ICONV], [
     [Define to 1 if you have the 'libiconv' function.])
 
   dnl Check libc first if no path is provided in --with-iconv.
-  if test "$PHP_ICONV" = "yes"; then
+  AS_VAR_IF([PHP_ICONV], [yes], [
     dnl Reset LIBS temporarily as it may have already been included -liconv in.
-    LIBS_save="$LIBS"
+    LIBS_save=$LIBS
     LIBS=
-    AC_CHECK_FUNC([iconv], [
-      found_iconv=yes
-    ],[
-      AC_CHECK_FUNC([libiconv], [
+    AC_CHECK_FUNC([iconv], [found_iconv=yes],
+      [AC_CHECK_FUNC([libiconv], [
         AC_DEFINE([HAVE_LIBICONV], [1])
         found_iconv=yes
-      ])
-    ])
-    LIBS="$LIBS_save"
-  fi
+      ])])
+    LIBS=$LIBS_save
+  ])
 
   dnl Check external libs for iconv funcs.
-  if test "$found_iconv" = "no"; then
-
+  AS_VAR_IF([found_iconv], [no], [
     for i in $PHP_ICONV /usr/local /usr; do
       if test -r $i/include/gnu-libiconv/iconv.h; then
         ICONV_DIR=$i
@@ -1876,9 +1878,10 @@ AC_DEFUN([PHP_SETUP_ICONV], [
       fi
     done
 
-    if test -z "$ICONV_DIR"; then
-      AC_MSG_ERROR([Please specify the install prefix of iconv with --with-iconv=<DIR>])
-    fi
+    AS_VAR_IF([ICONV_DIR],,
+      [AC_MSG_ERROR(m4_text_wrap([
+        Please specify the install prefix of iconv with --with-iconv=<DIR>
+      ]))])
 
     if test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.a ||
        test -f $ICONV_DIR/$PHP_LIBDIR/lib$iconv_lib_name.$SHLIB_SUFFIX_NAME ||
@@ -1896,7 +1899,7 @@ AC_DEFUN([PHP_SETUP_ICONV], [
           [-L$ICONV_DIR/$PHP_LIBDIR])],
         [-L$ICONV_DIR/$PHP_LIBDIR])
     fi
-  fi
+  ])
 
   if test "$found_iconv" = "yes"; then
     if test -n "$ICONV_DIR"; then
@@ -2022,7 +2025,7 @@ dnl PostgreSQL minimum version sanity check.
     [AC_MSG_FAILURE([PostgreSQL check failed: libpq 10.0 or later is required.])],
   [$PGSQL_LIBS])
 $2],
-[m4_default([$3], [AC_MSG_FAILURE(m4_normalize([
+[m4_default([$3], [AC_MSG_FAILURE(m4_text_wrap([
   Cannot find libpq-fe.h or pq library (libpq). Please specify the correct
   PostgreSQL installation path with environment variables PGSQL_CFLAGS and
   PGSQL_LIBS or provide the PostgreSQL installation directory.

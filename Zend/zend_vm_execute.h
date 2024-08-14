@@ -2246,7 +2246,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 		generator->execute_fake.prev_execute_data = NULL;
 		ZVAL_OBJ(&generator->execute_fake.This, (zend_object *) generator);
 
-		gen_execute_data->opline = opline + 1;
+		gen_execute_data->opline = opline;
 		/* EX(return_value) keeps pointer to zend_object (not a real zval) */
 		gen_execute_data->return_value = (zval*)generator;
 		call_info = Z_TYPE_INFO(EX(This));
@@ -3035,37 +3035,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	}
 
 	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	SAVE_OPLINE();
-	if (opline->op1_type != IS_UNUSED) {
-		zval *ptr = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
-
-		do {
-			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
-			} else {
-				if ((opline->op1_type & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
-					ptr = Z_REFVAL_P(ptr);
-					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
-						break;
-					}
-				}
-				zend_print_zval(ptr, 0);
-			}
-		} while (0);
-		FREE_OP(opline->op1_type, opline->op1.var);
-	}
-
-	if (!EG(exception)) {
-		zend_throw_unwind_exit();
-	}
-	HANDLE_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -5890,10 +5859,6 @@ yield_from_try_again:
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -7958,7 +7923,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CLASS_DELAYED_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -8121,10 +8085,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -10339,7 +10299,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10452,10 +10411,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLE
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -11300,10 +11255,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -12828,7 +12779,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -12940,10 +12890,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -15489,10 +15435,6 @@ yield_from_try_again:
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -16998,7 +16940,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -18465,7 +18406,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_TMPVAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -19872,7 +19812,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -20954,10 +20893,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -21398,10 +21333,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER(
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -21859,10 +21790,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -22262,10 +22189,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -26267,10 +26190,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CONST_HANDLER(Z
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -28760,10 +28679,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMPVAR_HANDLER(
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -30714,10 +30629,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -33185,10 +33096,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -35466,10 +35373,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -37439,10 +37342,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDL
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -37979,10 +37878,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -40061,10 +39956,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 		generator->send_target = NULL;
 	}
 
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
 	SAVE_OPLINE();
@@ -41419,10 +41310,6 @@ yield_from_try_again:
 
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -45335,7 +45222,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INSTANCEOF_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -45492,10 +45378,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZE
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -49067,7 +48949,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -49180,10 +49061,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER(Z
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -51037,10 +50914,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(Z
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -54639,7 +54512,6 @@ array_key_exists_array:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-/* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -54751,10 +54623,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_
 	} else {
 		generator->send_target = NULL;
 	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
 
 	/* The GOTO VM uses a local opline variable. We need to set the opline
 	 * variable in execute_data so we don't resume at an old position. */
@@ -56438,7 +56306,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_FE_RESET_R_SPEC_CV_LABEL,
 			(void*)&&ZEND_FE_FETCH_R_SPEC_VAR_LABEL,
-			(void*)&&ZEND_EXIT_SPEC_LABEL,
 			(void*)&&ZEND_FETCH_R_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_FETCH_R_SPEC_TMPVAR_UNUSED_LABEL,
 			(void*)&&ZEND_FETCH_R_SPEC_TMPVAR_UNUSED_LABEL,
@@ -58687,11 +58554,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC)
 				ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				VM_TRACE_OP_END(ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC)
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_EXIT_SPEC):
-				VM_TRACE(ZEND_EXIT_SPEC)
-				ZEND_EXIT_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				VM_TRACE_OP_END(ZEND_EXIT_SPEC)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_BEGIN_SILENCE_SPEC):
 				VM_TRACE(ZEND_BEGIN_SILENCE_SPEC)
@@ -65631,7 +65493,6 @@ void zend_vm_init(void)
 		ZEND_NULL_HANDLER,
 		ZEND_FE_RESET_R_SPEC_CV_HANDLER,
 		ZEND_FE_FETCH_R_SPEC_VAR_HANDLER,
-		ZEND_EXIT_SPEC_HANDLER,
 		ZEND_FETCH_R_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_FETCH_R_SPEC_TMPVAR_UNUSED_HANDLER,
 		ZEND_FETCH_R_SPEC_TMPVAR_UNUSED_HANDLER,
@@ -67576,7 +67437,7 @@ void zend_vm_init(void)
 		1255,
 		1256 | SPEC_RULE_OP1,
 		1261 | SPEC_RULE_OP1,
-		3487,
+		3486,
 		1266 | SPEC_RULE_OP1,
 		1271 | SPEC_RULE_OP1,
 		1276 | SPEC_RULE_OP2,
@@ -67610,100 +67471,101 @@ void zend_vm_init(void)
 		1559 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
 		1584 | SPEC_RULE_OP1,
 		1589,
-		1590,
-		1591 | SPEC_RULE_OP1,
-		1596 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1621 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1646 | SPEC_RULE_OP1,
-		1651 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1676 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1701 | SPEC_RULE_OP1,
-		1706 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1731 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1756 | SPEC_RULE_OP1,
-		1761 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1786 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1811 | SPEC_RULE_OP1,
-		1816 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1841 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1866 | SPEC_RULE_OP1,
-		1871 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1896 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1921 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		1946,
-		1947 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		3486,
+		1590 | SPEC_RULE_OP1,
+		1595 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1620 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1645 | SPEC_RULE_OP1,
+		1650 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1675 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1700 | SPEC_RULE_OP1,
+		1705 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1730 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1755 | SPEC_RULE_OP1,
+		1760 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1785 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1810 | SPEC_RULE_OP1,
+		1815 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1840 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1865 | SPEC_RULE_OP1,
+		1870 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1895 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1920 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		1945,
+		1946 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		1956,
 		1957,
 		1958,
 		1959,
 		1960,
-		1961,
-		1962 | SPEC_RULE_OP2,
-		1967,
-		1968 | SPEC_RULE_OP1,
-		1973 | SPEC_RULE_OP2,
-		1978 | SPEC_RULE_OP1,
-		1983 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
-		1993 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2018 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2043 | SPEC_RULE_OP1,
-		2048 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2073 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
-		2123 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2148 | SPEC_RULE_OP2,
-		2153,
-		2154 | SPEC_RULE_OP1,
-		2159 | SPEC_RULE_OP1,
-		2164,
-		2165 | SPEC_RULE_OP1,
-		2170 | SPEC_RULE_OP1,
-		2175 | SPEC_RULE_OP1,
+		1961 | SPEC_RULE_OP2,
+		1966,
+		1967 | SPEC_RULE_OP1,
+		1972 | SPEC_RULE_OP2,
+		1977 | SPEC_RULE_OP1,
+		1982 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		1992 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2017 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2042 | SPEC_RULE_OP1,
+		2047 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2072 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_QUICK_ARG,
+		2122 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2147 | SPEC_RULE_OP2,
+		2152,
+		2153 | SPEC_RULE_OP1,
+		2158 | SPEC_RULE_OP1,
+		2163,
+		2164 | SPEC_RULE_OP1,
+		2169 | SPEC_RULE_OP1,
+		2174 | SPEC_RULE_OP1,
+		2179,
 		2180,
-		2181,
-		2182 | SPEC_RULE_OP2,
-		2187 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2191 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2195 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
-		2199 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2199 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2224 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2224 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2249 | SPEC_RULE_OP1,
-		2254,
-		2255 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2280,
-		2281 | SPEC_RULE_OP1,
+		2181 | SPEC_RULE_OP2,
+		2186 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		2190 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		2194 | SPEC_RULE_RETVAL | SPEC_RULE_OBSERVER,
+		2198 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2198 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2223 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2223 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2248 | SPEC_RULE_OP1,
+		2253,
+		2254 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2279,
+		2280 | SPEC_RULE_OP1,
+		2285,
 		2286,
 		2287,
 		2288,
 		2289,
 		2290,
 		2291,
-		2292,
-		2293 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2292 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2317,
 		2318,
 		2319,
-		2320,
-		2321 | SPEC_RULE_OP1,
-		2326,
-		2327 | SPEC_RULE_ISSET,
-		2329 | SPEC_RULE_OP2,
-		2334,
-		2335 | SPEC_RULE_OP1,
-		2340 | SPEC_RULE_OBSERVER,
-		2342,
-		2343 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2368 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		2320 | SPEC_RULE_OP1,
+		2325,
+		2326 | SPEC_RULE_ISSET,
+		2328 | SPEC_RULE_OP2,
+		2333,
+		2334 | SPEC_RULE_OP1,
+		2339 | SPEC_RULE_OBSERVER,
+		2341,
+		2342 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2367 | SPEC_RULE_OP1 | SPEC_RULE_OBSERVER,
+		2377,
 		2378,
 		2379,
 		2380,
-		2381,
-		2382 | SPEC_RULE_OP1,
+		2381 | SPEC_RULE_OP1,
+		2386,
 		2387,
-		2388,
-		2389 | SPEC_RULE_OP1,
-		2394 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2419,
-		2420 | SPEC_RULE_OP1,
+		2388 | SPEC_RULE_OP1,
+		2393 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2418,
+		2419 | SPEC_RULE_OP1,
+		2424,
 		2425,
 		2426,
 		2427,
@@ -67711,82 +67573,81 @@ void zend_vm_init(void)
 		2429,
 		2430,
 		2431,
-		2432,
-		2433 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2432 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2457,
 		2458,
 		2459,
-		2460,
-		2461 | SPEC_RULE_OP2,
-		2466,
-		2467 | SPEC_RULE_OP1,
-		2472 | SPEC_RULE_OP1,
-		2477 | SPEC_RULE_OP1,
-		2482 | SPEC_RULE_OP1,
-		2487 | SPEC_RULE_OP1,
-		2492,
-		2493 | SPEC_RULE_OP1,
-		2498 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2523 | SPEC_RULE_OP1,
-		2528 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
-		2553 | SPEC_RULE_OP1,
-		2558 | SPEC_RULE_OP1,
+		2460 | SPEC_RULE_OP2,
+		2465,
+		2466 | SPEC_RULE_OP1,
+		2471 | SPEC_RULE_OP1,
+		2476 | SPEC_RULE_OP1,
+		2481 | SPEC_RULE_OP1,
+		2486 | SPEC_RULE_OP1,
+		2491,
+		2492 | SPEC_RULE_OP1,
+		2497 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2522 | SPEC_RULE_OP1,
+		2527 | SPEC_RULE_OP1 | SPEC_RULE_OP2,
+		2552 | SPEC_RULE_OP1,
+		2557 | SPEC_RULE_OP1,
+		2562,
 		2563,
 		2564,
 		2565,
 		2566,
-		2567,
-		2568 | SPEC_RULE_OBSERVER,
-		2570 | SPEC_RULE_OBSERVER,
-		2572 | SPEC_RULE_OBSERVER,
-		2574 | SPEC_RULE_OBSERVER,
+		2567 | SPEC_RULE_OBSERVER,
+		2569 | SPEC_RULE_OBSERVER,
+		2571 | SPEC_RULE_OBSERVER,
+		2573 | SPEC_RULE_OBSERVER,
+		2575,
 		2576,
-		2577,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
-		3487,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
+		3486,
 	};
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	zend_opcode_handler_funcs = labels;
@@ -67959,7 +67820,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2586 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2585 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -67967,7 +67828,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2611 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2610 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -67975,7 +67836,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2636 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2635 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 				if (op->op1_type < op->op2_type) {
 					zend_swap_operands(op);
 				}
@@ -67986,17 +67847,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2661 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2660 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2686 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2685 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2711 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 2710 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_MUL:
@@ -68007,17 +67868,17 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2736 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2735 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2761 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2760 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2786 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 2785 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_IDENTICAL:
@@ -68028,14 +67889,14 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2811 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2810 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2886 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2885 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3111 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3110 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
@@ -68046,14 +67907,14 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2961 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2960 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3036 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3035 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF))) {
-				spec = 3116 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
+				spec = 3115 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_EQUAL:
@@ -68064,12 +67925,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2811 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2810 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2886 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2885 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_NOT_EQUAL:
@@ -68080,12 +67941,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 2961 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 2960 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3036 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+				spec = 3035 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
 		case ZEND_IS_SMALLER:
@@ -68093,12 +67954,12 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3121 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3120 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3196 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3195 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
@@ -68106,79 +67967,79 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3271 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3270 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3346 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
+				spec = 3345 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH;
 			}
 			break;
 		case ZEND_QM_ASSIGN:
 			if (op1_info == MAY_BE_LONG) {
-				spec = 3433 | SPEC_RULE_OP1;
+				spec = 3432 | SPEC_RULE_OP1;
 			} else if (op1_info == MAY_BE_DOUBLE) {
-				spec = 3438 | SPEC_RULE_OP1;
+				spec = 3437 | SPEC_RULE_OP1;
 			} else if ((op->op1_type == IS_CONST) ? !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1)) : (!(op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))))) {
-				spec = 3443 | SPEC_RULE_OP1;
+				spec = 3442 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_PRE_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3421 | SPEC_RULE_RETVAL;
+				spec = 3420 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3423 | SPEC_RULE_RETVAL;
+				spec = 3422 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_PRE_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3425 | SPEC_RULE_RETVAL;
+				spec = 3424 | SPEC_RULE_RETVAL;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3427 | SPEC_RULE_RETVAL;
+				spec = 3426 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_POST_INC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3429;
+				spec = 3428;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3430;
+				spec = 3429;
 			}
 			break;
 		case ZEND_POST_DEC:
 			if (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG) {
-				spec = 3431;
+				spec = 3430;
 			} else if (op1_info == MAY_BE_LONG) {
-				spec = 3432;
+				spec = 3431;
 			}
 			break;
 		case ZEND_JMP:
 			if (OP_JMP_ADDR(op, op->op1) > op) {
-				spec = 2585;
+				spec = 2584;
 			}
 			break;
 		case ZEND_INIT_FCALL:
 			if (Z_EXTRA_P(RT_CONSTANT(op, op->op2)) != 0) {
-				spec = 2578;
+				spec = 2577;
 			}
 			break;
 		case ZEND_RECV:
 			if (op->op2.num == MAY_BE_ANY) {
-				spec = 2579;
+				spec = 2578;
 			}
 			break;
 		case ZEND_SEND_VAL:
 			if (op->op1_type == IS_CONST && op->op2_type == IS_UNUSED && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3483;
+				spec = 3482;
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3478 | SPEC_RULE_OP1;
+				spec = 3477 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_FE_FETCH_R:
 			if (op->op2_type == IS_CV && (op1_info & (MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 3485 | SPEC_RULE_RETVAL;
+				spec = 3484 | SPEC_RULE_RETVAL;
 			}
 			break;
 		case ZEND_FETCH_DIM_R:
@@ -68186,22 +68047,22 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
 					break;
 				}
-				spec = 3448 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
+				spec = 3447 | SPEC_RULE_OP1 | SPEC_RULE_OP2;
 			}
 			break;
 		case ZEND_SEND_VAL_EX:
 			if (op->op2_type == IS_UNUSED && op->op2.num <= MAX_ARG_FLAG_NUM && op->op1_type == IS_CONST && !Z_REFCOUNTED_P(RT_CONSTANT(op, op->op1))) {
-				spec = 3484;
+				spec = 3483;
 			}
 			break;
 		case ZEND_SEND_VAR:
 			if (op->op2_type == IS_UNUSED && (op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) == 0) {
-				spec = 3473 | SPEC_RULE_OP1;
+				spec = 3472 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_COUNT:
 			if ((op1_info & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) == MAY_BE_ARRAY) {
-				spec = 2580 | SPEC_RULE_OP1;
+				spec = 2579 | SPEC_RULE_OP1;
 			}
 			break;
 		case ZEND_BW_OR:

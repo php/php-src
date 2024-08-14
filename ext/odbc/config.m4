@@ -66,7 +66,6 @@ fi
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
 
-
 dnl
 dnl Figure out which library file to link with for the Empress support.
 dnl
@@ -107,9 +106,7 @@ PHP_ARG_WITH([adabas],,
 
   AC_MSG_CHECKING([for Adabas support])
   if test "$PHP_ADABAS" != "no"; then
-    if test "$PHP_ADABAS" = "yes"; then
-      PHP_ADABAS=/usr/local
-    fi
+    AS_VAR_IF([PHP_ADABAS], [yes], [PHP_ADABAS=/usr/local])
     PHP_ADD_INCLUDE([$PHP_ADABAS/incl])
     PHP_ADD_LIBPATH([$PHP_ADABAS/$PHP_LIBDIR])
     ODBC_OBJS="$PHP_ADABAS/$PHP_LIBDIR/odbclib.a"
@@ -138,9 +135,7 @@ PHP_ARG_WITH([sapdb],,
 
   AC_MSG_CHECKING([for SAP DB support])
   if test "$PHP_SAPDB" != "no"; then
-    if test "$PHP_SAPDB" = "yes"; then
-      PHP_SAPDB=/usr/local
-    fi
+    AS_VAR_IF([PHP_SAPDB], [yes], [PHP_SAPDB=/usr/local])
     PHP_ADD_INCLUDE([$PHP_SAPDB/incl])
     PHP_ADD_LIBPATH([$PHP_SAPDB/$PHP_LIBDIR])
     PHP_ADD_LIBRARY([sqlod])
@@ -160,9 +155,7 @@ PHP_ARG_WITH([solid],,
 
   AC_MSG_CHECKING([for Solid support])
   if test "$PHP_SOLID" != "no"; then
-    if test "$PHP_SOLID" = "yes"; then
-      PHP_SOLID=/usr/local/solid
-    fi
+    AS_VAR_IF([PHP_SOLID], [yes], [PHP_SOLID=/usr/local/solid])
     ODBC_INCDIR=$PHP_SOLID/include
     ODBC_LIBDIR=$PHP_SOLID/$PHP_LIBDIR
     ODBC_CFLAGS=-I$ODBC_INCDIR
@@ -304,9 +297,7 @@ PHP_ARG_WITH([custom-odbc],,
 
   AC_MSG_CHECKING([for a custom ODBC support])
   if test "$PHP_CUSTOM_ODBC" != "no"; then
-    if test "$PHP_CUSTOM_ODBC" = "yes"; then
-      PHP_CUSTOM_ODBC=/usr/local
-    fi
+    AS_VAR_IF([PHP_CUSTOM_ODBC], [yes], [PHP_CUSTOM_ODBC=/usr/local])
     ODBC_INCDIR=$PHP_CUSTOM_ODBC/include
     ODBC_LIBDIR=$PHP_CUSTOM_ODBC/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
@@ -346,9 +337,7 @@ PHP_ARG_WITH([esoob],,
 
   AC_MSG_CHECKING([for Easysoft ODBC-ODBC Bridge support])
   if test "$PHP_ESOOB" != "no"; then
-    if test "$PHP_ESOOB" = "yes"; then
-      PHP_ESOOB=/usr/local/easysoft/oob/client
-    fi
+    AS_VAR_IF([PHP_ESOOB], [yes], [PHP_ESOOB=/usr/local/easysoft/oob/client])
     ODBC_INCDIR=$PHP_ESOOB/include
     ODBC_LIBDIR=$PHP_ESOOB/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR

@@ -3070,7 +3070,7 @@ function toolset_get_compiler_version()
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		if (full.match(/clang version ([\d\.]+) \((.*)\)/)) {
+		if (full.match(/clang version ([\d\.]+)/)) {
 			version = RegExp.$1;
 			version = version.replace(/\./g, '');
 			version = version/100 < 1 ? version*10 : version;
@@ -3324,7 +3324,9 @@ function toolset_setup_common_cflags()
 		} else {
 			ADD_FLAG('CFLAGS', '-m64');
 		}
-		ADD_FLAG("CFLAGS", " /fallback ");
+		if (CLANGVERS < 1300) {
+			ADD_FLAG("CFLAGS", " /fallback ");
+		}
 		ADD_FLAG("CFLAGS", "-Xclang -fmodules");
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));

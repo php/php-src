@@ -192,6 +192,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added pkg-config support to find GNU MP library. As a fallback default
      system paths are searched. When a directory argument is provided
      (--with-gmp=DIR), it will be used instead of the pkg-config.
+   - Added optional pkg-config support to find NET-SNMP library. As a fallback
+     net-snmp-config utility is used like before.
    - Removed BC enable_pear variable check due to --enable-pear configure option
      once used (use with_pear variable name).
    - Cache variables synced to php_cv_* naming scheme. If you use them for
@@ -334,6 +336,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The php_escape_shell_arg() now takes a zend_string* instead of a char*
      Moreover, providing it with a binary safe string is the responsibility of
      the caller now.
+   - The php_info_html_esc() function has been removed, use
+     php_escape_html_entities() with ENT_QUOTES directly instead.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is
@@ -362,6 +366,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   operands. They only work for functions that are known at compile-time, and
   that provide a frameless handler (search for usages of the
   ZEND_FRAMELESS_FUNCTION macro).
+
+* CREATE_GENERATOR now initializes the generator with opline pointing to the
+  CREATE_GENERATOR op (before, opline was set to the next op).
+
+* YIELD and YIELD_FROM do not increment the opline anymore.
 
 ========================
 5. SAPI changes

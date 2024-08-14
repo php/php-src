@@ -3605,6 +3605,13 @@ ZEND_API zend_result zend_set_hash_symbol(zval *symbol, const char *name, size_t
 
 static void zend_disable_function(const char *function_name, size_t function_name_length)
 {
+	if (UNEXPECTED(
+		(function_name_length == strlen("exit") && !memcmp(function_name, "exit", strlen("exit")))
+		|| (function_name_length == strlen("die") && !memcmp(function_name, "die", strlen("die")))
+	)) {
+		zend_error(E_WARNING, "Cannot disable function %s()", function_name);
+		return;
+	}
 	zend_hash_str_del(CG(function_table), function_name, function_name_length);
 }
 

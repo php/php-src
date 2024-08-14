@@ -44,7 +44,7 @@ PHP_FUNCTION(header)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
-	ctr.line_len = (uint32_t)len;
+	ctr.line_len = len;
 	sapi_header_op(rep ? SAPI_HEADER_REPLACE:SAPI_HEADER_ADD, &ctr);
 }
 /* }}} */
@@ -62,17 +62,17 @@ PHP_FUNCTION(header_remove)
 	ZEND_PARSE_PARAMETERS_END();
 
 	ctr.line = line;
-	ctr.line_len = (uint32_t)len;
+	ctr.line_len = len;
 	sapi_header_op(line == NULL ? SAPI_HEADER_DELETE_ALL : SAPI_HEADER_DELETE, &ctr);
 }
 /* }}} */
 
-PHPAPI int php_header(void)
+PHPAPI bool php_header(void)
 {
 	if (sapi_send_headers()==FAILURE || SG(request_info).headers_only) {
-		return 0; /* don't allow output */
+		return false; /* don't allow output */
 	} else {
-		return 1; /* allow output */
+		return true; /* allow output */
 	}
 }
 

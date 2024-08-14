@@ -14,7 +14,7 @@ mysqli.max_links=1
     require_once 'table.inc';
 
     // to make sure we have at least one working connection...
-    var_dump(mysqli_ping($link));
+    var_dump($link->query('DO 1'));
     // to make sure that max_links is really set to one
     var_dump((int)ini_get('mysqli.max_links'));
 

@@ -2555,7 +2555,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_GENERATOR_RETURN:
 				case ZEND_RETURN_BY_REF:
 				case ZEND_RETURN:
-				case ZEND_EXIT:
 				case ZEND_MATCH_ERROR:
 				/* switch through trampoline */
 				case ZEND_YIELD:
@@ -3468,7 +3467,6 @@ ZEND_EXT_API int zend_jit_check_support(void)
 			/* JIT has no effect on these opcodes */
 			case ZEND_BEGIN_SILENCE:
 			case ZEND_END_SILENCE:
-			case ZEND_EXIT:
 				break;
 			default:
 				if (zend_get_user_opcode_handler(i) != NULL) {

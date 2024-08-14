@@ -5,7 +5,6 @@ PHP_ARG_ENABLE([pdo],
   [yes])
 
 if test "$PHP_PDO" != "no"; then
-
   dnl Make sure $PHP_PDO is 'yes' when it's not 'no' :)
   PHP_PDO=yes
 

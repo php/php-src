@@ -38,6 +38,7 @@ if (PHP_MYSQLND != "no") {
 			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "Define to 1 if mysqlnd core SSL is enabled.");
 			if (CHECK_LIB("crypt32.lib", "mysqlnd")) {
 				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Define to 1 if mysqlnd extended SSL is enabled through OpenSSL.");
+				ADD_EXTENSION_DEP('mysqlnd', 'hash');
 			}
 		}
 		PHP_INSTALL_HEADERS("", "ext/mysqlnd");
