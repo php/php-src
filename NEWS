@@ -531,6 +531,10 @@ PHP                                                                        NEWS
     (timwolla)
   . Added ReflectionGenerator::isClosed(). (timwolla)
 
+- Session:
+  . Emit warnings for non-positive values of session.gc_divisor and negative values
+    of session.gc_probability. (Jorg Sowa)
+
 - SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
     within foreach). (nielsdos)
