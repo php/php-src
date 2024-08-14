@@ -70,7 +70,7 @@ static inline void trace(char *fmt, ...)
 	if (COMG(rshutdown_started)) {																		\
 		trace(" PHP Object:%p (name:unknown) %s\n", Z_OBJ(disp->object),  methname); 							\
 	} else {																							\
-		trace(" PHP Object:%p (name:%s) %s\n", Z_OBJ(disp->object), Z_OBJCE(disp->object)->name->val, methname); 	\
+		trace(" PHP Object:%p (name:%s) %s\n", Z_OBJ(disp->object), ZSTR_VAL(Z_OBJCE(disp->object)->name), methname); 	\
 	}																									\
 	if (GetCurrentThreadId() != disp->engine_thread) {													\
 		return RPC_E_WRONG_THREAD;																		\
@@ -508,7 +508,7 @@ static php_dispatchex *disp_constructor(zval *object)
 {
 	php_dispatchex *disp = (php_dispatchex*)CoTaskMemAlloc(sizeof(php_dispatchex));
 
-	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, Z_OBJCE_P(object)->name->val);
+	trace("constructing a COM wrapper for PHP object %p (%s)\n", object, ZSTR_VAL(Z_OBJCE_P(object)->name));
 
 	if (disp == NULL)
 		return NULL;
