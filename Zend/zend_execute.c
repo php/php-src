@@ -5508,9 +5508,12 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 	CHECK_SYMBOL_TABLES() \
 	OPLINE = new_op
 
-#define ZEND_VM_SET_OPCODE(new_op) \
+#define ZEND_VM_SET_OPCODE_NO_INTERRUPT(new_op) \
 	CHECK_SYMBOL_TABLES() \
-	OPLINE = new_op; \
+	OPLINE = new_op
+
+#define ZEND_VM_SET_OPCODE(new_op) \
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(new_op); \
 	ZEND_VM_INTERRUPT_CHECK()
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \

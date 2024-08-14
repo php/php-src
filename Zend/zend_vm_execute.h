@@ -1323,8 +1323,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 		HANDLE_EXCEPTION();
 	}
 
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1388,8 +1387,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_RETV
 		HANDLE_EXCEPTION();
 	}
 
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1454,8 +1452,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_ICALL_SPEC_OBS
 		HANDLE_EXCEPTION();
 	}
 
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1630,8 +1627,7 @@ fcall_by_name_end:
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1733,8 +1729,7 @@ fcall_by_name_end:
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1838,8 +1833,7 @@ fcall_by_name_end:
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -1957,9 +1951,7 @@ fcall_end:
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -2077,9 +2069,7 @@ fcall_end:
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -2198,9 +2188,7 @@ fcall_end:
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 

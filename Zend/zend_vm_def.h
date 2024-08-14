@@ -4098,8 +4098,7 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL,OBSERVER))
 		HANDLE_EXCEPTION();
 	}
 
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -4228,8 +4227,7 @@ ZEND_VM_C_LABEL(fcall_by_name_end):
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
@@ -4348,9 +4346,7 @@ ZEND_VM_C_LABEL(fcall_end):
 		zend_rethrow_exception(execute_data);
 		HANDLE_EXCEPTION();
 	}
-
-	CHECK_SYMBOL_TABLES()
-	OPLINE = opline + 1;
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(opline + 1);
 	ZEND_VM_CONTINUE();
 }
 
