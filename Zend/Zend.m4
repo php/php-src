@@ -9,8 +9,12 @@ AC_CACHE_CHECK([if compiler allows typedef redeclarations],
     mytype var;
     (void)var;
   ])],
-  [],
-  [AC_MSG_FAILURE([Compiler does not support typedef redeclarations. Does it support C11?])])])])
+  [php_cv_have_typedef_redecl=yes],
+  [php_cv_have_typedef_redecl=no])])
+AS_VAR_IF([php_cv_have_typedef_redecl], [no],
+  [AC_MSG_FAILURE(m4_text_wrap([
+    Compiler does not support typedef redeclarations. Does it support C11?
+  ]))])
 
 dnl
 dnl ZEND_CHECK_FLOAT_PRECISION
