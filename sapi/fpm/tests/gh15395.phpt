@@ -33,20 +33,29 @@ $tester->start();
 $tester->expectLogStartNotices();
 $tester
     ->request(
-        uri: $scriptName,
-        address: '{{ADDR:UDS}}',
-        scriptFilename: "/",
-        scriptName: "/",
-	httpAuthorization: "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==",
-    );
+            uri: $scriptName,
+            address: '{{ADDR:UDS}}',
+            scriptFilename: "/",
+            scriptName: "/",
+            headers: ["HTTP_AUTHORIZATION" => "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", "REQUEST_METHOD" => "GET"],
+    )
+    ->expectStatus('404 Not Found');
+$tester->terminate();
+$tester->expectLogTerminatingNotices();
+$tester->close();
 
+$tester = new FPM\Tester($cfg, $code);
+[$sourceFilePath, $scriptName] = $tester->createSourceFileAndScriptName();
+$tester->start();
+$tester->expectLogStartNotices();
 $tester
     ->request(
-        uri: $scriptName,
-        address: '{{ADDR:UDS}}',
-        scriptFilename: "/",
-        scriptName: "/",
-    );
+            uri: $scriptName,
+            address: '{{ADDR:UDS}}',
+            scriptFilename: $sourceFilePath,
+            scriptName: $scriptName,
+    )
+    ->expectBody([$scriptName, $sourceFilePath, $scriptName]);
 $tester->terminate();
 $tester->expectLogTerminatingNotices();
 $tester->close();
