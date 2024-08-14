@@ -93,7 +93,6 @@ jobs:
             ${{ matrix.run_tests_parameters }}
             -d zend_extension=opcache.so
             -d opcache.enable_cli=1
-            ${{ matrix.asan && '--asan -x' || '' }}
 
   LINUX_X64:
     needs: GENERATE_MATRIX
