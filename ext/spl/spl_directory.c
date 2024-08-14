@@ -23,7 +23,7 @@
 #include "ext/standard/php_filestat.h"
 #include "ext/standard/flock_compat.h"
 #include "ext/standard/scanf.h"
-#include "ext/standard/php_string.h"
+#include "ext/standard/php_string.h" /* For php_basename() */
 #include "zend_attributes.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
@@ -1362,7 +1362,7 @@ PHP_METHOD(SplFileInfo, getPathInfo)
 	path = spl_filesystem_object_get_pathname(intern);
 	if (path && ZSTR_LEN(path)) {
 		zend_string *dpath = zend_string_init(ZSTR_VAL(path), ZSTR_LEN(path), 0);
-		ZSTR_LEN(dpath) = php_dirname(ZSTR_VAL(dpath), ZSTR_LEN(path));
+		ZSTR_LEN(dpath) = zend_dirname(ZSTR_VAL(dpath), ZSTR_LEN(path));
 		spl_filesystem_object_create_info(dpath, ce, return_value);
 		zend_string_release(dpath);
 	}
