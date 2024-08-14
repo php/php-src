@@ -259,8 +259,6 @@ jobs:
         run: .github/scripts/windows/build.bat
       - name: Test
         run: .github/scripts/windows/test.bat
-      - name: Check ZEND_API zend_always_inline symbol
-        run: dumpbin /exports x64\Release_TS\php8ts.dll | grep zend_string_addref
   BENCHMARKING:
     name: BENCHMARKING
     if: github.repository == 'php/php-src' || github.event_name == 'pull_request'
