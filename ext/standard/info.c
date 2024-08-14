@@ -296,19 +296,8 @@ static char* php_get_windows_name()
 		}
 	} else if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 6) {
 		if (osvi.dwMajorVersion == 6) {
-			if (osvi.dwMinorVersion == 0) {
-				if (osvi.wProductType == VER_NT_WORKSTATION) {
-					major = "Windows Vista";
-				} else {
-					major = "Windows Server 2008";
-				}
-			} else if (osvi.dwMinorVersion == 1) {
-				if (osvi.wProductType == VER_NT_WORKSTATION) {
-					major = "Windows 7";
-				} else {
-					major = "Windows Server 2008 R2";
-				}
-			} else if (osvi.dwMinorVersion == 2) {
+			ZEND_ASSERT(osvi.dwMinorVersion >= 2);
+			if (osvi.dwMinorVersion == 2) {
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
