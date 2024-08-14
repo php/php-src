@@ -331,7 +331,6 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		case ZEND_RETURN:
 		case ZEND_RETURN_BY_REF:
 		case ZEND_GENERATOR_RETURN:
-		case ZEND_EXIT:
 		case ZEND_THROW:
 		case ZEND_MATCH_ERROR:
 		case ZEND_CATCH:

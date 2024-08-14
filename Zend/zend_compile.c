@@ -10376,27 +10376,6 @@ static void zend_compile_print(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_exit(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *expr_ast = ast->child[0];
-	znode expr_node;
-
-	if (expr_ast) {
-		zend_compile_expr(&expr_node, expr_ast);
-	} else {
-		expr_node.op_type = IS_UNUSED;
-	}
-
-	zend_op *opline = zend_emit_op(NULL, ZEND_EXIT, &expr_node, NULL);
-	if (result) {
-		/* Mark this as an "expression throw" for opcache. */
-		opline->extended_value = ZEND_THROW_IS_EXPR;
-		result->op_type = IS_CONST;
-		ZVAL_TRUE(&result->u.constant);
-	}
-}
-/* }}} */
-
 static void zend_compile_yield(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *value_ast = ast->child[0];
@@ -11366,7 +11345,6 @@ static void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_halt_compiler(ast);
 			break;
 		case ZEND_AST_THROW:
-		case ZEND_AST_EXIT:
 			zend_compile_expr(NULL, ast);
 			break;
 		default:
@@ -11468,9 +11446,6 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_PRINT:
 			zend_compile_print(result, ast);
-			return;
-		case ZEND_AST_EXIT:
-			zend_compile_exit(result, ast);
 			return;
 		case ZEND_AST_YIELD:
 			zend_compile_yield(result, ast);

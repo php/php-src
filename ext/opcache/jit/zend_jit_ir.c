@@ -16450,8 +16450,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 			} else {
 				ir_GUARD(ir_GE(ref, ir_CONST_I32(0)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 			}
-		} else if (opline->opcode == ZEND_EXIT ||
-		           opline->opcode == ZEND_GENERATOR_RETURN ||
+		} else if (opline->opcode == ZEND_GENERATOR_RETURN ||
 		           opline->opcode == ZEND_YIELD ||
 		           opline->opcode == ZEND_YIELD_FROM) {
 			ir_IJMP(jit_STUB_ADDR(jit, jit_stub_trace_halt));
