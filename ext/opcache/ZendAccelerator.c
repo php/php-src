@@ -47,10 +47,11 @@
 #include "zend_accelerator_hash.h"
 #include "zend_file_cache.h"
 #include "ext/pcre/php_pcre.h"
-#include "ext/standard/md5.h"
+#include "ext/standard/basic_functions.h"
 
 #ifdef ZEND_WIN32
 # include "ext/hash/php_hash.h"
+# include "ext/standard/md5.h"
 #endif
 
 #ifdef HAVE_JIT
