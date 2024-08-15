@@ -3099,7 +3099,7 @@ function toolset_get_compiler_name(short)
 		version = probe_binary(PHP_CL).substr(0, 5).replace('.', '');
 
 		if (version >= 1950) {
-			return name;
+			// skip
 		} else if (version >= 1930) {
 			name = short ? "VS17" : "Visual C++ 2022";
 		} else if (version >= 1920) {
@@ -3110,12 +3110,6 @@ function toolset_get_compiler_name(short)
 						When new versions are introduced, adapt also checks in
 						php_win32_image_compatible(), if needed. */
 			name = short ? "VS16" : "Visual C++ 2019";
-		} else if (version >= 1910) {
-			name = short ? "VC15" : "Visual C++ 2017";
-		} else if (version >= 1900) {
-			name = short ? "VC14" : "Visual C++ 2015";
-		} else {
-			ERROR("Unsupported Visual C++ compiler " + version);
 		}
 
 		return name;
@@ -3123,7 +3117,7 @@ function toolset_get_compiler_name(short)
 		var command = 'cmd /c ""' + PHP_CL + '" -v"';
 		var full = execute(command + '" 2>&1"');
 
-		return full.split(/\n/)[0].replace(/\s/g, ' ');
+		ERROR(full.split(/\n/)[0].replace(/\s/g, ' '));
 	}
 
 	WARNING("Unsupported toolset");
