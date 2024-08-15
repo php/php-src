@@ -49,7 +49,7 @@ try {
 TEMPLATE;
 
 $php = getenv('TEST_PHP_EXECUTABLE_ESCAPED');
-$command = $php . ' ' . escapeshellarg(FILE_PATH);
+$command = $php . ' --no-php-ini ' . escapeshellarg(FILE_PATH);
 
 foreach ([FILE_CONTENT, str_replace('exit', 'die', FILE_CONTENT)] as $code) {
     foreach ($values as $value) {
