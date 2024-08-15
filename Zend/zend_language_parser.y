@@ -251,7 +251,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
-%type <ast> expr optional_expr while_statement for_statement foreach_variable
+%type <ast> expr expr_with_default optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -904,7 +904,7 @@ non_empty_argument_list:
 ;
 
 argument:
-		expr				{ $$ = $1; }
+		expr_with_default   { $$ = $1; }
 	|	identifier ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
@@ -1326,6 +1326,10 @@ expr:
 	|	match { $$ = $1; }
 ;
 
+expr_with_default:
+		expr		{ $$ = $1; }
+	|	T_DEFAULT   { $$ = zend_ast_create(ZEND_AST_DEFAULT); }
+;
 
 inline_function:
 		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type

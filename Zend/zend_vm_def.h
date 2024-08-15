@@ -9808,6 +9808,44 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED, UNUSED)
+{
+	USE_OPLINE
+	SAVE_OPLINE();
+
+	zend_function *called_func = EX(call)->func;
+
+	zend_string *reflection_class_name = ZSTR_INIT_LITERAL("ReflectionParameter", 0);
+	zend_class_entry *reflection_class = zend_fetch_class(reflection_class_name, ZEND_FETCH_CLASS_DEFAULT);
+	zend_string_release(reflection_class_name);
+
+	/*
+	 * [0]: The function (string) or class method (array) to reflect parameters from.
+	 * [1]: A zero-based integer specifying the parameter position.
+	 */
+	zval constructor_params[2];
+	ZVAL_LONG(&constructor_params[1], opline->op1.num - 1);
+	if (called_func->common.scope == NULL) {
+		ZVAL_STR_COPY(&constructor_params[0], called_func->common.function_name);
+	} else {
+		zval arr;
+		array_init_size(&arr, 2);
+		add_next_index_string(&arr, called_func->common.scope->name->val);
+		add_next_index_string(&arr, called_func->common.function_name->val);
+		ZVAL_ARR(&constructor_params[0], Z_ARR(arr));
+	}
+
+	zval reflection_obj;
+	// TODO: Check result.
+	/*zend_result res =*/ object_init_with_constructor(&reflection_obj, reflection_class, 2, constructor_params, NULL);
+
+	zval default_value;
+	zend_call_method_with_0_params(Z_OBJ(reflection_obj), reflection_class, NULL, "getDefaultValue", &default_value);
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &default_value);
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE

@@ -3778,6 +3778,8 @@ static uint32_t zend_compile_args(
 			arg_count++;
 		}
 
+		CG(arg_num) = arg_num;
+
 		/* Treat passing of $GLOBALS the same as passing a call.
 		 * This will error at runtime if the argument is by-ref. */
 		if (zend_is_call(arg) || is_globals_fetch(arg)) {
@@ -3895,6 +3897,12 @@ static uint32_t zend_compile_args(
 	return arg_count;
 }
 /* }}} */
+
+static void zend_compile_default(znode *result, zend_ast *ast)
+{
+	zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_DEFAULT_ARG, NULL, NULL);
+	opline->op1.num = CG(arg_num);
+}
 
 ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */
 {
@@ -11496,6 +11504,9 @@ static void zend_compile_expr_inner(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_MATCH:
 			zend_compile_match(result, ast);
+			return;
+		case ZEND_AST_DEFAULT:
+			zend_compile_default(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
