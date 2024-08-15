@@ -245,7 +245,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] [0x%08x] %s", where, hr, err);
+			snprintf(buf, sizeof(buf), "Failed to init .Net runtime [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			RETURN_THROWS();
@@ -258,7 +258,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08x] %s", where, hr, err);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
@@ -270,7 +270,7 @@ PHP_METHOD(dotnet, __construct)
 		if (FAILED(hr)) {
 			char buf[1024];
 			char *err = php_win32_error_to_msg(hr);
-			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08x] %s", where, hr, err);
+			snprintf(buf, sizeof(buf), "Failed to re-init .Net domain [%s] [0x%08lx] %s", where, hr, err);
 			php_win32_error_msg_free(err);
 			php_com_throw_exception(hr, buf);
 			ZVAL_NULL(object);
@@ -344,7 +344,7 @@ PHP_METHOD(dotnet, __construct)
 	if (ret == FAILURE) {
 		char buf[1024];
 		char *err = php_win32_error_to_msg(hr);
-		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08x] %s", where, hr, err);
+		snprintf(buf, sizeof(buf), "Failed to instantiate .Net object [%s] [0x%08lx] %s", where, hr, err);
 		php_win32_error_msg_free(err);
 		php_com_throw_exception(hr, buf);
 		RETURN_THROWS();
