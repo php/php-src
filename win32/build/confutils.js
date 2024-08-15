@@ -3073,8 +3073,9 @@ function toolset_get_compiler_version()
 		if (full.match(/clang version ([\d\.]+)/)) {
 			version = RegExp.$1;
 			version = version.replace(/\./g, '');
-			version = version/100 < 1 ? version*10 : version;
-
+			if (version < 400) {
+				ERROR("Building with clang " + version + " is no longer supported");
+			}
 			return version;
 		}
 	} else if (ICC_TOOLSET) {
