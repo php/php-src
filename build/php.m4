@@ -986,7 +986,10 @@ dnl $1 = name of extension, $2 = extension upon which it depends
 dnl $3 = optional: if true, it's ok for $2 to have not been configured default
 dnl is false and should halt the build. To be effective, this macro must be
 dnl invoked *after* PHP_NEW_EXTENSION. The extension on which it depends must
-dnl also have been configured. See ADD_EXTENSION_DEP in win32 build.
+dnl also have been configured. Due to the limited genif.sh parsing and regex
+dnl matching implementation, this macro must be called on its own line, and its
+dnl arguments must be passed unquoted (without Autoconf '[' and ']' characters.
+dnl For Windows, see 'ADD_EXTENSION_DEP' in the win32 build.
 dnl
 AC_DEFUN([PHP_ADD_EXTENSION_DEP], [
   am_i_shared=$[PHP_]translit($1,a-z_-,A-Z__)[_SHARED]
