@@ -168,7 +168,6 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 	php_url *resource = NULL;
 	php_stream *fpf;
 	zval *pzoption, *metadata;
-	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, path, mode, options)) == NULL) {
 		return NULL;
@@ -187,7 +186,7 @@ static php_stream * phar_wrapper_open_url(php_stream_wrapper *wrapper, const cha
 		return NULL;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 
 	/* strip leading "/" */
@@ -565,7 +564,6 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 	char *internal_file, *error;
 	phar_archive_data *phar;
 	phar_entry_info *entry;
-	uint32_t host_len;
 	size_t internal_file_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "r", flags|PHP_STREAM_URL_STAT_QUIET)) == NULL) {
@@ -583,7 +581,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		return FAILURE;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 
 	internal_file = ZSTR_VAL(resource->path) + 1; /* strip leading "/" */
@@ -674,7 +672,6 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	int internal_file_len;
 	phar_entry_data *idata;
 	phar_archive_data *pphar;
-	uint32_t host_len;
 
 	if ((resource = phar_parse_url(wrapper, url, "rb", options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: unlink failed");
@@ -694,7 +691,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		return 0;
 	}
 
-	host_len = ZSTR_LEN(resource->host);
+	size_t host_len = ZSTR_LEN(resource->host);
 	phar_request_initialize();
 
 	pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host);
@@ -747,7 +744,6 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	char *error;
 	phar_archive_data *phar, *pfrom, *pto;
 	phar_entry_info *entry;
-	uint32_t host_len;
 	int is_dir = 0;
 	int is_modified = 0;
 
@@ -823,7 +819,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		return 0;
 	}
 
-	host_len = ZSTR_LEN(resource_from->host);
+	size_t host_len = ZSTR_LEN(resource_from->host);
 
 	if (SUCCESS != phar_get_archive(&phar, ZSTR_VAL(resource_from->host), host_len, NULL, 0, &error)) {
 		php_url_free(resource_from);
@@ -893,8 +889,8 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 		Bucket *b;
 		zend_string *str_key;
 		zend_string *new_str_key;
-		uint32_t from_len = ZSTR_LEN(resource_from->path) - 1;
-		uint32_t to_len = ZSTR_LEN(resource_to->path) - 1;
+		size_t from_len = ZSTR_LEN(resource_from->path) - 1;
+		size_t to_len = ZSTR_LEN(resource_to->path) - 1;
 
 		ZEND_HASH_MAP_FOREACH_BUCKET(&phar->manifest, b) {
 			str_key = b->key;

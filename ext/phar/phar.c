@@ -2023,11 +2023,11 @@ woohoo:
 			zend_string *str_key;
 
 			ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&PHAR_G(phar_fname_map), str_key, pphar) {
-				if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
+				if (ZSTR_LEN(str_key) > filename_len) {
 					continue;
 				}
 
-				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
+				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && (filename_len == ZSTR_LEN(str_key)
 					|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 					*ext_str = filename + (ZSTR_LEN(str_key) - pphar->ext_len);
 					goto woohoo;
@@ -2036,11 +2036,11 @@ woohoo:
 
 			if (PHAR_G(manifest_cached)) {
 				ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&cached_phars, str_key, pphar) {
-					if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
+					if (ZSTR_LEN(str_key) > filename_len) {
 						continue;
 					}
 
-					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
+					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && (filename_len == ZSTR_LEN(str_key)
 						|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 						*ext_str = filename + (ZSTR_LEN(str_key) - pphar->ext_len);
 						goto woohoo;
