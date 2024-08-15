@@ -72,11 +72,11 @@ zend_result zend_startup_builtin_functions(void) /* {{{ */
 ZEND_FUNCTION(exit)
 {
 	zend_string *str = NULL;
-	zend_long code = 0;
+	zend_long status = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_OR_LONG(str, code)
+		Z_PARAM_STR_OR_LONG(str, status)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (str) {
@@ -89,7 +89,7 @@ ZEND_FUNCTION(exit)
 			}
 		}
 	} else {
-		EG(exit_status) = code;
+		EG(exit_status) = status;
 	}
 
 	ZEND_ASSERT(!EG(exception));
