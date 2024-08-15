@@ -2383,6 +2383,10 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
+        if (ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH) {
+            zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
+            RETURN_THROWS();
+        }
 		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");
