@@ -1168,7 +1168,7 @@ write_std_property:
 			}
 
 			Z_TRY_ADDREF_P(value);
-			variable_ptr = zend_hash_add_new(zend_std_get_properties_ex(zobj), name, value);
+			variable_ptr = zend_hash_add_new(zend_std_get_properties(zobj), name, value);
 		}
 	}
 
