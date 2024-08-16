@@ -39,6 +39,10 @@ PHP 8.5 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- Standard:
+  . Added get_declared_enums() function that returns a list of declared enums. The
+    existing get_declared_classes() function continues to include enums.
+
 ========================================
 7. New Classes and Interfaces
 ========================================
