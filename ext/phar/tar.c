@@ -18,6 +18,7 @@
 */
 
 #include "phar_internal.h"
+#include "ext/standard/php_string.h" /* For php_stristr() */
 
 static uint32_t phar_tar_number(const char *buf, size_t len) /* {{{ */
 {

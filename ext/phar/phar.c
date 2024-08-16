@@ -19,9 +19,14 @@
 
 #define PHAR_MAIN 1
 #include "phar_internal.h"
+#include "php_phar.h"
 #include "SAPI.h"
 #include "func_interceptors.h"
+#include "ext/standard/crc32.h"
 #include "ext/standard/php_var.h"
+#include "ext/standard/php_string.h" /* For php_stristr() */
+#include "ext/standard/info.h"
+#include "zend_smart_str.h"
 
 static void destroy_phar_data(zval *zv);
 

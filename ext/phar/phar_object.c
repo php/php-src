@@ -20,6 +20,14 @@
 #include "phar_internal.h"
 #include "func_interceptors.h"
 #include "phar_object_arginfo.h"
+#include "ext/spl/spl_array.h"
+#include "ext/spl/spl_exceptions.h"
+#include "ext/spl/spl_iterators.h"
+#include "ext/standard/php_var.h"
+#include "main/SAPI.h"
+#include "zend_exceptions.h"
+#include "zend_interfaces.h"
+#include "zend_exceptions.h"
 
 static zend_class_entry *phar_ce_archive;
 static zend_class_entry *phar_ce_data;
