@@ -153,6 +153,8 @@ ZEND_API HashTable *zend_get_properties_no_init(zend_object *zobj)
 		return zobj->properties;
 	}
 
+	ZEND_ASSERT(!zend_object_is_lazy(zobj));
+
 	return zobj->handlers->get_properties(zobj);
 }
 
