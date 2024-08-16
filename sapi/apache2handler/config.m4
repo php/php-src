@@ -79,13 +79,10 @@ if test "$PHP_APXS2" != "no"; then
   LIBPHP_CFLAGS="-shared"
   PHP_SUBST([LIBPHP_CFLAGS])
 
+  php_sapi_apache2handler_type=shared
   AS_CASE([$host_alias],
     [*aix*], [
       EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-      PHP_SELECT_SAPI([apache2handler],
-        [shared],
-        [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-        [$APACHE_CFLAGS])
       INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
     ],
     [*darwin*], [
@@ -101,19 +98,16 @@ if test "$PHP_APXS2" != "no"; then
       fi
       MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
       PHP_SUBST([MH_BUNDLE_FLAGS])
-      PHP_SELECT_SAPI([apache2handler],
-        [bundle],
-        [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-        [$APACHE_CFLAGS])
+      php_sapi_apache2handler_type=bundle
       SAPI_SHARED=libs/libphp.so
       INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
-    ], [
-      PHP_SELECT_SAPI([apache2handler],
-        [shared],
-        [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-        [$APACHE_CFLAGS])
-      INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
-    ])
+    ],
+    [INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"])
+
+  PHP_SELECT_SAPI([apache2handler],
+    [$php_sapi_apache2handler_type],
+    [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+    [$APACHE_CFLAGS])
 
   AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
     APACHE_THREADED_MPM=yes
