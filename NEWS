@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
     (zeriyoshi)
+  . Fixed bug GH-15438 (Hooks on constructor promoted properties without
+    visibility are ignored). (ilutov)
 
 15 Aug 2024, PHP 8.4.0beta3
 
