@@ -24,39 +24,9 @@
 #include <time.h>
 #include "php.h"
 #include "tar.h"
-#include "php_ini.h"
-#include "zend_constants.h"
-#include "zend_execute.h"
-#include "zend_exceptions.h"
+#include "pharzip.h"
 #include "zend_hash.h"
-#include "zend_interfaces.h"
-#include "zend_operators.h"
-#include "zend_sort.h"
-#include "zend_vm.h"
-#include "zend_smart_str.h"
-#include "main/php_streams.h"
-#include "main/streams/php_stream_plain_wrapper.h"
-#include "main/SAPI.h"
-#include "main/php_main.h"
-#include "main/php_open_temporary_file.h"
-#include "ext/standard/info.h"
-#include "ext/standard/basic_functions.h"
-#include "ext/standard/file.h"
-#include "ext/standard/php_string.h"
-#include "ext/standard/url.h"
-#include "ext/standard/crc32.h"
-#include "ext/standard/md5.h"
-#include "ext/standard/sha1.h"
-#include "ext/standard/php_var.h"
-#include "ext/standard/php_versioning.h"
-#include "Zend/zend_virtual_cwd.h"
-#include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
-#include "ext/spl/spl_exceptions.h"
-#include "ext/spl/spl_iterators.h"
-#include "php_phar.h"
-#include "ext/hash/php_hash.h"
-#include "ext/hash/php_hash_sha.h"
 
 /* PHP_ because this is public information via MINFO */
 #define PHP_PHAR_API_VERSION      "1.1.1"
@@ -192,8 +162,6 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 #if defined(ZTS) && defined(COMPILE_DL_PHAR)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
-
-#include "pharzip.h"
 
 typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;

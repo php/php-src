@@ -17,6 +17,8 @@
 */
 
 #include "phar_internal.h"
+#include "ext/standard/php_filestat.h"
+#include "ext/standard/file.h" /* For php_le_stream_context() */
 
 PHP_FUNCTION(phar_opendir) /* {{{ */
 {

@@ -19,7 +19,10 @@
 */
 
 #include "phar_internal.h"
+#include "php_phar.h"
+#include "ext/hash/php_hash.h" /* Needed for PHP_HASH_API in ext/hash/php_hash_sha.h */
 #include "ext/hash/php_hash_sha.h"
+#include "ext/standard/md5.h"
 
 #ifdef PHAR_HAVE_OPENSSL
 /* OpenSSL includes */

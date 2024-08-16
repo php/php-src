@@ -17,6 +17,8 @@
 */
 
 #include "phar_internal.h"
+#include "ext/standard/crc32.h"
+#include "ext/standard/php_string.h" /* For php_stristr() */
 
 #define PHAR_GET_16(var) ((uint16_t)((((uint16_t)var[0]) & 0xff) | \
 	(((uint16_t)var[1]) & 0xff) << 8))
