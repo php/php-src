@@ -24,6 +24,10 @@
 #include <sys/syscall.h>
 #include <sys/types.h>
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 #include "zend.h"
 #include "zend_globals.h"
 
@@ -46,6 +50,12 @@ ZEND_API void zend_max_execution_timer_init(void) /* {{{ */
 	sev.sigev_value.sival_ptr = &EG(max_execution_timer_timer);
 	sev.sigev_signo = SIGRTMIN;
 	sev.sigev_notify_thread_id = (pid_t) syscall(SYS_gettid);
+
+#if __has_feature(memory_sanitizer)
+	/* MSan does not intercept timer_create() */
+		__msan_unpoison(&EG(max_execution_timer_timer),
+						sizeof(EG(max_execution_timer_timer)));
+#endif
 
 	// Measure wall time instead of CPU time as originally planned now that it is possible https://github.com/php/php-src/pull/6504#issuecomment-1370303727
 	if (timer_create(CLOCK_BOOTTIME, &sev, &EG(max_execution_timer_timer)) != 0) {
