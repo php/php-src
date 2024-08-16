@@ -17,6 +17,10 @@ PHP                                                                        NEWS
     As such, passing invalid types to exit/die may now result in a TypeError
     being thrown. (Girgias)
 
+- CURL:
+  . Added CURLOPT_TCP_KEEPCNT to set the number of probes to send before
+    dropping the connection. (David Carlier)
+
 - Hash:
   . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
 

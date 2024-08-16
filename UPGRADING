@@ -917,6 +917,7 @@ PHP 8.4 UPGRADE NOTES
 - Curl:
   . CURL_HTTP_VERSION_3.
   . CURL_HTTP_VERSION_3ONLY.
+  . CURL_TCP_KEEPCNT
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant
