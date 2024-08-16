@@ -339,34 +339,6 @@ static inline php_stream *phar_get_entrypfp(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].fp;
 }
 
-static inline php_stream *phar_get_entrypufp(phar_entry_info *entry)
-{
-	if (!entry->is_persistent) {
-		return entry->phar->ufp;
-	}
-	return PHAR_G(cached_fp)[entry->phar->phar_pos].ufp;
-}
-
-static inline void phar_set_entrypfp(phar_entry_info *entry, php_stream *fp)
-{
-	if (!entry->phar->is_persistent) {
-		entry->phar->fp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[entry->phar->phar_pos].fp = fp;
-}
-
-static inline void phar_set_entrypufp(phar_entry_info *entry, php_stream *fp)
-{
-	if (!entry->phar->is_persistent) {
-		entry->phar->ufp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[entry->phar->phar_pos].ufp = fp;
-}
-
 static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
 {
 	if (!phar->is_persistent) {
@@ -375,67 +347,12 @@ static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
 	return PHAR_G(cached_fp)[phar->phar_pos].fp;
 }
 
-static inline php_stream *phar_get_pharufp(phar_archive_data *phar)
-{
-	if (!phar->is_persistent) {
-		return phar->ufp;
-	}
-	return PHAR_G(cached_fp)[phar->phar_pos].ufp;
-}
-
-static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
-{
-	if (!phar->is_persistent) {
-		phar->fp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[phar->phar_pos].fp = fp;
-}
-
-static inline void phar_set_pharufp(phar_archive_data *phar, php_stream *fp)
-{
-	if (!phar->is_persistent) {
-		phar->ufp =  fp;
-		return;
-	}
-
-	PHAR_G(cached_fp)[phar->phar_pos].ufp = fp;
-}
-
-static inline void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zend_off_t offset)
-{
-	phar_entry_fp_info *data;
-
-	if (!entry->is_persistent) {
-		entry->fp_type = type;
-		entry->offset = offset;
-		return;
-	}
-	data = &(PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos]);
-	data->fp_type = type;
-	data->offset = offset;
-}
-
 static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
 {
 	if (!entry->is_persistent) {
 		return entry->fp_type;
 	}
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type;
-}
-
-static inline zend_off_t phar_get_fp_offset(phar_entry_info *entry)
-{
-	if (!entry->is_persistent) {
-		return entry->offset;
-	}
-	if (PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type == PHAR_FP) {
-		if (!PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset) {
-			PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset = entry->offset;
-		}
-	}
-	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
 }
 
 #define PHAR_MIME_PHP '\0'
