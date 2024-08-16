@@ -16,8 +16,8 @@
 
 #include <config.w32.h>
 
-#include <win32/ioutil.h>
 #include <php.h>
+#include <win32/ioutil.h>
 
 #ifdef HAVE_LIBXML
 #include <libxml/threads.h>
