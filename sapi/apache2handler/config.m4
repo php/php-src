@@ -7,15 +7,14 @@ PHP_ARG_WITH([apxs2],
   [no])
 
 if test "$PHP_APXS2" != "no"; then
-  if test "$PHP_APXS2" = "yes"; then
+  AS_VAR_IF([PHP_APXS2], [yes], [
     APXS=apxs
     $APXS -q CFLAGS >/dev/null 2>&1
     if test "$?" != "0" && test -x /usr/sbin/apxs; then
       APXS=/usr/sbin/apxs
     fi
-  else
-    PHP_EXPAND_PATH([$PHP_APXS2], [APXS])
-  fi
+  ],
+  [PHP_EXPAND_PATH([$PHP_APXS2], [APXS])])
 
   $APXS -q CFLAGS >/dev/null 2>&1
   if test "$?" != "0"; then
@@ -53,9 +52,7 @@ if test "$PHP_APXS2" != "no"; then
   APU_CFLAGS="`$APU_CONFIG --includes`"
 
   for flag in $APXS_CFLAGS; do
-    case $flag in
-    -D*) APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag";;
-    esac
+    AS_CASE([$flag], [-D*], [APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag"])
   done
 
   APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
@@ -82,42 +79,41 @@ if test "$PHP_APXS2" != "no"; then
   LIBPHP_CFLAGS="-shared"
   PHP_SUBST([LIBPHP_CFLAGS])
 
-  case $host_alias in
-  *aix*)
-    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
-    PHP_SELECT_SAPI([apache2handler],
-      [shared],
-      [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-      [$APACHE_CFLAGS])
-    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
-    ;;
-  *darwin*)
-    dnl When using bundles on Darwin, we must resolve all symbols. However, the
-    dnl linker does not recursively look at the bundle loader and pull in its
-    dnl dependencies. Therefore, we must pull in the APR and APR-util libraries.
-    if test -x "$APR_CONFIG"; then
+  AS_CASE([$host_alias],
+    [*aix*], [
+      EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-brtl -Wl,-bI:$APXS_LIBEXECDIR/httpd.exp"
+      PHP_SELECT_SAPI([apache2handler],
+        [shared],
+        [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+        [$APACHE_CFLAGS])
+      INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
+    ],
+    [*darwin*], [
+      dnl When using bundles on Darwin, we must resolve all symbols. However,
+      dnl the linker does not recursively look at the bundle loader and pull in
+      dnl its dependencies. Therefore, we must pull in the APR and APR-util
+      dnl libraries.
+      if test -x "$APR_CONFIG"; then
         MH_BUNDLE_FLAGS="`$APR_CONFIG --ldflags --link-ld --libs`"
-    fi
-    if test -x "$APU_CONFIG"; then
+      fi
+      if test -x "$APU_CONFIG"; then
         MH_BUNDLE_FLAGS="`$APU_CONFIG --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
-    fi
-    MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
-    PHP_SUBST([MH_BUNDLE_FLAGS])
-    PHP_SELECT_SAPI([apache2handler],
-      [bundle],
-      [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-      [$APACHE_CFLAGS])
-    SAPI_SHARED=libs/libphp.so
-    INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
-    ;;
-  *)
-    PHP_SELECT_SAPI([apache2handler],
-      [shared],
-      [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-      [$APACHE_CFLAGS])
-    INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
-    ;;
-  esac
+      fi
+      MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
+      PHP_SUBST([MH_BUNDLE_FLAGS])
+      PHP_SELECT_SAPI([apache2handler],
+        [bundle],
+        [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+        [$APACHE_CFLAGS])
+      SAPI_SHARED=libs/libphp.so
+      INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
+    ], [
+      PHP_SELECT_SAPI([apache2handler],
+        [shared],
+        [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
+        [$APACHE_CFLAGS])
+      INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"
+    ])
 
   AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
     APACHE_THREADED_MPM=yes
