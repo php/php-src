@@ -16,7 +16,6 @@
 
 #include <config.w32.h>
 
-#include <win32/time.h>
 #include <win32/ioutil.h>
 #include <php.h>
 
