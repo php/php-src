@@ -61,7 +61,7 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Zlib:
-  . The "use_include_path" argument for the 
+  . The "use_include_path" argument for the
     gzfile, gzopen and readgzfile functions had been changed
     from int to boolean.
 
@@ -82,6 +82,10 @@ PHP 8.5 UPGRADE NOTES
   . pg_close_stmt offers an alternative way to close a prepared
     statement from the DEALLOCATE sql command in that we can reuse
     its name afterwards.
+
+- Standard:
+  . Added get_declared_enums() function that returns a list of declared enums. The
+    existing get_declared_classes() function continues to include enums.
 
 ========================================
 7. New Classes and Interfaces

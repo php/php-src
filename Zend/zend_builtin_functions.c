@@ -1382,7 +1382,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 		ZEND_HASH_MAP_FOREACH_STR_KEY_VAL(EG(class_table), key, zv) {
 			ce = Z_PTR_P(zv);
-			if ((ce->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
+			if ((ce->ce_flags & (flags|ZEND_ACC_LINKED|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT)) == flags
 			 && key
 			 && ZSTR_VAL(key)[0] != 0) {
 				ZEND_HASH_FILL_GROW();
@@ -1417,6 +1417,13 @@ ZEND_FUNCTION(get_declared_classes)
 ZEND_FUNCTION(get_declared_interfaces)
 {
 	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED | ZEND_ACC_INTERFACE);
+}
+/* }}} */
+
+/* {{{ Returns an array of all declared enums. */
+ZEND_FUNCTION(get_declared_enums)
+{
+	get_declared_class_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED | ZEND_ACC_ENUM);
 }
 /* }}} */
 
