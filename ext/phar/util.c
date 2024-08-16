@@ -184,7 +184,7 @@ int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_of
 /* }}} */
 
 /* mount an absolute path or uri to a path internal to the phar archive */
-int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len) /* {{{ */
+zend_result phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
@@ -361,6 +361,105 @@ splitted:
 }
 /* }}} */
 
+static zend_result phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error) /* {{{ */
+{
+	if (entry->fp_type == PHAR_MOD) {
+		/* already newly created, truncate */
+		php_stream_truncate_set_size(entry->fp, 0);
+
+		entry->old_flags = entry->flags;
+		entry->is_modified = 1;
+		phar->is_modified = 1;
+		/* reset file size */
+		entry->uncompressed_filesize = 0;
+		entry->compressed_filesize = 0;
+		entry->crc32 = 0;
+		entry->flags = PHAR_ENT_PERM_DEF_FILE;
+		entry->fp_type = PHAR_MOD;
+		entry->offset = 0;
+		return SUCCESS;
+	}
+
+	if (error) {
+		*error = NULL;
+	}
+
+	/* open a new temp file for writing */
+	if (entry->link) {
+		efree(entry->link);
+		entry->link = NULL;
+		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
+	}
+
+	entry->fp = php_stream_fopen_tmpfile();
+
+	if (!entry->fp) {
+		if (error) {
+			spprintf(error, 0, "phar error: unable to create temporary file");
+		}
+		return FAILURE;
+	}
+
+	entry->old_flags = entry->flags;
+	entry->is_modified = 1;
+	phar->is_modified = 1;
+	/* reset file size */
+	entry->uncompressed_filesize = 0;
+	entry->compressed_filesize = 0;
+	entry->crc32 = 0;
+	entry->flags = PHAR_ENT_PERM_DEF_FILE;
+	entry->fp_type = PHAR_MOD;
+	entry->offset = 0;
+	return SUCCESS;
+}
+/* }}} */
+
+static zend_result phar_separate_entry_fp(phar_entry_info *entry, char **error) /* {{{ */
+{
+	php_stream *fp;
+	phar_entry_info *link;
+
+	if (FAILURE == phar_open_entry_fp(entry, error, 1)) {
+		return FAILURE;
+	}
+
+	if (entry->fp_type == PHAR_MOD) {
+		return SUCCESS;
+	}
+
+	fp = php_stream_fopen_tmpfile();
+	if (fp == NULL) {
+		spprintf(error, 0, "phar error: unable to create temporary file");
+		return FAILURE;
+	}
+	phar_seek_efp(entry, 0, SEEK_SET, 0, 1);
+	link = phar_get_link_source(entry);
+
+	if (!link) {
+		link = entry;
+	}
+
+	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0), fp, link->uncompressed_filesize, NULL)) {
+		if (error) {
+			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", entry->filename, entry->phar->fname);
+		}
+		return FAILURE;
+	}
+
+	if (entry->link) {
+		efree(entry->link);
+		entry->link = NULL;
+		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
+	}
+
+	entry->offset = 0;
+	entry->fp = fp;
+	entry->fp_type = PHAR_MOD;
+	entry->is_modified = 1;
+	return SUCCESS;
+}
+/* }}} */
+
 /**
  * Retrieve a copy of the file information on a single file within a phar, or null.
  * This also transfers the open file pointer, if any, to the entry.
@@ -369,14 +468,14 @@ splitted:
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
+zend_result phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
-	int for_write  = mode[0] != 'r' || mode[1] == '+';
-	int for_append = mode[0] == 'a';
-	int for_create = mode[0] != 'r';
-	int for_trunc  = mode[0] == 'w';
+	bool for_write  = mode[0] != 'r' || mode[1] == '+';
+	bool for_append = mode[0] == 'a';
+	bool for_create = mode[0] != 'r';
+	bool for_trunc  = mode[0] == 'w';
 
 	if (!ret) {
 		return FAILURE;
@@ -648,7 +747,7 @@ static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
 }
 
 /* initialize a phar_archive_data's read-only fp for existing phar data */
-int phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
+zend_result phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 {
 	if (phar_get_pharfp(phar)) {
 		return SUCCESS;
@@ -669,7 +768,7 @@ int phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 /* }}} */
 
 /* copy file data from an existing to a new phar_entry_info that is not in the manifest */
-int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error) /* {{{ */
+zend_result phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **error) /* {{{ */
 {
 	phar_entry_info *link;
 
@@ -737,7 +836,7 @@ static void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zen
 
 /* open and decompress a compressed phar entry
  */
-int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links) /* {{{ */
+zend_result phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links) /* {{{ */
 {
 	php_stream_filter *filter;
 	phar_archive_data *phar = entry->phar;
@@ -853,105 +952,6 @@ int phar_open_entry_fp(phar_entry_info *entry, char **error, int follow_links) /
 }
 /* }}} */
 
-int phar_create_writeable_entry(phar_archive_data *phar, phar_entry_info *entry, char **error) /* {{{ */
-{
-	if (entry->fp_type == PHAR_MOD) {
-		/* already newly created, truncate */
-		php_stream_truncate_set_size(entry->fp, 0);
-
-		entry->old_flags = entry->flags;
-		entry->is_modified = 1;
-		phar->is_modified = 1;
-		/* reset file size */
-		entry->uncompressed_filesize = 0;
-		entry->compressed_filesize = 0;
-		entry->crc32 = 0;
-		entry->flags = PHAR_ENT_PERM_DEF_FILE;
-		entry->fp_type = PHAR_MOD;
-		entry->offset = 0;
-		return SUCCESS;
-	}
-
-	if (error) {
-		*error = NULL;
-	}
-
-	/* open a new temp file for writing */
-	if (entry->link) {
-		efree(entry->link);
-		entry->link = NULL;
-		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
-	}
-
-	entry->fp = php_stream_fopen_tmpfile();
-
-	if (!entry->fp) {
-		if (error) {
-			spprintf(error, 0, "phar error: unable to create temporary file");
-		}
-		return FAILURE;
-	}
-
-	entry->old_flags = entry->flags;
-	entry->is_modified = 1;
-	phar->is_modified = 1;
-	/* reset file size */
-	entry->uncompressed_filesize = 0;
-	entry->compressed_filesize = 0;
-	entry->crc32 = 0;
-	entry->flags = PHAR_ENT_PERM_DEF_FILE;
-	entry->fp_type = PHAR_MOD;
-	entry->offset = 0;
-	return SUCCESS;
-}
-/* }}} */
-
-int phar_separate_entry_fp(phar_entry_info *entry, char **error) /* {{{ */
-{
-	php_stream *fp;
-	phar_entry_info *link;
-
-	if (FAILURE == phar_open_entry_fp(entry, error, 1)) {
-		return FAILURE;
-	}
-
-	if (entry->fp_type == PHAR_MOD) {
-		return SUCCESS;
-	}
-
-	fp = php_stream_fopen_tmpfile();
-	if (fp == NULL) {
-		spprintf(error, 0, "phar error: unable to create temporary file");
-		return FAILURE;
-	}
-	phar_seek_efp(entry, 0, SEEK_SET, 0, 1);
-	link = phar_get_link_source(entry);
-
-	if (!link) {
-		link = entry;
-	}
-
-	if (SUCCESS != php_stream_copy_to_stream_ex(phar_get_efp(link, 0), fp, link->uncompressed_filesize, NULL)) {
-		if (error) {
-			spprintf(error, 4096, "phar error: cannot separate entry file \"%s\" contents in phar archive \"%s\" for write access", entry->filename, entry->phar->fname);
-		}
-		return FAILURE;
-	}
-
-	if (entry->link) {
-		efree(entry->link);
-		entry->link = NULL;
-		entry->tar_type = (entry->is_tar ? TAR_FILE : '\0');
-	}
-
-	entry->offset = 0;
-	entry->fp = fp;
-	entry->fp_type = PHAR_MOD;
-	entry->is_modified = 1;
-	return SUCCESS;
-}
-/* }}} */
-
 /**
  * helper function to open an internal file's fp just-in-time
  */
@@ -972,7 +972,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 }
 /* }}} */
 
-PHP_PHAR_API int phar_resolve_alias(char *alias, size_t alias_len, char **filename, size_t *filename_len) /* {{{ */ {
+PHP_PHAR_API zend_result phar_resolve_alias(char *alias, size_t alias_len, char **filename, size_t *filename_len) /* {{{ */ {
 	phar_archive_data *fd_ptr;
 	if (HT_IS_INITIALIZED(&PHAR_G(phar_alias_map))
 			&& NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
@@ -984,7 +984,7 @@ PHP_PHAR_API int phar_resolve_alias(char *alias, size_t alias_len, char **filena
 }
 /* }}} */
 
-int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {{{ */
+zend_result phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {{{ */
 {
 	if (phar->refcount || phar->is_persistent) {
 		return FAILURE;
@@ -1007,7 +1007,7 @@ int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
  */
-int phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error) /* {{{ */
+zend_result phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error) /* {{{ */
 {
 	phar_archive_data *fd, *fd_ptr;
 	char *my_realpath, *save;
@@ -1537,7 +1537,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
+zend_result phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
 {
 	size_t read_size, len;
 	zend_off_t read_len;
@@ -1851,7 +1851,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 }
 /* }}} */
 
-int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error) /* {{{ */
+zend_result phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error) /* {{{ */
 {
 	unsigned char buf[1024];
 	size_t sig_len;
@@ -2134,7 +2134,7 @@ static void phar_copy_cached_phar(phar_archive_data **pphar) /* {{{ */
 }
 /* }}} */
 
-int phar_copy_on_write(phar_archive_data **pphar) /* {{{ */
+zend_result phar_copy_on_write(phar_archive_data **pphar) /* {{{ */
 {
 	zval zv, *pzv;
 	phar_archive_data *newpphar;

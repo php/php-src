@@ -1922,7 +1922,7 @@ PHP_METHOD(Phar, isFileFormat)
 }
 /* }}} */
 
-static int phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{{ */
+static zend_result phar_copy_file_contents(phar_entry_info *entry, php_stream *fp) /* {{{ */
 {
 	char *error;
 	zend_off_t offset;
@@ -4004,7 +4004,7 @@ PHP_METHOD(Phar, getMetadata)
 /* }}} */
 
 /* {{{ Modifies the phar metadata or throws */
-static int serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persistent, zval *metadata)
+static zend_result serialize_metadata_or_throw(phar_metadata_tracker *tracker, int persistent, zval *metadata)
 {
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
@@ -4105,7 +4105,7 @@ PHP_METHOD(Phar, delMetadata)
 }
 /* }}} */
 
-static int phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
+static zend_result phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest, size_t dest_len, char **error) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	size_t len;
@@ -4259,7 +4259,7 @@ static int phar_extract_file(bool overwrite, phar_entry_info *entry, char *dest,
 		}
 	}
 
-	if (FAILURE == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
+	if (-1 == phar_seek_efp(entry, 0, SEEK_SET, 0, 0)) {
 		spprintf(error, 4096, "Cannot extract \"%s\" to \"%s\", unable to seek internal file pointer", entry->filename, fullpath);
 		efree(fullpath);
 		php_stream_close(fp);
