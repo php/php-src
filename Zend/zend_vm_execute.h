@@ -38131,12 +38131,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DEFAULT_ARG_SPEC_UNUSED_
 	zval reflection_obj;
 	// TODO: Check result.
 	/*zend_result res =*/ object_init_with_constructor(&reflection_obj, reflection_class, 2, constructor_params, NULL);
+	zval_ptr_dtor(&constructor_params[0]);
+	zval_ptr_dtor(&constructor_params[1]);
 
 	zval default_value;
 	zend_call_method_with_0_params(Z_OBJ(reflection_obj), reflection_class, NULL, "getDefaultValue", &default_value);
+	zval_ptr_dtor(&reflection_obj);
 
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &default_value);
-	ZEND_VM_NEXT_OPCODE();
+	ZVAL_COPY(EX_VAR(opline->result.var), &default_value);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_OP_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

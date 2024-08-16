@@ -9808,7 +9808,7 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED, UNUSED)
+ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 {
 	USE_OPLINE
 	SAVE_OPLINE();
@@ -9838,12 +9838,15 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED, UNUSED)
 	zval reflection_obj;
 	// TODO: Check result.
 	/*zend_result res =*/ object_init_with_constructor(&reflection_obj, reflection_class, 2, constructor_params, NULL);
+	zval_ptr_dtor(&constructor_params[0]);
+	zval_ptr_dtor(&constructor_params[1]);
 
 	zval default_value;
 	zend_call_method_with_0_params(Z_OBJ(reflection_obj), reflection_class, NULL, "getDefaultValue", &default_value);
+	zval_ptr_dtor(&reflection_obj);
 
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &default_value);
-	ZEND_VM_NEXT_OPCODE();
+	ZVAL_COPY(EX_VAR(opline->result.var), &default_value);
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
