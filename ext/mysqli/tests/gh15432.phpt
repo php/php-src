@@ -10,7 +10,7 @@ if ($link === false) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
 if ($link->server_version < 90000) {
-    die("skip ads");
+    die("skip MySQL 9.0.0+ needed");
 }
 ?>
 --FILE--
