@@ -331,7 +331,7 @@ struct _phar_entry_fp {
 	phar_entry_fp_info *manifest;
 };
 
-static inline php_stream *phar_get_entrypfp(phar_entry_info *entry)
+static inline php_stream *phar_get_entrypfp(const phar_entry_info *entry)
 {
 	if (!entry->is_persistent) {
 		return entry->phar->fp;
@@ -339,7 +339,7 @@ static inline php_stream *phar_get_entrypfp(phar_entry_info *entry)
 	return PHAR_G(cached_fp)[entry->phar->phar_pos].fp;
 }
 
-static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
+static inline php_stream *phar_get_pharfp(const phar_archive_data *phar)
 {
 	if (!phar->is_persistent) {
 		return phar->fp;
@@ -347,7 +347,7 @@ static inline php_stream *phar_get_pharfp(phar_archive_data *phar)
 	return PHAR_G(cached_fp)[phar->phar_pos].fp;
 }
 
-static inline enum phar_fp_type phar_get_fp_type(phar_entry_info *entry)
+static inline enum phar_fp_type phar_get_fp_type(const phar_entry_info *entry)
 {
 	if (!entry->is_persistent) {
 		return entry->fp_type;
