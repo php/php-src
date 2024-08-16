@@ -62,10 +62,10 @@ static uint32_t phar_tar_number(const char *buf, size_t len) /* {{{ */
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static int phar_tar_octal(char *buf, uint32_t val, int len) /* {{{ */
+static zend_result phar_tar_octal(char *buf, uint32_t val, size_t len) /* {{{ */
 {
 	char *p = buf;
-	int s = len;
+	size_t s = len;
 
 	p += len;		/* Start at the end and work backwards. */
 	while (s-- > 0) {
@@ -73,12 +73,14 @@ static int phar_tar_octal(char *buf, uint32_t val, int len) /* {{{ */
 		val >>= 3;
 	}
 
-	if (val == 0)
+	if (val == 0) {
 		return SUCCESS;
+	}
 
 	/* If it overflowed, fill field with max value. */
-	while (len-- > 0)
+	while (len-- > 0) {
 		*p++ = '7';
+	}
 
 	return FAILURE;
 }
@@ -97,37 +99,37 @@ static uint32_t phar_tar_checksum(char *buf, size_t len) /* {{{ */
 }
 /* }}} */
 
-int phar_is_tar(char *buf, char *fname) /* {{{ */
+bool phar_is_tar(char *buf, char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
 	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
-	uint32_t ret;
+	bool is_tar;
 	char save[sizeof(header->checksum)], *bname;
 
 	/* assume that the first filename in a tar won't begin with <?php */
 	if (!strncmp(buf, "<?php", sizeof("<?php")-1)) {
-		return 0;
+		return false;
 	}
 
 	memcpy(save, header->checksum, sizeof(header->checksum));
 	memset(header->checksum, ' ', sizeof(header->checksum));
-	ret = (checksum == phar_tar_checksum(buf, 512));
+	is_tar = (checksum == phar_tar_checksum(buf, 512));
 	memcpy(header->checksum, save, sizeof(header->checksum));
 	if ((bname = strrchr(fname, PHP_DIR_SEPARATOR))) {
 		fname = bname;
 	}
-	if (!ret && (bname = strstr(fname, ".tar")) && (bname[4] == '\0' || bname[4] == '.')) {
+	if (!is_tar && (bname = strstr(fname, ".tar")) && (bname[4] == '\0' || bname[4] == '.')) {
 		/* probably a corrupted tar - so we will pretend it is one */
-		return 1;
+		return true;
 	}
-	return ret;
+	return is_tar;
 }
 /* }}} */
 
-int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
+zend_result phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t alias_len, int is_data, uint32_t options, phar_archive_data** pphar, char **error) /* {{{ */
 {
 	phar_archive_data *phar;
-	int ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
+	zend_result ret = phar_create_or_parse_filename(fname, fname_len, alias, alias_len, is_data, options, &phar, error);
 
 	if (FAILURE == ret) {
 		return FAILURE;
@@ -157,7 +159,7 @@ int phar_open_or_create_tar(char *fname, size_t fname_len, char *alias, size_t a
 }
 /* }}} */
 
-static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* {{{ */
+static zend_result phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* {{{ */
 {
 	char *metadata;
 	size_t save = php_stream_tell(fp), read;
@@ -199,7 +201,7 @@ static int phar_tar_process_metadata(phar_entry_info *entry, php_stream *fp) /* 
 }
 /* }}} */
 
-int phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error) /* {{{ */
+zend_result phar_parse_tarfile(php_stream* fp, char *fname, size_t fname_len, char *alias, size_t alias_len, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
@@ -699,8 +701,8 @@ next:
 struct _phar_pass_tar_info {
 	php_stream *old;
 	php_stream *new;
-	int free_fp;
-	int free_ufp;
+	bool free_fp;
+	bool free_ufp;
 	char **error;
 };
 
@@ -863,7 +865,7 @@ static int phar_tar_writeheaders(zval *zv, void *argument) /* {{{ */
 }
 /* }}} */
 
-int phar_tar_setmetadata(const phar_metadata_tracker *tracker, phar_entry_info *entry, char **error) /* {{{ */
+static int phar_tar_setmetadata(const phar_metadata_tracker *tracker, phar_entry_info *entry, char **error) /* {{{ */
 {
 	/* Copy the metadata from tracker to the new entry being written out to temporary files */
 	const zend_string *serialized_str;
