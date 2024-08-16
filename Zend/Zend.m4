@@ -230,6 +230,10 @@ AX_CHECK_COMPILE_FLAG([-Wstrict-prototypes],
 AX_CHECK_COMPILE_FLAG([-fno-common],
   [CFLAGS="-fno-common $CFLAGS"],,
   [-Werror])
+dnl Suppress the Clang typedef redefinition warnings if it has enabled C99 mode.
+AX_CHECK_COMPILE_FLAG([-Wno-typedef-redefinition],
+  [CFLAGS="$CFLAGS -Wno-typedef-redefinition"],,
+  [-Werror])
 
 ZEND_CHECK_ALIGNMENT
 ZEND_CHECK_SIGNALS
