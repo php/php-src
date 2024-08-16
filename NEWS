@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (zeriyoshi)
   . Fixed bug GH-15438 (Hooks on constructor promoted properties without
     visibility are ignored). (ilutov)
+  . Fixed bug GH-15419 (Missing readonly+hook incompatibility check for readonly
+    classes). (ilutov)
 
 15 Aug 2024, PHP 8.4.0beta3
 

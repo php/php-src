@@ -8385,6 +8385,10 @@ static void zend_compile_property_hooks(
 {
 	zend_class_entry *ce = CG(active_class_entry);
 
+	if (prop_info->flags & ZEND_ACC_READONLY) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Hooked properties cannot be readonly");
+	}
+
 	if (hooks->children == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list cannot be empty");
 	}
@@ -8606,11 +8610,6 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		}
 		if ((flags & ZEND_ACC_ABSTRACT)) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-		}
-
-		if (hooks_ast && (flags & ZEND_ACC_READONLY)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Hooked properties cannot be readonly");
 		}
 
 		if (type_ast) {
