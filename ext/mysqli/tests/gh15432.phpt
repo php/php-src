@@ -9,7 +9,7 @@ $link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 if ($link === false) {
     die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 }
-if ($link->server_version < 90000) {
+if ($link->server_version < 90000 || $link->server_version >= 10_00_00) {
     die("skip MySQL 9.0.0+ needed");
 }
 ?>
