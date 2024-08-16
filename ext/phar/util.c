@@ -82,6 +82,14 @@ phar_entry_info *phar_get_link_source(phar_entry_info *entry) /* {{{ */
 }
 /* }}} */
 
+static php_stream *phar_get_entrypufp(const phar_entry_info *entry)
+{
+	if (!entry->is_persistent) {
+		return entry->phar->ufp;
+	}
+	return PHAR_G(cached_fp)[entry->phar->phar_pos].ufp;
+}
+
 /* retrieve a phar_entry_info's current file pointer for reading contents */
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links) /* {{{ */
 {
@@ -112,6 +120,19 @@ php_stream *phar_get_efp(phar_entry_info *entry, int follow_links) /* {{{ */
 	}
 }
 /* }}} */
+
+static zend_off_t phar_get_fp_offset(const phar_entry_info *entry)
+{
+	if (!entry->is_persistent) {
+		return entry->offset;
+	}
+	if (PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].fp_type == PHAR_FP) {
+		if (!PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset) {
+			PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset = entry->offset;
+		}
+	}
+	return PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos].offset;
+}
 
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links) /* {{{ */
 {
@@ -616,6 +637,16 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, ch
 }
 /* }}} */
 
+static inline void phar_set_pharfp(phar_archive_data *phar, php_stream *fp)
+{
+	if (!phar->is_persistent) {
+		phar->fp =  fp;
+		return;
+	}
+
+	PHAR_G(cached_fp)[phar->phar_pos].fp = fp;
+}
+
 /* initialize a phar_archive_data's read-only fp for existing phar data */
 int phar_open_archive_fp(phar_archive_data *phar) /* {{{ */
 {
@@ -679,6 +710,30 @@ int phar_copy_entry_fp(phar_entry_info *source, phar_entry_info *dest, char **er
 	return SUCCESS;
 }
 /* }}} */
+
+static void phar_set_entrypufp(const phar_entry_info *entry, php_stream *fp)
+{
+	if (!entry->phar->is_persistent) {
+		entry->phar->ufp =  fp;
+		return;
+	}
+
+	PHAR_G(cached_fp)[entry->phar->phar_pos].ufp = fp;
+}
+
+static void phar_set_fp_type(phar_entry_info *entry, enum phar_fp_type type, zend_off_t offset)
+{
+	phar_entry_fp_info *data;
+
+	if (!entry->is_persistent) {
+		entry->fp_type = type;
+		entry->offset = offset;
+		return;
+	}
+	data = &(PHAR_G(cached_fp)[entry->phar->phar_pos].manifest[entry->manifest_pos]);
+	data->fp_type = type;
+	data->offset = offset;
+}
 
 /* open and decompress a compressed phar entry
  */
