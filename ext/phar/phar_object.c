@@ -3527,10 +3527,7 @@ PHP_METHOD(Phar, offsetExists)
 		}
 		RETURN_TRUE;
 	} else {
-		if (zend_hash_str_exists(&phar_obj->archive->virtual_dirs, fname, fname_len)) {
-			RETURN_TRUE;
-		}
-		RETURN_FALSE;
+		RETURN_BOOL(zend_hash_str_exists(&phar_obj->archive->virtual_dirs, fname, fname_len));
 	}
 }
 /* }}} */
