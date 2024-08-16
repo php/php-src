@@ -22,7 +22,8 @@
  * This is implemented by using the same fallback mechanism as __get and __set
  * magic methods that is triggered when an undefined property is accessed.
  *
- * Execution of methods or virtual property hooks do not trigger initialization.
+ * Execution of methods or virtual property hooks do not trigger initialization
+ * until they access properties.
  *
  * A lazy object can be created via the Reflection API. The user specifies an
  * initializer function that is called when initialization is required.
