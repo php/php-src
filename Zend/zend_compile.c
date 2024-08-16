@@ -9165,10 +9165,15 @@ static void zend_compile_enum_case(zend_ast *ast)
 	ZVAL_STR_COPY(&case_name_zval, enum_case_name);
 	zend_ast *case_name_ast = zend_ast_create_zval(&case_name_zval);
 
+    zval value_zv;
 	zend_ast *case_value_ast = ast->child[1];
+
 	// Remove case_value_ast from the original AST to avoid freeing it, as it will be freed by zend_const_expr_to_zval
 	ast->child[1] = NULL;
-	if (enum_class->enum_backing_type != IS_UNDEF && case_value_ast == NULL) {
+    if (enum_class->enum_backing_type == IS_STRING && case_value_ast == NULL) {
+        ZVAL_STR_COPY(&value_zv, enum_case_name);
+        case_value_ast = zend_ast_create_zval(&value_zv);
+    } else if (enum_class->enum_backing_type != IS_UNDEF && case_value_ast == NULL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Case %s of backed enum %s must have a value",
 			ZSTR_VAL(enum_case_name),
 			ZSTR_VAL(enum_class_name));
@@ -9180,7 +9185,6 @@ static void zend_compile_enum_case(zend_ast *ast)
 
 	zend_ast *const_enum_init_ast = zend_ast_create(ZEND_AST_CONST_ENUM_INIT, class_name_ast, case_name_ast, case_value_ast);
 
-	zval value_zv;
 	zend_const_expr_to_zval(&value_zv, &const_enum_init_ast, /* allow_dynamic */ false);
 
 	/* Doc comment has been appended as second last element in ZEND_AST_ENUM ast - attributes are conventionally last */
