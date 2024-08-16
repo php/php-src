@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 4182a1159f6cf8a0d71a7814d0435b5e2be29276 */
+ * Stub hash: 031dc8f07d2d9bac4a5f82f4ac2c5b3da5995405 */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -133,11 +133,11 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_offsetUnset
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setAlias, 0, 1, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, IS_TRUE, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, webIndex, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
@@ -302,9 +302,14 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_offsetUnset arginfo_class_Phar_offsetUnset
 
-#define arginfo_class_PharData_setAlias arginfo_class_Phar_setAlias
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setAlias, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_PharData_setDefaultStub arginfo_class_Phar_setDefaultStub
+ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_PharData_setDefaultStub, 0, 0, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, webIndex, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_setMetadata arginfo_class_Phar_setMetadata
 
