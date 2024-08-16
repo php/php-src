@@ -27,7 +27,7 @@ object(Closure)#1 (2) {
   string(4) "exit"
   ["parameter"]=>
   array(1) {
-    ["$code"]=>
+    ["$status"]=>
     string(10) "<optional>"
   }
 }
@@ -36,7 +36,7 @@ object(Closure)#2 (2) {
   string(4) "exit"
   ["parameter"]=>
   array(1) {
-    ["$code"]=>
+    ["$status"]=>
     string(10) "<optional>"
   }
 }
