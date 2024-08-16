@@ -7,7 +7,8 @@
                 "ms-vscode.cpptools-extension-pack",
                 "maelvalais.autoconf",
                 "ms-azuretools.vscode-docker",
-                "editorconfig.editorconfig"
+                "editorconfig.editorconfig",
+                "github.vscode-github-actions"
             ]
         }
     },
