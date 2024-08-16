@@ -1729,6 +1729,9 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_CA_CACHE_TIMEOUT:
 		case CURLOPT_QUICK_EXIT:
 #endif
+#if LIBCURL_VERSION_NUM >= 0x080900 /* Available since 8.9.0 */
+		case CURLOPT_TCP_KEEPCNT:
+#endif
 			lval = zval_get_long(zvalue);
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
 				(PG(open_basedir) && *PG(open_basedir)) && (lval & CURLPROTO_FILE)) {
