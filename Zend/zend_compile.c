@@ -6358,11 +6358,12 @@ static uint32_t count_match_conds(zend_ast_list *arms)
 
 	for (uint32_t i = 0; i < arms->children; i++) {
 		zend_ast *arm_ast = arms->child[i];
-		if (arm_ast->child[0] == NULL) {
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
+
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			continue;
 		}
 
-		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 		num_conds += conds->children;
 	}
 
@@ -6372,12 +6373,13 @@ static uint32_t count_match_conds(zend_ast_list *arms)
 static bool can_match_use_jumptable(zend_ast_list *arms) {
 	for (uint32_t i = 0; i < arms->children; i++) {
 		zend_ast *arm_ast = arms->child[i];
-		if (!arm_ast->child[0]) {
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
+
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			/* Skip default arm */
 			continue;
 		}
 
-		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 		for (uint32_t j = 0; j < conds->children; j++) {
 			zend_ast **cond_ast = &conds->child[j];
 
@@ -6418,8 +6420,9 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 
 	for (uint32_t i = 0; i < arms->children; ++i) {
 		zend_ast *arm_ast = arms->child[i];
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (!arm_ast->child[0]) {
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			if (has_default_arm) {
 				CG(zend_lineno) = arm_ast->lineno;
 				zend_error_noreturn(E_COMPILE_ERROR,
@@ -6447,14 +6450,14 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		uint32_t cond_count = 0;
 		for (uint32_t i = 0; i < arms->children; ++i) {
 			zend_ast *arm_ast = arms->child[i];
-
-			if (!arm_ast->child[0]) {
-				continue;
-			}
-
 			zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
+
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
+
+				if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
+					break;
+				}
 
 				znode cond_node;
 				zend_compile_expr(&cond_node, cond_ast);
@@ -6507,10 +6510,9 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 	for (uint32_t i = 0; i < arms->children; ++i) {
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast *body_ast = arm_ast->child[1];
+		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (arm_ast->child[0] != NULL) {
-			zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
-
+		if (conds->child[0]->kind != ZEND_AST_DEFAULT) {
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
 

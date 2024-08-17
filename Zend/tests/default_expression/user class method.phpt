@@ -1,5 +1,5 @@
 --TEST--
-Test passing default argument to user class method.
+Tests passing default to a user class method parameter
 --FILE--
 <?php
 

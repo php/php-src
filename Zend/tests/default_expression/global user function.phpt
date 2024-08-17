@@ -1,5 +1,5 @@
 --TEST--
-Test passing default argument to global user function.
+Tests passing default to a global user function parameter
 --FILE--
 <?php
 

@@ -9815,10 +9815,6 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 
 	zend_function *called_func = EX(call)->func;
 
-	zend_string *reflection_class_name = ZSTR_INIT_LITERAL("ReflectionParameter", 0);
-	zend_class_entry *reflection_class = zend_fetch_class(reflection_class_name, ZEND_FETCH_CLASS_DEFAULT);
-	zend_string_release(reflection_class_name);
-
 	/*
 	 * [0]: The function (string) or class method (array) to reflect parameters from.
 	 * [1]: A zero-based integer specifying the parameter position.
@@ -9837,12 +9833,12 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 
 	zval reflection_obj;
 	// TODO: Check result.
-	/*zend_result res =*/ object_init_with_constructor(&reflection_obj, reflection_class, 2, constructor_params, NULL);
+	/*zend_result res =*/ object_init_with_constructor(&reflection_obj, reflection_parameter_ptr, 2, constructor_params, NULL);
 	zval_ptr_dtor(&constructor_params[0]);
 	zval_ptr_dtor(&constructor_params[1]);
 
 	zval default_value;
-	zend_call_method_with_0_params(Z_OBJ(reflection_obj), reflection_class, NULL, "getDefaultValue", &default_value);
+	zend_call_method_with_0_params(Z_OBJ(reflection_obj), reflection_parameter_ptr, NULL, "getDefaultValue", &default_value);
 	zval_ptr_dtor(&reflection_obj);
 
 	ZVAL_COPY(EX_VAR(opline->result.var), &default_value);

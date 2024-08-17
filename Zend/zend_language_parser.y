@@ -86,6 +86,9 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_ELSEIF
 %precedence T_ELSE
 
+%precedence T_DEFAULT
+%precedence T_SWITCH_DEFAULT
+
 %token <ast> T_LNUMBER   "integer"
 %token <ast> T_DNUMBER   "floating-point number"
 %token <ast> T_STRING    "identifier"
@@ -251,7 +254,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
 %type <ast> unprefixed_use_declarations const_decl inner_statement
-%type <ast> expr expr_with_default optional_expr while_statement for_statement foreach_variable
+%type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -702,9 +705,9 @@ switch_case_list:
 
 case_list:
 		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
-	|	case_list T_CASE expr case_separator inner_statement_list
+	|	case_list T_CASE expr case_separator inner_statement_list %prec T_SWITCH_DEFAULT
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
-	|	case_list T_DEFAULT case_separator inner_statement_list
+	|	case_list T_DEFAULT case_separator inner_statement_list %prec T_SWITCH_DEFAULT
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
 ;
 
@@ -716,7 +719,7 @@ case_separator:
 
 match:
 		T_MATCH '(' expr ')' '{' match_arm_list '}'
-			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); }
 ;
 
 match_arm_list:
@@ -732,8 +735,6 @@ non_empty_match_arm_list:
 match_arm:
 		match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, $1, $4); }
-	|	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
-			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, NULL, $4); }
 ;
 
 match_arm_cond_list:
@@ -904,7 +905,7 @@ non_empty_argument_list:
 ;
 
 argument:
-		expr_with_default   { $$ = $1; }
+		expr				{ $$ = $1; }
 	|	identifier ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_NAMED_ARG, $1, $3); }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
@@ -1321,15 +1322,12 @@ expr:
 	|	inline_function { $$ = $1; }
 	|	attributes inline_function { $$ = zend_ast_with_attributes($2, $1); }
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	T_DEFAULT { $$ = zend_ast_create(ZEND_AST_DEFAULT); }
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	match { $$ = $1; }
 ;
 
-expr_with_default:
-		expr		{ $$ = $1; }
-	|	T_DEFAULT   { $$ = zend_ast_create(ZEND_AST_DEFAULT); }
-;
 
 inline_function:
 		function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
