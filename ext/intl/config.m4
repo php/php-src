@@ -127,4 +127,6 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/transliterator
     $ext_builddir/uchar
   ]))
+
+  PHP_ADD_EXTENSION_DEP(intl, date)
 fi
