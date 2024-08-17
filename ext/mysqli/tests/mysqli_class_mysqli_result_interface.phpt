@@ -130,14 +130,10 @@ require_once 'skipifconnectfailure.inc';
         $mode = mt_rand(-1000, 1000);
     } while (in_array($mode, $valid));
 
-    if ($TEST_EXPERIMENTAL) {
-        ob_start();
+    try {
         new mysqli_result($link, $mode);
-        $content = ob_get_contents();
-        ob_end_clean();
-        if (!stristr($content, 'Invalid value for resultmode'))
-            printf("[009] Expecting warning because of invalid resultmode\n");
-    }
+        printf("[009] Expecting ValueError because of invalid resultmode\n");
+    } catch (ValueError $ex) {}
 
     print "done!";
 ?>

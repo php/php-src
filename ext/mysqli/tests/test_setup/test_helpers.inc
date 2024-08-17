@@ -142,6 +142,4 @@ function setup_table_with_data_on_default_connection(string $table): mysqli {
     return $link;
 }
 
-/* Development setting: test experimental features and/or feature requests that never worked before? */
-//$TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
 //$engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";
