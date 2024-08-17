@@ -1261,6 +1261,20 @@ ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname) /* {{{ 
 {
 	zend_function *added_func = zend_hash_add_ptr(EG(function_table), Z_STR_P(lcname), func);
 	if (UNEXPECTED(!added_func)) {
+		/* If a function name was marked as using the global name, properly declare the namespaced function */
+		zend_function *old_func = zend_hash_find_ptr(EG(function_table), Z_STR_P(lcname));
+		if (old_func == (zend_function *) &zend_pass_function) {
+			zend_hash_update_ptr(EG(function_table), Z_STR_P(lcname), func);
+			if (func->op_array.refcount) {
+				++*func->op_array.refcount;
+			}
+			if (func->common.function_name) {
+				zend_string_addref(func->common.function_name);
+			}
+			zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
+			return SUCCESS;
+		}
+
 		do_bind_function_error(Z_STR_P(lcname), &func->op_array, 0);
 		return FAILURE;
 	}
@@ -1271,7 +1285,9 @@ ZEND_API zend_result do_bind_function(zend_function *func, zval *lcname) /* {{{ 
 	if (func->common.function_name) {
 		zend_string_addref(func->common.function_name);
 	}
-	zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
+	if (EXPECTED(func != (zend_function *) &zend_pass_function)) {
+		zend_observer_function_declared_notify(&func->op_array, Z_STR_P(lcname));
+	}
 	return SUCCESS;
 }
 /* }}} */

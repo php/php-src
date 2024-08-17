@@ -812,7 +812,13 @@ static bool zend_optimizer_ignore_function(zval *fbc_zv, zend_string *filename)
 	zend_function *fbc = Z_PTR_P(fbc_zv);
 
 	if (fbc->type == ZEND_INTERNAL_FUNCTION) {
-		return false;
+		/* For ZEND_INIT_NS_FCALL_BY_NAME, the function may be the "fake" pass function
+		 * to indicate that the global function should be used instead */
+		if (UNEXPECTED(fbc == (zend_function *) &zend_pass_function)) {
+			return true;
+		} else {
+			return false;
+		}
 	} else if (fbc->type == ZEND_USER_FUNCTION) {
 		if (fbc->op_array.fn_flags & ZEND_ACC_PRELOADED) {
 			Bucket *fbc_bucket = (Bucket*)((uintptr_t)fbc_zv - XtOffsetOf(Bucket, val));

@@ -3843,6 +3843,8 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
+
+	ZEND_ASSERT(fbc != (zend_function*)&zend_pass_function);
 	call = _zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL);
 	call->prev_execute_data = EX(call);
@@ -3958,6 +3960,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 		HANDLE_EXCEPTION();
 	}
 
+	ZEND_ASSERT(func != (zend_function*)&zend_pass_function);
 	call = zend_vm_stack_push_call_frame(call_info,
 		func, opline->extended_value, object_or_called_scope);
 	call->prev_execute_data = EX(call);
@@ -3990,18 +3993,27 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 				}
 				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
-			/* We bind the unqualified name to the global function
+			/* We bind the unqualified name to the internal "zend_pass_function" for it to indicate that it
+			 * should use the global function.
 			 * Use the lowercase name of the function stored in the first cache slot as
 			 * function names are case insensitive */
 			else {
 				zval tmp;
 				ZVAL_STR(&tmp, Z_STR_P(function_name+1));
-				do_bind_function(fbc, &tmp);
+				do_bind_function((zend_function *) &zend_pass_function, &tmp);
 			}
+		} else if (fbc == (zend_function *) &zend_pass_function) {
+			/* Unqualified call was marked as using the global function
+			 * Thus we need to replace the pass function with the actual function.
+			 * Use the lowercase name of the function without tha namespace which is stored in the second cache slot */
+			fbc = (zend_function *) zend_hash_find_ptr(EG(function_table), Z_STR_P(function_name+2));
+			ZEND_ASSERT(fbc);
 		}
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+
+		ZEND_ASSERT(fbc != (zend_function*)&zend_pass_function);
 		CACHE_PTR(opline->result.num, fbc);
 	}
 
@@ -4031,6 +4043,7 @@ ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 		CACHE_PTR(opline->result.num, fbc);
 	}
 
+	ZEND_ASSERT(fbc != (zend_function*)&zend_pass_function);
 	call = _zend_vm_stack_push_call_frame_ex(
 		opline->op1.num, ZEND_CALL_NESTED_FUNCTION,
 		fbc, opline->extended_value, NULL);

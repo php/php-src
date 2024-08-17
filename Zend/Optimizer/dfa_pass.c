@@ -408,14 +408,19 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 
 		do {
 			if (call_info->caller_call_opline
-			 && call_info->caller_call_opline->opcode == ZEND_DO_ICALL
-			 && call_info->callee_func
-			 && zend_string_equals_literal(call_info->callee_func->common.function_name, "in_array")
-			 && (call_info->caller_init_opline->extended_value == 2
-			  || (call_info->caller_init_opline->extended_value == 3
-			   && (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL
-			   && (call_info->caller_call_opline - 1)->op1_type == IS_CONST))) {
-
+				&& call_info->caller_call_opline->opcode == ZEND_DO_ICALL
+				&& call_info->callee_func
+				&& call_info->callee_func->common.function_name /* Ignore fake "pass" function */
+				&& zend_string_equals_literal(call_info->callee_func->common.function_name, "in_array")
+				&& (
+					call_info->caller_init_opline->extended_value == 2
+					|| (
+						call_info->caller_init_opline->extended_value == 3
+						&& (call_info->caller_call_opline - 1)->opcode == ZEND_SEND_VAL
+						&& (call_info->caller_call_opline - 1)->op1_type == IS_CONST
+					)
+				)
+			) {
 				zend_op *send_array;
 				zend_op *send_needly;
 				bool strict = 0;

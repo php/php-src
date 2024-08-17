@@ -4865,7 +4865,10 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 			init_func_run_time_cache(&fbc->op_array);
 		}
 	} else {
-		if (UNEXPECTED((fbc = zend_lookup_function(function)) == NULL)) {
+		if (UNEXPECTED(
+			((fbc = zend_lookup_function(function)) == NULL)
+			|| (fbc == (zend_function *) &zend_pass_function)
+		)) {
 			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
 			return NULL;
 		}
