@@ -9815,31 +9815,14 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 
 	zend_function *called_func = EX(call)->func;
 
-	/*
-	 * [0]: The function (string) or class method (array) to reflect parameters from.
-	 * [1]: A zero-based integer specifying the parameter position.
-	 */
-	zval constructor_params[2];
-	ZVAL_LONG(&constructor_params[1], opline->op1.num - 1);
-	if (called_func->common.scope == NULL) {
-		ZVAL_STR_COPY(&constructor_params[0], called_func->common.function_name);
-	} else {
-		zval arr;
-		array_init_size(&arr, 2);
-		add_next_index_string(&arr, called_func->common.scope->name->val);
-		add_next_index_string(&arr, called_func->common.function_name->val);
-		ZVAL_ARR(&constructor_params[0], Z_ARR(arr));
-	}
-
-	zval reflection_obj;
-	// TODO: Check result.
-	/*zend_result res =*/ object_init_with_constructor(&reflection_obj, reflection_parameter_ptr, 2, constructor_params, NULL);
-	zval_ptr_dtor(&constructor_params[0]);
-	zval_ptr_dtor(&constructor_params[1]);
+	parameter_reference pr;
+	pr.offset = opline->op1.num - 1;
+	pr.required = pr.offset < called_func->common.required_num_args;
+	pr.arg_info = &called_func->common.arg_info[pr.offset];
+	pr.fptr = called_func;
 
 	zval default_value;
-	zend_call_method_with_0_params(Z_OBJ(reflection_obj), reflection_parameter_ptr, NULL, "getDefaultValue", &default_value);
-	zval_ptr_dtor(&reflection_obj);
+	get_parameter_default(&default_value, &pr);
 
 	ZVAL_COPY(EX_VAR(opline->result.var), &default_value);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

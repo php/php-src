@@ -130,14 +130,6 @@ typedef struct _property_reference {
 	zend_string *unmangled_name;
 } property_reference;
 
-/* Struct for parameters */
-typedef struct _parameter_reference {
-	uint32_t offset;
-	bool required;
-	struct _zend_arg_info *arg_info;
-	zend_function *fptr;
-} parameter_reference;
-
 /* Struct for type hints */
 typedef struct _type_reference {
 	zend_type type;
@@ -1536,7 +1528,7 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
 }
 
-static int get_parameter_default(zval *result, parameter_reference *param) {
+PHPAPI int get_parameter_default(zval *result, parameter_reference *param) {
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		if (param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
 			/* We don't have a way to determine the default value for this case right now. */
