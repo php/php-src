@@ -112,7 +112,6 @@ mysqli.allow_local_infile=1
     // we assume the above as tested and in the following we check only those
     mysqli_get_client_stats_assert_eq('result_set_queries', $new_info, $info, $test_counter);
 
-    /* we need to skip this test in unicode - we send set names utf8 during mysql_connect */
     mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, $info, $test_counter);
     mysqli_get_client_stats_assert_eq('buffered_sets', $new_info, $info, $test_counter);
     mysqli_get_client_stats_assert_eq('unbuffered_sets', $new_info, $info, $test_counter);

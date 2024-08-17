@@ -49,12 +49,12 @@ require_once 'skipifconnectfailure.inc';
         printf("[015] Expecting object/std_class, got %s/%s\n", gettype($charset), $charset);
 
     if (!isset($charset->charset) ||
-        !in_array(gettype($charset->charset), array("string", "unicode")) ||
-        ($character_set_connection !== $charset->charset))
+        !is_string($charset->charset) ||
+        $character_set_connection !== $charset->charset)
         printf("[016] Expecting string/%s, got %s/%s\n", $character_set_connection, gettype($charset->charset), $charset->charset);
     if (!isset($charset->collation) ||
-        !in_array(gettype($charset->collation), array("string", "unicode")) ||
-        ($collation_connection !== $charset->collation))
+        !is_string($charset->collation) ||
+        $collation_connection !== $charset->collation)
         printf("[017] Expecting string/%s, got %s/%s\n", $collation_connection, gettype($charset->collation), $charset->collation);
 
     if (!isset($charset->dir) ||

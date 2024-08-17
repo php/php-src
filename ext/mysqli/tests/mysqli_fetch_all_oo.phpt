@@ -121,25 +121,21 @@ require_once 'skipifconnectfailure.inc';
         }
         $row = $tmp[0];
 
-        $fields = mysqli_fetch_fields($res);
-
-        if (!(gettype($php_value)=="unicode" && ($fields[1]->flags & 128))) {
-            if ($regexp_comparison) {
-                if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
-                    printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-                        gettype($php_value), $php_value, $regexp_comparison,
-                        gettype($row[1]), $row[1],
-                        gettype($row['label']), $row['label'], $link->errno, $link->error);
-                    return false;
-                }
-            } else {
-                if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
-                    printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
-                        gettype($php_value), $php_value,
-                        gettype($row[1]), $row[1],
-                        gettype($row['label']), $row['label'], $link->errno, $link->error);
-                    return false;
-                }
+        if ($regexp_comparison) {
+            if (!preg_match($regexp_comparison, (string)$row['label']) || !preg_match($regexp_comparison, (string)$row[1])) {
+                printf("[%04d] Expecting %s/%s [reg exp = %s], got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+                    gettype($php_value), $php_value, $regexp_comparison,
+                    gettype($row[1]), $row[1],
+                    gettype($row['label']), $row['label'], $link->errno, $link->error);
+                return false;
+            }
+        } else {
+            if (($row['label'] !== $php_value) || ($row[1] != $php_value)) {
+                printf("[%04d] Expecting %s/%s, got %s/%s resp. %s/%s. [%d] %s\n", $offset + 4,
+                    gettype($php_value), $php_value,
+                    gettype($row[1]), $row[1],
+                    gettype($row['label']), $row['label'], $link->errno, $link->error);
+                return false;
             }
         }
 
