@@ -22,8 +22,6 @@ if test "$PHP_PDO_DBLIB" != "no"; then
       AC_MSG_ERROR([Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory])
     fi
 
-    AS_VAR_IF([PHP_LIBDIR],, [PHP_LIBDIR=lib])
-
     if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.so"; then
        AC_MSG_ERROR([[Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so]]])
     fi
