@@ -5,8 +5,9 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-die("SKIP: prefetch isn't supported at the moment");
 ?>
+--XFAIL--
+prefetch isn't supported at the moment
 --FILE--
 <?php
     require 'table.inc';
