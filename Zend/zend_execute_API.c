@@ -52,6 +52,7 @@
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
 ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
+ZEND_API zval *(*zend_autoload_function)(zend_string *name);
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = {0};

@@ -4859,6 +4859,28 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 /* }}} */
 #endif
 
+static zval* zend_locate_function(zend_string *function_name) /* {{{ */
+{
+	zval *func;
+	func = zend_hash_find(EG(function_table), function_name);
+	if (func == NULL && zend_autoload_function) {
+		zend_string *previous_filename = EG(filename_override);
+		zend_long previous_lineno = EG(lineno_override);
+		EG(filename_override) = NULL;
+		EG(lineno_override) = -1;
+		zend_exception_save();
+
+		func = zend_autoload_function(function_name);
+
+		zend_exception_restore();
+		EG(filename_override) = previous_filename;
+		EG(lineno_override) = previous_lineno;
+	}
+
+	return func;
+}
+/* }}} */
+
 static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args) /* {{{ */
 {
 	zend_function *fbc;
@@ -4920,7 +4942,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		} else {
 			lcname = zend_string_tolower(function);
 		}
-		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
+		if (UNEXPECTED((func = zend_locate_function(lcname)) == NULL)) {
 			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
 			zend_string_release_ex(lcname, 0);
 			return NULL;

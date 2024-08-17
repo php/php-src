@@ -3893,7 +3893,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
+		func = zend_locate_function(Z_STR_P(function_name+1));
 		if (UNEXPECTED(func == NULL)) {
 			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
@@ -3975,7 +3975,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
 		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
+		func = zend_locate_function(Z_STR_P(func_name + 1));
 		if (func == NULL) {
 			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
 			if (UNEXPECTED(func == NULL)) {

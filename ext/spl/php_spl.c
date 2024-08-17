@@ -37,7 +37,8 @@
 #include "main/snprintf.h"
 
 ZEND_TLS zend_string *spl_autoload_extensions;
-ZEND_TLS HashTable *spl_autoload_functions;
+ZEND_TLS HashTable *spl_autoload_class_functions;
+ZEND_TLS HashTable *spl_autoload_function_functions;
 
 #define SPL_DEFAULT_FILE_EXTENSIONS ".inc,.php"
 
@@ -414,18 +415,60 @@ static bool autoload_func_info_equals(
 		&& alfi1->closure == alfi2->closure;
 }
 
-static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_string *lc_name) {
-	if (!spl_autoload_functions) {
+static zval *spl_perform_function_autoload(zend_string *function_name) {
+	if(!spl_autoload_function_functions) {
 		return NULL;
 	}
 
 	/* We don't use ZEND_HASH_MAP_FOREACH here,
 	 * because autoloaders may be added/removed during autoloading. */
 	HashPosition pos;
-	zend_hash_internal_pointer_reset_ex(spl_autoload_functions, &pos);
+	zend_hash_internal_pointer_reset_ex(spl_autoload_function_functions, &pos);
+	zval *result = NULL;
+
 	while (1) {
 		autoload_func_info *alfi =
-			zend_hash_get_current_data_ptr_ex(spl_autoload_functions, &pos);
+				zend_hash_get_current_data_ptr_ex(spl_autoload_function_functions, &pos);
+		if (!alfi) {
+			break;
+		}
+
+		zend_function *func = alfi->func_ptr;
+		if(UNEXPECTED(func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE)) {
+			func = emalloc(sizeof(zend_op_array));
+			memcpy(func, alfi->func_ptr, sizeof(zend_op_array));
+			zend_string_addref(func->op_array.function_name);
+		}
+
+		zval params[2];
+		ZVAL_STR(&params[0], function_name);
+		ZVAL_LONG(&params[1], ZEND_AUTOLOAD_FUNCTION);
+		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 2, params, NULL);
+		if (EG(exception)) {
+			break;
+		}
+
+		result = zend_hash_find_known_hash(EG(function_table), function_name);
+		if (result) {
+			return result;
+		}
+	}
+
+	return NULL;
+}
+
+static zend_class_entry *spl_perform_class_autoload(zend_string *class_name, zend_string *lc_name) {
+	if (!spl_autoload_class_functions) {
+		return NULL;
+	}
+
+	/* We don't use ZEND_HASH_MAP_FOREACH here,
+	 * because autoloaders may be added/removed during autoloading. */
+	HashPosition pos;
+	zend_hash_internal_pointer_reset_ex(spl_autoload_class_functions, &pos);
+	while (1) {
+		autoload_func_info *alfi =
+			zend_hash_get_current_data_ptr_ex(spl_autoload_class_functions, &pos);
 		if (!alfi) {
 			break;
 		}
@@ -437,9 +480,10 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 			zend_string_addref(func->op_array.function_name);
 		}
 
-		zval param;
-		ZVAL_STR(&param, class_name);
-		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 1, &param, NULL);
+		zval params[2];
+		ZVAL_STR(&params[0], class_name);
+		ZVAL_LONG(&params[1], ZEND_AUTOLOAD_CLASS);
+		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 2, params, NULL);
 		if (EG(exception)) {
 			break;
 		}
@@ -453,7 +497,7 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 			}
 		}
 
-		zend_hash_move_forward_ex(spl_autoload_functions, &pos);
+		zend_hash_move_forward_ex(spl_autoload_class_functions, &pos);
 	}
 	return NULL;
 }
@@ -468,7 +512,7 @@ PHP_FUNCTION(spl_autoload_call)
 	}
 
 	zend_string *lc_name = zend_string_tolower(class_name);
-	spl_perform_autoload(class_name, lc_name);
+	spl_perform_class_autoload(class_name, lc_name);
 	zend_string_release(lc_name);
 } /* }}} */
 
@@ -483,12 +527,12 @@ PHP_FUNCTION(spl_autoload_call)
 	} while (0)
 
 static Bucket *spl_find_registered_function(autoload_func_info *find_alfi) {
-	if (!spl_autoload_functions) {
+	if (!spl_autoload_class_functions) {
 		return NULL;
 	}
 
 	autoload_func_info *alfi;
-	ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_functions, alfi) {
+	ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_class_functions, alfi) {
 		if (autoload_func_info_equals(alfi, find_alfi)) {
 			return _p;
 		}
@@ -506,7 +550,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_fcall_info_cache fcc;
 	autoload_func_info *alfi;
 
-	ZEND_PARSE_PARAMETERS_START(0, 3)
+	ZEND_PARSE_PARAMETERS_START(0, 4)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_FUNC_OR_NULL(fci, fcc)
 		Z_PARAM_BOOL(do_throw)
@@ -519,11 +563,18 @@ PHP_FUNCTION(spl_autoload_register)
 			"spl_autoload_register() will always throw");
 	}
 
-	if (!spl_autoload_functions) {
-		ALLOC_HASHTABLE(spl_autoload_functions);
-		zend_hash_init(spl_autoload_functions, 1, NULL, autoload_func_info_zval_dtor, 0);
+	if (!spl_autoload_class_functions) {
+		ALLOC_HASHTABLE(spl_autoload_class_functions);
+		zend_hash_init(spl_autoload_class_functions, 1, NULL, autoload_func_info_zval_dtor, 0);
 		/* Initialize as non-packed hash table for prepend functionality. */
-		zend_hash_real_init_mixed(spl_autoload_functions);
+		zend_hash_real_init_mixed(spl_autoload_class_functions);
+	}
+
+	if (!spl_autoload_function_functions) {
+		ALLOC_HASHTABLE(spl_autoload_function_functions);
+		zend_hash_init(spl_autoload_function_functions, 1, NULL, autoload_func_info_zval_dtor, 0);
+		/* Initialize as non-packed hash table for prepend functionality. */
+		zend_hash_real_init_mixed(spl_autoload_function_functions);
 	}
 
 	/* If first arg is not null */
@@ -563,10 +614,20 @@ PHP_FUNCTION(spl_autoload_register)
 		RETURN_TRUE;
 	}
 
-	zend_hash_next_index_insert_ptr(spl_autoload_functions, alfi);
-	if (prepend && spl_autoload_functions->nNumOfElements > 1) {
-		/* Move the newly created element to the head of the hashtable */
-		HT_MOVE_TAIL_TO_HEAD(spl_autoload_functions);
+	if (type & ZEND_AUTOLOAD_CLASS) {
+		zend_hash_next_index_insert_ptr(spl_autoload_class_functions, alfi);
+		if (prepend && spl_autoload_class_functions->nNumOfElements > 1) {
+			/* Move the newly created element to the head of the hashtable */
+			HT_MOVE_TAIL_TO_HEAD(spl_autoload_class_functions);
+		}
+	}
+
+	if (type & ZEND_AUTOLOAD_FUNCTION) {
+		zend_hash_next_index_insert_ptr(spl_autoload_function_functions, alfi);
+		if (prepend && spl_autoload_function_functions->nNumOfElements > 1) {
+			/* Move the newly created element to the head of the hashtable */
+			HT_MOVE_TAIL_TO_HEAD(spl_autoload_function_functions);
+		}
 	}
 
 	RETURN_TRUE;
@@ -584,9 +645,9 @@ PHP_FUNCTION(spl_autoload_unregister)
 
 	if (fcc.function_handler && zend_string_equals_literal(
 			fcc.function_handler->common.function_name, "spl_autoload_call")) {
-		if (spl_autoload_functions) {
+		if (spl_autoload_class_functions) {
 			/* Don't destroy the hash table, as we might be iterating over it right now. */
-			zend_hash_clean(spl_autoload_functions);
+			zend_hash_clean(spl_autoload_class_functions);
 		}
 		RETURN_TRUE;
 	}
@@ -602,7 +663,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	Bucket *p = spl_find_registered_function(alfi);
 	autoload_func_info_destroy(alfi);
 	if (p) {
-		zend_hash_del_bucket(spl_autoload_functions, p);
+		zend_hash_del_bucket(spl_autoload_class_functions, p);
 		RETURN_TRUE;
 	}
 
@@ -619,8 +680,8 @@ PHP_FUNCTION(spl_autoload_functions)
 	}
 
 	array_init(return_value);
-	if (spl_autoload_functions) {
-		ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_functions, alfi) {
+	if (spl_autoload_class_functions) {
+		ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_class_functions, alfi) {
 			if (alfi->closure) {
 				GC_ADDREF(alfi->closure);
 				add_next_index_object(return_value, alfi->closure);
@@ -720,7 +781,10 @@ PHP_MINFO_FUNCTION(spl)
 /* {{{ PHP_MINIT_FUNCTION(spl) */
 PHP_MINIT_FUNCTION(spl)
 {
-	zend_autoload = spl_perform_autoload;
+	zend_autoload = spl_perform_class_autoload;
+	zend_autoload_function = spl_perform_function_autoload;
+
+	register_php_spl_symbols(module_number);
 
 	PHP_MINIT(spl_exceptions)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_iterators)(INIT_FUNC_ARGS_PASSTHRU);
@@ -738,7 +802,8 @@ PHP_MINIT_FUNCTION(spl)
 PHP_RINIT_FUNCTION(spl) /* {{{ */
 {
 	spl_autoload_extensions = NULL;
-	spl_autoload_functions = NULL;
+	spl_autoload_class_functions = NULL;
+	spl_autoload_function_functions = NULL;
 	return SUCCESS;
 } /* }}} */
 
@@ -748,10 +813,15 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 		zend_string_release_ex(spl_autoload_extensions, 0);
 		spl_autoload_extensions = NULL;
 	}
-	if (spl_autoload_functions) {
-		zend_hash_destroy(spl_autoload_functions);
-		FREE_HASHTABLE(spl_autoload_functions);
-		spl_autoload_functions = NULL;
+	if (spl_autoload_class_functions) {
+		zend_hash_destroy(spl_autoload_class_functions);
+		FREE_HASHTABLE(spl_autoload_class_functions);
+		spl_autoload_class_functions = NULL;
+	}
+	if (spl_autoload_function_functions) {
+		zend_hash_destroy(spl_autoload_function_functions);
+		FREE_HASHTABLE(spl_autoload_function_functions);
+		spl_autoload_function_functions = NULL;
 	}
 	return SUCCESS;
 } /* }}} */
