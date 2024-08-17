@@ -37,6 +37,7 @@
 
 ZEND_MINIT_FUNCTION(core) { /* {{{ */
 	zend_autoload_class = zend_perform_class_autoload;
+	zend_autoload_function = zend_perform_function_autoload;
 
 	zend_register_default_classes();
 
@@ -1163,23 +1164,31 @@ ZEND_FUNCTION(enum_exists)
 ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
+	bool autoload = true;
 	bool exists;
 	zend_string *lcname;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_VAL(name)[0] == '\\') {
-		/* Ignore leading "\" */
-		lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
-		zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
-	} else {
-		lcname = zend_string_tolower(name);
-	}
+	if (!autoload) {
+		if (ZSTR_VAL(name)[0] == '\\') {
+			/* Ignore leading "\" */
+			lcname = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		} else {
+			lcname = zend_string_tolower(name);
+		}
 
-	exists = zend_hash_exists(EG(function_table), lcname);
-	zend_string_release_ex(lcname, 0);
+		exists = zend_hash_exists(EG(function_table), lcname);
+		zend_string_release_ex(lcname, 0);
+	} else {
+		zend_function *fbc = zend_lookup_function(name);
+		exists = fbc;
+	}
 
 	RETURN_BOOL(exists);
 }

@@ -48,7 +48,8 @@ ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
 ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
-ZEND_API bool zend_is_valid_class_name(zend_string *name);
+ZEND_API bool zend_is_valid_symbol_name(zend_string *name);
+#define zend_is_valid_class_name(name) zend_is_valid_symbol_name((name))
 ZEND_API zend_function *zend_lookup_function(zend_string *name);
 ZEND_API zend_function *zend_lookup_function_ex(zend_string *name, zend_string *lcname, bool use_autoload);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
@@ -405,7 +406,10 @@ ZEND_API zend_class_entry *zend_fetch_class(zend_string *class_name, uint32_t fe
 ZEND_API zend_class_entry *zend_fetch_class_with_scope(zend_string *class_name, uint32_t fetch_type, zend_class_entry *scope);
 ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zend_string *lcname, uint32_t fetch_type);
 
-ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_ex(zend_string *name, bool use_autoload);
+static inline zend_function * zend_fetch_function(zend_string *name) {
+	return zend_fetch_function_ex(name, true);
+}
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
 ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array);
 
