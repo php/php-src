@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: e2800e5ecc33f092576c7afcdb98d89825809669 */
+ * Stub hash: 6a1268dfa31c8f9f13a499cfecfcb15abb34fb99 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
@@ -129,6 +129,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_curl_share_init, 0, 0, CurlShareHandle, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_curl_share_init_persistent, 0, 2, CurlShareHandle, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, persistent_id, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, shares, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_share_setopt, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, share_handle, CurlShareHandle, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
@@ -174,6 +179,7 @@ ZEND_FUNCTION(curl_setopt);
 ZEND_FUNCTION(curl_share_close);
 ZEND_FUNCTION(curl_share_errno);
 ZEND_FUNCTION(curl_share_init);
+ZEND_FUNCTION(curl_share_init_persistent);
 ZEND_FUNCTION(curl_share_setopt);
 ZEND_FUNCTION(curl_share_strerror);
 ZEND_FUNCTION(curl_strerror);
@@ -212,6 +218,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(curl_share_close, arginfo_curl_share_close)
 	ZEND_FE(curl_share_errno, arginfo_curl_share_errno)
 	ZEND_FE(curl_share_init, arginfo_curl_share_init)
+	ZEND_FE(curl_share_init_persistent, arginfo_curl_share_init_persistent)
 	ZEND_FE(curl_share_setopt, arginfo_curl_share_setopt)
 	ZEND_FE(curl_share_strerror, arginfo_curl_share_strerror)
 	ZEND_FE(curl_strerror, arginfo_curl_strerror)

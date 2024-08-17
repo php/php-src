@@ -125,10 +125,13 @@ typedef struct {
 } php_curlm;
 
 typedef struct _php_curlsh {
-	CURLSH                   *share;
+	CURLSH	  *share;
+	zend_bool is_persistent;
+
 	struct {
 		int no;
 	} err;
+
 	zend_object std;
 } php_curlsh;
 
@@ -152,7 +155,8 @@ static inline php_curlsh *curl_share_from_obj(zend_object *obj) {
 #define Z_CURL_SHARE_P(zv) curl_share_from_obj(Z_OBJ_P(zv))
 
 void curl_multi_register_handlers(void);
-void curl_share_register_handlers(void);
+void curl_share_register_handlers(int);
+void curl_share_free_obj(zend_object *object);
 void curlfile_register_class(void);
 zend_result curl_cast_object(zend_object *obj, zval *result, int type);
 
