@@ -132,8 +132,9 @@ require_once 'skipifconnectfailure.inc';
 
     try {
         new mysqli_result($link, $mode);
-        printf("[009] Expecting ValueError because of invalid resultmode\n");
-    } catch (ValueError $ex) {}
+    } catch (ValueError $ex) {
+        echo $ex->getMessage(), "\n";
+    }
 
     print "done!";
 ?>
@@ -165,4 +166,5 @@ mysqli_result->unknown = ''
 
 Constructor:
 mysqli_result object is already closed
+mysqli_result::__construct(): Argument #2 ($result_mode) must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT
 done!
