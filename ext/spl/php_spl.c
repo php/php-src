@@ -510,7 +510,7 @@ static zend_class_entry *spl_perform_class_autoload(zend_string *class_name, zen
 PHP_FUNCTION(spl_autoload_call)
 {
 	zend_string *name;
-	zend_long type;
+	zend_long type = ZEND_AUTOLOAD_CLASS;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_STR(name)
