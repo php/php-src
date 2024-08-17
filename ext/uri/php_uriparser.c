@@ -181,7 +181,9 @@ void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_ur
 		return NULL;
 	}
 
-	if (base_uri_str != NULL) {
+	if (base_uri_str == NULL) {
+		return uri;
+	} else {
 		UriUriA *base_uri = emalloc(sizeof(UriUriA));
 
 		if (ZSTR_LEN(base_uri_str) == 0 || uriParseSingleUriA(base_uri, ZSTR_VAL(base_uri_str), NULL) != URI_SUCCESS) {
@@ -191,19 +193,23 @@ void *uriparser_parse_uri(const zend_string *uri_str, const zend_string *base_ur
 			return NULL;
 		}
 
-		if (uriAddBaseUriA(uri, uri, base_uri) != URI_SUCCESS) {
+		UriUriA *absolute_uri = emalloc(sizeof(UriUriA));
+
+		if (uriAddBaseUriA(absolute_uri, uri, base_uri) != URI_SUCCESS) {
 			uriFreeUriMembersA(uri);
 			uriFreeUriMembersA(base_uri);
 			efree(uri);
 			efree(base_uri);
+			efree(absolute_uri);
 			return NULL;
 		}
 
 		uriFreeUriMembersA(base_uri);
+		uriFreeUriMembersA(uri);
 		efree(base_uri);
+		efree(uri);
+		return absolute_uri;
 	}
-
-	return uri;
 }
 
 void uriparser_instantiate_uri(zval *zv)

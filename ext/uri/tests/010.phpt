@@ -7,7 +7,6 @@ uri
 
 var_dump(\Uri\Uri::fromRfc3986("http://example.com/path/to/file2", "https://test.com"));
 var_dump(\Uri\Uri::fromRfc3986("/path/to/file2", "https://test.com"));
-
 var_dump(\Uri\Uri::fromWhatWg("http://example.com/path/to/file1", "https://test.com"));
 var_dump(\Uri\Uri::fromWhatWg("/path/to/file1", "https://test.com"));
 
@@ -15,17 +14,17 @@ var_dump(\Uri\Uri::fromWhatWg("/path/to/file1", "https://test.com"));
 --EXPECTF--
 object(Uri\Rfc3986Uri)#%d (%d) {
   ["scheme"]=>
-  string(5) "https"
+  string(4) "http"
   ["user"]=>
   NULL
   ["password"]=>
   NULL
   ["host"]=>
-  string(8) "test.com"
+  string(11) "example.com"
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(13) "path/to/file2"
   ["query"]=>
   NULL
   ["fragment"]=>
@@ -43,7 +42,7 @@ object(Uri\Rfc3986Uri)#%d (%d) {
   ["port"]=>
   NULL
   ["path"]=>
-  NULL
+  string(13) "path/to/file2"
   ["query"]=>
   NULL
   ["fragment"]=>
