@@ -4859,7 +4859,7 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 /* }}} */
 #endif
 
-static zval* zend_locate_function(zend_string *function_name) /* {{{ */
+zval* zend_locate_function(zend_string *function_name) /* {{{ */
 {
 	zval *func;
 	func = zend_hash_find(EG(function_table), function_name);

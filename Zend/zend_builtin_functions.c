@@ -1162,10 +1162,13 @@ ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	bool exists;
+	bool autoload = 1;
 	zend_string *lcname;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(autoload)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_VAL(name)[0] == '\\') {
@@ -1176,7 +1179,11 @@ ZEND_FUNCTION(function_exists)
 		lcname = zend_string_tolower(name);
 	}
 
-	exists = zend_hash_exists(EG(function_table), lcname);
+	if (autoload) {
+		exists = zend_locate_function(lcname);
+	} else {
+		exists = zend_hash_exists(EG(function_table), lcname);
+	}
 	zend_string_release_ex(lcname, 0);
 
 	RETURN_BOOL(exists);
