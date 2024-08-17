@@ -12,7 +12,7 @@
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@/php
-libdir=@exec_prefix@/lib
+libdir=@orig_libdir@
 # The extension_dir PHP INI directive absolute path.
 extensiondir=@EXPANDED_EXTENSION_DIR@
 # PHP version as integer.
