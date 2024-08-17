@@ -696,7 +696,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 		Bucket *p = spl_find_registered_function(alfi, ZEND_AUTOLOAD_FUNCTION);
 		autoload_func_info_destroy(alfi);
 		if (p) {
-			zend_hash_del_bucket(spl_autoload_class_functions, p);
+			zend_hash_del_bucket(spl_autoload_function_functions, p);
 			RETURN_TRUE;
 		}
 	}
