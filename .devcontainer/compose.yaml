@@ -4,7 +4,7 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     cap_add:
-      - SYS_PTRACE
+      - SYS_ADMIN
     security_opt:
       - seccomp:unconfined
     privileged: true
