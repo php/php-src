@@ -3,6 +3,18 @@
 /** @generate-class-entries */
 
 /**
+ * @var int
+ * @cvalue ZEND_AUTOLOAD_CLASS
+ */
+const SPL_AUTOLOAD_CLASS = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue ZEND_AUTOLOAD_FUNCTION
+ */
+const SPL_AUTOLOAD_FUNCTION = UNKNOWN;
+
+/**
  * @param object|string $object_or_class
  * @return array<string, string>|false
  * @refcount 1
@@ -31,7 +43,7 @@ function spl_autoload_extensions(?string $file_extensions = null): string {}
 
 function spl_autoload_functions(): array {}
 
-function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false): bool {}
+function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false, int $type = SPL_AUTOLOAD_CLASS): bool {}
 
 function spl_autoload_unregister(callable $callback): bool {}
 

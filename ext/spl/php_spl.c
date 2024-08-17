@@ -501,6 +501,7 @@ PHP_FUNCTION(spl_autoload_register)
 {
 	bool do_throw = 1;
 	bool prepend  = 0;
+	zend_long type = ZEND_AUTOLOAD_CLASS;
 	zend_fcall_info fci = {0};
 	zend_fcall_info_cache fcc;
 	autoload_func_info *alfi;
@@ -510,6 +511,7 @@ PHP_FUNCTION(spl_autoload_register)
 		Z_PARAM_FUNC_OR_NULL(fci, fcc)
 		Z_PARAM_BOOL(do_throw)
 		Z_PARAM_BOOL(prepend)
+		Z_PARAM_LONG(type)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!do_throw) {

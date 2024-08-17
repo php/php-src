@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 21ec2dcca99c85c90afcd319da76016a9f678dc2 */
+ * Stub hash: ba638aa78b8e3264f0213bd4cde2016a7efe1453 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -30,6 +30,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_register, 0, 0, _IS
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, callback, IS_CALLABLE, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, throw, _IS_BOOL, 0, "true")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prepend, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, type, IS_LONG, 0, "SPL_AUTOLOAD_CLASS")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_unregister, 0, 1, _IS_BOOL, 0)
@@ -95,3 +96,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(iterator_to_array, arginfo_iterator_to_array)
 	ZEND_FE_END
 };
+
+static void register_php_spl_symbols(int module_number)
+{
+	REGISTER_LONG_CONSTANT("SPL_AUTOLOAD_CLASS", ZEND_AUTOLOAD_CLASS, CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SPL_AUTOLOAD_FUNCTION", ZEND_AUTOLOAD_FUNCTION, CONST_PERSISTENT);
+}
