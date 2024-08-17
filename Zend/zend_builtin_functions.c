@@ -1165,8 +1165,8 @@ ZEND_FUNCTION(function_exists)
 {
 	zend_string *name;
 	bool autoload = true;
+	bool exists;
 	zend_string *lcname;
-	zend_function *fbc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(name)
@@ -1183,18 +1183,14 @@ ZEND_FUNCTION(function_exists)
 			lcname = zend_string_tolower(name);
 		}
 
-		fbc = (zend_function*) zend_hash_find_ptr(EG(function_table), lcname);
+		exists = zend_hash_exists(EG(function_table), lcname);
 		zend_string_release_ex(lcname, 0);
 	} else {
-		fbc = zend_lookup_function(name);
+		zend_function *fbc = zend_lookup_function(name);
+		exists = fbc;
 	}
 
-	/* If the function was marked as using the global function, indicate it doesn't exist */
-	if (!fbc || fbc == (zend_function *) &zend_pass_function) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(exists);
 }
 /* }}} */
 

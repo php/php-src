@@ -603,6 +603,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					break;
 				case ZEND_INIT_FCALL:
 				case ZEND_INIT_FCALL_BY_NAME:
+				case ZEND_INIT_NS_FCALL_BY_NAME:
 					// op2 func
 					if (func_slot[opline->op2.constant] >= 0) {
 						opline->result.num = func_slot[opline->op2.constant];
@@ -611,13 +612,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						cache_size += sizeof(void *);
 						func_slot[opline->op2.constant] = opline->result.num;
 					}
-					break;
-				/* Do not compact runtime function cache for non qualified namespace calls */
-				case ZEND_INIT_NS_FCALL_BY_NAME:
-					// op2 func
-					opline->result.num = cache_size;
-					cache_size += sizeof(void *);
-					func_slot[opline->op2.constant] = opline->result.num;
 					break;
 				case ZEND_INIT_METHOD_CALL:
 					if (opline->op2_type == IS_CONST) {

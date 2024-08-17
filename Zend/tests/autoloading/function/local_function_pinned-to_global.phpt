@@ -1,8 +1,13 @@
 --TEST--
-Local function which falls back to global is NOT aliased to the global one, function_exists
+Local function which falls back to global is aliased to the global one
 --FILE--
 <?php
 
+namespace Bar {
+    if ( function_exists('Foo\strlen') ) {
+        var_dump(\Foo\strlen('hello'));
+    }
+}
 namespace Foo {
      var_dump(strlen('hello')); // triggers name pinning
 }
@@ -15,4 +20,6 @@ namespace Bar {
 
 ?>
 --EXPECT--
+int(5)
+\Foo\strlen() was bound to global \strlen()
 int(5)

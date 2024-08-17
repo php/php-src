@@ -149,9 +149,6 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->common.function_name);
 		destroy_op_array(&function->op_array);
 		/* op_arrays are allocated on arena, so we don't have to free them */
-	} else if (UNEXPECTED(function == (zend_function *) &zend_pass_function)) {
-		/* Ignore fake pass function */
-		return;
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
