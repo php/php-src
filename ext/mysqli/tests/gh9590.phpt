@@ -5,11 +5,8 @@ mysqli
 posix
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die("skip cannot connect");
-
+require_once __DIR__ . '/test_setup/test_helpers.inc';
+$link = mysqli_connect_or_skip();
 if (mysqli_get_server_version($link) < 50012)
     die("skip Test needs SQL function SLEEP() available as of MySQL 5.0.12");
 

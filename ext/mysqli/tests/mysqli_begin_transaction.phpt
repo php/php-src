@@ -4,12 +4,8 @@ mysqli_begin_transaction()
 mysqli
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
-
-require_once 'connect.inc';
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
-    die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
-
+require_once __DIR__ . '/test_setup/test_helpers.inc';;
+$link = mysqli_connect_or_skip();
 if (!have_innodb($link))
     die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
