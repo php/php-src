@@ -229,7 +229,7 @@ static void one_to_buffer(size_t sz, unsigned char *buf, uint64_t val) {
    significant bits first. This allows 32-bit and 64-bit architectures to
    interchange serialized HashContexts. */
 
-PHP_HASH_API int php_hash_serialize_spec(const php_hashcontext_object *hash, zval *zv, const char *spec) /* {{{ */
+PHP_HASH_API zend_result php_hash_serialize_spec(const php_hashcontext_object *hash, zval *zv, const char *spec) /* {{{ */
 {
 	size_t pos = 0, max_alignment = 1;
 	unsigned char *buf = (unsigned char *) hash->context;
@@ -331,7 +331,7 @@ PHP_HASH_API int php_hash_unserialize_spec(php_hashcontext_object *hash, const z
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv) /* {{{ */
+PHP_HASH_API zend_result php_hash_serialize(const php_hashcontext_object *hash, zend_long *magic, zval *zv) /* {{{ */
 {
 	if (hash->ops->serialize_spec) {
 		*magic = PHP_HASH_SERIALIZE_MAGIC_SPEC;
