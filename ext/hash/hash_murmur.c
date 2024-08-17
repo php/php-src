@@ -75,7 +75,7 @@ PHP_HASH_API void PHP_MURMUR3AFinal(unsigned char digest[4], PHP_MURMUR3A_CTX *c
 	digest[3] = (unsigned char)(ctx->h & 0xff);
 }
 
-PHP_HASH_API int PHP_MURMUR3ACopy(const php_hash_ops *ops, PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context)
+PHP_HASH_API zend_result PHP_MURMUR3ACopy(const php_hash_ops *ops, const PHP_MURMUR3A_CTX *orig_context, PHP_MURMUR3A_CTX *copy_context)
 {
 	copy_context->h = orig_context->h;
 	copy_context->carry = orig_context->carry;
@@ -154,7 +154,7 @@ PHP_HASH_API void PHP_MURMUR3CFinal(unsigned char digest[16], PHP_MURMUR3C_CTX *
 	digest[15] = (unsigned char)(h[3] & 0xff);
 }
 
-PHP_HASH_API int PHP_MURMUR3CCopy(const php_hash_ops *ops, PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context)
+PHP_HASH_API zend_result PHP_MURMUR3CCopy(const php_hash_ops *ops, const PHP_MURMUR3C_CTX *orig_context, PHP_MURMUR3C_CTX *copy_context)
 {
 	memcpy(&copy_context->h, &orig_context->h, sizeof orig_context->h);
 	memcpy(&copy_context->carry, &orig_context->carry, sizeof orig_context->carry);
@@ -231,7 +231,7 @@ PHP_HASH_API void PHP_MURMUR3FFinal(unsigned char digest[16], PHP_MURMUR3F_CTX *
 	digest[15] = (unsigned char)(h[1] & 0xff);
 }
 
-PHP_HASH_API int PHP_MURMUR3FCopy(const php_hash_ops *ops, PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context)
+PHP_HASH_API zend_result PHP_MURMUR3FCopy(const php_hash_ops *ops, const PHP_MURMUR3F_CTX *orig_context, PHP_MURMUR3F_CTX *copy_context)
 {
 	memcpy(&copy_context->h, &orig_context->h, sizeof orig_context->h);
 	memcpy(&copy_context->carry, &orig_context->carry, sizeof orig_context->carry);

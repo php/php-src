@@ -105,7 +105,7 @@ static struct mhash_bc_entry mhash_to_hash[MHASH_NUM_ALGOS] = {
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo) /* {{{ */
 {
 	zend_string *lower = zend_string_tolower(algo);
-	php_hash_ops *ops = zend_hash_find_ptr(&php_hash_hashtable, lower);
+	const php_hash_ops *ops = zend_hash_find_ptr(&php_hash_hashtable, lower);
 	zend_string_release(lower);
 
 	return ops;
@@ -121,7 +121,7 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 }
 /* }}} */
 
-PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context) /* {{{ */
+PHP_HASH_API zend_result php_hash_copy(const void *ops, const void *orig_context, void *dest_context) /* {{{ */
 {
 	php_hash_ops *hash_ops = (php_hash_ops *)ops;
 
