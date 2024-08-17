@@ -40,7 +40,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
                 mysqli_error($link));
             return false;
         }
-        while ($row = mysqli_fetch_assoc($res))
+        while (mysqli_fetch_assoc($res))
             ;
         mysqli_free_result($res);
 
@@ -97,7 +97,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     // -t,[N] - maximum nesting level
     $trace = try_control_string($link, 't,1:n:O,' . $trace_file, $trace_file, 70);
     $lines = explode("\n", $trace);
-    foreach ($lines as $k => $line) {
+    foreach ($lines as $line) {
         $line = trim($line);
         if (!preg_match("@^(\d+):+@ismU", $line, $matches)) {
             printf("[075] Nesting level seem to be missing, first characters from trace are '%s'\n", substr($line, 0, 80));
@@ -113,7 +113,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     // omitting t
     $trace = try_control_string($link, 'n:O,' . $trace_file, $trace_file, 80);
     $lines = explode("\n", $trace);
-    foreach ($lines as $k => $line) {
+    foreach ($lines as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>[\w]+@ism", $line, $matches)) {
             printf("[085] Looks like a function call, but there should be none in the trace file, first characters from trace are '%s'\n",
@@ -124,7 +124,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
     // -f[,functions] - Limit debugger list to specified functions. Empty list -> all functions
     $lines_all_funcs = explode("\n", try_control_string($link, 't:O,' . $trace_file, $trace_file, 90));
     $functions_all_funcs = array();
-    foreach ($lines_all_funcs as $k => $line) {
+    foreach ($lines_all_funcs as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_all_funcs[$matches[1]] = $matches[1];
@@ -133,7 +133,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 
     $lines_trace = explode("\n", try_control_string($link, 't:f:O,' . $trace_file, $trace_file, 100));
     $functions_trace = array();
-    foreach ($lines_trace as $k => $line) {
+    foreach ($lines_trace as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_trace[$matches[1]] = $matches[1];
@@ -169,7 +169,7 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 
     $lines_trace = explode("\n", try_control_string($link, $control_string, $trace_file, 110));
     $functions_trace = array();
-    foreach ($lines_trace as $k => $line) {
+    foreach ($lines_trace as $line) {
         $line = trim($line);
         if (preg_match("@^[|\s]*>([\w:]+)@ism", $line, $matches)) {
             $functions_trace[$matches[1]] = $matches[1];

@@ -31,7 +31,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_free_result($res);
 
     if (!$res = mysqli_query($link, "SELECT 1 AS a, 2 AS a, 3 AS c, 4 AS C, NULL AS d, true AS e")) {
-        printf("[010] Cannot run query, [%d] %s\n", mysqli_errno($link), $mysqli_error($link));
+        printf("[010] Cannot run query, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
     print "[011]\n";
     var_dump(mysqli_fetch_array($res, MYSQLI_BOTH));
@@ -39,7 +39,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_free_result($res);
     if (!$res = mysqli_query($link, "SELECT 1 AS a, 2 AS b, 3 AS c, 4 AS C")) {
         printf("[012] Cannot run query, [%d] %s\n",
-            mysqli_errno($link), $mysqli_error($link));
+            mysqli_errno($link), mysqli_error($link));
         exit(1);
     }
 
@@ -61,7 +61,7 @@ require_once 'skipifconnectfailure.inc';
 
     mysqli_free_result($res);
 
-    function func_mysqli_fetch_array($link, $engine, $sql_type, $sql_value, $php_value, $offset, $regexp_comparison = NULL, $binary_type = false) {
+    function func_mysqli_fetch_array($link, $engine, $sql_type, $sql_value, $php_value, $offset, $regexp_comparison = NULL) {
 
         if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
             printf("[%04d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));

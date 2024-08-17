@@ -69,12 +69,12 @@ require_once 'skipifconnectfailure.inc';
     printf("\nClass variables:\n");
     $variables = array_keys(get_class_vars(get_class($mysqli_result)));
     sort($variables);
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nObject variables:\n");
     $variables = array_keys(get_object_vars($mysqli_result));
-    foreach ($variables as $k => $var)
+    foreach ($variables as $var)
         printf("%s\n", $var);
 
     printf("\nMagic, magic properties:\n");
@@ -121,9 +121,9 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_query($link, "SELECT id FROM test ORDER BY id"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $res = new mysqli_result($link);
-    $res = new mysqli_result($link, MYSQLI_STORE_RESULT);
-    $res = new mysqli_result($link, MYSQLI_USE_RESULT);
+    new mysqli_result($link);
+    new mysqli_result($link, MYSQLI_STORE_RESULT);
+    new mysqli_result($link, MYSQLI_USE_RESULT);
 
     $valid = array(MYSQLI_STORE_RESULT, MYSQLI_USE_RESULT);
     do {
@@ -132,7 +132,7 @@ require_once 'skipifconnectfailure.inc';
 
     if ($TEST_EXPERIMENTAL) {
         ob_start();
-        $res = new mysqli_result($link, $mode);
+        new mysqli_result($link, $mode);
         $content = ob_get_contents();
         ob_end_clean();
         if (!stristr($content, 'Invalid value for resultmode'))

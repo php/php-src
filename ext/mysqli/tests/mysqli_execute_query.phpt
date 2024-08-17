@@ -36,7 +36,7 @@ if (!($tmp = $link->execute_query("SELECT ? AS a, ? AS b, ? AS c", [42, "foo", n
 assert($tmp->fetch_assoc() === ['a' => '42', 'b' => 'foo', 'c' => null]);
 
 // prepare error
-if (!($tmp = $link->execute_query("some random gibberish", [1, "foo"]))) {
+if (false === $link->execute_query("some random gibberish", [1, "foo"])) {
     printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 }
 

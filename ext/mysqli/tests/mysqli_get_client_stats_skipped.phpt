@@ -29,7 +29,7 @@ require_once 'skipifconnectfailure.inc';
 
     /* fetch all rows but the last one */
     for ($i = 0; $i < $num_rows - 1; $i++)
-        $row = mysqli_fetch_assoc($res);
+        mysqli_fetch_assoc($res);
 
     /* enforce implicit cleaning of the wire and skipping the last row */
     mysqli_free_result($res);

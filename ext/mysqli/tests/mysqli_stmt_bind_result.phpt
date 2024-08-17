@@ -275,7 +275,7 @@ require_once 'skipifconnectfailure.inc';
     try {
         mysqli_stmt_bind_result($stmt, $id);
     } catch (\ArgumentCountError $e) {
-        $e->getMessage() . \PHP_EOL;
+        echo $e->getMessage() . \PHP_EOL;
     }
 
     mysqli_stmt_close($stmt);
@@ -293,4 +293,5 @@ Number of bind variables doesn't match number of fields in prepared statement
 Number of bind variables doesn't match number of fields in prepared statement
 int(1)
 %s(1) "a"
+Number of bind variables doesn't match number of fields in prepared statement
 done!

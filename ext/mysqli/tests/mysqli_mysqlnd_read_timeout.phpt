@@ -18,7 +18,7 @@ mysqlnd.net_read_timeout=1
         printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
     }
 
-    if (!$res = mysqli_query($link, "SELECT SLEEP(5)"))
+    if (false === mysqli_query($link, "SELECT SLEEP(5)"))
         printf("[002] [%d] %s\n",  mysqli_errno($link), mysqli_error($link));
 
     mysqli_close($link);
