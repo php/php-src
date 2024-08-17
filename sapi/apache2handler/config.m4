@@ -31,25 +31,23 @@ if test "$PHP_APXS2" != "no"; then
     AC_MSG_ERROR([Aborting])
   fi
 
-  APXS_INCLUDEDIR=`$APXS -q INCLUDEDIR`
-  APXS_HTTPD=`$APXS -q SBINDIR`/`$APXS -q TARGET`
+  APXS_INCLUDEDIR=$($APXS -q INCLUDEDIR)
+  APXS_HTTPD=$($APXS -q SBINDIR)/$($APXS -q TARGET)
   AS_IF([test ! -x "$APXS_HTTPD"], [AC_MSG_ERROR(m4_text_wrap([
     $APXS_HTTPD executable not found. Please, install Apache HTTP Server
     command-line utility.
   ]))])
 
-  APXS_CFLAGS=`$APXS -q CFLAGS`
-  APU_BINDIR=`$APXS -q APU_BINDIR`
-  APR_BINDIR=`$APXS -q APR_BINDIR`
+  APXS_CFLAGS=$($APXS -q CFLAGS)
+  APU_BINDIR=$($APXS -q APU_BINDIR)
+  APR_BINDIR=$($APXS -q APR_BINDIR)
 
   dnl Pick up ap[ru]-N-config.
-  APR_CONFIG=`$APXS -q APR_CONFIG 2>/dev/null ||
-    echo $APR_BINDIR/apr-config`
-  APU_CONFIG=`$APXS -q APU_CONFIG 2>/dev/null ||
-    echo $APU_BINDIR/apu-config`
+  APR_CONFIG=$($APXS -q APR_CONFIG 2>/dev/null || echo $APR_BINDIR/apr-config)
+  APU_CONFIG=$($APXS -q APU_CONFIG 2>/dev/null || echo $APU_BINDIR/apu-config)
 
-  APR_CFLAGS="`$APR_CONFIG --cppflags --includes`"
-  APU_CFLAGS="`$APU_CONFIG --includes`"
+  APR_CFLAGS="$($APR_CONFIG --cppflags --includes)"
+  APU_CFLAGS="$($APU_CONFIG --includes)"
 
   for flag in $APXS_CFLAGS; do
     AS_CASE([$flag], [-D*], [APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag"])
@@ -62,13 +60,13 @@ if test "$PHP_APXS2" != "no"; then
   AS_VERSION_COMPARE([$APACHE_VERSION], [2004000],
     [AC_MSG_ERROR([Please note that Apache version >= 2.4 is required])])
 
-  APXS_LIBEXECDIR='$(INSTALL_ROOT)'`$APXS -q LIBEXECDIR`
-  if test -z `$APXS -q SYSCONFDIR`; then
+  APXS_LIBEXECDIR='$(INSTALL_ROOT)'$($APXS -q LIBEXECDIR)
+  if test -z $($APXS -q SYSCONFDIR); then
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
                        -i -n php"
   else
-    APXS_SYSCONFDIR='$(INSTALL_ROOT)'`$APXS -q SYSCONFDIR`
+    APXS_SYSCONFDIR='$(INSTALL_ROOT)'$($APXS -q SYSCONFDIR)
     INSTALL_IT="\$(mkinstalldirs) '$APXS_LIBEXECDIR' && \
                 \$(mkinstalldirs) '$APXS_SYSCONFDIR' && \
                  $APXS -S LIBEXECDIR='$APXS_LIBEXECDIR' \
@@ -91,10 +89,10 @@ if test "$PHP_APXS2" != "no"; then
       dnl its dependencies. Therefore, we must pull in the APR and APR-util
       dnl libraries.
       if test -x "$APR_CONFIG"; then
-        MH_BUNDLE_FLAGS="`$APR_CONFIG --ldflags --link-ld --libs`"
+        MH_BUNDLE_FLAGS="$($APR_CONFIG --ldflags --link-ld --libs)"
       fi
       if test -x "$APU_CONFIG"; then
-        MH_BUNDLE_FLAGS="`$APU_CONFIG --ldflags --link-ld --libs` $MH_BUNDLE_FLAGS"
+        MH_BUNDLE_FLAGS="$($APU_CONFIG --ldflags --link-ld --libs) $MH_BUNDLE_FLAGS"
       fi
       MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
       PHP_SUBST([MH_BUNDLE_FLAGS])
