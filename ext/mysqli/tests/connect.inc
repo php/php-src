@@ -16,7 +16,6 @@
     $db        = getenv("MYSQL_TEST_DB")       ?: "test";
     $engine    = getenv("MYSQL_TEST_ENGINE")   ?: "InnoDB";
     $socket    = getenv("MYSQL_TEST_SOCKET")   ?: null;
-    $skip_on_connect_failure  = getenv("MYSQL_TEST_SKIP_CONNECT_FAILURE") ?: true;
     if ($socket) {
         ini_set('mysqli.default_socket', $socket);
     }
