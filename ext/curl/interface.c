@@ -409,7 +409,7 @@ PHP_MINIT_FUNCTION(curl)
 	curl_multi_register_handlers();
 
 	curl_share_ce = register_class_CurlShareHandle();
-	curl_share_register_handlers();
+	curl_share_register_handlers(module_number);
 	curlfile_register_class();
 
 	return SUCCESS;

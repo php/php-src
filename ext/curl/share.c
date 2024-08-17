@@ -28,6 +28,69 @@
 
 #define SAVE_CURLSH_ERROR(__handle, __err) (__handle)->err.no = (int) __err;
 
+static int le_pcurlsh;
+
+/* {{{ Initialize a persistent curl share handle */
+PHP_FUNCTION(curl_share_init_persistent)
+{
+	php_curlsh *sh;
+
+	zend_string *persistent_id  = NULL;
+	zend_string *persistent_key = NULL;
+
+	zend_resource *persisted;
+
+	zval *arr, *entry;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR_EX(persistent_id, 1, 0)
+		Z_PARAM_ARRAY(arr)
+	ZEND_PARSE_PARAMETERS_END();
+
+	persistent_key = strpprintf(0, "curl_share_init_persistent:id=%s", ZSTR_VAL(persistent_id));
+
+	object_init_ex(return_value, curl_share_ce);
+
+	sh = Z_CURL_SHARE_P(return_value);
+
+	if ((persisted = zend_hash_find_ptr(&EG(persistent_list), persistent_key)) != NULL) {
+		if (persisted->type == le_pcurlsh) {
+			sh->share         = persisted->ptr;
+			sh->is_persistent = 1;
+
+			goto cleanup;
+		}
+	}
+
+	sh->share = curl_share_init();
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), entry) {
+		ZVAL_DEREF(entry);
+
+		CURLSHcode error = curl_share_setopt(sh->share, CURLSHOPT_SHARE, zval_get_long(entry));
+
+		if (error != CURLSHE_OK) {
+			php_error_docref(NULL, E_WARNING, "could not construct persistent curl share: %s", curl_share_strerror(error));
+			goto error;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	zend_register_persistent_resource(ZSTR_VAL(persistent_key), ZSTR_LEN(persistent_key), sh->share, le_pcurlsh);
+
+	sh->is_persistent = 1;
+
+ cleanup:
+	zend_string_release(persistent_key);
+	return;
+
+ error:
+	zend_string_release(persistent_key);
+	curl_share_free_obj(Z_OBJ_P(return_value));
+
+	RETURN_FALSE;
+}
+/* }}} */
+
 /* {{{ Initialize a share curl handle */
 PHP_FUNCTION(curl_share_init)
 {
@@ -41,6 +104,14 @@ PHP_FUNCTION(curl_share_init)
 	sh->share = curl_share_init();
 }
 /* }}} */
+
+ZEND_RSRC_DTOR_FUNC(php_pcurlsh_dtor)
+{
+	if (res->ptr) {
+		curl_share_cleanup(res->ptr);
+		res->ptr = NULL;
+	}
+}
 
 /* {{{ Close a set of cURL handles */
 PHP_FUNCTION(curl_share_close)
@@ -79,7 +150,7 @@ static bool _php_curl_share_setopt(php_curlsh *sh, zend_long option, zval *zvalu
 PHP_FUNCTION(curl_share_setopt)
 {
 	zval       *z_sh, *zvalue;
-	zend_long        options;
+	zend_long  options;
 	php_curlsh *sh;
 
 	ZEND_PARSE_PARAMETERS_START(3,3)
@@ -101,8 +172,8 @@ PHP_FUNCTION(curl_share_setopt)
 /* {{{ Return an integer containing the last share curl error number */
 PHP_FUNCTION(curl_share_errno)
 {
-	zval        *z_sh;
-	php_curlsh  *sh;
+	zval       *z_sh;
+	php_curlsh *sh;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
 		Z_PARAM_OBJECT_OF_CLASS(z_sh, curl_share_ce)
@@ -154,13 +225,16 @@ void curl_share_free_obj(zend_object *object)
 {
 	php_curlsh *sh = curl_share_from_obj(object);
 
-	curl_share_cleanup(sh->share);
+	if (!sh->is_persistent) {
+		curl_share_cleanup(sh->share);
+	}
+
 	zend_object_std_dtor(&sh->std);
 }
 
 static zend_object_handlers curl_share_handlers;
 
-void curl_share_register_handlers(void) {
+void curl_share_register_handlers(int module_number) {
 	curl_share_ce->create_object = curl_share_create_object;
 	curl_share_ce->default_object_handlers = &curl_share_handlers;
 
@@ -170,4 +244,6 @@ void curl_share_register_handlers(void) {
 	curl_share_handlers.get_constructor = curl_share_get_constructor;
 	curl_share_handlers.clone_obj = NULL;
 	curl_share_handlers.compare = zend_objects_not_comparable;
+
+	le_pcurlsh = zend_register_list_destructors_ex(NULL, php_pcurlsh_dtor, "Curl persistent shared handle", module_number);
 }

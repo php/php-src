@@ -3687,6 +3687,9 @@ function curl_share_errno(CurlShareHandle $share_handle): int {}
 /** @refcount 1 */
 function curl_share_init(): CurlShareHandle {}
 
+/** @refcount 1 */
+function curl_share_init_persistent(string $persistent_id, array $shares): CurlShareHandle|false {}
+
 function curl_share_setopt(CurlShareHandle $share_handle, int $option, mixed $value): bool {}
 
 /** @refcount 1 */
