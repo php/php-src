@@ -3842,32 +3842,11 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 	int call_via_handler = 0;
 	zend_class_entry *scope;
 	zval *zv;
-	ALLOCA_FLAG(use_heap)
 
 	fcc->calling_scope = NULL;
 
 	if (!ce_org) {
-		zend_function *func;
-		zend_string *lmname;
-
-		/* Check if function with given name exists.
-		 * This may be a compound name that includes namespace name */
-		if (UNEXPECTED(Z_STRVAL_P(callable)[0] == '\\')) {
-			/* Skip leading \ */
-			ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable) - 1, use_heap);
-			zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1);
-			func = zend_fetch_function(lmname);
-			ZSTR_ALLOCA_FREE(lmname, use_heap);
-		} else {
-			lmname = Z_STR_P(callable);
-			func = zend_fetch_function(lmname);
-			if (!func) {
-				ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable), use_heap);
-				zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-				func = zend_fetch_function(lmname);
-				ZSTR_ALLOCA_FREE(lmname, use_heap);
-			}
-		}
+		zend_function *func = zend_fetch_function(Z_STR_P(callable));
 		if (EXPECTED(func != NULL)) {
 			fcc->function_handler = func;
 			return 1;

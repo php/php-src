@@ -3887,17 +3887,16 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zval *function_name, *func;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
-		if (UNEXPECTED(func == NULL)) {
+		zval *function_name = (zval*)RT_CONSTANT(opline, opline->op2);
+		/* Fetch lowercase name stored in the next literal slot */
+		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
+		if (UNEXPECTED(fbc == NULL)) {
 			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
@@ -3967,22 +3966,21 @@ try_function_name:
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *func_name;
-	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
-		if (func == NULL) {
-			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
-			if (UNEXPECTED(func == NULL)) {
+		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
+		/* Fetch lowercase name stored in the next literal slot */
+		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
+		if (UNEXPECTED(fbc == NULL)) {
+			/* Fallback onto global namespace, by fetching the unqualified lowercase name stored in the second literal slot */
+			fbc = zend_lookup_function_ex(Z_STR_P(function_name+2), Z_STR_P(function_name+2), /* use_autoload */ true);
+			if (fbc == NULL) {
 				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			}
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
@@ -4000,15 +3998,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_N
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
-	zval *fname;
-	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		fname = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
+		zval *fname = (zval*)RT_CONSTANT(opline, opline->op2);
+		zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
 		ZEND_ASSERT(func != NULL && "Function existence must be checked at compile time");
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {

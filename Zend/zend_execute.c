@@ -4211,19 +4211,19 @@ static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_arr
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /* {{{ */
 {
-	zval *zv = zend_hash_find(EG(function_table), name);
+	zend_function *fbc = zend_lookup_function(name);
 
-	if (EXPECTED(zv != NULL)) {
-		zend_function *fbc = Z_FUNC_P(zv);
-
-		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
-			init_func_run_time_cache_i(&fbc->op_array);
-		}
-		return fbc;
+	if (UNEXPECTED(fbc == NULL)) {
+		return NULL;
 	}
-	return NULL;
+
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		init_func_run_time_cache_i(&fbc->op_array);
+	}
+	return fbc;
 } /* }}} */
 
+// TODO Update or drop as this indicates a zend_call_method() without an object...
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len) /* {{{ */
 {
 	zval *zv = zend_hash_str_find(EG(function_table), name, len);
@@ -4814,7 +4814,6 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_string *function, uint32_t num_args) /* {{{ */
 {
 	zend_function *fbc;
-	zval *func;
 	zend_class_entry *called_scope;
 	zend_string *lcname;
 	const char *colon;
@@ -4866,20 +4865,11 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 			init_func_run_time_cache(&fbc->op_array);
 		}
 	} else {
-		if (ZSTR_VAL(function)[0] == '\\') {
-			lcname = zend_string_alloc(ZSTR_LEN(function) - 1, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(function) + 1, ZSTR_LEN(function) - 1);
-		} else {
-			lcname = zend_string_tolower(function);
-		}
-		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
+		if (UNEXPECTED((fbc = zend_lookup_function(function)) == NULL)) {
 			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
-			zend_string_release_ex(lcname, 0);
 			return NULL;
 		}
-		zend_string_release_ex(lcname, 0);
 
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}

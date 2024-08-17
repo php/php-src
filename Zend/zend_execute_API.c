@@ -1142,6 +1142,49 @@ static const uint32_t valid_chars[8] = {
 	0xffffffff,
 };
 
+ZEND_API zend_function *zend_lookup_function_ex(zend_string *name, zend_string *lc_key, bool use_autoload)
+{
+	zend_function *fbc = NULL;
+	zval *func;
+	zend_string *lc_name;
+	zend_string *autoload_name;
+
+	if (lc_key) {
+		lc_name = lc_key;
+	} else {
+		if (name == NULL || !ZSTR_LEN(name)) {
+			return NULL;
+		}
+
+		if (ZSTR_VAL(name)[0] == '\\') {
+			lc_name = zend_string_alloc(ZSTR_LEN(name) - 1, 0);
+			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name) + 1, ZSTR_LEN(name) - 1);
+		} else {
+			lc_name = zend_string_tolower(name);
+		}
+	}
+
+	func = zend_hash_find(EG(function_table), lc_name);
+
+	if (EXPECTED(func)) {
+		if (!lc_key) {
+			zend_string_release_ex(lc_name, 0);
+		}
+		fbc = Z_FUNC_P(func);
+		return fbc;
+	}
+
+	if (!lc_key) {
+		zend_string_release_ex(lc_name, 0);
+	}
+	return NULL;
+}
+
+ZEND_API zend_function *zend_lookup_function(zend_string *name) /* {{{ */
+{
+	return zend_lookup_function_ex(name, NULL, 0);
+}
+
 ZEND_API bool zend_is_valid_class_name(zend_string *name) {
 	for (size_t i = 0; i < ZSTR_LEN(name); i++) {
 		unsigned char c = ZSTR_VAL(name)[i];
