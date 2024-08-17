@@ -19,7 +19,7 @@ require_once 'skipifconnectfailure.inc';
     $i = 0;
     do {
         $res = mysqli_store_result($link);
-        while ($row = mysqli_fetch_array($res))
+        while (mysqli_fetch_array($res))
             ;
         mysqli_free_result($res);
         $i++;
@@ -33,7 +33,7 @@ require_once 'skipifconnectfailure.inc';
     $i = 0;
     while (mysqli_next_result($link) && ($res = mysqli_store_result($link))) {
 
-        while ($row = mysqli_fetch_array($res))
+        while (mysqli_fetch_array($res))
             ;
         mysqli_free_result($res);
         printf("%d/%d\n", $i, mysqli_insert_id($link));
@@ -46,7 +46,7 @@ require_once 'skipifconnectfailure.inc';
 
     $i = 0;
     while (mysqli_next_result($link) && ($res = mysqli_store_result($link))) {
-        while ($row = mysqli_fetch_array($res))
+        while (mysqli_fetch_array($res))
             $i++;
         mysqli_free_result($res);
     }
@@ -77,7 +77,7 @@ require_once 'skipifconnectfailure.inc';
                     printf("[015 - %d] [%d] %s\n", $res_num, mysqli_errno($link), mysqli_error($link));
 
                 if (count($lengths) != 2)
-                    printf("[016 - %d] Expecting 2 column lengths got %d [%d] %s\n", $res_num, count($lengths));
+                    printf("[016 - %d] Expecting 2 column lengths got %d\n", $res_num, count($lengths));
 
                 foreach ($lengths as $k => $length)
                     if ($length <= 0)
@@ -87,7 +87,7 @@ require_once 'skipifconnectfailure.inc';
         }
 
         if ($num_rows != 1)
-            printf("[018 - %d] Expecting 1 row, got %d rows\n", $num_rows);
+            printf("[018 - %d] Expecting 1 row, got %d rows\n", $res_num, $num_rows);
 
         $res_num++;
 

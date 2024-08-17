@@ -36,7 +36,7 @@ if (!have_innodb($link))
 
     /* overrule autocommit */
     if (true !== ($tmp = mysqli_savepoint($link, 'my')))
-        printf("[010] Got %s - [%d] %s\n", var_dump($tmp, true), mysqli_errno($link), mysqli_error($link));
+        printf("[010] Got %s - [%d] %s\n", $tmp, mysqli_errno($link), mysqli_error($link));
 
     if (!mysqli_query($link, 'INSERT INTO test(id) VALUES (1)'))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

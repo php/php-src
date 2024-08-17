@@ -26,7 +26,7 @@ if (!$TEST_EXPERIMENTAL)
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_object($warning = mysqli_get_warnings($link)) || 'mysqli_warning' != get_class($warning)) {
-        printf("[005] Expecting object/mysqli_warning, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[006] Expecting object/mysqli_warning, got %s/%s\n", gettype($warning), (is_object($warning) ? var_export($warning, true) : $warning));
     }
 
     $warning_clone = clone $warning;

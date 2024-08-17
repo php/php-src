@@ -109,7 +109,7 @@ function default_mysqli_connect(): \mysqli{
 }
 function mysqli_check_skip_test(): void {
     try {
-        $link = default_mysqli_connect();
+        default_mysqli_connect();
     } catch (\mysqli_sql_exception) {
         die(sprintf("skip Can't connect to MySQL Server - [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
     }

@@ -11,7 +11,6 @@ require_once 'skipifconnectfailure.inc';
     require_once 'connect.inc';
 
     $mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
-    $version = $mysql->server_version;
 
     var_dump($mysql->query('DO 1'));
 

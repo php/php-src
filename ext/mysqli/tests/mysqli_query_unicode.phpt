@@ -40,7 +40,7 @@ mysqli_close($link);
         // let's try to play with stored procedures
         mysqli_query($link, 'DROP PROCEDURE IF EXISTS процедурка');
         if (mysqli_query($link, 'CREATE PROCEDURE процедурка(OUT версия VARCHAR(25)) BEGIN SELECT VERSION() INTO версия; END;')) {
-            $res = mysqli_query($link, 'CALL процедурка(@version)');
+            mysqli_query($link, 'CALL процедурка(@version)');
             $res = mysqli_query($link, 'SELECT @version AS п_версия');
 
             $tmp = mysqli_fetch_assoc($res);

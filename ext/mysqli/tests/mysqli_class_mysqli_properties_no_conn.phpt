@@ -15,7 +15,7 @@ require_once 'skipifconnectfailure.inc';
         printf("\nClass variables:\n");
         $variables = array_keys(get_class_vars(get_class($mysqli)));
         sort($variables);
-        foreach ($variables as $k => $var) {
+        foreach ($variables as $var) {
             try {
                 printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
             } catch (Error $exception) {
@@ -25,7 +25,7 @@ require_once 'skipifconnectfailure.inc';
 
         printf("\nObject variables:\n");
         $variables = array_keys(get_object_vars($mysqli));
-        foreach ($variables as $k => $var) {
+        foreach ($variables as $var) {
             try {
                 printf("%s = '%s'\n", $var, var_export($mysqli->$var, true));
             } catch (Error $exception) {

@@ -70,14 +70,14 @@ require_once 'skipifconnectfailure.inc';
             return false;
         }
 
-        if (!$mysqli->query($sql = sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
+        if (!$mysqli->query(sprintf("CREATE TABLE test(id INT NOT NULL, label %s, PRIMARY KEY(id)) ENGINE = %s", $sql_type, $engine))) {
                 // don't bail, engine might not support the datatype
                 return false;
         }
 
         if (is_null($php_value)) {
             if (!$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, NULL)"))) {
-                printf("[%04d] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
+                printf("[%04d] [%d] %s - %s\n", $offset + 1, $mysqli->errno, $mysqli->error, $sql);
                 return false;
             }
         } else {
@@ -88,7 +88,7 @@ require_once 'skipifconnectfailure.inc';
                 }
             } else {
                 if (!$mysqli->query($sql = sprintf("INSERT INTO test(id, label) VALUES (1, '%d')", $sql_value))) {
-                    printf("[%04di] [%d] %s\n", $offset + 1, $mysqli->errno, $mysqli->error);
+                    printf("[%04di] [%d] %s - %s\n", $offset + 1, $mysqli->errno, $mysqli->error, $sql);
                     return false;
                 }
             }

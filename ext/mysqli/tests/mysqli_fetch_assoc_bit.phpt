@@ -39,7 +39,6 @@ if (mysqli_get_server_version($link) < 50003)
             $max_value = 1;
         else
             $max_value = pow(2, $bits) - 1;
-        $tests = 0;
         if (!mysqli_query($link, "DROP TABLE IF EXISTS test") ||
             !mysqli_query($link, $sql = sprintf('CREATE TABLE test(id BIGINT, bit_value BIT(%d) NOT NULL, bit_null BIT(%d) DEFAULT NULL) ENGINE="%s"', $bits, $bits, $engine)))
             printf("[002 - %d] [%d] %s\n",$bits, mysqli_errno($link), mysqli_error($link));

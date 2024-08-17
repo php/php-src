@@ -29,7 +29,7 @@ mysqli
         die("skip GRANT failed");
     }
 
-    if (!($link_pcontest = @my_mysqli_connect($host, 'pcontest', 'pcontest', $db, $port, $socket))) {
+    if (!@my_mysqli_connect($host, 'pcontest', 'pcontest', $db, $port, $socket)) {
         mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest');
         mysqli_query($link, 'REVOKE ALL PRIVILEGES, GRANT OPTION FROM pcontest@localhost');
         mysqli_query($link, 'DROP USER pcontest@localhost');
@@ -56,7 +56,7 @@ mysqli.rollback_on_cached_plink=1
         !mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'%%'", $db)) ||
         !mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO pcontest@'localhost'", $db))) {
         printf("[000] Init failed, [%d] %s\n",
-            mysqli_errno($plink), mysqli_error($plink));
+            mysqli_errno($link), mysqli_error($link));
     }
 
     try {
@@ -129,9 +129,10 @@ mysqli.rollback_on_cached_plink=1
     var_dump(mysqli_get_links_stats());
 
     // this fails and we have 0 (<= $num_plinks) connections
+    // Do not remove the variable assignment as it is important that we have 2 active connections
     if ($plink = @my_mysqli_connect('p:' . $host, 'pcontest', 'pcontest', $db, $port, $socket))
         printf("[010] Can connect using the old password, [%d] %s\n",
-            mysqli_connect_errno($link), mysqli_connect_error($link));
+            mysqli_connect_errno(), mysqli_connect_error());
 
     echo "After second pconnect:";
     var_dump(mysqli_get_links_stats());
@@ -168,6 +169,7 @@ mysqli.rollback_on_cached_plink=1
     mysqli_free_result($res);
     var_dump($row);
 
+    // Do not remove the variable assignment as it is important that we have 2 active connections
     if ($plink2 = my_mysqli_connect('p:' . $host, 'pcontest', 'newpass', $db, $port, $socket)) {
         printf("[015] Can open more persistent connections than allowed, [%d] %s\n",
             mysqli_connect_errno(), mysqli_connect_error());

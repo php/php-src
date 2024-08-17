@@ -12,24 +12,12 @@ if (!$TEST_EXPERIMENTAL)
 <?php
     require_once 'connect.inc';
 
-    $tmp    = NULL;
-    $link   = NULL;
-
-    if (!is_null($tmp = @mysqli_get_warnings()))
-        printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-    if (!is_null($tmp = @mysqli_get_warnings($link)))
-        printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-    if (!is_null($tmp = @mysqli_get_warnings('')))
-        printf("[002] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
     if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
         printf("[003] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
     }
 
     if (false !== ($tmp = mysqli_get_warnings($link))) {
-        printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[004] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
     }
 
     if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
@@ -42,7 +30,7 @@ if (!$TEST_EXPERIMENTAL)
         printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
     if (!is_object($warning = mysqli_get_warnings($link)) || 'mysqli_warning' != get_class($warning)) {
-        printf("[008] Expecting object/mysqli_warning, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[008] Expecting object/mysqli_warning, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_export($tmp, true) : $tmp));
     }
 
     if (!method_exists($warning, 'next'))
@@ -71,7 +59,7 @@ if (!$TEST_EXPERIMENTAL)
         printf("[016] Expecting 2 warnings, got %d warnings", $tmp);
 
     if (!is_object($warning = mysqli_get_warnings($link)) || 'mysqli_warning' != get_class($warning)) {
-        printf("[017] Expecting object/mysqli_warning, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_dump($tmp, true) : $tmp));
+        printf("[017] Expecting object/mysqli_warning, got %s/%s\n", gettype($tmp), (is_object($tmp) ? var_export($tmp, true) : $tmp));
     }
 
     if (true !== ($tmp = $warning->next()))
@@ -129,7 +117,7 @@ if (!$TEST_EXPERIMENTAL)
     if (3 != $i)
         printf("[034] Expecting three warnings, got %d warnings\n", $i);
 
-    $stmt = mysqli_stmt_init();
+    $stmt = mysqli_stmt_init($mysqli);
     $warning = new mysqli_warning($stmt);
     if (false !== ($tmp = $warning->next()))
         printf("[035] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);

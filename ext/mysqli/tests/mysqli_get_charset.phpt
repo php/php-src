@@ -24,12 +24,8 @@ require_once 'skipifconnectfailure.inc';
 
     if (!$res = mysqli_query($link, $sql = sprintf("SHOW CHARACTER SET LIKE '%s'", $character_set_connection)))
         printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-    $tmp = mysqli_fetch_assoc($res);
-    if (empty($tmp))
+    if (!mysqli_fetch_assoc($res))
         printf("[010] Cannot fetch Maxlen and/or Comment, test will fail: $sql\n");
-
-    $maxlen = (isset($tmp['Maxlen'])) ? $tmp['Maxlen'] : '';
-    $comment = (isset($tmp['Description'])) ? $tmp['Description'] : '';
 
     if (!$res = mysqli_query($link, sprintf("SHOW COLLATION LIKE '%s'", $collation_connection)))
         printf("[011] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
