@@ -17,8 +17,6 @@
 #ifndef PHP_HASH_ADLER32_H
 #define PHP_HASH_ADLER32_H
 
-#include "ext/standard/basic_functions.h"
-
 typedef struct {
 	uint32_t state;
 } PHP_ADLER32_CTX;

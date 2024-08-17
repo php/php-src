@@ -19,7 +19,6 @@
 #define PHP_HASH_SHA_H
 
 #include "ext/standard/sha1.h"
-#include "ext/standard/basic_functions.h"
 
 /* SHA224 context. */
 typedef struct {
