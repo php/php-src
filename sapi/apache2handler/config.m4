@@ -99,7 +99,6 @@ if test "$PHP_APXS2" != "no"; then
       MH_BUNDLE_FLAGS="-bundle -bundle_loader $APXS_HTTPD $MH_BUNDLE_FLAGS"
       PHP_SUBST([MH_BUNDLE_FLAGS])
       php_sapi_apache2handler_type=bundle
-      SAPI_SHARED=libs/libphp.so
       INSTALL_IT="$INSTALL_IT $SAPI_SHARED"
     ],
     [INSTALL_IT="$INSTALL_IT $SAPI_LIBTOOL"])
