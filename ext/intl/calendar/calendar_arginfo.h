@@ -325,8 +325,7 @@ static zend_class_entry *register_class_IntlCalendar(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlCalendar", class_IntlCalendar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_FIELD_ERA_value;
 	ZVAL_LONG(&const_FIELD_ERA_value, UCAL_ERA);
@@ -570,8 +569,7 @@ static zend_class_entry *register_class_IntlGregorianCalendar(zend_class_entry *
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", class_IntlGregorianCalendar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_IntlCalendar);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_IntlCalendar, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }

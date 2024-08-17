@@ -58,7 +58,7 @@ static zend_class_entry *register_class_LogicException(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "LogicException", class_LogicException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }
@@ -68,7 +68,7 @@ static zend_class_entry *register_class_BadFunctionCallException(zend_class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "BadFunctionCallException", class_BadFunctionCallException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_LogicException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_LogicException, 0);
 
 	return class_entry;
 }
@@ -78,7 +78,7 @@ static zend_class_entry *register_class_BadMethodCallException(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "BadMethodCallException", class_BadMethodCallException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_BadFunctionCallException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_BadFunctionCallException, 0);
 
 	return class_entry;
 }
@@ -88,7 +88,7 @@ static zend_class_entry *register_class_DomainException(zend_class_entry *class_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DomainException", class_DomainException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_LogicException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_LogicException, 0);
 
 	return class_entry;
 }
@@ -98,7 +98,7 @@ static zend_class_entry *register_class_InvalidArgumentException(zend_class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "InvalidArgumentException", class_InvalidArgumentException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_LogicException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_LogicException, 0);
 
 	return class_entry;
 }
@@ -108,7 +108,7 @@ static zend_class_entry *register_class_LengthException(zend_class_entry *class_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "LengthException", class_LengthException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_LogicException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_LogicException, 0);
 
 	return class_entry;
 }
@@ -118,7 +118,7 @@ static zend_class_entry *register_class_OutOfRangeException(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "OutOfRangeException", class_OutOfRangeException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_LogicException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_LogicException, 0);
 
 	return class_entry;
 }
@@ -128,7 +128,7 @@ static zend_class_entry *register_class_RuntimeException(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RuntimeException", class_RuntimeException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }
@@ -138,7 +138,7 @@ static zend_class_entry *register_class_OutOfBoundsException(zend_class_entry *c
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "OutOfBoundsException", class_OutOfBoundsException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }
@@ -148,7 +148,7 @@ static zend_class_entry *register_class_OverflowException(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "OverflowException", class_OverflowException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }
@@ -158,7 +158,7 @@ static zend_class_entry *register_class_RangeException(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RangeException", class_RangeException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }
@@ -168,7 +168,7 @@ static zend_class_entry *register_class_UnderflowException(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "UnderflowException", class_UnderflowException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }
@@ -178,7 +178,7 @@ static zend_class_entry *register_class_UnexpectedValueException(zend_class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "UnexpectedValueException", class_UnexpectedValueException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }

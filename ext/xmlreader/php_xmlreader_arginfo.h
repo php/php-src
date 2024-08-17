@@ -176,7 +176,7 @@ static zend_class_entry *register_class_XMLReader(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "XMLReader", class_XMLReader_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_NONE_value;
 	ZVAL_LONG(&const_NONE_value, XML_READER_TYPE_NONE);

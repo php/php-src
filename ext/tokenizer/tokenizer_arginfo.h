@@ -67,7 +67,7 @@ static zend_class_entry *register_class_PhpToken(zend_class_entry *class_entry_S
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PhpToken", class_PhpToken_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	zval property_id_default_value;

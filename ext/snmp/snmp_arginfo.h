@@ -270,7 +270,7 @@ static zend_class_entry *register_class_SNMP(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SNMP", class_SNMP_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval const_VERSION_1_value;
 	ZVAL_LONG(&const_VERSION_1_value, SNMP_VERSION_1);
@@ -400,7 +400,7 @@ static zend_class_entry *register_class_SNMPException(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SNMPException", class_SNMPException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	return class_entry;
 }

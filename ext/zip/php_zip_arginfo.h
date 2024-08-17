@@ -616,7 +616,7 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ZipArchive", class_ZipArchive_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Countable);
 
 	zval const_CREATE_value;

@@ -117,7 +117,7 @@ static zend_class_entry *register_class_XSLTProcessor(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "XSLTProcessor", class_XSLTProcessor_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_doXInclude_default_value;
 	ZVAL_FALSE(&property_doXInclude_default_value);

@@ -10,8 +10,7 @@ static zend_class_entry *register_class_Pdo_Dblib(zend_class_entry *class_entry_
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Pdo", "Dblib", class_Pdo_Dblib_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_PDO);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_PDO, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_ATTR_CONNECTION_TIMEOUT_value;
 	ZVAL_LONG(&const_ATTR_CONNECTION_TIMEOUT_value, PDO_DBLIB_ATTR_CONNECTION_TIMEOUT);
