@@ -32,8 +32,8 @@ if test "$PHP_PDO_ODBC" != "no"; then
 
   AC_MSG_CHECKING([for selected PDO ODBC flavour])
 
-  pdo_odbc_flavour="`echo $PHP_PDO_ODBC | cut -d, -f1`"
-  pdo_odbc_dir="`echo $PHP_PDO_ODBC | cut -d, -f2`"
+  pdo_odbc_flavour="$(echo $PHP_PDO_ODBC | cut -d, -f1)"
+  pdo_odbc_dir="$(echo $PHP_PDO_ODBC | cut -d, -f2)"
 
   if test "$pdo_odbc_dir" = "$PHP_PDO_ODBC" ; then
     pdo_odbc_dir=
@@ -41,17 +41,17 @@ if test "$PHP_PDO_ODBC" != "no"; then
 
   AS_CASE([$pdo_odbc_flavour],
     [ibm-db2], [
-        pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
-        pdo_odbc_def_incdir=/home/db2inst1/sqllib/include
-        pdo_odbc_def_lib=db2
+      pdo_odbc_def_libdir=/home/db2inst1/sqllib/lib
+      pdo_odbc_def_incdir=/home/db2inst1/sqllib/include
+      pdo_odbc_def_lib=db2
     ],
     [iODBC|iodbc], [pdo_odbc_pkgconfig_module=libiodbc],
     [unixODBC|unixodbc], [pdo_odbc_pkgconfig_module=odbc],
     [generic], [
-        pdo_odbc_def_lib="`echo $PHP_PDO_ODBC | cut -d, -f3`"
-        pdo_odbc_def_ldflags="`echo $PHP_PDO_ODBC | cut -d, -f4`"
-        pdo_odbc_def_cflags="`echo $PHP_PDO_ODBC | cut -d, -f5`"
-        pdo_odbc_flavour="generic-$pdo_odbc_def_lib"
+      pdo_odbc_def_lib="$(echo $PHP_PDO_ODBC | cut -d, -f3)"
+      pdo_odbc_def_ldflags="$(echo $PHP_PDO_ODBC | cut -d, -f4)"
+      pdo_odbc_def_cflags="$(echo $PHP_PDO_ODBC | cut -d, -f5)"
+      pdo_odbc_flavour="generic-$pdo_odbc_def_lib"
     ],
     [AC_MSG_ERROR([Unknown ODBC flavour $pdo_odbc_flavour]PDO_ODBC_HELP_TEXT)])
 
@@ -59,13 +59,13 @@ if test "$PHP_PDO_ODBC" != "no"; then
     AC_MSG_RESULT([$pdo_odbc_flavour using pkg-config])
     PKG_CHECK_MODULES([PDO_ODBC], [$pdo_odbc_pkgconfig_module])
   else
-    if test -n "$pdo_odbc_dir"; then
+    AS_VAR_IF([pdo_odbc_dir],, [
+      PDO_ODBC_INCDIR=$pdo_odbc_def_incdir
+      PDO_ODBC_LIBDIR=$pdo_odbc_def_libdir
+    ], [
       PDO_ODBC_INCDIR="$pdo_odbc_dir/include"
       PDO_ODBC_LIBDIR="$pdo_odbc_dir/$PHP_LIBDIR"
-    else
-      PDO_ODBC_INCDIR="$pdo_odbc_def_incdir"
-      PDO_ODBC_LIBDIR="$pdo_odbc_def_libdir"
-    fi
+    ])
 
     AC_MSG_RESULT([$pdo_odbc_flavour
             libs       $PDO_ODBC_LIBDIR,
