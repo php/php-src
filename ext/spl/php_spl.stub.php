@@ -37,7 +37,7 @@ function class_uses($object_or_class, bool $autoload = true): array|false {}
 
 function spl_autoload(string $class, ?string $file_extensions = null): void {}
 
-function spl_autoload_call(string $class): void {}
+function spl_autoload_call(string $class, int $type = SPL_AUTOLOAD_CLASS): void {}
 
 function spl_autoload_extensions(?string $file_extensions = null): string {}
 
@@ -45,7 +45,7 @@ function spl_autoload_functions(): array {}
 
 function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false, int $type = SPL_AUTOLOAD_CLASS): bool {}
 
-function spl_autoload_unregister(callable $callback): bool {}
+function spl_autoload_unregister(callable $callback, int $type = SPL_AUTOLOAD_CLASS): bool {}
 
 /**
  * @return array<string, string>
