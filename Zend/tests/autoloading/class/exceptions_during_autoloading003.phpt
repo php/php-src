@@ -1,22 +1,20 @@
 --TEST--
-SPL: spl_autoload() capturing multiple Exceptions in __autoload
+Capturing multiple Exceptions during autoloading
 --FILE--
 <?php
 
-function autoload_first($name)
-{
+function autoload_first($name) {
   echo __METHOD__ . "\n";
   throw new Exception('first');
 }
 
-function autoload_second($name)
-{
+function autoload_second($name) {
   echo __METHOD__ . "\n";
   throw new Exception('second');
 }
 
-spl_autoload_register('autoload_first');
-spl_autoload_register('autoload_second');
+autoload_register_class('autoload_first');
+autoload_register_class('autoload_second');
 
 try {
     class_exists('ThisClassDoesNotExist');
@@ -44,9 +42,9 @@ autoload_first
 first
 autoload_first
 
-Fatal error: Uncaught Exception: first in %sspl_autoload_012.php:%d
+Fatal error: Uncaught Exception: first in %s:%d
 Stack trace:
 #0 [internal function]: autoload_first('ThisClassDoesNo...')
-#1 %sspl_autoload_012.php(%d): class_exists('ThisClassDoesNo...')
+#1 %s(%d): class_exists('ThisClassDoesNo...')
 #2 {main}
   thrown in %s on line %d

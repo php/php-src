@@ -1,11 +1,11 @@
 --TEST--
-SPL autoloader should not do anything magic with called scope
+Autoloader should not do anything magic with called scope
 --FILE--
 <?php
 
 class Test {
     public static function register() {
-        spl_autoload_register([Test::class, 'autoload']);
+        autoload_register_class([Test::class, 'autoload']);
     }
 
     public static function autoload($class) {
@@ -15,7 +15,7 @@ class Test {
 
 class Test2 extends Test {
     public static function register() {
-        spl_autoload_register([Test2::class, 'autoload']);
+        autoload_register_class([Test2::class, 'autoload']);
     }
 
     public static function runTest() {

@@ -39,6 +39,7 @@
 #include "zend_observer.h"
 #include "zend_call_stack.h"
 #include "zend_frameless_function.h"
+#include "zend_autoload.h"
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
@@ -51,7 +52,8 @@
 
 ZEND_API void (*zend_execute_ex)(zend_execute_data *execute_data);
 ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
-ZEND_API zend_class_entry *(*zend_autoload)(zend_string *name, zend_string *lc_name);
+ZEND_API zend_class_entry *(*zend_autoload_class)(zend_string *name, zend_string *lc_name);
+ZEND_API zend_function *(*zend_autoload_function)(zend_string *name, zend_string *lc_name);
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = {0};
@@ -438,6 +440,8 @@ void shutdown_executor(void) /* {{{ */
 		zend_stream_shutdown();
 	} zend_end_try();
 
+	/* Shutdown autoloader prior to releasing values as it may hold references to objects */
+	zend_autoload_shutdown();
 	zend_shutdown_executor_values(fast_shutdown);
 
 	zend_weakrefs_shutdown();
@@ -1147,7 +1151,6 @@ ZEND_API zend_function *zend_lookup_function_ex(zend_string *name, zend_string *
 	zend_function *fbc = NULL;
 	zval *func;
 	zend_string *lc_name;
-	zend_string *autoload_name;
 
 	if (lc_key) {
 		lc_name = lc_key;
@@ -1262,7 +1265,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return NULL;
 	}
 
-	if (!zend_autoload) {
+	if (!zend_autoload_class) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
@@ -1298,7 +1301,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	EG(filename_override) = NULL;
 	EG(lineno_override) = -1;
 	zend_exception_save();
-	ce = zend_autoload(autoload_name, lc_name);
+	ce = zend_autoload_class(autoload_name, lc_name);
 	zend_exception_restore();
 	EG(filename_override) = previous_filename;
 	EG(lineno_override) = previous_lineno;

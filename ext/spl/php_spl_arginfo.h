@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 21ec2dcca99c85c90afcd319da76016a9f678dc2 */
+ * Stub hash: 92f8ab4833e20330385f597cc62349d7ee23d1ca */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -65,11 +65,11 @@ ZEND_FUNCTION(class_implements);
 ZEND_FUNCTION(class_parents);
 ZEND_FUNCTION(class_uses);
 ZEND_FUNCTION(spl_autoload);
-ZEND_FUNCTION(spl_autoload_call);
+ZEND_FUNCTION(autoload_call_class);
 ZEND_FUNCTION(spl_autoload_extensions);
-ZEND_FUNCTION(spl_autoload_functions);
+ZEND_FUNCTION(autoload_list_class);
 ZEND_FUNCTION(spl_autoload_register);
-ZEND_FUNCTION(spl_autoload_unregister);
+ZEND_FUNCTION(autoload_unregister_class);
 ZEND_FUNCTION(spl_classes);
 ZEND_FUNCTION(spl_object_hash);
 ZEND_FUNCTION(spl_object_id);
@@ -82,11 +82,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(class_parents, arginfo_class_parents)
 	ZEND_FE(class_uses, arginfo_class_uses)
 	ZEND_FE(spl_autoload, arginfo_spl_autoload)
-	ZEND_FE(spl_autoload_call, arginfo_spl_autoload_call)
+	ZEND_RAW_FENTRY("spl_autoload_call", zif_autoload_call_class, arginfo_spl_autoload_call, 0, NULL, NULL)
 	ZEND_FE(spl_autoload_extensions, arginfo_spl_autoload_extensions)
-	ZEND_FE(spl_autoload_functions, arginfo_spl_autoload_functions)
+	ZEND_RAW_FENTRY("spl_autoload_functions", zif_autoload_list_class, arginfo_spl_autoload_functions, 0, NULL, NULL)
 	ZEND_FE(spl_autoload_register, arginfo_spl_autoload_register)
-	ZEND_FE(spl_autoload_unregister, arginfo_spl_autoload_unregister)
+	ZEND_RAW_FENTRY("spl_autoload_unregister", zif_autoload_unregister_class, arginfo_spl_autoload_unregister, 0, NULL, NULL)
 	ZEND_FE(spl_classes, arginfo_spl_classes)
 	ZEND_FE(spl_object_hash, arginfo_spl_object_hash)
 	ZEND_FE(spl_object_id, arginfo_spl_object_id)

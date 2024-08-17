@@ -210,3 +210,11 @@ function gc_disable(): void {}
  * @refcount 1
  */
 function gc_status(): array {}
+
+function autoload_register_class(callable $callback, bool $prepend = false): void {}
+
+function autoload_unregister_class(callable $callback): bool {}
+
+function autoload_call_class(string $class): void {}
+
+function autoload_list_class(): iterable {}

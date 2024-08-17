@@ -1,25 +1,25 @@
 --TEST--
-Bug #65006: spl_autoload_register fails with multiple callables using self, same method
+Bug #65006: autoload_register_class fails with multiple callables using self, same method
 --FILE--
 <?php
 
 class first {
     public static function init() {
-        spl_autoload_register(array('self','load'));
+        autoload_register_class(array('self','load'));
     }
     public static function load($class) {}
 }
 
 class second {
     public static function init() {
-        spl_autoload_register(array('self','load'));
+        autoload_register_class(array('self','load'));
     }
     public static function load($class){}
 }
 
 first::init();
 second::init();
-var_dump(spl_autoload_functions());
+var_dump(autoload_list_class());
 
 ?>
 --EXPECTF--

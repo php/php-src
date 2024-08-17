@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-spl_autoload_register(): Argument #1 ($callback) must not be the spl_autoload_call() function
+spl_autoload_register(): Argument #1 ($callback) must not be the autoload_call_class() function

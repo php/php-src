@@ -1,5 +1,5 @@
 --TEST--
-Bug #71202 (Autoload function registered by another not activated immediately)
+(Un)Registering autoloaders must take effect immidiately
 --FILE--
 <?php
 
@@ -19,11 +19,11 @@ function inner_autoload ($name){
     }
 }
 
-spl_autoload_register(function ($name) {
+autoload_register_class(function ($name) {
     if ($name == 'A') {
-        spl_autoload_register("inner_autoload");
+        autoload_register_class("inner_autoload");
     } else {
-        spl_autoload_unregister("inner_autoload");
+        autoload_unregister_class("inner_autoload");
     }
 });
 
