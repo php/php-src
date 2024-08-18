@@ -190,11 +190,6 @@ PHP_FUNCTION(bindtextdomain)
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
 
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_cannot_be_empty_error(1);
-		RETURN_THROWS();
-	}
-
 	if (dir == NULL) {
 		RETURN_STRING(bindtextdomain(ZSTR_VAL(domain), NULL));
 	}
@@ -311,11 +306,6 @@ PHP_FUNCTION(bind_textdomain_codeset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(1, ZSTR_LEN(domain))
-
-	if (!ZSTR_LEN(domain)) {
-		zend_argument_cannot_be_empty_error(1);
-		RETURN_THROWS();
-	}
 
 	retval = bind_textdomain_codeset(ZSTR_VAL(domain), codeset ? ZSTR_VAL(codeset) : NULL);
 
