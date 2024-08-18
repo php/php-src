@@ -5,8 +5,9 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-die("skip - is the server still buggy?");
 ?>
+--XFAIL--
+The server is still buggy
 --INI--
 max_execution_time=240
 --FILE--

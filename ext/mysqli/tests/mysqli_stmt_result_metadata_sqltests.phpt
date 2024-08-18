@@ -5,9 +5,9 @@ mysqli
 --SKIPIF--
 <?php
 require_once 'skipifconnectfailure.inc';
-
-die("skip Check again when the Klingons visit earth - http://bugs.mysql.com/bug.php?id=42490");
 ?>
+--XFAIL--
+http://bugs.mysql.com/bug.php?id=42490
 --FILE--
 <?php
     require 'table.inc';
