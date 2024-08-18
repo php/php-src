@@ -1501,7 +1501,7 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 
 		nlinks = zend_hash_num_elements(Z_ARRVAL_P(link));
 		if (nlinks == 0) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_cannot_be_empty_error(1);
 			ret = 0;
 			goto cleanup;
 		}

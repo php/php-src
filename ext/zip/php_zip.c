@@ -56,7 +56,7 @@ static int le_zip_entry;
 	This is always used for the first argument*/
 #define PHP_ZIP_STAT_PATH(za, path, path_len, flags, sb) \
 	if (path_len == 0) { \
-		zend_argument_value_error(1, "cannot be empty"); \
+		zend_argument_cannot_be_empty_error(1); \
 		RETURN_THROWS(); \
 	} \
 	if (zip_stat(za, path, flags, &sb) != 0) { \
@@ -1184,7 +1184,7 @@ PHP_FUNCTION(zip_open)
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1466,7 +1466,7 @@ PHP_METHOD(ZipArchive, open)
 	ze_obj = Z_ZIP_P(self);
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1753,7 +1753,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	}
 
 	if (ZSTR_LEN(pattern) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (options && zend_hash_num_elements(options) > 0 && (php_zip_parse_options(options, &opts) < 0)) {
@@ -1871,7 +1871,7 @@ PHP_METHOD(ZipArchive, addFile)
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1904,7 +1904,7 @@ PHP_METHOD(ZipArchive, replaceFile)
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2168,7 +2168,7 @@ PHP_METHOD(ZipArchive, setCommentName)
 	}
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2235,7 +2235,7 @@ PHP_METHOD(ZipArchive, setExternalAttributesName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2296,7 +2296,7 @@ PHP_METHOD(ZipArchive, getExternalAttributesName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2363,7 +2363,7 @@ PHP_METHOD(ZipArchive, setEncryptionName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2424,7 +2424,7 @@ PHP_METHOD(ZipArchive, getCommentName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2480,7 +2480,7 @@ PHP_METHOD(ZipArchive, setCompressionName)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2540,7 +2540,7 @@ PHP_METHOD(ZipArchive, setMtimeName)
 	ZIP_FROM_OBJECT(intern, this);
 
 	if (name_len == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2654,7 +2654,7 @@ PHP_METHOD(ZipArchive, renameIndex)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (new_name_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -2682,7 +2682,7 @@ PHP_METHOD(ZipArchive, renameName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (new_name_len == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

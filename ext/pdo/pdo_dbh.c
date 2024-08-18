@@ -563,7 +563,7 @@ PHP_METHOD(PDO, prepare)
 	PDO_CONSTRUCT_CHECK;
 
 	if (ZSTR_LEN(statement) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1030,7 +1030,7 @@ PHP_METHOD(PDO, exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(statement) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1166,7 +1166,7 @@ PHP_METHOD(PDO, query)
 	PDO_CONSTRUCT_CHECK;
 
 	if (ZSTR_LEN(statement) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

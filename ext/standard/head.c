@@ -87,7 +87,7 @@ PHPAPI zend_result php_setcookie(zend_string *name, zend_string *value, time_t e
 	smart_str buf = {0};
 
 	if (!ZSTR_LEN(name)) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		return FAILURE;
 	}
 	if (strpbrk(ZSTR_VAL(name), "=,; \t\r\n\013\014") != NULL) {   /* man isspace for \013 and \014 */

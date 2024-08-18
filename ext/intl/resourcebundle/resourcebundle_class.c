@@ -186,7 +186,7 @@ static zval *resource_bundle_array_fetch(
 	if (offset_str) {
 		if (UNEXPECTED(ZSTR_LEN(offset_str) == 0)) {
 			if (offset_arg_num) {
-				zend_argument_value_error(offset_arg_num, "cannot be empty");
+				zend_argument_cannot_be_empty_error(offset_arg_num);
 			} else {
 				zend_value_error("Offset cannot be empty");
 			}

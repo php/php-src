@@ -2500,7 +2500,7 @@ PHP_FUNCTION(parse_ini_file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(filename) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

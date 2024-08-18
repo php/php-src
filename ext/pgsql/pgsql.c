@@ -4613,7 +4613,7 @@ PHP_FUNCTION(pg_meta_data)
 
 	/* php_pgsql_meta_data() asserts that table_name is not empty */
 	if (ZSTR_LEN(table_name) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -5405,7 +5405,7 @@ PHP_FUNCTION(pg_convert)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(table_name) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -5618,7 +5618,7 @@ PHP_FUNCTION(pg_insert)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(table) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -5840,7 +5840,7 @@ PHP_FUNCTION(pg_update)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(table) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -5939,7 +5939,7 @@ PHP_FUNCTION(pg_delete)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(table) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -6095,7 +6095,7 @@ PHP_FUNCTION(pg_select)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(table) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -6143,13 +6143,13 @@ PHP_FUNCTION(pg_change_password)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(user) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
 	/* it is technically possible, but better to disallow it */
 	if (ZSTR_LEN(passwd) == 0) {
-		zend_argument_value_error(3, "cannot be empty");
+		zend_argument_cannot_be_empty_error(3);
 		RETURN_THROWS();
 	}
 
