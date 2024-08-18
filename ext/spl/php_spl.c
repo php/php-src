@@ -717,7 +717,8 @@ PHP_FUNCTION(spl_autoload_functions)
 	autoload_func_info *alfi;
 	zend_long type = ZEND_AUTOLOAD_CLASS;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+			Z_PARAM_OPTIONAL
 			Z_PARAM_LONG(type)
 	ZEND_PARSE_PARAMETERS_END();
 
