@@ -723,6 +723,11 @@ PHP_FUNCTION(spl_autoload_functions)
 
 	array_init(return_value);
 
+	if (type == (ZEND_AUTOLOAD_CLASS | ZEND_AUTOLOAD_FUNCTION)) {
+		zend_throw_error(NULL, "spl_autoload_functions() expects either ZEND_AUTOLOAD_CLASS or ZEND_AUTOLOAD_FUNCTION as the first argument");
+		RETURN_THROWS();
+	}
+
 	zend_array *arr = type & ZEND_AUTOLOAD_CLASS ? spl_autoload_class_functions : spl_autoload_function_functions;
 
 	if (arr) {
