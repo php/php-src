@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 92f8ab4833e20330385f597cc62349d7ee23d1ca */
+ * Stub hash: 98bf7efa4216725d1e806a61ab2be284b9624da8 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_implements, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object_or_class)
@@ -23,7 +23,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_extensions, 0, 0, I
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, file_extensions, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_functions, 0, 0, IS_ARRAY, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_spl_autoload_functions, 0, 0, Traversable, MAY_BE_ARRAY)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_register, 0, 0, _IS_BOOL, 0)
@@ -36,7 +36,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_autoload_unregister, 0, 1, _
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_spl_classes arginfo_spl_autoload_functions
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_classes, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_spl_object_hash, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)

@@ -31,7 +31,7 @@ function spl_autoload_call(string $class): void {}
 function spl_autoload_extensions(?string $file_extensions = null): string {}
 
 /** @alias autoload_list_class */
-function spl_autoload_functions(): array {}
+function spl_autoload_functions(): iterable {}
 
 function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false): bool {}
 
