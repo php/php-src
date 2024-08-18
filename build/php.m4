@@ -133,7 +133,7 @@ dnl Create empty Makefile placeholders.
 > Makefile.objects
 > Makefile.fragments
 
-dnl Marker whether the CFLAGS are set to automatic default value by Autoconf, or
+dnl Mark whether the CFLAGS are set to automatic default value by Autoconf, or
 dnl they are manually modified by the environment variable from outside. E.g.
 dnl './configure CFLAGS=...'. Set this before the AC_PROG_CC, where Autoconf
 dnl adjusts the CFLAGS variable, so the checks can modify CFLAGS.
