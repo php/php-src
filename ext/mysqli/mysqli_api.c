@@ -1740,8 +1740,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		switch (mode_in) {
 			case CURSOR_TYPE_NO_CURSOR:
 			case CURSOR_TYPE_READ_ONLY:
-			case CURSOR_TYPE_FOR_UPDATE:
-			case CURSOR_TYPE_SCROLLABLE:
 				break;
 			default:
 				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of the MYSQLI_CURSOR_TYPE_* constants "

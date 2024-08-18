@@ -100,12 +100,6 @@ require_once 'skipifconnectfailure.inc';
         echo $e->getMessage() . \PHP_EOL;
     }
 
-    if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_FOR_UPDATE)))
-        printf("[011] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
-    if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_SCROLLABLE)))
-        printf("[012] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-
     if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_NO_CURSOR)))
         printf("[013] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
