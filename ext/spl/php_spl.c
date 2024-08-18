@@ -462,9 +462,7 @@ static zval *spl_perform_function_autoload(zend_string *function_name, zend_stri
 			return result;
 		}
 
-		if(FAILURE == zend_hash_move_forward_ex(spl_autoload_class_functions, &pos)) {
-			break;
-		}
+		zend_hash_move_forward_ex(spl_autoload_function_functions, &pos);
 	}
 
 	return NULL;
