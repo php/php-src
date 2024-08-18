@@ -382,14 +382,14 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (?, ?)"))
         printf("[2010] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-        foreach ($value_list as $k => $values) {
+        foreach ($value_list as $values) {
         if (!mysqli_stmt_bind_param($stmt, 'is', $values['id'], $values['label'])) {
             printf("[2011] bind_param() failed for id = %d, [%d] %s\n",
                 $values['id'], mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
             continue;
         }
         if (!$stmt->execute())
-            printf("[2012] [%d] execute() failed for id = %d, [%d] %s\n",
+            printf("[2012] execute() failed for id = %d, [%d] %s\n",
                 $values['id'], mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
         if (!$res = mysqli_query($link, sprintf("SELECT label FROM test WHERE id = %d", $values['id'])))

@@ -107,7 +107,6 @@ $expected_constants['MYSQLI_STORE_RESULT_COPY_DATA'] = true;
 
 $expected_constants['MYSQLI_REFRESH_BACKUP_LOG'] = true;
 
-$version = 50007 + 1;
 $expected_constants['MYSQLI_OPT_NET_CMD_BUFFER_SIZE'] = true;
 $expected_constants['MYSQLI_OPT_NET_READ_BUFFER_SIZE'] = true;
 $expected_constants['MYSQLI_ASYNC'] = true;
@@ -154,7 +153,7 @@ $expected_constants["MYSQLI_TYPE_JSON"]	= true;
 
 $unexpected_constants = array();
 
-foreach ($constants as $group => $consts) {
+foreach ($constants as $consts) {
     foreach ($consts as $name => $value) {
         if (stristr($name, 'mysqli')) {
             $name = strtoupper($name);

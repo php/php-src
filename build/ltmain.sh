@@ -3467,7 +3467,7 @@ EOF
 	tempremovelist=`$echo "$output_objdir/*"`
 	for p in $tempremovelist; do
 	  case $p in
-	    *.$objext)
+	    *.$objext | *.gcno)
 	       ;;
 	    $output_objdir/$outputname | $output_objdir/$libname.* | $output_objdir/${libname}${release}.*)
 	       if test "X$precious_files_regex" != "X"; then

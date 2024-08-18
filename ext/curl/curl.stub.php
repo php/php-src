@@ -407,6 +407,13 @@ const CURLOPT_SSL_VERIFYPEER = UNKNOWN;
  * @cvalue CURLOPT_STDERR
  */
 const CURLOPT_STDERR = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080900 /* Available since 8.9.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_TCP_KEEPCNT
+ */
+const CURLOPT_TCP_KEEPCNT = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLOPT_TELNETOPTIONS

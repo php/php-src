@@ -67,7 +67,7 @@ $link->query('INSERT INTO t_test VALUES ();');
 $stmt = $link->prepare('SELECT * FROM t_test;');
 if ($stmt) {
     $stmt->execute();
-    $tid = $t = $t2 = $t3 = $t4 = null;
+    $tid = $t = $t2 = $t4 = null;
     $stmt->bind_result($tid, $t, $t2, $t4, $t6);
     while ($stmt->fetch()) {
         var_dump($t, $t2, $t4, $t6);

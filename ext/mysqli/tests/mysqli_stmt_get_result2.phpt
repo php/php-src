@@ -102,7 +102,7 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_stmt_bind_result($stmt, $id, $label))
         printf("[020] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
 
-    $row = mysqli_fetch_assoc($res);
+    mysqli_fetch_assoc($res);
     if (NULL !== $id || NULL !== $label)
         printf("[021] Bound variables should not have been set\n");
     mysqli_free_result($res);

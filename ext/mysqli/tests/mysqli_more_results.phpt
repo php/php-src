@@ -39,7 +39,7 @@ require_once 'skipifconnectfailure.inc';
         // NOTE: if you use mysqli_use_result() with mysqli_more_results() or any other info function,
         // you must fetch all rows before you can loop to the next result set!
         // See also the MySQL Reference Manual: mysql_use_result()
-        while ($row = mysqli_fetch_array($res))
+        while (mysqli_fetch_array($res))
             ;
         mysqli_free_result($res);
         if (mysqli_more_results($link))

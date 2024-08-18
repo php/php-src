@@ -178,4 +178,5 @@ if test "$PHP_MBSTRING" != "no"; then
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
+  PHP_ADD_EXTENSION_DEP(mbstring, pcre)
 fi

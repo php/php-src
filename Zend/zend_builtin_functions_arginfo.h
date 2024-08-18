@@ -1,8 +1,8 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: a6d7e59d6b7875ddc28ce828ae240c7dfd852023 */
+ * Stub hash: 3dbc84896823c9aaa9ac8aeef8841266920c3e50 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_exit, 0, 0, IS_NEVER, 0)
-	ZEND_ARG_TYPE_MASK(0, code, MAY_BE_STRING|MAY_BE_LONG, "0")
+	ZEND_ARG_TYPE_MASK(0, status, MAY_BE_STRING|MAY_BE_LONG, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_die arginfo_exit

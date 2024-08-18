@@ -7,6 +7,7 @@ if (PHP_MBSTRING != "no") {
 
 	if (CHECK_HEADER_ADD_INCLUDE("mbstring.h", "CFLAGS_MBSTRING", PHP_MBSTRING + ";" + PHP_PHP_BUILD + "\\include")) {
 		EXTENSION("mbstring", "mbstring.c php_unicode.c mb_gpc.c", PHP_MBSTRING_SHARED);
+		ADD_EXTENSION_DEP('mbstring', 'pcre');
 
 		STDOUT.WriteLine("Using bundled libmbfl...");
 

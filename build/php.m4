@@ -130,6 +130,8 @@ T_MD=$($php_shtool echo -n -e %B)
 T_ME=$($php_shtool echo -n -e %b)
 > Makefile.objects
 > Makefile.fragments
+dnl Required programs.
+PHP_PROG_AWK
 dnl Run at the end of the configuration, before creating the config.status.
 AC_CONFIG_COMMANDS_PRE(
 [dnl Directory for storing shared objects of extensions.

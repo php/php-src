@@ -15,7 +15,7 @@ require_once 'skipifconnectfailure.inc';
     }
 
     var_dump($res->lengths);
-    while ($row = $res->fetch_assoc())
+    while ($res->fetch_assoc())
         var_dump($res->lengths);
     var_dump($res->lengths);
 

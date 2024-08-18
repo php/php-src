@@ -10,15 +10,6 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    $valid_attr = array(MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH);
-    $valid_attr[] = MYSQLI_STMT_ATTR_CURSOR_TYPE;
-    $valid_attr[] =	MYSQLI_CURSOR_TYPE_NO_CURSOR;
-    $valid_attr[] =	MYSQLI_CURSOR_TYPE_READ_ONLY;
-    $valid_attr[] =	MYSQLI_CURSOR_TYPE_FOR_UPDATE;
-    $valid_attr[] =	MYSQLI_CURSOR_TYPE_SCROLLABLE;
-    $valid_attr[] = MYSQLI_STMT_ATTR_PREFETCH_ROWS;
-
-
     $stmt = mysqli_stmt_init($link);
     try {
         mysqli_stmt_attr_set($stmt, 0, 0);
@@ -51,9 +42,7 @@ require_once 'skipifconnectfailure.inc';
     $stmt->store_result();
     $res = $stmt->result_metadata();
     $fields = $res->fetch_fields();
-    $max_lengths = array();
-    foreach ($fields as $k => $meta) {
-        $max_lengths[$meta->name] = $meta->max_length;
+    foreach ($fields as $meta) {
         if ($meta->max_length !== 0)
             printf("[007] max_length should be not set (= 0), got %s for field %s\n", $meta->max_length, $meta->name);
     }
@@ -71,9 +60,7 @@ require_once 'skipifconnectfailure.inc';
     $stmt->store_result();
     $res = $stmt->result_metadata();
     $fields = $res->fetch_fields();
-    $max_lengths = array();
-    foreach ($fields as $k => $meta) {
-        $max_lengths[$meta->name] = $meta->max_length;
+    foreach ($fields as $meta) {
         if ($meta->max_length !== 0)
             printf("[008] max_length should be not set (= 0), got %s for field %s\n", $meta->max_length, $meta->name);
     }
@@ -91,9 +78,7 @@ require_once 'skipifconnectfailure.inc';
     $stmt->store_result();
     $res = $stmt->result_metadata();
     $fields = $res->fetch_fields();
-    $max_lengths = array();
-    foreach ($fields as $k => $meta) {
-        $max_lengths[$meta->name] = $meta->max_length;
+    foreach ($fields as $meta) {
         if ($meta->max_length !== 0)
             printf("[009] max_length should not be set (= 0), got %s for field %s\n", $meta->max_length, $meta->name);
     }

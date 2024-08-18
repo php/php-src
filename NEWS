@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta4
 
+- Core:
+  . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
+    (zeriyoshi)
 
 15 Aug 2024, PHP 8.4.0beta3
 
@@ -14,8 +17,16 @@ PHP                                                                        NEWS
     As such, passing invalid types to exit/die may now result in a TypeError
     being thrown. (Girgias)
 
+- CURL:
+  . Added CURLOPT_TCP_KEEPCNT to set the number of probes to send before
+    dropping the connection. (David Carlier)
+
 - Hash:
   . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
+
+- Sockets:
+  . Added SO_BINDTOIFINDEX to bind a socket to an interface index.
+    (David Carlier)
 
 - Standard:
   . php_uname() now throws ValueErrors on invalid inputs. (Girgias)

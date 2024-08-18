@@ -55,7 +55,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
     while(mysqli_more_results($link)) {
         mysqli_next_result($link);
-        $res = mysqli_store_result($link);
+        mysqli_store_result($link);
     }
     mysqli_next_result($link);
 
@@ -85,7 +85,7 @@ require_once 'skipifconnectfailure.inc';
     mysqli_stmt_prepare($stmt, "SELECT id FROM test WHERE id > ?");
     while(mysqli_more_results($link)) {
         mysqli_next_result($link);
-        $res = mysqli_store_result($link);
+        mysqli_store_result($link);
     }
     mysqli_next_result($link);
 
@@ -211,8 +211,6 @@ require_once 'skipifconnectfailure.inc';
 
     TODO:
     */
-    $log_slow_queries = false;
-    $log_queries_not_using_indexes = false;
     mysqli_report(MYSQLI_REPORT_OFF);
     mysqli_report(MYSQLI_REPORT_INDEX);
 
@@ -227,7 +225,7 @@ require_once 'skipifconnectfailure.inc';
         if (!$row = mysqli_fetch_assoc($res))
             printf("[019] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-        $log_slow_query = ('ON' == $row['Value']);
+        $log_slow_queries = ('ON' == $row['Value']);
 
         if (mysqli_get_server_version($link) >= 50111) {
             // this might cause a warning - no index used
@@ -300,8 +298,6 @@ require_once 'skipifconnectfailure.inc';
     if (!mysqli_query($link, "INSERT INTO test(id, label) VALUES (100, 'z')", MYSQLI_USE_RESULT) ||
             !mysqli_query($link, 'DELETE FROM test WHERE id > 50', MYSQLI_USE_RESULT))
         printf("[033] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-
-    $tmp = mysqli_thread_id($link);
 
     mysqli_close($link);
     print "done!";
