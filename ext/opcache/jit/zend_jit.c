@@ -99,7 +99,7 @@ static const void *zend_jit_loop_trace_counter_handler = NULL;
 static int ZEND_FASTCALL zend_runtime_jit(void);
 
 static int zend_jit_trace_op_len(const zend_op *opline);
-static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
+static bool zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline);
 static uint32_t zend_jit_trace_get_exit_point(const zend_op *to_opline, uint32_t flags);
 static const void *zend_jit_trace_get_exit_addr(uint32_t n);
 static void zend_jit_trace_add_code(const void *start, uint32_t size);
@@ -921,7 +921,7 @@ static int zend_may_overflow(const zend_op *opline, const zend_ssa_op *ssa_op, c
 	}
 }
 
-static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
+static zend_result zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
 {
 	uint32_t flags;
 
@@ -947,7 +947,7 @@ static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
+static zend_result zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
 {
 	if (zend_jit_build_cfg(op_array, &ssa->cfg) != SUCCESS) {
 		return FAILURE;
@@ -984,7 +984,7 @@ static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze2(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t optimization_level)
+static zend_result zend_jit_op_array_analyze2(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t optimization_level)
 {
 	if ((JIT_G(opt_level) >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
@@ -1267,7 +1267,7 @@ static bool zend_jit_supported_binary_op(uint8_t op, uint32_t op1_info, uint32_t
 	}
 }
 
-static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
+static zend_result zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
 {
 	int b, i, end;
 	zend_op *opline;
@@ -2992,7 +2992,7 @@ static void zend_jit_setup_hot_counters_ex(zend_op_array *op_array, zend_cfg *cf
 	}
 }
 
-static int zend_jit_restart_hot_counters(zend_op_array *op_array)
+static zend_result zend_jit_restart_hot_counters(zend_op_array *op_array)
 {
 	zend_jit_op_array_hot_extension *jit_extension;
 	zend_cfg cfg;
@@ -3046,7 +3046,7 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 
 #include "jit/zend_jit_trace.c"
 
-ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
+ZEND_EXT_API zend_result zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	if (dasm_ptr == NULL) {
 		return FAILURE;
@@ -3123,7 +3123,7 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 	return FAILURE;
 }
 
-ZEND_EXT_API int zend_jit_script(zend_script *script)
+ZEND_EXT_API zend_result zend_jit_script(zend_script *script)
 {
 	void *checkpoint;
 	zend_call_graph call_graph;
@@ -3331,7 +3331,7 @@ static void zend_jit_globals_dtor(zend_jit_globals *jit_globals)
 }
 #endif
 
-static int zend_jit_parse_config_num(zend_long jit)
+static zend_result zend_jit_parse_config_num(zend_long jit)
 {
 	if (jit == 0) {
 		JIT_G(on) = 0;
@@ -3362,7 +3362,7 @@ static int zend_jit_parse_config_num(zend_long jit)
 	return SUCCESS;
 }
 
-ZEND_EXT_API int zend_jit_config(zend_string *jit, int stage)
+ZEND_EXT_API zend_result zend_jit_config(zend_string *jit, int stage)
 {
 	if (stage != ZEND_INI_STAGE_STARTUP && !JIT_G(enabled)) {
 		if (stage == ZEND_INI_STAGE_RUNTIME) {
@@ -3418,7 +3418,7 @@ failure:
 	return FAILURE;
 }
 
-ZEND_EXT_API int zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage)
+ZEND_EXT_API zend_result zend_jit_debug_config(zend_long old_val, zend_long new_val, int stage)
 {
 	if (stage != ZEND_INI_STAGE_STARTUP) {
 		if (((old_val ^ new_val) & ZEND_JIT_DEBUG_PERSISTENT) != 0) {
@@ -3440,10 +3440,8 @@ ZEND_EXT_API void zend_jit_init(void)
 #endif
 }
 
-ZEND_EXT_API int zend_jit_check_support(void)
+ZEND_EXT_API zend_result zend_jit_check_support(void)
 {
-	int i;
-
 	zend_jit_vm_kind = zend_vm_kind();
 	if (zend_jit_vm_kind != ZEND_VM_KIND_CALL &&
 	    zend_jit_vm_kind != ZEND_VM_KIND_HYBRID) {
@@ -3464,7 +3462,7 @@ ZEND_EXT_API int zend_jit_check_support(void)
 		return FAILURE;
 	}
 
-	for (i = 0; i <= 256; i++) {
+	for (unsigned int i = 0; i <= 256; i++) {
 		switch (i) {
 			/* JIT has no effect on these opcodes */
 			case ZEND_BEGIN_SILENCE:
