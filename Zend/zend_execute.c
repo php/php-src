@@ -4252,7 +4252,7 @@ static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_arr
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /* {{{ */
 {
-	zval *zv = zend_hash_find(EG(function_table), name);
+	zval *zv = zend_locate_function(name);
 
 	if (EXPECTED(zv != NULL)) {
 		zend_function *fbc = Z_FUNC_P(zv);
