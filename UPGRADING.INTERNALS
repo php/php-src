@@ -370,6 +370,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
 * YIELD and YIELD_FROM do not increment the opline anymore.
 
+* The EXIT opcode has been removed as exit is now implemented as a function.
+
 ========================
 5. SAPI changes
 ========================
