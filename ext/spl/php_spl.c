@@ -294,7 +294,7 @@ PHP_FUNCTION(spl_autoload)
 	int pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = NULL;
-	zend_long type;
+	zend_long type = ZEND_AUTOLOAD_CLASS;
 	bool type_or_exts_is_null;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -307,7 +307,7 @@ PHP_FUNCTION(spl_autoload)
 		file_exts = spl_autoload_extensions;
 	}
 
-	if (type > 0 && type != ZEND_AUTOLOAD_CLASS) {
+	if (!type_or_exts_is_null && type != ZEND_AUTOLOAD_CLASS) {
 		zend_throw_error(NULL, "Default autoloader can only load classes.");
 		RETURN_THROWS();
 	}
