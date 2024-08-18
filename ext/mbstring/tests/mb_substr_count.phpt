@@ -69,9 +69,9 @@ output_handler=
 ?>
 --EXPECT--
 == Empty needle should raise an error ==
-mb_substr_count(): Argument #2 ($needle) must not be empty
-mb_substr_count(): Argument #2 ($needle) must not be empty
-mb_substr_count(): Argument #2 ($needle) must not be empty
+mb_substr_count(): Argument #2 ($needle) cannot be empty
+mb_substr_count(): Argument #2 ($needle) cannot be empty
+mb_substr_count(): Argument #2 ($needle) cannot be empty
 == Return value for empty haystack should always be zero ==
 int(0)
 int(0)
