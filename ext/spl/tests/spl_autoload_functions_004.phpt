@@ -9,7 +9,6 @@ spl_autoload_register($cb = function(string $name, int $mode) {
 
 spl_autoload_unregister($cb, SPL_AUTOLOAD_FUNCTION);
 
-spl_autoload('foo', SPL_AUTOLOAD_FUNCTION);
 bar();
 ?>
 --EXPECTF--
