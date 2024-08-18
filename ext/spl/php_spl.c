@@ -715,14 +715,18 @@ PHP_FUNCTION(spl_autoload_unregister)
 PHP_FUNCTION(spl_autoload_functions)
 {
 	autoload_func_info *alfi;
+	zend_long type = ZEND_AUTOLOAD_CLASS;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_LONG(type)
+	ZEND_PARSE_PARAMETERS_END();
 
 	array_init(return_value);
-	if (spl_autoload_class_functions) {
-		ZEND_HASH_MAP_FOREACH_PTR(spl_autoload_class_functions, alfi) {
+
+	zend_array *arr = type & ZEND_AUTOLOAD_CLASS ? spl_autoload_class_functions : spl_autoload_function_functions;
+
+	if (arr) {
+		ZEND_HASH_MAP_FOREACH_PTR(arr, alfi) {
 			if (alfi->closure) {
 				GC_ADDREF(alfi->closure);
 				add_next_index_object(return_value, alfi->closure);

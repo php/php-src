@@ -41,7 +41,7 @@ function spl_autoload_call(string $class, int $type = SPL_AUTOLOAD_CLASS): void 
 
 function spl_autoload_extensions(?string $file_extensions = null): string {}
 
-function spl_autoload_functions(): array {}
+function spl_autoload_functions(int $type = SPL_AUTOLOAD_CLASS): array {}
 
 function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false, int $type = SPL_AUTOLOAD_CLASS): bool {}
 
