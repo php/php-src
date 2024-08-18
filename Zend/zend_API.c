@@ -439,6 +439,11 @@ ZEND_API ZEND_COLD void zend_argument_value_error(uint32_t arg_num, const char *
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void zend_argument_cannot_be_empty_error(uint32_t arg_num)
+{
+	zend_argument_value_error(arg_num, "cannot be empty");
+}
+
 ZEND_API ZEND_COLD void zend_class_redeclaration_error_ex(int type, zend_string *new_name, zend_class_entry *old_ce)
 {
 	if (old_ce->type == ZEND_INTERNAL_CLASS) {
