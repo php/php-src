@@ -1180,7 +1180,7 @@ ZEND_FUNCTION(function_exists)
 	}
 
 	if (autoload) {
-		exists = zend_locate_function(lcname);
+		exists = zend_locate_function(name, lcname);
 	} else {
 		exists = zend_hash_exists(EG(function_table), lcname);
 	}

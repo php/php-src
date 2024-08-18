@@ -4250,9 +4250,9 @@ static zend_never_inline void ZEND_FASTCALL init_func_run_time_cache(zend_op_arr
 }
 /* }}} */
 
-ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /* {{{ */
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name, zend_string *lc_name) /* {{{ */
 {
-	zval *zv = zend_locate_function(name);
+	zval *zv = zend_locate_function(name, lc_name);
 
 	if (EXPECTED(zv != NULL)) {
 		zend_function *fbc = Z_FUNC_P(zv);
@@ -4859,10 +4859,10 @@ static void zend_swap_operands(zend_op *op) /* {{{ */
 /* }}} */
 #endif
 
-zval* zend_locate_function(zend_string *function_name) /* {{{ */
+zval* zend_locate_function(zend_string *function_name, zend_string *lc_name) /* {{{ */
 {
 	zval *func;
-	func = zend_hash_find(EG(function_table), function_name);
+	func = zend_hash_find(EG(function_table), lc_name);
 	if (func == NULL && zend_autoload_function) {
 		zend_string *previous_filename = EG(filename_override);
 		zend_long previous_lineno = EG(lineno_override);
@@ -4870,7 +4870,7 @@ zval* zend_locate_function(zend_string *function_name) /* {{{ */
 		EG(lineno_override) = -1;
 		zend_exception_save();
 
-		func = zend_autoload_function(function_name);
+		func = zend_autoload_function(function_name, lc_name);
 
 		zend_exception_restore();
 		EG(filename_override) = previous_filename;
@@ -4942,7 +4942,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		} else {
 			lcname = zend_string_tolower(function);
 		}
-		if (UNEXPECTED((func = zend_locate_function(lcname)) == NULL)) {
+		if (UNEXPECTED((func = zend_locate_function(function, lcname)) == NULL)) {
 			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
 			zend_string_release_ex(lcname, 0);
 			return NULL;

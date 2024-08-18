@@ -1643,11 +1643,11 @@ ZEND_METHOD(ReflectionFunction, __construct)
 			ALLOCA_FLAG(use_heap)
 			ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
 			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
-			fptr = zend_fetch_function(lcname);
+			fptr = zend_fetch_function(fname, lcname);
 			ZSTR_ALLOCA_FREE(lcname, use_heap);
 		} else {
 			lcname = zend_string_tolower(fname);
-			fptr = zend_fetch_function(lcname);
+			fptr = zend_fetch_function(fname, lcname);
 			zend_string_release(lcname);
 		}
 

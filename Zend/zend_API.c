@@ -3868,15 +3868,15 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 			/* Skip leading \ */
 			ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable) - 1, use_heap);
 			zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1);
-			func = zend_fetch_function(lmname);
+			func = zend_fetch_function(Z_STR_P(callable), lmname);
 			ZSTR_ALLOCA_FREE(lmname, use_heap);
 		} else {
 			lmname = Z_STR_P(callable);
-			func = zend_fetch_function(lmname);
+			func = zend_fetch_function(lmname, lmname);
 			if (!func) {
 				ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable), use_heap);
 				zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-				func = zend_fetch_function(lmname);
+				func = zend_fetch_function(Z_STR_P(callable), lmname);
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
 			}
 		}

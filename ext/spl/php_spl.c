@@ -424,7 +424,7 @@ static bool autoload_func_info_equals(
 		&& alfi1->closure == alfi2->closure;
 }
 
-static zval *spl_perform_function_autoload(zend_string *function_name) {
+static zval *spl_perform_function_autoload(zend_string *function_name, zend_string *lc_name) {
 	if(!spl_autoload_function_functions) {
 		return NULL;
 	}
@@ -457,7 +457,7 @@ static zval *spl_perform_function_autoload(zend_string *function_name) {
 			break;
 		}
 
-		result = zend_hash_find_known_hash(EG(function_table), function_name);
+		result = zend_hash_find(EG(function_table), lc_name);
 		if (result) {
 			return result;
 		}
@@ -531,7 +531,7 @@ PHP_FUNCTION(spl_autoload_call)
 	if (type == ZEND_AUTOLOAD_CLASS) {
 		spl_perform_class_autoload(name, lc_name);
 	} else if (type == ZEND_AUTOLOAD_FUNCTION) {
-		spl_perform_function_autoload(lc_name);
+		spl_perform_function_autoload(name, lc_name);
 	} else {
 		zend_string_release(lc_name);
 		zend_throw_error(NULL, "spl_autoload_call() expects either ZEND_AUTOLOAD_CLASS or ZEND_AUTOLOAD_FUNCTION as the second argument");
