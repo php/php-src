@@ -136,9 +136,6 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
 dnl Always shared.
 PHP_BUILD_SHARED
 
-dnl Required programs.
-PHP_PROG_AWK
-
 PHP_HELP_SEPARATOR([Extension:])
 PHP_CONFIGURE_PART([Configuring extension])
 

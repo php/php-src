@@ -152,7 +152,6 @@ dnl Check for -R, etc. switch.
 PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs.
-PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([1.0.3], [--no-generation-date])
 PHP_PROG_PHP()
