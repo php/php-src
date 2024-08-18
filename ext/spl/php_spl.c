@@ -294,13 +294,22 @@ PHP_FUNCTION(spl_autoload)
 	int pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = NULL;
+	zend_long type;
+	bool type_or_exts_is_null;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S!", &class_name, &file_exts) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+			Z_PARAM_STR(class_name)
+			Z_PARAM_OPTIONAL
+			Z_PARAM_STR_OR_LONG_OR_NULL(file_exts, type, type_or_exts_is_null)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!file_exts) {
 		file_exts = spl_autoload_extensions;
+	}
+
+	if (type > 0 && type != ZEND_AUTOLOAD_CLASS) {
+		zend_throw_error(NULL, "Default autoloader can only load classes.");
+		RETURN_THROWS();
 	}
 
 	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */
