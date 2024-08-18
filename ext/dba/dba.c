@@ -547,15 +547,15 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	}
 
 	if (ZSTR_LEN(path) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(mode) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 	if (handler_str && ZSTR_LEN(handler_str) == 0) {
-		zend_argument_value_error(3, "cannot be empty");
+		zend_argument_cannot_be_empty_error(3);
 		RETURN_THROWS();
 	}
 	// TODO Check Value for permission
@@ -640,7 +640,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	// bool is_file_lock = false;
 
 	if (ZSTR_LEN(mode) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		efree(resource_key);
 		RETURN_THROWS();
 	}

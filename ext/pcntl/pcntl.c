@@ -860,7 +860,7 @@ static bool php_pcntl_set_user_signal_infos(
 	bool allow_empty_signal_array
 ) {
 	if (!allow_empty_signal_array && zend_hash_num_elements(user_signals) == 0) {
-		zend_argument_value_error(arg_num, "cannot be empty");
+		zend_argument_cannot_be_empty_error(arg_num);
 		return false;
 	}
 

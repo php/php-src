@@ -374,7 +374,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			php_stream_statbuf ssb;
 
 			if (buffer == NULL || buffer_len == 0) {
-				zend_argument_value_error(1, "cannot be empty");
+				zend_argument_cannot_be_empty_error(1);
 				goto clean;
 			}
 			if (CHECK_NULL_PATH(buffer, buffer_len)) {

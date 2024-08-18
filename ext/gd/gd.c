@@ -646,7 +646,7 @@ PHP_FUNCTION(imagesetstyle)
 
 	num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
 	if (num_styles == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

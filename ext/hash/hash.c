@@ -914,7 +914,7 @@ PHP_FUNCTION(hash_hkdf)
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

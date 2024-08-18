@@ -4550,7 +4550,7 @@ PHP_FUNCTION(exif_read_data)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_cannot_be_empty_error(1);
 			RETURN_THROWS();
 		}
 
@@ -4727,7 +4727,7 @@ PHP_FUNCTION(exif_thumbnail)
 		}
 
 		if (!Z_STRLEN_P(stream)) {
-			zend_argument_value_error(1, "cannot be empty");
+			zend_argument_cannot_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

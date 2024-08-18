@@ -627,7 +627,7 @@ void pgsqlCopyFromArray_internal(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

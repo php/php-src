@@ -696,7 +696,7 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 	}
 
 	if (ZSTR_LEN(path) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

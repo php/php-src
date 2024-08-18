@@ -447,7 +447,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	PHP_ENCHANT_GET_BROKER;
 
 	if (taglen == 0) {
-		zend_argument_value_error(2, "cannot be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

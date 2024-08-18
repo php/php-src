@@ -125,7 +125,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(domain) == 0) {
-		zend_argument_value_error(1, "cannot be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZSTR_LEN(domain) > INT32_MAX - 1) {
