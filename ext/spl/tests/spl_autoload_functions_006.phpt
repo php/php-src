@@ -22,6 +22,9 @@ eval("Foo5('baz');");
 $funcs = ['Foo7', 'Foo8'];
 
 array_map(fn($f) => $f(), $funcs);
+
+Foo9();
+
 ?>
 --EXPECT--
 name=Foo1, mode=2
@@ -32,3 +35,4 @@ name=Foo5, mode=2
 name=Foo6, mode=2
 name=Foo7, mode=2
 name=Foo8, mode=2
+name=Foo9, mode=2
