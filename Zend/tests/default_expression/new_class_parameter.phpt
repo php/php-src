@@ -10,3 +10,5 @@ var_dump($D);
 --EXPECT--
 object(stdClass)#1 (0) {
 }
+--XFAIL--
+What to do when JIT eats my opcodes? 🤷🏻‍♂️

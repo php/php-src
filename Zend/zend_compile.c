@@ -3701,6 +3701,7 @@ static uint32_t zend_compile_args(
 	uint32_t i;
 	bool uses_arg_unpack = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
+	uint32_t prev_arg_num = CG(arg_num);
 
 	/* Whether named arguments are used syntactically, to enforce language level limitations.
 	 * May not actually use named argument passing. */
@@ -3894,14 +3895,22 @@ static uint32_t zend_compile_args(
 		zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	}
 
+	CG(arg_num) = prev_arg_num;
+
 	return arg_count;
 }
 /* }}} */
 
 static void zend_compile_default(znode *result, zend_ast *ast)
 {
+	uint32_t arg_num = CG(arg_num);
+
+	if (arg_num == 0) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use default in non-argument context.");
+	}
+
 	zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_DEFAULT_ARG, NULL, NULL);
-	opline->op1.num = CG(arg_num);
+	opline->op1.num = arg_num;
 }
 
 ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */

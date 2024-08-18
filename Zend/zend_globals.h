@@ -155,6 +155,7 @@ struct _zend_compiler_globals {
 
 	zend_stack short_circuiting_opnums;
 
+	// Current 1-based argument index if compiling arguments, otherwise zero.
 	uint32_t arg_num;
 #ifdef ZTS
 	uint32_t copied_functions_count;
