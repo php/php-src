@@ -1304,7 +1304,7 @@ session.save_handler = files
 ; vulnerability. It is disabled by default for maximum compatibility, but
 ; enabling it is encouraged.
 ; https://wiki.php.net/rfc/strict_sessions
-session.use_strict_mode = 0
+session.use_strict_mode = 1
 
 ; Whether to use cookies.
 ; https://php.net/session.use-cookies
@@ -1343,7 +1343,7 @@ session.cookie_domain =
 ; Whether or not to add the httpOnly flag to the cookie, which makes it
 ; inaccessible to browser scripting languages such as JavaScript.
 ; https://php.net/session.cookie-httponly
-session.cookie_httponly =
+session.cookie_httponly = 1
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
 ; Current valid values are "Strict", "Lax" or "None". When using "None",
