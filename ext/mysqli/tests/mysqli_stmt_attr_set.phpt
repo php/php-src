@@ -160,63 +160,6 @@ require_once 'skipifconnectfailure.inc';
         var_dump($results2);
     }
 
-
-    //
-    // MYSQLI_STMT_ATTR_PREFETCH_ROWS
-    //
-
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT id, label FROM test");
-    // Invalid prefetch value
-    try {
-        $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 0);
-    } catch (\ValueError $e) {
-        echo $e->getMessage() . \PHP_EOL;
-    }
-
-    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 1)))
-        printf("[020] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-    $stmt->execute();
-    $id = $label = NULL;
-    $stmt->bind_result($id, $label);
-    $results = array();
-    while ($stmt->fetch())
-        $results[$id] = $label;
-    $stmt->close();
-    if (empty($results))
-        printf("[021] Results should not be empty, subsequent tests will probably fail!\n");
-
-    /* prefetch is not supported
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT label FROM test");
-    if (false !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, -1)))
-        printf("[022] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
-    $stmt->close();
-
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT label FROM test");
-    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, PHP_INT_MAX)))
-            printf("[023] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-    $stmt->close();
-
-    $stmt = mysqli_stmt_init($link);
-    $stmt->prepare("SELECT id, label FROM test");
-    if (true !== ($tmp = $stmt->attr_set(MYSQLI_STMT_ATTR_PREFETCH_ROWS, 2)))
-        printf("[024] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
-    $stmt->execute();
-    $id = $label = NULL;
-    $stmt->bind_result($id, $label);
-    $results2 = array();
-    while ($stmt->fetch())
-        $results2[$id] = $label;
-    $stmt->close();
-    if ($results != $results2) {
-        printf("[025] Results should not differ. Dumping both result sets.\n");
-        var_dump($results);
-        var_dump($results2);
-    }
-    */
-
     mysqli_close($link);
     print "done!";
 ?>
@@ -226,9 +169,8 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECT--
 Error: mysqli_stmt object is not fully initialized
-mysqli_stmt_attr_set(): Argument #2 ($attribute) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE
+mysqli_stmt_attr_set(): Argument #2 ($attribute) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($value) must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
 bool(true)
 mysqli_stmt::attr_set(): Argument #2 ($value) must be one of the MYSQLI_CURSOR_TYPE_* constants for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE
-mysqli_stmt::attr_set(): Argument #2 ($value) must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS
 done!

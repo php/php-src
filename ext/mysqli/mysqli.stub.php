@@ -191,11 +191,6 @@ const MYSQLI_CURSOR_TYPE_FOR_UPDATE = UNKNOWN;
  * @cvalue CURSOR_TYPE_SCROLLABLE
  */
 const MYSQLI_CURSOR_TYPE_SCROLLABLE = UNKNOWN;
-/**
- * @var int
- * @cvalue STMT_ATTR_PREFETCH_ROWS
- */
-const MYSQLI_STMT_ATTR_PREFETCH_ROWS = UNKNOWN;
 
 /* column information */
 /**

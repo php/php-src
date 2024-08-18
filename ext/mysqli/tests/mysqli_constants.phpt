@@ -137,10 +137,6 @@ $expected_constants = array_merge($expected_constants, array(
     "MYSQLI_CURSOR_TYPE_SCROLLABLE"		=> true,
 ));
 
-$expected_constants = array_merge($expected_constants, array(
-    "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
-));
-
 $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
 
 /* pretty dump test, but that is the best way to mimic mysql.c */
