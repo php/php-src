@@ -1693,8 +1693,9 @@ PHP_FUNCTION(pcntl_setcpuaffinity)
 		Z_PARAM_ARRAY(hmask)
 	ZEND_PARSE_PARAMETERS_END();
 
+	// TODO Why are the arguments optional?
 	if (!hmask || zend_hash_num_elements(Z_ARRVAL_P(hmask)) == 0) {
-		zend_argument_value_error(2, "must not be empty");
+		zend_argument_cannot_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
