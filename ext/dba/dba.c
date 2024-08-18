@@ -639,11 +639,6 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, bool persistent)
 	bool is_lock_ignored = false;
 	// bool is_file_lock = false;
 
-	if (ZSTR_LEN(mode) == 0) {
-		zend_argument_cannot_be_empty_error(2);
-		efree(resource_key);
-		RETURN_THROWS();
-	}
 	if (ZSTR_LEN(mode) > 3) {
 		zend_argument_value_error(2, "must be at most 3 characters");
 		efree(resource_key);
