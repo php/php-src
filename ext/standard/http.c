@@ -19,7 +19,6 @@
 #include "url.h"
 #include "SAPI.h"
 #include "zend_exceptions.h"
-#include "ext/spl/spl_exceptions.h"
 #include "basic_functions.h"
 
 static void php_url_encode_scalar(zval *scalar, smart_str *form_str,
@@ -338,7 +337,7 @@ PHP_FUNCTION(request_parse_body)
 
 	sapi_read_post_data();
 	if (!SG(request_info).post_entry) {
-		zend_throw_error(spl_ce_InvalidArgumentException, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
+		zend_throw_error(zend_ce_request_parse_body_exception, "Content-Type \"%s\" is not supported", SG(request_info).content_type);
 		goto exit;
 	}
 
