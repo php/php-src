@@ -25,5 +25,5 @@ try {
 
 ?>
 --EXPECT--
-mb_ereg_search_init(): Argument #2 ($pattern) must not be empty
+mb_ereg_search_init(): Argument #2 ($pattern) cannot be empty
 No pattern was provided
