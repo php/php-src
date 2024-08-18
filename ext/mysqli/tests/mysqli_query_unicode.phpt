@@ -4,10 +4,7 @@ mysqli_query() - unicode (cyrillic)
 mysqli
 --SKIPIF--
 <?php
-require_once __DIR__ . '/test_setup/test_helpers.inc';
-$link = mysqli_connect_or_skip();
-if (!$res = mysqli_query($link, "SHOW CHARACTER SET LIKE 'utf8'"))
-    die("skip UTF8 chatset seems not available");
+require_once 'skipifconnectfailure.inc';
 ?>
 --FILE--
 <?php
