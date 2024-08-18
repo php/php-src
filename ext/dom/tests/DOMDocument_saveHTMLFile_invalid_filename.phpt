@@ -24,4 +24,4 @@ try {
 }
 ?>
 --EXPECT--
-DOMDocument::saveHTMLFile(): Argument #1 ($filename) must not be empty
+DOMDocument::saveHTMLFile(): Argument #1 ($filename) cannot be empty

@@ -23,5 +23,5 @@ try {
 }
 ?>
 --EXPECT--
-DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not be empty
+DOMDocument::loadHTMLFile(): Argument #1 ($filename) cannot be empty
 DOMDocument::loadHTMLFile(): Argument #1 ($filename) must not contain any null bytes
