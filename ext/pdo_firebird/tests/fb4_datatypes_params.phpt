@@ -5,7 +5,7 @@ pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); 
 if (Pdo\Firebird::getApiVersion() < 40) {
-	die('skip: Firebird API version must be greater than or equal to 40');
+    die('skip: Firebird API version must be greater than or equal to 40');
 }
 require 'testdb.inc';
 checkMinServerVersion('4.0.0');
@@ -17,15 +17,15 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 
 $sql = <<<'SQL'
-	SELECT 
-		CAST(? AS INT128) AS i128,
-		CAST(? AS NUMERIC(18,2)) AS N1,
-		CAST(? AS NUMERIC(38,2)) AS N2,
-		CAST(? AS TIMESTAMP WITH TIME ZONE)  AS TS_TZ,
-		CAST(? AS TIME WITH TIME ZONE) AS T_TZ,
-		CAST(? AS DECFLOAT(16)) AS df16,
-		CAST(? AS DECFLOAT(34)) AS df34
-	FROM RDB$DATABASE
+    SELECT 
+        CAST(? AS INT128) AS i128,
+        CAST(? AS NUMERIC(18,2)) AS N1,
+        CAST(? AS NUMERIC(38,2)) AS N2,
+        CAST(? AS TIMESTAMP WITH TIME ZONE)  AS TS_TZ,
+        CAST(? AS TIME WITH TIME ZONE) AS T_TZ,
+        CAST(? AS DECFLOAT(16)) AS df16,
+        CAST(? AS DECFLOAT(34)) AS df34
+    FROM RDB$DATABASE
 SQL;
 
 $dbh = getDbConnection();

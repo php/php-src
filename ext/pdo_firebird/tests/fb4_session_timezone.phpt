@@ -5,7 +5,7 @@ pdo_firebird
 --SKIPIF--
 <?php require('skipif.inc'); 
 if (Pdo\Firebird::getApiVersion() < 40) {
-	die('skip: Firebird API version must be greater than or equal to 40');
+    die('skip: Firebird API version must be greater than or equal to 40');
 }
 require 'testdb.inc';
 checkMinServerVersion('4.0.0');
@@ -17,11 +17,11 @@ See https://github.com/FirebirdSQL/firebird/issues/7849
 <?php
 
 $sql = <<<'SQL'
-	SELECT 
-		rdb$get_context('SYSTEM', 'SESSION_TIMEZONE') as tz,
-		trim(replace(current_timestamp, localtimestamp, '')) as tz1,
-		trim(replace(current_time, localtime, '')) as tz2
-	FROM rdb$database
+    SELECT 
+        rdb$get_context('SYSTEM', 'SESSION_TIMEZONE') as tz,
+        trim(replace(current_timestamp, localtimestamp, '')) as tz1,
+        trim(replace(current_time, localtime, '')) as tz2
+    FROM rdb$database
 SQL;
 
 $dbh = connectToDb([

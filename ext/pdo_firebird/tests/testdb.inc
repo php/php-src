@@ -14,11 +14,11 @@ define('PDO_FIREBIRD_TEST_DSN', getenv('PDO_FIREBIRD_TEST_DSN') ?: '');
 
 if(!PDO_FIREBIRD_TEST_DSN)
 {
-	die('Error: PDO_FIREBIRD_TEST_DSN must be set');
+    die('Error: PDO_FIREBIRD_TEST_DSN must be set');
 }
 
 function getDbConnection($class = PDO::class): PDO {
-	return new $class(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS);
+    return new $class(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS);
 }
 
 function connectToDb(array $params = []): Pdo\Firebird {
@@ -27,12 +27,12 @@ function connectToDb(array $params = []): Pdo\Firebird {
 
 function checkMinServerVersion(string $version): void
 {
-	$dbh = connectToDb();
-	$stmt = $dbh->query("SELECT RDB\$GET_CONTEXT('SYSTEM', 'ENGINE_VERSION') AS VERSION FROM RDB\$DATABASE");
-	$data = $stmt->fetch(\PDO::FETCH_ASSOC);
-	if (!$data || !array_key_exists('VERSION', $data) || version_compare($data['VERSION'], $version) < 0) {
-		die("skip Firebird Server version must be greater than or equal to $version");
-	}
+    $dbh = connectToDb();
+    $stmt = $dbh->query("SELECT RDB\$GET_CONTEXT('SYSTEM', 'ENGINE_VERSION') AS VERSION FROM RDB\$DATABASE");
+    $data = $stmt->fetch(\PDO::FETCH_ASSOC);
+    if (!$data || !array_key_exists('VERSION', $data) || version_compare($data['VERSION'], $version) < 0) {
+        die("skip Firebird Server version must be greater than or equal to $version");
+    }
 }
 
 ?>
