@@ -9813,18 +9813,39 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 	USE_OPLINE
 	SAVE_OPLINE();
 
+	// Initialize result.
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+
 	zend_function *called_func = EX(call)->func;
 
-	parameter_reference pr;
-	pr.offset = opline->op1.num - 1;
-	pr.required = pr.offset < called_func->common.required_num_args;
-	pr.arg_info = &called_func->common.arg_info[pr.offset];
-	pr.fptr = called_func;
+	parameter_reference param;
+	param.offset = opline->op1.num - 1;
+	param.required = param.offset < called_func->common.required_num_args;
+	param.arg_info = &called_func->common.arg_info[param.offset];
+	param.fptr = called_func;
+
+	if (param.required) {
+		zend_value_error("Cannot pass default to required parameter %u of %s%s%s()",
+			opline->op1.num,
+			called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
+			called_func->common.scope ? "::" : "",
+			ZSTR_VAL(called_func->common.function_name)
+		);
+		HANDLE_EXCEPTION();
+	}
 
 	zval default_value;
-	get_parameter_default(&default_value, &pr);
+	get_parameter_default(&default_value, &param);
 
-	ZVAL_COPY(EX_VAR(opline->result.var), &default_value);
+	// Evaluate AST value, e.g. new class.
+	if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(&default_value, called_func->common.scope) != SUCCESS)) {
+			HANDLE_EXCEPTION();
+		}
+	}
+
+	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &default_value);
+
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
