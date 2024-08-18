@@ -514,15 +514,11 @@ PHP_FUNCTION(shell_exec)
 	php_stream *stream;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(command, command_len)
+		Z_PARAM_PATH(command, command_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
 		zend_argument_cannot_be_empty_error(1);
-		RETURN_THROWS();
-	}
-	if (strlen(command) != command_len) {
-		zend_argument_value_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 
