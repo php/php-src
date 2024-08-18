@@ -295,6 +295,13 @@ const SO_ERROR = UNKNOWN;
  */
 const SO_BINDTODEVICE = UNKNOWN;
 #endif
+#ifdef SO_BINDTOIFINDEX
+/**
+ * @var int
+ * @cvalue SO_BINDTOIFINDEX
+ */
+const SO_BINDTOIFINDEX = UNKNOWN;
+#endif
 #ifdef SO_USER_COOKIE
 /**
  * @var int
