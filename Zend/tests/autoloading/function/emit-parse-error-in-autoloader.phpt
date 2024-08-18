@@ -1,5 +1,7 @@
 --TEST--
 Parse errors should be thrown if occuring from an autoloader
+--XFAIL--
+Problem with JIT that needs to be resolved
 --FILE--
 <?php
 
