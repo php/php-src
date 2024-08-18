@@ -1283,7 +1283,7 @@ PHP_METHOD(Dom_HTMLDocument, saveHtmlFile)
 	}
 
 	if (file_len == 0) {
-		zend_argument_value_error(1, "must not be empty");
+		zend_argument_cannot_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

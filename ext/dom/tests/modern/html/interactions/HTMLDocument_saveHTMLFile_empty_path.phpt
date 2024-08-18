@@ -11,7 +11,7 @@ $dom->saveHtmlFile("");
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ValueError: Dom\HTMLDocument::saveHtmlFile(): Argument #1 ($filename) must not be empty in %s:%d
+Fatal error: Uncaught ValueError: Dom\HTMLDocument::saveHtmlFile(): Argument #1 ($filename) cannot be empty in %s:%d
 Stack trace:
 #0 %s(%d): Dom\HTMLDocument->saveHtmlFile('')
 #1 {main}
