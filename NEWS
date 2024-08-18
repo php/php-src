@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
 
+- Sockets:
+  . Added SO_BINDTOIFINDEX to bind a socket to an interface index.
+    (David Carlier)
+
 - Standard:
   . php_uname() now throws ValueErrors on invalid inputs. (Girgias)
 
