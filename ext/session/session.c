@@ -799,7 +799,7 @@ static PHP_INI_MH(OnUpdateSessionGcProbability) /* {{{ */
         return FAILURE;
     }
 
-    return OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+    return OnUpdateLongGEZero(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
 /* }}} */
 
