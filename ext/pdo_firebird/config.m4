@@ -13,6 +13,8 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
     FB_LIBDIR=$($FB_CONFIG --libs)
     FB_VERSION=$($FB_CONFIG --version)
     AC_MSG_RESULT([version $FB_VERSION])
+    AS_VERSION_COMPARE([$FB_VERSION], [3.0],
+      [AC_MSG_ERROR([Firebird required version is at least 3.0])])
     PHP_EVAL_LIBLINE([$FB_LIBDIR], [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$FB_CFLAGS])
   else
