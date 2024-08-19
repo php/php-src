@@ -15,7 +15,7 @@ require_once 'skipifconnectfailure.inc';
             $host, $user, $db, $port, $socket);
 
     if (!mysqli_query($link, "SET sql_mode=''"))
-        printf("[002] Cannot set SQL-Mode, [%d] %s\n", mysqli_errno($mysql), mysqli_error($mysql));
+        printf("[002] Cannot set SQL-Mode, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     
     if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
