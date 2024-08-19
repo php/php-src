@@ -10,5 +10,6 @@ class B extends A {
     public function foo(callable $c): Closure {}
 }
 ?>
---EXPECTF--
-Fatal error: Declaration of B::foo(callable $c): Closure must be compatible with A::foo(Closure $c): callable in %s on line %d
+OK
+--EXPECT--
+OK
