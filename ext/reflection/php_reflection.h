@@ -51,14 +51,14 @@ extern PHPAPI zend_class_entry *reflection_fiber_ptr;
 PHPAPI void zend_reflection_class_factory(zend_class_entry *ce, zval *object);
 
 /* Struct for parameters */
-typedef struct _parameter_reference {
+typedef struct _reflection_parameter_reference {
 	uint32_t offset;
 	bool required;
 	struct _zend_arg_info *arg_info;
 	zend_function *fptr;
-} parameter_reference;
+} reflection_parameter_reference;
 
-PHPAPI int get_parameter_default(zval *result, parameter_reference *param);
+PHPAPI int reflection_get_parameter_default(zval *result, reflection_parameter_reference *param);
 
 END_EXTERN_C()
 

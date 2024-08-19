@@ -1,5 +1,5 @@
 --TEST--
-Test passing default to a parameter with a new class as the default
+Tests passing default to a parameter with a new class as the default
 --FILE--
 <?php
 

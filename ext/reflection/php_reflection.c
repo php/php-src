@@ -130,6 +130,9 @@ typedef struct _property_reference {
 	zend_string *unmangled_name;
 } property_reference;
 
+/* Struct for parameters */
+typedef reflection_parameter_reference parameter_reference;
+
 /* Struct for type hints */
 typedef struct _type_reference {
 	zend_type type;
@@ -1528,7 +1531,7 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
 }
 
-PHPAPI int get_parameter_default(zval *result, parameter_reference *param) {
+PHPAPI int reflection_get_parameter_default(zval *result, parameter_reference *param) {
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		if (param->fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
 			/* We don't have a way to determine the default value for this case right now. */
@@ -2925,7 +2928,7 @@ ZEND_METHOD(ReflectionParameter, getDefaultValue)
 
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	if (get_parameter_default(return_value, param) == FAILURE) {
+	if (reflection_get_parameter_default(return_value, param) == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Internal error: Failed to retrieve the default value");
 		RETURN_THROWS();
@@ -2950,7 +2953,7 @@ ZEND_METHOD(ReflectionParameter, isDefaultValueConstant)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	zval default_value;
-	if (get_parameter_default(&default_value, param) == FAILURE) {
+	if (reflection_get_parameter_default(&default_value, param) == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Internal error: Failed to retrieve the default value");
 		RETURN_THROWS();
@@ -2982,7 +2985,7 @@ ZEND_METHOD(ReflectionParameter, getDefaultValueConstantName)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	zval default_value;
-	if (get_parameter_default(&default_value, param) == FAILURE) {
+	if (reflection_get_parameter_default(&default_value, param) == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Internal error: Failed to retrieve the default value");
 		RETURN_THROWS();

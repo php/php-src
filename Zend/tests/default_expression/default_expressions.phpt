@@ -2,6 +2,7 @@
 Tests an exhaustive list of valid expressions containing the default keyword
 --FILE--
 <?php
+
 function F($V = 2) { return $V; }
 
 var_dump(F(default + 1));

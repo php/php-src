@@ -9818,7 +9818,7 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 
 	zend_function *called_func = EX(call)->func;
 
-	parameter_reference param;
+	reflection_parameter_reference param;
 	param.offset = opline->op1.num - 1;
 	param.required = param.offset < called_func->common.required_num_args;
 	param.arg_info = &called_func->common.arg_info[param.offset];
@@ -9835,13 +9835,12 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 	}
 
 	zval default_value;
-	get_parameter_default(&default_value, &param);
+	reflection_get_parameter_default(&default_value, &param);
 
 	// Evaluate AST value, e.g. new class.
-	if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
-		if (UNEXPECTED(zval_update_constant_ex(&default_value, called_func->common.scope) != SUCCESS)) {
+	if (Z_TYPE(default_value) == IS_CONSTANT_AST
+		&& UNEXPECTED(zval_update_constant_ex(&default_value, called_func->common.scope) != SUCCESS)) {
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), &default_value);
