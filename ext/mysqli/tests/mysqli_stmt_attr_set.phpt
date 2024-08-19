@@ -169,7 +169,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECT--
 Error: mysqli_stmt object is not fully initialized
-mysqli_stmt_attr_set(): Argument #2 ($attribute) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE
+mysqli_stmt_attr_set(): Argument #2 ($attribute) must be either MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE
 mysqli_stmt::attr_set(): Argument #2 ($value) must be 0 or 1 for attribute MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH
 bool(true)
 mysqli_stmt::attr_set(): Argument #2 ($value) must be one of the MYSQLI_CURSOR_TYPE_* constants for attribute MYSQLI_STMT_ATTR_CURSOR_TYPE

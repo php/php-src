@@ -874,6 +874,8 @@ PHP 8.4 UPGRADE NOTES
 - Mysqli:
   . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
     has been removed.
+  . The MYSQLI_STMT_ATTR_PREFETCH_ROWS constant has been removed.
+    The feature is unavailable with mysqlnd.
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.

@@ -50,7 +50,7 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECT--
-mysqli_stmt_attr_get(): Argument #2 ($attribute) must be one of MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE
+mysqli_stmt_attr_get(): Argument #2 ($attribute) must be either MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE
 mysqli_stmt object is already closed
 mysqli_stmt object is already closed
 done!

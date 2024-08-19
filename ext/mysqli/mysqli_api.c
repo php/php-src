@@ -1752,8 +1752,8 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode_p = &mode;
 		break;
 	default:
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be either "
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
 
@@ -1783,8 +1783,8 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
 		/* Success corresponds to 0 return value and a non-zero value
 		 * should only happen if the attr/option is unknown */
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be either "
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
 
