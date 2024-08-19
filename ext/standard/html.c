@@ -44,6 +44,7 @@
 #include "SAPI.h"
 #include <locale.h>
 
+#include "zend_enum.h"
 #include <zend_hash.h>
 #include "html_tables.h"
 
@@ -73,6 +74,8 @@
 
 #define sjis_lead(c) ((c) != 0x80 && (c) != 0xA0 && (c) < 0xFD)
 #define sjis_trail(c) ((c) >= 0x40  && (c) != 0x7F && (c) < 0xFD)
+
+PHPAPI zend_class_entry *html_context_ce;
 
 /* {{{ get_default_charset */
 static char *get_default_charset(void) {
@@ -1269,7 +1272,7 @@ PHPAPI zend_string *php_decode_html_ref(const zend_long context, const zend_stri
             size_t last_of_match = offset + *matched_byte_length;
             bool is_ambiguous = last_of_match < input_length && html5_character_reference_is_ambiguous(&input[last_of_match]);
 
-            if (HTML_ATTRIBUTE == context && is_ambiguous) {
+            if (PHP_HTML_CONTEXT_ATTRIBUTE == context && is_ambiguous) {
                 goto html5_find_short_reference;
             }
 
@@ -1286,7 +1289,7 @@ html5_find_short_reference:
         return NULL;
     }
 
-    if (HTML_ATTRIBUTE == context && offset + 3 < input_length && html5_character_reference_is_ambiguous(&input[offset + 2])) {
+    if (PHP_HTML_CONTEXT_ATTRIBUTE == context && offset + 3 < input_length && html5_character_reference_is_ambiguous(&input[offset + 2])) {
         return NULL;
     }
 
@@ -1683,10 +1686,25 @@ PHP_FUNCTION(htmlspecialchars_decode)
 }
 /* }}} */
 
+PHPAPI int php_html_context_from_enum(zend_object *context)
+{
+    zval *case_name = zend_enum_fetch_case_name(context);
+    zend_string *context_name = Z_STR_P(case_name);
+
+    switch (ZSTR_VAL(context_name)[0]) {
+        case 'A':
+            return PHP_HTML_CONTEXT_ATTRIBUTE;
+        case 'T':
+            return PHP_HTML_CONTEXT_TEXT;
+        EMPTY_SWITCH_DEFAULT_CASE();
+    }
+}
+
 /* {{{ Decode a UTF-8 HTML text span. */
 PHP_FUNCTION(decode_html)
 {
-    zend_long context;
+    zend_long context = 0;
+    zend_object *context_object = NULL;
     zend_string *html;
     zend_long offset;
     bool offset_is_null = 1;
@@ -1696,12 +1714,26 @@ PHP_FUNCTION(decode_html)
     zend_string *decoded;
 
     ZEND_PARSE_PARAMETERS_START(2, 4)
-        Z_PARAM_LONG(context)
+        Z_PARAM_OBJ_OF_CLASS(context_object, html_context_ce)
         Z_PARAM_STR(html)
         Z_PARAM_OPTIONAL
         Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
         Z_PARAM_LONG_OR_NULL(length, length_is_null)
     ZEND_PARSE_PARAMETERS_END();
+
+    if (context_object != NULL) {
+        context = php_html_context_from_enum(context_object);
+    }
+
+    switch (context) {
+        case PHP_HTML_CONTEXT_ATTRIBUTE:
+        case PHP_HTML_CONTEXT_TEXT:
+            break;
+        default:
+            /* This should only be reachable if passing NULL or an invalid value. */
+            zend_argument_value_error(1, "must be a valid HTML context (HtmlContext::*)");
+            RETURN_THROWS();
+    }
 
     if (offset_is_null) {
         offset = 0;
@@ -1723,7 +1755,8 @@ PHP_FUNCTION(decode_html)
 /* {{{ Find the next character reference in a UTF-8 HTML document */
 PHP_FUNCTION(decode_html_ref)
 {
-    zend_long context;
+    zend_long context = 0;
+    zend_object *context_object = NULL;
     zend_string *html;
     zend_long offset;
     bool offset_is_null = 1;
@@ -1732,12 +1765,26 @@ PHP_FUNCTION(decode_html_ref)
     int byte_length = 0;
 
     ZEND_PARSE_PARAMETERS_START(2, 4)
-        Z_PARAM_LONG(context)
+        Z_PARAM_OBJ_OF_CLASS(context_object, html_context_ce)
         Z_PARAM_STR(html)
         Z_PARAM_OPTIONAL
         Z_PARAM_LONG_OR_NULL(offset, offset_is_null)
         Z_PARAM_ZVAL(matched_byte_length)
     ZEND_PARSE_PARAMETERS_END();
+
+    if (context_object != NULL) {
+        context = php_html_context_from_enum(context_object);
+    }
+
+    switch (context) {
+        case PHP_HTML_CONTEXT_ATTRIBUTE:
+        case PHP_HTML_CONTEXT_TEXT:
+            break;
+        default:
+            /* This should only be reachable if passing NULL or an invalid value. */
+            zend_argument_value_error(1, "must be a valid HTML context (HtmlContext::*)");
+            RETURN_THROWS();
+    }
 
     if (offset_is_null) {
         offset = 0;

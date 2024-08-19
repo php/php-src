@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3157d84656b98fa55d091ec9d3a6681d648c9c02 */
+ * Stub hash: 4bd3f92b1c3a656aa8c1f8fd82c8491a1978ec6a */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -789,7 +789,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_htmlspecialchars_decode, 0, 1, I
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_decode_html, 0, 2, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, context, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, context, HtmlContext, 0)
 	ZEND_ARG_TYPE_INFO(0, html, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, length, IS_LONG, 1, "null")
@@ -3625,6 +3625,10 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
+static const zend_function_entry class_HtmlContext_methods[] = {
+	ZEND_FE_END
+};
+
 static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
 	ZEND_FE_END
 };
@@ -3790,8 +3794,6 @@ static void register_basic_functions_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("ENT_XML1", ENT_XML1, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ENT_XHTML", ENT_XHTML, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ENT_HTML5", ENT_HTML5, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("HTML_ATTRIBUTE", HTML_ATTRIBUTE, CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("HTML_TEXT", HTML_TEXT, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_GIF", IMAGE_FILETYPE_GIF, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_JPEG", IMAGE_FILETYPE_JPEG, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_PNG", IMAGE_FILETYPE_PNG, CONST_PERSISTENT);
@@ -4191,6 +4193,17 @@ static void register_basic_functions_symbols(int module_number)
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_hash", sizeof("password_hash") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
 
 	zend_add_parameter_attribute(zend_hash_str_find_ptr(CG(function_table), "password_verify", sizeof("password_verify") - 1), 0, ZSTR_KNOWN(ZEND_STR_SENSITIVEPARAMETER), 0);
+}
+
+static zend_class_entry *register_class_HtmlContext(void)
+{
+	zend_class_entry *class_entry = zend_register_internal_enum("HtmlContext", IS_UNDEF, class_HtmlContext_methods);
+
+	zend_enum_add_case_cstr(class_entry, "Attribute", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Text", NULL);
+
+	return class_entry;
 }
 
 static zend_class_entry *register_class___PHP_Incomplete_Class(void)
