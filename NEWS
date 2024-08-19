@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15419 (Missing readonly+hook incompatibility check for readonly
     classes). (ilutov)
   . Fixed bug GH-15187 (Various hooked object iterator issues). (ilutov)
+  . Fixed bug GH-15456 (Crash in get_class_vars() on virtual properties).
+    (ilutov)
 
 15 Aug 2024, PHP 8.4.0beta3
 
