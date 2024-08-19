@@ -133,8 +133,6 @@ $expected_constants = array_merge($expected_constants, array(
     "MYSQLI_STMT_ATTR_CURSOR_TYPE"		=> true,
     "MYSQLI_CURSOR_TYPE_NO_CURSOR"		=> true,
     "MYSQLI_CURSOR_TYPE_READ_ONLY"		=> true,
-    "MYSQLI_CURSOR_TYPE_FOR_UPDATE"		=> true,
-    "MYSQLI_CURSOR_TYPE_SCROLLABLE"		=> true,
 ));
 
 $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;

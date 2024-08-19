@@ -876,6 +876,9 @@ PHP 8.4 UPGRADE NOTES
     has been removed.
   . The MYSQLI_STMT_ATTR_PREFETCH_ROWS constant has been removed.
     The feature is unavailable with mysqlnd.
+  . The MYSQLI_CURSOR_TYPE_FOR_UPDATE and MYSQLI_CURSOR_TYPE_SCROLLABLE
+    constants have been removed. This functionality was never implemented,
+    neither with mysqlnd nor with libmysql.
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.

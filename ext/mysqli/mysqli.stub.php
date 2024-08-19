@@ -181,16 +181,6 @@ const MYSQLI_CURSOR_TYPE_NO_CURSOR = UNKNOWN;
  * @cvalue CURSOR_TYPE_READ_ONLY
  */
 const MYSQLI_CURSOR_TYPE_READ_ONLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURSOR_TYPE_FOR_UPDATE
- */
-const MYSQLI_CURSOR_TYPE_FOR_UPDATE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURSOR_TYPE_SCROLLABLE
- */
-const MYSQLI_CURSOR_TYPE_SCROLLABLE = UNKNOWN;
 
 /* column information */
 /**
