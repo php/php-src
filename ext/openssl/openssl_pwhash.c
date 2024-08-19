@@ -44,7 +44,7 @@
 
 #define PHP_OPENSSL_SALT_SIZE     16
 #define PHP_OPENSSL_HASH_SIZE     32
-#define PHP_OPENSSL_DIGEST_SIZE   128
+#define PHP_OPENSSL_DIGEST_SIZE  128
 
 static inline zend_result get_options(zend_array *options, uint32_t *memlimit, uint32_t *iterlimit, uint32_t *threads)
 {
@@ -93,16 +93,12 @@ static bool php_openssl_argon2_compute_hash(
 	unsigned char *hash, size_t hash_len)
 {
 	OSSL_PARAM params[7], *p = params;
-	OSSL_LIB_CTX *ctx = NULL;
 	EVP_KDF *kdf = NULL;
 	EVP_KDF_CTX *kctx = NULL;
 	bool ret = false;
 
 	if (threads > 1) {
-		if ((ctx = OSSL_LIB_CTX_new()) == NULL) {
-			goto fail;
-		}
-		if (OSSL_set_max_threads(ctx, threads) != 1) {
+		if (OSSL_set_max_threads(NULL, threads) != 1) {
 			goto fail;
 		}
 	}
@@ -121,7 +117,7 @@ static bool php_openssl_argon2_compute_hash(
 		(void *)pass, pass_len);
 	*p++ = OSSL_PARAM_construct_end();
 
-	if ((kdf = EVP_KDF_fetch(ctx, algo, NULL)) == NULL) {
+	if ((kdf = EVP_KDF_fetch(NULL, algo, NULL)) == NULL) {
 		goto fail;
 	}
 	if ((kctx = EVP_KDF_CTX_new(kdf)) == NULL) {
@@ -139,8 +135,7 @@ fail:
 	EVP_KDF_CTX_free(kctx);
 
 	if (threads > 1) {
-		OSSL_set_max_threads(ctx, 0);
-		OSSL_LIB_CTX_free(ctx);
+		OSSL_set_max_threads(NULL, 0);
 	}
 	return ret;
 }
@@ -200,7 +195,7 @@ static int php_openssl_argon2_extract(
 		return FAILURE;
 	}
 	if (sscanf(p, "v=%" PRIu32 "$m=%" PRIu32 ",t=%" PRIu32 ",p=%" PRIu32,
-		   version, memlimit, iterlimit, threads) != 4) {
+			version, memlimit, iterlimit, threads) != 4) {
 		return FAILURE;
 	}
 	if (salt && hash) {
