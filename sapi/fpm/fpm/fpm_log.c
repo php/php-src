@@ -19,7 +19,7 @@
 #include "fastcgi.h"
 #include "zlog.h"
 
-# define FPM_LOG_BUFFER 1024
+#define FPM_LOG_BUFFER 1024
 
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
