@@ -23,6 +23,7 @@
 #include "zend_execute.h"
 #include "zend_inheritance.h"
 #include "zend_interfaces.h"
+#include "zend_closures.h"
 #include "zend_smart_str.h"
 #include "zend_operators.h"
 #include "zend_exceptions.h"
@@ -487,6 +488,19 @@ static inheritance_status zend_is_class_subtype_of_type(
 		} else {
 			track_class_dependency(fe_ce, fe_class_name);
 			return INHERITANCE_SUCCESS;
+		}
+	}
+
+	/* If the parent has 'callable' as a return type, then Closure satisfies the co-variant check */
+	if (ZEND_TYPE_FULL_MASK(proto_type) & MAY_BE_CALLABLE) {
+		if (!fe_ce) fe_ce = lookup_class(fe_scope, fe_class_name);
+		if (!fe_ce) {
+			have_unresolved = 1;
+		} else if (fe_ce == zend_ce_closure) {
+			track_class_dependency(fe_ce, fe_class_name);
+			return INHERITANCE_SUCCESS;
+		} else {
+			return INHERITANCE_ERROR;
 		}
 	}
 

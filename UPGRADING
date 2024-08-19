@@ -65,6 +65,7 @@ PHP 8.5 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Closure is now a proper subtype of callable
   . Added support for Closures in constant expressions.
     RFC: https://wiki.php.net/rfc/closures_in_const_expr
 
