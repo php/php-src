@@ -46,14 +46,17 @@ PHP_HASH_API void PHP_XXH32Init(PHP_XXH32_CTX *ctx, HashTable *args)
 		zval *seed = zend_hash_str_find_deref(args, "seed", sizeof("seed") - 1);
 		/* This might be a bit too restrictive, but thinking that a seed might be set
 			once and for all, it should be done a clean way. */
-		if (seed && IS_LONG == Z_TYPE_P(seed)) {
-			XXH32_reset(&ctx->s, (XXH32_hash_t)Z_LVAL_P(seed));
-		} else {
-			XXH32_reset(&ctx->s, 0);
+		if (seed) {
+			if (IS_LONG == Z_TYPE_P(seed)) {
+				XXH32_reset(&ctx->s, (XXH32_hash_t)Z_LVAL_P(seed));
+				return;
+			} else {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
+			}
 		}
-	} else {
-		XXH32_reset(&ctx->s, 0);
 	}
+
+	XXH32_reset(&ctx->s, 0);
 }
 
 PHP_HASH_API void PHP_XXH32Update(PHP_XXH32_CTX *ctx, const unsigned char *in, size_t len)
@@ -112,12 +115,13 @@ PHP_HASH_API void PHP_XXH64Init(PHP_XXH64_CTX *ctx, HashTable *args)
 			once and for all, it should be done a clean way. */
 		if (seed && IS_LONG == Z_TYPE_P(seed)) {
 			XXH64_reset(&ctx->s, (XXH64_hash_t)Z_LVAL_P(seed));
+			return;
 		} else {
-			XXH64_reset(&ctx->s, 0);
+			php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is the same as setting the seed to 0");
 		}
-	} else {
-		XXH64_reset(&ctx->s, 0);
 	}
+
+	XXH64_reset(&ctx->s, 0);
 }
 
 PHP_HASH_API void PHP_XXH64Update(PHP_XXH64_CTX *ctx, const unsigned char *in, size_t len)
@@ -168,17 +172,27 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			return;
 		}
 
+		if (_seed && IS_LONG != Z_TYPE_P(_seed)) {
+			php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than int is deprecated because it is ignored");
+		}
+
 		if (_seed && IS_LONG == Z_TYPE_P(_seed)) {
 			/* This might be a bit too restrictive, but thinking that a seed might be set
 				once and for all, it should be done a clean way. */
 			func_init_seed(&ctx->s, (XXH64_hash_t)Z_LVAL_P(_seed));
 			return;
 		} else if (_secret) {
-			if (!try_convert_to_string(_secret)) {
+			if (IS_STRING != Z_TYPE_P(_secret)) {
+				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
+			}
+			zend_string *secret_string = zval_try_get_string(_secret);
+			if (UNEXPECTED(!secret_string)) {
+				ZEND_ASSERT(EG(exception));
 				return;
 			}
-			size_t len = Z_STRLEN_P(_secret);
+			size_t len = ZSTR_LEN(secret_string);
 			if (len < PHP_XXH3_SECRET_SIZE_MIN) {
+				zend_string_release(secret_string);
 				zend_throw_error(NULL, "%s: Secret length must be >= %u bytes, %zu bytes passed", algo_name, XXH3_SECRET_SIZE_MIN, len);
 				return;
 			}
@@ -186,7 +200,8 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 				len = sizeof(ctx->secret);
 				php_error_docref(NULL, E_WARNING, "%s: Secret content exceeding %zu bytes discarded", algo_name, sizeof(ctx->secret));
 			}
-			memcpy((unsigned char *)ctx->secret, Z_STRVAL_P(_secret), len);
+			memcpy((unsigned char *)ctx->secret, ZSTR_VAL(secret_string), len);
+			zend_string_release(secret_string);
 			func_init_secret(&ctx->s, ctx->secret, len);
 			return;
 		}

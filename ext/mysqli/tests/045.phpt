@@ -4,10 +4,8 @@ mysqli_stmt_bind_result (SHOW)
 mysqli
 --SKIPIF--
 <?php
-    require_once 'skipifconnectfailure.inc';
-
-    $link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
-
+    require_once __DIR__ . '/test_setup/test_helpers.inc';
+    $link = mysqli_connect_or_skip();
     $stmt = mysqli_prepare($link, "SHOW VARIABLES LIKE 'port'");
     mysqli_stmt_execute($stmt);
 

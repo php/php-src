@@ -5,12 +5,11 @@ PHP_ARG_WITH([gettext],
 
 if test "$PHP_GETTEXT" != "no"; then
   for i in $PHP_GETTEXT /usr/local /usr; do
-    test -r $i/include/libintl.h && GETTEXT_DIR=$i && break
+    AS_IF([test -r $i/include/libintl.h], [GETTEXT_DIR=$i; break;])
   done
 
-  if test -z "$GETTEXT_DIR"; then
-    AC_MSG_ERROR([Cannot locate header file libintl.h])
-  fi
+  AS_VAR_IF([GETTEXT_DIR],,
+    [AC_MSG_ERROR([Cannot locate header file libintl.h])])
 
   GETTEXT_LIBDIR=$GETTEXT_DIR/$PHP_LIBDIR
   GETTEXT_INCDIR=$GETTEXT_DIR/include
@@ -25,7 +24,7 @@ if test "$PHP_GETTEXT" != "no"; then
       GETTEXT_LIBS=
       GETTEXT_CHECK_IN_LIB=c
       ],
-      [AC_MSG_ERROR([Unable to find required gettext library])])])
+      [AC_MSG_FAILURE([Unable to find required intl library for gettext.])])])
 
   AC_DEFINE([HAVE_LIBINTL], [1], [Define to 1 if you have the 'intl' library.])
   PHP_NEW_EXTENSION([gettext], [gettext.c], [$ext_shared])
@@ -47,9 +46,8 @@ if test "$PHP_GETTEXT" != "no"; then
       [Define to 1 if you have the 'bind_textdomain_codeset' function.])])
   LDFLAGS=$O_LDFLAGS
 
-  if test -n "$GETTEXT_LIBS"; then
-    PHP_ADD_LIBRARY_WITH_PATH([$GETTEXT_LIBS],
+  AS_VAR_IF([GETTEXT_LIBS],,,
+    [PHP_ADD_LIBRARY_WITH_PATH([$GETTEXT_LIBS],
       [$GETTEXT_LIBDIR],
-      [GETTEXT_SHARED_LIBADD])
-  fi
+      [GETTEXT_SHARED_LIBADD])])
 fi

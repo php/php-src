@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 35cb16abb3392bd257a43cc675cad4f5af5549c1 */
+ * Stub hash: fad14b8b8abaf9f33d7837ba8f6190c5d10ff63f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_lcg_value, 0, 0, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
@@ -155,7 +155,7 @@ ZEND_METHOD(Random_Randomizer, __serialize);
 ZEND_METHOD(Random_Randomizer, __unserialize);
 
 static const zend_function_entry ext_functions[] = {
-	ZEND_FE(lcg_value, arginfo_lcg_value)
+	ZEND_RAW_FENTRY("lcg_value", zif_lcg_value, arginfo_lcg_value, ZEND_ACC_DEPRECATED, NULL, NULL)
 	ZEND_FE(mt_srand, arginfo_mt_srand)
 	ZEND_RAW_FENTRY("srand", zif_mt_srand, arginfo_srand, 0, NULL, NULL)
 	ZEND_FE(rand, arginfo_rand)
@@ -247,6 +247,19 @@ static void register_random_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("MT_RAND_MT19937", MT_RAND_MT19937, CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MT_RAND_PHP", MT_RAND_PHP, CONST_PERSISTENT | CONST_DEPRECATED);
+
+
+	zend_attribute *attribute_Deprecated_func_lcg_value_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "lcg_value", sizeof("lcg_value") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zval attribute_Deprecated_func_lcg_value_0_arg0;
+	zend_string *attribute_Deprecated_func_lcg_value_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg0, attribute_Deprecated_func_lcg_value_0_arg0_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_lcg_value_0->args[0].value, &attribute_Deprecated_func_lcg_value_0_arg0);
+	attribute_Deprecated_func_lcg_value_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
+	zval attribute_Deprecated_func_lcg_value_0_arg1;
+	zend_string *attribute_Deprecated_func_lcg_value_0_arg1_str = zend_string_init("use \\Random\\Randomizer::getFloat() instead", strlen("use \\Random\\Randomizer::getFloat() instead"), 1);
+	ZVAL_STR(&attribute_Deprecated_func_lcg_value_0_arg1, attribute_Deprecated_func_lcg_value_0_arg1_str);
+	ZVAL_COPY_VALUE(&attribute_Deprecated_func_lcg_value_0->args[1].value, &attribute_Deprecated_func_lcg_value_0_arg1);
+	attribute_Deprecated_func_lcg_value_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 }
 
 static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *class_entry_Random_Engine)

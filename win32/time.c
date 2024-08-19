@@ -23,44 +23,15 @@
 #include <errno.h>
 #include "php_win32_globals.h"
 
-typedef VOID (WINAPI *MyGetSystemTimeAsFileTime)(LPFILETIME lpSystemTimeAsFileTime);
-
-static MyGetSystemTimeAsFileTime timefunc = NULL;
-
-#ifdef PHP_EXPORTS
-static zend_always_inline MyGetSystemTimeAsFileTime get_time_func(void)
-{/*{{{*/
-	MyGetSystemTimeAsFileTime timefunc = NULL;
-	HMODULE hMod = GetModuleHandle("kernel32.dll");
-
-	if (hMod) {
-		/* Max possible resolution <1us, win8/server2012 */
-		timefunc = (MyGetSystemTimeAsFileTime)GetProcAddress(hMod, "GetSystemTimePreciseAsFileTime");
-	}
-
-	if(!timefunc) {
-		/* 100ns blocks since 01-Jan-1641 */
-		timefunc = (MyGetSystemTimeAsFileTime) GetSystemTimeAsFileTime;
-	}
-
-	return timefunc;
-}/*}}}*/
-
-void php_win32_init_gettimeofday(void)
-{/*{{{*/
-	timefunc = get_time_func();
-}/*}}}*/
-#endif
-
-static zend_always_inline int getfilesystemtime(struct timeval *tv)
+static zend_always_inline void getfilesystemtime(struct timeval *tv)
 {/*{{{*/
 	FILETIME ft;
 	unsigned __int64 ff = 0;
 	ULARGE_INTEGER fft;
 
-	timefunc(&ft);
+	GetSystemTimePreciseAsFileTime(&ft);
 
-        /*
+	/*
 	 * Do not cast a pointer to a FILETIME structure to either a
 	 * ULARGE_INTEGER* or __int64* value because it can cause alignment faults on 64-bit Windows.
 	 * via  http://technet.microsoft.com/en-us/library/ms724284(v=vs.85).aspx
@@ -74,8 +45,6 @@ static zend_always_inline int getfilesystemtime(struct timeval *tv)
 
 	tv->tv_sec = (long)(ff / 1000000Ui64);
 	tv->tv_usec = (long)(ff % 1000000Ui64);
-
-	return 0;
 }/*}}}*/
 
 PHPAPI int gettimeofday(struct timeval *time_Info, struct timezone *timezone_Info)

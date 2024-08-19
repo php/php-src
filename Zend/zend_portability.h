@@ -306,7 +306,7 @@ char *alloca();
 # define ZEND_FASTCALL __attribute__((fastcall))
 #elif defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER == 1700
 # define ZEND_FASTCALL __fastcall
-#elif defined(_MSC_VER) && _MSC_VER >= 1800 && !defined(__clang__)
+#elif defined(_MSC_VER) && _MSC_VER >= 1800
 # define ZEND_FASTCALL __vectorcall
 #else
 # define ZEND_FASTCALL

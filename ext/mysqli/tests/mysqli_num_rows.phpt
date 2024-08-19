@@ -10,7 +10,7 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    function func_test_mysqli_num_rows($link, $query, $expected, $offset, $test_free = false) {
+    function func_test_mysqli_num_rows(mysqli $link, string $query, int|null $expected, int $offset) {
 
         if (!$res = mysqli_query($link, $query, MYSQLI_STORE_RESULT)) {
             printf("[%03d] [%d] %s\n", $offset, mysqli_errno($link), mysqli_error($link));
@@ -36,7 +36,7 @@ require_once 'skipifconnectfailure.inc';
     func_test_mysqli_num_rows($link, "SELECT 1 AS a", 1, 5);
     func_test_mysqli_num_rows($link, "SHOW VARIABLES LIKE '%nixnutz%'", 0, 10);
     func_test_mysqli_num_rows($link, "INSERT INTO test(id, label) VALUES (100, 'z')", NULL, 15);
-    func_test_mysqli_num_rows($link, "SELECT id FROM test LIMIT 2", 2, 20, true);
+    func_test_mysqli_num_rows($link, "SELECT id FROM test LIMIT 2", 2, 20);
 
     if ($res = mysqli_query($link, 'SELECT COUNT(id) AS num FROM test')) {
 
@@ -53,7 +53,7 @@ require_once 'skipifconnectfailure.inc';
 
     if ($res = mysqli_query($link, 'SELECT id FROM test', MYSQLI_USE_RESULT)) {
 
-        $row = mysqli_fetch_row($res);
+        mysqli_fetch_row($res);
         try {
             var_dump(mysqli_num_rows($res));
         } catch (\Error $e) {

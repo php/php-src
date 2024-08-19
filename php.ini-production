@@ -139,16 +139,6 @@
 ;   Development Value: 1000
 ;   Production Value: 1000
 
-; session.sid_bits_per_character
-;   Default Value: 4
-;   Development Value: 5
-;   Production Value: 5
-
-; session.sid_length
-;   Default Value: 32
-;   Development Value: 26
-;   Production Value: 26
-
 ; short_open_tag
 ;   Default Value: On
 ;   Development Value: Off
@@ -1424,15 +1414,6 @@ session.cache_expire = 180
 ; https://php.net/session.use-trans-sid
 session.use_trans_sid = 0
 
-; Set session ID character length. This value could be between 22 to 256.
-; Shorter length than default is supported only for compatibility reason.
-; Users should use 32 or more chars.
-; https://php.net/session.sid-length
-; Default Value: 32
-; Development Value: 26
-; Production Value: 26
-session.sid_length = 26
-
 ; The URL rewriter will look for URLs in a defined set of HTML tags.
 ; <form> is special; if you include them here, the rewriter will
 ; add a hidden <input> field with the info which is otherwise appended
@@ -1457,18 +1438,6 @@ session.trans_sid_tags = "a=href,area=href,frame=src,form="
 ; Development Value: ""
 ; Production Value: ""
 ;session.trans_sid_hosts=""
-
-; Define how many bits are stored in each character when converting
-; the binary hash data to something readable.
-; Possible values:
-;   4  (4 bits: 0-9, a-f)
-;   5  (5 bits: 0-9, a-v)
-;   6  (6 bits: 0-9, a-z, A-Z, "-", ",")
-; Default Value: 4
-; Development Value: 5
-; Production Value: 5
-; https://php.net/session.hash-bits-per-character
-session.sid_bits_per_character = 5
 
 ; Enable upload progress tracking in $_SESSION
 ; Default Value: On

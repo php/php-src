@@ -31,7 +31,6 @@
 #include "zend_compile.h"
 #include "zend_hash.h"
 #include "zend_property_hooks.h"
-#include "ext/reflection/php_reflection.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -696,8 +695,6 @@ try_again:
 					 * to make sure no actual modification is possible. */
 					ZVAL_COPY(rv, retval);
 					retval = rv;
-				} else if (Z_PROP_FLAG_P(retval) & IS_PROP_REINITABLE) {
-					Z_PROP_FLAG_P(retval) &= ~IS_PROP_REINITABLE;
 				} else {
 					zend_readonly_property_indirect_modification_error(prop_info);
 					retval = &EG(uninitialized_zval);

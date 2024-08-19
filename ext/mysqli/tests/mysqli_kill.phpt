@@ -19,12 +19,10 @@ require_once 'skipifconnectfailure.inc';
     if (!$thread_id = mysqli_thread_id($link))
         printf("[004] Cannot determine thread id, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    $tmp = mysqli_kill($link, $thread_id);
-    if (!is_bool($tmp))
-        printf("[005] Expecting boolean/any, got %s/%s\n", gettype($tmp), $tmp);
+    mysqli_kill($link, $thread_id);
 
     if ($res = mysqli_query($link, "SELECT id FROM test LIMIT 1"))
-        pintf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
+        printf("[006] Expecting boolean/false, got %s/%s\n", gettype($res), $res);
 
     var_dump($error = mysqli_error($link));
     if (!is_string($error) || ('' === $error))
@@ -72,7 +70,11 @@ require_once 'skipifconnectfailure.inc';
     require_once 'clean_table.inc';
 ?>
 --EXPECTF--
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 string(%d) "%s"
 bool(false)
 object(mysqli)#%d (%d) {
@@ -123,10 +125,14 @@ object(mysqli)#%d (%d) {
   ["warning_count"]=>
   int(0)
 }
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 array(1) {
   ["id"]=>
   string(1) "1"
 }
+
+Deprecated: Function mysqli_kill() is deprecated since 8.4, use KILL CONNECTION/QUERY SQL statement instead in %s
 mysqli_kill(): Argument #2 ($process_id) must be greater than 0
 done!

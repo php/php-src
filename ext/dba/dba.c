@@ -1103,11 +1103,9 @@ PHP_FUNCTION(dba_key_split)
 	char *key, *name;
 	size_t key_len;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &zkey) == SUCCESS) {
 		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_FALSE)) {
+			php_error_docref(NULL, E_DEPRECATED, "Passing false or null is deprecated since 8.4");
 			RETURN_FALSE;
 		}
 	}

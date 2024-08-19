@@ -175,7 +175,6 @@ PHP_MINIT_FUNCTION(com_dotnet)
 {
 	zend_class_entry *tmp;
 
-	php_com_wrapper_minit(INIT_FUNC_ARGS_PASSTHRU);
 	php_com_persist_minit(INIT_FUNC_ARGS_PASSTHRU);
 
 	php_com_exception_class_entry = register_class_com_exception(zend_ce_exception);

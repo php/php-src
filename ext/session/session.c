@@ -751,6 +751,9 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (val != 32) {
+		zend_error(E_DEPRECATED, "session.sid_length INI setting is deprecated");
+	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
 		/* Numeric value */
@@ -771,6 +774,9 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
+	if (val != 4) {
+		zend_error(E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
+	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 4 && val <=6) {
 		/* Numeric value */
@@ -1869,13 +1875,13 @@ PHP_FUNCTION(session_get_cookie_params)
 }
 /* }}} */
 
-/* {{{ Return the current session name. If newname is given, the session name is replaced with newname */
+/* {{{ Return the current session name. If new name is given, the session name is replaced with new name */
 PHP_FUNCTION(session_name)
 {
 	zend_string *name = NULL;
 	zend_string *ini_name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S!", &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|P!", &name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2377,6 +2383,10 @@ PHP_FUNCTION(session_create_id)
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
+        if (ZSTR_LEN(prefix) > PS_MAX_SID_LENGTH) {
+            zend_argument_value_error(1, "cannot be longer than %d characters", PS_MAX_SID_LENGTH);
+            RETURN_THROWS();
+        }
 		if (php_session_valid_key(ZSTR_VAL(prefix)) == FAILURE) {
 			/* E_ERROR raised for security reason. */
 			php_error_docref(NULL, E_WARNING, "Prefix cannot contain special characters. Only the A-Z, a-z, 0-9, \"-\", and \",\" characters are allowed");

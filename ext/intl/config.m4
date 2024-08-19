@@ -89,10 +89,10 @@ if test "$PHP_INTL" != "no"; then
   AC_MSG_CHECKING([if intl requires -std=gnu++17])
   AS_IF([$PKG_CONFIG icu-uc --atleast-version=74],[
     AC_MSG_RESULT([yes])
-    PHP_CXX_COMPILE_STDCXX(17, mandatory, PHP_INTL_STDCXX)
+    PHP_CXX_COMPILE_STDCXX([17], [mandatory], [PHP_INTL_STDCXX])
   ],[
     AC_MSG_RESULT([no])
-    PHP_CXX_COMPILE_STDCXX(11, mandatory, PHP_INTL_STDCXX)
+    PHP_CXX_COMPILE_STDCXX([11], [mandatory], [PHP_INTL_STDCXX])
   ])
 
   PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $PHP_INTL_STDCXX $ICU_CXXFLAGS"
@@ -127,4 +127,6 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/transliterator
     $ext_builddir/uchar
   ]))
+
+  PHP_ADD_EXTENSION_DEP(intl, date)
 fi

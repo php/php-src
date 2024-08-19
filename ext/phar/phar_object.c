@@ -3036,7 +3036,7 @@ PHP_METHOD(Phar, setSignatureAlgorithm)
 				zend_throw_exception_ex(phar_ce_PharException, 0, "phar \"%s\" is persistent, unable to copy on write", phar_obj->archive->fname);
 				RETURN_THROWS();
 			}
-			phar_obj->archive->sig_flags = (php_uint32)algo;
+			phar_obj->archive->sig_flags = (uint32_t)algo;
 			phar_obj->archive->is_modified = 1;
 			PHAR_G(openssl_privatekey) = key;
 			PHAR_G(openssl_privatekey_len) = key_len;

@@ -235,7 +235,7 @@ AC_DEFUN([PHP_FPM_LQ],
 AS_VAR_IF([php_cv_have_TCP_INFO], [yes],
   [AC_DEFINE([HAVE_LQ_TCP_INFO], [1], [Define to 1 if you have 'TCP_INFO'.])])
 
-AC_CACHE_CHECK([for TCP_CONNECTION_INFO], [php_cv_have_TCP_CONNECTION_INFO]
+AC_CACHE_CHECK([for TCP_CONNECTION_INFO], [php_cv_have_TCP_CONNECTION_INFO],
   [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <netinet/tcp.h>], [
     struct tcp_connection_info ti;
     int x = TCP_CONNECTION_INFO;
@@ -413,7 +413,7 @@ if test "$PHP_FPM" != "no"; then
     CFLAGS_save=$CFLAGS
     CFLAGS="$INCLUDES $CFLAGS"
     AC_CHECK_HEADER([systemd/sd-daemon.h],,
-      [AC_MSG_ERROR([Required systemd/sd-daemon.h not found.])])
+      [AC_MSG_FAILURE([Required <systemd/sd-daemon.h> header file not found.])])
     CFLAGS=$CFLAGS_save
   ])
 
@@ -454,7 +454,7 @@ if test "$PHP_FPM" != "no"; then
       [PHP_EVAL_INCLINE([$APPARMOR_CFLAGS])],
       [AC_CHECK_LIB([apparmor], [aa_change_profile],
         [APPARMOR_LIBS=-lapparmor],
-        [AC_MSG_ERROR([libapparmor required but not found.])])])
+        [AC_MSG_FAILURE([Required libapparmor library not found.])])])
     PHP_EVAL_LIBLINE([$APPARMOR_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
@@ -463,7 +463,7 @@ if test "$PHP_FPM" != "no"; then
     AC_CHECK_HEADER([sys/apparmor.h],
       [AC_DEFINE([HAVE_APPARMOR], [1],
         [Define to 1 if AppArmor confinement is available for PHP-FPM.])],
-      [AC_MSG_ERROR([Required sys/apparmor.h not found.])])
+      [AC_MSG_FAILURE([Required <sys/apparmor.h> header file not found.])])
     CFLAGS=$CFLAGS_save
   ])
 
@@ -472,7 +472,7 @@ if test "$PHP_FPM" != "no"; then
       [PHP_EVAL_INCLINE([$SELINUX_CFLAGS])],
       [AC_CHECK_LIB([selinux], [security_setenforce],
         [SELINUX_LIBS=-lselinux],
-        [AC_MSG_ERROR([Required SELinux library not found.])])])
+        [AC_MSG_FAILURE([Required SELinux library not found.])])])
     PHP_EVAL_LIBLINE([$SELINUX_LIBS], [FPM_EXTRA_LIBS], [yes])
 
     dnl Sanity check.
@@ -481,34 +481,34 @@ if test "$PHP_FPM" != "no"; then
     AC_CHECK_HEADER([selinux/selinux.h],
       [AC_DEFINE([HAVE_SELINUX], [1],
         [Define to 1 if SELinux is available in PHP-FPM.])],
-      [AC_MSG_ERROR([Required selinux/selinux.h not found.])])
+      [AC_MSG_FAILURE([Required <selinux/selinux.h> header file not found.])])
     CFLAGS=$CFLAGS_save
   ])
 
   if test -z "$PHP_FPM_USER" || test "$PHP_FPM_USER" = "yes" || test "$PHP_FPM_USER" = "no"; then
-    php_fpm_user="nobody"
+    php_fpm_user=nobody
   else
-    php_fpm_user="$PHP_FPM_USER"
+    php_fpm_user=$PHP_FPM_USER
   fi
 
   if test -z "$PHP_FPM_GROUP" || test "$PHP_FPM_GROUP" = "yes" || test "$PHP_FPM_GROUP" = "no"; then
-    php_fpm_group="nobody"
+    php_fpm_group=nobody
   else
-    php_fpm_group="$PHP_FPM_GROUP"
+    php_fpm_group=$PHP_FPM_GROUP
   fi
 
   AC_SUBST([php_fpm_user])
   AC_SUBST([php_fpm_group])
-  php_fpm_sysconfdir=`eval echo $sysconfdir`
+  php_fpm_sysconfdir=$(eval echo $sysconfdir)
   AC_SUBST([php_fpm_sysconfdir])
-  php_fpm_localstatedir=`eval echo $localstatedir`
+  php_fpm_localstatedir=$(eval echo $localstatedir)
   AC_SUBST([php_fpm_localstatedir])
-  php_fpm_prefix=`eval echo $prefix`
+  php_fpm_prefix=$(eval echo $prefix)
   AC_SUBST([php_fpm_prefix])
 
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
   PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
-  PHP_OUTPUT([
+  AC_CONFIG_FILES([
     sapi/fpm/init.d.php-fpm
     sapi/fpm/php-fpm.8
     sapi/fpm/php-fpm.conf
@@ -560,17 +560,15 @@ if test "$PHP_FPM" != "no"; then
     [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
     [$PHP_FPM_CFLAGS])
 
-  case $host_alias in
-      *aix*)
-        BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
-        ;;
-      *darwin*)
-        BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
-      ;;
-      *)
-        BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
-      ;;
-  esac
+  AS_CASE([$host_alias],
+    [*aix*], [
+      BUILD_FPM="echo '\#! .' > php.sym && echo >>php.sym && nm -BCpg \`echo \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FPM_OBJS) | sed 's/\([A-Za-z0-9_]*\)\.lo/\1.o/g'\` | \$(AWK) '{ if (((\$\$2 == \"T\") || (\$\$2 == \"D\") || (\$\$2 == \"B\")) && (substr(\$\$3,1,1) != \".\")) { print \$\$3 } }' | sort -u >> php.sym && \$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) -Wl,-brtl -Wl,-bE:php.sym \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_FPM_OBJS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+    ],
+    [*darwin*], [
+      BUILD_FPM="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+    ], [
+      BUILD_FPM="\$(LIBTOOL) --tag=CC --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_FPM_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(FPM_EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_FPM_PATH)"
+    ])
 
   PHP_SUBST([SAPI_FPM_PATH])
   PHP_SUBST([BUILD_FPM])

@@ -94,12 +94,12 @@ AS_VAR_IF([PHP_EXTERNAL_LIBCRYPT], [no], [
 AC_SEARCH_LIBS([crypt], [crypt],
   [AC_DEFINE([HAVE_CRYPT], [1],
     [Define to 1 if you have the 'crypt' function.])],
-  [AC_MSG_ERROR([Cannot use external libcrypt as crypt() is missing.])])
+  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt() is missing.])])
 
 AC_SEARCH_LIBS([crypt_r], [crypt],
   [AC_DEFINE([HAVE_CRYPT_R], [1],
     [Define to 1 if you have the 'crypt_r' function.])],
-  [AC_MSG_ERROR([Cannot use external libcrypt as crypt_r() is missing.])])
+  [AC_MSG_FAILURE([Cannot use external libcrypt as crypt_r() is missing.])])
 
 PHP_CRYPT_R_STYLE
 AC_CHECK_HEADERS([crypt.h])
@@ -277,17 +277,17 @@ int main(void) {
     ac_cv_crypt_sha256=no
   ])])
 
-
   if test "$ac_cv_crypt_blowfish" = "no" || test "$ac_cv_crypt_des" = "no" || test "$ac_cv_crypt_ext_des" = "no" || test "$ac_cv_crypt_md5" = "no" || test "$ac_cv_crypt_sha512" = "no" || test "$ac_cv_crypt_sha256" = "no"; then
-    AC_MSG_ERROR([Cannot use external libcrypt as some algo are missing])
+    AC_MSG_FAILURE([Cannot use external libcrypt as some algo are missing.])
   fi
 
   AC_DEFINE([PHP_USE_PHP_CRYPT_R], [0])
 ])
 
-AS_VAR_IF([cross_compiling], [no], [AC_FUNC_FNMATCH],
+AS_VAR_IF([cross_compiling], [yes],
   [AS_CASE([$host_alias], [*linux*],
-    [AC_DEFINE([HAVE_FNMATCH], [1])])])
+    [AC_DEFINE([HAVE_FNMATCH], [1])])],
+  [AC_FUNC_FNMATCH])
 
 dnl
 dnl Check if there is a support means of creating a new process and defining
@@ -324,9 +324,9 @@ case "$PHP_SAPI" in
   ;;
 esac
 
-if test "$PHP_ENABLE_CHROOT_FUNC" = "yes"; then
-  AC_DEFINE(ENABLE_CHROOT_FUNC, 1, [Whether to enable chroot() function])
-fi
+AS_VAR_IF([PHP_ENABLE_CHROOT_FUNC], [yes],
+  [AC_DEFINE([ENABLE_CHROOT_FUNC], [1],
+    [Define to 1 to enable the 'chroot' function.])])
 
 dnl
 dnl Detect library functions needed by php dns_xxx functions
@@ -345,7 +345,7 @@ dnl
 
 PHP_CHECK_FUNC(res_search, resolv, socket)
 
-AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np])
+AC_CHECK_FUNCS([posix_spawn_file_actions_addchdir_np elf_aux_info])
 
 dnl
 dnl Obsolete check for strptime() declaration. The strptime, where available,
@@ -365,13 +365,14 @@ PHP_ARG_WITH([password-argon2],
   [AS_HELP_STRING([[--with-password-argon2]],
     [Include Argon2 support in password_*])])
 
-if test "$PHP_PASSWORD_ARGON2" != "no"; then
+AS_VAR_IF([PHP_PASSWORD_ARGON2], [no],, [
   PKG_CHECK_MODULES([ARGON2], [libargon2])
   PHP_EVAL_INCLINE([$ARGON2_CFLAGS])
   PHP_EVAL_LIBLINE([$ARGON2_LIBS])
 
-  AC_DEFINE(HAVE_ARGON2LIB, 1, [ ])
-fi
+  AC_DEFINE([HAVE_ARGON2LIB], [1],
+    [Define to 1 if the system has the 'libargon2' library.])
+])
 
 dnl
 dnl Check net/if.h for net_get_interfaces. Darwin and BSD-like systems need

@@ -26,6 +26,7 @@
 
 #include "Zend/zend_enum.h"
 #include "Zend/zend_exceptions.h"
+#include "zend_portability.h"
 
 static inline void randomizer_common_init(php_random_randomizer *randomizer, zend_object *engine_object) {
 	if (engine_object->ce->type == ZEND_INTERNAL_CLASS) {
@@ -292,14 +293,48 @@ PHP_METHOD(Random_Randomizer, getBytes)
 	size_t length = (size_t)user_length;
 	retval = zend_string_alloc(length, 0);
 
-	while (total_size < length) {
-		php_random_result result = engine.algo->generate(engine.state);
+	php_random_result result;
+	while (total_size + 8 <= length) {
+		result = engine.algo->generate(engine.state);
 		if (EG(exception)) {
 			zend_string_free(retval);
 			RETURN_THROWS();
 		}
+
+		/* If the result is not 64 bits, we can't use the fast path and
+		 * we don't attempt to use it in the future, because we don't
+		 * expect engines to change their output size.
+		 *
+		 * While it would be possible to always memcpy() the entire output,
+		 * using result.size as the length that would result in much worse
+		 * assembly, because it will actually emit a call to memcpy()
+		 * instead of just storing the 64 bit value at a memory offset.
+		 */
+		if (result.size != 8) {
+			goto non_64;
+		}
+
+#ifdef WORDS_BIGENDIAN
+		uint64_t swapped = ZEND_BYTES_SWAP64(result.result);
+		memcpy(ZSTR_VAL(retval) + total_size, &swapped, 8);
+#else
+		memcpy(ZSTR_VAL(retval) + total_size, &result.result, 8);
+#endif
+		total_size += 8;
+	}
+
+	while (total_size < length) {
+		result = engine.algo->generate(engine.state);
+		if (EG(exception)) {
+			zend_string_free(retval);
+			RETURN_THROWS();
+		}
+
+ non_64:
+
 		for (size_t i = 0; i < result.size; i++) {
-			ZSTR_VAL(retval)[total_size++] = (result.result >> (i * 8)) & 0xff;
+			ZSTR_VAL(retval)[total_size++] = result.result & 0xff;
+			result.result >>= 8;
 			if (total_size >= length) {
 				break;
 			}

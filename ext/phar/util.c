@@ -34,7 +34,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #else
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, php_uint32 sig_type);
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type);
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
@@ -1382,7 +1382,7 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature)
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, php_uint32 sig_type) /* {{{ */
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len, uint32_t sig_type) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;

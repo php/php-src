@@ -11,5 +11,6 @@ if (PHP_FILEINFO != 'no') {
 			strcasestr.c buffer.c is_csv.c";
 
 	EXTENSION('fileinfo', 'fileinfo.c php_libmagic.c', true, "/I" + configure_module_dirname + "/libmagic /I" + configure_module_dirname);
+	ADD_EXTENSION_DEP('fileinfo', 'pcre');
 	ADD_SOURCES(configure_module_dirname + '\\libmagic', LIBMAGIC_SOURCES, "fileinfo");
 }

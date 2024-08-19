@@ -3,17 +3,18 @@ PHP_ARG_WITH([mhash],
   [AS_HELP_STRING([[--with-mhash]],
     [Include mhash support])])
 
-if test "$PHP_MHASH" != "no"; then
+AS_VAR_IF([PHP_MHASH], [no],, [
   AC_MSG_WARN([The --with-mhash option and mhash* functions are deprecated as of PHP 8.1.0])
-  AC_DEFINE(PHP_MHASH_BC, 1, [ ])
-fi
+  AC_DEFINE([PHP_MHASH_BC], [1], [Define to 1 if mhash support is enabled.])
+])
 
-if test $ac_cv_c_bigendian_php = yes; then
-  EXT_HASH_SHA3_SOURCES="hash_sha3.c"
-  AC_DEFINE(HAVE_SLOW_HASH3, 1, [Define if hash3 algo is available])
+AS_VAR_IF([ac_cv_c_bigendian_php], [yes], [
+  EXT_HASH_SHA3_SOURCES=
+  AC_DEFINE([HAVE_SLOW_HASH3], [1],
+    [Define to 1 if the PHP hash extension uses the slow SHA3 algorithm.])
   AC_MSG_WARN([Using SHA3 slow implementation on bigendian])
   SHA3_DIR=
-else
+], [
   AC_CHECK_SIZEOF([long])
   AC_MSG_CHECKING([if we're at 64-bit platform])
   AS_IF([test "$ac_cv_sizeof_long" -eq 4],[
@@ -29,16 +30,35 @@ else
     SHA3_DIR="sha3/generic64lc"
     SHA3_OPT_SRC="$SHA3_DIR/KeccakP-1600-opt64.c"
   ])
-  EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c hash_sha3.c"
+  EXT_HASH_SHA3_SOURCES="$SHA3_OPT_SRC $SHA3_DIR/KeccakHash.c $SHA3_DIR/KeccakSponge.c"
   PHP_HASH_CFLAGS="$PHP_HASH_CFLAGS -I@ext_srcdir@/$SHA3_DIR -DKeccakP200_excluded -DKeccakP400_excluded -DKeccakP800_excluded -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-fi
+])
 
-EXT_HASH_SOURCES="hash.c hash_md.c hash_sha.c hash_ripemd.c hash_haval.c \
-  hash_tiger.c hash_gost.c hash_snefru.c hash_whirlpool.c hash_adler32.c \
-  hash_crc32.c hash_fnv.c hash_joaat.c $EXT_HASH_SHA3_SOURCES
-  murmur/PMurHash.c murmur/PMurHash128.c hash_murmur.c hash_xxhash.c"
-
-PHP_NEW_EXTENSION([hash], [$EXT_HASH_SOURCES], [no],, [$PHP_HASH_CFLAGS])
+PHP_NEW_EXTENSION([hash], m4_normalize([
+    $EXT_HASH_SHA3_SOURCES
+    hash_adler32.c
+    hash_crc32.c
+    hash_fnv.c
+    hash_gost.c
+    hash_haval.c
+    hash_joaat.c
+    hash_md.c
+    hash_murmur.c
+    hash_ripemd.c
+    hash_sha_ni.c
+    hash_sha_sse2.c
+    hash_sha.c
+    hash_sha3.c
+    hash_snefru.c
+    hash_tiger.c
+    hash_whirlpool.c
+    hash_xxhash.c
+    hash.c
+    murmur/PMurHash.c
+    murmur/PMurHash128.c
+  ]),
+  [no],,
+  [$PHP_HASH_CFLAGS])
 PHP_ADD_BUILD_DIR([$ext_builddir/murmur])
 AS_VAR_IF([SHA3_DIR],,, [PHP_ADD_BUILD_DIR([$ext_builddir/$SHA3_DIR])])
 PHP_INSTALL_HEADERS([ext/hash], m4_normalize([

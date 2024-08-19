@@ -645,6 +645,13 @@ static void soap_fault_dtor_properties(zval *obj)
 	zval_ptr_dtor(Z_FAULT_DETAIL_P(obj));
 	zval_ptr_dtor(Z_FAULT_NAME_P(obj));
 	zval_ptr_dtor(Z_FAULT_HEADERFAULT_P(obj));
+	ZVAL_EMPTY_STRING(Z_FAULT_STRING_P(obj));
+	ZVAL_NULL(Z_FAULT_CODE_P(obj));
+	ZVAL_NULL(Z_FAULT_CODENS_P(obj));
+	ZVAL_NULL(Z_FAULT_ACTOR_P(obj));
+	ZVAL_NULL(Z_FAULT_DETAIL_P(obj));
+	ZVAL_NULL(Z_FAULT_NAME_P(obj));
+	ZVAL_NULL(Z_FAULT_HEADERFAULT_P(obj));
 }
 
 /* {{{ SoapFault constructor */
@@ -667,9 +674,6 @@ PHP_METHOD(SoapFault, __construct)
 		Z_PARAM_ZVAL_OR_NULL(headerfault)
 	ZEND_PARSE_PARAMETERS_END();
 
-	/* Delete previously set properties */
-	soap_fault_dtor_properties(ZEND_THIS);
-
 	if (code_str) {
 		fault_code = ZSTR_VAL(code_str);
 		fault_code_len = ZSTR_LEN(code_str);
@@ -687,6 +691,9 @@ PHP_METHOD(SoapFault, __construct)
 		zend_argument_value_error(1, "is not a valid fault code");
 		RETURN_THROWS();
 	}
+
+	/* Delete previously set properties */
+	soap_fault_dtor_properties(ZEND_THIS);
 
 	if (name != NULL && ZSTR_LEN(name) == 0) {
 		name = NULL;
@@ -947,7 +954,7 @@ PHP_METHOD(SoapServer, __construct)
 
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			create_normalized_classmap(&service->class_map, tmp);
+			service->class_map = zend_array_dup(Z_ARRVAL_P(tmp));
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -1199,6 +1206,11 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
+			php_error_docref(NULL, E_DEPRECATED, "Enabling all functions via SOAP_FUNCTIONS_ALL is deprecated since 8.4, due to possible security concerns."
+				" If all PHP functions should be enabled, the flattened return value of get_defined_functions() can be used");
+			if (UNEXPECTED(EG(exception))) {
+				RETURN_THROWS();
+			}
 			if (service->soap_functions.ft != NULL) {
 				zend_hash_destroy(service->soap_functions.ft);
 				efree(service->soap_functions.ft);
@@ -1395,7 +1407,7 @@ PHP_METHOD(SoapServer, handle)
 	old_encoding = SOAP_GLOBAL(encoding);
 	SOAP_GLOBAL(encoding) = service->encoding;
 	old_class_map = SOAP_GLOBAL(class_map);
-	SOAP_GLOBAL(class_map) = Z_ARR(service->class_map);
+	SOAP_GLOBAL(class_map) = service->class_map;
 	old_typemap = SOAP_GLOBAL(typemap);
 	SOAP_GLOBAL(typemap) = service->typemap;
 	old_features = SOAP_GLOBAL(features);
@@ -2080,7 +2092,7 @@ PHP_METHOD(SoapClient, __construct)
 		}
 		if ((tmp = zend_hash_str_find(ht, "classmap", sizeof("classmap")-1)) != NULL &&
 			Z_TYPE_P(tmp) == IS_ARRAY) {
-			create_normalized_classmap(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
+			ZVAL_COPY(Z_CLIENT_CLASSMAP_P(this_ptr), tmp);
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "typemap", sizeof("typemap")-1)) != NULL &&
@@ -4517,7 +4529,10 @@ static void delete_service(soapServicePtr service) /* {{{ */
 	if (service->encoding) {
 		xmlCharEncCloseFunc(service->encoding);
 	}
-	zval_ptr_dtor(&service->class_map);
+	if (service->class_map) {
+		zend_hash_destroy(service->class_map);
+		FREE_HASHTABLE(service->class_map);
+	}
 	zval_ptr_dtor(&service->soap_object);
 	efree(service);
 }

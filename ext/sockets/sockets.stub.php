@@ -68,6 +68,20 @@ const SOCK_CONN_DGRAM = UNKNOWN;
  */
 const SOCK_DCCP = UNKNOWN;
 #endif
+#ifdef SOCK_CLOEXEC
+/**
+ * @var int
+ * @cvalue SOCK_CLOEXEC
+ */
+const SOCK_CLOEXEC = UNKNOWN;
+#endif
+#ifdef SOCK_NONBLOCK
+/**
+ * @var int
+ * @cvalue SOCK_NONBLOCK
+ */
+const SOCK_NONBLOCK = UNKNOWN;
+#endif
 
 /**
  * @var int
@@ -280,6 +294,13 @@ const SO_ERROR = UNKNOWN;
  * @cvalue SO_BINDTODEVICE
  */
 const SO_BINDTODEVICE = UNKNOWN;
+#endif
+#ifdef SO_BINDTOIFINDEX
+/**
+ * @var int
+ * @cvalue SO_BINDTOIFINDEX
+ */
+const SO_BINDTOIFINDEX = UNKNOWN;
 #endif
 #ifdef SO_USER_COOKIE
 /**
@@ -709,6 +730,29 @@ const IPV6_MULTICAST_LOOP = UNKNOWN;
  * @cvalue IPV6_V6ONLY
  */
 const IPV6_V6ONLY = UNKNOWN;
+#endif
+
+#ifdef IP_PORTRANGE
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE
+ */
+const IP_PORTRANGE = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_DEFAULT
+ */
+const IP_PORTRANGE_DEFAULT = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_HIGH
+ */
+const IP_PORTRANGE_HIGH = UNKNOWN;
+/**
+ * @var int
+ * @cvalue IP_PORTRANGE_LOW
+ */
+const IP_PORTRANGE_LOW = UNKNOWN;
 #endif
 
 #ifdef EPERM

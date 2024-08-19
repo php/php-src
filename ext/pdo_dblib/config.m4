@@ -4,20 +4,14 @@ PHP_ARG_WITH([pdo-dblib],
     [PDO: DBLIB-DB support. DIR is the FreeTDS home directory])])
 
 if test "$PHP_PDO_DBLIB" != "no"; then
-
-  if test "$PHP_PDO" = "no" && test "$ext_shared" = "no"; then
-    AC_MSG_ERROR([PDO is not enabled! Add --enable-pdo to your configure line.])
-  fi
-
-  if test "$PHP_PDO_DBLIB" = "yes"; then
+  AS_VAR_IF([PHP_PDO_DBLIB], [yes], [
     dnl FreeTDS must be on the default system include/library path.
     dnl Only perform a sanity check that this is really the case.
     PHP_CHECK_LIBRARY([sybdb], [dbsqlexec],
       [],
-      [AC_MSG_ERROR([Cannot find FreeTDS in known installation directories])])
+      [AC_MSG_FAILURE([Cannot find FreeTDS in known installation directories.])])
     PHP_ADD_LIBRARY([sybdb],, [PDO_DBLIB_SHARED_LIBADD])
-  elif test "$PHP_PDO_DBLIB" != "no"; then
-
+  ], [
     if test -f $PHP_PDO_DBLIB/include/sybdb.h; then
       PDO_FREETDS_INSTALLATION_DIR=$PHP_PDO_DBLIB
       PDO_FREETDS_INCLUDE_DIR=$PHP_PDO_DBLIB/include
@@ -28,10 +22,6 @@ if test "$PHP_PDO_DBLIB" != "no"; then
       AC_MSG_ERROR([Directory $PHP_PDO_DBLIB is not a FreeTDS installation directory])
     fi
 
-    if test "x$PHP_LIBDIR" = "x" ; then
-      PHP_LIBDIR=lib
-    fi
-
     if test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.a" && test ! -r "$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.so"; then
        AC_MSG_ERROR([[Could not find $PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR/libsybdb.[a|so]]])
     fi
@@ -40,7 +30,7 @@ if test "$PHP_PDO_DBLIB" != "no"; then
     PHP_ADD_LIBRARY_WITH_PATH([sybdb],
       [$PDO_FREETDS_INSTALLATION_DIR/$PHP_LIBDIR],
       [PDO_DBLIB_SHARED_LIBADD])
-  fi
+  ])
 
   PHP_CHECK_PDO_INCLUDES
 

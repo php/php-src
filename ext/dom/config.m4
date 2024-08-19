@@ -5,11 +5,6 @@ PHP_ARG_ENABLE([dom],
   [yes])
 
 if test "$PHP_DOM" != "no"; then
-
-  if test "$PHP_LIBXML" = "no"; then
-    AC_MSG_ERROR([DOM extension requires LIBXML extension, add --with-libxml])
-  fi
-
   PHP_SETUP_LIBXML([DOM_SHARED_LIBADD], [
     AC_DEFINE([HAVE_DOM], [1],
       [Define to 1 if the PHP extension 'dom' is available.])

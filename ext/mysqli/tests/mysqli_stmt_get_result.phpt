@@ -153,7 +153,9 @@ require_once 'skipifconnectfailure.inc';
     }
     mysqli_free_result($result);
 
-	if (!mysqli_kill($link, mysqli_thread_id($link)))
+    $link->real_query('KILL '.mysqli_thread_id($link));
+    // We kill our own connection so we should get "Query execution was interrupted"
+	if ($link->errno !== 1317)
 		printf("[042] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	if (false !== ($tmp = mysqli_stmt_get_result($stmt)))

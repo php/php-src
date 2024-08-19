@@ -10,10 +10,10 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    if (!$res = mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
+    if (false === mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id"))
         printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-    if (!is_object($res = mysqli_store_result($link, MYSQLI_STORE_RESULT_COPY_DATA)))
+    if (!is_object($res = mysqli_store_result($link)))
         printf("[004] Expecting object, got %s/%s. [%d] %s\n",
             gettype($res), $res, mysqli_errno($link), mysqli_error($link));
 

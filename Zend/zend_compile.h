@@ -438,6 +438,8 @@ typedef struct _zend_property_info {
 	((uint32_t)(XtOffsetOf(zend_object, properties_table) + sizeof(zval) * (num)))
 #define OBJ_PROP_TO_NUM(offset) \
 	((offset - OBJ_PROP_TO_OFFSET(0)) / sizeof(zval))
+#define OBJ_PROP_PTR_TO_NUM(obj, prop) \
+	(((char*)prop - (char*)obj->properties_table) / sizeof(zval))
 
 typedef struct _zend_class_constant {
 	zval value; /* flags are stored in u2 */

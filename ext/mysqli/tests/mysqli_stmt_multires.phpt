@@ -10,7 +10,6 @@ require_once 'skipifconnectfailure.inc';
 <?php
     require 'table.inc';
 
-    $stmt = mysqli_stmt_init($link);
     if (!$link->query('DROP PROCEDURE IF EXISTS p123')) {
         printf("[001] [%d] %s\n", $link->error, $link->errno);
     }

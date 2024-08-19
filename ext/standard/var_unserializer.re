@@ -1089,6 +1089,9 @@ use_double:
 	*p = YYCURSOR;
 
 	ZVAL_STR(rval, str);
+
+	php_error_docref(NULL, E_DEPRECATED, "Unserializing the 'S' format is deprecated");
+
 	return 1;
 }
 

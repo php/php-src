@@ -407,6 +407,13 @@ const CURLOPT_SSL_VERIFYPEER = UNKNOWN;
  * @cvalue CURLOPT_STDERR
  */
 const CURLOPT_STDERR = UNKNOWN;
+#if LIBCURL_VERSION_NUM >= 0x080900 /* Available since 8.9.0 */
+/**
+ * @var int
+ * @cvalue CURLOPT_TCP_KEEPCNT
+ */
+const CURLOPT_TCP_KEEPCNT = UNKNOWN;
+#endif
 /**
  * @var int
  * @cvalue CURLOPT_TELNETOPTIONS
@@ -3102,6 +3109,11 @@ const CURL_VERSION_HTTP3 = UNKNOWN;
  * @cvalue CURLINFO_RETRY_AFTER
  */
 const CURLINFO_RETRY_AFTER = UNKNOWN;
+/**
+ * @var int
+ * @cvalue CURL_HTTP_VERSION_3
+ */
+const CURL_HTTP_VERSION_3  = UNKNOWN;
 #endif
 
 #if LIBCURL_VERSION_NUM >= 0x074300 /* Available since 7.67.0 */
@@ -3545,6 +3557,14 @@ const CURLOPT_CA_CACHE_TIMEOUT = UNKNOWN;
  * @cvalue CURLOPT_QUICK_EXIT
  */
 const CURLOPT_QUICK_EXIT = UNKNOWN;
+#endif
+
+#if LIBCURL_VERSION_NUM >= 0x075800 /* Available since 7.88.0 */
+/**
+ * @var int
+ * @cvalue CURL_HTTP_VERSION_3ONLY
+ */
+const CURL_HTTP_VERSION_3ONLY  = UNKNOWN;
 #endif
 
 /**

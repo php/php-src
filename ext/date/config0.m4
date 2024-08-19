@@ -22,7 +22,8 @@ PHP_ADD_INCLUDE([$ext_builddir/lib])
 PHP_ADD_INCLUDE([$ext_srcdir/lib])
 
 PHP_INSTALL_HEADERS([ext/date], [php_date.h lib/timelib.h lib/timelib_config.h])
-AC_DEFINE([HAVE_TIMELIB_CONFIG_H], [1], [Have timelib_config.h])
+AC_DEFINE([HAVE_TIMELIB_CONFIG_H], [1],
+  [Define to 1 if you have the <timelib_config.h> header file.])
 
 cat > $ext_builddir/lib/timelib_config.h <<EOF
 #ifdef PHP_WIN32

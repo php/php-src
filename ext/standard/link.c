@@ -99,8 +99,9 @@ PHP_FUNCTION(linkinfo)
 		Z_PARAM_PATH(link, link_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	// TODO Check for empty string
 	dirname = estrndup(link, link_len);
-	php_dirname(dirname, link_len);
+	zend_dirname(dirname, link_len);
 
 	if (php_check_open_basedir(dirname)) {
 		efree(dirname);
@@ -141,7 +142,7 @@ PHP_FUNCTION(symlink)
 	}
 
 	memcpy(dirname, source_p, sizeof(source_p));
-	len = php_dirname(dirname, strlen(dirname));
+	len = zend_dirname(dirname, strlen(dirname));
 
 	if (!expand_filepath_ex(topath, dest_p, dirname, len)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");

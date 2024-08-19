@@ -1740,8 +1740,6 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		switch (mode_in) {
 			case CURSOR_TYPE_NO_CURSOR:
 			case CURSOR_TYPE_READ_ONLY:
-			case CURSOR_TYPE_FOR_UPDATE:
-			case CURSOR_TYPE_SCROLLABLE:
 				break;
 			default:
 				zend_argument_value_error(ERROR_ARG_POS(3), "must be one of the MYSQLI_CURSOR_TYPE_* constants "
@@ -1751,18 +1749,9 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode = mode_in;
 		mode_p = &mode;
 		break;
-	case STMT_ATTR_PREFETCH_ROWS:
-		if (mode_in < 1) {
-			zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS");
-			RETURN_THROWS();
-		}
-		mode = mode_in;
-		mode_p = &mode;
-		break;
 	default:
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
-			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be either "
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
 
@@ -1792,9 +1781,8 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	if ((rc = mysql_stmt_attr_get(stmt->stmt, attr, &value))) {
 		/* Success corresponds to 0 return value and a non-zero value
 		 * should only happen if the attr/option is unknown */
-		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
-			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
+		zend_argument_value_error(ERROR_ARG_POS(2), "must be either "
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or MYSQLI_STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
 
@@ -1957,6 +1945,14 @@ PHP_FUNCTION(mysqli_store_result)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_link, mysqli_link_class_entry, &flags) == FAILURE) {
 		RETURN_THROWS();
 	}
+
+	if ((hasThis() && ZEND_NUM_ARGS() == 1) || ZEND_NUM_ARGS() == 2) {
+		zend_error(E_DEPRECATED, "Passing the $mode parameter is deprecated since 8.4, as it has been ignored since 8.1");
+		if (UNEXPECTED(EG(exception))) {
+			RETURN_THROWS();
+		}
+	}
+
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	result = mysql_store_result(mysql->mysql);
 	if (!result) {

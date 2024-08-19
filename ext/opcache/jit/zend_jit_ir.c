@@ -13954,15 +13954,6 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 			ir_IF_FALSE_cold(if_prop_obj);
 
-			ir_ref extra_addr = ir_ADD_OFFSET(jit_ZVAL_ADDR(jit, prop_addr), offsetof(zval, u2.extra));
-			ir_ref extra = ir_LOAD_U32(extra_addr);
-			ir_ref if_reinitable = ir_IF(ir_AND_U32(extra, ir_CONST_U32(IS_PROP_REINITABLE)));
-			ir_IF_TRUE(if_reinitable);
-			ir_STORE(extra_addr, ir_AND_U32(extra, ir_CONST_U32(~IS_PROP_REINITABLE)));
-			ir_ref reinit_path = ir_END();
-
-			ir_IF_FALSE(if_reinitable);
-
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_indirect_modification_error), prop_info_ref);
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
@@ -13970,7 +13961,6 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 
 			if (flags == ZEND_FETCH_DIM_WRITE) {
 				ir_IF_FALSE_cold(if_readonly);
-				ir_MERGE_WITH(reinit_path);
 				jit_SET_EX_OPLINE(jit, opline);
 				ir_CALL_2(IR_VOID, ir_CONST_FC_FUNC(zend_jit_check_array_promotion),
 					prop_ref, prop_info_ref);
@@ -13978,7 +13968,6 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				ir_IF_FALSE(if_has_prop_info);
 			} else if (flags == ZEND_FETCH_REF) {
 				ir_IF_FALSE_cold(if_readonly);
-				ir_MERGE_WITH(reinit_path);
 				ir_CALL_3(IR_VOID, ir_CONST_FC_FUNC(zend_jit_create_typed_ref),
 					prop_ref,
 					prop_info_ref,
@@ -13986,14 +13975,11 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 				ir_END_list(end_inputs);
 				ir_IF_FALSE(if_has_prop_info);
 			} else {
-				ir_ref list = reinit_path;
-
 				ZEND_ASSERT(flags == 0);
 				ir_IF_FALSE(if_has_prop_info);
-				ir_END_list(list);
+				ir_ref no_prop_info_path = ir_END();
 				ir_IF_FALSE(if_readonly);
-				ir_END_list(list);
-				ir_MERGE_list(list);
+				ir_MERGE_WITH(no_prop_info_path);
 			}
 		}
 	} else {
@@ -14031,19 +14017,12 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 			ir_END_list(end_inputs);
 
 			ir_IF_FALSE_cold(if_prop_obj);
-
-			ir_ref extra_addr = ir_ADD_OFFSET(jit_ZVAL_ADDR(jit, prop_addr), offsetof(zval, u2.extra));
-			ir_ref extra = ir_LOAD_U32(extra_addr);
-			ir_ref if_reinitable = ir_IF(ir_AND_U32(extra, ir_CONST_U32(IS_PROP_REINITABLE)));
-
-			ir_IF_FALSE(if_reinitable);
 			jit_SET_EX_OPLINE(jit, opline);
 			ir_CALL_1(IR_VOID, ir_CONST_FC_FUNC(zend_readonly_property_indirect_modification_error), ir_CONST_ADDR(prop_info));
 			jit_set_Z_TYPE_INFO(jit, res_addr, _IS_ERROR);
 			ir_END_list(end_inputs);
 
-			ir_IF_TRUE(if_reinitable);
-			ir_STORE(extra_addr, ir_AND_U32(extra, ir_CONST_U32(~IS_PROP_REINITABLE)));
+			goto result_fetched;
 		}
 
 		if (opline->opcode == ZEND_FETCH_OBJ_W
@@ -14117,6 +14096,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		}
 	}
 
+result_fetched:
 	if (op1_avoid_refcounting) {
 		SET_STACK_REG(JIT_G(current_frame)->stack, EX_VAR_TO_NUM(opline->op1.var), ZREG_NONE);
 	}
@@ -14435,7 +14415,13 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 	} else {
 		prop_ref = ir_ADD_OFFSET(obj_ref, prop_info->offset);
 		prop_addr = ZEND_ADDR_REF_ZVAL(prop_ref);
-		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set || (prop_info->flags & ZEND_ACC_READONLY)) {
+		/* With the exception of __clone(), readonly assignment always happens on IS_UNDEF, doding
+		 * the fast path. Thus, the fast path is not useful. */
+		if (prop_info->flags & ZEND_ACC_READONLY) {
+			ZEND_ASSERT(slow_inputs == IR_UNUSED);
+			goto slow_path;
+		}
+		if (!ce || ce_is_instanceof || !(ce->ce_flags & ZEND_ACC_IMMUTABLE) || ce->__get || ce->__set) {
 			// Undefined property with magic __get()/__set()
 			if (JIT_G(trigger) == ZEND_JIT_ON_HOT_TRACE) {
 				int32_t exit_point = zend_jit_trace_get_exit_point(opline, ZEND_JIT_EXIT_TO_VM);
@@ -14527,6 +14513,8 @@ static int zend_jit_assign_obj(zend_jit_ctx         *jit,
 		ir_ref arg3, arg5;
 
 		ir_MERGE_list(slow_inputs);
+
+slow_path:
 		jit_SET_EX_OPLINE(jit, opline);
 
 		if (Z_MODE(val_addr) == IS_REG) {
@@ -16462,8 +16450,7 @@ static int zend_jit_trace_handler(zend_jit_ctx *jit, const zend_op_array *op_arr
 			} else {
 				ir_GUARD(ir_GE(ref, ir_CONST_I32(0)), jit_STUB_ADDR(jit, jit_stub_trace_halt));
 			}
-		} else if (opline->opcode == ZEND_EXIT ||
-		           opline->opcode == ZEND_GENERATOR_RETURN ||
+		} else if (opline->opcode == ZEND_GENERATOR_RETURN ||
 		           opline->opcode == ZEND_YIELD ||
 		           opline->opcode == ZEND_YIELD_FROM) {
 			ir_IJMP(jit_STUB_ADDR(jit, jit_stub_trace_halt));

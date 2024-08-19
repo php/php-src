@@ -415,21 +415,4 @@ PHP_METHOD(Dom_Implementation, createHTMLDocument)
 }
 /* }}} */
 
-/* {{{ URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
-Since: DOM Level 3
-*/
-PHP_METHOD(DOMImplementation, getFeature)
-{
-	size_t feature_len, version_len;
-	char *feature, *version;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	zend_throw_error(NULL, "Not yet implemented");
-	RETURN_THROWS();
-}
-/* }}} end dom_domimplementation_get_feature */
-
 #endif

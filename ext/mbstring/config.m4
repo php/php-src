@@ -75,7 +75,8 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
     PHP_MBSTRING_ADD_CFLAG([-DONIG_ESCAPE_UCHAR_COLLISION=1])
     PHP_MBSTRING_ADD_CFLAG([-DUChar=OnigUChar])
 
-    AC_DEFINE([HAVE_MBREGEX], 1, [whether to have multibyte regex support])
+    AC_DEFINE([HAVE_MBREGEX], [1],
+      [Define to 1 if mbstring has multibyte regex support enabled.])
 
     PHP_MBSTRING_ADD_BASE_SOURCES([php_mbregex.c])
     PHP_INSTALL_HEADERS([ext/mbstring], [php_mbregex.h php_onig_compat.h])
@@ -172,11 +173,10 @@ if test "$PHP_MBSTRING" != "no"; then
 
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
 
-  if test "$PHP_MBREGEX" != "no"; then
-    PHP_MBSTRING_SETUP_MBREGEX
-  fi
+  AS_VAR_IF([PHP_MBREGEX], [no],, [PHP_MBSTRING_SETUP_MBREGEX])
 
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION
+  PHP_ADD_EXTENSION_DEP(mbstring, pcre)
 fi

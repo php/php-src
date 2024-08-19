@@ -44,6 +44,7 @@ namespace {
     /**
      * @var int
      * @cvalue SOAP_FUNCTIONS_ALL
+     * @deprecated since 8.4
      */
     const SOAP_FUNCTIONS_ALL = UNKNOWN;
 

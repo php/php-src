@@ -21,8 +21,6 @@
  * AKA "Xerox Secure Hash Function"
  */
 
-#include "ext/standard/basic_functions.h"
-
 /* SNEFRU context */
 typedef struct {
 	uint32_t state[16];

@@ -9,16 +9,18 @@ if test "$PHP_SODIUM" != "no"; then
   PHP_EVAL_INCLINE([$LIBSODIUM_CFLAGS])
   PHP_EVAL_LIBLINE([$LIBSODIUM_LIBS], [SODIUM_SHARED_LIBADD])
 
-  AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [ ])
+  AC_DEFINE([HAVE_LIBSODIUMLIB], [1],
+    [Define to 1 if the PHP extension 'sodium' is available.])
 
-  SODIUM_COMPILER_FLAGS="$LIBSODIUM_CFLAGS"
+  SODIUM_COMPILER_FLAGS=$LIBSODIUM_CFLAGS
 
   dnl Add -Wno-type-limits and -Wno-logical-op as this may arise on 32bits platforms
   AC_CHECK_SIZEOF([long])
   AS_IF([test "$ac_cv_sizeof_long" -eq 4], [
     SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-type-limits"
     AX_CHECK_COMPILE_FLAG([-Wno-logical-op],
-      [SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op"],, [-Werror])
+      [SODIUM_COMPILER_FLAGS="$SODIUM_COMPILER_FLAGS -Wno-logical-op"],,
+      [-Werror])
   ])
 
   PHP_NEW_EXTENSION([sodium],

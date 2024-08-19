@@ -138,6 +138,7 @@ const MYSQLI_ASYNC = UNKNOWN;
 /**
  * @var int
  * @cvalue MYSQLI_STORE_RESULT_COPY_DATA
+ * @deprecated
  */
 const MYSQLI_STORE_RESULT_COPY_DATA = UNKNOWN;
 
@@ -180,21 +181,6 @@ const MYSQLI_CURSOR_TYPE_NO_CURSOR = UNKNOWN;
  * @cvalue CURSOR_TYPE_READ_ONLY
  */
 const MYSQLI_CURSOR_TYPE_READ_ONLY = UNKNOWN;
-/**
- * @var int
- * @cvalue CURSOR_TYPE_FOR_UPDATE
- */
-const MYSQLI_CURSOR_TYPE_FOR_UPDATE = UNKNOWN;
-/**
- * @var int
- * @cvalue CURSOR_TYPE_SCROLLABLE
- */
-const MYSQLI_CURSOR_TYPE_SCROLLABLE = UNKNOWN;
-/**
- * @var int
- * @cvalue STMT_ATTR_PREFETCH_ROWS
- */
-const MYSQLI_STMT_ATTR_PREFETCH_ROWS = UNKNOWN;
 
 /* column information */
 /**
@@ -518,52 +504,62 @@ const MYSQLI_SERVER_PS_OUT_PARAMS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_GRANT
+ * @deprecated
  */
 const MYSQLI_REFRESH_GRANT = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_LOG
+ * @deprecated
  */
 const MYSQLI_REFRESH_LOG = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_TABLES
+ * @deprecated
  */
 const MYSQLI_REFRESH_TABLES = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_HOSTS
+ * @deprecated
  */
 const MYSQLI_REFRESH_HOSTS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_STATUS
+ * @deprecated
  */
 const MYSQLI_REFRESH_STATUS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_THREADS
+ * @deprecated
  */
 const MYSQLI_REFRESH_THREADS = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
+ * @deprecated
  */
 const MYSQLI_REFRESH_REPLICA = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_SLAVE
+ * @deprecated
  */
 const MYSQLI_REFRESH_SLAVE = UNKNOWN;
 /**
  * @var int
  * @cvalue REFRESH_MASTER
+ * @deprecated
  */
 const MYSQLI_REFRESH_MASTER = UNKNOWN;
 #ifdef REFRESH_BACKUP_LOG
 /**
  * @var int
  * @cvalue REFRESH_BACKUP_LOG
+ * @deprecated
  */
 const MYSQLI_REFRESH_BACKUP_LOG = UNKNOWN;
 #endif
@@ -854,6 +850,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_kill
      */
+    #[\Deprecated(since: '8.4', message: 'use KILL CONNECTION/QUERY SQL statement instead')]
     public function kill(int $process_id): bool {}
 
     /**
@@ -878,6 +875,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_ping
      */
+    #[\Deprecated(since: '8.4', message: 'because the reconnect feature has been removed in PHP 8.2 and this method is now redundant')]
     public function ping(): bool {}
 
     /**
@@ -1026,6 +1024,7 @@ class mysqli
      * @tentative-return-type
      * @alias mysqli_refresh
      */
+    #[\Deprecated(since: '8.4', message: 'use FLUSH SQL statement instead')]
     public function refresh(int $flags): bool {}
 }
 
@@ -1503,6 +1502,7 @@ function mysqli_info(mysqli $mysql): ?string {}
 /** @refcount 1 */
 function mysqli_insert_id(mysqli $mysql): int|string {}
 
+#[\Deprecated(since: '8.4', message: 'use KILL CONNECTION/QUERY SQL statement instead')]
 function mysqli_kill(mysqli $mysql, int $process_id): bool {}
 
 function mysqli_more_results(mysqli $mysql): bool {}
@@ -1525,6 +1525,7 @@ function mysqli_options(mysqli $mysql, int $option, $value): bool {}
  */
 function mysqli_set_opt(mysqli $mysql, int $option, $value): bool {}
 
+#[\Deprecated(since: '8.4', message: 'because the reconnect feature has been removed in PHP 8.2 and this function is now redundant')]
 function mysqli_ping(mysqli $mysql): bool {}
 
 function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds, int $microseconds = 0): int|false {}
@@ -1532,7 +1533,7 @@ function mysqli_poll(?array &$read, ?array &$error, array &$reject, int $seconds
 /** @refcount 1 */
 function mysqli_prepare(mysqli $mysql, string $query): mysqli_stmt|false {}
 
-function mysqli_report(int $flags): bool {}
+function mysqli_report(int $flags): true {}
 
 /** @refcount 1 */
 function mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool {}
@@ -1664,4 +1665,5 @@ function mysqli_use_result(mysqli $mysql): mysqli_result|false {}
 
 function mysqli_warning_count(mysqli $mysql): int {}
 
+#[\Deprecated(since: '8.4', message: 'use FLUSH SQL statement instead')]
 function mysqli_refresh(mysqli $mysql, int $flags): bool {}

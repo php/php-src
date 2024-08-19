@@ -14,22 +14,26 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
     Linux)
       if ldd -v /bin/sh | grep GLIBC > /dev/null; then
-        AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
         ac_solid_os=l2x
       else
-        AC_DEFINE(SS_LINUX,1,[Needed in sqlunix.h ])
         ac_solid_os=lux
-      fi;;
+      fi
+      AC_DEFINE([SS_LINUX], [1],
+        [Define to 1 to be able to use the obsolete <sqlunix.h> header file on
+        some Linux systems.])
+      ;;
     SunOS)
       ac_solid_os=ssx;; # should we deal with SunOS 4?
     FreeBSD)
       if test `expr $ac_solid_uname_r : '\(.\)'` -gt "2"; then
-        AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
         ac_solid_os=fex
       else
-        AC_DEFINE(SS_FBX,1,[Needed in sqlunix.h for wchar defs ])
         ac_solid_os=fbx
-      fi;;
+      fi
+      AC_DEFINE([SS_FBX], [1],
+        [Define to 1 to be able to use the wchar defs in the obsolete
+        <sqlunix.h> header file on some FreeBSD systems.])
+      ;;
   esac
 
   if test -f $1/soc${ac_solid_os}35.a; then
@@ -61,7 +65,6 @@ fi
 
   AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
 ])
-
 
 dnl
 dnl Figure out which library file to link with for the Empress support.
@@ -103,9 +106,7 @@ PHP_ARG_WITH([adabas],,
 
   AC_MSG_CHECKING([for Adabas support])
   if test "$PHP_ADABAS" != "no"; then
-    if test "$PHP_ADABAS" = "yes"; then
-      PHP_ADABAS=/usr/local
-    fi
+    AS_VAR_IF([PHP_ADABAS], [yes], [PHP_ADABAS=/usr/local])
     PHP_ADD_INCLUDE([$PHP_ADABAS/incl])
     PHP_ADD_LIBPATH([$PHP_ADABAS/$PHP_LIBDIR])
     ODBC_OBJS="$PHP_ADABAS/$PHP_LIBDIR/odbclib.a"
@@ -119,7 +120,8 @@ PHP_ARG_WITH([adabas],,
     ODBC_TYPE=adabas
     ODBC_INCDIR=$PHP_ADABAS/incl
     PHP_ODBC_CHECK_HEADER(sqlext.h)
-    AC_DEFINE(HAVE_ADABAS,1,[ ])
+    AC_DEFINE([HAVE_ADABAS], [1],
+      [Define to 1 if the odbc extension uses the Adabas D.])
     AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT([no])
@@ -133,14 +135,13 @@ PHP_ARG_WITH([sapdb],,
 
   AC_MSG_CHECKING([for SAP DB support])
   if test "$PHP_SAPDB" != "no"; then
-    if test "$PHP_SAPDB" = "yes"; then
-      PHP_SAPDB=/usr/local
-    fi
+    AS_VAR_IF([PHP_SAPDB], [yes], [PHP_SAPDB=/usr/local])
     PHP_ADD_INCLUDE([$PHP_SAPDB/incl])
     PHP_ADD_LIBPATH([$PHP_SAPDB/$PHP_LIBDIR])
     PHP_ADD_LIBRARY([sqlod])
     ODBC_TYPE=sapdb
-    AC_DEFINE(HAVE_SAPDB,1,[ ])
+    AC_DEFINE([HAVE_SAPDB], [1],
+      [Define to 1 if the odbc extension uses the SAP DB.])
     AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT([no])
@@ -154,19 +155,18 @@ PHP_ARG_WITH([solid],,
 
   AC_MSG_CHECKING([for Solid support])
   if test "$PHP_SOLID" != "no"; then
-    if test "$PHP_SOLID" = "yes"; then
-      PHP_SOLID=/usr/local/solid
-    fi
+    AS_VAR_IF([PHP_SOLID], [yes], [PHP_SOLID=/usr/local/solid])
     ODBC_INCDIR=$PHP_SOLID/include
     ODBC_LIBDIR=$PHP_SOLID/$PHP_LIBDIR
     ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_TYPE=solid
     if test -f $ODBC_LIBDIR/soc*35.a; then
-      AC_DEFINE(HAVE_SOLID_35,1,[ ])
+      AC_DEFINE([HAVE_SOLID_35], [1], [Define to 1 if Solid DB 3.5 is used.])
     elif test -f $ODBC_LIBDIR/scl*30.a; then
-      AC_DEFINE(HAVE_SOLID_30,1,[ ])
+      AC_DEFINE([HAVE_SOLID_30], [1], [Define to 1 if Solid DB 3.0 is used.])
     elif test -f $ODBC_LIBDIR/scl*23.a; then
-      AC_DEFINE(HAVE_SOLID,1,[ ])
+      AC_DEFINE([HAVE_SOLID], [1],
+        [Define to 1 if the odbc extension uses the Solid DB.])
     fi
     AC_MSG_RESULT([$ext_output])
     PHP_ODBC_FIND_SOLID_LIBS($ODBC_LIBDIR)
@@ -197,19 +197,19 @@ PHP_ARG_WITH([ibm-db2],,
     ODBC_TYPE=ibm-db2
     ODBC_LIBS=-ldb2
 
-    PHP_TEST_BUILD(SQLExecute, [
-      AC_DEFINE(HAVE_IBMDB2,1,[ ])
+    PHP_TEST_BUILD([SQLExecute], [
+      AC_DEFINE([HAVE_IBMDB2], [1],
+        [Define to 1 if the odbc extension uses the IBM DB2.])
       AC_MSG_RESULT([$ext_output])
     ], [
       AC_MSG_RESULT([no])
-      AC_MSG_ERROR([
-build test failed. Please check the config.log for details.
-You need to source your DB2 environment before running PHP configure:
+      AC_MSG_FAILURE([
+ODBC build test failed. You need to source your DB2 environment before running
+PHP configure:
 # . \$IBM_DB2/db2profile
 ])
-    ], [
-      $ODBC_LFLAGS $ODBC_LIBS
-    ])
+    ],
+    [$ODBC_LFLAGS $ODBC_LIBS])
   else
     AC_MSG_RESULT([no])
   fi
@@ -233,7 +233,8 @@ PHP_ARG_WITH([empress],,
     ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_TYPE=empress
-    AC_DEFINE(HAVE_EMPRESS,1,[ ])
+    AC_DEFINE([HAVE_EMPRESS], [1],
+      [Define to 1 if the odbc extension uses the Empress.])
     AC_MSG_RESULT([$ext_output])
     PHP_ODBC_FIND_EMPRESS_LIBS($ODBC_LIBDIR)
   else
@@ -275,7 +276,8 @@ PHP_ARG_WITH([empress-bcs],,
     done
     ODBC_LIBS="-lempphpbcs -lms -lmscfg -lbasic -lbasic_os -lnlscstab -lnlsmsgtab -lm -ldl -lcrypt"
     ODBC_TYPE=empress-bcs
-    AC_DEFINE(HAVE_EMPRESS,1,[ ])
+    AC_DEFINE([HAVE_EMPRESS], [1],
+      [Define to 1 if the odbc extension uses the Empress.])
     AC_MSG_RESULT([$ext_output])
     PHP_ODBC_FIND_EMPRESS_BCS_LIBS($ODBC_LIBDIR)
   else
@@ -295,16 +297,15 @@ PHP_ARG_WITH([custom-odbc],,
 
   AC_MSG_CHECKING([for a custom ODBC support])
   if test "$PHP_CUSTOM_ODBC" != "no"; then
-    if test "$PHP_CUSTOM_ODBC" = "yes"; then
-      PHP_CUSTOM_ODBC=/usr/local
-    fi
+    AS_VAR_IF([PHP_CUSTOM_ODBC], [yes], [PHP_CUSTOM_ODBC=/usr/local])
     ODBC_INCDIR=$PHP_CUSTOM_ODBC/include
     ODBC_LIBDIR=$PHP_CUSTOM_ODBC/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LIBS=$CUSTOM_ODBC_LIBS
     ODBC_TYPE=custom-odbc
-    AC_DEFINE(HAVE_CODBC,1,[ ])
+    AC_DEFINE([HAVE_CODBC], [1],
+      [Define to 1 if the odbc extension uses custom ODBC installation.])
     AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT([no])
@@ -322,7 +323,8 @@ PHP_ARG_WITH([iodbc],,
     PKG_CHECK_MODULES([ODBC], [libiodbc])
     PHP_EVAL_INCLINE([$ODBC_CFLAGS])
     ODBC_TYPE=iodbc
-    AC_DEFINE(HAVE_IODBC,1,[ ])
+    AC_DEFINE([HAVE_IODBC], [1],
+      [Define to 1 if the odbc extension uses the iODBC.])
   else
     AC_MSG_RESULT([no])
   fi
@@ -335,16 +337,15 @@ PHP_ARG_WITH([esoob],,
 
   AC_MSG_CHECKING([for Easysoft ODBC-ODBC Bridge support])
   if test "$PHP_ESOOB" != "no"; then
-    if test "$PHP_ESOOB" = "yes"; then
-      PHP_ESOOB=/usr/local/easysoft/oob/client
-    fi
+    AS_VAR_IF([PHP_ESOOB], [yes], [PHP_ESOOB=/usr/local/easysoft/oob/client])
     ODBC_INCDIR=$PHP_ESOOB/include
     ODBC_LIBDIR=$PHP_ESOOB/$PHP_LIBDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
     ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LIBS=-lesoobclient
     ODBC_TYPE=esoob
-    AC_DEFINE(HAVE_ESOOB,1,[ ])
+    AC_DEFINE([HAVE_ESOOB], [1],
+      [Define to 1 if the odbc extension uses the Easysoft OOB.])
     AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT([no])
@@ -373,7 +374,8 @@ PHP_ARG_WITH([unixODBC],,
       AC_MSG_RESULT([yes in $PHP_UNIXODBC])
     fi
     ODBC_TYPE=unixODBC
-    AC_DEFINE(HAVE_UNIXODBC,1,[ ])
+    AC_DEFINE([HAVE_UNIXODBC], [1],
+      [Define to 1 if the odbc extension uses the unixODBC.])
   else
     AC_MSG_RESULT([no])
   fi
@@ -414,7 +416,8 @@ PHP_ARG_WITH([dbmaker],,
     ODBC_LIBS="-ldmapic -lc"
     ODBC_TYPE=dbmaker
 
-    AC_DEFINE(HAVE_DBMAKER,1,[Whether you want DBMaker])
+    AC_DEFINE([HAVE_DBMAKER], [1],
+      [Define to 1 if the odbc extension uses the DBMaker.])
 
     if test "$ext_shared" = "yes"; then
       AC_MSG_RESULT([yes (shared)])
@@ -431,22 +434,21 @@ PHP_ARG_WITH([dbmaker],,
   fi
 fi
 
-if test "no" != "$PHP_ODBCVER"; then
-  if test "$PHP_ODBCVER" != "0"; then
-    AC_DEFINE_UNQUOTED(ODBCVER, $PHP_ODBCVER, [ The highest supported ODBC version ])
-  fi
-else
-  AC_DEFINE(ODBCVER, 0x0350, [ The highest supported ODBC version ])
-fi
+AH_TEMPLATE([ODBCVER], [The highest supported ODBC version.])
+AS_VAR_IF([PHP_ODBCVER], [no],
+  [AC_DEFINE([ODBCVER], [0x0350])],
+  [AS_VAR_IF([PHP_ODBCVER], [0],,
+    [AC_DEFINE_UNQUOTED([ODBCVER], [$PHP_ODBCVER])])])
 
 dnl Extension setup
 if test -n "$ODBC_TYPE"; then
-  if test "$ODBC_TYPE" != "dbmaker"; then
-    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    if test "$ODBC_TYPE" != "solid"; then
-      AC_DEFINE(HAVE_SQLDATASOURCES,1,[ ])
-    fi
-  fi
+  AS_VAR_IF([ODBC_TYPE], [dbmaker],, [
+    PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], [ODBC_SHARED_LIBADD])
+    AS_VAR_IF([ODBC_TYPE], [solid],,
+      [AC_DEFINE([HAVE_SQLDATASOURCES], [1],
+        [Define to 1 if ODBC library has 'SQLDataSources', as a function or
+        macro.])])
+  ])
 
   AC_DEFINE([HAVE_UODBC], [1],
     [Define to 1 if the PHP extension 'odbc' is available.])

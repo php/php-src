@@ -100,12 +100,6 @@ dnl ----------------------------------------------------------------------------
 
 PHP_INIT_BUILD_SYSTEM
 
-T_MD=`$php_shtool echo -n -e %B`
-T_ME=`$php_shtool echo -n -e %b`
-
-dnl We want this one before the checks, so the checks can modify CFLAGS.
-AS_VAR_IF([CFLAGS],, [auto_cflags=1])
-
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
 
@@ -155,7 +149,6 @@ dnl Check for -R, etc. switch.
 PHP_RUNPATH_SWITCH
 
 dnl Checks for some support/generator progs.
-PHP_PROG_AWK
 PHP_PROG_BISON([3.0.0])
 PHP_PROG_RE2C([1.0.3], [--no-generation-date])
 PHP_PROG_PHP()
@@ -274,7 +267,7 @@ SAPI_SHARED=libs/$SAPI_LIBNAME_SHARED
 SAPI_STATIC=libs/$SAPI_LIBNAME_STATIC
 SAPI_LIBTOOL=libphp.la
 
-PHP_CONFIGURE_PART(Configuring SAPI modules)
+PHP_CONFIGURE_PART([Configuring SAPI modules])
 
 esyscmd(./build/config-stubs sapi)
 
@@ -284,20 +277,17 @@ AC_MSG_RESULT([$PHP_SAPI])
 
 dnl Show which binaries were selected.
 AC_MSG_CHECKING([for executable SAPI binaries])
-if test "$PHP_BINARIES"; then
-  AC_MSG_RESULT([$PHP_BINARIES])
-else
-  AC_MSG_RESULT([none])
-fi
+AS_VAR_IF([PHP_BINARIES],,
+  [AC_MSG_RESULT([none])],
+  [AC_MSG_RESULT([$PHP_BINARIES])])
 
 dnl Exit early.
-if test -z "$PHP_INSTALLED_SAPIS"; then
-  AC_MSG_ERROR([Nothing to build.])
-fi
+AS_VAR_IF([PHP_INSTALLED_SAPIS],, [AC_MSG_ERROR([Nothing to build.])])
 
-dnl Force ZTS.
-if test "$enable_zts" = "yes"; then
-  dnl Add pthreads linker and compiler flags.
+dnl Add POSIX threads compilation and linker flags when thread safety is enabled
+dnl with either the '--enable-zts' configure option or automatically enabled by
+dnl PHP SAPIs. For example, Apache SAPI.
+AS_VAR_IF([enable_zts], [yes], [
   if test -n "$ac_cv_pthreads_lib"; then
     LIBS="$LIBS -l$ac_cv_pthreads_lib"
   fi
@@ -306,12 +296,12 @@ if test "$enable_zts" = "yes"; then
   fi
 
   PTHREADS_FLAGS
-fi
+])
 
 dnl Starting system checks.
 dnl ----------------------------------------------------------------------------
 
-PHP_CONFIGURE_PART(Running system checks)
+PHP_CONFIGURE_PART([Running system checks])
 
 dnl Find sendmail binary.
 PHP_PROG_SENDMAIL
@@ -463,9 +453,9 @@ AC_CHECK_TYPES([socklen_t], [], [], [
 ])
 
 dnl These are defined elsewhere than stdio.h.
-PHP_CHECK_SIZEOF(intmax_t, 0)
-PHP_CHECK_SIZEOF(ssize_t, 8)
-PHP_CHECK_SIZEOF(ptrdiff_t, 8)
+PHP_CHECK_SIZEOF([intmax_t], [0])
+PHP_CHECK_SIZEOF([ssize_t], [8])
+PHP_CHECK_SIZEOF([ptrdiff_t], [8])
 
 dnl Check stdint types (must be after header check).
 PHP_CHECK_STDINT_TYPES
@@ -602,8 +592,8 @@ AC_CHECK_FUNCS(m4_normalize([
   vasprintf
 ]))
 
-AC_CHECK_FUNC([inet_ntop],,[AC_MSG_ERROR([Required inet_ntop not found.])])
-AC_CHECK_FUNC([inet_pton],,[AC_MSG_ERROR([Required inet_pton not found.])])
+AC_CHECK_FUNC([inet_ntop],, [AC_MSG_FAILURE([Required inet_ntop not found.])])
+AC_CHECK_FUNC([inet_pton],, [AC_MSG_FAILURE([Required inet_pton not found.])])
 
 dnl Check for strerror_r, and if its a POSIX-compatible or a GNU specific version.
 AC_FUNC_STRERROR_R
@@ -753,7 +743,7 @@ AS_VAR_IF([PHP_VALGRIND], [no],, [
 
 dnl General settings.
 dnl ----------------------------------------------------------------------------
-PHP_CONFIGURE_PART(General settings)
+PHP_CONFIGURE_PART([General settings])
 
 PHP_HELP_SEPARATOR([General settings:])
 
@@ -765,10 +755,8 @@ PHP_ARG_ENABLE([gcov],
   [no])
 
 if test "$PHP_GCOV" = "yes"; then
-
-  if test "$GCC" != "yes"; then
-    AC_MSG_ERROR([GCC is required for --enable-gcov])
-  fi
+  AS_VAR_IF([GCC], [yes],,
+    [AC_MSG_ERROR([GNU C compatible compiler is required for --enable-gcov])])
 
   dnl Check if ccache is being used.
   case `$php_shtool path $CC` in
@@ -777,7 +765,10 @@ if test "$PHP_GCOV" = "yes"; then
   esac
 
   if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
-    AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
+    AC_MSG_ERROR(m4_text_wrap([
+      ccache must be disabled when --enable-gcov option is used. You can disable
+      ccache by setting environment variable CCACHE_DISABLE=1.
+    ]))
   fi
 
   AC_DEFINE([HAVE_GCOV], [1], [Define to 1 if GCOV code coverage is enabled.])
@@ -802,7 +793,7 @@ PHP_ARG_ENABLE([debug],
   [no],
   [no])
 
-if test "$PHP_DEBUG" = "yes"; then
+AS_VAR_IF([PHP_DEBUG], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
@@ -824,10 +815,10 @@ if test "$PHP_DEBUG" = "yes"; then
       CXXFLAGS="$CFLAGS -g"
     fi
   fi
-else
+], [
   PHP_DEBUG=0
   ZEND_DEBUG=no
-fi
+])
 
 PHP_ARG_ENABLE([debug-assertions],
   [whether to enable debug assertions in release mode],
@@ -836,10 +827,10 @@ PHP_ARG_ENABLE([debug-assertions],
   [no],
   [no])
 
-if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
+AS_VAR_IF([PHP_DEBUG_ASSERTIONS], [yes], [
   PHP_DEBUG=1
   ZEND_DEBUG=yes
-fi
+])
 
 AC_ARG_ENABLE([zts],
   [AS_HELP_STRING([--enable-zts],
@@ -847,16 +838,11 @@ AC_ARG_ENABLE([zts],
   [ZEND_ZTS=$enableval],
   [ZEND_ZTS=no])
 
-if test "$ZEND_ZTS" = "yes"; then
-  AC_DEFINE(ZTS, 1,[ ])
-  PHP_THREAD_SAFETY=yes
-else
-  PHP_THREAD_SAFETY=no
-fi
+AS_VAR_IF([ZEND_ZTS], [yes], [PHP_THREAD_SAFETY=yes], [PHP_THREAD_SAFETY=no])
 
 AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [
   AS_VAR_IF([pthreads_working], [yes], [],
-    [AC_MSG_ERROR(m4_normalize([
+    [AC_MSG_FAILURE(m4_text_wrap([
       Unable to verify system support for POSIX Threads, which are required for
       PHP thread safety (ZTS) build.
     ]))])
@@ -884,14 +870,7 @@ PHP_ARG_WITH([layout],
   [PHP],
   [no])
 
-case $PHP_LAYOUT in
-  GNU)
-    oldstyleextdir=no
-    ;;
-  *)
-    oldstyleextdir=yes
-    ;;
-esac
+AS_CASE([$PHP_LAYOUT], [GNU], [oldstyleextdir=no], [oldstyleextdir=yes])
 
 PHP_ARG_WITH([config-file-path],
   [path to configuration file],
@@ -900,16 +879,10 @@ PHP_ARG_WITH([config-file-path],
   [DEFAULT],
   [no])
 
-if test "$PHP_CONFIG_FILE_PATH" = "DEFAULT"; then
-  case $PHP_LAYOUT in
-    GNU)
-      PHP_CONFIG_FILE_PATH=$sysconfdir
-      ;;
-    *)
-      PHP_CONFIG_FILE_PATH=$libdir
-      ;;
-  esac
-fi
+AS_VAR_IF([PHP_CONFIG_FILE_PATH], [DEFAULT],
+  [AS_CASE([$PHP_LAYOUT],
+    [GNU], [PHP_CONFIG_FILE_PATH=$sysconfdir],
+    [PHP_CONFIG_FILE_PATH=$libdir])])
 
 AC_MSG_CHECKING([where to scan for configuration files])
 PHP_ARG_WITH([config-file-scan-dir],,
@@ -918,9 +891,7 @@ PHP_ARG_WITH([config-file-scan-dir],,
   [DEFAULT],
   [no])
 
-if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
-  PHP_CONFIG_FILE_SCAN_DIR=
-fi
+AS_VAR_IF([PHP_CONFIG_FILE_SCAN_DIR], [DEFAULT], [PHP_CONFIG_FILE_SCAN_DIR=])
 AC_MSG_RESULT([$PHP_CONFIG_FILE_SCAN_DIR])
 
 PHP_ARG_ENABLE([sigchild],
@@ -943,14 +914,13 @@ PHP_ARG_ENABLE([libgcc],
   [no],
   [no])
 
-if test "$PHP_LIBGCC" = "yes"; then
+AS_VAR_IF([PHP_LIBGCC], [yes], [
   PHP_LIBGCC_LIBPATH([gcc])
-  if test -z "$libgcc_libpath"; then
-    AC_MSG_ERROR([Cannot locate libgcc. Make sure that gcc is in your path])
-  fi
+  AS_VAR_IF([libgcc_libpath],,
+    [AC_MSG_ERROR([Cannot locate libgcc. Make sure that gcc is in your path])])
   PHP_ADD_LIBPATH([$libgcc_libpath])
   PHP_ADD_LIBRARY([gcc], [yes])
-fi
+])
 
 PHP_ARG_ENABLE([short-tags],
   [whether to enable short tags by default],
@@ -978,7 +948,7 @@ AS_VAR_IF([PHP_DMALLOC], [yes],
     [PHP_ADD_LIBRARY([dmalloc])
       AC_DEFINE([HAVE_DMALLOC], [1], [Define to 1 if you have dmalloc.])
       AS_VAR_APPEND([CPPFLAGS], [" -DDMALLOC_FUNC_CHECK"])],
-    [AC_MSG_ERROR([Problem with enabling dmalloc. Please, check config.log for details.])])])
+    [AC_MSG_FAILURE([The dmalloc check failed. Cannot enable dmalloc.])])])
 
 PHP_ARG_ENABLE([ipv6],
   [whether to enable IPv6 support],
@@ -1035,16 +1005,14 @@ PHP_ARG_ENABLE([fd-setsize],,
   [no],
   [no])
 
-if test "$PHP_FD_SETSIZE" != "no"; then
+AS_VAR_IF([PHP_FD_SETSIZE], [no], [AC_MSG_RESULT([using system default])], [
   if test "0$PHP_FD_SETSIZE" -gt 0 2>/dev/null; then
     CPPFLAGS="$CPPFLAGS -DFD_SETSIZE=$PHP_FD_SETSIZE"
     AC_MSG_RESULT([using $PHP_FD_SETSIZE])
   else
     AC_MSG_ERROR([Invalid value passed to --enable-fd-setsize!])
   fi
-else
-  AC_MSG_RESULT([using system default])
-fi
+])
 
 PHP_ARG_ENABLE([werror],,
   [AS_HELP_STRING([--enable-werror],
@@ -1071,7 +1039,6 @@ dnl Extension configuration.
 dnl ----------------------------------------------------------------------------
 
 PHP_HELP_SEPARATOR([[Extensions:
-
   --with-EXTENSION=[shared[,PATH]]
 
     NOTE: Not all extensions can be built as 'shared'.
@@ -1082,7 +1049,7 @@ PHP_HELP_SEPARATOR([[Extensions:
       o foobar package install prefix is /usr/local/foobar/
 ]])
 
-PHP_CONFIGURE_PART(Configuring extensions)
+PHP_CONFIGURE_PART([Configuring extensions])
 
 dnl Check if all enabled by default extensions should be disabled.
 AC_ARG_ENABLE([all],
@@ -1156,7 +1123,7 @@ dnl PEAR
 dnl ----------------------------------------------------------------------------
 
 PHP_HELP_SEPARATOR([PEAR:])
-PHP_CONFIGURE_PART(Configuring PEAR)
+PHP_CONFIGURE_PART([Configuring PEAR])
 
 dnl If CLI is disabled disable PEAR.
 AS_VAR_IF([PHP_CLI], [no], [with_pear=no])
@@ -1172,7 +1139,7 @@ AS_VAR_IF([PHP_PEAR], [no],, [
   AC_MSG_WARN([The --with-pear option is deprecated])
 
   dnl PEAR dependencies.
-  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR(m4_normalize([
+  AS_VAR_IF([PHP_XML], [no], [AC_MSG_ERROR(m4_text_wrap([
     PEAR requires XML to be enabled. Add '--enable-xml' to the configure line,
     or disable PEAR (--without-pear).
   ]))])
@@ -1196,7 +1163,7 @@ dnl Configuring Zend and TSRM.
 dnl ----------------------------------------------------------------------------
 
 PHP_HELP_SEPARATOR([Zend:])
-PHP_CONFIGURE_PART(Configuring Zend)
+PHP_CONFIGURE_PART([Configuring Zend])
 
 AC_ARG_ENABLE([fiber-asm],
   [AS_HELP_STRING([--disable-fiber-asm],
@@ -1312,7 +1279,7 @@ else
   AC_CHECK_HEADER([ucontext.h],
     [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1],
       [Define to 1 if Zend fiber uses ucontext instead of boost context.])],
-    [AC_MSG_ERROR([fibers not available on this platform])])
+    [AC_MSG_FAILURE([fibers not available on this platform])])
 fi
 
 ZEND_INIT
@@ -1364,41 +1331,23 @@ datadir=`eval eval echo $datadir`
 dnl Build extension directory path.
 ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //'`
 
-if test -z "$EXTENSION_DIR"; then
+AS_VAR_IF([EXTENSION_DIR],, [
   extbasedir=$ZEND_MODULE_API_NO
-  if test "$oldstyleextdir" = "yes"; then
-    if test "$PHP_DEBUG" = "1"; then
-      part1=debug
-    else
-      part1=no-debug
-    fi
-    if test "$enable_zts" = "yes"; then
-      part2=zts
-    else
-      part2=non-zts
-    fi
+  AS_VAR_IF([oldstyleextdir], [yes], [
+    AS_VAR_IF([PHP_DEBUG], [1], [part1=debug], [part1=no-debug])
+    AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [part2=zts], [part2=non-zts])
     extbasedir=$part1-$part2-$extbasedir
     EXTENSION_DIR=$libdir/extensions/$extbasedir
-  else
-    if test "$enable_zts" = "yes"; then
-      extbasedir=$extbasedir-zts
-    fi
-
-    if test "$PHP_DEBUG" = "1"; then
-      extbasedir=$extbasedir-debug
-    fi
+  ], [
+    AS_VAR_IF([PHP_THREAD_SAFETY], [yes], [extbasedir=$extbasedir-zts])
+    AS_VAR_IF([PHP_DEBUG], [1], [extbasedir=$extbasedir-debug])
     EXTENSION_DIR=$libdir/$extbasedir
-  fi
-fi
+  ])
+])
 
-case $PHP_LAYOUT in
-  GNU)
-    datarootdir=$prefix/share
-    ;;
-  *)
-    datarootdir=$prefix/php
-    ;;
-esac
+AS_CASE([$PHP_LAYOUT],
+  [GNU], [datarootdir=$prefix/share],
+  [datarootdir=$prefix/php])
 
 dnl Expand all directory names for use in macros/constants.
 EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
@@ -1447,19 +1396,23 @@ EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
 UNAME=`uname -a | xargs`
 PHP_UNAME=${PHP_UNAME:-$UNAME}
-AC_DEFINE_UNQUOTED(PHP_UNAME,"$PHP_UNAME",[uname -a output])
+AC_DEFINE_UNQUOTED([PHP_UNAME], ["$PHP_UNAME"], [The 'uname -a' output.])
 PHP_OS=`uname | xargs`
-AC_DEFINE_UNQUOTED(PHP_OS,"$PHP_OS",[uname output])
+AC_DEFINE_UNQUOTED([PHP_OS], ["$PHP_OS"], [The 'uname' output.])
 PHP_BUILD_SYSTEM=${PHP_BUILD_SYSTEM:-$PHP_UNAME}
-AC_DEFINE_UNQUOTED(PHP_BUILD_SYSTEM,"$PHP_BUILD_SYSTEM",[builder uname output])
+AC_DEFINE_UNQUOTED([PHP_BUILD_SYSTEM], ["$PHP_BUILD_SYSTEM"],
+  [The system that PHP was built on.])
 if test -n "${PHP_BUILD_PROVIDER}"; then
-  AC_DEFINE_UNQUOTED(PHP_BUILD_PROVIDER,"$PHP_BUILD_PROVIDER",[build provider])
+  AC_DEFINE_UNQUOTED([PHP_BUILD_PROVIDER], ["$PHP_BUILD_PROVIDER"],
+    [The PHP build provider information.])
 fi
 if test -n "${PHP_BUILD_COMPILER}"; then
-  AC_DEFINE_UNQUOTED(PHP_BUILD_COMPILER,"$PHP_BUILD_COMPILER",[used compiler for build])
+  AC_DEFINE_UNQUOTED([PHP_BUILD_COMPILER], ["$PHP_BUILD_COMPILER"],
+    [The compiler used for the PHP build.])
 fi
 if test -n "${PHP_BUILD_ARCH}"; then
-  AC_DEFINE_UNQUOTED(PHP_BUILD_ARCH,"$PHP_BUILD_ARCH",[build architecture])
+  AC_DEFINE_UNQUOTED([PHP_BUILD_ARCH], ["$PHP_BUILD_ARCH"],
+    [The build architecture.])
 fi
 
 PHP_SUBST([PHP_FASTCGI_OBJS])
@@ -1521,10 +1474,10 @@ if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
 fi
 
 dnl Enable -Werror late, because it may break configure checks throwing warnings.
-if test "$PHP_WERROR" = "yes"; then
+AS_VAR_IF([PHP_WERROR], [yes], [
   CFLAGS="$CFLAGS -Werror"
   CXXFLAGS="$CXXFLAGS -Werror"
-fi
+])
 
 if test "$PHP_MEMORY_SANITIZER" = "yes" &&
    test "$PHP_ADDRESS_SANITIZER" = "yes"; then
@@ -1532,15 +1485,15 @@ if test "$PHP_MEMORY_SANITIZER" = "yes" &&
 fi
 
 dnl Enable -fsanitize=memory late, because interceptors may break linking detection.
-if test "$PHP_MEMORY_SANITIZER" = "yes"; then
-  AX_CHECK_COMPILE_FLAG([-fsanitize=memory -fsanitize-memory-track-origins], [
+AS_VAR_IF([PHP_MEMORY_SANITIZER], [yes],
+  [AX_CHECK_COMPILE_FLAG([-fsanitize=memory -fsanitize-memory-track-origins], [
     CFLAGS="$CFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
     CXXFLAGS="$CXXFLAGS -fsanitize=memory -fsanitize-memory-track-origins"
   ], [AC_MSG_ERROR([MemorySanitizer is not available])])
-fi
+])
 
 AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
-  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR(m4_normalize([
+  [AS_VAR_IF([PHP_VALGRIND], [no],, [AC_MSG_ERROR(m4_text_wrap([
     Valgrind and address sanitizer are not compatible. Either disable Valgrind
     (remove --with-valgrind) or disable address sanitizer (remove
     --enable-address-sanitizer).
@@ -1552,8 +1505,8 @@ AS_VAR_IF([PHP_ADDRESS_SANITIZER], [yes],
   ], [AC_MSG_ERROR([AddressSanitizer is not available])])
 ])
 
-if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
-  AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
+AS_VAR_IF([PHP_UNDEFINED_SANITIZER], [yes],
+  [AX_CHECK_COMPILE_FLAG([-fsanitize=undefined], [
     CFLAGS="$CFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
     CXXFLAGS="$CXXFLAGS -fsanitize=undefined -fno-sanitize-recover=undefined"
     AX_CHECK_COMPILE_FLAG([-fno-sanitize=object-size], [
@@ -1565,23 +1518,27 @@ if test "$PHP_UNDEFINED_SANITIZER" = "yes"; then
 
     dnl Clang 17 adds stricter function pointer compatibility checks where pointer args cannot be
     dnl cast to void*. In that case, set -fno-sanitize=function.
-    OLD_CFLAGS="$CFLAGS"
+    OLD_CFLAGS=$CFLAGS
     CFLAGS="$CFLAGS -fno-sanitize-recover=undefined"
-    AC_CACHE_CHECK([whether to add -fno-sanitize=function],[php_cv_ubsan_no_function],[
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    AC_CACHE_CHECK([whether to add -fno-sanitize=function],
+    [php_cv_ubsan_no_function],
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
 void foo(char *string) {}
 int main(void) {
   void (*f)(void *) = (void (*)(void *))foo;
   f("foo");
 }
-    ]])],[php_cv_ubsan_no_function=no],[php_cv_ubsan_no_function=yes],[php_cv_ubsan_no_function=no])])
-    CFLAGS="$OLD_CFLAGS"
-    if test "$php_cv_ubsan_no_function" = yes; then
+    ])],
+    [php_cv_ubsan_no_function=no],
+    [php_cv_ubsan_no_function=yes],
+    [php_cv_ubsan_no_function=no])])
+    CFLAGS=$OLD_CFLAGS
+    AS_VAR_IF([php_cv_ubsan_no_function], [yes], [
       CFLAGS="$CFLAGS -fno-sanitize=function"
       CXXFLAGS="$CFLAGS -fno-sanitize=function"
-    fi
+    ])
   ], [AC_MSG_ERROR([UndefinedBehaviorSanitizer is not available])])
-fi
+])
 
 if test "$PHP_MEMORY_SANITIZER" = "yes" ||
    test "$PHP_ADDRESS_SANITIZER" = "yes" ||
@@ -1595,7 +1552,7 @@ dnl Libtool creation.
 dnl
 
 PHP_HELP_SEPARATOR([Libtool:])
-PHP_CONFIGURE_PART(Configuring libtool)
+PHP_CONFIGURE_PART([Configuring libtool])
 
 dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
 dnl See https://github.com/php/php-src/pull/3017
@@ -1619,7 +1576,7 @@ PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
 
 CC=$old_CC
 
-PHP_CONFIGURE_PART(Generating files)
+PHP_CONFIGURE_PART([Generating files])
 
 CXXFLAGS_CLEAN=$CXXFLAGS
 CFLAGS_CLEAN="$CFLAGS \$(PROF_FLAGS)"
@@ -1829,13 +1786,13 @@ PHP_ADD_BUILD_DIR(m4_normalize([
   Zend/Optimizer
 ]))
 
-ALL_OUTPUT_FILES="main/build-defs.h \
-scripts/phpize scripts/man1/phpize.1 \
-scripts/php-config scripts/man1/php-config.1 \
-$PHP_OUTPUT_FILES"
-
-dnl Generate build files.
-AC_CONFIG_FILES([$ALL_OUTPUT_FILES])
+AC_CONFIG_FILES([
+  main/build-defs.h
+  scripts/man1/php-config.1
+  scripts/man1/phpize.1
+  scripts/php-config
+  scripts/phpize
+])
 
 AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([main/php_config.h.in])])
 
@@ -1855,24 +1812,16 @@ Thank you for using PHP.
 
 X
 ],[
-
-if test "\$CONFIG_FILES" = "$ALL_OUTPUT_FILES" || test "\$CONFIG_FILES" = " $ALL_OUTPUT_FILES" || test -z "\$CONFIG_FILES"; then
-  REDO_ALL=yes
-fi
-
 dnl Create configuration headers.
 dnl ----------------------------------------------------------------------------
 cat >Zend/zend_config.h <<FEO
 #include <../main/php_config.h>
 FEO
 
-dnl Run this only when generating all the files.
-if test -n "\$REDO_ALL"; then
-  echo "creating main/internal_functions.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
+echo "creating main/internal_functions.c"
+AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_STATIC" > main/internal_functions.c
 
-  echo "creating main/internal_functions_cli.c"
-  AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
-fi
+echo "creating main/internal_functions_cli.c"
+AWK="$AWK" sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in "$EXT_CLI_STATIC" > main/internal_functions_cli.c
 ])
 AC_OUTPUT
