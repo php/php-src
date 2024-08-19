@@ -1751,18 +1751,9 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 		mode = mode_in;
 		mode_p = &mode;
 		break;
-	case STMT_ATTR_PREFETCH_ROWS:
-		if (mode_in < 1) {
-			zend_argument_value_error(ERROR_ARG_POS(3), "must be greater than 0 for attribute MYSQLI_STMT_ATTR_PREFETCH_ROWS");
-			RETURN_THROWS();
-		}
-		mode = mode_in;
-		mode_p = &mode;
-		break;
 	default:
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
-			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
 
@@ -1793,8 +1784,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 		/* Success corresponds to 0 return value and a non-zero value
 		 * should only happen if the attr/option is unknown */
 		zend_argument_value_error(ERROR_ARG_POS(2), "must be one of "
-			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH, "
-			"MYSQLI_STMT_ATTR_PREFETCH_ROWS, or STMT_ATTR_CURSOR_TYPE");
+			"MYSQLI_STMT_ATTR_UPDATE_MAX_LENGTH or STMT_ATTR_CURSOR_TYPE");
 		RETURN_THROWS();
 	}
 

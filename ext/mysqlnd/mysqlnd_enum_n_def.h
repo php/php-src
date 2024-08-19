@@ -399,8 +399,7 @@ typedef enum param_bind_flags
 enum mysqlnd_stmt_attr
 {
 	STMT_ATTR_UPDATE_MAX_LENGTH,
-	STMT_ATTR_CURSOR_TYPE,
-	STMT_ATTR_PREFETCH_ROWS
+	STMT_ATTR_CURSOR_TYPE
 };
 
 enum myslqnd_cursor_type
