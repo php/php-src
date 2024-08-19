@@ -153,23 +153,23 @@ require_once 'skipifconnectfailure.inc';
 
     $link->real_query('KILL '.mysqli_thread_id($link));
     // We kill our own connection so we should get "Query execution was interrupted"
-	if ($link->errno !== 1317)
-		printf("[042] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    if ($link->errno !== 1317)
+        printf("[042] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_stmt_get_result($stmt)))
-		printf("[043] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
+    if (false !== ($tmp = mysqli_stmt_get_result($stmt)))
+        printf("[043] Expecting boolean/false, got %s/%s\n", gettype($tmp), var_export($tmp, true));
 
-	mysqli_stmt_close($stmt);
+    mysqli_stmt_close($stmt);
 
-	try {
+    try {
         mysqli_stmt_fetch($stmt);
     } catch (Error $exception) {
         echo $exception->getMessage(), "\n";
     }
 
-	mysqli_close($link);
+    mysqli_close($link);
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php
