@@ -100,9 +100,6 @@ dnl ----------------------------------------------------------------------------
 
 PHP_INIT_BUILD_SYSTEM
 
-dnl We want this one before the checks, so the checks can modify CFLAGS.
-AS_VAR_IF([CFLAGS],, [auto_cflags=1])
-
 abs_srcdir=`(cd $srcdir; pwd)`
 abs_builddir=`pwd`
 
