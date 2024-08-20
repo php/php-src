@@ -6114,6 +6114,47 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 	reflection_property_set_raw_value(ref, intern, Z_OBJ_P(object), value);
 }
 
+static zend_result reflection_property_check_lazy_compatible(reflection_object *intern,
+		property_reference *ref, zend_object *object, const char *method)
+{
+	if (!ref->prop) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Can not use %s on dynamic property %s::$%s",
+				method, ZSTR_VAL(intern->ce->name),
+				ZSTR_VAL(ref->unmangled_name));
+		return FAILURE;
+	}
+
+	if (ref->prop->flags & ZEND_ACC_STATIC) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Can not use %s on static property %s::$%s",
+				method, ZSTR_VAL(intern->ce->name),
+				ZSTR_VAL(ref->unmangled_name));
+		return FAILURE;
+	}
+
+	if (ref->prop->flags & ZEND_ACC_VIRTUAL) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+				"Can not use %s on virtual property %s::$%s",
+				method, ZSTR_VAL(intern->ce->name),
+				ZSTR_VAL(ref->unmangled_name));
+		return FAILURE;
+	}
+
+	if (UNEXPECTED(object->handlers->write_property != zend_std_write_property)) {
+		if (!zend_class_can_be_lazy(object->ce)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+					"Can not use %s on internal class %s",
+					method, ZSTR_VAL(intern->ce->name));
+			return FAILURE;
+		}
+	}
+
+	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(ref->prop->offset));
+
+	return SUCCESS;
+}
+
 /* {{{ Set property value withtout triggering initializer while skipping hooks if any */
 ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 {
@@ -6124,42 +6165,15 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!ref->prop) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use setRawValueWithoutLazyInitialization on dynamic property %s::$%s",
-				ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
-	if (ref->prop->flags & ZEND_ACC_STATIC) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use setRawValueWithoutLazyInitialization on static property %s::$%s",
-				ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
-	if (ref->prop->flags & ZEND_ACC_VIRTUAL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use setRawValueWithoutLazyInitialization on virtual property %s::$%s",
-				ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
 	ZEND_PARSE_PARAMETERS_START(2, 2) {
 		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
 		Z_PARAM_ZVAL(value)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(object->handlers->write_property != zend_std_write_property)) {
-		if (!zend_class_can_be_lazy(object->ce)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Can not use setRawValueWithoutLazyInitialization on internal class %s",
-					ZSTR_VAL(intern->ce->name));
-			RETURN_THROWS();
-		}
+	if (reflection_property_check_lazy_compatible(intern, ref, object,
+				"setRawValueWithoutLazyInitialization") == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(ref->prop->offset));
 
 	zval *var_ptr = OBJ_PROP(object, ref->prop->offset);
 	bool prop_was_lazy = Z_PROP_FLAG_P(var_ptr) & IS_PROP_LAZY;
@@ -6195,41 +6209,14 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!ref->prop) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use skipLazyInitialization on dynamic property %s::$%s",
-				ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
-	if (ref->prop->flags & ZEND_ACC_STATIC) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use skipLazyInitialization on static property %s::$%s",
-				ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
-	if (ref->prop->flags & ZEND_ACC_VIRTUAL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use skipLazyInitialization on virtual property %s::$%s",
-				ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
 	ZEND_PARSE_PARAMETERS_START(1, 1) {
 		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (UNEXPECTED(object->handlers->write_property != zend_std_write_property)) {
-		if (!zend_class_can_be_lazy(object->ce)) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Can not use skipLazyInitialization on internal class %s",
-					ZSTR_VAL(intern->ce->name));
-			RETURN_THROWS();
-		}
+	if (reflection_property_check_lazy_compatible(intern, ref, object,
+				"skipLazyInitialization") == FAILURE) {
+		RETURN_THROWS();
 	}
-
-	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(ref->prop->offset));
 
 	bool prop_was_lazy = (Z_PROP_FLAG_P(OBJ_PROP(object, ref->prop->offset)) & IS_PROP_LAZY);
 
