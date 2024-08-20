@@ -362,8 +362,7 @@ static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_tabl
 		for (int i = 0; i < ce->default_properties_count; i++) {
 			zval *p = &properties_table[i];
 			zend_object_dtor_property(obj, p);
-			ZVAL_COPY_PROP(p, &properties_table_snapshot[i]);
-			Z_TRY_DELREF_P(p);
+			ZVAL_COPY_VALUE_PROP(p, &properties_table_snapshot[i]);
 
 			zend_property_info *prop_info = ce->properties_info_table[i];
 			if (Z_ISREF_P(p) && prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
