@@ -6162,7 +6162,7 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 	/* Do not trigger initialization */
 	Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_LAZY;
 
-	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+	if (!ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
 		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
 	} else {
 		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
