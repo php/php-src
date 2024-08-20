@@ -449,6 +449,16 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 		return NULL;
 	}
 
+	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT)) {
+		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
+		zend_type_error("Lazy proxy factory must return an instance of a class compatible with %s, %s returned",
+				ZSTR_VAL(obj->ce->name),
+				zend_zval_value_name(&retval));
+		zval_ptr_dtor(&retval);
+		return NULL;
+
+	}
+
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT || !zend_lazy_object_compatible(Z_OBJ(retval), obj))) {
 		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_type_error("The real instance class %s is not compatible with the proxy class %s. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.",

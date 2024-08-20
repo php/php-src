@@ -152,7 +152,7 @@ string(11) "initializer"
 TypeError: The real instance class DateTime is not compatible with the proxy class C. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.
 ## C vs NULL
 string(11) "initializer"
-TypeError: The real instance class null is not compatible with the proxy class C. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.
+TypeError: Lazy proxy factory must return an instance of a class compatible with C, null returned
 ## C vs D
 string(11) "initializer"
 TypeError: The real instance class D is not compatible with the proxy class C. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.
