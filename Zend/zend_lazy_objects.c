@@ -95,7 +95,7 @@ void zend_lazy_objects_destroy(zend_lazy_objects_store *store)
 
 static void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
 {
-	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY));
+	ZEND_ASSERT(zend_object_is_lazy(obj));
 
 	zval *zv = zend_hash_index_add_new_ptr(&EG(lazy_objects_store).infos, obj->handle, info);
 	ZEND_ASSERT(zv);
@@ -103,7 +103,7 @@ static void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *i
 
 static zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
 {
-	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY));
+	ZEND_ASSERT(zend_object_is_lazy(obj));
 
 	zend_lazy_object_info *info = zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
 	ZEND_ASSERT(info);
