@@ -26,4 +26,4 @@ try {
 
 ?>
 --EXPECTF--
-string(61) "SQLite3::loadExtension(): Argument #1 ($name) cannot be empty"
+string(63) "SQLite3::loadExtension(): Argument #1 ($name) must not be empty"

@@ -635,7 +635,7 @@ PHP_FUNCTION(hash_init)
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
-			zend_argument_value_error(3, "cannot be empty when HMAC is requested");
+			zend_argument_value_error(3, "must not be empty when HMAC is requested");
 			RETURN_THROWS();
 		}
 	}
@@ -914,7 +914,7 @@ PHP_FUNCTION(hash_hkdf)
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
-		zend_argument_cannot_be_empty_error(2);
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 

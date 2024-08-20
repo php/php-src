@@ -114,7 +114,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 mysqli_close($link);
 ?>
 --EXPECTF--
-mysqli_query(): Argument #2 ($query) cannot be empty
+mysqli_query(): Argument #2 ($query) must not be empty
 array(1) {
   ["valid"]=>
   string(30) "this is sql but with semicolon"

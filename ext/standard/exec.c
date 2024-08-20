@@ -218,7 +218,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!cmd_len) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (strlen(cmd) != cmd_len) {
@@ -518,7 +518,7 @@ PHP_FUNCTION(shell_exec)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!command_len) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

@@ -20,8 +20,8 @@ gettext
     echo "Done\n";
 ?>
 --EXPECT--
-bind_textdomain_codeset(): Argument #1 ($domain) cannot be empty
-bind_textdomain_codeset(): Argument #1 ($domain) cannot be empty
+bind_textdomain_codeset(): Argument #1 ($domain) must not be empty
+bind_textdomain_codeset(): Argument #1 ($domain) must not be empty
 string(5) "UTF-8"
 Done
 --CREDITS--

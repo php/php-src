@@ -121,9 +121,9 @@ object(Dba\Connection)#%d (%d) {
 
 Warning: dba_open(): Handler "bogus" is not available in %s on line %d
 bool(false)
-dba_open(): Argument #1 ($path) cannot be empty
-dba_open(): Argument #2 ($mode) cannot be empty
-dba_open(): Argument #3 ($handler) cannot be empty
+dba_open(): Argument #1 ($path) must not be empty
+dba_open(): Argument #2 ($mode) must not be empty
+dba_open(): Argument #3 ($handler) must not be empty
 dba_open(): Argument #2 ($mode) first character must be one of "r", "w", "c", or "n"
 dba_open(): Argument #2 ($mode) second character must be one of "d", "l", "-", or "t"
 dba_open(): Argument #2 ($mode) third character must be "t"
@@ -133,9 +133,9 @@ dba_open(): Argument #5 ($map_size) must be greater than or equal to 0
 
 Warning: dba_popen(): Handler "bogus" is not available in %s on line %d
 bool(false)
-dba_popen(): Argument #1 ($path) cannot be empty
-dba_popen(): Argument #2 ($mode) cannot be empty
-dba_popen(): Argument #3 ($handler) cannot be empty
+dba_popen(): Argument #1 ($path) must not be empty
+dba_popen(): Argument #2 ($mode) must not be empty
+dba_popen(): Argument #3 ($handler) must not be empty
 dba_popen(): Argument #2 ($mode) first character must be one of "r", "w", "c", or "n"
 dba_popen(): Argument #2 ($mode) second character must be one of "d", "l", "-", or "t"
 dba_popen(): Argument #2 ($mode) third character must be "t"

@@ -20,4 +20,4 @@ try {
 
 ?>
 --EXPECT--
-DOMDocument::schemaValidate(): Argument #1 ($filename) cannot be empty
+DOMDocument::schemaValidate(): Argument #1 ($filename) must not be empty

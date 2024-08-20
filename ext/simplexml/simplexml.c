@@ -1667,7 +1667,7 @@ PHP_METHOD(SimpleXMLElement, addChild)
 	}
 
 	if (qname_len == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1734,7 +1734,7 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 	}
 
 	if (qname_len == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

@@ -55,7 +55,7 @@ ZEND_GET_MODULE(php_gettext)
 		zend_argument_value_error(_arg_num, "is too long"); \
 		RETURN_THROWS(); \
 	} else if (domain_len == 0) { \
-		zend_argument_cannot_be_empty_error(_arg_num); \
+		zend_argument_must_not_be_empty_error(_arg_num); \
 		RETURN_THROWS(); \
 	}
 

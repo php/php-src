@@ -572,7 +572,7 @@ PHP_FUNCTION(mysqli_query)
 	}
 
 	if (!query_len) {
-		zend_argument_cannot_be_empty_error(ERROR_ARG_POS(2));
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 	if ((resultmode & ~MYSQLI_ASYNC) != MYSQLI_USE_RESULT &&
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(mysqli_begin_transaction)
 		RETURN_THROWS();
 	}
 	if (name && !name_len) {
-		zend_argument_cannot_be_empty_error(ERROR_ARG_POS(3));
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(3));
 		RETURN_THROWS();
 	}
 
@@ -1037,7 +1037,7 @@ PHP_FUNCTION(mysqli_savepoint)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (name_len == 0) {
-		zend_argument_cannot_be_empty_error(ERROR_ARG_POS(2));
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 	if (name_len == 0) {
-		zend_argument_cannot_be_empty_error(ERROR_ARG_POS(2));
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 	if (FAIL == mysqlnd_release_savepoint(mysql->mysql, name)) {

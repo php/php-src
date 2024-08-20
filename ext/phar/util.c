@@ -380,7 +380,7 @@ int phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, ch
 
 	if (!path_len) {
 		if (error) {
-			spprintf(error, 4096, "phar error: file \"\" in phar \"%s\" cannot be empty", fname);
+			spprintf(error, 4096, "phar error: file \"\" in phar \"%s\" must not be empty", fname);
 		}
 		return FAILURE;
 	}

@@ -43,28 +43,28 @@ foreach($inputs as $input) {
 --EXPECT--
 -- Iteration 1 --
 Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL
 
 -- Iteration 2 --
 Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL
 
 -- Iteration 3 --
 Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL
 
 -- Iteration 4 --
 Without $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-mb_ereg(): Argument #1 ($pattern) cannot be empty
+mb_ereg(): Argument #1 ($pattern) must not be empty
 NULL

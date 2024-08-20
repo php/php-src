@@ -49,9 +49,9 @@ Warning: readfile(-1): Failed to open stream: %s in %s on line %d
 
 Warning: readfile(1): Failed to open stream: %s in %s on line %d
 -- testing '' --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- testing '' --
-ValueError: Path cannot be empty
+ValueError: Path must not be empty
 -- testing ' ' --
 
 Warning: readfile( ): Failed to open stream: %s in %s on line %d

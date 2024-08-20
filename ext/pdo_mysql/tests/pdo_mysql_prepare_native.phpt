@@ -165,7 +165,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test_prepare_native');
 ?>
 --EXPECT--
-PDO::prepare(): Argument #1 ($query) cannot be empty
+PDO::prepare(): Argument #1 ($query) must not be empty
 array(1) {
   [0]=>
   array(1) {

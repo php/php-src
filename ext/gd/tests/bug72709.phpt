@@ -18,5 +18,5 @@ imagedestroy($im);
 ?>
 ====DONE====
 --EXPECT--
-imagesetstyle(): Argument #2 ($style) cannot be empty
+imagesetstyle(): Argument #2 ($style) must not be empty
 ====DONE====

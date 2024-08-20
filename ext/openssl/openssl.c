@@ -7243,7 +7243,7 @@ PHP_FUNCTION(openssl_seal)
 	pubkeysht = Z_ARRVAL_P(pubkeys);
 	nkeys = pubkeysht ? zend_hash_num_elements(pubkeysht) : 0;
 	if (!nkeys) {
-		zend_argument_cannot_be_empty_error(4);
+		zend_argument_must_not_be_empty_error(4);
 		RETURN_THROWS();
 	}
 
@@ -8017,7 +8017,7 @@ PHP_FUNCTION(openssl_decrypt)
 	}
 
 	if (!method_len) {
-		zend_argument_cannot_be_empty_error(2);
+		zend_argument_must_not_be_empty_error(2);
 		RETURN_THROWS();
 	}
 
@@ -8059,7 +8059,7 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 	}
 
 	if (ZSTR_LEN(method) == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -8088,7 +8088,7 @@ PHP_FUNCTION(openssl_cipher_key_length)
 	}
 
 	if (ZSTR_LEN(method) == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

@@ -413,7 +413,7 @@ require_once 'skipifconnectfailure.inc';
 ?>
 --EXPECT--
 The number of variables must match the number of parameters in the prepared statement
-mysqli_stmt_bind_param(): Argument #2 ($types) cannot be empty
+mysqli_stmt_bind_param(): Argument #2 ($types) must not be empty
 The number of elements in the type definition string must match the number of bind variables
 The number of variables must match the number of parameters in the prepared statement
 The number of elements in the type definition string must match the number of bind variables
