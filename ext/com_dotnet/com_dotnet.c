@@ -20,7 +20,7 @@
 
 #include "php.h"
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 # include "php_ini.h"
 # include "ext/standard/info.h"
 # include "php_com_dotnet.h"

@@ -230,6 +230,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
    - The win32/build/libs_version.txt file has been removed.
    - MSVC builds now use the new preprocessor (/Zc:preprocessor).
+   - The CHECK_HEADER_ADD_INCLUDE function now consistently defines preprocessor
+     macros HAVE_<header>_H either to value 1 or leaves them undefined to match
+     the Autotools headers checks.
 
 ========================
 3. Module changes

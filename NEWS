@@ -12,6 +12,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15187 (Various hooked object iterator issues). (ilutov)
   . Fixed bug GH-15456 (Crash in get_class_vars() on virtual properties).
     (ilutov)
+  . Fixed bug GH-15501 (Windows HAVE_<header>_H macros defined to 1 or
+    undefined). (Peter Kokot)
 
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
