@@ -128,8 +128,20 @@ AC_DEFUN([PHP_INIT_BUILD_SYSTEM],
 php_shtool=$srcdir/build/shtool
 T_MD=$($php_shtool echo -n -e %B)
 T_ME=$($php_shtool echo -n -e %b)
+
+dnl Create empty Makefile placeholders.
 > Makefile.objects
 > Makefile.fragments
+
+dnl Mark whether the CFLAGS are set to automatic default value by Autoconf, or
+dnl they are manually modified by the environment variable from outside. E.g.
+dnl './configure CFLAGS=...'. Set this before the AC_PROG_CC, where Autoconf
+dnl adjusts the CFLAGS variable, so the checks can modify CFLAGS.
+AS_VAR_IF([CFLAGS],, [auto_cflags=1])
+
+dnl Required programs.
+PHP_PROG_AWK
+
 dnl Run at the end of the configuration, before creating the config.status.
 AC_CONFIG_COMMANDS_PRE(
 [dnl Directory for storing shared objects of extensions.

@@ -10,6 +10,7 @@ if (PHP_SOAP != "no") {
 		) {
 		EXTENSION('soap', 'soap.c php_encoding.c php_http.c php_packet_soap.c php_schema.c php_sdl.c php_xml.c', null, "/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 		AC_DEFINE('HAVE_SOAP', 1, "Define to 1 if the PHP extension 'soap' is available.");
+		ADD_EXTENSION_DEP('soap', 'date');
 		ADD_EXTENSION_DEP('soap', 'hash');
 		ADD_EXTENSION_DEP('soap', 'session', true);
 

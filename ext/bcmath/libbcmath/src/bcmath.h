@@ -146,7 +146,7 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale);
 	*(result) = mul_ex;                             \
 } while (0)
 
-bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, int scale);
+bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale);
 
 bool bc_modulo(bc_num num1, bc_num num2, bc_num *resul, size_t scale);
 

@@ -5,6 +5,22 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
     (zeriyoshi)
+  . Fixed bug GH-15438 (Hooks on constructor promoted properties without
+    visibility are ignored). (ilutov)
+  . Fixed bug GH-15419 (Missing readonly+hook incompatibility check for readonly
+    classes). (ilutov)
+  . Fixed bug GH-15187 (Various hooked object iterator issues). (ilutov)
+  . Fixed bug GH-15456 (Crash in get_class_vars() on virtual properties).
+    (ilutov)
+
+- MySQLnd:
+  . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
+    Kamil Tekiela)
+
+- Standard:
+  . The "allowed_classes" option for unserialize() now throws TypeErrors and
+    ValueErrors	if it is not an	array of class names. (Girgias)
+
 
 15 Aug 2024, PHP 8.4.0beta3
 
@@ -23,6 +39,10 @@ PHP                                                                        NEWS
 
 - Hash:
   . Fix GH-15384 (Build fails on Alpine / Musl for amd64). (timwolla)
+
+- Sockets:
+  . Added SO_BINDTOIFINDEX to bind a socket to an interface index.
+    (David Carlier)
 
 - Standard:
   . php_uname() now throws ValueErrors on invalid inputs. (Girgias)

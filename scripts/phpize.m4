@@ -26,7 +26,7 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
   test "[$]$1" = "no" && $1=yes
 ])dnl
 
-AS_VAR_IF([CFLAGS],, [auto_cflags=1])
+PHP_INIT_BUILD_SYSTEM
 
 abs_srcdir=`(cd $srcdir && pwd)`
 abs_builddir=`pwd`
@@ -64,8 +64,6 @@ PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
 
 AS_VAR_IF([prefix],,
   [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
-
-PHP_INIT_BUILD_SYSTEM
 
 AC_MSG_CHECKING([for PHP prefix])
 AC_MSG_RESULT([$prefix])
@@ -135,9 +133,6 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
 
 dnl Always shared.
 PHP_BUILD_SHARED
-
-dnl Required programs.
-PHP_PROG_AWK
 
 PHP_HELP_SEPARATOR([Extension:])
 PHP_CONFIGURE_PART([Configuring extension])

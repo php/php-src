@@ -343,6 +343,7 @@ int main(void) {
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
     [yes])
 
+  PHP_ADD_EXTENSION_DEP(opcache, date)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
   if test "$php_cv_shm_ipc" != "yes" && test "$php_cv_shm_mmap_posix" != "yes" && test "$php_cv_shm_mmap_anon" != "yes"; then

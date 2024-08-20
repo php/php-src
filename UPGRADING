@@ -148,7 +148,8 @@ PHP 8.4 UPGRADE NOTES
 
 - PDO_FIREBIRD:
   . Since some Firebird C++ APIs are used now, this extension requires a C++
-    compiler to be built.
+    compiler to be built. This also implies that the extension has to be built
+    against fbclient 3.0 or higher.
   . getAttribute, ATTR_AUTOCOMMIT has been changed to get the value as a bool.
 
 - PDO_MYSQL:
@@ -201,6 +202,8 @@ PHP 8.4 UPGRADE NOTES
     byte long or the empty string. This aligns the behaviour to be identical
     to that of fputcsv() and fgetcsv().
   . php_uname() now throws ValueErrors on invalid inputs.
+  . The "allowed_classes" option for unserialize() now throws TypeErrors and
+    ValueErrors if it is not an array of class names.
 
 - Tidy:
   . Failures in the constructor now throw exceptions rather than emitting
@@ -874,6 +877,15 @@ PHP 8.4 UPGRADE NOTES
 - Mysqli:
   . The unused and undocumented constant MYSQLI_SET_CHARSET_DIR
     has been removed.
+  . The MYSQLI_STMT_ATTR_PREFETCH_ROWS constant has been removed.
+    The feature is unavailable with mysqlnd.
+  . The MYSQLI_CURSOR_TYPE_FOR_UPDATE and MYSQLI_CURSOR_TYPE_SCROLLABLE
+    constants have been removed. This functionality was never implemented,
+    neither with mysqlnd nor with libmysql.
+  . A new constant has been added: MYSQLI_TYPE_VECTOR.
+
+- Mysqlnd
+  . Support for the new VECTOR data type from MySQL 9.
 
 - OpenSSL:
   . The OpenSSL extension now requires at least OpenSSL 1.1.1.
@@ -979,6 +991,7 @@ PHP 8.4 UPGRADE NOTES
   . IP_PORTRANGE_LOW (FreeBSD/NetBSD/OpenBSD only).
   . SOCK_NONBLOCK.
   . SOCK_CLOEXEC.
+  . SOCK_BINDTOIFINDEX.
 
 - Sodium:
   . SODIUM_CRYPTO_AEAD_AEGIS128L_KEYBYTES

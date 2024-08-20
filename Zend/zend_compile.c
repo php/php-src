@@ -7570,6 +7570,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
 		uint32_t property_flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		bool is_promoted = property_flags || hooks_ast;
 
 		znode var_node, default_node;
 		uint8_t opcode;
@@ -7626,14 +7627,14 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		if (attributes_ast) {
 			zend_compile_attributes(
 				&op_array->attributes, attributes_ast, i + 1, ZEND_ATTRIBUTE_TARGET_PARAMETER,
-				property_flags ? ZEND_ATTRIBUTE_TARGET_PROPERTY : 0
+				is_promoted ? ZEND_ATTRIBUTE_TARGET_PROPERTY : 0
 			);
 		}
 
 		bool forced_allow_nullable = false;
 		if (type_ast) {
 			uint32_t default_type = *default_ast_ptr ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
-			bool force_nullable = default_type == IS_NULL && !property_flags;
+			bool force_nullable = default_type == IS_NULL && !is_promoted;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename_ex(type_ast, force_nullable, &forced_allow_nullable);
@@ -7696,14 +7697,14 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		}
 
 		uint32_t arg_info_flags = _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic, /* is_tentative */ 0)
-			| (property_flags ? _ZEND_IS_PROMOTED_BIT : 0);
+			| (is_promoted ? _ZEND_IS_PROMOTED_BIT : 0);
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= arg_info_flags;
 		if (opcode == ZEND_RECV) {
 			opline->op2.num = type_ast ?
 				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
 		}
 
-		if (property_flags) {
+		if (is_promoted) {
 			zend_op_array *op_array = CG(active_op_array);
 			zend_class_entry *scope = op_array->scope;
 
@@ -7790,9 +7791,11 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 
 	for (i = 0; i < list->children; i++) {
 		zend_ast *param_ast = list->child[i];
+		zend_ast *hooks_ast = param_ast->child[5];
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
-		if (!flags) {
+		bool is_promoted = flags || hooks_ast;
+		if (!is_promoted) {
 			continue;
 		}
 
@@ -8382,6 +8385,10 @@ static void zend_compile_property_hooks(
 {
 	zend_class_entry *ce = CG(active_class_entry);
 
+	if (prop_info->flags & ZEND_ACC_READONLY) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Hooked properties cannot be readonly");
+	}
+
 	if (hooks->children == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list cannot be empty");
 	}
@@ -8543,6 +8550,10 @@ static void zend_compile_property_hooks(
 		/* Will be removed again, in case of Iterator or IteratorAggregate. */
 		ce->get_iterator = zend_hooked_object_get_iterator;
 	}
+
+	if (!prop_info->ce->parent_name) {
+		zend_verify_hooked_property(ce, prop_info, prop_name);
+	}
 }
 
 static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags, zend_ast *attr_ast) /* {{{ */
@@ -8599,11 +8610,6 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 		}
 		if ((flags & ZEND_ACC_ABSTRACT)) {
 			ce->ce_flags |= ZEND_ACC_IMPLICIT_ABSTRACT_CLASS;
-		}
-
-		if (hooks_ast && (flags & ZEND_ACC_READONLY)) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Hooked properties cannot be readonly");
 		}
 
 		if (type_ast) {
@@ -8679,10 +8685,6 @@ static void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t f
 
 		if (hooks_ast) {
 			zend_compile_property_hooks(info, name, type_ast, zend_ast_get_list(hooks_ast));
-
-			if (!ce->parent_name) {
-				zend_verify_hooked_property(ce, info, name);
-			}
 		}
 
 		if (attr_ast) {

@@ -8,6 +8,7 @@ if (PHP_INTL != "no") {
 		// always build as shared - zend_strtod.c/ICU type conflict
 		EXTENSION("intl", "php_intl.c intl_convert.c intl_convertcpp.cpp intl_error.c ", true,
 								"/I \"" + configure_module_dirname + "\" /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
+		ADD_EXTENSION_DEP('intl', 'date');
 		ADD_SOURCES(configure_module_dirname + "/collator", "\
 				collator_attr.c \
 				collator_class.c \

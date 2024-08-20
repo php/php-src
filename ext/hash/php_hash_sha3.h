@@ -17,8 +17,6 @@
 #ifndef PHP_HASH_SHA3_H
 #define PHP_HASH_SHA3_H
 
-#include "php.h"
-
 typedef struct {
 #ifdef HAVE_SLOW_HASH3
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
