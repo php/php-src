@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP-8.3.12
 
+- MySQLnd:
+  . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
+    Kamil Tekiela)
+
+29 Aug 2024, PHP-8.3.12
+
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
     (zeriyoshi)
