@@ -99,6 +99,7 @@ static void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *i
 
 	zval *zv = zend_hash_index_add_new_ptr(&EG(lazy_objects_store).infos, obj->handle, info);
 	ZEND_ASSERT(zv);
+	(void)zv;
 }
 
 static zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
