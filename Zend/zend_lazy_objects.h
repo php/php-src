@@ -36,9 +36,6 @@
 /* Do not call destructor when making existing object lazy */
 #define ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                    (1<<4)
 
-/* The object is a clone */
-#define ZEND_LAZY_OBJECT_CLONE                              (1<<5)
-
 #define ZEND_LAZY_OBJECT_USER_FLAGS (                                       \
 	ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE |                     \
 	ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                                        \

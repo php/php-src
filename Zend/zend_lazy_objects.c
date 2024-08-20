@@ -452,31 +452,6 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 		return NULL;
 	}
 
-	if (info->flags & ZEND_LAZY_OBJECT_CLONE) {
-		/* For uninitialized lazy proxies, cloning of the real instance is
-		 * postponed until initialization */
-
-		zend_object *clone = Z_OBJ_HT(retval)->clone_obj(Z_OBJ(retval));
-		if (EG(exception)) {
-			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
-			zval_ptr_dtor(&retval);
-			OBJ_RELEASE(clone);
-			return NULL;
-		}
-
-		ZEND_ASSERT(zend_lazy_object_compatible(clone, obj));
-
-		if (zend_object_is_lazy(clone)) {
-			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
-			zend_throw_error(NULL, "Lazy proxy factory must return a non-lazy object");
-			zval_ptr_dtor(&retval);
-			return NULL;
-		}
-
-		zval_ptr_dtor(&retval);
-		ZVAL_OBJ(&retval, clone);
-	}
-
 	zend_fcc_dtor(&info->u.initializer.fcc);
 	zval_ptr_dtor(&info->u.initializer.zv);
 	info->u.instance = Z_OBJ(retval);
