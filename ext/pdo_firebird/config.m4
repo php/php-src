@@ -28,11 +28,11 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
       FIREBIRD_LIBDIR_FLAG=-L$FIREBIRD_LIBDIR
     ])
 
-    PHP_CHECK_LIBRARY([fbclient], [isc_detach_database],
-      [FIREBIRD_LIBNAME=fbclient],
+    PHP_CHECK_LIBRARY([fbclient], [fb_get_master_interface],
+      [],
       [AC_MSG_FAILURE([libfbclient not found.])],
       [$FIREBIRD_LIBDIR_FLAG])
-    PHP_ADD_LIBRARY_WITH_PATH([$FIREBIRD_LIBNAME],
+    PHP_ADD_LIBRARY_WITH_PATH([fbclient],
       [$FIREBIRD_LIBDIR],
       [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_ADD_INCLUDE([$FIREBIRD_INCDIR])
