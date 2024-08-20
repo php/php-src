@@ -92,7 +92,6 @@ require_once 'skipifconnectfailure.inc';
         MYSQLI_TYPE_STRING => array("SET('I', 'smash', 'the')", 'smash'),
         MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL - TODO add testing',
         MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE - TODO add testing',
-        MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL - TODO add testing',
         MYSQLI_TYPE_GEOMETRY => 'MYSQLI_TYPE_GEOMETRY - TODO add testing',
     );
 

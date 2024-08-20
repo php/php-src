@@ -392,11 +392,6 @@ const MYSQLI_TYPE_STRING = UNKNOWN;
 const MYSQLI_TYPE_CHAR = UNKNOWN;
 /**
  * @var int
- * @cvalue FIELD_TYPE_INTERVAL
- */
-const MYSQLI_TYPE_INTERVAL = UNKNOWN;
-/**
- * @var int
  * @cvalue FIELD_TYPE_GEOMETRY
  */
 const MYSQLI_TYPE_GEOMETRY = UNKNOWN;

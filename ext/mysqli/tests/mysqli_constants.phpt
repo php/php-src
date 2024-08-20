@@ -75,7 +75,6 @@ $expected_constants = array(
     "MYSQLI_TYPE_VAR_STRING"			=> true,
     "MYSQLI_TYPE_STRING"				=> true,
     "MYSQLI_TYPE_CHAR"					=> true,
-    "MYSQLI_TYPE_INTERVAL"				=> true,
     "MYSQLI_TYPE_GEOMETRY"				=> true,
     "MYSQLI_NO_DATA"					=> true,
     "MYSQLI_REPORT_INDEX"				=> true,

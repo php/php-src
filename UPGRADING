@@ -882,6 +882,10 @@ PHP 8.4 UPGRADE NOTES
   . The MYSQLI_CURSOR_TYPE_FOR_UPDATE and MYSQLI_CURSOR_TYPE_SCROLLABLE
     constants have been removed. This functionality was never implemented,
     neither with mysqlnd nor with libmysql.
+  . The unused MYSQLI_TYPE_INTERVAL constant, which is currently a stub
+    and an alias for MYSQLI_TYPE_ENUM, has been removed. There are no
+    plans to add such data type to MySQL yet, so it's unclear what its value
+    would finally be.
   . A new constant has been added: MYSQLI_TYPE_VECTOR.
 
 - Mysqlnd
