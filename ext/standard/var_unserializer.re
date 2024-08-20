@@ -391,7 +391,7 @@ object = [OC];
 
 
 
-static inline zend_long parse_iv2(const unsigned char *p, const unsigned char **q)
+static zend_long parse_iv2(const unsigned char *p, const unsigned char **q)
 {
 	zend_ulong result = 0;
 	zend_ulong neg = 0;
@@ -1074,7 +1074,7 @@ use_double:
 	}
 
 	if (*(YYCURSOR) != '"') {
-		zend_string_efree(str);
+		zend_string_efree_noinline(str);
 		*p = YYCURSOR;
 		return 0;
 	}
@@ -1196,9 +1196,9 @@ object ":" uiv ":" ["]	{
 
 		lc_name = zend_string_tolower(class_name);
 		if(!unserialize_allowed_class(lc_name, var_hash)) {
-			zend_string_release_ex(lc_name, 0);
+			zend_string_release_ex_noinline(lc_name, 0);
 			if (!zend_is_valid_class_name(class_name)) {
-				zend_string_release_ex(class_name, 0);
+				zend_string_release_ex_noinline(class_name, 0);
 				return 0;
 			}
 			incomplete_class = 1;
@@ -1209,7 +1209,7 @@ object ":" uiv ":" ["]	{
 		if ((*var_hash)->allowed_classes && ZSTR_HAS_CE_CACHE(class_name)) {
 			ce = ZSTR_GET_CE_CACHE(class_name);
 			if (ce) {
-				zend_string_release_ex(lc_name, 0);
+				zend_string_release_ex_noinline(lc_name, 0);
 				break;
 			}
 		}
@@ -1218,13 +1218,13 @@ object ":" uiv ":" ["]	{
 		if (ce
 		 && (ce->ce_flags & ZEND_ACC_LINKED)
 		 && !(ce->ce_flags & ZEND_ACC_ANON_CLASS)) {
-			zend_string_release_ex(lc_name, 0);
+			zend_string_release_ex_noinline(lc_name, 0);
 			break;
 		}
 
 		if (!ZSTR_HAS_CE_CACHE(class_name) && !zend_is_valid_class_name(class_name)) {
-			zend_string_release_ex(lc_name, 0);
-			zend_string_release_ex(class_name, 0);
+			zend_string_release_ex_noinline(lc_name, 0);
+			zend_string_release_ex_noinline(class_name, 0);
 			return 0;
 		}
 
@@ -1234,7 +1234,7 @@ object ":" uiv ":" ["]	{
 		BG(serialize_lock)--;
 		zend_string_release_ex(lc_name, 0);
 		if (EG(exception)) {
-			zend_string_release_ex(class_name, 0);
+			zend_string_release_ex_noinline(class_name, 0);
 			return 0;
 		}
 
@@ -1259,7 +1259,7 @@ object ":" uiv ":" ["]	{
 		zval_ptr_dtor(&retval);
 
 		if (EG(exception)) {
-			zend_string_release_ex(class_name, 0);
+			zend_string_release_ex_noinline(class_name, 0);
 			zval_ptr_dtor(&user_func);
 			return 0;
 		}
@@ -1281,7 +1281,7 @@ object ":" uiv ":" ["]	{
 	if (ce->ce_flags & ZEND_ACC_NOT_SERIALIZABLE) {
 		zend_throw_exception_ex(NULL, 0, "Unserialization of '%s' is not allowed",
 			ZSTR_VAL(ce->name));
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 		return 0;
 	}
 
@@ -1299,13 +1299,13 @@ object ":" uiv ":" ["]	{
 
 	if (*p >= max - 2) {
 		zend_error(E_WARNING, "Bad unserialize data");
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 		return 0;
 	}
 
 	elements = parse_iv2(*p + 2, p);
 	if (elements < 0 || IS_FAKE_ELEM_COUNT(elements, max - YYCURSOR)) {
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 		return 0;
 	}
 
@@ -1329,12 +1329,12 @@ object ":" uiv ":" ["]	{
 	 * depending on the serialization format. */
 	if (ce->serialize != NULL && !has_unserialize) {
 		zend_error(E_WARNING, "Erroneous data format for unserializing '%s'", ZSTR_VAL(ce->name));
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 		return 0;
 	}
 
 	if (object_init_ex(rval, ce) == FAILURE) {
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 		return 0;
 	}
 
@@ -1421,8 +1421,8 @@ object ":" uiv ":" ["]	{
 	return 1;
 
 fail:
-	zend_string_release_ex(enum_name, 0);
-	zend_string_release_ex(case_name, 0);
+	zend_string_release_ex_noinline(enum_name, 0);
+	zend_string_release_ex_noinline(case_name, 0);
 	return 0;
 }
 

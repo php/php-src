@@ -104,7 +104,7 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property)
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_WARNING, "Attempt to read property \"%s\" on %s", ZSTR_VAL(property_name), zend_zval_value_name(object));
-	zend_tmp_string_release(tmp_property_name);
+	zend_tmp_string_release_noinline(tmp_property_name);
 }
 
 /* Argument parsing API -- andrei */
@@ -217,7 +217,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_none_error(void) /* 
 
 	zend_argument_count_error("%s() expects exactly 0 arguments, %d given", ZSTR_VAL(func_name), num_args);
 
-	zend_string_release(func_name);
+	zend_string_release_noinline(func_name);
 }
 /* }}} */
 
@@ -235,7 +235,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(uint32_t
 		num_args
 	);
 
-	zend_string_release(func_name);
+	zend_string_release_noinline(func_name);
 }
 /* }}} */
 
@@ -405,7 +405,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_en
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
 	);
 	efree(message);
-	zend_string_release(func_name);
+	zend_string_release_noinline(func_name);
 }
 /* }}} */
 
@@ -510,9 +510,9 @@ static ZEND_COLD bool zend_null_arg_deprecated(const char *fallback_type, uint32
 		ZSTR_VAL(func_name), arg_num,
 		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
 		type);
-	zend_string_release(func_name);
+	zend_string_release_noinline(func_name);
 	if (type_str) {
-		zend_string_release(type_str);
+		zend_string_release_noinline(type_str);
 	}
 	return !EG(exception);
 }
@@ -1225,7 +1225,7 @@ static zend_result zend_parse_va_args(uint32_t num_args, const char *type_spec, 
 				num_args
 			);
 
-			zend_string_release(func_name);
+			zend_string_release_noinline(func_name);
 		}
 		return FAILURE;
 	}
@@ -1873,7 +1873,7 @@ ZEND_API zend_result object_init_with_constructor(zval *arg, zend_class_entry *c
 			zend_hash_get_current_key(named_params, &arg_name, /* num_index */ NULL);
 			ZEND_ASSERT(arg_name != NULL);
 			zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
-			zend_string_release(arg_name);
+			zend_string_release_noinline(arg_name);
 			/* Do not call destructor, free object, and set arg to IS_UNDEF */
 			zend_object_store_ctor_failed(obj);
 			zval_ptr_dtor(arg);
@@ -2619,7 +2619,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, i
 	lcname = zend_new_interned_string(lcname);
 	if ((module_ptr = zend_hash_add_ptr(&module_registry, lcname, module)) == NULL) {
 		zend_error(E_CORE_WARNING, "Module \"%s\" is already loaded", module->name);
-		zend_string_release(lcname);
+		zend_string_release_noinline(lcname);
 		return NULL;
 	}
 	module = module_ptr;
@@ -2630,7 +2630,7 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module, i
 
 	if (module->functions && zend_register_functions(NULL, module->functions, NULL, module_type)==FAILURE) {
 		zend_hash_del(&module_registry, lcname);
-		zend_string_release(lcname);
+		zend_string_release_noinline(lcname);
 		EG(current_module) = NULL;
 		zend_error(E_CORE_WARNING,"%s: Unable to register functions, unable to load", module->name);
 		return NULL;

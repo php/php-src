@@ -648,7 +648,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	while (isspace((int)*(unsigned char *)p)) p++;
 	if (p >= end_p) {
 		if (key != regex) {
-			zend_string_release_ex(key, 0);
+			zend_string_release_ex_noinline(key, 0);
 		}
 		php_error_docref(NULL, E_WARNING, "Empty regular expression");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
@@ -660,7 +660,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	delimiter = *p++;
 	if (isalnum((int)*(unsigned char *)&delimiter) || delimiter == '\\' || delimiter == '\0') {
 		if (key != regex) {
-			zend_string_release_ex(key, 0);
+			zend_string_release_ex_noinline(key, 0);
 		}
 		php_error_docref(NULL, E_WARNING, "Delimiter must not be alphanumeric, backslash, or NUL byte");
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
@@ -766,7 +766,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 				pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 				efree(pattern);
 				if (key != regex) {
-					zend_string_release_ex(key, 0);
+					zend_string_release_ex_noinline(key, 0);
 				}
 				return NULL;
 		}
@@ -780,7 +780,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 			if (UNEXPECTED(!tables)) {
 				php_error_docref(NULL,E_WARNING, "Failed to generate locale character tables");
 				pcre_handle_exec_error(PCRE2_ERROR_NOMEMORY);
-				zend_string_release_ex(key, 0);
+				zend_string_release_ex_noinline(key, 0);
 				efree(pattern);
 				return NULL;
 			}
@@ -799,7 +799,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 
 	if (re == NULL) {
 		if (key != regex) {
-			zend_string_release_ex(key, 0);
+			zend_string_release_ex_noinline(key, 0);
 		}
 		pcre2_get_error_message(errnumber, error, sizeof(error));
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
@@ -851,7 +851,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
 	if (rc < 0) {
 		if (key != regex) {
-			zend_string_release_ex(key, 0);
+			zend_string_release_ex_noinline(key, 0);
 		}
 		php_error_docref(NULL, E_WARNING, "Internal pcre2_pattern_info() error %d", rc);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
@@ -862,7 +862,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, bo
 	rc = pcre2_pattern_info(re, PCRE2_INFO_NAMECOUNT, &name_count);
 	if (rc < 0) {
 		if (key != regex) {
-			zend_string_release_ex(key, 0);
+			zend_string_release_ex_noinline(key, 0);
 		}
 		php_error_docref(NULL, E_WARNING, "Internal pcre_pattern_info() error %d", rc);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);

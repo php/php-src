@@ -514,13 +514,13 @@ static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 
 	if (elem_num == 1 && ZSTR_LEN(str) == 0) {
 		zend_value_error("First element must contain a non-empty program name");
-		zend_string_release(str);
+		zend_string_release_noinline(str);
 		return NULL;
 	}
 
 	if (strlen(ZSTR_VAL(str)) != ZSTR_LEN(str)) {
 		zend_value_error("Command array element %d contains a null byte", elem_num);
-		zend_string_release(str);
+		zend_string_release_noinline(str);
 		return NULL;
 	}
 
@@ -871,7 +871,7 @@ static zend_result set_proc_descriptor_to_socket(descriptorspec_item *desc)
 	if (create_socketpair(sock)) {
 		zend_string *err = php_socket_error_str(php_socket_errno());
 		php_error_docref(NULL, E_WARNING, "Unable to create socket pair: %s", ZSTR_VAL(err));
-		zend_string_release(err);
+		zend_string_release_noinline(err);
 		return FAILURE;
 	}
 

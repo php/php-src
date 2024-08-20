@@ -1018,7 +1018,7 @@ static void phpdbg_welcome(bool cleaning) /* {{{ */
 	}
 } /* }}} */
 
-static inline void phpdbg_sigint_handler(int signo) /* {{{ */
+static void phpdbg_sigint_handler(int signo) /* {{{ */
 {
 	if (!(PHPDBG_G(flags) & PHPDBG_IS_INTERACTIVE)) {
 		/* set signalled only when not interactive */

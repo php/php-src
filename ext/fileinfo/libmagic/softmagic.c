@@ -2286,7 +2286,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
 		l = v = 0;
 		if ((pce = pcre_get_compiled_regex_cache(pattern)) == NULL) {
-			zend_string_release(pattern);
+			zend_string_release_noinline(pattern);
 			return -1;
 		} else {
 			/* pce now contains the compiled regex */
@@ -2307,7 +2307,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 
 			if (Z_LVAL(retval) < 0) {
 				zval_ptr_dtor(&subpats);
-				zend_string_release(pattern);
+				zend_string_release_noinline(pattern);
 				return -1;
 			} else if ((Z_LVAL(retval) > 0) && (Z_TYPE(subpats) == IS_ARRAY)) {
 				/* Need to fetch global match which equals pmatch[0] */
@@ -2334,7 +2334,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 				} else {
 error_out:
 					zval_ptr_dtor(&subpats);
-					zend_string_release(pattern);
+					zend_string_release_noinline(pattern);
 					return -1;
 				}
 			} else {

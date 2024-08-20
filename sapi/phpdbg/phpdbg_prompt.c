@@ -91,7 +91,7 @@ const phpdbg_command_t phpdbg_prompt_commands[] = {
 	PHPDBG_END_COMMAND
 }; /* }}} */
 
-static inline int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
+static int phpdbg_call_register(phpdbg_param_t *stack) /* {{{ */
 {
 	phpdbg_param_t *name = NULL;
 

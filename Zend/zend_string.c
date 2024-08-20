@@ -396,6 +396,8 @@ ZEND_API bool ZEND_FASTCALL I_REPLACE_SONAME_FNNAME_ZU(NONE,zend_string_equal_va
 {
 	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
 }
+#else
+ZEND_API extern inline bool zend_string_equal_val(const zend_string *s1, const zend_string *s2);
 #endif
 
 #if defined(__GNUC__) && defined(__i386__)
@@ -528,3 +530,41 @@ size_t strlcat (char *__restrict dest, const char *restrict src, size_t n)
 	return result;
 }
 #endif
+
+ZEND_API void zend_string_free_noinline(zend_string *s)
+{
+	zend_string_free(s);
+}
+
+ZEND_API void zend_string_efree_noinline(zend_string *s)
+{
+	zend_string_efree(s);
+}
+
+ZEND_API void zend_string_release_noinline(zend_string *s)
+{
+	zend_string_release(s);
+}
+
+ZEND_API void zend_string_release_ex_noinline(zend_string *s, bool persistent)
+{
+	zend_string_release_ex(s, persistent);
+}
+
+ZEND_API extern inline uint32_t zend_string_addref(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_alloc(size_t len, bool persistent);
+ZEND_API extern inline zend_string *zend_string_copy(zend_string *s);
+ZEND_API extern inline uint32_t zend_string_delref(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_dup(zend_string *s, bool persistent);
+ZEND_API extern inline bool zend_string_equals(const zend_string *s1, const zend_string *s2);
+ZEND_API extern inline bool zend_string_equal_content(const zend_string *s1, const zend_string *s2);
+ZEND_API extern inline bool zend_string_equals_cstr(const zend_string *s1, const char *s2, size_t s2_length);
+ZEND_API extern inline void zend_string_forget_hash_val(zend_string *s);
+ZEND_API extern inline zend_ulong zend_string_hash_val(zend_string *s);
+ZEND_API extern inline zend_string *zend_string_init(const char *str, size_t len, bool persistent);
+ZEND_API extern inline zend_string *zend_string_init_fast(const char *str, size_t len);
+ZEND_API extern inline zend_string *zend_string_realloc(zend_string *s, size_t len, bool persistent);
+ZEND_API extern inline uint32_t zend_string_refcount(const zend_string *s);
+ZEND_API extern inline zend_string *zend_string_safe_alloc(size_t n, size_t m, size_t l, bool persistent);
+ZEND_API extern inline zend_string *zend_string_safe_realloc(zend_string *s, size_t n, size_t m, size_t l, bool persistent);
+ZEND_API extern inline zend_string *zend_string_separate(zend_string *s, bool persistent);

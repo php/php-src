@@ -484,7 +484,7 @@ PHP_METHOD(PDOStatement, execute)
 }
 /* }}} */
 
-static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
+static void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, enum pdo_param_type *type_override) /* {{{ */
 {
 	if (colno < 0) {
 		zend_value_error("Column index must be greater than or equal to 0");
@@ -1301,7 +1301,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly 2 argument for PDO::FETCH_FUNC, %d given",
 					ZSTR_VAL(func), ZEND_NUM_ARGS());
-				zend_string_release(func);
+				zend_string_release_noinline(func);
 				RETURN_THROWS();
 			}
 			if (arg2 == NULL) {
@@ -1321,7 +1321,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects at most 2 argument for the fetch mode provided, %d given",
 					ZSTR_VAL(func), ZEND_NUM_ARGS());
-				zend_string_release(func);
+				zend_string_release_noinline(func);
 				RETURN_THROWS();
 			}
 			/* Is column index passed? */
@@ -1347,7 +1347,7 @@ PHP_METHOD(PDOStatement, fetchAll)
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly 1 argument for the fetch mode provided, %d given",
 				ZSTR_VAL(func), ZEND_NUM_ARGS());
-				zend_string_release(func);
+				zend_string_release_noinline(func);
 				RETURN_THROWS();
 			}
 	}
@@ -1733,7 +1733,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
 					ZSTR_VAL(func), mode_arg_num, total_num_args);
-				zend_string_release(func);
+				zend_string_release_noinline(func);
 				return false;
 			}
 			break;
@@ -1743,7 +1743,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
 					ZSTR_VAL(func), arg1_arg_num, total_num_args);
-				zend_string_release(func);
+				zend_string_release_noinline(func);
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_LONG) {
@@ -1767,7 +1767,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					zend_string *func = get_active_function_or_method_name();
 					zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
 						ZSTR_VAL(func), mode_arg_num, total_num_args);
-					zend_string_release(func);
+					zend_string_release_noinline(func);
 					return false;
 				}
 				stmt->fetch.cls.ce = NULL;
@@ -1777,7 +1777,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					zend_string *func = get_active_function_or_method_name();
 					zend_argument_count_error("%s() expects at least %d arguments for the fetch mode provided, %d given",
 						ZSTR_VAL(func), arg1_arg_num, total_num_args);
-					zend_string_release(func);
+					zend_string_release_noinline(func);
 					return false;
 				}
 				/* constructor_arguments can be null/not passed */
@@ -1785,7 +1785,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 					zend_string *func = get_active_function_or_method_name();
 					zend_argument_count_error("%s() expects at most %d arguments for the fetch mode provided, %d given",
 						ZSTR_VAL(func), constructor_arg_num, total_num_args);
-					zend_string_release(func);
+					zend_string_release_noinline(func);
 					return false;
 				}
 				if (Z_TYPE(args[0]) != IS_STRING) {
@@ -1825,7 +1825,7 @@ bool pdo_stmt_setup_fetch_mode(pdo_stmt_t *stmt, zend_long mode, uint32_t mode_a
 				zend_string *func = get_active_function_or_method_name();
 				zend_argument_count_error("%s() expects exactly %d arguments for the fetch mode provided, %d given",
 					ZSTR_VAL(func), arg1_arg_num, total_num_args);
-				zend_string_release(func);
+				zend_string_release_noinline(func);
 				return false;
 			}
 			if (Z_TYPE(args[0]) != IS_OBJECT) {

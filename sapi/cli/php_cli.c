@@ -972,7 +972,7 @@ do_repeat:
 				zval argn, argi;
 
 				if (!exec_run && script_file) {
-					zend_string_release_ex(file_handle.filename, 0);
+					zend_string_release_ex_noinline(file_handle.filename, 0);
 					file_handle.filename = NULL;
 				}
 

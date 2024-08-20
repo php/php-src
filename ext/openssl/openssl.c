@@ -2874,8 +2874,8 @@ static zend_result php_openssl_csr_add_subj_entry(zval *item, X509_NAME *subj, i
 	if (UNEXPECTED(!str_item)) {
 		return FAILURE;
 	}
-	if (!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
-				(unsigned char*)ZSTR_VAL(str_item), -1, -1, 0))
+	if (UNEXPECTED(!X509_NAME_add_entry_by_NID(subj, nid, MBSTRING_UTF8,
+				(unsigned char*)ZSTR_VAL(str_item), -1, -1, 0)))
 	{
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING,
@@ -2883,7 +2883,7 @@ static zend_result php_openssl_csr_add_subj_entry(zval *item, X509_NAME *subj, i
 			" queue and value of string_mask OpenSSL option "
 			"if illegal characters are reported)",
 			nid, ZSTR_VAL(str_item));
-		zend_string_release(str_item);
+		zend_string_release_noinline(str_item);
 		return FAILURE;
 	}
 	zend_string_release(str_item);
@@ -3009,10 +3009,10 @@ static zend_result php_openssl_csr_make(struct php_x509_request * req, X509_REQ 
 					if (UNEXPECTED(!str_item)) {
 						return FAILURE;
 					}
-					if (!X509_REQ_add1_attr_by_NID(csr, nid, MBSTRING_UTF8, (unsigned char*)ZSTR_VAL(str_item), (int)ZSTR_LEN(str_item))) {
+					if (UNEXPECTED(!X509_REQ_add1_attr_by_NID(csr, nid, MBSTRING_UTF8, (unsigned char*)ZSTR_VAL(str_item), (int)ZSTR_LEN(str_item)))) {
 						php_openssl_store_errors();
 						php_error_docref(NULL, E_WARNING, "attributes: add_attr_by_NID %d -> %s (failed)", nid, ZSTR_VAL(str_item));
-						zend_string_release(str_item);
+						zend_string_release_noinline(str_item);
 						return FAILURE;
 					}
 					zend_string_release(str_item);
@@ -7874,15 +7874,15 @@ PHP_OPENSSL_API zend_string* php_openssl_encrypt(
 				ZEND_TRY_ASSIGN_REF_NEW_STR(tag, tag_str);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Retrieving verification tag failed");
-				zend_string_release_ex(tag_str, 0);
-				zend_string_release_ex(outbuf, 0);
+				zend_string_release_ex_noinline(tag_str, 0);
+				zend_string_release_ex_noinline(outbuf, 0);
 				outbuf = NULL;
 			}
 		} else if (tag) {
 			ZEND_TRY_ASSIGN_REF_NULL(tag);
 		} else if (mode.is_aead) {
 			php_error_docref(NULL, E_WARNING, "A tag should be provided when using AEAD mode");
-			zend_string_release_ex(outbuf, 0);
+			zend_string_release_ex_noinline(outbuf, 0);
 			outbuf = NULL;
 		}
 	} else {
@@ -8115,13 +8115,13 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 
 	PHP_OPENSSL_CHECK_LONG_TO_INT_NULL_RETURN(buffer_length, length);
 	PHP_OPENSSL_RAND_ADD_TIME();
-	if (RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0) {
-		zend_string_release_ex(buffer, 0);
+	if (UNEXPECTED(RAND_bytes((unsigned char*)ZSTR_VAL(buffer), (int)buffer_length) <= 0)) {
+		zend_string_release_ex_noinline(buffer, 0);
 		zend_throw_exception(zend_ce_exception, "Error reading from source device", 0);
 		return NULL;
-	} else {
-		php_openssl_store_errors();
 	}
+
+	php_openssl_store_errors();
 
 	return buffer;
 }

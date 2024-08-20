@@ -25,7 +25,7 @@
 
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
-static inline void phpdbg_append_individual_arg(smart_str *s, uint32_t i, zend_function *func, zval *arg) {
+static void phpdbg_append_individual_arg(smart_str *s, uint32_t i, zend_function *func, zval *arg) {
 	const zend_arg_info *arginfo = func->common.arg_info;
 	char *arg_name = NULL;
 

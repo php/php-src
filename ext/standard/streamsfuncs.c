@@ -167,7 +167,7 @@ PHP_FUNCTION(stream_socket_client)
 		zend_string *quoted_host = php_addslashes(host);
 
 		php_error_docref(NULL, E_WARNING, "Unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
-		zend_string_release_ex(quoted_host, 0);
+		zend_string_release_ex_noinline(quoted_host, 0);
 	}
 
 	if (hashkey) {
@@ -242,7 +242,7 @@ PHP_FUNCTION(stream_socket_server)
 		if (zerrstr && errstr) {
 			ZEND_TRY_ASSIGN_REF_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release_ex(errstr, 0);
+			zend_string_release_ex_noinline(errstr, 0);
 		}
 		RETURN_FALSE;
 	}
@@ -312,7 +312,7 @@ PHP_FUNCTION(stream_socket_accept)
 		php_stream_to_zval(clistream, return_value);
 	} else {
 		if (peername) {
-			zend_string_release(peername);
+			zend_string_release_noinline(peername);
 		}
 		php_error_docref(NULL, E_WARNING, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
 		RETVAL_FALSE;

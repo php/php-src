@@ -4116,7 +4116,7 @@ static zend_result zend_compile_func_defined(znode *result, zend_ast_list *args)
 
 	name = zval_get_string(zend_ast_get_zval(args->child[0]));
 	if (zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name)) || zend_memrchr(ZSTR_VAL(name), ':', ZSTR_LEN(name))) {
-		zend_string_release_ex(name, 0);
+		zend_string_release_ex_noinline(name, 0);
 		return FAILURE;
 	}
 
@@ -4285,7 +4285,7 @@ static zend_result zend_compile_func_cufa(znode *result, zend_ast_list *args, ze
 				opline = zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, &len_node);
 				opline->extended_value = Z_LVAL_P(zv);
 				zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
-				zend_string_release_ex(name, 0);
+				zend_string_release_ex_noinline(name, 0);
 				return SUCCESS;
 			}
 		}
@@ -7538,7 +7538,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 				&& (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
 			zend_string *func_name = get_function_or_method_name((zend_function *) op_array);
 			zend_error(E_DEPRECATED, "%s(): Returning by reference from a void function is deprecated", ZSTR_VAL(func_name));
-			zend_string_release(func_name);
+			zend_string_release_noinline(func_name);
 		}
 	} else {
 		if (list->children == 0) {
@@ -7675,7 +7675,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 					"%s(): Optional parameter $%s declared before required parameter $%s "
 					"is implicitly treated as a required parameter",
 					ZSTR_VAL(func_name), ZSTR_VAL(name), ZSTR_VAL(zend_ast_get_str(required_param_ast->child[1])));
-				zend_string_release(func_name);
+				zend_string_release_noinline(func_name);
 			}
 
 			/* Regardless of whether we issue a deprecation, convert this parameter into
@@ -10744,7 +10744,7 @@ static void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 			zend_string *resolved_name = zend_resolve_class_name_ast(class_ast);
 			if (zend_try_ct_eval_class_const(&result->u.constant, resolved_name, const_str)) {
 				result->op_type = IS_CONST;
-				zend_string_release_ex(resolved_name, 0);
+				zend_string_release_ex_noinline(resolved_name, 0);
 				return;
 			}
 			zend_string_release_ex(resolved_name, 0);

@@ -761,7 +761,7 @@ static inline zend_long safe_shift_left(zend_long n, zend_long s) {
 	return (zend_long) ((zend_ulong) n << (zend_ulong) s);
 }
 
-static inline bool shift_left_overflows(zend_long n, zend_long s) {
+static bool shift_left_overflows(zend_long n, zend_long s) {
 	/* This considers shifts that shift in the sign bit to be overflowing as well */
 	if (n >= 0) {
 		return s >= SIZEOF_ZEND_LONG * 8 - 1 || safe_shift_left(n, s) < n;

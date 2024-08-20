@@ -1367,7 +1367,7 @@ PHP_FUNCTION(str_decrement)
 
 	if (UNEXPECTED(carry || (ZSTR_VAL(decremented)[0] == '0' && ZSTR_LEN(decremented) > 1))) {
 		if (ZSTR_LEN(decremented) == 1) {
-			zend_string_release_ex(decremented, /* persistent */ false);
+			zend_string_release_ex_noinline(decremented, /* persistent */ false);
 			zend_argument_value_error(1, "\"%s\" is out of decrement range", ZSTR_VAL(str));
 			RETURN_THROWS();
 		}
@@ -1539,7 +1539,7 @@ PHPAPI size_t php_dirname(char *path, size_t len)
 }
 /* }}} */
 
-static inline void _zend_dirname(zval *return_value, zend_string *str, zend_long levels)
+static void _zend_dirname(zval *return_value, zend_string *str, zend_long levels)
 {
 	zend_string *ret;
 
@@ -1554,7 +1554,7 @@ static inline void _zend_dirname(zval *return_value, zend_string *str, zend_long
 #endif
 	} else if (levels < 1) {
 		zend_argument_value_error(2, "must be greater than or equal to 1");
-		zend_string_efree(ret);
+		zend_string_efree_noinline(ret);
 		RETURN_THROWS();
 	} else {
 		/* Some levels up */
@@ -1784,7 +1784,7 @@ PHP_FUNCTION(stristr)
 }
 /* }}} */
 
-static inline void _zend_strstr(zval *return_value, zend_string *haystack, zend_string *needle, bool part)
+static void _zend_strstr(zval *return_value, zend_string *haystack, zend_string *needle, bool part)
 {
 	const char *found = NULL;
 	zend_long found_offset;
@@ -1928,7 +1928,7 @@ PHP_FUNCTION(str_ends_with)
 }
 /* }}} */
 
-static inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
+static zend_always_inline void _zend_strpos_inline(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
 {
 	const char *found = NULL;
 
@@ -1948,6 +1948,11 @@ static inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_
 		RETURN_FALSE;
 	}
 	RETURN_LONG(found - ZSTR_VAL(haystack));
+}
+
+static zend_never_inline void _zend_strpos(zval *return_value, zend_string *haystack, zend_string *needle, zend_long offset)
+{
+	_zend_strpos_inline(return_value, haystack, needle, offset);
 }
 
 /* {{{ Finds position of first occurrence of a string within another */
@@ -1975,7 +1980,7 @@ ZEND_FRAMELESS_FUNCTION(strpos, 2)
 	Z_FLF_PARAM_STR(1, haystack, haystack_tmp);
 	Z_FLF_PARAM_STR(2, needle, needle_tmp);
 
-	_zend_strpos(return_value, haystack, needle, 0);
+	_zend_strpos_inline(return_value, haystack, needle, 0);
 
 flf_clean:
 	Z_FLF_PARAM_FREE_STR(1, haystack_tmp);
@@ -2124,7 +2129,7 @@ PHP_FUNCTION(strripos)
 	haystack_dup = zend_string_tolower(haystack);
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			zend_string_release_ex(haystack_dup, 0);
+			zend_string_release_ex_noinline(haystack_dup, 0);
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
@@ -2132,7 +2137,7 @@ PHP_FUNCTION(strripos)
 		e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			zend_string_release_ex(haystack_dup, 0);
+			zend_string_release_ex_noinline(haystack_dup, 0);
 			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
@@ -2262,7 +2267,7 @@ PHP_FUNCTION(chunk_split)
 }
 /* }}} */
 
-static inline void _zend_substr(zval *return_value, zend_string *str, zend_long f, bool len_is_null, zend_long l)
+static void _zend_substr(zval *return_value, zend_string *str, zend_long f, bool len_is_null, zend_long l)
 {
 	if (f < 0) {
 		/* if "from" position is negative, count start position from the end

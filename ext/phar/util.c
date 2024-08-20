@@ -1541,7 +1541,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			tempsig = sig_len;
 
 			if (FAILURE == phar_call_openssl_signverify(0, fp, end_of_phar, ZSTR_VAL(pubkey), ZSTR_LEN(pubkey), &sig, &tempsig, sig_type)) {
-				zend_string_release_ex(pubkey, 0);
+				zend_string_release_ex_noinline(pubkey, 0);
 
 				if (error) {
 					spprintf(error, 0, "openssl signature could not be verified");
@@ -1557,7 +1557,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			in = BIO_new_mem_buf(ZSTR_VAL(pubkey), ZSTR_LEN(pubkey));
 
 			if (NULL == in) {
-				zend_string_release_ex(pubkey, 0);
+				zend_string_release_ex_noinline(pubkey, 0);
 				if (error) {
 					spprintf(error, 0, "openssl signature could not be processed");
 				}

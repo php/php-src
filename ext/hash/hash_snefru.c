@@ -37,7 +37,7 @@ void ph(uint32_t h[16])
 }
 #endif
 
-static inline void Snefru(uint32_t input[16])
+static void Snefru(uint32_t input[16])
 {
 	static const int shifts[4] = {16, 8, 16, 24};
 	int b, index, rshift, lshift;

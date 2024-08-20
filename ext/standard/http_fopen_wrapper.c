@@ -870,7 +870,7 @@ finish:
 						if (!s) {
 							s = ZSTR_VAL(resource->path);
 							if (!ZSTR_LEN(resource->path)) {
-								zend_string_release_ex(resource->path, 0);
+								zend_string_release_ex_noinline(resource->path, 0);
 								resource->path = ZSTR_INIT_LITERAL("/", 0);
 								s = ZSTR_VAL(resource->path);
 							} else {

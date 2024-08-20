@@ -2415,7 +2415,7 @@ send_again:
 					have_named_params = 1;
 					top = zend_handle_named_arg(&EX(call), name, &arg_num, cache_slot);
 					if (UNEXPECTED(!top)) {
-						zend_string_release(name);
+						zend_string_release_noinline(name);
 						break;
 					}
 
@@ -2435,7 +2435,7 @@ send_again:
 						ZVAL_COPY_VALUE(top, arg);
 					}
 
-					zend_string_release(name);
+					zend_string_release_noinline(name);
 				} else {
 					if (have_named_params) {
 						zend_throw_error(NULL,
@@ -3947,7 +3947,7 @@ try_function_name:
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-					zend_string_release_ex(call->func->common.function_name, 0);
+					zend_string_release_ex_noinline(call->func->common.function_name, 0);
 					zend_free_trampoline(call->func);
 				}
 				zend_vm_stack_free_call_frame(call);
@@ -4130,7 +4130,7 @@ try_function_name:
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-					zend_string_release_ex(call->func->common.function_name, 0);
+					zend_string_release_ex_noinline(call->func->common.function_name, 0);
 					zend_free_trampoline(call->func);
 				}
 				zend_vm_stack_free_call_frame(call);
@@ -4326,7 +4326,7 @@ try_function_name:
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-					zend_string_release_ex(call->func->common.function_name, 0);
+					zend_string_release_ex_noinline(call->func->common.function_name, 0);
 					zend_free_trampoline(call->func);
 				}
 				zend_vm_stack_free_call_frame(call);
@@ -7048,7 +7048,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -7060,7 +7060,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -9612,7 +9612,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -9624,7 +9624,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_TMPVAR_
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -12094,7 +12094,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -12106,7 +12106,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CONST_CV_HAND
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -16487,7 +16487,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -16499,7 +16499,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -17980,7 +17980,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -17992,7 +17992,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -19387,7 +19387,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -19399,7 +19399,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HAN
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -20573,7 +20573,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CONST_HANDLE
 
 			if (UNEXPECTED(EG(exception))) {
 				for (i = 0; i <= opline->extended_value; i++) {
-					zend_string_release_ex(rope[i], 0);
+					zend_string_release_ex_noinline(rope[i], 0);
 				}
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -21050,7 +21050,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_TMPVAR_HANDL
 			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 			if (UNEXPECTED(EG(exception))) {
 				for (i = 0; i <= opline->extended_value; i++) {
-					zend_string_release_ex(rope[i], 0);
+					zend_string_release_ex_noinline(rope[i], 0);
 				}
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -21907,7 +21907,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_END_SPEC_TMP_CV_HANDLER(Z
 
 			if (UNEXPECTED(EG(exception))) {
 				for (i = 0; i <= opline->extended_value; i++) {
-					zend_string_release_ex(rope[i], 0);
+					zend_string_release_ex_noinline(rope[i], 0);
 				}
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -44455,7 +44455,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -44467,7 +44467,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CONST_HAND
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -48320,7 +48320,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -48332,7 +48332,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_TMPVAR_HAN
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}
@@ -53886,7 +53886,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release_ex(op1_str, 0);
+				zend_string_release_ex_noinline(op1_str, 0);
 				break;
 			}
 		}
@@ -53898,7 +53898,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_CV_CV_HANDLER
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release_ex(op2_str, 0);
+				zend_string_release_ex_noinline(op2_str, 0);
 				break;
 			}
 		}

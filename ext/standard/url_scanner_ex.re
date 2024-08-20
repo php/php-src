@@ -182,7 +182,7 @@ alphadash = ([a-zA-Z] | "-");
 #define YYLIMIT q
 #define YYMARKER r
 
-static inline void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator, int type)
+static void append_modified_url(smart_str *url, smart_str *dest, smart_str *url_app, const char *separator, int type)
 {
 	php_url *url_parts;
 
@@ -485,7 +485,7 @@ static inline void handle_arg(STD_PARA)
 	}
 }
 
-static inline void handle_val(STD_PARA, char quotes, char type)
+static void handle_val(STD_PARA, char quotes, char type)
 {
 	smart_str_setl(&ctx->val, start + quotes, YYCURSOR - start - quotes * 2);
 	if (ctx->tag_type == TAG_FORM && ctx->attr_type == ATTR_ACTION) {
@@ -724,7 +724,7 @@ static void php_url_scanner_output_handler(char *output, size_t output_len, char
 	php_url_scanner_session_handler_impl(output, output_len, handled_output, handled_output_len, mode, /* is_session */ false);
 }
 
-static inline void php_url_scanner_add_var_impl(const char *name, size_t name_len, const char *value, size_t value_len, bool encode, bool is_session)
+static void php_url_scanner_add_var_impl(const char *name, size_t name_len, const char *value, size_t value_len, bool encode, bool is_session)
 {
 	smart_str sname = {0};
 	smart_str svalue = {0};
@@ -837,7 +837,7 @@ PHPAPI zend_result php_url_scanner_reset_vars(void)
 }
 
 
-static inline zend_result php_url_scanner_reset_var_impl(zend_string *name, int encode, bool is_session)
+static zend_result php_url_scanner_reset_var_impl(zend_string *name, int encode, bool is_session)
 {
 	char *start, *end, *limit;
 	size_t separator_len;

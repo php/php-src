@@ -132,7 +132,7 @@
 }
 /* }}} */
 
-static inline void TigerFinalize(PHP_TIGER_CTX *context)
+static void TigerFinalize(PHP_TIGER_CTX *context)
 {
 	context->passed += (uint64_t) context->length << 3;
 

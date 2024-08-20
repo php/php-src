@@ -2545,7 +2545,7 @@ static bool ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 		zend_string_addref(zstr);
 		zend_error(E_DEPRECATED, "Increment on non-alphanumeric string is deprecated");
 		if (EG(exception)) {
-			zend_string_release(zstr);
+			zend_string_release_noinline(zstr);
 			return false;
 		}
 		zval_ptr_dtor(str);
@@ -2754,7 +2754,7 @@ try_again:
 					zend_string_addref(zstr);
 					zend_error(E_DEPRECATED, "Decrement on non-numeric string has no effect and is deprecated");
 					if (EG(exception)) {
-						zend_string_release(zstr);
+						zend_string_release_noinline(zstr);
 						return FAILURE;
 					}
 					zval_ptr_dtor(op1);
@@ -3783,3 +3783,8 @@ ZEND_API zend_long ZEND_FASTCALL zend_dval_to_lval_slow(double d)
 }
 /* }}} */
 #endif
+
+ZEND_API void zend_tmp_string_release_noinline(zend_string *tmp)
+{
+	zend_tmp_string_release(tmp);
+}

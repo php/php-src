@@ -203,7 +203,7 @@ zend_result dom_document_version_write(dom_object *obj, zval *newval)
 	if (php_dom_follow_spec_intern(obj)) {
 		if (!zend_string_equals_literal(str, "1.0") && !zend_string_equals_literal(str, "1.1")) {
 			zend_value_error("Invalid XML version");
-			zend_string_release_ex(str, 0);
+			zend_string_release_ex_noinline(str, 0);
 			return FAILURE;
 		}
 	}

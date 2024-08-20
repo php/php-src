@@ -401,14 +401,14 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 		status = deflate(&Z, Z_FINISH);
 		deflateEnd(&Z);
 
-		if (Z_STREAM_END == status) {
+		if (EXPECTED(Z_STREAM_END == status)) {
 			/* size buffer down to actual length */
 			out = zend_string_truncate(out, Z.total_out, 0);
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = '\0';
 			return out;
-		} else {
-			zend_string_efree(out);
 		}
+
+		zend_string_efree_noinline(out);
 	}
 
 	php_error_docref(NULL, E_WARNING, "%s", zError(status));
@@ -1022,7 +1022,7 @@ PHP_FUNCTION(inflate_add)
 						case Z_DATA_ERROR:
 							efree(ctx->inflateDict);
 							ctx->inflateDict = NULL;
-							zend_string_release_ex(out, 0);
+							zend_string_release_ex_noinline(out, 0);
 							php_error_docref(NULL, E_WARNING, "Dictionary does not match expected dictionary (incorrect adler32 hash)");
 							RETURN_FALSE;
 						EMPTY_SWITCH_DEFAULT_CASE()
@@ -1033,7 +1033,7 @@ PHP_FUNCTION(inflate_add)
 					RETURN_FALSE;
 				}
 			default:
-				zend_string_release_ex(out, 0);
+				zend_string_release_ex_noinline(out, 0);
 				php_error_docref(NULL, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 		}
@@ -1246,7 +1246,7 @@ PHP_FUNCTION(deflate_add)
 			RETURN_STR(out);
 			break;
 		default:
-			zend_string_release_ex(out, 0);
+			zend_string_release_ex_noinline(out, 0);
 			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));
 			RETURN_FALSE;
 	}

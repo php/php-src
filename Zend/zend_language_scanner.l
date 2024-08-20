@@ -2999,7 +2999,7 @@ heredoc_scan_done:
 		}
 
 		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)) {
-			zend_string_efree(copy);
+			zend_string_efree_noinline(copy);
 			RETURN_TOKEN(T_ERROR);
 		}
 

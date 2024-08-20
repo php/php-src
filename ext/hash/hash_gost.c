@@ -203,7 +203,7 @@
 		AA(v, l, r); \
 	}
 
-static inline void Gost(PHP_GOST_CTX *context, uint32_t data[8])
+static void Gost(PHP_GOST_CTX *context, uint32_t data[8])
 {
 	int i;
 	uint32_t l, r, t, key[8], u[8], v[8], w[8], s[8], *h = context->state, *m = data;

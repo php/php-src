@@ -218,7 +218,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, const char *file, s
 	} else if (len > MAXPATHLEN) {
 		php_error_docref(NULL, E_WARNING, "Full extraction path exceed MAXPATHLEN (%i)", MAXPATHLEN);
 		efree(file_dirname_fullpath);
-		zend_string_release_ex(file_basename, 0);
+		zend_string_release_ex_noinline(file_basename, 0);
 		CWD_STATE_FREE(new_state.cwd);
 		return 0;
 	}
@@ -781,7 +781,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
 				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex_noinline(namelist[i], 0);
 				break;
 			}
 
@@ -803,7 +803,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 
 			if (0 != VCWD_STAT(fullpath, &s)) {
 				php_error_docref(NULL, E_WARNING, "Cannot read <%s>", fullpath);
-				zend_string_release_ex(namelist[i], 0);
+				zend_string_release_ex_noinline(namelist[i], 0);
 				continue;
 			}
 

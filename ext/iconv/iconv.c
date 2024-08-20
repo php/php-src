@@ -792,7 +792,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 	if (cd == (iconv_t)(-1)) {
 		if (ndl_buf != NULL) {
-			zend_string_efree(ndl_buf);
+			zend_string_efree_noinline(ndl_buf);
 		}
 		if (errno == EINVAL) {
 			return PHP_ICONV_ERR_WRONG_CHARSET;

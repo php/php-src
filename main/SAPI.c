@@ -296,7 +296,7 @@ SAPI_API SAPI_POST_READER_FUNC(sapi_read_standard_form_data)
 }
 
 
-static inline char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
+static char *get_default_content_type(uint32_t prefix_len, uint32_t *len)
 {
 	char *mimetype, *charset, *content_type;
 	uint32_t mimetype_len, charset_len;
@@ -850,7 +850,7 @@ SAPI_API int sapi_send_headers(void)
 	 * in case of an error situation.
 	 */
 	if (SG(sapi_headers).send_default_content_type && sapi_module.send_headers) {
-	    uint32_t len = 0;
+		uint32_t len = 0;
 		char *default_mimetype = get_default_content_type(0, &len);
 
 		if (default_mimetype && len) {

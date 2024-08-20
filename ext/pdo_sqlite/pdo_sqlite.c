@@ -347,11 +347,11 @@ static int php_sqlite_collation_callback(void *context, int string1_len, const v
 	zend_call_known_fcc(&collation->callback, &retval, /* argc */ 2, zargs, /* named_params */ NULL);
 
 	if (!Z_ISUNDEF(retval)) {
-		if (Z_TYPE(retval) != IS_LONG) {
+		if (UNEXPECTED(Z_TYPE(retval) != IS_LONG)) {
 			zend_string *func_name = get_active_function_or_method_name();
 			zend_type_error("%s(): Return value of the callback must be of type int, %s returned",
 				ZSTR_VAL(func_name), zend_zval_value_name(&retval));
-			zend_string_release(func_name);
+			zend_string_release_noinline(func_name);
 			return FAILURE;
 		}
 		if (Z_LVAL(retval) > 0) {

@@ -1573,7 +1573,7 @@ static ZEND_COLD void zend_error_va_list(
 {
 	zend_string *message = zend_vstrpprintf(0, format, args);
 	zend_error_zstr_at(orig_type, error_filename, error_lineno, message);
-	zend_string_release(message);
+	zend_string_release_noinline(message);
 }
 
 static ZEND_COLD void get_filename_lineno(int type, zend_string **filename, uint32_t *lineno) {
@@ -2047,3 +2047,11 @@ ZEND_API void zend_alloc_ce_cache(zend_string *type_name)
 	GC_ADD_FLAGS(type_name, IS_STR_CLASS_NAME_MAP_PTR);
 	GC_SET_REFCOUNT(type_name, ret);
 }
+
+
+ZEND_API extern inline uint32_t zend_gc_delref(zend_refcounted_h *p);
+ZEND_API extern inline uint32_t zval_gc_flags(uint32_t gc_type_info);
+ZEND_API extern inline uint32_t zval_gc_info(uint32_t gc_type_info);
+ZEND_API extern inline uint32_t zend_gc_refcount(const zend_refcounted_h *p);
+ZEND_API extern inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc);
+ZEND_API extern inline uint8_t zval_gc_type(uint32_t gc_type_info);

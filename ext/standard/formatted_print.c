@@ -45,7 +45,7 @@ static const char hexchars[] = "0123456789abcdef";
 static const char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
-inline static void
+static void
 php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 {
 	if ((*pos + 1) >= ZSTR_LEN(*buffer)) {
@@ -58,7 +58,7 @@ php_sprintf_appendchar(zend_string **buffer, size_t *pos, char add)
 /* }}} */
 
 /* php_spintf_appendchar() {{{ */
-inline static void
+static void
 php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len)
 {
 	if ((*pos + len) >= ZSTR_LEN(*buffer)) {
@@ -77,7 +77,7 @@ php_sprintf_appendchars(zend_string **buffer, size_t *pos, char *add, size_t len
 /* }}} */
 
 /* php_spintf_appendstring() {{{ */
-inline static void
+static void
 php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 						   size_t min_width, size_t max_width, char padding,
 						   size_t alignment, size_t len, bool neg, int expprec, int always_sign)
@@ -134,7 +134,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 /* }}} */
 
 /* php_spintf_appendint() {{{ */
-inline static void
+static void
 php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 						size_t width, char padding, size_t alignment,
 						int always_sign)
@@ -178,7 +178,7 @@ php_sprintf_appendint(zend_string **buffer, size_t *pos, zend_long number,
 /* }}} */
 
 /* php_spintf_appenduint() {{{ */
-inline static void
+static void
 php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 					   zend_ulong number,
 					   size_t width, char padding, size_t alignment)
@@ -210,7 +210,7 @@ php_sprintf_appenduint(zend_string **buffer, size_t *pos,
 /* }}} */
 
 /* php_spintf_appenddouble() {{{ */
-inline static void
+static void
 php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 						 double number,
 						 size_t width, char padding,
@@ -317,7 +317,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 /* }}} */
 
 /* php_spintf_appendd2n() {{{ */
-inline static void
+static void
 php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 size_t width, char padding, size_t alignment, int n,
 					 const char *chartable, int expprec)

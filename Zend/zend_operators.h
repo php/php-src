@@ -300,6 +300,7 @@ ZEND_API zend_long    ZEND_FASTCALL zval_try_get_long(const zval *op, bool *fail
 ZEND_API double       ZEND_FASTCALL zval_get_double_func(const zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op);
+ZEND_API void zend_tmp_string_release_noinline(zend_string *tmp);
 
 static zend_always_inline zend_long zval_get_long(const zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op, false);

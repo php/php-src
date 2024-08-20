@@ -244,7 +244,7 @@ PHP_FUNCTION(json_encode)
 		}
 	} else {
 		if (encoder.error_code != PHP_JSON_ERROR_NONE) {
-			smart_str_free(&buf);
+			smart_str_free_noinline(&buf);
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(encoder.error_code), encoder.error_code);
 			RETURN_THROWS();
 		}

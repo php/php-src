@@ -911,7 +911,7 @@ PHPAPI ZEND_COLD void php_log_err_with_severity(const char *log_message, int sys
 			php_ignore_value(write(fd, tmp, len));
 #endif
 			efree(tmp);
-			zend_string_free(error_time_str);
+			zend_string_free_noinline(error_time_str);
 			close(fd);
 			PG(in_error_log) = 0;
 			return;
@@ -1009,7 +1009,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 
 	if (PG(html_errors)) {
 		zend_string *replace_buffer = escape_html(ZSTR_VAL(buffer), ZSTR_LEN(buffer));
-		zend_string_free(buffer);
+		zend_string_free_noinline(buffer);
 
 		if (replace_buffer) {
 			buffer = replace_buffer;
@@ -1147,7 +1147,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		message = zend_strpprintf_unchecked(0, "%s: %S", origin, buffer);
 	}
 	if (replace_origin) {
-		zend_string_free(replace_origin);
+		zend_string_free_noinline(replace_origin);
 	} else {
 		efree(origin);
 	}
@@ -1155,10 +1155,10 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 		efree(docref_buf);
 	}
 
-	zend_string_free(buffer);
+	zend_string_free_noinline(buffer);
 
 	zend_error_zstr(type, message);
-	zend_string_release(message);
+	zend_string_release_noinline(message);
 }
 /* }}} */
 
@@ -1408,7 +1408,7 @@ static ZEND_COLD void php_error_cb(int orig_type, zend_string *error_filename, c
 					if (type == E_ERROR || type == E_PARSE) {
 						zend_string *buf = escape_html(ZSTR_VAL(message), ZSTR_LEN(message));
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
-						zend_string_free(buf);
+						zend_string_free_noinline(buf);
 					} else {
 						php_printf_unchecked("%s<br />\n<b>%s</b>:  %S in <b>%s</b> on line <b>%" PRIu32 "</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, message, ZSTR_VAL(error_filename), error_lineno, STR_PRINT(append_string));
 					}

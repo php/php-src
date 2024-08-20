@@ -1054,7 +1054,7 @@ flf_clean:;
 	Z_FLF_PARAM_FREE_STR(2, property_tmp)
 }
 
-static inline void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
+static void _class_exists_impl(zval *return_value, zend_string *name, bool autoload, int flags, int skip_flags) /* {{{ */
 {
 	zend_string *lcname;
 	zend_class_entry *ce;
@@ -1369,7 +1369,7 @@ ZEND_FUNCTION(restore_exception_handler)
 }
 /* }}} */
 
-static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags) /* {{{ */
+static void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int flags) /* {{{ */
 {
 	zend_string *key;
 	zval *zv;

@@ -34,7 +34,7 @@ static void incomplete_class_message(zend_object *object)
 	php_error_docref(NULL, E_WARNING, INCOMPLETE_CLASS_MSG,
 		"access a property", class_name ? ZSTR_VAL(class_name) : "unknown");
 	if (class_name) {
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 	}
 }
 
@@ -44,7 +44,7 @@ static void throw_incomplete_class_error(zend_object *object, const char *what)
 	zend_throw_error(NULL, INCOMPLETE_CLASS_MSG,
 		what, class_name ? ZSTR_VAL(class_name) : "unknown");
 	if (class_name) {
-		zend_string_release_ex(class_name, 0);
+		zend_string_release_ex_noinline(class_name, 0);
 	}
 }
 

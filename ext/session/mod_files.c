@@ -513,13 +513,13 @@ PS_READ_FUNC(files)
 #endif
 #endif
 
-	if (n != (zend_long)sbuf.st_size) {
+	if (UNEXPECTED(n != (zend_long)sbuf.st_size)) {
 		if (n == -1) {
 			php_error_docref(NULL, E_WARNING, "Read failed: %s (%d)", strerror(errno), errno);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Read returned less bytes than requested");
 		}
-		zend_string_release_ex(*val, 0);
+		zend_string_release_ex_noinline(*val, 0);
 		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}

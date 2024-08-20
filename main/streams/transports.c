@@ -46,7 +46,7 @@ PHPAPI int php_stream_xport_unregister(const char *protocol)
 #define ERR_RETURN(out_err, local_err, fmt) \
 	if (out_err) { *out_err = local_err; } \
 	else { php_error_docref(NULL, E_WARNING, fmt, local_err ? ZSTR_VAL(local_err) : "Unspecified error"); \
-		if (local_err) { zend_string_release_ex(local_err, 0); local_err = NULL; } \
+		if (local_err) { zend_string_release_ex_noinline(local_err, 0); local_err = NULL; } \
 	}
 
 PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, int options,

@@ -214,7 +214,7 @@ static zend_always_inline void clear_link_to_root(zend_generator *generator) {
 
 /* In the context of zend_generator_dtor_storage during shutdown, check if
  * the intermediate node 'generator' is running in a fiber */
-static inline bool check_node_running_in_fiber(zend_generator *generator) {
+static bool check_node_running_in_fiber(zend_generator *generator) {
 	ZEND_ASSERT(EG(flags) & EG_FLAGS_IN_SHUTDOWN);
 	ZEND_ASSERT(generator->execute_data);
 
