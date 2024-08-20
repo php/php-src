@@ -83,6 +83,7 @@
 #define ZEND_JIT_DEBUG_IR_AFTER_SCHEDULE (1<<29)
 #define ZEND_JIT_DEBUG_IR_AFTER_REGS     (1<<30)
 #define ZEND_JIT_DEBUG_IR_CODEGEN        (1U<<31)
+/* Update opcache.stub.php when adding more values here */
 
 #define ZEND_JIT_DEBUG_PERSISTENT      0x1f0 /* profile and debugger flags can't be changed at run-time */
 

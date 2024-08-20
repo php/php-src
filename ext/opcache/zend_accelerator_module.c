@@ -32,11 +32,12 @@
 #include "ext/standard/info.h"
 #include "ext/standard/php_filestat.h"
 #include "ext/date/php_date.h"
-#include "opcache_arginfo.h"
 
 #ifdef HAVE_JIT
 #include "jit/zend_jit.h"
 #endif
+
+#include "opcache_arginfo.h"
 
 #define STRING_NOT_NULL(s) (NULL == (s)?"":s)
 #define MIN_ACCEL_FILES 200
@@ -418,6 +419,7 @@ static ZEND_MINIT_FUNCTION(zend_accelerator)
 {
 	(void)type; /* keep the compiler happy */
 
+	register_opcache_symbols(module_number);
 	REGISTER_INI_ENTRIES();
 
 	return SUCCESS;
