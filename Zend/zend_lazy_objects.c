@@ -207,17 +207,15 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 	int lazy_properties_count = 0;
 
 	if (!obj) {
-		zval zobj;
-		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS|ZEND_ACC_ENUM))) {
-			/* Slow path: use object_init_ex() */
-			if (object_init_ex(&zobj, ce) == FAILURE) {
-				ZEND_ASSERT(EG(exception));
-				return NULL;
-			}
-			obj = Z_OBJ(zobj);
-		} else {
-			obj = zend_objects_new(ce);
+		if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+			zval zobj;
+			/* Call object_init_ex() for the generated exception */
+			zend_result result = object_init_ex(&zobj, ce);
+			ZEND_ASSERT(result == FAILURE && EG(exception));
+			return NULL;
 		}
+
+		obj = zend_objects_new(ce);
 
 		for (int i = 0; i < obj->ce->default_properties_count; i++) {
 			zval *p = &obj->properties_table[i];
