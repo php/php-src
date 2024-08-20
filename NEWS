@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.24
 
+- Core:
+  . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
+    (zeriyoshi)
+
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
@@ -9,8 +13,6 @@ PHP                                                                        NEWS
 29 Aug 2024, PHP 8.2.23
 
 - Core:
-  . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
-    (zeriyoshi)
   . Fixed bug GH-15020 (Memory leak in Zend/Optimizer/escape_analysis.c).
     (nielsdos)
   . Fixed bug GH-15023 (Memory leak in Zend/zend_ini.c). (nielsdos)
