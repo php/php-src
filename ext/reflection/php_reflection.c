@@ -5259,7 +5259,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 PHP_METHOD(ReflectionClass, newLazyGhost)
 {
 	reflection_class_new_lazy(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-			ZEND_LAZY_OBJECT_STRATEGY_GHOST, /*is_make_lazy */ false);
+			ZEND_LAZY_OBJECT_STRATEGY_GHOST, /* is_reset */ false);
 }
 /* }}} */
 
@@ -5267,7 +5267,7 @@ PHP_METHOD(ReflectionClass, newLazyGhost)
 PHP_METHOD(ReflectionClass, newLazyProxy)
 {
 	reflection_class_new_lazy(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-			ZEND_LAZY_OBJECT_STRATEGY_PROXY, /*is_make_lazy */ false);
+			ZEND_LAZY_OBJECT_STRATEGY_PROXY, /* is_reset */ false);
 }
 /* }}} */
 
@@ -5283,7 +5283,7 @@ PHP_METHOD(ReflectionClass, resetAsLazyGhost)
 PHP_METHOD(ReflectionClass, resetAsLazyProxy)
 {
 	reflection_class_new_lazy(INTERNAL_FUNCTION_PARAM_PASSTHRU,
-			ZEND_LAZY_OBJECT_STRATEGY_PROXY, /*is_reset */ true);
+			ZEND_LAZY_OBJECT_STRATEGY_PROXY, /* is_reset */ true);
 }
 /* }}} */
 
