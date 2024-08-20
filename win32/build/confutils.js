@@ -1040,10 +1040,10 @@ function CHECK_HEADER_ADD_INCLUDE(header_name, flag_name, path_to_check, use_env
 		add_to_flag_only = true;
 	}
 
-	if (typeof(add_to_flag_only) != "undefined") {
+	if (typeof(add_to_flag_only) != "undefined" && have) {
 		ADD_FLAG(flag_name, "/DHAVE_" + sym + "=" + have);
-	} else if (!configure_hdr.Exists('HAVE_' + sym)) {
-		AC_DEFINE("HAVE_" + sym, have, "have the " + header_name + " header file");
+	} else if (!configure_hdr.Exists('HAVE_' + sym) && have) {
+		AC_DEFINE("HAVE_" + sym, have, "Define to 1 if you have the <" + header_name + "> header file.");
 	}
 
 	return p;

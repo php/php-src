@@ -195,7 +195,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	tmp->create_object = php_com_object_new;
 	tmp->get_iterator = php_com_iter_get;
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	tmp = register_class_dotnet(php_com_variant_class_entry);
 	tmp->default_object_handlers = &php_com_object_handlers;
 	tmp->create_object = php_com_object_new;
@@ -216,7 +216,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 PHP_MSHUTDOWN_FUNCTION(com_dotnet)
 {
 	UNREGISTER_INI_ENTRIES();
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
 		php_com_dotnet_mshutdown();
 	}
@@ -239,7 +239,7 @@ PHP_RINIT_FUNCTION(com_dotnet)
 /* {{{ PHP_RSHUTDOWN_FUNCTION */
 PHP_RSHUTDOWN_FUNCTION(com_dotnet)
 {
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	if (COMG(dotnet_runtime_stuff)) {
 		php_com_dotnet_rshutdown();
 	}
@@ -257,7 +257,7 @@ PHP_MINFO_FUNCTION(com_dotnet)
 	php_info_print_table_row(2, "COM support", "enabled");
 	php_info_print_table_row(2, "DCOM support", COMG(allow_dcom) ? "enabled" : "disabled");
 
-#if HAVE_MSCOREE_H
+#ifdef HAVE_MSCOREE_H
 	php_info_print_table_row(2, ".Net support", "enabled");
 #else
 	php_info_print_table_row(2, ".Net support", "not present in this build");
