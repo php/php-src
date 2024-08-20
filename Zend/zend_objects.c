@@ -309,20 +309,20 @@ ZEND_API zend_object *zend_objects_clone_obj(zend_object *old_object)
 
 	if (UNEXPECTED(zend_object_is_lazy(old_object))) {
 		return zend_lazy_object_clone(old_object);
-	} else {
-		/* assume that create isn't overwritten, so when clone depends on the
-		 * overwritten one then it must itself be overwritten */
-		new_object = zend_objects_new(old_object->ce);
+	}
 
-		/* zend_objects_clone_members() expect the properties to be initialized. */
-		if (new_object->ce->default_properties_count) {
-			zval *p = new_object->properties_table;
-			zval *end = p + new_object->ce->default_properties_count;
-			do {
-				ZVAL_UNDEF(p);
-				p++;
-			} while (p != end);
-		}
+	/* assume that create isn't overwritten, so when clone depends on the
+	 * overwritten one then it must itself be overwritten */
+	new_object = zend_objects_new(old_object->ce);
+
+	/* zend_objects_clone_members() expect the properties to be initialized. */
+	if (new_object->ce->default_properties_count) {
+		zval *p = new_object->properties_table;
+		zval *end = p + new_object->ce->default_properties_count;
+		do {
+			ZVAL_UNDEF(p);
+			p++;
+		} while (p != end);
 	}
 
 	zend_objects_clone_members(new_object, old_object);
