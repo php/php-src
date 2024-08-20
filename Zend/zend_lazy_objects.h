@@ -81,7 +81,7 @@ void zend_lazy_object_realize(zend_object *obj);
 
 static zend_always_inline bool zend_object_is_lazy(zend_object *obj)
 {
-	return (OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY | IS_OBJ_LAZY_PROXY));
+	return (OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED | IS_OBJ_LAZY_PROXY));
 }
 
 static zend_always_inline bool zend_object_is_lazy_proxy(zend_object *obj)
@@ -91,7 +91,7 @@ static zend_always_inline bool zend_object_is_lazy_proxy(zend_object *obj)
 
 static zend_always_inline bool zend_lazy_object_initialized(zend_object *obj)
 {
-	return !(OBJ_EXTRA_FLAGS(obj) & IS_OBJ_LAZY);
+	return !(OBJ_EXTRA_FLAGS(obj) & IS_OBJ_LAZY_UNINITIALIZED);
 }
 
 /* True if accessing a lazy prop on obj mandates a call to

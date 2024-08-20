@@ -95,7 +95,7 @@ void zend_lazy_objects_destroy(zend_lazy_objects_store *store)
 
 void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
 {
-	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY));
+	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY));
 
 	zval *zv = zend_hash_index_add_new_ptr(&EG(lazy_objects_store).infos, obj->handle, info);
 	ZEND_ASSERT(zv);
@@ -103,7 +103,7 @@ void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
 
 zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
 {
-	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY));
+	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY));
 
 	zend_lazy_object_info *info = zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
 	ZEND_ASSERT(info);
@@ -246,7 +246,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 	} else {
 		if (zend_object_is_lazy(obj)) {
 			ZEND_ASSERT(zend_object_is_lazy_proxy(obj) && zend_lazy_object_initialized(obj));
-			OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY);
+			OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
 			zend_lazy_object_del_info(obj);
 		} else if (!(flags & ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR)
 				&& !(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
@@ -294,7 +294,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		return obj;
 	}
 
-	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY;
+	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED;
 
 	if (flags & ZEND_LAZY_OBJECT_STRATEGY_PROXY) {
 		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_PROXY;
@@ -335,7 +335,7 @@ ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj)
 	zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 	zval *properties_table = obj->properties_table;
 
-	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY);
+	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
 
 	for (int i = 0; i < ce->default_properties_count; i++) {
 		if (Z_PROP_FLAG_P(&properties_table[i]) & IS_PROP_LAZY) {
@@ -385,7 +385,7 @@ static void zend_lazy_object_revert_init(zend_object *obj, zval *properties_tabl
 		obj->properties = NULL;
 	}
 
-	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY;
+	OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED;
 }
 
 static bool zend_lazy_object_compatible(zend_object *real_object, zend_object *lazy_object)
@@ -418,7 +418,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	zend_lazy_object_info *info = zend_lazy_object_get_info(obj);
 
 	/* prevent reentrant initialization */
-	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY);
+	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
 
 	/* Call factory */
 	zval retval;
@@ -432,12 +432,12 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	zend_call_known_fcc(initializer, &retval, argc, &zobj, named_params);
 
 	if (UNEXPECTED(EG(exception))) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY;
+		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		return NULL;
 	}
 
 	if (UNEXPECTED(Z_TYPE(retval) != IS_OBJECT || !zend_lazy_object_compatible(Z_OBJ(retval), obj))) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY;
+		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_type_error("The real instance class %s is not compatible with the proxy class %s. The proxy must be a instance of the same class as the real instance, or a sub-class with no additional properties, and no overrides of the __destructor or __clone methods.",
 				zend_zval_value_name(&retval),
 				ZSTR_VAL(obj->ce->name));
@@ -446,7 +446,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 	}
 
 	if (UNEXPECTED(Z_OBJ(retval) == obj || zend_object_is_lazy(Z_OBJ(retval)))) {
-		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY;
+		OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 		zend_throw_error(NULL, "Lazy proxy factory must return a non-lazy object");
 		zval_ptr_dtor(&retval);
 		return NULL;
@@ -458,7 +458,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 
 		zend_object *clone = Z_OBJ_HT(retval)->clone_obj(Z_OBJ(retval));
 		if (EG(exception)) {
-			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY;
+			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 			zval_ptr_dtor(&retval);
 			OBJ_RELEASE(clone);
 			return NULL;
@@ -467,7 +467,7 @@ static zend_object *zend_lazy_object_init_proxy(zend_object *obj)
 		ZEND_ASSERT(zend_lazy_object_compatible(clone, obj));
 
 		if (zend_object_is_lazy(clone)) {
-			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY|IS_OBJ_LAZY_PROXY;
+			OBJ_EXTRA_FLAGS(obj) |= IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY;
 			zend_throw_error(NULL, "Lazy proxy factory must return a non-lazy object");
 			zval_ptr_dtor(&retval);
 			return NULL;
@@ -533,7 +533,7 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 	zend_fcall_info_cache *initializer = zend_lazy_object_get_initializer_fcc(obj);
 
 	/* Prevent reentrant initialization */
-	OBJ_EXTRA_FLAGS(obj) &= ~IS_OBJ_LAZY;
+	OBJ_EXTRA_FLAGS(obj) &= ~IS_OBJ_LAZY_UNINITIALIZED;
 
 	/* Snapshot dynamic properties */
 	HashTable *properties_snapshot = obj->properties;
@@ -614,7 +614,7 @@ void zend_lazy_object_realize(zend_object *obj)
 	}
 #endif
 
-	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY | IS_OBJ_LAZY_PROXY);
+	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED | IS_OBJ_LAZY_PROXY);
 }
 
 /* Initialize object and clone it. For proxies, we clone both the proxy and its
