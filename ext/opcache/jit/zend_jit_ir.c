@@ -350,7 +350,9 @@ static void** zend_jit_stub_handlers = NULL;
 static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])];
 #endif
 
+#ifdef HAVE_CAPSTONE
 static zend_atomic_bool zend_jit_disasm_setup_done = ZEND_ATOMIC_BOOL_INITIALIZER(false);
+#endif
 
 #if defined(IR_TARGET_AARCH64)
 
