@@ -29,11 +29,11 @@ echo "Done";
 --EXPECTF--
 *** Testing session_id() : basic functionality ***
 
-Deprecated: session.sid_bits_per_character INI setting is deprecated in %s on line %d
+Deprecated: ini_set(): session.sid_bits_per_character INI setting is deprecated in %s on line %d
 
-Deprecated: session.sid_length INI setting is deprecated in %s on line %d
+Deprecated: ini_set(): session.sid_length INI setting is deprecated in %s on line %d
 string(120) "%s"
 
-Deprecated: session.sid_length INI setting is deprecated in %s on line %d
+Deprecated: ini_set(): session.sid_length INI setting is deprecated in %s on line %d
 string(22) "%s"
 Done
