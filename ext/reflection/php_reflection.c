@@ -6083,6 +6083,16 @@ ZEND_METHOD(ReflectionProperty, getRawValue)
 	}
 }
 
+static void reflection_property_set_raw_value(property_reference *ref, reflection_object *intern, zend_object *object, zval *value)
+{
+	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
+		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
+	} else {
+		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
+		zend_call_known_instance_method_with_1_params(func, object, NULL, value);
+	}
+}
+
 ZEND_METHOD(ReflectionProperty, setRawValue)
 {
 	reflection_object *intern;
@@ -6101,12 +6111,7 @@ ZEND_METHOD(ReflectionProperty, setRawValue)
 		RETURN_THROWS();
 	}
 
-	if (!ref->prop || !ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		zend_update_property_ex(intern->ce, Z_OBJ_P(object), ref->unmangled_name, value);
-	} else {
-		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
-		zend_call_known_instance_method_with_1_params(func, Z_OBJ_P(object), NULL, value);
-	}
+	reflection_property_set_raw_value(ref, intern, Z_OBJ_P(object), value);
 }
 
 /* {{{ Set property value withtout triggering initializer while skipping hooks if any */
@@ -6162,12 +6167,7 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 	/* Do not trigger initialization */
 	Z_PROP_FLAG_P(var_ptr) &= ~IS_PROP_LAZY;
 
-	if (!ref->prop->hooks || !ref->prop->hooks[ZEND_PROPERTY_HOOK_SET]) {
-		zend_update_property_ex(intern->ce, object, ref->unmangled_name, value);
-	} else {
-		zend_function *func = zend_get_property_hook_trampoline(ref->prop, ZEND_PROPERTY_HOOK_SET, ref->unmangled_name);
-		zend_call_known_instance_method_with_1_params(func, object, NULL, value);
-	}
+	reflection_property_set_raw_value(ref, intern, object, value);
 
 	/* Mark property as lazy again if an exception prevented update */
 	if (EG(exception) && Z_TYPE_P(var_ptr) == IS_UNDEF
