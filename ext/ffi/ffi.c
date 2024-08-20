@@ -246,7 +246,7 @@ static zend_always_inline void zend_ffi_object_init(zend_object *object, zend_cl
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT | (IS_OBJ_DESTRUCTOR_CALLED << GC_FLAGS_SHIFT);
-	object->flags = 0;
+	object->extra_flags = 0;
 	object->ce = ce;
 	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
