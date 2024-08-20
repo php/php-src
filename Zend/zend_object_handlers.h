@@ -290,6 +290,19 @@ static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *obj
 /* Implements the fast path for array cast */
 ZEND_API HashTable *zend_std_build_object_properties_array(zend_object *zobj);
 
+#define ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(object) (            \
+		/* We can use zend_std_build_object_properties_array() for objects     \
+		 * without properties ht and with standard handlers */                 \
+		Z_OBJ_P(object)->properties == NULL                                    \
+		&& Z_OBJ_HT_P(object)->get_properties_for == NULL                      \
+		&& Z_OBJ_HT_P(object)->get_properties == zend_std_get_properties       \
+		/* For initialized proxies we need to forward to the real instance */  \
+		&& (                                                                   \
+			!zend_object_is_lazy_proxy(Z_OBJ_P(object))                        \
+			|| !zend_lazy_object_initialized(Z_OBJ_P(object))                  \
+		)                                                                      \
+)
+
 /* Handler for objects that cannot be meaningfully compared.
  * Only objects with the same identity will be considered equal. */
 ZEND_API int zend_objects_not_comparable(zval *o1, zval *o2);

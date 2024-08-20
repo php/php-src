@@ -812,10 +812,7 @@ try_again:
 		case IS_OBJECT:
 			if (Z_OBJCE_P(op) == zend_ce_closure) {
 				convert_scalar_to_array(op);
-			} else if (Z_OBJ_P(op)->properties == NULL
-			 && Z_OBJ_HT_P(op)->get_properties_for == NULL
-			 && Z_OBJ_HT_P(op)->get_properties == zend_std_get_properties
-			 && (!zend_object_is_lazy_proxy(Z_OBJ_P(op)) && !zend_lazy_object_initialized(Z_OBJ_P(op)))) {
+			} else if (ZEND_STD_BUILD_OBJECT_PROPERTIES_ARRAY_COMPATIBLE(op)) {
 				/* Optimized version without rebuilding properties HashTable */
 				HashTable *ht = zend_std_build_object_properties_array(Z_OBJ_P(op));
 				OBJ_RELEASE(Z_OBJ_P(op));
