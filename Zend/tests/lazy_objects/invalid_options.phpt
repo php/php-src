@@ -21,6 +21,13 @@ try {
     printf("%s: %s\n", $e::class, $e->getMessage());
 }
 
+try {
+    // SKIP_DESTRUCTOR is only allowed on resetAsLazyProxy()
+    $obj = $reflector->newLazyGhost(function ($obj) { }, ReflectionClass::SKIP_DESTRUCTOR);
+} catch (ReflectionException $e) {
+    printf("%s: %s\n", $e::class, $e->getMessage());
+}
+
 $obj = new C();
 
 try {
@@ -39,5 +46,6 @@ try {
 --EXPECT--
 ReflectionException: ReflectionClass::newLazyGhost(): Argument #2 ($options) contains invalid flags
 ReflectionException: ReflectionClass::newLazyProxy(): Argument #2 ($options) contains invalid flags
+ReflectionException: ReflectionClass::newLazyGhost(): Argument #2 ($options) does not accept ReflectionClass::SKIP_DESTRUCTOR
 ReflectionException: ReflectionClass::resetAsLazyGhost(): Argument #3 ($options) contains invalid flags
 ReflectionException: ReflectionClass::resetAsLazyProxy(): Argument #3 ($options) contains invalid flags

@@ -5222,10 +5222,17 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		obj = NULL;
 	}
 
-	if (options & ~ZEND_LAZY_OBJECT_USER_FLAGS) {
+	zend_long accepted_flags = ZEND_LAZY_OBJECT_USER_FLAGS;
+	if (options & ~accepted_flags) {
 		uint32_t arg_num = 2 + is_reset;
 		zend_argument_error(reflection_exception_ptr, arg_num,
 				"contains invalid flags");
+		RETURN_THROWS();
+	}
+
+	if (!is_reset && options & ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR) {
+		zend_argument_error(reflection_exception_ptr, 2,
+				"does not accept ReflectionClass::SKIP_DESTRUCTOR");
 		RETURN_THROWS();
 	}
 
