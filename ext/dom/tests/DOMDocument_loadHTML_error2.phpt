@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-DOMDocument::loadHTML(): Argument #1 ($source) cannot be empty
+DOMDocument::loadHTML(): Argument #1 ($source) must not be empty

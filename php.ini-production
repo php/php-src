@@ -1607,7 +1607,7 @@ zend.assertions = -1
 ; With mbstring support this will automatically be converted into the encoding
 ; given by corresponding encode setting. When empty mbstring.internal_encoding
 ; is used. For the decode settings you can distinguish between motorola and
-; intel byte order. A decode setting cannot be empty.
+; intel byte order. A decode setting must not be empty.
 ; https://php.net/exif.encode-unicode
 ;exif.encode_unicode = ISO-8859-15
 

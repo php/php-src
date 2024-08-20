@@ -1525,7 +1525,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (!source_len) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(source_len)) {
@@ -1579,7 +1579,7 @@ PHP_METHOD(DOMDocument, save)
 	}
 
 	if (file_len == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1883,7 +1883,7 @@ static void dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	if (!source_len) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1992,7 +1992,7 @@ static void dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	}
 
 	if (!source_len) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2085,7 +2085,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	}
 
 	if (!source_len) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -2162,7 +2162,7 @@ PHP_METHOD(DOMDocument, saveHTMLFile)
 	}
 
 	if (file_len == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

@@ -139,7 +139,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
 	if (!types_len) {
-		zend_argument_cannot_be_empty_error(ERROR_ARG_POS(2));
+		zend_argument_must_not_be_empty_error(ERROR_ARG_POS(2));
 		RETURN_THROWS();
 	}
 

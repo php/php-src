@@ -60,7 +60,7 @@ array(0) {
 array(0) {
 }
 bool(true)
-pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cannot be empty
+pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) must not be empty
 pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id invalid value (def)
 pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id must be between 0 and %d (%d)
 pcntl_setcpuaffinity(): Argument #2 ($cpu_ids) cpu id must be between 0 and %d (-1024)

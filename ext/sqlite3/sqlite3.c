@@ -421,7 +421,7 @@ PHP_METHOD(SQLite3, loadExtension)
 	}
 
 	if (extension_len == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

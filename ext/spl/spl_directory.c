@@ -696,7 +696,7 @@ static void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_l
 	}
 
 	if (ZSTR_LEN(path) == 0) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 
@@ -1227,7 +1227,7 @@ PHP_METHOD(SplFileInfo, getLinkTarget)
 	}
 #if defined(PHP_WIN32) || defined(HAVE_SYMLINK)
 	if (intern->file_name == NULL) {
-		zend_value_error("Filename cannot be empty");
+		zend_value_error("Filename must not be empty");
 		RETURN_THROWS();
 	}
 	if (!IS_ABSOLUTE_PATH(ZSTR_VAL(intern->file_name), ZSTR_LEN(intern->file_name))) {

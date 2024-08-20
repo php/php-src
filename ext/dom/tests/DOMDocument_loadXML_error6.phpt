@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-DOMDocument::loadXML(): Argument #1 ($source) cannot be empty
+DOMDocument::loadXML(): Argument #1 ($source) must not be empty

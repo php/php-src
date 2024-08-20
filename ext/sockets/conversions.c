@@ -662,7 +662,7 @@ static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
 	if (ZSTR_LEN(path_str) == 0) {
-		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
+		do_from_zval_err(ctx, "%s", "the path is must not be empty");
 		zend_tmp_string_release(tmp_path_str);
 		return;
 	}

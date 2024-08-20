@@ -668,7 +668,7 @@ static bool php_snmp_parse_oid(
 		objid_query->count++;
 	} else if (oid_ht) { /* we got objid array */
 		if (zend_hash_num_elements(oid_ht) == 0) {
-			zend_value_error("Array of object IDs cannot be empty");
+			zend_value_error("Array of object IDs must not be empty");
 			return false;
 		}
 		objid_query->vars = (snmpobjarg *)safe_emalloc(sizeof(snmpobjarg), zend_hash_num_elements(oid_ht), 0);

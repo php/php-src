@@ -8383,7 +8383,7 @@ static void zend_compile_property_hooks(
 	zend_class_entry *ce = CG(active_class_entry);
 
 	if (hooks->children == 0) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list cannot be empty");
+		zend_error_noreturn(E_COMPILE_ERROR, "Property hook list must not be empty");
 	}
 
 	for (uint32_t i = 0; i < hooks->children; i++) {

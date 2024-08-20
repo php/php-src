@@ -349,7 +349,7 @@ PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			zend_argument_cannot_be_empty_error(1);
+			zend_argument_must_not_be_empty_error(1);
 			RETURN_THROWS();
 		}
 

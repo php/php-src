@@ -87,9 +87,9 @@ foreach ($tests as $encoding => $test) {
 ?>
 --EXPECT--
 --- Error conditions ---
-ValueError: mb_str_pad(): Argument #3 ($pad_string) cannot be empty
-ValueError: mb_str_pad(): Argument #3 ($pad_string) cannot be empty
-ValueError: mb_str_pad(): Argument #3 ($pad_string) cannot be empty
+ValueError: mb_str_pad(): Argument #3 ($pad_string) must not be empty
+ValueError: mb_str_pad(): Argument #3 ($pad_string) must not be empty
+ValueError: mb_str_pad(): Argument #3 ($pad_string) must not be empty
 ValueError: mb_str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH
 ValueError: mb_str_pad(): Argument #5 ($encoding) must be a valid encoding, "non-existing" given
 --- Simple ASCII strings ---

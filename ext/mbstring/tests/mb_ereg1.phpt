@@ -35,7 +35,7 @@ array(3) {
   array(0) {
   }
 }
-ValueError: mb_ereg(): Argument #1 ($pattern) cannot be empty
+ValueError: mb_ereg(): Argument #1 ($pattern) must not be empty
 array(3) {
   [0]=>
   string(0) ""

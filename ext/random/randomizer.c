@@ -434,7 +434,7 @@ PHP_METHOD(Random_Randomizer, getBytesFromString)
 	const size_t max_offset = source_length - 1;
 
 	if (source_length < 1) {
-		zend_argument_cannot_be_empty_error(1);
+		zend_argument_must_not_be_empty_error(1);
 		RETURN_THROWS();
 	}
 

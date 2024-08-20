@@ -36,7 +36,7 @@ test
 test
 foo
 textdomain(): Argument #1 ($domain) cannot be zero
-textdomain(): Argument #1 ($domain) cannot be empty
+textdomain(): Argument #1 ($domain) must not be empty
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09
