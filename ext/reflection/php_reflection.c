@@ -5230,7 +5230,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		RETURN_THROWS();
 	}
 
-	if (!is_reset && options & ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR) {
+	if (!is_reset && (options & ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR)) {
 		zend_argument_error(reflection_exception_ptr, 2,
 				"does not accept ReflectionClass::SKIP_DESTRUCTOR");
 		RETURN_THROWS();
