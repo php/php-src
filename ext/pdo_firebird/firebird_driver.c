@@ -989,12 +989,6 @@ static int php_firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const zend_string *sq
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	char *new_sql;
 
-	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
-	if (ZSTR_LEN(sql) > 65536) {
-		php_firebird_error_with_info(dbh, "01004", strlen("01004"), NULL, 0);
-		return 0;
-	}
-
 	/* allocate the statement */
 	if (isc_dsql_allocate_statement(H->isc_status, &H->db, s)) {
 		php_firebird_error(dbh);
