@@ -9821,11 +9821,11 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 	reflection_parameter_reference param;
 	param.offset = opline->op1.num - 1;
 	param.required = param.offset < called_func->common.required_num_args;
-	param.arg_info = &called_func->common.arg_info[param.offset];
 	param.fptr = called_func;
 
-	if (param.required) {
-		zend_value_error("Cannot pass default to required parameter %u of %s%s%s()",
+	if (UNEXPECTED(param.required || param.offset >= called_func->common.num_args)) {
+		zend_value_error("Cannot pass default to %s parameter %u of %s%s%s()",
+			param.required ? "required" : "undeclared",
 			opline->op1.num,
 			called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
 			called_func->common.scope ? "::" : "",
@@ -9833,6 +9833,9 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 		);
 		HANDLE_EXCEPTION();
 	}
+
+	// This is not safe until the above validation is complete, since arg_info can be NULL.
+	param.arg_info = &called_func->common.arg_info[param.offset];
 
 	zval default_value;
 	reflection_get_parameter_default(&default_value, &param);

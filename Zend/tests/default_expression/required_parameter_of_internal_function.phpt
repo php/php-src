@@ -7,4 +7,5 @@ json_encode(default);
 ?>
 --EXPECTF--
 Fatal error: Uncaught ValueError: Cannot pass default to required parameter 1 of json_encode() in %s:%d
-Stack trace:%a
+Stack trace:
+%a
