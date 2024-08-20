@@ -665,7 +665,7 @@ HashTable *zend_lazy_object_debug_info(zend_object *object, int *is_temp)
 	}
 
 	*is_temp = 0;
-	return zend_get_properties_no_init(object);
+	return zend_get_properties_no_lazy_init(object);
 }
 
 HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n)

@@ -138,13 +138,13 @@ ZEND_API HashTable *zend_std_get_properties(zend_object *zobj) /* {{{ */
 /* }}} */
 
 /* Fetch properties HashTable without triggering lazy initialization */
-ZEND_API HashTable *zend_get_properties_no_init(zend_object *zobj)
+ZEND_API HashTable *zend_get_properties_no_lazy_init(zend_object *zobj)
 {
 	if (zobj->handlers->get_properties == zend_std_get_properties) {
 		if (UNEXPECTED(zend_object_is_lazy_proxy(zobj)
 				&& zend_lazy_object_initialized(zobj))) {
 			zend_object *instance = zend_lazy_object_get_instance(zobj);
-			return zend_get_properties_no_init(instance);
+			return zend_get_properties_no_lazy_init(instance);
 		}
 
 		if (!zobj->properties) {
@@ -2379,7 +2379,7 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 			}
 			return ht;
 		case ZEND_PROP_PURPOSE_ARRAY_CAST:
-			ht = zend_get_properties_no_init(obj);
+			ht = zend_get_properties_no_lazy_init(obj);
 			if (ht) {
 				GC_TRY_ADDREF(ht);
 			}
@@ -2387,7 +2387,7 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 		case ZEND_PROP_PURPOSE_SERIALIZE: {
 			if (zend_object_is_lazy(obj)
 					&& !zend_lazy_object_initialize_on_serialize(obj)) {
-				ht = zend_get_properties_no_init(obj);
+				ht = zend_get_properties_no_lazy_init(obj);
 			} else {
 				ht = obj->handlers->get_properties(obj);
 			}
