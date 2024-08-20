@@ -93,7 +93,7 @@ void zend_lazy_objects_destroy(zend_lazy_objects_store *store)
 	zend_hash_destroy(&store->infos);
 }
 
-void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
+static void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
 {
 	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY));
 
@@ -101,7 +101,7 @@ void zend_lazy_object_set_info(zend_object *obj, zend_lazy_object_info *info)
 	ZEND_ASSERT(zv);
 }
 
-zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
+static zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
 {
 	ZEND_ASSERT(OBJ_EXTRA_FLAGS(obj) & (IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY));
 
@@ -122,7 +122,7 @@ zval* zend_lazy_object_get_initializer_zv(zend_object *obj)
 	return &info->u.initializer.zv;
 }
 
-zend_fcall_info_cache* zend_lazy_object_get_initializer_fcc(zend_object *obj)
+static zend_fcall_info_cache* zend_lazy_object_get_initializer_fcc(zend_object *obj)
 {
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
 
