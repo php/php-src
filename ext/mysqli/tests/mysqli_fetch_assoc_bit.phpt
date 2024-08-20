@@ -4,9 +4,8 @@ mysqli_fetch_assoc() - BIT
 mysqli
 --SKIPIF--
 <?php
-require_once 'skipifconnectfailure.inc';
-
-require_once 'table.inc';
+require_once __DIR__ . '/test_setup/test_helpers.inc';;
+$link = mysqli_connect_or_skip();
 if (mysqli_get_server_version($link) < 50003)
     // b'001' syntax not supported before 5.0.3
     die("skip Syntax used for test not supported with MySQL Server before 5.0.3");

@@ -724,7 +724,8 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, bool s
 		if (((prop_info->flags & ZEND_ACC_PROTECTED) &&
 			 !zend_check_protected(prop_info->ce, scope)) ||
 			((prop_info->flags & ZEND_ACC_PRIVATE) &&
-			  prop_info->ce != scope)) {
+			  prop_info->ce != scope) ||
+			(prop_info->flags & ZEND_ACC_VIRTUAL)) {
 			continue;
 		}
 		prop = NULL;

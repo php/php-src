@@ -206,7 +206,6 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 	stmt->state = MYSQLND_STMT_INITTED;
 	stmt->execute_cmd_buffer.length = MYSQLND_NET_CMD_BUFFER_MIN_SIZE;
 	stmt->execute_cmd_buffer.buffer = mnd_emalloc(stmt->execute_cmd_buffer.length);
-	stmt->prefetch_rows = MYSQLND_DEFAULT_PREFETCH_ROWS;
 
 	/*
 	  Mark that we reference the connection, thus it won't be

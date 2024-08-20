@@ -130,13 +130,10 @@ require_once 'skipifconnectfailure.inc';
         $mode = mt_rand(-1000, 1000);
     } while (in_array($mode, $valid));
 
-    if ($TEST_EXPERIMENTAL) {
-        ob_start();
+    try {
         new mysqli_result($link, $mode);
-        $content = ob_get_contents();
-        ob_end_clean();
-        if (!stristr($content, 'Invalid value for resultmode'))
-            printf("[009] Expecting warning because of invalid resultmode\n");
+    } catch (ValueError $ex) {
+        echo $ex->getMessage(), "\n";
     }
 
     print "done!";
@@ -169,4 +166,5 @@ mysqli_result->unknown = ''
 
 Constructor:
 mysqli_result object is already closed
+mysqli_result::__construct(): Argument #2 ($result_mode) must be either MYSQLI_STORE_RESULT or MYSQLI_USE_RESULT
 done!

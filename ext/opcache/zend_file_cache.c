@@ -29,6 +29,7 @@
 #ifdef ZEND_WIN32
 #include "ext/standard/md5.h"
 #endif
+#include "ext/standard/php_filestat.h"
 
 #include "ZendAccelerator.h"
 #include "zend_file_cache.h"

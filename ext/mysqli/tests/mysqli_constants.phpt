@@ -66,6 +66,8 @@ $expected_constants = array(
     "MYSQLI_TYPE_NEWDATE"				=> true,
     "MYSQLI_TYPE_ENUM"					=> true,
     "MYSQLI_TYPE_SET"					=> true,
+    "MYSQLI_TYPE_VECTOR"			    => true,
+    "MYSQLI_TYPE_JSON"			        => true,
     "MYSQLI_TYPE_TINY_BLOB"				=> true,
     "MYSQLI_TYPE_MEDIUM_BLOB"			=> true,
     "MYSQLI_TYPE_LONG_BLOB"				=> true,
@@ -133,12 +135,6 @@ $expected_constants = array_merge($expected_constants, array(
     "MYSQLI_STMT_ATTR_CURSOR_TYPE"		=> true,
     "MYSQLI_CURSOR_TYPE_NO_CURSOR"		=> true,
     "MYSQLI_CURSOR_TYPE_READ_ONLY"		=> true,
-    "MYSQLI_CURSOR_TYPE_FOR_UPDATE"		=> true,
-    "MYSQLI_CURSOR_TYPE_SCROLLABLE"		=> true,
-));
-
-$expected_constants = array_merge($expected_constants, array(
-    "MYSQLI_STMT_ATTR_PREFETCH_ROWS"	=> true,
 ));
 
 $expected_constants['MYSQLI_OPT_SSL_VERIFY_SERVER_CERT'] = true;
@@ -148,8 +144,6 @@ $expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 
 $expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 $expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
-
-$expected_constants["MYSQLI_TYPE_JSON"]	= true;
 
 $unexpected_constants = array();
 

@@ -338,6 +338,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      the caller now.
    - The php_info_html_esc() function has been removed, use
      php_escape_html_entities() with ENT_QUOTES directly instead.
+   - The deprecated php_uint32 and php_int32 typedefs have been removed from
+     ext/standard/basic_functions.h. Use the standard uint32_t and int32_t
+     types instead.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is
@@ -366,6 +369,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
   CREATE_GENERATOR op (before, opline was set to the next op).
 
 * YIELD and YIELD_FROM do not increment the opline anymore.
+
+* The EXIT opcode has been removed as exit is now implemented as a function.
 
 ========================
 5. SAPI changes

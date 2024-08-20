@@ -20,9 +20,6 @@
         ini_set('mysqli.default_socket', $socket);
     }
 
-    /* Development setting: test experimental features and/or feature requests that never worked before? */
-    $TEST_EXPERIMENTAL = 1 == getenv("MYSQL_TEST_EXPERIMENTAL");
-
     function get_environment_connection_flags(): int {
         static $connect_flags = null;
         if ($connect_flags === null) {
