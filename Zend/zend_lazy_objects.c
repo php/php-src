@@ -276,7 +276,8 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 				zval *p = &obj->properties_table[i];
 				if (Z_TYPE_P(p) != IS_UNDEF) {
 					if ((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(p) & IS_PROP_REINITABLE)
-							&& (obj->ce->ce_flags & ZEND_ACC_FINAL)) {
+							/* TODO: test final property */
+							&& ((obj->ce->ce_flags & ZEND_ACC_FINAL) || (prop_info->flags & ZEND_ACC_FINAL))) {
 						continue;
 					}
 					zend_object_dtor_property(obj, p);
