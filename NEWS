@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15456 (Crash in get_class_vars() on virtual properties).
     (ilutov)
 
+- MySQLnd:
+  . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
+    Kamil Tekiela)
+
 15 Aug 2024, PHP 8.4.0beta3
 
 - Core:
