@@ -31,10 +31,6 @@
 #include "zend_globals.h"
 #include "zend_portability.h"
 
-#include "zend.h"
-#include "zend_globals.h"
-#include "zend_portability.h"
-
 #if __has_feature(memory_sanitizer)
 # include <sanitizer/msan_interface.h>
 #endif
