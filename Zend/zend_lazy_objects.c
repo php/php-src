@@ -112,6 +112,11 @@ static zend_lazy_object_info* zend_lazy_object_get_info(zend_object *obj)
 	return info;
 }
 
+static bool zend_lazy_object_has_stale_info(zend_object *obj)
+{
+	return zend_hash_index_find_ptr(&EG(lazy_objects_store).infos, obj->handle);
+}
+
 zval* zend_lazy_object_get_initializer_zv(zend_object *obj)
 {
 	ZEND_ASSERT(!zend_lazy_object_initialized(obj));
@@ -249,16 +254,23 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			ZEND_ASSERT(zend_object_is_lazy_proxy(obj) && zend_lazy_object_initialized(obj));
 			OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED|IS_OBJ_LAZY_PROXY);
 			zend_lazy_object_del_info(obj);
-		} else if (!(flags & ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR)
+		} else {
+			if (zend_lazy_object_has_stale_info(obj)) {
+				zend_throw_error(NULL, "Can not reset an object while it is being initialized");
+				return NULL;
+			}
+
+			if (!(flags & ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR)
 				&& !(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
-			if (obj->handlers->dtor_obj != zend_objects_destroy_object
-					|| obj->ce->destructor) {
-				GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
-				GC_ADDREF(obj);
-				obj->handlers->dtor_obj(obj);
-				GC_DELREF(obj);
-				if (EG(exception)) {
-					return NULL;
+				if (obj->handlers->dtor_obj != zend_objects_destroy_object
+						|| obj->ce->destructor) {
+					GC_ADD_FLAGS(obj, IS_OBJ_DESTRUCTOR_CALLED);
+					GC_ADDREF(obj);
+					obj->handlers->dtor_obj(obj);
+					GC_DELREF(obj);
+					if (EG(exception)) {
+						return NULL;
+					}
 				}
 			}
 		}
@@ -571,6 +583,8 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 		zend_release_properties(properties_snapshot);
 	}
 
+	/* Must be very last in this function, for the
+	 * zend_lazy_object_has_stale_info() check */
 	zend_lazy_object_del_info(obj);
 
 	return obj;
