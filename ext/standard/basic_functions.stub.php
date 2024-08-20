@@ -543,7 +543,10 @@ const ENT_HTML5 = UNKNOWN;
 
 enum HtmlContext {
     case Attribute;
-    case Text;
+    case BodyText;
+    case ForeignText;
+    case Script;
+    case Style;
 }
 
 /* image.c */

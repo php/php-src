@@ -4,51 +4,51 @@ decode_html_ref: Basic Decoding Tests
 <?php
 
 $test_cases = array(
-    array("&AElig;", HtmlContext::Text, 0),
+    array("&AElig;", HtmlContext::BodyText, 0),
 
     array("&lt", HtmlContext::Attribute, 0),
     array("&lt;", HtmlContext::Attribute, 0),
     array("&lt,", HtmlContext::Attribute, 0),
-    array("&lt,", HtmlContext::Text, 0),
+    array("&lt,", HtmlContext::BodyText, 0),
 
     array("&rightleftarrows", HtmlContext::Attribute, 0),
     array("&rightleftarrows;", HtmlContext::Attribute, 0),
     array("&rightleftarrows,", HtmlContext::Attribute, 0),
-    array("&rightleftarrows,", HtmlContext::Text, 0),
+    array("&rightleftarrows,", HtmlContext::BodyText, 0),
 
-    array("&#", HtmlContext::Text, 0),
-    array("&#;", HtmlContext::Text, 0),
-    array("&#x;", HtmlContext::Text, 0),
-    array("&#X;", HtmlContext::Text, 0),
-    array("&#X", HtmlContext::Text, 0),
+    array("&#", HtmlContext::BodyText, 0),
+    array("&#;", HtmlContext::BodyText, 0),
+    array("&#x;", HtmlContext::BodyText, 0),
+    array("&#X;", HtmlContext::BodyText, 0),
+    array("&#X", HtmlContext::BodyText, 0),
 
-    array("&#11141114111;", HtmlContext::Text, 0),
-    array("&#x10FFFF0000;", HtmlContext::Text, 0),
+    array("&#11141114111;", HtmlContext::BodyText, 0),
+    array("&#x10FFFF0000;", HtmlContext::BodyText, 0),
 
-    array("&#x80;", HtmlContext::Text, 0),
-    array("&#x8d;", HtmlContext::Text, 0),
+    array("&#x80;", HtmlContext::BodyText, 0),
+    array("&#x8d;", HtmlContext::BodyText, 0),
 
-    array("&#xD800;", HtmlContext::Text, 0),
-    array("&#xDD70;", HtmlContext::Text, 0),
+    array("&#xD800;", HtmlContext::BodyText, 0),
+    array("&#xDD70;", HtmlContext::BodyText, 0),
 
-    array("&#x1f170;", HtmlContext::Text, 0),
+    array("&#x1f170;", HtmlContext::BodyText, 0),
 
     array("&amp;=", HtmlContext::Attribute, 0),
     array("&amp=", HtmlContext::Attribute, 0),
-    array("&amp=", HtmlContext::Text, 0),
+    array("&amp=", HtmlContext::BodyText, 0),
 
     // &cent is allowed in unambiguous contexts without the ; but
     // it's also a substring of &centerdot; which requires the ;.
     array("&centerdot", HtmlContext::Attribute, 0),
-    array("&centerdot", HtmlContext::Text, 0),
+    array("&centerdot", HtmlContext::BodyText, 0),
 
-    array("&amp&&amp&&", HtmlContext::Text, 5),
-    array("&amp&&amp;&&", HtmlContext::Text, 5),
+    array("&amp&&amp&&", HtmlContext::BodyText, 5),
+    array("&amp&&amp;&&", HtmlContext::BodyText, 5),
     array("&amp&&amp&&", HtmlContext::Attribute, 5),
     array("&amp&&amp;&&", HtmlContext::Attribute, 5),
-    array("&amp&&amp=&", HtmlContext::Text, 5),
-    array("&amp&&amp=&", HtmlContext::Text, 5),
-    array("&amp&&amp/&", HtmlContext::Text, 5),
+    array("&amp&&amp=&", HtmlContext::BodyText, 5),
+    array("&amp&&amp=&", HtmlContext::BodyText, 5),
+    array("&amp&&amp/&", HtmlContext::BodyText, 5),
 );
 
 foreach ($test_cases as $test_case) {

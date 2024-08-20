@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 05591a96c636bae6ad26c1765b8c8a5acd9fc398 */
+ * Stub hash: e5129565d0b8885835eb5dc95212032b08d6528e */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -4201,7 +4201,13 @@ static zend_class_entry *register_class_HtmlContext(void)
 
 	zend_enum_add_case_cstr(class_entry, "Attribute", NULL);
 
-	zend_enum_add_case_cstr(class_entry, "Text", NULL);
+	zend_enum_add_case_cstr(class_entry, "BodyText", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "ForeignText", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Script", NULL);
+
+	zend_enum_add_case_cstr(class_entry, "Style", NULL);
 
 	return class_entry;
 }

@@ -1078,7 +1078,7 @@ static inline zend_string *html5_code_point_to_utf8_bytes(uint32_t code_point) {
     return zend_string_init(decoded, 4, 0);
 }
 
-PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length) {
+PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_string *html, const zend_long offset, int *matched_byte_length) {
     static uint8_t hex_digits[256] = {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255};
     static uint32_t cp1252_replacements[32] = {
         0x20AC, // 0x80 -> EURO SIGN (€).
@@ -1187,10 +1187,9 @@ PHPAPI zend_string *php_decode_html5_numeric_character_reference(const zend_long
 }
 
 /* {{{ php_decode_html
- * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT,
- * depending on whether the text being decoded is found inside an attribute or not.
+ * The parameter "flags" indicates which replacements ought to be made: whether to decode character references, whether to replace or remove NULL bytes, and whether to allow the ambiguous ampersand.
  */
-PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *html, const zend_long offset, const zend_long length)
+PHPAPI zend_string *php_decode_html(const zend_long flags, const zend_string *html, const zend_long offset, const zend_long length)
 {
     const char *input = ZSTR_VAL(html);
     const size_t input_length = ZSTR_LEN(html);
@@ -1200,37 +1199,87 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
     char *at = (char *)&input[offset];
     char *was_at = at;
 
+    /*
+     * Process NULL bytes in a separate pass. There probably are none, so this
+     * code will usually not run. Instead of checking for NULL bytes along the
+     * way, this makes two fast passes. Hopefully the cache makes up for the
+     * extra iteration. This should be measured.
+     */
+    int null_count = 0;
+    while (at != NULL && at < end) {
+        at = memchr(at, 0, end - at);
+        null_count += at != NULL;
+    }
+
+    /*
+     * If NULL bytes are removed they will require no additional bytes in the
+     * copied string. However, if they are replaced they will need two extra
+     * bytes per NULL byte.
+     *
+     * x00 -> xEF xBF xBD
+     */
+    size_t null_extra_bytes = (PHP_HTML_DECODE_REMOVE_NULL_BYTES & flags) ? 0 : (null_count << 1);
+
+    if (PHP_HTML_DECODE_CHARACTER_REFERENCES & flags) {
+        at = (char *)input;
+        while (at < end) {
+            at = memchr(at, '&', end - at);
+            if (NULL == at) {
+                // Copy the remaining plaintext.
+                memcpy((void *) &decoded[decoded_length], was_at, end - was_at);
+                decoded_length += end - was_at;
+                break;
+            }
+
+            size_t plaintext_span = at - was_at;
+
+            // Is there a character reference?
+            int matched_bytes;
+            zend_string *replacement = php_decode_html_ref(flags, html, at - input, &matched_bytes);
+            if (NULL == replacement) {
+                at++;
+                continue;
+            }
+
+            // Copy the span up to the next "&" into the destination.
+            memcpy((void *) &decoded[decoded_length], was_at, plaintext_span);
+            decoded_length += plaintext_span;
+
+            // Copy the decoded character(s) into the destination.
+            memcpy((void *) &decoded[decoded_length], ZSTR_VAL(replacement), ZSTR_LEN(replacement));
+            decoded_length += ZSTR_LEN(replacement);
+
+            // Advance the cursor to the next section of text.
+            zend_string_release(replacement);
+            at += matched_bytes;
+            was_at = at;
+        }
+    } else {
+        memcpy((void *)decoded, &input[offset], length);
+        decoded_length = length;
+    }
+
+    if (null_count > 0) {
+        at = (char *)decoded;
+        was_at = at;
+        end = &decoded[decoded_length];
+        if (PHP_HTML_DECODE_REMOVE_NULL_BYTES & flags) {
+            /* @todo Remove NULL bytes. */
+        } else {
+            /* @todo Replace NULL bytes with U+FFFD (xEF xBF xBD). */
+        }
+    }
+
+    /* @todo Replace \r\n with \n */
+
+    at = (char *)decoded;
+    end = &decoded[decoded_length];
     while (at < end) {
-        at = memchr(at, '&', end - at);
-        if (NULL == at) {
-            // Copy the remaining plaintext.
-            memcpy((void *)&decoded[decoded_length], was_at, end - was_at);
-            decoded_length += end - was_at;
+        at = memchr(at, '\r', end - at);
+        if (at == NULL) {
             break;
         }
-
-        size_t plaintext_span = at - was_at;
-
-        // Is there a character reference?
-        int matched_bytes;
-        zend_string *replacement = php_decode_html_ref(context, html, at - input, &matched_bytes);
-        if (NULL == replacement) {
-            at++;
-            continue;
-        }
-
-        // Copy the span up to the next "&" into the destination.
-        memcpy((void *)&decoded[decoded_length], was_at, plaintext_span);
-        decoded_length += plaintext_span;
-
-        // Copy the decoded character(s) into the destination.
-        memcpy((void *)&decoded[decoded_length], ZSTR_VAL(replacement), ZSTR_LEN(replacement));
-        decoded_length += ZSTR_LEN(replacement);
-
-        // Advance the cursor to the next section of text.
-        zend_string_release(replacement);
-        at += matched_bytes;
-        was_at = at;
+        *at = '\n';
     }
 
     zend_string *extracted_decoded = zend_string_init(decoded, decoded_length, 0);
@@ -1240,10 +1289,9 @@ PHPAPI zend_string *php_decode_html(const zend_long context, const zend_string *
 /* }}} */
 
 /* {{{ php_decode_html_ref
- * The parameter "context" should be one of HTML_ATTRIBUTE or HTML_TEXT,
- * depending on whether the text being decoded is found inside an attribute or not.
+ * The parameter "flags" indicates which replacements ought to be made, importantly whether the ambiguous ampersand is allowed.
  */
-PHPAPI zend_string *php_decode_html_ref(const zend_long context, const zend_string *html, const zend_long offset, int *matched_byte_length)
+PHPAPI zend_string *php_decode_html_ref(const zend_long flags, const zend_string *html, const zend_long offset, int *matched_byte_length)
 {
     const char *input = ZSTR_VAL(html);
     size_t input_length = ZSTR_LEN(html);
@@ -1253,7 +1301,7 @@ PHPAPI zend_string *php_decode_html_ref(const zend_long context, const zend_stri
     }
 
     if (input[offset + 1] == '#') {
-        return php_decode_html5_numeric_character_reference(context, html, offset, matched_byte_length);
+        return php_decode_html5_numeric_character_reference(html, offset, matched_byte_length);
     }
 
     if (input_length - offset <= 3) {
@@ -1272,7 +1320,7 @@ PHPAPI zend_string *php_decode_html_ref(const zend_long context, const zend_stri
             size_t last_of_match = offset + *matched_byte_length;
             bool is_ambiguous = last_of_match < input_length && html5_character_reference_is_ambiguous(&input[last_of_match]);
 
-            if (PHP_HTML_CONTEXT_ATTRIBUTE == context && is_ambiguous) {
+            if ((PHP_HTML_DECODE_AMBIGUOUS_AMPERSAND & ~flags) && is_ambiguous) {
                 goto html5_find_short_reference;
             }
 
@@ -1289,7 +1337,11 @@ html5_find_short_reference:
         return NULL;
     }
 
-    if (PHP_HTML_CONTEXT_ATTRIBUTE == context && offset + 3 < input_length && html5_character_reference_is_ambiguous(&input[offset + 2])) {
+    if (
+        (PHP_HTML_DECODE_AMBIGUOUS_AMPERSAND & ~flags) &&
+        offset + 3 < input_length &&
+        html5_character_reference_is_ambiguous(&input[offset + 2])
+    ) {
         return NULL;
     }
 
@@ -1686,16 +1738,35 @@ PHP_FUNCTION(htmlspecialchars_decode)
 }
 /* }}} */
 
-PHPAPI int php_html_context_from_enum(zend_object *context)
+PHPAPI int php_html_decoding_flags_from_context(zend_object *context)
 {
     zval *case_name = zend_enum_fetch_case_name(context);
     zend_string *context_name = Z_STR_P(case_name);
 
     switch (ZSTR_VAL(context_name)[0]) {
+        /* Attribute */
         case 'A':
-            return PHP_HTML_CONTEXT_ATTRIBUTE;
-        case 'T':
-            return PHP_HTML_CONTEXT_TEXT;
+            return PHP_HTML_DECODE_CHARACTER_REFERENCES;
+
+        /* BodyText */
+        case 'B':
+            return (
+                PHP_HTML_DECODE_CHARACTER_REFERENCES |
+                PHP_HTML_DECODE_REMOVE_NULL_BYTES |
+                PHP_HTML_DECODE_AMBIGUOUS_AMPERSAND
+            );
+
+        /* ForeignText */
+        case 'F':
+            return (
+                PHP_HTML_DECODE_CHARACTER_REFERENCES |
+                PHP_HTML_DECODE_AMBIGUOUS_AMPERSAND
+            );
+
+        /* Script | Style */
+        case 'S':
+            return 0;
+
         EMPTY_SWITCH_DEFAULT_CASE();
     }
 }
@@ -1703,7 +1774,7 @@ PHPAPI int php_html_context_from_enum(zend_object *context)
 /* {{{ Decode a UTF-8 HTML text span. */
 PHP_FUNCTION(decode_html)
 {
-    zend_long context = 0;
+    zend_long flags = 0;
     zend_object *context_object = NULL;
     zend_string *html;
     zend_long offset;
@@ -1721,19 +1792,7 @@ PHP_FUNCTION(decode_html)
         Z_PARAM_LONG_OR_NULL(length, length_is_null)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (context_object != NULL) {
-        context = php_html_context_from_enum(context_object);
-    }
-
-    switch (context) {
-        case PHP_HTML_CONTEXT_ATTRIBUTE:
-        case PHP_HTML_CONTEXT_TEXT:
-            break;
-        default:
-            /* This should only be reachable if passing NULL or an invalid value. */
-            zend_argument_value_error(1, "must be a valid HTML context (HtmlContext::*)");
-            RETURN_THROWS();
-    }
+    flags = php_html_decoding_flags_from_context(context_object);
 
     if (offset_is_null) {
         offset = 0;
@@ -1743,7 +1802,7 @@ PHP_FUNCTION(decode_html)
         length = ZSTR_LEN(html) - offset;
     }
 
-    decoded = php_decode_html(context, html, offset, length);
+    decoded = php_decode_html(flags, html, offset, length);
     if (NULL == decoded) {
         RETURN_NULL();
     } else {
@@ -1755,7 +1814,7 @@ PHP_FUNCTION(decode_html)
 /* {{{ Find the next character reference in a UTF-8 HTML document */
 PHP_FUNCTION(decode_html_ref)
 {
-    zend_long context = 0;
+    zend_long flags = 0;
     zend_object *context_object = NULL;
     zend_string *html;
     zend_long offset;
@@ -1772,25 +1831,13 @@ PHP_FUNCTION(decode_html_ref)
         Z_PARAM_ZVAL(matched_byte_length)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (context_object != NULL) {
-        context = php_html_context_from_enum(context_object);
-    }
-
-    switch (context) {
-        case PHP_HTML_CONTEXT_ATTRIBUTE:
-        case PHP_HTML_CONTEXT_TEXT:
-            break;
-        default:
-            /* This should only be reachable if passing NULL or an invalid value. */
-            zend_argument_value_error(1, "must be a valid HTML context (HtmlContext::*)");
-            RETURN_THROWS();
-    }
+    flags = php_html_decoding_flags_from_context(context_object);
 
     if (offset_is_null) {
         offset = 0;
     }
 
-    decoded = php_decode_html_ref((int)context, html, offset, &byte_length);
+    decoded = php_decode_html_ref(flags, html, offset, &byte_length);
     if (NULL == decoded) {
         RETURN_NULL();
     } else {
