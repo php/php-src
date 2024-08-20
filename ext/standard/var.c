@@ -1232,7 +1232,7 @@ again:
 							&& zend_lazy_object_initialize_on_serialize(Z_OBJ_P(struc))) {
 						obj = zend_lazy_object_init(Z_OBJ_P(struc));
 						if (!obj) {
-							smart_str_appendl(buf, "N;", 2);
+							ZEND_ASSERT(EG(exception));
 							return;
 						}
 					}
