@@ -5223,7 +5223,9 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (options & ~ZEND_LAZY_OBJECT_USER_FLAGS) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Invalid options");
+		uint32_t arg_num = 2 + is_reset;
+		zend_argument_error(reflection_exception_ptr, arg_num,
+				"contains invalid flags");
 		RETURN_THROWS();
 	}
 
