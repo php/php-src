@@ -2072,7 +2072,8 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 	if (zobj1->ce != zobj2->ce) {
 		return ZEND_UNCOMPARABLE; /* different classes */
 	}
-	if (!zobj1->properties && !zobj2->properties) {
+	if (!zobj1->properties && !zobj2->properties
+			&& !zend_object_is_lazy(zobj1) && !zend_object_is_lazy(zobj2)) {
 		zend_property_info *info;
 		int i;
 
