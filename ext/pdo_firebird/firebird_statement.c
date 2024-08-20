@@ -822,6 +822,13 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
+#if FB_API_VER >= 40
+						case SQL_INT128:
+						case SQL_DEC16:
+						case SQL_DEC34:
+						case SQL_TIMESTAMP_TZ:
+						case SQL_TIME_TZ:
+#endif
 							force_null = (Z_STRLEN_P(parameter) == 0);
 					}
 					if (!force_null) {
