@@ -6145,11 +6145,13 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 		Z_PARAM_ZVAL(value)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (object->handlers->write_property != zend_std_write_property) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use setRawValueWithoutLazyInitialization on internal class %s",
-				ZSTR_VAL(intern->ce->name));
-		RETURN_THROWS();
+	if (UNEXPECTED(object->handlers->write_property != zend_std_write_property)) {
+		if (!zend_class_can_be_lazy(object->ce)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+					"Can not use setRawValueWithoutLazyInitialization on internal class %s",
+					ZSTR_VAL(intern->ce->name));
+			RETURN_THROWS();
+		}
 	}
 
 	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(ref->prop->offset));
@@ -6218,11 +6220,13 @@ ZEND_METHOD(ReflectionProperty, skipLazyInitialization)
 		Z_PARAM_OBJ_OF_CLASS(object, intern->ce)
 	} ZEND_PARSE_PARAMETERS_END();
 
-	if (object->handlers->write_property != zend_std_write_property) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Can not use skipLazyInitialization on internal class %s",
-				ZSTR_VAL(intern->ce->name));
-		RETURN_THROWS();
+	if (UNEXPECTED(object->handlers->write_property != zend_std_write_property)) {
+		if (!zend_class_can_be_lazy(object->ce)) {
+			zend_throw_exception_ex(reflection_exception_ptr, 0,
+					"Can not use skipLazyInitialization on internal class %s",
+					ZSTR_VAL(intern->ce->name));
+			RETURN_THROWS();
+		}
 	}
 
 	ZEND_ASSERT(IS_VALID_PROPERTY_OFFSET(ref->prop->offset));

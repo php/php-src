@@ -177,6 +177,22 @@ bool zend_lazy_object_decr_lazy_props(zend_object *obj)
  * Making objects lazy
  */
 
+ZEND_API bool zend_class_can_be_lazy(zend_class_entry *ce)
+{
+	/* Internal classes are not supported */
+	if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ce != zend_standard_class_def)) {
+		return false;
+	}
+
+	for (zend_class_entry *parent = ce->parent; parent; parent = parent->parent) {
+		if (UNEXPECTED(parent->type == ZEND_INTERNAL_CLASS && parent != zend_standard_class_def)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
  * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,

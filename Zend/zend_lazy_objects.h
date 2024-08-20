@@ -59,6 +59,7 @@ typedef struct _zend_lazy_objects_store {
 typedef struct _zend_fcall_info zend_fcall_info;
 typedef struct _zend_fcall_info_cache zend_fcall_info_cache;
 
+ZEND_API bool zend_class_can_be_lazy(zend_class_entry *ce);
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		zend_class_entry *class_type, zval *initializer_zv,
 		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags);
