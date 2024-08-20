@@ -349,11 +349,11 @@ static int pdo_firebird_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, 
 #endif
 				param_type = PDO_PARAM_INT;
 				break;
-#ifdef SQL_BOOLEAN
+
 			case SQL_BOOLEAN:
 				param_type = PDO_PARAM_BOOL;
 				break;
-#endif
+
 			default:
 				param_type = PDO_PARAM_STR;
 				break;
@@ -542,11 +542,9 @@ static int pdo_firebird_stmt_get_col(
 					/* TODO: Why is this not returned as the native type? */
 					ZVAL_STR(result, zend_strpprintf_unchecked(0, "%.16H", php_get_double_from_sqldata(var->sqldata)));
 					break;
-#ifdef SQL_BOOLEAN
 				case SQL_BOOLEAN:
 					ZVAL_BOOL(result, *(FB_BOOLEAN*)var->sqldata);
 					break;
-#endif
 				case SQL_TYPE_DATE:
 					isc_decode_sql_date((ISC_DATE*)var->sqldata, &t);
 					fmt = S->H->date_format ? S->H->date_format : PDO_FB_DEF_DATE_FMT;
@@ -744,7 +742,6 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				}
 			}
 
-#ifdef SQL_BOOLEAN
 			/* keep native BOOLEAN type */
 			if ((var->sqltype & ~1) == SQL_BOOLEAN) {
 				switch (Z_TYPE_P(parameter)) {
@@ -797,8 +794,6 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 				}
 				break;
 			}
-#endif
-
 
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
@@ -829,6 +824,13 @@ static int pdo_firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param
 						case SQL_TIMESTAMP:
 						case SQL_TYPE_DATE:
 						case SQL_TYPE_TIME:
+#if FB_API_VER >= 40
+						case SQL_INT128:
+						case SQL_DEC16:
+						case SQL_DEC34:
+						case SQL_TIMESTAMP_TZ:
+						case SQL_TIME_TZ:
+#endif
 							force_null = (Z_STRLEN_P(parameter) == 0);
 					}
 					if (!force_null) {
