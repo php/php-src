@@ -66,6 +66,8 @@ $expected_constants = array(
     "MYSQLI_TYPE_NEWDATE"				=> true,
     "MYSQLI_TYPE_ENUM"					=> true,
     "MYSQLI_TYPE_SET"					=> true,
+    "MYSQLI_TYPE_VECTOR"			    => true,
+    "MYSQLI_TYPE_JSON"			        => true,
     "MYSQLI_TYPE_TINY_BLOB"				=> true,
     "MYSQLI_TYPE_MEDIUM_BLOB"			=> true,
     "MYSQLI_TYPE_LONG_BLOB"				=> true,
@@ -142,8 +144,6 @@ $expected_constants["MYSQLI_DATA_TRUNCATED"] = true;
 
 $expected_constants["MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
 $expected_constants["MYSQLI_CLIENT_CAN_HANDLE_EXPIRED_PASSWORDS"] = true;
-
-$expected_constants["MYSQLI_TYPE_JSON"]	= true;
 
 $unexpected_constants = array();
 

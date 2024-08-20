@@ -400,6 +400,11 @@ const MYSQLI_TYPE_INTERVAL = UNKNOWN;
  * @cvalue FIELD_TYPE_GEOMETRY
  */
 const MYSQLI_TYPE_GEOMETRY = UNKNOWN;
+/**
+ * @var int
+ * @cvalue FIELD_TYPE_VECTOR
+ */
+const MYSQLI_TYPE_VECTOR = UNKNOWN;
 #ifdef FIELD_TYPE_JSON
 /**
  * @var int
