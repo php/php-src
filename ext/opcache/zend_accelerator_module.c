@@ -200,6 +200,11 @@ static ZEND_INI_MH(OnUpdateJitDebug)
 
 	if (zend_jit_debug_config(*p, val, stage) == SUCCESS) {
 		*p = val;
+
+		if (val & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
+			zend_jit_enable_disasm();
+		}
+
 		return SUCCESS;
 	}
 	return FAILURE;
