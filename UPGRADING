@@ -202,6 +202,8 @@ PHP 8.4 UPGRADE NOTES
     byte long or the empty string. This aligns the behaviour to be identical
     to that of fputcsv() and fgetcsv().
   . php_uname() now throws ValueErrors on invalid inputs.
+  . The "allowed_classes" option for unserialize() now throws TypeErrors and
+    ValueErrors if it is not an array of class names.
 
 - Tidy:
   . Failures in the constructor now throw exceptions rather than emitting
