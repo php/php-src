@@ -13,6 +13,8 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
     FB_LIBDIR=$($FB_CONFIG --libs)
     FB_VERSION=$($FB_CONFIG --version)
     AC_MSG_RESULT([version $FB_VERSION])
+    AS_VERSION_COMPARE([$FB_VERSION], [3.0],
+      [AC_MSG_ERROR([Firebird required version is at least 3.0])])
     PHP_EVAL_LIBLINE([$FB_LIBDIR], [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_EVAL_INCLINE([$FB_CFLAGS])
   else
@@ -26,17 +28,11 @@ if test "$PHP_PDO_FIREBIRD" != "no"; then
       FIREBIRD_LIBDIR_FLAG=-L$FIREBIRD_LIBDIR
     ])
 
-    PHP_CHECK_LIBRARY([fbclient], [isc_detach_database],
-      [FIREBIRD_LIBNAME=fbclient],
-      [PHP_CHECK_LIBRARY([gds], [isc_detach_database],
-        [FIREBIRD_LIBNAME=gds],
-        [PHP_CHECK_LIBRARY([ib_util], [isc_detach_database],
-          [FIREBIRD_LIBNAME=ib_util],
-          [AC_MSG_FAILURE([libfbclient, libgds or libib_util not found.])],
-          [$FIREBIRD_LIBDIR_FLAG])],
-        [$FIREBIRD_LIBDIR_FLAG])],
+    PHP_CHECK_LIBRARY([fbclient], [fb_get_master_interface],
+      [],
+      [AC_MSG_FAILURE([libfbclient not found.])],
       [$FIREBIRD_LIBDIR_FLAG])
-    PHP_ADD_LIBRARY_WITH_PATH([$FIREBIRD_LIBNAME],
+    PHP_ADD_LIBRARY_WITH_PATH([fbclient],
       [$FIREBIRD_LIBDIR],
       [PDO_FIREBIRD_SHARED_LIBADD])
     PHP_ADD_INCLUDE([$FIREBIRD_INCDIR])

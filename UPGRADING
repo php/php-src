@@ -148,7 +148,8 @@ PHP 8.4 UPGRADE NOTES
 
 - PDO_FIREBIRD:
   . Since some Firebird C++ APIs are used now, this extension requires a C++
-    compiler to be built.
+    compiler to be built. This also implies that the extension has to be built
+    against fbclient 3.0 or higher.
   . getAttribute, ATTR_AUTOCOMMIT has been changed to get the value as a bool.
 
 - PDO_MYSQL:
