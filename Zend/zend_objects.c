@@ -32,7 +32,7 @@ static zend_always_inline void _zend_object_std_init(zend_object *object, zend_c
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = GC_OBJECT;
 	object->ce = ce;
-	object->flags = 0;
+	object->extra_flags = 0;
 	object->handlers = ce->default_object_handlers;
 	object->properties = NULL;
 	zend_objects_store_put(object);

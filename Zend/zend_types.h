@@ -556,7 +556,7 @@ typedef struct _HashTableIterator {
 struct _zend_object {
 	zend_refcounted_h gc;
 	uint32_t          handle; // TODO: may be removed ???
-	uint32_t          flags;
+	uint32_t          extra_flags; /* OBJ_EXTRA_FLAGS() */
 	zend_class_entry *ce;
 	const zend_object_handlers *handlers;
 	HashTable        *properties;
@@ -835,7 +835,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_OBJ_LAZY                 (1U<<31) /* Virtual proxy or uninitialized Ghost */
 #define IS_OBJ_LAZY_PROXY           (1U<<30) /* Virtual proxy (may be initialized) */
 
-#define OBJ_EXTRA_FLAGS(obj)		((obj)->flags)
+#define OBJ_EXTRA_FLAGS(obj)		((obj)->extra_flags)
 
 /* Fast class cache */
 #define ZSTR_HAS_CE_CACHE(s)		(GC_FLAGS(s) & IS_STR_CLASS_NAME_MAP_PTR)
