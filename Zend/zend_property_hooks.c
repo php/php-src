@@ -141,8 +141,7 @@ static void zho_declared_it_fetch_current(zend_object_iterator *iter)
 		} else if (Z_TYPE_P(property) != IS_REFERENCE) {
 			ZVAL_MAKE_REF(property);
 
-			zend_class_entry *ce = zobj->ce;
-			zend_property_info *prop_info = ce->properties_info_table[OBJ_PROP_PTR_TO_NUM(zobj, property)];
+			zend_property_info *prop_info = zend_get_property_info_for_slot(zobj, property);
 			if (ZEND_TYPE_IS_SET(prop_info->type)) {
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(property), prop_info);
 			}
