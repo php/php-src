@@ -5222,7 +5222,7 @@ void reflection_class_new_lazy(INTERNAL_FUNCTION_PARAMETERS,
 		obj = NULL;
 	}
 
-	zend_long accepted_flags = ZEND_LAZY_OBJECT_USER_FLAGS;
+	zend_long accepted_flags = ZEND_LAZY_OBJECT_USER_MASK;
 	if (options & ~accepted_flags) {
 		uint32_t arg_num = 2 + is_reset;
 		zend_argument_error(reflection_exception_ptr, arg_num,

@@ -36,12 +36,12 @@
 /* Do not call destructor when making existing object lazy */
 #define ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                    (1<<4)
 
-#define ZEND_LAZY_OBJECT_USER_FLAGS (                                       \
+#define ZEND_LAZY_OBJECT_USER_MASK (                                        \
 	ZEND_LAZY_OBJECT_SKIP_INITIALIZATION_ON_SERIALIZE |                     \
 	ZEND_LAZY_OBJECT_SKIP_DESTRUCTOR                                        \
 )
 
-#define ZEND_LAZY_OBJECT_STRATEGY_FLAGS (                                   \
+#define ZEND_LAZY_OBJECT_STRATEGY_MASK (                                    \
 		ZEND_LAZY_OBJECT_STRATEGY_PROXY |                                   \
 		ZEND_LAZY_OBJECT_STRATEGY_GHOST                                     \
 )

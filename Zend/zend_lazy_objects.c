@@ -205,9 +205,9 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		zend_class_entry *reflection_ce, zval *initializer_zv,
 		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags)
 {
-	ZEND_ASSERT(!(flags & ~(ZEND_LAZY_OBJECT_USER_FLAGS|ZEND_LAZY_OBJECT_STRATEGY_FLAGS)));
-	ZEND_ASSERT((flags & ZEND_LAZY_OBJECT_STRATEGY_FLAGS) == ZEND_LAZY_OBJECT_STRATEGY_GHOST
-			|| (flags & ZEND_LAZY_OBJECT_STRATEGY_FLAGS) == ZEND_LAZY_OBJECT_STRATEGY_PROXY);
+	ZEND_ASSERT(!(flags & ~(ZEND_LAZY_OBJECT_USER_MASK|ZEND_LAZY_OBJECT_STRATEGY_MASK)));
+	ZEND_ASSERT((flags & ZEND_LAZY_OBJECT_STRATEGY_MASK) == ZEND_LAZY_OBJECT_STRATEGY_GHOST
+			|| (flags & ZEND_LAZY_OBJECT_STRATEGY_MASK) == ZEND_LAZY_OBJECT_STRATEGY_PROXY);
 
 	ZEND_ASSERT(!obj || (!zend_object_is_lazy(obj) || zend_lazy_object_initialized(obj)));
 	ZEND_ASSERT(!obj || instanceof_function(obj->ce, reflection_ce));
