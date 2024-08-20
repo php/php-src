@@ -36,8 +36,8 @@ try {
 
 ?>
 --EXPECT--
-Only arrays and Traversables can be unpacked (null given)
-Only arrays and Traversables can be unpacked (int given)
-Only arrays and Traversables can be unpacked (stdClass given)
-Only arrays and Traversables can be unpacked (string given)
-Only arrays and Traversables can be unpacked (stdClass given)
+Only arrays and Traversables can be unpacked, null given
+Only arrays and Traversables can be unpacked, int given
+Only arrays and Traversables can be unpacked, stdClass given
+Only arrays and Traversables can be unpacked, string given
+Only arrays and Traversables can be unpacked, stdClass given
