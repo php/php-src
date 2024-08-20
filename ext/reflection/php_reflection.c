@@ -5353,7 +5353,7 @@ ZEND_METHOD(ReflectionClass, markLazyObjectAsInitialized)
 	if (zend_lazy_object_initialized(object)) {
 		RETURN_OBJ_COPY(zend_lazy_object_get_instance(object));
 	} else {
-		ZEND_ASSERT(EG(exception));
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -5373,7 +5373,7 @@ ZEND_METHOD(ReflectionClass, getLazyInitializer)
 
 	if (!zend_object_is_lazy(object)
 			|| zend_lazy_object_initialized(object)) {
-		return;
+		RETURN_NULL();
 	}
 
 	RETURN_ZVAL(zend_lazy_object_get_initializer_zv(object), 1, 0);
