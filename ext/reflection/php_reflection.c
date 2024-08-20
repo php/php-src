@@ -6170,7 +6170,7 @@ ZEND_METHOD(ReflectionProperty, setRawValueWithoutLazyInitialization)
 	reflection_property_set_raw_value(ref, intern, object, value);
 
 	/* Mark property as lazy again if an exception prevented update */
-	if (EG(exception) && Z_TYPE_P(var_ptr) == IS_UNDEF
+	if (EG(exception) && prop_was_lazy && Z_TYPE_P(var_ptr) == IS_UNDEF
 			&& zend_object_is_lazy(object)
 			&& !zend_lazy_object_initialized(object)) {
 		Z_PROP_FLAG_P(var_ptr) |= IS_PROP_LAZY;
