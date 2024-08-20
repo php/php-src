@@ -178,9 +178,9 @@ bool zend_lazy_object_decr_lazy_props(zend_object *obj)
  */
 
 /* Make object 'obj' lazy. If 'obj' is NULL, create a lazy instance of
- * class 'class_type' */
+ * class 'reflection_ce' */
 ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
-		zend_class_entry *ce, zval *initializer_zv,
+		zend_class_entry *reflection_ce, zval *initializer_zv,
 		zend_fcall_info_cache *initializer_fcc, zend_lazy_object_flags_t flags)
 {
 	ZEND_ASSERT(!(flags & ~(ZEND_LAZY_OBJECT_USER_FLAGS|ZEND_LAZY_OBJECT_STRATEGY_FLAGS)));
@@ -188,18 +188,18 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			|| (flags & ZEND_LAZY_OBJECT_STRATEGY_FLAGS) == ZEND_LAZY_OBJECT_STRATEGY_PROXY);
 
 	ZEND_ASSERT(!obj || (!zend_object_is_lazy(obj) || zend_lazy_object_initialized(obj)));
-	ZEND_ASSERT(!obj || instanceof_function(obj->ce, ce));
+	ZEND_ASSERT(!obj || instanceof_function(obj->ce, reflection_ce));
 
 	/* Internal classes are not supported */
-	if (UNEXPECTED(ce->type == ZEND_INTERNAL_CLASS && ce != zend_standard_class_def)) {
-		zend_throw_error(NULL, "Cannot make instance of internal class lazy: %s is internal", ZSTR_VAL(ce->name));
+	if (UNEXPECTED(reflection_ce->type == ZEND_INTERNAL_CLASS && reflection_ce != zend_standard_class_def)) {
+		zend_throw_error(NULL, "Cannot make instance of internal class lazy: %s is internal", ZSTR_VAL(reflection_ce->name));
 		return NULL;
 	}
 
-	for (zend_class_entry *parent = ce->parent; parent; parent = parent->parent) {
+	for (zend_class_entry *parent = reflection_ce->parent; parent; parent = parent->parent) {
 		if (UNEXPECTED(parent->type == ZEND_INTERNAL_CLASS && parent != zend_standard_class_def)) {
 			zend_throw_error(NULL, "Cannot make instance of internal class lazy: %s inherits internal class %s",
-				ZSTR_VAL(ce->name), ZSTR_VAL(parent->name));
+				ZSTR_VAL(reflection_ce->name), ZSTR_VAL(parent->name));
 			return NULL;
 		}
 	}
@@ -207,15 +207,15 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 	int lazy_properties_count = 0;
 
 	if (!obj) {
-		if (UNEXPECTED(ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
+		if (UNEXPECTED(reflection_ce->ce_flags & ZEND_ACC_UNINSTANTIABLE)) {
 			zval zobj;
 			/* Call object_init_ex() for the generated exception */
-			zend_result result = object_init_ex(&zobj, ce);
+			zend_result result = object_init_ex(&zobj, reflection_ce);
 			ZEND_ASSERT(result == FAILURE && EG(exception));
 			return NULL;
 		}
 
-		obj = zend_objects_new(ce);
+		obj = zend_objects_new(reflection_ce);
 
 		for (int i = 0; i < obj->ce->default_properties_count; i++) {
 			zval *p = &obj->properties_table[i];
@@ -253,7 +253,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 		obj->properties = NULL;
 
 		/* unset() declared properties */
-		for (int i = 0; i < ce->default_properties_count; i++) {
+		for (int i = 0; i < reflection_ce->default_properties_count; i++) {
 			zend_property_info *prop_info = obj->ce->properties_info_table[i];
 			if (EXPECTED(prop_info)) {
 				zval *p = &obj->properties_table[i];
