@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
 
+- Session:
+  . Emit warnings for non-positive values of session.gc_divisor and negative values
+    of session.gc_probability. (Jorg Sowa)
+
 - Standard:
   . The "allowed_classes" option for unserialize() now throws TypeErrors and
     ValueErrors	if it is not an	array of class names. (Girgias)
@@ -530,10 +534,6 @@ PHP                                                                        NEWS
   . Make ReflectionGenerator::getFunction() legal after generator termination.
     (timwolla)
   . Added ReflectionGenerator::isClosed(). (timwolla)
-
-- Session:
-  . Emit warnings for non-positive values of session.gc_divisor and negative values
-    of session.gc_probability. (Jorg Sowa)
 
 - SimpleXML:
   . Fixed bug GH-12192 (SimpleXML infinite loop when getName() is called
