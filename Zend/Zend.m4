@@ -226,7 +226,7 @@ AC_DEFUN([ZEND_CHECK_STACK_DIRECTION],
 int (*volatile f)(uintptr_t);
 
 int stack_grows_downwards(uintptr_t arg) {
-#if defined(__has_builtin)
+#ifdef __has_builtin
 # if __has_builtin(__builtin_frame_address)
     uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
 # else
@@ -242,7 +242,7 @@ int stack_grows_downwards(uintptr_t arg) {
 }
 
 int main(void) {
-#if defined(__has_builtin)
+#ifdef __has_builtin
 # if __has_builtin(__builtin_frame_address)
     uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
 # else
