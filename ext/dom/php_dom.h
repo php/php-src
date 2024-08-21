@@ -300,6 +300,23 @@ static zend_always_inline const xmlChar *php_dom_get_content_or_empty(const xmlN
 	return node->content ? node->content : BAD_CAST "";
 }
 
+#define PHP_DOM_DEPRECATED_PROPERTY(message) do { \
+    if (EXPECTED(!DOM_G(suppress_warnings))) {\
+        zend_error(E_DEPRECATED, message); \
+        if (UNEXPECTED(EG(exception))) { \
+            return FAILURE; \
+        } \
+    } \
+} while (0)
+
+ZEND_BEGIN_MODULE_GLOBALS(dom)
+	bool suppress_warnings;
+ZEND_END_MODULE_GLOBALS(dom)
+
+ZEND_EXTERN_MODULE_GLOBALS(dom)
+
+#define DOM_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(dom, v)
+
 PHP_MINIT_FUNCTION(dom);
 PHP_MSHUTDOWN_FUNCTION(dom);
 PHP_MINFO_FUNCTION(dom);
