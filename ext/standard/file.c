@@ -1504,26 +1504,26 @@ PHP_FUNCTION(copy)
 /* }}} */
 
 /* {{{ php_copy_file */
-PHPAPI int php_copy_file(const char *src, const char *dest)
+PHPAPI zend_result php_copy_file(const char *src, const char *dest)
 {
 	return php_copy_file_ctx(src, dest, 0, NULL);
 }
 /* }}} */
 
 /* {{{ php_copy_file_ex */
-PHPAPI int php_copy_file_ex(const char *src, const char *dest, int src_flg)
+PHPAPI zend_result php_copy_file_ex(const char *src, const char *dest, int src_flags)
 {
-	return php_copy_file_ctx(src, dest, src_flg, NULL);
+	return php_copy_file_ctx(src, dest, src_flags, NULL);
 }
 /* }}} */
 
 /* {{{ php_copy_file_ctx */
-PHPAPI int php_copy_file_ctx(const char *src, const char *dest, int src_flg, php_stream_context *ctx)
+PHPAPI zend_result php_copy_file_ctx(const char *src, const char *dest, int src_flags, php_stream_context *ctx)
 {
 	php_stream *srcstream = NULL, *deststream = NULL;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	php_stream_statbuf src_s, dest_s;
-	int src_stat_flags = (src_flg & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
+	int src_stat_flags = (src_flags & STREAM_DISABLE_OPEN_BASEDIR) ? PHP_STREAM_URL_STAT_IGNORE_OPEN_BASEDIR : 0;
 
 	switch (php_stream_stat_path_ex(src, src_stat_flags, &src_s, ctx)) {
 		case -1:
@@ -1590,7 +1590,7 @@ no_stat:
 	}
 safe_to_copy:
 
-	srcstream = php_stream_open_wrapper_ex(src, "rb", src_flg | REPORT_ERRORS, NULL, ctx);
+	srcstream = php_stream_open_wrapper_ex(src, "rb", src_flags | REPORT_ERRORS, NULL, ctx);
 
 	if (!srcstream) {
 		return ret;
