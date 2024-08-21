@@ -237,7 +237,7 @@ esac
 
 dnl Detect musl libc
 AC_MSG_CHECKING([whether we are using musl libc])
-if command -v ldd >/dev/null && ldd --version 2>&1 | grep -q ^musl
+if command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1
 then
   AC_MSG_RESULT([yes])
   AC_DEFINE([__MUSL__], [1], [Define to 1 when using musl libc.])
