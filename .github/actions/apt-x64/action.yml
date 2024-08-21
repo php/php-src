@@ -70,4 +70,5 @@ runs:
           libqdbm-dev \
           libjpeg-dev \
           libpng-dev \
-          libfreetype6-dev
+          libfreetype6-dev \
+          gh # to use in setup-caddy action
