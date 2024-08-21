@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 504f4172ac1d64535719234888400063eb37361b */
+ * Stub hash: c47ba2b7c1be93cda00bd7ef83d17629e7380a3f */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_set_time_limit, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
@@ -2094,6 +2094,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_is_countable arginfo_boolval
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_coerce_to_string, 0, 1, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, var, IS_MIXED, 0)
+ZEND_END_ARG_INFO()
+
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_uniqid, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prefix, IS_STRING, 0, "\"\"")
@@ -2906,6 +2910,7 @@ ZEND_FUNCTION(is_scalar);
 ZEND_FUNCTION(is_callable);
 ZEND_FUNCTION(is_iterable);
 ZEND_FUNCTION(is_countable);
+ZEND_FUNCTION(coerce_to_string);
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(uniqid);
 #endif
@@ -3560,6 +3565,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(is_callable, arginfo_is_callable)
 	ZEND_RAW_FENTRY("is_iterable", zif_is_iterable, arginfo_is_iterable, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 	ZEND_RAW_FENTRY("is_countable", zif_is_countable, arginfo_is_countable, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
+	ZEND_RAW_FENTRY("coerce_to_string", zif_coerce_to_string, arginfo_coerce_to_string, ZEND_ACC_COMPILE_TIME_EVAL, NULL, NULL)
 #if defined(HAVE_GETTIMEOFDAY)
 	ZEND_FE(uniqid, arginfo_uniqid)
 #endif

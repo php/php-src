@@ -466,3 +466,26 @@ PHP_FUNCTION(is_countable)
 	RETURN_BOOL(zend_is_countable(var));
 }
 /* }}} */
+
+PHP_FUNCTION(coerce_to_string)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(var) == IS_STRING)) {
+		RETURN_STR_COPY(Z_STR_P(var));
+	} else if (Z_TYPE_P(var) == IS_NULL) {
+		RETURN_NULL();
+	} else {
+		zend_string *dest = NULL;
+		/* arg_num is irrelevant, it's only used in the NULL path which is handled above. */
+		if (zend_parse_arg_str_weak(var, &dest, /* arg_num */ 0)) {
+			RETURN_STR_COPY(dest);
+		} else {
+			RETURN_NULL();
+		}
+	}
+}
