@@ -206,7 +206,7 @@ CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int li
 #define CWD_FILEPATH 1 /* resolve symlinks if file is exist otherwise expand */
 #define CWD_REALPATH 2 /* call realpath(), resolve symlinks. File must exist */
 
-CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath);
+CWD_API int virtual_file_ex(cwd_state *state, const char *path, size_t path_length, verify_path_func verify_path, int use_realpath);
 
 CWD_API char *tsrm_realpath(const char *path, char *real_path);
 

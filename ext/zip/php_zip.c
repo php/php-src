@@ -152,7 +152,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, const char *file, s
 	/* Clean/normlize the path and then transform any path (absolute or relative)
 		 to a path relative to cwd (../../mydir/foo.txt > mydir/foo.txt)
 	 */
-	virtual_file_ex(&new_state, file, NULL, CWD_EXPAND);
+	virtual_file_ex(&new_state, file, file_len, NULL, CWD_EXPAND);
 	path_cleaned =  php_zip_make_relative_path(new_state.cwd, new_state.cwd_length);
 	if(!path_cleaned) {
 		CWD_STATE_FREE(new_state.cwd);
