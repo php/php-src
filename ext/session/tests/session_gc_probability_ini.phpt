@@ -43,7 +43,7 @@ ob_end_flush();
 ?>
 Done
 --EXPECTF--
-Warning: session_start(): session.gc_probability cannot be negative in %s on line %d
+Warning: session_start(): session.gc_probability must be non-negative in %s on line %d
 
 Warning: session_start(): Setting option "gc_probability" failed in %s on line %d
 
@@ -51,7 +51,7 @@ Warning: session_start(): session.gc_divisor must be greater than 0 in %s on lin
 
 Warning: session_start(): Setting option "gc_divisor" failed in %s on line %d
 
-Warning: session_start(): session.gc_probability cannot be negative in %s on line %d
+Warning: session_start(): session.gc_probability must be non-negative in %s on line %d
 
 Warning: session_start(): Setting option "gc_probability" failed in %s on line %d
 
