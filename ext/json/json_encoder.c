@@ -125,17 +125,10 @@ static zend_result php_json_encode_array(smart_str *buf, zval *val, int options,
 	} else if (Z_OBJ_P(val)->properties == NULL
 	 && Z_OBJ_HT_P(val)->get_properties_for == NULL
 	 && Z_OBJ_HT_P(val)->get_properties == zend_std_get_properties
-	 && Z_OBJ_P(val)->ce->num_hooked_props == 0) {
+	 && Z_OBJ_P(val)->ce->num_hooked_props == 0
+	 && !zend_object_is_lazy(Z_OBJ_P(val))) {
 		/* Optimized version without rebuilding properties HashTable */
 		zend_object *obj = Z_OBJ_P(val);
-
-		if (zend_lazy_object_must_init(Z_OBJ_P(val))) {
-			obj = zend_lazy_object_init(Z_OBJ_P(val));
-			if (!obj) {
-				return FAILURE;
-			}
-		}
-
 		zend_class_entry *ce = obj->ce;
 		zend_property_info *prop_info;
 		zval *prop;
