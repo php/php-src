@@ -344,6 +344,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The deprecated php_uint32 and php_int32 typedefs have been removed from
      ext/standard/basic_functions.h. Use the standard uint32_t and int32_t
      types instead.
+   - The php_mkdir() and php_mkdir_ex() APIs have been removed, use
+     php_stream_mkdir() instead.
 
  h. ext/session
    - Added the php_get_session_status() API to get the session status, which is
