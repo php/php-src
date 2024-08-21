@@ -701,9 +701,9 @@ static bool zend_call_stack_get_solaris_pthread(zend_call_stack *stack)
 	return true;
 }
 
+#ifdef HAVE_LIBPROC_H
 static bool zend_call_stack_get_solaris_proc_maps(zend_call_stack *stack)
 {
-#ifdef HAVE_LIBPROC_H
 	char buffer[4096];
 	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
 	bool found = false, r = false;
@@ -773,16 +773,16 @@ end:
 	Prelease(proc, 0);
 	close(fd);
 	return r;
-#else
-	return false;
-#endif
 }
+#endif
 
 static bool zend_call_stack_get_solaris(zend_call_stack *stack)
 {
+#ifdef HAVE_LIBPROC_H
 	if (_lwp_self() == 1) {
 		return zend_call_stack_get_solaris_proc_maps(stack);
 	}
+#endif
 	return zend_call_stack_get_solaris_pthread(stack);
 }
 #else
