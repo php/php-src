@@ -815,7 +815,7 @@ static PHP_INI_MH(OnUpdateUseOnlyCookies)
 	bool *p = (bool *) ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (!*p) {
-		php_error_docref(NULL, E_DEPRECATED, "Disabling session.use_only_cookies INI setting is deprecated");
+		php_error_docref("session.configuration", E_DEPRECATED, "Disabling session.use_only_cookies INI setting is deprecated");
 	}
 	return SUCCESS;
 }
@@ -827,7 +827,7 @@ static PHP_INI_MH(OnUpdateUseTransSid)
 	bool *p = (bool *) ZEND_INI_GET_ADDR();
 	*p = zend_ini_parse_bool(new_value);
 	if (*p) {
-		php_error_docref(NULL, E_DEPRECATED, "Enabling session.use_trans_sid INI setting is deprecated");
+		php_error_docref("session.configuration", E_DEPRECATED, "Enabling session.use_trans_sid INI setting is deprecated");
 	}
 	return SUCCESS;
 }
@@ -837,7 +837,7 @@ static PHP_INI_MH(OnUpdateRefererCheck)
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
 	if (ZSTR_LEN(new_value) != 0) {
-		php_error_docref(NULL, E_DEPRECATED, "Usage of session.referer_check INI setting is deprecated");
+		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.referer_check INI setting is deprecated");
 	}
 	return OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 }
