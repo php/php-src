@@ -276,12 +276,7 @@ ZEND_API HashTable *rebuild_object_properties_internal(zend_object *zobj);
 static zend_always_inline HashTable *zend_std_get_properties_ex(zend_object *object)
 {
 	if (UNEXPECTED(zend_lazy_object_must_init(object))) {
-		zend_object *tmp = zend_lazy_object_init(object);
-		if (UNEXPECTED(!tmp)) {
-			ZEND_ASSERT(!object->properties || object->properties == &zend_empty_array);
-			return object->properties = (zend_array*) &zend_empty_array;
-		}
-		object = tmp;
+		return zend_lazy_object_get_properties(object);
 	}
 	if (!object->properties) {
 		return rebuild_object_properties_internal(object);

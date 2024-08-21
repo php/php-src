@@ -617,6 +617,22 @@ void zend_lazy_object_realize(zend_object *obj)
 	OBJ_EXTRA_FLAGS(obj) &= ~(IS_OBJ_LAZY_UNINITIALIZED | IS_OBJ_LAZY_PROXY);
 }
 
+ZEND_API HashTable *zend_lazy_object_get_properties(zend_object *object)
+{
+	ZEND_ASSERT(zend_object_is_lazy(object));
+
+	zend_object *tmp = zend_lazy_object_init(object);
+	if (UNEXPECTED(!tmp)) {
+		ZEND_ASSERT(!object->properties || object->properties == &zend_empty_array);
+		return object->properties = (zend_array*) &zend_empty_array;
+	}
+
+	object = tmp;
+	ZEND_ASSERT(!zend_lazy_object_must_init(object));
+
+	return zend_std_get_properties_ex(object);
+}
+
 /* Initialize object and clone it. For proxies, we clone both the proxy and its
  * real instance, and we don't call __clone() on the proxy. */
 zend_object *zend_lazy_object_clone(zend_object *old_obj)
