@@ -126,7 +126,7 @@ end:
 PHP_FUNCTION(mysqli_stmt_bind_param)
 {
 	zval			*args;
-	int				argc;
+	uint32_t		argc;
 	MY_STMT			*stmt;
 	zval			*mysql_stmt;
 	char			*types;
@@ -154,7 +154,7 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_THROWS();
 	}
 
-	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, hasThis() ? 1 : 2));
+	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, ERROR_ARG_POS(2)));
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 }
 /* }}} */
@@ -179,7 +179,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
 	zval		*args;
-	int			argc;
+	uint32_t	argc;
 	zend_ulong		rc;
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
@@ -190,7 +190,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if ((uint32_t)argc != mysql_stmt_field_count(stmt->stmt)) {
+	if (argc != mysql_stmt_field_count(stmt->stmt)) {
 		zend_argument_count_error("Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_THROWS();
 	}
