@@ -67,7 +67,9 @@ typedef int boolean_t;
 #define _STRUCTURED_PROC 1
 #include <sys/lwp.h>
 #include <sys/procfs.h>
-#include <libproc.h>
+# ifdef HAVE_LIBPROC_H
+#  include <libproc.h>
+# endif
 #include <thread.h>
 #endif
 
