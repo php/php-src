@@ -1499,11 +1499,7 @@ PHP_FUNCTION(copy)
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	if (php_copy_file_ctx(source, target, 0, context) == SUCCESS) {
-		RETURN_TRUE;
-	} else {
-		RETURN_FALSE;
-	}
+	RETURN_BOOL(php_copy_file_ctx(source, target, 0, context) == SUCCESS);
 }
 /* }}} */
 
