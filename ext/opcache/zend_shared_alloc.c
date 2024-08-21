@@ -53,7 +53,7 @@
 static const zend_shared_memory_handlers *g_shared_alloc_handler = NULL;
 static const char *g_shared_model;
 /* pointer to globals allocated in SHM and shared across processes */
-zend_smm_shared_globals *smm_shared_globals;
+ZEND_EXT_API zend_smm_shared_globals *smm_shared_globals;
 
 #ifndef ZEND_WIN32
 #ifdef ZTS
