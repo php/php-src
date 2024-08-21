@@ -65,6 +65,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15028 (Memory leak in ext/phar/stream.c). (nielsdos)
   . Fixed bug GH-15034 (Integer overflow on stream_notification_callback
     byte_max parameter with files bigger than 2GB). (nielsdos)
+  . Reverted fix for GH-14930 (Custom stream wrapper dir_readdir output
+    truncated to 255 characters). (Jakub Zelenka)
 
 - Tidy:
   . Fix memory leaks in ext/tidy basedir restriction code. (nielsdos)
