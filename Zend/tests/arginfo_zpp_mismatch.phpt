@@ -65,7 +65,6 @@ foreach (get_defined_functions()["internal"] as $function) {
 }
 
 foreach (get_declared_classes() as $class) {
-    if ($class === "com_safearray_proxy") var_dump("com_safearray_proxy");
     try {
         $rc = new ReflectionClass($class);
         $obj = $rc->newInstanceWithoutConstructor();
@@ -79,7 +78,6 @@ foreach (get_declared_classes() as $class) {
 }
 
 // var_dump() and debug_zval_dump() print all arguments
-echo "fail\n";
 ?>
 ===DONE===
 --EXPECT--
