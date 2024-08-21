@@ -223,16 +223,17 @@ AC_DEFUN([ZEND_CHECK_STACK_DIRECTION],
   [AC_RUN_IFELSE([AC_LANG_SOURCE([dnl
 #include <stdint.h>
 
+#ifdef __has_builtin
+# if __has_builtin(__builtin_frame_address)
+#  define builtin_frame_address __builtin_frame_address(0)
+# endif
+#endif
+
 int (*volatile f)(uintptr_t);
 
 int stack_grows_downwards(uintptr_t arg) {
-#ifdef __has_builtin
-# if __has_builtin(__builtin_frame_address)
-    uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
-# else
-    int local;
-    uintptr_t addr = (uintptr_t)&local;
-# endif
+#ifdef builtin_frame_address
+  uintptr_t addr = (uintptr_t)builtin_frame_address;
 #else
   int local;
   uintptr_t addr = (uintptr_t)&local;
@@ -242,13 +243,8 @@ int stack_grows_downwards(uintptr_t arg) {
 }
 
 int main(void) {
-#ifdef __has_builtin
-# if __has_builtin(__builtin_frame_address)
-    uintptr_t addr = (uintptr_t)__builtin_frame_address(0);
-# else
-    int local;
-    uintptr_t addr = (uintptr_t)&local;
-# endif
+#ifdef builtin_frame_address
+  uintptr_t addr = (uintptr_t)builtin_frame_address;
 #else
   int local;
   uintptr_t addr = (uintptr_t)&local;
