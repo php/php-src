@@ -808,12 +808,17 @@ static PHP_INI_MH(OnUpdateSessionDivisor) /* {{{ */
     SESSION_CHECK_ACTIVE_STATE;
     SESSION_CHECK_OUTPUT_STATE;
 
-    if (atol(ZSTR_VAL(new_value)) <= 0) {
+    zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+    if (tmp <= 0) {
         php_error_docref(NULL, E_WARNING, "session.gc_divisor must be greater than 0");
         return FAILURE;
     }
 
-    return OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+    zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+    *p = tmp;
+
+    return SUCCESS;
 }
 /* }}} */
 
