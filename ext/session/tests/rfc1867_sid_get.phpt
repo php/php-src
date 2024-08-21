@@ -1,6 +1,7 @@
 --TEST--
 session rfc1867 sid get
 --INI--
+display_startup_errors=0
 file_uploads=1
 upload_max_filesize=1024
 session.save_path=
@@ -130,5 +131,3 @@ array(5) {
     }
   }
 }
-
-Deprecated: PHP Startup: Disabling session.use_only_cookies INI setting is deprecated in Unknown on line 0
