@@ -40,6 +40,7 @@ if "%PLATFORM%" == "x86" (
 
 cmd /c configure.bat ^
 	--enable-snapshot-build ^
+	--enable-debug-assertions ^
 	--disable-debug-pack ^
 	--enable-com-dotnet=shared ^
 	--without-analyzer ^
