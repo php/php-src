@@ -3700,6 +3700,11 @@ function is_countable(mixed $value): bool {}
  */
 function coerce_to_string(mixed $var): ?string {}
 
+/**
+ * @compile-time-eval
+ */
+function coerce_to_int(mixed $var): ?int {}
+
 /* uniqid.c */
 
 #ifdef HAVE_GETTIMEOFDAY
