@@ -1501,36 +1501,31 @@ CWD_API int virtual_creat(const char *path, mode_t mode) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_rename(const char *oldname, const char *newname) /* {{{ */
+CWD_API zend_result virtual_rename(const char *old_name, size_t old_name_len, const char *new_name, size_t new_name_len) /* {{{ */
 {
 	cwd_state old_state;
 	cwd_state new_state;
-	size_t old_name_length = strlen(oldname);
-	size_t new_name_length = strlen(newname);
-	int retval;
 
 	CWD_STATE_COPY(&old_state, &CWDG(cwd));
-	if (virtual_file_ex(&old_state, oldname, old_name_length, NULL, CWD_EXPAND)) {
+	if (virtual_file_ex(&old_state, old_name, old_name_len, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE_ERR(&old_state);
-		return -1;
+		return FAILURE;
 	}
-	oldname = old_state.cwd;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, newname, new_name_length, NULL, CWD_EXPAND)) {
+	if (virtual_file_ex(&new_state, new_name, new_name_len, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE_ERR(&old_state);
 		CWD_STATE_FREE_ERR(&new_state);
-		return -1;
+		return FAILURE;
 	}
-	newname = new_state.cwd;
 
-	/* rename on windows will fail if newname already exists.
-	   MoveFileEx has to be used */
+	zend_result retval;
 #ifdef ZEND_WIN32
-	/* MoveFileEx returns 0 on failure, other way 'round for this function */
-	retval = php_win32_ioutil_rename(oldname, newname);
+	/* rename on windows will fail if new_name already exists. MoveFileEx has to be used */
+	/* MoveFileEx returns 0 on failure, other way round for this function */
+	retval = php_win32_ioutil_rename(old_state.cwd, old_state.cwd_length, new_name, new_name_len);
 #else
-	retval = rename(oldname, newname);
+	retval = virtual_rename_native(old_state.cwd, old_state.cwd_length, new_state.cwd, new_state.cwd_length);
 #endif
 
 	CWD_STATE_FREE_ERR(&old_state);

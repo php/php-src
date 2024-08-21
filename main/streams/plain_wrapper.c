@@ -1274,12 +1274,14 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 		return 0;
 	}
 
+	size_t url_from_len = strlen(url_from);
+	size_t url_to_len = strlen(url_to);
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
+	if (!php_win32_check_trailing_space(url_from, url_from_len)) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
 		return 0;
 	}
-	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
+	if (!php_win32_check_trailing_space(url_to, url_to_len)) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
 		return 0;
 	}
@@ -1287,17 +1289,19 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 
 	if (strncasecmp(url_from, "file://", sizeof("file://") - 1) == 0) {
 		url_from += sizeof("file://") - 1;
+		url_from_len -= sizeof("file://");
 	}
 
 	if (strncasecmp(url_to, "file://", sizeof("file://") - 1) == 0) {
 		url_to += sizeof("file://") - 1;
+		url_to_len -= sizeof("file://");
 	}
 
 	if (php_check_open_basedir(url_from) || php_check_open_basedir(url_to)) {
 		return 0;
 	}
 
-	ret = VCWD_RENAME(url_from, url_to);
+	ret = VCWD_RENAME(url_from, url_from_len, url_to, url_to_len);
 
 	if (ret == -1) {
 #ifndef PHP_WIN32

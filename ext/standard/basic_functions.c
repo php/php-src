@@ -2379,7 +2379,7 @@ PHP_FUNCTION(move_uploaded_file)
 		RETURN_FALSE;
 	}
 
-	if (VCWD_RENAME(path, new_path) == 0) {
+	if (VCWD_RENAME(path, path_len, new_path, new_path_len) == 0) {
 		successful = 1;
 #ifndef PHP_WIN32
 		oldmask = umask(077);

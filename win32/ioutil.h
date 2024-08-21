@@ -264,7 +264,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *buf, size_t len);
 
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
-PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
+PW32IO zend_result php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
@@ -418,46 +418,41 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_rename(const char *oldnamea, const char *newnamea)
+__forceinline static zend_result php_win32_ioutil_rename(const char *old_name_a, size_t old_name_a_len, const char *new_name_a, size_t new_name_a_len)
 {/*{{{*/
 	wchar_t *oldnamew;
 	wchar_t *newnamew;
-	int ret;
-	DWORD err = 0;
 
-	oldnamew = php_win32_ioutil_any_to_w(oldnamea);
+	oldnamew = php_win32_ioutil_conv_any_to_w(old_name_a, old_name_a_len, PHP_WIN32_CP_IGNORE_LEN_P);
 	if (!oldnamew) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return -1;
+		return FAILURE;
 	}
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, -1, 1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldnamew, FAILURE, 1)
 
-	newnamew = php_win32_ioutil_any_to_w(newnamea);
+	newnamew = php_win32_ioutil_conv_any_to_w(new_name_a, new_name_a_len, PHP_WIN32_CP_IGNORE_LEN_P);
 	if (!newnamew) {
 		free(oldnamew);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return -1;
+		return FAILURE;
 	} else {
 		size_t newnamew_len = wcslen(newnamew);
 		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(newnamew, newnamew_len)) {
 			free(oldnamew);
 			free(newnamew);
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
-			return -1;
+			return FAILURE;
 		}
 	}
 
-	ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
-	if (0 > ret) {
-		err = GetLastError();
+	zend_result ret = php_win32_ioutil_rename_w(oldnamew, newnamew);
+	if (ret == FAILURE) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
 	free(oldnamew);
 	free(newnamew);
-
-	if (0 > ret) {
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
 
 	return ret;
 }/*}}}*/

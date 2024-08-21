@@ -464,21 +464,18 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 	return ret;
 }/*}}}*/
 
-PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
+PW32IO zend_result php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
 {/*{{{*/
-	int ret = 0;
-
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
-
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, FAILURE, 0)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, FAILURE, 0)
 
 	if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
 		DWORD err = GetLastError();
-		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
+		return FAILURE;
 	}
 
-	return ret;
+	return SUCCESS;
 }/*}}}*/
 
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
