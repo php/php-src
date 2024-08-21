@@ -3710,6 +3710,11 @@ function coerce_to_int(mixed $var): ?int {}
  */
 function coerce_to_float(mixed $var): ?float {}
 
+/**
+ * @compile-time-eval
+ */
+function coerce_to_bool(mixed $var): ?bool {}
+
 /* uniqid.c */
 
 #ifdef HAVE_GETTIMEOFDAY

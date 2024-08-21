@@ -533,3 +533,27 @@ PHP_FUNCTION(coerce_to_float)
 		}
 	}
 }
+
+PHP_FUNCTION(coerce_to_bool)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (EXPECTED(Z_TYPE_P(var) == IS_TRUE)) {
+		RETURN_TRUE;
+	} else if (EXPECTED(Z_TYPE_P(var) == IS_FALSE)) {
+		RETURN_FALSE;
+	} else if (Z_TYPE_P(var) == IS_NULL) {
+		RETURN_NULL();
+	} else {
+		bool dest;
+		if (zend_parse_arg_bool_weak(var, &dest, /* arg_num */ 0)) {
+			RETURN_BOOL(dest);
+		} else {
+			RETURN_NULL();
+		}
+	}
+}
