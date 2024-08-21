@@ -941,15 +941,15 @@ unlink_errexit:
 /* }}} */
 
 /* {{{ php_stream_ftp_rename */
-static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context)
+static bool php_stream_ftp_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context)
 {
 	php_stream *stream = NULL;
 	php_url *resource_from = NULL, *resource_to = NULL;
 	int result;
 	char tmp_line[512];
 
-	resource_from = php_url_parse(url_from);
-	resource_to = php_url_parse(url_to);
+	resource_from = php_url_parse(ZSTR_VAL(url_from));
+	resource_to = php_url_parse(ZSTR_VAL(url_to));
 	/* Must be same scheme (ftp/ftp or ftps/ftps), same host, and same port
 		(or a 21/0 0/21 combination which is also "same")
 	   Also require paths to/from */
@@ -969,7 +969,7 @@ static int php_stream_ftp_rename(php_stream_wrapper *wrapper, const char *url_fr
 		goto rename_errexit;
 	}
 
-	stream = php_ftp_fopen_connect(wrapper, url_from, "r", 0, NULL, context, NULL, NULL, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, ZSTR_VAL(url_from), "r", 0, NULL, context, NULL, NULL, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", ZSTR_VAL(resource_from->host));

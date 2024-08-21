@@ -46,7 +46,7 @@ static php_stream *user_wrapper_opener(php_stream_wrapper *wrapper, const char *
 static int user_wrapper_close(php_stream_wrapper *wrapper, php_stream *stream);
 static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, int flags, php_stream_statbuf *ssb, php_stream_context *context);
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
-static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to, int options, php_stream_context *context);
+static bool user_wrapper_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context);
 static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context);
 static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context);
@@ -1067,7 +1067,7 @@ static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	return ret;
 }
 
-static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from, const char *url_to,
+static bool user_wrapper_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to,
 							   int options, php_stream_context *context)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
@@ -1084,8 +1084,8 @@ static int user_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 	}
 
 	/* call the rename method */
-	ZVAL_STRING(&args[0], url_from);
-	ZVAL_STRING(&args[1], url_to);
+	ZVAL_STRINGL(&args[0], ZSTR_VAL(url_from), ZSTR_LEN(url_from));
+	ZVAL_STRINGL(&args[1], ZSTR_VAL(url_to), ZSTR_LEN(url_to));
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_RENAME);
 
