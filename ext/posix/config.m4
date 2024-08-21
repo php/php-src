@@ -14,7 +14,8 @@ if test "$PHP_POSIX" = "yes"; then
 
 dnl Skip pathconf and fpathconf check on musl libc due to limited implementation
 dnl (first argument is not validated and has different error).
-  AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep -q "^musl"],[],
+  AS_IF([command -v ldd >/dev/null && ldd --version 2>&1 | grep ^musl >/dev/null 2>&1],
+    [],
     [AC_CHECK_FUNCS(pathconf fpathconf)])
 
   AC_MSG_CHECKING([for working ttyname_r() implementation])
