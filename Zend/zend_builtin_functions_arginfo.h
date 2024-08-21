@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 3dbc84896823c9aaa9ac8aeef8841266920c3e50 */
+ * Stub hash: af299a06e48f4ceda87110083d6a11a9807bd251 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_exit, 0, 0, IS_NEVER, 0)
 	ZEND_ARG_TYPE_MASK(0, status, MAY_BE_STRING|MAY_BE_LONG, "0")
@@ -121,6 +121,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_function_exists, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, function, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, autoload, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_alias, 0, 2, _IS_BOOL, 0)
@@ -223,6 +224,32 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_gc_status arginfo_func_get_args
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_register_class, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, prepend, _IS_BOOL, 0, "false")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_unregister_class, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_call_class, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, class, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_autoload_list_class, 0, 0, Traversable, MAY_BE_ARRAY)
+ZEND_END_ARG_INFO()
+
+#define arginfo_autoload_register_function arginfo_autoload_register_class
+
+#define arginfo_autoload_unregister_function arginfo_autoload_unregister_class
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_call_function, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, function, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_autoload_list_function arginfo_autoload_list_class
+
 
 ZEND_FRAMELESS_FUNCTION(property_exists, 2);
 static const zend_frameless_function_info frameless_function_infos_property_exists[] = {
@@ -297,6 +324,14 @@ ZEND_FUNCTION(gc_enabled);
 ZEND_FUNCTION(gc_enable);
 ZEND_FUNCTION(gc_disable);
 ZEND_FUNCTION(gc_status);
+ZEND_FUNCTION(autoload_register_class);
+ZEND_FUNCTION(autoload_unregister_class);
+ZEND_FUNCTION(autoload_call_class);
+ZEND_FUNCTION(autoload_list_class);
+ZEND_FUNCTION(autoload_register_function);
+ZEND_FUNCTION(autoload_unregister_function);
+ZEND_FUNCTION(autoload_call_function);
+ZEND_FUNCTION(autoload_list_function);
 
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(exit, arginfo_exit)
@@ -361,6 +396,14 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(gc_enable, arginfo_gc_enable)
 	ZEND_FE(gc_disable, arginfo_gc_disable)
 	ZEND_FE(gc_status, arginfo_gc_status)
+	ZEND_FE(autoload_register_class, arginfo_autoload_register_class)
+	ZEND_FE(autoload_unregister_class, arginfo_autoload_unregister_class)
+	ZEND_FE(autoload_call_class, arginfo_autoload_call_class)
+	ZEND_FE(autoload_list_class, arginfo_autoload_list_class)
+	ZEND_FE(autoload_register_function, arginfo_autoload_register_function)
+	ZEND_FE(autoload_unregister_function, arginfo_autoload_unregister_function)
+	ZEND_FE(autoload_call_function, arginfo_autoload_call_function)
+	ZEND_FE(autoload_list_function, arginfo_autoload_list_function)
 	ZEND_FE_END
 };
 

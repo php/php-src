@@ -57,9 +57,13 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name,
 	zend_function *fbc;
 
 	if (UNEXPECTED(func == NULL)) {
-		return NULL;
+		fbc = zend_lookup_function_ex(name, name, /* use_autoload */ true);
+		if (UNEXPECTED(fbc == NULL)) {
+			return NULL;
+		}
+	} else {
+		fbc = Z_FUNC_P(func);
 	}
-	fbc = Z_FUNC_P(func);
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 		fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
 	}
@@ -81,12 +85,28 @@ static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name
 	zend_function *fbc;
 
 	if (func == NULL) {
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
-		if (UNEXPECTED(func == NULL)) {
-			return NULL;
+		fbc = zend_lookup_function_ex(Z_STR_P(func_name), Z_STR_P(func_name + 1), /* use_autoload */ true);
+		if (UNEXPECTED(fbc == NULL)) {
+			if (UNEXPECTED(EG(exception))) {
+				return NULL;
+			}
+			/* Fallback onto global namespace, by fetching the unqualified lowercase name stored in the second literal slot */
+			fbc = zend_lookup_function_ex(Z_STR_P(func_name + 2), Z_STR_P(func_name + 2), /* use_autoload */ true);
+			if (UNEXPECTED(fbc == NULL)) {
+				return NULL;
+			}
+			/* We bind the unqualified name to the global function
+			 * Use the lowercase name of the function stored in the first cache slot as
+			 * function names are case insensitive */
+			else {
+				zval tmp;
+				ZVAL_STR(&tmp, Z_STR_P(func_name + 1));
+				do_bind_function(fbc, &tmp);
+			}
 		}
+	} else {
+		fbc = Z_FUNC_P(func);
 	}
-	fbc = Z_FUNC_P(func);
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 		fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
 	}

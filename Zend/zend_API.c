@@ -3830,44 +3830,23 @@ ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc) {
 	}
 }
 
-static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_execute_data *frame, zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation) /* {{{ */
+static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_execute_data *frame,
+	zend_fcall_info_cache *fcc, bool strict_class, char **error, bool suppress_deprecation, bool use_autoloader) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	bool retval = 0;
 	zend_string *mname, *cname;
 	zend_string *lmname;
-	const char *colon;
-	size_t clen;
+	const char *colon = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRLEN_P(callable));
 	HashTable *ftable;
-	int call_via_handler = 0;
+	bool call_via_handler = 0;
 	zend_class_entry *scope;
 	zval *zv;
-	ALLOCA_FLAG(use_heap)
 
 	fcc->calling_scope = NULL;
 
-	if (!ce_org) {
-		zend_function *func;
-		zend_string *lmname;
-
-		/* Check if function with given name exists.
-		 * This may be a compound name that includes namespace name */
-		if (UNEXPECTED(Z_STRVAL_P(callable)[0] == '\\')) {
-			/* Skip leading \ */
-			ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable) - 1, use_heap);
-			zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable) - 1);
-			func = zend_fetch_function(lmname);
-			ZSTR_ALLOCA_FREE(lmname, use_heap);
-		} else {
-			lmname = Z_STR_P(callable);
-			func = zend_fetch_function(lmname);
-			if (!func) {
-				ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable), use_heap);
-				zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-				func = zend_fetch_function(lmname);
-				ZSTR_ALLOCA_FREE(lmname, use_heap);
-			}
-		}
+	if (!ce_org && !colon) {
+		zend_function *func = zend_fetch_function_ex(Z_STR_P(callable), use_autoloader);
 		if (EXPECTED(func != NULL)) {
 			fcc->function_handler = func;
 			return 1;
@@ -3875,14 +3854,11 @@ static zend_always_inline bool zend_is_callable_check_func(zval *callable, zend_
 	}
 
 	/* Split name into class/namespace and method/function names */
-	if ((colon = zend_memrchr(Z_STRVAL_P(callable), ':', Z_STRLEN_P(callable))) != NULL &&
-		colon > Z_STRVAL_P(callable) &&
-		*(colon-1) == ':'
-	) {
+	if (colon && colon > Z_STRVAL_P(callable) && *(colon-1) == ':') {
 		size_t mlen;
 
 		colon--;
-		clen = colon - Z_STRVAL_P(callable);
+		size_t clen = colon - Z_STRVAL_P(callable);
 		mlen = Z_STRLEN_P(callable) - clen - 2;
 
 		if (colon == Z_STRVAL_P(callable)) {
@@ -4169,7 +4145,9 @@ again:
 			}
 
 check_func:
-			ret = zend_is_callable_check_func(callable, frame, fcc, strict_class, error, check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS);
+			ret = zend_is_callable_check_func(callable, frame, fcc, strict_class, error,
+				/* suppress_deprecation */ check_flags & IS_CALLABLE_SUPPRESS_DEPRECATIONS,
+				/* use_autoloader */ !(check_flags & IS_CALLABLE_CHECK_NO_AUTOLOAD));
 			if (fcc == &fcc_local) {
 				zend_release_fcall_info_cache(fcc);
 			}

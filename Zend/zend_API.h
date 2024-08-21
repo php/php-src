@@ -409,6 +409,8 @@ ZEND_API ZEND_COLD void zend_wrong_property_read(zval *object, zval *property);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
 #define IS_CALLABLE_SUPPRESS_DEPRECATIONS (1<<1)
+/* Only used for DEBUG builds where the VM will check if a call should throw, causing double autoloading */
+#define IS_CALLABLE_CHECK_NO_AUTOLOAD (1<<2)
 
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);
 ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object);

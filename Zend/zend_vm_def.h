@@ -3818,17 +3818,26 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
 	zend_function *fbc;
-	zval *function_name, *func;
 	zend_execute_data *call;
 
+	SAVE_OPLINE();
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
+		zval *function_name = (zval*)RT_CONSTANT(opline, opline->op2);
+		/* Perform quick look-up of function */
+		/* Fetch lowercase name stored in the next literal slot */
+		zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(function_name+1));
 		if (UNEXPECTED(func == NULL)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+			fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
+			if (UNEXPECTED(fbc == NULL)) {
+				if (EXPECTED(!EG(exception))) {
+					ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
+				}
+				HANDLE_EXCEPTION();
+			}
+		} else {
+			fbc = Z_FUNC_P(func);
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
@@ -3960,22 +3969,36 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
-	zval *func_name;
-	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
 
+	SAVE_OPLINE();
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		func_name = (zval *)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 1));
-		if (func == NULL) {
-			func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(func_name + 2));
-			if (UNEXPECTED(func == NULL)) {
+		zval *function_name = (zval *)RT_CONSTANT(opline, opline->op2);
+		/* Fetch lowercase name stored in the next literal slot */
+		fbc = zend_lookup_function_ex(Z_STR_P(function_name), Z_STR_P(function_name+1), /* use_autoload */ true);
+		if (UNEXPECTED(fbc == NULL)) {
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+			/* Fallback onto global namespace, by fetching the unqualified lowercase name stored in the second literal slot */
+			fbc = zend_lookup_function_ex(Z_STR_P(function_name+2), Z_STR_P(function_name+2), /* use_autoload */ true);
+			if (UNEXPECTED(fbc == NULL)) {
+				if (UNEXPECTED(EG(exception))) {
+					HANDLE_EXCEPTION();
+				}
 				ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper);
 			}
+			/* We bind the unqualified name to the global function
+			 * Use the lowercase name of the function stored in the first cache slot as
+			 * function names are case insensitive */
+			else {
+				zval tmp;
+				ZVAL_STR(&tmp, Z_STR_P(function_name+1));
+				do_bind_function(fbc, &tmp);
+			}
 		}
-		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
@@ -3993,15 +4016,13 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 {
 	USE_OPLINE
-	zval *fname;
-	zval *func;
 	zend_function *fbc;
 	zend_execute_data *call;
 
 	fbc = CACHED_PTR(opline->result.num);
 	if (UNEXPECTED(fbc == NULL)) {
-		fname = (zval*)RT_CONSTANT(opline, opline->op2);
-		func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
+		zval *fname = (zval*)RT_CONSTANT(opline, opline->op2);
+		zval *func = zend_hash_find_known_hash(EG(function_table), Z_STR_P(fname));
 		ZEND_ASSERT(func != NULL && "Function existence must be checked at compile time");
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {

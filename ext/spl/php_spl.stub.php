@@ -25,14 +25,17 @@ function class_uses($object_or_class, bool $autoload = true): array|false {}
 
 function spl_autoload(string $class, ?string $file_extensions = null): void {}
 
+/** @alias autoload_call_class */
 function spl_autoload_call(string $class): void {}
 
 function spl_autoload_extensions(?string $file_extensions = null): string {}
 
-function spl_autoload_functions(): array {}
+/** @alias autoload_list_class */
+function spl_autoload_functions(): iterable {}
 
 function spl_autoload_register(?callable $callback = null, bool $throw = true, bool $prepend = false): bool {}
 
+/** @alias autoload_unregister_class */
 function spl_autoload_unregister(callable $callback): bool {}
 
 /**
