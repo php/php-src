@@ -1206,39 +1206,38 @@ CWD_API zend_result virtual_chdir(const char *path) /* {{{ */
 }
 /* }}} */
 
-
-/* returns 0 for ok, 1 for empty string, -1 on error */
-CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path)) /* {{{ */
+CWD_API zend_result virtual_chdir_file(const char *path, size_t path_len, int (*p_chdir)(const char *path)) /* {{{ */
 {
-	size_t length = strlen(path);
 	char *temp;
-	int retval;
 	ALLOCA_FLAG(use_heap)
 
-	if (length == 0) {
-		return 1; /* Can't cd to empty string */
-	}
-	while(--length < SIZE_MAX && !IS_SLASH(path[length])) {
+	ZEND_ASSERT(path_len != 0 && "path must not be empty");
+	while(--path_len < SIZE_MAX && !IS_SLASH(path[path_len])) {
 	}
 
-	if (length == SIZE_MAX) {
+	if (path_len == SIZE_MAX) {
 		/* No directory only file name */
 		errno = ENOENT;
-		return -1;
+		return FAILURE;
 	}
 
-	if (length == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, length+1)) { /* Also use trailing slash if this is absolute */
-		length++;
+	if (path_len == COPY_WHEN_ABSOLUTE(path) && IS_ABSOLUTE_PATH(path, path_len+1)) { /* Also use trailing slash if this is absolute */
+		path_len++;
 	}
-	temp = (char *) do_alloca(length+1, use_heap);
-	memcpy(temp, path, length);
-	temp[length] = 0;
+	temp = (char *) do_alloca(path_len+1, use_heap);
+	memcpy(temp, path, path_len);
+	temp[path_len] = 0;
 #if VIRTUAL_CWD_DEBUG
 	fprintf (stderr, "Changing directory to %s\n", temp);
 #endif
-	retval = p_chdir(temp);
+	int retval = p_chdir(temp);
 	free_alloca(temp, use_heap);
-	return retval;
+
+	if (retval == 0) {
+		return SUCCESS;
+	} else {
+		return FAILURE;
+	}
 }
 /* }}} */
 

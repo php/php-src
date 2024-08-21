@@ -173,7 +173,7 @@ CWD_API void virtual_cwd_deactivate(void);
 CWD_API char *virtual_getcwd_ex(size_t *length);
 CWD_API char *virtual_getcwd(char *buf, size_t size);
 CWD_API zend_result virtual_chdir(const char *path);
-CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path));
+CWD_API zend_result virtual_chdir_file(const char *path, size_t path_len, int (*p_chdir)(const char *path));
 CWD_API int virtual_filepath(const char *path, char **filepath);
 CWD_API int virtual_filepath_ex(const char *path, char **filepath, verify_path_func verify_path);
 CWD_API char *virtual_realpath(const char *path, char *real_path);
@@ -272,7 +272,7 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_OPEN_MODE(path, flags, mode) virtual_open(path, flags, mode)
 #define VCWD_CREAT(path, mode) virtual_creat(path, mode)
 #define VCWD_CHDIR(path) virtual_chdir(path)
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, (int (*)(const char *)) virtual_chdir)
+#define VCWD_CHDIR_FILE(path, path_len) virtual_chdir_file(path, path_len, (int (*)(const char *)) virtual_chdir)
 #define VCWD_GETWD(buf)
 #define VCWD_REALPATH(path, real_path) virtual_realpath(path, real_path)
 #define VCWD_RENAME(oldname, newname) virtual_rename(oldname, newname)
@@ -326,7 +326,7 @@ extern void virtual_cwd_main_cwd_init(uint8_t);
 #define VCWD_CHMOD(path, mode) chmod(path, mode)
 #endif
 
-#define VCWD_CHDIR_FILE(path) virtual_chdir_file(path, chdir)
+#define VCWD_CHDIR_FILE(path, path_len) virtual_chdir_file(path, path_len, chdir)
 #define VCWD_GETWD(buf) getwd(buf)
 #define VCWD_STAT(path, buff) php_sys_stat(path, buff)
 #define VCWD_LSTAT(path, buff) lstat(path, buff)
