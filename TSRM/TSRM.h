@@ -115,8 +115,9 @@ TSRM_API void ts_apply_for_id(ts_rsrc_id id, void (*cb)(void *));
 
 typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id);
 typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id);
+typedef void (*tsrm_thread_free_begin_func_t)(THREAD_T thread_id);
+typedef void (*tsrm_thread_free_end_func_t)(THREAD_T thread_id);
 typedef void (*tsrm_shutdown_func_t)(void);
-
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
 TSRM_API void tsrm_error_set(int level, const char *debug_filename);
@@ -133,6 +134,8 @@ TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
+TSRM_API void *tsrm_set_free_thread_begin_handler(tsrm_thread_free_begin_func_t free_thread_begin_handler);
+TSRM_API void *tsrm_set_free_thread_end_handler(tsrm_thread_free_end_func_t free_thread_end_handler);
 TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
 
 TSRM_API void *tsrm_get_ls_cache(void);
