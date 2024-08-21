@@ -797,7 +797,7 @@ static PHP_INI_MH(OnUpdateSessionGcProbability) /* {{{ */
     zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 
     if (tmp < 0) {
-        php_error_docref(NULL, E_WARNING, "session.gc_probability must be non-negative");
+        php_error_docref("session.gc_probability", E_WARNING, "session.gc_probability must be greater than or equal to 0");
         return FAILURE;
     }
 
@@ -816,7 +816,7 @@ static PHP_INI_MH(OnUpdateSessionDivisor) /* {{{ */
     zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
 
     if (tmp <= 0) {
-        php_error_docref(NULL, E_WARNING, "session.gc_divisor must be greater than 0");
+        php_error_docref("session.gc_divisor", E_WARNING, "session.gc_divisor must be greater than 0");
         return FAILURE;
     }
 
