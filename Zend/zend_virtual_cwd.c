@@ -1618,22 +1618,21 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
+CWD_API zend_result virtual_rmdir(const char *path, size_t path_length) /* {{{ */
 {
 	cwd_state new_state;
-	int retval;
-	size_t path_length = strlen(pathname);
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
-	if (virtual_file_ex(&new_state, pathname, path_length, NULL, CWD_EXPAND)) {
+	if (virtual_file_ex(&new_state, path, path_length, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE_ERR(&new_state);
-		return -1;
+		return FAILURE;
 	}
 
+	zend_result retval;
 #ifdef ZEND_WIN32
-	retval = php_win32_ioutil_rmdir(new_state.cwd);
+	retval = php_win32_ioutil_rmdir(new_state.cwd, new_state.cwd_length);
 #else
-	retval = rmdir(new_state.cwd);
+	retval = virtual_rmdir_native(new_state.cwd, new_state.cwd_length);
 #endif
 	CWD_STATE_FREE_ERR(&new_state);
 	return retval;

@@ -1471,14 +1471,15 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 		return 0;
 	}
 
+	size_t url_len = strlen(url);
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url, strlen(url))) {
+	if (!php_win32_check_trailing_space(url, url_len)) {
 		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}
 #endif
 
-	if (VCWD_RMDIR(url) < 0) {
+	if (VCWD_RMDIR(url, url_len) < 0) {
 		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
 		return 0;
 	}

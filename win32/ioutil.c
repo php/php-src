@@ -436,21 +436,6 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 	return 0;
 }/*}}}*/
 
-PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
-{/*{{{*/
-	int ret = 0;
-
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
-
-	if (!RemoveDirectoryW(path)) {
-		DWORD err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;

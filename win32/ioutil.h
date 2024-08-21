@@ -359,29 +359,27 @@ __forceinline static int php_win32_ioutil_unlink(const char *path)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_rmdir(const char *path)
+__forceinline static zend_result php_win32_ioutil_rmdir(const char *path, size_t path_len)
 {/*{{{*/
+	// TODO Is it possible to use php_win32_ioutil_conv_any_to_w() with path_len?
 	PHP_WIN32_IOUTIL_INIT_W(path)
-	int ret = 0;
 	DWORD err = 0;
 
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return -1;
+		return FAILURE;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, FAILURE, 1)
 
+	zend_result ret = SUCCESS;
 	if (!RemoveDirectoryW(pathw)) {
-		err = GetLastError();
-		ret = -1;
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		ret = FAILURE;
 	}
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
-
-	if (0 > ret) {
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
 
 	return ret;
 }/*}}}*/
