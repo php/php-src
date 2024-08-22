@@ -872,8 +872,7 @@ PHP 8.4 UPGRADE NOTES
     INTL_IDNA_VARIANT_UTS46.
 
 - LibXML:
-  . The libxml extension and PHP_SETUP_LIBXML Autoconf macro now require at
-    least libxml2 2.9.4.
+  . The libxml extension now requires at least libxml2 2.9.4.
 
 - MBString:
   . Unicode data tables have been updated to Unicode 15.1.
