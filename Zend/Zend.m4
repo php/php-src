@@ -133,7 +133,10 @@ dnl
 AC_DEFUN([ZEND_INIT], [dnl
 AC_REQUIRE([AC_PROG_CC])
 
-AC_CHECK_HEADERS([cpuid.h])
+AC_CHECK_HEADERS(m4_normalize([
+  cpuid.h
+  libproc.h
+]))
 
 dnl Check for library functions.
 AC_CHECK_FUNCS(m4_normalize([
