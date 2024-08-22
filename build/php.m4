@@ -1934,7 +1934,7 @@ dnl
 dnl Common setup macro for libxml.
 dnl
 AC_DEFUN([PHP_SETUP_LIBXML], [
-  PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= 2.9.0])
+  PKG_CHECK_MODULES([LIBXML], [libxml-2.0 >= 2.9.4])
   PHP_EVAL_INCLINE([$LIBXML_CFLAGS])
   PHP_EVAL_LIBLINE([$LIBXML_LIBS], [$1])
   $2
