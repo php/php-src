@@ -3338,8 +3338,6 @@ function toolset_setup_common_cflags()
 function toolset_setup_intrinsic_cflags()
 {
 	var default_enabled = "sse2";
-	/* XXX AVX and above needs to be reflected in /arch, for now SSE4.2 is
-		the best possible optimization.*/
 	var avail = WScript.CreateObject("Scripting.Dictionary");
 	avail.Add("sse", "__SSE__");
 	avail.Add("sse2", "__SSE2__");
@@ -3348,7 +3346,7 @@ function toolset_setup_intrinsic_cflags()
 	avail.Add("sse4.1", "__SSE4_1__");
 	avail.Add("sse4.2", "__SSE4_2__");
 	/* From oldest to newest. */
-	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2");
+	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2", "avx512");
 
 	if (VS_TOOLSET) {
 		if ("disabled" == PHP_NATIVE_INTRINSICS) {
@@ -3374,9 +3372,9 @@ function toolset_setup_intrinsic_cflags()
 				AC_DEFINE(avail.Item(list[i]), 1);
 			}
 
-			/* All means all. __AVX__ and __AVX2__ are defined by compiler. */
-			ADD_FLAG("CFLAGS","/arch:AVX2");
-			configure_subst.Add("PHP_SIMD_SCALE", "AVX2");
+			/* All means all. __AVX__, __AVX2__, and __AVX512*__ are defined by compiler. */
+			ADD_FLAG("CFLAGS","/arch:AVX512");
+			configure_subst.Add("PHP_SIMD_SCALE", "AVX512");
 		} else {
 			var list = PHP_NATIVE_INTRINSICS.split(",");
 			var j = 0;
@@ -3385,7 +3383,7 @@ function toolset_setup_intrinsic_cflags()
 					var it = list[i].toLowerCase();
 					if (scale[k] == it) {
 						j = k > j ? k : j;
-					} else if (!avail.Exists(it) && "avx2" != it && "avx" != it) {
+					} else if (!avail.Exists(it) && "avx512" != it && "avx2" != it && "avx" != it) {
 						WARNING("Unknown intrinsic name '" + it + "' ignored");
 					}
 				}
@@ -3402,7 +3400,10 @@ function toolset_setup_intrinsic_cflags()
 			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
 				The declared macros therefore won't affect the code generation,
 				but will enable the guarded code parts. */
-			if ("avx2" == scale[j]) {
+			if ("avx512" == scale[j]) {
+				ADD_FLAG("CFLAGS","/arch:AVX512");
+				j -= 3;
+			} else if ("avx2" == scale[j]) {
 				ADD_FLAG("CFLAGS","/arch:AVX2");
 				j -= 2;
 			} else if ("avx" == scale[j]) {

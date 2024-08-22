@@ -1020,6 +1020,8 @@ PHP 8.4 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+* Native AVX-512 builds are now supported (--enable-native-intrinsics=avx512).
+
 ========================================
 13. Other Changes
 ========================================
