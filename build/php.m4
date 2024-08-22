@@ -1793,28 +1793,26 @@ AC_DEFUN([PHP_PROG_RE2C],[
   PHP_SUBST([RE2C_FLAGS])
 ])
 
-AC_DEFUN([PHP_PROG_PHP],[
-  AC_CHECK_PROG([PHP], [php], [php])
-
-  if test -n "$PHP"; then
-    AC_MSG_CHECKING([for php version])
-    php_version=$($PHP -v | head -n1 | cut -d ' ' -f 2 | cut -d '-' -f 1)
-    if test -z "$php_version"; then
-      php_version=0.0.0
-    fi
-    ac_IFS=$IFS; IFS="."
-    set $php_version
-    IFS=$ac_IFS
-    php_version_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
-    dnl Minimum supported version for gen_stub.php is PHP 7.4.
-    if test "$php_version_num" -lt 70400; then
-      AC_MSG_RESULT([$php_version (too old)])
-      unset PHP
-    else
-      AC_MSG_RESULT([$php_version (ok)])
-    fi
-  fi
-  PHP_SUBST([PHP])
+dnl
+dnl PHP_PROG_PHP([min-version])
+dnl
+dnl Find PHP command-line interface SAPI on the system and check if version is
+dnl greater or equal to "min-version". If suitable version is found, the PHP
+dnl variable is set and substituted to a Makefile variable. Used for generating
+dnl files and running PHP utilities during the build.
+dnl
+AC_DEFUN([PHP_PROG_PHP],
+[m4_if([$1],, [php_required_version=7.4], [php_required_version=$1])
+AC_CHECK_PROG([PHP], [php], [php])
+AS_VAR_IF([PHP],,, [
+AC_MSG_CHECKING([for php version])
+php_version=$($PHP -v | head -n1 | cut -d ' ' -f 2)
+AS_VERSION_COMPARE([$php_version], [$php_required_version], [unset PHP])
+AS_VAR_IF([PHP],,
+  [AC_MSG_RESULT([$php_version (too old, install $php_required_version or later)])],
+  [AC_MSG_RESULT([$php_version (ok)])])
+])
+PHP_SUBST([PHP])
 ])
 
 dnl ----------------------------------------------------------------------------
