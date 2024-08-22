@@ -42,7 +42,9 @@ static zend_result dom_html5_serialize_doctype(dom_html5_serialize_context *ctx,
 static zend_result dom_html5_serialize_comment(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
 	TRY(ctx->write_string_len(ctx->application_data, "<!--", strlen("<!--")));
-	TRY(ctx->write_string(ctx->application_data, (const char *) node->content));
+	if (node->content) {
+		TRY(ctx->write_string(ctx->application_data, (const char*) node->content));
+	}
 	return ctx->write_string_len(ctx->application_data, "-->", strlen("-->"));
 }
 
@@ -131,6 +133,10 @@ static zend_result dom_html5_escape_string(dom_html5_serialize_context *ctx, con
 
 static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ctx, const xmlNode *node)
 {
+	if (!node->content) {
+		return SUCCESS;
+	}
+
 	if (node->parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(node->parent, php_dom_ns_is_html_magic_token)) {
 		const xmlNode *parent = node->parent;
 		size_t name_length = strlen((const char *) parent->name);
