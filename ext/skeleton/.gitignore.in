@@ -1,3 +1,4 @@
+*.dep
 *.lo
 *.la
 .libs
@@ -8,11 +9,13 @@ build
 config.guess
 config.h
 config.h.in
+config.h.in~
 config.log
 config.nice
 config.status
 config.sub
 configure
+configure~
 configure.ac
 configure.in
 include
