@@ -499,11 +499,11 @@ bound:
 }
 /* }}} */
 
-PHPAPI int php_network_parse_network_address_with_port(const char *addr, zend_long addrlen, struct sockaddr *sa, socklen_t *sl)
+PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr, size_t addrlen, struct sockaddr *sa, socklen_t *sl)
 {
 	char *colon;
 	char *tmp;
-	int ret = FAILURE;
+	zend_result ret = FAILURE;
 	short port;
 	struct sockaddr_in *in4 = (struct sockaddr_in*)sa;
 	struct sockaddr **psal;
@@ -843,7 +843,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 				struct sockaddr_in6 in6;
 #endif
 			} local_address = {0};
-			int local_address_len = 0;
+			size_t local_address_len = 0;
 
 			if (sa->sa_family == AF_INET) {
 				if (inet_pton(AF_INET, bindto, &local_address.in4.sin_addr) == 1) {
@@ -974,7 +974,7 @@ PHPAPI void php_any_addr(int family, php_sockaddr_storage *addr, unsigned short 
 /* {{{ php_sockaddr_size
  * Returns the size of struct sockaddr_xx for the family
  */
-PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
+PHPAPI socklen_t php_sockaddr_size(php_sockaddr_storage *addr)
 {
 	switch (((struct sockaddr *)addr)->sa_family) {
 	case AF_INET:
@@ -1099,9 +1099,9 @@ PHPAPI php_stream *_php_stream_sock_open_host(const char *host, unsigned short p
 	return stream;
 }
 
-PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block)
+PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block)
 {
-	int ret = SUCCESS;
+	zend_result ret = SUCCESS;
 
 #ifdef PHP_WIN32
 	u_long flags;
@@ -1253,7 +1253,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
 	}
 
-	if (res != SUCCESS) {
+	if (res != 0) {
 		return NULL;
 	}
 
@@ -1295,7 +1295,7 @@ static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf
 	}
 	memset((void *)(*tmphstbuf),0,*hstbuflen);
 
-	if (SUCCESS != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
+	if (0 != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
 		return NULL;
 	}
 
