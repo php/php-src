@@ -34,6 +34,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
 
+- Opcache:
+  . Fixed bug GH-15490 (Building of callgraph modifies preloaded symbols).
+    (ilutov)
+
 - PDO_MYSQL:
   . mysqlnd: support ER_CLIENT_INTERACTION_TIMEOUT. (Appla)
 

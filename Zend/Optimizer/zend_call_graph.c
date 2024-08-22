@@ -79,7 +79,8 @@ ZEND_API void zend_analyze_calls(zend_arena **arena, zend_script *script, uint32
 
 					if (build_flags & ZEND_CALL_TREE) {
 						call_info->next_caller = NULL;
-					} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+					} else if (func->type == ZEND_INTERNAL_FUNCTION
+					 || func->op_array.filename != script->filename) {
 						call_info->next_caller = NULL;
 					} else {
 						zend_func_info *callee_func_info = ZEND_FUNC_INFO(&func->op_array);
