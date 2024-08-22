@@ -2096,13 +2096,13 @@ PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream
 /* }}} */
 
 /* {{{ _php_stream_rmdir */
-PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *context)
+PHPAPI bool _php_stream_rmdir(const zend_string *path, int options, php_stream_context *context)
 {
 	php_stream_wrapper *wrapper = NULL;
 
-	wrapper = php_stream_locate_url_wrapper(path, NULL, 0);
+	wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(path), NULL, 0);
 	if (!wrapper || !wrapper->wops || !wrapper->wops->stream_rmdir) {
-		return 0;
+		return false;
 	}
 
 	return wrapper->wops->stream_rmdir(wrapper, path, options, context);

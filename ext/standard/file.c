@@ -1160,13 +1160,12 @@ PHP_FUNCTION(mkdir)
 /* {{{ Remove a directory */
 PHP_FUNCTION(rmdir)
 {
-	char *dir;
-	size_t dir_len;
+	zend_string *dir;
 	zval *zcontext = NULL;
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH(dir, dir_len)
+		Z_PARAM_PATH_STR(dir)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();

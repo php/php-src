@@ -48,7 +48,7 @@ static int user_wrapper_stat_url(php_stream_wrapper *wrapper, const char *url, i
 static int user_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
 static bool user_wrapper_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context);
 static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context);
-static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
+static bool user_wrapper_rmdir(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context);
 static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context);
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
@@ -1151,7 +1151,7 @@ static int user_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url, int 
 	return ret;
 }
 
-static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
+static bool user_wrapper_rmdir(php_stream_wrapper *wrapper, const zend_string *url,
 							  int options, php_stream_context *context)
 {
 	struct php_user_stream_wrapper *uwrap = (struct php_user_stream_wrapper*)wrapper->abstract;
@@ -1168,7 +1168,7 @@ static int user_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url,
 	}
 
 	/* call the rmdir method */
-	ZVAL_STRING(&args[0], url);
+	ZVAL_STRINGL(&args[0], ZSTR_VAL(url), ZSTR_LEN(url));
 	ZVAL_LONG(&args[1], options);
 
 	ZVAL_STRING(&zfuncname, USERSTREAM_RMDIR);

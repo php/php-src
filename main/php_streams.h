@@ -152,7 +152,7 @@ typedef struct _php_stream_wrapper_ops {
 
 	/* Create/Remove directory */
 	int (*stream_mkdir)(php_stream_wrapper *wrapper, const char *url, int mode, int options, php_stream_context *context);
-	int (*stream_rmdir)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
+	bool (*stream_rmdir)(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context);
 	/* Metadata handling */
 	int (*stream_metadata)(php_stream_wrapper *wrapper, const char *url, int options, void *value, php_stream_context *context);
 } php_stream_wrapper_ops;
@@ -370,7 +370,7 @@ PHPAPI int _php_stream_stat_path(const char *path, int flags, php_stream_statbuf
 PHPAPI int _php_stream_mkdir(const char *path, int mode, int options, php_stream_context *context);
 #define php_stream_mkdir(path, mode, options, context)	_php_stream_mkdir(path, mode, options, context)
 
-PHPAPI int _php_stream_rmdir(const char *path, int options, php_stream_context *context);
+PHPAPI bool _php_stream_rmdir(const zend_string *path, int options, php_stream_context *context);
 #define php_stream_rmdir(path, options, context)	_php_stream_rmdir(path, options, context)
 
 PHPAPI php_stream *_php_stream_opendir(const char *path, int options, php_stream_context *context STREAMS_DC);
