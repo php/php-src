@@ -789,6 +789,44 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 }
 /* }}} */
 
+static PHP_INI_MH(OnUpdateSessionGcProbability) /* {{{ */
+{
+    SESSION_CHECK_ACTIVE_STATE;
+    SESSION_CHECK_OUTPUT_STATE;
+
+    zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+    if (tmp < 0) {
+        php_error_docref("session.gc_probability", E_WARNING, "session.gc_probability must be greater than or equal to 0");
+        return FAILURE;
+    }
+
+    zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+    *p = tmp;
+
+    return SUCCESS;
+}
+/* }}} */
+
+static PHP_INI_MH(OnUpdateSessionDivisor) /* {{{ */
+{
+    SESSION_CHECK_ACTIVE_STATE;
+    SESSION_CHECK_OUTPUT_STATE;
+
+    zend_long tmp = zend_ini_parse_quantity_warn(new_value, entry->name);
+
+    if (tmp <= 0) {
+        php_error_docref("session.gc_divisor", E_WARNING, "session.gc_divisor must be greater than 0");
+        return FAILURE;
+    }
+
+    zend_long *p = (zend_long *) ZEND_INI_GET_ADDR();
+    *p = tmp;
+
+    return SUCCESS;
+}
+/* }}} */
+
 static PHP_INI_MH(OnUpdateRfc1867Freq) /* {{{ */
 {
 	int tmp = ZEND_ATOL(ZSTR_VAL(new_value));
@@ -814,8 +852,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("session.name",               "PHPSESSID", PHP_INI_ALL, OnUpdateName,          session_name,       php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.save_handler",           "files",     PHP_INI_ALL, OnUpdateSaveHandler)
 	STD_PHP_INI_BOOLEAN("session.auto_start",       "0",         PHP_INI_PERDIR, OnUpdateBool,       auto_start,         php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateSessionLong,          gc_probability,     php_ps_globals,    ps_globals)
-	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateSessionLong,          gc_divisor,         php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_probability",     "1",         PHP_INI_ALL, OnUpdateSessionGcProbability,    gc_probability,     php_ps_globals,    ps_globals)
+	STD_PHP_INI_ENTRY("session.gc_divisor",         "100",       PHP_INI_ALL, OnUpdateSessionDivisor,gc_divisor,         php_ps_globals,    ps_globals)
 	STD_PHP_INI_ENTRY("session.gc_maxlifetime",     "1440",      PHP_INI_ALL, OnUpdateSessionLong,          gc_maxlifetime,     php_ps_globals,    ps_globals)
 	PHP_INI_ENTRY("session.serialize_handler",      "php",       PHP_INI_ALL, OnUpdateSerializer)
 	STD_PHP_INI_ENTRY("session.cookie_lifetime",    "0",         PHP_INI_ALL, OnUpdateCookieLifetime,cookie_lifetime,    php_ps_globals,    ps_globals)
