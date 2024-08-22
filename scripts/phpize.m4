@@ -28,9 +28,6 @@ AC_DEFUN([PHP_ALWAYS_SHARED],[
 
 PHP_INIT_BUILD_SYSTEM
 
-abs_srcdir=`(cd $srcdir && pwd)`
-abs_builddir=`pwd`
-
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC

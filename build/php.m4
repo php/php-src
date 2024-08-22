@@ -142,6 +142,9 @@ AS_VAR_IF([CFLAGS],, [auto_cflags=1])
 dnl Required programs.
 PHP_PROG_AWK
 
+abs_srcdir=$(cd $srcdir && pwd)
+abs_builddir=$(pwd)
+
 dnl Run at the end of the configuration, before creating the config.status.
 AC_CONFIG_COMMANDS_PRE(
 [dnl Directory for storing shared objects of extensions.

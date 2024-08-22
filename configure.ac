@@ -100,9 +100,6 @@ dnl ----------------------------------------------------------------------------
 
 PHP_INIT_BUILD_SYSTEM
 
-abs_srcdir=`(cd $srcdir; pwd)`
-abs_builddir=`pwd`
-
 dnl Because `make install` is often performed by the superuser, we create the
 dnl libs subdirectory as the user who configures PHP. Otherwise, the current
 dnl user will not be able to delete libs or the contents of libs.
