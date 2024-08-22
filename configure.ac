@@ -1796,6 +1796,12 @@ AC_CONFIG_FILES([
 
 AC_CONFIG_COMMANDS_PRE([PHP_PATCH_CONFIG_HEADERS([main/php_config.h.in])])
 
+AC_CONFIG_COMMANDS([Zend/zend_config.h], [
+cat >Zend/zend_config.h <<FEO
+#include <../main/php_config.h>
+FEO
+])
+
 AC_CONFIG_COMMANDS([main/internal_functions.c], [], [
   AWK="$AWK" $SHELL $srcdir/build/genif.sh \
     $srcdir/main/internal_functions.c.in \
@@ -1808,7 +1814,7 @@ AC_CONFIG_COMMANDS([main/internal_functions_cli.c], [], [
     "$EXT_CLI_STATIC" > main/internal_functions_cli.c
 ])
 
-AC_CONFIG_COMMANDS([default],[
+AC_CONFIG_COMMANDS([default], [
 cat <<X
 
 +--------------------------------------------------------------------+
@@ -1823,11 +1829,5 @@ cat <<X
 Thank you for using PHP.
 
 X
-],[
-dnl Create configuration headers.
-dnl ----------------------------------------------------------------------------
-cat >Zend/zend_config.h <<FEO
-#include <../main/php_config.h>
-FEO
 ])
 AC_OUTPUT
