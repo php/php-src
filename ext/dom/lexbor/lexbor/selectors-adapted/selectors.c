@@ -6,7 +6,6 @@
  * Based on Lexbor 2.4.0 (upstream commit e9d35f6384de7bd8c1b79e7111bc3a44f8822967)
  */
 
-#include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 #include <libxml/dict.h>
 #include <Zend/zend.h>
