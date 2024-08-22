@@ -1739,54 +1739,31 @@ dnl
 AC_DEFUN([PHP_PROG_RE2C],[
   AC_CHECK_PROG([RE2C], [re2c], [re2c])
 
-  ifelse($1,,php_re2c_required_version='',php_re2c_required_version="$1")
-
-  if test -n "$RE2C"; then
+  php_re2c_check=
+  AS_VAR_IF([RE2C],,, [
     AC_MSG_CHECKING([for re2c version])
 
     php_re2c_version=$($RE2C --version | cut -d ' ' -f 2 2>/dev/null)
-    if test -z "$php_re2c_version"; then
-      php_re2c_version=0.0.0
-    fi
-    ac_IFS=$IFS; IFS="."
-    set $php_re2c_version
-    IFS=$ac_IFS
-    php_re2c_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+
     php_re2c_check=ok
+    AS_VERSION_COMPARE([$php_re2c_version], [$1],
+      [php_re2c_check=invalid])
 
-    if test -z "$php_re2c_required_version" && test -z "$php_re2c_num"; then
-      php_re2c_check=invalid
-    elif test -n "$php_re2c_required_version"; then
-      ac_IFS=$IFS; IFS="."
-      set $php_re2c_required_version
-      IFS=$ac_IFS
-      php_re2c_required_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
-      php_re2c_required_version="$php_re2c_required_version or later"
+    AS_VAR_IF([php_re2c_check], [invalid],
+      [AC_MSG_RESULT([$php_re2c_version (too old)])],
+      [AC_MSG_RESULT([$php_re2c_version (ok)])])
+  ])
 
-      if test -z "$php_re2c_num" || test "$php_re2c_num" -lt "$php_re2c_required_num"; then
-        php_re2c_check=invalid
-      fi
-    fi
-
-    if test "$php_re2c_check" != "invalid"; then
-      AC_MSG_RESULT([$php_re2c_version (ok)])
-    else
-      AC_MSG_RESULT([$php_re2c_version (too old)])
-    fi
-  fi
-
-  case $php_re2c_check in
-    ""|invalid[)]
-      if test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"; then
+  AS_CASE([$php_re2c_check],
+    [""|invalid], [
+      AS_IF([test ! -f "$abs_srcdir/Zend/zend_language_scanner.c"], [
         AC_MSG_ERROR(m4_text_wrap([
-          re2c $php_re2c_required_version or newer is required to generate PHP
-          lexers.
+          re2c $1 or newer is required to generate PHP lexers.
         ]))
-      fi
+      ])
 
       RE2C="exit 0;"
-      ;;
-  esac
+    ])
 
   PHP_SUBST([RE2C])
   AS_VAR_SET([RE2C_FLAGS], m4_normalize(["$2"]))
