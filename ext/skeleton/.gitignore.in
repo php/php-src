@@ -9,13 +9,11 @@ build
 config.guess
 config.h
 config.h.in
-*~
 config.log
 config.nice
 config.status
 config.sub
 configure
-configure~
 configure.ac
 configure.in
 include
@@ -42,3 +40,4 @@ tests/**/*.sh
 tests/**/*.db
 tests/**/*.mem
 tmp-php.ini
+*~
