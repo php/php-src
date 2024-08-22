@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . The "allowed_classes" option for unserialize() now throws TypeErrors and
     ValueErrors	if it is not an	array of class names. (Girgias)
 
+- Streams:
+  . Fixed bug GH-14930 (Custom stream wrapper dir_readdir output truncated to
+    255 characters in PHP 8.3). (Joe Cai)
+
 
 15 Aug 2024, PHP 8.4.0beta3
 
