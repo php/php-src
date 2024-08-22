@@ -72,10 +72,8 @@ PHP_FUNCTION(mysqli_autocommit)
 /* }}} */
 
 /* {{{ mysqli_stmt_bind_param_do_bind */
-static
-int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *args, const char * const types, unsigned int num_extra_args)
+static enum_func_status mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, uint32_t num_vars, zval *args, const char * const types, unsigned int arg_num)
 {
-	unsigned int i;
 	MYSQLND_PARAM_BIND	*params;
 	enum_func_status	ret = FAIL;
 
@@ -87,7 +85,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 	if (!params) {
 		goto end;
 	}
-	for (i = 0; i < num_vars; i++) {
+	for (uint32_t i = 0; i < num_vars; i++) {
 		uint8_t type;
 		switch (types[i]) {
 			case 'd': /* Double */
@@ -107,7 +105,7 @@ int mysqli_stmt_bind_param_do_bind(MY_STMT *stmt, unsigned int num_vars, zval *a
 				type = MYSQL_TYPE_VAR_STRING;
 				break;
 			default:
-				zend_argument_value_error(num_extra_args, "must only contain the \"b\", \"d\", \"i\", \"s\" type specifiers");
+				zend_argument_value_error(arg_num, "must only contain the \"b\", \"d\", \"i\", \"s\" type specifiers");
 				ret = FAIL;
 				mysqlnd_stmt_free_param_bind(stmt->stmt, params);
 				goto end;
@@ -126,7 +124,7 @@ end:
 PHP_FUNCTION(mysqli_stmt_bind_param)
 {
 	zval			*args;
-	int				argc;
+	uint32_t		argc;
 	MY_STMT			*stmt;
 	zval			*mysql_stmt;
 	char			*types;
@@ -154,19 +152,17 @@ PHP_FUNCTION(mysqli_stmt_bind_param)
 		RETURN_THROWS();
 	}
 
-	RETVAL_BOOL(!mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, hasThis() ? 1 : 2));
+	RETVAL_BOOL(mysqli_stmt_bind_param_do_bind(stmt, argc, args, types, ERROR_ARG_POS(2)) == PASS);
 	MYSQLI_REPORT_STMT_ERROR(stmt->stmt);
 }
 /* }}} */
 
 /* {{{ mysqli_stmt_bind_result_do_bind */
-static int
-mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
+static enum_func_status mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, uint32_t argc)
 {
-	unsigned int i;
 	MYSQLND_RESULT_BIND *params = mysqlnd_stmt_alloc_result_bind(stmt->stmt);
 	if (params) {
-		for (i = 0; i < argc; i++) {
+		for (uint32_t i = 0; i < argc; i++) {
 			ZVAL_COPY_VALUE(&params[i].zv, &args[i]);
 		}
 		return mysqlnd_stmt_bind_result(stmt->stmt, params);
@@ -179,8 +175,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 PHP_FUNCTION(mysqli_stmt_bind_result)
 {
 	zval		*args;
-	int			argc;
-	zend_ulong		rc;
+	uint32_t	argc;
 	MY_STMT		*stmt;
 	zval		*mysql_stmt;
 
@@ -190,13 +185,13 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if ((uint32_t)argc != mysql_stmt_field_count(stmt->stmt)) {
+	if (argc != mysql_stmt_field_count(stmt->stmt)) {
 		zend_argument_count_error("Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_THROWS();
 	}
 
-	rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc);
-	RETURN_BOOL(!rc);
+	enum_func_status rc = mysqli_stmt_bind_result_do_bind(stmt, args, argc);
+	RETURN_BOOL(rc == PASS);
 }
 /* }}} */
 
@@ -207,21 +202,16 @@ PHP_FUNCTION(mysqli_change_user)
 	zval		*mysql_link = NULL;
 	char		*user, *password, *dbname;
 	size_t			user_len, password_len, dbname_len;
-	zend_ulong		rc;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!", &mysql_link, mysqli_link_class_entry, &user, &user_len, &password, &password_len, &dbname, &dbname_len) == FAILURE) {
 		RETURN_THROWS();
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-	rc = mysqlnd_change_user_ex(mysql->mysql, user, password, dbname, false, (size_t) password_len);
+	enum_func_status rc = mysqlnd_change_user_ex(mysql->mysql, user, password, dbname, false, (size_t) password_len);
 	MYSQLI_REPORT_MYSQL_ERROR(mysql->mysql);
 
-	if (rc) {
-		RETURN_FALSE;
-	}
-
-	RETURN_TRUE;
+	RETURN_BOOL(rc == PASS);
 }
 /* }}} */
 
