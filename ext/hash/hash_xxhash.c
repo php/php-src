@@ -183,7 +183,7 @@ zend_always_inline static void _PHP_XXH3_Init(PHP_XXH3_64_CTX *ctx, HashTable *a
 			return;
 		} else if (_secret) {
 			if (IS_STRING != Z_TYPE_P(_secret)) {
-				php_error_docref(NULL, E_DEPRECATED, "Passing a seed of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
+				php_error_docref(NULL, E_DEPRECATED, "Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs");
 			}
 			zend_string *secret_string = zval_try_get_string(_secret);
 			if (UNEXPECTED(!secret_string)) {
