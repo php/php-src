@@ -340,6 +340,7 @@ void zend_oparray_context_begin(zend_oparray_context *prev_context, zend_op_arra
 	CG(context).in_jmp_frameless_branch = false;
 	CG(context).active_property_info = NULL;
 	CG(context).active_property_hook_kind = (zend_property_hook_kind)-1;
+	CG(context).arg_num = 0;
 }
 /* }}} */
 
@@ -3701,7 +3702,7 @@ static uint32_t zend_compile_args(
 	uint32_t i;
 	bool uses_arg_unpack = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
-	uint32_t prev_arg_num = CG(arg_num);
+	uint32_t prev_arg_num = CG(context).arg_num;
 
 	/* Whether named arguments are used syntactically, to enforce language level limitations.
 	 * May not actually use named argument passing. */
@@ -3779,7 +3780,7 @@ static uint32_t zend_compile_args(
 			arg_count++;
 		}
 
-		CG(arg_num) = arg_num;
+		CG(context).arg_num = arg_num;
 
 		/* Treat passing of $GLOBALS the same as passing a call.
 		 * This will error at runtime if the argument is by-ref. */
@@ -3895,7 +3896,7 @@ static uint32_t zend_compile_args(
 		zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	}
 
-	CG(arg_num) = prev_arg_num;
+	CG(context).arg_num = prev_arg_num;
 
 	return arg_count;
 }
@@ -3903,7 +3904,7 @@ static uint32_t zend_compile_args(
 
 static void zend_compile_default(znode *result, zend_ast *ast)
 {
-	uint32_t arg_num = CG(arg_num);
+	uint32_t arg_num = CG(context).arg_num;
 
 	if (arg_num == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use default in non-argument context.");

@@ -1313,6 +1313,7 @@ expr:
 	|	'@' expr			{ $$ = zend_ast_create(ZEND_AST_SILENCE, $2); }
 	|	scalar { $$ = $1; }
 	|	'`' backticks_expr '`' { $$ = zend_ast_create(ZEND_AST_SHELL_EXEC, $2); }
+	|	T_DEFAULT { $$ = zend_ast_create(ZEND_AST_DEFAULT); }
 	|	T_PRINT expr { $$ = zend_ast_create(ZEND_AST_PRINT, $2); }
 	|	T_YIELD { $$ = zend_ast_create(ZEND_AST_YIELD, NULL, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
@@ -1322,7 +1323,6 @@ expr:
 	|	inline_function { $$ = $1; }
 	|	attributes inline_function { $$ = zend_ast_with_attributes($2, $1); }
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
-	|	T_DEFAULT { $$ = zend_ast_create(ZEND_AST_DEFAULT); }
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	match { $$ = $1; }

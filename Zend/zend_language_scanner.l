@@ -595,7 +595,6 @@ static zend_op_array *zend_compile(int type)
 	CG(in_compilation) = 1;
 	CG(ast) = NULL;
 	CG(ast_arena) = zend_arena_create(1024 * 32);
-	CG(arg_num) = 0;
 
 	if (!zendparse()) {
 		int last_lineno = CG(zend_lineno);
