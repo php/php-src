@@ -550,7 +550,7 @@ static void to_zval_read_uid_t(const char *data, zval *zv, res_context *ctx)
 /* CONVERSIONS for sockaddr */
 static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_context *ctx)
 {
-	int					res;
+	bool res;
 	struct sockaddr_in	saddr = {0};
 	zend_string			*addr_str, *tmp_addr_str;
 
@@ -600,7 +600,7 @@ static void to_zval_read_sockaddr_in(const char *data, zval *zv, res_context *ct
 #ifdef HAVE_IPV6
 static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_context *ctx)
 {
-	int					res;
+	bool res;
 	struct sockaddr_in6	saddr6 = {0};
 	zend_string			*addr_str, *tmp_addr_str;
 

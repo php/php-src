@@ -11,7 +11,7 @@
 
 extern zend_result php_string_to_if_index(const char *val, unsigned *out);
 
-int php_set_common_addr(struct sockaddr *sin, int family, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_common_addr(struct sockaddr *sin, int family, char *string, php_socket *php_sock) /* {{{ */
 {
 #ifdef HAVE_GETADDRINFO
 	struct sockaddr_in6 *sin6 = (struct sockaddr_in6*)sin;
@@ -41,12 +41,12 @@ int php_set_common_addr(struct sockaddr *sin, int family, char *string, php_sock
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
 #endif
-			return 0;
+			return false;
 		}
 		if (addrinfo->ai_family != family) {
 			php_error_docref(NULL, E_WARNING, "Host lookup failed: Wrong address family returned for socket");
 			freeaddrinfo(addrinfo);
-			return 0;
+			return false;
 		}
 
 		if (addrinfo->ai_family == AF_INET6) {
@@ -57,23 +57,23 @@ int php_set_common_addr(struct sockaddr *sin, int family, char *string, php_sock
 		freeaddrinfo(addrinfo);
 	}
 
-	return 1;
+	return true;
 #else
 	php_error_docref(NULL, E_WARNING, "Host lookup failed: getaddrinfo() not available on this system");
-	return 0;
+	return true;
 #endif
 }
 /* }}} */
 
 #ifdef HAVE_IPV6
 /* Sets addr by hostname, or by ip in string form (AF_INET6) */
-int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_sock) /* {{{ */
 {
 	char *scope = strchr(string, '%');
 
-	int ret = php_set_common_addr((struct sockaddr*)sin6, AF_INET6, string, php_sock);
+	bool ret = php_set_common_addr((struct sockaddr*)sin6, AF_INET6, string, php_sock);
 	if (!ret) {
-		return 0;
+		return false;
 	}
 
 	if (scope) {
@@ -100,7 +100,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 #endif
 
 /* Sets addr by hostname, or by ip in string form (AF_INET)  */
-int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_sock) /* {{{ */
 {
 	return php_set_common_addr((struct sockaddr*)sin, AF_INET, string, php_sock);
 }
@@ -108,7 +108,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 
 /* Sets addr by hostname or by ip in string form (AF_INET or AF_INET6,
  * depending on the socket) */
-int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock) /* {{{ */
+bool php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *string, php_socket *php_sock) /* {{{ */
 {
 	if (php_sock->type == AF_INET) {
 		struct sockaddr_in t = {0};
@@ -116,7 +116,7 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *strin
 			memcpy(ss, &t, sizeof t);
 			ss->ss_family = AF_INET;
 			*ss_len = sizeof(t);
-			return 1;
+			return true;
 		}
 	}
 #ifdef HAVE_IPV6
@@ -126,7 +126,7 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *strin
 			memcpy(ss, &t, sizeof t);
 			ss->ss_family = AF_INET6;
 			*ss_len = sizeof(t);
-			return 1;
+			return true;
 		}
 	}
 #endif
@@ -134,5 +134,5 @@ int php_set_inet46_addr(php_sockaddr_storage *ss, socklen_t *ss_len, char *strin
 		php_error_docref(NULL, E_WARNING,
 			"IP address used in the context of an unexpected type of socket");
 	}
-	return 0;
+	return false;
 }
