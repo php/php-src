@@ -683,7 +683,7 @@ int fcgi_listen(const char *path, int backlog)
 		} else {
 			if (!inet_pton(AF_INET, host, &sa.sa_inet.sin_addr)) {
 				php_sockaddr_storage resolved;
-				int address_count;
+				size_t address_count;
 
 				if (strlen(host) > MAXFQDNLEN) {
 					address_count = 0;

@@ -233,7 +233,7 @@ PHP_FUNCTION(gethostbyname)
 	}
 
 	php_sockaddr_storage resolved;
-	int address_count = php_network_getaddress(&resolved, hostname, 0, AF_INET, 0, NULL);
+	size_t address_count = php_network_getaddress(&resolved, hostname, 0, AF_INET, 0, NULL);
 	if (address_count == 0) {
 		/* don't need to docref here, getaddresses E_WARNINGs for us */
 		RETURN_STRINGL(hostname, hostname_len);
@@ -276,7 +276,7 @@ PHP_FUNCTION(gethostbynamel)
 	}
 
 	struct sockaddr **addresses = NULL;
-	int address_count = php_network_getaddresses(hostname, 0, &addresses, NULL);
+	size_t address_count = php_network_getaddresses(hostname, 0, &addresses, NULL);
 	if (address_count == 0) {
 		/* don't need to docref here, getaddresses E_WARNINGs for us */
 		RETURN_FALSE;

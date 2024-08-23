@@ -145,10 +145,11 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 /* {{{ php_network_getaddresses_ex
  * Returns number of addresses, 0 for none/error
  */
-PHPAPI int php_network_getaddresses_ex(const char *host, int socktype, int family, int ai_flags, struct sockaddr ***sal, zend_string **error_string)
+PHPAPI size_t php_network_getaddresses_ex(const char *host, int socktype, int family, int ai_flags, struct sockaddr ***sal, zend_string **error_string)
 {
 	struct sockaddr **sap;
-	int n;
+	size_t n;
+	int ret;
 #ifdef HAVE_GETADDRINFO
 # ifdef HAVE_IPV6
 	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
@@ -190,7 +191,7 @@ PHPAPI int php_network_getaddresses_ex(const char *host, int socktype, int famil
 	hints.ai_family = ipv6_borked ? AF_INET : family;
 # endif
 
-	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+	if ((ret = getaddrinfo(host, NULL, &hints, &res))) {
 # if defined(PHP_WIN32)
 		char *gai_error = php_win32_error_to_msg(n);
 # elif defined(HAVE_GAI_STRERROR)
@@ -253,7 +254,7 @@ PHPAPI int php_network_getaddresses_ex(const char *host, int socktype, int famil
 /* {{{ php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
-PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
+PHPAPI size_t php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
 {
 	return php_network_getaddresses_ex(host, socktype, AF_UNSPEC, 0, sal, error_string);
 }
@@ -262,10 +263,10 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 /* {{{ php_network_getaddress
  * Returns the number of addresses, and puts first address for a hostname in sockaddr.
  */
-PHPAPI int php_network_getaddress(php_sockaddr_storage *sockaddr, const char *host, int socktype, int family, int ai_flags, zend_string **error_string)
+PHPAPI size_t php_network_getaddress(php_sockaddr_storage *sockaddr, const char *host, int socktype, int family, int ai_flags, zend_string **error_string)
 {
 	struct sockaddr** addresses;
-	int address_count = php_network_getaddresses_ex(host, socktype, family, ai_flags, &addresses, error_string);
+	size_t address_count = php_network_getaddresses_ex(host, socktype, family, ai_flags, &addresses, error_string);
 	if (address_count == 0) {
 		return 0;
 	}
