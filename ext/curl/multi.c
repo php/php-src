@@ -187,8 +187,8 @@ PHP_FUNCTION(curl_multi_select)
 
 	mh = Z_CURL_MULTI_P(z_mh);
 
-	if (!(timeout >= ((double)INT_MIN / 1000.0) && timeout <= ((double)INT_MAX / 1000.0))) {
-		php_error_docref(NULL, E_WARNING, "timeout must be between %d and %d", (INT_MIN / 1000), (INT_MAX / 1000));
+	if (!(timeout >= 0.0 && timeout <= ((double)INT_MAX / 1000.0))) {
+		php_error_docref(NULL, E_WARNING, "timeout must be between 0 and %d", (int)ceilf((double)INT_MAX / 1000));
 		RETURN_LONG(-1);
 	}
 
