@@ -102,11 +102,6 @@ typedef struct {
 	HashTable *stream_filters;			/* per-request copy of stream_filters_hash */
 	HashTable *wrapper_errors;			/* key: wrapper address; value: linked list of char* */
 	int pclose_wait;
-#ifdef HAVE_GETHOSTBYNAME_R
-	struct hostent tmp_host_info;
-	char *tmp_host_buf;
-	size_t tmp_host_buf_len;
-#endif
 } php_file_globals;
 
 #ifdef ZTS
