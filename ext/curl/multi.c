@@ -189,7 +189,9 @@ PHP_FUNCTION(curl_multi_select)
 
 	if (!(timeout >= 0.0 && timeout <= ((double)INT_MAX / 1000.0))) {
 		php_error_docref(NULL, E_WARNING, "timeout must be between 0 and %d", (int)ceilf((double)INT_MAX / 1000));
+#ifdef CURLM_BAD_FUNCTION_ARGUMENT
 		SAVE_CURLM_ERROR(mh, CURLM_BAD_FUNCTION_ARGUMENT);
+#endif
 		RETURN_LONG(-1);
 	}
 

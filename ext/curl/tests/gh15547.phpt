@@ -20,10 +20,10 @@ var_dump(curl_multi_strerror(curl_multi_errno($mh)));
 --EXPECTF--
 Warning: curl_multi_select(): timeout must be between 0 and %d in %s on line %d
 int(-1)
-string(43) "A libcurl function was given a bad argument"
+%s
 
 Warning: curl_multi_select(): timeout must be between 0 and %d in %s on line %d
 int(-1)
-string(43) "A libcurl function was given a bad argument"
+%s
 int(0)
 string(8) "No error"
