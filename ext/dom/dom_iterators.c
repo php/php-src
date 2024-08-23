@@ -164,12 +164,14 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 	xmlNodePtr curnode = NULL;
 
 	php_dom_iterator *iterator = (php_dom_iterator *)iter;
+	if (Z_ISUNDEF(iterator->curobj)) {
+		return;
+	}
 
+	dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 	zval *object = &iterator->intern.data;
 	dom_object *nnmap = Z_DOMOBJ_P(object);
 	dom_nnodemap_object *objmap = nnmap->ptr;
-
-	dom_object *intern = Z_DOMOBJ_P(&iterator->curobj);
 
 	if (intern != NULL && intern->ptr != NULL) {
 		if (objmap->nodetype != XML_ENTITY_NODE &&

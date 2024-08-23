@@ -19,6 +19,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end
     date). (Mark Bennewitz, Derick)
 
+- DOM:
+  . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
+    ext/dom/xml_common.h). (nielsdos)
+
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
