@@ -1464,8 +1464,6 @@ PHP_SUBST([PHP_FRAMEWORKS])
 PHP_SUBST([PHP_FRAMEWORKPATH])
 PHP_SUBST([INSTALL_HEADERS])
 
-old_CC=$CC
-
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
@@ -1571,8 +1569,6 @@ PHP_SET_LIBTOOL_VARIABLE([--silent])
 
 dnl libtool 1.4.3 needs this.
 PHP_SET_LIBTOOL_VARIABLE([--preserve-dup-deps])
-
-CC=$old_CC
 
 PHP_CONFIGURE_PART([Generating files])
 
