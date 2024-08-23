@@ -6,5 +6,6 @@ gethostbyname() function - basic invalid parameter test
 <?php
     var_dump(gethostbyname(".toto.toto.toto"));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: gethostbyname(): php_network_getaddresses: getaddrinfo for .toto.toto.toto failed: nodename nor servname provided, or not known in %s on line %d
 string(15) ".toto.toto.toto"
