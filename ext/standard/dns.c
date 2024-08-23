@@ -118,7 +118,6 @@ extern void __res_ndestroy(res_state statp);
 /* }}} */
 
 static zend_string *php_gethostbyaddr(char *ip);
-static zend_string *php_gethostbyname(char *name);
 
 #ifdef HAVE_GETHOSTNAME
 /* {{{ Get the host name of the current machine */
@@ -220,7 +219,8 @@ PHP_FUNCTION(gethostbyname)
 {
 	char *hostname;
 	size_t hostname_len;
-	zend_string *ipaddr;
+	char addr4[INET_ADDRSTRLEN];
+	zend_string *ipaddr_zs = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(hostname, hostname_len)
@@ -232,11 +232,47 @@ PHP_FUNCTION(gethostbyname)
 		RETURN_STRINGL(hostname, hostname_len);
 	}
 
-	if (!(ipaddr = php_gethostbyname(hostname))) {
+	struct sockaddr **addresses = NULL;
+	zend_string *gai_error = NULL;
+	int address_count = php_network_getaddresses(hostname, 0, &addresses, &gai_error);
+	if (gai_error) {
+		zend_string_release_ex(gai_error, 0);
+	}
+	if (address_count == 0) {
+		/* don't need to docref here, getaddresses E_WARNINGs for us */
+		RETURN_STRINGL(hostname, hostname_len);
+	}
+
+	/*
+	 * Future behaviour change: This function is documented as only returning IPv4
+	 * addresses. We should change this to return IPv6 addresses as well.
+	 */
+	for (struct sockaddr **address_p = addresses; *address_p != NULL; address_p++) {
+		struct sockaddr *address = *address_p;
+
+		if (address->sa_family != AF_INET) {
+			continue;
+		}
+
+		struct sockaddr_in *address4 = (struct sockaddr_in*)address;
+		const char *ipaddr;
+		if (!(ipaddr = inet_ntop(AF_INET, &address4->sin_addr, addr4, INET_ADDRSTRLEN))) {
+			/* unlikely regarding (too) long hostname and protocols but checking still */
+			php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
+			continue;
+		} else {
+			ipaddr_zs = zend_string_init(ipaddr, strlen(ipaddr), 0);
+			break; /* we take only first IP for this function */
+		}
+	}
+
+	php_network_freeaddresses(addresses);
+
+	if (ipaddr_zs == NULL) {
 		php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
 		RETURN_STRINGL(hostname, hostname_len);
 	} else {
-		RETURN_STR(ipaddr);
+		RETURN_STR(ipaddr_zs);
 	}
 }
 /* }}} */
@@ -246,9 +282,6 @@ PHP_FUNCTION(gethostbynamel)
 {
 	char *hostname;
 	size_t hostname_len;
-	struct hostent *hp;
-	struct in_addr in;
-	int i;
 	char addr4[INET_ADDRSTRLEN];
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -261,24 +294,33 @@ PHP_FUNCTION(gethostbynamel)
 		RETURN_FALSE;
 	}
 
-	hp = php_network_gethostbyname(hostname);
-	if (!hp) {
+	struct sockaddr **addresses = NULL;
+	zend_string *gai_error = NULL;
+	int address_count = php_network_getaddresses(hostname, 0, &addresses, &gai_error);
+	if (gai_error) {
+		zend_string_release_ex(gai_error, 0);
+	}
+	if (address_count == 0) {
+		/* don't need to docref here, getaddresses E_WARNINGs for us */
 		RETURN_FALSE;
 	}
 
 	array_init(return_value);
 
-	for (i = 0;; i++) {
-		/* On macos h_addr_list entries may be misaligned. */
-		const char *ipaddr;
-		struct in_addr *h_addr_entry; /* Don't call this h_addr, it's a macro! */
-		memcpy(&h_addr_entry, &hp->h_addr_list[i], sizeof(struct in_addr *));
-		if (!h_addr_entry) {
-			return;
+	/*
+	 * Future behaviour change: This function is documented as only returning IPv4
+	 * addresses. We should change this to return IPv6 addresses as well.
+	 */
+	for (struct sockaddr **address_p = addresses; *address_p != NULL; address_p++) {
+		struct sockaddr *address = *address_p;
+
+		if (address->sa_family != AF_INET) {
+			continue;
 		}
 
-		in = *h_addr_entry;
-		if (!(ipaddr = inet_ntop(AF_INET, &in, addr4, INET_ADDRSTRLEN))) {
+		struct sockaddr_in *address4 = (struct sockaddr_in*)address;
+		const char *ipaddr;
+		if (!(ipaddr = inet_ntop(AF_INET, &address4->sin_addr, addr4, INET_ADDRSTRLEN))) {
 			/* unlikely regarding (too) long hostname and protocols but checking still */
 			php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
 			continue;
@@ -286,36 +328,8 @@ PHP_FUNCTION(gethostbynamel)
 			add_next_index_string(return_value, ipaddr);
 		}
 	}
-}
-/* }}} */
 
-/* {{{ php_gethostbyname */
-static zend_string *php_gethostbyname(char *name)
-{
-	struct hostent *hp;
-	struct in_addr *h_addr_0; /* Don't call this h_addr, it's a macro! */
-	struct in_addr in;
-	char addr4[INET_ADDRSTRLEN];
-	const char *address;
-
-	hp = php_network_gethostbyname(name);
-	if (!hp) {
-		return zend_string_init(name, strlen(name), 0);
-	}
-
-	/* On macos h_addr_list entries may be misaligned. */
-	memcpy(&h_addr_0, &hp->h_addr_list[0], sizeof(struct in_addr *));
-	if (!h_addr_0) {
-		return zend_string_init(name, strlen(name), 0);
-	}
-
-	memcpy(&in.s_addr, h_addr_0, sizeof(in.s_addr));
-
-	if (!(address = inet_ntop(AF_INET, &in, addr4, INET_ADDRSTRLEN))) {
-		return NULL;
-	}
-
-	return zend_string_init(address, strlen(address), 0);
+	php_network_freeaddresses(addresses);
 }
 /* }}} */
 
