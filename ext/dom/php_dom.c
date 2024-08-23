@@ -474,6 +474,8 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 		return debug_info;
 	}
 
+	DOM_G(suppress_warnings) = true;
+
 	object_str = ZSTR_INIT_LITERAL("(object value omitted)", false);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
@@ -481,12 +483,9 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 
 		ZEND_ASSERT(string_key != NULL);
 
-		DOM_G(suppress_warnings) = true;
 		if (entry->read_func(obj, &value) == FAILURE) {
-			DOM_G(suppress_warnings) = false;
 			continue;
 		}
-		DOM_G(suppress_warnings) = false;
 
 		if (Z_TYPE(value) == IS_OBJECT) {
 			zval_ptr_dtor(&value);
@@ -498,6 +497,8 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	} ZEND_HASH_FOREACH_END();
 
 	zend_string_release_ex(object_str, false);
+
+	DOM_G(suppress_warnings) = false;
 
 	return debug_info;
 }
