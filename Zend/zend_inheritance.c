@@ -1396,7 +1396,7 @@ static void inherit_property_hook(
 }
 
 static prop_variance prop_get_variance(zend_property_info *prop_info) {
-	bool unbacked = prop_info->flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_VIRTUAL);
+	bool unbacked = prop_info->flags & ZEND_ACC_VIRTUAL;
 	if (unbacked && prop_info->hooks) {
 		if (!prop_info->hooks[ZEND_PROPERTY_HOOK_SET]) {
 			return PROP_COVARIANT;
