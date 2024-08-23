@@ -688,11 +688,7 @@ int fcgi_listen(const char *path, int backlog)
 				if (strlen(host) > MAXFQDNLEN) {
 					address_count = 0;
 				} else {
-					zend_string *gai_error = NULL;
-					address_count = php_network_getaddress(&resolved, host, 0, AF_INET, 0, &gai_error);
-					if (gai_error) {
-						zend_string_release_ex(gai_error, 0);
-					}
+					address_count = php_network_getaddress(&resolved, host, 0, AF_INET, 0, NULL);
 				}
 				if (address_count == 0 || resolved.ss_family != AF_INET) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
