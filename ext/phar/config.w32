@@ -12,7 +12,7 @@ if (PHP_PHAR != "no") {
 	if (PHP_PHAR_SHARED || (PHP_PHAR_NATIVE_SSL_SHARED && PHP_SNAPSHOT_BUILD == "no")) {
 		ADD_FLAG("CFLAGS_PHAR", "/D COMPILE_DL_PHAR ");
 	}
-	if (PHP_PHAR_NATIVE_SSL != "no") {
+	if (PHP_PHAR_NATIVE_SSL != "no" && PHP_SNAPSHOT_BUILD == "no") {
 		var ret = SETUP_OPENSSL("phar", PHP_PHAR);
 
 		if (ret >= 2) {
