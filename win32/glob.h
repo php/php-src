@@ -42,8 +42,13 @@
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
+#ifdef PHP_EXPORTS
+# define PHP_WIN_GLOB __declspec(dllexport)
+#else
+# define PHP_WIN_GLOB __declspec(dllimport)
+#endif
+
 #include <stddef.h>
-#include "ioutil.h"
 
 typedef struct {
 	size_t gl_pathc;		/* Count of total paths so far. */
@@ -77,7 +82,7 @@ typedef struct {
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
 
 BEGIN_EXTERN_C()
-PW32IO int	glob(const char *, int, int (*)(const char *, int), glob_t *);
-PW32IO void	globfree(glob_t *);
+PHP_WIN_GLOB int	glob(const char *, int, int (*)(const char *, int), glob_t *);
+PHP_WIN_GLOB void	globfree(glob_t *);
 END_EXTERN_C()
 #endif /* !_GLOB_H_ */

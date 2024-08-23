@@ -66,7 +66,7 @@
 #include "readdir.h"
 
 #include <errno.h>
-#include <string.h> /* For strcmp() */
+#include <string.h>
 
 #define	DOLLAR		'$'
 #define	DOT		'.'
@@ -139,7 +139,7 @@ static bool	 match(Char *, Char *, Char *);
 static void	 qprintf(const char *, Char *);
 #endif
 
-PW32IO int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
+PHP_WIN_GLOB int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
 {
 	const uint8_t *patnext;
 	int c;
@@ -726,7 +726,7 @@ static bool match(Char *name, Char *pat, Char *patend)
 }
 
 /* Free allocated data belonging to a glob_t structure. */
-PW32IO void globfree(glob_t *pglob)
+PHP_WIN_GLOB void globfree(glob_t *pglob)
 {
 	register int i;
 	register char **pp;
@@ -746,7 +746,7 @@ static DIR * g_opendir(Char *str, glob_t *pglob)
 	char buf[MAXPATHLEN];
 
 	if (!*str)
-		strlcpy(buf, ".", sizeof(buf));
+		memcpy(buf, ".", strlen("."));
 	else {
 		if (g_Ctoc(str, buf, sizeof(buf)))
 			return(NULL);
