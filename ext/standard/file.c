@@ -136,11 +136,6 @@ static void file_globals_ctor(php_file_globals *file_globals_p)
 
 static void file_globals_dtor(php_file_globals *file_globals_p)
 {
-#if defined(HAVE_GETHOSTBYNAME_R)
-	if (file_globals_p->tmp_host_buf) {
-		free(file_globals_p->tmp_host_buf);
-	}
-#endif
 }
 
 static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
