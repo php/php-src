@@ -279,6 +279,34 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 }
 /* }}} */
 
+/* {{{ php_network_getaddress
+ * Returns the number of addresses, and puts first address for a hostname in sockaddr.
+ */
+PHPAPI int php_network_getaddress(php_sockaddr_storage *sockaddr, const char *host, int socktype, int family, int ai_flags, zend_string **error_string)
+{
+	struct sockaddr** addresses;
+	int address_count = php_network_getaddresses_ex(host, socktype, family, ai_flags, &addresses, error_string);
+	if (address_count == 0) {
+		return 0;
+	}
+
+	/*
+	 * we only care about the first address, hopefully getaddrinfo
+	 * filtered to the one we want
+	 */
+	struct sockaddr *address = *addresses;
+
+	int sa_size = address->sa_family == AF_INET6
+		? sizeof(struct sockaddr_in6)
+		: sizeof(struct sockaddr_in);
+	memcpy(sockaddr, address, sa_size);
+
+fail:
+	php_network_freeaddresses(addresses);
+	return address_count;
+}
+/* }}} */
+
 #ifndef O_NONBLOCK
 #define O_NONBLOCK O_NDELAY
 #endif
