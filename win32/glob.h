@@ -43,7 +43,6 @@
 #define	_GLOB_H_
 
 #include <stddef.h>
-#include "ioutil.h"
 
 typedef struct {
 	size_t gl_pathc;		/* Count of total paths so far. */
