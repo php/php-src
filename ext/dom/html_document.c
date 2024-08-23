@@ -1467,7 +1467,7 @@ static zend_string *dom_get_child_text_content(const xmlNode *node)
 
 	const xmlNode *text = node->children;
 	while (text != NULL) {
-		if (text->type == XML_TEXT_NODE || text->type == XML_CDATA_SECTION_NODE) {
+		if ((text->type == XML_TEXT_NODE || text->type == XML_CDATA_SECTION_NODE) && text->content != NULL) {
 			smart_str_appends(&content, (const char *) text->content);
 		}
 		text = text->next;
