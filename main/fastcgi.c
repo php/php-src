@@ -682,21 +682,30 @@ int fcgi_listen(const char *path, int backlog)
 			sa.sa_inet.sin_addr.s_addr = htonl(INADDR_ANY);
 		} else {
 			if (!inet_pton(AF_INET, host, &sa.sa_inet.sin_addr)) {
-				struct hostent *hep;
+				struct sockaddr **addresses = NULL;
+				int address_count;
 
-				if(strlen(host) > MAXFQDNLEN) {
-					hep = NULL;
+				if (strlen(host) > MAXFQDNLEN) {
+					address_count = 0;
 				} else {
-					hep = php_network_gethostbyname(host);
+					zend_string *gai_error = NULL;
+					address_count = php_network_getaddresses_ex(host, 0, AF_INET, 0,  &addresses, &gai_error);
+					if (gai_error) {
+						zend_string_release_ex(gai_error, 0);
+					}
 				}
-				if (!hep || hep->h_addrtype != AF_INET || !hep->h_addr_list[0]) {
+				if (address_count == 0 || (*addresses)->sa_family != AF_INET) {
 					fcgi_log(FCGI_ERROR, "Cannot resolve host name '%s'!\n", host);
+					php_network_freeaddresses(addresses);
 					return -1;
-				} else if (hep->h_addr_list[1]) {
+				} else if (address_count > 1) {
 					fcgi_log(FCGI_ERROR, "Host '%s' has multiple addresses. You must choose one explicitly!\n", host);
+					php_network_freeaddresses(addresses);
 					return -1;
 				}
-				sa.sa_inet.sin_addr.s_addr = ((struct in_addr*)hep->h_addr_list[0])->s_addr;
+				struct sockaddr_in *address4 = (struct sockaddr_in*)*addresses;
+				sa.sa_inet.sin_addr.s_addr = address4->sin_addr.s_addr;
+				php_network_freeaddresses(addresses);
 			}
 		}
 	} else {
