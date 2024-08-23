@@ -1240,29 +1240,31 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *u
 		return VCWD_STAT(url, &ssb->sb);
 }
 
-static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
+static bool php_plain_files_unlink(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context)
 {
-	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
-		url += sizeof("file://") - 1;
+	const char *url_ptr = ZSTR_VAL(url);
+	size_t url_len = ZSTR_LEN(url);
+	if (zend_string_starts_with_literal_ci(url, "file://")) {
+		url_ptr += strlen("file://");
+		url_len -= strlen("file://");
 	}
 
-	if (php_check_open_basedir(url)) {
-		return 0;
+	if (php_check_open_basedir(ZSTR_VAL(url))) {
+		return false;
 	}
 
-	size_t url_len = strlen(url);
-	zend_result ret = VCWD_UNLINK(url, url_len);
+	zend_result ret = VCWD_UNLINK(url_ptr, url_len);
 	if (ret == FAILURE) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
+			php_error_docref1(NULL, ZSTR_VAL(url), E_WARNING, "%s", strerror(errno));
 		}
-		return 0;
+		return false;
 	}
 
 	/* Clear stat cache (and realpath cache) */
 	php_clear_stat_cache(1, NULL, 0);
 
-	return 1;
+	return true;
 }
 
 static bool php_plain_files_rename(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context)

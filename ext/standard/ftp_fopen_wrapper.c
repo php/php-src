@@ -892,24 +892,24 @@ stat_errexit:
 /* }}} */
 
 /* {{{ php_stream_ftp_unlink */
-static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
+static bool php_stream_ftp_unlink(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context)
 {
 	php_stream *stream = NULL;
 	php_url *resource = NULL;
 	int result;
 	char tmp_line[512];
 
-	stream = php_ftp_fopen_connect(wrapper, url, "r", 0, NULL, context, NULL, &resource, NULL, NULL);
+	stream = php_ftp_fopen_connect(wrapper, ZSTR_VAL(url), "r", 0, NULL, context, NULL, &resource, NULL, NULL);
 	if (!stream) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", url);
+			php_error_docref(NULL, E_WARNING, "Unable to connect to %s", ZSTR_VAL(url));
 		}
 		goto unlink_errexit;
 	}
 
 	if (resource->path == NULL) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Invalid path provided in %s", url);
+			php_error_docref(NULL, E_WARNING, "Invalid path provided in %s", ZSTR_VAL(url));
 		}
 		goto unlink_errexit;
 	}
@@ -927,7 +927,7 @@ static int php_stream_ftp_unlink(php_stream_wrapper *wrapper, const char *url, i
 
 	php_url_free(resource);
 	php_stream_close(stream);
-	return 1;
+	return true;
 
 unlink_errexit:
 	if (resource) {
@@ -936,7 +936,7 @@ unlink_errexit:
 	if (stream) {
 		php_stream_close(stream);
 	}
-	return 0;
+	return false;
 }
 /* }}} */
 

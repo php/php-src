@@ -1294,21 +1294,20 @@ PHP_FUNCTION(rename)
 /* {{{ Delete a file */
 PHP_FUNCTION(unlink)
 {
-	char *filename;
-	size_t filename_len;
+	zend_string *filename;
 	php_stream_wrapper *wrapper;
 	zval *zcontext = NULL;
 	php_stream_context *context = NULL;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_PATH(filename, filename_len)
+		Z_PARAM_PATH_STR(filename)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
-	wrapper = php_stream_locate_url_wrapper(filename, NULL, 0);
+	wrapper = php_stream_locate_url_wrapper(ZSTR_VAL(filename), NULL, 0);
 
 	if (!wrapper || !wrapper->wops) {
 		php_error_docref(NULL, E_WARNING, "Unable to locate stream wrapper");

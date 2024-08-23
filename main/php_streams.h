@@ -145,7 +145,7 @@ typedef struct _php_stream_wrapper_ops {
 	const char *label;
 
 	/* delete a file */
-	int (*unlink)(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context);
+	bool (*unlink)(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context);
 
 	/* rename a file */
 	bool (*rename)(php_stream_wrapper *wrapper, const zend_string *url_from, const zend_string *url_to, int options, php_stream_context *context);

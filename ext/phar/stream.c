@@ -667,7 +667,7 @@ free_resource:
 /**
  * Unlink a file within a phar archive
  */
-static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context) /* {{{ */
+static bool phar_wrapper_unlink(php_stream_wrapper *wrapper, const zend_string *url, int options, php_stream_context *context) /* {{{ */
 {
 	php_url *resource;
 	char *internal_file, *error;
@@ -676,22 +676,22 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	phar_archive_data *pphar;
 	uint32_t host_len;
 
-	if ((resource = phar_parse_url(wrapper, url, "rb", options)) == NULL) {
+	if ((resource = phar_parse_url(wrapper, ZSTR_VAL(url), "rb", options)) == NULL) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: unlink failed");
-		return 0;
+		return false;
 	}
 
 	/* we must have at the very least phar://alias.phar/internalfile.php */
 	if (!resource->scheme || !resource->host || !resource->path) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", url);
-		return 0;
+		php_stream_wrapper_log_error(wrapper, options, "phar error: invalid url \"%s\"", ZSTR_VAL(url));
+		return false;
 	}
 
 	if (!zend_string_equals_literal_ci(resource->scheme, "phar")) {
 		php_url_free(resource);
-		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", url);
-		return 0;
+		php_stream_wrapper_log_error(wrapper, options, "phar error: not a phar stream url \"%s\"", ZSTR_VAL(url));
+		return false;
 	}
 
 	host_len = ZSTR_LEN(resource->host);
@@ -710,14 +710,14 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 	if (FAILURE == phar_get_entry_data(&idata, ZSTR_VAL(resource->host), host_len, internal_file, internal_file_len, "r", 0, &error, 1)) {
 		/* constraints of fp refcount were not met */
 		if (error) {
-			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed: %s", url, error);
+			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed: %s", ZSTR_VAL(url), error);
 			efree(error);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed, file does not exist", url);
+			php_stream_wrapper_log_error(wrapper, options, "unlink of \"%s\" failed, file does not exist", ZSTR_VAL(url));
 		}
 		efree(internal_file);
 		php_url_free(resource);
-		return 0;
+		return false;
 	}
 	if (error) {
 		efree(error);
@@ -728,7 +728,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		efree(internal_file);
 		php_url_free(resource);
 		phar_entry_delref(idata);
-		return 0;
+		return false;
 	}
 	php_url_free(resource);
 	efree(internal_file);
@@ -737,7 +737,7 @@ static int phar_wrapper_unlink(php_stream_wrapper *wrapper, const char *url, int
 		php_stream_wrapper_log_error(wrapper, options, "%s", error);
 		efree(error);
 	}
-	return 1;
+	return true;
 }
 /* }}} */
 
