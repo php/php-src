@@ -54,7 +54,7 @@ object(Test)#2 (1) {
 Test::$prop3::get
 Test::$prop3::set
 
-Warning: unserialize(): Cannot unserialize value for hooked property Test::$prop3 in %s on line %d
+Warning: unserialize(): Cannot unserialize value for virtual property Test::$prop3 in %s on line %d
 
 Warning: unserialize(): Error at offset 26 of 32 bytes in %s on line %d
 bool(false)
