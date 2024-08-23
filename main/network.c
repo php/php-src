@@ -143,10 +143,10 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 }
 /* }}} */
 
-/* {{{ php_network_getaddresses
+/* {{{ php_network_getaddresses_ex
  * Returns number of addresses, 0 for none/error
  */
-PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
+PHPAPI int php_network_getaddresses_ex(const char *host, int socktype, int family, int ai_flags, struct sockaddr ***sal, zend_string **error_string)
 {
 	struct sockaddr **sap;
 	int n;
@@ -168,6 +168,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 
 	hints.ai_family = AF_INET; /* default to regular inet (see below) */
 	hints.ai_socktype = socktype;
+	hints.ai_flags = ai_flags;
 
 # ifdef HAVE_IPV6
 	/* probe for a working IPv6 stack; even if detected as having v6 at compile
@@ -187,7 +188,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 			closesocket(s);
 		}
 	}
-	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
+	hints.ai_family = ipv6_borked ? AF_INET : family;
 # endif
 
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
@@ -266,6 +267,15 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 
 	*sap = NULL;
 	return n;
+}
+/* }}} */
+
+/* {{{ php_network_getaddresses
+ * Returns number of addresses, 0 for none/error
+ */
+PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
+{
+	return php_network_getaddresses_ex(host, socktype, AF_UNSPEC, 0, sal, error_string);
 }
 /* }}} */
 
