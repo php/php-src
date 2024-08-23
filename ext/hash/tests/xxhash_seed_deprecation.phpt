@@ -23,6 +23,6 @@ Deprecated: hash_init(): Passing a seed of a type other than int is deprecated b
 
 Deprecated: hash_init(): Passing a seed of a type other than int is deprecated because it is ignored in %s on line %d
 
-Deprecated: hash_init(): Passing a seed of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs in %s on line %d
+Deprecated: hash_init(): Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs in %s on line %d
 
-Deprecated: hash_init(): Passing a seed of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs in %s on line %d
+Deprecated: hash_init(): Passing a secret of a type other than string is deprecated because it implicitly converts to a string, potentially hiding bugs in %s on line %d
