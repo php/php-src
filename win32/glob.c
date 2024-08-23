@@ -62,14 +62,11 @@
 #include "glob.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include <sys/stat.h>
+#include "ioutil.h"
+#include "readdir.h"
 
-#include <ctype.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "php.h"
+#include <string.h> /* For strcmp() */
 
 #define	DOLLAR		'$'
 #define	DOT		'.'
@@ -142,7 +139,7 @@ static bool	 match(Char *, Char *, Char *);
 static void	 qprintf(const char *, Char *);
 #endif
 
-PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
+PW32IO int glob(const char *pattern, int flags, int (*errfunc)(const char *, int), glob_t *pglob)
 {
 	const uint8_t *patnext;
 	int c;
@@ -729,7 +726,7 @@ static bool match(Char *name, Char *pat, Char *patend)
 }
 
 /* Free allocated data belonging to a glob_t structure. */
-PHPAPI void globfree(glob_t *pglob)
+PW32IO void globfree(glob_t *pglob)
 {
 	register int i;
 	register char **pp;
