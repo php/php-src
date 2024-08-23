@@ -871,6 +871,9 @@ PHP 8.4 UPGRADE NOTES
     $domain name is empty or too long, and if $variant is not
     INTL_IDNA_VARIANT_UTS46.
 
+- LibXML:
+  . The libxml extension now requires at least libxml2 2.9.4.
+
 - MBString:
   . Unicode data tables have been updated to Unicode 15.1.
 
