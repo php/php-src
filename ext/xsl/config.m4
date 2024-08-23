@@ -15,7 +15,7 @@ if test "$PHP_XSL" != "no"; then
     PHP_EVAL_LIBLINE([$EXSLT_LIBS], [XSL_SHARED_LIBADD])
     AC_DEFINE([HAVE_XSL_EXSLT], [1],
       [Define to 1 if the system has the EXSLT extension library for XSLT.])
-  ], [ ])
+  ], [:])
 
   AC_DEFINE([HAVE_XSL], [1],
     [Define to 1 if the PHP extension 'xsl' is available.])
