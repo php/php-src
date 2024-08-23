@@ -53,17 +53,6 @@ typedef struct {
 	char **gl_pathv;	/* List of paths matching pattern. */
 				/* Copy of errfunc parameter to glob. */
 	int (*gl_errfunc)(const char *, int);
-
-	/*
-	 * Alternate filesystem access methods for glob; replacement
-	 * versions of closedir(3), readdir(3), opendir(3), stat(2)
-	 * and lstat(2).
-	 */
-	void (*gl_closedir)(void *);
-	struct dirent *(*gl_readdir)(void *);
-	void *(*gl_opendir)(const char *);
-	int (*gl_lstat)(const char *, php_win32_ioutil_stat_t *);
-	int (*gl_stat)(const char *, php_win32_ioutil_stat_t *);
 } glob_t;
 
 /* Flags */
@@ -73,7 +62,6 @@ typedef struct {
 #define	GLOB_MARK	0x0008	/* Append / to matching directories. */
 #define	GLOB_NOCHECK	0x0010	/* Return pattern itself if nothing matches. */
 #define	GLOB_NOSORT	0x0020	/* Don't sort. */
-#define	GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
 #define	GLOB_BRACE	0x0080	/* Expand braces ala csh. */
 #define	GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
 #define	GLOB_NOMAGIC	0x0200	/* GLOB_NOCHECK without magic chars (csh). */

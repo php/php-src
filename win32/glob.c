@@ -49,8 +49,6 @@
  * GLOB_NOMAGIC:
  *	Same as GLOB_NOCHECK, but it will only append pattern if it did
  *	not contain any magic characters.  [Used in csh style globbing]
- * GLOB_ALTDIRFUNC:
- *	Use alternately specified directory access functions.
  * GLOB_TILDE:
  *	expand ~user/foo to the /home/dir/of/user/foo
  * GLOB_BRACE:
@@ -560,14 +558,6 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 	DIR *dirp;
 	int err;
 
-	/*
-	 * The readdirfunc declaration can't be prototyped, because it is
-	 * assigned, below, to two functions which are prototyped in glob.h
-	 * and dirent.h as taking pointers to differently typed opaque
-	 * structures.
-	 */
-	struct dirent *(*readdirfunc)();
-
 	if (pathend > pathend_last)
 		return (1);
 	*pathend = EOS;
@@ -589,11 +579,7 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 	err = 0;
 
 	/* Search directory for matching names. */
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		readdirfunc = pglob->gl_readdir;
-	else
-		readdirfunc = readdir;
-	while ((dp = (*readdirfunc)(dirp))) {
+	while ((dp = readdir(dirp))) {
 		register uint8_t *sc;
 		register Char *dc;
 
@@ -620,10 +606,7 @@ static int glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend
 			break;
 	}
 
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		(*pglob->gl_closedir)(dirp);
-	else
-		closedir(dirp);
+	closedir(dirp);
 	return(err);
 }
 
@@ -777,9 +760,6 @@ static DIR * g_opendir(Char *str, glob_t *pglob)
 			return(NULL);
 	}
 
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_opendir)(buf));
-
 	return(opendir(buf));
 }
 
@@ -789,8 +769,6 @@ static int g_lstat(Char *fn, php_win32_ioutil_stat_t *sb, glob_t *pglob)
 
 	if (g_Ctoc(fn, buf, sizeof(buf)))
 		return(-1);
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_lstat)(buf, sb));
 	return(php_win32_ioutil_lstat(buf, sb));
 }
 
@@ -800,8 +778,6 @@ static int g_stat(Char *fn, php_win32_ioutil_stat_t *sb, glob_t *pglob)
 
 	if (g_Ctoc(fn, buf, sizeof(buf)))
 		return(-1);
-	if (pglob->gl_flags & GLOB_ALTDIRFUNC)
-		return((*pglob->gl_stat)(buf, sb));
 	return(php_win32_ioutil_stat(buf, sb));
 }
 
