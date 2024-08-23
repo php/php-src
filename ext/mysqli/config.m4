@@ -13,7 +13,7 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   ; do
     if test -r $i; then
       MYSQL_SOCK=$i
-      break 2
+      break
     fi
   done
 
