@@ -301,7 +301,6 @@ PHPAPI int php_network_getaddress(php_sockaddr_storage *sockaddr, const char *ho
 		: sizeof(struct sockaddr_in);
 	memcpy(sockaddr, address, sa_size);
 
-fail:
 	php_network_freeaddresses(addresses);
 	return address_count;
 }
