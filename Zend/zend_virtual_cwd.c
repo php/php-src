@@ -230,22 +230,20 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_cwd_activate(void) /* {{{ */
+CWD_API void virtual_cwd_activate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd == NULL) {
 		CWD_STATE_COPY(&CWDG(cwd), &main_cwd_state);
 	}
-	return 0;
 }
 /* }}} */
 
-CWD_API int virtual_cwd_deactivate(void) /* {{{ */
+CWD_API void virtual_cwd_deactivate(void) /* {{{ */
 {
 	if (CWDG(cwd).cwd != NULL) {
 		CWD_STATE_FREE(&CWDG(cwd));
 		CWDG(cwd).cwd = NULL;
 	}
-	return 0;
 }
 /* }}} */
 
