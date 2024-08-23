@@ -233,36 +233,7 @@ PHPAPI int php_network_getaddresses_ex(const char *host, int socktype, int famil
 
 	freeaddrinfo(res);
 #else
-	if (!inet_pton(AF_INET, host, &in)) {
-		if(strlen(host) > MAXFQDNLEN) {
-			host_info = NULL;
-			errno = E2BIG;
-		} else {
-			host_info = php_network_gethostbyname(host);
-		}
-		if (host_info == NULL) {
-			if (error_string) {
-				/* free error string received during previous iteration (if any) */
-				if (*error_string) {
-					zend_string_release_ex(*error_string, 0);
-				}
-				*error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
-				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
-			} else {
-				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
-			}
-			return 0;
-		}
-		in = *((struct in_addr *) host_info->h_addr);
-	}
-
-	*sal = safe_emalloc(2, sizeof(*sal), 0);
-	sap = *sal;
-	*sap = emalloc(sizeof(struct sockaddr_in));
-	(*sap)->sa_family = AF_INET;
-	((struct sockaddr_in *)*sap)->sin_addr = in;
-	sap++;
-	n = 1;
+	php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo() not available on this system");
 #endif
 
 	*sap = NULL;
