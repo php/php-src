@@ -74,7 +74,6 @@ typedef struct {
 #define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
 #define	GLOB_ABORTED	(-2)	/* Unignored error. */
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
-#define	GLOB_NOSYS	(-4)	/* Function not supported. */
 #define GLOB_ABEND	GLOB_ABORTED
 
 BEGIN_EXTERN_C()
