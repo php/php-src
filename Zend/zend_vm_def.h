@@ -9838,7 +9838,12 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 	param.arg_info = &called_func->common.arg_info[param.offset];
 
 	zval default_value;
-	reflection_get_parameter_default(&default_value, &param);
+	if (reflection_get_parameter_default(&default_value, &param) == FAILURE) {
+		if (!EG(exception)) {
+			zend_throw_exception(NULL, "Unable to fetch default value", 0);
+		}
+		HANDLE_EXCEPTION();
+	}
 
 	// Evaluate AST value, e.g. new class.
 	if (Z_TYPE(default_value) == IS_CONSTANT_AST
