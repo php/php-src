@@ -30,7 +30,7 @@ if test "$PHP_TIDY" != "no"; then
   dnl Check for tidybuffio.h (as opposed to simply buffio.h) which indicates
   dnl that we are building against tidy-html5 and not the legacy htmltidy. The
   dnl two are compatible, except for with regard to this header file.
-  AS_IF([test -f "$TIDY_INCDIR/tidybuffio.h"2],
+  AS_IF([test -f "$TIDY_INCDIR/tidybuffio.h"],
     [AC_DEFINE([HAVE_TIDYBUFFIO_H], [1],
       [Define to 1 if you have the <tidybuffio.h> header file.])])
 
