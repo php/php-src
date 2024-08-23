@@ -42,16 +42,13 @@
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
-#ifndef PHP_WIN32
-# include <sys/cdefs.h>
-#endif
-
-#include "Zend/zend_stream.h"
+#include <stddef.h>
+#include "ioutil.h"
 
 typedef struct {
-	int gl_pathc;		/* Count of total paths so far. */
-	int gl_matchc;		/* Count of paths matching pattern. */
-	int gl_offs;		/* Reserved at beginning of gl_pathv. */
+	size_t gl_pathc;		/* Count of total paths so far. */
+	unsigned int gl_matchc;		/* Count of paths matching pattern. */
+	size_t gl_offs;		/* Reserved at beginning of gl_pathv. */
 	int gl_flags;		/* Copy of flags parameter to glob. */
 	char **gl_pathv;	/* List of paths matching pattern. */
 				/* Copy of errfunc parameter to glob. */
@@ -65,8 +62,8 @@ typedef struct {
 	void (*gl_closedir)(void *);
 	struct dirent *(*gl_readdir)(void *);
 	void *(*gl_opendir)(const char *);
-	int (*gl_lstat)(const char *, zend_stat_t *);
-	int (*gl_stat)(const char *, zend_stat_t *);
+	int (*gl_lstat)(const char *, php_win32_ioutil_stat_t *);
+	int (*gl_stat)(const char *, php_win32_ioutil_stat_t *);
 } glob_t;
 
 /* Flags */
@@ -76,8 +73,6 @@ typedef struct {
 #define	GLOB_MARK	0x0008	/* Append / to matching directories. */
 #define	GLOB_NOCHECK	0x0010	/* Return pattern itself if nothing matches. */
 #define	GLOB_NOSORT	0x0020	/* Don't sort. */
-
-#ifndef _POSIX_SOURCE
 #define	GLOB_ALTDIRFUNC	0x0040	/* Use alternately specified directory funcs. */
 #define	GLOB_BRACE	0x0080	/* Expand braces ala csh. */
 #define	GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
@@ -86,7 +81,6 @@ typedef struct {
 #define	GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
 #define	GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
 #define GLOB_LIMIT	0x2000	/* Limit pattern match output to ARG_MAX */
-#endif
 
 /* Error values returned by glob(3) */
 #define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
