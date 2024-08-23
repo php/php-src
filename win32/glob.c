@@ -41,9 +41,6 @@
  *
  * Optional extra services, controlled by flags not defined by POSIX:
  *
- * GLOB_QUOTE:
- *	Escaping convention: \ inhibits any special meaning the following
- *	character might have (except \ at end of string is retained).
  * GLOB_MAGCHAR:
  *	Set in gl_flags if pattern contained a globbing character.
  * GLOB_NOMAGIC:
@@ -151,12 +148,10 @@ PHPAPI int glob(const char *pattern, int flags, int (*errfunc)(const char *, int
 	int c;
 	Char *bufnext, *bufend, patbuf[MAXPATHLEN];
 
-#ifdef PHP_WIN32
 	/* Force skipping escape sequences on windows
 	 * due to the ambiguity with path backslashes
 	 */
 	flags |= GLOB_NOESCAPE;
-#endif
 
 	patnext = (uint8_t *) pattern;
 	if (!(flags & GLOB_APPEND)) {

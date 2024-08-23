@@ -55,26 +55,26 @@ typedef struct {
 	int (*gl_errfunc)(const char *, int);
 } glob_t;
 
-/* Flags */
+/* Standard POSIX Flags */
 #define	GLOB_APPEND	0x0001	/* Append to output from previous call. */
 #define	GLOB_DOOFFS	0x0002	/* Use gl_offs. */
 #define	GLOB_ERR	0x0004	/* Return on error. */
 #define	GLOB_MARK	0x0008	/* Append / to matching directories. */
 #define	GLOB_NOCHECK	0x0010	/* Return pattern itself if nothing matches. */
+#define	GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
 #define	GLOB_NOSORT	0x0020	/* Don't sort. */
 #define	GLOB_BRACE	0x0080	/* Expand braces ala csh. */
+
+/* Implementation defined flags */
 #define	GLOB_MAGCHAR	0x0100	/* Pattern had globbing characters. */
 #define	GLOB_NOMAGIC	0x0200	/* GLOB_NOCHECK without magic chars (csh). */
-#define	GLOB_QUOTE	0x0400	/* Quote special chars with \. */
 #define	GLOB_TILDE	0x0800	/* Expand tilde names from the passwd file. */
-#define	GLOB_NOESCAPE	0x1000	/* Disable backslash escaping. */
 #define GLOB_LIMIT	0x2000	/* Limit pattern match output to ARG_MAX */
 
 /* Error values returned by glob(3) */
 #define	GLOB_NOSPACE	(-1)	/* Malloc call failed. */
 #define	GLOB_ABORTED	(-2)	/* Unignored error. */
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
-#define GLOB_ABEND	GLOB_ABORTED
 
 BEGIN_EXTERN_C()
 PHPAPI int	glob(const char *, int, int (*)(const char *, int), glob_t *);
