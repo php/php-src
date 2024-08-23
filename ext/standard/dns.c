@@ -232,9 +232,9 @@ PHP_FUNCTION(gethostbyname)
 		RETURN_STRINGL(hostname, hostname_len);
 	}
 
-	struct sockaddr **addresses = NULL;
+	php_sockaddr_storage resolved;
 	zend_string *gai_error = NULL;
-	int address_count = php_network_getaddresses(hostname, 0, &addresses, &gai_error);
+	int address_count = php_network_getaddress(&resolved, hostname, 0, AF_INET, 0, &gai_error);
 	if (gai_error) {
 		zend_string_release_ex(gai_error, 0);
 	}
@@ -247,26 +247,11 @@ PHP_FUNCTION(gethostbyname)
 	 * Future behaviour change: This function is documented as only returning IPv4
 	 * addresses. We should change this to return IPv6 addresses as well.
 	 */
-	for (struct sockaddr **address_p = addresses; *address_p != NULL; address_p++) {
-		struct sockaddr *address = *address_p;
-
-		if (address->sa_family != AF_INET) {
-			continue;
-		}
-
-		struct sockaddr_in *address4 = (struct sockaddr_in*)address;
-		const char *ipaddr;
-		if (!(ipaddr = inet_ntop(AF_INET, &address4->sin_addr, addr4, INET_ADDRSTRLEN))) {
-			/* unlikely regarding (too) long hostname and protocols but checking still */
-			php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
-			continue;
-		} else {
-			ipaddr_zs = zend_string_init(ipaddr, strlen(ipaddr), 0);
-			break; /* we take only first IP for this function */
-		}
+	struct sockaddr_in *address4 = (struct sockaddr_in*)&resolved;
+	const char *ipaddr;
+	if (resolved.ss_family == AF_INET && (ipaddr = inet_ntop(AF_INET, &address4->sin_addr, addr4, INET_ADDRSTRLEN))) {
+		ipaddr_zs = zend_string_init(ipaddr, strlen(ipaddr), 0);
 	}
-
-	php_network_freeaddresses(addresses);
 
 	if (ipaddr_zs == NULL) {
 		php_error_docref(NULL, E_WARNING, "Host name to ip failed %s", hostname);
