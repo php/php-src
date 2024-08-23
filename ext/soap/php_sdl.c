@@ -2364,7 +2364,7 @@ static void add_sdl_to_cache(const char *fn, size_t fn_len, const char *uri, tim
 	if (valid_file) {
 		/* This is allowed to fail, this means that another process was raced to create the file. */
 		if (VCWD_RENAME(ZSTR_VAL(temp_file_path), ZSTR_LEN(temp_file_path), fn, fn_len) < 0) {
-			VCWD_UNLINK(ZSTR_VAL(temp_file_path));
+			VCWD_UNLINK(ZSTR_VAL(temp_file_path), ZSTR_LEN(temp_file_path));
 		}
 	}
 

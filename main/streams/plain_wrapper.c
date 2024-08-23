@@ -509,7 +509,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 		}
 		if (data->temp_name) {
 #ifdef PHP_WIN32
-			php_win32_ioutil_unlink(ZSTR_VAL(data->temp_name));
+			php_win32_ioutil_unlink(ZSTR_VAL(data->temp_name), ZSTR_LEN(data->temp_name));
 #else
 			unlink(ZSTR_VAL(data->temp_name));
 #endif
@@ -1242,8 +1242,6 @@ static int php_plain_files_url_stater(php_stream_wrapper *wrapper, const char *u
 
 static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, int options, php_stream_context *context)
 {
-	int ret;
-
 	if (strncasecmp(url, "file://", sizeof("file://") - 1) == 0) {
 		url += sizeof("file://") - 1;
 	}
@@ -1252,8 +1250,9 @@ static int php_plain_files_unlink(php_stream_wrapper *wrapper, const char *url, 
 		return 0;
 	}
 
-	ret = VCWD_UNLINK(url);
-	if (ret == -1) {
+	size_t url_len = strlen(url);
+	zend_result ret = VCWD_UNLINK(url, url_len);
+	if (ret == FAILURE) {
 		if (options & REPORT_ERRORS) {
 			php_error_docref1(NULL, url, E_WARNING, "%s", strerror(errno));
 		}
@@ -1339,7 +1338,7 @@ static bool php_plain_files_rename(php_stream_wrapper *wrapper, const zend_strin
 					}
 #  endif
 					if (success) {
-						VCWD_UNLINK(url_from_ptr);
+						VCWD_UNLINK(url_from_ptr, url_from_len);
 					}
 				} else {
 					php_error_docref2(NULL, ZSTR_VAL(url_from), ZSTR_VAL(url_to), E_WARNING, "%s", strerror(errno));

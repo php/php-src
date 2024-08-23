@@ -266,7 +266,7 @@ PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO zend_result php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
-PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
+PW32IO zend_result php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode);
@@ -335,26 +335,21 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 	return ret;
 }/*}}}*/
 
-__forceinline static int php_win32_ioutil_unlink(const char *path)
+__forceinline static zend_result php_win32_ioutil_unlink(const char *path, size_t path_len)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
-	int ret = -1;
-	DWORD err;
 
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return -1;
+		return FAILURE;
 	}
 
-	ret = php_win32_ioutil_unlink_w(pathw);
-	if (0 > ret) {
-		err = GetLastError();
-	}
-	PHP_WIN32_IOUTIL_CLEANUP_W()
-
-	if (0 > ret) {
+	zend_result ret = php_win32_ioutil_unlink_w(pathw);
+	if (ret == FAILURE) {
+		DWORD err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	return ret;
 }/*}}}*/

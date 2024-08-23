@@ -1573,22 +1573,21 @@ CWD_API int virtual_lstat(const char *path, zend_stat_t *buf) /* {{{ */
 }
 /* }}} */
 
-CWD_API int virtual_unlink(const char *path) /* {{{ */
+CWD_API zend_result virtual_unlink(const char *path, size_t path_length) /* {{{ */
 {
 	cwd_state new_state;
-	int retval;
-	size_t path_length = strlen(path);
+	zend_result retval;
 
 	CWD_STATE_COPY(&new_state, &CWDG(cwd));
 	if (virtual_file_ex(&new_state, path, path_length, NULL, CWD_EXPAND)) {
 		CWD_STATE_FREE_ERR(&new_state);
-		return -1;
+		return FAILURE;
 	}
 
 #ifdef ZEND_WIN32
-	retval = php_win32_ioutil_unlink(new_state.cwd);
+	retval = php_win32_ioutil_unlink(new_state.cwd, new_state.cwd_length);
 #else
-	retval = unlink(new_state.cwd);
+	retval = virtual_unlink_native(new_state.cwd, new_state.cwd_length);
 #endif
 
 	CWD_STATE_FREE_ERR(&new_state);

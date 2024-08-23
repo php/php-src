@@ -2393,7 +2393,7 @@ PHP_FUNCTION(move_uploaded_file)
 		}
 #endif
 	} else if (php_copy_file_ex(ZSTR_VAL(path), new_path, STREAM_DISABLE_OPEN_BASEDIR) == SUCCESS) {
-		VCWD_UNLINK(ZSTR_VAL(path));
+		VCWD_UNLINK(ZSTR_VAL(path), ZSTR_LEN(path));
 		successful = 1;
 	}
 

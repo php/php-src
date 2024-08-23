@@ -365,7 +365,7 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 	return 0;
 }/*}}}*/
 
-PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
+PW32IO zend_result php_win32_ioutil_unlink_w(const wchar_t *path)
 {/*{{{*/
 	DWORD err = 0;
 	HANDLE h;
@@ -373,7 +373,7 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 	FILE_DISPOSITION_INFO disposition;
 	BOOL status;
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, FAILURE, 0)
 
 	h = CreateFileW(path,
 					FILE_READ_ATTRIBUTES | FILE_WRITE_ATTRIBUTES | DELETE,
@@ -386,21 +386,21 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 	if (INVALID_HANDLE_VALUE == h) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
-		return -1;
+		return FAILURE;
 	}
 
 	if (!GetFileInformationByHandle(h, &info)) {
 		err = GetLastError();
 		CloseHandle(h);
 		SET_ERRNO_FROM_WIN32_CODE(err);
-		return -1;
+		return FAILURE;
 	}
 
 	if (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
 		/* TODO Handle possible reparse point. */
 		CloseHandle(h);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_DIRECTORY_NOT_SUPPORTED);
-		return -1;
+		return FAILURE;
 	}
 
 #if 0
@@ -428,12 +428,12 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 		err = GetLastError();
 		CloseHandle(h);
 		SET_ERRNO_FROM_WIN32_CODE(err);
-		return -1;
+		return FAILURE;
 	}
 
 	CloseHandle(h);
 
-	return 0;
+	return SUCCESS;
 }/*}}}*/
 
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
