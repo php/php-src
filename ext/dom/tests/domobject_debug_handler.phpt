@@ -16,10 +16,6 @@ var_dump($d);
 ?>
 --EXPECTF--
 Deprecated: Creation of dynamic property DOMDocument::$dynamicProperty is deprecated in %s on line %d
-
-Deprecated: Property DOMDocument::$actualEncoding is deprecated in %s on line %d
-
-Deprecated: Property DOMDocument::$config is deprecated in %s on line %d
 object(DOMDocument)#1 (41) {
   ["dynamicProperty"]=>
   object(stdClass)#2 (0) {

@@ -203,6 +203,16 @@ static const libxml_doc_props default_doc_props = {
 	.classmap = NULL,
 };
 
+ZEND_DECLARE_MODULE_GLOBALS(dom)
+
+static PHP_GINIT_FUNCTION(dom)
+{
+#if defined(COMPILE_DL_DOM) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
+	dom_globals->suppress_warnings = false;
+}
+
 /* {{{ dom_get_doc_props() */
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document)
 {
@@ -464,6 +474,8 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 		return debug_info;
 	}
 
+	DOM_G(suppress_warnings) = true;
+
 	object_str = ZSTR_INIT_LITERAL("(object value omitted)", false);
 
 	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(prop_handlers, string_key, entry) {
@@ -485,6 +497,8 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	} ZEND_HASH_FOREACH_END();
 
 	zend_string_release_ex(object_str, false);
+
+	DOM_G(suppress_warnings) = false;
 
 	return debug_info;
 }
@@ -668,7 +682,11 @@ zend_module_entry dom_module_entry = { /* {{{ */
 	NULL,
 	PHP_MINFO(dom),
 	DOM_API_VERSION, /* Extension versionnumber */
-	STANDARD_MODULE_PROPERTIES
+	PHP_MODULE_GLOBALS(dom),
+	PHP_GINIT(dom),
+	NULL,
+	NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
