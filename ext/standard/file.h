@@ -20,7 +20,6 @@
 #include "php_network.h"
 
 PHP_MINIT_FUNCTION(file);
-PHP_MSHUTDOWN_FUNCTION(file);
 
 PHPAPI PHP_FUNCTION(fclose);
 PHPAPI PHP_FUNCTION(feof);
