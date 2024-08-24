@@ -118,7 +118,9 @@ static const char *php_gai_strerror(int code)
 		{EAI_NONAME, "Name or service not known"},
 		{EAI_SERVICE, "Servname not supported for ai_socktype"},
 		{EAI_SOCKTYPE, "ai_socktype not supported"},
+#  ifdef EAI_SYSTEM
 		{EAI_SYSTEM, "System error"},
+#  endif
 		{0, NULL}
 	};
 	int i;

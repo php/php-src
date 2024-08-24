@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (zeriyoshi)
   . Fixed bug GH-15515 (Configure error grep illegal option q). (Peter Kokot)
   . Fixed bug GH-15514 (Configure error: genif.sh: syntax error). (Peter Kokot)
+  . Fixed bug GH-15565 (--disable-ipv6 during compilation produces error
+    EAI_SYSTEM not found). (nielsdos)
 
 - DOM:
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
