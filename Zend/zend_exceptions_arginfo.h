@@ -194,7 +194,7 @@ static zend_class_entry *register_class_Exception(zend_class_entry *class_entry_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Exception", class_Exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Throwable);
 
 	zval property_message_default_value;
@@ -248,7 +248,7 @@ static zend_class_entry *register_class_ErrorException(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ErrorException", class_ErrorException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	zval property_severity_default_value;
 	ZVAL_LONG(&property_severity_default_value, E_ERROR);
@@ -264,7 +264,7 @@ static zend_class_entry *register_class_Error(zend_class_entry *class_entry_Thro
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Error", class_Error_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Throwable);
 
 	zval property_message_default_value;
@@ -318,7 +318,7 @@ static zend_class_entry *register_class_CompileError(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "CompileError", class_CompileError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -328,7 +328,7 @@ static zend_class_entry *register_class_ParseError(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ParseError", class_ParseError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_CompileError);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_CompileError, 0);
 
 	return class_entry;
 }
@@ -338,7 +338,7 @@ static zend_class_entry *register_class_TypeError(zend_class_entry *class_entry_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "TypeError", class_TypeError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -348,7 +348,7 @@ static zend_class_entry *register_class_ArgumentCountError(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArgumentCountError", class_ArgumentCountError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_TypeError);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_TypeError, 0);
 
 	return class_entry;
 }
@@ -358,7 +358,7 @@ static zend_class_entry *register_class_ValueError(zend_class_entry *class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ValueError", class_ValueError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -368,7 +368,7 @@ static zend_class_entry *register_class_ArithmeticError(zend_class_entry *class_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ArithmeticError", class_ArithmeticError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -378,7 +378,7 @@ static zend_class_entry *register_class_DivisionByZeroError(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", class_DivisionByZeroError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ArithmeticError);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ArithmeticError, 0);
 
 	return class_entry;
 }
@@ -388,7 +388,7 @@ static zend_class_entry *register_class_UnhandledMatchError(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "UnhandledMatchError", class_UnhandledMatchError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }
@@ -398,7 +398,7 @@ static zend_class_entry *register_class_RequestParseBodyException(zend_class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RequestParseBodyException", class_RequestParseBodyException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }

@@ -81,8 +81,7 @@ static zend_class_entry *register_class_Attribute(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Attribute", class_Attribute_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval const_TARGET_CLASS_value;
 	ZVAL_LONG(&const_TARGET_CLASS_value, ZEND_ATTRIBUTE_TARGET_CLASS);
@@ -153,8 +152,7 @@ static zend_class_entry *register_class_ReturnTypeWillChange(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReturnTypeWillChange", class_ReturnTypeWillChange_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zend_string *attribute_name_Attribute_class_ReturnTypeWillChange_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_ReturnTypeWillChange_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_ReturnTypeWillChange_0, 1);
@@ -171,8 +169,7 @@ static zend_class_entry *register_class_AllowDynamicProperties(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "AllowDynamicProperties", class_AllowDynamicProperties_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zend_string *attribute_name_Attribute_class_AllowDynamicProperties_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_AllowDynamicProperties_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_AllowDynamicProperties_0, 1);
@@ -189,8 +186,7 @@ static zend_class_entry *register_class_SensitiveParameter(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SensitiveParameter", class_SensitiveParameter_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zend_string *attribute_name_Attribute_class_SensitiveParameter_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_SensitiveParameter_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_SensitiveParameter_0, 1);
@@ -207,8 +203,7 @@ static zend_class_entry *register_class_SensitiveParameterValue(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SensitiveParameterValue", class_SensitiveParameterValue_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);
@@ -224,8 +219,7 @@ static zend_class_entry *register_class_Override(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Override", class_Override_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zend_string *attribute_name_Attribute_class_Override_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
 	zend_attribute *attribute_Attribute_class_Override_0 = zend_add_class_attribute(class_entry, attribute_name_Attribute_class_Override_0, 1);
@@ -242,8 +236,7 @@ static zend_class_entry *register_class_Deprecated(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Deprecated", class_Deprecated_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zval property_message_default_value;
 	ZVAL_UNDEF(&property_message_default_value);

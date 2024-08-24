@@ -49,8 +49,7 @@ static zend_class_entry *register_class_DoOperationNoCast(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DoOperationNoCast", class_DoOperationNoCast_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -66,8 +65,7 @@ static zend_class_entry *register_class_LongCastableNoOperations(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "LongCastableNoOperations", class_LongCastableNoOperations_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -83,8 +81,7 @@ static zend_class_entry *register_class_FloatCastableNoOperations(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "FloatCastableNoOperations", class_FloatCastableNoOperations_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -100,8 +97,7 @@ static zend_class_entry *register_class_NumericCastableNoOperations(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "NumericCastableNoOperations", class_NumericCastableNoOperations_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_val_default_value;
 	ZVAL_UNDEF(&property_val_default_value);
@@ -117,7 +113,7 @@ static zend_class_entry *register_class_DimensionHandlersNoArrayAccess(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DimensionHandlersNoArrayAccess", class_DimensionHandlersNoArrayAccess_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_read_default_value;
 	ZVAL_FALSE(&property_read_default_value);

@@ -3493,9 +3493,16 @@ static zend_class_entry *do_register_internal_class(zend_class_entry *orig_class
  */
 ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *class_entry, zend_class_entry *parent_ce) /* {{{ */
 {
-	zend_class_entry *register_class;
+	return zend_register_internal_class_with_flags(class_entry, parent_ce, 0);
+}
+/* }}} */
 
-	register_class = zend_register_internal_class(class_entry);
+ZEND_API zend_class_entry *zend_register_internal_class_with_flags(
+	zend_class_entry *class_entry,
+	zend_class_entry *parent_ce,
+	uint32_t ce_flags
+) {
+	zend_class_entry *register_class = do_register_internal_class(class_entry, ce_flags);
 
 	if (parent_ce) {
 		zend_do_inheritance(register_class, parent_ce);
@@ -3504,7 +3511,6 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 
 	return register_class;
 }
-/* }}} */
 
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...) /* {{{ */
 {

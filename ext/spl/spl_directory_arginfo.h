@@ -487,8 +487,7 @@ static zend_class_entry *register_class_SplFileInfo(zend_class_entry *class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplFileInfo", class_SplFileInfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 
@@ -507,7 +506,7 @@ static zend_class_entry *register_class_DirectoryIterator(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "DirectoryIterator", class_DirectoryIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileInfo);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileInfo, 0);
 	zend_class_implements(class_entry, 1, class_entry_SeekableIterator);
 
 	return class_entry;
@@ -518,7 +517,7 @@ static zend_class_entry *register_class_FilesystemIterator(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "FilesystemIterator", class_FilesystemIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_DirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DirectoryIterator, 0);
 
 	zval const_CURRENT_MODE_MASK_value;
 	ZVAL_LONG(&const_CURRENT_MODE_MASK_value, SPL_FILE_DIR_CURRENT_MODE_MASK);
@@ -600,7 +599,7 @@ static zend_class_entry *register_class_RecursiveDirectoryIterator(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "RecursiveDirectoryIterator", class_RecursiveDirectoryIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_FilesystemIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_FilesystemIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_RecursiveIterator);
 
 	return class_entry;
@@ -612,7 +611,7 @@ static zend_class_entry *register_class_GlobIterator(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "GlobIterator", class_GlobIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_FilesystemIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_FilesystemIterator, 0);
 	zend_class_implements(class_entry, 1, class_entry_Countable);
 
 	return class_entry;
@@ -624,7 +623,7 @@ static zend_class_entry *register_class_SplFileObject(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplFileObject", class_SplFileObject_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileInfo);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileInfo, 0);
 	zend_class_implements(class_entry, 2, class_entry_RecursiveIterator, class_entry_SeekableIterator);
 
 	zval const_DROP_NEW_LINE_value;
@@ -659,7 +658,7 @@ static zend_class_entry *register_class_SplTempFileObject(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplTempFileObject", class_SplTempFileObject_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileObject);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileObject, 0);
 
 	return class_entry;
 }

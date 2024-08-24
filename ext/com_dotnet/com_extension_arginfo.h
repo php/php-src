@@ -300,8 +300,7 @@ static zend_class_entry *register_class_variant(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -311,7 +310,7 @@ static zend_class_entry *register_class_com(zend_class_entry *class_entry_varian
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_variant, 0);
 
 	return class_entry;
 }
@@ -322,7 +321,7 @@ static zend_class_entry *register_class_dotnet(zend_class_entry *class_entry_var
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_variant);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_variant, 0);
 
 	return class_entry;
 }
@@ -333,8 +332,7 @@ static zend_class_entry *register_class_com_safearray_proxy(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "com_safearray_proxy", class_com_safearray_proxy_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	return class_entry;
 }
@@ -344,8 +342,7 @@ static zend_class_entry *register_class_com_exception(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "com_exception", class_com_exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_FINAL);
 
 	return class_entry;
 }

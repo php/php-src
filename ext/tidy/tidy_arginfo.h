@@ -526,7 +526,7 @@ static zend_class_entry *register_class_tidy(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "tidy", class_tidy_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_errorBuffer_default_value;
 	ZVAL_NULL(&property_errorBuffer_default_value);
@@ -548,8 +548,7 @@ static zend_class_entry *register_class_tidyNode(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "tidyNode", class_tidyNode_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_value_default_value;
 	ZVAL_UNDEF(&property_value_default_value);

@@ -1269,7 +1269,7 @@ static zend_class_entry *register_class_ReflectionException(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionException", class_ReflectionException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }
@@ -1279,7 +1279,7 @@ static zend_class_entry *register_class_Reflection(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Reflection", class_Reflection_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	return class_entry;
 }
@@ -1300,8 +1300,7 @@ static zend_class_entry *register_class_ReflectionFunctionAbstract(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionFunctionAbstract", class_ReflectionFunctionAbstract_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ABSTRACT|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_ABSTRACT|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval property_name_default_value;
@@ -1318,7 +1317,7 @@ static zend_class_entry *register_class_ReflectionFunction(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionFunction", class_ReflectionFunction_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionFunctionAbstract);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionFunctionAbstract, 0);
 
 	zval const_IS_DEPRECATED_value;
 	ZVAL_LONG(&const_IS_DEPRECATED_value, ZEND_ACC_DEPRECATED);
@@ -1347,8 +1346,7 @@ static zend_class_entry *register_class_ReflectionGenerator(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionGenerator", class_ReflectionGenerator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -1358,7 +1356,7 @@ static zend_class_entry *register_class_ReflectionMethod(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionMethod", class_ReflectionMethod_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionFunctionAbstract);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionFunctionAbstract, 0);
 
 	zval const_IS_STATIC_value;
 	ZVAL_LONG(&const_IS_STATIC_value, ZEND_ACC_STATIC);
@@ -1410,8 +1408,7 @@ static zend_class_entry *register_class_ReflectionClass(zend_class_entry *class_
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionClass", class_ReflectionClass_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval const_IS_IMPLICIT_ABSTRACT_value;
@@ -1452,7 +1449,7 @@ static zend_class_entry *register_class_ReflectionObject(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionObject", class_ReflectionObject_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionClass);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionClass, 0);
 
 	return class_entry;
 }
@@ -1479,8 +1476,7 @@ static zend_class_entry *register_class_ReflectionProperty(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionProperty", class_ReflectionProperty_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval const_IS_STATIC_value;
@@ -1539,8 +1535,7 @@ static zend_class_entry *register_class_ReflectionClassConstant(zend_class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionClassConstant", class_ReflectionClassConstant_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval const_IS_PUBLIC_value;
@@ -1587,8 +1582,7 @@ static zend_class_entry *register_class_ReflectionParameter(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionParameter", class_ReflectionParameter_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval property_name_default_value;
@@ -1642,8 +1636,7 @@ static zend_class_entry *register_class_ReflectionType(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionType", class_ReflectionType_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_ABSTRACT|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_ABSTRACT|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
 	return class_entry;
@@ -1654,7 +1647,7 @@ static zend_class_entry *register_class_ReflectionNamedType(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionNamedType", class_ReflectionNamedType_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionType);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionType, 0);
 
 	return class_entry;
 }
@@ -1664,7 +1657,7 @@ static zend_class_entry *register_class_ReflectionUnionType(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionUnionType", class_ReflectionUnionType_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionType);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionType, 0);
 
 	return class_entry;
 }
@@ -1674,7 +1667,7 @@ static zend_class_entry *register_class_ReflectionIntersectionType(zend_class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionIntersectionType", class_ReflectionIntersectionType_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionType);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionType, 0);
 
 	return class_entry;
 }
@@ -1684,8 +1677,7 @@ static zend_class_entry *register_class_ReflectionExtension(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionExtension", class_ReflectionExtension_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval property_name_default_value;
@@ -1702,8 +1694,7 @@ static zend_class_entry *register_class_ReflectionZendExtension(zend_class_entry
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionZendExtension", class_ReflectionZendExtension_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval property_name_default_value;
@@ -1720,8 +1711,7 @@ static zend_class_entry *register_class_ReflectionReference(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionReference", class_ReflectionReference_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -1731,8 +1721,7 @@ static zend_class_entry *register_class_ReflectionAttribute(zend_class_entry *cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionAttribute", class_ReflectionAttribute_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval const_IS_INSTANCEOF_value;
@@ -1755,7 +1744,7 @@ static zend_class_entry *register_class_ReflectionEnum(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionEnum", class_ReflectionEnum_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionClass);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionClass, 0);
 
 	return class_entry;
 }
@@ -1765,7 +1754,7 @@ static zend_class_entry *register_class_ReflectionEnumUnitCase(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionEnumUnitCase", class_ReflectionEnumUnitCase_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionClassConstant);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionClassConstant, 0);
 
 	return class_entry;
 }
@@ -1775,7 +1764,7 @@ static zend_class_entry *register_class_ReflectionEnumBackedCase(zend_class_entr
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionEnumBackedCase", class_ReflectionEnumBackedCase_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_ReflectionEnumUnitCase);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ReflectionEnumUnitCase, 0);
 
 	return class_entry;
 }
@@ -1785,8 +1774,7 @@ static zend_class_entry *register_class_ReflectionFiber(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionFiber", class_ReflectionFiber_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
 }
@@ -1796,8 +1784,7 @@ static zend_class_entry *register_class_ReflectionConstant(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "ReflectionConstant", class_ReflectionConstant_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Reflector);
 
 	zval property_name_default_value;

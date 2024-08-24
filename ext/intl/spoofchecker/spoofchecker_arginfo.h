@@ -62,8 +62,7 @@ static zend_class_entry *register_class_Spoofchecker(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_SINGLE_SCRIPT_CONFUSABLE_value;
 	ZVAL_LONG(&const_SINGLE_SCRIPT_CONFUSABLE_value, USPOOF_SINGLE_SCRIPT_CONFUSABLE);

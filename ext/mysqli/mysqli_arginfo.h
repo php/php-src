@@ -1212,8 +1212,7 @@ static zend_class_entry *register_class_mysqli_driver(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli_driver", class_mysqli_driver_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_client_info_default_value;
 	ZVAL_UNDEF(&property_client_info_default_value);
@@ -1247,7 +1246,7 @@ static zend_class_entry *register_class_mysqli(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli", class_mysqli_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_affected_rows_default_value;
 	ZVAL_UNDEF(&property_affected_rows_default_value);
@@ -1434,7 +1433,7 @@ static zend_class_entry *register_class_mysqli_result(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli_result", class_mysqli_result_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_IteratorAggregate);
 
 	zval property_current_field_default_value;
@@ -1475,7 +1474,7 @@ static zend_class_entry *register_class_mysqli_stmt(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli_stmt", class_mysqli_stmt_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_affected_rows_default_value;
 	ZVAL_UNDEF(&property_affected_rows_default_value);
@@ -1545,8 +1544,7 @@ static zend_class_entry *register_class_mysqli_warning(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli_warning", class_mysqli_warning_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_message_default_value;
 	ZVAL_UNDEF(&property_message_default_value);
@@ -1574,8 +1572,7 @@ static zend_class_entry *register_class_mysqli_sql_exception(zend_class_entry *c
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "mysqli_sql_exception", class_mysqli_sql_exception_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
-	class_entry->ce_flags |= ZEND_ACC_FINAL;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, ZEND_ACC_FINAL);
 
 	zval property_sqlstate_default_value;
 	zend_string *property_sqlstate_default_value_str = zend_string_init("00000", strlen("00000"), 1);

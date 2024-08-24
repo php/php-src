@@ -613,7 +613,7 @@ static zend_class_entry *register_class_PharException(zend_class_entry *class_en
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
 }
@@ -623,7 +623,7 @@ static zend_class_entry *register_class_Phar(zend_class_entry *class_entry_Recur
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	zval const_BZ2_value;
@@ -730,7 +730,7 @@ static zend_class_entry *register_class_PharData(zend_class_entry *class_entry_R
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RecursiveDirectoryIterator);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RecursiveDirectoryIterator, 0);
 	zend_class_implements(class_entry, 2, class_entry_Countable, class_entry_ArrayAccess);
 
 	return class_entry;
@@ -741,7 +741,7 @@ static zend_class_entry *register_class_PharFileInfo(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SplFileInfo);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplFileInfo, 0);
 
 	return class_entry;
 }

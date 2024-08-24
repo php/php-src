@@ -4178,8 +4178,7 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", class___PHP_Incomplete_Class_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 
 	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
 	zend_add_class_attribute(class_entry, attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0, 0);
@@ -4193,7 +4192,7 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
 }

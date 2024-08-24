@@ -165,8 +165,7 @@ static zend_class_entry *register_class_SimpleXMLElement(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SimpleXMLElement", class_SimpleXMLElement_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 3, class_entry_Stringable, class_entry_Countable, class_entry_RecursiveIterator);
 
 	return class_entry;
@@ -177,7 +176,7 @@ static zend_class_entry *register_class_SimpleXMLIterator(zend_class_entry *clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SimpleXMLIterator", class_SimpleXMLIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_SimpleXMLElement);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SimpleXMLElement, 0);
 
 	return class_entry;
 }

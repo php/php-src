@@ -20,7 +20,7 @@ static zend_class_entry *register_class_PDOException(zend_class_entry *class_ent
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "PDOException", class_PDOException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_RuntimeException);
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_RuntimeException, 0);
 
 	zval property_code_default_value;
 	ZVAL_LONG(&property_code_default_value, 0);

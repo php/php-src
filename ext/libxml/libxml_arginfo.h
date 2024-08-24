@@ -109,7 +109,7 @@ static zend_class_entry *register_class_LibXMLError(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "LibXMLError", class_LibXMLError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_level_default_value;
 	ZVAL_UNDEF(&property_level_default_value);

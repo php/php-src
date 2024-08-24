@@ -255,7 +255,7 @@ static zend_class_entry *register_class_SplObjectStorage(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "SplObjectStorage", class_SplObjectStorage_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 4, class_entry_Countable, class_entry_SeekableIterator, class_entry_Serializable, class_entry_ArrayAccess);
 
 	return class_entry;
@@ -266,7 +266,7 @@ static zend_class_entry *register_class_MultipleIterator(zend_class_entry *class
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "MultipleIterator", class_MultipleIterator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 	zend_class_implements(class_entry, 1, class_entry_Iterator);
 
 	zval const_MIT_NEED_ANY_value;

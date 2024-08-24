@@ -267,8 +267,7 @@ static zend_class_entry *register_class_Random_Engine_Mt19937(zend_class_entry *
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Mt19937", class_Random_Engine_Mt19937_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -279,8 +278,7 @@ static zend_class_entry *register_class_Random_Engine_PcgOneseq128XslRr64(zend_c
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "PcgOneseq128XslRr64", class_Random_Engine_PcgOneseq128XslRr64_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -291,8 +289,7 @@ static zend_class_entry *register_class_Random_Engine_Xoshiro256StarStar(zend_cl
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Xoshiro256StarStar", class_Random_Engine_Xoshiro256StarStar_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
 	return class_entry;
@@ -303,8 +300,7 @@ static zend_class_entry *register_class_Random_Engine_Secure(zend_class_entry *c
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random\\Engine", "Secure", class_Random_Engine_Secure_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 	zend_class_implements(class_entry, 1, class_entry_Random_CryptoSafeEngine);
 
 	return class_entry;
@@ -336,8 +332,7 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "Randomizer", class_Random_Randomizer_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	zval property_engine_default_value;
 	ZVAL_UNDEF(&property_engine_default_value);
@@ -369,8 +364,7 @@ static zend_class_entry *register_class_Random_RandomError(zend_class_entry *cla
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", class_Random_RandomError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Error);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -380,8 +374,7 @@ static zend_class_entry *register_class_Random_BrokenRandomEngineError(zend_clas
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", class_Random_BrokenRandomEngineError_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Random_RandomError);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Random_RandomError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }
@@ -391,8 +384,7 @@ static zend_class_entry *register_class_Random_RandomException(zend_class_entry 
 	zend_class_entry ce, *class_entry;
 
 	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", class_Random_RandomException_methods);
-	class_entry = zend_register_internal_class_ex(&ce, class_entry_Exception);
-	class_entry->ce_flags |= ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
 }

@@ -99,8 +99,7 @@ static zend_class_entry *register_class_Collator(void)
 	zend_class_entry ce, *class_entry;
 
 	INIT_CLASS_ENTRY(ce, "Collator", class_Collator_methods);
-	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_NOT_SERIALIZABLE;
+	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval const_DEFAULT_VALUE_value;
 	ZVAL_LONG(&const_DEFAULT_VALUE_value, UCOL_DEFAULT);
