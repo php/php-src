@@ -1,17 +1,22 @@
 --TEST--
-SplFileObject::fgetcsv with alternative delimiter
+SplFileObject::fgetcsv() delimiter error
 --FILE--
 <?php
 $fp = fopen('SplFileObject__fgetcsv3.csv', 'w+');
-fputcsv($fp, array(
-    'field1',
-    'field2',
-    'field3',
-    5
-), '|');
+fputcsv(
+    $fp,
+    [
+        'field1',
+        'field2',
+        'field3',
+        5,
+    ],
+    escape: '',
+);
 fclose($fp);
 
 $fo = new SplFileObject('SplFileObject__fgetcsv3.csv');
+$fo->setCsvControl(escape: '');
 try {
     var_dump($fo->fgetcsv('invalid'));
 } catch (ValueError $e) {

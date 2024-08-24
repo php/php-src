@@ -365,6 +365,7 @@ static zend_result spl_filesystem_file_open(spl_filesystem_object *intern, bool 
 	intern->u.file.delimiter = ',';
 	intern->u.file.enclosure = '"';
 	intern->u.file.escape = (unsigned char) '\\';
+	intern->u.file.is_escape_default = true;
 
 	intern->u.file.func_getCurr = zend_hash_str_find_ptr(&intern->std.ce->function_table, "getcurrentline", sizeof("getcurrentline") - 1);
 
@@ -2273,16 +2274,33 @@ PHP_METHOD(SplFileObject, getChildren)
 	/* return NULL */
 } /* }}} */
 
+static int spl_csv_enclosure_param_handling(const zend_string* escape_str, const spl_filesystem_object *intern, uint32_t arg_num)
+{
+	if (escape_str == NULL) {
+		if (intern->u.file.is_escape_default) {
+			php_error_docref(NULL, E_DEPRECATED, "the $escape parameter must be provided,"
+				" as its default value will change,"
+				" either explicitly or via SplFileObject::setCsvControl()");
+			if (UNEXPECTED(EG(exception))) {
+				return PHP_CSV_ESCAPE_ERROR;
+			}
+		}
+		return intern->u.file.escape;
+	} else {
+		return php_csv_handle_escape_argument(escape_str, arg_num);
+	}
+}
+
 /* {{{ Return current line as CSV */
 PHP_METHOD(SplFileObject, fgetcsv)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
-	int escape = intern->u.file.escape;
-	char *delim = NULL, *enclo = NULL, *esc = NULL;
-	size_t d_len = 0, e_len = 0, esc_len = 0;
+	char *delim = NULL, *enclo = NULL;
+	size_t d_len = 0, e_len = 0;
+	zend_string *escape_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssS", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2302,23 +2320,12 @@ PHP_METHOD(SplFileObject, fgetcsv)
 		}
 		enclosure = enclo[0];
 	}
-	if (esc) {
-		if (esc_len > 1) {
-			zend_argument_value_error(3, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (esc_len == 0) {
-			escape = PHP_CSV_NO_ESCAPE;
-		} else {
-			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
-			if (UNEXPECTED(EG(exception))) {
-				RETURN_THROWS();
-			}
-			escape = (unsigned char) esc[0];
-		}
+	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 3);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
 	}
 
-	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape, return_value, true) == FAILURE) {
+	if (spl_filesystem_file_read_csv(intern, delimiter, enclosure, escape_char, return_value, true) == FAILURE) {
 		RETURN_FALSE;
 	}
 }
@@ -2329,14 +2336,14 @@ PHP_METHOD(SplFileObject, fputcsv)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	char delimiter = intern->u.file.delimiter, enclosure = intern->u.file.enclosure;
-	int escape = intern->u.file.escape;
-	char *delim = NULL, *enclo = NULL, *esc = NULL;
-	size_t d_len = 0, e_len = 0, esc_len = 0;
+	char *delim = NULL, *enclo = NULL;
+	size_t d_len = 0, e_len = 0;
 	zend_long ret;
 	zval *fields = NULL;
+	zend_string *escape_str = NULL;
 	zend_string *eol = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|sssS", &fields, &delim, &d_len, &enclo, &e_len, &esc, &esc_len, &eol) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|ssSS", &fields, &delim, &d_len, &enclo, &e_len, &escape_str, &eol) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2354,23 +2361,12 @@ PHP_METHOD(SplFileObject, fputcsv)
 		}
 		enclosure = enclo[0];
 	}
-	if (esc) {
-		if (esc_len > 1) {
-			zend_argument_value_error(4, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (esc_len == 0) {
-			escape = PHP_CSV_NO_ESCAPE;
-		} else {
-			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
-			if (UNEXPECTED(EG(exception))) {
-				RETURN_THROWS();
-			}
-			escape = (unsigned char) esc[0];
-		}
+	int escape_char = spl_csv_enclosure_param_handling(escape_str, intern, 4);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
 	}
 
-	ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape, eol);
+	ret = php_fputcsv(intern->u.file.stream, fields, delimiter, enclosure, escape_char, eol);
 	if (ret < 0) {
 		RETURN_FALSE;
 	}
@@ -2383,11 +2379,11 @@ PHP_METHOD(SplFileObject, setCsvControl)
 {
 	spl_filesystem_object *intern = spl_filesystem_from_obj(Z_OBJ_P(ZEND_THIS));
 	char delimiter = ',', enclosure = '"';
-	int escape = (unsigned char) '\\';
-	char *delim = NULL, *enclo = NULL, *esc = NULL;
-	size_t d_len = 0, e_len = 0, esc_len = 0;
+	char *delim = NULL, *enclo = NULL;
+	size_t d_len = 0, e_len = 0;
+	zend_string *escape_str = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssS", &delim, &d_len, &enclo, &e_len, &escape_str) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2405,25 +2401,17 @@ PHP_METHOD(SplFileObject, setCsvControl)
 		}
 		enclosure = enclo[0];
 	}
-	if (esc) {
-		if (esc_len > 1) {
-			zend_argument_value_error(3, "must be empty or a single character");
-			RETURN_THROWS();
-		}
-		if (esc_len == 0) {
-			escape = PHP_CSV_NO_ESCAPE;
-		} else {
-			php_error_docref(NULL, E_DEPRECATED, "Passing a non-empty string to the $escape parameter is deprecated since 8.4");
-			if (UNEXPECTED(EG(exception))) {
-				RETURN_THROWS();
-			}
-			escape = (unsigned char) esc[0];
-		}
+	int escape_char = php_csv_handle_escape_argument(escape_str, 3);
+	if (escape_char == PHP_CSV_ESCAPE_ERROR) {
+		RETURN_THROWS();
+	}
+	if (escape_str != NULL) {
+		intern->u.file.is_escape_default = false;
 	}
 
 	intern->u.file.delimiter = delimiter;
 	intern->u.file.enclosure = enclosure;
-	intern->u.file.escape    = escape;
+	intern->u.file.escape    = escape_char;
 }
 /* }}} */
 
