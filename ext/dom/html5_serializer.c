@@ -137,8 +137,8 @@ static zend_result dom_html5_serialize_text_node(dom_html5_serialize_context *ct
 		return SUCCESS;
 	}
 
-	if (node->parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(node->parent, php_dom_ns_is_html_magic_token)) {
-		const xmlNode *parent = node->parent;
+	const xmlNode *parent = node->parent;
+	if (parent != NULL && parent->type == XML_ELEMENT_NODE && php_dom_ns_is_fast(parent, php_dom_ns_is_html_magic_token)) {
 		size_t name_length = strlen((const char *) parent->name);
 		/* Spec tells us to only emit noscript content as-is if scripting is enabled.
 		 * However, the user agent (PHP) does not support (JS) scripting.
