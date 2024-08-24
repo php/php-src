@@ -134,10 +134,6 @@ static void file_globals_ctor(php_file_globals *file_globals_p)
 	file_globals_p->def_chunk_size = PHP_SOCK_CHUNK_SIZE;
 }
 
-static void file_globals_dtor(php_file_globals *file_globals_p)
-{
-}
-
 static PHP_INI_MH(OnUpdateAutoDetectLineEndings)
 {
 	if (zend_ini_parse_bool(new_value)) {
@@ -158,7 +154,7 @@ PHP_MINIT_FUNCTION(file)
 	le_stream_context = zend_register_list_destructors_ex(file_context_dtor, NULL, "stream-context", module_number);
 
 #ifdef ZTS
-	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) file_globals_dtor);
+	ts_allocate_id(&file_globals_id, sizeof(php_file_globals), (ts_allocate_ctor) file_globals_ctor, (ts_allocate_dtor) NULL);
 #else
 	file_globals_ctor(&file_globals);
 #endif
@@ -167,15 +163,6 @@ PHP_MINIT_FUNCTION(file)
 
 	register_file_symbols(module_number);
 
-	return SUCCESS;
-}
-/* }}} */
-
-PHP_MSHUTDOWN_FUNCTION(file) /* {{{ */
-{
-#ifndef ZTS
-	file_globals_dtor(&file_globals);
-#endif
 	return SUCCESS;
 }
 /* }}} */
