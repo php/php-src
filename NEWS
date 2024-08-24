@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
     ext/dom/xml_common.h). (nielsdos)
+  . Fixed bug GH-15570 (Segmentation fault (access null pointer) in
+    ext/dom/html5_serializer.c). (nielsdos)
 
 - FPM:
   . Added memory peak to the scoreboard / status page. (Flávio Heleno)
