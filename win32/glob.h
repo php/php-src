@@ -42,6 +42,10 @@
 #ifndef _GLOB_H_
 #define	_GLOB_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef PHP_EXPORTS
 # define PHP_WIN_GLOB __declspec(dllexport)
 #else
@@ -81,8 +85,11 @@ typedef struct {
 #define	GLOB_ABORTED	(-2)	/* Unignored error. */
 #define	GLOB_NOMATCH	(-3)	/* No match and GLOB_NOCHECK not set. */
 
-BEGIN_EXTERN_C()
 PHP_WIN_GLOB int	glob(const char *, int, int (*)(const char *, int), glob_t *);
 PHP_WIN_GLOB void	globfree(glob_t *);
-END_EXTERN_C()
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* !_GLOB_H_ */
