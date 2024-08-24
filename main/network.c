@@ -41,6 +41,10 @@
 #include <fcntl.h>
 #endif
 
+#if defined(HAVE_SYS_IOCTL_H) && !defined(__sun)
+#include <sys/ioctl.h>
+#endif
+
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
@@ -1113,6 +1117,12 @@ PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block)
 	if (ioctlsocket(socketd, FIONBIO, &flags) == SOCKET_ERROR) {
 		ret = FAILURE;
 	}
+#elif defined(HAVE_SYS_IOCTL_H) && !defined(__sun)
+	/* FIONBIO does not work with sockets on solaris platforms */
+	int val = block ? 0 : 1;
+	if (ioctl(socketd, FIONBIO, (char *)&val) < 0) {
+		ret = FAILURE;
+	}
 #else
 	int myflag = 0;
 	int flags = fcntl(socketd, F_GETFL);
@@ -1120,6 +1130,7 @@ PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block)
 #ifdef O_NONBLOCK
 	myflag = O_NONBLOCK; /* POSIX version */
 #elif defined(O_NDELAY)
+	/* TODO: not sure it works well with sockets ? do we still support such systems ? */
 	myflag = O_NDELAY;   /* old non-POSIX version */
 #endif
 	if (!block) {
