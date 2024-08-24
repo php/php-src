@@ -60,7 +60,7 @@ lxb_tag_append_lower(lexbor_hash_t *hash, const lxb_char_t *name, size_t length)
 }
 
 const lxb_tag_data_t *
-lxb_tag_data_by_id(lexbor_hash_t *hash, lxb_tag_id_t tag_id)
+lxb_tag_data_by_id(lxb_tag_id_t tag_id)
 {
     if (tag_id >= LXB_TAG__LAST_ENTRY) {
         if (tag_id == LXB_TAG__LAST_ENTRY) {
@@ -121,16 +121,15 @@ lxb_tag_data_by_name_upper(lexbor_hash_t *hash,
  * No inline functions for ABI.
  */
 const lxb_char_t *
-lxb_tag_name_by_id_noi(lexbor_hash_t *hash, lxb_tag_id_t tag_id, size_t *len)
+lxb_tag_name_by_id_noi(lxb_tag_id_t tag_id, size_t *len)
 {
-    return lxb_tag_name_by_id(hash, tag_id, len);
+    return lxb_tag_name_by_id(tag_id, len);
 }
 
 const lxb_char_t *
-lxb_tag_name_upper_by_id_noi(lexbor_hash_t *hash,
-                             lxb_tag_id_t tag_id, size_t *len)
+lxb_tag_name_upper_by_id_noi(lxb_tag_id_t tag_id, size_t *len)
 {
-    return lxb_tag_name_upper_by_id(hash, tag_id, len);
+    return lxb_tag_name_upper_by_id(tag_id, len);
 }
 
 lxb_tag_id_t

@@ -202,7 +202,7 @@ lxb_html_parse_fragment_chunk_begin(lxb_html_parser_t *parser,
     }
 
     lxb_html_tokenizer_set_state_by_tag(parser->tkz, doc->scripting, tag_id, ns);
-	lxb_html_tokenizer_tmp_tag_id_set(parser->tkz, LXB_TAG__UNDEF);
+    lxb_html_tokenizer_tmp_tag_id_set(parser->tkz, LXB_TAG__UNDEF);
 
     parser->root = lxb_html_interface_create(new_doc, LXB_TAG_HTML, LXB_NS_HTML);
     if (parser->root == NULL) {
