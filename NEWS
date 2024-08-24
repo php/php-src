@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (ilutov)
   . Fixed bug GH-15501 (Windows HAVE_<header>_H macros defined to 1 or
     undefined). (Peter Kokot)
+  . Fixed bug GH-15565 (--disable-ipv6 during compilation produces error
+    EAI_SYSTEM not found). (nielsdos)
 
 - Date:
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end
