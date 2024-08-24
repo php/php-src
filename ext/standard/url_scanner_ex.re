@@ -102,6 +102,9 @@ static zend_result php_ini_on_update_tags(zend_ini_entry *entry, zend_string *ne
 
 static PHP_INI_MH(OnUpdateSessionTags)
 {
+	if (!zend_string_starts_with_literal(new_value, "a=href,area=href,frame=src,form=")) {
+		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.trans_sid_tags INI setting is deprecated");
+	}
 	return php_ini_on_update_tags(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ true);
 }
 
@@ -152,6 +155,9 @@ static zend_result php_ini_on_update_hosts(zend_ini_entry *entry, zend_string *n
 
 static PHP_INI_MH(OnUpdateSessionHosts)
 {
+	if (ZSTR_LEN(new_value) != 0) {
+		php_error_docref("session.configuration", E_DEPRECATED, "Usage of session.trans_sid_hosts INI setting is deprecated");
+	}
 	return php_ini_on_update_hosts(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage, /* is_session */ true);
 }
 
