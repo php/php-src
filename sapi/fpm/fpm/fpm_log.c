@@ -19,11 +19,7 @@
 #include "fastcgi.h"
 #include "zlog.h"
 
-#ifdef MAX_LINE_LENGTH
-# define FPM_LOG_BUFFER MAX_LINE_LENGTH
-#else
-# define FPM_LOG_BUFFER 1024
-#endif
+#define FPM_LOG_BUFFER 1024
 
 static char *fpm_log_format = NULL;
 static int fpm_log_fd = -1;
