@@ -324,7 +324,7 @@ STDOUT.WriteBlankLines(1);
 ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
 
 AC_DEFINE('HAVE_GAI_STRERROR', 1);
-if (PHP_IPV6) {
+if (PHP_IPV6 == "yes") {
 	STDOUT.WriteLine("Enabling IPv6 support");
 	AC_DEFINE('HAVE_IPV6', 1);
 }
