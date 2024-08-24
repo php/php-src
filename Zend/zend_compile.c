@@ -3703,6 +3703,7 @@ static uint32_t zend_compile_args(
 	bool uses_arg_unpack = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
 	uint32_t prev_arg_num = CG(context).arg_num;
+	zend_string *prev_arg_name = CG(context).arg_name;
 
 	/* Whether named arguments are used syntactically, to enforce language level limitations.
 	 * May not actually use named argument passing. */
@@ -3781,6 +3782,7 @@ static uint32_t zend_compile_args(
 		}
 
 		CG(context).arg_num = arg_num;
+		CG(context).arg_name = arg_name;
 
 		/* Treat passing of $GLOBALS the same as passing a call.
 		 * This will error at runtime if the argument is by-ref. */
@@ -3897,6 +3899,7 @@ static uint32_t zend_compile_args(
 	}
 
 	CG(context).arg_num = prev_arg_num;
+	CG(context).arg_name = prev_arg_name;
 
 	return arg_count;
 }
@@ -3912,6 +3915,16 @@ static void zend_compile_default(znode *result, zend_ast *ast)
 
 	zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_DEFAULT_ARG, NULL, NULL);
 	opline->op1.num = arg_num;
+
+	// Argument number could not be determined; send argument name instead.
+	if (arg_num == (uint32_t) -1) {
+		zend_string *arg_name = CG(context).arg_name;
+		zend_string_addref(arg_name);
+
+		opline->op1_type = IS_CONST;
+		opline->op1.constant = zend_add_literal_string(&arg_name);
+		opline->op2.num = zend_alloc_cache_slot();
+	}
 }
 
 ZEND_API uint8_t zend_get_call_op(const zend_op *init_op, zend_function *fbc) /* {{{ */

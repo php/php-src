@@ -9808,7 +9808,7 @@ ZEND_VM_HANDLER(209, ZEND_INIT_PARENT_PROPERTY_HOOK_CALL, CONST, UNUSED|NUM, NUM
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
+ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM|CONST, UNUSED|NUM)
 {
 	USE_OPLINE
 	SAVE_OPLINE();
@@ -9817,20 +9817,40 @@ ZEND_VM_HANDLER(210, ZEND_FETCH_DEFAULT_ARG, UNUSED|NUM, UNUSED)
 	ZVAL_UNDEF(EX_VAR(opline->result.var));
 
 	zend_function *called_func = EX(call)->func;
-
 	reflection_parameter_reference param;
-	param.offset = opline->op1.num - 1;
+
+	zend_string *arg_name;
+	if (OP1_TYPE == IS_CONST) {
+		// Argument offset could not be determined at compile-time (i.e. closure named param); look up offset by name.
+		arg_name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+		param.offset = zend_get_arg_offset_by_name(called_func, arg_name, CACHE_ADDR(opline->op2.num));
+	} else {
+		param.offset = opline->op1.num - 1;
+	}
+
 	param.required = param.offset < called_func->common.required_num_args;
 	param.fptr = called_func;
 
 	if (UNEXPECTED(param.required || param.offset >= called_func->common.num_args)) {
-		zend_value_error("Cannot pass default to %s parameter %u of %s%s%s()",
-			param.required ? "required" : "undeclared",
-			opline->op1.num,
-			called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
-			called_func->common.scope ? "::" : "",
-			ZSTR_VAL(called_func->common.function_name)
-		);
+		if (OP1_TYPE == IS_CONST) {
+			zend_value_error(
+				"Cannot pass default to non-existent named parameter $%s of %s%s%s()",
+				ZSTR_VAL(arg_name),
+				called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
+				called_func->common.scope ? "::" : "",
+				ZSTR_VAL(called_func->common.function_name)
+			);
+		} else {
+			zend_value_error(
+				"Cannot pass default to %s parameter %u of %s%s%s()",
+				param.required ? "required" : "undeclared",
+				opline->op1.num,
+				called_func->common.scope ? ZSTR_VAL(called_func->common.scope->name) : "",
+				called_func->common.scope ? "::" : "",
+				ZSTR_VAL(called_func->common.function_name)
+			);
+		}
+
 		HANDLE_EXCEPTION();
 	}
 
