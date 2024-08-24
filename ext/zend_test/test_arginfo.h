@@ -624,7 +624,6 @@ static zend_class_entry *register_class__ZendTestClass(zend_class_entry *class_e
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 	zend_class_implements(class_entry, 1, class_entry__ZendTestInterface);
 	zend_register_class_alias("_ZendTestClassAlias", class_entry);
@@ -762,7 +761,6 @@ static zend_class_entry *register_class__ZendTestMagicCall(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	return class_entry;
@@ -777,7 +775,6 @@ static zend_class_entry *register_class__ZendTestChildClass(zend_class_entry *cl
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry__ZendTestClass, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, class_entry__ZendTestClass);
-	class_entry->ce_flags |= 
 #endif
 
 	return class_entry;
@@ -792,7 +789,6 @@ static zend_class_entry *register_class_ZendAttributeTest(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	zval const_TEST_CONST_value;
@@ -846,7 +842,7 @@ static zend_class_entry *register_class__ZendTestTrait(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_TRAIT);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_TRAIT
+	class_entry->ce_flags |= ZEND_ACC_TRAIT;
 #endif
 
 	zval property_testProp_default_value;
@@ -880,7 +876,7 @@ static zend_class_entry *register_class_ZendTestAttribute(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
 	zend_string *attribute_name_Attribute_class_ZendTestAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
@@ -902,7 +898,7 @@ static zend_class_entry *register_class_ZendTestAttributeWithArguments(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
 	zval property_arg_default_value;
@@ -934,7 +930,7 @@ static zend_class_entry *register_class_ZendTestRepeatableAttribute(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
 	zend_string *attribute_name_Attribute_class_ZendTestRepeatableAttribute_0 = zend_string_init_interned("Attribute", sizeof("Attribute") - 1, 1);
@@ -956,7 +952,7 @@ static zend_class_entry *register_class_ZendTestParameterAttribute(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
 	zval property_parameter_default_value;
@@ -984,7 +980,7 @@ static zend_class_entry *register_class_ZendTestPropertyAttribute(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 #if (PHP_VERSION_ID >= 80400)
 	class_entry->doc_comment = zend_string_init_interned("/**\n     * \"Lorem ipsum\"\n     * @see https://www.php.net\n     * @since 8.1\n     */", 82, 1);
@@ -1016,7 +1012,6 @@ static zend_class_entry *register_class_ZendTestClassWithMethodWithParameterAttr
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 
@@ -1048,7 +1043,6 @@ static zend_class_entry *register_class_ZendTestChildClassWithMethodWithParamete
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_ZendTestClassWithMethodWithParameterAttribute, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, class_entry_ZendTestClassWithMethodWithParameterAttribute);
-	class_entry->ce_flags |= 
 #endif
 
 
@@ -1072,7 +1066,6 @@ static zend_class_entry *register_class_ZendTestClassWithPropertyAttribute(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	zval property_attributed_default_value;
@@ -1098,7 +1091,7 @@ static zend_class_entry *register_class_ZendTestForbidDynamicCall(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= ZEND_ACC_FINAL
+	class_entry->ce_flags |= ZEND_ACC_FINAL;
 #endif
 
 	return class_entry;
@@ -1176,7 +1169,6 @@ static zend_class_entry *register_class_ZendTestNS_Foo(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	return class_entry;
@@ -1191,7 +1183,6 @@ static zend_class_entry *register_class_ZendTestNS_UnlikelyCompileError(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	return class_entry;
@@ -1206,7 +1197,6 @@ static zend_class_entry *register_class_ZendTestNS_NotUnlikelyCompileError(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	return class_entry;
@@ -1221,7 +1211,6 @@ static zend_class_entry *register_class_ZendTestNS2_Foo(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	zval property_foo_default_value;
@@ -1243,7 +1232,6 @@ static zend_class_entry *register_class_ZendTestNS2_ZendSubNS_Foo(void)
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 #else
 	class_entry = zend_register_internal_class_ex(&ce, NULL);
-	class_entry->ce_flags |= 
 #endif
 
 	return class_entry;

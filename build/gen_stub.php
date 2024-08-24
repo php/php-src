@@ -3302,13 +3302,15 @@ class ClassInfo {
                     $code .= "#if (PHP_VERSION_ID >= " . PHP_84_VERSION_ID . ")\n";
                 }
 
-                $code .= "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ", " . (implode("", $flagCodes) ?: 0) . ");\n";
+                $code .= "\tclass_entry = zend_register_internal_class_with_flags(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ", " . ($flags ?: 0) . ");\n";
 
                 if (!$php84MinimumCompatibility) {
                     $code .= "#else\n";
 
                     $code .= "\tclass_entry = zend_register_internal_class_ex(&ce, " . (isset($this->extends[0]) ? "class_entry_" . str_replace("\\", "_", $this->extends[0]->toString()) : "NULL") . ");\n";
-                    $code .= "\tclass_entry->ce_flags |= " . implode("", $flagCodes) . "\n";
+                    if ($flags !== "") {
+                        $code .= "\tclass_entry->ce_flags |= $flags;\n";
+                    }
                     $code .= "#endif\n";
                 }
             } else {
