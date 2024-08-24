@@ -657,6 +657,10 @@ PHP 8.4 UPGRADE NOTES
 - PGSQL:
   . pg_select, the conditions arguments accepts an empty array and is optional.
 
+- Phar:
+  . Phar::setAlias() and Phar::setDefaultStub() methods now have a tentative
+    return type of true instead of bool.
+
 - POSIX:
   . posix_isatty now sets the error number when the file descriptor/stream argument
     is invalid.
