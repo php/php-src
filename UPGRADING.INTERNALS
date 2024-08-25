@@ -119,6 +119,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_LIBM has been removed.
    - Symbol HAVE_INET_ATON has been removed.
    - Symbol HAVE_SIGSETJMP has been removed.
+   - Symbol PHAR_HAVE_OPENSSL has been removed.
    - The Zend/zend_istdiostream.h header has been removed.
 
  b. Unix build system changes
@@ -213,7 +214,7 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,
-     --enable-apache2-2handler have been removed.
+     --enable-apache2-2handler, --enable-phar-native-ssl have been removed.
    - The configure option --enable-apache2-4handler is now an alias for the
      preferred --enable-apache2handler.
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build

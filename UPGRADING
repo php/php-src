@@ -907,6 +907,10 @@ PHP 8.4 UPGRADE NOTES
 - PgSQL:
   . The pgsql extension now requires at least libpq 10.0.
 
+- Phar:
+  . Native SSL support in phar extension has been removed in favor of phar SSL
+    support through the PHP openssl extension.
+
 - Reflection:
   . The class constants are typed now.
 
