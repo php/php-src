@@ -57,9 +57,12 @@ if test "$PHP_TIDY" != "no"; then
     [TIDY_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$TIDY_INCDIR])
 
-  dnl Add -Wno-ignored-qualifiers as this is an issue upstream
-  TIDY_COMPILER_FLAGS="$TIDY_CFLAGS -Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-  PHP_NEW_EXTENSION([tidy], [tidy.c], [$ext_shared],, [$TIDY_COMPILER_FLAGS])
+  dnl Add -Wno-ignored-qualifiers as this is an issue upstream. Fixed in
+  dnl tidy-html5 5.7.20: https://github.com/htacg/tidy-html5/issues/866
+  PHP_NEW_EXTENSION([tidy],
+    [tidy.c],
+    [$ext_shared],,
+    [-Wno-ignored-qualifiers -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_SUBST([TIDY_SHARED_LIBADD])
   AC_DEFINE([HAVE_TIDY], [1],
     [Define to 1 if the PHP extension 'tidy' is available.])
