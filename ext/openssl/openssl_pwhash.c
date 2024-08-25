@@ -95,26 +95,22 @@ static bool php_openssl_argon2_compute_hash(
 	OSSL_PARAM params[7], *p = params;
 	EVP_KDF *kdf = NULL;
 	EVP_KDF_CTX *kctx = NULL;
+	uint32_t oldthreads;
 	bool ret = false;
 
 	if (threads > 1) {
+		oldthreads = OSSL_get_max_threads(NULL);
 		if (OSSL_set_max_threads(NULL, threads) != 1) {
 			goto fail;
 		}
 	}
 	p = params;
-	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS,
-		&threads);
-	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES,
-		&threads);
-	*p++= OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER,
-		&iterlimit);
-	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST,
-		&memlimit);
-	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT,
-		(void *)salt, salt_len);
-	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD,
-		(void *)pass, pass_len);
+	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS, &threads);
+	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_LANES,	&threads);
+	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ITER, &iterlimit);
+	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_ARGON2_MEMCOST, &memlimit);
+	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_SALT, (void *)salt, salt_len);
+	*p++ = OSSL_PARAM_construct_octet_string(OSSL_KDF_PARAM_PASSWORD, (void *)pass, pass_len);
 	*p++ = OSSL_PARAM_construct_end();
 
 	if ((kdf = EVP_KDF_fetch(NULL, algo, NULL)) == NULL) {
@@ -135,7 +131,7 @@ fail:
 	EVP_KDF_CTX_free(kctx);
 
 	if (threads > 1) {
-		OSSL_set_max_threads(NULL, 0);
+		OSSL_set_max_threads(NULL, oldthreads);
 	}
 	return ret;
 }

@@ -50,12 +50,9 @@ if test "$PHP_OPENSSL" != "no"; then
     if test "$PHP_THREAD_SAFETY" != "no"; then
       AC_MSG_ERROR([Not supported in ZTS mode for now])
     fi
-    CFLAGS_SAVE=$CFLAGS
-    CFLAGS="$CFLAGS $OPENSSL_CFLAGS"
-    AC_CHECK_DECL([OSSL_KDF_PARAM_ARGON2_LANES],
-      [AC_DEFINE([HAVE_OPENSSL_ARGON2],[1],[ Enable argon2 password hashing ])],
+    PHP_CHECK_LIBRARY([crypto], [OSSL_set_max_threads],
+      [AC_DEFINE([HAVE_OPENSSL_ARGON2], [1], [ Define to 1 to enable argon2 password hashing ])],
       [AC_MSG_ERROR([argon2 hashing requires OpenSSL 3.2])],
-      [[#include <openssl/core_names.h>]])
-    CFLAGS=$CFLAGS_SAVE
+      [$OPENSSL_LIBS])
   fi
 fi
