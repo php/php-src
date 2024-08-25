@@ -57,7 +57,8 @@ if test "$PHP_TIDY" != "no"; then
     [TIDY_SHARED_LIBADD])
   PHP_ADD_INCLUDE([$TIDY_INCDIR])
 
-  dnl Add -Wno-ignored-qualifiers as this is an issue upstream
+  dnl Add -Wno-ignored-qualifiers as this is an issue upstream. Fixed in
+  dnl tidy-html5 5.7.20: https://github.com/htacg/tidy-html5/issues/866
   PHP_NEW_EXTENSION([tidy],
     [tidy.c],
     [$ext_shared],,
