@@ -25,6 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
 
+- Standard:
+  . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
+
 - Streams:
   . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
     (cmb)
