@@ -696,7 +696,19 @@ AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 
 AC_CACHE_CHECK([for aarch64 CRC32 API], [php_cv_func___crc32d],
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <arm_acle.h>], [__crc32d(0, 0);])],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([
+#include <arm_acle.h>
+# if defined(__GNUC__)
+#  if!defined(__clang__)
+#   pragma GCC push_options
+#   pragma GCC target ("+nothing+crc")
+#  elif defined(__APPLE__)
+#   pragma clang attribute push(__attribute__((target("crc"))), apply_to=function)
+#  else
+#   pragma clang attribute push(__attribute__((target("+nothing+crc"))), apply_to=function)
+#  endif
+# endif
+], [__crc32d(0, 0);])],
 [php_cv_func___crc32d=yes],
 [php_cv_func___crc32d=no])])
 AS_VAR_IF([php_cv_func___crc32d], [yes],
