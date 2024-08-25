@@ -738,11 +738,25 @@ AC_FUNC_ALLOCA
 PHP_TIME_R_TYPE
 PHP_CHECK_IN_ADDR_T
 
-AC_CACHE_CHECK([for aarch64 CRC32 API], ac_cv_func___crc32d,
-[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <arm_acle.h>]],[[__crc32d(0, 0);]])],[ac_cv_func___crc32d=yes],[ac_cv_func___crc32d="no"])])
-if test "$ac_cv_func___crc32d" = "yes"; then
-  AC_DEFINE([HAVE_AARCH64_CRC32], [1], [Define when aarch64 CRC32 API is available.])
-fi
+AC_CACHE_CHECK([for aarch64 CRC32 API], [ac_cv_func___crc32d],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([
+#include <arm_acle.h>
+# if defined(__GNUC__)
+#  if!defined(__clang__)
+#   pragma GCC push_options
+#   pragma GCC target ("+nothing+crc")
+#  elif defined(__APPLE__)
+#   pragma clang attribute push(__attribute__((target("crc"))), apply_to=function)
+#  else
+#   pragma clang attribute push(__attribute__((target("+nothing+crc"))), apply_to=function)
+#  endif
+# endif
+], [__crc32d(0, 0);])],
+[ac_cv_func___crc32d=yes],
+[ac_cv_func___crc32d=no])])
+AS_VAR_IF([ac_cv_func___crc32d], [yes],
+  [AC_DEFINE([HAVE_AARCH64_CRC32], [1],
+    [Define to 1 when aarch64 CRC32 API is available.])])
 
 dnl Check for asm goto support.
 AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,

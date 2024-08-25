@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-15514 (Configure error: genif.sh: syntax error). (Peter Kokot)
   . Fixed bug GH-15565 (--disable-ipv6 during compilation produces error
     EAI_SYSTEM not found). (nielsdos)
+  . Fixed bug GH-15587 (CRC32 API build error on arm 32-bit).
+    (Bernd Kuhls, Thomas Petazzoni)
 
 - DOM:
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
