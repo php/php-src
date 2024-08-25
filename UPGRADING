@@ -395,7 +395,7 @@ PHP 8.3 UPGRADE NOTES
     overloaded constructor of DatePeriod.
 
 - DOM:
-  . Added DOMNode::contains() and DOMNameSpaceNode::contains().
+  . Added DOMNode::contains().
   . Added DOMElement::getAttributeNames().
   . Added DOMNode::getRootNode(). The $options argument does nothing at the
     moment because it only influences the shadow DOM, which we do not support
