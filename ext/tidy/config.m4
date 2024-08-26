@@ -46,11 +46,16 @@ if test "$PHP_TIDY" != "no"; then
       [Define to 1 if Tidy library has the 'tidyOptGetDoc' function.])],
     [PHP_CHECK_LIBRARY([tidy5], [tidyOptGetDoc],
       [TIDY_LIB_NAME=tidy5
-      AC_DEFINE([HAVE_TIDYOPTGETDOC], [1])])])
+      AC_DEFINE([HAVE_TIDYOPTGETDOC], [1])],
+      [],
+      [-L$TIDY_LIBDIR])],
+    [-L$TIDY_LIBDIR])
 
   PHP_CHECK_LIBRARY([$TIDY_LIB_NAME], [tidyReleaseDate],
     [AC_DEFINE([HAVE_TIDYRELEASEDATE], [1],
-      [Define to 1 if Tidy library has the 'tidyReleaseDate' function.])])
+      [Define to 1 if Tidy library has the 'tidyReleaseDate' function.])],
+    [],
+    [-L$TIDY_LIBDIR])
 
   PHP_ADD_LIBRARY_WITH_PATH([$TIDY_LIB_NAME],
     [$TIDY_LIBDIR],
