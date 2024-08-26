@@ -1878,6 +1878,8 @@ tail_call:
 				smart_str_appends(str, "trait ");
 			} else if (decl->flags & ZEND_ACC_ENUM) {
 				smart_str_appends(str, "enum ");
+			} else if (decl->flags & ZEND_ACC_COLLECTION) {
+				smart_str_appends(str, "collection ");
 			} else {
 				if (decl->flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
 					smart_str_appends(str, "abstract ");

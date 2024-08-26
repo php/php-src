@@ -26,6 +26,7 @@
 #include "zend_objects_API.h"
 #include "zend_object_handlers.h"
 #include "zend_interfaces.h"
+#include "zend_collection.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_compile.h"
@@ -1182,6 +1183,10 @@ ZEND_API zval *zend_std_read_dimension(zend_object *object, zval *offset, int ty
 			return NULL;
 		}
 		return rv;
+	} else if (zend_class_implements_interface(ce, zend_ce_seq_collection)) {
+		return zend_collection_read_item(object, offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_dict_collection)) {
+		return zend_collection_read_item(object, offset);
 	} else {
 	    zend_bad_array_access(ce);
 		return NULL;
@@ -1205,6 +1210,10 @@ ZEND_API void zend_std_write_dimension(zend_object *object, zval *offset, zval *
 		zend_call_known_instance_method_with_2_params(funcs->zf_offsetset, object, NULL, &tmp_offset, value);
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_seq_collection)) {
+		zend_collection_add_item(object, offset, value);
+	} else if (zend_class_implements_interface(ce, zend_ce_dict_collection)) {
+		zend_collection_add_item(object, offset, value);
 	} else {
 	    zend_bad_array_access(ce);
 	}
@@ -1232,6 +1241,10 @@ ZEND_API int zend_std_has_dimension(zend_object *object, zval *offset, int check
 		}
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_seq_collection)) {
+		return zend_collection_has_item(object, offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_dict_collection)) {
+		return zend_collection_has_item(object, offset);
 	} else {
 	    zend_bad_array_access(ce);
 		return 0;
@@ -1418,6 +1431,10 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset) /* {{{
 		zend_call_known_instance_method_with_1_params(funcs->zf_offsetunset, object, NULL, &tmp_offset);
 		OBJ_RELEASE(object);
 		zval_ptr_dtor(&tmp_offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_seq_collection)) {
+		zend_collection_unset_item(object, offset);
+	} else if (zend_class_implements_interface(ce, zend_ce_dict_collection)) {
+		zend_collection_unset_item(object, offset);
 	} else {
 	    zend_bad_array_access(ce);
 	}

@@ -389,6 +389,16 @@ const T_INTERFACE = UNKNOWN;
 const T_ENUM = UNKNOWN;
 /**
  * @var int
+ * @cvalue T_COLLECTION_SEQ
+ */
+const T_COLLECTION_SEQ = UNKNOWN;
+/**
+ * @var int
+ * @cvalue T_COLLECTION_DICT
+ */
+const T_COLLECTION_DICT = UNKNOWN;
+/**
+ * @var int
  * @cvalue T_EXTENDS
  */
 const T_EXTENDS = UNKNOWN;

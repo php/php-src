@@ -12,34 +12,37 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Sterling Hughes <sterling@php.net>                          |
-   |          Marcus Boerger <helly@php.net>                              |
+   | Authors: Derick Rethans <derick@php.net>                             |
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
-#include "zend_API.h"
-#include "zend_attributes.h"
-#include "zend_builtin_functions.h"
-#include "zend_interfaces.h"
-#include "zend_exceptions.h"
-#include "zend_closures.h"
-#include "zend_generators.h"
-#include "zend_weakrefs.h"
-#include "zend_enum.h"
-#include "zend_fibers.h"
-#include "zend_collection.h"
+#ifndef ZEND_COLLECTION_H
+#define ZEND_COLLECTION_H
 
-ZEND_API void zend_register_default_classes(void)
-{
-	zend_register_interfaces();
-	zend_register_default_exception();
-	zend_register_iterator_wrapper();
-	zend_register_closure_ce();
-	zend_register_generator_ce();
-	zend_register_weakref_ce();
-	zend_register_attribute_ce();
-	zend_register_enum_ce();
-	zend_register_fiber_ce();
-	zend_register_collection_ce();
-}
+#include "zend.h"
+
+#include <stdint.h>
+
+BEGIN_EXTERN_C()
+
+extern ZEND_API zend_class_entry *zend_ce_seq_collection;
+extern ZEND_API zend_class_entry *zend_ce_dict_collection;
+
+extern ZEND_API zend_object_handlers zend_seq_collection_object_handlers;
+extern ZEND_API zend_object_handlers zend_dict_collection_object_handlers;
+
+void zend_register_collection_ce(void);
+void zend_collection_add_interfaces(zend_class_entry *ce);
+
+void zend_collection_register_handlers(zend_class_entry *ce);
+void zend_collection_register_props(zend_class_entry *ce);
+void zend_collection_register_funcs(zend_class_entry *ce);
+
+void zend_collection_add_item(zend_object *object, zval *offset, zval *value);
+int zend_collection_has_item(zend_object *object, zval *offset);
+zval *zend_collection_read_item(zend_object *object, zval *offset);
+void zend_collection_unset_item(zend_object *object, zval *offset);
+
+END_EXTERN_C()
+
+#endif /* ZEND_COLLECTION_H */

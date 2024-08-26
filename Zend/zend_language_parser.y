@@ -164,6 +164,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_TRAIT         "'trait'"
 %token <ident> T_INTERFACE     "'interface'"
 %token <ident> T_ENUM          "'enum'"
+%token <ident> T_COLLECTION_SEQ  "'collection(Seq)'"
+%token <ident> T_COLLECTION_DICT "'collection(Dict)'"
 %token <ident> T_EXTENDS       "'extends'"
 %token <ident> T_IMPLEMENTS    "'implements'"
 %token <ident> T_NAMESPACE     "'namespace'"
@@ -279,6 +281,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_decl attribute attributes attribute_group namespace_declaration_name
 %type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 %type <ast> enum_declaration_statement enum_backing_type enum_case enum_case_expr
+%type <ast> collection_declaration_statement collection_type_list
 %type <ast> function_name non_empty_member_modifiers
 %type <ast> property_hook property_hook_list optional_property_hook_list hooked_property property_hook_body
 %type <ast> optional_parameter_list
@@ -387,6 +390,7 @@ attributed_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	enum_declaration_statement			{ $$ = $1; }
+	|	collection_declaration_statement	{ $$ = $1; }
 ;
 
 top_statement:
@@ -654,6 +658,20 @@ enum_case:
 enum_case_expr:
 		%empty	{ $$ = NULL; }
 	|	'=' expr { $$ = $2; }
+;
+
+collection_declaration_statement:
+		T_COLLECTION_SEQ { $<num>$ = CG(zend_lineno); }
+		T_STRING '<' collection_type_list '>' backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $7, zend_ast_get_str($3), NULL, zend_ast_create_zval_from_long(ZEND_COLLECTION_SEQ), $9, NULL, $5); }
+	|	T_COLLECTION_DICT { $<num>$ = CG(zend_lineno); }
+		T_STRING '<' collection_type_list '>' backup_doc_comment '{' class_statement_list '}'
+			{ $$ = zend_ast_create_decl(ZEND_AST_CLASS, ZEND_ACC_COLLECTION|ZEND_ACC_FINAL, $<num>2, $7, zend_ast_get_str($3), NULL, zend_ast_create_zval_from_long(ZEND_COLLECTION_DICT), $9, NULL, $5); }
+;
+
+collection_type_list:
+		collection_type_list T_DOUBLE_ARROW type_expr { $$ = zend_ast_list_add($1, $3); }
+	|	type_expr { $$ = zend_ast_create_list(1, ZEND_AST_NAME_LIST, $1); }
 ;
 
 extends_from:

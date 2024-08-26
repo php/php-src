@@ -144,6 +144,9 @@ struct _zend_inheritance_cache_entry {
 	zend_class_entry             *traits_and_interfaces[1];
 };
 
+#define ZEND_COLLECTION_SEQ  1
+#define ZEND_COLLECTION_DICT 2
+
 struct _zend_class_entry {
 	char type;
 	zend_string *name;
@@ -218,10 +221,14 @@ struct _zend_class_entry {
 	zend_trait_precedence **trait_precedences;
 	HashTable *attributes;
 
+	zend_string *doc_comment;
+
 	uint32_t enum_backing_type;
 	HashTable *backed_enum_table;
 
-	zend_string *doc_comment;
+	uint16_t collection_data_structure;
+	uint32_t collection_key_type;
+	zend_type collection_item_type;
 
 	union {
 		struct {
