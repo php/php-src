@@ -6,7 +6,6 @@ Tests declaring multiple default match arms is still prohibited in an argument c
 function F($V = 1) {}
 F(
 	match (0) {
-		0,
 		default => 1,
 		default => 2,
 	}

@@ -6375,18 +6375,6 @@ static void zend_compile_switch(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static bool do_match_conditions_contain_default(zend_ast_list *conditions)
-{
-	for (uint32_t i = 0; i < conditions->children; ++i) {
-		// Default as an expression is still allowed, so we don't need to recurse sub-lists.
-		if (conditions->child[i]->kind == ZEND_AST_DEFAULT) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
 static uint32_t count_match_conds(zend_ast_list *arms)
 {
 	uint32_t num_conds = 0;
@@ -6395,7 +6383,7 @@ static uint32_t count_match_conds(zend_ast_list *arms)
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (do_match_conditions_contain_default(conds)) {
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			continue;
 		}
 
@@ -6410,7 +6398,7 @@ static bool can_match_use_jumptable(zend_ast_list *arms) {
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (do_match_conditions_contain_default(conds)) {
+		if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 			/* Skip default arm */
 			continue;
 		}
@@ -6457,13 +6445,20 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		zend_ast *arm_ast = arms->child[i];
 		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (do_match_conditions_contain_default(conds)) {
-			if (has_default_arm) {
-				CG(zend_lineno) = arm_ast->lineno;
-				zend_error_noreturn(E_COMPILE_ERROR,
-					"Match expressions may only contain one default arm");
+		for (uint32_t j = 0; j < conds->children; ++j) {
+			if (conds->child[j]->kind == ZEND_AST_DEFAULT) {
+				if (conds->children > 1) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Match arms may not share conditions with the default arm");
+				}
+
+				if (has_default_arm) {
+					CG(zend_lineno) = arm_ast->lineno;
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Match expressions may only contain one default arm");
+				}
+				has_default_arm = 1;
 			}
-			has_default_arm = 1;
 		}
 	}
 
@@ -6490,7 +6485,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
 
-				if (do_match_conditions_contain_default(conds)) {
+				if (conds->child[0]->kind == ZEND_AST_DEFAULT) {
 					break;
 				}
 
@@ -6547,7 +6542,7 @@ static void zend_compile_match(znode *result, zend_ast *ast)
 		zend_ast *body_ast = arm_ast->child[1];
 		zend_ast_list *conds = zend_ast_get_list(arm_ast->child[0]);
 
-		if (!do_match_conditions_contain_default(conds)) {
+		if (conds->child[0]->kind != ZEND_AST_DEFAULT) {
 			for (uint32_t j = 0; j < conds->children; j++) {
 				zend_ast *cond_ast = conds->child[j];
 
