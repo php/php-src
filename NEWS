@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
 
+- PDO_MYSQL:
+  . mysqlnd: support ER_CLIENT_INTERACTION_TIMEOUT. (Appla)
+
 - Session:
   . Emit warnings for non-positive values of session.gc_divisor and negative values
     of session.gc_probability. (Jorg Sowa)
