@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-15490 (Building of callgraph modifies preloaded symbols).
     (ilutov)
+  . Fixed bug GH-15178 (Assertion in tracing JIT on hooks). (ilutov)
 
 - PDO_MYSQL:
   . mysqlnd: support ER_CLIENT_INTERACTION_TIMEOUT. (Appla)
