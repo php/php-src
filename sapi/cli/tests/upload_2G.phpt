@@ -13,7 +13,7 @@ if (disk_free_space(sys_get_temp_dir()) < 2300000000) {
 }
 
 include(__DIR__.'/../../../tests/utils.php');
-if(!has_enough_memory(3 * 1024 * 1024 * 1024)) { // 3 GB
+if (!has_enough_memory(3 * 1024 * 1024 * 1024)) { // 3 GB
     die('skip Reason: Insufficient RAM (should be 3GB)');
 }
 

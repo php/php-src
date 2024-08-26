@@ -10,7 +10,7 @@ if (getenv('SKIP_SLOW_TESTS')) {
     die('skip slow test');
 }
 include(__DIR__.'/../../../../tests/utils.php');
-if(!has_enough_memory(10 * 1024 * 1024 * 1024)) { // 10GB
+if (!has_enough_memory(10 * 1024 * 1024 * 1024)) { // 10GB
     die('skip Reason: Insufficient RAM (should be 10GB)');
 }
 $tmpfile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . "file_get_contents_file_put_contents_5gb.bin";
