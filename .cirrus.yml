@@ -3,6 +3,7 @@ env:
 
 freebsd_task:
   name: FREEBSD_DEBUG_NTS
+  timeout_in: 50m
   freebsd_instance:
     image_family: freebsd-13-3
   env:
