@@ -182,7 +182,7 @@ URL: https://dom.spec.whatwg.org/#dom-element-classlist
 */
 zend_result dom_element_class_list_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 20;
+	const uint32_t PROP_INDEX = 0;
 
 #if ZEND_DEBUG
 	zend_string *class_list_str = ZSTR_INIT_LITERAL("classList", false);
