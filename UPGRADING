@@ -126,6 +126,10 @@ PHP 8.4 UPGRADE NOTES
     has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
     for a full changelog.
 
+- MySQLnd
+  . The error code reported for MySQL server wait timeouts has been changed from 2006
+    to 4031 for MySQL server versions 8.0.24 and above.
+
 - PCNTL:
   . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
     pcntl_sigtimedwait() now throw:
