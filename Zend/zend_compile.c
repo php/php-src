@@ -7821,7 +7821,7 @@ static void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32
 		zend_ast *param_ast = list->child[i];
 		zend_ast *hooks_ast = param_ast->child[5];
 		bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
-		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_READONLY);
+		uint32_t flags = param_ast->attr & (ZEND_ACC_PPP_MASK | ZEND_ACC_PPP_SET_MASK | ZEND_ACC_READONLY);
 		bool is_promoted = flags || hooks_ast;
 		if (!is_promoted) {
 			continue;
