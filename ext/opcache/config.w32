@@ -62,7 +62,7 @@ if (PHP_OPCACHE != "no") {
 		}
 	}
 
-	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname);
+	ADD_FLAG('CFLAGS_OPCACHE', "/I " + configure_module_dirname + " /D ZEND_EXT_EXPORTS");
 
 }
 

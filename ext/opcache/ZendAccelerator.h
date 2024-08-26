@@ -65,7 +65,11 @@
 
 #ifndef ZEND_EXT_API
 # ifdef ZEND_WIN32
-#  define ZEND_EXT_API __declspec(dllexport)
+#  ifdef ZEND_EXT_EXPORTS
+#   define ZEND_EXT_API __declspec(dllexport)
+#  else
+#   define ZEND_EXT_API __declspec(dllimport)
+#  endif
 # elif defined(__GNUC__) && __GNUC__ >= 4
 #  define ZEND_EXT_API __attribute__ ((visibility("default")))
 # else
