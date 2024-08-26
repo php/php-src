@@ -1077,6 +1077,7 @@ PHP 8.4 UPGRADE NOTES
     an xpath query. This can give a time improvement of easily two order of
     magnitude for documents with tens of thousands of nodes.
   . Improved performance and reduce memory consumption of XML serialization.
+  . Reduced memory usage of node classes.
 
 - FTP:
   . Improved the performance of FTP uploads up to a factor of 10x for large

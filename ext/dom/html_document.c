@@ -83,7 +83,7 @@ typedef struct dom_decoding_encoding_ctx {
 /* https://dom.spec.whatwg.org/#dom-document-implementation */
 zend_result dom_modern_document_implementation_read(dom_object *obj, zval *retval)
 {
-	const uint32_t PROP_INDEX = 14;
+	const uint32_t PROP_INDEX = 0;
 
 #if ZEND_DEBUG
 	zend_string *implementation_str = ZSTR_INIT_LITERAL("implementation", false);
