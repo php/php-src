@@ -26,6 +26,7 @@
 #include "zend_compile.h"
 #include "ZendAccelerator.h"
 #include "zend_persist.h"
+#include "zend_portability.h"
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_module.h"
 #include "zend_accelerator_blacklist.h"
@@ -3410,6 +3411,8 @@ void accel_shutdown(void)
 	}
 }
 
+ZEND_EXT_API void (*zend_accel_schedule_restart_hook)(zend_accel_restart_reason reason);
+
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 {
 	const char *zend_accel_restart_reason_text[ACCEL_RESTART_USER + 1] = {
@@ -3417,6 +3420,10 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 		"hash overflow",
 		"user",
 	};
+
+	if (UNEXPECTED(zend_accel_schedule_restart_hook)) {
+		zend_accel_schedule_restart_hook(reason);
+	}
 
 	if (ZCSG(restart_pending)) {
 		/* don't schedule twice */
