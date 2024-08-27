@@ -1753,7 +1753,8 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 	}
 
 	localname = xmlSplitQName2((xmlChar *)qname, &prefix);
-	if (localname == NULL) {
+	bool free_localname = localname != NULL;
+	if (!free_localname) {
 		if (nsuri_len > 0) {
 			if (prefix != NULL) {
 				xmlFree(prefix);
@@ -1761,17 +1762,13 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 			php_error_docref(NULL, E_WARNING, "Attribute requires prefix for namespace");
 			return;
 		}
-		localname = xmlStrdup((xmlChar *)qname);
+		localname = (xmlChar *) qname;
 	}
 
 	attrp = xmlHasNsProp(node, localname, (xmlChar *)nsuri);
 	if (attrp != NULL && attrp->type != XML_ATTRIBUTE_DECL) {
-		xmlFree(localname);
-		if (prefix != NULL) {
-			xmlFree(prefix);
-		}
 		php_error_docref(NULL, E_WARNING, "Attribute already exists");
-		return;
+		goto out;
 	}
 
 	if (nsuri != NULL) {
@@ -1783,7 +1780,10 @@ PHP_METHOD(SimpleXMLElement, addAttribute)
 
 	attrp = xmlNewNsProp(node, nsptr, localname, (xmlChar *)value);
 
-	xmlFree(localname);
+out:
+	if (free_localname) {
+		xmlFree(localname);
+	}
 	if (prefix != NULL) {
 		xmlFree(prefix);
 	}
