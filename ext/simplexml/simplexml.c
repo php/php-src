@@ -1899,19 +1899,18 @@ PHP_METHOD(SimpleXMLElement, __toString)
 }
 /* }}} */
 
-static zend_result php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
+static zend_long php_sxe_count_elements_helper(php_sxe_object *sxe) /* {{{ */
 {
-	*count = 0;
-
+	zend_long count = 0;
 	xmlNodePtr node = php_sxe_reset_iterator_no_clear_iter_data(sxe, 0);
 
 	while (node)
 	{
-		(*count)++;
+		count++;
 		node = php_sxe_iterator_fetch(sxe, node->next, 0);
 	}
 
-	return SUCCESS;
+	return count;
 }
 /* }}} */
 
@@ -1929,23 +1928,21 @@ static zend_result sxe_count_elements(zend_object *object, zend_long *count) /* 
 		}
 		return FAILURE;
 	}
-	return php_sxe_count_elements_helper(intern, count);
+	*count = php_sxe_count_elements_helper(intern);
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ Get number of child elements */
 PHP_METHOD(SimpleXMLElement, count)
 {
-	zend_long count = 0;
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	php_sxe_count_elements_helper(sxe, &count);
-
-	RETURN_LONG(count);
+	RETURN_LONG(php_sxe_count_elements_helper(sxe));
 }
 /* }}} */
 
