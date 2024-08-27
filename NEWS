@@ -14,6 +14,9 @@ PHP                                                                        NEWS
 - GD:
   . Added gdImageClone to bundled libgd. (David Carlier)
 
+- PDO_Firebird:
+  . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
+
 27 Aug 2024, PHP 8.4.0beta4
 
 - Core:
