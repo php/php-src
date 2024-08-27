@@ -5912,13 +5912,14 @@ PHP_METHOD(DatePeriod, __wakeup)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	period_obj = Z_PHPPERIOD_P(object);
-
 	myht = Z_OBJPROP_P(object);
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
 		RETURN_THROWS();
 	}
+
+	restore_custom_dateperiod_properties(object, myht);
 }
 /* }}} */
 
