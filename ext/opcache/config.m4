@@ -343,6 +343,13 @@ int main(void) {
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $JIT_CFLAGS],,
     [yes])
 
+  PHP_INSTALL_HEADERS([ext/opcache], m4_normalize([
+    ZendAccelerator.h
+    zend_accelerator_debug.h
+    zend_accelerator_hash.h
+    zend_shared_alloc.h
+  ]))
+
   PHP_ADD_EXTENSION_DEP(opcache, date)
   PHP_ADD_EXTENSION_DEP(opcache, pcre)
 
