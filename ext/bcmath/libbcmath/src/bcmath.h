@@ -98,7 +98,9 @@ static inline bc_num bc_copy_num(bc_num num)
 
 void bc_init_num(bc_num *num);
 
-bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, bool auto_scale);
+bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, size_t *full_scale, bool auto_scale);
+
+void bc_long2num(bc_num *num, zend_long lval);
 
 zend_string *bc_num2str_ex(bc_num num, size_t scale);
 
@@ -121,6 +123,8 @@ bool bc_is_zero_for_scale(bc_num num, size_t scale);
 bool bc_is_near_zero(bc_num num, size_t scale);
 
 bool bc_is_neg(bc_num num);
+
+void bc_rm_trailing_zeros(bc_num num);
 
 bc_num bc_add(bc_num n1, bc_num n2, size_t scale_min);
 
