@@ -44,9 +44,28 @@
 #define ENT_HTML5		(16|32)
 #define ENT_DISALLOWED	128
 
+/* The HTML contexts imply these internal flags for decoding HTML text. */
+#ifndef PHP_HTML_DECODE_CHARACTER_REFERENCES
+#define PHP_HTML_DECODE_CHARACTER_REFERENCES 0x01 /* Decode character references. */
+#endif
+
+#ifndef PHP_HTML_DECODE_REMOVE_NULL_BYTES
+#define PHP_HTML_DECODE_REMOVE_NULL_BYTES 0x02 /* Remove NULL bytes instead of replacing them. */
+#endif
+
+#ifndef PHP_HTML_DECODE_AMBIGUOUS_AMPERSAND
+#define PHP_HTML_DECODE_AMBIGUOUS_AMPERSAND 0x04 /* Decode character references followed by ambiguous characters. */
+#endif
+
 PHPAPI zend_string *php_escape_html_entities(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset);
 PHPAPI zend_string *php_escape_html_entities_ex(const unsigned char *old, size_t oldlen, int all, int flags, const char *hint_charset, bool double_encode, bool quiet);
 PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, const char *hint_charset);
 PHPAPI unsigned int php_next_utf8_char(const unsigned char *str, size_t str_len, size_t *cursor, zend_result *status);
+PHPAPI zend_string *php_decode_html(const zend_long flags, const zend_string *html, const zend_long offset, const zend_long length);
+PHPAPI zend_string *php_decode_html_ref(const zend_long flags, const zend_string *html, const zend_long offset, int *matched_byte_length);
+
+extern PHPAPI zend_class_entry *html_context_ce;
+
+PHPAPI int php_html_decoding_flags_from_context(zend_object *context);
 
 #endif /* HTML_H */

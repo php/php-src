@@ -541,6 +541,14 @@ const ENT_XHTML = UNKNOWN;
 */
 const ENT_HTML5 = UNKNOWN;
 
+enum HtmlContext {
+    case Attribute;
+    case BodyText;
+    case ForeignText;
+    case Script;
+    case Style;
+}
+
 /* image.c */
 
 /**
@@ -2263,6 +2271,11 @@ function headers_list(): array {}
 function htmlspecialchars(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null, bool $double_encode = true): string {}
 
 function htmlspecialchars_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401): string {}
+
+function decode_html(HtmlContext $context, string $html, int $offset = 0, ?int $length = null): ?string {}
+
+/** @param int $matched_byte_length */
+function decode_html_ref(HtmlContext $context, string $html, int $offset = 0, &$matched_byte_length = null): ?string {}
 
 function html_entity_decode(string $string, int $flags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, ?string $encoding = null): string {}
 
