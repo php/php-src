@@ -350,6 +350,10 @@ static void** zend_jit_stub_handlers = NULL;
 static void* zend_jit_stub_handlers[sizeof(zend_jit_stubs) / sizeof(zend_jit_stubs[0])];
 #endif
 
+#ifdef HAVE_CAPSTONE
+static zend_atomic_bool zend_jit_disasm_setup_done = ZEND_ATOMIC_BOOL_INITIALIZER(false);
+#endif
+
 #if defined(IR_TARGET_AARCH64)
 
 # ifdef __FreeBSD__
@@ -2901,6 +2905,10 @@ static void zend_jit_setup_stubs(void)
 static void zend_jit_setup_disasm(void)
 {
 #ifdef HAVE_CAPSTONE
+	bool done = zend_atomic_bool_exchange_ex(&zend_jit_disasm_setup_done, true);
+	if (done) {
+		return;
+	}
 	ir_disasm_init();
 
 	if (zend_vm_kind() == ZEND_VM_KIND_HYBRID) {
@@ -2958,7 +2966,9 @@ static void zend_jit_setup_disasm(void)
 		zend_vm_set_opcode_handler(&opline);
 		ir_disasm_add_symbol("ZEND_RETURN_SPEC_CV_LABEL", (uint64_t)(uintptr_t)opline.handler, sizeof(void*));
 
-		ir_disasm_add_symbol("ZEND_HYBRID_HALT_LABEL", (uint64_t)(uintptr_t)zend_jit_halt_op->handler, sizeof(void*));
+		if (zend_jit_halt_op) {
+			ir_disasm_add_symbol("ZEND_HYBRID_HALT_LABEL", (uint64_t)(uintptr_t)zend_jit_halt_op->handler, sizeof(void*));
+		}
 	}
 
 	REGISTER_DATA(zend_jit_profile_counter);
@@ -3379,9 +3389,7 @@ static void zend_jit_shutdown_ir(void)
 	}
 #endif
 #ifdef HAVE_CAPSTONE
-	if (JIT_G(debug) & (ZEND_JIT_DEBUG_ASM|ZEND_JIT_DEBUG_ASM_STUBS)) {
-		ir_disasm_free();
-	}
+	ir_disasm_free();
 #endif
 }
 

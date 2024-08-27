@@ -3728,4 +3728,10 @@ ZEND_EXT_API void zend_jit_restart(void)
 	}
 }
 
+ZEND_EXT_API void zend_jit_enable_disasm(void)
+{
+	if (ZCG(enabled) && JIT_G(enabled)) {
+		zend_jit_setup_disasm();
+	}
+}
 #endif /* HAVE_JIT */

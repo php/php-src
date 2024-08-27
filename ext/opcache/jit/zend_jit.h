@@ -164,6 +164,7 @@ ZEND_EXT_API void zend_jit_activate(void);
 ZEND_EXT_API void zend_jit_deactivate(void);
 ZEND_EXT_API void zend_jit_status(zval *ret);
 ZEND_EXT_API void zend_jit_restart(void);
+ZEND_EXT_API void zend_jit_enable_disasm(void);
 
 #define ZREG_LOAD           (1<<0)
 #define ZREG_STORE          (1<<1)
