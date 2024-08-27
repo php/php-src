@@ -30,7 +30,7 @@ bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 	/* If the number is positive and we are flooring, then nothing else needs to be done.
 	 * Similarly, if the number is negative and we are ceiling, then nothing else needs to be done. */
 	if (num->n_scale == 0 || result->n_sign == (is_floor ? PLUS : MINUS)) {
-		return result;
+		goto check_zero;
 	}
 
 	/* check fractional part. */
@@ -43,12 +43,19 @@ bc_num bc_floor_or_ceil(bc_num num, bool is_floor)
 
 	/* If all digits past the decimal point are 0 */
 	if (count == 0) {
-		return result;
+		goto check_zero;
 	}
 
 	/* Increment the absolute value of the result by 1 and add sign information */
 	bc_num tmp = _bc_do_add(result, BCG(_one_));
 	tmp->n_sign = result->n_sign;
 	bc_free_num(&result);
-	return tmp;
+	result = tmp;
+
+check_zero:
+	if (bc_is_zero(result)) {
+		result->n_sign = PLUS;
+	}
+
+	return result;
 }
