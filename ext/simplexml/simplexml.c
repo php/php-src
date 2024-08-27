@@ -42,7 +42,7 @@ PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 /* }}} */
 
 static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *fptr_count);
-static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data);
+static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe);
 static xmlNodePtr php_sxe_reset_iterator_no_clear_iter_data(php_sxe_object *sxe, int use_data);
 static xmlNodePtr php_sxe_iterator_fetch(php_sxe_object *sxe, xmlNodePtr node, int use_data);
 static void php_sxe_iterator_dtor(zend_object_iterator *iter);
@@ -2428,14 +2428,14 @@ static xmlNodePtr php_sxe_reset_iterator_no_clear_iter_data(php_sxe_object *sxe,
 	return NULL;
 }
 
-static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe, int use_data) /* {{{ */
+static xmlNodePtr php_sxe_reset_iterator(php_sxe_object *sxe) /* {{{ */
 {
 	if (!Z_ISUNDEF(sxe->iter.data)) {
 		zval_ptr_dtor(&sxe->iter.data);
 		ZVAL_UNDEF(&sxe->iter.data);
 	}
 
-	return php_sxe_reset_iterator_no_clear_iter_data(sxe, use_data);
+	return php_sxe_reset_iterator_no_clear_iter_data(sxe, 1);
 }
 /* }}} */
 
@@ -2531,7 +2531,7 @@ static void php_sxe_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 
 PHP_SXE_API void php_sxe_rewind_iterator(php_sxe_object *sxe) /* {{{ */
 {
-	php_sxe_reset_iterator(sxe, 1);
+	php_sxe_reset_iterator(sxe);
 }
 /* }}} */
 
@@ -2542,7 +2542,7 @@ static void php_sxe_iterator_rewind(zend_object_iterator *iter) /* {{{ */
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 	sxe = iterator->sxe;
 
-	php_sxe_reset_iterator(sxe, 1);
+	php_sxe_reset_iterator(sxe);
 }
 /* }}} */
 
