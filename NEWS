@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.23
+29 Aug 2024, PHP 8.2.23
 
 - Core:
   . Fixed bug GH-15020 (Memory leak in Zend/Optimizer/escape_analysis.c).
