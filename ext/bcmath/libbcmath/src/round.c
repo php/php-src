@@ -76,7 +76,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			if (*nptr >= 5) {
 				goto up;
 			} else if (*nptr < 5) {
-				return;
+				goto check_zero;
 			}
 			break;
 
@@ -86,14 +86,14 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			if (*nptr > 5) {
 				goto up;
 			} else if (*nptr < 5) {
-				return;
+				goto check_zero;
 			}
 			/* if *nptr == 5, we need to look-up further digits before making a decision. */
 			break;
 
 		case PHP_ROUND_CEILING:
 			if (num->n_sign != PLUS) {
-				return;
+				goto check_zero;
 			} else if (*nptr > 0) {
 				goto up;
 			}
@@ -102,7 +102,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 
 		case PHP_ROUND_FLOOR:
 			if (num->n_sign != MINUS) {
-				return;
+				goto check_zero;
 			} else if (*nptr > 0) {
 				goto up;
 			}
@@ -110,7 +110,7 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 			break;
 
 		case PHP_ROUND_TOWARD_ZERO:
-			return;
+			goto check_zero;
 
 		case PHP_ROUND_AWAY_FROM_ZERO:
 			if (*nptr > 0) {
@@ -139,17 +139,17 @@ void bc_round(bc_num num, zend_long precision, zend_long mode, bc_num *result)
 		case PHP_ROUND_CEILING:
 		case PHP_ROUND_FLOOR:
 		case PHP_ROUND_AWAY_FROM_ZERO:
-			return;
+			goto check_zero;
 
 		case PHP_ROUND_HALF_EVEN:
 			if (rounded_len == 0 || num->n_value[rounded_len - 1] % 2 == 0) {
-				return;
+				goto check_zero;
 			}
 			break;
 
 		case PHP_ROUND_HALF_ODD:
 			if (rounded_len != 0 && num->n_value[rounded_len - 1] % 2 == 1) {
-				return;
+				goto check_zero;
 			}
 			break;
 
@@ -175,5 +175,10 @@ up:
 
 		bc_free_num(result);
 		*result = tmp;
+	}
+
+check_zero:
+	if (bc_is_zero(*result)) {
+		(*result)->n_sign = PLUS;
 	}
 }
