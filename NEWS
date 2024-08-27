@@ -16,6 +16,7 @@ PHP                                                                        NEWS
     undefined). (Peter Kokot)
   . Fixed bug GH-15565 (--disable-ipv6 during compilation produces error
     EAI_SYSTEM not found). (nielsdos)
+  . Implemented asymmetric visibility for properties. (ilutov)
 
 - Date:
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end

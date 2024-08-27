@@ -2648,6 +2648,22 @@ static void ZEND_FASTCALL zend_jit_assign_obj_helper(zend_object *zobj, zend_str
 	}
 }
 
+static zend_always_inline bool verify_readonly_and_avis(zval *property_val, zend_property_info *info, bool indirect)
+{
+	if (UNEXPECTED(info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+		if ((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE)) {
+			zend_readonly_property_modification_error(info);
+			return false;
+		}
+		if ((info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(info)) {
+			const char *operation = indirect ? "indirectly modify" : "modify";
+			zend_asymmetric_visibility_property_modification_error(info, operation);
+			return false;
+		}
+	}
+	return true;
+}
+
 static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend_property_info *info, zval *value, zval *result)
 {
 	zend_execute_data *execute_data = EG(current_execute_data);
@@ -2661,8 +2677,7 @@ static void ZEND_FASTCALL zend_jit_assign_to_typed_prop(zval *property_val, zend
 		value = &EG(uninitialized_zval);
 	}
 
-	if (UNEXPECTED((info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(property_val) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(info);
+	if (UNEXPECTED(!verify_readonly_and_avis(property_val, info, false))) {
 		if (result) {
 			ZVAL_UNDEF(result);
 		}
@@ -2723,8 +2738,7 @@ static void ZEND_FASTCALL zend_jit_assign_op_to_typed_prop(zval *zptr, zend_prop
 	zend_execute_data *execute_data = EG(current_execute_data);
 	zval z_copy;
 
-	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(zptr) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(prop_info);
+	if (UNEXPECTED(!verify_readonly_and_avis(zptr, prop_info, true))) {
 		return;
 	}
 
@@ -2818,8 +2832,7 @@ static void ZEND_FASTCALL zend_jit_inc_typed_prop(zval *var_ptr, zend_property_i
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
 
-	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(var_ptr) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(prop_info);
+	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
 		return;
 	}
 
@@ -2851,8 +2864,7 @@ static void ZEND_FASTCALL zend_jit_dec_typed_prop(zval *var_ptr, zend_property_i
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
 
-	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(var_ptr) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(prop_info);
+	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
 		return;
 	}
 
@@ -2898,8 +2910,7 @@ static void ZEND_FASTCALL zend_jit_post_inc_typed_prop(zval *var_ptr, zend_prope
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
 
-	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(var_ptr) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(prop_info);
+	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
 		if (result) {
 			ZVAL_UNDEF(result);
 		}
@@ -2933,8 +2944,7 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_prop(zval *var_ptr, zend_prope
 {
 	ZEND_ASSERT(Z_TYPE_P(var_ptr) != IS_UNDEF);
 
-	if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(var_ptr) & IS_PROP_REINITABLE))) {
-		zend_readonly_property_modification_error(prop_info);
+	if (UNEXPECTED(!verify_readonly_and_avis(var_ptr, prop_info, true))) {
 		if (result) {
 			ZVAL_UNDEF(result);
 		}

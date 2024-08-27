@@ -304,13 +304,6 @@ static ZEND_COLD zend_never_inline bool zend_deprecated_dynamic_property(
 	return 1;
 }
 
-static ZEND_COLD zend_never_inline void zend_readonly_property_modification_scope_error(
-		const zend_class_entry *ce, const zend_string *member, const zend_class_entry *scope, const char *operation) {
-	zend_throw_error(NULL, "Cannot %s readonly property %s::$%s from %s%s",
-		operation, ZSTR_VAL(ce->name), ZSTR_VAL(member),
-		scope ? "scope " : "global scope", scope ? ZSTR_VAL(scope->name) : "");
-}
-
 static ZEND_COLD zend_never_inline void zend_readonly_property_unset_error(
 		zend_class_entry *ce, zend_string *member) {
 	zend_throw_error(NULL, "Cannot unset readonly property %s::$%s",
@@ -547,6 +540,17 @@ ZEND_API zend_result zend_check_property_access(const zend_object *zobj, zend_st
 }
 /* }}} */
 
+ZEND_API bool ZEND_FASTCALL zend_asymmetric_property_has_set_access(const zend_property_info *prop_info) {
+	ZEND_ASSERT(prop_info->flags & ZEND_ACC_PPP_SET_MASK);
+	ZEND_ASSERT(!(prop_info->flags & ZEND_ACC_PUBLIC_SET));
+	zend_class_entry *scope = get_fake_or_executed_scope();
+	if (prop_info->ce == scope) {
+		return true;
+	}
+	return EXPECTED((prop_info->flags & ZEND_ACC_PROTECTED_SET)
+		&& is_protected_compatible_scope(prop_info->ce, scope));
+}
+
 static void zend_property_guard_dtor(zval *el) /* {{{ */ {
 	uint32_t *ptr = (uint32_t*)Z_PTR_P(el);
 	if (EXPECTED(!(((uintptr_t)ptr) & 1))) {
@@ -686,32 +690,31 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
 		retval = OBJ_PROP(zobj, property_offset);
-		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
-			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)
-					&& (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)) {
-				if (Z_TYPE_P(retval) == IS_OBJECT) {
-					/* For objects, W/RW/UNSET fetch modes might not actually modify object.
-					 * Similar as with magic __get() allow them, but return the value as a copy
-					 * to make sure no actual modification is possible. */
-					ZVAL_COPY(rv, retval);
-					retval = rv;
-				} else {
-					zend_readonly_property_indirect_modification_error(prop_info);
-					retval = &EG(uninitialized_zval);
-				}
+
+		if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))
+		 && (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET)
+		 && ((prop_info->flags & ZEND_ACC_READONLY) || !zend_asymmetric_property_has_set_access(prop_info))) {
+			if (Z_TYPE_P(retval) == IS_OBJECT) {
+				/* For objects, W/RW/UNSET fetch modes might not actually modify object.
+				 * Similar as with magic __get() allow them, but return the value as a copy
+				 * to make sure no actual modification is possible. */
+				ZVAL_COPY(rv, retval);
+				retval = rv;
+				goto exit;
+			} else if (Z_TYPE_P(retval) == IS_UNDEF && type == BP_VAR_UNSET) {
+				retval = &EG(uninitialized_zval);
+				goto exit;
 			}
+			if (prop_info->flags & ZEND_ACC_READONLY) {
+				zend_readonly_property_indirect_modification_error(prop_info);
+			} else {
+				zend_asymmetric_visibility_property_modification_error(prop_info, "indirectly modify");
+			}
+			retval = &EG(uninitialized_zval);
 			goto exit;
-		} else {
-			if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-				if (type == BP_VAR_W || type == BP_VAR_RW) {
-					zend_readonly_property_indirect_modification_error(prop_info);
-					retval = &EG(uninitialized_zval);
-					goto exit;
-				} else if (type == BP_VAR_UNSET) {
-					retval = &EG(uninitialized_zval);
-					goto exit;
-				}
-			}
+		}
+		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
+			goto exit;
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(retval) & IS_PROP_UNINIT)) {
 			/* Skip __get() for uninitialized typed properties */
@@ -912,36 +915,12 @@ static zend_always_inline bool property_uses_strict_types(void) {
 		&& ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data));
 }
 
-static bool verify_readonly_initialization_access(
-		const zend_property_info *prop_info, const zend_class_entry *ce,
-		zend_string *name, const char *operation) {
-	zend_class_entry *scope = get_fake_or_executed_scope();
-	if (prop_info->ce == scope) {
-		return true;
-	}
-
-	/* We may have redeclared a parent property. In that case the parent should still be
-	 * allowed to initialize it. */
-	if (scope && is_derived_class(ce, scope)) {
-		const zend_property_info *prop_info = zend_hash_find_ptr(&scope->properties_info, name);
-		if (prop_info) {
-			/* This should be ensured by inheritance. */
-			ZEND_ASSERT(prop_info->flags & ZEND_ACC_READONLY);
-			if (prop_info->ce == scope) {
-				return true;
-			}
-		}
-	}
-
-	zend_readonly_property_modification_scope_error(prop_info->ce, name, scope, operation);
-	return false;
-}
-
 ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zval *value, void **cache_slot) /* {{{ */
 {
 	zval *variable_ptr, tmp;
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
+	uint32_t *guard = NULL;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
@@ -949,17 +928,35 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 try_again:
 		variable_ptr = OBJ_PROP(zobj, property_offset);
-		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-			Z_TRY_ADDREF_P(value);
 
-			if (prop_info) {
-				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY) && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE))) {
-					Z_TRY_DELREF_P(value);
+		if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+			bool error;
+			if (Z_TYPE_P(variable_ptr) != IS_UNDEF || (Z_PROP_FLAG_P(variable_ptr) & IS_PROP_UNINIT) || !zobj->ce->__set) {
+				error = true;
+			} else {
+				guard = zend_get_property_guard(zobj, name);
+				error = (*guard) & IN_SET;
+			}
+			if (error) {
+				if ((prop_info->flags & ZEND_ACC_READONLY)
+				 && Z_TYPE_P(variable_ptr) != IS_UNDEF
+				 && !(Z_PROP_FLAG_P(variable_ptr) & IS_PROP_REINITABLE)) {
 					zend_readonly_property_modification_error(prop_info);
 					variable_ptr = &EG(error_zval);
 					goto exit;
 				}
+				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
+					zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
+					variable_ptr = &EG(error_zval);
+					goto exit;
+				}
+			}
+		}
 
+		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
+			Z_TRY_ADDREF_P(value);
+
+			if (prop_info) {
 typed_property:
 				ZVAL_COPY_VALUE(&tmp, value);
 				// Increase refcount to prevent object from being released in __toString()
@@ -1073,7 +1070,9 @@ found:;
 
 	/* magic set */
 	if (zobj->ce->__set) {
-		uint32_t *guard = zend_get_property_guard(zobj, name);
+		if (!guard) {
+			guard = zend_get_property_guard(zobj, name);
+		}
 
 		if (!((*guard) & IN_SET)) {
 			GC_ADDREF(zobj);
@@ -1099,12 +1098,6 @@ write_std_property:
 
 			Z_TRY_ADDREF_P(value);
 			if (prop_info) {
-				if (UNEXPECTED((prop_info->flags & ZEND_ACC_READONLY)
-						&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "initialize"))) {
-					Z_TRY_DELREF_P(value);
-					variable_ptr = &EG(error_zval);
-					goto exit;
-				}
 				goto typed_property;
 			}
 
@@ -1270,9 +1263,10 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 							ZVAL_NULL(retval);
 						 }
 					}
-				} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-					/* Readonly property, delegate to read_property + write_property. */
-					retval = NULL;
+				} else if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+					if ((prop_info->flags & ZEND_ACC_READONLY) || !zend_asymmetric_property_has_set_access(prop_info)) {
+						retval = NULL;
+					}
 				} else if (!prop_info || !ZEND_TYPE_IS_SET(prop_info->type)) {
 					ZVAL_NULL(retval);
 				}
@@ -1280,9 +1274,10 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				/* we do have getter - fail and let it try again with usual get/set */
 				retval = NULL;
 			}
-		} else if (prop_info && UNEXPECTED(prop_info->flags & ZEND_ACC_READONLY)) {
-			/* Readonly property, delegate to read_property + write_property. */
-			retval = NULL;
+		} else if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+			if ((prop_info->flags & ZEND_ACC_READONLY) || !zend_asymmetric_property_has_set_access(prop_info)) {
+				retval = NULL;
+			}
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties)) {
@@ -1327,21 +1322,36 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 {
 	uintptr_t property_offset;
 	const zend_property_info *prop_info = NULL;
+	uint32_t *guard = NULL;
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__unset != NULL), cache_slot, &prop_info);
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
-		if (Z_TYPE_P(slot) != IS_UNDEF) {
-			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY))) {
-				if (Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE) {
-					Z_PROP_FLAG_P(slot) &= ~IS_PROP_REINITABLE;
-				} else {
+		if (prop_info && UNEXPECTED(prop_info->flags & (ZEND_ACC_READONLY|ZEND_ACC_PPP_SET_MASK))) {
+			bool error;
+			if (Z_TYPE_P(slot) != IS_UNDEF || Z_PROP_FLAG_P(slot) & IS_PROP_UNINIT || !zobj->ce->__unset) {
+				error = true;
+			} else {
+				guard = zend_get_property_guard(zobj, name);
+				error = (*guard) & IN_UNSET;
+			}
+			if (error) {
+				if ((prop_info->flags & ZEND_ACC_READONLY)
+				 && Z_TYPE_P(slot) != IS_UNDEF
+				 && !(Z_PROP_FLAG_P(slot) & IS_PROP_REINITABLE)) {
 					zend_readonly_property_unset_error(prop_info->ce, name);
 					return;
 				}
+				if ((prop_info->flags & ZEND_ACC_PPP_SET_MASK) && !zend_asymmetric_property_has_set_access(prop_info)) {
+					zend_asymmetric_visibility_property_modification_error(prop_info, "unset");
+					return;
+				}
 			}
+		}
+
+		if (Z_TYPE_P(slot) != IS_UNDEF) {
 			if (UNEXPECTED(Z_ISREF_P(slot)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
 				if (prop_info) {
@@ -1358,11 +1368,6 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			return;
 		}
 		if (UNEXPECTED(Z_PROP_FLAG_P(slot) & IS_PROP_UNINIT)) {
-			if (UNEXPECTED(prop_info && (prop_info->flags & ZEND_ACC_READONLY)
-					&& !verify_readonly_initialization_access(prop_info, zobj->ce, name, "unset"))) {
-				return;
-			}
-
 			/* Reset the IS_PROP_UNINIT flag, if it exists and bypass __unset(). */
 			Z_PROP_FLAG_P(slot) = 0;
 			return;
@@ -1388,7 +1393,9 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 
 	/* magic unset */
 	if (zobj->ce->__unset) {
-		uint32_t *guard = zend_get_property_guard(zobj, name);
+		if (!guard) {
+			guard = zend_get_property_guard(zobj, name);
+		}
 		if (!((*guard) & IN_UNSET)) {
 			/* have unsetter - try with it! */
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
