@@ -467,10 +467,9 @@ long_dim:
 			case IS_OBJECT:
 				if (Z_OBJCE_P(value) == ce_SimpleXMLElement) {
 					zval zval_copy;
-					if (sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING) == FAILURE) {
-						zend_throw_error(NULL, "Unable to cast node to string");
-						return &EG(error_zval);
-					}
+					zend_result rv = sxe_object_cast_ex(Z_OBJ_P(value), &zval_copy, IS_STRING);
+					ZEND_IGNORE_VALUE(rv);
+					ZEND_ASSERT(rv == SUCCESS);
 
 					value_str = Z_STR(zval_copy);
 					break;
@@ -1892,10 +1891,9 @@ PHP_METHOD(SimpleXMLElement, __toString)
 		RETURN_THROWS();
 	}
 
-	if (sxe_object_cast_ex(Z_OBJ_P(ZEND_THIS), return_value, IS_STRING) != SUCCESS) {
-		zval_ptr_dtor(return_value);
-		RETURN_EMPTY_STRING();
-	}
+	zend_result rv = sxe_object_cast_ex(Z_OBJ_P(ZEND_THIS), return_value, IS_STRING);
+	ZEND_IGNORE_VALUE(rv);
+	ZEND_ASSERT(rv == SUCCESS);
 }
 /* }}} */
 
