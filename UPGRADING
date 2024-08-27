@@ -574,6 +574,10 @@ PHP 8.4 UPGRADE NOTES
   . trigger_error() and user_error() now have a return type of true instead of
     bool.
 
+- Curl:
+  . curl_multi_select throws a ValueError if the timeout argument if it's negative
+    or greater than PHP_INT_MAX.
+
 - DOM:
   . DOMDocument::registerNodeClass() now has a tentative return type of true.
     Previously, the return type was bool but only true could be returned in practice.
