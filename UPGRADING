@@ -267,6 +267,8 @@ PHP 8.4 UPGRADE NOTES
     namespace block, even if a previous namespace block declared a symbol with
     the same name.
     See Zend/tests/use_function/ns_end_resets_seen_symbols_1.phpt.
+  . Implemented asymmetric property visibility.
+    RFC: https://wiki.php.net/rfc/asymmetric-visibility-v2
 
 - Curl:
   . curl_version() returns an additional feature_list value, which is an
