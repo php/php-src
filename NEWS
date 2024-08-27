@@ -22,10 +22,6 @@ PHP                                                                        NEWS
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end
     date). (Mark Bennewitz, Derick)
 
-- Curl:
-  . FIxed bug GH-15547 (curl_multi_select overflow on timeout argument).
-    (David Carlier)
-
 - DOM:
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
     ext/dom/xml_common.h). (nielsdos)
