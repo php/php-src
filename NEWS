@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15587 (CRC32 API build error on arm 32-bit).
     (Bernd Kuhls, Thomas Petazzoni)
 
+- Curl:
+  . FIxed bug GH-15547 (curl_multi_select overflow on timeout argument).
+    (David Carlier)
+
 - DOM:
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
     ext/dom/xml_common.h). (nielsdos)
