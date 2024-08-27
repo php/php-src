@@ -3411,7 +3411,7 @@ void accel_shutdown(void)
 	}
 }
 
-ZEND_EXT_API void (*zend_accel_schedule_restart_hook)(zend_accel_restart_reason reason);
+ZEND_EXT_API void (*zend_accel_schedule_restart_hook)(zend_accel_restart_reason reason) = NULL;
 
 void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 {
