@@ -72,7 +72,7 @@ OK
 <?php
 require_once 'testdb.inc';
 $dbh = getDbConnection();
-@$dbh->exec('drop table t_bug_0001');
-@$dbh->exec('drop sequence g_bug_0001');
+@$dbh->exec('drop table t_bug_15604');
+@$dbh->exec('drop sequence g_bug_15604');
 unset($dbh);
 ?>
