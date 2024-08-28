@@ -354,8 +354,10 @@ int main(void) {
   fi
 
   AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
-    PHP_ADD_BUILD_DIR([$ext_builddir/jit])
-    PHP_ADD_BUILD_DIR([$ext_builddir/jit/ir])
+    PHP_ADD_BUILD_DIR([
+      $ext_builddir/jit
+      $ext_builddir/jit/ir
+    ])
     PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
   ])
   PHP_SUBST([OPCACHE_SHARED_LIBADD])

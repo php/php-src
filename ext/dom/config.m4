@@ -227,7 +227,7 @@ if test "$PHP_DOM" != "no"; then
       ]),
       [$ext_shared],,
       [$PHP_LEXBOR_CFLAGS])
-    PHP_ADD_BUILD_DIR(m4_normalize([
+    PHP_ADD_BUILD_DIR([
       $ext_builddir/parentnode
       $ext_builddir/$LEXBOR_DIR/core
       $ext_builddir/$LEXBOR_DIR/css/selectors
@@ -242,7 +242,7 @@ if test "$PHP_DOM" != "no"; then
       $ext_builddir/$LEXBOR_DIR/ports/posix/lexbor/core
       $ext_builddir/$LEXBOR_DIR/selectors-adapted
       $ext_builddir/$LEXBOR_DIR/tag
-    ]))
+    ])
     PHP_SUBST([DOM_SHARED_LIBADD])
     PHP_INSTALL_HEADERS([ext/dom], m4_normalize([
       dom_ce.h

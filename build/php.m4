@@ -911,12 +911,15 @@ AC_DEFUN([PHP_SELECT_SAPI],[
 dnl
 dnl PHP_ADD_BUILD_DIR(dirs [, create])
 dnl
-dnl Add build directories and directories required for the out-of-source builds.
-dnl When "create" is given, the provided "dirs" are created immediately upon
-dnl macro invocation, instead of deferring it to the PHP_GEN_BUILD_DIRS.
+dnl Add blank-or-newline-separated list of build directories or directories
+dnl required for the out-of-source builds. When "create" is given, the provided
+dnl "dirs" are created immediately upon macro invocation, instead of deferring
+dnl them to the PHP_GEN_BUILD_DIRS.
 dnl
-AC_DEFUN([PHP_ADD_BUILD_DIR],[
-  ifelse($2,,[BUILD_DIR="$BUILD_DIR $1"], [$php_shtool mkdir -p $1])
+AC_DEFUN([PHP_ADD_BUILD_DIR],
+[m4_ifblank([$2],
+  [AS_VAR_APPEND([BUILD_DIR], [" m4_normalize(m4_expand([$1]))"])],
+  [$php_shtool mkdir -p m4_normalize(m4_expand([$1]))])
 ])
 
 dnl

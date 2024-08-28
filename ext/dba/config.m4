@@ -765,9 +765,11 @@ AS_VAR_IF([HAVE_DBA], [1], [
     ]),
     [$ext_shared],,
     [-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
-  PHP_ADD_BUILD_DIR([$ext_builddir/libcdb])
-  PHP_ADD_BUILD_DIR([$ext_builddir/libflatfile])
-  PHP_ADD_BUILD_DIR([$ext_builddir/libinifile])
+  PHP_ADD_BUILD_DIR([
+    $ext_builddir/libcdb
+    $ext_builddir/libflatfile
+    $ext_builddir/libinifile
+  ])
   PHP_SUBST([DBA_SHARED_LIBADD])
 ],
 [AC_MSG_RESULT([no])])

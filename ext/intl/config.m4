@@ -108,7 +108,7 @@ if test "$PHP_INTL" != "no"; then
       [shared_objects_intl],
       [yes])])
 
-  PHP_ADD_BUILD_DIR(m4_normalize([
+  PHP_ADD_BUILD_DIR([
     $ext_builddir/breakiterator
     $ext_builddir/calendar
     $ext_builddir/collator
@@ -126,7 +126,7 @@ if test "$PHP_INTL" != "no"; then
     $ext_builddir/timezone
     $ext_builddir/transliterator
     $ext_builddir/uchar
-  ]))
+  ])
 
   PHP_ADD_EXTENSION_DEP(intl, date)
 fi

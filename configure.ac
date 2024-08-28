@@ -1781,7 +1781,7 @@ PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/Zend/Makefile.frag],
 AC_DEFINE([HAVE_BUILD_DEFS_H], [1],
   [Define to 1 if PHP has the <main/build-defs.h> header file.])
 
-PHP_ADD_BUILD_DIR(m4_normalize([
+PHP_ADD_BUILD_DIR([
   main
   main/streams
   scripts
@@ -1790,7 +1790,7 @@ PHP_ADD_BUILD_DIR(m4_normalize([
   Zend
   Zend/asm
   Zend/Optimizer
-]))
+])
 
 AC_CONFIG_FILES([
   main/build-defs.h
