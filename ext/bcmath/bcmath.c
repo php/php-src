@@ -962,6 +962,7 @@ static zend_always_inline void bcmath_number_add_internal(
 		*scale = MAX(n1_full_scale, n2_full_scale);
 	}
 	*ret = bc_add(n1, n2, *scale);
+	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -973,6 +974,7 @@ static zend_always_inline void bcmath_number_sub_internal(
 		*scale = MAX(n1_full_scale, n2_full_scale);
 	}
 	*ret = bc_sub(n1, n2, *scale);
+	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -984,6 +986,7 @@ static zend_always_inline void bcmath_number_mul_internal(
 		*scale = MIN(n1_full_scale + n2_full_scale, INT_MAX);
 	}
 	*ret = bc_multiply(n1, n2, *scale);
+	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
 	bc_rm_trailing_zeros(*ret);
 }
 
@@ -1467,7 +1470,7 @@ PHP_METHOD(BcMath_Number, powmod)
 	zend_long modulus_lval = 0;
 	BCMATH_NUMBER_METHOD_PARSE_NUM(z_modulus, modulus_obj, modulus_str, modulus_lval, 2);
 
-	zend_long scale_lval;
+	zend_long scale_lval = 0;
 	bool scale_is_null = true;
 	BCMATH_NUMBER_METHOD_PARSE_SCALE(z_scale, scale_lval, scale_is_null, 3);
 
@@ -1553,6 +1556,7 @@ PHP_METHOD(BcMath_Number, sqrt)
 		RETURN_THROWS();
 	}
 
+	ret->n_scale = MIN(scale, ret->n_scale);
 	bc_rm_trailing_zeros(ret);
 	if (scale_is_null) {
 		size_t diff = scale - ret->n_scale;
