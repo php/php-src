@@ -2038,7 +2038,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 
 	if (!o1->initialized || !o2->initialized) {
 		zend_throw_error(date_ce_date_object_error, "Trying to compare uninitialized DateTimeZone objects");
-		return 1;
+		return ZEND_UNCOMPARABLE;
 	}
 
 	if (o1->type != o2->type) {
