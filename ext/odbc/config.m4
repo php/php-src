@@ -1,14 +1,21 @@
+dnl
+dnl PHP_ODBC_CHECK_HEADER(header)
+dnl
+dnl Check if required header file exists in the ODBC include directory.
+dnl
 AC_DEFUN([PHP_ODBC_CHECK_HEADER],
 [AS_IF([test ! -f "$ODBC_INCDIR/$1"],
   [AC_MSG_ERROR([ODBC header file '$ODBC_INCDIR/$1' not found!])])])
 
 dnl
+dnl PHP_ODBC_FIND_SOLID_LIBS(libdir)
+dnl
 dnl Figure out which library file to link with for the Solid support.
 dnl
 AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
   AC_MSG_CHECKING([Solid library file])
-  ac_solid_uname_r=`uname -r 2>/dev/null`
-  ac_solid_uname_s=`uname -s 2>/dev/null`
+  ac_solid_uname_r=$(uname -r 2>/dev/null)
+  ac_solid_uname_s=$(uname -s 2>/dev/null)
   case $ac_solid_uname_s in
     AIX) ac_solid_os=a3x;;   # a4x for AIX4/ Solid 2.3/3.0 only
     HP-UX) ac_solid_os=h9x;; # h1x for hpux11, h0x for hpux10
@@ -25,7 +32,7 @@ AC_DEFUN([PHP_ODBC_FIND_SOLID_LIBS],[
     SunOS)
       ac_solid_os=ssx;; # should we deal with SunOS 4?
     FreeBSD)
-      if test `expr $ac_solid_uname_r : '\(.\)'` -gt "2"; then
+      if test $(expr $ac_solid_uname_r : '\(.\)') -gt "2"; then
         ac_solid_os=fex
       else
         ac_solid_os=fbx
@@ -63,29 +70,36 @@ else
   ODBC_LIBS=-l${ac_solid_prefix}${ac_solid_os}${ac_solid_version}
 fi
 
-  AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
+  AC_MSG_RESULT([$(echo $ODBC_LIBS | sed -e 's!.*/!!')])
 ])
 
+dnl
+dnl PHP_ODBC_FIND_EMPRESS_LIBS(libdir)
 dnl
 dnl Figure out which library file to link with for the Empress support.
 dnl
-
 AC_DEFUN([PHP_ODBC_FIND_EMPRESS_LIBS],[
   AC_MSG_CHECKING([Empress library file])
-  ODBC_LIBS=`echo $1/libempodbccl.so | cut -d' ' -f1`
+  ODBC_LIBS=$(echo $1/libempodbccl.so | cut -d' ' -f1)
   if test ! -f $ODBC_LIBS; then
-    ODBC_LIBS=`echo $1/libempodbccl.so | cut -d' ' -f1`
+    ODBC_LIBS=$(echo $1/libempodbccl.so | cut -d' ' -f1)
   fi
-  AC_MSG_RESULT(`echo $ODBC_LIBS | sed -e 's!.*/!!'`)
+  AC_MSG_RESULT([$(echo $ODBC_LIBS | sed -e 's!.*/!!')])
 ])
 
+dnl
+dnl PHP_ODBC_FIND_EMPRESS_BCS_LIBS(libdir)
+dnl
+dnl Figure out which library file to link with for the Empress local access
+dnl support.
+dnl
 AC_DEFUN([PHP_ODBC_FIND_EMPRESS_BCS_LIBS],[
   AC_MSG_CHECKING([Empress local access library file])
-  ODBCBCS_LIBS=`echo $1/libempodbcbcs.a | cut -d' ' -f1`
+  ODBCBCS_LIBS=$(echo $1/libempodbcbcs.a | cut -d' ' -f1)
   if test ! -f $ODBCBCS_LIBS; then
-    ODBCBCS_LIBS=`echo $1/libempodbcbcs.a | cut -d' ' -f1`
+    ODBCBCS_LIBS=$(echo $1/libempodbcbcs.a | cut -d' ' -f1)
   fi
-  AC_MSG_RESULT(`echo $ODBCBCS_LIBS | sed -e 's!.*/!!'`)
+  AC_MSG_RESULT([$(echo $ODBCBCS_LIBS | sed -e 's!.*/!!')])
 ])
 
 dnl
@@ -99,7 +113,7 @@ PHP_ARG_WITH([odbcver],,
     be defined.])],
   [0x0350])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([adabas],,
   [AS_HELP_STRING([[--with-adabas[=DIR]]],
     [Include Adabas D support [/usr/local]])])
@@ -119,16 +133,16 @@ PHP_ARG_WITH([adabas],,
     PHP_ADD_LIBRARY_WITH_PATH([odbc_adabas], [$abs_builddir/ext/odbc])
     ODBC_TYPE=adabas
     ODBC_INCDIR=$PHP_ADABAS/incl
-    PHP_ODBC_CHECK_HEADER(sqlext.h)
+    PHP_ODBC_CHECK_HEADER([sqlext.h])
     AC_DEFINE([HAVE_ADABAS], [1],
       [Define to 1 if the odbc extension uses the Adabas D.])
     AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([sapdb],,
   [AS_HELP_STRING([[--with-sapdb[=DIR]]],
     [Include SAP DB support [/usr/local]])])
@@ -146,9 +160,9 @@ PHP_ARG_WITH([sapdb],,
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([solid],,
   [AS_HELP_STRING([[--with-solid[=DIR]]],
     [Include Solid support [/usr/local/solid]])])
@@ -169,13 +183,13 @@ PHP_ARG_WITH([solid],,
         [Define to 1 if the odbc extension uses the Solid DB.])
     fi
     AC_MSG_RESULT([$ext_output])
-    PHP_ODBC_FIND_SOLID_LIBS($ODBC_LIBDIR)
+    PHP_ODBC_FIND_SOLID_LIBS([$ODBC_LIBDIR])
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([ibm-db2],,
   [AS_HELP_STRING([[--with-ibm-db2[=DIR]]],
     [Include IBM DB2 support [/home/db2inst1/sqllib]])])
@@ -190,7 +204,7 @@ PHP_ARG_WITH([ibm-db2],,
       ODBC_LIBDIR=$PHP_IBM_DB2/$PHP_LIBDIR
     fi
 
-    PHP_ODBC_CHECK_HEADER(sqlcli1.h)
+    PHP_ODBC_CHECK_HEADER([sqlcli1.h])
 
     ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
@@ -213,9 +227,9 @@ PHP configure:
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([empress],,
   [AS_HELP_STRING([[--with-empress[=DIR]]],
     [Include Empress support $EMPRESSPATH (Empress Version >= 8.60
@@ -236,13 +250,13 @@ PHP_ARG_WITH([empress],,
     AC_DEFINE([HAVE_EMPRESS], [1],
       [Define to 1 if the odbc extension uses the Empress.])
     AC_MSG_RESULT([$ext_output])
-    PHP_ODBC_FIND_EMPRESS_LIBS($ODBC_LIBDIR)
+    PHP_ODBC_FIND_EMPRESS_LIBS([$ODBC_LIBDIR])
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([empress-bcs],,
   [AS_HELP_STRING([[--with-empress-bcs[=DIR]]],
     [Include Empress Local Access support $EMPRESSPATH (Empress Version >=
@@ -261,7 +275,7 @@ PHP_ARG_WITH([empress-bcs],,
     LD="empocc -bcs";export LD;
     ODBC_CFLAGS=-I$ODBC_INCDIR
     ODBC_LFLAGS=-L$ODBC_LIBDIR
-    LIST=`empocc -listlines -bcs -o a a.c`
+    LIST=$(empocc -listlines -bcs -o a a.c)
 
     NEWLIST=
     for I in $LIST
@@ -279,13 +293,13 @@ PHP_ARG_WITH([empress-bcs],,
     AC_DEFINE([HAVE_EMPRESS], [1],
       [Define to 1 if the odbc extension uses the Empress.])
     AC_MSG_RESULT([$ext_output])
-    PHP_ODBC_FIND_EMPRESS_BCS_LIBS($ODBC_LIBDIR)
+    PHP_ODBC_FIND_EMPRESS_BCS_LIBS([$ODBC_LIBDIR])
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([custom-odbc],,
   [AS_HELP_STRING([[--with-custom-odbc[=DIR]]],
     [Include user defined ODBC support. DIR is ODBC install base directory
@@ -310,9 +324,9 @@ PHP_ARG_WITH([custom-odbc],,
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([iodbc],,
   [AS_HELP_STRING([--with-iodbc],
     [Include iODBC support])])
@@ -328,9 +342,9 @@ PHP_ARG_WITH([iodbc],,
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([esoob],,
   [AS_HELP_STRING([[--with-esoob[=DIR]]],
     [Include Easysoft OOB support [/usr/local/easysoft/oob/client]])])
@@ -350,9 +364,9 @@ PHP_ARG_WITH([esoob],,
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([unixODBC],,
   [AS_HELP_STRING([--with-unixODBC],
     [Include unixODBC support])])
@@ -370,7 +384,7 @@ PHP_ARG_WITH([unixODBC],,
       ODBC_LFLAGS=-L$ODBC_LIBDIR
       ODBC_CFLAGS=-I$ODBC_INCDIR
       ODBC_LIBS=-lodbc
-      PHP_ODBC_CHECK_HEADER(sqlext.h)
+      PHP_ODBC_CHECK_HEADER([sqlext.h])
       AC_MSG_RESULT([yes in $PHP_UNIXODBC])
     fi
     ODBC_TYPE=unixODBC
@@ -379,9 +393,9 @@ PHP_ARG_WITH([unixODBC],,
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
-if test -z "$ODBC_TYPE"; then
+AS_VAR_IF([ODBC_TYPE],, [
 PHP_ARG_WITH([dbmaker],,
   [AS_HELP_STRING([[--with-dbmaker[=DIR]]],
     [Include DBMaker support])])
@@ -390,15 +404,15 @@ PHP_ARG_WITH([dbmaker],,
   if test "$PHP_DBMAKER" != "no"; then
     if test "$PHP_DBMAKER" = "yes"; then
       dnl Find dbmaker's home directory
-      DBMAKER_HOME=`grep "^dbmaker:" /etc/passwd | $AWK -F: '{print $6}'`
+      DBMAKER_HOME=$(grep "^dbmaker:" /etc/passwd | $AWK -F: '{print $6}')
 
       dnl check DBMaker version (from 5.0 to 2.0)
       DBMAKER_VERSION=5.0
 
       while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION && test "$DBMAKER_VERSION" != "2.9"; do
-        DM_VER=`echo $DBMAKER_VERSION | sed -e 's/\.//' | $AWK '{ print $1-1;}'`
-        MAJOR_V=`echo $DM_VER | $AWK '{ print $1/10; }'  | $AWK -F. '{ print $1; }'`
-        MINOR_V=`echo $DM_VER | $AWK '{ print $1%10; }'`
+        DM_VER=$(echo $DBMAKER_VERSION | sed -e 's/\.//' | $AWK '{ print $1-1;}')
+        MAJOR_V=$(echo $DM_VER | $AWK '{ print $1/10; }'  | $AWK -F. '{ print $1; }')
+        MINOR_V=$(echo $DM_VER | $AWK '{ print $1%10; }')
         DBMAKER_VERSION=$MAJOR_V.$MINOR_V
       done
 
@@ -419,20 +433,20 @@ PHP_ARG_WITH([dbmaker],,
     AC_DEFINE([HAVE_DBMAKER], [1],
       [Define to 1 if the odbc extension uses the DBMaker.])
 
-    if test "$ext_shared" = "yes"; then
+    AS_VAR_IF([ext_shared], [yes], [
       AC_MSG_RESULT([yes (shared)])
       ODBC_LIBS="-ldmapic -lc -lm"
       ODBC_SHARED="odbc.la"
-    else
+    ], [
       AC_MSG_RESULT([yes (static)])
       PHP_ADD_LIBRARY_WITH_PATH([dmapic], [$ODBC_LIBDIR])
       PHP_ADD_INCLUDE([$ODBC_INCDIR])
       ODBC_STATIC="libphpext_odbc.la"
-    fi
+    ])
   else
     AC_MSG_RESULT([no])
   fi
-fi
+])
 
 AH_TEMPLATE([ODBCVER], [The highest supported ODBC version.])
 AS_VAR_IF([PHP_ODBCVER], [no],
