@@ -19,6 +19,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_gc.h"
 #include "zend_ini.h"
 #include "zend_vm.h"
 #include "zend_exceptions.h"
@@ -27,6 +28,7 @@
 #include "zend_mmap.h"
 #include "zend_compile.h"
 #include "zend_closures.h"
+#include "zend_generators.h"
 
 #include "zend_fibers.h"
 #include "zend_fibers_arginfo.h"
@@ -763,7 +765,25 @@ static HashTable *zend_fiber_object_gc(zend_object *object, zval **table, int *n
 	HashTable *lastSymTable = NULL;
 	zend_execute_data *ex = fiber->execute_data;
 	for (; ex; ex = ex->prev_execute_data) {
-		HashTable *symTable = zend_unfinished_execution_gc_ex(ex, ex->func && ZEND_USER_CODE(ex->func->type) ? ex->call : NULL, buf, false);
+		HashTable *symTable;
+		if (ZEND_CALL_INFO(ex) & ZEND_CALL_GENERATOR) {
+			/* The generator object is stored in ex->return_value */
+			zend_generator *generator = (zend_generator*)ex->return_value;
+			/* There are two cases to consider:
+			 * - If the generator is currently running, the Generator's GC
+			 *   handler will ignore it because it is not collectable. However,
+			 *   in this context the generator is suspended in Fiber::suspend()
+			 *   and may be collectable, so we can inspect it.
+			 * - If the generator is not running, the Generator's GC handler
+			 *   will inspect it. In this case we have to skip the frame.
+			 */
+			if (!(generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING)) {
+				continue;
+			}
+			symTable = zend_generator_frame_gc(buf, generator);
+		} else {
+			symTable = zend_unfinished_execution_gc_ex(ex, ex->func && ZEND_USER_CODE(ex->func->type) ? ex->call : NULL, buf, false);
+		}
 		if (symTable) {
 			if (lastSymTable) {
 				zval *val;

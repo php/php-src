@@ -129,6 +129,8 @@ static zend_always_inline zend_generator *zend_generator_get_current(zend_genera
 	return zend_generator_update_current(generator);
 }
 
+HashTable *zend_generator_frame_gc(zend_get_gc_buffer *gc_buffer, zend_generator *generator);
+
 END_EXTERN_C()
 
 #endif

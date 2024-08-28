@@ -4564,7 +4564,20 @@ ZEND_API ZEND_ATTRIBUTE_DEPRECATED HashTable *zend_unfinished_execution_gc(zend_
 
 ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_data, zend_execute_data *call, zend_get_gc_buffer *gc_buffer, bool suspended_by_yield)
 {
-	if (!EX(func) || !ZEND_USER_CODE(EX(func)->common.type)) {
+	if (!EX(func)) {
+		return NULL;
+	}
+
+	if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
+		zend_get_gc_buffer_add_obj(gc_buffer, Z_OBJ(execute_data->This));
+	}
+
+	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
+		zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(EX(func)));
+	}
+
+	if (!ZEND_USER_CODE(EX(func)->common.type)) {
+		ZEND_ASSERT(!(EX_CALL_INFO() & (ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)));
 		return NULL;
 	}
 
@@ -4585,12 +4598,6 @@ ZEND_API HashTable *zend_unfinished_execution_gc_ex(zend_execute_data *execute_d
 		}
 	}
 
-	if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
-		zend_get_gc_buffer_add_obj(gc_buffer, Z_OBJ(execute_data->This));
-	}
-	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
-		zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(EX(func)));
-	}
 	if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
 		zval extra_named_params;
 		ZVAL_ARR(&extra_named_params, EX(extra_named_params));
