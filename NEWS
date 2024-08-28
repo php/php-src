@@ -71,6 +71,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15169 (stack overflow when var serialization in
     ext/standard/var). (nielsdos)
 
+- Windows:
+  . Fixed bug GH-16199 (GREP_HEADER() is broken). (Peter Kokot)
+
 26 Sep 2024, PHP 8.4.0RC1
 
 - BcMath:
