@@ -5958,13 +5958,6 @@ static zval *date_period_read_property(zend_object *object, zend_string *name, i
 		}
 	}
 
-	if (type != BP_VAR_IS && type != BP_VAR_R) {
-		if (date_period_is_internal_property(name)) {
-			zend_readonly_property_modification_error_ex("DatePeriod", ZSTR_VAL(name));
-			return &EG(uninitialized_zval);
-		}
-	}
-
 	return zend_std_read_property(object, name, type, cache_slot, rv);
 }
 /* }}} */
