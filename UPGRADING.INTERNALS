@@ -186,6 +186,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - M4 macro PHP_INSTALL_HEADERS arguments can now be also
      blank-or-newline-separated lists instead of only separated with whitespace
      or backslash-then-newline.
+   - M4 macro PHP_ADD_BUILD_DIR now also accepts 1st argument as a
+     blank-or-newline-separated separated list.
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and

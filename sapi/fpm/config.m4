@@ -506,8 +506,10 @@ if test "$PHP_FPM" != "no"; then
   php_fpm_prefix=$(eval echo $prefix)
   AC_SUBST([php_fpm_prefix])
 
-  PHP_ADD_BUILD_DIR([sapi/fpm/fpm])
-  PHP_ADD_BUILD_DIR([sapi/fpm/fpm/events])
+  PHP_ADD_BUILD_DIR([
+    sapi/fpm/fpm
+    sapi/fpm/fpm/events
+  ])
   AC_CONFIG_FILES([
     sapi/fpm/init.d.php-fpm
     sapi/fpm/php-fpm.8
