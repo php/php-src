@@ -302,6 +302,13 @@ PHP 8.4 UPGRADE NOTES
     to allow or abort the request.
   . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
     CURLOPT_FTP_RESPONSE_TIMEOUT. Both constants hold the same value.
+  . Added CURLOPT_DEBUGFUNCTION support. This Curl option accepts a callable
+    that gets called during the request lifetime with the CurlHandle object,
+    an integer containing the debug message type, and a string containing the
+    debug message. The debug message type is one of CURLINFO_TEXT, CURLINFO_HEADER_IN,
+    CURLINFO_HEADER_OUT, CURLINFO_DATA_IN, CURLINFO_DATA_OUT, CURLINFO_SSL_DATA_OUT,
+    CURLINFO_SSL_DATA_IN constants. Once this option is set, CURLINFO_HEADER_OUT
+    must not be set because it uses the same libcurl functionality.
 
 - Date:
   . Added static methods
@@ -1041,6 +1048,13 @@ PHP 8.4 UPGRADE NOTES
   . CURL_PREREQFUNC_OK.
   . CURL_PREREQFUNC_ABORT.
   . CURLOPT_SERVER_RESPONSE_TIMEOUT.
+  . CURLOPT_DEBUGFUNCTION.
+  . CURLINFO_TEXT.
+  . CURLINFO_HEADER_IN.
+  . CURLINFO_DATA_IN.
+  . CURLINFO_DATA_OUT.
+  . CURLINFO_SSL_DATA_OUT.
+  . CURLINFO_SSL_DATA_IN.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant

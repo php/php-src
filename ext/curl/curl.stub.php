@@ -486,6 +486,48 @@ const CURLOPT_WRITEHEADER = UNKNOWN;
  */
 const CURLOPT_XFERINFOFUNCTION = UNKNOWN;
 
+/**
+ * @var int
+ * @cvalue CURLOPT_DEBUGFUNCTION
+ */
+const CURLOPT_DEBUGFUNCTION = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_TEXT
+ */
+const CURLINFO_TEXT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_HEADER_IN
+ */
+const CURLINFO_HEADER_IN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_DATA_IN
+ */
+const CURLINFO_DATA_IN = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_DATA_OUT
+ */
+const CURLINFO_DATA_OUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_SSL_DATA_OUT
+ */
+const CURLINFO_SSL_DATA_OUT = UNKNOWN;
+
+/**
+ * @var int
+ * @cvalue CURLINFO_SSL_DATA_IN
+ */
+const CURLINFO_SSL_DATA_IN = UNKNOWN;
+
 /* */
 /**
  * @var int
