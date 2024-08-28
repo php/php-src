@@ -2905,6 +2905,7 @@ PHP_METHOD(DateTime, __wakeup)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -2924,6 +2925,7 @@ PHP_METHOD(DateTimeImmutable, __wakeup)
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -3815,6 +3817,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Timezone initialization failed");
 		zval_ptr_dtor(return_value);
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -3834,6 +3837,7 @@ PHP_METHOD(DateTimeZone, __wakeup)
 
 	if (!php_date_timezone_initialize_from_hash(&return_value, &tzobj, myht)) {
 		zend_throw_error(NULL, "Timezone initialization failed");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -3899,6 +3903,7 @@ PHP_METHOD(DateTimeZone, __unserialize)
 
 	if (!php_date_timezone_initialize_from_hash(&object, &tzobj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DateTimeZone object");
+		RETURN_THROWS();
 	}
 
 	restore_custom_datetimezone_properties(object, myht);
@@ -5440,6 +5445,7 @@ PHP_METHOD(DatePeriod, __set_state)
 	period_obj = Z_PHPPERIOD_P(return_value);
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -5515,6 +5521,7 @@ PHP_METHOD(DatePeriod, __unserialize)
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		RETURN_THROWS();
 	}
 	restore_custom_dateperiod_properties(object, myht);
 }
@@ -5535,6 +5542,7 @@ PHP_METHOD(DatePeriod, __wakeup)
 
 	if (!php_date_period_initialize_from_hash(period_obj, myht)) {
 		zend_throw_error(NULL, "Invalid serialization data for DatePeriod object");
+		RETURN_THROWS();
 	}
 }
 /* }}} */
