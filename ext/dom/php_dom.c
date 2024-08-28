@@ -365,16 +365,31 @@ static zval *dom_get_property_ptr_ptr(zend_object *object, zend_string *name, in
 	return NULL;
 }
 
+static zend_always_inline const dom_prop_handler *dom_get_prop_handler(const dom_object *obj, zend_string *name, void **cache_slot)
+{
+	const dom_prop_handler *hnd = NULL;
+
+	if (obj->prop_handler != NULL) {
+		if (cache_slot) {
+			hnd = *cache_slot;
+		}
+		if (!hnd) {
+			hnd = zend_hash_find_ptr(obj->prop_handler, name);
+			if (cache_slot) {
+				*cache_slot = (void *) hnd;
+			}
+		}
+	}
+
+	return hnd;
+}
+
 /* {{{ dom_read_property */
 zval *dom_read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
 	zval *retval;
-	dom_prop_handler *hnd = NULL;
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
+	const dom_prop_handler *hnd = dom_get_prop_handler(obj, name, cache_slot);
 
 	if (hnd) {
 		int ret = hnd->read_func(obj, rv);
@@ -394,19 +409,25 @@ zval *dom_read_property(zend_object *object, zend_string *name, int type, void *
 zval *dom_write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
 	dom_object *obj = php_dom_obj_from_obj(object);
-	dom_prop_handler *hnd = NULL;
-
-	if (obj->prop_handler != NULL) {
-		hnd = zend_hash_find_ptr(obj->prop_handler, name);
-	}
+	const dom_prop_handler *hnd = dom_get_prop_handler(obj, name, cache_slot);
 
 	if (hnd) {
-		if (!hnd->write_func) {
+		if (UNEXPECTED(!hnd->write_func)) {
 			zend_readonly_property_modification_error_ex(ZSTR_VAL(object->ce->name), ZSTR_VAL(name));
 			return &EG(error_zval);
 		}
 
-		zend_property_info *prop = zend_get_property_info(object->ce, name, /* silent */ true);
+		zend_property_info *prop = NULL;
+		if (cache_slot) {
+			prop = *(cache_slot + 1);
+		}
+		if (!prop) {
+			prop = zend_get_property_info(object->ce, name, /* silent */ true);
+			if (cache_slot) {
+				*(cache_slot + 1) = prop;
+			}
+		}
+
 		ZEND_ASSERT(prop && ZEND_TYPE_IS_SET(prop->type));
 		zval tmp;
 		ZVAL_COPY(&tmp, value);
