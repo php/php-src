@@ -331,7 +331,7 @@ dnl
 AC_DEFUN([PHP_DBA_DB_CHECK],[
   AS_VAR_IF([THIS_INCLUDE],,
     [AC_MSG_ERROR([DBA: Could not find necessary header file(s).])])
-  for LIB in $2; do
+  for LIB in m4_normalize([$2]); do
     if test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.a || test -f $THIS_PREFIX/$PHP_LIBDIR/lib$LIB.$SHLIB_SUFFIX_NAME; then
       lib_found="";
       PHP_TEMP_LDFLAGS([-L$THIS_PREFIX/$PHP_LIBDIR], [-l$LIB],
@@ -380,17 +380,18 @@ AC_DEFUN([PHP_DBA_DB_CHECK],[
     [AC_MSG_RESULT([yes])],
     [AC_MSG_ERROR([At least version 3.3 is required])])
   ])
-  if test -n "$THIS_LIBS"; then
-    AC_DEFINE_UNQUOTED([DBA_DB$1], [1],
-      [Define to 1 if the dba extension uses the Berkeley DB version $1 (DB$1)
-      handler.])
-    if test -n "$THIS_INCLUDE"; then
-      AC_DEFINE_UNQUOTED([DB$1_INCLUDE_FILE], ["$THIS_INCLUDE"],
-        [The DB$1 handler header file.])
-    fi
-  else
-    AC_MSG_ERROR([DBA: Could not find necessary library.])
-  fi
+
+  AS_VAR_IF([THIS_LIBS],,
+    [AC_MSG_ERROR([DBA: Could not find necessary library.])])
+
+  AC_DEFINE_UNQUOTED([DBA_DB$1], [1],
+    [Define to 1 if the dba extension uses the Berkeley DB version $1 (DB$1)
+    handler.])
+
+  AS_VAR_IF([THIS_INCLUDE],,,
+    [AC_DEFINE_UNQUOTED([DB$1_INCLUDE_FILE], ["$THIS_INCLUDE"],
+      [The DB$1 handler header file.])])
+
   THIS_RESULT=yes
   DB$1_LIBS=$THIS_LIBS
   DB$1_PREFIX=$THIS_PREFIX
@@ -404,7 +405,22 @@ if test "$PHP_DB4" != "no"; then
   PHP_DBA_STD_BEGIN
   dbdp4="/usr/local/BerkeleyDB.4."
   dbdp5="/usr/local/BerkeleyDB.5."
-  for i in $PHP_DB4 ${dbdp5}1 ${dbdp5}0 ${dbdp4}8 ${dbdp4}7 ${dbdp4}6 ${dbdp4}5 ${dbdp4}4 ${dbdp4}3 ${dbdp4}2 ${dbdp4}1 ${dbdp}0 /usr/local /usr; do
+  for i in \
+    $PHP_DB4 \
+    ${dbdp5}1 \
+    ${dbdp5}0 \
+    ${dbdp4}8 \
+    ${dbdp4}7 \
+    ${dbdp4}6 \
+    ${dbdp4}5 \
+    ${dbdp4}4 \
+    ${dbdp4}3 \
+    ${dbdp4}2 \
+    ${dbdp4}1 \
+    ${dbdp4}0 \
+    /usr/local \
+    /usr \
+  ; do
     if test -f "$i/db5/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/db5/db.h
@@ -459,7 +475,25 @@ if test "$PHP_DB4" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(4, db-5.3 db-5.1 db-5.0 db-4.8 db-4.7 db-4.6 db-4.5 db-4.4 db-4.3 db-4.2 db-4.1 db-4.0 db-4 db4 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK([4],
+    [
+      db-5.3
+      db-5.1
+      db-5.0
+      db-4.8
+      db-4.7
+      db-4.6
+      db-4.5
+      db-4.4
+      db-4.3
+      db-4.2
+      db-4.1
+      db-4.0
+      db-4
+      db4
+      db
+    ],
+    [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
 fi
 PHP_DBA_STD_RESULT([db4], [Berkeley DB4])
 
@@ -470,7 +504,15 @@ if test "$PHP_DB3" != "no"; then
     [PHP_DBA_STD_RESULT([db3],
       [Berkeley DB3],
       [You cannot combine --with-db3 with --with-db4])])
-  for i in $PHP_DB3 /usr/local/BerkeleyDB.3.3 /usr/local/BerkeleyDB.3.2 /usr/local/BerkeleyDB.3.1 /usr/local/BerkeleyDB.3.0 /usr/local /usr; do
+  for i in \
+    $PHP_DB3 \
+    /usr/local/BerkeleyDB.3.3 \
+    /usr/local/BerkeleyDB.3.2 \
+    /usr/local/BerkeleyDB.3.1 \
+    /usr/local/BerkeleyDB.3.0 \
+    /usr/local \
+    /usr\
+  ; do
     if test -f "$i/db3/db.h"; then
       THIS_PREFIX=$i
       THIS_INCLUDE=$i/include/db3/db.h
@@ -493,7 +535,9 @@ if test "$PHP_DB3" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(3, db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db, [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK([3],
+    [db-3.3 db-3.2 db-3.1 db-3.0 db-3 db3 db],
+    [(void)db_create((DB**)0, (DB_ENV*)0, 0)])
 fi
 PHP_DBA_STD_RESULT([db3], [Berkeley DB3])
 
@@ -528,7 +572,9 @@ if test "$PHP_DB2" != "no"; then
       break
     fi
   done
-  PHP_DBA_DB_CHECK(2, db-2 db2 db,  [(void)db_appinit("", NULL, (DB_ENV*)0, 0)])
+  PHP_DBA_DB_CHECK([2],
+    [db-2 db2 db],
+    [(void)db_appinit("", NULL, (DB_ENV*)0, 0)])
 fi
 PHP_DBA_STD_RESULT([db2], [Berkeley DB2])
 
@@ -552,7 +598,11 @@ if test "$PHP_DB1" != "no"; then
     AC_DEFINE_UNQUOTED([DB1_VERSION],
       ["Berkeley DB 1.85 emulation in DB$THIS_VERSION"],
       [The DB1 handler version information.])
-    for i in db$THIS_VERSION/db_185.h include/db$THIS_VERSION/db_185.h include/db/db_185.h; do
+    for i in \
+      db$THIS_VERSION/db_185.h \
+      include/db$THIS_VERSION/db_185.h \
+      include/db/db_185.h \
+    ; do
       if test -f "$THIS_PREFIX/$i"; then
         THIS_INCLUDE=$THIS_PREFIX/$i
         break
@@ -625,15 +675,15 @@ if test "$PHP_DBM" != "no"; then
         AC_MSG_CHECKING([for DBM using GDBM])
         AC_DEFINE_UNQUOTED([DBM_INCLUDE_FILE], ["$THIS_INCLUDE"],
           [The DBM handler include file.])
-        if test "$LIB" = "gdbm"; then
+        AS_VAR_IF([LIB], [gdbm], [
           AC_DEFINE([DBM_VERSION], ["GDBM"],
             [The DBM handler version information.])
           AC_MSG_RESULT([yes])
-        else
+        ], [
           AC_DEFINE([DBM_VERSION], ["DBM"],
             [The DBM handler version information.])
           AC_MSG_RESULT([no])
-        fi
+        ])
         AC_DEFINE([DBA_DBM], [1],
           [Define to 1 if the dba extension uses the DBM handler.])
         THIS_LIBS=$LIB
