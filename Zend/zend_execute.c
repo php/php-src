@@ -930,7 +930,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_asymmetric_visibility_property_modifi
 		visibility = "private(set)";
 	} else {
 		ZEND_ASSERT(prop_info->flags & ZEND_ACC_PROTECTED_SET);
-		visibility = "protected(set)";
+		if (prop_info->flags & ZEND_ACC_READONLY) {
+			visibility = "protected(set) readonly";
+		} else {
+			visibility = "protected(set)";
+		}
 	}
 
 	zend_throw_error(NULL, "Cannot %s %s property %s::$%s from %s%s",

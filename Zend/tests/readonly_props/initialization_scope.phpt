@@ -59,7 +59,7 @@ var_dump($test);
 
 ?>
 --EXPECTF--
-Cannot modify protected(set) property A::$prop from global scope
+Cannot modify protected(set) readonly property A::$prop from global scope
 object(B)#%d (1) {
   ["prop"]=>
   int(2)

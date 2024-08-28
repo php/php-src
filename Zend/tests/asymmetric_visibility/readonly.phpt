@@ -57,6 +57,6 @@ test();
 ?>
 --EXPECT--
 Cannot modify private(set) property P::$pPrivate from scope C
-Cannot modify protected(set) property P::$pDefault from global scope
+Cannot modify protected(set) readonly property P::$pDefault from global scope
 Cannot modify private(set) property P::$pPrivate from global scope
-Cannot modify protected(set) property P::$pProtected from global scope
+Cannot modify protected(set) readonly property P::$pProtected from global scope

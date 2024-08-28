@@ -126,9 +126,9 @@ Init: 0, scope: 1, op: is: 0
 Init: 0, scope: 1, op: us: done
 Init: 0, scope: 1, op: us_dim: done
 Init: 0, scope: 0, op: r: Typed property Test::$prop must not be accessed before initialization
-Init: 0, scope: 0, op: w: Cannot modify protected(set) property Test::$prop from global scope
+Init: 0, scope: 0, op: w: Cannot modify protected(set) readonly property Test::$prop from global scope
 Init: 0, scope: 0, op: rw: Typed property Test::$prop must not be accessed before initialization
 Init: 0, scope: 0, op: im: Cannot indirectly modify readonly property Test::$prop
 Init: 0, scope: 0, op: is: 0
-Init: 0, scope: 0, op: us: Cannot unset protected(set) property Test::$prop from global scope
+Init: 0, scope: 0, op: us: Cannot unset protected(set) readonly property Test::$prop from global scope
 Init: 0, scope: 0, op: us_dim: done
