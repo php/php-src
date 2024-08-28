@@ -19,5 +19,5 @@ try {
 }
 ?>
 --EXPECT--
-Cannot unset readonly property BcMath\Number::$value from global scope
-Cannot unset readonly property BcMath\Number::$scale from global scope
+Cannot unset protected(set) property BcMath\Number::$value from global scope
+Cannot unset protected(set) property BcMath\Number::$scale from global scope
