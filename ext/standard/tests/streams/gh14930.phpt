@@ -1,7 +1,9 @@
 --TEST--
 GH-14930: Custom stream wrapper dir_readdir output truncated to 255 characters in PHP 8.3
---XFAIL--
-Fix is an ABI break so reverted from 8.3
+--SKIPIF--
+<?php
+if (PHP_OS_FAMILY !== "Windows") die("xfail Fix is an ABI break so reverted from 8.3");
+?>
 --FILE--
 <?php
 
