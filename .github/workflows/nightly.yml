@@ -15,6 +15,7 @@ jobs:
       matrix-include: ${{ steps.set-matrix.outputs.matrix-include }}
       windows-matrix-include: ${{ steps.set-matrix.outputs.windows-matrix-include }}
       macos-matrix-include: ${{ steps.set-matrix.outputs.macos-matrix-include }}
+      alpine-matrix-include: ${{ steps.set-matrix.outputs.alpine-matrix-include }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,6 +40,65 @@ jobs:
         uses: ./.github/actions/notify-slack
         with:
           token: ${{ secrets.ACTION_MONITORING_SLACK }}
+  ALPINE:
+    needs: GENERATE_MATRIX
+    if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.GENERATE_MATRIX.outputs.alpine-matrix-include) }}
+    name: "${{ matrix.branch.name }}_ALPINE_X64${{ matrix.name }}_${{ matrix.debug && 'DEBUG' || 'RELEASE' }}_${{ matrix.zts && 'ZTS' || 'NTS' }}"
+    runs-on: ubuntu-22.04
+    container:
+      image: 'alpine:3.20.1'
+    steps:
+      - name: git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch.ref }}
+      - name: apk
+        uses: ./.github/actions/apk
+      - name: LLVM 17 (ASAN-only)
+        if: ${{ matrix.asan }}
+        # libclang_rt.asan-x86_64.a is provided by compiler-rt, and only for clang17:
+        # https://pkgs.alpinelinux.org/contents?file=libclang_rt.asan-x86_64.a&path=&name=&branch=v3.20
+        run: |
+          apk add clang17 compiler-rt
+      - name: System info
+        run: |
+          echo "::group::Show host CPU info"
+          lscpu
+          echo "::endgroup::"
+          echo "::group::Show installed package versions"
+          apk list
+          echo "::endgroup::"
+      - name: ./configure
+        uses: ./.github/actions/configure-alpine
+        with:
+          configurationParameters: >-
+            ${{ matrix.configuration_parameters }}
+            --${{ matrix.debug && 'enable' || 'disable' }}-debug
+            --${{ matrix.zts && 'enable' || 'disable' }}-zts
+          skipSlow: ${{ matrix.asan }}
+      - name: make
+        run: make -j$(/usr/bin/nproc) >/dev/null
+      - name: make install
+        uses: ./.github/actions/install-alpine
+      - name: Test Tracing JIT
+        if: matrix.test_jit
+        uses: ./.github/actions/test-alpine
+        with:
+          jitType: tracing
+          runTestsParameters: >-
+            ${{ matrix.run_tests_parameters }}
+            -d zend_extension=opcache.so
+            -d opcache.enable_cli=1
+      - name: Notify Slack
+        if: failure()
+        uses: ./.github/actions/notify-slack
+        with:
+          token: ${{ secrets.ACTION_MONITORING_SLACK }}
+
   LINUX_X64:
     needs: GENERATE_MATRIX
     if: ${{ needs.GENERATE_MATRIX.outputs.branches != '[]' }}
