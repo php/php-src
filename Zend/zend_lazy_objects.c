@@ -234,6 +234,7 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			/* Call object_init_ex() for the generated exception */
 			zend_result result = object_init_ex(&zobj, reflection_ce);
 			ZEND_ASSERT(result == FAILURE && EG(exception));
+			(void)result;
 			return NULL;
 		}
 
