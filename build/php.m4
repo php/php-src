@@ -2030,24 +2030,25 @@ dnl Misc. macros
 dnl ----------------------------------------------------------------------------
 
 dnl
-dnl PHP_INSTALL_HEADERS(path [, file ...])
+dnl PHP_INSTALL_HEADERS(path [, files ...])
 dnl
-dnl PHP header files to be installed.
+dnl Add PHP header files to the list to be installed on the system. The "files"
+dnl argument is a blank-or-newline-separated list of header files or directories
+dnl located in the "path". If 2nd argument is not given, it installs header
+dnl files in all paths from the blank-or-newline-separated "path" argument.
 dnl
-AC_DEFUN([PHP_INSTALL_HEADERS],[
-  ifelse([$2],[],[
-    for header_file in $1; do
-      PHP_RUN_ONCE(INSTALLHEADERS, $header_file, [
-        INSTALL_HEADERS="$INSTALL_HEADERS $header_file"
-      ])
+AC_DEFUN([PHP_INSTALL_HEADERS],
+  [m4_ifblank([$2], [
+    for header_file in m4_normalize(m4_expand([$1])); do
+      PHP_RUN_ONCE([INSTALLHEADERS], [$header_file],
+        [INSTALL_HEADERS="$INSTALL_HEADERS $header_file"])
     done
   ], [
     header_path=$1
-    for header_file in $2; do
+    for header_file in m4_normalize(m4_expand([$2])); do
       hp_hf="$header_path/$header_file"
-      PHP_RUN_ONCE(INSTALLHEADERS, $hp_hf, [
-        INSTALL_HEADERS="$INSTALL_HEADERS $hp_hf"
-      ])
+      PHP_RUN_ONCE([INSTALLHEADERS], [$hp_hf],
+        [INSTALL_HEADERS="$INSTALL_HEADERS $hp_hf"])
     done
   ])
 ])
