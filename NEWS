@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta5
 
+- Core:
+  . Fixed bug GH-15330 (Do not scan generator frames more than once). (Arnaud)
+
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
     PHP 8.1 than in PHP 8.0). (nielsdos)
