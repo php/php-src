@@ -31,7 +31,7 @@ int(2)
 
 Warning: session_save_path(): Session save path cannot be changed when a session is active in %s on line %d
 
-Deprecated: session_set_save_handler(): Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 
 Warning: session_set_save_handler(): Session save handler cannot be changed when a session is active in %s on line %d
 bool(false)

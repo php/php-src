@@ -59,7 +59,7 @@ rmdir($path);
 string(0) ""
 *** Without lazy_write ***
 
-Deprecated: session_set_save_handler(): Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 bool(true)
 Open [%s,PHPSESSID]
 CreateID [PHPT-%d]
@@ -75,7 +75,7 @@ string(%d) "PHPT-%d"
 *** With lazy_write ***
 string(%d) "PHPT-%d"
 
-Deprecated: session_set_save_handler(): Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 bool(true)
 Open [%s,PHPSESSID]
 ValidateID [%s,PHPT-%d]
