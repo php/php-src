@@ -18,6 +18,7 @@
 */
 
 #include "zend_portability.h"
+#include "zend.h" /* For zend_error_noreturn() */
 
 #ifndef ZEND_MULTIPLY_H
 #define ZEND_MULTIPLY_H

@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
  */
 
-#include <zend.h>
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
 #include "zend_enum.h"

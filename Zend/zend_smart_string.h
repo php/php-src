@@ -21,7 +21,8 @@
 #include "zend_smart_string_public.h"
 
 #include <stdlib.h>
-#include <zend.h>
+#include "zend_portability.h"
+#include "zend_long.h"
 
 /* wrapper */
 

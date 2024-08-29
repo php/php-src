@@ -321,7 +321,7 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 	} else {
 		value = Z_L(1)<<30;		/* effectively, no limit */
 	}
-	if (zend_set_memory_limit(value) == FAILURE) {
+	if (!zend_set_memory_limit(value)) {
 		/* When the memory limit is reset to the original level during deactivation, we may be
 		 * using more memory than the original limit while shutdown is still in progress.
 		 * Ignore a failure for now, and set the memory limit when the memory manager has been

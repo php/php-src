@@ -26,6 +26,7 @@
 # include <config.h>
 #endif
 
+
 #define ACCELERATOR_PRODUCT_NAME	"Zend OPcache"
 /* 2 - added Profiler support, on 20010712 */
 /* 3 - added support for Optimizer's encoded-only-files mode */
@@ -48,6 +49,8 @@
 # include <unistd.h>
 #endif
 
+#include "zend_types.h"
+#include "zend_modules.h"
 #include "zend_extensions.h"
 #include "zend_compile.h"
 
@@ -311,7 +314,7 @@ extern const char *zps_api_failure_reason;
 BEGIN_EXTERN_C()
 
 void accel_shutdown(void);
-zend_result  accel_activate(INIT_FUNC_ARGS);
+zend_result accel_activate(INIT_FUNC_ARGS);
 zend_result accel_post_deactivate(void);
 void zend_accel_schedule_restart(zend_accel_restart_reason reason);
 void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);

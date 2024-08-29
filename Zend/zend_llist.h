@@ -20,6 +20,8 @@
 #ifndef ZEND_LLIST_H
 #define ZEND_LLIST_H
 
+#include <stdarg.h>
+#include <stddef.h>
 #include "zend_portability.h"
 
 typedef struct _zend_llist_element {

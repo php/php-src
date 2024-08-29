@@ -17,9 +17,10 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
 #include "zend_sort.h"
-#include <limits.h>
+#include "zend_long.h"
+#include "zend_portability.h"
+#include <stddef.h>
 
 static inline void zend_sort_2(void *a, void *b, compare_func_t cmp, swap_func_t swp) /* {{{ */ {
 	if (cmp(a, b) > 0) {

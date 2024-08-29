@@ -20,9 +20,10 @@
 #ifndef MODULES_H
 #define MODULES_H
 
-#include "zend.h"
-#include "zend_compile.h"
+#include "zend_portability.h"
+#include "zend_types.h"
 #include "zend_build.h"
+#include "zend_ini.h"
 
 #define INIT_FUNC_ARGS		int type, int module_number
 #define INIT_FUNC_ARGS_PASSTHRU	type, module_number
@@ -64,7 +65,6 @@
 #define MODULE_PERSISTENT 1
 #define MODULE_TEMPORARY 2
 
-struct _zend_ini_entry;
 typedef struct _zend_module_entry zend_module_entry;
 typedef struct _zend_module_dep zend_module_dep;
 

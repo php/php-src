@@ -2853,7 +2853,7 @@ ZEND_API char* ZEND_FASTCALL zend_strndup(const char *s, size_t length)
 	return p;
 }
 
-ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
+ZEND_API bool zend_set_memory_limit(size_t memory_limit)
 {
 #if ZEND_MM_LIMIT
 	zend_mm_heap *heap = AG(mm_heap);
@@ -2868,13 +2868,13 @@ ZEND_API zend_result zend_set_memory_limit(size_t memory_limit)
 				heap->cached_chunks_count--;
 				heap->real_size -= ZEND_MM_CHUNK_SIZE;
 			} while (memory_limit < heap->real_size);
-			return SUCCESS;
+			return true;
 		}
-		return FAILURE;
+		return false;
 	}
 	AG(mm_heap)->limit = memory_limit;
 #endif
-	return SUCCESS;
+	return true;
 }
 
 ZEND_API bool zend_alloc_in_memory_limit_error_reporting(void)

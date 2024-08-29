@@ -19,10 +19,9 @@
 
 /* resource lists */
 
-#include "zend.h"
 #include "zend_list.h"
+#include "zend.h"
 #include "zend_API.h"
-#include "zend_globals.h"
 
 ZEND_API int le_index_ptr;
 

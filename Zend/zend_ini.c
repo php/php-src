@@ -17,10 +17,10 @@
 */
 
 #include "zend.h"
-#include "zend_sort.h"
-#include "zend_API.h"
 #include "zend_ini.h"
 #include "zend_alloc.h"
+#include "zend_globals.h"
+#include "zend_globals_macros.h"
 #include "zend_operators.h"
 #include "zend_strtod.h"
 #include "zend_modules.h"
