@@ -26,7 +26,7 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
 
 PHP_ARG_WITH([mysqli],
   [for MySQLi support],
-  [AS_HELP_STRING([[--with-mysqli]],
+  [AS_HELP_STRING([--with-mysqli],
     [Include MySQLi support. The MySQL native driver will be used])])
 
 dnl ext/pdo_mysql/config.m4 also depends on this configure option.

@@ -1049,7 +1049,7 @@ AC_DEFUN([_PHP_CHECK_SIZEOF], [
     LIBS=
     old_LDFLAGS=$LDFLAGS
     LDFLAGS=
-    AC_RUN_IFELSE([AC_LANG_SOURCE([[#include <stdio.h>
+    AC_RUN_IFELSE([AC_LANG_SOURCE([#include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <inttypes.h>
@@ -1065,7 +1065,7 @@ int main(void)
   fprintf(fp, "%d\n", sizeof($1));
   return(0);
 }
-  ]])], [
+  ])], [
     eval $php_cache_value=`cat conftestval`
   ], [
     eval $php_cache_value=0
@@ -1151,7 +1151,7 @@ dnl
 dnl Internal.
 dnl
 AC_DEFUN([PHP_DOES_PWRITE_WORK],[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1168,8 +1168,7 @@ $1
     if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) return 1;
     return 0;
     }
-
-  ]])],[
+  ])],[
     ac_cv_pwrite=yes
   ],[
     ac_cv_pwrite=no
@@ -1543,14 +1542,14 @@ dnl
 AC_DEFUN([PHP_TEST_BUILD], [
   old_LIBS=$LIBS
   LIBS="$4 $LIBS"
-  AC_LINK_IFELSE([AC_LANG_SOURCE([[
+  AC_LINK_IFELSE([AC_LANG_SOURCE([
     $5
     char $1(void);
     int main(void) {
       $1();
       return 0;
     }
-  ]])],[
+  ])],[
     LIBS=$old_LIBS
     $2
   ],[

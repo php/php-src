@@ -84,7 +84,7 @@ int main(void) {
     [AC_MSG_FAILURE([The iconv check failed, 'errno' is missing.])])
 
   AC_CACHE_CHECK([if iconv supports //IGNORE], [php_cv_iconv_ignore],
-    [AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    [AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <iconv.h>
 #include <stdlib.h>
 
@@ -103,7 +103,7 @@ int main(void) {
   }
   return 0;
 }
-    ]])],
+    ])],
     [php_cv_iconv_ignore=yes],
     [php_cv_iconv_ignore=no],
     [php_cv_iconv_ignore=no])])

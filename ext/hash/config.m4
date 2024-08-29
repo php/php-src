@@ -1,6 +1,6 @@
 PHP_ARG_WITH([mhash],
   [for mhash support],
-  [AS_HELP_STRING([[--with-mhash]],
+  [AS_HELP_STRING([--with-mhash],
     [Include mhash support])])
 
 AS_VAR_IF([PHP_MHASH], [no],, [
