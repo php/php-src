@@ -38,7 +38,9 @@
 #define zend_set_str_gc_flags(str) do { \
 	GC_SET_REFCOUNT(str, 2); \
 	uint32_t flags = GC_STRING | (ZSTR_IS_VALID_UTF8(str) ? IS_STR_VALID_UTF8 : 0); \
-	if (file_cache_only) { \
+	if (file_cache_only \
+	 || (ZCG(current_persistent_script) && ZCG(current_persistent_script)->corrupted)) { \
+		GC_TYPE_INFO(str) = GC_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 		flags |= (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
 		flags |= ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
