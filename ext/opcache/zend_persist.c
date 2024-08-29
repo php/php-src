@@ -815,7 +815,10 @@ static zend_property_info *zend_persist_property_info(zend_property_info *prop)
 			if (prop->hooks[i]) {
 				zend_op_array *hook = zend_persist_class_method(&prop->hooks[i]->op_array, ce);
 #ifdef HAVE_JIT
-				if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+				if (JIT_G(on)
+				 && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS
+				 && (!ZCG(current_persistent_script)
+				  || !ZCG(current_persistent_script)->corrupted)) {
 					if (hook->scope == ce && !(hook->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 						zend_jit_op_array(hook, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 					}
