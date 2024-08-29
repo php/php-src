@@ -70,7 +70,7 @@ else
   ODBC_LIBS=-l${ac_solid_prefix}${ac_solid_os}${ac_solid_version}
 fi
 
-  AC_MSG_RESULT([$(echo $ODBC_LIBS | sed -e 's!.*/!!')])
+  AC_MSG_RESULT([$(echo $ODBC_LIBS | $SED -e 's!.*/!!')])
 ])
 
 dnl
@@ -84,7 +84,7 @@ AC_DEFUN([PHP_ODBC_FIND_EMPRESS_LIBS],[
   if test ! -f $ODBC_LIBS; then
     ODBC_LIBS=$(echo $1/libempodbccl.so | cut -d' ' -f1)
   fi
-  AC_MSG_RESULT([$(echo $ODBC_LIBS | sed -e 's!.*/!!')])
+  AC_MSG_RESULT([$(echo $ODBC_LIBS | $SED -e 's!.*/!!')])
 ])
 
 dnl
@@ -99,7 +99,7 @@ AC_DEFUN([PHP_ODBC_FIND_EMPRESS_BCS_LIBS],[
   if test ! -f $ODBCBCS_LIBS; then
     ODBCBCS_LIBS=$(echo $1/libempodbcbcs.a | cut -d' ' -f1)
   fi
-  AC_MSG_RESULT([$(echo $ODBCBCS_LIBS | sed -e 's!.*/!!')])
+  AC_MSG_RESULT([$(echo $ODBCBCS_LIBS | $SED -e 's!.*/!!')])
 ])
 
 dnl
@@ -410,7 +410,7 @@ PHP_ARG_WITH([dbmaker],,
       DBMAKER_VERSION=5.0
 
       while test ! -d $DBMAKER_HOME/$DBMAKER_VERSION && test "$DBMAKER_VERSION" != "2.9"; do
-        DM_VER=$(echo $DBMAKER_VERSION | sed -e 's/\.//' | $AWK '{ print $1-1;}')
+        DM_VER=$(echo $DBMAKER_VERSION | $SED -e 's/\.//' | $AWK '{ print $1-1;}')
         MAJOR_V=$(echo $DM_VER | $AWK '{ print $1/10; }'  | $AWK -F. '{ print $1; }')
         MINOR_V=$(echo $DM_VER | $AWK '{ print $1%10; }')
         DBMAKER_VERSION=$MAJOR_V.$MINOR_V
