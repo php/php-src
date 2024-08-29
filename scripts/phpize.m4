@@ -53,11 +53,11 @@ PHP_ARG_WITH([php-config],,
 
 dnl For BC.
 PHP_CONFIG=$PHP_PHP_CONFIG
-prefix=`$PHP_CONFIG --prefix 2>/dev/null`
-phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
-INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
-EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
-PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
+prefix=$($PHP_CONFIG --prefix 2>/dev/null)
+phpincludedir=$($PHP_CONFIG --include-dir 2>/dev/null)
+INCLUDES=$($PHP_CONFIG --includes 2>/dev/null)
+EXTENSION_DIR=$($PHP_CONFIG --extension-dir 2>/dev/null)
+PHP_EXECUTABLE=$($PHP_CONFIG --php-binary 2>/dev/null)
 
 AS_VAR_IF([prefix],,
   [AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])])
@@ -106,8 +106,8 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
   ZEND_DEBUG=yes
   changequote({,})
   dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CFLAGS=$(echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
+  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
   changequote([,])
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then

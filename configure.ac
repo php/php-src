@@ -68,7 +68,7 @@ dnl Allow overriding PHP_EXTRA_VERSION through the homonymous env var
 AC_ARG_VAR([PHP_EXTRA_VERSION],[Extra PHP version label suffix, e.g. '-dev', 'rc1', '-acme'])dnl
 AS_IF([test -z "$PHP_EXTRA_VERSION"],[PHP_EXTRA_VERSION=[$]4])
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
-PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
+PHP_VERSION_ID=$(expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION)
 
 dnl Allow version values to be used in Makefile.
 PHP_SUBST([PHP_MAJOR_VERSION])
@@ -100,7 +100,7 @@ dnl ----------------------------------------------------------------------------
 
 PHP_INIT_BUILD_SYSTEM
 
-dnl Because `make install` is often performed by the superuser, we create the
+dnl Because 'make install' is often performed by the superuser, we create the
 dnl libs subdirectory as the user who configures PHP. Otherwise, the current
 dnl user will not be able to delete libs or the contents of libs.
 
@@ -499,7 +499,7 @@ dnl Check for structure members.
 AC_CHECK_MEMBERS([struct tm.tm_gmtoff],,,[#include <time.h>])
 AC_CHECK_MEMBERS([struct stat.st_blksize, struct stat.st_rdev])
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exist.
-if test "`uname -s 2>/dev/null`" != "QNX"; then
+if test "$(uname -s 2>/dev/null)" != "QNX"; then
   AC_STRUCT_ST_BLOCKS
 fi
 
@@ -516,7 +516,7 @@ dnl
 dnl At least some versions of FreeBSD seem to have buggy ifunc support, see
 dnl bug #77284. Conservatively don't use ifuncs on FreeBSD prior to version 12.
 AS_CASE([$host_alias], [*-*-*android*|*-*-*uclibc*|*-*-*musl*|*openbsd*], [true], [
-  if test "`uname -s 2>/dev/null`" != "FreeBSD" || test "`uname -U 2>/dev/null`" -ge 1200000; then
+  if test "$(uname -s 2>/dev/null)" != "FreeBSD" || test "$(uname -U 2>/dev/null)" -ge 1200000; then
     AX_GCC_FUNC_ATTRIBUTE([ifunc])
     AX_GCC_FUNC_ATTRIBUTE([target])
   fi
@@ -769,10 +769,9 @@ if test "$PHP_GCOV" = "yes"; then
     [AC_MSG_ERROR([GNU C compatible compiler is required for --enable-gcov])])
 
   dnl Check if ccache is being used.
-  case `$php_shtool path $CC` in
-    *ccache*[)] gcc_ccache=yes;;
-    *[)] gcc_ccache=no;;
-  esac
+  AS_CASE([$($php_shtool path $CC)],
+    [*ccache*], [gcc_ccache=yes],
+    [gcc_ccache=no])
 
   if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
     AC_MSG_ERROR(m4_text_wrap([
@@ -787,8 +786,8 @@ if test "$PHP_GCOV" = "yes"; then
   dnl Remove all optimization flags from CFLAGS.
   changequote({,})
   dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CFLAGS=$(echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
+  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
   changequote([,])
 
   dnl Add the special gcc flags.
@@ -808,8 +807,8 @@ AS_VAR_IF([PHP_DEBUG], [yes], [
   ZEND_DEBUG=yes
   changequote({,})
   dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
+  CFLAGS=$(echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
+  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g')
   changequote([,])
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -1323,23 +1322,21 @@ case $libdir in
     libdir=$libdir/php
     ;;
 esac
-case `eval echo $datadir` in
-  '${prefix}/share')
-    datadir=$datadir/php
-    ;;
-esac
 
-phptempdir=`pwd`/libs
+AS_CASE([$(eval echo $datadir)],
+  ['${prefix}/share'], [datadir=$datadir/php])
+
+phptempdir=$(pwd)/libs
 
 old_exec_prefix=$exec_prefix
 old_libdir=$libdir
 old_datadir=$datadir
-exec_prefix=`eval echo $exec_prefix`
-libdir=`eval echo $libdir`
-datadir=`eval eval echo $datadir`
+exec_prefix=$(eval echo $exec_prefix)
+libdir=$(eval echo $libdir)
+datadir=$(eval eval echo $datadir)
 
 dnl Build extension directory path.
-ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //'`
+ZEND_MODULE_API_NO=$($EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //')
 
 AS_VAR_IF([EXTENSION_DIR],, [
   extbasedir=$ZEND_MODULE_API_NO
@@ -1360,17 +1357,17 @@ AS_CASE([$PHP_LAYOUT],
   [datarootdir=$prefix/php])
 
 dnl Expand all directory names for use in macros/constants.
-EXPANDED_PEAR_INSTALLDIR=`eval echo $PEAR_INSTALLDIR`
-EXPANDED_EXTENSION_DIR=`eval echo $EXTENSION_DIR`
-EXPANDED_LOCALSTATEDIR=`eval echo $localstatedir`
-EXPANDED_BINDIR=`eval echo $bindir`
-EXPANDED_SBINDIR=`eval echo $sbindir`
-EXPANDED_MANDIR=`eval echo $mandir`
+EXPANDED_PEAR_INSTALLDIR=$(eval echo $PEAR_INSTALLDIR)
+EXPANDED_EXTENSION_DIR=$(eval echo $EXTENSION_DIR)
+EXPANDED_LOCALSTATEDIR=$(eval echo $localstatedir)
+EXPANDED_BINDIR=$(eval echo $bindir)
+EXPANDED_SBINDIR=$(eval echo $sbindir)
+EXPANDED_MANDIR=$(eval echo $mandir)
 EXPANDED_LIBDIR=$libdir
-EXPANDED_SYSCONFDIR=`eval echo $sysconfdir`
+EXPANDED_SYSCONFDIR=$(eval echo $sysconfdir)
 EXPANDED_DATADIR=$datadir
-EXPANDED_PHP_CONFIG_FILE_PATH=`eval echo "$PHP_CONFIG_FILE_PATH"`
-EXPANDED_PHP_CONFIG_FILE_SCAN_DIR=`eval echo "$PHP_CONFIG_FILE_SCAN_DIR"`
+EXPANDED_PHP_CONFIG_FILE_PATH=$(eval echo "$PHP_CONFIG_FILE_PATH")
+EXPANDED_PHP_CONFIG_FILE_SCAN_DIR=$(eval echo "$PHP_CONFIG_FILE_SCAN_DIR")
 INCLUDE_PATH=.:$EXPANDED_PEAR_INSTALLDIR
 
 exec_prefix=$old_exec_prefix
@@ -1404,10 +1401,10 @@ PHP_REMOVE_USR_LIB([LDFLAGS])
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
-UNAME=`uname -a | xargs`
+UNAME=$(uname -a | xargs)
 PHP_UNAME=${PHP_UNAME:-$UNAME}
 AC_DEFINE_UNQUOTED([PHP_UNAME], ["$PHP_UNAME"], [The 'uname -a' output.])
-PHP_OS=`uname | xargs`
+PHP_OS=$(uname | xargs)
 AC_DEFINE_UNQUOTED([PHP_OS], ["$PHP_OS"], [The 'uname' output.])
 PHP_BUILD_SYSTEM=${PHP_BUILD_SYSTEM:-$PHP_UNAME}
 AC_DEFINE_UNQUOTED([PHP_BUILD_SYSTEM], ["$PHP_BUILD_SYSTEM"],
@@ -1562,7 +1559,7 @@ dnl
 PHP_HELP_SEPARATOR([Libtool:])
 PHP_CONFIGURE_PART([Configuring libtool])
 
-dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
+dnl Silence warning: "ar: 'u' modifier ignored since 'D' is the default".
 dnl See https://github.com/php/php-src/pull/3017
 AC_SUBST([AR_FLAGS], [cr])
 
