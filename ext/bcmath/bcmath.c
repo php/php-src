@@ -1360,6 +1360,7 @@ PHP_METHOD(BcMath_Number, __construct)
 	bc_num num = NULL;
 	size_t scale;
 	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, lval, 1) == FAILURE) {
+		bc_free_num(&num);
 		RETURN_THROWS();
 	}
 
@@ -1730,6 +1731,7 @@ PHP_METHOD(BcMath_Number, __unserialize)
 	bc_num num = NULL;
 	size_t scale;
 	if (php_str2num_ex(&num, Z_STR_P(zv), &scale) == FAILURE) {
+		bc_free_num(&num);
 		goto fail;
 	}
 
