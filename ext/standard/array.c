@@ -6453,7 +6453,7 @@ PHP_FUNCTION(array_filter)
 	zval args[2];
 	zval retval;
 	bool have_callback = 0;
-	zend_long use_type = 0;
+	zend_long use_type = ARRAY_FILTER_USE_VALUE;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache;
@@ -6466,10 +6466,21 @@ PHP_FUNCTION(array_filter)
 		Z_PARAM_LONG(use_type)
 	ZEND_PARSE_PARAMETERS_END();
 
+	switch (use_type) {
+		case ARRAY_FILTER_USE_VALUE:
+		case ARRAY_FILTER_USE_BOTH:
+		case ARRAY_FILTER_USE_KEY:
+			break;
+		default:
+			zend_argument_value_error(3, "must be a valid mode");
+		RETURN_THROWS();
+	}
+
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
 		RETVAL_EMPTY_ARRAY();
 		return;
 	}
+
 	array_init(return_value);
 
 	if (ZEND_FCI_INITIALIZED(fci)) {
