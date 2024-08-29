@@ -855,7 +855,7 @@ static zend_object *bcmath_number_clone(zend_object *obj)
 
 static HashTable *bcmath_number_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
 {
-	if (ZEND_PROP_PURPOSE_GET_OBJECT_VARS) {
+	if (purpose == ZEND_PROP_PURPOSE_GET_OBJECT_VARS) {
 		return zend_std_get_properties_for(obj, purpose);
 	}
 
