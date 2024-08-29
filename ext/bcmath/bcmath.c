@@ -1297,39 +1297,56 @@ fallback:
 	return zend_std_compare_objects(op1, op2);
 }
 
-#define BCMATH_NUMBER_METHOD_PARSE_NUM(zv, obj, str, lval, arg_num) do { \
-	if (UNEXPECTED(bcmath_number_parse_num(zv, &obj, &str, &lval) == FAILURE)) { \
-		zend_argument_type_error(arg_num, "must be of type int, string, or %s, %s given", ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(zv)); \
-		RETURN_THROWS(); \
-	} \
-} while (0)
+#define BCMATH_PARSE_PARAMETERS_START(min_num_args, max_num_args) \
+	bool bc_num_arg_error = false; \
+	ZEND_PARSE_PARAMETERS_START(min_num_args, max_num_args)
 
-#define BCMATH_NUMBER_METHOD_PARSE_SCALE(zv, lval, is_null, arg_num) do { \
-	if (zv && UNEXPECTED(!zend_parse_arg_long(zv, &lval, &is_null, 1, arg_num))) { \
-		zend_argument_value_error(arg_num, "must be of type ?int, %s given", zend_zval_value_name(zv)); \
-		RETURN_THROWS(); \
-	} \
-} while (0)
+#define BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(dest_obj, ce, dest_str, dest_long) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!(zend_parse_arg_obj(_arg, &dest_obj, ce, 0) || \
+		zend_parse_arg_str_or_long(_arg, &dest_str, &dest_long, &_dummy, 0, _i)))) { \
+		bc_num_arg_error = true;\
+		break; \
+	}
 
-#define BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM_EX(num, scale_ptr, obj, str, lval, arg_num, failed_action) do { \
-	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(&num, scale_ptr, obj, str, lval) == FAILURE)) { \
-		zend_argument_value_error(arg_num, "is not well-formed"); \
-		failed_action; \
-	}\
-} while (0)
+#define BCMATH_PARSE_PARAMETERS_END() \
+			ZEND_ASSERT(_i == _max_num_args || _max_num_args == (uint32_t) -1); \
+		} while (0); \
+		if (UNEXPECTED(bc_num_arg_error)) { \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+				if (EG(exception)) { \
+					return; \
+				} \
+				zend_argument_type_error(_i, "must be of type int, string, or %s, %s given", \
+					ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(_arg)); \
+			} \
+			return; \
+		} else if (UNEXPECTED(_error_code != ZPP_ERROR_OK)) { \
+			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
+				zend_wrong_parameter_error(_error_code, _i, _error, _expected_type, _arg); \
+			} \
+			return; \
+		} \
+	} while (0)
 
-#define BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM(num, scale_ptr, obj, str, lval, arg_num) \
-	BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM_EX(num, scale_ptr, obj, str, lval, arg_num, RETURN_THROWS())
+static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
+	bc_num *num, size_t *scale, zend_object *obj, zend_string *str, zend_long lval, uint32_t arg_num)
+{
+	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, scale, obj, str, lval) == FAILURE)) {
+		zend_argument_value_error(arg_num, "is not well-formed");
+		return FAILURE;
+	}
+	return SUCCESS;
+}
 
-#define BCMATH_NUMBER_METHOD_CHECK_SCALE_EX(scale, scale_is_null, arg_num, failed_action) do { \
-	if (UNEXPECTED(!scale_is_null && (scale < 0 || scale > INT_MAX))) { \
-		zend_argument_value_error(arg_num, "must be between 0 and %d", INT_MAX); \
-		failed_action; \
-	} \
-} while (0)
-
-#define BCMATH_NUMBER_METHOD_CHECK_SCALE(scale, scale_is_null, arg_num) \
-	BCMATH_NUMBER_METHOD_CHECK_SCALE_EX(scale, scale_is_null, arg_num, RETURN_THROWS())
+static zend_always_inline zend_result bcmath_check_scale(zend_long scale, bool scale_is_null, uint32_t arg_num)
+{
+	if (UNEXPECTED(!scale_is_null && (scale < 0 || scale > INT_MAX))) {
+		zend_argument_value_error(arg_num, "must be between 0 and %d", INT_MAX);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
 
 PHP_METHOD(BcMath_Number, __construct)
 {
@@ -1342,7 +1359,9 @@ PHP_METHOD(BcMath_Number, __construct)
 
 	bc_num num = NULL;
 	size_t scale;
-	BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM(num, &scale, NULL, str, lval, 1);
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, lval, 1) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 	intern->num = num;
@@ -1351,28 +1370,27 @@ PHP_METHOD(BcMath_Number, __construct)
 
 static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opcode)
 {
-	zval *z_num;
-	zval *z_scale = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(z_num);
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(z_scale);
-	ZEND_PARSE_PARAMETERS_END();
-
 	zend_object *num_obj = NULL;
 	zend_string *num_str = NULL;
 	zend_long num_lval = 0;
-	BCMATH_NUMBER_METHOD_PARSE_NUM(z_num, num_obj, num_str, num_lval, 1);
-
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
-	BCMATH_NUMBER_METHOD_PARSE_SCALE(z_scale, scale_lval, scale_is_null, 2);
+
+	BCMATH_PARSE_PARAMETERS_START(1, 2)
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_lval);
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
+	BCMATH_PARSE_PARAMETERS_END();
 
 	bc_num num = NULL;
 	size_t num_full_scale;
-	BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM(num, &num_full_scale, num_obj, num_str, num_lval, 1);
-	BCMATH_NUMBER_METHOD_CHECK_SCALE(scale_lval, scale_is_null, 2);
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (bcmath_check_scale(scale_lval, scale_is_null, 2) == FAILURE) {
+		bc_free_num(&num);
+		RETURN_THROWS();
+	}
 
 	bc_num ret = NULL;
 	size_t scale = scale_lval;
@@ -1453,37 +1471,36 @@ PHP_METHOD(BcMath_Number, pow)
 
 PHP_METHOD(BcMath_Number, powmod)
 {
-	zval *z_exponent;
-	zval *z_modulus;
-	zval *z_scale = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-		Z_PARAM_ZVAL(z_exponent);
-		Z_PARAM_ZVAL(z_modulus);
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(z_scale);
-	ZEND_PARSE_PARAMETERS_END();
-
 	zend_object *exponent_obj = NULL;
 	zend_string *exponent_str = NULL;
 	zend_long exponent_lval = 0;
-	BCMATH_NUMBER_METHOD_PARSE_NUM(z_exponent, exponent_obj, exponent_str, exponent_lval, 1);
 
 	zend_object *modulus_obj = NULL;
 	zend_string *modulus_str = NULL;
 	zend_long modulus_lval = 0;
-	BCMATH_NUMBER_METHOD_PARSE_NUM(z_modulus, modulus_obj, modulus_str, modulus_lval, 2);
 
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
-	BCMATH_NUMBER_METHOD_PARSE_SCALE(z_scale, scale_lval, scale_is_null, 3);
+
+	BCMATH_PARSE_PARAMETERS_START(2, 3)
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(exponent_obj, bcmath_number_ce, exponent_str, exponent_lval);
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(modulus_obj, bcmath_number_ce, modulus_str, modulus_lval);
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
+	BCMATH_PARSE_PARAMETERS_END();
 
 	bc_num exponent_num = NULL;
-	BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM_EX(exponent_num, NULL, exponent_obj, exponent_str, exponent_lval, 1, goto cleanup);
+	if (bc_num_from_obj_or_str_or_long_with_err(&exponent_num, NULL, exponent_obj, exponent_str, exponent_lval, 1) == FAILURE) {
+		goto cleanup;
+	}
 
 	bc_num modulus_num = NULL;
-	BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM_EX(modulus_num, NULL, modulus_obj, modulus_str, modulus_lval, 2, goto cleanup);
-	BCMATH_NUMBER_METHOD_CHECK_SCALE_EX(scale_lval, scale_is_null, 3, goto cleanup);
+	if (bc_num_from_obj_or_str_or_long_with_err(&modulus_num, NULL, modulus_obj, modulus_str, modulus_lval, 2) == FAILURE) {
+		goto cleanup;
+	}
+	if (bcmath_check_scale(scale_lval, scale_is_null, 3) == FAILURE) {
+		goto cleanup;
+	}
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 	bc_num ret = NULL;
@@ -1542,7 +1559,9 @@ PHP_METHOD(BcMath_Number, sqrt)
 		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
 	ZEND_PARSE_PARAMETERS_END();
 
-	BCMATH_NUMBER_METHOD_CHECK_SCALE(scale_lval, scale_is_null, 1);
+	if (bcmath_check_scale(scale_lval, scale_is_null, 1) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 
@@ -1573,28 +1592,27 @@ PHP_METHOD(BcMath_Number, sqrt)
 
 PHP_METHOD(BcMath_Number, compare)
 {
-	zval *z_num;
-	zval *z_scale = NULL;
-
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(z_num);
-		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(z_scale);
-	ZEND_PARSE_PARAMETERS_END();
-
 	zend_object *num_obj = NULL;
 	zend_string *num_str = NULL;
 	zend_long num_lval = 0;
-	BCMATH_NUMBER_METHOD_PARSE_NUM(z_num, num_obj, num_str, num_lval, 1);
-
 	zend_long scale_lval = 0;
 	bool scale_is_null = true;
-	BCMATH_NUMBER_METHOD_PARSE_SCALE(z_scale, scale_lval, scale_is_null, 2);
+
+	BCMATH_PARSE_PARAMETERS_START(1, 2)
+		BCMATH_PARAM_NUMBER_OR_STR_OR_LONG(num_obj, bcmath_number_ce, num_str, num_lval);
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_OR_NULL(scale_lval, scale_is_null);
+	BCMATH_PARSE_PARAMETERS_END();
 
 	bc_num num = NULL;
 	size_t num_full_scale;
-	BCMATH_NUMBER_METHOD_CONVERT_TO_BC_NUM(num, &num_full_scale, num_obj, num_str, num_lval, 1);
-	BCMATH_NUMBER_METHOD_CHECK_SCALE(scale_lval, scale_is_null, 2);
+	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
+		RETURN_THROWS();
+	}
+	if (bcmath_check_scale(scale_lval, scale_is_null, 2) == FAILURE) {
+		bc_free_num(&num);
+		RETURN_THROWS();
+	}
 
 	size_t scale;
 	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
