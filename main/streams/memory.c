@@ -321,6 +321,7 @@ PHPAPI zend_string *_php_stream_memory_get_buffer(php_stream *stream STREAMS_DC)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	ZEND_ASSERT(ms != NULL);
+	ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 	return ms->data;
 }
 /* }}} */
