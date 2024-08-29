@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
     PHP 8.1 than in PHP 8.0). (nielsdos)
 
+- GD:
+  . Added gdImageClone to bundled libgd. (David Carlier)
+
 27 Aug 2024, PHP 8.4.0beta4
 
 - Core:
