@@ -2102,7 +2102,7 @@ EOF
     if test -n "$val"; then
       echo "$var='$val' \\" >> $1
       if test `expr "X$ac_configure_args" : ".*${var}.*"` != 0; then
-        clean_configure_args=$(echo $clean_configure_args | sed -e "s#'$var=$val'##")
+        clean_configure_args=$(echo $clean_configure_args | $SED -e "s#'$var=$val'##")
       fi
     fi
   done
