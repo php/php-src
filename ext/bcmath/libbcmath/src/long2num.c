@@ -16,31 +16,25 @@
 
 #include "bcmath.h"
 #include <stdbool.h>
+#include "convert.h"
 
-#if SIZEOF_ZEND_LONG == 8
-#  define BC_LONG_MAX_DIGITS 19
-#else
-#  define BC_LONG_MAX_DIGITS 10
-#endif
+#define BC_LONG_MAX_DIGITS sizeof(LONG_MIN_DIGITS) - 1
 
-void bc_long2num(bc_num *num, zend_long lval)
+bc_num bc_long2num(zend_long lval)
 {
+	bc_num num;
+
 	if (UNEXPECTED(lval == 0)) {
-		*num = bc_copy_num(BCG(_zero_));
-		return;
+		num = bc_copy_num(BCG(_zero_));
+		return num;
 	}
 
 	bool negative = lval < 0;
 	if (UNEXPECTED(lval == LONG_MIN)) {
-		*num = bc_new_num_nonzeroed(BC_LONG_MAX_DIGITS, 0);
-		char *ptr = (*num)->n_value;
-		memcpy(ptr, LONG_MIN_DIGITS, BC_LONG_MAX_DIGITS);
-		for (size_t i = 0; i < BC_LONG_MAX_DIGITS; i++) {
-			*ptr = *ptr - '0';
-			ptr++;
-		}
-		(*num)->n_sign = MINUS;
-		return;
+		num = bc_new_num_nonzeroed(BC_LONG_MAX_DIGITS, 0);
+		bc_copy_and_toggle_bcd(num->n_value, LONG_MIN_DIGITS, LONG_MIN_DIGITS + BC_LONG_MAX_DIGITS);
+		num->n_sign = MINUS;
+		return num;
 	} else if (negative) {
 		lval = -lval;
 	}
@@ -52,11 +46,13 @@ void bc_long2num(bc_num *num, zend_long lval)
 		len++;
 	}
 
-	*num = bc_new_num_nonzeroed(len, 0);
-	char *ptr = (*num)->n_value + len - 1;
+	num = bc_new_num_nonzeroed(len, 0);
+	char *ptr = num->n_value + len - 1;
 	for (; len > 0; len--) {
 		*ptr-- = lval % BASE;
 		lval /= BASE;
 	}
-	(*num)->n_sign = negative ? MINUS : PLUS;
+	num->n_sign = negative ? MINUS : PLUS;
+
+	return num;
 }
