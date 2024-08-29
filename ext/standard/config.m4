@@ -345,7 +345,7 @@ dnl Check for argon2
 dnl
 PHP_ARG_WITH([password-argon2],
   [for Argon2 support],
-  [AS_HELP_STRING([[--with-password-argon2]],
+  [AS_HELP_STRING([--with-password-argon2],
     [Include Argon2 support in password_*])])
 
 AS_VAR_IF([PHP_PASSWORD_ARGON2], [no],, [
