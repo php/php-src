@@ -188,6 +188,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      or backslash-then-newline.
    - M4 macro PHP_ADD_BUILD_DIR now also accepts 1st argument as a
      blank-or-newline-separated separated list.
+   - M4 macros PHP_NEW_EXTENSION, PHP_ADD_SOURCES, PHP_ADD_SOURCES_X,
+     PHP_SELECT_SAPI now have the source files arguments normalized so the list
+     of files can be passed as blank-or-newline-separated list (including
+     newlines, backslash-then-newline, or any sequence of spaces or tabs).
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS M4 macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and

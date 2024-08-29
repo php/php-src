@@ -197,9 +197,10 @@ dnl
 dnl PHP_ADD_SOURCES(source-path, sources [, special-flags [, type]])
 dnl
 dnl Adds sources which are located relative to source-path to the array of type
-dnl type. Sources are processed with optional special-flags which are passed to
-dnl the compiler. Sources can be either written in C or C++ (filenames shall end
-dnl in .c or .cpp, respectively).
+dnl type. The blank-or-newline separated list of "sources" are processed with
+dnl optional special-flags which are passed to the compiler. Sources can be
+dnl either written in C or C++ (filenames shall end in .c or .cpp,
+dnl respectively).
 dnl
 dnl Note: If source-path begins with a "/", the "/" is removed and the path is
 dnl interpreted relative to the top build-directory.
@@ -239,7 +240,8 @@ dnl PHP_ADD_SOURCES_X(source-path, sources[, special-flags[, target-var[, shared
 dnl
 dnl Additional to PHP_ADD_SOURCES (see above), this lets you set the name of the
 dnl array target-var directly, as well as whether shared objects will be built
-dnl from the sources. Should not be used directly.
+dnl from the blank-or-newline-separated list of "sources". Should not be used
+dnl directly.
 dnl
 AC_DEFUN([PHP_ADD_SOURCES_X],[
 dnl Relative to source- or build-directory?
@@ -255,7 +257,7 @@ dnl how to build .. shared or static?
 
 dnl Iterate over the sources.
   old_IFS=[$]IFS
-  for ac_src in $2; do
+  for ac_src in m4_normalize(m4_expand([$2])); do
 
 dnl Remove the suffix.
       IFS=.
@@ -864,8 +866,9 @@ dnl PHP_SELECT_SAPI(name, type[, sources [, extra-cflags]])
 dnl
 dnl When developing PHP SAPI modules, this macro specifies the SAPI "name" by
 dnl its "type", how PHP is supposed to be built (static, shared, bundle, or
-dnl program). It optionally adds the source files "sources" and compilation
-dnl flags "extra-cflags" to build the SAPI-specific objects. For example:
+dnl program). It optionally adds the blank-or-newline-separated source files
+dnl "sources" and compilation flags "extra-cflags" to build the SAPI-specific
+dnl objects. For example:
 dnl   PHP_SELECT_SAPI([apache2handler],
 dnl     [shared],
 dnl     [<sources...>],
@@ -936,8 +939,8 @@ dnl
 dnl Includes an extension in the build.
 dnl
 dnl "extname" is the name of the extension.
-dnl "sources" is a list of files relative to the subdir which are used to build
-dnl the extension.
+dnl "sources" is a blank-or-newline-separated list of source files relative to
+dnl the subdir which are used to build the extension.
 dnl "shared" can be set to "shared" or "yes" to build the extension as a
 dnl dynamically loadable library. Optional parameter "sapi_class" can be set to
 dnl "cli" to mark extension build only with CLI or CGI sapi's. "extra-cflags"
