@@ -1,7 +1,13 @@
 --TEST--
-BcMath\Number construct
+BcMath\Number construct 64 bit
 --EXTENSIONS--
 bcmath
+--SKIPIF--
+<?php
+if (PHP_INT_MAX <= 2147483647) {
+    die('skip only 64 bit');
+}
+?>
 --FILE--
 <?php
 
@@ -19,6 +25,8 @@ $values = [
     '.',
     0,
     123,
+    9223372036854775807,
+    -9223372036854775808,
 ];
 
 foreach ($values as $value) {
@@ -103,6 +111,18 @@ object(BcMath\Number)#1 (2) {
 object(BcMath\Number)#1 (2) {
   ["value"]=>
   string(3) "123"
+  ["scale"]=>
+  int(0)
+}
+object(BcMath\Number)#1 (2) {
+  ["value"]=>
+  string(19) "9223372036854775807"
+  ["scale"]=>
+  int(0)
+}
+object(BcMath\Number)#1 (2) {
+  ["value"]=>
+  string(20) "-9223372036854775808"
   ["scale"]=>
   int(0)
 }
