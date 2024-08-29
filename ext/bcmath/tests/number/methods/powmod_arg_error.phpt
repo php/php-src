@@ -5,6 +5,7 @@ bcmath
 --FILE--
 <?php
 $args = [
+    ['a', 'non number str'],
     [[], 'array'],
     [new stdClass(), 'other object'],
     [0.1, 'float'],
@@ -37,6 +38,8 @@ foreach ($args as [$val, $type]) {
 ?>
 --EXPECTF--
 ========== check 1st arg ==========
+non number str:
+BcMath\Number::powmod(): Argument #1 ($exponent) is not well-formed
 array:
 BcMath\Number::powmod(): Argument #1 ($exponent) must be of type int, string, or BcMath\Number, array given
 other object:
@@ -49,6 +52,8 @@ null:
 Deprecated: BcMath\Number::powmod(): Passing null to parameter #1 ($exponent) of type BcMath\Number|string|int is deprecated in %s
 
 ========== check 2nd arg ==========
+non number str:
+BcMath\Number::powmod(): Argument #2 ($modulus) is not well-formed
 array:
 BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, array given
 other object:
