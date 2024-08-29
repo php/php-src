@@ -881,6 +881,16 @@ static zval *bcmath_number_write_property(zend_object *obj, zend_string *name, z
 	return zend_std_write_property(obj, name, value, cache_slot);
 }
 
+static void bcmath_number_unset_property(zend_object *obj, zend_string *name, void **cache_slot)
+{
+	if (zend_string_equals_literal(name, "value") || zend_string_equals_literal(name, "scale")) {
+		zend_throw_error(NULL, "Cannot unset readonly property %s::$%s", ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
+		return;
+	}
+
+	zend_std_unset_property(obj, name, cache_slot);
+}
+
 static zval *bcmath_number_read_property(zend_object *obj, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
@@ -930,6 +940,7 @@ static void bcmath_number_register_class(void)
 	bcmath_number_obj_handlers.do_operation = bcmath_number_do_operation;
 	bcmath_number_obj_handlers.compare = bcmath_number_compare;
 	bcmath_number_obj_handlers.write_property = bcmath_number_write_property;
+	bcmath_number_obj_handlers.unset_property = bcmath_number_unset_property;
 	bcmath_number_obj_handlers.has_property = bcmath_number_isset_property;
 	bcmath_number_obj_handlers.read_property = bcmath_number_read_property;
 	bcmath_number_obj_handlers.get_properties_for = bcmath_number_get_properties_for;
