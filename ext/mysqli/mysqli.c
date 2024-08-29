@@ -340,7 +340,7 @@ static int mysqli_object_has_property(zend_object *object, zend_string *name, in
 	return has_property;
 } /* }}} */
 
-HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
+HashTable *mysqli_object_get_debug_info(zend_object *object, bool *is_temp)
 {
 	mysqli_object *obj = php_mysqli_fetch_object(object);
 	HashTable *retval, *props = obj->prop_handler;
@@ -358,7 +358,7 @@ HashTable *mysqli_object_get_debug_info(zend_object *object, int *is_temp)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	*is_temp = 1;
+	*is_temp = true;
 	return retval;
 }
 

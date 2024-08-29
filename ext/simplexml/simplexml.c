@@ -1190,9 +1190,9 @@ static HashTable *sxe_get_properties(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-static HashTable * sxe_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+static HashTable * sxe_get_debug_info(zend_object *object, bool *is_temp) /* {{{ */
 {
-	*is_temp = 1;
+	*is_temp = true;
 	return sxe_get_prop_hash(object, 1);
 }
 /* }}} */

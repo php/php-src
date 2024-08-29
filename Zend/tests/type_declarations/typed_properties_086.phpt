@@ -20,7 +20,7 @@ var_dump($t);
 
 ?>
 --EXPECT--
-object(T)#1 (1) {
+object(T)#1 (2) {
   ["i"]=>
   uninitialized(int)
   ["1"]=>

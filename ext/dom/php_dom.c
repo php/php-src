@@ -455,7 +455,7 @@ static int dom_property_exists(zend_object *object, zend_string *name, int check
 }
 /* }}} */
 
-static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /* {{{ */
+static HashTable* dom_get_debug_info_helper(zend_object *object, bool *is_temp) /* {{{ */
 {
 	dom_object			*obj = php_dom_obj_from_obj(object);
 	HashTable			*debug_info,
@@ -465,7 +465,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 	dom_prop_handler	*entry;
 	zend_string         *object_str;
 
-	*is_temp = 1;
+	*is_temp = true;
 
 	std_props = zend_std_get_properties(object);
 	debug_info = zend_array_dup(std_props);
@@ -504,7 +504,7 @@ static HashTable* dom_get_debug_info_helper(zend_object *object, int *is_temp) /
 }
 /* }}} */
 
-static HashTable* dom_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+static HashTable* dom_get_debug_info(zend_object *object, bool *is_temp) /* {{{ */
 {
 	return dom_get_debug_info_helper(object, is_temp);
 }

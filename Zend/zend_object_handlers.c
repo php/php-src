@@ -157,40 +157,40 @@ ZEND_API HashTable *zend_std_get_gc(zend_object *zobj, zval **table, int *n) /* 
 }
 /* }}} */
 
-ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /* {{{ */
+ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, bool *is_temp) /* {{{ */
 {
 	zend_class_entry *ce = object->ce;
 	zval retval;
 	HashTable *ht;
 
 	if (!ce->__debugInfo) {
-		*is_temp = 0;
+		*is_temp = false;
 		return object->handlers->get_properties(object);
 	}
 
 	zend_call_known_instance_method_with_0_params(ce->__debugInfo, object, &retval);
 	if (Z_TYPE(retval) == IS_ARRAY) {
 		if (!Z_REFCOUNTED(retval)) {
-			*is_temp = 1;
+			*is_temp = true;
 			return zend_array_dup(Z_ARRVAL(retval));
 		} else if (Z_REFCOUNT(retval) <= 1) {
-			*is_temp = 1;
+			*is_temp = true;
 			ht = Z_ARR(retval);
 			return ht;
 		} else {
-			*is_temp = 0;
+			*is_temp = false;
 			zval_ptr_dtor(&retval);
 			return Z_ARRVAL(retval);
 		}
 	} else if (Z_TYPE(retval) == IS_NULL) {
-		*is_temp = 1;
-		ht = zend_new_array(0);
-		return ht;
+		*is_temp = false;
+		zval_ptr_dtor(&retval);
+		return (HashTable*)&zend_empty_array;
+	} else {
+		zval_ptr_dtor(&retval);
+		zend_type_error(ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
+		return NULL;
 	}
-
-	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
-
-	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
 }
 /* }}} */
 
@@ -2245,7 +2245,7 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 	switch (purpose) {
 		case ZEND_PROP_PURPOSE_DEBUG:
 			if (obj->handlers->get_debug_info) {
-				int is_temp;
+				bool is_temp;
 				ht = obj->handlers->get_debug_info(obj, &is_temp);
 				if (ht && !is_temp) {
 					GC_TRY_ADDREF(ht);

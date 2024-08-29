@@ -69,10 +69,14 @@ NULL
   - After:
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#1 (0) {
+  object(C)#1 (1) {
+    ["prop"]=>
+    unset
   }
 }
-object(C)#1 (0) {
+object(C)#1 (1) {
+  ["prop"]=>
+  unset
 }
 
 --> Access prop on instance of MyArrayObject with ArrayObject::ARRAY_AS_PROPS:
@@ -97,8 +101,12 @@ NULL
   - After:
 object(MyArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
-  object(C)#4 (0) {
+  object(C)#4 (1) {
+    ["prop"]=>
+    unset
   }
 }
-object(C)#4 (0) {
+object(C)#4 (1) {
+  ["prop"]=>
+  unset
 }

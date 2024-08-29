@@ -18,7 +18,7 @@ class Foo {
 var_dump(new Test);
 ?>
 --EXPECT--
-object(Test)#1 (0) {
+object(Test)#1 (1) {
   ["prop":protected]=>
   uninitialized(Foo)
 }

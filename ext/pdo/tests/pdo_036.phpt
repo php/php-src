@@ -26,7 +26,7 @@ var_dump($x);
 
 ?>
 --EXPECTF--
-object(PDOStatement)#%d (0) {
+object(PDOStatement)#%d (1) {
   ["queryString"]=>
   uninitialized(string)
 }

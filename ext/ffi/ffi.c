@@ -2029,7 +2029,7 @@ static zend_object_iterator *zend_ffi_cdata_get_iterator(zend_class_entry *ce, z
 }
 /* }}} */
 
-static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, bool *is_temp) /* {{{ */
 {
 	zend_ffi_cdata *cdata = (zend_ffi_cdata*)obj;
 	zend_ffi_type  *type = ZEND_FFI_TYPE(cdata->type);
@@ -2047,7 +2047,8 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 
 	switch (type->kind) {
 		case ZEND_FFI_TYPE_VOID:
-			return NULL;
+			*is_temp = false;
+			return (HashTable*)&zend_empty_array;
 		case ZEND_FFI_TYPE_BOOL:
 		case ZEND_FFI_TYPE_CHAR:
 		case ZEND_FFI_TYPE_ENUM:
@@ -2067,7 +2068,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 			zend_ffi_cdata_to_zval(cdata, ptr, type, BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
 			ht = zend_new_array(1);
 			zend_hash_str_add(ht, "cdata", sizeof("cdata")-1, &tmp);
-			*is_temp = 1;
+			*is_temp = true;
 			return ht;
 			break;
 		case ZEND_FFI_TYPE_POINTER:
@@ -2075,19 +2076,19 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 				ZVAL_NULL(&tmp);
 				ht = zend_new_array(1);
 				zend_hash_index_add_new(ht, 0, &tmp);
-				*is_temp = 1;
+				*is_temp = true;
 				return ht;
 			} else if (ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_VOID) {
 				ZVAL_LONG(&tmp, (uintptr_t)*(void**)ptr);
 				ht = zend_new_array(1);
 				zend_hash_index_add_new(ht, 0, &tmp);
-				*is_temp = 1;
+				*is_temp = true;
 				return ht;
 			} else {
 				zend_ffi_cdata_to_zval(NULL, *(void**)ptr, ZEND_FFI_TYPE(type->pointer.type), BP_VAR_R, &tmp, ZEND_FFI_FLAG_CONST, 0, 0);
 				ht = zend_new_array(1);
 				zend_hash_index_add_new(ht, 0, &tmp);
-				*is_temp = 1;
+				*is_temp = true;
 				return ht;
 			}
 			break;
@@ -2105,7 +2106,7 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
-			*is_temp = 1;
+			*is_temp = true;
 			return ht;
 		case ZEND_FFI_TYPE_ARRAY:
 			ht = zend_new_array(type->array.length);
@@ -2114,12 +2115,12 @@ static HashTable *zend_ffi_cdata_get_debug_info(zend_object *obj, int *is_temp) 
 				zend_hash_index_add(ht, n, &tmp);
 				ptr = (void*)(((char*)ptr) + ZEND_FFI_TYPE(type->array.type)->size);
 			}
-			*is_temp = 1;
+			*is_temp = true;
 			return ht;
 		case ZEND_FFI_TYPE_FUNC:
 			ht = zend_new_array(0);
 			// TODO: function name ???
-			*is_temp = 1;
+			*is_temp = true;
 			return ht;
 			break;
 		default:
@@ -2272,9 +2273,10 @@ static int zend_ffi_ctype_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
-static HashTable *zend_ffi_ctype_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static HashTable *zend_ffi_ctype_get_debug_info(zend_object *obj, bool *is_temp) /* {{{ */
 {
-	return NULL;
+	*is_temp = false;
+	return (HashTable*)&zend_empty_array;
 }
 /* }}} */
 
@@ -5239,7 +5241,7 @@ static ZEND_COLD void zend_ffi_free_unset_property(zend_object *obj, zend_string
 }
 /* }}} */
 
-static HashTable *zend_ffi_free_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static HashTable *zend_ffi_free_get_debug_info(zend_object *obj, bool *is_temp) /* {{{ */
 {
 	zend_ffi_use_after_free();
 	return NULL;

@@ -271,9 +271,9 @@ static void zend_weakref_free(zend_object *zo) {
 	zend_object_std_dtor(&wr->std);
 }
 
-static HashTable *zend_weakref_get_debug_info(zend_object *object, int *is_temp)
+static HashTable *zend_weakref_get_debug_info(zend_object *object, bool *is_temp)
 {
-	*is_temp = 1;
+	*is_temp = true;
 
 	HashTable *ht = zend_new_array(1);
 

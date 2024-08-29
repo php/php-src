@@ -309,13 +309,13 @@ static zend_result gmp_cast_object(zend_object *readobj, zval *writeobj, int typ
 }
 /* }}} */
 
-static HashTable *gmp_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static HashTable *gmp_get_debug_info(zend_object *obj, bool *is_temp) /* {{{ */
 {
 	HashTable *ht, *props = zend_std_get_properties(obj);
 	mpz_ptr gmpnum = GET_GMP_OBJECT_FROM_OBJ(obj)->num;
 	zval zv;
 
-	*is_temp = 1;
+	*is_temp = true;
 	ht = zend_array_dup(props);
 
 	gmp_strval(&zv, gmpnum, 10);

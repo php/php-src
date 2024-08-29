@@ -234,7 +234,7 @@ static HashTable* spl_fixedarray_object_get_properties_for(zend_object *obj, zen
 
 	const zend_long size = intern->array.size;
 	if (size == 0 && (!source_properties || !zend_hash_num_elements(source_properties))) {
-		return NULL;
+		return (HashTable*)&zend_empty_array;
 	}
 	zval *const elements = intern->array.elements;
 	HashTable *ht = zend_new_array(size);

@@ -139,7 +139,7 @@ ZEND_METHOD(SensitiveParameterValue, __debugInfo)
 
 static HashTable *attributes_sensitive_parameter_value_get_properties_for(zend_object *zobj, zend_prop_purpose purpose)
 {
-	return NULL;
+	return (HashTable*)&zend_empty_array;
 }
 
 ZEND_METHOD(Override, __construct)

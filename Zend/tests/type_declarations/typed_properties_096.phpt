@@ -32,7 +32,7 @@ var_dump($test);
 ?>
 --EXPECT--
 Cannot assign int to property Test1::$prop of type Foobar
-object(Test1)#1 (1) {
+object(Test1)#1 (2) {
   ["prop"]=>
   uninitialized(Foobar)
   ["prop2"]=>

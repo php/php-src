@@ -171,7 +171,9 @@ object(ArrayObject)#2 (1) {
 
 --> Unset existent, non-existent and dynamic:
   Original wrapped object:
-object(UsesMagic)#1 (3) {
+object(UsesMagic)#1 (4) {
+  ["a"]=>
+  unset
   ["b"]=>
   int(2)
   ["c"]=>
@@ -182,7 +184,9 @@ object(UsesMagic)#1 (3) {
   Wrapping ArrayObject:
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
-  object(UsesMagic)#1 (3) {
+  object(UsesMagic)#1 (4) {
+    ["a"]=>
+    unset
     ["b"]=>
     int(2)
     ["c"]=>

@@ -275,7 +275,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 /* }}} */
 
 /* {{{ get_debug_info handler for TimeZone */
-static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
+static HashTable *TimeZone_get_debug_info(zend_object *object, bool *is_temp)
 {
 	zval			zv;
 	TimeZone_object	*to;
@@ -285,7 +285,7 @@ static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 	HashTable 		*debug_info;
 	UErrorCode		uec = U_ZERO_ERROR;
 
-	*is_temp = 1;
+	*is_temp = true;
 
 	debug_info = zend_new_array(8);
 

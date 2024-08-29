@@ -20,7 +20,7 @@ var_dump($types, (string)$types[0], (string)$types[1]);
 ?>
 ===DONE===
 --EXPECT--
-object(C)#1 (1) {
+object(C)#1 (2) {
   ["testProp"]=>
   NULL
   ["classUnionProp"]=>

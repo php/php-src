@@ -119,14 +119,14 @@ static zend_object *BreakIterator_clone_obj(zend_object *object)
 /* }}} */
 
 /* {{{ get_debug_info handler for BreakIterator */
-static HashTable *BreakIterator_get_debug_info(zend_object *object, int *is_temp)
+static HashTable *BreakIterator_get_debug_info(zend_object *object, bool *is_temp)
 {
 	zval val;
 	HashTable *debug_info;
 	BreakIterator_object	*bio;
 	const BreakIterator		*biter;
 
-	*is_temp = 1;
+	*is_temp = true;
 
 	debug_info = zend_new_array(8);
 
