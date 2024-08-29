@@ -511,7 +511,7 @@ if test "$PHP_DB3" != "no"; then
     /usr/local/BerkeleyDB.3.1 \
     /usr/local/BerkeleyDB.3.0 \
     /usr/local \
-    /usr\
+    /usr \
   ; do
     if test -f "$i/db3/db.h"; then
       THIS_PREFIX=$i
