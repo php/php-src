@@ -820,8 +820,6 @@ static zend_object *bcmath_number_create(zend_class_entry *ce)
 	zend_object_std_init(&intern->std, ce);
 	object_properties_init(&intern->std, ce);
 
-	intern->num = NULL;
-	intern->value = NULL;
 	intern->scale = 1;
 
 	return &intern->std;
@@ -857,15 +855,8 @@ static zend_object *bcmath_number_clone(zend_object *obj)
 
 static HashTable *bcmath_number_get_properties_for(zend_object *obj, zend_prop_purpose purpose)
 {
-	switch (purpose) {
-		case ZEND_PROP_PURPOSE_DEBUG:
-		case ZEND_PROP_PURPOSE_SERIALIZE:
-		case ZEND_PROP_PURPOSE_VAR_EXPORT:
-		case ZEND_PROP_PURPOSE_JSON:
-		case ZEND_PROP_PURPOSE_ARRAY_CAST:
-			break;
-		default:
-			return zend_std_get_properties_for(obj, purpose);
+	if (ZEND_PROP_PURPOSE_GET_OBJECT_VARS) {
+		return zend_std_get_properties_for(obj, purpose);
 	}
 
 	zval zv;
@@ -883,12 +874,11 @@ static HashTable *bcmath_number_get_properties_for(zend_object *obj, zend_prop_p
 static zval *bcmath_number_write_property(zend_object *obj, zend_string *name, zval *value, void **cache_slot)
 {
 	if (zend_string_equals_literal(name, "value") || zend_string_equals_literal(name, "scale")) {
-		zend_throw_error(NULL, "Cannot modify readonly property %s::$%s", ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
 		return &EG(error_zval);
 	}
 
-	zend_throw_error(NULL, "Cannot create dynamic property %s::$%s", ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
-	return &EG(error_zval);
+	return zend_std_write_property(obj, name, value, cache_slot);
 }
 
 static zval *bcmath_number_read_property(zend_object *obj, zend_string *name, int type, void **cache_slot, zval *rv)
@@ -924,13 +914,6 @@ static zend_result bcmath_number_cast_object(zend_object *obj, zval *ret, int ty
 	return zend_std_cast_object_tostring(obj, ret, type);
 }
 
-static HashTable *bcmath_number_get_gc(zend_object *obj, zval **table, int *n)
-{
-	*table = NULL;
-	*n = 0;
-	return zend_std_get_properties(obj);
-}
-
 static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zval *op1, zval *op2);
 static int bcmath_number_compare(zval *z1, zval *z2);
 
@@ -951,7 +934,6 @@ static void bcmath_number_register_class(void)
 	bcmath_number_obj_handlers.read_property = bcmath_number_read_property;
 	bcmath_number_obj_handlers.get_properties_for = bcmath_number_get_properties_for;
 	bcmath_number_obj_handlers.cast_object = bcmath_number_cast_object;
-	bcmath_number_obj_handlers.get_gc = bcmath_number_get_gc;
 }
 
 static zend_always_inline void bcmath_number_add_internal(
@@ -995,7 +977,7 @@ static zend_always_inline zend_result bcmath_number_div_internal(
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
-		*scale = MIN(n1_full_scale + BC_MATH_NUMBER_MAX_EX_SCALE, INT_MAX);
+		*scale = MIN(n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
 	}
 	if (!bc_divide(n1, n2, ret, *scale)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
@@ -1004,7 +986,7 @@ static zend_always_inline zend_result bcmath_number_div_internal(
 	bc_rm_trailing_zeros(*ret);
 	if (auto_scale) {
 		size_t diff = *scale - (*ret)->n_scale;
-		*scale -= diff > BC_MATH_NUMBER_MAX_EX_SCALE ? BC_MATH_NUMBER_MAX_EX_SCALE : diff;
+		*scale -= diff > BC_MATH_NUMBER_EXPAND_SCALE ? BC_MATH_NUMBER_EXPAND_SCALE : diff;
 	}
 	return SUCCESS;
 }
@@ -1047,7 +1029,7 @@ static zend_always_inline zend_result bcmath_number_pow_internal(
 				*scale = INT_MAX;
 			}
 		} else if (exponent < 0) {
-			*scale = MIN(n1_full_scale + BC_MATH_NUMBER_MAX_EX_SCALE, INT_MAX);
+			*scale = MIN(n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
 			scale_expand = true;
 		} else {
 			*scale = 0;
@@ -1066,7 +1048,7 @@ static zend_always_inline zend_result bcmath_number_pow_internal(
 	bc_rm_trailing_zeros(*ret);
 	if (scale_expand) {
 		size_t diff = *scale - (*ret)->n_scale;
-		*scale -= diff > BC_MATH_NUMBER_MAX_EX_SCALE ? BC_MATH_NUMBER_MAX_EX_SCALE : diff;
+		*scale -= diff > BC_MATH_NUMBER_EXPAND_SCALE ? BC_MATH_NUMBER_EXPAND_SCALE : diff;
 	}
 	return SUCCESS;
 }
@@ -1544,7 +1526,7 @@ PHP_METHOD(BcMath_Number, sqrt)
 
 	size_t scale;
 	if (scale_is_null) {
-		scale = MIN(intern->scale + BC_MATH_NUMBER_MAX_EX_SCALE, INT_MAX);
+		scale = MIN(intern->scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
 	} else {
 		scale = scale_lval;
 	}
@@ -1560,7 +1542,7 @@ PHP_METHOD(BcMath_Number, sqrt)
 	bc_rm_trailing_zeros(ret);
 	if (scale_is_null) {
 		size_t diff = scale - ret->n_scale;
-		scale -= diff > BC_MATH_NUMBER_MAX_EX_SCALE ? BC_MATH_NUMBER_MAX_EX_SCALE : diff;
+		scale -= diff > BC_MATH_NUMBER_EXPAND_SCALE ? BC_MATH_NUMBER_EXPAND_SCALE : diff;
 	}
 
 	bcmath_number_obj_t *new_intern = bcmath_number_new_obj(ret, scale);
