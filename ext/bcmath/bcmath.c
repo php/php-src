@@ -150,7 +150,7 @@ PHP_MINFO_FUNCTION(bcmath)
 
 static void php_long2num(bc_num *num, zend_long lval)
 {
-	bc_long2num(num, lval);
+	*num = bc_long2num(lval);
 }
 
 static zend_result php_str2num_ex(bc_num *num, const zend_string *str, size_t *full_scale)
