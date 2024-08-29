@@ -1698,13 +1698,12 @@ PHP_METHOD(BcMath_Number, __serialize)
 
 PHP_METHOD(BcMath_Number, __unserialize)
 {
-	zval *array;
+	HashTable *props;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(array)
+		Z_PARAM_ARRAY_HT(props)
 	ZEND_PARSE_PARAMETERS_END();
 
-	HashTable *props = Z_ARRVAL_P(array);
 	zval *zv = zend_hash_str_find(props, "value", sizeof("value")-1);
 	if (!zv || Z_TYPE_P(zv) != IS_STRING) {
 		goto fail;
