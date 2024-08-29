@@ -465,7 +465,7 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 /* set coercing a data type */
 static void set_coercing_output_data_types(XSQLDA* sqlda)
 {
-	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */ 
+	/* Data types introduced in Firebird 4.0 are difficult to process using the Firebird Legacy API. */
 	/* These data types include DECFLOAT(16), DECFLOAT(34), INT128 (NUMERIC/DECIMAL(38, x)). */
 	/* In any case, at this data types can only be mapped to strings. */
 	/* This function allows you to ensure minimal performance of queries if they contain columns of the above types. */
@@ -477,7 +477,7 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 	unsigned fb_client_major_version = (fb_client_version >> 8) & 0xFF;
 	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
 		dtype = (var->sqltype & ~1); /* drop flag bit  */
-		nullable = (var->sqltype & 1); 
+		nullable = (var->sqltype & 1);
 		switch(dtype) {
 			case SQL_INT128:
 				var->sqltype = SQL_VARYING + nullable;
@@ -497,7 +497,7 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 
 			case SQL_TIMESTAMP_TZ:
 			    if (fb_client_major_version < 4) {
-					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */ 
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */
 					/* so we convert these types to a string. */
 					var->sqltype = SQL_VARYING + nullable;
 					var->sqllen = 58;
@@ -506,8 +506,8 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 
 			case SQL_TIME_TZ:
 				if (fb_client_major_version < 4) {
-					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */ 
-					/* so we convert these types to a string. */					
+					/* If the client version is below 4.0, then it is impossible to handle time zones natively, */
+					/* so we convert these types to a string. */
 					var->sqltype = SQL_VARYING + nullable;
 					var->sqllen = 46;
 				}
@@ -516,7 +516,7 @@ static void set_coercing_output_data_types(XSQLDA* sqlda)
 			default:
 				break;
 		}
-	}	
+	}
 }
 #endif
 

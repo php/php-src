@@ -84,7 +84,7 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	unsigned hours = 0, minutes = 0, seconds = 0, fractions = 0;
 	char timeZoneBuffer[40] = {0};
 	char *fmt;
-	struct tm t; 
+	struct tm t;
 	ISC_TIME time;
 	char timeBuf[80] = {0};
 	char timeTzBuf[124] = {0};
@@ -94,7 +94,7 @@ static int get_formatted_time_tz(pdo_stmt_t *stmt, const ISC_TIME_TZ* timeTz, zv
 	time = fb_encode_time(hours, minutes, seconds, fractions);
 	isc_decode_sql_time(&time, &t);
 	fmt = S->H->time_format ? S->H->time_format : PDO_FB_DEF_TIME_FMT;
-	
+
 	size_t len = strftime(timeBuf, sizeof(timeBuf), fmt, &t);
 	if (len == 0) {
 		return 1;
@@ -112,7 +112,7 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	unsigned year, month, day, hours, minutes, seconds, fractions;
 	char timeZoneBuffer[40] = {0};
 	char *fmt;
-	struct tm t; 
+	struct tm t;
 	ISC_TIMESTAMP ts;
 	char timestampBuf[80] = {0};
 	char timestampTzBuf[124] = {0};
@@ -124,7 +124,7 @@ static int get_formatted_timestamp_tz(pdo_stmt_t *stmt, const ISC_TIMESTAMP_TZ* 
 	isc_decode_timestamp(&ts, &t);
 
 	fmt = S->H->timestamp_format ? S->H->timestamp_format : PDO_FB_DEF_TIMESTAMP_FMT;
-	
+
 	size_t len = strftime(timestampBuf, sizeof(timestampBuf), fmt, &t);
 	if (len == 0) {
 		return 1;
@@ -563,7 +563,7 @@ static int pdo_firebird_stmt_get_col(
 					size_t len = strftime(buf, sizeof(buf), fmt, &t);
 					ZVAL_STRINGL(result, buf, len);
 					break;
-#if FB_API_VER >= 40					
+#if FB_API_VER >= 40
 				case SQL_TIME_TZ: {
 					ISC_TIME_TZ time = php_get_isc_time_tz_from_sqldata(var->sqldata);
 					return get_formatted_time_tz(stmt, &time, result);
@@ -572,7 +572,7 @@ static int pdo_firebird_stmt_get_col(
 					ISC_TIMESTAMP_TZ ts = php_get_isc_timestamp_tz_from_sqldata(var->sqldata);
 					return get_formatted_timestamp_tz(stmt, &ts, result);
 				}
-#endif				
+#endif
 				case SQL_BLOB: {
 					ISC_QUAD quad = php_get_isc_quad_from_sqldata(var->sqldata);
 					return php_firebird_fetch_blob(stmt, colno, result, &quad);
