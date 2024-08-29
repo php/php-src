@@ -1057,6 +1057,14 @@ found:;
 			}
 			goto try_again;
 		}
+
+		if (UNEXPECTED(prop_info->flags & ZEND_ACC_PPP_SET_MASK
+		 && !zend_asymmetric_property_has_set_access(prop_info))) {
+			zend_asymmetric_visibility_property_modification_error(prop_info, "modify");
+			variable_ptr = &EG(error_zval);
+			goto exit;
+		}
+
 		GC_ADDREF(zobj);
 		zend_call_known_instance_method_with_1_params(set, zobj, NULL, value);
 		OBJ_RELEASE(zobj);

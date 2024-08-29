@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug GH-15330 (Do not scan generator frames more than once). (Arnaud)
+  . Fixed bug GH-15644 (Asymmetric visibility doesn't work with hooks). (ilutov)
 
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
