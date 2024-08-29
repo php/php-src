@@ -1,5 +1,5 @@
 --TEST--
-BcMath\Number calc methods (add, sub, mul, div, mod, pow) arg error
+BcMath\Number calc methods (add, sub, mul, div, mod, pow) num arg error
 --EXTENSIONS--
 bcmath
 --FILE--
