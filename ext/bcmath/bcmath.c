@@ -1119,11 +1119,7 @@ static zend_always_inline void bc_num_from_zend_object(const zend_object *obj, b
 
 static zend_always_inline zend_result bc_num_from_zend_string(const zend_string *str, bc_num *num, size_t *full_scale)
 {
-	if (UNEXPECTED(php_str2num_ex(num, str, full_scale) == FAILURE)) {
-		bc_free_num(num);
-		return FAILURE;
-	}
-	return SUCCESS;
+	return php_str2num_ex(num, str, full_scale);
 }
 
 static zend_always_inline void bc_num_from_zend_long(zend_long lval, bc_num *num, size_t *full_scale)
@@ -1717,7 +1713,6 @@ PHP_METHOD(BcMath_Number, __unserialize)
 	bc_num num = NULL;
 	size_t scale;
 	if (php_str2num_ex(&num, Z_STR_P(zv), &scale) == FAILURE) {
-		bc_free_num(&num);
 		goto fail;
 	}
 
