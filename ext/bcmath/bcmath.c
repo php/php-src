@@ -873,9 +873,9 @@ static HashTable *bcmath_number_get_properties_for(zend_object *obj, zend_prop_p
 	HashTable *props = zend_array_dup(zend_std_get_properties(obj));
 
 	ZVAL_STR_COPY(&zv, bcmath_number_value_to_str(intern));
-	zend_hash_str_update(props, "value", sizeof("value")-1, &zv);
+	zend_hash_str_update(props, ZEND_STRL("value"), &zv);
 	ZVAL_LONG(&zv, intern->scale);
-	zend_hash_str_update(props, "scale", sizeof("scale")-1, &zv);
+	zend_hash_str_update(props, ZEND_STRL("scale"), &zv);
 
 	return props;
 }
@@ -1032,7 +1032,7 @@ static zend_always_inline zend_result bcmath_number_pow_internal(
 	if (UNEXPECTED(n2->n_scale != 0)) {
 		if (is_op) {
 			zend_value_error("exponent cannot have a fractional part");
-		} else{
+		} else {
 			zend_argument_value_error(1, "exponent cannot have a fractional part");
 		}
 		return FAILURE;
