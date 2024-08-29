@@ -55,9 +55,9 @@ other object:
 BcMath\Number::powmod(): Argument #2 ($modulus) must be of type int, string, or BcMath\Number, stdClass given
 float:
 
-Deprecated: Implicit conversion from float 0.1 to int loses precision in /php-src/ext/bcmath/tests/number/methods/powmod_arg_error.php on line 27
+Deprecated: Implicit conversion from float 0.1 to int loses precision in %s
 Modulo by zero
 null:
 
-Deprecated: BcMath\Number::powmod(): Passing null to parameter #2 ($modulus) of type BcMath\Number|string|int is deprecated in /php-src/ext/bcmath/tests/number/methods/powmod_arg_error.php on line 27
+Deprecated: BcMath\Number::powmod(): Passing null to parameter #2 ($modulus) of type BcMath\Number|string|int is deprecated in %s
 Modulo by zero
