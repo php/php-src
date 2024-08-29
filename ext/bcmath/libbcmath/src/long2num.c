@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include "convert.h"
 
-#define BC_LONG_MAX_DIGITS sizeof(LONG_MIN_DIGITS) - 1
+#define BC_LONG_MAX_DIGITS (sizeof(LONG_MIN_DIGITS) - 1)
 
 bc_num bc_long2num(zend_long lval)
 {
@@ -31,6 +31,7 @@ bc_num bc_long2num(zend_long lval)
 
 	bool negative = lval < 0;
 	if (UNEXPECTED(lval == LONG_MIN)) {
+		ZEND_ASSERT(BC_LONG_MAX_DIGITS > 0);
 		num = bc_new_num_nonzeroed(BC_LONG_MAX_DIGITS, 0);
 		const char *ptr = LONG_MIN_DIGITS;
 		bc_copy_and_toggle_bcd(num->n_value, ptr, ptr + BC_LONG_MAX_DIGITS);
