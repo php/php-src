@@ -1386,11 +1386,10 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 	bc_num num = NULL;
 	size_t num_full_scale;
 	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
-		RETURN_THROWS();
+		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, scale_is_null, 2) == FAILURE) {
-		bc_free_num(&num);
-		RETURN_THROWS();
+		goto fail;
 	}
 
 	bc_num ret = NULL;
@@ -1409,16 +1408,19 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 			break;
 		case ZEND_DIV:
 			if (UNEXPECTED(bcmath_number_div_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null) == FAILURE)) {
+				bc_free_num(&ret);
 				goto fail;
 			}
 			break;
 		case ZEND_MOD:
 			if (UNEXPECTED(bcmath_number_mod_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null) == FAILURE)) {
+				bc_free_num(&ret);
 				goto fail;
 			}
 			break;
 		case ZEND_POW:
 			if (UNEXPECTED(bcmath_number_pow_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null, false) == FAILURE)) {
+				bc_free_num(&ret);
 				goto fail;
 			}
 			break;
@@ -1436,7 +1438,6 @@ fail:
 	if (num_obj == NULL) {
 		bc_free_num(&num);
 	}
-	bc_free_num(&ret);
 	RETURN_THROWS();
 }
 
@@ -1491,11 +1492,10 @@ PHP_METHOD(BcMath_Number, powmod)
 	BCMATH_PARSE_PARAMETERS_END();
 
 	bc_num exponent_num = NULL;
+	bc_num modulus_num = NULL;
 	if (bc_num_from_obj_or_str_or_long_with_err(&exponent_num, NULL, exponent_obj, exponent_str, exponent_lval, 1) == FAILURE) {
 		goto cleanup;
 	}
-
-	bc_num modulus_num = NULL;
 	if (bc_num_from_obj_or_str_or_long_with_err(&modulus_num, NULL, modulus_obj, modulus_str, modulus_lval, 2) == FAILURE) {
 		goto cleanup;
 	}
@@ -1544,7 +1544,7 @@ cleanup:
 	if (exponent_obj == NULL) {
 		bc_free_num(&exponent_num);
 	}
-	if (modulus_obj == NULL) {
+	if (modulus_obj == NULL && modulus_num != NULL) {
 		bc_free_num(&modulus_num);
 	}
 	RETURN_THROWS();
@@ -1608,11 +1608,10 @@ PHP_METHOD(BcMath_Number, compare)
 	bc_num num = NULL;
 	size_t num_full_scale;
 	if (bc_num_from_obj_or_str_or_long_with_err(&num, &num_full_scale, num_obj, num_str, num_lval, 1) == FAILURE) {
-		RETURN_THROWS();
+		goto fail;
 	}
 	if (bcmath_check_scale(scale_lval, scale_is_null, 2) == FAILURE) {
-		bc_free_num(&num);
-		RETURN_THROWS();
+		goto fail;
 	}
 
 	size_t scale;
@@ -1628,6 +1627,12 @@ PHP_METHOD(BcMath_Number, compare)
 		bc_free_num(&num);
 	}
 	RETURN_LONG(ret);
+
+fail:
+	if (num_obj == NULL) {
+		bc_free_num(&num);
+	}
+	RETURN_THROWS();
 }
 
 static void bcmath_number_floor_or_ceil(INTERNAL_FUNCTION_PARAMETERS, bool is_floor)

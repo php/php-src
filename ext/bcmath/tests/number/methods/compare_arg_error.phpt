@@ -5,6 +5,7 @@ bcmath
 --FILE--
 <?php
 $args = [
+    ['a', 'non number str'],
     [[], 'array'],
     [new stdClass(), 'other object'],
     [0.1, 'float'],
@@ -23,6 +24,9 @@ foreach ($args as [$val, $type]) {
 }
 ?>
 --EXPECTF--
+non number str:
+BcMath\Number::compare(): Argument #1 ($num) is not well-formed
+
 array:
 BcMath\Number::compare(): Argument #1 ($num) must be of type int, string, or BcMath\Number, array given
 
