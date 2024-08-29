@@ -5,12 +5,8 @@ bcmath
 --FILE--
 <?php
 $num = new BcMath\Number(1);
-try {
-    (int) $num;
-    (float) $num;
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
-}
+(int) $num;
+(float) $num;
 ?>
 --EXPECTF--
 Warning: Object of class BcMath\Number could not be converted to int in %s

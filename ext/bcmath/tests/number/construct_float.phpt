@@ -4,12 +4,8 @@ BcMath\Number construct float
 bcmath
 --FILE--
 <?php
-try {
-    $num = new BcMath\Number(0.1234);
-    var_dump($num);
-} catch (Error $e) {
-    echo $e->getMessage() . "\n";
-}
+$num = new BcMath\Number(0.1234);
+var_dump($num);
 ?>
 --EXPECTF--
 Deprecated: Implicit conversion from float 0.1234 to int loses precision in %s
