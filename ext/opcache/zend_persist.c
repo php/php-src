@@ -692,7 +692,10 @@ static void zend_persist_op_array(zval *zv)
 			}
 		}
 #ifdef HAVE_JIT
-		if (JIT_G(on) && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+		if (JIT_G(on)
+		 && JIT_G(opt_level) <= ZEND_JIT_LEVEL_OPT_FUNCS
+		 && (!ZCG(current_persistent_script)
+		  || !ZCG(current_persistent_script)->corrupted)) {
 			zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 		}
 #endif
