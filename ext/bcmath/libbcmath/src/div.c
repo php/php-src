@@ -335,7 +335,9 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 		return false;
 	}
 
-	bc_free_num(quot);
+	if (*quot != NULL) {
+		bc_free_num(quot);
+	}
 
 	/* If numerator is zero, the quotient is always zero. */
 	if (bc_is_zero(numerator)) {

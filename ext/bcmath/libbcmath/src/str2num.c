@@ -134,7 +134,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 
 	/* If a non-digit and non-decimal-point indicator is in the string, i.e. an invalid character */
 	if (UNEXPECTED(!decimal_point && *ptr != '\0')) {
-		goto fail;
+		return false;
 	}
 
 	/* search and validate fractional end if exists */
@@ -150,7 +150,7 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, boo
 		fractional_end = bc_count_digits(fractional_ptr, end);
 		if (UNEXPECTED(*fractional_end != '\0')) {
 			/* invalid num */
-			goto fail;
+			return false;
 		}
 
 		/* Exclude trailing zeros. */
@@ -204,8 +204,4 @@ after_fractional:
 zero:
 	*num = bc_copy_num(BCG(_zero_));
 	return true;
-
-fail:
-	*num = bc_copy_num(BCG(_zero_));
-	return false;
 }
