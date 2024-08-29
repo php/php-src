@@ -248,7 +248,7 @@ slightly different steps. We'll call attention where the steps differ.
    ```shell
    git add -p
    git commit --gpg-sign=YOURKEYID -m "[ci skip] Update NEWS for PHP X.Y.Z alpha2"
-   ``` 
+   ```
 
    🔷 **For post-GA releases only,** switch back to the *version branch* for
    your release (e.g., `PHP-8.2`) and bump the version numbers in

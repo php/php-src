@@ -103,7 +103,7 @@ static lxb_css_selector_list_t *dom_parse_selector(
 			php_dom_throw_error_with_message(SYNTAX_ERR, "Invalid selector", true);
 		}
 	}
-	
+
 	return list;
 }
 
