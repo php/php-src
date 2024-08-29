@@ -6500,7 +6500,7 @@ PHP_FUNCTION(array_filter)
 	zval args[2];
 	zval retval;
 	bool have_callback = 0;
-	zend_long use_type = 0;
+	zend_long mode = ARRAY_FILTER_USE_VALUE;
 	zend_string *string_key;
 	zend_fcall_info fci = empty_fcall_info;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -6510,19 +6510,30 @@ PHP_FUNCTION(array_filter)
 		Z_PARAM_ARRAY(array)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_FUNC_OR_NULL(fci, fci_cache)
-		Z_PARAM_LONG(use_type)
+		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
+
+	switch (mode) {
+		case ARRAY_FILTER_USE_VALUE:
+		case ARRAY_FILTER_USE_BOTH:
+		case ARRAY_FILTER_USE_KEY:
+			break;
+		default:
+			zend_argument_value_error(3, "must be a valid mode");
+		RETURN_THROWS();
+	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(array)) == 0) {
 		RETVAL_EMPTY_ARRAY();
 		return;
 	}
+
 	array_init(return_value);
 
 	if (ZEND_FCI_INITIALIZED(fci)) {
 		have_callback = 1;
 		fci.retval = &retval;
-		if (use_type == ARRAY_FILTER_USE_BOTH) {
+		if (mode == ARRAY_FILTER_USE_BOTH) {
 			fci.param_count = 2;
 			key = &args[1];
 		} else {
@@ -6533,7 +6544,7 @@ PHP_FUNCTION(array_filter)
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_key, string_key, operand) {
 		if (have_callback) {
-			if (use_type) {
+			if (mode) {
 				/* Set up the key */
 				if (!string_key) {
 					ZVAL_LONG(key, num_key);
@@ -6541,7 +6552,7 @@ PHP_FUNCTION(array_filter)
 					ZVAL_STR_COPY(key, string_key);
 				}
 			}
-			if (use_type != ARRAY_FILTER_USE_KEY) {
+			if (mode != ARRAY_FILTER_USE_KEY) {
 				ZVAL_COPY(&args[0], operand);
 			}
 			fci.params = args;
@@ -6550,7 +6561,7 @@ PHP_FUNCTION(array_filter)
 				bool retval_true;
 
 				zval_ptr_dtor(&args[0]);
-				if (use_type == ARRAY_FILTER_USE_BOTH) {
+				if (mode == ARRAY_FILTER_USE_BOTH) {
 					zval_ptr_dtor(&args[1]);
 				}
 				retval_true = zend_is_true(&retval);
@@ -6560,7 +6571,7 @@ PHP_FUNCTION(array_filter)
 				}
 			} else {
 				zval_ptr_dtor(&args[0]);
-				if (use_type == ARRAY_FILTER_USE_BOTH) {
+				if (mode == ARRAY_FILTER_USE_BOTH) {
 					zval_ptr_dtor(&args[1]);
 				}
 				return;
