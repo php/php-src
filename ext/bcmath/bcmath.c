@@ -1058,6 +1058,10 @@ static zend_always_inline zend_result bcmath_number_pow_internal(
 		}
 	}
 
+	/**
+	 * bc_num2long() returns 0 if exponent is too large.
+	 * Here, if n2->n_value is not 0 but exponent is 0, it is considered too large.
+	 */
 	if (UNEXPECTED(exponent == 0 && (n2->n_len > 1 || n2->n_value[0] != 0))) {
 		if (is_op) {
 			zend_value_error("exponent is too large");
