@@ -31,9 +31,11 @@ bc_num bc_long2num(zend_long lval)
 
 	bool negative = lval < 0;
 	if (UNEXPECTED(lval == LONG_MIN)) {
-		ZEND_ASSERT(BC_LONG_MAX_DIGITS > 0);
+		ZEND_ASSERT(BC_LONG_MAX_DIGITS == 19);
 		num = bc_new_num_nonzeroed(BC_LONG_MAX_DIGITS, 0);
 		const char *ptr = LONG_MIN_DIGITS;
+		ZEND_ASSERT(*ptr == '9');
+		ZEND_ASSERT(*(ptr + BC_LONG_MAX_DIGITS) == '8');
 		bc_copy_and_toggle_bcd(num->n_value, ptr, ptr + BC_LONG_MAX_DIGITS);
 		num->n_sign = MINUS;
 		return num;
