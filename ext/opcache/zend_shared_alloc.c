@@ -366,13 +366,12 @@ static size_t zend_shared_alloc_get_largest_free_block(void)
 
 void *zend_shared_alloc(size_t size)
 {
-	ZEND_ASSERT(ZCG(locked));
-
 	int i;
 	size_t block_size = ZEND_ALIGNED_SIZE(size);
 
 #if 1
 	if (!ZCG(locked)) {
+		ZEND_ASSERT(0 && "Shared memory lock not obtained");
 		zend_accel_error_noreturn(ACCEL_LOG_ERROR, "Shared memory lock not obtained");
 	}
 #endif
