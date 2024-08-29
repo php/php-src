@@ -17,4 +17,4 @@ $c = new C(1.0);
 var_dump($c);
 ?>
 --EXPECTF--
-Fatal error: __debuginfo() must return an array in %s%eZend%etests%edebug_info-error-1.0.php on line %d
+Fatal error: __debuginfo() must return an array in %s%eZend%etests%edebug_info%edebug_info-error-1.0.php on line %d
