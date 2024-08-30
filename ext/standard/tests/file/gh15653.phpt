@@ -9,11 +9,14 @@ $fp = fopen ($filename, "r");
 try {
 	fgetcsv($fp, PHP_INT_MAX);
 } catch (\ValueError $e) {
-	echo $e->getMessage();
+	echo $e->getMessage() . PHP_EOL;
 }
+
+fgetcsv($fp, PHP_INT_MAX-1);
 --CLEAN--
 <?php
 @unlink(__DIR__ . "/gh15653.tmp");
 ?>
 --EXPECTF--
 fgetcsv(): Argument #2 ($length) must be between 0 and %d
+%A
