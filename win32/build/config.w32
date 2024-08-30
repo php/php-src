@@ -32,6 +32,10 @@ ARG_ENABLE('debug-pack', 'Release binaries with external debug symbols (--enable
 if (PHP_DEBUG == "yes" && PHP_DEBUG_PACK == "yes") {
 	ERROR("Use of both --enable-debug and --enable-debug-pack not allowed.");
 }
+ARG_ENABLE('debug-assertions', 'Release binaries with debug assertions (--enable-debug must not be specified)', "no");
+if (PHP_DEBUG == "yes" && PHP_DEBUG_ASSERTIONS == "yes") {
+	ERROR("Use of both --enable-debug and --enable-debug-assertions not allowed.");
+}
 
 if (PHP_DEBUG == "yes") {
 	ADD_FLAG("CFLAGS"," /Wall ");

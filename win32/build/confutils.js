@@ -456,7 +456,7 @@ can be built that way. \
 	var snapshot_build_exclusions = new Array(
 		'debug', 'lzf-better-compression', 'php-build', 'snapshot-template', 'zts',
 		'ipv6', 'fd-setsize', 'pgi', 'pgo', 'all-shared', 'config-profile', 'sanitizer',
-		'phpdbg-debug'
+		'phpdbg-debug', 'debug-assertions'
 	);
 	var force;
 
@@ -3475,10 +3475,15 @@ function toolset_setup_build_mode()
 		}
 		ADD_FLAG("CFLAGS", "/LD /MD");
 		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
-			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+			ADD_FLAG("CFLAGS", "/Od /D NDebug /D ZEND_WIN32_NEVER_INLINE");
 		} else {
 			// Equivalent to Release_TSInline build -> best optimization
-			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /GF /D ZEND_DEBUG=0");
+			ADD_FLAG("CFLAGS", "/Ox /D NDebug /GF");
+		}
+		if (PHP_DEBUG_ASSERTIONS == "yes") {
+			ADD_FLAG("CFLAGS", "/D ZEND_DEBUG=1");
+		} else {
+			ADD_FLAG("CFLAGS", "/D ZEND_DEBUG=0 /D NDEBUG");
 		}
 
 		// if you have VS.Net /GS hardens the binary against buffer overruns
