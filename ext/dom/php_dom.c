@@ -1334,7 +1334,7 @@ bool dom_has_feature(zend_string *feature, zend_string *version)
 }
 /* }}} end dom_has_feature */
 
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, int *cur, int index) /* {{{ */
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, char *ns, char *local, zend_long *cur, zend_long index) /* {{{ */
 {
 	/* Can happen with detached document */
 	if (UNEXPECTED(nodep == NULL)) {

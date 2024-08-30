@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-15551 (Segmentation fault (access null pointer) in
     ext/dom/xml_common.h). (nielsdos)
+  . Fixed bug GH-15654 (Signed integer overflow in ext/dom/nodelist.c).
+    (nielsdos)
 
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
