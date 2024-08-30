@@ -624,8 +624,6 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	pdo_firebird_stmt *S = NULL;
 	HashTable *np;
-	unsigned int i;
-	XSQLVAR* var;
 
 	do {
 		isc_stmt_handle s = PDO_FIREBIRD_HANDLE_INITIALIZER;
@@ -685,6 +683,8 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 			}
 
 			/* make all parameters nullable */
+			unsigned int i;
+			XSQLVAR* var;			
 			for (i = 0, var = S->in_sqlda->sqlvar; i < S->in_sqlda->sqld; i++, var++) {
 				/* The low bit of sqltype indicates that the parameter can take a NULL value */
 				var->sqltype |= 1;
