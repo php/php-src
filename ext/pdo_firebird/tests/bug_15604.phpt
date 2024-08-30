@@ -56,6 +56,14 @@ unset($stmt2);
 
 echo "\nOK\n";
 ?>
+--CLEAN--
+<?php
+require_once 'testdb.inc';
+$dbh = getDbConnection();
+@$dbh->exec('drop table t_bug_15604');
+@$dbh->exec('drop sequence g_bug_15604');
+unset($dbh);
+?>
 --EXPECT--
 bool(false)
 array(3) {
@@ -68,11 +76,3 @@ array(3) {
 }
 
 OK
---CLEAN--
-<?php
-require_once 'testdb.inc';
-$dbh = getDbConnection();
-@$dbh->exec('drop table t_bug_15604');
-@$dbh->exec('drop sequence g_bug_15604');
-unset($dbh);
-?>

@@ -461,15 +461,6 @@ static int php_firebird_preprocess(const zend_string* sql, char* sql_out, HashTa
 	return 1;
 }
 
-static void set_nullable_input_params(XSQLDA* sqlda)
-{
-	unsigned int i;
-	XSQLVAR* var;
-	for (i=0, var = sqlda->sqlvar; i < sqlda->sqld; i++, var++) {
-		var->sqltype |= 1;
-	}
-}
-
 #if FB_API_VER >= 40
 /* set coercing a data type */
 static void set_coercing_output_data_types(XSQLDA* sqlda)
@@ -637,6 +628,8 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 	do {
 		isc_stmt_handle s = PDO_FIREBIRD_HANDLE_INITIALIZER;
 		XSQLDA num_sqlda;
+		unsigned int i;
+		XSQLVAR* var;
 		static char const info[] = { isc_info_sql_stmt_type };
 		char result[8];
 
@@ -691,8 +684,11 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 				break;
 			}
 
-			// make all parameters nullable
-			set_nullable_input_params(S->in_sqlda);
+			/* make all parameters nullable */
+			for (i = 0, var = S->in_sqlda->sqlvar; i < S->in_sqlda->sqld; i++, var++) {
+				/* The low bit of sqltype indicates that the parameter can take a NULL value */
+				var->sqltype |= 1;
+			}
 		}
 
 		stmt->driver_data = S;
