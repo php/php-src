@@ -707,8 +707,8 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 	mpz_ptr gmpnum_a, gmpnum_b, gmpnum_result;
 	gmp_temp_t temp_a, temp_b;
 
+	zval a_arg_2;
 	if (UNEXPECTED(is_operator && Z_TYPE_P(a_arg) == IS_NULL)) {
-		zval a_arg_2;
 		ZVAL_LONG(&a_arg_2, 0);
 		a_arg = &a_arg_2;
 	}
@@ -718,8 +718,8 @@ static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *
 		gmpnum_b = NULL;
 		temp_b.is_used = 0;
 	} else {
+		zval b_arg_2;
 		if (UNEXPECTED(is_operator && Z_TYPE_P(b_arg) == IS_NULL)) {
-			zval b_arg_2;
 			ZVAL_LONG(&b_arg_2, 0);
 			b_arg = &b_arg_2;
 		}
