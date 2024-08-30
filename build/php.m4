@@ -40,10 +40,10 @@ dnl Execute code, if variable is not set in namespace.
 dnl
 AC_DEFUN([PHP_RUN_ONCE],[
   changequote({,})
-  unique=`echo $2|$SED 's/[^a-zA-Z0-9]/_/g'`
+  unique=$(echo $2|$SED 's/[^a-zA-Z0-9]/_/g')
   changequote([,])
   cmd="echo $ac_n \"\$$1$unique$ac_c\""
-  if test -n "$unique" && test "`eval $cmd`" = "" ; then
+  if test -n "$unique" && test "$(eval $cmd)" = "" ; then
     eval "$1$unique=set"
     $3
   fi
@@ -59,10 +59,10 @@ AC_DEFUN([PHP_EXPAND_PATH],[
     $2=$1
   else
     changequote({,})
-    ep_dir=`echo $1|$SED 's%/*[^/][^/]*/*$%%'`
+    ep_dir=$(echo $1|$SED 's%/*[^/][^/]*/*$%%')
     changequote([,])
-    ep_realdir=`(cd "$ep_dir" && pwd)`
-    $2="$ep_realdir"/`basename "$1"`
+    ep_realdir=$(cd "$ep_dir" && pwd)
+    $2="$ep_realdir"/$(basename "$1")
   fi
 ])
 
@@ -248,7 +248,7 @@ dnl Relative to source- or build-directory?
 dnl ac_srcdir/ac_bdir include trailing slash
   case $1 in
   ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir; ac_inc="-I. -I$abs_srcdir" ;;
-  /*[)] ac_srcdir=`echo "$1"|cut -c 2-`"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
+  /*[)] ac_srcdir=$(echo "$1"|cut -c 2-)"/"; ac_bdir=$ac_srcdir; ac_inc="-I$ac_bdir -I$abs_srcdir/$ac_bdir" ;;
   *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$1/"; ac_inc="-I$ac_bdir -I$ac_srcdir" ;;
   esac
 
@@ -334,7 +334,7 @@ dnl Stores the location of libgcc in libgcc_libpath.
 dnl
 AC_DEFUN([PHP_LIBGCC_LIBPATH],[
   changequote({,})
-  libgcc_libpath=`$1 --print-libgcc-file-name|$SED 's%/*[^/][^/]*$%%'`
+  libgcc_libpath=$($1 --print-libgcc-file-name|$SED 's%/*[^/][^/]*$%%')
   changequote([,])
 ])
 
@@ -386,11 +386,11 @@ AC_DEFUN([PHP_EVAL_LIBLINE],
       fi
     ;;
     -l*[)]
-      ac_ii=`echo $ac_i|cut -c 3-`
+      ac_ii=$(echo $ac_i|cut -c 3-)
       PHP_ADD_LIBRARY($ac_ii,1,$2)
     ;;
     -L*[)]
-      ac_ii=`echo $ac_i|cut -c 3-`
+      ac_ii=$(echo $ac_i|cut -c 3-)
       PHP_ADD_LIBPATH($ac_ii,$2)
     ;;
     esac
@@ -408,7 +408,7 @@ AC_DEFUN([PHP_EVAL_INCLINE],[
   for ac_i in $1; do
     case $ac_i in
     -I*[)]
-      ac_ii=`echo $ac_i|cut -c 3-`
+      ac_ii=$(echo $ac_i|cut -c 3-)
       PHP_ADD_INCLUDE([$ac_ii])
     ;;
     esac
@@ -662,7 +662,7 @@ ext_output="yes, shared"
 ext_shared=yes
 case [$]$1 in
 shared,*[)]
-  $1=`echo "[$]$1"|$SED 's/^shared,//'`
+  $1=$(echo "[$]$1"|$SED 's/^shared,//')
   ;;
 shared[)]
   $1=yes
@@ -953,7 +953,7 @@ AC_DEFUN([PHP_NEW_EXTENSION],[
   ext_srcdir=[]PHP_EXT_SRCDIR()
   ext_dir=[]PHP_EXT_DIR()
 
-  ifelse($5,,ac_extra=,[ac_extra=`echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g`])
+  ifelse($5,,ac_extra=,[ac_extra=$(echo "$5"|$SED s#@ext_srcdir@#$ext_srcdir#g|$SED s#@ext_builddir@#$ext_builddir#g)])
 
   if test "$3" != "shared" && test "$3" != "yes" && test "$4" != "cli"; then
 dnl ---------------------------------------------- Static module
@@ -1066,7 +1066,7 @@ int main(void)
   return(0);
 }
   ])], [
-    eval $php_cache_value=`cat conftestval`
+    eval $php_cache_value=$(cat conftestval)
   ], [
     eval $php_cache_value=0
   ], [
@@ -1309,7 +1309,7 @@ dnl component of the path has execute but not read permissions.
 dnl
 AC_DEFUN([PHP_BROKEN_GETCWD],[
   AC_MSG_CHECKING([for broken getcwd])
-  os=`uname -sr 2>/dev/null`
+  os=$(uname -sr 2>/dev/null)
   case $os in
     SunOS*[)]
       AC_DEFINE([HAVE_BROKEN_GETCWD], [1],
@@ -1324,7 +1324,7 @@ dnl
 dnl PHP_BROKEN_GCC_STRLEN_OPT
 dnl
 dnl Early releases of GCC 8 shipped with a strlen() optimization bug, so they
-dnl didn't properly handle the `char val[1]` struct hack. See bug #76510.
+dnl didn't properly handle the 'char val[1]' struct hack. See bug #76510.
 dnl
 AC_DEFUN([PHP_BROKEN_GCC_STRLEN_OPT],
 [AC_CACHE_CHECK([for broken gcc optimize-strlen],
@@ -1684,7 +1684,7 @@ AC_DEFUN([PHP_PROG_BISON], [
     ac_IFS=$IFS; IFS="."
     set $php_bison_version
     IFS=$ac_IFS
-    php_bison_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+    php_bison_num=$(expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0})
     php_bison_branch="[$]1.[$]2"
     php_bison_check=ok
 
@@ -1694,7 +1694,7 @@ AC_DEFUN([PHP_PROG_BISON], [
       ac_IFS=$IFS; IFS="."
       set $php_bison_required_version
       IFS=$ac_IFS
-      php_bison_required_num=`expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0}`
+      php_bison_required_num=$(expr [$]{1:-0} \* 10000 + [$]{2:-0} \* 100 + [$]{3:-0})
       php_bison_required_version="$php_bison_required_version or later"
 
       if test -z "$php_bison_num" || test "$php_bison_num" -lt "$php_bison_required_num"; then
@@ -2065,14 +2065,14 @@ dnl This macro is used to get a comparable version for Apache.
 dnl
 AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
 AS_IF([test -x "$1"], [
-  ac_output=`$1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//'`
+  ac_output=$($1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//')
   ac_IFS=$IFS
 IFS="- /.
 "
   set $ac_output
   IFS=$ac_IFS
 
-  APACHE_VERSION=`expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6`
+  APACHE_VERSION=$(expr [$]4 \* 1000000 + [$]5 \* 1000 + [$]6)
 ])
 ])
 
@@ -2101,14 +2101,14 @@ EOF
     eval val=\$$var
     if test -n "$val"; then
       echo "$var='$val' \\" >> $1
-      if test `expr "X$ac_configure_args" : ".*${var}.*"` != 0; then
+      if test $(expr "X$ac_configure_args" : ".*${var}.*") != 0; then
         clean_configure_args=$(echo $clean_configure_args | $SED -e "s#'$var=$val'##")
       fi
     fi
   done
 
   echo "'[$]0' \\" >> $1
-  if test `expr " [$]0" : " '.*"` = 0; then
+  if test $(expr " [$]0" : " '.*") = 0; then
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND '[$]0'"
   else
     CONFIGURE_COMMAND="$CONFIGURE_COMMAND [$]0"
@@ -2116,12 +2116,12 @@ EOF
   CONFIGURE_ARGS="$clean_configure_args"
   while test "X$CONFIGURE_ARGS" != "X";
   do
-   if CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\('[[^']]*'\)"`
+   if CURRENT_ARG=$(expr "X$CONFIGURE_ARGS" : "X *\('[[^']]*'\)")
    then
-     CONFIGURE_ARGS=`expr "X$CONFIGURE_ARGS" : "X *'[[^']]*' \(.*\)"`
-   elif CURRENT_ARG=`expr "X$CONFIGURE_ARGS" : "X *\([[^ ]]*\)"`
+     CONFIGURE_ARGS=$(expr "X$CONFIGURE_ARGS" : "X *'[[^']]*' \(.*\)")
+   elif CURRENT_ARG=$(expr "X$CONFIGURE_ARGS" : "X *\([[^ ]]*\)")
    then
-     CONFIGURE_ARGS=`expr "X$CONFIGURE_ARGS" : "X *[[^ ]]* \(.*\)"`
+     CONFIGURE_ARGS=$(expr "X$CONFIGURE_ARGS" : "X *[[^ ]]* \(.*\)")
      CURRENT_ARG="'$CURRENT_ARG'"
    else
     break
@@ -2300,7 +2300,7 @@ AC_DEFUN([PHP_INIT_DTRACE],
 dnl Set paths properly when called from extension.
   case "$4" in
     ""[)] ac_srcdir="$abs_srcdir/"; unset ac_bdir;;
-    /*[)] ac_srcdir=`echo "$4"|cut -c 2-`"/"; ac_bdir=$ac_srcdir;;
+    /*[)] ac_srcdir=$(echo "$4"|cut -c 2-)"/"; ac_bdir=$ac_srcdir;;
     *[)] ac_srcdir="$abs_srcdir/$1/"; ac_bdir="$4/";;
   esac
 
@@ -2343,7 +2343,7 @@ dnl DTrace objects.
   case [$]php_sapi_module in
   shared[)]
     for ac_lo in $PHP_DTRACE_OBJS; do
-      dtrace_objs="[$]dtrace_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+      dtrace_objs="[$]dtrace_objs $(echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#')"
     done;
     ;;
   *[)]
@@ -2367,12 +2367,12 @@ EOF
 
   case $host_alias in
   *solaris*|*linux*|*freebsd*)
-    dtrace_prov_name="`echo $ac_provsrc | $SED -e 's#\(.*\)\/##'`.o"
-    dtrace_lib_dir="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/[^/]*#\1#'`/.libs"
-    dtrace_d_obj="`echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#'`.o"
+    dtrace_prov_name="$(echo $ac_provsrc | $SED -e 's#\(.*\)\/##').o"
+    dtrace_lib_dir="$(echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/[^/]*#\1#')/.libs"
+    dtrace_d_obj="$(echo $ac_bdir[$]ac_provsrc | $SED -e 's#\(.*\)/\([^/]*\)#\1/.libs/\2#').o"
     dtrace_nolib_objs='$(PHP_DTRACE_OBJS:.lo=.o)'
     for ac_lo in $PHP_DTRACE_OBJS; do
-      dtrace_lib_objs="[$]dtrace_lib_objs `echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#'`"
+      dtrace_lib_objs="[$]dtrace_lib_objs $(echo $ac_lo | $SED -e 's,\.lo$,.o,' -e 's#\(.*\)\/#\1\/.libs\/#')"
     done;
     dnl Always attempt to create both PIC and non-PIC DTrace objects (Bug 63692)
     cat>>Makefile.objects<<EOF
