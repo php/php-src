@@ -11,6 +11,7 @@ $b = gmp_init(17);
 var_dump($a + $b);
 var_dump($a + 17);
 var_dump(42 + $b);
+var_dump($a + null);
 
 var_dump($a - $b);
 var_dump($a - 17);
@@ -135,6 +136,10 @@ object(GMP)#3 (1) {
 object(GMP)#3 (1) {
   ["num"]=>
   string(2) "59"
+}
+object(GMP)#3 (1) {
+  ["num"]=>
+  string(2) "42"
 }
 object(GMP)#3 (1) {
   ["num"]=>
