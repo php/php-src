@@ -1895,8 +1895,8 @@ PHP_FUNCTION(fgetcsv)
 
 		if (len_is_null || len == 0) {
 			len = -1;
-		} else if (len < 0) {
-			zend_argument_value_error(2, "must be a greater than or equal to 0");
+		} else if (len < 0 || len > (ZEND_LONG_MAX - 1)) {
+			zend_argument_value_error(2, "must be between 0 and " ZEND_LONG_FMT, (ZEND_LONG_MAX - 1));
 			RETURN_THROWS();
 		}
 
