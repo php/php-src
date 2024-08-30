@@ -60,6 +60,7 @@ static ssize_t php_stream_memory_write(php_stream *stream, const char *buf, size
 	if (count) {
 		ZEND_ASSERT(buf != NULL);
 		memcpy(ZSTR_VAL(ms->data) + ms->fpos, (char*) buf, count);
+		ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 		ms->fpos += count;
 	}
 	return count;
@@ -240,6 +241,7 @@ static int php_stream_memory_set_option(php_stream *stream, int option, int valu
 						size_t old_size = ZSTR_LEN(ms->data);
 						ms->data = zend_string_realloc(ms->data, newsize, 0);
 						memset(ZSTR_VAL(ms->data) + old_size, 0, newsize - old_size);
+						ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
 					}
 					return PHP_STREAM_OPTION_RETURN_OK;
 			}
@@ -321,11 +323,6 @@ PHPAPI zend_string *_php_stream_memory_get_buffer(php_stream *stream STREAMS_DC)
 {
 	php_stream_memory_data *ms = (php_stream_memory_data*)stream->abstract;
 	ZEND_ASSERT(ms != NULL);
-	if (!ZSTR_IS_INTERNED(ms->data)) {
-		ZSTR_VAL(ms->data)[ZSTR_LEN(ms->data)] = '\0';
-	} else {
-		CHECK_ZVAL_STRING(ms->data);
-	}
 	return ms->data;
 }
 /* }}} */
