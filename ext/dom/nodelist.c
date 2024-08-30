@@ -91,7 +91,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 		reset_objmap_cache(objmap);
 	}
 
-	int count = 0;
+	zend_long count = 0;
 	if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
 		xmlNodePtr curnode = dom_nodelist_iter_start_first_child(nodep);
 		if (curnode) {
@@ -109,7 +109,7 @@ int php_dom_get_nodelist_length(dom_object *obj)
 			nodep = nodep->children;
 		}
 		dom_get_elements_by_tag_name_ns_raw(
-			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, INT_MAX - 1 /* because of <= */);
+			basep, nodep, (char *) objmap->ns, (char *) objmap->local, &count, ZEND_LONG_MAX - 1 /* because of <= */);
 	}
 
 	objmap->cached_length = count;
@@ -174,7 +174,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 						 * TODO: in the future we could extend the logic of the node list such that backwards searches
 						 *       are also possible. */
 						bool restart = true;
-						int relative_index = index;
+						zend_long relative_index = index;
 						if (index >= objmap->cached_obj_index && objmap->cached_obj && !php_dom_is_cache_tag_stale_from_node(&objmap->cache_tag, nodep)) {
 							xmlNodePtr cached_obj_xml_node = dom_object_get_node(objmap->cached_obj);
 
@@ -192,7 +192,7 @@ void php_dom_nodelist_get_item_into_zval(dom_nnodemap_object *objmap, zend_long 
 								nodep = cached_obj_xml_node;
 							}
 						}
-						int count = 0;
+						zend_long count = 0;
 						if (objmap->nodetype == XML_ATTRIBUTE_NODE || objmap->nodetype == XML_ELEMENT_NODE) {
 							if (restart) {
 								nodep = dom_nodelist_iter_start_first_child(nodep);
