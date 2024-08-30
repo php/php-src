@@ -89,6 +89,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fix passing non-finite timeout values in stream functions. (nielsdos)
   . Fixed GH-14780 p(f)sockopen timeout overflow. (David Carlier)
+  . Fixed GH-15653 overflow on fgetcsv length parameter. (David Carlier)
 
 - Streams:
   . Fixed bug GH-15028 (Memory leak in ext/phar/stream.c). (nielsdos)
