@@ -26,9 +26,9 @@ $values = [
     0,
     123,
     2147483646,
-    2147483647,
+    PHP_INT_MAX,
     -2147483647,
-    -2147483648,
+    PHP_INT_MIN,
 ];
 
 foreach ($values as $value) {
