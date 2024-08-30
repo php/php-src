@@ -225,14 +225,6 @@ typedef unsigned int socklen_t;
 
 #include <limits.h>
 
-#ifndef LONG_MAX
-#define LONG_MAX 2147483647L
-#endif
-
-#ifndef LONG_MIN
-#define LONG_MIN (- LONG_MAX - 1)
-#endif
-
 #ifndef INT_MAX
 #define INT_MAX 2147483647
 #endif
