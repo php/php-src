@@ -59,6 +59,8 @@
 #include "ext/standard/url.h"
 #include "curl_private.h"
 
+ZEND_DECLARE_MODULE_GLOBALS(curl)
+
 #ifdef __GNUC__
 /* don't complain about deprecated CURLOPT_* we're exposing to PHP; we
    need to keep using those to avoid breaking PHP API compatibility */
@@ -215,7 +217,11 @@ zend_module_entry curl_module_entry = {
 	NULL,
 	PHP_MINFO(curl),
 	PHP_CURL_VERSION,
-	STANDARD_MODULE_PROPERTIES
+    PHP_MODULE_GLOBALS(curl),
+    PHP_GINIT(curl),
+	PHP_GSHUTDOWN(curl),
+    NULL,
+	STANDARD_MODULE_PROPERTIES_EX
 };
 /* }}} */
 
@@ -409,12 +415,25 @@ PHP_MINIT_FUNCTION(curl)
 	curl_multi_register_handlers();
 
 	curl_share_ce = register_class_CurlShareHandle();
-	curl_share_register_handlers(module_number);
+	curl_share_register_handlers();
 	curlfile_register_class();
 
 	return SUCCESS;
 }
 /* }}} */
+
+/* {{{ PHP_GINIT_FUNCTION */
+PHP_GINIT_FUNCTION(curl)
+{
+	zend_hash_init(&curl_globals->persistent_share_handles, 0, NULL, curl_share_free_persistent, true);
+	GC_MAKE_PERSISTENT_LOCAL(&curl_globals->persistent_share_handles);
+}
+/* }}} */
+
+PHP_GSHUTDOWN_FUNCTION(curl)
+{
+	zend_hash_destroy(&curl_globals->persistent_share_handles);
+}
 
 /* CurlHandle class */
 
