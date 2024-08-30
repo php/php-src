@@ -1,9 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
-<<<<<<< HEAD
- * Stub hash: 3a5bd4e561f08f0dbd26383132a771acc8192fff */
-=======
- * Stub hash: f6d1e2af9e1f0d3e7ad8ff565fc324bc41202363 */
->>>>>>> 7316e8449b (feat: enable persistent `CurlShareHandle` objects)
+ * Stub hash: 76e3f5a925c35de2cd1e8d35b51f5f88030adf05 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_close, 0, 1, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, handle, CurlHandle, 0)
