@@ -344,7 +344,7 @@ bool bc_divide(bc_num numerator, bc_num divisor, bc_num *quot, size_t scale)
 	}
 
 	/* If divisor is 1 / -1, the quotient's n_value is equal to numerator's n_value. */
-	if (_bc_do_compare(divisor, BCG(_one_), scale, false) == BCMATH_EQUAL) {
+	if (_bc_do_compare(divisor, BCG(_one_), divisor->n_scale, false) == BCMATH_EQUAL) {
 		size_t quot_scale = MIN(numerator->n_scale, scale);
 		*quot = bc_new_num_nonzeroed(numerator->n_len, quot_scale);
 		char *qptr = (*quot)->n_value;
