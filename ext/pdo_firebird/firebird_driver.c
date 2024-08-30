@@ -624,12 +624,12 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
 	pdo_firebird_stmt *S = NULL;
 	HashTable *np;
+	unsigned int i;
+	XSQLVAR* var;
 
 	do {
 		isc_stmt_handle s = PDO_FIREBIRD_HANDLE_INITIALIZER;
 		XSQLDA num_sqlda;
-		unsigned int i;
-		XSQLVAR* var;
 		static char const info[] = { isc_info_sql_stmt_type };
 		char result[8];
 
