@@ -25,7 +25,9 @@ $values = [
     '.',
     0,
     123,
+    2147483646,
     2147483647,
+    -2147483647,
     -2147483648,
 ];
 
@@ -116,7 +118,19 @@ object(BcMath\Number)#1 (2) {
 }
 object(BcMath\Number)#1 (2) {
   ["value"]=>
+  string(10) "2147483646"
+  ["scale"]=>
+  int(0)
+}
+object(BcMath\Number)#1 (2) {
+  ["value"]=>
   string(10) "2147483647"
+  ["scale"]=>
+  int(0)
+}
+object(BcMath\Number)#1 (2) {
+  ["value"]=>
+  string(11) "-2147483647"
   ["scale"]=>
   int(0)
 }
