@@ -292,6 +292,10 @@ PHP 8.4 UPGRADE NOTES
     supported (true) or not (false).
   . Added CURL_HTTP_VERSION_3 and CURL_HTTP_VERSION_3ONLY constants (available
     since libcurl 7.66 and 7.88) as available options for CURLOPT_HTTP_VERSION.
+  . Added CURLOPT_PREREQFUNCTION as a Curl option that accepts a callback to
+    be called after the connection is made, but before the request is sent.
+    The callback must return either CURL_PREREQFUNC_OK or CURL_PREREQFUNC_ABORT
+    to allow or abort the request.
 
 - Date:
   . Added static methods
@@ -995,7 +999,10 @@ PHP 8.4 UPGRADE NOTES
 - Curl:
   . CURL_HTTP_VERSION_3.
   . CURL_HTTP_VERSION_3ONLY.
-  . CURL_TCP_KEEPCNT
+  . CURL_TCP_KEEPCNT.
+  . CURLOPT_PREREQFUNCTION.
+  . CURL_PREREQFUNC_OK.
+  . CURL_PREREQFUNC_ABORT.
 
 - Intl:
   . The IntlDateFormatter class exposes now the new PATTERN constant

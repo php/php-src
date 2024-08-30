@@ -32,6 +32,11 @@ PHP                                                                        NEWS
     EAI_SYSTEM not found). (nielsdos)
   . Implemented asymmetric visibility for properties. (ilutov)
 
+- Curl:
+  . Added CURLOPT_PREREQFUNCTION Curl option to set a custom callback
+    after the connection is established, but before the request is
+    performed. (Ayesh Karunaratne)
+
 - Date:
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end
     date). (Mark Bennewitz, Derick)
