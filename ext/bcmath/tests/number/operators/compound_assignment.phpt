@@ -1,5 +1,5 @@
 --TEST--
-BcMath\Number operator short syntax
+BcMath\Number operator compound assignment
 --EXTENSIONS--
 bcmath
 --FILE--
