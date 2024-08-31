@@ -1198,13 +1198,6 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 		goto fail;
 	}
 
-	/* For increment and decrement, etc */
-	zval op1_copy;
-	if (ret_val == op1) {
-		ZVAL_COPY_VALUE(&op1_copy, op1);
-		op1 = &op1_copy;
-	}
-
 	bc_num ret = NULL;
 	size_t scale;
 	switch (opcode) {
@@ -1248,9 +1241,10 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	ZVAL_OBJ(ret_val, &intern->std);
 
 	/* For increment and decrement, etc */
-	if (op1 == &op1_copy) {
-		zval_ptr_dtor(op1);
+	if (ret_val == op1) {
+		zval_ptr_dtor(ret_val);
 	}
+	ZVAL_OBJ(ret_val, &intern->std);
 
 	return SUCCESS;
 
