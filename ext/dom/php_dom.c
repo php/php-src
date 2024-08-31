@@ -370,13 +370,14 @@ static zend_always_inline const dom_prop_handler *dom_get_prop_handler(const dom
 	const dom_prop_handler *hnd = NULL;
 
 	if (obj->prop_handler != NULL) {
-		if (cache_slot) {
-			hnd = *cache_slot;
+		if (cache_slot && *cache_slot == obj->prop_handler) {
+			hnd = *(cache_slot + 1);
 		}
 		if (!hnd) {
 			hnd = zend_hash_find_ptr(obj->prop_handler, name);
 			if (cache_slot) {
-				*cache_slot = (void *) hnd;
+				*cache_slot = obj->prop_handler;
+				*(cache_slot + 1) = (void *) hnd;
 			}
 		}
 	}
@@ -419,12 +420,13 @@ zval *dom_write_property(zend_object *object, zend_string *name, zval *value, vo
 
 		zend_property_info *prop = NULL;
 		if (cache_slot) {
-			prop = *(cache_slot + 1);
+			ZEND_ASSERT(*cache_slot == obj->prop_handler);
+			prop = *(cache_slot + 2);
 		}
 		if (!prop) {
 			prop = zend_get_property_info(object->ce, name, /* silent */ true);
 			if (cache_slot) {
-				*(cache_slot + 1) = prop;
+				*(cache_slot + 2) = prop;
 			}
 		}
 
