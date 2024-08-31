@@ -1240,7 +1240,6 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	}
 
 	bcmath_number_obj_t *intern = bcmath_number_new_obj(ret, scale);
-	ZVAL_OBJ(ret_val, &intern->std);
 
 	/* For increment and decrement, etc */
 	if (ret_val == op1) {
