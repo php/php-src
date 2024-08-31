@@ -2111,6 +2111,10 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 	pdo_stmt_reset_columns(stmt);
 
 	if (!Z_ISUNDEF(stmt->fetch.into) && stmt->default_fetch_type == PDO_FETCH_INTO) {
+		/* For circular references, decrement the ref count by one. */
+		if (UNEXPECTED(Z_TYPE(stmt->fetch.into) == IS_OBJECT && Z_OBJ(stmt->fetch.into) == &stmt->std)) {
+			Z_DELREF_P(&stmt->fetch.into);
+		}
 		zval_ptr_dtor(&stmt->fetch.into);
 		ZVAL_UNDEF(&stmt->fetch.into);
 	}
