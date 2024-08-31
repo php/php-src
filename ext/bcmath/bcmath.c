@@ -1083,7 +1083,7 @@ static zend_always_inline bcmath_number_obj_t *bcmath_number_new_obj(bc_num ret,
 	return intern;
 }
 
-static zend_always_inline zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
+static zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_string **str, zend_long *lval)
 {
 	if (Z_TYPE_P(zv) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zv), bcmath_number_ce)) {
 		*obj = Z_OBJ_P(zv);
@@ -1126,7 +1126,7 @@ static zend_always_inline void bc_num_from_zend_long(zend_long lval, bc_num *num
 	}
 }
 
-static zend_always_inline zend_result bc_num_from_obj_or_str_or_long(
+static zend_result bc_num_from_obj_or_str_or_long(
 	bc_num *num, size_t *full_scale, const zend_object *obj, const zend_string *str, zend_long lval)
 {
 	if (obj) {
