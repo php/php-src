@@ -1278,7 +1278,7 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 		goto fallback;
 	}
 
-	int ret = bc_compare(n1, n2, MAX(n1->n_scale, n2->n_scale));
+	bcmath_compare_result ret = bc_compare(n1, n2, MAX(n1->n_scale, n2->n_scale));
 
 	if (Z_TYPE_P(op1) != IS_OBJECT) {
 		bc_free_num(&n1);
