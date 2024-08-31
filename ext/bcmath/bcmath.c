@@ -1355,6 +1355,12 @@ PHP_METHOD(BcMath_Number, __construct)
 		Z_PARAM_STR_OR_LONG(str, lval);
 	ZEND_PARSE_PARAMETERS_END();
 
+	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num != NULL)) {
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(bcmath_number_ce->name), "value");
+		RETURN_THROWS();
+	}
+
 	bc_num num = NULL;
 	size_t scale;
 	if (bc_num_from_obj_or_str_or_long_with_err(&num, &scale, NULL, str, lval, 1) == FAILURE) {
@@ -1362,7 +1368,6 @@ PHP_METHOD(BcMath_Number, __construct)
 		RETURN_THROWS();
 	}
 
-	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 	intern->num = num;
 	intern->scale = scale;
 }
@@ -1737,14 +1742,18 @@ PHP_METHOD(BcMath_Number, __unserialize)
 		goto fail;
 	}
 
+	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
+	if (UNEXPECTED(intern->num != NULL)) {
+		zend_readonly_property_modification_error_ex(ZSTR_VAL(bcmath_number_ce->name), "value");
+		RETURN_THROWS();
+	}
+
 	bc_num num = NULL;
 	size_t scale;
 	if (php_str2num_ex(&num, Z_STR_P(zv), &scale) == FAILURE) {
 		bc_free_num(&num);
 		goto fail;
 	}
-
-	bcmath_number_obj_t *intern = get_bcmath_number_from_zval(ZEND_THIS);
 
 	intern->num = num;
 	intern->scale = scale;
