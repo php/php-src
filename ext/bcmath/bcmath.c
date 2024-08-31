@@ -796,7 +796,7 @@ static zend_class_entry *bcmath_number_ce;
 static zend_object_handlers bcmath_number_obj_handlers;
 
 static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zval *op1, zval *op2);
-static int bcmath_number_compare(zval *z1, zval *z2);
+static int bcmath_number_compare(zval *op1, zval *op2);
 
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
 {
