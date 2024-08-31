@@ -1309,18 +1309,14 @@ fallback:
 			ZEND_ASSERT(_i == _max_num_args || _max_num_args == (uint32_t) -1); \
 		} while (0); \
 		if (UNEXPECTED(bc_num_arg_error)) { \
-			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				if (EG(exception)) { \
-					return; \
-				} \
-				zend_argument_type_error(_i, "must be of type int, string, or %s, %s given", \
-					ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(_arg)); \
+			if (EG(exception)) { \
+				return; \
 			} \
+			zend_argument_type_error(_i, "must be of type int, string, or %s, %s given", \
+				ZSTR_VAL(bcmath_number_ce->name), zend_zval_value_name(_arg)); \
 			return; \
 		} else if (UNEXPECTED(_error_code != ZPP_ERROR_OK)) { \
-			if (!(_flags & ZEND_PARSE_PARAMS_QUIET)) { \
-				zend_wrong_parameter_error(_error_code, _i, _error, _expected_type, _arg); \
-			} \
+			zend_wrong_parameter_error(_error_code, _i, _error, _expected_type, _arg); \
 			return; \
 		} \
 	} while (0)
