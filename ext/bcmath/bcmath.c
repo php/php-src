@@ -1726,7 +1726,7 @@ PHP_METHOD(BcMath_Number, __serialize)
 
 	zval zv;
 	ZVAL_STR_COPY(&zv, bcmath_number_value_to_str(intern));
-	zend_hash_str_update(props, "value", sizeof("value")-1, &zv);
+	zend_hash_str_update(props, ZEND_STRL("value"), &zv);
 }
 
 PHP_METHOD(BcMath_Number, __unserialize)
@@ -1737,7 +1737,7 @@ PHP_METHOD(BcMath_Number, __unserialize)
 		Z_PARAM_ARRAY_HT(props)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval *zv = zend_hash_str_find(props, "value", sizeof("value")-1);
+	zval *zv = zend_hash_str_find(props, ZEND_STRL("value"));
 	if (!zv || Z_TYPE_P(zv) != IS_STRING || Z_STRLEN_P(zv) == 0) {
 		goto fail;
 	}
