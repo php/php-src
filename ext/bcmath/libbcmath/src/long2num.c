@@ -18,7 +18,7 @@
 #include <stdbool.h>
 #include "convert.h"
 
-#define BC_LONG_MAX_DIGITS sizeof(LONG_MIN_DIGITS) - 1
+#define BC_LONG_MAX_DIGITS (sizeof(LONG_MIN_DIGITS) - 1)
 
 bc_num bc_long2num(zend_long lval)
 {
