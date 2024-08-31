@@ -53,8 +53,6 @@ if test "$PHP_APXS2" != "no"; then
     AS_CASE([$flag], [-D*], [APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag"])
   done
 
-  APACHE_CFLAGS="$APACHE_CPPFLAGS -I$APXS_INCLUDEDIR $APR_CFLAGS $APU_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-
   dnl Check Apache version.
   PHP_AP_EXTRACT_VERSION([$APXS_HTTPD])
   AS_VERSION_COMPARE([$APACHE_VERSION], [2004000],
@@ -104,7 +102,13 @@ if test "$PHP_APXS2" != "no"; then
   PHP_SELECT_SAPI([apache2handler],
     [$php_sapi_apache2handler_type],
     [mod_php.c sapi_apache2.c apache_config.c php_functions.c],
-    [$APACHE_CFLAGS])
+    [
+      $APACHE_CPPFLAGS
+      -I$APXS_INCLUDEDIR
+      $APR_CFLAGS
+      $APU_CFLAGS
+      -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1
+    ])
 
   AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
     APACHE_THREADED_MPM=yes
