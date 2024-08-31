@@ -978,16 +978,21 @@ static zend_always_inline void bcmath_number_sub_internal(
 	bc_rm_trailing_zeros(*ret);
 }
 
-static zend_always_inline void bcmath_number_mul_internal(
+static zend_always_inline zend_result bcmath_number_mul_internal(
 	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
-		*scale = MIN(n1_full_scale + n2_full_scale, INT_MAX);
+		*scale = n1_full_scale + n2_full_scale;
+		if (UNEXPECTED(*scale > INT_MAX)) {
+			zend_value_error("scale of the result is too large");
+			return FAILURE;
+		}
 	}
 	*ret = bc_multiply(n1, n2, *scale);
 	(*ret)->n_scale = MIN(*scale, (*ret)->n_scale);
 	bc_rm_trailing_zeros(*ret);
+	return SUCCESS;
 }
 
 static zend_always_inline zend_result bcmath_number_div_internal(
@@ -995,7 +1000,11 @@ static zend_always_inline zend_result bcmath_number_div_internal(
 	size_t n1_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
-		*scale = MIN(n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
+		*scale = n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE;
+		if (UNEXPECTED(*scale > INT_MAX)) {
+			zend_value_error("scale of the result is too large");
+			return FAILURE;
+		}
 	}
 	if (!bc_divide(n1, n2, ret, *scale)) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
@@ -1044,10 +1053,15 @@ static zend_always_inline zend_result bcmath_number_pow_internal(
 		if (exponent > 0) {
 			*scale = n1_full_scale * exponent;
 			if (UNEXPECTED(*scale > INT_MAX || *scale < n1_full_scale)) {
-				*scale = INT_MAX;
+				zend_value_error("scale of the result is too large");
+				return FAILURE;
 			}
 		} else if (exponent < 0) {
-			*scale = MIN(n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
+			*scale = n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE;
+			if (UNEXPECTED(*scale > INT_MAX)) {
+				zend_value_error("scale of the result is too large");
+				return FAILURE;
+			}
 			scale_expand = true;
 		} else {
 			*scale = 0;
@@ -1201,7 +1215,9 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 			bcmath_number_sub_internal(n1, n2, &ret, n1_full_scale, n2_full_scale, &scale, true);
 			break;
 		case ZEND_MUL:
-			bcmath_number_mul_internal(n1, n2, &ret, n1_full_scale, n2_full_scale, &scale, true);
+			if (UNEXPECTED(bcmath_number_mul_internal(n1, n2, &ret, n1_full_scale, n2_full_scale, &scale, true) == FAILURE)) {
+				goto fail;
+			}
 			break;
 		case ZEND_DIV:
 			if (UNEXPECTED(bcmath_number_div_internal(n1, n2, &ret, n1_full_scale, &scale, true) == FAILURE)) {
@@ -1396,7 +1412,9 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 			bcmath_number_sub_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null);
 			break;
 		case ZEND_MUL:
-			bcmath_number_mul_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null);
+			if (UNEXPECTED(bcmath_number_mul_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null) == FAILURE)) {
+				goto fail;
+			}
 			break;
 		case ZEND_DIV:
 			if (UNEXPECTED(bcmath_number_div_internal(intern->num, num, &ret, intern->scale, &scale, scale_is_null) == FAILURE)) {
@@ -1560,7 +1578,11 @@ PHP_METHOD(BcMath_Number, sqrt)
 
 	size_t scale;
 	if (scale_is_null) {
-		scale = MIN(intern->scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
+		scale = intern->scale + BC_MATH_NUMBER_EXPAND_SCALE;
+		if (UNEXPECTED(scale > INT_MAX)) {
+			zend_value_error("scale of the result is too large");
+			RETURN_THROWS();
+		}
 	} else {
 		scale = scale_lval;
 	}
