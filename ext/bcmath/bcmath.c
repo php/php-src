@@ -798,6 +798,12 @@ static zend_object_handlers bcmath_number_obj_handlers;
 static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zval *op1, zval *op2);
 static int bcmath_number_compare(zval *op1, zval *op2);
 
+#if SIZEOF_SIZE_T >= 8
+#  define CHECK_RET_SCALE_OVERFLOW(scale, origin_scale) (scale > INT_MAX)
+#else
+#  define CHECK_RET_SCALE_OVERFLOW(scale, origin_scale) (scale > INT_MAX || scale < origin_scale)
+#endif
+
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
 {
 	return (bcmath_number_obj_t*)((char*)(obj) - XtOffsetOf(bcmath_number_obj_t, std));
@@ -984,7 +990,7 @@ static zend_always_inline zend_result bcmath_number_mul_internal(
 ) {
 	if (auto_scale) {
 		*scale = n1_full_scale + n2_full_scale;
-		if (UNEXPECTED(*scale > INT_MAX)) {
+		if (UNEXPECTED(CHECK_RET_SCALE_OVERFLOW(*scale, n1_full_scale))) {
 			zend_value_error("scale of the result is too large");
 			return FAILURE;
 		}
@@ -1001,7 +1007,7 @@ static zend_always_inline zend_result bcmath_number_div_internal(
 ) {
 	if (auto_scale) {
 		*scale = n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE;
-		if (UNEXPECTED(*scale > INT_MAX)) {
+		if (UNEXPECTED(CHECK_RET_SCALE_OVERFLOW(*scale, n1_full_scale))) {
 			zend_value_error("scale of the result is too large");
 			return FAILURE;
 		}
@@ -1058,7 +1064,7 @@ static zend_always_inline zend_result bcmath_number_pow_internal(
 			}
 		} else if (exponent < 0) {
 			*scale = n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE;
-			if (UNEXPECTED(*scale > INT_MAX)) {
+			if (UNEXPECTED(CHECK_RET_SCALE_OVERFLOW(*scale, n1_full_scale))) {
 				zend_value_error("scale of the result is too large");
 				return FAILURE;
 			}
@@ -1574,7 +1580,7 @@ PHP_METHOD(BcMath_Number, sqrt)
 	size_t scale;
 	if (scale_is_null) {
 		scale = intern->scale + BC_MATH_NUMBER_EXPAND_SCALE;
-		if (UNEXPECTED(scale > INT_MAX)) {
+		if (UNEXPECTED(CHECK_RET_SCALE_OVERFLOW(scale, intern->scale))) {
 			zend_value_error("scale of the result is too large");
 			RETURN_THROWS();
 		}
