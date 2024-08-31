@@ -1738,7 +1738,7 @@ PHP_METHOD(BcMath_Number, __unserialize)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zval *zv = zend_hash_str_find(props, "value", sizeof("value")-1);
-	if (!zv || Z_TYPE_P(zv) != IS_STRING) {
+	if (!zv || Z_TYPE_P(zv) != IS_STRING || Z_STRLEN_P(zv) == 0) {
 		goto fail;
 	}
 
