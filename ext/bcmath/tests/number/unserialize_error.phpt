@@ -6,7 +6,7 @@ bcmath
 <?php
 try {
     unserialize('O:13:"BcMath\Number":1:{s:5:"value";s:1:"a";}');
-} catch (Error $e) {
+} catch (Exception $e) {
     echo $e->getMessage();
 }
 ?>

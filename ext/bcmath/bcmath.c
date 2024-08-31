@@ -1740,7 +1740,7 @@ PHP_METHOD(BcMath_Number, __unserialize)
 	return;
 
 fail:
-	zend_throw_error(NULL, "Invalid serialization data for %s object", ZSTR_VAL(bcmath_number_ce->name));
+	zend_throw_exception_ex(NULL, 0, "Invalid serialization data for %s object", ZSTR_VAL(bcmath_number_ce->name));
 	RETURN_THROWS();
 }
 
