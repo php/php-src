@@ -95,6 +95,10 @@ PHP 8.4 UPGRADE NOTES
     is converted to Unicode. This is significant because around 40 SJIS-Mac characters
     convert to a sequence of multiple Unicode codepoints.
 
+- MySQLnd:
+  . The error code reported for MySQL server wait timeouts has been changed from 2006
+    to 4031 for MySQL server versions 8.0.24 and above.
+
 - ODBC:
   . odbc_fetch_row() returns false when a value less than or equal to 0 is
     passed for parameter $row. Now, a warning is emitted in this case.
@@ -119,17 +123,6 @@ PHP 8.4 UPGRADE NOTES
   . If JIT is enabled, PHP will now exit with a fatal error on startup in case
     of JIT startup initialization issues.
 
-- PCRE:
-  . The bundled pcre2lib has been updated to version 10.44.
-    As a consequence, this means {,3} is now recognized as a quantifier instead
-    of as text. Furthermore, the meaning of some character classes in UCP mode
-    has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
-    for a full changelog.
-
-- MySQLnd
-  . The error code reported for MySQL server wait timeouts has been changed from 2006
-    to 4031 for MySQL server versions 8.0.24 and above.
-
 - PCNTL:
   . The functions pcntl_sigprocmask(), pcntl_sigwaitinfo() and
     pcntl_sigtimedwait() now throw:
@@ -145,6 +138,13 @@ PHP 8.4 UPGRADE NOTES
     - A ValueError if $seconds is less than 0
     - A ValueError if $nanoseconds is less than 0 or greater than 1e9
     - A ValueError if both $seconds and $nanoseconds are 0
+
+- PCRE:
+  . The bundled pcre2lib has been updated to version 10.44.
+    As a consequence, this means {,3} is now recognized as a quantifier instead
+    of as text. Furthermore, the meaning of some character classes in UCP mode
+    has changed. Consult https://github.com/PCRE2Project/pcre2/blob/master/NEWS
+    for a full changelog.
 
 - PDO_DBLIB:
   . setAttribute, DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER and DBLIB_ATTR_DATETIME_CONVERT
@@ -390,11 +390,11 @@ PHP 8.4 UPGRADE NOTES
     - two-dashes and C-style comments (non-nested)
     RFC: https://wiki.php.net/rfc/pdo_driver_specific_parsers
 
-- Phar:
-  . Added support for the unix timestamp extension for zip archives.
-
 - PgSQL:
   . Added pg_result_memory_size to get the visibility the memory used by a query result.
+
+- Phar:
+  . Added support for the unix timestamp extension for zip archives.
 
 - POSIX:
   . Added constant POSIX_SC_CHILD_MAX
@@ -426,14 +426,6 @@ PHP 8.4 UPGRADE NOTES
     - ReflectionClass::SKIP_DESTRUCTOR
     RFC: https://wiki.php.net/rfc/lazy-objects
 
-- Standard:
-  . stream_bucket_make_writeable() and stream_bucket_new() will now return a
-    StreamBucket instance instead of an instance of stdClass.
-    RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
-  . Added a new RoundingMode enum with clearer naming and improved discoverability
-    compared to the PHP_ROUND_* constants.
-    RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
-
 - SOAP:
   . Added support for clark notation for namespaces in class map.
     It is now possible to specify entries in a class map with clark notation
@@ -443,6 +435,14 @@ PHP 8.4 UPGRADE NOTES
     elements are now serialized as such instead of being serialized as an
     empty string.
   . Session persistence now works with a shared session module.
+
+- Standard:
+  . stream_bucket_make_writeable() and stream_bucket_new() will now return a
+    StreamBucket instance instead of an instance of stdClass.
+    RFC: https://wiki.php.net/rfc/dedicated_stream_bucket
+  . Added a new RoundingMode enum with clearer naming and improved discoverability
+    compared to the PHP_ROUND_* constants.
+    RFC: https://wiki.php.net/rfc/correctly_name_the_rounding_mode_and_make_it_an_enum
 
 - XSL:
   . It is now possible to use parameters that contain both single and double
@@ -952,7 +952,7 @@ PHP 8.4 UPGRADE NOTES
     would finally be.
   . A new constant has been added: MYSQLI_TYPE_VECTOR.
 
-- Mysqlnd
+- Mysqlnd:
   . Support for the new VECTOR data type from MySQL 9.
 
 - OpenSSL:
