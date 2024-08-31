@@ -795,6 +795,9 @@ PHP_FUNCTION(bcscale)
 static zend_class_entry *bcmath_number_ce;
 static zend_object_handlers bcmath_number_obj_handlers;
 
+static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zval *op1, zval *op2);
+static int bcmath_number_compare(zval *z1, zval *z2);
+
 static zend_always_inline bcmath_number_obj_t *get_bcmath_number_from_obj(const zend_object *obj)
 {
 	return (bcmath_number_obj_t*)((char*)(obj) - XtOffsetOf(bcmath_number_obj_t, std));
@@ -934,9 +937,6 @@ static zend_result bcmath_number_cast_object(zend_object *obj, zval *ret, int ty
 
 	return zend_std_cast_object_tostring(obj, ret, type);
 }
-
-static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zval *op1, zval *op2);
-static int bcmath_number_compare(zval *z1, zval *z2);
 
 static void bcmath_number_register_class(void)
 {
