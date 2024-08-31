@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 8.4.0beta5
 
 - BCMath:
+  . Fixed LONG_MAX in BCMath ext. (Saki Takamachi)
   . Fixed bcdiv() div by one. (Saki Takamachi)
 
 - Core:
