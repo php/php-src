@@ -14,6 +14,7 @@ $num += '50';
 echo $num . "\n";
 $num += (new BcMath\Number(30));
 echo $num . "\n";
+echo 'old: ' . $num_old . "\n";
 echo "\n";
 
 echo "========== sub ==========\n";
@@ -25,6 +26,7 @@ $num -= '50';
 echo $num . "\n";
 $num -= (new BcMath\Number(30));
 echo $num . "\n";
+echo 'old: ' . $num_old . "\n";
 echo "\n";
 
 echo "========== mul ==========\n";
@@ -36,6 +38,7 @@ $num *= '50';
 echo $num . "\n";
 $num *= (new BcMath\Number(30));
 echo $num . "\n";
+echo 'old: ' . $num_old . "\n";
 echo "\n";
 
 echo "========== div ==========\n";
@@ -47,6 +50,7 @@ $num /= '50';
 echo $num . "\n";
 $num /= (new BcMath\Number(30));
 echo $num . "\n";
+echo 'old: ' . $num_old . "\n";
 echo "\n";
 
 echo "========== mod ==========\n";
@@ -58,6 +62,7 @@ $num %= '30';
 echo $num . "\n";
 $num %= (new BcMath\Number(6));
 echo $num . "\n";
+echo 'old: ' . $num_old . "\n";
 echo "\n";
 
 echo "========== pow ==========\n";
@@ -69,6 +74,7 @@ $num **= '3';
 echo $num . "\n";
 $num **= (new BcMath\Number(0));
 echo $num . "\n";
+echo 'old: ' . $num_old . "\n";
 echo "\n";
 ?>
 --EXPECT--
@@ -76,28 +82,34 @@ echo "\n";
 200
 250
 280
+old: 100
 
 ========== sub ==========
 0
 -50
 -80
+old: 100
 
 ========== mul ==========
 10000
 500000
 15000000
+old: 100
 
 ========== div ==========
 1
 0.02
 0.000666666666
+old: 100
 
 ========== mod ==========
 10
 10
 4
+old: 1000
 
 ========== pow ==========
 100
 1000000
 1
+old: 10
