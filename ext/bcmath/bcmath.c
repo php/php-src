@@ -992,7 +992,7 @@ static zend_always_inline void bcmath_number_mul_internal(
 
 static zend_always_inline zend_result bcmath_number_div_internal(
 	bc_num n1, bc_num n2, bc_num *ret,
-	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale
+	size_t n1_full_scale, size_t *scale, bool auto_scale
 ) {
 	if (auto_scale) {
 		*scale = MIN(n1_full_scale + BC_MATH_NUMBER_EXPAND_SCALE, INT_MAX);
@@ -1026,7 +1026,7 @@ static zend_always_inline zend_result bcmath_number_mod_internal(
 
 static zend_always_inline zend_result bcmath_number_pow_internal(
 	bc_num n1, bc_num n2, bc_num *ret,
-	size_t n1_full_scale, size_t n2_full_scale, size_t *scale, bool auto_scale, bool is_op
+	size_t n1_full_scale, size_t *scale, bool auto_scale, bool is_op
 ) {
 	/* Check the exponent for scale digits and convert to a long. */
 	if (UNEXPECTED(n2->n_scale != 0)) {
@@ -1204,7 +1204,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 			bcmath_number_mul_internal(n1, n2, &ret, n1_full_scale, n2_full_scale, &scale, true);
 			break;
 		case ZEND_DIV:
-			if (UNEXPECTED(bcmath_number_div_internal(n1, n2, &ret, n1_full_scale, n2_full_scale, &scale, true) == FAILURE)) {
+			if (UNEXPECTED(bcmath_number_div_internal(n1, n2, &ret, n1_full_scale, &scale, true) == FAILURE)) {
 				goto fail;
 			}
 			break;
@@ -1214,7 +1214,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 			}
 			break;
 		case ZEND_POW:
-			if (UNEXPECTED(bcmath_number_pow_internal(n1, n2, &ret, n1_full_scale, n2_full_scale, &scale, true, true) == FAILURE)) {
+			if (UNEXPECTED(bcmath_number_pow_internal(n1, n2, &ret, n1_full_scale, &scale, true, true) == FAILURE)) {
 				goto fail;
 			}
 			break;
@@ -1399,7 +1399,7 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 			bcmath_number_mul_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null);
 			break;
 		case ZEND_DIV:
-			if (UNEXPECTED(bcmath_number_div_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null) == FAILURE)) {
+			if (UNEXPECTED(bcmath_number_div_internal(intern->num, num, &ret, intern->scale, &scale, scale_is_null) == FAILURE)) {
 				bc_free_num(&ret);
 				goto fail;
 			}
@@ -1411,7 +1411,7 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 			}
 			break;
 		case ZEND_POW:
-			if (UNEXPECTED(bcmath_number_pow_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null, false) == FAILURE)) {
+			if (UNEXPECTED(bcmath_number_pow_internal(intern->num, num, &ret, intern->scale, &scale, scale_is_null, false) == FAILURE)) {
 				bc_free_num(&ret);
 				goto fail;
 			}
