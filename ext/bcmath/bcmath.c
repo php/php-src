@@ -1112,6 +1112,10 @@ static zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_str
 				*str = Z_STR_P(zv);
 				return SUCCESS;
 
+			case IS_NULL:
+				*lval = 0;
+				return SUCCESS;
+
 			default:
 				return zend_parse_arg_str_or_long_slow(zv, str, lval, 1 /* dummy */) ? SUCCESS : FAILURE;
 		}
@@ -1176,15 +1180,7 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 	zend_string *str2 = NULL;
 	zend_long lval2;
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_NULL)) {
-		lval1 = 0;
-	} else if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE)) {
-		return FAILURE;
-	}
-
-	if (UNEXPECTED(Z_TYPE_P(op2) == IS_NULL)) {
-		lval2 = 0;
-	} else if (UNEXPECTED(bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
+	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE || bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
 		return FAILURE;
 	}
 
