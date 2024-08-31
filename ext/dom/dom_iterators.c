@@ -152,7 +152,7 @@ static xmlNodePtr dom_fetch_first_iteration_item(dom_nnodemap_object *objmap)
 			return dom_nodelist_iter_start_first_child(basep);
 		}
 	} else {
-		int curindex = 0;
+		zend_long curindex = 0;
 		xmlNodePtr nodep = php_dom_first_child_of_container_node(basep);
 		return dom_get_elements_by_tag_name_ns_raw(
 			basep, nodep, objmap->ns, objmap->local, objmap->local_lower, &curindex, 0);
@@ -209,7 +209,7 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 					/* We have a strong reference to the base node via baseobj_zv, this cannot become NULL */
 					ZEND_ASSERT(basenode != NULL);
 
-					int previndex;
+					zend_long previndex;
 					if (php_dom_is_cache_tag_stale_from_node(&iterator->cache_tag, basenode)) {
 						php_dom_mark_cache_tag_up_to_date_from_node(&iterator->cache_tag, basenode);
 						previndex = 0;

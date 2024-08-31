@@ -87,7 +87,7 @@ typedef struct dom_nnodemap_object {
 	xmlChar *ns;
 	php_libxml_cache_tag cache_tag;
 	dom_object *cached_obj;
-	int cached_obj_index;
+	zend_long cached_obj_index;
 	bool free_local : 1;
 	bool free_ns : 1;
 } dom_nnodemap_object;
@@ -143,7 +143,7 @@ void dom_reconcile_ns_list(xmlDocPtr doc, xmlNodePtr nodep, xmlNodePtr last);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void php_dom_normalize_legacy(xmlNodePtr nodep);
 void php_dom_normalize_modern(xmlNodePtr nodep);
-xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, int *cur, int index);
+xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr basep, xmlNodePtr nodep, xmlChar *ns, xmlChar *local, xmlChar *local_lower, zend_long *cur, zend_long index);
 void php_dom_create_implementation(zval *retval, bool modern);
 int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 bool dom_has_feature(zend_string *feature, zend_string *version);
