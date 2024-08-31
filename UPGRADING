@@ -1019,6 +1019,9 @@ PHP 8.4 UPGRADE NOTES
     substitution, but want to disallow external entity loading.
     This constant is available as of libxml2 2.13.
 
+- Mysqli:
+  . MYSQLI_TYPE_VECTOR.
+
 - OpenSSL:
   . X509_PURPOSE_OCSP_HELPER.
   . X509_PURPOSE_TIMESTAMP_SIGN.
