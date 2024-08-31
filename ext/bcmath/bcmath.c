@@ -1536,7 +1536,7 @@ cleanup:
 	if (exponent_obj == NULL) {
 		bc_free_num(&exponent_num);
 	}
-	if (modulus_obj == NULL && modulus_num != NULL) {
+	if (modulus_obj == NULL) {
 		bc_free_num(&modulus_num);
 	}
 	RETURN_THROWS();
