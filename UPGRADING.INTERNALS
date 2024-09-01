@@ -84,6 +84,10 @@ PHP 8.6 INTERNALS UPGRADE NOTES
     values can be compared to the result of
     zend_enum_fetch_case_id(zend_object*).
 
+- Unix build system changes:
+  . Symbol HAVE_ST_BLOCKS has been removed from php_config.h (use
+    HAVE_STRUCT_STAT_ST_BLOCKS).
+
 ========================
 3. Module changes
 ========================
