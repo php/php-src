@@ -143,22 +143,6 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 }
 /* }}} */
 
-#ifdef HAVE_GETADDRINFO
-static zend_always_inline report_getaddrinfo_failure(const char *host, int errcode, zend_string **error_string)
-{
-	zend_string *msg = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(errcode));
-	if (error_string) {
-		/* free error string received during previous iteration (if any) */
-		if (*error_string) {
-			zend_string_release_ex(*error_string, 0);
-		}
-		*error_string = zend_string_copy(msg);
-	}
-	php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(msg));
-	zend_string_release_ex(msg, 0);
-}
-#endif
-
 /* {{{ php_network_getaddresses
  * Returns number of addresses, 0 for none/error
  */
@@ -207,7 +191,16 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 # endif
 
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
-		report_getaddrinfo_failure(host, n, error_string);
+		if (error_string) {
+			/* free error string received during previous iteration (if any) */
+			if (*error_string) {
+				zend_string_release_ex(*error_string, 0);
+			}
+			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
+		} else {
+			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+		}
 		return 0;
 	} else if (res == NULL) {
 		if (error_string) {
