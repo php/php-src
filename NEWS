@@ -27,7 +27,11 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
 
-27 Aug 2024, PHP 8.4.0beta4
+- Streams:
+  . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
+    (cmb)
+
+29 Aug 2024, PHP 8.4.0beta4
 
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
