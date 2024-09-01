@@ -1401,26 +1401,35 @@ PHP_REMOVE_USR_LIB([LDFLAGS])
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
-UNAME=$(uname -a | xargs)
-PHP_UNAME=${PHP_UNAME:-$UNAME}
+AC_ARG_VAR([PHP_UNAME],
+  [System information (defaults to the 'uname -a' output)])
+AS_VAR_IF([PHP_UNAME],, [PHP_UNAME=$(uname -a | xargs)])
 AC_DEFINE_UNQUOTED([PHP_UNAME], ["$PHP_UNAME"], [The 'uname -a' output.])
+
 PHP_OS=$(uname | xargs)
 AC_DEFINE_UNQUOTED([PHP_OS], ["$PHP_OS"], [The 'uname' output.])
-PHP_BUILD_SYSTEM=${PHP_BUILD_SYSTEM:-$PHP_UNAME}
+
+AC_ARG_VAR([PHP_BUILD_SYSTEM],
+  [The system that PHP was built on (defaults to the 'uname -a' output)])
+AS_VAR_IF([PHP_BUILD_SYSTEM],, [PHP_BUILD_SYSTEM=$PHP_UNAME])
 AC_DEFINE_UNQUOTED([PHP_BUILD_SYSTEM], ["$PHP_BUILD_SYSTEM"],
   [The system that PHP was built on.])
-if test -n "${PHP_BUILD_PROVIDER}"; then
-  AC_DEFINE_UNQUOTED([PHP_BUILD_PROVIDER], ["$PHP_BUILD_PROVIDER"],
-    [The PHP build provider information.])
-fi
-if test -n "${PHP_BUILD_COMPILER}"; then
-  AC_DEFINE_UNQUOTED([PHP_BUILD_COMPILER], ["$PHP_BUILD_COMPILER"],
-    [The compiler used for the PHP build.])
-fi
-if test -n "${PHP_BUILD_ARCH}"; then
-  AC_DEFINE_UNQUOTED([PHP_BUILD_ARCH], ["$PHP_BUILD_ARCH"],
-    [The build architecture.])
-fi
+
+AC_ARG_VAR([PHP_BUILD_PROVIDER], [The PHP build provider information])
+AS_VAR_IF([PHP_BUILD_PROVIDER],,,
+  [AC_DEFINE_UNQUOTED([PHP_BUILD_PROVIDER], ["$PHP_BUILD_PROVIDER"],
+    [The PHP build provider information.])])
+
+AC_ARG_VAR([PHP_BUILD_COMPILER],
+  [Information about the compiler used for the PHP build])
+AS_VAR_IF([PHP_BUILD_COMPILER],,,
+  [AC_DEFINE_UNQUOTED([PHP_BUILD_COMPILER], ["$PHP_BUILD_COMPILER"],
+    [The compiler used for the PHP build.])])
+
+AC_ARG_VAR([PHP_BUILD_ARCH], [The build architecture])
+AS_VAR_IF([PHP_BUILD_ARCH],,,
+  [AC_DEFINE_UNQUOTED([PHP_BUILD_ARCH], ["$PHP_BUILD_ARCH"],
+    [The build architecture.])])
 
 PHP_SUBST([PHP_FASTCGI_OBJS])
 PHP_SUBST([PHP_SAPI_OBJS])
