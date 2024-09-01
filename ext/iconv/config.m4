@@ -8,9 +8,9 @@ if test "$PHP_ICONV" != "no"; then
   PHP_SETUP_ICONV([ICONV_SHARED_LIBADD],,
     [AC_MSG_FAILURE([The iconv not found.])])
 
-  save_LDFLAGS=$LDFLAGS
+  save_LIBS=$LIBS
   save_CFLAGS=$CFLAGS
-  LDFLAGS="$ICONV_SHARED_LIBADD $LDFLAGS"
+  LIBS="$LIBS $ICONV_SHARED_LIBADD"
   CFLAGS="$INCLUDES $CFLAGS"
 
   AC_CACHE_CHECK([for iconv implementation], [php_cv_iconv_implementation], [
@@ -111,7 +111,7 @@ int main(void) {
     [AC_DEFINE([ICONV_BROKEN_IGNORE], [1],
       [Define to 1 if iconv has broken IGNORE.])])
 
-  LDFLAGS=$save_LDFLAGS
+  LIBS=$save_LIBS
   CFLAGS=$save_CFLAGS
 
   AC_DEFINE([HAVE_ICONV], [1],
