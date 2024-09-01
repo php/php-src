@@ -1431,6 +1431,12 @@ AS_VAR_IF([PHP_BUILD_ARCH],,,
   [AC_DEFINE_UNQUOTED([PHP_BUILD_ARCH], ["$PHP_BUILD_ARCH"],
     [The build architecture.])])
 
+AC_ARG_VAR([PHP_EXTRA_CFLAGS],
+  [Additional build-phase compilation options appended to CFLAGS when building
+  PHP; these are isolated from the Autoconf configure checks and its CFLAGS])
+AS_VAR_IF([PHP_EXTRA_CFLAGS],,, [EXTRA_CFLAGS=$PHP_EXTRA_CFLAGS])
+
+PHP_SUBST([EXTRA_CFLAGS])
 PHP_SUBST([PHP_FASTCGI_OBJS])
 PHP_SUBST([PHP_SAPI_OBJS])
 PHP_SUBST([PHP_BINARY_OBJS])

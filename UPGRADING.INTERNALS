@@ -221,6 +221,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
        - ac_cv_write_stdout                -> php_cv_have_write_stdout
      and all other checks wrapped with their belonging cache variables (see *.m4
      source files for details).
+   - New configure-phase environment variable PHP_EXTRA_CFLAGS to append
+     additional build-time CFLAGS to the PHP build.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,
