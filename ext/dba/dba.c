@@ -309,7 +309,7 @@ static void dba_close_connection(dba_connection *connection)
 
 static zend_object *dba_connection_create_object(zend_class_entry *class_type)
 {
-	dba_connection *intern = zend_object_alloc(sizeof(dba_info), class_type);
+	dba_connection *intern = zend_object_alloc(sizeof(dba_connection), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
