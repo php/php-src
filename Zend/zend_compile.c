@@ -9829,7 +9829,7 @@ static bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 
 				continue;
 			} else {
-				zend_error_noreturn(E_COMPILE_ERROR, "Only arrays and Traversables can be unpacked");
+				zend_error_noreturn(E_COMPILE_ERROR, "Only arrays and Traversables can be unpacked, %s given", zend_zval_value_name(value));
 			}
 		}
 
