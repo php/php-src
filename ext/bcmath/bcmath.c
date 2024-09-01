@@ -1399,19 +1399,16 @@ static void bcmath_number_calc_method(INTERNAL_FUNCTION_PARAMETERS, uint8_t opco
 			break;
 		case ZEND_DIV:
 			if (UNEXPECTED(bcmath_number_div_internal(intern->num, num, &ret, intern->scale, &scale, scale_is_null) == FAILURE)) {
-				bc_free_num(&ret);
 				goto fail;
 			}
 			break;
 		case ZEND_MOD:
 			if (UNEXPECTED(bcmath_number_mod_internal(intern->num, num, &ret, intern->scale, num_full_scale, &scale, scale_is_null) == FAILURE)) {
-				bc_free_num(&ret);
 				goto fail;
 			}
 			break;
 		case ZEND_POW:
 			if (UNEXPECTED(bcmath_number_pow_internal(intern->num, num, &ret, intern->scale, &scale, scale_is_null, false) == FAILURE)) {
-				bc_free_num(&ret);
 				goto fail;
 			}
 			break;
