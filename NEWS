@@ -27,6 +27,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)
 
+- Streams:
+  . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
+    (cmb)
+
 29 Aug 2024, PHP 8.3.11
 
 - Core:
