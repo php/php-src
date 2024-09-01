@@ -53,6 +53,9 @@ PHP                                                                        NEWS
   . Implemented asymmetric visibility for properties. (ilutov)
 
 - Curl:
+  . Added CURLOPT_PREREQFUNCTION Curl option to set a custom callback
+    after the connection is established, but before the request is
+    performed. (Ayesh Karunaratne)
   . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
     CURLOPT_FTP_RESPONSE_TIMEOUT. (Ayesh Karunaratne)
 
