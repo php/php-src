@@ -49,17 +49,17 @@ $proc = proc_open(["\\cmd. ...  ", "/c", $batch_file_path, "\"&notepad.exe"], $d
 %sghsa-9fcc-425m-g385_002.bat
 "&notepad.exe
 
-Warning: proc_open(): CreateProcess failed, error code: 2 in %s on line %d
+Warning: proc_open(): CreateProcess failed: The system cannot find the file specified in %s on line %d
 %sghsa-9fcc-425m-g385_002.bat
 "&notepad.exe
 %sghsa-9fcc-425m-g385_002.bat
 "&notepad.exe
 
-Warning: proc_open(): CreateProcess failed, error code: 2 in %s on line %d
+Warning: proc_open(): CreateProcess failed: The system cannot find the file specified in %s on line %d
 
-Warning: proc_open(): CreateProcess failed, error code: 2 in %s on line %d
+Warning: proc_open(): CreateProcess failed: The system cannot find the file specified in %s on line %d
 
-Warning: proc_open(): CreateProcess failed, error code: 2 in %s on line %d
+Warning: proc_open(): CreateProcess failed: The system cannot find the file specified in %s on line %d
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/ghsa-9fcc-425m-g385_002.bat');

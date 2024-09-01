@@ -49,7 +49,7 @@ operable program or batch file.
 '"%sghsa-9fcc-425m-g385_001.bat. ... . ."' is not recognized as an internal or external command,
 operable program or batch file.
 
-Warning: proc_open(): CreateProcess failed, error code: 2 in %s on line %d
+Warning: proc_open(): CreateProcess failed: The system cannot find the file specified in %s on line %d
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/ghsa-9fcc-425m-g385_001.bat');
