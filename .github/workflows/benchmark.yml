@@ -1,0 +1,111 @@
+name: Benchmark
+on:
+  schedule:
+    - cron: "0 2 * * *"
+permissions:
+  contents: read
+jobs:
+  BENCHMARK:
+    name: BENCHMARK
+    if: github.repository == 'php/php-src'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Install dependencies
+        run: |
+          set -ex
+          sudo apt-get update
+          sudo apt-get install gpg
+
+          wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update
+          sudo apt install terraform=1.5.7-*
+      - name: Checkout benchmark suite
+        uses: actions/checkout@v4
+        with:
+          repository: 'kocsismate/php-version-benchmarks'
+          ref: 'main'
+          fetch-depth: 1
+          path: 'php-version-benchmarks'
+      - name: Checkout php-src
+        uses: actions/checkout@v4
+        with:
+          repository: 'php/php-src'
+          ref: 'master'
+          fetch-depth: 100
+          path: 'php-version-benchmarks/tmp/php_master'
+      - name: Copy-paste the same repo content for benchmarking JIT
+        run: |
+          set -e
+    
+          cp -r "php-version-benchmarks/tmp/php_master/" "php-version-benchmarks/tmp/php_master_jit"
+      - name: Setup benchmark config
+        run: |
+          set -e
+
+          cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          ESCAPED_DOCKER_REGISTRY=$(printf '%s\n' "${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}" | sed -e 's/[\/&]/\\&/g')
+          sed -i "s/INFRA_DOCKER_REGISTRY=public.ecr.aws\/abcdefgh/INFRA_DOCKER_REGISTRY=$ESCAPED_DOCKER_REGISTRY/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+
+          cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+
+          cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master1.ini
+          YESTERDAY="$(date -d "-2 day 13:00" '+%Y-%m-%d')"
+          YESTERDAY_SHA="$(cd ./php-version-benchmarks/tmp/php_master/ && git --no-pager log --until="$YESTERDAY 23:59:59" -n 1 --pretty='%H')"
+          sed -i 's/PHP_NAME="PHP - master"/PHP_NAME="PHP - previous master"/g' ./php-version-benchmarks/config/php/master1.ini
+          sed -i "s/PHP_ID=php_master/PHP_ID=php_master_previous/g" ./php-version-benchmarks/config/php/master1.ini
+          sed -i "s/PHP_COMMIT=/PHP_COMMIT=$YESTERDAY_SHA/g" ./php-version-benchmarks/config/php/master1.ini
+          cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master2.ini
+          cp ./php-version-benchmarks/config/php/master_jit.ini.dist ./php-version-benchmarks/config/php/master2_jit.ini
+
+          cp ./php-version-benchmarks/config/test/1_laravel.ini.dist ./php-version-benchmarks/config/test/1_laravel.ini
+          cp ./php-version-benchmarks/config/test/2_symfony_main.ini.dist ./php-version-benchmarks/config/test/2_symfony_main.ini
+          cp ./php-version-benchmarks/config/test/4_wordpress.ini.dist ./php-version-benchmarks/config/test/4_wordpress.ini
+          cp ./php-version-benchmarks/config/test/5_bench.php.ini.dist ./php-version-benchmarks/config/test/5_bench.php.ini
+          cp ./php-version-benchmarks/config/test/6_micro_bench.php.ini.dist ./php-version-benchmarks/config/test/6_micro_bench.php.ini
+
+          rm -rf ./php-version-benchmarks/docs/results
+      - name: Git setup
+        run: |
+          git config --global user.name "Benchmark"
+          git config --global user.email "benchmark@php.net"
+      - name: Checkout benchmark results
+        uses: actions/checkout@v4
+        with:
+          repository: kocsismate/php-version-benchmark-results
+          ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}
+          path: 'php-version-benchmarks/docs/results'
+      - name: Run benchmark
+        run: ./php-version-benchmarks/benchmark.sh run aws
+      - name: Store results
+        run: |
+          set -ex
+
+          cd ./php-version-benchmarks/docs/results
+          git pull --autostash
+          if [ -e ".git/MERGE_HEAD" ]; then
+            echo "Merging, can't proceed"
+            exit 1
+          fi
+          git add .
+          if git diff --cached --quiet; then
+            exit 0
+          fi
+          git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
+          git push
+      - name: Cleanup
+        if: always()
+        run: |
+          set -ex
+
+          rm -rf ./php-version-benchmarks/tmp/
+          rm -f ./php-version-benchmarks/build/infrastructure/config/*.tfvars
+          rm -rf ./php-version-benchmarks/build/infrastructure/aws/.terraform/
+          rm -f ./php-version-benchmarks/build/infrastructure/aws/.terraform.lock.hcl
+          rm -f ./php-version-benchmarks/build/infrastructure/aws/aws.tfplan
+          rm -f ./php-version-benchmarks/build/infrastructure/aws/terraform.tfstate
+          rm -f ./php-version-benchmarks/build/infrastructure/aws/terraform.tfstate.backup
+          rm -f ./php-version-benchmarks/config/infra/aws/*.ini
