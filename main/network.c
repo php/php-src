@@ -88,10 +88,7 @@ const struct in6_addr in6addr_any = {0}; /* IN6ADDR_ANY_INIT; */
 #endif
 
 #ifdef HAVE_GETADDRINFO
-#ifdef HAVE_GAI_STRERROR
-#  define PHP_GAI_STRERROR(x) (gai_strerror(x))
-#else
-#  define PHP_GAI_STRERROR(x) (php_gai_strerror(x))
+# if !defined(PHP_WIN32) && !defined(HAVE_GAI_STRERROR)
 /* {{{ php_gai_strerror */
 static const char *php_gai_strerror(int code)
 {
@@ -127,7 +124,7 @@ static const char *php_gai_strerror(int code)
 	return "Unknown error";
 }
 /* }}} */
-#endif
+# endif
 #endif
 
 /* {{{ php_network_freeaddresses */
@@ -191,16 +188,26 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 # endif
 
 	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+# if defined(PHP_WIN32)
+		char *gai_error = php_win32_error_to_msg(n);
+# elif defined(HAVE_GAI_STRERROR)
+		const char *gai_error = gai_strerror(n);
+# else
+		const char *gai_error = php_gai_strerror(n)
+# endif
 		if (error_string) {
 			/* free error string received during previous iteration (if any) */
 			if (*error_string) {
 				zend_string_release_ex(*error_string, 0);
 			}
-			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 		} else {
-			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, gai_error);
 		}
+# if PHP_WIN32
+		php_win32_error_msg_free(gai_error);
+# endif
 		return 0;
 	} else if (res == NULL) {
 		if (error_string) {
