@@ -1257,15 +1257,11 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 	bc_num n1 = NULL;
 	bc_num n2 = NULL;
 
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_NULL)) {
-		lval1 = 0;
-	} else if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE)) {
+	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE)) {
 		goto fallback;
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(op2) == IS_NULL)) {
-		lval2 = 0;
-	} else if (UNEXPECTED(bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
+	if (UNEXPECTED(bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
 		goto fallback;
 	}
 
