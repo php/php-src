@@ -1165,11 +1165,11 @@ static zend_result bcmath_number_do_operation(uint8_t opcode, zval *ret_val, zva
 
 	zend_object *obj1 = NULL;
 	zend_string *str1 = NULL;
-	zend_long lval1;
+	zend_long lval1 = 0;
 
 	zend_object *obj2 = NULL;
 	zend_string *str2 = NULL;
-	zend_long lval2;
+	zend_long lval2 = 0;
 
 	if (UNEXPECTED(bcmath_number_parse_num(op1, &obj1, &str1, &lval1) == FAILURE || bcmath_number_parse_num(op2, &obj2, &str2, &lval2) == FAILURE)) {
 		return FAILURE;
@@ -1248,11 +1248,11 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 {
 	zend_object *obj1 = NULL;
 	zend_string *str1 = NULL;
-	zend_long lval1;
+	zend_long lval1 = 0;
 
 	zend_object *obj2 = NULL;
 	zend_string *str2 = NULL;
-	zend_long lval2;
+	zend_long lval2 = 0;
 
 	bc_num n1 = NULL;
 	bc_num n2 = NULL;
@@ -1543,7 +1543,7 @@ cleanup:
 
 PHP_METHOD(BcMath_Number, sqrt)
 {
-	zend_long scale_lval;
+	zend_long scale_lval = 0;
 	bool scale_is_null = true;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
