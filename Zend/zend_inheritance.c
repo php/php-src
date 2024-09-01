@@ -1706,6 +1706,12 @@ ZEND_API void zend_verify_hooked_property(zend_class_entry *ce, zend_property_in
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Abstract property %s::$%s must specify at least one abstract hook", ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
 	}
+	if ((prop_info->flags & ZEND_ACC_VIRTUAL)
+	 && (prop_info->flags & ZEND_ACC_PPP_SET_MASK)
+	 && (!prop_info->hooks[ZEND_PROPERTY_HOOK_GET] || !prop_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Unilateral virtual property %s::$%s must not specify asymmetric visibility", ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+	}
 }
 
 ZEND_API ZEND_COLD ZEND_NORETURN void zend_hooked_property_variance_error_ex(zend_string *value_param_name, zend_string *class_name, zend_string *prop_name)
@@ -1893,11 +1899,13 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, key, property_info) {
-		if (property_info->ce == ce && property_info->hooks) {
-			zend_verify_hooked_property(ce, property_info, key);
-		}
-	} ZEND_HASH_FOREACH_END();
+	if (ce->num_hooked_props) {
+		ZEND_HASH_MAP_FOREACH_STR_KEY_PTR(&ce->properties_info, key, property_info) {
+			if (property_info->ce == ce && property_info->hooks) {
+				zend_verify_hooked_property(ce, property_info, key);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
 
 	if (zend_hash_num_elements(&parent_ce->constants_table)) {
 		zend_class_constant *c;
