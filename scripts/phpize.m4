@@ -153,6 +153,8 @@ AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
 ])
 AC_PROG_LIBTOOL
 
+PHP_SET_LIBTOOL_VARIABLE([--silent])
+
 all_targets='$(PHP_MODULES) $(PHP_ZEND_EX)'
 install_targets="install-modules install-headers"
 CPPFLAGS="$CPPFLAGS -DHAVE_CONFIG_H"
