@@ -27,6 +27,9 @@ PHP                                                                        NEWS
 - PDO_Firebird:
   . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
 
+- Standard:
+  . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
+
 - Streams:
   . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
     (cmb)
