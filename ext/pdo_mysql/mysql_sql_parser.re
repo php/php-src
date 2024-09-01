@@ -17,7 +17,6 @@
 
 #include "php.h"
 #include "ext/pdo/php_pdo_driver.h"
-#include "ext/pdo/php_pdo_int.h"
 #include "ext/pdo/pdo_sql_parser.h"
 
 int pdo_mysql_scanner(pdo_scanner_t *s)

@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - GD:
   . Added gdImageClone to bundled libgd. (David Carlier)
 
+- PDO:
+  . The internal header php_pdo_int.h is no longer installed; it is not
+    supposed to be used by PDO drivers. (cmb)
+
 - PDO_Firebird:
   . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
 

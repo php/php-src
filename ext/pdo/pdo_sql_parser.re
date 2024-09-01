@@ -16,7 +16,6 @@
 
 #include "php.h"
 #include "php_pdo_driver.h"
-#include "php_pdo_int.h"
 #include "pdo_sql_parser.h"
 
 static int default_scanner(pdo_scanner_t *s)
