@@ -225,6 +225,7 @@ PHP 8.4 UPGRADE NOTES
   . php_uname() now throws ValueErrors on invalid inputs.
   . The "allowed_classes" option for unserialize() now throws TypeErrors and
     ValueErrors if it is not an array of class names.
+  . http_build_query() now correctly handles backed enums.
 
 - Tidy:
   . Failures in the constructor now throw exceptions rather than emitting
