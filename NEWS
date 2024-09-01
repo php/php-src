@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0beta5
 
+- BCMath:
+  . Fixed LONG_MAX in BCMath ext. (Saki Takamachi)
+  . Fixed bcdiv() div by one. (Saki Takamachi)
+
 - Core:
   . Fixed bug GH-15330 (Do not scan generator frames more than once). (Arnaud)
   . Fixed bug GH-15644 (Asymmetric visibility doesn't work with hooks). (ilutov)
@@ -10,11 +14,27 @@ PHP                                                                        NEWS
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
     PHP 8.1 than in PHP 8.0). (nielsdos)
+  . Fixed bug GH-15654 (Signed integer overflow in ext/dom/nodelist.c).
+    (nielsdos)
 
 - GD:
   . Added gdImageClone to bundled libgd. (David Carlier)
 
-27 Aug 2024, PHP 8.4.0beta4
+- PDO:
+  . The internal header php_pdo_int.h is no longer installed; it is not
+    supposed to be used by PDO drivers. (cmb)
+
+- PDO_Firebird:
+  . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
+
+- Standard:
+  . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
+
+- Streams:
+  . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
+    (cmb)
+
+29 Aug 2024, PHP 8.4.0beta4
 
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
@@ -36,6 +56,8 @@ PHP                                                                        NEWS
   . Added CURLOPT_PREREQFUNCTION Curl option to set a custom callback
     after the connection is established, but before the request is
     performed. (Ayesh Karunaratne)
+  . Added CURLOPT_SERVER_RESPONSE_TIMEOUT, which was formerly known as
+    CURLOPT_FTP_RESPONSE_TIMEOUT. (Ayesh Karunaratne)
 
 - Date:
   . Fixed bug GH-13773 (DatePeriod not taking into account microseconds for end

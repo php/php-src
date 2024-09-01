@@ -65,8 +65,8 @@ if test "$PHP_PDO_MYSQL" != "no"; then
         AC_MSG_ERROR([Unable to find your mysql installation])
       fi
 
-      PHP_ADD_INCLUDE([$PDO_MYSQL_INC_DIR])
       PDO_MYSQL_INCLUDE=-I$PDO_MYSQL_INC_DIR
+      PDO_MYSQL_LIBS="-L$PDO_MYSQL_LIB_DIR -lmysqlclient"
     else
       AC_MSG_RESULT([not found])
       AC_MSG_ERROR([Unable to find your mysql installation])

@@ -526,8 +526,6 @@ if test "$PHP_FPM" != "no"; then
     [AS_IF([test -f "$abs_srcdir/sapi/fpm/fpm/fpm_trace_$fpm_trace_type.c"],
       [PHP_FPM_TRACE_FILES="fpm/fpm_trace.c fpm/fpm_trace_$fpm_trace_type.c"])])
 
-  PHP_FPM_CFLAGS="-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
-
   PHP_FPM_FILES="fpm/fpm.c \
     fpm/fpm_children.c \
     fpm/fpm_cleanup.c \
@@ -560,7 +558,7 @@ if test "$PHP_FPM" != "no"; then
   PHP_SELECT_SAPI([fpm],
     [program],
     [$PHP_FPM_FILES $PHP_FPM_TRACE_FILES $PHP_FPM_SD_FILES],
-    [$PHP_FPM_CFLAGS])
+    [-I$abs_srcdir/sapi/fpm -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
 
   AS_CASE([$host_alias],
     [*aix*], [

@@ -1695,7 +1695,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_HTTPAUTH:
 		case CURLOPT_FTP_CREATE_MISSING_DIRS:
 		case CURLOPT_PROXYAUTH:
-		case CURLOPT_FTP_RESPONSE_TIMEOUT:
+		case CURLOPT_SERVER_RESPONSE_TIMEOUT:
 		case CURLOPT_IPRESOLVE:
 		case CURLOPT_MAXFILESIZE:
 		case CURLOPT_TCP_NODELAY:

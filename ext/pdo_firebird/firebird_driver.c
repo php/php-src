@@ -681,6 +681,14 @@ static bool firebird_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, /* {{{ */
 			if (isc_dsql_describe_bind(H->isc_status, &s, PDO_FB_SQLDA_VERSION, S->in_sqlda)) {
 				break;
 			}
+
+			/* make all parameters nullable */
+			unsigned int i;
+			XSQLVAR* var;			
+			for (i = 0, var = S->in_sqlda->sqlvar; i < S->in_sqlda->sqld; i++, var++) {
+				/* The low bit of sqltype indicates that the parameter can take a NULL value */
+				var->sqltype |= 1;
+			}
 		}
 
 		stmt->driver_data = S;

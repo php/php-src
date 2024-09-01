@@ -7,7 +7,7 @@ AC_DEFUN([PHP_DBA_STD_BEGIN],
   [unset THIS_INCLUDE THIS_LIBS THIS_LFLAGS THIS_PREFIX THIS_RESULT])
 
 dnl
-dnl PHP_TEMP_LDFLAGS(ldflags, libs)
+dnl PHP_TEMP_LDFLAGS(ldflags, libs, action-to-execute)
 dnl
 dnl Save and restore linker flags.
 dnl
