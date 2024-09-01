@@ -1279,7 +1279,7 @@ static int bcmath_number_compare(zval *op1, zval *op2)
 		bc_free_num(&n2);
 	}
 
-	return ret;
+	return (int) ret;
 
 fallback:
 	return zend_std_compare_objects(op1, op2);
