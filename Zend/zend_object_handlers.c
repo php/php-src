@@ -2254,7 +2254,7 @@ found:
 	}
 
 	result = false;
-	if ((has_set_exists != ZEND_PROPERTY_EXISTS) && zobj->ce->__isset) {
+	if (has_set_exists != ZEND_PROPERTY_EXISTS) {
 		uint32_t *guard = zend_get_property_guard(zobj, name);
 
 		if (!((*guard) & IN_ISSET)) {
