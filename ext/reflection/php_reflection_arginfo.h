@@ -956,16 +956,8 @@ ZEND_METHOD(ReflectionConstant, getValue);
 ZEND_METHOD(ReflectionConstant, isDeprecated);
 ZEND_METHOD(ReflectionConstant, __toString);
 
-static const zend_function_entry class_ReflectionException_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Reflection_methods[] = {
 	ZEND_ME(Reflection, getModifierNames, arginfo_class_Reflection_getModifierNames, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Reflector_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1120,10 +1112,6 @@ static const zend_function_entry class_ReflectionClass_methods[] = {
 
 static const zend_function_entry class_ReflectionObject_methods[] = {
 	ZEND_ME(ReflectionObject, __construct, arginfo_class_ReflectionObject___construct, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_PropertyHookType_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1334,7 +1322,7 @@ static zend_class_entry *register_class_ReflectionException(zend_class_entry *cl
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "ReflectionException", class_ReflectionException_methods);
+	INIT_CLASS_ENTRY(ce, "ReflectionException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
@@ -1354,7 +1342,7 @@ static zend_class_entry *register_class_Reflector(zend_class_entry *class_entry_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Reflector", class_Reflector_methods);
+	INIT_CLASS_ENTRY(ce, "Reflector", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Stringable);
 
@@ -1534,7 +1522,7 @@ static zend_class_entry *register_class_ReflectionObject(zend_class_entry *class
 
 static zend_class_entry *register_class_PropertyHookType(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("PropertyHookType", IS_STRING, class_PropertyHookType_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("PropertyHookType", IS_STRING, NULL);
 
 	zval enum_case_Get_value;
 	zend_string *enum_case_Get_value_str = zend_string_init("get", strlen("get"), 1);

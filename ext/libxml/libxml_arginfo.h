@@ -50,10 +50,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_LibXMLError_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_libxml_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("LIBXML_VERSION", LIBXML_VERSION, CONST_PERSISTENT);
@@ -108,7 +104,7 @@ static zend_class_entry *register_class_LibXMLError(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "LibXMLError", class_LibXMLError_methods);
+	INIT_CLASS_ENTRY(ce, "LibXMLError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_level_default_value;

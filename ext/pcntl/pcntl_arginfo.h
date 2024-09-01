@@ -313,10 +313,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Pcntl_QosClass_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_pcntl_symbols(int module_number)
 {
 #if defined(WNOHANG)
@@ -712,7 +708,7 @@ static void register_pcntl_symbols(int module_number)
 
 static zend_class_entry *register_class_Pcntl_QosClass(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("Pcntl\\QosClass", IS_UNDEF, class_Pcntl_QosClass_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Pcntl\\QosClass", IS_UNDEF, NULL);
 
 	zend_enum_add_case_cstr(class_entry, "UserInteractive", NULL);
 

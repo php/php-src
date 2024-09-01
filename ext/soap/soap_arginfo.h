@@ -173,14 +173,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Soap_Url_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Soap_Sdl_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_SoapParam_methods[] = {
 	ZEND_ME(SoapParam, __construct, arginfo_class_SoapParam___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -322,7 +314,7 @@ static zend_class_entry *register_class_Soap_Url(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", class_Soap_Url_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Url", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -332,7 +324,7 @@ static zend_class_entry *register_class_Soap_Sdl(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", class_Soap_Sdl_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Soap", "Sdl", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

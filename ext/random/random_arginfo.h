@@ -207,10 +207,6 @@ static const zend_function_entry class_Random_Engine_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Random_CryptoSafeEngine_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, __construct, arginfo_class_Random_Randomizer___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, nextInt, arginfo_class_Random_Randomizer_nextInt, ZEND_ACC_PUBLIC)
@@ -224,22 +220,6 @@ static const zend_function_entry class_Random_Randomizer_methods[] = {
 	ZEND_ME(Random_Randomizer, pickArrayKeys, arginfo_class_Random_Randomizer_pickArrayKeys, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, __serialize, arginfo_class_Random_Randomizer___serialize, ZEND_ACC_PUBLIC)
 	ZEND_ME(Random_Randomizer, __unserialize, arginfo_class_Random_Randomizer___unserialize, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_IntervalBoundary_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_RandomError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_BrokenRandomEngineError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Random_RandomException_methods[] = {
 	ZEND_FE_END
 };
 
@@ -320,7 +300,7 @@ static zend_class_entry *register_class_Random_CryptoSafeEngine(zend_class_entry
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", class_Random_CryptoSafeEngine_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "CryptoSafeEngine", NULL);
 	class_entry = zend_register_internal_interface(&ce);
 	zend_class_implements(class_entry, 1, class_entry_Random_Engine);
 
@@ -346,7 +326,7 @@ static zend_class_entry *register_class_Random_Randomizer(void)
 
 static zend_class_entry *register_class_Random_IntervalBoundary(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, class_Random_IntervalBoundary_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Random\\IntervalBoundary", IS_UNDEF, NULL);
 
 	zend_enum_add_case_cstr(class_entry, "ClosedOpen", NULL);
 
@@ -363,7 +343,7 @@ static zend_class_entry *register_class_Random_RandomError(zend_class_entry *cla
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", class_Random_RandomError_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -373,7 +353,7 @@ static zend_class_entry *register_class_Random_BrokenRandomEngineError(zend_clas
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", class_Random_BrokenRandomEngineError_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "BrokenRandomEngineError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Random_RandomError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -383,7 +363,7 @@ static zend_class_entry *register_class_Random_RandomException(zend_class_entry 
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", class_Random_RandomException_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Random", "RandomException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;

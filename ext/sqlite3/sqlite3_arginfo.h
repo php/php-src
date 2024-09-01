@@ -210,10 +210,6 @@ ZEND_METHOD(SQLite3Result, fetchArray);
 ZEND_METHOD(SQLite3Result, reset);
 ZEND_METHOD(SQLite3Result, finalize);
 
-static const zend_function_entry class_SQLite3Exception_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_SQLite3_methods[] = {
 	ZEND_RAW_FENTRY("__construct", zim_SQLite3_open, arginfo_class_SQLite3___construct, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_ME(SQLite3, open, arginfo_class_SQLite3_open, ZEND_ACC_PUBLIC)
@@ -293,7 +289,7 @@ static zend_class_entry *register_class_SQLite3Exception(zend_class_entry *class
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SQLite3Exception", class_SQLite3Exception_methods);
+	INIT_CLASS_ENTRY(ce, "SQLite3Exception", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;

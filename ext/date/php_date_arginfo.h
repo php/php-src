@@ -780,42 +780,6 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_DateError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateObjectError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateRangeError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateInvalidTimeZoneException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateInvalidOperationException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateMalformedStringException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateMalformedIntervalStringException_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DateMalformedPeriodStringException_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_php_date_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("DATE_ATOM", DATE_FORMAT_RFC3339, CONST_PERSISTENT);
@@ -1205,7 +1169,7 @@ static zend_class_entry *register_class_DateError(zend_class_entry *class_entry_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateError", class_DateError_methods);
+	INIT_CLASS_ENTRY(ce, "DateError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1215,7 +1179,7 @@ static zend_class_entry *register_class_DateObjectError(zend_class_entry *class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateObjectError", class_DateObjectError_methods);
+	INIT_CLASS_ENTRY(ce, "DateObjectError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1225,7 +1189,7 @@ static zend_class_entry *register_class_DateRangeError(zend_class_entry *class_e
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateRangeError", class_DateRangeError_methods);
+	INIT_CLASS_ENTRY(ce, "DateRangeError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateError, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1235,7 +1199,7 @@ static zend_class_entry *register_class_DateException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateException", class_DateException_methods);
+	INIT_CLASS_ENTRY(ce, "DateException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1245,7 +1209,7 @@ static zend_class_entry *register_class_DateInvalidTimeZoneException(zend_class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", class_DateInvalidTimeZoneException_methods);
+	INIT_CLASS_ENTRY(ce, "DateInvalidTimeZoneException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1255,7 +1219,7 @@ static zend_class_entry *register_class_DateInvalidOperationException(zend_class
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateInvalidOperationException", class_DateInvalidOperationException_methods);
+	INIT_CLASS_ENTRY(ce, "DateInvalidOperationException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1265,7 +1229,7 @@ static zend_class_entry *register_class_DateMalformedStringException(zend_class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateMalformedStringException", class_DateMalformedStringException_methods);
+	INIT_CLASS_ENTRY(ce, "DateMalformedStringException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1275,7 +1239,7 @@ static zend_class_entry *register_class_DateMalformedIntervalStringException(zen
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateMalformedIntervalStringException", class_DateMalformedIntervalStringException_methods);
+	INIT_CLASS_ENTRY(ce, "DateMalformedIntervalStringException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;
@@ -1285,7 +1249,7 @@ static zend_class_entry *register_class_DateMalformedPeriodStringException(zend_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DateMalformedPeriodStringException", class_DateMalformedPeriodStringException_methods);
+	INIT_CLASS_ENTRY(ce, "DateMalformedPeriodStringException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DateException, ZEND_ACC_NO_DYNAMIC_PROPERTIES);
 
 	return class_entry;

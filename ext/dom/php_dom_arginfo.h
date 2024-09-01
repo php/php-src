@@ -1398,10 +1398,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_DOMDocumentType_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_DOMCdataSection_methods[] = {
 	ZEND_ME(DOMCdataSection, __construct, arginfo_class_DOMCdataSection___construct, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -1591,10 +1587,6 @@ static const zend_function_entry class_DOMDocument_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_DOMException_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_DOMText_methods[] = {
 	ZEND_ME(DOMText, __construct, arginfo_class_DOMText___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMText, isWhitespaceInElementContent, arginfo_class_DOMText_isWhitespaceInElementContent, ZEND_ACC_PUBLIC)
@@ -1612,16 +1604,8 @@ static const zend_function_entry class_DOMNamedNodeMap_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_DOMEntity_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_DOMEntityReference_methods[] = {
 	ZEND_ME(DOMEntityReference, __construct, arginfo_class_DOMEntityReference___construct, ZEND_ACC_PUBLIC)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_DOMNotation_methods[] = {
 	ZEND_FE_END
 };
 
@@ -1726,10 +1710,6 @@ static const zend_function_entry class_Dom_HTMLCollection_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Dom_AdjacentPosition_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_RAW_FENTRY("hasAttributes", zim_DOMNode_hasAttributes, arginfo_class_Dom_Element_hasAttributes, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("getAttributeNames", zim_DOMElement_getAttributeNames, arginfo_class_Dom_Element_getAttributeNames, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1771,10 +1751,6 @@ static const zend_function_entry class_Dom_Element_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Dom_HTMLElement_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Dom_Attr_methods[] = {
 	ZEND_RAW_FENTRY("isId", zim_DOMAttr_isId, arginfo_class_Dom_Attr_isId, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("rename", zim_Dom_Element_rename, arginfo_class_Dom_Attr_rename, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1799,18 +1775,6 @@ static const zend_function_entry class_Dom_Text_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Dom_CDATASection_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Dom_ProcessingInstruction_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Dom_Comment_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_Dom_DocumentType_methods[] = {
 	ZEND_RAW_FENTRY("remove", zim_DOMElement_remove, arginfo_class_Dom_DocumentType_remove, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("before", zim_DOMElement_before, arginfo_class_Dom_DocumentType_before, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1826,18 +1790,6 @@ static const zend_function_entry class_Dom_DocumentFragment_methods[] = {
 	ZEND_RAW_FENTRY("replaceChildren", zim_DOMElement_replaceChildren, arginfo_class_Dom_DocumentFragment_replaceChildren, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("querySelector", zim_Dom_Element_querySelector, arginfo_class_Dom_DocumentFragment_querySelector, ZEND_ACC_PUBLIC, NULL, NULL)
 	ZEND_RAW_FENTRY("querySelectorAll", zim_Dom_Element_querySelectorAll, arginfo_class_Dom_DocumentFragment_querySelectorAll, ZEND_ACC_PUBLIC, NULL, NULL)
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Dom_Entity_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Dom_EntityReference_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Dom_Notation_methods[] = {
 	ZEND_FE_END
 };
 
@@ -2005,7 +1957,7 @@ static zend_class_entry *register_class_DOMDocumentType(zend_class_entry *class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DOMDocumentType", class_DOMDocumentType_methods);
+	INIT_CLASS_ENTRY(ce, "DOMDocumentType", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DOMNode, 0);
 
 	zval property_name_default_value;
@@ -2682,7 +2634,7 @@ static zend_class_entry *register_class_DOMException(zend_class_entry *class_ent
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DOMException", class_DOMException_methods);
+	INIT_CLASS_ENTRY(ce, "DOMException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, ZEND_ACC_FINAL);
 	zend_register_class_alias("Dom\\DOMException", class_entry);
 
@@ -2732,7 +2684,7 @@ static zend_class_entry *register_class_DOMEntity(zend_class_entry *class_entry_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DOMEntity", class_DOMEntity_methods);
+	INIT_CLASS_ENTRY(ce, "DOMEntity", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DOMNode, 0);
 
 	zval property_publicId_default_value;
@@ -2788,7 +2740,7 @@ static zend_class_entry *register_class_DOMNotation(zend_class_entry *class_entr
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DOMNotation", class_DOMNotation_methods);
+	INIT_CLASS_ENTRY(ce, "DOMNotation", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_DOMNode, 0);
 
 	zval property_publicId_default_value;
@@ -3091,7 +3043,7 @@ static zend_class_entry *register_class_Dom_HTMLCollection(zend_class_entry *cla
 
 static zend_class_entry *register_class_Dom_AdjacentPosition(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("Dom\\AdjacentPosition", IS_STRING, class_Dom_AdjacentPosition_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("Dom\\AdjacentPosition", IS_STRING, NULL);
 
 	zval enum_case_BeforeBegin_value;
 	zend_string *enum_case_BeforeBegin_value_str = zend_string_init("beforebegin", strlen("beforebegin"), 1);
@@ -3227,7 +3179,7 @@ static zend_class_entry *register_class_Dom_HTMLElement(zend_class_entry *class_
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "HTMLElement", class_Dom_HTMLElement_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "HTMLElement", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Element, 0);
 
 	return class_entry;
@@ -3343,7 +3295,7 @@ static zend_class_entry *register_class_Dom_CDATASection(zend_class_entry *class
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "CDATASection", class_Dom_CDATASection_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "CDATASection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Text, 0);
 
 	return class_entry;
@@ -3353,7 +3305,7 @@ static zend_class_entry *register_class_Dom_ProcessingInstruction(zend_class_ent
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "ProcessingInstruction", class_Dom_ProcessingInstruction_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "ProcessingInstruction", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_CharacterData, 0);
 
 	zval property_target_default_value;
@@ -3369,7 +3321,7 @@ static zend_class_entry *register_class_Dom_Comment(zend_class_entry *class_entr
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "Comment", class_Dom_Comment_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "Comment", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_CharacterData, 0);
 
 	return class_entry;
@@ -3459,7 +3411,7 @@ static zend_class_entry *register_class_Dom_Entity(zend_class_entry *class_entry
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "Entity", class_Dom_Entity_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "Entity", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Node, 0);
 
 	zval property_publicId_default_value;
@@ -3487,7 +3439,7 @@ static zend_class_entry *register_class_Dom_EntityReference(zend_class_entry *cl
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "EntityReference", class_Dom_EntityReference_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "EntityReference", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Node, 0);
 
 	return class_entry;
@@ -3497,7 +3449,7 @@ static zend_class_entry *register_class_Dom_Notation(zend_class_entry *class_ent
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Dom", "Notation", class_Dom_Notation_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Dom", "Notation", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Dom_Node, 0);
 
 	zval property_publicId_default_value;
