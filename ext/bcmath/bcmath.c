@@ -1128,38 +1128,23 @@ static zend_result bcmath_number_parse_num(zval *zv, zend_object **obj, zend_str
 	}
 }
 
-static zend_always_inline void bc_num_from_zend_object(const zend_object *obj, bc_num *num, size_t *full_scale)
-{
-	bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
-	*num = intern->num;
-	if (full_scale) {
-		*full_scale = intern->scale;
-	}
-}
-
-static zend_always_inline zend_result bc_num_from_zend_string(const zend_string *str, bc_num *num, size_t *full_scale)
-{
-	return php_str2num_ex(num, str, full_scale);
-}
-
-static zend_always_inline void bc_num_from_zend_long(zend_long lval, bc_num *num, size_t *full_scale)
-{
-	php_long2num(num, lval);
-	if (full_scale) {
-		*full_scale = 0;
-	}
-}
-
 static zend_result bc_num_from_obj_or_str_or_long(
 	bc_num *num, size_t *full_scale, const zend_object *obj, const zend_string *str, zend_long lval)
 {
 	if (obj) {
-		bc_num_from_zend_object(obj, num, full_scale);
+		bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
+		*num = intern->num;
+		if (full_scale) {
+			*full_scale = intern->scale;
+		}
 		return SUCCESS;
 	} else if (str) {
-		return bc_num_from_zend_string(str, num, full_scale);
+		return php_str2num_ex(num, str, full_scale);
 	} else {
-		bc_num_from_zend_long(lval, num, full_scale);
+		php_long2num(num, lval);
+		if (full_scale) {
+			*full_scale = 0;
+		}
 		return SUCCESS;
 	}
 }
