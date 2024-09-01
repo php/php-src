@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (Peter Kokot, zeriyoshi)
   . Fixed missing error when adding asymmetric visibility to unilateral virtual
     property. (ilutov)
+  . Fixed bug GH-15693 (Unnecessary include in main.c bloats binary).
+    (nielsdos)
 
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in

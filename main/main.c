@@ -83,7 +83,6 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
-#include "ext/standard/html_tables.h"
 #include "main_arginfo.h"
 /* }}} */
 
