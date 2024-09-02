@@ -12,7 +12,6 @@ PHP                                                                        NEWS
   . Implemented lazy objects RFC. (Arnaud)
   . Fixed bug GH-15686 (Building shared iconv with external iconv library).
     (Peter Kokot, zeriyoshi)
-  . The Libtool --silent option is set to on in phpize. (Peter Kokot)
 
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
