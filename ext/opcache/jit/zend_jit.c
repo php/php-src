@@ -669,16 +669,16 @@ static zend_property_info* zend_get_known_property_info(const zend_op_array *op_
 	return NULL;
 }
 
-static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *member, bool on_this, zend_string *filename)
+static bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *member, bool on_this, const zend_op_array *op_array)
 {
 	zend_property_info *info;
 
-	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
+	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT) || (op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 		return 1;
 	}
 
 	if (!(ce->ce_flags & ZEND_ACC_IMMUTABLE)) {
-		if (ce->info.user.filename != filename) {
+		if (ce->info.user.filename != op_array->filename) {
 			/* class declaration might be changed independently */
 			return 1;
 		}
