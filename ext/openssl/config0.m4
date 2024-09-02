@@ -17,8 +17,15 @@ PHP_ARG_WITH([openssl-legacy-provider],
   [no],
   [no])
 
+PHP_ARG_WITH([openssl-argon2],
+  [whether to enable argon2 password hashing (requires OpenSSL >= 3.2)],
+  [AS_HELP_STRING([--with-openssl-argon2],
+    [OPENSSL: Enable argon2 password hashing])],
+  [no],
+  [no])
+
 if test "$PHP_OPENSSL" != "no"; then
-  PHP_NEW_EXTENSION([openssl], [openssl.c xp_ssl.c], [$ext_shared])
+  PHP_NEW_EXTENSION([openssl], [openssl.c openssl_pwhash.c xp_ssl.c], [$ext_shared])
   PHP_SUBST([OPENSSL_SHARED_LIBADD])
   PHP_SETUP_OPENSSL([OPENSSL_SHARED_LIBADD],
     [AC_DEFINE([HAVE_OPENSSL_EXT], [1],
@@ -38,4 +45,14 @@ if test "$PHP_OPENSSL" != "no"; then
     [AC_DEFINE([LOAD_OPENSSL_LEGACY_PROVIDER], [1],
       [Define to 1 to load the OpenSSL legacy algorithm provider in addition to
       the default provider.])])
+
+  if test "$PHP_OPENSSL_ARGON2" != "no"; then
+    if test "$PHP_THREAD_SAFETY" != "no"; then
+      AC_MSG_ERROR([Not supported in ZTS mode for now])
+    fi
+    PHP_CHECK_LIBRARY([crypto], [OSSL_set_max_threads],
+      [AC_DEFINE([HAVE_OPENSSL_ARGON2], [1], [ Define to 1 to enable argon2 password hashing ])],
+      [AC_MSG_ERROR([argon2 hashing requires OpenSSL 3.2])],
+      [$OPENSSL_LIBS])
+  fi
 fi
