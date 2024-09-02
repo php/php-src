@@ -98,11 +98,9 @@ static bool php_openssl_argon2_compute_hash(
 	uint32_t oldthreads;
 	bool ret = false;
 
-	if (threads > 1) {
-		oldthreads = OSSL_get_max_threads(NULL);
-		if (OSSL_set_max_threads(NULL, threads) != 1) {
-			goto fail;
-		}
+	oldthreads = OSSL_get_max_threads(NULL);
+	if (OSSL_set_max_threads(NULL, threads) != 1) {
+		goto fail;
 	}
 	p = params;
 	*p++ = OSSL_PARAM_construct_uint32(OSSL_KDF_PARAM_THREADS, &threads);
@@ -129,10 +127,8 @@ static bool php_openssl_argon2_compute_hash(
 fail:
 	EVP_KDF_free(kdf);
 	EVP_KDF_CTX_free(kctx);
+	OSSL_set_max_threads(NULL, oldthreads);
 
-	if (threads > 1) {
-		OSSL_set_max_threads(NULL, oldthreads);
-	}
 	return ret;
 }
 
