@@ -65,8 +65,9 @@ PHP_MAJOR_VERSION=[$]1
 PHP_MINOR_VERSION=[$]2
 PHP_RELEASE_VERSION=[$]3
 dnl Allow overriding PHP_EXTRA_VERSION through the homonymous env var
-AC_ARG_VAR([PHP_EXTRA_VERSION],[Extra PHP version label suffix, e.g. '-dev', 'rc1', '-acme'])dnl
-AS_IF([test -z "$PHP_EXTRA_VERSION"],[PHP_EXTRA_VERSION=[$]4])
+AC_ARG_VAR([PHP_EXTRA_VERSION],
+  [Extra PHP version label suffix, e.g. '-dev', 'rc1', '-acme'])dnl
+AS_VAR_IF([PHP_EXTRA_VERSION],, [PHP_EXTRA_VERSION=[$]4])
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=$(expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION)
 
@@ -764,7 +765,7 @@ PHP_ARG_ENABLE([gcov],
   [no],
   [no])
 
-if test "$PHP_GCOV" = "yes"; then
+AS_VAR_IF([PHP_GCOV], [yes], [
   AS_VAR_IF([GCC], [yes],,
     [AC_MSG_ERROR([GNU C compatible compiler is required for --enable-gcov])])
 
@@ -793,7 +794,7 @@ if test "$PHP_GCOV" = "yes"; then
   dnl Add the special gcc flags.
   CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
   CXXFLAGS="$CXXFLAGS -O0 -fprofile-arcs -ftest-coverage"
-fi
+])
 
 PHP_ARG_ENABLE([debug],
   [whether to include debugging symbols],
@@ -1282,9 +1283,7 @@ if test "$fiber_asm" = 'yes'; then
     [$fiber_asm_cflag])
   AC_MSG_RESULT([$fiber_asm_file])
 else
-  if test "$fiber_os" = 'mac'; then
-    AC_DEFINE([_XOPEN_SOURCE], 1, [ ])
-  fi
+  AS_VAR_IF([fiber_os], [mac], [AC_DEFINE([_XOPEN_SOURCE], [1], [ ])])
   AC_CHECK_HEADER([ucontext.h],
     [AC_DEFINE([ZEND_FIBER_UCONTEXT], [1],
       [Define to 1 if Zend fiber uses ucontext instead of boost context.])],
@@ -1317,11 +1316,8 @@ AS_VAR_IF([program_prefix], [NONE], [program_prefix=])
 AS_VAR_IF([program_suffix], [NONE], [program_suffix=])
 
 orig_libdir=$libdir
-case $libdir in
-  '${exec_prefix}/lib')
-    libdir=$libdir/php
-    ;;
-esac
+AS_CASE([$libdir],
+  ['${exec_prefix}/lib'], [libdir=$libdir/php])
 
 AS_CASE([$(eval echo $datadir)],
   ['${prefix}/share'], [datadir=$datadir/php])
