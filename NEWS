@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.25
 
+- Core:
+  . Fixed bug GH-15712: zend_strtod overflow with precision INI set on
+    large value. (David Carlier)
+
 - Date:
   . Fixed bug GH-15582: Crash when not calling parent constructor of
     DateTimeZone. (Derick)
