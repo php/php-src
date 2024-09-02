@@ -7662,6 +7662,8 @@ ZEND_EXT_API void zend_jit_blacklist_function(zend_op_array *op_array) {
 		return;
 	}
 
+	zend_jit_stop_persistent_op_array(op_array);
+
 	// First not-skipped op
 	zend_op *opline = op_array->opcodes;
 	if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
