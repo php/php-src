@@ -5,7 +5,6 @@ pcntl
 --SKIPIF--
 <?php
 if (!function_exists("pcntl_setcpuaffinity")) die("skip pcntl_setcpuaffinity is not available");
-if (getenv('TRAVIS')) die('skip Currently fails on Travis');
 ?>
 --FILE--
 <?php
