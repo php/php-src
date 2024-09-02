@@ -143,7 +143,9 @@ bool bc_str2num(bc_num *num, const char *str, const char *end, size_t scale, siz
 		fractional_ptr = fractional_end = decimal_point + 1;
 		/* For strings that end with a decimal point, such as "012." */
 		if (UNEXPECTED(*fractional_ptr == '\0')) {
-			*full_scale = 0;
+			if (full_scale) {
+				*full_scale = 0;
+			}
 			goto after_fractional;
 		}
 
