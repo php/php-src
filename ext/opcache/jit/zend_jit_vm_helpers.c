@@ -521,16 +521,27 @@ static int zend_jit_trace_record_fake_init_call_ex(zend_execute_data *call, zend
 		 && (func->op_array.fn_flags & (ZEND_ACC_CLOSURE|ZEND_ACC_FAKE_CLOSURE))) {
 			return -1;
 		}
-		if (func->type == ZEND_USER_FUNCTION
-		 && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+		if (func->type == ZEND_USER_FUNCTION) {
 			jit_extension =
 				(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&func->op_array);
-			if (UNEXPECTED(!jit_extension
-			 || !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE)
-			 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE))) {
+            if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
+				if (UNEXPECTED(!jit_extension
+				 || !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE)
+				 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE))) {
+					return -1;
+				}
+				func = (zend_function*)jit_extension->op_array;
+			}
+			// First not-skipped op
+			zend_op *opline = func->op_array.opcodes;
+			if (!(func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+					opline++;
+				}
+			}
+			if (jit_extension && ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_BLACKLISTED) {
 				return -1;
 			}
-			func = (zend_function*)jit_extension->op_array;
 		}
 		if (is_megamorphic == ZEND_JIT_EXIT_POLYMORPHISM
 		 /* TODO: use more accurate check ??? */
@@ -986,6 +997,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					break;
 				}
 
+				if (jit_extension && ZEND_OP_TRACE_INFO(opline, offset)->trace_flags & ZEND_JIT_TRACE_BLACKLISTED) {
+					stop = ZEND_JIT_TRACE_STOP_BLACK_LIST;
+					break;
+				}
+
 				TRACE_RECORD(ZEND_JIT_TRACE_ENTER,
 					EX(return_value) != NULL ? ZEND_JIT_TRACE_RETURN_VALUE_USED : 0,
 					op_array);
@@ -1100,17 +1116,29 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					stop = ZEND_JIT_TRACE_STOP_BAD_FUNC;
 					break;
 				}
-				if (func->type == ZEND_USER_FUNCTION
-				 && (func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
+				if (func->type == ZEND_USER_FUNCTION) {
 					jit_extension =
 						(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(&func->op_array);
-					if (UNEXPECTED(!jit_extension)
-					 || !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE)
-					 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE)) {
-						stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+					if (func->op_array.fn_flags & ZEND_ACC_CLOSURE) {
+						if (UNEXPECTED(!jit_extension
+						 || !(jit_extension->func_info.flags & ZEND_FUNC_JIT_ON_HOT_TRACE)
+						 || (func->op_array.fn_flags & ZEND_ACC_FAKE_CLOSURE))) {
+							stop = ZEND_JIT_TRACE_STOP_INTERPRETER;
+							break;
+						}
+						func = (zend_function*)jit_extension->op_array;
+					}
+					// First not-skipped op
+					zend_op *opline = func->op_array.opcodes;
+					if (!(func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+						while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+							opline++;
+						}
+					}
+					if (jit_extension && ZEND_OP_TRACE_INFO(opline, jit_extension->offset)->trace_flags & ZEND_JIT_TRACE_BLACKLISTED) {
+						stop = ZEND_JIT_TRACE_STOP_BLACK_LIST;
 						break;
 					}
-					func = (zend_function*)jit_extension->op_array;
 				}
 
 #ifndef HAVE_GCC_GLOBAL_REGS
