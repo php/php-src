@@ -12994,7 +12994,7 @@ static int zend_jit_fetch_obj(dasm_State          **Dst,
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
 		|	mov r0, aword [r0 + (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)]
-		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array);
 		if (may_be_dynamic) {
 			|	test r0, r0
 			if (opline->opcode == ZEND_FETCH_OBJ_W) {
