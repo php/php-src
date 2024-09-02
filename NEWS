@@ -22,6 +22,9 @@ PHP                                                                        NEWS
 - GD:
   . Added gdImageClone to bundled libgd. (David Carlier)
 
+- OpenSSL:
+  . Implement GH-13514 PASSWORD_ARGON2 from OpenSSL 3.2. (Remi)
+
 - PDO:
   . The internal header php_pdo_int.h is no longer installed; it is not
     supposed to be used by PDO drivers. (cmb)

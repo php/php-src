@@ -135,6 +135,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      --with-ftp-ssl and --with-mysqlnd-ssl.
    - New configure option --with-openssl-legacy-provider to enable OpenSSL
      legacy provider.
+   - New configure option --with-openssl-argon2 to enable PASSWORD_ARGON2
+     from OpenSSL 3.2
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
