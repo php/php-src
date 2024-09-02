@@ -13888,7 +13888,7 @@ static int zend_jit_fetch_obj(zend_jit_ctx         *jit,
 		ir_ref offset_ref = ir_LOAD_A(
 			ir_ADD_OFFSET(run_time_cache, (opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS) + sizeof(void*)));
 
-		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array);
 		if (may_be_dynamic) {
 			ir_ref if_dynamic = ir_IF(ir_LT(offset_ref, ir_CONST_ADDR(ZEND_FIRST_PROPERTY_OFFSET)));
 			if (opline->opcode == ZEND_FETCH_OBJ_W) {
