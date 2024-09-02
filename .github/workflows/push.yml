@@ -10,8 +10,6 @@ on:
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
       - .cirrus.yml
-      - .travis.yml
-      - travis/**
       - .circleci/**
     branches:
       - PHP-8.1
@@ -28,8 +26,6 @@ on:
       - CONTRIBUTING.md
       - CODING_STANDARDS.md
       - .cirrus.yml
-      - .travis.yml
-      - travis/**
       - .circleci/**
     branches:
       - '**'

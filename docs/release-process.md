@@ -54,7 +54,6 @@ releases.
 
 3. Ensure that the relevant tests on CI are green.
 
-   - https://travis-ci.com/github/php/php-src
    - https://cirrus-ci.com/github/php/php-src
    - https://github.com/php/php-src/actions
 
