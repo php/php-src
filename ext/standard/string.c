@@ -32,6 +32,8 @@
 #include "scanf.h"
 #include "zend_API.h"
 #include "zend_execute.h"
+#include "zend_string.h"
+#include "php_globals.h"
 #include "basic_functions.h"
 #include "zend_smart_str.h"
 #include <Zend/zend_exceptions.h>
@@ -49,6 +51,19 @@
 #include <emmintrin.h>
 #include "Zend/zend_bitset.h"
 #endif
+
+typedef struct {
+    char c;           
+    const char *repr; 
+} char_repr_t;
+
+static const char_repr_t char_reprs[] = {
+    {'\t', "\\t"},
+    {'\n', "\\n"},
+    {'\r', "\\r"},
+    {'"', "\\\""},
+    {'\\', "\\\\"},
+};
 
 /* this is read-only, so it's ok */
 ZEND_SET_ALIGNED(16, static const char hexconvtab[]) = "0123456789abcdef";
@@ -3862,6 +3877,55 @@ PHPAPI zend_string *php_addcslashes_str(const char *str, size_t len, const char 
 	return new_str;
 }
 /* }}} */
+
+static const char *get_char_repr(char c) {
+    for (size_t i = 0; i < sizeof(char_reprs) / sizeof(char_reprs[0]); i++) {
+        if (char_reprs[i].c == c) {
+            return char_reprs[i].repr;
+        }
+    }
+    return NULL;
+}
+
+/* {{{ php_repr_str */
+PHPAPI zend_string *php_repr_str(const char *str, size_t len) {
+    size_t new_len = 0;
+    char *repr_str;
+    
+    for (size_t i = 0; i < len; i++) {
+        const char *repr = get_char_repr(str[i]);
+        if (repr) {
+            new_len += strlen(repr);
+        } else if (isprint((unsigned char)str[i])) {
+            new_len += 1;
+        } else {
+            new_len += 4;
+        }
+    }
+    
+    repr_str = emalloc(new_len + 1);
+    
+    size_t pos = 0;
+    for (size_t i = 0; i < len; i++) {
+        const char *repr = get_char_repr(str[i]);
+        if (repr) {
+            size_t len_repr = strlen(repr);
+            memcpy(repr_str + pos, repr, len_repr);
+            pos += len_repr;
+        } else if (isprint((unsigned char)str[i])) {
+            repr_str[pos++] = str[i];
+        } else {
+            pos += snprintf(repr_str + pos, 5, "\\x%02x", (unsigned char)str[i]);
+        }
+    }
+    
+    repr_str[pos] = '\0';
+    zend_string *zend_str = zend_string_init(repr_str, pos, 0);
+    efree(repr_str);
+    
+    return zend_str;
+}
+
 
 /* {{{ php_addcslashes */
 PHPAPI zend_string *php_addcslashes(zend_string *str, const char *what, size_t wlength)

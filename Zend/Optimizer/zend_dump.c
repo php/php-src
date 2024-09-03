@@ -67,10 +67,8 @@ void zend_dump_const(const zval *zv)
 			fprintf(stderr, " float(%g)", Z_DVAL_P(zv));
 			break;
 		case IS_STRING:;
-			zend_string *escaped_string = php_addcslashes(Z_STR_P(zv), "\"\\", 2);
-
+			zend_string *escaped_string = php_repr_str(Z_STR_P(zv)->val, Z_STR_P(zv)->len);
 			fprintf(stderr, " string(\"%s\")", ZSTR_VAL(escaped_string));
-
 			zend_string_release(escaped_string);
 			break;
 		case IS_ARRAY:
