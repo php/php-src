@@ -39,6 +39,7 @@
 ZEND_TLS zend_string *spl_autoload_extensions;
 ZEND_TLS HashTable *spl_autoload_class_functions;
 ZEND_TLS HashTable *spl_autoload_function_functions;
+ZEND_TLS HashTable *spl_autoload_function_skiplist;
 
 #define SPL_DEFAULT_FILE_EXTENSIONS ".inc,.php"
 
@@ -422,6 +423,15 @@ static zval *spl_perform_function_autoload(zend_string *function_name, zend_stri
 		return NULL;
 	}
 
+	if(!spl_autoload_function_skiplist) {
+		ALLOC_HASHTABLE(spl_autoload_function_skiplist);
+		zend_hash_init(spl_autoload_function_skiplist, 1, NULL, NULL, 0);
+	}
+
+	if(zend_hash_find_ex(spl_autoload_function_skiplist, lc_name, false)) {
+		return NULL;
+	}
+
 	/* We don't use ZEND_HASH_MAP_FOREACH here,
 	 * because autoloaders may be added/removed during autoloading. */
 	HashPosition pos;
@@ -449,13 +459,15 @@ static zval *spl_perform_function_autoload(zend_string *function_name, zend_stri
 			break;
 		}
 
-		result = zend_hash_find(EG(function_table), lc_name);
+		result = zend_hash_find_ex(EG(function_table), lc_name, true);
 		if (result) {
 			return result;
 		}
 
 		zend_hash_move_forward_ex(spl_autoload_function_functions, &pos);
 	}
+
+	zend_hash_add_empty_element(spl_autoload_function_skiplist, lc_name);
 
 	return NULL;
 }
@@ -846,6 +858,7 @@ PHP_RINIT_FUNCTION(spl) /* {{{ */
 	spl_autoload_extensions = NULL;
 	spl_autoload_class_functions = NULL;
 	spl_autoload_function_functions = NULL;
+	spl_autoload_function_skiplist = NULL;
 	return SUCCESS;
 } /* }}} */
 
@@ -864,6 +877,11 @@ PHP_RSHUTDOWN_FUNCTION(spl) /* {{{ */
 		zend_hash_destroy(spl_autoload_function_functions);
 		FREE_HASHTABLE(spl_autoload_function_functions);
 		spl_autoload_function_functions = NULL;
+	}
+	if (spl_autoload_function_skiplist) {
+		zend_hash_destroy(spl_autoload_function_skiplist);
+		FREE_HASHTABLE(spl_autoload_function_skiplist);
+		spl_autoload_function_skiplist = NULL;
 	}
 	return SUCCESS;
 } /* }}} */
