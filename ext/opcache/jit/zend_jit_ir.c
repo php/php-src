@@ -1289,6 +1289,16 @@ static bool zend_jit_spilling_may_cause_conflict(zend_jit_ctx *jit, int var, ir_
 //	}
 	if (jit->ssa->vars[var].var < jit->current_op_array->last_var) {
 		/* IS_CV */
+		if (jit->ctx.ir_base[val].op == IR_LOAD
+		 && jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op == IR_ADD
+		 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op1].op == IR_RLOAD
+		 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op1].op2 == ZREG_FP
+		 && IR_IS_CONST_REF(jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op2)
+		 && jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op2].val.addr != (uintptr_t)EX_NUM_TO_VAR(jit->ssa->vars[var].var)
+		 && EX_VAR_TO_NUM(jit->ctx.ir_base[jit->ctx.ir_base[jit->ctx.ir_base[val].op2].op2].val.addr) < jit->current_op_array->last_var) {
+			/* binding between different CVs may cause spill conflict */
+			return 1;
+		}
 		return 0;
 	}
 	return 1;
