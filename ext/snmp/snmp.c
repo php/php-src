@@ -792,7 +792,7 @@ static bool netsnmp_session_init(php_snmp_session **session_p, int version, zend
 	php_snmp_session *session;
 	char *pptr, *host_ptr;
 	bool force_ipv6 = false;
-	int n;
+	size_t n;
 	struct sockaddr **psal;
 	struct sockaddr **res;
 	// TODO: Do not strip and re-add the port in peername?

@@ -76,7 +76,7 @@ END_EXTERN_C()
 #include <sys/socket.h>
 #endif
 
-#ifdef HAVE_GETHOSTBYNAME_R
+#ifndef PHP_WIN32
 #include <netdb.h>
 #endif
 
@@ -260,8 +260,10 @@ typedef struct {
 #endif
 
 BEGIN_EXTERN_C()
-PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string);
+PHPAPI size_t php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string);
+PHPAPI size_t php_network_getaddresses_ex(const char *host, int socktype, int family, int ai_flags, struct sockaddr ***sal, zend_string **error_string);
 PHPAPI void php_network_freeaddresses(struct sockaddr **sal);
+PHPAPI size_t php_network_getaddress(php_sockaddr_storage *sockaddr, const char *host, int socktype, int family, int ai_flags, zend_string **error_string);
 
 PHPAPI php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short port,
 		int socktype, int asynchronous, struct timeval *timeout, zend_string **error_string,
@@ -338,8 +340,6 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 PHPAPI zend_result php_network_parse_network_address_with_port(const char *addr,
 		size_t addrlen, struct sockaddr *sa, socklen_t *sl);
-
-PHPAPI struct hostent*	php_network_gethostbyname(const char *name);
 
 PHPAPI zend_result php_set_sock_blocking(php_socket_t socketd, bool block);
 END_EXTERN_C()

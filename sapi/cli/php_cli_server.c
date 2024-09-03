@@ -1286,7 +1286,7 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 	int err = 0;
 	struct sockaddr *sa = NULL, **p, **sal;
 
-	int num_addrs = php_network_getaddresses(host, socktype, &sal, errstr);
+	size_t num_addrs = php_network_getaddresses(host, socktype, &sal, errstr);
 	if (num_addrs == 0) {
 		return -1;
 	}

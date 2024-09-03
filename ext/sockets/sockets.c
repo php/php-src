@@ -220,18 +220,19 @@ ZEND_GET_MODULE(sockets)
 static bool php_open_listen_sock(php_socket *sock, int port, int backlog) /* {{{ */
 {
 	struct sockaddr_in  la = {0};
-	struct hostent	    *hp;
+	php_sockaddr_storage resolved;
 
 #ifndef PHP_WIN32
-	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
+	const char *hostname = "0.0.0.0";
 #else
-	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
+	const char *hostname = "localhost";
 #endif
+
+	if (php_network_getaddress(&resolved, hostname, SOCK_STREAM, AF_INET, 0, NULL) == 0 || resolved.ss_family != AF_INET) {
 		return 0;
 	}
 
-	memcpy((char *) &la.sin_addr, hp->h_addr, hp->h_length);
-	la.sin_family = hp->h_addrtype;
+	memcpy(&la, &resolved, sizeof(struct sockaddr_in));
 	la.sin_port = htons((unsigned short) port);
 
 	sock->bsd_socket = socket(PF_INET, SOCK_STREAM, 0);

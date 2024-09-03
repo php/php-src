@@ -4,7 +4,6 @@ dnl Include external macro definitions before the AC_INIT to also remove
 dnl comments starting with # and empty newlines from the included files.
 dnl ----------------------------------------------------------------------------
 m4_include([build/ax_check_compile_flag.m4])
-m4_include([build/ax_func_which_gethostbyname_r.m4])
 m4_include([build/ax_gcc_func_attribute.m4])
 m4_include([build/libtool.m4])
 m4_include([build/php_cxx_compile_stdcxx.m4])
@@ -600,8 +599,6 @@ AC_FUNC_STRERROR_R
 dnl Check for functions inside their belonging headers.
 AC_CHECK_HEADER([sys/prctl.h], [AC_CHECK_FUNCS([prctl])])
 AC_CHECK_HEADER([sys/procctl.h], [AC_CHECK_FUNCS([procctl])])
-
-AX_FUNC_WHICH_GETHOSTBYNAME_R
 
 dnl Some systems (Solaris 10) do not have nanosleep in libc.
 AC_CHECK_FUNCS([nanosleep],,

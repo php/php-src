@@ -145,13 +145,14 @@ PHPAPI void php_network_freeaddresses(struct sockaddr **sal)
 }
 /* }}} */
 
-/* {{{ php_network_getaddresses
+/* {{{ php_network_getaddresses_ex
  * Returns number of addresses, 0 for none/error
  */
-PHPAPI int php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
+PHPAPI size_t php_network_getaddresses_ex(const char *host, int socktype, int family, int ai_flags, struct sockaddr ***sal, zend_string **error_string)
 {
 	struct sockaddr **sap;
-	int n;
+	size_t n;
+	int ret;
 #ifdef HAVE_GETADDRINFO
 # ifdef HAVE_IPV6
 	static int ipv6_borked = -1; /* the way this is used *is* thread safe */
@@ -170,6 +171,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 
 	hints.ai_family = AF_INET; /* default to regular inet (see below) */
 	hints.ai_socktype = socktype;
+	hints.ai_flags = ai_flags;
 
 # ifdef HAVE_IPV6
 	/* probe for a working IPv6 stack; even if detected as having v6 at compile
@@ -189,19 +191,19 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 			closesocket(s);
 		}
 	}
-	hints.ai_family = ipv6_borked ? AF_INET : AF_UNSPEC;
+	hints.ai_family = ipv6_borked ? AF_INET : family;
 # endif
 
-	if ((n = getaddrinfo(host, NULL, &hints, &res))) {
+	if ((ret = getaddrinfo(host, NULL, &hints, &res))) {
 		if (error_string) {
 			/* free error string received during previous iteration (if any) */
 			if (*error_string) {
 				zend_string_release_ex(*error_string, 0);
 			}
-			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			*error_string = strpprintf(0, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(ret));
 			php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
 		} else {
-			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(n));
+			php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo for %s failed: %s", host, PHP_GAI_STRERROR(ret));
 		}
 		return 0;
 	} else if (res == NULL) {
@@ -234,40 +236,47 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 
 	freeaddrinfo(res);
 #else
-	if (!inet_pton(AF_INET, host, &in)) {
-		if(strlen(host) > MAXFQDNLEN) {
-			host_info = NULL;
-			errno = E2BIG;
-		} else {
-			host_info = php_network_gethostbyname(host);
-		}
-		if (host_info == NULL) {
-			if (error_string) {
-				/* free error string received during previous iteration (if any) */
-				if (*error_string) {
-					zend_string_release_ex(*error_string, 0);
-				}
-				*error_string = strpprintf(0, "php_network_getaddresses: gethostbyname failed. errno=%d", errno);
-				php_error_docref(NULL, E_WARNING, "%s", ZSTR_VAL(*error_string));
-			} else {
-				php_error_docref(NULL, E_WARNING, "php_network_getaddresses: gethostbyname failed");
-			}
-			return 0;
-		}
-		in = *((struct in_addr *) host_info->h_addr);
-	}
-
-	*sal = safe_emalloc(2, sizeof(*sal), 0);
-	sap = *sal;
-	*sap = emalloc(sizeof(struct sockaddr_in));
-	(*sap)->sa_family = AF_INET;
-	((struct sockaddr_in *)*sap)->sin_addr = in;
-	sap++;
-	n = 1;
+	php_error_docref(NULL, E_WARNING, "php_network_getaddresses: getaddrinfo() not available on this system");
 #endif
 
 	*sap = NULL;
 	return n;
+}
+/* }}} */
+
+/* {{{ php_network_getaddresses
+ * Returns number of addresses, 0 for none/error
+ */
+PHPAPI size_t php_network_getaddresses(const char *host, int socktype, struct sockaddr ***sal, zend_string **error_string)
+{
+	return php_network_getaddresses_ex(host, socktype, AF_UNSPEC, 0, sal, error_string);
+}
+/* }}} */
+
+/* {{{ php_network_getaddress
+ * Returns the number of addresses, and puts first address for a hostname in sockaddr.
+ */
+PHPAPI size_t php_network_getaddress(php_sockaddr_storage *sockaddr, const char *host, int socktype, int family, int ai_flags, zend_string **error_string)
+{
+	struct sockaddr** addresses;
+	size_t address_count = php_network_getaddresses_ex(host, socktype, family, ai_flags, &addresses, error_string);
+	if (address_count == 0) {
+		return 0;
+	}
+
+	/*
+	 * we only care about the first address, hopefully getaddrinfo
+	 * filtered to the one we want
+	 */
+	struct sockaddr *address = *addresses;
+
+	int sa_size = address->sa_family == AF_INET6
+		? sizeof(struct sockaddr_in6)
+		: sizeof(struct sockaddr_in);
+	memcpy(sockaddr, address, sa_size);
+
+	php_network_freeaddresses(addresses);
+	return address_count;
 }
 /* }}} */
 
@@ -1234,91 +1243,3 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 	return n;
 }
 #endif
-
-#if defined(HAVE_GETHOSTBYNAME_R)
-#ifdef HAVE_FUNC_GETHOSTBYNAME_R_6
-static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
-{
-	struct hostent *hp;
-	int herr,res;
-
-	if (*hstbuflen == 0) {
-		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
-	}
-
-	while (( res =
-		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
-		&& (errno == ERANGE)) {
-		/* Enlarge the buffer. */
-		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
-	}
-
-	if (res != 0) {
-		return NULL;
-	}
-
-	return hp;
-}
-#endif
-#ifdef HAVE_FUNC_GETHOSTBYNAME_R_5
-static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
-{
-	struct hostent *hp;
-	int herr;
-
-	if (*hstbuflen == 0) {
-		*hstbuflen = 1024;
-		*tmphstbuf = (char *)malloc (*hstbuflen);
-	}
-
-	while ((NULL == ( hp =
-		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
-		&& (errno == ERANGE)) {
-		/* Enlarge the buffer. */
-		*hstbuflen *= 2;
-		*tmphstbuf = (char *)realloc (*tmphstbuf,*hstbuflen);
-	}
-	return hp;
-}
-#endif
-#ifdef HAVE_FUNC_GETHOSTBYNAME_R_3
-static struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char **tmphstbuf,size_t *hstbuflen)
-{
-	if (*hstbuflen == 0) {
-		*hstbuflen = sizeof(struct hostent_data);
-		*tmphstbuf = (char *)malloc (*hstbuflen);
-	} else {
-		if (*hstbuflen < sizeof(struct hostent_data)) {
-			*hstbuflen = sizeof(struct hostent_data);
-			*tmphstbuf = (char *)realloc(*tmphstbuf, *hstbuflen);
-		}
-	}
-	memset((void *)(*tmphstbuf),0,*hstbuflen);
-
-	if (0 != gethostbyname_r(host,hostbuf,(struct hostent_data *)*tmphstbuf)) {
-		return NULL;
-	}
-
-	return hostbuf;
-}
-#endif
-#endif
-
-PHPAPI struct hostent*	php_network_gethostbyname(const char *name) {
-#if !defined(HAVE_GETHOSTBYNAME_R)
-	return gethostbyname(name);
-#else
-	if (FG(tmp_host_buf)) {
-		free(FG(tmp_host_buf));
-	}
-
-	FG(tmp_host_buf) = NULL;
-	FG(tmp_host_buf_len) = 0;
-
-	memset(&FG(tmp_host_info), 0, sizeof(struct hostent));
-
-	return gethostname_re(name, &FG(tmp_host_info), &FG(tmp_host_buf), &FG(tmp_host_buf_len));
-#endif
-}
