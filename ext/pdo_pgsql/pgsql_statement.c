@@ -198,6 +198,7 @@ stmt_retry:
 					/* it worked */
 					S->is_prepared = 1;
 					PQclear(S->result);
+					S->result = NULL;
 					break;
 				default: {
 					char *sqlstate = pdo_pgsql_sqlstate(S->result);
