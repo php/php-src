@@ -1437,7 +1437,7 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
             "GLOBALS" => $GLOBALS,
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
-                "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR
+                "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
             ]
         ])) . "\n";
 
