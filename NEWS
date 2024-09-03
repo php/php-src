@@ -16,8 +16,6 @@ PHP                                                                        NEWS
     property. (ilutov)
   . Fixed bug GH-15693 (Unnecessary include in main.c bloats binary).
     (nielsdos)
-  . Fixed bug GH-15718 (Segfault on ReflectionProperty::get{Hook,Hooks}() on
-    dynamic properties). (DanielEScherzer)
 
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
@@ -37,6 +35,10 @@ PHP                                                                        NEWS
 
 - PDO_Firebird:
   . Fixed GH-15604 (Always make input parameters nullable). (sim1984)
+
+- Reflection:
+  . Fixed bug GH-15718 (Segfault on ReflectionProperty::get{Hook,Hooks}() on
+    dynamic properties). (DanielEScherzer)
 
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
