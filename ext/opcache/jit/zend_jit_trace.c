@@ -898,55 +898,6 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array  *op_array,
 		goto copy_info;
 	}
 
-	if (opline) {
-		/* Try to find a difinition in SSA dominators tree */
-		var = tssa->vars[ssa_var].var;
-		uint32_t op_num = opline - op_array->opcodes;
-		uint32_t b = ssa->cfg.map[op_num];
-		zend_basic_block *bb = ssa->cfg.blocks + b;
-		zend_ssa_phi *pi, *phi;
-
-		while (1) {
-			while (op_num > bb->start) {
-				op_num--;
-				op = ssa->ops + op_num;
-				if (op->result_def >= 0 && ssa->vars[op->result_def].var == var) {
-					src = op->result_def;
-					goto copy_info;
-				} else if (op->op2_def >= 0 && ssa->vars[op->op2_def].var == var) {
-					src = op->op2_def;
-					goto copy_info;
-				} else if (op->op1_def >= 0 && ssa->vars[op->op1_def].var == var) {
-					src = op->op1_def;
-					goto copy_info;
-				}
-			}
-			phi = ssa->blocks[b].phis;
-			pi = NULL;
-			while (phi) {
-				if (ssa->vars[phi->ssa_var].var == var) {
-					if (phi->pi >= 0) {
-						pi = phi;
-					} else {
-						src = phi->ssa_var;
-						goto copy_info;
-					}
-				}
-				phi = phi->next;
-			}
-			if (pi) {
-				src = pi->ssa_var;
-				goto copy_info;
-			}
-			if (bb->idom < 0) {
-				break;
-			}
-			b = bb->idom;
-			bb = ssa->cfg.blocks + b;
-			op_num = bb->start + bb->len;
-		}
-	}
-
 	if (tssa->vars[ssa_var].phi_use_chain) {
 		// TODO: this may be incorrect ???
 		var = tssa->vars[ssa_var].phi_use_chain->ssa_var;
@@ -966,6 +917,54 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array  *op_array,
 		} else {
 			assert(0);
 			return 0;
+		}
+		if (opline) {
+			/* Try to find a difinition in SSA dominators tree */
+			var = tssa->vars[ssa_var].var;
+			uint32_t op_num = opline - op_array->opcodes;
+			uint32_t b = ssa->cfg.map[op_num];
+			zend_basic_block *bb = ssa->cfg.blocks + b;
+			zend_ssa_phi *pi, *phi;
+
+			while (1) {
+				while (op_num > bb->start) {
+					op_num--;
+					op = ssa->ops + op_num;
+					if (op->result_def >= 0 && ssa->vars[op->result_def].var == var) {
+						src = op->result_def;
+						goto copy_info;
+					} else if (op->op2_def >= 0 && ssa->vars[op->op2_def].var == var) {
+						src = op->op2_def;
+						goto copy_info;
+					} else if (op->op1_def >= 0 && ssa->vars[op->op1_def].var == var) {
+						src = op->op1_def;
+						goto copy_info;
+					}
+				}
+				phi = ssa->blocks[b].phis;
+				pi = NULL;
+				while (phi) {
+					if (ssa->vars[phi->ssa_var].var == var) {
+						if (phi->pi >= 0) {
+							pi = phi;
+						} else {
+							src = phi->ssa_var;
+							goto copy_info;
+						}
+					}
+					phi = phi->next;
+				}
+				if (pi) {
+					src = pi->ssa_var;
+					goto copy_info;
+				}
+				if (bb->idom < 0) {
+					break;
+				}
+				b = bb->idom;
+				bb = ssa->cfg.blocks + b;
+				op_num = bb->start + bb->len;
+			}
 		}
 		goto copy_info;
 	}
