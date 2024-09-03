@@ -94,29 +94,21 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mhash_get_block_size, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_MHASH_BC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mhash_get_hash_name, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_MHASH_BC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mhash_keygen_s2k, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_MHASH_BC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mhash_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(PHP_MHASH_BC)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mhash, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
@@ -152,17 +144,9 @@ ZEND_FUNCTION(hash_equals);
 ZEND_FUNCTION(hash_hkdf);
 #if defined(PHP_MHASH_BC)
 ZEND_FUNCTION(mhash_get_block_size);
-#endif
-#if defined(PHP_MHASH_BC)
 ZEND_FUNCTION(mhash_get_hash_name);
-#endif
-#if defined(PHP_MHASH_BC)
 ZEND_FUNCTION(mhash_keygen_s2k);
-#endif
-#if defined(PHP_MHASH_BC)
 ZEND_FUNCTION(mhash_count);
-#endif
-#if defined(PHP_MHASH_BC)
 ZEND_FUNCTION(mhash);
 #endif
 ZEND_METHOD(HashContext, __construct);
@@ -188,17 +172,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
 #if defined(PHP_MHASH_BC)
 	ZEND_RAW_FENTRY("mhash_get_block_size", zif_mhash_get_block_size, arginfo_mhash_get_block_size, ZEND_ACC_DEPRECATED, NULL, NULL)
-#endif
-#if defined(PHP_MHASH_BC)
 	ZEND_RAW_FENTRY("mhash_get_hash_name", zif_mhash_get_hash_name, arginfo_mhash_get_hash_name, ZEND_ACC_DEPRECATED, NULL, NULL)
-#endif
-#if defined(PHP_MHASH_BC)
 	ZEND_RAW_FENTRY("mhash_keygen_s2k", zif_mhash_keygen_s2k, arginfo_mhash_keygen_s2k, ZEND_ACC_DEPRECATED, NULL, NULL)
-#endif
-#if defined(PHP_MHASH_BC)
 	ZEND_RAW_FENTRY("mhash_count", zif_mhash_count, arginfo_mhash_count, ZEND_ACC_DEPRECATED, NULL, NULL)
-#endif
-#if defined(PHP_MHASH_BC)
 	ZEND_RAW_FENTRY("mhash", zif_mhash, arginfo_mhash, ZEND_ACC_DEPRECATED, NULL, NULL)
 #endif
 	ZEND_FE_END
@@ -238,8 +214,6 @@ static void register_hash_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_mhash_get_block_size_0_arg0, attribute_Deprecated_func_mhash_get_block_size_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_get_block_size_0->args[0].value, &attribute_Deprecated_func_mhash_get_block_size_0_arg0);
 	attribute_Deprecated_func_mhash_get_block_size_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-#endif
-#if defined(PHP_MHASH_BC)
 
 	zend_attribute *attribute_Deprecated_func_mhash_get_hash_name_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_get_hash_name", sizeof("mhash_get_hash_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
 	zval attribute_Deprecated_func_mhash_get_hash_name_0_arg0;
@@ -247,8 +221,6 @@ static void register_hash_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_mhash_get_hash_name_0_arg0, attribute_Deprecated_func_mhash_get_hash_name_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_get_hash_name_0->args[0].value, &attribute_Deprecated_func_mhash_get_hash_name_0_arg0);
 	attribute_Deprecated_func_mhash_get_hash_name_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-#endif
-#if defined(PHP_MHASH_BC)
 
 	zend_attribute *attribute_Deprecated_func_mhash_keygen_s2k_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_keygen_s2k", sizeof("mhash_keygen_s2k") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
 	zval attribute_Deprecated_func_mhash_keygen_s2k_0_arg0;
@@ -256,8 +228,6 @@ static void register_hash_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_mhash_keygen_s2k_0_arg0, attribute_Deprecated_func_mhash_keygen_s2k_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].value, &attribute_Deprecated_func_mhash_keygen_s2k_0_arg0);
 	attribute_Deprecated_func_mhash_keygen_s2k_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-#endif
-#if defined(PHP_MHASH_BC)
 
 	zend_attribute *attribute_Deprecated_func_mhash_count_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash_count", sizeof("mhash_count") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
 	zval attribute_Deprecated_func_mhash_count_0_arg0;
@@ -265,8 +235,6 @@ static void register_hash_symbols(int module_number)
 	ZVAL_STR(&attribute_Deprecated_func_mhash_count_0_arg0, attribute_Deprecated_func_mhash_count_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_mhash_count_0->args[0].value, &attribute_Deprecated_func_mhash_count_0_arg0);
 	attribute_Deprecated_func_mhash_count_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
-#endif
-#if defined(PHP_MHASH_BC)
 
 	zend_attribute *attribute_Deprecated_func_mhash_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "mhash", sizeof("mhash") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
 	zval attribute_Deprecated_func_mhash_0_arg0;

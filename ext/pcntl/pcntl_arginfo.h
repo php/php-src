@@ -52,9 +52,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigwaitinfo, 0, 1, MAY_BE_
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_sigtimedwait, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, signals, IS_ARRAY, 0)
 	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, info, "[]")
@@ -152,9 +150,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getcpuaffinity, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_SCHED_SETAFFINITY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setcpuaffinity, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, process_id, IS_LONG, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cpu_ids, IS_ARRAY, 0, "[]")
@@ -169,9 +165,7 @@ ZEND_END_ARG_INFO()
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_pcntl_getqos_class, 0, 0, Pcntl\\QosClass, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pcntl_setqos_class, 0, 0, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, qos_class, Pcntl\\QosClass, 0, "Pcntl\\QosClass::Default")
 ZEND_END_ARG_INFO()
@@ -191,8 +185,6 @@ ZEND_FUNCTION(pcntl_sigprocmask);
 #endif
 #if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigwaitinfo);
-#endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 ZEND_FUNCTION(pcntl_sigtimedwait);
 #endif
 ZEND_FUNCTION(pcntl_wifexited);
@@ -229,8 +221,6 @@ ZEND_FUNCTION(pcntl_setns);
 #endif
 #if defined(HAVE_SCHED_SETAFFINITY)
 ZEND_FUNCTION(pcntl_getcpuaffinity);
-#endif
-#if defined(HAVE_SCHED_SETAFFINITY)
 ZEND_FUNCTION(pcntl_setcpuaffinity);
 #endif
 #if defined(HAVE_SCHED_GETCPU)
@@ -238,8 +228,6 @@ ZEND_FUNCTION(pcntl_getcpu);
 #endif
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 ZEND_FUNCTION(pcntl_getqos_class);
-#endif
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 ZEND_FUNCTION(pcntl_setqos_class);
 #endif
 
@@ -258,8 +246,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigwaitinfo, arginfo_pcntl_sigwaitinfo)
-#endif
-#if defined(HAVE_STRUCT_SIGINFO_T) && (defined(HAVE_SIGWAITINFO) && defined(HAVE_SIGTIMEDWAIT))
 	ZEND_FE(pcntl_sigtimedwait, arginfo_pcntl_sigtimedwait)
 #endif
 	ZEND_FE(pcntl_wifexited, arginfo_pcntl_wifexited)
@@ -297,8 +283,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_SCHED_SETAFFINITY)
 	ZEND_FE(pcntl_getcpuaffinity, arginfo_pcntl_getcpuaffinity)
-#endif
-#if defined(HAVE_SCHED_SETAFFINITY)
 	ZEND_FE(pcntl_setcpuaffinity, arginfo_pcntl_setcpuaffinity)
 #endif
 #if defined(HAVE_SCHED_GETCPU)
@@ -306,8 +290,6 @@ static const zend_function_entry ext_functions[] = {
 #endif
 #if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 	ZEND_FE(pcntl_getqos_class, arginfo_pcntl_getqos_class)
-#endif
-#if defined(HAVE_PTHREAD_SET_QOS_CLASS_SELF_NP)
 	ZEND_FE(pcntl_setqos_class, arginfo_pcntl_setqos_class)
 #endif
 	ZEND_FE_END

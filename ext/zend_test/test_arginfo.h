@@ -117,9 +117,7 @@ ZEND_END_ARG_INFO()
 #if defined(ZEND_CHECK_STACK_LIMIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_call_stack_get, 0, 0, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(ZEND_CHECK_STACK_LIMIT)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_test_zend_call_stack_use_all, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -281,8 +279,6 @@ static ZEND_FUNCTION(zend_test_zend_ini_parse_uquantity);
 static ZEND_FUNCTION(zend_test_zend_ini_str);
 #if defined(ZEND_CHECK_STACK_LIMIT)
 static ZEND_FUNCTION(zend_test_zend_call_stack_get);
-#endif
-#if defined(ZEND_CHECK_STACK_LIMIT)
 static ZEND_FUNCTION(zend_test_zend_call_stack_use_all);
 #endif
 static ZEND_FUNCTION(zend_test_is_string_marked_as_valid_utf8);
@@ -386,8 +382,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_test_zend_ini_str, arginfo_zend_test_zend_ini_str)
 #if defined(ZEND_CHECK_STACK_LIMIT)
 	ZEND_FE(zend_test_zend_call_stack_get, arginfo_zend_test_zend_call_stack_get)
-#endif
-#if defined(ZEND_CHECK_STACK_LIMIT)
 	ZEND_FE(zend_test_zend_call_stack_use_all, arginfo_zend_test_zend_call_stack_use_all)
 #endif
 	ZEND_FE(zend_test_is_string_marked_as_valid_utf8, arginfo_zend_test_is_string_marked_as_valid_utf8)
