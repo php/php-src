@@ -313,15 +313,15 @@ int main(void) {
       [php_cv_shm_mmap_posix=no],
       [php_cv_shm_mmap_posix=no])
     ])
-
-    AS_VAR_IF([php_cv_shm_mmap_posix], [yes], [
-      AS_VAR_IF([ac_cv_search_shm_open], ["none required"],,
-        [OPCACHE_SHARED_LIBADD="$OPCACHE_SHARED_LIBADD $ac_cv_search_shm_open"])
-      AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
-        [Define to 1 if you have the POSIX mmap() SHM support.])
-    ])
   ])
   LIBS=$LIBS_save
+
+  AS_VAR_IF([php_cv_shm_mmap_posix], [yes], [
+    AC_DEFINE([HAVE_SHM_MMAP_POSIX], [1],
+      [Define to 1 if you have the POSIX mmap() SHM support.])
+    AS_CASE([$ac_cv_search_shm_open], ["none required"|no], [],
+      [PHP_EVAL_LIBLINE([$ac_cv_search_shm_open], [OPCACHE_SHARED_LIBADD])])
+  ])
 
   PHP_NEW_EXTENSION([opcache], m4_normalize([
       shared_alloc_mmap.c
