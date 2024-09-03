@@ -5104,9 +5104,7 @@ function generateArgInfoCode(
             }
         );
 
-        if (!empty($fileInfo->funcInfos)) {
-            $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
-        }
+        $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
 
         foreach ($fileInfo->classInfos as $classInfo) {
             $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos, $classInfo->cond);
@@ -5157,8 +5155,8 @@ function generateClassEntryCode(FileInfo $fileInfo, array $allConstInfos): strin
 
 /** @param FuncInfo[] $funcInfos */
 function generateFunctionEntries(?Name $className, array $funcInfos, ?string $cond = null): string {
-    // No need to add anything if there are no function entries for a class
-    if ($className !== null && $funcInfos === []) {
+    // No need to add anything if there are no function entries
+    if ($funcInfos === []) {
         return '';
     }
 
