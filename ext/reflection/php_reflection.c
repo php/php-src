@@ -6505,7 +6505,8 @@ ZEND_METHOD(ReflectionProperty, getHooks)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!ref->prop->hooks) {
+	// ref->prop can be missing for dynamic properties
+	if (!ref->prop || !ref->prop->hooks) {
 		RETURN_EMPTY_ARRAY();
 	}
 
@@ -6536,11 +6537,16 @@ ZEND_METHOD(ReflectionProperty, getHook)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
+	// ref->prop can be missing for dynamic properties
+	if (!ref->prop || !ref->prop->hooks) {
+		RETURN_NULL();
+	}
+
 	zend_function *hook;
 	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
-		hook = ref->prop->hooks ? ref->prop->hooks[ZEND_PROPERTY_HOOK_GET] : NULL;
+		hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_GET];
 	} else {
-		hook = ref->prop->hooks ? ref->prop->hooks[ZEND_PROPERTY_HOOK_SET] : NULL;
+		hook = ref->prop->hooks[ZEND_PROPERTY_HOOK_SET];
 	}
 
 	if (!hook) {
