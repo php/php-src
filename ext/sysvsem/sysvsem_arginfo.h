@@ -32,15 +32,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SysvSemaphore_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_SysvSemaphore(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SysvSemaphore", class_SysvSemaphore_methods);
+	INIT_CLASS_ENTRY(ce, "SysvSemaphore", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

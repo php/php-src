@@ -40,10 +40,6 @@ static const zend_function_entry class_NumericCastableNoOperations_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_DimensionHandlersNoArrayAccess_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_DoOperationNoCast(void)
 {
 	zend_class_entry ce, *class_entry;
@@ -112,7 +108,7 @@ static zend_class_entry *register_class_DimensionHandlersNoArrayAccess(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "DimensionHandlersNoArrayAccess", class_DimensionHandlersNoArrayAccess_methods);
+	INIT_CLASS_ENTRY(ce, "DimensionHandlersNoArrayAccess", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, 0);
 
 	zval property_read_default_value;

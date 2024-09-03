@@ -132,10 +132,6 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_PDORow_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_PDOStatement(zend_class_entry *class_entry_IteratorAggregate)
 {
 	zend_class_entry ce, *class_entry;
@@ -157,7 +153,7 @@ static zend_class_entry *register_class_PDORow(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
+	INIT_CLASS_ENTRY(ce, "PDORow", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NOT_SERIALIZABLE);
 
 	zval property_queryString_default_value;

@@ -929,10 +929,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_mysqli_driver_methods[] = {
-	ZEND_FE_END
-};
-
 static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME(mysqli, __construct, arginfo_class_mysqli___construct, ZEND_ACC_PUBLIC)
 	ZEND_RAW_FENTRY("autocommit", zif_mysqli_autocommit, arginfo_class_mysqli_autocommit, ZEND_ACC_PUBLIC, NULL, NULL)
@@ -1197,7 +1193,7 @@ static zend_class_entry *register_class_mysqli_driver(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "mysqli_driver", class_mysqli_driver_methods);
+	INIT_CLASS_ENTRY(ce, "mysqli_driver", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL);
 
 	zval property_client_info_default_value;

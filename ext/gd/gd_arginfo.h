@@ -862,14 +862,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_GdImage_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_GdFont_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_gd_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("IMG_AVIF", PHP_IMG_AVIF, CONST_PERSISTENT);
@@ -995,7 +987,7 @@ static zend_class_entry *register_class_GdImage(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "GdImage", class_GdImage_methods);
+	INIT_CLASS_ENTRY(ce, "GdImage", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -1005,7 +997,7 @@ static zend_class_entry *register_class_GdFont(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "GdFont", class_GdFont_methods);
+	INIT_CLASS_ENTRY(ce, "GdFont", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

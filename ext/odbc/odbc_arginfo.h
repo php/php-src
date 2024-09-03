@@ -390,14 +390,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Odbc_Connection_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_Odbc_Result_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_odbc_symbols(int module_number)
 {
 	REGISTER_STRING_CONSTANT("ODBC_TYPE", PHP_ODBC_TYPE, CONST_PERSISTENT);
@@ -509,7 +501,7 @@ static zend_class_entry *register_class_Odbc_Connection(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Connection", class_Odbc_Connection_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Connection", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;
@@ -519,7 +511,7 @@ static zend_class_entry *register_class_Odbc_Result(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Result", class_Odbc_Result_methods);
+	INIT_NS_CLASS_ENTRY(ce, "Odbc", "Result", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

@@ -146,10 +146,6 @@ static const zend_function_entry class_SplQueue_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_SplStack_methods[] = {
-	ZEND_FE_END
-};
-
 static zend_class_entry *register_class_SplDoublyLinkedList(zend_class_entry *class_entry_Iterator, zend_class_entry *class_entry_Countable, zend_class_entry *class_entry_ArrayAccess, zend_class_entry *class_entry_Serializable)
 {
 	zend_class_entry ce, *class_entry;
@@ -199,7 +195,7 @@ static zend_class_entry *register_class_SplStack(zend_class_entry *class_entry_S
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "SplStack", class_SplStack_methods);
+	INIT_CLASS_ENTRY(ce, "SplStack", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_SplDoublyLinkedList, 0);
 
 	return class_entry;

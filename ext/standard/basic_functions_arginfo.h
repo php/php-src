@@ -3607,18 +3607,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class___PHP_Incomplete_Class_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_AssertionError_methods[] = {
-	ZEND_FE_END
-};
-
-static const zend_function_entry class_RoundingMode_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_basic_functions_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("EXTR_OVERWRITE", PHP_EXTR_OVERWRITE, CONST_PERSISTENT);
@@ -4177,7 +4165,7 @@ static zend_class_entry *register_class___PHP_Incomplete_Class(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", class___PHP_Incomplete_Class_methods);
+	INIT_CLASS_ENTRY(ce, "__PHP_Incomplete_Class", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES);
 
 	zend_string *attribute_name_AllowDynamicProperties_class___PHP_Incomplete_Class_0 = zend_string_init_interned("AllowDynamicProperties", sizeof("AllowDynamicProperties") - 1, 1);
@@ -4191,7 +4179,7 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "AssertionError", class_AssertionError_methods);
+	INIT_CLASS_ENTRY(ce, "AssertionError", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Error, 0);
 
 	return class_entry;
@@ -4199,7 +4187,7 @@ static zend_class_entry *register_class_AssertionError(zend_class_entry *class_e
 
 static zend_class_entry *register_class_RoundingMode(void)
 {
-	zend_class_entry *class_entry = zend_register_internal_enum("RoundingMode", IS_UNDEF, class_RoundingMode_methods);
+	zend_class_entry *class_entry = zend_register_internal_enum("RoundingMode", IS_UNDEF, NULL);
 
 	zend_enum_add_case_cstr(class_entry, "HalfAwayFromZero", NULL);
 

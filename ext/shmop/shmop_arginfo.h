@@ -49,10 +49,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_Shmop_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_shmop_symbols(int module_number)
 {
 
@@ -73,7 +69,7 @@ static zend_class_entry *register_class_Shmop(void)
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "Shmop", class_Shmop_methods);
+	INIT_CLASS_ENTRY(ce, "Shmop", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, NULL, ZEND_ACC_FINAL|ZEND_ACC_NO_DYNAMIC_PROPERTIES|ZEND_ACC_NOT_SERIALIZABLE);
 
 	return class_entry;

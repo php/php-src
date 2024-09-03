@@ -1183,10 +1183,6 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_IntlException_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_php_intl_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("INTL_MAX_LOCALE_LEN", INTL_MAX_LOCALE_LEN, CONST_PERSISTENT);
@@ -1249,7 +1245,7 @@ static zend_class_entry *register_class_IntlException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "IntlException", class_IntlException_methods);
+	INIT_CLASS_ENTRY(ce, "IntlException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;

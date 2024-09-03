@@ -3285,11 +3285,12 @@ class ClassInfo {
         $flagCodes = generateVersionDependentFlagCode("%s", $this->getFlagsByPhpVersion(), $this->phpVersionIdMinimumCompatibility);
         $flags = implode("", $flagCodes);
 
+        $classMethods = ($this->funcInfos === []) ? 'NULL' : "class_{$escapedName}_methods";
         if ($this->type === "enum") {
             $name = addslashes((string) $this->name);
             $backingType = $this->enumBackingType
                 ? $this->enumBackingType->toTypeCode() : "IS_UNDEF";
-            $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, class_{$escapedName}_methods);\n";
+            $code .= "\tzend_class_entry *class_entry = zend_register_internal_enum(\"$name\", $backingType, $classMethods);\n";
             if ($flags !== "") {
                 $code .= "\tclass_entry->ce_flags |= $flags\n";
             }
@@ -3299,9 +3300,9 @@ class ClassInfo {
                 $className = $this->name->getLast();
                 $namespace = addslashes((string) $this->name->slice(0, -1));
 
-                $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", class_{$escapedName}_methods);\n";
+                $code .= "\tINIT_NS_CLASS_ENTRY(ce, \"$namespace\", \"$className\", $classMethods);\n";
             } else {
-                $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", class_{$escapedName}_methods);\n";
+                $code .= "\tINIT_CLASS_ENTRY(ce, \"$this->name\", $classMethods);\n";
             }
 
             if ($this->type === "class" || $this->type === "trait") {
@@ -5103,9 +5104,7 @@ function generateArgInfoCode(
             }
         );
 
-        if (!empty($fileInfo->funcInfos)) {
-            $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
-        }
+        $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
 
         foreach ($fileInfo->classInfos as $classInfo) {
             $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos, $classInfo->cond);
@@ -5156,6 +5155,11 @@ function generateClassEntryCode(FileInfo $fileInfo, array $allConstInfos): strin
 
 /** @param FuncInfo[] $funcInfos */
 function generateFunctionEntries(?Name $className, array $funcInfos, ?string $cond = null): string {
+    // No need to add anything if there are no function entries
+    if ($funcInfos === []) {
+        return '';
+    }
+
     $code = "\n";
 
     if ($cond) {

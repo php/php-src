@@ -49,10 +49,6 @@ static const zend_function_entry class_JsonSerializable_methods[] = {
 	ZEND_FE_END
 };
 
-static const zend_function_entry class_JsonException_methods[] = {
-	ZEND_FE_END
-};
-
 static void register_json_symbols(int module_number)
 {
 	REGISTER_LONG_CONSTANT("JSON_HEX_TAG", PHP_JSON_HEX_TAG, CONST_PERSISTENT);
@@ -100,7 +96,7 @@ static zend_class_entry *register_class_JsonException(zend_class_entry *class_en
 {
 	zend_class_entry ce, *class_entry;
 
-	INIT_CLASS_ENTRY(ce, "JsonException", class_JsonException_methods);
+	INIT_CLASS_ENTRY(ce, "JsonException", NULL);
 	class_entry = zend_register_internal_class_with_flags(&ce, class_entry_Exception, 0);
 
 	return class_entry;
