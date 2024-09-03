@@ -271,6 +271,8 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 	zend_string *nsql = NULL;
 	int emulate = 0;
 	int execute_only = 0;
+	zval *val;
+	zend_long lval;
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -303,6 +305,14 @@ static bool pgsql_handle_preparer(pdo_dbh_t *dbh, zend_string *sql, pdo_stmt_t *
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
 		stmt->named_rewrite_template = "$%d";
 	}
+
+	S->is_unbuffered =
+		driver_options
+		&& (val = zend_hash_index_find(Z_ARRVAL_P(driver_options), PDO_ATTR_PREFETCH))
+		&& pdo_get_long_param(&lval, val)
+		? !lval
+		: H->default_fetching_laziness
+	;
 
 	ret = pdo_parse_params(stmt, sql, &nsql);
 
@@ -1326,6 +1336,12 @@ static bool pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 				return false;
 			}
 			H->disable_prepares = bval;
+			return true;
+		case PDO_ATTR_PREFETCH:
+			if (!pdo_get_bool_param(&bval, val)) {
+				return false;
+			}
+			H->default_fetching_laziness = !bval;
 			return true;
 		default:
 			return false;

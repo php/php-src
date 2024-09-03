@@ -34,6 +34,8 @@ typedef struct {
 	char *errmsg;
 } pdo_pgsql_error_info;
 
+typedef struct pdo_pgsql_stmt pdo_pgsql_stmt;
+
 /* stuff we use in a pgsql database handle */
 typedef struct {
 	PGconn		*server;
@@ -49,13 +51,15 @@ typedef struct {
 	bool		disable_prepares;
 	HashTable       *lob_streams;
 	zend_fcall_info_cache *notice_callback;
+	bool		default_fetching_laziness;
+	pdo_pgsql_stmt  *running_stmt;
 } pdo_pgsql_db_handle;
 
 typedef struct {
 	Oid          pgsql_type;
 } pdo_pgsql_column;
 
-typedef struct {
+struct pdo_pgsql_stmt {
 	pdo_pgsql_db_handle     *H;
 	PGresult                *result;
 	pdo_pgsql_column        *cols;
@@ -68,7 +72,9 @@ typedef struct {
 	Oid *param_types;
 	int                     current_row;
 	bool is_prepared;
-} pdo_pgsql_stmt;
+	bool is_unbuffered;
+	bool is_running_unbuffered;
+};
 
 typedef struct {
 	Oid     oid;

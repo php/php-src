@@ -51,6 +51,9 @@ PHP 8.5 UPGRADE NOTES
 
 - PDO_PGSQL:
   . PDO::pgsqlCopyFromArray also supports inputs as Iterable.
+  . Pdo\Pgsql::setAttribute and Pdo\Pgsql::prepare supports
+    PDO::ATTR_PREFETCH sets to 0 which set to lazy fetch mode.
+    In this mode, statements cannot be run parallely.
 
 ========================================
 6. New Functions
