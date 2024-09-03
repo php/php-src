@@ -4,6 +4,9 @@ GHSA-9fcc-425m-g385 - bypass CVE-2024-1874 - cmd.exe variation
 <?php
 if( substr(PHP_OS, 0, 3) != "WIN" )
   die('skip Run only on Windows');
+if (!str_contains(shell_exec("does_not_exist.exe 2>&1"), "is not recognized as an internal or external command")) {
+  die("skip English locale required");
+}
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
