@@ -529,14 +529,11 @@ PHP_FUNCTION(spl_autoload_call)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_string *lc_name = zend_string_tolower(name);
-	if (type == ZEND_AUTOLOAD_CLASS) {
+	if (type & ZEND_AUTOLOAD_CLASS) {
 		spl_perform_class_autoload(name, lc_name);
-	} else if (type == ZEND_AUTOLOAD_FUNCTION) {
+	}
+	if (type & ZEND_AUTOLOAD_FUNCTION) {
 		spl_perform_function_autoload(name, lc_name);
-	} else {
-		zend_string_release(lc_name);
-		zend_throw_error(NULL, "spl_autoload_call() expects either ZEND_AUTOLOAD_CLASS or ZEND_AUTOLOAD_FUNCTION as the second argument");
-		RETURN_THROWS();
 	}
 
 	zend_string_release(lc_name);
@@ -702,7 +699,9 @@ PHP_FUNCTION(spl_autoload_unregister)
 			zend_hash_del_bucket(spl_autoload_class_functions, p);
 			RETURN_TRUE;
 		}
-	} else if (type & ZEND_AUTOLOAD_FUNCTION) {
+	}
+
+	if (type & ZEND_AUTOLOAD_FUNCTION) {
 		Bucket *p = spl_find_registered_function(alfi, ZEND_AUTOLOAD_FUNCTION);
 		autoload_func_info_destroy(alfi);
 		if (p) {
@@ -727,12 +726,7 @@ PHP_FUNCTION(spl_autoload_functions)
 
 	array_init(return_value);
 
-	if (type == (ZEND_AUTOLOAD_CLASS | ZEND_AUTOLOAD_FUNCTION)) {
-		zend_throw_error(NULL, "spl_autoload_functions() expects either ZEND_AUTOLOAD_CLASS or ZEND_AUTOLOAD_FUNCTION as the first argument");
-		RETURN_THROWS();
-	}
-
-	zend_array *arr = type & ZEND_AUTOLOAD_CLASS ? spl_autoload_class_functions : spl_autoload_function_functions;
+	zend_array *arr = type & ZEND_AUTOLOAD_CLASS ? spl_autoload_class_functions : NULL;
 
 	if (arr) {
 		ZEND_HASH_MAP_FOREACH_PTR(arr, alfi) {
@@ -755,6 +749,31 @@ PHP_FUNCTION(spl_autoload_functions)
 				add_next_index_str(return_value, zend_string_copy(alfi->func_ptr->common.function_name));
 			}
 		} ZEND_HASH_FOREACH_END();
+	}
+
+	arr = type & ZEND_AUTOLOAD_FUNCTION ? spl_autoload_function_functions : NULL;
+
+	if (arr) {
+		ZEND_HASH_MAP_FOREACH_PTR(arr, alfi) {
+					if (alfi->closure) {
+						GC_ADDREF(alfi->closure);
+						add_next_index_object(return_value, alfi->closure);
+					} else if (alfi->func_ptr->common.scope) {
+						zval tmp;
+
+						array_init(&tmp);
+						if (alfi->obj) {
+							GC_ADDREF(alfi->obj);
+							add_next_index_object(&tmp, alfi->obj);
+						} else {
+							add_next_index_str(&tmp, zend_string_copy(alfi->ce->name));
+						}
+						add_next_index_str(&tmp, zend_string_copy(alfi->func_ptr->common.function_name));
+						add_next_index_zval(return_value, &tmp);
+					} else {
+						add_next_index_str(return_value, zend_string_copy(alfi->func_ptr->common.function_name));
+					}
+				} ZEND_HASH_FOREACH_END();
 	}
 } /* }}} */
 
