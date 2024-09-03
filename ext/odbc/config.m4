@@ -131,9 +131,6 @@ AS_VAR_IF([PHP_ODBCVER], [no],
 dnl Extension setup
 if test -n "$ODBC_TYPE"; then
   PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], [ODBC_SHARED_LIBADD])
-  AC_DEFINE([HAVE_SQLDATASOURCES], [1],
-    [Define to 1 if ODBC library has 'SQLDataSources', as a function or
-    macro.])
 
   AC_DEFINE([HAVE_UODBC], [1],
     [Define to 1 if the PHP extension 'odbc' is available.])

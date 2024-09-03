@@ -341,9 +341,7 @@ namespace {
 
     function odbc_cursor(Odbc\Result $statement): string|false {}
 
-#ifdef HAVE_SQLDATASOURCES
     function odbc_data_source(Odbc\Connection $odbc, int $fetch_type): array|null|false {}
-#endif
 
     function odbc_exec(Odbc\Connection $odbc, string $query): Odbc\Result|false {}
 
