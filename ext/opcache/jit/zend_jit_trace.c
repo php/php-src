@@ -1640,6 +1640,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 	/* 4. Type inference */
 	op_array = trace_buffer->op_array;
+	opline = trace_buffer[1].opline;
 	jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 	ssa = &jit_extension->func_info.ssa;
