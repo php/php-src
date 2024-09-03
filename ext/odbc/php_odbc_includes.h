@@ -66,10 +66,6 @@
 #define ODBC_TYPE "IBM DB2 CLI"
 #define HAVE_SQL_EXTENDED_FETCH 1
 #include <sqlcli1.h>
-#ifdef DB268K
-/* Need to include ASLM for 68K applications */
-#include <LibraryManager.h>
-#endif
 
 #else /* MS ODBC */
 
