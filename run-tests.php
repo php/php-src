@@ -308,8 +308,6 @@ function main(): void
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
 
-    define('TRAVIS_CI', (bool) getenv('TRAVIS'));
-
     // Determine the tests to be run.
 
     $test_files = [];
@@ -916,7 +914,7 @@ function save_results(string $output_file, bool $prompt_to_save_results): void
 {
     global $sum_results, $failed_test_summary, $PHP_FAILED_TESTS, $php;
 
-    if (getenv('NO_INTERACTION') || TRAVIS_CI) {
+    if (getenv('NO_INTERACTION')) {
         return;
     }
 
@@ -1440,7 +1438,6 @@ function run_all_tests_parallel(array $test_files, array $env, ?string $redir_te
             "constants" => [
                 "INIT_DIR" => INIT_DIR,
                 "TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
-                "TRAVIS_CI" => TRAVIS_CI
             ]
         ])) . "\n";
 

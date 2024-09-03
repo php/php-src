@@ -297,18 +297,6 @@ class Tester
     }
 
     /**
-     * Skip if running on Travis.
-     *
-     * @param $message
-     */
-    static public function skipIfTravis($message)
-    {
-        if (getenv("TRAVIS")) {
-            die('skip Travis: ' . $message);
-        }
-    }
-
-    /**
      * Skip if not running as root.
      */
     static public function skipIfNotRoot()

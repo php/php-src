@@ -32,10 +32,6 @@ if (empty($enough_free_ram)) {
     die(sprintf("skip need +3G free RAM, but only %01.2f available", $free_ram));
 }
 
-if (getenv('TRAVIS')) {
-    die("skip Fails intermittently on travis");
-}
-
 if (getenv('CIRRUS_CI')) die('skip Fails on Cirrus');
 
 if (getenv('SKIP_PERF_SENSITIVE')) {
