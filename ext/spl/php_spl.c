@@ -428,7 +428,7 @@ static zval *spl_perform_function_autoload(zend_string *function_name, zend_stri
 		zend_hash_init(spl_autoload_function_skiplist, 1, NULL, NULL, 0);
 	}
 
-	if(zend_hash_find_ex(spl_autoload_function_skiplist, lc_name, false)) {
+	if(zend_hash_find(spl_autoload_function_skiplist, lc_name)) {
 		return NULL;
 	}
 
