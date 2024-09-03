@@ -56,14 +56,23 @@
 #define FLOAT8LABEL "float8"
 #define FLOAT8OID 701
 
+#define FIN_DISCARD 0x1
+#define FIN_CLOSE   0x2
+#define FIN_ABORT   0x4
 
 
-static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
+
+static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 {
-	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
-	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
-		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+	pdo_pgsql_db_handle *H = S->H;
+
+	if (S->is_running_unbuffered && S->result && (fin_mode & FIN_ABORT)) {
+		PGcancel *cancel = PQgetCancel(H->server);
+		char errbuf[256];
+		PQcancel(cancel, errbuf, 256);
+		PQfreeCancel(cancel);
+		S->is_running_unbuffered = false;
+	}
 
 	if (S->result) {
 		/* free the resource */
@@ -71,10 +80,24 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 		S->result = NULL;
 	}
 
-	if (S->stmt_name) {
-		if (S->is_prepared && server_obj_usable) {
-			pdo_pgsql_db_handle *H = S->H;
-			PGresult *res;
+	if (S->is_running_unbuffered) {
+		/* https://postgresql.org/docs/current/libpq-async.html:
+		 * "PQsendQuery cannot be called again until PQgetResult has returned NULL"
+		 * And as all single-row functions are connection-wise instead of statement-wise,
+		 * any new single-row query has to make sure no preceding one is still running.
+		 */
+		// @todo Implement !(fin_mode & FIN_DISCARD)
+		//       instead of discarding results we could store them to their statement
+		//       so that their fetch() will get them (albeit not in lazy mode anymore).
+		while ((S->result = PQgetResult(H->server))) {
+			PQclear(S->result);
+			S->result = NULL;
+		}
+		S->is_running_unbuffered = false;
+	}
+
+	if (S->stmt_name && S->is_prepared && (fin_mode & FIN_CLOSE)) {
+		PGresult *res;
 #ifndef HAVE_PQCLOSEPREPARED
 			// TODO (??) libpq does not support close statement protocol < postgres 17
 			// check if we can circumvent this.
@@ -88,7 +111,24 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 			if (res) {
 				PQclear(res);
 			}
+
+		S->is_prepared = false;
+		if (H->running_stmt == S) {
+			H->running_stmt = NULL;
 		}
+	}
+}
+
+static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
+{
+	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
+	bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
+		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
+		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+
+	pgsql_stmt_finish(S, FIN_DISCARD|(server_obj_usable ? FIN_CLOSE|FIN_ABORT : 0));
+
+	if (S->stmt_name) {
 		efree(S->stmt_name);
 		S->stmt_name = NULL;
 	}
@@ -142,14 +182,20 @@ static int pgsql_stmt_execute(pdo_stmt_t *stmt)
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	pdo_pgsql_db_handle *H = S->H;
 	ExecStatusType status;
+	int dispatch_result = 1;
 
 	bool in_trans = stmt->dbh->methods->in_transaction(stmt->dbh);
 
-	/* ensure that we free any previous unfetched results */
-	if(S->result) {
-		PQclear(S->result);
-		S->result = NULL;
+	/* in unbuffered mode, finish any running statement: libpq explicitely prohibits this
+	 * and returns a PGRES_FATAL_ERROR when PQgetResult gets called for stmt 2 if DEALLOCATE
+	 * was called for stmt 1 inbetween
+	 * (maybe it will change with pipeline mode in libpq 14?) */
+	if (S->is_unbuffered && H->running_stmt) {
+		pgsql_stmt_finish(H->running_stmt, FIN_CLOSE);
+		H->running_stmt = NULL;
 	}
+	/* ensure that we free any previous unfetched results */
+	pgsql_stmt_finish(S, 0);
 
 	S->current_row = 0;
 
@@ -228,6 +274,16 @@ stmt_retry:
 				}
 			}
 		}
+		if (S->is_unbuffered) {
+			dispatch_result = PQsendQueryPrepared(H->server, S->stmt_name,
+					stmt->bound_params ?
+						zend_hash_num_elements(stmt->bound_params) :
+						0,
+					(const char**)S->param_values,
+					S->param_lengths,
+					S->param_formats,
+					0);
+		} else {
 		S->result = PQexecPrepared(H->server, S->stmt_name,
 				stmt->bound_params ?
 					zend_hash_num_elements(stmt->bound_params) :
@@ -236,8 +292,18 @@ stmt_retry:
 				S->param_lengths,
 				S->param_formats,
 				0);
+		}
 	} else if (stmt->supports_placeholders == PDO_PLACEHOLDER_NAMED) {
 		/* execute query with parameters */
+		if (S->is_unbuffered) {
+			dispatch_result = PQsendQueryParams(H->server, ZSTR_VAL(S->query),
+					stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
+					S->param_types,
+					(const char**)S->param_values,
+					S->param_lengths,
+					S->param_formats,
+					0);
+		} else {
 		S->result = PQexecParams(H->server, ZSTR_VAL(S->query),
 				stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
 				S->param_types,
@@ -245,13 +311,35 @@ stmt_retry:
 				S->param_lengths,
 				S->param_formats,
 				0);
+		}
 	} else {
 		/* execute plain query (with embedded parameters) */
+		if (S->is_unbuffered) {
+			dispatch_result = PQsendQuery(H->server, ZSTR_VAL(stmt->active_query_string));
+		} else {
 		S->result = PQexec(H->server, ZSTR_VAL(stmt->active_query_string));
+		}
 	}
+
+	H->running_stmt = S;
+
+	if (S->is_unbuffered) {
+		if (!dispatch_result) {
+			pdo_pgsql_error_stmt(stmt, 0, NULL);
+			H->running_stmt = NULL;
+			return 0;
+		}
+		S->is_running_unbuffered = true;
+		(void)PQsetSingleRowMode(H->server);
+		/* no matter if it returns 0: PQ then transparently fallbacks to full result fetching */
+
+		/* try a first fetch to at least have column names and so on */
+		S->result = PQgetResult(S->H->server);
+	}
+
 	status = PQresultStatus(S->result);
 
-	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK) {
+	if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
 		pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
 		return 0;
 	}
@@ -473,6 +561,34 @@ static int pgsql_stmt_fetch(pdo_stmt_t *stmt,
 			return 0;
 		}
 	} else {
+		if (S->is_running_unbuffered && S->current_row >= stmt->row_count) {
+			ExecStatusType status;
+
+			/* @todo in unbuffered mode, PQ allows multiple queries to be passed:
+			 *       column_count should be recomputed on each iteration */
+
+			if(S->result) {
+				PQclear(S->result);
+				S->result = NULL;
+			}
+
+			S->result = PQgetResult(S->H->server);
+			status = PQresultStatus(S->result);
+
+			if (status != PGRES_COMMAND_OK && status != PGRES_TUPLES_OK && status != PGRES_SINGLE_TUPLE) {
+				pdo_pgsql_error_stmt(stmt, status, pdo_pgsql_sqlstate(S->result));
+				return 0;
+			}
+
+			stmt->row_count = (zend_long)PQntuples(S->result);
+			S->current_row = 0;
+
+			if (!stmt->row_count) {
+				S->is_running_unbuffered = false;
+				/* libpq requires looping until getResult returns null */
+				pgsql_stmt_finish(S, 0);
+			}
+		}
 		if (S->current_row < stmt->row_count) {
 			S->current_row++;
 			return 1;
