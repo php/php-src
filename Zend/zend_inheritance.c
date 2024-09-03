@@ -1709,8 +1709,11 @@ ZEND_API void zend_verify_hooked_property(zend_class_entry *ce, zend_property_in
 	if ((prop_info->flags & ZEND_ACC_VIRTUAL)
 	 && (prop_info->flags & ZEND_ACC_PPP_SET_MASK)
 	 && (!prop_info->hooks[ZEND_PROPERTY_HOOK_GET] || !prop_info->hooks[ZEND_PROPERTY_HOOK_SET])) {
+		const char *prefix = !prop_info->hooks[ZEND_PROPERTY_HOOK_GET]
+			? "Write-only" : "Read-only";
 		zend_error_noreturn(E_COMPILE_ERROR,
-			"Unilateral virtual property %s::$%s must not specify asymmetric visibility", ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
+			"%s virtual property %s::$%s must not specify asymmetric visibility",
+			prefix, ZSTR_VAL(ce->name), ZSTR_VAL(prop_name));
 	}
 }
 
