@@ -42,6 +42,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
+  . Implemented GH-15685 (improve proc_open error reporting on Windows). (cmb)
 
 - Streams:
   . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
