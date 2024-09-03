@@ -805,7 +805,12 @@ static bool zend_jit_trace_is_false_loop(const zend_op_array *op_array, const ze
 	}
 }
 
-static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+static int zend_jit_trace_copy_ssa_var_info(const zend_op_array  *op_array,
+                                            const zend_ssa       *ssa,
+                                            const zend_op       **tssa_opcodes,
+                                            zend_ssa             *tssa,
+                                            int                   ssa_var,
+                                            const zend_op        *opline)
 {
 	int var, use, def, src;
 	zend_ssa_op *op;
@@ -891,6 +896,55 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 			return 0;
 		}
 		goto copy_info;
+	}
+
+	if (opline) {
+		/* Try to find a difinition in SSA dominators tree */
+		var = tssa->vars[ssa_var].var;
+		uint32_t op_num = opline - op_array->opcodes;
+		uint32_t b = ssa->cfg.map[op_num];
+		zend_basic_block *bb = ssa->cfg.blocks + b;
+		zend_ssa_phi *pi, *phi;
+
+		while (1) {
+			while (op_num > bb->start) {
+				op_num--;
+				op = ssa->ops + op_num;
+				if (op->result_def >= 0 && ssa->vars[op->result_def].var == var) {
+					src = op->result_def;
+					goto copy_info;
+				} else if (op->op2_def >= 0 && ssa->vars[op->op2_def].var == var) {
+					src = op->op2_def;
+					goto copy_info;
+				} else if (op->op1_def >= 0 && ssa->vars[op->op1_def].var == var) {
+					src = op->op1_def;
+					goto copy_info;
+				}
+			}
+			phi = ssa->blocks[b].phis;
+			pi = NULL;
+			while (phi) {
+				if (ssa->vars[phi->ssa_var].var == var) {
+					if (phi->pi >= 0) {
+						pi = phi;
+					} else {
+						src = phi->ssa_var;
+						goto copy_info;
+					}
+				}
+				phi = phi->next;
+			}
+			if (pi) {
+				src = pi->ssa_var;
+				goto copy_info;
+			}
+			if (bb->idom < 0) {
+				break;
+			}
+			b = bb->idom;
+			bb = ssa->cfg.blocks + b;
+			op_num = bb->start + bb->len;
+		}
 	}
 
 	if (tssa->vars[ssa_var].phi_use_chain) {
@@ -1597,7 +1651,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		while (i < op_array->last_var) {
 			if (i < op_array->num_args) {
 				if (ssa->var_info
-				 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i)) {
+				 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i, NULL)) {
 					/* pass */
 				} else {
 					if (ssa->vars) {
@@ -1652,7 +1706,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		}
 		while (i < op_array->last_var + op_array->T) {
 			if (!ssa->var_info
-			 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i)) {
+			 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, i, opline)) {
 				if (ssa->vars && i < ssa->vars_count) {
 					ssa_vars[i].alias = ssa->vars[i].alias;
 				} else {
@@ -1690,7 +1744,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 
 		while (phi) {
 			if (!ssa->var_info
-			 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, phi->ssa_var)) {
+			 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, phi->ssa_var, NULL)) {
 				ssa_vars[phi->ssa_var].alias = ssa_vars[phi->sources[0]].alias;
 				ssa_var_info[phi->ssa_var].type = ssa_var_info[phi->sources[0]].type;
 			}
@@ -2409,7 +2463,7 @@ propagate_arg:
 				ssa_vars[v].var = i;
 				if (i < op_array->num_args) {
 					if (ssa->var_info
-					 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
+					 && zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v, NULL)) {
 						/* pass */
 					} else {
 						ssa_vars[v].alias = zend_jit_var_may_alias(op_array, ssa, i);
@@ -2460,7 +2514,7 @@ propagate_arg:
 				while (i < op_array->last_var) {
 					ssa_vars[v].var = i;
 					if (!ssa->var_info
-					 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
+					 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v, NULL)) {
 						ssa_var_info[v].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 					}
 					i++;
@@ -2469,7 +2523,7 @@ propagate_arg:
 				while (i < op_array->last_var + op_array->T) {
 					ssa_vars[v].var = i;
 					if (!ssa->var_info
-					 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
+					 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v, NULL)) {
 						ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 					}
 					i++;
@@ -4143,8 +4197,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			} else if (i < parent_vars_count
 			 && STACK_TYPE(parent_stack, i) != IS_UNKNOWN) {
 				/* This must be already handled by trace type inference */
-				ZEND_UNREACHABLE();
-				// SET_STACK_TYPE(stack, i, STACK_TYPE(parent_stack, i));
+				ZEND_ASSERT(ssa->vars[i].use_chain < 0 && !ssa->vars[i].phi_use_chain);
+				SET_STACK_TYPE(stack, i, STACK_TYPE(parent_stack, i), 1);
 			} else if ((info & MAY_BE_GUARD) != 0
 			 && (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
