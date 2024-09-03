@@ -23,59 +23,7 @@
 
 /* checking in the same order as in configure.ac */
 
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35) /* Solid Server */
-
-#define ODBC_TYPE "Solid"
-#if defined(HAVE_SOLID)
-# include <cli0core.h>
-# include <cli0ext1.h>
-# include <cli0env.h>
-#elif defined(HAVE_SOLID_30)
-# include <cli0cli.h>
-# include <cli0defs.h>
-# include <cli0env.h>
-#elif defined(HAVE_SOLID_35)
-# include <sqlunix.h>
-# include <sqltypes.h>
-# include <sqlucode.h>
-# include <sqlext.h>
-# include <sql.h>
-#endif	/* end: #if defined(HAVE_SOLID) */
-#undef HAVE_SQL_EXTENDED_FETCH
-#define SQLSMALLINT SWORD
-#define SQLUSMALLINT UWORD
-#ifndef SQL_SUCCEEDED
-#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
-#endif
-
-#elif defined(HAVE_EMPRESS) /* Empress */
-
-#define ODBC_TYPE "Empress"
-#include <sql.h>
-#include <sqlext.h>
-#undef HAVE_SQL_EXTENDED_FETCH
-
-#elif defined(HAVE_ADABAS) /* Adabas D */
-
-#define ODBC_TYPE "Adabas D"
-#include <WINDOWS.H>
-#include <sql.h>
-#include <sqlext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
-#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
-#define SQLINTEGER ULONG
-#define SQLUSMALLINT USHORT
-
-#elif defined(HAVE_SAPDB) /* SAP DB */
-
-#define ODBC_TYPE "SAP DB"
-#include <WINDOWS.H>
-#include <sql.h>
-#include <sqlext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
-#define SQL_SUCCEEDED(rc) (((rc)&(~1))==0)
-
-#elif defined(HAVE_IODBC) /* iODBC library */
+#if defined(HAVE_IODBC) /* iODBC library */
 
 #ifdef CHAR
 #undef CHAR
@@ -106,37 +54,6 @@
 #include <sql.h>
 #include <sqlext.h>
 #define HAVE_SQL_EXTENDED_FETCH 1
-
-#elif defined(HAVE_ESOOB) /* Easysoft ODBC-ODBC Bridge library */
-
-#define ODBC_TYPE "ESOOB"
-#include <sql.h>
-#include <sqlext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
-
-#elif defined(HAVE_OPENLINK) /* OpenLink ODBC drivers */
-
-#define ODBC_TYPE "Openlink"
-#include <iodbc.h>
-#include <isql.h>
-#include <isqlext.h>
-#include <udbcext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
-#ifndef SQLSMALLINT
-#define SQLSMALLINT SWORD
-#endif
-#ifndef SQLUSMALLINT
-#define SQLUSMALLINT UWORD
-#endif
-
-#elif defined(HAVE_DBMAKER) /* DBMaker */
-
-#define ODBC_TYPE "DBMaker"
-#undef ODBCVER
-#define ODBCVER 0x0300
-#define HAVE_SQL_EXTENDED_FETCH 1
-#include <odbc.h>
-
 
 #elif defined(HAVE_CODBC) /* Custom ODBC */
 
@@ -176,10 +93,6 @@
 #define ODBC_SQL_ENV_T SQLHANDLE
 #define ODBC_SQL_CONN_T SQLHANDLE
 #define ODBC_SQL_STMT_T SQLHANDLE
-#elif defined( HAVE_SOLID_35 ) || defined( HAVE_SAPDB ) || defined ( HAVE_EMPRESS )
-#define ODBC_SQL_ENV_T SQLHENV
-#define ODBC_SQL_CONN_T SQLHDBC
-#define ODBC_SQL_STMT_T SQLHSTMT
 #else
 #define ODBC_SQL_ENV_T HENV
 #define ODBC_SQL_CONN_T HDBC
