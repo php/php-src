@@ -3875,7 +3875,8 @@ PHPAPI zend_string *php_repr_str(const char *str, size_t len) {
 	// so we need 4 bytes for each character
 	// plus 2 byte for the leading quote and the trailing quote
 	// plus 1 byte for the null terminator
-    zend_string *new_str = zend_string_alloc(len * 4 + 2 + 1, 0);
+	int alloc_len = len * 4 + 2 + 1;
+    zend_string *new_str = zend_string_alloc(alloc_len, 0);
 	char *target = ZSTR_VAL(new_str);
 	// add the leading quote
 	*target++ = '"';
@@ -3890,7 +3891,7 @@ PHPAPI zend_string *php_repr_str(const char *str, size_t len) {
 	// add the null terminator
 	*target = '\0';
 	newlen = target - ZSTR_VAL(new_str);
-	if (newlen < len * 4) {
+	if (newlen < alloc_len) {
 		new_str = zend_string_truncate(new_str, newlen, 0);
 	}
 	return new_str;
