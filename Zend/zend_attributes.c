@@ -84,6 +84,11 @@ static void validate_allow_dynamic_properties(
 			ZSTR_VAL(scope->name)
 		);
 	}
+	if (scope->ce_flags & ZEND_ACC_ENUM) {
+		zend_error_noreturn(E_ERROR, "Cannot apply #[AllowDynamicProperties] to enum %s",
+			ZSTR_VAL(scope->name)
+		);
+	}
 	scope->ce_flags |= ZEND_ACC_ALLOW_DYNAMIC_PROPERTIES;
 }
 
