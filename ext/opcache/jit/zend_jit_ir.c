@@ -6088,6 +6088,10 @@ static int zend_jit_assign_op(zend_jit_ctx   *jit,
 			ZEND_UNREACHABLE();
 	}
 
+	if (!zend_jit_store_var_if_necessary_ex(jit, opline->op1.var, op1_def_addr, op1_def_info, op1_addr, op1_info)) {
+		return 0;
+	}
+
 	if (op1_info & MAY_BE_REF) {
 		ir_MERGE_WITH(slow_path);
 	}
