@@ -35,7 +35,7 @@ function class_parents($object_or_class, bool $autoload = true): array|false {}
  */
 function class_uses($object_or_class, bool $autoload = true): array|false {}
 
-function spl_autoload(string $class, int|string|null $file_extensions = null): void {}
+function spl_autoload(string $class, string|null $file_extensions = null): void {}
 
 function spl_autoload_call(string $class, int $type = SPL_AUTOLOAD_CLASS): void {}
 

@@ -294,22 +294,15 @@ PHP_FUNCTION(spl_autoload)
 	int pos_len, pos1_len;
 	char *pos, *pos1;
 	zend_string *class_name, *lc_name, *file_exts = NULL;
-	zend_long type = ZEND_AUTOLOAD_CLASS;
-	bool type_or_exts_is_null;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 			Z_PARAM_STR(class_name)
 			Z_PARAM_OPTIONAL
-			Z_PARAM_STR_OR_LONG_OR_NULL(file_exts, type, type_or_exts_is_null)
+			Z_PARAM_STR_OR_NULL(file_exts)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!file_exts) {
 		file_exts = spl_autoload_extensions;
-	}
-
-	if (!type_or_exts_is_null && type != ZEND_AUTOLOAD_CLASS) {
-		zend_throw_error(NULL, "Default autoloader can only load classes.");
-		RETURN_THROWS();
 	}
 
 	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */
@@ -449,10 +442,9 @@ static zval *spl_perform_function_autoload(zend_string *function_name, zend_stri
 			zend_string_addref(func->op_array.function_name);
 		}
 
-		zval params[2];
+		zval params[1];
 		ZVAL_STR(&params[0], function_name);
-		ZVAL_LONG(&params[1], ZEND_AUTOLOAD_FUNCTION);
-		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 2, params, NULL);
+		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 1, params, NULL);
 		if (EG(exception)) {
 			break;
 		}
@@ -491,10 +483,9 @@ static zend_class_entry *spl_perform_class_autoload(zend_string *class_name, zen
 			zend_string_addref(func->op_array.function_name);
 		}
 
-		zval params[2];
+		zval params[1];
 		ZVAL_STR(&params[0], class_name);
-		ZVAL_LONG(&params[1], ZEND_AUTOLOAD_CLASS);
-		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 2, params, NULL);
+		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 1, params, NULL);
 		if (EG(exception)) {
 			break;
 		}

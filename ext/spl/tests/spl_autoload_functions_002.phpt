@@ -4,8 +4,8 @@ SPL autoloader calls local functions first
 <?php
 
 namespace {
-    spl_autoload_register(function(string $name, int $mode) {
-        echo "name=$name, mode=$mode\n";
+    spl_autoload_register(function(string $name) {
+        echo "name=$name\n";
     }, true, false, SPL_AUTOLOAD_FUNCTION);
 }
 
@@ -14,5 +14,5 @@ namespace Foo {
 }
 ?>
 --EXPECT--
-name=foo\strlen, mode=2
+name=foo\strlen
 3
