@@ -3362,6 +3362,7 @@ static void zend_jit_trace_cleanup_stack(zend_jit_ctx *jit, zend_jit_trace_stack
 		CLEAR_STACK_REF(stack, EX_VAR_TO_NUM(opline->op1.var));
 	}
 	if (ssa_op->op2_use >= 0
+	 && ssa_op->op2_use != ssa_op->op1_use
 	 && jit->ra[ssa_op->op2_use].ref
 	 && (jit->ra[ssa_op->op2_use].flags & ZREG_LAST_USE)
 	 && (ssa_op->op2_use_chain == -1
@@ -3369,6 +3370,8 @@ static void zend_jit_trace_cleanup_stack(zend_jit_ctx *jit, zend_jit_trace_stack
 		CLEAR_STACK_REF(stack, EX_VAR_TO_NUM(opline->op2.var));
 	}
 	if (ssa_op->result_use >= 0
+	 && ssa_op->result_use != ssa_op->op1_use
+	 && ssa_op->result_use != ssa_op->op2_use
 	 && jit->ra[ssa_op->result_use].ref
 	 && (jit->ra[ssa_op->result_use].flags & ZREG_LAST_USE)
 	 && (ssa_op->res_use_chain == -1
