@@ -374,9 +374,7 @@ namespace {
 
     function odbc_num_rows(Odbc\Result $statement): int {}
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
     function odbc_next_result(Odbc\Result $statement): bool {}
-#endif
 
     function odbc_num_fields(Odbc\Result $statement): int {}
 
@@ -413,23 +411,19 @@ namespace {
 
     function odbc_primarykeys(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table): Odbc\Result|false {}
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
     function odbc_procedurecolumns(Odbc\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null, ?string $column = null): Odbc\Result|false {}
 
     function odbc_procedures(Odbc\Connection $odbc, ?string $catalog = null, ?string $schema = null, ?string $procedure = null): Odbc\Result|false {}
 
     function odbc_foreignkeys(Odbc\Connection $odbc, ?string $pk_catalog, string $pk_schema, string $pk_table, string $fk_catalog, string $fk_schema, string $fk_table): Odbc\Result|false {}
-#endif
 
     function odbc_specialcolumns(Odbc\Connection $odbc, int $type, ?string $catalog, string $schema, string $table, int $scope, int $nullable): Odbc\Result|false {}
 
     function odbc_statistics(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table, int $unique, int $accuracy): Odbc\Result|false {}
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
     function odbc_tableprivileges(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table): Odbc\Result|false {}
 
     function odbc_columnprivileges(Odbc\Connection $odbc, ?string $catalog, string $schema, string $table, string $column): Odbc\Result|false {}
-#endif
 
     /* odbc_utils.c */
 

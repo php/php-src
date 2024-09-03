@@ -253,10 +253,6 @@ static void odbc_result_free(odbc_result *res)
 
 	/* If aborted via timer expiration, don't try to call any unixODBC function */
 	if (res->stmt && !(PG(connection_status) & PHP_CONNECTION_TIMEOUT)) {
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30) || defined(HAVE_SOLID_35)
-		SQLTransact(res->conn_ptr->henv, res->conn_ptr->hdbc,
-					(SQLUSMALLINT) SQL_COMMIT);
-#endif
 		SQLFreeStmt(res->stmt,SQL_DROP);
 		/* We don't want the connection to be closed after the last statement has been closed
 		 * Connections will be closed on shutdown
@@ -796,17 +792,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
 	odbc_result *result;
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
-	/* this seems to be necessary for Solid2.3 ( tested by
-	 * tammy@synchronis.com) and Solid 3.0 (tested by eric@terra.telemediair.nl)
-	 * Solid does not seem to declare a SQLINTEGER, but it does declare a
-	 * SQL_INTEGER which does not work (despite being the same type as a SDWORD.
-	 * Solid 3.5 does not have this issue.
-	 */
-	SDWORD len;
-#else
 	SQLLEN len;
-#endif
 	zval *pv_res;
 	zend_long pv_num;
 
@@ -1079,9 +1065,6 @@ PHP_FUNCTION(odbc_execute)
 									  (void *)(intptr_t)params[i-1].fp, 0,
 									  &params[i-1].vallen);
 			} else {
-#ifdef HAVE_DBMAKER
-				precision = params[i-1].vallen;
-#endif
 				if (otype == IS_NULL) {
 					params[i-1].vallen = SQL_NULL_DATA;
 				}
@@ -2133,18 +2116,6 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 		return false;
 	}
 
-#if defined(HAVE_SOLID) || defined(HAVE_SOLID_30)
-	SQLSetConnectOption((link->connection->hdbc, SQL_TRANSLATE_OPTION,
-			SQL_SOLID_XLATOPT_NOCNV);
-#endif
-#ifdef HAVE_OPENLINK
-	{
-		char dsnbuf[1024];
-		short dsnbuflen;
-
-		rc = SQLDriverConnect(link->connection->hdbc, NULL, db, SQL_NTS,	dsnbuf, sizeof(dsnbuf) - 1, &dsnbuflen, SQL_DRIVER_NOPROMPT);
-	}
-#else
 	if (cur_opt != SQL_CUR_DEFAULT) {
 		rc = SQLSetConnectAttr(link->connection->hdbc, SQL_ATTR_ODBC_CURSORS, (SQLPOINTER) (intptr_t) cur_opt, 0);
 		if (rc != SQL_SUCCESS) {  /* && rc != SQL_SUCCESS_WITH_INFO ? */
@@ -2154,9 +2125,7 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	}
 /*  Possible fix for bug #10250
  *  Needs testing on UnixODBC < 2.0.5 though. */
-#if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC) || defined(PHP_WIN32) || defined (HAVE_IODBC)
-/* *  Uncomment the line above, and comment line below to fully test
- * #ifdef HAVE_EMPRESS */
+#if defined(HAVE_UNIXODBC) || defined(PHP_WIN32) || defined (HAVE_IODBC)
 	{
 		int     direct = 0;
 		SQLCHAR dsnbuf[1024];
@@ -2241,7 +2210,6 @@ bool odbc_sqlconnect(zval *zv, char *db, char *uid, char *pwd, int cur_opt, bool
 	}
 #else
 	rc = SQLConnect(link->connection->hdbc, (SQLCHAR *) db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
-#endif
 #endif
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
 		odbc_sql_error(link->connection, SQL_NULL_HSTMT, "SQLConnect");
@@ -2447,7 +2415,6 @@ PHP_FUNCTION(odbc_num_rows)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
 /* {{{ Checks if multiple results are available */
 PHP_FUNCTION(odbc_next_result)
 {
@@ -2494,7 +2461,6 @@ PHP_FUNCTION(odbc_next_result)
 	}
 }
 /* }}} */
-#endif
 
 /* {{{ Get number of columns in a result */
 PHP_FUNCTION(odbc_num_fields)
@@ -2924,7 +2890,6 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
 {
@@ -2984,9 +2949,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_DBMAKER || HAVE_SOLID*/
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier to either a list of foreign keys in the specified table or a list of foreign keys in other tables that refer to the primary key in the specified table */
 PHP_FUNCTION(odbc_foreignkeys)
 {
@@ -3001,7 +2964,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 		RETURN_THROWS();
 	}
 
-#if defined(HAVE_DBMAKER) || defined(HAVE_IBMDB2)
+#if defined(HAVE_IBMDB2)
 #define EMPTY_TO_NULL(xstr) \
 	if ((int)strlen((xstr)) == 0) (xstr) = NULL
 
@@ -3060,7 +3023,6 @@ PHP_FUNCTION(odbc_foreignkeys)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_SOLID */
 
 /* {{{ Returns a result identifier containing information about data types supported by the data source */
 PHP_FUNCTION(odbc_gettypeinfo)
@@ -3177,7 +3139,6 @@ PHP_FUNCTION(odbc_primarykeys)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
 {
@@ -3237,9 +3198,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_SOLID */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier containing the list of procedure names in a datasource */
 PHP_FUNCTION(odbc_procedures)
 {
@@ -3297,7 +3256,6 @@ PHP_FUNCTION(odbc_procedures)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_SOLID */
 
 /* {{{ Returns a result identifier containing either the optimal set of columns that uniquely identifies a row in the table or columns that are automatically updated when any value in the row is updated by a transaction */
 PHP_FUNCTION(odbc_specialcolumns)
@@ -3432,7 +3390,6 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)
 {
@@ -3490,6 +3447,5 @@ PHP_FUNCTION(odbc_tableprivileges)
 	odbc_insert_new_result(conn, return_value);
 }
 /* }}} */
-#endif /* HAVE_DBMAKER */
 
 #endif /* HAVE_UODBC */
