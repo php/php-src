@@ -37,7 +37,6 @@
 #include <sql.h>
 #include <sqlext.h>
 #include <iodbcext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
 
 #elif defined(HAVE_UNIXODBC) /* unixODBC library */
 
@@ -53,23 +52,19 @@
 #undef ODBCVER
 #include <sql.h>
 #include <sqlext.h>
-#define HAVE_SQL_EXTENDED_FETCH 1
 
 #elif defined(HAVE_CODBC) /* Custom ODBC */
 
 #define ODBC_TYPE "Custom ODBC"
-#define HAVE_SQL_EXTENDED_FETCH 1
 #include <odbc.h>
 
 #elif defined(HAVE_IBMDB2) /* DB2 CLI */
 
 #define ODBC_TYPE "IBM DB2 CLI"
-#define HAVE_SQL_EXTENDED_FETCH 1
 #include <sqlcli1.h>
 
 #else /* MS ODBC */
 
-#define HAVE_SQL_EXTENDED_FETCH 1
 #include <WINDOWS.H>
 #include <sql.h>
 #include <sqlext.h>
@@ -129,9 +124,7 @@ typedef struct odbc_result {
 	odbc_result_value *values;
 	SQLSMALLINT numcols;
 	SQLSMALLINT numparams;
-# ifdef HAVE_SQL_EXTENDED_FETCH
 	int fetch_abs;
-# endif
 	zend_long longreadlen;
 	int binmode;
 	int fetched;
