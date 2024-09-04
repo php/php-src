@@ -1691,7 +1691,7 @@ PHP_METHOD(BcMath_Number, __serialize)
 
 	zval zv;
 	ZVAL_STR_COPY(&zv, bcmath_number_value_to_str(intern));
-	zend_hash_str_update(props, ZEND_STRL("value"), &zv);
+	zend_hash_update(props, ZSTR_KNOWN(ZEND_STR_VALUE), &zv);
 }
 
 PHP_METHOD(BcMath_Number, __unserialize)
