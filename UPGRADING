@@ -873,6 +873,15 @@ PHP 8.4 UPGRADE NOTES
 7. New Classes and Interfaces
 ========================================
 
+- BCMath:
+  . Added BcMath\Number class. It is an immutable object, has methods that are
+    equivalent to existing BCMath calculation functions, and can also be calculated
+    using operators.
+    The existing BCMath function returned a string for each calculation, but this
+    class returns an object.
+    RFC: https://wiki.php.net/rfc/support_object_type_in_bcmath,
+    https://wiki.php.net/rfc/fix_up_bcmath_number_class
+
 - Core:
   . New RequestParseBodyException.
     RFC: https://wiki.php.net/rfc/rfc1867-non-post

@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - BCMath:
   . Fixed LONG_MAX in BCMath ext. (Saki Takamachi)
   . Fixed bcdiv() div by one. (Saki Takamachi)
+  . [RFC] Support object types in BCMath. (Saki Takamachi)
 
 - Core:
   . Fixed bug GH-15330 (Do not scan generator frames more than once). (Arnaud)

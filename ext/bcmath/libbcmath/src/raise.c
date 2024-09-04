@@ -94,9 +94,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 	} else {
 		bc_free_num (result);
 		*result = temp;
-		if ((*result)->n_scale > rscale) {
-			(*result)->n_scale = rscale;
-		}
+		(*result)->n_scale = MIN(scale, (*result)->n_scale);
 	}
 	bc_free_num (&power);
 }
