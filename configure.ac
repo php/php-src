@@ -1334,6 +1334,10 @@ datadir=$(eval eval echo $datadir)
 dnl Build extension directory path.
 ZEND_MODULE_API_NO=$($EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //')
 
+AC_ARG_VAR([EXTENSION_DIR],
+  [Default directory for dynamically loadable PHP extensions. If left empty, it
+  is determined automatically. Can be overridden using the PHP 'extension_dir'
+  INI directive.])
 AS_VAR_IF([EXTENSION_DIR],, [
   extbasedir=$ZEND_MODULE_API_NO
   AS_VAR_IF([oldstyleextdir], [yes], [
