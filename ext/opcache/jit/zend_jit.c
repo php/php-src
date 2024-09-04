@@ -1425,9 +1425,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 			zend_jit_set_last_valid_opline(&ctx, op_array->opcodes + ssa->cfg.blocks[b].start);
 		}
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
-			if (!zend_jit_check_timeout(&ctx, op_array->opcodes + ssa->cfg.blocks[b].start, NULL)) {
-				goto jit_failure;
-			}
+			zend_jit_check_timeout(&ctx, op_array->opcodes + ssa->cfg.blocks[b].start, NULL);
 		}
 		if (!ssa->cfg.blocks[b].len) {
 			zend_jit_bb_end(&ctx, b);

@@ -377,6 +377,11 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 4. OpCode changes
 ========================
 
+* DO_ICALL, DO_FCALL, and DO_FCALL_BY_NAME now call zend_interrupt_function
+  while the internal frame is still on the stack. This means interrupt handlers
+  will now see the internal call. If your interrupt handler does something like
+  switching EG(current_execute_data), it should not do so if an internal func
+  is on top.
 * New FRAMELESS_ICALL_[0,3] opcodes for faster internal function calls have been
   added. These opcodes don't create a stack frame, but pass arguments via opcode
   operands. They only work for functions that are known at compile-time, and

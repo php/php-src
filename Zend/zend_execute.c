@@ -4095,6 +4095,16 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_fcall_interrupt(zend_execute_data *call)
+{
+	zend_atomic_bool_store_ex(&EG(vm_interrupt), false);
+	if (zend_atomic_bool_load_ex(&EG(timed_out))) {
+		zend_timeout();
+	} else if (zend_interrupt_function) {
+		zend_interrupt_function(call);
+	}
+}
+
 #define ZEND_VM_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
 			ZEND_VM_INTERRUPT(); \
@@ -4104,6 +4114,12 @@ ZEND_API void ZEND_FASTCALL zend_free_compiled_variables(zend_execute_data *exec
 #define ZEND_VM_LOOP_INTERRUPT_CHECK() do { \
 		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
 			ZEND_VM_LOOP_INTERRUPT(); \
+		} \
+	} while (0)
+
+#define ZEND_VM_FCALL_INTERRUPT_CHECK(call) do { \
+		if (UNEXPECTED(zend_atomic_bool_load_ex(&EG(vm_interrupt)))) { \
+			zend_fcall_interrupt(call); \
 		} \
 	} while (0)
 
@@ -5541,9 +5557,12 @@ static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint
 	CHECK_SYMBOL_TABLES() \
 	OPLINE = new_op
 
-#define ZEND_VM_SET_OPCODE(new_op) \
+#define ZEND_VM_SET_OPCODE_NO_INTERRUPT(new_op) \
 	CHECK_SYMBOL_TABLES() \
-	OPLINE = new_op; \
+	OPLINE = new_op
+
+#define ZEND_VM_SET_OPCODE(new_op) \
+	ZEND_VM_SET_OPCODE_NO_INTERRUPT(new_op); \
 	ZEND_VM_INTERRUPT_CHECK()
 
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
