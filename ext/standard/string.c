@@ -3876,16 +3876,16 @@ PHPAPI zend_string *php_repr_str(const char *str, size_t len) {
 	// plus 2 byte for the leading quote and the trailing quote
 	// plus 1 byte for the null terminator
 	int alloc_len = len * 4 + 2 + 1;
-    zend_string *new_str = zend_string_alloc(alloc_len, 0);
+	zend_string *new_str = zend_string_alloc(alloc_len, 0);
 	char *target = ZSTR_VAL(new_str);
 	// add the leading quote
 	*target++ = '"';
-    for (size_t i = 0; i < len; i++) {
-        const char *repr = char_reprs[(unsigned char)str[i]].repr;
+	for (size_t i = 0; i < len; i++) {
+		const char *repr = char_reprs[(unsigned char)str[i]].repr;
 		size_t repr_len = char_reprs[(unsigned char)str[i]].len;
 		memcpy(target, repr, repr_len);
 		target += repr_len;
-    }
+	}
 	// add the trailing quote
 	*target++ = '"';
 	// add the null terminator
