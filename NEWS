@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     property. (ilutov)
   . Fixed bug GH-15693 (Unnecessary include in main.c bloats binary).
     (nielsdos)
+  . Fixed bug GH-15731 (AllowDynamicProperties validation should error on
+    enums). (DanielEScherzer)
 
 - Curl:
   . The CURLOPT_DNS_USE_GLOBAL_CACHE option is now silently ignored. (Ayesh Karunaratne)
