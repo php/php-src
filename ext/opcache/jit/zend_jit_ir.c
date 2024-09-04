@@ -5571,6 +5571,19 @@ static int zend_jit_long_math_helper(zend_jit_ctx   *jit,
 
 	ir_refs_init(res_inputs, 2);
 
+	if (Z_MODE(op1_addr) == IS_REG
+	 && Z_LOAD(op1_addr)
+	 && jit->ra[Z_SSA_VAR(op1_addr)].ref == IR_NULL) {
+		/* Force load */
+		zend_jit_use_reg(jit, op1_addr);
+	}
+	if (Z_MODE(op2_addr) == IS_REG
+	 && Z_LOAD(op2_addr)
+	 && jit->ra[Z_SSA_VAR(op2_addr)].ref == IR_NULL) {
+		/* Force load */
+		zend_jit_use_reg(jit, op2_addr);
+	}
+
 	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_LONG)) {
 		if_long1 = jit_if_Z_TYPE(jit, op1_addr, IS_LONG);
 		ir_IF_TRUE(if_long1);
