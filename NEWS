@@ -4,6 +4,10 @@ PHP                                                                        NEWS
 
 - PDO_PGSQL:
   . Added Iterable support for PDO::pgsqlCopyFromArray. (KentarouTakeda)
+  . Implement GH-15387 Pdo\Pgsql::setAttribute(PDO::ATTR_PREFETCH, 0) or
+    Pdo\PgSql::prepare(…, [ PDO::ATTR_PREFETCH => 0 ]) make fetch() lazy
+    instead of storing the whole result set in memory (Guillaume Outters)
+    /!\ In this mode statements cannot be run parallely
 
 - Random:
   . Moves from /dev/urandom usage to arc4random_buf on Haiku. (David Carlier)
