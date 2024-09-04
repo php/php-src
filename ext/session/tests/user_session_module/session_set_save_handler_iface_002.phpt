@@ -81,7 +81,7 @@ session_start();
 --EXPECTF--
 *** Testing session_set_save_handler() function: interface wrong ***
 
-Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 bool(true)
 session_set_save_handler(): Argument #1 ($open) must be of type SessionHandlerInterface, MySession2 given
 good handler writing

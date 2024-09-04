@@ -31,7 +31,7 @@ $setHandler = ini_get('session.save_handler');
 var_dump($initHandler, $setHandler);
 ?>
 --EXPECTF--
-Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 
 Warning: session_set_save_handler(): Session save handler cannot be changed after headers have already been sent in %s on line %d
 string(8) "whatever"

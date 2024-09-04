@@ -73,7 +73,7 @@ var_dump($_SESSION);
 --EXPECTF--
 *** Testing session_set_save_handler() function: create_sid ***
 
-Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 string(32) "session_set_save_handler_sid_001"
 string(4) "user"
 array(1) {

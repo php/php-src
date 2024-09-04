@@ -37,7 +37,7 @@ session_start();
 
 ?>
 --EXPECTF--
-Deprecated: session_set_save_handler(): providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 write: goodbye cruel world
 
 Fatal error: Uncaught Exception in %s
