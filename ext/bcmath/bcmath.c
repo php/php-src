@@ -869,7 +869,7 @@ static HashTable *bcmath_number_get_properties_for(zend_object *obj, zend_prop_p
 	HashTable *props = zend_array_dup(zend_std_get_properties(obj));
 
 	ZVAL_STR_COPY(&zv, bcmath_number_value_to_str(intern));
-	zend_hash_str_update(props, ZEND_STRL("value"), &zv);
+	zend_hash_update(props, ZSTR_KNOWN(ZEND_STR_VALUE), &zv);
 	ZVAL_LONG(&zv, intern->scale);
 	zend_hash_str_update(props, ZEND_STRL("scale"), &zv);
 
