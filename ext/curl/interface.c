@@ -1165,9 +1165,6 @@ static void _php_curl_set_default_options(php_curl *ch)
 	curl_easy_setopt(ch->cp, CURLOPT_INFILE,            (void *) ch);
 	curl_easy_setopt(ch->cp, CURLOPT_HEADERFUNCTION,    curl_write_header);
 	curl_easy_setopt(ch->cp, CURLOPT_WRITEHEADER,       (void *) ch);
-#ifndef ZTS
-	curl_easy_setopt(ch->cp, CURLOPT_DNS_USE_GLOBAL_CACHE, 1);
-#endif
 	curl_easy_setopt(ch->cp, CURLOPT_DNS_CACHE_TIMEOUT, 120);
 	curl_easy_setopt(ch->cp, CURLOPT_MAXREDIRS, 20); /* prevent infinite redirects */
 
@@ -1657,7 +1654,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		case CURLOPT_COOKIESESSION:
 		case CURLOPT_CRLF:
 		case CURLOPT_DNS_CACHE_TIMEOUT:
-		case CURLOPT_DNS_USE_GLOBAL_CACHE:
 		case CURLOPT_FAILONERROR:
 		case CURLOPT_FILETIME:
 		case CURLOPT_FORBID_REUSE:
@@ -1806,12 +1802,6 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 					php_error_docref(NULL, E_WARNING, "CURLPROTO_FILE cannot be activated when an open_basedir is set");
 					return FAILURE;
 			}
-# if defined(ZTS)
-			if (option == CURLOPT_DNS_USE_GLOBAL_CACHE && lval) {
-				php_error_docref(NULL, E_WARNING, "CURLOPT_DNS_USE_GLOBAL_CACHE cannot be activated when thread safety is enabled");
-				return FAILURE;
-			}
-# endif
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 		case CURLOPT_SAFE_UPLOAD:
@@ -2146,6 +2136,7 @@ static zend_result _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue
 		}
 
 		case CURLOPT_BINARYTRANSFER:
+		case CURLOPT_DNS_USE_GLOBAL_CACHE:
 			/* Do nothing, just backward compatibility */
 			break;
 

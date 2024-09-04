@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug GH-15693 (Unnecessary include in main.c bloats binary).
     (nielsdos)
 
+- Curl:
+  . The CURLOPT_DNS_USE_GLOBAL_CACHE option is now silently ignored. (Ayesh Karunaratne)
+
 - DOM:
   . Fixed bug GH-13988 (Storing DOMElement consume 4 times more memory in
     PHP 8.1 than in PHP 8.0). (nielsdos)
