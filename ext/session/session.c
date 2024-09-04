@@ -2113,7 +2113,7 @@ PHP_FUNCTION(session_set_save_handler)
 		RETURN_TRUE;
 	}
 
-	php_error_docref(NULL, E_DEPRECATED, "providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated");
+	php_error_docref(NULL, E_DEPRECATED, "Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated");
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}
