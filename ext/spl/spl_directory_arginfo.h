@@ -155,9 +155,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_GlobIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(HAVE_GLOB)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_GlobIterator_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -326,8 +324,6 @@ ZEND_METHOD(RecursiveDirectoryIterator, getSubPath);
 ZEND_METHOD(RecursiveDirectoryIterator, getSubPathname);
 #if defined(HAVE_GLOB)
 ZEND_METHOD(GlobIterator, __construct);
-#endif
-#if defined(HAVE_GLOB)
 ZEND_METHOD(GlobIterator, count);
 #endif
 ZEND_METHOD(SplFileObject, __construct);

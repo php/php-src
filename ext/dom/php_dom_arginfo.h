@@ -409,22 +409,16 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_load
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_HTML_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_loadHTMLFile, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_HTML_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_saveHTML, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, node, DOMNode, 1, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_HTML_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_MASK_EX(arginfo_class_DOMDocument_saveHTMLFile, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -440,22 +434,16 @@ ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_sche
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_schemaValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_relaxNGValidate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMDocument_relaxNGValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -513,42 +501,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, document, DOMDocument, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_evaluate, 0, 1, IS_MIXED, 0)
 	ZEND_ARG_TYPE_INFO(0, expression, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, DOMNode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 #define arginfo_class_DOMXPath_query arginfo_class_DOMXPath_evaluate
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerNamespace, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctions, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_MASK(0, restrict, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctionNS, 0, 3, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, namespaceURI, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, callable, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMXPath_quote, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -984,22 +960,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_schemaValidat
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_schemaValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_relaxNgValidate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_Document_relaxNgValidateSource, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, source, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1129,42 +1099,30 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Dom_XPath___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, document, Dom\\Document, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_class_Dom_XPath_evaluate, 0, 1, Dom\\\116odeList, MAY_BE_NULL|MAY_BE_BOOL|MAY_BE_DOUBLE|MAY_BE_STRING)
 	ZEND_ARG_TYPE_INFO(0, expression, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, Dom\\\116ode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_Dom_XPath_query, 0, 1, Dom\\\116odeList, 0)
 	ZEND_ARG_TYPE_INFO(0, expression, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, contextNode, Dom\\\116ode, 1, "null")
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_XPath_registerNamespace, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Dom_XPath_registerPhpFunctions, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_MASK(0, restrict, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_NULL, "null")
 ZEND_END_ARG_INFO()
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 #define arginfo_class_Dom_XPath_registerPhpFunctionNS arginfo_class_DOMXPath_registerPhpFunctionNS
-#endif
 
-#if defined(LIBXML_XPATH_ENABLED)
 #define arginfo_class_Dom_XPath_quote arginfo_class_DOMXPath_quote
 #endif
 
@@ -1261,27 +1219,15 @@ ZEND_METHOD(DOMDocument, registerNodeClass);
 ZEND_METHOD(DOMDocument, save);
 #if defined(LIBXML_HTML_ENABLED)
 ZEND_METHOD(DOMDocument, loadHTML);
-#endif
-#if defined(LIBXML_HTML_ENABLED)
 ZEND_METHOD(DOMDocument, loadHTMLFile);
-#endif
-#if defined(LIBXML_HTML_ENABLED)
 ZEND_METHOD(DOMDocument, saveHTML);
-#endif
-#if defined(LIBXML_HTML_ENABLED)
 ZEND_METHOD(DOMDocument, saveHTMLFile);
 #endif
 ZEND_METHOD(DOMDocument, saveXML);
 #if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_METHOD(DOMDocument, schemaValidate);
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_METHOD(DOMDocument, schemaValidateSource);
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_METHOD(DOMDocument, relaxNGValidate);
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 ZEND_METHOD(DOMDocument, relaxNGValidateSource);
 #endif
 ZEND_METHOD(DOMDocument, validate);
@@ -1299,23 +1245,11 @@ ZEND_METHOD(DOMEntityReference, __construct);
 ZEND_METHOD(DOMProcessingInstruction, __construct);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, __construct);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, evaluate);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, query);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, registerNamespace);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, registerPhpFunctions);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, registerPhpFunctionNS);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(DOMXPath, quote);
 #endif
 ZEND_METHOD(Dom_Implementation, createDocumentType);
@@ -1384,11 +1318,7 @@ ZEND_METHOD(Dom_TokenList, count);
 ZEND_METHOD(Dom_TokenList, getIterator);
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, __construct);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, evaluate);
-#endif
-#if defined(LIBXML_XPATH_ENABLED)
 ZEND_METHOD(Dom_XPath, query);
 #endif
 
@@ -1555,27 +1485,15 @@ static const zend_function_entry class_DOMDocument_methods[] = {
 	ZEND_ME(DOMDocument, save, arginfo_class_DOMDocument_save, ZEND_ACC_PUBLIC)
 #if defined(LIBXML_HTML_ENABLED)
 	ZEND_ME(DOMDocument, loadHTML, arginfo_class_DOMDocument_loadHTML, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_HTML_ENABLED)
 	ZEND_ME(DOMDocument, loadHTMLFile, arginfo_class_DOMDocument_loadHTMLFile, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_HTML_ENABLED)
 	ZEND_ME(DOMDocument, saveHTML, arginfo_class_DOMDocument_saveHTML, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_HTML_ENABLED)
 	ZEND_ME(DOMDocument, saveHTMLFile, arginfo_class_DOMDocument_saveHTMLFile, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_ME(DOMDocument, saveXML, arginfo_class_DOMDocument_saveXML, ZEND_ACC_PUBLIC)
 #if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_ME(DOMDocument, schemaValidate, arginfo_class_DOMDocument_schemaValidate, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_ME(DOMDocument, schemaValidateSource, arginfo_class_DOMDocument_schemaValidateSource, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_ME(DOMDocument, relaxNGValidate, arginfo_class_DOMDocument_relaxNGValidate, ZEND_ACC_PUBLIC)
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_ME(DOMDocument, relaxNGValidateSource, arginfo_class_DOMDocument_relaxNGValidateSource, ZEND_ACC_PUBLIC)
 #endif
 	ZEND_ME(DOMDocument, validate, arginfo_class_DOMDocument_validate, ZEND_ACC_PUBLIC)
@@ -1811,14 +1729,8 @@ static const zend_function_entry class_Dom_Document_methods[] = {
 	ZEND_ME(Dom_Document, registerNodeClass, arginfo_class_Dom_Document_registerNodeClass, ZEND_ACC_PUBLIC)
 #if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_RAW_FENTRY("schemaValidate", zim_DOMDocument_schemaValidate, arginfo_class_Dom_Document_schemaValidate, ZEND_ACC_PUBLIC, NULL, NULL)
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_RAW_FENTRY("schemaValidateSource", zim_DOMDocument_schemaValidateSource, arginfo_class_Dom_Document_schemaValidateSource, ZEND_ACC_PUBLIC, NULL, NULL)
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_RAW_FENTRY("relaxNgValidate", zim_DOMDocument_relaxNGValidate, arginfo_class_Dom_Document_relaxNgValidate, ZEND_ACC_PUBLIC, NULL, NULL)
-#endif
-#if defined(LIBXML_SCHEMAS_ENABLED)
 	ZEND_RAW_FENTRY("relaxNgValidateSource", zim_DOMDocument_relaxNGValidateSource, arginfo_class_Dom_Document_relaxNgValidateSource, ZEND_ACC_PUBLIC, NULL, NULL)
 #endif
 	ZEND_RAW_FENTRY("append", zim_DOMElement_append, arginfo_class_Dom_Document_append, ZEND_ACC_PUBLIC, NULL, NULL)

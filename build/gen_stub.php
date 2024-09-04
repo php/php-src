@@ -5022,20 +5022,47 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): 
 function generateCodeWithConditions(
     iterable $infos, string $separator, Closure $codeGenerator, ?string $parentCond = null): string {
     $code = "";
+    
+    // For combining the conditional blocks of the infos with the same condition
+    $openCondition = null;
     foreach ($infos as $info) {
         $infoCode = $codeGenerator($info);
         if ($infoCode === null) {
             continue;
         }
 
-        $code .= $separator;
         if ($info->cond && $info->cond !== $parentCond) {
-            $code .= "#if {$info->cond}\n";
+            if ($openCondition !== null
+                && $info->cond !== $openCondition
+            ) {
+                // Changing condition, end old
+                $code .= "#endif\n";
+                $code .= $separator;
+                $code .= "#if {$info->cond}\n";
+                $openCondition = $info->cond;
+            } elseif ($openCondition === null) {
+                // New condition with no existing one
+                $code .= $separator;
+                $code .= "#if {$info->cond}\n";
+                $openCondition = $info->cond;
+            } else {
+                // Staying in the same condition
+                $code .= $separator;
+            }
             $code .= $infoCode;
-            $code .= "#endif\n";
         } else {
+            if ($openCondition !== null) {
+                // Ending the condition
+                $code .= "#endif\n";
+                $openCondition = null;
+            }
+            $code .= $separator;
             $code .= $infoCode;
         }
+    }
+    // The last info might have been in a conditional block
+    if ($openCondition !== null) {
+        $code .= "#endif\n";
     }
 
     return $code;
