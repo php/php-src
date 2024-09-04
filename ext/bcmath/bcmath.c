@@ -878,7 +878,7 @@ static HashTable *bcmath_number_get_properties_for(zend_object *obj, zend_prop_p
 
 static zval *bcmath_number_write_property(zend_object *obj, zend_string *name, zval *value, void **cache_slot)
 {
-	if (zend_string_equals_literal(name, "value") || zend_string_equals_literal(name, "scale")) {
+	if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE)) || zend_string_equals_literal(name, "scale")) {
 		zend_readonly_property_modification_error_ex(ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
 		return &EG(error_zval);
 	}
@@ -888,7 +888,7 @@ static zval *bcmath_number_write_property(zend_object *obj, zend_string *name, z
 
 static void bcmath_number_unset_property(zend_object *obj, zend_string *name, void **cache_slot)
 {
-	if (zend_string_equals_literal(name, "value") || zend_string_equals_literal(name, "scale")) {
+	if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE)) || zend_string_equals_literal(name, "scale")) {
 		zend_throw_error(NULL, "Cannot unset readonly property %s::$%s", ZSTR_VAL(obj->ce->name), ZSTR_VAL(name));
 		return;
 	}
@@ -900,7 +900,7 @@ static zval *bcmath_number_read_property(zend_object *obj, zend_string *name, in
 {
 	bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
 
-	if (zend_string_equals_literal(name, "value")) {
+	if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE))) {
 		ZVAL_STR_COPY(rv, bcmath_number_value_to_str(intern));
 		return rv;
 	}
@@ -918,7 +918,7 @@ static int bcmath_number_has_property(zend_object *obj, zend_string *name, int c
 	if (check_empty == ZEND_PROPERTY_NOT_EMPTY) {
 		bcmath_number_obj_t *intern = get_bcmath_number_from_obj(obj);
 
-		if (zend_string_equals_literal(name, "value")) {
+		if (zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE))) {
 			return !bc_is_zero(intern->num);
 		}
 
@@ -926,7 +926,7 @@ static int bcmath_number_has_property(zend_object *obj, zend_string *name, int c
 			return intern->scale != 0;
 		}
 	}
-	return zend_string_equals_literal(name, "value") || zend_string_equals_literal(name, "scale");
+	return zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_VALUE)) || zend_string_equals_literal(name, "scale");
 }
 
 static zend_result bcmath_number_cast_object(zend_object *obj, zval *ret, int type)
