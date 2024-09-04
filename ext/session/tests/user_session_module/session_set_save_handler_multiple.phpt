@@ -73,7 +73,7 @@ session_write_close();
 ob_end_flush();
 ?>
 --EXPECTF--
-Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Open
 Create SID OLD
 Read
@@ -81,7 +81,7 @@ Write
 Close
 New handlers:
 
-Deprecated: Calling session_set_save_handler() with more than 2 arguments is deprecated in %s on line %d
+Deprecated: session_set_save_handler(): Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated in %s on line %d
 Open
 Validate ID
 Read

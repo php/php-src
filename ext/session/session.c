@@ -752,7 +752,7 @@ static PHP_INI_MH(OnUpdateSidLength) /* {{{ */
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
 	if (val != 32) {
-		zend_error(E_DEPRECATED, "session.sid_length INI setting is deprecated");
+		php_error_docref("session.configuration", E_DEPRECATED, "session.sid_length INI setting is deprecated");
 	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 22 && val <= PS_MAX_SID_LENGTH) {
@@ -775,7 +775,7 @@ static PHP_INI_MH(OnUpdateSidBits) /* {{{ */
 	SESSION_CHECK_OUTPUT_STATE;
 	val = ZEND_STRTOL(ZSTR_VAL(new_value), &endptr, 10);
 	if (val != 4) {
-		zend_error(E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
+		php_error_docref("session.configuration", E_DEPRECATED, "session.sid_bits_per_character INI setting is deprecated");
 	}
 	if (endptr && (*endptr == '\0')
 		&& val >= 4 && val <=6) {
@@ -2185,7 +2185,7 @@ PHP_FUNCTION(session_set_save_handler)
 		RETURN_TRUE;
 	}
 
-	zend_error(E_DEPRECATED, "Calling session_set_save_handler() with more than 2 arguments is deprecated");
+	php_error_docref(NULL, E_DEPRECATED, "Providing individual callbacks instead of an object implementing SessionHandlerInterface is deprecated");
 	if (UNEXPECTED(EG(exception))) {
 		RETURN_THROWS();
 	}

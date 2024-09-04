@@ -22,6 +22,6 @@ var_dump(session_start());
 var_dump(session_id());
 ?>
 --EXPECTF--
-Deprecated: session.sid_length INI setting is deprecated in Unknown on line 0
+Deprecated: PHP Startup: session.sid_length INI setting is deprecated in Unknown on line 0
 bool(true)
 string(40) "%s"
