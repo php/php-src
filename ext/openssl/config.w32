@@ -2,11 +2,16 @@
 
 ARG_WITH("openssl", "OpenSSL support", "no,shared");
 
+ARG_WITH("openssl-legacy-provider", "OPENSSL: Load legacy algorithm provider in addition to default provider", "no");
+
 if (PHP_OPENSSL != "no") {
 	var ret = SETUP_OPENSSL("openssl", PHP_OPENSSL);
 
 	if (ret >= 2) {
 		EXTENSION("openssl", "openssl.c xp_ssl.c");
 		AC_DEFINE("HAVE_OPENSSL_EXT", 1, "Define to 1 if the PHP extension 'openssl' is available.");
+		if (PHP_OPENSSL_LEGACY_PROVIDER != "no") {
+			AC_DEFINE("LOAD_OPENSSL_LEGACY_PROVIDER", 1, "Define to 1 to load the OpenSSL legacy algorithm provider in addition to the default provider.");
+		}
 	}
 }
