@@ -1039,7 +1039,7 @@ static zend_always_inline zend_result bcmath_number_mod_internal(
 	return SUCCESS;
 }
 
-static zend_always_inline zend_result bcmath_number_pow_internal(
+static zend_result bcmath_number_pow_internal(
 	bc_num n1, bc_num n2, bc_num *ret,
 	size_t n1_full_scale, size_t *scale, bool auto_scale, bool is_op
 ) {
@@ -1702,7 +1702,7 @@ PHP_METHOD(BcMath_Number, __unserialize)
 		Z_PARAM_ARRAY_HT(props)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval *zv = zend_hash_str_find(props, ZEND_STRL("value"));
+	zval *zv = zend_hash_str_find(props, ZSTR_KNOWN(ZEND_STR_VALUE));
 	if (!zv || Z_TYPE_P(zv) != IS_STRING || Z_STRLEN_P(zv) == 0) {
 		goto fail;
 	}
