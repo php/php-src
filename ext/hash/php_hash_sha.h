@@ -45,7 +45,7 @@ typedef struct {
 PHP_HASH_API void PHP_SHA256InitArgs(PHP_SHA256_CTX *, ZEND_ATTRIBUTE_UNUSED HashTable *);
 PHP_HASH_API void PHP_SHA256Update(PHP_SHA256_CTX *, const unsigned char *, size_t);
 
-#ifdef _MSC_VER
+#if defined(__cplusplus) || defined(_MSC_VER)
 # define PHP_STATIC_RESTRICT
 #else
 # define PHP_STATIC_RESTRICT static restrict

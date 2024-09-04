@@ -30,6 +30,9 @@ PHP                                                                        NEWS
 - GD:
   . Added gdImageClone to bundled libgd. (David Carlier)
 
+- Hash:
+  . Fixed bug GH-15742 (php_hash_sha.h incompatible with C++). (cmb)
+
 - OpenSSL:
   . Implement GH-13514 PASSWORD_ARGON2 from OpenSSL 3.2. (Remi)
 
