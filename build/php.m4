@@ -375,25 +375,23 @@ AC_DEFUN([PHP_EVAL_LIBLINE],
   [m4_warn([syntax], [Missing 2nd argument when skipping extension check])],
   [_php_ext_shared_saved=$ext_shared; ext_shared=yes])])
   for ac_i in $1; do
-    case $ac_i in
-    -pthread[)]
-      if test "$ext_shared" = "yes"; then
-        $2="[$]$2 -pthread"
-      else
-        PHP_RUN_ONCE(EXTRA_LDFLAGS, [$ac_i], [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
-        PHP_RUN_ONCE(EXTRA_LDFLAGS_PROGRAM, [$ac_i],
+    AS_CASE([$ac_i],
+      [-pthread], [
+        AS_VAR_IF([ext_shared], [yes], [$2="$$2 -pthread"], [
+          PHP_RUN_ONCE([EXTRA_LDFLAGS], [$ac_i],
+            [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
+          PHP_RUN_ONCE([EXTRA_LDFLAGS_PROGRAM], [$ac_i],
             [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $ac_i"])
-      fi
-    ;;
-    -l*[)]
-      ac_ii=$(echo $ac_i|cut -c 3-)
-      PHP_ADD_LIBRARY($ac_ii,1,$2)
-    ;;
-    -L*[)]
-      ac_ii=$(echo $ac_i|cut -c 3-)
-      PHP_ADD_LIBPATH($ac_ii,$2)
-    ;;
-    esac
+        ])
+      ],
+      [-l*], [
+        ac_ii=$(echo $ac_i|cut -c 3-)
+        PHP_ADD_LIBRARY([$ac_ii], [yes], [$2])
+      ],
+      [-L*], [
+        ac_ii=$(echo $ac_i|cut -c 3-)
+        PHP_ADD_LIBPATH([$ac_ii], [$2])
+      ])
   done
 m4_ifnblank([$3], [m4_ifnblank([$2], [ext_shared=$_php_ext_shared_saved])])[]dnl
 ])
