@@ -23,6 +23,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15654 (Signed integer overflow in ext/dom/nodelist.c).
     (nielsdos)
 
+- Fileinfo:
+  . Fixed bug GH-15752 (Incorrect error message for finfo_file
+    with an empty filename argument). (DanielEScherzer)
+
 - MySQLnd:
   . Fixed bug GH-15432 (Heap corruption when querying a vector). (cmb,
     Kamil Tekiela)

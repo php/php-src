@@ -25,4 +25,4 @@ try {
 string(28) "text/x-php; charset=us-ascii"
 string(22) "PHP script, ASCII text"
 string(28) "text/plain; charset=us-ascii"
-finfo_file(): Argument #1 ($finfo) must not contain any null bytes
+finfo_file(): Argument #2 ($filename) must not contain any null bytes
