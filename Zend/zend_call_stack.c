@@ -183,7 +183,7 @@ static bool zend_call_stack_get_linux_proc_maps(zend_call_stack *stack)
 	FILE *f;
 	char buffer[4096];
 	uintptr_t addr_on_stack = (uintptr_t) zend_call_stack_position();
-	uintptr_t start, end, prev_end = 0;
+	uintptr_t start = 0, end = 0, prev_end = 0;
 	size_t max_size;
 	bool found = false;
 	struct rlimit rlim;
