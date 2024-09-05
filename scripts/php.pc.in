@@ -1,26 +1,17 @@
-# The .pc file for the pkg-config command-line utility.
-# https://en.wikipedia.org/wiki/Pkg-config
-#
-# Usage:
-#   pkg-config --cflags php
-#   pkg-config --cflags-only-I php
-#   pkg-config --libs php
-#   pkg-config --mod-version php
-#   pkg-config --print-variables php
-#   pkg-config --variable=php_vernum php
+# The pkg-config .pc file for PHP.
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
 includedir=@includedir@/php
 libdir=@orig_libdir@
-# The extension_dir PHP INI directive absolute path.
-extensiondir=@EXPANDED_EXTENSION_DIR@
+# PHP extension directory containing dynamically loadable PHP extensions.
+php_extension_dir=@EXTENSION_DIR@
 # PHP version as integer.
 php_vernum=@PHP_VERSION_ID@
 # The path where to scan for additional INI configuration files.
-php_inidir=@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@
+php_ini_dir=@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@
 # The path in which to look for php.ini.
-php_inipath=@EXPANDED_PHP_CONFIG_FILE_PATH@
+php_ini_path=@EXPANDED_PHP_CONFIG_FILE_PATH@
 # Whether PHP is built in debug mode (yes) or not (no).
 php_debug=@ZEND_DEBUG@
 # Whether PHP is built with thread safety (yes) or not (no).
@@ -31,6 +22,6 @@ Description: Build extension for a PHP general-purpose scripting language
 URL: https://www.php.net
 License: PHP
 Version: @PHP_VERSION@
-CFlags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
+Cflags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
 Libs.private: @EXTRA_LIBS@ @ZEND_EXTRA_LIBS@
 Libs:
