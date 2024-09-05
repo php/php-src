@@ -469,7 +469,7 @@ int php_init_config(void)
 		 */
 
 		search_path_size = MAXPATHLEN * 4 + (int)strlen(env_location) + 3 + 1;
-		php_ini_search_path = (char *) emalloc(search_path_size);
+		php_ini_search_path = (char *) ecalloc(1, search_path_size);
 		free_ini_search_path = 1;
 		php_ini_search_path[0] = 0;
 
