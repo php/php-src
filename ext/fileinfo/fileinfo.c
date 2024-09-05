@@ -376,7 +376,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			// Implementation is used for both finfo_file() and mimetype_emu()
 			int buffer_param_num = (mimetype_emu ? 1 : 2);
 			if (buffer == NULL || buffer_len == 0) {
-				zend_argument_must_not_be_empty_error(1);
+				zend_argument_must_not_be_empty_error(buffer_param_num);
 				goto clean;
 			}
 			if (CHECK_NULL_PATH(buffer, buffer_len)) {
