@@ -5921,8 +5921,7 @@ ZEND_METHOD(ReflectionProperty, isVirtual)
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_VIRTUAL);
 }
 
-/* {{{ Returns whether this property is default (declared at compilation time). */
-ZEND_METHOD(ReflectionProperty, isDefault)
+static void _property_check_dynamic(INTERNAL_FUNCTION_PARAMETERS, bool dynamicTrue) /* {{{ */
 {
 	reflection_object *intern;
 	property_reference *ref;
@@ -5931,7 +5930,21 @@ ZEND_METHOD(ReflectionProperty, isDefault)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
-	RETURN_BOOL(ref->prop != NULL);
+	bool isDynamic = ref->prop == NULL;
+	RETURN_BOOL(dynamicTrue ? isDynamic : !isDynamic);
+}
+
+/* {{{ Returns whether this property is default (declared at compilation time). */
+ZEND_METHOD(ReflectionProperty, isDefault)
+{
+	_property_check_dynamic(INTERNAL_FUNCTION_PARAM_PASSTHRU, false);
+}
+/* }}} */
+
+/* {{{ Returns whether this property is dynamic (not declared at compilation time). */
+ZEND_METHOD(ReflectionProperty, isDynamic)
+{
+	_property_check_dynamic(INTERNAL_FUNCTION_PARAM_PASSTHRU, true);
 }
 /* }}} */
 
