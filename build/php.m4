@@ -1622,27 +1622,23 @@ dnl
 dnl Some vendors force mawk before gawk; mawk is broken so we don't like that.
 dnl
 AC_DEFUN([PHP_PROG_AWK], [
-  AC_CHECK_PROGS([AWK], [gawk nawk awk mawk], [bork], [/usr/xpg4/bin/:$PATH])
-  case "$AWK" in
-    *mawk)
-      AC_MSG_WARN([mawk is known to have problems on some systems. You should install GNU awk])
-      ;;
-    *gawk)
-      ;;
-    bork)
-      AC_MSG_ERROR([Could not find awk; Install GNU awk])
-      ;;
-    *)
-      AC_MSG_CHECKING([if $AWK is broken])
-      if ! $AWK 'function foo() {}' >/dev/null 2>&1 ; then
-        AC_MSG_RESULT([yes])
-        AC_MSG_ERROR([You should install GNU awk])
-      else
-        AC_MSG_RESULT([no])
-      fi
-      ;;
-  esac
-  PHP_SUBST([AWK])
+AC_CHECK_PROGS([AWK], [gawk nawk awk mawk], [bork], [/usr/xpg4/bin/:$PATH])
+AS_CASE([$AWK],
+  [*mawk],
+    [AC_MSG_WARN(m4_text_wrap([
+      mawk is known to have problems on some systems. You should install GNU awk
+    ]))],
+  [*gawk], [],
+  [bork], [AC_MSG_ERROR([Could not find awk; Install GNU awk])],
+  [
+    AC_MSG_CHECKING([if $AWK is broken])
+    AS_IF([! $AWK 'function foo() {}' >/dev/null 2>&1], [
+      AC_MSG_RESULT([yes])
+      AC_MSG_ERROR([You should install GNU awk])
+    ],
+    [AC_MSG_RESULT([no])])
+  ])
+PHP_SUBST([AWK])
 ])
 
 dnl
