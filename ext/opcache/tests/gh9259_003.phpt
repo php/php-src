@@ -9,6 +9,7 @@ if (getenv('SKIP_ASAN')) die('xleak Leaks memory with ASAN');
 --INI--
 opcache.interned_strings_buffer=500
 opcache.enable_cli=1
+opcache.enable=1
 --FILE--
 <?php
 
