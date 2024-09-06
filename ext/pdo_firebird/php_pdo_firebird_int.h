@@ -154,6 +154,9 @@ enum {
 
 	/* transaction access mode */
 	PDO_FB_WRITABLE_TRANSACTION,
+
+	/* session time zone */
+	PDO_FB_SESSION_TIMEZONE,
 };
 
 #endif	/* PHP_PDO_FIREBIRD_INT_H */

@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: d36b2055abc48ae91c3442dda68fa2a28eb6d25b */
+ * Stub hash: 50db19699b572bf8653790782327f05bbada9575 */
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Pdo_Firebird_getApiVersion, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -65,6 +65,12 @@ static zend_class_entry *register_class_Pdo_Firebird(zend_class_entry *class_ent
 	zend_string *const_WRITABLE_TRANSACTION_name = zend_string_init_interned("WRITABLE_TRANSACTION", sizeof("WRITABLE_TRANSACTION") - 1, 1);
 	zend_declare_typed_class_constant(class_entry, const_WRITABLE_TRANSACTION_name, &const_WRITABLE_TRANSACTION_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
 	zend_string_release(const_WRITABLE_TRANSACTION_name);
+
+	zval const_SESSION_TIMEZONE_value;
+	ZVAL_LONG(&const_SESSION_TIMEZONE_value, PDO_FB_SESSION_TIMEZONE);
+	zend_string *const_SESSION_TIMEZONE_name = zend_string_init_interned("SESSION_TIMEZONE", sizeof("SESSION_TIMEZONE") - 1, 1);
+	zend_declare_typed_class_constant(class_entry, const_SESSION_TIMEZONE_name, &const_SESSION_TIMEZONE_value, ZEND_ACC_PUBLIC, NULL, (zend_type) ZEND_TYPE_INIT_MASK(MAY_BE_LONG));
+	zend_string_release(const_SESSION_TIMEZONE_name);
 
 	return class_entry;
 }

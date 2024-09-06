@@ -1379,9 +1379,21 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 	}
 
 	do {
+#if FB_API_VER >= 40
+		zend_string *session_timezone = pdo_attr_strval(driver_options, PDO_FB_SESSION_TIMEZONE, NULL);
+#endif
+
 		static char const dpb_flags[] = {
-			isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name };
-		char const *dpb_values[] = { dbh->username, dbh->password, vars[1].optval, vars[2].optval };
+			isc_dpb_user_name, isc_dpb_password, isc_dpb_lc_ctype, isc_dpb_sql_role_name
+#if FB_API_VER >= 40
+			, isc_dpb_session_time_zone
+#endif				
+		};
+		char const *dpb_values[] = { dbh->username, dbh->password, vars[1].optval, vars[2].optval 
+#if FB_API_VER >= 40
+			, session_timezone ? ZSTR_VAL(session_timezone) : NULL
+#endif	
+		};
 		char dpb_buffer[256] = { isc_dpb_version1 }, *dpb;
 
 		dpb = dpb_buffer + 1;
@@ -1395,6 +1407,12 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 				buf_len -= dpb_len;
 			}
 		}
+
+#if FB_API_VER >= 40
+		if (session_timezone) {
+			zend_string_release_ex(session_timezone, 0);
+		}		
+#endif	
 
 		H->sql_dialect = PDO_FB_DIALECT;
 		if (vars[3].optval) {

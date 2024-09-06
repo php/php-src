@@ -34,5 +34,8 @@ class Firebird extends \PDO
     /** @cvalue PDO_FB_WRITABLE_TRANSACTION */
     public const int WRITABLE_TRANSACTION = UNKNOWN;
 
+    /** @cvalue PDO_FB_SESSION_TIMEZONE */
+    public const int SESSION_TIMEZONE = UNKNOWN;    
+
     public static function getApiVersion(): int {}
 }

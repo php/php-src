@@ -21,8 +21,8 @@ function getDbConnection($class = PDO::class): PDO {
     return new $class(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS);
 }
 
-function connectToDb(): Pdo\Firebird {
-    return Pdo\Firebird::connect(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS);
+function connectToDb(array $options = []): Pdo\Firebird {
+    return Pdo\Firebird::connect(PDO_FIREBIRD_TEST_DSN, PDO_FIREBIRD_TEST_USER, PDO_FIREBIRD_TEST_PASS, $options);
 }
 
 ?>
