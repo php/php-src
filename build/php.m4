@@ -1301,17 +1301,14 @@ dnl
 dnl Some systems, notably Solaris, cause getcwd() or realpath to fail if a
 dnl component of the path has execute but not read permissions.
 dnl
-AC_DEFUN([PHP_BROKEN_GETCWD],[
-  AC_MSG_CHECKING([for broken getcwd])
-  os=$(uname -sr 2>/dev/null)
-  case $os in
-    SunOS*[)]
-      AC_DEFINE([HAVE_BROKEN_GETCWD], [1],
-        [Define to 1 if system has a broken 'getcwd'.])
-      AC_MSG_RESULT([yes]);;
-    *[)]
-      AC_MSG_RESULT([no]);;
-  esac
+AC_DEFUN([PHP_BROKEN_GETCWD], [
+AC_CACHE_CHECK([for broken getcwd], [php_cv_func_getcwd_broken],
+  [AS_CASE([$host_alias],
+    [*solaris*], [php_cv_func_getcwd_broken=yes],
+    [php_cv_func_getcwd_broken=no])])
+AS_VAR_IF([php_cv_func_getcwd_broken], [yes],
+  [AC_DEFINE([HAVE_BROKEN_GETCWD], [1],
+    [Define to 1 if system has a broken 'getcwd'.])])
 ])
 
 dnl

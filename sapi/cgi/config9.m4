@@ -9,14 +9,14 @@ if test "$PHP_CGI" != "no"; then
   dnl BSD systems.
   AC_CHECK_MEMBERS([struct sockaddr_un.sun_len],,,[#include <sys/un.h>])
 
-  AC_MSG_CHECKING([whether cross-process locking is required by accept()])
-  AS_CASE([$(uname -sr)],
-    [SunOS\ 5.*], [
-      AC_MSG_RESULT([yes])
-      AC_DEFINE([USE_LOCKING], [1],
-        [Define to 1 if cross-process locking is required by 'accept()'.])
-    ],
-    [AC_MSG_RESULT([no])])
+  AC_CACHE_CHECK([whether cross-process locking is required by accept()],
+    [php_cv_have_cross_process_locking],
+    [AS_CASE([$host_alias],
+      [*solaris*], [php_cv_have_cross_process_locking=yes],
+      [php_cv_have_cross_process_locking=no])])
+  AS_VAR_IF([php_cv_have_cross_process_locking], [yes],
+    [AC_DEFINE([USE_LOCKING], [1],
+      [Define to 1 if cross-process locking is required by 'accept()'.])])
 
   PHP_ADD_MAKEFILE_FRAGMENT([$abs_srcdir/sapi/cgi/Makefile.frag])
 
