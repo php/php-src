@@ -467,21 +467,20 @@ AC_DEFUN([PHP_UTILIZE_RPATHS],[
 ])
 
 dnl
-dnl PHP_ADD_INCLUDE(path [,before])
+dnl PHP_ADD_INCLUDE(paths [,before])
 dnl
-dnl Add an include path. If before is 1, add in the beginning of INCLUDES.
+dnl Add blank-or-newline-separated list of include paths. If "before" is given,
+dnl paths are prepended to the beginning of INCLUDES.
 dnl
-AC_DEFUN([PHP_ADD_INCLUDE],[
-  if test "$1" != "/usr/include"; then
-    PHP_EXPAND_PATH($1, ai_p)
-    PHP_RUN_ONCE(INCLUDEPATH, $ai_p, [
-      if test "$2"; then
-        INCLUDES="-I$ai_p $INCLUDES"
-      else
-        INCLUDES="$INCLUDES -I$ai_p"
-      fi
-    ])
-  fi
+AC_DEFUN([PHP_ADD_INCLUDE], [
+for path in m4_normalize(m4_expand([$1])); do
+  AS_IF([test "$path" != "/usr/include"], [
+    PHP_EXPAND_PATH([$path], [ai_p])
+    PHP_RUN_ONCE([INCLUDEPATH], [$ai_p], [m4_ifnblank([$2],
+      [INCLUDES="-I$ai_p $INCLUDES"],
+      [INCLUDES="$INCLUDES -I$ai_p"])])
+  ])
+done
 ])
 
 dnl
