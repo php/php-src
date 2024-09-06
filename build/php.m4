@@ -112,9 +112,8 @@ AC_DEFUN([PHP_CANONICAL_HOST_TARGET],[
   if test -z "$host_alias" && test -n "$host"; then
     host_alias=$host
   fi
-  if test -z "$host_alias"; then
-    AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])
-  fi
+  AS_VAR_IF([host_alias],,
+    [AC_MSG_ERROR([host_alias is not set! Make sure to run config.guess])])
 ])
 
 dnl
@@ -634,12 +633,10 @@ dnl PHP_SET_LIBTOOL_VARIABLE(var)
 dnl
 dnl Set libtool variable.
 dnl
-AC_DEFUN([PHP_SET_LIBTOOL_VARIABLE],[
-  if test -z "$LIBTOOL"; then
-    LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'
-  else
-    LIBTOOL="$LIBTOOL $1"
-  fi
+AC_DEFUN([PHP_SET_LIBTOOL_VARIABLE], [
+AS_VAR_IF([LIBTOOL],,
+  [LIBTOOL='$(SHELL) $(top_builddir)/libtool $1'],
+  [LIBTOOL="$LIBTOOL $1"])
 ])
 
 dnl ----------------------------------------------------------------------------
@@ -753,13 +750,13 @@ AC_DEFUN([PHP_BUILD_THREAD_SAFE], [enable_zts=yes])
 dnl
 dnl PHP_REQUIRE_CXX
 dnl
-AC_DEFUN([PHP_REQUIRE_CXX],[
-  if test -z "$php_cxx_done"; then
-    AC_PROG_CXX
-    AC_PROG_CXXCPP
-    PHP_ADD_LIBRARY([stdc++])
-    php_cxx_done=yes
-  fi
+AC_DEFUN([PHP_REQUIRE_CXX], [
+AS_VAR_IF([php_cxx_done],, [
+  AC_PROG_CXX
+  AC_PROG_CXXCPP
+  PHP_ADD_LIBRARY([stdc++])
+  php_cxx_done=yes
+])
 ])
 
 dnl
@@ -833,11 +830,7 @@ AC_DEFUN([PHP_SHARED_MODULE],[
   install_modules="install-modules"
   suffix=la
 
-  case $host_alias in
-    *aix*[)]
-      additional_flags="-Wl,-G"
-      ;;
-  esac
+  AS_CASE([$host_alias], [*aix*], [additional_flags="-Wl,-G"])
 
   if test "x$5" = "xyes"; then
     PHP_ZEND_EX="$PHP_ZEND_EX \$(phplibdir)/$1.$suffix"
@@ -1562,22 +1555,22 @@ dnl
 dnl Determines shared library suffix SHLIB_DL_SUFFIX_NAME suffix can be: .so or
 dnl .sl
 dnl
-AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES],[
- AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
- PHP_SUBST_OLD([SHLIB_SUFFIX_NAME])
- PHP_SUBST_OLD([SHLIB_DL_SUFFIX_NAME])
- SHLIB_SUFFIX_NAME=so
- SHLIB_DL_SUFFIX_NAME=$SHLIB_SUFFIX_NAME
- case $host_alias in
- *hpux*[)]
-   SHLIB_SUFFIX_NAME=sl
-   SHLIB_DL_SUFFIX_NAME=sl
-   ;;
- *darwin*[)]
-   SHLIB_SUFFIX_NAME=dylib
-   SHLIB_DL_SUFFIX_NAME=so
-   ;;
- esac
+AC_DEFUN([PHP_SHLIB_SUFFIX_NAMES], [
+AC_REQUIRE([PHP_CANONICAL_HOST_TARGET])dnl
+AS_CASE([$host_alias],
+  [*hpux*], [
+    SHLIB_SUFFIX_NAME=sl
+    SHLIB_DL_SUFFIX_NAME=sl
+  ],
+  [*darwin*], [
+    SHLIB_SUFFIX_NAME=dylib
+    SHLIB_DL_SUFFIX_NAME=so
+  ], [
+    SHLIB_SUFFIX_NAME=so
+    SHLIB_DL_SUFFIX_NAME=$SHLIB_SUFFIX_NAME
+  ])
+PHP_SUBST_OLD([SHLIB_SUFFIX_NAME])
+PHP_SUBST_OLD([SHLIB_DL_SUFFIX_NAME])
 ])
 
 dnl
