@@ -154,6 +154,9 @@ struct _zend_compiler_globals {
 
 	uint32_t rtd_key_counter;
 
+	void *internal_run_time_cache;
+	uint32_t internal_run_time_cache_size;
+
 	zend_stack short_circuiting_opnums;
 #ifdef ZTS
 	uint32_t copied_functions_count;

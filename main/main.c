@@ -2316,6 +2316,9 @@ zend_result php_module_startup(sapi_module_struct *sf, zend_module_entry *additi
 	/* freeze the list of observer fcall_init handlers */
 	zend_observer_post_startup();
 
+	/* freeze the list of persistent internal functions */
+	zend_init_internal_run_time_cache();
+
 	/* Extensions that add engine hooks after this point do so at their own peril */
 	zend_finalize_system_id();
 

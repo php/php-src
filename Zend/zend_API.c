@@ -2958,7 +2958,11 @@ ZEND_API zend_result zend_register_functions(zend_class_entry *scope, const zend
 		if (EG(active)) { // at run-time: this ought to only happen if registered with dl() or somehow temporarily at runtime
 			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, zend_arena_calloc(&CG(arena), 1, zend_internal_run_time_cache_reserved_size()));
 		} else {
-			ZEND_MAP_PTR_NEW(internal_function->run_time_cache);
+#if ZTS
+			ZEND_MAP_PTR_NEW_STATIC(internal_function->run_time_cache);
+#else
+			ZEND_MAP_PTR_INIT(internal_function->run_time_cache, NULL);
+#endif
 		}
 		if (ptr->flags) {
 			if (!(ptr->flags & ZEND_ACC_PPP_MASK)) {
