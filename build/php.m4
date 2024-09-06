@@ -1137,8 +1137,8 @@ dnl PHP_DOES_PWRITE_WORK
 dnl
 dnl Internal.
 dnl
-AC_DEFUN([PHP_DOES_PWRITE_WORK],[
-  AC_RUN_IFELSE([AC_LANG_SOURCE([
+AC_DEFUN([PHP_DOES_PWRITE_WORK], [
+AC_RUN_IFELSE([AC_LANG_SOURCE([
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1155,13 +1155,10 @@ $1
     if (pwrite(fd, "text", 4, -1) != -1 || errno != EINVAL) return 1;
     return 0;
     }
-  ])],[
-    ac_cv_pwrite=yes
-  ],[
-    ac_cv_pwrite=no
-  ],[
-    ac_cv_pwrite=no
-  ])
+  ])],
+  [php_cv_func_pwrite=yes],
+  [php_cv_func_pwrite=no],
+  [php_cv_func_pwrite=no])
 ])
 
 dnl
@@ -1169,9 +1166,9 @@ dnl PHP_DOES_PREAD_WORK
 dnl
 dnl Internal.
 dnl
-AC_DEFUN([PHP_DOES_PREAD_WORK],[
-  echo test > conftest_pread
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+AC_DEFUN([PHP_DOES_PREAD_WORK], [
+echo test > conftest_pread
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -1188,61 +1185,52 @@ $1
     if (pread(fd, buf, 2, -1) != -1 || errno != EINVAL) return 1;
     return 0;
     }
-  ]])],[
-    ac_cv_pread=yes
-  ],[
-    ac_cv_pread=no
-  ],[
-    ac_cv_pread=no
-  ])
+  ]])],
+  [php_cv_func_pread=yes],
+  [php_cv_func_pread=no],
+  [php_cv_func_pread=no])
 ])
 
 dnl
 dnl PHP_PWRITE_TEST
 dnl
-AC_DEFUN([PHP_PWRITE_TEST],[
-  AC_CACHE_CHECK(whether pwrite works,ac_cv_pwrite,[
-    PHP_DOES_PWRITE_WORK
-    if test "$ac_cv_pwrite" = "no"; then
-      PHP_DOES_PWRITE_WORK([ssize_t pwrite(int, void *, size_t, off64_t);])
-      if test "$ac_cv_pwrite" = "yes"; then
-        ac_cv_pwrite=64
-      fi
-    fi
+AC_DEFUN([PHP_PWRITE_TEST], [
+AC_CACHE_CHECK([whether pwrite works], [php_cv_func_pwrite], [
+  PHP_DOES_PWRITE_WORK
+  AS_VAR_IF([php_cv_func_pwrite], [no], [
+    PHP_DOES_PWRITE_WORK([ssize_t pwrite(int, void *, size_t, off64_t);])
+    AS_VAR_IF([php_cv_func_pwrite], [yes], [php_cv_func_pwrite=64])
   ])
+])
 
-  if test "$ac_cv_pwrite" != "no"; then
-    AC_DEFINE([HAVE_PWRITE], [1],
-      [Define to 1 if you have the 'pwrite' function.])
-    if test "$ac_cv_pwrite" = "64"; then
-      AC_DEFINE([PHP_PWRITE_64], [1],
-        [Define to 1 if 'pwrite' declaration with 'off64_t' is missing.])
-    fi
-  fi
+AS_VAR_IF([php_cv_func_pwrite], [no],, [
+  AC_DEFINE([HAVE_PWRITE], [1],
+    [Define to 1 if you have the 'pwrite' function.])
+  AS_VAR_IF([php_cv_func_pwrite], [64],
+    [AC_DEFINE([PHP_PWRITE_64], [1],
+      [Define to 1 if 'pwrite' declaration with 'off64_t' is missing.])])
+])
 ])
 
 dnl
 dnl PHP_PREAD_TEST
 dnl
-AC_DEFUN([PHP_PREAD_TEST],[
-  AC_CACHE_CHECK(whether pread works,ac_cv_pread,[
-    PHP_DOES_PREAD_WORK
-    if test "$ac_cv_pread" = "no"; then
-      PHP_DOES_PREAD_WORK([ssize_t pread(int, void *, size_t, off64_t);])
-      if test "$ac_cv_pread" = "yes"; then
-        ac_cv_pread=64
-      fi
-    fi
+AC_DEFUN([PHP_PREAD_TEST], [
+AC_CACHE_CHECK([whether pread works], [php_cv_func_pread], [
+  PHP_DOES_PREAD_WORK
+  AS_VAR_IF([php_cv_func_pread], [no], [
+    PHP_DOES_PREAD_WORK([ssize_t pread(int, void *, size_t, off64_t);])
+    AS_VAR_IF([php_cv_func_pread], [yes], [php_cv_func_pread=64])
   ])
+])
 
-  if test "$ac_cv_pread" != "no"; then
-    AC_DEFINE([HAVE_PREAD], [1],
-      [Define to 1 if you have the 'pread' function.])
-    if test "$ac_cv_pread" = "64"; then
-      AC_DEFINE([PHP_PREAD_64], [1],
-        [Define to 1 if 'pread' declaration with 'off64_t' is missing.])
-    fi
-  fi
+AS_VAR_IF([php_cv_func_pread], [no],, [
+  AC_DEFINE([HAVE_PREAD], [1],
+    [Define to 1 if you have the 'pread' function.])
+  AS_VAR_IF([php_cv_func_pread], [64],
+    [AC_DEFINE([PHP_PREAD_64], [1],
+      [Define to 1 if 'pread' declaration with 'off64_t' is missing.])])
+])
 ])
 
 dnl
