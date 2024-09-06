@@ -19,6 +19,10 @@ PHP 8.5 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
+- SPL:
+  . ArrayObject no longer accepts enums, as modifying the $name or $value
+    properties can break engine assumptions.
+
 ========================================
 2. New Features
 ========================================
