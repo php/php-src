@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-15661 (Access null pointer in
     Zend/Optimizer/zend_inference.c). (nielsdos)
+  . Fixed bug GH-15658 (Segmentation fault in Zend/zend_vm_execute.h).
+    (nielsdos)
 
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
