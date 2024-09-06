@@ -2096,7 +2096,11 @@ function generate_files()
 
 	if (INVALID_CONFIG_ARGS.length) {
 		STDOUT.WriteLine('WARNING');
-		STDOUT.WriteLine('The following arguments are invalid, and therefore ignored:');
+		if (INVALID_CONFIG_ARGS.length > 1) {
+			STDOUT.WriteLine('The following arguments are invalid, and therefore ignored:');
+		} else {
+			STDOUT.WriteLine('The following argument is invalid, and therefore ignored:');
+		}
 
 		for (var i = 0; i < INVALID_CONFIG_ARGS.length; ++i) {
 			STDOUT.WriteLine(' ' + INVALID_CONFIG_ARGS[i]);
