@@ -148,6 +148,15 @@ PHP_MINFO_FUNCTION(bcmath)
 }
 /* }}} */
 
+static zend_always_inline zend_result bcmath_check_scale(zend_long scale, uint32_t arg_num)
+{
+	if (UNEXPECTED(scale < 0 || scale > INT_MAX)) {
+		zend_argument_value_error(arg_num, "must be between 0 and %d", INT_MAX);
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static void php_long2num(bc_num *num, zend_long lval)
 {
 	*num = bc_long2num(lval);
@@ -1300,15 +1309,6 @@ static zend_always_inline zend_result bc_num_from_obj_or_str_or_long_with_err(
 {
 	if (UNEXPECTED(bc_num_from_obj_or_str_or_long(num, scale, obj, str, lval) == FAILURE)) {
 		zend_argument_value_error(arg_num, "is not well-formed");
-		return FAILURE;
-	}
-	return SUCCESS;
-}
-
-static zend_always_inline zend_result bcmath_check_scale(zend_long scale, uint32_t arg_num)
-{
-	if (UNEXPECTED(scale < 0 || scale > INT_MAX)) {
-		zend_argument_value_error(arg_num, "must be between 0 and %d", INT_MAX);
 		return FAILURE;
 	}
 	return SUCCESS;
