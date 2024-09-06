@@ -1091,6 +1091,12 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
 				return;
 			}
+			if (UNEXPECTED(Z_OBJCE_P(array)->ce_flags & ZEND_ACC_ENUM)) {
+				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+					"Enum %s is not compatible with %s",
+					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				return;
+			}
 			zval_ptr_dtor(&intern->array);
 			ZVAL_COPY(&intern->array, array);
 		}
