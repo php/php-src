@@ -1,7 +1,7 @@
 name: Benchmark
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "30 0 * * *"
 permissions:
   contents: read
 jobs:
@@ -19,8 +19,9 @@ jobs:
           wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
           gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
           echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-          sudo apt update
-          sudo apt install terraform=1.5.7-*
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update -y
+          sudo apt-get install -y terraform=1.5.7-*
       - name: Checkout benchmark suite
         uses: actions/checkout@v4
         with:
@@ -32,52 +33,63 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: 'php/php-src'
-          ref: 'master'
+          ref: '${{ github.sha }}'
           fetch-depth: 100
           path: 'php-version-benchmarks/tmp/php_master'
-      - name: Copy-paste the same repo content for benchmarking JIT
-        run: |
-          set -e
-    
-          cp -r "php-version-benchmarks/tmp/php_master/" "php-version-benchmarks/tmp/php_master_jit"
-      - name: Setup benchmark config
-        run: |
-          set -e
-
-          cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-          ESCAPED_DOCKER_REGISTRY=$(printf '%s\n' "${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}" | sed -e 's/[\/&]/\\&/g')
-          sed -i "s/INFRA_DOCKER_REGISTRY=public.ecr.aws\/abcdefgh/INFRA_DOCKER_REGISTRY=$ESCAPED_DOCKER_REGISTRY/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
-
-          cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
-          sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
-          sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
-
-          cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master1.ini
-          YESTERDAY="$(date -d "-2 day 13:00" '+%Y-%m-%d')"
-          YESTERDAY_SHA="$(cd ./php-version-benchmarks/tmp/php_master/ && git --no-pager log --until="$YESTERDAY 23:59:59" -n 1 --pretty='%H')"
-          sed -i 's/PHP_NAME="PHP - master"/PHP_NAME="PHP - previous master"/g' ./php-version-benchmarks/config/php/master1.ini
-          sed -i "s/PHP_ID=php_master/PHP_ID=php_master_previous/g" ./php-version-benchmarks/config/php/master1.ini
-          sed -i "s/PHP_COMMIT=/PHP_COMMIT=$YESTERDAY_SHA/g" ./php-version-benchmarks/config/php/master1.ini
-          cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master2.ini
-          cp ./php-version-benchmarks/config/php/master_jit.ini.dist ./php-version-benchmarks/config/php/master2_jit.ini
-
-          cp ./php-version-benchmarks/config/test/1_laravel.ini.dist ./php-version-benchmarks/config/test/1_laravel.ini
-          cp ./php-version-benchmarks/config/test/2_symfony_main.ini.dist ./php-version-benchmarks/config/test/2_symfony_main.ini
-          cp ./php-version-benchmarks/config/test/4_wordpress.ini.dist ./php-version-benchmarks/config/test/4_wordpress.ini
-          cp ./php-version-benchmarks/config/test/5_bench.php.ini.dist ./php-version-benchmarks/config/test/5_bench.php.ini
-          cp ./php-version-benchmarks/config/test/6_micro_bench.php.ini.dist ./php-version-benchmarks/config/test/6_micro_bench.php.ini
-
-          rm -rf ./php-version-benchmarks/docs/results
-      - name: Git setup
+      - name: Setup benchmark results
         run: |
           git config --global user.name "Benchmark"
           git config --global user.email "benchmark@php.net"
+          
+          rm -rf ./php-version-benchmarks/docs/results
       - name: Checkout benchmark results
         uses: actions/checkout@v4
         with:
           repository: kocsismate/php-version-benchmark-results
           ssh-key: ${{ secrets.PHP_VERSION_BENCHMARK_RESULTS_DEPLOY_KEY }}
           path: 'php-version-benchmarks/docs/results'
+      - name: Set benchmark config
+        run: |
+          set -e
+
+          # Set infrastructure config
+          cp ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini.dist ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          ESCAPED_DOCKER_REGISTRY=$(printf '%s\n' "${{ secrets.PHP_VERSION_BENCHMARK_DOCKER_REGISTRY }}" | sed -e 's/[\/&]/\\&/g')
+          sed -i "s/INFRA_DOCKER_REGISTRY=public.ecr.aws\/abcdefgh/INFRA_DOCKER_REGISTRY=$ESCAPED_DOCKER_REGISTRY/g" ./php-version-benchmarks/config/infra/aws/x86_64-metal.ini
+          cp ./php-version-benchmarks/build/infrastructure/config/aws.tfvars.dist ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/access_key = ""/access_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_ACCESS_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+          sed -i 's/secret_key = ""/secret_key = "${{ secrets.PHP_VERSION_BENCHMARK_AWS_SECRET_KEY }}"/g' ./php-version-benchmarks/build/infrastructure/config/aws.tfvars
+
+          YEAR="$(date '+%Y')"
+          DATABASE="./php-version-benchmarks/docs/results/$YEAR/database.tsv"
+          if [ -f "$DATABASE" ]; then
+            LAST_RESULT_SHA="$(tail -n 2 "$DATABASE" | head -n 1 | cut -f 6)"
+          else
+            YESTERDAY="$(date -d "-2 day 23:59:59" '+%Y-%m-%d %H:%M:%S')"
+            LAST_RESULT_SHA="$(cd ./php-version-benchmarks/tmp/php_master/ && git --no-pager log --until="$YESTERDAY" -n 1 --pretty='%H')"
+          fi
+
+          # Set config for the previous PHP version
+          cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master1.ini
+          sed -i 's/PHP_NAME="PHP - master"/PHP_NAME="PHP - previous master"/g' ./php-version-benchmarks/config/php/master1.ini
+          sed -i "s/PHP_ID=php_master/PHP_ID=php_master_previous/g" ./php-version-benchmarks/config/php/master1.ini
+          sed -i "s/PHP_COMMIT=/PHP_COMMIT=$LAST_RESULT_SHA/g" ./php-version-benchmarks/config/php/master1.ini
+
+          # Set config for the current PHP version
+          cp ./php-version-benchmarks/config/php/master.ini.dist ./php-version-benchmarks/config/php/master2.ini
+          sed -i "s/PHP_COMMIT=/PHP_COMMIT=${{ github.sha }}/g" ./php-version-benchmarks/config/php/master2.ini
+
+          # Set config for current PHP version with JIT
+          git clone ./php-version-benchmarks/tmp/php_master/ ./php-version-benchmarks/tmp/php_master_jit
+          cp ./php-version-benchmarks/config/php/master_jit.ini.dist ./php-version-benchmarks/config/php/master2_jit.ini
+          sed -i "s/PHP_COMMIT=/PHP_COMMIT=${{ github.sha }}/g" ./php-version-benchmarks/config/php/master2_jit.ini
+
+          # Set test configs
+          cp ./php-version-benchmarks/config/test/1_laravel.ini.dist ./php-version-benchmarks/config/test/1_laravel.ini
+          cp ./php-version-benchmarks/config/test/2_symfony_main.ini.dist ./php-version-benchmarks/config/test/2_symfony_main.ini
+          cp ./php-version-benchmarks/config/test/4_wordpress.ini.dist ./php-version-benchmarks/config/test/4_wordpress.ini
+          cp ./php-version-benchmarks/config/test/5_bench.php.ini.dist ./php-version-benchmarks/config/test/5_bench.php.ini
+          cp ./php-version-benchmarks/config/test/6_micro_bench.php.ini.dist ./php-version-benchmarks/config/test/6_micro_bench.php.ini
       - name: Run benchmark
         run: ./php-version-benchmarks/benchmark.sh run aws
       - name: Store results
@@ -92,7 +104,7 @@ jobs:
           fi
           git add .
           if git diff --cached --quiet; then
-            exit 0
+            exit 1
           fi
           git commit -m "Add result for ${{ github.repository }}@${{ github.sha }}"
           git push
