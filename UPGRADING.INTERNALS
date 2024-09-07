@@ -222,6 +222,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
        - ac_cv_func_getaddrinfo            -> php_cv_func_getaddrinfo
        - ac_cv_have_broken_gcc_strlen_opt  -> php_cv_have_broken_gcc_strlen_opt
        - ac_cv_have_pcre2_jit              -> php_cv_have_pcre2_jit
+       - ac_cv_pread                       -> php_cv_func_pread
+       - ac_cv_pwrite                      -> php_cv_func_pwrite
        - ac_cv_syscall_shadow_stack_exists -> php_cv_have_shadow_stack_syscall
        - ac_cv_time_r_type                 -> php_cv_time_r_type
        - ac_cv_write_stdout                -> php_cv_have_write_stdout
