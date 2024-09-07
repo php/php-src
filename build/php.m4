@@ -473,9 +473,9 @@ dnl Add blank-or-newline-separated list of include paths. If "before" is given,
 dnl paths are prepended to the beginning of INCLUDES.
 dnl
 AC_DEFUN([PHP_ADD_INCLUDE], [
-for path in m4_normalize(m4_expand([$1])); do
-  AS_IF([test "$path" != "/usr/include"], [
-    PHP_EXPAND_PATH([$path], [ai_p])
+for include_path in m4_normalize(m4_expand([$1])); do
+  AS_IF([test "$include_path" != "/usr/include"], [
+    PHP_EXPAND_PATH([$include_path], [ai_p])
     PHP_RUN_ONCE([INCLUDEPATH], [$ai_p], [m4_ifnblank([$2],
       [INCLUDES="-I$ai_p $INCLUDES"],
       [INCLUDES="$INCLUDES -I$ai_p"])])
