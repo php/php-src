@@ -279,8 +279,10 @@ dnl Various checks for GD features
     PHP_GD_FREETYPE2
     PHP_GD_JISX0208
 
-    GD_CFLAGS="-Wno-strict-prototypes -I$ext_srcdir/libgd $GD_CFLAGS"
-    PHP_NEW_EXTENSION([gd], [gd.c $extra_sources], [$ext_shared],, [$GD_CFLAGS])
+    PHP_NEW_EXTENSION([gd],
+      [gd.c $extra_sources],
+      [$ext_shared],,
+      [-Wno-strict-prototypes -I@ext_srcdir@/libgd])
     PHP_ADD_BUILD_DIR([$ext_builddir/libgd])
 
     PHP_INSTALL_HEADERS([ext/gd], [php_gd.h libgd/])
