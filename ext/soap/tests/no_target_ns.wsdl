@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<definitions
+    xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns="http://schemas.xmlsoap.org/wsdl/">
+  <portType name="TestServicePortType">
+    <operation name="test"/>
+  </portType>
+
+  <binding name="TestServiceBinding" type="tns:TestServicePortType">
+    <operation name="test"/>
+  </binding>
+
+  <service name="TestService">
+    <port name="TestServicePort" binding="tns:TestServiceBinding">
+      <soap:address location="http://tmp" />
+    </port>
+  </service>
+</definitions>

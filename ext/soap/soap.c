@@ -2688,6 +2688,15 @@ PHP_METHOD(SoapClient, __getTypes)
 }
 /* }}} */
 
+PHP_METHOD(SoapClient, __getTargetNamespace)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	const sdl *sdl;
+	FETCH_THIS_SDL(sdl);
+	if (sdl && sdl->target_ns) {
+		RETURN_STRING(sdl->target_ns);
+	}
+}
 
 /* {{{ Returns last SOAP request */
 PHP_METHOD(SoapClient, __getLastRequest)
