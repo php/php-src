@@ -98,6 +98,9 @@ struct _soapService {
 	int        features;
 	int        send_errors;
 	struct _soapHeader **soap_headers_ptr;
+
+	bool         trace;
+	zend_string *last_response_body;
 };
 
 #define SOAP_CLASS 1
