@@ -149,9 +149,9 @@ bc_num bc_multiply(bc_num n1, bc_num n2, size_t scale);
 bc_num bc_square(bc_num n1, size_t scale);
 
 #define bc_square_ex(n1, result, scale_min) do {	\
-	bc_num square_ex = bc_square(n1, scale_min); \
-	bc_free_num (result);                           \
-	*(result) = square_ex;                             \
+	bc_num square_ex = bc_square(n1, scale_min);	\
+	bc_free_num (result);							\
+	*(result) = square_ex;							\
 } while (0)
 
 bool bc_divide(bc_num n1, bc_num n2, bc_num *quot, size_t scale);
