@@ -292,19 +292,16 @@ bc_num bc_square(bc_num n1, size_t scale)
 {
 	bc_num prod;
 
-	/* Initialize things. */
 	size_t len1 = n1->n_len + n1->n_scale;
 	size_t full_scale = n1->n_scale + n1->n_scale;
 	size_t prod_scale = MIN(full_scale, MAX(scale, n1->n_scale));
 
-	/* Do the square */
 	if (len1 <= BC_VECTOR_SIZE) {
 		bc_fast_square(n1, len1, &prod);
 	} else {
 		bc_standard_square(n1, len1, &prod);
 	}
 
-	/* Assign to prod and clean up the number. */
 	prod->n_sign = PLUS;
 	prod->n_len -= full_scale;
 	prod->n_scale = prod_scale;
