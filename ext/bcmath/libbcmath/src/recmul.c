@@ -90,6 +90,43 @@ static inline void bc_fast_square(bc_num n1, size_t n1len, bc_num *prod)
 	}
 }
 
+/** Common part of functions bc_standard_mul and bc_standard_square */
+static inline void bc_standard_mul_common(BC_VECTOR *prod_vector, size_t prod_arr_size, size_t prodlen, bc_num *prod, BC_VECTOR *buf) {
+	/*
+	 * Move a value exceeding 4/8 digits by carrying to the next digit.
+	 * However, the last digit does nothing.
+	 */
+	bc_mul_carry_calc(prod_vector, prod_arr_size);
+
+	/* Convert to bc_num */
+	*prod = bc_new_num_nonzeroed(prodlen, 0);
+	char *pptr = (*prod)->n_value;
+	char *pend = pptr + prodlen - 1;
+	size_t i = 0;
+	while (i < prod_arr_size - 1) {
+#if BC_VECTOR_SIZE == 4
+		bc_write_bcd_representation(prod_vector[i], pend - 3);
+		pend -= 4;
+#else
+		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
+		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
+		pend -= 8;
+#endif
+		i++;
+	}
+
+	/*
+	 * The last digit may carry over.
+	 * Also need to fill it to the end with zeros, so loop until the end of the string.
+	 */
+	while (pend >= pptr) {
+		*pend-- = prod_vector[i] % BASE;
+		prod_vector[i] /= BASE;
+	}
+
+	efree(buf);
+}
+
 /*
  * Converts the BCD of bc_num by 4 (32 bits) or 8 (64 bits) digits to an array of BC_VECTOR.
  * The array is generated starting with the smaller digits.
@@ -146,39 +183,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		}
 	}
 
-	/*
-	 * Move a value exceeding 4/8 digits by carrying to the next digit.
-	 * However, the last digit does nothing.
-	 */
-	bc_mul_carry_calc(prod_vector, prod_arr_size);
-
-	/* Convert to bc_num */
-	*prod = bc_new_num_nonzeroed(prodlen, 0);
-	char *pptr = (*prod)->n_value;
-	char *pend = pptr + prodlen - 1;
-	i = 0;
-	while (i < prod_arr_size - 1) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_vector[i], pend - 3);
-		pend -= 4;
-#else
-		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
-		pend -= 8;
-#endif
-		i++;
-	}
-
-	/*
-	 * The last digit may carry over.
-	 * Also need to fill it to the end with zeros, so loop until the end of the string.
-	 */
-	while (pend >= pptr) {
-		*pend-- = prod_vector[i] % BASE;
-		prod_vector[i] /= BASE;
-	}
-
-	efree(buf);
+	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod, buf);
 }
 
 /** This is bc_standard_mul implementation for square */
@@ -221,39 +226,7 @@ static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
 		}
 	}
 
-	/*
-	 * Move a value exceeding 4/8 digits by carrying to the next digit.
-	 * However, the last digit does nothing.
-	 */
-	bc_mul_carry_calc(prod_vector, prod_arr_size);
-
-	/* Convert to bc_num */
-	*prod = bc_new_num_nonzeroed(prodlen, 0);
-	char *pptr = (*prod)->n_value;
-	char *pend = pptr + prodlen - 1;
-	i = 0;
-	while (i < prod_arr_size - 1) {
-#if BC_VECTOR_SIZE == 4
-		bc_write_bcd_representation(prod_vector[i], pend - 3);
-		pend -= 4;
-#else
-		bc_write_bcd_representation(prod_vector[i] / 10000, pend - 7);
-		bc_write_bcd_representation(prod_vector[i] % 10000, pend - 3);
-		pend -= 8;
-#endif
-		i++;
-	}
-
-	/*
-	 * The last digit may carry over.
-	 * Also need to fill it to the end with zeros, so loop until the end of the string.
-	 */
-	while (pend >= pptr) {
-		*pend-- = prod_vector[i] % BASE;
-		prod_vector[i] /= BASE;
-	}
-
-	efree(buf);
+	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod, buf);
 }
 
 /* The multiply routine. N2 times N1 is put int PROD with the scale of
