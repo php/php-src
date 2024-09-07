@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #79075 (FFI header parser chokes on comments). (nielsdos)
 
+- FPM:
+  . Fixed bug GH-13437 (FPM: ERROR: scoreboard: failed to lock (already
+    locked)). (Jakub Zelenka)
+
 - Iconv:
   . Fixed bug GH-17047 (UAF on iconv filter failure). (nielsdos)
 
