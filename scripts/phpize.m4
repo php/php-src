@@ -16,17 +16,19 @@ AC_CONFIG_AUX_DIR([build])
 AC_PRESERVE_HELP_ORDER
 
 PHP_CONFIG_NICE([config.nice])
+PHP_INIT_BUILD_SYSTEM
 
-AC_DEFUN([PHP_EXT_BUILDDIR],[.])dnl
-AC_DEFUN([PHP_EXT_DIR],[""])dnl
-AC_DEFUN([PHP_EXT_SRCDIR],[$abs_srcdir])dnl
-AC_DEFUN([PHP_ALWAYS_SHARED],[
+ext_builddir=.
+ext_dir=""
+ext_srcdir=$abs_srcdir
+AC_DEFUN([PHP_EXT_BUILDDIR], [$ext_builddir])dnl
+AC_DEFUN([PHP_EXT_DIR], [$ext_dir])dnl
+AC_DEFUN([PHP_EXT_SRCDIR], [$ext_srcdir])dnl
+AC_DEFUN([PHP_ALWAYS_SHARED], [
   ext_output="yes, shared"
   ext_shared=yes
   test "[$]$1" = "no" && $1=yes
 ])dnl
-
-PHP_INIT_BUILD_SYSTEM
 
 PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])

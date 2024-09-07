@@ -227,6 +227,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
        - ac_cv_write_stdout                -> php_cv_have_write_stdout
      and all other checks wrapped with their belonging cache variables (see *.m4
      source files for details).
+   - The ext_builddir, ext_srcdir, and ext_dir variables are now set before
+     calling the PHP_NEW_EXTENSION macro, enabling their usage anywhere in the
+     current config.m4 file.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,

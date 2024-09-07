@@ -102,6 +102,11 @@ if test "$PHP_OPCACHE" != "no"; then
 
     JIT_CFLAGS="-I@ext_builddir@/jit/ir -D$IR_TARGET -DIR_PHP"
     AS_VAR_IF([ZEND_DEBUG], [yes], [JIT_CFLAGS="$JIT_CFLAGS -DIR_DEBUG"])
+
+    PHP_ADD_BUILD_DIR([
+      $ext_builddir/jit
+      $ext_builddir/jit/ir
+    ])
   ])
 
   AC_CHECK_FUNCS([mprotect shm_create_largepage])
@@ -353,12 +358,7 @@ int main(void) {
     ]))
   fi
 
-  AS_VAR_IF([PHP_OPCACHE_JIT], [yes], [
-    PHP_ADD_BUILD_DIR([
-      $ext_builddir/jit
-      $ext_builddir/jit/ir
-    ])
-    PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])
-  ])
+  AS_VAR_IF([PHP_OPCACHE_JIT], [yes],
+    [PHP_ADD_MAKEFILE_FRAGMENT([$ext_srcdir/jit/Makefile.frag])])
   PHP_SUBST([OPCACHE_SHARED_LIBADD])
 fi
