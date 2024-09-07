@@ -6,10 +6,6 @@ AC_DEFUN([PHP_MBSTRING_ADD_BASE_SOURCES], [
   PHP_MBSTRING_BASE_SOURCES="$PHP_MBSTRING_BASE_SOURCES $1"
 ])
 
-AC_DEFUN([PHP_MBSTRING_ADD_BUILD_DIR], [
-  PHP_MBSTRING_EXTRA_BUILD_DIRS="$PHP_MBSTRING_EXTRA_BUILD_DIRS $1"
-])
-
 AC_DEFUN([PHP_MBSTRING_ADD_INCLUDE], [
   PHP_MBSTRING_EXTRA_INCLUDES="$PHP_MBSTRING_EXTRA_INCLUDES $1"
 ])
@@ -24,10 +20,6 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
     [$ext_shared],,
     [$PHP_MBSTRING_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
   PHP_SUBST([MBSTRING_SHARED_LIBADD])
-
-  for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
-    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], [1])
-  done
 
   for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
     PHP_ADD_INCLUDE([$ext_srcdir/$dir])
@@ -83,14 +75,18 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
   fi
 ])
 
+dnl
+dnl PHP_MBSTRING_SETUP_LIBMBFL
+dnl
+dnl Setup the required bundled libmbfl.
+dnl
 AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
-  dnl
-  dnl Bundled libmbfl is required and can not be disabled
-  dnl
-  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl])
-  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/mbfl])
-  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/filters])
-  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/nls])
+  PHP_ADD_BUILD_DIR([$ext_builddir/libmbfl], [1])
+  PHP_ADD_BUILD_DIR([
+    $ext_builddir/libmbfl/filters
+    $ext_builddir/libmbfl/mbfl
+    $ext_builddir/libmbfl/nls
+  ])
   PHP_MBSTRING_ADD_INCLUDE([libmbfl])
   PHP_MBSTRING_ADD_INCLUDE([libmbfl/mbfl])
 
