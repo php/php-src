@@ -3051,8 +3051,9 @@ PHP_METHOD(DateTimeImmutable, __unserialize)
 }
 /* }}} */
 
-/* {{{ */
-PHP_METHOD(DateTime, __wakeup)
+/* {{{
+ * Common implementation for DateTime::__wakeup() and DateTimeImmutable::__wakeup() */
+static void php_do_date_time_wakeup(INTERNAL_FUNCTION_PARAMETERS, const char *class_name)
 {
 	zval             *object = ZEND_THIS;
 	php_date_obj     *dateobj;
@@ -3065,29 +3066,23 @@ PHP_METHOD(DateTime, __wakeup)
 	myht = Z_OBJPROP_P(object);
 
 	if (!php_date_initialize_from_hash(&dateobj, myht)) {
-		zend_throw_error(NULL, "Invalid serialization data for DateTime object");
+		zend_throw_error(NULL, "Invalid serialization data for %s object", class_name);
 		RETURN_THROWS();
 	}
 }
 /* }}} */
 
 /* {{{ */
+PHP_METHOD(DateTime, __wakeup)
+{
+	php_do_date_time_wakeup(INTERNAL_FUNCTION_PARAM_PASSTHRU, "DateTime");
+}
+/* }}} */
+
+/* {{{ */
 PHP_METHOD(DateTimeImmutable, __wakeup)
 {
-	zval             *object = ZEND_THIS;
-	php_date_obj     *dateobj;
-	HashTable        *myht;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	dateobj = Z_PHPDATE_P(object);
-
-	myht = Z_OBJPROP_P(object);
-
-	if (!php_date_initialize_from_hash(&dateobj, myht)) {
-		zend_throw_error(NULL, "Invalid serialization data for DateTimeImmutable object");
-		RETURN_THROWS();
-	}
+	php_do_date_time_wakeup(INTERNAL_FUNCTION_PARAM_PASSTHRU, "DateTimeImmutable");
 }
 /* }}} */
 
