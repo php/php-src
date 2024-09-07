@@ -73,6 +73,22 @@ int fpm_scoreboard_init_main(void)
 	return 0;
 }
 
+static inline void fpm_scoreboard_readers_decrement(struct fpm_scoreboard_s *scoreboard)
+{
+	fpm_spinlock(&scoreboard->lock, 1);
+	if (scoreboard->reader_count > 0) {
+		scoreboard->reader_count -= 1;
+	}
+#ifdef PHP_FPM_ZLOG_TRACE
+	unsigned int current_reader_count = scoreboard->reader_count;
+#endif
+	fpm_unlock(scoreboard->lock);
+#ifdef PHP_FPM_ZLOG_TRACE
+	/* this is useful for debugging but currently needs to be hidden as external logger would always log it */
+	zlog(ZLOG_DEBUG, "scoreboard: for proc %d reader decremented to value %u", getpid(), current_reader_count);
+#endif
+}
+
 static struct fpm_scoreboard_s *fpm_scoreboard_get_for_update(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 {
 	if (!scoreboard) {
@@ -93,7 +109,33 @@ void fpm_scoreboard_update_begin(struct fpm_scoreboard_s *scoreboard) /* {{{ */
 		return;
 	}
 
-	fpm_spinlock(&scoreboard->lock, 0);
+	int retries = 0;
+	while (1) {
+		fpm_spinlock(&scoreboard->lock, 1);
+		if (scoreboard->reader_count == 0) {
+			if (!fpm_spinlock_with_max_retries(&scoreboard->writer_active, FPM_SCOREBOARD_SPINLOCK_MAX_RETRIES)) {
+				/* in this case the writer might have crashed so just warn and continue as the lock was acquired */
+				zlog(ZLOG_WARNING, "scoreboard: writer %d waited too long for another writer to release lock.", getpid());
+			}
+#ifdef PHP_FPM_ZLOG_TRACE
+			else {
+				zlog(ZLOG_DEBUG, "scoreboard: writer lock acquired by writer %d", getpid());
+			}
+#endif
+			fpm_unlock(scoreboard->lock);
+			break;
+		}
+		fpm_unlock(scoreboard->lock);
+
+		if (++retries > FPM_SCOREBOARD_SPINLOCK_MAX_RETRIES) {
+			/* decrement reader count by 1 (assuming a killed or crashed reader) */
+			fpm_scoreboard_readers_decrement(scoreboard);
+			zlog(ZLOG_WARNING, "scoreboard: writer detected a potential crashed reader, decrementing reader count.");
+			retries = 0;
+		}
+
+		sched_yield();
+	}
 }
 /* }}} */
 
@@ -170,7 +212,10 @@ void fpm_scoreboard_update_commit(
 		scoreboard->active_max = scoreboard->active;
 	}
 
-	fpm_unlock(scoreboard->lock);
+	fpm_unlock(scoreboard->writer_active);
+#ifdef PHP_FPM_ZLOG_TRACE
+	zlog(ZLOG_DEBUG, "scoreboard: writer lock released by writer %d", getpid());
+#endif
 }
 /* }}} */
 
@@ -234,16 +279,37 @@ struct fpm_scoreboard_proc_s *fpm_scoreboard_proc_get_from_child(struct fpm_chil
 
 struct fpm_scoreboard_s *fpm_scoreboard_acquire(struct fpm_scoreboard_s *scoreboard, int nohang) /* {{{ */
 {
-	struct fpm_scoreboard_s *s;
-
-	s = scoreboard ? scoreboard : fpm_scoreboard;
+	struct fpm_scoreboard_s *s = scoreboard ? scoreboard : fpm_scoreboard;
 	if (!s) {
 		return NULL;
 	}
 
-	if (!fpm_spinlock(&s->lock, nohang)) {
-		return NULL;
+	int retries = 0;
+	while (1) {
+		/* increment reader if no writer active */
+		fpm_spinlock(&s->lock, 1);
+		if (!s->writer_active) {
+			s->reader_count += 1;
+#ifdef PHP_FPM_ZLOG_TRACE
+			unsigned int current_reader_count = s->reader_count;
+#endif
+			fpm_unlock(s->lock);
+#ifdef PHP_FPM_ZLOG_TRACE
+			zlog(ZLOG_DEBUG, "scoreboard: for proc %d reader incremented to value %u", getpid(), current_reader_count);
+#endif
+			break;
+		}
+		fpm_unlock(s->lock);
+
+		sched_yield();
+
+        if (++retries > FPM_SCOREBOARD_SPINLOCK_MAX_RETRIES) {
+            zlog(ZLOG_WARNING, "scoreboard: reader waited too long for writer to release lock.");
+			fpm_scoreboard_readers_decrement(s);
+			return NULL;
+        }
 	}
+
 	return s;
 }
 /* }}} */
@@ -253,7 +319,7 @@ void fpm_scoreboard_release(struct fpm_scoreboard_s *scoreboard) {
 		return;
 	}
 
-	scoreboard->lock = 0;
+	fpm_scoreboard_readers_decrement(scoreboard);
 }
 
 struct fpm_scoreboard_s *fpm_scoreboard_copy(struct fpm_scoreboard_s *scoreboard, int copy_procs)
