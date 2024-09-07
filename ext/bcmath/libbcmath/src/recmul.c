@@ -72,6 +72,10 @@ static inline void bc_fast_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len,
 	}
 }
 
+/*
+ * Equivalent of bc_fast_mul for small numbers to perform computations
+ * without using array.
+ */
 static inline void bc_fast_square(bc_num n1, size_t n1len, bc_num *prod)
 {
 	const char *n1end = n1->n_value + n1len - 1;
