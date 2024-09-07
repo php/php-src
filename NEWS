@@ -49,6 +49,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15718 (Segfault on ReflectionProperty::get{Hook,Hooks}() on
     dynamic properties). (DanielEScherzer)
 
+- SOAP:
+  . Fixed bug #61525 (SOAP functions require at least one space after HTTP
+    header colon). (nielsdos)
+
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
   . Implemented GH-15685 (improve proc_open error reporting on Windows). (cmb)
