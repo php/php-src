@@ -53,6 +53,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #61525 (SOAP functions require at least one space after HTTP
     header colon). (nielsdos)
+  . Implement request #47317 (SoapServer::__getLastResponse()). (nielsdos)
 
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)

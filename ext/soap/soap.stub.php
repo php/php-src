@@ -527,6 +527,8 @@ namespace {
 
         /** @tentative-return-type */
         public function handle(?string $request = null): void {}
+
+        public function __getLastResponse(): ?string {}
     }
 
     class SoapClient
