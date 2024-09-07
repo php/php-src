@@ -31,7 +31,7 @@ using namespace blocks:
        /** @var string */
        const ANIMAL = "Elephant";
        /** @var float */
-       const WEIGHT_TON: 6.8;
+       const WEIGHT_TON = 6.8;
 
        class Atmopshere {
            public function calculateBar(): float {}
