@@ -834,6 +834,17 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 static zend_string *get_serialization_string_from_zval(zval *data)
 {
 	switch (Z_TYPE_P(data)) {
+		case IS_OBJECT:
+			if (Z_OBJCE_P(data)->ce_flags & ZEND_ACC_ENUM) {
+				if (UNEXPECTED(Z_OBJCE_P(data)->enum_backing_type == IS_UNDEF)) {
+					zend_value_error("Non-backed enums have no default serialization");
+					return zend_empty_string;
+				} else {
+					zval *value = zend_enum_fetch_case_value(Z_OBJ_P(data));
+					return zval_get_string_func(value);
+				}
+			}
+			ZEND_FALLTHROUGH;
 		default:
 			return zval_get_string_func(data);
 	}
