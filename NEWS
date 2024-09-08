@@ -12,6 +12,7 @@ PHP                                                                        NEWS
   . Fixed bug GH-15587 (CRC32 API build error on arm 32-bit).
     (Bernd Kuhls, Thomas Petazzoni)
   . Fixed bug GH-15330 (Do not scan generator frames more than once). (Arnaud)
+  . Fixed uninitialized lineno in constant AST of internal enums. (ilutov)
 
 - Curl:
   . FIxed bug GH-15547 (curl_multi_select overflow on timeout argument).
