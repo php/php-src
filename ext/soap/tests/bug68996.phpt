@@ -18,6 +18,18 @@ function foo() {
 }
 $s->addFunction("foo");
 
+function handleFormatted($s, $input) {
+  ob_start();
+  $s->handle($input);
+  $response = ob_get_clean();
+
+  // libxml2 2.13 has different formatting behaviour: it outputs <faultcode/> instead of <faultcode></faultcode>
+  // this normalizes the output to <faultcode/>
+  $response = str_replace('<faultcode></faultcode>', '<faultcode/>', $response);
+  $response = str_replace('<env:Value></env:Value>', '<env:Value/>', $response);
+  echo $response;
+}
+
 // soap 1.1
 $HTTP_RAW_POST_DATA = <<<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -27,7 +39,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>
 EOF;
-$s->handle($HTTP_RAW_POST_DATA);
+handleFormatted($s, $HTTP_RAW_POST_DATA);
 
 // soap 1.2
 $HTTP_RAW_POST_DATA = <<<EOF
@@ -38,10 +50,10 @@ $HTTP_RAW_POST_DATA = <<<EOF
   </env:Body>
 </env:Envelope>
 EOF;
-$s->handle($HTTP_RAW_POST_DATA);
+handleFormatted($s, $HTTP_RAW_POST_DATA);
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode></faultcode><faultstring>some msg</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode/><faultstring>some msg</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
-<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Body><env:Fault><env:Code><env:Value></env:Value></env:Code><env:Reason><env:Text>some msg</env:Text></env:Reason></env:Fault></env:Body></env:Envelope>
+<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope"><env:Body><env:Fault><env:Code><env:Value/></env:Code><env:Reason><env:Text>some msg</env:Text></env:Reason></env:Fault></env:Body></env:Envelope>
