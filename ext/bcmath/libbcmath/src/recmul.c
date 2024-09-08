@@ -186,7 +186,7 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		}
 	}
 
-	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod);
+	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
 
 	efree(buf);
 }
@@ -231,7 +231,7 @@ static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
 		}
 	}
 
-	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod);
+	bc_mul_finish_from_vector(prod_vector, prod_arr_size, prodlen, prod);
 
 	efree(buf);
 }
