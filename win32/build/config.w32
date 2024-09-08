@@ -324,13 +324,9 @@ STDOUT.WriteBlankLines(1);
 /* Can we build with IPv6 support? */
 ARG_ENABLE("ipv6", "Disable IPv6 support (default is turn it on if available)", "yes");
 
-var main_network_has_ipv6 = 0;
+AC_DEFINE('HAVE_GAI_STRERROR', 1);
 if (PHP_IPV6 == "yes") {
-	main_network_has_ipv6 = CHECK_HEADER_ADD_INCLUDE("wspiapi.h", "CFLAGS") ? 1 : 0;
-}
-if (main_network_has_ipv6) {
 	STDOUT.WriteLine("Enabling IPv6 support");
-	AC_DEFINE('HAVE_GAI_STRERROR', 1);
 	AC_DEFINE('HAVE_IPV6', 1);
 }
 
