@@ -200,6 +200,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Autoconf macros PHP_NEW_EXTENSION, PHP_ADD_SOURCES, PHP_ADD_SOURCES_X,
      PHP_SELECT_SAPI now have the source files and flags arguments normalized so
      the list of items can be passed as a blank-or-newline-separated list.
+   - Autoconf macro PHP_ADD_INCLUDE now takes also a blank-or-newline-separated
+     list of include directories instead of a single directory. The "prepend"
+     argument is validated at Autoconf compile time.
    - TSRM/tsrm.m4 file and its TSRM_CHECK_PTHREADS macro have been removed.
    - Added pkg-config support to find libpq for the pdo_pgsql and pgsql
      extensions. The libpq paths can be customized with the PGSQL_CFLAGS and
