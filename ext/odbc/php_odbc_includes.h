@@ -25,28 +25,12 @@
 
 #if defined(HAVE_IODBC) /* iODBC library */
 
-#ifdef CHAR
-#undef CHAR
-#endif
-
-#ifdef SQLCHAR
-#undef SQLCHAR
-#endif
-
 #define ODBC_TYPE "iODBC"
 #include <sql.h>
 #include <sqlext.h>
 #include <iodbcext.h>
 
 #elif defined(HAVE_UNIXODBC) /* unixODBC library */
-
-#ifdef CHAR
-#undef CHAR
-#endif
-
-#ifdef SQLCHAR
-#undef SQLCHAR
-#endif
 
 #define ODBC_TYPE "unixODBC"
 #undef ODBCVER
