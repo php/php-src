@@ -112,7 +112,7 @@ if test "$PHP_APXS2" != "no"; then
 
   AS_IF([$APXS_HTTPD -V 2>/dev/null | grep 'threaded:.*yes' >/dev/null 2>&1], [
     APACHE_THREADED_MPM=yes
-    PHP_BUILD_THREAD_SAFE
+    enable_zts=yes
   ], [APACHE_THREADED_MPM=no])
 
 AC_CONFIG_COMMANDS([apache2handler], [AS_VAR_IF([enable_zts], [yes],,
