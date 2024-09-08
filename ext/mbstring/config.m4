@@ -18,69 +18,38 @@ AC_DEFUN([PHP_MBSTRING_ADD_CFLAG], [
   PHP_MBSTRING_CFLAGS="$PHP_MBSTRING_CFLAGS $1"
 ])
 
-AC_DEFUN([PHP_MBSTRING_EXTENSION], [
-  PHP_NEW_EXTENSION([mbstring],
-    [$PHP_MBSTRING_BASE_SOURCES $PHP_MBSTRING_SOURCES],
-    [$ext_shared],,
-    [$PHP_MBSTRING_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
-  PHP_SUBST([MBSTRING_SHARED_LIBADD])
-
-  for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
-    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], [1])
-  done
-
-  for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
-    PHP_ADD_INCLUDE([$ext_srcdir/$dir])
-    PHP_ADD_INCLUDE([$ext_builddir/$dir])
-  done
-
-  out="php_config.h"
-
-  if test "$ext_shared" != "no" && test -f "$ext_builddir/config.h.in"; then
-    out="$abs_builddir/config.h"
-  fi
-
-  cat > $ext_builddir/libmbfl/config.h <<EOF
-#include "$out"
-EOF
-
-  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h])
-])
-
 AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
-  if test "$PHP_MBREGEX" = "yes"; then
-    PKG_CHECK_MODULES([ONIG], [oniguruma])
-    PHP_EVAL_LIBLINE([$ONIG_LIBS], [MBSTRING_SHARED_LIBADD])
-    PHP_EVAL_INCLINE([$ONIG_CFLAGS])
+  PKG_CHECK_MODULES([ONIG], [oniguruma])
+  PHP_EVAL_LIBLINE([$ONIG_LIBS], [MBSTRING_SHARED_LIBADD])
+  PHP_EVAL_INCLINE([$ONIG_CFLAGS])
 
-    AC_CACHE_CHECK([if oniguruma has an invalid entry for KOI8 encoding],
-      [php_cv_lib_onig_invalid_koi8],
-      [save_old_LIBS=$LIBS
-        LIBS="$LIBS $MBSTRING_SHARED_LIBADD"
-        save_old_CFLAGS=$CFLAGS
-        CFLAGS="$CFLAGS $ONIG_CFLAGS"
-        AC_LINK_IFELSE([AC_LANG_PROGRAM([
-          #include <stdint.h>
-          #include <oniguruma.h>
-        ],
-        [return (intptr_t)(ONIG_ENCODING_KOI8 + 1);])],
-        [php_cv_lib_onig_invalid_koi8=no],
-        [php_cv_lib_onig_invalid_koi8=yes])
-        LIBS=$save_old_LIBS
-        CFLAGS=$save_old_CFLAGS])
-    AS_VAR_IF([php_cv_lib_onig_invalid_koi8], [yes],
-      [AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1],
-        [Define to 1 if oniguruma has an invalid entry for KOI8 encoding.])])
+  AC_CACHE_CHECK([if oniguruma has an invalid entry for KOI8 encoding],
+    [php_cv_lib_onig_invalid_koi8],
+    [save_old_LIBS=$LIBS
+      LIBS="$LIBS $MBSTRING_SHARED_LIBADD"
+      save_old_CFLAGS=$CFLAGS
+      CFLAGS="$CFLAGS $ONIG_CFLAGS"
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([
+        #include <stdint.h>
+        #include <oniguruma.h>
+      ],
+      [return (intptr_t)(ONIG_ENCODING_KOI8 + 1);])],
+      [php_cv_lib_onig_invalid_koi8=no],
+      [php_cv_lib_onig_invalid_koi8=yes])
+      LIBS=$save_old_LIBS
+      CFLAGS=$save_old_CFLAGS])
+  AS_VAR_IF([php_cv_lib_onig_invalid_koi8], [yes],
+    [AC_DEFINE([PHP_ONIG_BAD_KOI8_ENTRY], [1],
+      [Define to 1 if oniguruma has an invalid entry for KOI8 encoding.])])
 
-    PHP_MBSTRING_ADD_CFLAG([-DONIG_ESCAPE_UCHAR_COLLISION=1])
-    PHP_MBSTRING_ADD_CFLAG([-DUChar=OnigUChar])
+  PHP_MBSTRING_ADD_CFLAG([-DONIG_ESCAPE_UCHAR_COLLISION=1])
+  PHP_MBSTRING_ADD_CFLAG([-DUChar=OnigUChar])
 
-    AC_DEFINE([HAVE_MBREGEX], [1],
-      [Define to 1 if mbstring has multibyte regex support enabled.])
+  AC_DEFINE([HAVE_MBREGEX], [1],
+    [Define to 1 if mbstring has multibyte regex support enabled.])
 
-    PHP_MBSTRING_ADD_BASE_SOURCES([php_mbregex.c])
-    PHP_INSTALL_HEADERS([ext/mbstring], [php_mbregex.h php_onig_compat.h])
-  fi
+  PHP_MBSTRING_ADD_BASE_SOURCES([php_mbregex.c])
+  PHP_INSTALL_HEADERS([ext/mbstring], [php_mbregex.h php_onig_compat.h])
 ])
 
 AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
@@ -173,10 +142,38 @@ if test "$PHP_MBSTRING" != "no"; then
 
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
 
-  AS_VAR_IF([PHP_MBREGEX], [no],, [PHP_MBSTRING_SETUP_MBREGEX])
+  AS_VAR_IF([PHP_MBREGEX], [yes], [PHP_MBSTRING_SETUP_MBREGEX])
 
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
-  PHP_MBSTRING_EXTENSION
+
+  PHP_NEW_EXTENSION([mbstring],
+    [$PHP_MBSTRING_BASE_SOURCES $PHP_MBSTRING_SOURCES],
+    [$ext_shared],,
+    [$PHP_MBSTRING_CFLAGS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1])
+
+  PHP_SUBST([MBSTRING_SHARED_LIBADD])
+
+  for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
+    PHP_ADD_BUILD_DIR([$ext_builddir/$dir], [1])
+  done
+
+  for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
+    PHP_ADD_INCLUDE([$ext_srcdir/$dir])
+    PHP_ADD_INCLUDE([$ext_builddir/$dir])
+  done
+
+  out="php_config.h"
+
+  if test "$ext_shared" != "no" && test -f "$ext_builddir/config.h.in"; then
+    out="$abs_builddir/config.h"
+  fi
+
+  cat > $ext_builddir/libmbfl/config.h <<EOF
+#include "$out"
+EOF
+
+  PHP_INSTALL_HEADERS([ext/mbstring], [mbstring.h])
+
   PHP_ADD_EXTENSION_DEP(mbstring, pcre)
 fi
