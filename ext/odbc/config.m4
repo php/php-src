@@ -202,15 +202,18 @@ PHP_ARG_WITH([ibm-db2],
     ODBC_TYPE=ibm-db2
     ODBC_LIBS=-ldb2
 
-    PHP_TEST_BUILD([SQLExecute],
+    dnl Sanity check.
+    old_LIBS=$LIBS
+    LIBS="$ODBC_LFLAGS $ODBC_LIBS $LIBS"
+    AC_CHECK_FUNC([SQLExecute],
       [AC_DEFINE([HAVE_IBMDB2], [1],
         [Define to 1 if the odbc extension uses the IBM DB2.])],
       [AC_MSG_FAILURE([
 ODBC build test failed. You need to source your DB2 environment before running
 PHP configure:
 # . \$IBM_DB2/db2profile
-])],
-    [$ODBC_LFLAGS $ODBC_LIBS])
+])])
+    LIBS=$old_LIBS
   ])
 ])
 
