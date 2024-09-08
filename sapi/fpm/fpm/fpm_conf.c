@@ -106,6 +106,7 @@ static const struct ini_value_parser_s ini_fpm_global_options[] = {
 #ifdef HAVE_SYSTEMD
 	{ "systemd_interval",            &fpm_conf_set_time,            GO(systemd_interval) },
 #endif
+	{ "proctitle_prefix",            &fpm_conf_set_string,          GO(proctitle_prefix) },
 	{ 0, 0, 0 }
 };
 
