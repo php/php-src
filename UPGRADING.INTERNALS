@@ -189,6 +189,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      symbol anymore and requires at least libxml2 2.9.4.
    - Autoconf macro PHP_SETUP_ICONV doesn't define the HAVE_ICONV symbol
      anymore.
+   - Autoconf macro PHP_AP_EXTRACT_VERSION is obsolete (use the
+     'apxs -q HTTPD_VERSION').
    - Autoconf macro PHP_OUTPUT is obsolete (use AC_CONFIG_FILES).
    - Autoconf macro PHP_PROG_SETUP now accepts an argument to set the minimum
      required PHP version during the build.

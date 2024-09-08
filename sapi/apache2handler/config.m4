@@ -53,9 +53,19 @@ if test "$PHP_APXS2" != "no"; then
     AS_CASE([$flag], [-D*], [APACHE_CPPFLAGS="$APACHE_CPPFLAGS $flag"])
   done
 
-  dnl Check Apache version.
-  PHP_AP_EXTRACT_VERSION([$APXS_HTTPD])
-  AS_VERSION_COMPARE([$APACHE_VERSION], [2004000],
+  dnl Check Apache version. The HTTPD_VERSION was added in Apache 2.4.17.
+  dnl Earlier versions can use the Apache HTTP Server command-line utility.
+  APACHE_VERSION=$($APXS -q HTTPD_VERSION 2>/dev/null)
+  AS_VAR_IF([APACHE_VERSION],, [
+    ac_output=$($APXS_HTTPD -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//')
+    ac_IFS=$IFS
+    IFS="- /.
+"
+    set $ac_output
+    IFS=$ac_IFS
+    APACHE_VERSION="$4.$5.$6"
+  ])
+  AS_VERSION_COMPARE([$APACHE_VERSION], [2.4.0],
     [AC_MSG_ERROR([Please note that Apache version >= 2.4 is required])])
 
   APXS_LIBEXECDIR='$(INSTALL_ROOT)'$($APXS -q LIBEXECDIR)
