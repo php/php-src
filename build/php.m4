@@ -2030,7 +2030,8 @@ dnl PHP_AP_EXTRACT_VERSION(/path/httpd)
 dnl
 dnl This macro is used to get a comparable version for Apache.
 dnl
-AC_DEFUN([PHP_AP_EXTRACT_VERSION],[
+AC_DEFUN([PHP_AP_EXTRACT_VERSION], [m4_warn([obsolete],
+  [The macro 'PHP_AP_EXTRACT_VERSION' is obsolete. Use 'apxs -q HTTPD_VERSION'])
 AS_IF([test -x "$1"], [
   ac_output=$($1 -v 2>&1 | grep version | $SED -e 's/Oracle-HTTP-//')
   ac_IFS=$IFS
