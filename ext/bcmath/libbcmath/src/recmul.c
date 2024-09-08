@@ -94,8 +94,9 @@ static inline void bc_fast_square(bc_num n1, size_t n1len, bc_num *prod)
 	}
 }
 
-/** Common part of functions bc_standard_mul and bc_standard_square */
-static inline void bc_standard_mul_common(BC_VECTOR *prod_vector, size_t prod_arr_size, size_t prodlen, bc_num *prod, BC_VECTOR *buf) {
+/* Common part of functions bc_standard_mul and bc_standard_square
+ * that takes a vector and converts it to a bc_num 	*/
+static inline void bc_mul_finish_from_vector(BC_VECTOR *prod_vector, size_t prod_arr_size, size_t prodlen, bc_num *prod) {
 	/*
 	 * Move a value exceeding 4/8 digits by carrying to the next digit.
 	 * However, the last digit does nothing.
@@ -127,8 +128,6 @@ static inline void bc_standard_mul_common(BC_VECTOR *prod_vector, size_t prod_ar
 		*pend-- = prod_vector[i] % BASE;
 		prod_vector[i] /= BASE;
 	}
-
-	efree(buf);
 }
 
 /*
@@ -187,7 +186,9 @@ static void bc_standard_mul(bc_num n1, size_t n1len, bc_num n2, size_t n2len, bc
 		}
 	}
 
-	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod, buf);
+	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod);
+
+	efree(buf);
 }
 
 /** This is bc_standard_mul implementation for square */
@@ -230,7 +231,9 @@ static void bc_standard_square(bc_num n1, size_t n1len, bc_num *prod)
 		}
 	}
 
-	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod, buf);
+	bc_standard_mul_common(prod_vector, prod_arr_size, prodlen, prod);
+
+	efree(buf);
 }
 
 /* The multiply routine. N2 times N1 is put int PROD with the scale of
