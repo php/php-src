@@ -192,6 +192,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Autoconf macro PHP_AP_EXTRACT_VERSION is obsolete (use the
      'apxs -q HTTPD_VERSION').
    - Autoconf macro PHP_OUTPUT is obsolete (use AC_CONFIG_FILES).
+   - Autoconf macro PHP_TEST_BUILD is obsolete (use AC_* macros).
+   - Autoconf macro PHP_BUILD_THREAD_SAFE is obsolete (set enable_zts manually).
+   - Autoconf macro PHP_DEF_HAVE is obsolete (use AC_DEFINE).
    - Autoconf macro PHP_PROG_SETUP now accepts an argument to set the minimum
      required PHP version during the build.
    - Autoconf macro PHP_INSTALL_HEADERS arguments can now be also

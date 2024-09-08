@@ -31,7 +31,9 @@ dnl PHP_DEF_HAVE(what)
 dnl
 dnl Generates 'AC_DEFINE(HAVE_WHAT, 1, [ ])'.
 dnl
-AC_DEFUN([PHP_DEF_HAVE],[AC_DEFINE([HAVE_]translit($1,a-z_.-,A-Z___), 1, [ ])])
+AC_DEFUN([PHP_DEF_HAVE], [m4_warn([obsolete],
+  [The macro 'PHP_DEF_HAVE' is obsolete. Use AC_DEFINE.])
+AC_DEFINE([HAVE_]translit($1,a-z_.-,A-Z___), 1, [ ])])
 
 dnl
 dnl PHP_RUN_ONCE(namespace, variable, code)
@@ -744,7 +746,9 @@ dnl ----------------------------------------------------------------------------
 dnl
 dnl PHP_BUILD_THREAD_SAFE
 dnl
-AC_DEFUN([PHP_BUILD_THREAD_SAFE], [enable_zts=yes])
+AC_DEFUN([PHP_BUILD_THREAD_SAFE], [m4_warn([obsolete],
+  [The macro 'PHP_BUILD_THREAD_SAFE' is obsolete. Set 'enable_zts' manually.])
+  enable_zts=yes])
 
 dnl
 dnl PHP_REQUIRE_CXX
@@ -1510,7 +1514,8 @@ dnl PHP_TEST_BUILD(function, action-if-ok, action-if-not-ok [, extra-libs [, ext
 dnl
 dnl This macro checks whether build works and given function exists.
 dnl
-AC_DEFUN([PHP_TEST_BUILD], [
+AC_DEFUN([PHP_TEST_BUILD], [m4_warn([obsolete],
+  [The macro 'PHP_TEST_BUILD' is obsolete. Use AC_* macros.])
   old_LIBS=$LIBS
   LIBS="$4 $LIBS"
   AC_LINK_IFELSE([AC_LANG_SOURCE([
