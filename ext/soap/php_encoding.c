@@ -25,6 +25,7 @@
 #include <libxml/parserInternals.h>
 #include "zend_strtod.h"
 #include "zend_interfaces.h"
+#include "zend_enum.h"
 
 /* zval type decode */
 static zval *to_zval_double(zval* ret, encodeTypePtr type, xmlNodePtr data);
@@ -830,25 +831,25 @@ static zval *to_zval_hexbin(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	return ret;
 }
 
+static zend_string *get_serialization_string_from_zval(zval *data)
+{
+	switch (Z_TYPE_P(data)) {
+		default:
+			return zval_get_string_func(data);
+	}
+}
+
 static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr ret, text;
-	char *str;
-	int new_len;
 
 	ret = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, ret);
 	FIND_ZVAL_NULL(data, ret, style);
 
-	if (Z_TYPE_P(data) == IS_STRING) {
-		str = estrndup(Z_STRVAL_P(data), Z_STRLEN_P(data));
-		new_len = Z_STRLEN_P(data);
-	} else {
-		zend_string *tmp = zval_get_string_func(data);
-		str = estrndup(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
-		new_len = ZSTR_LEN(tmp);
-		zend_string_release_ex(tmp, 0);
-	}
+	zend_string *serialization = get_serialization_string_from_zval(data);
+	char *str = ZSTR_VAL(serialization);
+	size_t new_len = ZSTR_LEN(serialization);
 
 	if (SOAP_GLOBAL(encoding) != NULL) {
 		xmlBufferPtr in  = xmlBufferCreateStatic(str, new_len);
@@ -856,7 +857,8 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 		int n = xmlCharEncInFunc(SOAP_GLOBAL(encoding), out, in);
 
 		if (n >= 0) {
-			efree(str);
+			zend_string_release(serialization);
+			serialization = NULL;
 			str = estrdup((char*)xmlBufferContent(out));
 			new_len = n;
 		}
@@ -907,7 +909,11 @@ static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNo
 
 	text = xmlNewTextLen(BAD_CAST(str), new_len);
 	xmlAddChild(ret, text);
-	efree(str);
+	if (serialization) {
+		zend_string_release(serialization);
+	} else {
+		efree(str);
+	}
 
 	if (style == SOAP_ENCODED) {
 		set_ns_and_type(ret, type);
