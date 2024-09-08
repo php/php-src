@@ -467,9 +467,9 @@ AC_DEFUN([PHP_UTILIZE_RPATHS],[
 ])
 
 dnl
-dnl PHP_ADD_INCLUDE(paths [,before])
+dnl PHP_ADD_INCLUDE(paths [,prepend])
 dnl
-dnl Add blank-or-newline-separated list of include paths. If "before" is given,
+dnl Add blank-or-newline-separated list of include paths. If "prepend" is given,
 dnl paths are prepended to the beginning of INCLUDES.
 dnl
 AC_DEFUN([PHP_ADD_INCLUDE], [
