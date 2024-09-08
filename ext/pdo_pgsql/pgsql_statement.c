@@ -99,18 +99,18 @@ static void pgsql_stmt_finish(pdo_pgsql_stmt *S, int fin_mode)
 	if (S->stmt_name && S->is_prepared && (fin_mode & FIN_CLOSE)) {
 		PGresult *res;
 #ifndef HAVE_PQCLOSEPREPARED
-			// TODO (??) libpq does not support close statement protocol < postgres 17
-			// check if we can circumvent this.
-			char *q = NULL;
-			spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
-			res = PQexec(H->server, q);
-			efree(q);
+		// TODO (??) libpq does not support close statement protocol < postgres 17
+		// check if we can circumvent this.
+		char *q = NULL;
+		spprintf(&q, 0, "DEALLOCATE %s", S->stmt_name);
+		res = PQexec(H->server, q);
+		efree(q);
 #else
-			res = PQclosePrepared(H->server, S->stmt_name);
+		res = PQclosePrepared(H->server, S->stmt_name);
 #endif
-			if (res) {
-				PQclear(res);
-			}
+		if (res) {
+			PQclear(res);
+		}
 
 		S->is_prepared = false;
 		if (H->running_stmt == S) {
@@ -284,7 +284,7 @@ stmt_retry:
 					S->param_formats,
 					0);
 		} else {
-		S->result = PQexecPrepared(H->server, S->stmt_name,
+			S->result = PQexecPrepared(H->server, S->stmt_name,
 				stmt->bound_params ?
 					zend_hash_num_elements(stmt->bound_params) :
 					0,
@@ -304,7 +304,7 @@ stmt_retry:
 					S->param_formats,
 					0);
 		} else {
-		S->result = PQexecParams(H->server, ZSTR_VAL(S->query),
+			S->result = PQexecParams(H->server, ZSTR_VAL(S->query),
 				stmt->bound_params ? zend_hash_num_elements(stmt->bound_params) : 0,
 				S->param_types,
 				(const char**)S->param_values,
@@ -317,7 +317,7 @@ stmt_retry:
 		if (S->is_unbuffered) {
 			dispatch_result = PQsendQuery(H->server, ZSTR_VAL(stmt->active_query_string));
 		} else {
-		S->result = PQexec(H->server, ZSTR_VAL(stmt->active_query_string));
+			S->result = PQexec(H->server, ZSTR_VAL(stmt->active_query_string));
 		}
 	}
 
