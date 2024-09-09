@@ -4,7 +4,7 @@ GH-15658 (Segmentation fault in Zend/zend_vm_execute.h)
 opcache
 --INI--
 opcache.jit=0101
-opcache.jit_buffer_size=1024M
+opcache.jit_buffer_size=64M
 --FILE--
 <?php
 echo match (random_int(1, 2)) {
