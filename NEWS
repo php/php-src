@@ -19,6 +19,7 @@ PHP                                                                        NEWS
     (nielsdos)
   . Fixed bug GH-15731 (AllowDynamicProperties validation should error on
     enums). (DanielEScherzer)
+  . Fixed uninitialized lineno in constant AST of internal enums. (ilutov)
 
 - Curl:
   . The CURLOPT_DNS_USE_GLOBAL_CACHE option is now silently ignored. (Ayesh Karunaratne)
