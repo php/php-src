@@ -7,7 +7,7 @@ libdir=@orig_libdir@
 # PHP extension directory containing dynamically loadable PHP extensions.
 php_extension_dir=@EXTENSION_DIR@
 # PHP version as integer.
-php_version_id=@PHP_VERSION_ID@
+php_vernum=@PHP_VERSION_ID@
 # The path where to scan for additional INI configuration files.
 php_ini_dir=@EXPANDED_PHP_CONFIG_FILE_SCAN_DIR@
 # The path in which to look for php.ini.
