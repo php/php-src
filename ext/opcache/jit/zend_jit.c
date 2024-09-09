@@ -2541,7 +2541,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_MATCH:
 					/* We have to exit to the VM because the MATCH handler performs an N-way jump for
 					 * which we can't generate simple (opcache.jit=1201) JIT code. */
-					if (!zend_jit_tail_handler(&dasm_state, opline)) {
+					if (!zend_jit_tail_handler(&ctx, opline)) {
 						goto jit_failure;
 					}
 					break;
