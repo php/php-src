@@ -36,6 +36,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15658 (Segmentation fault in Zend/zend_vm_execute.h).
     (nielsdos)
 
+- SOAP:
+  . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
+    headers in array form). (nielsdos)
+
 - Standard:
   . Fixed bug GH-15552 (Signed integer overflow in ext/standard/scanf.c). (cmb)
 
