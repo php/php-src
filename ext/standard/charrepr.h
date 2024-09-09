@@ -14,8 +14,8 @@
   +----------------------------------------------------------------------+
 */
 
-#ifndef STRING_H
-#define STRING_H
+#ifndef CHARREPR_H
+#define CHARREPR_H
 
 typedef struct {
     const char *repr; 
@@ -60,7 +60,7 @@ static const char_repr_t char_reprs[256] = {
 	{"\\\"", 2},
 	{"#", 1},
 	{"$", 1},
-	{"%%", 1},
+	{"%", 1},
 	{"&", 1},
 	{"\'", 1},
 	{"(", 1},
