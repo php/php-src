@@ -143,6 +143,22 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 	}
 }
 
+/* Returned uri must be freed by the caller. */
+xmlChar *schema_location_construct_uri(const xmlAttr *attribute)
+{
+	xmlChar *uri;
+	xmlChar *base = xmlNodeGetBase(attribute->doc, attribute->parent);
+
+	if (base == NULL) {
+		uri = xmlBuildURI(attribute->children->content, attribute->doc->URL);
+	} else {
+		uri = xmlBuildURI(attribute->children->content, base);
+		xmlFree(base);
+	}
+
+	return uri;
+}
+
 /*
 2.6.1 xsi:type
 2.6.2 xsi:nil
@@ -196,15 +212,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 			if (location == NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: include has no 'schemaLocation' attribute");
 			} else {
-				xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(location);
 				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 			}
@@ -216,15 +224,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 			if (location == NULL) {
 				soap_error0(E_ERROR, "Parsing Schema: redefine has no 'schemaLocation' attribute");
 			} else {
-			  xmlChar *uri;
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				xmlChar *uri = schema_location_construct_uri(location);
 				schema_load_file(ctx, NULL, uri, tns, 0);
 				xmlFree(uri);
 				/* TODO: <redefine> support */
@@ -245,14 +245,7 @@ int load_schema(sdlCtx *ctx, xmlNodePtr schema)
 				}
 			}
 			if (location) {
-				xmlChar *base = xmlNodeGetBase(trav->doc, trav);
-
-				if (base == NULL) {
-			    uri = xmlBuildURI(location->children->content, trav->doc->URL);
-				} else {
-	    		uri = xmlBuildURI(location->children->content, base);
-			    xmlFree(base);
-				}
+				uri = schema_location_construct_uri(location);
 			}
 			schema_load_file(ctx, ns, uri, tns, 1);
 			if (uri != NULL) {xmlFree(uri);}
