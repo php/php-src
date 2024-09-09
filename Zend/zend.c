@@ -705,6 +705,7 @@ static void auto_global_copy_ctor(zval *zv) /* {{{ */
 static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{{ */
 {
 	compiler_globals->compiled_filename = NULL;
+	compiler_globals->zend_lineno = 0;
 
 	compiler_globals->function_table = (HashTable *) malloc(sizeof(HashTable));
 	zend_hash_init(compiler_globals->function_table, 1024, NULL, ZEND_FUNCTION_DTOR, 1);
