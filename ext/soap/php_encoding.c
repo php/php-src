@@ -850,6 +850,30 @@ static zend_string *get_serialization_string_from_zval(zval *data)
 	}
 }
 
+static zend_long get_serialization_long_from_zval(zval *data)
+{
+	switch (Z_TYPE_P(data)) {
+		case IS_OBJECT:
+			if (Z_OBJCE_P(data)->ce_flags & ZEND_ACC_ENUM) {
+				if (UNEXPECTED(Z_OBJCE_P(data)->enum_backing_type != IS_LONG)) {
+					if (Z_OBJCE_P(data)->enum_backing_type == IS_UNDEF) {
+						zend_value_error("Non-backed enums have no default serialization");
+					} else {
+						zend_value_error("String-backed enum cannot be serialized as int");
+					}
+					return 0;
+				} else {
+					zval *value = zend_enum_fetch_case_value(Z_OBJ_P(data));
+					ZEND_ASSERT(Z_TYPE_P(value) == IS_LONG);
+					return Z_LVAL_P(value);
+				}
+			}
+			ZEND_FALLTHROUGH;
+		default:
+			return zval_get_long(data);
+	}
+}
+
 static xmlNodePtr to_xml_string(encodeTypePtr type, zval *data, int style, xmlNodePtr parent)
 {
 	xmlNodePtr ret, text;
@@ -1075,7 +1099,7 @@ static xmlNodePtr to_xml_long(encodeTypePtr type, zval *data, int style, xmlNode
 		snprintf(s, sizeof(s), "%0.0F",floor(Z_DVAL_P(data)));
 		xmlNodeSetContent(ret, BAD_CAST(s));
 	} else {
-		zend_string *str = zend_long_to_str(zval_get_long(data));
+		zend_string *str = zend_long_to_str(get_serialization_long_from_zval(data));
 		xmlNodeSetContentLen(ret, BAD_CAST(ZSTR_VAL(str)), ZSTR_LEN(str));
 		zend_string_release_ex(str, 0);
 	}

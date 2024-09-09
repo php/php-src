@@ -8,6 +8,8 @@
                     <xsd:element name="any" type="xsd:any"/>
                     <xsd:element name="hexbin" type="xsd:hexBinary"/>
                     <xsd:element name="nmtokens" type="xsd:NMTOKENS"/>
+                    <xsd:element name="integer" type="xsd:integer"/>
+                    <xsd:element name="short" type="xsd:short"/>
 				</xsd:all>
 			</xsd:complexType>
   </xsd:schema>
