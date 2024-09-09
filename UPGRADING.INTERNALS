@@ -240,8 +240,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Removed checking and linking with obsolete libbind for some functions.
    - Backticks command substitutions in Autoconf code have been replaced with
      $(...). Passing double escaped Makefile variables '\\$(VAR)' to some
-     Autoconf macros should be now done with single quotes '\$(VAR)' or by using
-     regular shell variables.
+     Autoconf macros should be now done with '\$(VAR)' or by using regular shell
+     variables.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,
