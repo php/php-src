@@ -22,5 +22,6 @@ Description: A lightweight SAPI to embed PHP into application using C bindings
 URL: https://www.php.net
 License: PHP
 Version: @PHP_VERSION@
-Requires: php
+Cflags: -I${includedir} -I${includedir}/main -I${includedir}/TSRM -I${includedir}/Zend -I${includedir}/ext -I${includedir}/ext/date/lib
+Libs.private: @EXTRA_LIBS@ @ZEND_EXTRA_LIBS@
 Libs: -L${libdir} -lphp
