@@ -117,6 +117,10 @@ PHPAPI php_basic_globals basic_globals;
 #include "streamsfuncs.h"
 #include "basic_functions_arginfo.h"
 
+#if __has_feature(memory_sanitizer)
+# include <sanitizer/msan_interface.h>
+#endif
+
 typedef struct _user_tick_function_entry {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
@@ -2255,6 +2259,10 @@ PHP_FUNCTION(getservbyport)
 		RETURN_FALSE;
 	}
 
+	/* MSAN false positive, getservbyport() is not properly intercepted. */
+#if __has_feature(memory_sanitizer)
+	__msan_unpoison_string(serv->s_name);
+#endif
 	RETURN_STRING(serv->s_name);
 }
 /* }}} */
