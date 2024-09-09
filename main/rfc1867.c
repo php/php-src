@@ -729,6 +729,13 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 		boundary_len = boundary_end-boundary;
 	}
 
+	/* Boundaries larger than FILLUNIT-strlen("\r\n--") characters lead to
+	 * erroneous parsing */
+	if (boundary_len > FILLUNIT-strlen("\r\n--")) {
+		sapi_module.sapi_error(E_WARNING, "Boundary too large in multipart/form-data POST data");
+		return;
+	}
+
 	/* Initialize the buffer */
 	if (!(mbuff = multipart_buffer_new(boundary, boundary_len))) {
 		sapi_module.sapi_error(E_WARNING, "Unable to initialize the input buffer");
