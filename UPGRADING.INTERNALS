@@ -238,10 +238,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      directory anymore.
    - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
    - Removed checking and linking with obsolete libbind for some functions.
-   - Backticks command substitutions in Autoconf shell code have been replaced
-     with $(...). Passing double escaped Makefile variables (\\$VAR) to compile
-     options arguments in some macros should be now done with single quotes
-     (\$VAR) or by using regular shell variables.
+   - Backticks command substitutions in Autoconf code have been replaced with
+     $(...). Passing double escaped Makefile variables '\\$(VAR)' to some
+     Autoconf macros should be now done with single quotes '\$(VAR)' or by using
+     regular shell variables.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,
