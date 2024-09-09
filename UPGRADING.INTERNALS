@@ -108,6 +108,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 * Removed ZEND_DIM_ALTERNATIVE_SYNTAX constant. This syntax no longer has a
   specialized error message.
 
+* The Zend/zend_istdiostream.h header has been removed.
+
 ========================
 2. Build system changes
 ========================
@@ -122,7 +124,6 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_LIBM has been removed.
    - Symbol HAVE_INET_ATON has been removed.
    - Symbol HAVE_SIGSETJMP has been removed.
-   - The Zend/zend_istdiostream.h header has been removed.
 
  b. Unix build system changes
    - The configure option --with-imap-ssl has been removed.
@@ -137,19 +138,14 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      legacy provider.
    - New configure option --with-openssl-argon2 to enable PASSWORD_ARGON2
      from OpenSSL 3.2
+   - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
    - COOKIE_IO_FUNCTIONS_T symbol has been removed (use cookie_io_functions_t).
    - HAVE_SOCKADDR_UN_SUN_LEN symbol renamed to HAVE_STRUCT_SOCKADDR_UN_SUN_LEN.
    - HAVE_UTSNAME_DOMAINNAME symbol renamed to HAVE_STRUCT_UTSNAME_DOMAINNAME.
-   - PHP_CHECK_IN_ADDR_T Autoconf macro and 'in_addr_t' fallback definition to
-     'u_int' removed (use AC_CHECK_TYPES Autoconf macro instead).
    - HAVE_ODBC2 symbol has been removed in ext/odbc.
-   - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
-   - Removed checking and linking with obsolete libbind for some functions.
    - Symbol HAVE_JSON has been removed (ext/json is always available since PHP
      8.0).
    - Symbol DARWIN has been removed (use __APPLE__ to target Darwin systems).
-   - Symbol MISSING_FCLOSE_DECL and Autoconf macro PHP_MISSING_FCLOSE_DECL were
-     removed.
    - Symbol HAVE_BSD_ICONV has been removed.
    - Symbol ZEND_FIBER_ASM has been removed.
    - Symbols HAVE_DLOPEN and HAVE_DLSYM have been removed.
@@ -165,6 +161,10 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbols PHP_HAVE_AVX512_SUPPORTS and PHP_HAVE_AVX512_VBMI_SUPPORTS are now
      either defined to 1 or undefined.
    - Symbol HAVE_LIBCRYPT has been removed.
+   - Symbol MISSING_FCLOSE_DECL and Autoconf macro PHP_MISSING_FCLOSE_DECL were
+     removed.
+   - PHP_CHECK_IN_ADDR_T Autoconf macro and 'in_addr_t' fallback definition to
+     'u_int' removed (use AC_CHECK_TYPES Autoconf macro instead).
    - Autoconf macro PHP_DEFINE (atomic includes) removed (use AC_DEFINE and
      config.h).
    - Autoconf macro PHP_WITH_SHARED has been removed (use PHP_ARG_WITH).
@@ -179,9 +179,6 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Autoconf macros PHP_CHECK_BUILTIN_* have been removed in favor of
      PHP_CHECK_BUILTIN and all PHP_HAVE_BUILTIN_* symbols changed to be either
      undefined or defined to 1 whether compiler supports the builtin.
-   - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.
-   - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
-     directory anymore.
    - Autoconf macro PHP_SETUP_OPENSSL doesn't accept the 3rd argument anymore.
    - Autoconf macro PHP_EVAL_LIBLINE got a new 3rd argument to override the
      ext_shared checks.
@@ -237,12 +234,17 @@ PHP 8.4 INTERNALS UPGRADE NOTES
        - ac_cv_write_stdout                -> php_cv_have_write_stdout
      and all other checks wrapped with their belonging cache variables (see *.m4
      source files for details).
+   - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
+     directory anymore.
+   - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
+   - Removed checking and linking with obsolete libbind for some functions.
 
  c. Windows build system changes
    - The configure options --with-oci8-11g, --with-oci8-12c, --with-oci8-19,
      --enable-apache2-2handler have been removed.
    - The configure option --enable-apache2-4handler is now an alias for the
      preferred --enable-apache2handler.
+   - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
    - Added Bison flag '-Wall' when generating lexer files as done in *nix build
      system.
    - HAVE_WIN32_NATIVE_THREAD, USE_WIN32_NATIVE_THREAD, ENABLE_THREADS symbols
@@ -256,7 +258,6 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The HAVE_OPENSSL symbol has been removed.
    - The HAVE_OPENSSL_EXT symbol is now consistently defined to value 1 whether
      the openssl extension is available either as shared or built statically.
-   - Added configure option --enable-phpdbg-debug to build phpdbg in debug mode.
    - The win32/build/libs_version.txt file has been removed.
    - MSVC builds now use the new preprocessor (/Zc:preprocessor).
    - The CHECK_HEADER_ADD_INCLUDE function now consistently defines preprocessor
