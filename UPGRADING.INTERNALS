@@ -119,6 +119,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - The configure option --with-mhash emits deprecation warning.
    - The configure option --with-pdo-oci has been removed.
    - The configure option --with-pspell has been removed.
+   - New configure option --with-openssl-legacy-provider to enable OpenSSL
+     legacy provider.
    - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
    - Symbol DBA_CDB_MAKE removed in ext/dba.
    - Symbol HAVE_LIBM has been removed.
@@ -134,8 +136,6 @@ PHP 8.4 INTERNALS UPGRADE NOTES
      ext/ftp and ext/mysqlnd is enabled implicitly, when building with
      ext/openssl (--with-openssl), or explicitly by using new configure options
      --with-ftp-ssl and --with-mysqlnd-ssl.
-   - New configure option --with-openssl-legacy-provider to enable OpenSSL
-     legacy provider.
    - New configure option --with-openssl-argon2 to enable PASSWORD_ARGON2
      from OpenSSL 3.2
    - Added php-config --lib-dir and --lib-embed options for PHP embed SAPI.

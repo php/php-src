@@ -794,6 +794,9 @@ PHP 8.4 UPGRADE NOTES
   . Added mb_ucfirst and mb_lcfirst functions.
     RFC: https://wiki.php.net/rfc/mb_ucfirst
 
+- OpenSSL:
+  . Added openssl_password_hash() and openssl_password_verify().
+
 - PCNTL:
   . Added pcntl_setns allowing a process to be reassociated with a namespace in order
     to share resources with other processes within this context.
