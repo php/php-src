@@ -589,6 +589,8 @@ namespace {
         /** @tentative-return-type */
         public function __getTypes(): ?array {}
 
+        public function __getTargetNamespace(): ?string {}
+
         /** @tentative-return-type */
         public function __getLastRequest(): ?string {}
 
