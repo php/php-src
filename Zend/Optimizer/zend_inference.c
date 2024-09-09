@@ -4914,7 +4914,7 @@ ZEND_API bool zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			return 0;
 		case ZEND_BIND_GLOBAL:
 			if ((opline+1)->opcode == ZEND_BIND_GLOBAL) {
-				return zend_may_throw(opline + 1, ssa_op + 1, op_array, ssa);
+				return zend_may_throw(opline + 1, ssa_op ? ssa_op + 1 : NULL, op_array, ssa);
 			}
 			return 0;
 		case ZEND_ADD:
