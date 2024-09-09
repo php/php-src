@@ -775,6 +775,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_init_call_trampoline_op();
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
 	executor_globals->capture_warnings_during_sccp = 0;
+	executor_globals->user_error_handler_error_reporting = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
 	ZVAL_UNDEF(&executor_globals->user_exception_handler);
 	executor_globals->in_autoload = NULL;
