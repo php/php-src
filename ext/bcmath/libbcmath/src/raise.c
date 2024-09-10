@@ -34,13 +34,16 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+void bc_square_ex(bc_num n1, bc_num *result, size_t scale_min) {
+	bc_num square_ex = bc_square(n1, scale_min);
+	bc_free_num(result);
+	*(result) = square_ex;
+}
 
 /* Raise NUM1 to the NUM2 power.  The result is placed in RESULT.
    Maximum exponent is LONG_MAX.  If a NUM2 is not an integer,
    only the integer part is used.  */
-
-void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
-{
+void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale) {
 	bc_num temp, power;
 	size_t rscale;
 	size_t pwrscale;
@@ -102,8 +105,7 @@ void bc_raise(bc_num num1, long exponent, bc_num *result, size_t scale)
 }
 
 /* This is used internally by BCMath */
-void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale)
-{
+void bc_raise_bc_exponent(bc_num base, bc_num expo, bc_num *result, size_t scale) {
 	/* Exponent must not have fractional part */
 	assert(expo->n_scale == 0);
 
