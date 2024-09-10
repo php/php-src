@@ -556,13 +556,11 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 		smart_str_appends(str, "<");
 
 #define DUMP_CONST_FLAG(flag, output) \
-	do { \
-		if (flags & flag) { \
-			if (!first) smart_str_appends(str, ", "); \
-			smart_str_appends(str, output); \
-			first = false; \
-		} \
-	} while (0)
+	if (flags & flag) { \
+		if (!first) smart_str_appends(str, ", "); \
+		smart_str_appends(str, output); \
+		first = false; \
+	}
 		DUMP_CONST_FLAG(CONST_PERSISTENT, "persistent");
 		DUMP_CONST_FLAG(CONST_NO_FILE_CACHE, "no_file_cache");
 		DUMP_CONST_FLAG(CONST_DEPRECATED, "deprecated");
