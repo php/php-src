@@ -115,10 +115,9 @@ PHP 8.4 INTERNALS UPGRADE NOTES
 ========================
 
  a. Abstract
-   - The configure option --with-imap has been removed.
+   - The configure options --with-imap, --with-pdo-oci, --with-pspell have been
+     removed.
    - The configure option --with-mhash emits deprecation warning.
-   - The configure option --with-pdo-oci has been removed.
-   - The configure option --with-pspell has been removed.
    - New configure option --with-openssl-legacy-provider to enable OpenSSL
      legacy provider.
    - Symbol SIZEOF_SHORT removed (size of 2 on 32-bit and 64-bit platforms).
@@ -128,10 +127,8 @@ PHP 8.4 INTERNALS UPGRADE NOTES
    - Symbol HAVE_SIGSETJMP has been removed.
 
  b. Unix build system changes
-   - The configure option --with-imap-ssl has been removed.
-   - The configure option --with-oci8 has been removed.
-   - The configure option --with-zlib-dir has been removed.
-   - The configure option --with-kerberos has been removed.
+   - The configure options --with-imap-ssl, --with-oci8, --with-zlib-dir,
+     --with-kerberos have been removed.
    - The configure option --with-openssl-dir has been removed. SSL support in
      ext/ftp and ext/mysqlnd is enabled implicitly, when building with
      ext/openssl (--with-openssl), or explicitly by using new configure options
