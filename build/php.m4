@@ -2735,3 +2735,15 @@ AC_DEFUN([PHP_PATCH_CONFIG_HEADERS], [
   $SED -e 's/^#undef PACKAGE_[^ ]*/\/\* & \*\//g' < $srcdir/$1 \
     > $srcdir/$1.tmp && mv $srcdir/$1.tmp $srcdir/$1
 ])
+
+dnl
+dnl PHP_REMOVE_OPTIMIZATION_FLAGS
+dnl
+dnl Removes known compiler optimization flags like -O, -O0, -O1, ..., -Ofast
+dnl from CFLAGS and CXXFLAGS.
+dnl
+AC_DEFUN([PHP_REMOVE_OPTIMIZATION_FLAGS], [
+  sed_script='s/\([[\t ]]\|^\)-O\([[0-9gsz]]\|fast\|\)\([[\t ]]\|$\)/\1/g'
+  CFLAGS=$(echo "$CFLAGS" | $SED -e "$sed_script")
+  CXXFLAGS=$(echo "$CXXFLAGS" | $SED -e "$sed_script")
+])

@@ -115,11 +115,7 @@ dnl Discard optimization flags when debugging is enabled.
 if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
-  changequote({,})
-  dnl Discard known '-O...' flags, including just '-O', but do not remove only '-O' in '-Ounknown'
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O\([0-9gsz]\|fast\|\)\([\t ]\|$\)//g'`
-  changequote([,])
+  PHP_REMOVE_OPTIMIZATION_FLAGS
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
     CFLAGS="$CFLAGS -O0"
