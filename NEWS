@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.25
 
+- SOAP:
+  . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
 
 26 Sep 2024, PHP 8.2.24
 
