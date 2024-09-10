@@ -934,18 +934,18 @@ PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
 	}
 }/*}}}*/
 
-static void init_unmatched_null_pair(void) {
+static void init_unmatched_null_pair(zval *pair) {
 	zval val1, val2;
 	ZVAL_NULL(&val1);
 	ZVAL_LONG(&val2, -1);
-	ZVAL_ARR(&PCRE_G(unmatched_null_pair), zend_new_pair(&val1, &val2));
+	ZVAL_ARR(pair, zend_new_pair(&val1, &val2));
 }
 
-static void init_unmatched_empty_pair(void) {
+static void init_unmatched_empty_pair(zval *pair) {
 	zval val1, val2;
 	ZVAL_EMPTY_STRING(&val1);
 	ZVAL_LONG(&val2, -1);
-	ZVAL_ARR(&PCRE_G(unmatched_empty_pair), zend_new_pair(&val1, &val2));
+	ZVAL_ARR(pair, zend_new_pair(&val1, &val2));
 }
 
 static zend_always_inline void populate_match_value_str(
@@ -991,15 +991,29 @@ static inline void add_offset_pair(
 	/* Add (match, offset) to the return value */
 	if (PCRE2_UNSET == start_offset) {
 		if (unmatched_as_null) {
-			if (Z_ISUNDEF(PCRE_G(unmatched_null_pair))) {
-				init_unmatched_null_pair();
-			}
-			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_null_pair));
+			do {
+				if (Z_ISUNDEF(PCRE_G(unmatched_null_pair))) {
+					if (UNEXPECTED(EG(flags) & EG_FLAGS_IN_SHUTDOWN)) {
+						init_unmatched_null_pair(&match_pair);
+						break;
+					} else {
+						init_unmatched_null_pair(&PCRE_G(unmatched_null_pair));
+					}
+				}
+				ZVAL_COPY(&match_pair, &PCRE_G(unmatched_null_pair));
+			} while (0);
 		} else {
-			if (Z_ISUNDEF(PCRE_G(unmatched_empty_pair))) {
-				init_unmatched_empty_pair();
-			}
-			ZVAL_COPY(&match_pair, &PCRE_G(unmatched_empty_pair));
+			do {
+				if (Z_ISUNDEF(PCRE_G(unmatched_empty_pair))) {
+					if (UNEXPECTED(EG(flags) & EG_FLAGS_IN_SHUTDOWN)) {
+						init_unmatched_empty_pair(&match_pair);
+						break;
+					} else {
+						init_unmatched_empty_pair(&PCRE_G(unmatched_empty_pair));
+					}
+				}
+				ZVAL_COPY(&match_pair, &PCRE_G(unmatched_empty_pair));
+			} while (0);
 		}
 	} else {
 		zval val1, val2;

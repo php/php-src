@@ -18,6 +18,8 @@ class wrapper
 	{
 		echo "Close\n";
 		preg_replace('/pattern/', 'replace', 'subject');
+		preg_match('/(4)?(2)?\d/', '23456', $matches, PREG_OFFSET_CAPTURE | PREG_UNMATCHED_AS_NULL);
+		preg_match('/(4)?(2)?\d/', '23456', $matches, PREG_OFFSET_CAPTURE);
 	}
 
 	public $context;
