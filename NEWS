@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.4.0beta5
+12 Sep 2024, PHP 8.4.0beta5
 
 - BCMath:
   . Fixed LONG_MAX in BCMath ext. (Saki Takamachi)
