@@ -3142,7 +3142,7 @@ class AttributeInfo {
             $knowns["SensitiveParameter"] = "ZEND_STR_SENSITIVEPARAMETER";
         }
         if ($php84MinimumCompatibility) {
-            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED";
+            $knowns["Deprecated"] = "ZEND_STR_DEPRECATED_CAPITALIZED";
             $knowns["since"] = "ZEND_STR_SINCE";
         }
 

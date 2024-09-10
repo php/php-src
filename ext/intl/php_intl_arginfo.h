@@ -1210,7 +1210,7 @@ static void register_php_intl_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("IDNA_ERROR_CONTEXTJ", UIDNA_ERROR_CONTEXTJ, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_intlcal_set_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlcal_set", sizeof("intlcal_set") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_intlcal_set_0_arg0;
 	zend_string *attribute_Deprecated_func_intlcal_set_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_intlcal_set_0_arg0, attribute_Deprecated_func_intlcal_set_0_arg0_str);
@@ -1222,7 +1222,7 @@ static void register_php_intl_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_intlcal_set_0->args[1].value, &attribute_Deprecated_func_intlcal_set_0_arg1);
 	attribute_Deprecated_func_intlcal_set_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_intlgregcal_create_instance_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "intlgregcal_create_instance", sizeof("intlgregcal_create_instance") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_intlgregcal_create_instance_0_arg0;
 	zend_string *attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str = zend_string_init("8.4", strlen("8.4"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_intlgregcal_create_instance_0_arg0, attribute_Deprecated_func_intlgregcal_create_instance_0_arg0_str);
