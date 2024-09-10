@@ -115,7 +115,7 @@ static bool check_has_header(const char *headers, const char *header) {
 	return 0;
 }
 
-static bool php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)
+static zend_result php_stream_handle_proxy_authorization_header(const char *s, smart_str *header)
 {
 	const char *p;
 
@@ -131,7 +131,7 @@ static bool php_stream_handle_proxy_authorization_header(const char *s, smart_st
 				while (*p != 0 && *p != '\r' && *p !='\n') p++;
 				smart_str_appendl(header, s, p - s);
 				smart_str_appendl(header, "\r\n", sizeof("\r\n")-1);
-				return true;
+				return SUCCESS;
 			} else {
 				while (*p != 0 && *p != '\r' && *p !='\n') p++;
 			}
@@ -140,7 +140,7 @@ static bool php_stream_handle_proxy_authorization_header(const char *s, smart_st
 		while (*s == '\r' || *s == '\n') s++;
 	} while (*s != 0);
 
-	return false;
+	return FAILURE;
 }
 
 static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
@@ -290,14 +290,14 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmpzval), tmpheader) {
 					if (Z_TYPE_P(tmpheader) == IS_STRING) {
 						s = Z_STRVAL_P(tmpheader);
-						if (php_stream_handle_proxy_authorization_header(s, &header)) {
+						if (php_stream_handle_proxy_authorization_header(s, &header) == SUCCESS) {
 							goto finish;
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
 			} else if (Z_TYPE_P(tmpzval) == IS_STRING && Z_STRLEN_P(tmpzval)) {
 				s = Z_STRVAL_P(tmpzval);
-				if (php_stream_handle_proxy_authorization_header(s, &header)) {
+				if (php_stream_handle_proxy_authorization_header(s, &header) == SUCCESS) {
 					goto finish;
 				}
 			}
