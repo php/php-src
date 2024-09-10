@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 8.2.24
+12 Sep 2024, PHP 8.2.24RC1
 
 - Core:
   . Fixed bug GH-15408 (MSan false-positve on zend_max_execution_timer).
