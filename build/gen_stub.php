@@ -3006,7 +3006,7 @@ class PropertyInfo extends VariableLike
     // NEW in 8.4
     private const PHP_84_KNOWN = [
         "exit" => "ZEND_STR_EXIT",
-        "Deprecated" => "ZEND_STR_DEPRECATED",
+        "Deprecated" => "ZEND_STR_DEPRECATED_CAPITALIZED",
         "since" => "ZEND_STR_SINCE",
         "get" => "ZEND_STR_GET",
         "set" => "ZEND_STR_SET",
