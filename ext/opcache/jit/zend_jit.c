@@ -4764,7 +4764,7 @@ static int zend_jit_parse_config_num(zend_long jit)
 	JIT_G(opt_level) = jit % 10;
 
 	jit /= 10;
-	if (jit % 10 > 5) return FAILURE;
+	if (jit % 10 > 5 || jit % 10 == 4) return FAILURE;
 	JIT_G(trigger) = jit % 10;
 
 	jit /= 10;
