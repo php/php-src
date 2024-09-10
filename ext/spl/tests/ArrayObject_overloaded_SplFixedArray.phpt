@@ -9,7 +9,8 @@ $ao->exchangeArray($fixedArray);
 $ao[0] = new stdClass();
 var_dump($ao);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Creation of dynamic property SplFixedArray::$0 is deprecated in %s on line %d
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   object(SplFixedArray)#2 (2) {

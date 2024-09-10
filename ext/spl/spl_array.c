@@ -45,10 +45,14 @@ typedef struct _spl_array_object {
 	unsigned char	  nApplyCount;
 	bool			  is_child;
 	Bucket			  *bucket;
+	/* Overridden ArrayAccess methods */
 	zend_function     *fptr_offset_get;
 	zend_function     *fptr_offset_set;
 	zend_function     *fptr_offset_has;
 	zend_function     *fptr_offset_del;
+	/* Overridden append() method */
+	zend_function     *fptr_append;
+	/* Overridden count() method */
 	zend_function     *fptr_count;
 	zend_class_entry* ce_get_iterator;
 	zend_object       std;
@@ -194,6 +198,7 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 	ZEND_ASSERT(parent);
 
 	if (inherited) {
+		/* Find potentially overridden ArrayAccess methods */
 		intern->fptr_offset_get = zend_hash_str_find_ptr(&class_type->function_table, "offsetget", sizeof("offsetget") - 1);
 		if (intern->fptr_offset_get->common.scope == parent) {
 			intern->fptr_offset_get = NULL;
@@ -210,7 +215,12 @@ static zend_object *spl_array_object_new_ex(zend_class_entry *class_type, zend_o
 		if (intern->fptr_offset_del->common.scope == parent) {
 			intern->fptr_offset_del = NULL;
 		}
-		/* Find count() method */
+		/* Find potentially overridden append() method */
+		intern->fptr_append = zend_hash_str_find_ptr(&class_type->function_table, "append",  sizeof("append") - 1);
+		if (intern->fptr_append->common.scope == parent) {
+			intern->fptr_append = NULL;
+		}
+		/* Find potentially overridden count() method */
 		intern->fptr_count = zend_hash_find_ptr(&class_type->function_table, ZSTR_KNOWN(ZEND_STR_COUNT));
 		if (intern->fptr_count->common.scope == parent) {
 			intern->fptr_count = NULL;
@@ -462,32 +472,41 @@ static uint32_t spl_array_set_refcount(bool is_child, HashTable *ht, uint32_t re
 	return old_refcount;
 } /* }}} */
 
-static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_write_dimension_ex(bool check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 	HashTable *ht;
 	spl_hash_key key;
-
-	if (check_inherited && intern->fptr_offset_set) {
-		zval tmp;
-
-		if (!offset) {
-			ZVAL_NULL(&tmp);
-			offset = &tmp;
-		}
-		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
-		return;
-	}
+	uint32_t refcount = 0;
 
 	if (intern->nApplyCount > 0) {
 		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
-	Z_TRY_ADDREF_P(value);
+	/* We are appending */
+	if (!offset) {
+		/* append() method is overridden, so call it */
+		if (check_inherited && intern->fptr_append) {
+			zend_call_known_function(
+				intern->fptr_append,
+				object,
+				object->ce,
+				/* retval_ptr */NULL,
+				/* param_count */ 1,
+				/* params */ value,
+				/* named_params */ NULL
+			);
+			return;
+		}
 
-	uint32_t refcount = 0;
-	if (!offset || Z_TYPE_P(offset) == IS_NULL) {
+		/* Cannot append if backing value is an object */
+		if (spl_array_is_object(intern)) {
+			zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(object->ce->name));
+			return;
+		}
+
+		Z_TRY_ADDREF_P(value);
 		ht = spl_array_get_hash_table(intern);
 		refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 		zend_hash_next_index_insert(ht, value);
@@ -498,18 +517,48 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 		return;
 	}
 
+	/* offsetSet() method is overridden, so call it */
+	if (check_inherited && intern->fptr_offset_set) {
+		zend_call_method_with_2_params(object, object->ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
+		return;
+	}
+
 	if (get_hash_key(&key, intern, offset) == FAILURE) {
 		zend_illegal_container_offset(object->ce->name, offset, BP_VAR_W);
-		zval_ptr_dtor(value);
 		return;
 	}
 
 	ht = spl_array_get_hash_table(intern);
 	refcount = spl_array_set_refcount(intern->is_child, ht, 1);
 	if (key.key) {
-		zend_hash_update_ind(ht, key.key, value);
+		if (spl_array_is_object(intern) && !(intern->ar_flags & SPL_ARRAY_IS_SELF)) {
+			ZEND_ASSERT(Z_TYPE(intern->array) == IS_OBJECT);
+			zend_object *obj = Z_OBJ(intern->array);
+			/* For reasons ArrayObject must not go through the overloaded __set()/__get()/etc.
+			 * magic methods, so to emit a warning for dynamic props (or Error on classes
+			 * that do not support them, such as readonly classes) or an error for incompatible
+			 * typed properties, we set a property guard so that when calling the write_property
+			 * handler it does not call the magic __set() method. Thanks SPL. */
+			if (obj->ce->ce_flags & ZEND_ACC_USE_GUARDS) {
+				uint32_t *guard = zend_get_property_guard(obj, key.key);
+				uint32_t backup = *guard;
+				(*guard) |= ZEND_GUARD_PROPERTY_SET;
+				obj->handlers->write_property(obj, key.key, value, /* cache_slot */ NULL);
+				*guard = backup;
+			} else {
+				/* No overload method is defined on the object */
+				obj->handlers->write_property(obj, key.key, value, /* cache_slot */ NULL);
+			}
+		} else {
+			/* Increase refcount for value before adding to the Hashtable */
+			Z_TRY_ADDREF_P(value);
+			zend_hash_update_ind(ht, key.key, value);
+		}
 		spl_hash_key_release(&key);
 	} else {
+		/* Increase refcount for value before adding to the Hashtable */
+		Z_TRY_ADDREF_P(value);
+		ZEND_ASSERT(!spl_array_is_object(intern));
 		zend_hash_index_update(ht, key.h, value);
 	}
 
@@ -520,7 +569,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 
 static void spl_array_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
 {
-	spl_array_write_dimension_ex(1, object, offset, value);
+	spl_array_write_dimension_ex(/* check_inherited */ true, object, offset, value);
 } /* }}} */
 
 static void spl_array_unset_dimension_ex(int check_inherited, zend_object *object, zval *offset) /* {{{ */
@@ -681,18 +730,12 @@ PHP_METHOD(ArrayObject, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
+	spl_array_write_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), index, value);
 } /* }}} */
 
+/* Needed for spl_iterators.c:2938 */
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
 {
-	spl_array_object *intern = Z_SPLARRAY_P(object);
-
-	if (spl_array_is_object(intern)) {
-		zend_throw_error(NULL, "Cannot append properties to objects, use %s::offsetSet() instead", ZSTR_VAL(Z_OBJCE_P(object)->name));
-		return;
-	}
-
 	spl_array_write_dimension(Z_OBJ_P(object), NULL, append_value);
 } /* }}} */
 
@@ -704,7 +747,7 @@ PHP_METHOD(ArrayObject, append)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_iterator_append(ZEND_THIS, value);
+	spl_array_write_dimension_ex(/* check_inherited */ false, Z_OBJ_P(ZEND_THIS), /* offset */ NULL, value);
 } /* }}} */
 
 /* {{{ Unsets the value at the specified $index. */
