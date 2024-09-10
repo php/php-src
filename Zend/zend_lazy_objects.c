@@ -624,8 +624,10 @@ ZEND_API HashTable *zend_lazy_object_get_properties(zend_object *object)
 
 	zend_object *tmp = zend_lazy_object_init(object);
 	if (UNEXPECTED(!tmp)) {
-		ZEND_ASSERT(!object->properties || object->properties == &zend_empty_array);
-		return object->properties = (zend_array*) &zend_empty_array;
+		if (object->properties) {
+			return object->properties;
+		}
+		return object->properties = zend_new_array(0);
 	}
 
 	object = tmp;
