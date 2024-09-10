@@ -234,8 +234,6 @@ PHP 8.4 INTERNALS UPGRADE NOTES
        - ac_cv_write_stdout                -> php_cv_have_write_stdout
      and all other checks wrapped with their belonging cache variables (see *.m4
      source files for details).
-   - PDO extensions in php-src don't have the include flag -I$pdo_cv_inc_path
-     directory anymore.
    - Removed linking with obsolete dnet_stub library in ext/pdo_dblib.
    - Removed checking and linking with obsolete libbind for some functions.
    - Backticks command substitutions in Autoconf code have been replaced with
