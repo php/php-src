@@ -259,7 +259,9 @@ void sdl_set_uri_credentials(sdlCtx *ctx, char *uri)
 			ctx->context = php_stream_context_from_zval(context_ptr, 1);
 
 			if (ctx->context &&
-			    (header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL) {
+			    (header = php_stream_context_get_option(ctx->context, "http", "header")) != NULL &&
+				Z_TYPE_P(header) == IS_STRING) {
+				/* TODO: should support header as an array, but this code path is untested */
 				s = strstr(Z_STRVAL_P(header), "Authorization: Basic");
 				if (s && (s == Z_STRVAL_P(header) || *(s-1) == '\n' || *(s-1) == '\r')) {
 					char *rest = strstr(s, "\r\n");
