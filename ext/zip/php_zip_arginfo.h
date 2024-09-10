@@ -464,7 +464,7 @@ static const zend_function_entry class_ZipArchive_methods[] = {
 static void register_php_zip_symbols(int module_number)
 {
 
-	zend_attribute *attribute_Deprecated_func_zip_open_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_open", sizeof("zip_open") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_open_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_open", sizeof("zip_open") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_open_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_open_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_open_0_arg0, attribute_Deprecated_func_zip_open_0_arg0_str);
@@ -476,7 +476,7 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_open_0->args[1].value, &attribute_Deprecated_func_zip_open_0_arg1);
 	attribute_Deprecated_func_zip_open_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_close", sizeof("zip_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_close", sizeof("zip_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_close_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_close_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_close_0_arg0, attribute_Deprecated_func_zip_close_0_arg0_str);
@@ -488,7 +488,7 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_close_0->args[1].value, &attribute_Deprecated_func_zip_close_0_arg1);
 	attribute_Deprecated_func_zip_close_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_read_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_read", sizeof("zip_read") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_read_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_read", sizeof("zip_read") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_read_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_read_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_read_0_arg0, attribute_Deprecated_func_zip_read_0_arg0_str);
@@ -500,21 +500,21 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_read_0->args[1].value, &attribute_Deprecated_func_zip_read_0_arg1);
 	attribute_Deprecated_func_zip_read_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_open_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_open", sizeof("zip_entry_open") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_func_zip_entry_open_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_open", sizeof("zip_entry_open") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_func_zip_entry_open_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_open_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_open_0_arg0, attribute_Deprecated_func_zip_entry_open_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_entry_open_0->args[0].value, &attribute_Deprecated_func_zip_entry_open_0_arg0);
 	attribute_Deprecated_func_zip_entry_open_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_close", sizeof("zip_entry_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_func_zip_entry_close_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_close", sizeof("zip_entry_close") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_func_zip_entry_close_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_close_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_close_0_arg0, attribute_Deprecated_func_zip_entry_close_0_arg0_str);
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_entry_close_0->args[0].value, &attribute_Deprecated_func_zip_entry_close_0_arg0);
 	attribute_Deprecated_func_zip_entry_close_0->args[0].name = ZSTR_KNOWN(ZEND_STR_SINCE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_read_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_read", sizeof("zip_entry_read") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_entry_read_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_read", sizeof("zip_entry_read") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_entry_read_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_read_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_read_0_arg0, attribute_Deprecated_func_zip_entry_read_0_arg0_str);
@@ -526,7 +526,7 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_entry_read_0->args[1].value, &attribute_Deprecated_func_zip_entry_read_0_arg1);
 	attribute_Deprecated_func_zip_entry_read_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_name_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_name", sizeof("zip_entry_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_entry_name_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_name", sizeof("zip_entry_name") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_entry_name_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_name_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_name_0_arg0, attribute_Deprecated_func_zip_entry_name_0_arg0_str);
@@ -538,7 +538,7 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_entry_name_0->args[1].value, &attribute_Deprecated_func_zip_entry_name_0_arg1);
 	attribute_Deprecated_func_zip_entry_name_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_compressedsize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressedsize", sizeof("zip_entry_compressedsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_entry_compressedsize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressedsize", sizeof("zip_entry_compressedsize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_entry_compressedsize_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_compressedsize_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_compressedsize_0_arg0, attribute_Deprecated_func_zip_entry_compressedsize_0_arg0_str);
@@ -550,7 +550,7 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_entry_compressedsize_0->args[1].value, &attribute_Deprecated_func_zip_entry_compressedsize_0_arg1);
 	attribute_Deprecated_func_zip_entry_compressedsize_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_filesize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_filesize", sizeof("zip_entry_filesize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_entry_filesize_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_filesize", sizeof("zip_entry_filesize") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_entry_filesize_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_filesize_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_filesize_0_arg0, attribute_Deprecated_func_zip_entry_filesize_0_arg0_str);
@@ -562,7 +562,7 @@ static void register_php_zip_symbols(int module_number)
 	ZVAL_COPY_VALUE(&attribute_Deprecated_func_zip_entry_filesize_0->args[1].value, &attribute_Deprecated_func_zip_entry_filesize_0_arg1);
 	attribute_Deprecated_func_zip_entry_filesize_0->args[1].name = ZSTR_KNOWN(ZEND_STR_MESSAGE);
 
-	zend_attribute *attribute_Deprecated_func_zip_entry_compressionmethod_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressionmethod", sizeof("zip_entry_compressionmethod") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_zip_entry_compressionmethod_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "zip_entry_compressionmethod", sizeof("zip_entry_compressionmethod") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_zip_entry_compressionmethod_0_arg0;
 	zend_string *attribute_Deprecated_func_zip_entry_compressionmethod_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_zip_entry_compressionmethod_0_arg0, attribute_Deprecated_func_zip_entry_compressionmethod_0_arg0_str);
@@ -1358,7 +1358,7 @@ static zend_class_entry *register_class_ZipArchive(zend_class_entry *class_entry
 
 #if defined(ZIP_FL_RECOMPRESS)
 
-	zend_attribute *attribute_Deprecated_const_FL_RECOMPRESS_0 = zend_add_class_constant_attribute(class_entry, const_FL_RECOMPRESS, ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_const_FL_RECOMPRESS_0 = zend_add_class_constant_attribute(class_entry, const_FL_RECOMPRESS, ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_const_FL_RECOMPRESS_0_arg0;
 	zend_string *attribute_Deprecated_const_FL_RECOMPRESS_0_arg0_str = zend_string_init("8.3", strlen("8.3"), 1);
 	ZVAL_STR(&attribute_Deprecated_const_FL_RECOMPRESS_0_arg0, attribute_Deprecated_const_FL_RECOMPRESS_0_arg0_str);

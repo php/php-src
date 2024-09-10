@@ -461,7 +461,7 @@ static void register_odbc_symbols(int module_number)
 #endif
 
 
-	zend_attribute *attribute_Deprecated_func_odbc_result_all_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_result_all", sizeof("odbc_result_all") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 1);
+	zend_attribute *attribute_Deprecated_func_odbc_result_all_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "odbc_result_all", sizeof("odbc_result_all") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 1);
 	zval attribute_Deprecated_func_odbc_result_all_0_arg0;
 	zend_string *attribute_Deprecated_func_odbc_result_all_0_arg0_str = zend_string_init("8.1", strlen("8.1"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_odbc_result_all_0_arg0, attribute_Deprecated_func_odbc_result_all_0_arg0_str);

@@ -87,7 +87,7 @@ static void register_libxml_symbols(int module_number)
 	REGISTER_LONG_CONSTANT("LIBXML_ERR_FATAL", XML_ERR_FATAL, CONST_PERSISTENT);
 
 
-	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED), 2);
+	zend_attribute *attribute_Deprecated_func_libxml_disable_entity_loader_0 = zend_add_function_attribute(zend_hash_str_find_ptr(CG(function_table), "libxml_disable_entity_loader", sizeof("libxml_disable_entity_loader") - 1), ZSTR_KNOWN(ZEND_STR_DEPRECATED_CAPITALIZED), 2);
 	zval attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0;
 	zend_string *attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str = zend_string_init("8.0", strlen("8.0"), 1);
 	ZVAL_STR(&attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0, attribute_Deprecated_func_libxml_disable_entity_loader_0_arg0_str);
