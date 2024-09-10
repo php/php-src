@@ -2208,6 +2208,15 @@ found:
 		}
 	} else if (IS_HOOKED_PROPERTY_OFFSET(property_offset)) {
 		zend_function *get = prop_info->hooks[ZEND_PROPERTY_HOOK_GET];
+
+		if (has_set_exists == ZEND_PROPERTY_EXISTS) {
+			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
+				return true;
+			}
+			property_offset = prop_info->offset;
+			goto try_again;
+		}
+
 		if (!get) {
 			if (prop_info->flags & ZEND_ACC_VIRTUAL) {
 				zend_throw_error(NULL, "Property %s::$%s is write-only",
@@ -2219,19 +2228,12 @@ found:
 			}
 		}
 
-		if (has_set_exists == ZEND_PROPERTY_EXISTS) {
-			return 1;
-		}
-
 		zval rv;
 		if (!zend_call_get_hook(prop_info, name, get, zobj, &rv)) {
 			if (EG(exception)) {
 				return 0;
 			}
 			property_offset = prop_info->offset;
-			if (!ZEND_TYPE_IS_SET(prop_info->type)) {
-				prop_info = NULL;
-			}
 			goto try_again;
 		}
 

@@ -49,6 +49,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug GH-15718 (Segfault on ReflectionProperty::get{Hook,Hooks}() on
     dynamic properties). (DanielEScherzer)
+  . Fixed bug GH-15694 (ReflectionProperty::isInitialized() is incorrect for
+    hooked properties). (ilutov)
 
 - SOAP:
   . Fixed bug #61525 (SOAP functions require at least one space after HTTP
