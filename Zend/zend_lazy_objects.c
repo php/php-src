@@ -259,6 +259,13 @@ ZEND_API zend_object *zend_object_make_lazy(zend_object *obj,
 			return NULL;
 		}
 
+		if (UNEXPECTED(!(reflection_ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+			if (UNEXPECTED(zend_update_class_constants(reflection_ce) != SUCCESS)) {
+				ZEND_ASSERT(EG(exception));
+				return NULL;
+			}
+		}
+
 		obj = zend_objects_new(reflection_ce);
 
 		for (int i = 0; i < obj->ce->default_properties_count; i++) {
@@ -373,12 +380,7 @@ ZEND_API zend_object *zend_lazy_object_mark_as_initialized(zend_object *obj)
 
 	zend_class_entry *ce = obj->ce;
 
-	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-			ZEND_ASSERT(EG(exception));
-			return NULL;
-		}
-	}
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED);
 
 	zval *default_properties_table = CE_DEFAULT_PROPERTIES_TABLE(ce);
 	zval *properties_table = obj->properties_table;
@@ -568,12 +570,7 @@ ZEND_API zend_object *zend_lazy_object_init(zend_object *obj)
 
 	zend_class_entry *ce = obj->ce;
 
-	if (UNEXPECTED(!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
-		if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
-			ZEND_ASSERT(EG(exception));
-			return NULL;
-		}
-	}
+	ZEND_ASSERT(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED);
 
 	if (zend_object_is_lazy_proxy(obj)) {
 		return zend_lazy_object_init_proxy(obj);
