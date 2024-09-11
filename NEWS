@@ -76,8 +76,8 @@ PHP                                                                        NEWS
     (cmb)
 
 - MBString:
-  . Fixed bug GH-15824 mb_detect_encoding(): Argument $encodings contains
-    invalid encoding "UTF8". (Yuya Hamada)
+  . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
+    invalid encoding "UTF8"). (Yuya Hamada)
 
 29 Aug 2024, PHP 8.4.0beta4
 
