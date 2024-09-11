@@ -53,6 +53,7 @@ typedef struct _zend_lazy_objects_store {
 	HashTable infos;
 } zend_lazy_objects_store;
 
+typedef struct _zend_property_info zend_property_info;
 typedef struct _zend_fcall_info zend_fcall_info;
 typedef struct _zend_fcall_info_cache zend_fcall_info_cache;
 
@@ -75,6 +76,7 @@ HashTable *zend_lazy_object_debug_info(zend_object *object, int *is_temp);
 HashTable *zend_lazy_object_get_gc(zend_object *zobj, zval **table, int *n);
 bool zend_lazy_object_decr_lazy_props(zend_object *obj);
 void zend_lazy_object_realize(zend_object *obj);
+ZEND_API zend_property_info *zend_lazy_object_get_property_info_for_slot(zend_object *obj, zval *slot);
 
 static zend_always_inline bool zend_object_is_lazy(zend_object *obj)
 {
