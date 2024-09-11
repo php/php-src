@@ -453,19 +453,14 @@ static void _readline_string_zval(zval *ret, const char *str)
 	}
 }
 
-static void _readline_long_zval(zval *ret, long l)
-{
-	ZVAL_LONG(ret, l);
-}
-
 char **php_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
 	char **matches = NULL;
 
 	_readline_string_zval(&params[0], text);
-	_readline_long_zval(&params[1], start);
-	_readline_long_zval(&params[2], end);
+	ZVAL_LONG(&params[1], start);
+	ZVAL_LONG(&params[2], end);
 
 	if (call_user_function(NULL, NULL, &_readline_completion, &_readline_array, 3, params) == SUCCESS) {
 		if (Z_TYPE(_readline_array) == IS_ARRAY) {
