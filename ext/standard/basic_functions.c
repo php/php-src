@@ -1190,7 +1190,7 @@ PHP_FUNCTION(usleep)
 PHP_FUNCTION(time_nanosleep)
 {
 	zend_long tv_sec, tv_nsec;
-	struct timespec php_req, php_rem;
+	struct timespec php_req, php_rem = {0};
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(tv_sec)

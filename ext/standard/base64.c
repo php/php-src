@@ -891,6 +891,7 @@ PHPAPI zend_string *php_base64_encode(const unsigned char *str, size_t length)
 	zend_string *result;
 
 	result = zend_string_safe_alloc(((length + 2) / 3), 4 * sizeof(char), 0, 0);
+	memset(ZSTR_VAL(result), 0, ZSTR_LEN(result));
 	p = (unsigned char *)ZSTR_VAL(result);
 
 	p = php_base64_encode_impl(str, length, p);
@@ -912,6 +913,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	size_t outl = 0;
 
 	result = zend_string_alloc(length, 0);
+	memset(ZSTR_VAL(result), 0, ZSTR_LEN(result));
 
 	if (!php_base64_decode_impl(str, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
 		zend_string_efree(result);
