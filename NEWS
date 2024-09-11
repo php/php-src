@@ -17,6 +17,8 @@ PHP                                                                        NEWS
   . Fixed bug GH-16371 (Assertion failure in Zend/zend_weakrefs.c:646). (Arnaud)
   . Fixed missing error when adding asymmetric visibility to static properties.
     (ilutov)
+  . Fixed bug OSS-Fuzz #71407 (Null-dereference WRITE in
+    zend_lazy_object_clone). (Arnaud)
 
 - Curl:
   . Fixed bug GH-16302 (CurlMultiHandle holds a reference to CurlHandle if
