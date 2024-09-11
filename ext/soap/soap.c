@@ -4176,18 +4176,13 @@ static sdlFunctionPtr get_function(sdlPtr sdl, const char *function_name, size_t
 {
 	sdlFunctionPtr tmp;
 
-	char *str = estrndup(function_name, function_name_length);
-	zend_str_tolower(str, function_name_length);
 	if (sdl != NULL) {
-		if ((tmp = zend_hash_str_find_ptr(&sdl->functions, str, function_name_length)) != NULL) {
-			efree(str);
+		if ((tmp = zend_hash_str_find_ptr_lc(&sdl->functions, function_name, function_name_length)) != NULL) {
 			return tmp;
-		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr(sdl->requests, str, function_name_length)) != NULL) {
-			efree(str);
+		} else if (sdl->requests != NULL && (tmp = zend_hash_str_find_ptr_lc(sdl->requests, function_name, function_name_length)) != NULL) {
 			return tmp;
 		}
 	}
-	efree(str);
 	return NULL;
 }
 /* }}} */
