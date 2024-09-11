@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 09e21577c53d8b53e30aa30e3208d3807ecd8852 */
+ * Stub hash: 8faf835d31acf3ae3e12a0dfca56f0744b95831b */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -418,6 +418,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty_isReadOnly arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionProperty_isDefault arginfo_class_ReflectionFunctionAbstract_inNamespace
+
+#define arginfo_class_ReflectionProperty_isDynamic arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
 #define arginfo_class_ReflectionProperty_isAbstract arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
 
@@ -842,6 +844,7 @@ ZEND_METHOD(ReflectionProperty, isProtectedSet);
 ZEND_METHOD(ReflectionProperty, isStatic);
 ZEND_METHOD(ReflectionProperty, isReadOnly);
 ZEND_METHOD(ReflectionProperty, isDefault);
+ZEND_METHOD(ReflectionProperty, isDynamic);
 ZEND_METHOD(ReflectionProperty, isAbstract);
 ZEND_METHOD(ReflectionProperty, isVirtual);
 ZEND_METHOD(ReflectionProperty, isPromoted);
@@ -1135,6 +1138,7 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, isStatic, arginfo_class_ReflectionProperty_isStatic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isReadOnly, arginfo_class_ReflectionProperty_isReadOnly, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isDefault, arginfo_class_ReflectionProperty_isDefault, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, isDynamic, arginfo_class_ReflectionProperty_isDynamic, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isAbstract, arginfo_class_ReflectionProperty_isAbstract, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isVirtual, arginfo_class_ReflectionProperty_isVirtual, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, isPromoted, arginfo_class_ReflectionProperty_isPromoted, ZEND_ACC_PUBLIC)

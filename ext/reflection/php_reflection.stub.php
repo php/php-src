@@ -522,6 +522,8 @@ class ReflectionProperty implements Reflector
     /** @tentative-return-type */
     public function isDefault(): bool {}
 
+    public function isDynamic(): bool {}
+
     public function isAbstract(): bool {}
 
     public function isVirtual(): bool {}

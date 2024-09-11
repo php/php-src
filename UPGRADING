@@ -431,6 +431,7 @@ PHP 8.4 UPGRADE NOTES
     - ReflectionClass::SKIP_INITIALIZATION_ON_SERIALIZE
     - ReflectionClass::SKIP_DESTRUCTOR
     RFC: https://wiki.php.net/rfc/lazy-objects
+  . ReflectionProperty::isDynamic() was introduced.
 
 - SOAP:
   . Added support for clark notation for namespaces in class map.
