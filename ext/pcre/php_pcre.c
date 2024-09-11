@@ -521,8 +521,10 @@ static int pcre_clean_cache(zval *data, void *arg)
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	int *num_clean = (int *)arg;
 
-	if (*num_clean > 0 && !pce->refcount) {
-		(*num_clean)--;
+	if (!pce->refcount) {
+		if (--(*num_clean) == 0) {
+			return ZEND_HASH_APPLY_REMOVE|ZEND_HASH_APPLY_STOP;
+		}
 		return ZEND_HASH_APPLY_REMOVE;
 	} else {
 		return ZEND_HASH_APPLY_KEEP;
