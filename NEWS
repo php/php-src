@@ -75,6 +75,10 @@ PHP                                                                        NEWS
   . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
     (cmb)
 
+- MBString:
+  . Fixed bug GH-15824 mb_detect_encoding(): Argument $encodings contains
+    invalid encoding "UTF8". (Yuya Hamada)
+
 29 Aug 2024, PHP 8.4.0beta4
 
 - Core:
