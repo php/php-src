@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.4.0RC1
 
+- MBString:
+  . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
+    invalid encoding "UTF8"). (Yuya Hamada)
+
 - Opcache:
   . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
 
@@ -74,10 +78,6 @@ PHP                                                                        NEWS
 - Streams:
   . Fixed bug GH-15628 (php_stream_memory_get_buffer() not zero-terminated).
     (cmb)
-
-- MBString:
-  . Fixed bug GH-15824 (mb_detect_encoding(): Argument $encodings contains
-    invalid encoding "UTF8"). (Yuya Hamada)
 
 29 Aug 2024, PHP 8.4.0beta4
 
