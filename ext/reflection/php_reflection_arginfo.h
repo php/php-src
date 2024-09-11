@@ -1,5 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead.
- * Stub hash: 8faf835d31acf3ae3e12a0dfca56f0744b95831b */
+ * Stub hash: 83e9d4a4b2f49739af3e7faa3037df13e779bb8b */
 
 ZEND_BEGIN_ARG_WITH_TENTATIVE_RETURN_TYPE_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
@@ -448,7 +448,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_getAttributes arginfo_class_ReflectionFunctionAbstract_getAttributes
 
+#define arginfo_class_ReflectionProperty_hasHooks arginfo_class_ReflectionFunctionAbstract_hasTentativeReturnType
+
 #define arginfo_class_ReflectionProperty_getHooks arginfo_class_ReflectionFunctionAbstract_getClosureUsedVariables
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_hasHook, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, type, PropertyHookType, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionProperty_getHook, 0, 1, ReflectionMethod, 1)
 	ZEND_ARG_OBJ_INFO(0, type, PropertyHookType, 0)
@@ -858,7 +864,9 @@ ZEND_METHOD(ReflectionProperty, hasType);
 ZEND_METHOD(ReflectionProperty, hasDefaultValue);
 ZEND_METHOD(ReflectionProperty, getDefaultValue);
 ZEND_METHOD(ReflectionProperty, getAttributes);
+ZEND_METHOD(ReflectionProperty, hasHooks);
 ZEND_METHOD(ReflectionProperty, getHooks);
+ZEND_METHOD(ReflectionProperty, hasHook);
 ZEND_METHOD(ReflectionProperty, getHook);
 ZEND_METHOD(ReflectionClassConstant, __construct);
 ZEND_METHOD(ReflectionClassConstant, __toString);
@@ -1152,7 +1160,9 @@ static const zend_function_entry class_ReflectionProperty_methods[] = {
 	ZEND_ME(ReflectionProperty, hasDefaultValue, arginfo_class_ReflectionProperty_hasDefaultValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getDefaultValue, arginfo_class_ReflectionProperty_getDefaultValue, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getAttributes, arginfo_class_ReflectionProperty_getAttributes, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, hasHooks, arginfo_class_ReflectionProperty_hasHooks, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getHooks, arginfo_class_ReflectionProperty_getHooks, ZEND_ACC_PUBLIC)
+	ZEND_ME(ReflectionProperty, hasHook, arginfo_class_ReflectionProperty_hasHook, ZEND_ACC_PUBLIC)
 	ZEND_ME(ReflectionProperty, getHook, arginfo_class_ReflectionProperty_getHook, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
