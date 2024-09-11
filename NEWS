@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fix UAF issues with PCRE after request shutdown. (nielsdos)
 
+- SimpleXML:
+  . Fixed bug GH-15837 (Segmentation fault in ext/simplexml/simplexml.c).
+    (nielsdos)
+
 - SOAP:
   . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
     headers in array form). (nielsdos)
