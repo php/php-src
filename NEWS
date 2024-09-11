@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 8.2.25
 
+- Date:
+  . Fixed bug GH-15582: Crash when not calling parent constructor of
+    DateTimeZone. (Derick)
+
 - SOAP:
   . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
 
