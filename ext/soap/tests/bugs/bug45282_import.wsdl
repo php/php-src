@@ -1,0 +1,29 @@
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             targetNamespace="http://wssmcommupper/imported"
+             xmlns:x="http://wssmcommupper/x"
+             xmlns:imported2="http://wssmcommupper/imported2"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+  <import location="bug45282_import_nested1.wsdl"/>
+  <import namespace="http://wssmcommupper/imported2" location="bug45282_import_nested2.wsdl"/>
+  <portType name="wssmcommupper">
+    <operation name="reportHealthView">
+      <input message="x:reportHealthView" name="reportHealthView" />
+      <output message="imported2:reportHealthViewOut" name="reportHealthView" />
+    </operation>
+  </portType>
+  <!-- Intentionally missing tns declaration to test the BC fallback -->
+  <binding name="WSSmCommUpperImplServiceSoapBinding" type="tns:wssmcommupper">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="reportHealthView">
+      <soap:operation soapAction="" style="document" />
+      <input name="reportHealthView">
+        <soap:body use="literal" />
+      </input>
+    </operation>
+  </binding>
+  <service name="WSSmCommUpperImplService">
+    <port binding="tns:WSSmCommUpperImplServiceSoapBinding" name="WSSmCommUpperImplPort">
+      <soap:address location="http://172.20.22.9:10081/WSSmCommUpper/WSSmCommUpper" />
+    </port>
+  </service>
+</definitions>

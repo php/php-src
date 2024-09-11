@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+        xmlns:tns="http://wssmcommupper/"
+        xmlns:tnsi="http://wssmcommupper/imported"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        name="WSSmCommUpperImplService"
+        targetNamespace="http://wssmcommupper/">
+  <types/>
+  <import namespace="http://wssmcommupper/imported" location="bug45282_import.wsdl" />
+  <message name="reportHealthView">
+    <part type="xs:string" name="str" />
+  </message>
+  <portType name="wssmcommupper">
+    <operation name="reportHealthView">
+      <input message="tns:reportHealthView" name="reportHealthView" />
+    </operation>
+  </portType>
+  <binding name="WSSmCommUpperImplServiceSoapBinding" type="tns:wssmcommupper">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+    <operation name="reportHealthView">
+      <soap:operation soapAction="" style="document" />
+      <input name="reportHealthView">
+        <soap:body use="literal" />
+      </input>
+    </operation>
+  </binding>
+  <service name="WSSmCommUpperImplService">
+    <port binding="tns:WSSmCommUpperImplServiceSoapBinding" name="WSSmCommUpperImplPort">
+      <soap:address location="http://172.20.22.9:10081/WSSmCommUpper/WSSmCommUpper" />
+    </port>
+  </service>
+  <!-- cross-reference imported definitions -->
+  <service name="WSSmCommUpperImplService2">
+    <port binding="tnsi:WSSmCommUpperImplServiceSoapBinding" name="WSSmCommUpperImplPort">
+      <soap:address location="http://172.20.22.9:10081/WSSmCommUpper/WSSmCommUpper" />
+    </port>
+  </service>
+</definitions>

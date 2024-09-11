@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions
+        xmlns="http://schemas.xmlsoap.org/wsdl/"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        name="WSSmCommUpperImplService"
+        targetNamespace="http://wssmcommupper/x">
+  <types/>
+  <message name="reportHealthView">
+    <part name="number" type="xs:int"/>
+  </message>
+  <import location="bug45282_import_nested1.wsdl"/>
+</definitions>
