@@ -97,7 +97,7 @@ int ir_build_cfg(ir_ctx *ctx)
 		/* Some successors of IF and SWITCH nodes may be inaccessible by backward DFS */
 		use_list = &ctx->use_lists[end];
 		n = use_list->count;
-		if (n > 1) {
+		if (n > 1 || (n == 1 && (ir_op_flags[insn->op] & IR_OP_FLAG_TERMINATOR) != 0)) {
 			for (p = &ctx->use_edges[use_list->refs]; n > 0; p++, n--) {
 				/* Remember possible inaccessible successors */
 				ir_bitset_incl(bb_leaks, *p);
@@ -245,6 +245,7 @@ int ir_build_cfg(ir_ctx *ctx)
 				IR_ASSERT(ref);
 				ir_ref pred_b = _blocks[ref];
 				ir_block *pred_bb = &blocks[pred_b];
+				IR_ASSERT(pred_b > 0);
 				*q = pred_b;
 				edges[pred_bb->successors + pred_bb->successors_count++] = b;
 			}
