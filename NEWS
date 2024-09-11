@@ -5,6 +5,11 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug GH-15657 (Segmentation fault in dasm_x86.h). (nielsdos)
 
+- SOAP:
+  . Fixed bug #73182 (PHP SOAPClient does not support stream context HTTP
+    headers in array form). (nielsdos)
+  . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
+
 12 Sep 2024, PHP 8.4.0beta5
 
 - BCMath:

@@ -98,6 +98,13 @@ static encodePtr get_create_encoder(sdlPtr sdl, sdlTypePtr cur_type, const xmlCh
 	return enc;
 }
 
+/* Necessary for some error paths to avoid leaking persistent memory. */
+static void requestify_string(xmlChar **str) {
+	xmlChar *copy = (xmlChar *) estrdup((const char *) *str);
+	xmlFree(*str);
+	*str = copy;
+}
+
 static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlAttrPtr tns, int import) {
 	if (location != NULL &&
 	    !zend_hash_str_exists(&ctx->docs, (char*)location, xmlStrlen(location))) {
@@ -110,22 +117,35 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 		sdl_restore_uri_credentials(ctx);
 
 		if (doc == NULL) {
+			requestify_string(&location);
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		schema = get_node(doc->children, "schema");
 		if (schema == NULL) {
+			requestify_string(&location);
 			xmlFreeDoc(doc);
 			soap_error1(E_ERROR, "Parsing Schema: can't import schema from '%s'", location);
 		}
 		new_tns = get_attribute(schema->properties, "targetNamespace");
 		if (import) {
 			if (ns != NULL && (new_tns == NULL || xmlStrcmp(ns->children->content, new_tns->children->content) != 0)) {
-				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, ns->children->content);
+				requestify_string(&location);
+				if (new_tns == NULL) {
+					xmlFreeDoc(doc);
+					soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', missing 'targetNamespace', expected '%s'", location, ns->children->content);
+				} else {
+					/* Have to make a copy to avoid a UAF after freeing `doc` */
+					const char *target_ns_copy = estrdup((const char *) new_tns->children->content);
+					xmlFreeDoc(doc);
+					soap_error3(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s', expected '%s'", location, target_ns_copy, ns->children->content);
+				}
 			}
 			if (ns == NULL && new_tns != NULL) {
+				requestify_string(&location);
+				/* Have to make a copy to avoid a UAF after freeing `doc` */
+				const char *target_ns_copy = estrdup((const char *) new_tns->children->content);
 				xmlFreeDoc(doc);
-				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s'", location, new_tns->children->content);
+				soap_error2(E_ERROR, "Parsing Schema: can't import schema from '%s', unexpected 'targetNamespace'='%s', expected no 'targetNamespace'", location, target_ns_copy);
 			}
 		} else {
 			new_tns = get_attribute(schema->properties, "targetNamespace");
@@ -134,6 +154,7 @@ static void schema_load_file(sdlCtx *ctx, xmlAttrPtr ns, xmlChar *location, xmlA
 					xmlSetProp(schema, BAD_CAST("targetNamespace"), tns->children->content);
 				}
 			} else if (tns != NULL && xmlStrcmp(tns->children->content, new_tns->children->content) != 0) {
+				requestify_string(&location);
 				xmlFreeDoc(doc);
 				soap_error1(E_ERROR, "Parsing Schema: can't include schema from '%s', different 'targetNamespace'", location);
 			}
