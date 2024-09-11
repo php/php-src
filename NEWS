@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug GH-15582: Crash when not calling parent constructor of
     DateTimeZone. (Derick)
+  . Fixed regression where signs after the first one were ignored while parsing
+    a signed integer, with the DateTimeInterface::modify() function. (Derick)
 
 - SOAP:
   . Fixed bug #62900 (Wrong namespace on xsd import error message). (nielsdos)
