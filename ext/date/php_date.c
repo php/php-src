@@ -704,8 +704,11 @@ static zend_string *date_format(const char *format, size_t format_len, timelib_t
 			                          (offset->offset < 0) ? '-' : '+',
 			                          abs(offset->offset / 3600),
 			                          abs((offset->offset % 3600) / 60));
-		} else {
+		} else if (t->zone_type == TIMELIB_ZONETYPE_ID) {
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
+		} else {
+			/* Shouldn't happen, but code defensively */
+			offset = timelib_time_offset_ctor();
 		}
 	}
 
@@ -2446,6 +2449,9 @@ PHPAPI bool php_date_initialize(php_date_obj *dateobj, const char *time_str, siz
 				new_dst    = tzobj->tzi.z.dst;
 				new_abbr   = timelib_strdup(tzobj->tzi.z.abbr);
 				break;
+			default:
+				zend_throw_error(NULL, "The DateTimeZone object has not been correctly initialized by its constructor");
+				return 0;
 		}
 		type = tzobj->type;
 	} else if (dateobj->time->tz_info) {
