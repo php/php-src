@@ -6509,6 +6509,18 @@ ZEND_METHOD(ReflectionProperty, getDefaultValue)
 }
 /* }}} */
 
+ZEND_METHOD(ReflectionProperty, hasHooks)
+{
+	reflection_object *intern;
+	property_reference *ref;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	RETURN_BOOL(ref->prop && ref->prop->hooks);
+}
+
 ZEND_METHOD(ReflectionProperty, getHooks)
 {
 	reflection_object *intern;
@@ -6536,6 +6548,29 @@ ZEND_METHOD(ReflectionProperty, getHooks)
 		reflection_method_factory(hook->common.scope, hook, NULL, &hook_obj);
 		zend_hash_update(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_SET), &hook_obj);
 	}
+}
+
+ZEND_METHOD(ReflectionProperty, hasHook)
+{
+
+	reflection_object *intern;
+	property_reference *ref;
+	zend_object *type;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_OBJ_OF_CLASS(type, reflection_property_hook_type_ptr)
+	ZEND_PARSE_PARAMETERS_END();
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	zend_property_hook_kind kind;
+	if (zend_string_equals_literal(Z_STR_P(zend_enum_fetch_case_name(type)), "Get")) {
+		kind = ZEND_PROPERTY_HOOK_GET;
+	} else {
+		kind = ZEND_PROPERTY_HOOK_SET;
+	}
+
+	RETURN_BOOL(ref->prop && ref->prop->hooks && ref->prop->hooks[kind]);
 }
 
 ZEND_METHOD(ReflectionProperty, getHook)
