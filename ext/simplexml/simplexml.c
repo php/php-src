@@ -2540,6 +2540,11 @@ static void php_sxe_iterator_current_key(zend_object_iterator *iter, zval *key) 
 {
 	php_sxe_iterator *iterator = (php_sxe_iterator *)iter;
 	zval *curobj = &iterator->sxe->iter.data;
+	if (Z_ISUNDEF_P(curobj)) {
+		ZVAL_NULL(key);
+		return;
+	}
+
 	php_sxe_object *intern = Z_SXEOBJ_P(curobj);
 
 	xmlNodePtr curnode = NULL;
