@@ -538,7 +538,8 @@ static zval *master_to_zval_int(zval *ret, encodePtr encode, xmlNodePtr data)
 			if (type_attr != NULL) {
 				encodePtr new_enc;
 				xmlNsPtr nsptr;
-				char *ns, *cptype;
+				const char *cptype;
+				char *ns;
 				smart_str nscat = {0};
 
 				parse_namespace(type_attr->children->content, &cptype, &ns);
@@ -549,7 +550,6 @@ static zval *master_to_zval_int(zval *ret, encodePtr encode, xmlNodePtr data)
 				}
 				smart_str_appends(&nscat, cptype);
 				smart_str_0(&nscat);
-				efree(cptype);
 				if (ns) {efree(ns);}
 				if ((new_enc = zend_hash_find_ptr(SOAP_GLOBAL(typemap), nscat.s)) != NULL) {
 					encode = new_enc;
@@ -2466,7 +2466,8 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	if (data &&
 	    (attr = get_attribute(data->properties,"arrayType")) &&
 	    attr->children && attr->children->content) {
-		char *type, *end, *ns;
+		const char *type;
+		char *end, *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(attr->children->content, &type, &ns);
@@ -2481,13 +2482,13 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (nsptr != NULL) {
 			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type);
 		}
-		efree(type);
 		if (ns) {efree(ns);}
 
 	} else if ((attr = get_attribute(data->properties,"itemType")) &&
 	    attr->children &&
 	    attr->children->content) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(attr->children->content, &type, &ns);
@@ -2495,7 +2496,6 @@ static zval *to_zval_array(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (nsptr != NULL) {
 			enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type);
 		}
-		efree(type);
 		if (ns) {efree(ns);}
 
 		if ((attr = get_attribute(data->properties,"arraySize")) &&
@@ -2828,7 +2828,8 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 	master_to_zval_int(ret, enc, data);
 	if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
 		zval soapvar;
-		char *ns, *cptype;
+		const char *cptype;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		object_init_ex(&soapvar, soap_var_class_entry);
@@ -2840,7 +2841,6 @@ static zval *guess_zval_convert(zval *ret, encodeTypePtr type, xmlNodePtr data)
 		if (nsptr) {
 			ZVAL_STRING(Z_VAR_ENC_NS_P(&soapvar), (char*)nsptr->href);
 		}
-		efree(cptype);
 		if (ns) {efree(ns);}
 		ZVAL_COPY_VALUE(ret, &soapvar);
 	}
