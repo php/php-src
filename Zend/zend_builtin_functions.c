@@ -549,6 +549,13 @@ register_constant:
 	/* non persistent */
 	ZEND_CONSTANT_SET_FLAGS(&c, 0, PHP_USER_CONSTANT);
 	c.name = zend_string_copy(name);
+
+	zend_string *filename = zend_get_executed_filename_ex();
+	if (filename == NULL) {
+		c.filename = NULL;
+	} else {
+		c.filename = zend_string_copy(filename);
+	}
 	if (zend_register_constant(&c) == SUCCESS) {
 		RETURN_TRUE;
 	} else {
