@@ -46,11 +46,17 @@ void free_zend_constant(zval *zv)
 		if (c->name) {
 			zend_string_release_ex(c->name, 0);
 		}
+		if (c->filename) {
+			zend_string_release_ex(c->filename, 0);
+		}
 		efree(c);
 	} else {
 		zval_internal_ptr_dtor(&c->value);
 		if (c->name) {
 			zend_string_release_ex(c->name, 1);
+		}
+		if (c->filename) {
+			zend_string_release_ex(c->filename, 1);
 		}
 		free(c);
 	}
@@ -68,6 +74,9 @@ static void copy_zend_constant(zval *zv)
 
 	c = Z_PTR_P(zv);
 	c->name = zend_string_copy(c->name);
+	if (c->filename != NULL) {
+		c->filename = zend_string_copy(c->filename);
+	}
 	if (Z_TYPE(c->value) == IS_STRING) {
 		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
 	}
@@ -123,6 +132,7 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 	ZVAL_NULL(&c.value);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
+	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -133,6 +143,7 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, boo
 	ZVAL_BOOL(&c.value, bval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
+	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -143,6 +154,7 @@ ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zen
 	ZVAL_LONG(&c.value, lval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
+	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -154,6 +166,7 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 	ZVAL_DOUBLE(&c.value, dval);
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
+	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -165,6 +178,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, 
 	ZVAL_STR(&c.value, zend_string_init_interned(strval, strlen, flags & CONST_PERSISTENT));
 	ZEND_CONSTANT_SET_FLAGS(&c, flags, module_number);
 	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
+	c.filename = NULL;
 	zend_register_constant(&c);
 }
 
@@ -502,6 +516,10 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	) {
 		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
+		if (c->filename) {
+			zend_string_release(c->filename);
+			c->filename = NULL;
+		}
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);
 		}
