@@ -337,7 +337,7 @@ typedef struct _zend_oparray_context {
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
-#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |     */
+#define ZEND_ACC_DEPRECATED              (1 << 11) /*     |  X  |     |  X  */
 /*                                                        |     |     |     */
 /* Function returning by reference                        |     |     |     */
 #define ZEND_ACC_RETURN_REFERENCE        (1 << 12) /*     |  X  |     |     */
