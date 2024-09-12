@@ -435,7 +435,8 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 
 	itemType = get_attribute(listType->properties, "itemType");
 	if (itemType != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(itemType->children->content, &type, &ns);
@@ -457,7 +458,6 @@ static int schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType, sdlTypeP
 			}
 			zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	}
 
@@ -519,7 +519,8 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 	memberTypes = get_attribute(unionType->properties, "memberTypes");
 	if (memberTypes != NULL) {
 		char *str, *start, *end, *next;
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		str = estrdup((char*)memberTypes->children->content);
@@ -553,7 +554,6 @@ static int schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType, sdlTyp
 				}
 				zend_hash_next_index_insert_ptr(cur_type->elements, newType);
 			}
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 
 			start = next;
@@ -662,7 +662,8 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 
 	base = get_attribute(restType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -670,7 +671,6 @@ static int schema_restriction_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodeP
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else if (!simpleType) {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
@@ -767,7 +767,8 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 
 	base = get_attribute(restType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -775,7 +776,6 @@ static int schema_restriction_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNode
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: restriction has no 'base' attribute");
@@ -892,7 +892,8 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -900,7 +901,6 @@ static int schema_extension_simpleContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
@@ -947,7 +947,8 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 
 	base = get_attribute(extType->properties, "base");
 	if (base != NULL) {
-		char *type, *ns;
+		const char *type;
+		char *ns;
 		xmlNsPtr nsptr;
 
 		parse_namespace(base->children->content, &type, &ns);
@@ -955,7 +956,6 @@ static int schema_extension_complexContent(sdlPtr sdl, xmlAttrPtr tns, xmlNodePt
 		if (nsptr != NULL) {
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(type));
 		}
-		if (type) {efree(type);}
 		if (ns) {efree(ns);}
 	} else {
 		soap_error0(E_ERROR, "Parsing Schema: extension has no 'base' attribute");
@@ -1096,7 +1096,8 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 		smart_str key = {0};
 
 		if (ref) {
-			char *type, *ns;
+			const char *type;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
@@ -1120,7 +1121,6 @@ static int schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType, sdlTyp
 			newModel->kind = XSD_CONTENT_GROUP_REF;
 			newModel->u.group_ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
 
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 		} else {
 			newModel = emalloc(sizeof(sdlContentModel));
@@ -1534,7 +1534,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 
 		if (ref) {
 			smart_str nscat = {0};
-			char *type, *ns;
+			const char *type;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &type, &ns);
@@ -1555,7 +1556,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			smart_str_appends(&nscat, type);
 			newType->name = estrdup(type);
 			smart_str_0(&nscat);
-			if (type) {efree(type);}
 			if (ns) {efree(ns);}
 			newType->ref = estrndup(ZSTR_VAL(nscat.s), ZSTR_LEN(nscat.s));
 			smart_str_free(&nscat);
@@ -1679,7 +1679,8 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 	/* type = QName */
 	type = get_attribute(attrs, "type");
 	if (type) {
-		char *cptype, *str_ns;
+		const char *cptype;
+		char *str_ns;
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
@@ -1691,7 +1692,6 @@ static int schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element, sdlTyp
 			cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
-		if (cptype) {efree(cptype);}
 	}
 
 	trav = element->children;
@@ -1766,7 +1766,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 		memset(newAttr, 0, sizeof(sdlAttribute));
 
 		if (ref) {
-			char *attr_name, *ns;
+			const char *attr_name;
+			char *ns;
 			xmlNsPtr nsptr;
 
 			parse_namespace(ref->children->content, &attr_name, &ns);
@@ -1787,7 +1788,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			smart_str_appends(&key, attr_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (attr_name) {efree(attr_name);}
 			if (ns) {efree(ns);}
 		} else {
 			xmlAttrPtr ns;
@@ -1827,7 +1827,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 	/* type = QName */
 	type = get_attribute(attrType->properties, "type");
 	if (type) {
-		char *cptype, *str_ns;
+		const char *cptype;
+		char *str_ns;
 		xmlNsPtr nsptr;
 
 		if (ref != NULL) {
@@ -1839,7 +1840,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 			newAttr->encode = get_create_encoder(sdl, cur_type, nsptr->href, BAD_CAST(cptype));
 		}
 		if (str_ns) {efree(str_ns);}
-		if (cptype) {efree(cptype);}
 	}
 
 	attr = attrType->properties;
@@ -1881,7 +1881,8 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 				smart_str key2 = {0};
 				sdlExtraAttributePtr ext;
 				xmlNsPtr nsptr;
-				char *value, *ns;
+				const char *value;
+				char *ns;
 
 				ext = emalloc(sizeof(sdlExtraAttribute));
 				memset(ext, 0, sizeof(sdlExtraAttribute));
@@ -1894,7 +1895,6 @@ static int schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType, sdl
 					ext->val = estrdup((char*)attr->children->content);
 				}
 				if (ns) {efree(ns);}
-				efree(value);
 
 				if (!newAttr->extraAttributes) {
 					newAttr->extraAttributes = emalloc(sizeof(HashTable));
@@ -2007,7 +2007,8 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_free(&key);
 		} else if (ref) {
 			sdlAttributePtr newAttr;
-			char *group_name, *ns;
+			const char *group_name;
+			char *ns;
 			smart_str key = {0};
 			xmlNsPtr nsptr;
 
@@ -2027,7 +2028,6 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
 			newAttr->ref = estrndup(ZSTR_VAL(key.s), ZSTR_LEN(key.s));
-			if (group_name) {efree(group_name);}
 			if (ns) {efree(ns);}
 			smart_str_free(&key);
 

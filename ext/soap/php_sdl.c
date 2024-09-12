@@ -48,7 +48,8 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const xmlChar *ty
 {
 	encodePtr enc = NULL;
 	xmlNsPtr nsptr;
-	char *ns, *cptype;
+	const char *cptype;
+	char *ns;
 
 	parse_namespace(type, &cptype, &ns);
 	nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns));
@@ -60,7 +61,6 @@ encodePtr get_encoder_from_prefix(sdlPtr sdl, xmlNodePtr node, const xmlChar *ty
 	} else {
 		enc = get_encoder_ex(sdl, (char*)type, xmlStrlen(type));
 	}
-	efree(cptype);
 	if (ns) {efree(ns);}
 	return enc;
 }
@@ -71,7 +71,8 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 
 	if (sdl->elements) {
 		xmlNsPtr nsptr;
-		char *ns, *cptype;
+		const char *cptype;
+		char *ns;
 		sdlTypePtr sdl_type;
 
 		parse_namespace(type, &cptype, &ns);
@@ -99,7 +100,6 @@ static sdlTypePtr get_element(sdlPtr sdl, xmlNodePtr node, const xmlChar *type)
 			}
 		}
 
-		efree(cptype);
 		if (ns) {efree(ns);}
 	}
 	return ret;
