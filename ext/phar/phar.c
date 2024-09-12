@@ -730,7 +730,7 @@ void phar_parse_metadata_lazy(const char *buffer, phar_metadata_tracker *tracker
  * This is used by phar_open_from_filename to process the manifest, but can be called
  * directly.
  */
-static int phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, zend_long halt_offset, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
+static zend_result phar_parse_pharfile(php_stream *fp, char *fname, size_t fname_len, char *alias, size_t alias_len, zend_long halt_offset, phar_archive_data** pphar, uint32_t compression, char **error) /* {{{ */
 {
 	char b32[4], *buffer, *endbuffer, *savebuf;
 	phar_archive_data *mydata = NULL;
@@ -1806,7 +1806,7 @@ static zend_result phar_open_from_fp(php_stream* fp, char *fname, size_t fname_l
  * if not, check to see if its dirname() exists (i.e. "/path/to") and is a directory
  * succeed if we are creating the file, otherwise fail.
  */
-static int phar_analyze_path(const char *fname, const char *ext, size_t ext_len, int for_create) /* {{{ */
+static zend_result phar_analyze_path(const char *fname, const char *ext, size_t ext_len, int for_create) /* {{{ */
 {
 	php_stream_statbuf ssb;
 	char *realpath;
@@ -1911,7 +1911,7 @@ static int phar_analyze_path(const char *fname, const char *ext, size_t ext_len,
 /* }}} */
 
 /* check for ".phar" in extension */
-static int phar_check_str(const char *fname, const char *ext_str, size_t ext_len, int executable, int for_create) /* {{{ */
+static zend_result phar_check_str(const char *fname, const char *ext_str, size_t ext_len, int executable, int for_create) /* {{{ */
 {
 	const char *pos;
 
@@ -2057,6 +2057,7 @@ woohoo:
 		}
 	}
 
+	// TODO Use some sort of loop here instead of a goto
 	pos = memchr(filename + 1, '.', filename_len);
 next_extension:
 	if (!pos) {
@@ -2078,30 +2079,23 @@ next_extension:
 		*ext_len = strlen(pos);
 
 		/* file extension must contain "phar" */
-		switch (phar_check_str(filename, *ext_str, *ext_len, executable, for_create)) {
-			case SUCCESS:
-				return SUCCESS;
-			case FAILURE:
-				/* we are at the end of the string, so we fail */
-				return FAILURE;
-		}
+		return phar_check_str(filename, *ext_str, *ext_len, executable, for_create);
 	}
 
 	/* we've found an extension that ends at a directory separator */
 	*ext_str = pos;
 	*ext_len = slash - pos;
 
-	switch (phar_check_str(filename, *ext_str, *ext_len, executable, for_create)) {
-		case SUCCESS:
-			return SUCCESS;
-		case FAILURE:
-			/* look for more extensions */
-			pos = strchr(pos + 1, '.');
-			if (pos) {
-				*ext_str = NULL;
-				*ext_len = 0;
-			}
-			goto next_extension;
+	if (phar_check_str(filename, *ext_str, *ext_len, executable, for_create) == SUCCESS) {
+		return SUCCESS;
+	}
+
+	/* look for more extensions */
+	pos = strchr(pos + 1, '.');
+	if (pos) {
+		*ext_str = NULL;
+		*ext_len = 0;
+		goto next_extension;
 	}
 
 	return FAILURE;
