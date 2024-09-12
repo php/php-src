@@ -433,7 +433,7 @@ void phar_entry_remove(phar_entry_data *idata, char **error) /* {{{ */
 	}
 
 	if (!phar->donotflush) {
-		phar_flush(phar, 0, 0, 0, error);
+		phar_flush(phar, error);
 	}
 }
 /* }}} */
@@ -2520,27 +2520,30 @@ zend_string *phar_create_default_stub(const char *index_php, const char *web_ind
 }
 /* }}} */
 
+int phar_flush(phar_archive_data *phar, char **error) {
+	return phar_flush_ex(phar, NULL, false, error);
+}
+
 /**
  * Save phar contents to disk
  *
- * user_stub contains either a string, or a resource pointer, if len is a negative length.
- * user_stub and len should be both 0 if the default or existing stub should be used
+ * if user_stub is NULL the default or existing stub should be used
  */
-int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int convert, char **error) /* {{{ */
+int phar_flush_ex(phar_archive_data *phar, zend_string *user_stub, bool is_default_stub, char **error) /* {{{ */
 {
 	char halt_stub[] = "__HALT_COMPILER();";
 	zend_string *newstub;
 	phar_entry_info *entry, *newentry;
 	size_t halt_offset;
 	int restore_alias_len, global_flags = 0, closeoldfile;
-	char *pos, has_dirs = 0;
+	bool has_dirs = 0;
 	char manifest[18], entry_buffer[24];
 	zend_off_t manifest_ftell;
 	zend_long offset;
 	size_t wrote;
 	uint32_t manifest_len, mytime, new_manifest_count;
 	uint32_t newcrc32;
-	php_stream *file, *oldfile, *newfile, *stubfile;
+	php_stream *file, *oldfile, *newfile;
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
@@ -2566,11 +2569,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	zend_hash_clean(&phar->virtual_dirs);
 
 	if (phar->is_zip) {
-		return phar_zip_flush(phar, user_stub, len, convert, error);
+		return phar_zip_flush(phar, user_stub, is_default_stub, error);
 	}
 
 	if (phar->is_tar) {
-		return phar_tar_flush(phar, user_stub, len, convert, error);
+		return phar_tar_flush(phar, user_stub, is_default_stub, error);
 	}
 
 	if (PHAR_G(readonly)) {
@@ -2597,44 +2600,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	}
 
 	if (user_stub) {
-		zend_string *suser_stub;
-		bool free_user_stub = false;
+		char *pos = php_stristr(ZSTR_VAL(user_stub), halt_stub, ZSTR_LEN(user_stub), strlen(halt_stub));
 
-		if (len < 0) {
-			/* resource passed in */
-			if (!(php_stream_from_zval_no_verify(stubfile, (zval *)user_stub))) {
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to access resource to copy stub to new phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
-			if (len == -1) {
-				len = PHP_STREAM_COPY_ALL;
-			} else {
-				len = -len;
-			}
-			user_stub = 0;
-
-			if (!(suser_stub = php_stream_copy_to_mem(stubfile, len, 0))) {
-				if (closeoldfile) {
-					php_stream_close(oldfile);
-				}
-				php_stream_close(newfile);
-				if (error) {
-					spprintf(error, 0, "unable to read resource to copy stub to new phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
-			free_user_stub = true;
-			user_stub = ZSTR_VAL(suser_stub);
-			len = ZSTR_LEN(suser_stub);
-		}
-
-		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
+		if (pos == NULL) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2642,14 +2610,17 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "illegal stub for phar \"%s\" (__HALT_COMPILER(); is missing)", phar->fname);
 			}
-			if (free_user_stub) {
-				zend_string_free(suser_stub);
-			}
 			return EOF;
 		}
-		len = pos - user_stub + 18;
-		if ((size_t)len != php_stream_write(newfile, user_stub, len)
-		||			  5 != php_stream_write(newfile, " ?>\r\n", 5)) {
+
+		size_t len = pos - ZSTR_VAL(user_stub) + strlen(halt_stub);
+		const char end_sequence[] = " ?>\r\n";
+		size_t end_sequence_len = strlen(end_sequence);
+
+		if (
+			len != php_stream_write(newfile, ZSTR_VAL(user_stub), len)
+			|| end_sequence_len != php_stream_write(newfile, end_sequence, end_sequence_len)
+		) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
 			}
@@ -2657,15 +2628,9 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 			if (error) {
 				spprintf(error, 0, "unable to create stub from string in new phar \"%s\"", phar->fname);
 			}
-			if (free_user_stub) {
-				zend_string_free(suser_stub);
-			}
 			return EOF;
 		}
-		phar->halt_offset = len + 5;
-		if (free_user_stub) {
-			zend_string_free(suser_stub);
-		}
+		phar->halt_offset = len + end_sequence_len;
 	} else {
 		size_t written;
 

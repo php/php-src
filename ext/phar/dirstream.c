@@ -507,7 +507,7 @@ int phar_wrapper_mkdir(php_stream_wrapper *wrapper, const char *url_from, int mo
 		return 0;
 	}
 
-	phar_flush(phar, 0, 0, 0, &error);
+	phar_flush(phar, &error);
 
 	if (error) {
 		php_stream_wrapper_log_error(wrapper, options, "phar error: cannot create directory \"%s\" in phar \"%s\", %s", entry.filename, phar->fname, error);
@@ -634,7 +634,7 @@ int phar_wrapper_rmdir(php_stream_wrapper *wrapper, const char *url, int options
 	} else {
 		entry->is_deleted = 1;
 		entry->is_modified = 1;
-		phar_flush(phar, 0, 0, 0, &error);
+		phar_flush(phar, &error);
 
 		if (error) {
 			php_stream_wrapper_log_error(wrapper, options, "phar error: cannot remove directory \"%s\" in phar \"%s\", %s", entry->filename, phar->fname, error);
