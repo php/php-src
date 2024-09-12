@@ -4425,11 +4425,6 @@ PHP_METHOD(DateInterval, __construct)
 
 static void php_date_interval_initialize_from_hash(zval **return_value, php_interval_obj **intobj, HashTable *myht) /* {{{ */
 {
-	/* If ->diff is already set, then we need to free it first */
-	if ((*intobj)->diff) {
-		timelib_rel_time_dtor((*intobj)->diff);
-	}
-
 	/* If we have a date_string, use that instead */
 	zval *date_str = zend_hash_str_find(myht, "date_string", strlen("date_string"));
 	if (date_str && Z_TYPE_P(date_str) == IS_STRING) {
@@ -4449,6 +4444,11 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 				return;
 		}
 
+		/* If ->diff is already set, then we need to free it first */
+		if ((*intobj)->diff) {
+			timelib_rel_time_dtor((*intobj)->diff);
+		}
+
 		(*intobj)->diff = timelib_rel_time_clone(&time->relative);
 		(*intobj)->initialized = 1;
 		(*intobj)->civil_or_wall = PHP_DATE_CIVIL;
@@ -4459,6 +4459,11 @@ static void php_date_interval_initialize_from_hash(zval **return_value, php_inte
 		timelib_error_container_dtor(err);
 
 		return;
+	}
+
+	/* If ->diff is already set, then we need to free it first */
+	if ((*intobj)->diff) {
+		timelib_rel_time_dtor((*intobj)->diff);
 	}
 
 	/* Set new value */
