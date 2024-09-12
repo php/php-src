@@ -2180,9 +2180,7 @@ char *phar_fix_filepath(char *path, size_t *new_len, int use_cwd) /* {{{ */
 		ptr_length = ptr - tok;
 last_time:
 		if (IS_DIRECTORY_UP(tok, ptr_length)) {
-			const char previous = newpath[newpath_len - 1];
-
-			while (newpath_len > 1 && !IS_BACKSLASH(previous)) {
+			while (newpath_len > 1 && !IS_BACKSLASH(newpath[newpath_len - 1])) {
 				newpath_len--;
 			}
 
