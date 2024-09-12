@@ -1276,7 +1276,7 @@ static zend_result xmlreader_fixup_temporaries(void) {
 		++xmlreader_open_fn.T;
 		++xmlreader_xml_fn.T;
 	}
-#if !ZTS
+#ifndef ZTS
 	ZEND_MAP_PTR(xmlreader_open_fn.run_time_cache) = ZEND_MAP_PTR(((zend_internal_function *)zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "open", sizeof("open")-1))->run_time_cache);
 	ZEND_MAP_PTR(xmlreader_xml_fn.run_time_cache) = ZEND_MAP_PTR(((zend_internal_function *)zend_hash_str_find_ptr(&xmlreader_class_entry->function_table, "xml", sizeof("xml")-1))->run_time_cache);
 #endif

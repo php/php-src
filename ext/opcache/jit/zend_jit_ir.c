@@ -4544,7 +4544,7 @@ static struct jit_observer_fcall_is_unobserved_data jit_observer_fcall_is_unobse
 	if (func && (func->common.fn_flags & ZEND_ACC_CLOSURE) == 0 && ZEND_MAP_PTR_IS_OFFSET(func->common.run_time_cache)) {
 		// JIT: ZEND_MAP_PTR_GET_IMM(func->common.runtime_cache)
 		run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_LOAD_A(jit_CG(map_ptr_base)), (uintptr_t)ZEND_MAP_PTR(func->common.run_time_cache)));
-#if !ZTS
+#ifndef ZTS
 	} else if (func && rx == IS_UNUSED) { // happens for internal functions only
 		ZEND_ASSERT(!ZEND_USER_CODE(func->type));
 		run_time_cache = ir_LOAD_A(ir_ADD_OFFSET(ir_CONST_ADDR(func), offsetof(zend_op_array, run_time_cache__ptr)));
