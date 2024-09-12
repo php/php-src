@@ -2481,7 +2481,7 @@ static int phar_flush_clean_deleted_apply(zval *zv) /* {{{ */
 }
 /* }}} */
 
-#include "stub.h"
+#include "stub.h" /* Generated phar_get_stub() function from makestub.php script */
 
 zend_string *phar_create_default_stub(const char *index_php, const char *web_index, char **error) /* {{{ */
 {
