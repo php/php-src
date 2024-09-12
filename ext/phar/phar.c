@@ -2546,7 +2546,7 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 	php_stream_filter *filter;
 	php_serialize_data_t metadata_hash;
 	smart_str main_metadata_str = {0};
-	int free_user_stub, free_fp = 1, free_ufp = 1;
+	int free_fp = 1, free_ufp = 1;
 	int manifest_hack = 0;
 	php_stream *shared_cfp = NULL;
 
@@ -2600,6 +2600,8 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 
 	if (user_stub) {
 		zend_string *suser_stub;
+		bool free_user_stub = false;
+
 		if (len < 0) {
 			/* resource passed in */
 			if (!(php_stream_from_zval_no_verify(stubfile, (zval *)user_stub))) {
@@ -2629,12 +2631,11 @@ int phar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int conv
 				}
 				return EOF;
 			}
-			free_user_stub = 1;
+			free_user_stub = true;
 			user_stub = ZSTR_VAL(suser_stub);
 			len = ZSTR_LEN(suser_stub);
-		} else {
-			free_user_stub = 0;
 		}
+
 		if ((pos = php_stristr(user_stub, halt_stub, len, sizeof(halt_stub) - 1)) == NULL) {
 			if (closeoldfile) {
 				php_stream_close(oldfile);
@@ -3513,8 +3514,6 @@ void phar_request_initialize(void) /* {{{ */
 
 PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 {
-	uint32_t i;
-
 	PHAR_G(request_ends) = 1;
 
 	if (PHAR_G(request_init))
@@ -3529,7 +3528,7 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 		PHAR_G(phar_SERVER_mung_list) = 0;
 
 		if (PHAR_G(cached_fp)) {
-			for (i = 0; i < zend_hash_num_elements(&cached_phars); ++i) {
+			for (uint32_t i = 0; i < zend_hash_num_elements(&cached_phars); ++i) {
 				if (PHAR_G(cached_fp)[i].fp) {
 					php_stream_close(PHAR_G(cached_fp)[i].fp);
 				}
