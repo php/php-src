@@ -916,5 +916,7 @@ final class ReflectionConstant implements Reflector
 
     public function isDeprecated(): bool {}
 
+    public function getFileName(): string|false {}
+
     public function __toString(): string {}
 }

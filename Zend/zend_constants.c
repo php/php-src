@@ -46,11 +46,17 @@ void free_zend_constant(zval *zv)
 		if (c->name) {
 			zend_string_release_ex(c->name, 0);
 		}
+		if (c->filename) {
+			zend_string_release_ex(c->filename, 0);
+		}
 		efree(c);
 	} else {
 		zval_internal_ptr_dtor(&c->value);
 		if (c->name) {
 			zend_string_release_ex(c->name, 1);
+		}
+		if (c->filename) {
+			zend_string_release_ex(c->filename, 1);
 		}
 		free(c);
 	}
@@ -68,6 +74,9 @@ static void copy_zend_constant(zval *zv)
 
 	c = Z_PTR_P(zv);
 	c->name = zend_string_copy(c->name);
+	if (c->filename != NULL) {
+		c->filename = zend_string_copy(c->filename);
+	}
 	if (Z_TYPE(c->value) == IS_STRING) {
 		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
 	}
@@ -495,6 +504,13 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 		name = c->name;
 	}
 
+	zend_string *filename = zend_get_executed_filename_ex();
+	if (filename == NULL) {
+		c->filename = NULL;
+	} else {
+		c->filename = zend_string_copy(filename);
+	}
+
 	/* Check if the user is trying to define any special constant */
 	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
@@ -502,6 +518,10 @@ ZEND_API zend_result zend_register_constant(zend_constant *c)
 	) {
 		zend_error(E_WARNING, "Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
+		if (c->filename) {
+			zend_string_release(c->filename);
+			c->filename = NULL;
+		}
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);
 		}

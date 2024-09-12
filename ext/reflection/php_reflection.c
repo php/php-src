@@ -7553,6 +7553,20 @@ ZEND_METHOD(ReflectionConstant, isDeprecated)
 	RETURN_BOOL(ZEND_CONSTANT_FLAGS(const_) & CONST_DEPRECATED);
 }
 
+ZEND_METHOD(ReflectionConstant, getFileName)
+{
+	reflection_object *intern;
+	zend_constant *const_;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	GET_REFLECTION_OBJECT_PTR(const_);
+	if (const_->filename != NULL) {
+		RETURN_STR_COPY(const_->filename);
+	}
+	RETURN_FALSE;
+}
+
 ZEND_METHOD(ReflectionConstant, __toString)
 {
 	reflection_object *intern;
