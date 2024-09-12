@@ -3295,9 +3295,7 @@ static zend_jit_reg_var* zend_jit_trace_allocate_registers(zend_jit_trace_rec *t
 							RA_REG_FLAGS(def) |= ZREG_LOAD;
 						}
 					}
-				} else if (RA_HAS_REG(use)
-						&& (!ssa->vars[def].no_val
-				)) {
+				} else if (RA_HAS_REG(use)) {
 					if (ssa->vars[use].use_chain >= 0) {
 						RA_REG_FLAGS(use) |= ZREG_STORE; // TODO: ext/opcache/tests/jit/reg_alloc_00[67].phpt ???
 					} else {
@@ -4206,7 +4204,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			 && (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 			  || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 			  || (trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET
-			   && (opline-1)->result_type == IS_VAR
 			   && EX_VAR_TO_NUM((opline-1)->result.var) == i))
 			 && (ssa->vars[i].use_chain != -1
 			  || (ssa->vars[i].phi_use_chain
